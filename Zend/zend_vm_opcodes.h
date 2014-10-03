@@ -72,11 +72,9 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_JMPZ_EX                          46
 #define ZEND_JMPNZ_EX                         47
 #define ZEND_CASE                             48
-#define ZEND_SWITCH_FREE                      49
 #define ZEND_BRK                              50
 #define ZEND_CONT                             51
 #define ZEND_BOOL                             52
-#define ZEND_INIT_STRING                      53
 #define ZEND_ADD_CHAR                         54
 #define ZEND_ADD_STRING                       55
 #define ZEND_ADD_VAR                          56
@@ -156,7 +154,6 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_DECLARE_CLASS                   139
 #define ZEND_DECLARE_INHERITED_CLASS         140
 #define ZEND_DECLARE_FUNCTION                141
-#define ZEND_RAISE_ABSTRACT_ERROR            142
 #define ZEND_DECLARE_CONST                   143
 #define ZEND_ADD_INTERFACE                   144
 #define ZEND_DECLARE_INHERITED_CLASS_DELAYED 145
@@ -170,8 +167,6 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_ADD_TRAIT                       154
 #define ZEND_BIND_TRAITS                     155
 #define ZEND_SEPARATE                        156
-#define ZEND_QM_ASSIGN_VAR                   157
-#define ZEND_JMP_SET_VAR                     158
 #define ZEND_DISCARD_EXCEPTION               159
 #define ZEND_YIELD                           160
 #define ZEND_GENERATOR_RETURN                161
@@ -182,5 +177,6 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_POW                             166
 #define ZEND_ASSIGN_POW                      167
 #define ZEND_BIND_GLOBAL                     168
+#define ZEND_COALESCE                        169
 
 #endif

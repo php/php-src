@@ -126,7 +126,7 @@ BEGIN_EXTERN_C()
 static size_t encoding_filter_script_to_internal(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
 {
 	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
-	assert(internal_encoding && zend_multibyte_check_lexer_compatibility(internal_encoding));
+	ZEND_ASSERT(internal_encoding);
 	return zend_multibyte_encoding_converter(to, to_length, from, from_length, internal_encoding, LANG_SCNG(script_encoding) TSRMLS_CC);
 }
 
@@ -144,7 +144,7 @@ LANG_SCNG(script_encoding), zend_multibyte_encoding_utf8 TSRMLS_CC);
 static size_t encoding_filter_intermediate_to_internal(unsigned char **to, size_t *to_length, const unsigned char *from, size_t from_length TSRMLS_DC)
 {
 	const zend_encoding *internal_encoding = zend_multibyte_get_internal_encoding(TSRMLS_C);
-	assert(internal_encoding && zend_multibyte_check_lexer_compatibility(internal_encoding));
+	ZEND_ASSERT(internal_encoding);
 	return zend_multibyte_encoding_converter(to, to_length, from, from_length,
 internal_encoding, zend_multibyte_encoding_utf8 TSRMLS_CC);
 }
@@ -843,7 +843,7 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 	SCNG(yy_cursor) = new_yy_start + (SCNG(yy_cursor) - SCNG(yy_start));
 	SCNG(yy_marker) = new_yy_start + (SCNG(yy_marker) - SCNG(yy_start));
 	SCNG(yy_text) = new_yy_start + (SCNG(yy_text) - SCNG(yy_start));
-	SCNG(yy_limit) = new_yy_start + (SCNG(yy_limit) - SCNG(yy_start));
+	SCNG(yy_limit) = new_yy_start + length;
 
 	SCNG(yy_start) = new_yy_start;
 }
@@ -1200,6 +1200,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"..." {
 	return T_ELLIPSIS;
+}
+
+<ST_IN_SCRIPTING>"??" {
+	return T_COALESCE;
 }
 
 <ST_IN_SCRIPTING>"new" {

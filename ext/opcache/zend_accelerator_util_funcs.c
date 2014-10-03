@@ -75,7 +75,7 @@ zend_persistent_script* create_persistent_script(void)
 	zend_persistent_script *persistent_script = (zend_persistent_script *) emalloc(sizeof(zend_persistent_script));
 	memset(persistent_script, 0, sizeof(zend_persistent_script));
 
-	zend_hash_init(&persistent_script->function_table, 128, NULL, (dtor_func_t) zend_accel_destroy_zend_function, 0);
+	zend_hash_init(&persistent_script->function_table, 128, NULL, ZEND_FUNCTION_DTOR, 0);
 	/* class_table is usually destroyed by free_persistent_script() that
 	 * overrides destructor. ZEND_CLASS_DTOR may be used by standard
 	 * PHP compiler
@@ -232,14 +232,14 @@ static inline zend_string *zend_clone_str(zend_string *str TSRMLS_DC)
 
 	if (IS_INTERNED(str)) {		
 		ret = str;
-	} else if (zend_string_refcount(str) <= 1 || (ret = accel_xlat_get(str)) == NULL) {
+	} else if (GC_REFCOUNT(str) <= 1 || (ret = accel_xlat_get(str)) == NULL) {
 		ret = zend_string_dup(str, 0);
 		GC_FLAGS(ret) = GC_FLAGS(str);
-		if (zend_string_refcount(str) > 1) {
+		if (GC_REFCOUNT(str) > 1) {
 			accel_xlat_set(str, ret);
 		}
 	} else {
-		zend_string_addref(ret);
+		GC_REFCOUNT(ret)++;
 	}
 	return ret;
 }

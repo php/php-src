@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -636,7 +636,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 
 	/* Trim off trailing whitespace characters */
 	tmp_len--;
-	while (tmp_len >= 0 &&
+	while (tmp_len > 0 &&
 			(ent->d_name[tmp_len] == '\n' || ent->d_name[tmp_len] == '\r' ||
 			 ent->d_name[tmp_len] == '\t' || ent->d_name[tmp_len] == ' ')) {
 		ent->d_name[tmp_len--] = '\0';

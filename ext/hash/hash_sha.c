@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -321,7 +321,7 @@ static void SHA1Transform(php_hash_uint32 state[5], const unsigned char block[64
 	state[4] += e;
 
 	/* Zeroize sensitive information. */
-	memset((unsigned char*) x, 0, sizeof(x));
+	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
 /* }}} */
 
@@ -400,7 +400,7 @@ PHP_HASH_API void PHP_SHA1Final(unsigned char digest[20], PHP_SHA1_CTX * context
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -511,7 +511,7 @@ static void SHA256Transform(php_hash_uint32 state[8], const unsigned char block[
 	state[7] += h;
 
 	/* Zeroize sensitive information. */
-	memset((unsigned char*) x, 0, sizeof(x));
+	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
 /* }}} */
 
@@ -607,7 +607,7 @@ PHP_HASH_API void PHP_SHA224Final(unsigned char digest[28], PHP_SHA224_CTX * con
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -684,7 +684,7 @@ PHP_HASH_API void PHP_SHA256Final(unsigned char digest[32], PHP_SHA256_CTX * con
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -821,7 +821,7 @@ static void SHA512Transform(php_hash_uint64 state[8], const unsigned char block[
 	state[7] += h;
 
 	/* Zeroize sensitive information. */
-	memset((unsigned char*) x, 0, sizeof(x));
+	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
 /* }}} */
 
@@ -906,7 +906,7 @@ PHP_HASH_API void PHP_SHA384Final(unsigned char digest[48], PHP_SHA384_CTX * con
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -1020,7 +1020,7 @@ PHP_HASH_API void PHP_SHA512Final(unsigned char digest[64], PHP_SHA512_CTX * con
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 

@@ -99,6 +99,7 @@ ZEND_API void gc_reset(TSRMLS_D)
 {
 	GC_G(gc_runs) = 0;
 	GC_G(collected) = 0;
+	GC_G(gc_full) = 0;
 
 #if GC_BENCH
 	GC_G(root_buf_length) = 0;
@@ -184,14 +185,6 @@ ZEND_API void gc_possible_root(zend_refcounted *ref TSRMLS_DC)
 ZEND_API void gc_remove_from_buffer(zend_refcounted *ref TSRMLS_DC)
 {
 	gc_root_buffer *root;
-
-	if (UNEXPECTED(/*GC_ADDRESS(GC_INFO(ref)) &&*/
-	               GC_GET_COLOR(GC_INFO(ref)) == GC_BLACK &&
-		           GC_ADDRESS(GC_INFO(ref)) >= GC_G(last_unused) - GC_G(buf))) {
-		/* The given zval is a garbage that is going to be deleted by
-		 * currently running GC */
-		return;
-	}
 
 	root = GC_G(buf) + GC_ADDRESS(GC_INFO(ref));
 	GC_BENCH_INC(zval_remove_from_buffer);
@@ -492,8 +485,11 @@ tail_call:
 			} else if (GC_G(first_unused) != GC_G(last_unused)) {
 				buf = GC_G(first_unused);
 				GC_G(first_unused)++;
+			} else {
+				/* TODO: find a perfect way to handle such case */
+				GC_G(gc_full) = 1;
 			}
-			/* TODO: what should we do if we don't have room ??? */
+
 			if (buf) {
 				buf->ref = ref;
 				buf->next = GC_G(roots).next;
@@ -609,6 +605,18 @@ static int gc_collect_roots(TSRMLS_D)
 		}
 		current = current->next;
 	}
+
+	if (GC_G(gc_full) == 1) {
+		current = GC_G(roots).next;
+		while (current != &GC_G(roots)) {
+			GC_SET_ADDRESS(GC_INFO(current->ref), 0);
+			GC_SET_BLACK(GC_INFO(current->ref));
+			current = current->next;
+		}
+		gc_reset(TSRMLS_C);
+		return 0;
+	}
+
 	/* relink remaining roots into list to free */
 	if (GC_G(roots).next != &GC_G(roots)) {
 		if (GC_G(to_free).next == &GC_G(to_free)) {

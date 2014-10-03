@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -23,7 +23,7 @@
 #include "php_globals.h"
 #include "php_pcre.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 
@@ -782,7 +782,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 						}
 						/* Add MARK, if available */
 						if (mark) {
-							add_assoc_string(&result_set, "MARK", (char *) mark);
+							add_assoc_string_ex(&result_set, "MARK", sizeof("MARK") - 1, (char *)mark);
 						}
 						/* And add it to the output array */
 						zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &result_set);
@@ -822,7 +822,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 					}
 					/* Add MARK, if available */
 					if (mark) {
-						add_assoc_string(subpats, "MARK", (char *) mark);
+						add_assoc_string_ex(subpats, "MARK", sizeof("MARK") - 1, (char *)mark);
 					}
 				}
 

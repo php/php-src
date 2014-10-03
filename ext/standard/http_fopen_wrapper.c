@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -27,7 +27,7 @@
 #include "php_network.h"
 #include "php_ini.h"
 #include "ext/standard/basic_functions.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -422,7 +422,7 @@ finish:
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmpzval), tmpheader) {
 				if (Z_TYPE_P(tmpheader) == IS_STRING) {
-					smart_str_appendl(&tmpstr, Z_STRVAL_P(tmpheader), Z_STRLEN_P(tmpheader));
+					smart_str_append(&tmpstr, Z_STR_P(tmpheader));
 					smart_str_appendl(&tmpstr, "\r\n", sizeof("\r\n") - 1);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -437,7 +437,7 @@ finish:
 			/* Remove newlines and spaces from start and end php_trim will estrndup() */
 			tmp = php_trim(Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval), NULL, 0, NULL, 3 TSRMLS_CC);
 		}
-		if (tmp && strlen(tmp) > 0) {
+		if (tmp && tmp[0] != '\0') {
 			char *s;
 
 			user_headers = estrdup(tmp);

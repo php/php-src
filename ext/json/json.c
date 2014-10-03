@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -26,7 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/html.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "JSON_parser.h"
 #include "php_json.h"
 #include <zend_exceptions.h>
@@ -384,7 +384,7 @@ static void json_escape_string(smart_str *buf, char *s, size_t len, int options 
 {
 	int status;
 	unsigned int us, next_us = 0;
-	size_t pos, checkpoint, newlen;
+	size_t pos, checkpoint;
 
 	if (len == 0) {
 		smart_str_appendl(buf, "\"\"", 2);
@@ -789,7 +789,7 @@ static PHP_FUNCTION(json_encode)
 		ZVAL_FALSE(return_value);
 	} else {
 		smart_str_0(&buf); /* copy? */
-		ZVAL_STR(return_value, buf.s);
+		ZVAL_NEW_STR(return_value, buf.s);
 	}
 }
 /* }}} */

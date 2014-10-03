@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -999,7 +999,7 @@ PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D)
 
 
 /* {{{ date() and gmdate() data */
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 static char *mon_full_names[] = {
 	"January", "February", "March", "April",
@@ -2220,7 +2220,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC) /* {{{ */
 					abs(utc_offset / 60),
 					abs((utc_offset % 60)));
 
-				ZVAL_STR(&zv, tmpstr);
+				ZVAL_NEW_STR(&zv, tmpstr);
 				}
 				break;
 			case TIMELIB_ZONETYPE_ABBR:
@@ -2312,7 +2312,7 @@ static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC) /*
 			abs(tzobj->tzi.utc_offset / 60),
 			abs((tzobj->tzi.utc_offset % 60)));
 
-			ZVAL_STR(&zv, tmpstr);
+			ZVAL_NEW_STR(&zv, tmpstr);
 			}
 			break;
 		case TIMELIB_ZONETYPE_ABBR:
@@ -4496,12 +4496,12 @@ PHP_FUNCTION(timezone_abbreviations_list)
 
 	do {
 		array_init(&element);
-		add_assoc_bool(&element, "dst", entry->type);
-		add_assoc_long(&element, "offset", entry->gmtoffset);
+		add_assoc_bool_ex(&element, "dst", sizeof("dst") -1, entry->type);
+		add_assoc_long_ex(&element, "offset", sizeof("offset") - 1, entry->gmtoffset);
 		if (entry->full_tz_name) {
-			add_assoc_string(&element, "timezone_id", entry->full_tz_name);
+			add_assoc_string_ex(&element, "timezone_id", sizeof("timezone_id") - 1, entry->full_tz_name);
 		} else {
-			add_assoc_null(&element, "timezone_id");
+			add_assoc_null_ex(&element, "timezone_id", sizeof("timezone_id") - 1);
 		}
 
 		abbr_array_p = zend_hash_str_find(HASH_OF(return_value), entry->name, strlen(entry->name));

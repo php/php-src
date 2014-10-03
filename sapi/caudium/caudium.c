@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -38,7 +38,7 @@
  */
 #define NO_PIKE_SHORTHAND
 
-/* Ok, we are now using Pike level threads to handle PHP5 since
+/* Ok, we are now using Pike level threads to handle PHP7 since
  * the nice th_farm threads aren't working on Linux with glibc 2.2
  * (why this is I don't know).
  */
@@ -79,7 +79,7 @@
 #endif
 
 #ifndef PIKE_THREADS
-#error The PHP5 module requires that your Pike has thread support.
+#error The PHP7 module requires that your Pike has thread support.
 #endif
 
 #undef HIDE_GLOBAL_VARIABLES
@@ -625,7 +625,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
     SG(request_info).headers_only = 0;
   }
 
-  /* Let PHP5 handle the deconding of the AUTH */
+  /* Let PHP7 handle the deconding of the AUTH */
   php_handle_auth_data(lookup_string_header("HTTP_AUTHORIZATION", NULL), TSRMLS_C);
    /* Swap out this thread and release the interpreter lock to allow
    * Pike threads to run. We wait since the above would otherwise require

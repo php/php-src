@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,12 +25,12 @@
 
 /* Passed as opaque in malloc callbacks */
 typedef struct _php_zlib_filter_data {
-	int persistent;
 	z_stream strm;
 	char *inbuf;
 	size_t inbuf_len;
 	char *outbuf;
 	size_t outbuf_len;
+	int persistent;
 	zend_bool finished;
 } php_zlib_filter_data;
 

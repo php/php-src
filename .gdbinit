@@ -638,3 +638,28 @@ document zmemcheck
 	usage: zmemcheck [ptr].
 	if ptr is 0, all blocks will be listed.
 end
+
+define lookup_root
+	set $found = 0
+	if gc_globals->roots
+		set $current = gc_globals->roots->next
+		printf "looking ref %p in roots\n", $arg0
+		while $current != &gc_globals->roots
+			if $current->ref == $arg0
+				set $found = $current
+				break
+			end
+			set $current = $current->next
+		end
+		if $found != 0
+			printf "found root %p\n", $found
+		else
+			printf "not found\n"
+		end
+	end
+end
+
+document lookup_root
+	lookup a refcounted in root
+	usage: lookup_root [ptr].
+end

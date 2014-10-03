@@ -163,7 +163,7 @@ ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind ki
 }
 
 static inline zend_bool is_power_of_two(uint32_t n) {
-	return n == (n & -n);
+	return ((n != 0) && (n == (n & (~n + 1))));
 }
 
 ZEND_API zend_ast *zend_ast_list_add(zend_ast *ast, zend_ast *op) {

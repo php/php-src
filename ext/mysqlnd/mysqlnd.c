@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -27,7 +27,7 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 /*
   TODO :
@@ -2496,7 +2496,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
 				zval attrz;
-				ZVAL_STR(&attrz, zend_string_init(value, strlen(value), 1));
+				ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), 1));
 				zend_hash_str_update(conn->options->connect_attr, key, strlen(key), &attrz);
 			}
 			break;
@@ -2798,7 +2798,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 				smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
 			}
 			if (mode & (TRANS_START_READ_WRITE | TRANS_START_READ_ONLY)) {
-				unsigned long server_version = conn->m->get_server_version(conn TSRMLS_CC);
+				zend_ulong server_version = conn->m->get_server_version(conn TSRMLS_CC);
 				if (server_version < 50605L) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "This server version doesn't support 'READ WRITE' and 'READ ONLY'. Minimum 5.6.5 is required");
 					smart_str_free(&tmp_str);

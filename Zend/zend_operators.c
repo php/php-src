@@ -540,6 +540,7 @@ ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
 	switch (Z_TYPE_P(op)) {
+		case IS_UNDEF:
 		case IS_NULL:
 		case IS_FALSE: {
 			TSRMLS_FETCH();
@@ -822,11 +823,10 @@ ZEND_API zend_string *_zval_get_string_func(zval *op TSRMLS_DC) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(op)) {
+		case IS_UNDEF:
 		case IS_NULL:
 		case IS_FALSE:
 			return STR_EMPTY_ALLOC();
-		case IS_STRING:
-			return zend_string_copy(Z_STR_P(op));
 		case IS_TRUE:
 			return zend_string_init("1", 1, 0);
 		case IS_RESOURCE: {
@@ -866,6 +866,8 @@ try_again:
 		case IS_REFERENCE:
 			op = Z_REFVAL_P(op);
 			goto try_again;
+		case IS_STRING:
+			return zend_string_copy(Z_STR_P(op));
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
@@ -1447,6 +1449,18 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 		op1_lval = Z_LVAL_P(op1);
 	}
 
+	/* prevent wrapping quirkiness on some processors where << 64 + x == << x */
+	if (Z_LVAL_P(op2) >= SIZEOF_ZEND_LONG * 8) {
+		ZVAL_LONG(result, 0);
+		return SUCCESS;
+	}
+
+	if (Z_LVAL_P(op2) < 0) {
+		zend_error(E_WARNING, "Bit shift by negative number");
+		ZVAL_FALSE(result);
+		return FAILURE;
+	}
+
 	ZVAL_LONG(result, op1_lval << Z_LVAL_P(op2));
 	return SUCCESS;
 }
@@ -1465,6 +1479,18 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 		zendi_convert_to_long(op2, op2_copy, result);
 	} else {
 		op1_lval = Z_LVAL_P(op1);
+	}
+
+	/* prevent wrapping quirkiness on some processors where >> 64 + x == >> x */
+	if (Z_LVAL_P(op2) >= SIZEOF_ZEND_LONG * 8) {
+		ZVAL_LONG(result, (Z_LVAL_P(op1) < 0) ? -1 : 0);
+		return SUCCESS;
+	}
+
+	if (Z_LVAL_P(op2) < 0) {
+		zend_error(E_WARNING, "Bit shift by negative number");
+		ZVAL_FALSE(result);
+		return FAILURE;
 	}
 
 	ZVAL_LONG(result, op1_lval >> Z_LVAL_P(op2));
@@ -1539,7 +1565,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 			zend_error_noreturn(E_ERROR, "String size overflow");
 		}
 
-		if (result == op1 && !IS_INTERNED(Z_STR_P(result))) {
+		if (result == op1 && Z_REFCOUNTED_P(result)) {
 			/* special case, perform operations on result */
 			result_str = zend_string_realloc(Z_STR_P(result), result_len, 0);
 		} else {
@@ -2017,7 +2043,7 @@ static void increment_string(zval *str) /* {{{ */
 		return;
 	}
 
-	if (IS_INTERNED(Z_STR_P(str))) {
+	if (!Z_REFCOUNTED_P(str)) {
 		Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 	} else if (Z_REFCOUNT_P(str) > 1) {
@@ -2133,7 +2159,19 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+			if (Z_OBJ_HANDLER_P(op1, get)
+			   && Z_OBJ_HANDLER_P(op1, set)) {
+				/* proxy object */
+				zval rv;
+				zval *val;
+				TSRMLS_FETCH();
+
+				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);
+				Z_ADDREF_P(val);
+				fast_increment_function(val);
+				Z_OBJ_HANDLER_P(op1, set)(op1, val TSRMLS_CC);
+				zval_ptr_dtor(val);
+			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
 				TSRMLS_FETCH();
@@ -2196,7 +2234,19 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+			if (Z_OBJ_HANDLER_P(op1, get)
+			   && Z_OBJ_HANDLER_P(op1, set)) {
+				/* proxy object */
+				zval rv;
+				zval *val;
+				TSRMLS_FETCH();
+
+				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);
+				Z_ADDREF_P(val);
+				fast_decrement_function(val);
+				Z_OBJ_HANDLER_P(op1, set)(op1, val TSRMLS_CC);
+				zval_ptr_dtor(val);
+			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
 				TSRMLS_FETCH();
@@ -2518,14 +2568,150 @@ ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 ZEND_API zend_string *zend_long_to_str(zend_long num) /* {{{ */
 {
 	char buf[MAX_LENGTH_OF_LONG + 1];
-	char *res;
-	_zend_print_signed_to_buf(buf + sizeof(buf) - 1, num, zend_ulong, res);
+	char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, num);
 	return zend_string_init(res, buf + sizeof(buf) - 1 - res, 0);
 }
 /* }}} */
 
 ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) {
     return is_numeric_string_ex(str->val, str->len, lval, dval, -1, NULL);
+}
+
+ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info)
+{
+	const char *ptr;
+	int base = 10, digits = 0, dp_or_e = 0;
+	double local_dval = 0.0;
+	zend_uchar type;
+
+	if (!length) {
+		return 0;
+	}
+
+	if (oflow_info != NULL) {
+		*oflow_info = 0;
+	}
+
+	/* Skip any whitespace
+	 * This is much faster than the isspace() function */
+	while (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r' || *str == '\v' || *str == '\f') {
+		str++;
+		length--;
+	}
+	ptr = str;
+
+	if (*ptr == '-' || *ptr == '+') {
+		ptr++;
+	}
+
+	if (ZEND_IS_DIGIT(*ptr)) {
+		/* Handle hex numbers
+		 * str is used instead of ptr to disallow signs and keep old behavior */
+		if (length > 2 && *str == '0' && (str[1] == 'x' || str[1] == 'X')) {
+			base = 16;
+			ptr += 2;
+		}
+
+		/* Skip any leading 0s */
+		while (*ptr == '0') {
+			ptr++;
+		}
+
+		/* Count the number of digits. If a decimal point/exponent is found,
+		 * it's a double. Otherwise, if there's a dval or no need to check for
+		 * a full match, stop when there are too many digits for a long */
+		for (type = IS_LONG; !(digits >= MAX_LENGTH_OF_LONG && (dval || allow_errors == 1)); digits++, ptr++) {
+check_digits:
+			if (ZEND_IS_DIGIT(*ptr) || (base == 16 && ZEND_IS_XDIGIT(*ptr))) {
+				continue;
+			} else if (base == 10) {
+				if (*ptr == '.' && dp_or_e < 1) {
+					goto process_double;
+				} else if ((*ptr == 'e' || *ptr == 'E') && dp_or_e < 2) {
+					const char *e = ptr + 1;
+
+					if (*e == '-' || *e == '+') {
+						ptr = e++;
+					}
+					if (ZEND_IS_DIGIT(*e)) {
+						goto process_double;
+					}
+				}
+			}
+
+			break;
+		}
+
+		if (base == 10) {
+			if (digits >= MAX_LENGTH_OF_LONG) {
+				if (oflow_info != NULL) {
+					*oflow_info = *str == '-' ? -1 : 1;
+				}
+				dp_or_e = -1;
+				goto process_double;
+			}
+		} else if (!(digits < SIZEOF_ZEND_LONG * 2 || (digits == SIZEOF_ZEND_LONG * 2 && ptr[-digits] <= '7'))) {
+			if (dval) {
+				local_dval = zend_hex_strtod(str, &ptr);
+			}
+			if (oflow_info != NULL) {
+				*oflow_info = 1;
+			}
+			type = IS_DOUBLE;
+		}
+	} else if (*ptr == '.' && ZEND_IS_DIGIT(ptr[1])) {
+process_double:
+		type = IS_DOUBLE;
+
+		/* If there's a dval, do the conversion; else continue checking
+		 * the digits if we need to check for a full match */
+		if (dval) {
+			local_dval = zend_strtod(str, &ptr);
+		} else if (allow_errors != 1 && dp_or_e != -1) {
+			dp_or_e = (*ptr++ == '.') ? 1 : 2;
+			goto check_digits;
+		}
+	} else {
+		return 0;
+	}
+
+	if (ptr != str + length) {
+		if (!allow_errors) {
+			return 0;
+		}
+		if (allow_errors == -1) {
+			zend_error(E_NOTICE, "A non well formed numeric value encountered");
+		}
+	}
+
+	if (type == IS_LONG) {
+		if (digits == MAX_LENGTH_OF_LONG - 1) {
+			int cmp = strcmp(&ptr[-digits], long_min_digits);
+
+			if (!(cmp < 0 || (cmp == 0 && *str == '-'))) {
+				if (dval) {
+					*dval = zend_strtod(str, NULL);
+				}
+				if (oflow_info != NULL) {
+					*oflow_info = *str == '-' ? -1 : 1;
+				}
+
+				return IS_DOUBLE;
+			}
+		}
+
+		if (lval) {
+			*lval = ZEND_STRTOL(str, NULL, base);
+		}
+
+		return IS_LONG;
+	} else {
+		if (dval) {
+			*dval = local_dval;
+		}
+
+		return IS_DOUBLE;
+	}
 }
 
 /*

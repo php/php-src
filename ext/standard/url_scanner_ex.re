@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -40,7 +40,7 @@
 
 #define url_scanner url_scanner_ex
 
-#include "php_smart_str.h"
+#include "zend_smart_str.h"
 
 static void tag_dtor(zval *zv)
 {
@@ -122,7 +122,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 
 scan:
 /*!re2c
-  ":"		{ smart_str_append(dest, url); return; }
+  ":"		{ smart_str_append_smart_str(dest, url); return; }
   "?"		{ sep = separator; goto scan; }
   "#"		{ bash = p - 1; goto done; }
   (any\[:?#])+		{ goto scan; }
@@ -131,17 +131,17 @@ done:
 	
 	/* Don't modify URLs of the format "#mark" */
 	if (bash && bash - url->s->val == 0) {
-		smart_str_append(dest, url);
+		smart_str_append_smart_str(dest, url);
 		return;
 	}
 
 	if (bash)
 		smart_str_appendl(dest, url->s->val, bash - url->s->val);
 	else
-		smart_str_append(dest, url);
+		smart_str_append_smart_str(dest, url);
 
 	smart_str_appends(dest, sep);
-	smart_str_append(dest, url_app);
+	smart_str_append_smart_str(dest, url_app);
 
 	if (bash)
 		smart_str_appendl(dest, bash, q - bash);
@@ -166,7 +166,7 @@ static inline void tag_arg(url_adapt_state_ex_t *ctx, char quotes, char type TSR
 	if (f) {
 		append_modified_url(&ctx->val, &ctx->result, &ctx->url_app, PG(arg_separator).output);
 	} else {
-		smart_str_append(&ctx->result, &ctx->val);
+		smart_str_append_smart_str(&ctx->result, &ctx->val);
 	}
 	if (quotes)
 		smart_str_appendc(&ctx->result, type);
@@ -240,7 +240,7 @@ static void handle_form(STD_PARA)
 		}
 
 		if (doit)
-			smart_str_append(&ctx->result, &ctx->form_app);
+			smart_str_append_smart_str(&ctx->result, &ctx->form_app);
 	}
 }
 
@@ -410,7 +410,7 @@ static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_
 	}
 	smart_str_0(&ctx->result);
 	if (do_flush) {
-		smart_str_appendl(&ctx->result, ctx->buf.s->val, ctx->buf.s->len);
+		smart_str_append(&ctx->result, ctx->buf.s);
 		*newlen += ctx->buf.s->len;
 		smart_str_free(&ctx->buf);
 		smart_str_free(&ctx->val);
@@ -459,7 +459,7 @@ static void php_url_scanner_output_handler(char *output, uint output_len, char *
 	} else if (BG(url_adapt_state_ex).url_app.s->len == 0) {
 		url_adapt_state_ex_t *ctx = &BG(url_adapt_state_ex);
 		if (ctx->buf.s && ctx->buf.s->len) {
-			smart_str_appendl(&ctx->result, ctx->buf.s->val, ctx->buf.s->len);
+			smart_str_append(&ctx->result, ctx->buf.s);
 			smart_str_appendl(&ctx->result, output, output_len);
 
 			*handled_output = estrndup(ctx->result.s->val, ctx->result.s->len);
@@ -500,12 +500,12 @@ PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int va
 	
 	smart_str_appendl(&BG(url_adapt_state_ex).url_app, name, name_len);
 	smart_str_appendc(&BG(url_adapt_state_ex).url_app, '=');
-	smart_str_append(&BG(url_adapt_state_ex).url_app, &val);
+	smart_str_append_smart_str(&BG(url_adapt_state_ex).url_app, &val);
 
 	smart_str_appends(&BG(url_adapt_state_ex).form_app, "<input type=\"hidden\" name=\""); 
 	smart_str_appendl(&BG(url_adapt_state_ex).form_app, name, name_len);
 	smart_str_appends(&BG(url_adapt_state_ex).form_app, "\" value=\"");
-	smart_str_append(&BG(url_adapt_state_ex).form_app, &val);
+	smart_str_append_smart_str(&BG(url_adapt_state_ex).form_app, &val);
 	smart_str_appends(&BG(url_adapt_state_ex).form_app, "\" />");
 
 	if (urlencode) {

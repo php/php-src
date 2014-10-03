@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -40,7 +40,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/pcre/php_pcre.h"
 
 #ifdef ERROR

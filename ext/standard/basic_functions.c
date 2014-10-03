@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -4178,8 +4178,9 @@ static int parse_opts(char * opts, opt_struct ** result)
 {
 	opt_struct * paras = NULL;
 	unsigned int i, count = 0;
+	unsigned int opts_len = (unsigned int)strlen(opts);
 
-	for (i = 0; i < strlen(opts); i++) {
+	for (i = 0; i < opts_len; i++) {
 		if ((opts[i] >= 48 && opts[i] <= 57) ||
 			(opts[i] >= 65 && opts[i] <= 90) ||
 			(opts[i] >= 97 && opts[i] <= 122)
@@ -4785,15 +4786,15 @@ PHP_FUNCTION(forward_static_call)
 		return;
 	}
 
-	if (!EG(current_execute_data)->prev_execute_data->func->common.scope) {
+	if (!EX(prev_execute_data)->func->common.scope) {
 		zend_error(E_ERROR, "Cannot call forward_static_call() when no class scope is active");
 	}
 
 	fci.retval = &retval;
 
-	if (EG(current_execute_data)->called_scope &&
-		instanceof_function(EG(current_execute_data)->called_scope, fci_cache.calling_scope TSRMLS_CC)) {
-			fci_cache.called_scope = EG(current_execute_data)->called_scope;
+	if (EX(called_scope) &&
+		instanceof_function(EX(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
+			fci_cache.called_scope = EX(called_scope);
 	}
 	
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -4817,9 +4818,9 @@ PHP_FUNCTION(forward_static_call_array)
 	zend_fcall_info_args(&fci, params TSRMLS_CC);
 	fci.retval = &retval;
 
-	if (EG(current_execute_data)->called_scope &&
-		instanceof_function(EG(current_execute_data)->called_scope, fci_cache.calling_scope TSRMLS_CC)) {
-			fci_cache.called_scope = EG(current_execute_data)->called_scope;
+	if (EX(called_scope) &&
+		instanceof_function(EX(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
+			fci_cache.called_scope = EX(called_scope);
 	}
 
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -4861,9 +4862,11 @@ static int user_shutdown_function_call(zval *zv TSRMLS_DC) /* {{{ */
 	zend_string *function_name;
 
 	if (!zend_is_callable(&shutdown_function_entry->arguments[0], 0, &function_name TSRMLS_CC)) {
-		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", function_name->val);
 		if (function_name) {
+			php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", function_name->val);
 			zend_string_release(function_name);
+		} else {
+			php_error(E_WARNING, "(Registered shutdown functions) Unable to call - function does not exist");
 		}
 		return 0;
 	}
@@ -5009,7 +5012,11 @@ PHP_FUNCTION(register_shutdown_function)
 
 	/* Prevent entering of anything but valid callback (syntax check only!) */
 	if (!zend_is_callable(&shutdown_function_entry.arguments[0], 0, &callback_name TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", callback_name->val);
+		if (callback_name) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", callback_name->val);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback passed");
+		}
 		efree(shutdown_function_entry.arguments);
 		RETVAL_FALSE;
 	} else {
@@ -5119,7 +5126,7 @@ PHP_FUNCTION(php_strip_whitespace)
 	char *filename;
 	size_t filename_len;
 	zend_lex_state original_lex_state;
-	zend_file_handle file_handle = {0};
+	zend_file_handle file_handle = {{0}};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
@@ -5254,7 +5261,7 @@ static int php_ini_get_option(zval *zv TSRMLS_DC, int num_args, va_list args, ze
 			if (ini_entry->value) {
 				zval zv;
 
-				ZVAL_STR(&zv, zend_string_copy(ini_entry->value));
+				ZVAL_STR_COPY(&zv, ini_entry->value);
 				zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &zv);
 			} else {
 				zend_symtable_update(Z_ARRVAL_P(ini_array), ini_entry->name, &EG(uninitialized_zval));

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -178,7 +178,7 @@ static int php_check_dots(const char *element, int n)
 #define MAXIMUM_REPARSE_DATA_BUFFER_SIZE  ( 16 * 1024 )
 
 typedef struct {
-	zend_ulong  ReparseTag;
+	unsigned long  ReparseTag;
 	unsigned short ReparseDataLength;
 	unsigned short Reserved;
 	union {
@@ -187,7 +187,7 @@ typedef struct {
 			unsigned short SubstituteNameLength;
 			unsigned short PrintNameOffset;
 			unsigned short PrintNameLength;
-			zend_ulong  Flags;
+			unsigned long  Flags;
 			wchar_t        ReparseTarget[1];
 		} SymbolicLinkReparseBuffer;
 		struct {
@@ -201,19 +201,19 @@ typedef struct {
 			unsigned char  ReparseTarget[1];
 		} GenericReparseBuffer;
 	};
-} REPARSE_DATA_BUFFER;
+} REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
 
 #define SECS_BETWEEN_EPOCHS (__int64)11644473600
 #define SECS_TO_100NS (__int64)10000000
-static inline time_t FileTimeToUnixTime(const FILETIME FileTime)
+static inline time_t FileTimeToUnixTime(const FILETIME *FileTime)
 {
 	__int64 UnixTime;
 	long *nsec = NULL;
 	SYSTEMTIME SystemTime;
-	FileTimeToSystemTime(&FileTime, &SystemTime);
+	FileTimeToSystemTime(FileTime, &SystemTime);
 
-	UnixTime = ((__int64)FileTime.dwHighDateTime << 32) +
-	FileTime.dwLowDateTime;
+	UnixTime = ((__int64)FileTime->dwHighDateTime << 32) +
+	FileTime->dwLowDateTime;
 
 	UnixTime -= (SECS_BETWEEN_EPOCHS * SECS_TO_100NS);
 
@@ -294,7 +294,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{{ */
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
-	__int64 t;
+	LARGE_INTEGER t;
 	const size_t path_len = strlen(path);
 	ALLOCA_FLAG(use_heap_large);
 
@@ -393,13 +393,14 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	}
 
 	buf->st_nlink = 1;
-	t = data.nFileSizeHigh;
-	t = t << 32;
-	t |= data.nFileSizeLow;
-	buf->st_size = t;
-	buf->st_atime = FileTimeToUnixTime(data.ftLastAccessTime);
-	buf->st_ctime = FileTimeToUnixTime(data.ftCreationTime);
-	buf->st_mtime = FileTimeToUnixTime(data.ftLastWriteTime);
+	t.HighPart = data.nFileSizeHigh;
+	t.LowPart = data.nFileSizeLow;
+	/* It's an overflow on 32 bit, however it won't fix as long
+	as zend_long is 32 bit. */
+	buf->st_size = (zend_long)t.QuadPart;
+	buf->st_atime = FileTimeToUnixTime(&data.ftLastAccessTime);
+	buf->st_ctime = FileTimeToUnixTime(&data.ftCreationTime);
+	buf->st_mtime = FileTimeToUnixTime(&data.ftLastWriteTime);
 	return 0;
 }
 /* }}} */
@@ -983,6 +984,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				memcpy(substitutename, path, len + 1);
 				substitutename_len = len;
 			} else {
+				/* XXX this might be not the end, restart handling with REPARSE_GUID_DATA_BUFFER should be implemented. */
 				free_alloca(pbuffer, use_heap_large);
 				return -1;
 			}

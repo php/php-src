@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -78,7 +78,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	int _old_soap_version = SOAP_GLOBAL(soap_version);\
 	SOAP_GLOBAL(use_soap_error_handler) = 1;\
 	SOAP_GLOBAL(error_code) = "Server";\
-	Z_OBJ(SOAP_GLOBAL(error_object)) = Z_OBJ(EG(This));
+	Z_OBJ(SOAP_GLOBAL(error_object)) = Z_OBJ(EX(This));
 
 #define SOAP_SERVER_END_CODE() \
 	SOAP_GLOBAL(use_soap_error_handler) = _old_handler;\
@@ -97,7 +97,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	int _bailout = 0;\
 	SOAP_GLOBAL(use_soap_error_handler) = 1;\
 	SOAP_GLOBAL(error_code) = "Client";\
-	Z_OBJ(SOAP_GLOBAL(error_object)) = Z_OBJ(EG(This));\
+	Z_OBJ(SOAP_GLOBAL(error_object)) = Z_OBJ(EX(This));\
 	zend_try {
 
 #define SOAP_CLIENT_END_CODE() \
@@ -946,7 +946,7 @@ PHP_METHOD(SoapFault, __toString)
 	fci.function_table = &Z_OBJCE_P(getThis())->function_table;
 	ZVAL_STRINGL(&fci.function_name, "gettraceasstring", sizeof("gettraceasstring")-1);
 	fci.symbol_table = NULL;
-	fci.object = Z_OBJ(EG(This));
+	fci.object = Z_OBJ(EX(This));
 	fci.retval = &trace;
 	fci.param_count = 0;
 	fci.params = NULL;
@@ -1429,7 +1429,7 @@ PHP_METHOD(SoapServer, addFunction)
 					return;
 				}
 
-				ZVAL_STR(&function_copy, zend_string_copy(f->common.function_name));
+				ZVAL_STR_COPY(&function_copy, f->common.function_name);
 				zend_hash_update(service->soap_functions.ft, key, &function_copy);
 
 				zend_string_release(key);
@@ -1452,7 +1452,7 @@ PHP_METHOD(SoapServer, addFunction)
 			zend_hash_init(service->soap_functions.ft, 0, NULL, ZVAL_PTR_DTOR, 0);
 		}
 
-		ZVAL_STR(&function_copy, zend_string_copy(f->common.function_name));
+		ZVAL_STR_COPY(&function_copy, f->common.function_name);
 		zend_hash_update(service->soap_functions.ft, key, &function_copy);
 		zend_string_release(key);
 	} else if (Z_TYPE_P(function_name) == IS_LONG) {
@@ -1713,7 +1713,7 @@ PHP_METHOD(SoapServer, handle)
 				if (zend_hash_str_exists(&Z_OBJCE(tmp_soap)->function_table, php_strtolower(class_name, class_name_len), class_name_len)) {
 					zval c_ret, constructor;
 
-					ZVAL_STR(&constructor, zend_string_copy(service->soap_class.ce->name));
+					ZVAL_STR_COPY(&constructor, service->soap_class.ce->name);
 					if (call_user_function(NULL, &tmp_soap, &constructor, &c_ret, service->soap_class.argc, service->soap_class.argv TSRMLS_CC) == FAILURE) {
 						php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error calling constructor");
 					}
@@ -2621,7 +2621,8 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
   return ret;
 }
 
-static void do_soap_call(zval* this_ptr,
+static void do_soap_call(zend_execute_data *execute_data,
+                         zval* this_ptr,
                          char* function,
                          size_t function_len,
                          int arg_count,
@@ -2936,7 +2937,7 @@ PHP_METHOD(SoapClient, __call)
 	if (output_headers) {
 		array_init(output_headers);
 	}
-	do_soap_call(this_ptr, function, function_len, arg_count, real_args, return_value, location, soap_action, uri, soap_headers, output_headers TSRMLS_CC);
+	do_soap_call(execute_data, this_ptr, function, function_len, arg_count, real_args, return_value, location, soap_action, uri, soap_headers, output_headers TSRMLS_CC);
 	if (arg_count > 0) {
 		efree(real_args);
 	}

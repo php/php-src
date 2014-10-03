@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -82,7 +82,7 @@
 
 #define SMART_STR_PREALLOC 4096
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/url.h"
@@ -556,6 +556,12 @@ PHP_MINFO_FUNCTION(curl)
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071504 /* 7.21.4 */
 			{"TLS-SRP", CURL_VERSION_TLSAUTH_SRP},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072100 /* 7.33.0 */
+			{"HTTP2", CURL_VERSION_HTTP2},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x072600 /* 7.38.0 */
+			{"GSSAPI", CURL_VERSION_GSSAPI},
 #endif
 			{NULL, 0}
 		};
@@ -1832,10 +1838,10 @@ static void _php_curl_set_default_options(php_curl *ch)
 	curl_easy_setopt(ch->cp, CURLOPT_MAXREDIRS, 20); /* prevent infinite redirects */
 
 	cainfo = INI_STR("openssl.cafile");
-	if (!(cainfo && strlen(cainfo) > 0)) {
+	if (!(cainfo && cainfo[0] != '\0')) {
 		cainfo = INI_STR("curl.cainfo");
 	}
-	if (cainfo && strlen(cainfo) > 0) {
+	if (cainfo && cainfo[0] != '\0') {
 		curl_easy_setopt(ch->cp, CURLOPT_CAINFO, cainfo);
 	}
 
@@ -2462,7 +2468,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue TSRMLS_
 				zval *current;
 				HashTable *postfields;
 				zend_string *string_key;
-				ulong  num_key;
+				zend_ulong  num_key;
 				struct HttpPost *first = NULL;
 				struct HttpPost *last  = NULL;
 

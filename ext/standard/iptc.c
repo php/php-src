@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -300,8 +300,8 @@ PHP_FUNCTION(iptcparse)
 {
 	int inx = 0, len;
 	unsigned int tagsfound = 0;
-	unsigned char *buffer, recnum, dataset, key[ 16 ];
-	char *str;
+	unsigned char *buffer, recnum, dataset;
+	char *str, key[16];
 	size_t str_len;
 	zval values, *element;
 

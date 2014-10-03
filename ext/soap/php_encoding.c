@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -813,7 +813,7 @@ static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data TSRML
 			}
 		}
 		str->val[str->len] = '\0';
-		ZVAL_STR(ret, str);
+		ZVAL_NEW_STR(ret, str);
 	} else {
 		ZVAL_EMPTY_STRING(ret);
 	}
@@ -1201,7 +1201,7 @@ static zval* get_zval_property(zval* object, char* name, zval *rv TSRMLS_DC)
 			/* Hack for bug #32455 */
 			zend_property_info *property_info;
 
-			property_info = zend_get_property_info(Z_OBJCE_P(object), &member, 1 TSRMLS_CC);
+			property_info = zend_get_property_info(Z_OBJCE_P(object), Z_STR(member), 1 TSRMLS_CC);
 			EG(scope) = old_scope;
 			if (property_info && zend_hash_exists(Z_OBJPROP_P(object), property_info->name)) {
 				zval_ptr_dtor(&member);
@@ -1984,7 +1984,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 					if (Z_TYPE_P(data) == IS_OBJECT) {
 						const char *class_name;
 
-						zend_unmangle_property_name(str_key->val, str_key->len, &class_name, &prop_name);
+						zend_unmangle_property_name(str_key, &class_name, &prop_name);
 					} else {
 						prop_name = str_key->val;
 					}
@@ -2441,7 +2441,7 @@ iterator_done:
 					smart_str_appendl(&array_type,"xsd:ur-type",sizeof("xsd:ur-type")-1);
 				}
 				smart_str_appendc(&array_type, '[');
-				smart_str_append(&array_type, &array_size);
+				smart_str_append_smart_str(&array_type, &array_size);
 				smart_str_appendc(&array_type, ']');
 				smart_str_0(&array_type);
 				set_ns_prop(xmlParam, SOAP_1_1_ENC_NAMESPACE, "arrayType", array_type.s->val);

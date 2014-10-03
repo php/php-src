@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -21,7 +21,7 @@
 #ifndef PHP_WDDX_API_H
 #define PHP_WDDX_API_H
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str_public.h"
 
 #define WDDX_ARRAY_S			"<array length='%d'>"
 #define WDDX_ARRAY_E			"</array>"

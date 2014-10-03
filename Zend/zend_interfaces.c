@@ -325,7 +325,8 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 /* {{{ zend_implement_aggregate */
 static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
-	int i, t = -1;
+	uint32_t i;
+	int t = -1;
 
 	if (class_type->get_iterator) {
 		if (class_type->type == ZEND_INTERNAL_CLASS) {
@@ -406,7 +407,7 @@ static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_en
 /* }}}*/
 
 /* {{{ zend_user_serialize */
-ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, uint32_t *buf_len, zend_serialize_data *data TSRMLS_DC)
+ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC)
 {
 	zend_class_entry * ce = Z_OBJCE_P(object);
 	zval retval;
@@ -443,7 +444,7 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, uint32_t 
 /* }}} */
 
 /* {{{ zend_user_unserialize */
-ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, uint32_t buf_len, zend_unserialize_data *data TSRMLS_DC)
+ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data TSRMLS_DC)
 {
 	zval zdata;
 
@@ -463,7 +464,7 @@ ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const uns
 }
 /* }}} */
 
-ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, uint32_t *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
+ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", ce->name->val);
@@ -471,7 +472,7 @@ ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, uin
 }
 /* }}} */
 
-ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, uint32_t buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
+ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
 {
 	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Unserialization of '%s' is not allowed", ce->name->val);
 	return FAILURE;

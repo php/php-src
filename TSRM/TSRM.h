@@ -64,7 +64,7 @@ typedef int ts_rsrc_id;
 
 /* Define THREAD_T and MUTEX_T */
 #ifdef TSRM_WIN32
-# define THREAD_T UINT_PTR
+# define THREAD_T DWORD
 # define MUTEX_T CRITICAL_SECTION *
 #elif defined(GNUPTH)
 # define THREAD_T pth_t

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -56,7 +56,7 @@
 #include "zend_execute.h"
 #include "php_globals.h"
 #include "basic_functions.h"
-#include "php_smart_str.h"
+#include "zend_smart_str.h"
 #include <Zend/zend_exceptions.h>
 #ifdef ZTS
 #include "TSRM.h"
@@ -780,7 +780,7 @@ static inline int php_charmask(unsigned char *input, size_t len, char *mask TSRM
  */
 PHPAPI char *php_trim(char *c, size_t len, char *what, size_t what_len, zval *return_value, int mode TSRMLS_DC)
 {
-	register zend_long i;
+	register size_t i;
 	size_t trimmed = 0;
 	char mask[256];
 
@@ -802,12 +802,15 @@ PHPAPI char *php_trim(char *c, size_t len, char *what, size_t what_len, zval *re
 		c += trimmed;
 	}
 	if (mode & 2) {
-		for (i = len - 1; i >= 0; i--) {
-			if (mask[(unsigned char)c[i]]) {
-				len--;
-			} else {
-				break;
-			}
+		if (len > 0) {
+			i = len - 1;
+			do {
+				if (mask[(unsigned char)c[i]]) {
+					len--;
+				} else {
+					break;
+				}
+			} while (i-- != 0);
 		}
 	}
 
@@ -1147,7 +1150,7 @@ PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC)
 again:
 		switch (Z_TYPE_P(tmp)) {
 			case IS_STRING:
-				smart_str_appendl(&implstr, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
+				smart_str_append(&implstr, Z_STR_P(tmp));
 				break;
 
 			case IS_LONG:
@@ -1176,14 +1179,14 @@ again:
 
 			default:
 				str = zval_get_string(tmp);
-				smart_str_appendl(&implstr, str->val, str->len);
+				smart_str_append(&implstr, str);
 				zend_string_release(str);
 				break;
 
 		}
 
 		if (++i != numelems) {
-			smart_str_appendl(&implstr, Z_STRVAL_P(delim), Z_STRLEN_P(delim));
+			smart_str_append(&implstr, Z_STR_P(delim));
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -1810,7 +1813,7 @@ PHP_FUNCTION(strpos)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	if (offset < 0 || offset > haystack->len) {
+	if (offset < 0 || (size_t)offset > haystack->len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
@@ -1860,7 +1863,7 @@ PHP_FUNCTION(stripos)
 		return;
 	}
 
-	if (offset < 0 || offset > haystack->len) {
+	if (offset < 0 || (size_t)offset > haystack->len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
@@ -1948,20 +1951,20 @@ PHP_FUNCTION(strrpos)
 	}
 
 	if (offset >= 0) {
-		if (offset > haystack->len) {
+		if ((size_t)offset > haystack->len) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
-		p = haystack->val + offset;
+		p = haystack->val + (size_t)offset;
 		e = haystack->val + haystack->len - needle_len;
 	} else {
-		if (offset < -INT_MAX || -offset > haystack->len) {
+		if (offset < -INT_MAX || (size_t)(-offset) > haystack->len) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
 
 		p = haystack->val;
-		if (needle_len > -offset) {
+		if (needle_len > (size_t)(-offset)) {
 			e = haystack->val + haystack->len - needle_len;
 		} else {
 			e = haystack->val + haystack->len + offset;
@@ -2026,7 +2029,7 @@ PHP_FUNCTION(strripos)
 		/* Single character search can shortcut memcmps
 		   Can also avoid tolower emallocs */
 		if (offset >= 0) {
-			if (offset > haystack->len) {
+			if ((size_t)offset > haystack->len) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
@@ -2034,7 +2037,7 @@ PHP_FUNCTION(strripos)
 			e = haystack->val + haystack->len - 1;
 		} else {
 			p = haystack->val;
-			if (offset < -INT_MAX || -offset > haystack->len) {
+			if (offset < -INT_MAX || (size_t)(-offset) > haystack->len) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
@@ -2057,7 +2060,7 @@ PHP_FUNCTION(strripos)
 	php_strtolower(haystack_dup, haystack->len);
 
 	if (offset >= 0) {
-		if (offset > haystack->len) {
+		if ((size_t)offset > haystack->len) {
 			efree(needle_dup);
 			efree(haystack_dup);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
@@ -2066,14 +2069,14 @@ PHP_FUNCTION(strripos)
 		p = haystack_dup + offset;
 		e = haystack_dup + haystack->len - needle_len;
 	} else {
-		if (offset < -INT_MAX || -offset > haystack->len) {
+		if (offset < -INT_MAX || (size_t)(-offset) > haystack->len) {
 			efree(needle_dup);
 			efree(haystack_dup);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
 		p = haystack_dup;
-		if (needle_len > -offset) {
+		if (needle_len > (size_t)(-offset)) {
 			e = haystack_dup + haystack->len - needle_len;
 		} else {
 			e = haystack_dup + haystack->len + offset;
@@ -2197,7 +2200,7 @@ PHP_FUNCTION(chunk_split)
 		RETURN_FALSE;
 	}
 
-	if (chunklen > str->len) {
+	if ((size_t)chunklen > str->len) {
 		/* to maintain BC, we must return original string + ending */
 		result = zend_string_alloc(endlen + str->len, 0);
 		memcpy(result->val, str->val, str->len);
@@ -2210,7 +2213,7 @@ PHP_FUNCTION(chunk_split)
 		RETURN_EMPTY_STRING();
 	}
 
-	result = php_chunk_split(str->val, str->len, end, endlen, chunklen);
+	result = php_chunk_split(str->val, str->len, end, endlen, (size_t)chunklen);
 
 	if (result) {
 		RETURN_STR(result);
@@ -2242,7 +2245,7 @@ PHP_FUNCTION(substr)
 #endif
 
 	if (argc > 2) {
-		if ((l < 0 && -l > str->len)) {
+		if ((l < 0 && (size_t)(-l) > str->len)) {
 			RETURN_FALSE;
 		} else if (l > (zend_long)str->len) {
 			l = str->len;
@@ -2556,7 +2559,7 @@ PHP_FUNCTION(substr_replace)
 			if (str_index) {
 				zval tmp;
 
-				ZVAL_STR(&tmp, result);
+				ZVAL_NEW_STR(&tmp, result);
 				zend_symtable_update(Z_ARRVAL_P(return_value), str_index, &tmp);
 			} else {
 				add_index_str(return_value, num_index, result);
@@ -2904,7 +2907,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 				entry = zend_hash_str_find(pats, key, len);
 				if (entry != NULL) {
 					zend_string *str = zval_get_string(entry);
-					smart_str_appendl(&result, str->val, str->len);
+					smart_str_append(&result, str);
 					pos += len;
 					found = 1;
 					zend_string_release(str);
@@ -2929,7 +2932,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 				entry = zend_hash_str_find(pats, key, len);
 				if (entry != NULL) {
 					zend_string *str = zval_get_string(entry);
-					smart_str_appendl(&result, str->val, str->len);
+					smart_str_append(&result, str);
 					pos += len;
 					found = 1;
 					zend_string_release(str);
@@ -3794,7 +3797,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	zval result;
 	zend_string *string_key;
 	zend_ulong num_key;
-	zend_long count = 0;
+	size_t count = 0;
 	int argc = ZEND_NUM_ARGS();
 
 #ifndef FAST_ZPP
@@ -3980,7 +3983,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 
 	while (1) {
 		char_count=0;
-		while ((!max_chars || max_chars > 0 && char_count < max_chars) && begin > 0) {
+		while ((!max_chars || (max_chars > 0 && char_count < max_chars)) && begin > 0) {
 			char_count++;
 			begin--;
 			if (begin <= 0 || _isnewline(heb_str[begin])) {
@@ -4156,7 +4159,7 @@ PHP_FUNCTION(strip_tags)
 	if (allow != NULL) {
 		convert_to_string_ex(allow);
 // TODO: reimplement to avoid reallocation ???
-		if (IS_INTERNED(Z_STR_P(allow))) {
+		if (!Z_REFCOUNTED_P(allow)) {
 			allowed_tags = estrndup(Z_STRVAL_P(allow), Z_STRLEN_P(allow));
 			allowed_tags_len = Z_STRLEN_P(allow);
 		} else {
@@ -4169,7 +4172,7 @@ PHP_FUNCTION(strip_tags)
 	buf->len = php_strip_tags_ex(buf->val, str->len, NULL, allowed_tags, allowed_tags_len, 0);
 
 // TODO: reimplement to avoid reallocation ???
-	if (allow && IS_INTERNED(Z_STR_P(allow))) {
+	if (allow && !Z_REFCOUNTED_P(allow)) {
 		efree(allowed_tags);
 	}
 	RETURN_STR(buf);
@@ -4999,7 +5002,7 @@ PHP_FUNCTION(substr_count)
 		RETURN_FALSE;
 	}
 
-	if (offset > haystack_len) {
+	if ((size_t)offset > haystack_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset value " ZEND_LONG_FMT " exceeds string length", offset);
 		RETURN_FALSE;
 	}
@@ -5058,7 +5061,7 @@ PHP_FUNCTION(str_pad)
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
-	if (pad_length < 0  || pad_length <= input->len) {
+	if (pad_length < 0  || (size_t)pad_length <= input->len) {
 		RETURN_STRINGL(input->val, input->len);
 	}
 
@@ -5347,7 +5350,7 @@ PHP_FUNCTION(str_split)
 	}
 
 
-	if (0 == str->len || split_length >= str->len) {
+	if (0 == str->len || (size_t)split_length >= str->len) {
 		array_init_size(return_value, 1);
 		add_next_index_stringl(return_value, str->val, str->len);
 		return;
@@ -5424,7 +5427,7 @@ PHP_FUNCTION(substr_compare)
 		offset = (offset < 0) ? 0 : offset;
 	}
 
-	if (offset >= s1->len) {
+	if ((size_t)offset >= s1->len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The start position cannot exceed initial string length");
 		RETURN_FALSE;
 	}

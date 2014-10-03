@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -30,7 +30,7 @@
 
 #include <fcntl.h>
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #ifndef NETWARE
 #include "ext/standard/php_standard.h"
 #else
@@ -67,7 +67,7 @@
 
 #define PHP_MAGIC_TYPE "application/x-httpd-php"
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
-#define PHP_SCRIPT "php5-script"
+#define PHP_SCRIPT "php7-script"
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
@@ -482,7 +482,11 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	r->no_local_copy = 1;
 
 	content_length = (char *) apr_table_get(r->headers_in, "Content-Length");
-	SG(request_info).content_length = (content_length ? atol(content_length) : 0);
+	if (content_length) {
+		ZEND_ATOL(SG(request_info).content_length, content_length);
+	} else {
+		SG(request_info).content_length = 0;
+	}
 
 	apr_table_unset(r->headers_out, "Content-Length");
 	apr_table_unset(r->headers_out, "Last-Modified");
@@ -515,7 +519,7 @@ typedef struct {
 	HashTable config;
 } php_conf_rec;
 		zend_string *str;
-		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php5_module);
+		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php7_module);
 
 		ZEND_HASH_FOREACH_STR_KEY(&c->config, str) {
 			zend_restore_ini_entry(str, ZEND_INI_STAGE_SHUTDOWN);
@@ -540,7 +544,7 @@ static int php_handler(request_rec *r)
 
 #define PHPAP_INI_OFF php_apache_ini_dtor(r, parent_req TSRMLS_CC);
 
-	conf = ap_get_module_config(r->per_dir_config, &php5_module);
+	conf = ap_get_module_config(r->per_dir_config, &php7_module);
 
 	/* apply_config() needs r in some cases, so allocate server_context early */
 	ctx = SG(server_context);

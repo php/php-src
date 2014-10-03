@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -96,7 +96,7 @@
 #endif
 
 #include "ext/standard/file.h" /* for php_set_sock_blocking() :-( */
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/html.h"
 #include "ext/standard/url.h" /* for php_url_decode() */
 #include "ext/standard/php_string.h" /* for php_dirname() */
@@ -380,11 +380,11 @@ static void append_http_status_line(smart_str *buffer, int protocol_version, int
 	}
 	smart_str_appendl_ex(buffer, "HTTP", 4, persistent);
 	smart_str_appendc_ex(buffer, '/', persistent);
-	smart_str_append_generic_ex(buffer, protocol_version / 100, persistent, int, _unsigned);
+	smart_str_append_long_ex(buffer, protocol_version / 100, persistent);
 	smart_str_appendc_ex(buffer, '.', persistent);
-	smart_str_append_generic_ex(buffer, protocol_version % 100, persistent, int, _unsigned);
+	smart_str_append_long_ex(buffer, protocol_version % 100, persistent);
 	smart_str_appendc_ex(buffer, ' ', persistent);
-	smart_str_append_generic_ex(buffer, response_code, persistent, int, _unsigned);
+	smart_str_append_long_ex(buffer, response_code, persistent);
 	smart_str_appendc_ex(buffer, ' ', persistent);
 	smart_str_appends_ex(buffer, get_status_string(response_code), persistent);
 	smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
@@ -1902,13 +1902,13 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		append_essential_headers(&buffer, client, 1);
 		smart_str_appends_ex(&buffer, "Content-Type: text/html; charset=UTF-8\r\n", 1);
 		smart_str_appends_ex(&buffer, "Content-Length: ", 1);
-		smart_str_append_generic_ex(&buffer, php_cli_server_buffer_size(&client->content_sender.buffer), 1, size_t, _unsigned);
+		smart_str_append_unsigned_ex(&buffer, php_cli_server_buffer_size(&client->content_sender.buffer), 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 
 		chunk = php_cli_server_chunk_heap_new(buffer.s, buffer.s->val, buffer.s->len);
 		if (!chunk) {
-			smart_str_free_ex(&buffer, 1);
+			smart_str_free(&buffer);
 			goto fail;
 		}
 		php_cli_server_buffer_prepend(&client->content_sender.buffer, chunk);
@@ -1993,12 +1993,12 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		}
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appends_ex(&buffer, "Content-Length: ", 1);
-		smart_str_append_generic_ex(&buffer, client->request.sb.st_size, 1, size_t, _unsigned);
+		smart_str_append_unsigned_ex(&buffer, client->request.sb.st_size, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		chunk = php_cli_server_chunk_heap_new(buffer.s, buffer.s->val, buffer.s->len);
 		if (!chunk) {
-			smart_str_free_ex(&buffer, 1);
+			smart_str_free(&buffer);
 			php_cli_server_log_response(client, 500, NULL TSRMLS_CC);
 			return FAILURE;
 		}

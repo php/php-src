@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -221,7 +221,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 
 static int browscap_read_file(char *filename, browser_data *browdata, int persistent TSRMLS_DC) /* {{{ */
 {
-	zend_file_handle fh = {0};
+	zend_file_handle fh = {{0}};
 	
 	if (filename == NULL || filename[0] == '\0') {
 		return FAILURE;
@@ -379,14 +379,12 @@ static int browser_reg_compare(zval *browser TSRMLS_DC, int num_args, va_list ar
 		   number of characters changed in the user agent being checked versus
 		   the previous match found and the current match. */
 		if (Z_TYPE_P(found_browser_entry) == IS_ARRAY) {
-			int i, prev_len = 0, curr_len = 0, ua_len;
-			zval *current_match;
+			size_t i, prev_len = 0, curr_len = 0;
+			zval *current_match = zend_hash_str_find(Z_ARRVAL_P(browser), "browser_name_pattern", sizeof("browser_name_pattern")-1);
 
-			if ((current_match = zend_hash_str_find(Z_ARRVAL_P(browser), "browser_name_pattern", sizeof("browser_name_pattern")-1)) == NULL) {
+			if (!current_match) {
 				return 0;
 			}
-
-			ua_len = lookup_browser_length;
 
 			for (i = 0; i < Z_STRLEN_P(previous_match); i++) {
 				switch (Z_STRVAL_P(previous_match)[i]) {
@@ -414,7 +412,7 @@ static int browser_reg_compare(zval *browser TSRMLS_DC, int num_args, va_list ar
 
 			/* Pick which browser pattern replaces the least amount of
 			   characters when compared to the original user agent string... */
-			if (ua_len - prev_len > ua_len - curr_len) {
+			if (prev_len < curr_len) {
 				ZVAL_COPY_VALUE(found_browser_entry, browser);
 			}
 		}

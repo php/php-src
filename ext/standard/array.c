@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -45,7 +45,7 @@
 #include "basic_functions.h"
 #include "php_string.h"
 #include "php_rand.h"
-#include "php_smart_str.h"
+#include "zend_smart_str.h"
 #ifdef HAVE_SPL
 #include "ext/spl/spl_array.h"
 #endif
@@ -706,12 +706,12 @@ static int php_array_user_key_compare(const void *a, const void *b TSRMLS_DC) /*
 	if (f->key == NULL) {
 		ZVAL_LONG(&args[0], f->h);
 	} else {
-		ZVAL_STR(&args[0], zend_string_copy(f->key));
+		ZVAL_STR_COPY(&args[0], f->key);
 	}
 	if (s->key == NULL) {
 		ZVAL_LONG(&args[1], s->h);
 	} else {
-		ZVAL_STR(&args[1], zend_string_copy(s->key));
+		ZVAL_STR_COPY(&args[1], s->key);
 	}
 
 	BG(user_compare_fci).param_count = 2;
@@ -1427,7 +1427,7 @@ PHP_FUNCTION(extract)
 				if (var_exists && var_name->len == sizeof("this")-1  && !strcmp(var_name->val, "this") && EG(scope) && EG(scope)->name->len != 0) {
 					break;
 				}
-				ZVAL_STR(&final_name, zend_string_copy(var_name));
+				ZVAL_STR_COPY(&final_name, var_name);
 				break;
 
 			case EXTR_PREFIX_IF_EXISTS:
@@ -1438,7 +1438,7 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_SAME:
 				if (!var_exists && var_name->len != 0) {
-					ZVAL_STR(&final_name, zend_string_copy(var_name));
+					ZVAL_STR_COPY(&final_name, var_name);
 				}
 				/* break omitted intentionally */
 
@@ -1453,14 +1453,14 @@ PHP_FUNCTION(extract)
 					if (!php_valid_var_name(var_name->val, var_name->len)) {
 						php_prefix_varname(&final_name, prefix, var_name->val, var_name->len, 1 TSRMLS_CC);
 					} else {
-						ZVAL_STR(&final_name, zend_string_copy(var_name));
+						ZVAL_STR_COPY(&final_name, var_name);
 					}
 				}
 				break;
 
 			default:
 				if (!var_exists) {
-					ZVAL_STR(&final_name, zend_string_copy(var_name));
+					ZVAL_STR_COPY(&final_name, var_name);
 				}
 				break;
 		}
@@ -1528,7 +1528,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 PHP_FUNCTION(compact)
 {
 	zval *args = NULL;	/* function arguments array */
-	int num_args, i;
+	uint32_t num_args, i;
 	zend_array *symbol_table;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
@@ -1826,7 +1826,7 @@ static void php_array_data_shuffle(zval *array TSRMLS_DC) /* {{{ */
 
 	for (j = 0; j < n_elems; j++) {
 		p = hash->arData + j;
-		if (p->key && !IS_INTERNED(p->key)) {
+		if (p->key) {
 			zend_string_release(p->key);
 		}
 		p->h = j;
@@ -2085,7 +2085,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 				zend_hash_rehash(Z_ARRVAL_P(stack));
 			}
 		}
-	} else if (!key && Z_ARRVAL_P(stack)->nNextFreeElement > 0 && index >= Z_ARRVAL_P(stack)->nNextFreeElement - 1) {
+	} else if (!key && Z_ARRVAL_P(stack)->nNextFreeElement > 0 && index >= (zend_ulong)(Z_ARRVAL_P(stack)->nNextFreeElement - 1)) {
 		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
 	}
 
@@ -2605,7 +2605,7 @@ PHP_FUNCTION(array_keys)
 
 		if (add_key) {
 			if (str_idx) {
-				ZVAL_STR(&new_val, zend_string_copy(str_idx));
+				ZVAL_STR_COPY(&new_val, str_idx);
 			} else {
 				ZVAL_LONG(&new_val, num_idx);
 			}
@@ -2889,14 +2889,14 @@ PHP_FUNCTION(array_flip)
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 		if (Z_TYPE_P(entry) == IS_LONG) {
 			if (str_idx) {
-				ZVAL_STR(&data, zend_string_copy(str_idx));
+				ZVAL_STR_COPY(&data, str_idx);
 			} else {
 				ZVAL_LONG(&data, num_idx);
 			}
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), &data);
 		} else if (Z_TYPE_P(entry) == IS_STRING) {
 			if (str_idx) {
-				ZVAL_STR(&data, zend_string_copy(str_idx));
+				ZVAL_STR_COPY(&data, str_idx);
 			} else {
 				ZVAL_LONG(&data, num_idx);
 			}
@@ -3174,7 +3174,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	int arr_argc, i, c = 0;
 	uint idx;
 	Bucket **lists, *list, **ptrs, *p;
-	int req_args;
+	uint32_t req_args;
 	char *param_spec;
 	zend_fcall_info fci1, fci2;
 	zend_fcall_info_cache fci1_cache = empty_fcall_info_cache, fci2_cache = empty_fcall_info_cache;
@@ -3598,7 +3598,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	int arr_argc, i, c;
 	uint idx;
 	Bucket **lists, *list, **ptrs, *p;
-	int req_args;
+	uint32_t req_args;
 	char *param_spec;
 	zend_fcall_info fci1, fci2;
 	zend_fcall_info_cache fci1_cache = empty_fcall_info_cache, fci2_cache = empty_fcall_info_cache;
@@ -4366,9 +4366,9 @@ PHP_FUNCTION(array_filter)
 					}
 				} else {
 					if (use_type == ARRAY_FILTER_USE_BOTH) {
-						ZVAL_STR(&args[1], zend_string_copy(string_key));
+						ZVAL_STR_COPY(&args[1], string_key);
 					} else if (use_type == ARRAY_FILTER_USE_KEY) {
-						ZVAL_STR(&args[0], zend_string_copy(string_key));
+						ZVAL_STR_COPY(&args[0], string_key);
 					}
 				}
 			}
@@ -4423,7 +4423,8 @@ PHP_FUNCTION(array_map)
 	zval result;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	int i, k, maxlen = 0;
+	int i;
+	uint32_t k, maxlen = 0;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f!+", &fci, &fci_cache, &arrays, &n_arrays) == FAILURE) {

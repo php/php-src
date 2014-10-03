@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -35,7 +35,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/ereg/php_regex.h"
 #ifdef PHP_WIN32
 # include "win32/time.h"
@@ -5484,26 +5484,26 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 		char *name;
 		array_init(&elem);
 		/* pg_attribute.attnum */
-		add_assoc_long(&elem, "num", atoi(PQgetvalue(pg_result,i,1)));
+		add_assoc_long_ex(&elem, "num", sizeof("num") - 1, atoi(PQgetvalue(pg_result, i, 1)));
 		/* pg_type.typname */
-		add_assoc_string(&elem, "type", PQgetvalue(pg_result,i,2));
+		add_assoc_string_ex(&elem, "type", sizeof("type") - 1, PQgetvalue(pg_result, i, 2));
 		/* pg_attribute.attlen */
-		add_assoc_long(&elem, "len", atoi(PQgetvalue(pg_result,i,3)));
+		add_assoc_long_ex(&elem, "len", sizeof("len") - 1, atoi(PQgetvalue(pg_result,i,3)));
 		/* pg_attribute.attnonull */
-		add_assoc_bool(&elem, "not null", !strcmp(PQgetvalue(pg_result,i,4), "t"));
+		add_assoc_bool_ex(&elem, "not null", sizeof("not null") - 1, !strcmp(PQgetvalue(pg_result, i, 4), "t"));
 		/* pg_attribute.atthasdef */
-		add_assoc_bool(&elem, "has default", !strcmp(PQgetvalue(pg_result,i,5), "t"));
+		add_assoc_bool_ex(&elem, "has default", sizeof("has default") - 1, !strcmp(PQgetvalue(pg_result,i,5), "t"));
 		/* pg_attribute.attndims */
-		add_assoc_long(&elem, "array dims", atoi(PQgetvalue(pg_result,i,6)));
+		add_assoc_long_ex(&elem, "array dims", sizeof("array dims") - 1, atoi(PQgetvalue(pg_result, i, 6)));
 		/* pg_type.typtype */
-		add_assoc_bool(&elem, "is enum", !strcmp(PQgetvalue(pg_result,i,7), "e"));
+		add_assoc_bool_ex(&elem, "is enum", sizeof("is enum") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "e"));
 		if (extended) {
 			/* pg_type.typtype */
-			add_assoc_bool(&elem, "is base", !strcmp(PQgetvalue(pg_result,i,7), "b"));
-			add_assoc_bool(&elem, "is composite", !strcmp(PQgetvalue(pg_result,i,7), "c"));
-			add_assoc_bool(&elem, "is pesudo", !strcmp(PQgetvalue(pg_result,i,7), "p"));
+			add_assoc_bool_ex(&elem, "is base", sizeof("is base") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "b"));
+			add_assoc_bool_ex(&elem, "is composite", sizeof("is composite") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "c"));
+			add_assoc_bool_ex(&elem, "is pesudo", sizeof("is pesudo") - 1, !strcmp(PQgetvalue(pg_result, i, 7), "p"));
 			/* pg_description.description */
-			add_assoc_string(&elem, "description", PQgetvalue(pg_result,i,8));
+			add_assoc_string_ex(&elem, "description", sizeof("description") - 1, PQgetvalue(pg_result, i, 8));
 		}
 		/* pg_attribute.attname */
 		name = PQgetvalue(pg_result,i,0);
@@ -5701,7 +5701,7 @@ static int php_pgsql_add_quotes(zval *src, zend_bool should_free TSRMLS_DC)
 	if (should_free) {
 		zval_ptr_dtor(src);
 	}
-	ZVAL_STR(src, str.s);
+	ZVAL_NEW_STR(src, str.s);
 
 	return SUCCESS;
 }
@@ -5971,7 +5971,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							/* better to use PGSQLescapeLiteral since PGescapeStringConn does not handle special \ */
 							str->len = PQescapeStringConn(pg_link, str->val, Z_STRVAL_P(val), Z_STRLEN_P(val), NULL);
 							str = zend_string_realloc(str, str->len, 0);
-							ZVAL_STR(&new_val, str);
+							ZVAL_NEW_STR(&new_val, str);
 							php_pgsql_add_quotes(&new_val, 1 TSRMLS_CC);
 						}
 						break;
@@ -6268,7 +6268,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							smart_str_appendl(&s, Z_STRVAL(new_val), Z_STRLEN(new_val));
 							smart_str_0(&s);
 							zval_ptr_dtor(&new_val);
-							ZVAL_STR(&new_val, s.s);
+							ZVAL_NEW_STR(&new_val, s.s);
 						}
 						break;
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -86,7 +86,7 @@ static int php_password_salt_to64(const char *str, const size_t str_len, const s
 	if ((int) str_len < 0) {
 		return FAILURE;
 	}
-	buffer = php_base64_encode((unsigned char*) str, (int) str_len);
+	buffer = php_base64_encode((unsigned char*) str, str_len);
 	if (buffer->len < out_len) {
 		/* Too short of an encoded string generated */
 		zend_string_release(buffer);
@@ -163,7 +163,7 @@ static int php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {{{ */
 		efree(result);
 		return FAILURE;
 	}
-	memcpy(ret, result, (int) length);
+	memcpy(ret, result, length);
 	efree(result);
 	efree(buffer);
 	ret[length] = 0;
@@ -180,11 +180,6 @@ PHP_FUNCTION(password_get_info)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hash, &hash_len) == FAILURE) {
 		return;
-	}
-
-	if (hash_len < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied password hash too long to safely identify");
-		RETURN_FALSE;
 	}
 
 	array_init(&options);
@@ -223,11 +218,6 @@ PHP_FUNCTION(password_needs_rehash)
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
 		return;
-	}
-
-	if (hash_len < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied password hash too long to safely identify");
-		RETURN_FALSE;
 	}
 
 	algo = php_password_determine_algo(hash, (size_t) hash_len);
@@ -409,7 +399,7 @@ PHP_FUNCTION(password_hash)
 			salt_len = required_salt_len;
 		} else {
 			salt = safe_emalloc(required_salt_len, 1, 1);
-			memcpy(salt, buffer, (int) required_salt_len);
+			memcpy(salt, buffer, required_salt_len);
 			salt_len = required_salt_len;
 		}
 		efree(buffer);

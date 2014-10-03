@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -204,11 +204,11 @@ typedef struct _php_basic_globals {
 	zend_class_entry *incomplete_class;
 	unsigned serialize_lock; /* whether to use the locally supplied var_hash instead (__sleep/__wakeup) */
 	struct {
-		void *var_hash;
+		struct php_serialize_data *data;
 		unsigned level;
 	} serialize;
 	struct {
-		void *var_hash;
+		struct php_unserialize_data *data;
 		unsigned level;
 	} unserialize;
 

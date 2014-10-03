@@ -57,6 +57,7 @@
 #include "zend_alloc.h"
 #include "zend_globals.h"
 #include "zend_operators.h"
+#include "zend_multiply.h"
 
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
@@ -372,6 +373,30 @@ static ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 	exit(1);
 }
 
+#ifdef _WIN32
+void
+stderr_last_error(char *msg)
+{
+	LPSTR buf = NULL;
+	DWORD err = GetLastError();
+
+	if (!FormatMessage(
+			FORMAT_MESSAGE_ALLOCATE_BUFFER |
+			FORMAT_MESSAGE_FROM_SYSTEM |
+			FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,
+			err,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPSTR)&buf,
+		0, NULL)) {
+		fprintf(stderr, "\n%s: [0x%08x]\n", msg, err);
+	}
+	else {
+		fprintf(stderr, "\n%s: [0x%08x] %s\n", msg, err, buf);
+	}
+}
+#endif
+
 /*****************/
 /* OS Allocation */
 /*****************/
@@ -408,7 +433,7 @@ static void *zend_mm_mmap(size_t size)
 
 	if (ptr == NULL) {
 #if ZEND_MM_ERROR
-		fprintf(stderr, "\nVirtualAlloc() failed: [%d]\n", GetLastError());
+		stderr_last_error("VirtualAlloc() failed");
 #endif
 		return NULL;
 	}
@@ -431,7 +456,7 @@ static void zend_mm_munmap(void *addr, size_t size)
 #ifdef _WIN32
 	if (VirtualFree(addr, 0, MEM_RELEASE) == 0) {
 #if ZEND_MM_ERROR
-		fprintf(stderr, "\nVirtualFree() failed: [%d]\n", GetLastError());
+		stderr_last_error("VirtualFree() failed");
 #endif
 	}
 #else
@@ -452,6 +477,19 @@ static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 {
 #if defined(__GNUC__)
 	return __builtin_ctzl(~bitset);
+#elif defined(_WIN32)
+	unsigned long index;
+
+#if defined(_WIN64)
+	if (!BitScanForward64(&index, ~bitset)) {
+#else
+	if (!BitScanForward(&index, ~bitset)) {
+#endif
+		/* undefined behavior */
+		return 32;
+	}
+
+	return (int)index;
 #else
 	int n;
 
@@ -476,6 +514,19 @@ static zend_always_inline int zend_mm_bitset_ntz(zend_mm_bitset bitset)
 {
 #if defined(__GNUC__)
 	return __builtin_ctzl(bitset);
+#elif defined(_WIN32)
+	unsigned long index;
+
+#if defined(_WIN64)
+	if (!BitScanForward64(&index, bitset)) {
+#else
+	if (!BitScanForward(&index, bitset)) {
+#endif
+		/* undefined behavior */
+		return 32;
+	}
+
+	return (int)index;
 #else
 	int n;
 
@@ -882,6 +933,13 @@ not_found:
 				chunk = (zend_mm_chunk*)zend_mm_chunk_alloc(ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE);
 				if (UNEXPECTED(chunk == NULL)) {
 					/* insufficient memory */
+#if !ZEND_MM_LIMIT
+					zend_mm_safe_error(heap, "Out of memory");
+#elif ZEND_DEBUG
+					zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %lu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
+#else
+					zend_mm_safe_error(heap, "Out of memory (allocated %ld) (tried to allocate %lu bytes)", heap->real_size, ZEND_MM_PAGE_SIZE * pages_count);
+#endif
 					return NULL;
 				}
 #if ZEND_MM_STAT
@@ -991,6 +1049,15 @@ static zend_always_inline int zend_mm_small_size_to_bit(int size)
 {
 #if defined(__GNUC__)
 	return (__builtin_clz(size) ^ 0x1f) + 1;
+#elif defined(_WIN32)
+	unsigned long index;
+
+	if (!BitScanReverse(&index, (unsigned long)size)) {
+		/* undefined behavior */
+		return 64;
+	}
+
+	return (((31 - (int)index) ^ 0x1f) + 1);
 #else
 	int n = 16;
 	if (size <= 0x00ff) {n -= 8; size = size << 8;}
@@ -1545,6 +1612,13 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	ptr = zend_mm_chunk_alloc(new_size, ZEND_MM_CHUNK_SIZE);
 	if (UNEXPECTED(ptr == NULL)) {
 		/* insufficient memory */
+#if !ZEND_MM_LIMIT
+		zend_mm_safe_error(heap, "Out of memory");
+#elif ZEND_DEBUG
+		zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %lu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
+#else
+		zend_mm_safe_error(heap, "Out of memory (allocated %ld) (tried to allocate %lu bytes)", heap->real_size, size);
+#endif
 		return NULL;
 	}
 #if ZEND_DEBUG
@@ -1597,7 +1671,11 @@ zend_mm_heap *zend_mm_init(void)
 
 	if (UNEXPECTED(chunk == NULL)) {
 #if ZEND_MM_ERROR
+#ifdef _WIN32
+		stderr_last_error("Can't initialize heap");
+#else
 		fprintf(stderr, "\nCan't initialize heap: [%d] %s\n", errno, strerror(errno));
+#endif
 #endif
 		return NULL;
 	}
@@ -2079,124 +2157,17 @@ ZEND_API size_t ZEND_FASTCALL _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE
 	return zend_mm_size(AG(mm_heap), ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
 
-#if defined(__GNUC__) && (defined(__native_client__) || defined(i386))
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
+static zend_always_inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {
-	size_t res = nmemb;
-	zend_ulong overflow = 0;
-
-	__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
-	     : "=&a"(res), "=&d" (overflow)
-	     : "%0"(res),
-	       "rm"(size),
-	       "rm"(offset));
+	int overflow;
+	size_t ret = zend_safe_address(nmemb, size, offset, &overflow);
 
 	if (UNEXPECTED(overflow)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
 		return 0;
 	}
-	return res;
+	return ret;
 }
-
-#elif defined(__GNUC__) && defined(__x86_64__)
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
-{
-        size_t res = nmemb;
-        zend_ulong overflow = 0;
-
-#ifdef __ILP32__ /* x32 */
-# define LP_SUFF "l"
-#else /* amd64 */
-# define LP_SUFF "q"
-#endif
-
-        __asm__ ("mul" LP_SUFF  " %3\n\t"
-                 "add %4,%0\n\t"
-                 "adc $0,%1"
-             : "=&a"(res), "=&d" (overflow)
-             : "%0"(res),
-               "rm"(size),
-               "rm"(offset));
-
-#undef LP_SUFF
-        if (UNEXPECTED(overflow)) {
-                zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-                return 0;
-        }
-        return res;
-}
-
-#elif defined(__GNUC__) && defined(__arm__)
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
-{
-        size_t res;
-        zend_ulong overflow;
-
-        __asm__ ("umlal %0,%1,%2,%3"
-             : "=r"(res), "=r"(overflow)
-             : "r"(nmemb),
-               "r"(size),
-               "0"(offset),
-               "1"(0));
-
-        if (UNEXPECTED(overflow)) {
-                zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-                return 0;
-        }
-        return res;
-}
-
-#elif defined(__GNUC__) && defined(__aarch64__)
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
-{
-        size_t res;
-        zend_ulong overflow;
-
-        __asm__ ("mul %0,%2,%3\n\tumulh %1,%2,%3\n\tadds %0,%0,%4\n\tadc %1,%1,xzr"
-             : "=&r"(res), "=&r"(overflow)
-             : "r"(nmemb),
-               "r"(size),
-               "r"(offset));
-
-        if (UNEXPECTED(overflow)) {
-                zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-                return 0;
-        }
-        return res;
-}
-
-#elif SIZEOF_SIZE_T == 4 && defined(HAVE_ZEND_LONG64)
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
-{
-	zend_ulong64 res = (zend_ulong64)nmemb * (zend_ulong64)size + (zend_ulong64)offset;
-
-	if (UNEXPECTED(res > (zend_ulong64)0xFFFFFFFFL)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-		return 0;
-	}
-	return (size_t) res;
-}
-
-#else
-
-static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
-{
-	size_t res = nmemb * size + offset;
-	double _d  = (double)nmemb * (double)size + (double)offset;
-	double _delta = (double)res - _d;
-
-	if (UNEXPECTED((_d + _delta ) != _d)) {
-		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
-		return 0;
-	}
-	return res;
-}
-#endif
 
 
 ZEND_API void* ZEND_FASTCALL _safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)

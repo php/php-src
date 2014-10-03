@@ -174,8 +174,6 @@ struct _zend_executor_globals {
 
 	zend_class_entry *scope;
 
-	zval This;
-
 	zend_long precision;
 
 	int ticks_count;

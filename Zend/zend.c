@@ -156,8 +156,8 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 		if (string_key) {
 			if (is_object) {
 				const char *prop_name, *class_name;
-				int prop_len;
-				int mangled = zend_unmangle_property_name_ex(string_key->val, string_key->len, &class_name, &prop_name, &prop_len);
+				size_t prop_len;
+				int mangled = zend_unmangle_property_name_ex(string_key, &class_name, &prop_name, &prop_len);
 
 				ZEND_WRITE_EX(prop_name, prop_len);
 				if (class_name && mangled == SUCCESS) {
@@ -216,79 +216,10 @@ ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy TSRMLS_DC) /* 
 {
 	if (Z_TYPE_P(expr) == IS_STRING) {
 		return 0;
+	} else {
+		ZVAL_STR(expr_copy, _zval_get_string_func(expr TSRMLS_CC));
+		return 1;
 	}
-
-again:
-	switch (Z_TYPE_P(expr)) {
-		case IS_NULL:
-		case IS_FALSE:
-			ZVAL_EMPTY_STRING(expr_copy);
-		    break;
-		case IS_TRUE:
-		    if (CG(one_char_string)['1']) {
-				ZVAL_INTERNED_STR(expr_copy, CG(one_char_string)['1']);
-			} else {
-				ZVAL_NEW_STR(expr_copy, zend_string_init("1", 1, 0));
-			}
-		    break;
-		case IS_RESOURCE: {
-				char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
-				int len;
-
-				len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, Z_RES_HANDLE_P(expr));
-				ZVAL_NEW_STR(expr_copy, zend_string_init(buf, len, 0));
-			}
-			break;
-		case IS_ARRAY:
-			zend_error(E_NOTICE, "Array to string conversion");
-			// TODO: use interned string ???
-			ZVAL_NEW_STR(expr_copy, zend_string_init("Array", sizeof("Array") - 1, 0));
-			break;
-		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(expr, cast_object)) {
-				Z_ADDREF_P(expr);
-				if (Z_OBJ_HANDLER_P(expr, cast_object)(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-					zval_ptr_dtor(expr);
-					break;
-				}
-				zval_ptr_dtor(expr);
-			}
-			if (!Z_OBJ_HANDLER_P(expr, cast_object) && Z_OBJ_HANDLER_P(expr, get)) {
-				zval rv;
-				zval *z = Z_OBJ_HANDLER_P(expr, get)(expr, &rv TSRMLS_CC);
-
-				Z_ADDREF_P(z);
-				if (Z_TYPE_P(z) != IS_OBJECT) {
-					if (zend_make_printable_zval(z, expr_copy TSRMLS_CC)) {
-						zval_ptr_dtor(z);
-					} else {
-						ZVAL_ZVAL(expr_copy, z, 0, 1);
-					}
-					return 1;
-				}
-				zval_ptr_dtor(z);
-			}
-			zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name->val);
-			ZVAL_EMPTY_STRING(expr_copy);
-			break;
-		case IS_DOUBLE:
-			ZVAL_DUP(expr_copy, expr);
-			zend_locale_sprintf_double(expr_copy ZEND_FILE_LINE_CC);
-			break;
-		case IS_REFERENCE:
-			expr = Z_REFVAL_P(expr);
-			if (Z_TYPE_P(expr) == IS_STRING) {
-				ZVAL_STR(expr_copy, zend_string_copy(Z_STR_P(expr)));
-				return 1;
-			}
-			goto again;
-			break;
-		default:
-			ZVAL_DUP(expr_copy, expr);
-			convert_to_string(expr_copy);
-			break;
-	}
-	return 1;
 }
 /* }}} */
 
@@ -509,11 +440,20 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 
 	compiler_globals->last_static_member = zend_hash_num_elements(compiler_globals->class_table);
 	if (compiler_globals->last_static_member) {
-		compiler_globals->static_members_table = calloc(compiler_globals->last_static_member, sizeof(zval**));
+		compiler_globals->static_members_table = calloc(compiler_globals->last_static_member, sizeof(zval*));
 	} else {
 		compiler_globals->static_members_table = NULL;
 	}
 	compiler_globals->script_encoding_list = NULL;
+
+#ifdef ZTS
+	compiler_globals->empty_string = zend_string_alloc(sizeof("")-1, 1);
+	compiler_globals->empty_string->val[0] = '\000';
+	zend_string_hash_val(compiler_globals->empty_string);
+	compiler_globals->empty_string->gc.u.v.flags |= IS_STR_INTERNED;
+
+	memset(compiler_globals->one_char_string, 0, sizeof(compiler_globals->one_char_string));
+#endif
 }
 /* }}} */
 
@@ -538,6 +478,10 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
 	compiler_globals->last_static_member = 0;
+
+#ifdef ZTS
+	zend_string_release(compiler_globals->empty_string);
+#endif
 }
 /* }}} */
 
@@ -1031,7 +975,7 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 		} \
 	} while (0)
 
-#ifndef ZEND_WIN32
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 #else
 static void zend_error_va_list(int type, const char *format, va_list args)
@@ -1039,7 +983,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 {
 	char *str;
 	int len;
-#ifndef ZEND_WIN32
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 	va_list args;
 #endif
 	va_list usr_copy;
@@ -1144,7 +1088,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	}
 #endif /* HAVE_DTRACE */
 
-#ifndef ZEND_WIN32
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 	va_start(args, format);
 #endif
 
@@ -1257,7 +1201,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 			break;
 	}
 
-#ifndef ZEND_WIN32
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
 	va_end(args);
 #endif
 
@@ -1274,9 +1218,9 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 }
 /* }}} */
 
-#if defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((alias("zend_error"),noreturn));
-#elif defined(ZEND_WIN32)
+#elif defined(ZEND_WIN32) || defined(DARWIN)
 ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 {
 	va_list va;
@@ -1294,6 +1238,7 @@ ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ..
 	zend_error_va_list(type, format, va);
 	va_end(va);
 }
+/* }}} */
 #endif
 
 ZEND_API void zend_output_debug_string(zend_bool trigger_break, const char *format, ...) /* {{{ */
@@ -1410,6 +1355,7 @@ void free_estring(char **str_p) /* {{{ */
 {
 	efree(*str_p);
 }
+/* }}} */
 
 void free_string_zval(zval *zv) /* {{{ */
 {

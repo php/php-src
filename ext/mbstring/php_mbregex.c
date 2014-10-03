@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -28,7 +28,7 @@
 
 #if HAVE_MBREGEX
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "php_mbregex.h"
 #include "mbstring.h"
@@ -717,7 +717,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		/* don't bother doing an extended regex with just a number */
 	}
 
-	if (!Z_STRVAL_P(arg_pattern) || Z_STRLEN_P(arg_pattern) == 0) {
+	if (Z_STRLEN_P(arg_pattern) == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "empty pattern");
 		RETVAL_FALSE;
 		goto out;
@@ -1081,7 +1081,7 @@ PHP_FUNCTION(mb_split)
 	err = 0;
 	regs = onig_region_new();
 	/* churn through str, generating array entries as we go */
-	while (count != 0 && (pos - (OnigUChar *)string) < string_len) {
+	while (count != 0 && (pos - (OnigUChar *)string) < (ptrdiff_t)string_len) {
 		int beg, end;
 		err = onig_search(re, (OnigUChar *)string, (OnigUChar *)(string + string_len), pos, (OnigUChar *)(string + string_len), regs, 0);
 		if (err < 0) {
@@ -1403,7 +1403,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 		return;
 	}
 
-	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && position >= Z_STRLEN(MBREX(search_str)))) {
+	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && (size_t)position >= Z_STRLEN(MBREX(search_str)))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Position is out of range");
 		MBREX(search_pos) = 0;
 		RETURN_FALSE;

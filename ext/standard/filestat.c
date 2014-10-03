@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1235,18 +1235,18 @@ PHP_FUNCTION(realpath_cache_get)
 
 			/* bucket->key is unsigned long */
 			if (ZEND_LONG_MAX >= bucket->key) {
-				add_assoc_long(&entry, "key", bucket->key);
+				add_assoc_long_ex(&entry, "key", sizeof("key") - 1, bucket->key);
 			} else {
-				add_assoc_double(&entry, "key", (double)bucket->key);
+				add_assoc_double_ex(&entry, "key", sizeof("key") - 1, (double)bucket->key);
 			}
-			add_assoc_bool(&entry, "is_dir", bucket->is_dir);
-			add_assoc_stringl(&entry, "realpath", bucket->realpath, bucket->realpath_len);
-			add_assoc_long(&entry, "expires", bucket->expires);
+			add_assoc_bool_ex(&entry, "is_dir", sizeof("is_dir") - 1, bucket->is_dir);
+			add_assoc_stringl_ex(&entry, "realpath", sizeof("realpath") - 1, bucket->realpath, bucket->realpath_len);
+			add_assoc_long_ex(&entry, "expires", sizeof("expires") - 1, bucket->expires);
 #ifdef PHP_WIN32
-			add_assoc_bool(&entry, "is_rvalid", bucket->is_rvalid);
-			add_assoc_bool(&entry, "is_wvalid", bucket->is_wvalid);
-			add_assoc_bool(&entry, "is_readable", bucket->is_readable);
-			add_assoc_bool(&entry, "is_writable", bucket->is_writable);
+			add_assoc_bool_ex(&entry, "is_rvalid", sizeof("is_rvalid") - 1, bucket->is_rvalid);
+			add_assoc_bool_ex(&entry, "is_wvalid", sizeof("is_wvalid") - 1, bucket->is_wvalid);
+			add_assoc_bool_ex(&entry, "is_readable", sizeof("is_readable") - 1, bucket->is_readable);
+			add_assoc_bool_ex(&entry, "is_writable", sizeof("is_writable") - 1, bucket->is_writable);
 #endif
 			zend_hash_str_update(Z_ARRVAL_P(return_value), bucket->path, bucket->path_len, &entry);
 			bucket = bucket->next;

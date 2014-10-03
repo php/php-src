@@ -80,13 +80,14 @@ static zend_always_inline void* zend_arena_alloc(zend_arena **arena_ptr, size_t 
 
 static zend_always_inline void* zend_arena_calloc(zend_arena **arena_ptr, size_t count, size_t unit_size)
 {
-	zend_long overflow;
-	double d;
+	int overflow;
 	size_t size;
 	void *ret;
 
-	ZEND_SIGNED_MULTIPLY_LONG(unit_size, count, size, d, overflow);
-	ZEND_ASSERT(overflow == 0);
+	size = zend_safe_address(unit_size, count, 0, &overflow);
+	if (UNEXPECTED(overflow)) {
+		zend_error(E_ERROR, "Possible integer overflow in zend_arena_calloc() (%zu * %zu)", unit_size, count);
+	}
 	ret = zend_arena_alloc(arena_ptr, size);
 	memset(ret, 0, size);
 	return ret;

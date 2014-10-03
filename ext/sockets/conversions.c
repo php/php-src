@@ -6,7 +6,7 @@
 #endif
 
 #include <Zend/zend_llist.h>
-#include <ext/standard/php_smart_str.h>
+#include <zend_smart_str.h>
 
 #ifndef PHP_WIN32
 # include <sys/types.h>
@@ -175,7 +175,7 @@ static void do_from_to_zval_err(struct err_s *err,
 	err->should_free = 1;
 
 	efree(user_msg);
-	smart_str_free_ex(&path, 0);
+	smart_str_free(&path);
 }
 ZEND_ATTRIBUTE_FORMAT(printf, 2 ,3)
 static void do_from_zval_err(ser_context *ctx, const char *fmt, ...)
@@ -562,7 +562,7 @@ static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 	zend_string *str = zend_string_alloc(size - 1, 0);
 	memset(str->val, '\0', size);
 
-	ZVAL_STR(zv, str);
+	ZVAL_NEW_STR(zv, str);
 
 	if (inet_ntop(AF_INET, addr, Z_STRVAL_P(zv), size) == NULL) {
 		do_to_zval_err(ctx, "could not convert IPv4 address to string "
@@ -614,7 +614,7 @@ static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 
 	memset(str->val, '\0', size);
 
-	ZVAL_STR(zv, str);
+	ZVAL_NEW_STR(zv, str);
 
 	if (inet_ntop(AF_INET6, addr, Z_STRVAL_P(zv), size) == NULL) {
 		do_to_zval_err(ctx, "could not convert IPv6 address to string "
@@ -1212,7 +1212,7 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 		memcpy(buf->val, msghdr->msg_iov[i].iov_base, buf->len);
 		buf->val[buf->len] = '\0';
 
-		ZVAL_STR(&elem, buf);
+		ZVAL_NEW_STR(&elem, buf);
 		add_next_index_zval(zv, &elem);
 		bytes_left -= len;
 	}

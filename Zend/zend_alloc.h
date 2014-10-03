@@ -45,8 +45,8 @@ typedef struct _zend_leak_info {
 	void *addr;
 	size_t size;
 	const char *filename;
-	uint lineno;
 	const char *orig_filename;
+	uint lineno;
 	uint orig_lineno;
 } zend_leak_info;
 
@@ -164,7 +164,7 @@ ZEND_API void ZEND_FASTCALL _efree_huge(void *, size_t size);
 #define estrndup_rel(s, length)					_estrndup((s), (length) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define zend_mem_block_size_rel(ptr)			_zend_mem_block_size((ptr) TSRMLS_CC ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 
-inline static void * __zend_malloc(size_t len)
+zend_always_inline static void * __zend_malloc(size_t len)
 {
 	void *tmp = malloc(len);
 	if (tmp) {
@@ -174,14 +174,14 @@ inline static void * __zend_malloc(size_t len)
 	exit(1);
 }
 
-inline static void * __zend_calloc(size_t nmemb, size_t len)
+zend_always_inline static void * __zend_calloc(size_t nmemb, size_t len)
 {
 	void *tmp = _safe_malloc(nmemb, len, 0);
 	memset(tmp, 0, nmemb * len);
 	return tmp;
 }
 
-inline static void * __zend_realloc(void *p, size_t len)
+zend_always_inline static void * __zend_realloc(void *p, size_t len)
 {
 	p = realloc(p, len);
 	if (p) {

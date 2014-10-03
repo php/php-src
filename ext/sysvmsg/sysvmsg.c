@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -27,7 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_sysvmsg.h"
 #include "ext/standard/php_var.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 /* In order to detect MSG_EXCEPT use at run time; we have no way
  * of knowing what the bit definitions are, so we can't just define

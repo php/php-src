@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -48,7 +48,7 @@
 #include "ext/standard/url_scanner_ex.h"
 #include "ext/standard/php_rand.h" /* for RAND_MAX */
 #include "ext/standard/info.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/url.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/head.h"
@@ -1268,7 +1268,8 @@ static void php_session_remove_cookie(TSRMLS_D) {
 	zend_llist_element *current;
 	char *session_cookie;
 	zend_string *e_session_name;
-	int session_cookie_len, len = sizeof("Set-Cookie")-1;
+	int session_cookie_len;
+	uint len = sizeof("Set-Cookie")-1;
 
 	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)));
 	spprintf(&session_cookie, 0, "Set-Cookie: %s=", e_session_name->val);

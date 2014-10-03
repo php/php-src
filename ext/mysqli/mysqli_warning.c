@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -28,7 +28,7 @@
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 
-/* Define these in the PHP5 tree to make merging easy process */
+/* Define these in the PHP7 tree to make merging easy process */
 #define Zzend_string_dupLICATE (1<<0)
 #define ZSTR_AUTOFREE  (1<<1)
 

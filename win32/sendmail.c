@@ -87,9 +87,9 @@ char LocalHost[HOST_NAME_LEN];
 #endif
 char seps[] = " ,\t\n";
 #ifndef NETWARE
-char *php_mailer = "PHP 5 WIN32";
+char *php_mailer = "PHP 7 WIN32";
 #else
-char *php_mailer = "PHP 5 NetWare";
+char *php_mailer = "PHP 7 NetWare";
 #endif	/* NETWARE */
 
 /* Error messages */

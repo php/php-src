@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -40,7 +40,7 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_rand.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "php_mcrypt_filter.h"
 
 static int le_mcrypt;
@@ -452,7 +452,7 @@ static PHP_MSHUTDOWN_FUNCTION(mcrypt) /* {{{ */
 }
 /* }}} */
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 PHP_MINFO_FUNCTION(mcrypt) /* {{{ */
 {

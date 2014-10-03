@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -159,6 +159,8 @@ static const opt_struct OPTIONS[] = {
 };
 
 typedef struct _php_cgi_globals_struct {
+	HashTable user_config_cache;
+	char *redirect_status_env;
 	zend_bool rfc2616_headers;
 	zend_bool nph;
 	zend_bool check_shebang_line;
@@ -166,11 +168,9 @@ typedef struct _php_cgi_globals_struct {
 	zend_bool force_redirect;
 	zend_bool discard_path;
 	zend_bool fcgi_logging;
-	char *redirect_status_env;
 #ifdef PHP_WIN32
 	zend_bool impersonate;
 #endif
-	HashTable user_config_cache;
 } php_cgi_globals_struct;
 
 /* {{{ user_config_cache
@@ -2405,8 +2405,8 @@ consult the installation file that came with this distribution, or visit \n\
 							/* handle situations where line is terminated by \r\n */
 							if (c == '\r') {
 								if (fgetc(file_handle.handle.fp) != '\n') {
-									long pos = ftell(file_handle.handle.fp);
-									fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
+									zend_long pos = zend_ftell(file_handle.handle.fp);
+									zend_fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
 								}
 							}
 							CG(start_lineno) = 2;

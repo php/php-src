@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1064,7 +1064,7 @@ char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
 	zval zvalue;
-	ZVAL_STR(&zvalue, zend_string_init(value, value_len, 1));
+	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
 	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
 }
 

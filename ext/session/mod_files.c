@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -57,13 +57,13 @@
 #endif
 
 typedef struct {
-	int fd;
 	char *lastkey;
 	char *basedir;
 	size_t basedir_len;
 	size_t dirdepth;
 	size_t st_size;
 	int filemode;
+	int fd;
 } ps_files;
 
 ps_module ps_mod_files = {

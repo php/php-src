@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -35,7 +35,7 @@
 #include "ext/standard/php_incomplete_class.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/html.h"
 #include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"
@@ -289,7 +289,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	zval retval;
 	zval *ent;
 	zend_string *key;
-	ulong idx;
+	zend_ulong idx;
 	int ret;
 
 	if (vallen == 0) {
@@ -442,7 +442,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	zval *ent, fname, *varname;
 	zval retval;
 	zend_string *key;
-	ulong idx;
+	zend_ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
 	HashTable *objhash, *sleephash;
 	TSRMLS_FETCH();
@@ -505,10 +505,11 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			}
 			if (key) {
 				const char *class_name, *prop_name;
+				size_t prop_name_len;
 				zend_string *tmp;
 				
-				zend_unmangle_property_name(key->val, key->len, &class_name, &prop_name);
-				tmp = zend_string_init(prop_name, strlen(prop_name), 0);
+				zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len);
+				tmp = zend_string_init(prop_name, prop_name_len, 0);
 				php_wddx_serialize_var(packet, ent, tmp TSRMLS_CC);
 				zend_string_release(tmp);
 			} else {
@@ -532,10 +533,10 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
 	zval *ent;
 	zend_string *key;
 	int is_struct = 0;
-	ulong idx;
+	zend_ulong idx;
 	HashTable *target_hash;
 	char tmp_buf[WDDX_BUF_LEN];
-	ulong ind = 0;
+	zend_ulong ind = 0;
 	TSRMLS_FETCH();
 
 	target_hash = HASH_OF(arr);

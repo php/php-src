@@ -152,6 +152,8 @@ group = @php_fpm_group@
 ; Valid syntaxes are:
 ;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific address on
 ;                            a specific port;
+;   '[ip:6:addr:ess]:port' - to listen on a TCP socket to a specific IPv6 address on
+;                            a specific port;
 ;   'port'                 - to listen on a TCP socket to all addresses on a
 ;                            specific port;
 ;   '/path/to/unix/socket' - to listen on a unix socket.
@@ -490,7 +492,7 @@ pm.max_spare_servers = 3
 ; exectute php code.
 ; Note: set an empty value to allow all extensions.
 ; Default Value: .php
-;security.limit_extensions = .php .php3 .php4 .php5
+;security.limit_extensions = .php .php3 .php4 .php5 .php7
  
 ; Pass environment variables like LD_LIBRARY_PATH. All $VARIABLEs are taken from
 ; the current environment.

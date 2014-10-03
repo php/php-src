@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -739,7 +739,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 		return SUCCESS;
 	} else {
 		/* new line/NUL character safety check */
-		int i;
+		uint i;
 		for (i = 0; i < header_line_len; i++) {
 			/* RFC 2616 allows new lines if followed by SP or HT */
 			int illegal_break =

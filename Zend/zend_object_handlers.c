@@ -385,9 +385,9 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 }
 /* }}} */
 
-ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zval *member, int silent TSRMLS_DC) /* {{{ */
+ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent TSRMLS_DC) /* {{{ */
 {
-	return zend_get_property_info_quick(ce, Z_STR_P(member), silent, NULL TSRMLS_CC);
+	return zend_get_property_info_quick(ce, member, silent, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -397,10 +397,10 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 	const char *class_name = NULL;
 	const char *prop_name;
 	zend_string *member;
-	int prop_name_len;
+	size_t prop_name_len;
 
 	if (prop_info_name->val[0] == 0) {
-		zend_unmangle_property_name_ex(prop_info_name->val, prop_info_name->len, &class_name, &prop_name, &prop_name_len);
+		zend_unmangle_property_name_ex(prop_info_name, &class_name, &prop_name, &prop_name_len);
 		member = zend_string_init(prop_name, prop_name_len, 0);
 	} else {
 		member = zend_string_copy(prop_info_name);
@@ -434,10 +434,12 @@ static zend_long *zend_get_property_guard(zend_object *zobj, zend_property_info 
 		info.name = Z_STR_P(member);
 	} else if(property_info->name->val[0] == '\0'){
 		const char *class_name = NULL, *prop_name = NULL;
-		zend_unmangle_property_name(property_info->name->val, property_info->name->len, &class_name, &prop_name);
+		size_t prop_name_len;
+		zend_unmangle_property_name_ex(property_info->name, &class_name,
+			&prop_name, &prop_name_len);
 		if (class_name) {
 			/* use unmangled name for protected properties */
-			str = info.name = zend_string_init(prop_name, strlen(prop_name), 0);
+			str = info.name = zend_string_init(prop_name, prop_name_len, 0);
 			property_info = &info;
 		}
 	}
@@ -659,12 +661,12 @@ found:
 			}
 		}
 	} else if (EXPECTED(property_info != NULL)) {
+		zval tmp;
+
 write_std_property:
-		/* if we assign referenced variable, we should separate it */
 		if (Z_REFCOUNTED_P(value)) {
 			if (Z_ISREF_P(value)) {
-				zval tmp;
-
+				/* if we assign referenced variable, we should separate it */
 				ZVAL_DUP(&tmp, Z_REFVAL_P(value));
 				value = &tmp;
 			} else {
@@ -813,10 +815,6 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 		(guard = zend_get_property_guard(zobj, property_info, member)) == NULL ||
 		(property_info && ((*guard) & IN_GET))) {
 
-		/* we don't have access controls - will just add it */
-		if(UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
-			zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
-		}
 		ZVAL_NULL(&tmp);
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 		    property_info->offset >= 0) {
@@ -827,6 +825,12 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 				rebuild_object_properties(zobj);
 			}
 			retval = zend_hash_update(zobj->properties, property_info->name, &tmp);
+		}
+
+		/* Notice is thrown after creation of the property, to avoid EG(std_property_info)
+		 * being overwritten in an error handler. */
+		if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
+			zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
 		}
 	} else {
 		/* we do have getter - fail and let it try again with usual get/set */
@@ -919,7 +923,7 @@ static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC) /* {{
 
 ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	zend_internal_function *func = (zend_internal_function *)EG(current_execute_data)->func;
+	zend_internal_function *func = (zend_internal_function *)EX(func);
 	zval method_name, method_args;
 	zval method_result;
 	zend_class_entry *ce = Z_OBJCE_P(getThis());
@@ -1137,7 +1141,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 
 ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	zend_internal_function *func = (zend_internal_function *)EG(current_execute_data)->func;
+	zend_internal_function *func = (zend_internal_function *)EX(func);
 	zval method_name, method_args;
 	zval method_result;
 	zend_class_entry *ce = EG(scope);
@@ -1229,9 +1233,9 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 				zend_string_free(lc_function_name);
 			}
 			if (ce->__call &&
-			    Z_OBJ(EG(This)) &&
-			    Z_OBJ_HT(EG(This))->get_class_entry &&
-			    instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    Z_OBJ(EG(current_execute_data)->This) &&
+			    Z_OBJ_HT(EG(current_execute_data)->This)->get_class_entry &&
+			    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), ce TSRMLS_CC)) {
 				return zend_get_user_call_function(ce, function_name);
 			} else if (ce->__callstatic) {
 				return zend_get_user_callstatic_function(ce, function_name);

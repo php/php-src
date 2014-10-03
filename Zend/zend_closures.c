@@ -47,7 +47,7 @@ static zend_object_handlers closure_handlers;
 
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
-	zend_function *func = EG(current_execute_data)->func;
+	zend_function *func = EX(func);
 	zval *arguments;
 
 	arguments = emalloc(sizeof(zval) * ZEND_NUM_ARGS());
@@ -376,7 +376,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 							arg_info->pass_by_reference ? "&" : "",
 							i + 1);
 				}
-				ZVAL_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
+				ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
 				zend_hash_update(Z_ARRVAL(val), name, &info);
 				zend_string_release(name);
 				arg_info++;

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -20,7 +20,7 @@
 /* $Id$ */
 
 #include "php.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str_public.h"
 
 ZEND_BEGIN_MODULE_GLOBALS(cli_readline)
 	char *pager;

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -35,7 +35,7 @@
 #include "php_open_temporary_file.h"
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
-#include "php_smart_str.h"
+#include "zend_smart_str.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1210,7 +1210,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 		num_bytes = arg2len;
 	} else {
 		if (arg3 > 0) {
-			num_bytes = MAX(0, MIN((size_t)arg3, arg2len));
+			num_bytes = MIN((size_t)arg3, arg2len);
 		} else {
 			num_bytes = 0;
 		}
@@ -1943,7 +1943,7 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 			}
 			smart_str_appendc(&csvline, enclosure);
 		} else {
-			smart_str_appendl(&csvline, field_str->val, field_str->len);
+			smart_str_append(&csvline, field_str);
 		}
 
 		if (++i != count) {

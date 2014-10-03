@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -55,7 +55,7 @@
 #undef iconv
 #endif
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/quot_print.h"
 
@@ -415,7 +415,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 		}
 
 		if (mimetype != NULL && !(output_context->op & PHP_OUTPUT_HANDLER_CLEAN)) {
-			zend_long len;
+			size_t len;
 			char *p = strstr(get_output_encoding(TSRMLS_C), "//");
 
 			if (p) {
@@ -462,10 +462,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 	if (in_p != NULL) {
 		while (in_left > 0) {
 			out_left = buf_growth - out_left;
-			{
-				size_t newlen;
-				smart_str_alloc((d), out_left, 0);
-			}
+			smart_str_alloc(d, out_left, 0);
 
 			out_p = (d)->s->val + (d)->s->len;
 
@@ -499,10 +496,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 	} else {
 		for (;;) {
 			out_left = buf_growth - out_left;
-			{
-				size_t newlen;
-				smart_str_alloc((d), out_left, 0);
-			}
+			smart_str_alloc(d, out_left, 0);
 
 			out_p = (d)->s->val + (d)->s->len;
 
@@ -805,7 +799,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 	size_t out_left;
 
 	size_t cnt;
-	zend_long total_len;
+	size_t total_len;
 
 	err = _php_iconv_strlen(&total_len, str, nbytes, enc);
 	if (err != PHP_ICONV_ERR_SUCCESS) {
@@ -824,16 +818,16 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 		}
 	}
 
-	if(len > total_len) {
+	if((size_t)len > total_len) {
 		len = total_len;
 	}
 
 
-	if (offset >= total_len) {
+	if ((size_t)offset >= total_len) {
 		return PHP_ICONV_ERR_SUCCESS;
 	}
 
-	if ((offset + len) > total_len ) {
+	if ((size_t)(offset + len) > total_len ) {
 		/* trying to compute the length */
 		len = total_len - offset;
 	}
@@ -2076,7 +2070,7 @@ PHP_FUNCTION(iconv_substr)
 	err = _php_iconv_substr(&retval, str->val, str->len, offset, length, charset);
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
 
-	if (err == PHP_ICONV_ERR_SUCCESS && str->val != NULL && retval.s != NULL) {
+	if (err == PHP_ICONV_ERR_SUCCESS && str->val[0] != '\0' && retval.s != NULL) {
 		RETURN_STR(retval.s);
 	}
 	smart_str_free(&retval);
@@ -2761,7 +2755,7 @@ static int php_iconv_stream_filter_append_bucket(
 		prev_ocnt = ocnt;
 	}
 
-	if (out_buf_size - ocnt > 0) {
+	if (out_buf_size > ocnt) {
 		if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent TSRMLS_CC))) {
 			goto out_failure;
 		}

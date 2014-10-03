@@ -27,6 +27,7 @@
 #include "zend_constants.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_inheritance.h"
 
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
@@ -1144,9 +1145,8 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties TSRMLS_DC) 
 		if (key) {
 			zval member;
 
-			ZVAL_STR(&member, zend_string_copy(key));
+			ZVAL_STR(&member, key);
 			obj_ht->write_property(obj, &member, value, NULL TSRMLS_CC);
-			zval_ptr_dtor(&member);
 		}
 	} ZEND_HASH_FOREACH_END();
 	EG(scope) = old_scope;
@@ -1268,13 +1268,12 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 {
 	object->properties = properties;
 	if (object->ce->default_properties_count) {
-	    zval *prop, tmp;
+	    zval *prop;
     	zend_string *key;
     	zend_property_info *property_info;
 
     	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
-		    ZVAL_STR(&tmp, key);
-			property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
+			property_info = zend_get_property_info(object->ce, key, 1 TSRMLS_CC);
 			if (property_info &&
 			    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
 			    property_info->offset >= 0) {
@@ -1293,8 +1292,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties 
    	zend_property_info *property_info;
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
-	    ZVAL_STR(&tmp, key);
-		property_info = zend_get_property_info(object->ce, &tmp, 1 TSRMLS_CC);
+		property_info = zend_get_property_info(object->ce, key, 1 TSRMLS_CC);
 		if (property_info &&
 		    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
 		    property_info->offset >= 0) {
@@ -1303,7 +1301,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties 
 			zval_add_ref(&object->properties_table[property_info->offset]);
 			if (object->properties) {
 				ZVAL_INDIRECT(&tmp, &object->properties_table[property_info->offset]);
-				prop = zend_hash_update(object->properties, key, &tmp);
+				zend_hash_update(object->properties, key, &tmp);
 			}
 		} else {
 			if (!object->properties) {
@@ -2280,7 +2278,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 
 		/* If types of arguments have to be checked */
 		if (reg_function->common.arg_info && reg_function->common.num_args) {
-			int i;
+			uint32_t i;
 			for (i = 0; i < reg_function->common.num_args; i++) {
 				if (reg_function->common.arg_info[i].class_name ||
 				    reg_function->common.arg_info[i].type_hint) {
@@ -2856,8 +2854,8 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else {
 			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 			fcc->calling_scope = EG(scope);
-			if (!fcc->object && Z_OBJ(EG(This))) {
-				fcc->object = Z_OBJ(EG(This));
+			if (!fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This)) {
+				fcc->object = Z_OBJ(EG(current_execute_data)->This);
 			}
 			ret = 1;
 		}
@@ -2869,8 +2867,8 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else {
 			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 			fcc->calling_scope = EG(scope)->parent;
-			if (!fcc->object && Z_OBJ(EG(This))) {
-				fcc->object = Z_OBJ(EG(This));
+			if (!fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This)) {
+				fcc->object = Z_OBJ(EG(current_execute_data)->This);
 			}
 			*strict_class = 1;
 			ret = 1;
@@ -2881,8 +2879,8 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else {
 			fcc->called_scope = EG(current_execute_data)->called_scope;
 			fcc->calling_scope = EG(current_execute_data)->called_scope;
-			if (!fcc->object && Z_OBJ(EG(This))) {
-				fcc->object = Z_OBJ(EG(This));
+			if (!fcc->object && Z_OBJ(EG(current_execute_data)->This)) {
+				fcc->object = Z_OBJ(EG(current_execute_data)->This);
 			}
 			*strict_class = 1;
 			ret = 1;
@@ -2896,11 +2894,11 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		}
 		scope = ex ? ex->func->common.scope : NULL;
 		fcc->calling_scope = ce;
-		if (scope && !fcc->object && Z_OBJ(EG(This)) &&
-		    instanceof_function(Z_OBJCE(EG(This)), scope TSRMLS_CC) &&
+		if (scope && !fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This) &&
+		    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), scope TSRMLS_CC) &&
 		    instanceof_function(scope, fcc->calling_scope TSRMLS_CC)) {
-			fcc->object = Z_OBJ(EG(This));
-			fcc->called_scope = Z_OBJCE(EG(This));
+			fcc->object = Z_OBJ(EG(current_execute_data)->This);
+			fcc->called_scope = Z_OBJCE(EG(current_execute_data)->This);
 		} else {
 			fcc->called_scope = fcc->object ? zend_get_class_entry(fcc->object TSRMLS_CC) : fcc->calling_scope;
 		}
@@ -3101,10 +3099,10 @@ get_function_via_handler:
 			if (fcc->function_handler) {
 				retval = 1;
 				call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
-				if (call_via_handler && !fcc->object && Z_OBJ(EG(This)) &&
-				    Z_OBJ_HT(EG(This))->get_class_entry &&
-				    instanceof_function(Z_OBJCE(EG(This)), fcc->calling_scope TSRMLS_CC)) {
-					fcc->object = Z_OBJ(EG(This));
+				if (call_via_handler && !fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This) &&
+				    Z_OBJ_HT(EG(current_execute_data)->This)->get_class_entry &&
+				    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), fcc->calling_scope TSRMLS_CC)) {
+					fcc->object = Z_OBJ(EG(current_execute_data)->This);
 				}
 			}
 		}
@@ -3133,15 +3131,15 @@ get_function_via_handler:
 				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0) {
 					retval = 0;
 				}
-				if (Z_OBJ(EG(This)) && instanceof_function(Z_OBJCE(EG(This)), fcc->calling_scope TSRMLS_CC)) {
-					fcc->object = Z_OBJ(EG(This));
+				if (EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This) && instanceof_function(Z_OBJCE(EG(current_execute_data)->This), fcc->calling_scope TSRMLS_CC)) {
+					fcc->object = Z_OBJ(EG(current_execute_data)->This);
 					if (error) {
-						zend_spprintf(error, 0, "non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val, verb, Z_OBJCE(EG(This))->name->val);
+						zend_spprintf(error, 0, "non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val, verb, Z_OBJCE(EG(current_execute_data)->This)->name->val);
 						if (severity == E_ERROR) {
 							retval = 0;
 						}
 					} else if (retval) {
-						zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val, verb, Z_OBJCE(EG(This))->name->val);
+						zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val, verb, Z_OBJCE(EG(current_execute_data)->This)->name->val);
 					}
 				} else {
 					if (error) {
@@ -3450,7 +3448,7 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_i
 ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem) /* {{{ */
 {
 	if (fci->params) {
-		int i;
+		uint32_t i;
 
 		for (i = 0; i < fci->param_count; i++) {
 			zval_ptr_dtor(&fci->params[i]);
@@ -3484,7 +3482,7 @@ ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count
 ZEND_API int zend_fcall_info_args_ex(zend_fcall_info *fci, zend_function *func, zval *args TSRMLS_DC) /* {{{ */
 {
 	zval *arg, *params;
-	int n = 1;
+	uint32_t n = 1;
 
 	zend_fcall_info_args_clear(fci, !args);
 
@@ -3928,9 +3926,11 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 				zval garbage;
 
 				ZVAL_COPY_VALUE(&garbage, property);
-				Z_ADDREF_P(value);
-				if (Z_ISREF_P(value)) {
-					SEPARATE_ZVAL(value);
+				if (Z_REFCOUNTED_P(value)) {
+					Z_ADDREF_P(value);
+					if (Z_ISREF_P(value)) {
+						SEPARATE_ZVAL(value);
+					}
 				}
 				ZVAL_COPY_VALUE(property, value);
 				zval_ptr_dtor(&garbage);
@@ -4144,6 +4144,39 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 		}
 	} ZEND_HASH_FOREACH_END();
 	return f->common.function_name;
+}
+/* }}} */
+
+ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data) /* {{{ */
+{
+	if (EX(return_value)) {
+/*
+		if (Z_TYPE_P(EX(return_value)) == IS_OBJECT) {
+			zend_object *object = Z_OBJ_P(EX(return_value));
+			zend_execute_data *ex = EX(prev_execute_data);
+			
+			while (ex && Z_OBJ(ex->This) == object) {
+				if (ex->func) {
+					if (ZEND_USER_CODE(ex->func->type)) {
+						if (ex->func->op_array.this_var != -1) {
+							zval *this_var = EX_VAR_2(ex, ex->func->op_array.this_var);
+							if (this_var != EX(return_value)) {
+								zval_ptr_dtor(this_var);
+								ZVAL_NULL(this_var);
+							}
+						}
+					}
+				}
+				Z_OBJ(ex->This) = NULL;
+				ZVAL_NULL(&ex->This);
+				ex = ex->prev_execute_data;
+			}
+		}
+*/
+		zval_ptr_dtor(EX(return_value));
+		Z_OBJ_P(EX(return_value)) = NULL;
+		ZVAL_NULL(EX(return_value));
+	}
 }
 /* }}} */
 

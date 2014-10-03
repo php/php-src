@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -821,12 +821,12 @@ SPL_METHOD(DirectoryIterator, seek)
 
 	if (intern->u.dir.index > pos) {
 		/* we first rewind */
-		zend_call_method_with_0_params(&EG(This), Z_OBJCE(EG(This)), &intern->u.dir.func_rewind, "rewind", NULL);
+		zend_call_method_with_0_params(&EX(This), Z_OBJCE(EX(This)), &intern->u.dir.func_rewind, "rewind", NULL);
 	}
 
 	while (intern->u.dir.index < pos) {
 		int valid = 0;
-		zend_call_method_with_0_params(&EG(This), Z_OBJCE(EG(This)), &intern->u.dir.func_valid, "valid", &retval);
+		zend_call_method_with_0_params(&EX(This), Z_OBJCE(EX(This)), &intern->u.dir.func_valid, "valid", &retval);
 		if (!Z_ISUNDEF(retval)) {
 			valid = zend_is_true(&retval TSRMLS_CC);
 			zval_ptr_dtor(&retval);
@@ -834,7 +834,7 @@ SPL_METHOD(DirectoryIterator, seek)
 		if (!valid) {
 			break;
 		}
-		zend_call_method_with_0_params(&EG(This), Z_OBJCE(EG(This)), &intern->u.dir.func_next, "next", NULL);
+		zend_call_method_with_0_params(&EX(This), Z_OBJCE(EX(This)), &intern->u.dir.func_next, "next", NULL);
 	}
 } /* }}} */
 
@@ -2170,7 +2170,8 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 		if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)) {
 			return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL TSRMLS_CC);
 		} else {
-			zend_call_method_with_0_params(this_ptr, Z_OBJCE_P(getThis()), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
+			zend_execute_data *execute_data = EG(current_execute_data);
+			zend_call_method_with_0_params(this_ptr, Z_OBJCE(EX(This)), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
 		}
 		if (!Z_ISUNDEF(retval)) {
 			if (intern->u.file.current_line || !Z_ISUNDEF(intern->u.file.current_zval)) {
@@ -2883,7 +2884,12 @@ SPL_METHOD(SplFileObject, fwrite)
 	}
 
 	if (ZEND_NUM_ARGS() > 1) {
-		str_len = MAX(0, MIN(length, str_len));
+		if (length >= 0) {
+			str_len = MAX(0, MIN((size_t)length, str_len));
+		} else {
+			/* Negative length given, nothing to write */
+			str_len = 0;
+		}
 	}
 	if (!str_len) {
 		RETURN_LONG(0);
@@ -2911,7 +2917,7 @@ SPL_METHOD(SplFileObject, fread)
 		RETURN_FALSE;
 	}
 
-	ZVAL_STR(return_value, zend_string_alloc(length, 0));
+	ZVAL_NEW_STR(return_value, zend_string_alloc(length, 0));
 	Z_STRLEN_P(return_value) = php_stream_read(intern->u.file.stream, Z_STRVAL_P(return_value), length);
 
 	/* needed because recv/read/gzread doesnt put a null at the end*/

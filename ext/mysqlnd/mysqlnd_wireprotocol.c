@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -524,7 +524,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 		int1store(p, packet->auth_data_len);
 		++p;
 /*!!!!! is the buffer big enough ??? */
-		if ((sizeof(buffer) - (p - buffer)) < packet->auth_data_len) {
+		if (sizeof(buffer) < (packet->auth_data_len + (p - buffer))) {
 			DBG_ERR("the stack buffer was not enough!!");
 			DBG_RETURN(0);
 		}
@@ -596,7 +596,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 				} ZEND_HASH_FOREACH_END();
 			}
 #endif
-			if ((sizeof(buffer) - (p - buffer)) >= (ca_payload_len + php_mysqlnd_net_store_length_size(ca_payload_len))) {
+			if (sizeof(buffer) >= (ca_payload_len + php_mysqlnd_net_store_length_size(ca_payload_len) + (p - buffer))) {
 				p = php_mysqlnd_net_store_length(p, ca_payload_len);
 
 #ifdef OLD_CODE

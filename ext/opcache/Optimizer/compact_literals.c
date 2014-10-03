@@ -40,6 +40,7 @@
 #define LITERAL_STATIC_PROPERTY              0x0700
 #define LITERAL_METHOD                       0x0800
 #define LITERAL_PROPERTY                     0x0900
+#define LITERAL_GLOBAL                       0x0A00
 
 #define LITERAL_EX_CLASS                     0x4000
 #define LITERAL_EX_OBJ                       0x2000
@@ -277,6 +278,9 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 							LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 1, 0, 1);
 						}
 					}
+					break;
+				case ZEND_BIND_GLOBAL:
+					LITERAL_INFO(opline->op2.constant, LITERAL_GLOBAL, 0, 1, 1);
 					break;
 				default:
 					if (ZEND_OP1_TYPE(opline) == IS_CONST) {

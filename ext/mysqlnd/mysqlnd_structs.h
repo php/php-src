@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -23,7 +23,7 @@
 #ifndef MYSQLND_STRUCTS_H
 #define MYSQLND_STRUCTS_H
 
-#include "ext/standard/php_smart_str_public.h"
+#include "zend_smart_str_public.h"
 
 #define MYSQLND_TYPEDEFED_METHODS
 
@@ -56,9 +56,9 @@ struct st_mysqlnd_memory_pool_chunk
 	size_t				app;
 	MYSQLND_MEMORY_POOL	*pool;
 	zend_uchar			*ptr;
-	unsigned int		size;
 	enum_func_status	(*resize_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size TSRMLS_DC);
 	void				(*free_chunk)(MYSQLND_MEMORY_POOL_CHUNK * chunk TSRMLS_DC);
+	unsigned int		size;
 	zend_bool			from_pool;
 };
 
@@ -869,11 +869,10 @@ struct st_mysqlnd_net_data
 
 struct st_mysqlnd_net
 {
-	struct st_mysqlnd_net_data * data;
+	/* cmd buffer */
+	MYSQLND_CMD_BUFFER	cmd_buffer;
 
-	/* sequence for simple checking of correct packets */
-	zend_uchar			packet_no;
-	zend_uchar			compressed_envelope_packet_no;
+	struct st_mysqlnd_net_data * data;
 
 #ifdef MYSQLND_COMPRESSION_ENABLED
 	MYSQLND_READ_BUFFER	* uncompressed_data;
@@ -881,10 +880,11 @@ struct st_mysqlnd_net
 	void * 				unused_pad1;
 #endif
 
-	/* cmd buffer */
-	MYSQLND_CMD_BUFFER	cmd_buffer;
-
 	zend_bool persistent;
+
+	/* sequence for simple checking of correct packets */
+	zend_uchar			packet_no;
+	zend_uchar			compressed_envelope_packet_no;
 };
 
 
@@ -994,14 +994,17 @@ struct st_mysqlnd_result_metadata
 {
 	MYSQLND_FIELD					*fields;
 	struct mysqlnd_field_hash_key	*zend_hash_keys;
-	unsigned int					current_field;
-	unsigned int					field_count;
-	/* We need this to make fast allocs in rowp_read */
-	unsigned int					bit_fields_count;
-	size_t							bit_fields_total_len; /* trailing \0 not counted */
-	zend_bool						persistent;
 
 	struct st_mysqlnd_res_meta_methods * m;
+
+	size_t							bit_fields_total_len; /* trailing \0 not counted */
+	/* We need this to make fast allocs in rowp_read */
+	unsigned int					bit_fields_count;
+
+	unsigned int					current_field;
+	unsigned int					field_count;
+
+	zend_bool						persistent;
 };
 
 
@@ -1055,6 +1058,8 @@ struct st_mysqlnd_buffered_result_c
 
 struct st_mysqlnd_unbuffered_result
 {
+	struct st_mysqlnd_result_unbuffered_methods m;
+	uint64_t			row_count;
 
 	/* For unbuffered (both normal and PS) */
 	zval				*last_row_data;
@@ -1070,14 +1075,13 @@ struct st_mysqlnd_unbuffered_result
 
 	struct st_mysqlnd_packet_row * row_packet;
 
-	uint64_t			row_count;
+	unsigned int		field_count;
+
 	zend_bool			eof_reached;
 
-	unsigned int		field_count;
 	zend_bool			ps;
 	zend_bool			persistent;
 
-	struct st_mysqlnd_result_unbuffered_methods m;
 };
 
 

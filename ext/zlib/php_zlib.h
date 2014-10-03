@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -49,13 +49,13 @@ typedef struct _php_zlib_context {
 
 ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	/* variables for transparent gzip encoding */
-	int compression_coding;
 	zend_long output_compression;
 	zend_long output_compression_level;
 	char *output_handler;
 	php_zlib_context *ob_gzhandler;
 	zend_long output_compression_default;
     zend_bool handler_registered;
+	int compression_coding;
 ZEND_END_MODULE_GLOBALS(zlib);
 
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);

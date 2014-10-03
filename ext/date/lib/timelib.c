@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -71,10 +71,11 @@ timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *rel)
 void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 {
 	unsigned int i;
+	size_t tz_abbr_len = strlen(tz_abbr);
 	
 	TIMELIB_TIME_FREE(tm->tz_abbr);
 	tm->tz_abbr = strdup(tz_abbr);
-	for (i = 0; i < strlen(tz_abbr); i++) {
+	for (i = 0; i < tz_abbr_len; i++) {
 		tm->tz_abbr[i] = toupper(tz_abbr[i]);
 	}
 }

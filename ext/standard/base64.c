@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -58,10 +58,6 @@ PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) /
 	const unsigned char *current = str;
 	unsigned char *p;
 	zend_string *result;
-
-	if (length < 0) {
-		return NULL;
-	}
 
 	result = zend_string_alloc(((length + 2) / 3) * 4 * sizeof(char), 0);
 	p = (unsigned char *)result->val;

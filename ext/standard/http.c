@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -66,7 +66,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					/* private or protected property access outside of the class */
 					continue;
 				}
-				zend_unmangle_property_name_ex(key->val, key->len, &tmp, &prop_name, (int *)&prop_len);
+				zend_unmangle_property_name_ex(key, &tmp, &prop_name, &prop_len);
 			} else {
 				prop_name = key->val;
 				prop_len = key->len;
@@ -159,18 +159,14 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				} else {
 					ekey = php_url_encode(prop_name, prop_len);
 				}
-				smart_str_appendl(formstr, ekey->val, ekey->len);
+				smart_str_append(formstr, ekey);
 				zend_string_free(ekey);
 			} else {
-				char *ekey;
-				int ekey_len;
 				/* Numeric key */
 				if (num_prefix) {
 					smart_str_appendl(formstr, num_prefix, num_prefix_len);
 				}
-				ekey_len = spprintf(&ekey, 0, "%pd", idx);
-				smart_str_appendl(formstr, ekey, ekey_len);
-				efree(ekey);
+				smart_str_append_long(formstr, idx);
 			}
 			smart_str_appendl(formstr, key_suffix, key_suffix_len);
 			smart_str_appendl(formstr, "=", 1);
@@ -182,18 +178,12 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 						} else {
 							ekey = php_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));						
 						}
-						smart_str_appendl(formstr, ekey->val, ekey->len);
+						smart_str_append(formstr, ekey);
 						zend_string_free(ekey);
 					}
 					break;
 				case IS_LONG:
-					{
-						char *ekey;
-					  	int ekey_len;
-					  	ekey_len = spprintf(&ekey, 0, "%pd", Z_LVAL_P(zdata));
-						smart_str_appendl(formstr, ekey, ekey_len);
-						efree(ekey);
-				  	}
+					smart_str_append_long(formstr, Z_LVAL_P(zdata));
 					break;
 				case IS_FALSE:
 					smart_str_appendl(formstr, "0", sizeof("0")-1);
@@ -221,7 +211,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 						} else {
 							ekey = php_url_encode(Z_STRVAL(copyzval), Z_STRLEN(copyzval));
 						}
-						smart_str_appendl(formstr, ekey->val, ekey->len);
+						smart_str_append(formstr, ekey);
 						zval_ptr_dtor(&copyzval);
 						zend_string_free(ekey);
 					}

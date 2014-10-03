@@ -56,31 +56,31 @@ BUILD INSTRUCTIONS
 
        $ ./configure --help
 
-    3. Touch a file in your web-root 'php5.tux'.  This will
-       cause requests to '/php5.tux' to be redirected to the
-       userspace module php5.tux.
+    3. Touch a file in your web-root 'php7.tux'.  This will
+       cause requests to '/php7.tux' to be redirected to the
+       userspace module php7.tux.
 
     4. Start TUX with something like
 
-       # tux -d -t 8 -r /www -m /tux-modules php5.tux
+       # tux -d -t 8 -r /www -m /tux-modules php7.tux
       
        (daemon mode, eight threads, web-root /www, modules in
-        /tux-modules, load php5.tux)
+        /tux-modules, load php7.tux)
 
        BEFORE running this command, the kernel side of TUX has to
        be properly setup.
        
     5. Try to access
 
-           http://yourserver/php5.tux?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000
+           http://yourserver/php7.tux?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000
 
        It should display the PHP credits page.
 
        To access a script /foo/bar.php, use
 
-           http://yourserver/php5.tux?/foo/bar.php
+           http://yourserver/php7.tux?/foo/bar.php
 
        Parameters can be appended:
        
-           http://yourserver/php5.tux?/foo/bar.php&var=value
+           http://yourserver/php7.tux?/foo/bar.php&var=value
 

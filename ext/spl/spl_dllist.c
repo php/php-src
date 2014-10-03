@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -29,7 +29,7 @@
 #include "php_spl.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "spl_functions.h"
 #include "spl_engine.h"
 #include "spl_iterators.h"
@@ -101,8 +101,8 @@ struct _spl_dllist_object {
 /* define an overloaded iterator structure */
 struct _spl_dllist_it {
 	zend_user_iterator     intern;
-	int                    traverse_position;
 	spl_ptr_llist_element *traverse_pointer;
+	int                    traverse_position;
 	int                    flags;
 };
 

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -595,7 +595,7 @@ try_again:
 			smart_str_append_const(&soap_headers, "User-Agent: PHP-SOAP/"PHP_VERSION"\r\n");
 		}
 
-		smart_str_append(&soap_headers, &soap_headers_z);
+		smart_str_append_smart_str(&soap_headers, &soap_headers_z);
 
 		if (soap_version == SOAP_1_2) {
 			smart_str_append_const(&soap_headers,"Content-Type: application/soap+xml; charset=utf-8");

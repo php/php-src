@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -207,11 +207,11 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 
 			crypt_res = php_crypt_blowfish_rn(password, salt, output, sizeof(output));
 			if (!crypt_res) {
-				memset(output, 0, PHP_MAX_SALT_LEN + 1);
+				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
 				return NULL;
 			} else {
 				result = zend_string_init(output, strlen(output), 0);
-				memset(output, 0, PHP_MAX_SALT_LEN + 1);
+				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
 				return result;
 			}
 		} else {
