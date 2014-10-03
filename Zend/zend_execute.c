@@ -1217,14 +1217,13 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result TSRMLS_CC);
 
-			if (result) {
-				if (retval) {
-					if (result != retval) {
-						ZVAL_COPY(result, retval);
-					}
-				} else {
-					ZVAL_NULL(result);
+			ZEND_ASSERT(result != NULL);
+			if (retval) {
+				if (result != retval) {
+					ZVAL_COPY(result, retval);
 				}
+			} else {
+				ZVAL_NULL(result);
 			}
 		}
 	} else {
