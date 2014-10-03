@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2014, PHP 5.5.19
 
 - Core:
-  . Fixed bug #68188 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
+  . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
 
 
 ?? ??? 2014, PHP 5.5.18
