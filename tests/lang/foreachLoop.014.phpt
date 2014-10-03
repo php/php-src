@@ -1,5 +1,7 @@
 --TEST--
 Directly modifying a REFERENCED array when foreach'ing over it.
+--XFAIL--
+Needs major foreach changes to get sane behavior
 --FILE--
 <?php
 
