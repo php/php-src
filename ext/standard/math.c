@@ -220,7 +220,7 @@ static double php_asinh(double z)
 	return(asinh(z));
 #else
 # ifdef _WIN64
-	if (z > 0) {
+	if (z >= 0) {
 		return log(z + sqrt(z * z + 1));
 	}
 	else {
