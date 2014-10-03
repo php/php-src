@@ -1,7 +1,30 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2014, PHP 5.6.2
 
-?? ??? 2014, PHP 5.6.1
+- Core:
+  . Fixed bug #67739 (Windows 8.1/Server 2012 R2 OS build number reported
+    as 6.2 (instead of 6.3)). (Christian Wenz)
+  . Fixed bug #67633 (A foreach on an array returned from a function not doing
+    copy-on-write). (Nikita)
+  . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
+  . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
+
+- FPM:
+  . Fixed bug #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable
+    when using Apache, mod_proxy-fcgi and ProxyPass). (Remi)
+  . Implemented FR #55508 (listen and listen.allowed_clients should take IPv6
+    addresses). (Robin Gloster)
+
+- Reflection:
+  . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
+
+- OpenSSL:
+  . Fixed bug #68074 (Allow to use system cipher list instead of hardcoded
+    value). (Remi)
+
+
+02 Oct 2014, PHP 5.6.1
 
 - Core:
   . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
@@ -10,6 +33,13 @@ PHP                                                                        NEWS
   . Fixed bug #67878 (program_prefix not honoured in man pages). (Remi)
   . Fixed bug #67938 (Segfault when extending interface method with variadic).
     (Nikita)
+  . Fixed bug #67985 (Incorrect last used array index copied to new array after
+    unset). (Tjerk)
+  . Fixed bug #68088 (New Posthandler Potential Illegal efree() vulnerability).
+    (Mike) (CVE-2014-3622)
+
+- DOM:
+  . Made DOMNode::textContent writeable. (Tjerk)
 
 - Fileinfo:
   . Fixed bug #67731 (finfo::file() returns invalid mime type
@@ -29,17 +59,23 @@ PHP                                                                        NEWS
   . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
 
 - OpenSSL:
+  . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
+    (Daniel Lowrey)
   . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3).
     (Daniel Lowrey)
 
-- DOM:
-  . Made DOMNode::textContent writeable. (Tjerk)
+- phpdbg:
+  . Fixed issue krakjoe/phpdbg#111 (compile error without ZEND_SIGNALS). (Bob)
 
 - SOAP:
   . Fixed bug #67955 (SoapClient prepends 0-byte to cookie names). (Philip Hofstetter)
 
 - Session:
   . Fixed bug #67972 (SessionHandler Invalid memory read create_sid()). (Adam)
+
+- Sysvsem:
+  . Implemented FR #67990 (Add optional nowait argument to sem_acquire).
+    (Matteo)
 
 28 Aug 2014, PHP 5.6.0
 
@@ -66,6 +102,7 @@ PHP                                                                        NEWS
   . Fixed bug #66431 (Special Character via COM Interface (CP_UTF8)). (Anatol)
 
 - Core:
+  . Improved phpinfo() stylesheets. (Colin Viebrock)
   . Fixed bug #67693 (incorrect push to the empty array). (Tjerk)
   . Removed inconsistency regarding behaviour of array in constants at
     run-time. (Bob)

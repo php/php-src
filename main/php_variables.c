@@ -241,7 +241,7 @@ typedef struct post_var_data {
 
 static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof TSRMLS_DC)
 {
-	char *ksep, *vsep;
+	char *ksep, *vsep, *val;
 	size_t klen, vlen;
 	/* FIXME: string-size_t */
 	unsigned int new_vlen;
@@ -272,15 +272,17 @@ static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof TSR
 		vlen = 0;
 	}
 
-
 	php_url_decode(var->ptr, klen);
+
+	val = estrndup(ksep, vlen);
 	if (vlen) {
-		vlen = php_url_decode(ksep, vlen);
+		vlen = php_url_decode(val, vlen);
 	}
 
-	if (sapi_module.input_filter(PARSE_POST, var->ptr, &ksep, vlen, &new_vlen TSRMLS_CC)) {
-		php_register_variable_safe(var->ptr, ksep, new_vlen, arr TSRMLS_CC);
+	if (sapi_module.input_filter(PARSE_POST, var->ptr, &val, vlen, &new_vlen TSRMLS_CC)) {
+		php_register_variable_safe(var->ptr, val, new_vlen, arr TSRMLS_CC);
 	}
+	efree(val);
 
 	var->ptr = vsep + (vsep != var->end);
 	return 1;
