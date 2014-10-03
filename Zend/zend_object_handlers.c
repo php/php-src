@@ -815,10 +815,6 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 		(guard = zend_get_property_guard(zobj, property_info, member)) == NULL ||
 		(property_info && ((*guard) & IN_GET))) {
 
-		/* we don't have access controls - will just add it */
-		if(UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
-			zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
-		}
 		ZVAL_NULL(&tmp);
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 		    property_info->offset >= 0) {
@@ -829,6 +825,12 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 				rebuild_object_properties(zobj);
 			}
 			retval = zend_hash_update(zobj->properties, property_info->name, &tmp);
+		}
+
+		/* Notice is thrown after creation of the property, to avoid EG(std_property_info)
+		 * being overwritten in an error handler. */
+		if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
+			zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
 		}
 	} else {
 		/* we do have getter - fail and let it try again with usual get/set */
