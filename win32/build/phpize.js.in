@@ -24,7 +24,6 @@ var STDOUT = WScript.StdOut;
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var C = FSO.CreateTextFile("configure.js", true);
 var B = FSO.CreateTextFile("configure.bat", true);
-var DSP = false;
 re = /\\script/i;
 var PHP_DIR=FSO.GetParentFolderName(WScript.ScriptFullName).replace(re,"");
 
@@ -221,16 +220,6 @@ if (FSO.FileExists(PHP_DIR + "/script/ext_pickle.js")) {
 
 C.Write(file_get_contents(PHP_DIR + "/script/confutils.js"));
 C.Write(file_get_contents(PHP_DIR + "/script/config.phpize.js"));
-
-// If project files were requested, pull in the code to generate them
-if (DSP == true) {
-	C.WriteLine('PHP_DSP="yes"');
-	C.WriteBlankLines(1);
-	C.Write(file_get_contents(PHP_DIR + "win32/build/projectgen.js"));
-} else {
-	C.WriteLine('PHP_DSP="no"');
-	C.WriteBlankLines(1);
-}
 
 // Pull in code for the base detection
 modules = file_get_contents(PHP_DIR + "/script/config.w32.phpize.in");

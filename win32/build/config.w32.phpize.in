@@ -352,12 +352,5 @@ if (PHP_SNAPSHOT_TEMPLATE == "no") {
 
 DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
 
-if (PHP_DSP != "no") {
-	if (FSO.FolderExists("tmp")) {
-		FSO.DeleteFolder("tmp");
-	}
-	FSO.CreateFolder("tmp");
-}
-
 AC_DEFINE("PHP_DIR", PHP_DIR);
 DEFINE("PHP_DIR", PHP_DIR);

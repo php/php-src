@@ -28,7 +28,6 @@ var SYSTEM_DRIVE = WshShell.Environment("Process").Item("SystemDrive");
 var PROGRAM_FILES = WshShell.Environment("Process").Item("ProgramFiles");
 var PROGRAM_FILESx86 = WshShell.Environment("Process").Item("ProgramFiles(x86)");
 var VCINSTALLDIR = WshShell.Environment("Process").Item("VCINSTALLDIR");
-var DSP_FLAGS = new Array();
 var PHP_SRC_DIR=FSO.GetParentFolderName(WScript.ScriptFullName);
 
 /* Store the enabled extensions (summary + QA check) */
@@ -1130,10 +1129,6 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		ADD_FLAG("SAPI_TARGETS", makefiletarget);
 	}
 
-	if (PHP_DSP != "no") {
-		generate_dsp_file(sapiname, configure_module_dirname, file_list, false);
-	}
-
 	MFO.WriteBlankLines(1);
 	sapi_enabled[sapi_enabled.length] = [sapiname];
 }
@@ -1365,10 +1360,6 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		cflags = "/FI main/config.pickle.h " + cflags;
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
-
-	if (PHP_DSP != "no") {
-		generate_dsp_file(extname, configure_module_dirname, file_list, shared);
-	}
 
 	extensions_enabled[extensions_enabled.length] = [extname, shared ? 'shared' : 'static'];
 }
@@ -1663,15 +1654,6 @@ function generate_files()
 		if (!FSO.FolderExists(bd)) {
 			FSO.CreateFolder(bd);
 		}
-	}
-
-	if (PHP_DSP != "no") {
-		generate_dsp_file("TSRM", "TSRM", null, false);
-		generate_dsp_file("Zend", "Zend", null, false);
-		generate_dsp_file("win32", "win32", null, false);
-		generate_dsp_file("main", "main", null, false);
-		generate_dsp_file("streams", "main\\streams", null, false);
-		copy_dsp_files();
 	}
 
 	STDOUT.WriteLine("Generating files...");
@@ -2043,12 +2025,6 @@ function ADD_FLAG(name, flags, target)
 		configure_subst.Remove(name);
 	}
 	configure_subst.Add(name, flags);
-
-	if (PHP_DSP != "no") {
-		if (flags && (name.substr(name.length-3) != "PHP") && (name.substr(0, 7) == "CFLAGS_")) {
-			DSP_FLAGS[DSP_FLAGS.length] = new Array(name, flags);
-		}
-	}
 }
 
 function get_define(name)

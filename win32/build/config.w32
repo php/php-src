@@ -431,13 +431,6 @@ if (PHP_SNAPSHOT_TEMPLATE == "no") {
 
 DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
 
-if (PHP_DSP != "no") {
-	if (FSO.FolderExists("tmp")) {
-		FSO.DeleteFolder("tmp");
-	}
-	FSO.CreateFolder("tmp");
-}
-
 ARG_ENABLE("security-flags", "Disable the compiler security flags", "yes");
 if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
