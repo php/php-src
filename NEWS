@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
 - Core:
+  . Implemented the RFC `Catchable "Call to a member function bar() on a
+    non-object"` (Timm) 
   . Added PHP_INT_MIN constant. (Andrea)
   . Added Closure::apply() method. (Andrea)
   . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
