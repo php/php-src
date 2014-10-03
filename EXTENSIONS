@@ -385,6 +385,12 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.4
 -------------------------------------------------------------------------------
+EXTENSION:           hash
+PRIMARY MAINTAINER:  Sara Golemon <pollita@php.net>, Mike Wallner <mike@php.net>, Anatol Belski <ab@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               5.1.2
+-------------------------------------------------------------------------------
 EXTENSION:           iconv
 PRIMARY MAINTAINER:  Moriyoshi Koizumi <moriyoshi@php.net>
 MAINTENANCE:         Maintained

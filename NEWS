@@ -1,11 +1,35 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2014, PHP 5.5.19
+
+- Core:
+  . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
+
+
 ?? ??? 2014, PHP 5.5.18
+
+- Core:
+  . Fixed bug #67985 (Incorrect last used array index copied to new array after
+    unset). (Tjerk)
+  . Fixed bug #67739 (Windows 8.1/Server 2012 R2 OS build number reported
+    as 6.2 (instead of 6.3)). (Christian Wenz)
+  . Fixed bug #67633 (A foreach on an array returned from a function not doing
+    copy-on-write). (Nikita)
+  . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
+
+- FPM:
+  . Fixed bug #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable
+    when using Apache, mod_proxy-fcgi and ProxyPass). (Remi)
+  . Implemented FR #55508 (listen and listen.allowed_clients should take IPv6
+    addresses). (Robin Gloster)
+
+- Reflection:
+  . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
 
 - Session:
   . Fixed bug #67972 (SessionHandler Invalid memory read create_sid()). (Adam)
 
-11 Sep 2014, PHP 5.5.17
+18 Sep 2014, PHP 5.5.17
 
 - Core:
   . Fixed bug #47358 (glob returns error, should be empty array()). (Pierre)
@@ -18,8 +42,7 @@ PHP                                                                        NEWS
     (Aidas Kasparas)
 
 - FPM:
-  . Fixed #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable when
-    using Apache). (David Zuelke)
+  . Fixed #67606 (FPM with mod_fastcgi/apache2.4 is broken). (David Zuelke)
 
 - OpenSSL:
   . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
