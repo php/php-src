@@ -221,6 +221,8 @@ void zend_hash_display_pListTail(const HashTable *ht);
 void zend_hash_display(const HashTable *ht);
 #endif
 
+ZEND_API int _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx);
+
 END_EXTERN_C()
 
 #define ZEND_INIT_SYMTABLE(ht)								\
@@ -228,8 +230,6 @@ END_EXTERN_C()
 
 #define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
 	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
-
-ZEND_API int _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx);
 
 static zend_always_inline int _zend_handle_numeric_str(const char *key, size_t length, zend_ulong *idx)
 {

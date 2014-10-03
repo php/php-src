@@ -378,7 +378,7 @@ php_formatted_print(int param_count, int use_array, int format_offset TSRMLS_DC)
 	int always_sign;
 	int format_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(param_count TSRMLS_CC, "+", &args, &argc) == FAILURE) {
 		return NULL;
 	}
 

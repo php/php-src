@@ -68,8 +68,8 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 	/* If yield was used as a function argument there may be active
 	 * method calls those objects need to be freed */
 	while (execute_data->call) {
-		if (execute_data->call->object) {
-			OBJ_RELEASE(execute_data->call->object);
+		if (Z_OBJ(execute_data->call->This)) {
+			OBJ_RELEASE(Z_OBJ(execute_data->call->This));
 		}
 		execute_data->call = execute_data->call->prev_execute_data;
 	}
@@ -98,8 +98,8 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table TSRMLS_CC);
 		}
 
-		if (execute_data->object) {
-			OBJ_RELEASE(execute_data->object);
+		if (Z_OBJ(execute_data->This)) {
+			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		}
 
 		/* A fatal error / die occurred during the generator execution. Trying to clean
@@ -251,8 +251,8 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 
 	object_init_ex(return_value, zend_ce_generator);
 
-	if (Z_OBJ(EG(This))) {
-		Z_ADDREF(EG(This));
+	if (Z_OBJ(call->This)) {
+		Z_ADDREF(call->This);
 	}
 
 	/* Save execution context in generator object. */
@@ -292,15 +292,11 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 	{
 		/* Backup executor globals */
 		zend_execute_data *original_execute_data = EG(current_execute_data);
-		zend_object *original_This;
 		zend_class_entry *original_scope = EG(scope);
 		zend_vm_stack original_stack = EG(argument_stack);
 
-		original_This = Z_OBJ(EG(This));
-
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
-		Z_OBJ(EG(This)) = generator->execute_data->object;
 		EG(scope) = generator->execute_data->scope;
 		EG(argument_stack) = generator->stack;
 
@@ -322,7 +318,6 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 
 		/* Restore executor globals */
 		EG(current_execute_data) = original_execute_data;
-		Z_OBJ(EG(This)) = original_This;
 		EG(scope) = original_scope;
 		EG(argument_stack) = original_stack;
 

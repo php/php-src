@@ -69,6 +69,24 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSR
 
 ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only TSRMLS_DC);
 ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce TSRMLS_DC);
+
+/**
+ * Checks whether the string "str" with length "length" is numeric. The value
+ * of allow_errors determines whether it's required to be entirely numeric, or
+ * just its prefix. Leading whitespace is allowed.
+ *
+ * The function returns 0 if the string did not contain a valid number; IS_LONG
+ * if it contained a number that fits within the range of a long; or IS_DOUBLE
+ * if the number was out of long range or contained a decimal point/exponent.
+ * The number's value is returned into the respective pointer, *lval or *dval,
+ * if that pointer is not NULL.
+ *
+ * This variant also gives information if a string that represents an integer
+ * could not be represented as such due to overflow. It writes 1 to oflow_info
+ * if the integer is larger than ZEND_LONG_MAX and -1 if it's smaller than ZEND_LONG_MIN.
+ */
+ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info);
+
 END_EXTERN_C()
 
 #if ZEND_DVAL_TO_LVAL_CAST_OK
@@ -124,23 +142,6 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 #define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
-
-/**
- * Checks whether the string "str" with length "length" is numeric. The value
- * of allow_errors determines whether it's required to be entirely numeric, or
- * just its prefix. Leading whitespace is allowed.
- *
- * The function returns 0 if the string did not contain a valid number; IS_LONG
- * if it contained a number that fits within the range of a long; or IS_DOUBLE
- * if the number was out of long range or contained a decimal point/exponent.
- * The number's value is returned into the respective pointer, *lval or *dval,
- * if that pointer is not NULL.
- *
- * This variant also gives information if a string that represents an integer
- * could not be represented as such due to overflow. It writes 1 to oflow_info
- * if the integer is larger than ZEND_LONG_MAX and -1 if it's smaller than ZEND_LONG_MIN.
- */
-ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info);
 
 static zend_always_inline zend_uchar is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info)
 {

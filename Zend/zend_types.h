@@ -90,6 +90,7 @@ typedef uint32_t zend_uintptr_t;
 typedef struct _zend_object_handlers zend_object_handlers;
 typedef struct _zend_class_entry     zend_class_entry;
 typedef union  _zend_function        zend_function;
+typedef struct _zend_execute_data    zend_execute_data;
 
 typedef struct _zval_struct     zval;
 

@@ -464,7 +464,7 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 }
 
 /* the core of COM */
-int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
+int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *f,
 		WORD flags,	VARIANT *v, int nargs, zval *args TSRMLS_DC)
 {
 	DISPID dispid, altdispid;
@@ -472,20 +472,19 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 	HRESULT hr;
 	VARIANT *vargs = NULL, *byref_vals = NULL;
 	int i, byref_count = 0, j;
-	zend_internal_function *f = (zend_internal_function*)EG(current_execute_data)->func;
 
 	/* assumption: that the active function (f) is the function we generated for the engine */
 	if (!f || f->arg_info == NULL) {
 	   f = NULL;
 	}
 	
-	hr = php_com_get_id_of_name(obj, name, namelen, &dispid TSRMLS_CC);
+	hr = php_com_get_id_of_name(obj, f->function_name->val, f->function_name->len, &dispid TSRMLS_CC);
 
 	if (FAILED(hr)) {
 		char *winerr = NULL;
 		char *msg = NULL;
 		winerr = php_win32_error_to_msg(hr);
-		spprintf(&msg, 0, "Unable to lookup `%s': %s", name, winerr);
+		spprintf(&msg, 0, "Unable to lookup `%s': %s", f->function_name->val, winerr);
 		LocalFree(winerr);
 		php_com_throw_exception(hr, msg TSRMLS_CC);
 		efree(msg);

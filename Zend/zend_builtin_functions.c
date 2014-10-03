@@ -400,7 +400,7 @@ ZEND_FUNCTION(gc_disable)
    Get the number of arguments that were passed to the function */
 ZEND_FUNCTION(func_num_args)
 {
-	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
+	zend_execute_data *ex = EX(prev_execute_data);
 
 	if (ex->frame_kind == VM_FRAME_NESTED_FUNCTION || ex->frame_kind == VM_FRAME_TOP_FUNCTION) {
 		RETURN_LONG(ex->num_args);
@@ -429,7 +429,7 @@ ZEND_FUNCTION(func_get_arg)
 		RETURN_FALSE;
 	}
 
-	ex = EG(current_execute_data)->prev_execute_data;
+	ex = EX(prev_execute_data);
 	if (ex->frame_kind != VM_FRAME_NESTED_FUNCTION && ex->frame_kind != VM_FRAME_TOP_FUNCTION) {
 		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
 		RETURN_FALSE;
@@ -462,7 +462,7 @@ ZEND_FUNCTION(func_get_args)
 	zval *p;
 	uint32_t arg_count, first_extra_arg;
 	uint32_t i;
-	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
+	zend_execute_data *ex = EX(prev_execute_data);
 
 	if (ex->frame_kind != VM_FRAME_NESTED_FUNCTION && ex->frame_kind != VM_FRAME_TOP_FUNCTION) {
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
@@ -823,8 +823,8 @@ ZEND_FUNCTION(get_called_class)
 		return;
 	}
 
-	if (EG(current_execute_data)->called_scope) {
-		RETURN_STR(zend_string_copy(EG(current_execute_data)->called_scope->name));
+	if (EX(called_scope)) {
+		RETURN_STR(zend_string_copy(EX(called_scope)->name));
 	} else if (!EG(scope))  {
 		zend_error(E_WARNING, "get_called_class() called from outside a class");
 	}
@@ -2132,7 +2132,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 	}
 
 	ZVAL_UNDEF(&arg_array);
-	ptr = EG(current_execute_data)->prev_execute_data;
+	ptr = EX(prev_execute_data);
 
 	/* skip debug_backtrace() */
 	call = ptr;
@@ -2172,7 +2172,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 		}
 
 		/* $this may be passed into regular internal functions */
-		object = call->object;
+		object = Z_OBJ(call->This);
 		if (object &&
 			call &&
 		    call->func->type == ZEND_INTERNAL_FUNCTION &&
@@ -2394,7 +2394,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 		}
 
 		/* $this may be passed into regular internal functions */
-		object = call ? call->object : NULL;
+		object = call ? Z_OBJ(call->This) : NULL;
 		if (object &&
 		    call->func &&
 		    call->func->type == ZEND_INTERNAL_FUNCTION &&
