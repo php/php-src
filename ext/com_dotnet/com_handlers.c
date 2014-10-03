@@ -250,7 +250,7 @@ static PHP_FUNCTION(com_method_handler)
 	zval *object = getThis();
 
 	Z_OBJ_HANDLER_P(object, call_method)(
-			((zend_internal_function*)EG(current_execute_data)->func)->function_name,
+			((zend_internal_function*)EX(func))->function_name,
 			Z_OBJ_P(object),
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }

@@ -425,7 +425,7 @@ static zval *pdo_stmt_instantiate(pdo_dbh_t *dbh, zval *object, zend_class_entry
 	return object;
 } /* }}} */
 
-static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
+static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt, zval *object, zend_class_entry *dbstmt_ce, zval *ctor_args TSRMLS_DC) /* {{{ */
 {	
 	zval query_string;
 	zval z_key;
@@ -556,7 +556,7 @@ static PHP_METHOD(PDO, prepare)
 	ZVAL_UNDEF(&stmt->lazy_object_ref);
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, options TSRMLS_CC)) {
-		pdo_stmt_construct(stmt, return_value, dbstmt_ce, &ctor_args TSRMLS_CC);
+		pdo_stmt_construct(execute_data, stmt, return_value, dbstmt_ce, &ctor_args TSRMLS_CC);
 		return;
 	}
 
@@ -1109,7 +1109,7 @@ static PHP_METHOD(PDO, query)
 					stmt->executed = 1;
 				}
 				if (ret) {
-					pdo_stmt_construct(stmt, return_value, dbh->def_stmt_ce, &dbh->def_stmt_ctor_args TSRMLS_CC);
+					pdo_stmt_construct(execute_data, stmt, return_value, dbh->def_stmt_ce, &dbh->def_stmt_ctor_args TSRMLS_CC);
 					return;
 				}
 			}

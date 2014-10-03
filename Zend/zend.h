@@ -52,14 +52,13 @@
 # define HANDLE_UNBLOCK_INTERRUPTIONS()		ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
 #endif
 
-#define INTERNAL_FUNCTION_PARAMETERS uint32_t param_count, zval *return_value TSRMLS_DC
-#define INTERNAL_FUNCTION_PARAM_PASSTHRU param_count, return_value TSRMLS_CC
+#define INTERNAL_FUNCTION_PARAMETERS zend_execute_data *execute_data, zval *return_value TSRMLS_DC
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU execute_data, return_value TSRMLS_CC
 
 #define USED_RET() \
-	(!EG(current_execute_data) || \
-	 !EG(current_execute_data)->prev_execute_data || \
-	 !ZEND_USER_CODE(EG(current_execute_data)->prev_execute_data->func->common.type) || \
-	 !(EG(current_execute_data)->prev_execute_data->opline->result_type & EXT_TYPE_UNUSED))
+	(!EX(prev_execute_data) || \
+	 !ZEND_USER_CODE(EX(prev_execute_data)->func->common.type) || \
+	 !(EX(prev_execute_data)->opline->result_type & EXT_TYPE_UNUSED))
 
 #ifdef HAVE_NORETURN
 # if defined(ZEND_WIN32)

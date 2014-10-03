@@ -472,7 +472,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 	HRESULT hr;
 	VARIANT *vargs = NULL, *byref_vals = NULL;
 	int i, byref_count = 0, j;
-	zend_internal_function *f = (zend_internal_function*)EG(current_execute_data)->func;
+	zend_internal_function *f = (zend_internal_function*)EX(func);
 
 	/* assumption: that the active function (f) is the function we generated for the engine */
 	if (!f || f->arg_info == NULL) {

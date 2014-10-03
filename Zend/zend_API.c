@@ -2854,8 +2854,8 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else {
 			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 			fcc->calling_scope = EG(scope);
-			if (!fcc->object && Z_OBJ(EG(This))) {
-				fcc->object = Z_OBJ(EG(This));
+			if (!fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This)) {
+				fcc->object = Z_OBJ(EG(current_execute_data)->This);
 			}
 			ret = 1;
 		}
@@ -2867,8 +2867,8 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else {
 			fcc->called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 			fcc->calling_scope = EG(scope)->parent;
-			if (!fcc->object && Z_OBJ(EG(This))) {
-				fcc->object = Z_OBJ(EG(This));
+			if (!fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This)) {
+				fcc->object = Z_OBJ(EG(current_execute_data)->This);
 			}
 			*strict_class = 1;
 			ret = 1;
@@ -2879,8 +2879,8 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		} else {
 			fcc->called_scope = EG(current_execute_data)->called_scope;
 			fcc->calling_scope = EG(current_execute_data)->called_scope;
-			if (!fcc->object && Z_OBJ(EG(This))) {
-				fcc->object = Z_OBJ(EG(This));
+			if (!fcc->object && Z_OBJ(EG(current_execute_data)->This)) {
+				fcc->object = Z_OBJ(EG(current_execute_data)->This);
 			}
 			*strict_class = 1;
 			ret = 1;
@@ -2894,11 +2894,11 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 		}
 		scope = ex ? ex->func->common.scope : NULL;
 		fcc->calling_scope = ce;
-		if (scope && !fcc->object && Z_OBJ(EG(This)) &&
-		    instanceof_function(Z_OBJCE(EG(This)), scope TSRMLS_CC) &&
+		if (scope && !fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This) &&
+		    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), scope TSRMLS_CC) &&
 		    instanceof_function(scope, fcc->calling_scope TSRMLS_CC)) {
-			fcc->object = Z_OBJ(EG(This));
-			fcc->called_scope = Z_OBJCE(EG(This));
+			fcc->object = Z_OBJ(EG(current_execute_data)->This);
+			fcc->called_scope = Z_OBJCE(EG(current_execute_data)->This);
 		} else {
 			fcc->called_scope = fcc->object ? zend_get_class_entry(fcc->object TSRMLS_CC) : fcc->calling_scope;
 		}
@@ -3099,10 +3099,10 @@ get_function_via_handler:
 			if (fcc->function_handler) {
 				retval = 1;
 				call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
-				if (call_via_handler && !fcc->object && Z_OBJ(EG(This)) &&
-				    Z_OBJ_HT(EG(This))->get_class_entry &&
-				    instanceof_function(Z_OBJCE(EG(This)), fcc->calling_scope TSRMLS_CC)) {
-					fcc->object = Z_OBJ(EG(This));
+				if (call_via_handler && !fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This) &&
+				    Z_OBJ_HT(EG(current_execute_data)->This)->get_class_entry &&
+				    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), fcc->calling_scope TSRMLS_CC)) {
+					fcc->object = Z_OBJ(EG(current_execute_data)->This);
 				}
 			}
 		}
@@ -3131,15 +3131,15 @@ get_function_via_handler:
 				if ((check_flags & IS_CALLABLE_CHECK_IS_STATIC) != 0) {
 					retval = 0;
 				}
-				if (Z_OBJ(EG(This)) && instanceof_function(Z_OBJCE(EG(This)), fcc->calling_scope TSRMLS_CC)) {
-					fcc->object = Z_OBJ(EG(This));
+				if (EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This) && instanceof_function(Z_OBJCE(EG(current_execute_data)->This), fcc->calling_scope TSRMLS_CC)) {
+					fcc->object = Z_OBJ(EG(current_execute_data)->This);
 					if (error) {
-						zend_spprintf(error, 0, "non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val, verb, Z_OBJCE(EG(This))->name->val);
+						zend_spprintf(error, 0, "non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val, verb, Z_OBJCE(EG(current_execute_data)->This)->name->val);
 						if (severity == E_ERROR) {
 							retval = 0;
 						}
 					} else if (retval) {
-						zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val, verb, Z_OBJCE(EG(This))->name->val);
+						zend_error(severity, "Non-static method %s::%s() %s be called statically, assuming $this from compatible context %s", fcc->calling_scope->name->val, fcc->function_handler->common.function_name->val, verb, Z_OBJCE(EG(current_execute_data)->This)->name->val);
 					}
 				} else {
 					if (error) {
@@ -4144,6 +4144,39 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 		}
 	} ZEND_HASH_FOREACH_END();
 	return f->common.function_name;
+}
+/* }}} */
+
+ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data) /* {{{ */
+{
+	if (EX(return_value)) {
+/*
+		if (Z_TYPE_P(EX(return_value)) == IS_OBJECT) {
+			zend_object *object = Z_OBJ_P(EX(return_value));
+			zend_execute_data *ex = EX(prev_execute_data);
+			
+			while (ex && Z_OBJ(ex->This) == object) {
+				if (ex->func) {
+					if (ZEND_USER_CODE(ex->func->type)) {
+						if (ex->func->op_array.this_var != -1) {
+							zval *this_var = EX_VAR_2(ex, ex->func->op_array.this_var);
+							if (this_var != EX(return_value)) {
+								zval_ptr_dtor(this_var);
+								ZVAL_NULL(this_var);
+							}
+						}
+					}
+				}
+				Z_OBJ(ex->This) = NULL;
+				ZVAL_NULL(&ex->This);
+				ex = ex->prev_execute_data;
+			}
+		}
+*/
+		zval_ptr_dtor(EX(return_value));
+		Z_OBJ_P(EX(return_value)) = NULL;
+		ZVAL_NULL(EX(return_value));
+	}
 }
 /* }}} */
 

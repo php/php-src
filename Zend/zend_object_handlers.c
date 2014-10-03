@@ -921,7 +921,7 @@ static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC) /* {{
 
 ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	zend_internal_function *func = (zend_internal_function *)EG(current_execute_data)->func;
+	zend_internal_function *func = (zend_internal_function *)EX(func);
 	zval method_name, method_args;
 	zval method_result;
 	zend_class_entry *ce = Z_OBJCE_P(getThis());
@@ -1139,7 +1139,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 
 ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	zend_internal_function *func = (zend_internal_function *)EG(current_execute_data)->func;
+	zend_internal_function *func = (zend_internal_function *)EX(func);
 	zval method_name, method_args;
 	zval method_result;
 	zend_class_entry *ce = EG(scope);
@@ -1231,9 +1231,9 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 				zend_string_free(lc_function_name);
 			}
 			if (ce->__call &&
-			    Z_OBJ(EG(This)) &&
-			    Z_OBJ_HT(EG(This))->get_class_entry &&
-			    instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    Z_OBJ(EG(current_execute_data)->This) &&
+			    Z_OBJ_HT(EG(current_execute_data)->This)->get_class_entry &&
+			    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), ce TSRMLS_CC)) {
 				return zend_get_user_call_function(ce, function_name);
 			} else if (ce->__callstatic) {
 				return zend_get_user_callstatic_function(ce, function_name);

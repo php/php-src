@@ -123,9 +123,6 @@ static const zend_internal_function zend_pass_function = {
 #define DECODE_CTOR(ce) \
 	((zend_class_entry*)(((zend_uintptr_t)(ce)) & ~(CTOR_CALL_BIT|CTOR_USED_BIT)))
 
-#undef EX
-#define EX(element) execute_data->element
-
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data, uint32_t var)
 {
 	return EX_VAR(var);
@@ -426,22 +423,22 @@ static inline zval *_get_zval_ptr_ptr(int op_type, const znode_op *node, const z
 	}
 }
 
-static zend_always_inline zval *_get_obj_zval_ptr_unused(TSRMLS_D)
+static zend_always_inline zval *_get_obj_zval_ptr_unused(zend_execute_data *execute_data TSRMLS_DC)
 {
-	if (EXPECTED(Z_OBJ(EG(This)) != NULL)) {
-		return &EG(This);
+	if (EXPECTED(Z_OBJ(EX(This)) != NULL)) {
+		return &EX(This);
 	} else {
 		zend_error_noreturn(E_ERROR, "Using $this when not in object context");
 		return NULL;
 	}
 }
 
-static inline zval *_get_obj_zval_ptr(int op_type, znode_op *op, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
+static inline zval *_get_obj_zval_ptr(int op_type, znode_op *op, zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
 {
 	if (op_type == IS_UNUSED) {
-		if (EXPECTED(Z_OBJ(EG(This)) != NULL)) {
+		if (EXPECTED(Z_OBJ(EX(This)) != NULL)) {
 			should_free->var = NULL;
-			return &EG(This);
+			return &EX(This);
 		} else {
 			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
 		}
@@ -449,12 +446,12 @@ static inline zval *_get_obj_zval_ptr(int op_type, znode_op *op, const zend_exec
 	return get_zval_ptr(op_type, op, execute_data, should_free, type);
 }
 
-static inline zval *_get_obj_zval_ptr_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
+static inline zval *_get_obj_zval_ptr_ptr(int op_type, const znode_op *node, zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
 {
 	if (op_type == IS_UNUSED) {
-		if (EXPECTED(Z_OBJ(EG(This)) != NULL)) {
+		if (EXPECTED(Z_OBJ(EX(This)) != NULL)) {
 			should_free->var = NULL;
-			return &EG(This);
+			return &EX(This);
 		} else {
 			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
 		}
@@ -1367,7 +1364,7 @@ ZEND_API opcode_handler_t *zend_opcode_handlers;
 
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value TSRMLS_DC)
 {
-	execute_data->func->internal_function.handler(execute_data->num_args, return_value TSRMLS_CC);
+	execute_data->func->internal_function.handler(execute_data, return_value TSRMLS_CC);
 }
 
 void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC) /* {{{ */
@@ -1427,7 +1424,6 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 {
 	uint32_t first_extra_arg, num_args;
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
-	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
 
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
@@ -1479,9 +1475,9 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		} while (var != end);
 	}
 
-	if (op_array->this_var != -1 && EX(object)) {
-		ZVAL_OBJ(EX_VAR(op_array->this_var), EX(object));
-		GC_REFCOUNT(EX(object))++;
+	if (op_array->this_var != -1 && Z_OBJ(EX(This))) {
+		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
+		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
@@ -1496,7 +1492,6 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 static zend_always_inline void i_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
-	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
 
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
@@ -1520,7 +1515,6 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 static zend_always_inline void i_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
 {
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
-	ZEND_ASSERT(EX(object) == Z_OBJ(EG(This)));
 
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
@@ -1577,9 +1571,9 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 			} while (var != end);
 		}
 
-		if (op_array->this_var != -1 && EX(object)) {
-			ZVAL_OBJ(EX_VAR(op_array->this_var), EX(object));
-			GC_REFCOUNT(EX(object))++;
+		if (op_array->this_var != -1 && Z_OBJ(EX(This))) {
+			ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
+			GC_REFCOUNT(Z_OBJ(EX(This)))++;
 		}
 	}
 
@@ -1622,7 +1616,7 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 		num_args,
 		call->flags,
 		call->called_scope,
-		call->object,
+		Z_OBJ(call->This),
 		NULL TSRMLS_CC);
 	EX(num_args) = num_args;
 

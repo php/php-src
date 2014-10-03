@@ -83,7 +83,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 /* Method macros */
 
 #define METHOD_NOTSTATIC(ce)                                                                                \
-	if (!Z_OBJ(EG(This)) || !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {           \
+	if (!Z_OBJ(EX(This)) || !instanceof_function(Z_OBJCE(EX(This)), ce TSRMLS_CC)) {           \
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s() cannot be called statically", get_active_function_name(TSRMLS_C));        \
 		return;                                                                                             \
 	}                                                                                                       \

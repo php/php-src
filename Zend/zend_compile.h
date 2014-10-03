@@ -100,8 +100,6 @@ void zend_compile_var(znode *node, zend_ast *ast, uint32_t type TSRMLS_DC);
 void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC);
 void zend_const_expr_to_zval(zval *result, zend_ast *ast TSRMLS_DC);
 
-typedef struct _zend_execute_data zend_execute_data;
-
 #define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data TSRMLS_DC
 #define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data TSRMLS_CC
 
@@ -366,7 +364,7 @@ struct _zend_execute_data {
 	zend_uchar           flags;
 	zend_uchar           frame_kind;
 	zend_class_entry    *called_scope;
-	zend_object         *object;
+	zval                 This;
 	zend_execute_data   *prev_execute_data;
 	zval                *return_value;
 	zend_class_entry    *scope;            /* function scope (self)          */
@@ -385,7 +383,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_ARG(call, n) \
 	(((zval*)(call)) + ((n) + (ZEND_CALL_FRAME_SLOT - 1)))
 
-#define EX(element) execute_data.element
+#define EX(element) 			((execute_data)->element)
 
 #define EX_VAR_2(ex, n)			((zval*)(((char*)(ex)) + ((int)(n))))
 #define EX_VAR_NUM_2(ex, n)     (((zval*)(ex)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))

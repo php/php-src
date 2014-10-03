@@ -78,7 +78,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	int _old_soap_version = SOAP_GLOBAL(soap_version);\
 	SOAP_GLOBAL(use_soap_error_handler) = 1;\
 	SOAP_GLOBAL(error_code) = "Server";\
-	Z_OBJ(SOAP_GLOBAL(error_object)) = Z_OBJ(EG(This));
+	Z_OBJ(SOAP_GLOBAL(error_object)) = Z_OBJ(EX(This));
 
 #define SOAP_SERVER_END_CODE() \
 	SOAP_GLOBAL(use_soap_error_handler) = _old_handler;\
@@ -97,7 +97,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	int _bailout = 0;\
 	SOAP_GLOBAL(use_soap_error_handler) = 1;\
 	SOAP_GLOBAL(error_code) = "Client";\
-	Z_OBJ(SOAP_GLOBAL(error_object)) = Z_OBJ(EG(This));\
+	Z_OBJ(SOAP_GLOBAL(error_object)) = Z_OBJ(EX(This));\
 	zend_try {
 
 #define SOAP_CLIENT_END_CODE() \
@@ -946,7 +946,7 @@ PHP_METHOD(SoapFault, __toString)
 	fci.function_table = &Z_OBJCE_P(getThis())->function_table;
 	ZVAL_STRINGL(&fci.function_name, "gettraceasstring", sizeof("gettraceasstring")-1);
 	fci.symbol_table = NULL;
-	fci.object = Z_OBJ(EG(This));
+	fci.object = Z_OBJ(EX(This));
 	fci.retval = &trace;
 	fci.param_count = 0;
 	fci.params = NULL;
@@ -2621,7 +2621,8 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
   return ret;
 }
 
-static void do_soap_call(zval* this_ptr,
+static void do_soap_call(zend_execute_data *execute_data,
+                         zval* this_ptr,
                          char* function,
                          size_t function_len,
                          int arg_count,
@@ -2936,7 +2937,7 @@ PHP_METHOD(SoapClient, __call)
 	if (output_headers) {
 		array_init(output_headers);
 	}
-	do_soap_call(this_ptr, function, function_len, arg_count, real_args, return_value, location, soap_action, uri, soap_headers, output_headers TSRMLS_CC);
+	do_soap_call(execute_data, this_ptr, function, function_len, arg_count, real_args, return_value, location, soap_action, uri, soap_headers, output_headers TSRMLS_CC);
 	if (arg_count > 0) {
 		efree(real_args);
 	}

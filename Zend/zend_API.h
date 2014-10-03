@@ -343,12 +343,12 @@ ZEND_API zend_class_entry *zend_get_class_entry(const zend_object *object TSRMLS
 ZEND_API zend_string *zend_get_object_classname(const zend_object *object TSRMLS_DC);
 ZEND_API char *zend_get_type_by_const(int type);
 
-#define getThis() (Z_OBJ(EG(This)) ? &EG(This) : NULL)
+#define getThis()							(Z_OBJ(EX(This)) ? &EX(This) : NULL)
 
 #define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT()
 #define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)
-#define ARG_COUNT(dummy)	(param_count)
-#define ZEND_NUM_ARGS()		(param_count)
+#define ARG_COUNT(dummy)					EX(num_args)
+#define ZEND_NUM_ARGS()						EX(num_args)
 #define ZEND_WRONG_PARAM_COUNT()					{ zend_wrong_param_count(TSRMLS_C); return; }
 #define ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)		{ zend_wrong_param_count(TSRMLS_C); return ret; }
 
@@ -531,6 +531,8 @@ ZEND_API int zend_set_local_var_str(const char *name, int len, zval *value, int 
 ZEND_API zend_string *zend_find_alias_name(zend_class_entry *ce, zend_string *name);
 ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_function *f);
 
+ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data);
+
 #define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
 
 ZEND_API ZEND_FUNCTION(display_disabled_function);
@@ -639,26 +641,8 @@ END_EXTERN_C()
 } while (0)
 
 /* May be used in internal constructors to make them return NULL */
-#if 1 // support for directly called constructors only ???
-#define ZEND_CTOR_MAKE_NULL() do {										\
-		if (EG(current_execute_data)->return_value) {					\
-			zval_ptr_dtor(EG(current_execute_data)->return_value);		\
-			ZVAL_NULL(EG(current_execute_data)->return_value);			\
-		} \
-	} while (0)
-#else // attempt to support calls to parent::__construct() ???
-	  // see: ext/date/tests/bug67118.phpt
-#define ZEND_CTOR_MAKE_NULL() do {										\
-		if (EG(current_execute_data)->return_value) {					\
-			zval_ptr_dtor(EG(current_execute_data)->return_value);		\
-			ZVAL_NULL(EG(current_execute_data)->return_value);			\
-		} else if (EG(current_execute_data)->prev_execute_data &&		\
-			EG(current_execute_data)->prev_execute_data->object ==		\
-				EG(current_execute_data)->object) {						\
-			EG(current_execute_data)->prev_execute_data->object = NULL;	\
-		} \
-	} while (0)
-#endif
+#define ZEND_CTOR_MAKE_NULL() \
+	zend_ctor_make_null(execute_data)
 
 #define RETURN_ZVAL_FAST(z) { RETVAL_ZVAL_FAST(z); return; }
 
@@ -729,7 +713,7 @@ ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int chec
 		const int _flags = (flags); \
 		int _min_num_args = (min_num_args); \
 		int _max_num_args = (max_num_args); \
-		int _num_args = EG(current_execute_data)->num_args; \
+		int _num_args = EX(num_args); \
 		int _i; \
 		zval *_real_arg, *_arg = NULL; \
 		zend_expected_type _expected_type = IS_UNDEF; \
@@ -756,7 +740,7 @@ ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int chec
 				break; \
 			} \
 			_i = 0; \
-			_real_arg = ZEND_CALL_ARG(EG(current_execute_data), 0);
+			_real_arg = ZEND_CALL_ARG(execute_data, 0);
 
 #define ZEND_PARSE_PARAMETERS_START(min_num_args, max_num_args) \
 	ZEND_PARSE_PARAMETERS_START_EX(0, min_num_args, max_num_args)
