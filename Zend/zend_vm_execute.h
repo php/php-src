@@ -2908,8 +2908,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 
 	ZVAL_UNDEF(&tmp_inc_filename);
 	if (Z_TYPE_P(inc_filename) != IS_STRING) {
-		ZVAL_DUP(&tmp_inc_filename, inc_filename);
-		convert_to_string(&tmp_inc_filename);
+		ZVAL_STR(&tmp_inc_filename, zval_get_string(inc_filename));
 		inc_filename = &tmp_inc_filename;
 	}
 
@@ -9647,8 +9646,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 
 	ZVAL_UNDEF(&tmp_inc_filename);
 	if (Z_TYPE_P(inc_filename) != IS_STRING) {
-		ZVAL_DUP(&tmp_inc_filename, inc_filename);
-		convert_to_string(&tmp_inc_filename);
+		ZVAL_STR(&tmp_inc_filename, zval_get_string(inc_filename));
 		inc_filename = &tmp_inc_filename;
 	}
 
@@ -16236,8 +16234,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 
 	ZVAL_UNDEF(&tmp_inc_filename);
 	if (Z_TYPE_P(inc_filename) != IS_STRING) {
-		ZVAL_DUP(&tmp_inc_filename, inc_filename);
-		convert_to_string(&tmp_inc_filename);
+		ZVAL_STR(&tmp_inc_filename, zval_get_string(inc_filename));
 		inc_filename = &tmp_inc_filename;
 	}
 
@@ -33518,8 +33515,7 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 
 	ZVAL_UNDEF(&tmp_inc_filename);
 	if (Z_TYPE_P(inc_filename) != IS_STRING) {
-		ZVAL_DUP(&tmp_inc_filename, inc_filename);
-		convert_to_string(&tmp_inc_filename);
+		ZVAL_STR(&tmp_inc_filename, zval_get_string(inc_filename));
 		inc_filename = &tmp_inc_filename;
 	}
 
