@@ -76,7 +76,8 @@ function ok3(&$bar) {
 	$bar->run3();
 }
 
-$bar = &new bar();
+$foo = new bar();
+$bar =& $foo;
 ok1($bar);
 $bar->instance->finalize();
 print "done!\n";
@@ -91,7 +92,6 @@ $bar->instance->finalize();
 print "I'm alive!\n";
 ?>
 --EXPECTF--
-Deprecated: Assigning the return value of new by reference is deprecated in %s on line %d
 ok1
 bar::run1
 foo::method1
