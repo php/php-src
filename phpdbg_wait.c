@@ -312,9 +312,12 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 				if (Z_TYPE_PP(ini_entry) == IS_STRING) {
 					if (zend_hash_find(EG(ini_directives), Z_STRVAL(key), Z_STRLEN(key) + 1, (void **) &original_ini) == SUCCESS) {
 						if (!original_ini->on_modify || original_ini->on_modify(original_ini, Z_STRVAL_PP(ini_entry), Z_STRLEN_PP(ini_entry), original_ini->mh_arg1, original_ini->mh_arg2, original_ini->mh_arg3, ZEND_INI_STAGE_ACTIVATE TSRMLS_CC) == SUCCESS) {
+							if (original_ini->modified && original_ini->orig_value != original_ini->value) {
+								efree(original_ini->value);
+							}
 							original_ini->value = Z_STRVAL_PP(ini_entry);
 							original_ini->value_length = Z_STRLEN_PP(ini_entry);
-							continue; /* don't free the string */
+							Z_TYPE_PP(ini_entry) = IS_NULL; /* don't free the value */
 						}
 					}
 				}
