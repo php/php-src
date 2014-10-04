@@ -807,7 +807,7 @@ disconnect:
 				return NULL;
 			}
 
-#define USE_LIB_STAR (defined(HAVE_LIBREADLINE) && defined(HAVE_LIBEDIT))
+#define USE_LIB_STAR (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT))
 #if !USE_LIB_STAR
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 				if (!phpdbg_write("%s", phpdbg_get_prompt(TSRMLS_C))) {
