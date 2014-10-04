@@ -246,6 +246,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type TSRMLS_DC) {
 	fake.free_filename = 0;
 	fake.opened_path = NULL;
 	fake.filename = filename;
+	fake.opened_path = file->opened_path;
 
 	*(dataptr = emalloc(sizeof(phpdbg_file_source) + sizeof(uint) * data.len)) = data;
 	zend_hash_add(&PHPDBG_G(file_sources), filename, strlen(filename), &dataptr, sizeof(phpdbg_file_source *), NULL);
@@ -260,6 +261,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type TSRMLS_DC) {
 
 	ret = PHPDBG_G(compile_file)(&fake, type TSRMLS_CC);
 
+	fake.opened_path = NULL;
 	zend_file_handle_dtor(&fake TSRMLS_CC);
 
 	return ret;

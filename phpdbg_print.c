@@ -248,7 +248,7 @@ PHPDBG_PRINT(func) /* {{{ */
 			phpdbg_error("The function %s could not be found", func_name);
 		}
 	} phpdbg_catch_access {
-		phpdbg_error("Couldn't fetch function %.*s, invalid data source", func_name_len, func_name);
+		phpdbg_error("Couldn't fetch function %.*s, invalid data source", (int) func_name_len, func_name);
 	} phpdbg_end_try_access();
 
 	efree(lcname);

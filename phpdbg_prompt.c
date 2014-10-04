@@ -351,7 +351,9 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				PHPDBG_G(exec) = res;
 				PHPDBG_G(exec_len) = res_len;
-				
+
+				VCWD_CHDIR_FILE(res);
+
 				*SG(request_info).argv = PHPDBG_G(exec);
 				php_hash_environment(TSRMLS_C);
 
