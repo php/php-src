@@ -360,20 +360,26 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 PHPDBG_COMMAND(wait) /* {{{ */
 {
 	struct sockaddr_un local, remote;
-	int rlen, len, sr, sl = socket(AF_UNIX, SOCK_STREAM, 0);
+	int rlen, sr, sl;
 	unlink(PHPDBG_G(socket_path));
+	if (PHPDBG_G(socket_server_fd) == -1) {
+		int len;
+		PHPDBG_G(socket_server_fd) = sl = socket(AF_UNIX, SOCK_STREAM, 0);
 
-	local.sun_family = AF_UNIX;
-	strcpy(local.sun_path, PHPDBG_G(socket_path));
-	len = strlen(local.sun_path) + sizeof(local.sun_family);
-	if (bind(sl, (struct sockaddr *)&local, len) == -1) {
-		phpdbg_error("Unable to connect to UNIX domain socket at %s defined by phpdbg.path ini setting", PHPDBG_G(socket_path));
-		return FAILURE;
+		local.sun_family = AF_UNIX;
+		strcpy(local.sun_path, PHPDBG_G(socket_path));
+		len = strlen(local.sun_path) + sizeof(local.sun_family);
+		if (bind(sl, (struct sockaddr *)&local, len) == -1) {
+			phpdbg_error("Unable to connect to UNIX domain socket at %s defined by phpdbg.path ini setting", PHPDBG_G(socket_path));
+			return FAILURE;
+		}
+
+		chmod(PHPDBG_G(socket_path), 0666);
+
+		listen(sl, 2);
+	} else {
+		sl = PHPDBG_G(socket_server_fd);
 	}
-
-	chmod(PHPDBG_G(socket_path), 0666);
-
-	listen(sl, 2);
 
 	rlen = sizeof(remote);
 	sr = accept(sl, (struct sockaddr *) &remote, (socklen_t *) &rlen);
@@ -393,6 +399,11 @@ PHPDBG_COMMAND(wait) /* {{{ */
 	} while (recvd > 0);
 
 	phpdbg_webdata_decompress(data, *(int *) msglen TSRMLS_CC);
+
+	if (PHPDBG_G(socket_fd) != -1) {
+		close(PHPDBG_G(socket_fd));
+	}
+	PHPDBG_G(socket_fd) = sr;
 
 	efree(data);
 

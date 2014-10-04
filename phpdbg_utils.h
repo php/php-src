@@ -45,18 +45,18 @@ enum {
 };
 
 #ifdef ZTS
-PHPDBG_API int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
+PHPDBG_API int phpdbg_print(int severity TSRMLS_DC, int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
 #else
-PHPDBG_API int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPDBG_API int phpdbg_print(int severity TSRMLS_DC, int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 #endif
 
-PHPDBG_API int phpdbg_rlog(FILE *stream, const char *fmt, ...);
+PHPDBG_API int phpdbg_rlog(int fd, const char *fmt, ...);
 
-#define phpdbg_error(fmt, ...)              phpdbg_print(P_ERROR   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)
-#define phpdbg_notice(fmt, ...)             phpdbg_print(P_NOTICE  TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)
-#define phpdbg_writeln(fmt, ...)            phpdbg_print(P_WRITELN TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)
-#define phpdbg_write(fmt, ...)              phpdbg_print(P_WRITE   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)
-#define phpdbg_log(fmt, ...)                phpdbg_print(P_LOG     TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)
+#define phpdbg_error(fmt, ...)              phpdbg_print(P_ERROR   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
+#define phpdbg_notice(fmt, ...)             phpdbg_print(P_NOTICE  TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
+#define phpdbg_writeln(fmt, ...)            phpdbg_print(P_WRITELN TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
+#define phpdbg_write(fmt, ...)              phpdbg_print(P_WRITE   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
+#define phpdbg_log(fmt, ...)                phpdbg_print(P_LOG     TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, fmt, ##__VA_ARGS__)
 
 #define phpdbg_error_ex(out, fmt, ...)      phpdbg_print(P_ERROR   TSRMLS_CC, out, fmt, ##__VA_ARGS__)
 #define phpdbg_notice_ex(out, fmt, ...)     phpdbg_print(P_NOTICE  TSRMLS_CC, out, fmt, ##__VA_ARGS__)
@@ -65,7 +65,7 @@ PHPDBG_API int phpdbg_rlog(FILE *stream, const char *fmt, ...);
 #define phpdbg_log_ex(out, fmt, ...)        phpdbg_print(P_LOG     TSRMLS_CC, out, fmt, ##__VA_ARGS__)
 
 #if PHPDBG_DEBUG
-#	define phpdbg_debug(fmt, ...) phpdbg_print(P_LOG   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDERR], fmt, ##__VA_ARGS__)
+#	define phpdbg_debug(fmt, ...) phpdbg_print(P_LOG   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDERR].fd, fmt, ##__VA_ARGS__)
 #else
 #	define phpdbg_debug(fmt, ...)
 #endif
@@ -122,6 +122,8 @@ PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D); /* }}} */
 /* {{{ Console Width */
 PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D); /* }}} */
 
+PHPDBG_API void phpdbg_set_async_io(int fd);
+
 int phpdbg_rebuild_symtable(TSRMLS_D);
 
 #if PHP_VERSION_ID < 50500
@@ -143,5 +145,15 @@ static void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, Ha
 	}
 }
 #endif
+
+int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
+
+char *phpdbg_get_property_key(char *key);
+
+typedef int (*phpdbg_parse_var_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval **zv TSRMLS_DC);
+typedef int (*phpdbg_parse_var_with_arg_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval **zv, void *arg TSRMLS_DC);
+
+PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent TSRMLS_DC);
+PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, zend_bool silent, void *arg TSRMLS_DC);
 
 #endif /* PHPDBG_UTILS_H */

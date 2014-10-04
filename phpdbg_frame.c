@@ -56,15 +56,20 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 		return;
 	}
 
-	while (execute_data) {
-		if (i++ == frame) {
-			break;
-		}
+	phpdbg_try_access {
+		while (execute_data) {
+			if (i++ == frame) {
+				break;
+			}
 
-		do {
-			execute_data = execute_data->prev_execute_data;
-		} while (execute_data && execute_data->opline == NULL);
-	}
+			do {
+				execute_data = execute_data->prev_execute_data;
+			} while (execute_data && execute_data->opline == NULL);
+		}
+	} phpdbg_catch_access {
+		phpdbg_error("Couldn't switch frames, invalid data source");
+		return;
+	} phpdbg_end_try_access();
 
 	if (execute_data == NULL) {
 		phpdbg_error("No frame #%d", frame);
@@ -105,16 +110,12 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 	zval **funcname, **class, **type, **args, **argstmp;
 	char is_class;
 
-	zend_hash_find(Z_ARRVAL_PP(tmp), "function", sizeof("function"),
-		(void **)&funcname);
+	zend_hash_find(Z_ARRVAL_PP(tmp), "function", sizeof("function"), (void **) &funcname);
 
-	if ((is_class = zend_hash_find(Z_ARRVAL_PP(tmp),
-		"object", sizeof("object"), (void **)&class)) == FAILURE) {
-		is_class = zend_hash_find(Z_ARRVAL_PP(tmp), "class", sizeof("class"),
-			(void **)&class);
+	if ((is_class = zend_hash_find(Z_ARRVAL_PP(tmp), "object", sizeof("object"), (void **) &class)) == FAILURE) {
+		is_class = zend_hash_find(Z_ARRVAL_PP(tmp), "class", sizeof("class"), (void **)&class);
 	} else {
-		zend_get_object_classname(*class, (const char **)&Z_STRVAL_PP(class),
-			(zend_uint *)&Z_STRLEN_PP(class) TSRMLS_CC);
+		zend_get_object_classname(*class, (const char **) &Z_STRVAL_PP(class), (zend_uint *) &Z_STRLEN_PP(class) TSRMLS_CC);
 	}
 
 	if (is_class == SUCCESS) {
@@ -127,18 +128,22 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 		Z_STRVAL_PP(funcname)
 	);
 
-	if (zend_hash_find(Z_ARRVAL_PP(tmp), "args", sizeof("args"),
-		(void **)&args) == SUCCESS) {
+	if (zend_hash_find(Z_ARRVAL_PP(tmp), "args", sizeof("args"), (void **) &args) == SUCCESS) {
 		HashPosition iterator;
-		const zend_function *func = phpdbg_get_function(
-			Z_STRVAL_PP(funcname), is_class == FAILURE ? NULL : Z_STRVAL_PP(class) TSRMLS_CC);
-		const zend_arg_info *arginfo = func ? func->common.arg_info : NULL;
+		const zend_function *func;
+		const zend_arg_info *arginfo = NULL;
 		int j = 0, m = func ? func->common.num_args : 0;
 		zend_bool is_variadic = 0;
 
+		phpdbg_try_access {
+			/* assuming no autoloader call is necessary, class should have been loaded if it's in backtrace ... */
+			if ((func = phpdbg_get_function(Z_STRVAL_PP(funcname), is_class == FAILURE ? NULL : Z_STRVAL_PP(class) TSRMLS_CC))) {
+				arginfo = func->common.arg_info;
+			}
+		} phpdbg_end_try_access();
+
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(args), &iterator);
-		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(args),
-			(void **) &argstmp, &iterator) == SUCCESS) {
+		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(args), (void **) &argstmp, &iterator) == SUCCESS) {
 			if (j) {
 				phpdbg_write(", ");
 			}
@@ -174,8 +179,15 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 		phpdbg_error("Invalid backtrace size %d", limit);
 	}
 
-	zend_fetch_debug_backtrace(
-		&zbacktrace, 0, 0, limit TSRMLS_CC);
+	phpdbg_try_access {
+		zend_fetch_debug_backtrace(&zbacktrace, 0, 0, limit TSRMLS_CC);
+	} phpdbg_catch_access {
+		phpdbg_try_access {
+			zval_dtor(&zbacktrace);
+		} phpdbg_end_try_access();
+		phpdbg_error("Couldn't fetch backtrace, invalid data source");
+		return;
+	} phpdbg_end_try_access();
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
 	zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position);
@@ -184,8 +196,7 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 		zend_hash_find(Z_ARRVAL_PP(tmp), "line", sizeof("line"), (void **)&line);
 		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
 
-		if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace),
-			(void**)&tmp, &position) == FAILURE) {
+		if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == FAILURE) {
 			phpdbg_write("frame #%d: {main} at %s:%ld", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			break;
 		}

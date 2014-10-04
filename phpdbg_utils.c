@@ -224,10 +224,9 @@ PHPDBG_API char *phpdbg_trim(const char *str, size_t len, size_t *new_len) /* {{
 
 } /* }}} */
 
-PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ...) /* {{{ */
-{
+PHPDBG_API int phpdbg_print(int type TSRMLS_DC, int fd, const char *format, ...) { /* {{{ */
 	int rc = 0;
-	char *buffer = NULL;
+	char *buffer = NULL, *outbuf = NULL;
 	va_list args;
 
 	if (format != NULL && strlen(format) > 0L) {
@@ -240,36 +239,43 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 
 	switch (type) {
 		case P_ERROR:
+			if (!PHPDBG_G(last_was_newline)) {
+				write(fd, "\n", 1);
+				PHPDBG_G(last_was_newline) = 1;
+			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-				rc = fprintf(fp,
-						"\033[%sm[%s]\033[0m\n",
-						PHPDBG_G(colors)[PHPDBG_COLOR_ERROR]->code, buffer);
+				rc = spprintf(&outbuf, 0, "\033[%sm[%s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_ERROR]->code, buffer);
 			} else {
-				rc = fprintf(fp, "[%s]\n", buffer);
+				rc = spprintf(&outbuf, 0, "[%s]\n", buffer);
 			}
 		break;
 
 		case P_NOTICE:
+			if (!PHPDBG_G(last_was_newline)) {
+				write(fd, "\n", 1);
+				PHPDBG_G(last_was_newline) = 1;
+			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-				rc = fprintf(fp,
-						"\033[%sm[%s]\033[0m\n",
-						PHPDBG_G(colors)[PHPDBG_COLOR_NOTICE]->code, buffer);
+				rc = spprintf(&outbuf, 0, "\033[%sm[%s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_NOTICE]->code, buffer);
 			} else {
-				rc = fprintf(fp, "[%s]\n", buffer);
+				rc = spprintf(&outbuf, 0, "[%s]\n", buffer);
 			}
 		break;
 
 		case P_WRITELN: {
 			if (buffer) {
-				rc = fprintf(fp, "%s\n", buffer);
+				rc = spprintf(&outbuf, 0, "%s\n", buffer);
 			} else {
-				rc = fprintf(fp, "\n");
+				rc = 1;
+				outbuf = estrdup("\n");
 			}
+			PHPDBG_G(last_was_newline) = 1;
 		} break;
 
 		case P_WRITE:
 			if (buffer) {
-				rc = fprintf(fp, "%s", buffer);
+				rc = spprintf(&outbuf, 0, "%s", buffer);
+				PHPDBG_G(last_was_newline) = buffer[strlen(buffer) - 1] == '\n';
 			}
 		break;
 
@@ -278,12 +284,17 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 			if (buffer) {
 				struct timeval tp;
 				if (gettimeofday(&tp, NULL) == SUCCESS) {
-					rc = fprintf(fp, "[%ld %.8F]: %s\n", tp.tv_sec, tp.tv_usec / 1000000.00, buffer);
+					rc = spprintf(&outbuf, 0, "[%ld %.8F]: %s\n", tp.tv_sec, tp.tv_usec / 1000000.00, buffer);
 				} else {
 					rc = FAILURE;
 				}
 			}
 			break;
+	}
+
+	if (outbuf) {
+		rc = write(fd, outbuf, rc);
+		efree(outbuf);
 	}
 
 	if (buffer) {
@@ -293,7 +304,7 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, FILE *fp, const char *format, ..
 	return rc;
 } /* }}} */
 
-PHPDBG_API int phpdbg_rlog(FILE *fp, const char *fmt, ...) { /* {{{ */
+PHPDBG_API int phpdbg_rlog(int fd, const char *fmt, ...) { /* {{{ */
 	int rc = 0;
 
 	va_list args;
@@ -302,19 +313,21 @@ PHPDBG_API int phpdbg_rlog(FILE *fp, const char *fmt, ...) { /* {{{ */
 	va_start(args, fmt);
 	if (gettimeofday(&tp, NULL) == SUCCESS) {
 		char friendly[100];
-		char *format = NULL, *buffer = NULL;
+		char *format = NULL, *buffer = NULL, *outbuf = NULL;
 		const time_t tt = tp.tv_sec;
 
 		strftime(friendly, 100, "%a %b %d %T.%%04d %Y", localtime(&tt));
-		asprintf(
-			&buffer, friendly, tp.tv_usec/1000);
-		asprintf(
-			&format, "[%s]: %s\n", buffer, fmt);
-		rc = vfprintf(
-			fp, format, args);
+		spprintf(&buffer, 0,  friendly, tp.tv_usec/1000);
+		spprintf(&format, 0, "[%s]: %s\n", buffer, fmt);
+		rc = vspprintf(&outbuf, 0, format, args);
 
-		free(format);
-		free(buffer);
+		if (outbuf) {
+			rc = write(fd, outbuf, rc);
+			efree(outbuf);
+		}
+
+		efree(format);
+		efree(buffer);
 	}
 	va_end(args);
 
@@ -453,3 +466,157 @@ PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D) /* {{{ */
 #endif
 	return columns;
 } /* }}} */
+
+PHPDBG_API void phpdbg_set_async_io(int fd) {
+#ifndef _WIN32
+	int flags;
+	fcntl(STDIN_FILENO, F_SETOWN, getpid());
+	flags = fcntl(STDIN_FILENO, F_GETFL);
+	fcntl(STDIN_FILENO, F_SETFL, flags | FASYNC);
+#endif
+}
+
+int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC) {
+	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
+		char *lc_name, *lc_free;
+		int lc_length, ret = FAILURE;
+
+		if (name == NULL || !name_length) {
+			return FAILURE;
+		}
+
+		lc_free = lc_name = emalloc(name_length + 1);
+		zend_str_tolower_copy(lc_name, name, name_length);
+		lc_length = name_length + 1;
+
+		if (lc_name[0] == '\\') {
+			lc_name += 1;
+			lc_length -= 1;
+		}
+
+		phpdbg_try_access {
+			ret = zend_hash_find(EG(class_table), lc_name, lc_length, (void **) &ce);
+		} phpdbg_catch_access {
+			phpdbg_error("Could not fetch class %.*s, invalid data source", name_length, name);
+		} phpdbg_end_try_access();
+
+		efree(lc_free);
+		return ret;
+	} else {
+		return zend_lookup_class(name, name_length, ce TSRMLS_CC);
+	}
+}
+
+char *phpdbg_get_property_key(char *key) {
+	if (*key != 0) {
+		return key;
+	}
+	return strchr(key + 1, 0) + 1;
+}
+
+static int phpdbg_parse_variable_arg_wrapper(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval **zv, phpdbg_parse_var_func callback TSRMLS_DC) {
+	return callback(name, len, keyname, keylen, parent, zv TSRMLS_CC);
+}
+
+PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent TSRMLS_DC) {
+	return phpdbg_parse_variable_with_arg(input, len, parent, i, (phpdbg_parse_var_with_arg_func) phpdbg_parse_variable_arg_wrapper, silent, callback TSRMLS_CC);
+}
+
+PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, zend_bool silent, void *arg TSRMLS_DC) {
+	int ret = FAILURE;
+	zend_bool new_index = 1;
+	char *last_index;
+	size_t index_len = 0;
+	zval **zv;
+
+	if (len < 2 || *input != '$') {
+		goto error;
+	}
+
+	while (i++ < len) {
+		if (i == len) {
+			new_index = 1;
+		} else {
+			switch (input[i]) {
+				case '[':
+					new_index = 1;
+					break;
+				case ']':
+					break;
+				case '>':
+					if (last_index[index_len - 1] == '-') {
+						new_index = 1;
+						index_len--;
+					}
+					break;
+
+				default:
+					if (new_index) {
+						last_index = input + i;
+						new_index = 0;
+					}
+					if (input[i - 1] == ']') {
+						goto error;
+					}
+					index_len++;
+			}
+		}
+
+		if (new_index && index_len == 0) {
+			HashPosition position;
+			for (zend_hash_internal_pointer_reset_ex(parent, &position);
+			     zend_hash_get_current_data_ex(parent, (void **)&zv, &position) == SUCCESS;
+			     zend_hash_move_forward_ex(parent, &position)) {
+				if (i == len || (i == len - 1 && input[len - 1] == ']')) {
+					zval *key = emalloc(sizeof(zval));
+					size_t namelen;
+					char *name;
+					char *keyname = estrndup(last_index, index_len);
+					zend_hash_get_current_key_zval_ex(parent, key, &position);
+					convert_to_string(key);
+					name = emalloc(i + Z_STRLEN_P(key) + 2);
+					namelen = sprintf(name, "%.*s%s%s", (int)i, input, phpdbg_get_property_key(Z_STRVAL_P(key)), input[len - 1] == ']'?"]":"");
+					efree(key);
+
+					ret = callback(name, namelen, keyname, index_len, parent, zv, arg TSRMLS_CC) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+				} else if (Z_TYPE_PP(zv) == IS_OBJECT) {
+					phpdbg_parse_variable_with_arg(input, len, Z_OBJPROP_PP(zv), i, callback, silent, arg TSRMLS_CC);
+				} else if (Z_TYPE_PP(zv) == IS_ARRAY) {
+					phpdbg_parse_variable_with_arg(input, len, Z_ARRVAL_PP(zv), i, callback, silent, arg TSRMLS_CC);
+				} else {
+					/* Ignore silently */
+				}
+			}
+			return ret;
+		} else if (new_index) {
+			char last_chr = last_index[index_len];
+			last_index[index_len] = 0;
+			if (zend_symtable_find(parent, last_index, index_len + 1, (void **)&zv) == FAILURE) {
+				if (!silent) {
+					phpdbg_error("%.*s is undefined", (int)i, input);
+				}
+				return FAILURE;
+			}
+			last_index[index_len] = last_chr;
+			if (i == len) {
+				char *name = estrndup(input, len);
+				char *keyname = estrndup(last_index, index_len);
+
+				ret = callback(name, len, keyname, index_len, parent, zv, arg TSRMLS_CC) == SUCCESS || ret == SUCCESS?SUCCESS:FAILURE;
+			} else if (Z_TYPE_PP(zv) == IS_OBJECT) {
+				parent = Z_OBJPROP_PP(zv);
+			} else if (Z_TYPE_PP(zv) == IS_ARRAY) {
+				parent = Z_ARRVAL_PP(zv);
+			} else {
+				phpdbg_error("%.*s is nor an array nor an object", (int)i, input);
+				return FAILURE;
+			}
+			index_len = 0;
+		}
+	}
+
+	return ret;
+	error:
+		phpdbg_error("Malformed input");
+		return FAILURE;
+}

@@ -24,14 +24,14 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
 	zval array;
 	HashTable *ht;
 	/* I really need to change that to an array of zvals... */
-	zval zv1, *zvp1 = &zv1;
-	zval zv2, *zvp2 = &zv2;
-	zval zv3, *zvp3 = &zv3;
-	zval zv4, *zvp4 = &zv4;
-	zval zv5, *zvp5 = &zv5;
-	zval zv6, *zvp6 = &zv6;
-	zval zv7, *zvp7 = &zv7;
-	zval zv8, *zvp8 = &zv8;
+	zval zv1 = {{0}}, *zvp1 = &zv1;
+	zval zv2 = {{0}}, *zvp2 = &zv2;
+	zval zv3 = {{0}}, *zvp3 = &zv3;
+	zval zv4 = {{0}}, *zvp4 = &zv4;
+	zval zv5 = {{0}}, *zvp5 = &zv5;
+	zval zv6 = {{0}}, *zvp6 = &zv6;
+	zval zv7 = {{0}}, *zvp7 = &zv7;
+	zval zv8 = {{0}}, *zvp8 = &zv8;
 
 	array_init(&array);
 	ht = Z_ARRVAL(array);
@@ -62,16 +62,18 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
 		} else {
 			ZVAL_EMPTY_STRING(&zv2);
 		}
+		Z_SET_REFCOUNT(zv2, 2);
 		zend_hash_add(ht, "input", sizeof("input"), &zvp2, sizeof(zval *), NULL);
 	}
 
 	/* change sapi name */
 	{
 		if (sapi_module.name) {
-			ZVAL_STRING(&zv6, sapi_module.name, 1);
+			ZVAL_STRING(&zv6, sapi_module.name, 0);
 		} else {
 			Z_TYPE(zv6) = IS_NULL;
 		}
+		Z_SET_REFCOUNT(zv6, 2);
 		zend_hash_add(ht, "sapi_name", sizeof("sapi_name"), &zvp6, sizeof(zval *), NULL);
 	}
 
@@ -106,7 +108,7 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
 	}
 
 	/* switch cwd */
-	{
+	if (SG(options) & SAPI_OPTION_NO_CHDIR) {
 		char *ret = NULL;
 		char path[MAXPATHLEN];
 
@@ -117,6 +119,7 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
 #endif
 		if (ret) {
 			ZVAL_STRING(&zv5, path, 1);
+			Z_SET_REFCOUNT(zv5, 1);
 			zend_hash_add(ht, "cwd", sizeof("cwd"), &zvp5, sizeof(zval *), NULL);
 		}
 	}

@@ -162,7 +162,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 		}
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
-			phpdbg_log_ex(PHPDBG_G(oplog), "L%-5u %16p %-30s %s %s",
+			phpdbg_log_ex(fileno(PHPDBG_G(oplog)), "L%-5u %16p %-30s %s %s",
 				opline->lineno,
 				opline,
 				phpdbg_decode_opcode(opline->opcode),

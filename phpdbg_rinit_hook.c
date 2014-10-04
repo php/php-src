@@ -53,22 +53,35 @@ static PHP_RINIT_FUNCTION(phpdbg_webhelper) /* {{{ */
 	}
 
 #ifndef _WIN32
-	struct sockaddr_un sock;
-	int s = socket(AF_UNIX, SOCK_STREAM, 0);
-	int len = strlen(PHPDBG_WG(path)) + sizeof(sock.sun_family);
-	sock.sun_family = AF_UNIX;
-	strcpy(sock.sun_path, PHPDBG_WG(path));
+	{
+		struct sockaddr_un sock;
+		int s = socket(AF_UNIX, SOCK_STREAM, 0);
+		int len = strlen(PHPDBG_WG(path)) + sizeof(sock.sun_family);
+		char buf[(1 << 8) + 1];
+		int buflen;
+		sock.sun_family = AF_UNIX;
+		strcpy(sock.sun_path, PHPDBG_WG(path));
 
-	if (connect(s, (struct sockaddr *)&sock, len) == -1) {
-		zend_error(E_ERROR, "Unable to connect to UNIX domain socket at %s defined by phpdbg.path ini setting. Reason: %s", PHPDBG_WG(path), strerror(errno));
+		if (connect(s, (struct sockaddr *)&sock, len) == -1) {
+			zend_error(E_ERROR, "Unable to connect to UNIX domain socket at %s defined by phpdbg.path ini setting. Reason: %s", PHPDBG_WG(path), strerror(errno));
+		}
+
+		char *msg = NULL;
+		char msglen[5] = {0};
+		phpdbg_webdata_compress(&msg, (int *)msglen TSRMLS_CC);
+
+		send(s, msglen, 4, 0);
+		send(s, msg, *(int *) msglen, 0);
+
+		while ((buflen = recv(s, buf, sizeof(buf) - 1, 0)) > 0) {
+			php_write(buf, buflen TSRMLS_CC);
+		}
+
+		close(s);
+
+		php_output_flush_all(TSRMLS_C);
+		zend_bailout();
 	}
-
-	char *msg = NULL;
-	char msglen[5] = {0};
-	phpdbg_webdata_compress(&msg, (int *)msglen TSRMLS_CC);
-
-	send(s, msglen, 4, 0);
-	send(s, msg, *(int *) msglen, 0);
 #endif
 
 	return SUCCESS;

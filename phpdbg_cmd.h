@@ -86,6 +86,8 @@ struct _phpdbg_param {
 #define YYSTYPE phpdbg_param_t
 #endif
 
+#define PHPDBG_ASYNC_SAFE 1
+
 typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t* TSRMLS_DC);
 
 typedef struct _phpdbg_command_t phpdbg_command_t;
@@ -97,8 +99,9 @@ struct _phpdbg_command_t {
 	char alias;                         /* Alias */
 	phpdbg_command_handler_t handler;   /* Command handler */
 	const phpdbg_command_t *subs;       /* Sub Commands */
-	char *args;							/* Argument Spec */
-	const phpdbg_command_t *parent;		/* Parent Command */							
+	char *args;                         /* Argument Spec */
+	const phpdbg_command_t *parent;     /* Parent Command */
+	zend_bool flags;                    /* General flags */
 };
 /* }}} */
 
@@ -135,7 +138,7 @@ PHPDBG_API void phpdbg_destroy_input(char** TSRMLS_DC);
 PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param);
 PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top, char **why);
 PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack, char **why TSRMLS_DC);
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why TSRMLS_DC);
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why, zend_bool allow_async_unsafe TSRMLS_DC);
 PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack);
 
 /*
@@ -155,20 +158,20 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
  */
 #define PHPDBG_COMMAND_HANDLER(name) phpdbg_do_##name
 
-#define PHPDBG_COMMAND_D_EXP(name, tip, alias, handler, children, args, parent) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, parent}
+#define PHPDBG_COMMAND_D_EXP(name, tip, alias, handler, children, args, parent, flags) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, parent, flags}
 
-#define PHPDBG_COMMAND_D_EX(name, tip, alias, handler, children, args) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, NULL}
+#define PHPDBG_COMMAND_D_EX(name, tip, alias, handler, children, args, flags) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##handler, children, args, NULL, flags}
 
-#define PHPDBG_COMMAND_D(name, tip, alias, children, args) \
-	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, args, NULL}
+#define PHPDBG_COMMAND_D(name, tip, alias, children, args, flags) \
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, alias, phpdbg_do_##name, children, args, NULL, flags}
 
 #define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param TSRMLS_DC)
 
 #define PHPDBG_COMMAND_ARGS param TSRMLS_CC
 
-#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0', NULL}
+#define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, '\0', NULL, 0}
 
 /*
 * Default Switch Case
