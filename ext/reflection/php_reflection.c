@@ -5654,7 +5654,7 @@ static const zend_function_entry reflection_exception_functions[] = {
 	PHP_FE_END
 };
 
-ZEND_BEGIN_ARG_INF(arginfo_reflection__void, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_reflection__void, 0)
 ZEND_END_ARG_INFO()
 
 
