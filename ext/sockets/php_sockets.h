@@ -89,7 +89,7 @@ ZEND_BEGIN_MODULE_GLOBALS(sockets)
 ZEND_END_MODULE_GLOBALS(sockets)
 
 #ifdef ZTS
-#define SOCKETS_G(v) TSRMG(sockets_globals_id, zend_sockets_globals *, v)
+#define SOCKETS_G(v) ZEND_TSRMG(sockets_globals_id, zend_sockets_globals *, v)
 #else
 #define SOCKETS_G(v) (sockets_globals.v)
 #endif

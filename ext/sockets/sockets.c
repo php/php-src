@@ -370,6 +370,9 @@ zend_module_entry sockets_module_entry = {
 
 
 #ifdef COMPILE_DL_SOCKETS
+#ifdef ZTS
+	ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(sockets)
 #endif
 
@@ -600,6 +603,9 @@ char *sockets_strerror(int error TSRMLS_DC) /* {{{ */
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(sockets)
 {
+#if defined(COMPILE_DL_SOCKETS) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	sockets_globals->last_error = 0;
 	sockets_globals->strerror_buf = NULL;
 }
@@ -609,6 +615,9 @@ static PHP_GINIT_FUNCTION(sockets)
  */
 static PHP_MINIT_FUNCTION(sockets)
 {
+#if defined(COMPILE_DL_SOCKETS) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	le_socket = zend_register_list_destructors_ex(php_destroy_socket, NULL, le_socket_name, module_number);
 
 	REGISTER_LONG_CONSTANT("AF_UNIX",		AF_UNIX,		CONST_CS | CONST_PERSISTENT);
