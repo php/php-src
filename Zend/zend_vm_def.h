@@ -2139,11 +2139,48 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	object = GET_OP1_OBJ_ZVAL_PTR_DEREF(BP_VAR_R);
 
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+		uint32_t nesting = 1;
+
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+
+		zend_error(E_RECOVERABLE_ERROR, "Call to a member function %s() on %s",  Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+		FREE_OP2();
+		FREE_OP1_IF_VAR();
+
+		if (EG(exception) != NULL) {
+			HANDLE_EXCEPTION();
+		}
+
+		/* No exception raised: Skip over arguments until fcall opcode with correct
+		 * nesting level. Return NULL (except when return value unused) */
+		do {
+			opline++;
+			if (opline->opcode == ZEND_INIT_FCALL ||
+				opline->opcode == ZEND_INIT_FCALL_BY_NAME ||
+				opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME ||
+				opline->opcode == ZEND_INIT_METHOD_CALL ||
+				opline->opcode == ZEND_INIT_STATIC_METHOD_CALL ||
+				opline->opcode == ZEND_INIT_USER_CALL ||
+				opline->opcode == ZEND_NEW
+			) {
+				nesting++;
+			} else if (opline->opcode == ZEND_DO_FCALL) {
+				nesting--;
+			}
+		} while (nesting);
+
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+
+		/* We've skipped EXT_FCALL_BEGIND, so also skip the ending opcode */
+		if ((opline + 1)->opcode == ZEND_EXT_FCALL_END) {
+			opline++;
+		}
+		ZEND_VM_JMP(++opline);
 	}
 
 	obj = Z_OBJ_P(object);
