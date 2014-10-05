@@ -128,6 +128,8 @@ PHP X.Y UPGRADE NOTES
 - Core
   . Instead of being undefined and platform-dependant, NaN and Infinity will
     always be zero when casted to integer.
+  . Calling a method on a non-object no longer raises a fatal error; see
+    also: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object
 
 - Standard
   . call_user_method() and call_user_method_array() no longer exists.
