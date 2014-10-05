@@ -462,10 +462,13 @@ static inline zval *_get_obj_zval_ptr_ptr(int op_type, const znode_op *node, zen
 static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr TSRMLS_DC)
 {
 	if (EXPECTED(variable_ptr != value_ptr)) {
+		zend_reference *ref;
 		ZVAL_MAKE_REF(value_ptr);
 		Z_ADDREF_P(value_ptr);
+		ref = Z_REF_P(value_ptr);
+
 		zval_ptr_dtor(variable_ptr);
-		ZVAL_REF(variable_ptr, Z_REF_P(value_ptr));
+		ZVAL_REF(variable_ptr, ref);
 	} else {
 		ZVAL_MAKE_REF(variable_ptr);
 	}
