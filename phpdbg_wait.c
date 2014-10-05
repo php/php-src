@@ -35,12 +35,14 @@ static void phpdbg_rebuild_http_globals_array(int type, const char *name TSRMLS_
 	}
 }
 
-/*
-static int phpdbg_remove_rearm_autoglobals(zend_auto_global *auto_global TSRMLS_DC) {
-//	zend_hash_del(&EG(symbol_table), auto_global->name, auto_global->name_len + 1);
 
-	return 1;
-}*/
+static int phpdbg_dearm_autoglobals(zend_auto_global *auto_global TSRMLS_DC) {
+	if (auto_global->name_len != sizeof("GLOBALS") - 1 || memcmp(auto_global->name, "GLOBALS", sizeof("GLOBALS") - 1)) {
+		auto_global->armed = 0;
+	}
+
+	return ZEND_HASH_APPLY_KEEP;
+}
 
 typedef struct {
 	HashTable *ht[2];
@@ -139,12 +141,9 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 
 	/* Reapply symbol table */
 	if (zend_hash_find(ht, "GLOBALS", sizeof("GLOBALS"), (void **) &zvpp) == SUCCESS && Z_TYPE_PP(zvpp) == IS_ARRAY) {
-		zend_hash_clean(&EG(symbol_table));
-		EG(symbol_table) = *Z_ARRVAL_PP(zvpp);
-
 		{
 			zval **srv;
-			if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &srv) == SUCCESS && Z_TYPE_PP(srv) == IS_ARRAY) {
+			if (zend_hash_find(Z_ARRVAL_PP(zvpp), "_SERVER", sizeof("_SERVER"), (void **) &srv) == SUCCESS && Z_TYPE_PP(srv) == IS_ARRAY) {
 				zval **script;
 				if (zend_hash_find(Z_ARRVAL_PP(srv), "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME"), (void **) &script) == SUCCESS && Z_TYPE_PP(script) == IS_STRING) {
 					phpdbg_param_t param;
@@ -153,6 +152,12 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 				}
 			}
 		}
+
+		PG(auto_globals_jit) = 0;
+		zend_hash_apply(CG(auto_globals), (apply_func_t) phpdbg_dearm_autoglobals TSRMLS_CC);
+
+		zend_hash_clean(&EG(symbol_table));
+		EG(symbol_table) = *Z_ARRVAL_PP(zvpp);
 
 		/* Rebuild cookies, env vars etc. from GLOBALS (PG(http_globals)) */
 		phpdbg_rebuild_http_globals_array(TRACK_VARS_POST, "_POST" TSRMLS_CC);
@@ -350,12 +355,6 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 		efree(free_zv);
 	}
 
-	/* Remove and readd autoglobals */
-/*	php_hash_environment(TSRMLS_C);
-	zend_hash_apply(CG(auto_globals), (apply_func_t) phpdbg_remove_rearm_autoglobals TSRMLS_CC);
-	php_startup_auto_globals(TSRMLS_C);
-	zend_activate_auto_globals(TSRMLS_C);
-*/
 	/* Reapply raw input */
 	/* ??? */
 }
