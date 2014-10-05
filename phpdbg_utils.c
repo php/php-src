@@ -435,7 +435,7 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 					} else
 						precision = 0;
 
-					if (precision > FORMAT_CONV_MAX_PRECISION) {
+					if (precision > FORMAT_CONV_MAX_PRECISION && *fmt != 's' && *fmt != 'v' && *fmt != 'b') {
 						precision = FORMAT_CONV_MAX_PRECISION;
 					}
 				} else
@@ -705,10 +705,10 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 				case 'v':
 					s = va_arg(ap, char *);
 					if (s != NULL) {
-						s_len = strlen(s);
-
-						if (adjust_precision && precision < s_len) {
+						if (adjust_precision) {
 							s_len = precision;
+						} else {
+							s_len = strlen(s);
 						}
 
 						if (escape_xml) {
@@ -760,7 +760,7 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 							s_len = PHPDBG_G(err_buf).msglen;
 						}
 
-						if (adjust_precision && precision < s_len) {
+						if (adjust_precision && precision != s_len) {
 							s_len = precision;
 						}
 					} else {
