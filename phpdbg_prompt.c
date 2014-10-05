@@ -1325,10 +1325,18 @@ next:
 
 		/* stupid hack to make zend_do_fcall_common_helper return ZEND_VM_ENTER() instead of recursively calling zend_execute() and eventually segfaulting */
 		if ((execute_data->opline->opcode == ZEND_DO_FCALL_BY_NAME || execute_data->opline->opcode == ZEND_DO_FCALL) && execute_data->function_state.function->type == ZEND_USER_FUNCTION) {
+#if PHP_VERSION_ID < 50500
+			zend_execute = execute;
+#else
 			zend_execute_ex = execute_ex;
+#endif
 		}
 		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
+#if PHP_VERSION_ID < 50500
+		zend_execute = phpdbg_execute_ex;
+#else
 		zend_execute_ex = phpdbg_execute_ex;
+#endif
 
 		if (PHPDBG_G(vmret) > 0) {
 			switch (PHPDBG_G(vmret)) {
