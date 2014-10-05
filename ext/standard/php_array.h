@@ -130,7 +130,7 @@ ZEND_BEGIN_MODULE_GLOBALS(array)
 ZEND_END_MODULE_GLOBALS(array) 
 
 #ifdef ZTS
-#define ARRAYG(v) TSRMG(array_globals_id, zend_array_globals *, v)
+#define ARRAYG(v) ZEND_TSRMG(array_globals_id, zend_array_globals *, v)
 #else
 #define ARRAYG(v) (array_globals.v)
 #endif

@@ -35,7 +35,7 @@ PHP_FUNCTION(lcg_value);
 PHP_MINIT_FUNCTION(lcg);
 
 #ifdef ZTS
-#define LCG(v) TSRMG(lcg_globals_id, php_lcg_globals *, v)
+#define LCG(v) ZEND_TSRMG(lcg_globals_id, php_lcg_globals *, v)
 #else
 #define LCG(v) (lcg_globals.v)
 #endif

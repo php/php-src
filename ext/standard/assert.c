@@ -36,7 +36,7 @@ ZEND_END_MODULE_GLOBALS(assert)
 ZEND_DECLARE_MODULE_GLOBALS(assert)
 
 #ifdef ZTS
-#define ASSERTG(v) TSRMG(assert_globals_id, zend_assert_globals *, v)
+#define ASSERTG(v) ZEND_TSRMG(assert_globals_id, zend_assert_globals *, v)
 #else
 #define ASSERTG(v) (assert_globals.v)
 #endif

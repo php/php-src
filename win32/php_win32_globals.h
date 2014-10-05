@@ -26,7 +26,7 @@
 typedef struct _php_win32_core_globals php_win32_core_globals;
 
 #ifdef ZTS
-# define PW32G(v)		TSRMG(php_win32_core_globals_id, php_win32_core_globals*, v)
+# define PW32G(v)		ZEND_TSRMG(php_win32_core_globals_id, php_win32_core_globals*, v)
 extern PHPAPI int php_win32_core_globals_id;
 #else
 # define PW32G(v)		(the_php_win32_core_globals.v)

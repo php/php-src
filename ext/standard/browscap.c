@@ -46,7 +46,7 @@ ZEND_END_MODULE_GLOBALS(browscap)
 ZEND_DECLARE_MODULE_GLOBALS(browscap)
 
 #ifdef ZTS
-#define BROWSCAP_G(v)	TSRMG(browscap_globals_id, zend_browscap_globals *, v)
+#define BROWSCAP_G(v)	ZEND_TSRMG(browscap_globals_id, zend_browscap_globals *, v)
 #else
 #define BROWSCAP_G(v)	(browscap_globals.v)
 #endif

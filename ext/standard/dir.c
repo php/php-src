@@ -56,7 +56,7 @@ typedef struct {
 } php_dir_globals;
 
 #ifdef ZTS
-#define DIRG(v) TSRMG(dir_globals_id, php_dir_globals *, v)
+#define DIRG(v) ZEND_TSRMG(dir_globals_id, php_dir_globals *, v)
 int dir_globals_id;
 #else
 #define DIRG(v) (dir_globals.v)
