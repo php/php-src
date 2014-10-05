@@ -829,8 +829,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	call->num_args = fci->param_count;
 
 	EG(scope) = calling_scope;
-	if (!fci->object ||
-	    (func->common.fn_flags & ZEND_ACC_STATIC)) {
+	if (func->common.fn_flags & ZEND_ACC_STATIC) {
+		fci->object = NULL;
+	}
+	if (!fci->object) {
 		Z_OBJ(call->This) = NULL;
 		Z_TYPE_INFO(call->This) = IS_UNDEF;
 	} else {
@@ -908,7 +910,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 	}
 
-	if (fci->object && !(func->common.fn_flags & ZEND_ACC_STATIC)) {
+	if (fci->object) {
 		OBJ_RELEASE(fci->object);
 	}
 
