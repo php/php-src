@@ -116,7 +116,7 @@ command
  - invalidcommand: command input is totally invalid
  - (nostack: should not happen: is an internal error)
  - (emptystack: should not happen: is an internal error)
-p- command: passed command
+- command: passed command
 - subcommand: passed subcommand (present if the error is related to the subcommand)
 - expected: count of expected arguments
 - got: type of argument for type "wrongarg"
@@ -160,9 +160,9 @@ break / info break
 
 - id: the breakpoint id (if the leave command was executed, the id has the value "leave")
 - num: the nth opline of a function/method/file
-- success: has value "success": a brekpoint was successfully added
+- add: has value "success"/"fail": a brekpoint was successfully/not added
 - pending: the breakpoint is waiting for resolving (e.g. a file opline on a not yet loaded file)
-- deleted: has value "deleted": a breakpoint was successfully deleted
+- deleted: has value "success"/"fail": a breakpoint was successfully/not deleted
 - eval: the condition on conditional breakpoints
 - file
 - opline
@@ -382,12 +382,12 @@ exec
   - invalid: given context (attribute) is not matching a valid file or symlink
   - notfound: given context (attribute) does not exist
 
-run
----
+run / <stop> tag
+----------------
 
 - runs the script (set via exec command)
-- &lt;run type="end" />: script execution ended normally
-- (error) &lt;run type="bailout" /> the VM bailed out (usually because there was some error)
+- &lt;stop type="end" />: script execution ended normally
+- (error) &lt;stop type="bailout" /> the VM bailed out (usually because there was some error)
 - compile failures see under exec, errors, &lt;compile>
 
 step
