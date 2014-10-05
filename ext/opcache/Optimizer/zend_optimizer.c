@@ -244,7 +244,7 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 			case ZEND_FETCH_DIM_IS:
 			case ZEND_FETCH_DIM_FUNC_ARG:
 			case ZEND_FETCH_DIM_UNSET:
-			case ZEND_FETCH_DIM_TMP_VAR:
+			case ZEND_FETCH_LIST:
 check_numeric:
 				{
 					zend_ulong index;
