@@ -23,5 +23,6 @@ class mydt extends datetime
 new mydt("Funktionsansvarig rådgivning och juridik", "UTC");
 ?>
 --EXPECTF--
+
 Warning: DateTime::format(): The DateTime object has not been correctly initialized by its constructor in %s on line %d
 Bad date

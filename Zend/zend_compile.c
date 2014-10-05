@@ -513,15 +513,17 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 			}
 		} else {
 			while (opline>CG(active_op_array)->opcodes) {
-				if (opline->opcode == ZEND_FETCH_DIM_R
-				    && opline->op1_type == IS_VAR
-				    && opline->op1.var == op1->u.op.var) {
-					/* This should the end of a list() construct
-					 * Mark its result as unused
-					 */
-					opline->extended_value = ZEND_FETCH_STANDARD;
-					break;
-				} else if (opline->result_type==IS_VAR
+				if (opline->opcode == ZEND_FETCH_LIST &&
+				    opline->op1_type == IS_VAR &&
+				    opline->op1.var == op1->u.op.var) {
+					opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+					opline->opcode = ZEND_FREE;
+					SET_NODE(opline->op1, op1);
+					SET_UNUSED(opline->op2);
+					return;
+				}
+				if (opline->result_type==IS_VAR
 					&& opline->result.var == op1->u.op.var) {
 					if (opline->opcode == ZEND_NEW) {
 						opline->result_type |= EXT_TYPE_UNUSED;
@@ -2172,20 +2174,6 @@ void zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type TSRMLS
 }
 /* }}} */
 
-static inline zend_uchar get_list_fetch_opcode(zend_uchar op_type) /* {{{ */
-{
-	switch (op_type) {
-		case IS_VAR:
-		case IS_CV:
-			return ZEND_FETCH_DIM_R;
-		case IS_TMP_VAR:
-		case IS_CONST:
-			return ZEND_FETCH_DIM_TMP_VAR;
-		EMPTY_SWITCH_DEFAULT_CASE()
-	}
-}
-/* }}} */
-
 static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node TSRMLS_DC) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -2212,8 +2200,7 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 		}
 
 		opline = zend_emit_op(&fetch_result,
-			get_list_fetch_opcode(expr_node->op_type), expr_node, &dim_node TSRMLS_CC);
-		opline->extended_value |= ZEND_FETCH_ADD_LOCK;
+			ZEND_FETCH_LIST, expr_node, &dim_node TSRMLS_CC);
 
 		zend_emit_assign_znode(var_ast, &fetch_result TSRMLS_CC);
 	}
