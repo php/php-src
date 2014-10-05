@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "php_incomplete_class.h"
+#include "zend_operators.h"
 
 /* {{{ proto string gettype(mixed var)
    Returns the type of the variable */
@@ -422,6 +423,188 @@ PHP_FUNCTION(is_callable)
 	}
 
 	RETURN_BOOL(retval);
+}
+/* }}} */
+
+/* {{{ proto int toInt(mixed from [, int base]) 
+   Strictly convert the given value to an integer. */
+PHP_FUNCTION(toInt)
+{
+	zval *var;
+	zend_long base = 10;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &var, &base) == FAILURE) {
+		return;
+	}
+	
+	switch (Z_TYPE_P(var)) {
+		case IS_STRING:
+			{
+				zend_long lval;
+				char *endptr;
+				
+				errno = 0;
+				lval = ZEND_STRTOL(Z_STRVAL_P(var), &endptr, base);
+				
+				if (errno) {
+					return;
+				}
+				
+				/* strtol fails on trailing whitespace - check if trailing chars were whitespace */
+				while (endptr - Z_STRVAL_P(var) != Z_STRLEN_P(var)) {
+					if (*endptr == ' ' || *endptr == '\t' || *endptr == '\n' || *endptr == '\r' || *endptr == '\v' || *endptr == '\f') {
+						endptr++;
+					} else {
+						return;
+					}
+				}
+				
+				RETURN_LONG(lval);
+				
+				break;
+			}
+			
+		case IS_DOUBLE:
+			if (zend_isnan(Z_DVAL_P(var)) || !zend_finite(Z_DVAL_P(var))) {
+				return;
+			}
+			
+#			if SIZEOF_ZEND_LONG == 8
+				if (Z_DVAL_P(var) < ZEND_LONG_MIN || Z_DVAL_P(var) >= ZEND_LONG_MAX) {
+#			else
+				if (Z_DVAL_P(var) < ZEND_LONG_MIN || Z_DVAL_P(var) > ZEND_LONG_MAX) {
+#			endif
+				return;
+			}
+			
+			RETURN_LONG(zend_dval_to_lval(Z_DVAL_P(var)));
+			
+			break;
+			
+		case IS_LONG:
+			RETURN_LONG(Z_LVAL_P(var));
+			
+			break;
+
+		default:
+			break;
+	}
+}
+/* }}} */
+
+/* {{{ proto float toFloat(mixed from) 
+   Strictly convert the given value to a float. */
+PHP_FUNCTION(toFloat)
+{
+	zval *var;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
+		return;
+	}
+	
+	switch (Z_TYPE_P(var)) {
+		case IS_STRING:
+			{
+				double dval;
+				char *endptr;
+				
+				dval = zend_strtod(Z_STRVAL_P(var), &endptr);
+				
+				/* strtod fails on trailing whitespace - check if trailing chars were whitespace */
+				while (endptr - Z_STRVAL_P(var) != Z_STRLEN_P(var)) {
+					if (*endptr == ' ' || *endptr == '\t' || *endptr == '\n' || *endptr == '\r' || *endptr == '\v' || *endptr == '\f') {
+						endptr++;
+					} else {
+						return;
+					}
+				}
+				
+				RETURN_DOUBLE(dval);
+				
+				break;
+			}
+		
+		case IS_LONG:
+			RETURN_DOUBLE((double)Z_LVAL_P(var));
+
+			break;
+		
+		case IS_DOUBLE:
+			RETURN_DOUBLE(Z_DVAL_P(var));
+			
+			break;
+
+		default:
+			break;
+	}
+}
+/* }}} */
+
+/* {{{ proto string toString(mixed from)
+   Strictly convert the given value to a string. */
+PHP_FUNCTION(toString)
+{
+        zval *var;
+
+        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
+                return;
+        }
+
+	switch (Z_TYPE_P(var)) {
+		case IS_STRING:
+			Z_ADDREF_P(var);
+			RETURN_STR(Z_STR_P(var));
+
+			break;
+		
+		case IS_LONG:
+			RETURN_STR(zend_long_to_str(Z_LVAL_P(var)));
+
+			break;
+
+		case IS_DOUBLE:
+			{
+				char *str;
+				zend_string *zstr;
+				int len;
+
+				str = emalloc(MAX_LENGTH_OF_DOUBLE + EG(precision) + 1);
+				len = zend_sprintf(str, "%.*G", (int) EG(precision), Z_DVAL_P(var));
+				zstr = zend_string_init(str, len, 0);
+				RETVAL_STR(zstr);
+				efree(str);
+				return;
+			}
+			break;
+
+		case IS_OBJECT:
+			{
+				TSRMLS_FETCH();
+
+				ZVAL_UNDEF(return_value);
+				if (Z_OBJ_HT_P(var)->cast_object) {
+					if (Z_OBJ_HT_P(var)->cast_object(var, return_value, IS_STRING TSRMLS_CC) == SUCCESS) {
+						return;
+					}
+				} else if (Z_OBJ_HT_P(var)->get) {
+					zval *newop = Z_OBJ_HT_P(var)->get(var, return_value TSRMLS_CC);
+					if (Z_TYPE_P(newop) != IS_OBJECT) {
+						/* for safety - avoid loop */
+						ZVAL_COPY_VALUE(return_value, newop);
+						convert_to_string(return_value);
+
+						return;
+					}
+				}
+
+				RETVAL_NULL();
+				return;
+			}
+			break;
+
+		default:
+			break;
+	}
 }
 /* }}} */
 
