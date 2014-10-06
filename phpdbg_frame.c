@@ -155,7 +155,7 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 			if (j) {
 				phpdbg_out(", ");
 			}
-			phpdbg_xml("<arg");
+			phpdbg_xml("<arg %r");
 			if (m && j < m) {
 #if PHP_VERSION_ID >= 50600
 				is_variadic = arginfo[j].is_variadic;
@@ -194,7 +194,7 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 		phpdbg_error("backtrace", "type=\"minnum\"", "Invalid backtrace size %d", limit);
 	}
 
-	phpdbg_xml("<backtrace>");
+	phpdbg_xml("<backtrace %r>");
 
 	zend_fetch_debug_backtrace(
 		&zbacktrace, 0, 0, limit TSRMLS_CC);
