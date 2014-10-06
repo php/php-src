@@ -555,8 +555,7 @@ PHP_FUNCTION(to_string)
 
 	switch (Z_TYPE_P(var)) {
 		case IS_STRING:
-			Z_ADDREF_P(var);
-			RETURN_STR(Z_STR_P(var));
+			RETURN_STR(zend_string_copy(Z_STR_P(var)));
 
 			break;
 		
