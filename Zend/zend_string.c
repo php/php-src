@@ -80,7 +80,10 @@ void zend_interned_strings_dtor(TSRMLS_D)
 #ifndef ZTS
 	zend_hash_destroy(&CG(interned_strings));
 #else
-	zend_string_release(CG(empty_string));
+	if (NULL != CG(empty_string)) {
+		free(CG(empty_string));
+		CG(empty_string) = NULL;
+	}
 #endif
 }
 
