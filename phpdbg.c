@@ -44,6 +44,10 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
+PHP_INI_BEGIN()
+	STD_PHP_INI_ENTRY("phpdbg.path", "", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateString, socket_path, zend_phpdbg_globals, phpdbg_globals)
+PHP_INI_END()
+
 static zend_bool phpdbg_booted = 0;
 
 #if PHP_VERSION_ID >= 50500
@@ -72,6 +76,10 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->oplog = NULL;
 	memset(pg->io, 0, sizeof(pg->io));
 	pg->frame.num = 0;
+	pg->sapi_name_ptr = NULL;
+	pg->socket_fd = -1;
+	pg->socket_server_fd = -1;
+
 	pg->input_buflen = 0;
 	pg->sigsafe_mem.mem = NULL;
 	pg->sigsegv_bailout = NULL;
@@ -80,6 +88,8 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 {
 	ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
+	REGISTER_INI_ENTRIES();
+
 #if PHP_VERSION_ID >= 50500
 	zend_execute_old = zend_execute_ex;
 	zend_execute_ex = phpdbg_execute_ex;
@@ -89,7 +99,7 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
 #endif
 
 	REGISTER_STRINGL_CONSTANT("PHPDBG_VERSION", PHPDBG_VERSION, sizeof(PHPDBG_VERSION)-1, CONST_CS|CONST_PERSISTENT);
-	
+
 	REGISTER_LONG_CONSTANT("PHPDBG_FILE",   FILE_PARAM, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_METHOD", METHOD_PARAM, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHPDBG_LINENO", NUMERIC_PARAM, CONST_CS|CONST_PERSISTENT);
@@ -520,6 +530,9 @@ static void php_sapi_phpdbg_register_vars(zval *track_vars_array TSRMLS_DC) /* {
 
 static inline int php_sapi_phpdbg_ub_write(const char *message, unsigned int length TSRMLS_DC) /* {{{ */
 {
+	if (PHPDBG_G(socket_fd) != -1 && !(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
+		send(PHPDBG_G(socket_fd), message, length, 0);
+	}
 	return phpdbg_write("%s", message);
 } /* }}} */
 
@@ -1285,6 +1298,8 @@ phpdbg_main:
 		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
 #endif
 
+		PHPDBG_G(sapi_name_ptr) = sapi_name;
+
 		if (php_request_startup(TSRMLS_C) == SUCCESS) {
 			int i;
 		
@@ -1522,10 +1537,10 @@ phpdbg_out:
 	}
 #endif
 
-	if (sapi_name) {
-		free(sapi_name);
+	if (PHPDBG_G(sapi_name_ptr)) {
+		free(PHPDBG_G(sapi_name_ptr));
 	}
-	
+
 #ifdef _WIN32
 	free(bp_tmp_file);
 #else

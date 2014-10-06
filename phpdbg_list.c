@@ -244,7 +244,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type TSRMLS_DC) {
 	fake.handle.stream.mmap.buf = data.buf;
 	fake.handle.stream.mmap.len = data.len;
 	fake.free_filename = 0;
-	fake.opened_path = NULL;
+	fake.opened_path = file->opened_path;
 	fake.filename = filename;
 	fake.opened_path = file->opened_path;
 

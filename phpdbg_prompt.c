@@ -23,6 +23,7 @@
 #include "zend.h"
 #include "zend_compile.h"
 #include "phpdbg.h"
+
 #include "phpdbg_help.h"
 #include "phpdbg_print.h"
 #include "phpdbg_info.h"
@@ -37,6 +38,23 @@
 #include "phpdbg_frame.h"
 #include "phpdbg_lexer.h"
 #include "phpdbg_parser.h"
+#include "phpdbg_wait.h"
+
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+
+#ifdef HAVE_LIBDL
+#ifdef PHP_WIN32
+#include "win32/param.h"
+#include "win32/winutil.h"
+#define GET_DL_ERROR()  php_win_err()
+#elif defined(NETWARE)
+#include <sys/param.h>
+#define GET_DL_ERROR()  dlerror()
+#else
+#include <sys/param.h>
+#define GET_DL_ERROR()  DL_ERROR()
+#endif
+#endif
 
 /* {{{ command declarations */
 const phpdbg_command_t phpdbg_prompt_commands[] = {
@@ -63,11 +81,10 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(export,  "export breaks to a .phpdbginit script",    '>', NULL, "s", PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(sh,   	  "shell a command",                           0 , NULL, "i", 0),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_COMMAND_D(wait,    "wait for other process",                   'W', NULL, 0, 0),
 	PHPDBG_COMMAND_D(watch,   "set watchpoint",                           'w', phpdbg_watch_commands, "|ss", 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
-
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ */
 {
@@ -655,6 +672,11 @@ PHPDBG_COMMAND(run) /* {{{ */
 			}
 		} zend_end_try();
 
+		if (PHPDBG_G(socket_fd) != -1) {
+			close(PHPDBG_G(socket_fd));
+			PHPDBG_G(socket_fd) = -1;
+		}
+
 		if (restore) {
 			if (EG(exception)) {
 				phpdbg_handle_exception(TSRMLS_C);
@@ -861,6 +883,190 @@ PHPDBG_COMMAND(sh) /* {{{ */
 			"Failed to execute %s", param->str);
 	}
 	
+	return SUCCESS;
+} /* }}} */
+
+static int add_extension_info(zend_module_entry *module TSRMLS_DC) {
+	phpdbg_write("%s\n", module->name);
+	return 0;
+}
+
+static int add_zendext_info(zend_extension *ext TSRMLS_DC) {
+	phpdbg_write("%s\n", ext->name);
+	return 0;
+}
+
+PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, char **str TSRMLS_DC) {
+	DL_HANDLE handle;
+	char *extension_dir;
+
+	extension_dir = INI_STR("extension_dir");
+
+	if (strchr(*path, '/') != NULL || strchr(*path, DEFAULT_SLASH) != NULL) {
+		/* path is fine */
+	} else if (extension_dir && extension_dir[0]) {
+		char *libpath;
+		int extension_dir_len = strlen(extension_dir);
+		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
+			spprintf(&libpath, 0, "%s%s", extension_dir, *path); /* SAFE */
+		} else {
+			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, *path); /* SAFE */
+		}
+		efree(*path);
+		*path = libpath;
+	} else {
+		*str = estrdup("Not a full path given or extension_dir ini setting is not set");
+
+		return NULL;
+	}
+
+	handle = DL_LOAD(*path);
+
+	if (!handle) {
+#if PHP_WIN32
+		char *err = GET_DL_ERROR();
+		if (err && (*err != "")) {
+			*str = estrdup(err);
+			LocalFree(err);
+		} else {
+			*str = estrdup("Unknown reason");
+		}
+#else
+		*str = estrdup(GET_DL_ERROR());
+		GET_DL_ERROR(); /* free the buffer storing the error */
+#endif
+		return NULL;
+	}
+
+#if ZEND_EXTENSIONS_SUPPORT
+	do {
+		zend_extension *new_extension;
+		zend_extension_version_info *extension_version_info;
+
+		extension_version_info = (zend_extension_version_info *) DL_FETCH_SYMBOL(handle, "extension_version_info");
+		if (!extension_version_info) {
+			extension_version_info = (zend_extension_version_info *) DL_FETCH_SYMBOL(handle, "_extension_version_info");
+		}
+		new_extension = (zend_extension *) DL_FETCH_SYMBOL(handle, "zend_extension_entry");
+		if (!new_extension) {
+			new_extension = (zend_extension *) DL_FETCH_SYMBOL(handle, "_zend_extension_entry");
+		}
+		if (!extension_version_info || !new_extension) {
+			break;
+		}
+		if (extension_version_info->zend_extension_api_no != ZEND_EXTENSION_API_NO &&(!new_extension->api_no_check || new_extension->api_no_check(ZEND_EXTENSION_API_NO) != SUCCESS)) {
+			asprintf(str, "%s requires Zend Engine API version %d, which does not match the installed Zend Engine API version %d", new_extension->name, extension_version_info->zend_extension_api_no, ZEND_EXTENSION_API_NO);
+
+			goto quit;
+		} else if (strcmp(ZEND_EXTENSION_BUILD_ID, extension_version_info->build_id) && (!new_extension->build_id_check || new_extension->build_id_check(ZEND_EXTENSION_BUILD_ID) != SUCCESS)) {
+			asprintf(str, "%s was built with configuration %s, whereas running engine is %s", new_extension->name, extension_version_info->build_id, ZEND_EXTENSION_BUILD_ID);
+
+			goto quit;
+		}
+
+		*str = new_extension->name;
+
+		zend_register_extension(new_extension, handle);
+
+		if (new_extension->startup) {
+			if (new_extension->startup(new_extension) != SUCCESS) {
+				asprintf(str, "Unable to startup Zend extension %s", new_extension->name);
+
+				goto quit;
+			}
+			zend_append_version_info(new_extension);
+		}
+
+		return "Zend extension";
+	} while (0);
+#endif
+
+	do {
+		zend_module_entry *module_entry;
+		zend_module_entry *(*get_module)(void);
+
+		get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");
+		if (!get_module) {
+			get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "_get_module");
+		}
+
+		if (!get_module) {
+			break;
+		}
+
+		module_entry = get_module();
+
+		if (strcmp(ZEND_EXTENSION_BUILD_ID, module_entry->build_id)) {
+			asprintf(str, "%s was built with configuration %s, whereas running engine is %s", module_entry->name, module_entry->build_id, ZEND_EXTENSION_BUILD_ID);
+
+			goto quit;
+		}
+
+		module_entry->type = MODULE_PERSISTENT;
+		module_entry->module_number = zend_next_free_module();
+		module_entry->handle = handle;
+
+		if ((module_entry = zend_register_module_ex(module_entry TSRMLS_CC)) == NULL) {
+			asprintf(str, "Unable to register module %s", module_entry->name);
+
+			goto quit;
+		}
+
+		if (zend_startup_module_ex(module_entry TSRMLS_CC) == FAILURE) {
+			asprintf(str, "Unable to startup module %s", module_entry->name);
+
+			goto quit;
+		}
+
+		if (module_entry->request_startup_func) {
+			if (module_entry->request_startup_func(MODULE_PERSISTENT, module_entry->module_number TSRMLS_CC) == FAILURE) {
+				asprintf(str, "Unable to initialize module %s", module_entry->name);
+
+				goto quit;
+			}
+		}
+
+		return "module";
+	} while (0);
+
+	*str = estrdup("This shared object is nor a Zend extension nor a module");
+
+quit:
+	DL_UNLOAD(handle);
+	return NULL;
+}
+
+PHPDBG_COMMAND(dl) /* {{{ */
+{
+	const char *type;
+	char *name, *path;
+
+	if (!param || param->type == EMPTY_PARAM) {
+		phpdbg_notice("Zend extensions");
+		zend_llist_apply(&zend_extensions, (llist_apply_func_t) add_zendext_info TSRMLS_CC);
+		phpdbg_writeln(EMPTY);
+		phpdbg_notice("Modules");
+		zend_hash_apply(&module_registry, (apply_func_t) add_extension_info TSRMLS_CC);
+	} else switch (param->type) {
+		case STR_PARAM:
+#ifdef HAVE_LIBDL
+			path = estrndup(param->str, param->len);
+
+			if ((type = phpdbg_load_module_or_extension(&path, &name TSRMLS_CC)) == NULL) {
+				phpdbg_error("Could not load %s, not found or invalid zend extension / module: %s", path, name);
+				efree(name);
+			} else {
+				phpdbg_notice("Successfully loaded the %s %s at path %s", type, name, path);
+			}
+			efree(path);
+#else
+			phpdbg_error("Cannot dynamically load %.*s - dynamic modules are not supported", (int) param->len, param->str);
+#endif
+			break;
+
+		phpdbg_default_switch_case();
+	}
+
 	return SUCCESS;
 } /* }}} */
 

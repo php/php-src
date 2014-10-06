@@ -72,6 +72,25 @@
 #   include <editline/readline.h>
 #endif
 
+/* {{{ remote console headers */
+#ifndef _WIN32
+#	include <sys/socket.h>
+#	include <sys/un.h>
+#	include <sys/select.h>
+#	include <sys/types.h>
+#endif /* }}} */
+
+/* {{{ strings */
+#define PHPDBG_NAME "phpdbg"
+#define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
+#define PHPDBG_URL "http://phpdbg.com"
+#define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
+#define PHPDBG_VERSION "0.4.0"
+#define PHPDBG_INIT_FILENAME ".phpdbginit"
+/* }}} */
+
+#if !defined(PHPDBG_WEBDATA_TRANSFER_H) && !defined(PHPDBG_WEBHELPER_H)
+
 #ifdef ZTS
 # define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
 #else
@@ -161,15 +180,6 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET|PHPDBG_IS_BP_ENABLED)
 #endif /* }}} */
 
-/* {{{ strings */
-#define PHPDBG_NAME "phpdbg"
-#define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
-#define PHPDBG_URL "http://phpdbg.com"
-#define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.4.0"
-#define PHPDBG_INIT_FILENAME ".phpdbginit"
-/* }}} */
-
 /* {{{ output descriptors */
 #define PHPDBG_STDIN 			0
 #define PHPDBG_STDOUT			1
@@ -241,6 +251,13 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	JMP_BUF *sigsegv_bailout;                    /* bailout address for accesibility probing */
 
 	zend_ulong flags;                            /* phpdbg flags */
+
+	char *socket_path;                           /* phpdbg.path ini setting */
+	char *sapi_name_ptr;                         /* store sapi name to free it if necessary to not leak memory */
+	int socket_fd;                               /* file descriptor to socket (wait command) (-1 if unused) */
+	int socket_server_fd;                        /* file descriptor to master socket (wait command) (-1 if unused) */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
+
+#endif
 
 #endif /* PHPDBG_H */

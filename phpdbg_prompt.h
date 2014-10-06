@@ -49,12 +49,14 @@ PHPDBG_COMMAND(clean);
 PHPDBG_COMMAND(clear);
 PHPDBG_COMMAND(help);
 PHPDBG_COMMAND(sh);
+PHPDBG_COMMAND(dl);
 PHPDBG_COMMAND(set);
 PHPDBG_COMMAND(source);
 PHPDBG_COMMAND(export);
 PHPDBG_COMMAND(register);
 PHPDBG_COMMAND(quit);
-PHPDBG_COMMAND(watch); /* }}} */
+PHPDBG_COMMAND(watch);
+PHPDBG_COMMAND(wait); /* }}} */
 
 /* {{{ prompt commands */
 extern const phpdbg_command_t phpdbg_prompt_commands[]; /* }}} */
