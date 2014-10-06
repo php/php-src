@@ -17,8 +17,11 @@ class test {
 
 $test1 = new test();
 ?>
---EXPECT--
+--EXPECTF--
+Warning: Attempt to use null as an array in %s on line %d
 test1
+
+Warning: Attempt to use null as an array in %s on line %d
 test2
 test1
 test2

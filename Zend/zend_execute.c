@@ -1227,6 +1227,7 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 			}
 		}
 	} else {
+		zend_error(E_WARNING, "Attempt to use %s as an array", zend_get_type_by_const(Z_TYPE_P(container)));
 		ZVAL_NULL(result);
 	}
 }

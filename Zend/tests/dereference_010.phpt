@@ -21,7 +21,10 @@ var_dump(b()[1]);
 
 ?>
 --EXPECTF--
+Warning: Attempt to use integer as an array in %s on line %d
 NULL
+
+Warning: Attempt to use integer as an array in %s on line %d
 NULL
 
 Fatal error: Cannot use object of type stdClass as array in %s on line %d
