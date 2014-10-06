@@ -23,4 +23,4 @@ switch (1) {
 
 ?>
 --EXPECTF--
-Fatal error: Switch statements may only contain one default clause in %s on line 13
+Fatal error: Switch statements may only contain one default clause in %s on line %d
