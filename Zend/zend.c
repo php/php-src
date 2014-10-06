@@ -445,10 +445,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 	compiler_globals->script_encoding_list = NULL;
 
 #ifdef ZTS
-	compiler_globals->empty_string = zend_string_alloc(sizeof("")-1, 1);
-	compiler_globals->empty_string->val[0] = '\000';
-	zend_string_hash_val(compiler_globals->empty_string);
-	compiler_globals->empty_string->gc.u.v.flags |= IS_STR_INTERNED;
+	zend_interned_empty_string_init(&compiler_globals->empty_string TSRMLS_CC);
 
 	memset(compiler_globals->one_char_string, 0, sizeof(compiler_globals->one_char_string));
 #endif
@@ -478,7 +475,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 	compiler_globals->last_static_member = 0;
 
 #ifdef ZTS
-	zend_string_release(compiler_globals->empty_string);
+	zend_interned_empty_string_free(&compiler_globals->empty_string TSRMLS_CC);
 #endif
 }
 /* }}} */
