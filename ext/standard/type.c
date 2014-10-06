@@ -559,8 +559,6 @@ PHP_FUNCTION(to_string)
 
 		case IS_OBJECT:
 			{
-				TSRMLS_FETCH();
-
 				ZVAL_UNDEF(return_value);
 				if (Z_OBJ_HT_P(var)->cast_object) {
 					if (Z_OBJ_HT_P(var)->cast_object(var, return_value, IS_STRING TSRMLS_CC) == SUCCESS) {
