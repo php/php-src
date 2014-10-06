@@ -4244,8 +4244,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 
 	ZVAL_UNDEF(&tmp);
 	if (OP1_TYPE != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -4861,8 +4860,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		zval tmp, *varname = GET_OP1_ZVAL_PTR(BP_VAR_IS);
 
 		if (OP1_TYPE != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 

@@ -4528,8 +4528,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_CONST != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -4592,8 +4591,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 		zval tmp, *varname = opline->op1.zv;
 
 		if (IS_CONST != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
@@ -6954,8 +6952,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HAND
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_CONST != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -7018,8 +7015,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 		zval tmp, *varname = opline->op1.zv;
 
 		if (IS_CONST != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
@@ -7832,8 +7828,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_H
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_CONST != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -7896,8 +7891,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 		zval tmp, *varname = opline->op1.zv;
 
 		if (IS_CONST != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
@@ -11252,8 +11246,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HAND
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_TMP_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -11316,8 +11309,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 		zval tmp, *varname = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 		if (IS_TMP_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
@@ -13589,8 +13581,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLE
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_TMP_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -13653,8 +13644,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 		zval tmp, *varname = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 		if (IS_TMP_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
@@ -14342,8 +14332,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HAN
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_TMP_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -14406,8 +14395,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 		zval tmp, *varname = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 		if (IS_TMP_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
@@ -19184,8 +19172,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -19366,8 +19353,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 		zval tmp, *varname = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 		if (IS_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
@@ -23575,8 +23561,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -23757,8 +23742,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 		zval tmp, *varname = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 		if (IS_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
@@ -25035,8 +25019,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAN
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -25099,8 +25082,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 		zval tmp, *varname = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 		if (IS_VAR != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
@@ -36359,8 +36341,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_CV != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -36541,8 +36522,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 		zval tmp, *varname = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 
 		if (IS_CV != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
@@ -40548,8 +40528,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_CV != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -40730,8 +40709,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 		zval tmp, *varname = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 
 		if (IS_CV != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
@@ -41881,8 +41859,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 	ZVAL_UNDEF(&tmp);
 	if (IS_CV != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-		ZVAL_DUP(&tmp, varname);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(varname));
 		varname = &tmp;
 	}
 
@@ -41945,8 +41922,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 		zval tmp, *varname = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 
 		if (IS_CV != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
-			ZVAL_DUP(&tmp, varname);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
 		}
 
