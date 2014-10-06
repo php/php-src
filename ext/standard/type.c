@@ -433,7 +433,7 @@ PHP_FUNCTION(to_int)
 	zval *var;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
-		RETURN_BOOL(0);
+		RETURN_FALSE;
 	}
 	
 	switch (Z_TYPE_P(var)) {
@@ -446,7 +446,7 @@ PHP_FUNCTION(to_int)
 				lval = ZEND_STRTOL(Z_STRVAL_P(var), &endptr, 10);
 				
 				if (errno) {
-					RETURN_BOOL(0);
+					RETURN_FALSE;
 				}
 				
 				/* strtol fails on trailing whitespace - check if trailing chars were whitespace */
@@ -454,7 +454,7 @@ PHP_FUNCTION(to_int)
 					if (*endptr == ' ' || *endptr == '\t' || *endptr == '\n' || *endptr == '\r' || *endptr == '\v' || *endptr == '\f') {
 						endptr++;
 					} else {
-						RETURN_BOOL(0);
+						RETURN_FALSE;
 					}
 				}
 				
@@ -465,7 +465,7 @@ PHP_FUNCTION(to_int)
 			
 		case IS_DOUBLE:
 			if (zend_isnan(Z_DVAL_P(var)) || !zend_finite(Z_DVAL_P(var))) {
-				RETURN_BOOL(0);
+				RETURN_FALSE;
 			}
 			
 #			if SIZEOF_ZEND_LONG == 8
@@ -473,7 +473,7 @@ PHP_FUNCTION(to_int)
 #			else
 				if (Z_DVAL_P(var) < ZEND_LONG_MIN || Z_DVAL_P(var) > ZEND_LONG_MAX) {
 #			endif
-				RETURN_BOOL(0);
+				RETURN_FALSE;
 			}
 			
 			RETURN_LONG(zend_dval_to_lval(Z_DVAL_P(var)));
@@ -486,7 +486,7 @@ PHP_FUNCTION(to_int)
 			break;
 
 		default:
-			RETURN_BOOL(0);
+			RETURN_FALSE;
 
 			break;
 	}
@@ -500,7 +500,7 @@ PHP_FUNCTION(to_float)
 	zval *var;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
-		RETURN_BOOL(0);
+		RETURN_FALSE;
 	}
 	
 	switch (Z_TYPE_P(var)) {
@@ -516,7 +516,7 @@ PHP_FUNCTION(to_float)
 					if (*endptr == ' ' || *endptr == '\t' || *endptr == '\n' || *endptr == '\r' || *endptr == '\v' || *endptr == '\f') {
 						endptr++;
 					} else {
-						RETURN_BOOL(0);
+						RETURN_FALSE;
 					}
 				}
 				
@@ -536,7 +536,7 @@ PHP_FUNCTION(to_float)
 			break;
 
 		default:
-			RETURN_BOOL(0);
+			RETURN_FALSE;
 
 			break;
 	}
@@ -550,7 +550,7 @@ PHP_FUNCTION(to_string)
         zval *var;
 
         if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
-                RETURN_BOOL(0);
+                RETURN_FALSE;
         }
 
 	switch (Z_TYPE_P(var)) {
@@ -600,12 +600,12 @@ PHP_FUNCTION(to_string)
 					}
 				}
 
-				RETURN_BOOL(0);
+				RETURN_FALSE;
 			}
 			break;
 
 		default:
-			RETURN_BOOL(0);
+			RETURN_FALSE;
 
 			break;
 	}
