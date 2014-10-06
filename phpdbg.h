@@ -208,6 +208,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 		char *xml;
 		int xmllen;
 	} err_buf;                                   /* error buffer */
+	zend_ulong req_id;                           /* "request id" to keep track of commands */
 
 	char *prompt[2];                             /* prompt */
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */

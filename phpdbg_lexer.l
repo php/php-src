@@ -56,7 +56,7 @@ T_SHELL     'sh'
 T_IF        'if'
 T_RUN       'run'
 T_RUN_SHORT "r"
-WS          [ \r\n\t]+
+WS          [ \t]+
 DIGITS      [-]?[0-9\.]+
 ID          [^ \r\n\t:#\000]+
 ADDR        [0][x][a-fA-F0-9]+
@@ -67,6 +67,13 @@ INPUT       [^\n\000]+
 
 <*>[\n\000] {
 	return 0;
+}
+
+<RAW, NORMAL>[-][r]{WS}?{DIGITS} {
+	char *text = yytext + 2;
+	while (*++text < '0');
+	yylval->num = atoi(text);
+	return T_REQ_ID;
 }
 
 <NORMAL>{T_IF}{WS} {

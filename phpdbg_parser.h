@@ -69,7 +69,8 @@ typedef void* yyscan_t;
      T_OPCODE = 272,
      T_ID = 273,
      T_INPUT = 274,
-     T_UNEXPECTED = 275
+     T_UNEXPECTED = 275,
+     T_REQ_ID = 276
    };
 #endif
 /* Tokens.  */
@@ -91,6 +92,7 @@ typedef void* yyscan_t;
 #define T_ID 273
 #define T_INPUT 274
 #define T_UNEXPECTED 275
+#define T_REQ_ID 276
 
 
 

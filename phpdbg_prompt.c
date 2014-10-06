@@ -992,6 +992,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
 
 			phpdbg_stack_free(&stack);
 			phpdbg_destroy_input(&input TSRMLS_CC);
+			PHPDBG_G(req_id) = 0;
 		} while ((input = phpdbg_read_input(NULL TSRMLS_CC)));
 	}
 
@@ -999,6 +1000,7 @@ out:
 	if (input) {
 		phpdbg_stack_free(&stack);
 		phpdbg_destroy_input(&input TSRMLS_CC);
+		PHPDBG_G(req_id) = 0;
 	}
 
 	if (EG(in_execution)) {

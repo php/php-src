@@ -1150,7 +1150,12 @@ static int phpdbg_process_print(FILE *fp, int type, const char *tag, const char 
 	}
 
 
-	if ((PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {
+	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
+		if (PHPDBG_G(req_id)) {
+			char *xmlbuf = NULL;
+			xmllen = asprintf(&xmlbuf, "req=\"%lu\" %.*s", PHPDBG_G(req_id), xmllen, xml);
+			xml = xmlbuf;
+		}
 		if (msgout) {
 			buf = php_escape_html_entities((unsigned char *) msgout, msgoutlen, (size_t *) &buflen, 0, ENT_COMPAT, PG(internal_encoding) && PG(internal_encoding)[0] ? PG(internal_encoding) : (SG(default_charset) ? SG(default_charset) : "UTF-8") TSRMLS_CC);
 			xmloutlen = fprintf(fp, "<%s severity=\"%s\" %.*s msgout=\"%.*s\" />", tag, severity, xmllen, xml, buflen, buf);
@@ -1161,6 +1166,10 @@ static int phpdbg_process_print(FILE *fp, int type, const char *tag, const char 
 		}
 	} else if (msgout) {
 		fprintf(fp, "%.*s", msgoutlen, msgout);
+	}
+
+	if (PHPDBG_G(req_id) && (PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {
+		free((char *) xml);
 	}
 
 	if (msgout) {

@@ -74,6 +74,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->io[PHPDBG_STDERR] = NULL;
 	pg->frame.num = 0;
 
+	pg->req_id = 0;
 	pg->err_buf.active = 0;
 	pg->err_buf.type = 0;
 } /* }}} */
