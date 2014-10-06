@@ -266,14 +266,10 @@ ZEND_METHOD(error_exception, __construct)
 		return; \
 	}
 
-static void _default_exception_get_entry(zval *object, char *name, int name_len, zval *return_value TSRMLS_DC) /* {{{ */
-{
-	zval *value;
-
-	value = zend_read_property(default_exception_ce, object, name, name_len, 0 TSRMLS_CC);
-	ZVAL_COPY(return_value, value);
-}
-/* }}} */
+#define GET_PROPERTY(object, name) \
+	zend_read_property(default_exception_ce, (object), name, sizeof(name) - 1, 0 TSRMLS_CC)
+#define GET_PROPERTY_SILENT(object, name) \
+	zend_read_property(default_exception_ce, (object), name, sizeof(name) - 1, 1 TSRMLS_CC)
 
 /* {{{ proto string Exception::getFile()
    Get the file in which the exception occurred */
@@ -281,7 +277,7 @@ ZEND_METHOD(exception, getFile)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "file", sizeof("file")-1, return_value TSRMLS_CC);
+	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "file"));
 }
 /* }}} */
 
@@ -291,7 +287,7 @@ ZEND_METHOD(exception, getLine)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "line", sizeof("line")-1, return_value TSRMLS_CC);
+	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "line"));
 }
 /* }}} */
 
@@ -301,7 +297,7 @@ ZEND_METHOD(exception, getMessage)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "message", sizeof("message")-1, return_value TSRMLS_CC);
+	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "message"));
 }
 /* }}} */
 
@@ -311,7 +307,7 @@ ZEND_METHOD(exception, getCode)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "code", sizeof("code")-1, return_value TSRMLS_CC);
+	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "code"));
 }
 /* }}} */
 
@@ -321,7 +317,7 @@ ZEND_METHOD(exception, getTrace)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "trace", sizeof("trace")-1, return_value TSRMLS_CC);
+	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "trace"));
 }
 /* }}} */
 
@@ -331,7 +327,7 @@ ZEND_METHOD(error_exception, getSeverity)
 {
 	DEFAULT_0_PARAMS;
 
-	_default_exception_get_entry(getThis(), "severity", sizeof("severity")-1, return_value TSRMLS_CC);
+	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "severity"));
 }
 /* }}} */
 
@@ -407,7 +403,7 @@ static void smart_str_append_escaped(smart_str *str, const char *s, size_t l) {
 
 static void _build_trace_args(zval *arg, smart_str *str TSRMLS_DC) /* {{{ */
 {
-	/* the trivial way would be to do:
+	/* the trivial way would be to do
 	 * convert_to_string_ex(arg);
 	 * append it and kill the now tmp arg.
 	 * but that could cause some E_NOTICE and also damn long lines.
@@ -556,12 +552,9 @@ ZEND_METHOD(exception, getTraceAsString)
    Return previous Exception or NULL. */
 ZEND_METHOD(exception, getPrevious)
 {
-	zval *previous;
-
 	DEFAULT_0_PARAMS;
 
-	previous = zend_read_property(default_exception_ce, getThis(), "previous", sizeof("previous")-1, 1 TSRMLS_CC);
-	RETURN_ZVAL(previous, 1, 0);
+	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(getThis(), "previous"));
 } /* }}} */
 
 size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) /* {{{ */
@@ -592,8 +585,8 @@ zend_string *zend_strpprintf(size_t max_len, const char *format, ...) /* {{{ */
    Obtain the string representation of the Exception object */
 ZEND_METHOD(exception, __toString)
 {
-	zval message, file, line, trace, *exception;
-	zend_string *str, *prev_str;
+	zval trace, *exception;
+	zend_string *str;
 	zend_fcall_info fci;
 	zval fname;
 	
@@ -605,14 +598,10 @@ ZEND_METHOD(exception, __toString)
 	ZVAL_STRINGL(&fname, "gettraceasstring", sizeof("gettraceasstring")-1);
 
 	while (exception && Z_TYPE_P(exception) == IS_OBJECT) {
-		prev_str = str;
-		_default_exception_get_entry(exception, "message", sizeof("message")-1, &message TSRMLS_CC);
-		_default_exception_get_entry(exception, "file", sizeof("file")-1, &file TSRMLS_CC);
-		_default_exception_get_entry(exception, "line", sizeof("line")-1, &line TSRMLS_CC);
-
-		convert_to_string_ex(&message);
-		convert_to_string_ex(&file);
-		convert_to_long_ex(&line);
+		zend_string *prev_str = str;
+		zend_string *message = zval_get_string(GET_PROPERTY(exception, "message"));
+		zend_string *file = zval_get_string(GET_PROPERTY(exception, "file"));
+		zend_long line = zval_get_long(GET_PROPERTY(exception, "line"));
 
 		fci.size = sizeof(fci);
 		fci.function_table = &Z_OBJCE_P(exception)->function_table;
@@ -631,26 +620,26 @@ ZEND_METHOD(exception, __toString)
 			ZVAL_UNDEF(&trace);
 		}
 
-		if (Z_STRLEN(message) > 0) {
-			str = zend_strpprintf(0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s%s%s",
-					Z_OBJCE_P(exception)->name->val, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line),
+		if (message->len > 0) {
+			str = zend_strpprintf(0, "exception '%s' with message '%s' in %s:" ZEND_LONG_FMT
+					"\nStack trace:\n%s%s%s",
+					Z_OBJCE_P(exception)->name->val, message->val, file->val, line,
 					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
 					prev_str->len ? "\n\nNext " : "", prev_str->val);
 		} else {
-			str = zend_strpprintf(0, "exception '%s' in %s:%ld\nStack trace:\n%s%s%s",
-					Z_OBJCE_P(exception)->name->val, Z_STRVAL(file), Z_LVAL(line),
+			str = zend_strpprintf(0, "exception '%s' in %s:" ZEND_LONG_FMT
+					"\nStack trace:\n%s%s%s",
+					Z_OBJCE_P(exception)->name->val, file->val, line,
 					(Z_TYPE(trace) == IS_STRING && Z_STRLEN(trace)) ? Z_STRVAL(trace) : "#0 {main}\n",
 					prev_str->len ? "\n\nNext " : "", prev_str->val);
 		}
+
 		zend_string_release(prev_str);
-		zval_dtor(&message);
-		zval_dtor(&file);
-		zval_dtor(&line);
-
-		exception = zend_read_property(default_exception_ce, exception, "previous", sizeof("previous")-1, 0 TSRMLS_CC);
-
+		zend_string_release(message);
+		zend_string_release(file);
 		zval_ptr_dtor(&trace);
 
+		exception = GET_PROPERTY(exception, "previous");
 	}
 	zval_dtor(&fname);
 
@@ -816,7 +805,9 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity TSRMLS_DC) /* {
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = Z_OBJCE(exception);
 	if (instanceof_function(ce_exception, default_exception_ce TSRMLS_CC)) {
-		zval tmp, *str, *file, *line;
+		zval tmp;
+		zend_string *str, *file = NULL;
+		zend_long line = 0;
 
 		EG(exception) = NULL;
 
@@ -836,28 +827,28 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity TSRMLS_DC) /* {
 			ZVAL_OBJ(&zv, EG(exception));
 			/* do the best we can to inform about the inner exception */
 			if (instanceof_function(ce_exception, default_exception_ce TSRMLS_CC)) {
-				file = zend_read_property(default_exception_ce, &zv, "file", sizeof("file")-1, 1 TSRMLS_CC);
-				line = zend_read_property(default_exception_ce, &zv, "line", sizeof("line")-1, 1 TSRMLS_CC);
-
-				convert_to_string_ex(file);
-				file = (Z_STRLEN_P(file) > 0) ? file : NULL;
-				line = (Z_TYPE_P(line) == IS_LONG) ? line : NULL;
-			} else {
-				file = NULL;
-				line = NULL;
+				file = zval_get_string(GET_PROPERTY_SILENT(&zv, "file"));
+				line = zval_get_long(GET_PROPERTY_SILENT(&zv, "line"));
 			}
-			zend_error_va(E_WARNING, file ? Z_STRVAL_P(file) : NULL, line ? Z_LVAL_P(line) : 0, "Uncaught %s in exception handling during call to %s::__tostring()", Z_OBJCE(zv)->name->val, ce_exception->name->val);
+
+			zend_error_va(E_WARNING, (file && file->len > 0) ? file->val : NULL, line,
+				"Uncaught %s in exception handling during call to %s::__tostring()",
+				Z_OBJCE(zv)->name->val, ce_exception->name->val);
+
+			if (file) {
+				zend_string_release(file);
+			}
 		}
 
-		str = zend_read_property(default_exception_ce, &exception, "string", sizeof("string")-1, 1 TSRMLS_CC);
-		file = zend_read_property(default_exception_ce, &exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
-		line = zend_read_property(default_exception_ce, &exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
+		str = zval_get_string(GET_PROPERTY_SILENT(&exception, "string"));
+		file = zval_get_string(GET_PROPERTY_SILENT(&exception, "file"));
+		line = zval_get_long(GET_PROPERTY_SILENT(&exception, "line"));
 
-		convert_to_string_ex(str);
-		convert_to_string_ex(file);
-		convert_to_long_ex(line);
+		zend_error_va(severity, (file && file->len > 0) ? file->val : NULL, line,
+			"Uncaught %s\n  thrown", str->val);
 
-		zend_error_va(severity, (Z_STRLEN_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
+		zend_string_release(str);
+		zend_string_release(file);
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ce_exception->name->val);
 	}
