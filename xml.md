@@ -16,7 +16,7 @@ severity
 msgout
 ------
 
-- text message output related to the xml data (e.g. &lt;intro severity="normal" help="help" msgout="To get help using phpdbg type &quot;help&quot; and press enter" />)
+- text message output related to the xml data (e.g. &lt;intro severity="normal" help="help" msgout="To get help using phpdbg type &amp;quot;help&amp;quot; and press enter" />)
 
 file
 ----
