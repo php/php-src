@@ -2552,7 +2552,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_to_int, 0, 0, 1)
 	ZEND_ARG_INFO(0, from)
-	ZEND_ARG_INFO(0, base)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_to_float, 0, 0, 1)
@@ -3058,7 +3057,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_callable,														arginfo_is_callable)
 
 	PHP_FE(to_int,															arginfo_to_int)
-	PHP_FE(to_float,															arginfo_to_float)
+	PHP_FE(to_float,														arginfo_to_float)
 	PHP_FE(to_string,														arginfo_to_string)
 
 	/* functions from file.c */

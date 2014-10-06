@@ -27,18 +27,6 @@ var_dump(to_int([]));
 
 echo PHP_EOL;
 
-// bases
-var_dump(to_int("010", 0)); // base detect octal
-var_dump(to_int("010", 10)); // not octal
-var_dump(to_int("010"));     // not octal
-var_dump(to_int("0x10", 0)); // base detect hex
-var_dump(to_int("0x10", 10)); // not hex
-var_dump(to_int("0x10"));    // not hex
-var_dump(to_int("123ayz", 36));
-var_dump(to_int("123AyZ", 36));
-
-echo PHP_EOL;
-
 // check truncation
 var_dump(to_int(1.5));
 var_dump(to_int("1.5"));
@@ -47,9 +35,7 @@ echo PHP_EOL;
 
 // reject leading, trailing chars
 var_dump(to_int("10abc"));
-var_dump(to_int("123abcxyz", 13));
 var_dump(to_int("abc10"));
-var_dump(to_int("abcxyz123", 13));
 
 echo PHP_EOL;
 
@@ -86,20 +72,9 @@ bool(false)
 bool(false)
 bool(false)
 
-int(8)
-int(10)
-int(10)
-int(16)
-bool(false)
-bool(false)
-int(63979595)
-int(63979595)
-
 int(1)
 bool(false)
 
-bool(false)
-bool(false)
 bool(false)
 bool(false)
 

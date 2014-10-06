@@ -426,14 +426,13 @@ PHP_FUNCTION(is_callable)
 }
 /* }}} */
 
-/* {{{ proto int to_int(mixed from [, int base]) 
+/* {{{ proto int to_int(mixed from)
    Strictly convert the given value to an integer. */
 PHP_FUNCTION(to_int)
 {
 	zval *var;
-	zend_long base = 10;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &var, &base) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
 		RETURN_BOOL(0);
 	}
 	
@@ -444,7 +443,7 @@ PHP_FUNCTION(to_int)
 				char *endptr;
 				
 				errno = 0;
-				lval = ZEND_STRTOL(Z_STRVAL_P(var), &endptr, base);
+				lval = ZEND_STRTOL(Z_STRVAL_P(var), &endptr, 10);
 				
 				if (errno) {
 					RETURN_BOOL(0);
