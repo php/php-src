@@ -544,6 +544,13 @@ PHP_FUNCTION(to_string)
 			RETURN_STR(zend_long_to_str(Z_LVAL_P(var)));
 
 		case IS_DOUBLE:
+			/* This code, despite being used in many other places, segfaults
+			 * Since I can't figure out why, it's commented out for now
+			 * This is a shame, as an extra malloc is always bad
+			 * TODO: Stop this segfaulting so we can use it instead
+			 */ 
+			/*RETVAL_STR(zend_strpprintf("%.*G", (int) EG(precision), Z_DVAL_P(var)));*/
+
 			{
 				char *str;
 				zend_string *zstr;
