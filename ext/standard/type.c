@@ -457,12 +457,10 @@ PHP_FUNCTION(to_int)
 						RETURN_FALSE;
 					}
 				}
-				
+
 				RETURN_LONG(lval);
-				
-				break;
 			}
-			
+
 		case IS_DOUBLE:
 			if (zend_isnan(Z_DVAL_P(var)) || !zend_finite(Z_DVAL_P(var))) {
 				RETURN_FALSE;
@@ -478,17 +476,11 @@ PHP_FUNCTION(to_int)
 			
 			RETURN_LONG(zend_dval_to_lval(Z_DVAL_P(var)));
 			
-			break;
-			
 		case IS_LONG:
 			RETURN_LONG(Z_LVAL_P(var));
-			
-			break;
 
 		default:
 			RETURN_FALSE;
-
-			break;
 	}
 }
 /* }}} */
@@ -519,26 +511,17 @@ PHP_FUNCTION(to_float)
 						RETURN_FALSE;
 					}
 				}
-				
 				RETURN_DOUBLE(dval);
-				
-				break;
-			}
-		
+			}	
+
 		case IS_LONG:
 			RETURN_DOUBLE((double)Z_LVAL_P(var));
 
-			break;
-		
 		case IS_DOUBLE:
 			RETURN_DOUBLE(Z_DVAL_P(var));
-			
-			break;
 
 		default:
 			RETURN_FALSE;
-
-			break;
 	}
 }
 /* }}} */
@@ -556,13 +539,9 @@ PHP_FUNCTION(to_string)
 	switch (Z_TYPE_P(var)) {
 		case IS_STRING:
 			RETURN_STR(zend_string_copy(Z_STR_P(var)));
-
-			break;
 		
 		case IS_LONG:
 			RETURN_STR(zend_long_to_str(Z_LVAL_P(var)));
-
-			break;
 
 		case IS_DOUBLE:
 			{
@@ -575,9 +554,8 @@ PHP_FUNCTION(to_string)
 				zstr = zend_string_init(str, len, 0);
 				RETVAL_STR(zstr);
 				efree(str);
-				return;
 			}
-			break;
+			return;
 
 		case IS_OBJECT:
 			{
@@ -598,15 +576,11 @@ PHP_FUNCTION(to_string)
 						return;
 					}
 				}
-
-				RETURN_FALSE;
 			}
-			break;
+			RETURN_FALSE;
 
 		default:
 			RETURN_FALSE;
-
-			break;
 	}
 }
 /* }}} */
