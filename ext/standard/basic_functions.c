@@ -2550,16 +2550,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_is_callable, 0, 0, 1)
 	ZEND_ARG_INFO(1, callable_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_toInt, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_to_int, 0, 0, 1)
 	ZEND_ARG_INFO(0, from)
 	ZEND_ARG_INFO(0, base)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_toFloat, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_to_float, 0, 0, 1)
 	ZEND_ARG_INFO(0, from)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_toString, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_to_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, from)
 ZEND_END_ARG_INFO()
 
@@ -3057,9 +3057,9 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_scalar,														arginfo_is_scalar)
 	PHP_FE(is_callable,														arginfo_is_callable)
 
-	PHP_FE(toInt,															arginfo_toInt)
-	PHP_FE(toFloat,															arginfo_toFloat)
-	PHP_FE(toString,														arginfo_toString)
+	PHP_FE(to_int,															arginfo_to_int)
+	PHP_FE(to_float,															arginfo_to_float)
+	PHP_FE(to_string,														arginfo_to_string)
 
 	/* functions from file.c */
 	PHP_FE(pclose,															arginfo_pclose)

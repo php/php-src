@@ -426,9 +426,9 @@ PHP_FUNCTION(is_callable)
 }
 /* }}} */
 
-/* {{{ proto int toInt(mixed from [, int base]) 
+/* {{{ proto int to_int(mixed from [, int base]) 
    Strictly convert the given value to an integer. */
-PHP_FUNCTION(toInt)
+PHP_FUNCTION(to_int)
 {
 	zval *var;
 	zend_long base = 10;
@@ -492,9 +492,9 @@ PHP_FUNCTION(toInt)
 }
 /* }}} */
 
-/* {{{ proto float toFloat(mixed from) 
+/* {{{ proto float to_float(mixed from) 
    Strictly convert the given value to a float. */
-PHP_FUNCTION(toFloat)
+PHP_FUNCTION(to_float)
 {
 	zval *var;
 
@@ -540,9 +540,9 @@ PHP_FUNCTION(toFloat)
 }
 /* }}} */
 
-/* {{{ proto string toString(mixed from)
+/* {{{ proto string to_string(mixed from)
    Strictly convert the given value to a string. */
-PHP_FUNCTION(toString)
+PHP_FUNCTION(to_string)
 {
         zval *var;
 
