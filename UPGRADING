@@ -22,6 +22,11 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 - Core
+  . Added null coalesce operator (??).
+    (RFC: https://wiki.php.net/rfc/isset_ternary)
+  . list() now always supports ArrayAccess and never supports strings.
+    Previously both were accepted in some situations and not in others.
+    (RFC: https://wiki.php.net/rfc/fix_list_behavior_inconsistency)
   . Bitwise shifts by negative numbers of bits are disallowed (throws E_WARNING
     and gives FALSE, like a division by zero).
   . Left bitwise shifts by a number of bits beyond the bit width of an integer
@@ -29,6 +34,8 @@ PHP X.Y UPGRADE NOTES
   . Right bitwise shifts by a number of bits beyond the bit width of an integer
     will always result in 0 or -1 (depending on sign), even on CPUs which wrap
     around.
+  . Removed ASP (<%) and script (<script language=php>) tags.
+    (RFC: https://wiki.php.net/rfc/remove_alternative_php_tags)
 
 - DBA
   . dba_delete() now returns false if the key was not found for the inifile
@@ -102,6 +109,10 @@ PHP X.Y UPGRADE NOTES
 11. Changes to INI File Handling
 ========================================
 
+- Core
+  . Removed asp_tags ini directive. Trying to enable it will result in a fatal
+    error.
+
 ========================================
 12. Windows Support
 ========================================
@@ -117,6 +128,8 @@ PHP X.Y UPGRADE NOTES
 - Core
   . Instead of being undefined and platform-dependant, NaN and Infinity will
     always be zero when casted to integer.
+  . Calling a method on a non-object no longer raises a fatal error; see
+    also: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object
 
 - Standard
   . call_user_method() and call_user_method_array() no longer exists.

@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Added Closure::apply() method. (Andrea)
   . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
   . Fixed #67959 (Segfault when calling phpversion('spl')). (Florian)
+  . Implemented the RFC `Catchable "Call to a member function bar() on a
+    non-object"` (Timm)
 
 - Reflection
   . Fixed inheritance chain of Reflector interface (Tjerk)

@@ -462,10 +462,13 @@ static inline zval *_get_obj_zval_ptr_ptr(int op_type, const znode_op *node, zen
 static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr TSRMLS_DC)
 {
 	if (EXPECTED(variable_ptr != value_ptr)) {
+		zend_reference *ref;
 		ZVAL_MAKE_REF(value_ptr);
 		Z_ADDREF_P(value_ptr);
+		ref = Z_REF_P(value_ptr);
+
 		zval_ptr_dtor(variable_ptr);
-		ZVAL_REF(variable_ptr, Z_REF_P(value_ptr));
+		ZVAL_REF(variable_ptr, ref);
 	} else {
 		ZVAL_MAKE_REF(variable_ptr);
 	}
@@ -1503,6 +1506,11 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 
 	zend_attach_symbol_table(execute_data);
 
+	if (op_array->this_var != -1 && Z_OBJ(EX(This))) {
+		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
+		GC_REFCOUNT(Z_OBJ(EX(This)))++;
+	}
+
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
 		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
 	}
@@ -1570,11 +1578,11 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 				var++;
 			} while (var != end);
 		}
+	}
 
-		if (op_array->this_var != -1 && Z_OBJ(EX(This))) {
-			ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
-			GC_REFCOUNT(Z_OBJ(EX(This)))++;
-		}
+	if (op_array->this_var != -1 && Z_OBJ(EX(This))) {
+		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
+		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
