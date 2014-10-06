@@ -74,18 +74,18 @@ float(-%s)
 float(-%s)
 float(%s)
 
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 
 float(1.5)
 float(1.5)
 
-NULL
-NULL
+bool(false)
+bool(false)
 
 float(100)
 float(78)

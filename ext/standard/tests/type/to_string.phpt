@@ -42,12 +42,12 @@ string(3) "INF"
 string(4) "-INF"
 string(3) "NAN"
 
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 
-NULL
-NULL
+bool(false)
+bool(false)
 string(6) "foobar"

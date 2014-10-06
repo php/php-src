@@ -79,37 +79,37 @@ int(%d)
 int(-%d)
 int(-%d)
 
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 
 int(8)
 int(10)
 int(10)
 int(16)
-NULL
-NULL
+bool(false)
+bool(false)
 int(63979595)
 int(63979595)
 
 int(1)
-NULL
+bool(false)
 
-NULL
-NULL
-NULL
-NULL
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 
 int(100)
 int(78)
 int(78)
 int(78)
 
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
