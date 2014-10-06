@@ -45,9 +45,9 @@ static void _str_dtor(zval *zv)
 
 void zend_interned_strings_init(TSRMLS_D)
 {
+#ifndef ZTS
 	zend_string *str;
 
-#ifndef ZTS
 	zend_hash_init(&CG(interned_strings), 1024, NULL, _str_dtor, 1);
 	
 	CG(interned_strings).nTableMask = CG(interned_strings).nTableSize - 1;
@@ -59,12 +59,6 @@ void zend_interned_strings_init(TSRMLS_D)
 	str = zend_string_alloc(sizeof("")-1, 1);
 	str->val[0] = '\000';
 	CG(empty_string) = zend_new_interned_string_int(str TSRMLS_CC);
-#else
-	str = zend_string_alloc(sizeof("")-1, 1);
-	str->val[0] = '\000';
-	zend_string_hash_val(str);
-	str->gc.u.v.flags |= IS_STR_INTERNED;
-	CG(empty_string) = str;
 #endif
 
 	/* one char strings (the actual interned strings are going to be created by ext/opcache) */
@@ -79,11 +73,6 @@ void zend_interned_strings_dtor(TSRMLS_D)
 {
 #ifndef ZTS
 	zend_hash_destroy(&CG(interned_strings));
-#else
-	if (NULL != CG(empty_string)) {
-		free(CG(empty_string));
-		CG(empty_string) = NULL;
-	}
 #endif
 }
 
