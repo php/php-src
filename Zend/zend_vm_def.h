@@ -4855,7 +4855,6 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 			isset = 0;
 		}
 	} else {
-		HashTable *target_symbol_table;
 		zend_free_op free_op1;
 		zval tmp, *varname = GET_OP1_ZVAL_PTR(BP_VAR_IS);
 
@@ -4886,8 +4885,9 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 				isset = 0;
 			}
 		} else {
-			target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
-			if ((value = zend_hash_find(target_symbol_table, Z_STR_P(varname))) == NULL) {
+			HashTable *target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
+			value = zend_hash_find_ind(target_symbol_table, Z_STR_P(varname));
+			if (!value || Z_ISUNDEF_P(value)) {
 				isset = 0;
 			}
 		}
