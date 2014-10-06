@@ -104,6 +104,7 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 {
 	zval **funcname, **class, **type, **args, **argstmp;
 	char is_class;
+	int has_args = FAILURE;
 
 	zend_hash_find(Z_ARRVAL_PP(tmp), "function", sizeof("function"),
 		(void **)&funcname);
@@ -121,27 +122,32 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 		zend_hash_find(Z_ARRVAL_PP(tmp), "type", sizeof("type"), (void **)&type);
 	}
 
+	has_args = zend_hash_find(Z_ARRVAL_PP(tmp), "args", sizeof("args"), (void **)&args) == SUCCESS;
+
 	phpdbg_xml(" symbol=\"%s%s%s\"",
 		is_class == FAILURE?"":Z_STRVAL_PP(class),
 		is_class == FAILURE?"":Z_STRVAL_PP(type),
 		Z_STRVAL_PP(funcname)
 	);
+	if (has_args) {
+		phpdbg_xml(">");
+	} else {
+		phpdbg_xml(" />");
+	}
+
 	phpdbg_out("%s%s%s(",
 		is_class == FAILURE?"":Z_STRVAL_PP(class),
 		is_class == FAILURE?"":Z_STRVAL_PP(type),
 		Z_STRVAL_PP(funcname)
 	);
 
-	if (zend_hash_find(Z_ARRVAL_PP(tmp), "args", sizeof("args"),
-		(void **)&args) == SUCCESS) {
+	if (has_args) {
 		HashPosition iterator;
 		const zend_function *func = phpdbg_get_function(
 			Z_STRVAL_PP(funcname), is_class == FAILURE ? NULL : Z_STRVAL_PP(class) TSRMLS_CC);
 		const zend_arg_info *arginfo = func ? func->common.arg_info : NULL;
 		int j = 0, m = func ? func->common.num_args : 0;
 		zend_bool is_variadic = 0;
-
-		phpdbg_xml(">");
 
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(args), &iterator);
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(args),
@@ -154,14 +160,13 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 #if PHP_VERSION_ID >= 50600
 				is_variadic = arginfo[j].is_variadic;
 #endif
-				phpdbg_xml(" variadic=\"%s\" name=\"%s\"", is_variadic ? "variadic" : "", arginfo[j].name);
+				phpdbg_xml(" variadic=\"%s\" name=\"%s\">", is_variadic ? "variadic" : "", arginfo[j].name);
+				phpdbg_out("%s=%s", arginfo[j].name, is_variadic ? "[": "");
 
-				phpdbg_out("%s=%s",
-					arginfo[j].name, is_variadic ? "[": "");
+			} else {
+				phpdbg_xml(">");
 			}
 			++j;
-
-			phpdbg_xml(">");
 
 			zend_print_flat_zval_r(*argstmp TSRMLS_CC);
 			zend_hash_move_forward_ex(Z_ARRVAL_PP(args), &iterator);
@@ -172,8 +177,6 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 			phpdbg_out("]");
 		}
 		phpdbg_xml("</frame>");
-	} else {
-		phpdbg_xml(" />");
 	}
 	phpdbg_out(")");
 }
@@ -210,13 +213,13 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 		}
 
 		if (user_defined == SUCCESS) {
-			phpdbg_xml("<frame id=\"%d\" file=\"%s\" line=\"%d\"", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			phpdbg_out("frame #%d: ", i++);
+			phpdbg_xml("<frame %r id=\"%d\" file=\"%s\" line=\"%d\"", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			phpdbg_dump_prototype(tmp TSRMLS_CC);
 			phpdbg_out(" at %s:%ld\n", Z_STRVAL_PP(file), Z_LVAL_PP(line));
 		} else {
-			phpdbg_xml("<frame id=\"%d\" internal=\"internal\"", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			phpdbg_out(" => ");
+			phpdbg_xml("<frame %r id=\"%d\" internal=\"internal\"", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			phpdbg_dump_prototype(tmp TSRMLS_CC);
 			phpdbg_out(" (internal function)\n");
 		}
@@ -225,5 +228,5 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 	phpdbg_out("\n");
 	zval_dtor(&zbacktrace);
 
-	phpdbg_xml("<backtrace>");
+	phpdbg_xml("</backtrace>");
 } /* }}} */

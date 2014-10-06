@@ -771,6 +771,12 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 					break;
 
 
+				case 'r':
+					s_len = asprintf(&s, "req=\"%lu\"", PHPDBG_G(req_id));
+					free_s = s;
+					break;
+
+
 				case 'f':
 				case 'F':
 				case 'e':
@@ -1279,7 +1285,7 @@ PHPDBG_API int phpdbg_xml_internal(FILE *fp TSRMLS_DC, const char *fmt, ...) {
 		int buflen;
 
 		va_start(args, fmt);
-		buflen = vspprintf(&buffer, 0, fmt, args);
+		buflen = phpdbg_xml_vasprintf(&buffer, fmt, 0, args TSRMLS_CC);
 		va_end(args);
 
 		if (PHPDBG_G(in_script_xml)) {
