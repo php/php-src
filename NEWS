@@ -7,6 +7,9 @@ PHP                                                                        NEWS
 - Mysqli:
   . Fixed bug #68114 (linker error on some OS X machines with fixed width
     decimal support) (Keyur Govande)
+- ODBC:
+  . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
+    a VARCHAR column) (Keyur Govande)
 
 
 ?? ??? 2014, PHP 5.5.18
