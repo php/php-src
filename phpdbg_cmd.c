@@ -636,14 +636,14 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 }
 
 /* {{{ */
-PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top TSRMLS_DC) {
+PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top TSRMLS_DC) {
 	const phpdbg_command_t *command = commands;
 	phpdbg_param_t *name = *top;
 	const phpdbg_command_t *matched[3] = {NULL, NULL, NULL};
 	ulong matches = 0L;
 
 	while (command && command->name && command->handler) {
-		if ((name->len == 1) || (command->name_len >= name->len)) {
+		if (name->len == 1 || command->name_len >= name->len) {
 			/* match single letter alias */
 			if (command->alias && (name->len == 1)) {
 				if (command->alias == (*name->str)) {
@@ -655,15 +655,15 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 				if (strncasecmp(command->name, name->str, name->len) == SUCCESS) {
 					if (matches < 3) {
 						/* only allow abbreviating commands that can be aliased */
-						if (((name->len != command->name_len) && command->alias) ||
-							(name->len == command->name_len)) {
+						if ((name->len != command->name_len && command->alias) || name->len == command->name_len) {
 							matched[matches] = command;
 							matches++;
 						}
 
 						/* exact match */
-						if (name->len == command->name_len)
+						if (name->len == command->name_len) {
 							break;
+						}
 					} else {
 						break;
 					}
@@ -677,11 +677,9 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 	switch (matches) {
 		case 0:
 			if (parent) {
-				phpdbg_error("command", "type=\"notfound\" command=\"%s\" subcommand=\"%s\"", "The command \"%s %s\" could not be found",
-					parent->name, name->str);
+				phpdbg_error("command", "type=\"notfound\" command=\"%s\" subcommand=\"%s\"", "The command \"%s %s\" could not be found", parent->name, name->str);
 			} else {
-				phpdbg_error("command", "type=\"notfound\" command=\"%s\"", "The command \"%s\" could not be found",
-					name->str);
+				phpdbg_error("command", "type=\"notfound\" command=\"%s\"", "The command \"%s\" could not be found", name->str);
 			}
 			return parent;
 
@@ -698,9 +696,9 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 
 			while (it < matches) {
 				if (!list) {
-					list = emalloc(matched[it]->name_len + 1 + ((it + 1) < matches ? sizeof(", ") - 1 : 0));
+					list = emalloc(matched[it]->name_len + 1 + (it + 1 < matches ? sizeof(", ") - 1 : 0));
 				} else {
-					list = erealloc(list, (pos + matched[it]->name_len) + 1 + ((it + 1) < matches ? sizeof(", ") - 1 : 0));
+					list = erealloc(list, (pos + matched[it]->name_len) + 1 + (it + 1 < matches ? sizeof(", ") - 1 : 0));
 				}
 				memcpy(&list[pos], matched[it]->name, matched[it]->name_len);
 				pos += matched[it]->name_len;
@@ -714,8 +712,7 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 			}
 
 			/* ", " separated matches */
-			phpdbg_error("command", "type=\"ambiguous\" command=\"%s\" matches=\"%lu\" matched=\"%s\"", "The command \"%s\" is ambigious, matching %lu commands (%s)", 
-				name->str, matches, list);
+			phpdbg_error("command", "type=\"ambiguous\" command=\"%s\" matches=\"%lu\" matched=\"%s\"", "The command \"%s\" is ambigious, matching %lu commands (%s)", name->str, matches, list);
 			efree(list);
 
 			return NULL;
@@ -732,7 +729,7 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 } /* }}} */
 
 /* {{{ */
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack TSRMLS_DC) {
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe TSRMLS_DC) {
 	phpdbg_param_t *top = NULL;
 	const phpdbg_command_t *handler = NULL;
 
@@ -746,7 +743,7 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack TSRMLS_DC) {
 		return FAILURE;
 	}
 
-	top = (phpdbg_param_t*) stack->next;
+	top = (phpdbg_param_t *) stack->next;
 
 	switch (top->type) {
 		case EVAL_PARAM:
@@ -755,11 +752,18 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack TSRMLS_DC) {
 			return PHPDBG_COMMAND_HANDLER(ev)(top TSRMLS_CC);
 
 		case RUN_PARAM:
+			if (!allow_async_unsafe) {
+				phpdbg_error("signalsegv", "command=\"run\"", "run command is disallowed during hard interrupt");
+			}
 			phpdbg_activate_err_buf(0 TSRMLS_CC);
 			phpdbg_free_err_buf(TSRMLS_C);
 			return PHPDBG_COMMAND_HANDLER(run)(top TSRMLS_CC);
 
 		case SHELL_PARAM:
+			if (!allow_async_unsafe) {
+				phpdbg_error("signalsegv", "command=\"sh\"", "sh command is disallowed during hard interrupt");
+				return FAILURE;
+			}
 			phpdbg_activate_err_buf(0 TSRMLS_CC);
 			phpdbg_free_err_buf(TSRMLS_C);
 			return PHPDBG_COMMAND_HANDLER(sh)(top TSRMLS_CC);
@@ -768,9 +772,14 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack TSRMLS_DC) {
 			handler = phpdbg_stack_resolve(phpdbg_prompt_commands, NULL, &top TSRMLS_CC);
 
 			if (handler) {
+				if (!allow_async_unsafe && !(handler->flags & PHPDBG_ASYNC_SAFE)) {
+					phpdbg_error("signalsegv", "command=\"%s\"", "%s command is disallowed during hard interrupt", handler->name);
+					return FAILURE;
+				}
+
+				phpdbg_activate_err_buf(0 TSRMLS_CC);
+				phpdbg_free_err_buf(TSRMLS_C);
 				if (phpdbg_stack_verify(handler, &top TSRMLS_CC) == SUCCESS) {
-					phpdbg_activate_err_buf(0 TSRMLS_CC);
-					phpdbg_free_err_buf(TSRMLS_C);
 					return handler->handler(top TSRMLS_CC);
 				}
 			}
@@ -787,15 +796,11 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack TSRMLS_DC) {
 PHPDBG_API char *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 {
 	char *cmd = NULL;
-#if !defined(HAVE_LIBREADLINE) && !defined(HAVE_LIBEDIT)
-	char buf[PHPDBG_MAX_CMD];
-#endif
 	char *buffer = NULL;
 
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) &&
-			(buffered == NULL)) {
-			fflush(PHPDBG_G(io)[PHPDBG_STDOUT]);
+		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && (buffered == NULL) && !phpdbg_active_sigsafe_mem(TSRMLS_C)) {
+			fflush(PHPDBG_G(io)[PHPDBG_STDOUT].ptr);
 		}
 
 		if (buffered == NULL) {
@@ -806,35 +811,56 @@ disconnect:
 				return NULL;
 			}
 
-#if !defined(HAVE_LIBREADLINE) && !defined(HAVE_LIBEDIT)
+#define USE_LIB_STAR (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT))
+#if !USE_LIB_STAR
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 				if (!phpdbg_out("%s", phpdbg_get_prompt(TSRMLS_C))) {
 					goto disconnect;
 				}
 				PHPDBG_G(last_was_newline) = 1;
 			}
+#endif
 
-			/* note: EOF is ignored */
+			/* note: EOF makes readline write prompt again in local console mode - and ignored if compiled without readline */
+			/* strongly assuming to be in blocking mode... */
+#if USE_LIB_STAR
 readline:
-			if (!fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
-				/* the user has gone away */
-				if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
-					goto disconnect;
-				} else goto readline;
-			}
-
-			cmd = buf;
-#else
-			/* note: EOF makes readline write prompt again in local console mode */
-readline:
-			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
+			if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE)
+#endif
+			{
 				char buf[PHPDBG_MAX_CMD];
-				if (fgets(buf, PHPDBG_MAX_CMD, PHPDBG_G(io)[PHPDBG_STDIN])) {
-					cmd = buf;
-				} else goto disconnect;
-			} else {
+				int bytes = 0, len = PHPDBG_G(input_buflen);
+				if (PHPDBG_G(input_buflen)) {
+					memcpy(buf, PHPDBG_G(input_buffer), len);
+				}
+
+				while ((bytes = read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len)) > 0) {
+					int i;
+					for (i = len; i < len + bytes; i++) {
+						if (buf[i] == '\n') {
+							PHPDBG_G(input_buflen) = len + bytes - 1 - i;
+							if (PHPDBG_G(input_buflen)) {
+								memcpy(PHPDBG_G(input_buffer), buf + i + 1, PHPDBG_G(input_buflen));
+							}
+							if (i != PHPDBG_MAX_CMD - 1) {
+								buf[i + 1] = 0;
+							}
+							cmd = buf;
+							goto end;
+						}
+					}
+					len += bytes;
+				}
+
+				if (bytes <= 0) {
+					goto disconnect;
+				}
+
+				cmd = buf;
+			}
+#if USE_LIB_STAR
+			else {
 				cmd = readline(phpdbg_get_prompt(TSRMLS_C));
-				PHPDBG_G(last_was_newline) = 1;
 			}
 
 			if (!cmd) {
@@ -845,13 +871,15 @@ readline:
 				add_history(cmd);
 			}
 #endif
-		} else cmd = buffered;
-
+		} else {
+			cmd = buffered;
+		}
+end:
+		PHPDBG_G(last_was_newline) = 1;
 		buffer = estrdup(cmd);
 
-#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
-		if (!buffered && cmd &&
-			!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
+#if USE_LIB_STAR
+		if (!buffered && cmd &&	!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
 			free(cmd);
 		}
 #endif
@@ -885,4 +913,3 @@ PHPDBG_API void phpdbg_destroy_input(char **input TSRMLS_DC) /*{{{ */
 {
 	efree(*input);
 } /* }}} */
-

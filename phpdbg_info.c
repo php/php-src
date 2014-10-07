@@ -27,19 +27,19 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-#define PHPDBG_INFO_COMMAND_D(f, h, a, m, l, s) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[14])
+#define PHPDBG_INFO_COMMAND_D(f, h, a, m, l, s, flags) \
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[14], flags)
 
 const phpdbg_command_t phpdbg_info_commands[] = {
-	PHPDBG_INFO_COMMAND_D(break,    "show breakpoints",              'b', info_break,   NULL, 0),
-	PHPDBG_INFO_COMMAND_D(files,    "show included files",           'F', info_files,   NULL, 0),
-	PHPDBG_INFO_COMMAND_D(classes,  "show loaded classes",           'c', info_classes, NULL, 0),
-	PHPDBG_INFO_COMMAND_D(funcs,    "show loaded classes",           'f', info_funcs,   NULL, 0),
-	PHPDBG_INFO_COMMAND_D(error,    "show last error",               'e', info_error,   NULL, 0),
-	PHPDBG_INFO_COMMAND_D(vars,     "show active variables",         'v', info_vars,    NULL, 0),
-	PHPDBG_INFO_COMMAND_D(globals,  "show superglobals",             'g', info_globals, NULL, 0),
-	PHPDBG_INFO_COMMAND_D(literal,  "show active literal constants", 'l', info_literal, NULL, 0),
-	PHPDBG_INFO_COMMAND_D(memory,   "show memory manager stats",     'm', info_memory,  NULL, 0),
+	PHPDBG_INFO_COMMAND_D(break,    "show breakpoints",              'b', info_break,   NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_INFO_COMMAND_D(files,    "show included files",           'F', info_files,   NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_INFO_COMMAND_D(classes,  "show loaded classes",           'c', info_classes, NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_INFO_COMMAND_D(funcs,    "show loaded classes",           'f', info_funcs,   NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_INFO_COMMAND_D(error,    "show last error",               'e', info_error,   NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_INFO_COMMAND_D(vars,     "show active variables",         'v', info_vars,    NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_INFO_COMMAND_D(globals,  "show superglobals",             'g', info_globals, NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_INFO_COMMAND_D(literal,  "show active literal constants", 'l', info_literal, NULL, 0, PHPDBG_ASYNC_SAFE),
+	PHPDBG_INFO_COMMAND_D(memory,   "show memory manager stats",     'm', info_memory,  NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_END_COMMAND
 };
 
@@ -63,15 +63,21 @@ PHPDBG_INFO(files) /* {{{ */
 	HashPosition pos;
 	char *fname;
 
-	phpdbg_notice("includedfilecount", "num=\"%d\"", "Included files: %d",
-		zend_hash_num_elements(&EG(included_files)));
+	phpdbg_try_access {
+		phpdbg_notice("includedfilecount", "num=\"%d\"", "Included files: %d", zend_hash_num_elements(&EG(included_files)));
+	} phpdbg_catch_access {
+		phpdbg_error("signalsegv", "", "Could not fetch included file count, invalid data source");
+	} phpdbg_end_try_access();
 
-	zend_hash_internal_pointer_reset_ex(&EG(included_files), &pos);
-	while (zend_hash_get_current_key_ex(&EG(included_files), &fname,
-		NULL, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
-		phpdbg_writeln("includedfile", "name=\"%s\"", "File: %s", fname);
-		zend_hash_move_forward_ex(&EG(included_files), &pos);
-	}
+	phpdbg_try_access {
+		zend_hash_internal_pointer_reset_ex(&EG(included_files), &pos);
+		while (zend_hash_get_current_key_ex(&EG(included_files), &fname, NULL, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
+			phpdbg_writeln("includedfile", "name=\"%s\"", "File: %s", fname);
+			zend_hash_move_forward_ex(&EG(included_files), &pos);
+		}
+	} phpdbg_catch_access {
+		phpdbg_error("signalsegv", "", "Could not fetch file name, invalid data source, aborting included file listing");
+	} phpdbg_end_try_access();
 
 	return SUCCESS;
 } /* }}} */
@@ -79,8 +85,11 @@ PHPDBG_INFO(files) /* {{{ */
 PHPDBG_INFO(error) /* {{{ */
 {
 	if (PG(last_error_message)) {
-		phpdbg_writeln("lasterror", "error=\"%s\" file=\"%s\" line=\"%d\"", "Last error: %s at %s line %d",
-			PG(last_error_message), PG(last_error_file), PG(last_error_lineno));
+		phpdbg_try_access {
+			phpdbg_writeln("lasterror", "error=\"%s\" file=\"%s\" line=\"%d\"", "Last error: %s at %s line %d", PG(last_error_message), PG(last_error_file), PG(last_error_lineno));
+		} phpdbg_catch_access {
+			phpdbg_notice("lasterror", "error=\"\"", "No error found!");
+		} phpdbg_end_try_access();
 	} else {
 		phpdbg_notice("lasterror", "error=\"\"", "No error found!");
 	}
@@ -89,7 +98,11 @@ PHPDBG_INFO(error) /* {{{ */
 
 static int phpdbg_arm_auto_global(zend_auto_global *auto_global TSRMLS_DC) {
 	if (auto_global->armed) {
-		auto_global->armed = auto_global->auto_global_callback(auto_global->name, auto_global->name_len TSRMLS_CC);
+		if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
+			phpdbg_notice("variableinfo", "unreachable=\"%.*s\"", "Cannot show information about superglobal variable %.*s", auto_global->name_len, auto_global->name);
+		} else {
+			auto_global->armed = auto_global->auto_global_callback(auto_global->name, auto_global->name_len TSRMLS_CC);
+		}
 	}
 
 	return 0;
@@ -117,6 +130,7 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 
 
 	if (show_globals) {
+		/* that array should only be manipulated during init, so safe for async access during execution */
 		zend_hash_apply(CG(auto_globals), (apply_func_t) phpdbg_arm_auto_global TSRMLS_CC);
 		symtable = &EG(symbol_table);
 	} else {
@@ -125,15 +139,18 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 
 	zend_hash_init(&vars, 8, NULL, NULL, 0);
 
-	zend_hash_internal_pointer_reset_ex(symtable, &pos);
-	while (zend_hash_get_current_key_ex(symtable, &var,
-		NULL, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
-		zend_hash_get_current_data_ex(symtable, (void **)&data, &pos);
-		if (zend_is_auto_global(var, strlen(var) TSRMLS_CC) ^ !show_globals) {
-			zend_hash_update(&vars, var, strlen(var)+1, (void**)data, sizeof(zval*), NULL);
+	phpdbg_try_access {
+		zend_hash_internal_pointer_reset_ex(symtable, &pos);
+		while (zend_hash_get_current_key_ex(symtable, &var, NULL, NULL, 0, &pos) == HASH_KEY_IS_STRING) {
+			zend_hash_get_current_data_ex(symtable, (void **)&data, &pos);
+			if (zend_is_auto_global(var, strlen(var) TSRMLS_CC) ^ !show_globals) {
+				zend_hash_update(&vars, var, strlen(var)+1, (void**)data, sizeof(zval*), NULL);
+			}
+			zend_hash_move_forward_ex(symtable, &pos);
 		}
-		zend_hash_move_forward_ex(symtable, &pos);
-	}
+	} phpdbg_catch_access {
+		phpdbg_error("signalsegv", "", "Cannot fetch all data from the symbol table, invalid data source");
+	} phpdbg_end_try_access();
 
 	if (show_globals) {
 		phpdbg_notice("variableinfo", "num=\"%d\"", "Superglobal variables (%d)", zend_hash_num_elements(&vars));
@@ -161,23 +178,35 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 			zend_hash_get_current_data_ex(&vars, (void**) &data, &pos) == SUCCESS;
 			zend_hash_move_forward_ex(&vars, &pos)) {
 			char *var;
+			zend_bool invalid_data = 1;
 
 			zend_hash_get_current_key_ex(&vars, &var, NULL, NULL, 0, &pos);
 
-			if (*data) {
-				phpdbg_writeln("variable", "address=\"%p\" refcount=\"%d\" type=\"%s\"", "%p\t%d\t(%s)", *data, Z_REFCOUNT_PP(data), zend_zval_type_name(*data));
+			phpdbg_try_access {
+				if (!(invalid_data = !*data)) {
+					phpdbg_writeln("variable", "address=\"%p\" refcount=\"%d\" type=\"%s\"", "%p\t%d\t(%s)", *data, Z_REFCOUNT_PP(data), zend_zval_type_name(*data));
 
-				if (Z_TYPE_PP(data) == IS_RESOURCE) {
-					int type;
-
-					phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\" type=\"%s\"", "%s$%s\n|-------(typeof)------> (%s)\n", Z_ISREF_PP(data) ? "&": "", var, zend_list_find(Z_RESVAL_PP(data), &type) ? zend_rsrc_list_get_rsrc_type(type TSRMLS_CC) : "unknown");
-				} else if (Z_TYPE_PP(data) == IS_OBJECT) {
-					phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\" instanceof=\"%s\"", "%s$%s\n|-----(instanceof)----> (%s)\n", Z_ISREF_PP(data) ? "&": "", var, Z_OBJCE_PP(data)->name);
-				} else {
-					phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\"", "%s$%s", Z_ISREF_PP(data) ? "&": "", var);
+					if (Z_TYPE_PP(data) == IS_RESOURCE) {
+						phpdbg_try_access {
+							int type;
+							phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\" type=\"%s\"", "%s$%s\n|-------(typeof)------> (%s)\n", Z_ISREF_PP(data) ? "&": "", var, zend_list_find(Z_RESVAL_PP(data), &type) ? zend_rsrc_list_get_rsrc_type(type TSRMLS_CC) : "unknown");
+						} phpdbg_catch_access {
+							phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\" type=\"unknown\"", "%s$%s\n|-------(typeof)------> (unknown)\n", Z_ISREF_PP(data) ? "&": "", var);
+						} phpdbg_end_try_access();
+					} else if (Z_TYPE_PP(data) == IS_OBJECT) {
+						phpdbg_try_access {
+							phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\" instanceof=\"%s\"", "%s$%s\n|-----(instanceof)----> (%s)\n", Z_ISREF_PP(data) ? "&": "", var, Z_OBJCE_PP(data)->name);
+						} phpdbg_catch_access {
+							phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\" instanceof=\"unknown\"", "%s$%s\n|-----(instanceof)----> (unknown)\n", Z_ISREF_PP(data) ? "&": "", var);
+						} phpdbg_end_try_access();
+					} else {
+						phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\"", "%s$%s", Z_ISREF_PP(data) ? "&": "", var);
+					}
 				}
-			} else {
-				phpdbg_writeln("variable", "address=\"\" type=\"unknown\" name=\"%s\"", "n/a\tn/a\tn/a\t$%s", var);
+			} phpdbg_end_try_access();
+
+			if (invalid_data) {
+				phpdbg_writeln("variabledetails", "name=\"%s\"", "n/a\tn/a\tn/a\t$%s", var);
 			}
 		}
 	}
@@ -199,6 +228,7 @@ PHPDBG_INFO(globals) /* {{{ */
 
 PHPDBG_INFO(literal) /* {{{ */
 {
+	/* literals are assumed to not be manipulated during executing of their op_array and as such async safe */
 	if ((EG(in_execution) && EG(active_op_array)) || PHPDBG_G(ops)) {
 		zend_op_array *ops = EG(active_op_array) ? EG(active_op_array) : PHPDBG_G(ops);
 		int literal = 0, count = ops->last_literal-1;
@@ -220,8 +250,7 @@ PHPDBG_INFO(literal) /* {{{ */
 		while (literal < ops->last_literal) {
 			if (Z_TYPE(ops->literals[literal].constant) != IS_NULL) {
 				phpdbg_write("literal", "id=\"%u\"", "|-------- C%u -------> [", literal);
-				zend_print_zval(
-					&ops->literals[literal].constant, 0);
+				zend_print_zval(&ops->literals[literal].constant, 0);
 				phpdbg_out("]\n");
 			}
 			literal++;
@@ -235,14 +264,31 @@ PHPDBG_INFO(literal) /* {{{ */
 
 PHPDBG_INFO(memory) /* {{{ */
 {
-	if (is_zend_mm(TSRMLS_C)) {
+	size_t used, real, peak_used, peak_real;
+	zend_mm_heap *heap;
+	zend_bool is_mm;
+
+	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
+		heap = zend_mm_set_heap(phpdbg_original_heap_sigsafe_mem(TSRMLS_C) TSRMLS_CC);
+	}
+	if ((is_mm = is_zend_mm(TSRMLS_C))) {
+		used = zend_memory_usage(0 TSRMLS_CC);
+		real = zend_memory_usage(1 TSRMLS_CC);
+		peak_used = zend_memory_peak_usage(0 TSRMLS_CC);
+		peak_real = zend_memory_peak_usage(1 TSRMLS_CC);
+	}
+	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
+		zend_mm_set_heap(heap TSRMLS_CC);
+	}
+
+	if (is_mm) {
 		phpdbg_notice("meminfo", "", "Memory Manager Information");
 		phpdbg_notice("current", "", "Current");
-		phpdbg_writeln("used", "mem=\"%.3f\"", "|-------> Used:\t%.3f kB", (float) (zend_memory_usage(0 TSRMLS_CC)/1024));
-		phpdbg_writeln("real", "mem=\"%.3f\"", "|-------> Real:\t%.3f kB", (float) (zend_memory_usage(1 TSRMLS_CC)/1024));
+		phpdbg_writeln("used", "mem=\"%.3f\"", "|-------> Used:\t%.3f kB", (float) (used / 1024));
+		phpdbg_writeln("real", "mem=\"%.3f\"", "|-------> Real:\t%.3f kB", (float) (real / 1024));
 		phpdbg_notice("peak", "", "Peak");
-		phpdbg_writeln("used", "mem=\"%.3f\"", "|-------> Used:\t%.3f kB", (float) (zend_memory_peak_usage(0 TSRMLS_CC)/1024));
-		phpdbg_writeln("real", "mem=\"%.3f\"", "|-------> Real:\t%.3f kB", (float) (zend_memory_peak_usage(1 TSRMLS_CC)/1024));
+		phpdbg_writeln("used", "mem=\"%.3f\"", "|-------> Used:\t%.3f kB", (float) (peak_used / 1024));
+		phpdbg_writeln("real", "mem=\"%.3f\"", "|-------> Real:\t%.3f kB", (float) (peak_real / 1024));
 	} else {
 		phpdbg_error("inactive", "type=\"memory_manager\"", "Memory Manager Disabled!");
 	}
@@ -270,20 +316,24 @@ PHPDBG_INFO(classes) /* {{{ */
 
 	zend_hash_init(&classes, 8, NULL, NULL, 0);
 
-	for (zend_hash_internal_pointer_reset_ex(EG(class_table), &position);
-		zend_hash_get_current_data_ex(EG(class_table), (void**)&ce, &position) == SUCCESS;
-		zend_hash_move_forward_ex(EG(class_table), &position)) {
-
-		if ((*ce)->type == ZEND_USER_CLASS) {
-			zend_hash_next_index_insert(&classes, ce, sizeof(ce), NULL);
+	phpdbg_try_access {
+		for (zend_hash_internal_pointer_reset_ex(EG(class_table), &position);
+		     zend_hash_get_current_data_ex(EG(class_table), (void**)&ce, &position) == SUCCESS;
+		     zend_hash_move_forward_ex(EG(class_table), &position)) {
+			if ((*ce)->type == ZEND_USER_CLASS) {
+				zend_hash_next_index_insert(&classes, ce, sizeof(ce), NULL);
+			}
 		}
-	}
+	} phpdbg_catch_access {
+		phpdbg_notice("signalsegv", "", "Not all classes could be fetched, possibly invalid data source");
+	} phpdbg_end_try_access();
 
 	phpdbg_notice("classinfo", "num=\"%d\"", "User Classes (%d)", zend_hash_num_elements(&classes));
 
+	/* once added, assume that classes are stable... until shutdown. */
 	for (zend_hash_internal_pointer_reset_ex(&classes, &position);
-		zend_hash_get_current_data_ex(&classes, (void**)&ce, &position) == SUCCESS;
-		zend_hash_move_forward_ex(&classes, &position)) {
+	     zend_hash_get_current_data_ex(&classes, (void**)&ce, &position) == SUCCESS;
+	     zend_hash_move_forward_ex(&classes, &position)) {
 
 		phpdbg_print_class_name(ce TSRMLS_CC);
 
@@ -319,15 +369,17 @@ PHPDBG_INFO(funcs) /* {{{ */
 
 	zend_hash_init(&functions, 8, NULL, NULL, 0);
 
-	for (zend_hash_internal_pointer_reset_ex(EG(function_table), &position);
-		zend_hash_get_current_data_ex(EG(function_table), (void**)&zf, &position) == SUCCESS;
-		zend_hash_move_forward_ex(EG(function_table), &position)) {
-
-		if (zf->type == ZEND_USER_FUNCTION) {
-			zend_hash_next_index_insert(
-				&functions, (void**) &zf, sizeof(zend_function), NULL);
+	phpdbg_try_access {
+		for (zend_hash_internal_pointer_reset_ex(EG(function_table), &position);
+		     zend_hash_get_current_data_ex(EG(function_table), (void**)&zf, &position) == SUCCESS;
+		     zend_hash_move_forward_ex(EG(function_table), &position)) {
+			if (zf->type == ZEND_USER_FUNCTION) {
+				zend_hash_next_index_insert(&functions, (void**) &zf, sizeof(zend_function), NULL);
+			}
 		}
-	}
+	} phpdbg_catch_access {
+		phpdbg_notice("signalsegv", "", "Not all functions could be fetched, possibly invalid data source");
+	} phpdbg_end_try_access();
 
 	phpdbg_notice("functioninfo", "num=\"%d\"", "User Functions (%d)", zend_hash_num_elements(&functions));
 

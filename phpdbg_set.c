@@ -27,21 +27,21 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-#define PHPDBG_SET_COMMAND_D(f, h, a, m, l, s) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[18])
+#define PHPDBG_SET_COMMAND_D(f, h, a, m, l, s, flags) \
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[18], flags)
 
 const phpdbg_command_t phpdbg_set_commands[] = {
-	PHPDBG_SET_COMMAND_D(prompt,       "usage: set prompt [<string>]",            'p', set_prompt,       NULL, "|s"),
+	PHPDBG_SET_COMMAND_D(prompt,       "usage: set prompt [<string>]",            'p', set_prompt,       NULL, "|s", 0),
 #ifndef _WIN32
-	PHPDBG_SET_COMMAND_D(color,        "usage: set color  <element> <color>",     'c', set_color,        NULL, "ss"),
-	PHPDBG_SET_COMMAND_D(colors,       "usage: set colors [<on|off>]",            'C', set_colors,       NULL, "|b"),
+	PHPDBG_SET_COMMAND_D(color,        "usage: set color  <element> <color>",     'c', set_color,        NULL, "ss", PHPDBG_ASYNC_SAFE),
+	PHPDBG_SET_COMMAND_D(colors,       "usage: set colors [<on|off>]",            'C', set_colors,       NULL, "|b", PHPDBG_ASYNC_SAFE),
 #endif
-	PHPDBG_SET_COMMAND_D(oplog,        "usage: set oplog  [<output>]",            'O', set_oplog,        NULL, "|s"),
-	PHPDBG_SET_COMMAND_D(break,        "usage: set break id [<on|off>]",          'b', set_break,        NULL, "l|b"),
-	PHPDBG_SET_COMMAND_D(breaks,       "usage: set breaks [<on|off>]",            'B', set_breaks,       NULL, "|b"),
-	PHPDBG_SET_COMMAND_D(quiet,        "usage: set quiet [<on|off>]",             'q', set_quiet,        NULL, "|b"),
-	PHPDBG_SET_COMMAND_D(stepping,     "usage: set stepping [<line|op>]",         's', set_stepping,     NULL, "|s"),
-	PHPDBG_SET_COMMAND_D(refcount,     "usage: set refcount [<on|off>]",          'r', set_refcount,     NULL, "|b"),
+	PHPDBG_SET_COMMAND_D(oplog,        "usage: set oplog  [<output>]",            'O', set_oplog,        NULL, "|s", 0),
+	PHPDBG_SET_COMMAND_D(break,        "usage: set break id [<on|off>]",          'b', set_break,        NULL, "l|b", PHPDBG_ASYNC_SAFE),
+	PHPDBG_SET_COMMAND_D(breaks,       "usage: set breaks [<on|off>]",            'B', set_breaks,       NULL, "|b", PHPDBG_ASYNC_SAFE),
+	PHPDBG_SET_COMMAND_D(quiet,        "usage: set quiet [<on|off>]",             'q', set_quiet,        NULL, "|b", PHPDBG_ASYNC_SAFE),
+	PHPDBG_SET_COMMAND_D(stepping,     "usage: set stepping [<line|op>]",         's', set_stepping,     NULL, "|s", PHPDBG_ASYNC_SAFE),
+	PHPDBG_SET_COMMAND_D(refcount,     "usage: set refcount [<on|off>]",          'r', set_refcount,     NULL, "|b", PHPDBG_ASYNC_SAFE),
 	PHPDBG_END_COMMAND
 };
 

@@ -42,9 +42,9 @@ PHPDBG_WATCH(recursive);
  */
 
 static const phpdbg_command_t phpdbg_watch_commands[] = {
-	PHPDBG_COMMAND_D_EX(array,      "create watchpoint on an array", 'a', watch_array,     NULL, "s"),
-	PHPDBG_COMMAND_D_EX(delete,     "delete watchpoint",             'd', watch_delete,    NULL, "s"),
-	PHPDBG_COMMAND_D_EX(recursive,  "create recursive watchpoints",  'r', watch_recursive, NULL, "s"),
+	PHPDBG_COMMAND_D_EX(array,      "create watchpoint on an array", 'a', watch_array,     NULL, "s", 0),
+	PHPDBG_COMMAND_D_EX(delete,     "delete watchpoint",             'd', watch_delete,    NULL, "s", 0),
+	PHPDBG_COMMAND_D_EX(recursive,  "create recursive watchpoints",  'r', watch_recursive, NULL, "s", 0),
 	PHPDBG_END_COMMAND
 };
 

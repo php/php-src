@@ -18,37 +18,24 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_LIST_H
-#define PHPDBG_LIST_H
+#ifndef PHPDBG_WEBHELPER_H
+#define PHPDBG_WEBHELPER_H
 
-#include "TSRM.h"
-#include "phpdbg_cmd.h"
+#include "phpdbg_webdata_transfer.h"
 
-#define PHPDBG_LIST(name)         PHPDBG_COMMAND(list_##name)
-#define PHPDBG_LIST_HANDLER(name) PHPDBG_COMMAND_HANDLER(list_##name)
+extern zend_module_entry phpdbg_webhelper_module_entry;
+#define phpext_phpdbg_webhelper_ptr &phpdbg_webhelper_module_entry
 
-PHPDBG_LIST(lines);
-PHPDBG_LIST(class);
-PHPDBG_LIST(method);
-PHPDBG_LIST(func);
-
-void phpdbg_list_function_byname(const char *, size_t TSRMLS_DC);
-void phpdbg_list_function(const zend_function* TSRMLS_DC);
-void phpdbg_list_file(const char*, uint, uint, uint TSRMLS_DC);
-
-extern const phpdbg_command_t phpdbg_list_commands[];
-
-void phpdbg_init_list(TSRMLS_D);
-
-typedef struct {
-	char *filename;
-	char *buf;
-	size_t len;
-#if HAVE_MMAP
-	void *map;
+#ifdef ZTS
+# define PHPDBG_WG(v) TSRMG(phpdbg_webhelper_globals_id, zend_phpdbg_webhelper_globals *, v)
+#else
+# define PHPDBG_WG(v) (phpdbg_webhelper_globals.v)
 #endif
-	uint lines;
-	uint line[1];
-} phpdbg_file_source;
 
-#endif /* PHPDBG_LIST_H */
+/* {{{ structs */
+ZEND_BEGIN_MODULE_GLOBALS(phpdbg_webhelper)
+	char *auth;
+	char *path;
+ZEND_END_MODULE_GLOBALS(phpdbg_webhelper) /* }}} */
+
+#endif /* PHPDBG_WEBHELPER_H */

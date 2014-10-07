@@ -12,43 +12,18 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Felipe Pena <felipe@php.net>                                |
-   | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
    | Authors: Bob Weinand <bwoebi@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_LIST_H
-#define PHPDBG_LIST_H
+#ifndef PHPDBG_WAIT_H
+#define PHPDBG_WAIT_H
 
-#include "TSRM.h"
-#include "phpdbg_cmd.h"
+#include "zend.h"
+#include "phpdbg.h"
 
-#define PHPDBG_LIST(name)         PHPDBG_COMMAND(list_##name)
-#define PHPDBG_LIST_HANDLER(name) PHPDBG_COMMAND_HANDLER(list_##name)
+PHPDBG_COMMAND(wait);
 
-PHPDBG_LIST(lines);
-PHPDBG_LIST(class);
-PHPDBG_LIST(method);
-PHPDBG_LIST(func);
+void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC);
 
-void phpdbg_list_function_byname(const char *, size_t TSRMLS_DC);
-void phpdbg_list_function(const zend_function* TSRMLS_DC);
-void phpdbg_list_file(const char*, uint, uint, uint TSRMLS_DC);
-
-extern const phpdbg_command_t phpdbg_list_commands[];
-
-void phpdbg_init_list(TSRMLS_D);
-
-typedef struct {
-	char *filename;
-	char *buf;
-	size_t len;
-#if HAVE_MMAP
-	void *map;
-#endif
-	uint lines;
-	uint line[1];
-} phpdbg_file_source;
-
-#endif /* PHPDBG_LIST_H */
+#endif /* PHPDBG_WAIT_H */

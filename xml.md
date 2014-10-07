@@ -18,6 +18,11 @@ msgout
 
 - text message output related to the xml data (e.g. &lt;intro severity="normal" help="help" msgout="To get help using phpdbg type &amp;quot;help&amp;quot; and press enter" />)
 
+req
+---
+
+- the request id, if one was passed to the last command (via -r %d, where %d is the id) (and the output is related to that message)
+
 file
 ----
 
@@ -222,7 +227,7 @@ frame
  - maxnum: tried to access a frame with a number heigher than existing (or &lt; 0)
 
 ### attributes on &lt;arg> ###
-
+v
 - variadic: has a non-empty value if the argument is variadic
 - name: variable name of parameter
 
@@ -382,8 +387,8 @@ exec
   - invalid: given context (attribute) is not matching a valid file or symlink
   - notfound: given context (attribute) does not exist
 
-run / <stop> tag
-----------------
+run / &lt;stop> tag
+-------------------
 
 - runs the script (set via exec command)
 - &lt;stop type="end" />: script execution ended normally
@@ -562,21 +567,65 @@ set
 - generally enables / disables showing of refcount in watchpoint breaks silently with no further xml answer
 - if the boolean switch is omitted, it emits current state in a &lt;setrefcount active="" /> where active is on or off
 
+wait
+----
+
+- internally executes exec, so exec will output first (if binding to socket worked)
+
+### attributes ###
+
+- import: has value "success"/"fail"
+- missingmodule/missingextension: modules/extensions loaded in the target SAPI, but not in phpdbg
+
+### errors (by type) ###
+
+- nosocket: couldn't establish socket
+- invaliddata: invalid JSON passed to socket
+
+dl
+--
+
+- loads a module or Zend extension at a given path
+- if a relative path is passed, it's relative to the extension_dir ini setting
+
+### attributes ###
+
+- extensiontype: "Zend extension" or "module"
+- name: the extension name
+- path: the path where it was loaded
+
+### errors (by type) ###
+
+- unsupported: dynamic extension loading is unsupported
+- relpath: relative path given, but no extension_dir defined
+- unknown: general error with internal DL_LOAD() (for message see msg attribute)
+- wrongapi: wrong Zend engine version (apineeded / apiinstalled attributes give information about the API versions)
+- wrongbuild: unmatched build versions (buildneeded / buildinstalled attributes give information about the build versions)
+- registerfailure: registering module failed
+- startupfailure: couldn't startup Zend extension / module
+- initfailure: couldn't initialize module
+- nophpso: passed shared object is not a valid Zend extension nor module
+
+- errors may have the module or extension attribute when their name is already known at the point of failure
 
 Other tags
 ==========
 
 &lt;signal>
---------
+-----------
 
 - received caught signal
 
 ### attributes ###
 
-- type: type of signal
+- type: type of signal (e.g. SIGINT)
+
+### by type ###
+
+- SIGINT: interactive mode is entered...
 
 &lt;watch*>
---------
+-----------
 
 - generally emitted on hit watchpoint
 - &lt;watchdelete variable="" />: when a variable was unset, the watchpoint is removed too
@@ -593,3 +642,8 @@ Other tags
    - removed: number of elements removed
    - added: number of elements added
   - &lt;watcharrayptr>: if this tag appears, the internal pointer of the array way changed
+
+&lt;signalsegv>
+---------------
+
+- generally emitted when data couldn't be fetched (e.g. by accessing inconsistent data); only used in hard interrupt mode
