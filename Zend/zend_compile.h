@@ -360,11 +360,11 @@ struct _zend_execute_data {
 	zend_execute_data   *call;             /* current call                   */
 	void               **run_time_cache;
 	zend_function       *func;             /* executed op_array              */
-	uint32_t             num_args;
-	uint32_t             frame_info;
-	zend_class_entry    *called_scope;
 	zval                 This;
+	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
+	uint32_t             frame_info;
+	uint32_t             num_args;
 	zval                *return_value;
 	zend_class_entry    *scope;            /* function scope (self)          */
 	zend_array          *symbol_table;

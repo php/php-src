@@ -215,11 +215,11 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint3
 	}
 	call = (zend_execute_data*)zend_vm_stack_alloc(used_stack * sizeof(zval) TSRMLS_CC);
 	call->func = func;
-	call->num_args = 0;
-	call->frame_info = frame_info;
-	call->called_scope = called_scope;
 	ZVAL_OBJ(&call->This, object);
+	call->called_scope = called_scope;
 	call->prev_execute_data = prev;
+	call->frame_info = frame_info;
+	call->num_args = 0;
 	return call;
 }
 
