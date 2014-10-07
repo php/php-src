@@ -65,7 +65,7 @@ INPUT       [^\n\000]+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
-<*>[\n\000] {
+<*>{WS}?[\n\000] {
 	return 0;
 }
 
