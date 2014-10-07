@@ -58,12 +58,17 @@ dnl
 AC_CACHE_CHECK([whether whether compiler supports Decimal32/64/128 types], ac_cv_decimal_fp_supported,[
 AC_TRY_RUN( [
 #include <stdio.h>
+#include <string.h>
 
 int main(int argc, char **argv) {
 	typedef float dec32 __attribute__((mode(SD)));
 	dec32 k = 99.49f;
 	double d2 = (double)k;
-	return 0;
+	const char *check_str = "99.49";
+	char print_str[32];
+
+	snprintf(print_str, 32, "%f", d2);
+	return memcmp(print_str, check_str, 5);
 }
 ],[
   ac_cv_decimal_fp_supported=yes
