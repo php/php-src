@@ -105,3 +105,6 @@ foreach($tests2 as $test) {
 29. OK
 30. OK
 31. OK
+32. OK
+33. OK
+34. OK
