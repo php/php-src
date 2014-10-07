@@ -2698,7 +2698,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			ZEND_VM_C_GOTO(fcall_end);
 		}
 	} else if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-		EG(scope) = fbc->common.scope;
+		call->scope = EG(scope) = fbc->common.scope;
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
 			if (RETURN_VALUE_USED(opline)) {
 				zend_generator_create_zval(call, &fbc->op_array, EX_VAR(opline->result.var) TSRMLS_CC);
