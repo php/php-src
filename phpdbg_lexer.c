@@ -128,8 +128,12 @@ yyc_INITIAL:
 yy2:
 		YYDEBUG(2, *YYCURSOR);
 		++YYCURSOR;
-		if ((yych = *YYCURSOR) == '\t') goto yy26;
-		if (yych == ' ') goto yy26;
+		if ((yych = *YYCURSOR) <= '\n') {
+			if (yych <= 0x00) goto yy27;
+			if (yych >= '\t') goto yy27;
+		} else {
+			if (yych == ' ') goto yy27;
+		}
 yy3:
 		YYDEBUG(3, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
@@ -140,7 +144,7 @@ yy3:
 	YYCURSOR = LEX(text);
 	goto restart;
 }
-#line 144 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 148 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy4:
 		YYDEBUG(4, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -154,7 +158,7 @@ yy5:
 		{
 	return 0;
 }
-#line 158 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 162 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy7:
 		YYDEBUG(7, *YYCURSOR);
 		yyaccept = 0;
@@ -223,7 +227,7 @@ yy15:
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_RUN;
 }
-#line 227 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 231 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy18:
 		YYDEBUG(18, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -245,7 +249,7 @@ yy19:
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_SHELL;
 }
-#line 249 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 253 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy22:
 		YYDEBUG(22, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -267,15 +271,21 @@ yy23:
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_EVAL;
 }
-#line 271 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 275 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy26:
 		YYDEBUG(26, *YYCURSOR);
 		++YYCURSOR;
 		YYFILL(1);
 		yych = *YYCURSOR;
+yy27:
 		YYDEBUG(27, *YYCURSOR);
-		if (yych == '\t') goto yy26;
-		if (yych == ' ') goto yy26;
+		if (yych <= '\t') {
+			if (yych <= 0x00) goto yy5;
+			if (yych >= '\t') goto yy26;
+		} else {
+			if (yych <= '\n') goto yy5;
+			if (yych == ' ') goto yy26;
+		}
 		YYDEBUG(28, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
 #line 146 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.l"
@@ -284,7 +294,7 @@ yy26:
 
 	goto restart;
 }
-#line 288 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 298 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 	}
 /* *********************************** */
 yyc_NORMAL:
@@ -397,6 +407,8 @@ yy32:
 		if (yybm[0+yych] & 8) {
 			goto yy32;
 		}
+		if (yych <= 0x00) goto yy35;
+		if (yych == '\n') goto yy35;
 		YYDEBUG(34, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
 #line 146 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.l"
@@ -405,7 +417,7 @@ yy32:
 
 	goto restart;
 }
-#line 409 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 421 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy35:
 		YYDEBUG(35, *YYCURSOR);
 		++YYCURSOR;
@@ -415,7 +427,7 @@ yy35:
 		{
 	return 0;
 }
-#line 419 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 431 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy37:
 		YYDEBUG(37, *YYCURSOR);
 		yyaccept = 0;
@@ -435,7 +447,7 @@ yy38:
 	yylval->len = yyleng;
 	return T_ID; 
 }
-#line 439 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 451 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy39:
 		YYDEBUG(39, *YYCURSOR);
 		yyaccept = 0;
@@ -491,7 +503,7 @@ yy44:
 	yylval->num = atoi(yytext);
 	return T_DIGITS;
 }
-#line 495 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 507 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy45:
 		YYDEBUG(45, *YYCURSOR);
 		yyaccept = 1;
@@ -598,7 +610,7 @@ yy55:
 		{
 	return T_POUND;
 }
-#line 602 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 614 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy57:
 		YYDEBUG(57, *YYCURSOR);
 		++YYCURSOR;
@@ -609,7 +621,7 @@ yy57:
 		{
 	return T_COLON;
 }
-#line 613 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 625 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy59:
 		YYDEBUG(59, *YYCURSOR);
 		++YYCURSOR;
@@ -619,7 +631,7 @@ yy59:
 		{
 	return T_DCOLON;
 }
-#line 623 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 635 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy61:
 		YYDEBUG(61, *YYCURSOR);
 		yyaccept = 0;
@@ -644,7 +656,7 @@ yy62:
 	yylval->len = yyleng;
 	return T_PROTO;
 }
-#line 648 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 660 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy66:
 		YYDEBUG(66, *YYCURSOR);
 		yyaccept = 0;
@@ -698,7 +710,7 @@ yy71:
 	yylval->len = yyleng;
 	return T_OPCODE;
 }
-#line 702 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 714 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy72:
 		YYDEBUG(72, *YYCURSOR);
 		yyaccept = 0;
@@ -741,7 +753,7 @@ yy77:
 	yylval->num = 1;		
 	return T_TRUTHY;
 }
-#line 745 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 757 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy80:
 		YYDEBUG(80, *YYCURSOR);
 		yyaccept = 0;
@@ -783,7 +795,7 @@ yy84:
 	yylval->num = 0;
 	return T_FALSY;
 }
-#line 787 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 799 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy87:
 		YYDEBUG(87, *YYCURSOR);
 		yyaccept = 0;
@@ -914,7 +926,7 @@ yy104:
 	yylval->addr = strtoul(yytext, 0, 16);
 	return T_ADDR;
 }
-#line 918 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 930 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy105:
 		YYDEBUG(105, *YYCURSOR);
 		yyaccept = 0;
@@ -937,7 +949,7 @@ yy106:
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_IF;
 }
-#line 941 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 953 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy109:
 		YYDEBUG(109, *YYCURSOR);
 		yyaccept = 0;
@@ -1026,7 +1038,7 @@ yy115:
 	yylval->num = atoi(text);
 	return T_REQ_ID;
 }
-#line 1030 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 1042 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy116:
 		YYDEBUG(116, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -1104,8 +1116,9 @@ yy121:
 		if (yybm[0+yych] & 32) {
 			goto yy121;
 		}
-		if (yych <= 0x00) goto yy123;
-		if (yych != '\n') goto yy127;
+		if (yych <= 0x00) goto yy124;
+		if (yych == '\n') goto yy124;
+		goto yy127;
 yy123:
 		YYDEBUG(123, *YYCURSOR);
 		yyleng = (size_t) YYCURSOR - (size_t) yytext;
@@ -1116,7 +1129,7 @@ yy123:
 	yylval->len = yyleng;
 	return T_INPUT;
 }
-#line 1120 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 1133 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy124:
 		YYDEBUG(124, *YYCURSOR);
 		++YYCURSOR;
@@ -1126,7 +1139,7 @@ yy124:
 		{
 	return 0;
 }
-#line 1130 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 1143 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 yy126:
 		YYDEBUG(126, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -1192,7 +1205,7 @@ yy134:
 	yylval->num = atoi(text);
 	return T_REQ_ID;
 }
-#line 1196 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
+#line 1209 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.c"
 	}
 }
 #line 175 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_lexer.l"

@@ -20,6 +20,7 @@
 #include "ext/json/php_json.h"
 
 PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
+#ifdef HAVE_JSON
 	smart_str buf = {0};
 	zval array;
 	HashTable *ht;
@@ -180,4 +181,5 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
 	*msg = buf.c;
 	*len = buf.len;
 	zval_dtor(&array);
+#endif
 }

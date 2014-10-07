@@ -655,7 +655,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **break**    **b**      show current breakpoints" CR
 "  **files**    **F**      show included files" CR
 "  **classes**  **c**      show loaded classes" CR
-"  **funcs**    **f**      show loaded classes" CR
+"  **funcs**    **f**      show loaded functions" CR
 "  **error**    **e**      show last error" CR
 "  **vars**     **v**      show active variables" CR
 "  **globals**  **g**      show superglobal variables" CR

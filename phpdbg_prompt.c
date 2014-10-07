@@ -91,18 +91,21 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 	phpdbg_param_t *name = NULL;
 
 	if (stack->type == STACK_PARAM) {
+		char *lc_name;
+
 		name = stack->next;
 
 		if (!name || name->type != STR_PARAM) {
 			return FAILURE;
 		}
 
-		if (zend_hash_exists(&PHPDBG_G(registered), name->str, name->len+1)) {
+		lc_name = zend_str_tolower_dup(name->str, name->len);
 
+		if (zend_hash_exists(&PHPDBG_G(registered), lc_name, name->len+1)) {
 			zval fname, *fretval;
 			zend_fcall_info fci;
 
-			ZVAL_STRINGL(&fname, name->str, name->len, 1);
+			ZVAL_STRINGL(&fname, lc_name, name->len, 1);
 
 			memset(&fci, 0, sizeof(zend_fcall_info));
 
@@ -153,13 +156,13 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 						break;
 
 						case FILE_PARAM:
-							spprintf(&buffered, 0, "%s:%ld", 
+							spprintf(&buffered, 0, "%s:%ld",
 								next->file.name, next->file.line);
 							add_next_index_string(&params, buffered, 0);
 						break;
 
 						case NUMERIC_FILE_PARAM:
-							spprintf(&buffered, 0, "%s:#%ld", 
+							spprintf(&buffered, 0, "%s:#%ld",
 								next->file.name, next->file.line);
 							add_next_index_string(&params, buffered, 0);
 						break;
@@ -191,9 +194,12 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 			}
 
 			zval_dtor(&fname);
+			efree(lc_name);
 
 			return SUCCESS;
 		}
+
+		efree(lc_name);
 	}
 
 	return FAILURE;
