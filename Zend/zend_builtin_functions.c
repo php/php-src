@@ -402,7 +402,7 @@ ZEND_FUNCTION(func_num_args)
 {
 	zend_execute_data *ex = EX(prev_execute_data);
 
-	if (ex->frame_kind == VM_FRAME_NESTED_FUNCTION || ex->frame_kind == VM_FRAME_TOP_FUNCTION) {
+	if (VM_FRAME_KIND(ex->frame_info) == VM_FRAME_NESTED_FUNCTION || VM_FRAME_KIND(ex->frame_info) == VM_FRAME_TOP_FUNCTION) {
 		RETURN_LONG(ex->num_args);
 	} else {
 		zend_error(E_WARNING, "func_num_args():  Called from the global scope - no function context");
@@ -430,7 +430,7 @@ ZEND_FUNCTION(func_get_arg)
 	}
 
 	ex = EX(prev_execute_data);
-	if (ex->frame_kind != VM_FRAME_NESTED_FUNCTION && ex->frame_kind != VM_FRAME_TOP_FUNCTION) {
+	if (VM_FRAME_KIND(ex->frame_info) != VM_FRAME_NESTED_FUNCTION && VM_FRAME_KIND(ex->frame_info) != VM_FRAME_TOP_FUNCTION) {
 		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
@@ -464,7 +464,7 @@ ZEND_FUNCTION(func_get_args)
 	uint32_t i;
 	zend_execute_data *ex = EX(prev_execute_data);
 
-	if (ex->frame_kind != VM_FRAME_NESTED_FUNCTION && ex->frame_kind != VM_FRAME_TOP_FUNCTION) {
+	if (VM_FRAME_KIND(ex->frame_info) != VM_FRAME_NESTED_FUNCTION && VM_FRAME_KIND(ex->frame_info) != VM_FRAME_TOP_FUNCTION) {
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}

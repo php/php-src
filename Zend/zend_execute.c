@@ -1423,14 +1423,13 @@ void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* 
  *                             +----------------------------------------+
  */
 
-static zend_always_inline void i_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
+static zend_always_inline void i_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	uint32_t first_extra_arg, num_args;
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
-	EX(frame_kind) = frame_kind;
 	EX(return_value) = return_value;
 	EX(scope) = EG(scope);
 	EX(delayed_exception) = NULL;
@@ -1492,13 +1491,12 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 }
 /* }}} */
 
-static zend_always_inline void i_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
+static zend_always_inline void i_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
-	EX(frame_kind) = frame_kind;
 	EX(return_value) = return_value;
 	EX(scope) = EG(scope);
 	EX(delayed_exception) = NULL;
@@ -1520,13 +1518,12 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 }
 /* }}} */
 
-static zend_always_inline void i_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
+static zend_always_inline void i_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
-	EX(frame_kind) = frame_kind;
 	EX(return_value) = return_value;
 	EX(scope) = EG(scope);
 	EX(delayed_exception) = NULL;
@@ -1620,9 +1617,9 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 		NULL);
 
 	execute_data = zend_vm_stack_push_call_frame(
+		VM_FRAME_TOP_FUNCTION,
 		(zend_function*)op_array,
 		num_args,
-		call->flags,
 		call->called_scope,
 		Z_OBJ(call->This),
 		NULL TSRMLS_CC);
@@ -1641,16 +1638,16 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 
 	EX(symbol_table) = NULL;
 
-	i_init_func_execute_data(execute_data, op_array, return_value, VM_FRAME_TOP_FUNCTION TSRMLS_CC);
+	i_init_func_execute_data(execute_data, op_array, return_value TSRMLS_CC);
 
 	return execute_data;
 }
 /* }}} */
 
-ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC) /* {{{ */
+ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	EX(prev_execute_data) = EG(current_execute_data);
-	i_init_execute_data(execute_data, op_array, return_value, frame_kind TSRMLS_CC);
+	i_init_execute_data(execute_data, op_array, return_value TSRMLS_CC);
 }
 /* }}} */
 

@@ -1717,7 +1717,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 
 ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 {
-	vm_frame_kind frame_kind = EX(frame_kind);
+	vm_frame_kind frame_kind = VM_FRAME_KIND(EX(frame_info));
 
 	if (frame_kind == VM_FRAME_NESTED_FUNCTION) {
 		zend_object *object;
@@ -2213,8 +2213,8 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(
-		fbc, opline->extended_value, 0, called_scope, obj, EX(call) TSRMLS_CC);
+	EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+		fbc, opline->extended_value, called_scope, obj, EX(call) TSRMLS_CC);
 
 	FREE_OP2();
 	FREE_OP1_IF_VAR();
@@ -2337,8 +2337,8 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 		}
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(
-		fbc, opline->extended_value, 0, ce, object, EX(call) TSRMLS_CC);
+	EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+		fbc, opline->extended_value, ce, object, EX(call) TSRMLS_CC);
 	
 	if (OP2_TYPE == IS_UNUSED) {
 		EX(call)->return_value = NULL;
@@ -2366,8 +2366,8 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			CACHE_PTR(Z_CACHE_SLOT_P(opline->op2.zv), fbc);
 		}
 
-		EX(call) = zend_vm_stack_push_call_frame(
-			fbc, opline->extended_value, 0, NULL, NULL, EX(call) TSRMLS_CC);
+		EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+			fbc, opline->extended_value, NULL, NULL, EX(call) TSRMLS_CC);
 
 		/*CHECK_EXCEPTION();*/
 		ZEND_VM_NEXT_OPCODE();
@@ -2486,8 +2486,8 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
 			ZEND_VM_CONTINUE(); /* Never reached */
 		}
-		EX(call) = zend_vm_stack_push_call_frame(
-			fbc, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
+		EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+			fbc, opline->extended_value, called_scope, object, EX(call) TSRMLS_CC);
 
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -2540,8 +2540,8 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMP|VAR|CV)
 		object = NULL;
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(
-		func, opline->extended_value, 0, called_scope, object, EX(call) TSRMLS_CC);
+	EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+		func, opline->extended_value, called_scope, object, EX(call) TSRMLS_CC);
 
 	FREE_OP2();
 	CHECK_EXCEPTION();
@@ -2572,8 +2572,8 @@ ZEND_VM_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST)
 		CACHE_PTR(Z_CACHE_SLOT_P(opline->op2.zv), fbc);
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(
-		fbc, opline->extended_value, 0, NULL, NULL, EX(call) TSRMLS_CC);
+	EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+		fbc, opline->extended_value, NULL, NULL, EX(call) TSRMLS_CC);
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -2596,8 +2596,8 @@ ZEND_VM_HANDLER(61, ZEND_INIT_FCALL, ANY, CONST)
 		CACHE_PTR(Z_CACHE_SLOT_P(fname), fbc);
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(
-		fbc, opline->extended_value, 0, NULL, NULL, EX(call) TSRMLS_CC);
+	EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+		fbc, opline->extended_value, NULL, NULL, EX(call) TSRMLS_CC);
 
 	FREE_OP2();
 
@@ -2719,12 +2719,14 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			zend_vm_stack_free_call_frame(call TSRMLS_CC);
 		} else {
 			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, return_value, VM_FRAME_NESTED_FUNCTION TSRMLS_CC);
+			i_init_func_execute_data(call, &fbc->op_array, return_value TSRMLS_CC);
 
 			if (EXPECTED(zend_execute_ex == execute_ex)) {
 				ZEND_VM_ENTER();
 			} else {
-				call->frame_kind = VM_FRAME_TOP_FUNCTION;
+				call->frame_info = VM_FRAME_INFO(
+					VM_FRAME_TOP_FUNCTION,
+					VM_FRAME_FLAGS(call->frame_info));
 				zend_execute_ex(call TSRMLS_CC);
 			}
 		}
@@ -3685,9 +3687,12 @@ ZEND_VM_HANDLER(68, ZEND_NEW, ANY, ANY)
 	} else {
 		/* We are not handling overloaded classes right now */
 		EX(call) = zend_vm_stack_push_call_frame(
-			constructor, opline->extended_value,
-			RETURN_VALUE_USED(opline) ?
-				ZEND_CALL_CTOR : (ZEND_CALL_CTOR | ZEND_CALL_CTOR_RESULT_UNUSED),
+			VM_FRAME_INFO(
+				VM_FRAME_NESTED_FUNCTION,
+				RETURN_VALUE_USED(opline) ?
+					ZEND_CALL_CTOR : (ZEND_CALL_CTOR | ZEND_CALL_CTOR_RESULT_UNUSED)),
+			constructor,
+			opline->extended_value,
 			Z_CE_P(EX_VAR(opline->op1.var)),
 			Z_OBJ(object_zval),
 			EX(call) TSRMLS_CC);
@@ -4179,8 +4184,8 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 			return_value = EX_VAR(opline->result.var);
 		}
 
-		call = zend_vm_stack_push_call_frame(
-			(zend_function*)new_op_array, 0, 0, EX(called_scope), Z_OBJ(EX(This)), NULL TSRMLS_CC);
+		call = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_CODE,
+			(zend_function*)new_op_array, 0, EX(called_scope), Z_OBJ(EX(This)), NULL TSRMLS_CC);
 
 		if (EX(symbol_table)) {
 			call->symbol_table = EX(symbol_table);
@@ -4189,11 +4194,11 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		}
 
 		call->prev_execute_data = execute_data;
-	    i_init_code_execute_data(call, new_op_array, return_value, VM_FRAME_NESTED_CODE TSRMLS_CC);
+	    i_init_code_execute_data(call, new_op_array, return_value TSRMLS_CC);
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
-			call->frame_kind = VM_FRAME_TOP_CODE;
+			call->frame_info = VM_FRAME_TOP_CODE;
 			zend_execute_ex(call TSRMLS_CC);
 		}
 
@@ -5453,8 +5458,8 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			zend_vm_stack_free_args(EX(call) TSRMLS_CC);
 
 			if (Z_OBJ(call->This)) {
-				if (call->flags & ZEND_CALL_CTOR) {
-					if (!(call->flags & ZEND_CALL_CTOR_RESULT_UNUSED)) {
+				if (call->frame_info & ZEND_CALL_CTOR) {
+					if (!(call->frame_info & ZEND_CALL_CTOR_RESULT_UNUSED)) {
 						GC_REFCOUNT(Z_OBJ(call->This))--;
 					}
 					if (GC_REFCOUNT(Z_OBJ(call->This)) == 1) {

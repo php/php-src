@@ -736,7 +736,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	func = fci_cache->function_handler;
-	call = zend_vm_stack_push_call_frame(func, fci->param_count, 0, fci_cache->called_scope, fci_cache->object, NULL TSRMLS_CC);
+	call = zend_vm_stack_push_call_frame(VM_FRAME_TOP_FUNCTION,
+		func, fci->param_count, fci_cache->called_scope, fci_cache->object, NULL TSRMLS_CC);
 	calling_scope = fci_cache->calling_scope;
 	fci->object = fci_cache->object;
 	if (fci->object &&
@@ -844,7 +845,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(scope) = func->common.scope;
 		call->symbol_table = fci->symbol_table;
 		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
-			zend_init_execute_data(call, &func->op_array, fci->retval, VM_FRAME_TOP_FUNCTION TSRMLS_CC);
+			zend_init_execute_data(call, &func->op_array, fci->retval TSRMLS_CC);
 			zend_execute_ex(call TSRMLS_CC);
 		} else {
 			zend_generator_create_zval(call, &func->op_array, fci->retval TSRMLS_CC);
