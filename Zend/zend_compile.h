@@ -370,7 +370,8 @@ struct _zend_execute_data {
 	zend_array          *symbol_table;
 	const zend_op       *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
 	zend_object         *delayed_exception;
-	zval                 old_error_reporting;
+	uint32_t             silence_op_num;
+	uint32_t             old_error_reporting;
 };
 
 #define VM_FRAME_KIND_MASK           0x000000ff
