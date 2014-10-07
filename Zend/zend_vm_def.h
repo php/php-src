@@ -2698,17 +2698,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			ZEND_VM_C_GOTO(fcall_end);
 		}
 	} else if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-		zval *return_value = NULL;
-
 		EG(scope) = fbc->common.scope;
-		call->symbol_table = NULL;
-		if (RETURN_VALUE_USED(opline)) {
-			return_value = EX_VAR(opline->result.var);
-
-			ZVAL_NULL(return_value);
-			Z_VAR_FLAGS_P(return_value) = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0 ? IS_VAR_RET_REF : 0;
-		}
-
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
 			if (RETURN_VALUE_USED(opline)) {
 				zend_generator_create_zval(call, &fbc->op_array, EX_VAR(opline->result.var) TSRMLS_CC);
@@ -2718,6 +2708,16 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	
 			zend_vm_stack_free_call_frame(call TSRMLS_CC);
 		} else {
+			zval *return_value = NULL;
+
+			call->symbol_table = NULL;
+			if (RETURN_VALUE_USED(opline)) {
+				return_value = EX_VAR(opline->result.var);
+
+				ZVAL_NULL(return_value);
+				Z_VAR_FLAGS_P(return_value) = 0;
+			}
+
 			call->prev_execute_data = execute_data;
 			i_init_func_execute_data(call, &fbc->op_array, return_value TSRMLS_CC);
 
@@ -2842,6 +2842,7 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 				}
 			} else {
 				ZVAL_COPY_VALUE(EX(return_value), retval_ptr);
+				Z_VAR_FLAGS_P(EX(return_value)) = IS_VAR_RET_REF;
 				if (OP1_TYPE != IS_TMP_VAR) {
 					zval_opt_copy_ctor_no_imm(EX(return_value));
 				}
@@ -2862,6 +2863,7 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EX(return_value)) {
 					ZVAL_NEW_REF(EX(return_value), retval_ptr);
+					Z_VAR_FLAGS_P(EX(return_value)) = IS_VAR_RET_REF;
 					if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
 				}
 				break;
@@ -2872,6 +2874,7 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 			ZVAL_MAKE_REF(retval_ptr);
 			Z_ADDREF_P(retval_ptr);
 			ZVAL_REF(EX(return_value), Z_REF_P(retval_ptr));
+			Z_VAR_FLAGS_P(EX(return_value)) = IS_VAR_RET_REF;
 		}
 	} while (0);
 
