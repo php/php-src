@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
+- Mysqli:
+  . Fixed bug #68114 (linker error on some OS X machines with fixed width
+    decimal support) (Keyur Govande)
 
 
 ?? ??? 2014, PHP 5.5.18
