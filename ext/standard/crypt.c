@@ -196,7 +196,6 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 		} else if (
 				salt[0] == '$' &&
 				salt[1] == '2' &&
-				salt[2] >= 'a' && salt[2] <= 'z' &&
 				salt[3] == '$' &&
 				salt[4] >= '0' && salt[4] <= '3' &&
 				salt[5] >= '0' && salt[5] <= '9' &&
@@ -219,7 +218,7 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 			_crypt_extended_init_r();
 
 			crypt_res = _crypt_extended_r(password, salt, &buffer);
-			if (!crypt_res) {
+			if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
 				return FAILURE;
 			} else {
 				*result = estrdup(crypt_res);
