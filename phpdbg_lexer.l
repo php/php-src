@@ -56,7 +56,7 @@ T_SHELL     'sh'
 T_IF        'if'
 T_RUN       'run'
 T_RUN_SHORT "r"
-WS          [ \t]+
+WS          [ \r\n\t]+
 DIGITS      [-]?[0-9\.]+
 ID          [^ \r\n\t:#\000]+
 ADDR        [0][x][a-fA-F0-9]+
