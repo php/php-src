@@ -1013,41 +1013,36 @@ PHP_FUNCTION(wordwrap)
 
 /* {{{ php_explode
  */
-PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, zend_long limit)
+PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit)
 {
-	char *p1, *p2, *endp;
-
-	endp = Z_STRVAL_P(str) + Z_STRLEN_P(str);
-
-	p1 = Z_STRVAL_P(str);
-	p2 = (char*)php_memnstr(Z_STRVAL_P(str), Z_STRVAL_P(delim), Z_STRLEN_P(delim), endp);
+	char *p1 = str->val;
+	char *endp = str->val + str->len;
+	char *p2 = (char *) php_memnstr(str->val, delim->val, delim->len, endp);
 
 	if (p2 == NULL) {
-		add_next_index_stringl(return_value, p1, Z_STRLEN_P(str));
+		add_next_index_str(return_value, zend_string_copy(str));
 	} else {
 		do {
 			add_next_index_stringl(return_value, p1, p2 - p1);
-			p1 = p2 + Z_STRLEN_P(delim);
-		} while ((p2 = (char*)php_memnstr(p1, Z_STRVAL_P(delim), Z_STRLEN_P(delim), endp)) != NULL &&
-				 --limit > 1);
+			p1 = p2 + delim->len;
+			p2 = (char *) php_memnstr(p1, delim->val, delim->len, endp);
+		} while (p2 != NULL && --limit > 1);
 
-		if (p1 <= endp)
-			add_next_index_stringl(return_value, p1, endp-p1);
+		if (p1 <= endp) {
+			add_next_index_stringl(return_value, p1, endp - p1);
+		}
 	}
 }
 /* }}} */
 
 /* {{{ php_explode_negative_limit
  */
-PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_value, zend_long limit)
+PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit)
 {
 #define EXPLODE_ALLOC_STEP 64
-	char *p1, *p2, *endp;
-
-	endp = Z_STRVAL_P(str) + Z_STRLEN_P(str);
-
-	p1 = Z_STRVAL_P(str);
-	p2 = (char*)php_memnstr(Z_STRVAL_P(str), Z_STRVAL_P(delim), Z_STRLEN_P(delim), endp);
+	char *p1 = str->val;
+	char *endp = str->val + str->len;
+	char *p2 = (char *) php_memnstr(str->val, delim->val, delim->len, endp);
 
 	if (p2 == NULL) {
 		/*
@@ -1065,14 +1060,15 @@ PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_valu
 				allocated = found + EXPLODE_ALLOC_STEP;/* make sure we have enough memory */
 				positions = erealloc(positions, allocated*sizeof(char *));
 			}
-			positions[found++] = p1 = p2 + Z_STRLEN_P(delim);
-		} while ((p2 = (char*)php_memnstr(p1, Z_STRVAL_P(delim), Z_STRLEN_P(delim), endp)) != NULL);
+			positions[found++] = p1 = p2 + delim->len;
+			p2 = (char *) php_memnstr(p1, delim->val, delim->len, endp);
+		} while (p2 != NULL);
 
 		to_return = limit + found;
 		/* limit is at least -1 therefore no need of bounds checking : i will be always less than found */
-		for (i = 0;i < to_return;i++) { /* this checks also for to_return > 0 */
+		for (i = 0; i < to_return; i++) { /* this checks also for to_return > 0 */
 			add_next_index_stringl(return_value, positions[i],
-					(positions[i+1] - Z_STRLEN_P(delim)) - positions[i]);
+					(positions[i+1] - delim->len) - positions[i]);
 		}
 		efree(positions);
 	}
@@ -1086,7 +1082,6 @@ PHP_FUNCTION(explode)
 {
 	zend_string *str, *delim;
 	zend_long limit = ZEND_LONG_MAX; /* No limit */
-	zval zdelim, zstr;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &delim, &str, &limit) == FAILURE) {
@@ -1110,17 +1105,15 @@ PHP_FUNCTION(explode)
 
 	if (str->len == 0) {
 	  	if (limit >= 0) {
-			add_next_index_stringl(return_value, "", sizeof("") - 1);
+			add_next_index_str(return_value, STR_EMPTY_ALLOC());
 		}
 		return;
 	}
 
-	ZVAL_STR(&zstr, str);
-	ZVAL_STR(&zdelim, delim);
 	if (limit > 1) {
-		php_explode(&zdelim, &zstr, return_value, limit);
+		php_explode(delim, str, return_value, limit);
 	} else if (limit < 0) {
-		php_explode_negative_limit(&zdelim, &zstr, return_value, limit);
+		php_explode_negative_limit(delim, str, return_value, limit);
 	} else {
 		add_index_stringl(return_value, 0, str->val, str->len);
 	}
@@ -1133,7 +1126,7 @@ PHP_FUNCTION(explode)
 
 /* {{{ php_implode
  */
-PHPAPI void php_implode(zval *delim, zval *arr, zval *return_value TSRMLS_DC)
+PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value TSRMLS_DC)
 {
 	zval          *tmp;
 	smart_str      implstr = {0};
@@ -1170,8 +1163,8 @@ again:
 				size_t str_len = spprintf(&stmp, 0, "%.*G", (int) EG(precision), Z_DVAL_P(tmp));
 				smart_str_appendl(&implstr, stmp, str_len);
 				efree(stmp);
-			}
 				break;
+			}
 
 			case IS_REFERENCE:
 				tmp = Z_REFVAL_P(tmp);
@@ -1186,7 +1179,7 @@ again:
 		}
 
 		if (++i != numelems) {
-			smart_str_append(&implstr, Z_STR_P(delim));
+			smart_str_append(&implstr, delim);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -1205,7 +1198,8 @@ again:
    Joins array elements placing glue string between items and return one string */
 PHP_FUNCTION(implode)
 {
-	zval *arg1 = NULL, *arg2 = NULL, *delim, *arr, tmp;
+	zval *arg1, *arg2 = NULL, *arr;
+	zend_string *delim;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|z", &arg1, &arg2) == FAILURE) {
@@ -1225,20 +1219,15 @@ PHP_FUNCTION(implode)
 			return;
 		}
 
-		ZVAL_EMPTY_STRING(&tmp);
-		delim = &tmp;
-
-		SEPARATE_ZVAL(arg1);
+		delim = STR_EMPTY_ALLOC();
 		arr = arg1;
 	} else {
 		if (Z_TYPE_P(arg1) == IS_ARRAY) {
+			delim = zval_get_string(arg2);
 			arr = arg1;
-			convert_to_string_ex(arg2);
-			delim = arg2;
 		} else if (Z_TYPE_P(arg2) == IS_ARRAY) {
+			delim = zval_get_string(arg1);
 			arr = arg2;
-			convert_to_string_ex(arg1);
-			delim = arg1;
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid arguments passed");
 			return;
@@ -1246,6 +1235,7 @@ PHP_FUNCTION(implode)
 	}
 
 	php_implode(delim, arr, return_value TSRMLS_CC);
+	zend_string_release(delim);
 }
 /* }}} */
 
