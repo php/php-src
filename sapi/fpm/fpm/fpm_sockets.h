@@ -45,10 +45,4 @@ static inline int fd_set_blocked(int fd, int blocked) /* {{{ */
 }
 /* }}} */
 
-#define IPQUAD(sin_addr) \
-			(unsigned int) ((unsigned char *) &(sin_addr)->s_addr)[0], \
-			(unsigned int) ((unsigned char *) &(sin_addr)->s_addr)[1], \
-			(unsigned int) ((unsigned char *) &(sin_addr)->s_addr)[2], \
-			(unsigned int) ((unsigned char *) &(sin_addr)->s_addr)[3]
-
 #endif

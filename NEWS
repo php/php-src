@@ -7,13 +7,24 @@ PHP                                                                        NEWS
     as 6.2 (instead of 6.3)). (Christian Wenz)
   . Fixed bug #67633 (A foreach on an array returned from a function not doing
     copy-on-write). (Nikita)
+  . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
+  . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
 
 - FPM:
   . Fixed bug #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable
     when using Apache, mod_proxy-fcgi and ProxyPass). (Remi)
+  . Implemented FR #55508 (listen and listen.allowed_clients should take IPv6
+    addresses). (Robin Gloster)
+
+- Reflection:
+  . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
+
+- OpenSSL:
+  . Fixed bug #68074 (Allow to use system cipher list instead of hardcoded
+    value). (Remi)
 
 
-25 Sep 2014, PHP 5.6.1
+02 Oct 2014, PHP 5.6.1
 
 - Core:
   . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
@@ -24,6 +35,11 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #67985 (Incorrect last used array index copied to new array after
     unset). (Tjerk)
+  . Fixed bug #68088 (New Posthandler Potential Illegal efree() vulnerability).
+    (Mike) (CVE-2014-3622)
+
+- DOM:
+  . Made DOMNode::textContent writeable. (Tjerk)
 
 - Fileinfo:
   . Fixed bug #67731 (finfo::file() returns invalid mime type
@@ -48,8 +64,8 @@ PHP                                                                        NEWS
   . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3).
     (Daniel Lowrey)
 
-- DOM:
-  . Made DOMNode::textContent writeable. (Tjerk)
+- phpdbg:
+  . Fixed issue krakjoe/phpdbg#111 (compile error without ZEND_SIGNALS). (Bob)
 
 - SOAP:
   . Fixed bug #67955 (SoapClient prepends 0-byte to cookie names). (Philip Hofstetter)
