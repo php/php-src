@@ -360,22 +360,29 @@ struct _zend_execute_data {
 	zend_execute_data   *call;             /* current call                   */
 	void               **run_time_cache;
 	zend_function       *func;             /* executed op_array              */
-	uint32_t            num_args;
-	zend_uchar           flags;
-	zend_uchar           frame_kind;
-	zend_class_entry    *called_scope;
 	zval                 This;
+	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
+	uint32_t             frame_info;
+	uint32_t             num_args;
 	zval                *return_value;
 	zend_class_entry    *scope;            /* function scope (self)          */
 	zend_array          *symbol_table;
 	const zend_op       *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
 	zend_object         *delayed_exception;
-	zval                 old_error_reporting;
+	uint32_t             silence_op_num;
+	uint32_t             old_error_reporting;
 };
 
-#define ZEND_CALL_CTOR               (1 << 0)
-#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 1)
+#define VM_FRAME_KIND_MASK           0x000000ff
+#define VM_FRAME_FLAGS_MASK          0xffffff00
+
+#define ZEND_CALL_CTOR               (1 << 8)
+#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 9)
+
+#define VM_FRAME_INFO(kind, flags)   ((kind) | (flags))
+#define VM_FRAME_KIND(info)          ((info) & VM_FRAME_KIND_MASK)
+#define VM_FRAME_FLAGS(info)         ((info) & VM_FRAME_FLAGS_MASK)
 
 #define ZEND_CALL_FRAME_SLOT \
 	((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))

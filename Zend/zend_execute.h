@@ -35,7 +35,7 @@ ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data, z
 void init_executor(TSRMLS_D);
 void shutdown_executor(TSRMLS_D);
 void shutdown_destructors(TSRMLS_D);
-ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, vm_frame_kind frame_kind TSRMLS_DC);
+ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value TSRMLS_DC);
 ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data *call, zend_op_array *op_array, zval *return_value TSRMLS_DC);
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value TSRMLS_DC);
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
@@ -205,7 +205,7 @@ static zend_always_inline zval* zend_vm_stack_alloc(size_t size TSRMLS_DC)
 	return (zval*)top;
 }
 
-static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_function *func, uint32_t num_args, zend_uchar flags, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
+static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint32_t frame_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
 {
 	uint32_t used_stack = ZEND_CALL_FRAME_SLOT + num_args;
 	zend_execute_data *call;
@@ -215,11 +215,11 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(zend_
 	}
 	call = (zend_execute_data*)zend_vm_stack_alloc(used_stack * sizeof(zval) TSRMLS_CC);
 	call->func = func;
-	call->num_args = 0;
-	call->flags = flags;
-	call->called_scope = called_scope;
 	ZVAL_OBJ(&call->This, object);
+	call->called_scope = called_scope;
 	call->prev_execute_data = prev;
+	call->frame_info = frame_info;
+	call->num_args = 0;
 	return call;
 }
 
