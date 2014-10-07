@@ -239,7 +239,7 @@ PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt,
 #    error Data struct used by crypt_r() is unknown. Please report.
 #  endif
 		crypt_res = crypt_r(password, salt, &buffer);
-		if (!crypt_res) {
+		if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
 			return FAILURE;
 		} else {
 			*result = estrdup(crypt_res);
