@@ -314,7 +314,7 @@ ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_e
 
 ZEND_API int zend_do_fcall(ZEND_OPCODE_HANDLER_ARGS);
 
-void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC);
+ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC);
 void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC);
 
 #define CACHED_PTR(num) \
