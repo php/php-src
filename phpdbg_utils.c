@@ -718,19 +718,27 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 							char *old_s = s, *s_ptr;
 							free_s = s_ptr = s = emalloc(old_slen * 6 + 1);
 							do {
-								if (old_s[i] == '&' || old_s[i] == '"') {
+								if (old_s[i] == '&' || old_s[i] == '"' || old_s[i] == '<') {
 									*s_ptr++ = '&';
-									if (old_s[i] == '"') {
-										s_len += 5;
-										*s_ptr++ = 'q';
-										*s_ptr++ = 'u';
-										*s_ptr++ = 'o';
-										*s_ptr++ = 't';
-									} else {
-										s_len += 4;
-										*s_ptr++ = 'a';
-										*s_ptr++ = 'm';
-										*s_ptr++ = 'p';
+									switch (old_s[i]) {
+										case '"':
+											s_len += 5;
+											*s_ptr++ = 'q';
+											*s_ptr++ = 'u';
+											*s_ptr++ = 'o';
+											*s_ptr++ = 't';
+											break;
+										case '<':
+											s_len += 3;
+											*s_ptr++ = 'l';
+											*s_ptr++ = 't';
+											break;
+										case '&':
+											s_len += 4;
+											*s_ptr++ = 'a';
+											*s_ptr++ = 'm';
+											*s_ptr++ = 'p';
+											break;
 									}
 									*s_ptr++ = ';';
 								} else {
@@ -1052,15 +1060,18 @@ PHPAPI int phpdbg_xml_vasprintf(char **buf, const char *format, zend_bool escape
 }
 /* copy end */
 
-static int phpdbg_encode_xml(char **buf, char *msg, int msglen, char from, char *to) {
+static int phpdbg_encode_xml(char **buf, char *msg, int msglen, int from, char *to) {
 	int i;
-	char *tmp = *buf = emalloc(msglen * strlen(to));
-	int tolen = strlen(to);
+	int tolen = to ? strlen(to) : 5;
+	char *tmp = *buf = emalloc(msglen * tolen);
 	for (i = 0; i++ < msglen; msg++) {
 		if (*msg == '&') {
 			memcpy(tmp, ZEND_STRL("&amp;"));
 			tmp += sizeof("&amp;") - 1;
-		} else if (*msg == from) {
+		} else if (*msg == '<') {
+			memcpy(tmp, ZEND_STRL("&lt;"));
+			tmp += sizeof("&lt;") - 1;
+		} else if (((int) *msg) == from) {
 			memcpy(tmp, to, tolen);
 			tmp += tolen;
 		} else {
@@ -1319,7 +1330,7 @@ PHPDBG_API int phpdbg_xml_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 		int buflen;
 
 		va_start(args, fmt);
-		buflen = phpdbg_xml_vasprintf(&buffer, fmt, 0, args TSRMLS_CC);
+		buflen = phpdbg_xml_vasprintf(&buffer, fmt, 1, args TSRMLS_CC);
 		va_end(args);
 
 		if (PHPDBG_G(in_script_xml)) {
@@ -1361,13 +1372,18 @@ PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 	va_end(args);
 
 	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
+		char *msg;
+		int msglen;
+
+		msglen = phpdbg_encode_xml(&msg, buffer, buflen, 256, NULL);
+
 		if (PHPDBG_G(in_script_xml)) {
 			write(fd, ZEND_STRL("</stream>"));
 			PHPDBG_G(in_script_xml) = 0;
 		}
 
 		write(fd, ZEND_STRL("<phpdbg>"));
-		len = write(fd, buffer, buflen);
+		len = write(fd, msg, msglen);
 		write(fd, ZEND_STRL("</phpdbg>"));
 	} else {
 		len = write(fd, buffer, buflen);
