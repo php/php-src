@@ -777,9 +777,9 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async
 					return FAILURE;
 				}
 
-				phpdbg_activate_err_buf(0 TSRMLS_CC);
-				phpdbg_free_err_buf(TSRMLS_C);
 				if (phpdbg_stack_verify(handler, &top TSRMLS_CC) == SUCCESS) {
+					phpdbg_activate_err_buf(0 TSRMLS_CC);
+					phpdbg_free_err_buf(TSRMLS_C);
 					return handler->handler(top TSRMLS_CC);
 				}
 			}
