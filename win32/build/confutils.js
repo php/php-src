@@ -1429,7 +1429,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		obj = src.replace(re, ".obj");
 		tv += " " + sub_build + obj;
 
-		if (!MODE_PHPIZE && PHP_ONE_SHOT == "yes") {
+		if (!PHP_MP_DISABLED) {
 			if (i > 0) {
 				objs_line += " " + sub_build + obj;	
 				srcs_line += " " + dir + "\\" + src;
@@ -1448,7 +1448,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		}
 	}
 
-	if (!MODE_PHPIZE && PHP_ONE_SHOT == "yes") {
+	if (!PHP_MP_DISABLED) {
 		MFO.WriteLine(objs_line + ": " + srcs_line);
 		MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + " $(" + bd_flags_name + ") /c " + srcs_line);
 	}
