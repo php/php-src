@@ -69,6 +69,7 @@ intro
 - appears on startup if -q flag wasn't provided as command line arg
 - before any input possibility
 - attributes may be spread over multiple tags
+- wrapped in <intros> tag
 
 ### attributes ###
 

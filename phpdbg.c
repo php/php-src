@@ -733,9 +733,11 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 {
 	/* print blurb */
 	if (!cleaning) {
+		phpdbg_xml("<intros>");
 		phpdbg_notice("intro", "version=\"%s\"", "Welcome to phpdbg, the interactive PHP debugger, v%s", PHPDBG_VERSION);
 		phpdbg_writeln("intro", "help=\"help\"", "To get help using phpdbg type \"help\" and press enter");
 		phpdbg_notice("intro", "report=\"%s\"", "Please report bugs to <%s>", PHPDBG_ISSUES);
+		phpdbg_xml("</intros>");
 	} else {
 		if (!(PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {
 			phpdbg_notice(NULL, NULL, "Clean Execution Environment");
