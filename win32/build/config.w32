@@ -166,7 +166,7 @@ if (VCVERS >= 1400) {
 	}
 }
 
-ARG_WITH('mp', 'Tell VC9+ use up to [n,auto,disable] processes for compilation', 'auto');
+ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 if (VCVERS >= 1500 && PHP_MP != 'disable') {
 		// no from disable-all 
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
