@@ -151,14 +151,17 @@ if (VCVERS >= 1400) {
 }
 
 ARG_WITH('prefix', 'PHP installation prefix', '');
-ARG_WITH('mp', 'Tell VC9+ use up to [n,auto,disable] processes for compilation', 'auto');
+ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
+var PHP_MP_DISABLED = true;
 if (VCVERS >= 1500 && PHP_MP != 'disable') {
 		// no from disable-all 
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
+			PHP_MP_DISABLED = false;
 		} else {
 			if(parseInt(PHP_MP) != 0) {
 				ADD_FLAG('CFLAGS', ' /MP'+ PHP_MP +' ');
+				PHP_MP_DISABLED = false;
 			} else {
 				STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
 			}
