@@ -95,7 +95,10 @@ typedef void (*zend_object_dtor_obj_t)(zend_object *object TSRMLS_DC);
 typedef void (*zend_object_free_obj_t)(zend_object *object TSRMLS_DC);
 typedef zend_object* (*zend_object_clone_obj_t)(zval *object TSRMLS_DC);
 
-typedef zend_string *(*zend_object_get_class_name_t)(const zend_object *object, int parent TSRMLS_DC);
+/* Get class name for display in var_dump and other debugging functions.
+ * Must be defined and must return a non-NULL value. */
+typedef zend_string *(*zend_object_get_class_name_t)(const zend_object *object TSRMLS_DC);
+
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2 TSRMLS_DC);
 typedef int (*zend_object_compare_zvals_t)(zval *resul, zval *op1, zval *op2 TSRMLS_DC);
 

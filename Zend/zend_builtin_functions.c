@@ -811,7 +811,7 @@ ZEND_FUNCTION(get_class)
 		}
 	}
 
-	RETURN_STR(zend_get_object_classname(Z_OBJ_P(obj) TSRMLS_CC));
+	RETURN_STR(zend_string_copy(Z_OBJCE_P(obj)->name));
 }
 /* }}} */
 
@@ -838,7 +838,6 @@ ZEND_FUNCTION(get_parent_class)
 {
 	zval *arg;
 	zend_class_entry *ce = NULL;
-	zend_string *name;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z", &arg) == FAILURE) {
 		return;
@@ -854,12 +853,7 @@ ZEND_FUNCTION(get_parent_class)
 	}
 
 	if (Z_TYPE_P(arg) == IS_OBJECT) {
-		if (Z_OBJ_HT_P(arg)->get_class_name
-			&& (name = Z_OBJ_HT_P(arg)->get_class_name(Z_OBJ_P(arg), 1 TSRMLS_CC)) != NULL) {
-			RETURN_STR(name);
-		} else {
-			ce = Z_OBJ_P(arg)->ce;
-		}
+		ce = Z_OBJ_P(arg)->ce;
 	} else if (Z_TYPE_P(arg) == IS_STRING) {
 	    ce = zend_lookup_class(Z_STR_P(arg) TSRMLS_CC);
 	}
@@ -2194,7 +2188,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 				if (func->common.scope) {
 					class_name = func->common.scope->name;
 				} else {
-					class_name = zend_get_object_classname(object TSRMLS_CC);
+					class_name = object->ce->name;
 				}
 
 				call_type = "->";
@@ -2301,7 +2295,6 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	zend_function *func;
 	const char *function_name;
 	const char *filename;
-	zend_string *class_name;
 	const char *include_filename = NULL;
 	zval stack_frame;
 
@@ -2416,8 +2409,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				if (func->common.scope) {
 					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(func->common.scope->name));
 				} else {
-					class_name = zend_get_object_classname(object TSRMLS_CC);
-					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(class_name));
+					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(object->ce->name));
 					
 				}
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {

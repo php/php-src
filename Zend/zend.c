@@ -263,19 +263,10 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC) /* {{{ */
 		case IS_OBJECT:
 		{
 			HashTable *properties = NULL;
-			zend_string *class_name = NULL;
+			zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr) TSRMLS_CC);
+			zend_printf("%s Object (", class_name->val);
+			zend_string_release(class_name);
 
-			if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
-				class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr), 0 TSRMLS_CC);
-			}
-			if (class_name) {
-				zend_printf("%s Object (", class_name->val);
-			} else {
-				zend_printf("%s Object (", "Unknown Class");
-			}
-			if (class_name) {
-				zend_string_release(class_name);
-			}
 			if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 				properties = Z_OBJPROP_P(expr);
 			}
@@ -324,21 +315,13 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 		case IS_OBJECT:
 			{
 				HashTable *properties;
-				zend_string *class_name = NULL;
 				int is_temp;
 
-				if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
-					class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr), 0 TSRMLS_CC);
-				}
-				if (class_name) {
-					ZEND_PUTS_EX(class_name->val);
-				} else {
-					ZEND_PUTS_EX("Unknown Class");
-				}
+				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr) TSRMLS_CC);
+				ZEND_PUTS_EX(class_name->val);
+				zend_string_release(class_name);
+
 				ZEND_PUTS_EX(" Object\n");
-				if (class_name) {
-					zend_string_release(class_name);
-				}
 				if ((properties = Z_OBJDEBUG_P(expr, is_temp)) == NULL) {
 					break;
 				}

@@ -333,7 +333,7 @@ static union _zend_function *saproxy_constructor_get(zend_object *object TSRMLS_
 	return NULL;
 }
 
-static zend_string* saproxy_class_name_get(const zend_object *object, int parent TSRMLS_DC)
+static zend_string* saproxy_class_name_get(const zend_object *object TSRMLS_DC)
 {
 	return zend_string_copy(php_com_saproxy_class_entry->name);
 }

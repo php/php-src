@@ -2636,13 +2636,9 @@ static union _zend_function *row_get_ctor(zend_object *object TSRMLS_DC)
 	return (union _zend_function*)&ctor;
 }
 
-static zend_string *row_get_classname(const zend_object *object, int parent TSRMLS_DC)
+static zend_string *row_get_classname(const zend_object *object TSRMLS_DC)
 {
-	if (parent) {
-		return NULL;
-	} else {
-		return zend_string_init("PDORow", sizeof("PDORow") - 1, 0);
-	}
+	return zend_string_init("PDORow", sizeof("PDORow") - 1, 0);
 }
 
 static int row_compare(zval *object1, zval *object2 TSRMLS_DC)

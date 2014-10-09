@@ -423,7 +423,7 @@ static union _zend_function *com_constructor_get(zend_object *object TSRMLS_DC)
 	}
 }
 
-static zend_string* com_class_name_get(const zend_object *object, int parent TSRMLS_DC)
+static zend_string* com_class_name_get(const zend_object *object TSRMLS_DC)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
 

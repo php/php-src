@@ -1525,20 +1525,9 @@ exit:
 }
 /* }}} */
 
-zend_string* zend_std_object_get_class_name(const zend_object *zobj, int parent TSRMLS_DC) /* {{{ */
+zend_string *zend_std_object_get_class_name(const zend_object *zobj TSRMLS_DC) /* {{{ */
 {
-	zend_class_entry *ce;
-
-	if (parent) {
-		if (!zobj->ce->parent) {
-			return NULL;
-		}
-		ce = zobj->ce->parent;
-	} else {
-		ce = zobj->ce;
-	}
-
-	return zend_string_copy(ce->name);
+	return zend_string_copy(zobj->ce->name);
 }
 /* }}} */
 
