@@ -491,7 +491,8 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 		}
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), element) {
-			SEPARATE_ZVAL_IF_NOT_REF(element);
+			ZVAL_DEREF(element);
+			SEPARATE_ZVAL_NOREF(element);
 			if (Z_TYPE_P(element) == IS_ARRAY) {
 				Z_ARRVAL_P(element)->u.v.nApplyCount++;
 				php_zval_filter_recursive(element, filter, flags, options, charset, copy TSRMLS_CC);

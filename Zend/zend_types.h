@@ -783,6 +783,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 
 #define SEPARATE_ZVAL_NOREF(zv) do {					\
 		zval *_zv = (zv);								\
+		ZEND_ASSERT(Z_TYPE_P(_zv) != IS_REFERENCE);		\
 		if (Z_COPYABLE_P(_zv) ||						\
 		    Z_IMMUTABLE_P(_zv)) {						\
 			if (Z_REFCOUNT_P(_zv) > 1) {				\
