@@ -780,8 +780,13 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 
 
 				case 'r':
-					s_len = spprintf(&s, 0, "req=\"%lu\"", PHPDBG_G(req_id));
-					free_s = s;
+					if (PHPDBG_G(req_id)) {
+						s_len = spprintf(&s, 0, "req=\"%lu\"", PHPDBG_G(req_id));
+						free_s = s;
+					} else {
+						s = "";
+						s_len = 0;
+					}
 					break;
 
 
