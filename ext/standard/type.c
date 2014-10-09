@@ -462,10 +462,6 @@ PHP_FUNCTION(to_int)
 			}
 
 		case IS_DOUBLE:
-			if (zend_isnan(Z_DVAL_P(var)) || !zend_finite(Z_DVAL_P(var))) {
-				RETURN_FALSE;
-			}
-
 			if (Z_DVAL_P(var) == (double)(zend_long) Z_DVAL_P(var)) {
 				/* Exactly representable as zend_long
 				 * We don't need to use zend_dval_to_lval here, cast is safe
