@@ -98,47 +98,6 @@ int dom_nodelist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* }}} */
 
-xmlNodePtr dom_nodelist_xml_item(dom_nnodemap_object *objmap, long index) /* {{{ */
-{
-	xmlNodePtr itemnode = NULL;
-
-	if (objmap->nodetype == XML_ENTITY_NODE) {
-		itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
-	} else {
-		itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
-	}
-
-	return itemnode;
-} /* }}} end dom_nodelist_xml_item */
-
-xmlNodePtr dom_nodelist_baseobj_item(dom_nnodemap_object *objmap, long index) /* {{{ */
-{
-	xmlNodePtr itemnode = NULL;
-	xmlNodePtr nodep, curnode;
-	int count = 0;
-
-	nodep = dom_object_get_node(objmap->baseobj);
-	if (nodep) {
-		if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
-			curnode = nodep->children;
-			while (count < index && curnode != NULL) {
-				count++;
-				curnode = curnode->next;
-			}
-			itemnode = curnode;
-		} else {
-			if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-				nodep = xmlDocGetRootElement((xmlDoc *) nodep);
-			} else {
-				nodep = nodep->children;
-			}
-			itemnode = dom_get_elements_by_tag_name_ns_raw(nodep, (char *) objmap->ns, (char *) objmap->local, &count, index);
-		}
-	}
-
-	return itemnode;
-} /* }}} end dom_nodelist_baseobj_item */
-
 /* {{{ proto DOMNode dom_nodelist_item(int index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
 Since: 
@@ -152,6 +111,8 @@ PHP_FUNCTION(dom_nodelist_item)
 	xmlNodePtr itemnode = NULL;
 
 	dom_nnodemap_object *objmap;
+	xmlNodePtr nodep, curnode;
+	int count = 0;
 	HashTable *nodeht;
 	zval **entry;
 
@@ -165,16 +126,38 @@ PHP_FUNCTION(dom_nodelist_item)
 		objmap = (dom_nnodemap_object *)intern->ptr;
 		if (objmap != NULL) {
 			if (objmap->ht) {
-				itemnode = dom_nodelist_xml_item(objmap, index);
+				if (objmap->nodetype == XML_ENTITY_NODE) {
+					itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
+				} else {
+					itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
+				}
 			} else {
 				if (objmap->nodetype == DOM_NODESET) {
 					nodeht = HASH_OF(objmap->baseobjptr);
 					if (zend_hash_index_find(nodeht, index, (void **) &entry)==SUCCESS) {
-						MAKE_COPY_ZVAL(entry, return_value);
+						*return_value = **entry;
+						zval_copy_ctor(return_value);
 						return;
 					}
 				} else if (objmap->baseobj) {
-					itemnode = dom_nodelist_baseobj_item(objmap, index);
+					nodep = dom_object_get_node(objmap->baseobj);
+					if (nodep) {
+						if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
+							curnode = nodep->children;
+							while (count < index && curnode != NULL) {
+								count++;
+								curnode = curnode->next;
+							}
+							itemnode = curnode;
+						} else {
+							if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
+								nodep = xmlDocGetRootElement((xmlDoc *) nodep);
+							} else {
+								nodep = nodep->children;
+							}
+							itemnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &count, index);
+						}
+					}
 				}
 			}
 		}

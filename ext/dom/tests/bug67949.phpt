@@ -5,16 +5,57 @@ Bug #67949: DOMNodeList elements should be accessible through array notation
 
 $html = <<<HTML
 <div>data</div>
+<a href="test">hello world</a>
 HTML;
 $doc = new DOMDocument;
 $doc->loadHTML($html);
-var_dump($doc->getElementsByTagName('div')[0]->textContent);
-var_dump($doc->getElementsByTagName('div')['test']->textContent); // testing that weak casting works
-var_dump(isset($doc->getElementsByTagName('div')[0]));
-var_dump(isset($doc->getElementsByTagName('div')[1]));
 
---EXPECT--
-string(4) "data"
-string(4) "data"
+$nodes = $doc->getElementsByTagName('div');
+
+echo "testing has_dimension\n";
+var_dump(isset($nodes[0]));
+var_dump(isset($nodes[1]));
+var_dump(isset($nodes[-1]));
+
+echo "testing property access\n";
+var_dump($nodes[0]->textContent);
+var_dump($nodes[1]->textContent);
+
+echo "testing offset not a long\n";
+$offset = 'test';
+var_dump($offset);
+var_dump($nodes[$offset]->textContent);
+var_dump($offset);
+var_dump(isset($nodes[$offset]));
+var_dump($offset);
+
+echo "testing read_dimension with null offset\n";
+var_dump($nodes[][] = 1);
+
+echo "testing attribute access\n";
+$anchor = $doc->getElementsByTagName('a')[0];
+var_dump($anchor->attributes[0]->name);
+
+echo "==DONE==\n";
+
+--EXPECTF--
+testing has_dimension
 bool(true)
 bool(false)
+bool(false)
+testing property access
+string(4) "data"
+
+Notice: Trying to get property of non-object in %s on line %d
+NULL
+testing offset not a long
+string(4) "test"
+string(4) "data"
+string(4) "test"
+bool(true)
+string(4) "test"
+testing read_dimension with null offset
+NULL
+testing attribute access
+string(4) "href"
+==DONE==
