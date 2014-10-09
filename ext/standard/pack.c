@@ -82,7 +82,7 @@ static int machine_endian_long_map[4];
 static int big_endian_long_map[4];
 static int little_endian_long_map[4];
 
-#if SIZEOF_LONG > 4
+#if SIZEOF_ZEND_LONG > 4
 /* Mappings of bytes from quads (64bit) for all endian environments */
 static int machine_endian_longlong_map[8];
 static int big_endian_longlong_map[8];
@@ -209,7 +209,7 @@ PHP_FUNCTION(pack)
 			case 'Q':
 			case 'J':
 			case 'P':
-#if SIZEOF_LONG < 8
+#if SIZEOF_ZEND_LONG < 8
 					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
@@ -298,7 +298,7 @@ PHP_FUNCTION(pack)
 				INC_OUTPUTPOS(arg,4)		/* 32 bit per arg */
 				break;
 
-#if SIZEOF_LONG > 4
+#if SIZEOF_ZEND_LONG > 4
 			case 'q':
 			case 'Q':
 			case 'J':
@@ -457,7 +457,7 @@ PHP_FUNCTION(pack)
 				break;
 			}
 
-#if SIZEOF_LONG > 4
+#if SIZEOF_ZEND_LONG > 4
 			case 'q':
 			case 'Q':
 			case 'J':
@@ -471,7 +471,7 @@ PHP_FUNCTION(pack)
 				}
 
 				while (arg-- > 0) {
-					php_pack(argv[currentarg++], 8, map, &output[outputpos]);
+					php_pack(&argv[currentarg++], 8, map, &output[outputpos]);
 					outputpos += 8;
 				}
 				break;
@@ -675,7 +675,7 @@ PHP_FUNCTION(unpack)
 			case 'Q':
 			case 'J':
 			case 'P':
-#if SIZEOF_LONG > 4
+#if SIZEOF_ZEND_LONG > 4
 				size = 8;
 				break;
 #else
@@ -907,7 +907,7 @@ PHP_FUNCTION(unpack)
 						break;
 					}
 
-#if SIZEOF_LONG > 4
+#if SIZEOF_ZEND_LONG > 4
 					case 'q':
 					case 'Q':
 					case 'J':
@@ -1043,7 +1043,7 @@ PHP_MINIT_FUNCTION(pack)
 		little_endian_long_map[2] = 2;
 		little_endian_long_map[3] = 3;
 
-#if SIZEOF_LONG > 4
+#if SIZEOF_ZEND_LONG > 4
 		machine_endian_longlong_map[0] = 0;
 		machine_endian_longlong_map[1] = 1;
 		machine_endian_longlong_map[2] = 2;
@@ -1102,7 +1102,7 @@ PHP_MINIT_FUNCTION(pack)
 		little_endian_long_map[2] = size - 3;
 		little_endian_long_map[3] = size - 4;
 
-#if SIZEOF_LONG > 4
+#if SIZEOF_ZEND_LONG > 4
 		machine_endian_longlong_map[0] = size - 8;
 		machine_endian_longlong_map[1] = size - 7;
 		machine_endian_longlong_map[2] = size - 6;
