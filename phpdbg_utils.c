@@ -1086,9 +1086,36 @@ static int phpdbg_encode_xml(char **buf, char *msg, int msglen, int from, char *
 
 	{
 		int len = tmp - *buf;
-		*buf = erealloc(*buf, len);
+		*buf = erealloc(*buf, len + 1);
 		return len;
 	}
+}
+
+static void phpdbg_encode_ctrl_chars(char **buf, int *buflen) {
+	char *tmp, *tmpptr;
+	int len = *buflen;
+	int i;
+
+	tmp = tmpptr = emalloc(*buflen * 5);
+
+	for (i = 0; i < *buflen; i++) {
+		if ((*buf)[i] < 0x20) {
+			len += 4;
+			*tmpptr++ = '&';
+			*tmpptr++ = '#';
+			*tmpptr++ = ((*buf)[i] / 10) + '0';
+			*tmpptr++ = ((*buf)[i] % 10) + '0';
+			*tmpptr++ = ';';
+		} else {
+			*tmpptr++ = (*buf)[i];
+		}
+	}
+
+	len = tmpptr - tmp;
+
+	efree(*buf);
+	*buf = erealloc(tmp, len + 1);
+	*buflen = len;
 }
 
 static int phpdbg_process_print(int fd, int type, const char *tag, const char *msg, int msglen, const char *xml, int xmllen TSRMLS_DC) {
@@ -1174,6 +1201,7 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 						PHPDBG_G(in_script_xml) = type;
 					}
 					buf = php_escape_html_entities((unsigned char *) msg, msglen, (size_t *) &buflen, 0, ENT_NOQUOTES, PG(internal_encoding) && PG(internal_encoding)[0] ? PG(internal_encoding) : (SG(default_charset) ? SG(default_charset) : "UTF-8") TSRMLS_CC);
+					phpdbg_encode_ctrl_chars(&buf, &buflen);
 					write(fd, buf, buflen);
 					efree(buf);
 				} else {
@@ -1216,6 +1244,7 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 			xmloutlen = spprintf(&xmlout, 0, "<%s severity=\"%s\" %.*s msgout=\"\" />", tag, severity, xmllen, xml);
 		}
 
+		phpdbg_encode_ctrl_chars(&xmlout, &xmloutlen);
 		write(fd, xmlout, xmloutlen);
 		efree(xmlout);
 	} else if (msgout) {
