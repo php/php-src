@@ -198,7 +198,7 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 
 ZEND_API zend_class_entry *zend_get_class_entry(const zend_object *zobject TSRMLS_DC) /* {{{ */
 {
-	return zobject->handlers->get_class_entry(zobject TSRMLS_CC);
+	return zobject->ce;
 }
 /* }}} */
 

@@ -1958,7 +1958,6 @@ static zend_object_handlers sxe_object_handlers = { /* {{{ */
 	NULL, /* zend_get_std_object_handlers()->get_method,*/
 	NULL, /* zend_get_std_object_handlers()->call_method,*/
 	NULL, /* zend_get_std_object_handlers()->get_constructor, */
-	NULL, /* zend_get_std_object_handlers()->get_class_entry,*/
 	NULL, /* zend_get_std_object_handlers()->get_class_name,*/
 	sxe_objects_compare,
 	sxe_object_cast,
@@ -2580,7 +2579,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.clone_obj = sxe_object_clone;
 	sxe_object_handlers.get_method = zend_get_std_object_handlers()->get_method;
 	sxe_object_handlers.get_constructor = zend_get_std_object_handlers()->get_constructor;
-	sxe_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
 	sxe_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
 	sxe_class_entry->serialize = zend_class_serialize_deny;
 	sxe_class_entry->unserialize = zend_class_unserialize_deny;

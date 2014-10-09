@@ -1089,7 +1089,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 		/* Ensure that if we're calling a private function, we're allowed to do so.
 		 * If we're not and __call() handler exists, invoke it, otherwise error out.
 		 */
-		updated_fbc = zend_check_private_int(fbc, zobj->handlers->get_class_entry(zobj TSRMLS_CC), lc_method_name TSRMLS_CC);
+		updated_fbc = zend_check_private_int(fbc, zobj->ce, lc_method_name TSRMLS_CC);
 		if (EXPECTED(updated_fbc != NULL)) {
 			fbc = updated_fbc;
 		} else {
@@ -1525,12 +1525,6 @@ exit:
 }
 /* }}} */
 
-zend_class_entry *zend_std_object_get_class(const zend_object *object TSRMLS_DC) /* {{{ */
-{
-	return object->ce;
-}
-/* }}} */
-
 zend_string* zend_std_object_get_class_name(const zend_object *zobj, int parent TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce;
@@ -1660,7 +1654,6 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_get_method,					/* get_method */
 	NULL,									/* call_method */
 	zend_std_get_constructor,				/* get_constructor */
-	zend_std_object_get_class,				/* get_class_entry */
 	zend_std_object_get_class_name,			/* get_class_name */
 	zend_std_compare_objects,				/* compare_objects */
 	zend_std_cast_object_tostring,			/* cast_object */

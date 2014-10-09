@@ -287,7 +287,7 @@ void zend_shutdown_timeout_thread(void);
 /* The following tries to resolve the classname of a zval of type object.
  * Since it is slow it should be only used in error messages.
  */
-#define Z_OBJ_CLASS_NAME_P(obj) ((obj) ? (obj)->handlers->get_class_entry(obj TSRMLS_CC)->name->val : "")
+#define Z_OBJ_CLASS_NAME_P(obj) ((obj) ? (obj)->ce->name->val : "")
 
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, uint32_t var);
 
