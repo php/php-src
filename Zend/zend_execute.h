@@ -247,11 +247,6 @@ void zend_shutdown_timeout_thread(void);
 #define WM_UNREGISTER_ZEND_TIMEOUT		(WM_USER+2)
 #endif
 
-/* The following tries to resolve the classname of a zval of type object.
- * Since it is slow it should be only used in error messages.
- */
-#define Z_OBJ_CLASS_NAME_P(obj) ((obj) ? (obj)->ce->name->val : "")
-
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, uint32_t var);
 
 #define ZEND_USER_OPCODE_CONTINUE   0 /* execute next opcode */
