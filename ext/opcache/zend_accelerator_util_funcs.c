@@ -38,6 +38,9 @@ static uint32_t zend_accel_refcount = ZEND_PROTECTED_REFCOUNT;
 # define accel_xlat_get(old, new)	((new) = zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (zend_ulong)(zend_uintptr_t)(old), (void**)&(new)))
 #endif
 
+#define ARENA_REALLOC(ptr) \
+	(void*)(((char*)(ptr)) + ((char*)ZCG(arena_mem) - (char*)ZCG(current_persistent_script)->arena_mem))
+
 typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
 
@@ -469,9 +472,8 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		q->key = zend_clone_str(p->key TSRMLS_CC);
 
 		/* Copy data */
-		ZVAL_PTR(&q->val, (void *) zend_arena_alloc(&CG(arena), sizeof(zend_op_array)));
+		ZVAL_PTR(&q->val, ARENA_REALLOC(Z_PTR(p->val)));
 		new_entry = (zend_op_array*)Z_PTR(q->val);
-		*new_entry = *(zend_op_array*)Z_PTR(p->val);
 
 		/* Copy constructor */
 		/* we use refcount to show that op_array is referenced from several places */
@@ -546,9 +548,8 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		q->key = zend_clone_str(p->key TSRMLS_CC);
 
 		/* Copy data */
-		ZVAL_PTR(&q->val, (void *) zend_arena_alloc(&CG(arena), sizeof(zend_property_info)));
+		ZVAL_PTR(&q->val, ARENA_REALLOC(Z_PTR(p->val)));
 		prop_info = Z_PTR(q->val);
-		*prop_info = *(zend_property_info*)Z_PTR(p->val);
 
 		/* Copy constructor */
 		prop_info->name = zend_clone_str(prop_info->name TSRMLS_CC);
@@ -607,8 +608,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_function *new_func;
 	TSRMLS_FETCH();
 
-	*pce = ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
-	*ce = *old_ce;
+	*pce = ce = ARENA_REALLOC(old_ce);
 	ce->refcount = 1;
 
 	if (old_ce->refcount != 1) {
@@ -799,8 +799,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source, 
 			}
 		}
 		if (pCopyConstructor) {
-			Z_PTR_P(t) = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-			memcpy(Z_PTR_P(t), Z_PTR(p->val), sizeof(zend_op_array));			
+			Z_PTR_P(t) = ARENA_REALLOC(Z_PTR(p->val));
 			pCopyConstructor(Z_PTR_P(t));
 		}
 	}
@@ -876,8 +875,15 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 	op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
 	*op_array = persistent_script->main_op_array;
 
-	if (from_shared_memory) {
+	if (EXPECTED(from_shared_memory)) {
 		zend_hash_init(&ZCG(bind_hash), 10, NULL, NULL, 0);
+
+		ZCG(current_persistent_script) = persistent_script;
+		ZCG(arena_mem) = NULL;
+		if (EXPECTED(persistent_script->arena_size)) {
+			ZCG(arena_mem) = zend_arena_alloc(&CG(arena), persistent_script->arena_size);
+			memcpy(ZCG(arena_mem), persistent_script->arena_mem, persistent_script->arena_size);
+		}
 
 		/* Copy all the necessary stuff from shared memory to regular memory, and protect the shared script */
 		if (zend_hash_num_elements(&persistent_script->class_table) > 0) {
@@ -905,6 +911,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		}
 
 		zend_hash_destroy(&ZCG(bind_hash));
+		ZCG(current_persistent_script) = NULL;
 	} else /* if (!from_shared_memory) */ {
 		if (zend_hash_num_elements(&persistent_script->function_table) > 0) {
 			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table, NULL TSRMLS_CC);
@@ -921,7 +928,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		CG(compiled_filename) = orig_compiled_filename;
 	}
 
-	if (!from_shared_memory) {
+	if (UNEXPECTED(!from_shared_memory)) {
 		free_persistent_script(persistent_script, 0); /* free only hashes */
 	}
 
