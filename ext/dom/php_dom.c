@@ -1544,70 +1544,39 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 }
 /* }}} end dom_get_nsdecl */
 
-static int dom_nodelist_fetch_dimension(xmlNodePtr *itemnode, zval *offset, dom_nnodemap_object *objmap, zval *rv TSRMLS_DC) /* {{{ */
-{
-	long index = zval_get_long(offset);
-	HashTable *nodeht;
-	int ret = 0;
-
-	if (objmap->ht) {
-		*itemnode = dom_nodelist_xml_item(objmap, index);
-	} else {
-		if (objmap->nodetype == DOM_NODESET) {
-			nodeht = HASH_OF(&objmap->baseobj_zv);
-			zval *entry = zend_hash_index_find(nodeht, index);
-			if (entry) {
-				if (itemnode != NULL && rv != NULL) {
-					/* Passed by read_dimension */
-					ZVAL_COPY(rv, entry);
-				}
-				ret = 1;
-			}
-		} else if (objmap->baseobj) {
-			if (itemnode == NULL && rv == NULL) {
-				/* Passed by has_dimension */
-				if (dom_nodelist_baseobj_item(objmap, index)) {
-					ret = 1;
-				}
-			} else {
-				*itemnode = dom_nodelist_baseobj_item(objmap, index);
-			}
-		}
-	}
-
-	if (rv != NULL && itemnode != NULL) {
-		if (*itemnode) {
-			ret = 1;
-		}
-	}
-
-	return ret;
-} /* }}} end dom_nodelist_fetch_dimension */
-
 zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type, zval *rv TSRMLS_DC) /* {{{ */
 {
-	dom_object *intern = Z_DOMOBJ_P(object);
-	xmlNodePtr itemnode = NULL;
-	dom_nnodemap_object *objmap = (dom_nnodemap_object *)intern->ptr;
+	zval offset_copy;
 
-	if (dom_nodelist_fetch_dimension(&itemnode, offset, objmap, rv TSRMLS_CC)) {
-		if (itemnode) {
-			php_dom_create_object(itemnode, rv, objmap->baseobj TSRMLS_CC);
-		}
+	if (!offset) {
+		return NULL;
 	}
+
+	ZVAL_COPY(&offset_copy, offset);
+	convert_to_long(&offset_copy);
+
+	zend_call_method_with_1_params(object, Z_OBJCE_P(object), NULL, "item", rv, &offset_copy);
 
 	return rv;
 } /* }}} end dom_nodelist_read_dimension */
 
 int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty TSRMLS_DC)
 {
-	dom_object *intern;
-	dom_nnodemap_object *objmap;
+	zval *length, offset_copy;
+	int ret;
 
-	intern = Z_DOMOBJ_P(object);
-	objmap = (dom_nnodemap_object *)intern->ptr;
+	ZVAL_COPY(&offset_copy, member);
+	convert_to_long(&offset_copy);
 
-	return dom_nodelist_fetch_dimension(NULL, member, objmap, NULL TSRMLS_CC);
+	if (Z_LVAL(offset_copy) < 0) {
+		return 0;
+	}
+
+	length = zend_read_property(Z_OBJCE_P(object), object, "length", sizeof("length") - 1, 0 TSRMLS_CC);
+
+	ret = Z_LVAL(offset_copy) < Z_LVAL_P(length);
+
+	return ret;
 } /* }}} end dom_nodelist_has_dimension */
 
 #endif /* HAVE_DOM */
