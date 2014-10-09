@@ -333,11 +333,6 @@ static union _zend_function *saproxy_constructor_get(zend_object *object TSRMLS_
 	return NULL;
 }
 
-static zend_class_entry *saproxy_class_entry_get(const zend_object *object TSRMLS_DC)
-{
-	return php_com_saproxy_class_entry;
-}
-
 static zend_string* saproxy_class_name_get(const zend_object *object, int parent TSRMLS_DC)
 {
 	return zend_string_copy(php_com_saproxy_class_entry->name);
@@ -420,7 +415,6 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_method_get,
 	saproxy_call_method,
 	saproxy_constructor_get,
-	saproxy_class_entry_get,
 	saproxy_class_name_get,
 	saproxy_objects_compare,
 	saproxy_object_cast,

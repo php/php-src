@@ -423,13 +423,6 @@ static union _zend_function *com_constructor_get(zend_object *object TSRMLS_DC)
 	}
 }
 
-static zend_class_entry *com_class_entry_get(const zend_object *object TSRMLS_DC)
-{
-	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
-
-	return obj->ce;
-}
-
 static zend_string* com_class_name_get(const zend_object *object, int parent TSRMLS_DC)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
@@ -564,7 +557,6 @@ zend_object_handlers php_com_object_handlers = {
 	com_method_get,
 	com_call_method,
 	com_constructor_get,
-	com_class_entry_get,
 	com_class_name_get,
 	com_objects_compare,
 	com_object_cast,
