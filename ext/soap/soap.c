@@ -105,7 +105,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 		CG(in_compilation) = _old_in_compilation; \
 		EG(current_execute_data) = _old_current_execute_data; \
 		if (EG(exception) == NULL || \
-		    !instanceof_function(zend_get_class_entry(EG(exception) TSRMLS_CC), soap_fault_class_entry TSRMLS_CC)) {\
+		    !instanceof_function(EG(exception)->ce, soap_fault_class_entry TSRMLS_CC)) {\
 			_bailout = 1;\
 		}\
 		if (_old_stack_top != EG(argument_stack)->top) { \

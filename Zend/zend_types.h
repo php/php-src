@@ -438,7 +438,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_OBJ_HANDLE(zval)          (Z_OBJ((zval)))->handle
 #define Z_OBJ_HANDLE_P(zval_p)      Z_OBJ_HANDLE(*(zval_p))
 
-#define Z_OBJCE(zval)				zend_get_class_entry(Z_OBJ(zval) TSRMLS_CC)
+#define Z_OBJCE(zval)				(Z_OBJ(zval)->ce)
 #define Z_OBJCE_P(zval_p)			Z_OBJCE(*(zval_p))
 
 #define Z_OBJPROP(zval)				Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)

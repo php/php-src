@@ -858,7 +858,7 @@ ZEND_FUNCTION(get_parent_class)
 			&& (name = Z_OBJ_HT_P(arg)->get_class_name(Z_OBJ_P(arg), 1 TSRMLS_CC)) != NULL) {
 			RETURN_STR(name);
 		} else {
-			ce = zend_get_class_entry(Z_OBJ_P(arg) TSRMLS_CC);
+			ce = Z_OBJ_P(arg)->ce;
 		}
 	} else if (Z_TYPE_P(arg) == IS_STRING) {
 	    ce = zend_lookup_class(Z_STR_P(arg) TSRMLS_CC);
@@ -2181,9 +2181,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 			function_name = (func->common.scope &&
 			                 func->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
-					(object ?
-						zend_get_class_entry(object TSRMLS_CC) : 
-						func->common.scope), func)->val :
+					(object ? object->ce : func->common.scope), func)->val :
 				(func->common.function_name ? 
 					func->common.function_name->val : NULL);
 		} else {
@@ -2403,9 +2401,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			function_name = (func->common.scope &&
 			                 func->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
-					(object ?
-						zend_get_class_entry(object TSRMLS_CC) : 
-						func->common.scope), func)->val :
+					(object ? object->ce : func->common.scope), func)->val :
 				(func->common.function_name ? 
 					func->common.function_name->val : NULL);
 		} else {

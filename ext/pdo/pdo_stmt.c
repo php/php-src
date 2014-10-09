@@ -978,7 +978,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 				ZVAL_COPY(return_value, &stmt->fetch.into);
 
-				if (zend_get_class_entry(Z_OBJ_P(return_value) TSRMLS_CC) == ZEND_STANDARD_CLASS_DEF_PTR) {
+				if (Z_OBJ_P(return_value)->ce == ZEND_STANDARD_CLASS_DEF_PTR) {
 					how = PDO_FETCH_OBJ;
 				}
 				break;
