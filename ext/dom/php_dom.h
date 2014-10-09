@@ -126,6 +126,9 @@ xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
 xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce TSRMLS_DC);
+zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type, zval *rv TSRMLS_DC);
+int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty TSRMLS_DC);
+static int dom_nodelist_fetch_dimension(xmlNodePtr *itemnode, zval *offset, dom_nnodemap_object *objmap, zval *rv TSRMLS_DC);
 
 #define REGISTER_DOM_CLASS(ce, name, parent_ce, funcs, entry) \
 INIT_CLASS_ENTRY(ce, name, funcs); \

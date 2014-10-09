@@ -619,6 +619,8 @@ PHP_MINIT_FUNCTION(dom)
 	memcpy(&dom_nnodemap_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_nnodemap_object_handlers.free_obj = dom_nnodemap_objects_free_storage;
 	dom_nnodemap_object_handlers.dtor_obj = dom_nnodemap_object_dtor;
+	dom_nnodemap_object_handlers.read_dimension = dom_nodelist_read_dimension;
+	dom_nnodemap_object_handlers.has_dimension = dom_nodelist_has_dimension;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
@@ -1541,6 +1543,73 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 	return ret;
 }
 /* }}} end dom_get_nsdecl */
+
+static int dom_nodelist_fetch_dimension(xmlNodePtr *itemnode, zval *offset, dom_nnodemap_object *objmap, zval *rv TSRMLS_DC) /* {{{ */
+{
+	convert_to_long(offset);
+	long index = Z_LVAL_P(offset);
+	HashTable *nodeht;
+	int ret = 0;
+
+	if (objmap->ht) {
+		*itemnode = dom_nodelist_xml_item(objmap, index);
+	} else {
+		if (objmap->nodetype == DOM_NODESET) {
+			nodeht = HASH_OF(&objmap->baseobj_zv);
+			zval *entry = zend_hash_index_find(nodeht, index);
+			if (entry) {
+				if (itemnode != NULL && rv != NULL) {
+					/* Passed by read_dimension */
+					ZVAL_COPY(rv, entry);
+				}
+				ret = 1;
+			}
+		} else if (objmap->baseobj) {
+			if (itemnode == NULL && rv == NULL) {
+				/* Passed by has_dimension */
+				if (dom_nodelist_baseobj_item(objmap, index)) {
+					ret = 1;
+				}
+			} else {
+				*itemnode = dom_nodelist_baseobj_item(objmap, index);
+			}
+		}
+	}
+
+	if (rv != NULL && itemnode != NULL) {
+		if (*itemnode) {
+			ret = 1;
+		}
+	}
+
+	return ret;
+} /* }}} end dom_nodelist_fetch_dimension */
+
+zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type, zval *rv TSRMLS_DC) /* {{{ */
+{
+	dom_object *intern = Z_DOMOBJ_P(object);
+	xmlNodePtr itemnode = NULL;
+	dom_nnodemap_object *objmap = (dom_nnodemap_object *)intern->ptr;
+
+	if (dom_nodelist_fetch_dimension(&itemnode, offset, objmap, rv TSRMLS_CC)) {
+		if (itemnode) {
+			php_dom_create_object(itemnode, rv, objmap->baseobj TSRMLS_CC);
+		}
+	}
+
+	return rv;
+} /* }}} end dom_nodelist_read_dimension */
+
+int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty TSRMLS_DC)
+{
+	dom_object *intern;
+	dom_nnodemap_object *objmap;
+
+	intern = Z_DOMOBJ_P(object);
+	objmap = (dom_nnodemap_object *)intern->ptr;
+
+	return dom_nodelist_fetch_dimension(NULL, member, objmap, NULL TSRMLS_CC);
+} /* }}} end dom_nodelist_has_dimension */
 
 #endif /* HAVE_DOM */
 
