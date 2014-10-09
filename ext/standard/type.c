@@ -467,8 +467,10 @@ PHP_FUNCTION(to_int)
 			}
 
 			if (Z_DVAL_P(var) == (double)(zend_long) Z_DVAL_P(var)) {
-				/* Exactly representable as zend_long */
-				RETURN_LONG(zend_dval_to_lval(Z_DVAL_P(var)));
+				/* Exactly representable as zend_long
+				 * We don't need to use zend_dval_to_lval here, cast is safe
+				 */
+				RETURN_LONG((zend_long)Z_DVAL_P(var));
 			} else {
 				RETURN_FALSE;
 			}
