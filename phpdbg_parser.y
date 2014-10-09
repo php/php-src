@@ -145,13 +145,13 @@ req_id
 full_expression
 	: T_EVAL req_id T_INPUT { 
 		$$.type = EVAL_PARAM; 
-		$$.str = $2.str;
-		$$.len = $2.len;
+		$$.str = $3.str;
+		$$.len = $3.len;
 	}
 	| T_SHELL req_id T_INPUT { 	
 		$$.type = SHELL_PARAM; 
-		$$.str = $2.str;
-		$$.len = $2.len;
+		$$.str = $3.str;
+		$$.len = $3.len;
 	}
 	| T_RUN req_id {
 		$$.type = RUN_PARAM;
@@ -159,8 +159,8 @@ full_expression
 	}
 	| T_RUN req_id T_INPUT { 	
 		$$.type = RUN_PARAM; 
-		$$.str = $2.str;
-		$$.len = $2.len;
+		$$.str = $3.str;
+		$$.len = $3.len;
 	}
 	;
 

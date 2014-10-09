@@ -1651,8 +1651,8 @@ yyreduce:
 #line 146 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
     { 
 		(yyval).type = EVAL_PARAM; 
-		(yyval).str = (yyvsp[(2) - (3)]).str;
-		(yyval).len = (yyvsp[(2) - (3)]).len;
+		(yyval).str = (yyvsp[(3) - (3)]).str;
+		(yyval).len = (yyvsp[(3) - (3)]).len;
 	}
     break;
 
@@ -1662,8 +1662,8 @@ yyreduce:
 #line 151 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
     { 	
 		(yyval).type = SHELL_PARAM; 
-		(yyval).str = (yyvsp[(2) - (3)]).str;
-		(yyval).len = (yyvsp[(2) - (3)]).len;
+		(yyval).str = (yyvsp[(3) - (3)]).str;
+		(yyval).len = (yyvsp[(3) - (3)]).len;
 	}
     break;
 
@@ -1683,8 +1683,8 @@ yyreduce:
 #line 160 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
     { 	
 		(yyval).type = RUN_PARAM; 
-		(yyval).str = (yyvsp[(2) - (3)]).str;
-		(yyval).len = (yyvsp[(2) - (3)]).len;
+		(yyval).str = (yyvsp[(3) - (3)]).str;
+		(yyval).len = (yyvsp[(3) - (3)]).len;
 	}
     break;
 
