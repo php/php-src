@@ -331,7 +331,7 @@ PHP_FUNCTION(count)
 			}
 #ifdef HAVE_SPL
 			/* if not and the object implements Countable we call its count() method */
-			if (Z_OBJ_HT_P(array)->get_class_entry && instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
+			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
 				zend_call_method_with_0_params(array, NULL, NULL, "count", &retval);
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					RETVAL_LONG(zval_get_long(&retval));

@@ -2310,8 +2310,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 			GC_REFCOUNT(object)++;
 		}
 		if (!object ||
-		    (object->handlers->get_class_entry &&
-		     !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC))) {
+		    !instanceof_function(zend_get_class_entry(object TSRMLS_CC), ce TSRMLS_CC)) {
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -4436,13 +4435,8 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			}
 			if (Z_REFCOUNTED_P(array_ref)) Z_ADDREF_P(array_ref);
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
-			if(Z_OBJ_HT_P(array_ptr)->get_class_entry == NULL) {
-				zend_error(E_WARNING, "foreach() cannot iterate over objects without PHP class");
-				ZEND_VM_JMP(opline->op2.jmp_addr);
-			}
-
 			ce = Z_OBJCE_P(array_ptr);
-			if (!ce || ce->get_iterator == NULL) {
+			if (ce->get_iterator == NULL) {
 				Z_ADDREF_P(array_ptr);
 			}
 			array_ref = array_ptr;
@@ -4466,7 +4460,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			}
 		} else if (Z_TYPE_P(array_ptr) == IS_OBJECT) {
 			ce = Z_OBJCE_P(array_ptr);
-			if (!ce || !ce->get_iterator) {
+			if (!ce->get_iterator) {
 				if (OP1_TYPE == IS_CV) {
 					Z_ADDREF_P(array_ref);
 				}
@@ -5342,7 +5336,7 @@ ZEND_VM_HANDLER(138, ZEND_INSTANCEOF, TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 	expr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 
-	if (Z_TYPE_P(expr) == IS_OBJECT && Z_OBJ_HT_P(expr)->get_class_entry) {
+	if (Z_TYPE_P(expr) == IS_OBJECT) {
 		result = instanceof_function(Z_OBJCE_P(expr), Z_CE_P(EX_VAR(opline->op2.var)) TSRMLS_CC);
 	} else {
 		result = 0;
@@ -5977,16 +5971,12 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 			break;
 		case IS_OBJECT:
 			if (Z_TYPE_P(value) == opline->extended_value) {
-				if (Z_OBJ_HT_P(value)->get_class_entry == NULL) {
-					ZVAL_TRUE(EX_VAR(opline->result.var));
+				zend_class_entry *ce = Z_OBJCE_P(value);
+				if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1 
+						&& !strncmp(ce->name->val, "__PHP_Incomplete_Class", ce->name->len)) {
+					ZVAL_FALSE(EX_VAR(opline->result.var));
 				} else {
-					zend_class_entry *ce = Z_OBJCE_P(value);
-					if (ce->name->len == sizeof("__PHP_Incomplete_Class") - 1 
-							&& !strncmp(ce->name->val, "__PHP_Incomplete_Class", ce->name->len)) {
-						ZVAL_FALSE(EX_VAR(opline->result.var));
-					} else {
-						ZVAL_TRUE(EX_VAR(opline->result.var));
-					}
+					ZVAL_TRUE(EX_VAR(opline->result.var));
 				}
 			} else {
 				ZVAL_FALSE(EX_VAR(opline->result.var));

@@ -166,10 +166,6 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
 
-
-#define IS_ZEND_STD_OBJECT(z)  (Z_TYPE(z) == IS_OBJECT && (Z_OBJ_HT((z))->get_class_entry != NULL))
-#define HAS_CLASS_ENTRY(z) (Z_OBJ_HT(z)->get_class_entry != NULL)
-
 ZEND_API int zend_check_private(union _zend_function *fbc, zend_class_entry *ce, zend_string *function_name TSRMLS_DC);
 
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);

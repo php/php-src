@@ -838,13 +838,9 @@ again:
 				zval retval;
 				zval fname;
 				int res;
-				zend_class_entry *ce = NULL;
+				zend_class_entry *ce = Z_OBJCE_P(struc);
 
-				if (Z_OBJ_HT_P(struc)->get_class_entry) {
-					ce = Z_OBJCE_P(struc);
-				}
-
-				if (ce && ce->serialize != NULL) {
+				if (ce->serialize != NULL) {
 					/* has custom handler */
 					unsigned char *serialized_data = NULL;
 					size_t serialized_length;

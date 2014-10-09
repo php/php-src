@@ -98,24 +98,22 @@ again:
 			result = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
 			break;
 		case IS_OBJECT:
-			if (IS_ZEND_STD_OBJECT(*op)) {
-				if (Z_OBJ_HT_P(op)->cast_object) {
-					zval tmp;
-					if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, _IS_BOOL TSRMLS_CC) == SUCCESS) {
-						result = Z_TYPE(tmp) == IS_TRUE;
-						break;
-					}
-					zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to boolean", Z_OBJ_P(op)->ce->name->val);
-				} else if (Z_OBJ_HT_P(op)->get) {
-					zval rv;
-					zval *tmp = Z_OBJ_HT_P(op)->get(op, &rv TSRMLS_CC);
-					if (Z_TYPE_P(tmp) != IS_OBJECT) {
-						/* for safety - avoid loop */
-						convert_to_boolean(tmp);
-						result = Z_TYPE_P(tmp) == IS_TRUE;
-						zval_ptr_dtor(tmp);
-						break;
-					}
+			if (Z_OBJ_HT_P(op)->cast_object) {
+				zval tmp;
+				if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, _IS_BOOL TSRMLS_CC) == SUCCESS) {
+					result = Z_TYPE(tmp) == IS_TRUE;
+					break;
+				}
+				zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to boolean", Z_OBJ_P(op)->ce->name->val);
+			} else if (Z_OBJ_HT_P(op)->get) {
+				zval rv;
+				zval *tmp = Z_OBJ_HT_P(op)->get(op, &rv TSRMLS_CC);
+				if (Z_TYPE_P(tmp) != IS_OBJECT) {
+					/* for safety - avoid loop */
+					convert_to_boolean(tmp);
+					result = Z_TYPE_P(tmp) == IS_TRUE;
+					zval_ptr_dtor(tmp);
+					break;
 				}
 			}
 			result = 1;
@@ -289,7 +287,7 @@ void zend_shutdown_timeout_thread(void);
 /* The following tries to resolve the classname of a zval of type object.
  * Since it is slow it should be only used in error messages.
  */
-#define Z_OBJ_CLASS_NAME_P(obj) (((obj) && (obj)->handlers->get_class_entry != NULL && (obj)->handlers->get_class_entry) ? (obj)->handlers->get_class_entry(obj TSRMLS_CC)->name->val : "")
+#define Z_OBJ_CLASS_NAME_P(obj) ((obj) ? (obj)->handlers->get_class_entry(obj TSRMLS_CC)->name->val : "")
 
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, uint32_t var);
 

@@ -1230,7 +1230,6 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			}
 			if (ce->__call &&
 			    Z_OBJ(EG(current_execute_data)->This) &&
-			    Z_OBJ_HT(EG(current_execute_data)->This)->get_class_entry &&
 			    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), ce TSRMLS_CC)) {
 				return zend_get_user_call_function(ce, function_name);
 			} else if (ce->__callstatic) {

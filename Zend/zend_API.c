@@ -198,12 +198,7 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 
 ZEND_API zend_class_entry *zend_get_class_entry(const zend_object *zobject TSRMLS_DC) /* {{{ */
 {
-	if (zobject->handlers->get_class_entry) {
-		return zobject->handlers->get_class_entry(zobject TSRMLS_CC);
-	} else {
-		zend_error(E_ERROR, "Class entry requested for an object without PHP class");
-		return NULL;
-	}
+	return zobject->handlers->get_class_entry(zobject TSRMLS_CC);
 }
 /* }}} */
 
@@ -3100,7 +3095,6 @@ get_function_via_handler:
 				retval = 1;
 				call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
 				if (call_via_handler && !fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This) &&
-				    Z_OBJ_HT(EG(current_execute_data)->This)->get_class_entry &&
 				    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), fcc->calling_scope TSRMLS_CC)) {
 					fcc->object = Z_OBJ(EG(current_execute_data)->This);
 				}
