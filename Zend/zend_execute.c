@@ -123,6 +123,61 @@ static const zend_internal_function zend_pass_function = {
 #define DECODE_CTOR(ce) \
 	((zend_class_entry*)(((zend_uintptr_t)(ce)) & ~(CTOR_CALL_BIT|CTOR_USED_BIT)))
 
+#define ZEND_VM_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
+
+#define ZEND_VM_STACK_PAGE_SIZE  (ZEND_VM_STACK_PAGE_SLOTS * sizeof(zval))
+
+#define ZEND_VM_STACK_FREE_PAGE_SIZE \
+	((ZEND_VM_STACK_PAGE_SLOTS - ZEND_VM_STACK_HEADER_SLOTS) * sizeof(zval))
+
+#define ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size) \
+	(((size) + (ZEND_VM_STACK_FREE_PAGE_SIZE - 1)) & ~ZEND_VM_STACK_PAGE_SIZE)
+
+static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
+	zend_vm_stack page = (zend_vm_stack)emalloc(size);
+
+	page->top = ZEND_VM_STACK_ELEMETS(page);
+	page->end = (zval*)((char*)page + size);
+	page->prev = prev;
+	return page;
+}
+
+ZEND_API void zend_vm_stack_init(TSRMLS_D)
+{
+	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE, NULL);
+	EG(vm_stack)->top++;
+	EG(vm_stack_top) = EG(vm_stack)->top;
+	EG(vm_stack_end) = EG(vm_stack)->end;
+}
+
+ZEND_API void zend_vm_stack_destroy(TSRMLS_D)
+{
+	zend_vm_stack stack = EG(vm_stack);
+
+	while (stack != NULL) {
+		zend_vm_stack p = stack->prev;
+		efree(stack);
+		stack = p;
+	}
+}
+
+ZEND_API void* zend_vm_stack_extend(size_t size TSRMLS_DC)
+{
+    zend_vm_stack stack;
+    void *ptr;
+
+    stack = EG(vm_stack);
+    stack->top = EG(vm_stack_top);
+	EG(vm_stack) = stack = zend_vm_stack_new_page(
+		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE) ?
+			ZEND_VM_STACK_PAGE_SIZE : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size), 
+		stack);
+	ptr = stack->top;
+	EG(vm_stack_top) = (void*)(((char*)ptr) + size);
+	EG(vm_stack_end) = stack->end;
+	return ptr;
+}
+
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data, uint32_t var)
 {
 	return EX_VAR(var);
@@ -1610,11 +1665,13 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	uint32_t num_args = call->num_args;
 	size_t stack_size = (ZEND_CALL_FRAME_SLOT + MAX(op_array->last_var + op_array->T, num_args)) * sizeof(zval);
 
-	EG(argument_stack) = zend_vm_stack_new_page(
+	EG(vm_stack) = zend_vm_stack_new_page(
 		EXPECTED(stack_size < ZEND_VM_STACK_FREE_PAGE_SIZE) ?
 			ZEND_VM_STACK_PAGE_SIZE :
 			ZEND_VM_STACK_PAGE_ALIGNED_SIZE(stack_size),
 		NULL);
+	EG(vm_stack_top) = EG(vm_stack)->top;
+	EG(vm_stack_end) = EG(vm_stack)->end;
 
 	execute_data = zend_vm_stack_push_call_frame(
 		VM_FRAME_TOP_FUNCTION,
@@ -1662,12 +1719,10 @@ static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(const zend_op 
 static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call, uint32_t passed_args, uint32_t additional_args TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *new_call;
-	int used_stack = (EG(argument_stack)->top - (zval*)call) + additional_args;
+	int used_stack = (EG(vm_stack_top) - (zval*)call) + additional_args;
 		
 	/* copy call frame into new stack segment */
-	zend_vm_stack_extend(used_stack * sizeof(zval) TSRMLS_CC);
-	new_call = (zend_execute_data*)EG(argument_stack)->top;
-	EG(argument_stack)->top += used_stack;		
+	new_call = zend_vm_stack_extend(used_stack * sizeof(zval) TSRMLS_CC);
 	*new_call = *call;
 	if (passed_args) {
 		zval *src = ZEND_CALL_ARG(call, 1);
@@ -1681,13 +1736,13 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 	}
 
 	/* delete old call_frame from previous stack segment */
-	EG(argument_stack)->prev->top = (zval*)call;
+	EG(vm_stack)->prev->top = (zval*)call;
 
 	/* delete previous stack segment if it becames empty */
-	if (UNEXPECTED(EG(argument_stack)->prev->top == ZEND_VM_STACK_ELEMETS(EG(argument_stack)->prev))) {
-		zend_vm_stack r = EG(argument_stack)->prev;
+	if (UNEXPECTED(EG(vm_stack)->prev->top == ZEND_VM_STACK_ELEMETS(EG(vm_stack)->prev))) {
+		zend_vm_stack r = EG(vm_stack)->prev;
 
-		EG(argument_stack)->prev = r->prev;
+		EG(vm_stack)->prev = r->prev;
 		efree(r);
 	}
 
@@ -1697,8 +1752,8 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 
 static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data **call, uint32_t passed_args, uint32_t additional_args TSRMLS_DC) /* {{{ */
 {
-	if (EXPECTED(EG(argument_stack)->end - EG(argument_stack)->top > additional_args)) {
-		EG(argument_stack)->top += additional_args;
+	if (EXPECTED(EG(vm_stack_end) - EG(vm_stack_top) > additional_args)) {
+		EG(vm_stack_top) += additional_args;
 	} else {
 		*call = zend_vm_stack_copy_call_frame(*call, passed_args, additional_args TSRMLS_CC);
 	}

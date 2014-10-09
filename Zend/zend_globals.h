@@ -171,6 +171,11 @@ struct _zend_executor_globals {
 	HashTable *class_table;		/* class table */
 	HashTable *zend_constants;	/* constants table */
 
+	zval          *vm_stack_top;
+	zval          *vm_stack_end;
+	zend_vm_stack  vm_stack;
+
+	struct _zend_execute_data *current_execute_data;
 	zend_class_entry *scope;
 
 	zend_long precision;
@@ -191,8 +196,6 @@ struct _zend_executor_globals {
 
 	HashTable regular_list;
 	HashTable persistent_list;
-
-	zend_vm_stack argument_stack;
 
 	int user_error_handler_error_reporting;
 	zval user_error_handler;
@@ -217,8 +220,6 @@ struct _zend_executor_globals {
 	zend_object *exception, *prev_exception;
 	const zend_op *opline_before_exception;
 	zend_op exception_op[3];
-
-	struct _zend_execute_data *current_execute_data;
 
 	struct _zend_module_entry *current_module;
 
