@@ -72,6 +72,7 @@ zend_class_entry *dom_namespace_node_class_entry;
 /* }}} */
 
 zend_object_handlers dom_object_handlers;
+zend_object_handlers dom_nnodemap_object_handlers;
 
 static HashTable classes;
 /* {{{ prop handler tables */
@@ -667,6 +668,10 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
 	dom_object_handlers.has_property = dom_property_exists;
 	dom_object_handlers.get_debug_info = dom_get_debug_info;
+
+	memcpy(&dom_nnodemap_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
+	dom_nnodemap_object_handlers.read_dimension = dom_nodelist_read_dimension;
+	dom_nnodemap_object_handlers.has_dimension = dom_nodelist_has_dimension;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
@@ -1297,7 +1302,7 @@ zend_object_value dom_nnodemap_objects_new(zend_class_entry *class_type TSRMLS_D
 
 	retval.handle = zend_objects_store_put(intern, dom_nnodemap_object_dtor, (zend_objects_free_object_storage_t)dom_nnodemap_objects_free_storage, dom_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
-	retval.handlers = dom_get_obj_handlers(TSRMLS_C);
+	retval.handlers = &dom_nnodemap_object_handlers;
 
 	return retval;
 }
@@ -1673,6 +1678,83 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 	return ret;
 }
 /* }}} end dom_get_nsdecl */
+
+static int dom_nodelist_fetch_dimension(xmlNodePtr *itemnode, zval *offset, dom_nnodemap_object *objmap, zval *rv TSRMLS_DC) /* {{{ */
+{
+	convert_to_long(offset);
+	long index = Z_LVAL_P(offset);
+	HashTable *nodeht;
+	zval **entry;
+	int ret = 0;
+
+	if (objmap->ht) {
+		*itemnode = dom_nodelist_xml_item(objmap, index);
+	} else {
+		if (objmap->nodetype == DOM_NODESET) {
+			nodeht = HASH_OF(objmap->baseobjptr);
+			if (zend_hash_index_find(nodeht, index, (void **) &entry) == SUCCESS) {
+				if (itemnode != NULL && rv != NULL) {
+					/* Passed by read_dimension */
+					MAKE_COPY_ZVAL(entry, rv);
+				}
+				ret = 1;
+			}
+		} else if (objmap->baseobj) {
+			if (itemnode == NULL && rv == NULL) {
+				/* Passed by has_dimension */
+				if (dom_nodelist_baseobj_item(objmap, index)) {
+					ret = 1;
+				}
+			} else {
+				*itemnode = dom_nodelist_baseobj_item(objmap, index);
+			}
+		}
+	}
+
+	if (rv != NULL && itemnode != NULL) {
+		if (*itemnode) {
+			ret = 1;
+		}
+	}
+
+	return ret;
+} /* }}} end dom_nodelist_fetch_dimension */
+
+zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
+{
+	dom_object *intern;
+	xmlNodePtr itemnode = NULL;
+	dom_nnodemap_object *objmap;
+	zval *rv;
+	int found;
+
+	ALLOC_INIT_ZVAL(rv);
+
+	intern = (dom_object *) zend_object_store_get_object(object TSRMLS_CC);
+
+	objmap = (dom_nnodemap_object *)intern->ptr;
+
+	if (dom_nodelist_fetch_dimension(&itemnode, offset, objmap, rv TSRMLS_CC)) {
+		if (itemnode) {
+			php_dom_create_object(itemnode, &found, rv, objmap->baseobj TSRMLS_CC);
+		}
+	}
+
+	Z_DELREF_P(rv);
+
+	return rv;
+} /* }}} end dom_nodelist_read_dimension */
+
+int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty TSRMLS_DC)
+{
+	dom_object *intern;
+	dom_nnodemap_object *objmap;
+
+	intern = (dom_object *) zend_object_store_get_object(object TSRMLS_CC);
+	objmap = (dom_nnodemap_object *)intern->ptr;
+
+	return dom_nodelist_fetch_dimension(NULL, member, objmap, NULL TSRMLS_CC);
+} /* }}} end dom_nodelist_has_dimension */
 
 #endif /* HAVE_DOM */
 
