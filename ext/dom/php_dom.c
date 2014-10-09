@@ -1546,8 +1546,7 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 
 static int dom_nodelist_fetch_dimension(xmlNodePtr *itemnode, zval *offset, dom_nnodemap_object *objmap, zval *rv TSRMLS_DC) /* {{{ */
 {
-	convert_to_long(offset);
-	long index = Z_LVAL_P(offset);
+	long index = zval_get_long(offset);
 	HashTable *nodeht;
 	int ret = 0;
 
