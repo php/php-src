@@ -228,7 +228,7 @@ frame
  - maxnum: tried to access a frame with a number heigher than existing (or &lt; 0)
 
 ### attributes on &lt;arg> ###
-v
+
 - variadic: has a non-empty value if the argument is variadic
 - name: variable name of parameter
 
@@ -283,13 +283,13 @@ info (subcommands)
 
 - Format:
 
-   &lt;meminfo />
-   &lt;current />
-   &lt;used mem="" />
-   &lt;real mem="" />
-   &lt;peak />
-   &lt;used mem="" />
-   &lt;real mem="" />
+    &lt;meminfo />
+    &lt;current />
+    &lt;used mem="" />
+    &lt;real mem="" />
+    &lt;peak />
+    &lt;used mem="" />
+    &lt;real mem="" />
 
 - mem is an attribute whose value is a float. The memory is given in kilobytes (1 kB == 1024 bytes)
 
@@ -648,3 +648,4 @@ Other tags
 ---------------
 
 - generally emitted when data couldn't be fetched (e.g. by accessing inconsistent data); only used in hard interrupt mode
+- it might mean that data couldn't be fetched at all, or that only incomplete data was fetched (e.g. when a fixed number of following attributes are fetched, this tag will mark a stop of fetching if none or not all tags were printed)
