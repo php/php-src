@@ -184,29 +184,29 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 
 			phpdbg_try_access {
 				if (!(invalid_data = !*data)) {
-					phpdbg_writeln("variable", "address=\"%p\" refcount=\"%d\" type=\"%s\"", "%p\t%d\t(%s)", *data, Z_REFCOUNT_PP(data), zend_zval_type_name(*data));
+#define VARIABLEINFO(attrs, msg, ...) phpdbg_writeln("variable", "address=\"%p\" refcount=\"%d\" type=\"%s\" refstatus=\"%s\" name=\"%s\" " attrs, "%p\t%d\t(%s)\n%s$%s", *data, Z_REFCOUNT_PP(data), zend_zval_type_name(*data), Z_ISREF_PP(data) ? "&": "", var, ##__VA_ARGS__)
 
 					if (Z_TYPE_PP(data) == IS_RESOURCE) {
 						phpdbg_try_access {
 							int type;
-							phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\" type=\"%s\"", "%s$%s\n|-------(typeof)------> (%s)\n", Z_ISREF_PP(data) ? "&": "", var, zend_list_find(Z_RESVAL_PP(data), &type) ? zend_rsrc_list_get_rsrc_type(type TSRMLS_CC) : "unknown");
+							VARIABLEINFO("type=\"%s\"", "\n|-------(typeof)------> (%s)\n", zend_list_find(Z_RESVAL_PP(data), &type) ? zend_rsrc_list_get_rsrc_type(type TSRMLS_CC) : "unknown");
 						} phpdbg_catch_access {
-							phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\" type=\"unknown\"", "%s$%s\n|-------(typeof)------> (unknown)\n", Z_ISREF_PP(data) ? "&": "", var);
+							VARIABLEINFO("type=\"unknown\"", "\n|-------(typeof)------> (unknown)\n");
 						} phpdbg_end_try_access();
 					} else if (Z_TYPE_PP(data) == IS_OBJECT) {
 						phpdbg_try_access {
-							phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\" instanceof=\"%s\"", "%s$%s\n|-----(instanceof)----> (%s)\n", Z_ISREF_PP(data) ? "&": "", var, Z_OBJCE_PP(data)->name);
+							VARIABLEINFO("instanceof=\"%s\"", "\n|-----(instanceof)----> (%s)\n", Z_OBJCE_PP(data)->name);
 						} phpdbg_catch_access {
-							phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\" instanceof=\"unknown\"", "%s$%s\n|-----(instanceof)----> (unknown)\n", Z_ISREF_PP(data) ? "&": "", var);
+							VARIABLEINFO("instanceof=\"%s\"", "\n|-----(instanceof)----> (unknown)\n");
 						} phpdbg_end_try_access();
 					} else {
-						phpdbg_writeln("variabledetails", "refstatus=\"%s\" name=\"%s\"", "%s$%s", Z_ISREF_PP(data) ? "&": "", var);
+						VARIABLEINFO("", "");
 					}
 				}
 			} phpdbg_end_try_access();
 
 			if (invalid_data) {
-				phpdbg_writeln("variabledetails", "name=\"%s\"", "n/a\tn/a\tn/a\t$%s", var);
+				phpdbg_writeln("variable", "name=\"%s\"", "n/a\tn/a\tn/a\t$%s", var);
 			}
 		}
 	}

@@ -260,11 +260,11 @@ info (subcommands)
  - file
  - opline
 - for each variable there is a &lt;variable> followed by a &lt;variabledetails> element
-- &lt;variable address="" refcount="" type="" />
+- &lt;variable address="" refcount="" type="" name="" />
  - address: pointer to zval (hexadecimal)
  - refcount: refcount of zval
  - type: the variable type (long, string, ...). If the value is "unknown", the other attributes are meaningless
-- &lt;variabledetails name="" /> with name the name of the variable, optional args are:
+ - name: the name of the variable
  - refstatus: empty if the zval is not a reference
  - class: the class the object in the zval is an instance of
  - resource: the type of the resource in the zval
