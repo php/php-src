@@ -162,7 +162,7 @@ void phpdbg_list_file(const char *filename, uint count, uint offset, uint highli
 			}
 		}
 
-		if (*(buffer + linelen - 1) != '\n') {
+		if (*(buffer + linelen - 1) != '\n' || !linelen) {
 			phpdbg_out("\n");
 		}
 	}
@@ -265,8 +265,9 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type TSRMLS_DC) {
 			dataptr->line[++line] = (uint)(bufptr - data.buf) + 1;
 		}
 	}
-	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
 	dataptr->lines = ++line;
+	dataptr->line[line] = endptr - data.buf;
+	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
 
 	ret = PHPDBG_G(compile_file)(&fake, type TSRMLS_CC);
 
