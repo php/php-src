@@ -791,18 +791,18 @@ static void phpdbg_remote_close(int socket, FILE *stream) {
 }
 
 /* don't inline this, want to debug it easily, will inline when done */
-static int phpdbg_remote_init(const char* address, short port, int *server, int *socket, FILE **stream) {
+static int phpdbg_remote_init(const char* address, unsigned short port, int *server, int *socket, FILE **stream) {
 	phpdbg_remote_close(*socket, *stream);
 
 	*server = phpdbg_open_socket(address, port);
 
 	if (*server < 0) {
-		phpdbg_rlog(fileno(stderr), "Initializing connection on %s:%d failed", address, port);
+		phpdbg_rlog(fileno(stderr), "Initializing connection on %s:%u failed", address, port);
 
 		return FAILURE;
 	}
 
-	phpdbg_rlog(fileno(stderr), "accepting connections on %s:%d", address, port);
+	phpdbg_rlog(fileno(stderr), "accepting connections on %s:%u", address, port);
 	{
 		struct sockaddr_in address;
 		socklen_t size = sizeof(address);
