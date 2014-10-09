@@ -465,17 +465,14 @@ PHP_FUNCTION(to_int)
 			if (zend_isnan(Z_DVAL_P(var)) || !zend_finite(Z_DVAL_P(var))) {
 				RETURN_FALSE;
 			}
-			
-#			if SIZEOF_ZEND_LONG == 8
-				if (Z_DVAL_P(var) < ZEND_LONG_MIN || Z_DVAL_P(var) >= ZEND_LONG_MAX) {
-#			else
-				if (Z_DVAL_P(var) < ZEND_LONG_MIN || Z_DVAL_P(var) > ZEND_LONG_MAX) {
-#			endif
+
+			if (Z_DVAL_P(var) == (double)(zend_long) Z_DVAL_P(var)) {
+				/* Exactly representable as zend_long */
+				RETURN_LONG(zend_dval_to_lval(Z_DVAL_P(var)));
+			} else {
 				RETURN_FALSE;
 			}
-			
-			RETURN_LONG(zend_dval_to_lval(Z_DVAL_P(var)));
-			
+
 		case IS_LONG:
 			RETURN_LONG(Z_LVAL_P(var));
 
