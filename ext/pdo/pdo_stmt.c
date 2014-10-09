@@ -2636,11 +2636,6 @@ static union _zend_function *row_get_ctor(zend_object *object TSRMLS_DC)
 	return (union _zend_function*)&ctor;
 }
 
-static zend_class_entry *row_get_ce(const zend_object *object TSRMLS_DC)
-{
-	return pdo_row_ce;
-}
-
 static zend_string *row_get_classname(const zend_object *object, int parent TSRMLS_DC)
 {
 	if (parent) {
@@ -2675,7 +2670,6 @@ zend_object_handlers pdo_row_object_handlers = {
 	row_method_get,
 	row_call_method,
 	row_get_ctor,
-	row_get_ce,
 	row_get_classname,
 	row_compare,
 	NULL, /* cast */
