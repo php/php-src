@@ -153,12 +153,12 @@ void phpdbg_list_file(const char *filename, uint count, uint offset, uint highli
 		char *buffer = (*data)->buf + linestart;
 
 		if (!highlight) {
-			phpdbg_write("line", "line=\"%u\" code=\"%s\"", " %05u: %s", line, buffer);
+			phpdbg_write("line", "line=\"%u\" code=\"%.*s\"", " %05u: %.*s", line, linelen, buffer);
 		} else {
 			if (highlight != line) {
-				phpdbg_write("line", "line=\"%u\" code=\"%s\"", " %05u: %s", line, buffer);
+				phpdbg_write("line", "line=\"%u\" code=\"%.*s\"", " %05u: %.*s", line, linelen, buffer);
 			} else {
-				phpdbg_write("line", "line=\"%u\" code=\"%s\" current=\"current\"", ">%05u: %s", line, buffer);
+				phpdbg_write("line", "line=\"%u\" code=\"%.*s\" current=\"current\"", ">%05u: %.*s", line, linelen, buffer);
 			}
 		}
 
