@@ -2188,7 +2188,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	called_scope = obj->ce;
 
 	if (OP2_TYPE != IS_CONST ||
-	    (fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL) {
+	    EXPECTED((fbc = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(function_name), called_scope)) == NULL)) {
 	    zend_object *orig_obj = obj;
 
 		if (UNEXPECTED(obj->handlers->get_method == NULL)) {
@@ -2208,7 +2208,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		}
 	}
 
-	if ((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
 	} else {
 		GC_REFCOUNT(obj)++; /* For $this pointer */
