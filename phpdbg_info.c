@@ -338,7 +338,7 @@ PHPDBG_INFO(classes) /* {{{ */
 		phpdbg_print_class_name(ce TSRMLS_CC);
 
 		if ((*ce)->parent) {
-			phpdbg_xml("<parents>");
+			phpdbg_xml("<parents %r>");
 			zend_class_entry *pce = (*ce)->parent;
 			do {
 				phpdbg_out("|-------- ");

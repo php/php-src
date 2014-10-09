@@ -1332,7 +1332,7 @@ PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable
 
 PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 {
-	phpdbg_xml("<breakpoints>");
+	phpdbg_xml("<breakpoints %r>");
 
 	switch (type) {
 		case PHPDBG_BREAK_SYM: if ((PHPDBG_G(flags) & PHPDBG_HAS_SYM_BP)) {

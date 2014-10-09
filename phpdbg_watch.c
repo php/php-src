@@ -550,7 +550,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 				PHPDBG_G(watchpoint_hit) = 1;
 
 				phpdbg_notice("watchhit", "variable=\"%s\"", "Breaking on watchpoint %.*s", (int) watch->str_len, watch->str);
-				phpdbg_xml("<watchdata>");
+				phpdbg_xml("<watchdata %r>");
 			}
 
 			switch (watch->type) {
@@ -564,7 +564,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 							phpdbg_writeln("watchvalue", "type=\"old\" inaccessible=\"inaccessible\"", "Old value inaccessible, array or object (HashTable) already destroyed");
 						} else {
 							phpdbg_out("Old value: ");
-							phpdbg_xml("<watchvalue type=\"old\">");
+							phpdbg_xml("<watchvalue %r type=\"old\">");
 							zend_print_flat_zval_r((zval *) oldPtr TSRMLS_CC);
 							phpdbg_xml("</watchvalue>");
 							phpdbg_out("\n");
@@ -590,7 +590,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 
 					if (show_value) {
 						phpdbg_out("New value: ");
-						phpdbg_xml("<watchvalue type=\"new\">");
+						phpdbg_xml("<watchvalue %r type=\"new\">");
 						zend_print_flat_zval_r(watch->addr.zv TSRMLS_CC);
 						phpdbg_xml("</watchvalue>");
 						phpdbg_out("\n");
@@ -686,7 +686,7 @@ void phpdbg_list_watchpoints(TSRMLS_D) {
 	HashPosition position;
 	phpdbg_watchpoint_t **watch;
 
-	phpdbg_xml("<watchlist>");
+	phpdbg_xml("<watchlist %r>");
 
 	for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(watchpoints), &position);
 	     zend_hash_get_current_data_ex(&PHPDBG_G(watchpoints), (void**) &watch, &position) == SUCCESS;

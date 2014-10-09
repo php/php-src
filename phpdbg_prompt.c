@@ -671,7 +671,7 @@ out:
 
 int phpdbg_output_ev_variable(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval **zv TSRMLS_DC) {
 	phpdbg_notice("eval", "variable=\"%.*s\"", "Printing variable %.*s", (int) len, name);
-	phpdbg_xml("<eval>");
+	phpdbg_xml("<eval %r>");
 	zend_print_zval_r(*zv, 0 TSRMLS_CC);
 	phpdbg_xml("</eval>");
 	phpdbg_out("\n");
@@ -704,7 +704,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	PHPDBG_G(flags) |= PHPDBG_IN_EVAL;
 	zend_try {
 		if (zend_eval_stringl(param->str, param->len,&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-			phpdbg_xml("<eval>");
+			phpdbg_xml("<eval %r>");
 			zend_print_zval_r(&retval, 0 TSRMLS_CC);
 			phpdbg_xml("</eval>");
 			phpdbg_out("\n");
@@ -742,7 +742,7 @@ PHPDBG_COMMAND(back) /* {{{ */
 PHPDBG_COMMAND(print) /* {{{ */
 {
 	phpdbg_out("Execution Context Information\n\n");
-	phpdbg_xml("<printinfo>");
+	phpdbg_xml("<printinfo %r>");
 #ifdef HAVE_LIBREADLINE
 	phpdbg_writeln("print", "readline=\"yes\"", "Readline   yes");
 #else
@@ -1110,7 +1110,7 @@ PHPDBG_COMMAND(clean) /* {{{ */
 	}
 
 	phpdbg_out("Cleaning Execution Environment\n");
-	phpdbg_xml("<cleaninfo>");
+	phpdbg_xml("<cleaninfo %r>");
 
 	phpdbg_writeln("clean", "classes=\"%d\"", "Classes    %d", zend_hash_num_elements(EG(class_table)));
 	phpdbg_writeln("clean", "functions=\"%d\"", "Functions  %d", zend_hash_num_elements(EG(function_table)));
@@ -1127,7 +1127,7 @@ PHPDBG_COMMAND(clean) /* {{{ */
 PHPDBG_COMMAND(clear) /* {{{ */
 {
 	phpdbg_out("Clearing Breakpoints\n");
-	phpdbg_xml("<clearinfo>");
+	phpdbg_xml("<clearinfo %r>");
 
 	phpdbg_writeln("clear", "files=\"%d\"", "File              %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]));
 	phpdbg_writeln("clear", "functions=\"%d\"", "Functions         %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]));

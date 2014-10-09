@@ -167,7 +167,7 @@ PHPDBG_PRINT(class) /* {{{ */
 			(*ce)->name,
 			zend_hash_num_elements(&(*ce)->function_table));
 
-		phpdbg_xml("<printmethods>");
+		phpdbg_xml("<printmethods %r>");
 
 		if (zend_hash_num_elements(&(*ce)->function_table)) {
 			HashPosition position;
