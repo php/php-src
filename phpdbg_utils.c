@@ -772,8 +772,8 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 							s_len = precision;
 						}
 					} else {
-						s = S_NULL;
-						s_len = S_NULL_LEN;
+						s = "";
+						s_len = 0;
 					}
 					pad_char = ' ';
 					break;
@@ -1279,6 +1279,8 @@ PHPDBG_API int phpdbg_vprint(int type TSRMLS_DC, int fd, const char *tag, const 
 			va_copy(argcpy, args);
 			xmllen = phpdbg_xml_vasprintf(&xml, xmlfmt, 1, argcpy TSRMLS_CC);
 			va_end(argcpy);
+		} else {
+			xml = estrdup("");
 		}
 	}
 

@@ -265,10 +265,10 @@ PHPDBG_HELP(aliases) /* {{{ */
 
 	/* Print out aliases for all commands except help as this one comes last */
 	phpdbg_writeln("help", "", "Below are the aliased, short versions of all supported commands");
-	phpdbg_xml("<helpcommands>");
+	phpdbg_xml("<helpcommands %r>");
 	for(c = phpdbg_prompt_commands; c->name; c++) {
 		if (c->alias && c->alias != 'h') {
-			phpdbg_writeln("command", "name=\"%s\" alias=\"%c\" tip=\"%s\"", " %c     %-20s  %s", c->alias, c->name, c->tip);
+			phpdbg_writeln("command", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s", c->alias, c->name, c->tip);
 			if (c->subs) {
 				len = 20 - 1 - c->name_len;
 				for(c_sub = c->subs; c_sub->alias; c_sub++) {
@@ -285,7 +285,7 @@ PHPDBG_HELP(aliases) /* {{{ */
 
 	/* Print out aliases for help as this one comes last, with the added text on how aliases are used */
 	get_command("h", 1, &c, phpdbg_prompt_commands TSRMLS_CC);
-	phpdbg_writeln("aliasinfo", "alias=\"%c\" name=\"%-*s\" tip=\"%s\"", " %c     %-20s  %s\n", c->alias, c->name, c->tip);
+	phpdbg_writeln("aliasinfo", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s\n", c->alias, c->name, c->tip);
 
 	phpdbg_xml("<helpaliases>");
 
