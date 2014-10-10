@@ -1171,10 +1171,6 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		return new_persistent_script;
 	}
 
-	/* cleanup after calculation */
-	new_persistent_script->mem  = ZCG(mem);
-	new_persistent_script->size = memory_used;
-
 	/* Copy into shared memory */
 	new_persistent_script = zend_accel_script_persist(new_persistent_script, &key, key_length TSRMLS_CC);
 

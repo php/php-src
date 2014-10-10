@@ -153,8 +153,7 @@ PHP_FUNCTION(dom_nodelist_item)
 							} else {
 								nodep = nodep->children;
 							}
-							itemnode = dom_get_elements_by_tag_name_ns_raw(
-								nodep, (char *) objmap->ns, (char *) objmap->local, &count, index);
+							itemnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &count, index);
 						}
 					}
 				}

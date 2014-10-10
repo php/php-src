@@ -217,8 +217,9 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 	zend_generator *generator;
 	zend_execute_data *current_execute_data;
 	zend_execute_data *execute_data;
-	zend_vm_stack current_stack = EG(argument_stack);
+	zend_vm_stack current_stack = EG(vm_stack);
 
+	current_stack->top = EG(vm_stack_top);
 	/* Create a clone of closure, because it may be destroyed */
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 		zend_op_array *op_array_copy = (zend_op_array*)emalloc(sizeof(zend_op_array));
@@ -259,8 +260,11 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 	generator = (zend_generator *) Z_OBJ_P(return_value);
 	execute_data->prev_execute_data = NULL;
 	generator->execute_data = execute_data;
-	generator->stack = EG(argument_stack);
-	EG(argument_stack) = current_stack;
+	generator->stack = EG(vm_stack);
+	generator->stack->top = EG(vm_stack_top);
+	EG(vm_stack_top) = current_stack->top;
+	EG(vm_stack_end) = current_stack->end;
+	EG(vm_stack) = current_stack;
 
 	/* EX(return_value) keeps pointer to zend_object (not a real zval) */
 	execute_data->return_value = (zval*)generator;
@@ -293,12 +297,15 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		/* Backup executor globals */
 		zend_execute_data *original_execute_data = EG(current_execute_data);
 		zend_class_entry *original_scope = EG(scope);
-		zend_vm_stack original_stack = EG(argument_stack);
+		zend_vm_stack original_stack = EG(vm_stack);
 
+		original_stack->top = EG(vm_stack_top);
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
 		EG(scope) = generator->execute_data->scope;
-		EG(argument_stack) = generator->stack;
+		EG(vm_stack_top) = generator->stack->top;
+		EG(vm_stack_end) = generator->stack->end;
+		EG(vm_stack) = generator->stack;
 
 		/* We want the backtrace to look as if the generator function was
 		 * called from whatever method we are current running (e.g. next()).
@@ -319,7 +326,9 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		/* Restore executor globals */
 		EG(current_execute_data) = original_execute_data;
 		EG(scope) = original_scope;
-		EG(argument_stack) = original_stack;
+		EG(vm_stack_top) = original_stack->top;
+		EG(vm_stack_end) = original_stack->end;
+		EG(vm_stack) = original_stack;
 
 		/* If an exception was thrown in the generator we have to internally
 		 * rethrow it in the parent scope. */

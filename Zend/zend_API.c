@@ -194,32 +194,6 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_class_entry *zend_get_class_entry(const zend_object *zobject TSRMLS_DC) /* {{{ */
-{
-	if (zobject->handlers->get_class_entry) {
-		return zobject->handlers->get_class_entry(zobject TSRMLS_CC);
-	} else {
-		zend_error(E_ERROR, "Class entry requested for an object without PHP class");
-		return NULL;
-	}
-}
-/* }}} */
-
-/* returns 1 if you need to copy result, 0 if it's already a copy */
-ZEND_API zend_string *zend_get_object_classname(const zend_object *object TSRMLS_DC) /* {{{ */
-{
-	zend_string *ret;
-
-	if (object->handlers->get_class_name != NULL) {
-		ret = object->handlers->get_class_name(object, 0 TSRMLS_CC);
-		if (ret) {
-			return ret;
-		}
-	}
-	return zend_get_class_entry(object TSRMLS_CC)->name;
-}
-/* }}} */
-
 static int parse_arg_object_to_string(zval *arg, char **p, size_t *pl, int type TSRMLS_DC) /* {{{ */
 {
 	if (Z_OBJ_HANDLER_P(arg, cast_object)) {
@@ -2896,7 +2870,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 			fcc->object = Z_OBJ(EG(current_execute_data)->This);
 			fcc->called_scope = Z_OBJCE(EG(current_execute_data)->This);
 		} else {
-			fcc->called_scope = fcc->object ? zend_get_class_entry(fcc->object TSRMLS_CC) : fcc->calling_scope;
+			fcc->called_scope = fcc->object ? fcc->object->ce : fcc->calling_scope;
 		}
 		*strict_class = 1;
 		ret = 1;
@@ -3039,7 +3013,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		     ((fcc->object && fcc->calling_scope->__call) ||
 		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
 			if (fcc->function_handler->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-				if (!zend_check_private(fcc->function_handler, fcc->object ? zend_get_class_entry(fcc->object TSRMLS_CC) : EG(scope), lmname TSRMLS_CC)) {
+				if (!zend_check_private(fcc->function_handler, fcc->object ? fcc->object->ce : EG(scope), lmname TSRMLS_CC)) {
 					retval = 0;
 					fcc->function_handler = NULL;
 					goto get_function_via_handler;
@@ -3096,7 +3070,6 @@ get_function_via_handler:
 				retval = 1;
 				call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0;
 				if (call_via_handler && !fcc->object && EG(current_execute_data) && Z_OBJ(EG(current_execute_data)->This) &&
-				    Z_OBJ_HT(EG(current_execute_data)->This)->get_class_entry &&
 				    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), fcc->calling_scope TSRMLS_CC)) {
 					fcc->object = Z_OBJ(EG(current_execute_data)->This);
 				}
@@ -3150,7 +3123,7 @@ get_function_via_handler:
 			}
 			if (retval && (check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0) {
 				if (fcc->function_handler->op_array.fn_flags & ZEND_ACC_PRIVATE) {
-					if (!zend_check_private(fcc->function_handler, fcc->object ? zend_get_class_entry(fcc->object TSRMLS_CC) : EG(scope), lmname TSRMLS_CC)) {
+					if (!zend_check_private(fcc->function_handler, fcc->object ? fcc->object->ce : EG(scope), lmname TSRMLS_CC)) {
 						if (error) {
 							if (*error) {
 								efree(*error);
@@ -3183,7 +3156,7 @@ get_function_via_handler:
 	zend_string_release(mname);
 
 	if (fcc->object) {
-		fcc->called_scope = zend_get_class_entry(fcc->object TSRMLS_CC);
+		fcc->called_scope = fcc->object->ce;
 	}
 	if (retval) {
 		fcc->initialized = 1;
@@ -3224,7 +3197,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 		case IS_STRING:
 			if (object) {
 				fcc->object = object;
-				fcc->calling_scope = zend_get_class_entry(object TSRMLS_CC);
+				fcc->calling_scope = object->ce;
 				if (callable_name) {
 					char *ptr;
 
@@ -3822,8 +3795,7 @@ ZEND_API void zend_update_property(zend_class_entry *scope, zval *object, const 
 	EG(scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_string *class_name = zend_get_object_classname(Z_OBJ_P(object) TSRMLS_CC);
-		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, class_name->val);
+		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be updated", name, Z_OBJCE_P(object)->name->val);
 	}
 	ZVAL_STRINGL(&property, name, name_length);
 	Z_OBJ_HT_P(object)->write_property(object, &property, value, NULL TSRMLS_CC);
@@ -4002,8 +3974,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 	EG(scope) = scope;
 
 	if (!Z_OBJ_HT_P(object)->read_property) {
-		zend_string *class_name = zend_get_object_classname(Z_OBJ_P(object) TSRMLS_CC);
-		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be read", name, class_name->val);
+		zend_error(E_CORE_ERROR, "Property %s of class %s cannot be read", name, Z_OBJCE_P(object)->name->val);
 	}
 
 	ZVAL_STRINGL(&property, name, name_length);

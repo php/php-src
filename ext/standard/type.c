@@ -219,12 +219,7 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
-			zend_class_entry *ce;
-			if (Z_OBJ_HT_P(arg)->get_class_entry == NULL) {
-				/* if there's no get_class_entry it's not a PHP object, so it can't be INCOMPLETE_CLASS */
-				RETURN_TRUE;
-			}
-			ce = Z_OBJCE_P(arg);
+			zend_class_entry *ce = Z_OBJCE_P(arg);
 			if (ce->name->len == sizeof(INCOMPLETE_CLASS) - 1 
 					&& !strncmp(ce->name->val, INCOMPLETE_CLASS, ce->name->len)) {
 				RETURN_FALSE;

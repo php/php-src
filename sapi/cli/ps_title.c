@@ -386,7 +386,7 @@ int get_ps_title(int *displen, const char** string)
         return rc;
 
 #ifdef PS_USE_WIN32
-    if (!(ps_buffer_cur_len = GetConsoleTitle(ps_buffer, ps_buffer_size)))
+    if (!(ps_buffer_cur_len = GetConsoleTitle(ps_buffer, (DWORD)ps_buffer_size)))
         return PS_TITLE_WINDOWS_ERROR;
 #endif
     *displen = (int)ps_buffer_cur_len;

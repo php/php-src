@@ -41,7 +41,7 @@
 	var_name##_set = 0; \
 	if (option_array) { \
 		if ((option_val = zend_hash_str_find(HASH_OF(option_array), option_name, sizeof(option_name) - 1)) != NULL) {	\
-			PHP_FILTER_GET_LONG_OPT(option_val, var_name); \
+			var_name = zval_get_long(option_val); \
 			var_name##_set = 1; \
 		} \
 	}

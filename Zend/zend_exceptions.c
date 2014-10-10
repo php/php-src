@@ -89,11 +89,8 @@ ZEND_API void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 {
 #ifdef HAVE_DTRACE
 	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
-		zend_string *classname;
-
 		if (exception != NULL) {
-			classname = zend_get_object_classname(Z_OBJ_P(exception) TSRMLS_CC);
-			DTRACE_EXCEPTION_THROWN(classname->val);
+			DTRACE_EXCEPTION_THROWN(Z_OBJ_P(exception)->ce->val);
 		} else {
 			DTRACE_EXCEPTION_THROWN(NULL);
 		}
@@ -452,7 +449,7 @@ static void _build_trace_args(zval *arg, smart_str *str TSRMLS_DC) /* {{{ */
 			break;
 		case IS_OBJECT:
 			smart_str_appends(str, "Object(");
-			smart_str_append(str, zend_get_object_classname(Z_OBJ_P(arg) TSRMLS_CC));
+			smart_str_append(str, Z_OBJCE_P(arg)->name);
 			smart_str_appends(str, "), ");
 			break;
 	}
