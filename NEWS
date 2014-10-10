@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.19
 
+-Fileinfo:
+  . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
+
 - Core:
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames 
