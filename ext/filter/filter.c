@@ -582,9 +582,7 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 	char *charset = NULL;
 
 	if (filter_args && Z_TYPE_P(filter_args) != IS_ARRAY) {
-		zend_long lval;
-
-		PHP_FILTER_GET_LONG_OPT(filter_args, lval);
+		zend_long lval = zval_get_long(filter_args);
 
 		if (filter != -1) { /* handler for array apply */
 			/* filter_args is the filter_flags */
@@ -598,11 +596,11 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 		}
 	} else if (filter_args) {
 		if ((option = zend_hash_str_find(HASH_OF(filter_args), "filter", sizeof("filter") - 1)) != NULL) {
-			PHP_FILTER_GET_LONG_OPT(option, filter);
+			filter = zval_get_long(option);
 		}
 
 		if ((option = zend_hash_str_find(HASH_OF(filter_args), "flags", sizeof("flags") - 1)) != NULL) {
-			PHP_FILTER_GET_LONG_OPT(option, filter_flags);
+			filter_flags = zval_get_long(option);
 
 			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
 				filter_flags |= FILTER_REQUIRE_SCALAR;
@@ -662,7 +660,6 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 
 static void php_filter_array_handler(zval *input, zval *op, zval *return_value, zend_bool add_empty TSRMLS_DC) /* {{{ */
 {
-	zend_ulong index;
 	zend_string *arg_key;
 	zval *tmp, *arg_elm;
 
@@ -677,7 +674,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 	} else if (Z_TYPE_P(op) == IS_ARRAY) {
 		array_init(return_value);
 
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(op), index, arg_key, arg_elm) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(op), arg_key, arg_elm) {
 			if (arg_key == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric keys are not allowed in the definition array");
 				zval_ptr_dtor(return_value);
@@ -733,7 +730,7 @@ PHP_FUNCTION(filter_input)
 			if (Z_TYPE_P(filter_args) == IS_LONG) {
 				filter_flags = Z_LVAL_P(filter_args);
 			} else if (Z_TYPE_P(filter_args) == IS_ARRAY && (option = zend_hash_str_find(HASH_OF(filter_args), "flags", sizeof("flags") - 1)) != NULL) {
-				PHP_FILTER_GET_LONG_OPT(option, filter_flags);
+				filter_flags = zval_get_long(option);
 			}
 			if (Z_TYPE_P(filter_args) == IS_ARRAY && 
 				(opt = zend_hash_str_find(HASH_OF(filter_args), "options", sizeof("options") - 1)) != NULL &&
@@ -810,7 +807,7 @@ PHP_FUNCTION(filter_input_array)
 			if (Z_TYPE_P(op) == IS_LONG) {
 				filter_flags = Z_LVAL_P(op);
 			} else if (Z_TYPE_P(op) == IS_ARRAY && (option = zend_hash_str_find(HASH_OF(op), "flags", sizeof("flags") - 1)) != NULL) {
-				PHP_FILTER_GET_LONG_OPT(option, filter_flags);
+				filter_flags = zval_get_long(option);
 			}
 		}
 
