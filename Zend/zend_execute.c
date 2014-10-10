@@ -701,49 +701,50 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t ar
 	}
 }
 
-static inline void zend_assign_to_object(zval *retval, zval *object_ptr, zval *property_name, int value_type, const znode_op *value_op, const zend_execute_data *execute_data, int opcode, void **cache_slot TSRMLS_DC)
+static zend_always_inline void zend_assign_to_object(zval *retval, zval *object, uint32_t object_op_type, zval *property_name, int value_type, const znode_op *value_op, const zend_execute_data *execute_data, int opcode, void **cache_slot TSRMLS_DC)
 {
 	zend_free_op free_value;
  	zval *value = get_zval_ptr(value_type, value_op, execute_data, &free_value, BP_VAR_R);
  	zval tmp;
- 	zval *object = object_ptr;
 
- 	ZVAL_DEREF(object);
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		if (UNEXPECTED(object == &EG(error_zval))) {
- 			if (retval) {
- 				ZVAL_NULL(retval);
+ 	if (object_op_type != IS_UNUSED) {
+	 	ZVAL_DEREF(object);
+		if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(object == &EG(error_zval))) {
+ 				if (retval) {
+	 				ZVAL_NULL(retval);
+				}
+				FREE_OP(free_value);
+				return;
 			}
-			FREE_OP(free_value);
-			return;
-		}
-		if (EXPECTED(Z_TYPE_P(object) == IS_NULL ||
-		    Z_TYPE_P(object) == IS_FALSE ||
-		    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
-			zend_object *obj;
+			if (EXPECTED(Z_TYPE_P(object) == IS_NULL ||
+			    Z_TYPE_P(object) == IS_FALSE ||
+			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
+				zend_object *obj;
 
-			zval_ptr_dtor(object);
-			object_init(object);
-			Z_ADDREF_P(object);
-			obj = Z_OBJ_P(object);
-			zend_error(E_WARNING, "Creating default object from empty value");
-			if (GC_REFCOUNT(obj) == 1) {
-				/* the enclosing container was deleted, obj is unreferenced */
+				zval_ptr_dtor(object);
+				object_init(object);
+				Z_ADDREF_P(object);
+				obj = Z_OBJ_P(object);
+				zend_error(E_WARNING, "Creating default object from empty value");
+				if (GC_REFCOUNT(obj) == 1) {
+					/* the enclosing container was deleted, obj is unreferenced */
+					if (retval) {
+						ZVAL_NULL(retval);
+					}
+					FREE_OP(free_value);
+					OBJ_RELEASE(obj);
+					return;
+				}
+				Z_DELREF_P(object);
+			} else {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (retval) {
 					ZVAL_NULL(retval);
 				}
 				FREE_OP(free_value);
-				OBJ_RELEASE(obj);
 				return;
 			}
-			Z_DELREF_P(object);
-		} else {
-			zend_error(E_WARNING, "Attempt to assign property of non-object");
-			if (retval) {
-				ZVAL_NULL(retval);
-			}
-			FREE_OP(free_value);
-			return;
 		}
 	}
 
@@ -1301,31 +1302,30 @@ ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *
 	zend_fetch_dimension_address_read_R(result, container, dim, IS_TMP_VAR TSRMLS_CC);
 }
 
-static void zend_fetch_property_address(zval *result, zval *container_ptr, zval *prop_ptr, void **cache_slot, int type, int is_ref TSRMLS_DC)
+static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, void **cache_slot, int type, int is_ref TSRMLS_DC)
 {
-	zval *container = container_ptr;
+    if (container_op_type != IS_UNUSED) {
+		ZVAL_DEREF(container);
+		if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
+			if (UNEXPECTED(container == &EG(error_zval))) {
+				ZVAL_INDIRECT(result, &EG(error_zval));
+				return;
+			}
 
-	ZVAL_DEREF(container);
-	if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
-		if (UNEXPECTED(container == &EG(error_zval))) {
-			ZVAL_INDIRECT(result, &EG(error_zval));
-			return;
-		}
-
-		/* this should modify object only if it's empty */
-		if (type != BP_VAR_UNSET &&
-		    EXPECTED((Z_TYPE_P(container) == IS_NULL ||
-		      Z_TYPE_P(container) == IS_FALSE ||
-		      (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0)))) {
-			zval_ptr_dtor_nogc(container);
-			object_init(container);
-		} else {
-			zend_error(E_WARNING, "Attempt to modify property of non-object");
-			ZVAL_INDIRECT(result, &EG(error_zval));
-			return;
+			/* this should modify object only if it's empty */
+			if (type != BP_VAR_UNSET &&
+			    EXPECTED((Z_TYPE_P(container) == IS_NULL ||
+			      Z_TYPE_P(container) == IS_FALSE ||
+			      (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0)))) {
+				zval_ptr_dtor_nogc(container);
+				object_init(container);
+			} else {
+				zend_error(E_WARNING, "Attempt to modify property of non-object");
+				ZVAL_INDIRECT(result, &EG(error_zval));
+				return;
+			}
 		}
 	}
-
 	if (EXPECTED(Z_OBJ_HT_P(container)->get_property_ptr_ptr)) {
 		zval *ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr, type, cache_slot TSRMLS_CC);
 		if (NULL == ptr) {
