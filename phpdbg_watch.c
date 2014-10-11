@@ -303,7 +303,7 @@ static int phpdbg_watchpoint_parse_wrapper(char *name, size_t len, char *keyname
 }
 
 PHPDBG_API int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *parent, size_t i, int (*callback)(phpdbg_watchpoint_t * TSRMLS_DC), zend_bool silent TSRMLS_DC) {
-	phpdbg_parse_variable_with_arg(input, len, parent, i, (phpdbg_parse_var_with_arg_func) phpdbg_watchpoint_parse_wrapper, 0, callback TSRMLS_CC);
+	return phpdbg_parse_variable_with_arg(input, len, parent, i, (phpdbg_parse_var_with_arg_func) phpdbg_watchpoint_parse_wrapper, 0, callback TSRMLS_CC);
 }
 
 static int phpdbg_watchpoint_parse_symtables(char *input, size_t len, int (*callback)(phpdbg_watchpoint_t * TSRMLS_DC) TSRMLS_DC) {

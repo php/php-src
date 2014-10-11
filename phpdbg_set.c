@@ -215,7 +215,7 @@ PHPDBG_SET(stepping) /* {{{ */
 		phpdbg_writeln("setstepping", "type=\"%s\"", "Stepping %s", PHPDBG_G(flags) & PHPDBG_STEP_OPCODE ? "opcode" : "line");
 	} else switch (param->type) {
 		case STR_PARAM: {
-			if ((param->len == sizeof("opcode") - 1) && memcmp(param->str, "opcode", sizeof("opcode") == SUCCESS)) {
+			if ((param->len == sizeof("opcode") - 1) && memcmp(param->str, "opcode", sizeof("opcode")) == SUCCESS) {
 				PHPDBG_G(flags) |= PHPDBG_STEP_OPCODE;
 			} else if ((param->len == sizeof("line")-1) && memcmp(param->str, "line", sizeof("line")) == SUCCESS) {
 				PHPDBG_G(flags) &= ~PHPDBG_STEP_OPCODE;

@@ -90,6 +90,13 @@
 #define PHPDBG_DEFAULT_PROMPT "prompt>"
 /* }}} */
 
+/* Hey, apple. One shouldn't define *functions* from the standard C library as marcos. */
+#ifdef memcpy
+#define memcpy_tmp(...) memcpy(__VA_ARGS__)
+#undef memcpy
+#define memcpy(...) memcpy_tmp(__VA_ARGS__)
+#endif
+
 #if !defined(PHPDBG_WEBDATA_TRANSFER_H) && !defined(PHPDBG_WEBHELPER_H)
 
 #ifdef ZTS

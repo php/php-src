@@ -836,7 +836,7 @@ readline:
 
 				while ((bytes = read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len)) > 0 || (errno == EINTR && bytes < 0)) {
 					int i;
-					if (bytes <= 0) {
+					if (bytes <= 0) { 
 						continue;
 					}
 
