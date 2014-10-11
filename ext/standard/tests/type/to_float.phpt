@@ -8,6 +8,7 @@ var_dump(to_float("0"));
 var_dump(to_float(0));
 var_dump(to_float(0.0));
 var_dump(to_float("10"));
+var_dump(to_float("10.0"));
 var_dump(to_float(10));
 var_dump(to_float(10.0));
 var_dump(to_float((string)PHP_INT_MAX));
@@ -64,6 +65,7 @@ var_dump(to_float("31e+7"));
 float(0)
 float(0)
 float(0)
+float(10)
 float(10)
 float(10)
 float(10)
