@@ -834,8 +834,12 @@ readline:
 					memcpy(buf, PHPDBG_G(input_buffer), len);
 				}
 
-				while ((bytes = read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len)) > 0) {
+				while ((bytes = read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len)) > 0 || (errno == EINTR && bytes < 0)) {
 					int i;
+					if (bytes <= 0) {
+						continue;
+					}
+
 					for (i = len; i < len + bytes; i++) {
 						if (buf[i] == '\n') {
 							PHPDBG_G(input_buflen) = len + bytes - 1 - i;

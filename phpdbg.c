@@ -834,12 +834,10 @@ static void phpdbg_remote_close(int socket, FILE *stream) {
 }
 
 /* don't inline this, want to debug it easily, will inline when done */
-static int phpdbg_remote_init(const char* address, unsigned short port, int *server, int *socket, FILE **stream) {
+static int phpdbg_remote_init(const char* address, unsigned short port, int server, int *socket, FILE **stream) {
 	phpdbg_remote_close(*socket, *stream);
 
-	*server = phpdbg_open_socket(address, port);
-
-	if (*server < 0) {
+	if (server < 0) {
 		phpdbg_rlog(fileno(stderr), "Initializing connection on %s:%u failed", address, port);
 
 		return FAILURE;
@@ -852,7 +850,7 @@ static int phpdbg_remote_init(const char* address, unsigned short port, int *ser
 		char buffer[20] = {0};
 
 		memset(&address, 0, size);
-		*socket = accept(*server, (struct sockaddr *) &address, &size);
+		*socket = accept(server, (struct sockaddr *) &address, &size);
 		inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
 
 		phpdbg_rlog(fileno(stderr), "connection established from %s", buffer);
@@ -1302,7 +1300,8 @@ phpdbg_main:
 #ifndef _WIN32
 	/* setup remote server if necessary */
 	if (!cleaning && listen > 0) {
-		if (phpdbg_remote_init(address, listen, &server, &socket, &stream) == FAILURE) {
+		server = phpdbg_open_socket(address, listen);
+		if (phpdbg_remote_init(address, listen, server, &socket, &stream) == FAILURE) {
 			exit(0);
 		}
 
@@ -1493,7 +1492,7 @@ phpdbg_interact:
 					
 						if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 							/* renegociate connections */
-							phpdbg_remote_init(address, listen, &server, &socket, &stream);
+							phpdbg_remote_init(address, listen, server, &socket, &stream);
 				
 							/* set streams */
 							if (stream) {
