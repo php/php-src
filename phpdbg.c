@@ -663,10 +663,8 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'r', 0, "run"},
 	{'E', 0, "step-through-eval"},
 	{'S', 1, "sapi-name"},
-#ifndef _WIN32
 	{'l', 1, "listen"},
 	{'a', 1, "address-or-any"},
-#endif
 	{'V', 0, "version"},
 	{'-', 0, NULL}
 }; /* }}} */
@@ -985,10 +983,9 @@ int main(int argc, char **argv) /* {{{ */
 	signal_struct.sa_flags = SA_SIGINFO | SA_NODEFER;
 	sigio_struct.sa_sigaction = phpdbg_sigio_handler;
 	sigio_struct.sa_flags = SA_SIGINFO;
-
+#endif
 
 	address = strdup("127.0.0.1");
-#endif
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY;                 /* sets default for file streams to binary */
