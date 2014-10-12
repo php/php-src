@@ -4917,7 +4917,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast TSRMLS_DC)
 
 	switch (ast->attr) {
 		case T_LINE:
-			ZVAL_LONG(zv, CG(zend_lineno));
+			ZVAL_LONG(zv, ast->lineno);
 			break;
 		case T_FILE:
 			ZVAL_STR_COPY(zv, CG(compiled_filename));
