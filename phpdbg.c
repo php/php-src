@@ -740,7 +740,6 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 	}
 } /* }}} */
 
-#ifndef _WIN32
 int phpdbg_open_socket(const char *interface, short port) /* {{{ */
 {
 	int reuse = 1;
@@ -781,8 +780,12 @@ int phpdbg_open_socket(const char *interface, short port) /* {{{ */
 
 static void phpdbg_remote_close(int socket, FILE *stream) {
 	if (socket >= 0) {
+#ifdef _WIN32
+		closesocket(socket);
+#else
 		shutdown(socket, SHUT_RDWR);
 		close(socket);
+#endif
 	}
 
 	if (stream) {
@@ -827,6 +830,7 @@ static int phpdbg_remote_init(const char* address, unsigned short port, int *ser
 	return SUCCESS;
 }
 
+#ifndef _WIN32
 /* This function *strictly* assumes that SIGIO is *only* used on the remote connection stream */
 void phpdbg_sigio_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 {
@@ -964,13 +968,11 @@ int main(int argc, char **argv) /* {{{ */
 	char bp_tmp_file[] = "/tmp/phpdbg.XXXXXX";
 #endif
 
-#ifndef _WIN32
 	char *address;
 	int listen = -1;
 	int server = -1;
 	int socket = -1;
 	FILE* stream = NULL;
-#endif
 
 #ifdef ZTS
 	void ***tsrm_ls;
@@ -1149,7 +1151,6 @@ phpdbg_main:
 				show_banner = 0;
 			break;
 
-#ifndef _WIN32
 			/* if you pass a listen port, we will read and write on listen port */
 			case 'l': /* set listen ports */
 				if (sscanf(php_optarg, "%d", &listen) != 1) {
@@ -1163,7 +1164,6 @@ phpdbg_main:
 					address = strdup("*");
 				} else address = strdup(php_optarg);
 			} break;
-#endif
 
 			case 'V': {
 				sapi_startup(phpdbg);
@@ -1252,19 +1252,19 @@ phpdbg_main:
 #endif
 		zend_mm_heap *mm_heap;
 
-#ifndef _WIN32
 	/* setup remote server if necessary */
 	if (!cleaning && listen > 0) {
 		if (phpdbg_remote_init(address, listen, &server, &socket, &stream) == FAILURE) {
 			exit(0);
 		}
 
+#ifndef _WIN32
 		sigaction(SIGIO, &sigio_struct, NULL);
+#endif
 
 		/* set remote flag to stop service shutting down upon quit */
 		remote = 1;
 	}
-#endif
 
 		mm_heap = phpdbg_mm_get_heap();
 
@@ -1338,14 +1338,13 @@ phpdbg_main:
 		/* set flags from command line */
 		PHPDBG_G(flags) = flags;
 
-#ifndef _WIN32
 		/* setup io here */
 		if (stream) {
 			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
-
+#ifndef _WIN32
 			signal(SIGPIPE, SIG_IGN);
-		}
 #endif
+		}
 
 		PHPDBG_G(io)[PHPDBG_STDIN].ptr = stdin;
 		PHPDBG_G(io)[PHPDBG_STDIN].fd = fileno(stdin);
@@ -1418,10 +1417,7 @@ phpdbg_main:
 			}
 		}
 
-/* #ifndef for making compiler shutting up */
-#ifndef _WIN32
 phpdbg_interact:
-#endif
 		/* phpdbg main() */
 		do {
 			zend_try {
@@ -1436,7 +1432,6 @@ phpdbg_interact:
 					cleaning = 0;
 				}
 
-#ifndef _WIN32
 				if (!cleaning) {
 					/* remote client disconnected */
 					if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
@@ -1458,7 +1453,6 @@ phpdbg_interact:
 						}
 					}
 				}
-#endif
 			} zend_end_try();
 		} while(!cleaning && !(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
 		
@@ -1468,19 +1462,17 @@ phpdbg_interact:
 		/* this is just helpful */
 		PG(report_memleaks) = 0;
 		
-#ifndef _WIN32
 phpdbg_out:
 		if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
 			PHPDBG_G(flags) &= ~PHPDBG_IS_DISCONNECTED;
 			goto phpdbg_interact;
 		}
-#endif
 
 #ifdef _WIN32
 	} __except(phpdbg_exception_handler_win32(xp = GetExceptionInformation())) {
 		phpdbg_error("Access violation (Segementation fault) encountered\ntrying to abort cleanly...");
 	}
-phpdbg_out:
+/* phpdbg_out: */
 #endif
 	
 		{
