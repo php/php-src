@@ -1552,8 +1552,7 @@ zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type, zval *rv
 		return NULL;
 	}
 
-	ZVAL_COPY(&offset_copy, offset);
-	convert_to_long(&offset_copy);
+	ZVAL_LONG(&offset_copy, zval_get_long(offset));
 
 	zend_call_method_with_1_params(object, Z_OBJCE_P(object), NULL, "item", rv, &offset_copy);
 
@@ -1562,21 +1561,15 @@ zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type, zval *rv
 
 int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty TSRMLS_DC)
 {
-	zval *length, offset_copy;
-	int ret;
+	zend_long offset = zval_get_long(member);
 
-	ZVAL_COPY(&offset_copy, member);
-	convert_to_long(&offset_copy);
-
-	if (Z_LVAL(offset_copy) < 0) {
+	if (offset < 0) {
 		return 0;
+	} else {
+		zval *length = zend_read_property(Z_OBJCE_P(object), object, "length", sizeof("length") - 1, 0 TSRMLS_CC);
+
+		return length && offset < Z_LVAL_P(length);
 	}
-
-	length = zend_read_property(Z_OBJCE_P(object), object, "length", sizeof("length") - 1, 0 TSRMLS_CC);
-
-	ret = Z_LVAL(offset_copy) < Z_LVAL_P(length);
-
-	return ret;
 } /* }}} end dom_nodelist_has_dimension */
 
 #endif /* HAVE_DOM */
