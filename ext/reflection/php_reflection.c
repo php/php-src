@@ -2402,7 +2402,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 		} else {
 			zend_string *name = zend_string_init(param->arg_info->class_name, param->arg_info->class_name_len, 0);
 			ce = zend_lookup_class(name TSRMLS_CC);
-			zend_string_free(name);
+			zend_string_release(name);
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 					"Class %s does not exist", param->arg_info->class_name);
@@ -3862,10 +3862,10 @@ ZEND_METHOD(reflection_class, getProperty)
 			if (!EG(exception)) {
 				zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Class %s does not exist", classname->val);
 			}
-			zend_string_free(classname);
+			zend_string_release(classname);
 			return;
 		}
-		zend_string_free(classname);
+		zend_string_release(classname);
 
 		if (!instanceof_function(ce, ce2 TSRMLS_CC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Fully qualified property name %s::%s does not specify a base class of %s", ce2->name->val, str_name, ce->name->val);
