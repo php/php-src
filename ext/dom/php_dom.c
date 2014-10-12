@@ -1679,16 +1679,30 @@ xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName) {
 }
 /* }}} end dom_get_nsdecl */
 
+static inline long dom_get_long(zval *offset) /* {{{ */
+{
+	if (Z_TYPE_P(offset) == IS_LONG) {
+		return Z_LVAL_P(offset);
+	} else {
+		zval tmp;
+
+		MAKE_COPY_ZVAL(&offset, &tmp);
+		convert_to_long(&tmp);
+
+		return Z_LVAL(tmp);
+    }
+}
+/* }}} */
+
 zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type TSRMLS_DC) /* {{{ */
 {
-	zval *rv, offset_copy;
+	zval *rv, offset_copy = zval_used_for_init;
 
 	if (!offset) {
 		return NULL;
 	}
 
-	MAKE_COPY_ZVAL(&offset, &offset_copy);
-	convert_to_long(&offset_copy);
+	ZVAL_LONG(&offset_copy, dom_get_long(offset));
 
 	zend_call_method_with_1_params(&object, Z_OBJCE_P(object), NULL, "item", &rv, &offset_copy);
 
@@ -1699,23 +1713,18 @@ zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type TSRMLS_DC
 
 int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty TSRMLS_DC)
 {
-	zval *length, offset_copy;
-	int ret;
+	long offset = dom_get_long(member);
 
-	MAKE_COPY_ZVAL(&member, &offset_copy);
-	convert_to_long(&offset_copy);
-
-	if (Z_LVAL(offset_copy) < 0) {
+	if (offset < 0) {
 		return 0;
+	} else {
+		zval *length = zend_read_property(Z_OBJCE_P(object), object, "length", sizeof("length") - 1, 0 TSRMLS_CC);
+		int ret = length && offset < Z_LVAL_P(length);
+
+		FREE_ZVAL(length);
+
+		return ret;
 	}
-
-	length = zend_read_property(Z_OBJCE_P(object), object, "length", sizeof("length") - 1, 0 TSRMLS_CC);
-
-	ret = Z_LVAL(offset_copy) < Z_LVAL_P(length);
-
-	FREE_ZVAL(length);
-
-	return ret;
 } /* }}} end dom_nodelist_has_dimension */
 
 #endif /* HAVE_DOM */
