@@ -2623,7 +2623,7 @@ ZEND_API void zend_post_deactivate_modules(TSRMLS_D) /* {{{ */
 /* }}} */
 
 /* return the next free module number */
-int zend_next_free_module(void) /* {{{ */
+ZEND_API int zend_next_free_module(void) /* {{{ */
 {
 	return zend_hash_num_elements(&module_registry) + 1;
 }
