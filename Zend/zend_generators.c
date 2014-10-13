@@ -52,9 +52,9 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 
 			if (brk_cont->start < 0) {
 				continue;
-			} else if (brk_cont->start > op_num) {
+			} else if ((uint32_t)brk_cont->start > op_num) {
 				break;
-			} else if (brk_cont->brk > op_num) {
+			} else if (brk_cont->brk >= 0 && (uint32_t)brk_cont->brk > op_num) {
 				zend_op *brk_opline = op_array->opcodes + brk_cont->brk;
 
 				if (brk_opline->opcode == ZEND_FREE) {

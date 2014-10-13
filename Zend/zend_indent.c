@@ -54,7 +54,7 @@ ZEND_API void zend_indent(TSRMLS_D)
 	int in_string=0;
 	int nest_level=0;
 	int emit_whitespace[256];
-	int i;
+	unsigned int i;
 
 	memset(emit_whitespace, 0, sizeof(int)*256);
 
