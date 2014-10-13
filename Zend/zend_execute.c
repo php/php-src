@@ -1522,7 +1522,7 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	}
 
 	/* Initialize CV variables (skip arguments) */
-	if (EXPECTED(num_args < op_array->last_var)) {
+	if (EXPECTED((int)num_args < op_array->last_var)) {
 		zval *var = EX_VAR_NUM(num_args);
 		zval *end = EX_VAR_NUM(op_array->last_var);
 
@@ -1621,7 +1621,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 		}
 
 		/* Initialize CV variables (skip arguments) */
-		if (EXPECTED(num_args < op_array->last_var)) {
+		if (EXPECTED((int)num_args < op_array->last_var)) {
 			zval *var = EX_VAR_NUM(num_args);
 			zval *end = EX_VAR_NUM(op_array->last_var);
 
