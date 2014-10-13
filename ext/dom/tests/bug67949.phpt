@@ -22,11 +22,21 @@ var_dump($nodes[0]->textContent);
 var_dump($nodes[1]->textContent);
 
 echo "testing offset not a long\n";
+$offset = ['test'];
+var_dump($offset);
+var_dump(isset($nodes[$offset]), $nodes[$offset]->textContent);
+var_dump($offset);
+
+$something = 'test';
+$offset = &$something;
+
+var_dump($offset);
+var_dump(isset($nodes[$offset]), $nodes[$offset]->textContent);
+var_dump($offset);
+
 $offset = 'test';
 var_dump($offset);
-var_dump($nodes[$offset]->textContent);
-var_dump($offset);
-var_dump(isset($nodes[$offset]));
+var_dump(isset($nodes[$offset]), $nodes[$offset]->textContent);
 var_dump($offset);
 
 echo "testing read_dimension with null offset\n";
@@ -49,13 +59,29 @@ string(4) "data"
 Notice: Trying to get property of non-object in %s on line %d
 NULL
 testing offset not a long
-string(4) "test"
-string(4) "data"
+array(1) {
+  [0]=>
+  string(4) "test"
+}
+
+Notice: Trying to get property of non-object in %s on line %d
+bool(false)
+NULL
+array(1) {
+  [0]=>
+  string(4) "test"
+}
 string(4) "test"
 bool(true)
+string(4) "data"
+string(4) "test"
+string(4) "test"
+bool(true)
+string(4) "data"
 string(4) "test"
 testing read_dimension with null offset
 NULL
 testing attribute access
 string(4) "href"
 ==DONE==
+
