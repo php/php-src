@@ -266,6 +266,9 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRML
 						break;
 					}
 				}
+				if (Z_TYPE(c) == IS_CONSTANT_AST) {
+					break;
+				}
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
 				MAKE_NOP(opline);
 				zend_optimizer_replace_by_const(op_array, opline, IS_TMP_VAR, tv, &c TSRMLS_CC);
@@ -312,6 +315,9 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRML
 					if ((c = zend_hash_find(&ce->constants_table,
 							Z_STR(ZEND_OP2_LITERAL(opline)))) != NULL) {
 						ZVAL_DEREF(c);
+						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
+							break;
+						}
 						if (ZEND_IS_CONSTANT_TYPE(Z_TYPE_P(c))) { 
 							if (!zend_optimizer_get_persistent_constant(Z_STR_P(c), &t, 1 TSRMLS_CC) ||
 							    ZEND_IS_CONSTANT_TYPE(Z_TYPE(t))) {
