@@ -453,7 +453,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS
 				do {
 					p++;
 				} while (*p == ' ' || *p == '\t');
-				add_assoc_stringl_ex(return_value, s, len, p, h->header_len - (p - h->header));
+				add_assoc_stringl_ex(return_value, s, (uint)len, p, h->header_len - (p - h->header));
 				free_alloca(s, use_heap);
 			}
 		}
@@ -1027,12 +1027,20 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 	size_t _nbytes_sent_total = 0;
 
 	for (chunk = sender->buffer.first; chunk; chunk = next) {
+#ifdef PHP_WIN32
+		int nbytes_sent;
+#else
 		ssize_t nbytes_sent;
+#endif
 		next = chunk->next;
 
 		switch (chunk->type) {
 		case PHP_CLI_SERVER_CHUNK_HEAP:
+#ifdef PHP_WIN32
+			nbytes_sent = send(fd, chunk->data.heap.p, (int)chunk->data.heap.len, 0);
+#else
 			nbytes_sent = send(fd, chunk->data.heap.p, chunk->data.heap.len, 0);
+#endif
 			if (nbytes_sent < 0) {
 				*nbytes_sent_total = _nbytes_sent_total;
 				return php_socket_errno();
@@ -1051,7 +1059,11 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 			break;
 
 		case PHP_CLI_SERVER_CHUNK_IMMORTAL:
+#ifdef PHP_WIN32
+			nbytes_sent = send(fd, chunk->data.immortal.p, (int)chunk->data.immortal.len, 0);
+#else
 			nbytes_sent = send(fd, chunk->data.immortal.p, chunk->data.immortal.len, 0);
+#endif
 			if (nbytes_sent < 0) {
 				*nbytes_sent_total = _nbytes_sent_total;
 				return php_socket_errno();
@@ -1076,10 +1088,18 @@ static int php_cli_server_content_sender_send(php_cli_server_content_sender *sen
 
 static int php_cli_server_content_sender_pull(php_cli_server_content_sender *sender, int fd, size_t *nbytes_read TSRMLS_DC) /* {{{ */
 {
+#ifdef PHP_WIN32
+	int _nbytes_read;
+#else
 	ssize_t _nbytes_read;
+#endif
 	php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(131072);
 
+#ifdef PHP_WIN32
+	_nbytes_read = read(fd, chunk->data.heap.p, (unsigned int)chunk->data.heap.len);
+#else
 	_nbytes_read = read(fd, chunk->data.heap.p, chunk->data.heap.len);
+#endif
 	if (_nbytes_read < 0) {
 		char *errstr = get_last_error();
 		php_cli_server_logf("%s" TSRMLS_CC, errstr);
@@ -1204,7 +1224,7 @@ static void php_cli_server_logf(const char *format TSRMLS_DC, ...) /* {{{ */
 	efree(buf);
 } /* }}} */
 
-static int php_network_listen_socket(const char *host, int *port, int socktype, int *af, socklen_t *socklen, zend_string **errstr TSRMLS_DC) /* {{{ */
+static php_socket_t php_network_listen_socket(const char *host, int *port, int socktype, int *af, socklen_t *socklen, zend_string **errstr TSRMLS_DC) /* {{{ */
 {
 	php_socket_t retval = SOCK_ERR;
 	int err = 0;
@@ -1493,7 +1513,7 @@ static void normalize_vpath(char **retval, size_t *retval_len, const char *vpath
 		return;
 	}
 
-	decoded_vpath_end = decoded_vpath + php_url_decode(decoded_vpath, vpath_len);
+	decoded_vpath_end = decoded_vpath + php_url_decode(decoded_vpath, (int)vpath_len);
 
 	p = decoded_vpath;
 
@@ -1733,9 +1753,19 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 static size_t php_cli_server_client_send_through(php_cli_server_client *client, const char *str, size_t str_len) /* {{{ */
 {
 	struct timeval tv = { 10, 0 };
-	ssize_t nbytes_left = str_len;
+#ifdef PHP_WIN32
+	int nbytes_left = (int)str_len;
+#else
+	ssize_t nbytes_left = (ssize_t)str_len;
+#endif
 	do {
-		ssize_t nbytes_sent = send(client->sock, str + str_len - nbytes_left, nbytes_left, 0);
+#ifdef PHP_WIN32
+		int nbytes_sent;
+#else
+		ssize_t nbytes_sent;
+#endif
+
+		nbytes_sent = send(client->sock, str + str_len - nbytes_left, nbytes_left, 0);
 		if (nbytes_sent < 0) {
 			int err = php_socket_errno();
 			if (err == SOCK_EAGAIN) {
