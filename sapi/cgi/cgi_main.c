@@ -509,8 +509,13 @@ static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 {
 	size_t read_bytes = 0;
 	int tmp_read_bytes;
+	size_t remaining_bytes;
 
-	count_bytes = MIN(count_bytes, SG(request_info).content_length - SG(read_post_bytes));
+	assert(SG(request_info).content_length >= SG(read_post_bytes));
+
+	remaining_bytes = (size_t)(SG(request_info).content_length - SG(read_post_bytes));
+
+	count_bytes = MIN(count_bytes, remaining_bytes);
 	while (read_bytes < count_bytes) {
 		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
 		if (tmp_read_bytes <= 0) {
