@@ -9695,7 +9695,6 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 					if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
 				}
 
-				zval_ptr_dtor_nogc(free_op1.var);
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			}
