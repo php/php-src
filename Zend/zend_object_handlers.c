@@ -475,8 +475,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 
 	ZVAL_UNDEF(&tmp_member);
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		ZVAL_DUP(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -567,8 +566,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 
 	ZVAL_UNDEF(&tmp_member);
  	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		ZVAL_DUP(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -786,8 +784,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 
 	ZVAL_UNDEF(&tmp_member);
  	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		ZVAL_DUP(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -815,10 +812,6 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 		(guard = zend_get_property_guard(zobj, property_info, member)) == NULL ||
 		(property_info && ((*guard) & IN_GET))) {
 
-		/* we don't have access controls - will just add it */
-		if(UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
-			zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
-		}
 		ZVAL_NULL(&tmp);
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 		    property_info->offset >= 0) {
@@ -829,6 +822,12 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 				rebuild_object_properties(zobj);
 			}
 			retval = zend_hash_update(zobj->properties, property_info->name, &tmp);
+		}
+
+		/* Notice is thrown after creation of the property, to avoid EG(std_property_info)
+		 * being overwritten in an error handler. */
+		if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
+			zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
 		}
 	} else {
 		/* we do have getter - fail and let it try again with usual get/set */
@@ -853,8 +852,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 
 	ZVAL_UNDEF(&tmp_member);
  	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		ZVAL_DUP(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -921,7 +919,7 @@ static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC) /* {{
 
 ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	zend_internal_function *func = (zend_internal_function *)EG(current_execute_data)->func;
+	zend_internal_function *func = (zend_internal_function *)EX(func);
 	zval method_name, method_args;
 	zval method_result;
 	zend_class_entry *ce = Z_OBJCE_P(getThis());
@@ -1091,7 +1089,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 		/* Ensure that if we're calling a private function, we're allowed to do so.
 		 * If we're not and __call() handler exists, invoke it, otherwise error out.
 		 */
-		updated_fbc = zend_check_private_int(fbc, zobj->handlers->get_class_entry(zobj TSRMLS_CC), lc_method_name TSRMLS_CC);
+		updated_fbc = zend_check_private_int(fbc, zobj->ce, lc_method_name TSRMLS_CC);
 		if (EXPECTED(updated_fbc != NULL)) {
 			fbc = updated_fbc;
 		} else {
@@ -1139,7 +1137,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 
 ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	zend_internal_function *func = (zend_internal_function *)EG(current_execute_data)->func;
+	zend_internal_function *func = (zend_internal_function *)EX(func);
 	zval method_name, method_args;
 	zval method_result;
 	zend_class_entry *ce = EG(scope);
@@ -1231,9 +1229,8 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 				zend_string_free(lc_function_name);
 			}
 			if (ce->__call &&
-			    Z_OBJ(EG(This)) &&
-			    Z_OBJ_HT(EG(This))->get_class_entry &&
-			    instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {
+			    Z_OBJ(EG(current_execute_data)->This) &&
+			    instanceof_function(Z_OBJCE(EG(current_execute_data)->This), ce TSRMLS_CC)) {
 				return zend_get_user_call_function(ce, function_name);
 			} else if (ce->__callstatic) {
 				return zend_get_user_callstatic_function(ce, function_name);
@@ -1451,8 +1448,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 
 	ZVAL_UNDEF(&tmp_member);
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		ZVAL_DUP(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -1529,26 +1525,9 @@ exit:
 }
 /* }}} */
 
-zend_class_entry *zend_std_object_get_class(const zend_object *object TSRMLS_DC) /* {{{ */
+zend_string *zend_std_object_get_class_name(const zend_object *zobj TSRMLS_DC) /* {{{ */
 {
-	return object->ce;
-}
-/* }}} */
-
-zend_string* zend_std_object_get_class_name(const zend_object *zobj, int parent TSRMLS_DC) /* {{{ */
-{
-	zend_class_entry *ce;
-
-	if (parent) {
-		if (!zobj->ce->parent) {
-			return NULL;
-		}
-		ce = zobj->ce->parent;
-	} else {
-		ce = zobj->ce;
-	}
-
-	return zend_string_copy(ce->name);
+	return zend_string_copy(zobj->ce->name);
 }
 /* }}} */
 
@@ -1665,7 +1644,6 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_get_method,					/* get_method */
 	NULL,									/* call_method */
 	zend_std_get_constructor,				/* get_constructor */
-	zend_std_object_get_class,				/* get_class_entry */
 	zend_std_object_get_class_name,			/* get_class_name */
 	zend_std_compare_objects,				/* compare_objects */
 	zend_std_cast_object_tostring,			/* cast_object */

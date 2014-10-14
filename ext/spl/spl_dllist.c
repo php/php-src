@@ -86,7 +86,6 @@ struct _spl_dllist_object {
 	spl_ptr_llist         *llist;
 	int                    traverse_position;
 	spl_ptr_llist_element *traverse_pointer;
-	zval                   retval;
 	int                    flags;
 	zend_function         *fptr_offset_get;
 	zend_function         *fptr_offset_set;
@@ -358,7 +357,6 @@ static void spl_dllist_object_free_storage(zend_object *object TSRMLS_DC) /* {{{
 
 	spl_ptr_llist_destroy(intern->llist TSRMLS_CC);
 	SPL_LLIST_CHECK_DELREF(intern->traverse_pointer);
-	zval_ptr_dtor(&intern->retval);
 
 	if (intern->debug_info != NULL) {
 		zend_hash_destroy(intern->debug_info);
@@ -482,10 +480,8 @@ static int spl_dllist_object_count_elements(zval *object, zend_long *count TSRML
 		zval rv;
 		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
 		if (!Z_ISUNDEF(rv)) {
-			zval_ptr_dtor(&intern->retval);
-			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			convert_to_long(&intern->retval);
-			*count = (zend_long) Z_LVAL(intern->retval);
+			*count = zval_get_long(&rv);
+			zval_ptr_dtor(&rv);
 			return SUCCESS;
 		}
 		*count = 0;

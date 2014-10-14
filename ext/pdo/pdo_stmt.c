@@ -978,7 +978,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 				ZVAL_COPY(return_value, &stmt->fetch.into);
 
-				if (zend_get_class_entry(Z_OBJ_P(return_value) TSRMLS_CC) == ZEND_STANDARD_CLASS_DEF_PTR) {
+				if (Z_OBJ_P(return_value)->ce == ZEND_STANDARD_CLASS_DEF_PTR) {
 					how = PDO_FETCH_OBJ;
 				}
 				break;
@@ -2636,18 +2636,9 @@ static union _zend_function *row_get_ctor(zend_object *object TSRMLS_DC)
 	return (union _zend_function*)&ctor;
 }
 
-static zend_class_entry *row_get_ce(const zend_object *object TSRMLS_DC)
+static zend_string *row_get_classname(const zend_object *object TSRMLS_DC)
 {
-	return pdo_row_ce;
-}
-
-static zend_string *row_get_classname(const zend_object *object, int parent TSRMLS_DC)
-{
-	if (parent) {
-		return NULL;
-	} else {
-		return zend_string_init("PDORow", sizeof("PDORow") - 1, 0);
-	}
+	return zend_string_init("PDORow", sizeof("PDORow") - 1, 0);
 }
 
 static int row_compare(zval *object1, zval *object2 TSRMLS_DC)
@@ -2675,7 +2666,6 @@ zend_object_handlers pdo_row_object_handlers = {
 	row_method_get,
 	row_call_method,
 	row_get_ctor,
-	row_get_ce,
 	row_get_classname,
 	row_compare,
 	NULL, /* cast */

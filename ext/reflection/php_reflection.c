@@ -83,7 +83,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 /* Method macros */
 
 #define METHOD_NOTSTATIC(ce)                                                                                \
-	if (!Z_OBJ(EG(This)) || !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {           \
+	if (!Z_OBJ(EX(This)) || !instanceof_function(Z_OBJCE(EX(This)), ce TSRMLS_CC)) {           \
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s() cannot be called statically", get_active_function_name(TSRMLS_C));        \
 		return;                                                                                             \
 	}                                                                                                       \
@@ -2402,7 +2402,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 		} else {
 			zend_string *name = zend_string_init(param->arg_info->class_name, param->arg_info->class_name_len, 0);
 			ce = zend_lookup_class(name TSRMLS_CC);
-			zend_string_free(name);
+			zend_string_release(name);
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 					"Class %s does not exist", param->arg_info->class_name);
@@ -3862,10 +3862,10 @@ ZEND_METHOD(reflection_class, getProperty)
 			if (!EG(exception)) {
 				zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Class %s does not exist", classname->val);
 			}
-			zend_string_free(classname);
+			zend_string_release(classname);
 			return;
 		}
-		zend_string_free(classname);
+		zend_string_release(classname);
 
 		if (!instanceof_function(ce, ce2 TSRMLS_CC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Fully qualified property name %s::%s does not specify a base class of %s", ce2->name->val, str_name, ce->name->val);
@@ -4157,7 +4157,7 @@ ZEND_METHOD(reflection_class, isInstance)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	RETURN_BOOL(HAS_CLASS_ENTRY(*object) && instanceof_function(Z_OBJCE_P(object), ce TSRMLS_CC));
+	RETURN_BOOL(instanceof_function(Z_OBJCE_P(object), ce TSRMLS_CC));
 }
 /* }}} */
 
@@ -6046,7 +6046,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry reflection_zend_extension_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_zend_extension, export, arginfo_reflection_extension_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
-	ZEND_ME(reflection_zend_extension, __construct, arginfo_reflection_extension___construct, 0)
+	ZEND_ME(reflection_zend_extension, __construct, arginfo_reflection_zend_extension___construct, 0)
 	ZEND_ME(reflection_zend_extension, __toString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_zend_extension, getName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_zend_extension, getVersion, arginfo_reflection__void, 0)

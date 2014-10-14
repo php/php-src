@@ -616,7 +616,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_SOURCE(opline->op1)->opcode == ZEND_QM_ASSIGN &&
 			ZEND_OP1_TYPE(VAR_SOURCE(opline->op1)) == IS_CONST &&
 			opline->opcode != ZEND_CASE &&         /* CASE _always_ expects variable */
-			opline->opcode != ZEND_FETCH_DIM_TMP_VAR &&   /* in 5.1, FETCH_DIM_TMP_VAR expects T */
+			opline->opcode != ZEND_FETCH_LIST &&   /* in 5.1, FETCH_DIM_TMP_VAR expects T */
 			opline->opcode != ZEND_FE_RESET &&
 			opline->opcode != ZEND_FREE
 			) {

@@ -264,19 +264,10 @@ ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC) /* {{{ */
 		case IS_OBJECT:
 		{
 			HashTable *properties = NULL;
-			zend_string *class_name = NULL;
+			zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr) TSRMLS_CC);
+			zend_printf("%s Object (", class_name->val);
+			zend_string_release(class_name);
 
-			if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
-				class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr), 0 TSRMLS_CC);
-			}
-			if (class_name) {
-				zend_printf("%s Object (", class_name->val);
-			} else {
-				zend_printf("%s Object (", "Unknown Class");
-			}
-			if (class_name) {
-				zend_string_release(class_name);
-			}
 			if (Z_OBJ_HANDLER_P(expr, get_properties)) {
 				properties = Z_OBJPROP_P(expr);
 			}
@@ -325,21 +316,13 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 		case IS_OBJECT:
 			{
 				HashTable *properties;
-				zend_string *class_name = NULL;
 				int is_temp;
 
-				if (Z_OBJ_HANDLER_P(expr, get_class_name)) {
-					class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr), 0 TSRMLS_CC);
-				}
-				if (class_name) {
-					ZEND_PUTS_EX(class_name->val);
-				} else {
-					ZEND_PUTS_EX("Unknown Class");
-				}
+				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr) TSRMLS_CC);
+				ZEND_PUTS_EX(class_name->val);
+				zend_string_release(class_name);
+
 				ZEND_PUTS_EX(" Object\n");
-				if (class_name) {
-					zend_string_release(class_name);
-				}
 				if ((properties = Z_OBJDEBUG_P(expr, is_temp)) == NULL) {
 					break;
 				}
@@ -373,11 +356,9 @@ static FILE *zend_fopen_wrapper(const char *filename, char **opened_path TSRMLS_
 /* }}} */
 
 #ifdef ZTS
-static zend_bool asp_tags_default		  = 0;
-static zend_bool short_tags_default		  = 1;
+static zend_bool short_tags_default      = 1;
 static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 #else
-# define asp_tags_default			0
 # define short_tags_default			1
 # define compiler_options_default	ZEND_COMPILE_DEFAULT
 #endif
@@ -385,7 +366,6 @@ static uint32_t compiler_options_default = ZEND_COMPILE_DEFAULT;
 static void zend_set_default_compile_time_values(TSRMLS_D) /* {{{ */
 {
 	/* default compile-time values */
-	CG(asp_tags) = asp_tags_default;
 	CG(short_tags) = short_tags_default;
 	CG(compiler_options) = compiler_options_default;
 }
@@ -448,10 +428,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 	compiler_globals->script_encoding_list = NULL;
 
 #ifdef ZTS
-	compiler_globals->empty_string = zend_string_alloc(sizeof("")-1, 1);
-	compiler_globals->empty_string->val[0] = '\000';
-	zend_string_hash_val(compiler_globals->empty_string);
-	compiler_globals->empty_string->gc.u.v.flags |= IS_STR_INTERNED;
+	zend_interned_empty_string_init(&compiler_globals->empty_string TSRMLS_CC);
 
 	memset(compiler_globals->one_char_string, 0, sizeof(compiler_globals->one_char_string));
 #endif
@@ -481,7 +458,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 	compiler_globals->last_static_member = 0;
 
 #ifdef ZTS
-	zend_string_release(compiler_globals->empty_string);
+	zend_interned_empty_string_free(&compiler_globals->empty_string TSRMLS_CC);
 #endif
 }
 /* }}} */
@@ -723,7 +700,6 @@ void zend_post_startup(TSRMLS_D) /* {{{ */
 	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
 	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
 
-	asp_tags_default = CG(asp_tags);
 	short_tags_default = CG(short_tags);
 	compiler_options_default = CG(compiler_options);
 
@@ -848,7 +824,7 @@ ZEND_API void _zend_bailout(char *filename, uint lineno) /* {{{ */
 /* }}} */
 END_EXTERN_C()
 
-void zend_append_version_info(const zend_extension *extension) /* {{{ */
+ZEND_API void zend_append_version_info(const zend_extension *extension) /* {{{ */
 {
 	char *new_info;
 	uint new_info_length;

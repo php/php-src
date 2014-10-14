@@ -1343,8 +1343,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 		zval_ptr_dtor(&MBREX(search_str));
 	}
 
-	ZVAL_COPY(&MBREX(search_str), arg_str);
-	SEPARATE_ZVAL_IF_NOT_REF(&MBREX(search_str));
+	ZVAL_DUP(&MBREX(search_str), arg_str);
 
 	MBREX(search_pos) = 0;
 

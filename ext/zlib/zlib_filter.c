@@ -76,8 +76,6 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
 
-		bucket = buckets_in->head;
-
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
 
 		while (bin < (unsigned int) bucket->buflen) {

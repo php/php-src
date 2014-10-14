@@ -18,9 +18,5 @@ foreach($array as list(, $a)) {
 int(1)
 int(3)
 string(1) "b"
-
-Notice: Uninitialized string offset: 1 in %sforeach_list_002.php on line %d
-string(0) ""
-
-Notice: Uninitialized string offset: 1 in %sforeach_list_002.php on line %d
-string(0) ""
+NULL
+NULL

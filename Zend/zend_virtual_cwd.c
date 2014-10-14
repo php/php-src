@@ -294,7 +294,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{{ */
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
-	__int64 t;
+	LARGE_INTEGER t;
 	const size_t path_len = strlen(path);
 	ALLOCA_FLAG(use_heap_large);
 
@@ -393,10 +393,11 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	}
 
 	buf->st_nlink = 1;
-	t = data.nFileSizeHigh;
-	t = t << 32;
-	t |= data.nFileSizeLow;
-	buf->st_size = t;
+	t.HighPart = data.nFileSizeHigh;
+	t.LowPart = data.nFileSizeLow;
+	/* It's an overflow on 32 bit, however it won't fix as long
+	as zend_long is 32 bit. */
+	buf->st_size = (zend_long)t.QuadPart;
 	buf->st_atime = FileTimeToUnixTime(&data.ftLastAccessTime);
 	buf->st_ctime = FileTimeToUnixTime(&data.ftCreationTime);
 	buf->st_mtime = FileTimeToUnixTime(&data.ftLastWriteTime);

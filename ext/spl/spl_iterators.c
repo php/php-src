@@ -883,7 +883,7 @@ static union _zend_function *spl_recursive_it_get_method(zend_object **zobject, 
 	zval                    *zobj;
 
 	if (!object->iterators) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The %s instance wasn't initialized properly", zend_get_class_entry(*zobject TSRMLS_CC)->name->val);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The %s instance wasn't initialized properly", (*zobject)->ce->name->val);
 	}
 	zobj = &object->iterators[level].zobject;
 
