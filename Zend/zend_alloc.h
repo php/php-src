@@ -260,6 +260,23 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void  (*_free)(void*),
                                           void* (*_realloc)(void*, size_t));
 
+typedef struct _zend_mm_storage zend_mm_storage;
+
+typedef	void* (*zend_mm_chunk_alloc_t)(zend_mm_storage *storage, size_t size, size_t alignment);
+typedef void  (*zend_mm_chunk_free_t)(zend_mm_storage *storage, void *chunk, size_t size);
+typedef void  (*zend_mm_chunk_truncate_t)(zend_mm_storage *storage, void *chunk, size_t old_size, size_t new_size);
+typedef void  (*zend_mm_storage_dtor_t)(zend_mm_storage *storage);
+
+struct _zend_mm_storage {
+	zend_mm_chunk_alloc_t       chunk_alloc;
+	zend_mm_chunk_free_t        chunk_free;
+	zend_mm_chunk_truncate_t    chunk_truncate;
+	zend_mm_storage_dtor_t      dtor;
+};
+
+ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap);
+ZEND_API zend_mm_heap *zend_mm_startup_ex(zend_mm_storage *storage);
+
 END_EXTERN_C()
 
 #endif
