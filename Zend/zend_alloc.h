@@ -259,6 +259,10 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void* (*_malloc)(size_t),
                                           void  (*_free)(void*),
                                           void* (*_realloc)(void*, size_t));
+ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
+                                          void* (**_malloc)(size_t),
+                                          void  (**_free)(void*),
+                                          void* (**_realloc)(void*, size_t));
 
 typedef struct _zend_mm_storage zend_mm_storage;
 

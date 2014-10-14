@@ -2423,6 +2423,30 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
 #endif
 }
 
+ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
+                                          void* (**_malloc)(size_t),
+                                          void  (**_free)(void*),
+                                          void* (**_realloc)(void*, size_t))
+{
+#if ZEND_MM_CUSTOM
+	zend_mm_heap *_heap = (zend_mm_heap*)heap;
+
+	if (heap->use_custom_heap) {
+		*_malloc = _heap->_malloc;
+		*_free = _heap->_free;
+		*_realloc = _heap->_realloc;
+	} else {
+		*_malloc = NULL;
+		*_free = NULL;
+		*_realloc = NULL;
+	}
+#else
+	*_malloc = NULL;
+	*_free = NULL;
+	*_realloc = NULL;
+#endif
+}
+
 ZEND_API zend_mm_storage *zend_mm_get_storage(zend_mm_heap *heap)
 {
 #if ZEND_MM_CUSTOM
