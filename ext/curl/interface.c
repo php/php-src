@@ -178,12 +178,25 @@ static int php_curl_option_str(php_curl *ch, zend_long option, const char *str, 
 #if LIBCURL_VERSION_NUM >= 0x071100
 	if (make_copy) {
 #endif
+		char *copystr;
 
-	if (strlen(url) != len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Curl option contains invalid characters (\\0)");
-		return 0;
+		/* Strings passed to libcurl as 'char *' arguments, are copied by the library since 7.17.0 */
+		copystr = estrndup(str, len);
+		error = curl_easy_setopt(ch->cp, option, copystr);
+		zend_llist_add_element(&ch->to_free->str, &copystr);
+#if LIBCURL_VERSION_NUM >= 0x071100
+	} else {
+		error = curl_easy_setopt(ch->cp, option, str);
 	}
+#endif
 
+	SAVE_CURL_ERROR(ch, error)
+
+	return error == CURLE_OK ? SUCCESS : FAILURE;
+}
+
+static int php_curl_option_url(php_curl *ch, const char *url, const int len TSRMLS_DC) /* {{{ */
+{
 	/* Disable file:// if open_basedir are used */
 	if (PG(open_basedir) && *PG(open_basedir)) {
 #if LIBCURL_VERSION_NUM >= 0x071304
