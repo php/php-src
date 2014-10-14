@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.2
 
--Fileinfo:
-  . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
-
 - Core:
   . Fixed bug #67739 (Windows 8.1/Server 2012 R2 OS build number reported
     as 6.2 (instead of 6.3)). (Christian Wenz)
@@ -18,11 +15,17 @@ PHP                                                                        NEWS
     array notation) (Florian)
   . Implemented 64-bit format codes for pack() and unpack(). (Leigh)
 
+-Fileinfo:
+  . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
+
 - FPM:
   . Fixed bug #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable
     when using Apache, mod_proxy-fcgi and ProxyPass). (Remi)
   . Implemented FR #55508 (listen and listen.allowed_clients should take IPv6
     addresses). (Robin Gloster)
+
+- GMP:
+  . Implemented gmp_random_range() and gmp_random_bits(). (Leigh)
 
 - Reflection:
   . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)

@@ -270,6 +270,7 @@ PHP 5.6 UPGRADE NOTES
   Added gmp_root($a, $nth) and gmp_rootrem($a, $nth) for calculating nth roots.
   Added gmp_import($data, $word_size = 1, $options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN) in PHP 5.6.1.
   Added gmp_export($gmpnumber, $word_size = 1, $options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN) in PHP 5.6.1.
+  Added gmp_random_range() and gmp_random_bits() in PHP 5.6.3.
 
 - Hash
   Added hash_equals($known_string, $user_string)
