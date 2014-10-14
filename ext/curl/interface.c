@@ -172,7 +172,7 @@ static int php_curl_option_str(php_curl *ch, zend_long option, const char *str, 
 
 	if (strlen(str) != len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Curl option contains invalid characters (\\0)");
-		return 0;
+		return FAILURE;
 	}
 
 #if LIBCURL_VERSION_NUM >= 0x071100
