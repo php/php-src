@@ -133,10 +133,10 @@ void pretty_print(char *text TSRMLS_DC)
 	*q++ = '\0';
 
 	if ((q-new)>size) {
-		phpdbg_error("help", "overrun=\"%lu\"", "Output overrun of %lu bytes", ((q-new) - size));
+		phpdbg_error("help", "overrun=\"%lu\"", "Output overrun of %lu bytes", ((q - new) - size));
 	}
 
-	phpdbg_out("%s", new);
+	phpdbg_out("%s\n", new);
 	efree(new);
 }  /* }}} */
 
@@ -387,6 +387,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-l**      **-l**4000              Setup remote console ports" CR
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
+"  **-x**                          Enable xml output (instead of normal text output)" CR
 "  **-V**                          Print version number" CR
 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
 "argument after it" CR CR

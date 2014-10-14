@@ -1290,8 +1290,10 @@ PHPDBG_API int phpdbg_vprint(int type TSRMLS_DC, int fd, const char *tag, const 
 		PHPDBG_G(err_buf).tag = estrdup(tag);
 		PHPDBG_G(err_buf).msg = msg;
 		PHPDBG_G(err_buf).msglen = msglen;
-		PHPDBG_G(err_buf).xml = xml;
-		PHPDBG_G(err_buf).xmllen = xmllen;
+		if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
+			PHPDBG_G(err_buf).xml = xml;
+			PHPDBG_G(err_buf).xmllen = xmllen;
+		}
 
 		return msglen;
 	}
@@ -1318,7 +1320,9 @@ PHPDBG_API void phpdbg_free_err_buf(TSRMLS_D) {
 
 	efree(PHPDBG_G(err_buf).tag);
 	efree(PHPDBG_G(err_buf).msg);
-	efree(PHPDBG_G(err_buf).xml);
+	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
+		efree(PHPDBG_G(err_buf).xml);
+	}
 }
 
 PHPDBG_API void phpdbg_activate_err_buf(zend_bool active TSRMLS_DC) {
