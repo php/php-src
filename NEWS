@@ -42,6 +42,9 @@ PHP                                                                        NEWS
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
 
+- SPL:
+  . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
+
 02 Oct 2014, PHP 5.6.1
 
 - Core:
