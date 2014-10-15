@@ -15,7 +15,7 @@ PHP                                                                        NEWS
     array notation) (Florian)
   . Implemented 64-bit format codes for pack() and unpack(). (Leigh)
 
--Fileinfo:
+- Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
 
 - FPM:
@@ -23,6 +23,9 @@ PHP                                                                        NEWS
     when using Apache, mod_proxy-fcgi and ProxyPass). (Remi)
   . Implemented FR #55508 (listen and listen.allowed_clients should take IPv6
     addresses). (Robin Gloster)
+
+- GD:
+  . Fixed bug #65171 (imagescale() fails without height param). (Remi)
 
 - GMP:
   . Implemented gmp_random_range() and gmp_random_bits(). (Leigh)
