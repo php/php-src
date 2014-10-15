@@ -1475,7 +1475,7 @@ case $host_alias in
     PHP_ADD_BUILD_DIR(netware)
     ;;
   *)
-    PHP_ADD_SOURCES_X(/main, internal_functions_cli.c,, PHP_BINARY_OBJS)
+    PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_BINARY_OBJS)
     ;;
 esac
 
