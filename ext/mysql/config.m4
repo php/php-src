@@ -158,7 +158,7 @@ if test "$PHP_MYSQL" != "no"; then
   fi
 
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
-  PHP_NEW_EXTENSION(mysql, php_mysql.c, $ext_shared)
+  PHP_NEW_EXTENSION(mysql, php_mysql.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(MYSQL_SHARED_LIBADD)
 
   if test "$PHP_MYSQL" = "yes" || test "$PHP_MYSQL" = "mysqlnd"; then

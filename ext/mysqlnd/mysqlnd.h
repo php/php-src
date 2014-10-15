@@ -288,7 +288,10 @@ ZEND_END_MODULE_GLOBALS(mysqlnd)
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)
 
 #ifdef ZTS
-#define MYSQLND_G(v) TSRMG(mysqlnd_globals_id, zend_mysqlnd_globals *, v)
+#define MYSQLND_G(v) ZEND_TSRMG(mysqlnd_globals_id, zend_mysqlnd_globals *, v)
+#ifdef COMPILE_DL_MYSQLND
+ZEND_TSRMLS_CACHE_EXTERN;
+#endif
 #else
 #define MYSQLND_G(v) (mysqlnd_globals.v)
 #endif

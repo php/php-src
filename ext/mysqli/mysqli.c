@@ -537,6 +537,9 @@ PHP_INI_END()
  */
 static PHP_GINIT_FUNCTION(mysqli)
 {
+#if defined(COMPILE_DL_MYSQLI) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	mysqli_globals->num_links = 0;
 	mysqli_globals->num_active_persistent = 0;
 	mysqli_globals->num_inactive_persistent = 0;
@@ -1030,6 +1033,9 @@ zend_module_entry mysqli_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_MYSQLI
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(mysqli)
 #endif
 

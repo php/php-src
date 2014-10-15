@@ -724,7 +724,7 @@ PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 
 #ifdef COMPILE_DL_ZLIB
 #ifdef ZTS
-TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE;
 #endif
 ZEND_GET_MODULE(php_zlib)
 #endif
@@ -1011,7 +1011,7 @@ static PHP_MINFO_FUNCTION(zlib)
 static PHP_GINIT_FUNCTION(zlib)
 {
 #if defined(COMPILE_DL_ZLIB) && defined(ZTS)
-	TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE;
 #endif
 	zlib_globals->ob_gzhandler = NULL;
     zlib_globals->handler_registered = 0;

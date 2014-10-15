@@ -179,6 +179,9 @@ PHPAPI ZEND_DECLARE_MODULE_GLOBALS(mysqlnd)
  */
 static PHP_GINIT_FUNCTION(mysqlnd)
 {
+#if defined(COMPILE_DL_MYSQLND) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	mysqlnd_globals->collect_statistics = TRUE;
 	mysqlnd_globals->collect_memory_statistics = FALSE;
 	mysqlnd_globals->debug = NULL;	/* The actual string */
@@ -357,6 +360,9 @@ zend_module_entry mysqlnd_module_entry = {
 
 /* {{{ COMPILE_DL_MYSQLND */
 #ifdef COMPILE_DL_MYSQLND
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(mysqlnd)
 #endif
 /* }}} */
