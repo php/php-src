@@ -74,6 +74,7 @@ error (const char *format,...)
 {
 	va_list args;
 	char *tmp;
+	TSRMLS_FETCH();
 
 	va_start(args, format);
 	vspprintf(&tmp, 0, format, args);

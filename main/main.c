@@ -376,6 +376,7 @@ static PHP_INI_DISP(display_errors_mode)
 {
 	int mode, tmp_value_length, cgi_or_cli;
 	char *tmp_value;
+	TSRMLS_FETCH();
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 		tmp_value = (ini_entry->orig_value ? ini_entry->orig_value->val : NULL );
@@ -722,6 +723,7 @@ PHPAPI size_t php_printf(const char *format, ...)
 	size_t ret;
 	char *buffer;
 	size_t size;
+	TSRMLS_FETCH();
 
 	va_start(args, format);
 	size = vspprintf(&buffer, 0, format, args);
@@ -997,6 +999,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 {
 	char *buffer;
 	int buffer_len, display;
+	TSRMLS_FETCH();
 
 	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
 
@@ -1713,6 +1716,8 @@ int php_request_startup_for_hook(TSRMLS_D)
  */
 void php_request_shutdown_for_exec(void *dummy)
 {
+	TSRMLS_FETCH();
+
 	/* used to close fd's in the 3..255 range here, but it's problematic
 	 */
 	shutdown_memory_manager(1, 1 TSRMLS_CC);
@@ -1724,6 +1729,8 @@ void php_request_shutdown_for_exec(void *dummy)
  */
 void php_request_shutdown_for_hook(void *dummy)
 {
+	TSRMLS_FETCH();
+
 	if (PG(modules_activated)) zend_try {
 		php_call_shutdown_functions(TSRMLS_C);
 	} zend_end_try();
@@ -1775,6 +1782,7 @@ void php_request_shutdown_for_hook(void *dummy)
 void php_request_shutdown(void *dummy)
 {
 	zend_bool report_memleaks;
+	TSRMLS_FETCH();
 
 	report_memleaks = PG(report_memleaks);
 
@@ -1910,6 +1918,7 @@ PHPAPI void php_com_initialize(TSRMLS_D)
  */
 static size_t php_output_wrapper(const char *str, size_t str_length)
 {
+	TSRMLS_FETCH();
 	return php_output_write(str, str_length TSRMLS_CC);
 }
 /* }}} */
@@ -2008,6 +2017,7 @@ void dummy_invalid_parameter_handler(
 	int len;
 
 	if (!called) {
+		TSRMLS_FETCH();
 		if(PG(windows_show_crt_warning)) {
 			called = 1;
 			if (function) {
@@ -2393,6 +2403,7 @@ void php_module_shutdown_for_exec(void)
  */
 int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 {
+	TSRMLS_FETCH();
 	php_module_shutdown(TSRMLS_C);
 	return SUCCESS;
 }
@@ -2606,6 +2617,8 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret T
  */
 PHPAPI void php_handle_aborted_connection(void)
 {
+	TSRMLS_FETCH();
+
 	PG(connection_status) = PHP_CONNECTION_ABORTED;
 	php_output_set_status(PHP_OUTPUT_DISABLED TSRMLS_CC);
 

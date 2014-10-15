@@ -487,6 +487,7 @@ static void TIDY_CALL php_tidy_free(void *buf)
 
 static void TIDY_CALL php_tidy_panic(ctmbstr msg)
 {
+	TSRMLS_FETCH();
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
 }
 
@@ -1143,6 +1144,7 @@ static int php_tidy_output_handler(void **nothing, php_output_context *output_co
 	int status = FAILURE;
 	TidyDoc doc;
 	TidyBuffer inbuf, outbuf, errbuf;
+	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (TG(clean_output) && (output_context->op & PHP_OUTPUT_HANDLER_START) && (output_context->op & PHP_OUTPUT_HANDLER_FINAL)) {
 		doc = tidyCreate();

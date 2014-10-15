@@ -82,6 +82,8 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	char *str;
 	zend_string *callable = NULL;
 	dom_xpath_object *intern;
+	
+	TSRMLS_FETCH();
 
 	if (! zend_is_executing(TSRMLS_C)) {
 		xmlGenericError(xmlGenericErrorContext,

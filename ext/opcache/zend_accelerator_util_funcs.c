@@ -53,6 +53,7 @@ static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC);
 static void zend_accel_destroy_zend_function(zval *zv)
 {
 	zend_function *function = Z_PTR_P(zv);
+	TSRMLS_FETCH();
 
 	if (function->type == ZEND_USER_FUNCTION) {
 		if (function->op_array.static_variables) {
@@ -352,6 +353,7 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	uint idx;
 	Bucket *p, *q, *r;
 	zend_ulong nIndex;
+	TSRMLS_FETCH();
 
 	ht->nTableSize = source->nTableSize;
 	ht->nTableMask = source->nTableMask;
@@ -604,6 +606,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_class_entry *old_ce = ce;
 	zend_class_entry *new_ce;
 	zend_function *new_func;
+	TSRMLS_FETCH();
 
 	*pce = ce = ARENA_REALLOC(old_ce);
 	ce->refcount = 1;

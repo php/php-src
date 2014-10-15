@@ -1191,6 +1191,7 @@ PHP_FUNCTION(pcntl_strerror)
 static void pcntl_signal_handler(int signo)
 {
 	struct php_pcntl_pending_signal *psig;
+	TSRMLS_FETCH();
 	
 	psig = PCNTL_G(spares);
 	if (!psig) {
@@ -1218,6 +1219,7 @@ void pcntl_signal_dispatch()
 	struct php_pcntl_pending_signal *queue, *next;
 	sigset_t mask;
 	sigset_t old_mask;
+	TSRMLS_FETCH();
 		
 	/* Mask all signals */
 	sigfillset(&mask);

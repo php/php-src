@@ -2133,6 +2133,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	zend_execute_data *_old_current_execute_data;
 	int _old_http_response_code;
 	char *_old_http_status_line;
+	TSRMLS_FETCH();
 
 	_old_in_compilation = CG(in_compilation);
 	_old_current_execute_data = EG(current_execute_data);
@@ -3383,6 +3384,7 @@ static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, i
 					sdlParamPtr param = NULL;
 					if (function != NULL &&
 					    (param = zend_hash_index_find_ptr(function->requestParameters, cur_param)) == NULL) {
+						TSRMLS_FETCH();
 						soap_server_fault("Client", "Error cannot find parameter", NULL, NULL, NULL TSRMLS_CC);
 					}
 					if (param == NULL) {

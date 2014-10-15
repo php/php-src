@@ -39,6 +39,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 			}
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
+				TSRMLS_FETCH();
 
 				if (arr != &EG(symbol_table)) {
 					/* break possible cycles */
@@ -58,12 +59,14 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 			}
 		case IS_OBJECT: {
 				zend_object *obj = (zend_object*)p;
+				TSRMLS_FETCH();
 
 				OBJ_RELEASE(obj);
 				break;
 			}
 		case IS_RESOURCE: {
 				zend_resource *res = (zend_resource*)p;
+				TSRMLS_FETCH();
 
 				if (--GC_REFCOUNT(res) == 0) {
 					/* destroy resource */
@@ -96,6 +99,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 			}
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
+				TSRMLS_FETCH();
 
 				if (arr != &EG(symbol_table)) {
 					/* break possible cycles */
@@ -115,12 +119,14 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 			}
 		case IS_OBJECT: {
 				zend_object *obj = (zend_object*)p;
+				TSRMLS_FETCH();
 
 				zend_objects_store_del(obj TSRMLS_CC);
 				break;
 			}
 		case IS_RESOURCE: {
 				zend_resource *res = (zend_resource*)p;
+				TSRMLS_FETCH();
 
 				/* destroy resource */
 				zend_list_free(res);
@@ -232,6 +238,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			break;
 		case IS_ARRAY: {
 				HashTable *ht;
+				TSRMLS_FETCH();
 
 				if (Z_ARR_P(zvalue) == &EG(symbol_table)) {
 					return; /* do nothing */

@@ -158,6 +158,7 @@ static void ini_error(const char *msg)
 	char *error_buf;
 	int error_buf_len;
 	char *currently_parsed_filename;
+	TSRMLS_FETCH();
 
 	currently_parsed_filename = zend_ini_scanner_get_filename(TSRMLS_C);
 	if (currently_parsed_filename) {

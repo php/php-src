@@ -245,6 +245,8 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 	size_t estimate = (2 * l) + 1;
 	zend_string *cmd;
 
+	TSRMLS_FETCH();
+
 	cmd = zend_string_alloc(2 * l, 0);
 
 	for (x = 0, y = 0; x < l; x++) {
@@ -334,6 +336,8 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 	int x, y = 0, l = strlen(str);
 	zend_string *cmd;
 	size_t estimate = (4 * l) + 3;
+
+	TSRMLS_FETCH();
 
 	cmd = zend_string_alloc(4 * l + 2, 0); /* worst case */
 

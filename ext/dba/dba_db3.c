@@ -37,6 +37,8 @@
 
 static void php_dba_db3_errcall_fcn(const char *errpfx, char *msg)
 {
+	TSRMLS_FETCH();
+	
 	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
 }
 

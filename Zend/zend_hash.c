@@ -252,6 +252,9 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -404,6 +407,9 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 	CHECK_INIT(ht, h < ht->nTableSize);
@@ -541,6 +547,9 @@ ZEND_API zval *_zend_hash_next_index_insert_new(HashTable *ht, zval *pData ZEND_
 
 static void zend_hash_do_resize(HashTable *ht)
 {
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -659,6 +668,9 @@ ZEND_API int zend_hash_del(HashTable *ht, zend_string *key)
 	uint32_t idx;
 	Bucket *p;
 	Bucket *prev = NULL;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -695,6 +707,9 @@ ZEND_API int zend_hash_del_ind(HashTable *ht, zend_string *key)
 	uint32_t idx;
 	Bucket *p;
 	Bucket *prev = NULL;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -744,6 +759,9 @@ ZEND_API int zend_hash_str_del(HashTable *ht, const char *str, size_t len)
 	uint32_t idx;
 	Bucket *p;
 	Bucket *prev = NULL;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -792,6 +810,9 @@ ZEND_API int zend_hash_str_del_ind(HashTable *ht, const char *str, size_t len)
 	uint32_t idx;
 	Bucket *p;
 	Bucket *prev = NULL;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -822,6 +843,9 @@ ZEND_API int zend_hash_index_del(HashTable *ht, zend_ulong h)
 	uint32_t idx;
 	Bucket *p;
 	Bucket *prev = NULL;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -937,6 +961,10 @@ ZEND_API void zend_hash_clean(HashTable *ht)
  */
 static void zend_hash_apply_deleter(HashTable *ht, uint32_t idx, Bucket *p)
 {
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
+
 	HANDLE_BLOCK_INTERRUPTIONS();
 	_zend_hash_del_el(ht, idx, p);
 	HANDLE_UNBLOCK_INTERRUPTIONS();

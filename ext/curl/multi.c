@@ -100,6 +100,7 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 {
 	zval *z_ch = (zval *)data;
 	php_curl *ch;
+	TSRMLS_FETCH();
 
 	if (!z_ch) {
 		return;

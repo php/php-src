@@ -48,6 +48,8 @@ const char * gdPngGetVersionString()
 
 int overflow2(int a, int b)
 {
+	TSRMLS_FETCH();
+
 	if(a <= 0 || b <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "gd warning: one parameter to a memory allocation multiplication is negative or zero, failing operation gracefully\n");
 		return 1;

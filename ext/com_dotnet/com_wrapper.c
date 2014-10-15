@@ -88,6 +88,7 @@ static inline void trace(char *fmt, ...)
 
 #define FETCH_DISP(methname)																			\
 	php_dispatchex *disp = (php_dispatchex*)This; 														\
+	TSRMLS_FETCH();																						\
 	if (COMG(rshutdown_started)) {																		\
 		trace(" PHP Object:%p (name:unknown) %s\n", Z_OBJ(disp->object),  methname); 							\
 	} else {																							\

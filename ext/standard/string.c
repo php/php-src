@@ -3228,6 +3228,7 @@ char *php_strerror(int errnum)
 {
 	extern int sys_nerr;
 	extern char *sys_errlist[];
+	TSRMLS_FETCH();
 
 	if ((unsigned int) errnum < sys_nerr) {
 		return(sys_errlist[errnum]);

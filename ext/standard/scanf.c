@@ -316,6 +316,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 	int staticAssign[STATIC_LIST_SIZE];
 	int *nassign = staticAssign;
 	int objIndex, xpgSize, nspace = STATIC_LIST_SIZE;
+	TSRMLS_FETCH();
 
 	/*
 	 * Initialize an array that records the number of times a variable

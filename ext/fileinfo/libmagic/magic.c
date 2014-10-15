@@ -353,6 +353,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 	zend_stat_t   sb;
 	ssize_t nbytes = 0;	/* number of bytes read from a datafile */
 	int no_in_stream = 0;
+	TSRMLS_FETCH();
 
 	if (!inname && !stream) {
 		return NULL;

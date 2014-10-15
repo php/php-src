@@ -48,6 +48,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 	int arg_count;
 	va_list ptr;
 	zval **param, *param_ptr;
+	TSRMLS_FETCH();
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
 	arg_count = EG(current_execute_data)->num_args;
@@ -83,6 +84,7 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 	int arg_count;
 	va_list ptr;
 	zval **param, *param_ptr;
+	TSRMLS_FETCH();
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
 	arg_count = EG(current_execute_data)->num_args;
@@ -2473,6 +2475,8 @@ static void clean_module_classes(int module_number TSRMLS_DC) /* {{{ */
 
 void module_destructor(zend_module_entry *module) /* {{{ */
 {
+	TSRMLS_FETCH();
+
 	if (module->type == MODULE_TEMPORARY) {
 		zend_clean_module_rsrc_dtors(module->module_number TSRMLS_CC);
 		clean_module_constants(module->module_number TSRMLS_CC);

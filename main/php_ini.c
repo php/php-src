@@ -170,6 +170,7 @@ static int php_ini_available(zval *el, void *arg TSRMLS_DC)
 PHPAPI void display_ini_entries(zend_module_entry *module)
 {
 	int module_number, module_number_available;
+	TSRMLS_FETCH();
 
 	if (module) {
 		module_number = module->module_number;

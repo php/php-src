@@ -865,6 +865,7 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
 	zval* php_function;
 	zval xmlrpc_params;
 	zval callback_params[3];
+	TSRMLS_FETCH();
 
 	zval_ptr_dtor(&pData->xmlrpc_method);
 	zval_ptr_dtor(&pData->return_data);
@@ -905,6 +906,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 	zval callback_params[1];
 	zend_string *php_function_name;
 	xmlrpc_callback_data* pData = (xmlrpc_callback_data*)data;
+	TSRMLS_FETCH();
 
 	/* setup data hoojum */
 	ZVAL_COPY_VALUE(&callback_params[0], &pData->caller_params);
@@ -1255,6 +1257,7 @@ XMLRPC_VECTOR_TYPE xmlrpc_str_as_vector_type(const char* str) /* {{{ */
 int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 {
 	int bSuccess = FAILURE;
+	TSRMLS_FETCH();
 
 	/* we only really care about strings because they can represent
 	 * base64 and datetime.  all other types have corresponding php types
@@ -1301,6 +1304,7 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval* newvalue) /* {{{ */
 {
 	XMLRPC_VALUE_TYPE type = xmlrpc_none;
+	TSRMLS_FETCH();
 
 	if (value) {
 		switch (Z_TYPE_P(value)) {

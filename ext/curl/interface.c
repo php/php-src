@@ -1284,6 +1284,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 	php_curl *ch = (php_curl *) ctx;
 	php_curl_write *t = ch->handlers->write;
 	size_t length = size * nmemb;
+	TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
 #if PHP_CURL_DEBUG
 	fprintf(stderr, "curl_write() called\n");
@@ -1358,6 +1359,7 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 			zval retval;
 			int  error;
 			zend_fcall_info fci;
+			TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
 			ZVAL_RES(&argv[0], ch->res);
 			Z_ADDREF(argv[0]);
@@ -1415,6 +1417,7 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			zval retval;
 			int  error;
 			zend_fcall_info fci;
+			TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
 			ZVAL_RES(&argv[0], ch->res);
 			Z_ADDREF(argv[0]);
@@ -1477,6 +1480,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			zval retval;
 			int  error;
 			zend_fcall_info fci;
+			TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
 			ZVAL_RES(&argv[0], ch->res);
 			Z_ADDREF(argv[0]);
@@ -1528,6 +1532,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 	php_curl *ch = (php_curl *) ctx;
 	php_curl_write *t = ch->handlers->write_header;
 	size_t length = size * nmemb;
+	TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
 	switch (t->method) {
 		case PHP_CURL_STDOUT:
@@ -1617,6 +1622,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	zval  retval;
 	int   error;
 	int   ret = -1;
+	TSRMLS_FETCH_FROM_CTX(ch->thread_ctx);
 
 	ZVAL_RES(&argv[0], ch->res);
 	Z_ADDREF(argv[0]);

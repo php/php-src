@@ -312,6 +312,7 @@ int phar_archive_delref(phar_archive_data *phar TSRMLS_DC) /* {{{ */
 static void destroy_phar_data_only(zval *zv) /* {{{ */
 {
 	phar_archive_data *phar_data = (phar_archive_data *) Z_PTR_P(zv);
+	TSRMLS_FETCH();
 
 	if (EG(exception) || --phar_data->refcount < 0) {
 		phar_destroy_phar_data(phar_data TSRMLS_CC);
@@ -354,6 +355,7 @@ static int phar_tmpclose_apply(zval *zv TSRMLS_DC) /* {{{ */
 static void destroy_phar_data(zval *zv) /* {{{ */
 {
 	phar_archive_data *phar_data = (phar_archive_data *)Z_PTR_P(zv);
+	TSRMLS_FETCH();
 
 	if (PHAR_GLOBALS->request_ends) {
 		/* first, iterate over the manifest and close all PHAR_TMP entry fp handles,
@@ -376,6 +378,8 @@ static void destroy_phar_data(zval *zv) /* {{{ */
  */
 void destroy_phar_manifest_entry_int(phar_entry_info *entry) /* {{{ */
 {
+	TSRMLS_FETCH();
+
 	if (entry->cfp) {
 		php_stream_close(entry->cfp);
 		entry->cfp = 0;

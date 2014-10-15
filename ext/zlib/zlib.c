@@ -91,6 +91,7 @@ static int php_zlib_output_encoding(TSRMLS_D)
 static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context *output_context)
 {
 	int flags = Z_SYNC_FLUSH;
+	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (output_context->op & PHP_OUTPUT_HANDLER_START) {
 		/* start up */
@@ -176,6 +177,7 @@ static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context 
 static int php_zlib_output_handler(void **handler_context, php_output_context *output_context)
 {
 	php_zlib_context *ctx = *(php_zlib_context **) handler_context;
+	PHP_OUTPUT_TSRMLS(output_context);
 
 	if (!php_zlib_output_encoding(TSRMLS_C)) {
 		/* "Vary: Accept-Encoding" header sent along uncompressed content breaks caching in MSIE,
@@ -482,6 +484,7 @@ static PHP_FUNCTION(ob_gzhandler)
 		ZLIBG(ob_gzhandler) = php_zlib_output_handler_context_init(TSRMLS_C);
 	}
 
+	TSRMLS_SET_CTX(ctx.tsrm_ls);
 	ctx.op = flags;
 	ctx.in.data = in_str;
 	ctx.in.used = in_len;

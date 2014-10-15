@@ -232,6 +232,8 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 	zval *val;
 	zend_ulong allowed_depth = OPENSSL_DEFAULT_STREAM_VERIFY_DEPTH;
 
+	TSRMLS_FETCH();
+
 	ret = preverify_ok;
 
 	/* determine the status for the current cert */
@@ -531,6 +533,8 @@ static int win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /
 	php_openssl_netstream_data_t *sslsock;
 	zval *val;
 	zend_bool is_self_signed = 0;
+
+	TSRMLS_FETCH();
 
 	stream = (php_stream*)arg;
 	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
@@ -982,6 +986,8 @@ static void limit_handshake_reneg(const SSL *ssl) /* {{{ */
 	/* The token level exceeds our allowed limit */
 	if (sslsock->reneg->tokens > sslsock->reneg->limit) {
 		zval *val;
+
+		TSRMLS_FETCH();
 
 		sslsock->reneg->should_close = 1;
 

@@ -360,6 +360,8 @@ static ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 #endif
 	size_t size)
 {
+	TSRMLS_FETCH();
+
 	heap->overflow = 1;
 	zend_try {
 		zend_error_noreturn(E_ERROR,
@@ -2097,6 +2099,7 @@ ZEND_API int is_zend_mm(TSRMLS_D)
 
 # define _ZEND_BIN_ALLOCATOR(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void* ZEND_FASTCALL _emalloc_ ## _size(void) { \
+		TSRMLS_FETCH(); \
 		ZEND_MM_CUSTOM_ALLOCATOR(_size); \
 		return zend_mm_alloc_small(AG(mm_heap), _size, _num ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC); \
 	}
@@ -2105,18 +2108,23 @@ ZEND_MM_BINS_INFO(_ZEND_BIN_ALLOCATOR, x, y)
 
 ZEND_API void* ZEND_FASTCALL _emalloc_large(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+	TSRMLS_FETCH();
+
 	ZEND_MM_CUSTOM_ALLOCATOR(size);
 	return zend_mm_alloc_large(AG(mm_heap), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
 
 ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 {
+	TSRMLS_FETCH();
+
 	ZEND_MM_CUSTOM_ALLOCATOR(size);
 	return zend_mm_alloc_huge(AG(mm_heap), size);
 }
 
 # define _ZEND_BIN_FREE(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void ZEND_FASTCALL _efree_ ## _size(void *ptr) { \
+		TSRMLS_FETCH(); \
 		ZEND_MM_CUSTOM_DEALLOCATOR(ptr); \
 		{ \
 			size_t page_offset = ZEND_MM_ALIGNED_OFFSET(ptr, ZEND_MM_CHUNK_SIZE); \
@@ -2133,6 +2141,8 @@ ZEND_MM_BINS_INFO(_ZEND_BIN_FREE, x, y)
 
 ZEND_API void ZEND_FASTCALL _efree_large(void *ptr, size_t size)
 {
+	TSRMLS_FETCH();
+
 	ZEND_MM_CUSTOM_DEALLOCATOR(ptr);
 	{
 		size_t page_offset = ZEND_MM_ALIGNED_OFFSET(ptr, ZEND_MM_CHUNK_SIZE);
@@ -2149,6 +2159,8 @@ ZEND_API void ZEND_FASTCALL _efree_large(void *ptr, size_t size)
 
 ZEND_API void ZEND_FASTCALL _efree_huge(void *ptr, size_t size)
 {
+	TSRMLS_FETCH();
+
 	ZEND_MM_CUSTOM_DEALLOCATOR(ptr);
 	// TODO: use size???
 	zend_mm_free_huge(AG(mm_heap), ptr);
@@ -2157,6 +2169,8 @@ ZEND_API void ZEND_FASTCALL _efree_huge(void *ptr, size_t size)
 
 ZEND_API void* ZEND_FASTCALL _emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+	TSRMLS_FETCH();
+
 #if ZEND_MM_CUSTOM
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
 		return AG(mm_heap)->_malloc(size);
@@ -2167,6 +2181,8 @@ ZEND_API void* ZEND_FASTCALL _emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 
 ZEND_API void ZEND_FASTCALL _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+	TSRMLS_FETCH();
+
 #if ZEND_MM_CUSTOM
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
 		AG(mm_heap)->_free(ptr);
@@ -2178,6 +2194,8 @@ ZEND_API void ZEND_FASTCALL _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_OR
 
 ZEND_API void* ZEND_FASTCALL _erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+	TSRMLS_FETCH();
+
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
 		return AG(mm_heap)->_realloc(ptr, size);
 	}
@@ -2229,7 +2247,9 @@ ZEND_API void* ZEND_FASTCALL _safe_realloc(void *ptr, size_t nmemb, size_t size,
 ZEND_API void* ZEND_FASTCALL _ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	void *p;
-
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 	HANDLE_BLOCK_INTERRUPTIONS();
 
 	p = _safe_emalloc(nmemb, size, 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -2246,6 +2266,9 @@ ZEND_API char* ZEND_FASTCALL _estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_
 {
 	size_t length;
 	char *p;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
@@ -2263,6 +2286,9 @@ ZEND_API char* ZEND_FASTCALL _estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_
 ZEND_API char* ZEND_FASTCALL _estrndup(const char *s, size_t length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	char *p;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
@@ -2281,6 +2307,9 @@ ZEND_API char* ZEND_FASTCALL _estrndup(const char *s, size_t length ZEND_FILE_LI
 ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 {
 	char *p;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
@@ -2338,7 +2367,6 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 
 static void alloc_globals_ctor(zend_alloc_globals *alloc_globals TSRMLS_DC)
 {
-
 #if ZEND_MM_CUSTOM
 	char *tmp = getenv("USE_ZEND_ALLOC");
 

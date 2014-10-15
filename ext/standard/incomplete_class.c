@@ -136,6 +136,7 @@ PHPAPI zend_string *php_lookup_class_name(zval *object)
 {
 	zval *val;
 	HashTable *object_properties;
+	TSRMLS_FETCH();
 
 	object_properties = Z_OBJPROP_P(object);
 
@@ -152,6 +153,8 @@ PHPAPI zend_string *php_lookup_class_name(zval *object)
 PHPAPI void php_store_class_name(zval *object, const char *name, uint32_t len)
 {
 	zval val;
+	TSRMLS_FETCH();
+
 
 	ZVAL_STRINGL(&val, name, len);
 	zend_hash_str_update(Z_OBJPROP_P(object), MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1, &val);

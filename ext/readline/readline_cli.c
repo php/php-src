@@ -505,6 +505,7 @@ TODO:
 */
 	char *retval = NULL;
 	int textlen = strlen(text);
+	TSRMLS_FETCH();
 
 	if (!index) {
 		cli_completion_state = 0;

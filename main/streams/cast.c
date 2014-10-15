@@ -63,6 +63,7 @@ FILE *fopencookie(void *cookie, const char *mode, COOKIE_IO_FUNCTIONS_T *funcs)
 static int stream_cookie_reader(void *cookie, char *buffer, int size)
 {
 	int ret;
+	TSRMLS_FETCH();
 
 	ret = php_stream_read((php_stream*)cookie, buffer, size);
 	return ret;
@@ -70,17 +71,22 @@ static int stream_cookie_reader(void *cookie, char *buffer, int size)
 
 static int stream_cookie_writer(void *cookie, const char *buffer, int size)
 {
+	TSRMLS_FETCH();
+
 	return php_stream_write((php_stream *)cookie, (char *)buffer, size);
 }
 
 static PHP_FPOS_T stream_cookie_seeker(void *cookie, zend_off_t position, int whence)
 {
+	TSRMLS_FETCH();
+
 	return (PHP_FPOS_T)php_stream_seek((php_stream *)cookie, position, whence);
 }
 
 static int stream_cookie_closer(void *cookie)
 {
 	php_stream *stream = (php_stream*)cookie;
+	TSRMLS_FETCH();
 
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
@@ -90,6 +96,7 @@ static int stream_cookie_closer(void *cookie)
 static ssize_t stream_cookie_reader(void *cookie, char *buffer, size_t size)
 {
 	ssize_t ret;
+	TSRMLS_FETCH();
 
 	ret = php_stream_read(((php_stream *)cookie), buffer, size);
 	return ret;
@@ -97,12 +104,16 @@ static ssize_t stream_cookie_reader(void *cookie, char *buffer, size_t size)
 
 static ssize_t stream_cookie_writer(void *cookie, const char *buffer, size_t size)
 {
+	TSRMLS_FETCH();
+
 	return php_stream_write(((php_stream *)cookie), (char *)buffer, size);
 }
 
 # ifdef COOKIE_SEEKER_USES_OFF64_T
 static int stream_cookie_seeker(void *cookie, __off64_t *position, int whence)
 {
+	TSRMLS_FETCH();
+
 	*position = php_stream_seek((php_stream *)cookie, (zend_off_t)*position, whence);
 
 	if (*position == -1) {
@@ -113,6 +124,8 @@ static int stream_cookie_seeker(void *cookie, __off64_t *position, int whence)
 # else
 static int stream_cookie_seeker(void *cookie, zend_off_t position, int whence)
 {
+	TSRMLS_FETCH();
+
 	return php_stream_seek((php_stream *)cookie, position, whence);
 }
 # endif
@@ -120,6 +133,7 @@ static int stream_cookie_seeker(void *cookie, zend_off_t position, int whence)
 static int stream_cookie_closer(void *cookie)
 {
 	php_stream *stream = (php_stream*)cookie;
+	TSRMLS_FETCH();
 
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;

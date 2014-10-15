@@ -1097,6 +1097,8 @@ static void php_free_gd_font(zend_resource *rsrc TSRMLS_DC)
  */
 void php_gd_error_method(int type, const char *format, va_list args)
 {
+	TSRMLS_FETCH();
+
 	php_verror(NULL, "", type, format, args TSRMLS_CC);
 }
 /* }}} */
@@ -4355,6 +4357,7 @@ static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold
 	int dest_height = gdImageSY(im_org);
 	int dest_width = gdImageSX(im_org);
 	int x, y;
+	TSRMLS_FETCH();
 
 	im_dest = gdImageCreate(dest_width, dest_height);
 	if (im_dest == NULL) {

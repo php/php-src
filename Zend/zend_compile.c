@@ -186,6 +186,8 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 
 ZEND_API void file_handle_dtor(zend_file_handle *fh) /* {{{ */
 {
+	TSRMLS_FETCH();
+
 	zend_file_handle_dtor(fh TSRMLS_CC);
 }
 /* }}} */

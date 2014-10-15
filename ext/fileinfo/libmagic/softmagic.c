@@ -360,6 +360,7 @@ check_fmt(struct magic_set *ms, struct magic *m)
 	int re_options, rv = -1;
 	pcre_extra *re_extra;
 	zend_string *pattern;
+	TSRMLS_FETCH();
 	
 	if (strchr(m->desc, '%') == NULL)
 		return 0;
@@ -2078,6 +2079,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		zval pattern;
 		int options = 0;
 		pcre_cache_entry *pce;
+		TSRMLS_FETCH();
 		
 		options |= PCRE_MULTILINE;
 		

@@ -188,6 +188,7 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 {
 	struct pdo_bound_param_data *param = (struct pdo_bound_param_data*)ctx;
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
+	TSRMLS_FETCH();
 
 	if (!param || !param->parameter) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "param is NULL in oci_bind_input_cb; this should not happen");
@@ -219,6 +220,7 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 {
 	struct pdo_bound_param_data *param = (struct pdo_bound_param_data*)ctx;
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
+	TSRMLS_FETCH();
 
 	if (!param || !param->parameter) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "param is NULL in oci_bind_output_cb; this should not happen");
@@ -479,6 +481,7 @@ static sb4 oci_define_callback(dvoid *octxp, OCIDefine *define, ub4 iter, dvoid 
 		ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcodepp)
 {
 	pdo_oci_column *col = (pdo_oci_column*)octxp;
+	TSRMLS_FETCH();
 
 	switch (col->dtype) {
 		case SQLT_BLOB:

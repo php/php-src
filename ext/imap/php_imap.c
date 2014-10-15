@@ -760,6 +760,7 @@ void mail_free_messagelist(MESSAGELIST **msglist, MESSAGELIST **tail)
 void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
 {
 	zval t_map, *return_value;
+	TSRMLS_FETCH();
 
 	return_value = *IMAPG(quota_return);
 
@@ -787,6 +788,8 @@ void mail_getquota(MAILSTREAM *stream, char *qroot, QUOTALIST *qlist)
  */
 void mail_getacl(MAILSTREAM *stream, char *mailbox, ACLLIST *alist)
 {
+	TSRMLS_FETCH();
+
 	/* walk through the ACLLIST */
 	for(; alist; alist = alist->next) {
 		add_assoc_stringl(IMAPG(imap_acl_list), alist->identifier, alist->rights, strlen(alist->rights));
@@ -4761,6 +4764,8 @@ PHP_FUNCTION(imap_timeout)
 #define GETS_FETCH_SIZE 8196LU
 static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DATA *md) /* {{{ */
 {
+	TSRMLS_FETCH();
+
 	/*	write to the gets stream if it is set,
 		otherwise forward to c-clients gets */
 	if (IMAPG(gets_stream)) {
@@ -4806,6 +4811,7 @@ static char *php_mail_gets(readfn_t f, void *stream, unsigned long size, GETS_DA
 PHP_IMAP_EXPORT void mm_searched(MAILSTREAM *stream, unsigned long number)
 {
 	MESSAGELIST *cur = NIL;
+	TSRMLS_FETCH();
 
 	if (IMAPG(imap_messages) == NIL) {
 		IMAPG(imap_messages) = mail_newmessagelist();
@@ -4838,6 +4844,7 @@ PHP_IMAP_EXPORT void mm_flags(MAILSTREAM *stream, unsigned long number)
 PHP_IMAP_EXPORT void mm_notify(MAILSTREAM *stream, char *str, long errflg)
 {
 	STRINGLIST *cur = NIL;
+	TSRMLS_FETCH();
 
 	if (strncmp(str, "[ALERT] ", 8) == 0) {
 		if (IMAPG(imap_alertstack) == NIL) {
@@ -4861,6 +4868,7 @@ PHP_IMAP_EXPORT void mm_list(MAILSTREAM *stream, DTYPE delimiter, char *mailbox,
 {
 	STRINGLIST *cur=NIL;
 	FOBJECTLIST *ocur=NIL;
+	TSRMLS_FETCH();
 
 	if (IMAPG(folderlist_style) == FLIST_OBJECT) {
 		/* build up a the new array of objects */
@@ -4907,6 +4915,7 @@ PHP_IMAP_EXPORT void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox,
 {
 	STRINGLIST *cur=NIL;
 	FOBJECTLIST *ocur=NIL;
+	TSRMLS_FETCH();
 
 	if (IMAPG(folderlist_style) == FLIST_OBJECT) {
 		/* build the array of objects */
@@ -4948,6 +4957,8 @@ PHP_IMAP_EXPORT void mm_lsub(MAILSTREAM *stream, DTYPE delimiter, char *mailbox,
 
 PHP_IMAP_EXPORT void mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
+	TSRMLS_FETCH();
+
 	IMAPG(status_flags)=status->flags;
 	if (IMAPG(status_flags) & SA_MESSAGES) {
 		IMAPG(status_messages)=status->messages;
@@ -4969,6 +4980,7 @@ PHP_IMAP_EXPORT void mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *st
 PHP_IMAP_EXPORT void mm_log(char *str, long errflg)
 {
 	ERRORLIST *cur = NIL;
+	TSRMLS_FETCH();
 
 	/* Author: CJH */
 	if (errflg != NIL) { /* CJH: maybe put these into a more comprehensive log for debugging purposes? */
@@ -5000,6 +5012,8 @@ PHP_IMAP_EXPORT void mm_dlog(char *str)
 
 PHP_IMAP_EXPORT void mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 {
+	TSRMLS_FETCH();
+
 	if (*mb->user) {
 		strlcpy (user, mb->user, MAILTMPLEN);
 	} else {

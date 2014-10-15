@@ -2388,7 +2388,6 @@ typedef struct php_cli_server_do_event_for_each_fd_callback_params {
 static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socket_t fd, int event) /* {{{ */
 {
 	php_cli_server_do_event_for_each_fd_callback_params *params = _params;
-
 	php_cli_server *server = params->server;
 	if (server->server_sock == fd) {
 		php_cli_server_client *client = NULL;

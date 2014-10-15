@@ -206,6 +206,8 @@ static int zval_call_destructor(zval *zv TSRMLS_DC) /* {{{ */
 
 static void zend_unclean_zval_ptr_dtor(zval *zv) /* {{{ */
 {
+	TSRMLS_FETCH();
+
 	if (Z_TYPE_P(zv) == IS_INDIRECT) {
 		zv = Z_INDIRECT_P(zv);
 	}
@@ -483,6 +485,7 @@ ZEND_API zend_bool zend_is_executing(TSRMLS_D) /* {{{ */
 
 ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 {
+	TSRMLS_FETCH();
 	i_zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
 }
 /* }}} */
@@ -1141,6 +1144,8 @@ ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name,
 
 ZEND_API void zend_timeout(int dummy) /* {{{ */
 {
+	TSRMLS_FETCH();
+
 	if (zend_on_timeout) {
 #ifdef ZEND_SIGNALS
 		/*
@@ -1278,6 +1283,8 @@ void zend_shutdown_timeout_thread(void) /* {{{ */
 
 void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 {
+	TSRMLS_FETCH();
+
 	EG(timeout_seconds) = seconds;
 
 #ifdef ZEND_WIN32

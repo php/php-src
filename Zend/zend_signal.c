@@ -74,6 +74,7 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 {
 	int errno_save = errno;
 	zend_signal_queue_t *queue, *qtmp;
+	TSRMLS_FETCH();
 
 	if (SIGG(active)) {
 		if (SIGG(depth) == 0) { /* try to handle signal */

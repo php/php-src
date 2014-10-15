@@ -168,6 +168,7 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, int len)
 {
 	encodePtr enc;
+	TSRMLS_FETCH();
 
 	if ((enc = zend_hash_str_find_ptr(&SOAP_GLOBAL(defEnc), (char*)nscat, len)) != NULL) {
 		return enc;

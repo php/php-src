@@ -834,6 +834,7 @@ static char *php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t le
 				!strncmp(encoding, "GBK", sizeof("GBK")-1) ||
 				!strncmp(encoding, "JOHAB", sizeof("JOHAB")-1) ||
 				!strncmp(encoding, "UHC", sizeof("UHC")-1) ) {
+				TSRMLS_FETCH();
 
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsafe encoding is used. Do not use '%s' encoding or use PostgreSQL 9.0 or later libpq.", encoding);
 			}
@@ -960,6 +961,7 @@ static void _php_pgsql_notice_handler(void *resource_id, const char *message)
 {
 	php_pgsql_notice *notice;
 	
+	TSRMLS_FETCH();
 	if (! PGG(ignore_notices)) {
 		notice = (php_pgsql_notice *)emalloc(sizeof(php_pgsql_notice));
 		notice->message = _php_pgsql_trim_message(message, &notice->len);

@@ -179,6 +179,7 @@ ftp_close(ftpbuf_t *ftp)
 		data_close(ftp, ftp->data);
 	}
 	if (ftp->stream && ftp->closestream) {
+		TSRMLS_FETCH();
 		php_stream_close(ftp->stream);
 	}
 	if (ftp->fd != -1) {

@@ -42,6 +42,8 @@ static void php_dba_db4_errcall_fcn(
 #endif
 	const char *errpfx, const char *msg)
 {
+	TSRMLS_FETCH();
+
 #if (DB_VERSION_MAJOR == 5 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 8))
 /* Bug 51086, Berkeley DB 4.8.26 */
 /* This code suppresses a BDB 4.8+ error message, thus keeping PHP test compatibility */

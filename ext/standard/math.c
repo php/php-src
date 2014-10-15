@@ -972,8 +972,12 @@ PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 		if (num > onum)
 			continue;
 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number '%s' is too big to fit in long", s);
-		return ZEND_LONG_MAX;
+		{
+			TSRMLS_FETCH();
+
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number '%s' is too big to fit in long", s);
+			return ZEND_LONG_MAX;
+		}
 	}
 
 	return num;

@@ -1235,7 +1235,7 @@ int main(int argc, char *argv[])
 
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
-	tsrm_ls = ts_resource_ex(0, NULL);
+	tsrm_ls = ts_resource(0);
 #endif
 
 #ifdef PHP_WIN32
