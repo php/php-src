@@ -4576,6 +4576,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 		ptr->pos = pos;
 		ptr->ht = fe_ht;
 		ptr->h = fe_ht->arData[pos].h;
+		ptr->key = fe_ht->arData[pos].key;
 		is_empty = 0;
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
@@ -4630,8 +4631,11 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				pos = ptr->h;
 			} else {
 				pos = fe_ht->arHash[ptr->h & fe_ht->nTableMask];
-				while (pos != INVALID_IDX) {
-					if (fe_ht->arData[pos].h == ptr->h && pos == ptr->pos) {
+				while (1) {
+					if (pos == INVALID_IDX) {
+						pos = fe_ht->nInternalPointer;
+						break;
+					} else if (fe_ht->arData[pos].h == ptr->h && fe_ht->arData[pos].key == ptr->key) {
 						break;
 					}
 					pos = Z_NEXT(fe_ht->arData[pos].val);
@@ -4684,6 +4688,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			      Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF));
 		fe_ht->nInternalPointer = ptr->pos = pos;
 		ptr->h = fe_ht->arData[pos].h;
+		ptr->key = fe_ht->arData[pos].key;
 		ZEND_VM_INC_OPCODE();
 		ZEND_VM_NEXT_OPCODE();
 	} else if (EXPECTED(Z_TYPE_P(array) == IS_OBJECT)) {
@@ -4707,8 +4712,11 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 					pos = ptr->h;
 				} else {
 					pos = fe_ht->arHash[ptr->h & fe_ht->nTableMask];
-					while (pos != INVALID_IDX) {
-						if (fe_ht->arData[pos].h == ptr->h && pos == ptr->pos) {
+					while (1) {
+						if (pos == INVALID_IDX) {
+							pos = fe_ht->nInternalPointer;
+							break;
+						} else if (fe_ht->arData[pos].h == ptr->h && fe_ht->arData[pos].key == ptr->key) {
 							break;
 						}
 						pos = Z_NEXT(fe_ht->arData[pos].val);
@@ -4777,6 +4785,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 				      zend_check_property_access(zobj, p->key TSRMLS_CC) == FAILURE));
 			fe_ht->nInternalPointer = ptr->pos = pos;
 			ptr->h = fe_ht->arData[pos].h;
+			ptr->key = fe_ht->arData[pos].key;
 			ZEND_VM_INC_OPCODE();
 			ZEND_VM_NEXT_OPCODE();
 		} else {
