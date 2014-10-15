@@ -55,7 +55,6 @@
 
 #define INC_OUTPUTPOS(a,b) \
 	if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) { \
-		efree(argv);	\
 		efree(formatcodes);	\
 		efree(formatargs);	\
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow in format string", code); \
@@ -210,7 +209,6 @@ PHP_FUNCTION(pack)
 			case 'J':
 			case 'P':
 #if SIZEOF_ZEND_LONG < 8
-					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
