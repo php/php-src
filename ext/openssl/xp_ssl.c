@@ -1807,7 +1807,7 @@ static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size
 }
 /* }}} */
 
-static void php_openssl_stream_wait_for_data(php_netstream_data_t *sock)
+static void php_openssl_stream_wait_for_data(php_netstream_data_t *sock TSRMLS_DC)
 {
 	int retval;
 	struct timeval *ptimeout;
