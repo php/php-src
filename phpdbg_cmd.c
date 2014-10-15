@@ -841,6 +841,14 @@ readline:
 					}
 
 					for (i = len; i < len + bytes; i++) {
+						if (buf[i] == '\x03') {
+							if (i != len + bytes - 1) {
+								memmove(buf + i, buf + i + 1, len + bytes - i - 1);
+							}
+							len--;
+							i--;
+							continue;
+						}
 						if (buf[i] == '\n') {
 							PHPDBG_G(input_buflen) = len + bytes - 1 - i;
 							if (PHPDBG_G(input_buflen)) {

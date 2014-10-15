@@ -1103,7 +1103,11 @@ static void phpdbg_encode_ctrl_chars(char **buf, int *buflen) {
 			len += 4;
 			*tmpptr++ = '&';
 			*tmpptr++ = '#';
-			*tmpptr++ = ((*buf)[i] / 10) + '0';
+			if ((unsigned int) buf[i] > 10) {
+				*tmpptr++ = ((*buf)[i] / 10) + '0';
+			} else {
+				--len;
+			}
 			*tmpptr++ = ((*buf)[i] % 10) + '0';
 			*tmpptr++ = ';';
 		} else {
@@ -1373,6 +1377,8 @@ PHPDBG_API int phpdbg_xml_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 		buflen = phpdbg_xml_vasprintf(&buffer, fmt, 1, args TSRMLS_CC);
 		va_end(args);
 
+		phpdbg_encode_ctrl_chars(&buffer, &buflen);
+
 		if (PHPDBG_G(in_script_xml)) {
 			write(fd, ZEND_STRL("</stream>"));
 			PHPDBG_G(in_script_xml) = 0;
@@ -1416,6 +1422,7 @@ PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 		int msglen;
 
 		msglen = phpdbg_encode_xml(&msg, buffer, buflen, 256, NULL);
+		phpdbg_encode_ctrl_chars(&msg, &msglen);
 
 		if (PHPDBG_G(in_script_xml)) {
 			write(fd, ZEND_STRL("</stream>"));
