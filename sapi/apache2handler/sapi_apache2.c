@@ -540,7 +540,10 @@ static int php_handler(request_rec *r)
 	apr_bucket *bucket;
 	apr_status_t rv;
 	request_rec * volatile parent_req = NULL;
-	TSRMLS_FETCH();
+#ifdef ZTS
+	/* initial resource fetch */
+	void ***tsrm_ls = ts_resource(0);
+#endif
 
 #define PHPAP_INI_OFF php_apache_ini_dtor(r, parent_req TSRMLS_CC);
 
