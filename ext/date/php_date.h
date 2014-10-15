@@ -197,7 +197,7 @@ ZEND_BEGIN_MODULE_GLOBALS(date)
 ZEND_END_MODULE_GLOBALS(date)
 
 #ifdef ZTS
-#define DATEG(v) TSRMG(date_globals_id, zend_date_globals *, v)
+#define DATEG(v) ZEND_TSRMG(date_globals_id, zend_date_globals *, v)
 #else
 #define DATEG(v) (date_globals.v)
 #endif
