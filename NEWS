@@ -1,5 +1,21 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+16 Oct 2014, PHP 5.6.2
+
+- Core:
+  . Fixed bug #68044 (Integer overflow in unserialize() (32-bits only)).
+    (CVE-2014-3669) (Stas)
+
+- cURL:
+  . Fixed bug #68089 (NULL byte injection - cURL lib). (Stas)
+
+- EXIF:
+  . Fixed bug #68113 (Heap corruption in exif_thumbnail()). (CVE-2014-3670)
+    (Stas)
+
+- XMLRPC:
+  . Fixed bug #68027 (Global buffer overflow in mkgmtime() function).
+    (CVE-2014-3668) (Stas)
 
 02 Oct 2014, PHP 5.6.1
 
