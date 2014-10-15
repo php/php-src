@@ -2,22 +2,25 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.19
 
--Fileinfo:
+- Core:
+  . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
+  . Fixed bug #68129 (parse_url() - incomplete support for empty usernames
+    and passwords) (Tjerk)
+
+- Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
 
 - GD:
   . Fixed bug #65171 (imagescale() fails without height param). (Remi)
 
-- Core:
-  . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
-  . Fixed bug #68129 (parse_url() - incomplete support for empty usernames 
-    and passwords) (Tjerk)
 - Mysqli:
   . Fixed bug #68114 (linker error on some OS X machines with fixed width
     decimal support) (Keyur Govande)
+
 - ODBC:
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
+
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
 
