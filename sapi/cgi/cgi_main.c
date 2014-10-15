@@ -199,7 +199,9 @@ static void user_config_cache_entry_dtor(zval *el)
 #ifdef ZTS
 static int php_cgi_globals_id;
 #define CGIG(v) ZEND_TSRMG(php_cgi_globals_id, php_cgi_globals_struct *, v)
+#if defined(PHP_WIN32)
 ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 #else
 static php_cgi_globals_struct php_cgi_globals;
 #define CGIG(v) (php_cgi_globals.v)
