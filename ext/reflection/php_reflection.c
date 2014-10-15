@@ -70,7 +70,7 @@ ZEND_END_MODULE_GLOBALS(reflection)
 
 #ifdef ZTS
 # define REFLECTION_G(v) \
-	TSRMG(reflection_globals_id, zend_reflection_globals*, v)
+	ZEND_TSRMG(reflection_globals_id, zend_reflection_globals*, v)
 extern int reflection_globals_id;
 #else
 # define REFLECTION_G(v) (reflection_globals.v)

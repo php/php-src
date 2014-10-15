@@ -47,7 +47,7 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
     PHP_ADD_SOURCES(PHP_EXT_DIR(mbstring), $PHP_MBSTRING_BASE_SOURCES)
     out="php_config.h"
   else
-    PHP_ADD_SOURCES_X(PHP_EXT_DIR(mbstring),$PHP_MBSTRING_BASE_SOURCES,,shared_objects_mbstring,yes)
+    PHP_ADD_SOURCES_X(PHP_EXT_DIR(mbstring),$PHP_MBSTRING_BASE_SOURCES, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,shared_objects_mbstring,yes)
     if test -f "$ext_builddir/config.h.in"; then
       out="$abs_builddir/config.h"
     else

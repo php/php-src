@@ -79,7 +79,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 ZEND_END_MODULE_GLOBALS(pcre)
 
 #ifdef ZTS
-# define PCRE_G(v) TSRMG(pcre_globals_id, zend_pcre_globals *, v)
+# define PCRE_G(v) ZEND_TSRMG(pcre_globals_id, zend_pcre_globals *, v)
 #else
 # define PCRE_G(v)	(pcre_globals.v)
 #endif

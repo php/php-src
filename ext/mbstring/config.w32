@@ -16,7 +16,7 @@ if (PHP_MBSTRING != "no") {
 		"-Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
 		-Iext/mbstring/oniguruma /D NOT_RUBY=1 /D LIBMBFL_EXPORTS=1 \
 		/D HAVE_STDARG_PROTOTYPES=1 /D HAVE_CONFIG_H /D HAVE_STDLIB_H \
-		/D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /D EXPORT");
+		/D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /D EXPORT /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 	
 	ADD_SOURCES("ext/mbstring/libmbfl/filters", "html_entities.c \
 		mbfilter_7bit.c mbfilter_ascii.c mbfilter_base64.c mbfilter_big5.c \
