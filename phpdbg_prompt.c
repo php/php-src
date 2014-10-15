@@ -551,7 +551,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 	zend_call_function(&fci, NULL TSRMLS_CC);
 
 	if (trace) {
-		phpdbg_writeln("exception", "name=\"%s\" trace=\"%s\"", "Uncaught %s!\n%.*s", Z_OBJCE(exception)->name, Z_STRLEN_P(trace), Z_STRVAL_P(trace));
+		phpdbg_writeln("exception", "name=\"%s\" trace=\"%.*s\"", "Uncaught %s!\n%.*s", Z_OBJCE(exception)->name, Z_STRLEN_P(trace), Z_STRVAL_P(trace));
 
 		zval_ptr_dtor(&trace);
 	} else {
