@@ -1852,7 +1852,7 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 		   to hang forever. To avoid this scenario we poll with a timeout before performing
 		   the actual read. If it times out we're finished.
 		*/
-		if (sock->is_blocked && SSL_pending(sslsock->ssl_handle) == 0) {
+		if (sock->is_blocked) {
 			php_openssl_stream_wait_for_data(sock);
 			if (sock->timeout_event) {
 				stream->eof = 1;
