@@ -99,6 +99,10 @@ PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
+
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -1236,6 +1240,7 @@ int main(int argc, char *argv[])
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
 	tsrm_ls = ts_resource(0);
+	ZEND_TSRMLS_CACHE_UPDATE;
 #endif
 
 #ifdef PHP_WIN32

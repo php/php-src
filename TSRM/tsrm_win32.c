@@ -42,6 +42,9 @@ static tsrm_win32_globals win32_globals;
 
 static void tsrm_win32_ctor(tsrm_win32_globals *globals TSRMLS_DC)
 {
+#ifdef ZTS
+TSRMLS_CACHE_UPDATE;
+#endif
 	globals->process = NULL;
 	globals->shm	 = NULL;
 	globals->process_size = 0;

@@ -465,6 +465,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS
 
 static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS_DC) /* {{{ */
 {
+	ZEND_TSRMLS_CACHE_UPDATE;
 	zend_startup_constants(TSRMLS_C);
 	zend_copy_constants(EG(zend_constants), GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist(TSRMLS_C);
@@ -562,6 +563,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 #else
 	extern zend_ini_scanner_globals ini_scanner_globals;
 	extern zend_php_scanner_globals language_scanner_globals;
+	ZEND_TSRMLS_CACHE_UPDATE;
 #endif
 
 	start_memory_manager(TSRMLS_C);

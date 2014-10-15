@@ -22,6 +22,10 @@
 
 typedef struct _tsrm_tls_entry tsrm_tls_entry;
 
+#if defined(TSRM_WIN32)
+/* TSRMLS_CACHE_DEFINE; is already done in Zend, this is being always compiled statically. */
+#endif
+
 struct _tsrm_tls_entry {
 	void **storage;
 	int count;
