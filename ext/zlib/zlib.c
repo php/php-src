@@ -484,7 +484,6 @@ static PHP_FUNCTION(ob_gzhandler)
 		ZLIBG(ob_gzhandler) = php_zlib_output_handler_context_init(TSRMLS_C);
 	}
 
-	TSRMLS_SET_CTX(ctx.tsrm_ls);
 	ctx.op = flags;
 	ctx.in.data = in_str;
 	ctx.in.used = in_len;
@@ -724,6 +723,9 @@ PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
 
 #ifdef COMPILE_DL_ZLIB
+#ifdef ZTS
+TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(php_zlib)
 #endif
 
@@ -1008,6 +1010,9 @@ static PHP_MINFO_FUNCTION(zlib)
 /* {{{ ZEND_MODULE_GLOBALS_CTOR */
 static PHP_GINIT_FUNCTION(zlib)
 {
+#if defined(COMPILE_DL_ZLIB) && defined(ZTS)
+	TSRMLS_CACHE_UPDATE;
+#endif
 	zlib_globals->ob_gzhandler = NULL;
     zlib_globals->handler_registered = 0;
 }
