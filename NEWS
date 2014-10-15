@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 -Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
 
+- GD:
+  . Fixed bug #65171 (imagescale() fails without height param). (Remi)
+
 - Core:
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames 
