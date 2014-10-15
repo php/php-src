@@ -64,7 +64,8 @@ ZEND_BEGIN_MODULE_GLOBALS(filter)
 ZEND_END_MODULE_GLOBALS(filter)
 
 #ifdef ZTS
-#define IF_G(v) TSRMG(filter_globals_id, zend_filter_globals *, v)
+#define IF_G(v) ZEND_TSRMG(filter_globals_id, zend_filter_globals *, v)
+ZEND_TSRMLS_CACHE_EXTERN;
 #else
 #define IF_G(v) (filter_globals.v)
 #endif
