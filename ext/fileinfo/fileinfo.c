@@ -57,7 +57,7 @@ typedef struct _finfo_object {
 } finfo_object;
 
 #define FILEINFO_DECLARE_INIT_OBJECT(object) \
-	zval *object = getThis();
+	zval *object = ZEND_IS_METHOD_CALL() ? getThis() : NULL;
 
 static inline finfo_object *php_finfo_fetch_object(zend_object *obj) {
 	return (finfo_object *)((char*)(obj) - XtOffsetOf(finfo_object, zo));
