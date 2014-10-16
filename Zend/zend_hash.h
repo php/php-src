@@ -170,9 +170,10 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
 
 typedef struct _HashPointer {
-	HashPosition pos;
-	HashTable *ht;
-	zend_ulong h;
+	HashPosition  pos;
+	HashTable    *ht;
+	zend_ulong    h;
+	zend_string  *key;
 } HashPointer;
 
 #define zend_hash_has_more_elements(ht) \

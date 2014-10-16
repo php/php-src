@@ -59,11 +59,9 @@ typedef union _znode_op {
 	uint32_t      constant;
 	uint32_t      var;
 	uint32_t      num;
-	zend_ulong     hash;
 	uint32_t      opline_num; /*  Needs to be signed */
 	zend_op       *jmp_addr;
 	zval          *zv;
-	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */
