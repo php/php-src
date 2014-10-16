@@ -937,15 +937,15 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		return NULL;
 	}
 	
+	if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
+	    return ce;
+	}
+	
 	ce->refcount++;
+	
 	if (zend_hash_add_ptr(class_table, Z_STR_P(op2), ce) == NULL) {
 		ce->refcount--;
-		
-		if ((ce->ce_flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS) {
-		    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
-		    return ce;
-		}
-		
+
 		if (!compile_time) {
 			/* If we're in compile time, in practice, it's quite possible
 			 * that we'll never reach this class declaration at runtime,
@@ -956,6 +956,10 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		}
 		return NULL;
 	} else {
+	    if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
+	        ce->ce_flags |= ZEND_ACC_ANON_BOUND;
+	    }
+	    
 		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
 			zend_verify_abstract_class(ce TSRMLS_CC);
 		}
@@ -997,13 +1001,12 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from trait %s", ce->name->val, parent_ce->name->val);
 	}
 
-    /* Reuse anonymous finalized class */
-    if (ce->ce_flags & (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS) == (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) {
-        ce->refcount--;
+    /* Reuse anonymous bound class */
+    if (ce->ce_flags & ZEND_ACC_ANON_BOUND) {
         return ce;
     }
 
-	zend_do_inheritance(ce, parent_ce TSRMLS_CC);
+    zend_do_inheritance(ce, parent_ce TSRMLS_CC);	
 
 	ce->refcount++;
 
@@ -1013,9 +1016,10 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 	}
 	
 	/* Set final on anonymous class */
-	if ((ce->ce_flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS) {
-	    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
+	    ce->ce_flags |= ZEND_ACC_ANON_BOUND;
 	}
+
 	return ce;
 }
 /* }}} */
@@ -2959,13 +2963,10 @@ zend_string* zend_name_anon_class(TSRMLS_D) {
     zend_string *anon;
 
     len = spprintf
-        (&val, 0, "{anonymous}@%d", CG(anon_class_id));
-    anon = zend_string_alloc(len, 1);
-    memcpy(&anon->val, val, len);
+        (&val, 0, "{anonymous}@%d", ++CG(anon_class_id));
+    anon = zend_string_init(val, len, 1);
     efree(val);
-    
-    CG(anon_class_id)++;
-    
+
     return anon;
 }
 

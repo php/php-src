@@ -30,7 +30,7 @@ $outer = new Outer($data);
 $proxy = $outer->getArrayAccess();
 
 unset($proxy[0]);
-var_dump(@$outer->getArrayAccess()[0]);
+var_dump($outer->getArrayAccess()[0]);
 ?>
 --EXPECT--	
 NULL
