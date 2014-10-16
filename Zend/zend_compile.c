@@ -990,6 +990,12 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from trait %s", ce->name->val, parent_ce->name->val);
 	}
 
+    /* Reuse anonymous finalized class */
+    if (ce->ce_flags & (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS) == (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) {
+        ce->refcount--;
+        return ce;
+    }
+
 	zend_do_inheritance(ce, parent_ce TSRMLS_CC);
 
 	ce->refcount++;
@@ -997,6 +1003,11 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 	/* Register the derived class */
 	if (zend_hash_add_ptr(class_table, Z_STR_P(op2), ce) == NULL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare class %s", ce->name->val);
+	}
+	
+	/* Set final on anonymous class */
+	if ((ce->ce_flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS) {
+	    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 	}
 	return ce;
 }
@@ -2965,8 +2976,15 @@ zend_class_entry* zend_compile_class_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 	zend_class_entry *active = CG(active_class_entry);
 	
 	if (!name) {
-	    name = zend_name_anon_class(TSRMLS_C);
+	    name = 
+	        zend_name_anon_class(TSRMLS_C);
+	    decl->flags |= ZEND_ACC_ANON_CLASS;
 	}
+	
+	if (CG(active_class_entry) && !((decl->flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {
+        zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
+        return;
+    }
 
 	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved",
