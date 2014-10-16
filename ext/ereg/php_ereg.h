@@ -54,7 +54,7 @@ ZEND_END_MODULE_GLOBALS(ereg)
 PHP_MINFO_FUNCTION(ereg);
 
 #ifdef ZTS
-#define EREG(v) TSRMG(ereg_globals_id, zend_ereg_globals *, v)
+#define EREG(v) ZEND_TSRMG(ereg_globals_id, zend_ereg_globals *, v)
 #else
 #define EREG(v) (ereg_globals.v)
 #endif

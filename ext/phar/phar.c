@@ -3228,6 +3228,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 /* }}} */
 
 #ifdef COMPILE_DL_PHAR
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(phar)
 #endif
 
@@ -3335,6 +3338,9 @@ static void mime_type_dtor(zval *zv)
 
 PHP_GINIT_FUNCTION(phar) /* {{{ */
 {
+#if defined(COMPILE_DL_PHAR) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	phar_mime_type mime;
 
 	memset(phar_globals, 0, sizeof(zend_phar_globals));
