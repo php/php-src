@@ -482,7 +482,11 @@ static void zend_mm_munmap(void *addr, size_t size)
 static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 {
 #if defined(__GNUC__)
+# if SIZEOF_ZEND_LONG == SIZEOF_LONG
 	return __builtin_ctzl(~bitset);
+# else
+	return __builtin_ctzll(~bitset);
+# endif
 #elif defined(_WIN32)
 	unsigned long index;
 
@@ -519,7 +523,11 @@ static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 static zend_always_inline int zend_mm_bitset_ntz(zend_mm_bitset bitset)
 {
 #if defined(__GNUC__)
+# if SIZEOF_ZEND_LONG == SIZEOF_LONG
 	return __builtin_ctzl(bitset);
+# else
+	return __builtin_ctzll(bitset);
+# endif
 #elif defined(_WIN32)
 	unsigned long index;
 

@@ -117,7 +117,7 @@
 static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, int *overflow)
 {
 	size_t res = nmemb;
-	zend_ulong m_overflow = 0;
+	size_t m_overflow = 0;
 
 	__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
 	     : "=&a"(res), "=&d" (m_overflow)
