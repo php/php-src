@@ -936,9 +936,16 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(op1));
 		return NULL;
 	}
+	
 	ce->refcount++;
 	if (zend_hash_add_ptr(class_table, Z_STR_P(op2), ce) == NULL) {
 		ce->refcount--;
+		
+		if ((ce->ce_flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS) {
+		    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
+		    return ce;
+		}
+		
 		if (!compile_time) {
 			/* If we're in compile time, in practice, it's quite possible
 			 * that we'll never reach this class declaration at runtime,
@@ -2953,7 +2960,7 @@ zend_string* zend_name_anon_class(TSRMLS_D) {
 
     len = spprintf
         (&val, 0, "{anonymous}@%d", CG(anon_class_id));
-    anon = zend_string_alloc(len, 0);
+    anon = zend_string_alloc(len, 1);
     memcpy(&anon->val, val, len);
     efree(val);
     
