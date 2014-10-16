@@ -64,20 +64,6 @@ typedef enum {
 # endif
 #endif
 
-#define HAVE_ZEND_LONG64
-#ifdef ZEND_WIN32
-typedef __int64 zend_long64;
-typedef unsigned __int64 zend_ulong64;
-#elif SIZEOF_LONG_LONG_INT == 8
-typedef long long int zend_long64;
-typedef unsigned long long int zend_ulong64;
-#elif SIZEOF_LONG_LONG == 8
-typedef long long zend_long64;
-typedef unsigned long long zend_ulong64;
-#else
-# undef HAVE_ZEND_LONG64
-#endif
-
 /* XXX this won't work on X32 platform */
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 typedef int64_t zend_intptr_t;
