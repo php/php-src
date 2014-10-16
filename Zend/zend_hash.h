@@ -32,6 +32,7 @@
 #define HASH_ADD				(1<<1)
 #define HASH_UPDATE_INDIRECT	(1<<2)
 #define HASH_ADD_NEW			(1<<3)
+#define HASH_ADD_NEXT			(1<<4)
 
 #define INVALID_IDX ((uint32_t) -1)
 
