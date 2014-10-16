@@ -425,6 +425,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS
 		compiler_globals->static_members_table = NULL;
 	}
 	compiler_globals->script_encoding_list = NULL;
+    compiler_globals->anon_class_id = 0L;
 
 #ifdef ZTS
 	zend_interned_empty_string_init(&compiler_globals->empty_string TSRMLS_CC);

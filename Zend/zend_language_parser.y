@@ -233,7 +233,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> extends_from parameter optional_type argument expr_without_variable global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
-%type <ast> new_expr class_name class_name_reference simple_variable internal_functions_in_yacc
+%type <ast> new_expr anonymous_class class_name class_name_reference simple_variable internal_functions_in_yacc
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name
 %type <ast> variable_class_name dereferencable_scalar class_name_scalar constant dereferencable
 %type <ast> callable_expr callable_variable static_member new_variable
@@ -736,9 +736,19 @@ non_empty_for_exprs:
 	|	expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1); }
 ;
 
+anonymous_class:
+        T_CLASS {
+            $<num>$ = CG(zend_lineno);
+        } extends_from implements_list backup_doc_comment '{' class_statement_list '}' {
+            $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $5, NULL, $3, $4, $7);
+        }
+;
+
 new_expr:
 		T_NEW class_name_reference ctor_arguments
 			{ $$ = zend_ast_create(ZEND_AST_NEW, $2, $3); }
+	|   T_NEW anonymous_class ctor_arguments
+	        { $$ = zend_ast_create(ZEND_AST_NEW, $2, $3); }   
 ;
 
 expr_without_variable:
