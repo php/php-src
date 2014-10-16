@@ -962,9 +962,9 @@ not_found:
 				if (heap->real_size + ZEND_MM_CHUNK_SIZE > heap->limit) {
 					if (heap->overflow == 0) {
 #if ZEND_DEBUG
-						zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+						zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-						zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, ZEND_MM_PAGE_SIZE * pages_count);
+						zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)", heap->limit, ZEND_MM_PAGE_SIZE * pages_count);
 #endif
 						return NULL;
 					}
@@ -976,9 +976,9 @@ not_found:
 #if !ZEND_MM_LIMIT
 					zend_mm_safe_error(heap, "Out of memory");
 #elif ZEND_DEBUG
-					zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %lu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
+					zend_mm_safe_error(heap, "Out of memory (allocated %zu) at %s:%d (tried to allocate %zu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
 #else
-					zend_mm_safe_error(heap, "Out of memory (allocated %ld) (tried to allocate %lu bytes)", heap->real_size, ZEND_MM_PAGE_SIZE * pages_count);
+					zend_mm_safe_error(heap, "Out of memory (allocated %zu) (tried to allocate %zu bytes)", heap->real_size, ZEND_MM_PAGE_SIZE * pages_count);
 #endif
 					return NULL;
 				}
@@ -1415,9 +1415,9 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size ZEN
 				if (heap->real_size + (new_size - old_size) > heap->limit) {
 					if (heap->overflow == 0) {
 #if ZEND_DEBUG
-						zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+						zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-						zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, size);
+						zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)", heap->limit, size);
 #endif
 						return NULL;
 					}
@@ -1641,9 +1641,9 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	if (heap->real_size + new_size > heap->limit) {
 		if (heap->overflow == 0) {
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted at %s:%d (tried to allocate %lu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted (tried to allocate %lu bytes)", heap->limit, size);
+			zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)", heap->limit, size);
 #endif
 			return NULL;
 		}
@@ -1655,9 +1655,9 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 #if !ZEND_MM_LIMIT
 		zend_mm_safe_error(heap, "Out of memory");
 #elif ZEND_DEBUG
-		zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %lu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
+		zend_mm_safe_error(heap, "Out of memory (allocated %zu) at %s:%d (tried to allocate %zu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
 #else
-		zend_mm_safe_error(heap, "Out of memory (allocated %ld) (tried to allocate %lu bytes)", heap->real_size, size);
+		zend_mm_safe_error(heap, "Out of memory (allocated %zu) (tried to allocate %zu bytes)", heap->real_size, size);
 #endif
 		return NULL;
 	}
