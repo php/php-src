@@ -83,7 +83,10 @@ ZEND_END_MODULE_GLOBALS(pdo_mysql)
 ZEND_EXTERN_MODULE_GLOBALS(pdo_mysql)
 
 #ifdef ZTS
-#define PDO_MYSQL_G(v) TSRMG(pdo_mysql_globals_id, zend_pdo_mysql_globals *, v)
+#define PDO_MYSQL_G(v) ZEND_TSRMG(pdo_mysql_globals_id, zend_pdo_mysql_globals *, v)
+# ifdef COMPILE_DL_PDO_MYSQL
+ZEND_TSRMLS_CACHE_EXTERN;
+# endif
 #else
 #define PDO_MYSQL_G(v) (pdo_mysql_globals.v)
 #endif
