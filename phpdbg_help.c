@@ -62,7 +62,7 @@ void pretty_print(char *text TSRMLS_DC)
 	unsigned int line_count = 0;          /* number printable chars on current line */
 
 	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
-		phpdbg_xml("<help msg=\"%s\" />", text);
+		phpdbg_xml("<help %r msg=\"%s\" />", text);
 		return;
 	}
 
