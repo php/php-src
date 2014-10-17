@@ -1069,7 +1069,7 @@ static int phpdbg_encode_xml(char **buf, char *msg, int msglen, int from, char *
 	int i;
 	int tolen = to ? strlen(to) : 5;
 	char *tmp = *buf = emalloc(msglen * tolen);
-	for (i = 0; i++ < msglen; msg++) {
+	for (i = 0; ++i < msglen; msg++) {
 		if (*msg == '&') {
 			memcpy(tmp, ZEND_STRL("&amp;"));
 			tmp += sizeof("&amp;") - 1;
