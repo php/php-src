@@ -52,6 +52,10 @@ PHP                                                                        NEWS
   . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
     CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
 
+- PDO_pgsql:
+  . Fixed bug #68199 (PDO::pgsqlGetNotify doesn't support NOTIFY payloads)
+    (Matteo, Alain Laporte)
+
 16 Oct 2014, PHP 5.6.2
 
 - Core:
