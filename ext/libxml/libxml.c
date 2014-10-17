@@ -79,6 +79,9 @@ static zend_class_entry *libxmlerror_class_entry;
 
 /* {{{ dynamically loadable module stuff */
 #ifdef COMPILE_DL_LIBXML
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(libxml)
 #endif /* COMPILE_DL_LIBXML */
 /* }}} */
@@ -268,6 +271,9 @@ static void php_libxml_node_free_list(xmlNodePtr node TSRMLS_DC)
 /* {{{ startup, shutdown and info functions */
 static PHP_GINIT_FUNCTION(libxml)
 {
+#if defined(COMPILE_DL_LIBXML) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	ZVAL_UNDEF(&libxml_globals->stream_context);
 	libxml_globals->error_buffer.s = NULL;
 	libxml_globals->error_list = NULL;

@@ -6,7 +6,7 @@ ARG_WITH("xml", "XML support", "yes");
 if (PHP_XML == "yes") {
 	if (PHP_LIBXML == "yes"
 	&& ADD_EXTENSION_DEP('xml', 'libxml')) {
-		EXTENSION("xml", "xml.c compat.c");
+		EXTENSION("xml", "xml.c compat.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE("HAVE_XML", 1, "XML support");
 		if (!PHP_XML_SHARED) {
 			ADD_FLAG("CFLAGS_XML", "/D LIBXML_STATIC ");

@@ -466,6 +466,9 @@ zend_module_entry soap_module_entry = {
 };
 
 #ifdef COMPILE_DL_SOAP
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(soap)
 #endif
 
@@ -602,6 +605,9 @@ PHP_MSHUTDOWN_FUNCTION(soap)
 
 PHP_RINIT_FUNCTION(soap)
 {
+#if defined(COMPILE_DL_SOAP) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	SOAP_GLOBAL(typemap) = NULL;
 	SOAP_GLOBAL(use_soap_error_handler) = 0;
 	SOAP_GLOBAL(error_code) = NULL;
