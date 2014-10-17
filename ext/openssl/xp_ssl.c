@@ -1476,13 +1476,16 @@ int php_openssl_setup_crypto(php_stream *stream,
 	}
 
 	GET_VER_OPT_STRING("ciphers", cipherlist);
+#ifndef USE_OPENSSL_SYSTEM_CIPHERS
 	if (!cipherlist) {
 		cipherlist = OPENSSL_DEFAULT_STREAM_CIPHERS;
 	}
-	if (SSL_CTX_set_cipher_list(sslsock->ctx, cipherlist) != 1) {
-		return FAILURE;
+#endif
+	if (cipherlist) {
+		if (SSL_CTX_set_cipher_list(sslsock->ctx, cipherlist) != 1) {
+			return FAILURE;
+		}
 	}
-
 	if (FAILURE == set_local_cert(sslsock->ctx, stream TSRMLS_CC)) {
 		return FAILURE;
 	}
@@ -1804,59 +1807,13 @@ static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size
 }
 /* }}} */
 
-static void php_openssl_stream_wait_for_data(php_netstream_data_t *sock)
-{
-	int retval;
-	struct timeval *ptimeout;
-
-	if (sock->socket == -1) {
-		return;
-	}
-	
-	sock->timeout_event = 0;
-
-	if (sock->timeout.tv_sec == -1)
-		ptimeout = NULL;
-	else
-		ptimeout = &sock->timeout;
-
-	while(1) {
-		retval = php_pollfd_for(sock->socket, PHP_POLLREADABLE, ptimeout);
-
-		if (retval == 0)
-			sock->timeout_event = 1;
-
-		if (retval >= 0)
-			break;
-
-		if (php_socket_errno() != EINTR)
-			break;
-	}
-}
-
 static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-	php_netstream_data_t *sock;
 	int nr_bytes = 0;
 
 	if (sslsock->ssl_active) {
 		int retry = 1;
-		sock = (php_netstream_data_t*)stream->abstract;
-
-		/* The SSL_read() function will block indefinitely waiting for data on a blocking
-		   socket. If we don't poll for readability first this operation has the potential
-		   to hang forever. To avoid this scenario we poll with a timeout before performing
-		   the actual read. If it times out we're finished.
-		*/
-		if (sock->is_blocked) {
-			php_openssl_stream_wait_for_data(sock);
-			if (sock->timeout_event) {
-				stream->eof = 1;
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL read operation timed out");
-				return nr_bytes;
-			}
-		}
 
 		do {
 			nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);
@@ -2176,19 +2133,6 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret TS
 
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 			if (ret) {
-				if (sslsock->ssl_active) {
-					/* OpenSSL has an internal buffer which select() cannot see. If we don't
-					   fetch it into the stream's buffer, no activity will be reported on the
-					   stream even though there is data waiting to be read - but we only fetch
-					   the number of bytes OpenSSL has ready to give us since we weren't asked
-					   for any data at this stage. This is only likely to cause issues with
-					   non-blocking streams, but it's harmless to always do it. */
-					int bytes;
-					while ((bytes = SSL_pending(sslsock->ssl_handle)) > 0) {
-						php_stream_fill_read_buffer(stream, (size_t)bytes);
-					}
-				}
-
 				*(php_socket_t *)ret = sslsock->s.socket;
 			}
 			return SUCCESS;

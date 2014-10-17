@@ -111,7 +111,7 @@ END_EXTERN_C()
 ZEND_API extern zend_llist zend_extensions;
 
 void zend_extension_dtor(zend_extension *extension);
-void zend_append_version_info(const zend_extension *extension);
+ZEND_API void zend_append_version_info(const zend_extension *extension);
 int zend_startup_extensions_mechanism(void);
 int zend_startup_extensions(void);
 void zend_shutdown_extensions(TSRMLS_D);
