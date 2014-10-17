@@ -5266,6 +5266,15 @@ ZEND_VM_HANDLER(139, ZEND_DECLARE_CLASS, ANY, ANY)
 
 	SAVE_OPLINE();
 	Z_CE_P(EX_VAR(opline->result.var)) = do_bind_class(&EX(func)->op_array, opline, EG(class_table), 0 TSRMLS_CC);
+	if (Z_CE_P(EX_VAR(opline->result.var))->ce_flags & ZEND_ACC_ANON_CLASS) {
+	    if (Z_CE_P(EX_VAR(opline->result.var))->ce_flags & ZEND_ACC_ANON_BOUND) {
+	        while (opline->opcode != ZEND_FETCH_CLASS) {
+	            opline++;
+	        }
+	        ZEND_VM_SET_OPCODE(opline);
+	        ZEND_VM_CONTINUE();
+	    } else Z_CE_P(EX_VAR(opline->result.var))->ce_flags |= ZEND_ACC_ANON_BOUND;
+	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -5276,6 +5285,15 @@ ZEND_VM_HANDLER(140, ZEND_DECLARE_INHERITED_CLASS, ANY, ANY)
 
 	SAVE_OPLINE();
 	Z_CE_P(EX_VAR(opline->result.var)) = do_bind_inherited_class(&EX(func)->op_array, opline, EG(class_table), Z_CE_P(EX_VAR(opline->extended_value)), 0 TSRMLS_CC);
+	if (Z_CE_P(EX_VAR(opline->result.var))->ce_flags & ZEND_ACC_ANON_CLASS) {
+	    if (Z_CE_P(EX_VAR(opline->result.var))->ce_flags & ZEND_ACC_ANON_BOUND) {
+	        while (opline->opcode != ZEND_FETCH_CLASS) {
+	            opline++;
+	        }
+	        ZEND_VM_SET_OPCODE(opline);
+	        ZEND_VM_CONTINUE();
+	    } else Z_CE_P(EX_VAR(opline->result.var))->ce_flags |= ZEND_ACC_ANON_BOUND;
+	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }

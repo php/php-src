@@ -956,10 +956,6 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		}
 		return NULL;
 	} else {
-	    if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
-	        ce->ce_flags |= ZEND_ACC_ANON_BOUND;
-	    }
-	    
 		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
 			zend_verify_abstract_class(ce TSRMLS_CC);
 		}
@@ -1013,11 +1009,6 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 	/* Register the derived class */
 	if (zend_hash_add_ptr(class_table, Z_STR_P(op2), ce) == NULL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare class %s", ce->name->val);
-	}
-	
-	/* Set final on anonymous class */
-	if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
-	    ce->ce_flags |= ZEND_ACC_ANON_BOUND;
 	}
 
 	return ce;
