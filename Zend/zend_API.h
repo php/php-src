@@ -342,6 +342,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 ZEND_API char *zend_get_type_by_const(int type);
 
 #define getThis()							(Z_OBJ(EX(This)) ? &EX(This) : NULL)
+#define ZEND_IS_METHOD_CALL()				(EX(func)->common.scope != NULL)
 
 #define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT()
 #define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)

@@ -2597,7 +2597,7 @@ PHP_FUNCTION(array_keys)
 	add_key = 1;
 
 	/* Go through input array and add keys to the return array */
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
+	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
 		if (search_value != NULL) {
 			is_equal_func(&res, search_value, entry TSRMLS_CC);
 			add_key = zval_is_true(&res);

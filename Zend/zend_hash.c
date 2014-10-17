@@ -444,11 +444,15 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 
 		HANDLE_BLOCK_INTERRUPTIONS();
 		/* incremental initialization of empty Buckets */
-		if (h >= ht->nNumUsed) {
-			Bucket *q = ht->arData + ht->nNumUsed;
-			while (q != p) {
-				ZVAL_UNDEF(&q->val);
-				q++;
+		if ((flag & (HASH_ADD_NEW|HASH_ADD_NEXT)) == (HASH_ADD_NEW|HASH_ADD_NEXT)) {
+			ht->nNumUsed = h + 1;
+		} else if (h >= ht->nNumUsed) {
+			if (h > ht->nNumUsed) {
+				Bucket *q = ht->arData + ht->nNumUsed;
+				while (q != p) {
+					ZVAL_UNDEF(&q->val);
+					q++;
+				}
 			}
 			ht->nNumUsed = h + 1;
 		}
@@ -537,12 +541,12 @@ ZEND_API zval *_zend_hash_index_update(HashTable *ht, zend_ulong h, zval *pData 
 
 ZEND_API zval *_zend_hash_next_index_insert(HashTable *ht, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEXT ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval *_zend_hash_next_index_insert_new(HashTable *ht, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEW | HASH_ADD_NEXT ZEND_FILE_LINE_RELAY_CC);
 }
 
 static void zend_hash_do_resize(HashTable *ht)
