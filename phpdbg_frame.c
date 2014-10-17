@@ -231,7 +231,7 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 			phpdbg_out(" at %s:%ld\n", Z_STRVAL_PP(file), Z_LVAL_PP(line));
 		} else {
 			phpdbg_out(" => ");
-			phpdbg_xml("<frame %r id=\"%d\" internal=\"internal\"", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
+			phpdbg_xml("<frame %r id=\"%d\" internal=\"internal\"", i);
 			phpdbg_dump_prototype(tmp TSRMLS_CC);
 			phpdbg_out(" (internal function)\n");
 		}
