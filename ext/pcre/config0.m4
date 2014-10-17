@@ -47,7 +47,7 @@ PHP_ARG_WITH(pcre-regex,,
     
     AC_DEFINE(HAVE_PCRE, 1, [ ])
     PHP_ADD_INCLUDE($PCRE_INCDIR)
-    PHP_NEW_EXTENSION(pcre, php_pcre.c, no, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+    PHP_NEW_EXTENSION(pcre, php_pcre.c, no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
     PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h])
   else
     AC_MSG_CHECKING([for PCRE library to use])
