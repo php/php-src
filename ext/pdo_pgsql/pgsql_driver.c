@@ -1062,14 +1062,14 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 		add_index_string(return_value, 0, pgsql_notify->relname);
 		add_index_long(return_value, 1, pgsql_notify->be_pid);
 		if (pgsql_notify->extra && pgsql_notify->extra[0]) {
-			add_index_string(return_value, 2, pgsql_notify->extra, 1);
+			add_index_string(return_value, 2, pgsql_notify->extra);
 		}
 	}
 	if (result_type == PDO_FETCH_ASSOC || result_type == PDO_FETCH_BOTH) {
 		add_assoc_string(return_value, "message", pgsql_notify->relname);
 		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
 		if (pgsql_notify->extra && pgsql_notify->extra[0]) {
-			add_assoc_string(return_value, "payload", pgsql_notify->extra, 1);
+			add_assoc_string(return_value, "payload", pgsql_notify->extra);
 		}
 	}
 
