@@ -1992,13 +1992,14 @@ PHP_FUNCTION(array_push)
 }
 /* }}} */
 
-/* {{{ void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end) */
-static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
+/* {{{ proto mixed array_pop(array stack)
+   Pops an element off the end of the array */
+PHP_FUNCTION(array_pop)
 {
 	zval *stack,	/* Input stack */
 		 *val;		/* Value to be popped */
-	zend_string *key = NULL;
-	zend_ulong index;
+	uint32_t idx;
+	Bucket *p;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/", &stack) == FAILURE) {
@@ -2014,56 +2015,118 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 		return;
 	}
 
-	/* Get the first or last value and copy it into the return value */
-	if (off_the_end) {
-		zend_hash_internal_pointer_end(Z_ARRVAL_P(stack));
-		while (1) {
-			val = zend_hash_get_current_data(Z_ARRVAL_P(stack));
-			if (!val) {
-				return;
-			} else if (Z_TYPE_P(val) == IS_INDIRECT) {
-				val = Z_INDIRECT_P(val);
-				if (Z_TYPE_P(val) == IS_UNDEF) {
-					zend_hash_move_backwards(Z_ARRVAL_P(stack));
-					continue;
-				}
-			}
-			break;
+	/* Get the last value and copy it into the return value */
+	idx = Z_ARRVAL_P(stack)->nNumUsed;
+	while (1) {
+		if (idx == 0) {
+			return;
 		}
-	} else {
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
-		while (1) {
-			val = zend_hash_get_current_data(Z_ARRVAL_P(stack));
-			if (!val) {
-				return;
-			} else if (Z_TYPE_P(val) == IS_INDIRECT) {
-				val = Z_INDIRECT_P(val);
-				if (Z_TYPE_P(val) == IS_UNDEF) {
-					zend_hash_move_forward(Z_ARRVAL_P(stack));
-					continue;
-				}
-			}
+		idx--;
+		p = Z_ARRVAL_P(stack)->arData + idx;
+		val = &p->val;
+		if (Z_TYPE_P(val) == IS_INDIRECT) {
+			val = Z_INDIRECT_P(val);
+		}
+		if (Z_TYPE_P(val) != IS_UNDEF) {
 			break;
 		}
 	}
-	RETVAL_ZVAL_FAST(val);
+	ZVAL_DEREF(val);
+	ZVAL_COPY(return_value, val);
 
-	/* Delete the first or last value */
-	zend_hash_get_current_key(Z_ARRVAL_P(stack), &key, &index, 0);
-	if (key && Z_ARRVAL_P(stack) == &EG(symbol_table).ht) {
-		zend_delete_global_variable(key TSRMLS_CC);
-	} else if (key) {
-		zend_hash_del(Z_ARRVAL_P(stack), key);
-	} else {
-		zend_hash_index_del(Z_ARRVAL_P(stack), index);
+	if (!p->key && Z_ARRVAL_P(stack)->nNextFreeElement > 0 && p->h >= (zend_ulong)(Z_ARRVAL_P(stack)->nNextFreeElement - 1)) {
+		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
 	}
 
-	/* If we did a shift... re-index like it did before */
-	if (!off_the_end) {
-		unsigned int k = 0;
+	/* Delete the last value */
+	if (p->key) {
+		if (Z_ARRVAL_P(stack) == &EG(symbol_table).ht) {
+			zend_delete_global_variable(p->key TSRMLS_CC);
+		} else {
+			zend_hash_del(Z_ARRVAL_P(stack), p->key);
+		}
+	} else {
+		zend_hash_index_del(Z_ARRVAL_P(stack), p->h);
+	}
+
+	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
+}
+/* }}} */
+
+/* {{{ proto mixed array_shift(array stack)
+   Pops an element off the beginning of the array */
+PHP_FUNCTION(array_shift)
+{
+	zval *stack,	/* Input stack */
+		 *val;		/* Value to be popped */
+	uint32_t idx;
+	Bucket *p;
+
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/", &stack) == FAILURE) {
+		return;
+	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_EX(stack, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
+	if (zend_hash_num_elements(Z_ARRVAL_P(stack)) == 0) {
+		return;
+	}
+
+	/* Get the first value and copy it into the return value */
+	idx = 0;
+	while (1) {
+		if (idx == Z_ARRVAL_P(stack)->nNumUsed) {
+			return;
+		}
+		p = Z_ARRVAL_P(stack)->arData + idx;
+		val = &p->val;
+		if (Z_TYPE_P(val) == IS_INDIRECT) {
+			val = Z_INDIRECT_P(val);
+		}
+		if (Z_TYPE_P(val) != IS_UNDEF) {
+			break;
+		}
+		idx++;
+	}
+	ZVAL_DEREF(val);
+	ZVAL_COPY(return_value, val);
+
+	/* Delete the first value */
+	if (p->key) {
+		if (Z_ARRVAL_P(stack) == &EG(symbol_table).ht) {
+			zend_delete_global_variable(p->key TSRMLS_CC);
+		} else {
+			zend_hash_del(Z_ARRVAL_P(stack), p->key);
+		}
+	} else {
+		zend_hash_index_del(Z_ARRVAL_P(stack), p->h);
+	}
+
+	/* re-index like it did before */
+	if (Z_ARRVAL_P(stack)->u.flags & HASH_FLAG_PACKED) {
+		uint32_t k = 0;
+
+		for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
+			p = Z_ARRVAL_P(stack)->arData + idx;
+			if (Z_TYPE(p->val) == IS_UNDEF) continue;
+			if (idx != k) {
+				Bucket *q = Z_ARRVAL_P(stack)->arData + k;
+				q->h = k;
+				q->key = NULL;
+				ZVAL_COPY_VALUE(&q->val, &p->val);
+				ZVAL_UNDEF(&p->val);										
+			}
+			k++;
+		}
+		Z_ARRVAL_P(stack)->nNumUsed = k;
+		Z_ARRVAL_P(stack)->nNextFreeElement = k;
+	} else {
+		uint32_t k = 0;
 		int should_rehash = 0;
-		uint idx;
-		Bucket *p;
 
 		for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
 			p = Z_ARRVAL_P(stack)->arData + idx;
@@ -2079,33 +2142,11 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 		}
 		Z_ARRVAL_P(stack)->nNextFreeElement = k;
 		if (should_rehash) {
-			if (Z_ARRVAL_P(stack)->u.flags & HASH_FLAG_PACKED) {
-				zend_hash_packed_to_hash(Z_ARRVAL_P(stack));
-			} else {
-				zend_hash_rehash(Z_ARRVAL_P(stack));
-			}
+			zend_hash_rehash(Z_ARRVAL_P(stack));
 		}
-	} else if (!key && Z_ARRVAL_P(stack)->nNextFreeElement > 0 && index >= (zend_ulong)(Z_ARRVAL_P(stack)->nNextFreeElement - 1)) {
-		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
 	}
 
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
-}
-/* }}} */
-
-/* {{{ proto mixed array_pop(array stack)
-   Pops an element off the end of the array */
-PHP_FUNCTION(array_pop)
-{
-	_phpi_pop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-}
-/* }}} */
-
-/* {{{ proto mixed array_shift(array stack)
-   Pops an element off the beginning of the array */
-PHP_FUNCTION(array_shift)
-{
-	_phpi_pop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 

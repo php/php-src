@@ -423,41 +423,19 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 }
 /* }}} */
 
-static zend_long *zend_get_property_guard(zend_object *zobj, zend_property_info *property_info, zval *member) /* {{{ */
+static zend_long *zend_get_property_guard(zend_object *zobj, zval *member) /* {{{ */
 {
-	zend_property_info info;
 	zval stub, *guard;
-	zend_string *str = NULL;
 
-	if (!property_info) {
-		property_info = &info;
-		info.name = Z_STR_P(member);
-	} else if(property_info->name->val[0] == '\0'){
-		const char *class_name = NULL, *prop_name = NULL;
-		size_t prop_name_len;
-		zend_unmangle_property_name_ex(property_info->name, &class_name,
-			&prop_name, &prop_name_len);
-		if (class_name) {
-			/* use unmangled name for protected properties */
-			str = info.name = zend_string_init(prop_name, prop_name_len, 0);
-			property_info = &info;
-		}
-	}
 	if (!zobj->guards) {
 		ALLOC_HASHTABLE(zobj->guards);
 		zend_hash_init(zobj->guards, 8, NULL, NULL, 0);
-	} else if ((guard = zend_hash_find(zobj->guards, property_info->name)) != NULL) {
-		if (str) {
-			zend_string_release(str);
-		}
+	} else if ((guard = zend_hash_find(zobj->guards, Z_STR_P(member))) != NULL) {
 		return &Z_LVAL_P(guard);
 	}
 
 	ZVAL_LONG(&stub, 0);
-	guard = zend_hash_add_new(zobj->guards, property_info->name, &stub);
-	if (str) {
-		zend_string_release(str);
-	}
+	guard = zend_hash_add_new(zobj->guards, Z_STR_P(member), &stub);
 	return &Z_LVAL_P(guard);
 }
 /* }}} */
@@ -468,9 +446,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	zval tmp_member;
 	zval *retval;
 	zend_property_info *property_info;
-	int silent;
 
-	silent = (type == BP_VAR_IS);
 	zobj = Z_OBJ_P(object);
 
 	ZVAL_UNDEF(&tmp_member);
@@ -485,7 +461,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 #endif
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
-	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), silent || (zobj->ce->__get != NULL), cache_slot TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), (type == BP_VAR_IS) || (zobj->ce->__get != NULL), cache_slot TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL)) {
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -502,7 +478,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 
 	/* magic get */
 	if (zobj->ce->__get) {
-		zend_long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_long *guard = zend_get_property_guard(zobj, member);
 		if (!((*guard) & IN_GET)) {
 			zval tmp_object;
 
@@ -533,13 +509,13 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 					zend_error(E_ERROR, "Cannot access property started with '\\0'");
 				}
 			}
-			if (!silent) {
+			if (type != BP_VAR_IS) {
 				zend_error(E_NOTICE,"Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
 			}
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		if (!silent) {
+		if ((type != BP_VAR_IS)) {
 			zend_error(E_NOTICE,"Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
 		}
 		retval = &EG(uninitialized_zval);
@@ -635,7 +611,7 @@ found:
 
 	/* magic set */
 	if (zobj->ce->__set) {
-		zend_long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_long *guard = zend_get_property_guard(zobj, member);
 
 	    if (!((*guard) & IN_SET)) {
 			zval tmp_object;
@@ -809,7 +785,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 	}
 
 	if (!zobj->ce->__get ||
-		(guard = zend_get_property_guard(zobj, property_info, member)) == NULL ||
+		(guard = zend_get_property_guard(zobj, member)) == NULL ||
 		(property_info && ((*guard) & IN_GET))) {
 
 		ZVAL_NULL(&tmp);
@@ -875,7 +851,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 	
 	/* magic unset */
 	if (zobj->ce->__unset) {
-		zend_long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_long *guard = zend_get_property_guard(zobj, member);
 		if (!((*guard) & IN_UNSET)) {
 			zval tmp_object;
 
@@ -1483,7 +1459,7 @@ found:
 
 	result = 0;
 	if ((has_set_exists != 2) && zobj->ce->__isset) {
-		zend_long *guard = zend_get_property_guard(zobj, property_info, member);
+		zend_long *guard = zend_get_property_guard(zobj, member);
 
 		if (!((*guard) & IN_ISSET)) {
 			zval rv;
