@@ -1117,6 +1117,8 @@ static zend_always_inline int _z_param_double(zval *arg, double *dest, zend_bool
 		*dest = Z_DVAL_P(arg);
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		*dest = (double)Z_LVAL_P(arg);
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		*dest = zend_bigint_to_double(Z_BIG_P(arg));
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		zend_long l;
 		zend_bigint *big;
@@ -1124,8 +1126,8 @@ static zend_always_inline int _z_param_double(zval *arg, double *dest, zend_bool
 
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), &l, dest, &big)) != IS_DOUBLE)) {
 			if (EXPECTED(type != 0)) {
-				if (type == IS_DOUBLE) {
-					*dest = (double)(l);
+				if (type == IS_LONG) {
+					*dest = (double)l;
 				} else {
 					*dest = zend_bigint_to_double(big);
 					zend_bigint_release(big);
