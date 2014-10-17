@@ -127,6 +127,9 @@ zend_module_entry bcmath_module_entry = {
 };
 
 #ifdef COMPILE_DL_BCMATH
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(bcmath)
 #endif
 
@@ -140,6 +143,9 @@ PHP_INI_END()
  */
 static PHP_GINIT_FUNCTION(bcmath)
 {
+#if defined(COMPILE_DL_BCMATH) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	bcmath_globals->bc_precision = 0;
 	bc_init_numbers(TSRMLS_C);
 }

@@ -5,7 +5,7 @@ ARG_ENABLE("exif", "exif", "no");
 
 if (PHP_EXIF == "yes") {
 	if (ADD_EXTENSION_DEP('exif', 'mbstring')) {
-		EXTENSION("exif", "exif.c");
+		EXTENSION("exif", "exif.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE('HAVE_EXIF', 1, 'Have exif');
 	} else {
 		WARNING("exif support can't be enabled, libxml is not enabled")

@@ -385,7 +385,7 @@ fi
 	Optimizer/optimize_temp_vars_5.c \
 	Optimizer/nop_removal.c \
 	Optimizer/compact_literals.c,
-	shared,,,,yes)
+	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
 fi

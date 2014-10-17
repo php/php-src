@@ -6,7 +6,7 @@ ARG_WITH("gmp", "Include GNU MP support.", "no");
 if (PHP_GMP != "no") {
 	if (CHECK_LIB("mpir_a.lib", "gmp", PHP_GMP) &&
 		CHECK_HEADER_ADD_INCLUDE("gmp.h", "CFLAGS_GMP", PHP_GMP +  ";" + PHP_PHP_BUILD + "\\include\\mpir")) {
-		EXTENSION("gmp", "gmp.c");
+		EXTENSION("gmp", "gmp.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE('HAVE_GMP', 1, 'GMP support');
 		AC_DEFINE('HAVE_MPIR', 1, 'MPIR support');
 	} else {

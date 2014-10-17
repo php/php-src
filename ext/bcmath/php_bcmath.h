@@ -49,7 +49,10 @@ ZEND_BEGIN_MODULE_GLOBALS(bcmath)
 ZEND_END_MODULE_GLOBALS(bcmath)
 	
 #ifdef ZTS
-# define BCG(v) TSRMG(bcmath_globals_id, zend_bcmath_globals *, v)
+# define BCG(v) ZEND_TSRMG(bcmath_globals_id, zend_bcmath_globals *, v)
+# ifdef COMPILE_DL_BCMATH
+ZEND_TSRMLS_CACHE_EXTERN;
+# endif
 #else
 # define BCG(v) (bcmath_globals.v)
 #endif

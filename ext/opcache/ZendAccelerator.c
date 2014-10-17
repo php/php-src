@@ -90,6 +90,9 @@ ZEND_EXTENSION();
 zend_accel_globals accel_globals;
 #else
 int accel_globals_id;
+#if defined(COMPILE_DL_OPCACHE)
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 #endif
 
 /* Points to the structure shared across all PHP processes */
@@ -2243,6 +2246,9 @@ static int zend_accel_init_shm(TSRMLS_D)
 
 static void accel_globals_ctor(zend_accel_globals *accel_globals TSRMLS_DC)
 {
+#if defined(COMPILE_DL_OPCACHE) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
 	zend_hash_init(&accel_globals->function_table, zend_hash_num_elements(CG(function_table)), NULL, ZEND_FUNCTION_DTOR, 1);
 	zend_accel_copy_internal_functions(TSRMLS_C);
