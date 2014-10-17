@@ -1126,7 +1126,7 @@ try_again:
 }
 /* }}} */
 
-ZEND_API zend_uchar _zval_get_bigint_or_long_func(zval *op, long *lval, zend_bigint **big TSRMLS_DC) /* {{{ */
+ZEND_API zend_uchar _zval_get_bigint_or_long_func(zval *op, zend_long *lval, zend_bigint **big TSRMLS_DC) /* {{{ */
 {
 	try_again:
 		switch (Z_TYPE_P(op)) {

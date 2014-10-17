@@ -266,7 +266,7 @@ ZEND_API void multi_convert_to_string_ex(int argc, ...);
 
 ZEND_API zend_long _zval_get_long_func(zval *op TSRMLS_DC);
 ZEND_API double _zval_get_double_func(zval *op TSRMLS_DC);
-ZEND_API zend_uchar _zval_get_bigint_or_long_func(zval *op, long *lval, zend_bigint **big TSRMLS_DC);
+ZEND_API zend_uchar _zval_get_bigint_or_long_func(zval *op, zend_long *lval, zend_bigint **big TSRMLS_DC);
 ZEND_API zend_string *_zval_get_string_func(zval *op TSRMLS_DC);
 
 static zend_always_inline zend_long _zval_get_long(zval *op TSRMLS_DC) {
@@ -275,7 +275,7 @@ static zend_always_inline zend_long _zval_get_long(zval *op TSRMLS_DC) {
 static zend_always_inline double _zval_get_double(zval *op TSRMLS_DC) {
 	return Z_TYPE_P(op) == IS_DOUBLE ? Z_DVAL_P(op) : _zval_get_double_func(op TSRMLS_CC);
 }
-static zend_always_inline double _zval_get_bigint_or_long(zval *op, long *lval, zend_bigint **big TSRMLS_DC) {
+static zend_always_inline double _zval_get_bigint_or_long(zval *op, zend_long *lval, zend_bigint **big TSRMLS_DC) {
 	if (Z_TYPE_P(op) == IS_LONG) {
 		*lval = Z_LVAL_P(op);
 		return IS_LONG;
