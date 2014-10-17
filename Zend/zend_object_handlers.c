@@ -468,9 +468,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	zval tmp_member;
 	zval *retval;
 	zend_property_info *property_info;
-	int silent;
 
-	silent = (type == BP_VAR_IS);
 	zobj = Z_OBJ_P(object);
 
 	ZVAL_UNDEF(&tmp_member);
@@ -485,7 +483,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 #endif
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
-	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), silent || (zobj->ce->__get != NULL), cache_slot TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, Z_STR_P(member), (type == BP_VAR_IS) || (zobj->ce->__get != NULL), cache_slot TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL)) {
 		if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -533,13 +531,13 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 					zend_error(E_ERROR, "Cannot access property started with '\\0'");
 				}
 			}
-			if (!silent) {
+			if (type != BP_VAR_IS) {
 				zend_error(E_NOTICE,"Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
 			}
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		if (!silent) {
+		if ((type != BP_VAR_IS)) {
 			zend_error(E_NOTICE,"Undefined property: %s::$%s", zobj->ce->name->val, Z_STRVAL_P(member));
 		}
 		retval = &EG(uninitialized_zval);
