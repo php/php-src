@@ -1203,7 +1203,8 @@ static zval* get_zval_property(zval* object, char* name, zval *rv TSRMLS_DC)
 
 			property_info = zend_get_property_info(Z_OBJCE_P(object), Z_STR(member), 1 TSRMLS_CC);
 			EG(scope) = old_scope;
-			if (property_info && zend_hash_exists(Z_OBJPROP_P(object), property_info->name)) {
+			if (property_info != ZEND_WRONG_PROPERTY_INFO && property_info &&
+			    zend_hash_exists(Z_OBJPROP_P(object), property_info->name)) {
 				zval_ptr_dtor(&member);
 				return data;
 			}

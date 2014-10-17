@@ -1248,9 +1248,9 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 
     	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
 			property_info = zend_get_property_info(object->ce, key, 1 TSRMLS_CC);
-			if (property_info &&
-			    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
-			    property_info->offset >= 0) {
+			if (property_info != ZEND_WRONG_PROPERTY_INFO &&
+			    property_info &&
+			    (property_info->flags & ZEND_ACC_STATIC) == 0) {
 				ZVAL_COPY_VALUE(&object->properties_table[property_info->offset], prop);
 				ZVAL_INDIRECT(prop, &object->properties_table[property_info->offset]);
 			}
@@ -1267,9 +1267,9 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties 
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(properties, key, prop) {
 		property_info = zend_get_property_info(object->ce, key, 1 TSRMLS_CC);
-		if (property_info &&
-		    (property_info->flags & ZEND_ACC_STATIC) == 0 &&
-		    property_info->offset >= 0) {
+		if (property_info != ZEND_WRONG_PROPERTY_INFO &&
+		    property_info &&
+		    (property_info->flags & ZEND_ACC_STATIC) == 0) {
 		    zval_ptr_dtor(&object->properties_table[property_info->offset]);
 			ZVAL_COPY_VALUE(&object->properties_table[property_info->offset], prop);
 			zval_add_ref(&object->properties_table[property_info->offset]);

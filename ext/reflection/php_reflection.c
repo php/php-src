@@ -3922,9 +3922,14 @@ static int _adddynproperty(zval *ptr TSRMLS_DC, int num_args, va_list args, zend
 		return 0; /* non public cannot be dynamic */
 	}
 
-	if (zend_get_property_info(ce, hash_key->key, 1 TSRMLS_CC) == &EG(std_property_info)) {
-		EG(std_property_info).flags = ZEND_ACC_IMPLICIT_PUBLIC;
-		reflection_property_factory(ce, &EG(std_property_info), &property TSRMLS_CC);
+	if (zend_get_property_info(ce, hash_key->key, 1 TSRMLS_CC) == NULL) {
+		zend_property_info property_info;
+		
+		property_info.flags = ZEND_ACC_IMPLICIT_PUBLIC;
+		property_info.name = hash_key->key;
+		property_info.ce = ce;
+		property_info.offset = -1;
+		reflection_property_factory(ce, &property_info, &property TSRMLS_CC);
 		add_next_index_zval(retval, &property);
 	}
 	return 0;
