@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -70,17 +70,17 @@ typedef struct _ze_zip_read_rsrc {
 	struct zip_stat sb;
 } zip_read_rsrc;
 
-#define ZIPARCHIVE_ME(name, arg_info, flags) {#name, c_ziparchive_ ##name, arg_info,(zend_uint) (sizeof(arg_info)/sizeof(struct _zend_arg_info)-1), flags },
+#define ZIPARCHIVE_ME(name, arg_info, flags) {#name, c_ziparchive_ ##name, arg_info,(uint32_t) (sizeof(arg_info)/sizeof(struct _zend_arg_info)-1), flags },
 #define ZIPARCHIVE_METHOD(name)	ZEND_NAMED_FUNCTION(c_ziparchive_ ##name)
 
 /* Extends zend object */
 typedef struct _ze_zip_object {
 	struct zip *za;
-	int buffers_cnt;
 	char **buffers;
 	HashTable *prop_handler;
 	char *filename;
 	int filename_len;
+	int buffers_cnt;
 	zend_object zo;
 } ze_zip_object;
 

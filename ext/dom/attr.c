@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -60,7 +60,7 @@ PHP_METHOD(domattr, __construct)
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name, *value = NULL;
-	int name_len, value_len, name_valid;
+	size_t name_len, value_len, name_valid;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
@@ -78,7 +78,7 @@ PHP_METHOD(domattr, __construct)
 		RETURN_FALSE;
 	}
 
-	nodep = xmlNewProp(NULL, (xmlChar *) name, value);
+	nodep = xmlNewProp(NULL, (xmlChar *) name, (xmlChar *) value);
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
@@ -147,7 +147,7 @@ int dom_attr_value_read(dom_object *obj, zval *retval TSRMLS_DC)
 	}
 
 	if ((content = xmlNodeGetContent((xmlNodePtr) attrp)) != NULL) {
-		ZVAL_STRING(retval, content);
+		ZVAL_STRING(retval, (char *) content);
 		xmlFree(content);
 	} else {
 		ZVAL_EMPTY_STRING(retval);
@@ -173,9 +173,9 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 	str = zval_get_string(newval);
 
-	xmlNodeSetContentLen((xmlNodePtr) attrp, str->val, str->len + 1);
+	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) str->val, str->len + 1);
 
-	STR_RELEASE(str);
+	zend_string_release(str);
 	return SUCCESS;
 }
 

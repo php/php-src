@@ -77,12 +77,13 @@ typedef struct _gc_root_buffer {
 	zend_refcounted          *ref;
 	struct _gc_root_buffer   *next;     /* double-linked list               */
 	struct _gc_root_buffer   *prev;
-	zend_uint                 refcount;
+	uint32_t                 refcount;
 } gc_root_buffer;
 
 typedef struct _zend_gc_globals {
 	zend_bool         gc_enabled;
 	zend_bool         gc_active;
+	zend_bool         gc_full;
 
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
 	gc_root_buffer    roots;			/* list of possible roots of cycles */
@@ -93,16 +94,16 @@ typedef struct _zend_gc_globals {
 	gc_root_buffer    to_free;			/* list to free                     */
 	gc_root_buffer   *next_to_free;
 
-	zend_uint gc_runs;
-	zend_uint collected;
+	uint32_t gc_runs;
+	uint32_t collected;
 
 #if GC_BENCH
-	zend_uint root_buf_length;
-	zend_uint root_buf_peak;
-	zend_uint zval_possible_root;
-	zend_uint zval_buffered;
-	zend_uint zval_remove_from_buffer;
-	zend_uint zval_marked_grey;
+	uint32_t root_buf_length;
+	uint32_t root_buf_peak;
+	uint32_t zval_possible_root;
+	uint32_t zval_buffered;
+	uint32_t zval_remove_from_buffer;
+	uint32_t zval_marked_grey;
 #endif
 
 } zend_gc_globals;

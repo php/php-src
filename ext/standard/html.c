@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -392,9 +392,9 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 	if (zenc != NULL) {
 		charset_hint = (char *)zend_multibyte_get_encoding_name(zenc);
 		if (charset_hint != NULL && (len=strlen(charset_hint)) != 0) {
-			if ((len == 4) /* sizeof (none|auto|pass) */ &&
+			if ((len == 4) /* sizeof (auto|pass) */ &&
+					/* XXX should the "wchar" be ignored as well?? */
 					(!memcmp("pass", charset_hint, 4) ||
-					 !memcmp("auto", charset_hint, 4) ||
 					 !memcmp("auto", charset_hint, 4))) {
 				charset_hint = NULL;
 				len = 0;
@@ -790,7 +790,7 @@ static inline int numeric_entity_is_allowed(unsigned uni_cp, int document_type)
  */
 static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 {
-	php_int_t code_l;
+	zend_long code_l;
 	int hexadecimal = (**buf == 'x' || **buf == 'X'); /* TODO: XML apparently disallows "X" */
 	char *endptr;
 
@@ -804,7 +804,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 		return FAILURE;
 	}
 
-	code_l = ZEND_STRTOI(*buf, &endptr, hexadecimal ? 16 : 10);
+	code_l = ZEND_STRTOL(*buf, &endptr, hexadecimal ? 16 : 10);
 	/* we're guaranteed there were valid digits, so *endptr > buf */
 	*buf = endptr;
 
@@ -813,7 +813,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 
 	/* many more are invalid, but that depends on whether it's HTML
 	 * (and which version) or XML. */
-	if (code_l > Z_I(0x10FFFF))
+	if (code_l > Z_L(0x10FFFF))
 		return FAILURE;
 
 	if (code_point != NULL)
@@ -856,7 +856,7 @@ static inline int process_named_entity_html(const char **buf, const char **start
 static inline int resolve_named_entity_html(const char *start, size_t length, const entity_ht *ht, unsigned *uni_cp1, unsigned *uni_cp2)
 {
 	const entity_cp_map *s;
-	php_uint_t hash = zend_inline_hash_func(start, length);
+	zend_ulong hash = zend_inline_hash_func(start, length);
 
 	s = ht->buckets[hash % ht->num_elems];
 	while (s->entity) {
@@ -1112,11 +1112,11 @@ PHPAPI zend_string *php_unescape_html_entities(unsigned char *old, size_t oldlen
 
 	if (oldlen > new_size) {
 		/* overflow, refuse to do anything */
-		ret = STR_INIT((char*)old, oldlen, 0);
+		ret = zend_string_init((char*)old, oldlen, 0);
 		retlen = oldlen;
 		goto empty_source;
 	}
-	ret = STR_ALLOC(new_size, 0);
+	ret = zend_string_alloc(new_size, 0);
 	ret->val[0] = '\0';
 	ret->len = oldlen;
 	retlen = oldlen;
@@ -1275,7 +1275,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 		}
 	}
 
-	replaced = STR_ALLOC(maxlen, 0);
+	replaced = zend_string_alloc(maxlen, 0);
 	len = 0;
 	cursor = 0;
 	while (cursor < oldlen) {
@@ -1288,7 +1288,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 		/* guarantee we have at least 40 bytes to write.
 		 * In HTML5, entities may take up to 33 bytes */
 		if (len > maxlen - 40) { /* maxlen can never be smaller than 128 */
-			replaced = STR_SAFE_REALLOC(replaced, maxlen, 1, 128, 0);
+			replaced = zend_string_safe_realloc(replaced, maxlen, 1, 128, 0);
 			maxlen += 128;
 		}
 
@@ -1301,7 +1301,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 				len += replacement_len;
 				continue;
 			} else {
-				STR_FREE(replaced);
+				zend_string_free(replaced);
 				return STR_EMPTY_ALLOC();
 			}
 		} else { /* SUCCESS */
@@ -1420,7 +1420,7 @@ encode_amp:
 				/* at this point maxlen - len >= 40 */
 				if (maxlen - len < ent_len + 2 /* & and ; */) {
 					/* ent_len < oldlen, which is certainly <= SIZE_MAX/2 */
-					replaced = STR_SAFE_REALLOC(replaced, maxlen, 1, ent_len + 128, 0);
+					replaced = zend_string_safe_realloc(replaced, maxlen, 1, ent_len + 128, 0);
 					maxlen += ent_len + 128;
 				}
 				replaced->val[len++] = '&';
@@ -1444,19 +1444,19 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
 	zend_string *str, *hint_charset = NULL;
 	char *default_charset;
-	php_int_t flags = ENT_COMPAT;
+	zend_long flags = ENT_COMPAT;
 	zend_string *replaced;
 	zend_bool double_encode = 1;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|iS!b", &str, &flags, &hint_charset, &double_encode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|lS!b", &str, &flags, &hint_charset, &double_encode) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_INT(flags)
+		Z_PARAM_LONG(flags)
 		Z_PARAM_STR_EX(hint_charset, 1, 0)
 		Z_PARAM_BOOL(double_encode);
 	ZEND_PARSE_PARAMETERS_END();
@@ -1477,18 +1477,18 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
  */
 void register_html_constants(INIT_FUNC_ARGS)
 {
-	REGISTER_INT_CONSTANT("HTML_SPECIALCHARS", HTML_SPECIALCHARS, CONST_PERSISTENT|CONST_CS);
-	REGISTER_INT_CONSTANT("HTML_ENTITIES", HTML_ENTITIES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_INT_CONSTANT("ENT_COMPAT", ENT_COMPAT, CONST_PERSISTENT|CONST_CS);
-	REGISTER_INT_CONSTANT("ENT_QUOTES", ENT_QUOTES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_INT_CONSTANT("ENT_NOQUOTES", ENT_NOQUOTES, CONST_PERSISTENT|CONST_CS);
-	REGISTER_INT_CONSTANT("ENT_IGNORE", ENT_IGNORE, CONST_PERSISTENT|CONST_CS);
-	REGISTER_INT_CONSTANT("ENT_SUBSTITUTE", ENT_SUBSTITUTE, CONST_PERSISTENT|CONST_CS);
-	REGISTER_INT_CONSTANT("ENT_DISALLOWED", ENT_DISALLOWED, CONST_PERSISTENT|CONST_CS);
-	REGISTER_INT_CONSTANT("ENT_HTML401", ENT_HTML401, CONST_PERSISTENT|CONST_CS);
-	REGISTER_INT_CONSTANT("ENT_XML1", ENT_XML1, CONST_PERSISTENT|CONST_CS);
-	REGISTER_INT_CONSTANT("ENT_XHTML", ENT_XHTML, CONST_PERSISTENT|CONST_CS);
-	REGISTER_INT_CONSTANT("ENT_HTML5", ENT_HTML5, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("HTML_SPECIALCHARS", HTML_SPECIALCHARS, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("HTML_ENTITIES", HTML_ENTITIES, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_COMPAT", ENT_COMPAT, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_QUOTES", ENT_QUOTES, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_NOQUOTES", ENT_NOQUOTES, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_IGNORE", ENT_IGNORE, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_SUBSTITUTE", ENT_SUBSTITUTE, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_DISALLOWED", ENT_DISALLOWED, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_HTML401", ENT_HTML401, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_XML1", ENT_XML1, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_XHTML", ENT_XHTML, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("ENT_HTML5", ENT_HTML5, CONST_PERSISTENT|CONST_CS);
 }
 /* }}} */
 
@@ -1505,11 +1505,11 @@ PHP_FUNCTION(htmlspecialchars)
 PHP_FUNCTION(htmlspecialchars_decode)
 {
 	char *str;
-	int str_len;
-	php_int_t quote_style = ENT_COMPAT;
+	size_t str_len;
+	zend_long quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &str, &str_len, &quote_style) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &quote_style) == FAILURE) {
 		return;
 	}
 
@@ -1527,12 +1527,11 @@ PHP_FUNCTION(html_entity_decode)
 {
 	zend_string *str, *hint_charset = NULL;
 	char *default_charset;
-	size_t new_len = 0;
-	php_int_t quote_style = ENT_COMPAT;
+	zend_long quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|iS", &str,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|lS", &str,
 							  &quote_style, &hint_charset) == FAILURE) {
 		return;
 	}
@@ -1540,7 +1539,7 @@ PHP_FUNCTION(html_entity_decode)
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_INT(quote_style)
+		Z_PARAM_LONG(quote_style)
 		Z_PARAM_STR(hint_charset)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
@@ -1626,20 +1625,20 @@ static inline void write_s3row_data(
    Returns the internal translation table used by htmlspecialchars and htmlentities */
 PHP_FUNCTION(get_html_translation_table)
 {
-	php_int_t all = HTML_SPECIALCHARS,
+	zend_long all = HTML_SPECIALCHARS,
 		 flags = ENT_COMPAT;
 	int doctype;
 	entity_table_opt entity_table;
 	const enc_to_uni *to_uni_table = NULL;
 	char *charset_hint = NULL;
-	int charset_hint_len;
+	size_t charset_hint_len;
 	enum entity_charset charset;
 
 	/* in this function we have to jump through some loops because we're
 	 * getting the translated table from data structures that are optimized for
 	 * random access, not traversal */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|iis",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lls",
 			&all, &flags, &charset_hint, &charset_hint_len) == FAILURE) {
 		return;
 	}

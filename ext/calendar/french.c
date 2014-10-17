@@ -93,12 +93,12 @@
 #define LAST_VALID         2380952
 
 void SdnToFrench(
-					php_int_t sdn,
+					zend_long sdn,
 					int *pYear,
 					int *pMonth,
 					int *pDay)
 {
-	php_int_t temp;
+	zend_long temp;
 	int dayOfYear;
 
 	if (sdn < FIRST_VALID || sdn > LAST_VALID) {
@@ -114,7 +114,7 @@ void SdnToFrench(
 	*pDay = dayOfYear % DAYS_PER_MONTH + 1;
 }
 
-php_int_t FrenchToSdn(
+zend_long FrenchToSdn(
 						int year,
 						int month,
 						int day)

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,19 +41,19 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	zval		*object;
 
 	const char	*locale_str;
-	int			locale_len		= 0;
+	size_t			locale_len		= 0;
 	Locale		locale;
-    php_int_t		date_type		= 0;
-    php_int_t		time_type		= 0;
+    zend_long		date_type		= 0;
+    zend_long		time_type		= 0;
 	zval		*calendar_zv	= NULL;
 	Calendar	*calendar		= NULL;
-	php_int_t		calendar_type;
+	zend_long		calendar_type;
 	bool		calendar_owned;
 	zval		*timezone_zv	= NULL;
 	TimeZone	*timezone		= NULL;
 	bool		explicit_tz;
     char*       pattern_str		= NULL;
-    int         pattern_str_len	= 0;
+    size_t         pattern_str_len	= 0;
     UChar*      svalue			= NULL;		/* UTF-16 pattern_str */
     int         slength			= 0;
 	IntlDateFormatter_object* dfo;
@@ -61,7 +61,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	intl_error_reset(NULL TSRMLS_CC);
 	object = return_value;
 	/* Parse parameters. */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sii|zzs",
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "

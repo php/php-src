@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -21,7 +21,7 @@
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/head.h"
 #include "php_ini.h"
@@ -72,7 +72,7 @@ static request_rec *php_apache_lookup_uri(char *filename TSRMLS_DC)
 PHP_FUNCTION(virtual)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	request_rec *rr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
@@ -109,9 +109,9 @@ PHP_FUNCTION(virtual)
 /* }}} */
 
 #define ADD_LONG(name) \
-		add_property_int(return_value, #name, rr->name)
+		add_property_long(return_value, #name, rr->name)
 #define ADD_TIME(name) \
-		add_property_int(return_value, #name, apr_time_sec(rr->name));
+		add_property_long(return_value, #name, apr_time_sec(rr->name));
 #define ADD_STRING(name) \
 		if (rr->name) add_property_string(return_value, #name, (char *) rr->name)
 
@@ -119,7 +119,7 @@ PHP_FUNCTION(apache_lookup_uri)
 {
 	request_rec *rr;
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		return;
@@ -222,7 +222,7 @@ PHP_FUNCTION(apache_note)
 {
 	php_struct *ctx;
 	char *note_name, *note_val = NULL;
-	int note_name_len, note_val_len;
+	size_t note_name_len, note_val_len;
 	char *old_note_val=NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
@@ -254,7 +254,7 @@ PHP_FUNCTION(apache_setenv)
 {
 	php_struct *ctx;
 	char *variable=NULL, *string_val=NULL;
-	int variable_len, string_val_len;
+	size_t variable_len, string_val_len;
 	zend_bool walk_to_top = 0;
 	int arg_count = ZEND_NUM_ARGS();
 	request_rec *r;

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,9 +24,9 @@
 PHP_FUNCTION(base64_decode);
 PHP_FUNCTION(base64_encode);
 
-PHPAPI extern zend_string *php_base64_encode(const unsigned char *, php_size_t);
-PHPAPI extern zend_string *php_base64_decode_ex(const unsigned char *, php_size_t, zend_bool);
-PHPAPI extern zend_string *php_base64_decode(const unsigned char *, php_size_t);
+PHPAPI extern zend_string *php_base64_encode(const unsigned char *, size_t);
+PHPAPI extern zend_string *php_base64_decode_ex(const unsigned char *, size_t, zend_bool);
+PHPAPI extern zend_string *php_base64_decode(const unsigned char *, size_t);
 
 #endif /* BASE64_H */
 

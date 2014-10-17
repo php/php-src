@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -59,7 +59,7 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
 			
 			if (op_array) {
 				zend_op *opline = &(op_array->opcodes[0]);
-				zend_uint opcode = 0,
+				uint32_t opcode = 0,
 				end = op_array->last-1;
 
 				if (method->common.scope) {

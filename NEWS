@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 7.0.0
 
+-Fileinfo:
+  . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
+
 - CLI server:
   . Refactor MIME type handling to use a hash table instead of linear search.
     (Adam)
@@ -9,6 +12,11 @@ PHP                                                                        NEWS
 
 - Core:
   . Added PHP_INT_MIN constant. (Andrea)
+  . Added Closure::apply() method. (Andrea)
+  . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
+  . Fixed #67959 (Segfault when calling phpversion('spl')). (Florian)
+  . Implemented the RFC `Catchable "Call to a member function bar() on a
+    non-object"` (Timm)
 
 - Reflection
   . Fixed inheritance chain of Reflector interface (Tjerk)
@@ -33,5 +41,12 @@ PHP                                                                        NEWS
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
+
+- SPL:
+  . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
+    nor curruption state). (Julien)
+
+- DOM:
+  . Made DOMNode::textContent writeable. (Tjerk)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

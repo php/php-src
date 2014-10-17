@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -158,7 +158,7 @@ static int php_disk_total_space(char *path, double *space TSRMLS_DC) /* {{{ */
 
 			/* i know - this is ugly, but i works <thies@thieso.net> */
 			bytestotal  = TotalNumberOfBytes.HighPart *
-				(double) (((php_uint_t)1) << 31) * 2.0 +
+				(double) (((zend_ulong)1) << 31) * 2.0 +
 				TotalNumberOfBytes.LowPart;
 		} else { /* If it's not available, we just use GetDiskFreeSpace */
 			if (GetDiskFreeSpace(path,
@@ -233,7 +233,7 @@ PHP_FUNCTION(disk_total_space)
 {
 	double bytestotal;
 	char *path;
-	int path_len;
+	size_t path_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &path, &path_len) == FAILURE) {
 		return;
@@ -290,7 +290,7 @@ static int php_disk_free_space(char *path, double *space TSRMLS_DC) /* {{{ */
 
 			/* i know - this is ugly, but i works <thies@thieso.net> */
 			bytesfree  = FreeBytesAvailableToCaller.HighPart *
-				(double) (((php_uint_t)1) << 31) * 2.0 +
+				(double) (((zend_ulong)1) << 31) * 2.0 +
 				FreeBytesAvailableToCaller.LowPart;
 		} else { /* If it's not available, we just use GetDiskFreeSpace */
 			if (GetDiskFreeSpace(path,
@@ -368,7 +368,7 @@ PHP_FUNCTION(disk_free_space)
 {
 	double bytesfree;
 	char *path;
-	int path_len;
+	size_t path_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &path, &path_len) == FAILURE) {
 		return;
@@ -420,7 +420,7 @@ PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid TSRMLS_DC)
 static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	zval *group;
 #if !defined(WINDOWS)
 	gid_t gid;
@@ -437,9 +437,9 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		if(wrapper && wrapper->wops->stream_metadata) {
 			int option;
 			void *value;
-			if (Z_TYPE_P(group) == IS_INT) {
+			if (Z_TYPE_P(group) == IS_LONG) {
 				option = PHP_STREAM_META_GROUP;
-				value = &Z_IVAL_P(group);
+				value = &Z_LVAL_P(group);
 			} else if (Z_TYPE_P(group) == IS_STRING) {
 				option = PHP_STREAM_META_GROUP_NAME;
 				value = Z_STRVAL_P(group);
@@ -465,8 +465,8 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	/* We have no native chgrp on Windows, nothing left to do if stream doesn't have own implementation */
 	RETURN_FALSE;
 #else
-	if (Z_TYPE_P(group) == IS_INT) {
-		gid = (gid_t)Z_IVAL_P(group);
+	if (Z_TYPE_P(group) == IS_LONG) {
+		gid = (gid_t)Z_LVAL_P(group);
 	} else if (Z_TYPE_P(group) == IS_STRING) {
 		if(php_get_gid_by_name(Z_STRVAL_P(group), &gid TSRMLS_CC) != SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
@@ -557,7 +557,7 @@ PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid TSRMLS_DC)
 static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	zval *user;
 #if !defined(WINDOWS)
 	uid_t uid;
@@ -574,9 +574,9 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		if(wrapper && wrapper->wops->stream_metadata) {
 			int option;
 			void *value;
-			if (Z_TYPE_P(user) == IS_INT) {
+			if (Z_TYPE_P(user) == IS_LONG) {
 				option = PHP_STREAM_META_OWNER;
-				value = &Z_IVAL_P(user);
+				value = &Z_LVAL_P(user);
 			} else if (Z_TYPE_P(user) == IS_STRING) {
 				option = PHP_STREAM_META_OWNER_NAME;
 				value = Z_STRVAL_P(user);
@@ -603,8 +603,8 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	RETURN_FALSE;
 #else
 
-	if (Z_TYPE_P(user) == IS_INT) {
-		uid = (uid_t)Z_IVAL_P(user);
+	if (Z_TYPE_P(user) == IS_LONG) {
+		uid = (uid_t)Z_LVAL_P(user);
 	} else if (Z_TYPE_P(user) == IS_STRING) {
 		if(php_get_uid_by_name(Z_STRVAL_P(user), &uid TSRMLS_CC) != SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
@@ -667,13 +667,13 @@ PHP_FUNCTION(lchown)
 PHP_FUNCTION(chmod)
 {
 	char *filename;
-	int filename_len;
-	php_int_t mode;
+	size_t filename_len;
+	zend_long mode;
 	int ret;
 	mode_t imode;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pi", &filename, &filename_len, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pl", &filename, &filename_len, &mode) == FAILURE) {
 		return;
 	}
 
@@ -713,15 +713,15 @@ PHP_FUNCTION(chmod)
 PHP_FUNCTION(touch)
 {
 	char *filename;
-	int filename_len;
-	php_int_t filetime = 0, fileatime = 0;
+	size_t filename_len;
+	zend_long filetime = 0, fileatime = 0;
 	int ret, argc = ZEND_NUM_ARGS();
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = &newtimebuf;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "p|ii", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "p|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
 		return;
 	}
 
@@ -829,7 +829,7 @@ PHP_FUNCTION(clearstatcache)
 {
 	zend_bool  clear_realpath_cache = 0;
 	char      *filename             = NULL;
-	int        filename_len         = 0;
+	size_t     filename_len         = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bp", &clear_realpath_cache, &filename, &filename_len) == FAILURE) {
 		return;
@@ -962,21 +962,21 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 	switch (type) {
 	case FS_PERMS:
-		RETURN_INT((php_int_t)ssb.sb.st_mode);
+		RETURN_LONG((zend_long)ssb.sb.st_mode);
 	case FS_INODE:
-		RETURN_INT((php_int_t)ssb.sb.st_ino);
+		RETURN_LONG((zend_long)ssb.sb.st_ino);
 	case FS_SIZE:
-		RETURN_INT((php_int_t)ssb.sb.st_size);
+		RETURN_LONG((zend_long)ssb.sb.st_size);
 	case FS_OWNER:
-		RETURN_INT((php_int_t)ssb.sb.st_uid);
+		RETURN_LONG((zend_long)ssb.sb.st_uid);
 	case FS_GROUP:
-		RETURN_INT((php_int_t)ssb.sb.st_gid);
+		RETURN_LONG((zend_long)ssb.sb.st_gid);
 	case FS_ATIME:
-		RETURN_INT((php_int_t)ssb.sb.st_atime);
+		RETURN_LONG((zend_long)ssb.sb.st_atime);
 	case FS_MTIME:
-		RETURN_INT((php_int_t)ssb.sb.st_mtime);
+		RETURN_LONG((zend_long)ssb.sb.st_mtime);
 	case FS_CTIME:
-		RETURN_INT((php_int_t)ssb.sb.st_ctime);
+		RETURN_LONG((zend_long)ssb.sb.st_ctime);
 	case FS_TYPE:
 		if (S_ISLNK(ssb.sb.st_mode)) {
 			RETURN_STRING("link");
@@ -1012,30 +1012,41 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_STAT:
 		array_init(return_value);
 
-		ZVAL_INT(&stat_dev, stat_sb->st_dev);
-		ZVAL_INT(&stat_ino, stat_sb->st_ino);
-		ZVAL_INT(&stat_mode, stat_sb->st_mode);
-		ZVAL_INT(&stat_nlink, stat_sb->st_nlink);
-		ZVAL_INT(&stat_uid, stat_sb->st_uid);
-		ZVAL_INT(&stat_gid, stat_sb->st_gid);
+		ZVAL_LONG(&stat_dev, stat_sb->st_dev);
+		ZVAL_LONG(&stat_ino, stat_sb->st_ino);
+		ZVAL_LONG(&stat_mode, stat_sb->st_mode);
+		ZVAL_LONG(&stat_nlink, stat_sb->st_nlink);
+		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
+		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
 #ifdef HAVE_ST_RDEV
-		ZVAL_INT(&stat_rdev, stat_sb->st_rdev);
+# ifdef PHP_WIN32
+	/* It is unsigned, so if a negative came from userspace, it'll
+	   convert to UINT_MAX, but we wan't to keep the userspace value.
+	   Almost the same as in php_if_fstat. */
+	if ((int)stat_sb->st_rdev < 0) {
+		ZVAL_LONG(&stat_rdev, (int)stat_sb->st_rdev);
+	} else {
+		ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
+	}
+# else
+	ZVAL_LONG(&stat_rdev, stat_sb->st_rdev);
+# endif
 #else
-		ZVAL_INT(&stat_rdev, -1);
+		ZVAL_LONG(&stat_rdev, -1);
 #endif
-		ZVAL_INT(&stat_size, stat_sb->st_size);
-		ZVAL_INT(&stat_atime, stat_sb->st_atime);
-		ZVAL_INT(&stat_mtime, stat_sb->st_mtime);
-		ZVAL_INT(&stat_ctime, stat_sb->st_ctime);
+		ZVAL_LONG(&stat_size, stat_sb->st_size);
+		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
+		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
+		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
 #ifdef HAVE_ST_BLKSIZE
-		ZVAL_INT(&stat_blksize, stat_sb->st_blksize);
+		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
 #else
-		ZVAL_INT(&stat_blksize,-1);
+		ZVAL_LONG(&stat_blksize,-1);
 #endif
 #ifdef HAVE_ST_BLOCKS
-		ZVAL_INT(&stat_blocks, stat_sb->st_blocks);
+		ZVAL_LONG(&stat_blocks, stat_sb->st_blocks);
 #else
-		ZVAL_INT(&stat_blocks,-1);
+		ZVAL_LONG(&stat_blocks,-1);
 #endif
 		/* Store numeric indexes in propper order */
 		zend_hash_next_index_insert(HASH_OF(return_value), &stat_dev);
@@ -1081,7 +1092,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 # define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	char *filename; \
-	int filename_len; \
+	size_t filename_len; \
 	\
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) { \
 		return; \
@@ -1093,7 +1104,7 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 # define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	char *filename; \
-	int filename_len; \
+	size_t filename_len; \
 	\
 	ZEND_PARSE_PARAMETERS_START(1, 1) \
 		Z_PARAM_PATH(filename, filename_len) \
@@ -1201,7 +1212,7 @@ PHP_FUNCTION(realpath_cache_size)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_INT(realpath_cache_size(TSRMLS_C));
+	RETURN_LONG(realpath_cache_size(TSRMLS_C));
 }
 
 /* {{{ proto bool realpath_cache_get()
@@ -1223,19 +1234,19 @@ PHP_FUNCTION(realpath_cache_get)
 			array_init(&entry);
 
 			/* bucket->key is unsigned long */
-			if (ZEND_INT_MAX >= bucket->key) {
-				add_assoc_int(&entry, "key", bucket->key);
+			if (ZEND_LONG_MAX >= bucket->key) {
+				add_assoc_long_ex(&entry, "key", sizeof("key") - 1, bucket->key);
 			} else {
-				add_assoc_double(&entry, "key", (double)bucket->key);
+				add_assoc_double_ex(&entry, "key", sizeof("key") - 1, (double)bucket->key);
 			}
-			add_assoc_bool(&entry, "is_dir", bucket->is_dir);
-			add_assoc_stringl(&entry, "realpath", bucket->realpath, bucket->realpath_len);
-			add_assoc_int(&entry, "expires", bucket->expires);
+			add_assoc_bool_ex(&entry, "is_dir", sizeof("is_dir") - 1, bucket->is_dir);
+			add_assoc_stringl_ex(&entry, "realpath", sizeof("realpath") - 1, bucket->realpath, bucket->realpath_len);
+			add_assoc_long_ex(&entry, "expires", sizeof("expires") - 1, bucket->expires);
 #ifdef PHP_WIN32
-			add_assoc_bool(&entry, "is_rvalid", bucket->is_rvalid);
-			add_assoc_bool(&entry, "is_wvalid", bucket->is_wvalid);
-			add_assoc_bool(&entry, "is_readable", bucket->is_readable);
-			add_assoc_bool(&entry, "is_writable", bucket->is_writable);
+			add_assoc_bool_ex(&entry, "is_rvalid", sizeof("is_rvalid") - 1, bucket->is_rvalid);
+			add_assoc_bool_ex(&entry, "is_wvalid", sizeof("is_wvalid") - 1, bucket->is_wvalid);
+			add_assoc_bool_ex(&entry, "is_readable", sizeof("is_readable") - 1, bucket->is_readable);
+			add_assoc_bool_ex(&entry, "is_writable", sizeof("is_writable") - 1, bucket->is_writable);
 #endif
 			zend_hash_str_update(Z_ARRVAL_P(return_value), bucket->path, bucket->path_len, &entry);
 			bucket = bucket->next;

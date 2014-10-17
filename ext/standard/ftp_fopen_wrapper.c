@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -498,7 +498,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	} else if (read_write == 2) {
 		/* when writing file (but not appending), it must NOT exist, unless a context option exists which allows it */
 		if (context && (tmpzval = php_stream_context_get_option(context, "ftp", "overwrite")) != NULL) {
-			allow_overwrite = Z_IVAL_P(tmpzval);
+			allow_overwrite = Z_LVAL_P(tmpzval);
 		}
 		if (result <= 299 && result >= 200) {
 			if (allow_overwrite) {
@@ -529,12 +529,12 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		/* set resume position if applicable */
 		if (context &&
 			(tmpzval = php_stream_context_get_option(context, "ftp", "resume_pos")) != NULL &&
-			Z_TYPE_P(tmpzval) == IS_INT &&
-			Z_IVAL_P(tmpzval) > 0) {
-			php_stream_printf(stream TSRMLS_CC, "REST %ld\r\n", Z_IVAL_P(tmpzval));
+			Z_TYPE_P(tmpzval) == IS_LONG &&
+			Z_LVAL_P(tmpzval) > 0) {
+			php_stream_printf(stream TSRMLS_CC, "REST %pd\r\n", Z_LVAL_P(tmpzval));
 			result = GET_FTP_RESULT(stream);
 			if (result < 300 || result > 399) {			
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to resume from offset %ld", Z_IVAL_P(tmpzval));
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to resume from offset %pd", Z_LVAL_P(tmpzval));
 				goto errexit;
 			}
 		}
@@ -632,11 +632,11 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 	tmp_len = MIN(sizeof(ent->d_name), basename->len - 1);
 	memcpy(ent->d_name, basename->val, tmp_len);
 	ent->d_name[tmp_len - 1] = '\0';
-	STR_RELEASE(basename);
+	zend_string_release(basename);
 
 	/* Trim off trailing whitespace characters */
 	tmp_len--;
-	while (tmp_len >= 0 &&
+	while (tmp_len > 0 &&
 			(ent->d_name[tmp_len] == '\n' || ent->d_name[tmp_len] == '\r' ||
 			 ent->d_name[tmp_len] == '\t' || ent->d_name[tmp_len] == ' ')) {
 		ent->d_name[tmp_len--] = '\0';

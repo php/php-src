@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -62,7 +62,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 PHP_FUNCTION( msgfmt_set_pattern )
 {
 	char*       value = NULL;
-	int         value_len = 0;
+	size_t         value_len = 0;
 	int         spattern_len = 0;
 	UChar*	    spattern  = NULL;
 	MSG_FORMAT_METHOD_INIT_VARS;

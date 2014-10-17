@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -41,7 +41,7 @@ PHP_FUNCTION(gettype)
 			RETVAL_STRING("boolean");
 			break;
 
-		case IS_INT:
+		case IS_LONG:
 			RETVAL_STRING("integer");
 			break;
 
@@ -94,7 +94,7 @@ PHP_FUNCTION(settype)
 {
 	zval *var;
 	char *type;
-	int type_len = 0;
+	size_t type_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &var, &type, &type_len) == FAILURE) {
 		return;
@@ -103,9 +103,9 @@ PHP_FUNCTION(settype)
 	ZVAL_DEREF(var);
 	SEPARATE_ZVAL_NOREF(var);
 	if (!strcasecmp(type, "integer")) {
-		convert_to_int(var);
+		convert_to_long(var);
 	} else if (!strcasecmp(type, "int")) {
-		convert_to_int(var);
+		convert_to_long(var);
 	} else if (!strcasecmp(type, "float")) {
 		convert_to_double(var);
 	} else if (!strcasecmp(type, "double")) { /* deprecated */
@@ -138,25 +138,25 @@ PHP_FUNCTION(settype)
 PHP_FUNCTION(intval)
 {
 	zval *num;
-	php_int_t base = 10;
+	zend_long base = 10;
 
 	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
 		WRONG_PARAM_COUNT;
 	}
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &num, &base) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &num, &base) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(num)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_INT(base)
+		Z_PARAM_LONG(base)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
 	RETVAL_ZVAL(num, 1, 0);
-	convert_to_int_base(return_value, base);
+	convert_to_long_base(return_value, base);
 }
 /* }}} */
 
@@ -219,12 +219,7 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
-			zend_class_entry *ce;
-			if (Z_OBJ_HT_P(arg)->get_class_entry == NULL) {
-				/* if there's no get_class_entry it's not a PHP object, so it can't be INCOMPLETE_CLASS */
-				RETURN_TRUE;
-			}
-			ce = Z_OBJCE_P(arg);
+			zend_class_entry *ce = Z_OBJCE_P(arg);
 			if (ce->name->len == sizeof(INCOMPLETE_CLASS) - 1 
 					&& !strncmp(ce->name->val, INCOMPLETE_CLASS, ce->name->len)) {
 				RETURN_FALSE;
@@ -243,7 +238,8 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 
 /* {{{ proto bool is_null(mixed var)
-   Returns true if variable is null */
+   Returns true if variable is null
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_null)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_NULL);
@@ -251,7 +247,8 @@ PHP_FUNCTION(is_null)
 /* }}} */
 
 /* {{{ proto bool is_resource(mixed var)
-   Returns true if variable is a resource */
+   Returns true if variable is a resource
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_resource)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_RESOURCE);
@@ -259,7 +256,8 @@ PHP_FUNCTION(is_resource)
 /* }}} */
 
 /* {{{ proto bool is_bool(mixed var)
-   Returns true if variable is a boolean */
+   Returns true if variable is a boolean
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_bool)
 {
 	zval *arg;
@@ -274,15 +272,17 @@ PHP_FUNCTION(is_bool)
 /* }}} */
 
 /* {{{ proto bool is_long(mixed var)
-   Returns true if variable is a long (integer) */
+   Returns true if variable is a long (integer)
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_long)
 {
-	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_INT);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
 }
 /* }}} */
 
 /* {{{ proto bool is_float(mixed var)
-   Returns true if variable is float point*/
+   Returns true if variable is float point
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_float)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE);
@@ -290,7 +290,8 @@ PHP_FUNCTION(is_float)
 /* }}} */
 
 /* {{{ proto bool is_string(mixed var)
-   Returns true if variable is a string */
+   Returns true if variable is a string
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_string)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
@@ -298,7 +299,8 @@ PHP_FUNCTION(is_string)
 /* }}} */
 
 /* {{{ proto bool is_array(mixed var)
-   Returns true if variable is an array */
+   Returns true if variable is an array
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_array)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY);
@@ -306,7 +308,8 @@ PHP_FUNCTION(is_array)
 /* }}} */
 
 /* {{{ proto bool is_object(mixed var)
-   Returns true if variable is an object */
+   Returns true if variable is an object
+   Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_object)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT);
@@ -324,13 +327,13 @@ PHP_FUNCTION(is_numeric)
 	}
 
 	switch (Z_TYPE_P(arg)) {
-		case IS_INT:
+		case IS_LONG:
 		case IS_DOUBLE:
 			RETURN_TRUE;
 			break;
 
 		case IS_STRING:
-			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRSIZE_P(arg), NULL, NULL, 0)) {
+			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 0)) {
 				RETURN_TRUE;
 			} else {
 				RETURN_FALSE;
@@ -364,7 +367,7 @@ PHP_FUNCTION(is_scalar)
 		case IS_FALSE:
 		case IS_TRUE:
 		case IS_DOUBLE:
-		case IS_INT:
+		case IS_LONG:
 		case IS_STRING:
 			RETURN_TRUE;
 			break;
@@ -401,7 +404,7 @@ PHP_FUNCTION(is_callable)
 		//??? is it necessary to be consistent with old PHP ("\0" support)
 		if (UNEXPECTED(name->len) != strlen(name->val)) {
 			ZVAL_STRINGL(callable_name, name->val, strlen(name->val));
-			STR_RELEASE(name);
+			zend_string_release(name);
 		} else {
 			ZVAL_STR(callable_name, name);
 		}

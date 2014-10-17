@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -159,8 +159,9 @@ PHP_METHOD(domelement, __construct)
 	dom_object *intern;
 	char *name, *value = NULL, *uri = NULL;
 	char *localname = NULL, *prefix = NULL;
-	int errorcode = 0, uri_len = 0;
-	int name_len, value_len = 0, name_valid;
+	int errorcode = 0;
+	size_t name_len, value_len = 0, uri_len = 0;
+	int name_valid;
 	xmlNsPtr nsptr = NULL;
 	zend_error_handling error_handling;
 
@@ -200,7 +201,7 @@ PHP_METHOD(domelement, __construct)
 		}
 	} else {
 	    /* If you don't pass a namespace uri, then you can't set a prefix */
-	    localname = xmlSplitQName2((xmlChar *)name, (xmlChar **) &prefix);
+	    localname = (char *) xmlSplitQName2((xmlChar *) name, (xmlChar **) &prefix);
 	    if (prefix != NULL) {
 			xmlFree(localname);
 			xmlFree(prefix);
@@ -330,7 +331,7 @@ PHP_FUNCTION(dom_element_get_attribute)
 	xmlChar *value = NULL;
 	dom_object *intern;
 	xmlNodePtr attr;
-	int name_len;
+	size_t name_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
 		return;
@@ -370,7 +371,8 @@ PHP_FUNCTION(dom_element_set_attribute)
 	zval *id;
 	xmlNode *nodep;
 	xmlNodePtr attr = NULL;
-	int ret, name_len, value_len, name_valid;
+	int ret, name_valid;
+	size_t name_len, value_len;
 	dom_object *intern;
 	char *name, *value;
 
@@ -436,7 +438,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 	zval *id;
 	xmlNodePtr nodep, attrp;
 	dom_object *intern;
-	int name_len;
+	size_t name_len;
 	char *name;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
@@ -483,7 +485,8 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 {
 	zval *id;
 	xmlNodePtr nodep, attrp;
-	int name_len, ret;
+	size_t name_len;
+	int ret;
 	dom_object *intern;
 	char *name;
 
@@ -632,7 +635,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 {
 	zval *id;
 	xmlNodePtr elemp;
-	int name_len;
+	size_t name_len;
 	dom_object *intern, *namednode;
 	char *name;
 	xmlChar *local;
@@ -660,7 +663,7 @@ PHP_FUNCTION(dom_element_get_attribute_ns)
 	xmlNodePtr elemp;
 	xmlNsPtr nsptr;
 	dom_object *intern;
-	int uri_len = 0, name_len = 0;
+	size_t uri_len = 0, name_len = 0;
 	char *uri, *name;
 	xmlChar *strattr;
 
@@ -740,7 +743,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 	xmlNodePtr elemp, nodep = NULL;
 	xmlNsPtr nsptr;
 	xmlAttr *attr;
-	int uri_len = 0, name_len = 0, value_len = 0;
+	size_t uri_len = 0, name_len = 0, value_len = 0;
 	char *uri, *name, *value;
 	char *localname = NULL, *prefix = NULL;
 	dom_object *intern;
@@ -869,7 +872,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 	xmlAttr *attrp;
 	xmlNsPtr nsptr;
 	dom_object *intern;
-	int name_len, uri_len;
+	size_t name_len, uri_len;
 	char *name, *uri;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
@@ -925,7 +928,8 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 	xmlNodePtr elemp;
 	xmlAttrPtr attrp;
 	dom_object *intern;
-	int uri_len, name_len, ret;
+	size_t uri_len, name_len;
+	int ret;
 	char *uri, *name;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os!s", &id, dom_element_class_entry, &uri, &uri_len, &name, &name_len) == FAILURE) {
@@ -1026,7 +1030,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 {
 	zval *id;
 	xmlNodePtr elemp;
-	int uri_len, name_len;
+	size_t uri_len, name_len;
 	dom_object *intern, *namednode;
 	char *uri, *name;
 	xmlChar *local, *nsuri;
@@ -1056,7 +1060,7 @@ PHP_FUNCTION(dom_element_has_attribute)
 	xmlNode *nodep;
 	dom_object *intern;
 	char *name;
-	int name_len;
+	size_t name_len;
 	xmlNodePtr attr;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_element_class_entry, &name, &name_len) == FAILURE) {
@@ -1084,7 +1088,7 @@ PHP_FUNCTION(dom_element_has_attribute_ns)
 	xmlNodePtr elemp;
 	xmlNs *nsp;
 	dom_object *intern;
-	int uri_len, name_len;
+	size_t uri_len, name_len;
 	char *uri, *name;
 	xmlChar *value;
 
@@ -1142,7 +1146,7 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 	xmlAttrPtr attrp;
 	dom_object *intern;
 	char *name;
-	int name_len;
+	size_t name_len;
 	zend_bool is_id;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Osb", &id, dom_element_class_entry, &name, &name_len, &is_id) == FAILURE) {
@@ -1177,7 +1181,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_ns)
 	xmlNodePtr elemp;
 	xmlAttrPtr attrp;
 	dom_object *intern;
-	int uri_len, name_len;
+	size_t uri_len, name_len;
 	char *uri, *name;
 	zend_bool is_id;
 

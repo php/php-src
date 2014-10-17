@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -31,7 +31,7 @@ PHP_FUNCTION(unixtojd)
 	time_t ts = 0;
 	struct tm *ta, tmbuf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &ts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &ts) == FAILURE) {
 		return;
 	}	
 
@@ -45,7 +45,7 @@ PHP_FUNCTION(unixtojd)
 		RETURN_FALSE;
 	}
 
-	RETURN_INT(GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1, ta->tm_mday));
+	RETURN_LONG(GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1, ta->tm_mday));
 }
 /* }}} */
 
@@ -53,7 +53,7 @@ PHP_FUNCTION(unixtojd)
    Convert Julian Day to UNIX timestamp */
 PHP_FUNCTION(jdtounix)
 {
-	long uday;
+	zend_long uday;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uday) == FAILURE) {
 		return;
@@ -64,7 +64,7 @@ PHP_FUNCTION(jdtounix)
 		RETURN_FALSE;
 	}
 
-	RETURN_INT(uday * 24 * 3600);
+	RETURN_LONG(uday * 24 * 3600);
 }
 /* }}} */
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,10 +46,10 @@ static const DateFormat::EStyle valid_styles[] = {
 };
 
 static bool valid_format(zval *z) {
-	if (Z_TYPE_P(z) == IS_INT) {
-		php_int_t lval = Z_IVAL_P(z);
+	if (Z_TYPE_P(z) == IS_LONG) {
+		zend_long lval = Z_LVAL_P(z);
 		for (int i = 0; i < sizeof(valid_styles) / sizeof(*valid_styles); i++) {
-			if ((php_int_t)valid_styles[i] == lval) {
+			if ((zend_long)valid_styles[i] == lval) {
 				return true;
 			}
 		}
@@ -63,7 +63,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	zval				*object,
 						*format = NULL;
 	const char			*locale_str	= NULL;
-	int					locale_len;
+	size_t					locale_len;
 	bool				pattern		= false;
 	UDate				date;
 	TimeZone			*timeZone	= NULL;
@@ -103,7 +103,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 					"element of the array) is not valid", 0 TSRMLS_CC);
 			RETURN_FALSE;
 		}
-		dateStyle = (DateFormat::EStyle)Z_IVAL_P(z);
+		dateStyle = (DateFormat::EStyle)Z_LVAL_P(z);
 
 		zend_hash_move_forward_ex(ht, &pos);
 		z = zend_hash_get_current_data_ex(ht, &pos);
@@ -113,18 +113,18 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 					"second element of the array) is not valid", 0 TSRMLS_CC);
 			RETURN_FALSE;
 		}
-		timeStyle = (DateFormat::EStyle)Z_IVAL_P(z);
-	} else if (Z_TYPE_P(format) == IS_INT) {
+		timeStyle = (DateFormat::EStyle)Z_LVAL_P(z);
+	} else if (Z_TYPE_P(format) == IS_LONG) {
 		if (!valid_format(format)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: the date/time format type is invalid",
 					0 TSRMLS_CC);
 			RETURN_FALSE;
 		}
-		dateStyle = timeStyle = (DateFormat::EStyle)Z_IVAL_P(format);
+		dateStyle = timeStyle = (DateFormat::EStyle)Z_LVAL_P(format);
 	} else {
 		convert_to_string_ex(format);
-		if (Z_STRSIZE_P(format) == 0) {
+		if (Z_STRLEN_P(format) == 0) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: the format is empty", 0 TSRMLS_CC);
 			RETURN_FALSE;
@@ -176,7 +176,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 	if (pattern) {
 		 df = new SimpleDateFormat(
-				UnicodeString(Z_STRVAL_P(format), Z_STRSIZE_P(format),
+				UnicodeString(Z_STRVAL_P(format), Z_STRLEN_P(format),
 						UnicodeString::kInvariant),
 				Locale::createFromName(locale_str),
 				status);

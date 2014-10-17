@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -178,7 +178,7 @@ static int php_check_dots(const char *element, int n)
 #define MAXIMUM_REPARSE_DATA_BUFFER_SIZE  ( 16 * 1024 )
 
 typedef struct {
-	zend_uint_t  ReparseTag;
+	unsigned long  ReparseTag;
 	unsigned short ReparseDataLength;
 	unsigned short Reserved;
 	union {
@@ -187,7 +187,7 @@ typedef struct {
 			unsigned short SubstituteNameLength;
 			unsigned short PrintNameOffset;
 			unsigned short PrintNameLength;
-			zend_uint_t  Flags;
+			unsigned long  Flags;
 			wchar_t        ReparseTarget[1];
 		} SymbolicLinkReparseBuffer;
 		struct {
@@ -201,19 +201,19 @@ typedef struct {
 			unsigned char  ReparseTarget[1];
 		} GenericReparseBuffer;
 	};
-} REPARSE_DATA_BUFFER;
+} REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
 
 #define SECS_BETWEEN_EPOCHS (__int64)11644473600
 #define SECS_TO_100NS (__int64)10000000
-static inline time_t FileTimeToUnixTime(const FILETIME FileTime)
+static inline time_t FileTimeToUnixTime(const FILETIME *FileTime)
 {
 	__int64 UnixTime;
 	long *nsec = NULL;
 	SYSTEMTIME SystemTime;
-	FileTimeToSystemTime(&FileTime, &SystemTime);
+	FileTimeToSystemTime(FileTime, &SystemTime);
 
-	UnixTime = ((__int64)FileTime.dwHighDateTime << 32) +
-	FileTime.dwLowDateTime;
+	UnixTime = ((__int64)FileTime->dwHighDateTime << 32) +
+	FileTime->dwLowDateTime;
 
 	UnixTime -= (SECS_BETWEEN_EPOCHS * SECS_TO_100NS);
 
@@ -294,7 +294,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{{ */
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
-	__int64 t;
+	LARGE_INTEGER t;
 	const size_t path_len = strlen(path);
 	ALLOCA_FLAG(use_heap_large);
 
@@ -393,13 +393,14 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	}
 
 	buf->st_nlink = 1;
-	t = data.nFileSizeHigh;
-	t = t << 32;
-	t |= data.nFileSizeLow;
-	buf->st_size = t;
-	buf->st_atime = FileTimeToUnixTime(data.ftLastAccessTime);
-	buf->st_ctime = FileTimeToUnixTime(data.ftCreationTime);
-	buf->st_mtime = FileTimeToUnixTime(data.ftLastWriteTime);
+	t.HighPart = data.nFileSizeHigh;
+	t.LowPart = data.nFileSizeLow;
+	/* It's an overflow on 32 bit, however it won't fix as long
+	as zend_long is 32 bit. */
+	buf->st_size = (zend_long)t.QuadPart;
+	buf->st_atime = FileTimeToUnixTime(&data.ftLastAccessTime);
+	buf->st_ctime = FileTimeToUnixTime(&data.ftCreationTime);
+	buf->st_mtime = FileTimeToUnixTime(&data.ftLastWriteTime);
 	return 0;
 }
 /* }}} */
@@ -582,9 +583,9 @@ CWD_API char *virtual_getcwd(char *buf, size_t size TSRMLS_DC) /* {{{ */
 /* }}} */
 
 #ifdef PHP_WIN32
-static inline zend_uint_t realpath_cache_key(const char *path, int path_len TSRMLS_DC) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, int path_len TSRMLS_DC) /* {{{ */
 {
-	register zend_uint_t h;
+	register zend_ulong h;
 	char *bucket_key_start = tsrm_win32_get_path_sid_key(path TSRMLS_CC);
 	char *bucket_key = (char *)bucket_key_start;
 	const char *e = bucket_key + strlen(bucket_key);
@@ -593,8 +594,8 @@ static inline zend_uint_t realpath_cache_key(const char *path, int path_len TSRM
 		return 0;
 	}
 
-	for (h = Z_UI(2166136261); bucket_key < e;) {
-		h *= Z_UI(16777619);
+	for (h = Z_UL(2166136261); bucket_key < e;) {
+		h *= Z_UL(16777619);
 		h ^= *bucket_key++;
 	}
 	HeapFree(GetProcessHeap(), 0, (LPVOID)bucket_key_start);
@@ -602,13 +603,13 @@ static inline zend_uint_t realpath_cache_key(const char *path, int path_len TSRM
 }
 /* }}} */
 #else
-static inline zend_uint_t realpath_cache_key(const char *path, int path_len) /* {{{ */
+static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {{{ */
 {
-	register zend_uint_t h;
+	register zend_ulong h;
 	const char *e = path + path_len;
 
-	for (h = Z_UI(2166136261); path < e;) {
-		h *= Z_UI(16777619);
+	for (h = Z_UL(2166136261); path < e;) {
+		h *= Z_UL(16777619);
 		h ^= *path++;
 	}
 
@@ -637,11 +638,11 @@ CWD_API void realpath_cache_clean(TSRMLS_D) /* {{{ */
 CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WIN32
-	zend_uint_t key = realpath_cache_key(path, path_len TSRMLS_CC);
+	zend_ulong key = realpath_cache_key(path, path_len TSRMLS_CC);
 #else
-	zend_uint_t key = realpath_cache_key(path, path_len);
+	zend_ulong key = realpath_cache_key(path, path_len);
 #endif
-	zend_uint_t n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
+	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 	realpath_cache_bucket **bucket = &CWDG(realpath_cache)[n];
 
 	while (*bucket != NULL) {
@@ -668,7 +669,7 @@ CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC) /* {{{
 
 static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, int realpath_len, int is_dir, time_t t TSRMLS_DC) /* {{{ */
 {
-	zend_int_t size = sizeof(realpath_cache_bucket) + path_len + 1;
+	zend_long size = sizeof(realpath_cache_bucket) + path_len + 1;
 	int same = 1;
 
 	if (realpath_len != path_len ||
@@ -679,7 +680,7 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 
 	if (CWDG(realpath_cache_size) + size <= CWDG(realpath_cache_size_limit)) {
 		realpath_cache_bucket *bucket = malloc(size);
-		zend_uint_t n;
+		zend_ulong n;
 
 		if (bucket == NULL) {
 			return;
@@ -719,12 +720,12 @@ static inline void realpath_cache_add(const char *path, int path_len, const char
 static inline realpath_cache_bucket* realpath_cache_find(const char *path, int path_len, time_t t TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WIN32
-	zend_uint_t key = realpath_cache_key(path, path_len TSRMLS_CC);
+	zend_ulong key = realpath_cache_key(path, path_len TSRMLS_CC);
 #else
-	zend_uint_t key = realpath_cache_key(path, path_len);
+	zend_ulong key = realpath_cache_key(path, path_len);
 #endif
 
-	zend_uint_t n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
+	zend_ulong n = key % (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 	realpath_cache_bucket **bucket = &CWDG(realpath_cache)[n];
 
 	while (*bucket != NULL) {
@@ -756,12 +757,12 @@ CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_
 }
 /* }}} */
 
-CWD_API zend_int_t realpath_cache_size(TSRMLS_D)
+CWD_API zend_long realpath_cache_size(TSRMLS_D)
 {
 	return CWDG(realpath_cache_size);
 }
 
-CWD_API zend_int_t realpath_cache_max_buckets(TSRMLS_D)
+CWD_API zend_long realpath_cache_max_buckets(TSRMLS_D)
 {
 	return (sizeof(CWDG(realpath_cache)) / sizeof(CWDG(realpath_cache)[0]));
 }
@@ -983,6 +984,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				memcpy(substitutename, path, len + 1);
 				substitutename_len = len;
 			} else {
+				/* XXX this might be not the end, restart handling with REPARSE_GUID_DATA_BUFFER should be implemented. */
 				free_alloca(pbuffer, use_heap_large);
 				return -1;
 			}

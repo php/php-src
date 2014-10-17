@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -201,7 +201,7 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 	if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), ZEND_STRL("key"))) &&
 		Z_TYPE_P(tmpzval) == IS_STRING) {
 		key = Z_STRVAL_P(tmpzval);
-		key_len = Z_STRSIZE_P(tmpzval);
+		key_len = Z_STRLEN_P(tmpzval);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key not specified or is not a string");
 		return NULL;
@@ -226,11 +226,11 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 	}
 
 	iv = emalloc(iv_len + 1);
-	if (iv_len <= Z_STRSIZE_P(tmpzval)) {
+	if (iv_len <= Z_STRLEN_P(tmpzval)) {
 		memcpy(iv, Z_STRVAL_P(tmpzval), iv_len);
 	} else {
-		memcpy(iv, Z_STRVAL_P(tmpzval), Z_STRSIZE_P(tmpzval));
-		memset(iv + Z_STRSIZE_P(tmpzval), 0, iv_len - Z_STRSIZE_P(tmpzval));
+		memcpy(iv, Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
+		memset(iv + Z_STRLEN_P(tmpzval), 0, iv_len - Z_STRLEN_P(tmpzval));
 	}
 
 	result = mcrypt_generic_init(mcrypt_module, key, key_len, iv);

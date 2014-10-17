@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -127,7 +127,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 	if (millis) {
 		ZVAL_STRING(&zfuncname, "getTimestamp");
 		if (call_user_function(NULL, z, &zfuncname, &retval, 0, NULL TSRMLS_CC)
-				!= SUCCESS || Z_TYPE(retval) != IS_INT) {
+				!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
 			spprintf(&message, 0, "%s: error calling ::getTimeStamp() on the "
 					"object", func);
 			intl_errors_set(err, U_INTERNAL_PROGRAM_ERROR,
@@ -137,7 +137,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 			return FAILURE;
 		}
 
-		*millis = U_MILLIS_PER_SECOND * (double)Z_IVAL(retval);
+		*millis = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval);
 		zval_ptr_dtor(&zfuncname);
 	}
 
@@ -174,7 +174,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TSRMLS_DC)
 {
 	double	rv = NAN;
-	php_int_t	lv;
+	zend_long	lv;
 	int		type;
 	char	*message;
 
@@ -184,10 +184,10 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TS
 
 	switch (Z_TYPE_P(z)) {
 	case IS_STRING:
-		type = is_numeric_string(Z_STRVAL_P(z), Z_STRSIZE_P(z), &lv, &rv, 0);
+		type = is_numeric_string(Z_STRVAL_P(z), Z_STRLEN_P(z), &lv, &rv, 0);
 		if (type == IS_DOUBLE) {
 			rv *= U_MILLIS_PER_SECOND;
-		} else if (type == IS_INT) {
+		} else if (type == IS_LONG) {
 			rv = U_MILLIS_PER_SECOND * (double)lv;
 		} else {
 			spprintf(&message, 0, "%s: string '%s' is not numeric, "
@@ -198,8 +198,8 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TS
 			efree(message);
 		}
 		break;
-	case IS_INT:
-		rv = U_MILLIS_PER_SECOND * (double)Z_IVAL_P(z);
+	case IS_LONG:
+		rv = U_MILLIS_PER_SECOND * (double)Z_LVAL_P(z);
 		break;
 	case IS_DOUBLE:
 		rv = U_MILLIS_PER_SECOND * Z_DVAL_P(z);

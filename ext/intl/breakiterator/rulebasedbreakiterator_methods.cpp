@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object		= getThis();
 	char		*rules;
-	int			rules_len;
+	size_t			rules_len;
 	zend_bool	compiled	= 0;
 	UErrorCode	status		= U_ZERO_ERROR;
 	intl_error_reset(NULL TSRMLS_CC);
@@ -151,7 +151,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	RETURN_INT(fetch_rbbi(bio)->getRuleStatus());
+	RETURN_LONG(fetch_rbbi(bio)->getRuleStatus());
 }
 
 U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
@@ -189,7 +189,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 
 	array_init_size(return_value, num_rules);
 	for (int32_t i = 0; i < num_rules; i++) {
-		add_next_index_int(return_value, rules[i]);
+		add_next_index_long(return_value, rules[i]);
 	}
 	delete[] rules;
 }
@@ -218,7 +218,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 		RETURN_FALSE;
 	}
 
-	zend_string *ret_rules = STR_ALLOC(rules_len, 0);
+	zend_string *ret_rules = zend_string_alloc(rules_len, 0);
 	memcpy(ret_rules->val, rules, rules_len);
 	ret_rules->val[rules_len] = '\0';
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,7 @@
 #include <zend.h>
 #include <php.h>
 #include "main/php_ini.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
@@ -223,12 +223,11 @@ PHP_NAMED_FUNCTION(zif_locale_get_default)
    Set default locale */
 PHP_NAMED_FUNCTION(zif_locale_set_default)
 {
-	char* locale_name = NULL;
-	int   len=0;	
+	zend_string* locale_name;
 	zend_string *ini_name;
+	char *default_locale = NULL;
 
-	if(zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC,  "s",
-		&locale_name ,&len ) == FAILURE)
+	if(zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC,  "S", &locale_name) == FAILURE)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 	"locale_set_default: unable to parse input params", 0 TSRMLS_CC );
@@ -236,14 +235,17 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 		RETURN_FALSE;
 	}
 
-	if(len == 0) {
-		locale_name =  (char *)uloc_getDefault() ;
-		len = strlen(locale_name);
+	if (locale_name->len == 0) {
+		default_locale = (char *)uloc_getDefault();
+		locale_name = zend_string_init(default_locale, strlen(default_locale), 0);
 	}
 	
-	ini_name = STR_INIT(LOCALE_INI_NAME, sizeof(LOCALE_INI_NAME) - 1, 0);
-	zend_alter_ini_entry(ini_name, locale_name, len, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);	
-	STR_RELEASE(ini_name);
+	ini_name = zend_string_init(LOCALE_INI_NAME, sizeof(LOCALE_INI_NAME) - 1, 0);
+	zend_alter_ini_entry(ini_name, locale_name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);	
+	zend_string_release(ini_name);
+	if (default_locale != NULL) {
+		zend_string_release(locale_name);
+	}
 
 	RETURN_TRUE;
 }
@@ -373,7 +375,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 {
 
 	const char* loc_name        	= NULL;
-	int         loc_name_len    	= 0;
+	size_t         loc_name_len    	= 0;
 
 	char*       tag_value		= NULL;
 	char*       empty_result	= "";
@@ -471,10 +473,10 @@ PHP_FUNCTION(locale_get_primary_language )
 static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS) 
 {
 	const char* loc_name        	= NULL;
-	int         loc_name_len    	= 0;
+	size_t         loc_name_len    	= 0;
 
 	const char* disp_loc_name       = NULL;
-	int         disp_loc_name_len   = 0;
+	size_t         disp_loc_name_len   = 0;
 	int         free_loc_name       = 0;
 
 	UChar*      disp_name      	= NULL;
@@ -685,7 +687,7 @@ PHP_FUNCTION( locale_get_keywords )
     int32_t         kw_key_len    = 0;
 
     const char*       	loc_name        = NULL;
-    int        	 	loc_name_len    = 0;
+    size_t        	 	loc_name_len    = 0;
 
 /* 
 	ICU expects the buffer to be allocated  before calling the function 
@@ -782,7 +784,7 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_
 			/* not lang or grandfathered tag */
 			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
 		}
-		smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRSIZE_P(ele_value));
+		smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
 		return SUCCESS;
 	}
 
@@ -822,7 +824,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 			add_prefix( loc_name , key_name);
 
 			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-			smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRSIZE_P(ele_value));
+			smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
 			return SUCCESS;
 		} else if(Z_TYPE_P(ele_value) == IS_ARRAY ) {
 			HashTable *arr = HASH_OF(ele_value);
@@ -836,7 +838,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 					add_prefix(loc_name , key_name);
 				}
 				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-				smart_str_appendl(loc_name, Z_STRVAL_P(data) , Z_STRSIZE_P(data));
+				smart_str_appendl(loc_name, Z_STRVAL_P(data) , Z_STRLEN_P(data));
 			} ZEND_HASH_FOREACH_END();
 			return SUCCESS;
 		} else {
@@ -869,7 +871,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 					add_prefix(loc_name , cur_key_name);
 				}
 				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-				smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRSIZE_P(ele_value));
+				smart_str_appendl(loc_name, Z_STRVAL_P(ele_value) , Z_STRLEN_P(ele_value));
 			}
 		} /* end of for */
 	} /* end of else */
@@ -1099,7 +1101,7 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name 
 PHP_FUNCTION(locale_parse)
 {
     const char* loc_name        = NULL;
-    int         loc_name_len    = 0;
+    size_t         loc_name_len    = 0;
     int         grOffset    	= 0;
 
     intl_error_reset( NULL TSRMLS_CC );
@@ -1143,7 +1145,7 @@ PHP_FUNCTION(locale_parse)
 PHP_FUNCTION(locale_get_all_variants)
 {
 	const char*  	loc_name        = NULL;
-	int    		loc_name_len    = 0;
+	size_t    		loc_name_len    = 0;
 
 	int	result		= 0;
 	char*	token		= NULL;
@@ -1238,9 +1240,9 @@ static int strToMatch(const char* str ,char *retstr)
 PHP_FUNCTION(locale_filter_matches)
 {
 	char*       	lang_tag        = NULL;
-	int         	lang_tag_len    = 0;
+	size_t         	lang_tag_len    = 0;
 	const char*     loc_range       = NULL;
-	int         	loc_range_len   = 0;
+	size_t         	loc_range_len   = 0;
 
 	int		result		= 0;
 	char*		token		= 0;
@@ -1439,7 +1441,7 @@ static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int ca
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: locale array element is not a string", 0 TSRMLS_CC);
 			LOOKUP_CLEAN_RETURN(NULL);
 		} 
-		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_P(ele_value), Z_STRSIZE_P(ele_value));
+		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_P(ele_value), Z_STRLEN_P(ele_value));
 		result = strToMatch(Z_STRVAL_P(ele_value), cur_arr[cur_arr_len*2]);
 		if(result == 0) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag", 0 TSRMLS_CC);
@@ -1529,9 +1531,9 @@ static char* lookup_loc_range(const char* loc_range, HashTable* hash_arr, int ca
 PHP_FUNCTION(locale_lookup)
 {
 	char*      	fallback_loc  		= NULL;
-	int        	fallback_loc_len	= 0;
+	size_t        	fallback_loc_len	= 0;
 	const char*    	loc_range      		= NULL;
-	int        	loc_range_len  		= 0;
+	size_t        	loc_range_len  		= 0;
 
 	zval*		arr				= NULL;
 	HashTable*	hash_arr		= NULL;
@@ -1582,7 +1584,7 @@ PHP_FUNCTION(locale_accept_from_http)
 {
 	UEnumeration *available;
 	char *http_accept = NULL;
-	int http_accept_len;
+	size_t http_accept_len;
 	UErrorCode status = 0;
 	int len;
 	char resultLocale[INTL_MAX_LOCALE_LEN+1];

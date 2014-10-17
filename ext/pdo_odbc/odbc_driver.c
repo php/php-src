@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -48,7 +48,7 @@ static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *inf
 				einfo->what, einfo->last_error,
 				einfo->file, einfo->line);
 
-	add_next_index_int(info, einfo->last_error);
+	add_next_index_long(info, einfo->last_error);
 	add_next_index_str(info, message);
 	add_next_index_string(info, einfo->last_state);
 
@@ -142,7 +142,7 @@ static int odbc_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 	return 0;
 }
 
-static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
 	RETCODE rc;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
@@ -181,7 +181,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_l
 		return 0;
 	}
 
-	cursor_type = pdo_attr_ival(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY TSRMLS_CC);
+	cursor_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY TSRMLS_CC);
 	if (cursor_type != PDO_CURSOR_FWDONLY) {
 		rc = SQLSetStmtAttr(S->stmt, SQL_ATTR_CURSOR_SCROLLABLE, (void*)SQL_SCROLLABLE, 0);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
@@ -220,7 +220,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_l
 	return 1;
 }
 
-static php_int_t odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_len TSRMLS_DC)
+static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -336,7 +336,7 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	return 1;
 }
 
-static int odbc_handle_set_attr(pdo_dbh_t *dbh, php_int_t attr, zval *val TSRMLS_DC)
+static int odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	switch (attr) {
@@ -351,7 +351,7 @@ static int odbc_handle_set_attr(pdo_dbh_t *dbh, php_int_t attr, zval *val TSRMLS
 	}
 }
 
-static int odbc_handle_get_attr(pdo_dbh_t *dbh, php_int_t attr, zval *val TSRMLS_DC)
+static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_DC)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	switch (attr) {
@@ -431,7 +431,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	}
 
 	/* set up the cursor library, if needed, or if configured explicitly */
-	cursor_lib = pdo_attr_ival(driver_options, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY, SQL_CUR_USE_IF_NEEDED TSRMLS_CC);
+	cursor_lib = pdo_attr_lval(driver_options, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY, SQL_CUR_USE_IF_NEEDED TSRMLS_CC);
 	rc = SQLSetConnectAttr(H->dbc, SQL_ODBC_CURSORS, (void*)cursor_lib, SQL_IS_INTEGER);
 	if (rc != SQL_SUCCESS && cursor_lib != SQL_CUR_USE_IF_NEEDED) {
 		pdo_odbc_drv_error("SQLSetConnectAttr SQL_ODBC_CURSORS");

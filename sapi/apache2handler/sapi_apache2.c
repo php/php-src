@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -30,7 +30,7 @@
 
 #include <fcntl.h>
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #ifndef NETWARE
 #include "ext/standard/php_standard.h"
 #else
@@ -67,13 +67,13 @@
 
 #define PHP_MAGIC_TYPE "application/x-httpd-php"
 #define PHP_SOURCE_MAGIC_TYPE "application/x-httpd-php-source"
-#define PHP_SCRIPT "php5-script"
+#define PHP_SCRIPT "php7-script"
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
 
-static php_size_t
-php_apache_sapi_ub_write(const char *str, php_size_t str_length TSRMLS_DC)
+static size_t
+php_apache_sapi_ub_write(const char *str, size_t str_length TSRMLS_DC)
 {
 	request_rec *r;
 	php_struct *ctx;
@@ -181,7 +181,7 @@ php_apache_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 }
 
 static apr_size_t
-php_apache_sapi_read_post(char *buf, php_size_t count_bytes TSRMLS_DC)
+php_apache_sapi_read_post(char *buf, size_t count_bytes TSRMLS_DC)
 {
 	apr_size_t len, tlen=0;
 	php_struct *ctx = SG(server_context);
@@ -212,7 +212,7 @@ php_apache_sapi_read_post(char *buf, php_size_t count_bytes TSRMLS_DC)
 	return tlen;
 }
 
-static php_stat_t*
+static zend_stat_t*
 php_apache_sapi_get_stat(TSRMLS_D)
 {
 	php_struct *ctx = SG(server_context);
@@ -270,18 +270,18 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 	php_struct *ctx = SG(server_context);
 	const apr_array_header_t *arr = apr_table_elts(ctx->r->subprocess_env);
 	char *key, *val;
-	php_size_t new_val_len;
+	size_t new_val_len;
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) {
 			val = "";
 		}
-		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), (php_size_t *)&new_val_len TSRMLS_CC)) {
+		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), (size_t *)&new_val_len TSRMLS_CC)) {
 			php_register_variable_safe(key, val, new_val_len, track_vars_array TSRMLS_CC);
 		}
 	APR_ARRAY_FOREACH_CLOSE()
 
-	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), (php_size_t *)&new_val_len TSRMLS_CC)) {
+	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), (size_t *)&new_val_len TSRMLS_CC)) {
 		php_register_variable_safe("PHP_SELF", ctx->r->uri, new_val_len, track_vars_array TSRMLS_CC);
 	}
 }
@@ -482,7 +482,11 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	r->no_local_copy = 1;
 
 	content_length = (char *) apr_table_get(r->headers_in, "Content-Length");
-	SG(request_info).content_length = (content_length ? atol(content_length) : 0);
+	if (content_length) {
+		ZEND_ATOL(SG(request_info).content_length, content_length);
+	} else {
+		SG(request_info).content_length = 0;
+	}
 
 	apr_table_unset(r->headers_out, "Content-Length");
 	apr_table_unset(r->headers_out, "Last-Modified");
@@ -515,7 +519,7 @@ typedef struct {
 	HashTable config;
 } php_conf_rec;
 		zend_string *str;
-		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php5_module);
+		php_conf_rec *c = ap_get_module_config(r->per_dir_config, &php7_module);
 
 		ZEND_HASH_FOREACH_STR_KEY(&c->config, str) {
 			zend_restore_ini_entry(str, ZEND_INI_STAGE_SHUTDOWN);
@@ -540,7 +544,7 @@ static int php_handler(request_rec *r)
 
 #define PHPAP_INI_OFF php_apache_ini_dtor(r, parent_req TSRMLS_CC);
 
-	conf = ap_get_module_config(r->per_dir_config, &php5_module);
+	conf = ap_get_module_config(r->per_dir_config, &php7_module);
 
 	/* apply_config() needs r in some cases, so allocate server_context early */
 	ctx = SG(server_context);

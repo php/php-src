@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -180,7 +180,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable registered;                        /* registered */
 	HashTable seek;                              /* seek oplines */
 	phpdbg_frame_t frame;                        /* frame */
-	zend_uint last_line;                         /* last executed line */
+	uint32_t last_line;                         /* last executed line */
 
 	phpdbg_lexer_data lexer;                     /* lexer data */
 	phpdbg_param_t *parser_stack;                /* param stack during lexer / parser phase */

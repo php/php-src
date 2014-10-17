@@ -10,9 +10,5 @@ Bug #39304 (Segmentation fault with list unpacking of string offset)
 ?>
 --EXPECTF--
 Notice: Uninitialized string offset: 0 in %sbug39304_2_4.php on line %d
-
-Notice: Uninitialized string offset: 1 in %sbug39304_2_4.php on line %d
-
-Notice: Uninitialized string offset: 0 in %sbug39304_2_4.php on line %d
-string(0) ""
-string(0) ""
+NULL
+NULL

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -36,7 +36,7 @@
 
 #include "php_sysvshm.h"
 #include "ext/standard/php_var.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "php_ini.h"
 
 /* {{{ arginfo */
@@ -116,9 +116,9 @@ ZEND_GET_MODULE(sysvshm)
 
 THREAD_LS sysvshm_module php_sysvshm;
 
-static int php_put_shm_data(sysvshm_chunk_head *ptr, php_int_t key, const char *data, php_int_t len);
-static php_int_t php_check_shm_data(sysvshm_chunk_head *ptr, php_int_t key);
-static int php_remove_shm_data(sysvshm_chunk_head *ptr, php_int_t shm_varpos);
+static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len);
+static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key);
+static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 
 /* {{{ php_release_sysvshm
  */
@@ -136,7 +136,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 {
 	php_sysvshm.le_shm = zend_register_list_destructors_ex(php_release_sysvshm, NULL, PHP_SHM_RSRC_NAME, module_number);
 
-	if (cfg_get_int("sysvshm.init_mem", &php_sysvshm.init_mem) == FAILURE) {
+	if (cfg_get_long("sysvshm.init_mem", &php_sysvshm.init_mem) == FAILURE) {
 		php_sysvshm.init_mem=10000;
 	}
 	return SUCCESS;
@@ -150,9 +150,9 @@ PHP_FUNCTION(shm_attach)
 	sysvshm_shm *shm_list_ptr;
 	char *shm_ptr;
 	sysvshm_chunk_head *chunk_ptr;
-	php_int_t shm_key, shm_id, shm_size = php_sysvshm.init_mem, shm_flag = 0666;
+	zend_long shm_key, shm_id, shm_size = php_sysvshm.init_mem, shm_flag = 0666;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|ii", &shm_key, &shm_size, &shm_flag)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ll", &shm_key, &shm_size, &shm_flag)) {
 		return;
 	}
 
@@ -229,7 +229,7 @@ PHP_FUNCTION(shm_remove)
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	
 	if (shmctl(shm_list_ptr->id, IPC_RMID, NULL) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x, id %ld: %s", shm_list_ptr->key, Z_IVAL_P(shm_id), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x, id %ld: %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -243,12 +243,12 @@ PHP_FUNCTION(shm_put_var)
 {
 	zval *shm_id, *arg_var;
 	int ret;
-	php_int_t shm_key;
+	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 	smart_str shm_var = {0};
 	php_serialize_data_t var_hash;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "riz", &shm_id, &shm_key, &arg_var)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &shm_id, &shm_key, &arg_var)) {
 		return;
 	}
 	
@@ -282,14 +282,14 @@ PHP_FUNCTION(shm_put_var)
 PHP_FUNCTION(shm_get_var)
 {
 	zval *shm_id;
-	php_int_t shm_key;
+	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 	char *shm_data;
-	php_int_t shm_varpos;
+	zend_long shm_varpos;
 	sysvshm_chunk *shm_var;
 	php_unserialize_data_t var_hash;
 	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &shm_id, &shm_key)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &shm_id, &shm_key)) {
 		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
@@ -319,10 +319,10 @@ PHP_FUNCTION(shm_get_var)
 PHP_FUNCTION(shm_has_var)
 {
 	zval *shm_id;
-	php_int_t shm_key;
+	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &shm_id, &shm_key)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &shm_id, &shm_key)) {
 		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
@@ -335,10 +335,10 @@ PHP_FUNCTION(shm_has_var)
 PHP_FUNCTION(shm_remove_var)
 {
 	zval *shm_id;
-	php_int_t shm_key, shm_varpos;
+	zend_long shm_key, shm_varpos;
 	sysvshm_shm *shm_list_ptr;
 	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &shm_id, &shm_key)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &shm_id, &shm_key)) {
 		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
@@ -356,13 +356,13 @@ PHP_FUNCTION(shm_remove_var)
 
 /* {{{ php_put_shm_data
  * inserts an ascii-string into shared memory */
-static int php_put_shm_data(sysvshm_chunk_head *ptr, php_int_t key, const char *data, php_int_t len)
+static int php_put_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *data, zend_long len)
 {
 	sysvshm_chunk *shm_var;
-	php_int_t total_size;
-	php_int_t shm_varpos;
+	zend_long total_size;
+	zend_long shm_varpos;
 
-	total_size = ((php_int_t) (len + sizeof(sysvshm_chunk) - 1) / sizeof(php_int_t)) * sizeof(php_int_t) + sizeof(php_int_t); /* php_int_t alligment */
+	total_size = ((zend_long) (len + sizeof(sysvshm_chunk) - 1) / sizeof(zend_long)) * sizeof(zend_long) + sizeof(zend_long); /* zend_long alligment */
 
 	if ((shm_varpos = php_check_shm_data(ptr, key)) > 0) {
 		php_remove_shm_data(ptr, shm_varpos);
@@ -385,9 +385,9 @@ static int php_put_shm_data(sysvshm_chunk_head *ptr, php_int_t key, const char *
 
 /* {{{ php_check_shm_data
  */
-static php_int_t php_check_shm_data(sysvshm_chunk_head *ptr, php_int_t key)
+static zend_long php_check_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 {
-	php_int_t pos;
+	zend_long pos;
 	sysvshm_chunk *shm_var;
 
 	pos = ptr->start;
@@ -412,10 +412,10 @@ static php_int_t php_check_shm_data(sysvshm_chunk_head *ptr, php_int_t key)
 
 /* {{{ php_remove_shm_data
  */
-static int php_remove_shm_data(sysvshm_chunk_head *ptr, php_int_t shm_varpos)
+static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 {
 	sysvshm_chunk *chunk_ptr, *next_chunk_ptr;
-	php_int_t memcpy_len;
+	zend_long memcpy_len;
 	
 	chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos);
 	next_chunk_ptr = (sysvshm_chunk *) ((char *) ptr + shm_varpos + chunk_ptr->next);

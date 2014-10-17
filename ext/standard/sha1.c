@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -46,10 +46,10 @@ PHP_FUNCTION(sha1)
 
 	sha1str[0] = '\0';
 	PHP_SHA1Init(&context);
-	PHP_SHA1Update(&context, arg->val, arg->len);
+	PHP_SHA1Update(&context, (unsigned char *) arg->val, arg->len);
 	PHP_SHA1Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL(digest, 20);
+		RETURN_STRINGL((char *) digest, 20);
 	} else {
 		make_digest_ex(sha1str, digest, 20);
 		RETVAL_STRING(sha1str);
@@ -65,13 +65,13 @@ PHP_FUNCTION(sha1)
 PHP_FUNCTION(sha1_file)
 {
 	char          *arg;
-	int           arg_len;
+	size_t           arg_len;
 	zend_bool raw_output = 0;
 	char          sha1str[41];
 	unsigned char buf[1024];
 	unsigned char digest[20];
 	PHP_SHA1_CTX   context;
-	int           n;
+	size_t         n;
 	php_stream    *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
@@ -85,7 +85,7 @@ PHP_FUNCTION(sha1_file)
 
 	PHP_SHA1Init(&context);
 
-	while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
+	while ((n = php_stream_read(stream, (char *) buf, sizeof(buf))) > 0) {
 		PHP_SHA1Update(&context, buf, n);
 	}
 
@@ -93,12 +93,8 @@ PHP_FUNCTION(sha1_file)
 
 	php_stream_close(stream);
 
-	if (n<0) {
-		RETURN_FALSE;
-	}
-
 	if (raw_output) {
-		RETURN_STRINGL(digest, 20);
+		RETURN_STRINGL((char *) digest, 20);
 	} else {
 		make_digest_ex(sha1str, digest, 20);
 		RETVAL_STRING(sha1str);
@@ -180,7 +176,7 @@ PHPAPI void PHP_SHA1Init(PHP_SHA1_CTX * context)
    context.
  */
 PHPAPI void PHP_SHA1Update(PHP_SHA1_CTX * context, const unsigned char *input,
-			   php_size_t inputLen)
+			   size_t inputLen)
 {
 	unsigned int i, index, partLen;
 

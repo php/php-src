@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -188,7 +188,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	zval *object = getThis();
 	php_com_dotnet_object *obj;
 	char *assembly_name, *datatype_name;
-	int assembly_name_len, datatype_name_len;
+	size_t assembly_name_len, datatype_name_len;
 	struct dotnet_runtime_stuff *stuff;
 	OLECHAR *oleassembly, *oletype;
 	BSTR oleassembly_sys, oletype_sys;
@@ -243,7 +243,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 
 	obj = CDNO_FETCH(object);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|i",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l",
 			&assembly_name, &assembly_name_len,
 			&datatype_name, &datatype_name_len,
 			&obj->code_page)) {

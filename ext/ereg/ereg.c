@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -294,7 +294,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	zval *regex,			/* Regular expression */
 		*array = NULL;		/* Optional register array */
 	char *findin;		/* String to apply expression to */
-	int findin_len;
+	size_t findin_len;
 	regex_t re;
 	regmatch_t *subs;
 	int err, match_len, string_len;
@@ -323,7 +323,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	} else {
 		/* we convert numbers to integers and treat them as a string */
 		if (Z_TYPE_P(regex) == IS_DOUBLE) {
-			convert_to_int_ex(regex);	/* get rid of decimal places */
+			convert_to_long_ex(regex);	/* get rid of decimal places */
 		}
 		convert_to_string_ex(regex);
 		/* don't bother doing an extended regex with just a number */
@@ -379,7 +379,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	} else {
 		if (match_len == 0)
 			match_len = 1;
-		RETVAL_INT(match_len);
+		RETVAL_LONG(match_len);
 	}
 	regfree(&re);
 }
@@ -564,33 +564,33 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (Z_TYPE_P(arg_pattern) == IS_STRING) {
-		if (Z_STRVAL_P(arg_pattern) && Z_STRSIZE_P(arg_pattern)) {
-			pattern = STR_COPY(Z_STR_P(arg_pattern));
+		if (Z_STRVAL_P(arg_pattern) && Z_STRLEN_P(arg_pattern)) {
+			pattern = zend_string_copy(Z_STR_P(arg_pattern));
 		} else {
 			pattern = STR_EMPTY_ALLOC();
 		}
 	} else {
-		convert_to_int_ex(arg_pattern);
-		pattern = STR_ALLOC(1, 0);
-		pattern->val[0] = (char) Z_IVAL_P(arg_pattern);
+		convert_to_long_ex(arg_pattern);
+		pattern = zend_string_alloc(1, 0);
+		pattern->val[0] = (char) Z_LVAL_P(arg_pattern);
 		pattern->val[1] = '\0';
 	}
 
 	if (Z_TYPE_P(arg_replace) == IS_STRING) {
-		if (Z_STRVAL_P(arg_replace) && Z_STRSIZE_P(arg_replace)) {
-			replace = STR_COPY(Z_STR_P(arg_replace));
+		if (Z_STRVAL_P(arg_replace) && Z_STRLEN_P(arg_replace)) {
+			replace = zend_string_copy(Z_STR_P(arg_replace));
 		} else {
 			replace = STR_EMPTY_ALLOC();
 		}
 	} else {
-		convert_to_int_ex(arg_replace);
-		replace = STR_ALLOC(1, 0);
-		replace->val[0] = (char) Z_IVAL_P(arg_replace);
+		convert_to_long_ex(arg_replace);
+		replace = zend_string_alloc(1, 0);
+		replace->val[0] = (char) Z_LVAL_P(arg_replace);
 		replace->val[1] = '\0';
 	}
 
 	if (arg_string) {
-		string = STR_COPY(arg_string);
+		string = zend_string_copy(arg_string);
 	} else {
 		string = STR_EMPTY_ALLOC();
 	}
@@ -604,9 +604,9 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		efree(ret);
 	}
 
-	STR_RELEASE(string);
-	STR_RELEASE(replace);
-	STR_RELEASE(pattern);
+	zend_string_release(string);
+	zend_string_release(replace);
+	zend_string_release(pattern);
 }
 /* }}} */
 
@@ -630,14 +630,14 @@ PHP_FUNCTION(eregi_replace)
  */
 static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	php_int_t count = -1;
+	zend_long count = -1;
 	regex_t re;
 	regmatch_t subs[1];
 	char *spliton, *str, *strp, *endp;
-	int spliton_len, str_len;
+	size_t spliton_len, str_len;
 	int err, size, copts = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|i", &spliton, &spliton_len, &str, &str_len, &count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &spliton, &spliton_len, &str, &str_len, &count) == FAILURE) {
 		return;
 	}
 
@@ -733,7 +733,7 @@ PHP_FUNCTION(spliti)
 PHP_EREG_API PHP_FUNCTION(sql_regcase)
 {
 	char *string, *tmp;
-	int string_len;
+	size_t string_len;
 	unsigned char c;
 	register int i, j;
 

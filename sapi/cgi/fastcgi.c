@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -72,8 +72,6 @@
 # include <arpa/inet.h>
 # include <netdb.h>
 # include <signal.h>
-
-# define closesocket(s) close(s)
 
 # if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
 #  include <sys/poll.h>
@@ -643,7 +641,7 @@ int fcgi_listen(const char *path, int backlog)
 		if (namedPipe == INVALID_HANDLE_VALUE) {
 			return -1;
 		}
-		listen_socket = _open_osfhandle((long)namedPipe, 0);
+		listen_socket = _open_osfhandle((intptr_t)namedPipe, 0);
 		if (!is_initialized) {
 			fcgi_init();
 		}
@@ -724,7 +722,7 @@ int fcgi_listen(const char *path, int backlog)
 
 #ifdef _WIN32
 	if (tcp) {
-		listen_socket = _open_osfhandle((long)listen_socket, 0);
+		listen_socket = _open_osfhandle((intptr_t)listen_socket, 0);
 	}
 #else
 	fcgi_setup_signals();
@@ -993,7 +991,7 @@ static int fcgi_read_request(fcgi_request *req)
 			if ((value = zend_hash_str_find(&fcgi_mgmt_vars, q->var, q->var_len)) == NULL) {
 				continue;
 			}
-			zlen = Z_STRSIZE_P(value);
+			zlen = Z_STRLEN_P(value);
 			if ((p + 4 + 4 + q->var_len + zlen) >= (buf + sizeof(buf))) {
 				break;
 			}
@@ -1113,7 +1111,7 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 
 				shutdown(req->fd, 1);
 				/* read the last FCGI_STDIN header (it may be omitted) */
-				recv(req->fd, (char *)&buf, sizeof(buf), 0);
+				recv(req->fd, (char *)(&buf), sizeof(buf), 0);
 			}
 			closesocket(req->fd);
 		}
@@ -1123,7 +1121,7 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 
 			shutdown(req->fd, 1);
 			/* read the last FCGI_STDIN header (it may be omitted) */
-			recv(req->fd, &buf, sizeof(buf), 0);
+			recv(req->fd, (char *)(&buf), sizeof(buf), 0);
 		}
 		close(req->fd);
 #endif
@@ -1512,7 +1510,7 @@ void fcgi_impersonate(void)
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
 	zval zvalue;
-	ZVAL_NEW_STR(&zvalue, STR_INIT(value, value_len, 1));
+	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
 	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
 }
 

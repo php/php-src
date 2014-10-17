@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -183,7 +183,7 @@ err:
 
 			err_msg = intl_error_get_message( TRANSLITERATOR_ERROR_P( to_orig ) TSRMLS_CC );
 			php_error_docref( NULL TSRMLS_CC, E_ERROR, "%s", err_msg->val );
-			STR_FREE( err_msg ); /* if it's changed into a warning */
+			zend_string_free( err_msg ); /* if it's changed into a warning */
 			/* do not destroy tempz; we need to return something */
 		}
 	}
@@ -223,7 +223,7 @@ static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, in
 	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
 
 	if(zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		Z_STRVAL_P( member ), Z_STRSIZE_P( member ) ) == 0 )
+		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 )
 	{
 		retval = NULL; /* fallback to read_property */
 	}
@@ -247,7 +247,7 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 
 	if( ( type != BP_VAR_R && type != BP_VAR_IS ) &&
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		Z_STRVAL_P( member ), Z_STRSIZE_P( member ) ) == 0 ) )
+		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
 	{
 		php_error_docref0( NULL TSRMLS_CC, E_WARNING, "The property \"id\" is read-only" );
 		retval = &EG( uninitialized_zval );
@@ -272,7 +272,7 @@ static void Transliterator_write_property( zval *object, zval *member, zval *val
 
 	if( ( EG( scope ) != Transliterator_ce_ptr ) &&
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		Z_STRVAL_P( member ), Z_STRSIZE_P( member ) ) == 0 ) )
+		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
 	{
 		php_error_docref0( NULL TSRMLS_CC, E_WARNING, "The property \"id\" is read-only" );
 	}

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -121,7 +121,7 @@ static zend_object *BreakIterator_clone_obj(zval *object TSRMLS_DC)
 				"Could not clone BreakIterator", 0 TSRMLS_CC);
 			err_msg = intl_error_get_message(BREAKITER_ERROR_P(bio_orig) TSRMLS_CC);
 			zend_throw_exception(NULL, err_msg->val, 0 TSRMLS_CC);
-			STR_FREE(err_msg);
+			zend_string_free(err_msg);
 		} else {
 			bio_new->biter = new_biter;
 			ZVAL_COPY(&bio_new->text, &bio_orig->text);
@@ -338,36 +338,36 @@ U_CFUNC void breakiterator_register_BreakIterator_class(TSRMLS_D)
 	zend_class_implements(BreakIterator_ce_ptr TSRMLS_CC, 1,
 			zend_ce_traversable);
 
-	zend_declare_class_constant_int(BreakIterator_ce_ptr,
+	zend_declare_class_constant_long(BreakIterator_ce_ptr,
 		"DONE", sizeof("DONE") - 1, BreakIterator::DONE TSRMLS_CC );
 
 	/* Declare constants that are defined in the C header */
-#define BREAKITER_DECL_INT_CONST(name) \
-	zend_declare_class_constant_int(BreakIterator_ce_ptr, #name, \
+#define BREAKITER_DECL_LONG_CONST(name) \
+	zend_declare_class_constant_long(BreakIterator_ce_ptr, #name, \
 		sizeof(#name) - 1, UBRK_ ## name TSRMLS_CC)
 
-	BREAKITER_DECL_INT_CONST(WORD_NONE);
-	BREAKITER_DECL_INT_CONST(WORD_NONE_LIMIT);
-	BREAKITER_DECL_INT_CONST(WORD_NUMBER);
-	BREAKITER_DECL_INT_CONST(WORD_NUMBER_LIMIT);
-	BREAKITER_DECL_INT_CONST(WORD_LETTER);
-	BREAKITER_DECL_INT_CONST(WORD_LETTER_LIMIT);
-	BREAKITER_DECL_INT_CONST(WORD_KANA);
-	BREAKITER_DECL_INT_CONST(WORD_KANA_LIMIT);
-	BREAKITER_DECL_INT_CONST(WORD_IDEO);
-	BREAKITER_DECL_INT_CONST(WORD_IDEO_LIMIT);
+	BREAKITER_DECL_LONG_CONST(WORD_NONE);
+	BREAKITER_DECL_LONG_CONST(WORD_NONE_LIMIT);
+	BREAKITER_DECL_LONG_CONST(WORD_NUMBER);
+	BREAKITER_DECL_LONG_CONST(WORD_NUMBER_LIMIT);
+	BREAKITER_DECL_LONG_CONST(WORD_LETTER);
+	BREAKITER_DECL_LONG_CONST(WORD_LETTER_LIMIT);
+	BREAKITER_DECL_LONG_CONST(WORD_KANA);
+	BREAKITER_DECL_LONG_CONST(WORD_KANA_LIMIT);
+	BREAKITER_DECL_LONG_CONST(WORD_IDEO);
+	BREAKITER_DECL_LONG_CONST(WORD_IDEO_LIMIT);
 
-	BREAKITER_DECL_INT_CONST(LINE_SOFT);
-	BREAKITER_DECL_INT_CONST(LINE_SOFT_LIMIT);
-	BREAKITER_DECL_INT_CONST(LINE_HARD);
-	BREAKITER_DECL_INT_CONST(LINE_HARD_LIMIT);
+	BREAKITER_DECL_LONG_CONST(LINE_SOFT);
+	BREAKITER_DECL_LONG_CONST(LINE_SOFT_LIMIT);
+	BREAKITER_DECL_LONG_CONST(LINE_HARD);
+	BREAKITER_DECL_LONG_CONST(LINE_HARD_LIMIT);
 
-	BREAKITER_DECL_INT_CONST(SENTENCE_TERM);
-	BREAKITER_DECL_INT_CONST(SENTENCE_TERM_LIMIT);
-	BREAKITER_DECL_INT_CONST(SENTENCE_SEP);
-	BREAKITER_DECL_INT_CONST(SENTENCE_SEP_LIMIT);
+	BREAKITER_DECL_LONG_CONST(SENTENCE_TERM);
+	BREAKITER_DECL_LONG_CONST(SENTENCE_TERM_LIMIT);
+	BREAKITER_DECL_LONG_CONST(SENTENCE_SEP);
+	BREAKITER_DECL_LONG_CONST(SENTENCE_SEP_LIMIT);
 
-#undef BREAKITER_DECL_INT_CONST
+#undef BREAKITER_DECL_LONG_CONST
 
 
 	/* Create and register 'RuleBasedBreakIterator' class. */

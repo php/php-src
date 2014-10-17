@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -28,28 +28,28 @@
 
 typedef struct VConn {
 	HDBC    hdbc;
-	php_int_t    index;
+	zend_long    index;
 } VConn;
 
 typedef struct {
 	char name[32];
 	char *value;
-	php_int_t vallen;
+	zend_long vallen;
 	SDWORD valtype;
 } VResVal;
 
 typedef struct Vresult {
 	HSTMT   hstmt;
 	VConn   *conn; 
-	php_int_t    index;
+	zend_long    index;
 	VResVal *values;
-	php_int_t    numcols;
+	zend_long    numcols;
 	int     fetched;
 } Vresult;
 
 typedef struct {
-	php_int_t num_links;
-	php_int_t max_links;
+	zend_long num_links;
+	zend_long max_links;
 	int le_link,le_result;
 } birdstep_module;
 

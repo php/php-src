@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -334,7 +334,7 @@ exit_success:
 		 * will be accessing the stream.  Emit a warning so that the end-user will
 		 * know that they should try something else */
 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, ZEND_INT_FMT " bytes of buffered data lost during stream conversion!", (php_int_t)(stream->writepos - stream->readpos));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, ZEND_LONG_FMT " bytes of buffered data lost during stream conversion!", (zend_long)(stream->writepos - stream->readpos));
 	}
 
 	if (castas == PHP_STREAM_AS_STDIO && ret) {

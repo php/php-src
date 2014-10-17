@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -159,7 +159,7 @@ PHPDBG_INFO(vars) /* {{{ */
 
 				switch (Z_TYPE_PP(data)) {
 					case IS_STRING: 	phpdbg_write("(string)\t"); 	break;
-					case IS_INT: 		phpdbg_write("(integer)\t"); 	break;
+					case IS_LONG: 		phpdbg_write("(integer)\t"); 	break;
 					case IS_DOUBLE: 	phpdbg_write("(float)\t"); 		break;
 					case IS_RESOURCE:	phpdbg_write("(resource)\t"); 	break;
 					case IS_ARRAY:		phpdbg_write("(array)\t"); 		break;

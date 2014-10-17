@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -269,7 +269,7 @@ SAPI_API int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC)
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
 	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of %pd bytes exceeds the limit of %pd bytes",
 					SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
@@ -290,7 +290,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 			}
 
 			if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Actual POST length does not match Content-Length, and exceeds " ZEND_INT_FMT " bytes", SG(post_max_size));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Actual POST length does not match Content-Length, and exceeds " ZEND_LONG_FMT " bytes", SG(post_max_size));
 				break;
 			}
 
@@ -739,7 +739,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 		return SUCCESS;
 	} else {
 		/* new line/NUL character safety check */
-		int i;
+		uint i;
 		for (i = 0; i < header_line_len; i++) {
 			/* RFC 2616 allows new lines if followed by SP or HT */
 			int illegal_break =
@@ -789,9 +789,9 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 
 				/* Disable possible output compression for images */
 				if (!strncmp(ptr, "image/", sizeof("image/")-1)) {
-					zend_string *key = STR_INIT("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
-					zend_alter_ini_entry(key, "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-					STR_RELEASE(key);
+					zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
+					zend_alter_ini_entry_chars(key, "0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
+					zend_string_release(key);
 				}
 
 				mimetype = estrdup(ptr);
@@ -817,10 +817,10 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				 * do disable compression altogether. This contributes to making scripts
 				 * portable between setups that have and don't have zlib compression
 				 * enabled globally. See req #44164 */
-				zend_string *key = STR_INIT("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
-				zend_alter_ini_entry(key,
+				zend_string *key = zend_string_init("zlib.output_compression", sizeof("zlib.output_compression")-1, 0);
+				zend_alter_ini_entry_chars(key,
 					"0", sizeof("0") - 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-				STR_RELEASE(key);
+				zend_string_release(key);
 			} else if (!STRCASECMP(header_line, "Location")) {
 				if ((SG(sapi_headers).http_response_code < 300 ||
 					SG(sapi_headers).http_response_code > 399) &&
@@ -984,7 +984,7 @@ SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zva
 	return SUCCESS;
 }
 
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC)
+SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, size_t val_len, size_t *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC)
 {
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -21,7 +21,6 @@
 #ifndef __TIMELIB_H__
 #define __TIMELIB_H__
 
-#include "php.h" /* for php_int_t */
 #include "timelib_structs.h"
 #if HAVE_LIMITS_H
 #include <limits.h>
@@ -72,9 +71,9 @@ int timelib_valid_date(timelib_sll y, timelib_sll m, timelib_sll d);
 timelib_time *timelib_strtotime(char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
 timelib_time *timelib_parse_from_format(char *format, char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
-char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst);
+char *timelib_timezone_id_from_abbr(const char *abbr, timelib_long gmtoffset, int isdst);
 const timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
-long timelib_parse_tz_cor(char**);
+timelib_long timelib_parse_tz_cor(char**);
 
 /* From parse_iso_intervals.re */
 void timelib_strtointerval(char *s, int len, 
@@ -106,7 +105,7 @@ timelib_sll timelib_get_current_offset(timelib_time *t);
 void timelib_dump_tzinfo(timelib_tzinfo *tz);
 const timelib_tzdb *timelib_builtin_db(void);
 const timelib_tzdb_index_entry *timelib_timezone_builtin_identifiers_list(int *count);
-long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper);
+timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper);
 
 /* From timelib.c */
 timelib_tzinfo* timelib_tzinfo_ctor(char *name);
@@ -129,12 +128,12 @@ void timelib_time_offset_dtor(timelib_time_offset* t);
 
 void timelib_error_container_dtor(timelib_error_container *errors);
 
-php_int_t timelib_date_to_int(timelib_time *d, int *error);
+timelib_long timelib_date_to_int(timelib_time *d, int *error);
 void timelib_dump_date(timelib_time *d, int options);
 void timelib_dump_rel_time(timelib_rel_time *d);
 
 void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec);
-long timelib_parse_tz_cor(char **ptr);
+timelib_long timelib_parse_tz_cor(char **ptr);
 
 /* from astro.c */
 double timelib_ts_to_juliandate(timelib_sll ts);

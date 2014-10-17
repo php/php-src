@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -178,7 +178,7 @@ PHP_FUNCTION(ibase_wait_event)
 	isc_event_counts(occurred_event, buffer_size, event_buffer, result_buffer);
 	for (i = 0; i < event_count; ++i) {
 		if (occurred_event[i]) {
-			zend_string *result = STR_INIT(events[i], strlen(events[i]), 0);
+			zend_string *result = zend_string_init(events[i], strlen(events[i]), 0);
 			_php_ibase_event_free(event_buffer,result_buffer);
 			efree(args);
 			RETURN_STR(result);
@@ -297,8 +297,8 @@ PHP_FUNCTION(ibase_set_event_handler)
 			RETURN_FALSE;
 		}
 
-		convert_to_int_ex(&args[0]);
-		link_res_id = Z_IVAL(args[0]);
+		convert_to_long_ex(&args[0]);
+		link_res_id = Z_LVAL(args[0]);
 
 	} else {
 		/* callback, event_1 [, ... event_15] 
@@ -319,10 +319,10 @@ PHP_FUNCTION(ibase_set_event_handler)
 	/* get the callback */
 	if (!zend_is_callable(cb_arg, 0, &cb_name TSRMLS_CC)) {
 		_php_ibase_module_error("Callback argument %s is not a callable function" TSRMLS_CC, cb_name->val);
-		STR_RELEASE(cb_name);
+		zend_string_release(cb_name);
 		RETURN_FALSE;
 	}
-	STR_RELEASE(cb_name);
+	zend_string_release(cb_name);
 
 	/* allocate the event resource */
 	event = (ibase_event *) safe_emalloc(sizeof(ibase_event), 1, 0);

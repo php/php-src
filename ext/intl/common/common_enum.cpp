@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -238,7 +238,7 @@ static PHP_METHOD(IntlIterator, key)
 	if (ii->iterator->funcs->get_current_key) {
 		ii->iterator->funcs->get_current_key(ii->iterator, return_value TSRMLS_CC);
 	} else {
-		RETURN_INT(ii->iterator->index);
+		RETURN_LONG(ii->iterator->index);
 	}
 }
 

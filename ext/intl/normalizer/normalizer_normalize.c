@@ -34,8 +34,8 @@ PHP_FUNCTION( normalizer_normalize )
 {
 	char*			input = NULL;
 	/* form is optional, defaults to FORM_C */
-	php_int_t			form = NORMALIZER_DEFAULT;
-	int			input_len = 0;
+	zend_long			form = NORMALIZER_DEFAULT;
+	size_t			input_len = 0;
 		
 	UChar*			uinput = NULL;
 	int			uinput_len = 0;
@@ -53,7 +53,7 @@ PHP_FUNCTION( normalizer_normalize )
 	intl_error_reset( NULL TSRMLS_CC );
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "s|i",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "s|l",
 				&input, &input_len, &form ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -174,8 +174,8 @@ PHP_FUNCTION( normalizer_is_normalized )
 {
 	char*	 	input = NULL;
 	/* form is optional, defaults to FORM_C */
-	php_int_t		form = NORMALIZER_DEFAULT;
-	int		input_len = 0;
+	zend_long		form = NORMALIZER_DEFAULT;
+	size_t		input_len = 0;
 
 	UChar*	 	uinput = NULL;
 	int		uinput_len = 0;
@@ -186,7 +186,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 	intl_error_reset( NULL TSRMLS_CC );
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "s|i",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "s|l",
 				&input, &input_len, &form) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

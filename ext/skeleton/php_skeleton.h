@@ -25,7 +25,7 @@ extern zend_module_entry extname_module_entry;
 	and END macros here:     
 
 ZEND_BEGIN_MODULE_GLOBALS(extname)
-	php_int_t  global_value;
+	zend_long  global_value;
 	char *global_string;
 ZEND_END_MODULE_GLOBALS(extname)
 */

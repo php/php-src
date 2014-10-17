@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -38,7 +38,7 @@
 
 /* {{{ php_srand
  */
-PHPAPI void php_srand(php_int_t seed TSRMLS_DC)
+PHPAPI void php_srand(zend_long seed TSRMLS_DC)
 {
 #ifdef ZTS
 	BG(rand_seed) = (unsigned int) seed;
@@ -59,9 +59,9 @@ PHPAPI void php_srand(php_int_t seed TSRMLS_DC)
 
 /* {{{ php_rand
  */
-PHPAPI php_int_t php_rand(TSRMLS_D)
+PHPAPI zend_long php_rand(TSRMLS_D)
 {
-	php_int_t ret;
+	zend_long ret;
 
 	if (!BG(rand_is_seeded)) {
 		php_srand(GENERATE_SEED() TSRMLS_CC);
@@ -229,9 +229,9 @@ PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
    Seeds random number generator */
 PHP_FUNCTION(srand)
 {
-	php_int_t seed = 0;
+	zend_long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &seed) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE)
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
@@ -245,9 +245,9 @@ PHP_FUNCTION(srand)
    Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
-	php_int_t seed = 0;
+	zend_long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &seed) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE) 
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
@@ -288,12 +288,12 @@ PHP_FUNCTION(mt_srand)
    Returns a random number */
 PHP_FUNCTION(rand)
 {
-	php_int_t min;
-	php_int_t max;
-	php_int_t number;
+	zend_long min;
+	zend_long max;
+	zend_long number;
 	int  argc = ZEND_NUM_ARGS();
 
-	if (argc != 0 && zend_parse_parameters(argc TSRMLS_CC, "ii", &min, &max) == FAILURE)
+	if (argc != 0 && zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE)
 		return;
 
 	number = php_rand(TSRMLS_C);
@@ -301,7 +301,7 @@ PHP_FUNCTION(rand)
 		RAND_RANGE(number, min, max, PHP_RAND_MAX);
 	}
 
-	RETURN_INT(number);
+	RETURN_LONG(number);
 }
 /* }}} */
 
@@ -309,16 +309,16 @@ PHP_FUNCTION(rand)
    Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
 {
-	php_int_t min;
-	php_int_t max;
-	php_int_t number;
+	zend_long min;
+	zend_long max;
+	zend_long number;
 	int  argc = ZEND_NUM_ARGS();
 
 	if (argc != 0) {
-		if (zend_parse_parameters(argc TSRMLS_CC, "ii", &min, &max) == FAILURE) {
+		if (zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE) {
 			return;
 		} else if (max < min) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(" ZEND_INT_FMT ") is smaller than min(" ZEND_INT_FMT ")", max, min);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
 			RETURN_FALSE;
 		}
 	}
@@ -335,12 +335,12 @@ PHP_FUNCTION(mt_rand)
 	 * Update: 
 	 * I talked with Cokus via email and it won't ruin the algorithm
 	 */
-	number = (php_int_t) (php_mt_rand(TSRMLS_C) >> 1);
+	number = (zend_long) (php_mt_rand(TSRMLS_C) >> 1);
 	if (argc == 2) {
 		RAND_RANGE(number, min, max, PHP_MT_RAND_MAX);
 	}
 
-	RETURN_INT(number);
+	RETURN_LONG(number);
 }
 /* }}} */
 
@@ -352,7 +352,7 @@ PHP_FUNCTION(getrandmax)
 		return;
 	}
 
-	RETURN_INT(PHP_RAND_MAX);
+	RETURN_LONG(PHP_RAND_MAX);
 }
 /* }}} */
 
@@ -368,7 +368,7 @@ PHP_FUNCTION(mt_getrandmax)
 	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain
 	 * compatibility with the previous php_rand
 	 */
-  	RETURN_INT(PHP_MT_RAND_MAX); /* 2^^31 */
+  	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
 }
 /* }}} */
 

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -49,7 +49,7 @@ static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info
 	}
 
 	if (einfo->errcode) {
-		add_next_index_int(info, einfo->errcode);
+		add_next_index_long(info, einfo->errcode);
 		add_next_index_string(info, einfo->errmsg);
 	}
 
@@ -258,7 +258,7 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 	int ret;
 
 #if HAVE_OCISTMTFETCH2
-	S->exec_type = pdo_attr_ival(driver_options, PDO_ATTR_CURSOR,
+	S->exec_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
 		PDO_CURSOR_FWDONLY TSRMLS_CC) == PDO_CURSOR_SCROLL ?
 		OCI_STMT_SCROLLABLE_READONLY : OCI_DEFAULT;
 #else
@@ -302,7 +302,7 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 
 	}
 
-	prefetch = pdo_oci_sanitize_prefetch(pdo_attr_ival(driver_options, PDO_ATTR_PREFETCH, PDO_OCI_PREFETCH_DEFAULT TSRMLS_CC));
+	prefetch = pdo_oci_sanitize_prefetch(pdo_attr_lval(driver_options, PDO_ATTR_PREFETCH, PDO_OCI_PREFETCH_DEFAULT TSRMLS_CC));
 	if (prefetch) {
 		H->last_err = OCIAttrSet(S->stmt, OCI_HTYPE_STMT, &prefetch, 0,
 			OCI_ATTR_PREFETCH_ROWS, H->err);
@@ -456,9 +456,9 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_
 			dbh->in_txn = 0;
 		}
 
-		convert_to_int(val);
+		convert_to_long(val);
 
-		dbh->auto_commit = Z_IVAL_P(val);
+		dbh->auto_commit = Z_LVAL_P(val);
 		return 1;
 	} else {
 		return 0;

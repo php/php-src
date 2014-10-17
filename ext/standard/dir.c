@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -148,44 +148,44 @@ PHP_MINIT_FUNCTION(dir)
 	pathsep_str[1] = '\0';
 	REGISTER_STRING_CONSTANT("PATH_SEPARATOR", pathsep_str, CONST_CS|CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("SCANDIR_SORT_ASCENDING",  PHP_SCANDIR_SORT_ASCENDING,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("SCANDIR_SORT_DESCENDING", PHP_SCANDIR_SORT_DESCENDING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("SCANDIR_SORT_NONE",       PHP_SCANDIR_SORT_NONE,       CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SCANDIR_SORT_ASCENDING",  PHP_SCANDIR_SORT_ASCENDING,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SCANDIR_SORT_DESCENDING", PHP_SCANDIR_SORT_DESCENDING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SCANDIR_SORT_NONE",       PHP_SCANDIR_SORT_NONE,       CONST_CS | CONST_PERSISTENT);
 
 #ifdef HAVE_GLOB
 
 #ifdef GLOB_BRACE
-	REGISTER_INT_CONSTANT("GLOB_BRACE", GLOB_BRACE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_BRACE", GLOB_BRACE, CONST_CS | CONST_PERSISTENT);
 #else
 # define GLOB_BRACE 0
 #endif
 
 #ifdef GLOB_MARK
-	REGISTER_INT_CONSTANT("GLOB_MARK", GLOB_MARK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_MARK", GLOB_MARK, CONST_CS | CONST_PERSISTENT);
 #else
 # define GLOB_MARK 0
 #endif
 
 #ifdef GLOB_NOSORT
-	REGISTER_INT_CONSTANT("GLOB_NOSORT", GLOB_NOSORT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_NOSORT", GLOB_NOSORT, CONST_CS | CONST_PERSISTENT);
 #else 
 # define GLOB_NOSORT 0
 #endif
 
 #ifdef GLOB_NOCHECK
-	REGISTER_INT_CONSTANT("GLOB_NOCHECK", GLOB_NOCHECK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_NOCHECK", GLOB_NOCHECK, CONST_CS | CONST_PERSISTENT);
 #else 
 # define GLOB_NOCHECK 0
 #endif
 
 #ifdef GLOB_NOESCAPE
-	REGISTER_INT_CONSTANT("GLOB_NOESCAPE", GLOB_NOESCAPE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_NOESCAPE", GLOB_NOESCAPE, CONST_CS | CONST_PERSISTENT);
 #else 
 # define GLOB_NOESCAPE 0
 #endif
 
 #ifdef GLOB_ERR
-	REGISTER_INT_CONSTANT("GLOB_ERR", GLOB_ERR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_ERR", GLOB_ERR, CONST_CS | CONST_PERSISTENT);
 #else 
 # define GLOB_ERR 0
 #endif
@@ -201,8 +201,8 @@ PHP_MINIT_FUNCTION(dir)
 /* This is used for checking validity of passed flags (passing invalid flags causes segfault in glob()!! */
 #define GLOB_AVAILABLE_FLAGS (0 | GLOB_BRACE | GLOB_MARK | GLOB_NOSORT | GLOB_NOCHECK | GLOB_NOESCAPE | GLOB_ERR | GLOB_ONLYDIR)
 
-	REGISTER_INT_CONSTANT("GLOB_ONLYDIR", GLOB_ONLYDIR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("GLOB_AVAILABLE_FLAGS", GLOB_AVAILABLE_FLAGS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_ONLYDIR", GLOB_ONLYDIR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("GLOB_AVAILABLE_FLAGS", GLOB_AVAILABLE_FLAGS, CONST_CS | CONST_PERSISTENT);
 
 #endif /* HAVE_GLOB */
 
@@ -214,7 +214,7 @@ PHP_MINIT_FUNCTION(dir)
 static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
 	char *dirname;
-	int dir_len;
+	size_t dir_len;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	php_stream *dirp;
@@ -273,7 +273,7 @@ PHP_FUNCTION(closedir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -292,7 +292,8 @@ PHP_FUNCTION(closedir)
 PHP_FUNCTION(chroot)
 {
 	char *str;
-	int ret, str_len;
+	int ret;
+	size_t str_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
@@ -323,7 +324,8 @@ PHP_FUNCTION(chroot)
 PHP_FUNCTION(chdir)
 {
 	char *str;
-	int ret, str_len;
+	int ret;
+	size_t str_len;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
@@ -387,7 +389,7 @@ PHP_FUNCTION(rewinddir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -406,7 +408,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is not a valid Directory resource", dirp->res->handle);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid Directory resource", dirp->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -429,14 +431,14 @@ PHP_FUNCTION(glob)
 	char *result;
 #endif
 	char *pattern = NULL;
-	int pattern_len;
-	php_int_t flags = 0;
+	size_t pattern_len;
+	zend_long flags = 0;
 	glob_t globbuf;
 	int n;
 	int ret;
 	zend_bool basedir_limit = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|i", &pattern, &pattern_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|l", &pattern, &pattern_len, &flags) == FAILURE) {
 		return;
 	}
 
@@ -524,7 +526,7 @@ no_results:
 		 * able to filter directories out. 
 		 */
 		if (flags & GLOB_ONLYDIR) {
-			php_stat_t s;
+			zend_stat_t s;
 
 			if (0 != VCWD_STAT(globbuf.gl_pathv[n], &s)) {
 				continue;
@@ -552,14 +554,14 @@ no_results:
 PHP_FUNCTION(scandir)
 {
 	char *dirn;
-	int dirn_len;
-	php_int_t flags = 0;
+	size_t dirn_len;
+	zend_long flags = 0;
 	zend_string **namelist;
 	int n, i;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|ir", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|lr", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 

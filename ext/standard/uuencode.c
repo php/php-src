@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -65,14 +65,14 @@
 
 #define PHP_UU_DEC(c) (((c) - ' ') & 077)
 
-PHPAPI zend_string *php_uuencode(char *src, php_size_t src_len) /* {{{ */
+PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 {
-	php_size_t len = 45;
+	size_t len = 45;
 	char *p, *s, *e, *ee;
 	zend_string *dest;
 
 	/* encoded length is ~ 38% greater than the original */
-	dest = STR_ALLOC((size_t)ceil(src_len * 1.38) + 46, 0);
+	dest = zend_string_alloc((size_t)ceil(src_len * 1.38) + 46, 0);
 	p = dest->val;
 	s = src;
 	e = src + src_len;
@@ -122,18 +122,18 @@ PHPAPI zend_string *php_uuencode(char *src, php_size_t src_len) /* {{{ */
 	*p++ = '\n';
 	*p = '\0';
 
-	dest = STR_REALLOC(dest, p - dest->val, 0);
+	dest = zend_string_realloc(dest, p - dest->val, 0);
 	return dest;
 }
 /* }}} */
 
-PHPAPI zend_string *php_uudecode(char *src, php_size_t src_len) /* {{{ */
+PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 {
-	php_size_t len, total_len=0;
+	size_t len, total_len=0;
 	char *s, *e, *p, *ee;
 	zend_string *dest;
 
-	dest = STR_ALLOC((size_t) ceil(src_len * 0.75), 0);
+	dest = zend_string_alloc((size_t) ceil(src_len * 0.75), 0);
 	p = dest->val;
 	s = src;
 	e = src + src_len;
@@ -189,7 +189,7 @@ PHPAPI zend_string *php_uudecode(char *src, php_size_t src_len) /* {{{ */
 	return dest;
 
 err:
-	STR_FREE(dest);
+	zend_string_free(dest);
 
 	return NULL;
 }

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -37,13 +37,14 @@ static size_t php_gziop_read(php_stream *stream, char *buf, size_t count TSRMLS_
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 	int read;
 	
+	/* XXX this needs to be looped for the case count > UINT_MAX */
 	read = gzread(self->gz_file, buf, count);
 	
 	if (gzeof(self->gz_file)) {
 		stream->eof = 1;
 	}
 		
-	return (read < 0) ? 0 : read;
+	return (size_t)((read < 0) ? 0 : read);
 }
 
 static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
@@ -51,9 +52,10 @@ static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count 
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 	int wrote;
 
+	/* XXX this needs to be looped for the case count > UINT_MAX */
 	wrote = gzwrite(self->gz_file, (char *) buf, count);
 
-	return (wrote < 0) ? 0 : wrote;
+	return (size_t)((wrote < 0) ? 0 : wrote);
 }
 
 static int php_gziop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)

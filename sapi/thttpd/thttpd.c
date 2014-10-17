@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -27,7 +27,7 @@
 #include "php_ini.h"
 #include "zend_highlight.h"
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #include <sys/time.h>
 #include <sys/types.h>
@@ -181,7 +181,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	
 	if (!SG(sapi_headers).http_status_line) {
 		ADD_VEC_S("HTTP/1.1 ");
-		p = smart_str_print_long(buf+sizeof(buf)-1, 
+		p = zend_print_long_to_buf(buf+sizeof(buf)-1, 
 				SG(sapi_headers).http_response_code);
 		ADD_VEC(p, strlen(p));
 		ADD_VEC_S(" HTTP\r\n");
@@ -293,7 +293,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 	ADD_STRING_EX("REMOTE_HOST", p);
 
 	ADD_STRING_EX("SERVER_PORT",
-			smart_str_print_long(buf + sizeof(buf) - 1,
+			zend_print_long_to_buf(buf + sizeof(buf) - 1,
 				TG(hc)->hs->port));
 
 	buf[0] = '/';
@@ -323,7 +323,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array TSRMLS_DC)
 
 	if (TG(hc)->contentlength != -1) {
 		ADD_STRING_EX("CONTENT_LENGTH",
-				smart_str_print_long(buf + sizeof(buf) - 1, 
+				zend_print_long_to_buf(buf + sizeof(buf) - 1, 
 					TG(hc)->contentlength));
 	}
 
@@ -468,7 +468,7 @@ static void thttpd_request_ctor(TSRMLS_D)
 
 static void thttpd_request_dtor(TSRMLS_D)
 {
-	smart_str_free_ex(&TG(sbuf), 1);
+	smart_str_free(&TG(sbuf));
 	if (SG(request_info).query_string)
 		free(SG(request_info).query_string);
 	free(SG(request_info).request_uri);

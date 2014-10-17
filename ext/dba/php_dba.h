@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -126,7 +126,7 @@ typedef struct dba_handler {
 	DBA_SYNC_FUNC(x); \
 	DBA_INFO_FUNC(x)
 
-#define VALLEN(p) Z_STRVAL_PP(p), Z_STRSIZE_PP(p)
+#define VALLEN(p) Z_STRVAL_PP(p), Z_STRLEN_PP(p)
 	
 PHP_FUNCTION(dba_open);
 PHP_FUNCTION(dba_popen);

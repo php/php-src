@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -66,6 +66,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sem_acquire, 0, 0, 1)
 	ZEND_ARG_INFO(0, sem_identifier)
+	ZEND_ARG_INFO(0, nowait)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sem_release, 0, 0, 1)
@@ -187,13 +188,13 @@ PHP_MINIT_FUNCTION(sysvsem)
    Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
-	php_int_t key, max_acquire = 1, perm = 0666, auto_release = 1;
+	zend_long key, max_acquire = 1, perm = 0666, auto_release = 1;
 	int semid;
 	struct sembuf sop[3];
 	int count;
 	sysvsem_sem *sem_ptr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|iii", &key, &max_acquire, &perm, &auto_release)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|lll", &key, &max_acquire, &perm, &auto_release)) {
 		RETURN_FALSE;
 	}
 
@@ -299,27 +300,36 @@ PHP_FUNCTION(sem_get)
 static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
 	zval *arg_id;
+	zend_bool nowait = 0;
 	sysvsem_sem *sem_ptr;
 	struct sembuf sop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg_id) == FAILURE) {
-		return;
+	if (acquire) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|b", &arg_id, &nowait) == FAILURE) {
+			return;
+		}
+	} else {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg_id) == FAILURE) {
+			return;
+		}
 	}
 
 	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, arg_id, -1, "SysV semaphore", php_sysvsem_module.le_sem);
 
 	if (!acquire && sem_ptr->count == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semaphore %ld (key 0x%x) is not currently acquired", Z_IVAL_P(arg_id), sem_ptr->key);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semaphore %ld (key 0x%x) is not currently acquired", Z_LVAL_P(arg_id), sem_ptr->key);
 		RETURN_FALSE;
 	}
 
 	sop.sem_num = SYSVSEM_SEM;
 	sop.sem_op  = acquire ? -1 : 1;
-	sop.sem_flg = SEM_UNDO;
+	sop.sem_flg = SEM_UNDO | (nowait ? IPC_NOWAIT : 0);
 
 	while (semop(sem_ptr->semid, &sop, 1) == -1) {
 		if (errno != EINTR) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to %s key 0x%x: %s", acquire ? "acquire" : "release", sem_ptr->key, strerror(errno));
+			if (errno != EAGAIN) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to %s key 0x%x: %s", acquire ? "acquire" : "release", sem_ptr->key, strerror(errno));
+			}
 			RETURN_FALSE;
 		}
 	}
@@ -374,7 +384,7 @@ PHP_FUNCTION(sem_remove)
 #else
 	if (semctl(sem_ptr->semid, 0, IPC_STAT, NULL) < 0) {
 #endif
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semaphore %ld does not (any longer) exist", Z_IVAL_P(arg_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semaphore %ld does not (any longer) exist", Z_LVAL_P(arg_id));
 		RETURN_FALSE;
 	}
 
@@ -383,7 +393,7 @@ PHP_FUNCTION(sem_remove)
 #else
 	if (semctl(sem_ptr->semid, 0, IPC_RMID, NULL) < 0) {
 #endif
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for SysV sempphore %ld: %s", Z_IVAL_P(arg_id), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for SysV sempphore %ld: %s", Z_LVAL_P(arg_id), strerror(errno));
 		RETURN_FALSE;
 	}
 	

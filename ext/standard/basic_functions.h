@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -167,7 +167,7 @@ typedef struct _php_basic_globals {
 	char *locale_string;
 	char *strtok_last;
 	char strtok_table[256];
-	php_uint_t strtok_len;
+	zend_ulong strtok_len;
 	char str_ebuf[40];
 	zend_fcall_info array_walk_fci;
 	zend_fcall_info_cache array_walk_fci_cache;
@@ -178,9 +178,9 @@ typedef struct _php_basic_globals {
 	zval active_ini_file_section;
 	
 	/* pageinfo.c */
-	php_int_t page_uid;
-	php_int_t page_gid;
-	php_int_t page_inode;
+	zend_long page_uid;
+	zend_long page_gid;
+	zend_long page_inode;
 	time_t page_mtime;
 
 	/* filestat.c && main/streams/streams.c */
@@ -204,11 +204,11 @@ typedef struct _php_basic_globals {
 	zend_class_entry *incomplete_class;
 	unsigned serialize_lock; /* whether to use the locally supplied var_hash instead (__sleep/__wakeup) */
 	struct {
-		void *var_hash;
+		struct php_serialize_data *data;
 		unsigned level;
 	} serialize;
 	struct {
-		void *var_hash;
+		struct php_unserialize_data *data;
 		unsigned level;
 	} unserialize;
 

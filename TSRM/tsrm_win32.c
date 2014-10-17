@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -457,7 +457,7 @@ TSRM_API FILE *popen(const char *command, const char *type)
 TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env TSRMLS_DC)
 {
 	FILE *stream = NULL;
-	int fno, type_len = strlen(type), read, mode;
+	int fno, type_len, read, mode;
 	STARTUPINFO startup;
 	PROCESS_INFORMATION process;
 	SECURITY_ATTRIBUTES security;
@@ -605,13 +605,13 @@ TSRM_API int shmget(int key, int size, int flags)
 	shm_handle  = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_segment);
 	info_handle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, shm_info);
 
-	if ((!shm_handle && !info_handle)) {
+	if (!shm_handle && !info_handle) {
 		if (flags & IPC_CREAT) {
 			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, shm_segment);
 			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), shm_info);
 			created		= TRUE;
 		}
-		if ((!shm_handle || !info_handle)) {
+		if (!shm_handle || !info_handle) {
 			return -1;
 		}
 	} else {

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 2009 The PHP Group                                     |
    +----------------------------------------------------------------------+
@@ -51,56 +51,56 @@ void idn_register_constants( INIT_FUNC_ARGS )
 
 	/* Option to prohibit processing of unassigned codepoints in the input and
 	   do not check if the input conforms to STD-3 ASCII rules. */
-	REGISTER_INT_CONSTANT("IDNA_DEFAULT", UIDNA_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_DEFAULT", UIDNA_DEFAULT, CONST_CS | CONST_PERSISTENT);
 
 	/* Option to allow processing of unassigned codepoints in the input */
-	REGISTER_INT_CONSTANT("IDNA_ALLOW_UNASSIGNED", UIDNA_ALLOW_UNASSIGNED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ALLOW_UNASSIGNED", UIDNA_ALLOW_UNASSIGNED, CONST_CS | CONST_PERSISTENT);
 
 	/* Option to check if input conforms to STD-3 ASCII rules */
-	REGISTER_INT_CONSTANT("IDNA_USE_STD3_RULES", UIDNA_USE_STD3_RULES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_USE_STD3_RULES", UIDNA_USE_STD3_RULES, CONST_CS | CONST_PERSISTENT);
 
 #ifdef HAVE_46_API
 
 	/* Option to check for whether the input conforms to the BiDi rules.
 	 * Ignored by the IDNA2003 implementation. (IDNA2003 always performs a BiDi check.) */
-	REGISTER_INT_CONSTANT("IDNA_CHECK_BIDI", UIDNA_CHECK_BIDI, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_CHECK_BIDI", UIDNA_CHECK_BIDI, CONST_CS | CONST_PERSISTENT);
 
 	/* Option to check for whether the input conforms to the CONTEXTJ rules.
 	 * Ignored by the IDNA2003 implementation. (The CONTEXTJ check is new in IDNA2008.) */
-	REGISTER_INT_CONSTANT("IDNA_CHECK_CONTEXTJ", UIDNA_CHECK_CONTEXTJ, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_CHECK_CONTEXTJ", UIDNA_CHECK_CONTEXTJ, CONST_CS | CONST_PERSISTENT);
 
 	/* Option for nontransitional processing in ToASCII().
 	 * By default, ToASCII() uses transitional processing.
 	 * Ignored by the IDNA2003 implementation. */
-	REGISTER_INT_CONSTANT("IDNA_NONTRANSITIONAL_TO_ASCII", UIDNA_NONTRANSITIONAL_TO_ASCII, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_NONTRANSITIONAL_TO_ASCII", UIDNA_NONTRANSITIONAL_TO_ASCII, CONST_CS | CONST_PERSISTENT);
 
 	/* Option for nontransitional processing in ToUnicode().
 	 * By default, ToUnicode() uses transitional processing.
 	 * Ignored by the IDNA2003 implementation. */
-	REGISTER_INT_CONSTANT("IDNA_NONTRANSITIONAL_TO_UNICODE", UIDNA_NONTRANSITIONAL_TO_UNICODE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_NONTRANSITIONAL_TO_UNICODE", UIDNA_NONTRANSITIONAL_TO_UNICODE, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/* VARIANTS */
-	REGISTER_INT_CONSTANT("INTL_IDNA_VARIANT_2003", INTL_IDN_VARIANT_2003, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INTL_IDNA_VARIANT_2003", INTL_IDN_VARIANT_2003, CONST_CS | CONST_PERSISTENT);
 #ifdef HAVE_46_API
-	REGISTER_INT_CONSTANT("INTL_IDNA_VARIANT_UTS46", INTL_IDN_VARIANT_UTS46, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INTL_IDNA_VARIANT_UTS46", INTL_IDN_VARIANT_UTS46, CONST_CS | CONST_PERSISTENT);
 #endif
 
 #ifdef HAVE_46_API
 	/* PINFO ERROR CODES */
-	REGISTER_INT_CONSTANT("IDNA_ERROR_EMPTY_LABEL", UIDNA_ERROR_EMPTY_LABEL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_LABEL_TOO_LONG", UIDNA_ERROR_LABEL_TOO_LONG, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_DOMAIN_NAME_TOO_LONG", UIDNA_ERROR_DOMAIN_NAME_TOO_LONG, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_LEADING_HYPHEN", UIDNA_ERROR_LEADING_HYPHEN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_TRAILING_HYPHEN", UIDNA_ERROR_TRAILING_HYPHEN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_HYPHEN_3_4", UIDNA_ERROR_HYPHEN_3_4, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_LEADING_COMBINING_MARK", UIDNA_ERROR_LEADING_COMBINING_MARK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_DISALLOWED", UIDNA_ERROR_DISALLOWED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_PUNYCODE", UIDNA_ERROR_PUNYCODE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_LABEL_HAS_DOT", UIDNA_ERROR_LABEL_HAS_DOT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_INVALID_ACE_LABEL", UIDNA_ERROR_INVALID_ACE_LABEL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_BIDI", UIDNA_ERROR_BIDI, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IDNA_ERROR_CONTEXTJ", UIDNA_ERROR_CONTEXTJ, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_EMPTY_LABEL", UIDNA_ERROR_EMPTY_LABEL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_LABEL_TOO_LONG", UIDNA_ERROR_LABEL_TOO_LONG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_DOMAIN_NAME_TOO_LONG", UIDNA_ERROR_DOMAIN_NAME_TOO_LONG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_LEADING_HYPHEN", UIDNA_ERROR_LEADING_HYPHEN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_TRAILING_HYPHEN", UIDNA_ERROR_TRAILING_HYPHEN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_HYPHEN_3_4", UIDNA_ERROR_HYPHEN_3_4, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_LEADING_COMBINING_MARK", UIDNA_ERROR_LEADING_COMBINING_MARK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_DISALLOWED", UIDNA_ERROR_DISALLOWED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_PUNYCODE", UIDNA_ERROR_PUNYCODE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_LABEL_HAS_DOT", UIDNA_ERROR_LABEL_HAS_DOT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_INVALID_ACE_LABEL", UIDNA_ERROR_INVALID_ACE_LABEL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_BIDI", UIDNA_ERROR_BIDI, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IDNA_ERROR_CONTEXTJ", UIDNA_ERROR_CONTEXTJ, CONST_CS | CONST_PERSISTENT);
 #endif
 }
 /* }}} */
@@ -140,14 +140,14 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	UIDNA		  *uts46;
 	int32_t		  len;
 	int32_t		  buffer_capac = 255; /* no domain name may exceed this */
-	zend_string	  *buffer = STR_ALLOC(buffer_capac, 0);
+	zend_string	  *buffer = zend_string_alloc(buffer_capac, 0);
 	UIDNAInfo	  info = UIDNA_INFO_INITIALIZER;
 	int			  buffer_used = 0;
 	
 	uts46 = uidna_openUTS46(option, &status);
 	if (php_intl_idn_check_status(status, "failed to open UIDNA instance",
 			mode TSRMLS_CC) == FAILURE) {
-		STR_FREE(buffer);
+		zend_string_free(buffer);
 		RETURN_FALSE;
 	}
 
@@ -161,7 +161,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	if (php_intl_idn_check_status(status, "failed to convert name",
 			mode TSRMLS_CC) == FAILURE) {
 		uidna_close(uts46);
-		STR_FREE(buffer);
+		zend_string_free(buffer);
 		RETURN_FALSE;
 	}
 	if (len >= 255) {
@@ -184,17 +184,17 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, return_value);
 		} else {
 			zval zv;
-			ZVAL_STR(&zv, buffer);
+			ZVAL_NEW_STR(&zv, buffer);
 			buffer_used = 1;
 			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, &zv);
 		}
 		add_assoc_bool_ex(idna_info, "isTransitionalDifferent",
 				sizeof("isTransitionalDifferent")-1, info.isTransitionalDifferent);
-		add_assoc_int_ex(idna_info, "errors", sizeof("errors")-1, (php_int_t)info.errors);
+		add_assoc_long_ex(idna_info, "errors", sizeof("errors")-1, (zend_long)info.errors);
 	}
 
 	if (!buffer_used) {
-		STR_FREE(buffer);
+		zend_string_free(buffer);
 	}
 
 	uidna_close(uts46);
@@ -264,14 +264,14 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	char *domain;
-	int domain_len;
-	php_int_t option = 0,
+	size_t domain_len;
+	zend_long option = 0,
 		 variant = INTL_IDN_VARIANT_2003;
 	zval *idna_info = NULL;
 
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|iiz/",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llz/",
 			&domain, &domain_len, &option, &variant, &idna_info) == FAILURE) {
 		php_intl_bad_args("bad arguments", mode TSRMLS_CC);
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -258,7 +258,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 	if( pe->line > 0 )
 	{
 		smart_str_appends( &ret, "on line " );
-		smart_str_append_int( &ret, (php_int_t ) pe->line );
+		smart_str_append_long( &ret, (zend_long ) pe->line );
 		any = 1;
 	}
 	if( pe->offset >= 0 ) {
@@ -268,7 +268,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 			smart_str_appends( &ret, "at " );
 
 		smart_str_appends( &ret, "offset " );
-		smart_str_append_int( &ret, (php_int_t ) pe->offset ); 
+		smart_str_append_long( &ret, (zend_long ) pe->offset ); 
 		any = 1;
 	}
 

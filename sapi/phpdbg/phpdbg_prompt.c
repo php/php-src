@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -118,7 +118,7 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 						break;
 						
 						case NUMERIC_PARAM:
-							add_next_index_int(&params, next->num);
+							add_next_index_long(&params, next->num);
 						break;
 						
 						case METHOD_PARAM:
@@ -430,7 +430,7 @@ PHPDBG_COMMAND(until) /* {{{ */
 
 	PHPDBG_G(flags) |= PHPDBG_IN_UNTIL;
 	{
-		zend_uint next = 0,
+		uint32_t next = 0,
 				  self = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
 		zend_op  *opline = &EG(active_op_array)->opcodes[self];
 
@@ -458,7 +458,7 @@ PHPDBG_COMMAND(finish) /* {{{ */
 
 	PHPDBG_G(flags) |= PHPDBG_IN_FINISH;
 	{
-		zend_uint next = 0,
+		uint32_t next = 0,
 				  self = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
 
 		for (next = self; next < EG(active_op_array)->last; next++) {
@@ -491,7 +491,7 @@ PHPDBG_COMMAND(leave) /* {{{ */
 
 	PHPDBG_G(flags) |= PHPDBG_IN_LEAVE;
 	{
-		zend_uint next = 0,
+		uint32_t next = 0,
 				  self = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
 
 		for (next = self; next < EG(active_op_array)->last; next++) {
@@ -534,7 +534,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 
 	/* get filename and linenumber before unsetting exception */
 	const char *filename = zend_get_executed_filename(TSRMLS_C);
-	zend_uint lineno = zend_get_executed_lineno(TSRMLS_C);
+	uint32_t lineno = zend_get_executed_lineno(TSRMLS_C);
 
 	/* copy exception */
 	exception = *EG(exception);
@@ -1134,7 +1134,7 @@ static inline zend_execute_data *phpdbg_create_execute_data(zend_op_array *op_ar
 		}
 	}
 
-	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
+	EX(opline) = op_array->opcodes;
 	EG(opline_ptr) = &EX(opline);
 
 	EX(function_state).function = (zend_function *) op_array;

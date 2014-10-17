@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,8 +33,8 @@ PHP_FUNCTION( collator_compare )
 {
 	char*            str1      = NULL;
 	char*            str2      = NULL;
-	int              str1_len  = 0;
-	int              str2_len  = 0;
+	size_t              str1_len  = 0;
+	size_t              str2_len  = 0;
 
 	UChar*           ustr1     = NULL;
 	UChar*           ustr2     = NULL;
@@ -119,7 +119,7 @@ PHP_FUNCTION( collator_compare )
 		efree( ustr2 );
 
 	/* Return result of the comparison. */
-	RETURN_INT( result );
+	RETURN_LONG( result );
 }
 /* }}} */
 

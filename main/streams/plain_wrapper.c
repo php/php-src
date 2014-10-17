@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -138,7 +138,7 @@ typedef struct {
 	HANDLE file_mapping;
 #endif
 
-	php_stat_t sb;
+	zend_stat_t sb;
 } php_stdio_stream_data;
 #define PHP_STDIOP_GET_FD(anfd, data)	anfd = (data)->file ? fileno((data)->file) : (data)->fd
 
@@ -149,7 +149,7 @@ static int do_fstat(php_stdio_stream_data *d, int force)
 		int r;
 	   
 		PHP_STDIOP_GET_FD(fd, d);
-		r = php_fstat(fd, &d->sb);
+		r = zend_fstat(fd, &d->sb);
 		d->cached_fstat = r == 0;
 
 		return r;
@@ -348,6 +348,34 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
+#ifdef PHP_WIN32
+		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
+
+		if (self->is_pipe || self->is_process_pipe) {
+			HANDLE ph = (HANDLE)_get_osfhandle(data->fd);
+			int retry = 0;
+			DWORD avail_read = 0;
+
+			do {
+				/* Look ahead to get the available data amount to read. Do the same
+					as read() does, however not blocking forever. In case it failed,
+					no data will be read (better than block). */
+				if (!PeekNamedPipe(ph, NULL, 0, NULL, &avail_read, NULL)) {
+					break;
+				}
+				/* If there's nothing to read, wait in 100ms periods. */
+				if (0 == avail_read) {
+					usleep(100000);
+				}
+			} while (0 == avail_read && retry++ < 320);
+
+			/* Reduce the required data amount to what is available, otherwise read()
+				will block.*/
+			if (avail_read < count) {
+				count = avail_read;
+			}
+		}
+#endif
 		ret = read(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 
 		if (ret == (size_t)-1 && errno == EINTR) {
@@ -1102,7 +1130,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 #ifndef PHP_WIN32
 # ifdef EXDEV
 		if (errno == EXDEV) {
-			php_stat_t sb;
+			zend_stat_t sb;
 			if (php_copy_file(url_from, url_to TSRMLS_CC) == SUCCESS) {
 				if (VCWD_STAT(url_from, &sb) == 0) {
 #  if !defined(TSRM_WIN32) && !defined(NETWARE)
@@ -1165,7 +1193,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 	} else {
 		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
 		char *e;
-		php_stat_t sb;
+		zend_stat_t sb;
 		int dir_len = strlen(dir);
 		int offset = 0;
 		char buf[MAXPATHLEN];
@@ -1336,7 +1364,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 			break;
 #endif
 		case PHP_STREAM_META_ACCESS:
-			mode = (mode_t)*(long *)value;
+			mode = (mode_t)*(zend_long *)value;
 			ret = VCWD_CHMOD(url, mode);
 			break;
 		default:

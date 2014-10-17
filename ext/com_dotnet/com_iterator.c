@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -32,7 +32,7 @@
 struct php_com_iterator {
 	zend_object_iterator iter;
 	IEnumVARIANT *ev;
-	php_uint_t key;
+	zend_ulong key;
 	VARIANT v; /* cached element */
 	int code_page;
 	VARIANT safe_array;
@@ -75,10 +75,10 @@ static void com_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 {
 	struct php_com_iterator *I = (struct php_com_iterator*)Z_PTR(iter->data);
 
-	if (I->key == (php_uint_t)-1) {
+	if (I->key == (zend_ulong)-1) {
 		ZVAL_NULL(key);
 	} else {
-		ZVAL_INT(key, I->key);
+		ZVAL_LONG(key, I->key);
 	}
 }
 

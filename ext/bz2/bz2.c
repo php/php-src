@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -343,11 +343,11 @@ static PHP_MINFO_FUNCTION(bz2)
 static PHP_FUNCTION(bzread)
 {
 	zval *bz;
-	php_int_t len = 1024;
+	zend_long len = 1024;
 	php_stream *stream;
 	zend_string *data;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &bz, &len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &bz, &len)) {
 		RETURN_FALSE;
 	}
 
@@ -357,14 +357,8 @@ static PHP_FUNCTION(bzread)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length may not be negative");
 		RETURN_FALSE;
 	}
-	data = STR_ALLOC(len, 0);
+	data = zend_string_alloc(len, 0);
 	data->len = php_stream_read(stream, data->val, data->len);
-
-	if (data->len < 0) {
-		STR_FREE(data);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "could not read valid bz2 data from stream");
-		RETURN_FALSE;
-	}
 	data->val[data->len] = '\0';
 
 	RETURN_STR(data);
@@ -377,7 +371,7 @@ static PHP_FUNCTION(bzopen)
 {
 	zval     *file;   /* The file to open */
 	char     *mode;   /* The mode to open the stream with */
-	int      mode_len;
+	size_t      mode_len;
 
 	BZFILE   *bz;     /* The compressed file stream */
 	php_stream *stream = NULL;
@@ -393,7 +387,7 @@ static PHP_FUNCTION(bzopen)
 
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_P(file) == IS_STRING) {
-		if (Z_STRSIZE_P(file) == 0) {
+		if (Z_STRLEN_P(file) == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "filename cannot be empty");
 			RETURN_FALSE;
 		}
@@ -406,7 +400,7 @@ static PHP_FUNCTION(bzopen)
 	} else if (Z_TYPE_P(file) == IS_RESOURCE) {
 		/* If it is a resource, than its a stream resource */
 		php_socket_t fd;
-		php_size_t stream_mode_len;
+		size_t stream_mode_len;
 
 		php_stream_from_zval(stream, file);
 		stream_mode_len = strlen(stream->mode);
@@ -490,19 +484,19 @@ static PHP_FUNCTION(bzerror)
 static PHP_FUNCTION(bzcompress)
 {
 	char             *source;          /* Source data to compress */
-	php_int_t              zblock_size = 0; /* Optional block size to use */
-	php_int_t              zwork_factor = 0;/* Optional work factor to use */
+	zend_long              zblock_size = 0; /* Optional block size to use */
+	zend_long              zwork_factor = 0;/* Optional work factor to use */
 	zend_string      *dest = NULL;     /* Destination to place the compressed data into */
 	int               error,           /* Error Container */
 					  block_size  = 4, /* Block size for compression algorithm */
 					  work_factor = 0, /* Work factor for compression algorithm */
 					  argc;            /* Argument count */
-	int               source_len;      /* Length of the source data */
+	size_t               source_len;      /* Length of the source data */
 	unsigned int      dest_len;        /* Length of the destination buffer */ 
 
 	argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ii", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
 		return;
 	}
 
@@ -513,7 +507,7 @@ static PHP_FUNCTION(bzcompress)
 	dest_len = (unsigned int) (source_len + (0.01 * source_len) + 600);
 	
 	/* Allocate the destination buffer */
-	dest = STR_ALLOC(dest_len, 0);
+	dest = zend_string_alloc(dest_len, 0);
 	
 	/* Handle the optional arguments */
 	if (argc > 1) {
@@ -526,8 +520,8 @@ static PHP_FUNCTION(bzcompress)
 
 	error = BZ2_bzBuffToBuffCompress(dest->val, &dest_len, source, source_len, block_size, 0, work_factor);
 	if (error != BZ_OK) {
-		STR_FREE(dest);
-		RETURN_INT(error);
+		zend_string_free(dest);
+		RETURN_LONG(error);
 	} else {
 		/* Copy the buffer, we have perhaps allocate a lot more than we need,
 		   so we erealloc() the buffer to the proper size */
@@ -543,8 +537,9 @@ static PHP_FUNCTION(bzcompress)
 static PHP_FUNCTION(bzdecompress)
 {
 	char *source, *dest;
-	int source_len, error;
-	php_int_t small = 0;
+	size_t source_len;
+	int error;
+	zend_long small = 0;
 #if defined(PHP_WIN32)
 	unsigned __int64 size = 0;
 #else
@@ -552,7 +547,7 @@ static PHP_FUNCTION(bzdecompress)
 #endif
 	bz_stream bzs;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|i", &source, &source_len, &small)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &source, &source_len, &small)) {
 		RETURN_FALSE;
 	}
 
@@ -586,7 +581,7 @@ static PHP_FUNCTION(bzdecompress)
 		efree(dest);
 	} else { /* real error */
 		efree(dest);
-		RETVAL_INT(error);
+		RETVAL_LONG(error);
 	}
 
 	BZ2_bzDecompressEnd(&bzs);
@@ -621,7 +616,7 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	/* Determine what to return */
 	switch (opt) {
 		case PHP_BZ_ERRNO:
-			RETURN_INT(errnum);
+			RETURN_LONG(errnum);
 			break;
 		case PHP_BZ_ERRSTR:
 			RETURN_STRING((char*)errstr);
@@ -629,7 +624,7 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 		case PHP_BZ_ERRBOTH:
 			array_init(return_value);
 		
-			add_assoc_int  (return_value, "errno",  errnum);
+			add_assoc_long  (return_value, "errno",  errnum);
 			add_assoc_string(return_value, "errstr", (char*)errstr);
 			break;
 	}

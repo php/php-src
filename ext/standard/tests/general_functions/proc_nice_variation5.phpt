@@ -8,6 +8,7 @@ Simone Gentili (sensorario@gmail.com)
 --SKIPIF--
 <?php
 	if(!function_exists('proc_nice')) die("skip. proc_nice not available ");
+	if(!function_exists('posix_geteuid')) die("skip. posix_geteuid not available ");
 	if(posix_geteuid() == 0) print "skip - Cannot run test as root.";
 ?>
 --FILE--

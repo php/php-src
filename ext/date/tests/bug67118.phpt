@@ -23,4 +23,7 @@ class mydt extends datetime
 new mydt("Funktionsansvarig rådgivning och juridik", "UTC");
 ?>
 --EXPECTF--
-Fatal error: Call to a member function format() on null in %sbug67118.php on line %d
+
+Warning: DateTime::format(): The DateTime object has not been correctly initialized by its constructor in %s on line %d
+Bad date
+

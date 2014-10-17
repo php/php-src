@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -29,7 +29,7 @@
 #include "php_spl.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "spl_functions.h"
 #include "spl_engine.h"
 #include "spl_iterators.h"
@@ -86,7 +86,6 @@ struct _spl_dllist_object {
 	spl_ptr_llist         *llist;
 	int                    traverse_position;
 	spl_ptr_llist_element *traverse_pointer;
-	zval                   retval;
 	int                    flags;
 	zend_function         *fptr_offset_get;
 	zend_function         *fptr_offset_set;
@@ -101,8 +100,8 @@ struct _spl_dllist_object {
 /* define an overloaded iterator structure */
 struct _spl_dllist_it {
 	zend_user_iterator     intern;
-	int                    traverse_position;
 	spl_ptr_llist_element *traverse_pointer;
+	int                    traverse_position;
 	int                    flags;
 };
 
@@ -143,9 +142,9 @@ static spl_ptr_llist *spl_ptr_llist_init(spl_ptr_llist_ctor_func ctor, spl_ptr_l
 }
 /* }}} */
 
-static php_int_t spl_ptr_llist_count(spl_ptr_llist *llist) /* {{{ */
+static zend_long spl_ptr_llist_count(spl_ptr_llist *llist) /* {{{ */
 {
-	return (php_int_t)llist->count;
+	return (zend_long)llist->count;
 }
 /* }}} */
 
@@ -167,7 +166,7 @@ static void spl_ptr_llist_destroy(spl_ptr_llist *llist TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static spl_ptr_llist_element *spl_ptr_llist_offset(spl_ptr_llist *llist, php_int_t offset, int backward) /* {{{ */
+static spl_ptr_llist_element *spl_ptr_llist_offset(spl_ptr_llist *llist, zend_long offset, int backward) /* {{{ */
 {
 
 	spl_ptr_llist_element *current;
@@ -358,7 +357,6 @@ static void spl_dllist_object_free_storage(zend_object *object TSRMLS_DC) /* {{{
 
 	spl_ptr_llist_destroy(intern->llist TSRMLS_CC);
 	SPL_LLIST_CHECK_DELREF(intern->traverse_pointer);
-	zval_ptr_dtor(&intern->retval);
 
 	if (intern->debug_info != NULL) {
 		zend_hash_destroy(intern->debug_info);
@@ -474,7 +472,7 @@ static zend_object *spl_dllist_object_clone(zval *zobject TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int spl_dllist_object_count_elements(zval *object, php_int_t *count TSRMLS_DC) /* {{{ */
+static int spl_dllist_object_count_elements(zval *object, zend_long *count TSRMLS_DC) /* {{{ */
 {
 	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
 
@@ -482,10 +480,8 @@ static int spl_dllist_object_count_elements(zval *object, php_int_t *count TSRML
 		zval rv;
 		zend_call_method_with_0_params(object, intern->std.ce, &intern->fptr_count, "count", &rv);
 		if (!Z_ISUNDEF(rv)) {
-			zval_ptr_dtor(&intern->retval);
-			ZVAL_ZVAL(&intern->retval, &rv, 0, 0);
-			convert_to_int(&intern->retval);
-			*count = (php_int_t) Z_IVAL(intern->retval);
+			*count = zval_get_long(&rv);
+			zval_ptr_dtor(&rv);
 			return SUCCESS;
 		}
 		*count = 0;
@@ -520,9 +516,9 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 		zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
 		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1 TSRMLS_CC);
-		ZVAL_INT(&tmp, intern->flags);
+		ZVAL_LONG(&tmp, intern->flags);
 		zend_hash_add(intern->debug_info, pnstr, &tmp);
-		STR_RELEASE(pnstr);
+		zend_string_release(pnstr);
 
 		array_init(&dllist_array);
 
@@ -540,7 +536,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 
 		pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1 TSRMLS_CC);
 		zend_hash_add(intern->debug_info, pnstr, &dllist_array);
-		STR_RELEASE(pnstr);
+		zend_string_release(pnstr);
 	}
 
 	return intern->debug_info;
@@ -673,7 +669,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
  Return the number of elements in the datastructure. */
 SPL_METHOD(SplDoublyLinkedList, count)
 {
-	php_int_t count;
+	zend_long count;
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -681,7 +677,7 @@ SPL_METHOD(SplDoublyLinkedList, count)
 	}
 
 	count = spl_ptr_llist_count(intern->llist);
-	RETURN_INT(count);
+	RETURN_LONG(count);
 }
 /* }}} */
 
@@ -689,7 +685,7 @@ SPL_METHOD(SplDoublyLinkedList, count)
  Return true if the SplDoublyLinkedList is empty. */
 SPL_METHOD(SplDoublyLinkedList, isEmpty)
 {
-	php_int_t count;
+	zend_long count;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -704,10 +700,10 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
  Set the mode of iteration */
 SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 {
-	php_int_t value;
+	zend_long value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &value) == FAILURE) {
 		return;
 	}
 
@@ -721,7 +717,7 @@ SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 
 	intern->flags = value & SPL_DLLIST_IT_MASK;
 
-	RETURN_INT(intern->flags);
+	RETURN_LONG(intern->flags);
 }
 /* }}} */
 
@@ -737,7 +733,7 @@ SPL_METHOD(SplDoublyLinkedList, getIteratorMode)
 
 	intern = Z_SPLDLLIST_P(getThis());
 
-	RETURN_INT(intern->flags);
+	RETURN_LONG(intern->flags);
 }
 /* }}} */
 
@@ -747,14 +743,14 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 {
 	zval              *zindex;
 	spl_dllist_object *intern;
-	php_int_t               index;
+	zend_long               index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zindex) == FAILURE) {
 		return;
 	}
 
 	intern = Z_SPLDLLIST_P(getThis());
-	index  = spl_offset_convert_to_int(zindex TSRMLS_CC);
+	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
 	RETURN_BOOL(index >= 0 && index < intern->llist->count);
 } /* }}} */
@@ -764,7 +760,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 SPL_METHOD(SplDoublyLinkedList, offsetGet)
 {
 	zval                  *zindex;
-	php_int_t                   index;
+	zend_long                   index;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
 
@@ -773,7 +769,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	}
 
 	intern = Z_SPLDLLIST_P(getThis());
-	index  = spl_offset_convert_to_int(zindex TSRMLS_CC);
+	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
 	if (index < 0 || index >= intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
@@ -808,10 +804,10 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		spl_ptr_llist_push(intern->llist, value TSRMLS_CC);
 	} else {
 		/* $obj[$foo] = ... */
-		php_int_t                   index;
+		zend_long                   index;
 		spl_ptr_llist_element *element;
 
-		index = spl_offset_convert_to_int(zindex TSRMLS_CC);
+		index = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
 		if (index < 0 || index >= intern->llist->count) {
 			zval_ptr_dtor(value);
@@ -849,7 +845,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 {
 	zval                  *zindex;
-	php_int_t             index;
+	zend_long             index;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
 	spl_ptr_llist         *llist;
@@ -859,7 +855,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 	}
 
 	intern = Z_SPLDLLIST_P(getThis());
-	index  = spl_offset_convert_to_int(zindex TSRMLS_CC);
+	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 	llist  = intern->llist;
 
 	if (index < 0 || index >= intern->llist->count) {
@@ -1006,7 +1002,7 @@ static void spl_dllist_it_get_current_key(zend_object_iterator *iter, zval *key 
 {
 	spl_dllist_it *iterator = (spl_dllist_it *)iter;
 
-	ZVAL_INT(key, iterator->traverse_position);
+	ZVAL_LONG(key, iterator->traverse_position);
 }
 /* }}} */
 
@@ -1031,7 +1027,7 @@ SPL_METHOD(SplDoublyLinkedList, key)
 		return;
 	}
 
-	RETURN_INT(intern->traverse_position);
+	RETURN_LONG(intern->traverse_position);
 }
 /* }}} */
 
@@ -1127,7 +1123,7 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	/* flags */
-	ZVAL_INT(&flags, intern->flags);
+	ZVAL_LONG(&flags, intern->flags);
 	php_var_serialize(&buf, &flags, &var_hash TSRMLS_CC);
 	zval_ptr_dtor(&flags);
 
@@ -1161,7 +1157,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
 	zval flags, elem;
 	char *buf;
-	int buf_len;
+	size_t buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	
@@ -1181,12 +1177,12 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 		goto error;
 	}
 
-	if (Z_TYPE(flags) != IS_INT) {
+	if (Z_TYPE(flags) != IS_LONG) {
 		zval_ptr_dtor(&flags);
 		goto error;
 	}
 
-	intern->flags = Z_IVAL(flags);
+	intern->flags = Z_LVAL(flags);
 	zval_ptr_dtor(&flags);
 
 	/* elements */
@@ -1209,7 +1205,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 
 error:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %pd of %d bytes", (php_int_t)((char*)p - buf), buf_len);
+	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %pd of %d bytes", (zend_long)((char*)p - buf), buf_len);
 	return;
 
 } /* }}} */
@@ -1221,14 +1217,14 @@ SPL_METHOD(SplDoublyLinkedList, add)
 	zval                  *zindex, *value;
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
-	php_int_t                  index;
+	zend_long                  index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zindex, &value) == FAILURE) {
 		return;
 	}
 
 	intern = Z_SPLDLLIST_P(getThis());
-	index  = spl_offset_convert_to_int(zindex TSRMLS_CC);
+	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
 	if (index < 0 || index > intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
@@ -1385,10 +1381,10 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	spl_handler_SplDoublyLinkedList.dtor_obj = zend_objects_destroy_object;
 	spl_handler_SplDoublyLinkedList.free_obj = spl_dllist_object_free_storage;
 
-	REGISTER_SPL_CLASS_CONST_INT(SplDoublyLinkedList, "IT_MODE_LIFO",  SPL_DLLIST_IT_LIFO);
-	REGISTER_SPL_CLASS_CONST_INT(SplDoublyLinkedList, "IT_MODE_FIFO",  0);
-	REGISTER_SPL_CLASS_CONST_INT(SplDoublyLinkedList, "IT_MODE_DELETE",SPL_DLLIST_IT_DELETE);
-	REGISTER_SPL_CLASS_CONST_INT(SplDoublyLinkedList, "IT_MODE_KEEP",  0);
+	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_LIFO",  SPL_DLLIST_IT_LIFO);
+	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_FIFO",  0);
+	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_DELETE",SPL_DLLIST_IT_DELETE);
+	REGISTER_SPL_CLASS_CONST_LONG(SplDoublyLinkedList, "IT_MODE_KEEP",  0);
 
 	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Iterator);
 	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Countable);

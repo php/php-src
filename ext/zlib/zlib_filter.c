@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,12 +25,12 @@
 
 /* Passed as opaque in malloc callbacks */
 typedef struct _php_zlib_filter_data {
-	int persistent;
 	z_stream strm;
 	char *inbuf;
 	size_t inbuf_len;
 	char *outbuf;
 	size_t outbuf_len;
+	int persistent;
 	zend_bool finished;
 } php_zlib_filter_data;
 
@@ -75,8 +75,6 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
-
-		bucket = buckets_in->head;
 
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
 
@@ -332,11 +330,11 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 				/* log-2 base of history window (9 - 15) */
 				ZVAL_DUP(&tmp, tmpzval);
-				convert_to_int(&tmp);
-				if (Z_IVAL(tmp) < -MAX_WBITS || Z_IVAL(tmp) > MAX_WBITS + 32) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%ld)", Z_IVAL(tmp));
+				convert_to_long(&tmp);
+				if (Z_LVAL(tmp) < -MAX_WBITS || Z_LVAL(tmp) > MAX_WBITS + 32) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
 				} else {
-					windowBits = Z_IVAL(tmp);
+					windowBits = Z_LVAL(tmp);
 				}
 			}
 		}
@@ -363,25 +361,25 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				case IS_OBJECT:
 					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "memory", sizeof("memory") -1))) {
 						ZVAL_DUP(&tmp, tmpzval);
-						convert_to_int(&tmp);
+						convert_to_long(&tmp);
 
 						/* Memory Level (1 - 9) */
-						if (Z_IVAL(tmp) < 1 || Z_IVAL(tmp) > MAX_MEM_LEVEL) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for memory level. (%ld)", Z_IVAL(tmp));
+						if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > MAX_MEM_LEVEL) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for memory level. (%pd)", Z_LVAL(tmp));
 						} else {
-							memLevel = Z_IVAL(tmp);
+							memLevel = Z_LVAL(tmp);
 						}
 					}
 
 					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
 						ZVAL_DUP(&tmp, tmpzval);
-						convert_to_int(&tmp);
+						convert_to_long(&tmp);
 
 						/* log-2 base of history window (9 - 15) */
-						if (Z_IVAL(tmp) < -MAX_WBITS || Z_IVAL(tmp) > MAX_WBITS + 16) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%ld)", Z_IVAL(tmp));
+						if (Z_LVAL(tmp) < -MAX_WBITS || Z_LVAL(tmp) > MAX_WBITS + 16) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
 						} else {
-							windowBits = Z_IVAL(tmp);
+							windowBits = Z_LVAL(tmp);
 						}
 					}
 
@@ -394,17 +392,17 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 					break;
 				case IS_STRING:
 				case IS_DOUBLE:
-				case IS_INT:
+				case IS_LONG:
 					ZVAL_COPY_VALUE(&tmp, filterparams);
 factory_setlevel:
 					zval_copy_ctor(&tmp);
-					convert_to_int(&tmp);
+					convert_to_long(&tmp);
 
 					/* Set compression level within reason (-1 == default, 0 == none, 1-9 == least to most compression */
-					if (Z_IVAL(tmp) < -1 || Z_IVAL(tmp) > 9) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression level specified. (%ld)", Z_IVAL(tmp));
+					if (Z_LVAL(tmp) < -1 || Z_LVAL(tmp) > 9) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression level specified. (%pd)", Z_LVAL(tmp));
 					} else {
-						level = Z_IVAL(tmp);
+						level = Z_LVAL(tmp);
 					}
 					break;
 				default:

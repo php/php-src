@@ -25,6 +25,14 @@
  * - change $i++ to ++$i where possible
  */
 
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
 /* compares opcodes with allowing oc1 be _EX of oc2 */
 #define SAME_OPCODE_EX(oc1, oc2) ((oc1 == oc2) || (oc1 == ZEND_JMPZ_EX && oc2 == ZEND_JMPZ) || (oc1 == ZEND_JMPNZ_EX && oc2 == ZEND_JMPNZ))
 
@@ -45,16 +53,17 @@
 	}										\
 	jmp_hitlist[jmp_hitlist_count++] = ZEND_OP2(&op_array->opcodes[target]).opline_num;
 
-if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
+void zend_optimizer_pass3(zend_op_array *op_array TSRMLS_DC)
+{
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
-	zend_uint *jmp_hitlist;
+	uint32_t *jmp_hitlist;
 	int jmp_hitlist_count;
 	int i;
-	zend_uint opline_num = 0;
+	uint32_t opline_num = 0;
 	ALLOCA_FLAG(use_heap);
 
-	jmp_hitlist = (zend_uint *)DO_ALLOCA(sizeof(zend_uint)*op_array->last);
+	jmp_hitlist = (uint32_t *)DO_ALLOCA(sizeof(uint32_t)*op_array->last);
 	opline = op_array->opcodes;
 
 	while (opline < end) {
@@ -153,7 +162,7 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 				break;
 
 			case ZEND_JMP:
-				if (op_array->has_finally_block) {
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
 
@@ -173,8 +182,8 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 				break;
 
 			case ZEND_JMP_SET:
-			case ZEND_JMP_SET_VAR:
-				if (op_array->has_finally_block) {
+			case ZEND_COALESCE:
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
 
@@ -189,7 +198,7 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 				break;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
-				if (op_array->has_finally_block) {
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
 
@@ -245,7 +254,7 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 					zend_uchar T_type = opline->result_type;
 					znode_op T = opline->result;
 
-					if (op_array->has_finally_block) {
+					if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 						break;
 					}
 
@@ -379,7 +388,7 @@ continue_jmp_ex_optimization:
 				break;
 
 			case ZEND_JMPZNZ:
-				if (op_array->has_finally_block) {
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
 

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -292,9 +292,9 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri TSRMLS_DC)
 						zval new_header;
 				    	
 						rest += 2;
-						ZVAL_STR(&new_header, STR_ALLOC(Z_STRSIZE_P(header) - (rest - s), 0));
+						ZVAL_NEW_STR(&new_header, zend_string_alloc(Z_STRLEN_P(header) - (rest - s), 0));
 						memcpy(Z_STRVAL(new_header), Z_STRVAL_P(header), s - Z_STRVAL_P(header));
-						memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_P(header)), rest, Z_STRSIZE_P(header) - (rest - Z_STRVAL_P(header)) + 1);
+						memcpy(Z_STRVAL(new_header) + (s - Z_STRVAL_P(header)), rest, Z_STRLEN_P(header) - (rest - Z_STRVAL_P(header)) + 1);
 						ZVAL_COPY(&ctx->old_header, header);
 						php_stream_context_set_option(ctx->context, "http", "header", &new_header);
 						zval_dtor(&new_header);
@@ -975,7 +975,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 
 					input = get_node_ex(portTypeOperation->children, "input", WSDL_NAMESPACE);
 					if (input != NULL) {
-						xmlAttrPtr message, name;
+						xmlAttrPtr message;
 
 						message = get_attribute(input->properties, "message");
 						if (message == NULL) {
@@ -983,8 +983,8 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 						}
 						function->requestParameters = wsdl_message(&ctx, message->children->content);
 
-						name = get_attribute(input->properties, "name");
 /* FIXME
+						xmlAttrPtr name = get_attribute(input->properties, "name");
 						if (name != NULL) {
 							function->requestName = estrdup(name->children->content);
 						} else {
@@ -1004,7 +1004,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 
 					output = get_node_ex(portTypeOperation->children, "output", WSDL_NAMESPACE);
 					if (output != NULL) {
-						xmlAttrPtr message, name;
+						xmlAttrPtr message;
 
 						message = get_attribute(output->properties, "message");
 						if (message == NULL) {
@@ -1012,8 +1012,8 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 						}
 						function->responseParameters = wsdl_message(&ctx, message->children->content);
 
-						name = get_attribute(output->properties, "name");
 /* FIXME
+						xmlAttrPtr name = get_attribute(output->properties, "name");
 						if (name != NULL) {
 							function->responseName = estrdup(name->children->content);
 						} else if (input == NULL) {
@@ -1805,7 +1805,7 @@ static void sdl_serialize_encoder_ref(encodePtr enc, HashTable *tmp_encoders, sm
 	if (enc) {
 		zval *encoder_num;
 		if ((encoder_num = zend_hash_str_find(tmp_encoders, (char*)&enc, sizeof(enc))) != 0) {
-			WSDL_CACHE_PUT_INT(Z_IVAL_P(encoder_num), out);
+			WSDL_CACHE_PUT_INT(Z_LVAL_P(encoder_num), out);
 		} else {
 			WSDL_CACHE_PUT_INT(0, out);
 		}
@@ -1818,7 +1818,7 @@ static void sdl_serialize_type_ref(sdlTypePtr type, HashTable *tmp_types, smart_
 	if (type) {
 		zval *type_num;
 		if ((type_num = zend_hash_str_find(tmp_types, (char*)&type, sizeof(type))) != NULL) {
-			WSDL_CACHE_PUT_INT(Z_IVAL_P(type_num), out);
+			WSDL_CACHE_PUT_INT(Z_LVAL_P(type_num), out);
 		} else {
 			WSDL_CACHE_PUT_INT(0, out);
 		}
@@ -1974,7 +1974,7 @@ static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTab
 		ZEND_HASH_FOREACH_STR_KEY_PTR(type->elements, key, tmp) {
 			sdl_serialize_key(key, out);
 			sdl_serialize_type(tmp, tmp_encoders, tmp_types, out);
-			ZVAL_INT(&zv, i);
+			ZVAL_LONG(&zv, i);
 			zend_hash_str_add(tmp_elements, (char*)&tmp, sizeof(tmp), &zv);
 			i--;
 		} ZEND_HASH_FOREACH_END();
@@ -2140,7 +2140,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		zval zv;
 
 		ZEND_HASH_FOREACH_PTR(sdl->groups, tmp) {
-			ZVAL_INT(&zv, type_num);
+			ZVAL_LONG(&zv, type_num);
 			zend_hash_str_add(&tmp_types, (char*)&tmp, sizeof(tmp), &zv);
 			++type_num;
 		} ZEND_HASH_FOREACH_END();
@@ -2157,7 +2157,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		zval zv;
 
 		ZEND_HASH_FOREACH_PTR(sdl->types, tmp) {
-			ZVAL_INT(&zv,  type_num);
+			ZVAL_LONG(&zv,  type_num);
 			zend_hash_str_add(&tmp_types, (char*)&tmp, sizeof(tmp), &zv);
 			++type_num;
 		} ZEND_HASH_FOREACH_END();
@@ -2174,7 +2174,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		zval zv;
 
 		ZEND_HASH_FOREACH_PTR(sdl->elements, tmp) {
-			ZVAL_INT(&zv, type_num);
+			ZVAL_LONG(&zv, type_num);
 			zend_hash_str_add(&tmp_types, (char*)&tmp, sizeof(tmp), &zv);
 			++type_num;
 		} ZEND_HASH_FOREACH_END();
@@ -2191,7 +2191,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		zval zv;
 
 		ZEND_HASH_FOREACH_PTR(sdl->encoders, tmp) {
-			ZVAL_INT(&zv, encoder_num);
+			ZVAL_LONG(&zv, encoder_num);
 			zend_hash_str_add(&tmp_encoders, (char*)&tmp, sizeof(tmp), &zv);
 			++encoder_num;
 		} ZEND_HASH_FOREACH_END();
@@ -2200,7 +2200,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	while (enc->details.type != END_KNOWN_TYPES) {
 		zval zv;
 
-		ZVAL_INT(&zv, encoder_num);
+		ZVAL_LONG(&zv, encoder_num);
 		zend_hash_str_add(&tmp_encoders, (char*)&enc, sizeof(encodePtr), &zv);
 		enc++;
 		++encoder_num;
@@ -2272,7 +2272,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 				WSDL_CACHE_PUT_1(0,out);
 			}
 
-			ZVAL_INT(&zv, binding_num);
+			ZVAL_LONG(&zv, binding_num);
 			zend_hash_str_add(&tmp_bindings, (char*)&tmp, sizeof(tmp), &zv);
 			binding_num++;
 		} ZEND_HASH_FOREACH_END();
@@ -2296,8 +2296,8 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 			if (tmp->binding) {
 				binding_num = zend_hash_str_find(&tmp_bindings,(char*)&tmp->binding, sizeof(tmp->binding));
 				if (binding_num) {
-					WSDL_CACHE_PUT_INT(Z_IVAL_P(binding_num), out);
-					if (Z_IVAL_P(binding_num) >= 0) {
+					WSDL_CACHE_PUT_INT(Z_LVAL_P(binding_num), out);
+					if (Z_LVAL_P(binding_num) >= 0) {
 						if (tmp->binding->bindingType == BINDING_SOAP && tmp->bindingAttributes != NULL) {
 							sdlSoapBindingFunctionPtr binding = (sdlSoapBindingFunctionPtr)tmp->bindingAttributes;
 							WSDL_CACHE_PUT_1(binding->style, out);
@@ -2338,7 +2338,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 				WSDL_CACHE_PUT_INT(0, out);
 			}
 
-			ZVAL_INT(&zv, function_num);
+			ZVAL_LONG(&zv, function_num);
 			zend_hash_str_add(&tmp_functions, (char*)&tmp, sizeof(tmp), &zv);
 			function_num++;
 		} ZEND_HASH_FOREACH_END();
@@ -2358,7 +2358,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->requests, key, tmp) {
 			function_num = zend_hash_str_find(&tmp_functions, (char*)&tmp, sizeof(tmp));
-			WSDL_CACHE_PUT_INT(Z_IVAL_P(function_num), out);
+			WSDL_CACHE_PUT_INT(Z_LVAL_P(function_num), out);
 			sdl_serialize_key(key, out);
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -3151,7 +3151,7 @@ static void delete_psdl(zval *zv)
 	free(Z_PTR_P(zv));
 }
 
-sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
+sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl TSRMLS_DC)
 {
 	char  fn[MAXPATHLEN];
 	sdlPtr sdl = NULL;
@@ -3230,7 +3230,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
 	}
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent")-1)) != NULL &&
-	    Z_TYPE_P(tmp) == IS_STRING && Z_STRSIZE_P(tmp) > 0) {	
+	    Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {	
 		smart_str_appends(&headers, "User-Agent: ");
 		smart_str_appends(&headers, Z_STRVAL_P(tmp));
 		smart_str_appends(&headers, "\r\n");
@@ -3239,7 +3239,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
 	if ((proxy_host = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_host", sizeof("_proxy_host")-1)) != NULL &&
 	    Z_TYPE_P(proxy_host) == IS_STRING &&
 	    (proxy_port = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port")-1)) != NULL &&
-	    Z_TYPE_P(proxy_port) == IS_INT) {
+	    Z_TYPE_P(proxy_port) == IS_LONG) {
 	    	zval str_port, str_proxy;
 	    	smart_str proxy = {0};
 		ZVAL_DUP(&str_port, proxy_port);
@@ -3250,8 +3250,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
 		smart_str_appends(&proxy,Z_STRVAL(str_port));
 		smart_str_0(&proxy);
 		zval_dtor(&str_port);
-		ZVAL_STR(&str_proxy, STR_COPY(proxy.s));
-		smart_str_free(&proxy);
+		ZVAL_NEW_STR(&str_proxy, proxy.s);
 		
 		if (!context) {
 			context = php_stream_context_alloc(TSRMLS_C);
@@ -3289,9 +3288,8 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC)
 		}
 
 		smart_str_0(&headers);
-		ZVAL_STR(&str_headers, STR_COPY(headers.s));
+		ZVAL_NEW_STR(&str_headers, headers.s);
 		php_stream_context_set_option(context, "http", "header", &str_headers);
-		smart_str_free(&headers);
 		zval_ptr_dtor(&str_headers);
 	}
 

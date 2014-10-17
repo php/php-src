@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -84,7 +84,7 @@
 *
 *     gcc -shared `php-config --includes` `php-config --ldflags` \
 *         `php-config --libs` -o php_ibase_udf.so php_ibase_udf.c \
-*         /usr/lib/libphp5.a
+*         /usr/lib/libphp7.a
 *
 * If you use the super server, you should also link against the embedded
 * library, but be sure to enable thread safety, as the super server is
@@ -231,7 +231,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 
 				case dtype_short:
 					if (argv[i]->dsc_scale == 0) {
-						ZVAL_INT(&args[i], *(short*)argv[i]->dsc_address);
+						ZVAL_LONG(&args[i], *(short*)argv[i]->dsc_address);
 					} else {
 						ZVAL_DOUBLE(&args[i],
 							((double)*(short*)argv[i]->dsc_address)/scales[-argv[i]->dsc_scale]);
@@ -240,7 +240,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 
 				case dtype_long:
 					if (argv[i]->dsc_scale == 0) {
-						ZVAL_INT(&args[i], *(ISC_LONG*)argv[i]->dsc_address);
+						ZVAL_LONG(&args[i], *(ISC_LONG*)argv[i]->dsc_address);
 					} else {
 						ZVAL_DOUBLE(&args[i],
 							((double)*(ISC_LONG*)argv[i]->dsc_address)/scales[-argv[i]->dsc_scale]);
@@ -251,7 +251,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 					l = *(ISC_INT64*)argv[i]->dsc_address;
 
 					if (argv[i]->dsc_scale == 0 && l <= LONG_MAX && l >= LONG_MIN) {
-						ZVAL_INT(&args[i], (long)l);
+						ZVAL_LONG(&args[i], (long)l);
 					} else {
 						ZVAL_DOUBLE(&args[i], ((double)l)/scales[-argv[i]->dsc_scale]);
 					}
@@ -307,9 +307,9 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 		/* return whatever type we got back from the callback: let DB handle conversion */
 		switch (Z_TYPE(return_value)) {
 
-			case IS_INT:
+			case IS_LONG:
 				r->dsc_dtype = dtype_long;
-				*(long*)r->dsc_address = Z_IVAL(return_value);
+				*(long*)r->dsc_address = Z_LVAL(return_value);
 				r->dsc_length = sizeof(long);
 				break;
 
@@ -329,7 +329,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 			case IS_STRING:
 				r->dsc_dtype = dtype_varying;
 				memcpy(res->vary_string, Z_STRVAL(return_value),
-					(res->vary_length = min(r->dsc_length-2,Z_STRSIZE(return_value))));
+					(res->vary_length = min(r->dsc_length-2,Z_STRLEN(return_value))));
 				r->dsc_length = res->vary_length+2;
 				break;
 		}
@@ -404,4 +404,3 @@ void udf_call_php8(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARA
 	PARAMDSC *args[8] = { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 };
 	call_php(name, r, 8, args);
 }
-

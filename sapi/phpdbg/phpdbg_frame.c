@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -114,7 +114,7 @@ static void phpdbg_dump_prototype(zval **tmp TSRMLS_DC) /* {{{ */
 			(void **)&class);
 	} else {
 		zend_get_object_classname(*class, (const char **)&Z_STRVAL_PP(class),
-			(zend_uint *)&Z_STRSIZE_PP(class) TSRMLS_CC);
+			(uint32_t *)&Z_STRLEN_PP(class) TSRMLS_CC);
 	}
 
 	if (is_class == SUCCESS) {
@@ -186,14 +186,14 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 
 		if (zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace),
 			(void**)&tmp, &position) == FAILURE) {
-			phpdbg_write("frame #%d: {main} at %s:%ld", i, Z_STRVAL_PP(file), Z_IVAL_PP(line));
+			phpdbg_write("frame #%d: {main} at %s:%ld", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			break;
 		}
 
 		if (user_defined == SUCCESS) {
 			phpdbg_write("frame #%d: ", i++);
 			phpdbg_dump_prototype(tmp TSRMLS_CC);
-			phpdbg_writeln(" at %s:%ld", Z_STRVAL_PP(file), Z_IVAL_PP(line));
+			phpdbg_writeln(" at %s:%ld", Z_STRVAL_PP(file), Z_LVAL_PP(line));
 		} else {
 			phpdbg_write(" => ");
 			phpdbg_dump_prototype(tmp TSRMLS_CC);

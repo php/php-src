@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -28,8 +28,9 @@ PHPAPI void config_zval_dtor(zval *zvalue);
 int php_init_config(TSRMLS_D);
 int php_shutdown_config(void);
 void php_ini_register_extensions(TSRMLS_D);
+PHPAPI zval *cfg_get_entry_ex(zend_string *name);
 PHPAPI zval *cfg_get_entry(const char *name, uint name_length);
-PHPAPI int cfg_get_int(const char *varname, zend_int_t *result);
+PHPAPI int cfg_get_long(const char *varname, zend_long *result);
 PHPAPI int cfg_get_double(const char *varname, double *result);
 PHPAPI int cfg_get_string(const char *varname, char **result);
 PHPAPI int php_parse_user_ini_file(const char *dirname, char *ini_filename, HashTable *target_hash TSRMLS_DC);
@@ -83,7 +84,7 @@ END_EXTERN_C()
 
 #define php_alter_ini_entry		zend_alter_ini_entry
 
-#define php_ini_long	zend_ini_int
+#define php_ini_long	zend_ini_long
 #define php_ini_double	zend_ini_double
 #define php_ini_string	zend_ini_string
 

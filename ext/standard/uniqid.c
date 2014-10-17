@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -50,7 +50,8 @@ PHP_FUNCTION(uniqid)
 	zend_bool more_entropy = 0;
 #endif
 	zend_string *uniqid;
-	int sec, usec, prefix_len = 0;
+	int sec, usec;
+	size_t prefix_len = 0;
 	struct timeval tv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sb", &prefix, &prefix_len,

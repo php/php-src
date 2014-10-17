@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -45,7 +45,7 @@ typedef struct _spl_filesystem_object  spl_filesystem_object;
 typedef void (*spl_foreign_dtor_t)(spl_filesystem_object *object TSRMLS_DC);
 typedef void (*spl_foreign_clone_t)(spl_filesystem_object *src, spl_filesystem_object *dst TSRMLS_DC);
 
-PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, int *len TSRMLS_DC);
+PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, size_t *len TSRMLS_DC);
 
 typedef struct _spl_other_handler {
 	spl_foreign_dtor_t     dtor;
@@ -68,7 +68,7 @@ struct _spl_filesystem_object {
 	char               *file_name;
 	int                file_name_len;
 	SPL_FS_OBJ_TYPE    type;
-	php_int_t               flags;
+	zend_long               flags;
 	zend_class_entry   *file_class;
 	zend_class_entry   *info_class;
 	union {
@@ -93,7 +93,7 @@ struct _spl_filesystem_object {
 			char               *current_line;
 			size_t             current_line_len;
 			size_t             max_line_len;
-			php_int_t               current_line_num;
+			zend_long               current_line_num;
 			zval               zresource;
 			zend_function      *func_getCurr;
 			char               delimiter;

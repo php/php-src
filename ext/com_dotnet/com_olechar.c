@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -30,7 +30,7 @@
 #include "php_com_dotnet_internal.h"
 
 
-PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, uint string_len, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, size_t string_len, int codepage TSRMLS_DC)
 {
 	OLECHAR *olestring = NULL;
 	DWORD flags = codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED | MB_ERR_INVALID_CHARS;
@@ -71,7 +71,7 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, uint strin
 	return olestring;
 }
 
-PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, uint *string_len, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, size_t *string_len, int codepage TSRMLS_DC)
 {
 	char *string;
 	uint length = 0;

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -34,8 +34,8 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	zend_string *key = NULL;
 	char *newprefix, *p;
 	const char *prop_name;
-	int arg_sep_len, newprefix_len, prop_len;
-	php_uint_t idx;
+	size_t arg_sep_len, newprefix_len, prop_len;
+	zend_ulong idx;
 	zval *zdata = NULL, copyzval;
 
 	if (!ht) {
@@ -66,7 +66,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					/* private or protected property access outside of the class */
 					continue;
 				}
-				zend_unmangle_property_name_ex(key->val, key->len, &tmp, &prop_name, &prop_len);
+				zend_unmangle_property_name_ex(key, &tmp, &prop_name, &prop_len);
 			} else {
 				prop_name = key->val;
 				prop_len = key->len;
@@ -95,7 +95,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 
 				memcpy(p, ekey->val, ekey->len);
 				p += ekey->len;
-				STR_FREE(ekey);
+				zend_string_free(ekey);
 
 				if (key_suffix) {
 					memcpy(p, key_suffix, key_suffix_len);
@@ -109,7 +109,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				char *ekey;
 				int ekey_len;
 				/* Is an integer key */
-				ekey_len = spprintf(&ekey, 0, "%ld", idx);
+				ekey_len = spprintf(&ekey, 0, "%pd", idx);
 				newprefix_len = key_prefix_len + num_prefix_len + ekey_len + key_suffix_len + 3 /* %5B */;
 				newprefix = emalloc(newprefix_len + 1);
 				p = newprefix;
@@ -159,18 +159,14 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				} else {
 					ekey = php_url_encode(prop_name, prop_len);
 				}
-				smart_str_appendl(formstr, ekey->val, ekey->len);
-				STR_FREE(ekey);
+				smart_str_append(formstr, ekey);
+				zend_string_free(ekey);
 			} else {
-				char *ekey;
-				int ekey_len;
 				/* Numeric key */
 				if (num_prefix) {
 					smart_str_appendl(formstr, num_prefix, num_prefix_len);
 				}
-				ekey_len = spprintf(&ekey, 0, "%ld", idx);
-				smart_str_appendl(formstr, ekey, ekey_len);
-				efree(ekey);
+				smart_str_append_long(formstr, idx);
 			}
 			smart_str_appendl(formstr, key_suffix, key_suffix_len);
 			smart_str_appendl(formstr, "=", 1);
@@ -178,22 +174,16 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				case IS_STRING: {
 						zend_string *ekey;
 						if (enc_type == PHP_QUERY_RFC3986) {
-							ekey = php_raw_url_encode(Z_STRVAL_P(zdata), Z_STRSIZE_P(zdata));
+							ekey = php_raw_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));
 						} else {
-							ekey = php_url_encode(Z_STRVAL_P(zdata), Z_STRSIZE_P(zdata));						
+							ekey = php_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));						
 						}
-						smart_str_appendl(formstr, ekey->val, ekey->len);
-						STR_FREE(ekey);
+						smart_str_append(formstr, ekey);
+						zend_string_free(ekey);
 					}
 					break;
-				case IS_INT:
-					{
-						char *ekey;
-					  	int ekey_len;
-					  	ekey_len = spprintf(&ekey, 0, "%ld", Z_IVAL_P(zdata));
-						smart_str_appendl(formstr, ekey, ekey_len);
-						efree(ekey);
-				  	}
+				case IS_LONG:
+					smart_str_append_long(formstr, Z_LVAL_P(zdata));
 					break;
 				case IS_FALSE:
 					smart_str_appendl(formstr, "0", sizeof("0")-1);
@@ -217,13 +207,13 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 						ZVAL_DUP(&copyzval, zdata);
 						convert_to_string_ex(&copyzval);
 						if (enc_type == PHP_QUERY_RFC3986) {
-							ekey = php_raw_url_encode(Z_STRVAL(copyzval), Z_STRSIZE(copyzval));
+							ekey = php_raw_url_encode(Z_STRVAL(copyzval), Z_STRLEN(copyzval));
 						} else {
-							ekey = php_url_encode(Z_STRVAL(copyzval), Z_STRSIZE(copyzval));
+							ekey = php_url_encode(Z_STRVAL(copyzval), Z_STRLEN(copyzval));
 						}
-						smart_str_appendl(formstr, ekey->val, ekey->len);
+						smart_str_append(formstr, ekey);
 						zval_ptr_dtor(&copyzval);
-						STR_FREE(ekey);
+						zend_string_free(ekey);
 					}
 			}
 		}
@@ -239,11 +229,11 @@ PHP_FUNCTION(http_build_query)
 {
 	zval *formdata;
 	char *prefix = NULL, *arg_sep=NULL;
-	int arg_sep_len = 0, prefix_len = 0;
+	size_t arg_sep_len = 0, prefix_len = 0;
 	smart_str formstr = {0};
-	php_int_t enc_type = PHP_QUERY_RFC1738;
+	zend_long enc_type = PHP_QUERY_RFC1738;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ssi", &formdata, &prefix, &prefix_len, &arg_sep, &arg_sep_len, &enc_type) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ssl", &formdata, &prefix, &prefix_len, &arg_sep, &arg_sep_len, &enc_type) != SUCCESS) {
 		RETURN_FALSE;
 	}
 

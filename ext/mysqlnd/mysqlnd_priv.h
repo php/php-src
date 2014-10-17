@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -209,7 +209,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 						const char * const db,
 						const size_t db_len,
 						const MYSQLND_OPTIONS * const options,
-						php_uint_t mysql_flags,
+						zend_ulong mysql_flags,
 						unsigned int server_charset_no,
 						zend_bool use_full_blown_auth_packet,
 						const char * const auth_protocol,

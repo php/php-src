@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -32,7 +32,7 @@
 PHP_FUNCTION(mysqli_embedded_server_start)
 {
 #ifdef HAVE_EMBEDDED_MYSQLI
-	php_int_t start;
+	zend_long start;
 	zval *args;
 	zval *grps;
 
@@ -42,7 +42,7 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 	HashPosition pos;
 	int index, rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iaa", &start, &args, &grps) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "laa", &start, &args, &grps) == FAILURE) {
 		return;
 	}
 

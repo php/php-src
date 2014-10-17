@@ -52,9 +52,9 @@ ZEND_API void zend_indent(TSRMLS_D)
 	zval token;
 	int token_type;
 	int in_string=0;
-	int nest_level=0;
-	int emit_whitespace[256];
-	int i;
+	unsigned int nest_level=0;
+	unsigned int emit_whitespace[256];
+	unsigned int i;
 
 	memset(emit_whitespace, 0, sizeof(int)*256);
 
@@ -138,7 +138,7 @@ dflt_printout:
 			case T_WHITESPACE:
 				break;
 			default:
-				STR_RELEASE(Z_STR(token));
+				zend_string_release(Z_STR(token));
 				break;
 			}
 		}

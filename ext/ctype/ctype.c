@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -146,11 +146,11 @@ static PHP_MINFO_FUNCTION(ctype)
 	zval *c, tmp; \
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE) \
 		return; \
-	if (Z_TYPE_P(c) == IS_INT) { \
-		if (Z_IVAL_P(c) <= 255 && Z_IVAL_P(c) >= 0) { \
-			RETURN_BOOL(iswhat(Z_IVAL_P(c))); \
-		} else if (Z_IVAL_P(c) >= -128 && Z_IVAL_P(c) < 0) { \
-			RETURN_BOOL(iswhat(Z_IVAL_P(c) + 256)); \
+	if (Z_TYPE_P(c) == IS_LONG) { \
+		if (Z_LVAL_P(c) <= 255 && Z_LVAL_P(c) >= 0) { \
+			RETURN_BOOL(iswhat(Z_LVAL_P(c))); \
+		} else if (Z_LVAL_P(c) >= -128 && Z_LVAL_P(c) < 0) { \
+			RETURN_BOOL(iswhat(Z_LVAL_P(c) + 256)); \
 		} \
 		tmp = *c; \
 		zval_copy_ctor(&tmp); \
@@ -159,18 +159,18 @@ static PHP_MINFO_FUNCTION(ctype)
 		tmp = *c; \
 	} \
 	if (Z_TYPE(tmp) == IS_STRING) { \
-		char *p = Z_STRVAL(tmp), *e = Z_STRVAL(tmp) + Z_STRSIZE(tmp); \
+		char *p = Z_STRVAL(tmp), *e = Z_STRVAL(tmp) + Z_STRLEN(tmp); \
 		if (e == p) {	\
-			if (Z_TYPE_P(c) == IS_INT) zval_dtor(&tmp); \
+			if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
 			RETURN_FALSE;	\
 		}	\
 		while (p < e) { \
 			if(!iswhat((int)*(unsigned char *)(p++))) { \
-				if (Z_TYPE_P(c) == IS_INT) zval_dtor(&tmp); \
+				if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
 				RETURN_FALSE; \
 			} \
 		} \
-		if (Z_TYPE_P(c) == IS_INT) zval_dtor(&tmp); \
+		if (Z_TYPE_P(c) == IS_LONG) zval_dtor(&tmp); \
 		RETURN_TRUE; \
 	} else { \
 		RETURN_FALSE; \

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -72,7 +72,7 @@
 		*p = ' ';								\
 	}											\
 
-extern php_int_t php_getuid(TSRMLS_D);
+extern zend_long php_getuid(TSRMLS_D);
 
 /* {{{ proto int ezmlm_hash(string addr)
    Calculate EZMLM list hash value. */
@@ -80,19 +80,19 @@ PHP_FUNCTION(ezmlm_hash)
 {
 	char *str = NULL;
 	unsigned int h = 5381;
-	int j, str_len;
+	size_t j, str_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
 		return;
 	}
 
 	for (j = 0; j < str_len; j++) {
-		h = (h + (h << 5)) ^ (unsigned long) (unsigned char) tolower(str[j]);
+		h = (h + (h << 5)) ^ (zend_ulong) (unsigned char) tolower(str[j]);
 	}
 
 	h = (h % 53);
 
-	RETURN_INT((int) h);
+	RETURN_LONG((zend_long) h);
 }
 /* }}} */
 
@@ -103,8 +103,8 @@ PHP_FUNCTION(mail)
 	char *to=NULL, *message=NULL, *headers=NULL, *headers_trimmed=NULL;
 	char *subject=NULL;
 	zend_string *extra_cmd=NULL;
-	int to_len, message_len, headers_len = 0;
-	int subject_len, i;
+	size_t to_len, message_len, headers_len = 0;
+	size_t subject_len, i;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
 	char *p, *e;
@@ -182,7 +182,7 @@ PHP_FUNCTION(mail)
 	}
 
 	if (extra_cmd) {
-		STR_RELEASE(extra_cmd);
+		zend_string_release(extra_cmd);
 	}
 	if (to_r != to) {
 		efree(to_r);
@@ -259,7 +259,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 
 		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", date_str->val, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), to, hdr ? hdr : "");
 
-		STR_FREE(date_str);
+		zend_string_free(date_str);
 
 		if (hdr) {
 			php_mail_log_crlf_to_spaces(tmp);
@@ -285,11 +285,11 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		f = php_basename(tmp, strlen(tmp), NULL, 0 TSRMLS_CC);
 
 		if (headers != NULL) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s\n%s", php_getuid(TSRMLS_C), f->val, headers);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\n%s", php_getuid(TSRMLS_C), f->val, headers);
 		} else {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: %ld:%s", php_getuid(TSRMLS_C), f->val);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(TSRMLS_C), f->val);
 		}
-		STR_RELEASE(f);
+		zend_string_release(f);
 	}
 
 	if (!sendmail_path) {

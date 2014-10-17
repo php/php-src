@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -24,14 +24,14 @@
 #include "sdncal.h"
 #include <time.h>
 
-static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, php_int_t gm)
+static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 {
 
 	/* based on code by Simon Kershaw, <webmaster@ely.anglican.org> */
 
 	struct tm te;
-	php_int_t year, golden, solar, lunar, pfm, dom, tmp, easter, result;
-	php_int_t method = CAL_EASTER_DEFAULT;
+	zend_long year, golden, solar, lunar, pfm, dom, tmp, easter, result;
+	zend_long method = CAL_EASTER_DEFAULT;
 
 	/* Default to the current year if year parameter is not given */
 	{
@@ -47,7 +47,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, php_int_t gm)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-		"|ii", &year, &method) == FAILURE) {
+		"|ll", &year, &method) == FAILURE) {
 			return;
 	}
  
@@ -115,7 +115,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, php_int_t gm)
 	} else {							/* return the days after March 21 */	
 	    result = easter;
 	}
-    ZVAL_INT(return_value, result);
+    ZVAL_LONG(return_value, result);
 }
 
 /* {{{ proto int easter_date([int year])

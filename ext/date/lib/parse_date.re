@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -564,11 +564,11 @@ static timelib_sll timelib_get_relative_text(char **ptr, int *behavior)
 	return timelib_lookup_relative_text(ptr, behavior);
 }
 
-static long timelib_lookup_month(char **ptr)
+static timelib_long timelib_lookup_month(char **ptr)
 {
 	char *word;
 	char *begin = *ptr, *end;
-	long  value = 0;
+	timelib_long  value = 0;
 	const timelib_lookup_table *tp;
 
 	while ((**ptr >= 'A' && **ptr <= 'Z') || (**ptr >= 'a' && **ptr <= 'z')) {
@@ -588,7 +588,7 @@ static long timelib_lookup_month(char **ptr)
 	return value;
 }
 
-static long timelib_get_month(char **ptr)
+static timelib_long timelib_get_month(char **ptr)
 {
 	while (**ptr == ' ' || **ptr == '\t' || **ptr == '-' || **ptr == '.' || **ptr == '/') {
 		++*ptr;
@@ -668,7 +668,7 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, int behavior, S
 	}
 }
 
-const static timelib_tz_lookup_table* abbr_search(const char *word, long gmtoffset, int isdst)
+const static timelib_tz_lookup_table* abbr_search(const char *word, timelib_long gmtoffset, int isdst)
 {
 	int first_found = 0;
 	const timelib_tz_lookup_table  *tp, *first_found_elem = NULL;
@@ -706,11 +706,11 @@ const static timelib_tz_lookup_table* abbr_search(const char *word, long gmtoffs
 	return NULL;
 }
 
-static long timelib_lookup_abbr(char **ptr, int *dst, char **tz_abbr, int *found)
+static timelib_long timelib_lookup_abbr(char **ptr, int *dst, char **tz_abbr, int *found)
 {
 	char *word;
 	char *begin = *ptr, *end;
-	long  value = 0;
+	timelib_long  value = 0;
 	const timelib_tz_lookup_table *tp;
 
 	while (**ptr != '\0' && **ptr != ')' && **ptr != ' ') {
@@ -733,10 +733,10 @@ static long timelib_lookup_abbr(char **ptr, int *dst, char **tz_abbr, int *found
 	return value;
 }
 
-long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper)
+timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper)
 {
 	timelib_tzinfo *res;
-	long            retval = 0;
+	timelib_long            retval = 0;
 
 	*tz_not_found = 0;
 
@@ -764,7 +764,7 @@ long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found
 		retval = timelib_parse_tz_cor(ptr);
 	} else {
 		int found = 0;
-		long offset = 0;
+		timelib_long offset = 0;
 		char *tz_abbr;
 
 		t->is_localtime = 1;
@@ -2202,7 +2202,7 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 */
 }
 
-char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst)
+char *timelib_timezone_id_from_abbr(const char *abbr, timelib_long gmtoffset, int isdst)
 {
 	const timelib_tz_lookup_table *tp;
 

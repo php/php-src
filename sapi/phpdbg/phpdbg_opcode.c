@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -26,7 +26,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zend_literal *literal TSRMLS_DC) /* {{{ */
+static inline uint32_t phpdbg_decode_literal(zend_op_array *ops, zend_literal *literal TSRMLS_DC) /* {{{ */
 {
 	int iter = 0;
 
@@ -40,7 +40,7 @@ static inline zend_uint phpdbg_decode_literal(zend_op_array *ops, zend_literal *
 	return 0;
 } /* }}} */
 
-static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, zend_uint type, HashTable *vars TSRMLS_DC) /* {{{ */
+static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t type, HashTable *vars TSRMLS_DC) /* {{{ */
 {
 	char *decode = NULL;
 
@@ -103,9 +103,6 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 
 #ifdef ZEND_JMP_SET
 	case ZEND_JMP_SET:
-#endif
-#ifdef ZEND_JMP_SET_VAR
-	case ZEND_JMP_SET_VAR:
 #endif
 		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
 		asprintf(
@@ -235,7 +232,6 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 		CASE(ZEND_JMPZ_EX);
 		CASE(ZEND_JMPNZ_EX);
 		CASE(ZEND_CASE);
-		CASE(ZEND_SWITCH_FREE);
 		CASE(ZEND_BRK);
 		CASE(ZEND_CONT);
 		CASE(ZEND_BOOL);
@@ -284,7 +280,7 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 		CASE(ZEND_FETCH_UNSET);
 		CASE(ZEND_FETCH_DIM_UNSET);
 		CASE(ZEND_FETCH_OBJ_UNSET);
-		CASE(ZEND_FETCH_DIM_TMP_VAR);
+		CASE(ZEND_FETCH_LIST);
 		CASE(ZEND_FETCH_CONSTANT);
 		CASE(ZEND_GOTO);
 		CASE(ZEND_EXT_STMT);
@@ -332,12 +328,6 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 #endif
 #ifdef ZEND_SEPARATE
 		CASE(ZEND_SEPARATE);
-#endif
-#ifdef ZEND_QM_ASSIGN_VAR
-		CASE(ZEND_QM_ASSIGN_VAR);
-#endif
-#ifdef ZEND_JMP_SET_VAR
-		CASE(ZEND_JMP_SET_VAR);
 #endif
 #ifdef ZEND_DISCARD_EXCEPTION
 		CASE(ZEND_DISCARD_EXCEPTION);

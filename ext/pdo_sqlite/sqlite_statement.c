@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -117,13 +117,13 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 								return 1;
 							}
 						} else {
-							convert_to_int(parameter);
-#if PHP_INT_MAX > 2147483647
-							if (SQLITE_OK == sqlite3_bind_int64(S->stmt, param->paramno + 1, Z_IVAL_P(parameter))) {
+							convert_to_long(parameter);
+#if ZEND_LONG_MAX > 2147483647
+							if (SQLITE_OK == sqlite3_bind_int64(S->stmt, param->paramno + 1, Z_LVAL_P(parameter))) {
 								return 1;
 							}
 #else
-							if (SQLITE_OK == sqlite3_bind_int(S->stmt, param->paramno + 1, Z_IVAL_P(parameter))) {
+							if (SQLITE_OK == sqlite3_bind_int(S->stmt, param->paramno + 1, Z_LVAL_P(parameter))) {
 								return 1;
 							}
 #endif
@@ -159,7 +159,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						
 						if (SQLITE_OK == sqlite3_bind_blob(S->stmt, param->paramno + 1,
 								Z_STRVAL_P(parameter),
-								Z_STRSIZE_P(parameter),
+								Z_STRLEN_P(parameter),
 								SQLITE_STATIC)) {
 							return 1;	
 						}
@@ -180,7 +180,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 							convert_to_string(parameter);
 							if (SQLITE_OK == sqlite3_bind_text(S->stmt, param->paramno + 1,
 									Z_STRVAL_P(parameter),
-									Z_STRSIZE_P(parameter),
+									Z_STRLEN_P(parameter),
 									SQLITE_STATIC)) {
 								return 1;	
 							}
@@ -198,7 +198,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 }
 
 static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
-	enum pdo_fetch_orientation ori, php_int_t offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, zend_long offset TSRMLS_DC)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
 	int i;
@@ -259,7 +259,7 @@ static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int pdo_sqlite_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, php_uint_t *len, int *caller_frees TSRMLS_DC)
+static int pdo_sqlite_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees TSRMLS_DC)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
 	if (!S->stmt) {
@@ -288,7 +288,7 @@ static int pdo_sqlite_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, php_
 	}
 }
 
-static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, php_int_t colno, zval *return_value TSRMLS_DC)
+static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value TSRMLS_DC)
 {
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
 	const char *str;

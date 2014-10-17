@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1101,7 +1101,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 		}
 	}
 
-	ret_buf = STR_ALLOC(tent_ret_len, 0);
+	ret_buf = zend_string_alloc(tent_ret_len, 0);
 	/* php_stream_read will not call ops->read here because the necessary
 	 * data is guaranteedly buffered */
 	ret_buf->len = php_stream_read(stream, ret_buf->val, tent_ret_len);
@@ -1445,7 +1445,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 	}
 
 	if (maxlen > 0) {
-		result = STR_ALLOC(maxlen, persistent);
+		result = zend_string_alloc(maxlen, persistent);
 		ptr = result->val;
 		while ((len < maxlen) && !php_stream_eof(src)) {
 			ret = php_stream_read(src, ptr, maxlen - len);
@@ -1459,7 +1459,7 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 			*ptr = '\0';
 			result->len = len;
 		} else {
-			STR_FREE(result);
+			zend_string_free(result);
 			result = NULL;
 		}
 		return result;
@@ -1477,13 +1477,13 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		max_len = step;
 	}
 
-	result = STR_ALLOC(max_len, persistent);
+	result = zend_string_alloc(max_len, persistent);
 	ptr = result->val;
 
 	while ((ret = php_stream_read(src, ptr, max_len - len)))	{
 		len += ret;
 		if (len + min_room >= max_len) {
-			result = STR_REALLOC(result, max_len + step, persistent);
+			result = zend_string_realloc(result, max_len + step, persistent);
 			max_len += step;
 			ptr = result->val + len;
 		} else {
@@ -1491,10 +1491,10 @@ PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int 
 		}
 	}
 	if (len) {
-		result = STR_REALLOC(result, len, persistent);
+		result = zend_string_realloc(result, len, persistent);
 		result->val[len] = '\0';
 	} else {
-		STR_FREE(result);
+		zend_string_free(result);
 		result = NULL;
 	}
 
@@ -2310,7 +2310,7 @@ PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], in
 			vector = (zend_string **) safe_erealloc(vector, vector_size, sizeof(char *), 0);
 		}
 
-		vector[nfiles] = STR_INIT(sdp.d_name, strlen(sdp.d_name), 0);
+		vector[nfiles] = zend_string_init(sdp.d_name, strlen(sdp.d_name), 0);
 
 		nfiles++;
 		if(vector_size < 10 || nfiles == 0) {

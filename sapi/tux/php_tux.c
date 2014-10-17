@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -21,7 +21,7 @@
 #include "php_main.h"
 #include "php_variables.h"
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #include "tuxmodule.h"
 

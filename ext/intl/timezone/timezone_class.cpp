@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -180,7 +180,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 						gottenId;
 		UErrorCode		status = U_ZERO_ERROR; /* outside_error may be NULL */
 		convert_to_string_ex(zv_timezone);
-		if (intl_stringFromChar(id, Z_STRVAL_P(zv_timezone), Z_STRSIZE_P(zv_timezone),
+		if (intl_stringFromChar(id, Z_STRVAL_P(zv_timezone), Z_STRLEN_P(zv_timezone),
 				&status) == FAILURE) {
 			spprintf(&message, 0, "%s: Time zone identifier given is not a "
 				"valid UTF-8 string", func);
@@ -249,7 +249,7 @@ static zend_object *TimeZone_clone_obj(zval *object TSRMLS_DC)
 				"Could not clone IntlTimeZone", 0 TSRMLS_CC);
 			err_msg = intl_error_get_message(TIMEZONE_ERROR_P(to_orig) TSRMLS_CC);
 			zend_throw_exception(NULL, err_msg->val, 0 TSRMLS_CC);
-			STR_FREE(err_msg);
+			zend_string_free(err_msg);
 		} else {
 			to_new->utimezone = newTimeZone;
 		}
@@ -331,9 +331,9 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 		return debug_info;
 	}
 	
-	ZVAL_INT(&zv, (php_int_t)rawOffset);
+	ZVAL_LONG(&zv, (zend_long)rawOffset);
 	zend_hash_str_update(debug_info,"rawOffset", sizeof("rawOffset") - 1, &zv); 
-	ZVAL_INT(&zv, (php_int_t)(rawOffset + dstOffset));
+	ZVAL_LONG(&zv, (zend_long)(rawOffset + dstOffset));
 	zend_hash_str_update(debug_info,"currentOffset", sizeof("currentOffset") - 1, &zv); 
 
 	return debug_info;
@@ -513,26 +513,26 @@ U_CFUNC void timezone_register_IntlTimeZone_class(TSRMLS_D)
 
 
 	/* Declare 'IntlTimeZone' class constants */
-#define TIMEZONE_DECL_INT_CONST(name, val) \
-	zend_declare_class_constant_int(TimeZone_ce_ptr, name, sizeof(name) - 1, \
+#define TIMEZONE_DECL_LONG_CONST(name, val) \
+	zend_declare_class_constant_long(TimeZone_ce_ptr, name, sizeof(name) - 1, \
 		val TSRMLS_CC)
 
-	TIMEZONE_DECL_INT_CONST("DISPLAY_SHORT", TimeZone::SHORT);
-	TIMEZONE_DECL_INT_CONST("DISPLAY_LONG", TimeZone::LONG);
+	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT", TimeZone::SHORT);
+	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG", TimeZone::LONG);
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
-	TIMEZONE_DECL_INT_CONST("DISPLAY_SHORT_GENERIC", TimeZone::SHORT_GENERIC);
-	TIMEZONE_DECL_INT_CONST("DISPLAY_LONG_GENERIC", TimeZone::LONG_GENERIC);
-	TIMEZONE_DECL_INT_CONST("DISPLAY_SHORT_GMT", TimeZone::SHORT_GMT);
-	TIMEZONE_DECL_INT_CONST("DISPLAY_LONG_GMT", TimeZone::LONG_GMT);
-	TIMEZONE_DECL_INT_CONST("DISPLAY_SHORT_COMMONLY_USED", TimeZone::SHORT_COMMONLY_USED);
-	TIMEZONE_DECL_INT_CONST("DISPLAY_GENERIC_LOCATION", TimeZone::GENERIC_LOCATION);
+	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_GENERIC", TimeZone::SHORT_GENERIC);
+	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG_GENERIC", TimeZone::LONG_GENERIC);
+	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_GMT", TimeZone::SHORT_GMT);
+	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG_GMT", TimeZone::LONG_GMT);
+	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_COMMONLY_USED", TimeZone::SHORT_COMMONLY_USED);
+	TIMEZONE_DECL_LONG_CONST("DISPLAY_GENERIC_LOCATION", TimeZone::GENERIC_LOCATION);
 #endif
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
-	TIMEZONE_DECL_INT_CONST("TYPE_ANY", UCAL_ZONE_TYPE_ANY);
-	TIMEZONE_DECL_INT_CONST("TYPE_CANONICAL", UCAL_ZONE_TYPE_CANONICAL);
-	TIMEZONE_DECL_INT_CONST("TYPE_CANONICAL_LOCATION", UCAL_ZONE_TYPE_CANONICAL_LOCATION);
+	TIMEZONE_DECL_LONG_CONST("TYPE_ANY", UCAL_ZONE_TYPE_ANY);
+	TIMEZONE_DECL_LONG_CONST("TYPE_CANONICAL", UCAL_ZONE_TYPE_CANONICAL);
+	TIMEZONE_DECL_LONG_CONST("TYPE_CANONICAL_LOCATION", UCAL_ZONE_TYPE_CANONICAL_LOCATION);
 #endif
 
 	/* Declare 'IntlTimeZone' class properties */

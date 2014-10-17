@@ -201,10 +201,6 @@ engine = On
 ; http://php.net/short-open-tag
 short_open_tag = Off
 
-; Allow ASP-style <% %> tags.
-; http://php.net/asp-tags
-asp_tags = Off
-
 ; The number of significant digits displayed in floating point numbers.
 ; http://php.net/precision
 precision = 14
@@ -865,8 +861,8 @@ default_socket_timeout = 60
 ;
 ; Windows Extensions
 ; Note that ODBC support is built in, so no dll is needed for it.
-; Note that many DLL files are located in the extensions/ (PHP 4) ext/ (PHP 5)
-; extension folders as well as the separate PECL DLL download (PHP 5).
+; Note that many DLL files are located in the extensions/ (PHP 4) ext/ (PHP 5+)
+; extension folders as well as the separate PECL DLL download (PHP 5+).
 ; Be sure to appropriately set the extension_dir directive.
 ;
 ;extension=php_bz2.dll
@@ -1756,7 +1752,7 @@ mssql.secure_connection = Off
 ;mbstring.encoding_translation = Off
 
 ; automatic encoding detection order.
-; "auto" detect order is changed accoding to mbstring.language
+; "auto" detect order is changed according to mbstring.language
 ; http://php.net/mbstring.detect-order
 ;mbstring.detect_order = auto
 

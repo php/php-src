@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -116,10 +116,10 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
-	php_int_t row_count;
+	zend_long row_count;
 	pdo_mysql_stmt *S = stmt->driver_data;
-	row_count = (php_int_t) mysql_stmt_affected_rows(S->stmt);
-	if (row_count != (php_int_t)-1) {
+	row_count = (zend_long) mysql_stmt_affected_rows(S->stmt);
+	if (row_count != (zend_long)-1) {
 		stmt->row_count = row_count;
 	}
 }
@@ -146,12 +146,12 @@ static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 			PDO_DBG_RETURN(0);
 		}
 
-		stmt->row_count = (php_int_t) mysql_num_rows(S->result);
+		stmt->row_count = (zend_long) mysql_num_rows(S->result);
 		stmt->column_count = (int) mysql_num_fields(S->result);
 		S->fields = mysql_fetch_fields(S->result);
 	} else {
 		/* this was a DML or DDL query (INSERT, UPDATE, DELETE, ... */
-		stmt->row_count = (php_int_t) row_count;
+		stmt->row_count = (zend_long) row_count;
 	}
 
 	PDO_DBG_RETURN(1);
@@ -200,7 +200,7 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt TSRMLS_DC) 
 			stmt->column_count = (int)mysql_num_fields(S->result);
 			S->bound_result = ecalloc(stmt->column_count, sizeof(MYSQL_BIND));
 			S->out_null = ecalloc(stmt->column_count, sizeof(my_bool));
-			S->out_length = ecalloc(stmt->column_count, sizeof(php_uint_t));
+			S->out_length = ecalloc(stmt->column_count, sizeof(zend_ulong));
 
 			/* summon memory to hold the row */
 			for (i = 0; i < stmt->column_count; i++) {
@@ -343,7 +343,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
 #if PDO_USE_MYSQLND
-	php_int_t row_count;
+	zend_long row_count;
 #endif
 	PDO_DBG_ENTER("pdo_mysql_stmt_next_rowset");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
@@ -393,8 +393,8 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 				}
 			}
 		}
-		row_count = (php_int_t) mysql_stmt_affected_rows(S->stmt);
-		if (row_count != (php_int_t)-1) {
+		row_count = (zend_long) mysql_stmt_affected_rows(S->stmt);
+		if (row_count != (zend_long)-1) {
 			stmt->row_count = row_count;
 		}
 		PDO_DBG_RETURN(1);
@@ -550,10 +550,10 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 					case IS_STRING:
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_VAR_STRING);
 						break;
-					case IS_INT:
-#if SIZEOF_ZEND_INT==8
+					case IS_LONG:
+#if SIZEOF_ZEND_LONG==8
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_LONGLONG);
-#elif SIZEOF_ZEND_INT==4
+#elif SIZEOF_ZEND_LONG==4
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_LONG);
 #endif /* SIZEOF_LONG */
 						break;
@@ -576,13 +576,13 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 					case IS_STRING:
 						b->buffer_type = MYSQL_TYPE_STRING;
 						b->buffer = Z_STRVAL_P(parameter);
-						b->buffer_length = Z_STRSIZE_P(parameter);
-						*b->length = Z_STRSIZE_P(parameter);
+						b->buffer_length = Z_STRLEN_P(parameter);
+						*b->length = Z_STRLEN_P(parameter);
 						PDO_DBG_RETURN(1);
 
-					case IS_INT:
+					case IS_LONG:
 						b->buffer_type = MYSQL_TYPE_LONG;
-						b->buffer = &Z_IVAL_P(parameter);
+						b->buffer = &Z_LVAL_P(parameter);
 						PDO_DBG_RETURN(1);
 
 					case IS_DOUBLE:
@@ -608,7 +608,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 }
 /* }}} */
 
-static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, php_int_t offset TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 #if PDO_USE_MYSQLND
@@ -722,7 +722,7 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, php_uint_t *len, int *caller_frees TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
@@ -823,7 +823,7 @@ static char *type_to_name_native(int type) /* {{{ */
 #undef PDO_MYSQL_NATIVE_TYPE_NAME
 } /* }}} */
 
-static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, php_int_t colno, zval *return_value TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	const MYSQL_FIELD *F;
@@ -879,10 +879,10 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, php_int_t colno, zval *retu
 #if SIZEOF_LONG==8
 		case MYSQL_TYPE_LONGLONG:
 #endif
-			add_assoc_int(return_value, "pdo_type", PDO_PARAM_INT);
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_INT);
 			break;
 		default:
-			add_assoc_int(return_value, "pdo_type", PDO_PARAM_STR);
+			add_assoc_long(return_value, "pdo_type", PDO_PARAM_STR);
 			break;
 	}
 #endif

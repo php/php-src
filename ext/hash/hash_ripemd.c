@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -244,7 +244,7 @@ static void RIPEMD128Transform(php_hash_uint32 state[4], const unsigned char blo
 	state[0] = tmp;
 
 	tmp = 0;
-	memset(x, 0, sizeof(x));
+	ZEND_SECURE_ZERO(x, sizeof(x));
 }
 /* }}} */
 
@@ -342,7 +342,7 @@ static void RIPEMD256Transform(php_hash_uint32 state[8], const unsigned char blo
 	state[7] += dd;
 
 	tmp = 0;
-	memset(x, 0, sizeof(x));
+	ZEND_SECURE_ZERO(x, sizeof(x));
 }
 /* }}} */
 
@@ -441,7 +441,7 @@ static void RIPEMD160Transform(php_hash_uint32 state[5], const unsigned char blo
 	state[0] = tmp;
 
 	tmp = 0;
-	memset(x, 0, sizeof(x));
+	ZEND_SECURE_ZERO(x, sizeof(x));
 }
 /* }}} */
 
@@ -549,7 +549,7 @@ static void RIPEMD320Transform(php_hash_uint32 state[10], const unsigned char bl
 	state[9] += ee;
 
 	tmp = 0;
-	memset(x, 0, sizeof(x));
+	ZEND_SECURE_ZERO(x, sizeof(x));
 }
 /* }}} */
 
@@ -650,7 +650,7 @@ PHP_HASH_API void PHP_RIPEMD128Final(unsigned char digest[16], PHP_RIPEMD128_CTX
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -687,7 +687,7 @@ PHP_HASH_API void PHP_RIPEMD256Final(unsigned char digest[32], PHP_RIPEMD256_CTX
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -724,7 +724,7 @@ PHP_HASH_API void PHP_RIPEMD160Final(unsigned char digest[20], PHP_RIPEMD160_CTX
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -761,7 +761,7 @@ PHP_HASH_API void PHP_RIPEMD320Final(unsigned char digest[40], PHP_RIPEMD320_CTX
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 

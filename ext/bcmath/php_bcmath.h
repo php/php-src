@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -45,7 +45,7 @@ ZEND_BEGIN_MODULE_GLOBALS(bcmath)
 	bc_num _zero_;
 	bc_num _one_;
 	bc_num _two_;
-	php_int_t bc_precision;
+	zend_long bc_precision;
 ZEND_END_MODULE_GLOBALS(bcmath)
 	
 #ifdef ZTS

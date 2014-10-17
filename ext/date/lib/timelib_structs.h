@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -35,6 +35,24 @@
 #include <string.h>
 #else
 #include <strings.h>
+#endif
+
+#if defined(__X86_64__) || defined(__LP64__) || defined(_LP64) || defined(_WIN64)
+typedef int64_t timelib_long;
+typedef uint64_t timelib_ulong;
+# define TIMELIB_LONG_MAX INT64_MAX
+# define TIMELIB_LONG_MIN INT64_MIN
+# define TIMELIB_ULONG_MAX UINT64_MAX
+# define TIMELIB_LONG_FMT "%" PRId64
+# define TIMELIB_ULONG_FMT "%" PRIu64
+#else
+typedef int32_t timelib_long;
+typedef uint32_t timelib_ulong;
+# define TIMELIB_LONG_MAX INT32_MAX
+# define TIMELIB_LONG_MIN INT32_MIN
+# define TIMELIB_ULONG_MAX UINT32_MAX
+# define TIMELIB_LONG_FMT "%" PRId32
+# define TIMELIB_ULONG_FMT "%" PRIu32
 #endif
 
 #if defined(_MSC_VER)
@@ -155,10 +173,10 @@ typedef struct timelib_error_message {
 } timelib_error_message;
 
 typedef struct timelib_error_container {
-	int                           warning_count;
+	struct timelib_error_message *error_messages;
 	struct timelib_error_message *warning_messages;
 	int                           error_count;
-	struct timelib_error_message *error_messages;
+	int                           warning_count;
 } timelib_error_container;
 
 typedef struct _timelib_tz_lookup_table {

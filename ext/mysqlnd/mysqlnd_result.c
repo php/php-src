@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -71,7 +71,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, initialize_result_set_rest)(MYSQLND
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
 				if (Z_TYPE(data_cursor[i]) == IS_STRING) {
-					php_uint_t len = Z_STRSIZE(data_cursor[i]);
+					zend_ulong len = Z_STRLEN(data_cursor[i]);
 					if (meta->fields[i].max_length < len) {
 						meta->fields[i].max_length = len;
 					}
@@ -126,7 +126,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
 				if (Z_TYPE(current_row[i]) == IS_STRING) {
-					php_uint_t len = Z_STRSIZE(current_row[i]);
+					zend_ulong len = Z_STRLEN(current_row[i]);
 					if (meta->fields[i].max_length < len) {
 						meta->fields[i].max_length = len;
 					}
@@ -599,7 +599,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
   of PHP, to be called as separate function. But let's have it for
   completeness.
 */
-static php_uint_t *
+static zend_ulong *
 MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths)(MYSQLND_RES_BUFFERED * const result TSRMLS_DC)
 {
 	const MYSQLND_RES_BUFFERED_ZVAL * set = (MYSQLND_RES_BUFFERED_ZVAL *) result;
@@ -631,7 +631,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_lengths)(MYSQLND_RES_BUFFERED
   of PHP, to be called as separate function. But let's have it for
   completeness.
 */
-static php_uint_t *
+static zend_ulong *
 MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths)(MYSQLND_RES_BUFFERED * const result TSRMLS_DC)
 {
 	const MYSQLND_RES_BUFFERED_C * set = (MYSQLND_RES_BUFFERED_C *) result;
@@ -648,7 +648,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_lengths)(MYSQLND_RES_BUFFERED * 
 
 
 /* {{{ mysqlnd_result_unbuffered::fetch_lengths */
-static php_uint_t *
+static zend_ulong *
 MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(MYSQLND_RES_UNBUFFERED * const result TSRMLS_DC)
 {
 	/* simulate output of libmysql */
@@ -658,10 +658,10 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_lengths)(MYSQLND_RES_UNBUFFERED 
 
 
 /* {{{ mysqlnd_res::fetch_lengths */
-static php_uint_t *
+static zend_ulong *
 MYSQLND_METHOD(mysqlnd_res, fetch_lengths)(MYSQLND_RES * const result TSRMLS_DC)
 {
-	php_uint_t * ret;
+	zend_ulong * ret;
 	DBG_ENTER("mysqlnd_res::fetch_lengths");
 	ret = result->stored_data && result->stored_data->m.fetch_lengths ?
 					result->stored_data->m.fetch_lengths(result->stored_data TSRMLS_CC) :
@@ -731,11 +731,11 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 				*row = mnd_malloc(field_count * sizeof(char *));
 				if (*row) {
 					MYSQLND_FIELD * field = meta->fields;
-					php_uint_t * lengths = result->unbuf->lengths;
+					zend_ulong * lengths = result->unbuf->lengths;
 
 					for (i = 0; i < field_count; i++, field++) {
 						zval * data = &result->unbuf->last_row_data[i];
-						unsigned int len = (Z_TYPE_P(data) == IS_STRING)? Z_STRSIZE_P(data) : 0;
+						unsigned int len = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 /* BEGIN difference between normal normal fetch and _c */
 						if (Z_TYPE_P(data) != IS_NULL) {
@@ -849,11 +849,11 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 			{
 				HashTable * row_ht = Z_ARRVAL_P(row);
 				MYSQLND_FIELD * field = meta->fields;
-				php_uint_t * lengths = result->unbuf->lengths;
+				zend_ulong * lengths = result->unbuf->lengths;
 
 				for (i = 0; i < field_count; i++, field++) {
 					zval * data = &result->unbuf->last_row_data[i];
-					unsigned int len = (Z_TYPE_P(data) == IS_STRING)? Z_STRSIZE_P(data) : 0;
+					unsigned int len = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 					if (flags & MYSQLND_FETCH_NUM) {
 						Z_TRY_ADDREF_P(data);
@@ -1002,7 +1002,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 					  Thus for NULL and zero-length we are quite efficient.
 					*/
 					if (Z_TYPE(current_row[i]) == IS_STRING) {
-						php_uint_t len = Z_STRSIZE(current_row[i]);
+						zend_ulong len = Z_STRLEN(current_row[i]);
 						if (meta->fields[i].max_length < len) {
 							meta->fields[i].max_length = len;
 						}
@@ -1017,7 +1017,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 				for (i = 0; i < field_count; i++) {
 					zval * data = &current_row[i];
 
-					set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRSIZE_P(data) : 0;
+					set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 					if (Z_TYPE_P(data) != IS_NULL) {
 						convert_to_string(data);
@@ -1093,7 +1093,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
 				if (Z_TYPE(current_row[i]) == IS_STRING) {
-					php_uint_t len = Z_STRSIZE(current_row[i]);
+					zend_ulong len = Z_STRLEN(current_row[i]);
 					if (meta->fields[i].max_length < len) {
 						meta->fields[i].max_length = len;
 					}
@@ -1104,7 +1104,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 		for (i = 0; i < field_count; i++) {
 			zval * data = &current_row[i];
 
-			set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRSIZE_P(data) : 0;
+			set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 			if (flags & MYSQLND_FETCH_NUM) {
 				Z_TRY_ADDREF_P(data);
@@ -1188,7 +1188,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 				  Thus for NULL and zero-length we are quite efficient.
 				*/
 				if (Z_TYPE(current_row[i]) == IS_STRING) {
-					php_uint_t len = Z_STRSIZE(current_row[i]);
+					zend_ulong len = Z_STRLEN(current_row[i]);
 					if (meta->fields[i].max_length < len) {
 						meta->fields[i].max_length = len;
 					}
@@ -1199,7 +1199,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 		for (i = 0; i < field_count; i++) {
 			zval * data = &current_row[i];
 
-			set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRSIZE_P(data) : 0;
+			set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 			
 			if (flags & MYSQLND_FETCH_NUM) {
 				Z_TRY_ADDREF_P(data);
@@ -1776,7 +1776,7 @@ static void
 MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int flags, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 {
 	zval  row;
-	php_uint_t i = 0;
+	zend_ulong i = 0;
 	MYSQLND_RES_BUFFERED *set = result->stored_data;
 
 	DBG_ENTER("mysqlnd_res::fetch_all");
@@ -1927,7 +1927,7 @@ mysqlnd_result_unbuffered_init(unsigned int field_count, zend_bool ps, zend_bool
 		DBG_RETURN(NULL);
 	}
 
-	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(php_uint_t), persistent))) {
+	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(zend_ulong), persistent))) {
 		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
 	}
@@ -1967,7 +1967,7 @@ mysqlnd_result_buffered_zval_init(unsigned int field_count, zend_bool ps, zend_b
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
-	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(php_uint_t), persistent))) {
+	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(zend_ulong), persistent))) {
 		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
 	}
@@ -2010,7 +2010,7 @@ mysqlnd_result_buffered_c_init(unsigned int field_count, zend_bool ps, zend_bool
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
-	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(php_uint_t), persistent))) {
+	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(zend_ulong), persistent))) {
 		mnd_pefree(ret, persistent);
 		DBG_RETURN(NULL);
 	}

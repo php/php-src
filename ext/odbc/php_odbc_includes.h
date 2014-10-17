@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -161,7 +161,7 @@ PHP_FUNCTION(solid_fetch_prev);
 #define ODBC_TYPE "Birdstep"
 #define UNIX
 /*
- * Extended Fetch in the Birdstep ODBC API is incapable of returning php_int_t varchar (memo) fields.
+ * Extended Fetch in the Birdstep ODBC API is incapable of returning zend_long varchar (memo) fields.
  * So the following line has been commented-out to accommodate. - KNS
  *
  * #define HAVE_SQL_EXTENDED_FETCH 1
@@ -247,7 +247,7 @@ typedef struct odbc_result {
 # if HAVE_SQL_EXTENDED_FETCH
 	int fetch_abs;
 # endif
-	php_int_t longreadlen;
+	zend_long longreadlen;
 	int binmode;
 	int fetched;
 	odbc_connection *conn_ptr;
@@ -257,16 +257,16 @@ ZEND_BEGIN_MODULE_GLOBALS(odbc)
 	char *defDB;
 	char *defUser;
 	char *defPW;
-	php_int_t allow_persistent;
-	php_int_t check_persistent;
-	php_int_t max_persistent;
-	php_int_t max_links;
-	php_int_t num_persistent;
-	php_int_t num_links;
+	zend_long allow_persistent;
+	zend_long check_persistent;
+	zend_long max_persistent;
+	zend_long max_links;
+	zend_long num_persistent;
+	zend_long num_links;
 	int defConn;
-    php_int_t defaultlrl;
-    php_int_t defaultbinmode;
-    php_int_t default_cursortype;
+    zend_long defaultlrl;
+    zend_long defaultbinmode;
+    zend_long default_cursortype;
     char laststate[6];
     char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
 	HashTable *resource_list;

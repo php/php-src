@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -21,7 +21,7 @@
 #ifndef PHP_WDDX_API_H
 #define PHP_WDDX_API_H
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str_public.h"
 
 #define WDDX_ARRAY_S			"<array length='%d'>"
 #define WDDX_ARRAY_E			"</array>"
@@ -57,7 +57,7 @@ typedef smart_str wddx_packet;
 wddx_packet* php_wddx_constructor(void);
 void		 php_wddx_destructor(wddx_packet *packet);
 
-void 		 php_wddx_packet_start(wddx_packet *packet, char *comment, int comment_len);
+void 		 php_wddx_packet_start(wddx_packet *packet, char *comment, size_t comment_len);
 void 		 php_wddx_packet_end(wddx_packet *packet);
 
 void 		 php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name TSRMLS_DC);

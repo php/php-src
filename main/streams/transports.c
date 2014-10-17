@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -46,7 +46,7 @@ PHPAPI int php_stream_xport_unregister(const char *protocol TSRMLS_DC)
 #define ERR_RETURN(out_err, local_err, fmt) \
 	if (out_err) { *out_err = local_err; } \
 	else { php_error_docref(NULL TSRMLS_CC, E_WARNING, fmt, local_err ? local_err->val : "Unspecified error"); \
-		if (local_err) { STR_RELEASE(local_err); local_err = NULL; } \
+		if (local_err) { zend_string_release(local_err); local_err = NULL; } \
 	}
 	
 PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, int options,
@@ -163,8 +163,8 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 					if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
 						zval *ztmp = zbacklog;
 						
-						convert_to_int_ex(ztmp);
-						backlog = Z_IVAL_P(ztmp);
+						convert_to_long_ex(ztmp);
+						backlog = Z_LVAL_P(ztmp);
 						if (ztmp != zbacklog) {
 							zval_ptr_dtor(ztmp);
 						}

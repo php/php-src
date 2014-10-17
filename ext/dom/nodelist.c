@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -84,14 +84,15 @@ int dom_nodelist_length_read(dom_object *obj, zval *retval TSRMLS_DC)
 						} else {
 							nodep = nodep->children;
 						}
-						curnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &count, -1);
+						curnode = dom_get_elements_by_tag_name_ns_raw(
+							nodep, (char *) objmap->ns, (char *) objmap->local, &count, -1);
 					}
 				}
 			}
 		}
 	}
 
-	ZVAL_INT(retval, count);
+	ZVAL_LONG(retval, count);
 	return SUCCESS;
 }
 
@@ -104,7 +105,7 @@ Since:
 PHP_FUNCTION(dom_nodelist_item)
 {
 	zval *id;
-	long index;
+	zend_long index;
 	int ret;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -79,7 +79,7 @@ void * _mysqlnd_emalloc(size_t size MYSQLND_MEM_D)
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 #if PHP_DEBUG
-	php_int_t * threshold = &MYSQLND_G(debug_emalloc_fail_threshold);
+	zend_long * threshold = &MYSQLND_G(debug_emalloc_fail_threshold);
 #endif
 	TRACE_ALLOC_ENTER(mysqlnd_emalloc_name);
 
@@ -119,7 +119,7 @@ void * _mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D)
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 #if PHP_DEBUG
-	php_int_t * threshold = persistent? &MYSQLND_G(debug_malloc_fail_threshold):&MYSQLND_G(debug_emalloc_fail_threshold);
+	zend_long * threshold = persistent? &MYSQLND_G(debug_malloc_fail_threshold):&MYSQLND_G(debug_emalloc_fail_threshold);
 #endif
 	TRACE_ALLOC_ENTER(mysqlnd_pemalloc_name);
 
@@ -162,7 +162,7 @@ void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 #if PHP_DEBUG
-	php_int_t * threshold = &MYSQLND_G(debug_ecalloc_fail_threshold);
+	zend_long * threshold = &MYSQLND_G(debug_ecalloc_fail_threshold);
 #endif
 	TRACE_ALLOC_ENTER(mysqlnd_ecalloc_name);
 
@@ -203,7 +203,7 @@ void * _mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent M
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 #if PHP_DEBUG
-	php_int_t * threshold = persistent? &MYSQLND_G(debug_calloc_fail_threshold):&MYSQLND_G(debug_ecalloc_fail_threshold);
+	zend_long * threshold = persistent? &MYSQLND_G(debug_calloc_fail_threshold):&MYSQLND_G(debug_ecalloc_fail_threshold);
 #endif
 	TRACE_ALLOC_ENTER(mysqlnd_pecalloc_name);
 #if PHP_DEBUG
@@ -246,7 +246,7 @@ void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 	size_t old_size = collect_memory_statistics && ptr? *(size_t *) (((char*)ptr) - sizeof(size_t)) : 0;
 #if PHP_DEBUG
-	php_int_t * threshold = &MYSQLND_G(debug_erealloc_fail_threshold);
+	zend_long * threshold = &MYSQLND_G(debug_erealloc_fail_threshold);
 #endif
 	TRACE_ALLOC_ENTER(mysqlnd_erealloc_name);
 
@@ -287,7 +287,7 @@ void * _mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQL
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 	size_t old_size = collect_memory_statistics && ptr? *(size_t *) (((char*)ptr) - sizeof(size_t)) : 0;
 #if PHP_DEBUG
-	php_int_t * threshold = persistent? &MYSQLND_G(debug_realloc_fail_threshold):&MYSQLND_G(debug_erealloc_fail_threshold);
+	zend_long * threshold = persistent? &MYSQLND_G(debug_realloc_fail_threshold):&MYSQLND_G(debug_erealloc_fail_threshold);
 #endif
 	TRACE_ALLOC_ENTER(mysqlnd_perealloc_name);
 
@@ -393,7 +393,7 @@ void * _mysqlnd_malloc(size_t size MYSQLND_MEM_D)
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 #if PHP_DEBUG
-	php_int_t * threshold = &MYSQLND_G(debug_malloc_fail_threshold);
+	zend_long * threshold = &MYSQLND_G(debug_malloc_fail_threshold);
 #endif
 	TRACE_ALLOC_ENTER(mysqlnd_malloc_name);
 
@@ -432,7 +432,7 @@ void * _mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 #if PHP_DEBUG
-	php_int_t * threshold = &MYSQLND_G(debug_calloc_fail_threshold);
+	zend_long * threshold = &MYSQLND_G(debug_calloc_fail_threshold);
 #endif
 	TRACE_ALLOC_ENTER(mysqlnd_calloc_name);
 
@@ -471,7 +471,7 @@ void * _mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 	void *ret;
 	zend_bool collect_memory_statistics = MYSQLND_G(collect_memory_statistics);
 #if PHP_DEBUG
-	php_int_t * threshold = &MYSQLND_G(debug_realloc_fail_threshold);
+	zend_long * threshold = &MYSQLND_G(debug_realloc_fail_threshold);
 #endif
 	TRACE_ALLOC_ENTER(mysqlnd_realloc_name);
 
@@ -539,7 +539,7 @@ void _mysqlnd_free(void *ptr MYSQLND_MEM_D)
 
 #define SMART_STR_START_SIZE 2048
 #define SMART_STR_PREALLOC 512
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 
 /* {{{ _mysqlnd_pestrndup */

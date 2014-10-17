@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,15 +125,15 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
  *
  * Ignores `locale' stuff.
  */
-static php_int_t collator_u_strtol(nptr, endptr, base)
+static zend_long collator_u_strtol(nptr, endptr, base)
 	const UChar *nptr;
 	UChar **endptr;
 	register int base;
 {
 	register const UChar *s = nptr;
-	register php_uint_t acc;
+	register zend_ulong acc;
 	register UChar c;
-	register php_uint_t cutoff;
+	register zend_ulong cutoff;
 	register int neg = 0, any, cutlim;
 
 	if (s == NULL) {
@@ -184,9 +184,9 @@ static php_int_t collator_u_strtol(nptr, endptr, base)
 	 * Set any if any `digits' consumed; make it negative to indicate
 	 * overflow.
 	 */
-	cutoff = neg ? -(php_uint_t)PHP_INT_MIN : PHP_INT_MAX;
-	cutlim = cutoff % (php_uint_t)base;
-	cutoff /= (php_uint_t)base;
+	cutoff = neg ? -(zend_ulong)ZEND_LONG_MIN : ZEND_LONG_MAX;
+	cutlim = cutoff % (zend_ulong)base;
+	cutoff /= (zend_ulong)base;
 	for (acc = 0, any = 0;; c = *s++) {
 		if (c >= 0x30 /*'0'*/ && c <= 0x39 /*'9'*/)
 			c -= 0x30 /*'0'*/;
@@ -208,7 +208,7 @@ static php_int_t collator_u_strtol(nptr, endptr, base)
 		}
 	}
 	if (any < 0) {
-		acc = neg ? PHP_INT_MIN : PHP_INT_MAX;
+		acc = neg ? ZEND_LONG_MIN : ZEND_LONG_MAX;
 		errno = ERANGE;
 	} else if (neg)
 		acc = -acc;
@@ -222,9 +222,9 @@ static php_int_t collator_u_strtol(nptr, endptr, base)
 /* {{{ collator_is_numeric]
  * Taken from PHP6:is_numeric_unicode()
  */
-zend_uchar collator_is_numeric( UChar *str, int length, php_int_t *lval, double *dval, int allow_errors )
+zend_uchar collator_is_numeric( UChar *str, int length, zend_long *lval, double *dval, int allow_errors )
 {
-	php_int_t local_lval;
+	zend_long local_lval;
 	double local_dval;
 	UChar *end_ptr_long, *end_ptr_double;
 	int conv_base=10;
@@ -245,7 +245,7 @@ zend_uchar collator_is_numeric( UChar *str, int length, php_int_t *lval, double 
 			if (lval) {
 				*lval = local_lval;
 			}
-			return IS_INT;
+			return IS_LONG;
 		} else if (end_ptr_long == str && *end_ptr_long != '\0' && *str != '.' && *str != '-') { /* ignore partial string matches */
 			return 0;
 		}
@@ -288,7 +288,7 @@ zend_uchar collator_is_numeric( UChar *str, int length, php_int_t *lval, double 
 			return IS_DOUBLE;
 		} else if (end_ptr_long && lval) {
 			*lval = local_lval;
-			return IS_INT;
+			return IS_LONG;
 		}
 	}
 	return 0;

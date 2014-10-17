@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -182,11 +182,11 @@ static int phpdbg_create_recursive_watchpoint(phpdbg_watchpoint_t *watch TSRMLS_
 
 			zend_hash_get_current_key_zval_ex(ht, &key, &position);
 			if (Z_TYPE(key) == IS_STRING) {
-				new_watch->name_in_parent = zend_strndup(Z_STRVAL(key), Z_STRSIZE(key));
-				new_watch->name_in_parent_len = Z_STRSIZE(key);
+				new_watch->name_in_parent = zend_strndup(Z_STRVAL(key), Z_STRLEN(key));
+				new_watch->name_in_parent_len = Z_STRLEN(key);
 			} else {
 				new_watch->name_in_parent = NULL;
-				new_watch->name_in_parent_len = asprintf(&new_watch->name_in_parent, "%ld", Z_IVAL(key));
+				new_watch->name_in_parent_len = asprintf(&new_watch->name_in_parent, "%ld", Z_LVAL(key));
 			}
 
 			new_watch->str = NULL;
@@ -238,7 +238,7 @@ static int phpdbg_delete_watchpoint_recursive(phpdbg_watchpoint_t *watch, zend_b
 				if (Z_TYPE(key) == IS_STRING) {
 					str_len = asprintf(&str, "%.*s%s%s%s", (int)watch->parent->str_len, watch->parent->str, Z_TYPE_P(watch->parent->addr.zv) == IS_ARRAY?"[":"->", phpdbg_get_property_key(Z_STRVAL(key)), Z_TYPE_P(watch->parent->addr.zv) == IS_ARRAY?"]":"");
 				} else {
-					str_len = asprintf(&str, "%.*s%s%li%s", (int)watch->parent->str_len, watch->parent->str, Z_TYPE_P(watch->parent->addr.zv) == IS_ARRAY?"[":"->", Z_IVAL(key), Z_TYPE_P(watch->parent->addr.zv) == IS_ARRAY?"]":"");
+					str_len = asprintf(&str, "%.*s%s%li%s", (int)watch->parent->str_len, watch->parent->str, Z_TYPE_P(watch->parent->addr.zv) == IS_ARRAY?"[":"->", Z_LVAL(key), Z_TYPE_P(watch->parent->addr.zv) == IS_ARRAY?"]":"");
 				}
 
 				if (zend_hash_find(&PHPDBG_G(watchpoints), str, str_len, (void **) &watchpoint) == SUCCESS) {
@@ -338,7 +338,7 @@ static int phpdbg_watchpoint_parse_input(char *input, size_t len, HashTable *par
 					watch->flags = 0;
 					zend_hash_get_current_key_zval_ex(parent, key, &position);
 					convert_to_string(key);
-					watch->str = malloc(i + Z_STRSIZE_P(key) + 2);
+					watch->str = malloc(i + Z_STRLEN_P(key) + 2);
 					watch->str_len = sprintf(watch->str, "%.*s%s%s", (int)i, input, phpdbg_get_property_key(Z_STRVAL_P(key)), input[len - 1] == ']'?"]":"");
 					efree(key);
 					watch->name_in_parent = zend_strndup(last_index, index_len);

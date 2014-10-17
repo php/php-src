@@ -20,6 +20,15 @@
 /* pass 11
  * - compact literals table
  */
+
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
 #define DEBUG_COMPACT_LITERALS 0
 
 #define LITERAL_VALUE                        0x0100
@@ -31,6 +40,7 @@
 #define LITERAL_STATIC_PROPERTY              0x0700
 #define LITERAL_METHOD                       0x0800
 #define LITERAL_PROPERTY                     0x0900
+#define LITERAL_GLOBAL                       0x0A00
 
 #define LITERAL_EX_CLASS                     0x4000
 #define LITERAL_EX_OBJ                       0x2000
@@ -44,7 +54,7 @@
 #define LITERAL_NUM_SLOTS(info)   ((info & LITERAL_NUM_SLOTS_MASK) >> LITERAL_NUM_SLOTS_SHIFT)
 
 typedef struct _literal_info {
-	zend_uint  flags; /* bitmask (see defines above) */
+	uint32_t  flags; /* bitmask (see defines above) */
 	union {
 		int    num;   /* variable number or class name literal number */
 	} u;
@@ -71,9 +81,9 @@ static void optimizer_literal_obj_info(literal_info   *info,
                                        zend_uchar      op_type,
                                        znode_op        op,
                                        int             constant,
-                                       zend_uint       kind,
-                                       zend_uint       slots,
-                                       zend_uint       related,
+                                       uint32_t       kind,
+                                       uint32_t       slots,
+                                       uint32_t       related,
                                        zend_op_array  *op_array)
 {
 	/* For now we merge only $this object properties and methods.
@@ -92,9 +102,9 @@ static void optimizer_literal_class_info(literal_info   *info,
                                          zend_uchar      op_type,
                                          znode_op        op,
                                          int             constant,
-                                         zend_uint       kind,
-                                         zend_uint       slots,
-                                         zend_uint       related,
+                                         uint32_t       kind,
+                                         uint32_t       slots,
+                                         uint32_t       related,
                                          zend_op_array  *op_array)
 {
 	if (op_type == IS_CONST) {
@@ -104,7 +114,7 @@ static void optimizer_literal_class_info(literal_info   *info,
 	}
 }
 
-static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC)
+void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS_DC)
 {
 	zend_op *opline, *end;
 	int i, j, n, *map, cache_slots;
@@ -269,6 +279,9 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 						}
 					}
 					break;
+				case ZEND_BIND_GLOBAL:
+					LITERAL_INFO(opline->op2.constant, LITERAL_GLOBAL, 0, 1, 1);
+					break;
 				default:
 					if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 1);
@@ -291,7 +304,7 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 			for (i = 0; i < op_array->last_literal; i++) {
 				zval zv = op_array->literals[i].constant;
 				use_copy = zend_make_printable_zval(&op_array->literals[i].constant, &zv TSRMLS_CC);
-				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRSIZE(zv), Z_STRVAL(zv));
+				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
 					zval_dtor(&zv);
 				}
@@ -302,7 +315,7 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 
 		/* Merge equal constants */
 		j = 0; cache_slots = 0;
-		zend_hash_init(&hash, 16, NULL, NULL, 0);
+		zend_hash_init(&hash, op_array->last_literal, NULL, NULL, 0);
 		map = (int*)zend_arena_alloc(&ctx->arena, op_array->last_literal * sizeof(int));
 		memset(map, 0, op_array->last_literal * sizeof(int));
 		for (i = 0; i < op_array->last_literal; i++) {
@@ -345,13 +358,13 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 					}
 					map[i] = l_true;
 					break;
-				case IS_INT:
-					if ((pos = zend_hash_index_find(&hash, Z_IVAL(op_array->literals[i]))) != NULL) {
-						map[i] = Z_IVAL_P(pos);
+				case IS_LONG:
+					if ((pos = zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i]))) != NULL) {
+						map[i] = Z_LVAL_P(pos);
 					} else {
 						map[i] = j;
-						ZVAL_INT(&zv, j);
-						zend_hash_index_update(&hash, Z_IVAL(op_array->literals[i]), &zv);
+						ZVAL_LONG(&zv, j);
+						zend_hash_index_add_new(&hash, Z_LVAL(op_array->literals[i]), &zv);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
@@ -361,10 +374,10 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 					break;
 				case IS_DOUBLE:
 					if ((pos = zend_hash_str_find(&hash, (char*)&Z_DVAL(op_array->literals[i]), sizeof(double))) != NULL) {
-						map[i] = Z_IVAL_P(pos);
+						map[i] = Z_LVAL_P(pos);
 					} else {
 						map[i] = j;
-						ZVAL_INT(&zv, j);
+						ZVAL_LONG(&zv, j);
 						zend_hash_str_add(&hash, (char*)&Z_DVAL(op_array->literals[i]), sizeof(double), &zv);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
@@ -377,32 +390,32 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 				case IS_CONSTANT:
 					if (info[i].flags & LITERAL_MAY_MERGE) {
 						if (info[i].flags & LITERAL_EX_OBJ) {
-							int key_len = MAX_LENGTH_OF_ZEND_INT + sizeof("->") + Z_STRSIZE(op_array->literals[i]);
-							key = STR_ALLOC(key_len, 0);
+							int key_len = MAX_LENGTH_OF_LONG + sizeof("->") + Z_STRLEN(op_array->literals[i]);
+							key = zend_string_alloc(key_len, 0);
 							key->len = snprintf(key->val, key->len-1, "%d->%s", info[i].u.num, Z_STRVAL(op_array->literals[i]));
 						} else if (info[i].flags & LITERAL_EX_CLASS) {
 							int key_len;
 							zval *class_name = &op_array->literals[(info[i].u.num < i) ? map[info[i].u.num] : info[i].u.num];
-							key_len = Z_STRSIZE_P(class_name) + sizeof("::") + Z_STRSIZE(op_array->literals[i]);
-							key = STR_ALLOC(key_len, 0);
-							memcpy(key->val, Z_STRVAL_P(class_name), Z_STRSIZE_P(class_name));
-							memcpy(key->val + Z_STRSIZE_P(class_name), "::", sizeof("::") - 1);
-							memcpy(key->val + Z_STRSIZE_P(class_name) + sizeof("::") - 1,
+							key_len = Z_STRLEN_P(class_name) + sizeof("::") + Z_STRLEN(op_array->literals[i]);
+							key = zend_string_alloc(key_len, 0);
+							memcpy(key->val, Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
+							memcpy(key->val + Z_STRLEN_P(class_name), "::", sizeof("::") - 1);
+							memcpy(key->val + Z_STRLEN_P(class_name) + sizeof("::") - 1,
 								Z_STRVAL(op_array->literals[i]),
-								Z_STRSIZE(op_array->literals[i]) + 1);
+								Z_STRLEN(op_array->literals[i]) + 1);
 						} else {
-							key = STR_INIT(Z_STRVAL(op_array->literals[i]), Z_STRSIZE(op_array->literals[i]), 0);
+							key = zend_string_init(Z_STRVAL(op_array->literals[i]), Z_STRLEN(op_array->literals[i]), 0);
 						}
 						key->h = zend_hash_func(key->val, key->len);
 						key->h += info[i].flags;
 					}
 					if ((info[i].flags & LITERAL_MAY_MERGE) &&
 						(pos = zend_hash_find(&hash, key)) != NULL &&
-					   	Z_TYPE(op_array->literals[i]) == Z_TYPE(op_array->literals[Z_IVAL_P(pos)]) &&
-						info[i].flags == info[Z_IVAL_P(pos)].flags) {
+					   	Z_TYPE(op_array->literals[i]) == Z_TYPE(op_array->literals[Z_LVAL_P(pos)]) &&
+						info[i].flags == info[Z_LVAL_P(pos)].flags) {
 
-						STR_RELEASE(key);
-						map[i] = Z_IVAL_P(pos);
+						zend_string_release(key);
+						map[i] = Z_LVAL_P(pos);
 						zval_dtor(&op_array->literals[i]);
 						n = LITERAL_NUM_RELATED(info[i].flags);
 						while (n > 1) {
@@ -413,9 +426,9 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 					} else {
 						map[i] = j;
 						if (info[i].flags & LITERAL_MAY_MERGE) {
-							ZVAL_INT(&zv, j);
-							zend_hash_add(&hash, key, &zv);
-							STR_RELEASE(key);
+							ZVAL_LONG(&zv, j);
+							zend_hash_add_new(&hash, key, &zv);
+							zend_string_release(key);
 						}
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
@@ -472,7 +485,7 @@ static void optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_c
 			for (i = 0; i < op_array->last_literal; i++) {
 				zval zv = op_array->literals[i].constant;
 				use_copy = zend_make_printable_zval(&op_array->literals[i].constant, &zv TSRMLS_CC);
-				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRSIZE(zv), Z_STRVAL(zv));
+				fprintf(stderr, "Literal %d, val (%d):%s\n", i, Z_STRLEN(zv), Z_STRVAL(zv));
 				if (use_copy) {
 					zval_dtor(&zv);
 				}

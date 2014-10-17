@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,7 @@
 static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char*      locale;
-	int              locale_len = 0;
+	size_t              locale_len = 0;
 	zval*            object;
 	Collator_object* co;
 

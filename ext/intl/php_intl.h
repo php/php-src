@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,7 +50,7 @@ ZEND_BEGIN_MODULE_GLOBALS(intl)
 	collator_compare_func_t compare_func;
 	UBreakIterator* grapheme_iterator;
 	intl_error g_error;
-	php_int_t error_level;
+	zend_long error_level;
 	zend_bool use_exceptions;
 ZEND_END_MODULE_GLOBALS(intl)
 

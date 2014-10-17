@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,14 +29,14 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
 	char*       pattern = NULL;
-	int         locale_len = 0, pattern_len = 0;
-	php_int_t        style;
+	size_t         locale_len = 0, pattern_len = 0;
+	zend_long        style;
 	UChar*      spattern     = NULL;
 	int         spattern_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "si|s",
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sl|s",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -125,7 +125,7 @@ PHP_FUNCTION( numfmt_get_error_code )
 	nfo = Z_INTL_NUMBERFORMATTER_P(object);
 
 	/* Return formatter's last error code. */
-	RETURN_INT( INTL_DATA_ERROR_CODE(nfo) );
+	RETURN_LONG( INTL_DATA_ERROR_CODE(nfo) );
 }
 /* }}} */
 

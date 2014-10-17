@@ -1,12 +1,8 @@
 $Id$
 
-UPGRADE NOTES - PHP X.Y
+PHP 7.0 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
-  a. Addition of do_operation and compare object handlers
-  b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
-  c. POST data handling
-  d. Arginfo changes
   e. New data types
   f. zend_parse_parameters() specs
   g. sprintf() formats
@@ -30,22 +26,17 @@ UPGRADE NOTES - PHP X.Y
 
         Besides the old way of accepting the strings with 's', the new 'S' ZPP spec
 	was introduced. It expects an argument of the type zend_string *. String lengths
-	in it do no more depend on the firm 'int' datatype. The replacement
-	is a platform dependent size_t datatype called php_size_t.
-
-	String length is defined as zend_size_t inside Zend and aliased as php_size_t
-	anywhere else. The inclusion of php.h is necessary.
+	in it are bound to the size_t datatype.
 
      Integer types
 
 	Integers do no more depend on the firm 'long' type. Instead a platform
-	dependent integer type is used. That datatype is defined dynamically to
-	guarantee the consistent 64 bit support. The zval field representing user
-	land integer it bound to php_int_t.
+	dependent integer type is used, it is called zend_long. That datatype is
+	defined dynamically to guarantee the consistent 64 bit support. The zval 
+	field representing user land integer it bound to zend_long.
 
-	Signed integer is defined as zend_int_t, unsigned integer as zend_uint_t
-	inside Zend. Both are aliased as php_int_t and php_uint_t anywhere else,
-	respectively. The inclusion of php.h is necessary.
+	Signed integer is defined as zend_long, unsigned integer as zend_ulong
+	inside Zend. 
 
      Other datatypes
 
@@ -66,20 +57,25 @@ UPGRADE NOTES - PHP X.Y
   f. zend_parse_parameters() specs
 
        The new spec 'S' introduced, which expects an argument of type zend_string *.
-       The new specs 'i' and 'I' introduced, which expect an argument of type php_int_t.
+       The 'l' spec expects a parameter of the type zend_long, not long anymore.
+       The 's' spec expects parameters of the type char * and size_t, no int anymore.
 
   g. sprintf() formats
 
-       New printf modifier 'p' was implemented to platform independently output php_int_t,
-       php_uint_t and php_size_t datatypes. That modifier can be used with'd', 'u', 'x' and 'o'
+       New printf modifier 'p' was implemented to platform independently output zend_long,
+       zend_ulong and php_size_t datatypes. That modifier can be used with'd', 'u', 'x' and 'o'
        printf format specs with spprintf, snprintf and the wrapping printf implementations.
-       %pu is sufficient for both php_uint_t and php_size_t. the code using %p spec to output
+       %pu is sufficient for both zend_ulong and php_size_t. the code using %p spec to output
        pointer address might need to be enclosed into #ifdef when it unlickily followed by 'd',
        'u', 'x' or 'o'.
 
+       The only exceptions are the snprintf and zend_sprintf functions yet, because in some cases
+       they can use the implemenations available on the system, not the PHP one. Fro snprintf the
+       the macros ZEND_INT_FMT ZEND_UINT_FMT should be used.
+
   h. HashTable API
 
-       Datatype for array indexes was changed to php_uint_t, for string keys to zend_string *.
+       Datatype for array indexes was changed to zend_ulong, for string keys to zend_string *.
 
   i. New portable macros for large file support
 
@@ -93,16 +89,26 @@ UPGRADE NOTES - PHP X.Y
   j. New portable macros for integers
 
       Function(s)                                         Alias             Comment
-      snprintf with "%ld" or "%lld", _ltoa_s, _i64toa_s   ZEND_ITOA         for use with zend_int_t
-      atol, atoll, _atoi64                                ZEND_ATOI         for use with zend_int_t
-      strtol, strtoll, _strtoi64                          ZEND_STRTOI       for use with zend_int_t
-      strtoul, strtoull, _strtoui64                       ZEND_STRTOUI      for use with zend_int_t
-      abs, llabs, _abs64                                  ZEND_ABS          for use with zend_int_t
-      -                                                   ZEND_INT_MAX      Aliased with PHP_INT_MAX in php.h, replaces LONG_MAX where appropriate
-      -                                                   ZEND_INT_MIN      Aliased with PHP_INT_MIN in php.h, replaces LONG_MIN where appropriate
-      -                                                   ZEND_UINT_MAX     ULONG_MAX
-      -                                                   SIZEOF_ZEND_INT   Replaces SIZEOF_ZEND_LONG where appropriate
-      -                                                   ZEND_SIZE_MAX     Max value of zend_size_t
+      snprintf with "%ld" or "%lld", _ltoa_s, _i64toa_s   ZEND_LTOA         for use with zend_long
+      atol, atoll, _atoi64                                ZEND_ATOL         for use with zend_long
+      strtol, strtoll, _strtoi64                          ZEND_STRTOL       for use with zend_long
+      strtoul, strtoull, _strtoui64                       ZEND_STRTOUL      for use with zend_long
+      abs, llabs, _abs64                                  ZEND_ABS          for use with zend_long
+      -                                                   ZEND_LONG_MAX     replaces LONG_MAX where appropriate
+      -                                                   ZEND_LONG_MIN     replaces LONG_MIN where appropriate
+      -                                                   ZEND_ULONG_MAX    replaces ULONG_MAX where appropriate
+      -                                                   SIZEOF_ZEND_LONG  reworked SIZEOF_ZEND_LONG representing the size of zend_long datatype
+      -                                                   ZEND_SIZE_MAX     Max value of size_t
+
+  k. The get_class_entry object handler is no longer available. Instead
+     zend_object.ce is always used.
+
+  l. The get_class_name object handler is now only used for displaying class
+     names in debugging functions like var_dump(). It is no longer used in
+     get_class(), get_parent_class() or similar.
+
+     The handler is now obligatory, no longer accepts a `parent` argument and
+     must return a non-NULL zend_string*, which will be released by the caller.
 
 ========================
 2. Build system changes

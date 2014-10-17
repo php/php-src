@@ -169,7 +169,7 @@ void list_entry_destructor(zval *zv)
 	
 		zend_resource_dtor(res TSRMLS_CC);
 	}
-	efree(res);
+	efree_size(res, sizeof(zend_resource));
 }
 
 void plist_entry_destructor(zval *zv)

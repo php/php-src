@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -153,7 +153,7 @@ PHP_FUNCTION(gethostname)
 PHP_FUNCTION(gethostbyaddr)
 {
 	char *addr;
-	int addr_len;
+	size_t addr_len;
 	zend_string *hostname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &addr, &addr_len) == FAILURE) {
@@ -203,10 +203,10 @@ static zend_string *php_gethostbyaddr(char *ip)
 #endif
 
 	if (!hp || hp->h_name == NULL || hp->h_name[0] == '\0') {
-		return STR_INIT(ip, strlen(ip), 0);
+		return zend_string_init(ip, strlen(ip), 0);
 	}
 
-	return STR_INIT(hp->h_name, strlen(hp->h_name), 0);
+	return zend_string_init(hp->h_name, strlen(hp->h_name), 0);
 }
 /* }}} */
 
@@ -215,7 +215,7 @@ static zend_string *php_gethostbyaddr(char *ip)
 PHP_FUNCTION(gethostbyname)
 {
 	char *hostname;
-	int hostname_len;
+	size_t hostname_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hostname, &hostname_len) == FAILURE) {
 		return;
@@ -230,7 +230,7 @@ PHP_FUNCTION(gethostbyname)
 PHP_FUNCTION(gethostbynamel)
 {
 	char *hostname;
-	int hostname_len;
+	size_t hostname_len;
 	struct hostent *hp;
 	struct in_addr in;
 	int i;
@@ -263,13 +263,13 @@ static zend_string *php_gethostbyname(char *name)
 	hp = gethostbyname(name);
 
 	if (!hp || !*(hp->h_addr_list)) {
-		return STR_INIT(name, strlen(name), 0);
+		return zend_string_init(name, strlen(name), 0);
 	}
 
 	memcpy(&in.s_addr, *(hp->h_addr_list), sizeof(in.s_addr));
 
 	address = inet_ntoa(in);
-	return STR_INIT(address, strlen(address), 0);
+	return zend_string_init(address, strlen(address), 0);
 }
 /* }}} */
 
@@ -345,7 +345,7 @@ PHP_FUNCTION(dns_check_record)
 #endif
 	u_char ans[MAXPACKET];
 	char *hostname, *rectype = NULL;
-	int hostname_len, rectype_len = 0;
+	size_t hostname_len, rectype_len = 0;
 	int type = T_MX, i;
 #if defined(HAVE_DNS_SEARCH)
 	struct sockaddr_storage from;
@@ -456,10 +456,10 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 
 	add_assoc_string(subarray, "host", name);
 	add_assoc_string(subarray, "class", "IN");
-	add_assoc_int(subarray, "ttl", ttl);
+	add_assoc_long(subarray, "ttl", ttl);
 
 	if (raw) {
-		add_assoc_int(subarray, "type", type);
+		add_assoc_long(subarray, "type", type);
 		add_assoc_stringl(subarray, "data", (char*) cp, (uint) dlen);
 		cp += dlen;
 		return cp;
@@ -477,7 +477,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			CHECKCP(2);
 			add_assoc_string(subarray, "type", "MX");
 			GETSHORT(n, cp);
-			add_assoc_int(subarray, "pri", n);
+			add_assoc_long(subarray, "pri", n);
 			/* no break; */
 		case DNS_T_CNAME:
 			if (type == DNS_T_CNAME) {
@@ -523,7 +523,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 				zend_string *tp;
 
 				add_assoc_string(subarray, "type", "TXT");
-				tp = STR_ALLOC(dlen, 0);
+				tp = zend_string_alloc(dlen, 0);
 				
 				array_init(&entries);
 				
@@ -535,7 +535,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 					}
 					if (n) {
 						memcpy(tp->val + l2 , cp + l1 + 1, n);
-						add_next_index_stringl(&entries, cp + l1 + 1, n);
+						add_next_index_stringl(&entries, (char *) cp + l1 + 1, n);
 					}
 					l1 = l1 + n + 1;
 					l2 = l2 + n;
@@ -564,15 +564,15 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			add_assoc_string(subarray, "rname", name);
 			CHECKCP(5*4);
 			GETLONG(n, cp);
-			add_assoc_int(subarray, "serial", n);
+			add_assoc_long(subarray, "serial", n);
 			GETLONG(n, cp);
-			add_assoc_int(subarray, "refresh", n);
+			add_assoc_long(subarray, "refresh", n);
 			GETLONG(n, cp);
-			add_assoc_int(subarray, "retry", n);
+			add_assoc_long(subarray, "retry", n);
 			GETLONG(n, cp);
-			add_assoc_int(subarray, "expire", n);
+			add_assoc_long(subarray, "expire", n);
 			GETLONG(n, cp);
-			add_assoc_int(subarray, "minimum-ttl", n);
+			add_assoc_long(subarray, "minimum-ttl", n);
 			break;
 		case DNS_T_AAAA:
 			tp = (u_char*)name;
@@ -614,7 +614,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			CHECKCP(1);
 			n = ((int)cp[0]) & 0xFF;
 			cp++;
-			add_assoc_int(subarray, "masklen", n);
+			add_assoc_long(subarray, "masklen", n);
 			tp = (u_char*)name;
 			if (n > 15) {
 				have_v6_break = 1;
@@ -689,11 +689,11 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			CHECKCP(3*2);
 			add_assoc_string(subarray, "type", "SRV");
 			GETSHORT(n, cp);
-			add_assoc_int(subarray, "pri", n);
+			add_assoc_long(subarray, "pri", n);
 			GETSHORT(n, cp);
-			add_assoc_int(subarray, "weight", n);
+			add_assoc_long(subarray, "weight", n);
 			GETSHORT(n, cp);
-			add_assoc_int(subarray, "port", n);
+			add_assoc_long(subarray, "port", n);
 			n = dn_expand(answer->qb2, end, cp, name, (sizeof name) - 2);
 			if (n < 0) {
 				return NULL;
@@ -705,9 +705,9 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			CHECKCP(2*2);
 			add_assoc_string(subarray, "type", "NAPTR");
 			GETSHORT(n, cp);
-			add_assoc_int(subarray, "order", n);
+			add_assoc_long(subarray, "order", n);
 			GETSHORT(n, cp);
-			add_assoc_int(subarray, "pref", n);
+			add_assoc_long(subarray, "pref", n);
 
 			CHECKCP(1);
 			n = (cp[0] & 0xFF);
@@ -753,7 +753,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
-	int hostname_len;
+	size_t hostname_len;
 	long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type_to_fetch;
@@ -965,7 +965,7 @@ PHP_FUNCTION(dns_get_record)
 PHP_FUNCTION(dns_get_mx)
 {
 	char *hostname;
-	int hostname_len;
+	size_t hostname_len;
 	zval *mx_list, *weight_list = NULL;
 	int count, qdc;
 	u_short type, weight;
@@ -1047,7 +1047,7 @@ PHP_FUNCTION(dns_get_mx)
 		cp += i;
 		add_next_index_string(mx_list, buf);
 		if (weight_list) {
-			add_next_index_int(weight_list, weight);
+			add_next_index_long(weight_list, weight);
 		}
 	}
 	php_dns_free_handle(handle);
@@ -1059,20 +1059,20 @@ PHP_FUNCTION(dns_get_mx)
 
 #if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
 PHP_MINIT_FUNCTION(dns) {
-	REGISTER_INT_CONSTANT("DNS_A",     PHP_DNS_A,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_NS",    PHP_DNS_NS,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_CNAME", PHP_DNS_CNAME, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_SOA",   PHP_DNS_SOA,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_PTR",   PHP_DNS_PTR,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_HINFO", PHP_DNS_HINFO, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_MX",    PHP_DNS_MX,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_TXT",   PHP_DNS_TXT,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_SRV",   PHP_DNS_SRV,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_NAPTR", PHP_DNS_NAPTR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_AAAA",  PHP_DNS_AAAA,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_A6",    PHP_DNS_A6,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_ANY",   PHP_DNS_ANY,   CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("DNS_ALL",   PHP_DNS_ALL,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_A",     PHP_DNS_A,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_NS",    PHP_DNS_NS,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_CNAME", PHP_DNS_CNAME, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_SOA",   PHP_DNS_SOA,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_PTR",   PHP_DNS_PTR,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_HINFO", PHP_DNS_HINFO, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_MX",    PHP_DNS_MX,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_TXT",   PHP_DNS_TXT,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_SRV",   PHP_DNS_SRV,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_NAPTR", PHP_DNS_NAPTR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_AAAA",  PHP_DNS_AAAA,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_A6",    PHP_DNS_A6,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_ANY",   PHP_DNS_ANY,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DNS_ALL",   PHP_DNS_ALL,   CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 #endif /* HAVE_FULL_DNS_FUNCS */

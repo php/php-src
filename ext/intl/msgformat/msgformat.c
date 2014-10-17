@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
 	char*       pattern;
-	int         locale_len = 0, pattern_len = 0;
+	size_t         locale_len = 0, pattern_len = 0;
 	UChar*      spattern     = NULL;
 	int         spattern_len = 0;
 	zval*       object;
@@ -144,7 +144,7 @@ PHP_FUNCTION( msgfmt_get_error_code )
 	mfo = Z_INTL_MESSAGEFORMATTER_P( object );
 
 	/* Return formatter's last error code. */
-	RETURN_INT( INTL_DATA_ERROR_CODE(mfo) );
+	RETURN_LONG( INTL_DATA_ERROR_CODE(mfo) );
 }
 /* }}} */
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -69,7 +69,7 @@
 
 #define SAPI_LSAPI_MAX_HEADER_LENGTH 2048
 
-static int  lsapi_mode       = 1;
+static int  lsapi_mode       = 0;
 static char *php_self        = "";
 static char *script_filename = "";
 static int  source_highlight = 0;
@@ -104,7 +104,7 @@ static int php_lsapi_startup(sapi_module_struct *sapi_module)
 #define INI_DEFAULT(name,value)\
     ZVAL_STRING(tmp, value, 0);\
     zend_hash_update(configuration_hash, name, sizeof(name), tmp, sizeof(zval), (void**)&entry);\
-    Z_STRVAL_P(entry) = zend_strndup(Z_STRVAL_P(entry), Z_STRSIZE_P(entry))
+    Z_STRVAL_P(entry) = zend_strndup(Z_STRVAL_P(entry), Z_STRLEN_P(entry))
 
 static void sapi_lsapi_ini_defaults(HashTable *configuration_hash)
 {
@@ -195,15 +195,22 @@ static char *sapi_lsapi_getenv( char * name, size_t name_len TSRMLS_DC )
 /* }}} */
 
 
-/*
+
+
 static int add_variable( const char * pKey, int keyLen, const char * pValue, int valLen,
                          void * arg )
 {
-    php_register_variable_safe((char *)pKey, (char *)pValue, valLen, (zval *)arg TSRMLS_CC);
-    return 1;
-}
-*/
+	int filter_arg = (arg == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
+    char * new_val = (char *) pValue; 
+    unsigned int new_val_len;
 
+    if (sapi_module.input_filter(filter_arg, (char *)pKey, &new_val, valLen, &new_val_len TSRMLS_CC)) {
+        php_register_variable_safe((char *)pKey, new_val, new_val_len, (zval *)arg );
+    }
+	return 1;
+}
+
+/*
 static int add_variable( const char * pKey, int keyLen, const char * pValue, int valLen,
                          void * arg )
 {
@@ -212,7 +219,7 @@ static int add_variable( const char * pKey, int keyLen, const char * pValue, int
     register char * pKey1 = (char *)pKey;
 
     MAKE_STD_ZVAL(gpc_element);
-    Z_STRSIZE_P( gpc_element ) = valLen;
+    Z_STRLEN_P( gpc_element ) = valLen;
     Z_STRVAL_P( gpc_element ) = estrndup(pValue, valLen);
     Z_TYPE_P( gpc_element ) = IS_STRING;
 #if PHP_MAJOR_VERSION > 4
@@ -221,6 +228,55 @@ static int add_variable( const char * pKey, int keyLen, const char * pValue, int
     zend_hash_update( symtable1, pKey1, keyLen + 1, &gpc_element, sizeof( zval *), (void **) &gpc_element_p );
 #endif
     return 1;
+}
+*/
+
+static void litespeed_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
+{
+	char buf[128];
+	char **env, *p, *t = buf;
+	size_t alloc_size = sizeof(buf);
+	unsigned long nlen; /* ptrdiff_t is not portable */
+
+	if (PG(http_globals)[TRACK_VARS_ENV] &&
+		array_ptr != PG(http_globals)[TRACK_VARS_ENV] &&
+		Z_TYPE_P(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
+		zend_hash_num_elements(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV])) > 0
+	) {
+		zval_dtor(array_ptr);
+		*array_ptr = *PG(http_globals)[TRACK_VARS_ENV];
+		INIT_PZVAL(array_ptr);
+		zval_copy_ctor(array_ptr);
+		return;
+	} else if (PG(http_globals)[TRACK_VARS_SERVER] &&
+		array_ptr != PG(http_globals)[TRACK_VARS_SERVER] &&
+		Z_TYPE_P(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
+		zend_hash_num_elements(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER])) > 0
+	) {
+		zval_dtor(array_ptr);
+		*array_ptr = *PG(http_globals)[TRACK_VARS_SERVER];
+		INIT_PZVAL(array_ptr);
+		zval_copy_ctor(array_ptr);
+		return;
+	}
+
+	for (env = environ; env != NULL && *env != NULL; env++) {
+		p = strchr(*env, '=');
+		if (!p) {				/* malformed entry? */
+			continue;
+		}
+		nlen = p - *env;
+		if (nlen >= alloc_size) {
+			alloc_size = nlen + 64;
+			t = (t == buf ? emalloc(alloc_size): erealloc(t, alloc_size));
+		}
+		memcpy(t, *env, nlen);
+		t[nlen] = '\0';
+		add_variable(t, nlen, p + 1, strlen( p + 1 ), array_ptr TSRMLS_CC);
+	}
+	if (t != buf && t != NULL) {
+		efree(t);
+	}
 }
 
 
@@ -233,8 +289,8 @@ static int add_variable_magic_quote( const char * pKey, int keyLen, const char *
     register char * pKey1 = (char *)pKey;
 
     MAKE_STD_ZVAL(gpc_element);
-    Z_STRSIZE_P( gpc_element ) = valLen;
-    Z_STRVAL_P( gpc_element ) = php_addslashes((char *)pValue, valLen, &Z_STRSIZE_P( gpc_element ), 0 );
+    Z_STRLEN_P( gpc_element ) = valLen;
+    Z_STRVAL_P( gpc_element ) = php_addslashes((char *)pValue, valLen, &Z_STRLEN_P( gpc_element ), 0 );
     Z_TYPE_P( gpc_element ) = IS_STRING;
 #if PHP_MAJOR_VERSION > 4
     zend_symtable_update( symtable1, pKey1, keyLen + 1, &gpc_element, sizeof( zval *), (void **) &gpc_element_p );
@@ -255,6 +311,8 @@ static void sapi_lsapi_register_variables(zval *track_vars_array TSRMLS_DC)
         if ( (SG(request_info).request_uri ) )
             php_self = (SG(request_info).request_uri );
 
+        litespeed_php_import_environment_variables(track_vars_array TSRMLS_CC);
+
 #if ((PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || PHP_MAJOR_VERSION < 5)
         if (!PG(magic_quotes_gpc)) {
 #endif
@@ -268,7 +326,6 @@ static void sapi_lsapi_register_variables(zval *track_vars_array TSRMLS_DC)
             add_variable_magic_quote("PHP_SELF", 8, php_self, strlen( php_self ), track_vars_array );
         }
 #endif
-        php_import_environment_variables(track_vars_array TSRMLS_CC);
     } else {
         php_import_environment_variables(track_vars_array TSRMLS_CC);
 
@@ -370,7 +427,7 @@ static void sapi_lsapi_log_message(char *message TSRMLS_DC)
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V6.6",
+    "LiteSpeed V6.7",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -996,6 +1053,7 @@ int main( int argc, char * argv[] )
     LSAPI_Init();
    
     LSAPI_Init_Env_Parameters( NULL );
+    lsapi_mode = 1; 
 
     slow_script_msec = LSAPI_Get_Slow_Req_Msecs();
 

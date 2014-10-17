@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,8 +42,8 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	zval		args_a[6] = {0},
 				*args		= &args_a[0];
 	char		*locale		= NULL;
-	int			locale_len;
-	php_int_t		largs[6];
+	size_t			locale_len;
+	zend_long		largs[6];
 	UErrorCode	status		= U_ZERO_ERROR;
 	int			variant;
 	intl_error_reset(NULL TSRMLS_CC);
@@ -242,11 +242,11 @@ U_CFUNC PHP_FUNCTION(intlgregcal_get_gregorian_change)
 
 U_CFUNC PHP_FUNCTION(intlgregcal_is_leap_year)
 {
-	php_int_t year;
+	zend_long year;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
-			"Oi", &object, GregorianCalendar_ce_ptr, &year) == FAILURE) {
+			"Ol", &object, GregorianCalendar_ce_ptr, &year) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlgregcal_is_leap_year: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;

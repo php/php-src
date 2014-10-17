@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -82,7 +82,7 @@ typedef struct {
 	const char *request_method;
 	char *query_string;
 	char *cookie_data;
-	zend_int_t content_length;
+	zend_long content_length;
 
 	char *path_translated;
 	char *request_uri;
@@ -129,7 +129,7 @@ typedef struct _sapi_globals_struct {
 	char *default_mimetype;
 	char *default_charset;
 	HashTable *rfc1867_uploaded_files;
-	zend_int_t post_max_size;
+	zend_long post_max_size;
 	int options;
 	zend_bool sapi_started;
 	double global_request_time;
@@ -170,7 +170,7 @@ END_EXTERN_C()
 typedef struct {
 	char *line; /* If you allocated this, you need to free it yourself */
 	uint line_len;
-	zend_int_t response_code; /* long due to zend_parse_parameters compatibility */
+	zend_long response_code; /* long due to zend_parse_parameters compatibility */
 } sapi_header_line;
 
 typedef enum {					/* Parameter: 			*/
@@ -198,7 +198,7 @@ SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D) TSRMLS_DC);
 SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC) TSRMLS_DC);
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC);
+SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, size_t val_len, size_t *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC);
 
 SAPI_API int sapi_flush(TSRMLS_D);
 SAPI_API zend_stat_t *sapi_get_stat(TSRMLS_D);
@@ -228,7 +228,7 @@ struct _sapi_module_struct {
 	int (*activate)(TSRMLS_D);
 	int (*deactivate)(TSRMLS_D);
 
-	php_size_t (*ub_write)(const char *str, php_size_t str_length TSRMLS_DC);
+	size_t (*ub_write)(const char *str, size_t str_length TSRMLS_DC);
 	void (*flush)(void *server_context TSRMLS_DC);
 	zend_stat_t *(*get_stat)(TSRMLS_D);
 	char *(*getenv)(char *name, size_t name_len TSRMLS_DC);
@@ -239,7 +239,7 @@ struct _sapi_module_struct {
 	int (*send_headers)(sapi_headers_struct *sapi_headers TSRMLS_DC);
 	void (*send_header)(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC);
 
-	php_size_t (*read_post)(char *buffer, php_size_t count_bytes TSRMLS_DC);
+	size_t (*read_post)(char *buffer, size_t count_bytes TSRMLS_DC);
 	char *(*read_cookies)(TSRMLS_D);
 
 	void (*register_server_variables)(zval *track_vars_array TSRMLS_DC);
@@ -266,7 +266,7 @@ struct _sapi_module_struct {
 	int (*get_target_uid)(uid_t * TSRMLS_DC);
 	int (*get_target_gid)(gid_t * TSRMLS_DC);
 
-	unsigned int (*input_filter)(int arg, char *var, char **val, php_size_t val_len, php_size_t *new_val_len TSRMLS_DC);
+	unsigned int (*input_filter)(int arg, char *var, char **val, size_t val_len, size_t *new_val_len TSRMLS_DC);
 	
 	void (*ini_defaults)(HashTable *configuration_hash);
 	int phpinfo_as_text;
@@ -300,7 +300,7 @@ struct _sapi_post_entry {
 #define SAPI_POST_HANDLER_FUNC(post_handler) void post_handler(char *content_type_dup, void *arg TSRMLS_DC)
 
 #define SAPI_TREAT_DATA_FUNC(treat_data) void treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
-#define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, char *var, char **val, php_size_t val_len, php_size_t *new_val_len TSRMLS_DC)
+#define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, char *var, char **val, size_t val_len, size_t *new_val_len TSRMLS_DC)
 
 BEGIN_EXTERN_C()
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);

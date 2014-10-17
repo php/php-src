@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -60,12 +60,12 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS
 	spprintf(&message, 0, "%s [%d] (severity %d) [%s]",
 		msg, einfo->dberr, einfo->severity, stmt ? stmt->active_query_string : "");
 
-	add_next_index_int(info, einfo->dberr);
+	add_next_index_long(info, einfo->dberr);
 	// TODO: avoid reallocation ???
 	add_next_index_string(info, message);
 	efree(message);
-	add_next_index_int(info, einfo->oserr);
-	add_next_index_int(info, einfo->severity);
+	add_next_index_long(info, einfo->oserr);
+	add_next_index_long(info, einfo->severity);
 	if (einfo->oserrstr) {
 		add_next_index_string(info, einfo->oserrstr);
 	}
@@ -93,7 +93,7 @@ static int dblib_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 	return 0;
 }
 
-static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	pdo_dblib_stmt *S = ecalloc(1, sizeof(*S));
@@ -107,7 +107,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_
 	return 1;
 }
 
-static php_int_t dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_len TSRMLS_DC)
+static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	RETCODE ret, resret;

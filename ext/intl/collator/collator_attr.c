@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,12 +33,12 @@
  */
 PHP_FUNCTION( collator_get_attribute )
 {
-	php_int_t attribute, value;
+	zend_long attribute, value;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oi",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
 		&object, Collator_ce_ptr, &attribute ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -53,7 +53,7 @@ PHP_FUNCTION( collator_get_attribute )
 	value = ucol_getAttribute( co->ucoll, attribute, COLLATOR_ERROR_CODE_P( co ) );
 	COLLATOR_CHECK_STATUS( co, "Error getting attribute value" );
 
-	RETURN_INT( value );
+	RETURN_LONG( value );
 }
 /* }}} */
 
@@ -64,12 +64,12 @@ PHP_FUNCTION( collator_get_attribute )
  */
 PHP_FUNCTION( collator_set_attribute )
 {
-	php_int_t attribute, value;
+	zend_long attribute, value;
 	COLLATOR_METHOD_INIT_VARS
 
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oii",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll",
 		&object, Collator_ce_ptr, &attribute, &value ) == FAILURE)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -112,7 +112,7 @@ PHP_FUNCTION( collator_get_strength )
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 	/* Get current strength and return it. */
-	RETURN_INT( ucol_getStrength( co->ucoll ) );
+	RETURN_LONG( ucol_getStrength( co->ucoll ) );
 }
 /* }}} */
 
@@ -123,12 +123,12 @@ PHP_FUNCTION( collator_get_strength )
  */
 PHP_FUNCTION( collator_set_strength )
 {
-	php_int_t strength;
+	zend_long strength;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oi",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
 		&object, Collator_ce_ptr, &strength ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

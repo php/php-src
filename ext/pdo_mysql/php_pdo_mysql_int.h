@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -106,7 +106,7 @@ typedef struct {
 	unsigned fetch_table_names:1;
 	unsigned _reserved:31;	
 #if !PDO_USE_MYSQLND
-	php_uint_t max_buffer_size;
+	zend_ulong max_buffer_size;
 #endif
 
 	pdo_mysql_error_info einfo;
@@ -122,9 +122,9 @@ typedef struct {
 	const MYSQL_FIELD		*fields;
 	MYSQL_ROW				current_data;
 #if PDO_USE_MYSQLND
-	php_uint_t		*current_lengths;
+	zend_ulong		*current_lengths;
 #else
-	php_int_t		*current_lengths;
+	zend_long		*current_lengths;
 #endif
 	pdo_mysql_error_info 	einfo;
 #if PDO_USE_MYSQLND
@@ -136,11 +136,11 @@ typedef struct {
 	PDO_MYSQL_PARAM_BIND	*params;
 #ifndef PDO_USE_MYSQLND
 	my_bool					*in_null;
-	php_uint_t			*in_length;
+	zend_ulong			*in_length;
 #endif
 	PDO_MYSQL_PARAM_BIND	*bound_result;
 	my_bool					*out_null;
-	php_uint_t			*out_length;
+	zend_ulong			*out_length;
 	unsigned int			params_given;
 	unsigned				max_length:1;
 } pdo_mysql_stmt;

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -22,7 +22,7 @@
 #define PHP_HTTP_H
 
 #include "php.h"
-#include "php_smart_str.h"
+#include "zend_smart_str.h"
 
 PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *num_prefix, int num_prefix_len,

@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <zend.h>
 
-const char *zend_vm_opcodes_map[169] = {
+const char *zend_vm_opcodes_map[170] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -71,11 +71,11 @@ const char *zend_vm_opcodes_map[169] = {
 	"ZEND_JMPZ_EX",
 	"ZEND_JMPNZ_EX",
 	"ZEND_CASE",
-	"ZEND_SWITCH_FREE",
+	NULL,
 	"ZEND_BRK",
 	"ZEND_CONT",
 	"ZEND_BOOL",
-	"ZEND_INIT_STRING",
+	NULL,
 	"ZEND_ADD_CHAR",
 	"ZEND_ADD_STRING",
 	"ZEND_ADD_VAR",
@@ -120,7 +120,7 @@ const char *zend_vm_opcodes_map[169] = {
 	"ZEND_FETCH_UNSET",
 	"ZEND_FETCH_DIM_UNSET",
 	"ZEND_FETCH_OBJ_UNSET",
-	"ZEND_FETCH_DIM_TMP_VAR",
+	"ZEND_FETCH_LIST",
 	"ZEND_FETCH_CONSTANT",
 	"ZEND_GOTO",
 	"ZEND_EXT_STMT",
@@ -164,7 +164,7 @@ const char *zend_vm_opcodes_map[169] = {
 	"ZEND_DECLARE_CLASS",
 	"ZEND_DECLARE_INHERITED_CLASS",
 	"ZEND_DECLARE_FUNCTION",
-	"ZEND_RAISE_ABSTRACT_ERROR",
+	NULL,
 	"ZEND_DECLARE_CONST",
 	"ZEND_ADD_INTERFACE",
 	"ZEND_DECLARE_INHERITED_CLASS_DELAYED",
@@ -179,8 +179,8 @@ const char *zend_vm_opcodes_map[169] = {
 	"ZEND_ADD_TRAIT",
 	"ZEND_BIND_TRAITS",
 	"ZEND_SEPARATE",
-	"ZEND_QM_ASSIGN_VAR",
-	"ZEND_JMP_SET_VAR",
+	NULL,
+	NULL,
 	"ZEND_DISCARD_EXCEPTION",
 	"ZEND_YIELD",
 	"ZEND_GENERATOR_RETURN",
@@ -191,6 +191,7 @@ const char *zend_vm_opcodes_map[169] = {
 	"ZEND_POW",
 	"ZEND_ASSIGN_POW",
 	"ZEND_BIND_GLOBAL",
+	"ZEND_COALESCE",
 };
 
 ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {

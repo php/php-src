@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -254,7 +254,7 @@ struct _sdlAttribute {
 };
 
 
-sdlPtr get_sdl(zval *this_ptr, char *uri, php_int_t cache_wsdl TSRMLS_DC);
+sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl TSRMLS_DC);
 
 encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const xmlChar *type);
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type);

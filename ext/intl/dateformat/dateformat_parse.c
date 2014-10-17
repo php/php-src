@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,24 +57,24 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* tex
 	if(result > LONG_MAX || result < -LONG_MAX) {
 		ZVAL_DOUBLE(return_value, result<0?ceil(result):floor(result));
 	} else {
-		ZVAL_INT(return_value, (php_int_t)result);
+		ZVAL_LONG(return_value, (zend_long)result);
 	}
 }
 /* }}} */
 
-static void add_to_localtime_arr( IntlDateFormatter_object *dfo, zval* return_value, const UCalendar *parsed_calendar, php_int_t calendar_field, char* key_name TSRMLS_DC)
+static void add_to_localtime_arr( IntlDateFormatter_object *dfo, zval* return_value, const UCalendar *parsed_calendar, zend_long calendar_field, char* key_name TSRMLS_DC)
 {
-	php_int_t calendar_field_val = ucal_get( parsed_calendar, calendar_field, &INTL_DATA_ERROR_CODE(dfo));	
+	zend_long calendar_field_val = ucal_get( parsed_calendar, calendar_field, &INTL_DATA_ERROR_CODE(dfo));	
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing - localtime failed : could not get a field from calendar" );
 
 	if( strcmp(key_name, CALENDAR_YEAR )==0 ){
 		/* since tm_year is years from 1900 */
-		add_assoc_int( return_value, key_name,( calendar_field_val-1900) ); 
+		add_assoc_long( return_value, key_name,( calendar_field_val-1900) ); 
 	}else if( strcmp(key_name, CALENDAR_WDAY )==0 ){
 		/* since tm_wday starts from 0 whereas ICU WDAY start from 1 */
-		add_assoc_int( return_value, key_name,( calendar_field_val-1) ); 
+		add_assoc_long( return_value, key_name,( calendar_field_val-1) ); 
 	}else{
-		add_assoc_int( return_value, key_name, calendar_field_val ); 
+		add_assoc_long( return_value, key_name, calendar_field_val ); 
 	}
 }
 
@@ -86,7 +86,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 	UCalendar      *parsed_calendar = NULL;
 	UChar*  	text_utf16  = NULL;
 	int32_t 	text_utf16_len = 0;
-	php_int_t 		isInDST = 0;
+	zend_long 		isInDST = 0;
 
 	/* Convert timezone to UTF-16. */
 	intl_convert_utf8_to_utf16(&text_utf16, &text_utf16_len, text_to_parse, text_len, &INTL_DATA_ERROR_CODE(dfo));
@@ -116,7 +116,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 	/* Is in DST? */
 	isInDST = ucal_inDaylightTime(parsed_calendar	, &INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing - localtime failed : while checking if currently in DST." );
-	add_assoc_int( return_value, CALENDAR_ISDST,(isInDST==1?1:0)); 
+	add_assoc_long( return_value, CALENDAR_ISDST,(isInDST==1?1:0)); 
 }
 /* }}} */
 
@@ -128,7 +128,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 PHP_FUNCTION(datefmt_parse)
 {
 	char*           text_to_parse = NULL;
-	int32_t         text_len =0;
+	size_t          text_len =0;
 	zval*         	z_parse_pos = NULL;
 	int32_t			parse_pos = -1;
 
@@ -146,8 +146,8 @@ PHP_FUNCTION(datefmt_parse)
 
 	if (z_parse_pos) {
 		ZVAL_DEREF(z_parse_pos);
-		convert_to_int(z_parse_pos);
-		parse_pos = (int32_t)Z_IVAL_P(z_parse_pos);
+		convert_to_long(z_parse_pos);
+		parse_pos = (int32_t)Z_LVAL_P(z_parse_pos);
 		if(parse_pos > text_len) {
 			RETURN_FALSE;
 		}
@@ -155,7 +155,7 @@ PHP_FUNCTION(datefmt_parse)
 	internal_parse_to_timestamp( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, return_value TSRMLS_CC);
 	if(z_parse_pos) {
 		zval_dtor(z_parse_pos);
-		ZVAL_INT(z_parse_pos, parse_pos);
+		ZVAL_LONG(z_parse_pos, parse_pos);
 	}
 }
 /* }}} */
@@ -167,9 +167,9 @@ PHP_FUNCTION(datefmt_parse)
 PHP_FUNCTION(datefmt_localtime)
 {
 	char*           text_to_parse = NULL;
-	int32_t         text_len =0;
+	size_t          text_len =0;
 	zval*         	z_parse_pos = NULL;
-	int32_t			parse_pos = -1;
+	int32_t		parse_pos = -1;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
@@ -185,8 +185,8 @@ PHP_FUNCTION(datefmt_localtime)
 
 	if (z_parse_pos) {
 		ZVAL_DEREF(z_parse_pos);
-		convert_to_int(z_parse_pos);
-		parse_pos = (int32_t)Z_IVAL_P(z_parse_pos);
+		convert_to_long(z_parse_pos);
+		parse_pos = (int32_t)Z_LVAL_P(z_parse_pos);
 		if(parse_pos > text_len) {
 			RETURN_FALSE;
 		}
@@ -194,7 +194,7 @@ PHP_FUNCTION(datefmt_localtime)
 	internal_parse_to_localtime( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, return_value TSRMLS_CC);
 	if (z_parse_pos) {
 		zval_dtor(z_parse_pos);
-		ZVAL_INT(z_parse_pos, parse_pos);
+		ZVAL_LONG(z_parse_pos, parse_pos);
 	}
 }
 /* }}} */

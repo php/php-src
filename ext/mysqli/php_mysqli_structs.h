@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -99,9 +99,9 @@ enum mysqli_status {
 
 typedef struct {
 	char		*val;
-	php_uint_t		buflen;
-	php_uint_t		output_len;
-	php_uint_t		type;
+	zend_ulong		buflen;
+	zend_ulong		output_len;
+	zend_ulong		type;
 } VAR_BUFFER;
 
 typedef struct {
@@ -214,7 +214,7 @@ extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_stat
 extern zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
 extern zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 
-extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, php_int_t fetchtype TSRMLS_DC);
+extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend_long fetchtype TSRMLS_DC);
 
 #ifdef HAVE_SPL
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
@@ -318,27 +318,27 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
-	php_int_t			default_link;
-	php_int_t			num_links;
-	php_int_t			max_links;
-	php_int_t 			num_active_persistent;
-	php_int_t 			num_inactive_persistent;
-	php_int_t			max_persistent;
-	php_int_t			allow_persistent;
-	php_uint_t	default_port;
+	zend_long			default_link;
+	zend_long			num_links;
+	zend_long			max_links;
+	zend_long 			num_active_persistent;
+	zend_long 			num_inactive_persistent;
+	zend_long			max_persistent;
+	zend_long			allow_persistent;
+	zend_ulong	default_port;
 	char			*default_host;
 	char			*default_user;
 	char			*default_socket;
 	char			*default_pw;
-	php_int_t			reconnect;
-	php_int_t			allow_local_infile;
-	php_int_t			strict;
-	php_int_t			error_no;
+	zend_long			reconnect;
+	zend_long			allow_local_infile;
+	zend_long			strict;
+	zend_long			error_no;
 	char			*error_msg;
-	php_int_t			report_mode;
+	zend_long			report_mode;
 	HashTable		*report_ht;
-	php_uint_t	multi_query;
-	php_uint_t	embedded;
+	zend_ulong	multi_query;
+	zend_ulong	embedded;
 	zend_bool 		rollback_on_cached_plink;
 ZEND_END_MODULE_GLOBALS(mysqli)
 

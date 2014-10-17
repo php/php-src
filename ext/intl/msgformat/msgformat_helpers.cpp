@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -112,7 +112,7 @@ static HashTable *umsg_get_numeric_types(MessageFormatter_object *mfo,
 
 	for (int i = 0; i < parts_count; i++) {
 		const Formattable::Type t = types[i];
-		if (zend_hash_index_update_mem(ret, (php_uint_t)i, (void*)&t, sizeof(t)) == NULL) {
+		if (zend_hash_index_update_mem(ret, (zend_ulong)i, (void*)&t, sizeof(t)) == NULL) {
 			intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
 				"Write to argument types hash table failed", 0 TSRMLS_CC);
 			break;
@@ -200,10 +200,10 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 					"Found part with negative number", 0 TSRMLS_CC);
 				continue;
 			}
-			if ((storedType = (Formattable::Type*)zend_hash_index_find_ptr(ret, (php_uint_t)argNumber)) == NULL) {
+			if ((storedType = (Formattable::Type*)zend_hash_index_find_ptr(ret, (zend_ulong)argNumber)) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				if ((storedType = (Formattable::Type*)zend_hash_index_update_mem(ret, (php_uint_t)argNumber, (void*)&bogusType, sizeof(bogusType))) == NULL) {
+				if ((storedType = (Formattable::Type*)zend_hash_index_update_mem(ret, (zend_ulong)argNumber, (void*)&bogusType, sizeof(bogusType))) == NULL) {
 					intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
 						"Write to argument types hash table failed", 0 TSRMLS_CC);
 					continue;
@@ -388,7 +388,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 
 	// Key related variables
 	zend_string		*str_index;
-	php_uint_t			num_index;
+	zend_ulong			num_index;
 
 	ZEND_HASH_FOREACH_KEY_VAL(args, num_index, str_index, elem) {
 		Formattable& formattable = fargs[argNum];
@@ -401,7 +401,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 		/* Process key and retrieve type */
 		if (str_index == NULL) {
 			/* includes case where index < 0 because it's exposed as unsigned */
-			if (num_index > (php_uint_t)INT32_MAX) {
+			if (num_index > (zend_ulong)INT32_MAX) {
 				intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
 					"Found negative or too large array key", 0 TSRMLS_CC);
 				continue;
@@ -411,7 +411,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 		   int32_t len = u_sprintf(temp, "%u", (uint32_t)num_index);
 		   key.append(temp, len);
 
-		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, (php_uint_t)num_index);
+		   storedArgType = (Formattable::Type*)zend_hash_index_find_ptr(types, (zend_ulong)num_index);
 		} else { //string; assumed to be in UTF-8
 			intl_stringFromChar(key, str_index->val, str_index->len, &err.code);
 
@@ -447,7 +447,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 
 					UnicodeString *text = new UnicodeString();
 					intl_stringFromChar(*text,
-						Z_STRVAL_P(elem), Z_STRSIZE_P(elem), &err.code);
+						Z_STRVAL_P(elem), Z_STRLEN_P(elem), &err.code);
 
 					if (U_FAILURE(err.code)) {
 						char *message;
@@ -466,14 +466,14 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 					double d;
 					if (Z_TYPE_P(elem) == IS_DOUBLE) {
 						d = Z_DVAL_P(elem);
-					} else if (Z_TYPE_P(elem) == IS_INT) {
-						d = (double)Z_IVAL_P(elem);
+					} else if (Z_TYPE_P(elem) == IS_LONG) {
+						d = (double)Z_LVAL_P(elem);
 					} else {
 						SEPARATE_ZVAL_IF_NOT_REF(elem);
 						convert_scalar_to_number(elem TSRMLS_CC);
 						d = (Z_TYPE_P(elem) == IS_DOUBLE)
 							? Z_DVAL_P(elem)
-							: (double)Z_IVAL_P(elem);
+							: (double)Z_LVAL_P(elem);
 					}
 					formattable.setDouble(d);
 					break;
@@ -491,14 +491,14 @@ retry_klong:
 						} else {
 							tInt32 = (int32_t)Z_DVAL_P(elem);
 						}
-					} else if (Z_TYPE_P(elem) == IS_INT) {
-						if (Z_IVAL_P(elem) > INT32_MAX ||
-								Z_IVAL_P(elem) < INT32_MIN) {
+					} else if (Z_TYPE_P(elem) == IS_LONG) {
+						if (Z_LVAL_P(elem) > INT32_MAX ||
+								Z_LVAL_P(elem) < INT32_MIN) {
 							intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
 								"Found PHP integer with absolute value too large "
 								"for 32 bit integer argument", 0 TSRMLS_CC);
 						} else {
-							tInt32 = (int32_t)Z_IVAL_P(elem);
+							tInt32 = (int32_t)Z_LVAL_P(elem);
 						}
 					} else {
 						SEPARATE_ZVAL_IF_NOT_REF(elem);
@@ -521,9 +521,9 @@ retry_kint64:
 						} else {
 							tInt64 = (int64_t)Z_DVAL_P(elem);
 						}
-					} else if (Z_TYPE_P(elem) == IS_INT) {
+					} else if (Z_TYPE_P(elem) == IS_LONG) {
 						/* assume long is not wider than 64 bits */
-						tInt64 = (int64_t)Z_IVAL_P(elem);
+						tInt64 = (int64_t)Z_LVAL_P(elem);
 					} else {
 						SEPARATE_ZVAL_IF_NOT_REF(elem);
 						convert_scalar_to_number(elem TSRMLS_CC);
@@ -567,10 +567,10 @@ retry_kint64:
 				break;
 			case IS_TRUE:
 			case IS_FALSE:
-				convert_to_int_ex(elem);
+				convert_to_long_ex(elem);
 				/* Intentional fallthrough */
-			case IS_INT:
-				formattable.setInt64((int64_t)Z_IVAL_P(elem));
+			case IS_LONG:
+				formattable.setInt64((int64_t)Z_LVAL_P(elem));
 				break;
 			case IS_NULL:
 				formattable.setInt64((int64_t)0);
@@ -658,15 +658,15 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args, UCh
             break;
 
         case Formattable::kLong:
-			ZVAL_INT(&(*args)[i], fargs[i].getLong());
+			ZVAL_LONG(&(*args)[i], fargs[i].getLong());
             break;
 
         case Formattable::kInt64:
             aInt64 = fargs[i].getInt64();
-			if(aInt64 > PHP_INT_MAX || aInt64 < -PHP_INT_MAX) {
+			if(aInt64 > ZEND_LONG_MAX || aInt64 < -ZEND_LONG_MAX) {
 				ZVAL_DOUBLE(&(*args)[i], (double)aInt64);
 			} else {
-				ZVAL_INT(&(*args)[i], (php_int_t)aInt64);
+				ZVAL_LONG(&(*args)[i], (zend_long)aInt64);
 			}
             break;
 

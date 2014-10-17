@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -162,7 +162,7 @@ PHP_MINFO_FUNCTION(php_gettext)
 PHP_NAMED_FUNCTION(zif_textdomain)
 {
 	char *domain, *domain_name, *retval;
-	int domain_len;
+	size_t domain_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &domain, &domain_len) == FAILURE) {
 		return;
@@ -187,7 +187,7 @@ PHP_NAMED_FUNCTION(zif_textdomain)
 PHP_NAMED_FUNCTION(zif_gettext)
 {
 	char *msgid, *msgstr;
-	int msgid_len;
+	size_t msgid_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &msgid, &msgid_len) == FAILURE) {
 		return;
@@ -205,7 +205,7 @@ PHP_NAMED_FUNCTION(zif_gettext)
 PHP_NAMED_FUNCTION(zif_dgettext)
 {
 	char *domain, *msgid, *msgstr;
-	int domain_len, msgid_len;
+	size_t domain_len, msgid_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &domain, &domain_len, &msgid, &msgid_len) == FAILURE)	{
 		return;
@@ -225,10 +225,10 @@ PHP_NAMED_FUNCTION(zif_dgettext)
 PHP_NAMED_FUNCTION(zif_dcgettext)
 {
 	char *domain, *msgid, *msgstr;
-	int domain_len, msgid_len;
-	php_int_t category;
+	size_t domain_len, msgid_len;
+	zend_long category;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssi", &domain, &domain_len, &msgid, &msgid_len, &category) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl", &domain, &domain_len, &msgid, &msgid_len, &category) == FAILURE) {
 		return;
 	}
 
@@ -246,7 +246,7 @@ PHP_NAMED_FUNCTION(zif_dcgettext)
 PHP_NAMED_FUNCTION(zif_bindtextdomain)
 {
 	char *domain, *dir;
-	int domain_len, dir_len;
+	size_t domain_len, dir_len;
 	char *retval, dir_name[MAXPATHLEN];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &domain, &domain_len, &dir, &dir_len) == FAILURE) {
@@ -280,10 +280,10 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 PHP_NAMED_FUNCTION(zif_ngettext)
 {
 	char *msgid1, *msgid2, *msgstr;
-	int msgid1_len, msgid2_len;
-	php_int_t count;
+	size_t msgid1_len, msgid2_len;
+	zend_long count;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssi", &msgid1, &msgid1_len, &msgid2, &msgid2_len, &count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl", &msgid1, &msgid1_len, &msgid2, &msgid2_len, &count) == FAILURE) {
 		return;
 	}
 
@@ -304,10 +304,10 @@ PHP_NAMED_FUNCTION(zif_ngettext)
 PHP_NAMED_FUNCTION(zif_dngettext)
 {
 	char *domain, *msgid1, *msgid2, *msgstr = NULL;
-	int domain_len, msgid1_len, msgid2_len;
-	php_int_t count;
+	size_t domain_len, msgid1_len, msgid2_len;
+	zend_long count;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssi", &domain, &domain_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssl", &domain, &domain_len,
 		&msgid1, &msgid1_len, &msgid2, &msgid2_len, &count) == FAILURE) {
 		return;
 	}
@@ -330,12 +330,12 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 PHP_NAMED_FUNCTION(zif_dcngettext)
 {
 	char *domain, *msgid1, *msgid2, *msgstr = NULL;
-	int domain_len, msgid1_len, msgid2_len;
-	php_int_t count, category;
+	size_t domain_len, msgid1_len, msgid2_len;
+	zend_long count, category;
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssii", &domain, &domain_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssll", &domain, &domain_len,
 		&msgid1, &msgid1_len, &msgid2, &msgid2_len, &count, &category) == FAILURE) {
 		return;
 	}
@@ -360,7 +360,7 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
 {
 	char *domain, *codeset, *retval = NULL;
-	int domain_len, codeset_len;
+	size_t domain_len, codeset_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &domain, &domain_len, &codeset, &codeset_len) == FAILURE) {
 		return;

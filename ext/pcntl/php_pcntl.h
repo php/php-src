@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -61,7 +61,7 @@ PHP_FUNCTION(pcntl_setpriority);
 
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
-	php_int_t signo;
+	zend_long signo;
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)
@@ -77,7 +77,7 @@ ZEND_END_MODULE_GLOBALS(pcntl)
 #define PCNTL_G(v)	(pcntl_globals.v)
 #endif
 
-#define REGISTER_PCNTL_ERRNO_CONSTANT(name) REGISTER_INT_CONSTANT("PCNTL_" #name, name, CONST_CS | CONST_PERSISTENT)
+#define REGISTER_PCNTL_ERRNO_CONSTANT(name) REGISTER_LONG_CONSTANT("PCNTL_" #name, name, CONST_CS | CONST_PERSISTENT)
 
 #endif	/* PHP_PCNTL_H */
 

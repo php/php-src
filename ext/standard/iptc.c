@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -178,16 +178,16 @@ static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 PHP_FUNCTION(iptcembed)
 {
 	char *iptcdata, *jpeg_file;
-	int iptcdata_len, jpeg_file_len;
-	php_int_t spool = 0;
+	size_t iptcdata_len, jpeg_file_len;
+	zend_long spool = 0;
 	FILE *fp;
 	unsigned int marker, done = 0;
 	int inx;
 	unsigned char *spoolbuf = NULL, *poi = NULL;
-	struct stat sb;
+	zend_stat_t sb;
 	zend_bool written = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|i", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
 		return;
 	}
 
@@ -201,7 +201,7 @@ PHP_FUNCTION(iptcembed)
 	}
 
 	if (spool < 2) {
-		fstat(fileno(fp), &sb);
+		zend_fstat(fileno(fp), &sb);
 
 		poi = spoolbuf = safe_emalloc(1, iptcdata_len + sizeof(psheader) + sb.st_size + 1024, 1);
 		memset(poi, 0, iptcdata_len + sizeof(psheader) + sb.st_size + 1024 + 1);
@@ -300,9 +300,9 @@ PHP_FUNCTION(iptcparse)
 {
 	int inx = 0, len;
 	unsigned int tagsfound = 0;
-	unsigned char *buffer, recnum, dataset, key[ 16 ];
-	char *str;
-	int str_len;
+	unsigned char *buffer, recnum, dataset;
+	char *str, key[16];
+	size_t str_len;
 	zval values, *element;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) != SUCCESS) {
@@ -334,8 +334,8 @@ PHP_FUNCTION(iptcparse)
 			if((inx+6) >= str_len) {
 				break;
 			}
-			len = (((php_int_t) buffer[ inx + 2 ]) << 24) + (((php_int_t) buffer[ inx + 3 ]) << 16) + 
-				  (((php_int_t) buffer[ inx + 4 ]) <<  8) + (((php_int_t) buffer[ inx + 5 ]));
+			len = (((zend_long) buffer[ inx + 2 ]) << 24) + (((zend_long) buffer[ inx + 3 ]) << 16) + 
+				  (((zend_long) buffer[ inx + 4 ]) <<  8) + (((zend_long) buffer[ inx + 5 ]));
 			inx += 6;
 		} else { /* short tag */
 			len = (((unsigned short) buffer[ inx ])<<8) | (unsigned short)buffer[ inx+1 ];

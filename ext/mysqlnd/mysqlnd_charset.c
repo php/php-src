@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -726,7 +726,7 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const name
 
 
 /* {{{ mysqlnd_cset_escape_quotes */
-PHPAPI php_uint_t mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char *newstr,
+PHPAPI zend_ulong mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset, char *newstr,
 										const char * escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	const char 	*newstr_s = newstr;
@@ -780,7 +780,7 @@ PHPAPI php_uint_t mysqlnd_cset_escape_quotes(const MYSQLND_CHARSET * const cset,
 
 
 /* {{{ mysqlnd_cset_escape_slashes */
-PHPAPI php_uint_t mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, char *newstr,
+PHPAPI zend_ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, char *newstr,
 										 const char * escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	const char 	*newstr_s = newstr;

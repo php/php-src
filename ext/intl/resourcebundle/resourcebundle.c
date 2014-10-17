@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 	const int32_t*         vfield;
 	int32_t                ilen;
 	int                    i;
-	php_int_t                   lfield;
+	zend_long                   lfield;
 	ResourceBundle_object* newrb;
 
 	restype = ures_getType( source->child );
@@ -53,7 +53,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 		case URES_INT:
 			lfield = ures_getInt( source->child, &INTL_DATA_ERROR_CODE(source) );
 			INTL_METHOD_CHECK_STATUS(source, "Failed to retrieve integer value");
-			ZVAL_INT( return_value, lfield );
+			ZVAL_LONG( return_value, lfield );
 			break;
 
 		case URES_INT_VECTOR:
@@ -61,7 +61,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 			INTL_METHOD_CHECK_STATUS(source, "Failed to retrieve vector value");
 			array_init( return_value );
 			for (i=0; i<ilen; i++) {
-				add_next_index_int( return_value, vfield[i] );
+				add_next_index_long( return_value, vfield[i] );
 			}
 			break;
 

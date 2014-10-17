@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@
 #include "intl_convert.h"
 
 #if !defined(HAVE_PTRDIFF_T) && !defined(_PTRDIFF_T_DEFINED)
-typedef php_int_t ptrdiff_t;
+typedef zend_long ptrdiff_t;
 #endif
 
 /**
@@ -80,10 +80,10 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 		}
 
 		/* Compare the strings using ICU. */
-		ZVAL_INT(result, ucol_strcoll(
+		ZVAL_LONG(result, ucol_strcoll(
 					co->ucoll,
-					INTL_Z_STRVAL_P(str1_p), INTL_Z_STRSIZE_P(str1_p),
-					INTL_Z_STRVAL_P(str2_p), INTL_Z_STRSIZE_P(str2_p) ));
+					INTL_Z_STRVAL_P(str1_p), INTL_Z_STRLEN_P(str1_p),
+					INTL_Z_STRVAL_P(str2_p), INTL_Z_STRLEN_P(str2_p) ));
 	}
 	else
 	{
@@ -190,10 +190,10 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2 TSRM
 	co = Z_INTL_COLLATOR_P(&INTL_G(current_collator));
 
 	/* Compare the strings using ICU. */
-	ZVAL_INT(result, ucol_strcoll(
+	ZVAL_LONG(result, ucol_strcoll(
 				co->ucoll,
-				INTL_Z_STRVAL_P(str1_p), INTL_Z_STRSIZE_P(str1_p),
-				INTL_Z_STRVAL_P(str2_p), INTL_Z_STRSIZE_P(str2_p) ));
+				INTL_Z_STRVAL_P(str1_p), INTL_Z_STRLEN_P(str1_p),
+				INTL_Z_STRVAL_P(str2_p), INTL_Z_STRLEN_P(str2_p) ));
 
 	zval_ptr_dtor( str1_p );
 	zval_ptr_dtor( str2_p );
@@ -203,7 +203,7 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2 TSRM
 /* }}} */
 
 /* {{{ collator_compare_func
- * Taken from PHP5 source (array_data_compare).
+ * Taken from PHP7 source (array_data_compare).
  */
 static int collator_compare_func( const void* a, const void* b TSRMLS_DC )
 {
@@ -232,11 +232,11 @@ static int collator_compare_func( const void* a, const void* b TSRMLS_DC )
 			return 0;
 	}
 
-	convert_to_int(&result);
+	convert_to_long(&result);
 
-	if( Z_IVAL(result) < 0 )
+	if( Z_LVAL(result) < 0 )
 		return -1;
-	else if( Z_IVAL(result) > 0 )
+	else if( Z_LVAL(result) > 0 )
 		return 1;
 
 	return 0;
@@ -258,7 +258,7 @@ static int collator_cmp_sort_keys( const void *p1, const void *p2 TSRMLS_DC )
 /* {{{ collator_get_compare_function
  * Choose compare function according to sort flags.
  */
-static collator_compare_func_t collator_get_compare_function( const php_int_t sort_flags )
+static collator_compare_func_t collator_get_compare_function( const zend_long sort_flags )
 {
 	collator_compare_func_t func;
 
@@ -290,12 +290,12 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	zval           saved_collator;
 	zval*          array            = NULL;
 	HashTable*     hash             = NULL;
-	php_int_t           sort_flags       = COLLATOR_SORT_REGULAR;
+	zend_long           sort_flags       = COLLATOR_SORT_REGULAR;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/|i",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa/|l",
 		&object, Collator_ce_ptr, &array, &sort_flags ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -424,7 +424,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 		/* Process string values only. */
 		if( Z_TYPE_P( hashData ) == IS_STRING )
 		{
-			intl_convert_utf8_to_utf16( &utf16_buf, &utf16_len, Z_STRVAL_P( hashData ), Z_STRSIZE_P( hashData ), COLLATOR_ERROR_CODE_P( co ) );
+			intl_convert_utf8_to_utf16( &utf16_buf, &utf16_len, Z_STRVAL_P( hashData ), Z_STRLEN_P( hashData ), COLLATOR_ERROR_CODE_P( co ) );
 
 			if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
 			{
@@ -536,7 +536,7 @@ PHP_FUNCTION( collator_asort )
 PHP_FUNCTION( collator_get_sort_key )
 {
 	char*            str      = NULL;
-	int              str_len  = 0;
+	size_t              str_len  = 0;
 	UChar*           ustr     = NULL;
 	int              ustr_len = 0;
 	uint8_t*         key     = NULL;

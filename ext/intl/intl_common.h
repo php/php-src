@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -39,6 +39,6 @@
 #define UCHARS(len) ((len) / sizeof(UChar))
 
 #define INTL_Z_STRVAL_P(str) (UChar*) Z_STRVAL_P(str)
-#define INTL_Z_STRSIZE_P(str) UCHARS( Z_STRSIZE_P(str) )
+#define INTL_Z_STRLEN_P(str) UCHARS( Z_STRLEN_P(str) )
 
 #endif /* INTL_COMMON_H */

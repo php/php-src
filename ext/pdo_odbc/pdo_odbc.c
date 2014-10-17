@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -136,11 +136,11 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	}
 #endif
 
-	REGISTER_PDO_CLASS_CONST_INT("ODBC_ATTR_USE_CURSOR_LIBRARY", PDO_ODBC_ATTR_USE_CURSOR_LIBRARY);
-	REGISTER_PDO_CLASS_CONST_INT("ODBC_ATTR_ASSUME_UTF8", PDO_ODBC_ATTR_ASSUME_UTF8);
-	REGISTER_PDO_CLASS_CONST_INT("ODBC_SQL_USE_IF_NEEDED", SQL_CUR_USE_IF_NEEDED);
-	REGISTER_PDO_CLASS_CONST_INT("ODBC_SQL_USE_DRIVER", SQL_CUR_USE_DRIVER);
-	REGISTER_PDO_CLASS_CONST_INT("ODBC_SQL_USE_ODBC", SQL_CUR_USE_ODBC);
+	REGISTER_PDO_CLASS_CONST_LONG("ODBC_ATTR_USE_CURSOR_LIBRARY", PDO_ODBC_ATTR_USE_CURSOR_LIBRARY);
+	REGISTER_PDO_CLASS_CONST_LONG("ODBC_ATTR_ASSUME_UTF8", PDO_ODBC_ATTR_ASSUME_UTF8);
+	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_IF_NEEDED", SQL_CUR_USE_IF_NEEDED);
+	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_DRIVER", SQL_CUR_USE_DRIVER);
+	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_ODBC", SQL_CUR_USE_ODBC);
 	
 	return SUCCESS;
 }

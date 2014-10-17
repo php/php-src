@@ -58,7 +58,7 @@ static int phar_dir_close(php_stream *stream, int close_handle TSRMLS_DC)  /* {{
 /**
  * Used for seeking on a phar directory handle
  */
-static int phar_dir_seek(php_stream *stream, php_off_t offset, int whence, php_off_t *newoffset TSRMLS_DC) /* {{{ */
+static int phar_dir_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
@@ -95,7 +95,7 @@ static size_t phar_dir_read(php_stream *stream, char *buf, size_t count TSRMLS_D
 	size_t to_read;
 	HashTable *data = (HashTable *)stream->abstract;
 	zend_string *str_key;
-	php_uint_t unused;
+	zend_ulong unused;
 
 	if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(data, &str_key, &unused, 0, &data->nInternalPointer)) {
 		return 0;
@@ -184,7 +184,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 	char *entry, *found, *save;
 	zend_string *str_key;
 	uint keylen;
-	php_uint_t unused;
+	zend_ulong unused;
 
 	ALLOC_HASHTABLE(data);
 	zend_hash_init(data, 64, NULL, NULL, 0);
@@ -306,7 +306,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	php_stream *ret;
 	char *internal_file, *error;
 	zend_string *str_key;
-	php_uint_t unused;
+	zend_ulong unused;
 	phar_archive_data *phar;
 	phar_entry_info *entry = NULL;
 	uint host_len;
@@ -550,7 +550,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	php_url *resource = NULL;
 	uint host_len;
 	zend_string *str_key;
-	php_uint_t unused;
+	zend_ulong unused;
 	uint path_len;
 
 	/* pre-readonly check, we need to know if this is a data phar */

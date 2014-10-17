@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -72,28 +72,28 @@ struct gfxinfo {
  * Register IMAGETYPE_<xxx> constants used by GetImageSize(), image_type_to_mime_type, ext/exif */
 PHP_MINIT_FUNCTION(imagetypes)
 {
-	REGISTER_INT_CONSTANT("IMAGETYPE_GIF",     IMAGE_FILETYPE_GIF,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_JPEG",    IMAGE_FILETYPE_JPEG,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_PNG",     IMAGE_FILETYPE_PNG,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_SWF",     IMAGE_FILETYPE_SWF,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_PSD",     IMAGE_FILETYPE_PSD,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_BMP",     IMAGE_FILETYPE_BMP,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_TIFF_II", IMAGE_FILETYPE_TIFF_II, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_TIFF_MM", IMAGE_FILETYPE_TIFF_MM, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_JPC",     IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_JP2",     IMAGE_FILETYPE_JP2,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_JPX",     IMAGE_FILETYPE_JPX,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_JB2",     IMAGE_FILETYPE_JB2,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_GIF",     IMAGE_FILETYPE_GIF,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG",    IMAGE_FILETYPE_JPEG,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_PNG",     IMAGE_FILETYPE_PNG,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_SWF",     IMAGE_FILETYPE_SWF,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_PSD",     IMAGE_FILETYPE_PSD,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_BMP",     IMAGE_FILETYPE_BMP,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_TIFF_II", IMAGE_FILETYPE_TIFF_II, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_TIFF_MM", IMAGE_FILETYPE_TIFF_MM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_JPC",     IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_JP2",     IMAGE_FILETYPE_JP2,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_JPX",     IMAGE_FILETYPE_JPX,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_JB2",     IMAGE_FILETYPE_JB2,     CONST_CS | CONST_PERSISTENT);
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
-	REGISTER_INT_CONSTANT("IMAGETYPE_SWC",     IMAGE_FILETYPE_SWC,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_SWC",     IMAGE_FILETYPE_SWC,     CONST_CS | CONST_PERSISTENT);
 #endif	
-	REGISTER_INT_CONSTANT("IMAGETYPE_IFF",     IMAGE_FILETYPE_IFF,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_WBMP",    IMAGE_FILETYPE_WBMP,    CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_JPEG2000",IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT); /* keep alias */
-	REGISTER_INT_CONSTANT("IMAGETYPE_XBM",     IMAGE_FILETYPE_XBM,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_ICO",     IMAGE_FILETYPE_ICO,     CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_UNKNOWN", IMAGE_FILETYPE_UNKNOWN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("IMAGETYPE_COUNT",   IMAGE_FILETYPE_COUNT,   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_IFF",     IMAGE_FILETYPE_IFF,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_WBMP",    IMAGE_FILETYPE_WBMP,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG2000",IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT); /* keep alias */
+	REGISTER_LONG_CONSTANT("IMAGETYPE_XBM",     IMAGE_FILETYPE_XBM,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_ICO",     IMAGE_FILETYPE_ICO,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_UNKNOWN", IMAGE_FILETYPE_UNKNOWN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_COUNT",   IMAGE_FILETYPE_COUNT,   CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -237,7 +237,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 		
 		if (bufz) {
-			STR_RELEASE(bufz);
+			zend_string_release(bufz);
 		}	
 		
 		if (status == Z_OK) {
@@ -366,8 +366,8 @@ static unsigned short php_read2(php_stream * stream TSRMLS_DC)
 {
 	unsigned char a[2];
 
-	/* just return 0 if we hit the end-of-file */
-	if((php_stream_read(stream, (char*)a, sizeof(a))) <= 0) return 0;
+	/* return 0 if we couldn't read enough data */
+	if((php_stream_read(stream, a, sizeof(a))) < sizeof(a)) return 0;
 
 	return (((unsigned short)a[0]) << 8) + ((unsigned short)a[1]);
 }
@@ -425,13 +425,13 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int co
  * skip over a variable-length block; assumes proper length marker */
 static int php_skip_variable(php_stream * stream TSRMLS_DC)
 {
-	off_t length = ((unsigned int)php_read2(stream TSRMLS_CC));
+	zend_off_t length = ((unsigned int)php_read2(stream TSRMLS_CC));
 
 	if (length < 2)	{
 		return 0;
 	}
 	length = length - 2;
-	php_stream_seek(stream, (long)length, SEEK_CUR);
+	php_stream_seek(stream, (zend_long)length, SEEK_CUR);
 	return 1;
 }
 /* }}} */
@@ -453,7 +453,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info TSR
 
 	buffer = emalloc(length);
 
-	if (php_stream_read(stream, buffer, (long) length) <= 0) {
+	if (php_stream_read(stream, buffer, (zend_long) length) <= 0) {
 		efree(buffer);
 		return 0;
 	}
@@ -647,7 +647,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 #endif
 
 	result->channels = php_read2(stream TSRMLS_CC); /* Csiz */
-	if (result->channels < 0 || result->channels > 256) {
+	if (result->channels == 0 && php_stream_eof(stream) || result->channels > 256) {
 		efree(result);
 		return NULL;
 	}
@@ -1160,9 +1160,9 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
    Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_mime_type)
 {
-	php_int_t p_image_type;
+	zend_long p_image_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &p_image_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &p_image_type) == FAILURE) {
 		return;
 	}
 
@@ -1174,10 +1174,10 @@ PHP_FUNCTION(image_type_to_mime_type)
    Get file extension for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype */
 PHP_FUNCTION(image_type_to_extension)
 {
-	php_int_t image_type;
+	zend_long image_type;
 	zend_bool inc_dot=1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|b", &image_type, &inc_dot) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|b", &image_type, &inc_dot) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1364,19 +1364,19 @@ static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNA
 	}
 
 	if (result) {
-		char temp[MAX_LENGTH_OF_ZEND_INT * 2 + sizeof("width=\"\" height=\"\"")];
+		char temp[MAX_LENGTH_OF_LONG * 2 + sizeof("width=\"\" height=\"\"")];
 		array_init(return_value);
-		add_index_int(return_value, 0, result->width);
-		add_index_int(return_value, 1, result->height);
-		add_index_int(return_value, 2, itype);
+		add_index_long(return_value, 0, result->width);
+		add_index_long(return_value, 1, result->height);
+		add_index_long(return_value, 2, itype);
 		snprintf(temp, sizeof(temp), "width=\"%d\" height=\"%d\"", result->width, result->height);
 		add_index_string(return_value, 3, temp);
 
 		if (result->bits != 0) {
-			add_assoc_int(return_value, "bits", result->bits);
+			add_assoc_long(return_value, "bits", result->bits);
 		}
 		if (result->channels != 0) {
-			add_assoc_int(return_value, "channels", result->channels);
+			add_assoc_long(return_value, "channels", result->channels);
 		}
 		add_assoc_string(return_value, "mime", (char*)php_image_type_to_mime_type(itype));
 		efree(result);
@@ -1393,7 +1393,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	zval *info = NULL;
 	php_stream *stream = NULL;
 	char *input;
-	int input_len;
+	size_t input_len;
 	const int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "s|z/", &input, &input_len, &info) == FAILURE) {

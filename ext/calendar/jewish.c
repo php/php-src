@@ -382,12 +382,12 @@ char *JewishMonthHebName[14] =
  * (called dehiyyot) delays it.  These 4 rules can delay the start of the
  * year by as much as 2 days.
  */
-static php_int_t Tishri1(
+static zend_long Tishri1(
 						   int metonicYear,
-						   php_int_t moladDay,
-						   php_int_t moladHalakim)
+						   zend_long moladDay,
+						   zend_long moladHalakim)
 {
-	php_int_t tishri1;
+	zend_long tishri1;
 	int dow;
 	int leapYear;
 	int lastWasLeapYear;
@@ -429,10 +429,10 @@ static php_int_t Tishri1(
  */
 static void MoladOfMetonicCycle(
 								   int metonicCycle,
-								   php_int_t *pMoladDay,
-								   php_int_t *pMoladHalakim)
+								   zend_long *pMoladDay,
+								   zend_long *pMoladHalakim)
 {
-	register php_uint_t r1, r2, d1, d2;
+	register zend_ulong r1, r2, d1, d2;
 
 	/* Start with the time of the first molad after creation. */
 	r1 = NEW_MOON_OF_CREATION;
@@ -468,14 +468,14 @@ static void MoladOfMetonicCycle(
  * us to avoid calculating the length of the year in most cases.
  */
 static void FindTishriMolad(
-							   php_int_t inputDay,
+							   zend_long inputDay,
 							   int *pMetonicCycle,
 							   int *pMetonicYear,
-							   php_int_t *pMoladDay,
-							   php_int_t *pMoladHalakim)
+							   zend_long *pMoladDay,
+							   zend_long *pMoladHalakim)
 {
-	php_int_t moladDay;
-	php_int_t moladHalakim;
+	zend_long moladDay;
+	zend_long moladHalakim;
 	int metonicCycle;
 	int metonicYear;
 
@@ -523,8 +523,8 @@ static void FindStartOfYear(
 							   int year,
 							   int *pMetonicCycle,
 							   int *pMetonicYear,
-							   php_int_t *pMoladDay,
-							   php_int_t *pMoladHalakim,
+							   zend_long *pMoladDay,
+							   zend_long *pMoladHalakim,
 							   int *pTishri1)
 {
 	*pMetonicCycle = (year - 1) / 19;
@@ -546,14 +546,14 @@ static void FindStartOfYear(
  * range 1 to 13 inclusive; *pDay will be in the range 1 to 30 inclusive.
  */
 void SdnToJewish(
-					php_int_t sdn,
+					zend_long sdn,
 					int *pYear,
 					int *pMonth,
 					int *pDay)
 {
-	php_int_t inputDay;
-	php_int_t day;
-	php_int_t halakim;
+	zend_long inputDay;
+	zend_long day;
+	zend_long halakim;
 	int metonicCycle;
 	int metonicYear;
 	int tishri1;
@@ -684,18 +684,18 @@ void SdnToJewish(
  * value.  To verify that a date is valid, convert it to SDN and then back
  * and compare with the original.
  */
-php_int_t JewishToSdn(
+zend_long JewishToSdn(
 						int year,
 						int month,
 						int day)
 {
-	php_int_t sdn;
+	zend_long sdn;
 	int metonicCycle;
 	int metonicYear;
 	int tishri1;
 	int tishri1After;
-	php_int_t moladDay;
-	php_int_t moladHalakim;
+	zend_long moladDay;
+	zend_long moladHalakim;
 	int yearLength;
 	int lengthOfAdarIAndII;
 

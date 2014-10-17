@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -113,7 +113,7 @@ int dom_namednodemap_length_read(dom_object *obj, zval *retval TSRMLS_DC)
 		}
 	}
 
-	ZVAL_INT(retval, count);
+	ZVAL_LONG(retval, count);
 	return SUCCESS;
 }
 
@@ -126,7 +126,8 @@ Since:
 PHP_FUNCTION(dom_namednodemap_get_named_item)
 {
 	zval *id;
-	int ret, namedlen=0;
+	int ret;
+	size_t namedlen=0;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
 	char *named;
@@ -148,9 +149,9 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
 				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (xmlChar *) named);
 				} else {
-					notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
+					notep = (xmlNotation *)xmlHashLookup(objmap->ht, (xmlChar *) named);
 					if (notep) {
 						itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
 					}
@@ -159,7 +160,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 		} else {
 			nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
-				itemnode = (xmlNodePtr)xmlHasProp(nodep, named);
+				itemnode = (xmlNodePtr)xmlHasProp(nodep, (xmlChar *) named);
 			}
 		}
 	}
@@ -200,7 +201,7 @@ Since:
 PHP_FUNCTION(dom_namednodemap_item)
 {
 	zval *id;
-	php_int_t index;
+	zend_long index;
 	int ret;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
@@ -209,7 +210,7 @@ PHP_FUNCTION(dom_namednodemap_item)
 	xmlNodePtr nodep, curnode;
 	int count;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oi", &id, dom_namednodemap_class_entry, &index) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol", &id, dom_namednodemap_class_entry, &index) == FAILURE) {
 		return;
 	}
 	if (index >= 0) {
@@ -258,7 +259,8 @@ Since: DOM Level 2
 PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 {
 	zval *id;
-	int ret, namedlen=0, urilen=0;
+	int ret;
+	size_t namedlen=0, urilen=0;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
 	char *uri, *named;
@@ -280,9 +282,9 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
 				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, named);
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (xmlChar *) named);
 				} else {
-					notep = (xmlNotation *)xmlHashLookup(objmap->ht, named);
+					notep = (xmlNotation *)xmlHashLookup(objmap->ht, (xmlChar *) named);
 					if (notep) {
 						itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
 					}
@@ -291,7 +293,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 		} else {
 			nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
-				itemnode = (xmlNodePtr)xmlHasNsProp(nodep, named, uri);
+				itemnode = (xmlNodePtr)xmlHasNsProp(nodep, (xmlChar *) named, (xmlChar *) uri);
 			}
 		}
 	}

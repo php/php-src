@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -96,7 +96,7 @@ PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t lengt
 		i--;
 	}
 
-	retval = STR_ALLOC(buf_size, 0);
+	retval = zend_string_alloc(buf_size, 0);
 	i = length; p1 = str; p2 = (unsigned char*)retval->val;
 	decoded_len = 0;
 
@@ -147,12 +147,12 @@ PHPAPI zend_string *php_quot_print_decode(const unsigned char *str, size_t lengt
  
 PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t length) /* {{{ */
 {
-	php_uint_t lp = 0;
+	zend_ulong lp = 0;
 	unsigned char c, *d;
 	char *hex = "0123456789ABCDEF";
 	zend_string *ret;
 
-	ret = STR_SAFE_ALLOC(3, (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0, 0);
+	ret = zend_string_safe_alloc(3, (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0, 0);
 	d = (unsigned char*)ret->val;
 
 	while (length--) {
@@ -187,7 +187,7 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 		}
 	}
 	*d = '\0';
-	ret = STR_REALLOC(ret, d - (unsigned char*)ret->val, 0);
+	ret = zend_string_realloc(ret, d - (unsigned char*)ret->val, 0);
 	return ret;
 }
 /* }}} */
@@ -204,7 +204,7 @@ PHP_FUNCTION(quoted_printable_decode)
 	zend_string *arg1;
 	char *str_in;
 	zend_string *str_out;
-	php_size_t i = 0, j = 0, k;
+	size_t i = 0, j = 0, k;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arg1) == FAILURE) {
 		return;
@@ -216,7 +216,7 @@ PHP_FUNCTION(quoted_printable_decode)
 	}
 
 	str_in = arg1->val;
-	str_out = STR_ALLOC(arg1->len, 0);
+	str_out = zend_string_alloc(arg1->len, 0);
 	while (str_in[i]) {
 		switch (str_in[i]) {
 		case '=':

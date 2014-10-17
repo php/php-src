@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -136,10 +136,10 @@ static void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, Ha
 	} else if (p->nKeyLength) {
 		Z_TYPE_P(key) = IS_STRING;
 		Z_STRVAL_P(key) = IS_INTERNED(p->arKey) ? (char*)p->arKey : estrndup(p->arKey, p->nKeyLength - 1);
-		Z_STRSIZE_P(key) = p->nKeyLength - 1;
+		Z_STRLEN_P(key) = p->nKeyLength - 1;
 	} else {
-		Z_TYPE_P(key) = IS_INT;
-		Z_IVAL_P(key) = p->h;
+		Z_TYPE_P(key) = IS_LONG;
+		Z_LVAL_P(key) = p->h;
 	}
 }
 #endif

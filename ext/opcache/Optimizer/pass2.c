@@ -25,7 +25,16 @@
  * - optimize static BRKs and CONTs
  */
 
-if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
+void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
+{
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
 
@@ -61,8 +70,8 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_SL:
 			case ZEND_SR:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_INT) {
-						convert_to_int(&ZEND_OP1_LITERAL(opline));
+					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_LONG) {
+						convert_to_long(&ZEND_OP1_LITERAL(opline));
 					}
 				}
 				/* break missing *intentionally - the assign_op's may only optimize op2 */
@@ -74,8 +83,8 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					break;
 				}
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
-					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_INT) {
-						convert_to_int(&ZEND_OP2_LITERAL(opline));
+					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
+						convert_to_long(&ZEND_OP2_LITERAL(opline));
 					}
 				}
 				break;
@@ -183,7 +192,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					if (ZEND_OP2_TYPE(opline) != IS_CONST) {
 						break;
 					}
-					convert_to_int(&ZEND_OP2_LITERAL(opline));
+					convert_to_long(&ZEND_OP2_LITERAL(opline));
 					nest_levels = ZEND_OP2_LITERAL(opline).value.lval;
 
 					array_offset = ZEND_OP1(opline).opline_num;
@@ -196,8 +205,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 						array_offset = jmp_to->parent;
 						if (--nest_levels > 0) {
 							if (opline->opcode == ZEND_BRK &&
-							    (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE ||
-							     op_array->opcodes[jmp_to->brk].opcode == ZEND_SWITCH_FREE)) {
+							    op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE) {
 								dont_optimize = 1;
 								break;
 							}

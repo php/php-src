@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -507,7 +507,7 @@ bound:
 }
 /* }}} */
 
-PHPAPI int php_network_parse_network_address_with_port(const char *addr, php_int_t addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC)
+PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC)
 {
 	char *colon;
 	char *tmp;
@@ -563,7 +563,7 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, php_int
 	if (n == 0) {
 		if (errstr) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to resolve `%s': %s", tmp, errstr->val);
-			STR_RELEASE(errstr);
+			zend_string_release(errstr);
 		}
 		goto out;
 	}
@@ -645,10 +645,10 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 					if (ua->sun_path[0] == '\0') {
 						/* abstract name */
 						int len = strlen(ua->sun_path + 1) + 1;
-						*textaddr = STR_INIT((char*)ua->sun_path, len, 0);
+						*textaddr = zend_string_init((char*)ua->sun_path, len, 0);
 					} else {
 						int len = strlen(ua->sun_path);
-						*textaddr = STR_INIT((char*)ua->sun_path, len, 0);
+						*textaddr = zend_string_init((char*)ua->sun_path, len, 0);
 					}
 				}
 				break;
@@ -880,7 +880,7 @@ skip_bind:
 			}
 			/* free error string received during previous iteration (if any) */
 			if (error_string && *error_string) {
-				STR_RELEASE(*error_string);
+				zend_string_release(*error_string);
 				*error_string = NULL;
 			}
 
@@ -1050,7 +1050,7 @@ PHPAPI zend_string *php_socket_error_str(long err)
 	char *errstr;
 
 	errstr = strerror(err);
-	return STR_INIT(errstr, strlen(errstr), 0);
+	return zend_string_init(errstr, strlen(errstr), 0);
 #else
 	zend_string *ret;
 	char *sysbuf;
@@ -1070,7 +1070,7 @@ PHPAPI zend_string *php_socket_error_str(long err)
 		sysbuf = "Unknown Error";
 	}
 
-	ret = STR_INIT(sysbuf, strlen(sysbuf), 0);
+	ret = zend_string_init(sysbuf, strlen(sysbuf), 0);
 
 	if (free_it) {
 		LocalFree(sysbuf);
@@ -1110,7 +1110,7 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 		int socktype, struct timeval *timeout, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
 	char *res;
-	php_int_t reslen;
+	zend_long reslen;
 	php_stream *stream;
 
 	reslen = spprintf(&res, 0, "tcp://%s:%d", host, port);
@@ -1123,7 +1123,7 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 	return stream;
 }
 
-PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
+PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block TSRMLS_DC)
 {
 	int ret = SUCCESS;
 	int flags;

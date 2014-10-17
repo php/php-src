@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -1133,8 +1133,6 @@ int main(int argc, char *argv[])
 			PUTS(param_error);
 			exit(1);
 		}
-
-		CG(interactive) = interactive;
 
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
 		if (argc > ap_php_optind && !filename) {

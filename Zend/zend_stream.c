@@ -105,7 +105,7 @@ static inline int zend_stream_is_mmap(zend_file_handle *file_handle) { /* {{{ */
 
 static size_t zend_stream_fsize(zend_file_handle *file_handle TSRMLS_DC) /* {{{ */
 {
-	struct stat buf;
+	zend_stat_t buf;
 
 	if (zend_stream_is_mmap(file_handle)) {
 		return file_handle->handle.stream.mmap.len;
@@ -113,7 +113,7 @@ static size_t zend_stream_fsize(zend_file_handle *file_handle TSRMLS_DC) /* {{{ 
 	if (file_handle->type == ZEND_HANDLE_STREAM || file_handle->type == ZEND_HANDLE_MAPPED) {
 		return file_handle->handle.stream.fsizer(file_handle->handle.stream.handle TSRMLS_CC);
 	}
-	if (file_handle->handle.fp && fstat(fileno(file_handle->handle.fp), &buf) == 0) {
+	if (file_handle->handle.fp && zend_fstat(fileno(file_handle->handle.fp), &buf) == 0) {
 #ifdef S_ISREG
 		if (!S_ISREG(buf.st_mode)) {
 			return 0;
@@ -236,7 +236,7 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 			/*  *buf[size] is zeroed automatically by the kernel */
 			*buf = mmap(0, size + ZEND_MMAP_AHEAD, PROT_READ, MAP_PRIVATE, fileno(file_handle->handle.fp), 0);
 			if (*buf != MAP_FAILED) {
-				zend_int_t offset = ftell(file_handle->handle.fp);
+				zend_long offset = ftell(file_handle->handle.fp);
 				file_handle->handle.stream.mmap.map = *buf;
 
 				if (offset != -1) {

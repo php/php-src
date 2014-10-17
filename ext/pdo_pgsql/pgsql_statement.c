@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -230,10 +230,10 @@ stmt_retry:
 	}
 
 	if (status == PGRES_COMMAND_OK) {
-		ZEND_ATOI(stmt->row_count, PQcmdTuples(S->result));
+		ZEND_ATOL(stmt->row_count, PQcmdTuples(S->result));
 		H->pgoid = PQoidValue(S->result);
 	} else {
-		stmt->row_count = (php_int_t)PQntuples(S->result);
+		stmt->row_count = (zend_long)PQntuples(S->result);
 	}
 
 	return 1;
@@ -256,14 +256,14 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				/* decode name from $1, $2 into 0, 1 etc. */
 				if (param->name) {
 					if (param->name->val[0] == '$') {
-						ZEND_ATOI(param->paramno, param->name->val + 1);
+						ZEND_ATOL(param->paramno, param->name->val + 1);
 					} else {
 						/* resolve parameter name to rewritten name */
 						char *namevar;
 
 						if (stmt->bound_param_map && (namevar = zend_hash_find_ptr(stmt->bound_param_map,
 								param->name)) != NULL) {
-							ZEND_ATOI(param->paramno, namevar + 1);
+							ZEND_ATOL(param->paramno, namevar + 1);
 							param->paramno--;
 						} else {
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY093", param->name->val TSRMLS_CC);
@@ -359,7 +359,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 						//SEPARATE_ZVAL_IF_NOT_REF(&param->parameter);
 						convert_to_string_ex(parameter);
 						S->param_values[param->paramno] = Z_STRVAL_P(parameter);
-						S->param_lengths[param->paramno] = Z_STRSIZE_P(parameter);
+						S->param_lengths[param->paramno] = Z_STRLEN_P(parameter);
 						S->param_formats[param->paramno] = 0;
 					}
 
@@ -391,7 +391,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 }
 
 static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
-	enum pdo_fetch_orientation ori, php_int_t offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, zend_long offset TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
@@ -480,7 +480,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 			break;
 
 		case INT8OID:
-			if (sizeof(php_int_t)>=8) {
+			if (sizeof(zend_long)>=8) {
 				cols[colno].param_type = PDO_PARAM_INT;
 			} else {
 				cols[colno].param_type = PDO_PARAM_STR;
@@ -498,7 +498,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, php_uint_t *len, int *caller_frees  TSRMLS_DC)
+static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees  TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
@@ -519,9 +519,9 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, php_uint_
 		switch (cols[colno].param_type) {
 
 			case PDO_PARAM_INT:
-				ZEND_ATOI(S->cols[colno].intval, *ptr);
+				ZEND_ATOL(S->cols[colno].intval, *ptr);
 				*ptr = (char *) &(S->cols[colno].intval);
-				*len = sizeof(php_int_t);
+				*len = sizeof(zend_long);
 				break;
 
 			case PDO_PARAM_BOOL:
@@ -577,7 +577,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, php_uint_
 	return 1;
 }
 
-static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, php_int_t colno, zval *return_value TSRMLS_DC)
+static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	PGresult *res;
@@ -593,7 +593,7 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, php_int_t colno, zval *r
 	}
 
 	array_init(return_value);
-	add_assoc_int(return_value, "pgsql:oid", S->cols[colno].pgsql_type);
+	add_assoc_long(return_value, "pgsql:oid", S->cols[colno].pgsql_type);
 
 	/* Fetch metadata from Postgres system catalogue */
 	spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);

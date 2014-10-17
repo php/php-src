@@ -47,7 +47,6 @@ static zend_object_handlers iterator_object_handlers = {
 	NULL, /* method get */
 	NULL, /* call */
 	NULL, /* get ctor */
-	NULL, /* get_ce */
 	NULL, /* get class name */
 	NULL, /* compare */
 	NULL, /* cast */
@@ -84,29 +83,13 @@ ZEND_API void zend_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
 	zend_objects_store_del(&iter->std TSRMLS_CC);
 }
 
-ZEND_API enum zend_object_iterator_kind zend_iterator_unwrap(
-	zval *array_ptr, zend_object_iterator **iter TSRMLS_DC)
+ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr TSRMLS_DC)
 {
-	switch (Z_TYPE_P(array_ptr)) {
-		case IS_OBJECT:
-			if (Z_OBJ_HT_P(array_ptr) == &iterator_object_handlers) {
-				*iter = (zend_object_iterator *)Z_OBJ_P(array_ptr);
-				return ZEND_ITER_OBJECT;
-			}
-			if (Z_OBJPROP_P(array_ptr)) {
-				return ZEND_ITER_PLAIN_OBJECT;
-			}
-			return ZEND_ITER_INVALID;
-
-		case IS_ARRAY:
-			if (Z_ARRVAL_P(array_ptr)) {
-				return ZEND_ITER_PLAIN_ARRAY;
-			}
-			return ZEND_ITER_INVALID;
-
-		default:
-			return ZEND_ITER_INVALID;
+	if (Z_TYPE_P(array_ptr) &&
+	    Z_OBJ_HT_P(array_ptr) == &iterator_object_handlers) {
+		return (zend_object_iterator *)Z_OBJ_P(array_ptr);
 	}
+	return NULL;
 }
 
 /*

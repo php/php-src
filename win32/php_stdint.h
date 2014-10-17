@@ -116,13 +116,8 @@ typedef uint32_t  u_int32_t;
 typedef uint64_t  uint_fast64_t;
 
 // 7.18.1.4 Integer types capable of holding object pointers
-#ifdef _WIN64 // [
-   typedef __int64           intptr_t;
-   typedef unsigned __int64  uintptr_t;
-#else // _WIN64 ][
-   typedef _W64 int               intptr_t;
-   typedef _W64 unsigned int      uintptr_t;
-#endif // _WIN64 ]
+/* intptr_t and uintptr_t are available from stddef.h */
+#include <stddef.h>
 
 // 7.18.1.5 Greatest-width integer types
 typedef int64_t   intmax_t;

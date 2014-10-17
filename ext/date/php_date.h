@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -203,7 +203,7 @@ ZEND_END_MODULE_GLOBALS(date)
 #endif
 
 /* Backwards compatibility wrapper */
-PHPAPI php_int_t php_parse_date(char *string, php_int_t *now);
+PHPAPI zend_long php_parse_date(char *string, zend_long *now);
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
 PHPAPI int php_idate(char format, time_t ts, int localtime TSRMLS_DC);
 #if HAVE_STRFTIME
@@ -222,7 +222,7 @@ PHPAPI zend_class_entry *php_date_get_timezone_ce(void);
 
 /* Functions for creating DateTime objects, and initializing them from a string */
 PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC);
-PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC);
+PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, size_t time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC);
 
 
 #endif /* PHP_DATE_H */

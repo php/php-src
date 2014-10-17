@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -166,17 +166,17 @@ ZEND_DECLARE_MODULE_GLOBALS(exif)
 
 ZEND_INI_MH(OnUpdateEncode)
 {
-	if (new_value && new_value_length) {
+	if (new_value && new_value->len) {
 		const zend_encoding **return_list;
 		size_t return_size;
-		if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length,
+		if (FAILURE == zend_multibyte_parse_encoding_list(new_value->val, new_value->len,
 	&return_list, &return_size, 0 TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value->val);
 			return FAILURE;
 		}
 		efree(return_list);
 	}
-	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 
 ZEND_INI_MH(OnUpdateDecode)
@@ -184,14 +184,14 @@ ZEND_INI_MH(OnUpdateDecode)
 	if (new_value) {
 		const zend_encoding **return_list;
 		size_t return_size;
-		if (FAILURE == zend_multibyte_parse_encoding_list(new_value, new_value_length,
+		if (FAILURE == zend_multibyte_parse_encoding_list(new_value->val, new_value->len,
 	&return_list, &return_size, 0 TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal encoding ignored: '%s'", new_value->val);
 			return FAILURE;
 		}
 		efree(return_list);
 	}
-	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 
 PHP_INI_BEGIN()
@@ -223,9 +223,9 @@ PHP_MINIT_FUNCTION(exif)
 {
 	REGISTER_INI_ENTRIES();
 	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) {
-		REGISTER_INT_CONSTANT("EXIF_USE_MBSTRING", 1, CONST_CS | CONST_PERSISTENT); 
+		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 1, CONST_CS | CONST_PERSISTENT); 
 	} else {
-		REGISTER_INT_CONSTANT("EXIF_USE_MBSTRING", 0, CONST_CS | CONST_PERSISTENT); 
+		REGISTER_LONG_CONSTANT("EXIF_USE_MBSTRING", 0, CONST_CS | CONST_PERSISTENT); 
 	}
 	return SUCCESS;
 }
@@ -2020,16 +2020,16 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									if (l>1) {
 										info_value = &info_data->value;
 										for (b=0;b<l;b++) {
-											add_index_int(&array, b, (int)(info_value->s[b]));
+											add_index_long(&array, b, (int)(info_value->s[b]));
 										}
 										break;
 									}
 								case TAG_FMT_USHORT:
 								case TAG_FMT_ULONG:
 									if (l==1) {
-										add_assoc_int(&tmpi, name, (int)info_value->u);
+										add_assoc_long(&tmpi, name, (int)info_value->u);
 									} else {
-										add_index_int(&array, ap, (int)info_value->u);
+										add_index_long(&array, ap, (int)info_value->u);
 									}
 									break;
 
@@ -2046,16 +2046,16 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 									if (l>1) {
 										info_value = &info_data->value;
 										for (b=0;b<l;b++) {
-											add_index_int(&array, ap, (int)info_value->s[b]);
+											add_index_long(&array, ap, (int)info_value->s[b]);
 										}
 										break;
 									}
 								case TAG_FMT_SSHORT:
 								case TAG_FMT_SLONG:
 									if (l==1) {
-										add_assoc_int(&tmpi, name, info_value->i);
+										add_assoc_long(&tmpi, name, info_value->i);
 									} else {
-										add_index_int(&array, ap, info_value->i);
+										add_index_long(&array, ap, info_value->i);
 									}
 									break;
 
@@ -2334,10 +2334,10 @@ static char * exif_get_markername(int marker)
 	Get headername for index or false if not defined */
 PHP_FUNCTION(exif_tagname)
 {
-	php_int_t tag;
+	zend_long tag;
 	char *szTemp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &tag) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &tag) == FAILURE) {
 		return;
 	}
 
@@ -2413,11 +2413,11 @@ static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel 
 					data_ptr += 8;
 					break;
 				case TAG_FMT_SINGLE:
-					memmove(data_ptr, &info_data->value.f, byte_count);
+					memmove(data_ptr, &info_value->f, 4);
 					data_ptr += 4;
 					break;
 				case TAG_FMT_DOUBLE:
-					memmove(data_ptr, &info_data->value.d, byte_count);
+					memmove(data_ptr, &info_value->d, 8);
 					data_ptr += 8;
 					break;
 			}
@@ -3847,7 +3847,7 @@ static int exif_discard_imageinfo(image_info_type *ImageInfo)
 static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnail, int read_all TSRMLS_DC)
 {
 	int ret;
-	php_stat_t st;
+	zend_stat_t st;
 	zend_string *base;
 	
 	/* Start with an empty image information structure. */
@@ -3884,7 +3884,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 
 	base = php_basename(FileName, strlen(FileName), NULL, 0 TSRMLS_CC);
 	ImageInfo->FileName          = estrndup(base->val, base->len);
-	STR_RELEASE(base);
+	zend_string_release(base);
 	ImageInfo->read_thumbnail = read_thumbnail;
 	ImageInfo->read_all = read_all;
 	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;
@@ -3912,7 +3912,7 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 PHP_FUNCTION(exif_read_data)
 {
 	char *p_name, *p_sections_needed = NULL;
-	int p_name_len, p_sections_needed_len = 0;
+	size_t p_name_len, p_sections_needed_len = 0;
 	zend_bool sub_arrays=0, read_thumbnail=0, read_all=0;
 
 	int i, ret, sections_needed=0;
@@ -4091,7 +4091,8 @@ PHP_FUNCTION(exif_thumbnail)
 {
 	zval *p_width = 0, *p_height = 0, *p_imagetype = 0;
 	char *p_name;
-	int p_name_len, ret, arg_c = ZEND_NUM_ARGS();
+	size_t p_name_len;
+	int ret, arg_c = ZEND_NUM_ARGS();
 	image_info_type ImageInfo;
 
 	memset(&ImageInfo, 0, sizeof(ImageInfo));
@@ -4129,12 +4130,12 @@ PHP_FUNCTION(exif_thumbnail)
 		}
 		zval_dtor(p_width);
 		zval_dtor(p_height);
-		ZVAL_INT(p_width,  ImageInfo.Thumbnail.width);
-		ZVAL_INT(p_height, ImageInfo.Thumbnail.height);
+		ZVAL_LONG(p_width,  ImageInfo.Thumbnail.width);
+		ZVAL_LONG(p_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
 		zval_dtor(p_imagetype);
-		ZVAL_INT(p_imagetype, ImageInfo.Thumbnail.filetype);
+		ZVAL_LONG(p_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
 #ifdef EXIF_DEBUG
@@ -4154,7 +4155,7 @@ PHP_FUNCTION(exif_thumbnail)
 PHP_FUNCTION(exif_imagetype)
 {
 	char *imagefile;
-	int imagefile_len;
+	size_t imagefile_len;
 	php_stream * stream;
  	int itype = 0;
 
@@ -4175,7 +4176,7 @@ PHP_FUNCTION(exif_imagetype)
 	if (itype == IMAGE_FILETYPE_UNKNOWN) {
 		RETURN_FALSE;
 	} else {
-		ZVAL_INT(return_value, itype);
+		ZVAL_LONG(return_value, itype);
 	}
 }
 /* }}} */

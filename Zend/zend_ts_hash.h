@@ -25,7 +25,7 @@
 
 typedef struct _zend_ts_hashtable {
 	HashTable hash;
-	zend_uint reader;
+	uint32_t reader;
 #ifdef ZTS
 	MUTEX_T mx_reader;
 	MUTEX_T mx_writer;
@@ -55,11 +55,11 @@ ZEND_API zval *_zend_ts_hash_add_or_update(TsHashTable *ht, zend_string *key, zv
 #define zend_ts_hash_add(ht, key, pData) \
 		_zend_ts_hash_add_or_update(ht, key, pData, HASH_ADD ZEND_FILE_LINE_CC)
 
-ZEND_API zval *_zend_ts_hash_index_update_or_next_insert(TsHashTable *ht, zend_uint_t h, zval *pData, int flag ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_ts_hash_index_add_or_update(TsHashTable *ht, zend_ulong h, zval *pData, int flag ZEND_FILE_LINE_DC);
 #define zend_ts_hash_index_update(ht, h, pData) \
-		_zend_ts_hash_index_update_or_next_insert(ht, h, pData, HASH_UPDATE ZEND_FILE_LINE_CC)
+		_zend_ts_hash_index_add_or_update(ht, h, pData, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_ts_hash_next_index_insert(ht, pData) \
-		_zend_ts_hash_index_update_or_next_insert(ht, 0, pData, HASH_NEXT_INSERT ZEND_FILE_LINE_CC)
+		_zend_ts_hash_index_add_or_update(ht, ht->nNextFreeElement, pData, HASH_ADD ZEND_FILE_LINE_CC)
 
 ZEND_API zval* zend_ts_hash_add_empty_element(TsHashTable *ht, zend_string *key);
 
@@ -73,15 +73,15 @@ ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_fun
 
 /* Deletes */
 ZEND_API int zend_ts_hash_del(TsHashTable *ht, zend_string *key);
-ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, zend_uint_t h);
+ZEND_API int zend_ts_hash_index_del(TsHashTable *ht, zend_ulong h);
 
 /* Data retreival */
 ZEND_API zval *zend_ts_hash_find(TsHashTable *ht, zend_string *key);
-ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, zend_uint_t);
+ZEND_API zval *zend_ts_hash_index_find(TsHashTable *ht, zend_ulong);
 
 /* Misc */
 ZEND_API int zend_ts_hash_exists(TsHashTable *ht, zend_string *key);
-ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, zend_uint_t h);
+ZEND_API int zend_ts_hash_index_exists(TsHashTable *ht, zend_ulong h);
 
 /* Copying, merging and sorting */
 ZEND_API void zend_ts_hash_copy(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor);
@@ -111,7 +111,7 @@ ZEND_API zval *_zend_ts_hash_str_add(TsHashTable *ht, const char *key, int len, 
 #define zend_ts_hash_str_add(ht, key, len, pData) \
 		_zend_ts_hash_str_add(ht, key, len, pData ZEND_FILE_LINE_CC)
 
-static inline void *zend_ts_hash_str_find_ptr(TsHashTable *ht, const char *str, int len)
+static zend_always_inline void *zend_ts_hash_str_find_ptr(TsHashTable *ht, const char *str, int len)
 {
 	zval *zv;
 
@@ -119,7 +119,7 @@ static inline void *zend_ts_hash_str_find_ptr(TsHashTable *ht, const char *str, 
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
-static inline void *zend_ts_hash_str_update_ptr(TsHashTable *ht, const char *str, int len, void *pData)
+static zend_always_inline void *zend_ts_hash_str_update_ptr(TsHashTable *ht, const char *str, int len, void *pData)
 {
 	zval tmp, *zv;
 
@@ -128,7 +128,7 @@ static inline void *zend_ts_hash_str_update_ptr(TsHashTable *ht, const char *str
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
-static inline void *zend_ts_hash_str_add_ptr(TsHashTable *ht, const char *str, int len, void *pData)
+static zend_always_inline void *zend_ts_hash_str_add_ptr(TsHashTable *ht, const char *str, int len, void *pData)
 {
 	zval tmp, *zv;
 

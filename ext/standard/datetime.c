@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -86,9 +86,9 @@ char *strptime(const char *s, const char *format, struct tm *tm);
 PHP_FUNCTION(strptime)
 {
 	char      *ts;
-	int        ts_length;
+	size_t        ts_length;
 	char      *format;
-	int        format_length;
+	size_t        format_length;
 	struct tm  parsed_time;
 	char      *unparsed_part;
 
@@ -104,14 +104,14 @@ PHP_FUNCTION(strptime)
 	}
 
 	array_init(return_value);
-	add_assoc_int(return_value, "tm_sec",   parsed_time.tm_sec);
-	add_assoc_int(return_value, "tm_min",   parsed_time.tm_min);
-	add_assoc_int(return_value, "tm_hour",  parsed_time.tm_hour);
-	add_assoc_int(return_value, "tm_mday",  parsed_time.tm_mday);
-	add_assoc_int(return_value, "tm_mon",   parsed_time.tm_mon);
-	add_assoc_int(return_value, "tm_year",  parsed_time.tm_year);
-	add_assoc_int(return_value, "tm_wday",  parsed_time.tm_wday);
-	add_assoc_int(return_value, "tm_yday",  parsed_time.tm_yday);
+	add_assoc_long(return_value, "tm_sec",   parsed_time.tm_sec);
+	add_assoc_long(return_value, "tm_min",   parsed_time.tm_min);
+	add_assoc_long(return_value, "tm_hour",  parsed_time.tm_hour);
+	add_assoc_long(return_value, "tm_mday",  parsed_time.tm_mday);
+	add_assoc_long(return_value, "tm_mon",   parsed_time.tm_mon);
+	add_assoc_long(return_value, "tm_year",  parsed_time.tm_year);
+	add_assoc_long(return_value, "tm_wday",  parsed_time.tm_wday);
+	add_assoc_long(return_value, "tm_yday",  parsed_time.tm_yday);
 	add_assoc_string(return_value, "unparsed", unparsed_part);
 }
 /* }}} */

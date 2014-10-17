@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -32,31 +32,31 @@
 static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *host;
-	int host_len;
-	php_int_t port = -1;
+	size_t host_len;
+	zend_long port = -1;
 	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout = FG(default_socket_timeout);
-	php_uint_t conv;
+	zend_ulong conv;
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
 	int err;
 	char *hostname = NULL;
-	php_int_t hostname_len;
+	zend_long hostname_len;
 	zend_string *errstr = NULL;
 
 	RETVAL_FALSE;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|iz/z/d", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/z/d", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (persistent) {
-		spprintf(&hashkey, 0, "pfsockopen__%s:" ZEND_INT_FMT, host, port);
+		spprintf(&hashkey, 0, "pfsockopen__%s:" ZEND_LONG_FMT, host, port);
 	}
 
 	if (port > 0) {
-		hostname_len = spprintf(&hostname, 0, "%s:" ZEND_INT_FMT, host, port);
+		hostname_len = spprintf(&hostname, 0, "%s:" ZEND_LONG_FMT, host, port);
 	} else {
 		hostname_len = host_len;
 		hostname = host;
@@ -69,7 +69,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (zerrno)	{
 		zval_dtor(zerrno);
-		ZVAL_INT(zerrno, 0);
+		ZVAL_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
 		zval_dtor(zerrstr);
@@ -83,7 +83,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		efree(hostname);
 	}
 	if (stream == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:" ZEND_INT_FMT " (%s)", host, port, errstr == NULL ? "Unknown error" : errstr->val);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:" ZEND_LONG_FMT " (%s)", host, port, errstr == NULL ? "Unknown error" : errstr->val);
 	}
 
 	if (hashkey) {
@@ -93,21 +93,21 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (stream == NULL)	{
 		if (zerrno) {
 			zval_dtor(zerrno);
-			ZVAL_INT(zerrno, err);
+			ZVAL_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */
 			zval_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (!zerrstr && errstr) {
-			STR_RELEASE(errstr);
+			zend_string_release(errstr);
 		} 
 
 		RETURN_FALSE;
 	}
 
 	if (errstr) {
-		STR_RELEASE(errstr);
+		zend_string_release(errstr);
 	}
 		
 	php_stream_to_zval(stream, return_value);

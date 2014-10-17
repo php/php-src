@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -44,10 +44,10 @@ static int php_embed_deactivate(TSRMLS_D)
 	return SUCCESS;
 }
 
-static inline size_t php_embed_single_write(const char *str, php_size_t str_length)
+static inline size_t php_embed_single_write(const char *str, size_t str_length)
 {
 #ifdef PHP_WRITE_STDOUT
-	php_int_t ret;
+	zend_long ret;
 
 	ret = write(STDOUT_FILENO, str, str_length);
 	if (ret <= 0) return 0;
@@ -61,10 +61,10 @@ static inline size_t php_embed_single_write(const char *str, php_size_t str_leng
 }
 
 
-static php_size_t php_embed_ub_write(const char *str, php_size_t str_length TSRMLS_DC)
+static size_t php_embed_ub_write(const char *str, size_t str_length TSRMLS_DC)
 {
 	const char *ptr = str;
-	php_size_t remaining = str_length;
+	size_t remaining = str_length;
 	size_t ret;
 
 	while (remaining > 0) {

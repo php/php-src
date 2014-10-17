@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -31,6 +31,8 @@ ZEND_MODULE_DEACTIVATE_D(gmp);
 ZEND_MODULE_INFO_D(gmp);
 
 ZEND_FUNCTION(gmp_init);
+ZEND_FUNCTION(gmp_import);
+ZEND_FUNCTION(gmp_export);
 ZEND_FUNCTION(gmp_intval);
 ZEND_FUNCTION(gmp_strval);
 ZEND_FUNCTION(gmp_add);
@@ -64,6 +66,8 @@ ZEND_FUNCTION(gmp_or);
 ZEND_FUNCTION(gmp_com);
 ZEND_FUNCTION(gmp_xor);
 ZEND_FUNCTION(gmp_random);
+ZEND_FUNCTION(gmp_random_bits);
+ZEND_FUNCTION(gmp_random_range);
 ZEND_FUNCTION(gmp_setbit);
 ZEND_FUNCTION(gmp_clrbit);
 ZEND_FUNCTION(gmp_scan0);
@@ -72,6 +76,15 @@ ZEND_FUNCTION(gmp_testbit);
 ZEND_FUNCTION(gmp_popcount);
 ZEND_FUNCTION(gmp_hamdist);
 ZEND_FUNCTION(gmp_nextprime);
+
+/* GMP and MPIR use different datatypes on different platforms */
+#ifdef PHP_WIN32
+typedef zend_long gmp_long;
+typedef zend_ulong gmp_ulong;
+#else
+typedef long gmp_long;
+typedef unsigned long gmp_ulong;
+#endif
 
 ZEND_BEGIN_MODULE_GLOBALS(gmp)
 	zend_bool rand_initialized;

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -42,7 +42,7 @@ php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent TSRMLS
 			meta->def = NULL;
 		}
 		if (meta->sname) {
-			STR_RELEASE(meta->sname);
+			zend_string_release(meta->sname);
 		}
 	}
 }
@@ -64,7 +64,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 	}
 	field_packet->persistent_alloc = meta->persistent;
 	for (;i < meta->field_count; i++) {
-		php_int_t idx;
+		zend_ulong idx;
 
 		if (meta->fields[i].root) {
 			/* We re-read metadata for PS */
@@ -226,7 +226,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 		memcpy(new_fields[i].root, orig_fields[i].root, new_fields[i].root_len);
 
 		if (orig_fields[i].sname) {
-			new_fields[i].sname = STR_COPY(orig_fields[i].sname);
+			new_fields[i].sname = zend_string_copy(orig_fields[i].sname);
 			new_fields[i].name = new_fields[i].sname->val;
 			new_fields[i].name_length = new_fields[i].sname->len;
 		}

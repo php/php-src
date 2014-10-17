@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -64,7 +64,7 @@ typedef struct _xsl_object {
 	HashTable *node_list;
 	php_libxml_node_object *doc;
 	char *profiling;
-	php_int_t securityPrefs;
+	zend_long securityPrefs;
 	int securityPrefsSet;
 	zend_object  std;
 } xsl_object;

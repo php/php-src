@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -29,7 +29,7 @@
 #include "main/php_streams.h"
 
 /* Declare this so we can get to it from outside the sapi_apache2.c file */
-extern module AP_MODULE_DECLARE_DATA php5_module;
+extern module AP_MODULE_DECLARE_DATA php7_module;
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 extern char *apache2_php_ini_path_override;
@@ -43,7 +43,7 @@ typedef struct php_struct {
 #if defined(NETWARE) && defined(CLIB_STAT_PATCH)
 	struct stat_libc finfo;
 #else
-	php_stat_t finfo;
+	zend_stat_t finfo;
 #endif
 	/* Whether or not we've processed PHP in the output filters yet. */
 	int request_processed;

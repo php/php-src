@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -135,7 +135,7 @@ int _php_ibase_blob_add(zval *string_arg, ibase_blob *ib_blob TSRMLS_DC) /* {{{ 
 
 	convert_to_string_ex(string_arg);
 
-	for (rem_cnt = Z_STRSIZE_P(string_arg); rem_cnt > 0; rem_cnt -= chunk_size)  {
+	for (rem_cnt = Z_STRLEN_P(string_arg); rem_cnt > 0; rem_cnt -= chunk_size)  {
 
 		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : (unsigned short)rem_cnt;
 
@@ -239,7 +239,7 @@ PHP_FUNCTION(ibase_blob_create)
 PHP_FUNCTION(ibase_blob_open)
 {
 	char *blob_id;
-	int blob_id_len;
+	size_t blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
@@ -337,9 +337,9 @@ PHP_FUNCTION(ibase_blob_get)
 		RETURN_FALSE;
 	}
 
-	convert_to_int_ex(len_arg);
+	convert_to_long_ex(len_arg);
 
-	if (_php_ibase_blob_get(return_value, ib_blob, Z_IVAL_P(len_arg) TSRMLS_CC) != SUCCESS) {
+	if (_php_ibase_blob_get(return_value, ib_blob, Z_LVAL_P(len_arg) TSRMLS_CC) != SUCCESS) {
 		RETURN_FALSE;
 	}
 }
@@ -406,7 +406,7 @@ PHP_FUNCTION(ibase_blob_cancel)
 PHP_FUNCTION(ibase_blob_info)
 {
 	char *blob_id;
-	int blob_id_len;
+	size_t blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;
@@ -460,14 +460,14 @@ PHP_FUNCTION(ibase_blob_info)
 
 	array_init(return_value);
 
-	add_index_int(return_value, 0, bl_info.total_length);
- 	add_assoc_int(return_value, "length", bl_info.total_length);
+	add_index_long(return_value, 0, bl_info.total_length);
+ 	add_assoc_long(return_value, "length", bl_info.total_length);
 
-	add_index_int(return_value, 1, bl_info.num_segments);
- 	add_assoc_int(return_value, "numseg", bl_info.num_segments);
+	add_index_long(return_value, 1, bl_info.num_segments);
+ 	add_assoc_long(return_value, "numseg", bl_info.num_segments);
 
-	add_index_int(return_value, 2, bl_info.max_segment);
- 	add_assoc_int(return_value, "maxseg", bl_info.max_segment);
+	add_index_long(return_value, 2, bl_info.max_segment);
+ 	add_assoc_long(return_value, "maxseg", bl_info.max_segment);
 
 	add_index_bool(return_value, 3, bl_info.bl_stream);
  	add_assoc_bool(return_value, "stream", bl_info.bl_stream);
@@ -482,7 +482,7 @@ PHP_FUNCTION(ibase_blob_info)
 PHP_FUNCTION(ibase_blob_echo)
 {
 	char *blob_id;
-	int blob_id_len;
+	size_t blob_id_len;
 	zval *link = NULL;
 	ibase_db_link *ib_link;
 	ibase_trans *trans = NULL;

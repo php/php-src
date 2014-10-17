@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -209,7 +209,7 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 		/* regular string bind */
 		convert_to_string(param->parameter);
 		*bufpp = Z_STRVAL_P(param->parameter);
-		*alenp = Z_STRSIZE_P(param->parameter);
+		*alenp = Z_STRLEN_P(param->parameter);
 	}
 
 	*piecep = OCI_ONE_PIECE;
@@ -244,11 +244,11 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 	convert_to_string(param->parameter);
 	zval_dtor(param->parameter);
 
-	Z_STRSIZE_P(param->parameter) = param->max_value_len;
-	Z_STRVAL_P(param->parameter) = ecalloc(1, Z_STRSIZE_P(param->parameter)+1);
+	Z_STRLEN_P(param->parameter) = param->max_value_len;
+	Z_STRVAL_P(param->parameter) = ecalloc(1, Z_STRLEN_P(param->parameter)+1);
 	P->used_for_output = 1;
 
-	P->actual_len = Z_STRSIZE_P(param->parameter);
+	P->actual_len = Z_STRLEN_P(param->parameter);
 	*alenpp = &P->actual_len;
 	*bufpp = Z_STRVAL_P(param->parameter);
 	*piecep = OCI_ONE_PIECE;
@@ -360,7 +360,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 							&& Z_STRVAL_P(param->parameter) != empty_string
 #endif
 							) {
-						Z_STRSIZE_P(param->parameter) = P->actual_len;
+						Z_STRLEN_P(param->parameter) = P->actual_len;
 						Z_STRVAL_P(param->parameter) = erealloc(Z_STRVAL_P(param->parameter), P->actual_len+1);
 						Z_STRVAL_P(param->parameter)[P->actual_len] = '\0';
 					}
@@ -410,7 +410,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 						} else if (Z_TYPE_P(param->parameter) == IS_STRING) {
 							/* stick the string into the LOB */
 							consume = Z_STRVAL_P(param->parameter);
-							n = Z_STRSIZE_P(param->parameter);
+							n = Z_STRLEN_P(param->parameter);
 							if (n) {
 								OCILobOpen(S->H->svc, S->err, (OCILobLocator*)P->thing, OCI_LOB_READWRITE);
 								while (n) {

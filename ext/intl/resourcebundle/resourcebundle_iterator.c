@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -109,7 +109,7 @@ static void resourcebundle_iterator_key( zend_object_iterator *iter, zval *key T
 	if (iterator->is_table) {
 		ZVAL_STRING(key, iterator->currentkey);
 	} else {
-		ZVAL_INT(key, iterator->i);
+		ZVAL_LONG(key, iterator->i);
 	}
 }
 /* }}} */

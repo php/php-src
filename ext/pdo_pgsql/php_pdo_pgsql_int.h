@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -54,7 +54,7 @@ typedef struct {
 typedef struct {
 	char         *def;
 	Oid          pgsql_type;
-	php_int_t         intval;
+	zend_long         intval;
 	zend_bool    boolval;
 } pdo_pgsql_column;
 

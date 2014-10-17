@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -779,51 +779,51 @@ static PHP_MINIT_FUNCTION(libxml)
 
 	php_libxml_initialize();
 
-	REGISTER_INT_CONSTANT("LIBXML_VERSION",			LIBXML_VERSION,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_VERSION",			LIBXML_VERSION,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBXML_DOTTED_VERSION",	LIBXML_DOTTED_VERSION,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBXML_LOADED_VERSION",	(char *)xmlParserVersion,		CONST_CS | CONST_PERSISTENT);
 
 	/* For use with loading xml */
-	REGISTER_INT_CONSTANT("LIBXML_NOENT",		XML_PARSE_NOENT,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_DTDLOAD",	XML_PARSE_DTDLOAD,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_DTDATTR",	XML_PARSE_DTDATTR,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_DTDVALID",	XML_PARSE_DTDVALID,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_NOERROR",	XML_PARSE_NOERROR,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_NOWARNING",	XML_PARSE_NOWARNING,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_NOBLANKS",	XML_PARSE_NOBLANKS,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_XINCLUDE",	XML_PARSE_XINCLUDE,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_NSCLEAN",	XML_PARSE_NSCLEAN,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_NOCDATA",	XML_PARSE_NOCDATA,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_NONET",		XML_PARSE_NONET,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_PEDANTIC",	XML_PARSE_PEDANTIC,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_NOENT",		XML_PARSE_NOENT,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_DTDLOAD",	XML_PARSE_DTDLOAD,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_DTDATTR",	XML_PARSE_DTDATTR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_DTDVALID",	XML_PARSE_DTDVALID,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_NOERROR",	XML_PARSE_NOERROR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_NOWARNING",	XML_PARSE_NOWARNING,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_NOBLANKS",	XML_PARSE_NOBLANKS,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_XINCLUDE",	XML_PARSE_XINCLUDE,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_NSCLEAN",	XML_PARSE_NSCLEAN,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_NOCDATA",	XML_PARSE_NOCDATA,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_NONET",		XML_PARSE_NONET,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_PEDANTIC",	XML_PARSE_PEDANTIC,		CONST_CS | CONST_PERSISTENT);
 #if LIBXML_VERSION >= 20621
-	REGISTER_INT_CONSTANT("LIBXML_COMPACT",	XML_PARSE_COMPACT,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_NOXMLDECL",	XML_SAVE_NO_DECL,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_COMPACT",	XML_PARSE_COMPACT,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_NOXMLDECL",	XML_SAVE_NO_DECL,		CONST_CS | CONST_PERSISTENT);
 #endif
 #if LIBXML_VERSION >= 20703
-	REGISTER_INT_CONSTANT("LIBXML_PARSEHUGE",	XML_PARSE_HUGE,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_PARSEHUGE",	XML_PARSE_HUGE,			CONST_CS | CONST_PERSISTENT);
 #endif
-	REGISTER_INT_CONSTANT("LIBXML_NOEMPTYTAG",	LIBXML_SAVE_NOEMPTYTAG,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_NOEMPTYTAG",	LIBXML_SAVE_NOEMPTYTAG,	CONST_CS | CONST_PERSISTENT);
 
 	/* Schema validation options */
 #if defined(LIBXML_SCHEMAS_ENABLED) && LIBXML_VERSION >= 20614
-	REGISTER_INT_CONSTANT("LIBXML_SCHEMA_CREATE",	XML_SCHEMA_VAL_VC_I_CREATE,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_SCHEMA_CREATE",	XML_SCHEMA_VAL_VC_I_CREATE,	CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/* Additional constants for use with loading html */
 #if LIBXML_VERSION >= 20707
-	REGISTER_INT_CONSTANT("LIBXML_HTML_NOIMPLIED",	HTML_PARSE_NOIMPLIED,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_HTML_NOIMPLIED",	HTML_PARSE_NOIMPLIED,		CONST_CS | CONST_PERSISTENT);
 #endif
 
 #if LIBXML_VERSION >= 20708
-	REGISTER_INT_CONSTANT("LIBXML_HTML_NODEFDTD",	HTML_PARSE_NODEFDTD,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_HTML_NODEFDTD",	HTML_PARSE_NODEFDTD,		CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/* Error levels */
-	REGISTER_INT_CONSTANT("LIBXML_ERR_NONE",		XML_ERR_NONE,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_ERR_WARNING",	XML_ERR_WARNING,	CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_ERR_ERROR",		XML_ERR_ERROR,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("LIBXML_ERR_FATAL",		XML_ERR_FATAL,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_ERR_NONE",		XML_ERR_NONE,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_ERR_WARNING",	XML_ERR_WARNING,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_ERR_ERROR",		XML_ERR_ERROR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_ERR_FATAL",		XML_ERR_FATAL,		CONST_CS | CONST_PERSISTENT);
 
 	INIT_CLASS_ENTRY(ce, "LibXMLError", NULL);
 	libxmlerror_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
@@ -991,9 +991,9 @@ static PHP_FUNCTION(libxml_get_last_error)
 	
 	if (error) {
 		object_init_ex(return_value, libxmlerror_class_entry);
-		add_property_int(return_value, "level", error->level);
-		add_property_int(return_value, "code", error->code);
-		add_property_int(return_value, "column", error->int2);
+		add_property_long(return_value, "level", error->level);
+		add_property_long(return_value, "code", error->code);
+		add_property_long(return_value, "column", error->int2);
 		if (error->message) {
 			add_property_string(return_value, "message", error->message);
 		} else {
@@ -1004,7 +1004,7 @@ static PHP_FUNCTION(libxml_get_last_error)
 		} else {
 			add_property_stringl(return_value, "file", "", 0);
 		}
-		add_property_int(return_value, "line", error->line);
+		add_property_long(return_value, "line", error->line);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1030,20 +1030,20 @@ static PHP_FUNCTION(libxml_get_errors)
 			zval z_error;
 
 			object_init_ex(&z_error, libxmlerror_class_entry);
-			add_property_int(&z_error, "level", error->level);
-			add_property_int(&z_error, "code", error->code);
-			add_property_int(&z_error, "column", error->int2);
+			add_property_long_ex(&z_error, "level", sizeof("level") - 1, error->level TSRMLS_CC);
+			add_property_long_ex(&z_error, "code", sizeof("code") - 1, error->code TSRMLS_CC);
+			add_property_long_ex(&z_error, "column", sizeof("column") - 1, error->int2  TSRMLS_CC);
 			if (error->message) {
-				add_property_string(&z_error, "message", error->message);
+				add_property_string_ex(&z_error, "message", sizeof("message") - 1, error->message TSRMLS_CC);
 			} else {
-				add_property_stringl(&z_error, "message", "", 0);
+				add_property_stringl_ex(&z_error, "message", sizeof("message") - 1, "", 0 TSRMLS_CC);
 			}
 			if (error->file) {
-				add_property_string(&z_error, "file", error->file);
+				add_property_string_ex(&z_error, "file", sizeof("file") - 1, error->file TSRMLS_CC);
 			} else {
-				add_property_stringl(&z_error, "file", "", 0);
+				add_property_stringl_ex(&z_error, "file", sizeof("file") - 1, "", 0 TSRMLS_CC);
 			}
-			add_property_int(&z_error, "line", error->line);
+			add_property_long_ex(&z_error, "line", sizeof("line") - 1, error->line TSRMLS_CC);
 			add_next_index_zval(return_value, &z_error);
 
 			error = zend_llist_get_next(LIBXML(error_list));

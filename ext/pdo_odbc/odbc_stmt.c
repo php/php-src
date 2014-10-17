@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -58,7 +58,7 @@ static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SWORD sqltype)
 }
 
 static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf, 
-	php_uint_t buflen, php_uint_t *outlen)
+	zend_ulong buflen, zend_ulong *outlen)
 {
 #ifdef PHP_WIN32
 	if (is_unicode && buflen) {
@@ -93,7 +93,7 @@ static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 }
 
 static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, const char *buf, 
-	php_uint_t buflen, php_uint_t *outlen)
+	zend_ulong buflen, zend_ulong *outlen)
 {
 #ifdef PHP_WIN32
 	if (is_unicode && buflen) {
@@ -190,16 +190,16 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			}
 			if (Z_TYPE_P(parameter) != IS_RESOURCE) {
 				/* they passed in a string */
-				php_uint_t ulen;
+				zend_ulong ulen;
 				convert_to_string(parameter);
 
 				switch (pdo_odbc_utf82ucs2(stmt, P->is_unicode, 
 							Z_STRVAL_P(parameter),
-							Z_STRSIZE_P(parameter),
+							Z_STRLEN_P(parameter),
 							&ulen)) {
 					case PDO_ODBC_CONV_NOT_REQUIRED:
 						SQLPutData(S->stmt, Z_STRVAL_P(parameter),
-							Z_STRSIZE_P(parameter));
+							Z_STRLEN_P(parameter));
 						break;
 					case PDO_ODBC_CONV_OK:
 						SQLPutData(S->stmt, S->convbuf, ulen);
@@ -447,10 +447,10 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 					} else {
 						convert_to_string(parameter);
 						if (P->outbuf) {
-							P->len = Z_STRSIZE_P(parameter);
+							P->len = Z_STRLEN_P(parameter);
 							memcpy(P->outbuf, Z_STRVAL_P(parameter), P->len);
 						} else {
-							P->len = SQL_LEN_DATA_AT_EXEC(Z_STRSIZE_P(parameter));
+							P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
 						}
 					}
 				} else if (Z_TYPE_P(parameter) == IS_NULL || PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL) {
@@ -458,14 +458,14 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				} else {
 					convert_to_string(parameter);
 					if (P->outbuf) {
-						php_uint_t ulen;
+						zend_ulong ulen;
 						switch (pdo_odbc_utf82ucs2(stmt, P->is_unicode,
 								Z_STRVAL_P(parameter),
-								Z_STRSIZE_P(parameter),
+								Z_STRLEN_P(parameter),
 								&ulen)) {
 							case PDO_ODBC_CONV_FAIL:
 							case PDO_ODBC_CONV_NOT_REQUIRED:
-								P->len = Z_STRSIZE_P(parameter);
+								P->len = Z_STRLEN_P(parameter);
 								memcpy(P->outbuf, Z_STRVAL_P(parameter), P->len);
 								break;
 							case PDO_ODBC_CONV_OK:
@@ -474,7 +474,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 								break;
 						}
 					} else {
-						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRSIZE_P(parameter));
+						P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
 					}
 				}
 				return 1;
@@ -483,9 +483,9 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 				P = param->driver_data;
 
 				if (P->outbuf) {
-					php_uint_t ulen;
+					zend_ulong ulen;
 					char *srcbuf;
-					php_uint_t srclen = 0;
+					zend_ulong srclen = 0;
 
 					if (Z_ISREF(param->parameter)) {
 						parameter = Z_REFVAL(param->parameter);
@@ -512,9 +512,9 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 									break;
 							}
 										
-							ZVAL_NEW_STR(parameter, STR_ALLOC(srclen, 0));
+							ZVAL_NEW_STR(parameter, zend_string_alloc(srclen, 0));
 							memcpy(Z_STRVAL_P(parameter), srcbuf, srclen);
-							Z_STRVAL_P(parameter)[Z_STRSIZE_P(parameter)] = '\0';
+							Z_STRVAL_P(parameter)[Z_STRLEN_P(parameter)] = '\0';
 					}
 				}
 				return 1;
@@ -524,7 +524,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 }
 
 static int odbc_stmt_fetch(pdo_stmt_t *stmt,
-	enum pdo_fetch_orientation ori, php_int_t offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, zend_long offset TSRMLS_DC)
 {
 	RETCODE rc;
 	SQLSMALLINT odbcori;
@@ -628,15 +628,15 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, php_uint_t *len, int *caller_frees TSRMLS_DC)
+static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees TSRMLS_DC)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	pdo_odbc_column *C = &S->cols[colno];
-	php_uint_t ulen;
+	zend_ulong ulen;
 
 	/* if it is a column containing "long" data, perform late binding now */
 	if (C->is_long) {
-		php_uint_t used = 0;
+		zend_ulong used = 0;
 		char *buf;
 		RETCODE rc;
 
@@ -755,7 +755,7 @@ in_data:
 	return 1;
 }
 
-static int odbc_stmt_set_param(pdo_stmt_t *stmt, php_int_t attr, zval *val TSRMLS_DC)
+static int odbc_stmt_set_param(pdo_stmt_t *stmt, zend_long attr, zval *val TSRMLS_DC)
 {
 	SQLRETURN rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
@@ -763,7 +763,7 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, php_int_t attr, zval *val TSRML
 	switch (attr) {
 		case PDO_ATTR_CURSOR_NAME:
 			convert_to_string(val);
-			rc = SQLSetCursorName(S->stmt, Z_STRVAL_P(val), Z_STRSIZE_P(val));
+			rc = SQLSetCursorName(S->stmt, Z_STRVAL_P(val), Z_STRLEN_P(val));
 
 			if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
 				return 1;
@@ -782,7 +782,7 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, php_int_t attr, zval *val TSRML
 	}
 }
 
-static int odbc_stmt_get_attr(pdo_stmt_t *stmt, php_int_t attr, zval *val TSRMLS_DC)
+static int odbc_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val TSRMLS_DC)
 {
 	SQLRETURN rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;

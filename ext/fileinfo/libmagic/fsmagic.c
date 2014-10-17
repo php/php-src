@@ -90,7 +90,7 @@ handle_mime(struct magic_set *ms, int mime, const char *str)
 }
 
 protected int
-file_fsmagic(struct magic_set *ms, const char *fn, php_stat_t *sb, php_stream *stream)
+file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *stream)
 {
 	int ret, did = 0;
 	int mime = ms->flags & MAGIC_MIME;

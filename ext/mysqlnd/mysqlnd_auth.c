@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -37,7 +37,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const char * const db,
 							  const size_t db_len,
 							  const MYSQLND_OPTIONS * const options,
-							  php_uint_t mysql_flags,
+							  zend_ulong mysql_flags,
 							  unsigned int server_charset_no,
 							  zend_bool use_full_blown_auth_packet,
 							  const char * const auth_protocol,
@@ -361,7 +361,7 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_OPTIONS * const options,
 								  const MYSQLND_NET_OPTIONS * const net_options,
-								  php_uint_t mysql_flags
+								  zend_ulong mysql_flags
 								  TSRMLS_DC)
 {
 	zend_uchar * ret = NULL;
@@ -421,7 +421,7 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 							   const MYSQLND_OPTIONS * const options,
 							   const MYSQLND_NET_OPTIONS * const net_options,
-							   php_uint_t mysql_flags
+							   zend_ulong mysql_flags
 							   TSRMLS_DC)
 {
 	zend_uchar * ret = NULL;
@@ -553,7 +553,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 				BIO_free(bio);
 				DBG_INF("Successfully loaded");
 				DBG_INF_FMT("Public key:%*.s", key_str->len, key_str->val);
-				STR_RELEASE(key_str);
+				zend_string_release(key_str);
 			}
 			php_stream_free(stream, PHP_STREAM_FREE_CLOSE);
 		}
@@ -571,7 +571,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_OPTIONS * const options,
 								  const MYSQLND_NET_OPTIONS * const net_options,
-								  php_uint_t mysql_flags
+								  zend_ulong mysql_flags
 								  TSRMLS_DC)
 {
 	RSA * server_public_key;

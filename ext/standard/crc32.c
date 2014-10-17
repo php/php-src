@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -27,7 +27,7 @@
 PHP_NAMED_FUNCTION(php_if_crc32)
 {
 	char *p;
-	int nr;
+	size_t nr;
 	php_uint32 crcinit = 0;
 	register php_uint32 crc;
 
@@ -39,7 +39,7 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 	for (; nr--; ++p) {
 		crc = ((crc >> 8) & 0x00FFFFFF) ^ crc32tab[(crc ^ (*p)) & 0xFF ];
 	}
-	RETVAL_INT(crc^0xFFFFFFFF);
+	RETVAL_LONG(crc^0xFFFFFFFF);
 }
 /* }}} */
 

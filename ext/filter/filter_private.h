@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -114,17 +114,6 @@
 		while (p[len-1] == ' ' || p[len-1] == '\t' || p[len-1] == '\r' || p[len-1] == '\v' || p[len-1] == '\n') { \
 			len--; \
 		} \
-	} \
-}
-
-#define PHP_FILTER_GET_LONG_OPT(zv, opt) { \
-	if (Z_TYPE_P(zv) != IS_INT) { \
-		zval ___tmp; \
-		ZVAL_DUP(&___tmp, zv); \
-		convert_to_int(&___tmp); \
-		opt = Z_IVAL(___tmp); \
-	} else { \
-		opt = Z_IVAL_P(zv); \
 	} \
 }
 

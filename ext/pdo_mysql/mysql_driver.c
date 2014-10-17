@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -129,7 +129,7 @@ static int pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 	}
 
 	if (einfo->errcode) {
-		add_next_index_int(info, einfo->errcode);
+		add_next_index_long(info, einfo->errcode);
 		add_next_index_string(info, einfo->errmsg);
 	}
 
@@ -161,7 +161,7 @@ static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 /* }}} */
 
 /* {{{ mysql_handle_preparer */
-static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_mysql_stmt *S = ecalloc(1, sizeof(pdo_mysql_stmt));
@@ -235,12 +235,12 @@ static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_
 #else
 		S->params = ecalloc(S->num_params, sizeof(MYSQL_BIND));
 		S->in_null = ecalloc(S->num_params, sizeof(my_bool));
-		S->in_length = ecalloc(S->num_params, sizeof(php_uint_t));
+		S->in_length = ecalloc(S->num_params, sizeof(zend_ulong));
 #endif
 	}
 	dbh->alloc_own_columns = 1;
 
-	S->max_length = pdo_attr_ival(driver_options, PDO_ATTR_MAX_COLUMN_LEN, 0 TSRMLS_CC);
+	S->max_length = pdo_attr_lval(driver_options, PDO_ATTR_MAX_COLUMN_LEN, 0 TSRMLS_CC);
 
 	PDO_DBG_RETURN(1);
 
@@ -253,7 +253,7 @@ end:
 /* }}} */
 
 /* {{{ mysql_handle_doer */
-static php_int_t mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, php_int_t sql_len TSRMLS_DC)
+static zend_long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	PDO_DBG_ENTER("mysql_handle_doer");
@@ -368,7 +368,7 @@ static inline int mysql_handle_autocommit(pdo_dbh_t *dbh TSRMLS_DC)
 /* }}} */
 
 /* {{{ pdo_mysql_set_attribute */
-static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *val TSRMLS_DC)
+static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_DC)
 {
 	PDO_DBG_ENTER("pdo_mysql_set_attribute");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
@@ -400,13 +400,13 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *val TSR
 			PDO_DBG_RETURN(1);
 #ifndef PDO_USE_MYSQLND
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
-			convert_to_int(val);
-			if (Z_IVAL_P(val) < 0) {
+			convert_to_long(val);
+			if (Z_LVAL_P(val) < 0) {
 				/* TODO: Johannes, can we throw a warning here? */
  				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = 1024*1024;
 				PDO_DBG_INF_FMT("Adjusting invalid buffer size to =%l", ((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size);
 			} else {
-				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = Z_IVAL_P(val);
+				((pdo_mysql_db_handle *)dbh->driver_data)->max_buffer_size = Z_LVAL_P(val);
 			}
 			PDO_DBG_RETURN(1);
 			break;
@@ -419,7 +419,7 @@ static int pdo_mysql_set_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *val TSR
 /* }}} */
 
 /* {{{ pdo_mysql_get_attribute */
-static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *return_value TSRMLS_DC)
+static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value TSRMLS_DC)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 
@@ -456,20 +456,20 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, php_int_t attr, zval *return_
 		}
 			break;
 		case PDO_ATTR_AUTOCOMMIT:
-			ZVAL_INT(return_value, dbh->auto_commit);
+			ZVAL_LONG(return_value, dbh->auto_commit);
 			break;
 			
 		case PDO_MYSQL_ATTR_USE_BUFFERED_QUERY:
-			ZVAL_INT(return_value, H->buffered);
+			ZVAL_LONG(return_value, H->buffered);
 			break;
 
 		case PDO_MYSQL_ATTR_DIRECT_QUERY:
-			ZVAL_INT(return_value, H->emulate_prepare);
+			ZVAL_LONG(return_value, H->emulate_prepare);
 			break;
 
 #ifndef PDO_USE_MYSQLND
 		case PDO_MYSQL_ATTR_MAX_BUFFER_SIZE:
-			ZVAL_INT(return_value, H->max_buffer_size);
+			ZVAL_LONG(return_value, H->max_buffer_size);
 			break;
 #endif
 
@@ -596,30 +596,30 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	/* handle MySQL options */
 	if (driver_options) {
-		php_int_t connect_timeout = pdo_attr_ival(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
-		php_int_t local_infile = pdo_attr_ival(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0 TSRMLS_CC);
+		zend_long connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
+		zend_long local_infile = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0 TSRMLS_CC);
 		char *init_cmd = NULL;
 #ifndef PDO_USE_MYSQLND
 		char *default_file = NULL, *default_group = NULL;
 #endif
-		php_int_t compress = 0;
+		zend_long compress = 0;
 		char *ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL, *ssl_cipher = NULL;
-		H->buffered = pdo_attr_ival(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1 TSRMLS_CC);
+		H->buffered = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_USE_BUFFERED_QUERY, 1 TSRMLS_CC);
 
-		H->emulate_prepare = pdo_attr_ival(driver_options,
+		H->emulate_prepare = pdo_attr_lval(driver_options,
 			PDO_MYSQL_ATTR_DIRECT_QUERY, H->emulate_prepare TSRMLS_CC);
-		H->emulate_prepare = pdo_attr_ival(driver_options, 
+		H->emulate_prepare = pdo_attr_lval(driver_options, 
 			PDO_ATTR_EMULATE_PREPARES, H->emulate_prepare TSRMLS_CC);
 
 #ifndef PDO_USE_MYSQLND
-		H->max_buffer_size = pdo_attr_ival(driver_options, PDO_MYSQL_ATTR_MAX_BUFFER_SIZE, H->max_buffer_size TSRMLS_CC);
+		H->max_buffer_size = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_MAX_BUFFER_SIZE, H->max_buffer_size TSRMLS_CC);
 #endif
 
-		if (pdo_attr_ival(driver_options, PDO_MYSQL_ATTR_FOUND_ROWS, 0 TSRMLS_CC)) {
+		if (pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_FOUND_ROWS, 0 TSRMLS_CC)) {
 			connect_opts |= CLIENT_FOUND_ROWS;
 		}
 
-		if (pdo_attr_ival(driver_options, PDO_MYSQL_ATTR_IGNORE_SPACE, 0 TSRMLS_CC)) {
+		if (pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_IGNORE_SPACE, 0 TSRMLS_CC)) {
 			connect_opts |= CLIENT_IGNORE_SPACE;
 		}
 
@@ -648,7 +648,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		 * mysqlnd doesn't support reconnect, thus we don't have "|| defined(PDO_USE_MYSQLND)"
 		*/
 		{
-			php_int_t reconnect = 1;
+			zend_long reconnect = 1;
 			mysql_options(H->server, MYSQL_OPT_RECONNECT, (const char*)&reconnect);
 		}
 #endif
@@ -682,7 +682,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 			efree(default_group);
 		}
 #endif
-		compress = pdo_attr_ival(driver_options, PDO_MYSQL_ATTR_COMPRESS, 0 TSRMLS_CC);
+		compress = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_COMPRESS, 0 TSRMLS_CC);
 		if (compress) {
 			if (mysql_options(H->server, MYSQL_OPT_COMPRESS, 0)) {
 				pdo_mysql_error(dbh);

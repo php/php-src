@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -28,19 +28,18 @@
 
 #define PHP_SET_CLASS_ATTRIBUTES(struc) \
 	/* OBJECTS_FIXME: Fix for new object model */	\
-	if (Z_OBJ_HT_P(struc)->get_class_entry && \
-            Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
+	if (Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
 		class_name = php_lookup_class_name(struc); \
 		if (!class_name) { \
-			class_name = STR_INIT(INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1, 0); \
+			class_name = zend_string_init(INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1, 0); \
 		} \
 		incomplete_class = 1; \
 	} else { \
-		class_name = zend_get_object_classname(Z_OBJ_P(struc) TSRMLS_CC); \
+		class_name = zend_string_copy(Z_OBJCE_P(struc)->name); \
 	}
 
 #define PHP_CLEANUP_CLASS_ATTRIBUTES()	\
-	STR_RELEASE(class_name)
+	zend_string_release(class_name)
 
 #define PHP_CLASS_ATTRIBUTES											\
 	zend_string *class_name;											\
@@ -55,7 +54,7 @@ extern "C" {
 
 PHPAPI zend_class_entry *php_create_incomplete_class(TSRMLS_D);
 PHPAPI zend_string *php_lookup_class_name(zval *object);
-PHPAPI void  php_store_class_name(zval *object, const char *name, zend_uint len);
+PHPAPI void  php_store_class_name(zval *object, const char *name, uint32_t len);
 
 #ifdef __cplusplus
 };

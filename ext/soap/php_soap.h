@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -29,7 +29,7 @@
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 #include "ext/session/php_session.h"
 #endif
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "php_ini.h"
 #include "SAPI.h"
 #include <libxml/parser.h>
@@ -171,8 +171,8 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	char       cache_mode;
 	char       cache_enabled;
 	char*      cache_dir;
-	php_int_t       cache_ttl;
-	php_int_t       cache_limit;
+	zend_long       cache_ttl;
+	zend_long       cache_limit;
 	HashTable *mem_cache;
 	xmlCharEncodingHandlerPtr encoding;
 	HashTable *class_map;

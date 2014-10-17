@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -39,21 +39,21 @@ static zval *name(mysqli_object *obj, zval *retval TSRMLS_DC) \
 #define MAP_PROPERTY_MYG_BOOL_WRITE(name, value) \
 static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
 { \
-	MyG(value) = Z_IVAL_P(value) > 0; \
+	MyG(value) = Z_LVAL_P(value) > 0; \
 	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_READ(name, value) \
 static zval *name(mysqli_object *obj, zval *retval TSRMLS_DC) \
 { \
-	ZVAL_INT(retval, MyG(value)); \
+	ZVAL_LONG(retval, MyG(value)); \
 	return retval; \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_WRITE(name, value) \
 static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
 { \
-	MyG(value) = Z_IVAL_P(value); \
+	MyG(value) = Z_LVAL_P(value); \
 	return SUCCESS; \
 } \
 
@@ -74,7 +74,7 @@ static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
 /* {{{ property driver_report_write */
 static int driver_report_write(mysqli_object *obj, zval *value TSRMLS_DC)
 {
-	MyG(report_mode) = Z_IVAL_P(value);
+	MyG(report_mode) = Z_LVAL_P(value);
 	/*FIXME*/
 	/* zend_replace_error_handling(MyG(report_mode) & MYSQLI_REPORT_STRICT ? EH_THROW : EH_NORMAL, NULL, NULL TSRMLS_CC); */
 	return SUCCESS;
@@ -96,7 +96,7 @@ static zval *driver_embedded_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 /* {{{ property driver_client_version_read */
 static zval *driver_client_version_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 {
-	ZVAL_INT(retval, MYSQL_VERSION_ID);
+	ZVAL_LONG(retval, MYSQL_VERSION_ID);
 	return retval;
 }
 /* }}} */
@@ -112,7 +112,7 @@ static zval *driver_client_info_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 /* {{{ property driver_driver_version_read */
 static zval *driver_driver_version_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 {
-	ZVAL_INT(retval, MYSQLI_VERSION_ID);
+	ZVAL_LONG(retval, MYSQLI_VERSION_ID);
 	return retval;
 }
 /* }}} */

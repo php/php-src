@@ -240,18 +240,18 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 		if (pht != NULL) {
 			HashTable *ht = pht;
 			zend_string *index;
-			php_uint_t num;
+			zend_ulong num;
 			zval *data;
 
 			ZEND_HASH_FOREACH_KEY_VAL(ht, num, index, data) {
-				zend_alter_ini_entry(index, Z_STRVAL_P(data), Z_STRSIZE_P(data), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+				zend_alter_ini_entry(index, Z_STR_P(data), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 			} ZEND_HASH_FOREACH_END();	
 /*
 			for (zend_hash_internal_pointer_reset_ex(ht, &pos);
 			     zend_hash_get_current_data_ex(ht, (void**)&data, &pos) == SUCCESS &&
 			     zend_hash_get_current_key_ex(ht, &index, &index_len, &num, 0, &pos) == HASH_KEY_IS_STRING;
 			     zend_hash_move_forward_ex(ht, &pos)) {
-				zend_alter_ini_entry(index, index_len, Z_STRVAL_PP(data), Z_STRSIZE_PP(data), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+				zend_alter_ini_entry(index, index_len, Z_STRVAL_PP(data), Z_STRLEN_PP(data), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 			}
 			break;
 */

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -349,7 +349,7 @@ CPH_METHOD(GetCurFileName)
 		res = IPersistFile_GetCurFile(helper->ipf, &olename);
 
 		if (res == S_OK) {
-			int len;
+			size_t len;
 			char *str = php_com_olestring_to_string(olename,
 				   &len, helper->codepage TSRMLS_CC);
 			RETVAL_STRINGL(str, len);
@@ -375,7 +375,7 @@ CPH_METHOD(SaveToFile)
 {
 	HRESULT res;
 	char *filename, *fullpath = NULL;
-	int filename_len;
+	size_t filename_len;
 	zend_bool remember = TRUE;
 	OLECHAR *olefilename = NULL;
 	CPH_FETCH();
@@ -438,8 +438,8 @@ CPH_METHOD(LoadFromFile)
 {
 	HRESULT res;
 	char *filename, *fullpath;
-	int filename_len;
-	php_int_t flags = 0;
+	size_t filename_len;
+	zend_long flags = 0;
 	OLECHAR *olefilename;
 	CPH_FETCH();
 	
@@ -448,7 +448,7 @@ CPH_METHOD(LoadFromFile)
 	res = get_persist_file(helper);
 	if (helper->ipf) {
 
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|i",
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|l",
 					&filename, &filename_len, &flags)) {
 			php_com_throw_exception(E_INVALIDARG, "Invalid arguments" TSRMLS_CC);
 			return;
@@ -506,7 +506,7 @@ CPH_METHOD(GetMaxStreamSize)
 		php_com_throw_exception(res, NULL TSRMLS_CC);
 	} else {
 		/* TODO: handle 64 bit properly */
-		RETURN_INT((php_int_t)size.QuadPart);
+		RETURN_LONG((zend_long)size.QuadPart);
 	}
 }
 /* }}} */

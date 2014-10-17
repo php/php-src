@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -356,7 +356,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 			 * must not be a mixture of XPG3 specs and non-XPG3 specs
 			 * in the same format string.
 			 */
-			value = ZEND_STRTOUI(format-1, &end, 10);
+			value = ZEND_STRTOUL(format-1, &end, 10);
 			if (*end != '$') {
 				goto notXpg;
 			}
@@ -403,7 +403,7 @@ xpgCheckDone:
 		 * Parse any width specifier.
 		 */
 		if (isdigit(UCHAR(*ch))) {
-			value = ZEND_STRTOUI(format-1, &format, 10);
+			value = ZEND_STRTOUL(format-1, &format, 10);
 			flags |= SCAN_WIDTH;
 			ch = format++;
 		}
@@ -582,7 +582,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 {
 	int  numVars, nconversions, totalVars = -1;
 	int  i, result;
-	php_int_t value;
+	zend_long value;
 	int  objIndex;
 	char *end, *baseString;
 	zval *current;
@@ -590,7 +590,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	int  base = 0;
 	int  underflow = 0;
 	size_t width;
-	php_int_t (*fn)() = NULL;
+	zend_long (*fn)() = NULL;
 	char *ch, sch;
 	int  flags;
 	char buf[64];	/* Temporary buffer to hold scanned number
@@ -708,7 +708,7 @@ literal:
 			flags |= SCAN_SUPPRESS;
 			ch = format++;
 		} else if ( isdigit(UCHAR(*ch))) {
-			value = ZEND_STRTOUI(format-1, &end, 10);
+			value = ZEND_STRTOUL(format-1, &end, 10);
 			if (*end == '$') {
 				format = end+1;
 				ch = format++;
@@ -720,7 +720,7 @@ literal:
 		 * Parse any width specifier.
 		 */
 		if ( isdigit(UCHAR(*ch))) {
-			width = ZEND_STRTOUI(format-1, &format, 10);
+			width = ZEND_STRTOUL(format-1, &format, 10);
 			ch = format++;
 		} else {
 			width = 0;
@@ -744,9 +744,9 @@ literal:
 					} else if (numVars) {
 						current = Z_REFVAL(args[objIndex++]);
 						zval_ptr_dtor(current);
-						ZVAL_INT(current, (php_int_t)(string - baseString) );
+						ZVAL_LONG(current, (zend_long)(string - baseString) );
 					} else {
-						add_index_int(return_value, objIndex++, string - baseString);
+						add_index_long(return_value, objIndex++, string - baseString);
 					}
 				}
 				nconversions++;
@@ -756,29 +756,29 @@ literal:
 			case 'D':
 				op = 'i';
 				base = 10;
-				fn = (php_int_t (*)())ZEND_STRTOI_PTR;
+				fn = (zend_long (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'i':
 				op = 'i';
 				base = 0;
-				fn = (php_int_t (*)())ZEND_STRTOI_PTR;
+				fn = (zend_long (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'o':
 				op = 'i';
 				base = 8;
-				fn = (php_int_t (*)())ZEND_STRTOI_PTR;
+				fn = (zend_long (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'x':
 			case 'X':
 				op = 'i';
 				base = 16;
-				fn = (php_int_t (*)())ZEND_STRTOI_PTR;
+				fn = (zend_long (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'u':
 				op = 'i';
 				base = 10;
 				flags |= SCAN_UNSIGNED;
-				fn = (php_int_t (*)())ZEND_STRTOUI_PTR;
+				fn = (zend_long (*)())ZEND_STRTOUL_PTR;
 				break;
 
 			case 'f':
@@ -1049,9 +1049,9 @@ addToInt:
 				 */
 				if (!(flags & SCAN_SUPPRESS)) {
 					*end = '\0';
-					value = (php_int_t) (*fn)(buf, NULL, base);
+					value = (zend_long) (*fn)(buf, NULL, base);
 					if ((flags & SCAN_UNSIGNED) && (value < 0)) {
-						snprintf(buf, sizeof(buf), ZEND_UINT_FMT, value); /* INTL: ISO digit */
+						snprintf(buf, sizeof(buf), ZEND_ULONG_FMT, value); /* INTL: ISO digit */
 						if (numVars && objIndex >= argCount) {
 							break;
 						} else if (numVars) {
@@ -1068,9 +1068,9 @@ addToInt:
 						} else if (numVars) {
 							current = Z_REFVAL(args[objIndex++]);
 							zval_ptr_dtor(current);
-							ZVAL_INT(current, value);
+							ZVAL_LONG(current, value);
 						} else {
-							add_index_int(return_value, objIndex++, value);
+							add_index_long(return_value, objIndex++, value);
 						}
 					}
 				}
@@ -1190,8 +1190,8 @@ done:
 		scan_set_error_return( numVars, return_value );
 		result = SCAN_ERROR_EOF;
 	} else if (numVars) {
-		convert_to_int(return_value );
-		Z_IVAL_P(return_value) = nconversions;
+		convert_to_long(return_value );
+		Z_LVAL_P(return_value) = nconversions;
 	} else if (nconversions < totalVars) {
 		/* TODO: not all elements converted. we need to prune the list - cc */
 	}
@@ -1203,7 +1203,7 @@ done:
 static inline void scan_set_error_return(int numVars, zval *return_value) /* {{{ */
 {
 	if (numVars) {
-		ZVAL_INT(return_value, SCAN_ERROR_EOF);  /* EOF marker */
+		ZVAL_LONG(return_value, SCAN_ERROR_EOF);  /* EOF marker */
 	} else {
 		/* convert_to_null calls destructor */
 		convert_to_null(return_value);

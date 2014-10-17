@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -217,10 +217,10 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 		name = zend_hash_get_current_data_ex(Z_ARRVAL_P(key), &pos);
 		convert_to_string_ex(group);
 		convert_to_string_ex(name);
-		if (Z_STRSIZE_P(group) == 0) {
+		if (Z_STRLEN_P(group) == 0) {
 			*key_str = Z_STRVAL_P(name);
 			*key_free = NULL;
-			return Z_STRSIZE_P(name);
+			return Z_STRLEN_P(name);
 		}
 		len = spprintf(key_str, 0, "[%s]%s", Z_STRVAL_P(group), Z_STRVAL_P(name));
 		*key_free = *key_str;
@@ -232,8 +232,8 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 		ZVAL_COPY(&tmp, key);
 		convert_to_string(&tmp);
 
-		*key_free = *key_str = estrndup(Z_STRVAL(tmp), Z_STRSIZE(tmp));
-		len = Z_STRSIZE(tmp);
+		*key_free = *key_str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
+		len = Z_STRLEN(tmp);
 
 		zval_ptr_dtor(&tmp);
 		return len;
@@ -256,7 +256,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 	zval *key;													\
 	char *key_str, *key_free;									\
 	size_t key_len; 											\
-	php_int_t skip = 0;  											\
+	zend_long skip = 0;  											\
 	switch(ac) {												\
 	case 2: 													\
 		if (zend_parse_parameters(ac TSRMLS_CC, "zr", &key, &id) == FAILURE) { \
@@ -264,7 +264,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 		} 														\
 		break;  												\
 	case 3: 													\
-		if (zend_parse_parameters(ac TSRMLS_CC, "zir", &key, &skip, &id) == FAILURE) { \
+		if (zend_parse_parameters(ac TSRMLS_CC, "zlr", &key, &skip, &id) == FAILURE) { \
 			return;												\
 		} 														\
 		break;  												\
@@ -470,19 +470,19 @@ ZEND_INI_MH(OnUpdateDefaultHandler)
 {
 	dba_handler *hptr;
 
-	if (!strlen(new_value)) {
+	if (!new_value->len) {
 		DBA_G(default_hptr) = NULL;
-		return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	}
 
-	for (hptr = handler; hptr->name && strcasecmp(hptr->name, new_value); hptr++);
+	for (hptr = handler; hptr->name && strcasecmp(hptr->name, new_value->val); hptr++);
 
 	if (!hptr->name) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such handler: %s", new_value);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such handler: %s", new_value->val);
 		return FAILURE;
 	}
 	DBA_G(default_hptr) = hptr;
-	return OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 }
 
 PHP_INI_BEGIN()
@@ -519,7 +519,7 @@ PHP_MSHUTDOWN_FUNCTION(dba)
 }
 /* }}} */
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 /* {{{ PHP_MINFO_FUNCTION
  */
@@ -551,7 +551,7 @@ PHP_MINFO_FUNCTION(dba)
  */
 static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
-	int val_len;
+	size_t val_len;
 	zval *id;
 	dba_info *info = NULL;
 	int ac = ZEND_NUM_ARGS();
@@ -646,7 +646,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		} else if (Z_REFCOUNTED(args[i])) {
 			Z_ADDREF(args[i]);
 		}
-		keylen += Z_STRSIZE(args[i]);
+		keylen += Z_STRLEN(args[i]);
 	}
 
 	if (persistent) {
@@ -658,8 +658,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		keylen = 0;
 		
 		for(i = 0; i < ac; i++) {
-			memcpy(key+keylen, Z_STRVAL(args[i]), Z_STRSIZE(args[i]));
-			keylen += Z_STRSIZE(args[i]);
+			memcpy(key+keylen, Z_STRVAL(args[i]), Z_STRLEN(args[i]));
+			keylen += Z_STRLEN(args[i]);
 		}
 
 		/* try to find if we already have this link in our persistent list */
@@ -1054,7 +1054,7 @@ PHP_FUNCTION(dba_key_split)
 {
 	zval *zkey;
 	char *key, *name;
-	int key_len;
+	size_t key_len;
 
 	if (ZEND_NUM_ARGS() != 1) {
 		WRONG_PARAM_COUNT;
@@ -1243,7 +1243,7 @@ PHP_FUNCTION(dba_handlers)
    List opened databases */
 PHP_FUNCTION(dba_list)
 {
-	php_uint_t numitems, i;
+	zend_ulong numitems, i;
 	zend_resource *le;
 	dba_info *info;
 

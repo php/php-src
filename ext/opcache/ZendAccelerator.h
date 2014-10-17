@@ -157,13 +157,15 @@ typedef struct _zend_persistent_script {
 	zend_op_array  main_op_array;
 	HashTable      function_table;
 	HashTable      class_table;
-	zend_int_t           compiler_halt_offset;   /* position of __HALT_COMPILER or -1 */
+	zend_long           compiler_halt_offset;   /* position of __HALT_COMPILER or -1 */
 	int            ping_auto_globals_mask; /* which autoglobals are used by the script */
 	accel_time_t   timestamp;              /* the script modification time */
 	zend_bool      corrupted;
 
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */
+	void          *arena_mem;              /* part that should be copied into process */
+	size_t         arena_size;
 
 	/* All entries that shouldn't be counted in the ADLER32
 	 * checksum must be declared in this struct
@@ -173,7 +175,7 @@ typedef struct _zend_persistent_script {
 #ifdef ZEND_WIN32
 		LONGLONG   hits;
 #else
-		zend_uint_t        hits;
+		zend_ulong        hits;
 #endif
 		unsigned int memory_consumption;
 		unsigned int checksum;
@@ -182,12 +184,12 @@ typedef struct _zend_persistent_script {
 } zend_persistent_script;
 
 typedef struct _zend_accel_directives {
-	zend_int_t           memory_consumption;
-	zend_int_t           max_accelerated_files;
+	zend_long           memory_consumption;
+	zend_long           max_accelerated_files;
 	double         max_wasted_percentage;
 	char          *user_blacklist_filename;
-	zend_int_t           consistency_checks;
-	zend_int_t           force_restart_timeout;
+	zend_long           consistency_checks;
+	zend_long           force_restart_timeout;
 	zend_bool      use_cwd;
 	zend_bool      ignore_dups;
 	zend_bool      validate_timestamps;
@@ -199,18 +201,18 @@ typedef struct _zend_accel_directives {
 	zend_bool      file_override_enabled;
 	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
-	zend_uint_t  revalidate_freq;
-	zend_uint_t  file_update_protection;
+	zend_ulong  revalidate_freq;
+	zend_ulong  file_update_protection;
 	char          *error_log;
 #ifdef ZEND_WIN32
 	char          *mmap_base;
 #endif
 	char          *memory_model;
-	zend_int_t           log_verbosity_level;
+	zend_long           log_verbosity_level;
 
-	zend_int_t           optimization_level;
-	zend_int_t           max_file_size;
-	zend_int_t           interned_strings_buffer;
+	zend_long           optimization_level;
+	zend_long           max_file_size;
+	zend_long           interned_strings_buffer;
 	char          *restrict_api;
 } zend_accel_directives;
 
@@ -234,8 +236,10 @@ typedef struct _zend_accel_globals {
 	time_t                  request_time;
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
+	void                   *arena_mem;
+	zend_persistent_script *current_persistent_script;
 	/* cache to save hash lookup on the same INCLUDE opcode */
-	zend_op                *cache_opline;
+	const zend_op          *cache_opline;
 	zend_persistent_script *cache_persistent_script;
 	/* preallocated buffer for keys */
 	int                     key_len;
@@ -244,12 +248,12 @@ typedef struct _zend_accel_globals {
 
 typedef struct _zend_accel_shared_globals {
 	/* Cache Data Structures */
-	zend_uint_t   hits;
-	zend_uint_t   misses;
-	zend_uint_t   blacklist_misses;
-	zend_uint_t   oom_restarts;     /* number of restarts because of out of memory */
-	zend_uint_t   hash_restarts;    /* number of restarts because of hash overflow */
-	zend_uint_t   manual_restarts;  /* number of restarts scheduled by opcache_reset() */
+	zend_ulong   hits;
+	zend_ulong   misses;
+	zend_ulong   blacklist_misses;
+	zend_ulong   oom_restarts;     /* number of restarts because of out of memory */
+	zend_ulong   hash_restarts;    /* number of restarts because of hash overflow */
+	zend_ulong   manual_restarts;  /* number of restarts scheduled by opcache_reset() */
 	zend_accel_hash hash;             /* hash table for cached scripts */
 	zend_accel_hash include_paths;    /* used "include_path" values    */
 

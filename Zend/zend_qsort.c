@@ -74,7 +74,7 @@ ZEND_API void zend_qsort_r(void *base, size_t nmemb, size_t siz, compare_r_func_
 		end   = end_stack[loop];
 
 		while (begin < end) {
-			offset = (end - begin) >> Z_I(1);
+			offset = (end - begin) >> Z_L(1);
 			_zend_qsort_swap(begin, begin + (offset - (offset % siz)), siz);
 
 			seg1 = begin + siz;

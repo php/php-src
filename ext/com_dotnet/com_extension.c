@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -272,7 +272,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 	char *strtok_buf = NULL;
 	int cached;
 
-	if (!new_value || !new_value[0] || (typelib_file = VCWD_FOPEN(new_value, "r"))==NULL) {
+	if (NULL == new_value || !new_value->val[0] || (typelib_file = VCWD_FOPEN(new_value->val, "r"))==NULL) {
 		return FAILURE;
 	}
 
@@ -383,12 +383,12 @@ PHP_MINIT_FUNCTION(com_dotnet)
 
 	REGISTER_INI_ENTRIES();
 
-#define COM_CONST(x) REGISTER_INT_CONSTANT(#x, x, CONST_CS|CONST_PERSISTENT)
+#define COM_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_CS|CONST_PERSISTENT)
 
 #define COM_ERR_CONST(x) { \
-	php_int_t __tmp; \
+	zend_long __tmp; \
 	ULongToUIntPtr(x, &__tmp); \
-	REGISTER_INT_CONSTANT(#x, __tmp, CONST_CS|CONST_PERSISTENT); \
+	REGISTER_LONG_CONSTANT(#x, __tmp, CONST_CS|CONST_PERSISTENT); \
 }
 	
 	COM_CONST(CLSCTX_INPROC_SERVER);

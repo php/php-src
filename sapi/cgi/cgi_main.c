@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -159,6 +159,8 @@ static const opt_struct OPTIONS[] = {
 };
 
 typedef struct _php_cgi_globals_struct {
+	HashTable user_config_cache;
+	char *redirect_status_env;
 	zend_bool rfc2616_headers;
 	zend_bool nph;
 	zend_bool check_shebang_line;
@@ -166,11 +168,9 @@ typedef struct _php_cgi_globals_struct {
 	zend_bool force_redirect;
 	zend_bool discard_path;
 	zend_bool fcgi_logging;
-	char *redirect_status_env;
 #ifdef PHP_WIN32
 	zend_bool impersonate;
 #endif
-	HashTable user_config_cache;
 } php_cgi_globals_struct;
 
 /* {{{ user_config_cache
@@ -287,10 +287,10 @@ static inline size_t sapi_cgi_single_write(const char *str, uint str_length TSRM
 #endif
 }
 
-static php_size_t sapi_cgi_ub_write(const char *str, php_size_t str_length TSRMLS_DC)
+static size_t sapi_cgi_ub_write(const char *str, size_t str_length TSRMLS_DC)
 {
 	const char *ptr = str;
-	php_size_t remaining = str_length;
+	size_t remaining = str_length;
 	size_t ret;
 
 	while (remaining > 0) {
@@ -306,14 +306,14 @@ static php_size_t sapi_cgi_ub_write(const char *str, php_size_t str_length TSRML
 	return str_length;
 }
 
-static php_size_t sapi_fcgi_ub_write(const char *str, php_size_t str_length TSRMLS_DC)
+static size_t sapi_fcgi_ub_write(const char *str, size_t str_length TSRMLS_DC)
 {
 	const char *ptr = str;
-	php_size_t remaining = str_length;
+	size_t remaining = str_length;
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	while (remaining > 0) {
-		php_int_t ret = fcgi_write(request, FCGI_STDOUT, ptr, remaining);
+		zend_long ret = fcgi_write(request, FCGI_STDOUT, ptr, remaining);
 
 		if (ret <= 0) {
 			php_handle_aborted_connection();
@@ -505,12 +505,17 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 # define STDIN_FILENO 0
 #endif
 
-static php_size_t sapi_cgi_read_post(char *buffer, php_size_t count_bytes TSRMLS_DC)
+static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 {
-	php_size_t read_bytes = 0;
+	size_t read_bytes = 0;
 	int tmp_read_bytes;
+	size_t remaining_bytes;
 
-	count_bytes = MIN(count_bytes, SG(request_info).content_length - SG(read_post_bytes));
+	assert(SG(request_info).content_length >= SG(read_post_bytes));
+
+	remaining_bytes = (size_t)(SG(request_info).content_length - SG(read_post_bytes));
+
+	count_bytes = MIN(count_bytes, remaining_bytes);
 	while (read_bytes < count_bytes) {
 		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
 		if (tmp_read_bytes <= 0) {
@@ -521,9 +526,9 @@ static php_size_t sapi_cgi_read_post(char *buffer, php_size_t count_bytes TSRMLS
 	return read_bytes;
 }
 
-static php_size_t sapi_fcgi_read_post(char *buffer, php_size_t count_bytes TSRMLS_DC)
+static size_t sapi_fcgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 {
-	php_size_t read_bytes = 0;
+	size_t read_bytes = 0;
 	int tmp_read_bytes;
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 	size_t remaining = SG(request_info).content_length - SG(read_post_bytes);
@@ -622,7 +627,7 @@ static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, uns
 {
 	zval *array_ptr = (zval*)arg;	
 	int filter_arg = (Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV]))?PARSE_ENV:PARSE_SERVER;
-	php_size_t new_val_len;
+	size_t new_val_len;
 
 	if (sapi_module.input_filter(filter_arg, var, &val, strlen(val), &new_val_len TSRMLS_CC)) {
 		php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
@@ -658,7 +663,7 @@ static void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 
 static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
-	php_size_t php_self_len;
+	size_t php_self_len;
 	char *php_self;
 
 	/* In CGI mode, we consider the environment to be a part of the server
@@ -1184,7 +1189,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 #endif
 
 		if (CGIG(fix_pathinfo)) {
-			php_stat_t st;
+			zend_stat_t st;
 			char *real_path = NULL;
 			char *env_redirect_url = CGI_GETENV("REDIRECT_URL");
 			char *env_document_root = CGI_GETENV("DOCUMENT_ROOT");
@@ -1587,7 +1592,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 		char buf[128];
 		char **env, *p, *q, *var, *val, *t = buf;
 		size_t alloc_size = sizeof(buf);
-		php_uint_t var_len;
+		zend_ulong var_len;
 
 		for (env = environ; env != NULL && *env != NULL; env++) {
 			val = strchr(*env, '=');
@@ -1751,6 +1756,7 @@ int main(int argc, char *argv[])
 	char *bindpath = NULL;
 	int fcgi_fd = 0;
 	fcgi_request *request = NULL;
+	int warmup_repeats = 0;
 	int repeats = 1;
 	int benchmark = 0;
 #if HAVE_GETTIMEOFDAY
@@ -2094,7 +2100,15 @@ consult the installation file that came with this distribution, or visit \n\
 			switch (c) {
 				case 'T':
 					benchmark = 1;
-					repeats = atoi(php_optarg);
+					{
+						char *comma = strchr(php_optarg, ',');
+						if (comma) {
+							warmup_repeats = atoi(php_optarg);
+							repeats = atoi(comma + 1);
+						} else {
+							repeats = atoi(php_optarg);
+						}
+					}
 #ifdef HAVE_GETTIMEOFDAY
 					gettimeofday(&start, NULL);
 #else
@@ -2130,7 +2144,6 @@ consult the installation file that came with this distribution, or visit \n\
 		while (!fastcgi || fcgi_accept_request(request) >= 0) {
 			SG(server_context) = fastcgi ? (void *) request : (void *) 1;
 			init_request_info(request TSRMLS_CC);
-			CG(interactive) = 0;
 
 			if (!cgi && !fastcgi) {
 				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
@@ -2138,7 +2151,6 @@ consult the installation file that came with this distribution, or visit \n\
 
 						case 'a':	/* interactive mode */
 							printf("Interactive mode enabled\n\n");
-							CG(interactive) = 1;
 							break;
 
 						case 'C': /* don't chdir to the script directory */
@@ -2398,8 +2410,8 @@ consult the installation file that came with this distribution, or visit \n\
 							/* handle situations where line is terminated by \r\n */
 							if (c == '\r') {
 								if (fgetc(file_handle.handle.fp) != '\n') {
-									long pos = ftell(file_handle.handle.fp);
-									fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
+									zend_long pos = zend_ftell(file_handle.handle.fp);
+									zend_fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
 								}
 							}
 							CG(start_lineno) = 2;
@@ -2416,7 +2428,7 @@ consult the installation file that came with this distribution, or visit \n\
 							/* handle situations where line is terminated by \r\n */
 							if (c == '\r') {
 								if (php_stream_getc((php_stream*)file_handle.handle.stream.handle) != '\n') {
-									php_off_t pos = php_stream_tell((php_stream*)file_handle.handle.stream.handle);
+									zend_off_t pos = php_stream_tell((php_stream*)file_handle.handle.stream.handle);
 									php_stream_seek((php_stream*)file_handle.handle.stream.handle, pos - 1, SEEK_SET);
 								}
 							}
@@ -2514,12 +2526,24 @@ fastcgi_request_done:
 
 			if (!fastcgi) {
 				if (benchmark) {
-					repeats--;
-					if (repeats > 0) {
-						script_file = NULL;
-						php_optind = orig_optind;
-						php_optarg = orig_optarg;
+					if (warmup_repeats) {
+						warmup_repeats--;
+						if (!warmup_repeats) {
+#ifdef HAVE_GETTIMEOFDAY
+							gettimeofday(&start, NULL);
+#else
+							time(&start);						
+#endif
+						}
 						continue;
+					} else {
+						repeats--;
+						if (repeats > 0) {
+							script_file = NULL;
+							php_optind = orig_optind;
+							php_optarg = orig_optarg;
+							continue;
+						}
 					}
 				}
 				break;

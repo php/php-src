@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -460,7 +460,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 			smart_str anonymous = {0};
 			
 			smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
-			smart_str_append_int(&anonymous, zend_hash_num_elements(sdl->types));
+			smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
 			smart_str_0(&anonymous);
 			// TODO: avoid reallocation ???
 			newType->name = estrndup(anonymous.s->val, anonymous.s->len);
@@ -558,7 +558,7 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 				smart_str anonymous = {0};
 			
 				smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
-				smart_str_append_int(&anonymous, zend_hash_num_elements(sdl->types));
+				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
 				smart_str_0(&anonymous);
 				// TODO: avoid reallocation ???
 				newType->name = estrndup(anonymous.s->val, anonymous.s->len);
@@ -1931,7 +1931,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 				smart_str anonymous = {0};
 			
 				smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
-				smart_str_append_int(&anonymous, zend_hash_num_elements(sdl->types));
+				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
 				smart_str_0(&anonymous);
 				// TODO: avoid reallocation ???
 				dummy_type->name = estrndup(anonymous.s->val, anonymous.s->len);
@@ -2169,7 +2169,7 @@ static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashT
 
 							zend_hash_move_forward(tmp->attributes);
 						} else {
-							php_uint_t index;
+							zend_ulong index;
 
 							schema_attributegroup_fixup(ctx, tmp_attr, ht);
 							zend_hash_get_current_key(tmp->attributes, NULL, &index, 0);
@@ -2268,7 +2268,7 @@ static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 	}
 	if (type->attributes) {
 		zend_string *str_key;
-		php_uint_t index;
+		zend_ulong index;
 
 		ZEND_HASH_FOREACH_KEY_PTR(type->attributes, index, str_key, attr) {
 			if (str_key) {

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -197,7 +197,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	char *strtok_buf = NULL, **val_list = NULL;
 	zval *array_ptr = (zval *) arg;
 	int n, num, *len_list = NULL;
-	php_size_t val_len, new_val_len;
+	size_t val_len, new_val_len;
 	mbfl_string string, resvar, resval;
 	const mbfl_encoding *from_encoding = NULL;
 	mbfl_encoding_detector *identd = NULL; 
@@ -254,7 +254,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	} 
 
 	if (n > (PG(max_input_vars) * 2)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %pd. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
 		goto out;
 	}
 
@@ -378,7 +378,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	php_stream_rewind(SG(request_info).request_body);
 	post_data_str = php_stream_copy_to_mem(SG(request_info).request_body, PHP_STREAM_COPY_ALL, 0);
 	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str->val TSRMLS_CC);
-	STR_RELEASE(post_data_str);
+	zend_string_release(post_data_str);
 
 	MBSTRG(http_input_identify) = detected;
 	if (detected) {

@@ -28,7 +28,7 @@ Features
 AsynchDNS => Yes
 CharConv => No
 Debug => No
-GSS-Negotiate => Yes
+GSS-Negotiate => No
 IDN => Yes
 IPv6 => Yes
 krb4 => No
@@ -40,6 +40,8 @@ SPNEGO => Yes
 SSL => Yes
 SSPI => Yes
 TLS-SRP => No
+HTTP2 => No
+GSSAPI => No
 Protocols => dict, file, ftp, ftps, gopher, http, https, imap, imaps, ldap, pop3, pop3s, rtsp, scp, sftp, smtp, smtps, telnet, tftp
 Host => %s-pc-win32
 SSL Version => OpenSSL/%s

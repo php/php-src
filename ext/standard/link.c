@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -55,7 +55,7 @@
 PHP_FUNCTION(readlink)
 {
 	char *link;
-	int link_len;
+	size_t link_len;
 	char buff[MAXPATHLEN];
 	int ret;
 
@@ -86,8 +86,8 @@ PHP_FUNCTION(linkinfo)
 {
 	char *link;
 	char *dirname;
-	int link_len, dir_len;
-	struct stat sb;
+	size_t link_len, dir_len;
+	zend_stat_t sb;
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &link, &link_len) == FAILURE) {
@@ -106,11 +106,11 @@ PHP_FUNCTION(linkinfo)
 	if (ret == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		efree(dirname);
-		RETURN_INT(-1L);
+		RETURN_LONG(-1L);
 	}
 
 	efree(dirname);
-	RETURN_INT((long) sb.st_dev);
+	RETURN_LONG((zend_long) sb.st_dev);
 }
 /* }}} */
 
@@ -119,7 +119,7 @@ PHP_FUNCTION(linkinfo)
 PHP_FUNCTION(symlink)
 {
 	char *topath, *frompath;
-	int topath_len, frompath_len;
+	size_t topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
@@ -177,7 +177,7 @@ PHP_FUNCTION(symlink)
 PHP_FUNCTION(link)
 {
 	char *topath, *frompath;
-	int topath_len, frompath_len;
+	size_t topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];

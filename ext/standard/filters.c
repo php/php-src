@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -27,7 +27,7 @@
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 /* {{{ rot13 stream filter implementation */
 static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -263,14 +263,14 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(filterparams), tmp) {
 				convert_to_string_ex(tmp);
 				smart_str_appendc(&tags_ss, '<');
-				smart_str_appendl(&tags_ss, Z_STRVAL_P(tmp), Z_STRSIZE_P(tmp));
+				smart_str_append(&tags_ss, Z_STR_P(tmp));
 				smart_str_appendc(&tags_ss, '>');
 			} ZEND_HASH_FOREACH_END();
 			smart_str_0(&tags_ss);
 		} else {
 			/* FIXME: convert_to_* may clutter zvals and lead it into segfault ? */
 			convert_to_string_ex(filterparams);
-			smart_str_setl(&tags_ss, Z_STRVAL_P(filterparams), Z_STRSIZE_P(filterparams));
+			smart_str_setl(&tags_ss, Z_STRVAL_P(filterparams), Z_STRLEN_P(filterparams));
 		}
 	}
 
@@ -322,14 +322,14 @@ struct _php_conv {
 typedef struct _php_conv_base64_encode {
 	php_conv _super;
 
-	unsigned char erem[3];
+	const char *lbchars;
+	size_t lbchars_len;
 	size_t erem_len;
 	unsigned int line_ccnt;
 	unsigned int line_len;
-	const char *lbchars;
 	int lbchars_dup;
-	size_t lbchars_len;
 	int persistent;
+	unsigned char erem[3];
 } php_conv_base64_encode;
 
 static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *inst, const char **in_p, size_t *in_left, char **out_p, size_t *out_left);
@@ -735,12 +735,12 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 typedef struct _php_conv_qprint_encode {
 	php_conv _super;
 
+	const char *lbchars;
+	size_t lbchars_len;
 	int opts;
 	unsigned int line_ccnt;
 	unsigned int line_len;
-	const char *lbchars;
 	int lbchars_dup;
-	size_t lbchars_len;
 	int persistent;
 	unsigned int lb_ptr;
 	unsigned int lb_cnt;
@@ -987,11 +987,11 @@ static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst, 
 typedef struct _php_conv_qprint_decode {
 	php_conv _super;
 
+	const char *lbchars;
+	size_t lbchars_len;
 	int scan_stat;
 	unsigned int next_char;
-	const char *lbchars;
 	int lbchars_dup;
-	size_t lbchars_len;
 	int persistent;
 	unsigned int lb_ptr;
 	unsigned int lb_cnt;	
@@ -1224,7 +1224,7 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 
 		*pretval_len = str->len;
 		memcpy(*pretval, str->val, str->len + 1);
-		STR_RELEASE(str);
+		zend_string_release(str);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	}
@@ -1232,7 +1232,7 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 }
 
 #if IT_WAS_USED
-static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, php_int_t *pretval, char *field_name, size_t field_name_len)
+static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, zend_long *pretval, char *field_name, size_t field_name_len)
 {
 	zval **tmpval;
 
@@ -1241,13 +1241,13 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, php_int_t *
 	if (zend_hash_find((HashTable *)ht, field_name, field_name_len, (void **)&tmpval) == SUCCESS) {
 		zval tmp, *ztval = *tmpval;
 
-		if (Z_TYPE_PP(tmpval) != IS_INT) {
+		if (Z_TYPE_PP(tmpval) != IS_LONG) {
 			tmp = *ztval;
 			zval_copy_ctor(&tmp);
-			convert_to_int(&tmp);
+			convert_to_long(&tmp);
 			ztval = &tmp;
 		}
-		*pretval = Z_IVAL_P(ztval);
+		*pretval = Z_LVAL_P(ztval);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	} 
@@ -1255,7 +1255,7 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, php_int_t *
 }
 #endif
 
-static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, php_uint_t *pretval, char *field_name, size_t field_name_len)
+static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, zend_ulong *pretval, char *field_name, size_t field_name_len)
 {
 	zval *tmpval;
 
@@ -1264,15 +1264,15 @@ static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, php_uint_t
 	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
 		zval tmp;
 
-		if (Z_TYPE_P(tmpval) != IS_INT) {
+		if (Z_TYPE_P(tmpval) != IS_LONG) {
 			ZVAL_DUP(&tmp, tmpval);;
-			convert_to_int(&tmp);
+			convert_to_long(&tmp);
 			tmpval = &tmp;
 		}
-		if (Z_IVAL_P(tmpval) < 0) {
+		if (Z_LVAL_P(tmpval) < 0) {
 			*pretval = 0;
 		} else {
-			*pretval = Z_IVAL_P(tmpval);
+			*pretval = Z_LVAL_P(tmpval);
 		}
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
@@ -1306,7 +1306,7 @@ static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretva
 #if IT_WAS_USED
 static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
 {
-	php_int_t l;
+	zend_long l;
 	php_conv_err_t err;
 
 	*pretval = 0;
@@ -1320,7 +1320,7 @@ static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *fie
 
 static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)
 {
-	php_uint_t l;
+	zend_ulong l;
 	php_conv_err_t err;
 
 	*pretval = 0;
@@ -1699,7 +1699,7 @@ static int strfilter_convert_append_bucket(
 		}
 	}
 
-	if (out_buf_size - ocnt > 0) {
+	if (out_buf_size > ocnt) {
 		if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent TSRMLS_CC))) {
 			goto out_failure;
 		}
@@ -1831,9 +1831,9 @@ static php_stream_filter_factory strfilter_convert_factory = {
 
 /* {{{ consumed filter implementation */
 typedef struct _php_consumed_filter_data {
-	int persistent;
 	size_t consumed;
-	off_t offset;
+	zend_off_t offset;
+	int persistent;
 } php_consumed_filter_data;
 
 static php_stream_filter_status_t consumed_filter_filter(
@@ -1926,8 +1926,8 @@ typedef enum _php_chunked_filter_state {
 } php_chunked_filter_state;
 
 typedef struct _php_chunked_filter_data {
-	php_chunked_filter_state state;
 	size_t chunk_size;
+	php_chunked_filter_state state;
 	int persistent;
 } php_chunked_filter_data;
 

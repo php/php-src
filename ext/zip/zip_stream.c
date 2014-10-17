@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -152,7 +152,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		STR_RELEASE(file_basename);
+		zend_string_release(file_basename);
 		return -1;
 	}
 
@@ -160,7 +160,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	if (za) {
 		memset(ssb, 0, sizeof(php_stream_statbuf));
 		if (zip_stat(za, fragment, ZIP_FL_NOCASE, &sb) != 0) {
-			STR_RELEASE(file_basename);
+			zend_string_release(file_basename);
 			return -1;
 		}
 		zip_close(za);
@@ -184,7 +184,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 #endif
 		ssb->sb.st_ino = -1;
 	}
-	STR_RELEASE(file_basename);
+	zend_string_release(file_basename);
 	return 0;
 }
 /* }}} */
@@ -296,7 +296,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		STR_RELEASE(file_basename);
+		zend_string_release(file_basename);
 		return NULL;
 	}
 
@@ -320,7 +320,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 		}
 	}
 
-	STR_RELEASE(file_basename);
+	zend_string_release(file_basename);
 
 	if (!stream) {
 		return NULL;

@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -77,7 +77,7 @@ static const filter_list_entry filter_list[] = {
 #define PARSE_SESSION 6
 #endif
 
-static unsigned int php_sapi_filter(int arg, char *var, char **val, php_size_t val_len, php_size_t *new_val_len TSRMLS_DC);
+static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_len, size_t *new_val_len TSRMLS_DC);
 static unsigned int php_sapi_filter_init(TSRMLS_D);
 
 /* {{{ arginfo */
@@ -160,7 +160,7 @@ static PHP_INI_MH(UpdateDefaultFilter) /* {{{ */
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
 	for (i = 0; i < size; ++i) {
-		if ((strcasecmp(new_value, filter_list[i].name) == 0)) {
+		if ((strcasecmp(new_value->val, filter_list[i].name) == 0)) {
 			IF_G(default_filter) = filter_list[i].id;
 			return SUCCESS;
 		}
@@ -178,7 +178,7 @@ static PHP_INI_MH(OnUpdateFlags)
 	if (!new_value) {
 		IF_G(default_filter_flags) = FILTER_FLAG_NO_ENCODE_QUOTES;
 	} else {
-		IF_G(default_filter_flags) = atoi(new_value);
+		IF_G(default_filter_flags) = atoi(new_value->val);
 	}
 	return SUCCESS;
 }
@@ -211,72 +211,72 @@ PHP_MINIT_FUNCTION(filter)
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_INT_CONSTANT("INPUT_POST",	PARSE_POST, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("INPUT_GET",		PARSE_GET,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("INPUT_COOKIE",	PARSE_COOKIE, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("INPUT_ENV",		PARSE_ENV,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("INPUT_SERVER",	PARSE_SERVER, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("INPUT_SESSION", PARSE_SESSION, 	CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("INPUT_REQUEST", PARSE_REQUEST, 	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_POST",	PARSE_POST, 	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_GET",		PARSE_GET,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_COOKIE",	PARSE_COOKIE, 	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_ENV",		PARSE_ENV,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_SERVER",	PARSE_SERVER, 	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_SESSION", PARSE_SESSION, 	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("INPUT_REQUEST", PARSE_REQUEST, 	CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_FLAG_NONE", FILTER_FLAG_NONE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_NONE", FILTER_FLAG_NONE, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_REQUIRE_SCALAR", FILTER_REQUIRE_SCALAR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_REQUIRE_ARRAY", FILTER_REQUIRE_ARRAY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FORCE_ARRAY", FILTER_FORCE_ARRAY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_NULL_ON_FAILURE", FILTER_NULL_ON_FAILURE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_REQUIRE_SCALAR", FILTER_REQUIRE_SCALAR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_REQUIRE_ARRAY", FILTER_REQUIRE_ARRAY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FORCE_ARRAY", FILTER_FORCE_ARRAY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_NULL_ON_FAILURE", FILTER_NULL_ON_FAILURE, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_VALIDATE_INT", FILTER_VALIDATE_INT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_VALIDATE_BOOLEAN", FILTER_VALIDATE_BOOLEAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_VALIDATE_FLOAT", FILTER_VALIDATE_FLOAT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_INT", FILTER_VALIDATE_INT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_BOOLEAN", FILTER_VALIDATE_BOOLEAN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_FLOAT", FILTER_VALIDATE_FLOAT, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_VALIDATE_REGEXP", FILTER_VALIDATE_REGEXP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_VALIDATE_URL", FILTER_VALIDATE_URL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_VALIDATE_EMAIL", FILTER_VALIDATE_EMAIL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_VALIDATE_IP", FILTER_VALIDATE_IP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_VALIDATE_MAC", FILTER_VALIDATE_MAC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_REGEXP", FILTER_VALIDATE_REGEXP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_URL", FILTER_VALIDATE_URL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_EMAIL", FILTER_VALIDATE_EMAIL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_IP", FILTER_VALIDATE_IP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_VALIDATE_MAC", FILTER_VALIDATE_MAC, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_DEFAULT", FILTER_DEFAULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_UNSAFE_RAW", FILTER_UNSAFE_RAW, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_DEFAULT", FILTER_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_UNSAFE_RAW", FILTER_UNSAFE_RAW, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_SANITIZE_STRING", FILTER_SANITIZE_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_SANITIZE_STRIPPED", FILTER_SANITIZE_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_SANITIZE_ENCODED", FILTER_SANITIZE_ENCODED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_SANITIZE_SPECIAL_CHARS", FILTER_SANITIZE_SPECIAL_CHARS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_SANITIZE_FULL_SPECIAL_CHARS", FILTER_SANITIZE_FULL_SPECIAL_CHARS, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_SANITIZE_EMAIL", FILTER_SANITIZE_EMAIL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_SANITIZE_URL", FILTER_SANITIZE_URL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_SANITIZE_NUMBER_INT", FILTER_SANITIZE_NUMBER_INT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_SANITIZE_NUMBER_FLOAT", FILTER_SANITIZE_NUMBER_FLOAT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_SANITIZE_MAGIC_QUOTES", FILTER_SANITIZE_MAGIC_QUOTES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_STRING", FILTER_SANITIZE_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_STRIPPED", FILTER_SANITIZE_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_ENCODED", FILTER_SANITIZE_ENCODED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_SPECIAL_CHARS", FILTER_SANITIZE_SPECIAL_CHARS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_FULL_SPECIAL_CHARS", FILTER_SANITIZE_FULL_SPECIAL_CHARS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_EMAIL", FILTER_SANITIZE_EMAIL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_URL", FILTER_SANITIZE_URL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_NUMBER_INT", FILTER_SANITIZE_NUMBER_INT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_NUMBER_FLOAT", FILTER_SANITIZE_NUMBER_FLOAT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_SANITIZE_MAGIC_QUOTES", FILTER_SANITIZE_MAGIC_QUOTES, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_CALLBACK", FILTER_CALLBACK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_CALLBACK", FILTER_CALLBACK, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_FLAG_ALLOW_OCTAL", FILTER_FLAG_ALLOW_OCTAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_ALLOW_HEX", FILTER_FLAG_ALLOW_HEX, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_OCTAL", FILTER_FLAG_ALLOW_OCTAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_HEX", FILTER_FLAG_ALLOW_HEX, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_FLAG_STRIP_LOW", FILTER_FLAG_STRIP_LOW, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_STRIP_HIGH", FILTER_FLAG_STRIP_HIGH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_STRIP_BACKTICK", FILTER_FLAG_STRIP_BACKTICK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_ENCODE_LOW", FILTER_FLAG_ENCODE_LOW, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_ENCODE_HIGH", FILTER_FLAG_ENCODE_HIGH, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_ENCODE_AMP", FILTER_FLAG_ENCODE_AMP, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_NO_ENCODE_QUOTES", FILTER_FLAG_NO_ENCODE_QUOTES, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_EMPTY_STRING_NULL", FILTER_FLAG_EMPTY_STRING_NULL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRIP_LOW", FILTER_FLAG_STRIP_LOW, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRIP_HIGH", FILTER_FLAG_STRIP_HIGH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_STRIP_BACKTICK", FILTER_FLAG_STRIP_BACKTICK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_LOW", FILTER_FLAG_ENCODE_LOW, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_HIGH", FILTER_FLAG_ENCODE_HIGH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ENCODE_AMP", FILTER_FLAG_ENCODE_AMP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_ENCODE_QUOTES", FILTER_FLAG_NO_ENCODE_QUOTES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_EMPTY_STRING_NULL", FILTER_FLAG_EMPTY_STRING_NULL, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_FLAG_ALLOW_FRACTION", FILTER_FLAG_ALLOW_FRACTION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_ALLOW_THOUSAND", FILTER_FLAG_ALLOW_THOUSAND, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_ALLOW_SCIENTIFIC", FILTER_FLAG_ALLOW_SCIENTIFIC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_FRACTION", FILTER_FLAG_ALLOW_FRACTION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_THOUSAND", FILTER_FLAG_ALLOW_THOUSAND, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_ALLOW_SCIENTIFIC", FILTER_FLAG_ALLOW_SCIENTIFIC, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_FLAG_SCHEME_REQUIRED", FILTER_FLAG_SCHEME_REQUIRED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_HOST_REQUIRED", FILTER_FLAG_HOST_REQUIRED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_PATH_REQUIRED", FILTER_FLAG_PATH_REQUIRED, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_QUERY_REQUIRED", FILTER_FLAG_QUERY_REQUIRED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_SCHEME_REQUIRED", FILTER_FLAG_SCHEME_REQUIRED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_HOST_REQUIRED", FILTER_FLAG_HOST_REQUIRED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_PATH_REQUIRED", FILTER_FLAG_PATH_REQUIRED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_QUERY_REQUIRED", FILTER_FLAG_QUERY_REQUIRED, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_INT_CONSTANT("FILTER_FLAG_IPV4", FILTER_FLAG_IPV4, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_IPV6", FILTER_FLAG_IPV6, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_NO_RES_RANGE", FILTER_FLAG_NO_RES_RANGE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_INT_CONSTANT("FILTER_FLAG_NO_PRIV_RANGE", FILTER_FLAG_NO_PRIV_RANGE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_IPV4", FILTER_FLAG_IPV4, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_IPV6", FILTER_FLAG_IPV6, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_RES_RANGE", FILTER_FLAG_NO_RES_RANGE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_PRIV_RANGE", FILTER_FLAG_NO_PRIV_RANGE, CONST_CS | CONST_PERSISTENT);
 
 	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init TSRMLS_CC);
 
@@ -327,7 +327,7 @@ PHP_MINFO_FUNCTION(filter)
 }
 /* }}} */
 
-static filter_list_entry php_find_filter(php_int_t id) /* {{{ */
+static filter_list_entry php_find_filter(zend_long id) /* {{{ */
 {
 	int i, size = sizeof(filter_list) / sizeof(filter_list_entry);
 
@@ -358,7 +358,7 @@ static unsigned int php_sapi_filter_init(TSRMLS_D)
 	return SUCCESS;
 }
 
-static void php_zval_filter(zval *value, php_int_t filter, php_int_t flags, zval *options, char* charset, zend_bool copy TSRMLS_DC) /* {{{ */
+static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval *options, char* charset, zend_bool copy TSRMLS_DC) /* {{{ */
 {
 	filter_list_entry  filter_func;
 
@@ -402,7 +402,7 @@ static void php_zval_filter(zval *value, php_int_t filter, php_int_t flags, zval
 }
 /* }}} */
 
-static unsigned int php_sapi_filter(int arg, char *var, char **val, php_size_t val_len, php_size_t *new_val_len TSRMLS_DC) /* {{{ */
+static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_len, size_t *new_val_len TSRMLS_DC) /* {{{ */
 {
 	zval  new_var, raw_var;
 	zval *array_ptr = NULL, *orig_array_ptr = NULL;
@@ -466,11 +466,11 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, php_size_t v
 
 	if (retval) {
 		if (new_val_len) {
-			*new_val_len = Z_STRSIZE(new_var);
+			*new_val_len = Z_STRLEN(new_var);
 		}
 		efree(*val);
-		if (Z_STRSIZE(new_var)) {
-			*val = estrndup(Z_STRVAL(new_var), Z_STRSIZE(new_var));
+		if (Z_STRLEN(new_var)) {
+			*val = estrndup(Z_STRVAL(new_var), Z_STRLEN(new_var));
 		} else {
 			*val = estrdup("");
 		}
@@ -481,7 +481,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, php_size_t v
 }
 /* }}} */
 
-static void php_zval_filter_recursive(zval *value, php_int_t filter, php_int_t flags, zval *options, char *charset, zend_bool copy TSRMLS_DC) /* {{{ */
+static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long flags, zval *options, char *charset, zend_bool copy TSRMLS_DC) /* {{{ */
 {
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		zval *element;
@@ -491,7 +491,8 @@ static void php_zval_filter_recursive(zval *value, php_int_t filter, php_int_t f
 		}
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), element) {
-			SEPARATE_ZVAL_IF_NOT_REF(element);
+			ZVAL_DEREF(element);
+			SEPARATE_ZVAL_NOREF(element);
 			if (Z_TYPE_P(element) == IS_ARRAY) {
 				Z_ARRVAL_P(element)->u.v.nApplyCount++;
 				php_zval_filter_recursive(element, filter, flags, options, charset, copy TSRMLS_CC);
@@ -506,7 +507,7 @@ static void php_zval_filter_recursive(zval *value, php_int_t filter, php_int_t f
 }
 /* }}} */
 
-static zval *php_filter_get_storage(php_int_t arg TSRMLS_DC)/* {{{ */
+static zval *php_filter_get_storage(zend_long arg TSRMLS_DC)/* {{{ */
 
 {
 	zval *array_ptr = NULL;
@@ -523,17 +524,17 @@ static zval *php_filter_get_storage(php_int_t arg TSRMLS_DC)/* {{{ */
 			break;
 		case PARSE_SERVER:
 			if (PG(auto_globals_jit)) {
-				zend_string *name = STR_INIT("_SERVER", sizeof("_SERVER") - 1, 0);
+				zend_string *name = zend_string_init("_SERVER", sizeof("_SERVER") - 1, 0);
 				zend_is_auto_global(name TSRMLS_CC);
-				STR_RELEASE(name);
+				zend_string_release(name);
 			}
 			array_ptr = &IF_G(server_array);
 			break;
 		case PARSE_ENV:
 			if (PG(auto_globals_jit)) {
-				zend_string *name = STR_INIT("_ENV", sizeof("_ENV") - 1, 0);
+				zend_string *name = zend_string_init("_ENV", sizeof("_ENV") - 1, 0);
 				zend_is_auto_global(name TSRMLS_CC);
-				STR_RELEASE(name);
+				zend_string_release(name);
 			}
 			array_ptr = &IF_G(env_array) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
 			break;
@@ -556,11 +557,11 @@ static zval *php_filter_get_storage(php_int_t arg TSRMLS_DC)/* {{{ */
  */
 PHP_FUNCTION(filter_has_var)
 {
-	php_int_t         arg;
+	zend_long         arg;
 	zend_string *var;
 	zval        *array_ptr = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iS", &arg, &var) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lS", &arg, &var) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -574,16 +575,14 @@ PHP_FUNCTION(filter_has_var)
 }
 /* }}} */
 
-static void php_filter_call(zval *filtered, php_int_t filter, zval *filter_args, const int copy, php_int_t filter_flags TSRMLS_DC) /* {{{ */
+static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args, const int copy, zend_long filter_flags TSRMLS_DC) /* {{{ */
 {
 	zval *options = NULL;
 	zval *option;
 	char *charset = NULL;
 
 	if (filter_args && Z_TYPE_P(filter_args) != IS_ARRAY) {
-		php_int_t lval;
-
-		PHP_FILTER_GET_LONG_OPT(filter_args, lval);
+		zend_long lval = zval_get_long(filter_args);
 
 		if (filter != -1) { /* handler for array apply */
 			/* filter_args is the filter_flags */
@@ -597,11 +596,11 @@ static void php_filter_call(zval *filtered, php_int_t filter, zval *filter_args,
 		}
 	} else if (filter_args) {
 		if ((option = zend_hash_str_find(HASH_OF(filter_args), "filter", sizeof("filter") - 1)) != NULL) {
-			PHP_FILTER_GET_LONG_OPT(option, filter);
+			filter = zval_get_long(option);
 		}
 
 		if ((option = zend_hash_str_find(HASH_OF(filter_args), "flags", sizeof("flags") - 1)) != NULL) {
-			PHP_FILTER_GET_LONG_OPT(option, filter_flags);
+			filter_flags = zval_get_long(option);
 
 			if (!(filter_flags & FILTER_REQUIRE_ARRAY ||  filter_flags & FILTER_FORCE_ARRAY)) {
 				filter_flags |= FILTER_REQUIRE_SCALAR;
@@ -661,7 +660,6 @@ static void php_filter_call(zval *filtered, php_int_t filter, zval *filter_args,
 
 static void php_filter_array_handler(zval *input, zval *op, zval *return_value, zend_bool add_empty TSRMLS_DC) /* {{{ */
 {
-	php_uint_t index;
 	zend_string *arg_key;
 	zval *tmp, *arg_elm;
 
@@ -669,14 +667,14 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 		zval_ptr_dtor(return_value);
 		ZVAL_DUP(return_value, input);
 		php_filter_call(return_value, FILTER_DEFAULT, NULL, 0, FILTER_REQUIRE_ARRAY TSRMLS_CC);
-	} else if (Z_TYPE_P(op) == IS_INT) {
+	} else if (Z_TYPE_P(op) == IS_LONG) {
 		zval_ptr_dtor(return_value);
 		ZVAL_DUP(return_value, input);
-		php_filter_call(return_value, Z_IVAL_P(op), NULL, 0, FILTER_REQUIRE_ARRAY TSRMLS_CC);
+		php_filter_call(return_value, Z_LVAL_P(op), NULL, 0, FILTER_REQUIRE_ARRAY TSRMLS_CC);
 	} else if (Z_TYPE_P(op) == IS_ARRAY) {
 		array_init(return_value);
 
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(op), index, arg_key, arg_elm) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(op), arg_key, arg_elm) {
 			if (arg_key == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Numeric keys are not allowed in the definition array");
 				zval_ptr_dtor(return_value);
@@ -710,12 +708,12 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
  */
 PHP_FUNCTION(filter_input)
 {
-	php_int_t fetch_from, filter = FILTER_DEFAULT;
+	zend_long fetch_from, filter = FILTER_DEFAULT;
 	zval *filter_args = NULL, *tmp;
 	zval *input = NULL;
 	zend_string *var;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iS|iz", &fetch_from, &var, &filter, &filter_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lS|lz", &fetch_from, &var, &filter, &filter_args) == FAILURE) {
 		return;
 	}
 
@@ -726,13 +724,13 @@ PHP_FUNCTION(filter_input)
 	input = php_filter_get_storage(fetch_from TSRMLS_CC);
 
 	if (!input || !HASH_OF(input) || (tmp = zend_hash_find(HASH_OF(input), var)) == NULL) {
-		php_int_t filter_flags = 0;
+		zend_long filter_flags = 0;
 		zval *option, *opt, *def;
 		if (filter_args) {
-			if (Z_TYPE_P(filter_args) == IS_INT) {
-				filter_flags = Z_IVAL_P(filter_args);
+			if (Z_TYPE_P(filter_args) == IS_LONG) {
+				filter_flags = Z_LVAL_P(filter_args);
 			} else if (Z_TYPE_P(filter_args) == IS_ARRAY && (option = zend_hash_str_find(HASH_OF(filter_args), "flags", sizeof("flags") - 1)) != NULL) {
-				PHP_FILTER_GET_LONG_OPT(option, filter_flags);
+				filter_flags = zval_get_long(option);
 			}
 			if (Z_TYPE_P(filter_args) == IS_ARRAY && 
 				(opt = zend_hash_str_find(HASH_OF(filter_args), "options", sizeof("options") - 1)) != NULL &&
@@ -766,10 +764,10 @@ PHP_FUNCTION(filter_input)
  */
 PHP_FUNCTION(filter_var)
 {
-	php_int_t filter = FILTER_DEFAULT;
+	zend_long filter = FILTER_DEFAULT;
 	zval *filter_args = NULL, *data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/|iz", &data, &filter, &filter_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/|lz", &data, &filter, &filter_args) == FAILURE) {
 		return;
 	}
 
@@ -788,28 +786,28 @@ PHP_FUNCTION(filter_var)
  */
 PHP_FUNCTION(filter_input_array)
 {
-	php_int_t    fetch_from;
+	zend_long    fetch_from;
 	zval   *array_input = NULL, *op = NULL;
 	zend_bool add_empty = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i|zb",  &fetch_from, &op, &add_empty) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|zb",  &fetch_from, &op, &add_empty) == FAILURE) {
 		return;
 	}
 
-	if (op && (Z_TYPE_P(op) != IS_ARRAY) && (Z_TYPE_P(op) == IS_INT && !PHP_FILTER_ID_EXISTS(Z_IVAL_P(op)))) {
+	if (op && (Z_TYPE_P(op) != IS_ARRAY) && (Z_TYPE_P(op) == IS_LONG && !PHP_FILTER_ID_EXISTS(Z_LVAL_P(op)))) {
 		RETURN_FALSE;
 	}
 
 	array_input = php_filter_get_storage(fetch_from TSRMLS_CC);
 
 	if (!array_input || !HASH_OF(array_input)) {
-		php_int_t filter_flags = 0;
+		zend_long filter_flags = 0;
 		zval *option;
 		if (op) {
-			if (Z_TYPE_P(op) == IS_INT) {
-				filter_flags = Z_IVAL_P(op);
+			if (Z_TYPE_P(op) == IS_LONG) {
+				filter_flags = Z_LVAL_P(op);
 			} else if (Z_TYPE_P(op) == IS_ARRAY && (option = zend_hash_str_find(HASH_OF(op), "flags", sizeof("flags") - 1)) != NULL) {
-				PHP_FILTER_GET_LONG_OPT(option, filter_flags);
+				filter_flags = zval_get_long(option);
 			}
 		}
 
@@ -841,7 +839,7 @@ PHP_FUNCTION(filter_var_array)
 		return;
 	}
 
-	if (op && (Z_TYPE_P(op) != IS_ARRAY) && (Z_TYPE_P(op) == IS_INT && !PHP_FILTER_ID_EXISTS(Z_IVAL_P(op)))) {
+	if (op && (Z_TYPE_P(op) != IS_ARRAY) && (Z_TYPE_P(op) == IS_LONG && !PHP_FILTER_ID_EXISTS(Z_LVAL_P(op)))) {
 		RETURN_FALSE;
 	}
 
@@ -870,7 +868,8 @@ PHP_FUNCTION(filter_list)
  * Returns the filter ID belonging to a named filter */
 PHP_FUNCTION(filter_id)
 {
-	int i, filter_len;
+	int i;
+	size_t filter_len;
 	int size = sizeof(filter_list) / sizeof(filter_list_entry);
 	char *filter;
 
@@ -880,7 +879,7 @@ PHP_FUNCTION(filter_id)
 
 	for (i = 0; i < size; ++i) {
 		if (strcmp(filter_list[i].name, filter) == 0) {
-			RETURN_INT(filter_list[i].id);
+			RETURN_LONG(filter_list[i].id);
 		}
 	}
 

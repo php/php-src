@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -141,7 +141,7 @@ static void php_mysqli_result_iterator_current_key(zend_object_iterator *iter, z
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 
-	ZVAL_INT(key, iterator->row_num);
+	ZVAL_LONG(key, iterator->row_num);
 }
 /* }}} */
 

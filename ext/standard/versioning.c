@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -211,7 +211,7 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 PHP_FUNCTION(version_compare)
 {
 	char *v1, *v2, *op = NULL;
-	int v1_len, v2_len, op_len = 0;
+	size_t v1_len, v2_len, op_len = 0;
 	int compare, argc;
 
 	argc = ZEND_NUM_ARGS();
@@ -221,7 +221,7 @@ PHP_FUNCTION(version_compare)
 	}
 	compare = php_version_compare(v1, v2);
 	if (argc == 2) {
-		RETURN_INT(compare);
+		RETURN_LONG(compare);
 	}
 	if (!strncmp(op, "<", op_len) || !strncmp(op, "lt", op_len)) {
 		RETURN_BOOL(compare == -1);

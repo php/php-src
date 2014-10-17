@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -60,8 +60,8 @@ DBA_OPEN_FUNC(dbm)
 	int filemode = 0644;
 
 	if(info->argc > 0) {
-		convert_to_int_ex(&info->argv[0]);
-		filemode = Z_IVAL(info->argv[0]);
+		convert_to_long_ex(&info->argv[0]);
+		filemode = Z_LVAL(info->argv[0]);
 	}
 	
 	if(info->mode == DBA_TRUNC) {

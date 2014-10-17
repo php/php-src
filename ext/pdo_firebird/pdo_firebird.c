@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -62,9 +62,9 @@ ZEND_GET_MODULE(pdo_firebird)
 
 PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 {
-	REGISTER_PDO_CLASS_CONST_INT("FB_ATTR_DATE_FORMAT", (php_int_t) PDO_FB_ATTR_DATE_FORMAT);
-	REGISTER_PDO_CLASS_CONST_INT("FB_ATTR_TIME_FORMAT", (php_int_t) PDO_FB_ATTR_TIME_FORMAT);
-	REGISTER_PDO_CLASS_CONST_INT("FB_ATTR_TIMESTAMP_FORMAT", (php_int_t) PDO_FB_ATTR_TIMESTAMP_FORMAT);
+	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_DATE_FORMAT", (zend_long) PDO_FB_ATTR_DATE_FORMAT);
+	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIME_FORMAT", (zend_long) PDO_FB_ATTR_TIME_FORMAT);
+	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIMESTAMP_FORMAT", (zend_long) PDO_FB_ATTR_TIMESTAMP_FORMAT);
 
 	php_pdo_register_driver(&pdo_firebird_driver);
 

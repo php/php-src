@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -58,7 +58,7 @@ static php_rfc1867_basename_t php_rfc1867_basename = NULL;
 
 PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **extra TSRMLS_DC) = NULL;
 
-static void safe_php_register_variable(char *var, char *strval, php_size_t val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
+static void safe_php_register_variable(char *var, char *strval, size_t val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
 
 /* The longest property name we use in an uploaded file array */
 #define MAX_SIZE_OF_INDEX sizeof("[tmp_name]")
@@ -78,14 +78,14 @@ static void safe_php_register_variable(char *var, char *strval, php_size_t val_l
 
 void php_rfc1867_register_constants(TSRMLS_D) /* {{{ */
 {
-	REGISTER_MAIN_INT_CONSTANT("UPLOAD_ERR_OK",         UPLOAD_ERROR_OK, CONST_CS | CONST_PERSISTENT);
-	REGISTER_MAIN_INT_CONSTANT("UPLOAD_ERR_INI_SIZE",   UPLOAD_ERROR_A,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_MAIN_INT_CONSTANT("UPLOAD_ERR_FORM_SIZE",  UPLOAD_ERROR_B,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_MAIN_INT_CONSTANT("UPLOAD_ERR_PARTIAL",    UPLOAD_ERROR_C,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_MAIN_INT_CONSTANT("UPLOAD_ERR_NO_FILE",    UPLOAD_ERROR_D,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_MAIN_INT_CONSTANT("UPLOAD_ERR_NO_TMP_DIR", UPLOAD_ERROR_E,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_MAIN_INT_CONSTANT("UPLOAD_ERR_CANT_WRITE", UPLOAD_ERROR_F,  CONST_CS | CONST_PERSISTENT);
-	REGISTER_MAIN_INT_CONSTANT("UPLOAD_ERR_EXTENSION",  UPLOAD_ERROR_X,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_OK",         UPLOAD_ERROR_OK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_INI_SIZE",   UPLOAD_ERROR_A,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_FORM_SIZE",  UPLOAD_ERROR_B,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_PARTIAL",    UPLOAD_ERROR_C,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_NO_FILE",    UPLOAD_ERROR_D,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_NO_TMP_DIR", UPLOAD_ERROR_E,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_CANT_WRITE", UPLOAD_ERROR_F,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("UPLOAD_ERR_EXTENSION",  UPLOAD_ERROR_X,  CONST_CS | CONST_PERSISTENT);
 }
 /* }}} */
 
@@ -161,7 +161,7 @@ static zend_bool is_protected_variable(char *varname TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void safe_php_register_variable(char *var, char *strval, php_size_t val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC) /* {{{ */
+static void safe_php_register_variable(char *var, char *strval, size_t val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC) /* {{{ */
 {
 	if (override_protection || !is_protected_variable(var TSRMLS_CC)) {
 		php_register_variable_safe(var, strval, val_len, track_vars_array TSRMLS_CC);
@@ -611,9 +611,9 @@ static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int ne
 }
 
 /* read until a boundary condition */
-static int multipart_buffer_read(multipart_buffer *self, char *buf, php_size_t bytes, int *end TSRMLS_DC)
+static int multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes, int *end TSRMLS_DC)
 {
-	php_size_t len, max;
+	size_t len, max;
 	char *bound;
 
 	/* fill buffer if needed */
@@ -657,7 +657,7 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, php_size_t b
   XXX: this is horrible memory-usage-wise, but we only expect
   to do this on small pieces of form data.
 */
-static char *multipart_buffer_read_body(multipart_buffer *self, php_size_t *len TSRMLS_DC)
+static char *multipart_buffer_read_body(multipart_buffer *self, size_t *len TSRMLS_DC)
 {
 	char buf[FILLUNIT], *out=NULL;
 	int total_bytes=0, read_bytes=0;
@@ -701,7 +701,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	php_rfc1867_getword_t getword;
 	php_rfc1867_getword_conf_t getword_conf;
 	php_rfc1867_basename_t _basename;
-	php_int_t count = 0;
+	zend_long count = 0;
 
 	if (php_rfc1867_encoding_translation(TSRMLS_C) && internal_encoding) {
 		getword = php_rfc1867_getword;
@@ -714,7 +714,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	}
 
 	if (SG(post_max_size) > 0 && SG(request_info).content_length > SG(post_max_size)) {
-		sapi_module.sapi_error(E_WARNING, "POST Content-Length of " ZEND_INT_FMT " bytes exceeds the limit of " ZEND_INT_FMT " bytes", SG(request_info).content_length, SG(post_max_size));
+		sapi_module.sapi_error(E_WARNING, "POST Content-Length of " ZEND_LONG_FMT " bytes exceeds the limit of " ZEND_LONG_FMT " bytes", SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
 
@@ -850,9 +850,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 			/* Normal form variable, safe to read all data into memory */
 			if (!filename && param) {
-				php_size_t value_len;
+				size_t value_len;
 				char *value = multipart_buffer_read_body(mbuff, &value_len TSRMLS_CC);
-				php_size_t new_val_len; /* Dummy variable */
+				size_t new_val_len; /* Dummy variable */
 
 				if (!value) {
 					value = estrdup("");
@@ -889,7 +889,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					safe_php_register_variable(param, value, new_val_len, array_ptr, 0 TSRMLS_CC);
 				} else {
 					if (count == PG(max_input_vars) + 1) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded " ZEND_INT_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
 					}
 				
 					if (php_rfc1867_callback != NULL) {
@@ -1034,14 +1034,14 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					}
 				}
 
-				if (PG(upload_max_filesize) > 0 && (php_int_t)(total_bytes+blen) > PG(upload_max_filesize)) {
+				if (PG(upload_max_filesize) > 0 && (zend_long)(total_bytes+blen) > PG(upload_max_filesize)) {
 #if DEBUG_FILE_UPLOAD
-					sapi_module.sapi_error(E_NOTICE, "upload_max_filesize of " ZEND_INT_FMT " bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
+					sapi_module.sapi_error(E_NOTICE, "upload_max_filesize of " ZEND_LONG_FMT " bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
 #endif
 					cancel_upload = UPLOAD_ERROR_A;
-				} else if (max_file_size && ((php_int_t)(total_bytes+blen) > max_file_size)) {
+				} else if (max_file_size && ((zend_long)(total_bytes+blen) > max_file_size)) {
 #if DEBUG_FILE_UPLOAD
-					sapi_module.sapi_error(E_NOTICE, "MAX_FILE_SIZE of " ZEND_INT_FMT " bytes exceeded - file [%s=%s] not saved", max_file_size, param, filename);
+					sapi_module.sapi_error(E_NOTICE, "MAX_FILE_SIZE of " ZEND_LONG_FMT " bytes exceeded - file [%s=%s] not saved", max_file_size, param, filename);
 #endif
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
@@ -1224,13 +1224,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				int size_overflow = 0;
 				char file_size_buf[65];
 
-				ZVAL_INT(&error_type, cancel_upload);
+				ZVAL_LONG(&error_type, cancel_upload);
 
 				/* Add $foo[error] */
 				if (cancel_upload) {
-					ZVAL_INT(&file_size, 0);
+					ZVAL_LONG(&file_size, 0);
 				} else {
-					if (total_bytes > ZEND_INT_MAX) {
+					if (total_bytes > ZEND_LONG_MAX) {
 #ifdef PHP_WIN32
 						if (_i64toa_s(total_bytes, file_size_buf, 65, 10)) {
 							file_size_buf[0] = '0';
@@ -1245,7 +1245,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 						size_overflow = 1;
 
 					} else {
-						ZVAL_INT(&file_size, total_bytes);
+						ZVAL_LONG(&file_size, total_bytes);
 					}
 				}
 

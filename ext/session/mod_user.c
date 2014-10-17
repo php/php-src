@@ -1,6 +1,6 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -26,9 +26,9 @@ ps_module ps_mod_user = {
 	PS_MOD_SID(user)
 };
 
-#define SESS_ZVAL_INT(val, a)						\
+#define SESS_ZVAL_LONG(val, a)						\
 {													\
-	ZVAL_INT(a, val);								\
+	ZVAL_LONG(a, val);								\
 }
 
 #define SESS_ZVAL_STRING(vl, a)						\
@@ -44,7 +44,7 @@ ps_module ps_mod_user = {
 
 #define SESS_ZVAL_STR(vl, a)						\
 {													\
-	ZVAL_STR(a, STR_COPY(vl));						\
+	ZVAL_STR_COPY(a, vl);							\
 }
 
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval TSRMLS_DC)
@@ -73,10 +73,10 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval TSRML
 			ret = SUCCESS; \
 		} else if (Z_TYPE(retval) == IS_FALSE) { \
 			ret = FAILURE; \
-        }  else if ((Z_TYPE(retval) == IS_INT) && (Z_IVAL(retval) == -1)) { \
+        }  else if ((Z_TYPE(retval) == IS_LONG) && (Z_LVAL(retval) == -1)) { \
 			/* BC for clever users - Deprecate me */ \
 			ret = FAILURE; \
-		} else if ((Z_TYPE(retval) == IS_INT) && (Z_IVAL(retval) == 0)) { \
+		} else if ((Z_TYPE(retval) == IS_LONG) && (Z_LVAL(retval) == 0)) { \
 			/* BC for clever users - Deprecate me */ \
 			ret = SUCCESS; \
 		} else { \
@@ -150,7 +150,7 @@ PS_READ_FUNC(user)
 
 	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) == IS_STRING) {
-			*val = STR_COPY(Z_STR(retval));
+			*val = zend_string_copy(Z_STR(retval));
 			ret = SUCCESS;
 		}
 		zval_ptr_dtor(&retval);
@@ -189,7 +189,7 @@ PS_GC_FUNC(user)
 	zval args[1];
 	STDVARS;
 
-	SESS_ZVAL_INT(maxlifetime, &args[0]);
+	SESS_ZVAL_LONG(maxlifetime, &args[0]);
 
 	ps_call_handler(&PSF(gc), 1, args, &retval TSRMLS_CC);
 
@@ -207,7 +207,7 @@ PS_CREATE_SID_FUNC(user)
 
 		if (!Z_ISUNDEF(retval)) {
 			if (Z_TYPE(retval) == IS_STRING) {
-				id = STR_COPY(Z_STR(retval));
+				id = zend_string_copy(Z_STR(retval));
 			}
 			zval_ptr_dtor(&retval);
 		} else {

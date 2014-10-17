@@ -48,16 +48,16 @@ define print_cvs
 end
 
 define dump_bt
-	set $ex = $arg0->prev_execute_data
+	set $ex = $arg0
 	while $ex
 		printf "[%p] ", $ex
 		set $func = $ex->func
 		if $func
-			if $ex->object
+			if $ex->This->value.obj
 				if $func->common.scope
 					printf "%s->", $func->common.scope->name->val
 				else
-					printf "%s->", $ex->object->ce.name->val
+					printf "%s->", $ex->This->value.obj->ce.name->val
 				end
 			else
 				if $func->common.scope
@@ -65,7 +65,11 @@ define dump_bt
 				end
 			end
 
-			printf "%s(", $func->common.function_name->val
+			if $func->common.function_name
+				printf "%s(", $func->common.function_name->val
+			else
+				printf "(main"
+			end
 
 			set $callFrameSize = (sizeof(zend_execute_data) + sizeof(zval) - 1) / sizeof(zval)
 
@@ -119,7 +123,11 @@ define dump_bt
 			printf "??? "
 		end
 		if $func != 0
-			printf "%s:%d ", $func->op_array.filename->val, $ex->opline->lineno
+			if $func->type == 2
+				printf "%s:%d ", $func->op_array.filename->val, $ex->opline->lineno
+			else
+				printf "[internal function]"
+			end
 		end
 		set $ex = $ex->prev_execute_data
 		printf "\n"
@@ -629,4 +637,29 @@ document zmemcheck
 	show status of a memory block.
 	usage: zmemcheck [ptr].
 	if ptr is 0, all blocks will be listed.
+end
+
+define lookup_root
+	set $found = 0
+	if gc_globals->roots
+		set $current = gc_globals->roots->next
+		printf "looking ref %p in roots\n", $arg0
+		while $current != &gc_globals->roots
+			if $current->ref == $arg0
+				set $found = $current
+				break
+			end
+			set $current = $current->next
+		end
+		if $found != 0
+			printf "found root %p\n", $found
+		else
+			printf "not found\n"
+		end
+	end
+end
+
+document lookup_root
+	lookup a refcounted in root
+	usage: lookup_root [ptr].
 end

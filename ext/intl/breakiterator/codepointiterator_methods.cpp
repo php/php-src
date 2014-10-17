@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,5 +40,5 @@ U_CFUNC PHP_FUNCTION(cpbi_get_last_code_point)
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	RETURN_INT(fetch_cpbi(bio)->getLastCodePoint());
+	RETURN_LONG(fetch_cpbi(bio)->getLastCodePoint());
 }

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -73,11 +73,11 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		offset = timelib_get_time_zone_info(tp.tv_sec, get_timezone_info(TSRMLS_C));
 				
 		array_init(return_value);
-		add_assoc_int(return_value, "sec", tp.tv_sec);
-		add_assoc_int(return_value, "usec", tp.tv_usec);
+		add_assoc_long(return_value, "sec", tp.tv_sec);
+		add_assoc_long(return_value, "usec", tp.tv_usec);
 
-		add_assoc_int(return_value, "minuteswest", -offset->offset / SEC_IN_MIN);
-		add_assoc_int(return_value, "dsttime", offset->is_dst);
+		add_assoc_long(return_value, "minuteswest", -offset->offset / SEC_IN_MIN);
+		add_assoc_long(return_value, "dsttime", offset->is_dst);
 
 		timelib_time_offset_dtor(offset);
 	} else {
@@ -111,10 +111,10 @@ PHP_FUNCTION(gettimeofday)
 PHP_FUNCTION(getrusage)
 {
 	struct rusage usg;
-	php_int_t pwho = 0;
+	zend_long pwho = 0;
 	int who = RUSAGE_SELF;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &pwho) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &pwho) == FAILURE) {
 		return;
 	}
 	
@@ -130,7 +130,7 @@ PHP_FUNCTION(getrusage)
 
 	array_init(return_value);
 #define PHP_RUSAGE_PARA(a) \
-		add_assoc_int(return_value, #a, usg.a)
+		add_assoc_long(return_value, #a, usg.a)
 #if !defined( _OSD_POSIX) && !defined(__BEOS__) /* BS2000 has only a few fields in the rusage struct */
 	PHP_RUSAGE_PARA(ru_oublock);
 	PHP_RUSAGE_PARA(ru_inblock);

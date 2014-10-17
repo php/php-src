@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,11 +36,11 @@
  */
 PHP_FUNCTION( numfmt_parse )
 {
-	php_int_t type = FORMAT_TYPE_DOUBLE;
+	zend_long type = FORMAT_TYPE_DOUBLE;
 	UChar* sstr = NULL;
 	int sstr_len = 0;
 	char* str = NULL;
-	int str_len;
+	size_t str_len;
 	int32_t val32, position = 0;
 	int64_t val64;
 	double val_double;
@@ -50,7 +50,7 @@ PHP_FUNCTION( numfmt_parse )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|iz/!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|lz/!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -68,8 +68,8 @@ PHP_FUNCTION( numfmt_parse )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_int(zposition);
-		position = (int32_t)Z_IVAL_P( zposition );
+		convert_to_long(zposition);
+		position = (int32_t)Z_LVAL_P( zposition );
 		position_p = &position;
 	}
 
@@ -82,14 +82,14 @@ PHP_FUNCTION( numfmt_parse )
 	switch(type) {
 		case FORMAT_TYPE_INT32:
 			val32 = unum_parse(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, &INTL_DATA_ERROR_CODE(nfo));
-			RETVAL_INT(val32);
+			RETVAL_LONG(val32);
 			break;
 		case FORMAT_TYPE_INT64:
 			val64 = unum_parseInt64(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, &INTL_DATA_ERROR_CODE(nfo));
-			if(val64 > ZEND_INT_MAX || val64 < ZEND_INT_MIN) {
+			if(val64 > ZEND_LONG_MAX || val64 < ZEND_LONG_MIN) {
 				RETVAL_DOUBLE(val64);
 			} else {
-				RETVAL_INT((php_int_t)val64);
+				RETVAL_LONG((zend_long)val64);
 			}
 			break;
 		case FORMAT_TYPE_DOUBLE:
@@ -97,7 +97,7 @@ PHP_FUNCTION( numfmt_parse )
 			RETVAL_DOUBLE(val_double);
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported format type %ld", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported format type %pd", type);
 			RETVAL_FALSE;
 			break;
 	}
@@ -107,7 +107,7 @@ PHP_FUNCTION( numfmt_parse )
 #endif
 	if(zposition) {
 		zval_dtor(zposition);
-		ZVAL_INT(zposition, position);
+		ZVAL_LONG(zposition, position);
 	}
 
 	if (sstr) {
@@ -132,7 +132,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	char *currency_str = NULL;
 	int currency_len = 0;
 	char *str;
-	int str_len;
+	size_t str_len;
 	int32_t* position_p = NULL;
 	int32_t position = 0;
 	zval *zcurrency, *zposition = NULL;
@@ -157,15 +157,15 @@ PHP_FUNCTION( numfmt_parse_currency )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_int(zposition);
-		position = (int32_t)Z_IVAL_P( zposition );
+		convert_to_long(zposition);
+		position = (int32_t)Z_LVAL_P( zposition );
 		position_p = &position;
 	}
 
 	number = unum_parseDoubleCurrency(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, currency, &INTL_DATA_ERROR_CODE(nfo));
 	if(zposition) {
 		zval_dtor(zposition);
-		ZVAL_INT(zposition, position);
+		ZVAL_LONG(zposition, position);
 	}
 	if (sstr) {
 		efree(sstr);
