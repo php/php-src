@@ -23,8 +23,6 @@
 #ifndef ZEND_TYPES_H
 #define ZEND_TYPES_H
 
-/* For defining zend_bigint */
-#include <gmp.h>
 #include "zend_portability.h"
 #include "zend_long.h"
 
@@ -161,10 +159,8 @@ struct _zend_refcounted {
 	} u;
 };
 
-struct _zend_bigint {
-	zend_refcounted   gc;
-	mpz_t             mpz;
-};
+/* To keep the implementation of bigints abstracted, the struct is only fleshed-out in zend_bigint.c */
+struct _zend_bigint;
 
 struct _zend_string {
 	zend_refcounted   gc;

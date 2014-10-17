@@ -29,6 +29,11 @@
 #include "zend_bigint.h"
 #include "zend_string.h"
 
+struct _zend_bigint {
+    zend_refcounted   gc;
+    mpz_t             mpz;
+};
+
 /*** INTERNAL MACROS ***/
 
 /* Convenience macro to create a temporary mpz_t from a zend_long
