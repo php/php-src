@@ -8,7 +8,7 @@ if (PHP_ICONV != "no") {
 			CHECK_LIB("iconv_a.lib", "iconv", PHP_ICONV) || CHECK_LIB("iconv.lib", "iconv", PHP_ICONV)) &&
 		CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_ICONV", PHP_ICONV)) {
 
-		EXTENSION("iconv", "iconv.c");
+		EXTENSION("iconv", "iconv.c", null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		
 		AC_DEFINE("HAVE_ICONV", 1, "Define if iconv extension is enabled");
 		AC_DEFINE("HAVE_LIBICONV", 1, "Define if libiconv is available");

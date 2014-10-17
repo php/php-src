@@ -44,7 +44,10 @@ ZEND_BEGIN_MODULE_GLOBALS(json)
 ZEND_END_MODULE_GLOBALS(json)
 
 #ifdef ZTS
-# define JSON_G(v) TSRMG(json_globals_id, zend_json_globals *, v)
+# define JSON_G(v) ZEND_TSRMG(json_globals_id, zend_json_globals *, v)
+# ifdef COMPILE_DL_JSON
+ZEND_TSRMLS_CACHE_EXTERN;
+# endif
 #else
 # define JSON_G(v) (json_globals.v)
 #endif
