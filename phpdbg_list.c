@@ -124,7 +124,7 @@ PHPDBG_LIST(class) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-void phpdbg_list_file(const char *filename, uint count, uint offset, uint highlight TSRMLS_DC) /* {{{ */
+void phpdbg_list_file(const char *filename, uint count, int offset, uint highlight TSRMLS_DC) /* {{{ */
 {
 	uint line, lastline;
 	phpdbg_file_source **data;
