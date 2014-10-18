@@ -247,9 +247,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 		FILE *ptr;
 		int fd;
 	} io[PHPDBG_IO_FDS];                         /* io */
-#ifndef _WIN32
 	size_t (*php_stdiop_write)(php_stream *, const char *, size_t TSRMLS_DC);
-#endif
 	int in_script_xml;                           /* in <stream> output mode */
 	struct {
 		zend_bool active;
