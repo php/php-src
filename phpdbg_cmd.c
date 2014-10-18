@@ -862,7 +862,7 @@ readline:
 						}
 					}
 					len += bytes;
-				} while ((bytes = read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len)) > 0 || (errno == EINTR && bytes < 0));
+				} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, 10000)) > 0 || (errno == EINTR && bytes < 0));
 
 				if (bytes <= 0) {
 					goto disconnect;

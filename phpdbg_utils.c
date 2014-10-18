@@ -26,6 +26,7 @@
 #include "spprintf.h"
 #include "phpdbg.h"
 #include "phpdbg_opcode.h"
+#include "phpdbg_io.h"
 #include "phpdbg_utils.h"
 #include "ext/standard/html.h"
 
@@ -1128,7 +1129,7 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 	const char *severity;
 
 	if ((PHPDBG_G(flags) & PHPDBG_WRITE_XML) && PHPDBG_G(in_script_xml) && PHPDBG_G(in_script_xml) != type) {
-		write(fd, ZEND_STRL("</stream>"));
+		phpdbg_mixed_write(fd, ZEND_STRL("</stream>"));
 		PHPDBG_G(in_script_xml) = 0;
 	}
 
@@ -1139,9 +1140,9 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 			severity = "error";
 			if (!PHPDBG_G(last_was_newline)) {
 				if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
-					write(fd, ZEND_STRL("<phpdbg>\n</phpdbg>"));
+					phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>\n</phpdbg>"));
 				} else {
-					write(fd, ZEND_STRL("\n"));
+					phpdbg_mixed_write(fd, ZEND_STRL("\n"));
 				}
 				PHPDBG_G(last_was_newline) = 1;
 			}
@@ -1156,9 +1157,9 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 			severity = "notice";
 			if (!PHPDBG_G(last_was_newline)) {
 				if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
-					write(fd, ZEND_STRL("<phpdbg>\n</phpdbg>"));
+					phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>\n</phpdbg>"));
 				} else {
-					write(fd, ZEND_STRL("\n"));
+					phpdbg_mixed_write(fd, ZEND_STRL("\n"));
 				}
 				PHPDBG_G(last_was_newline) = 1;
 			}
@@ -1200,16 +1201,16 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 					if (PHPDBG_G(in_script_xml) != type) {
 						char *stream_buf;
 						int stream_buflen = spprintf(&stream_buf, 0, "<stream type=\"%s\">", type == P_STDERR ? "stderr" : "stdout");
-						write(fd, stream_buf, stream_buflen);
+						phpdbg_mixed_write(fd, stream_buf, stream_buflen);
 						efree(stream_buf);
 						PHPDBG_G(in_script_xml) = type;
 					}
 					buf = php_escape_html_entities((unsigned char *) msg, msglen, (size_t *) &buflen, 0, ENT_NOQUOTES, PG(internal_encoding) && PG(internal_encoding)[0] ? PG(internal_encoding) : (SG(default_charset) ? SG(default_charset) : "UTF-8") TSRMLS_CC);
 					phpdbg_encode_ctrl_chars(&buf, &buflen);
-					write(fd, buf, buflen);
+					phpdbg_mixed_write(fd, buf, buflen);
 					efree(buf);
 				} else {
-					write(fd, msg, msglen);
+					phpdbg_mixed_write(fd, msg, msglen);
 				}
 				return msglen;
 			}
@@ -1249,10 +1250,10 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 		}
 
 		phpdbg_encode_ctrl_chars(&xmlout, &xmloutlen);
-		write(fd, xmlout, xmloutlen);
+		phpdbg_mixed_write(fd, xmlout, xmloutlen);
 		efree(xmlout);
 	} else if (msgout) {
-		write(fd, msgout, msgoutlen);
+		phpdbg_mixed_write(fd, msgout, msgoutlen);
 	}
 
 	if (PHPDBG_G(req_id) && (PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {
@@ -1380,11 +1381,11 @@ PHPDBG_API int phpdbg_xml_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 		phpdbg_encode_ctrl_chars(&buffer, &buflen);
 
 		if (PHPDBG_G(in_script_xml)) {
-			write(fd, ZEND_STRL("</stream>"));
+			phpdbg_mixed_write(fd, ZEND_STRL("</stream>"));
 			PHPDBG_G(in_script_xml) = 0;
 		}
 
-		len = write(fd, buffer, buflen);
+		len = phpdbg_mixed_write(fd, buffer, buflen);
 		efree(buffer);
 	}
 
@@ -1401,7 +1402,7 @@ PHPDBG_API int phpdbg_log_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 	buflen = vspprintf(&buffer, 0, fmt, args);
 	va_end(args);
 
-	len = write(fd, buffer, buflen);
+	len = phpdbg_mixed_write(fd, buffer, buflen);
 	efree(buffer);
 
 	return len;
@@ -1425,15 +1426,15 @@ PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 		phpdbg_encode_ctrl_chars(&msg, &msglen);
 
 		if (PHPDBG_G(in_script_xml)) {
-			write(fd, ZEND_STRL("</stream>"));
+			phpdbg_mixed_write(fd, ZEND_STRL("</stream>"));
 			PHPDBG_G(in_script_xml) = 0;
 		}
 
-		write(fd, ZEND_STRL("<phpdbg>"));
-		len = write(fd, msg, msglen);
-		write(fd, ZEND_STRL("</phpdbg>"));
+		phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>"));
+		len = phpdbg_mixed_write(fd, msg, msglen);
+		phpdbg_mixed_write(fd, ZEND_STRL("</phpdbg>"));
 	} else {
-		len = write(fd, buffer, buflen);
+		len = phpdbg_mixed_write(fd, buffer, buflen);
 	}
 
 	return len;
@@ -1458,7 +1459,7 @@ PHPDBG_API int phpdbg_rlog(int fd, const char *fmt, ...) { /* {{{ */
 		rc = vspprintf(&outbuf, 0, format, args);
 
 		if (outbuf) {
-			rc = write(fd, outbuf, rc);
+			rc = phpdbg_mixed_write(fd, outbuf, rc);
 			efree(outbuf);
 		}
 
