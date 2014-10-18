@@ -33,7 +33,7 @@ if test "$BUILD_PHPDBG" == "" && test "$PHP_PHPDBG" != "no"; then
   fi
 
   PHP_PHPDBG_CFLAGS="-D_GNU_SOURCE"
-  PHP_PHPDBG_FILES="phpdbg.c phpdbg_parser.c phpdbg_lexer.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c phpdbg_frame.c phpdbg_watch.c phpdbg_btree.c phpdbg_sigsafe.c phpdbg_wait.c"
+  PHP_PHPDBG_FILES="phpdbg.c phpdbg_parser.c phpdbg_lexer.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c phpdbg_frame.c phpdbg_watch.c phpdbg_btree.c phpdbg_sigsafe.c phpdbg_wait.c phpdbg_io.c"
 
   if test "$PHP_READLINE" != "no" -o  "$PHP_LIBEDIT" != "no"; then
   	PHPDBG_EXTRA_LIBS="$PHP_READLINE_LIBS"
