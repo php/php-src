@@ -21,37 +21,17 @@
 
 #include "phpdbg.h"
 
-#ifdef PHP_WIN32
-#undef UNICODE
-#include "win32/inet.h"
-#include <winsock2.h>
-#include <windows.h>
-#include <Ws2tcpip.h>
-#include "win32/sockets.h"
-
-#else
-
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#include <sys/socket.h>
-#include <netinet/in.h>
-#if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#include <netdb.h>
-
-#include <fcntl.h>
-
-#include <poll.h>
-#endif
-
-
 PHPDBG_API int
 phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo);
 
 PHPDBG_API int
 phpdbg_send_bytes(int sock, char *ptr, int len);
+
+PHPDBG_API int
+phpdbg_mixed_read(int sock, char *ptr, int len, int tmo TSRMLS_CC);
+
+PHPDBG_API int
+phpdbg_mixed_write(int sock, char *ptr, int len TSRMLS_CC);
 
 #endif /* PHPDBG_IO_H */
 
