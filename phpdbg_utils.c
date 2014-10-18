@@ -1103,7 +1103,7 @@ static void phpdbg_encode_ctrl_chars(char **buf, int *buflen) {
 			len += 4;
 			*tmpptr++ = '&';
 			*tmpptr++ = '#';
-			if ((unsigned int) ((*buf)[i]) > 10) {
+			if ((unsigned int) ((*buf)[i]) > 9) {
 				*tmpptr++ = ((*buf)[i] / 10) + '0';
 			} else {
 				--len;

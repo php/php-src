@@ -829,12 +829,12 @@ readline:
 #endif
 			{
 				char buf[PHPDBG_MAX_CMD];
-				int bytes = 0, len = PHPDBG_G(input_buflen);
+				int bytes = PHPDBG_G(input_buflen), len = 0;
 				if (PHPDBG_G(input_buflen)) {
-					memcpy(buf, PHPDBG_G(input_buffer), len);
+					memcpy(buf, PHPDBG_G(input_buffer), bytes);
 				}
 
-				while ((bytes = read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len)) > 0 || (errno == EINTR && bytes < 0)) {
+				do {
 					int i;
 					if (bytes <= 0) { 
 						continue;
@@ -862,7 +862,7 @@ readline:
 						}
 					}
 					len += bytes;
-				}
+				} while ((bytes = read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len)) > 0 || (errno == EINTR && bytes < 0));
 
 				if (bytes <= 0) {
 					goto disconnect;
