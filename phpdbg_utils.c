@@ -1042,7 +1042,7 @@ static int phpdbg_xml_vsnprintf(char *buf, size_t len, const char *format, zend_
 	return (cc);
 }
 
-PHPAPI int phpdbg_xml_vasprintf(char **buf, const char *format, zend_bool escape_xml, va_list ap TSRMLS_DC) {
+PHPDBG_API int phpdbg_xml_vasprintf(char **buf, const char *format, zend_bool escape_xml, va_list ap TSRMLS_DC) {
 	va_list ap2;
 	int cc;
 
