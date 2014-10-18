@@ -434,26 +434,29 @@ else
   fi 
 fi 
 
-for i in $PHP_GMP /usr/local /usr; do
-  test -f $i/include/gmp.h && GMP_DIR=$i && break
-done
+AC_ARG_ENABLE(bigint-gmp,
+[  --enable-bigint-gmp     Use GMP instead of LibTomMath for bigints],[
+  for i in $PHP_GMP /usr/local /usr; do
+    test -f $i/include/gmp.h && GMP_DIR=$i && break
+  done
 
-if test -z "$GMP_DIR"; then
-  AC_MSG_ERROR(Unable to locate gmp.h)
-fi
+  if test -z "$GMP_DIR"; then
+    AC_MSG_ERROR(Unable to locate gmp.h)
+  fi
+  PHP_ADD_LIBRARY_WITH_PATH(gmp, $GMP_DIR/$PHP_LIBDIR, GMP_SHARED_LIBADD)
+  PHP_ADD_INCLUDE($GMP_DIR/include)
+  AC_DEFINE([ZEND_HAVE_GMP], 1, [Define whether GMP is available and to be used by bigints])
+], [
+  for i in $PHP_TOMMATH /usr/local /usr; do
+    test -f $i/include/tommath.h && TOMMATH_DIR=$i && break
+  done
 
-PHP_CHECK_LIBRARY(gmp, __gmp_randinit_lc_2exp_size,
-[],[
-  PHP_CHECK_LIBRARY(gmp, gmp_randinit_lc_2exp_size,
-  [],[
-    AC_MSG_ERROR([GNU MP Library version 4.1.2 or greater required.])
-  ],[
-    -L$GMP_DIR/$PHP_LIBDIR
-  ])
-],[
-  -L$GMP_DIR/$PHP_LIBDIR
+  if test -z "$TOMMATH_DIR"; then
+    AC_MSG_ERROR(Unable to locate tommath.h)
+  fi
+  PHP_ADD_LIBRARY_WITH_PATH(tommath, $TOMMATH_DIR/$PHP_LIBDIR, TOMMATH_SHARED_LIBADD)
+  PHP_ADD_INCLUDE($TOMMATH_DIR/include)
+  AC_DEFINE([ZEND_HAVE_LIBTOMMATH], 1, [Define whether LibTomMath is available and to be used by bigints])
 ])
 
-PHP_ADD_LIBRARY_WITH_PATH(gmp, $GMP_DIR/$PHP_LIBDIR, GMP_SHARED_LIBADD)
-PHP_ADD_INCLUDE($GMP_DIR/include)
-AC_DEFINE(HAVE_GMP, 1, [ ])
+
