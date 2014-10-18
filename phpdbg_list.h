@@ -34,7 +34,7 @@ PHPDBG_LIST(func);
 
 void phpdbg_list_function_byname(const char *, size_t TSRMLS_DC);
 void phpdbg_list_function(const zend_function* TSRMLS_DC);
-void phpdbg_list_file(const char*, uint, uint, uint TSRMLS_DC);
+void phpdbg_list_file(const char*, uint, int, uint TSRMLS_DC);
 
 extern const phpdbg_command_t phpdbg_list_commands[];
 

@@ -80,6 +80,10 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->socket_fd = -1;
 	pg->socket_server_fd = -1;
 
+	pg->req_id = 0;
+	pg->err_buf.active = 0;
+	pg->err_buf.type = 0;
+
 	pg->input_buflen = 0;
 	pg->sigsafe_mem.mem = NULL;
 	pg->sigsegv_bailout = NULL;
@@ -240,7 +244,7 @@ static PHP_FUNCTION(phpdbg_exec)
 {
 	char *exec = NULL;
 	int exec_len = 0;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &exec, &exec_len) == FAILURE) {
 		return;
 	}
@@ -322,7 +326,7 @@ static PHP_FUNCTION(phpdbg_color)
 {
 	long element = 0L;
 	char *color = NULL;
-	int color_len = 0;
+	size_t color_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &element, &color, &color_len) == FAILURE) {
 		return;
@@ -343,7 +347,7 @@ static PHP_FUNCTION(phpdbg_color)
 static PHP_FUNCTION(phpdbg_prompt)
 {
 	char *prompt = NULL;
-	int prompt_len = 0;
+	size_t prompt_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &prompt, &prompt_len) == FAILURE) {
 		return;
@@ -440,7 +444,7 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 	* We must not request TSRM before being boot
 	*/
 	if (phpdbg_booted) {
-		phpdbg_error("%s", message);
+		phpdbg_error("php", "msg=\"%s\"", "%s", message);
 
 		switch (PG(last_error_type)) {
 			case E_ERROR:
@@ -533,8 +537,38 @@ static inline int php_sapi_phpdbg_ub_write(const char *message, unsigned int len
 	if (PHPDBG_G(socket_fd) != -1 && !(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
 		send(PHPDBG_G(socket_fd), message, length, 0);
 	}
-	return phpdbg_write("%s", message);
+	return phpdbg_script(P_STDOUT, "%.*s", length, message);
 } /* }}} */
+
+/* beginning of struct, see main/streams/plain_wrapper.c line 111 */
+typedef struct {
+	FILE *file;
+	int fd;
+} php_stdio_stream_data;
+
+static size_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) {
+	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
+
+	while (data->fd >= 0) {
+		struct stat stat[3];
+		memset(stat, 0, sizeof(stat));
+		if (((fstat(fileno(stderr), &stat[2]) < 0) & (fstat(fileno(stdout), &stat[0]) < 0)) | (fstat(data->fd, &stat[1]) < 0)) {
+			break;
+		}
+
+		if (stat[0].st_dev == stat[1].st_dev && stat[0].st_ino == stat[1].st_ino) {
+			phpdbg_script(P_STDOUT, "%.*s", (int) count, buf);
+			return count;
+		}
+		if (stat[2].st_dev == stat[1].st_dev && stat[2].st_ino == stat[1].st_ino) {
+			phpdbg_script(P_STDERR, "%.*s", (int) count, buf);
+			return count;
+		}
+		break;
+	}
+
+	return PHPDBG_G(php_stdiop_write)(stream, buf, count TSRMLS_CC);
+}
 
 #if PHP_VERSION_ID >= 50700
 static inline void php_sapi_phpdbg_flush(void *context TSRMLS_DC)  /* {{{ */
@@ -665,6 +699,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'S', 1, "sapi-name"},
 	{'l', 1, "listen"},
 	{'a', 1, "address-or-any"},
+	{'x', 0, "xml output"},
 	{'V', 0, "version"},
 	{'-', 0, NULL}
 }; /* }}} */
@@ -696,17 +731,25 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 {
 	/* print blurb */
 	if (!cleaning) {
-		phpdbg_notice("Welcome to phpdbg, the interactive PHP debugger, v%s",
-				PHPDBG_VERSION);
-		phpdbg_writeln("To get help using phpdbg type \"help\" and press enter");
-		phpdbg_notice("Please report bugs to <%s>", PHPDBG_ISSUES);
+		phpdbg_xml("<intros>");
+		phpdbg_notice("intro", "version=\"%s\"", "Welcome to phpdbg, the interactive PHP debugger, v%s", PHPDBG_VERSION);
+		phpdbg_writeln("intro", "help=\"help\"", "To get help using phpdbg type \"help\" and press enter");
+		phpdbg_notice("intro", "report=\"%s\"", "Please report bugs to <%s>", PHPDBG_ISSUES);
+		phpdbg_xml("</intros>");
 	} else {
-		phpdbg_notice("Clean Execution Environment");
+		if (!(PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {
+			phpdbg_notice(NULL, NULL, "Clean Execution Environment");
+		}
 
-		phpdbg_writeln("Classes\t\t\t%d", zend_hash_num_elements(EG(class_table)));
-		phpdbg_writeln("Functions\t\t%d", zend_hash_num_elements(EG(function_table)));
-		phpdbg_writeln("Constants\t\t%d", zend_hash_num_elements(EG(zend_constants)));
-		phpdbg_writeln("Includes\t\t%d",  zend_hash_num_elements(&EG(included_files)));
+		phpdbg_write("cleaninfo", "classes=\"%d\" functions=\"%d\" constants=\"%d\" includes=\"%d\"",
+			"Classes              %d\n"
+			"Functions            %d\n"
+			"Constants            %d\n"
+			"Includes             %d\n",
+			zend_hash_num_elements(EG(class_table)),
+			zend_hash_num_elements(EG(function_table)),
+			zend_hash_num_elements(EG(zend_constants)),
+			zend_hash_num_elements(&EG(included_files)));
 	}
 } /* }}} */
 
@@ -792,12 +835,10 @@ static void phpdbg_remote_close(int socket, FILE *stream) {
 }
 
 /* don't inline this, want to debug it easily, will inline when done */
-static int phpdbg_remote_init(const char* address, unsigned short port, int *server, int *socket, FILE **stream) {
+static int phpdbg_remote_init(const char* address, unsigned short port, int server, int *socket, FILE **stream) {
 	phpdbg_remote_close(*socket, *stream);
 
-	*server = phpdbg_open_socket(address, port);
-
-	if (*server < 0) {
+	if (server < 0) {
 		phpdbg_rlog(fileno(stderr), "Initializing connection on %s:%u failed", address, port);
 
 		return FAILURE;
@@ -810,7 +851,7 @@ static int phpdbg_remote_init(const char* address, unsigned short port, int *ser
 		char buffer[20] = {0};
 
 		memset(&address, 0, size);
-		*socket = accept(*server, (struct sockaddr *) &address, &size);
+		*socket = accept(server, (struct sockaddr *) &address, &size);
 		inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
 
 		phpdbg_rlog(fileno(stderr), "connection established from %s", buffer);
@@ -1014,7 +1055,7 @@ phpdbg_main:
 		}
 
 		if (!bp_tmp_file) {
-			phpdbg_error("Unable to create temporary file");
+			phpdbg_error("tmpfile", "", "Unable to create temporary file");
 			return 1;
 		}
 #else
@@ -1162,6 +1203,10 @@ phpdbg_main:
 				} else address = strdup(php_optarg);
 			} break;
 
+			case 'x':
+				flags |= PHPDBG_WRITE_XML;
+			break;
+
 			case 'V': {
 				sapi_startup(phpdbg);
 				phpdbg->startup(phpdbg);
@@ -1251,7 +1296,8 @@ phpdbg_main:
 
 	/* setup remote server if necessary */
 	if (!cleaning && listen > 0) {
-		if (phpdbg_remote_init(address, listen, &server, &socket, &stream) == FAILURE) {
+		server = phpdbg_open_socket(address, listen);
+		if (phpdbg_remote_init(address, listen, server, &socket, &stream) == FAILURE) {
 			exit(0);
 		}
 
@@ -1297,10 +1343,15 @@ phpdbg_main:
 
 		PHPDBG_G(sapi_name_ptr) = sapi_name;
 
+		php_output_activate(TSRMLS_C);
+		php_output_deactivate(TSRMLS_C);
+
+		php_output_activate(TSRMLS_C);
+
 		if (php_request_startup(TSRMLS_C) == SUCCESS) {
 			int i;
-		
-			SG(request_info).argc = argc - php_optind + 1;		
+
+			SG(request_info).argc = argc - php_optind + 1;
 			SG(request_info).argv = emalloc(SG(request_info).argc * sizeof(char *));
 			for (i = SG(request_info).argc; --i;) {
 				SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
@@ -1309,12 +1360,6 @@ phpdbg_main:
 
 			php_hash_environment(TSRMLS_C);
 		}
-
-		/* make sure to turn off buffer for ev command */
-		php_output_activate(TSRMLS_C);
-		php_output_deactivate(TSRMLS_C);
-
-		php_output_activate(TSRMLS_C);
 
 		/* do not install sigint handlers for remote consoles */
 		/* sending SIGINT then provides a decent way of shutting down the server */
@@ -1350,6 +1395,11 @@ phpdbg_main:
 		PHPDBG_G(io)[PHPDBG_STDERR].ptr = stderr;
 		PHPDBG_G(io)[PHPDBG_STDERR].fd = fileno(stderr);
 
+#ifndef _WIN32
+		PHPDBG_G(php_stdiop_write) = php_stream_stdio_ops.write;
+		php_stream_stdio_ops.write = phpdbg_stdiop_write;
+#endif
+
 		if (exec) { /* set execution context */
 			PHPDBG_G(exec) = phpdbg_resolve_path(exec TSRMLS_CC);
 			PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
@@ -1360,8 +1410,7 @@ phpdbg_main:
 		if (oplog_file) { /* open oplog */
 			PHPDBG_G(oplog) = fopen(oplog_file, "w+");
 			if (!PHPDBG_G(oplog)) {
-				phpdbg_error(
-						"Failed to open oplog %s", oplog_file);
+				phpdbg_error("oplog", "path=\"%s\"", "Failed to open oplog %s", oplog_file);
 			}
 			free(oplog_file);
 		}
@@ -1372,7 +1421,7 @@ phpdbg_main:
 		phpdbg_set_color_ex(PHPDBG_COLOR_NOTICE,  PHPDBG_STRL("green") TSRMLS_CC);
 
 		/* set default prompt */
-		phpdbg_set_prompt(PROMPT TSRMLS_CC);
+		phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT TSRMLS_CC);
 
 		/* Make stdin, stdout and stderr accessible from PHP scripts */
 		phpdbg_register_file_handles(TSRMLS_C);
@@ -1435,7 +1484,7 @@ phpdbg_interact:
 					
 						if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 							/* renegociate connections */
-							phpdbg_remote_init(address, listen, &server, &socket, &stream);
+							phpdbg_remote_init(address, listen, server, &socket, &stream);
 				
 							/* set streams */
 							if (stream) {
@@ -1467,11 +1516,11 @@ phpdbg_out:
 
 #ifdef _WIN32
 	} __except(phpdbg_exception_handler_win32(xp = GetExceptionInformation())) {
-		phpdbg_error("Access violation (Segementation fault) encountered\ntrying to abort cleanly...");
+		phpdbg_error("segfault", "", "Access violation (Segementation fault) encountered\ntrying to abort cleanly...");
 	}
 /* phpdbg_out: */
 #endif
-	
+
 		{
 			int i;
 			/* free argv */
@@ -1484,8 +1533,7 @@ phpdbg_out:
 #ifndef ZTS
 		/* force cleanup of auto and core globals */
 		zend_hash_clean(CG(auto_globals));
-		memset(
-			&core_globals, 0, sizeof(php_core_globals));
+		memset(	&core_globals, 0, sizeof(php_core_globals));
 #endif
 		if (ini_entries) {
 			free(ini_entries);
@@ -1494,14 +1542,16 @@ phpdbg_out:
 		if (ini_override) {
 			free(ini_override);
 		}
-		
+
 		/* this must be forced */
 		CG(unclean_shutdown) = 0;
-		
+
 		/* this is just helpful */
 		PG(report_memleaks) = 0;
 
 		php_request_shutdown((void*)0);
+
+		php_output_deactivate(TSRMLS_C);
 
 		zend_try {
 			php_module_shutdown(TSRMLS_C);
@@ -1514,7 +1564,7 @@ phpdbg_out:
 	if (cleaning || remote) {
 		goto phpdbg_main;
 	}
-	
+
 #ifdef ZTS
 	/* bugggy */
 	/* tsrm_shutdown(); */

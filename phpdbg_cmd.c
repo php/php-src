@@ -39,7 +39,7 @@ static inline const char *phpdbg_command_name(const phpdbg_command_t *command, c
 	memcpy(&buffer[pos], command->name, command->name_len);
 	pos += command->name_len;
 	buffer[pos] = 0;
-	
+
 	return buffer;
 }
 
@@ -231,12 +231,12 @@ PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* des
 		case STACK_PARAM:
 			/* nope */
 		break;
-		
+
 		case STR_PARAM:
 			dest->str = estrndup(src->str, src->len);
 			dest->len = src->len;
 		break;
-		
+
 		case OP_PARAM:
 			dest->str = estrndup(src->str, src->len);
 			dest->len = src->len;
@@ -276,7 +276,7 @@ PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* des
 		break;
 
 		case EMPTY_PARAM: { /* do nothing */ } break;
-		
+
 		default: {
 			/* not yet */
 		}
@@ -291,7 +291,7 @@ PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param TSRMLS_DC) /
 		case STACK_PARAM:
 			/* nope */
 		break;
-		
+
 		case STR_PARAM:
 			hash += zend_inline_hash_func(param->str, param->len);
 		break;
@@ -329,7 +329,7 @@ PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param TSRMLS_DC) /
 		break;
 
 		case EMPTY_PARAM: { /* do nothing */ } break;
-		
+
 		default: {
 			/* not yet */
 		}
@@ -347,7 +347,7 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_pa
 					/* nope, or yep */
 					return 1;
 				break;
-				
+
 				case NUMERIC_FUNCTION_PARAM:
 					if (l->num != r->num) {
 						break;
@@ -402,7 +402,7 @@ PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_pa
 
 				case EMPTY_PARAM:
 					return 1;
-					
+
 				default: {
 					/* not yet */
 				}
@@ -419,43 +419,43 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 			case STR_PARAM:
 				fprintf(stderr, "%s STR_PARAM(%s=%lu)\n", msg, param->str, param->len);
 			break;
-			
+
 			case ADDR_PARAM:
 				fprintf(stderr, "%s ADDR_PARAM(%lu)\n", msg, param->addr);
 			break;
-			
+
 			case NUMERIC_FILE_PARAM:
 				fprintf(stderr, "%s NUMERIC_FILE_PARAM(%s:#%lu)\n", msg, param->file.name, param->file.line);
 			break;
-			
+
 			case FILE_PARAM:
 				fprintf(stderr, "%s FILE_PARAM(%s:%lu)\n", msg, param->file.name, param->file.line);
 			break;
-			
+
 			case METHOD_PARAM:
 				fprintf(stderr, "%s METHOD_PARAM(%s::%s)\n", msg, param->method.class, param->method.name);
 			break;
-			
+
 			case NUMERIC_METHOD_PARAM:
 				fprintf(stderr, "%s NUMERIC_METHOD_PARAM(%s::%s)\n", msg, param->method.class, param->method.name);
 			break;
-			
+
 			case NUMERIC_FUNCTION_PARAM:
 				fprintf(stderr, "%s NUMERIC_FUNCTION_PARAM(%s::%ld)\n", msg, param->str, param->num);
 			break;
-			
+
 			case NUMERIC_PARAM:
 				fprintf(stderr, "%s NUMERIC_PARAM(%ld)\n", msg, param->num);
 			break;
-			
+
 			case COND_PARAM:
 				fprintf(stderr, "%s COND_PARAM(%s=%lu)\n", msg, param->str, param->len);
 			break;
-			
+
 			case OP_PARAM:
 				fprintf(stderr, "%s OP_PARAM(%s=%lu)\n", msg, param->str, param->len);
 			break;
-			
+
 			default: {
 				/* not yet */
 			}
@@ -467,13 +467,13 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 	if (stack && stack->next) {
 		phpdbg_param_t *remove = stack->next;
-		
+
 		while (remove) {
 			phpdbg_param_t *next = NULL;
-			
+
 			if (remove->next)
 				next = remove->next;
-			
+
 			switch (remove->type) {
 				case NUMERIC_METHOD_PARAM:
 				case METHOD_PARAM:
@@ -487,29 +487,30 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack) {
 				case STR_PARAM:
 				case OP_PARAM:
 					if (remove->str)
-						free(remove->str);	
+						free(remove->str);
 				break;
-				
+
 				case NUMERIC_FILE_PARAM:
 				case FILE_PARAM:
 					if (remove->file.name)
 						free(remove->file.name);
 				break;
-				
+
 				default: {
 					/* nothing */
 				}
 			}
-			
+
 			free(remove);
 			remove = NULL;
-			
+
 			if (next)
-				remove = next; 
+				remove = next;
 			else break;
 		}
 	}
-	
+
+
 	stack->next = NULL;
 } /* }}} */
 
@@ -537,30 +538,29 @@ PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) 
 	stack->len++;
 } /* }}} */
 
-PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack, char **why TSRMLS_DC) {
+PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack TSRMLS_DC) {
 	if (command) {
 		char buffer[128] = {0,};
 		const phpdbg_param_t *top = (stack != NULL) ? *stack : NULL;
 		const char *arg = command->args;
 		size_t least = 0L,
-			   received = 0L,
-			   current = 0L;
+		       received = 0L,
+		       current = 0L;
 		zend_bool optional = 0;
-		
+
 		/* check for arg spec */
 		if (!(arg) || !(*arg)) {
 			if (!top) {
 				return SUCCESS;
 			}
-			
-			asprintf(why,
-				"The command \"%s\" expected no arguments", 
+
+			phpdbg_error("command", "type=\"toomanyargs\" command=\"%s\" expected=\"0\"", "The command \"%s\" expected no arguments", 
 				phpdbg_command_name(command, buffer));
 			return FAILURE;
 		}
-		
+
 		least = 0L;
-		
+
 		/* count least amount of arguments */
 		while (arg && *arg) {
 			if (arg[0] == '|') {
@@ -569,21 +569,19 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 			least++;
 			arg++;
 		}
-		
+
 		arg = command->args;
 
 #define verify_arg(e, a, t) if (!(a)) { \
 	if (!optional) { \
-		asprintf(why, \
-			"The command \"%s\" expected %s and got nothing at parameter %lu", \
+		phpdbg_error("command", "type=\"noarg\" command=\"%s\" expected=\"%s\" num=\"%lu\"", "The command \"%s\" expected %s and got nothing at parameter %lu", \
 			phpdbg_command_name(command, buffer), \
 			(e), \
 			current); \
 		return FAILURE;\
 	} \
 } else if ((a)->type != (t)) { \
-	asprintf(why, \
-		"The command \"%s\" expected %s and got %s at parameter %lu", \
+	phpdbg_error("command", "type=\"wrongarg\" command=\"%s\" expected=\"%s\" got=\"%s\" num=\"%lu\"", "The command \"%s\" expected %s and got %s at parameter %lu", \
 		phpdbg_command_name(command, buffer), \
 		(e),\
 		phpdbg_get_param_type((a) TSRMLS_CC), \
@@ -593,14 +591,14 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 
 		while (arg && *arg) {
 			current++;
-			
+
 			switch (*arg) {
 				case '|': {
 					current--;
 					optional = 1;
 					arg++;
 				} continue;
-				
+
 				case 'i': verify_arg("raw input", top, STR_PARAM); break;
 				case 's': verify_arg("string", top, STR_PARAM); break;
 				case 'n': verify_arg("number", top, NUMERIC_PARAM); break;
@@ -610,14 +608,14 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 				case 'c': verify_arg("condition", top, COND_PARAM); break;
 				case 'o': verify_arg("opcode", top, OP_PARAM); break;
 				case 'b': verify_arg("boolean", top, NUMERIC_PARAM); break;
-				
+
 				case '*': { /* do nothing */ } break;
 			}
-			
+
 			if (top ) {
 				top = top->next;
 			} else break;
-			
+
 			received++;
 			arg++;
 		}
@@ -625,21 +623,20 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 #undef verify_arg
 
 		if ((received < least)) {
-			asprintf(why,
-				"The command \"%s\" expected at least %lu arguments (%s) and received %lu",
+			phpdbg_error("command", "type=\"toofewargs\" command=\"%s\" expected=\"%d\" argtypes=\"%s\" got=\"%d\"", "The command \"%s\" expected at least %lu arguments (%s) and received %lu",
 				phpdbg_command_name(command, buffer),
 				least,
-				command->args, 
+				command->args,
 				received);
 			return FAILURE;
 		}
 	}
-	
+
 	return SUCCESS;
 }
 
 /* {{{ */
-PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top, char **why) {
+PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top TSRMLS_DC) {
 	const phpdbg_command_t *command = commands;
 	phpdbg_param_t *name = *top;
 	const phpdbg_command_t *matched[3] = {NULL, NULL, NULL};
@@ -658,8 +655,7 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 				if (strncasecmp(command->name, name->str, name->len) == SUCCESS) {
 					if (matches < 3) {
 						/* only allow abbreviating commands that can be aliased */
-						if (((name->len != command->name_len) && command->alias) ||
-							(name->len == command->name_len)) {
+						if ((name->len != command->name_len && command->alias) || name->len == command->name_len) {
 							matched[matches] = command;
 							matches++;
 						}
@@ -681,9 +677,9 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 	switch (matches) {
 		case 0:
 			if (parent) {
-				spprintf(why, 0, "The command \"%s %s\" could not be found", parent->name, name->str);
+				phpdbg_error("command", "type=\"notfound\" command=\"%s\" subcommand=\"%s\"", "The command \"%s %s\" could not be found", parent->name, name->str);
 			} else {
-				spprintf(why, 0, "The command \"%s\" could not be found", name->str);
+				phpdbg_error("command", "type=\"notfound\" command=\"%s\"", "The command \"%s\" could not be found", name->str);
 			}
 			return parent;
 
@@ -695,7 +691,7 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 
 		default: {
 			char *list = NULL;
-			zend_uint it = 0;
+			uint32_t it = 0;
 			size_t pos = 0;
 
 			while (it < matches) {
@@ -715,7 +711,8 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 				it++;
 			}
 
-			spprintf(why, 0, "The command \"%s\" is ambigious, matching %lu commands (%s)", name->str, matches, list);
+			/* ", " separated matches */
+			phpdbg_error("command", "type=\"ambiguous\" command=\"%s\" matches=\"%lu\" matched=\"%s\"", "The command \"%s\" is ambigious, matching %lu commands (%s)", name->str, matches, list);
 			efree(list);
 
 			return NULL;
@@ -723,7 +720,7 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 	}
 
 	if (command->subs && (*top) && ((*top)->type == STR_PARAM)) {
-		return phpdbg_stack_resolve(command->subs, command, top, why);
+		return phpdbg_stack_resolve(command->subs, command, top TSRMLS_CC);
 	} else {
 		return command;
 	}
@@ -732,64 +729,71 @@ PHPDBG_API const phpdbg_command_t* phpdbg_stack_resolve(const phpdbg_command_t *
 } /* }}} */
 
 /* {{{ */
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, char **why, zend_bool allow_async_unsafe TSRMLS_DC) {
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe TSRMLS_DC) {
 	phpdbg_param_t *top = NULL;
 	const phpdbg_command_t *handler = NULL;
 
 	if (stack->type != STACK_PARAM) {
-		spprintf(why, 0, "The passed argument was not a stack !!");
+		phpdbg_error("command", "type=\"nostack\"", "The passed argument was not a stack !");
 		return FAILURE;
 	}
 
 	if (!stack->len) {
-		spprintf(why, 0, "The stack contains nothing !!");
+		phpdbg_error("command", "type=\"emptystack\"", "The stack contains nothing !");
 		return FAILURE;
 	}
 
-	top = (phpdbg_param_t*) stack->next;
+	top = (phpdbg_param_t *) stack->next;
 
 	switch (top->type) {
 		case EVAL_PARAM:
+			phpdbg_activate_err_buf(0 TSRMLS_CC);
+			phpdbg_free_err_buf(TSRMLS_C);
 			return PHPDBG_COMMAND_HANDLER(ev)(top TSRMLS_CC);
 
 		case RUN_PARAM:
-			if (allow_async_unsafe) {
-				return PHPDBG_COMMAND_HANDLER(run)(top TSRMLS_CC);
+			if (!allow_async_unsafe) {
+				phpdbg_error("signalsegv", "command=\"run\"", "run command is disallowed during hard interrupt");
 			}
-			spprintf(why, 0, "run command is disallowed during hard interrupt");
-			return FAILURE;
+			phpdbg_activate_err_buf(0 TSRMLS_CC);
+			phpdbg_free_err_buf(TSRMLS_C);
+			return PHPDBG_COMMAND_HANDLER(run)(top TSRMLS_CC);
 
 		case SHELL_PARAM:
-			if (allow_async_unsafe) {
-				return PHPDBG_COMMAND_HANDLER(sh)(top TSRMLS_CC);
+			if (!allow_async_unsafe) {
+				phpdbg_error("signalsegv", "command=\"sh\"", "sh command is disallowed during hard interrupt");
+				return FAILURE;
 			}
-			spprintf(why, 0, "sh command is disallowed during hard interrupt");
-			return FAILURE;
+			phpdbg_activate_err_buf(0 TSRMLS_CC);
+			phpdbg_free_err_buf(TSRMLS_C);
+			return PHPDBG_COMMAND_HANDLER(sh)(top TSRMLS_CC);
 
 		case STR_PARAM: {
-			handler = phpdbg_stack_resolve(phpdbg_prompt_commands, NULL, &top, why);
+			handler = phpdbg_stack_resolve(phpdbg_prompt_commands, NULL, &top TSRMLS_CC);
 
 			if (handler) {
 				if (!allow_async_unsafe && !(handler->flags & PHPDBG_ASYNC_SAFE)) {
-					spprintf(why, 0, "%s command is disallowed during hard interrupt", handler->name);
+					phpdbg_error("signalsegv", "command=\"%s\"", "%s command is disallowed during hard interrupt", handler->name);
 					return FAILURE;
 				}
 
-				if (phpdbg_stack_verify(handler, &top, why TSRMLS_CC) == SUCCESS) {
+				if (phpdbg_stack_verify(handler, &top TSRMLS_CC) == SUCCESS) {
+					phpdbg_activate_err_buf(0 TSRMLS_CC);
+					phpdbg_free_err_buf(TSRMLS_C);
 					return handler->handler(top TSRMLS_CC);
 				}
 			}
 		} return FAILURE;
 
 		default:
-			spprintf(why, 0, "The first parameter makes no sense !!");
+			phpdbg_error("command", "type=\"invalidcommand\"", "The first parameter makes no sense !");
 			return FAILURE;
 	}
 
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_API char* phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
+PHPDBG_API char *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 {
 	char *cmd = NULL;
 	char *buffer = NULL;
@@ -810,7 +814,7 @@ disconnect:
 #define USE_LIB_STAR (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT))
 #if !USE_LIB_STAR
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
-				if (!phpdbg_write("%s", phpdbg_get_prompt(TSRMLS_C))) {
+				if (!phpdbg_out("%s", phpdbg_get_prompt(TSRMLS_C))) {
 					goto disconnect;
 				}
 				PHPDBG_G(last_was_newline) = 1;
@@ -825,14 +829,26 @@ readline:
 #endif
 			{
 				char buf[PHPDBG_MAX_CMD];
-				int bytes = 0, len = PHPDBG_G(input_buflen);
+				int bytes = PHPDBG_G(input_buflen), len = 0;
 				if (PHPDBG_G(input_buflen)) {
-					memcpy(buf, PHPDBG_G(input_buffer), len);
+					memcpy(buf, PHPDBG_G(input_buffer), bytes);
 				}
 
-				while ((bytes = read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len)) > 0) {
+				do {
 					int i;
+					if (bytes <= 0) { 
+						continue;
+					}
+
 					for (i = len; i < len + bytes; i++) {
+						if (buf[i] == '\x03') {
+							if (i != len + bytes - 1) {
+								memmove(buf + i, buf + i + 1, len + bytes - i - 1);
+							}
+							len--;
+							i--;
+							continue;
+						}
 						if (buf[i] == '\n') {
 							PHPDBG_G(input_buflen) = len + bytes - 1 - i;
 							if (PHPDBG_G(input_buflen)) {
@@ -846,7 +862,7 @@ readline:
 						}
 					}
 					len += bytes;
-				}
+				} while ((bytes = read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len)) > 0 || (errno == EINTR && bytes < 0));
 
 				if (bytes <= 0) {
 					goto disconnect;
@@ -901,7 +917,7 @@ end:
 			buffer = estrdup(PHPDBG_G(buffer));
 		}
 	}
-	
+
 	return buffer;
 } /* }}} */
 

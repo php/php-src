@@ -87,7 +87,15 @@
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
 #define PHPDBG_VERSION "0.4.0"
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
+#define PHPDBG_DEFAULT_PROMPT "prompt>"
 /* }}} */
+
+/* Hey, apple. One shouldn't define *functions* from the standard C library as marcos. */
+#ifdef memcpy
+#define memcpy_tmp(...) memcpy(__VA_ARGS__)
+#undef memcpy
+#define memcpy(...) memcpy_tmp(__VA_ARGS__)
+#endif
 
 #if !defined(PHPDBG_WEBDATA_TRANSFER_H) && !defined(PHPDBG_WEBHELPER_H)
 
@@ -165,8 +173,9 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 #define PHPDBG_IS_BP_ENABLED          (1<<26)
 #define PHPDBG_IS_REMOTE              (1<<27)
 #define PHPDBG_IS_DISCONNECTED        (1<<28)
+#define PHPDBG_WRITE_XML              (1<<29)
 
-#define PHPDBG_SHOW_REFCOUNTS         (1<<29)
+#define PHPDBG_SHOW_REFCOUNTS         (1<<30)
 
 #define PHPDBG_IN_SIGNAL_HANDLER      (1<<30)
 
@@ -208,7 +217,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable registered;                        /* registered */
 	HashTable seek;                              /* seek oplines */
 	phpdbg_frame_t frame;                        /* frame */
-	zend_uint last_line;                         /* last executed line */
+	uint32_t last_line;                          /* last executed line */
 
 	phpdbg_lexer_data lexer;                     /* lexer data */
 	phpdbg_param_t *parser_stack;                /* param stack during lexer / parser phase */
@@ -238,6 +247,21 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 		FILE *ptr;
 		int fd;
 	} io[PHPDBG_IO_FDS];                         /* io */
+#ifndef _WIN32
+	size_t (*php_stdiop_write)(php_stream *, const char *, size_t TSRMLS_DC);
+#endif
+	int in_script_xml;                           /* in <stream> output mode */
+	struct {
+		zend_bool active;
+		int type;
+		int fd;
+		char *tag;
+		char *msg;
+		int msglen;
+		char *xml;
+		int xmllen;
+	} err_buf;                                   /* error buffer */
+	zend_ulong req_id;                           /* "request id" to keep track of commands */
 
 	char *prompt[2];                             /* prompt */
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */

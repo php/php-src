@@ -134,7 +134,7 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 	php_json_decode(&zv, msg, len, 1, 1000 /* enough */ TSRMLS_CC);
 
 	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE) {
-		phpdbg_error("Malformed JSON was sent to this socket, arborting");
+		phpdbg_error("wait", "type=\"invaliddata\" import=\"fail\"", "Malformed JSON was sent to this socket, arborting");
 		return;
 	}
 
@@ -237,7 +237,7 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 			} else if (mode > 0) {
 				// not loaded module
 				if (!sapi_module.name || strcmp(sapi_module.name, Z_STRVAL_PP(module))) {
-					phpdbg_notice("The module %.*s isn't present in " PHPDBG_NAME ", you still can load via dl /path/to/module/%.*s.so", Z_STRLEN_PP(module), Z_STRVAL_PP(module), Z_STRLEN_PP(module), Z_STRVAL_PP(module));
+					phpdbg_notice("wait", "missingmodule=\"%.*s\"", "The module %.*s isn't present in " PHPDBG_NAME ", you still can load via dl /path/to/module/%.*s.so", Z_STRLEN_PP(module), Z_STRVAL_PP(module), Z_STRLEN_PP(module), Z_STRVAL_PP(module));
 				}
 			}
 		} while (module);
@@ -297,7 +297,7 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 			for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(zvpp), &hpos);
 			     zend_hash_get_current_data_ex(Z_ARRVAL_PP(zvpp), (void **) &name, &hpos) == SUCCESS;
 			     zend_hash_move_forward_ex(Z_ARRVAL_PP(zvpp), &hpos)) {
-				phpdbg_notice("The (zend) extension %.*s isn't present in " PHPDBG_NAME ", you still can load via dl /path/to/extension.so", Z_STRLEN_PP(name), Z_STRVAL_PP(name));
+				phpdbg_notice("wait", "missingextension=\"%.*s\"", "The Zend extension %.*s isn't present in " PHPDBG_NAME ", you still can load via dl /path/to/extension.so", Z_STRLEN_PP(name), Z_STRVAL_PP(name));
 			}
 		}
 	}
@@ -375,7 +375,7 @@ PHPDBG_COMMAND(wait) /* {{{ */
 		strcpy(local.sun_path, PHPDBG_G(socket_path));
 		len = strlen(local.sun_path) + sizeof(local.sun_family);
 		if (bind(sl, (struct sockaddr *)&local, len) == -1) {
-			phpdbg_error("Unable to connect to UNIX domain socket at %s defined by phpdbg.path ini setting", PHPDBG_G(socket_path));
+			phpdbg_error("wait", "type=\"nosocket\" import=\"fail\"", "Unable to connect to UNIX domain socket at %s defined by phpdbg.path ini setting", PHPDBG_G(socket_path));
 			return FAILURE;
 		}
 
@@ -412,7 +412,7 @@ PHPDBG_COMMAND(wait) /* {{{ */
 
 	efree(data);
 
-	phpdbg_notice("Successfully imported request data, stopped before executing");
+	phpdbg_notice("wait", "import=\"success\"", "Successfully imported request data, stopped before executing");
 
 	return SUCCESS;
 #endif

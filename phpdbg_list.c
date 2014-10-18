@@ -48,7 +48,7 @@ const phpdbg_command_t phpdbg_list_commands[] = {
 PHPDBG_LIST(lines) /* {{{ */
 {
 	if (!PHPDBG_G(exec) && !zend_is_executing(TSRMLS_C)) {
-		phpdbg_error("Not executing, and execution context not set");
+		phpdbg_error("inactive", "type=\"execution\"", "Not executing, and execution context not set");
 		return SUCCESS;
 	}
 
@@ -59,7 +59,7 @@ PHPDBG_LIST(lines) /* {{{ */
 				(param->num < 0 ? param->num : 0) + zend_get_executed_lineno(TSRMLS_C),
 				0 TSRMLS_CC);
 			break;
-			
+
 		case FILE_PARAM:
 			phpdbg_list_file(param->file.name, param->file.line, 0, 0 TSRMLS_CC);
 			break;
@@ -88,12 +88,12 @@ PHPDBG_LIST(method) /* {{{ */
 		if (zend_hash_find(&(*ce)->function_table, lcname, strlen(lcname)+1, (void**) &function) == SUCCESS) {
 			phpdbg_list_function(function TSRMLS_CC);
 		} else {
-			phpdbg_error("Could not find %s::%s", param->method.class, param->method.name);
+			phpdbg_error("list", "type=\"notfound\" method=\"%s::%s\"", "Could not find %s::%s", param->method.class, param->method.name);
 		}
 
 		efree(lcname);
 	} else {
-		phpdbg_error("Could not find the class %s", param->method.class);
+		phpdbg_error("list", "type=\"notfound\" class=\"%s\"", "Could not find the class %s", param->method.class);
 	}
 
 	return SUCCESS;
@@ -112,25 +112,26 @@ PHPDBG_LIST(class) /* {{{ */
 					(*ce)->info.user.line_start, 0 TSRMLS_CC
 				);
 			} else {
-				phpdbg_error("The source of the requested class (%s) cannot be found", (*ce)->name);
+				phpdbg_error("list", "type=\"nosource\" class=\"%s\"", "The source of the requested class (%s) cannot be found", (*ce)->name);
 			}
 		} else {
-			phpdbg_error("The class requested (%s) is not user defined", (*ce)->name);
+			phpdbg_error("list", "type=\"internalclass\" class=\"%s\"", "The class requested (%s) is not user defined", (*ce)->name);
 		}
 	} else {
-		phpdbg_error("The requested class (%s) could not be found", param->str);
+		phpdbg_error("list", "type=\"notfound\" class=\"%s\"", "The requested class (%s) could not be found", param->str);
 	}
 
 	return SUCCESS;
 } /* }}} */
 
-void phpdbg_list_file(const char *filename, uint count, uint offset, uint highlight TSRMLS_DC) /* {{{ */
+void phpdbg_list_file(const char *filename, uint count, int offset, uint highlight TSRMLS_DC) /* {{{ */
 {
 	uint line, lastline;
 	phpdbg_file_source **data;
 
 	if (zend_hash_find(&PHPDBG_G(file_sources), filename, strlen(filename), (void **) &data) == FAILURE) {
-		phpdbg_error("Could not find information about included file...");
+		phpdbg_error("list", "type=\"unknownfile\"", "Could not find information about included file...");
+		return;
 	}
 
 	if (offset < 0) {
@@ -144,25 +145,29 @@ void phpdbg_list_file(const char *filename, uint count, uint offset, uint highli
 		lastline = (*data)->lines;
 	}
 
+	phpdbg_xml("<list %r file=\"%s\">", filename);
+
 	for (line = offset; line < lastline;) {
 		uint linestart = (*data)->line[line++];
 		uint linelen = (*data)->line[line] - linestart;
 		char *buffer = (*data)->buf + linestart;
 
 		if (!highlight) {
-			phpdbg_write("%05u: %.*s", line, linelen, buffer);
+			phpdbg_write("line", "line=\"%u\" code=\"%.*s\"", " %05u: %.*s", line, linelen, buffer);
 		} else {
 			if (highlight != line) {
-				phpdbg_write(" %05u: %.*s", line, linelen, buffer);
+				phpdbg_write("line", "line=\"%u\" code=\"%.*s\"", " %05u: %.*s", line, linelen, buffer);
 			} else {
-				phpdbg_write(">%05u: %.*s", line, linelen, buffer);
+				phpdbg_write("line", "line=\"%u\" code=\"%.*s\" current=\"current\"", ">%05u: %.*s", line, linelen, buffer);
 			}
 		}
 
 		if (*(buffer + linelen - 1) != '\n' || !linelen) {
-			phpdbg_writeln(EMPTY);
+			phpdbg_out("\n");
 		}
 	}
+
+	phpdbg_xml("</list>");
 } /* }}} */
 
 void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
@@ -170,7 +175,7 @@ void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
 	const zend_op_array *ops;
 
 	if (fbc->type != ZEND_USER_FUNCTION) {
-		phpdbg_error("The function requested (%s) is not user defined", fbc->common.function_name);
+		phpdbg_error("list", "type=\"internalfunction\" function=\"%s\"", "The function requested (%s) is not user defined", fbc->common.function_name);
 		return;
 	}
 
@@ -194,11 +199,11 @@ void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC) /* {{{ *
 
 			func_table = &EG(scope)->function_table;
 		} else {
-			phpdbg_error("No active class");
+			phpdbg_error("inactive", "type=\"noclasses\"", "No active class");
 			return;
 		}
 	} else if (!EG(function_table)) {
-		phpdbg_error("No function table loaded");
+		phpdbg_error("inactive", "type=\"function_table\"", "No function table loaded");
 		return;
 	} else {
 		func_table = EG(function_table);
@@ -211,10 +216,10 @@ void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC) /* {{{ *
 		if (zend_hash_find(func_table, func_name, func_name_len+1, (void**)&fbc) == SUCCESS) {
 			phpdbg_list_function(fbc TSRMLS_CC);
 		} else {
-			phpdbg_error("Function %s not found", func_name);
+			phpdbg_error("list", "type=\"nofunction\" function=\"%s\"", "Function %s not found", func_name);
 		}
 	} phpdbg_catch_access {
-		phpdbg_error("Could not list function %s, invalid data source", func_name);
+		phpdbg_error("signalsegv", "function=\"%s\"", "Could not list function %s, invalid data source", func_name);
 	} phpdbg_end_try_access();
 
 	efree(func_name);
