@@ -849,7 +849,7 @@ static int phpdbg_remote_init(const char* address, unsigned short port, int serv
 		struct sockaddr_in address;
 		socklen_t size = sizeof(address);
 		char buffer[20] = {0};
-
+		/* XXX error checks */
 		memset(&address, 0, size);
 		*socket = accept(server, (struct sockaddr *) &address, &size);
 		inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
@@ -857,6 +857,7 @@ static int phpdbg_remote_init(const char* address, unsigned short port, int serv
 		phpdbg_rlog(fileno(stderr), "connection established from %s", buffer);
 	}
 
+#ifndef _WIN32
 	dup2(*socket, fileno(stdout));
 	dup2(*socket, fileno(stdin));
 
@@ -865,7 +866,7 @@ static int phpdbg_remote_init(const char* address, unsigned short port, int serv
 	*stream = fdopen(*socket, "r+");
 
 	phpdbg_set_async_io(*socket);
-
+#endif
 	return SUCCESS;
 }
 
@@ -1381,17 +1382,36 @@ phpdbg_main:
 		PHPDBG_G(flags) = flags;
 
 		/* setup io here */
-		if (stream) {
+		if (remote) {
 			PHPDBG_G(flags) |= PHPDBG_IS_REMOTE;
 #ifndef _WIN32
 			signal(SIGPIPE, SIG_IGN);
 #endif
 		}
 
+#ifndef _WIN32
 		PHPDBG_G(io)[PHPDBG_STDIN].ptr = stdin;
 		PHPDBG_G(io)[PHPDBG_STDIN].fd = fileno(stdin);
 		PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
 		PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
+#else
+		/* XXX this is a complete mess here with FILE/fd/SOCKET,
+			we should let only one to survive probably. Need 
+			a clean separation whether it's a remote or local
+			prompt. And what is supposed to go as user interaction,
+			error log, etc. */
+		if (remote) {
+			PHPDBG_G(io)[PHPDBG_STDIN].ptr = stdin;
+			PHPDBG_G(io)[PHPDBG_STDIN].fd = socket;
+			PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
+			PHPDBG_G(io)[PHPDBG_STDOUT].fd = socket;
+		} else {
+			PHPDBG_G(io)[PHPDBG_STDIN].ptr = stdin;
+			PHPDBG_G(io)[PHPDBG_STDIN].fd = fileno(stdin);
+			PHPDBG_G(io)[PHPDBG_STDOUT].ptr = stdout;
+			PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
+		}
+#endif
 		PHPDBG_G(io)[PHPDBG_STDERR].ptr = stderr;
 		PHPDBG_G(io)[PHPDBG_STDERR].fd = fileno(stderr);
 
