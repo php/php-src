@@ -691,7 +691,7 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 
 		default: {
 			char *list = NULL;
-			uint32_t it = 0;
+			zend_uint it = 0;
 			size_t pos = 0;
 
 			while (it < matches) {

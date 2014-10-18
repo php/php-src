@@ -696,7 +696,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRML
 static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, const phpdbg_param_t *param, const char *expr, size_t expr_len, zend_ulong hash TSRMLS_DC) /* {{{ */
 {
 	phpdbg_breakcond_t new_break;
-	uint32_t cops = CG(compiler_options);
+	zend_uint cops = CG(compiler_options);
 	zval pv;
 
 	PHPDBG_BREAK_INIT(new_break, PHPDBG_BREAK_COND);
@@ -1075,7 +1075,7 @@ PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC) /* {{{ */
 
 	if ((brake = phpdbg_find_breakbase_ex(num, &table, &position TSRMLS_CC))) {
 		char *key;
-		uint32_t klen;
+		zend_uint klen;
 		zend_ulong idx;
 		int type = brake->type;
 		char *name = NULL;
@@ -1354,7 +1354,7 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 			HashPosition position[2];
 			HashTable *class_table;
 			char *class_name = NULL;
-			uint32_t class_len = 0;
+			zend_uint class_len = 0;
 			zend_ulong class_idx = 0L;
 
 			phpdbg_out(SEPARATE "\n");
@@ -1433,7 +1433,7 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 			HashPosition position[3];
 			HashTable *class_table, *method_table;
 			char *class_name = NULL, *method_name = NULL;
-			uint32_t class_len = 0, method_len = 0;
+			zend_uint class_len = 0, method_len = 0;
 			zend_ulong class_idx = 0L, method_idx = 0L;
 
 			phpdbg_out(SEPARATE "\n");
@@ -1472,7 +1472,7 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 			HashPosition position[2];
 			HashTable *function_table;
 			char *function_name = NULL;
-			uint32_t function_len = 0;
+			zend_uint function_len = 0;
 			zend_ulong function_idx = 0L;
 
 			phpdbg_out(SEPARATE "\n");
@@ -1502,7 +1502,7 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 			HashPosition position[2];
 			HashTable *file_table;
 			char *file_name = NULL;
-			uint32_t file_len = 0;
+			zend_uint file_len = 0;
 			zend_ulong file_idx = 0L;
 
 			phpdbg_out(SEPARATE "\n");
