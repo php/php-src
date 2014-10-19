@@ -140,9 +140,7 @@ struct _zend_compiler_globals {
 	zend_arena *ast_arena;
 
 	zend_stack delayed_oplines_stack;
-    
-    uint32_t anon_class_id;
-    
+
 #ifdef ZTS
 	zval **static_members_table;
 	int last_static_member;
