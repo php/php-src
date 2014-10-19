@@ -1154,8 +1154,7 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CLASS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 	        while (opline->opcode != ZEND_FETCH_CLASS) {
 	            opline++;
 	        }
-	        ZEND_VM_SET_OPCODE(opline);
-	        ZEND_VM_CONTINUE();
+	        ZEND_VM_JMP(opline);
 	    } else Z_CE_P(EX_VAR(opline->result.var))->ce_flags |= ZEND_ACC_ANON_BOUND;
 	}
 	CHECK_EXCEPTION();
@@ -1173,8 +1172,7 @@ static int ZEND_FASTCALL  ZEND_DECLARE_INHERITED_CLASS_SPEC_HANDLER(ZEND_OPCODE_
 	        while (opline->opcode != ZEND_FETCH_CLASS) {
 	            opline++;
 	        }
-	        ZEND_VM_SET_OPCODE(opline);
-	        ZEND_VM_CONTINUE();
+	        ZEND_VM_JMP(opline);
 	    } else Z_CE_P(EX_VAR(opline->result.var))->ce_flags |= ZEND_ACC_ANON_BOUND;
 	}
 	CHECK_EXCEPTION();

@@ -9,7 +9,7 @@ class Outer {
         /* array access will be implemented by the time we get to here */
         $this->data = &$data;
     }
- 
+
     public function getArrayAccess() {
         /* create a child object implementing array access */
         /* this grants you access to protected methods and members */
