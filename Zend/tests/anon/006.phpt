@@ -11,6 +11,6 @@ namespace {
 }
 ?>
 --EXPECTF--
-object(lone\class@%s.%d)#1 (0) {
+object(lone\class@%s)#1 (0) {
 }
 

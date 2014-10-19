@@ -2952,19 +2952,20 @@ zend_string* zend_name_anon_class(zend_ast *parent TSRMLS_DC) {
     size_t len;
     char   *val;
     zend_string *anon;
-
+    uint32_t next = get_next_op_number(CG(active_op_array));
+    
     if (parent) {
         zval *extends = zend_ast_get_zval(parent);
         len = spprintf(
-            &val, 0, "%s@%p.%d",
-            Z_STR_P(extends), CG(active_op_array), ++CG(anon_class_id));
+            &val, 0, "%s@%p",
+            Z_STR_P(extends), &CG(active_op_array)->opcodes[next-1]);
         anon = zend_string_init(val, len, 1);
         Z_DELREF_P(extends); /* ?? */
         efree(val);
     } else {
         len = spprintf(
-            &val, 0, "class@%p.%d", 
-            CG(active_op_array), ++CG(anon_class_id));
+            &val, 0, "class@%p", 
+            CG(active_op_array), &CG(active_op_array)->opcodes[next-1]);
         anon = zend_string_init(val, len, 1);
         efree(val);
     }
