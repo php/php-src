@@ -13,7 +13,7 @@ class Outer {
     public function getArrayAccess() {
         /* create a child object implementing array access */
         /* this grants you access to protected methods and members */
-        return new class extends Outer implements ArrayAccess {
+        return new Outer implements ArrayAccess {
             public function offsetGet($offset) { return $this->data[$offset]; }
             public function offsetSet($offset, $data) { return ($this->data[$offset] = $data); }
             public function offsetUnset($offset) { unset($this->data[$offset]); }

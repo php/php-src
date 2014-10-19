@@ -2948,18 +2948,61 @@ void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type TSRMLS
 }
 /* }}} */
 
-zend_string* zend_name_anon_class(TSRMLS_D) {
+zend_string* zend_name_anon_class(zend_ast *parent TSRMLS_DC) {
     size_t len;
     char   *val;
     zend_string *anon;
 
-    len = spprintf
-        (&val, 0, "{anonymous}@%d", ++CG(anon_class_id));
-    anon = zend_string_init(val, len, 1);
-    efree(val);
+    if (parent) {
+        zval *extends = zend_ast_get_zval(parent);
+        len = spprintf(
+            &val, 0, "%s@%p.%d",
+            Z_STR_P(extends), CG(active_op_array), ++CG(anon_class_id));
+        anon = zend_string_init(val, len, 1);
+        Z_DELREF_P(extends); /* ?? */
+        efree(val);
+    } else {
+        len = spprintf(
+            &val, 0, "class@%p.%d", 
+            CG(active_op_array), ++CG(anon_class_id));
+        anon = zend_string_init(val, len, 1);
+        efree(val);
+    }
 
     return anon;
+} /* }}} */
+
+void zend_compile_implements(znode *class_node, zend_ast *ast TSRMLS_DC) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(ast);
+	uint32_t i;
+	for (i = 0; i < list->children; ++i) {
+		zend_ast *class_ast = list->child[i];
+		zend_string *name = zend_ast_get_str(class_ast);
+
+		zend_op *opline;
+
+		/* Traits can not implement interfaces */
+		if (ZEND_CE_IS_TRAIT(CG(active_class_entry))) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' "
+				"since it is a Trait", name->val, CG(active_class_entry)->name->val);
+		}
+
+		if (!zend_is_const_default_class_ref(class_ast)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use '%s' as interface name as it is reserved", name->val);
+		}
+
+		opline = zend_emit_op(NULL, ZEND_ADD_INTERFACE, class_node, NULL TSRMLS_CC);
+		opline->extended_value = ZEND_FETCH_CLASS_INTERFACE;
+		opline->op2_type = IS_CONST;
+		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
+			zend_resolve_class_name_ast(class_ast TSRMLS_CC) TSRMLS_CC);
+
+		CG(active_class_entry)->num_interfaces++;
+	}
 }
+/* }}} */
 
 zend_class_entry* zend_compile_class_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 {
@@ -2974,10 +3017,9 @@ zend_class_entry* zend_compile_class_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 	znode declare_node, extends_node;
 	zend_class_entry *active = CG(active_class_entry);
 	
-	if (!name) {
+	if (decl->flags & ZEND_ACC_ANON_CLASS) {
 	    name = 
-	        zend_name_anon_class(TSRMLS_C);
-	    decl->flags |= ZEND_ACC_ANON_CLASS;
+	        zend_name_anon_class((zend_ast*)name TSRMLS_CC);
 	}
 	
 	if (CG(active_class_entry) && !((decl->flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {
@@ -4631,38 +4673,6 @@ void zend_compile_use_trait(zend_ast *ast TSRMLS_DC) /* {{{ */
 				break;
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
-	}
-}
-/* }}} */
-
-void zend_compile_implements(znode *class_node, zend_ast *ast TSRMLS_DC) /* {{{ */
-{
-	zend_ast_list *list = zend_ast_get_list(ast);
-	uint32_t i;
-	for (i = 0; i < list->children; ++i) {
-		zend_ast *class_ast = list->child[i];
-		zend_string *name = zend_ast_get_str(class_ast);
-
-		zend_op *opline;
-
-		/* Traits can not implement interfaces */
-		if (ZEND_CE_IS_TRAIT(CG(active_class_entry))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' "
-				"since it is a Trait", name->val, CG(active_class_entry)->name->val);
-		}
-
-		if (!zend_is_const_default_class_ref(class_ast)) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use '%s' as interface name as it is reserved", name->val);
-		}
-
-		opline = zend_emit_op(NULL, ZEND_ADD_INTERFACE, class_node, NULL TSRMLS_CC);
-		opline->extended_value = ZEND_FETCH_CLASS_INTERFACE;
-		opline->op2_type = IS_CONST;
-		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
-			zend_resolve_class_name_ast(class_ast TSRMLS_CC) TSRMLS_CC);
-
-		CG(active_class_entry)->num_interfaces++;
 	}
 }
 /* }}} */

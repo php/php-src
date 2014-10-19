@@ -4,8 +4,8 @@ declare bare anonymous class
 <?php
 var_dump(new class{});
 ?>
---EXPECTF--	
-object(%s@%d)#%d (0) {
+--EXPECTF--
+object(class@%s.%d)#%d (0) {
 }
 
 

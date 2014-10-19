@@ -11,7 +11,7 @@ class Outer {
     
     public function getArrayAccess() {
         /* create a proxy object implementing array access */
-        return new class extends Outer implements ArrayAccess {
+        return new Outer implements ArrayAccess {
             public function offsetGet($offset)          { return $this->data[$offset]; }
             public function offsetSet($offset, $data)   { return ($this->data[$offset] = $data); }
             public function offsetUnset($offset)        { unset($this->data[$offset]); }
