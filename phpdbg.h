@@ -40,20 +40,20 @@
 #include "zend_ini_scanner.h"
 #include "zend_stream.h"
 #ifndef _WIN32
-# include "zend_signal.h"
+#	include "zend_signal.h"
 #endif
 #include "SAPI.h"
 #include <fcntl.h>
 #include <sys/types.h>
 #if defined(_WIN32) && !defined(__MINGW32__)
-# include <windows.h>
-# include "config.w32.h"
-# undef  strcasecmp
-# undef  strncasecmp
-# define strcasecmp _stricmp 
-# define strncasecmp _strnicmp 
+#	include <windows.h>
+#	include "config.w32.h"
+#	undef  strcasecmp
+#	undef  strncasecmp
+#	define strcasecmp _stricmp 
+#	define strncasecmp _strnicmp 
 #else
-# include "php_config.h"
+#	include "php_config.h"
 #endif
 #ifndef O_BINARY
 #	define O_BINARY 0
@@ -65,11 +65,11 @@
 #endif
 
 #ifdef HAVE_LIBREADLINE
-#   include <readline/readline.h>
-#   include <readline/history.h>
+#	include <readline/readline.h>
+#	include <readline/history.h>
 #endif
 #ifdef HAVE_LIBEDIT
-#   include <editline/readline.h>
+#	include <editline/readline.h>
 #endif
 
 /* {{{ remote console headers */
@@ -78,6 +78,7 @@
 #	include <sys/un.h>
 #	include <sys/select.h>
 #	include <sys/types.h>
+#	include <netdb.h>
 #endif /* }}} */
 
 /* {{{ strings */

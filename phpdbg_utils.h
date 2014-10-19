@@ -56,7 +56,8 @@ PHPDBG_API int phpdbg_xml_internal(int fd TSRMLS_DC, const char *fmt, ...);
 PHPDBG_API int phpdbg_log_internal(int fd TSRMLS_DC, const char *fmt, ...);
 PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...);
 
-PHPDBG_API int phpdbg_rlog(int fd, const char *fmt, ...);
+PHPDBG_API int phpdbg_rlog_internal(int fd TSRMLS_DC, const char *fmt, ...);
+#define phpdbg_rlog(fd, fmt, ...) phpdbg_rlog_internal(fd TSRMLS_CC, fmt, ##__VA_ARGS__)
 
 #define phpdbg_error(tag, xmlfmt, strfmt, ...)              phpdbg_print(P_ERROR   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
 #define phpdbg_notice(tag, xmlfmt, strfmt, ...)             phpdbg_print(P_NOTICE  TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)

@@ -28,6 +28,7 @@
 #include "phpdbg_list.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_set.h"
+#include "phpdbg_io.h"
 #include "zend_alloc.h"
 
 /* {{{ remote console headers */
@@ -793,7 +794,7 @@ static void phpdbg_remote_close(int socket, FILE *stream) {
 }
 
 /* don't inline this, want to debug it easily, will inline when done */
-static int phpdbg_remote_init(const char* address, unsigned short port, int server, int *socket, FILE **stream) {
+static int phpdbg_remote_init(const char* address, unsigned short port, int server, int *socket, FILE **stream TSRMLS_DC) {
 	phpdbg_remote_close(*socket, *stream);
 
 	if (server < 0) {
@@ -1255,8 +1256,8 @@ phpdbg_main:
 
 	/* setup remote server if necessary */
 	if (!cleaning && listen > 0) {
-		server = phpdbg_open_socket(address, listen);
-		if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream) == FAILURE) {
+		server = phpdbg_open_socket(address, listen TSRMLS_CC);
+		if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream TSRMLS_CC) == FAILURE) {
 			exit(0);
 		}
 
@@ -1462,7 +1463,7 @@ phpdbg_interact:
 					
 						if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 							/* renegociate connections */
-							phpdbg_remote_init(address, listen, server, &socket, &stream);
+							phpdbg_remote_init(address, listen, server, &socket, &stream TSRMLS_CC);
 				
 							/* set streams */
 							if (stream) {
