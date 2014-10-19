@@ -83,11 +83,11 @@ phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo)
 	}
 
 	while(i > 0) {
-#ifdef PHP_WIN32
+		/* There's something to read. Read what's available and proceed
+		disregarding whether len could be exhausted or not.*/
 		int can_read = recv(sock, p, i, MSG_PEEK);
-
 		i = can_read;
-#endif
+
 		got_now = recv(sock, p, i, 0);
 		if (got_now == -1) {
 			return -1;
