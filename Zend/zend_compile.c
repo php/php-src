@@ -2958,7 +2958,7 @@ zend_string* zend_name_anon_class(zend_ast *parent TSRMLS_DC) {
         zval *extends = zend_ast_get_zval(parent);
         len = spprintf(
             &val, 0, "%s@%p",
-            Z_STR_P(extends), &CG(active_op_array)->opcodes[next-1]);
+            Z_STRVAL_P(extends), &CG(active_op_array)->opcodes[next-1]);
         anon = zend_string_init(val, len, 1);
         Z_DELREF_P(extends); /* ?? */
         efree(val); 
