@@ -60,6 +60,7 @@ phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo)
 	struct pollfd pfd;
 	TSRMLS_FETCH();
 
+	if (tmo < 0) goto recv_once;
 	pfd.fd = sock;
 	pfd.events = POLLIN;
 
@@ -71,6 +72,7 @@ phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo)
 	struct timeval ttmo;
 	TSRMLS_FETCH();
 
+	if (tmo < 0) goto recv_once;
 	FD_ZERO(&readfds);
 	FD_SET(sock, &readfds);
 
@@ -84,11 +86,14 @@ phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo)
 		return -1;
 	}
 
+recv_once:
 	while(i > 0) {
-		/* There's something to read. Read what's available and proceed
-		disregarding whether len could be exhausted or not.*/
-		int can_read = recv(sock, p, i, MSG_PEEK);
-		i = can_read;
+		if (tmo < 0) {
+			/* There's something to read. Read what's available and proceed
+			disregarding whether len could be exhausted or not.*/
+			int can_read = recv(sock, p, i, MSG_PEEK);
+			i = can_read;
+		}
 
 		got_now = recv(sock, p, i, 0);
 		if (got_now == -1) {

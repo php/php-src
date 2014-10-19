@@ -863,7 +863,7 @@ readline:
 					}
 					len += bytes;
 					/* XXX export the timeout through INI??*/
-				} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, 30000)) > 0 || (errno == EINTR && bytes < 0));
+				} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1)) > 0 || (errno == EINTR && bytes < 0));
 
 				if (bytes <= 0) {
 					goto disconnect;
