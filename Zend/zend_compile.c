@@ -2965,7 +2965,7 @@ zend_string* zend_name_anon_class(zend_ast *parent TSRMLS_DC) {
     } else {
         len = spprintf(
             &val, 0, "class@%p", 
-            CG(active_op_array), &CG(active_op_array)->opcodes[next-1]);
+            &CG(active_op_array)->opcodes[next-1]);
         anon = zend_string_init(val, len, 1);
         efree(val);
     }
