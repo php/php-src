@@ -33,5 +33,14 @@ phpdbg_mixed_read(int sock, char *ptr, int len, int tmo TSRMLS_CC);
 PHPDBG_API int
 phpdbg_mixed_write(int sock, char *ptr, int len TSRMLS_CC);
 
+PHPDBG_API int
+phpdbg_create_listenable_socket(const char *addr, int port, struct addrinfo *res);
+
+PHPDBG_API int
+phpdbg_open_socket(const char *interface, short port); 
+
+PHPDBG_API void
+phpdbg_close_socket(int sock);
+
 #endif /* PHPDBG_IO_H */
 

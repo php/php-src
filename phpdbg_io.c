@@ -58,6 +58,7 @@ phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo)
 	char *p = ptr;
 #ifndef PHP_WIN32
 	struct pollfd pfd;
+	TSRMLS_FETCH();
 
 	pfd.fd = sock;
 	pfd.events = POLLIN;
@@ -68,6 +69,7 @@ phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo)
 #else
 	struct fd_set readfds;
 	struct timeval ttmo;
+	TSRMLS_FETCH();
 
 	FD_ZERO(&readfds);
 	FD_SET(sock, &readfds);
@@ -90,6 +92,7 @@ phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo)
 
 		got_now = recv(sock, p, i, 0);
 		if (got_now == -1) {
+			write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Read operation timed out!\n"));
 			return -1;
 		}
 		i -= got_now;
@@ -138,3 +141,135 @@ phpdbg_mixed_write(int sock, char *ptr, int len TSRMLS_CC)
 
 	return write(sock, ptr, len);
 }/*}}}*/
+
+
+PHPDBG_API int
+phpdbg_open_socket(const char *interface, short port) /* {{{ */
+{
+	struct addrinfo res;
+	int fd = phpdbg_create_listenable_socket(interface, port, &res);
+
+	if (fd == -1) {
+		return -1;
+	}
+
+	if (bind(fd, res.ai_addr, res.ai_addrlen) == -1) {
+		phpdbg_close_socket(fd);
+		return -4;
+	}
+
+	listen(fd, 5);
+
+	return fd;
+} /* }}} */
+
+
+PHPDBG_API int
+phpdbg_create_listenable_socket(const char *addr, int port, struct addrinfo *addr_res)
+{/*{{{*/
+	int sock = -1, rc;
+	int reuse = 1;
+	struct in6_addr serveraddr;
+	struct addrinfo hints, *res = NULL;
+	char port_buf[8];
+	int8_t any_addr = *addr == '*';
+	TSRMLS_FETCH();
+
+	do {
+		memset(&hints, 0, sizeof hints);
+		if (any_addr) {
+			hints.ai_flags = AI_PASSIVE;
+		} else {
+			hints.ai_flags = AI_NUMERICSERV;
+		}
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+
+		rc = inet_pton(AF_INET, addr, &serveraddr);
+		if (1 == rc) {
+			hints.ai_family = AF_INET;
+			if (!any_addr) {
+				hints.ai_flags |= AI_NUMERICHOST;
+			}
+		} else {
+			rc = inet_pton(AF_INET6, addr, &serveraddr);
+			if (1 == rc) {
+				hints.ai_family = AF_INET6;
+				if (!any_addr) {
+					hints.ai_flags |= AI_NUMERICHOST;
+				}
+			} else {
+				/* XXX get host by name ??? */
+			}
+		}
+
+		snprintf(port_buf, 7, "%d", port);
+		if (!any_addr) {
+			rc = getaddrinfo(addr, port_buf, &hints, &res);
+		} else {
+			rc = getaddrinfo(NULL, port_buf, &hints, &res);
+		}
+		if (0 != rc) {
+#ifndef PHP_WIN32
+			if (rc == EAI_SYSTEM) {
+				char buf[128];
+				int wrote;
+
+				wrote = snprintf(buf, 128, "Could not translate address '%s'", addr);
+				buf[wrote] = '\0';
+				write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+
+				return sock;
+			} else {
+#endif
+				char buf[256];
+				int wrote;
+
+				wrote = snprintf(buf, 256, "Host '%s' not found. %s", addr, estrdup(gai_strerror(rc)));
+				buf[wrote] = '\0';
+				write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+
+				return sock;
+#ifndef PHP_WIN32
+			}
+#endif
+			return sock;
+		}
+
+		if((sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1) {
+			char buf[128];
+			int wrote;
+
+			wrote = sprintf(buf, "Unable to create socket");
+			buf[wrote] = '\0';
+			write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+
+			return sock;
+		} 
+
+		if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*) &reuse, sizeof(reuse)) == -1) {
+			phpdbg_close_socket(sock);
+			return sock;
+		}
+
+
+	} while (0);
+
+	*addr_res = *res;
+
+	return sock;
+}/*}}}*/
+
+PHPDBG_API void
+phpdbg_close_socket(int sock)
+{
+	if (socket >= 0) {
+#ifdef _WIN32
+		closesocket(sock);
+#else
+		shutdown(sock, SHUT_RDWR);
+		close(sock);
+#endif
+	}
+}
+

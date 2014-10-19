@@ -781,52 +781,10 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 	}
 } /* }}} */
 
-int phpdbg_open_socket(const char *interface, short port) /* {{{ */
-{
-	int reuse = 1;
-	struct sockaddr_in address;
-	int fd = socket(AF_INET, SOCK_STREAM, 0);
-
-	if (fd == -1) {
-		return -1;
-	}
-
-	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char*) &reuse, sizeof(reuse)) == -1) {
-		close(fd);
-		return -2;
-	}
-
-
-	memset(&address, 0, sizeof(address));
-
-	address.sin_port = htons(port);
-	address.sin_family = AF_INET;
-
-	if ((*interface == '*')) {
-		address.sin_addr.s_addr = htonl(INADDR_ANY);
-	} else if (!inet_pton(AF_INET, interface, &address.sin_addr)) {
-		close(fd);
-		return -3;
-	}
-
-	if (bind(fd, (struct sockaddr *)&address, sizeof(address)) == -1) {
-		close(fd);
-		return -4;
-	}
-
-	listen(fd, 5);
-
-	return fd;
-} /* }}} */
 
 static void phpdbg_remote_close(int socket, FILE *stream) {
 	if (socket >= 0) {
-#ifdef _WIN32
-		closesocket(socket);
-#else
-		shutdown(socket, SHUT_RDWR);
-		close(socket);
-#endif
+		phpdbg_close_socket(socket);
 	}
 
 	if (stream) {
@@ -846,13 +804,13 @@ static int phpdbg_remote_init(const char* address, unsigned short port, int serv
 
 	phpdbg_rlog(fileno(stderr), "accepting connections on %s:%u", address, port);
 	{
-		struct sockaddr_in address;
+		struct sockaddr_storage address;
 		socklen_t size = sizeof(address);
 		char buffer[20] = {0};
 		/* XXX error checks */
 		memset(&address, 0, size);
 		*socket = accept(server, (struct sockaddr *) &address, &size);
-		inet_ntop(AF_INET, &address.sin_addr, buffer, sizeof(buffer));
+		inet_ntop(AF_INET, &(((struct sockaddr_in *)&address)->sin_addr), buffer, sizeof(buffer));
 
 		phpdbg_rlog(fileno(stderr), "connection established from %s", buffer);
 	}
@@ -1298,7 +1256,7 @@ phpdbg_main:
 	/* setup remote server if necessary */
 	if (!cleaning && listen > 0) {
 		server = phpdbg_open_socket(address, listen);
-		if (phpdbg_remote_init(address, listen, server, &socket, &stream) == FAILURE) {
+		if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream) == FAILURE) {
 			exit(0);
 		}
 
