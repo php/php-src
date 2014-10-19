@@ -742,10 +742,10 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 		}
 
 		phpdbg_write("cleaninfo", "classes=\"%d\" functions=\"%d\" constants=\"%d\" includes=\"%d\"",
-			"Classes              %d" PHP_EOL
-			"Functions            %d" PHP_EOL
-			"Constants            %d" PHP_EOL
-			"Includes             %d" PHP_EOL,
+			"Classes              %d\n"
+			"Functions            %d\n"
+			"Constants            %d\n"
+			"Includes             %d\n",
 			zend_hash_num_elements(EG(class_table)),
 			zend_hash_num_elements(EG(function_table)),
 			zend_hash_num_elements(EG(zend_constants)),
@@ -1170,7 +1170,7 @@ phpdbg_main:
 				sapi_startup(phpdbg);
 				phpdbg->startup(phpdbg);
 				printf(
-					"phpdbg %s (built: %s %s)" PHP_EOL "PHP %s, Copyright (c) 1997-2014 The PHP Group" PHP_EOL "%s",
+					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2014 The PHP Group\n%s",
 					PHPDBG_VERSION,
 					__DATE__,
 					__TIME__,

@@ -417,43 +417,43 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 	if (param && param->type) {
 		switch (param->type) {
 			case STR_PARAM:
-				fprintf(stderr, "%s STR_PARAM(%s=%lu)" PHP_EOL, msg, param->str, param->len);
+				fprintf(stderr, "%s STR_PARAM(%s=%lu)\n", msg, param->str, param->len);
 			break;
 
 			case ADDR_PARAM:
-				fprintf(stderr, "%s ADDR_PARAM(%lu)" PHP_EOL, msg, param->addr);
+				fprintf(stderr, "%s ADDR_PARAM(%lu)\n", msg, param->addr);
 			break;
 
 			case NUMERIC_FILE_PARAM:
-				fprintf(stderr, "%s NUMERIC_FILE_PARAM(%s:#%lu)" PHP_EOL, msg, param->file.name, param->file.line);
+				fprintf(stderr, "%s NUMERIC_FILE_PARAM(%s:#%lu)\n", msg, param->file.name, param->file.line);
 			break;
 
 			case FILE_PARAM:
-				fprintf(stderr, "%s FILE_PARAM(%s:%lu)" PHP_EOL, msg, param->file.name, param->file.line);
+				fprintf(stderr, "%s FILE_PARAM(%s:%lu)\n", msg, param->file.name, param->file.line);
 			break;
 
 			case METHOD_PARAM:
-				fprintf(stderr, "%s METHOD_PARAM(%s::%s)" PHP_EOL, msg, param->method.class, param->method.name);
+				fprintf(stderr, "%s METHOD_PARAM(%s::%s)\n", msg, param->method.class, param->method.name);
 			break;
 
 			case NUMERIC_METHOD_PARAM:
-				fprintf(stderr, "%s NUMERIC_METHOD_PARAM(%s::%s)" PHP_EOL, msg, param->method.class, param->method.name);
+				fprintf(stderr, "%s NUMERIC_METHOD_PARAM(%s::%s)\n", msg, param->method.class, param->method.name);
 			break;
 
 			case NUMERIC_FUNCTION_PARAM:
-				fprintf(stderr, "%s NUMERIC_FUNCTION_PARAM(%s::%ld)" PHP_EOL, msg, param->str, param->num);
+				fprintf(stderr, "%s NUMERIC_FUNCTION_PARAM(%s::%ld)\n", msg, param->str, param->num);
 			break;
 
 			case NUMERIC_PARAM:
-				fprintf(stderr, "%s NUMERIC_PARAM(%ld)" PHP_EOL, msg, param->num);
+				fprintf(stderr, "%s NUMERIC_PARAM(%ld)\n", msg, param->num);
 			break;
 
 			case COND_PARAM:
-				fprintf(stderr, "%s COND_PARAM(%s=%lu)" PHP_EOL, msg, param->str, param->len);
+				fprintf(stderr, "%s COND_PARAM(%s=%lu)\n", msg, param->str, param->len);
 			break;
 
 			case OP_PARAM:
-				fprintf(stderr, "%s OP_PARAM(%s=%lu)" PHP_EOL, msg, param->str, param->len);
+				fprintf(stderr, "%s OP_PARAM(%s=%lu)\n", msg, param->str, param->len);
 			break;
 
 			default: {

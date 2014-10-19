@@ -136,7 +136,7 @@ void pretty_print(char *text TSRMLS_DC)
 		phpdbg_error("help", "overrun=\"%lu\"", "Output overrun of %lu bytes", ((q - new) - size));
 	}
 
-	phpdbg_out("%s" PHP_EOL, new);
+	phpdbg_out("%s\n", new);
 	efree(new);
 }  /* }}} */
 
@@ -144,7 +144,7 @@ void pretty_print(char *text TSRMLS_DC)
 void summary_print(phpdbg_command_t const * const cmd TSRMLS_DC)
 {
 	char *summary;
-	spprintf(&summary, 0, "Command: **%s**  Alias: **%c**  **%s**" PHP_EOL, cmd->name, cmd->alias, cmd->tip);
+	spprintf(&summary, 0, "Command: **%s**  Alias: **%c**  **%s**\n", cmd->name, cmd->alias, cmd->tip);
 	pretty_print(summary TSRMLS_CC);
 	efree(summary);
 }
@@ -285,7 +285,7 @@ PHPDBG_HELP(aliases) /* {{{ */
 
 	/* Print out aliases for help as this one comes last, with the added text on how aliases are used */
 	get_command("h", 1, &c, phpdbg_prompt_commands TSRMLS_CC);
-	phpdbg_writeln("aliasinfo", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s" PHP_EOL, c->alias, c->name, c->tip);
+	phpdbg_writeln("aliasinfo", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s\n", c->alias, c->name, c->tip);
 
 	phpdbg_xml("<helpaliases>");
 
@@ -319,7 +319,7 @@ PHPDBG_HELP(aliases) /* {{{ */
  * Also note the convention that help text not directly referenceable as a help param
  * has a key ending in !
  */
-#define CR PHP_EOL 
+#define CR "\n" 
 phpdbg_help_text_t phpdbg_help_text[] = {
 
 /******************************** General Help Topics ********************************/
