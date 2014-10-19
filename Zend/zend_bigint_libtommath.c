@@ -67,7 +67,6 @@ struct _zend_bigint {
 
 #define int_abs(n) ((n) >= 0 ? n : -n) 
 #define int_sgn(n) ((n) > 0 ? 1 : ((n) < 0 ? -1 : 0))
-#define big_sgn(n) (mpz_sgn((n)->mpz))
 
 /*** INTERNAL FUNCTIONS ***/
 
@@ -332,15 +331,42 @@ ZEND_API zend_ulong zend_bigint_to_ulong(const zend_bigint *big) /* {{{ */
 /* Converts to bool */
 ZEND_API zend_bool zend_bigint_to_bool(const zend_bigint *big) /* {{{ */
 {
-	return SIGN(&big->mp);
+	return SIGN(&big->mp) ? 1 : 0;
 }
 /* }}} */
 
 /* Converts to double; this will lose precision beyond a certain point */
 ZEND_API double zend_bigint_to_double(const zend_bigint *big) /* {{{ */
 {
-	/* TODO: Handle larger numbers */
-	return mp_get_int(&big->mp) * SIGN(&big->mp);
+	/* from http://github.com/libtom/libtommath/issues/3#issuecomment-5668076
+	   having it depend on library internals is bad, but sadly not yet a function
+	   FIXME: TODO: Replace with built-in LibTomMath function once available */
+	static const int PRECISION = 53;
+	static const int NEED_DIGITS = (PRECISION + 2 * DIGIT_BIT - 2) / DIGIT_BIT;
+	static const double DIGIT_MULTI = (mp_digit)1 << DIGIT_BIT;
+
+	mp_int *a = (mp_int*)&big->mp;
+	int i, limit;
+	double d = 0.0;
+
+	/* this is technically a violation of the parameter being a const
+	 * however, it shouldn't change the value, and I'd rather not duplicate
+	 */
+	mp_clamp(a);
+	i = USED(a);
+	limit = i <= NEED_DIGITS ? 0 : i - NEED_DIGITS;
+
+	while (i-- > limit) {
+		d += DIGIT(a, i);
+		d *= DIGIT_MULTI;
+	}
+
+	if (SIGN(a) == MP_NEG) {
+		d *= -1.0;
+	}
+
+	d *= pow(2.0, i * DIGIT_BIT);
+	return d;
 }
 /* }}} */
 
