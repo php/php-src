@@ -567,7 +567,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 							phpdbg_xml("<watchvalue %r type=\"old\">");
 							zend_print_flat_zval_r((zval *) oldPtr TSRMLS_CC);
 							phpdbg_xml("</watchvalue>");
-							phpdbg_out("\n");
+							phpdbg_out(PHP_EOL);
 						}
 					}
 					if (PHPDBG_G(flags) & PHPDBG_SHOW_REFCOUNTS && (removed || show_ref)) {
@@ -593,7 +593,7 @@ static void phpdbg_print_changed_zval(phpdbg_watch_memdump *dump TSRMLS_DC) {
 						phpdbg_xml("<watchvalue %r type=\"new\">");
 						zend_print_flat_zval_r(watch->addr.zv TSRMLS_CC);
 						phpdbg_xml("</watchvalue>");
-						phpdbg_out("\n");
+						phpdbg_out(PHP_EOL);
 					}
 					if (PHPDBG_G(flags) & PHPDBG_SHOW_REFCOUNTS && show_ref) {
 						phpdbg_writeln("watchrefcount", "type=\"new\" refcount=\"%d\" isref=\"%d\"", "New refcount: %d; New is_ref: %d", watch->addr.zv->refcount__gc, watch->addr.zv->is_ref__gc);

@@ -190,7 +190,7 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 
 			if (fretval) {
 				zend_print_zval_r(fretval, 0 TSRMLS_CC);
-				phpdbg_out("\n");
+				phpdbg_out(PHP_EOL);
 			}
 
 			zval_dtor(&fname);
@@ -551,7 +551,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 	zend_call_function(&fci, NULL TSRMLS_CC);
 
 	if (trace) {
-		phpdbg_writeln("exception", "name=\"%s\" trace=\"%.*s\"", "Uncaught %s!\n%.*s", Z_OBJCE(exception)->name, Z_STRLEN_P(trace), Z_STRVAL_P(trace));
+		phpdbg_writeln("exception", "name=\"%s\" trace=\"%.*s\"", "Uncaught %s!" PHP_EOL "%.*s", Z_OBJCE(exception)->name, Z_STRLEN_P(trace), Z_STRVAL_P(trace));
 
 		zval_ptr_dtor(&trace);
 	} else {
@@ -674,7 +674,7 @@ int phpdbg_output_ev_variable(char *name, size_t len, char *keyname, size_t keyl
 	phpdbg_xml("<eval %r>");
 	zend_print_zval_r(*zv, 0 TSRMLS_CC);
 	phpdbg_xml("</eval>");
-	phpdbg_out("\n");
+	phpdbg_out(PHP_EOL);
 
 	efree(name);
 	efree(keyname);
@@ -707,7 +707,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 			phpdbg_xml("<eval %r>");
 			zend_print_zval_r(&retval, 0 TSRMLS_CC);
 			phpdbg_xml("</eval>");
-			phpdbg_out("\n");
+			phpdbg_out(PHP_EOL);
 			zval_dtor(&retval);
 		}
 	} zend_end_try();
@@ -741,7 +741,7 @@ PHPDBG_COMMAND(back) /* {{{ */
 
 PHPDBG_COMMAND(print) /* {{{ */
 {
-	phpdbg_out("Execution Context Information\n\n");
+	phpdbg_out("Execution Context Information" PHP_EOL PHP_EOL);
 	phpdbg_xml("<printinfo %r>");
 #ifdef HAVE_LIBREADLINE
 	phpdbg_writeln("print", "readline=\"yes\"", "Readline   yes");
@@ -855,12 +855,12 @@ PHPDBG_COMMAND(sh) /* {{{ */
 } /* }}} */
 
 static int add_module_info(zend_module_entry *module TSRMLS_DC) {
-	phpdbg_write("module", "name=\"%s\"", "%s\n", module->name);
+	phpdbg_write("module", "name=\"%s\"", "%s" PHP_EOL, module->name);
 	return 0;
 }
 
 static int add_zendext_info(zend_extension *ext TSRMLS_DC) {
-	phpdbg_write("extension", "name=\"%s\"", "%s\n", ext->name);
+	phpdbg_write("extension", "name=\"%s\"", "%s" PHP_EOL, ext->name);
 	return 0;
 }
 
@@ -1012,7 +1012,7 @@ PHPDBG_COMMAND(dl) /* {{{ */
 	if (!param || param->type == EMPTY_PARAM) {
 		phpdbg_notice("dl", "extensiontype=\"Zend extension\"", "Zend extensions");
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) add_zendext_info TSRMLS_CC);
-		phpdbg_out("\n");
+		phpdbg_out(PHP_EOL);
 		phpdbg_notice("dl", "extensiontype=\"module\"", "Modules");
 		zend_hash_apply(&module_registry, (apply_func_t) add_module_info TSRMLS_CC);
 	} else switch (param->type) {
@@ -1109,7 +1109,7 @@ PHPDBG_COMMAND(clean) /* {{{ */
 		return SUCCESS;
 	}
 
-	phpdbg_out("Cleaning Execution Environment\n");
+	phpdbg_out("Cleaning Execution Environment" PHP_EOL);
 	phpdbg_xml("<cleaninfo %r>");
 
 	phpdbg_writeln("clean", "classes=\"%d\"", "Classes    %d", zend_hash_num_elements(EG(class_table)));
@@ -1126,7 +1126,7 @@ PHPDBG_COMMAND(clean) /* {{{ */
 
 PHPDBG_COMMAND(clear) /* {{{ */
 {
-	phpdbg_out("Clearing Breakpoints\n");
+	phpdbg_out("Clearing Breakpoints" PHP_EOL);
 	phpdbg_xml("<clearinfo %r>");
 
 	phpdbg_writeln("clear", "files=\"%d\"", "File              %d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]));
@@ -1479,7 +1479,7 @@ zend_vm_enter:
 		if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
 			PHPDBG_G(flags) &= ~PHPDBG_IS_SIGNALED;
 
-			phpdbg_out("\n");
+			phpdbg_out(PHP_EOL);
 			phpdbg_notice("signal", "type=\"SIGINT\"", "Program received signal SIGINT");
 			DO_INTERACTIVE(1);
 		}
