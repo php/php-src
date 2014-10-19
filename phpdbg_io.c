@@ -104,7 +104,7 @@ phpdbg_send_bytes(int sock, char *ptr, int len)
 {/*{{{*/
 	int sent, i = len;
 	char *p = ptr;
-
+/* XXX poll/select needed here? */
 	while(i > 0) {
 		sent = send(sock, p, i, 0);
 		if (sent == -1) {
