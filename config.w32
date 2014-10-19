@@ -12,6 +12,7 @@ if (PHP_PHPDBG == "yes") {
 	SAPI('phpdbg', PHPDBG_SOURCES, PHPDBG_EXE);
 	ADD_FLAG("LIBS_PHPDBG", "ws2_32.lib user32.lib");
 	ADD_FLAG("CFLAGS_PHPDBG", "/D YY_NO_UNISTD_H");
+	ADD_FLAG("LDFLAGS_PHPDBG", "/stack:8388608");
 }
 
 if (PHP_PHPDBGS == "yes") {
