@@ -319,7 +319,7 @@ PHPDBG_HELP(aliases) /* {{{ */
  * Also note the convention that help text not directly referenceable as a help param
  * has a key ending in !
  */
-#define CR "\n"
+#define CR PHP_EOL 
 phpdbg_help_text_t phpdbg_help_text[] = {
 
 /******************************** General Help Topics ********************************/

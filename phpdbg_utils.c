@@ -1140,16 +1140,16 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 			severity = "error";
 			if (!PHPDBG_G(last_was_newline)) {
 				if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
-					phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>\n</phpdbg>"));
+					phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>" PHP_EOL "</phpdbg>"));
 				} else {
-					phpdbg_mixed_write(fd, ZEND_STRL("\n"));
+					phpdbg_mixed_write(fd, ZEND_STRL(PHP_EOL));
 				}
 				PHPDBG_G(last_was_newline) = 1;
 			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-				msgoutlen = spprintf(&msgout, 0, "\033[%sm[%.*s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_ERROR]->code, msglen, msg);
+				msgoutlen = spprintf(&msgout, 0, "\033[%sm[%.*s]\033[0m" PHP_EOL, PHPDBG_G(colors)[PHPDBG_COLOR_ERROR]->code, msglen, msg);
 			} else {
-				msgoutlen = spprintf(&msgout, 0, "[%.*s]\n", msglen, msg);
+				msgoutlen = spprintf(&msgout, 0, "[%.*s]" PHP_EOL, msglen, msg);
 			}
 			break;
 
@@ -1157,26 +1157,26 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 			severity = "notice";
 			if (!PHPDBG_G(last_was_newline)) {
 				if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
-					phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>\n</phpdbg>"));
+					phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>" PHP_EOL "</phpdbg>"));
 				} else {
-					phpdbg_mixed_write(fd, ZEND_STRL("\n"));
+					phpdbg_mixed_write(fd, ZEND_STRL(PHP_EOL));
 				}
 				PHPDBG_G(last_was_newline) = 1;
 			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-				msgoutlen = spprintf(&msgout, 0, "\033[%sm[%.*s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_NOTICE]->code, msglen, msg);
+				msgoutlen = spprintf(&msgout, 0, "\033[%sm[%.*s]\033[0m" PHP_EOL, PHPDBG_G(colors)[PHPDBG_COLOR_NOTICE]->code, msglen, msg);
 			} else {
-				msgoutlen = spprintf(&msgout, 0, "[%.*s]\n", msglen, msg);
+				msgoutlen = spprintf(&msgout, 0, "[%.*s]" PHP_EOL, msglen, msg);
 			}
 			break;
 
 		case P_WRITELN:
 			severity = "normal";
 			if (msg) {
-				msgoutlen = spprintf(&msgout, 0, "%.*s\n", msglen, msg);
+				msgoutlen = spprintf(&msgout, 0, "%.*s" PHP_EOL, msglen, msg);
 			} else {
 				msgoutlen = 1;
-				msgout = estrdup("\n");
+				msgout = estrdup(PHP_EOL);
 			}
 			PHPDBG_G(last_was_newline) = 1;
 			break;
@@ -1222,7 +1222,7 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 			if (msg) {
 				struct timeval tp;
 				if (gettimeofday(&tp, NULL) == SUCCESS) {
-					msgoutlen = spprintf(&msgout, 0, "[%ld %.8F]: %.*s\n", tp.tv_sec, tp.tv_usec / 1000000., msglen, msg);
+					msgoutlen = spprintf(&msgout, 0, "[%ld %.8F]: %.*s" PHP_EOL, tp.tv_sec, tp.tv_usec / 1000000., msglen, msg);
 				} else {
 					msgoutlen = FAILURE;
 				}
@@ -1453,9 +1453,13 @@ PHPDBG_API int phpdbg_rlog(int fd, const char *fmt, ...) { /* {{{ */
 		char *format = NULL, *buffer = NULL, *outbuf = NULL;
 		const time_t tt = tp.tv_sec;
 
+#ifdef PHP_WIN32
+		strftime(friendly, 100, "%a %b %d %H.%%04d %Y", localtime(&tt));
+#else
 		strftime(friendly, 100, "%a %b %d %T.%%04d %Y", localtime(&tt));
+#endif
 		spprintf(&buffer, 0,  friendly, tp.tv_usec/1000);
-		spprintf(&format, 0, "[%s]: %s\n", buffer, fmt);
+		spprintf(&format, 0, "[%s]: %s" PHP_EOL, buffer, fmt);
 		rc = vspprintf(&outbuf, 0, format, args);
 
 		if (outbuf) {
