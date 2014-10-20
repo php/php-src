@@ -813,14 +813,6 @@ disconnect:
 			}
 
 #define USE_LIB_STAR (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT))
-#if !USE_LIB_STAR
-			if (!(PHPDBG_G(flags) & PHPDBG_IS_REMOTE)) {
-				if (!phpdbg_out("%s", phpdbg_get_prompt(TSRMLS_C))) {
-					goto disconnect;
-				}
-				PHPDBG_G(last_was_newline) = 1;
-			}
-#endif
 
 			/* note: EOF makes readline write prompt again in local console mode - and ignored if compiled without readline */
 			/* strongly assuming to be in blocking mode... */
@@ -834,6 +826,9 @@ readline:
 				if (PHPDBG_G(input_buflen)) {
 					memcpy(buf, PHPDBG_G(input_buffer), bytes);
 				}
+
+				phpdbg_write("prompt", "", "%s", phpdbg_get_prompt(TSRMLS_C));
+				PHPDBG_G(last_was_newline) = 1;
 
 				do {
 					int i;
@@ -864,7 +859,7 @@ readline:
 					}
 					len += bytes;
 					/* XXX export the timeout through INI??*/
-				} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1 TSRMLS_CC)) > 0 || (errno == EINTR && bytes < 0));
+				} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1 TSRMLS_CC)) > 0);
 
 				if (bytes <= 0) {
 					goto disconnect;

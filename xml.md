@@ -77,6 +77,11 @@ intro
 - help: command name for help
 - report: URL for bug reporting
 
+prompt
+------
+
+- msg tag contains the text prompt
+- indicates that a new command may be accepted
 
 phpdbg
 ------
