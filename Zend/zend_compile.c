@@ -2956,14 +2956,14 @@ zend_string* zend_name_anon_class(zend_ast *parent TSRMLS_DC) {
     
     if (parent) {
         zval *extends = zend_ast_get_zval(parent);
-        len = spprintf(
+        len = zend_spprintf(
             &val, 0, "%s@%p",
             Z_STRVAL_P(extends), &CG(active_op_array)->opcodes[next-1]);
         anon = zend_string_init(val, len, 1);
         Z_DELREF_P(extends); /* ?? */
         efree(val); 
     } else {
-        len = spprintf(
+        len = zend_spprintf(
             &val, 0, "class@%p", 
             &CG(active_op_array)->opcodes[next-1]);
         anon = zend_string_init(val, len, 1);
@@ -3025,7 +3025,7 @@ zend_class_entry* zend_compile_class_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 	
 	if (CG(active_class_entry) && !((decl->flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {
         zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
-        return;
+        return NULL;
     }
 
 	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type(name)) {
