@@ -1066,6 +1066,30 @@ PHPDBG_API int phpdbg_xml_vasprintf(char **buf, const char *format, zend_bool es
 }
 /* copy end */
 
+#define phpdbg_xml_asprintf(buf, ...) _phpdbg_xml_asprintf(buf TSRMLS_CC, ##__VA_ARGS__)
+PHPDBG_API int _phpdbg_xml_asprintf(char **buf TSRMLS_DC, const char *format, zend_bool escape_xml, ...) {
+	int ret;
+	va_list va;
+
+	va_start(va, escape_xml);
+	ret = phpdbg_xml_vasprintf(buf, format, escape_xml, va TSRMLS_CC);
+	va_end(va);
+
+	return ret;
+}
+
+#define phpdbg_asprintf(buf, ...) _phpdbg_asprintf(buf TSRMLS_CC, ##__VA_ARGS__)
+PHPDBG_API int _phpdbg_asprintf(char **buf TSRMLS_DC, const char *format, ...) {
+	int ret;
+	va_list va;
+
+	va_start(va, format);
+	ret = phpdbg_xml_vasprintf(buf, format, 0, va TSRMLS_CC);
+	va_end(va);
+
+	return ret;
+}
+
 static int phpdbg_encode_xml(char **buf, char *msg, int msglen, int from, char *to) {
 	int i;
 	int tolen = to ? strlen(to) : 5;
@@ -1147,9 +1171,9 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 				PHPDBG_G(last_was_newline) = 1;
 			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-				msgoutlen = spprintf(&msgout, 0, "\033[%sm[%.*s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_ERROR]->code, msglen, msg);
+				msgoutlen = phpdbg_asprintf(&msgout, "\033[%sm[%.*s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_ERROR]->code, msglen, msg);
 			} else {
-				msgoutlen = spprintf(&msgout, 0, "[%.*s]\n", msglen, msg);
+				msgoutlen = phpdbg_asprintf(&msgout, "[%.*s]\n", msglen, msg);
 			}
 			break;
 
@@ -1164,16 +1188,16 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 				PHPDBG_G(last_was_newline) = 1;
 			}
 			if (PHPDBG_G(flags) & PHPDBG_IS_COLOURED) {
-				msgoutlen = spprintf(&msgout, 0, "\033[%sm[%.*s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_NOTICE]->code, msglen, msg);
+				msgoutlen = phpdbg_asprintf(&msgout, "\033[%sm[%.*s]\033[0m\n", PHPDBG_G(colors)[PHPDBG_COLOR_NOTICE]->code, msglen, msg);
 			} else {
-				msgoutlen = spprintf(&msgout, 0, "[%.*s]\n", msglen, msg);
+				msgoutlen = phpdbg_asprintf(&msgout, "[%.*s]\n", msglen, msg);
 			}
 			break;
 
 		case P_WRITELN:
 			severity = "normal";
 			if (msg) {
-				msgoutlen = spprintf(&msgout, 0, "%.*s\n", msglen, msg);
+				msgoutlen = phpdbg_asprintf(&msgout, "%.*s\n", msglen, msg);
 			} else {
 				msgoutlen = 1;
 				msgout = estrdup("\n");
@@ -1200,7 +1224,7 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 				if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
 					if (PHPDBG_G(in_script_xml) != type) {
 						char *stream_buf;
-						int stream_buflen = spprintf(&stream_buf, 0, "<stream type=\"%s\">", type == P_STDERR ? "stderr" : "stdout");
+						int stream_buflen = phpdbg_asprintf(&stream_buf, "<stream type=\"%s\">", type == P_STDERR ? "stderr" : "stdout");
 						phpdbg_mixed_write(fd, stream_buf, stream_buflen TSRMLS_CC);
 						efree(stream_buf);
 						PHPDBG_G(in_script_xml) = type;
@@ -1222,7 +1246,7 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 			if (msg) {
 				struct timeval tp;
 				if (gettimeofday(&tp, NULL) == SUCCESS) {
-					msgoutlen = spprintf(&msgout, 0, "[%ld %.8F]: %.*s\n", tp.tv_sec, tp.tv_usec / 1000000., msglen, msg);
+					msgoutlen = phpdbg_asprintf(&msgout, "[%ld %.8F]: %.*s\n", tp.tv_sec, tp.tv_usec / 1000000., msglen, msg);
 				} else {
 					msgoutlen = FAILURE;
 				}
@@ -1235,16 +1259,16 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 
 		if (PHPDBG_G(req_id)) {
 			char *xmlbuf = NULL;
-			xmllen = spprintf(&xmlbuf, 0, "req=\"%lu\" %.*s", PHPDBG_G(req_id), xmllen, xml);
+			xmllen = phpdbg_asprintf(&xmlbuf, "req=\"%lu\" %.*s", PHPDBG_G(req_id), xmllen, xml);
 			xml = xmlbuf;
 		}
 		if (msgout) {
 			buflen = phpdbg_encode_xml(&buf, msgout, msgoutlen, '"', "&quot;");
-			xmloutlen = spprintf(&xmlout, 0, "<%s severity=\"%s\" %.*s msgout=\"%.*s\" />", tag, severity, xmllen, xml, buflen, buf);
+			xmloutlen = phpdbg_asprintf(&xmlout, "<%s severity=\"%s\" %.*s msgout=\"%.*s\" />", tag, severity, xmllen, xml, buflen, buf);
 
 			efree(buf);
 		} else {
-			xmloutlen = spprintf(&xmlout, 0, "<%s severity=\"%s\" %.*s msgout=\"\" />", tag, severity, xmllen, xml);
+			xmloutlen = phpdbg_asprintf(&xmlout, "<%s severity=\"%s\" %.*s msgout=\"\" />", tag, severity, xmllen, xml);
 		}
 
 		phpdbg_encode_ctrl_chars(&xmlout, &xmloutlen);
@@ -1397,7 +1421,7 @@ PHPDBG_API int phpdbg_log_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 	int len = 0;
 
 	va_start(args, fmt);
-	buflen = vspprintf(&buffer, 0, fmt, args);
+	buflen = phpdbg_xml_vasprintf(&buffer, fmt, 0, args TSRMLS_CC);
 	va_end(args);
 
 	len = phpdbg_mixed_write(fd, buffer, buflen TSRMLS_CC);
@@ -1413,7 +1437,7 @@ PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 	int len = 0;
 
 	va_start(args, fmt);
-	buflen = vspprintf(&buffer, 0, fmt, args);
+	buflen = phpdbg_xml_vasprintf(&buffer, fmt, 0, args TSRMLS_CC);
 	va_end(args);
 
 	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
@@ -1456,9 +1480,9 @@ PHPDBG_API int phpdbg_rlog_internal(int fd TSRMLS_DC, const char *fmt, ...) { /*
 #else
 		strftime(friendly, 100, "%a %b %d %T.%%04d %Y", localtime(&tt));
 #endif
-		spprintf(&buffer, 0,  friendly, tp.tv_usec/1000);
-		spprintf(&format, 0, "[%s]: %s\n", buffer, fmt);
-		rc = vspprintf(&outbuf, 0, format, args);
+		phpdbg_asprintf(&buffer, friendly, tp.tv_usec/1000);
+		phpdbg_asprintf(&format, "[%s]: %s\n", buffer, fmt);
+		rc = phpdbg_xml_vasprintf(&outbuf, format, 0, args TSRMLS_CC);
 
 		if (outbuf) {
 			rc = phpdbg_mixed_write(fd, outbuf, rc TSRMLS_CC);
