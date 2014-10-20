@@ -38,10 +38,6 @@ echo PHP_EOL;
 // reject leading, trailing chars
 var_dump(to_float("10abc"));
 var_dump(to_float("abc10"));
-
-echo PHP_EOL;
-
-// accept leading, trailing whitespace
 var_dump(to_float("   100    "));
 var_dump(to_float("\n\t\v\r\f   78 \n \t\v\r\f   \n"));
 var_dump(to_float("\n\t\v\r\f78"));
@@ -88,11 +84,10 @@ float(1.5)
 
 bool(false)
 bool(false)
-
-float(100)
-float(78)
-float(78)
-float(78)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 
 float(INF)
 float(-INF)

@@ -442,6 +442,11 @@ PHP_FUNCTION(to_int)
 				zend_long lval;
 				char *endptr;
 				
+				/* ban leading whitespace */
+				if (isspace(Z_STRVAL_P(var)[0])) {
+					RETURN_FALSE;
+				}
+
 				errno = 0;
 				lval = ZEND_STRTOL(Z_STRVAL_P(var), &endptr, 10);
 				
@@ -449,13 +454,9 @@ PHP_FUNCTION(to_int)
 					RETURN_FALSE;
 				}
 				
-				/* strtol fails on trailing whitespace - check if trailing chars were whitespace */
-				while (endptr - Z_STRVAL_P(var) != Z_STRLEN_P(var)) {
-					if (*endptr == ' ' || *endptr == '\t' || *endptr == '\n' || *endptr == '\r' || *endptr == '\v' || *endptr == '\f') {
-						endptr++;
-					} else {
-						RETURN_FALSE;
-					}
+				/* ban trailing chars */
+				if (endptr - Z_STRVAL_P(var) != Z_STRLEN_P(var)) {
+					RETURN_FALSE;
 				}
 
 				RETURN_LONG(lval);
@@ -495,16 +496,17 @@ PHP_FUNCTION(to_float)
 			{
 				double dval;
 				char *endptr;
-				
+			
+				/* ban leading whitespace */
+				if (isspace(Z_STRVAL_P(var)[0])) {
+					RETURN_FALSE;
+				}
+
 				dval = zend_strtod(Z_STRVAL_P(var), &endptr);
 				
-				/* strtod fails on trailing whitespace - check if trailing chars were whitespace */
-				while (endptr - Z_STRVAL_P(var) != Z_STRLEN_P(var)) {
-					if (*endptr == ' ' || *endptr == '\t' || *endptr == '\n' || *endptr == '\r' || *endptr == '\v' || *endptr == '\f') {
-						endptr++;
-					} else {
-						RETURN_FALSE;
-					}
+				/* ban trailing chars */
+				if (endptr - Z_STRVAL_P(var) != Z_STRLEN_P(var)) {
+					RETURN_FALSE;
 				}
 				RETURN_DOUBLE(dval);
 			}	
