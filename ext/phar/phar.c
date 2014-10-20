@@ -3356,6 +3356,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 
 	zend_try {
 		failed = 0;
+		CG(zend_lineno) = 0;
 		res = phar_orig_compile_file(file_handle, type TSRMLS_CC);
 	} zend_catch {
 		failed = 1;
