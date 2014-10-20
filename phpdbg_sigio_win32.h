@@ -21,10 +21,16 @@
 #define PHPDBG_SIGIO_WIN32_H
 
 #include "phpdbg.h"
+#include "phpdbg_prompt.h"
+#include "phpdbg_io.h"
 
 struct win32_sigio_watcher_data {
+	zend_ulong flags;
+#ifdef ZTS
+	void ***tsrm_ls;
+#endif
 	int fd;
-	zend_uchar signaled;
+	zend_uchar running;
 };
 
 void

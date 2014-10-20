@@ -20,6 +20,7 @@
 #include <signal.h>
 
 #include "phpdbg.h"
+#include "phpdbg_sigio_win32.h"
 
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -29,16 +30,32 @@ VOID
 SigIoWatcherThread(VOID *p)
 {
 	zend_uchar sig;
+	struct win32_sigio_watcher_data *swd = (struct win32_sigio_watcher_data *)p;
+#ifdef ZTS
+	void ***tsrm_ls = swd->tsrm_ls;
+	(void)phpdbg_consume_bytes(swd->fd, &sig, 1, -1, tsrm_ls);
+#else
+	(void)phpdbg_consume_bytes(swd->fd, &sig, 1, -1);
+#endif
 
-	(void)recv(PHPDBG_G(swd).fd, &sig, 1, 0);
 
 	if (3 == sig) {
 		printf("signaled, got %d", sig);
-		/* XXX completely not sure where to go from here */
-		if (raise(sig)) {
-			/* just out*/
-			exit(0);
+		/* XXX completely not sure it is done right here */
+		if (swd->flags & PHPDBG_IS_INTERACTIVE) {
+			if (raise(sig)) {
+				/* just out*/
+				exit(0);
+			}
 		}
+		if (swd->flags & PHPDBG_IS_SIGNALED) {
+			phpdbg_set_sigsafe_mem(&sig TSRMLS_CC);
+			zend_try {
+				phpdbg_force_interruption(TSRMLS_C);
+			} zend_end_try();
+			phpdbg_clear_sigsafe_mem(TSRMLS_C);
+		}
+		/* XXX set signaled flag to the caller thread, question is - whether it's needed */
 		ExitThread(sig);
 	}
 }
@@ -50,14 +67,20 @@ session. */
 void
 sigio_watcher_start(void)
 {
+	TSRMLS_FETCH();
+
 	PHPDBG_G(swd).fd = PHPDBG_G(io)[PHPDBG_STDIN].fd;
-	PHPDBG_G(swd).signaled = 0;
+	PHPDBG_G(swd).running = 1;
+	PHPDBG_G(swd).flags = PHPDBG_G(flags);
+#ifdef ZTS
+	PHPDBG_G(swd).tsrm_ls = tsrm_ls;
+#endif
 
 	PHPDBG_G(sigio_watcher_thread) = CreateThread(
 		NULL,
 		0,
 		(LPTHREAD_START_ROUTINE)SigIoWatcherThread,
-		NULL,
+		&PHPDBG_G(swd),
 		0,
 		NULL);
 }
@@ -66,6 +89,7 @@ void
 sigio_watcher_stop(void)
 {
 	DWORD waited;
+	TSRMLS_FETCH();
 
 	if (INVALID_HANDLE_VALUE == PHPDBG_G(sigio_watcher_thread)) {
 		/* it probably did bail out already */
@@ -85,7 +109,8 @@ sigio_watcher_stop(void)
 	}
 
 	PHPDBG_G(swd).fd = -1;
-	PHPDBG_G(swd).signaled = 0;
+	PHPDBG_G(swd).running = 0;
+	PHPDBG_G(swd).flags = 0;
 	PHPDBG_G(sigio_watcher_thread) = INVALID_HANDLE_VALUE;
 }
 
