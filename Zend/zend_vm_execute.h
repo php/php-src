@@ -17472,7 +17472,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	zval *property = opline->op2.zv;
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -17495,21 +17495,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -17826,7 +17822,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CONST(incdec_t
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -17854,21 +17850,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CONST(incdec_t
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -17920,7 +17912,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -17946,19 +17938,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
@@ -19901,7 +19889,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	zval *property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -19924,21 +19912,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -20256,7 +20240,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_TMP(incdec_t i
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -20284,21 +20268,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_TMP(incdec_t i
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -20351,7 +20331,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_TMP(incdec_t 
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -20377,19 +20357,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_TMP(incdec_t 
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
@@ -21913,7 +21889,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	zval *property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -21936,21 +21912,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -22268,7 +22240,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_VAR(incdec_t i
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -22296,21 +22268,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_VAR(incdec_t i
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -22363,7 +22331,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_VAR(incdec_t 
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -22389,19 +22357,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_VAR(incdec_t 
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
@@ -24011,7 +23975,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	zval *property = NULL;
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -24034,21 +23998,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_UNUSED == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_UNUSED == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -25476,7 +25436,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 	zval *object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 	zval *property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_VAR == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -25499,21 +25459,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -25830,7 +25786,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CV(incdec_t in
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -25858,21 +25814,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CV(incdec_t in
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -25924,7 +25876,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t i
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -25950,19 +25902,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t i
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
@@ -27346,7 +27294,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 	zval *object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
 	zval *property = opline->op2.zv;
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -27369,21 +27317,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -27699,7 +27643,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incde
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -27727,21 +27671,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incde
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -27793,7 +27733,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incd
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -27819,19 +27759,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incd
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
@@ -28736,7 +28672,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 	zval *object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
 	zval *property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -28759,21 +28695,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -29090,7 +29022,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_TMP(incdec_
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -29118,21 +29050,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_TMP(incdec_
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -29185,7 +29113,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_TMP(incdec
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -29211,19 +29139,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_TMP(incdec
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
@@ -30044,7 +29968,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 	zval *object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
 	zval *property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -30067,21 +29991,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -30398,7 +30318,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_VAR(incdec_
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -30426,21 +30346,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_VAR(incdec_
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -30493,7 +30409,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_VAR(incdec
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -30519,19 +30435,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_VAR(incdec
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
@@ -31352,7 +31264,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 	zval *object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
 	zval *property = NULL;
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -31375,21 +31287,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_UNUSED == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_UNUSED == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -31871,7 +31779,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 	zval *object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
 	zval *property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_UNUSED == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -31894,21 +31802,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -32224,7 +32128,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -32252,21 +32156,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -32318,7 +32218,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -32344,19 +32244,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
@@ -34846,7 +34742,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
 	zval *property = opline->op2.zv;
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -34869,21 +34765,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -35199,7 +35091,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t 
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
@@ -35227,21 +35119,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t 
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -35293,7 +35181,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
@@ -35319,19 +35207,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
@@ -37107,7 +36991,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
 	zval *property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -37130,21 +37014,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -37461,7 +37341,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_TMP(incdec_t in
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
@@ -37489,21 +37369,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_TMP(incdec_t in
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -37556,7 +37432,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_TMP(incdec_t i
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
@@ -37582,19 +37458,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_TMP(incdec_t i
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_TMP_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
@@ -38991,7 +38863,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
 	zval *property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -39014,21 +38886,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -39345,7 +39213,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_VAR(incdec_t in
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
@@ -39373,21 +39241,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_VAR(incdec_t in
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -39440,7 +39304,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_VAR(incdec_t i
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
@@ -39466,19 +39330,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_VAR(incdec_t i
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_VAR == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
@@ -40959,7 +40819,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
 	zval *property = NULL;
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -40982,21 +40842,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_UNUSED == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_UNUSED == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -42279,7 +42135,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 	zval *object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
 	zval *property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 	zval *value;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	if (IS_CV == IS_VAR && UNEXPECTED(object == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
@@ -42302,21 +42158,17 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 	} else {
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
-			&& Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-			zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
+			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-				have_get_ptr = 1;
-				binary_op(zptr, zptr, value TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline)) {
-					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
-				}
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			binary_op(zptr, zptr, value TSRMLS_CC);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 			}
-		}
-
-		if (!have_get_ptr) {
+		} else {
 			zval *z = NULL;
 			zval rv;
 
@@ -42632,7 +42484,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t inc
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
@@ -42660,21 +42512,17 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t inc
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			ZVAL_DEREF(zptr);
-			SEPARATE_ZVAL_NOREF(zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			have_get_ptr = 1;
-			incdec_op(zptr);
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_COPY(retval, zptr);
-			}
+		ZVAL_DEREF(zptr);
+		SEPARATE_ZVAL_NOREF(zptr);
+
+		incdec_op(zptr);
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(retval, zptr);
 		}
-	}
-
-	if (!have_get_ptr) {
+	} else {
 		zval rv;
 
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
@@ -42726,7 +42574,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t in
 	zval *object;
 	zval *property;
 	zval *retval;
-	int have_get_ptr = 0;
+	zval *zptr;
 
 	SAVE_OPLINE();
 	object = _get_zval_ptr_cv_BP_VAR_RW(execute_data, opline->op1.var TSRMLS_CC);
@@ -42752,19 +42600,15 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t in
 
 	/* here we are sure we are dealing with an object */
 
-	if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
-		zval *zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-		if (zptr != NULL) { 			/* NULL means no success in getting PTR */
-			have_get_ptr = 1;
-			ZVAL_DEREF(zptr);
-			ZVAL_COPY(retval, zptr);
+	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
 
-			SEPARATE_ZVAL_NOREF(zptr);
-			incdec_op(zptr);
-		}
-	}
+		ZVAL_DEREF(zptr);
+		ZVAL_COPY(retval, zptr);
 
-	if (!have_get_ptr) {
+		SEPARATE_ZVAL_NOREF(zptr);
+		incdec_op(zptr);
+	} else {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 			zval rv;
 			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
