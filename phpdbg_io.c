@@ -150,7 +150,7 @@ PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len TSRMLS_DC) 
 }
 
 
-PHPDBG_API int phpdbg_open_socket(const char *interface, short port TSRMLS_DC) {
+PHPDBG_API int phpdbg_open_socket(const char *interface, unsigned short port TSRMLS_DC) {
 	struct addrinfo res;
 	int fd = phpdbg_create_listenable_socket(interface, port, &res TSRMLS_CC);
 
@@ -169,7 +169,7 @@ PHPDBG_API int phpdbg_open_socket(const char *interface, short port TSRMLS_DC) {
 }
 
 
-PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, int port, struct addrinfo *addr_res TSRMLS_DC) {
+PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short port, struct addrinfo *addr_res TSRMLS_DC) {
 	int sock = -1, rc;
 	int reuse = 1;
 	struct in6_addr serveraddr;
@@ -205,12 +205,13 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, int port, struc
 			}
 		}
 
-		snprintf(port_buf, 7, "%d", port);
+		snprintf(port_buf, 7, "%u", port);
 		if (!any_addr) {
 			rc = getaddrinfo(addr, port_buf, &hints, &res);
 		} else {
 			rc = getaddrinfo(NULL, port_buf, &hints, &res);
 		}
+
 		if (0 != rc) {
 #ifndef PHP_WIN32
 			if (rc == EAI_SYSTEM) {
