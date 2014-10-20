@@ -3,11 +3,12 @@ reusing anonymous classes
 --FILE--
 <?php
 while (@$i++<10) {
-    var_dump(new class{
+    var_dump(new class($i) {
+        
         public function __construct($i) {
             $this->i = $i;
         }
-    }($i));
+    });
 }
 ?>
 --EXPECTF--	

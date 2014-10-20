@@ -3,11 +3,12 @@ declare anonymous class extending another
 --FILE--
 <?php
 class A{}
+
 interface B{
     public function method();
 }
 
-$a = new A implements B {
+$a = new class extends A implements B {
     public function method(){
         return true;
     }
