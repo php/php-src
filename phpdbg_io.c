@@ -88,10 +88,22 @@ recv_once:
 			/* There's something to read. Read what's available and proceed
 			disregarding whether len could be exhausted or not.*/
 			int can_read = recv(sock, p, i, MSG_PEEK);
+#ifndef _WIN32
+			if (can_read == -1 && errno == EINTR) {
+				continue;
+			}
+#endif
 			i = can_read;
 		}
 
+#ifdef _WIN32
 		got_now = recv(sock, p, i, 0);
+#else
+		do {
+			got_now = recv(sock, p, i, 0);
+		} while (got_now == -1 && errno == EINTR);
+#endif
+
 		if (got_now == -1) {
 			write(PHPDBG_G(io)[PHPDBG_STDERR].fd, ZEND_STRL("Read operation timed out!\n"));
 			return -1;

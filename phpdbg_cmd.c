@@ -23,6 +23,7 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_set.h"
 #include "phpdbg_prompt.h"
+#include "phpdbg_io.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -863,7 +864,7 @@ readline:
 					}
 					len += bytes;
 					/* XXX export the timeout through INI??*/
-				} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1)) > 0 || (errno == EINTR && bytes < 0));
+				} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1 TSRMLS_CC)) > 0 || (errno == EINTR && bytes < 0));
 
 				if (bytes <= 0) {
 					goto disconnect;
