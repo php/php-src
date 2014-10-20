@@ -112,6 +112,12 @@
 #include "phpdbg_utils.h"
 #include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
+#ifdef PHP_WIN32
+# include "phpdbg_sigio_win32.h"
+#else
+# define sigio_watcher_start()
+# define sigio_watcher_stop()
+#endif
 
 int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 
@@ -279,6 +285,10 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	char *sapi_name_ptr;                         /* store sapi name to free it if necessary to not leak memory */
 	int socket_fd;                               /* file descriptor to socket (wait command) (-1 if unused) */
 	int socket_server_fd;                        /* file descriptor to master socket (wait command) (-1 if unused) */
+#ifdef PHP_WIN32
+	HANDLE sigio_watcher_thread;                  /* sigio watcher thread handle */
+	struct win32_sigio_watcher_data swd;
+#endif
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 #endif

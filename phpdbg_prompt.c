@@ -579,6 +579,8 @@ PHPDBG_COMMAND(run) /* {{{ */
 		zend_bool restore = 1;
 		zend_execute_data *ex = EG(current_execute_data);
 
+		sigio_watcher_start();
+
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
 				phpdbg_error("compile", "type=\"compilefailure\" context=\"%s\"", "Failed to compile %s, cannot run", PHPDBG_G(exec));
@@ -635,6 +637,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
 			phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
+			sigio_watcher_stop();
 		} zend_catch {
 			EG(active_op_array) = orig_op_array;
 			EG(opline_ptr) = orig_opline;
@@ -644,6 +647,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 				phpdbg_error("stop", "type=\"bailout\"", "Caught exit/error from VM");
 				restore = 0;
 			}
+			sigio_watcher_stop();
 		} zend_end_try();
 
 		if (PHPDBG_G(socket_fd) != -1) {
@@ -665,6 +669,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 	}
 
 out:
+	sigio_watcher_stop();
 	PHPDBG_FRAME(num) = 0;
 	return SUCCESS;
 } /* }}} */

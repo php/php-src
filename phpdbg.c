@@ -88,6 +88,11 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	pg->input_buflen = 0;
 	pg->sigsafe_mem.mem = NULL;
 	pg->sigsegv_bailout = NULL;
+
+#ifdef PHP_WIN32
+	pg->sigio_watcher_thread = INVALID_HANDLE_VALUE;
+	memset(&pg->swd, 0, sizeof(struct win32_sigio_watcher_data));
+#endif
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
