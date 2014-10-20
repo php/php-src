@@ -653,15 +653,16 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Specific info commands are show below:" CR CR
 
 "  **Target**   **Alias**  **Purpose**" CR
-"  **break**    **b**      show current breakpoints" CR
-"  **files**    **F**      show included files" CR
-"  **classes**  **c**      show loaded classes" CR
-"  **funcs**    **f**      show loaded functions" CR
-"  **error**    **e**      show last error" CR
-"  **vars**     **v**      show active variables" CR
-"  **globals**  **g**      show superglobal variables" CR
-"  **literal**  **l**      show active literal constants" CR
-"  **memory**   **m**      show memory manager stats"
+"  **break**      **b**      show current breakpoints" CR
+"  **files**      **F**      show included files" CR
+"  **classes**    **c**      show loaded classes" CR
+"  **funcs**      **f**      show loaded functions" CR
+"  **error**      **e**      show last error" CR
+"  **constants**  **d**      show user-defined constants" CR
+"  **vars**       **v**      show active variables" CR
+"  **globals**    **g**      show superglobal variables" CR
+"  **literal**    **l**      show active literal constants" CR
+"  **memory**     **m**      show memory manager stats"
 },
 
 // ******** same issue about breakpoints in called frames
