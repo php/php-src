@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #60704 (unlink() bug with some files path).
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
 
+- Date:
+  . Implemented FR #68268 (DatePeriod: Getter for start date, end date and 
+    interval). (Marc Bennewitz)
+
 - mbstring:
   . Fixed bug #68504 (--with-libmbfl configure option not present on Windows).
     (Ashesh Vashi)

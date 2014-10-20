@@ -533,6 +533,9 @@ const zend_function_entry date_funcs_period[] = {
 	PHP_ME(DatePeriod,                __construct,                 arginfo_date_period_construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DatePeriod,                __wakeup,                    NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DatePeriod,                __set_state,                 NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DatePeriod,                getStartDate,                NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(DatePeriod,                getEndDate,                  NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(DatePeriod,                getDateInterval,             NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -4475,7 +4478,82 @@ PHP_METHOD(DatePeriod, __construct)
 }
 /* }}} */
 
-static int check_id_allowed(char *id, long what)
+/* {{{ proto DatePeriod::getStartDate()
+   Get start date.
+*/
+PHP_METHOD(DatePeriod, getStartDate)
+{
+	php_period_obj   *dpobj;
+	php_date_obj     *dateobj;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	dpobj = (php_period_obj *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	php_date_instantiate(dpobj->start_ce, return_value TSRMLS_CC);
+	dateobj = (php_date_obj *)zend_object_store_get_object(return_value);
+	dateobj->time = timelib_time_ctor();
+	*dateobj->time = *dpobj->start;
+	if (dpobj->start->tz_abbr) {
+		dateobj->time->tz_abbr = strdup(dpobj->start->tz_abbr);
+	}
+	if (dpobj->start->tz_info) {
+		dateobj->time->tz_info = dpobj->start->tz_info;
+	}
+}
+/* }}} */
+
+/* {{{ proto DatePeriod::getEndDate()
+   Get end date.
+*/
+PHP_METHOD(DatePeriod, getEndDate)
+{
+        php_period_obj   *dpobj;
+        php_date_obj     *dateobj;
+
+        if (zend_parse_parameters_none() == FAILURE) {
+                return;
+        }
+
+        dpobj = (php_period_obj *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+        php_date_instantiate(dpobj->start_ce, return_value TSRMLS_CC);
+        dateobj = (php_date_obj *)zend_object_store_get_object(return_value);
+        dateobj->time = timelib_time_ctor();
+        *dateobj->time = *dpobj->end;
+        if (dpobj->end->tz_abbr) {
+                dateobj->time->tz_abbr = strdup(dpobj->end->tz_abbr);
+        }
+        if (dpobj->end->tz_info) {
+                dateobj->time->tz_info = dpobj->end->tz_info;
+        }
+}
+/* }}} */
+
+/* {{{ proto DatePeriod::getDateInterval()
+   Get date interval.
+*/ 
+PHP_METHOD(DatePeriod, getDateInterval)
+{
+	php_period_obj   *dpobj;
+	php_interval_obj *diobj;
+        
+        if (zend_parse_parameters_none() == FAILURE) {
+                return;
+        }
+
+	dpobj = (php_period_obj *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	php_date_instantiate(date_ce_interval, return_value TSRMLS_CC);
+	diobj = (php_interval_obj *)zend_object_store_get_object(return_value TSRMLS_CC);
+	diobj->diff = timelib_rel_time_clone(dpobj->interval);
+	diobj->initialized = 1;
+}
+/* }}} */
+
+static int check_id_allowed(char *id, long what) /* {{{ */
 {
 	if (what & PHP_DATE_TIMEZONE_GROUP_AFRICA     && strncasecmp(id, "Africa/",      7) == 0) return 1;
 	if (what & PHP_DATE_TIMEZONE_GROUP_AMERICA    && strncasecmp(id, "America/",     8) == 0) return 1;

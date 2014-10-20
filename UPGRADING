@@ -266,6 +266,9 @@ PHP 5.6 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Datetime:
+  Added DatePeriod::getStartDate(), DatePeriod::getEndDate(), DatePeriod::getDateInterval() in 5.6.5.
+
 - GMP:
   Added gmp_root($a, $nth) and gmp_rootrem($a, $nth) for calculating nth roots.
   Added gmp_import($data, $word_size = 1, $options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN) in PHP 5.6.1.
