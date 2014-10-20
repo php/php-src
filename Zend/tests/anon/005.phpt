@@ -26,10 +26,11 @@ $data = array(
     rand(1, 100),
     rand(2, 200)
 ); 
+
 $outer = new Outer($data);
 $proxy = $outer->getArrayAccess();
 
-unset($proxy[0]);
+/* null because no inheritance, so no access to protected member */
 var_dump(@$outer->getArrayAccess()[0]);
 ?>
 --EXPECT--	

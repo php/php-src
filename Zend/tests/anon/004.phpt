@@ -24,9 +24,8 @@ $outer = new Outer(array(
     rand(1, 100)
 ));
 
-$proxy = $outer->getArrayAccess();
-
-var_dump($proxy[0]);
+/* not null because inheritance */
+var_dump($outer->getArrayAccess()[0]);
 ?>
 --EXPECTF--	
 int(%d)
