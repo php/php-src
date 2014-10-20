@@ -136,6 +136,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 				ALLOC_HASHTABLE_REL(tmp_ht);
 				zend_hash_init(tmp_ht, zend_hash_num_elements(original_ht), NULL, ZVAL_PTR_DTOR, 0);
 				zend_hash_copy(tmp_ht, original_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+				tmp_ht->nNextFreeElement = original_ht->nNextFreeElement;
 				zvalue->value.ht = tmp_ht;
 			}
 			break;
