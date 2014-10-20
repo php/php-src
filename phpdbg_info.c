@@ -173,7 +173,7 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 	}
 
 	if (zend_hash_num_elements(&vars)) {
-		phpdbg_out("Address\t\tRefs\tType\t\tVariable");
+		phpdbg_out("Address            Refs    Type      Variable\n");
 		for (zend_hash_internal_pointer_reset_ex(&vars, &pos);
 			zend_hash_get_current_data_ex(&vars, (void**) &data, &pos) == SUCCESS;
 			zend_hash_move_forward_ex(&vars, &pos)) {
@@ -184,23 +184,42 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 
 			phpdbg_try_access {
 				if (!(invalid_data = !*data)) {
-#define VARIABLEINFO(attrs, msg, ...) phpdbg_writeln("variable", "address=\"%p\" refcount=\"%d\" type=\"%s\" refstatus=\"%s\" name=\"%s\" " attrs, "%p\t%d\t(%s)\n%s$%s", *data, Z_REFCOUNT_PP(data), zend_zval_type_name(*data), Z_ISREF_PP(data) ? "&": "", var, ##__VA_ARGS__)
+#define VARIABLEINFO(attrs, msg, ...) phpdbg_writeln("variable", "address=\"%p\" refcount=\"%d\" type=\"%s\" refstatus=\"%s\" name=\"%s\" " attrs, "%-18p %-7d %-9s %s$%s" msg, *data, Z_REFCOUNT_PP(data), zend_zval_type_name(*data), Z_ISREF_PP(data) ? "&": "", var, ##__VA_ARGS__)
 
-					if (Z_TYPE_PP(data) == IS_RESOURCE) {
-						phpdbg_try_access {
-							int type;
-							VARIABLEINFO("type=\"%s\"", "\n|-------(typeof)------> (%s)\n", zend_list_find(Z_RESVAL_PP(data), &type) ? zend_rsrc_list_get_rsrc_type(type TSRMLS_CC) : "unknown");
-						} phpdbg_catch_access {
-							VARIABLEINFO("type=\"unknown\"", "\n|-------(typeof)------> (unknown)\n");
-						} phpdbg_end_try_access();
-					} else if (Z_TYPE_PP(data) == IS_OBJECT) {
-						phpdbg_try_access {
-							VARIABLEINFO("instanceof=\"%s\"", "\n|-----(instanceof)----> (%s)\n", Z_OBJCE_PP(data)->name);
-						} phpdbg_catch_access {
-							VARIABLEINFO("instanceof=\"%s\"", "\n|-----(instanceof)----> (unknown)\n");
-						} phpdbg_end_try_access();
-					} else {
-						VARIABLEINFO("", "");
+					switch (Z_TYPE_PP(data)) {
+						case IS_RESOURCE:
+							phpdbg_try_access {
+								int type;
+								VARIABLEINFO("type=\"%s\"", "\n|-------(typeof)------> (%s)\n", zend_list_find(Z_RESVAL_PP(data), &type) ? zend_rsrc_list_get_rsrc_type(type TSRMLS_CC) : "unknown");
+							} phpdbg_catch_access {
+								VARIABLEINFO("type=\"unknown\"", "\n|-------(typeof)------> (unknown)\n");
+							} phpdbg_end_try_access();
+							break;
+						case IS_OBJECT:
+							phpdbg_try_access {
+								VARIABLEINFO("instanceof=\"%s\"", "\n|-----(instanceof)----> (%s)\n", Z_OBJCE_PP(data)->name);
+							} phpdbg_catch_access {
+								VARIABLEINFO("instanceof=\"%s\"", "\n|-----(instanceof)----> (unknown)\n");
+							} phpdbg_end_try_access();
+							break;
+						case IS_STRING:
+							phpdbg_try_access {
+								VARIABLEINFO("length=\"%d\" value=\"%.*s%s\"", "\nstring (%d) \"%.*s%s\"", Z_STRLEN_PP(data), Z_STRLEN_PP(data) < 255 ? Z_STRLEN_PP(data) : 255, Z_STRVAL_PP(data), Z_STRLEN_PP(data) > 255 ? "..." : "");
+							} phpdbg_catch_access {
+								VARIABLEINFO("", "");
+							} phpdbg_end_try_access();
+							break;
+						case IS_BOOL:
+							VARIABLEINFO("value=\"%s\"", "\nbool (%s)", Z_LVAL_PP(data) ? "true" : "false");
+							break;
+						case IS_LONG:
+							VARIABLEINFO("value=\"%ld\"", "\nint (%ld)", Z_LVAL_PP(data));
+							break;
+						case IS_DOUBLE:
+							VARIABLEINFO("value=\"%lf\"", "\ndouble (%lf)", Z_DVAL_PP(data));
+							break;
+						default:
+							VARIABLEINFO("", "");
 					}
 				}
 			} phpdbg_end_try_access();

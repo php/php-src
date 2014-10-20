@@ -268,6 +268,8 @@ info (subcommands)
  - refstatus: empty if the zval is not a reference
  - class: the class the object in the zval is an instance of
  - resource: the type of the resource in the zval
+ - value: the value of primitive types (scalars) => string/int/bool/double
+ - length: if string, then the length of that string
 
 ### literal ###
 
