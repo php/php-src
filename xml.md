@@ -251,6 +251,23 @@ info (subcommands)
 - &lt;lasterror error="" (file="" line="") />
 - error attribute contains the last error as a string, is empty if there's no last error
 
+### constants ###
+
+- &lt;constantinfo num="" /> with num having an integer value, indicating the number of (local or superglobal) variables
+- if info vars was used it'll have also one of these attributes:
+ - method
+ - function
+ - file
+ - opline
+- for each variable there is a &lt;constant> element
+- &lt;constant address="" refcount="" type="" name="" />
+ - address: pointer to zval (hexadecimal)
+ - refcount: refcount of zval
+ - type: the variable type (long, string, ...). If the value is "unknown", the other attributes are meaningless
+ - name: the name of the variable
+ - value: the value of primitive types (scalars) => string/int/bool/double
+ - length: if string, then the length of that string
+
 ### vars / globals ###
 
 - &lt;variableinfo num="" /> with num having an integer value, indicating the number of (local or superglobal) variables
@@ -259,7 +276,7 @@ info (subcommands)
  - function
  - file
  - opline
-- for each variable there is a &lt;variable> followed by a &lt;variabledetails> element
+- for each variable there is a &lt;variable> element
 - &lt;variable address="" refcount="" type="" name="" />
  - address: pointer to zval (hexadecimal)
  - refcount: refcount of zval
