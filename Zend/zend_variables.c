@@ -221,7 +221,7 @@ ZEND_API void zval_add_ref_unref(zval *p)
 {
 	if (Z_REFCOUNTED_P(p)) {
 		if (Z_ISREF_P(p)) {
-			ZVAL_DUP(p, Z_REFVAL_P(p));
+			ZVAL_COPY(p, Z_REFVAL_P(p));
 		} else {
 			Z_ADDREF_P(p);
 		}
