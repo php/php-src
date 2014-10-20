@@ -1094,7 +1094,7 @@ static int phpdbg_encode_xml(char **buf, char *msg, int msglen, int from, char *
 	int i;
 	int tolen = to ? strlen(to) : 5;
 	char *tmp = *buf = emalloc(msglen * tolen);
-	for (i = 0; ++i < msglen; msg++) {
+	for (i = 0; i++ < msglen; msg++) {
 		if (*msg == '&') {
 			memcpy(tmp, ZEND_STRL("&amp;"));
 			tmp += sizeof("&amp;") - 1;
@@ -1118,20 +1118,17 @@ static int phpdbg_encode_xml(char **buf, char *msg, int msglen, int from, char *
 
 static void phpdbg_encode_ctrl_chars(char **buf, int *buflen) {
 	char *tmp, *tmpptr;
-	int len = *buflen;
+	int len;
 	int i;
 
 	tmp = tmpptr = emalloc(*buflen * 5);
 
 	for (i = 0; i < *buflen; i++) {
 		if ((*buf)[i] < 0x20) {
-			len += 4;
 			*tmpptr++ = '&';
 			*tmpptr++ = '#';
 			if ((unsigned int) ((*buf)[i]) > 9) {
 				*tmpptr++ = ((*buf)[i] / 10) + '0';
-			} else {
-				--len;
 			}
 			*tmpptr++ = ((*buf)[i] % 10) + '0';
 			*tmpptr++ = ';';
