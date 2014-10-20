@@ -17596,18 +17596,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_CONST(int (*b
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -17648,18 +17637,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CONST(int (*binar
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -20014,18 +19992,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_TMP(int (*bin
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -20066,18 +20033,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_TMP(int (*binary_
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -22014,18 +21970,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_VAR(int (*bin
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -22066,18 +22011,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_VAR(int (*binary_
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -24099,18 +24033,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_UNUSED(int (*
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -24151,18 +24074,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_UNUSED(int (*bina
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -25560,18 +25472,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_VAR_CV(int (*bina
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -25612,18 +25513,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_VAR_CV(int (*binary_o
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -27417,18 +27307,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_CONST(int 
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -27469,18 +27348,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CONST(int (*bi
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -28796,18 +28664,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_TMP(int (*
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -28848,18 +28705,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_TMP(int (*bina
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -30092,18 +29938,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_VAR(int (*
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -30144,18 +29979,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_VAR(int (*bina
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -31387,18 +31211,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_UNUSED(int
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -31439,18 +31252,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_UNUSED(int (*b
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -31902,18 +31704,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_UNUSED_CV(int (*b
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -31954,18 +31745,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_UNUSED_CV(int (*binar
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -34865,18 +34645,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_CONST(int (*bi
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -34917,18 +34686,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CONST(int (*binary
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -37115,18 +36873,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_TMP(int (*bina
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -37167,18 +36914,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_TMP(int (*binary_o
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -38987,18 +38723,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_VAR(int (*bina
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -39039,18 +38764,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_VAR(int (*binary_o
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -40942,18 +40656,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_UNUSED(int (*b
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -40994,18 +40697,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_UNUSED(int (*binar
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -42258,18 +41950,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_dim_helper_SPEC_CV_CV(int (*binar
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
@@ -42310,18 +41991,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_helper_SPEC_CV_CV(int (*binary_op
 	ZVAL_DEREF(var_ptr);
 	SEPARATE_ZVAL_NOREF(var_ptr);
 
-	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_OBJECT) &&
-	    UNEXPECTED(Z_OBJ_HANDLER_P(var_ptr, get) && Z_OBJ_HANDLER_P(var_ptr, set))) {
-		/* proxy object */
-		zval rv;
-		zval *objval = Z_OBJ_HANDLER_P(var_ptr, get)(var_ptr, &rv TSRMLS_CC);
-		Z_ADDREF_P(objval);
-		binary_op(objval, objval, value TSRMLS_CC);
-		Z_OBJ_HANDLER_P(var_ptr, set)(var_ptr, objval TSRMLS_CC);
-		zval_ptr_dtor(objval);
-	} else {
-		binary_op(var_ptr, var_ptr, value TSRMLS_CC);
-	}
+	binary_op(var_ptr, var_ptr, value TSRMLS_CC);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
