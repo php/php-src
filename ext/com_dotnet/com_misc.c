@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,7 @@ void php_com_throw_exception(HRESULT code, char *message TSRMLS_DC)
 		message = php_win32_error_to_msg(code);
 		free_msg = 1;
 	}
-	zend_throw_exception(php_com_exception_class_entry, message, (long)code TSRMLS_CC);
+	zend_throw_exception(php_com_exception_class_entry, message, (zend_long)code TSRMLS_CC);
 	if (free_msg) {
 		LocalFree(message);
 	}
@@ -60,9 +60,9 @@ PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 	IDispatch_AddRef(V_DISPATCH(&obj->v));
 	IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo);
 
-	Z_TYPE_P(z) = IS_OBJECT;
-	z->value.obj.handle = zend_objects_store_put(obj, NULL, php_com_object_free_storage, php_com_object_clone TSRMLS_CC);
-	z->value.obj.handlers = &php_com_object_handlers;
+	zend_object_std_init(&obj->zo, php_com_variant_class_entry TSRMLS_CC);
+	obj->zo.handlers = &php_com_object_handlers;
+	ZVAL_OBJ(z, &obj->zo);
 }
 
 PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
@@ -84,10 +84,9 @@ PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 		IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo);
 	}
 
-	Z_TYPE_P(z) = IS_OBJECT;
-	
-	z->value.obj.handle = zend_objects_store_put(obj, NULL, php_com_object_free_storage, php_com_object_clone TSRMLS_CC);
-	z->value.obj.handlers = &php_com_object_handlers;
+	zend_object_std_init(&obj->zo, php_com_variant_class_entry TSRMLS_CC);
+	obj->zo.handlers = &php_com_object_handlers;
+	ZVAL_OBJ(z, &obj->zo);
 }
 
 /* this is a convenience function for fetching a particular

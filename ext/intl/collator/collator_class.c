@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,48 +36,36 @@ static zend_object_handlers Collator_handlers;
  */
 
 /* {{{ Collator_objects_dtor */
-static void Collator_objects_dtor(
-	void *object,
-	zend_object_handle handle TSRMLS_DC )
+static void Collator_objects_dtor(zend_object *object TSRMLS_DC )
 {
-	zend_objects_destroy_object( object, handle TSRMLS_CC );
+	zend_objects_destroy_object(object TSRMLS_CC );
 }
 /* }}} */
 
 /* {{{ Collator_objects_free */
-void Collator_objects_free( zend_object *object TSRMLS_DC )
+void Collator_objects_free(zend_object *object TSRMLS_DC )
 {
-	Collator_object* co = (Collator_object*)object;
+	Collator_object* co = php_intl_collator_fetch_object(object);
 
-	zend_object_std_dtor( &co->zo TSRMLS_CC );
+	zend_object_std_dtor(&co->zo TSRMLS_CC );
 
-	collator_object_destroy( co TSRMLS_CC );
-
-	efree( co );
+	collator_object_destroy(co TSRMLS_CC );
 }
 /* }}} */
 
 /* {{{ Collator_object_create */
-zend_object_value Collator_object_create(
-	zend_class_entry *ce TSRMLS_DC )
+zend_object *Collator_object_create(zend_class_entry *ce TSRMLS_DC )
 {
-	zend_object_value    retval;
 	Collator_object*     intern;
 
-	intern = ecalloc( 1, sizeof(Collator_object) );
-	intl_error_init( COLLATOR_ERROR_P( intern ) TSRMLS_CC );
-	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
+	intern = ecalloc(1, sizeof(Collator_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	intl_error_init(COLLATOR_ERROR_P(intern) TSRMLS_CC);
+	zend_object_std_init(&intern->zo, ce TSRMLS_CC );
 	object_properties_init(&intern->zo, ce);
 
-	retval.handle = zend_objects_store_put(
-		intern,
-		Collator_objects_dtor,
-		(zend_objects_free_object_storage_t)Collator_objects_free,
-		NULL TSRMLS_CC );
+	intern->zo.handlers = &Collator_handlers;
 
-	retval.handlers = &Collator_handlers;
-
-	return retval;
+	return &intern->zo;
 }
 /* }}} */
 
@@ -148,7 +136,10 @@ void collator_register_Collator_class( TSRMLS_D )
 		sizeof Collator_handlers);
 	/* Collator has no usable clone semantics - ucol_cloneBinary/ucol_openBinary require binary buffer 
 	   for which we don't have the place to keep */	
+	Collator_handlers.offset = XtOffsetOf(Collator_object, zo);
 	Collator_handlers.clone_obj = NULL; 
+	Collator_handlers.dtor_obj = Collator_objects_dtor;
+	Collator_handlers.free_obj = Collator_objects_free;
 
 	/* Declare 'Collator' class properties. */
 	if( !Collator_ce_ptr )

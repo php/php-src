@@ -6,6 +6,8 @@
 extern zend_module_entry extname_module_entry;
 #define phpext_extname_ptr &extname_module_entry
 
+#define PHP_EXTNAME_VERSION "0.1.0" /* Replace with version number for your extension */
+
 #ifdef PHP_WIN32
 #	define PHP_EXTNAME_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
@@ -23,7 +25,7 @@ extern zend_module_entry extname_module_entry;
 	and END macros here:     
 
 ZEND_BEGIN_MODULE_GLOBALS(extname)
-	long  global_value;
+	zend_long  global_value;
 	char *global_string;
 ZEND_END_MODULE_GLOBALS(extname)
 */

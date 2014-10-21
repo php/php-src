@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -54,10 +54,9 @@ extern zend_module_entry xsl_module_entry;
 #define XSL_SECPREF_DEFAULT 44
 
 typedef struct _xsl_object {
-	zend_object  std;
 	void *ptr;
 	HashTable *prop_handler;
-	zend_object_handle handle;
+	zval handle;
 	HashTable *parameter;
 	int hasKeys;
 	int registerPhpFunctions;
@@ -65,13 +64,20 @@ typedef struct _xsl_object {
 	HashTable *node_list;
 	php_libxml_node_object *doc;
 	char *profiling;
-	long securityPrefs;
+	zend_long securityPrefs;
 	int securityPrefsSet;
+	zend_object  std;
 } xsl_object;
 
+static inline xsl_object *php_xsl_fetch_object(zend_object *obj) {
+	return (xsl_object *)((char*)(obj) - XtOffsetOf(xsl_object, std));
+}
+
+#define Z_XSL_P(zv) php_xsl_fetch_object(Z_OBJ_P((zv)))
+
 void php_xsl_set_object(zval *wrapper, void *obj TSRMLS_DC);
-void xsl_objects_free_storage(void *object TSRMLS_DC);
-zval *php_xsl_create_object(xsltStylesheetPtr obj, int *found, zval *wrapper_in, zval *return_value  TSRMLS_DC);
+void xsl_objects_free_storage(zend_object *object TSRMLS_DC);
+void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return_value  TSRMLS_DC);
 
 void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
 void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
@@ -79,14 +85,14 @@ void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
 #define REGISTER_XSL_CLASS(ce, name, parent_ce, funcs, entry) \
 INIT_CLASS_ENTRY(ce, name, funcs); \
 ce.create_object = xsl_objects_new; \
-entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
+entry = zend_register_internal_class_ex(&ce, parent_ce TSRMLS_CC);
 
 #define XSL_DOMOBJ_NEW(zval, obj, ret) \
-	if (NULL == (zval = php_xsl_create_object(obj, ret, zval, return_value TSRMLS_CC))) { \
+	zval = php_xsl_create_object(obj, ret, zval, return_value TSRMLS_CC); \
+	if (ZVAL_IS_NULL(zval)) { \
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object"); \
 		RETURN_FALSE; \
 	}
-
 
 
 PHP_MINIT_FUNCTION(xsl);

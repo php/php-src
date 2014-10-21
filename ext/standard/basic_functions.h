@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -81,8 +81,6 @@ PHP_FUNCTION(error_get_last);
 
 PHP_FUNCTION(call_user_func);
 PHP_FUNCTION(call_user_func_array);
-PHP_FUNCTION(call_user_method);
-PHP_FUNCTION(call_user_method_array);
 PHP_FUNCTION(forward_static_call);
 PHP_FUNCTION(forward_static_call_array);
 
@@ -164,12 +162,12 @@ typedef signed long php_int32;
 typedef struct _php_basic_globals {
 	HashTable *user_shutdown_function_names;
 	HashTable putenv_ht;
-	zval *strtok_zval;
+	zval  strtok_zval;
 	char *strtok_string;
 	char *locale_string;
 	char *strtok_last;
 	char strtok_table[256];
-	ulong strtok_len;
+	zend_ulong strtok_len;
 	char str_ebuf[40];
 	zend_fcall_info array_walk_fci;
 	zend_fcall_info_cache array_walk_fci_cache;
@@ -177,12 +175,12 @@ typedef struct _php_basic_globals {
 	zend_fcall_info_cache user_compare_fci_cache;
 	zend_llist *user_tick_functions;
 
-	zval *active_ini_file_section;
+	zval active_ini_file_section;
 	
 	/* pageinfo.c */
-	long page_uid;
-	long page_gid;
-	long page_inode;
+	zend_long page_uid;
+	zend_long page_gid;
+	zend_long page_inode;
 	time_t page_mtime;
 
 	/* filestat.c && main/streams/streams.c */
@@ -206,11 +204,11 @@ typedef struct _php_basic_globals {
 	zend_class_entry *incomplete_class;
 	unsigned serialize_lock; /* whether to use the locally supplied var_hash instead (__sleep/__wakeup) */
 	struct {
-		void *var_hash;
+		struct php_serialize_data *data;
 		unsigned level;
 	} serialize;
 	struct {
-		void *var_hash;
+		struct php_unserialize_data *data;
 		unsigned level;
 	} unserialize;
 
@@ -253,7 +251,7 @@ PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);
 
 typedef struct _php_shutdown_function_entry {
-	zval **arguments;
+	zval *arguments;
 	int arg_count;
 } php_shutdown_function_entry;
 

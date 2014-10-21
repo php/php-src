@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@ extern "C" {
 #define INTLITERATOR_ERROR_CODE_P(ii)				&(INTL_ERROR_CODE(INTLITERATOR_ERROR(ii)))
 
 #define INTLITERATOR_METHOD_INIT_VARS				INTL_METHOD_INIT_VARS(IntlIterator, ii)
-#define INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(IntlIterator, ii)
+#define INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_ITERATOR, ii)
 #define INTLITERATOR_METHOD_FETCH_OBJECT\
 	object = getThis(); \
 	INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; \
@@ -48,15 +48,21 @@ extern "C" {
 	}
 
 typedef struct {
-	zend_object				zo;
 	intl_error				err;
 	zend_object_iterator	*iterator;
+	zend_object				zo;
 } IntlIterator_object;
+
+
+static inline IntlIterator_object *php_intl_iterator_fetch_object(zend_object *obj) {
+	return (IntlIterator_object *)((char*)(obj) - XtOffsetOf(IntlIterator_object, zo));
+}
+#define Z_INTL_ITERATOR_P(zv) php_intl_iterator_fetch_object(Z_OBJ_P(zv))
 
 typedef struct {
 	zend_object_iterator	zoi;
-	zval					*current;
-	zval					*wrapping_obj;
+	zval					current;
+	zval					wrapping_obj;
 	void					(*destroy_it)(zend_object_iterator	*iterator TSRMLS_DC);
 } zoi_with_current;
 
@@ -65,7 +71,7 @@ extern zend_object_handlers IntlIterator_handlers;
 
 U_CFUNC void zoi_with_current_dtor(zend_object_iterator *iter TSRMLS_DC);
 U_CFUNC int zoi_with_current_valid(zend_object_iterator *iter TSRMLS_DC);
-U_CFUNC void zoi_with_current_get_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
+U_CFUNC zval *zoi_with_current_get_current_data(zend_object_iterator *iter TSRMLS_DC);
 U_CFUNC void zoi_with_current_invalidate_current(zend_object_iterator *iter TSRMLS_DC);
 
 #ifdef __cplusplus

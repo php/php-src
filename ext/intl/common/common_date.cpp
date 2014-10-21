@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -110,7 +110,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 		intl_error *err, const char *func TSRMLS_DC)
 {
 	zval	retval;
-	zval	*zfuncname;
+	zval	zfuncname;
 	char	*message;
 
 	if (err && U_FAILURE(err->code)) {
@@ -125,10 +125,8 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 	}
 
 	if (millis) {
-		INIT_ZVAL(retval);
-		MAKE_STD_ZVAL(zfuncname);
-		ZVAL_STRING(zfuncname, "getTimestamp", 1);
-		if (call_user_function(NULL, &(z), zfuncname, &retval, 0, NULL TSRMLS_CC)
+		ZVAL_STRING(&zfuncname, "getTimestamp");
+		if (call_user_function(NULL, z, &zfuncname, &retval, 0, NULL TSRMLS_CC)
 				!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
 			spprintf(&message, 0, "%s: error calling ::getTimeStamp() on the "
 					"object", func);
@@ -145,7 +143,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 
 	if (tz) {
 		php_date_obj *datetime;
-		datetime = (php_date_obj*)zend_object_store_get_object(z TSRMLS_CC);
+		datetime = Z_PHPDATE_P(z);
 		if (!datetime->time) {
 			spprintf(&message, 0, "%s: the DateTime object is not properly "
 					"initialized", func);
@@ -176,7 +174,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TSRMLS_DC)
 {
 	double	rv = NAN;
-	long	lv;
+	zend_long	lv;
 	int		type;
 	char	*message;
 
@@ -210,8 +208,7 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TS
 		if (instanceof_function(Z_OBJCE_P(z), php_date_get_date_ce() TSRMLS_CC)) {
 			intl_datetime_decompose(z, &rv, NULL, err, func TSRMLS_CC);
 		} else if (instanceof_function(Z_OBJCE_P(z), Calendar_ce_ptr TSRMLS_CC)) {
-			Calendar_object *co = (Calendar_object *)
-				zend_object_store_get_object(z TSRMLS_CC );
+			Calendar_object *co = Z_INTL_CALENDAR_P(z);
 			if (co->ucal == NULL) {
 				spprintf(&message, 0, "%s: IntlCalendar object is not properly "
 						"constructed", func);

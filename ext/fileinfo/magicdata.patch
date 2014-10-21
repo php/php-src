@@ -1,0 +1,58 @@
+Patches applied to file 5.17 sources tree before generating magic.mgc
+and before running create_data_file.php to create data_file.c.
+
+
+
+From 0b478f445b6b7540b58af5d1fe583fa9e48fd745 Mon Sep 17 00:00:00 2001
+From: Christos Zoulas <christos@zoulas.com>
+Date: Wed, 28 May 2014 19:52:36 +0000
+Subject: [PATCH] further optimize awk by not looking for the BEGIN regex until
+ we found the BEGIN (Jan Kaluza)
+
+---
+ magic/Magdir/commands | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/magic/Magdir/commands b/magic/Magdir/commands
+index bfffdef..26b2869 100644
+--- a/magic/Magdir/commands
++++ b/magic/Magdir/commands
+@@ -49,7 +49,8 @@
+ !:mime	text/x-awk
+ 0	string/wt	#!\ /usr/bin/awk	awk script text executable
+ !:mime	text/x-awk
+-0	regex		=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
++0       search/16384    BEGIN
++>0	regex		=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
+ 
+ # AT&T Bell Labs' Plan 9 shell
+ 0	string/wt	#!\ /bin/rc	Plan 9 rc shell script text executable
+-- 
+2.0.3
+
+From 71a8b6c0d758acb0f73e2e51421a711b5e9d6668 Mon Sep 17 00:00:00 2001
+From: Christos Zoulas <christos@zoulas.com>
+Date: Fri, 30 May 2014 16:48:44 +0000
+Subject: [PATCH] Limit regex search for BEGIN to the first 4K of the file.
+
+---
+ magic/Magdir/commands | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/magic/Magdir/commands b/magic/Magdir/commands
+index 26b2869..bcd0f43 100644
+--- a/magic/Magdir/commands
++++ b/magic/Magdir/commands
+@@ -49,8 +49,7 @@
+ !:mime	text/x-awk
+ 0	string/wt	#!\ /usr/bin/awk	awk script text executable
+ !:mime	text/x-awk
+-0       search/16384    BEGIN
+->0	regex		=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
++0	regex/4096	=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
+ 
+ # AT&T Bell Labs' Plan 9 shell
+ 0	string/wt	#!\ /bin/rc	Plan 9 rc shell script text executable
+-- 
+2.0.3
+

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,12 +48,12 @@
 int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 							   int level,
 							   int optname,
-							   zval **arg4 TSRMLS_DC);
+							   zval *arg4 TSRMLS_DC);
 
 int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 								 int level,
 								 int optname,
-								 zval **arg4 TSRMLS_DC);
+								 zval *arg4 TSRMLS_DC);
 
 int php_if_index_to_addr4(
         unsigned if_index,

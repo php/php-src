@@ -20,7 +20,7 @@ echo "Done\n";
 --EXPECTF-- 
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2006-12-12 00:00:00"
+  string(26) "2006-12-12 00:00:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -37,6 +37,4 @@ Warning: timezone_offset_get() expects exactly 2 parameters, 0 given in %s on li
 bool(false)
 int(0)
 
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, object given in %s on line %d
-bool(false)
-Done
+Catchable fatal error: Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, instance of DateTime given in %s

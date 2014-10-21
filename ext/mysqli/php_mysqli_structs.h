@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -99,15 +99,15 @@ enum mysqli_status {
 
 typedef struct {
 	char		*val;
-	ulong		buflen;
-	ulong		output_len;
-	ulong		type;
+	zend_ulong		buflen;
+	zend_ulong		output_len;
+	zend_ulong		type;
 } VAR_BUFFER;
 
 typedef struct {
 	unsigned int	var_cnt;
 	VAR_BUFFER		*buf;
-	zval			**vars;
+	zval			*vars;
 	char			*is_null;
 } BIND_BUFFER;
 
@@ -116,12 +116,16 @@ typedef struct {
 	BIND_BUFFER	param;
 	BIND_BUFFER	result;
 	char		*query;
+#ifndef MYSQLI_USE_MYSQLND
+	/* used to manage refcount with libmysql (already implement in mysqlnd) */
+	zval		link_handle;
+#endif
 } MY_STMT;
 
 typedef struct {
 	MYSQL			*mysql;
-	char			*hash_key;
-	zval			*li_read;
+	zend_string		*hash_key;
+	zval			li_read;
 	php_stream		*li_stream;
 	unsigned int 	multi_query;
 	zend_bool		persistent;
@@ -137,10 +141,16 @@ typedef struct {
 } MYSQLI_RESOURCE;
 
 typedef struct _mysqli_object {
-	zend_object 		zo;
 	void 				*ptr;
 	HashTable 			*prop_handler;
+	zend_object 		zo;
 } mysqli_object; /* extends zend_object */
+
+static inline mysqli_object *php_mysqli_fetch_object(zend_object *obj) {
+	return (mysqli_object *)((char*)(obj) - XtOffsetOf(mysqli_object, zo));
+}
+
+#define Z_MYSQLI_P(zv) php_mysqli_fetch_object(Z_OBJ_P((zv)))
 
 typedef struct st_mysqli_warning MYSQLI_WARNING;
 
@@ -154,10 +164,9 @@ struct st_mysqli_warning {
 typedef struct _mysqli_property_entry {
 	const char *pname;
 	size_t pname_length;
-	int (*r_func)(mysqli_object *obj, zval **retval TSRMLS_DC);
+	zval *(*r_func)(mysqli_object *obj, zval *retval TSRMLS_DC);
 	int (*w_func)(mysqli_object *obj, zval *value TSRMLS_DC);
 } mysqli_property_entry;
-
 
 typedef struct {
 	zend_ptr_stack free_links;
@@ -205,7 +214,7 @@ extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_stat
 extern zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
 extern zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 
-extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, long fetchtype TSRMLS_DC);
+extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend_long fetchtype TSRMLS_DC);
 
 #ifdef HAVE_SPL
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
@@ -229,35 +238,33 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 } \
 
 #define MYSQLI_REGISTER_RESOURCE_EX(__ptr, __zval)  \
-	((mysqli_object *) zend_object_store_get_object(__zval TSRMLS_CC))->ptr = __ptr;
+	(Z_MYSQLI_P(__zval))->ptr = __ptr;
 
 #define MYSQLI_RETURN_RESOURCE(__ptr, __ce) \
-	Z_TYPE_P(return_value) = IS_OBJECT; \
-	(return_value)->value.obj = mysqli_objects_new(__ce TSRMLS_CC); \
+	RETVAL_OBJ(mysqli_objects_new(__ce TSRMLS_CC)); \
 	MYSQLI_REGISTER_RESOURCE_EX(__ptr, return_value)
 
 #define MYSQLI_REGISTER_RESOURCE(__ptr, __ce) \
 {\
-	zval *object = getThis();\
-	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) {\
-		object = return_value;\
-		Z_TYPE_P(object) = IS_OBJECT;\
-		(object)->value.obj = mysqli_objects_new(__ce TSRMLS_CC);\
-	}\
+	zval *object = getThis(); \
+	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) { \
+		object = return_value; \
+		ZVAL_OBJ(object, mysqli_objects_new(__ce TSRMLS_CC)); \
+	} \
 	MYSQLI_REGISTER_RESOURCE_EX(__ptr, object)\
 }
 
 #define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __name, __check) \
 { \
 	MYSQLI_RESOURCE *my_res; \
-	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
+	mysqli_object *intern = Z_MYSQLI_P(__id); \
 	if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {\
-  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
+  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name->val);\
   		RETURN_NULL();\
   	}\
 	__ptr = (__type)my_res->ptr; \
 	if (__check && my_res->status < __check) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
 		RETURN_NULL();\
 	}\
 }
@@ -266,24 +273,23 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 { \
 	MYSQLI_RESOURCE *my_res; \
 	if (!(my_res = (MYSQLI_RESOURCE *)(__obj->ptr))) {\
-  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
+  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name->val);\
   		return;\
   	}\
 	__ptr = (__type)my_res->ptr; \
 	if (__check && my_res->status < __check) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
 		return;\
 	}\
 }
-
 
 #define MYSQLI_FETCH_RESOURCE_CONN(__ptr, __id, __check) \
 { \
 	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), "mysqli_link", (__check)); \
 	if (!(__ptr)->mysql) { \
-		mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name); \
-		RETURN_NULL();\
+		mysqli_object *intern = Z_MYSQLI_P(__id); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
+		RETURN_NULL(); \
 	} \
 }
 
@@ -291,49 +297,49 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 { \
 	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), "mysqli_stmt", (__check)); \
 	if (!(__ptr)->stmt) { \
-		mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name); \
+		mysqli_object *intern = Z_MYSQLI_P(__id); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
 		RETURN_NULL();\
 	} \
 }
 
-
 #define MYSQLI_SET_STATUS(__id, __value) \
 { \
-	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
+	mysqli_object *intern = Z_MYSQLI_P(__id); \
 	((MYSQLI_RESOURCE *)intern->ptr)->status = __value; \
 } \
 
 #define MYSQLI_CLEAR_RESOURCE(__id) \
 { \
-	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
+	mysqli_object *intern = Z_MYSQLI_P(__id); \
 	efree(intern->ptr); \
 	intern->ptr = NULL; \
 }
 
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqli)
-	long			default_link;
-	long			num_links;
-	long			max_links;
-	long 			num_active_persistent;
-	long 			num_inactive_persistent;
-	long			max_persistent;
-	long			allow_persistent;
-	unsigned long	default_port;
+	zend_long			default_link;
+	zend_long			num_links;
+	zend_long			max_links;
+	zend_long 			num_active_persistent;
+	zend_long 			num_inactive_persistent;
+	zend_long			max_persistent;
+	zend_long			allow_persistent;
+	zend_ulong	default_port;
 	char			*default_host;
 	char			*default_user;
 	char			*default_socket;
 	char			*default_pw;
-	long			reconnect;
-	long			allow_local_infile;
-	long			strict;
-	long			error_no;
+	zend_long			reconnect;
+	zend_long			allow_local_infile;
+	zend_long			strict;
+	zend_long			error_no;
 	char			*error_msg;
-	long			report_mode;
+	zend_long			report_mode;
 	HashTable		*report_ht;
-	unsigned long	multi_query;
-	unsigned long	embedded;
+	zend_ulong	multi_query;
+	zend_ulong	embedded;
+	zend_bool 		rollback_on_cached_plink;
 ZEND_END_MODULE_GLOBALS(mysqli)
 
 

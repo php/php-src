@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,7 @@
 
 #include <errno.h>
 #include "zend.h"
+#include "zend_API.h"
 #include "zend_globals.h"
 #include <zend_ini_parser.h>
 #include "zend_ini_scanner.h"
@@ -131,20 +132,64 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 /* Eat trailing whitespace */
 #define EAT_TRAILING_WHITESPACE()	EAT_TRAILING_WHITESPACE_EX('X')
 
-#define zend_ini_copy_value(retval, str, len) {  \
-	Z_STRVAL_P(retval) = zend_strndup(str, len); \
-	Z_STRLEN_P(retval) = len;                    \
-	Z_TYPE_P(retval) = IS_STRING;                \
+#define zend_ini_copy_value(retval, str, len)	\
+	ZVAL_NEW_STR(retval, zend_string_init(str, len, 1))
+
+
+#define RETURN_TOKEN(type, str, len) {                       \
+	if (SCNG(scanner_mode) == ZEND_INI_SCANNER_TYPED) {      \
+		zend_ini_copy_typed_value(ini_lval, type, str, len); \
+	} else {                                                 \
+		zend_ini_copy_value(ini_lval, str, len);             \
+	}                                                        \
+	return type;                                             \
 }
 
-#define RETURN_TOKEN(type, str, len) {           \
-	zend_ini_copy_value(ini_lval, str, len);     \
-	return type;                                 \
+static inline int convert_to_number(zval *retval, const char *str, const int str_len)
+{
+	zend_uchar type;
+	int overflow;
+	zend_long lval;
+	double dval;
+
+	if ((type = is_numeric_string_ex(str, str_len, &lval, &dval, 0, &overflow)) != 0) {
+		if (type == IS_LONG) {
+			ZVAL_LONG(retval, lval);
+			return SUCCESS;
+		} else if (type == IS_DOUBLE && !overflow) {
+			ZVAL_DOUBLE(retval, dval);
+			return SUCCESS;
+		}
+	}
+
+	return FAILURE;
+}
+
+static void zend_ini_copy_typed_value(zval *retval, const int type, const char *str, int len)
+{
+	switch (type) {
+		case BOOL_FALSE:
+		case BOOL_TRUE:
+			ZVAL_BOOL(retval, type == BOOL_TRUE);
+			break;
+
+		case NULL_NULL:
+			ZVAL_NULL(retval);
+			break;
+
+		case TC_NUMBER:
+			if (convert_to_number(retval, str, len) == SUCCESS) {
+				break;
+			}
+			/* intentional fall-through */
+		default:
+			zend_ini_copy_value(retval, str, len);
+	}
 }
 
 static void _yy_push_state(int new_state TSRMLS_DC)
 {
-	zend_stack_push(&SCNG(state_stack), (void *) &YYGETCONDITION(), sizeof(int));
+	zend_stack_push(&SCNG(state_stack), (void *) &YYGETCONDITION());
 	YYSETCONDITION(new_state);
 }
 
@@ -152,8 +197,7 @@ static void _yy_push_state(int new_state TSRMLS_DC)
 
 static void yy_pop_state(TSRMLS_D)
 {
-	int *stack_state;
-	zend_stack_top(&SCNG(state_stack), (void **) &stack_state);
+	int *stack_state = zend_stack_top(&SCNG(state_stack));
 	YYSETCONDITION(*stack_state);
 	zend_stack_del_top(&SCNG(state_stack));
 }
@@ -172,7 +216,7 @@ static void yy_scan_buffer(char *str, unsigned int len TSRMLS_DC)
 static int init_ini_scanner(int scanner_mode, zend_file_handle *fh TSRMLS_DC)
 {
 	/* Sanity check */
-	if (scanner_mode != ZEND_INI_SCANNER_NORMAL && scanner_mode != ZEND_INI_SCANNER_RAW) {
+	if (scanner_mode != ZEND_INI_SCANNER_NORMAL && scanner_mode != ZEND_INI_SCANNER_RAW && scanner_mode != ZEND_INI_SCANNER_TYPED) {
 		zend_error(E_WARNING, "Invalid scanner mode");
 		return FAILURE;
 	}
@@ -187,7 +231,7 @@ static int init_ini_scanner(int scanner_mode, zend_file_handle *fh TSRMLS_DC)
 		ini_filename = NULL;
 	}
 
-	zend_stack_init(&SCNG(state_stack));
+	zend_stack_init(&SCNG(state_stack), sizeof(int));
 	BEGIN(INITIAL);
 
 	return SUCCESS;
@@ -422,8 +466,12 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	RETURN_TOKEN(BOOL_TRUE, "1", 1);
 }
 
-<INITIAL,ST_VALUE>("false"|"off"|"no"|"none"|"null"){TABS_AND_SPACES}* { /* FALSE value (when used outside option value/offset this causes parse error!)*/
+<INITIAL,ST_VALUE>("false"|"off"|"no"|"none"){TABS_AND_SPACES}* { /* FALSE value (when used outside option value/offset this causes parse error!)*/
 	RETURN_TOKEN(BOOL_FALSE, "", 0);
+}
+
+<INITIAL,ST_VALUE>("null"){TABS_AND_SPACES}* {
+	RETURN_TOKEN(NULL_NULL, "", 0);
 }
 
 <INITIAL>{LABEL} { /* Get option name */
@@ -446,7 +494,7 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 }
 
 <ST_RAW>{RAW_VALUE_CHARS} { /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
-	char *sc = NULL;
+	unsigned char *sc = NULL;
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR) {
 			case '\n':

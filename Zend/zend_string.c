@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -21,47 +21,48 @@
 #include "zend.h"
 #include "zend_globals.h"
 
-#ifndef ZEND_DEBUG_INTERNED_STRINGS
-# define ZEND_DEBUG_INTERNED_STRINGS 0
-#endif
-
-#if ZEND_DEBUG_INTERNED_STRINGS
-# include <sys/mman.h>
-#endif
-
-ZEND_API const char *(*zend_new_interned_string)(const char *str, int len, int free_src TSRMLS_DC);
+ZEND_API zend_string *(*zend_new_interned_string)(zend_string *str TSRMLS_DC);
 ZEND_API void (*zend_interned_strings_snapshot)(TSRMLS_D);
 ZEND_API void (*zend_interned_strings_restore)(TSRMLS_D);
 
-static const char *zend_new_interned_string_int(const char *str, int len, int free_src TSRMLS_DC);
+static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC);
 static void zend_interned_strings_snapshot_int(TSRMLS_D);
 static void zend_interned_strings_restore_int(TSRMLS_D);
+
+ZEND_API zend_ulong zend_hash_func(const char *str, size_t len)
+{
+	return zend_inline_hash_func(str, len);
+}
+
+#ifndef ZTS
+static void _str_dtor(zval *zv)
+{
+	zend_string *str = Z_STR_P(zv);
+	GC_FLAGS(str) &= ~IS_STR_INTERNED;
+	GC_REFCOUNT(str) = 1;
+}
+#endif
 
 void zend_interned_strings_init(TSRMLS_D)
 {
 #ifndef ZTS
-	size_t size = 1024 * 1024;
+	zend_string *str;
 
-#if ZEND_DEBUG_INTERNED_STRINGS
-	CG(interned_strings_start) = valloc(size);
-#else
-	CG(interned_strings_start) = malloc(size);
-#endif
-
-	CG(interned_strings_top) = CG(interned_strings_start);
-	CG(interned_strings_snapshot_top) = CG(interned_strings_start);
-	CG(interned_strings_end) = CG(interned_strings_start) + size;
-
-	zend_hash_init(&CG(interned_strings), 0, NULL, NULL, 1);
+	zend_hash_init(&CG(interned_strings), 1024, NULL, _str_dtor, 1);
 	
 	CG(interned_strings).nTableMask = CG(interned_strings).nTableSize - 1;
-	CG(interned_strings).arBuckets = (Bucket **) pecalloc(CG(interned_strings).nTableSize, sizeof(Bucket *), CG(interned_strings).persistent);
+	CG(interned_strings).arData = (Bucket*) pecalloc(CG(interned_strings).nTableSize, sizeof(Bucket), 1);
+	CG(interned_strings).arHash = (uint32_t*) pecalloc(CG(interned_strings).nTableSize, sizeof(uint32_t), 1);
+	memset(CG(interned_strings).arHash, INVALID_IDX, CG(interned_strings).nTableSize * sizeof(uint32_t));
 
-#if ZEND_DEBUG_INTERNED_STRINGS
-	mprotect(CG(interned_strings_start), CG(interned_strings_end) - CG(interned_strings_start), PROT_READ);
+	/* interned empty string */
+	str = zend_string_alloc(sizeof("")-1, 1);
+	str->val[0] = '\000';
+	CG(empty_string) = zend_new_interned_string_int(str TSRMLS_CC);
 #endif
 
-#endif
+	/* one char strings (the actual interned strings are going to be created by ext/opcache) */
+	memset(CG(one_char_string), 0, sizeof(CG(one_char_string)));
 
 	zend_new_interned_string = zend_new_interned_string_int;
 	zend_interned_strings_snapshot = zend_interned_strings_snapshot_int;
@@ -71,94 +72,48 @@ void zend_interned_strings_init(TSRMLS_D)
 void zend_interned_strings_dtor(TSRMLS_D)
 {
 #ifndef ZTS
-#if ZEND_DEBUG_INTERNED_STRINGS
-	mprotect(CG(interned_strings_start), CG(interned_strings_end) - CG(interned_strings_start), PROT_WRITE | PROT_READ);
-#endif
-	free(CG(interned_strings).arBuckets);
-	free(CG(interned_strings_start));
+	zend_hash_destroy(&CG(interned_strings));
 #endif
 }
 
-static const char *zend_new_interned_string_int(const char *arKey, int nKeyLength, int free_src TSRMLS_DC)
+static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 {
 #ifndef ZTS
-	ulong h;
+	zend_ulong h;
 	uint nIndex;
+	uint idx;
 	Bucket *p;
 
-	if (IS_INTERNED(arKey)) {
-		return arKey;
+	if (IS_INTERNED(str)) {
+		return str;
 	}
 
-	h = zend_inline_hash_func(arKey, nKeyLength);
+	h = zend_string_hash_val(str);
 	nIndex = h & CG(interned_strings).nTableMask;
-	p = CG(interned_strings).arBuckets[nIndex];
-	while (p != NULL) {
-		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
-			if (!memcmp(p->arKey, arKey, nKeyLength)) {
-				if (free_src) {
-					efree((void *)arKey);
-				}
-				return p->arKey;
+	idx = CG(interned_strings).arHash[nIndex];
+	while (idx != INVALID_IDX) {
+		p = CG(interned_strings).arData + idx;
+		if ((p->h == h) && (p->key->len == str->len)) {
+			if (!memcmp(p->key->val, str->val, str->len)) {
+				zend_string_release(str);
+				return p->key;
 			}
 		}
-		p = p->pNext;
+		idx = Z_NEXT(p->val);
 	}
 	
-	if (CG(interned_strings_top) + ZEND_MM_ALIGNED_SIZE(sizeof(Bucket) + nKeyLength) >=
-	    CG(interned_strings_end)) {
-	    /* no memory */
-		return arKey;
-	}
+	GC_REFCOUNT(str) = 1;
+	GC_FLAGS(str) |= IS_STR_INTERNED;
 
-	p = (Bucket *) CG(interned_strings_top);
-	CG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(sizeof(Bucket) + nKeyLength);
-
-#if ZEND_DEBUG_INTERNED_STRINGS
-	mprotect(CG(interned_strings_start), CG(interned_strings_end) - CG(interned_strings_start), PROT_READ | PROT_WRITE);
-#endif
-	
-	p->arKey = (char*)(p+1);
-	memcpy((char*)p->arKey, arKey, nKeyLength);
-	if (free_src) {
-		efree((void *)arKey);
-	}
-	p->nKeyLength = nKeyLength;
-	p->h = h;
-	p->pData = &p->pDataPtr;
-	p->pDataPtr = p;
-	
-	p->pNext = CG(interned_strings).arBuckets[nIndex];
-	p->pLast = NULL;
-	if (p->pNext) {
-		p->pNext->pLast = p;
-	}
-
-	HANDLE_BLOCK_INTERRUPTIONS();
-	
-	p->pListLast = CG(interned_strings).pListTail;
-	CG(interned_strings).pListTail = p;
-	p->pListNext = NULL;
-	if (p->pListLast != NULL) {
-		p->pListLast->pListNext = p;
-	}
-	if (!CG(interned_strings).pListHead) {
-		CG(interned_strings).pListHead = p;
-	}
-
-	CG(interned_strings).arBuckets[nIndex] = p;
-
-	HANDLE_UNBLOCK_INTERRUPTIONS();
-
-	CG(interned_strings).nNumOfElements++;
-
-	if (CG(interned_strings).nNumOfElements > CG(interned_strings).nTableSize) {
+	if (CG(interned_strings).nNumUsed >= CG(interned_strings).nTableSize) {
 		if ((CG(interned_strings).nTableSize << 1) > 0) {	/* Let's double the table size */
-			Bucket **t = (Bucket **) perealloc_recoverable(CG(interned_strings).arBuckets, (CG(interned_strings).nTableSize << 1) * sizeof(Bucket *), CG(interned_strings).persistent);
+			Bucket *d = (Bucket *) perealloc_recoverable(CG(interned_strings).arData, (CG(interned_strings).nTableSize << 1) * sizeof(Bucket), 1);
+			uint32_t *h = (uint32_t *) perealloc_recoverable(CG(interned_strings).arHash, (CG(interned_strings).nTableSize << 1) * sizeof(uint32_t), 1);
 
-			if (t) {
+			if (d && h) {
 				HANDLE_BLOCK_INTERRUPTIONS();
-				CG(interned_strings).arBuckets = t;
+				CG(interned_strings).arData = d;
+				CG(interned_strings).arHash = h;
 				CG(interned_strings).nTableSize = (CG(interned_strings).nTableSize << 1);
 				CG(interned_strings).nTableMask = CG(interned_strings).nTableSize - 1;
 				zend_hash_rehash(&CG(interned_strings));
@@ -167,60 +122,73 @@ static const char *zend_new_interned_string_int(const char *arKey, int nKeyLengt
 		}
 	}
 
-#if ZEND_DEBUG_INTERNED_STRINGS
-	mprotect(CG(interned_strings_start), CG(interned_strings_end) - CG(interned_strings_start), PROT_READ);
-#endif
+	HANDLE_BLOCK_INTERRUPTIONS();
+	
+	idx = CG(interned_strings).nNumUsed++;
+	CG(interned_strings).nNumOfElements++;
+	p = CG(interned_strings).arData + idx;
+	p->h = h;
+	p->key = str;
+	Z_STR(p->val) = str;
+	Z_TYPE_INFO(p->val) = IS_INTERNED_STRING_EX;
+	nIndex = h & CG(interned_strings).nTableMask;
+	Z_NEXT(p->val) = CG(interned_strings).arHash[nIndex];
+	CG(interned_strings).arHash[nIndex] = idx;
+		
+	HANDLE_UNBLOCK_INTERRUPTIONS();
 
-	return p->arKey;
+	return str;
 #else
-	return arKey;
+	return str;
 #endif
 }
 
 static void zend_interned_strings_snapshot_int(TSRMLS_D)
 {
-	CG(interned_strings_snapshot_top) = CG(interned_strings_top);
+#ifndef ZTS
+	uint idx;
+	Bucket *p;
+
+	idx = CG(interned_strings).nNumUsed;
+	while (idx > 0) {
+		idx--;
+		p = CG(interned_strings).arData + idx;
+		ZEND_ASSERT(GC_FLAGS(p->key) & IS_STR_PERSISTENT);
+		GC_FLAGS(p->key) |= IS_STR_PERMANENT;
+	}
+#endif
 }
 
 static void zend_interned_strings_restore_int(TSRMLS_D)
 {
 #ifndef ZTS
+	uint nIndex;
+	uint idx;
 	Bucket *p;
-	int i;
-#endif
 
-	CG(interned_strings_top) = CG(interned_strings_snapshot_top);
+	idx = CG(interned_strings).nNumUsed;
+	while (idx > 0) {
+		idx--;
+		p = CG(interned_strings).arData + idx;
+		if (GC_FLAGS(p->key) & IS_STR_PERMANENT) break;
+		CG(interned_strings).nNumUsed--;
+		CG(interned_strings).nNumOfElements--;
 
-#ifndef ZTS
-#if ZEND_DEBUG_INTERNED_STRINGS
-	mprotect(CG(interned_strings_start), CG(interned_strings_end) - CG(interned_strings_start), PROT_WRITE | PROT_READ);
-#endif
+		GC_FLAGS(p->key) &= ~IS_STR_INTERNED;
+		GC_REFCOUNT(p->key) = 1;
+		zend_string_free(p->key);
 
-	for (i = 0; i < CG(interned_strings).nTableSize; i++) {
-		p = CG(interned_strings).arBuckets[i];
-		while (p && p->arKey > CG(interned_strings_top)) {
-			CG(interned_strings).nNumOfElements--;
-			if (p->pListLast != NULL) {
-				p->pListLast->pListNext = p->pListNext;
-			} else { 
-				CG(interned_strings).pListHead = p->pListNext;
-			}
-			if (p->pListNext != NULL) {
-				p->pListNext->pListLast = p->pListLast;
-			} else {
-				CG(interned_strings).pListTail = p->pListLast;
-			}
-			p = p->pNext;
-		}
-		if (p) {
-			p->pLast = NULL;
-		}
-		CG(interned_strings).arBuckets[i] = p;
-	}
-
-#if ZEND_DEBUG_INTERNED_STRINGS
-	mprotect(CG(interned_strings_start), CG(interned_strings_end) - CG(interned_strings_start), PROT_READ);
-#endif
+		nIndex = p->h & CG(interned_strings).nTableMask;
+		if (CG(interned_strings).arHash[nIndex] == idx) {
+			CG(interned_strings).arHash[nIndex] = Z_NEXT(p->val);
+		} else {
+			uint prev = CG(interned_strings).arHash[nIndex];
+			while (Z_NEXT(CG(interned_strings).arData[prev].val) != idx) {
+				prev = Z_NEXT(CG(interned_strings).arData[prev].val);
+ 			}
+			Z_NEXT(CG(interned_strings).arData[prev].val) = Z_NEXT(p->val);
+ 		}
+ 	}
 #endif
 }
 

@@ -1,8 +1,8 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@
  */
 #define NO_PIKE_SHORTHAND
 
-/* Ok, we are now using Pike level threads to handle PHP5 since
+/* Ok, we are now using Pike level threads to handle PHP7 since
  * the nice th_farm threads aren't working on Linux with glibc 2.2
  * (why this is I don't know).
  */
@@ -79,7 +79,7 @@
 #endif
 
 #ifndef PIKE_THREADS
-#error The PHP5 module requires that your Pike has thread support.
+#error The PHP7 module requires that your Pike has thread support.
 #endif
 
 #undef HIDE_GLOBAL_VARIABLES
@@ -395,11 +395,10 @@ php_caudium_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
  * the client. Used for POST/PUT requests.
  */
 
-INLINE static int php_caudium_low_read_post(char *buf, uint count_bytes)
+INLINE static int php_caudium_low_read_post(char *buf, uint count_bytes TSRMLS_DC)
 {
   uint total_read = 0;
   GET_THIS();
-  TSRMLS_FETCH();
   
   if(!MY_FD_OBJ->prog)
   {
@@ -423,7 +422,7 @@ static int
 php_caudium_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 {
   uint total_read = 0;
-  THREAD_SAFE_RUN(total_read = php_caudium_low_read_post(buf, count_bytes), "read post");
+  THREAD_SAFE_RUN(total_read = php_caudium_low_read_post(buf, count_bytes TSRMLS_CC), "read post");
   return total_read;
 }
 
@@ -626,7 +625,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
     SG(request_info).headers_only = 0;
   }
 
-  /* Let PHP5 handle the deconding of the AUTH */
+  /* Let PHP7 handle the deconding of the AUTH */
   php_handle_auth_data(lookup_string_header("HTTP_AUTHORIZATION", NULL), TSRMLS_C);
    /* Swap out this thread and release the interpreter lock to allow
    * Pike threads to run. We wait since the above would otherwise require

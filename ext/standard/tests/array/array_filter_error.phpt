@@ -28,7 +28,7 @@ $extra_arg = 10;
 
 // with one more than the expected number of arguments
 echo "-- Testing array_filter() function with more than expected no. of arguments --";
-var_dump( array_filter($input, "odd", $extra_arg) );
+var_dump( array_filter($input, "odd", $extra_arg, $extra_arg) );
 
 // with incorrect callback function
 echo "-- Testing array_filter() function with incorrect callback --";
@@ -42,7 +42,7 @@ echo "Done"
 Warning: array_filter() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 -- Testing array_filter() function with more than expected no. of arguments --
-Warning: array_filter() expects at most 2 parameters, 3 given in %s on line %d
+Warning: array_filter() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 -- Testing array_filter() function with incorrect callback --
 Warning: array_filter() expects parameter 2 to be a valid callback, function 'even' not found or invalid function name in %s on line %d

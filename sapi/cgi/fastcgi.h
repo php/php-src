@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -139,7 +139,7 @@ void fcgi_impersonate(void);
 #endif
 
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len);
-void fcgi_free_mgmt_var_cb(void * ptr);
+void fcgi_free_mgmt_var_cb(zval *zv);
 
 /*
  * Local variables:

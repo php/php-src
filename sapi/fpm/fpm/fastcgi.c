@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -426,8 +426,9 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 	char buf[128];
 	char *tmp = buf;
 	size_t buf_size = sizeof(buf);
-	int name_len, val_len;
-	uint eff_name_len;
+	int name_len = 0;
+	int val_len = 0;
+	uint eff_name_len = 0;
 	char *s;
 	int ret = 1;
 	size_t bytes_consumed;
@@ -478,11 +479,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 		memcpy(tmp, p, eff_name_len);
 		tmp[eff_name_len] = 0;
 		s = estrndup((char*)p + name_len, val_len);
-		if (s == NULL) {
-			ret = 0;
-			break;
-		}
-		zend_hash_update(req->env, tmp, eff_name_len+1, &s, sizeof(char*), NULL);
+		zend_hash_str_update_ptr(req->env, tmp, eff_name_len, s);
 		p += name_len + val_len;
 	}
 	if (tmp != buf && tmp != NULL) {
@@ -491,9 +488,9 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 	return ret;
 }
 
-static void fcgi_free_var(char **s)
+static void fcgi_free_var(zval *zv)
 {
-	efree(*s);
+	efree(Z_PTR_P(zv));
 }
 
 static int fcgi_read_request(fcgi_request *req)
@@ -508,7 +505,7 @@ static int fcgi_read_request(fcgi_request *req)
 	req->out_hdr = NULL;
 	req->out_pos = req->out_buf;
 	ALLOC_HASHTABLE(req->env);
-	zend_hash_init(req->env, 0, NULL, (void (*)(void *)) fcgi_free_var, 0);
+	zend_hash_init(req->env, 0, NULL, fcgi_free_var, 0);
 
 	if (safe_read(req, &hdr, sizeof(fcgi_header)) != sizeof(fcgi_header) ||
 	    hdr.version < FCGI_VERSION_1) {
@@ -545,15 +542,15 @@ static int fcgi_read_request(fcgi_request *req)
 		switch ((((fcgi_begin_request*)buf)->roleB1 << 8) + ((fcgi_begin_request*)buf)->roleB0) {
 			case FCGI_RESPONDER:
 				val = estrdup("RESPONDER");
-				zend_hash_update(req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), &val, sizeof(char*), NULL);
+				zend_hash_str_update_ptr(req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), val);
 				break;
 			case FCGI_AUTHORIZER:
 				val = estrdup("AUTHORIZER");
-				zend_hash_update(req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), &val, sizeof(char*), NULL);
+				zend_hash_str_update_ptr(req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), val);
 				break;
 			case FCGI_FILTER:
 				val = estrdup("FILTER");
-				zend_hash_update(req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), &val, sizeof(char*), NULL);
+				zend_hash_str_update_ptr(req->env, "FCGI_ROLE", sizeof("FCGI_ROLE"), val);
 				break;
 			default:
 				return 0;
@@ -592,12 +589,8 @@ static int fcgi_read_request(fcgi_request *req)
 		}
 	} else if (hdr.type == FCGI_GET_VALUES) {
 		unsigned char *p = buf + sizeof(fcgi_header);
-		HashPosition pos;
-		char * str_index;
-		uint str_length;
-		ulong num_index;
-		int key_type;
-		zval ** value;
+		zend_string *key;
+		zval *value;
 
 		if (safe_read(req, buf, len+padding) != len+padding) {
 			req->keep = 0;
@@ -609,28 +602,26 @@ static int fcgi_read_request(fcgi_request *req)
 			return 0;
 		}
 
-		zend_hash_internal_pointer_reset_ex(req->env, &pos);
-		while ((key_type = zend_hash_get_current_key_ex(req->env, &str_index, &str_length, &num_index, 0, &pos)) != HASH_KEY_NON_EXISTENT) {
+		ZEND_HASH_FOREACH_STR_KEY(req->env, key) {
 			int zlen;
-			zend_hash_move_forward_ex(req->env, &pos);
-			if (key_type != HASH_KEY_IS_STRING) {
+			if (!key) {
 				continue;
 			}
-			if (zend_hash_find(&fcgi_mgmt_vars, str_index, str_length, (void**) &value) != SUCCESS) {
+			value = zend_hash_find(&fcgi_mgmt_vars, key);
+			if (!value) {
 				continue;
 			}
-			--str_length;
-			zlen = Z_STRLEN_PP(value);
-			if ((p + 4 + 4 + str_length + zlen) >= (buf + sizeof(buf))) {
+			zlen = Z_STRLEN_P(value);
+			if ((p + 4 + 4 + key->len + zlen) >= (buf + sizeof(buf))) {
 				break;
 			}
-			if (str_length < 0x80) {
-				*p++ = str_length;
+			if (key->len < 0x80) {
+				*p++ = key->len;
 			} else {
-				*p++ = ((str_length >> 24) & 0xff) | 0x80;
-				*p++ = (str_length >> 16) & 0xff;
-				*p++ = (str_length >> 8) & 0xff;
-				*p++ = str_length & 0xff;
+				*p++ = ((key->len >> 24) & 0xff) | 0x80;
+				*p++ = (key->len >> 16) & 0xff;
+				*p++ = (key->len >> 8) & 0xff;
+				*p++ = key->len & 0xff;
 			}
 			if (zlen < 0x80) {
 				*p++ = zlen;
@@ -640,11 +631,11 @@ static int fcgi_read_request(fcgi_request *req)
 				*p++ = (zlen >> 8) & 0xff;
 				*p++ = zlen & 0xff;
 			}
-			memcpy(p, str_index, str_length);
-			p += str_length;
-			memcpy(p, Z_STRVAL_PP(value), zlen);
+			memcpy(p, key->val, key->len);
+			p += key->len;
+			memcpy(p, Z_STRVAL_P(value), zlen);
 			p += zlen;
-		}
+		} ZEND_HASH_FOREACH_END();
 		len = p - buf - sizeof(fcgi_header);
 		len += fcgi_make_header((fcgi_header*)buf, FCGI_GET_VALUES_RESULT, 0, len);
 		if (safe_write(req, buf, sizeof(fcgi_header)+len) != (int)sizeof(fcgi_header)+len) {
@@ -1049,28 +1040,22 @@ int fcgi_finish_request(fcgi_request *req, int force_close)
 
 char* fcgi_getenv(fcgi_request *req, const char* var, int var_len)
 {
-	char **val;
-
-	if (!req) return NULL;
-
-	if (zend_hash_find(req->env, (char*)var, var_len+1, (void**)&val) == SUCCESS) {
-		return *val;
+	if (!req) {
+		return NULL;
 	}
-	return NULL;
+
+	return zend_hash_str_find_ptr(req->env, var, var_len);
 }
 
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 {
 	if (var && req) {
 		if (val == NULL) {
-			zend_hash_del(req->env, var, var_len+1);
+			zend_hash_str_del(req->env, var, var_len);
 		} else {
-			char **ret;
-
 			val = estrdup(val);
-			if (zend_hash_update(req->env, var, var_len+1, &val, sizeof(char*), (void**)&ret) == SUCCESS) {
-				return *ret;
-			}
+			zend_hash_str_update_ptr(req->env, var, var_len, val);
+			return val;
 		}
 	}
 	return NULL;
@@ -1078,19 +1063,14 @@ char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
-	zval * zvalue;
-	zvalue = pemalloc(sizeof(*zvalue), 1);
-	Z_TYPE_P(zvalue) = IS_STRING;
-	Z_STRVAL_P(zvalue) = pestrndup(value, value_len, 1);
-	Z_STRLEN_P(zvalue) = value_len;
-	zend_hash_add(&fcgi_mgmt_vars, name, name_len + 1, &zvalue, sizeof(zvalue), NULL);
+	zval zvalue;
+	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
+	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
 }
 
-void fcgi_free_mgmt_var_cb(void * ptr)
+void fcgi_free_mgmt_var_cb(zval *zv)
 {
-	zval ** var = (zval **)ptr;
-	pefree(Z_STRVAL_PP(var), 1);
-	pefree(*var, 1);
+	zend_string_free(Z_STR_P(zv));
 }
 
 char *fcgi_get_last_client_ip() /* {{{ */

@@ -362,7 +362,7 @@ AC_TRY_RUN([
 if test "$flock_type" == "unknown"; then
 	AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])
 fi
-  
+
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
 	zend_accelerator_blacklist.c \
@@ -376,7 +376,15 @@ fi
 	shared_alloc_shm.c \
 	shared_alloc_mmap.c \
 	shared_alloc_posix.c \
-	Optimizer/zend_optimizer.c,
+	Optimizer/zend_optimizer.c \
+	Optimizer/pass1_5.c \
+	Optimizer/pass2.c \
+	Optimizer/pass3.c \
+	Optimizer/optimize_func_calls.c \
+	Optimizer/block_pass.c \
+	Optimizer/optimize_temp_vars_5.c \
+	Optimizer/nop_removal.c \
+	Optimizer/compact_literals.c,
 	shared,,,,yes)
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)

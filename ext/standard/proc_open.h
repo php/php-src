@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,7 +44,7 @@ struct php_process_handle {
 	HANDLE childHandle;
 #endif
 	int npipes;
-	long pipes[PHP_PROC_OPEN_MAX_DESCRIPTORS];
+	zend_resource *pipes[PHP_PROC_OPEN_MAX_DESCRIPTORS];
 	char *command;
 	int is_persistent;
 	php_process_env_t env;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 The PHP Group                                |
+   | Copyright (c) 1998-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -130,7 +130,7 @@ int  zend_shared_memdup_size(void *p, size_t size);
 typedef union _align_test {
 	void   *ptr;
 	double  dbl;
-	long    lng;
+	zend_long  lng;
 } align_test;
 
 #if ZEND_GCC_VERSION >= 2000

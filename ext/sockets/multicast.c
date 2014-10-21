@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -93,17 +93,19 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out TSRMLS_DC)
 		if (Z_LVAL_P(val) < 0 || Z_LVAL_P(val) > UINT_MAX) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				"the interface index cannot be negative or larger than %u;"
-				" given %ld", UINT_MAX, Z_LVAL_P(val));
+				" given %pd", UINT_MAX, Z_LVAL_P(val));
 			ret = FAILURE;
 		} else {
 			*out = Z_LVAL_P(val);
 			ret = SUCCESS;
 		}
 	} else {
-		zval_add_ref(&val);
-		convert_to_string_ex(&val);
+		if (Z_REFCOUNTED_P(val)) {
+			Z_ADDREF_P(val);
+		}
+		convert_to_string_ex(val);
 		ret = php_string_to_if_index(Z_STRVAL_P(val), out TSRMLS_CC);
-		zval_ptr_dtor(&val);
+		zval_ptr_dtor(val);
 	}
 
 	return ret;
@@ -114,38 +116,38 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out TSRMLS_DC)
 static int php_get_if_index_from_array(const HashTable *ht, const char *key,
 	php_socket *sock, unsigned int *if_index TSRMLS_DC)
 {
-	zval **val;
+	zval *val;
 
-	if (zend_hash_find(ht, key, strlen(key) + 1, (void **)&val) == FAILURE) {
+	if ((val = zend_hash_str_find(ht, key, strlen(key))) == NULL) {
 		*if_index = 0; /* default: 0 */
 		return SUCCESS;
 	}
 
-	return php_get_if_index_from_zval(*val, if_index TSRMLS_CC);
+	return php_get_if_index_from_zval(val, if_index TSRMLS_CC);
 }
 
 static int php_get_address_from_array(const HashTable *ht, const char *key,
 	php_socket *sock, php_sockaddr_storage *ss, socklen_t *ss_len TSRMLS_DC)
 {
-	zval **val,
-		 *valcp;
+	zval *val;
 
-	if (zend_hash_find(ht, key, strlen(key) + 1, (void **)&val) == FAILURE) {
+	if ((val = zend_hash_str_find(ht, key, strlen(key))) == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no key \"%s\" passed in optval", key);
 		return FAILURE;
 	}
-	valcp = *val;
-	zval_add_ref(&valcp);
+	if (Z_REFCOUNTED_P(val)) {
+		Z_ADDREF_P(val);
+	}
 	convert_to_string_ex(val);
-	if (!php_set_inet46_addr(ss, ss_len, Z_STRVAL_P(valcp), sock TSRMLS_CC)) {
-		zval_ptr_dtor(&valcp);
+	if (!php_set_inet46_addr(ss, ss_len, Z_STRVAL_P(val), sock TSRMLS_CC)) {
+		zval_ptr_dtor(val);
 		return FAILURE;
 	}
-	zval_ptr_dtor(&valcp);
+	zval_ptr_dtor(val);
 	return SUCCESS;
 }
 
-static int php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval **arg4 TSRMLS_DC)
+static int php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval *arg4 TSRMLS_DC)
 {
 	HashTable		 		*opt_ht;
 	unsigned int			if_index;
@@ -169,7 +171,7 @@ static int php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval *
 			mcast_req_fun = &php_mcast_leave;
 mcast_req_fun:
 			convert_to_array_ex(arg4);
-			opt_ht = HASH_OF(*arg4);
+			opt_ht = HASH_OF(arg4);
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
 				&glen TSRMLS_CC) == FAILURE) {
@@ -205,7 +207,7 @@ mcast_req_fun:
 			mcast_sreq_fun = &php_mcast_leave_source;
 		mcast_sreq_fun:
 			convert_to_array_ex(arg4);
-			opt_ht = HASH_OF(*arg4);
+			opt_ht = HASH_OF(arg4);
 
 			if (php_get_address_from_array(opt_ht, "group", php_sock, &group,
 					&glen TSRMLS_CC) == FAILURE) {
@@ -244,7 +246,7 @@ mcast_req_fun:
 int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 							   int level,
 							   int optname,
-							   zval **arg4 TSRMLS_DC)
+							   zval *arg4 TSRMLS_DC)
 {
 	unsigned int	if_index;
 	struct in_addr	if_addr;
@@ -269,7 +271,7 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 		}
 
 	case IP_MULTICAST_IF:
-		if (php_get_if_index_from_zval(*arg4, &if_index TSRMLS_CC) == FAILURE) {
+		if (php_get_if_index_from_zval(arg4, &if_index TSRMLS_CC) == FAILURE) {
 			return FAILURE;
 		}
 
@@ -282,17 +284,18 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 
 	case IP_MULTICAST_LOOP:
 		convert_to_boolean_ex(arg4);
+		ipv4_mcast_ttl_lback = (unsigned char) (Z_TYPE_P(arg4) == IS_TRUE);
 		goto ipv4_loop_ttl;
 
 	case IP_MULTICAST_TTL:
 		convert_to_long_ex(arg4);
-		if (Z_LVAL_PP(arg4) < 0L || Z_LVAL_PP(arg4) > 255L) {
+		if (Z_LVAL_P(arg4) < 0L || Z_LVAL_P(arg4) > 255L) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"Expected a value between 0 and 255");
 			return FAILURE;
 		}
+		ipv4_mcast_ttl_lback = (unsigned char) Z_LVAL_P(arg4);
 ipv4_loop_ttl:
-		ipv4_mcast_ttl_lback = (unsigned char) Z_LVAL_PP(arg4);
 		opt_ptr = &ipv4_mcast_ttl_lback;
 		optlen	= sizeof(ipv4_mcast_ttl_lback);
 		goto dosockopt;
@@ -313,7 +316,7 @@ dosockopt:
 int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 								 int level,
 								 int optname,
-								 zval **arg4 TSRMLS_DC)
+								 zval *arg4 TSRMLS_DC)
 {
 	unsigned int	if_index;
 	void			*opt_ptr;
@@ -337,7 +340,7 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 		}
 
 	case IPV6_MULTICAST_IF:
-		if (php_get_if_index_from_zval(*arg4, &if_index TSRMLS_CC) == FAILURE) {
+		if (php_get_if_index_from_zval(arg4, &if_index TSRMLS_CC) == FAILURE) {
 			return FAILURE;
 		}
 
@@ -347,16 +350,17 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 
 	case IPV6_MULTICAST_LOOP:
 		convert_to_boolean_ex(arg4);
+		ov = (int) Z_TYPE_P(arg4) == IS_TRUE;
 		goto ipv6_loop_hops;
 	case IPV6_MULTICAST_HOPS:
 		convert_to_long_ex(arg4);
-		if (Z_LVAL_PP(arg4) < -1L || Z_LVAL_PP(arg4) > 255L) {
+		if (Z_LVAL_P(arg4) < -1L || Z_LVAL_P(arg4) > 255L) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"Expected a value between -1 and 255");
 			return FAILURE;
 		}
+		ov = (int) Z_LVAL_P(arg4);
 ipv6_loop_hops:
-		ov = (int) Z_LVAL_PP(arg4);
 		opt_ptr = &ov;
 		optlen	= sizeof(ov);
 		goto dosockopt;

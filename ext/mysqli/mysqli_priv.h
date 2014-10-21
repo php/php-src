@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -84,8 +84,7 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 
 #define PHP_MYSQLI_EXPORT(__type) PHP_MYSQLI_API __type
 
-PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRMLS_DC);
-
+PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry * TSRMLS_DC);
 
 #define MYSQLI_DISABLE_MQ if (mysql->multi_query) { \
 	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF); \
@@ -97,26 +96,25 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	mysql->multi_query = 1; \
 }
 
-
-#define MYSQLI_RETURN_LONG_LONG(__val) \
+#define MYSQLI_RETURN_LONG_INT(__val) \
 { \
-	if ((__val) < LONG_MAX) {		\
-		RETURN_LONG((long) (__val));		\
+	if ((__val) < ZEND_LONG_MAX) {		\
+		RETURN_LONG((zend_long) (__val));		\
 	} else {				\
-		char *ret;			\
 		/* always used with my_ulonglong -> %llu */ \
-		int l = spprintf(&ret, 0, MYSQLI_LLU_SPEC, (__val));	\
-		RETURN_STRINGL(ret, l, 0);		\
-	}					\
+		RETURN_STR(strpprintf(0, MYSQLI_LLU_SPEC, (__val)));	\
+	} \
 }
 
 #define MYSQLI_STORE_RESULT 0
 #define MYSQLI_USE_RESULT 	1
 #ifdef MYSQLI_USE_MYSQLND
 #define MYSQLI_ASYNC	 	8
+#define MYSQLI_STORE_RESULT_COPY_DATA 16
 #else
 /* libmysql */
 #define MYSQLI_ASYNC	 	0
+#define MYSQLI_STORE_RESULT_COPY_DATA	0
 #endif
 
 /* for mysqli_fetch_assoc */

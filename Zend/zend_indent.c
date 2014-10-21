@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -47,27 +47,26 @@ static void handle_whitespace(int *emit_whitespace)
 }
 
 
-ZEND_API void zend_indent()
+ZEND_API void zend_indent(TSRMLS_D)
 {
 	zval token;
 	int token_type;
 	int in_string=0;
-	int nest_level=0;
-	int emit_whitespace[256];
-	int i;
-	TSRMLS_FETCH();
+	unsigned int nest_level=0;
+	unsigned int emit_whitespace[256];
+	unsigned int i;
 
 	memset(emit_whitespace, 0, sizeof(int)*256);
 
 	/* highlight stuff coming back from zendlex() */
-	token.type = 0;
+	ZVAL_UNDEF(&token);
 	while ((token_type=lex_scan(&token TSRMLS_CC))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
 				zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				break;
 			case T_WHITESPACE: {
-					token.type = 0;
+					ZVAL_UNDEF(&token);
 					/* eat whitespace, emit newlines */
 					for (i=0; i<LANG_SCNG(yy_leng); i++) {
 						emit_whitespace[(unsigned char) LANG_SCNG(yy_text)[i]]++;
@@ -79,7 +78,7 @@ ZEND_API void zend_indent()
 				in_string = !in_string;
 				/* break missing intentionally */
 			default:
-				if (token.type==0) {
+				if (Z_TYPE(token) == IS_UNDEF) {
 					/* keyword */
 					switch (token_type) {
 						case ',':
@@ -132,18 +131,18 @@ dflt_printout:
 				}
 				break;
 		}
-		if (token.type == IS_STRING) {
+		if (Z_TYPE(token) == IS_STRING) {
 			switch (token_type) {
 			case T_OPEN_TAG:
 			case T_CLOSE_TAG:
 			case T_WHITESPACE:
 				break;
 			default:
-				efree(token.value.str.val);
+				zend_string_release(Z_STR(token));
 				break;
 			}
 		}
-		token.type = 0;
+		ZVAL_UNDEF(&token);
 	}
 }
 

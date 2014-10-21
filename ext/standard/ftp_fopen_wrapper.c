@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -163,7 +163,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 		goto connect_errexit;
 	}
 
-	php_stream_context_set(stream, context);
+	php_stream_context_set(stream, context TSRMLS_CC);
 	php_stream_notify_info(context, PHP_STREAM_NOTIFY_CONNECT, NULL, 0);
 
 	/* Start talking to ftp server */
@@ -423,7 +423,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	int result = 0, use_ssl, use_ssl_on_data=0;
 	php_stream *reuseid=NULL;
 	size_t file_size = 0;
-	zval **tmpzval;
+	zval *tmpzval;
 	int allow_overwrite = 0;
 	int read_write = 0;
 	char *transport;
@@ -452,7 +452,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	}
 
 	if (context &&
-		php_stream_context_get_option(context, "ftp", "proxy", &tmpzval) == SUCCESS) {
+		(tmpzval = php_stream_context_get_option(context, "ftp", "proxy")) != NULL) {
 		if (read_write == 1) {
 			/* Use http wrapper to proxy ftp request */
 			return php_stream_url_wrap_http(wrapper, path, mode, options, opened_path, context STREAMS_CC TSRMLS_CC);
@@ -497,8 +497,8 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		}	
 	} else if (read_write == 2) {
 		/* when writing file (but not appending), it must NOT exist, unless a context option exists which allows it */
-		if (context && php_stream_context_get_option(context, "ftp", "overwrite", &tmpzval) == SUCCESS) {
-			allow_overwrite = Z_LVAL_PP(tmpzval);
+		if (context && (tmpzval = php_stream_context_get_option(context, "ftp", "overwrite")) != NULL) {
+			allow_overwrite = Z_LVAL_P(tmpzval);
 		}
 		if (result <= 299 && result >= 200) {
 			if (allow_overwrite) {
@@ -528,13 +528,13 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	if (read_write == 1) {
 		/* set resume position if applicable */
 		if (context &&
-			php_stream_context_get_option(context, "ftp", "resume_pos", &tmpzval) == SUCCESS &&
-			Z_TYPE_PP(tmpzval) == IS_LONG &&
-			Z_LVAL_PP(tmpzval) > 0) {
-			php_stream_printf(stream TSRMLS_CC, "REST %ld\r\n", Z_LVAL_PP(tmpzval));
+			(tmpzval = php_stream_context_get_option(context, "ftp", "resume_pos")) != NULL &&
+			Z_TYPE_P(tmpzval) == IS_LONG &&
+			Z_LVAL_P(tmpzval) > 0) {
+			php_stream_printf(stream TSRMLS_CC, "REST %pd\r\n", Z_LVAL_P(tmpzval));
 			result = GET_FTP_RESULT(stream);
 			if (result < 300 || result > 399) {			
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to resume from offset %ld", Z_LVAL_PP(tmpzval));
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to resume from offset %pd", Z_LVAL_P(tmpzval));
 				goto errexit;
 			}
 		}
@@ -571,7 +571,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		goto errexit;	
 	}
 	
-	php_stream_context_set(datastream, context);
+	php_stream_context_set(datastream, context TSRMLS_CC);
 	php_stream_notify_progress_init(context, 0, file_size);
 
 	if (use_ssl_on_data && (php_stream_xport_crypto_setup(datastream,
@@ -611,8 +611,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 	php_stream_dirent *ent = (php_stream_dirent *)buf;
 	php_stream *innerstream;
 	size_t tmp_len;
-	char *basename;
-	size_t basename_len;
+	zend_string *basename;
 
 	innerstream =  ((php_ftp_dirstream_data *)stream->abstract)->datastream;
 
@@ -628,24 +627,16 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 		return 0;
 	}
 
-	php_basename(ent->d_name, tmp_len, NULL, 0, &basename, &basename_len TSRMLS_CC);
-	if (!basename) {
-		return 0;
-	}
+	basename = php_basename(ent->d_name, tmp_len, NULL, 0 TSRMLS_CC);
 
-	if (!basename_len) {
-		efree(basename);
-		return 0;
-	}
-
-	tmp_len = MIN(sizeof(ent->d_name), basename_len - 1);
-	memcpy(ent->d_name, basename, tmp_len);
+	tmp_len = MIN(sizeof(ent->d_name), basename->len - 1);
+	memcpy(ent->d_name, basename->val, tmp_len);
 	ent->d_name[tmp_len - 1] = '\0';
-	efree(basename);
+	zend_string_release(basename);
 
 	/* Trim off trailing whitespace characters */
 	tmp_len--;
-	while (tmp_len >= 0 &&
+	while (tmp_len > 0 &&
 			(ent->d_name[tmp_len] == '\n' || ent->d_name[tmp_len] == '\r' ||
 			 ent->d_name[tmp_len] == '\t' || ent->d_name[tmp_len] == ' ')) {
 		ent->d_name[tmp_len--] = '\0';
@@ -745,7 +736,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 		goto opendir_errexit;	
 	}
 	
-	php_stream_context_set(datastream, context);
+	php_stream_context_set(datastream, context TSRMLS_CC);
 
 	if (use_ssl_on_data && (php_stream_xport_crypto_setup(stream,
 			STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL TSRMLS_CC) < 0 ||

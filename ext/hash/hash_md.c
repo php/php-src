@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -106,7 +106,7 @@ PHP_HASH_API void make_digest(char *md5str, unsigned char *digest)
 PHP_NAMED_FUNCTION(php_if_md5)
 {
 	char *arg;
-	int arg_len;
+	size_t arg_len;
 	zend_bool raw_output = 0;
 	char md5str[33];
 	PHP_MD5_CTX context;
@@ -121,10 +121,10 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	PHP_MD5Update(&context, arg, arg_len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_STRINGL(digest, 16);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		RETVAL_STRING(md5str);
 	}
 
 }
@@ -168,10 +168,10 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	}
 
 	if (raw_output) {
-		RETURN_STRINGL(digest, 16, 1);
+		RETURN_STRINGL(digest, 16);
 	} else {
 		make_digest(md5str, digest);
-		RETVAL_STRING(md5str, 1);
+		RETVAL_STRING(md5str);
 	}
 }
 /* }}} */
@@ -344,7 +344,7 @@ PHP_HASH_API void PHP_MD5Final(unsigned char digest[16], PHP_MD5_CTX * context)
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -437,7 +437,7 @@ const unsigned char block[64];
 	state[3] += d;
 
 	/* Zeroize sensitive information. */
-	memset((unsigned char*) x, 0, sizeof(x));
+	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
 /* }}} */
 
@@ -602,7 +602,7 @@ PHP_HASH_API void PHP_MD4Final(unsigned char digest[16], PHP_MD4_CTX * context)
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,27 +25,59 @@
 #include "php_spl.h"
 #include "zend_interfaces.h"
 
-PHPAPI void spl_instantiate(zend_class_entry *pce, zval **object, int alloc TSRMLS_DC);
+PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC);
 
-PHPAPI long spl_offset_convert_to_long(zval *offset TSRMLS_DC);
+PHPAPI zend_long spl_offset_convert_to_long(zval *offset TSRMLS_DC);
 
 /* {{{ spl_instantiate_arg_ex1 */
-static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval **retval, int alloc, zval *arg1 TSRMLS_DC)
+static inline int spl_instantiate_arg_ex1(zend_class_entry *pce, zval *retval, zval *arg1 TSRMLS_DC)
 {
-	spl_instantiate(pce, retval, alloc TSRMLS_CC);
+	zend_function *func = pce->constructor;
+	spl_instantiate(pce, retval TSRMLS_CC);
 	
-	zend_call_method(retval, pce, &pce->constructor, pce->constructor->common.function_name, strlen(pce->constructor->common.function_name), NULL, 1, arg1, NULL TSRMLS_CC);
+	zend_call_method(retval, pce, &func, func->common.function_name->val, func->common.function_name->len, NULL, 1, arg1, NULL TSRMLS_CC);
 	return 0;
 }
 /* }}} */
 
 /* {{{ spl_instantiate_arg_ex2 */
-static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval **retval, int alloc, zval *arg1, zval *arg2 TSRMLS_DC)
+static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval *retval, zval *arg1, zval *arg2 TSRMLS_DC)
 {
-	spl_instantiate(pce, retval, alloc TSRMLS_CC);
+	zend_function *func = pce->constructor;
+	spl_instantiate(pce, retval TSRMLS_CC);
 	
-	zend_call_method(retval, pce, &pce->constructor, pce->constructor->common.function_name, strlen(pce->constructor->common.function_name), NULL, 2, arg1, arg2 TSRMLS_CC);
+	zend_call_method(retval, pce, &func, func->common.function_name->val, func->common.function_name->len, NULL, 2, arg1, arg2 TSRMLS_CC);
 	return 0;
+}
+/* }}} */
+
+/* {{{ spl_instantiate_arg_n */
+static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, int argc, zval *argv TSRMLS_DC)
+{
+	zend_function *func = pce->constructor;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zval dummy;
+
+	spl_instantiate(pce, retval TSRMLS_CC);
+
+	fci.size = sizeof(zend_fcall_info);
+	fci.function_table = &pce->function_table;
+	ZVAL_STR(&fci.function_name, func->common.function_name);
+	fci.object = Z_OBJ_P(retval);
+	fci.symbol_table = NULL;
+	fci.retval = &dummy;
+	fci.param_count = argc;
+	fci.params = argv;
+	fci.no_separation = 1;
+
+	fcc.initialized = 1;
+	fcc.function_handler = func;
+	fcc.calling_scope = EG(scope);
+	fcc.called_scope = pce;
+	fcc.object = Z_OBJ_P(retval);
+
+	zend_call_function(&fci, &fcc TSRMLS_CC);
 }
 /* }}} */
 

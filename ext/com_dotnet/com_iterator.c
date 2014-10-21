@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,53 +32,50 @@
 struct php_com_iterator {
 	zend_object_iterator iter;
 	IEnumVARIANT *ev;
-	ulong key;
+	zend_ulong key;
 	VARIANT v; /* cached element */
 	int code_page;
 	VARIANT safe_array;
 	VARTYPE sa_type;
 	LONG sa_max;
-	zval *zdata;
+	zval zdata;
 };
 
 static void com_iter_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
-	struct php_com_iterator *I = (struct php_com_iterator*)iter->data;
+	struct php_com_iterator *I = (struct php_com_iterator*)Z_PTR(iter->data);
 	
 	if (I->ev) {
 		IEnumVARIANT_Release(I->ev);
 	}
 	VariantClear(&I->v);
 	VariantClear(&I->safe_array);
-	if (I->zdata) {
-		zval_ptr_dtor((zval**)&I->zdata);
-	}
-	efree(I);
+	zval_ptr_dtor(&I->zdata);
 }
 
 static int com_iter_valid(zend_object_iterator *iter TSRMLS_DC)
 {
-	struct php_com_iterator *I = (struct php_com_iterator*)iter->data;
+	struct php_com_iterator *I = (struct php_com_iterator*)Z_PTR(iter->data);
 
-	if (I->zdata) {
+	if (Z_TYPE(I->zdata) != IS_UNDEF) {
 		return SUCCESS;
 	}
 
 	return FAILURE;
 }
 
-static void com_iter_get_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
+static zval* com_iter_get_data(zend_object_iterator *iter TSRMLS_DC)
 {
-	struct php_com_iterator *I = (struct php_com_iterator*)iter->data;
+	struct php_com_iterator *I = (struct php_com_iterator*)Z_PTR(iter->data);
 
-	*data = &I->zdata;
+	return &I->zdata;
 }
 
 static void com_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 {
-	struct php_com_iterator *I = (struct php_com_iterator*)iter->data;
+	struct php_com_iterator *I = (struct php_com_iterator*)Z_PTR(iter->data);
 
-	if (I->key == (ulong)-1) {
+	if (I->key == (zend_ulong)-1) {
 		ZVAL_NULL(key);
 	} else {
 		ZVAL_LONG(key, I->key);
@@ -87,16 +84,16 @@ static void com_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 
 static int com_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
 {
-	struct php_com_iterator *I = (struct php_com_iterator*)iter->data;
+	struct php_com_iterator *I = (struct php_com_iterator*)Z_PTR(iter->data);
 	unsigned long n_fetched;
-	zval *ptr;
+	zval ptr;
 
 	/* release current cached element */
 	VariantClear(&I->v);
 
-	if (I->zdata) {
-		zval_ptr_dtor((zval**)&I->zdata);
-		I->zdata = NULL;
+	if (Z_TYPE(I->zdata) != IS_UNDEF) {
+		zval_ptr_dtor(&I->zdata);
+		ZVAL_UNDEF(&I->zdata);
 	}
 
 	if (I->ev) {
@@ -121,10 +118,10 @@ static int com_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
 		}
 	}
 
-	MAKE_STD_ZVAL(ptr);
-	php_com_zval_from_variant(ptr, &I->v, I->code_page TSRMLS_CC);
+	ZVAL_NULL(&ptr);
+	php_com_zval_from_variant(&ptr, &I->v, I->code_page TSRMLS_CC);
 	/* php_com_wrap_variant(ptr, &I->v, I->code_page TSRMLS_CC); */
-	I->zdata = ptr;
+	ZVAL_COPY_VALUE(&I->zdata, &ptr);
 	return SUCCESS;
 }
 
@@ -146,7 +143,7 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 	DISPPARAMS dp;
 	VARIANT v;
 	unsigned long n_fetched;
-	zval *ptr;
+	zval ptr;
 
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
@@ -163,10 +160,11 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 	VariantInit(&v);	
 
 	I = (struct php_com_iterator*)ecalloc(1, sizeof(*I));
+	zend_iterator_init(&I->iter TSRMLS_CC);
 	I->iter.funcs = &com_iter_funcs;
-	I->iter.data = I;
+	Z_PTR(I->iter.data) = I;
 	I->code_page = obj->code_page;
-	I->zdata = NULL;
+	ZVAL_UNDEF(&I->zdata);
 	VariantInit(&I->safe_array);
 	VariantInit(&I->v);
 
@@ -193,9 +191,9 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 		/* pre-fetch the element */
 		if (php_com_safearray_get_elem(&I->safe_array, &I->v, bound TSRMLS_CC)) {
 			I->key = bound;
-			MAKE_STD_ZVAL(ptr);
-			php_com_zval_from_variant(ptr, &I->v, I->code_page TSRMLS_CC);
-			I->zdata = ptr;
+			ZVAL_NULL(&ptr);
+			php_com_zval_from_variant(&ptr, &I->v, I->code_page TSRMLS_CC);
+			ZVAL_COPY_VALUE(&I->zdata, &ptr);
 		} else {
 			I->key = (ulong)-1;
 		}
@@ -227,9 +225,9 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 		if (SUCCEEDED(IEnumVARIANT_Next(I->ev, 1, &I->v, &n_fetched)) && n_fetched > 0) {
 			/* indicate that we have element 0 */
 			I->key = 0;
-			MAKE_STD_ZVAL(ptr);
-			php_com_zval_from_variant(ptr, &I->v, I->code_page TSRMLS_CC);
-			I->zdata = ptr;
+			ZVAL_NULL(&ptr);
+			php_com_zval_from_variant(&ptr, &I->v, I->code_page TSRMLS_CC);
+			ZVAL_COPY_VALUE(&I->zdata, &ptr);
 		} else {
 			/* indicate that there are no more items */
 			I->key = (ulong)-1;

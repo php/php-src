@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,10 +44,10 @@ static int php_embed_deactivate(TSRMLS_D)
 	return SUCCESS;
 }
 
-static inline size_t php_embed_single_write(const char *str, uint str_length)
+static inline size_t php_embed_single_write(const char *str, size_t str_length)
 {
 #ifdef PHP_WRITE_STDOUT
-	long ret;
+	zend_long ret;
 
 	ret = write(STDOUT_FILENO, str, str_length);
 	if (ret <= 0) return 0;
@@ -61,10 +61,10 @@ static inline size_t php_embed_single_write(const char *str, uint str_length)
 }
 
 
-static int php_embed_ub_write(const char *str, uint str_length TSRMLS_DC)
+static size_t php_embed_ub_write(const char *str, size_t str_length TSRMLS_DC)
 {
 	const char *ptr = str;
-	uint remaining = str_length;
+	size_t remaining = str_length;
 	size_t ret;
 
 	while (remaining > 0) {
@@ -79,7 +79,7 @@ static int php_embed_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void php_embed_flush(void *server_context)
+static void php_embed_flush(void *server_context TSRMLS_DC)
 {
 	if (fflush(stdout)==EOF) {
 		php_handle_aborted_connection();

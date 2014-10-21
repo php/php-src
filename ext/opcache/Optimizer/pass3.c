@@ -1,8 +1,37 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend OPcache                                                         |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998-2014 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Stanislav Malyshev <stas@zend.com>                          |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
+   +----------------------------------------------------------------------+
+*/
+
 /* pass 3:
  * - optimize $i = $i+expr to $i+=expr
  * - optimize series of JMPs
  * - change $i++ to ++$i where possible
  */
+
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
 
 /* compares opcodes with allowing oc1 be _EX of oc2 */
 #define SAME_OPCODE_EX(oc1, oc2) ((oc1 == oc2) || (oc1 == ZEND_JMPZ_EX && oc2 == ZEND_JMPZ) || (oc1 == ZEND_JMPNZ_EX && oc2 == ZEND_JMPNZ))
@@ -24,16 +53,17 @@
 	}										\
 	jmp_hitlist[jmp_hitlist_count++] = ZEND_OP2(&op_array->opcodes[target]).opline_num;
 
-if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
+void zend_optimizer_pass3(zend_op_array *op_array TSRMLS_DC)
+{
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
-	zend_uint *jmp_hitlist;
+	uint32_t *jmp_hitlist;
 	int jmp_hitlist_count;
 	int i;
-	zend_uint opline_num = 0;
+	uint32_t opline_num = 0;
 	ALLOCA_FLAG(use_heap);
 
-	jmp_hitlist = (zend_uint *)DO_ALLOCA(sizeof(zend_uint)*op_array->last);
+	jmp_hitlist = (uint32_t *)DO_ALLOCA(sizeof(uint32_t)*op_array->last);
 	opline = op_array->opcodes;
 
 	while (opline < end) {
@@ -45,6 +75,7 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 			case ZEND_MUL:
 			case ZEND_DIV:
 			case ZEND_MOD:
+			case ZEND_POW:
 			case ZEND_CONCAT:
 			case ZEND_SL:
 			case ZEND_SR:
@@ -72,12 +103,8 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 						/* change $i=expr+$i to $i=$i+expr so that the next
 						* optimization works on it
 						*/
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 						zend_uchar tmp_type = opline->op1_type;
 						znode_op tmp = opline->op1;
-#else
-						znode tmp = opline->op1;
-#endif
 
 						if (opline->opcode != ZEND_ADD || ZEND_OP1_TYPE(opline) == IS_CONST) {
 							/* protection from array add: $a = array + $a is not commutative! */
@@ -103,6 +130,9 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 								break;
 							case ZEND_MOD:
 								opline->opcode = ZEND_ASSIGN_MOD;
+								break;
+							case ZEND_POW:
+								opline->opcode = ZEND_ASSIGN_POW;
 								break;
 							case ZEND_CONCAT:
 								opline->opcode = ZEND_ASSIGN_CONCAT;
@@ -132,11 +162,9 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 				break;
 
 			case ZEND_JMP:
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
-				if (op_array->has_finally_block) {
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
-#endif
 
 				/* convert L: JMP L+1 to NOP */
 				if (ZEND_OP1(opline).opline_num == opline_num + 1) {
@@ -153,17 +181,11 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 				}
 				break;
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 			case ZEND_JMP_SET:
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-			case ZEND_JMP_SET_VAR:
-#endif
-
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
-				if (op_array->has_finally_block) {
+			case ZEND_COALESCE:
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
-#endif
 
 				while (ZEND_OP2(opline).opline_num < op_array->last) {
 					int target = ZEND_OP2(opline).opline_num;
@@ -174,15 +196,11 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 					}
 				}
 				break;
-#endif
-
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
-				if (op_array->has_finally_block) {
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
-#endif
 
 				/* convert L: JMPZ L+1 to NOP */
 				if (ZEND_OP2(opline).opline_num == opline_num + 1) {
@@ -233,17 +251,13 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX: {
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 					zend_uchar T_type = opline->result_type;
 					znode_op T = opline->result;
-#else
-					znode T = opline->result;
-#endif
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
-					if (op_array->has_finally_block) {
+
+					if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 						break;
 					}
-#endif
+
 					/* convert L: T = JMPZ_EX X,L+1 to T = BOOL(X) */
 					/* convert L: T = JMPZ_EX T,L+1 to NOP */
 					if (ZEND_OP2(opline).opline_num == opline_num + 1) {
@@ -312,12 +326,8 @@ continue_jmp_ex_optimization:
 							   op->opcode == ZEND_CONT ||
 							   op->opcode == ZEND_CASE ||
 							   op->opcode == ZEND_RETURN ||
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 							   op->opcode == ZEND_RETURN_BY_REF ||
-#endif
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 							   op->opcode == ZEND_FAST_RET ||
-#endif
 							   op->opcode == ZEND_FE_FETCH ||
 							   op->opcode == ZEND_EXIT) {
 								break;
@@ -351,12 +361,8 @@ continue_jmp_ex_optimization:
 							   op->opcode == ZEND_CONT ||
 							   op->opcode == ZEND_CASE ||
 							   op->opcode == ZEND_RETURN ||
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 							   op->opcode == ZEND_RETURN_BY_REF ||
-#endif
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 							   op->opcode == ZEND_FAST_RET ||
-#endif
 							   op->opcode == ZEND_FE_FETCH ||
 							   op->opcode == ZEND_EXIT) {
 								break;
@@ -382,11 +388,10 @@ continue_jmp_ex_optimization:
 				break;
 
 			case ZEND_JMPZNZ:
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
-				if (op_array->has_finally_block) {
+				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}
-#endif
+
 				/* JMPZNZ(X,L1,L2), L1: JMP(L3) => JMPZNZ(X,L3,L2), L1: JMP(L3) */
 				while (ZEND_OP2(opline).opline_num < op_array->last
 						&& op_array->opcodes[ZEND_OP2(opline).opline_num].opcode == ZEND_JMP) {
@@ -423,13 +428,7 @@ continue_jmpznz_optimization:
 								opline->opcode = ZEND_PRE_DEC;
 								break;
 						}
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 						ZEND_RESULT_TYPE(opline) = IS_VAR | EXT_TYPE_UNUSED;
-#else
-						ZEND_RESULT_TYPE(opline) = IS_VAR;
-						ZEND_RESULT(opline).EA.type = 0;
-						ZEND_RESULT(opline).EA.type |= EXT_TYPE_UNUSED;
-#endif
 					}
 				}
 				break;

@@ -148,7 +148,11 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "chroot",                    &fpm_conf_set_string,      WPO(chroot) },
 	{ "chdir",                     &fpm_conf_set_string,      WPO(chdir) },
 	{ "catch_workers_output",      &fpm_conf_set_boolean,     WPO(catch_workers_output) },
+	{ "clear_env",                 &fpm_conf_set_boolean,     WPO(clear_env) },
 	{ "security.limit_extensions", &fpm_conf_set_string,      WPO(security_limit_extensions) },
+#ifdef HAVE_APPARMOR
+	{ "apparmor_hat",              &fpm_conf_set_string,      WPO(apparmor_hat) },
+#endif
 	{ 0, 0, 0 }
 };
 
@@ -603,6 +607,7 @@ static void *fpm_worker_pool_config_alloc() /* {{{ */
 	wp->config->listen_backlog = FPM_BACKLOG_DEFAULT;
 	wp->config->pm_process_idle_timeout = 10; /* 10s by default */
 	wp->config->process_priority = 64; /* 64 means unset */
+	wp->config->clear_env = 1;
 
 	if (!fpm_worker_all_pools) {
 		fpm_worker_all_pools = wp;
@@ -644,6 +649,9 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	free(wpc->chroot);
 	free(wpc->chdir);
 	free(wpc->security_limit_extensions);
+#ifdef HAVE_APPARMOR
+	free(wpc->apparmor_hat);
+#endif
 
 	for (kv = wpc->php_values; kv; kv = kv_next) {
 		kv_next = kv->next;
@@ -1067,6 +1075,9 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				}
 			}
 			for (kv = wp->config->php_admin_values; kv; kv = kv->next) {
+				if (!strcasecmp(kv->key, "error_log") && !strcasecmp(kv->value, "syslog")) {
+					continue;
+				}
 				for (p = options; *p; p++) {
 					if (!strcasecmp(kv->key, *p)) {
 						fpm_evaluate_full_path(&kv->value, wp, NULL, 0);
@@ -1465,7 +1476,8 @@ static void fpm_conf_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback
 int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 {
 	int error = 0;
-	char buf[1024+1];
+	char *buf = NULL, *newbuf = NULL;
+	int bufsize = 0;
 	int fd, n;
 	int nb_read = 1;
 	char c = '*';
@@ -1492,19 +1504,36 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 	ini_lineno = 0;
 	while (nb_read > 0) {
 		int tmp;
-		memset(buf, 0, sizeof(char) * (1024 + 1));
-		for (n = 0; n < 1024 && (nb_read = read(fd, &c, sizeof(char))) == sizeof(char) && c != '\n'; n++) {
-			buf[n] = c;
-		}
-		buf[n++] = '\n';
 		ini_lineno++;
 		ini_filename = filename;
+		for (n = 0; (nb_read = read(fd, &c, sizeof(char))) == sizeof(char) && c != '\n'; n++) {
+			if (n == bufsize) {
+				bufsize += 1024;
+				newbuf = (char*) realloc(buf, sizeof(char) * (bufsize + 2));
+				if (newbuf == NULL) {
+					ini_recursion--;
+					close(fd);
+					free(buf);
+					return -1;
+				}
+				buf = newbuf;
+			}
+
+			buf[n] = c;
+		}
+		if (n == 0) {
+			continue;
+		}
+		/* always append newline and null terminate */
+		buf[n++] = '\n';
+		buf[n] = '\0';
 		tmp = zend_parse_ini_string(buf, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t)fpm_conf_ini_parser, &error TSRMLS_CC);
 		ini_filename = filename;
 		if (error || tmp == FAILURE) {
 			if (ini_include) free(ini_include);
 			ini_recursion--;
 			close(fd);
+			free(buf);
 			return -1;
 		}
 		if (ini_include) {
@@ -1516,16 +1545,17 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 				free(tmp);
 				ini_recursion--;
 				close(fd);
+				free(buf);
 				return -1;
 			}
 			free(tmp);
 		}
 	}
+	free(buf);
 
 	ini_recursion--;
 	close(fd);
 	return ret;
-
 }
 /* }}} */
 
@@ -1600,6 +1630,7 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tchroot = %s",                     STR2STR(wp->config->chroot));
 		zlog(ZLOG_NOTICE, "\tchdir = %s",                      STR2STR(wp->config->chdir));
 		zlog(ZLOG_NOTICE, "\tcatch_workers_output = %s",       BOOL2STR(wp->config->catch_workers_output));
+		zlog(ZLOG_NOTICE, "\tclear_env = %s",                  BOOL2STR(wp->config->clear_env));
 		zlog(ZLOG_NOTICE, "\tsecurity.limit_extensions = %s",  wp->config->security_limit_extensions);
 
 		for (kv = wp->config->env; kv; kv = kv->next) {

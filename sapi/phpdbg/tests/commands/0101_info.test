@@ -1,0 +1,19 @@
+#################################################
+# name: info
+# purpose: test info commands
+# expect: TEST::FORMAT
+# options: -rr
+#################################################
+#[User Classes (%d)]
+#User Class test (3)
+#|---- in phpdbginit code on line %d
+#################################################
+<:
+class test {
+        public function testMethod(){}
+        private function testPrivateMethod(){}
+        protected function testProtectedMethod(){}
+}
+:>
+info classes
+q

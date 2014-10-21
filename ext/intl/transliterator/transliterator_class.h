@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,14 +25,19 @@
 #include <unicode/utrans.h>
 
 typedef struct {
-	zend_object     zo;
-
 	// 	error handling
 	intl_error  err;
 
 	// ICU transliterator
 	UTransliterator* utrans;
+
+	zend_object     zo;
 } Transliterator_object;
+
+static inline Transliterator_object *php_intl_transliterator_fetch_object(zend_object *obj) {
+	return (Transliterator_object *)((char*)(obj) - XtOffsetOf(Transliterator_object, zo));
+}
+#define Z_INTL_TRANSLITERATOR_P(zv) php_intl_transliterator_fetch_object(Z_OBJ_P(zv))
 
 #define TRANSLITERATOR_FORWARD UTRANS_FORWARD
 #define TRANSLITERATOR_REVERSE UTRANS_REVERSE
@@ -44,7 +49,7 @@ typedef struct {
 #define TRANSLITERATOR_ERROR_CODE_P( co ) &(INTL_ERROR_CODE(TRANSLITERATOR_ERROR( co )))
 
 #define TRANSLITERATOR_METHOD_INIT_VARS		         INTL_METHOD_INIT_VARS( Transliterator, to )
-#define TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK  INTL_METHOD_FETCH_OBJECT( Transliterator, to )
+#define TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK  INTL_METHOD_FETCH_OBJECT( INTL_TRANSLITERATOR, to )
 #define TRANSLITERATOR_METHOD_FETCH_OBJECT\
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if( to->utrans == NULL ) \

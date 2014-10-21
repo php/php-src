@@ -78,6 +78,6 @@ bool(false)
 Warning: fgetss(): Length parameter must be greater than 0 in %s on line %d
 bool(false)
 
-Warning: fgetss(): %d is not a valid stream resource in %s on line %d
+Warning: fgetss(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 Done

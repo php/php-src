@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -85,15 +85,16 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const char
 
 
 /* Connect */
-#define mysqlnd_init(persistent) _mysqlnd_init((persistent) TSRMLS_CC)
-PHPAPI MYSQLND * _mysqlnd_init(zend_bool persistent TSRMLS_DC);
+#define mysqlnd_init(client_flags, persistent) _mysqlnd_init((client_flags), (persistent) TSRMLS_CC)
+PHPAPI MYSQLND * _mysqlnd_init(unsigned int client_flags, zend_bool persistent TSRMLS_DC);
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 						  const char * host, const char * user,
 						  const char * passwd, unsigned int passwd_len,
 						  const char * db, unsigned int db_len,
 						  unsigned int port,
 						  const char * socket_or_pipe,
-						  unsigned int mysql_flags
+						  unsigned int mysql_flags,
+						  unsigned int client_api_flags
 						  TSRMLS_DC);
 
 #define mysqlnd_change_user(conn, user, passwd, db, silent)		((conn)->data)->m->change_user((conn)->data, (user), (passwd), (db), (silent), strlen((passwd)) TSRMLS_CC)
@@ -117,10 +118,11 @@ PHPAPI void _mysqlnd_debug(const char *mode TSRMLS_DC);
 #define mysqlnd_reap_async_query(conn)					((conn)->data)->m->reap_query((conn)->data TSRMLS_CC)
 #define mysqlnd_unbuffered_skip_result(result)			(result)->m.skip_result((result) TSRMLS_CC)
 
-PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, uint * desc_num TSRMLS_DC);
+PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long sec, long usec, int * desc_num TSRMLS_DC);
 
-#define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data TSRMLS_CC)
-#define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data TSRMLS_CC)
+#define mysqlnd_use_result(conn)		((conn)->data)->m->use_result((conn)->data, 0 TSRMLS_CC)
+#define mysqlnd_store_result(conn)		((conn)->data)->m->store_result((conn)->data, MYSQLND_STORE_NO_COPY TSRMLS_CC)
+#define mysqlnd_store_result_ofs(conn)	((conn)->data)->m->store_result((conn)->data, MYSQLND_STORE_COPY TSRMLS_CC)
 #define mysqlnd_next_result(conn)		((conn)->data)->m->next_result((conn)->data TSRMLS_CC)
 #define mysqlnd_more_results(conn)		((conn)->data)->m->more_results((conn)->data TSRMLS_CC)
 #define mysqlnd_free_result(r,e_or_i)	((MYSQLND_RES*)r)->m.free_result(((MYSQLND_RES*)(r)), (e_or_i) TSRMLS_CC)
@@ -150,8 +152,7 @@ PHPAPI enum_func_status _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQ
 #define mysqlnd_num_rows(result)		(result)->m.num_rows((result) TSRMLS_CC)
 #define mysqlnd_num_fields(result)		(result)->m.num_fields((result) TSRMLS_CC)
 
-#define mysqlnd_fetch_lengths(result)	_mysqlnd_fetch_lengths((result) TSRMLS_CC)
-PHPAPI unsigned long * _mysqlnd_fetch_lengths(MYSQLND_RES * const result  TSRMLS_DC);
+#define mysqlnd_fetch_lengths(result)	(result)->m.fetch_lengths((result) TSRMLS_CC)
 
 #define mysqlnd_field_seek(result, ofs)			(result)->m.seek_field((result), (ofs) TSRMLS_CC)
 #define mysqlnd_field_tell(result)				(result)->m.field_tell((result) TSRMLS_CC)
@@ -187,8 +188,7 @@ PHPAPI void mysqlnd_free_result_bind_dtor(MYSQLND_RESULT_BIND * result_bind TSRM
 PHPAPI const char * mysqlnd_field_type_name(enum mysqlnd_field_types field_type);
 
 /* LOAD DATA LOCAL */
-PHPAPI void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
-PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, const char * const funcname);
+void mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn);
 
 /* Simple commands */
 #define mysqlnd_autocommit(conn, mode)		((conn)->data)->m->set_autocommit((conn)->data, (mode) TSRMLS_CC)
@@ -208,7 +208,7 @@ PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, con
 #define mysqlnd_refresh(conn, options)		((conn)->data)->m->refresh_server((conn)->data, (options) TSRMLS_CC)
 #define mysqlnd_shutdown(conn, level)		((conn)->data)->m->shutdown_server((conn)->data, (level) TSRMLS_CC)
 #define mysqlnd_set_character_set(conn, cs)	((conn)->data)->m->set_charset((conn)->data, (cs) TSRMLS_CC)
-#define mysqlnd_stat(conn, msg, msg_len)	((conn)->data)->m->get_server_statistics(((conn)->data), (msg), (msg_len) TSRMLS_CC)
+#define mysqlnd_stat(conn, msg)				((conn)->data)->m->get_server_statistics(((conn)->data), (msg) TSRMLS_CC)
 #define mysqlnd_options(conn, opt, value)	((conn)->data)->m->set_client_option((conn)->data, (opt), (value) TSRMLS_CC)
 #define mysqlnd_options4(conn, opt, k, v)	((conn)->data)->m->set_client_option_2d((conn)->data, (opt), (k), (v) TSRMLS_CC)
 #define mysqlnd_set_server_option(conn, op)	((conn)->data)->m->set_server_option((conn)->data, (op) TSRMLS_CC)
@@ -219,7 +219,7 @@ PHPAPI void mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, con
 #define mysqlnd_escape_string(newstr, escapestr, escapestr_len) \
 		mysqlnd_old_escape_string((newstr), (escapestr), (escapestr_len) TSRMLS_CC)
 
-PHPAPI ulong mysqlnd_old_escape_string(char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC);
+PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC);
 
 
 /* PS */
@@ -264,24 +264,25 @@ PHPAPI void			_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_L
 #define MYSQLND_METHOD_PRIVATE(class, method) php_##class##_##method##_priv
 
 ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
-	zend_bool		collect_statistics;
-	zend_bool		collect_memory_statistics;
 	char *			debug;	/* The actual string */
 	char *			trace_alloc_settings;	/* The actual string */
 	MYSQLND_DEBUG *	dbg;	/* The DBG object for standard tracing */
 	MYSQLND_DEBUG *	trace_alloc;	/* The DBG object for allocation tracing */
-	long			net_cmd_buffer_size;
-	long			net_read_buffer_size;
-	long			log_mask;
-	long			net_read_timeout;
-	long			mempool_default_size;
-	long			debug_emalloc_fail_threshold;
-	long			debug_ecalloc_fail_threshold;
-	long			debug_erealloc_fail_threshold;
-	long			debug_malloc_fail_threshold;
-	long			debug_calloc_fail_threshold;
-	long			debug_realloc_fail_threshold;
+	zend_long		net_cmd_buffer_size;
+	zend_long		net_read_buffer_size;
+	zend_long		log_mask;
+	zend_long		net_read_timeout;
+	zend_long		mempool_default_size;
+	zend_long		debug_emalloc_fail_threshold;
+	zend_long		debug_ecalloc_fail_threshold;
+	zend_long		debug_erealloc_fail_threshold;
+	zend_long		debug_malloc_fail_threshold;
+	zend_long		debug_calloc_fail_threshold;
+	zend_long		debug_realloc_fail_threshold;
 	char *			sha256_server_public_key;
+	zend_bool		fetch_data_copy;
+	zend_bool		collect_statistics;
+	zend_bool		collect_memory_statistics;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)

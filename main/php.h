@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,9 +26,10 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20121113
+#define PHP_API_VERSION 20131218
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
+#define PHP_DEFAULT_CHARSET "UTF-8"
 
 #include "php_version.h"
 #include "zend.h"
@@ -279,8 +280,8 @@ ssize_t pread(int, void *, size_t, off64_t);
 
 BEGIN_EXTERN_C()
 void phperror(char *error);
-PHPAPI int php_write(void *buf, uint size TSRMLS_DC);
-PHPAPI int php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
+PHPAPI size_t php_write(void *buf, size_t size TSRMLS_DC);
+PHPAPI size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
 		2);
 PHPAPI int php_get_module_initialized(void);
 PHPAPI void php_log_err(char *log_message TSRMLS_DC);
@@ -400,7 +401,7 @@ END_EXTERN_C()
 
 
 /* Virtual current working directory support */
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 
 #include "zend_constants.h"
 
@@ -433,7 +434,7 @@ END_EXTERN_C()
 #else /* ! (CRAY || __arm) */
 
 #define XtOffset(p_type, field) \
-    ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
+    ((zend_long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 #endif /* !CRAY */
 #endif /* ! XtOffset */

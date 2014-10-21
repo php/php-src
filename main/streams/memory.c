@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -20,9 +20,9 @@
 
 #define _GNU_SOURCE
 #include "php.h"
+#include "ext/standard/base64.h"
 
 PHPAPI int php_url_decode(char *str, int len);
-PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length);
 
 /* Memory streams use a dynamic memory buffer to emulate a stream.
  * You can use php_stream_memory_open to create a readonly stream
@@ -127,7 +127,7 @@ static int php_stream_memory_flush(php_stream *stream TSRMLS_DC)
 
 
 /* {{{ */
-static int php_stream_memory_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+static int php_stream_memory_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
 {
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	assert(ms != NULL);
@@ -351,7 +351,8 @@ typedef struct {
 	php_stream  *innerstream;
 	size_t      smax;
 	int			mode;
-	zval*       meta;
+	zval        meta;
+	char*		tmpdir;
 } php_stream_temp_data;
 
 
@@ -369,7 +370,7 @@ static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t 
 		char *membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
 
 		if (memsize + count >= ts->smax) {
-			php_stream *file = php_stream_fopen_tmpfile();
+			php_stream *file = php_stream_fopen_temporary_file(ts->tmpdir, "php", NULL);
 			php_stream_write(file, membuf, memsize);
 			php_stream_free_enclosed(ts->innerstream, PHP_STREAM_FREE_CLOSE);
 			ts->innerstream = file;
@@ -416,8 +417,10 @@ static int php_stream_temp_close(php_stream *stream, int close_handle TSRMLS_DC)
 		ret = 0;
 	}
 	
-	if (ts->meta) {
-		zval_ptr_dtor(&ts->meta);
+	zval_ptr_dtor(&ts->meta);
+
+	if (ts->tmpdir) {
+		efree(ts->tmpdir);
 	}
 
 	efree(ts);
@@ -439,7 +442,7 @@ static int php_stream_temp_flush(php_stream *stream TSRMLS_DC)
 
 
 /* {{{ */
-static int php_stream_temp_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+static int php_stream_temp_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
 {
 	php_stream_temp_data *ts = (php_stream_temp_data*)stream->abstract;
 	int ret;
@@ -465,7 +468,7 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRML
 	php_stream *file;
 	size_t memsize;
 	char *membuf;
-	off_t pos;
+	zend_off_t pos;
 
 	assert(ts != NULL);
 
@@ -522,8 +525,8 @@ static int php_stream_temp_set_option(php_stream *stream, int option, int value,
 	
 	switch(option) {
 		case PHP_STREAM_OPTION_META_DATA_API:
-			if (ts->meta) {
-				zend_hash_copy(Z_ARRVAL_P((zval*)ptrparam), Z_ARRVAL_P(ts->meta), (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval*));
+			if (Z_TYPE(ts->meta) != IS_UNDEF) {
+				zend_hash_copy(Z_ARRVAL_P((zval*)ptrparam), Z_ARRVAL(ts->meta), zval_add_ref);
 			}
 			return PHP_STREAM_OPTION_RETURN_OK;
 		default:
@@ -547,8 +550,8 @@ PHPAPI php_stream_ops	php_stream_temp_ops = {
 
 /* }}} */
 
-/* {{{ _php_stream_temp_create */
-PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC)
+/* {{{ _php_stream_temp_create_ex */
+PHPAPI php_stream *_php_stream_temp_create_ex(int mode, size_t max_memory_usage, const char *tmpdir STREAMS_DC TSRMLS_DC)
 {
 	php_stream_temp_data *self;
 	php_stream *stream;
@@ -556,7 +559,10 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	self = ecalloc(1, sizeof(*self));
 	self->smax = max_memory_usage;
 	self->mode = mode;
-	self->meta = NULL;
+	ZVAL_UNDEF(&self->meta);
+	if (tmpdir) {
+		self->tmpdir = estrdup(tmpdir);
+	}
 	stream = php_stream_alloc_rel(&php_stream_temp_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	self->innerstream = php_stream_memory_create_rel(mode);
@@ -566,13 +572,19 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 }
 /* }}} */
 
+/* {{{ _php_stream_temp_create */
+PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC)
+{
+	return php_stream_temp_create_ex(mode, max_memory_usage, NULL);
+}
+/* }}} */
 
 /* {{{ _php_stream_temp_open */
 PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream;
 	php_stream_temp_data *ts;
-	off_t newoffs;
+	zend_off_t newoffs;
 
 	if ((stream = php_stream_temp_create_rel(mode, max_memory_usage)) != NULL) {
 		if (length) {
@@ -606,10 +618,12 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	php_stream_temp_data *ts;
 	char *comma, *semi, *sep, *key;
 	size_t mlen, dlen, plen, vlen;
-	off_t newoffs;
-	zval *meta = NULL;
+	zend_off_t newoffs;
+	zval meta;
 	int base64 = 0, ilen;
+	zend_string *base64_comma = NULL;
 
+	ZVAL_NULL(&meta);
 	if (memcmp(path, "data:", 5)) {
 		return NULL;
 	}
@@ -639,14 +653,13 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			return NULL;
 		}
 
-		MAKE_STD_ZVAL(meta);
-		array_init(meta);
+		array_init(&meta);
 		if (!semi) { /* there is only a mime type */
-			add_assoc_stringl(meta, "mediatype", (char *) path, mlen, 1);
+			add_assoc_stringl(&meta, "mediatype", (char *) path, mlen);
 			mlen = 0;
 		} else if (sep && sep < semi) { /* there is a mime type */
 			plen = semi - path;
-			add_assoc_stringl(meta, "mediatype", (char *) path, plen, 1);
+			add_assoc_stringl(&meta, "mediatype", (char *) path, plen);
 			mlen -= plen;
 			path += plen;
 		} else if (semi != path || mlen != sizeof(";base64")-1 || memcmp(path, ";base64", sizeof(";base64")-1)) { /* must be error since parameters are only allowed after mediatype */
@@ -676,7 +689,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			plen = sep - path;
 			vlen = (semi ? semi - sep : mlen - plen) - 1 /* '=' */;
 			key = estrndup(path, plen);
-			add_assoc_stringl_ex(meta, key, plen + 1, sep + 1, vlen, 1);
+			add_assoc_stringl_ex(&meta, key, plen, sep + 1, vlen);
 			efree(key);
 			plen += vlen + 1;
 			mlen -= plen;
@@ -688,22 +701,23 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			return NULL;
 		}
 	} else {
-		MAKE_STD_ZVAL(meta);
-		array_init(meta);
+		array_init(&meta);
 	}
-	add_assoc_bool(meta, "base64", base64);
+	add_assoc_bool(&meta, "base64", base64);
 
 	/* skip ',' */
 	comma++;
 	dlen--;
 
 	if (base64) {
-		comma = (char*)php_base64_decode((const unsigned char *)comma, dlen, &ilen);
-		if (!comma) {
+		base64_comma = php_base64_decode((const unsigned char *)comma, dlen);
+		if (!base64_comma) {
 			zval_ptr_dtor(&meta);
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "rfc2397: unable to decode");
 			return NULL;
 		}
+		comma = base64_comma->val;
+		ilen = base64_comma->len;
 	} else {
 		comma = estrndup(comma, dlen);
 		ilen = dlen = php_url_decode(comma, dlen);
@@ -724,9 +738,13 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		ts = (php_stream_temp_data*)stream->abstract;
 		assert(ts != NULL);
 		ts->mode = mode && mode[0] == 'r' && mode[1] != '+' ? TEMP_STREAM_READONLY : 0;
-		ts->meta = meta;
+		ZVAL_COPY_VALUE(&ts->meta, &meta);
 	}
-	efree(comma);
+	if (base64_comma) {
+		zend_string_free(base64_comma);
+	} else {
+		efree(comma);
+	}
 
 	return stream;
 }

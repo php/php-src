@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -74,7 +74,7 @@ ZEND_API void zend_qsort_r(void *base, size_t nmemb, size_t siz, compare_r_func_
 		end   = end_stack[loop];
 
 		while (begin < end) {
-			offset = (end - begin) >> 1;
+			offset = (end - begin) >> Z_L(1);
 			_zend_qsort_swap(begin, begin + (offset - (offset % siz)), siz);
 
 			seg1 = begin + siz;

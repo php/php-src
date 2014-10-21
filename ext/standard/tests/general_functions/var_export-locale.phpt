@@ -1,7 +1,7 @@
 --TEST--
 Test var_export() function with locale
 --INI--
-precision=14
+serialize_precision=17
 --SKIPIF--
 <?php
 if (!setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8")) {
@@ -784,15 +784,15 @@ string(20) "array (
 Iteration 13
 array (
   0 => 10.5,
-  1 => 5.6,
+  1 => 5.5999999999999996,
 )
 array (
   0 => 10.5,
-  1 => 5.6,
+  1 => 5.5999999999999996,
 )
-string(34) "array (
+string(49) "array (
   0 => 10.5,
-  1 => 5.6,
+  1 => 5.5999999999999996,
 )"
 
 

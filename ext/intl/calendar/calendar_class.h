@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,14 +29,19 @@ typedef void Calendar;
 #endif
 
 typedef struct {
-	zend_object	zo;
-
 	// 	error handling
 	intl_error  err;
 
 	// ICU calendar
 	Calendar*	ucal;
+
+	zend_object	zo;
 } Calendar_object;
+
+static inline Calendar_object *php_intl_calendar_fetch_object(zend_object *obj) {
+	return (Calendar_object *)((char*)(obj) - XtOffsetOf(Calendar_object, zo));
+}
+#define Z_INTL_CALENDAR_P(zv) php_intl_calendar_fetch_object(Z_OBJ_P(zv))
 
 #define CALENDAR_ERROR(co)		(co)->err
 #define CALENDAR_ERROR_P(co)	&(CALENDAR_ERROR(co))
@@ -45,7 +50,7 @@ typedef struct {
 #define CALENDAR_ERROR_CODE_P(co)	&(INTL_ERROR_CODE(CALENDAR_ERROR(co)))
 
 #define CALENDAR_METHOD_INIT_VARS		        INTL_METHOD_INIT_VARS(Calendar, co)
-#define CALENDAR_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(Calendar, co)
+#define CALENDAR_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_CALENDAR, co)
 #define CALENDAR_METHOD_FETCH_OBJECT \
 	CALENDAR_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (co->ucal == NULL) \

@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -55,7 +55,7 @@ typedef struct _php_hash_data {
 	const php_hash_ops *ops;
 	void *context;
 
-	long options;
+	zend_long options;
 	unsigned char *key;
 } php_hash_data;
 
@@ -85,7 +85,9 @@ extern const php_hash_ops php_hash_adler32_ops;
 extern const php_hash_ops php_hash_crc32_ops;
 extern const php_hash_ops php_hash_crc32b_ops;
 extern const php_hash_ops php_hash_fnv132_ops;
+extern const php_hash_ops php_hash_fnv1a32_ops;
 extern const php_hash_ops php_hash_fnv164_ops;
+extern const php_hash_ops php_hash_fnv1a64_ops;
 extern const php_hash_ops php_hash_joaat_ops;
 
 #define PHP_HASH_HAVAL_OPS(p,b)	extern const php_hash_ops php_hash_##p##haval##b##_ops;
@@ -134,8 +136,9 @@ PHP_FUNCTION(hash_update_file);
 PHP_FUNCTION(hash_final);
 PHP_FUNCTION(hash_algos);
 PHP_FUNCTION(hash_pbkdf2);
+PHP_FUNCTION(hash_equals);
 
-PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
+PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, size_t algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
 PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context);
 

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -371,6 +371,7 @@ PS_READ_FUNC(mm)
 			PS(send_cookie) = 1;
 		}
 		php_session_reset_id(TSRMLS_C);
+		PS(session_status) = php_session_active;
 	}
 
 	sd = ps_sd_lookup(data, PS(id), 0);

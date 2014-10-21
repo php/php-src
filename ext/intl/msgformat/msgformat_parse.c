@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,9 +28,9 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, int src_len, zval *return_value TSRMLS_DC) 
+static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, size_t src_len, zval *return_value TSRMLS_DC) 
 {
-	zval **fargs;
+	zval *fargs;
 	int count = 0;
 	int i;
 	UChar *usource = NULL;
@@ -47,7 +47,7 @@ static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, int src_
 
 	array_init(return_value);
 	for(i=0;i<count;i++) {
-		add_next_index_zval(return_value, fargs[i]);
+		add_next_index_zval(return_value, &fargs[i]);
 	}
 	efree(fargs);
 }
@@ -61,7 +61,7 @@ static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, int src_
 PHP_FUNCTION( msgfmt_parse )
 {
 	char *source;
-	int source_len;
+	size_t source_len;
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 
@@ -92,11 +92,11 @@ PHP_FUNCTION( msgfmt_parse_message )
 	UChar      *spattern = NULL;
 	int         spattern_len = 0;
 	char       *pattern = NULL;
-	int         pattern_len = 0;
-	char       *slocale = NULL;
-	int         slocale_len = 0;
+	size_t         pattern_len = 0;
+	const char *slocale = NULL;
+	size_t         slocale_len = 0;
 	char       *source = NULL;
-	int         src_len = 0;
+	size_t         src_len = 0;
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 

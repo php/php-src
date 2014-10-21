@@ -10,9 +10,9 @@ $ov = preg_match('/Compile-time ORACLE_HOME/', $phpinfo);
 if ($ov !== 1) {
 	die ("skip Test only valid when OCI8 is built with an ORACLE_HOME");
 }
-preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
-if (!isset($matches[0]) || !($matches[0] == 10 && $matches[0] == 2)) {
-    die ("skip tests a feature that works only with Oracle 10gR2");
+preg_match('/^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/', oci_client_version(), $matches);
+if (!isset($matches[0]) || !($matches[1] == 10 && $matches[2] == 2)) {
+    die ("skip tests a feature that works only with Oracle 10gR2 client");
 }
 ?>
 --ENV--

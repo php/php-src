@@ -65,7 +65,7 @@ echo "Done";
 --> http://www.php.net:80/index.php?test=1&test2=char&test3=mixesCI   : NULL
 --> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : NULL
 --> http://secret@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : NULL
---> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : NULL
+--> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(0) ""
 --> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(7) "hideout"
 --> http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(7) "hideout"
 --> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : NULL
@@ -109,6 +109,7 @@ echo "Done";
 --> http://[x:80]/   : NULL
 -->    : NULL
 --> /   : NULL
+--> /rest/Users?filter={"id":"123"}   : NULL
 --> http:///blah.com   : bool(false)
 --> http://:80   : bool(false)
 --> http://user@:80   : bool(false)

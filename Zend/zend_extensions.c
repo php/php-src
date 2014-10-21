@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -24,7 +24,7 @@
 ZEND_API zend_llist zend_extensions;
 static int last_resource_number;
 
-int zend_load_extension(const char *path)
+int zend_load_extension(const char *path TSRMLS_DC)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	DL_HANDLE handle;
@@ -105,9 +105,17 @@ int zend_load_extension(const char *path)
 #endif
 		DL_UNLOAD(handle);
 		return FAILURE;
+	} else if (zend_get_extension(new_extension->name)) {
+		fprintf(stderr, "Cannot load %s - it was already loaded\n", new_extension->name);
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef PHP_WIN32
+		fflush(stderr);
+#endif
+		DL_UNLOAD(handle);
+		return FAILURE;
 	}
 
-	return zend_register_extension(new_extension, handle);
+	return zend_register_extension(new_extension, handle TSRMLS_CC);
 #else
 	fprintf(stderr, "Extensions are not supported on this platform.\n");
 /* See http://support.microsoft.com/kb/190351 */
@@ -119,7 +127,7 @@ int zend_load_extension(const char *path)
 }
 
 
-int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
+int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle TSRMLS_DC)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	zend_extension extension;
@@ -127,7 +135,7 @@ int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 	extension = *new_extension;
 	extension.handle = handle;
 
-	zend_extension_dispatch_message(ZEND_EXTMSG_NEW_EXTENSION, &extension);
+	zend_extension_dispatch_message(ZEND_EXTMSG_NEW_EXTENSION, &extension TSRMLS_CC);
 
 	zend_llist_add_element(&zend_extensions, &extension);
 
@@ -187,7 +195,7 @@ void zend_shutdown_extensions(TSRMLS_D)
 void zend_extension_dtor(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT && !ZEND_DEBUG
-	if (extension->handle) {
+	if (extension->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
 		DL_UNLOAD(extension->handle);
 	}
 #endif
@@ -208,10 +216,8 @@ static void zend_extension_message_dispatcher(const zend_extension *extension, i
 }
 
 
-ZEND_API void zend_extension_dispatch_message(int message, void *arg)
+ZEND_API void zend_extension_dispatch_message(int message, void *arg TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	zend_llist_apply_with_arguments(&zend_extensions, (llist_apply_with_args_func_t) zend_extension_message_dispatcher TSRMLS_CC, 2, message, arg);
 }
 

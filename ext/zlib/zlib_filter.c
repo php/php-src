@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,12 +25,12 @@
 
 /* Passed as opaque in malloc callbacks */
 typedef struct _php_zlib_filter_data {
-	int persistent;
 	z_stream strm;
 	char *inbuf;
 	size_t inbuf_len;
 	char *outbuf;
 	size_t outbuf_len;
+	int persistent;
 	zend_bool finished;
 } php_zlib_filter_data;
 
@@ -66,17 +66,15 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 	int status;
 	php_stream_filter_status_t exit_status = PSFS_FEED_ME;
 
-	if (!thisfilter || !thisfilter->abstract) {
+	if (!thisfilter || !Z_PTR(thisfilter->abstract)) {
 		/* Should never happen */
 		return PSFS_ERR_FATAL;
 	}
 
-	data = (php_zlib_filter_data *)(thisfilter->abstract);
+	data = (php_zlib_filter_data *)(Z_PTR(thisfilter->abstract));
 
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
-
-		bucket = buckets_in->head;
 
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
 
@@ -156,8 +154,8 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 
 static void php_zlib_inflate_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
-	if (thisfilter && thisfilter->abstract) {
-		php_zlib_filter_data *data = thisfilter->abstract;
+	if (thisfilter && Z_PTR(thisfilter->abstract)) {
+		php_zlib_filter_data *data = Z_PTR(thisfilter->abstract);
 		if (!data->finished) {
 			inflateEnd(&(data->strm));
 		}
@@ -191,12 +189,12 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 	int status;
 	php_stream_filter_status_t exit_status = PSFS_FEED_ME;
 
-	if (!thisfilter || !thisfilter->abstract) {
+	if (!thisfilter || !Z_PTR(thisfilter->abstract)) {
 		/* Should never happen */
 		return PSFS_ERR_FATAL;
 	}
 
-	data = (php_zlib_filter_data *)(thisfilter->abstract);
+	data = (php_zlib_filter_data *)(Z_PTR(thisfilter->abstract));
 
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
@@ -265,8 +263,8 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 
 static void php_zlib_deflate_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
-	if (thisfilter && thisfilter->abstract) {
-		php_zlib_filter_data *data = thisfilter->abstract;
+	if (thisfilter && Z_PTR(thisfilter->abstract)) {
+		php_zlib_filter_data *data = Z_PTR(thisfilter->abstract);
 		deflateEnd(&(data->strm));
 		pefree(data->inbuf, data->persistent);
 		pefree(data->outbuf, data->persistent);
@@ -302,7 +300,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 	data->strm.zalloc = (alloc_func) php_zlib_alloc;
 	data->strm.zfree = (free_func) php_zlib_free;
-	data->strm.avail_out = data->outbuf_len = data->inbuf_len = 2048;
+	data->strm.avail_out = data->outbuf_len = data->inbuf_len = 0x8000;
 	data->strm.next_in = data->inbuf = (Bytef *) pemalloc(data->inbuf_len, persistent);
 	if (!data->inbuf) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes", data->inbuf_len);
@@ -324,18 +322,17 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 		int windowBits = -MAX_WBITS;
 
 		if (filterparams) {
-			zval **tmpzval;
+			zval *tmpzval;
 
 			if ((Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) &&
-				zend_hash_find(HASH_OF(filterparams), "window", sizeof("window"), (void **) &tmpzval) == SUCCESS) {
+				(tmpzval = zend_hash_str_find(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
 				zval tmp;
 
 				/* log-2 base of history window (9 - 15) */
-				tmp = **tmpzval;
-				zval_copy_ctor(&tmp);
+				ZVAL_DUP(&tmp, tmpzval);
 				convert_to_long(&tmp);
 				if (Z_LVAL(tmp) < -MAX_WBITS || Z_LVAL(tmp) > MAX_WBITS + 32) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%ld)", Z_LVAL(tmp));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
 				} else {
 					windowBits = Z_LVAL(tmp);
 				}
@@ -354,7 +351,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 
 		if (filterparams) {
-			zval **tmpzval, tmp;
+			zval *tmpzval, tmp;
 
 			/* filterparams can either be a scalar value to indicate compression level (shortcut method)
                Or can be a hash containing one or more of 'window', 'memory', and/or 'level' members. */
@@ -362,34 +359,32 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 			switch (Z_TYPE_P(filterparams)) {
 				case IS_ARRAY:
 				case IS_OBJECT:
-					if (zend_hash_find(HASH_OF(filterparams), "memory", sizeof("memory"), (void**) &tmpzval) == SUCCESS) {
-						tmp = **tmpzval;
-						zval_copy_ctor(&tmp);
+					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "memory", sizeof("memory") -1))) {
+						ZVAL_DUP(&tmp, tmpzval);
 						convert_to_long(&tmp);
 
 						/* Memory Level (1 - 9) */
 						if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > MAX_MEM_LEVEL) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for memory level. (%ld)", Z_LVAL(tmp));
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for memory level. (%pd)", Z_LVAL(tmp));
 						} else {
 							memLevel = Z_LVAL(tmp);
 						}
 					}
 
-					if (zend_hash_find(HASH_OF(filterparams), "window", sizeof("window"), (void**) &tmpzval) == SUCCESS) {
-						tmp = **tmpzval;
-						zval_copy_ctor(&tmp);
+					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "window", sizeof("window") - 1))) {
+						ZVAL_DUP(&tmp, tmpzval);
 						convert_to_long(&tmp);
 
 						/* log-2 base of history window (9 - 15) */
 						if (Z_LVAL(tmp) < -MAX_WBITS || Z_LVAL(tmp) > MAX_WBITS + 16) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%ld)", Z_LVAL(tmp));
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
 						} else {
 							windowBits = Z_LVAL(tmp);
 						}
 					}
 
-					if (zend_hash_find(HASH_OF(filterparams), "level", sizeof("level"), (void**) &tmpzval) == SUCCESS) {
-						tmp = **tmpzval;
+					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "level", sizeof("level") - 1))) {
+						ZVAL_COPY_VALUE(&tmp, tmpzval);
 
 						/* Psuedo pass through to catch level validating code */
 						goto factory_setlevel;
@@ -398,14 +393,14 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				case IS_STRING:
 				case IS_DOUBLE:
 				case IS_LONG:
-					tmp = *filterparams;
+					ZVAL_COPY_VALUE(&tmp, filterparams);
 factory_setlevel:
 					zval_copy_ctor(&tmp);
 					convert_to_long(&tmp);
 
 					/* Set compression level within reason (-1 == default, 0 == none, 1-9 == least to most compression */
 					if (Z_LVAL(tmp) < -1 || Z_LVAL(tmp) > 9) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression level specified. (%ld)", Z_LVAL(tmp));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression level specified. (%pd)", Z_LVAL(tmp));
 					} else {
 						level = Z_LVAL(tmp);
 					}

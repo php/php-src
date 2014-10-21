@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -106,9 +106,9 @@ mysqlnd_plugin_subsystem_init(TSRMLS_D)
 
 /* {{{ mysqlnd_plugin_end_apply_func */
 int
-mysqlnd_plugin_end_apply_func(void *pDest TSRMLS_DC)
+mysqlnd_plugin_end_apply_func(zval *el TSRMLS_DC)
 {
-	struct st_mysqlnd_plugin_header * plugin_header = *(struct st_mysqlnd_plugin_header **) pDest;
+	struct st_mysqlnd_plugin_header * plugin_header = (struct st_mysqlnd_plugin_header *)Z_PTR_P(el);
 	if (plugin_header->m.plugin_shutdown) {
 		plugin_header->m.plugin_shutdown(plugin_header TSRMLS_CC);
 	}
@@ -141,7 +141,7 @@ PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header *
 {
 	if (plugin) {
 		if (plugin->plugin_api_version == MYSQLND_PLUGIN_API_VERSION) {
-			zend_hash_update(&mysqlnd_registered_plugins, plugin->plugin_name, strlen(plugin->plugin_name) + 1, &plugin, sizeof(void *), NULL);
+			zend_hash_str_update_ptr(&mysqlnd_registered_plugins, plugin->plugin_name, strlen(plugin->plugin_name), plugin);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Plugin API version mismatch while loading plugin %s. Expected %d, got %d",
 							plugin->plugin_name, MYSQLND_PLUGIN_API_VERSION, plugin->plugin_api_version);
@@ -157,8 +157,8 @@ PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header *
 PHPAPI void * _mysqlnd_plugin_find(const char * const name TSRMLS_DC)
 {
 	void * plugin;
-	if (SUCCESS == zend_hash_find(&mysqlnd_registered_plugins, name, strlen(name) + 1, (void **) &plugin)) {
-		return (void *)*(char **) plugin;
+	if ((plugin = zend_hash_str_find_ptr(&mysqlnd_registered_plugins, name, strlen(name))) != NULL) {
+		return plugin;
 	}
 	return NULL;
 
@@ -173,20 +173,18 @@ PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, voi
 	 * zend_hash_apply_with_argument nor zend_hash_internal_pointer_reset and
 	 * friends
 	 */
-	Bucket *p;
+	zval *val;
+	int result;
 
-	p = mysqlnd_registered_plugins.pListHead;
-	while (p != NULL) {
-		int result = apply_func(p->pData, argument TSRMLS_CC);
-
+	ZEND_HASH_FOREACH_VAL(&mysqlnd_registered_plugins, val) {
+		result = apply_func(val, argument TSRMLS_CC);
 		if (result & ZEND_HASH_APPLY_REMOVE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mysqlnd_plugin_apply_with_argument must not remove table entries");
 		}
-		p = p->pListNext;
 		if (result & ZEND_HASH_APPLY_STOP) {
 			break;
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

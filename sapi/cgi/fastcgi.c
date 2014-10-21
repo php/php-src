@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,6 +19,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "php_network.h"
 #include "fastcgi.h"
 
 #include <string.h>
@@ -71,8 +72,6 @@
 # include <arpa/inet.h>
 # include <netdb.h>
 # include <signal.h>
-
-# define closesocket(s) close(s)
 
 # if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
 #  include <sys/poll.h>
@@ -411,7 +410,7 @@ int fcgi_init(void)
 		sa_t sa;
 		socklen_t len = sizeof(sa);
 #endif
-		zend_hash_init(&fcgi_mgmt_vars, 0, NULL, fcgi_free_mgmt_var_cb, 1);
+		zend_hash_init(&fcgi_mgmt_vars, 8, NULL, fcgi_free_mgmt_var_cb, 1);
 		fcgi_set_mgmt_var("FCGI_MPXS_CONNS", sizeof("FCGI_MPXS_CONNS")-1, "0", sizeof("0")-1);
 
 		is_initialized = 1;
@@ -642,7 +641,7 @@ int fcgi_listen(const char *path, int backlog)
 		if (namedPipe == INVALID_HANDLE_VALUE) {
 			return -1;
 		}
-		listen_socket = _open_osfhandle((long)namedPipe, 0);
+		listen_socket = _open_osfhandle((intptr_t)namedPipe, 0);
 		if (!is_initialized) {
 			fcgi_init();
 		}
@@ -723,7 +722,7 @@ int fcgi_listen(const char *path, int backlog)
 
 #ifdef _WIN32
 	if (tcp) {
-		listen_socket = _open_osfhandle((long)listen_socket, 0);
+		listen_socket = _open_osfhandle((intptr_t)listen_socket, 0);
 	}
 #else
 	fcgi_setup_signals();
@@ -973,7 +972,7 @@ static int fcgi_read_request(fcgi_request *req)
 		}
 	} else if (hdr.type == FCGI_GET_VALUES) {
 		unsigned char *p = buf + sizeof(fcgi_header);
-		zval ** value;
+		zval *value;
 		unsigned int zlen;
 		fcgi_hash_bucket *q;
 
@@ -989,10 +988,10 @@ static int fcgi_read_request(fcgi_request *req)
 
 		q = req->env.list;
 		while (q != NULL) {
-			if (zend_hash_find(&fcgi_mgmt_vars, q->var, q->var_len, (void**) &value) != SUCCESS) {
+			if ((value = zend_hash_str_find(&fcgi_mgmt_vars, q->var, q->var_len)) == NULL) {
 				continue;
 			}
-			zlen = Z_STRLEN_PP(value);
+			zlen = Z_STRLEN_P(value);
 			if ((p + 4 + 4 + q->var_len + zlen) >= (buf + sizeof(buf))) {
 				break;
 			}
@@ -1014,7 +1013,7 @@ static int fcgi_read_request(fcgi_request *req)
 			}
 			memcpy(p, q->var, q->var_len);
 			p += q->var_len;
-			memcpy(p, Z_STRVAL_PP(value), zlen);
+			memcpy(p, Z_STRVAL_P(value), zlen);
 			p += zlen;
 		}
 		len = p - buf - sizeof(fcgi_header);
@@ -1112,7 +1111,7 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 
 				shutdown(req->fd, 1);
 				/* read the last FCGI_STDIN header (it may be omitted) */
-				recv(req->fd, &buf, sizeof(buf), 0);
+				recv(req->fd, (char *)(&buf), sizeof(buf), 0);
 			}
 			closesocket(req->fd);
 		}
@@ -1122,7 +1121,7 @@ static inline void fcgi_close(fcgi_request *req, int force, int destroy)
 
 			shutdown(req->fd, 1);
 			/* read the last FCGI_STDIN header (it may be omitted) */
-			recv(req->fd, &buf, sizeof(buf), 0);
+			recv(req->fd, (char *)(&buf), sizeof(buf), 0);
 		}
 		close(req->fd);
 #endif
@@ -1510,19 +1509,14 @@ void fcgi_impersonate(void)
 
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
-	zval * zvalue;
-	zvalue = pemalloc(sizeof(*zvalue), 1);
-	Z_TYPE_P(zvalue) = IS_STRING;
-	Z_STRVAL_P(zvalue) = pestrndup(value, value_len, 1);
-	Z_STRLEN_P(zvalue) = value_len;
-	zend_hash_add(&fcgi_mgmt_vars, name, name_len, &zvalue, sizeof(zvalue), NULL);
+	zval zvalue;
+	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
+	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
 }
 
-void fcgi_free_mgmt_var_cb(void * ptr)
+void fcgi_free_mgmt_var_cb(zval *zv)
 {
-	zval ** var = (zval **)ptr;
-	pefree(Z_STRVAL_PP(var), 1);
-	pefree(*var, 1);
+	pefree(Z_STR_P(zv), 1);
 }
 
 /*

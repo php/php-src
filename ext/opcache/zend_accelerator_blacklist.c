@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 The PHP Group                                |
+   | Copyright (c) 1998-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,16 +23,7 @@
 #include "main/fopen_wrappers.h"
 #include "ZendAccelerator.h"
 #include "zend_accelerator_blacklist.h"
-
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-# include "ext/ereg/php_regex.h"
-#else
-# include "main/php_regex.h"
-#endif
-
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-# include "ext/standard/php_string.h"
-#endif
+#include "ext/ereg/php_regex.h"
 
 #ifdef ZEND_WIN32
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB|REG_ICASE)
@@ -256,11 +247,7 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	zend_accel_error(ACCEL_LOG_DEBUG,"Loading blacklist file:  '%s'", filename);
 
 	if (VCWD_REALPATH(filename, buf)) {
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-		blacklist_path_length = php_dirname(buf, strlen(buf));
-#else
 		blacklist_path_length = zend_dirname(buf, strlen(buf));
-#endif
 		blacklist_path = zend_strndup(buf, blacklist_path_length);
 	}
 
@@ -314,6 +301,7 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 		blacklist->entries[blacklist->pos].path = (char *)malloc(path_length + 1);
 		if (!blacklist->entries[blacklist->pos].path) {
 			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed\n");
+			fclose(fp);
 			return;
 		}
 		blacklist->entries[blacklist->pos].id = blacklist->pos;
@@ -370,7 +358,7 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 	return ret;
 }
 
-void zend_accel_blacklist_apply(zend_blacklist *blacklist, apply_func_arg_t func, void *argument TSRMLS_DC)
+void zend_accel_blacklist_apply(zend_blacklist *blacklist, blacklist_apply_func_arg_t func, void *argument TSRMLS_DC)
 {
 	int i;
 

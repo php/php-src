@@ -1,6 +1,8 @@
 /-- This set of tests is for UTF support, excluding Unicode properties. It is
     compatible with all versions of Perl >= 5.10 and both the 8-bit and 16-bit
     PCRE libraries. --/
+    
+< forbid 9?=ABCDEFfGILMNPTUWXZ<
    
 /a.b/8
     acb
@@ -1090,5 +1092,183 @@ MK: a\x{1234}b
     abc
  0: a
 MK: a\x{a3}b
+
+/-- Noncharacters --/
+
+/./8
+    \x{fffe}
+ 0: \x{fffe}
+    \x{ffff}
+ 0: \x{ffff}
+    \x{1fffe}
+ 0: \x{1fffe}
+    \x{1ffff}
+ 0: \x{1ffff}
+    \x{2fffe}
+ 0: \x{2fffe}
+    \x{2ffff}
+ 0: \x{2ffff}
+    \x{3fffe}
+ 0: \x{3fffe}
+    \x{3ffff}
+ 0: \x{3ffff}
+    \x{4fffe}
+ 0: \x{4fffe}
+    \x{4ffff}
+ 0: \x{4ffff}
+    \x{5fffe}
+ 0: \x{5fffe}
+    \x{5ffff}
+ 0: \x{5ffff}
+    \x{6fffe}
+ 0: \x{6fffe}
+    \x{6ffff}
+ 0: \x{6ffff}
+    \x{7fffe}
+ 0: \x{7fffe}
+    \x{7ffff}
+ 0: \x{7ffff}
+    \x{8fffe}
+ 0: \x{8fffe}
+    \x{8ffff}
+ 0: \x{8ffff}
+    \x{9fffe}
+ 0: \x{9fffe}
+    \x{9ffff}
+ 0: \x{9ffff}
+    \x{afffe}
+ 0: \x{afffe}
+    \x{affff}
+ 0: \x{affff}
+    \x{bfffe}
+ 0: \x{bfffe}
+    \x{bffff}
+ 0: \x{bffff}
+    \x{cfffe}
+ 0: \x{cfffe}
+    \x{cffff}
+ 0: \x{cffff}
+    \x{dfffe}
+ 0: \x{dfffe}
+    \x{dffff}
+ 0: \x{dffff}
+    \x{efffe}
+ 0: \x{efffe}
+    \x{effff}
+ 0: \x{effff}
+    \x{ffffe}
+ 0: \x{ffffe}
+    \x{fffff}
+ 0: \x{fffff}
+    \x{10fffe}
+ 0: \x{10fffe}
+    \x{10ffff}
+ 0: \x{10ffff}
+    \x{fdd0}
+ 0: \x{fdd0}
+    \x{fdd1}
+ 0: \x{fdd1}
+    \x{fdd2}
+ 0: \x{fdd2}
+    \x{fdd3}
+ 0: \x{fdd3}
+    \x{fdd4}
+ 0: \x{fdd4}
+    \x{fdd5}
+ 0: \x{fdd5}
+    \x{fdd6}
+ 0: \x{fdd6}
+    \x{fdd7}
+ 0: \x{fdd7}
+    \x{fdd8}
+ 0: \x{fdd8}
+    \x{fdd9}
+ 0: \x{fdd9}
+    \x{fdda}
+ 0: \x{fdda}
+    \x{fddb}
+ 0: \x{fddb}
+    \x{fddc}
+ 0: \x{fddc}
+    \x{fddd}
+ 0: \x{fddd}
+    \x{fdde}
+ 0: \x{fdde}
+    \x{fddf}
+ 0: \x{fddf}
+    \x{fde0}
+ 0: \x{fde0}
+    \x{fde1}
+ 0: \x{fde1}
+    \x{fde2}
+ 0: \x{fde2}
+    \x{fde3}
+ 0: \x{fde3}
+    \x{fde4}
+ 0: \x{fde4}
+    \x{fde5}
+ 0: \x{fde5}
+    \x{fde6}
+ 0: \x{fde6}
+    \x{fde7}
+ 0: \x{fde7}
+    \x{fde8}
+ 0: \x{fde8}
+    \x{fde9}
+ 0: \x{fde9}
+    \x{fdea}
+ 0: \x{fdea}
+    \x{fdeb}
+ 0: \x{fdeb}
+    \x{fdec}
+ 0: \x{fdec}
+    \x{fded}
+ 0: \x{fded}
+    \x{fdee}
+ 0: \x{fdee}
+    \x{fdef}
+ 0: \x{fdef}
+
+/^\d*\w{4}/8
+    1234
+ 0: 1234
+    123 
+No match
+    
+/^[^b]*\w{4}/8
+    aaaa
+ 0: aaaa
+    aaa  
+No match
+ 
+/^[^b]*\w{4}/8i
+    aaaa
+ 0: aaaa
+    aaa  
+No match
+ 
+/^\x{100}*.{4}/8
+    \x{100}\x{100}\x{100}\x{100}
+ 0: \x{100}\x{100}\x{100}\x{100}
+    \x{100}\x{100}\x{100}
+No match
+
+/^\x{100}*.{4}/8i
+    \x{100}\x{100}\x{100}\x{100}
+ 0: \x{100}\x{100}\x{100}\x{100}
+    \x{100}\x{100}\x{100}
+No match
+
+/^a+[a\x{200}]/8
+    aa
+ 0: aa
+
+/^.\B.\B./8
+    \x{10123}\x{10124}\x{10125}
+ 0: \x{10123}\x{10124}\x{10125}
+
+/^#[^\x{ffff}]#[^\x{ffff}]#[^\x{ffff}]#/8
+    #\x{10000}#\x{100}#\x{10ffff}#
+ 0: #\x{10000}#\x{100}#\x{10ffff}#
 
 /-- End of testinput4 --/

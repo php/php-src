@@ -1,65 +1,52 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 201?, PHP 5.6.0
+?? ??? 20??, PHP 7.0.0
+
+-Fileinfo:
+  . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
+
+- CLI server:
+  . Refactor MIME type handling to use a hash table instead of linear search.
+    (Adam)
+  . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
 - Core:
-  . Improved IS_VAR operands fetching. (Laruence, Dmitry)
-  . Implemented internal operator overloading
-    (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
-  . Made calls from incompatible context issue an E_DEPRECATED warning instead
-    of E_STRICT (phase 1 of RFC: https://wiki.php.net/rfc/incompat_ctx).
-	(Gustavo)
-  . Uploads equal or greater than 2GB in size are now accepted.
-    (Ralf Lang, Mike)
-  . Reduced POST data memory usage by 200-300%. Removed INI setting
-    always_populate_raw_post_data and the $HTTP_RAW_POST_DATA global
-    variable. (Mike)
-  . Implemented dedicated syntax for variadic functions
-    (RFC: https://wiki.php.net/rfc/variadics). (Nikita)
+  . Added PHP_INT_MIN constant. (Andrea)
+  . Added Closure::apply() method. (Andrea)
+  . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
+  . Fixed #67959 (Segfault when calling phpversion('spl')). (Florian)
+  . Implemented the RFC `Catchable "Call to a member function bar() on a
+    non-object"` (Timm)
 
-- cURL:
-  . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir
-    or safe_mode). (Adam)
+- Reflection
+  . Fixed inheritance chain of Reflector interface (Tjerk)
 
-- GMP:
-  . Moved GMP to use object as the underlying structure and implemented various
-    improvements based on this.
-    (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
+- DBA:
+  . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
 
-- Hash:
-  . Added gost-crypto (CryptoPro S-box) GOST hash algo. (Manuel Mausz)
-
-- mysqlnd:
-  . Disabled flag for SP OUT variables for 5.5+ servers as they are not natively
-    supported by the overlying APIs. (Andrey)
-
-- OPcache:
-  . Added an optimization pass to convert FCALL_BY_NAME into DO_FCALL.
-    (Laruence, Dmitry)
-  . Added an optimization pass to merged identical constants (and related
-    cache_slots) in op_array->literals table. (Laruence, Dmitry)
-  . Added script level constant replacement optimization pass. (Dmitry)
-
-- PDO_pgsql:
-  . Fixed Bug #42614 (PDO_pgsql: add pg_get_notify support). (Matteo)
-  . Fixed Bug #63657 (pgsqlCopyFromFile, pgsqlCopyToArray use Postgres < 7.3
-    syntax). (Matteo)
-
-- Session:
-  . Fixed Bug #65315 (session.hash_function silently fallback to default md5)
-    (Yasuo)
-  . Implemented Request #54649 (Create session_serializer_name()). (Yasuo)
-  . Implemented Request #17860 (Session write short circuit). (Yasuo)
-  . Implemented Request #20421 (session_abort() and session_reset() function).
-    (Yasuo)
-  . Implemented Request #11100 (session_gc() function). (Yasuo)
+- FPM:
+  . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
 
 - Standard:
-  . Implemented FR #65634 (HTTP wrapper is very slow with protocol_version
-    1.1). (Adam)
+  . Removed call_user_method() and call_user_method_array() functions. (Kalle)
+  . Fix user session handlers (See rfc:session.user.return-value). (Sara)
+  . Added intdiv() function. (Andrea)
+  . Improved precision of log() function for base 2 and 10. (Marc Bennewitz)
 
-- XMLReader:
-  . Fixed bug #55285 (XMLReader::getAttribute/No/Ns methods inconsistency). 
-    (Mike)
+- XSL:
+  . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
+
+- GD:
+  . Made fontFetch's path parser thread-safe. (Sara)
+
+- Session:
+  . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
+
+- SPL:
+  . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
+    nor curruption state). (Julien)
+
+- DOM:
+  . Made DOMNode::textContent writeable. (Tjerk)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

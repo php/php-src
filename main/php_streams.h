@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,8 @@
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "zend.h"
+#include "zend_stream.h"
 
 BEGIN_EXTERN_C()
 PHPAPI int php_file_le_stream(void);
@@ -61,7 +63,7 @@ END_EXTERN_C()
  * the ultimate ancestor, which is useful, because there can be several layers of calls */
 #define php_stream_alloc_rel(ops, thisptr, persistent, mode) _php_stream_alloc((ops), (thisptr), (persistent), (mode) STREAMS_REL_CC TSRMLS_CC)
 
-#define php_stream_copy_to_mem_rel(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_REL_CC TSRMLS_CC)
+#define php_stream_copy_to_mem_rel(src, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_REL_CC TSRMLS_CC)
 
 #define php_stream_fopen_rel(filename, mode, opened, options) _php_stream_fopen((filename), (mode), (opened), (options) STREAMS_REL_CC TSRMLS_CC)
 
@@ -104,7 +106,7 @@ typedef struct _php_stream_filter php_stream_filter;
 #include "streams/php_stream_filter_api.h"
 
 typedef struct _php_stream_statbuf {
-	struct stat sb; /* regular info */
+	zend_stat_t sb; /* regular info */
 	/* extended info to go here some day: content-type etc. etc. */
 } php_stream_statbuf;
 
@@ -123,7 +125,7 @@ typedef struct _php_stream_ops  {
 	const char *label; /* label for this ops structure */
 
 	/* these are optional */
-	int (*seek)(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
+	int (*seek)(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC);
 	int (*cast)(php_stream *stream, int castas, void **ret TSRMLS_DC);
 	int (*stat)(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 	int (*set_option)(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
@@ -191,31 +193,29 @@ struct _php_stream  {
 
 	php_stream_wrapper *wrapper; /* which wrapper was used to open the stream */
 	void *wrapperthis;		/* convenience pointer for a instance of a wrapper */
-	zval *wrapperdata;		/* fgetwrapperdata retrieves this */
+	zval wrapperdata;		/* fgetwrapperdata retrieves this */
 
 	int fgetss_state;		/* for fgetss to handle multiline tags */
 	int is_persistent;
 	char mode[16];			/* "rwb" etc. ala stdio */
-	int rsrc_id;			/* used for auto-cleanup */
+	zend_resource *res;		/* used for auto-cleanup */
 	int in_free;			/* to prevent recursion during free */
 	/* so we know how to clean it up correctly.  This should be set to
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
 	int fclose_stdiocast;
 	FILE *stdiocast;    /* cache this, otherwise we might leak! */
-#if ZEND_DEBUG
 	int __exposed;	/* non-zero if exposed as a zval somewhere */
-#endif
 	char *orig_path;
 
-	php_stream_context *context;
+	zend_resource *ctx;
 	int flags;	/* PHP_STREAM_FLAG_XXX */
 
 	/* buffer */
-	off_t position; /* of underlying stream */
+	zend_off_t position; /* of underlying stream */
 	unsigned char *readbuf;
 	size_t readbuflen;
-	off_t readpos;
-	off_t writepos;
+	zend_off_t readpos;
+	zend_off_t writepos;
 
 	/* how much data to read when filling buffer */
 	size_t chunk_size;
@@ -230,6 +230,9 @@ struct _php_stream  {
 	struct _php_stream *enclosing_stream; /* this is a private stream owned by enclosing_stream */
 }; /* php_stream */
 
+#define PHP_STREAM_CONTEXT(stream) \
+	((php_stream_context*) ((stream)->ctx ? ((stream)->ctx->ptr) : NULL))
+
 /* state definitions when closing down; these are private to streams.c */
 #define PHP_STREAM_FCLOSE_NONE 0
 #define PHP_STREAM_FCLOSE_FDOPEN	1
@@ -242,21 +245,16 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
 END_EXTERN_C()
 #define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC TSRMLS_CC)
 
-#define php_stream_get_resource_id(stream)		((php_stream *)(stream))->rsrc_id
-#if ZEND_DEBUG
+#define php_stream_get_resource_id(stream)		((php_stream *)(stream))->res->handle
 /* use this to tell the stream that it is OK if we don't explicitly close it */
-# define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
+#define php_stream_auto_cleanup(stream)	{ (stream)->__exposed++; }
 /* use this to assign the stream to a zval and tell the stream that is
  * has been exported to the engine; it will expect to be closed automatically
  * when the resources are auto-destructed */
-# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->rsrc_id); (stream)->__exposed++; }
-#else
-# define php_stream_auto_cleanup(stream)	/* nothing */
-# define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->rsrc_id); }
-#endif
+#define php_stream_to_zval(stream, zval)	{ ZVAL_RES(zval, (stream)->res); (stream)->__exposed++; }
 
-#define php_stream_from_zval(xstr, ppzval)	ZEND_FETCH_RESOURCE2((xstr), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
-#define php_stream_from_zval_no_verify(xstr, ppzval)	(xstr) = (php_stream*)zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_zval(xstr, pzval)	ZEND_FETCH_RESOURCE2((xstr), php_stream *, (pzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource((pzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())
 
 BEGIN_EXTERN_C()
 PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);
@@ -283,11 +281,11 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC);
 #define php_stream_close(stream)	_php_stream_free((stream), PHP_STREAM_FREE_CLOSE TSRMLS_CC)
 #define php_stream_pclose(stream)	_php_stream_free((stream), PHP_STREAM_FREE_CLOSE_PERSISTENT TSRMLS_CC)
 
-PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC);
+PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence TSRMLS_DC);
 #define php_stream_rewind(stream)	_php_stream_seek((stream), 0L, SEEK_SET TSRMLS_CC)
 #define php_stream_seek(stream, offset, whence)	_php_stream_seek((stream), (offset), (whence) TSRMLS_CC)
 
-PHPAPI off_t _php_stream_tell(php_stream *stream TSRMLS_DC);
+PHPAPI zend_off_t _php_stream_tell(php_stream *stream TSRMLS_DC);
 #define php_stream_tell(stream)	_php_stream_tell((stream) TSRMLS_CC)
 
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t count TSRMLS_DC);
@@ -322,7 +320,7 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, 
 #define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL TSRMLS_CC)
 
 #define php_stream_get_line(stream, buf, maxlen, retlen) _php_stream_get_line((stream), (buf), (maxlen), (retlen) TSRMLS_CC)
-PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, const char *delim, size_t delim_len TSRMLS_DC);
+PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, const char *delim, size_t delim_len TSRMLS_DC);
 
 /* CAREFUL! this is equivalent to puts NOT fputs! */
 PHPAPI int _php_stream_puts(php_stream *stream, const char *buf TSRMLS_DC);
@@ -348,11 +346,11 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 #define php_stream_closedir(dirstream)	php_stream_close((dirstream))
 #define php_stream_rewinddir(dirstream)	php_stream_rewind((dirstream))
 
-PHPAPI int php_stream_dirent_alphasort(const char **a, const char **b);
-PHPAPI int php_stream_dirent_alphasortr(const char **a, const char **b);
+PHPAPI int php_stream_dirent_alphasort(const zend_string **a, const zend_string **b);
+PHPAPI int php_stream_dirent_alphasortr(const zend_string **a, const zend_string **b);
 
-PHPAPI int _php_stream_scandir(const char *dirname, char **namelist[], int flags, php_stream_context *context,
-			int (*compare) (const char **a, const char **b) TSRMLS_DC);
+PHPAPI int _php_stream_scandir(const char *dirname, zend_string **namelist[], int flags, php_stream_context *context,
+			int (*compare) (const zend_string **a, const zend_string **b) TSRMLS_DC);
 #define php_stream_scandir(dirname, namelist, context, compare) _php_stream_scandir((dirname), (namelist), 0, (context), (compare) TSRMLS_CC)
 
 PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
@@ -373,6 +371,7 @@ END_EXTERN_C()
 /* Flags for url_stat method in wrapper ops */
 #define PHP_STREAM_URL_STAT_LINK	1
 #define PHP_STREAM_URL_STAT_QUIET	2
+#define PHP_STREAM_URL_STAT_NOCACHE	4
 
 /* change the blocking mode of stream: value == 1 => blocking, value == 0 => non-blocking. */
 #define PHP_STREAM_OPTION_BLOCKING	1
@@ -440,9 +439,8 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 
 /* read all data from stream and put into a buffer. Caller must free buffer
  * when done. */
-PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen,
-		int persistent STREAMS_DC TSRMLS_DC);
-#define php_stream_copy_to_mem(src, buf, maxlen, persistent) _php_stream_copy_to_mem((src), (buf), (maxlen), (persistent) STREAMS_CC TSRMLS_CC)
+PHPAPI zend_string *_php_stream_copy_to_mem(php_stream *src, size_t maxlen, int persistent STREAMS_DC TSRMLS_DC);
+#define php_stream_copy_to_mem(src, maxlen, persistent) _php_stream_copy_to_mem((src), (maxlen), (persistent) STREAMS_CC TSRMLS_CC)
 
 /* output all data from a stream */
 PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC TSRMLS_DC);
@@ -546,7 +544,7 @@ PHPAPI int php_register_url_stream_wrapper_volatile(const char *protocol, php_st
 PHPAPI int php_unregister_url_stream_wrapper_volatile(const char *protocol TSRMLS_DC);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const char **path_for_open, int options TSRMLS_DC);
-PHPAPI const char *php_stream_locate_eol(php_stream *stream, const char *buf, size_t buf_len TSRMLS_DC);
+PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf TSRMLS_DC);
 
 #define php_stream_open_wrapper(path, mode, options, opened)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), NULL STREAMS_CC TSRMLS_CC)
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC TSRMLS_CC)

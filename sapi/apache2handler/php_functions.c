@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/head.h"
 #include "php_ini.h"
@@ -72,7 +72,7 @@ static request_rec *php_apache_lookup_uri(char *filename TSRMLS_DC)
 PHP_FUNCTION(virtual)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	request_rec *rr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
@@ -113,13 +113,13 @@ PHP_FUNCTION(virtual)
 #define ADD_TIME(name) \
 		add_property_long(return_value, #name, apr_time_sec(rr->name));
 #define ADD_STRING(name) \
-		if (rr->name) add_property_string(return_value, #name, (char *) rr->name, 1)
+		if (rr->name) add_property_string(return_value, #name, (char *) rr->name)
 
 PHP_FUNCTION(apache_lookup_uri)
 {
 	request_rec *rr;
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		return;
@@ -187,7 +187,7 @@ PHP_FUNCTION(apache_request_headers)
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) val = "";
-		add_assoc_string(return_value, key, val, 1);
+		add_assoc_string(return_value, key, val);
 	APR_ARRAY_FOREACH_CLOSE()
 }
 /* }}} */
@@ -211,7 +211,7 @@ PHP_FUNCTION(apache_response_headers)
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) val = "";
-		add_assoc_string(return_value, key, val, 1);
+		add_assoc_string(return_value, key, val);
 	APR_ARRAY_FOREACH_CLOSE()
 }
 /* }}} */
@@ -222,7 +222,7 @@ PHP_FUNCTION(apache_note)
 {
 	php_struct *ctx;
 	char *note_name, *note_val = NULL;
-	int note_name_len, note_val_len;
+	size_t note_name_len, note_val_len;
 	char *old_note_val=NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
@@ -238,7 +238,7 @@ PHP_FUNCTION(apache_note)
 	}
 
 	if (old_note_val) {
-		RETURN_STRING(old_note_val, 1);
+		RETURN_STRING(old_note_val);
 	}
 
 	RETURN_FALSE;
@@ -254,7 +254,7 @@ PHP_FUNCTION(apache_setenv)
 {
 	php_struct *ctx;
 	char *variable=NULL, *string_val=NULL;
-	int variable_len, string_val_len;
+	size_t variable_len, string_val_len;
 	zend_bool walk_to_top = 0;
 	int arg_count = ZEND_NUM_ARGS();
 	request_rec *r;
@@ -313,7 +313,7 @@ PHP_FUNCTION(apache_getenv)
 	env_val = (char*) apr_table_get(r->subprocess_env, variable);
 
 	if (env_val != NULL) {
-		RETURN_STRING(env_val, 1);
+		RETURN_STRING(env_val);
 	}
 
 	RETURN_FALSE;
@@ -336,7 +336,7 @@ PHP_FUNCTION(apache_get_version)
 	char *apv = php_apache_get_version();
 
 	if (apv && *apv) {
-		RETURN_STRING(apv, 1);
+		RETURN_STRING(apv);
 	} else {
 		RETURN_FALSE;
 	}
@@ -355,9 +355,9 @@ PHP_FUNCTION(apache_get_modules)
 	for (n = 0; ap_loaded_modules[n]; ++n) {
 		char *s = (char *) ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
-			add_next_index_stringl(return_value, s, (p - s), 1);
+			add_next_index_stringl(return_value, s, (p - s));
 		} else {
-			add_next_index_string(return_value, s, 1);
+			add_next_index_string(return_value, s);
 		}
 	}
 }
@@ -388,8 +388,8 @@ PHP_MINFO_FUNCTION(apache)
 		}
 		smart_str_appendc(&tmp1, ' ');
 	}
-	if ((tmp1.len - 1) >= 0) {
-		tmp1.c[tmp1.len - 1] = '\0';
+	if (tmp1.s && (tmp1.s->len - 1) >= 0) {
+		tmp1.s->val[tmp1.s->len - 1] = '\0';
 	}
             
 	php_info_print_table_start();
@@ -426,7 +426,7 @@ PHP_MINFO_FUNCTION(apache)
 	
 	php_info_print_table_row(2, "Virtual Server", (serv->is_virtual ? "Yes" : "No"));
 	php_info_print_table_row(2, "Server Root", ap_server_root);
-	php_info_print_table_row(2, "Loaded Modules", tmp1.c);
+	php_info_print_table_row(2, "Loaded Modules", tmp1.s->val);
 
 	smart_str_free(&tmp1);
 	php_info_print_table_end();

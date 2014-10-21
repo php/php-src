@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -75,6 +75,10 @@ struct placeholder {
 	int freeq;
 	struct placeholder *next;
 };
+
+static void free_param_name(zval *el) {
+	efree(Z_PTR_P(el));
+}
 
 PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
 	char **outquery, int *outquery_len TSRMLS_DC)
@@ -165,7 +169,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 		if (query_type != PDO_PLACEHOLDER_POSITIONAL && bindno > zend_hash_num_elements(params)) {
 			int ok = 1;
 			for (plc = placeholders; plc; plc = plc->next) {
-				if (zend_hash_find(params, plc->pos, plc->len, (void**) &param) == FAILURE) {
+				if ((param = zend_hash_str_find_ptr(params, plc->pos, plc->len)) == NULL) {
 					ok = 0;
 					break;
 				}
@@ -188,38 +192,43 @@ safe:
 		/* let's quote all the values */	
 		for (plc = placeholders; plc; plc = plc->next) {
 			if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
-				ret = zend_hash_index_find(params, plc->bindno, (void**) &param);
+				param = zend_hash_index_find_ptr(params, plc->bindno);
 			} else {
-				ret = zend_hash_find(params, plc->pos, plc->len, (void**) &param);
+				param = zend_hash_str_find_ptr(params, plc->pos, plc->len);
 			}
-			if (ret == FAILURE) {
+			if (param == NULL) {
 				/* parameter was not defined */
 				ret = -1;
 				pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "parameter was not defined" TSRMLS_CC);
 				goto clean_up;
 			}
 			if (stmt->dbh->methods->quoter) {
-				if (param->param_type == PDO_PARAM_LOB && Z_TYPE_P(param->parameter) == IS_RESOURCE) {
+				zval *parameter;
+				if (Z_ISREF(param->parameter)) {
+					parameter = Z_REFVAL(param->parameter);
+				} else {
+					parameter = &param->parameter;
+				}
+				if (param->param_type == PDO_PARAM_LOB && Z_TYPE_P(parameter) == IS_RESOURCE) {
 					php_stream *stm;
 
-					php_stream_from_zval_no_verify(stm, &param->parameter);
+					php_stream_from_zval_no_verify(stm, parameter);
 					if (stm) {
-						size_t len;
-						char *buf = NULL;
+						zend_string *buf;
 					
-						len = php_stream_copy_to_mem(stm, &buf, PHP_STREAM_COPY_ALL, 0);
-						if (!stmt->dbh->methods->quoter(stmt->dbh, buf, len, &plc->quoted, &plc->qlen,
+						buf = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
+						if (!stmt->dbh->methods->quoter(stmt->dbh, buf->val, buf->len, &plc->quoted, &plc->qlen,
 								param->param_type TSRMLS_CC)) {
 							/* bork */
 							ret = -1;
 							strncpy(stmt->error_code, stmt->dbh->error_code, 6);
 							if (buf) {
-								efree(buf);
+								zend_string_release(buf);
 							}
 							goto clean_up;
 						}
 						if (buf) {
-							efree(buf);
+							zend_string_release(buf);
 						}
 					} else {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
@@ -228,28 +237,31 @@ safe:
 					}
 					plc->freeq = 1;
 				} else {
-					switch (Z_TYPE_P(param->parameter)) {
+					zval tmp_param;
+				   	ZVAL_DUP(&tmp_param, parameter);
+					switch (Z_TYPE(tmp_param)) {
 						case IS_NULL:
 							plc->quoted = "NULL";
 							plc->qlen = sizeof("NULL")-1;
 							plc->freeq = 0;
 							break;
 
-						case IS_BOOL:
-							convert_to_long(param->parameter);
-
+						case IS_FALSE:
+						case IS_TRUE:
+							convert_to_long(&tmp_param);
+							/* fall through */
 						case IS_LONG:
 						case IS_DOUBLE:
-							convert_to_string(param->parameter);
-							plc->qlen = Z_STRLEN_P(param->parameter);
-							plc->quoted = Z_STRVAL_P(param->parameter);
-							plc->freeq = 0;
+							convert_to_string(&tmp_param);
+							plc->qlen = Z_STRLEN(tmp_param);
+							plc->quoted = estrdup(Z_STRVAL(tmp_param));
+							plc->freeq = 1;
 							break;
 
 						default:
-							convert_to_string(param->parameter);
-							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
-									Z_STRLEN_P(param->parameter), &plc->quoted, &plc->qlen,
+							convert_to_string(&tmp_param);
+							if (!stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL(tmp_param),
+									Z_STRLEN(tmp_param), &plc->quoted, &plc->qlen,
 									param->param_type TSRMLS_CC)) {
 								/* bork */
 								ret = -1;
@@ -258,10 +270,17 @@ safe:
 							}
 							plc->freeq = 1;
 					}
+					zval_dtor(&tmp_param);
 				}
 			} else {
-				plc->quoted = Z_STRVAL_P(param->parameter);
-				plc->qlen = Z_STRLEN_P(param->parameter);
+				zval *parameter;
+				if (Z_ISREF(param->parameter)) {
+					parameter = Z_REFVAL(param->parameter);
+				} else {
+					parameter = &param->parameter;
+				}
+				plc->quoted = Z_STRVAL_P(parameter);
+				plc->qlen = Z_STRLEN_P(parameter);
 			}
 			newbuffer_len += plc->qlen;
 		}
@@ -309,7 +328,7 @@ rewrite:
 
 		if (stmt->bound_param_map == NULL) {
 			ALLOC_HASHTABLE(stmt->bound_param_map);
-			zend_hash_init(stmt->bound_param_map, 13, NULL, NULL, 0);
+			zend_hash_init(stmt->bound_param_map, 13, NULL, free_param_name, 0);
 		}
 
 		for (plc = placeholders; plc; plc = plc->next) {
@@ -318,7 +337,7 @@ rewrite:
 			name = estrndup(plc->pos, plc->len);
 
 			/* check if bound parameter is already available */
-			if (!strcmp(name, "?") || zend_hash_find(stmt->bound_param_map, name, plc->len + 1, (void**) &p) == FAILURE) {
+			if (!strcmp(name, "?") || (p = zend_hash_str_find_ptr(stmt->bound_param_map, name, plc->len)) == NULL) {
 				spprintf(&idxbuf, 0, tmpl, bind_no++);
 			} else {
 				idxbuf = estrdup(p);
@@ -332,11 +351,11 @@ rewrite:
 
 			if (!skip_map && stmt->named_rewrite_template) {
 				/* create a mapping */
-				zend_hash_update(stmt->bound_param_map, name, plc->len + 1, idxbuf, plc->qlen + 1, NULL);
+				zend_hash_str_update_mem(stmt->bound_param_map, name, plc->len, idxbuf, plc->qlen + 1);
 			}
 
 			/* map number to name */
-			zend_hash_index_update(stmt->bound_param_map, plc->bindno, idxbuf, plc->qlen + 1, NULL);
+			zend_hash_index_update_mem(stmt->bound_param_map, plc->bindno, idxbuf, plc->qlen + 1);
 			
 			efree(name);
 		}
@@ -350,14 +369,13 @@ rewrite:
 	
 		if (stmt->bound_param_map == NULL) {
 			ALLOC_HASHTABLE(stmt->bound_param_map);
-			zend_hash_init(stmt->bound_param_map, 13, NULL, NULL, 0);
+			zend_hash_init(stmt->bound_param_map, 13, NULL, free_param_name, 0);
 		}
 		
 		for (plc = placeholders; plc; plc = plc->next) {
 			char *name;
-			
 			name = estrndup(plc->pos, plc->len);
-			zend_hash_index_update(stmt->bound_param_map, plc->bindno, name, plc->len + 1, NULL);
+			zend_hash_index_update_mem(stmt->bound_param_map, plc->bindno, name, plc->len + 1);
 			efree(name);
 			plc->quoted = "?";
 			plc->qlen = 1;
@@ -404,8 +422,9 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 		padding = 3;
 	}
 	if(params) {
+		HashPosition *param_pos;
 		zend_hash_internal_pointer_reset(params);
-		while (SUCCESS == zend_hash_get_current_data(params, (void**)&param)) {
+		while ((param == zend_hash_get_current_data_ptr_ex(params, &param_pos)) != NULL) {
 			if(param->parameter) {
 				convert_to_string(param->parameter);
 				/* accommodate a string that needs to be fully quoted
@@ -437,9 +456,9 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 			}
 			/* lookup bind first via hash and then index */
 			/* stupid keys need to be null-terminated, even though we know their length */
-			if((SUCCESS == zend_hash_find(params, s.tok, s.cur-s.tok,(void **)&param))  
+			if((NULL != (param = zend_hash_str_find_ptr(params, s.tok, s.cur-s.tok))  
 			    ||
-			   (SUCCESS == zend_hash_index_find(params, bindno, (void **)&param))) 
+			   NULL != (params = zend_hash_index_find_ptr(params, bindno))) 
 			{
 				char *quotedstr;
 				int quotedstrlen;
@@ -476,7 +495,7 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 				return (int) (s.cur - inquery);
 			}
 			/* lookup bind by index */
-			if(SUCCESS == zend_hash_index_find(params, bindno, (void **)&param)) 
+			if(NULL != (params = zend_hash_index_find_ptr(params, bindno))) 
 			{
 				char *quotedstr;
 				int quotedstrlen;

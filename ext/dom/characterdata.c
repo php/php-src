@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -76,25 +76,21 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-72AB8359
 Since: 
 */
-int dom_characterdata_data_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_characterdata_data_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	xmlNodePtr nodep;
+	xmlNodePtr nodep = dom_object_get_node(obj);
 	xmlChar *content;
-
-	nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
-	
 	if ((content = xmlNodeGetContent(nodep)) != NULL) {
-		ZVAL_STRING(*retval, content, 1);
+		ZVAL_STRING(retval, (char *) content);
 		xmlFree(content);
 	} else {
-		ZVAL_EMPTY_STRING(*retval);
+		ZVAL_EMPTY_STRING(retval);
 	}
 
 	return SUCCESS;
@@ -102,31 +98,19 @@ int dom_characterdata_data_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 int dom_characterdata_data_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
-	zval value_copy;
-	xmlNode *nodep;
-
-	nodep = dom_object_get_node(obj);
+	xmlNode *nodep = dom_object_get_node(obj);
+	zend_string *str;
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	if (newval->type != IS_STRING) {
-		if(Z_REFCOUNT_P(newval) > 1) {
-			value_copy = *newval;
-			zval_copy_ctor(&value_copy);
-			newval = &value_copy;
-		}
-		convert_to_string(newval);
-	}
+	str = zval_get_string(newval);
 
-	xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
+	xmlNodeSetContentLen(nodep, (xmlChar *) str->val, str->len + 1);
 
-	if (newval == &value_copy) {
-		zval_dtor(newval);
-	}
-
+	zend_string_release(str);
 	return SUCCESS;
 }
 
@@ -137,21 +121,17 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7D61178C
 Since: 
 */
-int dom_characterdata_length_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_characterdata_length_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	xmlNodePtr nodep;
+	xmlNodePtr nodep = dom_object_get_node(obj);
 	xmlChar *content;
 	long length = 0;
-
-	nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
-	
 	content = xmlNodeGetContent(nodep);
 
 	if (content) {
@@ -159,7 +139,7 @@ int dom_characterdata_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 		xmlFree(content);
 	}
 
-	ZVAL_LONG(*retval, length);
+	ZVAL_LONG(retval, length);
 
 	return SUCCESS;
 }
@@ -176,7 +156,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 	xmlChar    *cur;
 	xmlChar    *substring;
 	xmlNodePtr  node;
-	long        offset, count;
+	zend_long        offset, count;
 	int         length;
 	dom_object	*intern;
 
@@ -207,7 +187,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 	xmlFree(cur);
 
 	if (substring) {
-		RETVAL_STRING(substring, 1);
+		RETVAL_STRING((char *) substring);
 		xmlFree(substring);
 	} else {
 		RETVAL_EMPTY_STRING();
@@ -225,7 +205,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 	xmlNode *nodep;
 	dom_object *intern;
 	char *arg;
-	int arg_len;
+	size_t arg_len;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_characterdata_class_entry, &arg, &arg_len) == FAILURE) {
 		return;
@@ -243,7 +223,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
     }
     nodep->properties = NULL;
 #else
-	xmlTextConcat(nodep, arg, arg_len);
+	xmlTextConcat(nodep, (xmlChar *) arg, arg_len);
 #endif
 	RETURN_TRUE;
 }
@@ -259,8 +239,9 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	xmlChar		*cur, *first, *second;
 	xmlNodePtr  node;
 	char		*arg;
-	long        offset;
-	int         length, arg_len;
+	zend_long        offset;
+	int         length;
+	size_t arg_len;
 	dom_object	*intern;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols", &id, dom_characterdata_class_entry, &offset, &arg, &arg_len) == FAILURE) {
@@ -287,7 +268,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	xmlFree(cur);
 
 	xmlNodeSetContent(node, first);
-	xmlNodeAddContent(node, arg);
+	xmlNodeAddContent(node, (xmlChar *) arg);
 	xmlNodeAddContent(node, second);
 	
 	xmlFree(first);
@@ -306,7 +287,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 	zval *id;
 	xmlChar    *cur, *substring, *second;
 	xmlNodePtr  node;
-	long        offset, count;
+	zend_long        offset, count;
 	int         length;
 	dom_object	*intern;
 
@@ -362,8 +343,9 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 	xmlChar		*cur, *substring, *second = NULL;
 	xmlNodePtr  node;
 	char		*arg;
-	long        offset, count;
-	int         length, arg_len;
+	zend_long        offset, count;
+	int         length;
+	size_t arg_len;
 	dom_object	*intern;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olls", &id, dom_characterdata_class_entry, &offset, &count, &arg, &arg_len) == FAILURE) {
@@ -399,7 +381,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 		second = xmlUTF8Strsub(cur, offset + count, length - offset);
 	}
 
-	substring = xmlStrcat(substring, arg);
+	substring = xmlStrcat(substring, (xmlChar *) arg);
 	substring = xmlStrcat(substring, second);
 
 	xmlNodeSetContent(node, substring);

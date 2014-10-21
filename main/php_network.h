@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,6 +63,7 @@
  * Also works sensibly for win32 */
 BEGIN_EXTERN_C()
 PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
+PHPAPI zend_string *php_socket_error_str(long err);
 END_EXTERN_C()
 
 #ifdef HAVE_NETINET_IN_H
@@ -104,6 +105,11 @@ typedef int php_socket_t;
 # define SOCK_CONN_ERR -1
 # define SOCK_RECV_ERR -1
 #endif
+
+#define STREAM_SOCKOP_NONE         1 << 0
+#define STREAM_SOCKOP_SO_REUSEPORT 1 << 1
+#define STREAM_SOCKOP_SO_BROADCAST 1 << 2
+
 
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */
 /* #define PHP_USE_POLL_2_EMULATION 1 */
@@ -224,12 +230,12 @@ typedef struct {
 #endif
 
 BEGIN_EXTERN_C()
-PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, char **error_string TSRMLS_DC);
+PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string TSRMLS_DC);
 PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
 
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
-		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
-		int *error_code, char *bindto, unsigned short bindport 
+		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
+		int *error_code, char *bindto, unsigned short bindport, long sockopts
 		TSRMLS_DC);
 
 PHPAPI int php_network_connect_socket(php_socket_t sockfd,
@@ -237,33 +243,33 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		socklen_t addrlen,
 		int asynchronous,
 		struct timeval *timeout,
-		char **error_string,
+		zend_string **error_string,
 		int *error_code);
 
 #define php_connect_nonb(sock, addr, addrlen, timeout) \
 	php_network_connect_socket((sock), (addr), (addrlen), 0, (timeout), NULL, NULL)
 
 PHPAPI php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
-		int socktype, char **error_string, int *error_code
+		int socktype, long sockopts, zend_string **error_string, int *error_code
 		TSRMLS_DC);
 
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
-		char **textaddr, long *textaddrlen,
+		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen,
 		struct timeval *timeout,
-		char **error_string,
+		zend_string **error_string,
 		int *error_code
 		TSRMLS_DC);
 
 PHPAPI int php_network_get_sock_name(php_socket_t sock, 
-		char **textaddr, long *textaddrlen,
+		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen
 		TSRMLS_DC);
 	
 PHPAPI int php_network_get_peer_name(php_socket_t sock, 
-		char **textaddr, long *textaddrlen,
+		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen
 		TSRMLS_DC);
@@ -293,14 +299,14 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 		/* input address */
 		struct sockaddr *sa, socklen_t sl,
 		/* output readable address */
-		char **textaddr, long *textaddrlen,
+		zend_string **textaddr,
 		/* output address */
 		struct sockaddr **addr,
 		socklen_t *addrlen
 		TSRMLS_DC);
 
 PHPAPI int php_network_parse_network_address_with_port(const char *addr,
-		long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC);
+		zend_long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC);
 END_EXTERN_C()
 
 #define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC TSRMLS_CC)

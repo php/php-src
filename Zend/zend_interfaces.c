@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -31,24 +31,27 @@ ZEND_API zend_class_entry *zend_ce_serializable;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
-ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
+ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, int function_name_len, zval *retval_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
 {
 	int result;
 	zend_fcall_info fci;
-	zval z_fname;
-	zval *retval;
+	zval retval;
 	HashTable *function_table;
 
-	zval **params[2];
+	zval params[2];
 
-	params[0] = &arg1;
-	params[1] = &arg2;
+	if (param_count > 0) {
+		ZVAL_COPY_VALUE(&params[0], arg1);
+	}
+	if (param_count > 1) {
+		ZVAL_COPY_VALUE(&params[1], arg2);
+	}
 
 	fci.size = sizeof(fci);
 	/*fci.function_table = NULL; will be read form zend_class_entry of object if needed */
-	fci.object_ptr = object_pp ? *object_pp : NULL;
-	fci.function_name = &z_fname;
-	fci.retval_ptr_ptr = retval_ptr_ptr ? retval_ptr_ptr : &retval;
+	fci.object = (object && Z_TYPE_P(object) == IS_OBJECT) ? Z_OBJ_P(object) : NULL;
+	ZVAL_STRINGL(&fci.function_name, function_name, function_name_len);
+	fci.retval = retval_ptr ? retval_ptr : &retval;
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.no_separation = 1;
@@ -57,15 +60,15 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 	if (!fn_proxy && !obj_ce) {
 		/* no interest in caching and no information already present that is
 		 * needed later inside zend_call_function. */
-		ZVAL_STRINGL(&z_fname, function_name, function_name_len, 0);
-		fci.function_table = !object_pp ? EG(function_table) : NULL;
+		fci.function_table = !object ? EG(function_table) : NULL;
 		result = zend_call_function(&fci, NULL TSRMLS_CC);
+		zval_ptr_dtor(&fci.function_name);
 	} else {
 		zend_fcall_info_cache fcic;
 
 		fcic.initialized = 1;
 		if (!obj_ce) {
-			obj_ce = object_pp ? Z_OBJCE_PP(object_pp) : NULL;
+			obj_ce = object ? Z_OBJCE_P(object) : NULL;
 		}
 		if (obj_ce) {
 			function_table = &obj_ce->function_table;
@@ -73,9 +76,9 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 			function_table = EG(function_table);
 		}
 		if (!fn_proxy || !*fn_proxy) {
-			if (zend_hash_find(function_table, function_name, function_name_len+1, (void **) &fcic.function_handler) == FAILURE) {
+			if ((fcic.function_handler = zend_hash_find_ptr(function_table, Z_STR(fci.function_name))) == NULL) {
 				/* error at c-level */
-				zend_error(E_CORE_ERROR, "Couldn't find implementation for method %s%s%s", obj_ce ? obj_ce->name : "", obj_ce ? "::" : "", function_name);
+				zend_error(E_CORE_ERROR, "Couldn't find implementation for method %s%s%s", obj_ce ? obj_ce->name->val : "", obj_ce ? "::" : "", function_name);
 			}
 			if (fn_proxy) {
 				*fn_proxy = fcic.function_handler;
@@ -84,46 +87,50 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 			fcic.function_handler = *fn_proxy;
 		}
 		fcic.calling_scope = obj_ce;
-		if (object_pp) {
-			fcic.called_scope = Z_OBJCE_PP(object_pp);
+		if (object) {
+			fcic.called_scope = Z_OBJCE_P(object);
 		} else if (obj_ce &&
-		           !(EG(called_scope) &&
-		             instanceof_function(EG(called_scope), obj_ce TSRMLS_CC))) {
+		           !(EG(current_execute_data) &&
+		             EG(current_execute_data)->called_scope &&
+		             instanceof_function(EG(current_execute_data)->called_scope, obj_ce TSRMLS_CC))) {
 			fcic.called_scope = obj_ce;
 		} else {
-			fcic.called_scope = EG(called_scope);
+			fcic.called_scope = EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL;
 		}
-		fcic.object_ptr = object_pp ? *object_pp : NULL;
+		fcic.object = object ? Z_OBJ_P(object) : NULL;
 		result = zend_call_function(&fci, &fcic TSRMLS_CC);
+		zval_ptr_dtor(&fci.function_name);
 	}
 	if (result == FAILURE) {
 		/* error at c-level */
 		if (!obj_ce) {
-			obj_ce = object_pp ? Z_OBJCE_PP(object_pp) : NULL;
+			obj_ce = object ? Z_OBJCE_P(object) : NULL;
 		}
 		if (!EG(exception)) {
-			zend_error(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? obj_ce->name : "", obj_ce ? "::" : "", function_name);
+			zend_error(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? obj_ce->name->val : "", obj_ce ? "::" : "", function_name);
 		}
 	}
-	if (!retval_ptr_ptr) {
-		if (retval) {
-			zval_ptr_dtor(&retval);
-		}
+	/* copy arguments back, they might be changed by references */
+	if (param_count > 0 && Z_ISREF(params[0]) && !Z_ISREF_P(arg1)) {
+		ZVAL_COPY_VALUE(arg1, &params[0]);
+	}
+	if (param_count > 1 && Z_ISREF(params[1]) && !Z_ISREF_P(arg2)) {
+		ZVAL_COPY_VALUE(arg2, &params[1]);
+	}
+	if (!retval_ptr) {
+		zval_ptr_dtor(&retval);
 		return NULL;
 	}
-	return *retval_ptr_ptr;
+	return retval_ptr;
 }
 /* }}} */
 
 /* iterator interface, c-level functions used by engine */
 
 /* {{{ zend_user_it_new_iterator */
-ZEND_API zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+ZEND_API void zend_user_it_new_iterator(zend_class_entry *ce, zval *object, zval *retval TSRMLS_DC)
 {
-	zval *retval;
-
-	return zend_call_method_with_0_params(&object, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", &retval);
-
+	zend_call_method_with_0_params(object, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", retval);
 }
 /* }}} */
 
@@ -132,9 +139,9 @@ ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 
-	if (iter->value) {
+	if (!Z_ISUNDEF(iter->value)) {
 		zval_ptr_dtor(&iter->value);
-		iter->value = NULL;
+		ZVAL_UNDEF(&iter->value);
 	}
 }
 /* }}} */
@@ -143,11 +150,10 @@ ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS
 static void zend_user_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	zval *object = (zval*)iter->it.data;
+	zval *object = &iter->it.data;
 
 	zend_user_it_invalidate_current(_iter TSRMLS_CC);
-	zval_ptr_dtor(&object);
-	efree(iter);
+	zval_ptr_dtor(object);
 }
 /* }}} */
 
@@ -156,13 +162,13 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
-		zval *object = (zval*)iter->it.data;
-		zval *more;
+		zval *object = &iter->it.data;
+		zval more;
 		int result;
 
-		zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_valid, "valid", &more);
-		if (more) {
-			result = i_zend_is_true(more);
+		zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs.zf_valid, "valid", &more);
+		if (Z_TYPE(more) != IS_UNDEF) {
+			result = i_zend_is_true(&more TSRMLS_CC);
 			zval_ptr_dtor(&more);
 			return result ? SUCCESS : FAILURE;
 		}
@@ -172,15 +178,15 @@ ZEND_API int zend_user_it_valid(zend_object_iterator *_iter TSRMLS_DC)
 /* }}} */
 
 /* {{{ zend_user_it_get_current_data */
-ZEND_API void zend_user_it_get_current_data(zend_object_iterator *_iter, zval ***data TSRMLS_DC)
+ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	zval *object = (zval*)iter->it.data;
+	zval *object = &iter->it.data;
 
-	if (!iter->value) {
-		zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_current, "current", &iter->value);
-	}
-	*data = &iter->value;
+	if (Z_ISUNDEF(iter->value)) {
+		zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs.zf_current, "current", &iter->value);
+	}	
+	return &iter->value;
 }
 /* }}} */
 
@@ -198,30 +204,31 @@ static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, cha
 ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *key TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	zval *object = (zval*)iter->it.data;
-	zval *retval;
+	zval *object = &iter->it.data;
+	zval retval;
 
-	zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_key, "key", &retval);
+	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs.zf_key, "key", &retval);
 
-	if (retval) {
-		ZVAL_ZVAL(key, retval, 1, 1);
+	if (Z_TYPE(retval) != IS_UNDEF) {
+		ZVAL_ZVAL(key, &retval, 1, 1);
 	} else {
 		if (!EG(exception)) {
-			zend_error(E_WARNING, "Nothing returned from %s::key()", iter->ce->name);
+			zend_error(E_WARNING, "Nothing returned from %s::key()", iter->ce->name->val);
 		}
 
 		ZVAL_LONG(key, 0);
 	}
 }
+/* }}} */
 
 /* {{{ zend_user_it_move_forward */
 ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	zval *object = (zval*)iter->it.data;
+	zval *object = &iter->it.data;
 
 	zend_user_it_invalidate_current(_iter TSRMLS_CC);
-	zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_next, "next", NULL);
+	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs.zf_next, "next", NULL);
 }
 /* }}} */
 
@@ -229,10 +236,10 @@ ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
-	zval *object = (zval*)iter->it.data;
+	zval *object = &iter->it.data;
 
 	zend_user_it_invalidate_current(_iter TSRMLS_CC);
-	zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_rewind, "rewind", NULL);
+	zend_call_method_with_0_params(object, iter->ce, &iter->ce->iterator_funcs.zf_rewind, "rewind", NULL);
 }
 /* }}} */
 
@@ -257,11 +264,12 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 
 	iterator = emalloc(sizeof(zend_user_iterator));
 
-	Z_ADDREF_P(object);
-	iterator->it.data = (void*)object;
+	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+
+	ZVAL_COPY(&iterator->it.data, object);
 	iterator->it.funcs = ce->iterator_funcs.funcs;
 	iterator->ce = Z_OBJCE_P(object);
-	iterator->value = NULL;
+	ZVAL_UNDEF(&iterator->value);
 	return (zend_object_iterator*)iterator;
 }
 /* }}} */
@@ -269,22 +277,22 @@ static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zva
 /* {{{ zend_user_it_get_new_iterator */
 ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
 {
-	zval *iterator = zend_user_it_new_iterator(ce, object TSRMLS_CC);
+	zval iterator;
 	zend_object_iterator *new_iterator;
+	zend_class_entry *ce_it;
 
-	zend_class_entry *ce_it = iterator && Z_TYPE_P(iterator) == IS_OBJECT ? Z_OBJCE_P(iterator) : NULL;
+	zend_user_it_new_iterator(ce, object, &iterator TSRMLS_CC);
+	ce_it = (Z_TYPE(iterator) == IS_OBJECT) ? Z_OBJCE(iterator) : NULL;
 
-	if (!ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && iterator == object)) {
+	if (!ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && Z_OBJ(iterator) == Z_OBJ_P(object))) {
 		if (!EG(exception)) {
-			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce ? ce->name : Z_OBJCE_P(object)->name);
+			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce ? ce->name->val : Z_OBJCE_P(object)->name->val);
 		}
-		if (iterator) {
-			zval_ptr_dtor(&iterator);
-		}
+		zval_ptr_dtor(&iterator);
 		return NULL;
 	}
 
-	new_iterator = ce_it->get_iterator(ce_it, iterator, by_ref TSRMLS_CC);
+	new_iterator = ce_it->get_iterator(ce_it, &iterator, by_ref TSRMLS_CC);
 	zval_ptr_dtor(&iterator);
 	return new_iterator;
 }
@@ -294,7 +302,7 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 static int zend_implement_traversable(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
 	/* check that class_type is traversable at c-level or implements at least one of 'aggregate' and 'Iterator' */
-	zend_uint i;
+	uint32_t i;
 
 	if (class_type->get_iterator || (class_type->parent && class_type->parent->get_iterator)) {
 		return SUCCESS;
@@ -305,10 +313,10 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 		}
 	}
 	zend_error(E_CORE_ERROR, "Class %s must implement interface %s as part of either %s or %s",
-		class_type->name,
-		zend_ce_traversable->name,
-		zend_ce_iterator->name,
-		zend_ce_aggregate->name);
+		class_type->name->val,
+		zend_ce_traversable->name->val,
+		zend_ce_iterator->name->val,
+		zend_ce_aggregate->name->val);
 	return FAILURE;
 }
 /* }}} */
@@ -316,7 +324,8 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 /* {{{ zend_implement_aggregate */
 static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
-	int i, t = -1;
+	uint32_t i;
+	int t = -1;
 
 	if (class_type->get_iterator) {
 		if (class_type->type == ZEND_INTERNAL_CLASS) {
@@ -328,9 +337,9 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 				for (i = 0; i < class_type->num_interfaces; i++) {
 					if (class_type->interfaces[i] == zend_ce_iterator) {
 						zend_error(E_ERROR, "Class %s cannot implement both %s and %s at the same time",
-									class_type->name,
-									interface->name,
-									zend_ce_iterator->name);
+									class_type->name->val,
+									interface->name->val,
+									zend_ce_iterator->name->val);
 						return FAILURE;
 					}
 					if (class_type->interfaces[i] == zend_ce_traversable) {
@@ -360,9 +369,9 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 			/* c-level get_iterator cannot be changed */
 			if (class_type->get_iterator == zend_user_it_get_new_iterator) {
 				zend_error(E_ERROR, "Class %s cannot implement both %s and %s at the same time",
-							class_type->name,
-							interface->name,
-							zend_ce_aggregate->name);
+							class_type->name->val,
+							interface->name->val,
+							zend_ce_aggregate->name->val);
 			}
 			return FAILURE;
 		}
@@ -397,26 +406,26 @@ static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_en
 /* }}}*/
 
 /* {{{ zend_user_serialize */
-ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC)
+ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC)
 {
 	zend_class_entry * ce = Z_OBJCE_P(object);
-	zval *retval;
+	zval retval;
 	int result;
 
-	zend_call_method_with_0_params(&object, ce, &ce->serialize_func, "serialize", &retval);
+	zend_call_method_with_0_params(object, ce, &ce->serialize_func, "serialize", &retval);
 
 
-	if (!retval || EG(exception)) {
+	if (Z_TYPE(retval) == IS_UNDEF || EG(exception)) {
 		result = FAILURE;
 	} else {
-		switch(Z_TYPE_P(retval)) {
+		switch(Z_TYPE(retval)) {
 		case IS_NULL:
 			/* we could also make this '*buf_len = 0' but this allows to skip variables */
 			zval_ptr_dtor(&retval);
 			return FAILURE;
 		case IS_STRING:
-			*buffer = (unsigned char*)estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-			*buf_len = Z_STRLEN_P(retval);
+			*buffer = (unsigned char*)estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
+			*buf_len = Z_STRLEN(retval);
 			result = SUCCESS;
 			break;
 		default: /* failure */
@@ -427,23 +436,22 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint
 	}
 
 	if (result == FAILURE && !EG(exception)) {
-		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s::serialize() must return a string or NULL", ce->name);
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s::serialize() must return a string or NULL", ce->name->val);
 	}
 	return result;
 }
 /* }}} */
 
 /* {{{ zend_user_unserialize */
-ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC)
+ZEND_API int zend_user_unserialize(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data TSRMLS_DC)
 {
-	zval * zdata;
+	zval zdata;
 
-	object_init_ex(*object, ce);
+	object_init_ex(object, ce);
 
-	MAKE_STD_ZVAL(zdata);
-	ZVAL_STRINGL(zdata, (char*)buf, buf_len, 1);
+	ZVAL_STRINGL(&zdata, (char*)buf, buf_len);
 
-	zend_call_method_with_1_params(object, ce, &ce->unserialize_func, "unserialize", NULL, zdata);
+	zend_call_method_with_1_params(object, ce, &ce->unserialize_func, "unserialize", NULL, &zdata);
 
 	zval_ptr_dtor(&zdata);
 
@@ -455,17 +463,17 @@ ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, const un
 }
 /* }}} */
 
-ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
+ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
-	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", ce->name);
+	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", ce->name->val);
 	return FAILURE;
 }
 /* }}} */
 
-ZEND_API int zend_class_unserialize_deny(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
+ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
 {
-	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Unserialization of '%s' is not allowed", ce->name);
+	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Unserialization of '%s' is not allowed", ce->name->val);
 	return FAILURE;
 }
 /* }}} */

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,6 +44,8 @@ static inline DateFormat *fetch_datefmt(IntlDateFormatter_object *dfo) {
  */
 U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 {
+	char *str;
+	int str_len;
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
@@ -57,11 +59,12 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 
 	UnicodeString res = UnicodeString();
 	fetch_datefmt(dfo)->getTimeZone().getID(res);
-	intl_charFromString(res, &Z_STRVAL_P(return_value),
-			&Z_STRLEN_P(return_value), &INTL_DATA_ERROR_CODE(dfo));
+	intl_charFromString(res, &str, &str_len, &INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS(dfo, "Could not convert time zone id to UTF-8");
 
-	Z_TYPE_P(return_value) = IS_STRING;
+	RETVAL_STRINGL(str, str_len);
+	//????
+	efree(str);
 }
 
 /* {{{ proto IntlTimeZone IntlDateFormatter::getTimeZone()
@@ -111,13 +114,13 @@ U_CFUNC PHP_FUNCTION(datefmt_set_timezone_id)
  */
 U_CFUNC PHP_FUNCTION(datefmt_set_timezone)
 {
-	zval		**timezone_zv;
+	zval		*timezone_zv;
 	TimeZone	*timezone;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	if ( zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
-			"OZ", &object, IntlDateFormatter_ce_ptr, &timezone_zv) == FAILURE) {
+			"Oz", &object, IntlDateFormatter_ce_ptr, &timezone_zv) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_set_timezone: "
 				"unable to parse input params", 0 TSRMLS_CC);
 		RETURN_FALSE;
@@ -217,7 +220,7 @@ U_CFUNC PHP_FUNCTION(datefmt_set_calendar)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	Calendar	*cal;
-	long		cal_type;
+	zend_long		cal_type;
 	bool		cal_owned;
 	Locale		locale = Locale::createFromName(dfo->requested_locale);
 	// getting the actual locale from the DateFormat is not enough

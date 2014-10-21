@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -198,15 +198,6 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 }
 
 static void
-_namespace_handler(XML_Parser parser, xmlNsPtr nsptr)
-{
-	if (nsptr != NULL) {
-		_namespace_handler(parser, nsptr->next);
-		parser->h_end_ns(parser->user, nsptr->prefix);
-	}
-}
-
-static void
 _end_element_handler(void *user, const xmlChar *name)
 {
 	xmlChar    *qualified_name;
@@ -368,7 +359,7 @@ _external_entity_ref_handler(void *user, const xmlChar *names, int type, const x
 		return;
 	}
 
-	parser->h_external_entity_ref(parser, names, "", sys_id, pub_id);
+	parser->h_external_entity_ref(parser, names, (XML_Char *) "", sys_id, pub_id);
 }
 
 static xmlEntityPtr
@@ -602,7 +593,7 @@ has been defined and none can be detected */
 	}
 #endif
 
-	error = xmlParseChunk(parser->parser, data, data_len, is_final);
+	error = xmlParseChunk(parser->parser, (char *) data, data_len, is_final);
 	if (!error) {
 		return 1;
 	} else if (parser->parser->lastError.level > XML_ERR_WARNING ){
@@ -728,7 +719,7 @@ PHPAPI const XML_Char *
 XML_ErrorString(int code)
 {
 	if (code < 0 || code >= (int)(sizeof(error_mapping) / sizeof(error_mapping[0]))) {
-		return "Unknown";
+		return (const XML_Char *) "Unknown";
 	}
 	return error_mapping[code];
 }
@@ -763,7 +754,7 @@ XML_GetCurrentByteCount(XML_Parser parser)
 
 PHPAPI const XML_Char *XML_ExpatVersion(void)
 {
-	return "1.0";
+	return (const XML_Char *) "1.0";
 }
 
 PHPAPI void

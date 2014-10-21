@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -157,6 +157,7 @@ static const opt_struct OPTIONS[] = {
 	{'R', 0, "allow-to-run-as-root"},
 	{'D', 0, "daemonize"},
 	{'F', 0, "nodaemonize"},
+	{'O', 0, "force-stderr"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -187,10 +188,12 @@ typedef struct _user_config_cache_entry {
 	HashTable *user_config;
 } user_config_cache_entry;
 
-static void user_config_cache_entry_dtor(user_config_cache_entry *entry)
+static void user_config_cache_entry_dtor(zval *el)
 {
+	user_config_cache_entry *entry = (user_config_cache_entry *)Z_PTR_P(el);
 	zend_hash_destroy(entry->user_config);
 	free(entry->user_config);
+	free(entry);
 }
 /* }}} */
 
@@ -215,30 +218,30 @@ static php_cgi_globals_struct php_cgi_globals;
 #define TRANSLATE_SLASHES(path)
 #endif
 
-static int print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
+static int print_module_info(zval *zv TSRMLS_DC)
 {
+	zend_module_entry *module = Z_PTR_P(zv);
 	php_printf("%s\n", module->name);
 	return 0;
 }
 
 static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
 {
-	Bucket *f = *((Bucket **) a);
-	Bucket *s = *((Bucket **) b);
+	Bucket *f = (Bucket *) a;
+	Bucket *s = (Bucket *) b;
 
-	return strcasecmp(	((zend_module_entry *)f->pData)->name,
-						((zend_module_entry *)s->pData)->name);
+	return strcasecmp(	((zend_module_entry *) Z_PTR(f->val))->name,
+						((zend_module_entry *) Z_PTR(s->val))->name);
 }
 
 static void print_modules(TSRMLS_D)
 {
 	HashTable sorted_registry;
-	zend_module_entry tmp;
 
 	zend_hash_init(&sorted_registry, 50, NULL, NULL, 1);
-	zend_hash_copy(&sorted_registry, &module_registry, NULL, &tmp, sizeof(zend_module_entry));
+	zend_hash_copy(&sorted_registry, &module_registry, NULL);
 	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
-	zend_hash_apply_with_argument(&sorted_registry, (apply_func_arg_t) print_module_info, NULL TSRMLS_CC);
+	zend_hash_apply(&sorted_registry, print_module_info TSRMLS_CC);
 	zend_hash_destroy(&sorted_registry);
 }
 
@@ -295,7 +298,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length T
 #endif
 }
 
-static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
+static size_t sapi_cgibin_ub_write(const char *str, size_t str_length TSRMLS_DC)
 {
 	const char *ptr = str;
 	uint remaining = str_length;
@@ -315,7 +318,7 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 }
 
 
-static void sapi_cgibin_flush(void *server_context)
+static void sapi_cgibin_flush(void *server_context TSRMLS_DC)
 {
 	/* fpm has started, let use fcgi instead of stdout */
 	if (fpm_is_running) {
@@ -494,12 +497,15 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 # define STDIN_FILENO 0
 #endif
 
-static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
+static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 {
 	uint read_bytes = 0;
 	int tmp_read_bytes;
+	size_t remaining = SG(request_info).content_length - SG(read_post_bytes);
 
-	count_bytes = MIN(count_bytes, (uint) SG(request_info).content_length - SG(read_post_bytes));
+	if (remaining < count_bytes) {
+		count_bytes = remaining;
+	}
 	while (read_bytes < count_bytes) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
 		if (request_body_fd == -1) {
@@ -564,32 +570,23 @@ static char *sapi_cgi_read_cookies(TSRMLS_D)
 void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
 	fcgi_request *request;
-	HashPosition pos;
-	char *var, **val;
-	uint var_len;
-	ulong idx;
+	zend_string *var;
+	char *val;
 	int filter_arg;
 
-
-	if (PG(http_globals)[TRACK_VARS_ENV] &&
-		array_ptr != PG(http_globals)[TRACK_VARS_ENV] &&
-		Z_TYPE_P(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
-		zend_hash_num_elements(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_ENV])) > 0
+	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
+		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
+		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
 	) {
 		zval_dtor(array_ptr);
-		*array_ptr = *PG(http_globals)[TRACK_VARS_ENV];
-		INIT_PZVAL(array_ptr);
-		zval_copy_ctor(array_ptr);
+		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
 		return;
-	} else if (PG(http_globals)[TRACK_VARS_SERVER] &&
-		array_ptr != PG(http_globals)[TRACK_VARS_SERVER] &&
-		Z_TYPE_P(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
-		zend_hash_num_elements(Z_ARRVAL_P(PG(http_globals)[TRACK_VARS_SERVER])) > 0
+	} else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
+		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
+		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
 	) {
 		zval_dtor(array_ptr);
-		*array_ptr = *PG(http_globals)[TRACK_VARS_SERVER];
-		INIT_PZVAL(array_ptr);
-		zval_copy_ctor(array_ptr);
+		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_SERVER]);
 		return;
 	}
 
@@ -597,24 +594,21 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	php_php_import_environment_variables(array_ptr TSRMLS_CC);
 
 	request = (fcgi_request*) SG(server_context);
-	filter_arg = (array_ptr == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
+	filter_arg = Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV])
+		? PARSE_ENV : PARSE_SERVER;
 
-	for (zend_hash_internal_pointer_reset_ex(request->env, &pos);
-	     zend_hash_get_current_key_ex(request->env, &var, &var_len, &idx, 0, &pos) == HASH_KEY_IS_STRING &&
-	     zend_hash_get_current_data_ex(request->env, (void **) &val, &pos) == SUCCESS;
-	     zend_hash_move_forward_ex(request->env, &pos)
-	) {
-		unsigned int new_val_len;
+	ZEND_HASH_FOREACH_STR_KEY_PTR(request->env, var, val) {
+		size_t new_val_len;
 
-		if (sapi_module.input_filter(filter_arg, var, val, strlen(*val), &new_val_len TSRMLS_CC)) {
-			php_register_variable_safe(var, *val, new_val_len, array_ptr TSRMLS_CC);
+		if (var && sapi_module.input_filter(filter_arg, var->val, &val, strlen(val), &new_val_len TSRMLS_CC)) {
+			php_register_variable_safe(var->val, val, new_val_len, array_ptr TSRMLS_CC);
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 
 static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 {
-	unsigned int php_self_len;
+	size_t php_self_len;
 	char *php_self;
 
 	/* In CGI mode, we consider the environment to be a part of the server
@@ -691,17 +685,16 @@ static void sapi_cgi_log_message(char *message)
 static void php_cgi_ini_activate_user_config(char *path, int path_len, const char *doc_root, int doc_root_len, int start TSRMLS_DC)
 {
 	char *ptr;
-	user_config_cache_entry *new_entry, *entry;
 	time_t request_time = sapi_get_request_time(TSRMLS_C);
+	user_config_cache_entry *entry = zend_hash_str_find_ptr(&CGIG(user_config_cache), path, path_len);
 
 	/* Find cached config entry: If not found, create one */
-	if (zend_hash_find(&CGIG(user_config_cache), path, path_len + 1, (void **) &entry) == FAILURE) {
-		new_entry = pemalloc(sizeof(user_config_cache_entry), 1);
-		new_entry->expires = 0;
-		new_entry->user_config = (HashTable *) pemalloc(sizeof(HashTable), 1);
-		zend_hash_init(new_entry->user_config, 0, NULL, (dtor_func_t) config_zval_dtor, 1);
-		zend_hash_update(&CGIG(user_config_cache), path, path_len + 1, new_entry, sizeof(user_config_cache_entry), (void **) &entry);
-		free(new_entry);
+	if (!entry) {
+		entry = pemalloc(sizeof(user_config_cache_entry), 1);
+		entry->expires = 0;
+		entry->user_config = (HashTable *) pemalloc(sizeof(HashTable), 1);
+		zend_hash_init(entry->user_config, 0, NULL, config_zval_dtor, 1);
+		zend_hash_str_update_ptr(&CGIG(user_config_cache), path, path_len, entry);
 	}
 
 	/* Check whether cache entry has expired and rescan if it is */
@@ -780,7 +773,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 			server_name_len = strlen(server_name);
 			server_name = estrndup(server_name, server_name_len);
 			zend_str_tolower(server_name, server_name_len);
-			php_ini_activate_per_host_config(server_name, server_name_len + 1 TSRMLS_CC);
+			php_ini_activate_per_host_config(server_name, server_name_len TSRMLS_CC);
 			efree(server_name);
 		}
 	}
@@ -918,7 +911,7 @@ static void php_cgi_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-t] [-p <prefix>] [-g <pid>] [-c <file>] [-d foo[=bar]] [-y <file>] [-D] [-F]\n"
+	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-t] [-p <prefix>] [-g <pid>] [-c <file>] [-d foo[=bar]] [-y <file>] [-D] [-F [-O]]\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
 				"  -n               No php.ini file will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
@@ -937,6 +930,8 @@ static void php_cgi_usage(char *argv0)
 				"  -D, --daemonize  force to run in background, and ignore daemonize option from config file\n"
 				"  -F, --nodaemonize\n"
 				"                   force to stay in foreground, and ignore daemonize option from config file\n"
+                                "  -O, --force-stderr\n"
+                                "                   force output to stderr in nodaemonize even if stderr is not a TTY\n"
 				"  -R, --allow-to-run-as-root\n"
 				"                   Allow pool to run as root (disabled by default)\n",
 				prog, PHP_PREFIX);
@@ -1142,13 +1137,16 @@ static void init_request_info(TSRMLS_D)
 				TRANSLATE_SLASHES(env_document_root);
 			}
 
-			if (env_path_translated != NULL && env_redirect_url != NULL &&
+			if (!apache_was_here && env_path_translated != NULL && env_redirect_url != NULL &&
 			    env_path_translated != script_path_translated &&
 			    strcmp(env_path_translated, script_path_translated) != 0) {
 				/*
 				 * pretty much apache specific.  If we have a redirect_url
 				 * then our script_filename and script_name point to the
 				 * php executable
+				 * we don't want to do this for the new mod_proxy_fcgi approach,
+				 * where redirect_url may also exist but the below will break
+				 * with rewrites to PATH_INFO, hence the !apache_was_here check
 				 */
 				script_path_translated = env_path_translated;
 				/* we correct SCRIPT_NAME now in case we don't have PATH_INFO */
@@ -1228,6 +1226,17 @@ static void init_request_info(TSRMLS_D)
 										SG(request_info).request_uri = orig_script_name;
 									}
 									path_info[0] = old;
+								} else if (apache_was_here && env_script_name) {
+									/* Using mod_proxy_fcgi and ProxyPass, apache cannot set PATH_INFO
+									 * As we can extract PATH_INFO from PATH_TRANSLATED
+									 * it is probably also in SCRIPT_NAME and need to be removed
+									 */
+									int snlen = strlen(env_script_name);
+									if (snlen>slen && !strcmp(env_script_name+snlen-slen, path_info)) {
+										_sapi_cgibin_putenv("ORIG_SCRIPT_NAME", orig_script_name TSRMLS_CC);
+										env_script_name[snlen-slen] = 0;
+										SG(request_info).request_uri = _sapi_cgibin_putenv("SCRIPT_NAME", env_script_name TSRMLS_CC);
+									}
 								}
 								env_path_info = _sapi_cgibin_putenv("PATH_INFO", path_info TSRMLS_CC);
 							}
@@ -1323,7 +1332,7 @@ static void init_request_info(TSRMLS_D)
 					efree(pt);
 				}
 			} else {
-				/* make sure path_info/translated are empty */
+				/* make sure original values are remembered in ORIG_ copies if we've changed them */
 				if (!orig_script_filename ||
 					(script_path_translated != orig_script_filename &&
 					strcmp(script_path_translated, orig_script_filename) != 0)) {
@@ -1332,7 +1341,9 @@ static void init_request_info(TSRMLS_D)
 					}
 					script_path_translated = _sapi_cgibin_putenv("SCRIPT_FILENAME", script_path_translated TSRMLS_CC);
 				}
-				if (env_redirect_url) {
+				if (!apache_was_here && env_redirect_url) {
+					/* if we used PATH_TRANSLATED to work around Apache mod_fastcgi (but not mod_proxy_fcgi,
+					 * hence !apache_was_here) weirdness, strip info accordingly */
 					if (orig_path_info) {
 						_sapi_cgibin_putenv("ORIG_PATH_INFO", orig_path_info TSRMLS_CC);
 						_sapi_cgibin_putenv("PATH_INFO", NULL TSRMLS_CC);
@@ -1350,7 +1361,7 @@ static void init_request_info(TSRMLS_D)
 				} else {
 					SG(request_info).request_uri = env_script_name;
 				}
-				free(real_path);
+				efree(real_path);
 			}
 		} else {
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
@@ -1462,7 +1473,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals TSRMLS_
 	php_cgi_globals->fix_pathinfo = 1;
 	php_cgi_globals->discard_path = 0;
 	php_cgi_globals->fcgi_logging = 1;
-	zend_hash_init(&php_cgi_globals->user_config_cache, 0, NULL, (dtor_func_t) user_config_cache_entry_dtor, 1);
+	zend_hash_init(&php_cgi_globals->user_config_cache, 0, NULL, user_config_cache_entry_dtor, 1);
 	php_cgi_globals->error_header = NULL;
 	php_cgi_globals->fpm_config = NULL;
 }
@@ -1569,6 +1580,7 @@ int main(int argc, char *argv[])
 	char *fpm_pid = NULL;
 	int test_conf = 0;
 	int force_daemon = -1;
+	int force_stderr = 0;
 	int php_information = 0;
 	int php_allow_to_run_as_root = 0;
 
@@ -1697,6 +1709,10 @@ int main(int argc, char *argv[])
 				force_daemon = 0;
 				break;
 
+			case 'O': /* force stderr even on non tty */
+				force_stderr = 1;
+				break;
+
 			default:
 			case 'h':
 			case '?':
@@ -1721,9 +1737,9 @@ int main(int argc, char *argv[])
 				SG(request_info).no_headers = 1;
 
 #if ZEND_DEBUG
-				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
 #else
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
 #endif
 				php_request_shutdown((void *) 0);
 				fcgi_shutdown();
@@ -1824,7 +1840,7 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon)) {
+	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr)) {
 
 		if (fpm_globals.send_config_pipe[1]) {
 			int writeval = 0;
@@ -1861,7 +1877,6 @@ consult the installation file that came with this distribution, or visit \n\
 			request_body_fd = -1;
 			SG(server_context) = (void *) &request;
 			init_request_info(TSRMLS_C);
-			CG(interactive) = 0;
 			char *primary_script = NULL;
 
 			fpm_request_info();
@@ -1955,7 +1970,7 @@ fastcgi_request_done:
 			fpm_request_end(TSRMLS_C);
 			fpm_log_write(NULL TSRMLS_CC);
 
-			STR_FREE(SG(request_info).path_translated);
+			efree(SG(request_info).path_translated);
 			SG(request_info).path_translated = NULL;
 
 			php_request_shutdown((void *) 0);
@@ -1982,8 +1997,9 @@ fastcgi_request_done:
 out:
 
 	SG(server_context) = NULL;
+	php_module_shutdown(TSRMLS_C);
+
 	if (parent) {
-		php_module_shutdown(TSRMLS_C);
 		sapi_shutdown();
 	}
 

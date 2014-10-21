@@ -97,5 +97,5 @@ bool(false)
 bool(false)
 *** closing file, testing eof ***
 
-Warning: feof(): %d is not a valid stream resource in %s on line %d
+Warning: feof(): supplied resource is not a valid stream resource in %s on line %d
 Done

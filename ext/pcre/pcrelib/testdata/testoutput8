@@ -1,5 +1,8 @@
-/-- This set of tests check the DFA matching functionality of pcre_dfa_exec().
-    The -dfa flag must be used with pcretest when running it. --/
+/-- This set of tests check the DFA matching functionality of pcre_dfa_exec(),
+    excluding UTF and Unicode property support. The -dfa flag must be used with
+    pcretest when running it. --/
+    
+< forbid 8W 
      
 /abc/
     abc
@@ -25,7 +28,7 @@ No match
     ab
 No match
     
-/a*/
+/a*/O
     a
  0: a
  1: 
@@ -49,7 +52,7 @@ No match
 16: a
 17: 
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 
-Matched, but too many subsidiary matches
+Matched, but offsets vector is too small to show all matches
  0: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
  1: aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
  2: aaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -341,7 +344,7 @@ No match
     axyzq
 No match
       
-/[^a]+/
+/[^a]+/O
     bac
  0: b
     bcdefax
@@ -359,7 +362,7 @@ No match
     aaaaa   
 No match
 
-/[^a]*/
+/[^a]*/O
     bac
  0: b
  1: 
@@ -380,7 +383,7 @@ No match
     aaaaa   
  0: 
     
-/[^a]{3,5}/
+/[^a]{3,5}/O
     xyz
  0: xyz
     awxyza
@@ -408,29 +411,18 @@ No match
 /\d*/
     1234b567
  0: 1234
- 1: 123
- 2: 12
- 3: 1
- 4: 
     xyz
  0: 
     
 /\D*/
     a1234b567
  0: a
- 1: 
     xyz
  0: xyz
- 1: xy
- 2: x
- 3: 
      
 /\d+/
     ab1234c56
  0: 1234
- 1: 123
- 2: 12
- 3: 1
     *** Failers
 No match
     xyz
@@ -439,19 +431,8 @@ No match
 /\D+/
     ab123c56
  0: ab
- 1: a
     *** Failers
  0: *** Failers
- 1: *** Failer
- 2: *** Faile
- 3: *** Fail
- 4: *** Fai
- 5: *** Fa
- 6: *** F
- 7: *** 
- 8: ***
- 9: **
-10: *
     789
 No match
     
@@ -478,9 +459,6 @@ No match
 /a+/
     aaaa
  0: aaaa
- 1: aaa
- 2: aa
- 3: a
 
 /^.*xyz/
     xyz
@@ -886,9 +864,6 @@ No match
  0: 
     aaabcd
  0: aaa
- 1: aa
- 2: a
- 3: 
     xyz
  0: xyz
  1: 
@@ -985,7 +960,7 @@ Partial match: abc
    xyzfo\P 
 No match
    foob\P\>2 
-Partial match: foob
+Partial match at offset 3: foob
    foobar...\R\P\>4 
  0: ar
    xyzfo\P
@@ -1577,18 +1552,6 @@ No match
 /^[.^$|()*+?{,}]+/
     .^\$(*+)|{?,?}
  0: .^$(*+)|{?,?}
- 1: .^$(*+)|{?,?
- 2: .^$(*+)|{?,
- 3: .^$(*+)|{?
- 4: .^$(*+)|{
- 5: .^$(*+)|
- 6: .^$(*+)
- 7: .^$(*+
- 8: .^$(*
- 9: .^$(
-10: .^$
-11: .^
-12: .
 
 /^a*\w/
     z
@@ -1744,38 +1707,16 @@ No match
 /foo(?!bar)(.*)/
     foobar is foolish see?
  0: foolish see?
- 1: foolish see
- 2: foolish se
- 3: foolish s
- 4: foolish 
- 5: foolish
- 6: foolis
- 7: fooli
- 8: fool
- 9: foo
 
 /(?:(?!foo)...|^.{0,2})bar(.*)/
     foobar crowbar etc
  0: rowbar etc
- 1: rowbar et
- 2: rowbar e
- 3: rowbar 
- 4: rowbar
     barrel
  0: barrel
- 1: barre
- 2: barr
- 3: bar
     2barrel
  0: 2barrel
- 1: 2barre
- 2: 2barr
- 3: 2bar
     A barrel
  0: A barrel
- 1: A barre
- 2: A barr
- 3: A bar
 
 /^(\D*)(?=\d)(?!123)/
     abc456
@@ -1820,7 +1761,7 @@ No match
     the abc
 No match
 
-/^[ab]{1,3}(ab*|b)/
+/^[ab]{1,3}(ab*|b)/O
     aabbbbb
  0: aabbbbb
  1: aabbbb
@@ -1829,7 +1770,7 @@ No match
  4: aab
  5: aa
 
-/^[ab]{1,3}?(ab*|b)/
+/^[ab]{1,3}?(ab*|b)/O
     aabbbbb
  0: aabbbbb
  1: aabbbb
@@ -1838,7 +1779,7 @@ No match
  4: aab
  5: aa
 
-/^[ab]{1,3}?(ab*?|b)/
+/^[ab]{1,3}?(ab*?|b)/O
     aabbbbb
  0: aabbbbb
  1: aabbbb
@@ -1847,7 +1788,7 @@ No match
  4: aab
  5: aa
 
-/^[ab]{1,3}(ab*?|b)/
+/^[ab]{1,3}(ab*?|b)/O
     aabbbbb
  0: aabbbbb
  1: aabbbb
@@ -2705,10 +2646,6 @@ No match
 /\0*/
     \0\0\0\0
  0: \x00\x00\x00\x00
- 1: \x00\x00\x00
- 2: \x00\x00
- 3: \x00
- 4: 
 
 /A\x0{2,3}Z/
     The A\x0\x0Z
@@ -2760,56 +2697,14 @@ No match
 /([^.]*)\.([^:]*):[T ]+(.*)/
     track1.title:TBlah blah blah
  0: track1.title:TBlah blah blah
- 1: track1.title:TBlah blah bla
- 2: track1.title:TBlah blah bl
- 3: track1.title:TBlah blah b
- 4: track1.title:TBlah blah 
- 5: track1.title:TBlah blah
- 6: track1.title:TBlah bla
- 7: track1.title:TBlah bl
- 8: track1.title:TBlah b
- 9: track1.title:TBlah 
-10: track1.title:TBlah
-11: track1.title:TBla
-12: track1.title:TBl
-13: track1.title:TB
-14: track1.title:T
 
 /([^.]*)\.([^:]*):[T ]+(.*)/i
     track1.title:TBlah blah blah
  0: track1.title:TBlah blah blah
- 1: track1.title:TBlah blah bla
- 2: track1.title:TBlah blah bl
- 3: track1.title:TBlah blah b
- 4: track1.title:TBlah blah 
- 5: track1.title:TBlah blah
- 6: track1.title:TBlah bla
- 7: track1.title:TBlah bl
- 8: track1.title:TBlah b
- 9: track1.title:TBlah 
-10: track1.title:TBlah
-11: track1.title:TBla
-12: track1.title:TBl
-13: track1.title:TB
-14: track1.title:T
 
 /([^.]*)\.([^:]*):[t ]+(.*)/i
     track1.title:TBlah blah blah
  0: track1.title:TBlah blah blah
- 1: track1.title:TBlah blah bla
- 2: track1.title:TBlah blah bl
- 3: track1.title:TBlah blah b
- 4: track1.title:TBlah blah 
- 5: track1.title:TBlah blah
- 6: track1.title:TBlah bla
- 7: track1.title:TBlah bl
- 8: track1.title:TBlah b
- 9: track1.title:TBlah 
-10: track1.title:TBlah
-11: track1.title:TBla
-12: track1.title:TBl
-13: track1.title:TB
-14: track1.title:T
 
 /^[W-c]+$/
     WXY_^abc
@@ -2882,13 +2777,10 @@ No match
  0: b
     c::b
  0: ::
- 1: :
 
 /[-az]+/
     az-
  0: az-
- 1: az
- 2: a
     *** Failers
  0: a
     b
@@ -2897,8 +2789,6 @@ No match
 /[az-]+/
     za-
  0: za-
- 1: za
- 2: z
     *** Failers
  0: a
     b
@@ -2907,8 +2797,6 @@ No match
 /[a\-z]+/
     a-z
  0: a-z
- 1: a-
- 2: a
     *** Failers
  0: a
     b
@@ -2917,20 +2805,10 @@ No match
 /[a-z]+/
     abcdxyz
  0: abcdxyz
- 1: abcdxy
- 2: abcdx
- 3: abcd
- 4: abc
- 5: ab
- 6: a
 
 /[\d-]+/
     12-34
  0: 12-34
- 1: 12-3
- 2: 12-
- 3: 12
- 4: 1
     *** Failers
 No match
     aaa
@@ -2939,11 +2817,6 @@ No match
 /[\d-z]+/
     12-34z
  0: 12-34z
- 1: 12-34
- 2: 12-3
- 3: 12-
- 4: 12
- 5: 1
     *** Failers
 No match
     aaa
@@ -3027,18 +2900,22 @@ No match
     abc\100\60
  0: abc@0
 
-/abc\81/
-    abc\081
- 0: abc\x0081
-    abc\0\x38\x31
- 0: abc\x0081
-
-/abc\91/
-    abc\091
- 0: abc\x0091
-    abc\0\x39\x31
- 0: abc\x0091
-
+/^A\8B\9C$/
+    A8B9C
+ 0: A8B9C
+    *** Failers
+No match
+    A\08B\09C  
+No match
+    
+/^[A\8B\9C]+$/
+    A8B9C
+ 0: A8B9C
+    *** Failers 
+No match
+    A8B9C\x00
+No match
+    
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)\12\123/
     abcdefghijk\12S
  0: abcdefghijk\x0aS
@@ -3077,16 +2954,13 @@ No match
  1: baNOTccc
  2: baNOTcc
  3: baNOTc
- 4: baNOT
     baNOTcccd
  0: baNOTccc
  1: baNOTcc
  2: baNOTc
- 3: baNOT
     baNOTccd
  0: baNOTcc
  1: baNOTc
- 2: baNOT
     bacccd
  0: baccc
     *** Failers
@@ -3096,7 +2970,6 @@ No match
  3: *** Fail
  4: *** Fai
  5: *** Fa
- 6: *** F
     anything
 No match
     b\bc   
@@ -3115,23 +2988,14 @@ No match
 /[^a]+/
     AAAaAbc
  0: AAA
- 1: AA
- 2: A
   
 /[^a]+/i
     AAAaAbc 
  0: bc
- 1: b
 
 /[^a]+/
     bbb\nccc
  0: bbb\x0accc
- 1: bbb\x0acc
- 2: bbb\x0ac
- 3: bbb\x0a
- 4: bbb
- 5: bb
- 6: b
    
 /[^k]$/
     abc
@@ -3208,20 +3072,8 @@ No match
 /(\.\d\d[1-9]?)\d+/
     1.230003938
  0: .230003938
- 1: .23000393
- 2: .2300039
- 3: .230003
- 4: .23000
- 5: .2300
- 6: .230
     1.875000282   
  0: .875000282
- 1: .87500028
- 2: .8750002
- 3: .875000
- 4: .87500
- 5: .8750
- 6: .875
     1.235  
  0: .235
                   
@@ -3243,10 +3095,6 @@ No match
 /\b(foo)\s+(\w+)/i
     Food is on the foo table
  0: foo table
- 1: foo tabl
- 2: foo tab
- 3: foo ta
- 4: foo t
     
 /foo(.*)bar/
     The food is under the bar in the barn.
@@ -3258,9 +3106,9 @@ No match
  0: food is under the bar in the bar
  1: food is under the bar
 
-/(.*)(\d*)/
+/(.*)(\d*)/O
     I have 2 numbers: 53147
-Matched, but too many subsidiary matches
+Matched, but offsets vector is too small to show all matches
  0: I have 2 numbers: 53147
  1: I have 2 numbers: 5314
  2: I have 2 numbers: 531
@@ -3287,15 +3135,11 @@ Matched, but too many subsidiary matches
 /(.*)(\d+)/
     I have 2 numbers: 53147
  0: I have 2 numbers: 53147
- 1: I have 2 numbers: 5314
- 2: I have 2 numbers: 531
- 3: I have 2 numbers: 53
- 4: I have 2 numbers: 5
- 5: I have 2
+ 1: I have 2
  
-/(.*?)(\d*)/
+/(.*?)(\d*)/O
     I have 2 numbers: 53147
-Matched, but too many subsidiary matches
+Matched, but offsets vector is too small to show all matches
  0: I have 2 numbers: 53147
  1: I have 2 numbers: 5314
  2: I have 2 numbers: 531
@@ -3322,11 +3166,7 @@ Matched, but too many subsidiary matches
 /(.*?)(\d+)/
     I have 2 numbers: 53147
  0: I have 2 numbers: 53147
- 1: I have 2 numbers: 5314
- 2: I have 2 numbers: 531
- 3: I have 2 numbers: 53
- 4: I have 2 numbers: 5
- 5: I have 2
+ 1: I have 2
 
 /(.*)(\d+)$/
     I have 2 numbers: 53147
@@ -3738,13 +3578,8 @@ No match
  0: a
     ab
  0: ab
- 1: a
     abbbb
  0: abbbb
- 1: abbb
- 2: abb
- 3: ab
- 4: a
     *** Failers
  0: a
     bbbbb    
@@ -3930,19 +3765,8 @@ No match
 /(?>(\.\d\d[1-9]?))\d+/
     1.230003938
  0: .230003938
- 1: .23000393
- 2: .2300039
- 3: .230003
- 4: .23000
- 5: .2300
- 6: .230
     1.875000282
  0: .875000282
- 1: .87500028
- 2: .8750002
- 3: .875000
- 4: .87500
- 5: .8750
     *** Failers 
 No match
     1.235 
@@ -4561,7 +4385,6 @@ No match
 /.{3,4}/
     abbbbc
  0: abbb
- 1: abb
 
 /ab{0,}bc/
     abbbbc
@@ -4929,9 +4752,6 @@ No match
 /[^ab]*/
     cde
  0: cde
- 1: cd
- 2: c
- 3: 
 
 /abc/
     *** Failers
@@ -4966,7 +4786,6 @@ No match
 /ab*/
     xabyabbbz
  0: ab
- 1: a
     xayabbbz
  0: a
 
@@ -4995,8 +4814,7 @@ No match
 /a([bc]*)c*/
     abc
  0: abc
- 1: ab
- 2: a
+ 1: a
 
 /a([bc]*)(c*d)/
     abcd
@@ -5033,10 +4851,6 @@ No match
 /[a-zA-Z_][a-zA-Z0-9_]*/
     alpha
  0: alpha
- 1: alph
- 2: alp
- 3: al
- 4: a
 
 /^a(bc+|b[eh])g|.h$/
     abh
@@ -5079,8 +4893,6 @@ No match
 /(.*)c(.*)/
     abcde
  0: abcde
- 1: abcd
- 2: abc
 
 /\((.*), (.*)\)/
     (a, b)
@@ -5395,9 +5207,6 @@ No match
 /[^ab]*/i
     CDE
  0: CDE
- 1: CD
- 2: C
- 3: 
 
 /abc/i
 
@@ -5427,7 +5236,6 @@ No match
 /ab*/i
     XABYABBBZ
  0: AB
- 1: A
     XAYABBBZ
  0: A
 
@@ -5458,8 +5266,7 @@ No match
 /a([bc]*)c*/i
     ABC
  0: ABC
- 1: AB
- 2: A
+ 1: A
 
 /a([bc]*)(c*d)/i
     ABCD
@@ -5490,10 +5297,6 @@ No match
 /[a-zA-Z_][a-zA-Z0-9_]*/i
     ALPHA
  0: ALPHA
- 1: ALPH
- 2: ALP
- 3: AL
- 4: A
 
 /^a(bc+|b[eh])g|.h$/i
     ABH
@@ -5546,8 +5349,6 @@ No match
 /(.*)c(.*)/i
     ABCDE
  0: ABCDE
- 1: ABCD
- 2: ABC
 
 /\((.*), (.*)\)/i
     (A, B)
@@ -6052,17 +5853,14 @@ No match
 /([[:]+)/
     a:[b]:
  0: :[
- 1: :
 
 /([[=]+)/
     a=[b]=
  0: =[
- 1: =
 
 /([[.]+)/
     a.[b].
  0: .[
- 1: .
 
 /((?>a+)b)/
     aaab
@@ -6196,25 +5994,11 @@ No match
 /a*/g
     abbab
  0: a
- 1: 
  0: 
  0: 
  0: a
- 1: 
  0: 
  0: 
-
-/^[a-\d]/
-    abcde
- 0: a
-    -things
- 0: -
-    0digit
- 0: 0
-    *** Failers
-No match
-    bcdef    
-No match
 
 /^[\d-a]/
     abcde
@@ -6231,36 +6015,22 @@ No match
 /[[:space:]]+/
     > \x09\x0a\x0c\x0d\x0b<
  0:  \x09\x0a\x0c\x0d\x0b
- 1:  \x09\x0a\x0c\x0d
- 2:  \x09\x0a\x0c
- 3:  \x09\x0a
- 4:  \x09
- 5:  
      
 /[[:blank:]]+/
     > \x09\x0a\x0c\x0d\x0b<
  0:  \x09
- 1:  
      
 /[\s]+/
     > \x09\x0a\x0c\x0d\x0b<
- 0:  \x09\x0a\x0c\x0d
- 1:  \x09\x0a\x0c
- 2:  \x09\x0a
- 3:  \x09
- 4:  
+ 0:  \x09\x0a\x0c\x0d\x0b
      
 /\s+/
     > \x09\x0a\x0c\x0d\x0b<
- 0:  \x09\x0a\x0c\x0d
- 1:  \x09\x0a\x0c
- 2:  \x09\x0a
- 3:  \x09
- 4:  
+ 0:  \x09\x0a\x0c\x0d\x0b
      
 /ab/x
     ab
-No match
+ 0: ab
 
 /(?!\A)x/m
   a\nxb\n
@@ -6563,8 +6333,6 @@ Partial match: 123
 /Content-Type\x3A[^\r\n]{6,}/
     Content-Type:xxxxxyyy 
  0: Content-Type:xxxxxyyy
- 1: Content-Type:xxxxxyy
- 2: Content-Type:xxxxxy
 
 /Content-Type\x3A[^\r\n]{6,}z/
     Content-Type:xxxxxyyyz
@@ -6661,66 +6429,22 @@ No match
 /.*/<lf>
     abc\ndef
  0: abc
- 1: ab
- 2: a
- 3: 
     abc\rdef
  0: abc\x0ddef
- 1: abc\x0dde
- 2: abc\x0dd
- 3: abc\x0d
- 4: abc
- 5: ab
- 6: a
- 7: 
     abc\r\ndef
  0: abc\x0d
- 1: abc
- 2: ab
- 3: a
- 4: 
     \<cr>abc\ndef
  0: abc\x0adef
- 1: abc\x0ade
- 2: abc\x0ad
- 3: abc\x0a
- 4: abc
- 5: ab
- 6: a
- 7: 
     \<cr>abc\rdef
  0: abc
- 1: ab
- 2: a
- 3: 
     \<cr>abc\r\ndef
  0: abc
- 1: ab
- 2: a
- 3: 
     \<crlf>abc\ndef
  0: abc\x0adef
- 1: abc\x0ade
- 2: abc\x0ad
- 3: abc\x0a
- 4: abc
- 5: ab
- 6: a
- 7: 
     \<crlf>abc\rdef
  0: abc\x0ddef
- 1: abc\x0dde
- 2: abc\x0dd
- 3: abc\x0d
- 4: abc
- 5: ab
- 6: a
- 7: 
     \<crlf>abc\r\ndef
  0: abc
- 1: ab
- 2: a
- 3: 
 
 /\w+(.)(.)?def/s
     abc\ndef
@@ -7033,10 +6757,8 @@ No match
 /\H*\h+\V?\v{3,4}/ 
     \x09\x20\xa0X\x0a\x0b\x0c\x0d\x0a
  0: \x09 \xa0X\x0a\x0b\x0c\x0d
- 1: \x09 \xa0X\x0a\x0b\x0c
     \x09\x20\xa0\x0a\x0b\x0c\x0d\x0a
  0: \x09 \xa0\x0a\x0b\x0c\x0d
- 1: \x09 \xa0\x0a\x0b\x0c
     \x09\x20\xa0\x0a\x0b\x0c
  0: \x09 \xa0\x0a\x0b\x0c
     ** Failers 
@@ -7047,7 +6769,6 @@ No match
 /\H{3,4}/
     XY  ABCDE
  0: ABCD
- 1: ABC
     XY  PQR ST 
  0: PQR
     
@@ -7466,17 +7187,17 @@ Error -16 (item unsupported for DFA matching)
     xyzabc123pqr 
  0: 123
     xyzabc12\P
-Partial match: abc12
+Partial match at offset 6: abc12
     xyzabc12\P\P
-Partial match: abc12
+Partial match at offset 6: abc12
 
 /\babc\b/
     +++abc+++
  0: abc
     +++ab\P
-Partial match: +ab
+Partial match at offset 3: +ab
     +++ab\P\P  
-Partial match: +ab
+Partial match at offset 3: +ab
 
 /(?=C)/g+
     ABCDECBA
@@ -7511,7 +7232,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 3
-Starting byte set: a d x 
+Starting chars: a d x 
     terhjk;abcdaadsfe
  0: abc
     the quick xyz brown fox 
@@ -7531,15 +7252,11 @@ No match
     xxxxabcd\P
  0: abcd
  0+ 
- 1: abc
     xxxxabcd\P\P
 Partial match: abcd
     dddxxx\R 
  0: ddd
  0+ xxx
- 1: dd
- 2: d
- 3: 
     xxxxabcd\P\P
 Partial match: abcd
     xxx\R 
@@ -7549,27 +7266,22 @@ Partial match: abcd
 /abcd*/i
     xxxxabcd\P
  0: abcd
- 1: abc
     xxxxabcd\P\P
 Partial match: abcd
     XXXXABCD\P
  0: ABCD
- 1: ABC
     XXXXABCD\P\P
 Partial match: ABCD
 
 /abc\d*/
     xxxxabc1\P
  0: abc1
- 1: abc
     xxxxabc1\P\P
 Partial match: abc1
 
 /abc[de]*/
     xxxxabcde\P
  0: abcde
- 1: abcd
- 2: abc
     xxxxabcde\P\P
 Partial match: abcde
 
@@ -7625,7 +7337,7 @@ Error -16 (item unsupported for DFA matching)
 
 /(?<=abc)def/
     abc\P\P
-Partial match: abc
+Partial match at offset 3: abc
 
 /abc$/
     abc
@@ -7684,11 +7396,8 @@ Partial match: abc
 /.+/
     abc\>0
  0: abc
- 1: ab
- 2: a
     abc\>1
  0: bc
- 1: b
     abc\>2
  0: c
     abc\>3
@@ -7811,10 +7520,6 @@ No match
 /^(?!a){0}\w+/
     aaaaa
  0: aaaaa
- 1: aaaa
- 2: aaa
- 3: aa
- 4: a
 
 /(?<=(abc))?xyz/
     abcxyz
@@ -7846,9 +7551,9 @@ Error -17 (backreference condition or recursion test not supported for DFA match
     aaaabcde
 Error -26 (nested recursion at the same subject position)
 
-/(a+)/
+/(a+)/O
     \O6aaaa
-Matched, but too many subsidiary matches
+Matched, but offsets vector is too small to show all matches
  0: aaaa
  1: aaa
  2: aa
@@ -7971,7 +7676,6 @@ Partial match: \x0d
 Partial match: \x0d\x0d
     \r\r\r\P
  0: \x0d\x0d\x0d
- 1: \x0d\x0d
     \r\r\r\P\P     
 Partial match: \x0d\x0d\x0d
 
@@ -8015,5 +7719,62 @@ Error -30 (invalid data in workspace for DFA restart)
     xx\xa0xxxxxabcd 
  0: xx\xa0xxxxxabcd
  1: xx\xa0xxxxxabc
+
+/abcd/
+    abcd\O0
+Matched, but offsets vector is too small to show all matches
+
+/-- These tests show up auto-possessification --/
+
+/[ab]*/
+    aaaa
+ 0: aaaa
+    
+/[ab]*?/
+    aaaa
+ 0: aaaa
+ 1: aaa
+ 2: aa
+ 3: a
+ 4: 
+    
+/[ab]?/
+    aaaa
+ 0: a
+    
+/[ab]??/
+    aaaa
+ 0: a
+ 1: 
+    
+/[ab]+/
+    aaaa
+ 0: aaaa
+    
+/[ab]+?/
+    aaaa
+ 0: aaaa
+ 1: aaa
+ 2: aa
+ 3: a
+    
+/[ab]{2,3}/
+    aaaa
+ 0: aaa
+    
+/[ab]{2,3}?/
+    aaaa
+ 0: aaa
+ 1: aa
+    
+/[ab]{2,}/
+    aaaa    
+ 0: aaaa
+
+/[ab]{2,}?/
+    aaaa    
+ 0: aaaa
+ 1: aaa
+ 2: aa
 
 /-- End of testinput8 --/

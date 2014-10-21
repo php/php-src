@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,8 +43,7 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 
 	ALLOC_HASHTABLE(args_copy);
 	zend_hash_init(args_copy, count, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(args_copy, Z_ARRVAL_P(args), (copy_ctor_func_t)zval_add_ref,
-		NULL, sizeof(zval*));
+	zend_hash_copy(args_copy, Z_ARRVAL_P(args), (copy_ctor_func_t)zval_add_ref);
 
 	umsg_format_helper(mfo, args_copy, &formatted, &formatted_len TSRMLS_CC);
 
@@ -102,9 +101,9 @@ PHP_FUNCTION( msgfmt_format_message )
 	UChar      *spattern = NULL;
 	int         spattern_len = 0;
 	char       *pattern = NULL;
-	int         pattern_len = 0;
-	char       *slocale = NULL;
-	int         slocale_len = 0;
+	size_t         pattern_len = 0;
+	const char *slocale = NULL;
+	size_t         slocale_len = 0;
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 

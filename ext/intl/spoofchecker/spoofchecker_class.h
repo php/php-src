@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,14 +27,19 @@
 #include <unicode/uspoof.h>
 
 typedef struct {
-	zend_object     zo;
-
 	// error handling
 	intl_error  err;
 
 	// ICU Spoofchecker
 	USpoofChecker*      uspoof;
+
+	zend_object     zo;
 } Spoofchecker_object;
+
+static inline Spoofchecker_object *php_intl_spoofchecker_fetch_object(zend_object *obj) {
+	    return (Spoofchecker_object *)((char*)(obj) - XtOffsetOf(Spoofchecker_object, zo));
+}
+#define Z_INTL_SPOOFCHECKER_P(zv) php_intl_spoofchecker_fetch_object((Z_OBJ_P(zv)))
 
 #define SPOOFCHECKER_ERROR(co) (co)->err
 #define SPOOFCHECKER_ERROR_P(co) &(SPOOFCHECKER_ERROR(co))
@@ -56,7 +61,7 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
     Spoofchecker_object*  co  = NULL;   \
     intl_error_reset(NULL TSRMLS_CC); \
 
-#define SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(Spoofchecker, co)
+#define SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_SPOOFCHECKER, co)
 #define SPOOFCHECKER_METHOD_FETCH_OBJECT							\
 	SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK;						\
 	if (co->uspoof == NULL)	{										\

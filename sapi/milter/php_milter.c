@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -290,7 +290,7 @@ static sfsistat mlfi_envfrom(SMFICTX *ctx, char **argv)
 	array_init(param[0]);
 
 	while (*argv) {
-		add_next_index_string(param[0], *argv, 1);
+		add_next_index_string(param[0], *argv);
 		argv++;
 	}
 
@@ -330,7 +330,7 @@ static sfsistat mlfi_envrcpt(SMFICTX *ctx, char **argv)
 	array_init(param[0]);
 
 	while (*argv) {
-		add_next_index_string(param[0], *argv, 1);
+		add_next_index_string(param[0], *argv);
 		argv++;
 	}
 
@@ -525,6 +525,10 @@ static sfsistat mlfi_close(SMFICTX *ctx)
 	int status;
 	TSRMLS_FETCH();
 
+	if (!SG(sapi_started) && SUCCESS != php_request_startup(TSRMLS_C)) {
+		return ret;
+	}
+
 	/* call userland */
 	INIT_ZVAL(function_name);
 	ZVAL_STRING(&function_name, "milter_close", 0);
@@ -550,7 +554,7 @@ static sfsistat mlfi_close(SMFICTX *ctx)
 
 /* {{{ Milter entry struct
  */
-struct smfiDesc smfilter = {
+static struct smfiDesc smfilter = {
     "php-milter",	/* filter name */
     SMFI_VERSION,   /* version code -- leave untouched */
     0,				/* flags */
@@ -860,10 +864,6 @@ static int sapi_milter_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void sapi_milter_flush(void *server_context)
-{
-}
-
 static void sapi_milter_register_variables(zval *track_vars_array TSRMLS_DC)
 {
 	php_register_variable ("SERVER_SOFTWARE", "Sendmail Milter", track_vars_array TSRMLS_CC);
@@ -906,7 +906,7 @@ static sapi_module_struct milter_sapi_module = {
 	NULL,							/* deactivate */
 
 	sapi_milter_ub_write,			/* unbuffered write */
-	sapi_milter_flush,				/* flush */
+	NULL,							/* flush */
 	NULL,							/* get uid */
 	NULL,							/* getenv */
 
@@ -1015,6 +1015,7 @@ int main(int argc, char *argv[])
 
 
 	tsrm_startup(1, 1, 0, NULL);
+	tsrm_ls = ts_resource(0);
 	sapi_startup(&milter_sapi_module);
 	
 	while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
@@ -1032,7 +1033,6 @@ int main(int argc, char *argv[])
 
 	milter_sapi_module.executable_location = argv[0];
 
-	tsrm_ls = ts_resource(0);
 
 	sapi_module.startup(&milter_sapi_module);
 
@@ -1109,7 +1109,7 @@ int main(int argc, char *argv[])
 				}
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 				php_output_teardown();
 				exit(1);
 				break;
@@ -1119,7 +1119,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'z': /* load extension file */
-				zend_load_extension(ap_php_optarg);
+				zend_load_extension(ap_php_optarg TSRMLS_CC);
 				break;
 
 			default:
@@ -1133,8 +1133,6 @@ int main(int argc, char *argv[])
 			PUTS(param_error);
 			exit(1);
 		}
-
-		CG(interactive) = interactive;
 
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
 		if (argc > ap_php_optind && !filename) {

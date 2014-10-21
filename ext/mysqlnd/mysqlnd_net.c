@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -99,10 +99,12 @@ MYSQLND_METHOD(mysqlnd_net, network_write_ex)(MYSQLND_NET * const net, const zen
 {
 	size_t ret;
 	DBG_ENTER("mysqlnd_net::network_write_ex");
+	DBG_INF_FMT("sending %u bytes", count);
 	ret = php_stream_write(net->data->m.get_stream(net TSRMLS_CC), (char *)buffer, count);
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_net::open_pipe */
 static php_stream *
@@ -115,6 +117,7 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 #else
 	unsigned int streams_options = 0;
 #endif
+	dtor_func_t origin_dtor;
 	php_stream * net_stream = NULL;
 
 	DBG_ENTER("mysqlnd_net::open_pipe");
@@ -130,12 +133,13 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 	/*
 	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
 	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
-	  unregistered yntil the script ends. So, we need to take care of that.
+	  unregistered until the script ends. So, we need to take care of that.
 	*/
-	net_stream->in_free = 1;
-	zend_hash_index_del(&EG(regular_list), net_stream->rsrc_id);
-	net_stream->in_free = 0;
-
+	origin_dtor = EG(regular_list).pDestructor;
+	EG(regular_list).pDestructor = NULL;
+	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
+	EG(regular_list).pDestructor = origin_dtor;
+	net_stream->res = NULL;
 
 	DBG_RETURN(net_stream);
 }
@@ -156,9 +160,10 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	unsigned int streams_flags = STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT;
 	char * hashed_details = NULL;
 	int hashed_details_len = 0;
-	char * errstr = NULL;
+	zend_string *errstr = NULL;
 	int errcode = 0;
 	struct timeval tv;
+	dtor_func_t origin_dtor;
 	php_stream * net_stream = NULL;
 
 	DBG_ENTER("mysqlnd_net::open_tcp_or_unix");
@@ -185,10 +190,10 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 			mnd_sprintf_free(hashed_details);
 		}
 		errcode = CR_CONNECTION_ERROR;
-		SET_CLIENT_ERROR(*error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr);
+		SET_CLIENT_ERROR(*error_info, errcode? errcode:CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, errstr->val);
 		if (errstr) {
 			/* no mnd_ since we don't allocate it */
-			efree(errstr);
+			zend_string_release(errstr);
 		}
 		DBG_RETURN(NULL);
 	}
@@ -198,17 +203,19 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 		  This is unwanted. ext/mysql or ext/mysqli are responsible to clean,
 		  whatever they have to.
 		*/
-		zend_rsrc_list_entry *le;
+		zend_resource *le;
 
-		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_len + 1, (void*) &le) == SUCCESS) {
+		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashed_details, hashed_details_len))) {
+			origin_dtor = EG(persistent_list).pDestructor;
 			/*
 			  in_free will let streams code skip destructing - big HACK,
 			  but STREAMS suck big time regarding persistent streams.
 			  Just not compatible for extensions that need persistency.
 			*/
-			net_stream->in_free = 1;
-			zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_len + 1);
-			net_stream->in_free = 0;
+			EG(persistent_list).pDestructor = NULL;
+			zend_hash_str_del(&EG(persistent_list), hashed_details, hashed_details_len);
+			EG(persistent_list).pDestructor = origin_dtor;
+			pefree(le, 1);
 		}
 #if ZEND_DEBUG
 		/* Shut-up the streams, they don't know what they are doing */
@@ -220,12 +227,14 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	/*
 	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
 	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
-	  unregistered yntil the script ends. So, we need to take care of that.
+	  unregistered until the script ends. So, we need to take care of that.
 	*/
-	net_stream->in_free = 1;
-	zend_hash_index_del(&EG(regular_list), net_stream->rsrc_id);
-	net_stream->in_free = 0;
-
+	origin_dtor = EG(regular_list).pDestructor;
+	EG(regular_list).pDestructor = NULL;
+	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
+	efree(net_stream->res);
+	net_stream->res = NULL;
+	EG(regular_list).pDestructor = origin_dtor;
 	DBG_RETURN(net_stream);
 }
 /* }}} */
@@ -357,6 +366,10 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 
 	do {
 		to_be_sent = MIN(left, MYSQLND_MAX_PACKET_SIZE);
+		DBG_INF_FMT("to_be_sent=%u", to_be_sent);
+		DBG_INF_FMT("packets_sent=%u", packets_sent);
+		DBG_INF_FMT("compressed_envelope_packet_no=%u", net->compressed_envelope_packet_no);
+		DBG_INF_FMT("packet_no=%u", net->packet_no);
 #ifdef MYSQLND_COMPRESSION_ENABLED
 		if (net->data->compressed == TRUE) {
 			/* here we need to compress the data and then write it, first comes the compressed header */
@@ -663,7 +676,7 @@ MYSQLND_METHOD(mysqlnd_net, receive_ex)(MYSQLND_NET * const net, zend_uchar * co
 			}
 			net->compressed_envelope_packet_no++;
 #ifdef MYSQLND_DUMP_HEADER_N_BODY
-			DBG_INF_FMT("HEADER: hwd_packet_no=%u size=%3u", packet_no, (unsigned long) net_payload_size);
+			DBG_INF_FMT("HEADER: hwd_packet_no=%u size=%3u", packet_no, (zend_ulong) net_payload_size);
 #endif
 			/* Now let's read from the wire, decompress it and fill the read buffer */
 			net->data->m.read_compressed_packet_from_stream_and_fill_read_buffer(net, net_payload_size, conn_stats, error_info TSRMLS_CC);
@@ -864,7 +877,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 
 	if (net->data->options.ssl_key) {
 		zval key_zval;
-		ZVAL_STRING(&key_zval, net->data->options.ssl_key, 0);
+		ZVAL_STRING(&key_zval, net->data->options.ssl_key);
 		php_stream_context_set_option(context, "ssl", "local_pk", &key_zval);
 	}
 	if (net->data->options.ssl_verify_peer) {
@@ -874,7 +887,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	}
 	if (net->data->options.ssl_cert) {
 		zval cert_zval;
-		ZVAL_STRING(&cert_zval, net->data->options.ssl_cert, 0);
+		ZVAL_STRING(&cert_zval, net->data->options.ssl_cert);
 		php_stream_context_set_option(context, "ssl", "local_cert", &cert_zval);
 		if (!net->data->options.ssl_key) {
 			php_stream_context_set_option(context, "ssl", "local_pk", &cert_zval);
@@ -882,25 +895,29 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	}
 	if (net->data->options.ssl_ca) {
 		zval cafile_zval;
-		ZVAL_STRING(&cafile_zval, net->data->options.ssl_ca, 0);
+		ZVAL_STRING(&cafile_zval, net->data->options.ssl_ca);
 		php_stream_context_set_option(context, "ssl", "cafile", &cafile_zval);
 	}
 	if (net->data->options.ssl_capath) {
 		zval capath_zval;
-		ZVAL_STRING(&capath_zval, net->data->options.ssl_capath, 0);
+		ZVAL_STRING(&capath_zval, net->data->options.ssl_capath);
 		php_stream_context_set_option(context, "ssl", "cafile", &capath_zval);
 	}
 	if (net->data->options.ssl_passphrase) {
 		zval passphrase_zval;
-		ZVAL_STRING(&passphrase_zval, net->data->options.ssl_passphrase, 0);
+		ZVAL_STRING(&passphrase_zval, net->data->options.ssl_passphrase);
 		php_stream_context_set_option(context, "ssl", "passphrase", &passphrase_zval);
 	}
 	if (net->data->options.ssl_cipher) {
 		zval cipher_zval;
-		ZVAL_STRING(&cipher_zval, net->data->options.ssl_cipher, 0);
+		ZVAL_STRING(&cipher_zval, net->data->options.ssl_cipher);
 		php_stream_context_set_option(context, "ssl", "ciphers", &cipher_zval);
 	}
+#if PHP_API_VERSION >= 20131106
+	php_stream_context_set(net_stream, context TSRMLS_CC);
+#else
 	php_stream_context_set(net_stream, context);
+#endif
 	if (php_stream_xport_crypto_setup(net_stream, STREAM_CRYPTO_METHOD_TLS_CLIENT, NULL TSRMLS_CC) < 0 ||
 	    php_stream_xport_crypto_enable(net_stream, 1 TSRMLS_CC) < 0)
 	{
@@ -916,7 +933,11 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	  of the context, which means usage of already freed memory, bad. Actually we don't need this
 	  context anymore after we have enabled SSL on the connection. Thus it is very simple, we remove it.
 	*/
+#if PHP_API_VERSION >= 20131106
+	php_stream_context_set(net_stream, NULL TSRMLS_CC);
+#else
 	php_stream_context_set(net_stream, NULL);
+#endif
 
 	if (net->data->options.timeout_read) {
 		struct timeval tv;
@@ -929,7 +950,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	DBG_RETURN(PASS);
 #else
 	DBG_ENTER("mysqlnd_net::enable_ssl");
-	DBG_INFO("MYSQLND_SSL_SUPPORTED is not defined");
+	DBG_INF("MYSQLND_SSL_SUPPORTED is not defined");
 	DBG_RETURN(PASS);
 #endif
 }

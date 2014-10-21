@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,8 +49,9 @@ PHP_FUNCTION(uniqid)
 #else
 	zend_bool more_entropy = 0;
 #endif
-	char *uniqid;
-	int sec, usec, prefix_len = 0;
+	zend_string *uniqid;
+	int sec, usec;
+	size_t prefix_len = 0;
 	struct timeval tv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sb", &prefix, &prefix_len,
@@ -76,12 +77,12 @@ PHP_FUNCTION(uniqid)
 	 * digits for usecs.
 	 */
 	if (more_entropy) {
-		spprintf(&uniqid, 0, "%s%08x%05x%.8F", prefix, sec, usec, php_combined_lcg(TSRMLS_C) * 10);
+		uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, sec, usec, php_combined_lcg(TSRMLS_C) * 10);
 	} else {
-		spprintf(&uniqid, 0, "%s%08x%05x", prefix, sec, usec);
+		uniqid = strpprintf(0, "%s%08x%05x", prefix, sec, usec);
 	}
 
-	RETURN_STRING(uniqid, 0);
+	RETURN_STR(uniqid);
 }
 #endif
 /* }}} */

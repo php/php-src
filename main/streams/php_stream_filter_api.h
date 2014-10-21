@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -107,7 +107,7 @@ typedef struct _php_stream_filter_chain {
 
 struct _php_stream_filter {
 	php_stream_filter_ops *fops;
-	void *abstract; /* for use by filter implementation */
+	zval abstract; /* for use by filter implementation */
 	php_stream_filter *next;
 	php_stream_filter *prev;
 	int is_persistent;
@@ -119,7 +119,7 @@ struct _php_stream_filter {
 	php_stream_bucket_brigade buffer;
 
 	/* filters are auto_registered when they're applied */
-	int rsrc_id;
+	zend_resource *res;
 };
 
 /* stack filter onto a stream */

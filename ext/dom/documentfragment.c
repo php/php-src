@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -72,15 +72,13 @@ PHP_METHOD(domdocumentfragment, __construct)
 		RETURN_FALSE;
 	}
 
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
-	if (intern != NULL) {
-		oldnode = dom_object_get_node(intern);
-		if (oldnode != NULL) {
-			php_libxml_node_free_resource(oldnode  TSRMLS_CC);
-		}
-		/* php_dom_set_object(intern, nodep TSRMLS_CC); */
-		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
+	intern = Z_DOMOBJ_P(id);
+	oldnode = dom_object_get_node(intern);
+	if (oldnode != NULL) {
+		php_libxml_node_free_resource(oldnode  TSRMLS_CC);
 	}
+	/* php_dom_set_object(intern, nodep TSRMLS_CC); */
+	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, nodep, (void *)intern TSRMLS_CC);
 }
 /* }}} end DOMDocumentFragment::__construct */
 
@@ -124,7 +122,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 	xmlNode *nodep;
 	dom_object *intern;
 	char *data = NULL;
-	int data_len = 0;
+	size_t data_len = 0;
 	int err;
 	xmlNodePtr lst;
 
@@ -140,7 +138,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 	}
 
 	if (data) {
-		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, data, &lst);
+		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, (xmlChar *) data, &lst);
 		if (err != 0) {
 			RETURN_FALSE;
 		}

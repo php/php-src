@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,18 +31,18 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *key_suffix, int key_suffix_len,
 			  zval *type, char *arg_sep, int enc_type TSRMLS_DC)
 {
-	char *key = NULL;
-	char *ekey, *newprefix, *p;
-	int arg_sep_len, ekey_len, key_type, newprefix_len;
-	uint key_len;
-	ulong idx;
-	zval **zdata = NULL, *copyzval;
+	zend_string *key = NULL;
+	char *newprefix, *p;
+	const char *prop_name;
+	size_t arg_sep_len, newprefix_len, prop_len;
+	zend_ulong idx;
+	zval *zdata = NULL, copyzval;
 
 	if (!ht) {
 		return FAILURE;
 	}
 
-	if (ht->nApplyCount > 0) {
+	if (ht->u.v.nApplyCount > 0) {
 		/* Prevent recursion */
 		return SUCCESS;
 	}
@@ -55,39 +55,36 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	}
 	arg_sep_len = strlen(arg_sep);
 
-	for (zend_hash_internal_pointer_reset(ht);
-		(key_type = zend_hash_get_current_key_ex(ht, &key, &key_len, &idx, 0, NULL)) != HASH_KEY_NON_EXISTENT;
-		zend_hash_move_forward(ht)
-	) {
-		if (key_type == HASH_KEY_IS_STRING && key_len && key[key_len-1] == '\0') {
-			/* We don't want that trailing NULL */
-			key_len -= 1;
-		}
-
+	ZEND_HASH_FOREACH_KEY_VAL_IND(ht, idx, key, zdata) {
 		/* handling for private & protected object properties */
-		if (key && *key == '\0' && type != NULL) {
-			const char *tmp;
+		if (key) {
+			if (key->val[0] == '\0' && type != NULL) {
+				const char *tmp;
 
-			zend_object *zobj = zend_objects_get_address(type TSRMLS_CC);
-			if (zend_check_property_access(zobj, key, key_len TSRMLS_CC) != SUCCESS) {
-				/* private or protected property access outside of the class */
-				continue;
-			}
-			zend_unmangle_property_name_ex(key, key_len, &tmp, (const char**)&key, &key_len);
-		}
-
-		if (zend_hash_get_current_data_ex(ht, (void **)&zdata, NULL) == FAILURE || !zdata || !(*zdata)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error traversing form data array");
-			return FAILURE;
-		}
-		if (Z_TYPE_PP(zdata) == IS_ARRAY || Z_TYPE_PP(zdata) == IS_OBJECT) {
-			if (key_type == HASH_KEY_IS_STRING) {
-				if (enc_type == PHP_QUERY_RFC3986) {
-					ekey = php_raw_url_encode(key, key_len, &ekey_len);
-				} else {
-					ekey = php_url_encode(key, key_len, &ekey_len);
+				zend_object *zobj = Z_OBJ_P(type);
+				if (zend_check_property_access(zobj, key TSRMLS_CC) != SUCCESS) {
+					/* private or protected property access outside of the class */
+					continue;
 				}
-				newprefix_len = key_suffix_len + ekey_len + key_prefix_len + 3 /* %5B */;
+				zend_unmangle_property_name_ex(key, &tmp, &prop_name, &prop_len);
+			} else {
+				prop_name = key->val;
+				prop_len = key->len;
+			}
+		} else {
+			prop_name = NULL;
+			prop_len = 0;
+		}
+
+		if (Z_TYPE_P(zdata) == IS_ARRAY || Z_TYPE_P(zdata) == IS_OBJECT) {
+			if (key) {
+				zend_string *ekey;
+				if (enc_type == PHP_QUERY_RFC3986) {
+					ekey = php_raw_url_encode(prop_name, prop_len);
+				} else {
+					ekey = php_url_encode(prop_name, prop_len);
+				}
+				newprefix_len = key_suffix_len + ekey->len + key_prefix_len + 3 /* %5B */;
 				newprefix = emalloc(newprefix_len + 1);
 				p = newprefix;
 
@@ -96,9 +93,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					p += key_prefix_len;
 				}
 
-				memcpy(p, ekey, ekey_len);
-				p += ekey_len;
-				efree(ekey);
+				memcpy(p, ekey->val, ekey->len);
+				p += ekey->len;
+				zend_string_free(ekey);
 
 				if (key_suffix) {
 					memcpy(p, key_suffix, key_suffix_len);
@@ -109,8 +106,10 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				*(p++) = 'B';
 				*p = '\0';
 			} else {
+				char *ekey;
+				int ekey_len;
 				/* Is an integer key */
-				ekey_len = spprintf(&ekey, 0, "%ld", idx);
+				ekey_len = spprintf(&ekey, 0, "%pd", idx);
 				newprefix_len = key_prefix_len + num_prefix_len + ekey_len + key_suffix_len + 3 /* %5B */;
 				newprefix = emalloc(newprefix_len + 1);
 				p = newprefix;
@@ -136,70 +135,89 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				*(p++) = 'B';
 				*p = '\0';
 			}
-			ht->nApplyCount++;
-			php_url_encode_hash_ex(HASH_OF(*zdata), formstr, NULL, 0, newprefix, newprefix_len, "%5D", 3, (Z_TYPE_PP(zdata) == IS_OBJECT ? *zdata : NULL), arg_sep, enc_type TSRMLS_CC);
-			ht->nApplyCount--;
+			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
+				ht->u.v.nApplyCount++;
+			}
+			php_url_encode_hash_ex(HASH_OF(zdata), formstr, NULL, 0, newprefix, newprefix_len, "%5D", 3, (Z_TYPE_P(zdata) == IS_OBJECT ? zdata : NULL), arg_sep, enc_type TSRMLS_CC);
+			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
+				ht->u.v.nApplyCount--;
+			}
 			efree(newprefix);
-		} else if (Z_TYPE_PP(zdata) == IS_NULL || Z_TYPE_PP(zdata) == IS_RESOURCE) {
+		} else if (Z_TYPE_P(zdata) == IS_NULL || Z_TYPE_P(zdata) == IS_RESOURCE) {
 			/* Skip these types */
 			continue;
 		} else {
-			if (formstr->len) {
+			if (formstr->s) {
 				smart_str_appendl(formstr, arg_sep, arg_sep_len);
 			}
 			/* Simple key=value */
 			smart_str_appendl(formstr, key_prefix, key_prefix_len);
-			if (key_type == HASH_KEY_IS_STRING) {
+			if (key) {
+				zend_string *ekey;
 				if (enc_type == PHP_QUERY_RFC3986) {
-					ekey = php_raw_url_encode(key, key_len, &ekey_len);
+					ekey = php_raw_url_encode(prop_name, prop_len);
 				} else {
-					ekey = php_url_encode(key, key_len, &ekey_len);
+					ekey = php_url_encode(prop_name, prop_len);
 				}
-				smart_str_appendl(formstr, ekey, ekey_len);
-				efree(ekey);
+				smart_str_append(formstr, ekey);
+				zend_string_free(ekey);
 			} else {
 				/* Numeric key */
 				if (num_prefix) {
 					smart_str_appendl(formstr, num_prefix, num_prefix_len);
 				}
-				ekey_len = spprintf(&ekey, 0, "%ld", idx);
-				smart_str_appendl(formstr, ekey, ekey_len);
-				efree(ekey);
+				smart_str_append_long(formstr, idx);
 			}
 			smart_str_appendl(formstr, key_suffix, key_suffix_len);
 			smart_str_appendl(formstr, "=", 1);
-			switch (Z_TYPE_PP(zdata)) {
-				case IS_STRING:
-					if (enc_type == PHP_QUERY_RFC3986) {
-						ekey = php_raw_url_encode(Z_STRVAL_PP(zdata), Z_STRLEN_PP(zdata), &ekey_len);
-					} else {
-						ekey = php_url_encode(Z_STRVAL_PP(zdata), Z_STRLEN_PP(zdata), &ekey_len);						
+			switch (Z_TYPE_P(zdata)) {
+				case IS_STRING: {
+						zend_string *ekey;
+						if (enc_type == PHP_QUERY_RFC3986) {
+							ekey = php_raw_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));
+						} else {
+							ekey = php_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));						
+						}
+						smart_str_append(formstr, ekey);
+						zend_string_free(ekey);
 					}
 					break;
 				case IS_LONG:
-				case IS_BOOL:
-					ekey_len = spprintf(&ekey, 0, "%ld", Z_LVAL_PP(zdata));
+					smart_str_append_long(formstr, Z_LVAL_P(zdata));
+					break;
+				case IS_FALSE:
+					smart_str_appendl(formstr, "0", sizeof("0")-1);
+					break;
+				case IS_TRUE:
+					smart_str_appendl(formstr, "1", sizeof("1")-1);
 					break;
 				case IS_DOUBLE:
-					ekey_len = spprintf(&ekey, 0, "%.*G", (int) EG(precision), Z_DVAL_PP(zdata));
+					{
+						char *ekey;
+					  	int ekey_len;
+						ekey_len = spprintf(&ekey, 0, "%.*G", (int) EG(precision), Z_DVAL_P(zdata));
+						smart_str_appendl(formstr, ekey, ekey_len);
+						efree(ekey);
+				  	}
 					break;
 				default:
-					/* fall back on convert to string */
-					MAKE_STD_ZVAL(copyzval);
-					*copyzval = **zdata;
-					zval_copy_ctor(copyzval);
-					convert_to_string_ex(&copyzval);
-					if (enc_type == PHP_QUERY_RFC3986) {
-						ekey = php_raw_url_encode(Z_STRVAL_P(copyzval), Z_STRLEN_P(copyzval), &ekey_len);
-					} else {
-						ekey = php_url_encode(Z_STRVAL_P(copyzval), Z_STRLEN_P(copyzval), &ekey_len);
+					{
+						zend_string *ekey;
+						/* fall back on convert to string */
+						ZVAL_DUP(&copyzval, zdata);
+						convert_to_string_ex(&copyzval);
+						if (enc_type == PHP_QUERY_RFC3986) {
+							ekey = php_raw_url_encode(Z_STRVAL(copyzval), Z_STRLEN(copyzval));
+						} else {
+							ekey = php_url_encode(Z_STRVAL(copyzval), Z_STRLEN(copyzval));
+						}
+						smart_str_append(formstr, ekey);
+						zval_ptr_dtor(&copyzval);
+						zend_string_free(ekey);
 					}
-					zval_ptr_dtor(&copyzval);
 			}
-			smart_str_appendl(formstr, ekey, ekey_len);
-			efree(ekey);
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	return SUCCESS;
 }
@@ -211,9 +229,9 @@ PHP_FUNCTION(http_build_query)
 {
 	zval *formdata;
 	char *prefix = NULL, *arg_sep=NULL;
-	int arg_sep_len = 0, prefix_len = 0;
+	size_t arg_sep_len = 0, prefix_len = 0;
 	smart_str formstr = {0};
-	long enc_type = PHP_QUERY_RFC1738;
+	zend_long enc_type = PHP_QUERY_RFC1738;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ssl", &formdata, &prefix, &prefix_len, &arg_sep, &arg_sep_len, &enc_type) != SUCCESS) {
 		RETURN_FALSE;
@@ -225,19 +243,19 @@ PHP_FUNCTION(http_build_query)
 	}
 
 	if (php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, enc_type TSRMLS_CC) == FAILURE) {
-		if (formstr.c) {
-			efree(formstr.c);
+		if (formstr.s) {
+			smart_str_free(&formstr);
 		}
 		RETURN_FALSE;
 	}
 
-	if (!formstr.c) {
+	if (!formstr.s) {
 		RETURN_EMPTY_STRING();
 	}
 
 	smart_str_0(&formstr);
 	
-	RETURN_STRINGL(formstr.c, formstr.len, 0);
+	RETURN_STR(formstr.s);
 }
 /* }}} */
 

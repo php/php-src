@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,8 +28,8 @@
    for this to work! 
 */
 typedef struct _intl_data {
-	zend_object		zo;
 	intl_error		error;
+	zend_object		zo;
 } intl_object;
 
 #define INTL_METHOD_INIT_VARS(oclass, obj)		\
@@ -42,7 +42,7 @@ typedef struct _intl_data {
 #define INTL_DATA_ERROR_CODE(obj)			INTL_ERROR_CODE(INTL_DATA_ERROR((obj)))
 
 #define INTL_METHOD_FETCH_OBJECT(oclass, obj)									\
-	obj = (oclass##_object *) zend_object_store_get_object( object TSRMLS_CC );	\
+	obj = Z_##oclass##_P( object );												\
     intl_error_reset( INTL_DATA_ERROR_P(obj) TSRMLS_CC );						\
 
 /* Check status by error code, if error - exit */
@@ -69,8 +69,13 @@ typedef struct _intl_data {
     if( U_FAILURE( INTL_DATA_ERROR_CODE((obj)) ) )									\
     {																				\
         intl_errors_set_custom_msg( INTL_DATA_ERROR_P((obj)), msg, 0 TSRMLS_CC );	\
-		zval_dtor(return_value);													\
-        RETURN_NULL();																\
+		/* yes, this is ugly, but it alreay is */									\
+		if (return_value != getThis()) {											\
+			zval_dtor(return_value);												\
+			RETURN_NULL();															\
+		}																			\
+		Z_OBJ_P(return_value) = NULL;												\
+		return;																		\
     }
 
 #define INTL_METHOD_RETVAL_UTF8(obj, ustring, ulen, free_it)									\
@@ -82,7 +87,8 @@ typedef struct _intl_data {
 		efree(ustring);																			\
 	}																							\
 	INTL_METHOD_CHECK_STATUS((obj), "Error converting value to UTF-8");							\
-	RETVAL_STRINGL(u8value, u8len, 0);															\
+	RETVAL_STRINGL(u8value, u8len);																\
+	efree(u8value);																				\
 }
 
 #define INTL_MAX_LOCALE_LEN 80

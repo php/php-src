@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,7 +55,7 @@ int transliterator_object_construct( zval *object,
 		return FAILURE;
 	}
 
-	zend_update_property_stringl( Transliterator_ce_ptr, object,
+	zend_update_property_stringl(Transliterator_ce_ptr, object,
 		"id", sizeof( "id" ) - 1, str_id, str_id_len TSRMLS_CC );
 	efree( str_id );
 	return SUCCESS;
@@ -98,53 +98,38 @@ static void transliterator_object_destroy( Transliterator_object* to TSRMLS_DC )
 
 /* {{{ Transliterator_objects_dtor */
 static void Transliterator_objects_dtor(
-	void *object,
-	zend_object_handle handle TSRMLS_DC )
+	zend_object *object TSRMLS_DC )
 {
-	zend_objects_destroy_object( object, handle TSRMLS_CC );
+	zend_objects_destroy_object( object TSRMLS_CC );
 }
 /* }}} */
 
 /* {{{ Transliterator_objects_free */
 static void Transliterator_objects_free( zend_object *object TSRMLS_DC )
 {
-	Transliterator_object* to = (Transliterator_object*) object;
+	Transliterator_object* to = php_intl_transliterator_fetch_object(object);
 
 	zend_object_std_dtor( &to->zo TSRMLS_CC );
 
 	transliterator_object_destroy( to TSRMLS_CC );
-
-	efree( to );
 }
 /* }}} */
 
 /* {{{ Transliterator_object_create */
-static zend_object_value Transliterator_object_create(
+static zend_object *Transliterator_object_create(
 	zend_class_entry *ce TSRMLS_DC )
 {
-	zend_object_value      retval;
 	Transliterator_object* intern;
 
-	intern = ecalloc( 1, sizeof( Transliterator_object ) );
+	intern = ecalloc( 1, sizeof( Transliterator_object ) + sizeof(zval) * (ce->default_properties_count - 1));
 
 	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
-#if PHP_VERSION_ID < 50399
-    zend_hash_copy( intern->zo.properties, &(ce->default_properties ),
-        (copy_ctor_func_t) zval_add_ref, NULL, sizeof( zval* ) );
-#else
-    object_properties_init( (zend_object*) intern, ce );
-#endif
+    object_properties_init( &intern->zo, ce );
 	transliterator_object_init( intern TSRMLS_CC );
 
-	retval.handle = zend_objects_store_put(
-		intern,
-		Transliterator_objects_dtor,
-		(zend_objects_free_object_storage_t) Transliterator_objects_free,
-		NULL TSRMLS_CC );
+	intern->zo.handlers = &Transliterator_handlers;
 
-	retval.handlers = &Transliterator_handlers;
-
-	return retval;
+	return &intern->zo;
 }
 /* }}} */
 
@@ -153,20 +138,19 @@ static zend_object_value Transliterator_object_create(
  */
 
 /* {{{ clone handler for Transliterator */
-static zend_object_value Transliterator_clone_obj( zval *object TSRMLS_DC )
+static zend_object *Transliterator_clone_obj( zval *object TSRMLS_DC )
 {
 	Transliterator_object *to_orig,
 	                      *to_new;
-	zend_object_value     ret_val;
+	zend_object 		  *ret_val;
 	intl_error_reset( NULL TSRMLS_CC );
 
-	to_orig = zend_object_store_get_object( object TSRMLS_CC );
+	to_orig = Z_INTL_TRANSLITERATOR_P( object );
 	intl_error_reset( INTL_DATA_ERROR_P( to_orig ) TSRMLS_CC );
 	ret_val = Transliterator_ce_ptr->create_object( Z_OBJCE_P( object ) TSRMLS_CC );
-	to_new  = zend_object_store_get_object_by_handle( ret_val.handle TSRMLS_CC );
+	to_new  = php_intl_transliterator_fetch_object( ret_val );
 
-	zend_objects_clone_members( &to_new->zo, ret_val,
-		&to_orig->zo, Z_OBJ_HANDLE_P( object ) TSRMLS_CC );
+	zend_objects_clone_members( &to_new->zo, &to_orig->zo TSRMLS_CC );
 
 	if( to_orig->utrans != NULL )
 	{
@@ -179,13 +163,13 @@ static zend_object_value Transliterator_clone_obj( zval *object TSRMLS_DC )
 		if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to_orig ) ) )
 			goto err;
 
-		Z_OBJVAL( tempz ) = ret_val;
+		ZVAL_OBJ(&tempz, ret_val);
 		transliterator_object_construct( &tempz, utrans,
 			TRANSLITERATOR_ERROR_CODE_P( to_orig ) TSRMLS_CC );
 
 		if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to_orig ) ) )
 		{
-			char *err_msg;
+			zend_string *err_msg;
 err:
 
 			if( utrans != NULL )
@@ -198,8 +182,8 @@ err:
 				"Could not clone transliterator", 0 TSRMLS_CC );
 
 			err_msg = intl_error_get_message( TRANSLITERATOR_ERROR_P( to_orig ) TSRMLS_CC );
-			php_error_docref( NULL TSRMLS_CC, E_ERROR, "%s", err_msg );
-			efree( err_msg ); /* if it's changed into a warning */
+			php_error_docref( NULL TSRMLS_CC, E_ERROR, "%s", err_msg->val );
+			zend_string_free( err_msg ); /* if it's changed into a warning */
 			/* do not destroy tempz; we need to return something */
 		}
 	}
@@ -214,8 +198,7 @@ err:
 }
 /* }}} */
 
-#if PHP_VERSION_ID >= 50399
-# define TRANSLITERATOR_PROPERTY_HANDLER_PROLOG \
+#define TRANSLITERATOR_PROPERTY_HANDLER_PROLOG  \
 	zval tmp_member;							\
 	if( Z_TYPE_P( member ) != IS_STRING )		\
 	{											\
@@ -223,35 +206,19 @@ err:
 		zval_copy_ctor( &tmp_member );			\
 		convert_to_string( &tmp_member );		\
 		member = &tmp_member;					\
-		key = NULL;								\
+		cache_slot = NULL;						\
     }
-#else
-# define TRANSLITERATOR_PROPERTY_HANDLER_PROLOG \
-	zval tmp_member;							\
-	if( Z_TYPE_P( member ) != IS_STRING )		\
-	{											\
-		tmp_member = *member;					\
-		zval_copy_ctor( &tmp_member );			\
-		convert_to_string( &tmp_member );		\
-		member = &tmp_member;					\
-    }
-#endif
 
 #define TRANSLITERATOR_PROPERTY_HANDLER_EPILOG	\
-	if( member == &tmp_member )				\
+	if( member == &tmp_member )					\
 	{											\
 		zval_dtor( &tmp_member );				\
 	}
 
 /* {{{ get_property_ptr_ptr handler */
-#if PHP_VERSION_ID < 50399
-static zval **Transliterator_get_property_ptr_ptr( zval *object, zval *member TSRMLS_DC )
-#else
-static zval **Transliterator_get_property_ptr_ptr( zval *object, zval *member, int type,
-	const struct _zend_literal *key TSRMLS_DC )
-#endif
+static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, int type, void **cache_slot TSRMLS_DC )
 {
-	zval **retval;
+	zval *retval;
 
 	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
 
@@ -262,11 +229,7 @@ static zval **Transliterator_get_property_ptr_ptr( zval *object, zval *member, i
 	}
 	else
 	{
-#if PHP_VERSION_ID < 50399
-		retval = std_object_handlers.get_property_ptr_ptr( object, member TSRMLS_CC );
-#else
-		retval = std_object_handlers.get_property_ptr_ptr( object, member, type, key TSRMLS_CC );
-#endif
+		retval = std_object_handlers.get_property_ptr_ptr( object, member, type, cache_slot TSRMLS_CC );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -276,12 +239,7 @@ static zval **Transliterator_get_property_ptr_ptr( zval *object, zval *member, i
 /* }}} */
 
 /* {{{ read_property handler */
-#if PHP_VERSION_ID < 50399
-static zval *Transliterator_read_property( zval *object, zval *member, int type TSRMLS_DC ) /* {{{ */
-#else
-static zval *Transliterator_read_property( zval *object, zval *member, int type,
-	const struct _zend_literal *key TSRMLS_DC ) /* {{{ */
-#endif
+static zval *Transliterator_read_property( zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC )
 {
 	zval *retval;
 
@@ -296,11 +254,7 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 	}
 	else
 	{
-#if PHP_VERSION_ID < 50399
-		retval = std_object_handlers.read_property( object, member, type TSRMLS_CC );
-#else
-		retval = std_object_handlers.read_property( object, member, type, key TSRMLS_CC );
-#endif
+		retval = std_object_handlers.read_property( object, member, type, cache_slot, rv TSRMLS_CC );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -311,12 +265,8 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 /* }}} */
 
 /* {{{ write_property handler */
-#if PHP_VERSION_ID < 50399
-static void Transliterator_write_property( zval *object, zval *member, zval *value TSRMLS_DC )
-#else
 static void Transliterator_write_property( zval *object, zval *member, zval *value,
-	const struct _zend_literal *key TSRMLS_DC )
-#endif
+	void **cache_slot TSRMLS_DC )
 {
 	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
 
@@ -328,11 +278,7 @@ static void Transliterator_write_property( zval *object, zval *member, zval *val
 	}
 	else
 	{
-#if PHP_VERSION_ID < 50399
-		std_object_handlers.write_property( object, member, value TSRMLS_CC );
-#else
-		std_object_handlers.write_property( object, member, value, key TSRMLS_CC );
-#endif
+		std_object_handlers.write_property( object, member, value, cache_slot TSRMLS_CC );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -403,6 +349,9 @@ void transliterator_register_Transliterator_class( TSRMLS_D )
 	Transliterator_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
 	memcpy( &Transliterator_handlers, zend_get_std_object_handlers(),
 		sizeof Transliterator_handlers );
+	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
+	Transliterator_handlers.dtor_obj = Transliterator_objects_dtor;
+	Transliterator_handlers.free_obj = Transliterator_objects_free;
 	Transliterator_handlers.clone_obj = Transliterator_clone_obj;
 	Transliterator_handlers.get_property_ptr_ptr = Transliterator_get_property_ptr_ptr;
 	Transliterator_handlers.read_property = Transliterator_read_property;

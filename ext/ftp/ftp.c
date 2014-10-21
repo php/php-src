@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -121,7 +121,7 @@ union ipbox {
 /* {{{ ftp_open
  */
 ftpbuf_t*
-ftp_open(const char *host, short port, long timeout_sec TSRMLS_DC)
+ftp_open(const char *host, short port, zend_long timeout_sec TSRMLS_DC)
 {
 	ftpbuf_t		*ftp;
 	socklen_t		 size;
@@ -136,7 +136,7 @@ ftp_open(const char *host, short port, long timeout_sec TSRMLS_DC)
 
 	ftp->fd = php_network_connect_socket_to_host(host,
 			(unsigned short) (port ? port : 21), SOCK_STREAM,
-			0, &tv, NULL, NULL, NULL, 0 TSRMLS_CC);
+			0, &tv, NULL, NULL, NULL, 0, STREAM_SOCKOP_NONE TSRMLS_CC);
 	if (ftp->fd == -1) {
 		goto bail;
 	}
@@ -177,6 +177,10 @@ ftp_close(ftpbuf_t *ftp)
 	}
 	if (ftp->data) {
 		data_close(ftp, ftp->data);
+	}
+	if (ftp->stream && ftp->closestream) {
+		TSRMLS_FETCH();
+		php_stream_close(ftp->stream);
 	}
 	if (ftp->fd != -1) {
 #if HAVE_OPENSSL_EXT
@@ -244,7 +248,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 {
 #if HAVE_OPENSSL_EXT
 	SSL_CTX	*ctx = NULL;
-	long ssl_ctx_options = SSL_OP_ALL;
+	zend_long ssl_ctx_options = SSL_OP_ALL;
 #endif
 	if (ftp == NULL) {
 		return 0;
@@ -475,7 +479,7 @@ ftp_raw(ftpbuf_t *ftp, const char *cmd, zval *return_value)
 	}
 	array_init(return_value);
 	while (ftp_readline(ftp)) {
-		add_next_index_string(return_value, ftp->inbuf, 1);
+		add_next_index_string(return_value, ftp->inbuf);
 		if (isdigit(ftp->inbuf[0]) && isdigit(ftp->inbuf[1]) && isdigit(ftp->inbuf[2]) && ftp->inbuf[3] == ' ') {
 			return;
 		}
@@ -533,10 +537,11 @@ ftp_cdup(ftpbuf_t *ftp)
 
 /* {{{ ftp_mkdir
  */
-char*
+zend_string*
 ftp_mkdir(ftpbuf_t *ftp, const char *dir)
 {
 	char *mkd, *end;
+	zend_string *ret;
 
 	if (ftp == NULL) {
 		return NULL;
@@ -549,17 +554,16 @@ ftp_mkdir(ftpbuf_t *ftp, const char *dir)
 	}
 	/* copy out the dir from response */
 	if ((mkd = strchr(ftp->inbuf, '"')) == NULL) {
-		mkd = estrdup(dir);
-		return mkd;
+		return zend_string_init(dir, strlen(dir), 0);
 	}
 	if ((end = strrchr(++mkd, '"')) == NULL) {
 		return NULL;
 	}
 	*end = 0;
-	mkd = estrdup(mkd);
+	ret = zend_string_init(mkd, end - mkd, 0);
 	*end = '"';
 
-	return mkd;
+	return ret;
 }
 /* }}} */
 
@@ -612,7 +616,7 @@ ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int filenam
 /* {{{ ftp_alloc
  */
 int
-ftp_alloc(ftpbuf_t *ftp, const long size, char **response)
+ftp_alloc(ftpbuf_t *ftp, const zend_long size, zend_string **response)
 {
 	char buffer[64];
 
@@ -620,7 +624,7 @@ ftp_alloc(ftpbuf_t *ftp, const long size, char **response)
 		return 0;
 	}
 
-	snprintf(buffer, sizeof(buffer) - 1, "%ld", size);
+	snprintf(buffer, sizeof(buffer) - 1, ZEND_LONG_FMT, size);
     
 	if (!ftp_putcmd(ftp, "ALLO", buffer)) {
 		return 0;
@@ -630,8 +634,8 @@ ftp_alloc(ftpbuf_t *ftp, const long size, char **response)
 		return 0;
 	}
 
-	if (response && ftp->inbuf) {
-		*response = estrdup(ftp->inbuf);
+	if (response) {
+		*response = zend_string_init(ftp->inbuf, strlen(ftp->inbuf), 0);
 	}
 
 	if (ftp->resp < 200 || ftp->resp >= 300) {
@@ -787,7 +791,7 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 /* {{{ ftp_get
  */
 int
-ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, long resumepos TSRMLS_DC)
+ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
 	size_t			rcvd;
@@ -807,7 +811,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 	ftp->data = data;
 
 	if (resumepos > 0) {
-		snprintf(arg, sizeof(arg), "%ld", resumepos);
+		snprintf(arg, sizeof(arg), ZEND_LONG_FMT, resumepos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -879,10 +883,10 @@ bail:
 /* {{{ ftp_put
  */
 int
-ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, long startpos TSRMLS_DC)
+ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
-	long			size;
+	zend_long			size;
 	char			*ptr;
 	int			ch;
 	char			arg[11];
@@ -899,7 +903,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, l
 	ftp->data = data;	
 
 	if (startpos > 0) {
-		snprintf(arg, sizeof(arg), "%ld", startpos);
+		snprintf(arg, sizeof(arg), ZEND_LONG_FMT, startpos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -956,7 +960,7 @@ bail:
 
 /* {{{ ftp_size
  */
-long
+zend_long
 ftp_size(ftpbuf_t *ftp, const char *path)
 {
 	if (ftp == NULL) {
@@ -1223,7 +1227,7 @@ ftp_getresp(ftpbuf_t *ftp)
 int
 my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 {
-	long		size, sent;
+	zend_long		size, sent;
     int         n;
 
 	size = len;
@@ -1489,7 +1493,7 @@ data_accept(databuf_t *data, ftpbuf_t *ftp TSRMLS_DC)
 
 #if HAVE_OPENSSL_EXT
 	SSL_CTX		*ctx;
-	long ssl_ctx_options = SSL_OP_ALL;
+	zend_long ssl_ctx_options = SSL_OP_ALL;
 #endif
 
 	if (data->fd != -1) {
@@ -1638,7 +1642,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 	if (ftp->resp == 226) {
 		ftp->data = data_close(ftp, data);
 		php_stream_close(tmpstream);
-		return ecalloc(1, sizeof(char**));
+		return ecalloc(1, sizeof(char*));
 	}
 
 	/* pull data buffer into tmpfile */
@@ -1666,11 +1670,11 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 		}
 	}
 
-	ftp->data = data = data_close(ftp, data);
+	ftp->data = data_close(ftp, data);
 
 	php_stream_rewind(tmpstream);
 
-	ret = safe_emalloc((lines + 1), sizeof(char**), size * sizeof(char*));
+	ret = safe_emalloc((lines + 1), sizeof(char*), size);
 
 	entry = ret;
 	text = (char*) (ret + lines + 1);
@@ -1707,7 +1711,7 @@ bail:
 /* {{{ ftp_nb_get
  */
 int
-ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, long resumepos TSRMLS_DC)
+ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
 	char			arg[11];
@@ -1725,7 +1729,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 	}
 
 	if (resumepos>0) {
-		snprintf(arg, sizeof(arg), "%ld", resumepos);
+		snprintf(arg, sizeof(arg), ZEND_LONG_FMT, resumepos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -1824,7 +1828,7 @@ bail:
 /* {{{ ftp_nb_put
  */
 int
-ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, long startpos TSRMLS_DC)
+ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
 	char			arg[11];
@@ -1839,7 +1843,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type
 		goto bail;
 	}
 	if (startpos > 0) {
-		snprintf(arg, sizeof(arg), "%ld", startpos);
+		snprintf(arg, sizeof(arg), ZEND_LONG_FMT, startpos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}

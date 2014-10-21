@@ -3,6 +3,7 @@ Test session_set_save_handler() : incorrect arguments for existing handler open
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
+session.gc_probability=0
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -23,7 +24,9 @@ class MySession extends SessionHandler {
 	public function open($path, $name) {
 		++$this->i;
 		echo 'Open ', session_id(), "\n";
-		return parent::open();
+		// This test was written for broken return value handling
+		// Mimmick what was actually being tested by returning true here
+		return (null === parent::open());
 	}
 	public function read($key) {
 		++$this->i;
@@ -54,6 +57,8 @@ int(2)
 array(0) {
 }
 
-Warning: Unknown: Parent session handler is not open in Unknown on line 0
+Warning: SessionHandler::write(): Parent session handler is not open in Unknown on line 0
 
-Warning: Unknown: Parent session handler is not open in Unknown on line 0
+Warning: session_write_close(): Failed to write session data %s in %s on line %d
+
+Warning: SessionHandler::close(): Parent session handler is not open in Unknown on line 0

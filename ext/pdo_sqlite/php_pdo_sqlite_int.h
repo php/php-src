@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@ struct pdo_sqlite_fci {
 struct pdo_sqlite_func {
 	struct pdo_sqlite_func *next;
 
-	zval *func, *step, *fini;
+	zval func, step, fini;
 	int argc;
 	const char *funcname;
 	
@@ -50,7 +50,7 @@ struct pdo_sqlite_collation {
 	struct pdo_sqlite_collation *next;
 
 	const char *name;
-	zval *callback;
+	zval callback;
 	struct pdo_sqlite_fci fc;
 };
 

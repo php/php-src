@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,13 +41,13 @@ typedef struct {
 	DWORD engine_thread;
 	LONG refcount;
 	php_stream *stream;
-	int id;
+	zend_resource *res;
 } php_istream;
 
 static int le_istream;
 static void istream_destructor(php_istream *stm TSRMLS_DC);
 
-static void istream_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void istream_dtor(zend_resource *rsrc TSRMLS_DC)
 {
 	php_istream *stm = (php_istream *)rsrc->ptr;
 	istream_destructor(stm TSRMLS_CC);
@@ -97,8 +97,8 @@ static ULONG STDMETHODCALLTYPE stm_release(IStream *This)
 	ret = InterlockedDecrement(&stm->refcount);
 	if (ret == 0) {
 		/* destroy it */
-		if (stm->id)
-			zend_list_delete(stm->id);
+		if (stm->res)
+			zend_list_delete(stm->res);
 	}
 	return ret;
 }
@@ -251,10 +251,10 @@ static struct IStreamVtbl php_istream_vtbl = {
 
 static void istream_destructor(php_istream *stm TSRMLS_DC)
 {
-	if (stm->id) {
-		int id = stm->id;
-		stm->id = 0;
-		zend_list_delete(id);
+	if (stm->res) {
+		zend_resource *res = stm->res;
+		stm->res = NULL;
+		zend_list_delete(res);
 		return;
 	}
 
@@ -262,7 +262,7 @@ static void istream_destructor(php_istream *stm TSRMLS_DC)
 		CoDisconnectObject((IUnknown*)stm, 0);
 	}
 
-	zend_list_delete(stm->stream->rsrc_id);
+	zend_list_delete(stm->stream->res);
 
 	CoTaskMemFree(stm);
 }
@@ -271,6 +271,7 @@ static void istream_destructor(php_istream *stm TSRMLS_DC)
 PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream TSRMLS_DC)
 {
 	php_istream *stm = (php_istream*)CoTaskMemAlloc(sizeof(*stm));
+	zval *tmp;
 
 	if (stm == NULL)
 		return NULL;
@@ -281,8 +282,9 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream TSR
 	stm->refcount = 1;
 	stm->stream = stream;
 
-	zend_list_addref(stream->rsrc_id);
-	stm->id = zend_list_insert(stm, le_istream TSRMLS_CC);
+	GC_REFCOUNT(stream->res)++;
+	tmp = zend_list_insert(stm, le_istream TSRMLS_CC);
+	stm->res = Z_RES_P(tmp);
 
 	return (IStream*)stm;
 }
@@ -291,7 +293,7 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream TSR
 #define CPH_SME(fname, arginfo)	PHP_ME(com_persist, fname, arginfo, ZEND_ACC_ALLOW_STATIC|ZEND_ACC_PUBLIC)
 #define CPH_METHOD(fname)		static PHP_METHOD(com_persist, fname)
 	
-#define CPH_FETCH()				php_com_persist_helper *helper = (php_com_persist_helper*)zend_object_store_get_object(getThis() TSRMLS_CC);
+#define CPH_FETCH()				php_com_persist_helper *helper = (php_com_persist_helper*)Z_OBJ_P(getThis());
 
 #define CPH_NO_OBJ()			if (helper->unk == NULL) { php_com_throw_exception(E_INVALIDARG, "No COM object is associated with this helper instance" TSRMLS_CC); return; }
 
@@ -347,9 +349,12 @@ CPH_METHOD(GetCurFileName)
 		res = IPersistFile_GetCurFile(helper->ipf, &olename);
 
 		if (res == S_OK) {
-			Z_TYPE_P(return_value) = IS_STRING;
-			Z_STRVAL_P(return_value) = php_com_olestring_to_string(olename,
-				   &Z_STRLEN_P(return_value), helper->codepage TSRMLS_CC);
+			size_t len;
+			char *str = php_com_olestring_to_string(olename,
+				   &len, helper->codepage TSRMLS_CC);
+			RETVAL_STRINGL(str, len);
+			// TODO: avoid reallocarion???
+			efree(str);
 			CoTaskMemFree(olename);
 			return;
 		} else if (res == S_FALSE) {
@@ -370,7 +375,7 @@ CPH_METHOD(SaveToFile)
 {
 	HRESULT res;
 	char *filename, *fullpath = NULL;
-	int filename_len;
+	size_t filename_len;
 	zend_bool remember = TRUE;
 	OLECHAR *olefilename = NULL;
 	CPH_FETCH();
@@ -433,8 +438,8 @@ CPH_METHOD(LoadFromFile)
 {
 	HRESULT res;
 	char *filename, *fullpath;
-	int filename_len;
-	long flags = 0;
+	size_t filename_len;
+	zend_long flags = 0;
 	OLECHAR *olefilename;
 	CPH_FETCH();
 	
@@ -501,7 +506,7 @@ CPH_METHOD(GetMaxStreamSize)
 		php_com_throw_exception(res, NULL TSRMLS_CC);
 	} else {
 		/* TODO: handle 64 bit properly */
-		RETURN_LONG((LONG)size.QuadPart);
+		RETURN_LONG((zend_long)size.QuadPart);
 	}
 }
 /* }}} */
@@ -545,7 +550,7 @@ CPH_METHOD(LoadFromStream)
 		return;
 	}
 
-	php_stream_from_zval_no_verify(stream, &zstm);
+	php_stream_from_zval_no_verify(stream, zstm);
 	
 	if (stream == NULL) {
 		php_com_throw_exception(E_INVALIDARG, "expected a stream" TSRMLS_CC);
@@ -607,7 +612,7 @@ CPH_METHOD(SaveToStream)
 		return;
 	}
 
-	php_stream_from_zval_no_verify(stream, &zstm);
+	php_stream_from_zval_no_verify(stream, zstm);
 	
 	if (stream == NULL) {
 		php_com_throw_exception(E_INVALIDARG, "expected a stream" TSRMLS_CC);
@@ -688,7 +693,7 @@ static const zend_function_entry com_persist_helper_methods[] = {
 	PHP_FE_END
 };
 
-static void helper_free_storage(void *obj TSRMLS_DC)
+static void helper_free_storage(zend_object *obj TSRMLS_DC)
 {
 	php_com_persist_helper *object = (php_com_persist_helper*)obj;
 
@@ -705,17 +710,15 @@ static void helper_free_storage(void *obj TSRMLS_DC)
 		IUnknown_Release(object->unk);
 	}
 	zend_object_std_dtor(&object->std TSRMLS_CC);
-	efree(object);
 }
 
 
-static void helper_clone(void *obj, void **clone_ptr TSRMLS_DC)
+static zend_object* helper_clone(zval *obj TSRMLS_DC)
 {
-	php_com_persist_helper *clone, *object = (php_com_persist_helper*)obj;
+	php_com_persist_helper *clone, *object = (php_com_persist_helper*)Z_OBJ_P(obj);
 
 	clone = emalloc(sizeof(*object));
 	memcpy(clone, object, sizeof(*object));
-	*clone_ptr = clone;
 
 	zend_object_std_init(&clone->std, object->std.ce TSRMLS_CC);
 
@@ -731,22 +734,20 @@ static void helper_clone(void *obj, void **clone_ptr TSRMLS_DC)
 	if (clone->unk) {
 		IUnknown_AddRef(clone->unk);
 	}
+	return (zend_object*)clone;
 }
 
-static zend_object_value helper_new(zend_class_entry *ce TSRMLS_DC)
+static zend_object* helper_new(zend_class_entry *ce TSRMLS_DC)
 {
 	php_com_persist_helper *helper;
-	zend_object_value retval;
 
 	helper = emalloc(sizeof(*helper));
 	memset(helper, 0, sizeof(*helper));
 
 	zend_object_std_init(&helper->std, helper_ce TSRMLS_CC);
-	
-	retval.handle = zend_objects_store_put(helper, NULL, helper_free_storage, helper_clone TSRMLS_CC);
-	retval.handlers = &helper_handlers;
+	helper->std.handlers = &helper_handlers;
 
-	return retval;
+	return &helper->std;
 }
 
 int php_com_persist_minit(INIT_FUNC_ARGS)
@@ -754,7 +755,8 @@ int php_com_persist_minit(INIT_FUNC_ARGS)
 	zend_class_entry ce;
 
 	memcpy(&helper_handlers, zend_get_std_object_handlers(), sizeof(helper_handlers));
-	helper_handlers.clone_obj = NULL;
+	helper_handlers.free_obj = helper_free_storage;
+	helper_handlers.clone_obj = helper_clone;
 
 	INIT_CLASS_ENTRY(ce, "COMPersistHelper", com_persist_helper_methods);
 	ce.create_object = helper_new;

@@ -93,4 +93,4 @@ array(1) {
 
 Warning: PDO::prepare(): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'unknown_column' in 'field list' in %s on line %d
 
-Fatal error: Call to a member function execute() on a non-object in %s on line %d
+Catchable fatal error: Call to a member function execute() on boolean in %s on line %d

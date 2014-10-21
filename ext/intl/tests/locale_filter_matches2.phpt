@@ -1,8 +1,9 @@
 --TEST--
-locale_filter_matches.phpt() icu >= 4.8
+locale_filter_matches.phpt() icu >= 4.8 && icu < 50.1.2
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+<?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
 

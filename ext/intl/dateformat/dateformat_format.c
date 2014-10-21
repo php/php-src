@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -62,7 +62,7 @@ static void internal_format(IntlDateFormatter_object *dfo, UDate timestamp, zval
 static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
 		HashTable* hash_arr, char* key_name, intl_error *err TSRMLS_DC)
 {
-	zval	**ele_value	= NULL;
+	zval	*ele_value	= NULL;
 	int32_t	result		= 0;
 	char	*message;
 
@@ -70,23 +70,22 @@ static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
 		return result;
 	}
 
-	if (zend_hash_find(hash_arr, key_name, strlen(key_name) + 1,
-			(void **)&ele_value) == SUCCESS) {
-		if(Z_TYPE_PP(ele_value) != IS_LONG) {
+	if ((ele_value = zend_hash_str_find(hash_arr, key_name, strlen(key_name))) != NULL) {
+		if(Z_TYPE_P(ele_value) != IS_LONG) {
 			spprintf(&message, 0, "datefmt_format: parameter array contains "
 					"a non-integer element for key '%s'", key_name);
 			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
 			efree(message);
 		} else {
-			if (Z_LVAL_PP(ele_value) > INT32_MAX ||
-					Z_LVAL_PP(ele_value) < INT32_MIN) {
-				spprintf(&message, 0, "datefmt_format: value %ld is out of "
+			if (Z_LVAL_P(ele_value) > INT32_MAX ||
+					Z_LVAL_P(ele_value) < INT32_MIN) {
+				spprintf(&message, 0, "datefmt_format: value %pd is out of "
 						"bounds for a 32-bit integer in key '%s'",
-						Z_LVAL_PP(ele_value), key_name);
+						Z_LVAL_P(ele_value), key_name);
 				intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
 				efree(message);
 			} else {
-				result = Z_LVAL_PP(ele_value);
+				result = Z_LVAL_P(ele_value);
 			}
 		}
 	}

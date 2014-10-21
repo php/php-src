@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -87,7 +87,7 @@ PHPAPI int ap_php_asprintf(char **buf, const char *format, ...);
 PHPAPI int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPAPI char * php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_conv_fp(register char format, register double num,
-		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, int *len);
+		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, size_t *len);
 
 END_EXTERN_C()
 
@@ -137,7 +137,8 @@ typedef enum {
 #endif
 	LM_SIZE_T,
 	LM_LONG,
-	LM_LONG_DOUBLE
+	LM_LONG_DOUBLE,
+	LM_PHP_INT_T
 } length_modifier_e;
 
 #ifdef PHP_WIN32
@@ -152,11 +153,11 @@ typedef enum {
 typedef WIDE_INT wide_int;
 typedef unsigned WIDE_INT u_wide_int;
 
-extern char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
-	   register bool_int * is_negative, char *buf_end, register int *len);
+PHPAPI char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
+	   register bool_int * is_negative, char *buf_end, register size_t *len);
 
-extern char * ap_php_conv_p2(register u_wide_int num, register int nbits,
-		 char format, char *buf_end, register int *len);
+PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits,
+		 char format, char *buf_end, register size_t *len);
 
 /* The maximum precision that's allowed for float conversion. Does not include
  * decimal separator, exponent, sign, terminator. Currently does not affect

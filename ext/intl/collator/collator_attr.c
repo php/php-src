@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
  */
 PHP_FUNCTION( collator_get_attribute )
 {
-	long attribute, value;
+	zend_long attribute, value;
 
 	COLLATOR_METHOD_INIT_VARS
 
@@ -64,7 +64,7 @@ PHP_FUNCTION( collator_get_attribute )
  */
 PHP_FUNCTION( collator_set_attribute )
 {
-	long attribute, value;
+	zend_long attribute, value;
 	COLLATOR_METHOD_INIT_VARS
 
 
@@ -123,7 +123,7 @@ PHP_FUNCTION( collator_get_strength )
  */
 PHP_FUNCTION( collator_set_strength )
 {
-	long strength;
+	zend_long strength;
 
 	COLLATOR_METHOD_INIT_VARS
 

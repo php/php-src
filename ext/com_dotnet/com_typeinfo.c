@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -162,8 +162,9 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 	UINT NameCount;
 	BSTR bstr_ids;
 	zend_constant c;
-	zval exists, results, value;
+	zval *exists, results, value;
 	char *const_name;
+	size_t len;
 
 	if (TL == NULL) {
 		return FAILURE;
@@ -184,22 +185,23 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 					continue;
 				}
 
-				const_name = php_com_olestring_to_string(bstr_ids, &c.name_len, codepage TSRMLS_CC);
-				c.name = zend_strndup(const_name, c.name_len);
+				const_name = php_com_olestring_to_string(bstr_ids, &len, codepage TSRMLS_CC);
+				c.name = zend_string_init(const_name, len, 1);
+				// TODO: avoid reallocation???
 				efree(const_name);
 				if(c.name == NULL) {
 					ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
 					continue;
 				}
-				c.name_len++; /* include NUL */
+//???				c.name_len++; /* include NUL */
 				SysFreeString(bstr_ids);
 
 				/* sanity check for the case where the constant is already defined */
-				if (zend_get_constant(c.name, c.name_len - 1, &exists TSRMLS_CC)) {
-					if (COMG(autoreg_verbose) && !compare_function(&results, &c.value, &exists TSRMLS_CC)) {
+				if ((exists = zend_get_constant(c.name TSRMLS_CC)) != NULL) {
+					if (COMG(autoreg_verbose) && !compare_function(&results, &c.value, exists TSRMLS_CC)) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type library constant %s is already defined", c.name);
 					}
-					free(c.name);
+					zend_string_release(c.name);
 					ITypeInfo_ReleaseVarDesc(TypeInfo, pVarDesc);
 					continue;
 				}
@@ -208,8 +210,7 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepa
 				php_com_zval_from_variant(&value, pVarDesc->lpvarValue, codepage TSRMLS_CC);
 				if (Z_TYPE(value) == IS_LONG) {
 					c.flags = mode;
-					c.value.type = IS_LONG;
-					c.value.value.lval = Z_LVAL(value);
+					ZVAL_LONG(&c.value, Z_LVAL(value));
 					c.module_number = 0;
 					zend_register_constant(&c TSRMLS_CC);
 				}
@@ -231,19 +232,17 @@ void php_com_typelibrary_dtor(void *pDest)
 PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
 	int codepage, int *cached TSRMLS_DC)
 {
-	ITypeLib **TLp;
 	ITypeLib *TL;
 	char *name_dup;
 	int l;
 
 	l = strlen(search_string);
 
-	if (zend_ts_hash_find(&php_com_typelibraries, search_string, l+1,
-			(void**)&TLp) == SUCCESS) {
+	if ((TL = zend_ts_hash_str_find_ptr(&php_com_typelibraries, search_string, l)) != NULL) {
 		*cached = 1;
 		/* add a reference for the caller */
-		ITypeLib_AddRef(*TLp);
-		return *TLp;
+		ITypeLib_AddRef(TL);
+		return TL;
 	}
 
 	*cached = 0;
@@ -252,8 +251,8 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
 	efree(name_dup);
 
 	if (TL) {
-		if (SUCCESS == zend_ts_hash_update(&php_com_typelibraries,
-				search_string, l+1, (void*)&TL, sizeof(ITypeLib*), NULL)) {
+		if (NULL != zend_ts_hash_str_update_ptr(&php_com_typelibraries,
+				search_string, l, TL)) {
 			/* add a reference for the hash table */
 			ITypeLib_AddRef(TL);
 		}
@@ -438,7 +437,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 	int i;
 	OLECHAR *olename;
 	char *ansiname = NULL;
-	unsigned int ansinamelen;
+	size_t ansinamelen;
 	int ret = 0;
 
 	if (FAILED(ITypeInfo_GetTypeAttr(typeinfo, &attr))) {
@@ -472,7 +471,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 
 		/* So we've got the dispatch interface; lets list the event methods */
 		for (i = 0; i < attr->cFuncs; i++) {
-			zval *tmp;
+			zval tmp;
 			DISPID lastid = 0;	/* for props */
 			int isprop;
 
@@ -492,7 +491,8 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 				if (printdef) {
 					int j;
 					char *funcdesc;
-					unsigned int funcdesclen, cnames = 0;
+					size_t funcdesclen;
+					unsigned int cnames = 0;
 					BSTR *names;
 
 					names = (BSTR*)safe_emalloc((func->cParams + 1), sizeof(BSTR), 0);
@@ -582,9 +582,10 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 
 				if (id_to_name) {
 					zend_str_tolower(ansiname, ansinamelen);
-					MAKE_STD_ZVAL(tmp);
-					ZVAL_STRINGL(tmp, ansiname, ansinamelen, 0);
-					zend_hash_index_update(id_to_name, func->memid, (void*)&tmp, sizeof(zval *), NULL);
+					ZVAL_STRINGL(&tmp, ansiname, ansinamelen);
+					zend_hash_index_update(id_to_name, func->memid, &tmp);
+					// TODO: avoid reallocation???
+					efree(ansiname);
 				}
 			}
 			ITypeInfo_ReleaseFuncDesc(typeinfo, func);

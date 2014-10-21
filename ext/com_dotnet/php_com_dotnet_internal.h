@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,8 @@
 #include <dispex.h>
 #include "win32/winutil.h"
 
+#include "zend_ts_hash.h"
+
 typedef struct _php_com_dotnet_object {
 	zend_object zo;
 
@@ -36,7 +38,7 @@ typedef struct _php_com_dotnet_object {
 	int modified;
 
 	ITypeInfo *typeinfo;
-	long code_page;
+	zend_long code_page;
 
 	zend_class_entry *ce;
 
@@ -54,18 +56,18 @@ typedef struct _php_com_dotnet_object {
 static inline int php_com_is_valid_object(zval *zv TSRMLS_DC)
 {
 	zend_class_entry *ce = Z_OBJCE_P(zv);
-	return strcmp("com", ce->name) == 0 ||
-		strcmp("dotnet", ce->name) == 0 ||
-		strcmp("variant", ce->name) == 0;
+	return strcmp("com", ce->name->val) == 0 ||
+		strcmp("dotnet", ce->name->val) == 0 ||
+		strcmp("variant", ce->name->val) == 0;
 }
 
-#define CDNO_FETCH(zv)			(php_com_dotnet_object*)zend_object_store_get_object(zv TSRMLS_CC)
+#define CDNO_FETCH(zv)			(php_com_dotnet_object*)Z_OBJ_P(zv)
 #define CDNO_FETCH_VERIFY(obj, zv)	do { \
 	if (!php_com_is_valid_object(zv TSRMLS_CC)) { \
 		php_com_throw_exception(E_UNEXPECTED, "expected a variant object" TSRMLS_CC); \
 		return; \
 	} \
-	obj = (php_com_dotnet_object*)zend_object_store_get_object(zv TSRMLS_CC); \
+	obj = (php_com_dotnet_object*)Z_OBJ_P(zv); \
 } while(0)
 
 /* com_extension.c */
@@ -73,9 +75,9 @@ TsHashTable php_com_typelibraries;
 zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_entry, *php_com_saproxy_class_entry;
 
 /* com_handlers.c */
-zend_object_value php_com_object_new(zend_class_entry *ce TSRMLS_DC);
-void php_com_object_clone(void *object, void **clone_ptr TSRMLS_DC);
-void php_com_object_free_storage(void *object TSRMLS_DC);
+zend_object* php_com_object_new(zend_class_entry *ce TSRMLS_DC);
+zend_object* php_com_object_clone(zval *object TSRMLS_DC);
+void php_com_object_free_storage(zend_object *object TSRMLS_DC);
 zend_object_handlers php_com_object_handlers;
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable TSRMLS_DC);
 
@@ -85,9 +87,9 @@ int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index TSRMLS
 
 /* com_olechar.c */
 PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring,
-		uint *string_len, int codepage TSRMLS_DC);
+		size_t *string_len, int codepage TSRMLS_DC);
 PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string,
-		uint string_len, int codepage TSRMLS_DC);
+		size_t string_len, int codepage TSRMLS_DC);
 
 
 /* com_com.c */
@@ -102,13 +104,13 @@ PHP_FUNCTION(com_get_active_object);
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 		WORD flags, DISPPARAMS *disp_params, VARIANT *v, int silent, int allow_noarg TSRMLS_DC);
 HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
-		int namelen, DISPID *dispid TSRMLS_DC);
+		size_t namelen, DISPID *dispid TSRMLS_DC);
 int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
-		WORD flags,	VARIANT *v, int nargs, zval **args, int silent, int allow_noarg TSRMLS_DC);
+		WORD flags,	VARIANT *v, int nargs, zval *args, int silent, int allow_noarg TSRMLS_DC);
 int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
-		WORD flags,	VARIANT *v, int nargs, zval **args, int allow_noarg TSRMLS_DC);
-int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
-		WORD flags,	VARIANT *v, int nargs, zval ***args TSRMLS_DC);
+		WORD flags,	VARIANT *v, int nargs, zval *args, int allow_noarg TSRMLS_DC);
+int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *f,
+		WORD flags,	VARIANT *v, int nargs, zval *args TSRMLS_DC);
 
 /* com_wrapper.c */
 int php_com_wrapper_minit(INIT_FUNC_ARGS);

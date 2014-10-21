@@ -18,13 +18,33 @@ var_dump(serialize($_ENV));
 echo "OK";
 ?>
 --EXPECTF--
-array(3) {
+array(13) {
   ["client"]=>
   string(%d) "%s"
   ["protocol"]=>
   int(%d)
   ["server"]=>
   string(%d) "%s"
+  ["server_encoding"]=>
+  string(%d) "%s"
+  ["client_encoding"]=>
+  string(%d) "%s"
+  ["is_superuser"]=>
+  string(%d) "%s"
+  ["session_authorization"]=>
+  string(%d) "%s"
+  ["DateStyle"]=>
+  string(%d) "%s"
+  ["IntervalStyle"]=>
+  string(%d) %s
+  ["TimeZone"]=>
+  string(%d) "%s"
+  ["integer_datetimes"]=>
+  string(%d) "%s"
+  ["standard_conforming_strings"]=>
+  string(%d) "%s"
+  ["application_name"]=>
+  string(%d) %s
 }
 string(%d) "%s"
 OK

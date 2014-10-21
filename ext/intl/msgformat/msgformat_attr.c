@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,7 +47,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	if(mfo->mf_data.orig_format) {
-		RETURN_STRINGL(mfo->mf_data.orig_format, mfo->mf_data.orig_format_len, 1);
+		RETURN_STRINGL(mfo->mf_data.orig_format, mfo->mf_data.orig_format_len);
 	}
 
 	RETURN_FALSE;
@@ -62,7 +62,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 PHP_FUNCTION( msgfmt_set_pattern )
 {
 	char*       value = NULL;
-	int         value_len = 0;
+	size_t         value_len = 0;
 	int         spattern_len = 0;
 	UChar*	    spattern  = NULL;
 	MSG_FORMAT_METHOD_INIT_VARS;
@@ -137,7 +137,7 @@ PHP_FUNCTION( msgfmt_get_locale )
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	loc = (char *)umsg_getLocale(MSG_FORMAT_OBJECT(mfo));
-	RETURN_STRING(loc, 1);
+	RETURN_STRING(loc);
 }
 /* }}} */
 

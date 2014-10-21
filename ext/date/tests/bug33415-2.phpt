@@ -233,8 +233,8 @@ result=Saturday 1970-01-03 00:00:00 CAT 0
 wanted=Saturday            00:00:00
 
 TZ=Asia/Kashgar - Is it OK for this to be 3 AM? yes
-tStamp=Thursday 1980-04-24 17:17:17 KAST 0
-result=Thursday 1980-05-01 03:00:00 CST 0
+tStamp=Thursday 1980-04-24 17:17:17 XJT 0
+result=Thursday 1980-05-01 00:00:00 XJT 0
 wanted=Thursday            03:00:00
 
 TZ=Indian/Christmas - Is it OK for this to be 7 AM?  Note: does

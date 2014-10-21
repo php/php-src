@@ -1,7 +1,9 @@
 --TEST--
 readline_info(): Basic test
 --SKIPIF--
-<?php if (!extension_loaded("readline")) die("skip"); ?>
+<?php if (!extension_loaded("readline")) die("skip");
+if (READLINE_LIB == "libedit") die("skip readline only");
+?>
 --FILE--
 <?php
 

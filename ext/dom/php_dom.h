@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,38 +68,41 @@ extern zend_module_entry dom_module_entry;
 #define DOM_NODESET XML_XINCLUDE_START
 
 typedef struct _dom_xpath_object {
-	zend_object  std;
-	void *ptr;
-	php_libxml_ref_obj *document;
-	HashTable *prop_handler;
-	zend_object_handle handle;
 	int registerPhpFunctions;
 	HashTable *registered_phpfunctions;
 	HashTable *node_list;
+	dom_object dom;
 } dom_xpath_object;
+
+static inline dom_xpath_object *php_xpath_obj_from_obj(zend_object *obj) {
+	return (dom_xpath_object*)((char*)(obj)
+		- XtOffsetOf(dom_xpath_object, dom) - XtOffsetOf(dom_object, std));
+}
+
+#define Z_XPATHOBJ_P(zv)  php_xpath_obj_from_obj(Z_OBJ_P((zv)))
 
 typedef struct _dom_nnodemap_object {
 	dom_object *baseobj;
+	zval baseobj_zv;
 	int nodetype;
 	xmlHashTable *ht;
 	xmlChar *local;
 	xmlChar *ns;
-	zval *baseobjptr;
 } dom_nnodemap_object;
 
 typedef struct {
-	zend_object_iterator     intern;
-	zval *curobj;
+	zend_object_iterator intern;
+	zval curobj;
 } php_dom_iterator;
 
 #include "dom_fe.h"
 
 dom_object *dom_object_get_data(xmlNodePtr obj);
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document);
-zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC);
-zend_object_value dom_nnodemap_objects_new(zend_class_entry *class_type TSRMLS_DC);
+zend_object *dom_objects_new(zend_class_entry *class_type TSRMLS_DC);
+zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type TSRMLS_DC);
 #if defined(LIBXML_XPATH_ENABLED)
-zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC);
+zend_object *dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC);
 #endif
 int dom_get_strict_error(php_libxml_ref_obj *document);
 void php_dom_throw_error(int error_code, int strict_error TSRMLS_DC);
@@ -111,7 +114,7 @@ void dom_set_old_ns(xmlDoc *doc, xmlNs *ns);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void dom_normalize (xmlNodePtr nodep TSRMLS_DC);
 xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, int *cur, int index);
-void php_dom_create_implementation(zval **retval  TSRMLS_DC);
+void php_dom_create_implementation(zval *retval TSRMLS_DC);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 int dom_has_feature(char *feature, char *version);
 int dom_node_is_read_only(xmlNodePtr node);
@@ -123,16 +126,18 @@ xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
 xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
 int dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce TSRMLS_DC);
+zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type, zval *rv TSRMLS_DC);
+int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty TSRMLS_DC);
 
 #define REGISTER_DOM_CLASS(ce, name, parent_ce, funcs, entry) \
 INIT_CLASS_ENTRY(ce, name, funcs); \
 ce.create_object = dom_objects_new; \
-entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
+entry = zend_register_internal_class_ex(&ce, parent_ce TSRMLS_CC);
 
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
-	__intern = (dom_object *)zend_object_store_get_object(__id TSRMLS_CC); \
+	__intern = Z_DOMOBJ_P(__id); \
 	if (__intern->ptr == NULL || !(__ptr = (__prtype)((php_libxml_node_ptr *)__intern->ptr)->node)) { \
-  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
+  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name->val);\
   		RETURN_NULL();\
   	} \
 }

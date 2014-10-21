@@ -10,8 +10,10 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
-		printf("[001] Cannot connect\n");
+	if (!$mysqli = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+			$host, $user, $db, $port, $socket);
+	}
 
 	if (!is_null($tmp = @mysqli_fetch_lengths()))
 		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);

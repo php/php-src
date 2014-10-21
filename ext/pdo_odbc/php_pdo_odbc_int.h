@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -135,7 +135,7 @@ typedef struct {
 
 typedef struct {
 	char *data;
-	unsigned long datalen;
+	zend_ulong datalen;
 	SQLLEN fetched_len;
 	SWORD	coltype;
 	char colname[128];
@@ -150,14 +150,14 @@ typedef struct {
 	pdo_odbc_db_handle *H;
 	pdo_odbc_errinfo einfo;
 	char *convbuf;
-	unsigned long convbufsize;
+	zend_ulong convbufsize;
 	unsigned going_long:1;
 	unsigned assume_utf8:1;
 	unsigned _spare:30;
 } pdo_odbc_stmt;
 
 typedef struct {
-	SQLINTEGER len;
+	SQLLEN len;
 	SQLSMALLINT paramtype;
 	char *outbuf;
 	unsigned is_unicode:1;

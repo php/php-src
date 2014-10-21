@@ -1,7 +1,5 @@
 --TEST--
 Bug #64896 (Segfault with gc_collect_cycles using unserialize on certain objects)
---XFAIL--
-We can not fix this bug without a significant (performace slow down) change to gc
 --FILE--
 <?php
 $bar = NULL;
@@ -38,7 +36,7 @@ object(bad)#4 (1) {
 */
 ?>
 --EXPECTF--
-bject(bad)#%d (1) {
+object(bad)#%d (1) {
   ["_private":"bad":private]=>
   array(1) {
     [0]=>

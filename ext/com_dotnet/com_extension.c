@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,8 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include <intsafe.h>
 
 #include "php.h"
 #include "php_ini.h"
@@ -270,7 +272,7 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 	char *strtok_buf = NULL;
 	int cached;
 
-	if (!new_value || !new_value[0] || (typelib_file = VCWD_FOPEN(new_value, "r"))==NULL) {
+	if (NULL == new_value || !new_value->val[0] || (typelib_file = VCWD_FOPEN(new_value->val, "r"))==NULL) {
 		return FAILURE;
 	}
 
@@ -350,7 +352,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	php_com_persist_minit(INIT_FUNC_ARGS_PASSTHRU);
 
 	INIT_CLASS_ENTRY(ce, "com_exception", NULL);
-	php_com_exception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C), NULL TSRMLS_CC);
+	php_com_exception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
 	php_com_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 /*	php_com_exception_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 
@@ -367,7 +369,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 
 	INIT_CLASS_ENTRY(ce, "com", NULL);
 	ce.create_object = php_com_object_new;
-	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry, "variant" TSRMLS_CC);
+	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry TSRMLS_CC);
 	tmp->get_iterator = php_com_iter_get;
 
 	zend_ts_hash_init(&php_com_typelibraries, 0, NULL, php_com_typelibrary_dtor, 1);
@@ -375,13 +377,19 @@ PHP_MINIT_FUNCTION(com_dotnet)
 #if HAVE_MSCOREE_H
 	INIT_CLASS_ENTRY(ce, "dotnet", NULL);
 	ce.create_object = php_com_object_new;
-	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry, "variant" TSRMLS_CC);
+	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry TSRMLS_CC);
 	tmp->get_iterator = php_com_iter_get;
 #endif
 
 	REGISTER_INI_ENTRIES();
 
 #define COM_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_CS|CONST_PERSISTENT)
+
+#define COM_ERR_CONST(x) { \
+	zend_long __tmp; \
+	ULongToUIntPtr(x, &__tmp); \
+	REGISTER_LONG_CONSTANT(#x, __tmp, CONST_CS|CONST_PERSISTENT); \
+}
 	
 	COM_CONST(CLSCTX_INPROC_SERVER);
 	COM_CONST(CLSCTX_INPROC_HANDLER);
@@ -441,10 +449,10 @@ PHP_MINIT_FUNCTION(com_dotnet)
 #ifdef NORM_IGNOREKASHIDA
 	COM_CONST(NORM_IGNOREKASHIDA);
 #endif
-	COM_CONST(DISP_E_DIVBYZERO);
-	COM_CONST(DISP_E_OVERFLOW);
-	COM_CONST(DISP_E_BADINDEX);
-	COM_CONST(MK_E_UNAVAILABLE);
+	COM_ERR_CONST(DISP_E_DIVBYZERO);
+	COM_ERR_CONST(DISP_E_OVERFLOW);
+	COM_ERR_CONST(DISP_E_BADINDEX);
+	COM_ERR_CONST(MK_E_UNAVAILABLE);
 
 	return SUCCESS;
 }

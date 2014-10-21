@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +29,7 @@
 PHP_FUNCTION(soundex)
 {
 	char	*str;
-	int	i, _small, str_len, code, last;
+	size_t	i, _small, str_len, code, last;
 	char	soundex[4 + 1];
 
 	static char soundex_table[26] =
@@ -101,7 +101,7 @@ PHP_FUNCTION(soundex)
 	}
 	soundex[_small] = '\0';
 
-	RETURN_STRINGL(soundex, _small, 1);
+	RETURN_STRINGL(soundex, _small);
 }
 /* }}} */
 

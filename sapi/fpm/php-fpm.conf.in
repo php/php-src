@@ -152,6 +152,8 @@ group = @php_fpm_group@
 ; Valid syntaxes are:
 ;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific address on
 ;                            a specific port;
+;   '[ip:6:addr:ess]:port' - to listen on a TCP socket to a specific IPv6 address on
+;                            a specific port;
 ;   'port'                 - to listen on a TCP socket to all addresses on a
 ;                            specific port;
 ;   '/path/to/unix/socket' - to listen on a unix socket.
@@ -159,17 +161,17 @@ group = @php_fpm_group@
 listen = 127.0.0.1:9000
 
 ; Set listen(2) backlog.
-; Default Value: 128 (-1 on FreeBSD and OpenBSD)
-;listen.backlog = 128
+; Default Value: 65535 (-1 on FreeBSD and OpenBSD)
+;listen.backlog = 65535
 
 ; Set permissions for unix socket, if one is used. In Linux, read/write
 ; permissions must be set in order to allow connections from a web server. Many
 ; BSD-derived systems allow connections regardless of permissions. 
 ; Default Values: user and group are set as the running user
-;                 mode is set to 0666
+;                 mode is set to 0660
 ;listen.owner = @php_fpm_user@
 ;listen.group = @php_fpm_group@
-;listen.mode = 0666
+;listen.mode = 0660
  
 ; List of ipv4 addresses of FastCGI clients which are allowed to connect.
 ; Equivalent to the FCGI_WEB_SERVER_ADDRS environment variable in the original
@@ -185,7 +187,7 @@ listen = 127.0.0.1:9000
 ;       - The pool processes will inherit the master process priority
 ;         unless it specified otherwise
 ; Default Value: no set
-; priority = -19
+; process.priority = -19
 
 ; Choose how the process manager will control the number of child processes.
 ; Possible Values:
@@ -475,13 +477,22 @@ pm.max_spare_servers = 3
 ; Default Value: no
 ;catch_workers_output = yes
 
+; Clear environment in FPM workers
+; Prevents arbitrary environment variables from reaching FPM worker processes
+; by clearing the environment in workers before env vars specified in this
+; pool configuration are added.
+; Setting to "no" will make all environment variables available to PHP code
+; via getenv(), $_ENV and $_SERVER.
+; Default Value: yes
+;clear_env = no
+
 ; Limits the extensions of the main script FPM will allow to parse. This can
 ; prevent configuration mistakes on the web server side. You should only limit
 ; FPM to .php extensions to prevent malicious users to use other extensions to
 ; exectute php code.
 ; Note: set an empty value to allow all extensions.
 ; Default Value: .php
-;security.limit_extensions = .php .php3 .php4 .php5
+;security.limit_extensions = .php .php3 .php4 .php5 .php7
  
 ; Pass environment variables like LD_LIBRARY_PATH. All $VARIABLEs are taken from
 ; the current environment.

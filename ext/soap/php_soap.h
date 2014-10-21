@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +29,7 @@
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 #include "ext/session/php_session.h"
 #endif
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "php_ini.h"
 #include "SAPI.h"
 #include <libxml/parser.h>
@@ -74,8 +74,8 @@ typedef struct _soapService soapService, *soapServicePtr;
 #include "php_packet_soap.h"
 
 struct _soapMapping {
-	zval *to_xml;
-	zval *to_zval;
+	zval to_xml;
+	zval to_zval;
 };
 
 struct _soapHeader;
@@ -90,12 +90,12 @@ struct _soapService {
 
 	struct _soap_class {
 		zend_class_entry *ce;
-		zval **argv;
+		zval *argv;
 		int argc;
 		int persistance;
 	} soap_class;
 
-	zval *soap_object;
+	zval soap_object;
 
 	HashTable *typemap;
 	int        version;
@@ -166,13 +166,13 @@ ZEND_BEGIN_MODULE_GLOBALS(soap)
 	sdlPtr     sdl;
 	zend_bool  use_soap_error_handler;
 	char*      error_code;
-	zval*      error_object;
+	zval       error_object;
 	char       cache;
 	char       cache_mode;
 	char       cache_enabled;
 	char*      cache_dir;
-	long       cache_ttl;
-	long       cache_limit;
+	zend_long       cache_ttl;
+	zend_long       cache_limit;
 	HashTable *mem_cache;
 	xmlCharEncodingHandlerPtr encoding;
 	HashTable *class_map;
@@ -200,7 +200,7 @@ ZEND_EXTERN_MODULE_GLOBALS(soap)
 
 extern zend_class_entry* soap_var_class_entry;
 
-zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
+void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
 
 #define soap_error0(severity, format) \
 	php_error(severity, "SOAP-ERROR: " format)

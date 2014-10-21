@@ -20,9 +20,9 @@ var_dump( timezone_open("America/Los_Angeles") );
 *** Testing timezone_open() : basic functionality ***
 object(DateTimeZone)#%d (2) {
   ["timezone_type"]=>
-  int(3)
+  int(2)
   ["timezone"]=>
-  string(3) "UTC"
+  string(3) "GMT"
 }
 object(DateTimeZone)#%d (2) {
   ["timezone_type"]=>

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -85,7 +85,7 @@ static const zend_function_entry php_recode_functions[] = {
 	PHP_FE(recode_file, 	arginfo_recode_file)
 	PHP_FALIAS(recode, recode_string, arginfo_recode_string)
 	PHP_FE_END
-};
+}; /* }}} */
 
 zend_module_entry recode_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -146,7 +146,7 @@ PHP_FUNCTION(recode_string)
 	RECODE_REQUEST request = NULL;
 	char *r = NULL;
 	size_t r_len = 0, r_alen = 0;
-	int req_len, str_len;
+	size_t req_len, str_len;
 	char *req, *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &req, &req_len, &str, &str_len) == FAILURE) {
@@ -171,7 +171,7 @@ PHP_FUNCTION(recode_string)
 error_exit:
 		RETVAL_FALSE;
 	} else {
-		RETVAL_STRINGL(r, r_len, 1);
+		RETVAL_STRINGL(r, r_len);
 		free(r);
 	}
 
@@ -196,8 +196,8 @@ PHP_FUNCTION(recode_file)
 	 	return;
 	}
 
-	php_stream_from_zval(instream, &input);
-	php_stream_from_zval(outstream, &output);
+	php_stream_from_zval(instream, input);
+	php_stream_from_zval(outstream, output);
 
 	if (FAILURE == php_stream_cast(instream, PHP_STREAM_AS_STDIO, (void**)&in_fp, REPORT_ERRORS))	{
 		RETURN_FALSE;

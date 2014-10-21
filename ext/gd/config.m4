@@ -185,30 +185,25 @@ AC_DEFUN([PHP_GD_FREETYPE2],[
   if test "$PHP_FREETYPE_DIR" != "no"; then
 
     for i in $PHP_FREETYPE_DIR /usr/local /usr; do
-      if test -f "$i/include/freetype2/freetype/freetype.h"; then
+      if test -f "$i/bin/freetype-config"; then
         FREETYPE2_DIR=$i
-        FREETYPE2_INC_DIR=$i/include/freetype2
+        FREETYPE2_CONFIG="$i/bin/freetype-config"
         break
       fi
     done
 
     if test -z "$FREETYPE2_DIR"; then
-      AC_MSG_ERROR([freetype.h not found.])
+      AC_MSG_ERROR([freetype-config not found.])
     fi
 
-    PHP_CHECK_LIBRARY(freetype, FT_New_Face,
-    [
-      PHP_ADD_LIBRARY_WITH_PATH(freetype, $FREETYPE2_DIR/$PHP_LIBDIR, GD_SHARED_LIBADD)
-      PHP_ADD_INCLUDE($FREETYPE2_DIR/include)
-      PHP_ADD_INCLUDE($FREETYPE2_INC_DIR)
-      AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
-      AC_DEFINE(HAVE_LIBFREETYPE,1,[ ])
-      AC_DEFINE(ENABLE_GD_TTF,1,[ ])
-    ],[
-      AC_MSG_ERROR([Problem with freetype.(a|so). Please check config.log for more information.])
-    ],[
-      -L$FREETYPE2_DIR/$PHP_LIBDIR
-    ])
+    FREETYPE2_CFLAGS=`$FREETYPE2_CONFIG --cflags`
+    FREETYPE2_LIBS=`$FREETYPE2_CONFIG --libs`
+
+    PHP_EVAL_INCLINE($FREETYPE2_CFLAGS)
+    PHP_EVAL_LIBLINE($FREETYPE2_LIBS, GD_SHARED_LIBADD)
+    AC_DEFINE(USE_GD_IMGSTRTTF, 1, [ ])
+    AC_DEFINE(HAVE_LIBFREETYPE,1,[ ])
+    AC_DEFINE(ENABLE_GD_TTF,1,[ ])
   else
     AC_MSG_RESULT([If configure fails try --with-freetype-dir=<DIR>])
   fi

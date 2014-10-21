@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -66,7 +66,6 @@ struct st_mysqlnd_plugin_trace_log
 	struct
 	{
 		MYSQLND_DEBUG * (*trace_instance_init)(const char * skip_functions[] TSRMLS_DC);
-		char * (*get_backtrace)(uint max_levels, size_t * length TSRMLS_DC);
 	} methods;
 };
 
@@ -74,7 +73,6 @@ void mysqlnd_debug_trace_plugin_register(TSRMLS_D);
 
 PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC);
 
-PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 
 #if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400))
 #ifdef PHP_WIN32
@@ -126,7 +124,8 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 					if ((dbg_obj2)) { \
 						dbg_skip_trace |= !(dbg_obj2)->m->func_enter((dbg_obj2), __LINE__, __FILE__, func_name, strlen(func_name)); \
 					} \
-					if (dbg_skip_trace); /* shut compiler's mouth */\
+					if (dbg_skip_trace) \
+						/* EMPTY */ ; /* shut compiler's mouth */	\
 					do { \
 						if (((dbg_obj1) && (dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS) || \
 							((dbg_obj2) && (dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) \

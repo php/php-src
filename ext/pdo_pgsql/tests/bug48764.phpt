@@ -104,7 +104,7 @@ function bug($db, $options = array()) {
 	}
 }
 
---EXPECT--
+--EXPECTF--
 Test 1
 42P18
 Test 2
@@ -112,23 +112,43 @@ Test 2
 OK
 Test 3
 42P18
+
+Deprecated: PDO::prepare(): PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead in %s on line %d
 OK
 Test 4
 OK
 42P18
 Test 5
+
+Deprecated: PDO::setAttribute(): PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead in %s on line %d
+
+Deprecated: PDO::prepare(): PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead in %s on line %d
 OK
+
+Deprecated: PDO::setAttribute(): PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead in %s on line %d
 42P18
 Test 6
 OK
 42P18
 OK
+
+Deprecated: PDO::__construct(): PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead in %s on line %d
 Test 7
+
+Deprecated: PDO::prepare(): PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead in %s on line %d
 OK
+
+Deprecated: PDO::prepare(): PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead in %s on line %d
 OK
 42P18
+
+Deprecated: PDO::__construct(): PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead in %s on line %d
 Test 8
+
+Deprecated: PDO::prepare(): PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead in %s on line %d
 OK
+
+Deprecated: PDO::prepare(): PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead in %s on line %d
 OK
 OK
 42P18

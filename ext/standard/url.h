@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,8 +36,8 @@ PHPAPI php_url *php_url_parse(char const *str);
 PHPAPI php_url *php_url_parse_ex(char const *str, int length);
 PHPAPI int php_url_decode(char *str, int len); /* return value: length of decoded string */
 PHPAPI int php_raw_url_decode(char *str, int len); /* return value: length of decoded string */
-PHPAPI char *php_url_encode(char const *s, int len, int *new_length);
-PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length);
+PHPAPI zend_string *php_url_encode(char const *s, int len);
+PHPAPI zend_string *php_raw_url_encode(char const *s, int len);
 
 PHP_FUNCTION(parse_url);
 PHP_FUNCTION(urlencode);

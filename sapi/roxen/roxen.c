@@ -1,8 +1,8 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -387,13 +387,12 @@ php_roxen_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
  * the client. Used for POST/PUT requests.
  */
 
-INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
+INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes TSRMLS_DC)
 {
   uint total_read = 0;
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
-  TSRMLS_FETCH();
   
   if(!MY_FD_OBJ->prog)
   {
@@ -417,7 +416,7 @@ static int
 php_roxen_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 {
   uint total_read = 0;
-  THREAD_SAFE_RUN(total_read = php_roxen_low_read_post(buf, count_bytes), "read post");
+  THREAD_SAFE_RUN(total_read = php_roxen_low_read_post(buf, count_bytes TSRMLS_CC), "read post");
   return total_read;
 }
 
@@ -617,12 +616,12 @@ void f_php_roxen_request_handler(INT32 args)
   TSRMLS_FETCH();
 
   if(current_thread == th_self())
-    php_error(E_WARNING, "PHP5.Interpreter->run: Tried to run a PHP-script from a PHP "
+    php_error(E_WARNING, "PHP7.Interpreter->run: Tried to run a PHP-script from a PHP "
 	  "callback!");
-  get_all_args("PHP5.Interpreter->run", args, "%S%m%O%*", &script,
+  get_all_args("PHP7.Interpreter->run", args, "%S%m%O%*", &script,
 	       &request_data, &my_fd_obj, &done_callback);
   if(done_callback->type != PIKE_T_FUNCTION) 
-    php_error(E_WARNING, "PHP5.Interpreter->run: Bad argument 4, expected function.\n");
+    php_error(E_WARNING, "PHP7.Interpreter->run: Bad argument 4, expected function.\n");
   PHP_LOCK(THIS); /* Need to lock here or reusing the same object might cause
 		       * problems in changing stuff in that object */
 #ifndef ROXEN_USE_ZTS
@@ -658,7 +657,7 @@ void f_php_roxen_request_handler(INT32 args)
   {
     int fd = fd_from_object(raw_fd->u.object);
     if(fd == -1)
-      php_error(E_WARNING, "PHP5.Interpreter->run: my_fd object not open or not an FD.\n");
+      php_error(E_WARNING, "PHP7.Interpreter->run: my_fd object not open or not an FD.\n");
     THIS->my_fd = fd;
   } else
     THIS->my_fd = 0;

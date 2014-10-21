@@ -4,7 +4,7 @@
  * PostgreSQL Database Management System (formerly known as Postgres, then as
  * Postgres95)
  *
- * Portions Copyright (c) 1996-2013, The PostgreSQL Global Development Group
+ * Portions Copyright (c) 1996-2014, The PostgreSQL Global Development Group
  *
  * Portions Copyright (c) 1994, The Regents of the University of California
  *
@@ -311,7 +311,7 @@ const char* ps_title_errno(int rc)
 
 #ifdef PS_USE_WIN32
     case PS_TITLE_WINDOWS_ERROR:
-        sprintf(windows_error_details, "Windows error code: %d", GetLastError());
+        sprintf(windows_error_details, "Windows error code: %u", GetLastError());
         return windows_error_details;
 #endif
     }
@@ -386,7 +386,7 @@ int get_ps_title(int *displen, const char** string)
         return rc;
 
 #ifdef PS_USE_WIN32
-    if (!(ps_buffer_cur_len = GetConsoleTitle(ps_buffer, ps_buffer_size)))
+    if (!(ps_buffer_cur_len = GetConsoleTitle(ps_buffer, (DWORD)ps_buffer_size)))
         return PS_TITLE_WINDOWS_ERROR;
 #endif
     *displen = (int)ps_buffer_cur_len;

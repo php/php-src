@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -56,7 +56,7 @@ php_oci_collection *php_oci_collection_create(php_oci_connection *connection, ch
 
 	collection->connection = connection;
 	collection->collection = NULL;
-	zend_list_addref(collection->connection->id);
+	++GC_REFCOUNT(collection->connection->id);
 
 	/* get type handle by name */
 	PHP_OCI_CALL_RETURN(errstatus, OCITypeByName,
@@ -260,7 +260,7 @@ int php_oci_collection_size(php_oci_collection *collection, sb4 *size TSRMLS_DC)
 
 /* {{{ php_oci_collection_max()
  Return max number of elements in the collection */
-int php_oci_collection_max(php_oci_collection *collection, long *max TSRMLS_DC)
+int php_oci_collection_max(php_oci_collection *collection, zend_long *max TSRMLS_DC)
 {
 	php_oci_connection *connection = collection->connection;
 	
@@ -273,7 +273,7 @@ int php_oci_collection_max(php_oci_collection *collection, long *max TSRMLS_DC)
 
 /* {{{ php_oci_collection_trim()
  Trim collection to the given number of elements */
-int php_oci_collection_trim(php_oci_collection *collection, long trim_size TSRMLS_DC)
+int php_oci_collection_trim(php_oci_collection *collection, zend_long trim_size TSRMLS_DC)
 {
 	php_oci_connection *connection = collection->connection;
 	sword errstatus;
@@ -361,13 +361,7 @@ int php_oci_collection_append_number(php_oci_collection *collection, char *numbe
 	php_oci_connection *connection = collection->connection;
 	sword errstatus;
 
-#if (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION == 3 && PHP_RELEASE_VERSION < 10)
-	/* minimum PHP version ext/oci8/config.m4 accepts is 4.3.9 */
-	element_double = strtod(number, NULL);
-#else
-	/* zend_strtod was introduced in PHP 4.3.10 */
 	element_double = zend_strtod(number, NULL);
-#endif
 			
 	PHP_OCI_CALL_RETURN(errstatus, OCINumberFromReal, (connection->err, &element_double, sizeof(double), &oci_number));
 
@@ -479,7 +473,7 @@ int php_oci_collection_append(php_oci_collection *collection, char *element, int
 
 /* {{{ php_oci_collection_element_get()
  Get the element with the given index */
-int php_oci_collection_element_get(php_oci_collection *collection, long index, zval **result_element TSRMLS_DC)
+int php_oci_collection_element_get(php_oci_collection *collection, zend_long index, zval *result_element TSRMLS_DC)
 {
 	php_oci_connection *connection = collection->connection;
 	dvoid *element;
@@ -489,8 +483,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 	ub4 buff_len = 1024;
 	sword errstatus;
 	
-	MAKE_STD_ZVAL(*result_element);
-	ZVAL_NULL(*result_element);
+	ZVAL_NULL(result_element);
 
 	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 
@@ -509,13 +502,11 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 	if (errstatus != OCI_SUCCESS) {
 		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
-		FREE_ZVAL(*result_element);
 		return 1;
 	}
 	
 	if (exists == 0) {
 		/* element doesn't exist */
-		FREE_ZVAL(*result_element);
 		return 1;
 	}
 
@@ -531,12 +522,11 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 			if (errstatus != OCI_SUCCESS) {
 				connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 				PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
-				FREE_ZVAL(*result_element);
 				return 1;
 			}
 
-			ZVAL_STRINGL(*result_element, (char *)buff, buff_len, 1);
-			Z_STRVAL_P(*result_element)[buff_len] = '\0';
+			ZVAL_STRINGL(result_element, (char *)buff, buff_len);
+			Z_STRVAL_P(result_element)[buff_len] = '\0';
 			
 			return 0;
 			break;
@@ -549,7 +539,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 			PHP_OCI_CALL_RETURN(str, OCIStringPtr, (connection->env, oci_string));
 			
 			if (str) {
-				ZVAL_STRING(*result_element, (char *)str, 1);
+				ZVAL_STRING(result_element, (char *)str);
 			}
 			return 0;
 		}
@@ -574,18 +564,16 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 			if (errstatus != OCI_SUCCESS) {
 				connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 				PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
-				FREE_ZVAL(*result_element);
 				return 1;
 			}
 			
-			ZVAL_DOUBLE(*result_element, double_number);
+			ZVAL_DOUBLE(result_element, double_number);
 
 			return 0;
 		}
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown or unsupported type of element: %d", collection->element_typecode);
-			FREE_ZVAL(*result_element);
 			return 1;
 			break;
 	}
@@ -596,7 +584,7 @@ int php_oci_collection_element_get(php_oci_collection *collection, long index, z
 
 /* {{{ php_oci_collection_element_set_null()
  Set the element with the given index to NULL */
-int php_oci_collection_element_set_null(php_oci_collection *collection, long index TSRMLS_DC)
+int php_oci_collection_element_set_null(php_oci_collection *collection, zend_long index TSRMLS_DC)
 {
 	OCIInd null_index = OCI_IND_NULL;
 	php_oci_connection *connection = collection->connection;
@@ -617,7 +605,7 @@ int php_oci_collection_element_set_null(php_oci_collection *collection, long ind
 
 /* {{{ php_oci_collection_element_set_date()
  Change element's value to the given DATE */
-int php_oci_collection_element_set_date(php_oci_collection *collection, long index, char *date, int date_len TSRMLS_DC)
+int php_oci_collection_element_set_date(php_oci_collection *collection, zend_long index, char *date, int date_len TSRMLS_DC)
 {
 	OCIInd new_index = OCI_IND_NOTNULL;
 	OCIDate oci_date;
@@ -658,7 +646,7 @@ int php_oci_collection_element_set_date(php_oci_collection *collection, long ind
 
 /* {{{ php_oci_collection_element_set_number()
  Change element's value to the given NUMBER */
-int php_oci_collection_element_set_number(php_oci_collection *collection, long index, char *number, int number_len TSRMLS_DC)
+int php_oci_collection_element_set_number(php_oci_collection *collection, zend_long index, char *number, int number_len TSRMLS_DC)
 {
 	OCIInd new_index = OCI_IND_NOTNULL;
 	double element_double;
@@ -666,13 +654,7 @@ int php_oci_collection_element_set_number(php_oci_collection *collection, long i
 	php_oci_connection *connection = collection->connection;
 	sword errstatus;
 
-#if (PHP_MAJOR_VERSION == 4 && PHP_MINOR_VERSION == 3 && PHP_RELEASE_VERSION < 10)
-	/* minimum PHP version ext/oci8/config.m4 accepts is 4.3.9 */
-	element_double = strtod(number, NULL);
-#else
-	/* zend_strtod was introduced in PHP 4.3.10 */
 	element_double = zend_strtod(number, NULL);
-#endif
 			
 	PHP_OCI_CALL_RETURN(errstatus, OCINumberFromReal, (connection->err, &element_double, sizeof(double), &oci_number));
 
@@ -706,7 +688,7 @@ int php_oci_collection_element_set_number(php_oci_collection *collection, long i
 
 /* {{{ php_oci_collection_element_set_string()
  Change element's value to the given string */
-int php_oci_collection_element_set_string(php_oci_collection *collection, long index, char *element, int element_len TSRMLS_DC)
+int php_oci_collection_element_set_string(php_oci_collection *collection, zend_long index, char *element, int element_len TSRMLS_DC)
 {
 	OCIInd new_index = OCI_IND_NOTNULL;
 	OCIString *ocistr = (OCIString *)0;
@@ -745,7 +727,7 @@ int php_oci_collection_element_set_string(php_oci_collection *collection, long i
 
 /* {{{ php_oci_collection_element_set()
  Collection element setter */
-int php_oci_collection_element_set(php_oci_collection *collection, long index, char *value, int value_len TSRMLS_DC)
+int php_oci_collection_element_set(php_oci_collection *collection, zend_long index, char *value, int value_len TSRMLS_DC)
 {
 	if (value_len == 0) {
 		return php_oci_collection_element_set_null(collection, index TSRMLS_CC);

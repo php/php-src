@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -70,7 +70,7 @@ static const char *real_value_hnd(cmd_parms *cmd, void *dummy, const char *name,
 	e.status = status;
 	e.htaccess = ((cmd->override & (RSRC_CONF|ACCESS_CONF)) == 0);
 
-	zend_hash_update(&d->config, (char *) name, strlen(name) + 1, &e, sizeof(e), NULL);
+	zend_hash_str_update_mem(&d->config, (char *) name, strlen(name), &e, sizeof(e));
 	return NULL;
 }
 
@@ -117,11 +117,12 @@ static const char *php_apache_phpini_set(cmd_parms *cmd, void *mconfig, const ch
 	return NULL;
 }
 
-static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, php_dir_entry *new_per_dir_entry, zend_hash_key *hash_key, void *pData)
+static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, zend_hash_key *hash_key, void *pData)
 {
+	php_dir_entry *new_per_dir_entry = Z_PTR_P(zv);
 	php_dir_entry *orig_per_dir_entry;
 
-	if (zend_hash_find(target_ht, hash_key->arKey, hash_key->nKeyLength, (void **) &orig_per_dir_entry)==FAILURE) {
+	if ((orig_per_dir_entry = zend_hash_find_ptr(target_ht, hash_key->key)) == NULL) {
 		return 1; /* does not exist in dest, copy from source */
 	}
 
@@ -148,10 +149,12 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 
 	n = create_php_config(p, "merge_php_config");
 	/* copy old config */
-	zend_hash_copy(&n->config, &d->config, NULL, NULL, sizeof(php_dir_entry));
+	zend_hash_copy(&n->config, &d->config, NULL);
+//???	zend_hash_copy(&n->config, &d->config, NULL, NULL, sizeof(php_dir_entry));
 	/* merge new config */
 	phpapdebug((stderr, "Merge dir (%p)+(%p)=(%p)\n", base_conf, new_conf, n));
-	zend_hash_merge_ex(&n->config, &e->config, NULL, sizeof(php_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
+	zend_hash_merge_ex(&n->config, &e->config, NULL, should_overwrite_per_dir_entry, NULL);
+//???	zend_hash_merge_ex(&n->config, &e->config, NULL, sizeof(php_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
 #if STAS_0
 	for (zend_hash_internal_pointer_reset(&d->config);
 			zend_hash_get_current_key_ex(&d->config, &str, &str_len, 
@@ -174,7 +177,7 @@ char *get_php_config(void *conf, char *name, size_t name_len)
 	php_conf_rec *d = conf;
 	php_dir_entry *pe;
 	
-	if (zend_hash_find(&d->config, name, name_len, (void **) &pe) == SUCCESS) {
+	if ((pe = zend_hash_str_find_ptr(&d->config, name, name_len)) != NULL) {
 		return pe->value;
 	}
 
@@ -184,21 +187,15 @@ char *get_php_config(void *conf, char *name, size_t name_len)
 void apply_config(void *dummy)
 {
 	php_conf_rec *d = dummy;
-	char *str;
-	uint str_len;
+	zend_string *str;
 	php_dir_entry *data;
 	
-	for (zend_hash_internal_pointer_reset(&d->config);
-			zend_hash_get_current_key_ex(&d->config, &str, &str_len, NULL, 0, 
-				NULL) == HASH_KEY_IS_STRING;
-			zend_hash_move_forward(&d->config)) {
-		if (zend_hash_get_current_data(&d->config, (void **) &data) == SUCCESS) {
-			phpapdebug((stderr, "APPLYING (%s)(%s)\n", str, data->value));
-			if (zend_alter_ini_entry(str, str_len, data->value, data->value_len, data->status, data->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE) == FAILURE) {
-				phpapdebug((stderr, "..FAILED\n"));
-			}
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&d->config, str, data) {
+		phpapdebug((stderr, "APPLYING (%s)(%s)\n", str, data->value));
+		if (zend_alter_ini_entry_chars(str, data->value, data->value_len, data->status, data->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE) == FAILURE) {
+			phpapdebug((stderr, "..FAILED\n"));
 		}
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 
 const command_rec php_dir_cmds[] =

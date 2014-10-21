@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -120,7 +120,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 					bufl = l + 1;
 					buf[bufl] = '\0';
 				}
-				add_next_index_stringl(array, buf, bufl, 1);
+				add_next_index_stringl(array, buf, bufl);
 			}
 			b = buf;
 		}
@@ -134,12 +134,12 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 					buf[bufl] = '\0';
 				}
 				if (type == 2) {
-					add_next_index_stringl(array, buf, bufl, 1);
+					add_next_index_stringl(array, buf, bufl);
 				}
 			}
 
 			/* Return last line from the shell command */
-			RETVAL_STRINGL(buf, bufl, 1);
+			RETVAL_STRINGL(buf, bufl);
 		} else { /* should return NULL, but for BC we return "" */
 			RETVAL_EMPTY_STRING();
 		}
@@ -171,7 +171,7 @@ err:
 static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	char *cmd;
-	int cmd_len;
+	size_t cmd_len;
 	zval *ret_code=NULL, *ret_array=NULL;
 	int ret;
 
@@ -238,16 +238,16 @@ PHP_FUNCTION(passthru)
 
    *NOT* safe for binary strings
 */
-PHPAPI char *php_escape_shell_cmd(char *str)
+PHPAPI zend_string *php_escape_shell_cmd(char *str)
 {
 	register int x, y, l = strlen(str);
-	char *cmd;
 	char *p = NULL;
 	size_t estimate = (2 * l) + 1;
+	zend_string *cmd;
 
 	TSRMLS_FETCH();
 
-	cmd = safe_emalloc(2, l, 1);
+	cmd = zend_string_alloc(2 * l, 0);
 
 	for (x = 0, y = 0; x < l; x++) {
 		int mb_len = php_mblen(str + x, (l - x));
@@ -256,7 +256,7 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 		if (mb_len < 0) {
 			continue;
 		} else if (mb_len > 1) {
-			memcpy(cmd + y, str + x, mb_len);
+			memcpy(cmd->val + y, str + x, mb_len);
 			y += mb_len;
 			x += mb_len - 1;
 			continue;
@@ -271,13 +271,13 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 				} else if (p && *p == str[x]) {
 					p = NULL;
 				} else {
-					cmd[y++] = '\\';
+					cmd->val[y++] = '\\';
 				}
-				cmd[y++] = str[x];
+				cmd->val[y++] = str[x];
 				break;
 #else
 			/* % is Windows specific for enviromental variables, ^%PATH% will 
-				output PATH whil ^%PATH^% not. escapeshellcmd will escape all %.
+				output PATH whil ^%PATH^% not. escapeshellcmd->val will escape all %.
 			*/
 			case '%':
 			case '"':
@@ -305,23 +305,25 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 			case '\x0A': /* excluding these two */
 			case '\xFF':
 #ifdef PHP_WIN32
-				cmd[y++] = '^';
+				cmd->val[y++] = '^';
 #else
-				cmd[y++] = '\\';
+				cmd->val[y++] = '\\';
 #endif
 				/* fall-through */
 			default:
-				cmd[y++] = str[x];
+				cmd->val[y++] = str[x];
 
 		}
 	}
-	cmd[y] = '\0';
+	cmd->val[y] = '\0';
 
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
 		 * Arbitrary cutoff point of 4096 */
-		cmd = erealloc(cmd, y + 1);
+		cmd = zend_string_realloc(cmd, y, 0);
 	}
+
+	cmd->len = y;
 
 	return cmd;
 }
@@ -329,20 +331,20 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 
 /* {{{ php_escape_shell_arg
  */
-PHPAPI char *php_escape_shell_arg(char *str)
+PHPAPI zend_string *php_escape_shell_arg(char *str)
 {
 	int x, y = 0, l = strlen(str);
-	char *cmd;
+	zend_string *cmd;
 	size_t estimate = (4 * l) + 3;
 
 	TSRMLS_FETCH();
 
-	cmd = safe_emalloc(4, l, 3); /* worst case */
+	cmd = zend_string_alloc(4 * l + 2, 0); /* worst case */
 
 #ifdef PHP_WIN32
-	cmd[y++] = '"';
+	cmd->val[y++] = '"';
 #else
-	cmd[y++] = '\'';
+	cmd->val[y++] = '\'';
 #endif
 
 	for (x = 0; x < l; x++) {
@@ -352,7 +354,7 @@ PHPAPI char *php_escape_shell_arg(char *str)
 		if (mb_len < 0) {
 			continue;
 		} else if (mb_len > 1) {
-			memcpy(cmd + y, str + x, mb_len);
+			memcpy(cmd->val + y, str + x, mb_len);
 			y += mb_len;
 			x += mb_len - 1;
 			continue;
@@ -362,31 +364,32 @@ PHPAPI char *php_escape_shell_arg(char *str)
 #ifdef PHP_WIN32
 		case '"':
 		case '%':
-			cmd[y++] = ' ';
+			cmd->val[y++] = ' ';
 			break;
 #else
 		case '\'':
-			cmd[y++] = '\'';
-			cmd[y++] = '\\';
-			cmd[y++] = '\'';
+			cmd->val[y++] = '\'';
+			cmd->val[y++] = '\\';
+			cmd->val[y++] = '\'';
 #endif
 			/* fall-through */
 		default:
-			cmd[y++] = str[x];
+			cmd->val[y++] = str[x];
 		}
 	}
 #ifdef PHP_WIN32
-	cmd[y++] = '"';
+	cmd->val[y++] = '"';
 #else
-	cmd[y++] = '\'';
+	cmd->val[y++] = '\'';
 #endif
-	cmd[y] = '\0';
+	cmd->val[y] = '\0';
 
 	if ((estimate - y) > 4096) {
 		/* realloc if the estimate was way overill
 		 * Arbitrary cutoff point of 4096 */
-		cmd = erealloc(cmd, y + 1);
+		cmd = zend_string_realloc(cmd, y, 0);
 	}
+	cmd->len = y;
 	return cmd;
 }
 /* }}} */
@@ -396,16 +399,14 @@ PHPAPI char *php_escape_shell_arg(char *str)
 PHP_FUNCTION(escapeshellcmd)
 {
 	char *command;
-	int command_len;
-	char *cmd = NULL;
+	size_t command_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
 		return;
 	}
 
 	if (command_len) {
-		cmd = php_escape_shell_cmd(command);
-		RETVAL_STRING(cmd, 0);
+		RETVAL_STR(php_escape_shell_cmd(command));
 	} else {
 		RETVAL_EMPTY_STRING();
 	}
@@ -417,16 +418,14 @@ PHP_FUNCTION(escapeshellcmd)
 PHP_FUNCTION(escapeshellarg)
 {
 	char *argument;
-	int argument_len;
-	char *cmd = NULL;
+	size_t argument_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &argument, &argument_len) == FAILURE) {
 		return;
 	}
 
 	if (argument) {
-		cmd = php_escape_shell_arg(argument);
-		RETVAL_STRING(cmd, 0);
+		RETVAL_STR(php_escape_shell_arg(argument));
 	}
 }
 /* }}} */
@@ -436,10 +435,9 @@ PHP_FUNCTION(escapeshellarg)
 PHP_FUNCTION(shell_exec)
 {
 	FILE *in;
-	size_t total_readbytes;
 	char *command;
-	int command_len;
-	char *ret;
+	size_t command_len;
+	zend_string *ret;
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
@@ -456,11 +454,11 @@ PHP_FUNCTION(shell_exec)
 	}
 
 	stream = php_stream_fopen_from_pipe(in, "rb");
-	total_readbytes = php_stream_copy_to_mem(stream, &ret, PHP_STREAM_COPY_ALL, 0);
+	ret = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
 	php_stream_close(stream);
 
-	if (total_readbytes > 0) {
-		RETVAL_STRINGL(ret, total_readbytes, 0);
+	if (ret && ret->len > 0) {
+		RETVAL_STR(ret);
 	}
 }
 /* }}} */
@@ -470,7 +468,7 @@ PHP_FUNCTION(shell_exec)
    Change the priority of the current process */
 PHP_FUNCTION(proc_nice)
 {
-	long pri;
+	zend_long pri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &pri) == FAILURE) {
 		RETURN_FALSE;

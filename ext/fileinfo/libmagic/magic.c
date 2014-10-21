@@ -28,7 +28,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: magic.c,v 1.78 2013/01/07 18:20:19 christos Exp $")
+FILE_RCSID("@(#)$File: magic.c,v 1.81 2013/11/29 15:42:51 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -81,7 +81,7 @@ FILE_RCSID("@(#)$File: magic.c,v 1.78 2013/01/07 18:20:19 christos Exp $")
 #endif
 
 private void close_and_restore(const struct magic_set *, const char *, int,
-    const struct stat *);
+    const zend_stat_t *);
 private int unreadable_info(struct magic_set *, mode_t, const char *);
 #if 0
 private const char* get_default_magic(void);
@@ -263,7 +263,7 @@ public int
 magic_load(struct magic_set *ms, const char *magicfile)
 {
 	if (ms == NULL)
-	return -1;
+		return -1;
 	return file_apprentice(ms, magicfile, FILE_LOAD);
 }
 
@@ -286,7 +286,7 @@ magic_list(struct magic_set *ms, const char *magicfile)
 
 private void
 close_and_restore(const struct magic_set *ms, const char *name, int fd,
-    const struct stat *sb)
+    const zend_stat_t *sb)
 {
 
 	if ((ms->flags & MAGIC_PRESERVE_ATIME) != 0) {
@@ -350,7 +350,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 {
 	int	rv = -1;
 	unsigned char *buf;
-	struct stat	sb;
+	zend_stat_t   sb;
 	ssize_t nbytes = 0;	/* number of bytes read from a datafile */
 	int no_in_stream = 0;
 	TSRMLS_FETCH();
@@ -383,11 +383,7 @@ file_or_stream(struct magic_set *ms, const char *inname, php_stream *stream)
 
 	if (!stream && inname) {
 		no_in_stream = 1;
-#if PHP_API_VERSION < 20100412
-		stream = php_stream_open_wrapper((char *)inname, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
-#else
 		stream = php_stream_open_wrapper((char *)inname, "rb", REPORT_ERRORS, NULL);
-#endif
 	}
 
 	if (!stream) {

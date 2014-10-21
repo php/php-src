@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -41,56 +41,12 @@ php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta, zend_bool persistent TSRMLS
 			mnd_pefree(meta->def, persistent);
 			meta->def = NULL;
 		}
+		if (meta->sname) {
+			zend_string_release(meta->sname);
+		}
 	}
 }
 /* }}} */
-
-
-/* {{{ mysqlnd_handle_numeric */
-/*
-  The following code is stolen from ZE - HANDLE_NUMERIC() macro from zend_hash.c
-  and modified for the needs of mysqlnd.
-*/
-static zend_bool
-mysqlnd_is_key_numeric(const char * key, size_t length, long *idx)
-{
-	register const char * tmp = key;
-
-	if (*tmp=='-') {
-		tmp++;
-	}
-	if ((*tmp>='0' && *tmp<='9')) {
-		do { /* possibly a numeric index */
-			const char *end=key+length-1;
-
-			if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */
-				break;
-			}
-			while (tmp<end) {
-				if (!(*tmp>='0' && *tmp<='9')) {
-					break;
-				}
-				tmp++;
-			}
-			if (tmp==end && *tmp=='\0') { /* a numeric index */
-				if (*key=='-') {
-					*idx = strtol(key, NULL, 10);
-					if (*idx!=LONG_MIN) {
-						return TRUE;
-					}
-				} else {
-					*idx = strtol(key, NULL, 10);
-					if (*idx!=LONG_MAX) {
-						return TRUE;
-					}
-				}
-			}
-		} while (0);
-	}
-	return FALSE;
-}
-/* }}} */
-
 
 /* {{{ mysqlnd_res_meta::read_metadata */
 static enum_func_status
@@ -108,7 +64,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 	}
 	field_packet->persistent_alloc = meta->persistent;
 	for (;i < meta->field_count; i++) {
-		long idx;
+		zend_ulong idx;
 
 		if (meta->fields[i].root) {
 			/* We re-read metadata for PS */
@@ -179,17 +135,9 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 		}
 
 		/* For BC we have to check whether the key is numeric and use it like this */
-		if ((meta->zend_hash_keys[i].is_numeric =
-					mysqlnd_is_key_numeric(field_packet->metadata->name,
-										   field_packet->metadata->name_length + 1,
-										   &idx)))
-		{
+		if ((meta->zend_hash_keys[i].is_numeric = ZEND_HANDLE_NUMERIC(field_packet->metadata->sname, idx))) {
 			meta->zend_hash_keys[i].key = idx;
-		} else {
-			meta->zend_hash_keys[i].key =
-					zend_get_hash_value(field_packet->metadata->name,
-										field_packet->metadata->name_length + 1);
-		}
+		} 
 	}
 	PACKET_FREE(field_packet);
 
@@ -270,26 +218,30 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 	for (i = 0; i < meta->field_count; i++) {
 		/* First copy the root, then field by field adjust the pointers */
 		new_fields[i].root = mnd_pemalloc(orig_fields[i].root_len, persistent);
+
 		if (!new_fields[i].root) {
 			goto oom;
 		}
+
 		memcpy(new_fields[i].root, orig_fields[i].root, new_fields[i].root_len);
 
-		if (orig_fields[i].name && orig_fields[i].name != mysqlnd_empty_string) {
-			new_fields[i].name = new_fields[i].root +
-								 (orig_fields[i].name - orig_fields[i].root);
+		if (orig_fields[i].sname) {
+			new_fields[i].sname = zend_string_copy(orig_fields[i].sname);
+			new_fields[i].name = new_fields[i].sname->val;
+			new_fields[i].name_length = new_fields[i].sname->len;
 		}
+
 		if (orig_fields[i].org_name && orig_fields[i].org_name != mysqlnd_empty_string) {
 			new_fields[i].org_name = new_fields[i].root +
-									 (orig_fields[i].org_name - orig_fields[i].root);
+				(orig_fields[i].org_name - orig_fields[i].root);
 		}
 		if (orig_fields[i].table && orig_fields[i].table != mysqlnd_empty_string) {
 			new_fields[i].table	= new_fields[i].root +
-								  (orig_fields[i].table - orig_fields[i].root);
+				(orig_fields[i].table - orig_fields[i].root);
 		}
 		if (orig_fields[i].org_table && orig_fields[i].org_table != mysqlnd_empty_string) {
 			new_fields[i].org_table	= new_fields[i].root +
-									  (orig_fields[i].org_table - orig_fields[i].root);
+				(orig_fields[i].org_table - orig_fields[i].root);
 		}
 		if (orig_fields[i].db && orig_fields[i].db != mysqlnd_empty_string) {
 			new_fields[i].db = new_fields[i].root + (orig_fields[i].db - orig_fields[i].root);
@@ -322,6 +274,7 @@ oom:
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_res_meta::fetch_field */
 static const MYSQLND_FIELD *
 MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta TSRMLS_DC)
@@ -341,7 +294,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, fetch_field)(MYSQLND_RES_METADATA * const meta 
 
 /* {{{ mysqlnd_res_meta::fetch_field_direct */
 static const MYSQLND_FIELD *
-MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA * const meta, MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct)(const MYSQLND_RES_METADATA * const meta, const MYSQLND_FIELD_OFFSET fieldnr TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_res_meta::fetch_field_direct");
 	DBG_INF_FMT("fieldnr=%u", fieldnr);
@@ -372,12 +325,25 @@ MYSQLND_METHOD(mysqlnd_res_meta, field_tell)(const MYSQLND_RES_METADATA * const 
 /* }}} */
 
 
+/* {{{ mysqlnd_res_meta::field_seek */
+static MYSQLND_FIELD_OFFSET
+MYSQLND_METHOD(mysqlnd_res_meta, field_seek)(MYSQLND_RES_METADATA * const meta, const MYSQLND_FIELD_OFFSET field_offset TSRMLS_DC)
+{
+	MYSQLND_FIELD_OFFSET return_value = 0;
+	DBG_ENTER("mysqlnd_res_meta::fetch_fields");
+	return_value = meta->current_field;
+	meta->current_field = field_offset;
+	DBG_RETURN(return_value);
+}
+/* }}} */
+
 static
 MYSQLND_CLASS_METHODS_START(mysqlnd_res_meta)
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_field),
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_field_direct),
 	MYSQLND_METHOD(mysqlnd_res_meta, fetch_fields),
 	MYSQLND_METHOD(mysqlnd_res_meta, field_tell),
+	MYSQLND_METHOD(mysqlnd_res_meta, field_seek),
 	MYSQLND_METHOD(mysqlnd_res_meta, read_metadata),
 	MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata),
 	MYSQLND_METHOD(mysqlnd_res_meta, free),

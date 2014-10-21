@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,22 +44,19 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-D7303025
 Since: 
 */
-int dom_entity_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_entity_public_id_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	xmlEntity *nodep;
-
-	nodep = (xmlEntity *) dom_object_get_node(obj);
+	xmlEntity *nodep = (xmlEntity *) dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
-		ZVAL_NULL(*retval);
+		ZVAL_NULL(retval);
 	} else {
-		ZVAL_STRING(*retval, (char *) (nodep->ExternalID), 1);
+		ZVAL_STRING(retval, (char *) (nodep->ExternalID));
 	}
 
 	return SUCCESS;
@@ -72,22 +69,19 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-D7C29F3E
 Since: 
 */
-int dom_entity_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_entity_system_id_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	xmlEntity *nodep;
-
-	nodep = (xmlEntity *) dom_object_get_node(obj);
+	xmlEntity *nodep = (xmlEntity *) dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
-		ZVAL_NULL(*retval);
+		ZVAL_NULL(retval);
 	} else {
-		ZVAL_STRING(*retval, (char *) (nodep->SystemID), 1);
+		ZVAL_STRING(retval, (char *) (nodep->SystemID));
 	}
 
 	return SUCCESS;
@@ -100,24 +94,21 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-6ABAEB38
 Since: 
 */
-int dom_entity_notation_name_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_entity_notation_name_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	xmlEntity *nodep;
+	xmlEntity *nodep = (xmlEntity *) dom_object_get_node(obj);
 	char *content;
-
-	nodep = (xmlEntity *) dom_object_get_node(obj);
 
 	if (nodep == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
 		return FAILURE;
 	}
 
-	ALLOC_ZVAL(*retval);
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
-		ZVAL_NULL(*retval);
+		ZVAL_NULL(retval);
 	} else {
-		content = xmlNodeGetContent((xmlNodePtr) nodep);
-		ZVAL_STRING(*retval, content, 1);
+		content = (char *) xmlNodeGetContent((xmlNodePtr) nodep);
+		ZVAL_STRING(retval, content);
 		xmlFree(content);
 	}
 
@@ -131,10 +122,9 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-actualEncoding
 Since: DOM Level 3
 */
-int dom_entity_actual_encoding_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_entity_actual_encoding_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 
@@ -150,10 +140,9 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-encoding
 Since: DOM Level 3
 */
-int dom_entity_encoding_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_entity_encoding_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 
@@ -169,10 +158,9 @@ readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-version
 Since: DOM Level 3
 */
-int dom_entity_version_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_entity_version_read(dom_object *obj, zval *retval TSRMLS_DC)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,82 +36,79 @@ static zend_object_handlers php_incomplete_object_handlers;
  */
 static void incomplete_class_message(zval *object, int error_type TSRMLS_DC)
 {
-	char *class_name;
-	zend_bool class_name_alloced = 1;
+	zend_string *class_name;
 
-	class_name = php_lookup_class_name(object, NULL);
+	class_name = php_lookup_class_name(object);
 
-	if (!class_name) {
-		class_name_alloced = 0;
-		class_name = "unknown";
-	}
-
-	php_error_docref(NULL TSRMLS_CC, error_type, INCOMPLETE_CLASS_MSG, class_name);
-
-	if (class_name_alloced) {
-		efree(class_name);
+	if (class_name) {
+		php_error_docref(NULL TSRMLS_CC, error_type, INCOMPLETE_CLASS_MSG, class_name->val);
+		zend_string_release(class_name);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, error_type, INCOMPLETE_CLASS_MSG, "unknown");
 	}
 }
 /* }}} */
 
-static zval *incomplete_class_get_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval *incomplete_class_get_property(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 
 	if (type == BP_VAR_W || type == BP_VAR_RW) {
-		return EG(error_zval_ptr);
+		return &EG(error_zval);
 	} else {
-		return EG(uninitialized_zval_ptr);
+		return &EG(uninitialized_zval);
 	}
 }
 /* }}} */
 
-static void incomplete_class_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC) /* {{{ */
+static void incomplete_class_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 }
 /* }}} */
 
-static zval **incomplete_class_get_property_ptr_ptr(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval *incomplete_class_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
-	return &EG(error_zval_ptr);
+	return &EG(error_zval);
 }
 /* }}} */
 
-static void incomplete_class_unset_property(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
+static void incomplete_class_unset_property(zval *object, zval *member, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 }
 /* }}} */
 
-static int incomplete_class_has_property(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC) /* {{{ */
+static int incomplete_class_has_property(zval *object, zval *member, int check_empty, void **cache_slot TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 	return 0;
 }
 /* }}} */
 
-static union _zend_function *incomplete_class_get_method(zval **object, char *method, int method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
+static union _zend_function *incomplete_class_get_method(zend_object **object, zend_string *method, const zval *key TSRMLS_DC) /* {{{ */
 {
-	incomplete_class_message(*object, E_ERROR TSRMLS_CC);
+	zval zobject;
+
+	ZVAL_OBJ(&zobject, *object);
+	incomplete_class_message(&zobject, E_ERROR TSRMLS_CC);
 	return NULL;
 }
 /* }}} */
 
 /* {{{ php_create_incomplete_class
  */
-static zend_object_value php_create_incomplete_object(zend_class_entry *class_type TSRMLS_DC)
+static zend_object *php_create_incomplete_object(zend_class_entry *class_type TSRMLS_DC)
 {
 	zend_object *object;
-	zend_object_value value;
 
-	value = zend_objects_new(&object, class_type TSRMLS_CC);
-	value.handlers = &php_incomplete_object_handlers;
+	object = zend_objects_new( class_type TSRMLS_CC);
+	object->handlers = &php_incomplete_object_handlers;
 
 	object_properties_init(object, class_type);
 
-	return value;
+	return object;
 }
 
 PHPAPI zend_class_entry *php_create_incomplete_class(TSRMLS_D)
@@ -135,41 +132,32 @@ PHPAPI zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 
 /* {{{ php_lookup_class_name
  */
-PHPAPI char *php_lookup_class_name(zval *object, zend_uint *nlen)
+PHPAPI zend_string *php_lookup_class_name(zval *object)
 {
-	zval **val;
-	char *retval = NULL;
+	zval *val;
 	HashTable *object_properties;
 	TSRMLS_FETCH();
 
 	object_properties = Z_OBJPROP_P(object);
 
-	if (zend_hash_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER), (void **) &val) == SUCCESS) {
-		retval = estrndup(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
-
-		if (nlen) {
-			*nlen = Z_STRLEN_PP(val);
-		}
+	if ((val = zend_hash_str_find(object_properties, MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1)) != NULL) {
+		return zend_string_copy(Z_STR_P(val));
 	}
 
-	return retval;
+	return NULL;
 }
 /* }}} */
 
 /* {{{ php_store_class_name
  */
-PHPAPI void php_store_class_name(zval *object, const char *name, zend_uint len)
+PHPAPI void php_store_class_name(zval *object, const char *name, uint32_t len)
 {
-	zval *val;
+	zval val;
 	TSRMLS_FETCH();
 
-	MAKE_STD_ZVAL(val);
 
-	Z_TYPE_P(val)   = IS_STRING;
-	Z_STRVAL_P(val) = estrndup(name, len);
-	Z_STRLEN_P(val) = len;
-
-	zend_hash_update(Z_OBJPROP_P(object), MAGIC_MEMBER, sizeof(MAGIC_MEMBER), &val, sizeof(val), NULL);
+	ZVAL_STRINGL(&val, name, len);
+	zend_hash_str_update(Z_OBJPROP_P(object), MAGIC_MEMBER, sizeof(MAGIC_MEMBER)-1, &val);
 }
 /* }}} */
 

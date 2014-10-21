@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -94,8 +94,8 @@ PHP_FUNCTION(levenshtein)
 	int argc = ZEND_NUM_ARGS();
 	char *str1, *str2;
 	char *callback_name;
-	int str1_len, str2_len, callback_len;
-	long cost_ins, cost_rep, cost_del;
+	size_t str1_len, str2_len, callback_len;
+	zend_long cost_ins, cost_rep, cost_del;
 	int distance = -1;
 
 	switch (argc) {

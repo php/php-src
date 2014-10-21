@@ -80,11 +80,15 @@ if (!$IS_MYSQLND)
 		if (0 == count($poll_links))
 			break;
 
-		if (0 == ($num_ready = mysqli_poll($poll_links, $poll_errors, $poll_reject, 0, 200000)))
+		if (0 === ($num_ready = mysqli_poll($poll_links, $poll_errors, $poll_reject, 0, 200000)))
 			continue;
 
 		if (!empty($poll_errors)) {
 			die(var_dump($poll_errors));
+		}
+
+		if (FALSE === $num_ready) {
+			die("Some mysqli indicated error");
 		}
 
 		foreach ($poll_links as $link) {

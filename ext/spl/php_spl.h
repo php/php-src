@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -58,13 +58,12 @@ PHP_MINFO_FUNCTION(spl);
 
 
 ZEND_BEGIN_MODULE_GLOBALS(spl)
-	char *       autoload_extensions;
-	HashTable *  autoload_functions;
-	int          autoload_running;
-	int          autoload_extensions_len;
+	zend_string *autoload_extensions;
+	HashTable   *autoload_functions;
 	intptr_t     hash_mask_handle;
 	intptr_t     hash_mask_handlers;
 	int          hash_mask_init;
+	int          autoload_running;
 ZEND_END_MODULE_GLOBALS(spl)
 
 #ifdef ZTS
@@ -80,7 +79,7 @@ PHP_FUNCTION(class_parents);
 PHP_FUNCTION(class_implements);
 PHP_FUNCTION(class_uses);
 
-PHPAPI void php_spl_object_hash(zval *obj, char* md5str TSRMLS_DC);
+PHPAPI zend_string *php_spl_object_hash(zval *obj TSRMLS_DC);
 
 #endif /* PHP_SPL_H */
 

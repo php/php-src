@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -129,24 +129,24 @@ void intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg TSRMLS_D
 /* {{{ const char* intl_error_get_message( intl_error* err )
  * Create output message in format "<intl_error_text>: <extra_user_error_text>".
  */
-char* intl_error_get_message( intl_error* err TSRMLS_DC )
+zend_string * intl_error_get_message( intl_error* err TSRMLS_DC )
 {
-	const char* uErrorName = NULL;
-	char*       errMessage = 0;
+	const char *uErrorName = NULL;
+	zend_string *errMessage = 0;
 
 	if( !err && !( err = intl_g_error_get( TSRMLS_C ) ) )
-		return estrdup( "" );
+		return STR_EMPTY_ALLOC();
 
 	uErrorName = u_errorName( err->code );
 
 	/* Format output string */
 	if( err->custom_error_message )
 	{
-		spprintf( &errMessage, 0, "%s: %s", err->custom_error_message, uErrorName );
+		errMessage = strpprintf(0, "%s: %s", err->custom_error_message, uErrorName );
 	}
 	else
 	{
-		spprintf( &errMessage, 0, "%s", uErrorName );
+		errMessage = strpprintf(0, "%s", uErrorName );
 	}
 
 	return errMessage;
@@ -240,7 +240,7 @@ void intl_register_IntlException_class( TSRMLS_D )
 	/* Create and register 'IntlException' class. */
 	INIT_CLASS_ENTRY_EX( ce, "IntlException", sizeof( "IntlException" ) - 1, NULL );
 	IntlException_ce_ptr = zend_register_internal_class_ex( &ce,
-		default_exception_ce, NULL TSRMLS_CC );
+		default_exception_ce TSRMLS_CC );
 	IntlException_ce_ptr->create_object = default_exception_ce->create_object;
 }
 
@@ -258,7 +258,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 	if( pe->line > 0 )
 	{
 		smart_str_appends( &ret, "on line " );
-		smart_str_append_long( &ret, (long ) pe->line );
+		smart_str_append_long( &ret, (zend_long ) pe->line );
 		any = 1;
 	}
 	if( pe->offset >= 0 ) {
@@ -268,7 +268,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 			smart_str_appends( &ret, "at " );
 
 		smart_str_appends( &ret, "offset " );
-		smart_str_append_long( &ret, (long ) pe->offset ); 
+		smart_str_append_long( &ret, (zend_long ) pe->offset ); 
 		any = 1;
 	}
 

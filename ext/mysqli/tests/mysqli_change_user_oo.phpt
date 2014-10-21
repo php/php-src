@@ -10,6 +10,9 @@ require_once('table.inc');
 if (!$IS_MYSQLND && (mysqli_get_server_version($link) < 50118 && mysqli_get_server_version($link) > 50100)) {
 	die("skip Your MySQL Server version has a known bug that will cause a crash");
 }
+
+if (mysqli_get_server_version($link) >= 50600)
+	die("SKIP For MySQL < 5.6.0");
 ?>
 --FILE--
 <?php
@@ -42,6 +45,11 @@ if (!$IS_MYSQLND && (mysqli_get_server_version($link) < 50118 && mysqli_get_serv
 
 	if (false !== ($tmp = $mysqli->change_user($user, $passwd, $db . '_unknown_really')))
 		printf("[008] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+
+	// Reconnect because after 3 failed change_user attempts, the server blocks you off.
+	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
+		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+			$host, $user, $db, $port, $socket);
 
 	if (!$mysqli->query('SET @mysqli_change_user_test_var=1'))
 		printf("[009] Failed to set test variable: [%d] %s\n", $mysqli->errno, $mysqli->error);

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,11 +60,6 @@ PHP_FUNCTION(chmod);
 PHP_FUNCTION(touch);
 #endif
 PHP_FUNCTION(clearstatcache);
-
-#define MAKE_LONG_ZVAL_INCREF(name, val)\
-	MAKE_STD_ZVAL(name); \
-	ZVAL_LONG(name, val); \
-	Z_ADDREF_P(name); 
 
 #ifdef PHP_WIN32
 #define S_IRUSR S_IREAD

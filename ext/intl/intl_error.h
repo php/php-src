@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 
 #include <unicode/utypes.h>
 #include <unicode/parseerr.h>
-#include <ext/standard/php_smart_str.h>
+#include <zend_smart_str.h>
 
 #define INTL_ERROR_CODE(e) (e).code
 
@@ -38,7 +38,7 @@ void        intl_error_set_code( intl_error* err, UErrorCode err_code TSRMLS_DC 
 void        intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg TSRMLS_DC );
 void        intl_error_set( intl_error* err, UErrorCode code, char* msg, int copyMsg TSRMLS_DC );
 UErrorCode  intl_error_get_code( intl_error* err TSRMLS_DC );
-char*       intl_error_get_message( intl_error* err TSRMLS_DC );
+zend_string* intl_error_get_message( intl_error* err TSRMLS_DC );
 
 // Wrappers to synchonize object's and global error structures.
 void        intl_errors_reset( intl_error* err TSRMLS_DC );

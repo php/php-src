@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@
 
 /* {{{ mysqlnd_local_infile_init */
 static
-int mysqlnd_local_infile_init(void ** ptr, char * filename, void ** userdata TSRMLS_DC)
+int mysqlnd_local_infile_init(void ** ptr, const char * const filename TSRMLS_DC)
 {
 	MYSQLND_INFILE_INFO	*info;
 	php_stream_context	*context = NULL;
@@ -73,7 +73,7 @@ int mysqlnd_local_infile_read(void * ptr, zend_uchar * buf, unsigned int buf_len
 
 	DBG_ENTER("mysqlnd_local_infile_read");
 
-	count = (int)php_stream_read(info->fd, (char *) buf, buf_len);
+	count = (int) php_stream_read(info->fd, (char *) buf, buf_len);
 
 	if (count < 0) {
 		strcpy(info->error_msg, "Error reading file");
@@ -125,27 +125,13 @@ void mysqlnd_local_infile_end(void * ptr TSRMLS_DC)
 
 
 /* {{{ mysqlnd_local_infile_default */
-PHPAPI void
+void
 mysqlnd_local_infile_default(MYSQLND_CONN_DATA * conn)
 {
 	conn->infile.local_infile_init = mysqlnd_local_infile_init;
 	conn->infile.local_infile_read = mysqlnd_local_infile_read;
 	conn->infile.local_infile_error = mysqlnd_local_infile_error;
 	conn->infile.local_infile_end = mysqlnd_local_infile_end;
-}
-/* }}} */
-
-
-/* {{{ mysqlnd_set_local_infile_handler */
-PHPAPI void
-mysqlnd_set_local_infile_handler(MYSQLND_CONN_DATA * const conn, const char * const funcname)
-{
-	if (!conn->infile.callback) {
-		MAKE_STD_ZVAL(conn->infile.callback);
-	} else {
-		zval_dtor(conn->infile.callback);
-	}
-	ZVAL_STRING(conn->infile.callback, (char*) funcname, 1);
 }
 /* }}} */
 
@@ -184,7 +170,7 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zen
 	*is_warning = FALSE;
 
 	/* init handler: allocate read buffer and open file */
-	if (infile.local_infile_init(&info, (char *)filename, conn->infile.userdata TSRMLS_CC)) {
+	if (infile.local_infile_init(&info, (char *)filename TSRMLS_CC)) {
 		char tmp_buf[sizeof(conn->error_info->error)];
 		int tmp_error_no;
 		*is_warning = TRUE;

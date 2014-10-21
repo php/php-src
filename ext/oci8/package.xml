@@ -8,12 +8,17 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <summary>Extension for Oracle Database</summary>
 
  <description>
-   This extension allows you to access Oracle Database. OCI8 2.0 can
-   be built with PHP 4.3.9 onwards. OCI8 can be linked with Oracle
-   Database 9.2, 10, 11, or 12.1 client libraries.  Oracle's standard
-   cross-version connectivity applies.  For example PHP linked with
-   Oracle Database 11.2 client libraries can connect to Oracle
-   Database 9.2 onwards.
+Use the OCI8 extension to access Oracle Database.  The extension can
+be linked with Oracle client libraries from Oracle Database 10.2, 11,
+or 12.1.  These libraries are found in the database installation, or
+in the free Oracle Instant Client available from Oracle.  Oracle's
+standard cross-version connectivity applies.  For example, PHP OCI8
+linked with Instant Client 11.2 can connect to Oracle Database 9.2
+onward.  See Oracle's note "Oracle Client / Server Interoperability
+Support" (ID 207303.1) for details.  PHP OCI8 2.0 can be built with
+PHP 5.2 onward.  Use the older PHP OCI8 1.4.10 when using PHP 4.3.9
+through to PHP 5.1.x, or when only Oracle Database 9.2 client
+libraries are available.
  </description>
  <lead>
   <name>Christopher Jones</name>
@@ -40,20 +45,20 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2013-09-27</date>
+ <date>2014-03-19</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.0.5</release>
-   <api>2.0.5</api>
+   <release>2.0.9</release>
+   <api>2.0.9</api>
   </version>
   <stability>
-   <release>devel</release>
-   <api>devel</api>
+   <release>stable</release>
+   <api>stable</api>
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-   - no notes yet
+Fixed oci_field_* reflection: $field can be a column name or index
   </notes>
  <contents>
   <dir name="/">
@@ -86,6 +91,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="b47243_1.phpt" role="test" />
     <file name="b47243_2.phpt" role="test" />
     <file name="b47243_3.phpt" role="test" />
+    <file name="bind_boolean_1.phpt" role="test" />
     <file name="bind_char_1_11gR1.phpt" role="test" />
     <file name="bind_char_1.phpt" role="test" />
     <file name="bind_char_2_11gR1.phpt" role="test" />
@@ -139,7 +145,6 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="bug42841.phpt" role="test" />
     <file name="bug43492_2.phpt" role="test" />
     <file name="bug43492.phpt" role="test" />
-    <file name="bug43497_92.phpt" role="test" />
     <file name="bug43497.phpt" role="test" />
     <file name="bug44008.phpt" role="test" />
     <file name="bug44113.phpt" role="test" />
@@ -152,7 +157,6 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="bug51253.phpt" role="test" />
     <file name="bug51291_1.phpt" role="test" />
     <file name="bug51291_2.phpt" role="test" />
-    <file name="clientversion_92.phpt" role="test" />
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
@@ -221,6 +225,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="cursors_old.phpt" role="test" />
     <file name="cursors.phpt" role="test" />
     <file name="dbmsoutput.phpt" role="test" />
+    <file name="db_op_1.phpt" role="test" />
+    <file name="db_op_2.phpt" role="test" />
     <file name="debug.phpt" role="test" />
     <file name="default_prefetch0.phpt" role="test" />
     <file name="default_prefetch1.phpt" role="test" />
@@ -263,9 +269,12 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="error2.phpt" role="test" />
     <file name="error3.phpt" role="test" />
     <file name="error_bind.phpt" role="test" />
+    <file name="error_bind_2.phpt" role="test" />
+    <file name="error_bind_3.phpt" role="test" />
     <file name="error_old.phpt" role="test" />
     <file name="error_parse.phpt" role="test" />
     <file name="error.phpt" role="test" />
+    <file name="error_set.phpt" role="test" />
     <file name="exec_fetch.phpt" role="test" />
     <file name="execute_mode.phpt" role="test" />
     <file name="extauth_01.phpt" role="test" />
@@ -423,6 +432,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />
+   <file name="LICENSE" role="doc" />
    <file name="oci8.c" role="src" />
    <file name="oci8_dtrace.d" role="src" />
    <file name="oci8_collection.c" role="src" />
@@ -438,8 +448,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <dependencies>
   <required>
    <php>
-    <min>4.3.9</min>
-    <max>6.0.0</max>
+    <min>5.2.0</min>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
@@ -451,6 +460,73 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.0.8</release>
+   <api>2.0.8</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+Enhancement - Improve performance of multi-row OCI_RETURN_LOB queries (Bug #66875)
+  </notes>
+ </release>
+
+<release>
+  <version>
+   <release>2.0.7</release>
+   <api>2.0.7</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+Added oci_bind_by_name() support for PL/SQL BOOLEAN type    
+Build change: Fix source variable definition for C89 compatibility
+  </notes>
+</release>
+
+<release>
+ <version>
+  <release>2.0.6</release>
+  <api>2.0.6</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+Added a LICENSE file to make it easier for PECL binary distributions
+to conform with the license.
+ </notes>
+</release>
+
+<release>
+ <version>
+  <release>2.0.5</release>
+  <api>2.0.5</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+Bump PHP OCI8 2.0 mininum requirements to PHP 5.2 and Oracle client
+library 10.2.  (Use OCI8 1.4 for older PHP version support or if only
+Oracle 9.2 client libraries are available.)
+
+Re-enable php_oci8.dll and php_oci8_11g.dll for Windows builds so URL
+links work in the new Windows PECL infrastructure.
+ </notes>
+</release>
 
 <release>
   <version>

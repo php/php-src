@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,7 @@
 #include "php_com_dotnet_internal.h"
 
 
-PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, uint string_len, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, size_t string_len, int codepage TSRMLS_DC)
 {
 	OLECHAR *olestring = NULL;
 	DWORD flags = codepage == CP_UTF8 ? 0 : MB_PRECOMPOSED | MB_ERR_INVALID_CHARS;
@@ -46,7 +46,13 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, uint strin
 
 	if (string_len > 0) {
 		olestring = (OLECHAR*)safe_emalloc(string_len, sizeof(OLECHAR), 0);
+		/* XXX if that's a real multibyte string, olestring is obviously allocated excessively.
+		This should be fixed by reallocating the olestring, but as emalloc is used, that doesn't
+		matter much. */
 		ok = MultiByteToWideChar(codepage, flags, string, string_len, olestring, string_len);
+		if (ok > 0 && ok < string_len) {
+			olestring[ok] = '\0';
+		}
 	} else {
 		ok = FALSE;
 		olestring = (OLECHAR*)emalloc(sizeof(OLECHAR));
@@ -65,7 +71,7 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, uint strin
 	return olestring;
 }
 
-PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, uint *string_len, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, size_t *string_len, int codepage TSRMLS_DC)
 {
 	char *string;
 	uint length = 0;

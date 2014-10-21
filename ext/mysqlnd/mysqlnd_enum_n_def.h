@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -100,7 +100,9 @@
 #define CLIENT_CONNECT_ATTRS		(1UL << 20) /* Client supports connection attributes */
 #define CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA	(1UL << 21) /* Enable authentication response packet to be larger than 255 bytes. */
 #define CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS		(1UL << 22) /* Don't close the connection for a connection with expired password. */
-#define CLIENT_SSL_VERIFY_SERVER_CERT (1UL << 30)
+#define CLIENT_SESSION_TRACK					(1UL << 23) /* Extended OK */
+#define CLIENT_SSL_VERIFY_SERVER_CERT	(1UL << 30)
+#define CLIENT_REMEMBER_OPTIONS			(1UL << 31)
 
 #define MYSQLND_CAPABILITIES (CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_TRANSACTIONS | \
 				CLIENT_PROTOCOL_41 | CLIENT_SECURE_CONNECTION | \
@@ -214,23 +216,23 @@ typedef enum mysqlnd_protocol_type
 
 typedef enum mysqlnd_field_types
 {
-	MYSQL_TYPE_DECIMAL,
-	MYSQL_TYPE_TINY,
-	MYSQL_TYPE_SHORT,
-	MYSQL_TYPE_LONG,
-	MYSQL_TYPE_FLOAT,
-	MYSQL_TYPE_DOUBLE,
-	MYSQL_TYPE_NULL,
-	MYSQL_TYPE_TIMESTAMP,
-	MYSQL_TYPE_LONGLONG,
-	MYSQL_TYPE_INT24,
-	MYSQL_TYPE_DATE,
-	MYSQL_TYPE_TIME,
-	MYSQL_TYPE_DATETIME,
-	MYSQL_TYPE_YEAR,
-	MYSQL_TYPE_NEWDATE,
-	MYSQL_TYPE_VARCHAR,
-	MYSQL_TYPE_BIT,
+	MYSQL_TYPE_DECIMAL	= 0,
+	MYSQL_TYPE_TINY		= 1,
+	MYSQL_TYPE_SHORT	= 2,
+	MYSQL_TYPE_LONG		= 3,
+	MYSQL_TYPE_FLOAT	= 4,
+	MYSQL_TYPE_DOUBLE	= 5,
+	MYSQL_TYPE_NULL		= 6,
+	MYSQL_TYPE_TIMESTAMP= 7,
+	MYSQL_TYPE_LONGLONG	= 8,
+	MYSQL_TYPE_INT24	= 9,
+	MYSQL_TYPE_DATE		= 10,
+	MYSQL_TYPE_TIME		= 11,
+	MYSQL_TYPE_DATETIME	= 12,
+	MYSQL_TYPE_YEAR		= 13,
+	MYSQL_TYPE_NEWDATE	= 14,
+	MYSQL_TYPE_VARCHAR	= 15,
+	MYSQL_TYPE_BIT		= 16,
 	MYSQL_TYPE_NEWDECIMAL=246,
 	MYSQL_TYPE_ENUM=247,
 	MYSQL_TYPE_SET=248,
@@ -322,23 +324,23 @@ typedef enum mysqlnd_server_option
 typedef enum mysqlnd_connection_state
 {
 	CONN_ALLOCED = 0,
-	CONN_READY,
-	CONN_QUERY_SENT,
-	CONN_SENDING_LOAD_DATA,
-	CONN_FETCHING_DATA,
-	CONN_NEXT_RESULT_PENDING,
-	CONN_QUIT_SENT /* object is "destroyed" at this stage */
+	CONN_READY = 1,
+	CONN_QUERY_SENT = 2,
+	CONN_SENDING_LOAD_DATA = 3,
+	CONN_FETCHING_DATA = 4,
+	CONN_NEXT_RESULT_PENDING = 5,
+	CONN_QUIT_SENT = 6 /* object is "destroyed" at this stage */
 } enum_mysqlnd_connection_state;
 
 
 typedef enum mysqlnd_stmt_state
 {
 	MYSQLND_STMT_INITTED = 0,
-	MYSQLND_STMT_PREPARED,
-	MYSQLND_STMT_EXECUTED,
-	MYSQLND_STMT_WAITING_USE_OR_STORE,
-	MYSQLND_STMT_USE_OR_STORE_CALLED,
-	MYSQLND_STMT_USER_FETCHING /* fetch_row_buff or fetch_row_unbuf */
+	MYSQLND_STMT_PREPARED = 1,
+	MYSQLND_STMT_EXECUTED = 2,
+	MYSQLND_STMT_WAITING_USE_OR_STORE = 3,
+	MYSQLND_STMT_USE_OR_STORE_CALLED = 4,
+	MYSQLND_STMT_USER_FETCHING = 5/* fetch_row_buff or fetch_row_unbuf */
 } enum_mysqlnd_stmt_state;
 
 
@@ -561,6 +563,10 @@ enum mysqlnd_packet_type
 };
 
 
+/*
+  After adding new elements please update
+  `mysqlnd_command_to_text` in mysqlnd_wireprotocol.c
+*/
 enum php_mysqlnd_server_command
 {
 	COM_SLEEP = 0,
@@ -592,12 +598,15 @@ enum php_mysqlnd_server_command
 	COM_STMT_RESET = 26,
 	COM_SET_OPTION = 27,
 	COM_STMT_FETCH = 28,
-	COM_DAEMON,
+	COM_DAEMON = 29,
+	COM_BINLOG_DUMP_GTID = 30,
+	COM_RESET_CONNECTION = 31,
+	COM_STMT_EXECUTE_BATCH = 32,
 	COM_END
 };
 
 
-#define MYSQLND_DEFAULT_PREFETCH_ROWS (ulong) 1
+#define MYSQLND_DEFAULT_PREFETCH_ROWS (zend_ulong) 1
 
 #define MYSQLND_REFRESH_GRANT		1	/* Refresh grant tables */
 #define MYSQLND_REFRESH_LOG			2	/* Start on new log file */
@@ -608,6 +617,21 @@ enum php_mysqlnd_server_command
 #define MYSQLND_REFRESH_SLAVE		64	/* Reset master info and restart slave */
 #define MYSQLND_REFRESH_MASTER		128	/* Remove all bin logs in the index */
 #define MYSQLND_REFRESH_BACKUP_LOG	0x200000L
+
+
+#define MYSQLND_STORE_PS		1
+#define MYSQLND_STORE_NO_COPY	2
+#define MYSQLND_STORE_COPY		4
+
+enum mysqlnd_buffered_type
+{
+	MYSQLND_BUFFERED_TYPE_ZVAL = 1,
+	MYSQLND_BUFFERED_TYPE_C
+};
+
+
+#define MYSQLND_CLIENT_NO_FLAG				0
+#define MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA	1
 
 #endif	/* MYSQLND_ENUM_N_DEF_H */
 

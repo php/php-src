@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@
 PHP_FUNCTION(cli_set_process_title)
 {
     char *title = NULL;
-    int title_len;
+    size_t title_len;
     int rc;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &title, &title_len) == FAILURE) {
@@ -66,7 +66,7 @@ PHP_FUNCTION(cli_get_process_title)
                 RETURN_NULL();
         }
 
-        RETURN_STRINGL(title, length, 1);
+        RETURN_STRINGL(title, length);
 }
 /* }}} */
 

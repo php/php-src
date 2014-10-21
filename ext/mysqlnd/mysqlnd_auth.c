@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const char * const db,
 							  const size_t db_len,
 							  const MYSQLND_OPTIONS * const options,
-							  unsigned long mysql_flags,
+							  zend_ulong mysql_flags,
 							  unsigned int server_charset_no,
 							  zend_bool use_full_blown_auth_packet,
 							  const char * const auth_protocol,
@@ -361,7 +361,7 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_OPTIONS * const options,
 								  const MYSQLND_NET_OPTIONS * const net_options,
-								  unsigned long mysql_flags
+								  zend_ulong mysql_flags
 								  TSRMLS_DC)
 {
 	zend_uchar * ret = NULL;
@@ -421,7 +421,7 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 							   const MYSQLND_OPTIONS * const options,
 							   const MYSQLND_NET_OPTIONS * const net_options,
-							   unsigned long mysql_flags
+							   zend_ulong mysql_flags
 							   TSRMLS_DC)
 {
 	zend_uchar * ret = NULL;
@@ -485,7 +485,6 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 						   TSRMLS_DC)
 {
 	RSA * ret = NULL;
-	int len;
 	const char * fname = (net_options->sha256_server_public_key && net_options->sha256_server_public_key[0] != '\0')? 
 								net_options->sha256_server_public_key:
 								MYSQLND_G(sha256_server_public_key);
@@ -543,20 +542,18 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 		DBG_ERR("server_public_key is not set");
 		DBG_RETURN(NULL);
 	} else {
-		char * key_str = NULL;
+		zend_string * key_str;
 		DBG_INF_FMT("Key in a file. [%s]", fname);
 		stream = php_stream_open_wrapper((char *) fname, "rb", REPORT_ERRORS, NULL);
 
 		if (stream) {
-			if ((len = php_stream_copy_to_mem(stream, &key_str, PHP_STREAM_COPY_ALL, 0)) >= 0 ) {
-				BIO * bio = BIO_new_mem_buf(key_str, len);
+			if ((key_str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
+				BIO * bio = BIO_new_mem_buf(key_str->val, key_str->len);
 				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 				BIO_free(bio);
 				DBG_INF("Successfully loaded");
-			}
-			if (key_str) {
-				DBG_INF_FMT("Public key:%*.s", len, key_str);
-				efree(key_str);
+				DBG_INF_FMT("Public key:%*.s", key_str->len, key_str->val);
+				zend_string_release(key_str);
 			}
 			php_stream_free(stream, PHP_STREAM_FREE_CLOSE);
 		}
@@ -574,7 +571,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_OPTIONS * const options,
 								  const MYSQLND_NET_OPTIONS * const net_options,
-								  unsigned long mysql_flags
+								  zend_ulong mysql_flags
 								  TSRMLS_DC)
 {
 	RSA * server_public_key;

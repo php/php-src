@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,7 +43,7 @@ PHP_FUNCTION( collator_get_error_code )
 	}
 
 	/* Fetch the object (without resetting its last error code). */
-	co = (Collator_object *) zend_object_store_get_object(object TSRMLS_CC);
+	co = Z_INTL_COLLATOR_P(object);
 	if( co == NULL )
 		RETURN_FALSE;
 
@@ -59,7 +59,7 @@ PHP_FUNCTION( collator_get_error_code )
  */
 PHP_FUNCTION( collator_get_error_message )
 {
-	const char* message = NULL;
+	zend_string* message = NULL;
 
 	COLLATOR_METHOD_INIT_VARS
 
@@ -74,13 +74,13 @@ PHP_FUNCTION( collator_get_error_message )
 	}
 
 	/* Fetch the object (without resetting its last error code). */
-	co = (Collator_object *) zend_object_store_get_object( object TSRMLS_CC );
+	co = Z_INTL_COLLATOR_P( object );
 	if( co == NULL )
 		RETURN_FALSE;
 
 	/* Return last error message. */
 	message = intl_error_get_message( COLLATOR_ERROR_P( co ) TSRMLS_CC );
-	RETURN_STRING( (char*)message, FALSE );
+	RETURN_STR(message);
 }
 /* }}} */
 

@@ -111,7 +111,7 @@ _PROTOTYPE(void bc_init_num, (bc_num *num TSRMLS_DC));
 
 _PROTOTYPE(void bc_str2num, (bc_num *num, char *str, int scale TSRMLS_DC));
 
-_PROTOTYPE(char *bc_num2str, (bc_num num));
+_PROTOTYPE(zend_string *bc_num2str, (bc_num num));
 
 _PROTOTYPE(void bc_int2num, (bc_num *num, int val));
 

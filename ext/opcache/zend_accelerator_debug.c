@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 The PHP Group                                |
+   | Copyright (c) 1998-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,7 +57,7 @@ void zend_accel_error(int type, const char *format, ...)
 	}
 
 #ifdef ZTS
-    fprintf(fLog, "%s (%lu): ", time_string, (unsigned long)tsrm_thread_id());
+    fprintf(fLog, "%s (" ZEND_ULONG_FMT "): ", time_string, (zend_ulong)tsrm_thread_id());
 #else
     fprintf(fLog, "%s (%d): ", time_string, getpid());
 #endif

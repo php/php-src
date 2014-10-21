@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,6 +36,7 @@
 
 #if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
 # define atoll(s) _atoi64(s)
+# define HAVE_ATOLL 1
 #endif
 
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
@@ -57,7 +58,7 @@ static php_rfc1867_basename_t php_rfc1867_basename = NULL;
 
 PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **extra TSRMLS_DC) = NULL;
 
-static void safe_php_register_variable(char *var, char *strval, int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
+static void safe_php_register_variable(char *var, char *strval, size_t val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
 
 /* The longest property name we use in an uploaded file array */
 #define MAX_SIZE_OF_INDEX sizeof("[tmp_name]")
@@ -148,21 +149,19 @@ static void normalize_protected_variable(char *varname TSRMLS_DC) /* {{{ */
 
 static void add_protected_variable(char *varname TSRMLS_DC) /* {{{ */
 {
-	int dummy = 1;
-
 	normalize_protected_variable(varname TSRMLS_CC);
-	zend_hash_add(&PG(rfc1867_protected_variables), varname, strlen(varname)+1, &dummy, sizeof(int), NULL);
+	zend_hash_str_add_empty_element(&PG(rfc1867_protected_variables), varname, strlen(varname));
 }
 /* }}} */
 
 static zend_bool is_protected_variable(char *varname TSRMLS_DC) /* {{{ */
 {
 	normalize_protected_variable(varname TSRMLS_CC);
-	return zend_hash_exists(&PG(rfc1867_protected_variables), varname, strlen(varname)+1);
+	return zend_hash_str_exists(&PG(rfc1867_protected_variables), varname, strlen(varname));
 }
 /* }}} */
 
-static void safe_php_register_variable(char *var, char *strval, int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC) /* {{{ */
+static void safe_php_register_variable(char *var, char *strval, size_t val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC) /* {{{ */
 {
 	if (override_protection || !is_protected_variable(var TSRMLS_CC)) {
 		php_register_variable_safe(var, strval, val_len, track_vars_array TSRMLS_CC);
@@ -190,16 +189,23 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 }
 /* }}} */
 
-static int unlink_filename(char **filename TSRMLS_DC) /* {{{ */
+static int unlink_filename(zval *el TSRMLS_DC) /* {{{ */
 {
-	VCWD_UNLINK(*filename);
+	char *filename = (char*)Z_PTR_P(el);
+	VCWD_UNLINK(filename);
 	return 0;
 }
 /* }}} */
 
+
+static void free_filename(zval *el) {
+	char *filename = (char*)Z_PTR_P(el);
+	efree(filename);
+}
+
 void destroy_uploaded_files_hash(TSRMLS_D) /* {{{ */
 {
-	zend_hash_apply(SG(rfc1867_uploaded_files), (apply_func_t) unlink_filename TSRMLS_CC);
+	zend_hash_apply(SG(rfc1867_uploaded_files), unlink_filename TSRMLS_CC);
 	zend_hash_destroy(SG(rfc1867_uploaded_files));
 	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
 }
@@ -605,9 +611,9 @@ static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int ne
 }
 
 /* read until a boundary condition */
-static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes, int *end TSRMLS_DC)
+static int multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes, int *end TSRMLS_DC)
 {
-	int len, max;
+	size_t len, max;
 	char *bound;
 
 	/* fill buffer if needed */
@@ -651,7 +657,7 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes, i
   XXX: this is horrible memory-usage-wise, but we only expect
   to do this on small pieces of form data.
 */
-static char *multipart_buffer_read_body(multipart_buffer *self, unsigned int *len TSRMLS_DC)
+static char *multipart_buffer_read_body(multipart_buffer *self, size_t *len TSRMLS_DC)
 {
 	char buf[FILLUNIT], *out=NULL;
 	int total_bytes=0, read_bytes=0;
@@ -683,7 +689,6 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	int boundary_len = 0, cancel_upload = 0, is_arr_upload = 0, array_len = 0;
 	int64_t total_bytes = 0, max_file_size = 0;
 	int skip_upload = 0, anonindex = 0, is_anonymous;
-	zval *http_post_files = NULL;
 	HashTable *uploaded_files = NULL;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
@@ -696,7 +701,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	php_rfc1867_getword_t getword;
 	php_rfc1867_getword_conf_t getword_conf;
 	php_rfc1867_basename_t _basename;
-	long count = 0;
+	zend_long count = 0;
 
 	if (php_rfc1867_encoding_translation(TSRMLS_C) && internal_encoding) {
 		getword = php_rfc1867_getword;
@@ -709,7 +714,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	}
 
 	if (SG(post_max_size) > 0 && SG(request_info).content_length > SG(post_max_size)) {
-		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes", SG(request_info).content_length, SG(post_max_size));
+		sapi_module.sapi_error(E_WARNING, "POST Content-Length of " ZEND_LONG_FMT " bytes exceeds the limit of " ZEND_LONG_FMT " bytes", SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
 
@@ -758,16 +763,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	}
 
 	/* Initialize $_FILES[] */
-	zend_hash_init(&PG(rfc1867_protected_variables), 5, NULL, NULL, 0);
+	zend_hash_init(&PG(rfc1867_protected_variables), 8, NULL, NULL, 0);
 
 	ALLOC_HASHTABLE(uploaded_files);
-	zend_hash_init(uploaded_files, 5, NULL, (dtor_func_t) free_estring, 0);
+	zend_hash_init(uploaded_files, 8, NULL, free_filename, 0);
 	SG(rfc1867_uploaded_files) = uploaded_files;
 
-	ALLOC_ZVAL(http_post_files);
-	array_init(http_post_files);
-	INIT_PZVAL(http_post_files);
-	PG(http_globals)[TRACK_VARS_FILES] = http_post_files;
+	array_init(&PG(http_globals)[TRACK_VARS_FILES]);
 
 	zend_llist_init(&header, sizeof(mime_header_entry), (llist_dtor_func_t) php_free_hdr_entry, 0);
 
@@ -785,7 +787,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 		char buff[FILLUNIT];
 		char *cd = NULL, *param = NULL, *filename = NULL, *tmp = NULL;
 		size_t blen = 0, wlen = 0;
-		off_t offset;
+		zend_off_t offset;
 
 		zend_llist_clean(&header);
 
@@ -848,9 +850,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 			/* Normal form variable, safe to read all data into memory */
 			if (!filename && param) {
-				unsigned int value_len;
+				size_t value_len;
 				char *value = multipart_buffer_read_body(mbuff, &value_len TSRMLS_CC);
-				unsigned int new_val_len; /* Dummy variable */
+				size_t new_val_len; /* Dummy variable */
 
 				if (!value) {
 					value = estrdup("");
@@ -887,7 +889,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					safe_php_register_variable(param, value, new_val_len, array_ptr, 0 TSRMLS_CC);
 				} else {
 					if (count == PG(max_input_vars) + 1) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
 					}
 				
 					if (php_rfc1867_callback != NULL) {
@@ -903,7 +905,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				}
 
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
+#ifdef HAVE_ATOLL
 					max_file_size = atoll(value);
+#else
+					max_file_size = strtoll(value, NULL, 10);
+#endif
 				}
 
 				efree(param);
@@ -1028,14 +1034,14 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					}
 				}
 
-				if (PG(upload_max_filesize) > 0 && (long)(total_bytes+blen) > PG(upload_max_filesize)) {
+				if (PG(upload_max_filesize) > 0 && (zend_long)(total_bytes+blen) > PG(upload_max_filesize)) {
 #if DEBUG_FILE_UPLOAD
-					sapi_module.sapi_error(E_NOTICE, "upload_max_filesize of %ld bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
+					sapi_module.sapi_error(E_NOTICE, "upload_max_filesize of " ZEND_LONG_FMT " bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
 #endif
 					cancel_upload = UPLOAD_ERROR_A;
-				} else if (max_file_size && ((long)(total_bytes+blen) > max_file_size)) {
+				} else if (max_file_size && ((zend_long)(total_bytes+blen) > max_file_size)) {
 #if DEBUG_FILE_UPLOAD
-					sapi_module.sapi_error(E_NOTICE, "MAX_FILE_SIZE of %ld bytes exceeded - file [%s=%s] not saved", max_file_size, param, filename);
+					sapi_module.sapi_error(E_NOTICE, "MAX_FILE_SIZE of " ZEND_LONG_FMT " bytes exceeded - file [%s=%s] not saved", max_file_size, param, filename);
 #endif
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
@@ -1098,7 +1104,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				}
 				temp_filename = "";
 			} else {
-				zend_hash_add(SG(rfc1867_uploaded_files), temp_filename, strlen(temp_filename) + 1, &temp_filename, sizeof(char *), NULL);
+				zend_hash_str_add_ptr(SG(rfc1867_uploaded_files), temp_filename, strlen(temp_filename), temp_filename);
 			}
 
 			/* is_arr_upload is true when name of file upload field
@@ -1149,7 +1155,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			} else {
 				snprintf(lbuf, llen, "%s[name]", param);
 			}
-			register_http_post_files_variable(lbuf, s, http_post_files, 0 TSRMLS_CC);
+			register_http_post_files_variable(lbuf, s, &PG(http_globals)[TRACK_VARS_FILES], 0 TSRMLS_CC);
 			efree(filename);
 			s = NULL;
 
@@ -1180,7 +1186,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			} else {
 				snprintf(lbuf, llen, "%s[type]", param);
 			}
-			register_http_post_files_variable(lbuf, cd, http_post_files, 0 TSRMLS_CC);
+			register_http_post_files_variable(lbuf, cd, &PG(http_globals)[TRACK_VARS_FILES], 0 TSRMLS_CC);
 
 			/* Restore Content-Type Header */
 			if (s != NULL) {
@@ -1198,7 +1204,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 				/* if param is of form xxx[.*] this will cut it to xxx */
 				if (!is_anonymous) {
-					ZVAL_STRING(&zfilename, temp_filename, 1);
+					ZVAL_STRING(&zfilename, temp_filename);
 					safe_php_register_variable_ex(param, &zfilename, NULL, 1 TSRMLS_CC);
 				}
 
@@ -1209,8 +1215,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					snprintf(lbuf, llen, "%s[tmp_name]", param);
 				}
 				add_protected_variable(lbuf TSRMLS_CC);
-				ZVAL_STRING(&zfilename, temp_filename, 1);
-				register_http_post_files_variable_ex(lbuf, &zfilename, http_post_files, 1 TSRMLS_CC);
+				ZVAL_STRING(&zfilename, temp_filename);
+				register_http_post_files_variable_ex(lbuf, &zfilename, &PG(http_globals)[TRACK_VARS_FILES], 1 TSRMLS_CC);
 			}
 
 			{
@@ -1224,7 +1230,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				if (cancel_upload) {
 					ZVAL_LONG(&file_size, 0);
 				} else {
-					if (total_bytes > LONG_MAX) {
+					if (total_bytes > ZEND_LONG_MAX) {
 #ifdef PHP_WIN32
 						if (_i64toa_s(total_bytes, file_size_buf, 65, 10)) {
 							file_size_buf[0] = '0';
@@ -1248,7 +1254,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				} else {
 					snprintf(lbuf, llen, "%s[error]", param);
 				}
-				register_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
+				register_http_post_files_variable_ex(lbuf, &error_type, &PG(http_globals)[TRACK_VARS_FILES], 0 TSRMLS_CC);
 
 				/* Add $foo_size */
 				if (is_arr_upload) {
@@ -1258,7 +1264,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				}
 				if (!is_anonymous) {
 					if (size_overflow) {
-						ZVAL_STRING(&file_size, file_size_buf, 1);
+						ZVAL_STRING(&file_size, file_size_buf);
 					}
 					safe_php_register_variable_ex(lbuf, &file_size, NULL, size_overflow TSRMLS_CC);
 				}
@@ -1270,9 +1276,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					snprintf(lbuf, llen, "%s[size]", param);
 				}
 				if (size_overflow) {
-					ZVAL_STRING(&file_size, file_size_buf, 1);
+					ZVAL_STRING(&file_size, file_size_buf);
 				}
-				register_http_post_files_variable_ex(lbuf, &file_size, http_post_files, size_overflow TSRMLS_CC);
+				register_http_post_files_variable_ex(lbuf, &file_size, &PG(http_globals)[TRACK_VARS_FILES], size_overflow TSRMLS_CC);
 			}
 			efree(param);
 		}

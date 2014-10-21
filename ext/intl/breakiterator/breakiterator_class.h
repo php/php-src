@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,8 +29,6 @@ typedef void BreakIterator;
 #endif
 
 typedef struct {
-	zend_object	zo;
-
 	// 	error handling
 	intl_error  err;
 
@@ -38,8 +36,15 @@ typedef struct {
 	BreakIterator*	biter;
 
 	// current text
-	zval *text;
+	zval text;
+
+	zend_object	zo;
 } BreakIterator_object;
+
+static inline BreakIterator_object *php_intl_breakiterator_fetch_object(zend_object *obj) {
+	return (BreakIterator_object *)((char*)(obj) - XtOffsetOf(BreakIterator_object, zo));
+}
+#define Z_INTL_BREAKITERATOR_P(zv) php_intl_breakiterator_fetch_object(Z_OBJ_P(zv))
 
 #define BREAKITER_ERROR(bio)		(bio)->err
 #define BREAKITER_ERROR_P(bio)		&(BREAKITER_ERROR(bio))
@@ -48,7 +53,7 @@ typedef struct {
 #define BREAKITER_ERROR_CODE_P(bio)	&(INTL_ERROR_CODE(BREAKITER_ERROR(bio)))
 
 #define BREAKITER_METHOD_INIT_VARS		        INTL_METHOD_INIT_VARS(BreakIterator, bio)
-#define BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(BreakIterator, bio)
+#define BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_BREAKITERATOR, bio)
 #define BREAKITER_METHOD_FETCH_OBJECT \
 	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (bio->biter == NULL) \
@@ -57,7 +62,7 @@ typedef struct {
 		RETURN_FALSE; \
 	}
 
-void breakiterator_object_create(zval *object, BreakIterator *break_iter TSRMLS_DC);
+void breakiterator_object_create(zval *object, BreakIterator *break_iter, int brand_new TSRMLS_DC);
 
 void breakiterator_object_construct(zval *object, BreakIterator *break_iter TSRMLS_DC);
 

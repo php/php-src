@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Author: Ard Biesheuvel <a.k.biesheuvel@ewi.tudelft.nl>               |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /**
 * This UDF library adds the ability to call PHP functions from SQL
@@ -86,7 +84,7 @@
 *
 *     gcc -shared `php-config --includes` `php-config --ldflags` \
 *         `php-config --libs` -o php_ibase_udf.so php_ibase_udf.c \
-*         /usr/lib/libphp5.a
+*         /usr/lib/libphp7.a
 *
 * If you use the super server, you should also link against the embedded
 * library, but be sure to enable thread safety, as the super server is
@@ -185,12 +183,11 @@ static ISC_INT64 const scales[] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10
 static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 {
 	do {
-		zval callback, args[4], *argp[4], return_value;
+		zval callback, args[4], return_value;
 		PARAMVARY *res = (PARAMVARY*)r->dsc_address;
 		int i;
 
-		INIT_ZVAL(callback);
-		ZVAL_STRING(&callback,name,0);
+		ZVAL_STRING(&callback, name);
 
 		LOCK();
 		
@@ -204,12 +201,9 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 		/* create the argument array */
 		for (i = 0; i < argc; ++i) {
 
-			INIT_ZVAL(args[i]);
-			argp[i] = &args[i];
-			
 			/* test arg for null */
 			if (argv[i]->dsc_flags & DSC_null) {
-				ZVAL_NULL(argp[i]);
+				ZVAL_NULL(&args[i]);
 				continue;
 			}
 
@@ -220,32 +214,35 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 				char d[64];
 
 				case dtype_cstring:
-					ZVAL_STRING(argp[i], (char*)argv[i]->dsc_address,0);
+//???
+					ZVAL_STRING(&args[i], (char*)argv[i]->dsc_address);
 					break;
 
 				case dtype_text:
-					ZVAL_STRINGL(argp[i], (char*)argv[i]->dsc_address, argv[i]->dsc_length,0);
+//???
+					ZVAL_STRINGL(&args[i], (char*)argv[i]->dsc_address, argv[i]->dsc_length);
 					break;
 
 				case dtype_varying:
-					ZVAL_STRINGL(argp[i], ((PARAMVARY*)argv[i]->dsc_address)->vary_string,
-						((PARAMVARY*)argv[i]->dsc_address)->vary_length,0);
+//???
+					ZVAL_STRINGL(&args[i], ((PARAMVARY*)argv[i]->dsc_address)->vary_string,
+						((PARAMVARY*)argv[i]->dsc_address)->vary_length);
 					break;
 
 				case dtype_short:
 					if (argv[i]->dsc_scale == 0) {
-						ZVAL_LONG(argp[i], *(short*)argv[i]->dsc_address);
+						ZVAL_LONG(&args[i], *(short*)argv[i]->dsc_address);
 					} else {
-						ZVAL_DOUBLE(argp[i],
+						ZVAL_DOUBLE(&args[i],
 							((double)*(short*)argv[i]->dsc_address)/scales[-argv[i]->dsc_scale]);
 					}
 					break;
 
 				case dtype_long:
 					if (argv[i]->dsc_scale == 0) {
-						ZVAL_LONG(argp[i], *(ISC_LONG*)argv[i]->dsc_address);
+						ZVAL_LONG(&args[i], *(ISC_LONG*)argv[i]->dsc_address);
 					} else {
-						ZVAL_DOUBLE(argp[i],
+						ZVAL_DOUBLE(&args[i],
 							((double)*(ISC_LONG*)argv[i]->dsc_address)/scales[-argv[i]->dsc_scale]);
 					}
 					break;
@@ -254,33 +251,33 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 					l = *(ISC_INT64*)argv[i]->dsc_address;
 
 					if (argv[i]->dsc_scale == 0 && l <= LONG_MAX && l >= LONG_MIN) {
-						ZVAL_LONG(argp[i], (long)l);
+						ZVAL_LONG(&args[i], (long)l);
 					} else {
-						ZVAL_DOUBLE(argp[i], ((double)l)/scales[-argv[i]->dsc_scale]);
+						ZVAL_DOUBLE(&args[i], ((double)l)/scales[-argv[i]->dsc_scale]);
 					}
 					break;
 
 				case dtype_real:
-					ZVAL_DOUBLE(argp[i], *(float*)argv[i]->dsc_address);
+					ZVAL_DOUBLE(&args[i], *(float*)argv[i]->dsc_address);
 					break;
 
 				case dtype_double:
-					ZVAL_DOUBLE(argp[i], *(double*)argv[i]->dsc_address);
+					ZVAL_DOUBLE(&args[i], *(double*)argv[i]->dsc_address);
 					break;
 
 				case dtype_sql_date:
 					isc_decode_sql_date((ISC_DATE*)argv[i]->dsc_address, &t);
-					ZVAL_STRINGL(argp[i], d, strftime(d, sizeof(d), INI_STR("ibase.dateformat"), &t),1); 
+					ZVAL_STRINGL(&args[i], d, strftime(d, sizeof(d), INI_STR("ibase.dateformat"), &t),1); 
 					break;
 
 				case dtype_sql_time:
 					isc_decode_sql_time((ISC_TIME*)argv[i]->dsc_address, &t);
-					ZVAL_STRINGL(argp[i], d, strftime(d, sizeof(d), INI_STR("ibase.timeformat"), &t),1); 
+					ZVAL_STRINGL(&args[i], d, strftime(d, sizeof(d), INI_STR("ibase.timeformat"), &t),1); 
 					break;
 
 				case dtype_timestamp:
 					isc_decode_timestamp((ISC_TIMESTAMP*)argv[i]->dsc_address, &t);
-					ZVAL_STRINGL(argp[i], d, strftime(d, sizeof(d), INI_STR("ibase.timestampformat"), &t),1); 
+					ZVAL_STRINGL(&args[i], d, strftime(d, sizeof(d), INI_STR("ibase.timestampformat"), &t)); 
 					break;
 			}
 		}
@@ -289,7 +286,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 
 		/* now call the function */
 		if (FAILURE == call_user_function(EG(function_table), NULL,
-				&callback, &return_value, argc, argp TSRMLS_CC)) {
+				&callback, &return_value, argc, args TSRMLS_CC)) {
 			UNLOCK();
 			break;
 		}
@@ -301,10 +298,11 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 				case dtype_sql_date:
 				case dtype_sql_time:
 				case dtype_timestamp:
-					zval_dtor(argp[i]);
-					
+					zval_dtor(&args[i]);					
 			}
 		}
+
+		zval_dtor(&callback);
 
 		/* return whatever type we got back from the callback: let DB handle conversion */
 		switch (Z_TYPE(return_value)) {
@@ -406,4 +404,3 @@ void udf_call_php8(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARA
 	PARAMDSC *args[8] = { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 };
 	call_php(name, r, 8, args);
 }
-

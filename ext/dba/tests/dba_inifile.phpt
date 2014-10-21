@@ -12,6 +12,10 @@ DBA INIFILE handler test
 	require_once dirname(__FILE__) .'/dba_handler.inc';
 ?>
 ===DONE===
+--CLEAN--
+<?php 
+	require(dirname(__FILE__) .'/clean.inc'); 
+?>
 --EXPECT--
 database handler: inifile
 3NYNYY
@@ -19,7 +23,7 @@ Content String 2
 Content 2 replaced
 Read during write: not allowed
 "key number 6" written
-Failed to write "key number 6" 2nd time
+"key number 6" written 2nd time
 Content 2 replaced 2nd time
 The 6th value
 array(3) {
@@ -36,7 +40,7 @@ Content String 2
 Content 2 replaced
 Read during write: not allowed
 "key number 6" written
-Failed to write "key number 6" 2nd time
+"key number 6" written 2nd time
 Content 2 replaced 2nd time
 The 6th value
 array(3) {

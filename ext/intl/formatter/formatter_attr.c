@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,7 @@
  */
 PHP_FUNCTION( numfmt_get_attribute )
 {
-	long attribute, value;
+	zend_long attribute, value;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -101,7 +101,7 @@ PHP_FUNCTION( numfmt_get_attribute )
  */
 PHP_FUNCTION( numfmt_get_text_attribute )
 {
-	long   attribute;
+	zend_long   attribute;
 	UChar  value_buf[64];
 	int    value_buf_size = USIZE( value_buf );
 	UChar* value  = value_buf;
@@ -145,12 +145,12 @@ PHP_FUNCTION( numfmt_get_text_attribute )
  */
 PHP_FUNCTION( numfmt_set_attribute )
 {
-	long attribute;
-	zval **value;
+	zend_long attribute;
+	zval *value;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OlZ",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Olz",
 		&object, NumberFormatter_ce_ptr, &attribute, &value ) == FAILURE)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -183,11 +183,11 @@ PHP_FUNCTION( numfmt_set_attribute )
 		case UNUM_MAX_SIGNIFICANT_DIGITS:
 		case UNUM_LENIENT_PARSE:
 			convert_to_long_ex(value);
-			unum_setAttribute(FORMATTER_OBJECT(nfo), attribute, Z_LVAL_PP(value));
+			unum_setAttribute(FORMATTER_OBJECT(nfo), attribute, Z_LVAL_P(value));
 			break;
 		case UNUM_ROUNDING_INCREMENT:
 			convert_to_double_ex(value);
-			unum_setDoubleAttribute(FORMATTER_OBJECT(nfo), attribute, Z_DVAL_PP(value));
+			unum_setDoubleAttribute(FORMATTER_OBJECT(nfo), attribute, Z_DVAL_P(value));
 			break;
 		default:
 			INTL_DATA_ERROR_CODE(nfo) = U_UNSUPPORTED_ERROR;
@@ -209,9 +209,9 @@ PHP_FUNCTION( numfmt_set_text_attribute )
 {
 	int slength = 0;
 	UChar *svalue = NULL;
-	long attribute;
+	zend_long attribute;
 	char *value;
-	int len;
+	size_t len;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -249,7 +249,7 @@ PHP_FUNCTION( numfmt_set_text_attribute )
  */
 PHP_FUNCTION( numfmt_get_symbol )
 {
-	long symbol;
+	zend_long symbol;
 	UChar value_buf[4];
 	UChar *value = value_buf;
 	int length = USIZE(value_buf);
@@ -297,9 +297,9 @@ PHP_FUNCTION( numfmt_get_symbol )
  */
 PHP_FUNCTION( numfmt_set_symbol )
 {
-	long       symbol;
+	zend_long       symbol;
 	char*      value     = NULL;
-	int        value_len = 0;
+	size_t        value_len = 0;
 	UChar*     svalue  = 0;
 	int        slength = 0;
 	FORMATTER_METHOD_INIT_VARS;
@@ -387,7 +387,7 @@ PHP_FUNCTION( numfmt_get_pattern )
 PHP_FUNCTION( numfmt_set_pattern )
 {
 	char*       value = NULL;
-	int         value_len = 0;
+	size_t      value_len = 0;
 	int         slength = 0;
 	UChar*	    svalue  = NULL;
 	FORMATTER_METHOD_INIT_VARS;
@@ -426,7 +426,7 @@ PHP_FUNCTION( numfmt_set_pattern )
  */
 PHP_FUNCTION( numfmt_get_locale )
 {
-	long type = ULOC_ACTUAL_LOCALE;
+	zend_long type = ULOC_ACTUAL_LOCALE;
 	char* loc;
 	FORMATTER_METHOD_INIT_VARS;
 
@@ -445,7 +445,7 @@ PHP_FUNCTION( numfmt_get_locale )
 
 	loc = (char *)unum_getLocaleByType(FORMATTER_OBJECT(nfo), type, &INTL_DATA_ERROR_CODE(nfo));
 	INTL_METHOD_CHECK_STATUS( nfo, "Error getting locale" );
-	RETURN_STRING(loc, 1);
+	RETURN_STRING(loc);
 }
 /* }}} */
 

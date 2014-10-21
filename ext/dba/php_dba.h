@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,7 +46,7 @@ typedef struct dba_info {
 	int fd;
 	/* arg[cv] are only available when the dba_open handler is called! */
 	int argc;
-	zval ***argv;
+	zval *argv;
 	/* private */
 	int flags; /* whether and how dba did locking and other flags*/
 	struct dba_handler *hnd;	

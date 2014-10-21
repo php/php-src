@@ -105,12 +105,17 @@ if (PHP_DEBUG == "yes" && PHP_DEBUG_PACK == "yes") {
 	ERROR("Use of both --enable-debug and --enable-debug-pack not allowed.");
 }
 
+if (PHP_PREFIX == '') {
+	PHP_PREFIX = "C:\\php";
+	if (PHP_DEBUG == "yes")
+		PHP_PREFIX += "\\debug";
+}
 DEFINE('PHP_PREFIX', PHP_PREFIX);
 
 DEFINE("BASE_INCLUDES", "/I " + PHP_DIR + "/include /I " + PHP_DIR + "/include/main /I " + PHP_DIR + "/include/Zend /I " + PHP_DIR + "/include/TSRM /I " + PHP_DIR + "/include/ext ");
 
 // CFLAGS for building the PHP dll
-DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP5DLLTS_EXPORTS /D PHP_EXPORTS \
+DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP7DLLTS_EXPORTS /D PHP_EXPORTS \
 /D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D WINVER=0x500");
 
 DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
@@ -146,14 +151,17 @@ if (VCVERS >= 1400) {
 }
 
 ARG_WITH('prefix', 'PHP installation prefix', '');
-ARG_WITH('mp', 'Tell VC9+ use up to [n,auto,disable] processes for compilation', 'auto');
+ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
+var PHP_MP_DISABLED = true;
 if (VCVERS >= 1500 && PHP_MP != 'disable') {
 		// no from disable-all 
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
+			PHP_MP_DISABLED = false;
 		} else {
 			if(parseInt(PHP_MP) != 0) {
 				ADD_FLAG('CFLAGS', ' /MP'+ PHP_MP +' ');
+				PHP_MP_DISABLED = false;
 			} else {
 				STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
 			}
@@ -346,13 +354,6 @@ if (PHP_SNAPSHOT_TEMPLATE == "no") {
 }
 
 DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
-
-if (PHP_DSP != "no") {
-	if (FSO.FolderExists("tmp")) {
-		FSO.DeleteFolder("tmp");
-	}
-	FSO.CreateFolder("tmp");
-}
 
 AC_DEFINE("PHP_DIR", PHP_DIR);
 DEFINE("PHP_DIR", PHP_DIR);

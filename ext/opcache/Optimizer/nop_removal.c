@@ -1,21 +1,49 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend OPcache                                                         |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998-2014 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Stanislav Malyshev <stas@zend.com>                          |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
+   +----------------------------------------------------------------------+
+*/
+
 /* pass 10:
  * - remove NOPs
  */
 
-static void nop_removal(zend_op_array *op_array)
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
+void zend_optimizer_nop_removal(zend_op_array *op_array)
 {
 	zend_op *end, *opline;
-	zend_uint new_count, i, shift;
+	uint32_t new_count, i, shift;
 	int j;
-	zend_uint *shiftlist;
+	uint32_t *shiftlist;
 	ALLOCA_FLAG(use_heap);
 
-	shiftlist = (zend_uint *)DO_ALLOCA(sizeof(zend_uint) * op_array->last);
+	shiftlist = (uint32_t *)DO_ALLOCA(sizeof(uint32_t) * op_array->last);
 	i = new_count = shift = 0;
 	end = op_array->opcodes + op_array->last;
 	for (opline = op_array->opcodes; opline < end; opline++) {
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 		/* GOTO target is unresolved yet. We can't optimize. */
 		if (opline->opcode == ZEND_GOTO &&
 			Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
@@ -23,7 +51,6 @@ static void nop_removal(zend_op_array *op_array)
 			FREE_ALLOCA(shiftlist);
 			return;
 		}
-#endif
 
 		/* Kill JMP-over-NOP-s */
 		if (opline->opcode == ZEND_JMP && ZEND_OP1(opline).opline_num > i) {
@@ -58,12 +85,8 @@ static void nop_removal(zend_op_array *op_array)
 		for (opline = op_array->opcodes; opline<end; opline++) {
 			switch (opline->opcode) {
 				case ZEND_JMP:
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 				case ZEND_GOTO:
-#endif
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 				case ZEND_FAST_CALL:
-#endif
 					ZEND_OP1(opline).opline_num -= shiftlist[ZEND_OP1(opline).opline_num];
 					break;
 				case ZEND_JMPZ:
@@ -73,12 +96,8 @@ static void nop_removal(zend_op_array *op_array)
 				case ZEND_FE_FETCH:
 				case ZEND_FE_RESET:
 				case ZEND_NEW:
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 				case ZEND_JMP_SET:
-#endif
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-				case ZEND_JMP_SET_VAR:
-#endif
+				case ZEND_COALESCE:
 					ZEND_OP2(opline).opline_num -= shiftlist[ZEND_OP2(opline).opline_num];
 					break;
 				case ZEND_JMPZNZ:
@@ -102,25 +121,21 @@ static void nop_removal(zend_op_array *op_array)
 		for (j = 0; j < op_array->last_try_catch; j++) {
 			op_array->try_catch_array[j].try_op -= shiftlist[op_array->try_catch_array[j].try_op];
 			op_array->try_catch_array[j].catch_op -= shiftlist[op_array->try_catch_array[j].catch_op];
-#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 			if (op_array->try_catch_array[j].finally_op) {
 				op_array->try_catch_array[j].finally_op -= shiftlist[op_array->try_catch_array[j].finally_op];
 				op_array->try_catch_array[j].finally_end -= shiftlist[op_array->try_catch_array[j].finally_end];
 			}
-#endif
 		}
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 		/* update early binding list */
-		if (op_array->early_binding != (zend_uint)-1) {
-			zend_uint *opline_num = &op_array->early_binding;
+		if (op_array->early_binding != (uint32_t)-1) {
+			uint32_t *opline_num = &op_array->early_binding;
 
 			do {
 				*opline_num -= shiftlist[*opline_num];
 				opline_num = &ZEND_RESULT(&op_array->opcodes[*opline_num]).opline_num;
-			} while (*opline_num != (zend_uint)-1);
+			} while (*opline_num != (uint32_t)-1);
 		}
-#endif
 	}
 	FREE_ALLOCA(shiftlist);
 }

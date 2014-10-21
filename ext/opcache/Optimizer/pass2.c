@@ -1,10 +1,40 @@
+/*
+   +----------------------------------------------------------------------+
+   | Zend OPcache                                                         |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998-2014 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.01 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_01.txt                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Andi Gutmans <andi@zend.com>                                |
+   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Stanislav Malyshev <stas@zend.com>                          |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
+   +----------------------------------------------------------------------+
+*/
+
 /* pass 2:
  * - convert non-numeric constants to numeric constants in numeric operators
  * - optimize constant conditional JMPs
  * - optimize static BRKs and CONTs
  */
 
-if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
+#include "php.h"
+#include "Optimizer/zend_optimizer.h"
+#include "Optimizer/zend_optimizer_internal.h"
+#include "zend_API.h"
+#include "zend_constants.h"
+#include "zend_execute.h"
+#include "zend_vm.h"
+
+void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
+{
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
 
@@ -16,7 +46,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_MUL:
 			case ZEND_DIV:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-					if (ZEND_OP1_LITERAL(opline).type == IS_STRING) {
+					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
 						convert_scalar_to_number(&ZEND_OP1_LITERAL(opline) TSRMLS_CC);
 					}
 				}
@@ -30,7 +60,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					break;
 				}
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
-					if (ZEND_OP2_LITERAL(opline).type == IS_STRING) {
+					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 						convert_scalar_to_number(&ZEND_OP2_LITERAL(opline) TSRMLS_CC);
 					}
 				}
@@ -40,7 +70,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_SL:
 			case ZEND_SR:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-					if (ZEND_OP1_LITERAL(opline).type != IS_LONG) {
+					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_LONG) {
 						convert_to_long(&ZEND_OP1_LITERAL(opline));
 					}
 				}
@@ -53,7 +83,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					break;
 				}
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
-					if (ZEND_OP2_LITERAL(opline).type != IS_LONG) {
+					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
 						convert_to_long(&ZEND_OP2_LITERAL(opline));
 					}
 				}
@@ -61,7 +91,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 
 			case ZEND_CONCAT:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-					if (ZEND_OP1_LITERAL(opline).type != IS_STRING) {
+					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_STRING) {
 						convert_to_string(&ZEND_OP1_LITERAL(opline));
 					}
 				}
@@ -72,7 +102,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					break;
 				}
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
-					if (ZEND_OP2_LITERAL(opline).type != IS_STRING) {
+					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
 						convert_to_string(&ZEND_OP2_LITERAL(opline));
 					}
 				}
@@ -89,7 +119,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 				/* convert Ti = JMPZ_EX(C, L) => Ti = QM_ASSIGN(C)
 				   in case we know it wouldn't jump */
 				} else if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
+					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline) TSRMLS_CC);
 					if (opline->opcode == ZEND_JMPZ_EX) {
 						should_jmp = !should_jmp;
 					}
@@ -103,7 +133,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
+					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline) TSRMLS_CC);
 
 					if (opline->opcode == ZEND_JMPZ) {
 						should_jmp = !should_jmp;
@@ -139,8 +169,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_JMPZNZ:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					int opline_num;
-
-					if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
+					if (zend_is_true(&ZEND_OP1_LITERAL(opline) TSRMLS_CC)) {
 						opline_num = opline->extended_value; /* JMPNZ */
 					} else {
 						opline_num = ZEND_OP2(opline).opline_num; /* JMPZ */
@@ -176,8 +205,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 						array_offset = jmp_to->parent;
 						if (--nest_levels > 0) {
 							if (opline->opcode == ZEND_BRK &&
-							    (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE ||
-							     op_array->opcodes[jmp_to->brk].opcode == ZEND_SWITCH_FREE)) {
+							    op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE) {
 								dont_optimize = 1;
 								break;
 							}

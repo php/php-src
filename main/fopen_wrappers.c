@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -94,24 +94,24 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 
 	if (stage == PHP_INI_STAGE_STARTUP || stage == PHP_INI_STAGE_SHUTDOWN || stage == PHP_INI_STAGE_ACTIVATE || stage == PHP_INI_STAGE_DEACTIVATE) {
 		/* We're in a PHP_INI_SYSTEM context, no restrictions */
-		*p = new_value;
+		*p = new_value ? new_value->val : NULL;
 		return SUCCESS;
 	}
 
 	/* Otherwise we're in runtime */
 	if (!*p || !**p) {
 		/* open_basedir not set yet, go ahead and give it a value */
-		*p = new_value;
+		*p = new_value->val;
 		return SUCCESS;
 	}
 
 	/* Shortcut: When we have a open_basedir and someone tries to unset, we know it'll fail */
-	if (!new_value || !*new_value) {
+	if (!new_value || !*new_value->val) {
 		return FAILURE;
 	}
 
 	/* Is the proposed open_basedir at least as restrictive as the current setting? */
-	ptr = pathbuf = estrdup(new_value);
+	ptr = pathbuf = estrdup(new_value->val);
 	while (ptr && *ptr) {
 		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
 		if (end != NULL) {
@@ -128,7 +128,7 @@ PHPAPI ZEND_INI_MH(OnUpdateBaseDir)
 	efree(pathbuf);
 
 	/* Everything checks out, set it */
-	*p = new_value;
+	*p = new_value->val;
 
 	return SUCCESS;
 }
@@ -226,12 +226,13 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 
 	/* Resolve open_basedir to resolved_basedir */
 	if (expand_filepath(local_open_basedir, resolved_basedir TSRMLS_CC) != NULL) {
+		int basedir_len = (int)strlen(basedir);
 		/* Handler for basedirs that end with a / */
-		resolved_basedir_len = strlen(resolved_basedir);
+		resolved_basedir_len = (int)strlen(resolved_basedir);
 #if defined(PHP_WIN32) || defined(NETWARE)
-		if (basedir[strlen(basedir) - 1] == PHP_DIR_SEPARATOR || basedir[strlen(basedir) - 1] == '/') {
+		if (basedir[basedir_len - 1] == PHP_DIR_SEPARATOR || basedir[basedir_len - 1] == '/') {
 #else
-		if (basedir[strlen(basedir) - 1] == PHP_DIR_SEPARATOR) {
+		if (basedir[basedir_len - 1] == PHP_DIR_SEPARATOR) {
 #endif
 			if (resolved_basedir[resolved_basedir_len - 1] != PHP_DIR_SEPARATOR) {
 				resolved_basedir[resolved_basedir_len] = PHP_DIR_SEPARATOR;
@@ -433,14 +434,18 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 
 	if (!resolved_path) {
 		if (SG(request_info).path_translated != filename) {
-			STR_FREE(filename);
+			if (filename) {
+				efree(filename);
+			}
 		}
 		/* we have to free SG(request_info).path_translated here because
 		 * php_destroy_request_info assumes that it will get
 		 * freed when the include_names hash is emptied, but
 		 * we're not adding it in this case */
-		STR_FREE(SG(request_info).path_translated);
-		SG(request_info).path_translated = NULL;
+		if (SG(request_info).path_translated) {
+			efree(SG(request_info).path_translated);
+			SG(request_info).path_translated = NULL;
+		}
 		return FAILURE;
 	}
 	efree(resolved_path);
@@ -450,16 +455,22 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 	if (zend_stream_open(filename, file_handle TSRMLS_CC) == FAILURE) {
 		PG(display_errors) = orig_display_errors;
 		if (SG(request_info).path_translated != filename) {
-			STR_FREE(filename);
+			if (filename) {
+				efree(filename);
+			}
 		}
-		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
-		SG(request_info).path_translated = NULL;
+		if (SG(request_info).path_translated) {
+			efree(SG(request_info).path_translated);
+			SG(request_info).path_translated = NULL;
+		}
 		return FAILURE;
 	}
 	PG(display_errors) = orig_display_errors;
 
 	if (SG(request_info).path_translated != filename) {
-		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
+		if (SG(request_info).path_translated) {
+			efree(SG(request_info).path_translated);
+		}
 		SG(request_info).path_translated = filename;
 	}
 
@@ -748,10 +759,15 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 	cwd_state new_state;
 	char cwd[MAXPATHLEN];
 	int copy_len;
+	int path_len;
 
 	if (!filepath[0]) {
 		return NULL;
-	} else if (IS_ABSOLUTE_PATH(filepath, strlen(filepath))) {
+	}
+
+	path_len = (int)strlen(filepath);
+
+	if (IS_ABSOLUTE_PATH(filepath, path_len)) {
 		cwd[0] = '\0';
 	} else {
 		const char *iam = SG(request_info).path_translated;
@@ -774,7 +790,7 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 				/* return a relative file path if for any reason
 				 * we cannot cannot getcwd() and the requested,
 				 * relatively referenced file is accessible */
-				copy_len = strlen(filepath) > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : strlen(filepath);
+				copy_len = path_len > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : path_len;
 				if (real_path) {
 					memcpy(real_path, filepath, copy_len);
 					real_path[copy_len] = '\0';
@@ -791,11 +807,11 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 		}
 	}
 
-	new_state.cwd = strdup(cwd);
+	new_state.cwd = estrdup(cwd);
 	new_state.cwd_length = strlen(cwd);
 
 	if (virtual_file_ex(&new_state, filepath, NULL, realpath_mode TSRMLS_CC)) {
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return NULL;
 	}
 
@@ -806,7 +822,7 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 	} else {
 		real_path = estrndup(new_state.cwd, new_state.cwd_length);
 	}
-	free(new_state.cwd);
+	efree(new_state.cwd);
 
 	return real_path;
 }

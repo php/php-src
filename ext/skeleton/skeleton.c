@@ -36,7 +36,7 @@ PHP_INI_END()
 PHP_FUNCTION(confirm_extname_compiled)
 {
 	char *arg = NULL;
-	int arg_len, len;
+	size_t arg_len, len;
 	char *strg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
@@ -44,7 +44,9 @@ PHP_FUNCTION(confirm_extname_compiled)
 	}
 
 	len = spprintf(&strg, 0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "extname", arg);
-	RETURN_STRINGL(strg, len, 0);
+
+	RETVAL_STRINGL(strg, len);
+	efree(strg);
 }
 /* }}} */
 /* The previous line is meant for vim and emacs, so it can correctly fold and 
@@ -142,7 +144,7 @@ zend_module_entry extname_module_entry = {
 	PHP_RINIT(extname),		/* Replace with NULL if there's nothing to do at request start */
 	PHP_RSHUTDOWN(extname),	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(extname),
-	"0.1", /* Replace with version number for your extension */
+	PHP_EXTNAME_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

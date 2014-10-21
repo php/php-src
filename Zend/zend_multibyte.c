@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -53,7 +53,7 @@ static size_t dummy_encoding_converter(unsigned char **to, size_t *to_length, co
 static int dummy_encoding_list_parser(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, int persistent TSRMLS_DC)
 {
 	*return_list = pemalloc(0, persistent);
-	return_size = 0;
+	*return_size = 0;
 	return SUCCESS;
 }
 
@@ -114,7 +114,7 @@ ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functi
 	 * populated, we need to reinitialize script_encoding here.
 	 */
 	{
-		const char *value = zend_ini_string("zend.script_encoding", sizeof("zend.script_encoding"), 0);
+		const char *value = zend_ini_string("zend.script_encoding", sizeof("zend.script_encoding") - 1, 0);
 		zend_multibyte_set_script_encoding_by_string(value, strlen(value) TSRMLS_CC);
 	}
 	return SUCCESS;
@@ -168,7 +168,7 @@ ZEND_API const zend_encoding *zend_multibyte_get_script_encoding(TSRMLS_D)
 ZEND_API int zend_multibyte_set_script_encoding(const zend_encoding **encoding_list, size_t encoding_list_size TSRMLS_DC)
 {
 	if (CG(script_encoding_list)) {
-		free(CG(script_encoding_list));
+		free((char*)CG(script_encoding_list));
 	}
 	CG(script_encoding_list) = encoding_list;
 	CG(script_encoding_list_size) = encoding_list_size;
@@ -195,7 +195,7 @@ ZEND_API int zend_multibyte_set_script_encoding_by_string(const char *new_value,
 	}
 
 	if (size == 0) {
-		pefree(list, 1);
+		pefree((void*)list, 1);
 		return FAILURE;
 	}
 

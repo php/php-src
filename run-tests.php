@@ -2,7 +2,7 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -241,6 +241,7 @@ $ini_overwrites = array(
 		'precision=14',
 		'memory_limit=128M',
 		'opcache.fast_shutdown=0',
+		'opcache.file_update_protection=0',
 	);
 
 function write_information($show_html)
@@ -580,8 +581,8 @@ if (isset($argc) && $argc > 1) {
 					if (!$valgrind_header) {
 						error("Valgrind returned no version info, cannot proceed.\nPlease check if Valgrind is installed.");
 					} else {
-						$valgrind_version = preg_replace("/valgrind-([0-9])\.([0-9])\.([0-9]+)([.-\w]+)?(\s+)/", '$1$2$3', $valgrind_header, 1, $replace_count);
-						if ($replace_count != 1 || !is_numeric($valgrind_version)) {
+						$valgrind_version = preg_replace("/valgrind-(\d+)\.(\d+)\.(\d+)([.\w_-]+)?(\s+)/", '$1.$2.$3', $valgrind_header, 1, $replace_count);
+						if ($replace_count != 1) {
 							error("Valgrind returned invalid version info (\"$valgrind_header\"), cannot proceed.");
 						}
 						$valgrind_header = trim($valgrind_header);
@@ -592,6 +593,9 @@ if (isset($argc) && $argc > 1) {
 						$pass_options .= ' -n';
 					}
 					$pass_option_n = true;
+					break;
+				case 'e':
+					$pass_options .= ' -e';
 					break;
 				case '--no-clean':
 					$no_clean = true;
@@ -849,7 +853,7 @@ $exts_skipped = 0;
 $ignored_by_ext = 0;
 sort($exts_to_test);
 $test_dirs = array();
-$optionals = array('tests', 'ext', 'Zend', 'ZendEngine2', 'sapi/cli', 'sapi/cgi');
+$optionals = array('tests', 'ext', 'Zend', 'ZendEngine2', 'sapi/cli', 'sapi/cgi', 'sapi/fpm');
 
 foreach($optionals as $dir) {
 	if (@filetype($dir) == 'dir') {
@@ -1090,6 +1094,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 		fwrite($pipes[0], $stdin);
 	}
 	fclose($pipes[0]);
+	unset($pipes[0]);
 
 	$timeout = $leak_check ? 300 : (isset($env['TEST_TIMEOUT']) ? $env['TEST_TIMEOUT'] : 60);
 
@@ -1187,6 +1192,7 @@ function run_test($php, $file, $env)
 	global $no_clean;
 	global $valgrind_version;
 	global $JUNIT;
+	global $SHOW_ONLY_GROUPS;
 	$temp_filenames = null;
 	$org_file = $file;
 
@@ -1289,16 +1295,20 @@ TEST $file
 				unset($section_text['FILEEOF']);
 			}
 
-			if (@count($section_text['FILE_EXTERNAL']) == 1) {
-				// don't allow tests to retrieve files from anywhere but this subdirectory
-				$section_text['FILE_EXTERNAL'] = dirname($file) . '/' . trim(str_replace('..', '', $section_text['FILE_EXTERNAL']));
+			foreach (array( 'FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX' ) as $prefix) {            
+				$key = $prefix . '_EXTERNAL';
 
-				if (file_exists($section_text['FILE_EXTERNAL'])) {
-					$section_text['FILE'] = file_get_contents($section_text['FILE_EXTERNAL'], FILE_BINARY);
-					unset($section_text['FILE_EXTERNAL']);
-				} else {
-					$bork_info = "could not load --FILE_EXTERNAL-- " . dirname($file) . '/' . trim($section_text['FILE_EXTERNAL']);
-					$borked = true;
+				if (@count($section_text[$key]) == 1) {
+					// don't allow tests to retrieve files from anywhere but this subdirectory
+					$section_text[$key] = dirname($file) . '/' . trim(str_replace('..', '', $section_text[$key]));
+
+					if (file_exists($section_text[$key])) {
+						$section_text[$prefix] = file_get_contents($section_text[$key], FILE_BINARY);
+						unset($section_text[$key]);
+					} else {
+						$bork_info = "could not load --" . $key . "-- " . dirname($file) . '/' . trim($section_text[$key]);
+						$borked = true;
+					}
 				}
 			}
 
@@ -1350,13 +1360,16 @@ TEST $file
 			} else {
 				show_result('SKIP', $tested, $tested_file, "reason: CGI not available");
 
+				junit_init_suite(junit_get_suitename_for($shortname));
 				junit_mark_test_as('SKIP', $shortname, $tested, 0, 'CGI not available');
 				return 'SKIPPED';
 			}
 		}
 	}
 
-	show_test($test_idx, $shortname);
+	if (!$SHOW_ONLY_GROUPS) {
+		show_test($test_idx, $shortname);
+	}
 
 	if (is_array($IN_REDIRECT)) {
 		$temp_dir = $test_dir = $IN_REDIRECT['dir'];
@@ -1529,7 +1542,7 @@ TEST $file
 				}
 
 				$message = !empty($m[1]) ? $m[1] : '';
-				junit_mark_test_as('SKIP', $shortname, $tested, null, "<![CDATA[\n$message\n]]>");
+				junit_mark_test_as('SKIP', $shortname, $tested, null, $message);
 				return 'SKIPPED';
 			}
 
@@ -1554,7 +1567,7 @@ TEST $file
 	) {
 		$message = "ext/zlib required";
 		show_result('SKIP', $tested, $tested_file, "reason: $message", $temp_filenames);
-		junit_mark_test_as('SKIP', $shortname, $tested, null, "<![CDATA[\n$message\n]]>");
+		junit_mark_test_as('SKIP', $shortname, $tested, null, $message);
 		return 'SKIPPED';
 	}
 
@@ -1778,7 +1791,7 @@ TEST $file
 		$env['USE_ZEND_ALLOC'] = '0';
 		$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
-		if ($valgrind_version >= 330) {
+		if (version_compare($valgrind_version, '3.3.0', '>=')) {
 			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
 			$cmd = "valgrind -q --tool=memcheck --trace-children=yes --log-file=$memcheck_filename $cmd";
 		} else {
@@ -2122,7 +2135,7 @@ $output
 		$php = $old_php;
 	}
 	
-	$diff = empty($diff) ? '' : "<![CDATA[\n " . preg_replace('/\e/', '<esc>', $diff) . "\n]]>";
+	$diff = empty($diff) ? '' : preg_replace('/\e/', '<esc>', $diff);
 
 	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, $diff);
 
@@ -2562,7 +2575,7 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
 
 	if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
 		echo "$result $tested [$tested_file] $extra\n";
-	} else {
+	} else if (!$SHOW_ONLY_GROUPS) {
 		// Write over the last line to avoid random trailing chars on next echo
 		echo str_repeat(" ", $line_length), "\r";
 	}
@@ -2701,6 +2714,10 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	junit_suite_record($suite, 'execution_time', $time);
 
 	$escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
+	$escaped_details = preg_replace_callback('/[\0-\x08\x0B\x0C\x0E-\x1F]/', function ($c) {
+		return sprintf('[[0x%02x]]', ord($c[0]));
+	}, $escaped_details);
+	$escaped_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
 
     $escaped_test_name = basename($file_name) . ' - ' . htmlspecialchars($test_name, ENT_QUOTES);
     $JUNIT['files'][$file_name]['xml'] = "<testcase classname='$suite' name='$escaped_test_name' time='$time'>\n";
@@ -2717,16 +2734,16 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 		junit_suite_record($suite, 'test_pass');
 	} elseif ('BORK' == $type) {
 		junit_suite_record($suite, 'test_error');
-		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$message'/>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'/>\n";
 	} elseif ('SKIP' == $type) {
 		junit_suite_record($suite, 'test_skip');
-		$JUNIT['files'][$file_name]['xml'] .= "<skipped>$message</skipped>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<skipped>$escaped_message</skipped>\n";
 	} elseif('FAIL' == $type) {
 		junit_suite_record($suite, 'test_fail');
-		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$message'>$escaped_details</failure>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$escaped_message'>$escaped_details</failure>\n";
 	} else {
 		junit_suite_record($suite, 'test_error');
-		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$message'>$escaped_details</error>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$escaped_message'>$escaped_details</error>\n";
 	}
 
 	$JUNIT['files'][$file_name]['xml'] .= "</testcase>\n";

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 The PHP Group                                |
+   | Copyright (c) 1998-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -288,7 +288,7 @@ static size_t zend_shared_alloc_get_largest_free_block(void)
 #define MIN_FREE_MEMORY 64*1024
 
 #define SHARED_ALLOC_FAILED() do {		\
-		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate %ld bytes (%ld bytes free)", (long)size, (long)ZSMMG(shared_free)); \
+		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate %pd bytes (%pd bytes free)", (zend_long)size, (zend_long)ZSMMG(shared_free)); \
 		if (zend_shared_alloc_get_largest_free_block() < MIN_FREE_MEMORY) { \
 			ZSMMG(memory_exhausted) = 1; \
 		} \
@@ -325,9 +325,9 @@ void *zend_shared_alloc(size_t size)
 
 int zend_shared_memdup_size(void *source, size_t size)
 {
-	void **old_p;
+	void *old_p;
 
-	if (zend_hash_index_find(&xlat_table, (ulong)source, (void **)&old_p) == SUCCESS) {
+	if ((old_p = zend_hash_index_find_ptr(&xlat_table, (zend_ulong)source)) != NULL) {
 		/* we already duplicated this pointer */
 		return 0;
 	}
@@ -337,17 +337,17 @@ int zend_shared_memdup_size(void *source, size_t size)
 
 void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source TSRMLS_DC)
 {
-	void **old_p, *retval;
+	void *old_p, *retval;
 
-	if (zend_hash_index_find(&xlat_table, (ulong)source, (void **)&old_p) == SUCCESS) {
+	if ((old_p = zend_hash_index_find_ptr(&xlat_table, (zend_ulong)source)) != NULL) {
 		/* we already duplicated this pointer */
-		return *old_p;
+		return old_p;
 	}
-	retval = ZCG(mem);;
+	retval = ZCG(mem);
 	ZCG(mem) = (void*)(((char*)ZCG(mem)) + ZEND_ALIGNED_SIZE(size));
 	memcpy(retval, source, size);
 	if (free_source) {
-		interned_efree((char*)source);
+		efree(source);
 	}
 	zend_shared_alloc_register_xlat_entry(source, retval);
 	return retval;
@@ -402,7 +402,7 @@ void zend_shared_alloc_lock(TSRMLS_D)
 	 * won't be taken from space which is freed by efree in memdup.
 	 * Otherwise it leads to false matches in memdup check.
 	 */
-	zend_hash_init(&xlat_table, 100, NULL, NULL, 1);
+	zend_hash_init(&xlat_table, 128, NULL, NULL, 1);
 }
 
 void zend_shared_alloc_unlock(TSRMLS_D)
@@ -431,17 +431,17 @@ void zend_shared_alloc_clear_xlat_table(void)
 
 void zend_shared_alloc_register_xlat_entry(const void *old, const void *new)
 {
-	zend_hash_index_update(&xlat_table, (ulong)old, (void*)&new, sizeof(void *), NULL);
+	zend_hash_index_update_ptr(&xlat_table, (zend_ulong)old, (void*)new);
 }
 
 void *zend_shared_alloc_get_xlat_entry(const void *old)
 {
-	void **retval;
+	void *retval;
 
-	if (zend_hash_index_find(&xlat_table, (ulong)old, (void **)&retval) == FAILURE) {
+	if ((retval = zend_hash_index_find_ptr(&xlat_table, (zend_ulong)old)) == NULL) {
 		return NULL;
 	}
-	return *retval;
+	return retval;
 }
 
 size_t zend_shared_alloc_get_free_memory(void)

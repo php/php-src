@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 2009 The PHP Group                                     |
    +----------------------------------------------------------------------+
@@ -140,38 +140,39 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	UIDNA		  *uts46;
 	int32_t		  len;
 	int32_t		  buffer_capac = 255; /* no domain name may exceed this */
-	char		  *buffer = emalloc(buffer_capac);
+	zend_string	  *buffer = zend_string_alloc(buffer_capac, 0);
 	UIDNAInfo	  info = UIDNA_INFO_INITIALIZER;
 	int			  buffer_used = 0;
 	
 	uts46 = uidna_openUTS46(option, &status);
 	if (php_intl_idn_check_status(status, "failed to open UIDNA instance",
 			mode TSRMLS_CC) == FAILURE) {
-		efree(buffer);
+		zend_string_free(buffer);
 		RETURN_FALSE;
 	}
 
 	if (mode == INTL_IDN_TO_ASCII) {
 		len = uidna_nameToASCII_UTF8(uts46, domain, (int32_t)domain_len,
-				buffer, buffer_capac, &info, &status);
+				buffer->val, buffer_capac, &info, &status);
 	} else {
 		len = uidna_nameToUnicodeUTF8(uts46, domain, (int32_t)domain_len,
-				buffer, buffer_capac, &info, &status);
+				buffer->val, buffer_capac, &info, &status);
 	}
 	if (php_intl_idn_check_status(status, "failed to convert name",
 			mode TSRMLS_CC) == FAILURE) {
 		uidna_close(uts46);
-		efree(buffer);
+		zend_string_free(buffer);
 		RETURN_FALSE;
 	}
 	if (len >= 255) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "ICU returned an unexpected length");
 	}
 
-	buffer[len] = '\0';
+	buffer->val[len] = '\0';
+	buffer->len = len;
 
 	if (info.errors == 0) {
-		RETVAL_STRINGL(buffer, len, 0);
+		RETVAL_STR(buffer);
 		buffer_used = 1;
 	} else {
 		RETVAL_FALSE;
@@ -180,21 +181,20 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	if (idna_info) {
 		if (buffer_used) { /* used in return_value then */
 			zval_addref_p(return_value);
-			add_assoc_zval_ex(idna_info, "result", sizeof("result"), return_value);
+			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, return_value);
 		} else {
-			zval *zv;
-			ALLOC_INIT_ZVAL(zv);
-			ZVAL_STRINGL(zv, buffer, len, 0);
+			zval zv;
+			ZVAL_NEW_STR(&zv, buffer);
 			buffer_used = 1;
-			add_assoc_zval_ex(idna_info, "result", sizeof("result"), zv);
+			add_assoc_zval_ex(idna_info, "result", sizeof("result")-1, &zv);
 		}
 		add_assoc_bool_ex(idna_info, "isTransitionalDifferent",
-				sizeof("isTransitionalDifferent"), info.isTransitionalDifferent);
-		add_assoc_long_ex(idna_info, "errors", sizeof("errors"), (long)info.errors);
+				sizeof("isTransitionalDifferent")-1, info.isTransitionalDifferent);
+		add_assoc_long_ex(idna_info, "errors", sizeof("errors")-1, (zend_long)info.errors);
 	}
 
 	if (!buffer_used) {
-		efree(buffer);
+		zend_string_free(buffer);
 	}
 
 	uidna_close(uts46);
@@ -256,20 +256,22 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	/* return the allocated string, not a duplicate */
-	RETURN_STRINGL(((char *)converted_utf8), converted_utf8_len, 0);
+	RETVAL_STRINGL(((char *)converted_utf8), converted_utf8_len);
+	//????
+	efree(converted_utf8);
 }
 
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	char *domain;
-	int domain_len;
-	long option = 0,
+	size_t domain_len;
+	zend_long option = 0,
 		 variant = INTL_IDN_VARIANT_2003;
 	zval *idna_info = NULL;
 
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llz/",
 			&domain, &domain_len, &option, &variant, &idna_info) == FAILURE) {
 		php_intl_bad_args("bad arguments", mode TSRMLS_CC);
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -137,7 +137,7 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 			zend_hash_move_forward(&d->config)) {
 		pe = NULL;
 		zend_hash_get_current_data(&d->config, (void **) &data);
-		if (zend_hash_find(&n->config, str, str_len, (void **) &pe) == SUCCESS) {
+		if ((pe = zend_hash_find(&n->config, str, str_len) != NULL) != NULL) {
 			if (pe->status >= data->status) continue;
 		}
 		zend_hash_update(&n->config, str, str_len, data, sizeof(*data), NULL);
@@ -152,7 +152,7 @@ char *get_php_config(void *conf, char *name, size_t name_len)
 	php_conf_rec *d = conf;
 	php_dir_entry *pe;
 	
-	if (zend_hash_find(&d->config, name, name_len, (void **) &pe) == SUCCESS) {
+	if ((pe = zend_hash_find(&d->config, name, name_len)) != NULL) {
 		return pe->value;
 	}
 

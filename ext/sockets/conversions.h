@@ -79,6 +79,6 @@ zval *to_zval_run_conversions(const char				*structure,
 							  to_zval_read_field		*reader,
 							  const char				*top_name,
 							  const struct key_value	*key_value_pairs,
-							  struct err_s				*err);
+							  struct err_s				*err, zval *zv);
 
 #endif

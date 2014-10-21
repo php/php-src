@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -287,11 +287,11 @@ static void birdstep_del_result(HashTable *list,int ind)
 PHP_FUNCTION(birdstep_connect)
 {
 	char *serv, *user, *pass;
-	int serv_len, user_len, pass_len;
+	size_t serv_len, user_len, pass_len;
 	RETCODE stat;
 	HDBC hdbc;
 	VConn *new;
-	long ind;
+	zend_long ind;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &serv, &serv_len, &user, &user_len, &pass, &pass_len) == FAILURE) {
 		return;
@@ -324,7 +324,7 @@ PHP_FUNCTION(birdstep_connect)
  */
 PHP_FUNCTION(birdstep_close)
 {
-	long id;
+	zend_long id;
 	VConn *conn;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &id) == FAILURE) {
@@ -346,8 +346,8 @@ PHP_FUNCTION(birdstep_close)
 PHP_FUNCTION(birdstep_exec)
 {
 	char *query;
-	long ind;
-	int query_len, indx;
+	zend_long ind;
+	size_t query_len, indx;
 	VConn *conn;
 	Vresult *res;
 	RETCODE stat;
@@ -426,7 +426,7 @@ PHP_FUNCTION(birdstep_exec)
  */
 PHP_FUNCTION(birdstep_fetch)
 {
-	long ind;
+	zend_long ind;
 	Vresult *res;
 	RETCODE stat;
 	UDWORD  row;
@@ -460,7 +460,7 @@ PHP_FUNCTION(birdstep_fetch)
 PHP_FUNCTION(birdstep_result)
 {
 	zval **col;
-	long ind;
+	zend_long ind;
 	Vresult *res;
 	RETCODE stat;
 	int i,sql_c_type;
@@ -539,7 +539,7 @@ l1:
 			if ( res->values[indx].valtype == SQL_LONGVARCHAR ) {
 				RETURN_STRING(res->values[indx].value,TRUE);
 			} else {
-				RETURN_LONG((long)res->values[indx].value);
+				RETURN_LONG((zend_long)res->values[indx].value);
 			}
 		default:
 			if ( res->values[indx].value != NULL ) {
@@ -553,7 +553,7 @@ l1:
  */
 PHP_FUNCTION(birdstep_freeresult)
 {
-	long ind;
+	zend_long ind;
 	Vresult *res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {
@@ -572,7 +572,7 @@ PHP_FUNCTION(birdstep_freeresult)
  */
 PHP_FUNCTION(birdstep_autocommit)
 {
-	long id;
+	zend_long id;
 	RETCODE stat;
 	VConn *conn;
 
@@ -595,7 +595,7 @@ PHP_FUNCTION(birdstep_autocommit)
  */
 PHP_FUNCTION(birdstep_off_autocommit)
 {
-	long id;
+	zend_long id;
 	RETCODE stat;
 	VConn *conn;
 
@@ -618,7 +618,7 @@ PHP_FUNCTION(birdstep_off_autocommit)
  */
 PHP_FUNCTION(birdstep_commit)
 {
-	long id;
+zend_long
 	RETCODE stat;
 	VConn *conn;
 
@@ -641,7 +641,7 @@ PHP_FUNCTION(birdstep_commit)
  */
 PHP_FUNCTION(birdstep_rollback)
 {
-	long id;
+	zend_long id;
 	RETCODE stat;
 	VConn *conn;
 
@@ -664,7 +664,7 @@ PHP_FUNCTION(birdstep_rollback)
  */
 PHP_FUNCTION(birdstep_fieldname)
 {
-	long ind, col;
+	zend_long ind, col;
 	Vresult *res;
 	SWORD indx;
 
@@ -687,7 +687,7 @@ PHP_FUNCTION(birdstep_fieldname)
  */
 PHP_FUNCTION(birdstep_fieldnum)
 {
-	long ind;
+	zend_long ind;
 	Vresult *res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ind) == FAILURE) {

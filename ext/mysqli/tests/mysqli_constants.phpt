@@ -108,6 +108,10 @@ require_once('skipifconnectfailure.inc');
 		$expected_constants['MYSQLI_OPT_INT_AND_FLOAT_NATIVE'] = true;
 	}
 
+	if ($IS_MYSQLND && defined('MYSQLI_STORE_RESULT_COPY_DATA')) {
+		$expected_constants['MYSQLI_STORE_RESULT_COPY_DATA'] = true;
+	}
+
 	if ($IS_MYSQLND || defined('MYSQLI_REFRESH_BACKUP_LOG')) {
 		$expected_constants['MYSQLI_REFRESH_BACKUP_LOG'] = true;
 	}
@@ -192,6 +196,7 @@ require_once('skipifconnectfailure.inc');
 	if (($IS_MYSQLND && version_compare(PHP_VERSION, ' 5.4.12-dev', '>=')) || (!$IS_MYSQLND && ($version > 50610))) {
 		/* could be that MySQL/libmysql 5.6.9 had the flag already but it was no stable release */
 		$expected_constants["MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
+		$expected_constants["MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
 	}
 
 	$unexpected_constants = array();

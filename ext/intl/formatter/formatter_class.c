@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,61 +35,51 @@ static zend_object_handlers NumberFormatter_handlers;
 
 /* {{{ NumberFormatter_objects_dtor */
 static void NumberFormatter_object_dtor(
-	void *object,
-	zend_object_handle handle TSRMLS_DC )
+	zend_object *object
+	TSRMLS_DC )
 {
-	zend_objects_destroy_object( object, handle TSRMLS_CC );
+	zend_objects_destroy_object( object TSRMLS_CC );
 }
 /* }}} */
 
 /* {{{ NumberFormatter_objects_free */
 void NumberFormatter_object_free( zend_object *object TSRMLS_DC )
 {
-	NumberFormatter_object* nfo = (NumberFormatter_object*)object;
+	NumberFormatter_object* nfo = php_intl_number_format_fetch_object(object);
 
 	zend_object_std_dtor( &nfo->zo TSRMLS_CC );
 
 	formatter_data_free( &nfo->nf_data TSRMLS_CC );
-
-	efree( nfo );
 }
 /* }}} */
 
 /* {{{ NumberFormatter_object_create */
-zend_object_value NumberFormatter_object_create(zend_class_entry *ce TSRMLS_DC)
+zend_object *NumberFormatter_object_create(zend_class_entry *ce TSRMLS_DC)
 {
-	zend_object_value    retval;
 	NumberFormatter_object*     intern;
 
-	intern = ecalloc( 1, sizeof(NumberFormatter_object) );
+	intern = ecalloc( 1, sizeof(NumberFormatter_object) + sizeof(zval) * (ce->default_properties_count - 1) );
 	formatter_data_init( &intern->nf_data TSRMLS_CC );
 	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
 	object_properties_init(&intern->zo, ce);
 
-	retval.handle = zend_objects_store_put(
-		intern,
-		NumberFormatter_object_dtor,
-		(zend_objects_free_object_storage_t)NumberFormatter_object_free,
-		NULL TSRMLS_CC );
+	intern->zo.handlers = &NumberFormatter_handlers;
 
-	retval.handlers = &NumberFormatter_handlers;
-
-	return retval;
+	return &intern->zo;
 }
 /* }}} */
 
 /* {{{ NumberFormatter_object_clone */
-zend_object_value NumberFormatter_object_clone(zval *object TSRMLS_DC)
+zend_object *NumberFormatter_object_clone(zval *object TSRMLS_DC)
 {
-	zend_object_value new_obj_val;
-	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
 	NumberFormatter_object *nfo, *new_nfo;
+	zend_object *new_obj;
 
 	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
-	new_obj_val = NumberFormatter_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
-	new_nfo = (NumberFormatter_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
+	new_obj = NumberFormatter_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
+	new_nfo = php_intl_number_format_fetch_object(new_obj);
 	/* clone standard parts */	
-	zend_objects_clone_members(&new_nfo->zo, new_obj_val, &nfo->zo, handle TSRMLS_CC);
+	zend_objects_clone_members(&new_nfo->zo, &nfo->zo TSRMLS_CC);
 	/* clone formatter object. It may fail, the destruction code must handle this case */
 	if (FORMATTER_OBJECT(nfo) != NULL) {
 		FORMATTER_OBJECT(new_nfo) = unum_clone(FORMATTER_OBJECT(nfo),
@@ -103,7 +93,7 @@ zend_object_value NumberFormatter_object_clone(zval *object TSRMLS_DC)
 	} else {
 		zend_throw_exception(NULL, "Cannot clone unconstructed NumberFormatter", 0 TSRMLS_CC);
 	}
-	return new_obj_val;
+	return new_obj;
 }
 /* }}} */
 
@@ -205,7 +195,10 @@ void formatter_register_class( TSRMLS_D )
 
 	memcpy(&NumberFormatter_handlers, zend_get_std_object_handlers(),
 		sizeof(NumberFormatter_handlers));
+	NumberFormatter_handlers.offset = XtOffsetOf(NumberFormatter_object, zo);
 	NumberFormatter_handlers.clone_obj = NumberFormatter_object_clone;
+	NumberFormatter_handlers.dtor_obj = NumberFormatter_object_dtor;
+	NumberFormatter_handlers.free_obj = NumberFormatter_object_free;
 
 	/* Declare 'NumberFormatter' class properties. */
 	if( !NumberFormatter_ce_ptr )
