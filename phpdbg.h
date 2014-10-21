@@ -114,9 +114,6 @@
 #include "phpdbg_watch.h"
 #ifdef PHP_WIN32
 # include "phpdbg_sigio_win32.h"
-#else
-# define sigio_watcher_start()
-# define sigio_watcher_stop()
 #endif
 
 int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
@@ -289,6 +286,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HANDLE sigio_watcher_thread;                  /* sigio watcher thread handle */
 	struct win32_sigio_watcher_data swd;
 #endif
+	char *eol;
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 #endif

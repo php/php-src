@@ -83,6 +83,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(wait,    "wait for other process",                   'W', NULL, 0, 0),
 	PHPDBG_COMMAND_D(watch,   "set watchpoint",                           'w', phpdbg_watch_commands, "|ss", 0),
+	//PHPDBG_COMMAND_D(eol,     "set eol",                                  'E', NULL, "|s", 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
 
@@ -579,8 +580,6 @@ PHPDBG_COMMAND(run) /* {{{ */
 		zend_bool restore = 1;
 		zend_execute_data *ex = EG(current_execute_data);
 
-		sigio_watcher_start();
-
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
 				phpdbg_error("compile", "type=\"compilefailure\" context=\"%s\"", "Failed to compile %s, cannot run", PHPDBG_G(exec));
@@ -637,7 +636,6 @@ PHPDBG_COMMAND(run) /* {{{ */
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
 			phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
-			sigio_watcher_stop();
 		} zend_catch {
 			EG(active_op_array) = orig_op_array;
 			EG(opline_ptr) = orig_opline;
@@ -647,7 +645,6 @@ PHPDBG_COMMAND(run) /* {{{ */
 				phpdbg_error("stop", "type=\"bailout\"", "Caught exit/error from VM");
 				restore = 0;
 			}
-			sigio_watcher_stop();
 		} zend_end_try();
 
 		if (PHPDBG_G(socket_fd) != -1) {
@@ -669,7 +666,6 @@ PHPDBG_COMMAND(run) /* {{{ */
 	}
 
 out:
-	sigio_watcher_stop();
 	PHPDBG_FRAME(num) = 0;
 	return SUCCESS;
 } /* }}} */
@@ -1208,6 +1204,11 @@ int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC) /* {{{ */
 			if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
 				phpdbg_activate_err_buf(1 TSRMLS_CC);
 
+#ifdef PHP_WIN32
+				if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
+					sigio_watcher_start();
+				}
+#endif
 				switch (ret = phpdbg_stack_execute(&stack, allow_async_unsafe TSRMLS_CC)) {
 					case FAILURE:
 						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
@@ -1232,6 +1233,11 @@ int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC) /* {{{ */
 
 				phpdbg_activate_err_buf(0 TSRMLS_CC);
 				phpdbg_free_err_buf(TSRMLS_C);
+#ifdef PHP_WIN32
+				if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
+					sigio_watcher_stop();
+				}
+#endif
 			}
 
 			phpdbg_stack_free(&stack);
