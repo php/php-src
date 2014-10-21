@@ -12,12 +12,13 @@ class Foo {
 }
 
 class Bar extends Foo {
-    public function read() {
-        return $this->bar;
+    public function read(Foo $x) {
+        return $x->bar;
     }
 }
 
-$x = new Bar;
-var_dump($x->read());
+$x = new Foo;
+$y = new Bar;
+var_dump($y->read($x));
 --EXPECTF--
 string(10) "elePHPants"
