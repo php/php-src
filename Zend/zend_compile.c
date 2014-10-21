@@ -4208,6 +4208,14 @@ void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
 	}
 
+	if (flags & ZEND_ACC_READONLY && flags & ZEND_ACC_PRIVATE) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be both readonly and private");
+	}
+
+	if (flags & ZEND_ACC_READONLY && flags & ZEND_ACC_STATIC) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Static properties cannot be readonly");
+	}
+
 	/* Doc comment has been appended as last element in property list */
 	if (list->child[children - 1]->kind == ZEND_AST_ZVAL) {
 		doc_comment = zend_string_copy(zend_ast_get_str(list->child[children - 1]));

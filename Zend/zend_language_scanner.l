@@ -1316,6 +1316,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_PUBLIC;
 }
 
+<ST_IN_SCRIPTING>"readonly" {
+	return T_READONLY;
+}
+
 <ST_IN_SCRIPTING>"unset" {
 	return T_UNSET;
 }
