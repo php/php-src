@@ -83,7 +83,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0, PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(wait,    "wait for other process",                   'W', NULL, 0, 0),
 	PHPDBG_COMMAND_D(watch,   "set watchpoint",                           'w', phpdbg_watch_commands, "|ss", 0),
-	//PHPDBG_COMMAND_D(eol,     "set eol",                                  'E', NULL, "|s", 0),
+	PHPDBG_COMMAND_D(eol,     "set eol",                                  'E', NULL, "|s", 0),
 	PHPDBG_END_COMMAND
 }; /* }}} */
 
@@ -1563,3 +1563,26 @@ next:
 		zend_bailout();
 	}
 }
+
+PHPDBG_COMMAND(eol) /* {{{ */
+{
+	if (!param || param->type == EMPTY_PARAM) {
+		//phpdbg_notice("eol", "variable=\"%.*s\"", "Set watchpoint on %.*s", (int) param->len, param->str);
+		phpdbg_notice("eol", "argument required, supported crlf, lfcr, lf, cr", "argument required, supported crlf, lfcr, lf, cr");
+	} else switch (param->type) {
+		case STR_PARAM:
+			if (0 == strcmp(param->str, "CRLF", 4) || 0 == strcmp(param->str, "crlf", 4)) {
+				PHPDBG_G(eol) = "\r\n";
+			} else if (0 == strcmp(param->str, "LF", 2) || 0 == strcmp(param->str, "lf", 4)) {
+				PHPDBG_G(eol) = "\n";
+			} else if (0 == strcmp(param->str, "CR", 2) || 0 == strcmp(param->str, "cr", 4)) {
+				PHPDBG_G(eol) = "\r";
+			} else if (0 == strcmp(param->str, "LFCR", 4) || 0 == strcmp(param->str, "lfcr", 4)) {
+				PHPDBG_G(eol) = "\n\r";
+			}
+			break;
+
+		phpdbg_default_switch_case();
+	}
+} /* }}} */
+
