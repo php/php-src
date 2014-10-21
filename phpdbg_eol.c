@@ -86,6 +86,7 @@ phpdbg_eol_rep(int8_t id)
 }
 
 
+/* Inspired by https://ccrma.stanford.edu/~craig/utility/flip/flip.cpp */
 void
 phpdbg_eol_convert(char **str, int *len TSRMLS_DC)
 {
