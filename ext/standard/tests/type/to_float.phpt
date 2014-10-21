@@ -8,6 +8,7 @@ var_dump(to_float("0"));
 var_dump(to_float(0));
 var_dump(to_float(0.0));
 var_dump(to_float("10"));
+var_dump(to_float("010"));
 var_dump(to_float("10.0"));
 var_dump(to_float(10));
 var_dump(to_float(10.0));
@@ -21,6 +22,7 @@ var_dump(to_float((float)PHP_INT_MIN));
 echo PHP_EOL;
 
 // disallowed types
+var_dump(to_float("0x10"));
 var_dump(to_float(NULL));
 var_dump(to_float(TRUE));
 var_dump(to_float(FALSE));
@@ -51,6 +53,8 @@ var_dump(to_float(-INF));
 var_dump(to_float(NAN));
 var_dump(to_float(PHP_INT_MAX * 2));
 var_dump(to_float(PHP_INT_MIN * 2));
+var_dump(to_float((string)(PHP_INT_MAX * 2)));
+var_dump(to_float((string)(PHP_INT_MIN * 2)));
 
 echo PHP_EOL;
 
@@ -65,6 +69,7 @@ float(10)
 float(10)
 float(10)
 float(10)
+float(10)
 float(%s)
 float(%s)
 float(%s)
@@ -72,6 +77,7 @@ float(-%s)
 float(-%s)
 float(%s)
 
+bool(false)
 bool(false)
 bool(false)
 bool(false)
@@ -92,6 +98,8 @@ bool(false)
 float(INF)
 float(-INF)
 float(NAN)
+float(%s)
+float(%s)
 float(%s)
 float(%s)
 
