@@ -286,7 +286,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HANDLE sigio_watcher_thread;                  /* sigio watcher thread handle */
 	struct win32_sigio_watcher_data swd;
 #endif
-	char *eol;
+	int8_t eol;
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 #endif

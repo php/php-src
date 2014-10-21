@@ -30,6 +30,7 @@
 #include "phpdbg_set.h"
 #include "phpdbg_io.h"
 #include "zend_alloc.h"
+#include "phpdbg_eol.h"
 
 /* {{{ remote console headers */
 #ifndef _WIN32
@@ -51,24 +52,12 @@ static PHP_INI_MH(OnUpdateEol)
 		return FAILURE;
 	}
 
-	if (0 == strcmp(new_value, "CRLF", 4) || 0 == strcmp(new_value, "crlf", 4)) {
-		PHPDBG_G(eol) = "\r\n";
-	} else if (0 == strcmp(new_value, "LF", 2) || 0 == strcmp(new_value, "lf", 4)) {
-		PHPDBG_G(eol) = "\n";
-	} else if (0 == strcmp(new_value, "CR", 2) || 0 == strcmp(new_value, "cr", 4)) {
-		PHPDBG_G(eol) = "\r";
-	} else if (0 == strcmp(new_value, "LFCR", 4) || 0 == strcmp(new_value, "lfcr", 4)) {
-		PHPDBG_G(eol) = "\n\r";
-	} else {
-		return FAILURE;
-	}
-
-	return SUCCESS;
+	return phpdbg_update_eol_global(new_value TSRMLS_CC);
 }
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("phpdbg.path", "", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateString, socket_path, zend_phpdbg_globals, phpdbg_globals)
-	STD_PHP_INI_ENTRY("phpdbg.eol", "lf", PHP_INI_ALL, OnUpdateEol, socket_path, zend_phpdbg_globals, phpdbg_globals)
+	STD_PHP_INI_ENTRY("phpdbg.eol", "2", PHP_INI_ALL, OnUpdateEol, socket_path, zend_phpdbg_globals, phpdbg_globals)
 PHP_INI_END()
 
 static zend_bool phpdbg_booted = 0;
@@ -116,7 +105,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 	memset(&pg->swd, 0, sizeof(struct win32_sigio_watcher_data));
 #endif
 
-	pg->eol = "\n";
+	pg->eol = PHPDBG_EOL_LF;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
