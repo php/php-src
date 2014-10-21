@@ -2281,8 +2281,6 @@ void zend_compile_assign(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 			opline->opcode = ZEND_ASSIGN_DIM;
 
 			opline = zend_emit_op_data(&expr_node TSRMLS_CC);
-			opline->op2.var = get_temporary_variable(CG(active_op_array));
-			opline->op2_type = IS_VAR;
 			return;
 		case ZEND_AST_PROP:
 			offset = zend_delayed_compile_begin(TSRMLS_C);
@@ -2374,8 +2372,6 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast TSRMLS_DC) /* {{{
 			opline->extended_value = ZEND_ASSIGN_DIM;
 
 			opline = zend_emit_op_data(&expr_node TSRMLS_CC);
-			opline->op2.var = get_temporary_variable(CG(active_op_array));
-			opline->op2_type = IS_VAR;
 			return;
 		case ZEND_AST_PROP:
 			offset = zend_delayed_compile_begin(TSRMLS_C);
