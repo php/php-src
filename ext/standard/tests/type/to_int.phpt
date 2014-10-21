@@ -8,6 +8,7 @@ var_dump(to_int("0"));
 var_dump(to_int(0));
 var_dump(to_int(0.0));
 var_dump(to_int("10"));
+var_dump(to_int("010"));
 var_dump(to_int(10));
 var_dump(to_int(10.0));
 var_dump(to_int((string)PHP_INT_MAX));
@@ -21,6 +22,7 @@ echo PHP_EOL;
 var_dump(to_int("10.0"));
 var_dump(to_int("75e-5"));
 var_dump(to_int("31e+7"));
+var_dump(to_int("0x10"));
 
 echo PHP_EOL;
 
@@ -56,6 +58,8 @@ var_dump(to_int(-INF));
 var_dump(to_int(NAN));
 var_dump(to_int(PHP_INT_MAX * 2));
 var_dump(to_int(PHP_INT_MIN * 2));
+var_dump(to_int((string)(PHP_INT_MAX * 2)));
+var_dump(to_int((string)(PHP_INT_MIN * 2)));
 --EXPECTF--
 int(0)
 int(0)
@@ -63,6 +67,7 @@ int(0)
 int(10)
 int(10)
 int(10)
+int(10)
 int(%d)
 int(%d)
 int(-%d)
@@ -71,6 +76,17 @@ int(-%d)
 bool(false)
 bool(false)
 bool(false)
+bool(false)
+
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
+
+bool(false)
+bool(false)
 
 bool(false)
 bool(false)
@@ -81,14 +97,6 @@ bool(false)
 
 bool(false)
 bool(false)
-
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-
 bool(false)
 bool(false)
 bool(false)
