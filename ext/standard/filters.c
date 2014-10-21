@@ -1265,7 +1265,7 @@ static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, zend_ulong
 		zval tmp;
 
 		if (Z_TYPE_P(tmpval) != IS_LONG) {
-			ZVAL_DUP(&tmp, tmpval);;
+			ZVAL_DUP(&tmp, tmpval);
 			convert_to_long(&tmp);
 			tmpval = &tmp;
 		}
