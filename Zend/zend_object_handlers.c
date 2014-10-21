@@ -362,7 +362,11 @@ exit_dynamic:
 	} else if (UNEXPECTED(property_info == ZEND_WRONG_PROPERTY_INFO)) {
 		/* Information was available, but we were denied access.  Error out. */
 		if (!silent) {
-			zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(flags), ce->name->val, member->val);
+			if (flags & ZEND_ACC_READONLY && write) {
+				zend_error_noreturn(E_ERROR, "Cannot write to readonly %s property %s::$%s", zend_visibility_string(flags), ce->name->val, member->val);
+			} else {
+				zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(flags), ce->name->val, member->val);
+			}
 		}
 		if (cache_slot) {
 			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, ZEND_WRONG_PROPERTY_INFO);
