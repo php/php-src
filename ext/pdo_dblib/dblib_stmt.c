@@ -255,12 +255,11 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 			break;
 		}
 		case SQLUNIQUE: {
-			*len = 36+1;
+			*len = 37;
 			tmp_ptr = emalloc(*len + 1);
-
-			/* uniqueidentifier is a 16-byte binary number, convert to 32 char hex string */
 			*len = dbconvert(NULL, SQLUNIQUE, *ptr, *len, SQLCHAR, tmp_ptr, *len);
 			php_strtoupper(tmp_ptr, *len);
+			tmp_ptr[36] = '\0';
 			*ptr = tmp_ptr;
 			break;
 		}
