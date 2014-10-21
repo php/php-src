@@ -1574,7 +1574,7 @@ PHPDBG_COMMAND(eol) /* {{{ */
 	} else switch (param->type) {
 		case STR_PARAM:
 			if (FAILURE == phpdbg_eol_global_update(param->str TSRMLS_CC)) {
-				phpdbg_notice("eol", "unknown EOL name '%s', give crlf, lfcr, lf, cr", "unknown EOL name '%s', give  crlf, lfcr, lf, cr", param->str);
+				phpdbg_notice("eol", "unknown EOL name '%s', give crlf, lf, cr", "unknown EOL name '%s', give  crlf, lf, cr", param->str);
 			}
 			break;
 

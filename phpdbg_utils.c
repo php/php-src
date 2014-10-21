@@ -28,6 +28,7 @@
 #include "phpdbg_opcode.h"
 #include "phpdbg_io.h"
 #include "phpdbg_utils.h"
+#include "phpdbg_eol.h"
 #include "ext/standard/html.h"
 
 #ifdef _WIN32
