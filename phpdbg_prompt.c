@@ -39,6 +39,7 @@
 #include "phpdbg_lexer.h"
 #include "phpdbg_parser.h"
 #include "phpdbg_wait.h"
+#include "phpdbg_eol.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -1205,7 +1206,8 @@ int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC) /* {{{ */
 				phpdbg_activate_err_buf(1 TSRMLS_CC);
 
 #ifdef PHP_WIN32
-				if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
+#define PARA ((phpdbg_param_t *)stack.next)->type
+				if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE && (RUN_PARAM == PARA || EVAL_PARAM == PARA)) {
 					sigio_watcher_start();
 				}
 #endif
@@ -1234,9 +1236,10 @@ int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC) /* {{{ */
 				phpdbg_activate_err_buf(0 TSRMLS_CC);
 				phpdbg_free_err_buf(TSRMLS_C);
 #ifdef PHP_WIN32
-				if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
+				if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE && (RUN_PARAM == PARA || EVAL_PARAM == PARA)) {
 					sigio_watcher_stop();
 				}
+#undef PARA
 #endif
 			}
 
@@ -1577,5 +1580,7 @@ PHPDBG_COMMAND(eol) /* {{{ */
 
 		phpdbg_default_switch_case();
 	}
+
+	return SUCCESS;
 } /* }}} */
 
