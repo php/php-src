@@ -1269,9 +1269,11 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 		}
 
 		phpdbg_encode_ctrl_chars(&xmlout, &xmloutlen);
+		phpdbg_eol_convert(&xmlout, &xmloutlen TSRMLS_CC);
 		phpdbg_mixed_write(fd, xmlout, xmloutlen TSRMLS_CC);
 		efree(xmlout);
 	} else if (msgout) {
+		phpdbg_eol_convert(&msgout, &msgoutlen TSRMLS_CC);
 		phpdbg_mixed_write(fd, msgout, msgoutlen TSRMLS_CC);
 	}
 
@@ -1443,6 +1445,7 @@ PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 
 		msglen = phpdbg_encode_xml(&msg, buffer, buflen, 256, NULL);
 		phpdbg_encode_ctrl_chars(&msg, &msglen);
+		phpdbg_eol_convert(&msg, &msglen TSRMLS_CC);
 
 		if (PHPDBG_G(in_script_xml)) {
 			phpdbg_mixed_write(fd, ZEND_STRL("</stream>") TSRMLS_CC);
@@ -1453,6 +1456,7 @@ PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 		len = phpdbg_mixed_write(fd, msg, msglen TSRMLS_CC);
 		phpdbg_mixed_write(fd, ZEND_STRL("</phpdbg>") TSRMLS_CC);
 	} else {
+		phpdbg_eol_convert(&buffer, &buflen TSRMLS_CC);
 		len = phpdbg_mixed_write(fd, buffer, buflen TSRMLS_CC);
 	}
 

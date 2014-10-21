@@ -52,7 +52,7 @@ static PHP_INI_MH(OnUpdateEol)
 		return FAILURE;
 	}
 
-	return phpdbg_update_eol_global(new_value TSRMLS_CC);
+	return phpdbg_eol_global_update(new_value TSRMLS_CC);
 }
 
 PHP_INI_BEGIN()

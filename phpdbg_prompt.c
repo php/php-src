@@ -1570,10 +1570,10 @@ next:
 PHPDBG_COMMAND(eol) /* {{{ */
 {
 	if (!param || param->type == EMPTY_PARAM) {
-		phpdbg_notice("eol", "argument required, supported crlf, lfcr, lf, cr", "argument required, supported crlf, lfcr, lf, cr");
+		phpdbg_notice("eol", "argument required", "argument required");
 	} else switch (param->type) {
 		case STR_PARAM:
-			if (FAILURE == phpdbg_update_eol_global(param->str TSRMLS_CC)) {
+			if (FAILURE == phpdbg_eol_global_update(param->str TSRMLS_CC)) {
 				phpdbg_notice("eol", "unknown EOL name '%s', give crlf, lfcr, lf, cr", "unknown EOL name '%s', give  crlf, lfcr, lf, cr", param->str);
 			}
 			break;

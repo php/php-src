@@ -22,6 +22,7 @@
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 #include "phpdbg_prompt.h"
+#include "phpdbg_eol.h"
 #include "zend.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
