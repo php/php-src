@@ -33,8 +33,10 @@ SigIoWatcherThread(VOID *p)
 	struct win32_sigio_watcher_data *swd = (struct win32_sigio_watcher_data *)p;
 #ifdef ZTS
 	void ***tsrm_ls = swd->tsrm_ls;
+top:
 	(void)phpdbg_consume_bytes(swd->fd, &sig, 1, -1, tsrm_ls);
 #else
+top:
 	(void)phpdbg_consume_bytes(swd->fd, &sig, 1, -1);
 #endif
 
@@ -57,6 +59,8 @@ SigIoWatcherThread(VOID *p)
 		}
 		/* XXX set signaled flag to the caller thread, question is - whether it's needed */
 		ExitThread(sig);
+	} else {
+		goto top;
 	}
 }
 
