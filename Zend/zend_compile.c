@@ -4130,6 +4130,10 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	zend_op_array *orig_op_array = CG(active_op_array);
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 
+	if (decl->flags & ZEND_ACC_READONLY) {
+		zend_error_noreturn(E_COMPILE_ERROR, "A method cannot be readonly");
+	}
+
 	// TODO.AST interactive (not just here - also bpc etc!)
 	
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);

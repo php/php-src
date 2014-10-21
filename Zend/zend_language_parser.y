@@ -676,7 +676,6 @@ method_body:
 variable_modifiers:
 		non_empty_member_modifiers				{ $$ = $1; }
 	|	T_VAR									{ $$ = ZEND_ACC_PUBLIC; }
-	|	T_READONLY non_empty_member_modifiers	{ $$ = $2 | ZEND_ACC_READONLY; }
 ;
 
 method_modifiers:
@@ -698,6 +697,7 @@ member_modifier:
 	|	T_STATIC				{ $$ = ZEND_ACC_STATIC; }
 	|	T_ABSTRACT				{ $$ = ZEND_ACC_ABSTRACT; }
 	|	T_FINAL					{ $$ = ZEND_ACC_FINAL; }
+	|	T_READONLY				{ $$ = ZEND_ACC_READONLY; }
 ;
 
 property_list:
