@@ -1,9 +1,9 @@
 --TEST--
-testing hashKey returns null
+testing hash returns null
 --FILE--
 <?php
 class Foo {
-    public function __hashKey() {
+    public function __hash() {
         return null;
     }
 }

@@ -4437,7 +4437,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -4455,7 +4455,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -6015,7 +6015,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -6033,7 +6033,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -7232,7 +7232,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -7250,7 +7250,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -8371,7 +8371,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -8389,7 +8389,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -9532,7 +9532,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -9550,7 +9550,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -10194,7 +10194,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -10212,7 +10212,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -10700,7 +10700,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -10718,7 +10718,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -11177,7 +11177,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -11195,7 +11195,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -13794,7 +13794,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -13812,7 +13812,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -15238,7 +15238,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -15256,7 +15256,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -16735,7 +16735,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -16753,7 +16753,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -18222,7 +18222,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -18240,7 +18240,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -26513,7 +26513,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -26531,7 +26531,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -28730,7 +28730,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -28748,7 +28748,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -30695,7 +30695,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -30713,7 +30713,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);
@@ -32697,7 +32697,7 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
-		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hash) {
 		        zend_fcall_info fci;
 		        zend_fcall_info_cache fcc;
 		        zval result;
@@ -32715,7 +32715,7 @@ str_index:
 
 		        fcc.initialized = 1;
 		        fcc.function_handler =
-		            Z_OBJCE_P(offset)->__hashKey;
+		            Z_OBJCE_P(offset)->__hash;
 		        fcc.calling_scope = EG(scope);
 		        fcc.called_scope = Z_OBJCE_P(offset);
 		        fcc.object = Z_OBJ_P(offset);

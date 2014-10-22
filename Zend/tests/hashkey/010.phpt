@@ -1,9 +1,9 @@
 --TEST--
-testing hashKey returns resource
+testing hash returns resource
 --FILE--
 <?php
 class Foo {
-    public function __hashKey() {
+    public function __hash() {
         return fopen("php://stdin", "r");
     }
 }

@@ -1,9 +1,9 @@
 --TEST--
-testing hashKey returns array
+testing hash returns array
 --FILE--
 <?php
 class Foo {
-    public function __hashKey() {
+    public function __hash() {
         return [];
     }
 }
