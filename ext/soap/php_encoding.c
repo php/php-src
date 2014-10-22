@@ -3134,11 +3134,9 @@ static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodeP
 	if (Z_TYPE_P(data) == IS_STRING) {
 		ret = xmlNewTextLen(BAD_CAST(Z_STRVAL_P(data)), Z_STRLEN_P(data));
 	} else {
-		zval tmp;
-
-		ZVAL_STR(&tmp, zval_get_string(data));
-		ret = xmlNewTextLen(BAD_CAST(Z_STRVAL(tmp)), Z_STRLEN(tmp));
-		zval_dtor(&tmp);
+		zend_string *tmp = zval_get_string(data);
+		ret = xmlNewTextLen(BAD_CAST(tmp->val), tmp->len);
+		zend_string_release(tmp);
 	}
 
 	ret->name = xmlStringTextNoenc;

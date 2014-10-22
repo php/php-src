@@ -1672,18 +1672,11 @@ static int php_needle_char(zval *needle, char *target TSRMLS_DC)
 			*target = (char)(int)Z_DVAL_P(needle);
 			return SUCCESS;
 		case IS_OBJECT:
-			{
-				zval holder;
-			   
-				ZVAL_LONG(&holder, zval_get_long(needle));
-
-				*target = (char)Z_LVAL(holder);
-				return SUCCESS;
-			}
-		default: {
+			*target = (char) zval_get_long(needle);
+			return SUCCESS;
+		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "needle is not a string or an integer");
 			return FAILURE;
-		 }
 	}
 }
 /* }}} */
