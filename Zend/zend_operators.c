@@ -2757,7 +2757,7 @@ static int hash_zval_identical_function(zval *z1, zval *z2 TSRMLS_DC) /* {{{ */
 
 ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
+	if (Z_TYPE_P(op1) != Z_TYPE_P(op2) && !UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT && Z_TYPE_P(op2) == IS_LONG) && !UNEXPECTED(Z_TYPE_P(op1) == IS_LONG && Z_TYPE_P(op2) == IS_BIGINT)) {
 		ZVAL_BOOL(result, 0);
 		return SUCCESS;
 	}
@@ -2768,13 +2768,21 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			ZVAL_BOOL(result, 1);
 			break;
 		case IS_LONG:
-			ZVAL_BOOL(result, Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			if (!UNEXPECTED(Z_TYPE_P(op2) == IS_BIGINT)) {
+				ZVAL_BOOL(result, Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			} else {
+				ZVAL_BOOL(result, !zend_bigint_cmp_long(Z_BIG_P(op2), Z_LVAL_P(op1)));
+			}
 			break;
 		case IS_BIGINT:
-			if (Z_BIG_P(op1) == Z_BIG_P(op2)) {
-				ZVAL_BOOL(result, 1);
+			if (!UNEXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+				if (Z_BIG_P(op1) == Z_BIG_P(op2)) {
+					ZVAL_BOOL(result, 1);
+				} else {
+					ZVAL_BOOL(result, !zend_bigint_cmp(Z_BIG_P(op1), Z_BIG_P(op2)));
+				}
 			} else {
-				ZVAL_BOOL(result, !zend_bigint_cmp(Z_BIG_P(op1), Z_BIG_P(op2)));
+				ZVAL_BOOL(result, !zend_bigint_cmp_long(Z_BIG_P(op1), Z_LVAL_P(op2)));
 			}
 			break;
 		case IS_RESOURCE:
