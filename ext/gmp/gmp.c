@@ -1792,7 +1792,7 @@ ZEND_FUNCTION(gmp_random)
    Gets a random number in the range 0 to (2 ** n) - 1 */
 ZEND_FUNCTION(gmp_random_bits)
 {
-	long bits;
+	zend_long bits;
 	mpz_ptr gmpnum_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &bits) == FAILURE) {
