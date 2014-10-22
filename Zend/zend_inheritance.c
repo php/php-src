@@ -607,6 +607,10 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 			ZVAL_UNDEF(&ce->default_properties_table[child_info->offset]);
 			child_info->offset = parent_info->offset;
 		}
+
+		if ((child_info->flags & ZEND_ACC_READONLY) && !(parent_info->flags & ZEND_ACC_READONLY)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "%s::$%s cannot be readonly as parent in class %s is not readonly", ce->name->val, key->val, parent_ce->name->val);
+		}
 		return 0;	/* Don't copy from parent */
 	} else {
 		return 1;	/* Copy from parent */
@@ -1411,8 +1415,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
 				} else {
-					if ((coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
-						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
+					if ((coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY))
+						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY))) {
 						/* flags are identical, now the value needs to be checked */
 						if (flags & ZEND_ACC_STATIC) {
 							not_compatible = (FAILURE == compare_function(&compare_result,
