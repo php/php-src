@@ -1227,7 +1227,11 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 						efree(stream_buf);
 						PHPDBG_G(in_script_xml) = type;
 					}
+#if PHP_VERSION_ID >= 50600
 					buf = php_escape_html_entities((unsigned char *) msg, msglen, (size_t *) &buflen, 0, ENT_NOQUOTES, PG(internal_encoding) && PG(internal_encoding)[0] ? PG(internal_encoding) : (SG(default_charset) ? SG(default_charset) : "UTF-8") TSRMLS_CC);
+#else
+					buf = php_escape_html_entities((unsigned char *) msg, msglen, (size_t *) &buflen, 0, ENT_NOQUOTES, SG(default_charset) ? SG(default_charset) : "UTF-8" TSRMLS_CC);
+#endif
 					phpdbg_encode_ctrl_chars(&buf, &buflen);
 					phpdbg_mixed_write(fd, buf, buflen TSRMLS_CC);
 					efree(buf);

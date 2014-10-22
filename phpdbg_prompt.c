@@ -557,7 +557,7 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 
 		zval_ptr_dtor(&trace);
 	} else {
-		phpdbg_error("exception", "name=\"%s\"" "Uncaught %s!", Z_OBJCE(exception)->name);
+		phpdbg_error("exception", "name=\"%s\"", "Uncaught %s!", Z_OBJCE(exception)->name);
 	}
 
 	/* output useful information about address */
