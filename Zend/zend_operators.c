@@ -1280,11 +1280,10 @@ ZEND_API int bitwise_not_function(zval *result, zval *op1 TSRMLS_DC) /* {{{ */
 			return SUCCESS;
 		case IS_STRING: {
 			size_t i;
-			zval op1_copy = *op1;
 
-			ZVAL_NEW_STR(result, zend_string_alloc(Z_STRLEN(op1_copy), 0));
-			for (i = 0; i < Z_STRLEN(op1_copy); i++) {
-				Z_STRVAL_P(result)[i] = ~Z_STRVAL(op1_copy)[i];
+			ZVAL_NEW_STR(result, zend_string_alloc(Z_STRLEN_P(op1), 0));
+			for (i = 0; i < Z_STRLEN_P(op1); i++) {
+				Z_STRVAL_P(result)[i] = ~Z_STRVAL_P(op1)[i];
 			}
 			Z_STRVAL_P(result)[i] = 0;
 			return SUCCESS;
