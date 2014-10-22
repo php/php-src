@@ -2314,7 +2314,7 @@ PHP_FUNCTION(array_slice)
 	}
 
 	/* Initialize returned array */
-	array_init_size(return_value, length > 0 ? (uint)length : 0);
+	array_init_size(return_value, length > 0 ? (uint32_t)length : 0);
 
 	if (length <= 0) {
 		return;
