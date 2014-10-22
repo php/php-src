@@ -728,7 +728,7 @@ static int php_array_user_key_compare(const void *a, const void *b TSRMLS_DC) /*
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&args[1]);
 
-	return result;
+	return result < 0 ? -1 : result > 0 ? 1 : 0;
 }
 /* }}} */
 
@@ -1387,7 +1387,7 @@ PHP_FUNCTION(extract)
 
 	if (prefix) {
 		convert_to_string(prefix);
-		if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), Z_STRLEN_P(prefix))) {
+		if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), (int)Z_STRLEN_P(prefix))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid identifier");
 			return;
 		}
@@ -1408,7 +1408,7 @@ PHP_FUNCTION(extract)
 
 			ZVAL_LONG(&num, num_key);
 			convert_to_string(&num);
-			php_prefix_varname(&final_name, prefix, Z_STRVAL(num), Z_STRLEN(num), 1 TSRMLS_CC);
+			php_prefix_varname(&final_name, prefix, Z_STRVAL(num), (int)Z_STRLEN(num), 1 TSRMLS_CC);
 			zval_dtor(&num);
 		} else {
 			continue;
@@ -1432,7 +1432,7 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_IF_EXISTS:
 				if (var_exists) {
-					php_prefix_varname(&final_name, prefix, var_name->val, var_name->len, 1 TSRMLS_CC);
+					php_prefix_varname(&final_name, prefix, var_name->val, (int)var_name->len, 1 TSRMLS_CC);
 				}
 				break;
 
@@ -1444,14 +1444,14 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_ALL:
 				if (Z_TYPE(final_name) == IS_NULL && var_name->len != 0) {
-					php_prefix_varname(&final_name, prefix, var_name->val, var_name->len, 1 TSRMLS_CC);
+					php_prefix_varname(&final_name, prefix, var_name->val, (int)var_name->len, 1 TSRMLS_CC);
 				}
 				break;
 
 			case EXTR_PREFIX_INVALID:
 				if (Z_TYPE(final_name) == IS_NULL) {
-					if (!php_valid_var_name(var_name->val, var_name->len)) {
-						php_prefix_varname(&final_name, prefix, var_name->val, var_name->len, 1 TSRMLS_CC);
+					if (!php_valid_var_name(var_name->val, (int)var_name->len)) {
+						php_prefix_varname(&final_name, prefix, var_name->val, (int)var_name->len, 1 TSRMLS_CC);
 					} else {
 						ZVAL_STR_COPY(&final_name, var_name);
 					}
@@ -1465,7 +1465,7 @@ PHP_FUNCTION(extract)
 				break;
 		}
 
-		if (Z_TYPE(final_name) != IS_NULL && php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
+		if (Z_TYPE(final_name) != IS_NULL && php_valid_var_name(Z_STRVAL(final_name), (int)Z_STRLEN(final_name))) {
 			if (extract_refs) {
 				zval *orig_var;
 
@@ -1569,7 +1569,7 @@ PHP_FUNCTION(array_fill)
 	}
 
 	/* allocate an array for return */
-	array_init_size(return_value, num);
+	array_init_size(return_value, (uint32_t)num);
 
 	if (num == 0) {
 		return;
@@ -1786,10 +1786,10 @@ err:
 
 static void php_array_data_shuffle(zval *array TSRMLS_DC) /* {{{ */
 {
-	uint idx;
+	uint32_t idx, j, n_elems;
 	Bucket *p, temp;
 	HashTable *hash;
-	int j, n_elems, rnd_idx, n_left;
+	zend_long rnd_idx, n_left;
 
 	n_elems = zend_hash_num_elements(Z_ARRVAL_P(array));
 
