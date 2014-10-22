@@ -5414,10 +5414,22 @@ void zend_compile_instanceof(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 			"instanceof expects an object instance, constant given");
 	}
 
-	opline = zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
-	opline->extended_value |= ZEND_FETCH_CLASS_NO_AUTOLOAD;
+	if (zend_is_const_default_class_ref(class_ast)) {
+		class_node.op_type = IS_CONST;
+		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast TSRMLS_CC));
+	} else {
+		zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
+	}
 
-	zend_emit_op_tmp(result, ZEND_INSTANCEOF, &obj_node, &class_node TSRMLS_CC);
+	opline = zend_emit_op_tmp(result, ZEND_INSTANCEOF, &obj_node, NULL TSRMLS_CC);
+
+	if (class_node.op_type == IS_CONST) {
+		opline->op2_type = IS_CONST;
+		opline->op2.constant = zend_add_class_name_literal(
+			CG(active_op_array), Z_STR(class_node.u.constant) TSRMLS_CC);
+	} else {
+		SET_NODE(opline->op2, &class_node);
+	}
 }
 /* }}} */
 
