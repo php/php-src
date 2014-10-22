@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-???, PHP 5.4.34
+?? ??? ???, PHP 5.4.35
 
 - Fileinfo:
   . Fixed bug #68283 (fileinfo: out-of-bounds read in elf note headers).
