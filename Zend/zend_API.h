@@ -383,18 +383,18 @@ ZEND_API int add_assoc_string_ex(zval *arg, const char *key, uint key_len, char 
 ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, uint key_len, char *str, size_t length);
 ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, uint key_len, zval *value);
 
-#define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key), __n)
-#define add_assoc_null(__arg, __key) add_assoc_null_ex(__arg, __key, strlen(__key))
-#define add_assoc_bool(__arg, __key, __b) add_assoc_bool_ex(__arg, __key, strlen(__key), __b)
-#define add_assoc_resource(__arg, __key, __r) add_assoc_resource_ex(__arg, __key, strlen(__key), __r)
-#define add_assoc_double(__arg, __key, __d) add_assoc_double_ex(__arg, __key, strlen(__key), __d)
-#define add_assoc_str(__arg, __key, __str) add_assoc_str_ex(__arg, __key, strlen(__key), __str)
-#define add_assoc_string(__arg, __key, __str) add_assoc_string_ex(__arg, __key, strlen(__key), __str)
-#define add_assoc_stringl(__arg, __key, __str, __length) add_assoc_stringl_ex(__arg, __key, strlen(__key), __str, __length)
-#define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key), __value)
+#define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, (uint)strlen(__key), __n)
+#define add_assoc_null(__arg, __key) add_assoc_null_ex(__arg, __key, (uint)strlen(__key))
+#define add_assoc_bool(__arg, __key, __b) add_assoc_bool_ex(__arg, __key, (uint)strlen(__key), __b)
+#define add_assoc_resource(__arg, __key, __r) add_assoc_resource_ex(__arg, __key, (uint)strlen(__key), __r)
+#define add_assoc_double(__arg, __key, __d) add_assoc_double_ex(__arg, __key, (uint)strlen(__key), __d)
+#define add_assoc_str(__arg, __key, __str) add_assoc_str_ex(__arg, __key, (uint)strlen(__key), __str)
+#define add_assoc_string(__arg, __key, __str) add_assoc_string_ex(__arg, __key, (uint)strlen(__key), __str)
+#define add_assoc_stringl(__arg, __key, __str, __length) add_assoc_stringl_ex(__arg, __key, (uint)strlen(__key), __str, __length)
+#define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, (uint)strlen(__key), __value)
 
 /* unset() functions are only suported for legacy modules and null() functions should be used */
-#define add_assoc_unset(__arg, __key) add_assoc_null_ex(__arg, __key, strlen(__key))
+#define add_assoc_unset(__arg, __key) add_assoc_null_ex(__arg, __key, (uint)strlen(__key))
 #define add_index_unset(__arg, __key) add_index_null(__arg, __key)
 #define add_next_index_unset(__arg) add_next_index_null(__arg)
 #define add_property_unset(__arg, __key) add_property_null(__arg, __key)
