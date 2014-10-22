@@ -99,7 +99,6 @@ static const uint32_t uninitialized_bucket = {INVALID_IDX};
 
 ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
-	uint32_t i = 3;
 
 	SET_INCONSISTENT(HT_OK);
 
@@ -107,10 +106,23 @@ ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestru
 		/* prevent overflow */
 		ht->nTableSize = 0x80000000;
 	} else {
-		while ((1U << i) < nSize) {
-			i++;
+		if (nSize > 8) {
+#ifdef PHP_WIN32
+			ht->nTableSize = 1U << __lzcnt(nSize);
+			if (ht->nTableSize < nSize) {
+				ht->nTableSize <<= 1;
+			}
+#else
+			uint32_t i = 4;
+
+			while ((1U << i) < nSize) {
+				i++;
+			}
+			ht->nTableSize = 1 << i;
+#endif
+		} else {
+			ht->nTableSize = 8;
 		}
-		ht->nTableSize = 1 << i;
 	}
 
 	ht->nTableMask = 0;	/* 0 means that ht->arBuckets is uninitialized */
