@@ -2222,7 +2222,7 @@ PHP_FUNCTION(array_splice)
 	/* Don't create the array of removed elements if it's not going
 	 * to be used; e.g. only removing and/or replacing elements */
 	if (USED_RET()) {
-		int size = length;
+		zend_long size = length;
 
 		/* Clamp the offset.. */
 		if (offset > num_in) {
@@ -2234,17 +2234,17 @@ PHP_FUNCTION(array_splice)
 		/* ..and the length */
 		if (length < 0) {
 			size = num_in - offset + length;
-		} else if (((zend_ulong) offset + (zend_ulong) length) > (unsigned) num_in) {
+		} else if (((zend_ulong) offset + (zend_ulong) length) > (uint32_t) num_in) {
 			size = num_in - offset;
 		}
 
 		/* Initialize return value */
-		array_init_size(return_value, size > 0 ? size : 0);
+		array_init_size(return_value, size > 0 ? (uint32_t)size : 0);
 		rem_hash = Z_ARRVAL_P(return_value);
 	}
 
 	/* Perform splice */
-	new_hash = php_splice(Z_ARRVAL_P(array), offset, length, repl, repl_num, rem_hash);
+	new_hash = php_splice(Z_ARRVAL_P(array), (int)offset, (int)length, repl, (int)repl_num, rem_hash);
 
 	/* Replace input array's hashtable with the new one */
 	old_hash = *Z_ARRVAL_P(array);
@@ -2314,7 +2314,7 @@ PHP_FUNCTION(array_slice)
 	}
 
 	/* Initialize returned array */
-	array_init_size(return_value, length > 0 ? length : 0);
+	array_init_size(return_value, length > 0 ? (uint)length : 0);
 
 	if (length <= 0) {
 		return;
@@ -2897,9 +2897,9 @@ PHP_FUNCTION(array_pad)
 
 	/* Pad on the right or on the left */
 	if (pad_size > 0) {
-		new_hash = php_splice(Z_ARRVAL_P(return_value), input_size, 0, pads, num_pads, NULL);
+		new_hash = php_splice(Z_ARRVAL_P(return_value), (int)input_size, 0, pads, (int)num_pads, NULL);
 	} else {
-		new_hash = php_splice(Z_ARRVAL_P(return_value), 0, 0, pads, num_pads, NULL);
+		new_hash = php_splice(Z_ARRVAL_P(return_value), 0, 0, pads, (int)num_pads, NULL);
 	}
 
 	/* Copy the result hash into return value */
@@ -3971,22 +3971,23 @@ PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 	Bucket *ab = *(Bucket **)a;
 	Bucket *bb = *(Bucket **)b;
 	int r;
-	int result = 0;
+	zend_long result;
 	zval temp;
 
 	r = 0;
 	do {
+
 		php_set_compare_func(ARRAYG(multisort_flags)[MULTISORT_TYPE][r] TSRMLS_CC);
 
 		ARRAYG(compare_func)(&temp, &ab[r].val, &bb[r].val TSRMLS_CC);
 		result = ARRAYG(multisort_flags)[MULTISORT_ORDER][r] * Z_LVAL(temp);
 		if (result != 0) {
-			return result;
+			return result > 0 ? 1 : -1;
 		}
 		r++;
 	} while (Z_TYPE(ab[r].val) != IS_UNDEF);
 
-	return result;
+	return 0;
 }
 /* }}} */
 
@@ -4077,7 +4078,7 @@ PHP_FUNCTION(array_multisort)
 					/* flag allowed here */
 					if (parse_state[MULTISORT_TYPE] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */
-						sort_type = Z_LVAL(args[i]);
+						sort_type = (int)Z_LVAL(args[i]);
 						parse_state[MULTISORT_TYPE] = 0;
 					} else {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
@@ -4205,7 +4206,7 @@ PHP_FUNCTION(array_rand)
 
 	/* Make the return value an array only if we need to pass back more than one result. */
 	if (num_req > 1) {
-		array_init_size(return_value, num_req);
+		array_init_size(return_value, (uint32_t)num_req);
 	}
 
 	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
@@ -4690,14 +4691,14 @@ PHP_FUNCTION(array_chunk)
 		size = num_in > 0 ? num_in : 1;
 	}
 
-	array_init_size(return_value, ((num_in - 1) / size) + 1);
+	array_init_size(return_value, (uint32_t)(((num_in - 1) / size) + 1));
 
 	ZVAL_UNDEF(&chunk);
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, str_key, entry) {
 		/* If new chunk, create and initialize it. */
 		if (Z_TYPE(chunk) == IS_UNDEF) {
-			array_init_size(&chunk, size);
+			array_init_size(&chunk, (uint32_t)size);
 		}
 
 		/* Add entry to the chunk, preserving keys if necessary. */
