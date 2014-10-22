@@ -4385,7 +4385,6 @@ void zend_compile_use_trait(zend_ast *ast TSRMLS_DC) /* {{{ */
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_ADD_TRAIT;
 		SET_NODE(opline->op1, &CG(implementing_class));
-		opline->extended_value = ZEND_FETCH_CLASS_TRAIT;
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
 			zend_resolve_class_name_ast(trait_ast TSRMLS_CC) TSRMLS_CC);
@@ -4434,7 +4433,6 @@ void zend_compile_implements(znode *class_node, zend_ast *ast TSRMLS_DC) /* {{{ 
 		}
 
 		opline = zend_emit_op(NULL, ZEND_ADD_INTERFACE, class_node, NULL TSRMLS_CC);
-		opline->extended_value = ZEND_FETCH_CLASS_INTERFACE;
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
 			zend_resolve_class_name_ast(class_ast TSRMLS_CC) TSRMLS_CC);

@@ -1225,7 +1225,7 @@ static int ZEND_FASTCALL  ZEND_ADD_TRAIT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		trait = zend_fetch_class_by_name(Z_STR_P(opline->op2.zv),
 		                                 opline->op2.zv + 1,
-		                                 opline->extended_value TSRMLS_CC);
+		                                 ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
 		if (UNEXPECTED(trait == NULL)) {
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
@@ -1772,7 +1772,7 @@ static int ZEND_FASTCALL  ZEND_ADD_INTERFACE_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 	if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 		iface = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
 	} else {
-		iface = zend_fetch_class_by_name(Z_STR_P(opline->op2.zv), opline->op2.zv + 1, opline->extended_value TSRMLS_CC);
+		iface = zend_fetch_class_by_name(Z_STR_P(opline->op2.zv), opline->op2.zv + 1, ZEND_FETCH_CLASS_INTERFACE TSRMLS_CC);
 		if (UNEXPECTED(iface == NULL)) {
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
@@ -4325,7 +4325,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv));
 			} else {
-				ce = zend_fetch_class_by_name(Z_STR_P(opline->op1.zv), opline->op1.zv + 1, opline->extended_value TSRMLS_CC);
+				ce = zend_fetch_class_by_name(Z_STR_P(opline->op1.zv), opline->op1.zv + 1, 0 TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
 				}
@@ -18883,7 +18883,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv));
 			} else {
-				ce = zend_fetch_class_by_name(Z_STR_P(opline->op1.zv), opline->op1.zv + 1, opline->extended_value TSRMLS_CC);
+				ce = zend_fetch_class_by_name(Z_STR_P(opline->op1.zv), opline->op1.zv + 1, 0 TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
 				}
@@ -28102,7 +28102,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv));
 			} else {
-				ce = zend_fetch_class_by_name(Z_STR_P(opline->op1.zv), opline->op1.zv + 1, opline->extended_value TSRMLS_CC);
+				ce = zend_fetch_class_by_name(Z_STR_P(opline->op1.zv), opline->op1.zv + 1, 0 TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
 				}

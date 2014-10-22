@@ -3802,7 +3802,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv));
 			} else {
-				ce = zend_fetch_class_by_name(Z_STR_P(opline->op1.zv), opline->op1.zv + 1, opline->extended_value TSRMLS_CC);
+				ce = zend_fetch_class_by_name(Z_STR_P(opline->op1.zv), opline->op1.zv + 1, 0 TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					HANDLE_EXCEPTION();
 				}
@@ -5335,7 +5335,7 @@ ZEND_VM_HANDLER(144, ZEND_ADD_INTERFACE, ANY, CONST)
 	if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv))) {
 		iface = CACHED_PTR(Z_CACHE_SLOT_P(opline->op2.zv));
 	} else {
-		iface = zend_fetch_class_by_name(Z_STR_P(opline->op2.zv), opline->op2.zv + 1, opline->extended_value TSRMLS_CC);
+		iface = zend_fetch_class_by_name(Z_STR_P(opline->op2.zv), opline->op2.zv + 1, ZEND_FETCH_CLASS_INTERFACE TSRMLS_CC);
 		if (UNEXPECTED(iface == NULL)) {
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
@@ -5364,7 +5364,7 @@ ZEND_VM_HANDLER(154, ZEND_ADD_TRAIT, ANY, ANY)
 	} else {
 		trait = zend_fetch_class_by_name(Z_STR_P(opline->op2.zv),
 		                                 opline->op2.zv + 1,
-		                                 opline->extended_value TSRMLS_CC);
+		                                 ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
 		if (UNEXPECTED(trait == NULL)) {
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
