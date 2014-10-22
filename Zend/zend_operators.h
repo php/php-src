@@ -855,7 +855,7 @@ static zend_always_inline void fast_is_smaller_or_equal_function(zval *result, z
 
 static zend_always_inline void fast_is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
-	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
+	if (Z_TYPE_P(op1) != Z_TYPE_P(op2) && !UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT && Z_TYPE_P(op2) == IS_LONG) && !UNEXPECTED(Z_TYPE_P(op1) == IS_LONG && Z_TYPE_P(op2) == IS_BIGINT)) {
 		ZVAL_BOOL(result, 0);
 		return;
 	}
@@ -864,7 +864,7 @@ static zend_always_inline void fast_is_identical_function(zval *result, zval *op
 
 static zend_always_inline void fast_is_not_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
-	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
+	if (Z_TYPE_P(op1) != Z_TYPE_P(op2) && !UNEXPECTED(Z_TYPE_P(op1) == IS_BIGINT && Z_TYPE_P(op2) == IS_LONG) && !UNEXPECTED(Z_TYPE_P(op1) == IS_LONG && Z_TYPE_P(op2) == IS_BIGINT)) {
 		ZVAL_BOOL(result, 1);
 		return;
 	}
