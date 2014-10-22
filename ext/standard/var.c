@@ -389,7 +389,7 @@ PHP_FUNCTION(debug_zval_dump)
 #define buffer_append_spaces(buf, num_spaces) \
 	do { \
 		char *tmp_spaces; \
-		int tmp_spaces_len; \
+		size_t tmp_spaces_len; \
 		tmp_spaces_len = spprintf(&tmp_spaces, 0,"%*c", num_spaces, ' '); \
 		smart_str_appendl(buf, tmp_spaces, tmp_spaces_len); \
 		efree(tmp_spaces); \
