@@ -4066,6 +4066,12 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 					"public visibility and cannot be static");
 			}
 			ce->__tostring = (zend_function *) op_array;
+		} else if (zend_string_equals_literal(lcname, ZEND_HASHKEY_FUNC_NAME)) {
+			if (!is_public || is_static) {
+				zend_error(E_WARNING, "The magic method __hashKey() must have "
+					"public visibility and cannot be static");
+			}
+			ce->__hashKey = (zend_function *) op_array;
 		} else if (zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __invoke() must have "

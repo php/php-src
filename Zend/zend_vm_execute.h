@@ -4437,6 +4437,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -5962,6 +6015,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -7126,6 +7232,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -8212,6 +8371,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -9320,6 +9532,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -9929,6 +10194,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -10382,6 +10700,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -10806,6 +11177,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -13370,6 +13794,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -14761,6 +15238,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -16205,6 +16735,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -17639,6 +18222,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -25877,6 +26513,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -28041,6 +28730,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -29953,6 +30695,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;
@@ -31902,6 +32697,59 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+		    case IS_OBJECT: if (Z_OBJCE_P(offset)->__hashKey) {
+		        zend_fcall_info fci;
+		        zend_fcall_info_cache fcc;
+		        zval result;
+		        zval *key = &result;
+
+		        memset(&fci, 0, sizeof(zend_fcall_info));
+		        memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+		        fci.size = sizeof(zend_fcall_info);
+		        fci.function_table =
+		            &Z_OBJCE_P(offset)->function_table;
+		        fci.object = Z_OBJ_P(offset);
+		        fci.retval = key;
+		        fci.no_separation = 1;
+
+		        fcc.initialized = 1;
+		        fcc.function_handler =
+		            Z_OBJCE_P(offset)->__hashKey;
+		        fcc.calling_scope = EG(scope);
+		        fcc.called_scope = Z_OBJCE_P(offset);
+		        fcc.object = Z_OBJ_P(offset);
+
+                if (zend_call_function(&fci, &fcc TSRMLS_CC) == SUCCESS) {
+                    switch (Z_TYPE_P(key)) {
+                        case IS_STRING:
+                            str = Z_STR_P(key);
+                            Z_DELREF_P(key);
+                            goto str_index;
+                        case IS_LONG:
+                            hval = Z_LVAL_P(key);
+                            goto num_index;
+                        case IS_DOUBLE:
+                            hval = zend_dval_to_lval(Z_DVAL_P(key));
+                            goto num_index;
+                        case IS_TRUE:
+                            hval = 1;
+                            goto num_index;
+                        case IS_FALSE:
+                            hval = 0;
+                            goto num_index;
+                        case IS_NULL:
+                            str = STR_EMPTY_ALLOC();
+			                goto str_index;
+			            case IS_REFERENCE:
+			                offset = Z_REFVAL_P(key);
+			                goto add_again;
+			            case IS_ARRAY:
+			                zval_ptr_dtor(key);
+			            /* intentionally fall through */
+                    }
+                }
+		    }
 			case IS_REFERENCE:
 				offset = Z_REFVAL_P(offset);
 				goto add_again;

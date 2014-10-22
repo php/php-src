@@ -106,6 +106,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce TSRMLS_DC) /* {{{
 	if (!ce->__debugInfo) {
 		ce->__debugInfo = ce->parent->__debugInfo;
 	}
+	if (!ce->__hashKey) {
+		ce->__hashKey = ce->parent->__hashKey;
+	}
 	if (ce->constructor) {
 		if (ce->parent->constructor && ce->parent->constructor->common.fn_flags & ZEND_ACC_FINAL) {
 			zend_error(E_ERROR, "Cannot override final %s::%s() with %s::%s()",
@@ -1012,6 +1015,8 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		ce->__callstatic = fe;
 	} else if (!strncmp(mname->val, ZEND_TOSTRING_FUNC_NAME, mname->len)) {
 		ce->__tostring = fe;
+	} else if (!strncmp(mname->val, ZEND_HASHKEY_FUNC_NAME, mname->len)) {
+		ce->__hashKey = fe;
 	} else if (!strncmp(mname->val, ZEND_DEBUGINFO_FUNC_NAME, mname->len)) {
 		ce->__debugInfo = fe;
 	} else if (ce->name->len == mname->len) {
