@@ -105,24 +105,22 @@ ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestru
 	if (nSize >= 0x80000000) {
 		/* prevent overflow */
 		ht->nTableSize = 0x80000000;
+	} else if (nSize <= 8) {
+		ht->nTableSize = 8;
 	} else {
-		if (nSize > 8) {
 #ifdef PHP_WIN32
-			ht->nTableSize = 1U << __lzcnt(nSize);
-			if (ht->nTableSize < nSize) {
-				ht->nTableSize <<= 1;
-			}
-#else
-			uint32_t i = 4;
-
-			while ((1U << i) < nSize) {
-				i++;
-			}
-			ht->nTableSize = 1 << i;
-#endif
-		} else {
-			ht->nTableSize = 8;
+		ht->nTableSize = 1U << __lzcnt(nSize);
+		if (ht->nTableSize < nSize) {
+			ht->nTableSize <<= 1;
 		}
+#else
+		uint32_t i = 4;
+
+		while ((1U << i) < nSize) {
+			i++;
+		}
+		ht->nTableSize = 1 << i;
+#endif
 	}
 
 	ht->nTableMask = 0;	/* 0 means that ht->arBuckets is uninitialized */
