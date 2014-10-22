@@ -1641,11 +1641,8 @@ static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 		case BP_VAR_R:
 			return;
 		case BP_VAR_W:
-			opline->opcode += 3;
-			return;
 		case BP_VAR_REF:
 			opline->opcode += 3;
-			opline->extended_value |= ZEND_FETCH_MAKE_REF;
 			return;
 		case BP_VAR_RW:
 			opline->opcode += 6;
@@ -3121,7 +3118,7 @@ void zend_compile_return(zend_ast *ast TSRMLS_DC) /* {{{ */
 	if (expr_ast) {
 		if (zend_is_call(expr_ast)) {
 			opline->extended_value = ZEND_RETURNS_FUNCTION;
-		} else if (!zend_is_variable(expr_ast)) {
+		} else if (by_ref && !zend_is_variable(expr_ast)) {
 			opline->extended_value = ZEND_RETURNS_VALUE;
 		}
 	}
