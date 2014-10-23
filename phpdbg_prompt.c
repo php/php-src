@@ -707,6 +707,10 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	zend_try {
 		if (zend_eval_stringl(param->str, param->len,&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
 			phpdbg_xml("<eval %r>");
+			if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
+				zval *zvp = &retval;
+				phpdbg_xml_var_dump(&zvp TSRMLS_CC);
+			}
 			zend_print_zval_r(&retval, 0 TSRMLS_CC);
 			phpdbg_xml("</eval>");
 			phpdbg_out("\n");

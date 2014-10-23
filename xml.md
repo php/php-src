@@ -60,6 +60,7 @@ type
 
 - general attribute for most errors, describes the genre of the error
 
+
 General tags
 ============
 
@@ -460,6 +461,7 @@ ev
 
 - eval()uates some code
 - output wrapped in &lt;eval> tags
+- output is here first a dump of xml tags (see "Variable Dump" section), then a dump wrapped in <stream> tags
 
 sh
 --
@@ -633,6 +635,7 @@ dl
 
 - errors may have the module or extension attribute when their name is already known at the point of failure
 
+
 Other tags
 ==========
 
@@ -673,3 +676,83 @@ Other tags
 
 - generally emitted when data couldn't be fetched (e.g. by accessing inconsistent data); only used in hard interrupt mode
 - it might mean that data couldn't be fetched at all, or that only incomplete data was fetched (e.g. when a fixed number of following attributes are fetched, this tag will mark a stop of fetching if none or not all tags were printed)
+
+
+Variable Dump
+=============
+
+- all except property and element tags have a refstatus attribute, is set to non-empty if it's a reference
+
+object properties
+-----------------
+
+- wrapped in a property tag &lt;property name="" protection="">
+ - name: name of key
+ - protection: one of these three values: public / protected / private
+ - class: only present if protection attribute is set to "private", contains the name of the class to which the property belongs
+- if the property tag contains any serverity="error" attribute, there was some crucial error to read it, just skip it
+
+array elements
+--------------
+- wrapped in an element tag &lt;property name="" protection="">
+ - name: name of key
+- if the element tag contains any serverity="error" attribute, there was some crucial error to read it, jsut skip it
+
+int
+---
+
+- &lt;int refstatus="" value="" />
+ - value is the integer
+
+float
+-----
+
+- &lt;float refstatus="" value="" />
+ - value is the float
+
+bool
+----
+
+- &lt;bool refstatus="" value="" />
+ -value: true or false
+
+string
+------
+
+- &lt;string refstatus="" length="" value="" />
+ - length: length or string
+ - value: the string
+
+null
+----
+
+- &lt;null refstatus="" />
+
+array
+-----
+
+- &lt;array refstatus="" num="">
+ - num: number of elements
+ - contains &lt;element> tags
+ 
+object
+------
+
+- &lt;object refstatus="" class="" id="" num="">
+ - class: name of the class the object is an instance of (may be empty if unknown)
+ - id: id of the object
+ - num: number of properties
+ - contains &lt;property> tags
+
+resource
+--------
+
+- &lt;resource refstatus="" id="" type="" />
+ - id: resource id
+ - type: type of resource
+
+recursion
+---------
+
+- &lt;recursion />
+- if that tag appears, there's a recursive reference inside the value to be printed

@@ -110,4 +110,6 @@ typedef int (*phpdbg_parse_var_with_arg_func)(char *name, size_t len, char *keyn
 PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent TSRMLS_DC);
 PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, zend_bool silent, void *arg TSRMLS_DC);
 
+PHPDBG_API void phpdbg_xml_var_dump(zval **zv TSRMLS_DC);
+
 #endif /* PHPDBG_UTILS_H */
