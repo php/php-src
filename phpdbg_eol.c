@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 7-4 The PHP Group                                      |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,12 +17,11 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#	include "config.h"
 #endif
 
 #include "phpdbg.h"
 #include "phpdbg_eol.h"
-
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -34,8 +33,7 @@ struct phpdbg_eol_rep phpdbg_eol_list[EOL_LIST_LEN] = {
 	{"CR", "\r", PHPDBG_EOL_CR},
 };
 
-int8_t
-phpdbg_eol_global_update(char *name TSRMLS_DC)
+int phpdbg_eol_global_update(char *name TSRMLS_DC)
 {
 
 	if (0 == memcmp(name, "CRLF", 4) || 0 == memcmp(name, "crlf", 4) || 0 == memcmp(name, "DOS", 3) || 0 == memcmp(name, "dos", 3)) {
@@ -51,8 +49,7 @@ phpdbg_eol_global_update(char *name TSRMLS_DC)
 	return SUCCESS;
 }
 
-char *
-phpdbg_eol_name(int8_t id)
+char *phpdbg_eol_name(int id)
 {
 	size_t i = 0;
 
@@ -68,8 +65,7 @@ phpdbg_eol_name(int8_t id)
 	return NULL;
 }
 
-char *
-phpdbg_eol_rep(int8_t id)
+char *phpdbg_eol_rep(int id)
 {
 	size_t i = 0;
 
@@ -87,8 +83,7 @@ phpdbg_eol_rep(int8_t id)
 
 
 /* Inspired by https://ccrma.stanford.edu/~craig/utility/flip/flip.cpp */
-void
-phpdbg_eol_convert(char **str, int *len TSRMLS_DC)
+void phpdbg_eol_convert(char **str, int *len TSRMLS_DC)
 {
 	char *in = *str, *out ;
 	int in_len = *len, out_len, cursor, i;
@@ -175,6 +170,3 @@ phpdbg_eol_convert(char **str, int *len TSRMLS_DC)
 	*len = cursor;
 	in = NULL;
 }
-
-
-
