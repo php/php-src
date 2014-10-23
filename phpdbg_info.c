@@ -133,7 +133,7 @@ PHPDBG_INFO(constants) /* {{{ */
 			switch (Z_TYPE(data->value)) {
 				case IS_STRING:
 					phpdbg_try_access {
-						VARIABLEINFO("length=\"%d\" value=\"%.*s%s\"", "\nstring (%d) \"%.*s%s\"", Z_STRLEN(data->value), Z_STRLEN(data->value) < 255 ? Z_STRLEN(data->value) : 255, Z_STRVAL(data->value), Z_STRLEN(data->value) > 255 ? "..." : "");
+						VARIABLEINFO("length=\"%d\" value=\"%.*s\"", "\nstring (%d) \"%.*s%s\"", Z_STRLEN(data->value), Z_STRLEN(data->value) < 255 ? Z_STRLEN(data->value) : 255, Z_STRVAL(data->value), Z_STRLEN(data->value) > 255 ? "..." : "");
 					} phpdbg_catch_access {
 						VARIABLEINFO("", "");
 					} phpdbg_end_try_access();
@@ -266,7 +266,7 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 							break;
 						case IS_STRING:
 							phpdbg_try_access {
-								VARIABLEINFO("length=\"%d\" value=\"%.*s%s\"", "\nstring (%d) \"%.*s%s\"", Z_STRLEN_PP(data), Z_STRLEN_PP(data) < 255 ? Z_STRLEN_PP(data) : 255, Z_STRVAL_PP(data), Z_STRLEN_PP(data) > 255 ? "..." : "");
+								VARIABLEINFO("length=\"%d\" value=\"%.*s\"", "\nstring (%d) \"%.*s%s\"", Z_STRLEN_PP(data), Z_STRLEN_PP(data) < 255 ? Z_STRLEN_PP(data) : 255, Z_STRVAL_PP(data), Z_STRLEN_PP(data) > 255 ? "..." : "");
 							} phpdbg_catch_access {
 								VARIABLEINFO("", "");
 							} phpdbg_end_try_access();
