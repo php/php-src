@@ -5428,7 +5428,8 @@ void zend_compile_instanceof(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast TSRMLS_CC));
 	} else {
-		zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
+		opline = zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
+		opline->extended_value |= ZEND_FETCH_CLASS_NO_AUTOLOAD;
 	}
 
 	opline = zend_emit_op_tmp(result, ZEND_INSTANCEOF, &obj_node, NULL TSRMLS_CC);
