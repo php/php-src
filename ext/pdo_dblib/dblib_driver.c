@@ -61,7 +61,6 @@ static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS
 		msg, einfo->dberr, einfo->severity, stmt ? stmt->active_query_string : "");
 
 	add_next_index_long(info, einfo->dberr);
-	// TODO: avoid reallocation ???
 	add_next_index_string(info, message);
 	efree(message);
 	add_next_index_long(info, einfo->oserr);
@@ -145,10 +144,12 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sq
 
 static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC)
 {
-	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+	
+	/* pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data; */
+	
 	char *q;
 	int l = 1;
-
+		
 	*quoted = q = safe_emalloc(2, unquotedlen, 3);
 	*q++ = '\'';
 
@@ -174,7 +175,6 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 static int pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
-	RETCODE ret;
 	
 	if (FAIL == dbcmd(H->link, cmd)) {
 		return 0;
@@ -246,6 +246,23 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len T
 	return id;
 }
 
+static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_DC)
+{
+	switch(attr) {
+		case PDO_ATTR_TIMEOUT:
+			return 0;
+		default:
+			return 1;
+	}
+
+}
+
+static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value TSRMLS_DC)
+{
+	/* dblib_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data; */
+	return 0;
+}
+
 static struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_closer,
 	dblib_handle_preparer,
@@ -254,10 +271,10 @@ static struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_begin, /* begin */
 	dblib_handle_commit, /* commit */
 	dblib_handle_rollback, /* rollback */
-	NULL, /*set attr */
+	dblib_set_attr, /*set attr */
 	dblib_handle_last_id, /* last insert id */
 	dblib_fetch_error, /* fetch error */
-	NULL, /* get attr */
+	dblib_get_attribute, /* get attr */
 	NULL, /* check liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
@@ -303,6 +320,12 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
 
+	if (driver_options) {
+		int timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
+		dbsetlogintime(timeout); /* Connection/Login Timeout */
+		dbsettime(timeout); /* Statement Timeout */
+	}
+
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 	H->login = dblogin();
 	H->err.sqlstate = dbh->error_code;
@@ -311,8 +334,8 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		goto cleanup;
 	}
 
-	DBERRHANDLE(H->login, (EHANDLEFUNC) error_handler);
-	DBMSGHANDLE(H->login, (MHANDLEFUNC) msg_handler);
+	DBERRHANDLE(H->login, (EHANDLEFUNC) pdo_dblib_error_handler);
+	DBMSGHANDLE(H->login, (MHANDLEFUNC) pdo_dblib_msg_handler);
 	
 	if(vars[5].optval) {
 		for(i=0;i<nvers;i++) {
