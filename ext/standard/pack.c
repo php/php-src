@@ -912,7 +912,7 @@ PHP_FUNCTION(unpack)
 					case 'P': {
 						int issigned = 0;
 						int *map = machine_endian_longlong_map;
-						long v = 0;
+						zend_long v = 0;
 
 						if (type == 'q' || type == 'Q') {
 							issigned = input[inputpos + (machine_little_endian ? 7 : 0)] & 0x80;
@@ -927,9 +927,9 @@ PHP_FUNCTION(unpack)
 						v = php_unpack(&input[inputpos], 8, issigned, map);
 
 						if (type == 'q') {
-							v = (signed long int) v;
+							v = (zend_long) v;
 						} else {
-							v = (unsigned long int) v;
+							v = (zend_ulong) v;
 						}
 
 						add_assoc_long(return_value, n, v);
