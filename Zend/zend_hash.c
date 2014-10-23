@@ -1760,11 +1760,12 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 					return result;
 				}
 			} else { /* string indices */
-				result = (p1->key ? p1->key->len : 0) - (p2->key ? p2->key->len : 0);
-				if (result != 0) {
+				size_t len0 = (p1->key ? p1->key->len : 0);
+				size_t len1 = (p2->key ? p2->key->len : 0);
+				if (len0 != len1) {
 					HASH_UNPROTECT_RECURSION(ht1); 
 					HASH_UNPROTECT_RECURSION(ht2); 
-					return result;
+					return len0 > len1 ? 1 : -1;
 				}
 				result = memcmp(p1->key->val, p2->key->val, p1->key->len);
 				if (result != 0) {
