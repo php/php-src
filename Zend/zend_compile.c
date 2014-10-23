@@ -514,7 +514,7 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 				opline->result_type |= EXT_TYPE_UNUSED;
 			}
 		} else {
-			while (opline>CG(active_op_array)->opcodes) {
+			while (opline >= CG(active_op_array)->opcodes) {
 				if (opline->opcode == ZEND_FETCH_LIST &&
 				    opline->op1_type == IS_VAR &&
 				    opline->op1.var == op1->u.op.var) {
@@ -2937,10 +2937,23 @@ void zend_compile_new(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	zend_op *opline;
 	uint32_t opnum;
 
-	zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
+	if (zend_is_const_default_class_ref(class_ast)) {
+		class_node.op_type = IS_CONST;
+		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast TSRMLS_CC));
+	} else {
+		zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
+	}
 
 	opnum = get_next_op_number(CG(active_op_array));
-	zend_emit_op(result, ZEND_NEW, &class_node, NULL TSRMLS_CC);
+	opline = zend_emit_op(result, ZEND_NEW, NULL, NULL TSRMLS_CC);
+
+	if (class_node.op_type == IS_CONST) {
+		opline->op1_type = IS_CONST;
+		opline->op1.constant = zend_add_class_name_literal(
+			CG(active_op_array), Z_STR(class_node.u.constant) TSRMLS_CC);
+	} else {
+		SET_NODE(opline->op1, &class_node);
+	}
 
 	zend_compile_call_common(&ctor_result, args_ast, NULL TSRMLS_CC);
 	zend_do_free(&ctor_result TSRMLS_CC);
