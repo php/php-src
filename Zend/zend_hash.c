@@ -101,11 +101,11 @@ ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestru
 {
 	/* Use big enough power of 2 */
 #ifdef PHP_WIN32
-	if (nSize >= 0x80000000) {
+	if (nSize <= 8) {
+		ht->nTableSize = 8;
+	} else if (nSize >= 0x80000000) {
 		/* prevent overflow */
 		ht->nTableSize = 0x80000000;
-	} else if (nSize <= 8) {
-		ht->nTableSize = 8;
 	} else {
 		ht->nTableSize = 1U << __lzcnt(nSize);
 		if (ht->nTableSize < nSize) {
