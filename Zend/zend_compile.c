@@ -1641,11 +1641,8 @@ static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 		case BP_VAR_R:
 			return;
 		case BP_VAR_W:
-			opline->opcode += 3;
-			return;
 		case BP_VAR_REF:
 			opline->opcode += 3;
-			opline->extended_value |= ZEND_FETCH_MAKE_REF;
 			return;
 		case BP_VAR_RW:
 			opline->opcode += 6;
@@ -3121,7 +3118,7 @@ void zend_compile_return(zend_ast *ast TSRMLS_DC) /* {{{ */
 	if (expr_ast) {
 		if (zend_is_call(expr_ast)) {
 			opline->extended_value = ZEND_RETURNS_FUNCTION;
-		} else if (!zend_is_variable(expr_ast)) {
+		} else if (by_ref && !zend_is_variable(expr_ast)) {
 			opline->extended_value = ZEND_RETURNS_VALUE;
 		}
 	}
@@ -4385,7 +4382,6 @@ void zend_compile_use_trait(zend_ast *ast TSRMLS_DC) /* {{{ */
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_ADD_TRAIT;
 		SET_NODE(opline->op1, &CG(implementing_class));
-		opline->extended_value = ZEND_FETCH_CLASS_TRAIT;
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
 			zend_resolve_class_name_ast(trait_ast TSRMLS_CC) TSRMLS_CC);
@@ -4434,7 +4430,6 @@ void zend_compile_implements(znode *class_node, zend_ast *ast TSRMLS_DC) /* {{{ 
 		}
 
 		opline = zend_emit_op(NULL, ZEND_ADD_INTERFACE, class_node, NULL TSRMLS_CC);
-		opline->extended_value = ZEND_FETCH_CLASS_INTERFACE;
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_class_name_literal(CG(active_op_array),
 			zend_resolve_class_name_ast(class_ast TSRMLS_CC) TSRMLS_CC);
@@ -5416,10 +5411,22 @@ void zend_compile_instanceof(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 			"instanceof expects an object instance, constant given");
 	}
 
-	opline = zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
-	opline->extended_value |= ZEND_FETCH_CLASS_NO_AUTOLOAD;
+	if (zend_is_const_default_class_ref(class_ast)) {
+		class_node.op_type = IS_CONST;
+		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast TSRMLS_CC));
+	} else {
+		zend_compile_class_ref(&class_node, class_ast TSRMLS_CC);
+	}
 
-	zend_emit_op_tmp(result, ZEND_INSTANCEOF, &obj_node, &class_node TSRMLS_CC);
+	opline = zend_emit_op_tmp(result, ZEND_INSTANCEOF, &obj_node, NULL TSRMLS_CC);
+
+	if (class_node.op_type == IS_CONST) {
+		opline->op2_type = IS_CONST;
+		opline->op2.constant = zend_add_class_name_literal(
+			CG(active_op_array), Z_STR(class_node.u.constant) TSRMLS_CC);
+	} else {
+		SET_NODE(opline->op2, &class_node);
+	}
 }
 /* }}} */
 

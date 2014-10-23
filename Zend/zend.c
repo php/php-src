@@ -223,13 +223,13 @@ ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy TSRMLS_DC) /* 
 }
 /* }}} */
 
-ZEND_API int zend_print_zval(zval *expr, int indent TSRMLS_DC) /* {{{ */
+ZEND_API size_t zend_print_zval(zval *expr, int indent TSRMLS_DC) /* {{{ */
 {
 	return zend_print_zval_ex(zend_write, expr, indent TSRMLS_CC);
 }
 /* }}} */
 
-ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC) /* {{{ */
+ZEND_API size_t zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC) /* {{{ */
 {
 	zend_string *str = zval_get_string(expr);
 	size_t len = str->len;
@@ -793,7 +793,7 @@ void zend_shutdown(TSRMLS_D) /* {{{ */
 void zend_set_utility_values(zend_utility_values *utility_values) /* {{{ */
 {
 	zend_uv = *utility_values;
-	zend_uv.import_use_extension_length = strlen(zend_uv.import_use_extension);
+	zend_uv.import_use_extension_length = (uint)strlen(zend_uv.import_use_extension);
 }
 /* }}} */
 
@@ -827,11 +827,11 @@ ZEND_API void zend_append_version_info(const zend_extension *extension) /* {{{ *
 	char *new_info;
 	uint new_info_length;
 
-	new_info_length = sizeof("    with  v, , by \n")
+	new_info_length = (uint)(sizeof("    with  v, , by \n")
 						+ strlen(extension->name)
 						+ strlen(extension->version)
 						+ strlen(extension->copyright)
-						+ strlen(extension->author);
+						+ strlen(extension->author));
 
 	new_info = (char *) malloc(new_info_length + 1);
 
@@ -1097,7 +1097,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 # endif
 #endif
 			va_copy(usr_copy, args);
-			len = zend_vspprintf(&str, 0, format, usr_copy);
+			len = (int)zend_vspprintf(&str, 0, format, usr_copy);
 			ZVAL_NEW_STR(&params[1], zend_string_init(str, len, 0));
 			efree(str);
 #ifdef va_copy

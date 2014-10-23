@@ -834,13 +834,10 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 		str = estrndup(Z_STRVAL_P(data), Z_STRLEN_P(data));
 		new_len = Z_STRLEN_P(data);
 	} else {
-		zval tmp = *data;
-
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
-		str = estrndup(Z_STRVAL(tmp), Z_STRLEN(tmp));
-		new_len = Z_STRLEN(tmp);
-		zval_dtor(&tmp);
+		zend_string *tmp = zval_get_string(data);
+		str = estrndup(tmp->val, tmp->len);
+		new_len = tmp->len;
+		zend_string_release(tmp);
 	}
 
 	if (SOAP_GLOBAL(encoding) != NULL) {
@@ -953,9 +950,7 @@ static xmlNodePtr to_xml_hexbin(encodeTypePtr type, zval *data, int style, xmlNo
 	FIND_ZVAL_NULL(data, ret, style);
 
 	if (Z_TYPE_P(data) != IS_STRING) {
-		tmp = *data;
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(data));
 		data = &tmp;
 	}
 	str = (unsigned char *) safe_emalloc(Z_STRLEN_P(data) * 2, sizeof(char), 1);
@@ -1063,9 +1058,9 @@ static xmlNodePtr to_xml_long(encodeTypePtr type, zval *data, int style, xmlNode
 		snprintf(s, sizeof(s), "%0.0F",floor(Z_DVAL_P(data)));
 		xmlNodeSetContent(ret, BAD_CAST(s));
 	} else {
-		zval tmp = *data;
+		zval tmp;
 
-		zval_copy_ctor(&tmp);
+		ZVAL_DUP(&tmp, data);
 		if (Z_TYPE(tmp) != IS_LONG) {
 			convert_to_long(&tmp);
 		}
@@ -1090,11 +1085,7 @@ static xmlNodePtr to_xml_double(encodeTypePtr type, zval *data, int style, xmlNo
 	xmlAddChild(parent, ret);
 	FIND_ZVAL_NULL(data, ret, style);
 
-	tmp = *data;
-	if (Z_TYPE(tmp) != IS_DOUBLE) {
-		zval_copy_ctor(&tmp);
-		convert_to_double(&tmp);
-	}
+	ZVAL_DOUBLE(&tmp, zval_get_double(data));
 	
 	str = (char *) safe_emalloc(EG(precision), 1, MAX_LENGTH_OF_DOUBLE + 1);
 	php_gcvt(Z_DVAL(tmp), EG(precision), '.', 'E', str);
@@ -3032,13 +3023,12 @@ static xmlNodePtr to_xml_list(encodeTypePtr enc, zval *data, int style, xmlNodeP
 		xmlNodeSetContentLen(ret, BAD_CAST(list.s->val), list.s->len);
 		smart_str_free(&list);
 	} else {
-		zval tmp = *data;
+		zval tmp;
 		char *str, *start, *next;
 		smart_str list = {0};
 
 		if (Z_TYPE_P(data) != IS_STRING) {
-			zval_copy_ctor(&tmp);
-			convert_to_string(&tmp);
+			ZVAL_STR(&tmp, zval_get_string(data));
 			data = &tmp;
 		}
 		str = estrndup(Z_STRVAL_P(data), Z_STRLEN_P(data));
@@ -3144,10 +3134,9 @@ static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodeP
 	if (Z_TYPE_P(data) == IS_STRING) {
 		ret = xmlNewTextLen(BAD_CAST(Z_STRVAL_P(data)), Z_STRLEN_P(data));
 	} else {
-		zval tmp = *data;
+		zval tmp;
 
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(data));
 		ret = xmlNewTextLen(BAD_CAST(Z_STRVAL(tmp)), Z_STRLEN(tmp));
 		zval_dtor(&tmp);
 	}

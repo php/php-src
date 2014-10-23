@@ -129,7 +129,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 		}
 		libpath = estrdup(filename);
 	} else if (extension_dir && extension_dir[0]) {
-		int extension_dir_len = strlen(extension_dir);
+		int extension_dir_len = (int)strlen(extension_dir);
 
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
 			spprintf(&libpath, 0, "%s%s", extension_dir, filename); /* SAFE */

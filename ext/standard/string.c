@@ -1663,12 +1663,10 @@ static int php_needle_char(zval *needle, char *target TSRMLS_DC)
 			return SUCCESS;
 		case IS_OBJECT:
 			{
-				zval holder = *needle;
-				zval_copy_ctor(&(holder));
-				convert_to_long(&(holder));
-				if(Z_TYPE(holder) != IS_LONG) {
-					return FAILURE;
-				}
+				zval holder;
+			   
+				ZVAL_LONG(&holder, zval_get_long(needle));
+
 				*target = (char)Z_LVAL(holder);
 				return SUCCESS;
 			}
