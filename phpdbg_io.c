@@ -41,15 +41,11 @@
 #include <arpa/inet.h>
 #endif
 #include <netdb.h>
-
 #include <fcntl.h>
-
 #include <poll.h>
 #endif
 
-
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
-
 
 PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo TSRMLS_DC) {
 	int got_now, i = len, j;
@@ -117,7 +113,7 @@ recv_once:
 
 PHPDBG_API int phpdbg_send_bytes(int sock, const char *ptr, int len) {
 	int sent, i = len;
-	char *p = ptr;
+	const char *p = ptr;
 /* XXX poll/select needed here? */
 	while(i > 0) {
 		sent = send(sock, p, i, 0);
