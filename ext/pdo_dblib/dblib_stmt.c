@@ -103,21 +103,15 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 	/* Cancel any pending results */
 	dbcancel(H->link);
 	
-	efree(stmt->columns); 
-	stmt->columns = NULL;
-	
 	return 1;
 }
 
 static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
-
-	efree(stmt->columns); 
-	stmt->columns = NULL;
-
+	
 	efree(S);
-		
+	
 	return 1;
 }
 
@@ -128,16 +122,16 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	RETCODE ret;
 	
 	ret = dbresults(H->link);
-	
+
 	if (FAIL == ret) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbresults() returned FAIL" TSRMLS_CC);		
 		return 0;
 	}
-		
+	
 	if(NO_MORE_RESULTS == ret) {
 		return 0;
 	}
-	
+		
 	stmt->row_count = DBCOUNT(H->link);
 	stmt->column_count = dbnumcols(H->link);
 	
@@ -204,7 +198,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	
 	struct pdo_column_data *col = &stmt->columns[colno];
 	
-	col->name = (char*)dbcolname(H->link, colno+1);
+	col->name =  estrdup(dbcolname(H->link, colno+1));
 	col->maxlen = dbcollen(H->link, colno+1);
 	col->namelen = strlen(col->name);
 	col->param_type = PDO_PARAM_STR;
