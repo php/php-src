@@ -4899,6 +4899,14 @@ ZEND_METHOD(reflection_property, isProtected)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionProperty::isReadonly()
+   Returns whether this property is readonly */
+ZEND_METHOD(reflection_property, isReadonly)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_READONLY);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionProperty::isStatic()
    Returns whether this property is static */
 ZEND_METHOD(reflection_property, isStatic)
@@ -5972,6 +5980,7 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, isPublic, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, isPrivate, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, isProtected, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property, isReadonly, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, isStatic, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, isDefault, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getModifiers, arginfo_reflection__void, 0)

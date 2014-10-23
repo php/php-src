@@ -1,5 +1,5 @@
 --TEST--
-Test usage of ReflectionProperty methods __toString(), export(), getName(), isPublic(), isPrivate(), isProtected(), isStatic(), getValue() and setValue().
+Test usage of ReflectionProperty methods __toString(), export(), getName(), isPublic(), isPrivate(), isProtected(), isReadonly(), isStatic(), getValue() and setValue().
 --FILE--
 <?php
 
@@ -21,6 +21,8 @@ function reflectProperty($class, $property) {
     var_dump($propInfo->isPrivate());
     echo "isProtected():\n";
     var_dump($propInfo->isProtected());
+    echo "isReadonly():\n";
+    var_dump($propInfo->isReadonly());
     echo "isStatic():\n";
     var_dump($propInfo->isStatic());
     $instance = new $class();
@@ -39,12 +41,14 @@ class TestClass {
     static public $stat = "static property";
     protected $prot = 4;
     private $priv = "keepOut";
+    public readonly $readonly = 1.0;
 }
 
 reflectProperty("TestClass", "pub");
 reflectProperty("TestClass", "stat");
 reflectProperty("TestClass", "prot");
 reflectProperty("TestClass", "priv");
+reflectProperty("TestClass", "readonly");
 
 ?>
 --EXPECT--
@@ -68,6 +72,8 @@ bool(true)
 isPrivate():
 bool(false)
 isProtected():
+bool(false)
+isReadonly():
 bool(false)
 isStatic():
 bool(false)
@@ -98,6 +104,8 @@ isPrivate():
 bool(false)
 isProtected():
 bool(false)
+isReadonly():
+bool(false)
 isStatic():
 bool(true)
 getValue():
@@ -127,6 +135,8 @@ isPrivate():
 bool(false)
 isProtected():
 bool(true)
+isReadonly():
+bool(false)
 isStatic():
 bool(false)
 
@@ -152,9 +162,40 @@ isPrivate():
 bool(true)
 isProtected():
 bool(false)
+isReadonly():
+bool(false)
 isStatic():
 bool(false)
 
 **********************************
+**********************************
+Reflecting on property TestClass::readonly
 
+__toString():
+string(40) "Property [ <default> public $readonly ]
+"
+export():
+string(40) "Property [ <default> public $readonly ]
+"
+export():
+Property [ <default> public $readonly ]
 
+NULL
+getName():
+string(8) "readonly"
+isPublic():
+bool(true)
+isPrivate():
+bool(false)
+isProtected():
+bool(false)
+isReadonly():
+bool(true)
+isStatic():
+bool(false)
+getValue():
+float(1)
+getValue() after a setValue():
+string(8) "NewValue"
+
+**********************************
