@@ -33,64 +33,6 @@ PHPDBG_API char *phpdbg_resolve_path(const char* TSRMLS_DC);
 PHPDBG_API char *phpdbg_trim(const char*, size_t, size_t*);
 PHPDBG_API const zend_function *phpdbg_get_function(const char*, const char* TSRMLS_DC);
 
-/**
- * Error/notice/formatting helpers
- */
-enum {
-	P_ERROR  = 1,
-	P_NOTICE,
-	P_WRITELN,
-	P_WRITE,
-	P_STDOUT,
-	P_STDERR,
-	P_LOG
-};
-
-#ifdef ZTS
-PHPDBG_API int phpdbg_print(int severity TSRMLS_DC, int fd, const char *tag, const char *xmlfmt, const char *strfmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 6, 7);
-#else
-PHPDBG_API int phpdbg_print(int severity TSRMLS_DC, int fd, const char *tag, const char *xmlfmt, const char *strfmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
-#endif
-
-PHPDBG_API int phpdbg_xml_internal(int fd TSRMLS_DC, const char *fmt, ...);
-PHPDBG_API int phpdbg_log_internal(int fd TSRMLS_DC, const char *fmt, ...);
-PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...);
-
-PHPDBG_API int phpdbg_rlog_internal(int fd TSRMLS_DC, const char *fmt, ...);
-#define phpdbg_rlog(fd, fmt, ...) phpdbg_rlog_internal(fd TSRMLS_CC, fmt, ##__VA_ARGS__)
-
-#define phpdbg_error(tag, xmlfmt, strfmt, ...)              phpdbg_print(P_ERROR   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
-#define phpdbg_notice(tag, xmlfmt, strfmt, ...)             phpdbg_print(P_NOTICE  TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
-#define phpdbg_writeln(tag, xmlfmt, strfmt, ...)            phpdbg_print(P_WRITELN TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
-#define phpdbg_write(tag, xmlfmt, strfmt, ...)              phpdbg_print(P_WRITE   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
-#define phpdbg_script(type, fmt, ...)                       phpdbg_print(type      TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, NULL, NULL,   fmt,    ##__VA_ARGS__)
-#define phpdbg_log(fmt, ...) phpdbg_log_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd TSRMLS_CC, fmt, ##__VA_ARGS__)
-#define phpdbg_xml(fmt, ...) phpdbg_xml_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd TSRMLS_CC, fmt, ##__VA_ARGS__)
-#define phpdbg_out(fmt, ...) phpdbg_out_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd TSRMLS_CC, fmt, ##__VA_ARGS__)
-
-#define phpdbg_error_ex(out, tag, xmlfmt, strfmt, ...)      phpdbg_print(P_ERROR   TSRMLS_CC, out, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
-#define phpdbg_notice_ex(out, tag, xmlfmt, strfmt, ...)     phpdbg_print(P_NOTICE  TSRMLS_CC, out, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
-#define phpdbg_writeln_ex(out, tag, xmlfmt, strfmt, ...)    phpdbg_print(P_WRITELN TSRMLS_CC, out, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
-#define phpdbg_write_ex(out, tag, xmlfmt, strfmt, ...)      phpdbg_print(P_WRITE   TSRMLS_CC, out, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
-#define phpdbg_script_ex(out, type, fmt, ...)               phpdbg_print(type      TSRMLS_CC, out, NULL, NULL,   fmt,    ##__VA_ARGS__)
-#define phpdbg_log_ex(out, fmt, ...) phpdbg_log_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd TSRMLS_CC, fmt, ##__VA_ARGS__)
-#define phpdbg_xml_ex(out, fmt, ...) phpdbg_xml_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd TSRMLS_CC, fmt, ##__VA_ARGS__)
-#define phpdbg_out_ex(out, fmt, ...) phpdbg_out_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd TSRMLS_CC, fmt, ##__VA_ARGS__)
-
-#if PHPDBG_DEBUG
-#	define phpdbg_debug(fmt, ...) phpdbg_log_ex(PHPDBG_G(io)[PHPDBG_STDERR].fd TSRMLS_CC, fmt, ##__VA_ARGS__)
-#else
-#	define phpdbg_debug(fmt, ...)
-#endif
-
-PHPDBG_API void phpdbg_free_err_buf(TSRMLS_D);
-PHPDBG_API void phpdbg_activate_err_buf(zend_bool active TSRMLS_DC);
-PHPDBG_API int phpdbg_output_err_buf(const char *tag, const char *xmlfmt, const char *strfmt TSRMLS_DC, ...);
-
-
-/* {{{ For separation */
-#define SEPARATE "------------------------------------------------" /* }}} */
-
 /* {{{ Color Management */
 #define PHPDBG_COLOR_LEN 12
 #define PHPDBG_COLOR_D(color, code) \

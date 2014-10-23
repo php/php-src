@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 7-4 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -110,6 +110,7 @@
 #endif
 
 #include "phpdbg_sigsafe.h"
+#include "phpdbg_out.h"
 #include "phpdbg_lexer.h"
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
