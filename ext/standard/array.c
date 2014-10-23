@@ -1301,9 +1301,10 @@ PHP_FUNCTION(array_search)
 }
 /* }}} */
 
-static int php_valid_var_name(char *var_name, int var_name_len) /* {{{ */
+static int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
 {
-	int i, ch;
+	size_t i;
+	int ch;
 
 	if (!var_name || !var_name_len) {
 		return 0;
@@ -1337,7 +1338,7 @@ static int php_valid_var_name(char *var_name, int var_name_len) /* {{{ */
 }
 /* }}} */
 
-PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, int var_name_len, zend_bool add_underscore TSRMLS_DC) /* {{{ */
+PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, size_t var_name_len, zend_bool add_underscore TSRMLS_DC) /* {{{ */
 {
 	ZVAL_NEW_STR(result, zend_string_alloc(Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0) + var_name_len, 0));
 	memcpy(Z_STRVAL_P(result), Z_STRVAL_P(prefix), Z_STRLEN_P(prefix));
@@ -1387,7 +1388,7 @@ PHP_FUNCTION(extract)
 
 	if (prefix) {
 		convert_to_string(prefix);
-		if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), (int)Z_STRLEN_P(prefix))) {
+		if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), Z_STRLEN_P(prefix))) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid identifier");
 			return;
 		}
@@ -1408,7 +1409,7 @@ PHP_FUNCTION(extract)
 
 			ZVAL_LONG(&num, num_key);
 			convert_to_string(&num);
-			php_prefix_varname(&final_name, prefix, Z_STRVAL(num), (int)Z_STRLEN(num), 1 TSRMLS_CC);
+			php_prefix_varname(&final_name, prefix, Z_STRVAL(num), Z_STRLEN(num), 1 TSRMLS_CC);
 			zval_dtor(&num);
 		} else {
 			continue;
@@ -1432,7 +1433,7 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_IF_EXISTS:
 				if (var_exists) {
-					php_prefix_varname(&final_name, prefix, var_name->val, (int)var_name->len, 1 TSRMLS_CC);
+					php_prefix_varname(&final_name, prefix, var_name->val, var_name->len, 1 TSRMLS_CC);
 				}
 				break;
 
@@ -1444,14 +1445,14 @@ PHP_FUNCTION(extract)
 
 			case EXTR_PREFIX_ALL:
 				if (Z_TYPE(final_name) == IS_NULL && var_name->len != 0) {
-					php_prefix_varname(&final_name, prefix, var_name->val, (int)var_name->len, 1 TSRMLS_CC);
+					php_prefix_varname(&final_name, prefix, var_name->val, var_name->len, 1 TSRMLS_CC);
 				}
 				break;
 
 			case EXTR_PREFIX_INVALID:
 				if (Z_TYPE(final_name) == IS_NULL) {
-					if (!php_valid_var_name(var_name->val, (int)var_name->len)) {
-						php_prefix_varname(&final_name, prefix, var_name->val, (int)var_name->len, 1 TSRMLS_CC);
+					if (!php_valid_var_name(var_name->val, var_name->len)) {
+						php_prefix_varname(&final_name, prefix, var_name->val, var_name->len, 1 TSRMLS_CC);
 					} else {
 						ZVAL_STR_COPY(&final_name, var_name);
 					}
@@ -1465,7 +1466,7 @@ PHP_FUNCTION(extract)
 				break;
 		}
 
-		if (Z_TYPE(final_name) != IS_NULL && php_valid_var_name(Z_STRVAL(final_name), (int)Z_STRLEN(final_name))) {
+		if (Z_TYPE(final_name) != IS_NULL && php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 			if (extract_refs) {
 				zval *orig_var;
 
