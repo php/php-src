@@ -225,10 +225,11 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 		}
 
 		if (user_defined == SUCCESS) {
-			phpdbg_out("frame #%d: ", i++);
+			phpdbg_out("frame #%d: ", i);
 			phpdbg_xml("<frame %r id=\"%d\" file=\"%s\" line=\"%d\"", i, Z_STRVAL_PP(file), Z_LVAL_PP(line));
 			phpdbg_dump_prototype(tmp TSRMLS_CC);
 			phpdbg_out(" at %s:%ld\n", Z_STRVAL_PP(file), Z_LVAL_PP(line));
+			i++;
 		} else {
 			phpdbg_out(" => ");
 			phpdbg_xml("<frame %r id=\"%d\" internal=\"internal\"", i);
