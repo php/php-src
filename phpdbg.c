@@ -463,6 +463,11 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 	* We must not request TSRM before being boot
 	*/
 	if (phpdbg_booted) {
+		if (PHPDBG_G(flags) & PHPDBG_IN_EVAL) {
+			phpdbg_error("eval", "msg=\"%s\"", "%s", message);
+			return;
+		}
+
 		phpdbg_error("php", "msg=\"%s\"", "%s", message);
 
 		switch (PG(last_error_type)) {
