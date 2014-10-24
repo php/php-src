@@ -2699,7 +2699,7 @@ ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *or
 }
 /* }}} */
 
-ZEND_API int zend_register_class_alias_ex(const char *name, int name_len, zend_class_entry *ce TSRMLS_DC) /* {{{ */
+ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	zend_string *lcname;
 
@@ -2759,7 +2759,7 @@ static zend_function_entry disabled_function[] = {
 	ZEND_FE_END
 };
 
-ZEND_API int zend_disable_function(char *function_name, uint function_name_length TSRMLS_DC) /* {{{ */
+ZEND_API int zend_disable_function(char *function_name, size_t function_name_length TSRMLS_DC) /* {{{ */
 {
 	int ret;
 
@@ -2792,7 +2792,7 @@ static const zend_function_entry disabled_class_new[] = {
 	ZEND_FE_END
 };
 
-ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_DC) /* {{{ */
+ZEND_API int zend_disable_class(char *class_name, size_t class_name_length TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *disabled_class;
 	zend_string *key;
