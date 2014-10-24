@@ -511,7 +511,7 @@ static int phpdbg_xml_array_element_dump(zval **zv TSRMLS_DC, int num_args, va_l
 		if (hash_key->nKeyLength == 0) { /* numeric key */
 			phpdbg_xml(" name=\"%ld\"", hash_key->h);
 		} else { /* string key */
-			phpdbg_xml(" name=\"%.*s\"", hash_key->arKey, hash_key->nKeyLength - 1);
+			phpdbg_xml(" name=\"%.*s\"", hash_key->nKeyLength - 1, hash_key->arKey);
 		}
 	} phpdbg_catch_access {
 		phpdbg_xml(" severity=\"error\" ></element>");
@@ -545,7 +545,7 @@ static int phpdbg_xml_object_property_dump(zval **zv TSRMLS_DC, int num_args, va
 					phpdbg_xml("class=\"%s\" protection=\"private\"", class_name);
 				}
 			} else {
-				phpdbg_xml(" name=\"%.*s\" protection=\"public\"", hash_key->arKey, hash_key->nKeyLength - 1);
+				phpdbg_xml(" name=\"%.*s\" protection=\"public\"", hash_key->nKeyLength - 1, hash_key->arKey);
 			}
 		}
 	} phpdbg_catch_access {
@@ -583,10 +583,10 @@ PHPDBG_API void phpdbg_xml_var_dump(zval **zv TSRMLS_DC) {
 				phpdbg_xml("<int refstatus=\"%s\" value=\"%ld\" />", COMMON, Z_LVAL_PP(zv));
 				break;
 			case IS_DOUBLE:
-				phpdbg_xml("<float refstatus=\"%s\" value=\"%.*G\" />", COMMON, (int) EG(precision), Z_DVAL_PP(zv));
+				php_printf("<float refstatus=\"%s\" value=\"%.*G\" />", COMMON, (int) EG(precision), Z_DVAL_PP(zv));
 					break;
 			case IS_STRING:
-				phpdbg_xml("<string refstatus=\"%s\" length=\"%d\" value=\"%.*s\" />", COMMON, Z_STRLEN_PP(zv), Z_STRLEN_PP(zv), Z_STRVAL_PP(zv));
+				php_printf("<string refstatus=\"%s\" length=\"%d\" value=\"%.*s\" />", COMMON, Z_STRLEN_PP(zv), Z_STRLEN_PP(zv), Z_STRVAL_PP(zv));
 					break;
 			case IS_ARRAY:
 				myht = Z_ARRVAL_PP(zv);
@@ -603,7 +603,7 @@ PHPDBG_API void phpdbg_xml_var_dump(zval **zv TSRMLS_DC) {
 				myht = Z_OBJDEBUG_PP(zv, is_temp);
 					if (myht && ++myht->nApplyCount > 1) {
 					phpdbg_xml("<recursion />");
-					--myht->nApplyCount;
+						--myht->nApplyCount;
 					break;
 				}
 	
@@ -621,7 +621,7 @@ head_done:
 					--myht->nApplyCount;
 					if (is_temp) {
 						zend_hash_destroy(myht);
-						efree(myht);
+							efree(myht);
 					}
 				}
 				if (Z_TYPE_PP(zv) == IS_ARRAY) {
@@ -634,7 +634,7 @@ head_done:
 				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(zv) TSRMLS_CC);
 				phpdbg_xml("<resource refstatus=\"%s\" id=\"%ld\" type=\"%ld\" />", COMMON, Z_LVAL_PP(zv), type_name ? type_name : "unknown");
 				break;
-			}
+				}
 			default:
 				break;
 		}
