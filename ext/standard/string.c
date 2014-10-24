@@ -2764,13 +2764,13 @@ PHP_FUNCTION(ucwords)
 PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size_t trlen)
 {
 	size_t i;
-	unsigned char xlat[256], j;
+	unsigned char xlat[256], j = 0;
 
 	if ((trlen < 1) || (len < 1)) {
 		return str;
 	}
 
-	for (j = 0; j < 256; xlat[j] = j, j++);
+	do { xlat[j] = j; } while (++j != 0);
 
 	for (i = 0; i < trlen; i++) {
 		xlat[(size_t) str_from[i]] = str_to[i];
