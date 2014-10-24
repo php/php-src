@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 7-4 The PHP Group                                      |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,30 +12,31 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Felipe Pena <felipe@php.net>                                |
-   | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
-   | Authors: Bob Weinand <bwoebi@php.net>                                |
+   | Authors: Anatol Belski <ab@php.net>                                  |
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_INFO_H
-#define PHPDBG_INFO_H
 
-#include "phpdbg_cmd.h"
+#ifndef PHPDBG_SIGIO_WIN32_H
+#define PHPDBG_SIGIO_WIN32_H
 
-#define PHPDBG_INFO(name) PHPDBG_COMMAND(info_##name)
+#include "phpdbg.h"
+#include "phpdbg_prompt.h"
+#include "phpdbg_io.h"
 
-PHPDBG_INFO(files);
-PHPDBG_INFO(break);
-PHPDBG_INFO(classes);
-PHPDBG_INFO(funcs);
-PHPDBG_INFO(error);
-PHPDBG_INFO(constants);
-PHPDBG_INFO(vars);
-PHPDBG_INFO(globals);
-PHPDBG_INFO(literal);
-PHPDBG_INFO(memory);
+struct win32_sigio_watcher_data {
+	zend_ulong flags;
+#ifdef ZTS
+	void ***tsrm_ls;
+#endif
+	int fd;
+	zend_uchar running;
+};
 
-extern const phpdbg_command_t phpdbg_info_commands[];
+void
+sigio_watcher_start(void);
 
-#endif /* PHPDBG_INFO_H */
+void
+sigio_watcher_stop(void);
+
+#endif /* PHPDBG_SIGIO_WIN32_H */

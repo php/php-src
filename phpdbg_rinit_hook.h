@@ -18,38 +18,24 @@
    +----------------------------------------------------------------------+
 */
 
-#include "phpdbg.h"
-#include "phpdbg_print.h"
-#include "phpdbg_utils.h"
-#include "phpdbg_opcode.h"
-#include "phpdbg_break.h"
-#include "phpdbg_bp.h"
-#include "phpdbg_prompt.h"
+#ifndef PHPDBG_WEBHELPER_H
+#define PHPDBG_WEBHELPER_H
 
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+#include "phpdbg_webdata_transfer.h"
 
-#define PHPDBG_BREAK_COMMAND_D(f, h, a, m, l, s, flags) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[10], flags)
+extern zend_module_entry phpdbg_webhelper_module_entry;
+#define phpext_phpdbg_webhelper_ptr &phpdbg_webhelper_module_entry
 
-/**
- * Commands
- */
-const phpdbg_command_t phpdbg_break_commands[] = {
-	PHPDBG_BREAK_COMMAND_D(at,         "specify breakpoint by location and condition",           '@', break_at,      NULL, "*c", 0),
-	PHPDBG_BREAK_COMMAND_D(del,        "delete breakpoint by identifier number",                 '~', break_del,     NULL, "n",  0),
-	PHPDBG_END_COMMAND
-};
+#ifdef ZTS
+# define PHPDBG_WG(v) TSRMG(phpdbg_webhelper_globals_id, zend_phpdbg_webhelper_globals *, v)
+#else
+# define PHPDBG_WG(v) (phpdbg_webhelper_globals.v)
+#endif
 
-PHPDBG_BREAK(at) /* {{{ */
-{
-	phpdbg_set_breakpoint_at(param TSRMLS_CC);
+/* {{{ structs */
+ZEND_BEGIN_MODULE_GLOBALS(phpdbg_webhelper)
+	char *auth;
+	char *path;
+ZEND_END_MODULE_GLOBALS(phpdbg_webhelper) /* }}} */
 
-	return SUCCESS;
-} /* }}} */
-
-PHPDBG_BREAK(del) /* {{{ */
-{
-	phpdbg_delete_breakpoint(param->num TSRMLS_CC);
-
-	return SUCCESS;
-} /* }}} */
+#endif /* PHPDBG_WEBHELPER_H */

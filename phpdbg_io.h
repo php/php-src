@@ -12,37 +12,23 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Felipe Pena <felipe@php.net>                                |
-   | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
-   | Authors: Bob Weinand <bwoebi@php.net>                                |
+   | Authors: Anatol Belski <ab@php.net>                                  |
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_HELP_H
-#define PHPDBG_HELP_H
+#ifndef PHPDBG_IO_H
+#define PHPDBG_IO_H
 
-#include "TSRM.h"
 #include "phpdbg.h"
-#include "phpdbg_cmd.h"
 
-#define PHPDBG_HELP(name) PHPDBG_COMMAND(help_##name)
+PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo TSRMLS_DC);
+PHPDBG_API int phpdbg_send_bytes(int sock, const char *ptr, int len);
+PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo TSRMLS_DC);
+PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len TSRMLS_DC);
 
-/**
- * Helper Forward Declarations
- */
-PHPDBG_HELP(aliases);
+PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short port, struct addrinfo *res TSRMLS_DC);
+PHPDBG_API int phpdbg_open_socket(const char *interface, unsigned short port TSRMLS_DC);
+PHPDBG_API void phpdbg_close_socket(int sock);
 
-extern const phpdbg_command_t phpdbg_help_commands[];
+#endif /* PHPDBG_IO_H */
 
-#define phpdbg_help_header() \
-	phpdbg_notice("version", "version=\"%s\"", "Welcome to phpdbg, the interactive PHP debugger, v%s", PHPDBG_VERSION);
-#define phpdbg_help_footer() \
-	phpdbg_notice("issues", "url=\"%s\"", "Please report bugs to <%s>", PHPDBG_ISSUES);
-
-typedef struct _phpdbg_help_text_t {
-	char *key;
-	char *text;
-} phpdbg_help_text_t;
-
-extern phpdbg_help_text_t phpdbg_help_text[];
-#endif /* PHPDBG_HELP_H */

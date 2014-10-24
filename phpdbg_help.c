@@ -22,6 +22,7 @@
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 #include "phpdbg_prompt.h"
+#include "phpdbg_eol.h"
 #include "zend.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -60,6 +61,11 @@ void pretty_print(char *text TSRMLS_DC)
 	char *last_new_blank = NULL;          /* position in new buffer of last blank char */
 	unsigned int last_blank_count = 0;    /* printable char offset of last blank char */
 	unsigned int line_count = 0;          /* number printable chars on current line */
+
+	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
+		phpdbg_xml("<help %r msg=\"%s\" />", text);
+		return;
+	}
 
 	/* First pass calculates a safe size for the pretty print version */
 	for (p = text; *p; p++) {
@@ -128,10 +134,10 @@ void pretty_print(char *text TSRMLS_DC)
 	*q++ = '\0';
 
 	if ((q-new)>size) {
-		phpdbg_error("Output overrun of %lu bytes", ((q-new) - size));
+		phpdbg_error("help", "overrun=\"%lu\"", "Output overrun of %lu bytes", ((q - new) - size));
 	}
 
-	phpdbg_write("%s\n", new);
+	phpdbg_out("%s\n", new);
 	efree(new);
 }  /* }}} */
 
@@ -201,7 +207,7 @@ static int get_command(
 
 	return num_matches;
 
-} /* }}} */	
+} /* }}} */
 
 PHPDBG_COMMAND(help) /* {{{ */
 {
@@ -231,7 +237,7 @@ PHPDBG_COMMAND(help) /* {{{ */
 				pretty_print(get_help("duplicate!" TSRMLS_CC) TSRMLS_CC);
 				return SUCCESS;
 			} else {
-				phpdbg_error("Internal help error, non-unique alias \"%c\"", param->str[0]);
+				phpdbg_error("help", "type=\"ambiguousalias\" alias=\"%s\"", "Internal help error, non-unique alias \"%c\"", param->str[0]);
 				return FAILURE;
 			}
 
@@ -259,33 +265,40 @@ PHPDBG_HELP(aliases) /* {{{ */
 	int len;
 
 	/* Print out aliases for all commands except help as this one comes last */
-	phpdbg_writeln("Below are the aliased, short versions of all supported commands");
+	phpdbg_writeln("help", "", "Below are the aliased, short versions of all supported commands");
+	phpdbg_xml("<helpcommands %r>");
 	for(c = phpdbg_prompt_commands; c->name; c++) {
 		if (c->alias && c->alias != 'h') {
-			phpdbg_writeln(" %c     %-20s  %s", c->alias, c->name, c->tip);
+			phpdbg_writeln("command", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s", c->alias, c->name, c->tip);
 			if (c->subs) {
 				len = 20 - 1 - c->name_len;
 				for(c_sub = c->subs; c_sub->alias; c_sub++) {
 					if (c_sub->alias) {
-						phpdbg_writeln(" %c %c   %s %-*s  %s",
-							c->alias, c_sub->alias, (char *)c->name, len, c_sub->name, c_sub->tip);
+						phpdbg_writeln("subcommand", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
+							c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 					}
 				}
 			}
 		}
 	}
 
+	phpdbg_xml("</helpcommands>");
+
 	/* Print out aliases for help as this one comes last, with the added text on how aliases are used */
 	get_command("h", 1, &c, phpdbg_prompt_commands TSRMLS_CC);
-	phpdbg_writeln(" %c     %-20s  %s\n", c->alias, c->name, c->tip);
+	phpdbg_writeln("aliasinfo", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s\n", c->alias, c->name, c->tip);
+
+	phpdbg_xml("<helpaliases>");
 
 	len = 20 - 1 - c->name_len;
 	for(c_sub = c->subs; c_sub->alias; c_sub++) {
 		if (c_sub->alias) {
-			phpdbg_writeln(" %c %c   %s %-*s  %s",
+			phpdbg_writeln("alias", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
 				c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 		}
 	}
+
+	phpdbg_xml("</helpaliases>");
 
 	pretty_print(get_help("aliases!" TSRMLS_CC) TSRMLS_CC);
 	return SUCCESS;
@@ -307,7 +320,7 @@ PHPDBG_HELP(aliases) /* {{{ */
  * Also note the convention that help text not directly referenceable as a help param
  * has a key ending in !
  */
-#define CR "\n"
+#define CR "\n" 
 phpdbg_help_text_t phpdbg_help_text[] = {
 
 /******************************** General Help Topics ********************************/
@@ -362,7 +375,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-c**      **-c**/my/php.ini       Set php.ini file to load" CR
 "  **-d**      **-d**memory_limit=4G   Set a php.ini directive" CR
 "  **-n**                          Disable default php.ini" CR
-"  **-q**                          Supress welcome banner" CR
+"  **-q**                          Suppress welcome banner" CR
 "  **-v**                          Enable oplog output" CR
 "  **-s**                          Enable stepping" CR
 "  **-b**                          Disable colour" CR
@@ -375,6 +388,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-l**      **-l**4000              Setup remote console ports" CR
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
+"  **-x**                          Enable xml output (instead of normal text output)" CR
 "  **-V**                          Print version number" CR
 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
 "argument after it" CR CR
@@ -386,9 +400,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "bind address using the **-a** option. If **-a** is specied without an argument, then phpdbg "
 "will bind to all available interfaces.  You should be aware of the security implications of "
 "doing this, so measures should be taken to secure this service if bound to a publicly accessible "
-"interface/port." CR CR
-
-"Specify both stdin and stdout with -lstdin/stdout; by default stdout is stdin * 2."
+"interface/port."
 },
 
 {"phpdbginit", CR
@@ -545,7 +557,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "    $P break ZEND_ADD" CR
 "    $P b ZEND_ADD" CR
-"    Break on any occurence of the opcode ZEND_ADD" CR CR
+"    Break on any occurrence of the opcode ZEND_ADD" CR CR
 
 "    $P break del 2" CR
 "    $P b ~ 2" CR
@@ -642,14 +654,16 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Specific info commands are show below:" CR CR
 
 "  **Target**   **Alias**  **Purpose**" CR
-"  **break**    **b**      show current breakpoints" CR
-"  **files**    **F**      show included files" CR
-"  **classes**  **c**      show loaded classes" CR
-"  **funcs**    **f**      show loaded classes" CR
-"  **error**    **e**      show last error" CR
-"  **vars**     **v**      show active variables" CR
-"  **literal**  **l**      show active literal constants" CR
-"  **memory**   **m**      show memory manager stats"
+"  **break**      **b**      show current breakpoints" CR
+"  **files**      **F**      show included files" CR
+"  **classes**    **c**      show loaded classes" CR
+"  **funcs**      **f**      show loaded functions" CR
+"  **error**      **e**      show last error" CR
+"  **constants**  **d**      show user-defined constants" CR
+"  **vars**       **v**      show active variables" CR
+"  **globals**    **g**      show superglobal variables" CR
+"  **literal**    **l**      show active literal constants" CR
+"  **memory**     **m**      show memory manager stats"
 },
 
 // ******** same issue about breakpoints in called frames
