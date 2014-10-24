@@ -2764,20 +2764,20 @@ PHP_FUNCTION(ucwords)
 PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size_t trlen)
 {
 	size_t i;
-	unsigned char xlat[256];
+	unsigned char xlat[256], j;
 
 	if ((trlen < 1) || (len < 1)) {
 		return str;
 	}
 
-	for (i = 0; i < 256; xlat[i] = i, i++);
+	for (j = 0; j < 256; xlat[j] = j, j++);
 
 	for (i = 0; i < trlen; i++) {
-		xlat[(unsigned char) str_from[i]] = str_to[i];
+		xlat[(size_t) str_from[i]] = str_to[i];
 	}
 
 	for (i = 0; i < len; i++) {
-		str[i] = xlat[(unsigned char) str[i]];
+		str[i] = xlat[(size_t) str[i]];
 	}
 
 	return str;
@@ -4183,7 +4183,7 @@ PHP_FUNCTION(setlocale)
 
 #ifdef HAVE_SETLOCALE
 	if (Z_TYPE_P(pcategory) == IS_LONG) {
-		cat = Z_LVAL_P(pcategory);
+		cat = (int)Z_LVAL_P(pcategory);
 	} else {
 		/* FIXME: The following behaviour should be removed. */
 		char *category;
@@ -4894,14 +4894,14 @@ PHP_FUNCTION(localeconv)
 		localeconv_r( &currlocdata );
 
 		/* Grab the grouping data out of the array */
-		len = strlen(currlocdata.grouping);
+		len = (int)strlen(currlocdata.grouping);
 
 		for (i = 0; i < len; i++) {
 			add_index_long(&grouping, i, currlocdata.grouping[i]);
 		}
 
 		/* Grab the monetary grouping data out of the array */
-		len = strlen(currlocdata.mon_grouping);
+		len = (int)strlen(currlocdata.mon_grouping);
 
 		for (i = 0; i < len; i++) {
 			add_index_long(&mon_grouping, i, currlocdata.mon_grouping[i]);
@@ -5344,7 +5344,7 @@ PHP_FUNCTION(str_split)
 		return;
 	}
 
-	array_init_size(return_value, ((str->len - 1) / split_length) + 1);
+	array_init_size(return_value, (uint32_t)(((str->len - 1) / split_length) + 1));
 
 	n_reg_segments = str->len / split_length;
 	p = str->val;
