@@ -462,6 +462,7 @@ ev
 - eval()uates some code
 - output wrapped in &lt;eval> tags
 - output is here first a dump of xml tags (see "Variable Dump" section), then a dump wrapped in <stream> tags
+- if there's an error, the tag will be <eval>, instead of the usual <php> tag
 
 sh
 --
