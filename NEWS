@@ -15,6 +15,10 @@ PHP                                                                        NEWS
     array notation) (Florian)
   . Implemented 64-bit format codes for pack() and unpack(). (Leigh)
 
+- phpdbg:
+  . Added XML protocol (-x command line flag). (Bob)
+  . Added hard interruptions (twice SIGINT). (Bob)
+
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
   . Fixed bug #68224 (buffer-overflow in libmagic/readcdf.c caught by
