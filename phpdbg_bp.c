@@ -1414,10 +1414,10 @@ PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
 					case PHPDBG_BREAK_METHOD_OPLINE:
 					case PHPDBG_BREAK_FUNCTION_OPLINE:
 					case PHPDBG_BREAK_FILE_OPLINE:
-						phpdbg_out("opline", "id=\"%d\" num=\"%#lx\" type=\"%s\" disabled=\"%s\"", "#%d\t\t%#lx\t\t(%s breakpoint)%s", brake->id, brake->opline,
-							brake->type == PHPDBG_BREAK_METHOD_OPLINE?"method":
-								brake->type == PHPDBG_BREAK_FUNCTION_OPLINE?"function":
-									brake->type == PHPDBG_BREAK_FILE_OPLINE?"file":
+						phpdbg_writeln("opline", "id=\"%d\" num=\"%#lx\" type=\"%s\" disabled=\"%s\"", "#%d\t\t%#lx\t\t(%s breakpoint)%s", brake->id, brake->opline,
+							brake->type == PHPDBG_BREAK_METHOD_OPLINE ? "method" :
+								brake->type == PHPDBG_BREAK_FUNCTION_OPLINE ? "function" :
+									brake->type == PHPDBG_BREAK_FILE_OPLINE ? "file" :
 										"--- error ---",
 							((phpdbg_breakbase_t*)brake)->disabled ? " [disabled]" : "");
 						break;

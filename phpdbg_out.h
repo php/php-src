@@ -36,16 +36,18 @@ enum {
 
 #ifdef ZTS
 PHPDBG_API int phpdbg_print(int severity TSRMLS_DC, int fd, const char *tag, const char *xmlfmt, const char *strfmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 6, 7);
+PHPDBG_API int phpdbg_xml_internal(int fd TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPDBG_API int phpdbg_log_internal(int fd TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPDBG_API int phpdbg_rlog_internal(int fd TSRMLS_DC, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 #else
-PHPDBG_API int phpdbg_print(int severity TSRMLS_DC, int fd, const char *tag, const char *xmlfmt, const char *strfmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
+PHPDBG_API int phpdbg_print(int severity, int fd, const char *tag, const char *xmlfmt, const char *strfmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
+PHPDBG_API int phpdbg_xml_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPDBG_API int phpdbg_log_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 #endif
 
-PHPDBG_API int phpdbg_xml_internal(int fd TSRMLS_DC, const char *fmt, ...);
-PHPDBG_API int phpdbg_log_internal(int fd TSRMLS_DC, const char *fmt, ...);
-PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...);
-
-PHPDBG_API int phpdbg_rlog_internal(int fd TSRMLS_DC, const char *fmt, ...);
-#define phpdbg_rlog(fd, fmt, ...) phpdbg_rlog_internal(fd TSRMLS_CC, fmt, ##__VA_ARGS__)
 
 #define phpdbg_error(tag, xmlfmt, strfmt, ...)              phpdbg_print(P_ERROR   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
 #define phpdbg_notice(tag, xmlfmt, strfmt, ...)             phpdbg_print(P_NOTICE  TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
@@ -64,6 +66,8 @@ PHPDBG_API int phpdbg_rlog_internal(int fd TSRMLS_DC, const char *fmt, ...);
 #define phpdbg_log_ex(out, fmt, ...) phpdbg_log_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd TSRMLS_CC, fmt, ##__VA_ARGS__)
 #define phpdbg_xml_ex(out, fmt, ...) phpdbg_xml_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd TSRMLS_CC, fmt, ##__VA_ARGS__)
 #define phpdbg_out_ex(out, fmt, ...) phpdbg_out_internal(PHPDBG_G(io)[PHPDBG_STDOUT].fd TSRMLS_CC, fmt, ##__VA_ARGS__)
+
+#define phpdbg_rlog(fd, fmt, ...) phpdbg_rlog_internal(fd TSRMLS_CC, fmt, ##__VA_ARGS__)
 
 #define phpdbg_xml_asprintf(buf, ...) _phpdbg_xml_asprintf(buf TSRMLS_CC, ##__VA_ARGS__)
 PHPDBG_API int _phpdbg_xml_asprintf(char **buf TSRMLS_DC, const char *format, zend_bool escape_xml, ...);
