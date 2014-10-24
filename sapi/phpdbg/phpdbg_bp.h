@@ -21,6 +21,19 @@
 #ifndef PHPDBG_BP_H
 #define PHPDBG_BP_H
 
+/* {{{ defines */
+#define PHPDBG_BREAK_FILE            0
+#define PHPDBG_BREAK_SYM             1
+#define PHPDBG_BREAK_OPLINE          2
+#define PHPDBG_BREAK_METHOD          3
+#define PHPDBG_BREAK_COND            4
+#define PHPDBG_BREAK_OPCODE          5
+#define PHPDBG_BREAK_FUNCTION_OPLINE 6
+#define PHPDBG_BREAK_METHOD_OPLINE   7
+#define PHPDBG_BREAK_FILE_OPLINE     8
+#define PHPDBG_BREAK_MAP             9
+#define PHPDBG_BREAK_TABLES          10 /* }}} */
+
 /* {{{ */
 typedef struct _zend_op *phpdbg_opline_ptr_t; /* }}} */
 
