@@ -266,7 +266,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 }
 
 
-ZEND_API int zend_print_variable(zval *var TSRMLS_DC) 
+ZEND_API size_t zend_print_variable(zval *var TSRMLS_DC) 
 {
 	return zend_print_zval(var, 0 TSRMLS_CC);
 }
