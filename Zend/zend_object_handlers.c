@@ -268,12 +268,7 @@ static zend_always_inline int zend_verify_property_access(zend_property_info *pr
 		case ZEND_ACC_PROTECTED:
 			return zend_check_protected(property_info->ce, EG(scope));
 		case ZEND_ACC_PRIVATE:
-			if ((ce==EG(scope) || property_info->ce == EG(scope)) && EG(scope)) {
-				return 1;
-			} else {
-				return 0;
-			}
-			break;
+			return (ce == EG(scope) || property_info->ce == EG(scope));
 	}
 	return 0;
 }
@@ -295,9 +290,9 @@ static zend_always_inline zend_bool is_derived_class(zend_class_entry *child_cla
 
 static zend_always_inline zend_property_info *zend_get_property_info_quick(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot TSRMLS_DC) /* {{{ */
 {
-	zend_property_info *property_info;
-	zend_property_info *scope_property_info;
-	zend_bool denied_access = 0;
+	zval *zv;
+	zend_property_info *property_info = NULL;
+	uint32_t flags;
 
 	if (cache_slot && EXPECTED(ce == CACHED_PTR_EX(cache_slot))) {
 		return CACHED_PTR_EX(cache_slot + 1);
@@ -313,60 +308,61 @@ static zend_always_inline zend_property_info *zend_get_property_info_quick(zend_
 		}
 		return ZEND_WRONG_PROPERTY_INFO;
 	}
-	property_info = zend_hash_find_ptr(&ce->properties_info, member);
-	if (property_info != NULL) {
-		if (UNEXPECTED((property_info->flags & ZEND_ACC_SHADOW) != 0)) {
+
+	if (UNEXPECTED(zend_hash_num_elements(&ce->properties_info) == 0)) {
+		goto exit_dynamic;
+	}
+
+	zv = zend_hash_find(&ce->properties_info, member);
+	if (EXPECTED(zv != NULL)) {
+		property_info = (zend_property_info*)Z_PTR_P(zv);
+		flags = property_info->flags;
+		if (UNEXPECTED((flags & ZEND_ACC_SHADOW) != 0)) {
 			/* if it's a shadow - go to access it's private */
 			property_info = NULL;
 		} else {
 			if (EXPECTED(zend_verify_property_access(property_info, ce TSRMLS_CC) != 0)) {
-				if (EXPECTED((property_info->flags & ZEND_ACC_CHANGED) != 0)
-					&& EXPECTED(!(property_info->flags & ZEND_ACC_PRIVATE))) {
-					/* We still need to make sure that we're not in a context
-					 * where the right property is a different 'statically linked' private
-					 * continue checking below...
-					 */
-				} else {
-					if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) != 0) && !silent) {
+				if (UNEXPECTED(!(flags & ZEND_ACC_CHANGED))
+					|| UNEXPECTED((flags & ZEND_ACC_PRIVATE))) {
+					if (UNEXPECTED((flags & ZEND_ACC_STATIC) != 0) && !silent) {
 						zend_error(E_STRICT, "Accessing static property %s::$%s as non static", ce->name->val, member->val);
 					}
-					if (cache_slot) {
-						CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, property_info);
-					}
-					return property_info;
+					goto exit;
 				}
 			} else {
 				/* Try to look in the scope instead */
-				denied_access = 1;
+				property_info = ZEND_WRONG_PROPERTY_INFO;
 			}
 		}
 	}
+	
 	if (EG(scope) != ce
 		&& EG(scope)
 		&& is_derived_class(ce, EG(scope))
-		&& (scope_property_info = zend_hash_find_ptr(&EG(scope)->properties_info, member)) != NULL
-		&& scope_property_info->flags & ZEND_ACC_PRIVATE) {
-		if (cache_slot) {
-			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, scope_property_info);
-		}
-		return scope_property_info;
-	} else if (property_info) {
-		if (UNEXPECTED(denied_access != 0)) {
-			/* Information was available, but we were denied access.  Error out. */
-			if (!silent) {
-				zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name->val, member->val);
-			}
-			return ZEND_WRONG_PROPERTY_INFO;
-		} else {
-			/* fall through, return property_info... */
-			if (cache_slot) {
-				CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, property_info);
-			}
-		}
-	} else {
+		&& (zv = zend_hash_find(&EG(scope)->properties_info, member)) != NULL
+		&& ((zend_property_info*)Z_PTR_P(zv))->flags & ZEND_ACC_PRIVATE) {
+		property_info = (zend_property_info*)Z_PTR_P(zv);
+		goto exit;
+	} else if (UNEXPECTED(property_info == NULL)) {
+exit_dynamic:
 		if (cache_slot) {
 			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, NULL);
 		}
+		return NULL;
+	} else if (UNEXPECTED(property_info == ZEND_WRONG_PROPERTY_INFO)) {
+		/* Information was available, but we were denied access.  Error out. */
+		if (!silent) {
+			zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(flags), ce->name->val, member->val);
+		}
+		if (cache_slot) {
+			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, ZEND_WRONG_PROPERTY_INFO);
+		}
+		return ZEND_WRONG_PROPERTY_INFO;
+	}
+
+exit:
+	if (cache_slot) {
+		CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, property_info);
 	}
 	return property_info;
 }
@@ -462,12 +458,12 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 		    EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0)) {
 
 			retval = &zobj->properties_table[property_info->offset];
-			if (Z_TYPE_P(retval) != IS_UNDEF) {
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
 				goto exit;
 			}
-		} else if (UNEXPECTED(zobj->properties != NULL)) {
+		} else if (EXPECTED(zobj->properties != NULL)) {
 			retval = zend_hash_find(zobj->properties, Z_STR_P(member));
-			if (retval) goto exit;
+			if (EXPECTED(retval)) goto exit;
 		}
 	}
 
@@ -831,7 +827,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 				ZVAL_UNDEF(&zobj->properties_table[property_info->offset]);
 				goto exit;
 			}
-		} else if (zobj->properties &&
+		} else if (EXPECTED(zobj->properties != NULL) &&
         	EXPECTED(zend_hash_del(zobj->properties, Z_STR_P(member)) != FAILURE)) {
 			goto exit;
 		}
@@ -1427,7 +1423,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 			if (Z_TYPE_P(value) != IS_UNDEF) {
 				goto found;
 			}
-		} else if (UNEXPECTED(zobj->properties != NULL) &&
+		} else if (EXPECTED(zobj->properties != NULL) &&
 		           (value = zend_hash_find(zobj->properties, Z_STR_P(member))) != NULL) {
 found:
 			switch (has_set_exists) {

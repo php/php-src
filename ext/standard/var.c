@@ -389,7 +389,7 @@ PHP_FUNCTION(debug_zval_dump)
 #define buffer_append_spaces(buf, num_spaces) \
 	do { \
 		char *tmp_spaces; \
-		int tmp_spaces_len; \
+		size_t tmp_spaces_len; \
 		tmp_spaces_len = spprintf(&tmp_spaces, 0,"%*c", num_spaces, ' '); \
 		smart_str_appendl(buf, tmp_spaces, tmp_spaces_len); \
 		efree(tmp_spaces); \
@@ -594,7 +594,7 @@ PHP_FUNCTION(var_export)
 
 static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash TSRMLS_DC);
 
-static inline uint32_t php_add_var_hash(php_serialize_data_t data, zval *var TSRMLS_DC) /* {{{ */
+static inline zend_long php_add_var_hash(php_serialize_data_t data, zval *var TSRMLS_DC) /* {{{ */
 {
 	zval *zv;
 	zend_ulong key;
@@ -772,7 +772,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 
 static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash TSRMLS_DC) /* {{{ */
 {
-	uint32_t var_already;
+	zend_long var_already;
 	HashTable *myht;
 
 	if (EG(exception)) {
@@ -816,7 +816,7 @@ again:
 
 				smart_str_appendl(buf, "d:", 2);
 				s = (char *) safe_emalloc(PG(serialize_precision), 1, MAX_LENGTH_OF_DOUBLE + 1);
-				php_gcvt(Z_DVAL_P(struc), PG(serialize_precision), '.', 'E', s);
+				php_gcvt(Z_DVAL_P(struc), (int)PG(serialize_precision), '.', 'E', s);
 				smart_str_appends(buf, s);
 				smart_str_appendc(buf, ';');
 				efree(s);

@@ -497,7 +497,9 @@ static void TIDY_CALL php_tidy_panic(ctmbstr msg)
 static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS_DC)
 {
 	TidyOption opt = tidyGetOptionByName(doc, optname);
-	zval conv = *value;
+	zval conv;
+
+	ZVAL_COPY_VALUE(&conv, value);
 
 	if (!opt) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown Tidy Configuration Option '%s'", optname);

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -20,6 +20,19 @@
 
 #ifndef PHPDBG_BP_H
 #define PHPDBG_BP_H
+
+/* {{{ defines */
+#define PHPDBG_BREAK_FILE            0
+#define PHPDBG_BREAK_SYM             1
+#define PHPDBG_BREAK_OPLINE          2
+#define PHPDBG_BREAK_METHOD          3
+#define PHPDBG_BREAK_COND            4
+#define PHPDBG_BREAK_OPCODE          5
+#define PHPDBG_BREAK_FUNCTION_OPLINE 6
+#define PHPDBG_BREAK_METHOD_OPLINE   7
+#define PHPDBG_BREAK_FILE_OPLINE     8
+#define PHPDBG_BREAK_MAP             9
+#define PHPDBG_BREAK_TABLES          10 /* }}} */
 
 /* {{{ */
 typedef struct _zend_op *phpdbg_opline_ptr_t; /* }}} */
@@ -138,7 +151,7 @@ PHPDBG_API void phpdbg_disable_breakpoints(TSRMLS_D); /* }}} */
 
 /* {{{ Breakbase API */
 PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase(zend_ulong id TSRMLS_DC);
-PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable ***table, HashPosition *position TSRMLS_DC); /* }}} */
+PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable **table, zend_ulong *numkey, zend_string **strkey TSRMLS_DC); /* }}} */
 
 /* {{{ Breakpoint Exportation API */
 PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC); /* }}} */

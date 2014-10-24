@@ -25,12 +25,12 @@
 /* }}} */
 
 ZEND_BEGIN_MODULE_GLOBALS(assert)
-	zend_long active;
-	zend_long bail;
-	zend_long warning;
-	zend_long quiet_eval;
 	zval callback;
 	char *cb;
+	zend_bool active;
+	zend_bool bail;
+	zend_bool warning;
+	zend_bool quiet_eval;
 ZEND_END_MODULE_GLOBALS(assert)
 
 ZEND_DECLARE_MODULE_GLOBALS(assert)
@@ -78,11 +78,11 @@ static PHP_INI_MH(OnChangeCallback) /* {{{ */
 /* }}} */
 
 PHP_INI_BEGIN()
-	 STD_PHP_INI_ENTRY("assert.active",		"1",	PHP_INI_ALL,	OnUpdateLong,		active,	 			zend_assert_globals,		assert_globals)
-	 STD_PHP_INI_ENTRY("assert.bail",		"0",	PHP_INI_ALL,	OnUpdateLong,		bail,	 			zend_assert_globals,		assert_globals)
-	 STD_PHP_INI_ENTRY("assert.warning",	"1",	PHP_INI_ALL,	OnUpdateLong,		warning, 			zend_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.active",		"1",	PHP_INI_ALL,	OnUpdateBool,		active,	 			zend_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.bail",		"0",	PHP_INI_ALL,	OnUpdateBool,		bail,	 			zend_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.warning",	"1",	PHP_INI_ALL,	OnUpdateBool,		warning, 			zend_assert_globals,		assert_globals)
 	 PHP_INI_ENTRY("assert.callback",		NULL,	PHP_INI_ALL,	OnChangeCallback)
-	 STD_PHP_INI_ENTRY("assert.quiet_eval", "0",	PHP_INI_ALL,	OnUpdateLong,		quiet_eval,		 	zend_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.quiet_eval", "0",	PHP_INI_ALL,	OnUpdateBool,		quiet_eval,		 	zend_assert_globals,		assert_globals)
 PHP_INI_END()
 
 static void php_assert_init_globals(zend_assert_globals *assert_globals_p TSRMLS_DC) /* {{{ */
@@ -258,7 +258,7 @@ PHP_FUNCTION(assert_options)
 {
 	zval *value = NULL;
 	zend_long what;
-	int oldint;
+	zend_bool oldint;
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 

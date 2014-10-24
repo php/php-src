@@ -251,7 +251,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	if (mail_log && *mail_log) {
 		char *tmp;
 		time_t curtime;
-		int l;
+		size_t l;
 		zend_string *date_str;
 
 		time(&curtime);

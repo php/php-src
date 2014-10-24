@@ -268,7 +268,7 @@ PHP_FUNCTION(password_verify)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &password, &password_len, &hash, &hash_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if ((ret = php_crypt(password, password_len, hash, hash_len)) == NULL) {
+	if ((ret = php_crypt(password, (int)password_len, hash, (int)hash_len)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -298,7 +298,8 @@ PHP_FUNCTION(password_hash)
 {
 	char *hash_format, *hash, *salt, *password;
 	zend_long algo = 0;
-	size_t password_len = 0, hash_len;
+	size_t password_len = 0;
+	int hash_len;
 	size_t salt_len = 0, required_salt_len = 0, hash_format_len;
 	HashTable *options = 0;
 	zval *option_buffer;
@@ -344,7 +345,7 @@ PHP_FUNCTION(password_hash)
 
 	if (options && (option_buffer = zend_symtable_str_find(options, "salt", sizeof("salt")-1)) != NULL) {
 		char *buffer;
-		int buffer_len_int = 0;
+		size_t buffer_len_int = 0;
 		size_t buffer_len;
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING:
@@ -425,7 +426,7 @@ PHP_FUNCTION(password_hash)
 	/* This cast is safe, since both values are defined here in code and cannot overflow */
 	hash_len = (int) (hash_format_len + salt_len);
 
-	if ((result = php_crypt(password, password_len, hash, hash_len)) == NULL) {
+	if ((result = php_crypt(password, (int)password_len, hash, hash_len)) == NULL) {
 		efree(hash);
 		RETURN_FALSE;
 	}

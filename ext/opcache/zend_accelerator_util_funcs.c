@@ -88,64 +88,6 @@ zend_persistent_script* create_persistent_script(void)
 	return persistent_script;
 }
 
-static int compact_hash_table(HashTable *ht)
-{
-	uint i = 3;
-	uint j;
-	uint nSize;
-	Bucket *d;
-	Bucket *p;
-
-	if (!ht->nNumOfElements || (ht->u.flags & HASH_FLAG_PACKED)) {
-		/* Empty tables don't allocate space for Buckets */
-		return 1;
-	}
-
-	if (ht->nNumOfElements >= 0x80000000) {
-		/* prevent overflow */
-		nSize = 0x80000000;
-	} else {
-		while ((1U << i) < ht->nNumOfElements) {
-			i++;
-		}
-		nSize = 1 << i;
-	}
-
-	if (nSize >= ht->nTableSize) {
-		/* Keep the size */
-		return 1;
-	}
-
-	d = (Bucket *)pemalloc(nSize * (sizeof(Bucket) + sizeof(uint32_t)), ht->u.flags & HASH_FLAG_PERSISTENT);
-	if (!d) {
-		return 0;
-	}
-
-	for (i = 0, j = 0; i < ht->nNumUsed; i++) {
-		p = ht->arData + i;
-		if (Z_TYPE(p->val) != IS_UNDEF) {
-			d[j++] = *p;
-		}
-	}
-	ht->nNumUsed = j;
-
-	pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
-
-	ht->arData = d;
-	ht->arHash = (uint32_t *)(d + nSize);
-	ht->nTableSize = nSize;
-	ht->nTableMask = ht->nTableSize - 1;
-	zend_hash_rehash(ht);
-	
-	return 1;
-}
-
-int compact_persistent_script(zend_persistent_script *persistent_script)
-{
-	return compact_hash_table(&persistent_script->function_table) &&
-	       compact_hash_table(&persistent_script->class_table);
-}
-
 void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements)
 {
 	if (destroy_elements) {

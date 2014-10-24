@@ -87,7 +87,7 @@ static zend_class_entry *dir_class_entry_ptr;
 			} \
 			ZEND_FETCH_RESOURCE(dirp, php_stream *, tmp, -1, "Directory", php_file_le_stream()); \
 		} else { \
-			ZEND_FETCH_RESOURCE(dirp, php_stream *, 0, DIRG(default_dir)->handle, "Directory", php_file_le_stream()); \
+			ZEND_FETCH_RESOURCE(dirp, php_stream *, 0, (int)DIRG(default_dir)->handle, "Directory", php_file_le_stream()); \
 		} \
 	} else { \
 		dirp = (php_stream *) zend_fetch_resource(id TSRMLS_CC, -1, "Directory", NULL, 1, php_file_le_stream()); \
@@ -463,7 +463,7 @@ PHP_FUNCTION(glob)
 			cwd[2] = '\0';
 		}
 #endif
-		cwd_skip = strlen(cwd)+1;
+		cwd_skip = (int)strlen(cwd)+1;
 
 		snprintf(work_pattern, MAXPATHLEN, "%s%c%s", cwd, DEFAULT_SLASH, pattern);
 		pattern = work_pattern;
