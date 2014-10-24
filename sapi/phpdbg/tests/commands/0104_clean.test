@@ -4,11 +4,11 @@
 # expect: TEST::FORMAT
 # options: -rr
 #################################################
-#[Cleaning Execution Environment]
-#Classes			%d
-#Functions		%d
-#Constants		%d
-#Includes		%d
+#Cleaning Execution Environment
+#Classes    %d
+#Functions  %d
+#Constants  %d
+#Includes   %d
 #[Nothing to execute!]
 #################################################
 clean

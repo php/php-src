@@ -12,20 +12,23 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Felipe Pena <felipe@php.net>                                |
-   | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
-   | Authors: Bob Weinand <bwoebi@php.net>                                |
+   | Authors: Anatol Belski <ab@php.net>                                  |
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_OPCODE_H
-#define PHPDBG_OPCODE_H
+#ifndef PHPDBG_IO_H
+#define PHPDBG_IO_H
 
-#include "zend_types.h"
+#include "phpdbg.h"
 
-const char *phpdbg_decode_opcode(zend_uchar);
-char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC);
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC);
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags TSRMLS_DC);
+PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo TSRMLS_DC);
+PHPDBG_API int phpdbg_send_bytes(int sock, const char *ptr, int len);
+PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo TSRMLS_DC);
+PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len TSRMLS_DC);
 
-#endif /* PHPDBG_OPCODE_H */
+PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short port, struct addrinfo *res TSRMLS_DC);
+PHPDBG_API int phpdbg_open_socket(const char *interface, unsigned short port TSRMLS_DC);
+PHPDBG_API void phpdbg_close_socket(int sock);
+
+#endif /* PHPDBG_IO_H */
+

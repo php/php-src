@@ -12,20 +12,35 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Felipe Pena <felipe@php.net>                                |
-   | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
-   | Authors: Bob Weinand <bwoebi@php.net>                                |
+   | Authors: Anatol Belski <ab@php.net>                                  |
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_OPCODE_H
-#define PHPDBG_OPCODE_H
+#ifndef PHPDBG_EOL_H
+#define PHPDBG_EOL_H
 
-#include "zend_types.h"
+#include "phpdbg.h"
 
-const char *phpdbg_decode_opcode(zend_uchar);
-char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC);
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC);
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags TSRMLS_DC);
+struct phpdbg_eol_rep {
+	char *name;
+	char *rep;
+	int id;
+};
 
-#endif /* PHPDBG_OPCODE_H */
+enum {
+	PHPDBG_EOL_CRLF, /* DOS */
+	/*PHPDBG_EOL_LFCR,*/ /* for Risc OS? */
+	PHPDBG_EOL_LF, /* UNIX */
+	PHPDBG_EOL_CR /* MAC */
+};
+
+int phpdbg_eol_global_update(char *name TSRMLS_DC);
+
+char *phpdbg_eol_name(int id);
+
+char *phpdbg_eol_rep(int id);
+
+void phpdbg_eol_convert(char **str, int *len TSRMLS_DC);
+
+#endif /* PHPDBG_EOL_H */
+

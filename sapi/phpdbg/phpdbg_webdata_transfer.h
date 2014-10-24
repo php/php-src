@@ -12,20 +12,16 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Felipe Pena <felipe@php.net>                                |
-   | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
    | Authors: Bob Weinand <bwoebi@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_OPCODE_H
-#define PHPDBG_OPCODE_H
+#ifndef PHPDBG_WEBDATA_TRANSFER_H
+#define PHPDBG_WEBDATA_TRANSFER_H
 
-#include "zend_types.h"
+#include "zend.h"
+#include "phpdbg.h"
 
-const char *phpdbg_decode_opcode(zend_uchar);
-char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC);
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC);
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags TSRMLS_DC);
+PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC);
 
-#endif /* PHPDBG_OPCODE_H */
+#endif /* PHPDBG_WEBDATA_TRANSFER_H */

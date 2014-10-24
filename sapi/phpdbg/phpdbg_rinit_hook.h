@@ -18,14 +18,24 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_OPCODE_H
-#define PHPDBG_OPCODE_H
+#ifndef PHPDBG_WEBHELPER_H
+#define PHPDBG_WEBHELPER_H
 
-#include "zend_types.h"
+#include "phpdbg_webdata_transfer.h"
 
-const char *phpdbg_decode_opcode(zend_uchar);
-char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC);
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC);
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags TSRMLS_DC);
+extern zend_module_entry phpdbg_webhelper_module_entry;
+#define phpext_phpdbg_webhelper_ptr &phpdbg_webhelper_module_entry
 
-#endif /* PHPDBG_OPCODE_H */
+#ifdef ZTS
+# define PHPDBG_WG(v) TSRMG(phpdbg_webhelper_globals_id, zend_phpdbg_webhelper_globals *, v)
+#else
+# define PHPDBG_WG(v) (phpdbg_webhelper_globals.v)
+#endif
+
+/* {{{ structs */
+ZEND_BEGIN_MODULE_GLOBALS(phpdbg_webhelper)
+	char *auth;
+	char *path;
+ZEND_END_MODULE_GLOBALS(phpdbg_webhelper) /* }}} */
+
+#endif /* PHPDBG_WEBHELPER_H */
