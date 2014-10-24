@@ -60,7 +60,7 @@ PHP_FUNCTION(stream_socket_pair)
 		RETURN_FALSE;
 	}
 
-	if (0 != socketpair(domain, type, protocol, pair)) {
+	if (0 != socketpair((int)domain, (int)type, (int)protocol, pair)) {
 		char errbuf[256];
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create sockets: [%d]: %s",
 			php_socket_errno(), php_socket_strerror(php_socket_errno(), errbuf, sizeof(errbuf)));
@@ -90,7 +90,7 @@ PHP_FUNCTION(stream_socket_client)
 	char *host;
 	size_t host_len;
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
-	double timeout = FG(default_socket_timeout);
+	double timeout = (double)FG(default_socket_timeout);
 	php_timeout_ull conv;
 	struct timeval tv;
 	char *hashkey = NULL;
@@ -206,7 +206,7 @@ PHP_FUNCTION(stream_socket_server)
 	}
 
 	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,
-			STREAM_XPORT_SERVER | flags,
+			STREAM_XPORT_SERVER | (int)flags,
 			NULL, NULL, context, &errstr, &err);
 
 	if (stream == NULL) {
@@ -239,7 +239,7 @@ PHP_FUNCTION(stream_socket_server)
    Accept a client connection from a server socket */
 PHP_FUNCTION(stream_socket_accept)
 {
-	double timeout = FG(default_socket_timeout);
+	double timeout = (double)FG(default_socket_timeout);
 	zval *zpeername = NULL;
 	zend_string *peername = NULL;
 	php_timeout_ull conv;
@@ -340,7 +340,7 @@ PHP_FUNCTION(stream_socket_sendto)
 		}
 	}
 
-	RETURN_LONG(php_stream_xport_sendto(stream, data, datalen, flags, target_addr ? &sa : NULL, sl TSRMLS_CC));
+	RETURN_LONG(php_stream_xport_sendto(stream, data, datalen, (int)flags, target_addr ? &sa : NULL, sl TSRMLS_CC));
 }
 /* }}} */
 
@@ -374,7 +374,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 
 	read_buf = zend_string_alloc(to_read, 0);
 
-	recvd = php_stream_xport_recvfrom(stream, read_buf->val, to_read, flags, NULL, NULL,
+	recvd = php_stream_xport_recvfrom(stream, read_buf->val, to_read, (int)flags, NULL, NULL,
 			zremote ? &remote_addr : NULL
 			TSRMLS_CC);
 
@@ -410,7 +410,7 @@ PHP_FUNCTION(stream_get_contents)
 
 	if (desiredpos >= 0) {
 		int		seek_res = 0;
-		off_t	position;
+		zend_off_t	position;
 
 		position = php_stream_tell(stream);
 		if (position >= 0 && desiredpos > position) {
@@ -773,6 +773,10 @@ PHP_FUNCTION(stream_select)
 			RETURN_FALSE;
 		}
 
+#ifdef PHP_WIN32
+		tv.tv_sec = (long)(Z_LVAL_P(sec) + (usec / 1000000));
+		tv.tv_usec = (long)(usec % 1000000);
+#else
 		/* Solaris + BSD do not like microsecond values which are >= 1 sec */
 		if (usec > 999999) {
 			tv.tv_sec = Z_LVAL_P(sec) + (usec / 1000000);
@@ -781,7 +785,7 @@ PHP_FUNCTION(stream_select)
 			tv.tv_sec = Z_LVAL_P(sec);
 			tv.tv_usec = usec;
 		}
-
+#endif
 		tv_p = &tv;
 	}
 
@@ -1275,19 +1279,16 @@ PHP_FUNCTION(stream_get_line)
 PHP_FUNCTION(stream_set_blocking)
 {
 	zval *arg1;
-	int block;
-	zend_long arg2;
+	zend_long block;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &block) == FAILURE) {
 		return;
 	}
 
 	php_stream_from_zval(stream, arg1);
 
-	block = arg2;
-
-	if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, block == 0 ? 0 : 1, NULL) == -1) {
+	if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, block ? 1 : 0, NULL) == -1) {
 		RETURN_FALSE;
 	}
 
@@ -1313,6 +1314,16 @@ PHP_FUNCTION(stream_set_timeout)
 
 	php_stream_from_zval(stream, socket);
 
+#ifdef PHP_WIN32
+	t.tv_sec = (long)seconds;
+
+	if (argc == 3) {
+		t.tv_usec = (long)(microseconds % 1000000);
+		t.tv_sec +=(long)(microseconds / 1000000);
+	} else {
+		t.tv_usec = 0;
+	}
+#else
 	t.tv_sec = seconds;
 
 	if (argc == 3) {
@@ -1321,6 +1332,7 @@ PHP_FUNCTION(stream_set_timeout)
 	} else {
 		t.tv_usec = 0;
 	}
+#endif
 
 	if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &t)) {
 		RETURN_TRUE;
@@ -1485,7 +1497,7 @@ PHP_FUNCTION(stream_resolve_include_path)
 		return;
 	}
 
-	resolved_path = zend_resolve_path(filename, filename_len TSRMLS_CC);
+	resolved_path = zend_resolve_path(filename, (int)filename_len TSRMLS_CC);
 
 	if (resolved_path) {
 		// TODO: avoid reallocation ???
