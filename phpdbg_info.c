@@ -433,9 +433,7 @@ PHPDBG_INFO(classes) /* {{{ */
 		}
 
 		if ((*ce)->info.user.filename) {
-			phpdbg_writeln("classsource", "file=\"\" line=\"%u\"", "|---- in %s on line %u",
-				(*ce)->info.user.filename,
-				(*ce)->info.user.line_start);
+			phpdbg_writeln("classsource", "file=\"%s\" line=\"%u\"", "|---- in %s on line %u", (*ce)->info.user.filename, (*ce)->info.user.line_start);
 		} else {
 			phpdbg_writeln("classsource", "", "|---- no source code");
 		}
