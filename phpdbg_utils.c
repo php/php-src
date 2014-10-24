@@ -542,7 +542,7 @@ static int phpdbg_xml_object_property_dump(zval **zv TSRMLS_DC, int num_args, va
 				if (class_name[0] == '*') {
 					phpdbg_xml(" protection=\"protected\"");
 				} else {
-					phpdbg_xml("class=\"%s\" protection=\"private\"", class_name);
+					phpdbg_xml(" class=\"%s\" protection=\"private\"", class_name);
 				}
 			} else {
 				phpdbg_xml(" name=\"%.*s\" protection=\"public\"", hash_key->nKeyLength - 1, hash_key->arKey);
