@@ -1107,7 +1107,7 @@ ZEND_API zend_string *zend_mangle_property_name(const char *src1, size_t src1_le
 }
 /* }}} */
 
-static int zend_strnlen(const char* s, size_t maxlen) /* {{{ */
+static size_t zend_strnlen(const char* s, size_t maxlen) /* {{{ */
 {
 	size_t len = 0;
 	while (*s++ && maxlen--) len++;
@@ -3818,7 +3818,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) /* {{{ */
 
 		arg_info = &arg_infos[i];
 		arg_info->name = estrndup(name->val, name->len);
-		arg_info->name_len = name->len;
+		arg_info->name_len = (uint32_t)name->len;
 		arg_info->pass_by_reference = is_ref;
 		arg_info->is_variadic = is_variadic;
 		arg_info->type_hint = 0;
@@ -3862,7 +3862,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) /* {{{ */
 
 				arg_info->type_hint = IS_OBJECT;
 				arg_info->class_name = estrndup(class_name->val, class_name->len);
-				arg_info->class_name_len = class_name->len;
+				arg_info->class_name_len = (uint32_t)class_name->len;
 
 				zend_string_release(class_name);
 
