@@ -1814,7 +1814,7 @@ ZEND_API int add_property_zval_ex(zval *arg, const char *key, size_t key_len, zv
 
 ZEND_API int zend_startup_module_ex(zend_module_entry *module TSRMLS_DC) /* {{{ */
 {
-	int name_len;
+	size_t name_len;
 	zend_string *lcname;
 
 	if (module->module_started) {
@@ -2001,7 +2001,7 @@ ZEND_API void zend_destroy_modules(void) /* {{{ */
 
 ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module TSRMLS_DC) /* {{{ */
 {
-	int name_len;
+	size_t name_len;
 	zend_string *lcname;
 	zend_module_entry *module_ptr;
 
@@ -2070,7 +2070,7 @@ ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *mod
 ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, int error_type TSRMLS_DC) /* {{{ */
 {
 	char lcname[16];
-	int name_len;
+	size_t name_len;
 
 	/* we don't care if the function name is longer, in fact lowercasing only
 	 * the beginning of the name speeds up the check process */
@@ -2142,9 +2142,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	int error_type;
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL, *__debugInfo = NULL;
 	zend_string *lowercase_name;
-	int fname_len;
+	size_t fname_len;
 	const char *lc_class_name = NULL;
-	int class_name_len = 0;
+	size_t class_name_len = 0;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -2417,7 +2417,7 @@ ZEND_API void zend_unregister_functions(const zend_function_entry *functions, in
 	int i=0;
 	HashTable *target_function_table = function_table;
 	zend_string *lowercase_name;
-	int fname_len;
+	size_t fname_len;
 
 	if (!target_function_table) {
 		target_function_table = CG(function_table);
@@ -2814,7 +2814,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 {
 	int ret = 0;
 	zend_class_entry *ce;
-	int name_len = name->len;
+	size_t name_len = name->len;
 	zend_string *lcname;
 	ALLOCA_FLAG(use_heap);
 
@@ -2893,7 +2893,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	zend_string *mname, *cname;
 	zend_string *lmname;
 	const char *colon;
-	int clen, mlen;
+	size_t clen, mlen;
 	zend_class_entry *last_scope;
 	HashTable *ftable;
 	int call_via_handler = 0;
@@ -3579,7 +3579,7 @@ ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *f
 ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 {
 	zend_string *lname;
-	int name_len = strlen(module_name);
+	size_t name_len = strlen(module_name);
 	zend_module_entry *module;
 
 	lname = zend_string_alloc(name_len, 0);
