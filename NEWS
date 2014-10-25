@@ -23,6 +23,8 @@ PHP                                                                        NEWS
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
   . Fixed bug #68224 (buffer-overflow in libmagic/readcdf.c caught by
     AddressSanitizer). (Remi)
+  . Fixed bug #68283 (fileinfo: out-of-bounds read in elf note headers).
+    (CVE-2014-3710) (Remi)
 
 - FPM:
   . Fixed bug #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable
