@@ -1532,6 +1532,11 @@ phpdbg_out:
 			efree(SG(request_info).argv);
 		}
 
+#ifndef _WIN32
+		/* reset it... else we risk a stack overflow upon next run (when clean'ing) */
+		php_stream_stdio_ops.write = PHPDBG_G(php_stdiop_write);
+#endif
+
 #ifndef ZTS
 		/* force cleanup of auto and core globals */
 		zend_hash_clean(CG(auto_globals));
