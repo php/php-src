@@ -351,7 +351,9 @@ PHP_FUNCTION(spl_autoload)
 		while (ex && (!ex->func || !ZEND_USER_CODE(ex->func->type))) {
 			ex = ex->prev_execute_data;
 		}
-		if (ex && ex->opline->opcode != ZEND_FETCH_CLASS) {
+		if (ex &&
+		    ex->opline->opcode != ZEND_FETCH_CLASS &&
+		    ex->opline->opcode != ZEND_NEW) {
 			zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Class %s could not be loaded", class_name->val);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Class %s could not be loaded", class_name->val);

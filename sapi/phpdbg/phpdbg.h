@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -29,6 +29,8 @@
 # define PHPDBG_API
 #endif
 
+#include <stdint.h>
+#include <stddef.h>
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
@@ -40,20 +42,21 @@
 #include "zend_ini_scanner.h"
 #include "zend_stream.h"
 #ifndef _WIN32
-# include "zend_signal.h"
+#	include "zend_signal.h"
 #endif
 #include "SAPI.h"
 #include <fcntl.h>
 #include <sys/types.h>
 #if defined(_WIN32) && !defined(__MINGW32__)
-# include <windows.h>
-# include "config.w32.h"
-# undef  strcasecmp
-# undef  strncasecmp
-# define strcasecmp _stricmp 
-# define strncasecmp _strnicmp 
+#	include <windows.h>
+#	include "config.w32.h"
+#	include "win32/php_stdint.h"
+#	undef  strcasecmp
+#	undef  strncasecmp
+#	define strcasecmp _stricmp 
+#	define strncasecmp _strnicmp 
 #else
-# include "php_config.h"
+#	include "php_config.h"
 #endif
 #ifndef O_BINARY
 #	define O_BINARY 0
@@ -64,27 +67,83 @@
 # include "TSRM.h"
 #endif
 
-#ifdef LIBREADLINE
-#   include <readline/readline.h>
-#   include <readline/history.h>
+#define ZEND_HASH_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_h = _p->h; \
+	_ptr = Z_PTR_P(_z);
+
+#undef zend_hash_str_add
+#define zend_hash_str_add_tmp(ht, key, len, pData) \
+	_zend_hash_str_add(ht, key, len, pData ZEND_FILE_LINE_CC)
+#define zend_hash_str_add(...) zend_hash_str_add_tmp(__VA_ARGS__)
+
+static zend_always_inline void *zend_hash_index_add_mem(HashTable *ht, zend_ulong h, void *pData, size_t size)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, NULL);
+	if ((zv = zend_hash_index_add(ht, h, &tmp))) {
+		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+		memcpy(Z_PTR_P(zv), pData, size);
+		return Z_PTR_P(zv);
+	}
+	return NULL;
+}
+
+#ifdef HAVE_LIBREADLINE
+#	include <readline/readline.h>
+#	include <readline/history.h>
 #endif
 #ifdef HAVE_LIBEDIT
-#   include <editline/readline.h>
+#	include <editline/readline.h>
 #endif
 
-#include "phpdbg_lexer.h"
-#include "phpdbg_cmd.h"
-#include "phpdbg_utils.h"
-#include "phpdbg_btree.h"
-#include "phpdbg_watch.h"
+/* {{{ remote console headers */
+#ifndef _WIN32
+#	include <sys/socket.h>
+#	include <sys/un.h>
+#	include <sys/select.h>
+#	include <sys/types.h>
+#	include <netdb.h>
+#endif /* }}} */
 
-int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
+/* {{{ strings */
+#define PHPDBG_NAME "phpdbg"
+#define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
+#define PHPDBG_URL "http://phpdbg.com"
+#define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
+#define PHPDBG_VERSION "0.4.0"
+#define PHPDBG_INIT_FILENAME ".phpdbginit"
+#define PHPDBG_DEFAULT_PROMPT "prompt>"
+/* }}} */
+
+/* Hey, apple. One shouldn't define *functions* from the standard C library as marcos. */
+#ifdef memcpy
+#define memcpy_tmp(...) memcpy(__VA_ARGS__)
+#undef memcpy
+#define memcpy(...) memcpy_tmp(__VA_ARGS__)
+#endif
+
+#if !defined(PHPDBG_WEBDATA_TRANSFER_H) && !defined(PHPDBG_WEBHELPER_H)
 
 #ifdef ZTS
 # define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
 #else
 # define PHPDBG_G(v) (phpdbg_globals.v)
 #endif
+
+#include "phpdbg_sigsafe.h"
+#include "phpdbg_out.h"
+#include "phpdbg_lexer.h"
+#include "phpdbg_cmd.h"
+#include "phpdbg_utils.h"
+#include "phpdbg_btree.h"
+#include "phpdbg_watch.h"
+#ifdef PHP_WIN32
+# include "phpdbg_sigio_win32.h"
+#endif
+
+int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 
 #define PHPDBG_NEXT   2
 #define PHPDBG_UNTIL  3
@@ -145,11 +204,14 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 #define PHPDBG_IS_BP_ENABLED          (1<<26)
 #define PHPDBG_IS_REMOTE              (1<<27)
 #define PHPDBG_IS_DISCONNECTED        (1<<28)
+#define PHPDBG_WRITE_XML              (1<<29)
 
-#define PHPDBG_SHOW_REFCOUNTS         (1<<29)
+#define PHPDBG_SHOW_REFCOUNTS         (1<<30)
+
+#define PHPDBG_IN_SIGNAL_HANDLER      (1<<30)
 
 #define PHPDBG_SEEK_MASK              (PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE)
-#define PHPDBG_BP_RESOLVE_MASK		  (PHPDBG_HAS_FUNCTION_OPLINE_BP|PHPDBG_HAS_METHOD_OPLINE_BP|PHPDBG_HAS_FILE_OPLINE_BP)
+#define PHPDBG_BP_RESOLVE_MASK	      (PHPDBG_HAS_FUNCTION_OPLINE_BP|PHPDBG_HAS_METHOD_OPLINE_BP|PHPDBG_HAS_FILE_OPLINE_BP)
 #define PHPDBG_BP_MASK                (PHPDBG_HAS_FILE_BP|PHPDBG_HAS_SYM_BP|PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_OPLINE_BP|PHPDBG_HAS_COND_BP|PHPDBG_HAS_OPCODE_BP|PHPDBG_HAS_FUNCTION_OPLINE_BP|PHPDBG_HAS_METHOD_OPLINE_BP|PHPDBG_HAS_FILE_OPLINE_BP)
 
 #ifndef _WIN32
@@ -158,20 +220,26 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET|PHPDBG_IS_BP_ENABLED)
 #endif /* }}} */
 
-/* {{{ strings */
-#define PHPDBG_NAME "phpdbg"
-#define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
-#define PHPDBG_URL "http://phpdbg.com"
-#define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
-#define PHPDBG_VERSION "0.4.0"
-#define PHPDBG_INIT_FILENAME ".phpdbginit"
-/* }}} */
-
 /* {{{ output descriptors */
 #define PHPDBG_STDIN 			0
 #define PHPDBG_STDOUT			1
 #define PHPDBG_STDERR			2
 #define PHPDBG_IO_FDS 			3 /* }}} */
+
+#define phpdbg_try_access \
+	{                                                            \
+		JMP_BUF *__orig_bailout = PHPDBG_G(sigsegv_bailout); \
+		JMP_BUF __bailout;                                   \
+                                                                     \
+		PHPDBG_G(sigsegv_bailout) = &__bailout;              \
+		if (SETJMP(__bailout) == 0) {
+#define phpdbg_catch_access \
+		} else {                                             \
+			PHPDBG_G(sigsegv_bailout) = __orig_bailout;
+#define phpdbg_end_try_access() \
+		}                                                    \
+			PHPDBG_G(sigsegv_bailout) = __orig_bailout;  \
+	}
 
 
 /* {{{ structs */
@@ -180,7 +248,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable registered;                        /* registered */
 	HashTable seek;                              /* seek oplines */
 	phpdbg_frame_t frame;                        /* frame */
-	uint32_t last_line;                         /* last executed line */
+	uint32_t last_line;                          /* last executed line */
 
 	phpdbg_lexer_data lexer;                     /* lexer data */
 	phpdbg_param_t *parser_stack;                /* param stack during lexer / parser phase */
@@ -191,6 +259,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
 	phpdbg_btree watch_HashTables;               /* tree with original dtors of watchpoints */
 	HashTable watchpoints;                       /* watchpoints */
+	HashTable watch_collisions;                  /* collision table to check if multiple watches share the same recursive watchpoint */
 	zend_llist watchlist_mem;                    /* triggered watchpoints */
 	zend_bool watchpoint_hit;                    /* a watchpoint was hit */
 	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
@@ -198,33 +267,57 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	char *exec;                                  /* file to execute */
 	size_t exec_len;                             /* size of exec */
 	zend_op_array *ops;                 	     /* op_array */
-	zval *retval;                                /* return value */
+	zval retval;                                 /* return value */
 	int bp_count;                                /* breakpoint count */
 	int vmret;                                   /* return from last opcode handler execution */
+	zend_bool in_execution;                      /* in execution? */
+
+	zend_op_array *(*compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
+	HashTable file_sources;
 
 	FILE *oplog;                                 /* opline log */
-	FILE *io[PHPDBG_IO_FDS];                     /* io */
+	struct {
+		FILE *ptr;
+		int fd;
+	} io[PHPDBG_IO_FDS];                         /* io */
+	size_t (*php_stdiop_write)(php_stream *, const char *, size_t TSRMLS_DC);
+	int in_script_xml;                           /* in <stream> output mode */
+	struct {
+		zend_bool active;
+		int type;
+		int fd;
+		char *tag;
+		char *msg;
+		int msglen;
+		char *xml;
+		int xmllen;
+	} err_buf;                                   /* error buffer */
+	zend_ulong req_id;                           /* "request id" to keep track of commands */
 
 	char *prompt[2];                             /* prompt */
 	const phpdbg_color_t *colors[PHPDBG_COLORS]; /* colors */
 	char *buffer;                                /* buffer */
+	zend_bool last_was_newline;                  /* check if we don't need to output a newline upon next phpdbg_error or phpdbg_notice */
+
+	char input_buffer[PHPDBG_MAX_CMD];           /* stdin input buffer */
+	int input_buflen;                            /* length of stdin input buffer */
+	phpdbg_signal_safe_mem sigsafe_mem;          /* memory to use in async safe environment (only once!) */
+
+	JMP_BUF *sigsegv_bailout;                    /* bailout address for accesibility probing */
 
 	zend_ulong flags;                            /* phpdbg flags */
+
+	char *socket_path;                           /* phpdbg.path ini setting */
+	char *sapi_name_ptr;                         /* store sapi name to free it if necessary to not leak memory */
+	int socket_fd;                               /* file descriptor to socket (wait command) (-1 if unused) */
+	int socket_server_fd;                        /* file descriptor to master socket (wait command) (-1 if unused) */
+#ifdef PHP_WIN32
+	HANDLE sigio_watcher_thread;                  /* sigio watcher thread handle */
+	struct win32_sigio_watcher_data swd;
+#endif
+	int8_t eol;
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
-/* the beginning (= the important part) of the _zend_mm_heap struct defined in Zend/zend_alloc.c
-   Needed for realizing watchpoints */
-struct _zend_mm_heap {
-	int   use_zend_alloc;
-	void *(*_malloc)(size_t);
-	void  (*_free)(void *);
-	void *(*_realloc)(void *, size_t);
-	size_t              free_bitmap;
-	size_t              large_free_bitmap;
-	size_t              block_size;
-	size_t              compact_size;
-	zend_mm_segment    *segments_list;
-	zend_mm_storage    *storage;
-};
+#endif
 
 #endif /* PHPDBG_H */

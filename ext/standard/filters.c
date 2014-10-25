@@ -176,14 +176,14 @@ typedef struct _php_strip_tags_filter {
 	int persistent;
 } php_strip_tags_filter;
 
-static int php_strip_tags_filter_ctor(php_strip_tags_filter *inst, const char *allowed_tags, int allowed_tags_len, int persistent)
+static int php_strip_tags_filter_ctor(php_strip_tags_filter *inst, const char *allowed_tags, size_t allowed_tags_len, int persistent)
 {
 	if (allowed_tags != NULL) {
 		if (NULL == (inst->allowed_tags = pemalloc(allowed_tags_len, persistent))) {
 			return FAILURE;
 		}
 		memcpy((char *)inst->allowed_tags, allowed_tags, allowed_tags_len);
-		inst->allowed_tags_len = allowed_tags_len; 
+		inst->allowed_tags_len = (int)allowed_tags_len; 
 	} else {
 		inst->allowed_tags = NULL;
 	}
@@ -861,7 +861,8 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 				/* Check to see if this is EOL whitespace. */
 				if (inst->lbchars != NULL) {
 					unsigned char *ps2;
-					unsigned int j, lb_cnt2;
+					unsigned int lb_cnt2;
+					size_t j;
 
 					lb_cnt2 = 0;
 					ps2 = ps;
@@ -1318,6 +1319,7 @@ static int php_conv_get_int_prop_ex(const HashTable *ht, int *pretval, char *fie
 }
 #endif
 
+/* XXX this might need an additional fix so it uses size_t, whereby unsigned is quite big so leaving as is for now */
 static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)
 {
 	zend_ulong l;
@@ -1326,7 +1328,7 @@ static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval,
 	*pretval = 0;
 
 	if ((err = php_conv_get_ulong_prop_ex(ht, &l, field_name, field_name_len)) == PHP_CONV_ERR_SUCCESS) {
-		*pretval = l;
+		*pretval = (unsigned int)l;
 	}
 	return err;
 }
@@ -1931,12 +1933,12 @@ typedef struct _php_chunked_filter_data {
 	int persistent;
 } php_chunked_filter_data;
 
-static int php_dechunk(char *buf, int len, php_chunked_filter_data *data)
+static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 {
 	char *p = buf;
 	char *end = p + len;
 	char *out = buf;
-	int out_len = 0;
+	size_t out_len = 0;
 
 	while (p < end) {
 		switch (data->state) {

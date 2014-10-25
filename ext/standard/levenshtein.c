@@ -27,10 +27,11 @@
 
 /* {{{ reference_levdist
  * reference implementation, only optimized for memory usage, not speed */
-static int reference_levdist(const char *s1, int l1, const char *s2, int l2, int cost_ins, int cost_rep, int cost_del )
+static zend_long reference_levdist(const char *s1, size_t l1, const char *s2, size_t l2, zend_long cost_ins, zend_long cost_rep, zend_long cost_del )
 {
-	int *p1, *p2, *tmp;
-	int i1, i2, c0, c1, c2;
+	zend_long *p1, *p2, *tmp;
+	zend_long c0, c1, c2;
+	size_t i1, i2;
 
 	if (l1 == 0) {
 		return l2 * cost_ins;
@@ -42,8 +43,8 @@ static int reference_levdist(const char *s1, int l1, const char *s2, int l2, int
 	if ((l1 > LEVENSHTEIN_MAX_LENGTH) || (l2 > LEVENSHTEIN_MAX_LENGTH)) {
 		return -1;
 	}
-	p1 = safe_emalloc((l2 + 1), sizeof(int), 0);
-	p2 = safe_emalloc((l2 + 1), sizeof(int), 0);
+	p1 = safe_emalloc((l2 + 1), sizeof(zend_long), 0);
+	p2 = safe_emalloc((l2 + 1), sizeof(zend_long), 0);
 
 	for (i2 = 0; i2 <= l2; i2++) {
 		p1[i2] = i2 * cost_ins;
@@ -96,7 +97,7 @@ PHP_FUNCTION(levenshtein)
 	char *callback_name;
 	size_t str1_len, str2_len, callback_len;
 	zend_long cost_ins, cost_rep, cost_del;
-	int distance = -1;
+	zend_long distance = -1;
 
 	switch (argc) {
 		case 2: /* just two strings: use maximum performance version */

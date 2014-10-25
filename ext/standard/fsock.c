@@ -35,14 +35,18 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	size_t host_len;
 	zend_long port = -1;
 	zval *zerrno = NULL, *zerrstr = NULL;
-	double timeout = FG(default_socket_timeout);
-	zend_ulong conv;
+	double timeout = (double)FG(default_socket_timeout);
+#ifndef PHP_WIN32
+	time_t conv;
+#else
+	long conv;
+#endif
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
 	int err;
 	char *hostname = NULL;
-	zend_long hostname_len;
+	size_t hostname_len;
 	zend_string *errstr = NULL;
 
 	RETVAL_FALSE;
@@ -63,8 +67,13 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	
 	/* prepare the timeout value for use */
-	conv = (unsigned long) (timeout * 1000000.0);
+#ifndef PHP_WIN32
+	conv = (time_t) (timeout * 1000000.0);
 	tv.tv_sec = conv / 1000000;
+#else
+	conv = (long) (timeout * 1000000.0);
+	tv.tv_sec = conv / 1000000;
+#endif
 	tv.tv_usec = conv % 1000000;
 
 	if (zerrno)	{

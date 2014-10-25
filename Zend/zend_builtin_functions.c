@@ -1059,7 +1059,7 @@ ZEND_FUNCTION(get_object_vars)
 }
 /* }}} */
 
-static int same_name(const char *key, const char *name, uint32_t name_len) /* {{{ */
+static int same_name(const char *key, const char *name, size_t name_len) /* {{{ */
 {
 	char *lcname = zend_str_tolower_dup(name, name_len);
 	int ret = memcmp(lcname, key, name_len) == 0;
@@ -1102,7 +1102,7 @@ ZEND_FUNCTION(get_class_methods)
 		       zend_check_protected(mptr->common.scope, EG(scope)))
 		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
 		       EG(scope) == mptr->common.scope)))) {
-			uint len = mptr->common.function_name->len;
+			size_t len = mptr->common.function_name->len;
 
 			/* Do not display old-style inherited constructors */
 			if (!key) {

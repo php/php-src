@@ -1023,57 +1023,6 @@ static int ZEND_FASTCALL  ZEND_RECV_VARIADIC_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL  ZEND_NEW_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval object_zval;
-	zend_function *constructor;
-
-	SAVE_OPLINE();
-	if (UNEXPECTED((Z_CE_P(EX_VAR(opline->op1.var))->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0)) {
-		if (Z_CE_P(EX_VAR(opline->op1.var))->ce_flags & ZEND_ACC_INTERFACE) {
-			zend_error_noreturn(E_ERROR, "Cannot instantiate interface %s", Z_CE_P(EX_VAR(opline->op1.var))->name->val);
-		} else if ((Z_CE_P(EX_VAR(opline->op1.var))->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-			zend_error_noreturn(E_ERROR, "Cannot instantiate trait %s", Z_CE_P(EX_VAR(opline->op1.var))->name->val);
-		} else {
-			zend_error_noreturn(E_ERROR, "Cannot instantiate abstract class %s", Z_CE_P(EX_VAR(opline->op1.var))->name->val);
-		}
-	}
-	object_init_ex(&object_zval, Z_CE_P(EX_VAR(opline->op1.var)));
-	constructor = Z_OBJ_HT(object_zval)->get_constructor(Z_OBJ(object_zval) TSRMLS_CC);
-
-	if (constructor == NULL) {
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &object_zval);
-		} else {
-			zval_ptr_dtor(&object_zval);
-		}
-		ZEND_VM_JMP(opline->op2.jmp_addr);
-	} else {
-		/* We are not handling overloaded classes right now */
-		EX(call) = zend_vm_stack_push_call_frame(
-			VM_FRAME_INFO(
-				VM_FRAME_NESTED_FUNCTION,
-				RETURN_VALUE_USED(opline) ?
-					ZEND_CALL_CTOR : (ZEND_CALL_CTOR | ZEND_CALL_CTOR_RESULT_UNUSED)),
-			constructor,
-			opline->extended_value,
-			Z_CE_P(EX_VAR(opline->op1.var)),
-			Z_OBJ(object_zval),
-			EX(call) TSRMLS_CC);
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_COPY(EX_VAR(opline->result.var), &object_zval);
-			EX(call)->return_value = EX_VAR(opline->result.var);
-		} else {
-			EX(call)->return_value = NULL;
-		}
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-}
-
 static int ZEND_FASTCALL  ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -1480,7 +1429,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 		} else if (Z_TYPE_P(class_name) == IS_OBJECT) {
 			Z_CE_P(EX_VAR(opline->result.var)) = Z_OBJCE_P(class_name);
 		} else if (Z_TYPE_P(class_name) == IS_STRING) {
-			Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(Z_STR_P(class_name), 0 TSRMLS_CC);
+			Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(Z_STR_P(class_name), opline->extended_value TSRMLS_CC);
 		} else {
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
@@ -1815,7 +1764,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CLASS_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 		} else if (Z_TYPE_P(class_name) == IS_OBJECT) {
 			Z_CE_P(EX_VAR(opline->result.var)) = Z_OBJCE_P(class_name);
 		} else if (Z_TYPE_P(class_name) == IS_STRING) {
-			Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(Z_STR_P(class_name), 0 TSRMLS_CC);
+			Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(Z_STR_P(class_name), opline->extended_value TSRMLS_CC);
 		} else {
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
@@ -2001,7 +1950,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CLASS_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 		} else if (Z_TYPE_P(class_name) == IS_OBJECT) {
 			Z_CE_P(EX_VAR(opline->result.var)) = Z_OBJCE_P(class_name);
 		} else if (Z_TYPE_P(class_name) == IS_STRING) {
-			Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(Z_STR_P(class_name), 0 TSRMLS_CC);
+			Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(Z_STR_P(class_name), opline->extended_value TSRMLS_CC);
 		} else {
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
@@ -2187,7 +2136,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CLASS_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 		} else if (Z_TYPE_P(class_name) == IS_OBJECT) {
 			Z_CE_P(EX_VAR(opline->result.var)) = Z_OBJCE_P(class_name);
 		} else if (Z_TYPE_P(class_name) == IS_STRING) {
-			Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(Z_STR_P(class_name), 0 TSRMLS_CC);
+			Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(Z_STR_P(class_name), opline->extended_value TSRMLS_CC);
 		} else {
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
@@ -2226,7 +2175,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CLASS_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 		} else if (Z_TYPE_P(class_name) == IS_OBJECT) {
 			Z_CE_P(EX_VAR(opline->result.var)) = Z_OBJCE_P(class_name);
 		} else if (Z_TYPE_P(class_name) == IS_STRING) {
-			Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(Z_STR_P(class_name), 0 TSRMLS_CC);
+			Z_CE_P(EX_VAR(opline->result.var)) = zend_fetch_class(Z_STR_P(class_name), opline->extended_value TSRMLS_CC);
 		} else {
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
@@ -2767,6 +2716,72 @@ static int ZEND_FASTCALL  ZEND_BOOL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_NEW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval object_zval;
+	zend_function *constructor;
+	zend_class_entry *ce;
+
+	SAVE_OPLINE();
+	if (IS_CONST == IS_CONST) {
+		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
+			ce = CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv));
+		} else {
+			ce = zend_fetch_class_by_name(Z_STR_P(opline->op1.zv), opline->op1.zv + 1, 0 TSRMLS_CC);
+			if (UNEXPECTED(ce == NULL)) {
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
+			CACHE_PTR(Z_CACHE_SLOT_P(opline->op1.zv), ce);
+		}
+	} else {
+		ce = Z_CE_P(EX_VAR(opline->op1.var));
+	}
+	if (UNEXPECTED((ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0)) {
+		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+			zend_error_noreturn(E_ERROR, "Cannot instantiate interface %s", ce->name->val);
+		} else if ((ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+			zend_error_noreturn(E_ERROR, "Cannot instantiate trait %s", ce->name->val);
+		} else {
+			zend_error_noreturn(E_ERROR, "Cannot instantiate abstract class %s", ce->name->val);
+		}
+	}
+	object_init_ex(&object_zval, ce);
+	constructor = Z_OBJ_HT(object_zval)->get_constructor(Z_OBJ(object_zval) TSRMLS_CC);
+
+	if (constructor == NULL) {
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &object_zval);
+		} else {
+			zval_ptr_dtor(&object_zval);
+		}
+		ZEND_VM_JMP(opline->op2.jmp_addr);
+	} else {
+		/* We are not handling overloaded classes right now */
+		EX(call) = zend_vm_stack_push_call_frame(
+			VM_FRAME_INFO(
+				VM_FRAME_NESTED_FUNCTION,
+				RETURN_VALUE_USED(opline) ?
+					ZEND_CALL_CTOR : (ZEND_CALL_CTOR | ZEND_CALL_CTOR_RESULT_UNUSED)),
+			constructor,
+			opline->extended_value,
+			ce,
+			Z_OBJ(object_zval),
+			EX(call) TSRMLS_CC);
+
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(EX_VAR(opline->result.var), &object_zval);
+			EX(call)->return_value = EX_VAR(opline->result.var);
+		} else {
+			EX(call)->return_value = NULL;
+		}
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -16300,6 +16315,72 @@ static int ZEND_FASTCALL  ZEND_BOOL_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_NEW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval object_zval;
+	zend_function *constructor;
+	zend_class_entry *ce;
+
+	SAVE_OPLINE();
+	if (IS_VAR == IS_CONST) {
+		if (CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv))) {
+			ce = CACHED_PTR(Z_CACHE_SLOT_P(opline->op1.zv));
+		} else {
+			ce = zend_fetch_class_by_name(Z_STR_P(opline->op1.zv), opline->op1.zv + 1, 0 TSRMLS_CC);
+			if (UNEXPECTED(ce == NULL)) {
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
+			CACHE_PTR(Z_CACHE_SLOT_P(opline->op1.zv), ce);
+		}
+	} else {
+		ce = Z_CE_P(EX_VAR(opline->op1.var));
+	}
+	if (UNEXPECTED((ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0)) {
+		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+			zend_error_noreturn(E_ERROR, "Cannot instantiate interface %s", ce->name->val);
+		} else if ((ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+			zend_error_noreturn(E_ERROR, "Cannot instantiate trait %s", ce->name->val);
+		} else {
+			zend_error_noreturn(E_ERROR, "Cannot instantiate abstract class %s", ce->name->val);
+		}
+	}
+	object_init_ex(&object_zval, ce);
+	constructor = Z_OBJ_HT(object_zval)->get_constructor(Z_OBJ(object_zval) TSRMLS_CC);
+
+	if (constructor == NULL) {
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &object_zval);
+		} else {
+			zval_ptr_dtor(&object_zval);
+		}
+		ZEND_VM_JMP(opline->op2.jmp_addr);
+	} else {
+		/* We are not handling overloaded classes right now */
+		EX(call) = zend_vm_stack_push_call_frame(
+			VM_FRAME_INFO(
+				VM_FRAME_NESTED_FUNCTION,
+				RETURN_VALUE_USED(opline) ?
+					ZEND_CALL_CTOR : (ZEND_CALL_CTOR | ZEND_CALL_CTOR_RESULT_UNUSED)),
+			constructor,
+			opline->extended_value,
+			ce,
+			Z_OBJ(object_zval),
+			EX(call) TSRMLS_CC);
+
+		if (RETURN_VALUE_USED(opline)) {
+			ZVAL_COPY(EX_VAR(opline->result.var), &object_zval);
+			EX(call)->return_value = EX_VAR(opline->result.var);
+		} else {
+			EX(call)->return_value = NULL;
+		}
+
+		CHECK_EXCEPTION();
+		ZEND_VM_NEXT_OPCODE();
+	}
 }
 
 static int ZEND_FASTCALL  ZEND_CLONE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -45345,31 +45426,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_SEND_REF_SPEC_CV_HANDLER,
   	ZEND_SEND_REF_SPEC_CV_HANDLER,
   	ZEND_SEND_REF_SPEC_CV_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
-  	ZEND_NEW_SPEC_HANDLER,
+  	ZEND_NEW_SPEC_CONST_HANDLER,
+  	ZEND_NEW_SPEC_CONST_HANDLER,
+  	ZEND_NEW_SPEC_CONST_HANDLER,
+  	ZEND_NEW_SPEC_CONST_HANDLER,
+  	ZEND_NEW_SPEC_CONST_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NEW_SPEC_VAR_HANDLER,
+  	ZEND_NEW_SPEC_VAR_HANDLER,
+  	ZEND_NEW_SPEC_VAR_HANDLER,
+  	ZEND_NEW_SPEC_VAR_HANDLER,
+  	ZEND_NEW_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
   	ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,

@@ -156,7 +156,7 @@ PHP_FUNCTION(intval)
 #endif
 
 	RETVAL_ZVAL(num, 1, 0);
-	convert_to_long_base(return_value, base);
+	convert_to_long_base(return_value, (int)base);
 }
 /* }}} */
 
