@@ -477,15 +477,7 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 			case E_USER_ERROR:
 			case E_PARSE:
 			case E_RECOVERABLE_ERROR:
-				if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) {
-					phpdbg_list_file(
-						zend_get_executed_filename(TSRMLS_C),
-						3,
-						zend_get_executed_lineno(TSRMLS_C)-1,
-						zend_get_executed_lineno(TSRMLS_C)
-						TSRMLS_CC
-					);
-				}
+				phpdbg_list_file(zend_get_executed_filename(TSRMLS_C), 3, zend_get_executed_lineno(TSRMLS_C)-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
 
 				do {
 					switch (phpdbg_interactive(1 TSRMLS_CC)) {
@@ -1531,6 +1523,11 @@ phpdbg_out:
 			}
 			efree(SG(request_info).argv);
 		}
+
+#ifndef _WIN32
+		/* reset it... else we risk a stack overflow upon next run (when clean'ing) */
+		php_stream_stdio_ops.write = PHPDBG_G(php_stdiop_write);
+#endif
 
 #ifndef ZTS
 		/* force cleanup of auto and core globals */
