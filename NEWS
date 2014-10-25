@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
+  . Fixed bug #68283 (fileinfo: out-of-bounds read in elf note headers).
+    (CVE-2014-3710) (Remi)
 
 - GD:
   . Fixed bug #65171 (imagescale() fails without height param). (Remi)
