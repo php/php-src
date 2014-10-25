@@ -112,4 +112,29 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 
 PHPDBG_API void phpdbg_xml_var_dump(zval **zv TSRMLS_DC);
 
+#ifdef ZTS
+#define PHPDBG_OUTPUT_BACKUP_DEFINES() \
+	zend_output_globals *output_globals_ptr; \
+	zend_output_globals original_output_globals; \
+	output_globals_ptr = (zend_output_globals *) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(output_globals_id)];
+#else
+#define PHPDBG_OUTPUT_BACKUP_DEFINES() \
+	zend_output_globals *output_globals_ptr; \
+	zend_output_globals original_output_globals; \
+	output_globals_ptr = &output_globals;
+#endif
+
+#define PHPDBG_OUTPUT_BACKUP_SWAP() \
+	original_output_globals = *output_globals_ptr; \
+	memset(output_globals_ptr, 0, sizeof(zend_output_globals)); \
+	php_output_activate(TSRMLS_C);
+
+#define PHPDBG_OUTPUT_BACKUP() \
+	PHPDBG_OUTPUT_BACKUP_DEFINES() \
+	PHPDBG_OUTPUT_BACKUP_SWAP()
+
+#define PHPDBG_OUTPUT_BACKUP_RESTORE() \
+	php_output_deactivate(TSRMLS_C); \
+	*output_globals_ptr = original_output_globals;
+
 #endif /* PHPDBG_UTILS_H */

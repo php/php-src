@@ -42,6 +42,7 @@
 #include "phpdbg_eol.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(output);
 
 #ifdef HAVE_LIBDL
 #ifdef PHP_WIN32
@@ -699,12 +700,16 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	zend_class_entry *original_called_scope = EG(called_scope);
 	zend_vm_stack original_stack = EG(argument_stack);
 
+	PHPDBG_OUTPUT_BACKUP();
+
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
 		phpdbg_try_access {
 			phpdbg_parse_variable(param->str, param->len, &EG(symbol_table), 0, phpdbg_output_ev_variable, 0 TSRMLS_CC);
 		} phpdbg_catch_access {
 			phpdbg_error("signalsegv", "", "Could not fetch data, invalid data source");
 		} phpdbg_end_try_access();
+
+		PHPDBG_OUTPUT_BACKUP_RESTORE();
 		return SUCCESS;
 	}
 
@@ -745,6 +750,8 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	}
 
 	CG(unclean_shutdown) = 0;
+
+	PHPDBG_OUTPUT_BACKUP_RESTORE();
 
 	return SUCCESS;
 } /* }}} */
