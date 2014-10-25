@@ -52,7 +52,7 @@ PHP X.Y UPGRADE NOTES
 
 - Core
   . Support for strings with length >= 2^31 bytes in 64 bit builds
-  . Closure::apply() method added
+  . Closure::call() method added
 
 - Standard
   . intdiv() function for integer division added.
