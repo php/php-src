@@ -2773,11 +2773,11 @@ PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size
 	do { xlat[j] = j; } while (++j != 0);
 
 	for (i = 0; i < trlen; i++) {
-		xlat[(size_t) str_from[i]] = str_to[i];
+		xlat[(size_t)(unsigned char) str_from[i]] = str_to[i];
 	}
 
 	for (i = 0; i < len; i++) {
-		str[i] = xlat[(size_t) str[i]];
+		str[i] = xlat[(size_t)(unsigned char) str[i]];
 	}
 
 	return str;
