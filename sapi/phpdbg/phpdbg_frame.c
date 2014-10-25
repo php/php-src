@@ -25,6 +25,7 @@
 #include "phpdbg_list.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(output);
 
 void phpdbg_restore_frame(TSRMLS_D) /* {{{ */
 {
@@ -174,8 +175,12 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 	zval *file, *line;
 	int i = 0, limit = num;
 
+	PHPDBG_OUTPUT_BACKUP();
+
 	if (limit < 0) {
 		phpdbg_error("backtrace", "type=\"minnum\"", "Invalid backtrace size %d", limit);
+
+		PHPDBG_OUTPUT_BACKUP_RESTORE();
 		return;
 	}
 
@@ -218,4 +223,6 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 	phpdbg_xml("</backtrace>");
 
 	zval_dtor(&zbacktrace);
+
+	PHPDBG_OUTPUT_BACKUP_RESTORE();
 } /* }}} */

@@ -126,8 +126,16 @@ void phpdbg_list_file(zend_string *filename, uint count, int offset, uint highli
 {
 	uint line, lastline;
 	phpdbg_file_source *data;
+	char resolved_path_buf[MAXPATHLEN];
+	const char *abspath;
 
-	if (!(data = zend_hash_find_ptr(&PHPDBG_G(file_sources), filename))) {
+	if (VCWD_REALPATH(filename->val, resolved_path_buf)) {
+		abspath = resolved_path_buf;
+	} else {
+		abspath = filename->val;
+	}
+
+	if (!(data = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), abspath, strlen(abspath)))) {
 		phpdbg_error("list", "type=\"unknownfile\"", "Could not find information about included file...");
 		return;
 	}
@@ -230,6 +238,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type TSRMLS_DC) {
 	char *filename = (char *)(file->opened_path ? file->opened_path : file->filename);
 	uint line;
 	char *bufptr, *endptr;
+	char resolved_path_buf[MAXPATHLEN];
 
 	zend_stream_fixup(file, &data.buf, &data.len TSRMLS_CC);
 
@@ -256,6 +265,9 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type TSRMLS_DC) {
 	fake.opened_path = file->opened_path;
 
 	*(dataptr = emalloc(sizeof(phpdbg_file_source) + sizeof(uint) * data.len)) = data;
+	if (VCWD_REALPATH(filename, resolved_path_buf)) {
+		filename = resolved_path_buf;
+	}
 
 	for (line = 0, bufptr = data.buf - 1, endptr = data.buf + data.len; ++bufptr < endptr;) {
 		if (*bufptr == '\n') {

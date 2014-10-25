@@ -43,6 +43,7 @@
 #include "phpdbg_eol.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+ZEND_EXTERN_MODULE_GLOBALS(output);
 
 #ifdef HAVE_LIBDL
 #ifdef PHP_WIN32
@@ -645,12 +646,21 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	zend_bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING) == PHPDBG_IS_STEPPING);
 	zval retval;
 
+	zend_execute_data *original_execute_data = EG(current_execute_data);
+	zend_class_entry *original_scope = EG(scope);
+	zend_vm_stack original_stack = EG(vm_stack);
+	original_stack->top = EG(vm_stack_top);
+
+	PHPDBG_OUTPUT_BACKUP();
+
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
 		phpdbg_try_access {
 			phpdbg_parse_variable(param->str, param->len, &EG(symbol_table).ht, 0, phpdbg_output_ev_variable, 0 TSRMLS_CC);
 		} phpdbg_catch_access {
 			phpdbg_error("signalsegv", "", "Could not fetch data, invalid data source");
 		} phpdbg_end_try_access();
+
+		PHPDBG_OUTPUT_BACKUP_RESTORE();
 		return SUCCESS;
 	}
 
@@ -672,6 +682,12 @@ PHPDBG_COMMAND(ev) /* {{{ */
 			phpdbg_out("\n");
 			zval_ptr_dtor(&retval);
 		}
+	} zend_catch {
+		EG(current_execute_data) = original_execute_data;
+		EG(scope) = original_scope;
+		EG(vm_stack_top) = original_stack->top;
+		EG(vm_stack_end) = original_stack->end;
+		EG(vm_stack) = original_stack;
 	} zend_end_try();
 	PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
 
@@ -681,6 +697,8 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	}
 
 	CG(unclean_shutdown) = 0;
+
+	PHPDBG_OUTPUT_BACKUP_RESTORE();
 
 	return SUCCESS;
 } /* }}} */
