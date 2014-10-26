@@ -499,7 +499,7 @@ static int accelerator_get_scripts(zval *return_value TSRMLS_DC)
 			timerclear(&exec_time);
 			timerclear(&fetch_time);
 
-			zend_hash_str_update(Z_ARRVAL_P(return_value), cache_entry->key, cache_entry->key_length-1, &persistent_script_report);
+			zend_hash_str_update(Z_ARRVAL_P(return_value), cache_entry->key, cache_entry->key_length, &persistent_script_report);
 		}
 	}
 	accelerator_shm_read_unlock(TSRMLS_C);
