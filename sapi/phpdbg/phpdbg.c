@@ -730,7 +730,8 @@ const char phpdbg_ini_hardcoded[] =
 "log_errors=On\n"
 "max_execution_time=0\n"
 "max_input_time=-1\n"
-"error_log=\n\0";
+"error_log=\n"
+"output_buffering=off\0";
 
 /* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
 #define INI_DEFAULT(name, value) \
