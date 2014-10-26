@@ -1028,7 +1028,7 @@ found:
 
 static zend_always_inline void *zend_mm_alloc_large(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	int pages_count = ZEND_MM_SIZE_TO_NUM(size, ZEND_MM_PAGE_SIZE);
+	int pages_count = (int)ZEND_MM_SIZE_TO_NUM(size, ZEND_MM_PAGE_SIZE);
 #if ZEND_DEBUG
 	void *ptr = zend_mm_alloc_pages(heap, pages_count, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 #else
@@ -1261,7 +1261,7 @@ static zend_always_inline zend_mm_debug_info *zend_mm_get_debug_info(zend_mm_hea
 
 	ZEND_MM_CHECK(page_offset != 0, "zend_mm_heap corrupted");
 	chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE);
-	page_num = page_offset / ZEND_MM_PAGE_SIZE;
+	page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 	info = chunk->map[page_num];
 	ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
 	if (EXPECTED(info & ZEND_MM_IS_SRUN)) {
@@ -1326,7 +1326,7 @@ static zend_always_inline void zend_mm_free_heap(zend_mm_heap *heap, void *ptr Z
 		}
 	} else {
 		zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE);
-		int page_num = page_offset / ZEND_MM_PAGE_SIZE;
+		int page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 		zend_mm_page_info info = chunk->map[page_num];
 
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
@@ -1357,7 +1357,7 @@ static size_t zend_mm_size(zend_mm_heap *heap, void *ptr ZEND_FILE_LINE_DC ZEND_
 		zend_mm_page_info info;
 
 		chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE);
-		page_num = page_offset / ZEND_MM_PAGE_SIZE;
+		page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 		info = chunk->map[page_num];
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
 		if (EXPECTED(info & ZEND_MM_IS_SRUN)) {
@@ -1451,7 +1451,7 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size ZEN
 		}
 	} else {
 		zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE);
-		int page_num = page_offset / ZEND_MM_PAGE_SIZE;
+		int page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 		zend_mm_page_info info = chunk->map[page_num];
 #if ZEND_DEBUG
 		size_t real_size = size;
@@ -1494,8 +1494,8 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size ZEN
 					return ptr;
 				} else if (new_size < old_size) {
 					/* free tail pages */
-					int new_pages_count = new_size / ZEND_MM_PAGE_SIZE;
-					int rest_pages_count = (old_size - new_size) / ZEND_MM_PAGE_SIZE;
+					int new_pages_count = (int)(new_size / ZEND_MM_PAGE_SIZE);
+					int rest_pages_count = (int)((old_size - new_size) / ZEND_MM_PAGE_SIZE);
 
 #if ZEND_MM_STAT
 					heap->size -= rest_pages_count * ZEND_MM_PAGE_SIZE;
@@ -1513,8 +1513,8 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size ZEN
 #endif
 					return ptr;
 				} else /* if (new_size > old_size) */ {
-					int new_pages_count = new_size / ZEND_MM_PAGE_SIZE;
-					int old_pages_count = old_size / ZEND_MM_PAGE_SIZE;
+					int new_pages_count = (int)(new_size / ZEND_MM_PAGE_SIZE);
+					int old_pages_count = (int)(old_size / ZEND_MM_PAGE_SIZE);
 
 					/* try to allocate tail pages after this block */
 					if (page_num + new_pages_count <= ZEND_MM_PAGES &&

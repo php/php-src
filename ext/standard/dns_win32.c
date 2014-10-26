@@ -208,7 +208,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				DWORD count = data_txt->dwStringCount;
 				zend_string *txt;
 				char *txt_dst;
-				long txt_len = 0;
+				size_t txt_len = 0;
 				zval entries;
 
 				add_assoc_string(subarray, "type", "TXT");
@@ -222,7 +222,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				txt = zend_string_safe_alloc(txt_len, 2, 0, 0);
 				txt_dst = txt->val;
 				for (i = 0; i < count; i++) {
-					int len = strlen(data_txt->pStringArray[i]);
+					size_t len = strlen(data_txt->pStringArray[i]);
 					memcpy(txt_dst, data_txt->pStringArray[i], len);
 					add_next_index_stringl(&entries, data_txt->pStringArray[i], len);
 					txt_dst += len;

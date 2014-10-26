@@ -59,6 +59,7 @@ typedef void* yyscan_t;
 %token T_ID         "identifier (command or function name)"
 %token T_INPUT      "input (input string or data)"
 %token T_UNEXPECTED "input"
+%token T_REQ_ID     "request id (-r %d)"
 
 %% /* Rules */
 
@@ -71,6 +72,7 @@ input
 parameters
 	: parameter { phpdbg_stack_push(PHPDBG_G(parser_stack), &$1); }
 	| parameters parameter { phpdbg_stack_push(PHPDBG_G(parser_stack), &$2); }
+	| parameters req_id { $$ = $1; }
 	;
 
 parameter
@@ -135,32 +137,37 @@ parameter
 	| T_ID { $$ = $1; }
 	;
 
+req_id
+	: T_REQ_ID { PHPDBG_G(req_id) = $1.num; }
+	| /* empty */
+;
+
 full_expression
-	: T_EVAL T_INPUT { 
+	: T_EVAL req_id T_INPUT { 
 		$$.type = EVAL_PARAM; 
-		$$.str = $2.str;
-		$$.len = $2.len;
+		$$.str = $3.str;
+		$$.len = $3.len;
 	}
-	| T_SHELL T_INPUT { 	
+	| T_SHELL req_id T_INPUT { 	
 		$$.type = SHELL_PARAM; 
-		$$.str = $2.str;
-		$$.len = $2.len;
+		$$.str = $3.str;
+		$$.len = $3.len;
 	}
-	| T_RUN {
+	| T_RUN req_id {
 		$$.type = RUN_PARAM;
 		$$.len = 0;
 	}
-	| T_RUN T_INPUT { 	
+	| T_RUN req_id T_INPUT { 	
 		$$.type = RUN_PARAM; 
-		$$.str = $2.str;
-		$$.len = $2.len;
+		$$.str = $3.str;
+		$$.len = $3.len;
 	}
 	;
 
 %%
 
 static int yyerror(void ***tsrm_ls, const char *msg) {
-	phpdbg_error("Parse Error: %s", msg);
+	phpdbg_error("command", "type=\"parseerror\" msg=\"%s\"", "Parse Error: %s", msg);
 
 	{
 		const phpdbg_param_t *top = PHPDBG_G(parser_stack);

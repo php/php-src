@@ -82,7 +82,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	char **ep;
 #endif
 	char *p;
-	uint cnt, l, sizeenv=0;
+	size_t cnt, l, sizeenv=0;
 	HashTable *target_hash;
 
 	memset(&env, 0, sizeof(env));
@@ -109,7 +109,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	/* first, we have to get the size of all the elements in the hash */
 	ZEND_HASH_FOREACH_STR_KEY_VAL(target_hash, string_key, element) {
 		zend_string *str = zval_get_string(element);
-		uint el_len = str->len;
+		size_t el_len = str->len;
 		zend_string_release(str);
 
 		if (el_len == 0) {
@@ -512,7 +512,7 @@ PHP_FUNCTION(proc_open)
 			goto exit_fail;
 		}
 
-		descriptors[ndesc].index = nindex;
+		descriptors[ndesc].index = (int)nindex;
 
 		if (Z_TYPE_P(descitem) == IS_RESOURCE) {
 			/* should be a stream - try and dup the descriptor */
@@ -526,7 +526,7 @@ PHP_FUNCTION(proc_open)
 			}
 
 #ifdef PHP_WIN32
-			descriptors[ndesc].childend = dup_fd_as_handle(fd);
+			descriptors[ndesc].childend = dup_fd_as_handle((int)fd);
 			if (descriptors[ndesc].childend == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to dup File-Handle for descriptor %d", nindex);
 				goto exit_fail;
@@ -621,8 +621,8 @@ PHP_FUNCTION(proc_open)
 				}
 
 #ifdef PHP_WIN32
-				descriptors[ndesc].childend = dup_fd_as_handle(fd);
-				_close(fd);
+				descriptors[ndesc].childend = dup_fd_as_handle((int)fd);
+				_close((int)fd);
 
 				/* simulate the append mode by fseeking to the end of the file
 				this introduces a potential race-condition, but it is the best we can do, though */

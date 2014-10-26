@@ -619,7 +619,6 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_FETCH_TYPE_MASK		0x70000000
 
 #define ZEND_FETCH_STANDARD		    0x00000000
-#define ZEND_FETCH_MAKE_REF		    0x04000000
 
 #define ZEND_ISSET				    0x02000000
 #define ZEND_ISEMPTY			    0x01000000

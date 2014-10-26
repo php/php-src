@@ -529,7 +529,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 			char *actual = Z_STRVAL_P(p);
 
 			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
-				int len;
+				size_t len;
 
 				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
 				len = Z_STRLEN_P(p) - ((colon - Z_STRVAL_P(p)) + 1);
@@ -544,7 +544,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 			} else {
 				zend_string *save = Z_STR_P(p);
 				char *slash;
-				int actual_len = Z_STRLEN_P(p);
+				size_t actual_len = Z_STRLEN_P(p);
 				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
 					actual = slash + 1;
 					actual_len -= (actual - Z_STRVAL_P(p));
@@ -1055,7 +1055,7 @@ ZEND_API zend_class_entry *zend_lookup_class(zend_string *name TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC) /* {{{ */
+ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char *string_name TSRMLS_DC) /* {{{ */
 {
 	zval pv;
 	zend_op_array *new_op_array;
@@ -1123,7 +1123,7 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 }
 /* }}} */
 
-ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
+ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
 {
 	int result;
 

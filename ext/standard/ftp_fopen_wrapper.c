@@ -155,7 +155,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	if (resource->port == 0)
 		resource->port = 21;
 	
-	transport_len = spprintf(&transport, 0, "tcp://%s:%d", resource->host, resource->port);
+	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", resource->host, resource->port);
 	stream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, NULL, NULL);
 	efree(transport);
 	if (stream == NULL) {
@@ -245,7 +245,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 
 	/* send the user name */
 	if (resource->user != NULL) {
-		tmp_len = php_raw_url_decode(resource->user, strlen(resource->user));
+		tmp_len = (int)php_raw_url_decode(resource->user, (int)strlen(resource->user));
 
 		PHP_FTP_CNTRL_CHK(resource->user, tmp_len, "Invalid login %s")
 
@@ -262,7 +262,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 		php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, tmp_line, 0);
 
 		if (resource->pass != NULL) {
-			tmp_len = php_raw_url_decode(resource->pass, strlen(resource->pass));
+			tmp_len = (int)php_raw_url_decode(resource->pass, (int)strlen(resource->pass));
 
 			PHP_FTP_CNTRL_CHK(resource->pass, tmp_len, "Invalid password %s")
 
@@ -424,8 +424,8 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	php_stream *reuseid=NULL;
 	size_t file_size = 0;
 	zval *tmpzval;
-	int allow_overwrite = 0;
-	int read_write = 0;
+	zend_bool allow_overwrite = 0;
+	int8_t read_write = 0;
 	char *transport;
 	int transport_len;
 
@@ -498,7 +498,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	} else if (read_write == 2) {
 		/* when writing file (but not appending), it must NOT exist, unless a context option exists which allows it */
 		if (context && (tmpzval = php_stream_context_get_option(context, "ftp", "overwrite")) != NULL) {
-			allow_overwrite = Z_LVAL_P(tmpzval);
+			allow_overwrite = Z_LVAL_P(tmpzval) ? 1 : 0;
 		}
 		if (result <= 299 && result >= 200) {
 			if (allow_overwrite) {
@@ -554,7 +554,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	if (hoststart == NULL) {
 		hoststart = resource->host;
 	}
-	transport_len = spprintf(&transport, 0, "tcp://%s:%d", hoststart, portno);
+	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", hoststart, portno);
 	datastream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, NULL, NULL);
 	efree(transport);
 	if (datastream == NULL) {
@@ -855,7 +855,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		gmt->tm_isdst = -1;
 
 		/* apply the GMT offset */
-		tm.tm_sec += stamp - mktime(gmt);
+		tm.tm_sec += (long)(stamp - mktime(gmt));
 		tm.tm_isdst = gmt->tm_isdst;
 
 		ssb->sb.st_mtime = mktime(&tm);

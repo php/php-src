@@ -90,7 +90,7 @@ ZEND_API void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 #ifdef HAVE_DTRACE
 	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
 		if (exception != NULL) {
-			DTRACE_EXCEPTION_THROWN(Z_OBJ_P(exception)->ce->val);
+			DTRACE_EXCEPTION_THROWN(Z_OBJ_P(exception)->ce->name->val);
 		} else {
 			DTRACE_EXCEPTION_THROWN(NULL);
 		}
