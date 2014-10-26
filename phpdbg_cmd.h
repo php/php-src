@@ -131,6 +131,7 @@ typedef struct {
 */
 PHPDBG_API char* phpdbg_read_input(char *buffered TSRMLS_DC);
 PHPDBG_API void phpdbg_destroy_input(char** TSRMLS_DC);
+PHPDBG_API int phpdbg_ask_user_permission(const char *question TSRMLS_DC);
 
 /**
  * Stack Management
