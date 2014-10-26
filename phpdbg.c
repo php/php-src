@@ -46,7 +46,6 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 int phpdbg_startup_run = 0;
-char *phpdbg_exec = NULL;
 
 static PHP_INI_MH(OnUpdateEol)
 {
@@ -186,7 +185,8 @@ static void php_phpdbg_destroy_registered(void *data) /* {{{ */
 
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
-	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],   8, NULL, php_phpdbg_destroy_bp_file, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], 8, NULL, php_phpdbg_destroy_bp_file, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], 8, NULL, php_phpdbg_destroy_bp_file, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
@@ -216,8 +216,8 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 	zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]);
 	zend_hash_destroy(&PHPDBG_G(seek));
-	zend_hash_destroy(&PHPDBG_G(registered));
 	zend_hash_destroy(&PHPDBG_G(file_sources));
+	zend_hash_destroy(&PHPDBG_G(registered));
 	zend_hash_destroy(&PHPDBG_G(watchpoints));
 	zend_llist_destroy(&PHPDBG_G(watchlist_mem));
 
@@ -363,6 +363,7 @@ static PHP_FUNCTION(phpdbg_break_function)
 static PHP_FUNCTION(phpdbg_clear)
 {
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
+	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING]);
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE]);
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD_OPLINE]);
@@ -543,11 +544,27 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 
 static int php_sapi_phpdbg_deactivate(TSRMLS_D) /* {{{ */
 {
+	if ((PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_CLEANING) {
+		zend_phpdbg_globals *pg = PHPDBG_G(backup) = calloc(1, sizeof(zend_phpdbg_globals));
+
+		php_phpdbg_globals_ctor(pg);
+
+		pg->exec = strndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
+		pg->exec_len = PHPDBG_G(exec_len);
+		pg->oplog = PHPDBG_G(oplog);
+		pg->prompt[0] = PHPDBG_G(prompt)[0];
+		pg->prompt[1] = PHPDBG_G(prompt)[1];
+		memset(pg->colors, PHPDBG_G(colors), sizeof(pg->colors));
+		pg->eol = PHPDBG_G(eol);
+		pg->flags = PHPDBG_G(flags) & PHPDBG_PRESERVE_FLAGS_MASK;
+	}
+
 	fflush(stdout);
 	if(SG(request_info).argv0) {
 		free(SG(request_info).argv0);
 		SG(request_info).argv0 = NULL;
 	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1009,6 +1026,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_ulong zend_extensions_len = 0L;
 	zend_bool ini_ignore;
 	char *ini_override;
+	char *exec = NULL;
 	char *init_file;
 	size_t init_file_len;
 	zend_bool init_file_default;
@@ -1020,6 +1038,7 @@ int main(int argc, char **argv) /* {{{ */
 	long cleaning = 0;
 	zend_bool remote = 0;
 	int step = 0;
+	zend_phpdbg_globals *settings = NULL;
 
 #ifdef _WIN32
 	char *bp_tmp_file = NULL;
@@ -1102,6 +1121,9 @@ phpdbg_main:
 	opt = 0;
 	step = 0;
 	sapi_name = NULL;
+	if (settings) {
+		exec = settings->exec;
+	}
 
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
@@ -1243,12 +1265,12 @@ phpdbg_main:
 	}
 	
 	/* set exec if present on command line */
-	if (!phpdbg_exec && (argc > php_optind) && (strcmp(argv[php_optind-1],"--") != SUCCESS)) {
+	if (!exec && (argc > php_optind) && (strcmp(argv[php_optind-1], "--") != SUCCESS)) {
 		if (strlen(argv[php_optind])) {
-			if (phpdbg_exec) {
-				free(phpdbg_exec);
+			if (exec) {
+				free(exec);
 			}
-			phpdbg_exec = strdup(argv[php_optind]);
+			exec = strdup(argv[php_optind]);
 		}
 		php_optind++;
 	}
@@ -1309,20 +1331,31 @@ phpdbg_main:
 #endif
 		zend_mm_heap *mm_heap;
 
-	/* setup remote server if necessary */
-	if (!cleaning && listen > 0) {
-		server = phpdbg_open_socket(address, listen TSRMLS_CC);
-		if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream TSRMLS_CC) == FAILURE) {
-			exit(0);
+		/* set flags from command line */
+		PHPDBG_G(flags) = flags;
+
+		if (settings) {
+#ifdef ZTS
+			*((zend_phpdbg_globals *) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(phpdbg_globals_id)]) = *settings;
+#else
+			phpdbg_globals = *settings;
+#endif
 		}
 
+		/* setup remote server if necessary */
+		if (!cleaning && listen > 0) {
+			server = phpdbg_open_socket(address, listen TSRMLS_CC);
+				if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream TSRMLS_CC) == FAILURE) {
+				exit(0);
+			}
+
 #ifndef _WIN32
-		sigaction(SIGIO, &sigio_struct, NULL);
+			sigaction(SIGIO, &sigio_struct, NULL);
 #endif
 
-		/* set remote flag to stop service shutting down upon quit */
-		remote = 1;
-	}
+			/* set remote flag to stop service shutting down upon quit */
+			remote = 1;
+		}
 
 		mm_heap = phpdbg_mm_get_heap();
 
@@ -1371,7 +1404,7 @@ phpdbg_main:
 			for (i = SG(request_info).argc; --i;) {
 				SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
 			}
-			SG(request_info).argv[i] = phpdbg_exec ? estrdup(phpdbg_exec) : estrdup("");
+			SG(request_info).argv[i] = exec ? estrdup(exec) : estrdup("");
 
 			php_hash_environment(TSRMLS_C);
 		}
@@ -1391,9 +1424,6 @@ phpdbg_main:
 #endif
 
 		PG(modules_activated) = 0;
-
-		/* set flags from command line */
-		PHPDBG_G(flags) = flags;
 
 		/* setup io here */
 		if (remote) {
@@ -1434,12 +1464,12 @@ phpdbg_main:
 		php_stream_stdio_ops.write = phpdbg_stdiop_write;
 #endif
 
-		if (phpdbg_exec) { /* set execution context */
-			PHPDBG_G(exec) = phpdbg_resolve_path(phpdbg_exec TSRMLS_CC);
+		if (exec) { /* set execution context */
+			PHPDBG_G(exec) = phpdbg_resolve_path(exec TSRMLS_CC);
 			PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
 
-			free(phpdbg_exec);
-			phpdbg_exec = NULL;
+			free(exec);
+			exec = NULL;
 		}
 
 		if (oplog_file) { /* open oplog */
@@ -1537,7 +1567,12 @@ phpdbg_interact:
 				}
 			} zend_end_try();
 		} while (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING));
-		
+
+
+		if (PHPDBG_G(exec) && (PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
+			exec = strdup(PHPDBG_G(exec)); /* preserve exec, don't reparse that from cmd */
+		}
+
 		/* this must be forced */
 		CG(unclean_shutdown) = 0;
 		
@@ -1590,7 +1625,24 @@ phpdbg_out:
 		/* this is just helpful */
 		PG(report_memleaks) = 0;
 
-		php_request_shutdown((void*)0);
+		if ((PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_CLEANING) {
+			php_free_shutdown_functions(TSRMLS_C);
+			zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
+		}
+
+		/* sapi_module.deactivate is where to backup things, last chance before mm_shutdown... */
+
+		zend_try {
+			php_request_shutdown(NULL);
+		} zend_end_try();
+
+		if ((PHPDBG_G(flags) & (PHPDBG_IS_QUITTING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_RUNNING) {
+			phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
+		}
+
+		if ((PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_CLEANING) {
+			settings = PHPDBG_G(backup);
+		}
 
 		php_output_deactivate(TSRMLS_C);
 
