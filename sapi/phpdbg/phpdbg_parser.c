@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.5.  */
+/* A Bison parser, made by GNU Bison 2.7.  */
 
 /* Bison implementation for Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.5"
+#define YYBISON_VERSION "2.7"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -58,8 +58,6 @@
 /* Pull parsers.  */
 #define YYPULL 1
 
-/* Using locations.  */
-#define YYLSP_NEEDED 0
 
 /* Substitute the variable and function names.  */
 #define yyparse         phpdbg_parse
@@ -70,11 +68,9 @@
 #define yydebug         phpdbg_debug
 #define yynerrs         phpdbg_nerrs
 
-
 /* Copy the first part of user declarations.  */
-
-/* Line 268 of yacc.c  */
-#line 1 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 371 of yacc.c  */
+#line 1 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
 
  
 /*
@@ -101,14 +97,16 @@ static int yyerror(void ***tsrm_ls, const char *msg);
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 
+/* Line 371 of yacc.c  */
+#line 102 "sapi/phpdbg/phpdbg_parser.c"
 
-/* Line 268 of yacc.c  */
-#line 107 "sapi/phpdbg/phpdbg_parser.c"
-
-/* Enabling traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
+# ifndef YY_NULL
+#  if defined __cplusplus && 201103L <= __cplusplus
+#   define YY_NULL nullptr
+#  else
+#   define YY_NULL 0
+#  endif
+# endif
 
 /* Enabling verbose error messages.  */
 #ifdef YYERROR_VERBOSE
@@ -118,15 +116,20 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 # define YYERROR_VERBOSE 1
 #endif
 
-/* Enabling the token table.  */
-#ifndef YYTOKEN_TABLE
-# define YYTOKEN_TABLE 0
+/* In a future release of Bison, this section will be replaced
+   by #include "phpdbg_parser.h".  */
+#ifndef YY_PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
+# define YY_PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED
+/* Enabling traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
 #endif
-
+#if YYDEBUG
+extern int phpdbg_debug;
+#endif
 /* "%code requires" blocks.  */
-
-/* Line 288 of yacc.c  */
-#line 31 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 387 of yacc.c  */
+#line 31 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
 
 #include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -135,9 +138,8 @@ typedef void* yyscan_t;
 #endif
 
 
-
-/* Line 288 of yacc.c  */
-#line 141 "sapi/phpdbg/phpdbg_parser.c"
+/* Line 387 of yacc.c  */
+#line 143 "sapi/phpdbg/phpdbg_parser.c"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -189,7 +191,6 @@ typedef void* yyscan_t;
 
 
 
-
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef int YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
@@ -198,11 +199,26 @@ typedef int YYSTYPE;
 #endif
 
 
+#ifdef YYPARSE_PARAM
+#if defined __STDC__ || defined __cplusplus
+int phpdbg_parse (void *YYPARSE_PARAM);
+#else
+int phpdbg_parse ();
+#endif
+#else /* ! YYPARSE_PARAM */
+#if defined __STDC__ || defined __cplusplus
+int phpdbg_parse (void *tsrm_ls);
+#else
+int phpdbg_parse ();
+#endif
+#endif /* ! YYPARSE_PARAM */
+
+#endif /* !YY_PHPDBG_SAPI_PHPDBG_PHPDBG_PARSER_H_INCLUDED  */
+
 /* Copy the second part of user declarations.  */
 
-
-/* Line 343 of yacc.c  */
-#line 206 "sapi/phpdbg/phpdbg_parser.c"
+/* Line 390 of yacc.c  */
+#line 222 "sapi/phpdbg/phpdbg_parser.c"
 
 #ifdef short
 # undef short
@@ -255,24 +271,24 @@ typedef short int yytype_int16;
 # if defined YYENABLE_NLS && YYENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
-#   define YY_(msgid) dgettext ("bison-runtime", msgid)
+#   define YY_(Msgid) dgettext ("bison-runtime", Msgid)
 #  endif
 # endif
 # ifndef YY_
-#  define YY_(msgid) msgid
+#  define YY_(Msgid) Msgid
 # endif
 #endif
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(e) ((void) (e))
+# define YYUSE(E) ((void) (E))
 #else
-# define YYUSE(e) /* empty */
+# define YYUSE(E) /* empty */
 #endif
 
 /* Identity function, used to suppress warnings about constant conditions.  */
 #ifndef lint
-# define YYID(n) (n)
+# define YYID(N) (N)
 #else
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
@@ -308,6 +324,7 @@ YYID (yyi)
 #    if ! defined _ALLOCA_H && ! defined EXIT_SUCCESS && (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
 #     include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
+      /* Use EXIT_SUCCESS as a witness for stdlib.h.  */
 #     ifndef EXIT_SUCCESS
 #      define EXIT_SUCCESS 0
 #     endif
@@ -399,20 +416,20 @@ union yyalloc
 #endif
 
 #if defined YYCOPY_NEEDED && YYCOPY_NEEDED
-/* Copy COUNT objects from FROM to TO.  The source and destination do
+/* Copy COUNT objects from SRC to DST.  The source and destination do
    not overlap.  */
 # ifndef YYCOPY
 #  if defined __GNUC__ && 1 < __GNUC__
-#   define YYCOPY(To, From, Count) \
-      __builtin_memcpy (To, From, (Count) * sizeof (*(From)))
+#   define YYCOPY(Dst, Src, Count) \
+      __builtin_memcpy (Dst, Src, (Count) * sizeof (*(Src)))
 #  else
-#   define YYCOPY(To, From, Count)		\
-      do					\
-	{					\
-	  YYSIZE_T yyi;				\
-	  for (yyi = 0; yyi < (Count); yyi++)	\
-	    (To)[yyi] = (From)[yyi];		\
-	}					\
+#   define YYCOPY(Dst, Src, Count)              \
+      do                                        \
+        {                                       \
+          YYSIZE_T yyi;                         \
+          for (yyi = 0; yyi < (Count); yyi++)   \
+            (Dst)[yyi] = (Src)[yyi];            \
+        }                                       \
       while (YYID (0))
 #  endif
 # endif
@@ -505,7 +522,7 @@ static const yytype_uint8 yyrline[] =
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
+#if YYDEBUG || YYERROR_VERBOSE || 1
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
@@ -519,7 +536,7 @@ static const char *const yytname[] =
   "\"opcode\"", "\"identifier (command or function name)\"",
   "\"input (input string or data)\"", "\"input\"",
   "\"request id (-r %d)\"", "$accept", "input", "parameters", "parameter",
-  "req_id", "full_expression", 0
+  "req_id", "full_expression", YY_NULL
 };
 #endif
 
@@ -599,10 +616,10 @@ static const yytype_uint8 yytable[] =
       32,    36,    39,    40,     0,     0,    41,    42,    27
 };
 
-#define yypact_value_is_default(yystate) \
-  ((yystate) == (-16))
+#define yypact_value_is_default(Yystate) \
+  (!!((Yystate) == (-16)))
 
-#define yytable_value_is_error(yytable_value) \
+#define yytable_value_is_error(Yytable_value) \
   YYID (0)
 
 static const yytype_int8 yycheck[] =
@@ -652,62 +669,35 @@ static const yytype_uint8 yystos[] =
 
 #define YYRECOVERING()  (!!yyerrstatus)
 
-#define YYBACKUP(Token, Value)					\
-do								\
-  if (yychar == YYEMPTY && yylen == 1)				\
-    {								\
-      yychar = (Token);						\
-      yylval = (Value);						\
-      YYPOPSTACK (1);						\
-      goto yybackup;						\
-    }								\
-  else								\
-    {								\
+#define YYBACKUP(Token, Value)                                  \
+do                                                              \
+  if (yychar == YYEMPTY)                                        \
+    {                                                           \
+      yychar = (Token);                                         \
+      yylval = (Value);                                         \
+      YYPOPSTACK (yylen);                                       \
+      yystate = *yyssp;                                         \
+      goto yybackup;                                            \
+    }                                                           \
+  else                                                          \
+    {                                                           \
       yyerror (tsrm_ls, YY_("syntax error: cannot back up")); \
       YYERROR;							\
     }								\
 while (YYID (0))
 
-
+/* Error token number */
 #define YYTERROR	1
 #define YYERRCODE	256
 
 
-/* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
-   If N is 0, then set CURRENT to the empty location which ends
-   the previous symbol: RHS[0] (always defined).  */
-
-#define YYRHSLOC(Rhs, K) ((Rhs)[K])
-#ifndef YYLLOC_DEFAULT
-# define YYLLOC_DEFAULT(Current, Rhs, N)				\
-    do									\
-      if (YYID (N))                                                    \
-	{								\
-	  (Current).first_line   = YYRHSLOC (Rhs, 1).first_line;	\
-	  (Current).first_column = YYRHSLOC (Rhs, 1).first_column;	\
-	  (Current).last_line    = YYRHSLOC (Rhs, N).last_line;		\
-	  (Current).last_column  = YYRHSLOC (Rhs, N).last_column;	\
-	}								\
-      else								\
-	{								\
-	  (Current).first_line   = (Current).last_line   =		\
-	    YYRHSLOC (Rhs, 0).last_line;				\
-	  (Current).first_column = (Current).last_column =		\
-	    YYRHSLOC (Rhs, 0).last_column;				\
-	}								\
-    while (YYID (0))
-#endif
-
-
 /* This macro is provided for backward compatibility. */
-
 #ifndef YY_LOCATION_PRINT
 # define YY_LOCATION_PRINT(File, Loc) ((void) 0)
 #endif
 
 
 /* YYLEX -- calling `yylex' with the right arguments.  */
-
 #ifdef YYLEX_PARAM
 # define YYLEX yylex (&yylval, YYLEX_PARAM)
 #else
@@ -758,6 +748,8 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, tsrm_ls)
     void *tsrm_ls;
 #endif
 {
+  FILE *yyo = yyoutput;
+  YYUSE (yyo);
   if (!yyvaluep)
     return;
   YYUSE (tsrm_ls);
@@ -770,7 +762,7 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, tsrm_ls)
   switch (yytype)
     {
       default:
-	break;
+        break;
     }
 }
 
@@ -1012,12 +1004,11 @@ static int
 yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
                 yytype_int16 *yyssp, int yytoken)
 {
-  YYSIZE_T yysize0 = yytnamerr (0, yytname[yytoken]);
+  YYSIZE_T yysize0 = yytnamerr (YY_NULL, yytname[yytoken]);
   YYSIZE_T yysize = yysize0;
-  YYSIZE_T yysize1;
   enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
   /* Internationalized format string. */
-  const char *yyformat = 0;
+  const char *yyformat = YY_NULL;
   /* Arguments of yyformat. */
   char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
   /* Number of reported tokens (one for the "unexpected", one per
@@ -1077,11 +1068,13 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
                     break;
                   }
                 yyarg[yycount++] = yytname[yyx];
-                yysize1 = yysize + yytnamerr (0, yytname[yyx]);
-                if (! (yysize <= yysize1
-                       && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
-                  return 2;
-                yysize = yysize1;
+                {
+                  YYSIZE_T yysize1 = yysize + yytnamerr (YY_NULL, yytname[yyx]);
+                  if (! (yysize <= yysize1
+                         && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
+                    return 2;
+                  yysize = yysize1;
+                }
               }
         }
     }
@@ -1101,10 +1094,12 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
 # undef YYCASE_
     }
 
-  yysize1 = yysize + yystrlen (yyformat);
-  if (! (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
-    return 2;
-  yysize = yysize1;
+  {
+    YYSIZE_T yysize1 = yysize + yystrlen (yyformat);
+    if (! (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
+      return 2;
+    yysize = yysize1;
+  }
 
   if (*yymsg_alloc < yysize)
     {
@@ -1166,25 +1161,11 @@ yydestruct (yymsg, yytype, yyvaluep, tsrm_ls)
     {
 
       default:
-	break;
+        break;
     }
 }
 
 
-/* Prevent warnings from -Wmissing-prototypes.  */
-#ifdef YYPARSE_PARAM
-#if defined __STDC__ || defined __cplusplus
-int yyparse (void *YYPARSE_PARAM);
-#else
-int yyparse ();
-#endif
-#else /* ! YYPARSE_PARAM */
-#if defined __STDC__ || defined __cplusplus
-int yyparse (void *tsrm_ls);
-#else
-int yyparse ();
-#endif
-#endif /* ! YYPARSE_PARAM */
 
 
 /*----------.
@@ -1216,8 +1197,31 @@ yyparse (tsrm_ls)
 /* The lookahead symbol.  */
 int yychar;
 
+
+#if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
+/* Suppress an incorrect diagnostic about yylval being uninitialized.  */
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
+    _Pragma ("GCC diagnostic push") \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
+    _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
+    _Pragma ("GCC diagnostic pop")
+#else
+/* Default value used for initialization, for pacifying older GCCs
+   or non-GCC compilers.  */
+static YYSTYPE yyval_default;
+# define YY_INITIAL_VALUE(Value) = Value
+#endif
+#ifndef YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END
+#endif
+#ifndef YY_INITIAL_VALUE
+# define YY_INITIAL_VALUE(Value) /* Nothing. */
+#endif
+
 /* The semantic value of the lookahead symbol.  */
-YYSTYPE yylval;
+YYSTYPE yylval YY_INITIAL_VALUE(yyval_default);
 
     /* Number of syntax errors so far.  */
     int yynerrs;
@@ -1230,7 +1234,7 @@ YYSTYPE yylval;
        `yyss': related to states.
        `yyvs': related to semantic values.
 
-       Refer to the stacks thru separate pointers, to allow yyoverflow
+       Refer to the stacks through separate pointers, to allow yyoverflow
        to reallocate them elsewhere.  */
 
     /* The state stack.  */
@@ -1248,7 +1252,7 @@ YYSTYPE yylval;
   int yyn;
   int yyresult;
   /* Lookahead token as an internal (translated) token number.  */
-  int yytoken;
+  int yytoken = 0;
   /* The variables used to return semantic value and location from the
      action routines.  */
   YYSTYPE yyval;
@@ -1266,9 +1270,8 @@ YYSTYPE yylval;
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
 
-  yytoken = 0;
-  yyss = yyssa;
-  yyvs = yyvsa;
+  yyssp = yyss = yyssa;
+  yyvsp = yyvs = yyvsa;
   yystacksize = YYINITDEPTH;
 
   YYDPRINTF ((stderr, "Starting parse\n"));
@@ -1277,14 +1280,6 @@ YYSTYPE yylval;
   yyerrstatus = 0;
   yynerrs = 0;
   yychar = YYEMPTY; /* Cause a token to be read.  */
-
-  /* Initialize stack pointers.
-     Waste one element of value and location stack
-     so that they stay on the same level as the state stack.
-     The wasted elements are never initialized.  */
-  yyssp = yyss;
-  yyvsp = yyvs;
-
   goto yysetstate;
 
 /*------------------------------------------------------------.
@@ -1425,7 +1420,9 @@ yybackup:
   yychar = YYEMPTY;
 
   yystate = yyn;
+  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   *++yyvsp = yylval;
+  YY_IGNORE_MAYBE_UNINITIALIZED_END
 
   goto yynewstate;
 
@@ -1462,37 +1459,32 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-
-/* Line 1806 of yacc.c  */
-#line 68 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 68 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { phpdbg_stack_push(PHPDBG_G(parser_stack), &(yyvsp[(1) - (1)])); }
     break;
 
   case 5:
-
-/* Line 1806 of yacc.c  */
-#line 73 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 73 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { phpdbg_stack_push(PHPDBG_G(parser_stack), &(yyvsp[(1) - (1)])); }
     break;
 
   case 6:
-
-/* Line 1806 of yacc.c  */
-#line 74 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 74 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { phpdbg_stack_push(PHPDBG_G(parser_stack), &(yyvsp[(2) - (2)])); }
     break;
 
   case 7:
-
-/* Line 1806 of yacc.c  */
-#line 75 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 75 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (2)]); }
     break;
 
   case 8:
-
-/* Line 1806 of yacc.c  */
-#line 79 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 79 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { 	
 		(yyval).type = FILE_PARAM;
 		(yyval).file.name = (yyvsp[(2) - (3)]).str;
@@ -1501,9 +1493,8 @@ yyreduce:
     break;
 
   case 9:
-
-/* Line 1806 of yacc.c  */
-#line 84 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 84 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = NUMERIC_FILE_PARAM;
 		(yyval).file.name = (yyvsp[(1) - (4)]).str;
@@ -1512,9 +1503,8 @@ yyreduce:
     break;
 
   case 10:
-
-/* Line 1806 of yacc.c  */
-#line 89 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 89 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = FILE_PARAM;
 		(yyval).file.name = malloc((yyvsp[(1) - (4)]).len + (yyvsp[(2) - (4)]).len + 1);
@@ -1528,9 +1518,8 @@ yyreduce:
     break;
 
   case 11:
-
-/* Line 1806 of yacc.c  */
-#line 99 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 99 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = NUMERIC_FILE_PARAM;
 		(yyval).file.name = malloc((yyvsp[(1) - (5)]).len + (yyvsp[(2) - (5)]).len + 1);
@@ -1544,9 +1533,8 @@ yyreduce:
     break;
 
   case 12:
-
-/* Line 1806 of yacc.c  */
-#line 109 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 109 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { 
 		(yyval).type = METHOD_PARAM;
 		(yyval).method.class = (yyvsp[(1) - (3)]).str;
@@ -1555,9 +1543,8 @@ yyreduce:
     break;
 
   case 13:
-
-/* Line 1806 of yacc.c  */
-#line 114 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 114 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { 
 		(yyval).type = NUMERIC_METHOD_PARAM;
 		(yyval).method.class = (yyvsp[(1) - (5)]).str;
@@ -1567,9 +1554,8 @@ yyreduce:
     break;
 
   case 14:
-
-/* Line 1806 of yacc.c  */
-#line 120 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 120 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = NUMERIC_FUNCTION_PARAM;
 		(yyval).str = (yyvsp[(1) - (3)]).str;
@@ -1579,9 +1565,8 @@ yyreduce:
     break;
 
   case 15:
-
-/* Line 1806 of yacc.c  */
-#line 126 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 126 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = COND_PARAM; 
 		(yyval).str = (yyvsp[(2) - (2)]).str;
@@ -1590,65 +1575,56 @@ yyreduce:
     break;
 
   case 16:
-
-/* Line 1806 of yacc.c  */
-#line 131 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 131 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 17:
-
-/* Line 1806 of yacc.c  */
-#line 132 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 132 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 18:
-
-/* Line 1806 of yacc.c  */
-#line 133 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 133 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 19:
-
-/* Line 1806 of yacc.c  */
-#line 134 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 134 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 20:
-
-/* Line 1806 of yacc.c  */
-#line 135 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 135 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 21:
-
-/* Line 1806 of yacc.c  */
-#line 136 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 136 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 22:
-
-/* Line 1806 of yacc.c  */
-#line 137 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 137 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 23:
-
-/* Line 1806 of yacc.c  */
-#line 141 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 141 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { PHPDBG_G(req_id) = (yyvsp[(1) - (1)]).num; }
     break;
 
   case 25:
-
-/* Line 1806 of yacc.c  */
-#line 146 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 146 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { 
 		(yyval).type = EVAL_PARAM; 
 		(yyval).str = (yyvsp[(3) - (3)]).str;
@@ -1657,9 +1633,8 @@ yyreduce:
     break;
 
   case 26:
-
-/* Line 1806 of yacc.c  */
-#line 151 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 151 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { 	
 		(yyval).type = SHELL_PARAM; 
 		(yyval).str = (yyvsp[(3) - (3)]).str;
@@ -1668,9 +1643,8 @@ yyreduce:
     break;
 
   case 27:
-
-/* Line 1806 of yacc.c  */
-#line 156 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 156 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = RUN_PARAM;
 		(yyval).len = 0;
@@ -1678,9 +1652,8 @@ yyreduce:
     break;
 
   case 28:
-
-/* Line 1806 of yacc.c  */
-#line 160 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1792 of yacc.c  */
+#line 160 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
     { 	
 		(yyval).type = RUN_PARAM; 
 		(yyval).str = (yyvsp[(3) - (3)]).str;
@@ -1689,9 +1662,8 @@ yyreduce:
     break;
 
 
-
-/* Line 1806 of yacc.c  */
-#line 1695 "sapi/phpdbg/phpdbg_parser.c"
+/* Line 1792 of yacc.c  */
+#line 1667 "sapi/phpdbg/phpdbg_parser.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1854,7 +1826,9 @@ yyerrlab1:
       YY_STACK_PRINT (yyss, yyssp);
     }
 
+  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   *++yyvsp = yylval;
+  YY_IGNORE_MAYBE_UNINITIALIZED_END
 
 
   /* Shift the error token.  */
@@ -1878,7 +1852,7 @@ yyabortlab:
   yyresult = 1;
   goto yyreturn;
 
-#if !defined(yyoverflow) || YYERROR_VERBOSE
+#if !defined yyoverflow || YYERROR_VERBOSE
 /*-------------------------------------------------.
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
@@ -1920,9 +1894,8 @@ yyreturn:
 }
 
 
-
-/* Line 2067 of yacc.c  */
-#line 167 "/root/php-src-xml-data-phpdbg/sapi/phpdbg/phpdbg_parser.y"
+/* Line 2055 of yacc.c  */
+#line 167 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
 
 
 static int yyerror(void ***tsrm_ls, const char *msg) {
@@ -1948,4 +1921,3 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC) {
 	return yyparse(NULL);
 #endif
 }
-
