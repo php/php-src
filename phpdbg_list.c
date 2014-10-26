@@ -278,6 +278,8 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type TSRMLS_DC) {
 	dataptr->line[line] = endptr - data.buf;
 	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
 
+	phpdbg_resolve_pending_file_break(filename TSRMLS_CC);
+
 	ret = PHPDBG_G(compile_file)(&fake, type TSRMLS_CC);
 
 	fake.opened_path = NULL;
