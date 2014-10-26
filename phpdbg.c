@@ -544,7 +544,7 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 
 static int php_sapi_phpdbg_deactivate(TSRMLS_D) /* {{{ */
 {
-	if ((PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_CLEANING) {
+	if ((PHPDBG_G(flags) & PHPDBG_IS_STOPPING) == PHPDBG_IS_CLEANING) {
 		zend_phpdbg_globals *pg = PHPDBG_G(backup) = calloc(1, sizeof(zend_phpdbg_globals));
 
 		php_phpdbg_globals_ctor(pg);
@@ -554,7 +554,7 @@ static int php_sapi_phpdbg_deactivate(TSRMLS_D) /* {{{ */
 		pg->oplog = PHPDBG_G(oplog);
 		pg->prompt[0] = PHPDBG_G(prompt)[0];
 		pg->prompt[1] = PHPDBG_G(prompt)[1];
-		memset(pg->colors, PHPDBG_G(colors), sizeof(pg->colors));
+		memcpy(pg->colors, PHPDBG_G(colors), sizeof(pg->colors));
 		pg->eol = PHPDBG_G(eol);
 		pg->flags = PHPDBG_G(flags) & PHPDBG_PRESERVE_FLAGS_MASK;
 	}
@@ -1035,7 +1035,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_ulong flags;
 	char *php_optarg;
 	int php_optind, opt, show_banner = 1;
-	long cleaning = 0;
+	long cleaning = -1;
 	zend_bool remote = 0;
 	int step = 0;
 	zend_phpdbg_globals *settings = NULL;
@@ -1491,21 +1491,20 @@ phpdbg_main:
 		/* Make stdin, stdout and stderr accessible from PHP scripts */
 		phpdbg_register_file_handles(TSRMLS_C);
 
-		if (show_banner) {
+		if (show_banner && cleaning < 2) {
 			/* print blurb */
-			phpdbg_welcome((cleaning > 0) TSRMLS_CC);
+			phpdbg_welcome(cleaning == 1 TSRMLS_CC);
 		}
 
-		/* auto compile */
-		if (PHPDBG_G(exec)) {
-			phpdbg_compile(TSRMLS_C);
-		}
+		cleaning = -1;
 
 		/* initialize from file */
 		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 		zend_try {
 			phpdbg_init(init_file, init_file_len, init_file_default TSRMLS_CC);
+			PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
 			phpdbg_try_file_init(bp_tmp_file, strlen(bp_tmp_file), 0 TSRMLS_CC);
+			PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
 		} zend_end_try();
 		PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
 		
@@ -1514,14 +1513,24 @@ phpdbg_main:
 			goto phpdbg_out;
 		}
 
+		/* auto compile */
+		if (PHPDBG_G(exec)) {
+			if (settings) {
+				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
+			}
+			phpdbg_compile(TSRMLS_C);
+			PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
+		}
+
 		/* step from here, not through init */
 		if (step) {
 			PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 		}
 
 		if (phpdbg_startup_run) {
-			/* no need to try{}, run does it ... */
-			PHPDBG_COMMAND_HANDLER(run)(NULL TSRMLS_CC);
+			zend_try {
+				PHPDBG_COMMAND_HANDLER(run)(NULL TSRMLS_CC);
+			} zend_end_try();
 			if (phpdbg_startup_run > 1) {
 				/* if -r is on the command line more than once just quit */
 				goto phpdbg_out;
@@ -1537,7 +1546,9 @@ phpdbg_interact:
 			} zend_catch {
 				if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
 					FILE *bp_tmp_fp = fopen(bp_tmp_file, "w");
+					PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
 					phpdbg_export_breakpoints(bp_tmp_fp TSRMLS_CC);
+					PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
 					fclose(bp_tmp_fp);
 					cleaning = 1;
 				} else {
@@ -1589,8 +1600,12 @@ phpdbg_out:
 	} __except(phpdbg_exception_handler_win32(xp = GetExceptionInformation())) {
 		phpdbg_error("segfault", "", "Access violation (Segementation fault) encountered\ntrying to abort cleanly...");
 	}
-/* phpdbg_out: */
 #endif
+
+		if (cleaning <= 0) {
+			PHPDBG_G(flags) &= ~PHPDBG_IS_CLEANING;
+			cleaning = -1;
+		}
 
 		{
 			int i;
@@ -1638,9 +1653,10 @@ phpdbg_out:
 
 		if ((PHPDBG_G(flags) & (PHPDBG_IS_QUITTING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_RUNNING) {
 			phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
+			cleaning++;
 		}
 
-		if ((PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_CLEANING) {
+		if ((PHPDBG_G(flags) & PHPDBG_IS_STOPPING) == PHPDBG_IS_CLEANING) {
 			settings = PHPDBG_G(backup);
 		}
 
@@ -1654,7 +1670,7 @@ phpdbg_out:
 
 	}
 
-	if (cleaning || remote) {
+	if (cleaning > 0 || remote) {
 		goto phpdbg_main;
 	}
 

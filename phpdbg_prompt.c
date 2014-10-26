@@ -263,7 +263,7 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 						goto next_line;
 					}
 
-					{
+					zend_try {
 						char *input = phpdbg_read_input(cmd TSRMLS_CC);
 						phpdbg_param_t stack;
 
@@ -287,7 +287,12 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 
 						phpdbg_stack_free(&stack);
 						phpdbg_destroy_input(&input TSRMLS_CC);
-					}
+					} zend_catch {
+						PHPDBG_G(flags) &= ~(PHPDBG_IS_RUNNING | PHPDBG_IS_CLEANING);
+						if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+							zend_bailout();
+						}
+					} zend_end_try();
 				}
 next_line:
 				line++;
@@ -1159,6 +1164,8 @@ PHPDBG_COMMAND(clean) /* {{{ */
 	phpdbg_writeln("clean", "functions=\"%d\"", "Functions  %d", zend_hash_num_elements(EG(function_table)));
 	phpdbg_writeln("clean", "constants=\"%d\"", "Constants  %d", zend_hash_num_elements(EG(zend_constants)));
 	phpdbg_writeln("clean", "includes=\"%d\"", "Includes   %d", zend_hash_num_elements(&EG(included_files)));
+
+	PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
 
 	phpdbg_clean(1 TSRMLS_CC);
 
