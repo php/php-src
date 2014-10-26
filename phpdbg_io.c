@@ -47,6 +47,55 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
+/* is easy to generalize ... but not needed for now */
+PHPDBG_API int phpdbg_consume_stdin_line(char *buf TSRMLS_DC) {
+	int bytes = PHPDBG_G(input_buflen), len = 0;
+
+	if (PHPDBG_G(input_buflen)) {
+		memcpy(buf, PHPDBG_G(input_buffer), bytes);
+	}
+
+	PHPDBG_G(last_was_newline) = 1;
+
+	do {
+		int i;
+		if (bytes <= 0) { 
+			continue;
+		}
+
+		for (i = len; i < len + bytes; i++) {
+			if (buf[i] == '\x03') {
+				if (i != len + bytes - 1) {
+					memmove(buf + i, buf + i + 1, len + bytes - i - 1);
+				}
+				len--;
+				i--;
+				continue;
+			}
+			if (buf[i] == '\n') {
+				PHPDBG_G(input_buflen) = len + bytes - 1 - i;
+				if (PHPDBG_G(input_buflen)) {
+					memcpy(PHPDBG_G(input_buffer), buf + i + 1, PHPDBG_G(input_buflen));
+				}
+				if (i != PHPDBG_MAX_CMD - 1) {
+					buf[i + 1] = 0;
+				}
+				return i;
+			}
+		}
+
+		len += bytes;
+	} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1 TSRMLS_CC)) > 0);
+
+	if (bytes <= 0) {
+		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
+		zend_bailout();
+		return 0;
+	}
+
+	return bytes;
+}
+
 PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo TSRMLS_DC) {
 	int got_now, i = len, j;
 	char *p = ptr;
