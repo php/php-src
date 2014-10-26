@@ -1320,7 +1320,10 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 	}
 
 	if (full) {
-		phpdbg_exec = strdup(PHPDBG_G(exec)); /* preserve exec, don't reparse that from cmd */
+		if (PHPDBG_G(exec)) {
+			phpdbg_exec = strdup(PHPDBG_G(exec)); /* preserve exec, don't reparse that from cmd */
+		}
+
 		PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
 
 		zend_bailout();
