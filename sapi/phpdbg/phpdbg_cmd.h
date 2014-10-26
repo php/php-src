@@ -144,7 +144,6 @@ PHPDBG_API void phpdbg_stack_free(phpdbg_param_t *stack);
 /*
 * Parameter Management
 */
-PHPDBG_API phpdbg_param_type phpdbg_parse_param(const char*, size_t, phpdbg_param_t* TSRMLS_DC);
 PHPDBG_API void phpdbg_clear_param(phpdbg_param_t* TSRMLS_DC);
 PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t*, phpdbg_param_t* TSRMLS_DC);
 PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *, const phpdbg_param_t * TSRMLS_DC);
