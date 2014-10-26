@@ -297,26 +297,57 @@ static PHP_FUNCTION(phpdbg_exec)
 	}
 } /* }}} */
 
-/* {{{ proto void phpdbg_break([integer type, string expression])
+/* {{{ proto void phpdbg_break()
     instructs phpdbg to insert a breakpoint at the next opcode */
-static PHP_FUNCTION(phpdbg_break)
+static PHP_FUNCTION(phpdbg_break_next)
 {
-	if (ZEND_NUM_ARGS() > 0) {
-		long type = 0;
-		char *expr = NULL;
-		int expr_len = 0;
-		phpdbg_param_t param;
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
+    
+	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) EG(current_execute_data)->opline + 1 TSRMLS_CC);
+} /* }}} */
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &type, &expr, &expr_len) == FAILURE) {
-			return;
-		}
-
-		phpdbg_parse_param(expr, expr_len, &param TSRMLS_CC);
-		phpdbg_do_break(&param TSRMLS_CC);
-		phpdbg_clear_param(&param TSRMLS_CC);
-	} else if (EG(current_execute_data) && EG(current_execute_data)->func->type != ZEND_INTERNAL_FUNCTION) {
-		phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) EG(current_execute_data)->opline + 1 TSRMLS_CC);
+/* {{{ proto void phpdbg_break_file(string file, integer line) */
+static PHP_FUNCTION(phpdbg_break_file)
+{
+	char    *file = NULL;
+    size_t   flen = 0;
+    long     line;
+    
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &file, &flen, &line) == FAILURE) {
+		return;
 	}
+
+	phpdbg_set_breakpoint_file(file, line TSRMLS_CC);
+} /* }}} */
+
+/* {{{ proto void phpdbg_break_method(string class, string method) */
+static PHP_FUNCTION(phpdbg_break_method)
+{
+    char *class = NULL,
+         *method = NULL;
+    size_t clen = 0, 
+           mlen = 0;
+    
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &class, &clen, &method, &mlen) == FAILURE) {
+		return;
+	}
+
+	phpdbg_set_breakpoint_method(class, method TSRMLS_CC);
+} /* }}} */
+
+/* {{{ proto void phpdbg_break_function(string function) */
+static PHP_FUNCTION(phpdbg_break_function)
+{
+	char    *function = NULL;
+	size_t   function_len;
+    
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &function, &function_len) == FAILURE) {
+		return;
+	}
+
+	phpdbg_set_breakpoint_symbol(function, function_len TSRMLS_CC);
 } /* }}} */
 
 /* {{{ proto void phpdbg_clear(void)
@@ -368,9 +399,21 @@ static PHP_FUNCTION(phpdbg_prompt)
 	phpdbg_set_prompt(prompt TSRMLS_CC);
 } /* }}} */
 
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_arginfo, 0, 0, 0)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(0, expression)
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_next_arginfo, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_file_arginfo, 0, 0, 2)
+	ZEND_ARG_INFO(0, file)
+	ZEND_ARG_INFO(0, line)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_method_arginfo, 0, 0, 2)
+	ZEND_ARG_INFO(0, class)
+	ZEND_ARG_INFO(0, method)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_function_arginfo, 0, 0, 1)
+	ZEND_ARG_INFO(0, function)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(phpdbg_color_arginfo, 0, 0, 0)
@@ -391,7 +434,10 @@ ZEND_END_ARG_INFO()
 
 zend_function_entry phpdbg_user_functions[] = {
 	PHP_FE(phpdbg_clear, phpdbg_clear_arginfo)
-	PHP_FE(phpdbg_break, phpdbg_break_arginfo)
+	PHP_FE(phpdbg_break_next, phpdbg_break_next_arginfo)
+	PHP_FE(phpdbg_break_file, phpdbg_break_file_arginfo)
+	PHP_FE(phpdbg_break_method, phpdbg_break_method_arginfo)
+	PHP_FE(phpdbg_break_function, phpdbg_break_function_arginfo)
 	PHP_FE(phpdbg_exec,  phpdbg_exec_arginfo)
 	PHP_FE(phpdbg_color, phpdbg_color_arginfo)
 	PHP_FE(phpdbg_prompt, phpdbg_prompt_arginfo)
@@ -704,7 +750,8 @@ const char phpdbg_ini_hardcoded[] =
 "log_errors=On\n"
 "max_execution_time=0\n"
 "max_input_time=-1\n"
-"error_log=\n\0";
+"error_log=\n"
+"output_buffering=off\n\0";
 
 /* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
 #define INI_DEFAULT(name, value) \
