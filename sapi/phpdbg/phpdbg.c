@@ -45,6 +45,8 @@
 #endif /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
+int phpdbg_startup_run = 0;
+char *phpdbg_exec = NULL;
 
 static PHP_INI_MH(OnUpdateEol)
 {
@@ -487,7 +489,7 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 						case PHPDBG_NEXT:
 							return;
 					}
-				} while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+				} while (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING));
 
 		}
 	} else fprintf(stdout, "%s\n", message);
@@ -752,7 +754,7 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 		phpdbg_writeln("intro", "help=\"help\"", "To get help using phpdbg type \"help\" and press enter");
 		phpdbg_notice("intro", "report=\"%s\"", "Please report bugs to <%s>", PHPDBG_ISSUES);
 		phpdbg_xml("</intros>");
-	} else {
+	} else if (phpdbg_startup_run == 0) {
 		if (!(PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {
 			phpdbg_notice(NULL, NULL, "Clean Execution Environment");
 		}
@@ -776,7 +778,7 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 	if (PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE) {
 		/* we quit remote consoles on recv SIGINT */
 		if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
-			PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+			PHPDBG_G(flags) |= PHPDBG_IS_STOPPING;
 			zend_bailout();
 		}
 	} else {
@@ -961,8 +963,6 @@ int main(int argc, char **argv) /* {{{ */
 	zend_ulong zend_extensions_len = 0L;
 	zend_bool ini_ignore;
 	char *ini_override;
-	char *exec;
-	size_t exec_len;
 	char *init_file;
 	size_t init_file_len;
 	zend_bool init_file_default;
@@ -973,7 +973,6 @@ int main(int argc, char **argv) /* {{{ */
 	int php_optind, opt, show_banner = 1;
 	long cleaning = 0;
 	zend_bool remote = 0;
-	int run = 0;
 	int step = 0;
 
 #ifdef _WIN32
@@ -1046,8 +1045,6 @@ phpdbg_main:
 	ini_override = NULL;
 	zend_extensions = NULL;
 	zend_extensions_len = 0L;
-	exec = NULL;
-	exec_len = 0;
 	init_file = NULL;
 	init_file_len = 0;
 	init_file_default = 1;
@@ -1057,14 +1054,13 @@ phpdbg_main:
 	php_optarg = NULL;
 	php_optind = 1;
 	opt = 0;
-	run = 0;
 	step = 0;
 	sapi_name = NULL;
 
 	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
 		switch (opt) {
 			case 'r':
-				run++;
+				phpdbg_startup_run++;
 				break;
 			case 'n':
 				ini_ignore = 1;
@@ -1201,14 +1197,12 @@ phpdbg_main:
 	}
 	
 	/* set exec if present on command line */
-	if ((argc > php_optind) && (strcmp(argv[php_optind-1],"--") != SUCCESS))
-	{
-		exec_len = strlen(argv[php_optind]);
-		if (exec_len) {
-			if (exec) {
-				free(exec);
+	if (!phpdbg_exec && (argc > php_optind) && (strcmp(argv[php_optind-1],"--") != SUCCESS)) {
+		if (strlen(argv[php_optind])) {
+			if (phpdbg_exec) {
+				free(phpdbg_exec);
 			}
-			exec = strdup(argv[php_optind]);
+			phpdbg_exec = strdup(argv[php_optind]);
 		}
 		php_optind++;
 	}
@@ -1331,7 +1325,7 @@ phpdbg_main:
 			for (i = SG(request_info).argc; --i;) {
 				SG(request_info).argv[i] = estrdup(argv[php_optind - 1 + i]);
 			}
-			SG(request_info).argv[i] = exec ? estrndup(exec, exec_len) : estrdup("");
+			SG(request_info).argv[i] = phpdbg_exec ? estrdup(phpdbg_exec) : estrdup("");
 
 			php_hash_environment(TSRMLS_C);
 		}
@@ -1394,11 +1388,12 @@ phpdbg_main:
 		php_stream_stdio_ops.write = phpdbg_stdiop_write;
 #endif
 
-		if (exec) { /* set execution context */
-			PHPDBG_G(exec) = phpdbg_resolve_path(exec TSRMLS_CC);
+		if (phpdbg_exec) { /* set execution context */
+			PHPDBG_G(exec) = phpdbg_resolve_path(phpdbg_exec TSRMLS_CC);
 			PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
 
-			free(exec);
+			free(phpdbg_exec);
+			phpdbg_exec = NULL;
 		}
 
 		if (oplog_file) { /* open oplog */
@@ -1448,13 +1443,14 @@ phpdbg_main:
 			PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 		}
 
-		if (run) {
+		if (phpdbg_startup_run) {
 			/* no need to try{}, run does it ... */
 			PHPDBG_COMMAND_HANDLER(run)(NULL TSRMLS_CC);
-			if (run > 1) {
+			if (phpdbg_startup_run > 1) {
 				/* if -r is on the command line more than once just quit */
 				goto phpdbg_out;
 			}
+			phpdbg_startup_run = 0;
 		}
 
 phpdbg_interact:
@@ -1494,7 +1490,7 @@ phpdbg_interact:
 					}
 				}
 			} zend_end_try();
-		} while(!cleaning && !(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
+		} while (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING));
 		
 		/* this must be forced */
 		CG(unclean_shutdown) = 0;
