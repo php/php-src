@@ -1438,6 +1438,10 @@ void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	}
 #endif
 
+	if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_STOPPING) {
+		zend_bailout();
+	}
+
 	EG(in_execution) = 1;
 
 #if PHP_VERSION_ID >= 50500
