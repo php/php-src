@@ -1117,6 +1117,8 @@ PHPDBG_API int phpdbg_vprint(int type TSRMLS_DC, int fd, const char *tag, const 
 	}
 
 	if (PHPDBG_G(err_buf).active && type != P_STDOUT && type != P_STDERR) {
+		phpdbg_free_err_buf(TSRMLS_C);
+
 		PHPDBG_G(err_buf).type = type;
 		PHPDBG_G(err_buf).fd = fd;
 		PHPDBG_G(err_buf).tag = estrdup(tag);

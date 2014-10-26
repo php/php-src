@@ -28,7 +28,6 @@
 #include "phpdbg_print.h"
 #include "phpdbg_info.h"
 #include "phpdbg_break.h"
-#include "phpdbg_bp.h"
 #include "phpdbg_opcode.h"
 #include "phpdbg_list.h"
 #include "phpdbg_utils.h"
@@ -44,7 +43,6 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 ZEND_EXTERN_MODULE_GLOBALS(output);
 extern int phpdbg_startup_run;
-extern char *phpdbg_exec;
 
 #ifdef HAVE_LIBDL
 #ifdef PHP_WIN32
@@ -641,10 +639,10 @@ PHPDBG_COMMAND(run) /* {{{ */
 		}
 
 		zend_try {
-			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
+			PHPDBG_G(flags) &= ~PHPDBG_IS_INTERACTIVE;
+			PHPDBG_G(flags) |= PHPDBG_IS_RUNNING;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
-			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
-			phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
+			PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 		} zend_catch {
 			EG(active_op_array) = orig_op_array;
 			EG(opline_ptr) = orig_opline;
@@ -669,7 +667,11 @@ PHPDBG_COMMAND(run) /* {{{ */
 			EG(active_op_array) = orig_op_array;
 			EG(opline_ptr) = orig_opline;
 			EG(return_value_ptr_ptr) = orig_retval_ptr;
+
+			phpdbg_clean(1 TSRMLS_CC);
 		}
+
+		PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
 	} else {
 		phpdbg_error("inactive", "type=\"nocontext\"", "Nothing to execute!");
 	}
@@ -1235,8 +1237,8 @@ int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC) /* {{{ */
 
 	PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 
-	while (1) {
-		if (PHPDBG_G(flags) & PHPDBG_IS_STOPPING) {
+	while (ret == SUCCESS || ret == FAILURE) {
+		if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_STOPPING) {
 			zend_bailout();
 		}
 
@@ -1291,6 +1293,7 @@ int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC) /* {{{ */
 		phpdbg_stack_free(&stack);
 		phpdbg_destroy_input(&input TSRMLS_CC);
 		PHPDBG_G(req_id) = 0;
+		input = NULL;
 	}
 
 	if (input) {
@@ -1320,10 +1323,6 @@ void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
 	}
 
 	if (full) {
-		if (PHPDBG_G(exec)) {
-			phpdbg_exec = strdup(PHPDBG_G(exec)); /* preserve exec, don't reparse that from cmd */
-		}
-
 		PHPDBG_G(flags) |= PHPDBG_IS_CLEANING;
 
 		zend_bailout();

@@ -727,7 +727,7 @@ PHPDBG_API char *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 	char *cmd = NULL;
 	char *buffer = NULL;
 
-	if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
+	if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) != PHPDBG_IS_STOPPING) {
 		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && (buffered == NULL) && !phpdbg_active_sigsafe_mem(TSRMLS_C)) {
 			fflush(PHPDBG_G(io)[PHPDBG_STDOUT].ptr);
 		}
