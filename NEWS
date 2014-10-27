@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #65171 (imagescale() fails without height param). (Remi)
 
+- GMP:
+  . Fixed bug #63595 (GMP memory management conflicts with other libraries
+    using GMP). (Remi)
+
 - Mysqli:
   . Fixed bug #68114 (linker error on some OS X machines with fixed width
     decimal support) (Keyur Govande)
