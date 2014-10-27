@@ -261,7 +261,7 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 
 		char *buf = self->buffer + self->bytes_in_buffer;
 
-		actual_read = sapi_module.read_post(buf, bytes_to_read TSRMLS_CC);
+		actual_read = (int)sapi_module.read_post(buf, bytes_to_read TSRMLS_CC);
 
 		/* update the buffer length */
 		if (actual_read > 0) {
@@ -300,7 +300,7 @@ static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len T
 
 	spprintf(&self->boundary, 0, "--%s", boundary);
 
-	self->boundary_next_len = spprintf(&self->boundary_next, 0, "\n--%s", boundary);
+	self->boundary_next_len = (int)spprintf(&self->boundary_next, 0, "\n--%s", boundary);
 
 	self->buf_begin = self->buffer;
 	self->bytes_in_buffer = 0;
@@ -442,8 +442,8 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 
 		} else if (zend_llist_count(header)) { /* If no ':' on the line, add to previous line */
 
-			prev_len = strlen(prev_entry.value);
-			cur_len = strlen(line);
+			prev_len = (int)strlen(prev_entry.value);
+			cur_len = (int)strlen(line);
 
 			entry.value = emalloc(prev_len + cur_len + 1);
 			memcpy(entry.value, prev_entry.value, prev_len);
@@ -551,7 +551,7 @@ static char *php_ap_getword_conf(const zend_encoding *encoding, char *str TSRMLS
 		char quote = *str;
 
 		str++;
-		return substring_conf(str, strlen(str), quote);
+		return substring_conf(str, (int)strlen(str), quote);
 	} else {
 		char *strend = str;
 
@@ -646,11 +646,11 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes
 		}
 
 		/* update the buffer */
-		self->bytes_in_buffer -= len;
+		self->bytes_in_buffer -= (int)len;
 		self->buf_begin += len;
 	}
 
-	return len;
+	return (int)len;
 }
 
 /*
@@ -721,7 +721,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	/* Get the boundary */
 	boundary = strstr(content_type_dup, "boundary");
 	if (!boundary) {
-		int content_type_len = strlen(content_type_dup);
+		int content_type_len = (int)strlen(content_type_dup);
 		char *content_type_lcase = estrndup(content_type_dup, content_type_len);
 
 		php_strtolower(content_type_lcase, content_type_len);
@@ -738,7 +738,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	}
 
 	boundary++;
-	boundary_len = strlen(boundary);
+	boundary_len = (int)strlen(boundary);
 
 	if (boundary[0] == '"') {
 		boundary++;
@@ -1045,7 +1045,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 #endif
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
+#ifdef PHP_WIN32
+					wlen = write(fd, buff, (unsigned int)blen);
+#else
 					wlen = write(fd, buff, blen);
+#endif
 
 					if (wlen == -1) {
 						/* write failed */
@@ -1113,7 +1117,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			is_arr_upload =	(start_arr = strchr(param,'[')) && (param[strlen(param)-1] == ']');
 
 			if (is_arr_upload) {
-				array_len = strlen(start_arr);
+				array_len = (int)strlen(start_arr);
 				if (array_index) {
 					efree(array_index);
 				}
@@ -1122,7 +1126,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 			/* Add $foo_name */
 			if (llen < strlen(param) + MAX_SIZE_OF_INDEX + 1) {
-				llen = strlen(param);
+				llen = (int)strlen(param);
 				lbuf = (char *) safe_erealloc(lbuf, llen, 1, MAX_SIZE_OF_INDEX + 1);
 				llen += MAX_SIZE_OF_INDEX + 1;
 			}
