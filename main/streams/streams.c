@@ -177,7 +177,7 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 			size_t l = 0;
 			int brlen;
 			int i;
-			int count = zend_llist_count(err_list);
+			int count = (int)zend_llist_count(err_list);
 			const char *br;
 			const char **err_buf_p;
 			zend_llist_position pos;
