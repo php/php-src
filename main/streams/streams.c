@@ -813,7 +813,7 @@ PHPAPI int _php_stream_getc(php_stream *stream TSRMLS_DC)
 
 PHPAPI int _php_stream_puts(php_stream *stream, const char *buf TSRMLS_DC)
 {
-	int len;
+	size_t len;
 	char newline[2] = "\n"; /* is this OK for Win? */
 	len = strlen(buf);
 
@@ -1364,7 +1364,8 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 	if (ret == PHP_STREAM_OPTION_RETURN_NOTIMPL) {
 		switch(option) {
 			case PHP_STREAM_OPTION_SET_CHUNK_SIZE:
-				ret = stream->chunk_size;
+				/* XXX chunk size itself is of size_t, that might be ok or not for a particular case*/
+				ret = stream->chunk_size > INT_MAX ? INT_MAX : (int)stream->chunk_size;
 				stream->chunk_size = value;
 				return ret;
 
@@ -1395,7 +1396,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 {
 	size_t bcount = 0;
 	char buf[8192];
-	int b;
+	size_t b;
 
 	if (php_stream_mmap_possible(stream)) {
 		char *p;
@@ -1710,7 +1711,7 @@ static inline int php_stream_wrapper_scheme_validate(const char *protocol, unsig
 /* API for registering GLOBAL wrappers */
 PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	unsigned int protocol_len = strlen(protocol);
+	unsigned int protocol_len = (unsigned int)strlen(protocol);
 
 	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
 		return FAILURE;
@@ -1734,7 +1735,7 @@ static void clone_wrapper_hash(TSRMLS_D)
 /* API for registering VOLATILE wrappers */
 PHPAPI int php_register_url_stream_wrapper_volatile(const char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	unsigned int protocol_len = strlen(protocol);
+	unsigned int protocol_len = (unsigned int)strlen(protocol);
 
 	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
 		return FAILURE;
@@ -2040,7 +2041,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (options & USE_PATH) {
-		resolved_path = zend_resolve_path(path, strlen(path) TSRMLS_CC);
+		resolved_path = zend_resolve_path(path, (int)strlen(path) TSRMLS_CC);
 		if (resolved_path) {
 			path = resolved_path;
 			/* we've found this file, don't re-check include_path or run realpath */
