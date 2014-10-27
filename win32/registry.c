@@ -27,8 +27,8 @@ static int OpenPhpRegistryKey(char* sub_key, HKEY *hKey)
 	const char **key_name = registry_keys;
 
 	if (sub_key) {
-		int main_key_len;
-		int sub_key_len = strlen(sub_key);
+		size_t main_key_len;
+		size_t sub_key_len = strlen(sub_key);
 		char *reg_key;
 
 		while (*key_name) {
@@ -235,7 +235,6 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 	}
 	zend_str_tolower(path, path_len);
 	while (path_len >= 0) {
-	ZEND_API zval *zend_hash_str_find(const HashTable *ht, const char *key, int len);
 		pht = (HashTable *)zend_hash_str_find_ptr(PW32G(registry_directories), path, path_len+1);
 		if (pht != NULL) {
 			HashTable *ht = pht;
