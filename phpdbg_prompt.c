@@ -653,6 +653,10 @@ PHPDBG_COMMAND(run) /* {{{ */
 			EG(opline_ptr) = orig_opline;
 			EG(return_value_ptr_ptr) = orig_retval_ptr;
 
+			if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+				zend_bailout();
+			}
+
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 				phpdbg_error("stop", "type=\"bailout\"", "Caught exit/error from VM");
 				restore = 0;
@@ -1143,6 +1147,7 @@ PHPDBG_COMMAND(quit) /* {{{ */
 	/* don't allow this to loop, ever ... */
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+		PHPDBG_G(flags) &= ~(PHPDBG_IS_RUNNING | PHPDBG_IS_CLEANING);
 		zend_bailout();
 	}
 
@@ -1261,8 +1266,7 @@ int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC) /* {{{ */
 
 #ifdef PHP_WIN32
 #define PARA ((phpdbg_param_t *)stack.next)->type
-#define HANDLE_SIGIO (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && PARA != EMPTY_PARAM
-			if (HANDLE_SIGIO) {
+			if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE && (RUN_PARAM == PARA || EVAL_PARAM == PARA)) {
 				sigio_watcher_start();
 			}
 #endif
@@ -1279,29 +1283,22 @@ int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC) /* {{{ */
 				case PHPDBG_FINISH:
 				case PHPDBG_UNTIL:
 				case PHPDBG_NEXT: {
-#ifdef PHP_WIN32
-					if (HANDLE_SIGIO) {
-						sigio_watcher_stop();
-						sigio_watcher_start();
-					}
-#endif
 					phpdbg_activate_err_buf(0 TSRMLS_CC);
 					phpdbg_free_err_buf(TSRMLS_C);
-					if (!EG(in_execution) && !(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+					if (!EG(in_execution) && !(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 						phpdbg_error("command", "type=\"noexec\"", "Not running");
 					}
+					break;
 				}
-				break;
 			}
 
 			phpdbg_activate_err_buf(0 TSRMLS_CC);
 			phpdbg_free_err_buf(TSRMLS_C);
 #ifdef PHP_WIN32
-			if (HANDLE_SIGIO) {
+			if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE && (RUN_PARAM == PARA || EVAL_PARAM == PARA)) {
 				sigio_watcher_stop();
 			}
 #undef PARA
-#undef HANDLE_SIGIO
 #endif
 		}
 
@@ -1446,7 +1443,7 @@ void phpdbg_execute_ex(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	}
 #endif
 
-	if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_STOPPING) {
+	if ((PHPDBG_G(flags) & PHPDBG_IS_STOPPING) && !(PHPDBG_G(flags) & PHPDBG_IS_RUNNING)) {
 		zend_bailout();
 	}
 
