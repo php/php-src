@@ -125,7 +125,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 	}
 
 	new_state.cwd = estrdup(cwd);
-	new_state.cwd_length = strlen(cwd);
+	new_state.cwd_length = (int)strlen(cwd);
 
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH TSRMLS_CC)) {
 		efree(new_state.cwd);
@@ -200,7 +200,7 @@ PHPAPI const char* php_get_temporary_directory(TSRMLS_D)
 	{
 		char *sys_temp_dir = PG(sys_temp_dir);
 		if (sys_temp_dir) {
-			int len = strlen(sys_temp_dir);
+			int len = (int)strlen(sys_temp_dir);
 			if (len >= 2 && sys_temp_dir[len - 1] == DEFAULT_SLASH) {
 				temporary_directory = zend_strndup(sys_temp_dir, len - 1);
 				return temporary_directory;
