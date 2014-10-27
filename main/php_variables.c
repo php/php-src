@@ -59,7 +59,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	char *ip = NULL;		/* index pointer */
 	char *index;
 	char *var, *var_orig;
-	int var_len, index_len;
+	size_t var_len, index_len;
 	zval gpc_element, *gpc_element_p;
 	zend_bool is_array = 0;
 	HashTable *symtable1 = NULL;
@@ -125,7 +125,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 		int nest_level = 0;
 		while (1) {
 			char *index_s;
-			int new_idx_len = 0;
+			size_t new_idx_len = 0;
 
 			if(++nest_level > PG(max_input_nesting_level)) {
 				HashTable *ht;
