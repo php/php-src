@@ -742,7 +742,7 @@ globextend(path, pglob, limitp)
 
 	for (p = path; *p++;)
 		;
-	len = (size_t)(p - path);
+	len = (u_int)(p - path);
 	*limitp += len;
 	if ((copy = malloc(len)) != NULL) {
 		if (g_Ctoc(path, copy, len)) {
