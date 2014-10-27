@@ -84,7 +84,7 @@ ZEND_API int zend_atoi(const char *str, int str_len) /* {{{ */
 	int retval;
 
 	if (!str_len) {
-		str_len = strlen(str);
+		str_len = (int)strlen(str);
 	}
 	retval = ZEND_STRTOL(str, NULL, 0);
 	if (str_len>0) {
@@ -112,7 +112,7 @@ ZEND_API zend_long zend_atol(const char *str, int str_len) /* {{{ */
 	zend_long retval;
 
 	if (!str_len) {
-		str_len = strlen(str);
+		str_len = (int)strlen(str);
 	}
 	retval = ZEND_STRTOL(str, NULL, 0);
 	if (str_len>0) {
