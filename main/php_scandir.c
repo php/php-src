@@ -97,7 +97,7 @@ PHPAPI int php_scandir(const char *dirname, struct dirent **namelist[], int (*se
 			vector = newv;
 		}
 
-		dsize = sizeof (struct dirent) + ((strlen(dp->d_name) + 1) * sizeof(char));
+		dsize = sizeof (struct dirent) + (((int)strlen(dp->d_name) + 1) * sizeof(char));
 		newdp = (struct dirent *) malloc(dsize);
 
 		if (newdp == NULL) {
