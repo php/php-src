@@ -157,7 +157,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		strlcpy(local_open_basedir, basedir, sizeof(local_open_basedir));
 	}
 
-	path_len = strlen(path);
+	path_len = (int)strlen(path);
 	if (path_len > (MAXPATHLEN - 1)) {
 		/* empty and too long paths are invalid */
 		return -1;
@@ -168,7 +168,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		return -1;
 	}
 
-	path_len = strlen(resolved_name);
+	path_len = (int)strlen(resolved_name);
 	memcpy(path_tmp, resolved_name, path_len + 1); /* safe */
 
 	while (VCWD_REALPATH(path_tmp, resolved_name) == NULL) {
@@ -243,7 +243,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 				resolved_basedir[resolved_basedir_len] = '\0';
 		}
 
-		resolved_name_len = strlen(resolved_name);
+		resolved_name_len = (int)strlen(resolved_name);
 		if (path_tmp[path_len - 1] == PHP_DIR_SEPARATOR) {
 			if (resolved_name[resolved_name_len - 1] != PHP_DIR_SEPARATOR) {
 				resolved_name[resolved_name_len] = PHP_DIR_SEPARATOR;
@@ -409,9 +409,9 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 		}
 	} else
 #endif
-	if (PG(doc_root) && path_info && (length = strlen(PG(doc_root))) &&
+	if (PG(doc_root) && path_info && (length = (int)strlen(PG(doc_root))) &&
 		IS_ABSOLUTE_PATH(PG(doc_root), length)) {
-		int path_len = strlen(path_info);
+		int path_len = (int)strlen(path_info);
 		filename = emalloc(length + path_len + 2);
 		if (filename) {
 			memcpy(filename, PG(doc_root), length);
@@ -429,7 +429,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 
 
 	if (filename) {
-		resolved_path = zend_resolve_path(filename, strlen(filename) TSRMLS_CC);
+		resolved_path = zend_resolve_path(filename, (int)strlen(filename) TSRMLS_CC);
 	}
 
 	if (!resolved_path) {
@@ -542,7 +542,7 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 			memcpy(trypath+(end-ptr)+1, filename, filename_length+1);
 			ptr = end+1;
 		} else {
-			int len = strlen(ptr);
+			int len = (int)strlen(ptr);
 
 			if (len + 1 + filename_length + 1 >= MAXPATHLEN) {
 				break;
@@ -577,7 +577,7 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 	 */
 	if (zend_is_executing(TSRMLS_C)) {
 		const char *exec_fname = zend_get_executed_filename(TSRMLS_C);
-		int exec_fname_length = strlen(exec_fname);
+		int exec_fname_length = (int)strlen(exec_fname);
 
 		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if (exec_fname && exec_fname[0] != '[' &&
@@ -637,7 +637,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 		return NULL;
 	}
 
-	filename_length = strlen(filename);
+	filename_length = (int)strlen(filename);
 
 	/* Relative path open */
 	if ((*filename == '.')
@@ -654,8 +654,8 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 	 */
 	if (zend_is_executing(TSRMLS_C)) {
 		exec_fname = zend_get_executed_filename(TSRMLS_C);
-		exec_fname_length = strlen(exec_fname);
-		path_length = strlen(path);
+		exec_fname_length = (int)strlen(exec_fname);
+		path_length = (int)strlen(path);
 
 		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if ((exec_fname && exec_fname[0] == '[') || exec_fname_length <= 0) {
@@ -808,7 +808,7 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 	}
 
 	new_state.cwd = estrdup(cwd);
-	new_state.cwd_length = strlen(cwd);
+	new_state.cwd_length = (int)strlen(cwd);
 
 	if (virtual_file_ex(&new_state, filepath, NULL, realpath_mode TSRMLS_CC)) {
 		efree(new_state.cwd);
