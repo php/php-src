@@ -615,6 +615,10 @@ PHPDBG_COMMAND(run) /* {{{ */
 		} zend_catch {
 			PHPDBG_G(in_execution) = 0;
 
+			if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+				zend_bailout();
+			}
+
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 				phpdbg_error("stop", "type=\"bailout\"", "Caught exit/error from VM");
 				restore = 0;
@@ -1092,6 +1096,7 @@ PHPDBG_COMMAND(quit) /* {{{ */
 	/* don't allow this to loop, ever ... */
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+		PHPDBG_G(flags) &= ~(PHPDBG_IS_RUNNING | PHPDBG_IS_CLEANING);
 		zend_bailout();
 	}
 
@@ -1310,7 +1315,7 @@ void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 
 	zend_hash_init(&vars, execute_data->func->op_array.last, NULL, NULL, 0);
 
-	if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_STOPPING) {
+	if ((PHPDBG_G(flags) & PHPDBG_IS_STOPPING) && !(PHPDBG_G(flags) & PHPDBG_IS_RUNNING)) {
 		zend_bailout();
 	}
 

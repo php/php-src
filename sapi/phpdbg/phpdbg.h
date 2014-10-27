@@ -29,8 +29,12 @@
 # define PHPDBG_API
 #endif
 
-#include <stdint.h>
-#include <stddef.h>
+#ifndef PHP_WIN32
+#	include <stdint.h>
+#	include <stddef.h>
+#else
+#	include "win32/php_stdint.h"
+#endif
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
@@ -50,7 +54,6 @@
 #if defined(_WIN32) && !defined(__MINGW32__)
 #	include <windows.h>
 #	include "config.w32.h"
-#	include "win32/php_stdint.h"
 #	undef  strcasecmp
 #	undef  strncasecmp
 #	define strcasecmp _stricmp 
