@@ -121,6 +121,7 @@ typedef struct _phpdbg_breakcond_t {
 PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC);
 PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_op_array *op_array TSRMLS_DC);
 PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRMLS_DC);
+PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint filelen, const char *cur, uint curlen, HashTable *fileht TSRMLS_DC);
 PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file TSRMLS_DC); /* }}} */
 
 /* {{{ Breakpoint Creation API */
