@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 
 - GMP:
   . Implemented gmp_random_range() and gmp_random_bits(). (Leigh)
+  . Fixed bug #63595 (GMP memory management conflicts with other libraries
+    using GMP). (Remi)
 
 - Reflection:
   . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
