@@ -80,7 +80,8 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type TSRMLS_DC)
 		ini_entry->displayer(ini_entry, type);
 	} else {
 		char *display_string;
-		uint display_string_length, esc_html=0;
+		size_t display_string_length;
+		int esc_html=0;
 
 		if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 			if (ini_entry->orig_value && ini_entry->orig_value->val[0]) {
@@ -281,7 +282,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 /* fprintf(stdout, "ZEND_INI_PARSER_SECTION: %s\n",Z_STRVAL_P(arg1)); */
 
 				char *key = NULL;
-				uint key_len;
+				size_t key_len;
 
 				/* PATH sections */
 				if (!strncasecmp(Z_STRVAL_P(arg1), "PATH", sizeof("PATH") - 1)) {
@@ -355,14 +356,14 @@ static void php_load_php_extension_cb(void *arg TSRMLS_DC)
 static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 {
 	char *filename = *((char **) arg);
-	const int length = strlen(filename);
+	const int length = (int)strlen(filename);
 
 	if (IS_ABSOLUTE_PATH(filename, length)) {
 		zend_load_extension(filename TSRMLS_CC);
 	} else {
 	    char *libpath;
 		char *extension_dir = INI_STR("extension_dir");
-		int extension_dir_len = strlen(extension_dir);
+		int extension_dir_len = (int)strlen(extension_dir);
 
 		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
 			spprintf(&libpath, 0, "%s%s", extension_dir, filename);
@@ -449,7 +450,7 @@ int php_init_config(TSRMLS_D)
 		 * Prepare search path
 		 */
 
-		search_path_size = MAXPATHLEN * 4 + strlen(env_location) + 3 + 1;
+		search_path_size = MAXPATHLEN * 4 + (int)strlen(env_location) + 3 + 1;
 		php_ini_search_path = (char *) emalloc(search_path_size);
 		free_ini_search_path = 1;
 		php_ini_search_path[0] = 0;
@@ -608,7 +609,7 @@ int php_init_config(TSRMLS_D)
 		/* Or fall back using possible --with-config-file-scan-dir setting (defaults to empty string!) */
 		php_ini_scanned_path = PHP_CONFIG_FILE_SCAN_DIR;
 	}
-	php_ini_scanned_path_len = strlen(php_ini_scanned_path);
+	php_ini_scanned_path_len = (int)strlen(php_ini_scanned_path);
 
 	/* Scan and parse any .ini files found in scan path if path not empty. */
 	if (!sapi_module.php_ini_ignore && php_ini_scanned_path_len) {
@@ -638,7 +639,7 @@ int php_init_config(TSRMLS_D)
 				   to allow "/foo/phd.d:" or ":/foo/php.d" */
 				debpath = PHP_CONFIG_FILE_SCAN_DIR;
 			}
-			lenpath = strlen(debpath);
+			lenpath = (int)strlen(debpath);
 
 			if (lenpath > 0 && (ndir = php_scandir(debpath, &namelist, 0, php_alphasort)) > 0) {
 
@@ -665,7 +666,7 @@ int php_init_config(TSRMLS_D)
 
 								if (zend_parse_ini_file(&fh2, 1, ZEND_INI_SCANNER_NORMAL, (zend_ini_parser_cb_t) php_ini_parser_cb, &configuration_hash TSRMLS_CC) == SUCCESS) {
 									/* Here, add it to the list of ini files read */
-									l = strlen(ini_file);
+									l = (int)strlen(ini_file);
 									total_l += l + 2;
 									p = estrndup(ini_file, l);
 									zend_llist_add_element(&scanned_ini_list, &p);
@@ -681,7 +682,7 @@ int php_init_config(TSRMLS_D)
 		efree(bufpath);
 
 		if (total_l) {
-			int php_ini_scanned_files_len = (php_ini_scanned_files) ? strlen(php_ini_scanned_files) + 1 : 0;
+			int php_ini_scanned_files_len = (php_ini_scanned_files) ? (int)strlen(php_ini_scanned_files) + 1 : 0;
 			php_ini_scanned_files = (char *) realloc(php_ini_scanned_files, php_ini_scanned_files_len + total_l + 1);
 			if (!php_ini_scanned_files_len) {
 				*php_ini_scanned_files = '\0';
