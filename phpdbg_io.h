@@ -21,6 +21,8 @@
 
 #include "phpdbg.h"
 
+PHPDBG_API int phpdbg_consume_stdin_line(char *buf TSRMLS_DC);
+
 PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo TSRMLS_DC);
 PHPDBG_API int phpdbg_send_bytes(int sock, const char *ptr, int len);
 PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo TSRMLS_DC);
