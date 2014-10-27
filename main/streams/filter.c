@@ -255,7 +255,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	int n;
 	char *period;
 
-	n = strlen(filtername);
+	n = (int)strlen(filtername);
 	
 	if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, filtername, n))) {
 		filter = factory->create_filter(filtername, filterparams, persistent TSRMLS_CC);
