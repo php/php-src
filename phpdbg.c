@@ -1343,7 +1343,7 @@ phpdbg_main:
 		}
 
 		/* setup remote server if necessary */
-		if (!cleaning && listen > 0) {
+		if (cleaning <= 0 && listen > 0) {
 			server = phpdbg_open_socket(address, listen TSRMLS_CC);
 				if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream TSRMLS_CC) == FAILURE) {
 				exit(0);
