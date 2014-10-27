@@ -257,11 +257,30 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRML
 	}
 
 	if (!zend_hash_index_exists(broken, line_num)) {
+		HashPosition position;
+		char *file;
+		uint filelen;
+
 		PHPDBG_BREAK_INIT(new_break, PHPDBG_BREAK_FILE);
 		new_break.filename = estrndup(path, path_len);
 		new_break.line = line_num;
 
 		zend_hash_index_update(broken, line_num, (void **) &new_break, sizeof(phpdbg_breakfile_t), NULL);
+
+		PHPDBG_BREAK_MAPPING(new_break.id, broken);
+
+		if (pending) {
+			for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(file_sources), &position);
+			     zend_hash_get_current_key_ex(&PHPDBG_G(file_sources), &file, &filelen, NULL, 0, &position) == HASH_KEY_IS_STRING;
+			     zend_hash_move_forward_ex(&PHPDBG_G(file_sources), &position)) {
+				if (!(pending = ((broken = phpdbg_resolve_pending_file_break_ex(file, filelen, path, path_len, broken TSRMLS_CC)) == NULL))) {
+					phpdbg_breakfile_t *brake;
+					zend_hash_index_find(broken, line_num, (void **) &brake);
+					new_break = *brake;
+					break;
+				}
+			}
+		}
 
 		if (pending) {
 			PHPDBG_G(flags) |= PHPDBG_HAS_PENDING_FILE_BP;
@@ -272,69 +291,77 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRML
 
 			phpdbg_notice("breakpoint", "add=\"success\" id=\"%d\" file=\"%s\" line=\"%ld\"", "Breakpoint #%d added at %s:%ld", new_break.id, new_break.filename, new_break.line);
 		}
-
-		PHPDBG_BREAK_MAPPING(new_break.id, broken);
 	} else {
 		phpdbg_error("breakpoint", "type=\"exists\" add=\"fail\" file=\"%s\" line=\"%ld\"", "Breakpoint at %s:%ld exists", path, line_num);
 	}
 } /* }}} */
 
+PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint filelen, const char *cur, uint curlen, HashTable *fileht TSRMLS_DC) /* {{{ */
+{
+	if (curlen < filelen && file[filelen - curlen - 1] == '/' && !memcmp(file + filelen - curlen, cur, curlen)) {
+		phpdbg_breakfile_t *brake, new_brake;
+		HashTable *master = NULL;
+		HashPosition position;
+		dtor_func_t dtor;
+
+		PHPDBG_G(flags) |= PHPDBG_HAS_FILE_BP;
+
+		if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], file, filelen, (void **) &master) == FAILURE) {
+			dtor = PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING].pDestructor;
+			PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING].pDestructor = NULL;
+			zend_hash_add(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], file, filelen, fileht, sizeof(HashTable), (void **) &fileht);
+		}
+
+		for (zend_hash_internal_pointer_reset_ex(fileht, &position);
+		     zend_hash_get_current_data_ex(fileht, (void**)&brake, &position) == SUCCESS;
+		     zend_hash_move_forward_ex(fileht, &position)) {
+			new_brake = *brake;
+			new_brake.filename = estrndup(file, filelen);
+			PHPDBG_BREAK_UNMAPPING(brake->id);
+
+			if (master) {
+				zend_hash_index_update(master, brake->line, (void **) &new_brake, sizeof(phpdbg_breakfile_t), NULL);
+				PHPDBG_BREAK_MAPPING(brake->id, master);
+			} else {
+				efree((char *) brake->filename);
+				*brake = new_brake;
+				PHPDBG_BREAK_MAPPING(brake->id, fileht);
+			}
+		}
+
+		zend_hash_del(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], cur, curlen);
+
+		if (!master) {
+			PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING].pDestructor = dtor;
+		}
+
+		if (!zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING])) {
+			PHPDBG_G(flags) &= ~PHPDBG_HAS_PENDING_FILE_BP;
+		}
+
+		return fileht;
+	}
+
+	return NULL;
+} /* }}} */
+
 PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file TSRMLS_DC) /* {{{ */
 {
-	HashPosition position[2];
+	HashPosition position;
 	HashTable *fileht;
 	uint filelen = strlen(file);
 
-	zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], &position[0]);
-	while (zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], (void**) &fileht, &position[0]) == SUCCESS) {
+	zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], &position);
+	while (zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], (void**) &fileht, &position) == SUCCESS) {
 		const char *cur;
 		uint curlen;
 
-		zend_hash_get_current_key_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], (char **) &cur, &curlen, NULL, 0, &position[0]);
-		zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], &position[0]);
+		zend_hash_get_current_key_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], (char **) &cur, &curlen, NULL, 0, &position);
+		zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], &position);
 
-		if (curlen < filelen && file[filelen - curlen - 1] == '/' && !memcmp(file + filelen - curlen, cur, curlen)) {
-			phpdbg_breakfile_t *brake, new_brake;
-			HashTable *master = NULL;
-			dtor_func_t dtor;
-
-			PHPDBG_G(flags) |= PHPDBG_HAS_FILE_BP;
-
-			if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], file, filelen, (void **) &master) == FAILURE) {
-				dtor = PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING].pDestructor;
-				PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING].pDestructor = NULL;
-				zend_hash_add(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], file, filelen, fileht, sizeof(HashTable), (void **) &fileht);
-			}
-
-			for (zend_hash_internal_pointer_reset_ex(fileht, &position[1]);
-			     zend_hash_get_current_data_ex(fileht, (void**)&brake, &position[1]) == SUCCESS;
-			     zend_hash_move_forward_ex(fileht, &position[1])) {
-				new_brake = *brake;
-				new_brake.filename = estrndup(file, filelen);
-				PHPDBG_BREAK_UNMAPPING(brake->id);
-
-				if (master) {
-					zend_hash_index_update(master, brake->line, (void **) &new_brake, sizeof(phpdbg_breakfile_t), NULL);
-					PHPDBG_BREAK_MAPPING(brake->id, master);
-				} else {
-					efree((char *) brake->filename);
-					*brake = new_brake;
-					PHPDBG_BREAK_MAPPING(brake->id, fileht);
-				}
-			}
-
-			zend_hash_del(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], cur, curlen);
-
-			if (!master) {
-				PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING].pDestructor = dtor;
-			}
-
-			if (!zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING])) {
-				PHPDBG_G(flags) &= ~PHPDBG_HAS_PENDING_FILE_BP;
-			}
-		}
+		phpdbg_resolve_pending_file_break_ex(file, filelen, cur, curlen, fileht TSRMLS_CC);
 	}
-} /* }}} */
+}
 
 PHPDBG_API void phpdbg_set_breakpoint_symbol(const char *name, size_t name_len TSRMLS_DC) /* {{{ */
 {
