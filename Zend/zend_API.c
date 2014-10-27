@@ -1655,6 +1655,15 @@ ZEND_API zval *add_get_index_stringl(zval *arg, zend_ulong index, const char *st
 ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value TSRMLS_DC) /* {{{ */
 {
 	zval *result;
+	zval obj_key;
+	int free_key = 0;
+
+	if (UNEXPECTED(Z_TYPE_P(key) == IS_OBJECT && Z_OBJCE_P(key)->__hash)) {
+		if (zend_object_offset(key, &obj_key TSRMLS_CC) == SUCCESS) {
+			free_key = 1;
+			key = &obj_key;
+		}
+	}
 
 	switch (Z_TYPE_P(key)) {
 		case IS_STRING:
@@ -1682,6 +1691,10 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value TSRMLS_DC)
 		default:
 			zend_error(E_WARNING, "Illegal offset type");
 			result = NULL;
+	}
+
+	if(free_key) {
+		zval_dtor(&obj_key);
 	}
 
 	if (result) {
