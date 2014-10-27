@@ -1248,7 +1248,7 @@ PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{
 	strx_printv(&cc, buf, len, format, ap);
 	va_end(ap);
 	if (cc >= len) {
-		cc = len -1;
+		cc = (int)len -1;
 		buf[cc] = '\0';
 	}
 	return cc;
@@ -1261,7 +1261,7 @@ PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list a
 
 	strx_printv(&cc, buf, len, format, ap);
 	if (cc >= len) {
-		cc = len -1;
+		cc = (int)len -1;
 		buf[cc] = '\0';
 	}
 	return cc;
