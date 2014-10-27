@@ -717,10 +717,11 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			return NULL;
 		}
 		comma = base64_comma->val;
-		ilen = base64_comma->len;
+		ilen = (int)base64_comma->len;
 	} else {
 		comma = estrndup(comma, dlen);
-		ilen = dlen = php_url_decode(comma, dlen);
+		dlen = php_url_decode(comma, (int)dlen);
+		ilen = (int)dlen;
 	}
 
 	if ((stream = php_stream_temp_create_rel(0, ~0u)) != NULL) {
