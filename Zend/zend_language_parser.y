@@ -1187,7 +1187,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			
 			str = LANG_SCNG(yy_text);
 			end = memchr(str, '\n', LANG_SCNG(yy_leng));
-			yystr_len = yystrlen(yystr);
+			yystr_len = (unsigned int)yystrlen(yystr);
 			
 			if ((tok1 = memchr(yystr, '(', yystr_len)) != NULL
 				&& (tok2 = zend_memrchr(yystr, ')', yystr_len)) != NULL) {
