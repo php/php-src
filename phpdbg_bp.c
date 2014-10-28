@@ -232,6 +232,8 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRML
 	}
 	path_len = strlen(path);
 
+	phpdbg_debug("file path: %s, resolved path: %s, was compiled: %d\n", original_path, path, zend_hash_exists(&PHPDBG_G(file_sources), path, path_len));
+
 	if (!zend_hash_exists(&PHPDBG_G(file_sources), path, path_len)) {
 		if (php_stream_stat_path(path, &ssb) == FAILURE) {
 			if (original_path[0] == '/') {
@@ -246,6 +248,8 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRML
 		} else if (!(ssb.sb.st_mode & (S_IFREG|S_IFLNK))) {
 			phpdbg_error("breakpoint", "type=\"notregular\" add=\"fail\" file=\"%s\"", "Cannot set breakpoint in %s, it is not a regular file", path);
 			return;
+		} else {
+			phpdbg_debug("File exists, but not compiled\n");
 		}
 	}
 
@@ -273,9 +277,13 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRML
 			for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(file_sources), &position);
 			     zend_hash_get_current_key_ex(&PHPDBG_G(file_sources), &file, &filelen, NULL, 0, &position) == HASH_KEY_IS_STRING;
 			     zend_hash_move_forward_ex(&PHPDBG_G(file_sources), &position)) {
-				if (!(pending = ((broken = phpdbg_resolve_pending_file_break_ex(file, filelen, path, path_len, broken TSRMLS_CC)) == NULL))) {
+				HashTable *fileht;
+
+				phpdbg_debug("Compare against loaded %s\n", file);
+
+				if (!(pending = ((fileht = phpdbg_resolve_pending_file_break_ex(file, filelen, path, path_len, broken TSRMLS_CC)) == NULL))) {
 					phpdbg_breakfile_t *brake;
-					zend_hash_index_find(broken, line_num, (void **) &brake);
+					zend_hash_index_find(fileht, line_num, (void **) &brake);
 					new_break = *brake;
 					break;
 				}
@@ -298,18 +306,19 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRML
 
 PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint filelen, const char *cur, uint curlen, HashTable *fileht TSRMLS_DC) /* {{{ */
 {
-	if (curlen < filelen && file[filelen - curlen - 1] == '/' && !memcmp(file + filelen - curlen, cur, curlen)) {
+	phpdbg_debug("file: %s, filelen: %u, cur: %s, curlen %u, pos: %c, memcmp: %d\n", file, filelen, cur, curlen, filelen > curlen ? file[filelen - curlen - 1] : '?', filelen > curlen ? memcmp(file + filelen - curlen, cur, curlen) : 0);
+
+	if (((curlen < filelen && file[filelen - curlen - 1] == '/') || filelen == curlen) && !memcmp(file + filelen - curlen, cur, curlen)) {
 		phpdbg_breakfile_t *brake, new_brake;
 		HashTable *master = NULL;
 		HashPosition position;
-		dtor_func_t dtor;
 
 		PHPDBG_G(flags) |= PHPDBG_HAS_FILE_BP;
 
 		if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], file, filelen, (void **) &master) == FAILURE) {
-			dtor = PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING].pDestructor;
-			PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING].pDestructor = NULL;
-			zend_hash_add(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], file, filelen, fileht, sizeof(HashTable), (void **) &fileht);
+			HashTable new_ht;
+			zend_hash_init(&new_ht, 8, NULL, phpdbg_file_breaks_dtor, 0);
+			zend_hash_add(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], file, filelen, &new_ht, sizeof(HashTable), (void **) &master);
 		}
 
 		for (zend_hash_internal_pointer_reset_ex(fileht, &position);
@@ -322,24 +331,18 @@ PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uin
 			if (master) {
 				zend_hash_index_update(master, brake->line, (void **) &new_brake, sizeof(phpdbg_breakfile_t), NULL);
 				PHPDBG_BREAK_MAPPING(brake->id, master);
-			} else {
-				efree((char *) brake->filename);
-				*brake = new_brake;
-				PHPDBG_BREAK_MAPPING(brake->id, fileht);
 			}
 		}
 
 		zend_hash_del(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], cur, curlen);
 
-		if (!master) {
-			PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING].pDestructor = dtor;
-		}
-
 		if (!zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING])) {
 			PHPDBG_G(flags) &= ~PHPDBG_HAS_PENDING_FILE_BP;
 		}
 
-		return fileht;
+		phpdbg_debug("compiled file: %s, cur bp file: %s\n", file, cur);
+
+		return master;
 	}
 
 	return NULL;
@@ -351,6 +354,8 @@ PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file TSRMLS_DC) /*
 	HashTable *fileht;
 	uint filelen = strlen(file);
 
+	phpdbg_debug("was compiled: %s\n", file);
+
 	zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], &position);
 	while (zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], (void**) &fileht, &position) == SUCCESS) {
 		const char *cur;
@@ -358,6 +363,8 @@ PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file TSRMLS_DC) /*
 
 		zend_hash_get_current_key_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], (char **) &cur, &curlen, NULL, 0, &position);
 		zend_hash_move_forward_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], &position);
+
+		phpdbg_debug("check bp: %s\n", cur);
 
 		phpdbg_resolve_pending_file_break_ex(file, filelen, cur, curlen, fileht TSRMLS_CC);
 	}
@@ -877,10 +884,21 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array *op_
 {
 	HashTable *breaks;
 	phpdbg_breakbase_t *brake;
-	size_t name_len = strlen(op_array->filename);
+	size_t path_len;
+	char realpath[MAXPATHLEN];
+	const char *path = op_array->filename;
 
-	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], op_array->filename,
-		name_len, (void**)&breaks) == FAILURE) {
+	if (VCWD_REALPATH(path, realpath)) {
+		path = realpath;
+	}
+
+	path_len = strlen(path);
+
+#if 0
+	phpdbg_debug("Op at: %.*s %d\n", path_len, path, (*EG(opline_ptr))->lineno);
+#endif
+
+	if (zend_hash_find(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], path, path_len, (void**)&breaks) == FAILURE) {
 		return NULL;
 	}
 
