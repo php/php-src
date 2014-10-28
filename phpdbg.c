@@ -1527,21 +1527,20 @@ phpdbg_main:
 			PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 		}
 
-		if (phpdbg_startup_run) {
-			zend_try {
-				PHPDBG_COMMAND_HANDLER(run)(NULL TSRMLS_CC);
-			} zend_end_try();
-			if (phpdbg_startup_run > 1) {
-				/* if -r is on the command line more than once just quit */
-				goto phpdbg_out;
-			}
-			phpdbg_startup_run = 0;
-		}
-
 phpdbg_interact:
 		/* phpdbg main() */
 		do {
 			zend_try {
+				if (phpdbg_startup_run) {
+					PHPDBG_COMMAND_HANDLER(run)(NULL TSRMLS_CC);
+					if (phpdbg_startup_run > 1) {
+						/* if -r is on the command line more than once just quit */
+						EG(bailout) = __orig_bailout; /* reset zend_try */
+						break;
+					}
+					phpdbg_startup_run = 0;
+				}
+
 				phpdbg_interactive(1 TSRMLS_CC);
 			} zend_catch {
 				if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
