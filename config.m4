@@ -22,8 +22,8 @@ if test "$BUILD_PHPDBG" == "" && test "$PHP_PHPDBG" != "no"; then
   fi
 
   if test "$PHP_PHPDBG_WEBHELPER" != "no"; then
-    if ! test -d ext/phpdbg_webhelper; then
-      ln -s ../sapi/phpdbg ext/phpdbg_webhelper
+    if ! test -d $abs_srcdir/ext/phpdbg_webhelper; then
+      ln -s ../sapi/phpdbg $abs_srcdir/ext/phpdbg_webhelper
     fi
     if test "$PHP_JSON" != "no"; then
       PHP_NEW_EXTENSION(phpdbg_webhelper, phpdbg_rinit_hook.c phpdbg_webdata_transfer.c, $ext_shared)
