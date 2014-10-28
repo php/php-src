@@ -1466,7 +1466,7 @@ phpdbg_main:
 
 		if (exec) { /* set execution context */
 			PHPDBG_G(exec) = phpdbg_resolve_path(exec TSRMLS_CC);
-			PHPDBG_G(exec_len) = strlen(exec);
+			PHPDBG_G(exec_len) = PHPDBG_G(exec) ? strlen(PHPDBG_G(exec)) : 0;
 
 			free(exec);
 			exec = NULL;
