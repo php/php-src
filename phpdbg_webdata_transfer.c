@@ -17,11 +17,9 @@
 */
 
 #include "phpdbg_webdata_transfer.h"
-#include "ext/json/php_json.h"
+#include "ext/standard/php_var.h"
 
 PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
-#ifdef HAVE_JSON
-	smart_str buf = {0};
 	zval array;
 	HashTable *ht;
 	/* I really need to change that to an array of zvals... */
@@ -177,9 +175,17 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
 	}
 
 	/* encode data */
-	php_json_encode(&buf, &array, 0 TSRMLS_CC);
-	*msg = buf.c;
-	*len = buf.len;
+	{
+		php_serialize_data_t var_hash;
+		smart_str buf = {0};
+		zval *arrayptr = &array;
+
+		PHP_VAR_SERIALIZE_INIT(var_hash);
+		php_var_serialize(&buf, &arrayptr, &var_hash TSRMLS_CC);
+		PHP_VAR_SERIALIZE_DESTROY(var_hash);
+		*msg = buf.c;
+		*len = buf.len;
+	}
+
 	zval_dtor(&array);
-#endif
 }
