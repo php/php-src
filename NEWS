@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
 - Core:
+  . Fixed bug #68252 (segfault in Zend/zend_hash.c in function
+    _zend_hash_del_el). (Laruence)
   . Added PHP_INT_MIN constant. (Andrea)
   . Added Closure::call() method. (Andrea)
   . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
