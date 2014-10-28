@@ -43,6 +43,11 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 #define YYERROR_VERBOSE
 #define YYSTYPE zend_parser_stack_elem
 
+#ifdef _MSC_VER
+#define YYMALLOC malloc
+#define YYFREE free
+#endif
+
 %}
 
 %pure_parser

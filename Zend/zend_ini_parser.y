@@ -43,6 +43,11 @@ int ini_parse(void);
 #define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
 #define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
 
+#ifdef _MSC_VER
+#define YYMALLOC malloc
+#define YYFREE free
+#endif
+
 /* {{{ zend_ini_do_op()
 */
 static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
