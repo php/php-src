@@ -114,6 +114,7 @@ PHP_FUNCTION(posix_getrlimit);
 PHP_FUNCTION(posix_initgroups);
 #endif
 
+void php_posix_set_last_error(int);
 PHP_FUNCTION(posix_get_last_error);
 PHP_FUNCTION(posix_strerror);
 

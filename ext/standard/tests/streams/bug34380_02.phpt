@@ -2,8 +2,10 @@
 Bug #34380: stream_select should set posix_globals.last_error on failure
 --SKIPIF--
 <?php
-if( substr(PHP_OS, 0, 3) == "WIN" )
+if (substr(PHP_OS, 0, 3) == "WIN")
 	die("skip. Do not run on Windows");
+if (!extension_loaded("posix") || !extension_loaded('pcntl'))
+	die("skip. posix and pcntl extensions must be loaded");
 ?>
 --FILE--
 <?php

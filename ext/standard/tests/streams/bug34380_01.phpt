@@ -2,8 +2,10 @@
 Bug #34380: stream_socket_pair should set posix_globals.last_error on failure
 --SKIPIF--
 <?php
-if( substr(PHP_OS, 0, 3) == "WIN" )
+if (substr(PHP_OS, 0, 3) == "WIN")
 	die("skip. Do not run on Windows");
+if (!extension_loaded("posix"))
+	die("skip. posix extension must be loaded");
 ?>
 --FILE--
 <?php
