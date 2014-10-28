@@ -111,9 +111,18 @@ PHPDBG_API void phpdbg_reset_breakpoints(TSRMLS_D) /* {{{ */
 
 PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 {
+	char *string;
+	phpdbg_export_breakpoints_to_string(&string TSRMLS_CC);
+	fputs(string, handle);
+}
+
+PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str TSRMLS_DC) /* {{{ */
+{
 	HashPosition position[2];
 	HashTable **table = NULL;
 	zend_ulong id = 0L;
+
+	*str = "";
 
 	if (zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP])) {
 		phpdbg_notice("exportbreakpoint", "count=\"%d\"", "Exporting %d breakpoints", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP]));
@@ -126,55 +135,57 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 			zend_hash_get_current_key_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], NULL, NULL, &id, 0, &position[0]);
 
 			for (zend_hash_internal_pointer_reset_ex((*table), &position[1]);
-				zend_hash_get_current_data_ex((*table), (void**)&brake, &position[1]) == SUCCESS;
-				zend_hash_move_forward_ex((*table), &position[1])) {
+			     zend_hash_get_current_data_ex((*table), (void**)&brake, &position[1]) == SUCCESS;
+			     zend_hash_move_forward_ex((*table), &position[1])) {
 				if (brake->id == id) {
+					char *new_str = NULL;
+
 					switch (brake->type) {
 						case PHPDBG_BREAK_FILE: {
-							fprintf(handle,
-								"break %s:%lu\n",
+							phpdbg_asprintf(&new_str,
+								"%sbreak %s:%lu\n", *str,
 								((phpdbg_breakfile_t*)brake)->filename,
 								((phpdbg_breakfile_t*)brake)->line);
 						} break;
 
 						case PHPDBG_BREAK_SYM: {
-							fprintf(handle,
-								"break %s\n",
+							phpdbg_asprintf(&new_str,
+								"%sbreak %s\n", *str,
 								((phpdbg_breaksymbol_t*)brake)->symbol);
 						} break;
 
 						case PHPDBG_BREAK_METHOD: {
-							fprintf(handle,
-								"break %s::%s\n",
+							phpdbg_asprintf(&new_str,
+								"%sbreak %s::%s\n", *str,
 								((phpdbg_breakmethod_t*)brake)->class_name,
 								((phpdbg_breakmethod_t*)brake)->func_name);
 						} break;
 
 						case PHPDBG_BREAK_METHOD_OPLINE: {
-							fprintf(handle,
-								"break %s::%s#%ld\n",
+							phpdbg_asprintf(&new_str,
+								"%sbreak %s::%s#%ld\n", *str,
 								((phpdbg_breakopline_t*)brake)->class_name,
 								((phpdbg_breakopline_t*)brake)->func_name,
 								((phpdbg_breakopline_t*)brake)->opline_num);
 						} break;
 
 						case PHPDBG_BREAK_FUNCTION_OPLINE: {
-							fprintf(handle,
-								"break %s#%ld\n",
+							phpdbg_asprintf(&new_str,
+								"%sbreak %s#%ld\n", *str,
 								((phpdbg_breakopline_t*)brake)->func_name,
 								((phpdbg_breakopline_t*)brake)->opline_num);
 						} break;
 
 						case PHPDBG_BREAK_FILE_OPLINE: {
-							fprintf(handle,
-								"break %s:#%ld\n",
+							phpdbg_asprintf(&new_str,
+								"%sbreak %s:#%ld\n", *str,
 								((phpdbg_breakopline_t*)brake)->class_name,
 								((phpdbg_breakopline_t*)brake)->opline_num);
 						} break;
 
 						case PHPDBG_BREAK_OPCODE: {
-							fprintf(handle,
-								"break %s\n",
+							phpdbg_asprintf(&new_str,
+								"%sbreak %s\n", *str,
 								((phpdbg_breakop_t*)brake)->name);
 						} break;
 
@@ -184,20 +195,20 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 							if (conditional->paramed) {
 								switch (conditional->param.type) {
 									case STR_PARAM:
-										fprintf(handle,
-											"break at %s if %s\n", conditional->param.str, conditional->code);
+										phpdbg_asprintf(&new_str,
+											"%sbreak at %s if %s\n", *str, conditional->param.str, conditional->code);
 									break;
 
 									case METHOD_PARAM:
-										fprintf(handle,
-											"break at %s::%s if %s\n",
+										phpdbg_asprintf(&new_str,
+											"%sbreak at %s::%s if %s\n", *str,
 											conditional->param.method.class, conditional->param.method.name,
 											conditional->code);
 									break;
 
 									case FILE_PARAM:
-										fprintf(handle,
-											"break at %s:%lu if %s\n",
+										phpdbg_asprintf(&new_str,
+											"%sbreak at %s:%lu if %s\n", *str,
 											conditional->param.file.name, conditional->param.file.line,
 											conditional->code);
 									break;
@@ -205,14 +216,22 @@ PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
 									default: { /* do nothing */ } break;
 								}
 							} else {
-								fprintf(
-									handle, "break if %s\n", conditional->code);
+								phpdbg_asprintf(&new_str, "%sbreak if %s\n", str, conditional->code);
 							}
 						} break;
 					}
+
+					if ((*str)[0]) {
+						efree(*str);
+					}
+					*str = new_str;
 				}
 			}
 		}
+	}
+
+	if (!(*str)[0]) {
+		*str = NULL;
 	}
 } /* }}} */
 
