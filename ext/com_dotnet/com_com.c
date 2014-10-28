@@ -475,7 +475,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 
 	/* assumption: that the active function (f) is the function we generated for the engine */
 	if (!f || f->arg_info == NULL) {
-	   f = NULL;
+		return FAILURE;
 	}
 	
 	hr = php_com_get_id_of_name(obj, f->function_name->val, f->function_name->len, &dispid TSRMLS_CC);
