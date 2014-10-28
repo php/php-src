@@ -174,6 +174,7 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 		free_zv = *zvpp;
 	}
 
+#if PHP_VERSION_ID >= 50600
 	if (zend_hash_find(ht, "input", sizeof("input"), (void **) &zvpp) == SUCCESS && Z_TYPE_PP(zvpp) == IS_STRING) {
 		if (SG(request_info).request_body) {
 			php_stream_close(SG(request_info).request_body);
@@ -182,6 +183,7 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 		php_stream_truncate_set_size(SG(request_info).request_body, 0);
 		php_stream_write(SG(request_info).request_body, Z_STRVAL_PP(zvpp), Z_STRLEN_PP(zvpp));
 	}
+#endif
 
 	if (zend_hash_find(ht, "cwd", sizeof("cwd"), (void **) &zvpp) == SUCCESS && Z_TYPE_PP(zvpp) == IS_STRING) {
 		if (VCWD_CHDIR(Z_STRVAL_PP(zvpp)) == SUCCESS) {

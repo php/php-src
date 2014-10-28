@@ -49,6 +49,7 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
 		zend_hash_add(ht, "GLOBALS", sizeof("GLOBALS"), &zvp1, sizeof(zval *), NULL);
 	}
 
+#if PHP_VERSION_ID >= 50600
 	/* save php://input */
 	{
 		php_stream *stream;
@@ -64,6 +65,7 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
 		Z_SET_REFCOUNT(zv2, 2);
 		zend_hash_add(ht, "input", sizeof("input"), &zvp2, sizeof(zval *), NULL);
 	}
+#endif
 
 	/* change sapi name */
 	{
