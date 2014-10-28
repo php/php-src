@@ -712,7 +712,7 @@ ZEND_API zend_bool zend_is_auto_global(const char *name, uint name_len TSRMLS_DC
 ZEND_API zend_bool zend_is_auto_global_quick(const char *name, uint name_len, ulong hashval TSRMLS_DC);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 
-int zendlex(znode *zendlval TSRMLS_DC);
+int zendlex(znode *zendlval, TSRMLS_DN);
 
 int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 

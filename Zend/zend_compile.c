@@ -6747,7 +6747,7 @@ ZEND_API void zend_activate_auto_globals(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-int zendlex(znode *zendlval TSRMLS_DC) /* {{{ */
+int zendlex(znode *zendlval, TSRMLS_DN) /* {{{ */
 {
 	int retval;
 

@@ -4,7 +4,7 @@ dnl This file contains local autoconf functions.
 
 AC_DEFUN([LIBZEND_BISON_CHECK],[
   # we only support certain bison versions
-  bison_version_list="2.4 2.4.1 2.4.2 2.4.3 2.5 2.5.1 2.6 2.6.1 2.6.2 2.6.3 2.6.4 2.6.5 2.7"
+  bison_version_list="2.4 2.4.1 2.4.2 2.4.3 2.5 2.5.1 2.6 2.6.1 2.6.2 2.6.3 2.6.4 2.6.5 2.7 3.0 3.0.1 3.0.2"
 
   # for standalone build of Zend Engine
   test -z "$SED" && SED=sed

@@ -866,7 +866,7 @@ void zend_set_utility_values(zend_utility_values *utility_values) /* {{{ */
 /* }}} */
 
 /* this should be compatible with the standard zenderror */
-void zenderror(const char *error) /* {{{ */
+void zenderror(TSRMLS_DN, const char *error) /* {{{ */
 {
 	zend_error(E_PARSE, "%s", error);
 }

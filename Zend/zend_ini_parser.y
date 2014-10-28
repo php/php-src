@@ -29,16 +29,9 @@
 #include "zend_ini_scanner.h"
 #include "zend_extensions.h"
 
-#define YYERROR_VERBOSE
 #define YYSTYPE zval
 
-#ifdef ZTS
-#define YYPARSE_PARAM tsrm_ls
-#define YYLEX_PARAM tsrm_ls
 int ini_parse(void *arg);
-#else
-int ini_parse(void);
-#endif
 
 #define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
 #define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
@@ -160,12 +153,11 @@ static void zend_ini_get_var(zval *result, zval *name TSRMLS_DC)
 
 /* {{{ ini_error()
 */
-static void ini_error(char *msg)
+static void ini_error(TSRMLS_DN, char *msg)
 {
 	char *error_buf;
 	int error_buf_len;
 	char *currently_parsed_filename;
-	TSRMLS_FETCH();
 
 	currently_parsed_filename = zend_ini_scanner_get_filename(TSRMLS_C);
 	if (currently_parsed_filename) {
@@ -206,7 +198,7 @@ ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_erro
 	}
 
 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
-	retval = ini_parse(TSRMLS_C);
+	retval = ini_parse(TSRMLS_CN);
 	zend_file_handle_dtor(fh TSRMLS_CC);
 
 	shutdown_ini_scanner(TSRMLS_C);
@@ -235,7 +227,7 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 	}
 
 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
-	retval = ini_parse(TSRMLS_C);
+	retval = ini_parse(TSRMLS_CN);
 
 	shutdown_ini_scanner(TSRMLS_C);
 
@@ -249,8 +241,13 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 
 %}
 
+%error-verbose
+
 %expect 0
 %pure_parser
+
+%parse-param { void *tsrm_ls }
+%lex-param { void *tsrm_ls }
 
 %token TC_SECTION
 %token TC_RAW

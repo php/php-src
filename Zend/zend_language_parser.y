@@ -39,20 +39,17 @@
 #define yytnamerr zend_yytnamerr
 static YYSIZE_T zend_yytnamerr(char*, const char*);
 
-#define YYERROR_VERBOSE
 #define YYSTYPE znode
 
 %}
 
-%pure_parser
+%error-verbose
+
+%pure-parser
 %expect 3
 
-%code requires {
-#ifdef ZTS
-# define YYPARSE_PARAM tsrm_ls
-# define YYLEX_PARAM tsrm_ls
-#endif
-}
+%parse-param { void *tsrm_ls }
+%lex-param { void *tsrm_ls }
 
 %token END 0 "end of file"
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
