@@ -474,7 +474,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 	int i, byref_count = 0, j;
 
 	/* assumption: that the active function (f) is the function we generated for the engine */
-	if (!f || f->arg_info == NULL) {
+	if (!f) {
 		return FAILURE;
 	}
 	
@@ -496,7 +496,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 		vargs = (VARIANT*)safe_emalloc(sizeof(VARIANT), nargs, 0);
 	}
 
-	if (f) {
+	if (f->arg_info) {
 		for (i = 0; i < nargs; i++) {
 			if (f->arg_info[nargs - i - 1].pass_by_reference) {
 				byref_count++;
@@ -551,30 +551,36 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 
 	/* release variants */
 	if (vargs) {
-		for (i = 0, j = 0; i < nargs; i++) {
-			/* if this was byref, update the zval */
-			if (f && f->arg_info[nargs - i - 1].pass_by_reference) {
-				SEPARATE_ZVAL_IF_NOT_REF(&args[nargs - i - 1]);
+		if (f && f->arg_info) {
+			for (i = 0, j = 0; i < nargs; i++) {
+				/* if this was byref, update the zval */
+				if (f->arg_info[nargs - i - 1].pass_by_reference) {
+					SEPARATE_ZVAL_IF_NOT_REF(&args[nargs - i - 1]);
 
-				/* if the variant is pointing at the byref_vals, we need to map
-				 * the pointee value as a zval; otherwise, the value is pointing
-				 * into an existing PHP variant record */
-				if (V_VT(&vargs[i]) & VT_BYREF) {
-					if (vargs[i].byref == &V_UINT(&byref_vals[j])) {
-						/* copy that value */
-						php_com_zval_from_variant(&args[nargs - i - 1], &byref_vals[j],
+					/* if the variant is pointing at the byref_vals, we need to map
+					 * the pointee value as a zval; otherwise, the value is pointing
+					 * into an existing PHP variant record */
+					if (V_VT(&vargs[i]) & VT_BYREF) {
+						if (vargs[i].byref == &V_UINT(&byref_vals[j])) {
+							/* copy that value */
+							php_com_zval_from_variant(&args[nargs - i - 1], &byref_vals[j],
+								obj->code_page TSRMLS_CC);
+						}
+					} else {
+						/* not sure if this can ever happen; the variant we marked as BYREF
+						 * is no longer BYREF - copy its value */
+						php_com_zval_from_variant(&args[nargs - i - 1], &vargs[i],
 							obj->code_page TSRMLS_CC);
 					}
-				} else {
-					/* not sure if this can ever happen; the variant we marked as BYREF
-					 * is no longer BYREF - copy its value */
-					php_com_zval_from_variant(&args[nargs - i - 1], &vargs[i],
-						obj->code_page TSRMLS_CC);
+					VariantClear(&byref_vals[j]);
+					j++;
 				}
-				VariantClear(&byref_vals[j]);
-				j++;
-			}	
-			VariantClear(&vargs[i]);
+				VariantClear(&vargs[i]);
+			}
+		} else {
+			for (i = 0, j = 0; i < nargs; i++) {
+				VariantClear(&vargs[i]);
+			}
 		}
 		efree(vargs);
 	}
