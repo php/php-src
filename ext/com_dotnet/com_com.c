@@ -129,11 +129,11 @@ PHP_FUNCTION(com_create_instance)
 
 		if (user_name) {
 			authid.User = php_com_string_to_olestring(user_name, -1, obj->code_page TSRMLS_CC);
-			authid.UserLength = user_name_len;
+			authid.UserLength = (ULONG)user_name_len;
 
 			if (password) {
 				authid.Password = (OLECHAR*)password;
-				authid.PasswordLength = password_len;
+				authid.PasswordLength = (ULONG)password_len;
 			} else {
 				authid.Password = (OLECHAR*)"";
 				authid.PasswordLength = 0;
@@ -141,7 +141,7 @@ PHP_FUNCTION(com_create_instance)
 
 			if (domain_name) {
 				authid.Domain = (OLECHAR*)domain_name;
-				authid.DomainLength = domain_name_len;
+				authid.DomainLength = (ULONG)domain_name_len;
 			} else {
 				authid.Domain = (OLECHAR*)"";
 				authid.DomainLength = 0;
@@ -288,7 +288,7 @@ PHP_FUNCTION(com_get_active_object)
 {
 	CLSID clsid;
 	char *module_name;
-	int module_name_len;
+	size_t module_name_len;
 	zend_long code_page = COMG(code_page);
 	IUnknown *unk = NULL;
 	IDispatch *obj = NULL;
@@ -302,7 +302,7 @@ PHP_FUNCTION(com_get_active_object)
 		return;
 	}
 
-	module = php_com_string_to_olestring(module_name, module_name_len, code_page TSRMLS_CC);
+	module = php_com_string_to_olestring(module_name, module_name_len, (int)code_page TSRMLS_CC);
 
 	res = CLSIDFromString(module, &clsid);
 
@@ -320,7 +320,7 @@ PHP_FUNCTION(com_get_active_object)
 				php_com_throw_exception(res, NULL TSRMLS_CC);
 			} else if (obj) {
 				/* we got our dispatchable object */
-				php_com_wrap_dispatch(return_value, obj, code_page TSRMLS_CC);
+				php_com_wrap_dispatch(return_value, obj, (int)code_page TSRMLS_CC);
 			}
 		}
 	}
@@ -427,7 +427,7 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 	}
 
 	if (obj->id_of_name_cache && NULL != (tmp = zend_hash_str_find(obj->id_of_name_cache, name, namelen))) {
-		*dispid = Z_LVAL_P(tmp);
+		*dispid = (DISPID)Z_LVAL_P(tmp);
 		return S_OK;
 	}
 	
@@ -631,7 +631,7 @@ int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 	return SUCCEEDED(hr) ? SUCCESS : FAILURE;
 }
 
-int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
+int php_com_do_invoke(php_com_dotnet_object *obj, char *name, size_t namelen,
 		WORD flags,	VARIANT *v, int nargs, zval *args, int allow_noarg TSRMLS_DC)
 {
 	DISPID dispid;
@@ -791,7 +791,7 @@ PHP_FUNCTION(com_message_pump)
 		RETURN_FALSE;
 	
 	php_com_initialize(TSRMLS_C);
-	result = MsgWaitForMultipleObjects(0, NULL, FALSE, timeoutms, QS_ALLINPUT);
+	result = MsgWaitForMultipleObjects(0, NULL, FALSE, (DWORD)timeoutms, QS_ALLINPUT);
 
 	if (result == WAIT_OBJECT_0) {
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {

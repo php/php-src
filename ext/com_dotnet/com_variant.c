@@ -62,7 +62,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 
 	/* allocate the structure */	
 	bound.lLbound = 0;
-	bound.cElements = intindex + 1;
+	bound.cElements = (ULONG)(intindex + 1);
 	sa = SafeArrayCreate(VT_VARIANT, 1, &bound);
 
 	/* get a lock on the array itself */
@@ -146,8 +146,13 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 			break;
 
 		case IS_LONG:
+#if SIZEOF_ZEND_LONG == 4
 			V_VT(v) = VT_I4;
 			V_I4(v) = Z_LVAL_P(z);
+#else
+			V_VT(v) = VT_I8;
+			V_I8(v) = Z_LVAL_P(z);
+#endif
 			break;
 
 		case IS_DOUBLE:
@@ -159,9 +164,9 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 			V_VT(v) = VT_BSTR;
 			olestring = php_com_string_to_olestring(Z_STRVAL_P(z), Z_STRLEN_P(z), codepage TSRMLS_CC);
 			if (CP_UTF8 == codepage) {
-				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, wcslen(olestring) * sizeof(OLECHAR));
+				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, (UINT)(wcslen(olestring) * sizeof(OLECHAR)));
 			} else {
-				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, Z_STRLEN_P(z) * sizeof(OLECHAR));
+				V_BSTR(v) = SysAllocStringByteLen((char*)olestring, (UINT)(Z_STRLEN_P(z) * sizeof(OLECHAR)));
 			}
 			efree(olestring);
 			break;
@@ -428,7 +433,7 @@ PHP_FUNCTION(com_variant_create_instance)
 
 	php_com_initialize(TSRMLS_C);
 	if (ZEND_NUM_ARGS() == 3) {
-		obj->code_page = codepage;
+		obj->code_page = (int)codepage;
 	}
 
 	if (zvalue) {
@@ -849,7 +854,7 @@ PHP_FUNCTION(variant_round)
 		return;
 	}
 
-	if (SUCCEEDED(VarRound(vleft, decimals, &vres))) {
+	if (SUCCEEDED(VarRound(vleft, (int)decimals, &vres))) {
 		php_com_wrap_variant(return_value, &vres, codepage TSRMLS_CC);
 	}
 
@@ -909,7 +914,7 @@ PHP_FUNCTION(variant_cmp)
 		return;
 	}
 
-	ZVAL_LONG(return_value, VarCmp(vleft, vright, lcid, flags));
+	ZVAL_LONG(return_value, VarCmp(vleft, vright, (LCID)lcid, (ULONG)flags));
 
 	VariantClear(&left_val);
 	VariantClear(&right_val);

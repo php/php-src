@@ -116,7 +116,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codep
 									continue;
 								}
 								/* get the default value for this key and compare */
-								libnamelen = strlen(search_string)+1;
+								libnamelen = (DWORD)strlen(search_string)+1;
 								if (ERROR_SUCCESS == RegQueryValue(hsubkey, version, libname, &libnamelen)) {
 									if (0 == stricmp(libname, search_string)) {
 										char *str = NULL;
@@ -234,7 +234,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
 {
 	ITypeLib *TL;
 	char *name_dup;
-	int l;
+	size_t l;
 
 	l = strlen(search_string);
 
