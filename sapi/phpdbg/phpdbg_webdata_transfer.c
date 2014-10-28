@@ -17,7 +17,7 @@
 */
 
 #include "phpdbg_webdata_transfer.h"
-#include "ext/json/php_json.h"
+#include "ext/standard/php_var.h"
 
 static int phpdbg_is_auto_global(char *name, int len TSRMLS_DC) {
 	int ret;
@@ -28,8 +28,6 @@ static int phpdbg_is_auto_global(char *name, int len TSRMLS_DC) {
 }
 
 PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
-#ifdef HAVE_JSON
-	smart_str buf = {0};
 	zval array;
 	HashTable *ht;
 	zval zv[9] = {{{0}}};
@@ -162,9 +160,16 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
 	}
 
 	/* encode data */
-	php_json_encode(&buf, &array, 0 TSRMLS_CC);
-	*msg = buf.s->val;
-	*len = buf.s->len;
+	{
+		php_serialize_data_t var_hash;
+		smart_str buf = {0};
+
+		PHP_VAR_SERIALIZE_INIT(var_hash);
+		php_var_serialize(&buf, &array, &var_hash TSRMLS_CC);
+		PHP_VAR_SERIALIZE_DESTROY(var_hash);
+		*msg = buf.s->val;
+		*len = buf.s->len;
+	}
+
 	zval_dtor(&array);
-#endif
 }
