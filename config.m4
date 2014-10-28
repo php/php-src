@@ -25,6 +25,7 @@ if test "$BUILD_PHPDBG" == "" && test "$PHP_PHPDBG" != "no"; then
     if ! test -d $abs_srcdir/ext/phpdbg_webhelper; then
       ln -s ../sapi/phpdbg $abs_srcdir/ext/phpdbg_webhelper
     fi
+    PHP_NEW_EXTENSION(phpdbg_webhelper, phpdbg_rinit_hook.c phpdbg_webdata_transfer.c, $ext_shared)
   fi
 
   PHP_PHPDBG_CFLAGS="-D_GNU_SOURCE"
