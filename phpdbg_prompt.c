@@ -1132,7 +1132,7 @@ PHPDBG_COMMAND(register) /* {{{ */
 
 			phpdbg_notice("register", "function=\"%s\"", "Registered %s", lcname);
 		} else {
-			phpdbg_error("register", "type=\"notfoundc\" function=\"%s\"", "The requested function (%s) could not be found", param->str);
+			phpdbg_error("register", "type=\"notfound\" function=\"%s\"", "The requested function (%s) could not be found", param->str);
 		}
 	} else {
 		phpdbg_error("register", "type=\"inuse\" function=\"%s\"", "The requested name (%s) is already in use", lcname);
