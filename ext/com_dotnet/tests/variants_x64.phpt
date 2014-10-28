@@ -3,7 +3,7 @@ COM: General variant tests
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present";
-if (4 != PHP_INT_SIZE) print "skip x86 only"; ?>
+if (8 != PHP_INT_SIZE) print "skip x64 only"; ?>
 --FILE--
 <?php // $Id$
 error_reporting(E_ALL);
@@ -13,7 +13,7 @@ if (VT_EMPTY != variant_get_type($v)) {
 	echo "VT_EMPTY: bork\n";
 }
 
-$values = array(VT_I4 => 42, VT_R8 => 3.5, VT_BSTR => "hello", VT_BOOL => false);
+$values = array(VT_I8 => 42, VT_R8 => 3.5, VT_BSTR => "hello", VT_BOOL => false);
 $binary_ops = array('add', 'cat', 'sub', 'mul', 'and', 'div',
 	'eqv', 'idiv', 'imp', 'mod', 'or', 'pow', 'xor');
 

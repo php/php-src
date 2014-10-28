@@ -204,11 +204,19 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 			ZVAL_LONG(z, (zend_long)V_I2(v));
 			break;
 		case VT_UI4:  /* TODO: promote to double if large? */
-			ZVAL_LONG(z, (zend_long)V_UI4(v));
+			ZVAL_LONG(z, (long)V_UI4(v));
 			break;
 		case VT_I4:
-			ZVAL_LONG(z, (zend_long)V_I4(v));
+			ZVAL_LONG(z, (long)V_I4(v));
 			break;
+#if SIZEOF_ZEND_LONG == 8
+		case VT_UI8:
+			ZVAL_LONG(z, (zend_long)V_UI8(v));
+			break;
+		case VT_I8:
+			ZVAL_LONG(z, (zend_long)V_I8(v));
+			break;
+#endif
 		case VT_INT:
 			ZVAL_LONG(z, V_INT(v));
 			break;
@@ -333,7 +341,23 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar TSR
 			V_I4(dstvar) = V_I4(srcvar);
 		}
 		break;
+#if SIZEOF_ZEND_LONG == 8 
+	case VT_UI8: 
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_UI8REF(dstvar) = V_UI8(srcvar);
+		} else {
+			V_UI8(dstvar) = V_UI8(srcvar);
+		}
+		break;
 
+	case VT_I8:
+		if (V_VT(dstvar) & VT_BYREF) {
+			*V_I8REF(dstvar) = V_I8(srcvar);
+		} else {
+			V_I8(dstvar) = V_I8(srcvar);
+		}
+		break;
+#endif
 	case VT_INT:
 		if (V_VT(dstvar) & VT_BYREF) {
 			*V_INTREF(dstvar) = V_INT(srcvar);
