@@ -366,7 +366,6 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 
 PHPDBG_COMMAND(wait) /* {{{ */
 {
-#ifdef HAVE_JSON
 	struct sockaddr_un local, remote;
 	int rlen, sr, sl;
 	unlink(PHPDBG_G(socket_path));
@@ -418,5 +417,4 @@ PHPDBG_COMMAND(wait) /* {{{ */
 	phpdbg_notice("wait", "import=\"success\"", "Successfully imported request data, stopped before executing");
 
 	return SUCCESS;
-#endif
 } /* }}} */
