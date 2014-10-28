@@ -187,10 +187,6 @@ PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo TSRMLS_DC
 
 
 PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len TSRMLS_DC) {
-	if (PHPDBG_G(flags) & PHPDBG_DISCARD_OUTPUT) {
-		return 0;
-	}
-
 	if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 		return phpdbg_send_bytes(sock, ptr, len);
 	}
