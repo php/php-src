@@ -676,9 +676,9 @@ PHPDBG_COMMAND(run) /* {{{ */
 			EG(active_op_array) = orig_op_array;
 			EG(opline_ptr) = orig_opline;
 			EG(return_value_ptr_ptr) = orig_retval_ptr;
-
-			phpdbg_clean(1 TSRMLS_CC);
 		}
+
+		phpdbg_clean(1 TSRMLS_CC);
 
 		PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
 	} else {
