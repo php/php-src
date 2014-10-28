@@ -201,9 +201,13 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
 			}
 			p++;
 		}
-			text = buf;
+		*p2 = 0;
+		text = buf;
 	}
 
+	if (strlen(text)<17) {
+		return -1;
+	}
 
    tm.tm_isdst = -1;
 
