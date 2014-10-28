@@ -115,7 +115,8 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 		return FAILURE;
 	}
 
-	ret = CryptGenRandom(hCryptProv, size, buf);
+	/* XXX should go in the loop if size exceeds UINT_MAX */
+	ret = CryptGenRandom(hCryptProv, (DWORD)size, buf);
 
 	if (ret) {
 		return SUCCESS;
