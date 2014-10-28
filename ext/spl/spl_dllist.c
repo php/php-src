@@ -1182,7 +1182,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 		goto error;
 	}
 
-	intern->flags = Z_LVAL(flags);
+	intern->flags = (int)Z_LVAL(flags);
 	zval_ptr_dtor(&flags);
 
 	/* elements */
