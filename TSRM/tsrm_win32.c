@@ -279,14 +279,14 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
 
 		if (CWDG(realpath_cache_size_limit)) {
 			t = time(0);
-			bucket = realpath_cache_lookup(pathname, strlen(pathname), t TSRMLS_CC);
+			bucket = realpath_cache_lookup(pathname, (int)strlen(pathname), t TSRMLS_CC);
 			if(bucket == NULL && real_path == NULL) {
 				/* We used the pathname directly. Call tsrm_realpath */
 				/* so that entry is created in realpath cache */
 				real_path = (char *)malloc(MAX_PATH);
 				if(tsrm_realpath(pathname, real_path TSRMLS_CC) != NULL) {
 					pathname = real_path;
-					bucket = realpath_cache_lookup(pathname, strlen(pathname), t TSRMLS_CC);
+					bucket = realpath_cache_lookup(pathname, (int)strlen(pathname), t TSRMLS_CC);
 				}
 			}
  		}
@@ -477,7 +477,7 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	}
 
 	/*The following two checks can be removed once we drop XP support */
-	type_len = strlen(type);
+	type_len = (int)strlen(type);
 	if (type_len <1 || type_len > 2) {
 		return NULL;
 	}
