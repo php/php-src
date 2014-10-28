@@ -1169,6 +1169,10 @@ PHPDBG_API int phpdbg_output_err_buf(const char *tag, const char *xmlfmt, const 
 	va_list args;
 	int errbuf_active = PHPDBG_G(err_buf).active;
 
+	if (PHPDBG_G(flags) & PHPDBG_DISCARD_OUTPUT) {
+		return 0;
+	}
+
 	PHPDBG_G(err_buf).active = 0;
 
 #ifdef ZTS
@@ -1189,6 +1193,10 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, int fd, const char *tag, const c
 	va_list args;
 	int len;
 
+	if (PHPDBG_G(flags) & PHPDBG_DISCARD_OUTPUT) {
+		return 0;
+	}
+
 	va_start(args, strfmt);
 	len = phpdbg_vprint(type TSRMLS_CC, fd, tag, xmlfmt, strfmt, args);
 	va_end(args);
@@ -1198,6 +1206,10 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, int fd, const char *tag, const c
 
 PHPDBG_API int phpdbg_xml_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 	int len = 0;
+
+	if (PHPDBG_G(flags) & PHPDBG_DISCARD_OUTPUT) {
+		return 0;
+	}
 
 	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
 		va_list args;
@@ -1243,6 +1255,10 @@ PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 	char *buffer;
 	int buflen;
 	int len = 0;
+
+	if (PHPDBG_G(flags) & PHPDBG_DISCARD_OUTPUT) {
+		return 0;
+	}
 
 	va_start(args, fmt);
 	buflen = phpdbg_xml_vasprintf(&buffer, fmt, 0, args TSRMLS_CC);

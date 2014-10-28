@@ -201,6 +201,110 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 	return FAILURE;
 } /* }}} */
 
+struct phpdbg_init_state {
+	int line;
+	zend_bool in_code;
+	char *code;
+	size_t code_len;
+	const char *init_file;
+};
+
+static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state TSRMLS_DC) {
+	size_t cmd_len = strlen(cmd);
+
+	state->line++;
+
+	while (cmd_len > 0L && isspace(cmd[cmd_len-1])) {
+		cmd_len--;
+	}
+
+	cmd[cmd_len] = '\0';
+
+	if (*cmd && cmd_len > 0L && cmd[0] != '#') {
+		if (cmd_len == 2) {
+			if (memcmp(cmd, "<:", sizeof("<:")-1) == SUCCESS) {
+				state->in_code = 1;
+				return;
+			} else {
+				if (memcmp(cmd, ":>", sizeof(":>")-1) == SUCCESS) {
+					state->in_code = 0;
+					state->code[state->code_len] = '\0';
+					zend_eval_stringl(state->code, state->code_len, NULL, "phpdbginit code" TSRMLS_CC);
+					free(state->code);
+					state->code = NULL;
+					return;
+				}
+			}
+		}
+
+		if (state->in_code) {
+			if (state->code == NULL) {
+				state->code = malloc(cmd_len + 1);
+			} else {
+				state->code = realloc(state->code, state->code_len + cmd_len + 1);
+			}
+
+			if (state->code) {
+				memcpy(&state->code[state->code_len], cmd, cmd_len);
+				state->code_len += cmd_len;
+			}
+
+			return;
+		}
+
+		zend_try {
+			char *input = phpdbg_read_input(cmd TSRMLS_CC);
+			phpdbg_param_t stack;
+
+			phpdbg_init_param(&stack, STACK_PARAM);
+
+			phpdbg_activate_err_buf(1 TSRMLS_CC);
+
+			if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
+				switch (phpdbg_stack_execute(&stack, 1 /* allow_async_unsafe == 1 */ TSRMLS_CC)) {
+					case FAILURE:
+						phpdbg_activate_err_buf(0 TSRMLS_CC);
+						if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
+							if (state->init_file) {
+								phpdbg_output_err_buf("initfailure", "%b file=\"%s\" line=\"%d\" input=\"%s\"", "Unrecognized command in %s:%d: %s, %b!" TSRMLS_CC, state->init_file, state->line, input);
+							} else {
+								phpdbg_output_err_buf("initfailure", "%b line=\"%d\" input=\"%s\"", "Unrecognized command on line %d: %s, %b!" TSRMLS_CC, state->line, input);
+							}
+						}
+					break;
+				}
+			}
+
+			phpdbg_activate_err_buf(0 TSRMLS_CC);
+			phpdbg_free_err_buf(TSRMLS_C);
+
+			phpdbg_stack_free(&stack);
+			phpdbg_destroy_input(&input TSRMLS_CC);
+		} zend_catch {
+			PHPDBG_G(flags) &= ~(PHPDBG_IS_RUNNING | PHPDBG_IS_CLEANING);
+			if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+				zend_bailout();
+			}
+		} zend_end_try();
+	}
+
+}
+
+void phpdbg_string_init(char *buffer TSRMLS_DC) {
+	struct phpdbg_init_state state = {0};
+	char *str = strtok(buffer, "\n");
+
+	while (str) {
+		phpdbg_line_init(str, &state TSRMLS_CC);
+
+		str = strtok(NULL, "\n");
+	}
+
+	if (state.code) {
+		free(state.code);
+	}
+}
+
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC) /* {{{ */
 {
 	struct stat sb;
@@ -208,91 +312,17 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 	if (init_file && VCWD_STAT(init_file, &sb) != -1) {
 		FILE *fp = fopen(init_file, "r");
 		if (fp) {
-			int line = 1;
-
 			char cmd[PHPDBG_MAX_CMD];
-			size_t cmd_len = 0L;
-			char *code = NULL;
-			size_t code_len = 0L;
-			zend_bool in_code = 0;
+			struct phpdbg_init_state state = {0};
+
+			state.init_file = init_file;
 
 			while (fgets(cmd, PHPDBG_MAX_CMD, fp) != NULL) {
-				cmd_len = strlen(cmd)-1;
-
-				while (cmd_len > 0L && isspace(cmd[cmd_len-1]))
-					cmd_len--;
-
-				cmd[cmd_len] = '\0';
-
-				if (*cmd && cmd_len > 0L && cmd[0] != '#') {
-					if (cmd_len == 2) {
-						if (memcmp(cmd, "<:", sizeof("<:")-1) == SUCCESS) {
-							in_code = 1;
-							goto next_line;
-						} else {
-							if (memcmp(cmd, ":>", sizeof(":>")-1) == SUCCESS) {
-								in_code = 0;
-								code[code_len] = '\0';
-								{
-									zend_eval_stringl(code, code_len, NULL, "phpdbginit code" TSRMLS_CC);
-								}
-								free(code);
-								code = NULL;
-								goto next_line;
-							}
-						}
-					}
-
-					if (in_code) {
-						if (code == NULL) {
-							code = malloc(cmd_len + 1);
-						} else code = realloc(code, code_len + cmd_len + 1);
-
-						if (code) {
-							memcpy(
-								&code[code_len], cmd, cmd_len);
-							code_len += cmd_len;
-						}
-						goto next_line;
-					}
-
-					zend_try {
-						char *input = phpdbg_read_input(cmd TSRMLS_CC);
-						phpdbg_param_t stack;
-
-						phpdbg_init_param(&stack, STACK_PARAM);
-
-						phpdbg_activate_err_buf(1 TSRMLS_CC);
-
-						if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
-							switch (phpdbg_stack_execute(&stack, 1 /* allow_async_unsafe == 1 */ TSRMLS_CC)) {
-								case FAILURE:
-									phpdbg_activate_err_buf(0 TSRMLS_CC);
-									if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
-										phpdbg_output_err_buf("initfailure", "%b file=\"%s\" line=\"%d\" input=\"%s\"", "Unrecognized command in %s:%d: %s, %b!" TSRMLS_CC, init_file, line, input);
-									}
-								break;
-							}
-						}
-
-						phpdbg_activate_err_buf(0 TSRMLS_CC);
-						phpdbg_free_err_buf(TSRMLS_C);
-
-						phpdbg_stack_free(&stack);
-						phpdbg_destroy_input(&input TSRMLS_CC);
-					} zend_catch {
-						PHPDBG_G(flags) &= ~(PHPDBG_IS_RUNNING | PHPDBG_IS_CLEANING);
-						if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
-							zend_bailout();
-						}
-					} zend_end_try();
-				}
-next_line:
-				line++;
+				phpdbg_line_init(cmd, &state TSRMLS_CC);
 			}
 
-			if (code) {
-				free(code);
+			if (state.code) {
+				free(state.code);
 			}
 
 			fclose(fp);
@@ -634,9 +664,9 @@ PHPDBG_COMMAND(run) /* {{{ */
 			if (EG(exception)) {
 				phpdbg_handle_exception(TSRMLS_C);
 			}
-
-			phpdbg_clean(1 TSRMLS_CC);
 		}
+
+		phpdbg_clean(1 TSRMLS_CC);
 
 		PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
 	} else {
@@ -1081,7 +1111,7 @@ PHPDBG_COMMAND(register) /* {{{ */
 
 			phpdbg_notice("register", "function=\"%s\"", "Registered %s", lcname);
 		} else {
-			phpdbg_error("register", "type=\"notfoundc\" function=\"%s\"", "The requested function (%s) could not be found", param->str);
+			phpdbg_error("register", "type=\"notfound\" function=\"%s\"", "The requested function (%s) could not be found", param->str);
 		}
 	} else {
 		phpdbg_error("register", "type=\"inuse\" function=\"%s\"", "The requested name (%s) is already in use", lcname);
