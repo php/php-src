@@ -70,28 +70,10 @@
 # include "TSRM.h"
 #endif
 
-#define ZEND_HASH_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
-	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_ptr = Z_PTR_P(_z);
-
 #undef zend_hash_str_add
 #define zend_hash_str_add_tmp(ht, key, len, pData) \
 	_zend_hash_str_add(ht, key, len, pData ZEND_FILE_LINE_CC)
 #define zend_hash_str_add(...) zend_hash_str_add_tmp(__VA_ARGS__)
-
-static zend_always_inline void *zend_hash_index_add_mem(HashTable *ht, zend_ulong h, void *pData, size_t size)
-{
-	zval tmp, *zv;
-
-	ZVAL_PTR(&tmp, NULL);
-	if ((zv = zend_hash_index_add(ht, h, &tmp))) {
-		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
-		memcpy(Z_PTR_P(zv), pData, size);
-		return Z_PTR_P(zv);
-	}
-	return NULL;
-}
 
 #ifdef HAVE_LIBREADLINE
 #	include <readline/readline.h>
