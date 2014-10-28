@@ -22,6 +22,7 @@
 #define PHPDBG_PROMPT_H
 
 /* {{{ */
+void phpdbg_string_init(char *buffer TSRMLS_DC);
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC);
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC);
 int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC);

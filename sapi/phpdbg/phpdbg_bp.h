@@ -157,6 +157,7 @@ PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase(zend_ulong id TSRMLS_DC);
 PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable ***table, HashPosition *position TSRMLS_DC); /* }}} */
 
 /* {{{ Breakpoint Exportation API */
-PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC); /* }}} */
+PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC);
+PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str TSRMLS_DC); /* }}} */
 
 #endif /* PHPDBG_BP_H */
