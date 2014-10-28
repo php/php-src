@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2014, PHP 5.5.19
 
 - Core:
+  . Fixed bug #68095 (AddressSanitizer reports a heap buffer overflow in 
+    php_getopt()). (Stas)
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames
     and passwords) (Tjerk)
