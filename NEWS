@@ -3,17 +3,19 @@ PHP                                                                        NEWS
 ?? ??? 2014, PHP 5.6.3
 
 - Core:
-  . Fixed bug #67739 (Windows 8.1/Server 2012 R2 OS build number reported
-    as 6.2 (instead of 6.3)). (Christian Wenz)
+  . Implemented 64-bit format codes for pack() and unpack(). (Leigh)
+  . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
   . Fixed bug #67633 (A foreach on an array returned from a function not doing
     copy-on-write). (Nikita)
-  . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
+  . Fixed bug #67739 (Windows 8.1/Server 2012 R2 OS build number reported
+    as 6.2 (instead of 6.3)). (Christian Wenz)
+  . Fixed bug #67949 (DOMNodeList elements should be accessible through
+    array notation) (Florian)
+  . Fixed bug #68095 (AddressSanitizer reports a heap buffer overflow in
+    php_getopt()). (Stas)
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames 
     and passwords) (Tjerk)
-  . Fixed bug #67949 (DOMNodeList elements should be accessible through
-    array notation) (Florian)
-  . Implemented 64-bit format codes for pack() and unpack(). (Leigh)
 
 - phpdbg:
   . Added XML protocol (-x command line flag). (Bob)
