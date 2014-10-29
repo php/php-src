@@ -35,7 +35,11 @@
 #include "zend_stack.h"
 #include "php_output.h"
 
-ZEND_DECLARE_MODULE_GLOBALS(output);
+#ifdef ZTS
+PHPAPI int output_globals_id;
+#else
+PHPAPI php_output_globals output_globals;
+#endif
 
 const char php_output_default_handler_name[sizeof("default output handler")] = "default output handler";
 const char php_output_devnull_handler_name[sizeof("null output handler")] = "null output handler";

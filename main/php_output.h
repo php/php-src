@@ -152,6 +152,12 @@ ZEND_BEGIN_MODULE_GLOBALS(output)
 	int output_start_lineno;
 ZEND_END_MODULE_GLOBALS(output)
 
+#ifdef ZTS
+PHPAPI extern int output_globals_id;
+#else
+PHPAPI extern php_output_globals output_globals;
+#endif
+
 /* there should not be a need to use OG() from outside of output.c */
 #ifdef ZTS
 # define OG(v) TSRMG(output_globals_id, zend_output_globals *, v)
