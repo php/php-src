@@ -99,3 +99,7 @@ zend_module_entry phpdbg_webhelper_module_entry = {
 	PHPDBG_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
+
+#ifdef COMPILE_DL_PHPDBG_WEBHELPER
+ZEND_GET_MODULE(phpdbg_webhelper)
+#endif
