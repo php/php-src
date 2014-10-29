@@ -549,7 +549,7 @@ static int php_sapi_phpdbg_deactivate(TSRMLS_D) /* {{{ */
 
 		php_phpdbg_globals_ctor(pg);
 
-		pg->exec = strndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
+		pg->exec = zend_strndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
 		pg->exec_len = PHPDBG_G(exec_len);
 		pg->oplog = PHPDBG_G(oplog);
 		pg->prompt[0] = PHPDBG_G(prompt)[0];
