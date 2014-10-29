@@ -87,7 +87,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_ELSEIF
 %left T_ELSE 
 %left T_ENDIF 
-%right T_STATIC T_ABSTRACT T_FINAL T_PRIVATE T_PROTECTED T_PUBLIC
+%right T_STATIC T_ABSTRACT T_FINAL T_PRIVATE T_PROTECTED T_PUBLIC T_READONLY
 %right T_DOUBLE_ARROW
 
 %token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
@@ -185,6 +185,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_PRIVATE    "private (T_PRIVATE)"
 %token T_PROTECTED  "protected (T_PROTECTED)"
 %token T_PUBLIC     "public (T_PUBLIC)"
+%token T_READONLY   "readonly (T_READONLY)"
 %token T_VAR        "var (T_VAR)"
 %token T_UNSET      "unset (T_UNSET)"
 %token T_ISSET      "isset (T_ISSET)"
@@ -673,8 +674,8 @@ method_body:
 ;
 
 variable_modifiers:
-		non_empty_member_modifiers		{ $$ = $1; }
-	|	T_VAR							{ $$ = ZEND_ACC_PUBLIC; }
+		non_empty_member_modifiers				{ $$ = $1; }
+	|	T_VAR									{ $$ = ZEND_ACC_PUBLIC; }
 ;
 
 method_modifiers:
@@ -696,6 +697,7 @@ member_modifier:
 	|	T_STATIC				{ $$ = ZEND_ACC_STATIC; }
 	|	T_ABSTRACT				{ $$ = ZEND_ACC_ABSTRACT; }
 	|	T_FINAL					{ $$ = ZEND_ACC_FINAL; }
+	|	T_READONLY				{ $$ = ZEND_ACC_READONLY; }
 ;
 
 property_list:

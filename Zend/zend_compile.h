@@ -171,6 +171,9 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_PRIVATE	0x400
 #define ZEND_ACC_PPP_MASK  (ZEND_ACC_PUBLIC | ZEND_ACC_PROTECTED | ZEND_ACC_PRIVATE)
 
+/* property attribute */
+#define ZEND_ACC_READONLY	0x2000
+
 #define ZEND_ACC_CHANGED	0x800
 #define ZEND_ACC_IMPLICIT_PUBLIC	0x1000
 

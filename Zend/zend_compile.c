@@ -4136,6 +4136,10 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 	zend_op_array *orig_op_array = CG(active_op_array);
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 
+	if (decl->flags & ZEND_ACC_READONLY) {
+		zend_error_noreturn(E_COMPILE_ERROR, "A method cannot be readonly");
+	}
+
 	// TODO.AST interactive (not just here - also bpc etc!)
 	
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
@@ -4212,6 +4216,14 @@ void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 
 	if (flags & ZEND_ACC_ABSTRACT) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
+	}
+
+	if (flags & ZEND_ACC_READONLY && flags & ZEND_ACC_PRIVATE) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be both readonly and private");
+	}
+
+	if (flags & ZEND_ACC_READONLY && flags & ZEND_ACC_STATIC) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Static properties cannot be readonly");
 	}
 
 	/* Doc comment has been appended as last element in property list */
