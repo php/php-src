@@ -1,6 +1,6 @@
 ARG_ENABLE('phpdbg', 'Build phpdbg', 'no');
 ARG_ENABLE('phpdbgs', 'Build phpdbg shared', 'no');
-ARG_ENABLE('phpdbgwebhelper', 'Build phpdbg webhelper', 'yes');
+ARG_ENABLE('phpdbg-webhelper', 'Build phpdbg webhelper', 'yes');
 
 PHPDBG_SOURCES='phpdbg.c phpdbg_prompt.c phpdbg_cmd.c phpdbg_info.c phpdbg_help.c phpdbg_break.c ' +
 		'phpdbg_print.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c phpdbg_utils.c ' +
@@ -16,8 +16,8 @@ if (PHP_PHPDBG == "yes") {
 	ADD_FLAG("CFLAGS_PHPDBG", "/D YY_NO_UNISTD_H");
 	ADD_FLAG("LDFLAGS_PHPDBG", "/stack:8388608");
 
-	if (PHP_PHPDBGWEBHELPER == "yes") {
-		EXTENSION('phpdbg-webhelper', 'phpdbg_rinit_hook.c phpdbg_webdata_compress.c');
+	if (PHP_PHPDBG_WEBHELPER == "yes") {
+		EXTENSION('phpdbg_webhelper', 'phpdbg_rinit_hook.c phpdbg_webdata_transfer.c');
 	}
 }
 

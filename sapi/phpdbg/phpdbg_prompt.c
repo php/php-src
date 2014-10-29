@@ -42,7 +42,6 @@
 #include "phpdbg_eol.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
-ZEND_EXTERN_MODULE_GLOBALS(output);
 extern int phpdbg_startup_run;
 
 #ifdef HAVE_LIBDL

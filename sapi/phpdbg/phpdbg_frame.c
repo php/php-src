@@ -25,7 +25,6 @@
 #include "phpdbg_list.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
-ZEND_EXTERN_MODULE_GLOBALS(output);
 
 void phpdbg_restore_frame(TSRMLS_D) /* {{{ */
 {
