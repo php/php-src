@@ -540,7 +540,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	intern->iterators = emalloc(sizeof(spl_sub_iterator));
 	intern->level = 0;
 	intern->mode = mode;
-	intern->flags = flags;
+	intern->flags = (int)flags;
 	intern->max_depth = -1;
 	intern->in_iteration = 0;
 	intern->ce = Z_OBJCE_P(object);
@@ -854,8 +854,11 @@ SPL_METHOD(RecursiveIteratorIterator, setMaxDepth)
 	if (max_depth < -1) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Parameter max_depth must be >= -1", 0 TSRMLS_CC);
 		return;
+	} else if (max_depth > INT_MAX) {
+		max_depth = INT_MAX;
 	}
-	object->max_depth = max_depth;
+
+	object->max_depth = (int)max_depth;
 } /* }}} */
 
 /* {{{ proto int|false RecursiveIteratorIterator::getMaxDepth()
@@ -1423,9 +1426,9 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more TSRMLS_DC);
 
-static inline int spl_cit_check_flags(int flags)
+static inline int spl_cit_check_flags(zend_long flags)
 {
-	int cnt = 0;
+	zend_long cnt = 0;
 
 	cnt += (flags & CIT_CALL_TOSTRING) ? 1 : 0;
 	cnt += (flags & CIT_TOSTRING_USE_KEY) ? 1 : 0;
@@ -2051,10 +2054,10 @@ SPL_METHOD(RegexIterator, accept)
 	use_copy = zend_make_printable_zval(subject_ptr, &subject_copy TSRMLS_CC);
 	if (use_copy) {
 		subject = Z_STRVAL(subject_copy);
-		subject_len = Z_STRLEN(subject_copy);
+		subject_len = (int)Z_STRLEN(subject_copy);
 	} else {
 		subject = Z_STRVAL_P(subject_ptr);
-		subject_len = Z_STRLEN_P(subject_ptr);
+		subject_len = (int)Z_STRLEN_P(subject_ptr);
 	}
 
 	use_copy = 0;
