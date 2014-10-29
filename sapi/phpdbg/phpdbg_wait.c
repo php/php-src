@@ -22,7 +22,6 @@
 #include "ext/standard/basic_functions.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
-ZEND_EXTERN_MODULE_GLOBALS(json);
 
 static void phpdbg_rebuild_http_globals_array(int type, const char *name TSRMLS_DC) {
 	zval *zvp;
