@@ -423,8 +423,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex TSRMLS
 		extra = pcre_study(re, soptions, &error);
 		if (extra) {
 			extra->flags |= PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
-			extra->match_limit = PCRE_G(backtrack_limit);
-			extra->match_limit_recursion = PCRE_G(recursion_limit);
+			extra->match_limit = (unsigned long)PCRE_G(backtrack_limit);
+			extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
 		}
 		if (error != NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while studying pattern");
@@ -568,14 +568,14 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		RETURN_FALSE;
 	}
 
-	php_pcre_match_impl(pce, subject->val, subject->len, return_value, subpats, 
+	php_pcre_match_impl(pce, subject->val, (int)subject->len, return_value, subpats, 
 		global, ZEND_NUM_ARGS() >= 4, flags, start_offset TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ php_pcre_match_impl() */
 PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
-	zval *subpats, int global, int use_flags, long flags, long start_offset TSRMLS_DC)
+	zval *subpats, int global, int use_flags, zend_long flags, zend_long start_offset TSRMLS_DC)
 {
 	zval			 result_set,		/* Holds a set of subpatterns after
 										   a global match */
@@ -640,8 +640,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
 		extra = &extra_data;
 	}
-	extra->match_limit = PCRE_G(backtrack_limit);
-	extra->match_limit_recursion = PCRE_G(recursion_limit);
+	extra->match_limit = (unsigned long)PCRE_G(backtrack_limit);
+	extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
 #ifdef PCRE_EXTRA_MARK
 	extra->mark = &mark;
 	extra->flags |= PCRE_EXTRA_MARK;
@@ -682,7 +682,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 	
 	do {
 		/* Execute the regular expression. */
-		count = pcre_exec(pce->re, extra, subject, subject_len, start_offset,
+		count = pcre_exec(pce->re, extra, subject, (int)subject_len, (int)start_offset,
 						  exoptions|g_notempty, offsets, size_offsets);
 
 		/* the string was already proved to be valid UTF-8 */
@@ -834,8 +834,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
 			if (g_notempty != 0 && start_offset < subject_len) {
-				offsets[0] = start_offset;
-				offsets[1] = start_offset + 1;
+				offsets[0] = (int)start_offset;
+				offsets[1] = (int)(start_offset + 1);
 			} else
 				break;
 		} else {
@@ -1130,8 +1130,8 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, 
 		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
 		extra = &extra_data;
 	}
-	extra->match_limit = PCRE_G(backtrack_limit);
-	extra->match_limit_recursion = PCRE_G(recursion_limit);
+	extra->match_limit = (unsigned long)PCRE_G(backtrack_limit);
+	extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
 
 	eval = pce->preg_options & PREG_REPLACE_EVAL;
 	if (is_callable_replace) {
@@ -1141,7 +1141,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, 
 		}
 	} else {
 		replace = Z_STRVAL_P(replace_val);
-		replace_len = Z_STRLEN_P(replace_val);
+		replace_len = (int)Z_STRLEN_P(replace_val);
 		replace_end = replace + replace_len;
 	}
 
@@ -1212,11 +1212,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, 
 			if (eval) {
 				eval_result = preg_do_eval(replace, replace_len, subject,
 											   offsets, count TSRMLS_CC);
-				new_len += eval_result->len;
+				new_len += (int)eval_result->len;
 			} else if (is_callable_replace) {
 				/* Use custom function to get replacement string and its length. */
 				eval_result = preg_do_repl_func(replace_val, subject, offsets, subpat_names, count, mark TSRMLS_CC);
-				new_len += eval_result->len;
+				new_len += (int)eval_result->len;
 			} else { /* do regular substitution */
 				walk = replace;
 				walk_last = 0;
@@ -1245,7 +1245,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, 
 			}
 			/* copy the part of the string before the match */
 			memcpy(&result->val[result_len], piece, match-piece);
-			result_len += match-piece;
+			result_len += (int)(match-piece);
 
 			/* copy replacement and backrefs */
 			walkbuf = result->val + result_len;
@@ -1254,7 +1254,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, 
 			 * and clean up. */
 			if (eval || is_callable_replace) {
 				memcpy(walkbuf, eval_result->val, eval_result->len);
-				result_len += eval_result->len;
+				result_len += (int)eval_result->len;
 				if (eval_result) zend_string_release(eval_result);
 			} else { /* do regular backreference copying */
 				walk = replace;
@@ -1280,7 +1280,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, 
 				}
 				*walkbuf = '\0';
 				/* increment the result length by how much we've added to the string */
-				result_len += walkbuf - (result->val + result_len);
+				result_len += (int)(walkbuf - (result->val + result_len));
 			}
 
 			if (limit != -1)
@@ -1393,7 +1393,7 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 			   for further replacements. */
 			if ((result = php_pcre_replace(regex_str,
 										   subject_str->val,
-										   subject_str->len,
+										   (int)subject_str->len,
 										   replace_value,
 										   is_callable_replace,
 										   limit,
@@ -1413,7 +1413,7 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 	} else {
 		result = php_pcre_replace(Z_STR_P(regex),
 								  subject_str->val,
-								  subject_str->len,
+								  (int)subject_str->len,
 								  replace,
 								  is_callable_replace,
 								  limit,
@@ -1477,7 +1477,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	}
 
 	if (ZEND_NUM_ARGS() > 3) {
-		limit_val = limit;
+		limit_val = (int)limit;
 	}
 		
 	if (Z_TYPE_P(regex) != IS_ARRAY) {
@@ -1579,14 +1579,14 @@ static PHP_FUNCTION(preg_split)
 		RETURN_FALSE;
 	}
 
-	php_pcre_split_impl(pce, subject->val, subject->len, return_value, limit_val, flags TSRMLS_CC);
+	php_pcre_split_impl(pce, subject->val, (int)subject->len, return_value, (int)limit_val, flags TSRMLS_CC);
 }
 /* }}} */
 
 /* {{{ php_pcre_split
  */
 PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
-	long limit_val, long flags TSRMLS_DC)
+	zend_long limit_val, zend_long flags TSRMLS_DC)
 {
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
 	pcre			*re_bump = NULL;	/* Regex instance for empty matches */
@@ -1617,8 +1617,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
 		extra = &extra_data;
 	}
-	extra->match_limit = PCRE_G(backtrack_limit);
-	extra->match_limit_recursion = PCRE_G(recursion_limit);
+	extra->match_limit = (unsigned long)PCRE_G(backtrack_limit);
+	extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
 #ifdef PCRE_EXTRA_MARK
 	extra->flags &= ~PCRE_EXTRA_MARK;
 #endif
@@ -1661,7 +1661,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 				if (offset_capture) {
 					/* Add (match, offset) pair to the return value */
-					add_offset_pair(return_value, last_match, &subject[offsets[0]]-last_match, next_offset, NULL);
+					add_offset_pair(return_value, last_match, (int)(&subject[offsets[0]]-last_match), next_offset, NULL);
 				} else {
 					/* Add the piece to the return value */
 					add_next_index_stringl(return_value, last_match,
@@ -1737,7 +1737,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	}
 
 
-	start_offset = last_match - subject; /* the offset might have been incremented, but without further successful matches */
+	start_offset = (int)(last_match - subject); /* the offset might have been incremented, but without further successful matches */
 
 	if (!no_empty || start_offset < subject_len)
 	{
@@ -1889,7 +1889,7 @@ static PHP_FUNCTION(preg_grep)
 }
 /* }}} */
 
-PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return_value, long flags TSRMLS_DC) /* {{{ */
+PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return_value, zend_long flags TSRMLS_DC) /* {{{ */
 {
 	zval		    *entry;				/* An entry in the input array */
 	pcre_extra		*extra = pce->extra;/* Holds results of studying */
@@ -1909,8 +1909,8 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		extra_data.flags = PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
 		extra = &extra_data;
 	}
-	extra->match_limit = PCRE_G(backtrack_limit);
-	extra->match_limit_recursion = PCRE_G(recursion_limit);
+	extra->match_limit = (unsigned long)PCRE_G(backtrack_limit);
+	extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
 #ifdef PCRE_EXTRA_MARK
 	extra->flags &= ~PCRE_EXTRA_MARK;
 #endif
@@ -1934,7 +1934,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 		/* Perform the match */
 		count = pcre_exec(pce->re, extra, subject_str->val,
-						  subject_str->len, 0,
+						  (int)subject_str->len, 0,
 						  0, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */
