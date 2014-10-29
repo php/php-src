@@ -67,7 +67,7 @@ PHP_FUNCTION(stream_socket_pair)
 	if (0 != socketpair((int)domain, (int)type, (int)protocol, pair)) {
 		char errbuf[256];
 		if (zend_hash_str_exists(&module_registry, "posix", sizeof("posix")-1))
-			php_posix_set_last_error(php_socket_errno());
+			php_posix_set_last_error(php_socket_errno() TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create sockets: [%d]: %s",
 			php_socket_errno(), php_socket_strerror(php_socket_errno(), errbuf, sizeof(errbuf)));
 		RETURN_FALSE;
@@ -816,7 +816,7 @@ PHP_FUNCTION(stream_select)
 
 	if (retval == -1) {
 		if (zend_hash_str_exists(&module_registry, "posix", sizeof("posix")-1))
-			php_posix_set_last_error(errno);
+			php_posix_set_last_error(errno TSRMLS_CC);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to select [%d]: %s (max_fd=%d)",
 				errno, strerror(errno), max_fd);
 		RETURN_FALSE;

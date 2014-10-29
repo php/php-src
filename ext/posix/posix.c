@@ -1322,7 +1322,7 @@ PHP_FUNCTION(posix_getrlimit)
 
 #endif /* HAVE_GETRLIMIT */
 
-void php_posix_set_last_error(int error) /* {{{ */
+void php_posix_set_last_error(int error TSRMLS_DC) /* {{{ */
 {
 	POSIX_G(last_error) = error;
 }
