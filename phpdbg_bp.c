@@ -240,7 +240,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRML
 	php_stream_statbuf ssb;
 	char realpath[MAXPATHLEN];
 	const char *original_path = path;
-	zend_bool pending;
+	zend_bool pending = 0;
 
 	HashTable *broken, *file_breaks =  &PHPDBG_G(bp)[PHPDBG_BREAK_FILE];
 	phpdbg_breakfile_t new_break;
