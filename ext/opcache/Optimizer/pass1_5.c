@@ -381,15 +381,33 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRML
 			}
 			 
 			/* define("name", scalar); */
-			if (collect_constants &&
-			    Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("define")-1 &&
+			if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("define")-1 &&
 			    zend_binary_strcasecmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)), Z_STRLEN(ZEND_OP2_LITERAL(init_opline)), "define", sizeof("define")-1) == 0) {
 				
 				if (Z_TYPE(ZEND_OP1_LITERAL(send1_opline)) == IS_STRING &&
 				    send2_opline &&
 				    Z_TYPE(ZEND_OP1_LITERAL(send2_opline)) <= IS_STRING) {
 
-					zend_optimizer_collect_constant(ctx, &ZEND_OP1_LITERAL(send1_opline), &ZEND_OP1_LITERAL(send2_opline));
+					if (collect_constants) {
+						zend_optimizer_collect_constant(ctx, &ZEND_OP1_LITERAL(send1_opline), &ZEND_OP1_LITERAL(send2_opline));
+					}
+
+					if (RESULT_UNUSED(opline) &&
+					    !zend_memnstr(Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)), "::", sizeof("::") - 1, Z_STRVAL(ZEND_OP1_LITERAL(send1_opline)) + Z_STRLEN(ZEND_OP1_LITERAL(send1_opline)))) {
+
+						opline->opcode = ZEND_DECLARE_CONST;
+						opline->op1_type = IS_CONST;
+						opline->op2_type = IS_CONST;
+						opline->result_type = IS_UNUSED;
+						opline->op1.constant = send1_opline->op1.constant;
+						opline->op2.constant = send2_opline->op1.constant;
+						opline->result.zv = NULL;
+
+						literal_dtor(&ZEND_OP2_LITERAL(init_opline));
+						MAKE_NOP(init_opline);
+						MAKE_NOP(send1_opline);
+						MAKE_NOP(send2_opline);
+					}
 					break;
 				}
 			}
