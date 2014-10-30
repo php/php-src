@@ -175,6 +175,8 @@ array(11) {
   string(16) "D, d M Y H:i:s O"
   ["RFC3339"]=>
   string(13) "Y-m-d\TH:i:sP"
+  ["RFC7231"]=>
+  string(21) "D, d M Y H:i:s \G\M\T"
   ["RSS"]=>
   string(16) "D, d M Y H:i:s O"
   ["W3C"]=>

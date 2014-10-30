@@ -23,6 +23,7 @@ var_dump( $date->format( DateTime::RFC1036) ) ;
 var_dump( $date->format( DateTime::RFC1123) ) ;
 var_dump( $date->format( DateTime:: RFC2822) ) ;
 var_dump( $date->format( DateTime::RFC3339) ) ;
+var_dump( $date->format( DateTime::RFC7231) ) ;
 var_dump( $date->format( DateTime::RSS) ) ;
 var_dump( $date->format( DateTime::W3C) ) ;
 
@@ -39,6 +40,7 @@ string(29) "Thu, 14 Jul 05 22:30:41 +0100"
 string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
 string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
 string(25) "2005-07-14T22:30:41+01:00"
+string(29) "Thu, 14 Jul 2005 22:30:41 GMT"
 string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
 string(25) "2005-07-14T22:30:41+01:00"
 ===DONE===
