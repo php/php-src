@@ -384,7 +384,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > 9) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%pd)", Z_LVAL_P(tmpzval));
 					} else {
-						blockSize100k = Z_LVAL(tmp);
+						blockSize100k = (int)Z_LVAL(tmp);
 					}
 				}
 
@@ -398,7 +398,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					if (Z_LVAL(tmp) < 0 || Z_LVAL(tmp) > 250) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for work factor. (%pd)", Z_LVAL(tmp));
 					} else {
-						workFactor = Z_LVAL(tmp);
+						workFactor = (int)Z_LVAL(tmp);
 					}
 				}
 			}
