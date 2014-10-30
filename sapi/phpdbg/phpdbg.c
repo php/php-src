@@ -779,7 +779,9 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'S', 1, "sapi-name"},
 	{'l', 1, "listen"},
 	{'a', 1, "address-or-any"},
+#if PHPDBG_IN_DEV
 	{'x', 0, "xml output"},
+#endif
 	{'V', 0, "version"},
 	{'-', 0, NULL}
 }; /* }}} */
@@ -1213,8 +1215,10 @@ phpdbg_main:
 				} else address = strdup(php_optarg);
 			} break;
 
+#if PHPDBG_IN_DEV
 			case 'x':
 				flags |= PHPDBG_WRITE_XML;
+#endif
 			break;
 
 			case 'V': {

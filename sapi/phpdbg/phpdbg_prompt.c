@@ -82,7 +82,9 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(export,  "export breaks to a .phpdbginit script",    '>', NULL, "s", PHPDBG_ASYNC_SAFE),
 	PHPDBG_COMMAND_D(sh,   	  "shell a command",                           0 , NULL, "i", 0),
 	PHPDBG_COMMAND_D(quit,    "exit phpdbg",                              'q', NULL, 0, PHPDBG_ASYNC_SAFE),
+#if PHPDBG_IN_DEV
 	PHPDBG_COMMAND_D(wait,    "wait for other process",                   'W', NULL, 0, 0),
+#endif
 	PHPDBG_COMMAND_D(watch,   "set watchpoint",                           'w', phpdbg_watch_commands, "|ss", 0),
 	PHPDBG_COMMAND_D(eol,     "set EOL",                                  'E', NULL, "|s", 0),
 	PHPDBG_END_COMMAND
