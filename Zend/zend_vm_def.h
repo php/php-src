@@ -3775,13 +3775,15 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(opline->op2.zv), '\\', Z_STRLEN_P(opline->op2.zv));
 				if (!actual) {
-					actual = Z_STRVAL_P(opline->op2.zv);
+					ZVAL_STR(EX_VAR(opline->result.var), zend_string_copy(Z_STR_P(opline->op2.zv)));
 				} else {
 					actual++;
+					ZVAL_STRINGL(EX_VAR(opline->result.var),
+							actual, Z_STRLEN_P(opline->op2.zv) - (actual - Z_STRVAL_P(opline->op2.zv)));
 				}
 				/* non-qualified constant - allow text substitution */
-				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'", actual, actual);
-				ZVAL_STRINGL(EX_VAR(opline->result.var), actual, Z_STRLEN_P(opline->op2.zv)-(actual - Z_STRVAL_P(opline->op2.zv)));
+				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+						Z_STRVAL_P(EX_VAR(opline->result.var)), Z_STRVAL_P(EX_VAR(opline->result.var)));
 				CHECK_EXCEPTION();
 				ZEND_VM_NEXT_OPCODE();
 			} else {
