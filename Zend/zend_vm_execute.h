@@ -2497,13 +2497,14 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_AR
 	}
 
 	if (i_zend_is_true(val TSRMLS_CC)) {
+
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline++;
 	} else {
+
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline = opline->op2.jmp_addr;
 	}
-
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		HANDLE_EXCEPTION();
 	}
@@ -4298,7 +4299,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 		} else if ((c = zend_quick_get_constant(opline->op2.zv + 1, opline->extended_value TSRMLS_CC)) == NULL) {
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(opline->op2.zv), '\\', Z_STRLEN_P(opline->op2.zv));
-				if(!actual) {
+				if (!actual) {
 					actual = Z_STRVAL_P(opline->op2.zv);
 				} else {
 					actual++;
@@ -9336,13 +9337,14 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	if (i_zend_is_true(val TSRMLS_CC)) {
+		zval_ptr_dtor_nogc(free_op1.var);
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline++;
 	} else {
+		zval_ptr_dtor_nogc(free_op1.var);
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline = opline->op2.jmp_addr;
 	}
-	zval_ptr_dtor_nogc(free_op1.var);
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		HANDLE_EXCEPTION();
 	}
@@ -15920,13 +15922,14 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	if (i_zend_is_true(val TSRMLS_CC)) {
+		zval_ptr_dtor_nogc(free_op1.var);
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline++;
 	} else {
+		zval_ptr_dtor_nogc(free_op1.var);
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline = opline->op2.jmp_addr;
 	}
-	zval_ptr_dtor_nogc(free_op1.var);
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		HANDLE_EXCEPTION();
 	}
@@ -18946,7 +18949,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 		} else if ((c = zend_quick_get_constant(opline->op2.zv + 1, opline->extended_value TSRMLS_CC)) == NULL) {
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(opline->op2.zv), '\\', Z_STRLEN_P(opline->op2.zv));
-				if(!actual) {
+				if (!actual) {
 					actual = Z_STRVAL_P(opline->op2.zv);
 				} else {
 					actual++;
@@ -28230,7 +28233,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 		} else if ((c = zend_quick_get_constant(opline->op2.zv + 1, opline->extended_value TSRMLS_CC)) == NULL) {
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(opline->op2.zv), '\\', Z_STRLEN_P(opline->op2.zv));
-				if(!actual) {
+				if (!actual) {
 					actual = Z_STRVAL_P(opline->op2.zv);
 				} else {
 					actual++;
@@ -33369,13 +33372,14 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	if (i_zend_is_true(val TSRMLS_CC)) {
+
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline++;
 	} else {
+
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline = opline->op2.jmp_addr;
 	}
-
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		HANDLE_EXCEPTION();
 	}

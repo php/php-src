@@ -1910,13 +1910,14 @@ ZEND_VM_HANDLER(46, ZEND_JMPZ_EX, CONST|TMP|VAR|CV, ANY)
 	}
 
 	if (i_zend_is_true(val TSRMLS_CC)) {
+		FREE_OP1();
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline++;
 	} else {
+		FREE_OP1();
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline = opline->op2.jmp_addr;
 	}
-	FREE_OP1();
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		HANDLE_EXCEPTION();
 	}
@@ -3773,7 +3774,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 		} else if ((c = zend_quick_get_constant(opline->op2.zv + 1, opline->extended_value TSRMLS_CC)) == NULL) {
 			if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
 				char *actual = (char *)zend_memrchr(Z_STRVAL_P(opline->op2.zv), '\\', Z_STRLEN_P(opline->op2.zv));
-				if(!actual) {
+				if (!actual) {
 					actual = Z_STRVAL_P(opline->op2.zv);
 				} else {
 					actual++;
