@@ -804,6 +804,46 @@ PHP_RSHUTDOWN_FUNCTION(date)
  */
 #define DATE_FORMAT_RFC3339  "Y-m-d\\TH:i:sP"
 
+/*
+ * RFC7231, Section 7.1.1.1: https://www.ietf.org/rfc/rfc7231.txt
+ *
+ * IMF-fixdate  = day-name "," SP date1 SP time-of-day SP GMT
+ * fixed length/zone/capitalization subset of the format
+ * see Section 3.3 of [RFC5322]
+ *
+ *  day-name     = %x4D.6F.6E ; "Mon", case-sensitive
+ *               / %x54.75.65 ; "Tue", case-sensitive
+ *               / %x57.65.64 ; "Wed", case-sensitive
+ *               / %x54.68.75 ; "Thu", case-sensitive
+ *               / %x46.72.69 ; "Fri", case-sensitive
+ *               / %x53.61.74 ; "Sat", case-sensitive
+ *               / %x53.75.6E ; "Sun", case-sensitive
+ * 
+ *  date1        = day SP month SP year
+ *               ; e.g., 02 Jun 1982 *
+ *  day          = 2DIGIT
+ *  month        = %x4A.61.6E ; "Jan", case-sensitive
+ *               / %x46.65.62 ; "Feb", case-sensitive
+ *               / %x4D.61.72 ; "Mar", case-sensitive
+ *               / %x41.70.72 ; "Apr", case-sensitive
+ *               / %x4D.61.79 ; "May", case-sensitive
+ *               / %x4A.75.6E ; "Jun", case-sensitive
+ *               / %x4A.75.6C ; "Jul", case-sensitive
+ *               / %x41.75.67 ; "Aug", case-sensitive
+ *               / %x53.65.70 ; "Sep", case-sensitive
+ *               / %x4F.63.74 ; "Oct", case-sensitive
+ *               / %x4E.6F.76 ; "Nov", case-sensitive
+ *               / %x44.65.63 ; "Dec", case-sensitive
+ *  year         = 4DIGIT *
+ *  GMT          = %x47.4D.54 ; "GMT", case-sensitive *
+ *  time-of-day  = hour ":" minute ":" second
+ *               ; 00:00:00 - 23:59:60 (leap second) *
+ *  hour         = 2DIGIT
+ *  minute       = 2DIGIT
+ *  second       = 2DIGIT
+ */
+#define DATE_FORMAT_RFC7231  "D, d M Y H:i:s \\G\\M\\T"
+
 #define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
 
 /*
