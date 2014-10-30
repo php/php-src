@@ -92,7 +92,8 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 
 	case ZEND_JMPZNZ:
 			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
-			asprintf(&decode[2], "J%u or J%lu", op->op2.opline_num, op->extended_value);
+			asprintf(
+				&decode[2], "J%u or J%lu", op->op2.opline_num, op->extended_value);
 		goto result;
 
 	case ZEND_JMPZ:
@@ -103,8 +104,12 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 #ifdef ZEND_JMP_SET
 	case ZEND_JMP_SET:
 #endif
+#ifdef ZEND_JMP_SET_VAR
+	case ZEND_JMP_SET_VAR:
+#endif
 		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
-		asprintf(&decode[2], "J%ld", op->op2.jmp_addr - ops->opcodes);
+		asprintf(
+			&decode[2], "J%ld", op->op2.jmp_addr - ops->opcodes);
 	goto result;
 
 	case ZEND_RECV_INIT:
@@ -116,7 +121,8 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 result:
 			decode[3] = phpdbg_decode_op(ops, &op->result, op->result_type, vars TSRMLS_CC);
 format:
-			asprintf(&decode[0],
+			asprintf(
+				&decode[0],
 				"%-20s %-20s %-20s",
 				decode[1] ? decode[1] : "",
 				decode[2] ? decode[2] : "",
@@ -147,7 +153,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 
 		if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) || (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 			/* output line info */
-			phpdbg_notice("opline", "line=\"%u\" opline=\"%p\" opcode=\"%s\" op=\"%s\" file=\"%s\"", "L%-5u %16p %-30s %s %s",
+			phpdbg_notice("L%-5u %16p %-30s %s %s",
 			   opline->lineno,
 			   opline,
 			   phpdbg_decode_opcode(opline->opcode),
@@ -156,7 +162,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 		}
 
 		if (!ignore_flags && PHPDBG_G(oplog)) {
-			phpdbg_log_ex(fileno(PHPDBG_G(oplog)), "L%-5u %16p %-30s %s %s",
+			phpdbg_log_ex(PHPDBG_G(oplog), "L%-5u %16p %-30s %s %s",
 				opline->lineno,
 				opline,
 				phpdbg_decode_opcode(opline->opcode),
@@ -326,6 +332,12 @@ const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 #endif
 #ifdef ZEND_SEPARATE
 		CASE(ZEND_SEPARATE);
+#endif
+#ifdef ZEND_QM_ASSIGN_VAR
+		CASE(ZEND_QM_ASSIGN_VAR);
+#endif
+#ifdef ZEND_JMP_SET_VAR
+		CASE(ZEND_JMP_SET_VAR);
 #endif
 #ifdef ZEND_DISCARD_EXCEPTION
 		CASE(ZEND_DISCARD_EXCEPTION);

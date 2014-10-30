@@ -34,21 +34,8 @@ PHPDBG_LIST(func);
 
 void phpdbg_list_function_byname(const char *, size_t TSRMLS_DC);
 void phpdbg_list_function(const zend_function* TSRMLS_DC);
-void phpdbg_list_file(const char*, uint, int, uint TSRMLS_DC);
+void phpdbg_list_file(const char*, long, long, int TSRMLS_DC);
 
 extern const phpdbg_command_t phpdbg_list_commands[];
-
-void phpdbg_init_list(TSRMLS_D);
-
-typedef struct {
-	char *filename;
-	char *buf;
-	size_t len;
-#if HAVE_MMAP
-	void *map;
-#endif
-	uint lines;
-	uint line[1];
-} phpdbg_file_source;
 
 #endif /* PHPDBG_LIST_H */

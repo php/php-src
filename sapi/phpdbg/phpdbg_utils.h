@@ -33,6 +33,52 @@ PHPDBG_API char *phpdbg_resolve_path(const char* TSRMLS_DC);
 PHPDBG_API char *phpdbg_trim(const char*, size_t, size_t*);
 PHPDBG_API const zend_function *phpdbg_get_function(const char*, const char* TSRMLS_DC);
 
+/**
+ * Error/notice/formatting helpers
+ */
+enum {
+	P_ERROR  = 1,
+	P_NOTICE,
+	P_WRITELN,
+	P_WRITE,
+	P_LOG
+};
+
+#ifdef ZTS
+PHPDBG_API int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
+#else
+PHPDBG_API int phpdbg_print(int TSRMLS_DC, FILE*, const char*, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+#endif
+
+PHPDBG_API int phpdbg_rlog(FILE *stream, const char *fmt, ...);
+
+#define phpdbg_error(fmt, ...)              phpdbg_print(P_ERROR   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)
+#define phpdbg_notice(fmt, ...)             phpdbg_print(P_NOTICE  TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)
+#define phpdbg_writeln(fmt, ...)            phpdbg_print(P_WRITELN TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)
+#define phpdbg_write(fmt, ...)              phpdbg_print(P_WRITE   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)
+#define phpdbg_log(fmt, ...)                phpdbg_print(P_LOG     TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDOUT], fmt, ##__VA_ARGS__)
+
+#define phpdbg_error_ex(out, fmt, ...)      phpdbg_print(P_ERROR   TSRMLS_CC, out, fmt, ##__VA_ARGS__)
+#define phpdbg_notice_ex(out, fmt, ...)     phpdbg_print(P_NOTICE  TSRMLS_CC, out, fmt, ##__VA_ARGS__)
+#define phpdbg_writeln_ex(out, fmt, ...)    phpdbg_print(P_WRITELN TSRMLS_CC, out, fmt, ##__VA_ARGS__)
+#define phpdbg_write_ex(out, fmt, ...)      phpdbg_print(P_WRITE   TSRMLS_CC, out, fmt, ##__VA_ARGS__)
+#define phpdbg_log_ex(out, fmt, ...)        phpdbg_print(P_LOG     TSRMLS_CC, out, fmt, ##__VA_ARGS__)
+
+#if PHPDBG_DEBUG
+#	define phpdbg_debug(fmt, ...) phpdbg_print(P_LOG   TSRMLS_CC, PHPDBG_G(io)[PHPDBG_STDERR], fmt, ##__VA_ARGS__)
+#else
+#	define phpdbg_debug(fmt, ...)
+#endif
+
+/* {{{ For writing blank lines */
+#define EMPTY NULL /* }}} */
+
+/* {{{ For prompt lines */
+#define PROMPT "phpdbg>" /* }}} */
+
+/* {{{ For separation */
+#define SEPARATE "------------------------------------------------" /* }}} */
+
 /* {{{ Color Management */
 #define PHPDBG_COLOR_LEN 12
 #define PHPDBG_COLOR_D(color, code) \
@@ -66,7 +112,7 @@ typedef struct _phpdbg_element_t {
 PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_length TSRMLS_DC);
 PHPDBG_API void phpdbg_set_color(int element, const phpdbg_color_t *color TSRMLS_DC);
 PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_length TSRMLS_DC);
-PHPDBG_API const phpdbg_color_t *phpdbg_get_colors(TSRMLS_D);
+PHPDBG_API const phpdbg_color_t* phpdbg_get_colors(TSRMLS_D); 
 PHPDBG_API int phpdbg_get_element(const char *name, size_t len TSRMLS_DC); /* }}} */
 
 /* {{{ Prompt Management */
@@ -75,8 +121,6 @@ PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D); /* }}} */
 
 /* {{{ Console Width */
 PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D); /* }}} */
-
-PHPDBG_API void phpdbg_set_async_io(int fd);
 
 int phpdbg_rebuild_symtable(TSRMLS_D);
 
@@ -99,42 +143,5 @@ static void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, Ha
 	}
 }
 #endif
-
-int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
-
-char *phpdbg_get_property_key(char *key);
-
-typedef int (*phpdbg_parse_var_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval **zv TSRMLS_DC);
-typedef int (*phpdbg_parse_var_with_arg_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval **zv, void *arg TSRMLS_DC);
-
-PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent TSRMLS_DC);
-PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, zend_bool silent, void *arg TSRMLS_DC);
-
-PHPDBG_API void phpdbg_xml_var_dump(zval **zv TSRMLS_DC);
-
-#ifdef ZTS
-#define PHPDBG_OUTPUT_BACKUP_DEFINES() \
-	zend_output_globals *output_globals_ptr; \
-	zend_output_globals original_output_globals; \
-	output_globals_ptr = (zend_output_globals *) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(output_globals_id)];
-#else
-#define PHPDBG_OUTPUT_BACKUP_DEFINES() \
-	zend_output_globals *output_globals_ptr; \
-	zend_output_globals original_output_globals; \
-	output_globals_ptr = &output_globals;
-#endif
-
-#define PHPDBG_OUTPUT_BACKUP_SWAP() \
-	original_output_globals = *output_globals_ptr; \
-	memset(output_globals_ptr, 0, sizeof(zend_output_globals)); \
-	php_output_activate(TSRMLS_C);
-
-#define PHPDBG_OUTPUT_BACKUP() \
-	PHPDBG_OUTPUT_BACKUP_DEFINES() \
-	PHPDBG_OUTPUT_BACKUP_SWAP()
-
-#define PHPDBG_OUTPUT_BACKUP_RESTORE() \
-	php_output_deactivate(TSRMLS_C); \
-	*output_globals_ptr = original_output_globals;
 
 #endif /* PHPDBG_UTILS_H */

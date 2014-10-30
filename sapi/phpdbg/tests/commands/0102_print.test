@@ -4,14 +4,15 @@
 # expect: TEST::FORMAT
 # options: -rr
 #################################################
-#[User Class: test (3 methods)]
+#[User Class: test]
+#Methods (3):
 #L%d-%d test::testMethod() %s
 #		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>            
 #	L%d-%d test::testPrivateMethod() %s
 #		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>            
 #	L%d-%d test::testProtectedMethod() %s
 #		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>            
-#[User Method testMethod (1 ops)]
+#[User Method testMethod]
 #	L%d-%d test::testMethod() %s
 #		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>   
 #################################################

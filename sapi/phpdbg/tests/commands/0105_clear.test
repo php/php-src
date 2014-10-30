@@ -4,7 +4,7 @@
 # expect: TEST::FORMAT
 # options: -rr
 #################################################
-#Clearing Breakpoints
+#[Clearing Breakpoints]
 #File%w%d
 #Functions%w%d
 #Methods%w%d
