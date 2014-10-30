@@ -1,12 +1,12 @@
 --TEST--
-addcslashes() function test
+addcslashes(); function test
 --CREDITS--
-marcosptf - <marcosptf@yahoo.com.br>
+ marcosptf - <marcosptf@yahoo.com.br>
 #phptestfest PHPSP on Google - Sao Paulo - Brazil - 2014-06-05
 --FILE--
 <?php
-error_reporting(0);
 echo addcslashes("zoo['.']","z..A");
 ?>
---EXPECT--
+--EXPECTF--
+Warning: addcslashes(): Invalid '..'-range, '..'-range needs to be incrementing in %s on line %d
 \zoo['\.']
