@@ -3,10 +3,10 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 5.5.22
 
 - Core:
-  . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
-    buffer overflow). (Stas)
   . Fixed bug #67068 (getClosure returns somethings that's not a closure). 
     (Danack at basereality dot com)
+  . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
+    buffer overflow). (Stas)
 
 - Date:
   . Fixed bug #45081 (strtotime incorrectly interprets SGT time zone). (Derick)
@@ -20,6 +20,7 @@ PHP                                                                        NEWS
   . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
 
 - FPM:
+  . Fixed bug #66479 (Wrong response to FCGI_GET_VALUES). (Frank Stolle)
   . Fixed bug #68571 (core dump when webserver close the socket).
     (redfoxli069 at gmail dot com, Laruence)
 
