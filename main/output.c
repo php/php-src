@@ -38,7 +38,7 @@
 #ifdef ZTS
 PHPAPI int output_globals_id;
 #else
-PHPAPI php_output_globals output_globals;
+PHPAPI zend_output_globals output_globals;
 #endif
 
 const char php_output_default_handler_name[sizeof("default output handler")] = "default output handler";
