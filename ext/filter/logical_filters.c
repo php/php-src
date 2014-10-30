@@ -80,7 +80,7 @@
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
 
-static int php_filter_parse_int(const char *str, unsigned int str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
+static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
 	zend_long ctx_value;
 	int sign = 0, digit = 0;
 	const char *end = str + str_len;
@@ -132,7 +132,7 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, zend_long
 }
 /* }}} */
 
-static int php_filter_parse_octal(const char *str, unsigned int str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
+static int php_filter_parse_octal(const char *str, size_t str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
 	zend_ulong ctx_value = 0;
 	const char *end = str + str_len;
 
@@ -155,7 +155,7 @@ static int php_filter_parse_octal(const char *str, unsigned int str_len, zend_lo
 }
 /* }}} */
 
-static int php_filter_parse_hex(const char *str, unsigned int str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
+static int php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
 	zend_ulong ctx_value = 0;
 	const char *end = str + str_len;
 	zend_ulong n;
@@ -188,7 +188,8 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	zend_long  min_range, max_range, option_flags;
 	int   min_range_set, max_range_set;
 	int   allow_octal = 0, allow_hex = 0;
-	int	  len, error = 0;
+	size_t	  len;
+	int error = 0;
 	zend_long  ctx_value;
 	char *p;
 
@@ -250,7 +251,7 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	char *str = Z_STRVAL_P(value);
-	int len = Z_STRLEN_P(value);
+	size_t len = Z_STRLEN_P(value);
 	int ret;
 
 	PHP_FILTER_TRIM_DEFAULT_EX(str, len, 0);
@@ -318,12 +319,13 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
-	int len;
+	size_t len;
 	char *str, *end;
 	char *num, *p;
 	zval *option_val;
 	char *decimal;
-	int decimal_set, decimal_len;
+	int decimal_set;
+	size_t decimal_len;
 	char dec_sep = '.';
 	char tsd_sep[3] = "',.";
 
@@ -400,7 +402,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	switch (is_numeric_string(num, p - num, &lval, &dval, 0)) {
 		case IS_LONG:
 			zval_ptr_dtor(value);
-			ZVAL_DOUBLE(value, lval);
+			ZVAL_DOUBLE(value, (double)lval);
 			break;
 		case IS_DOUBLE:
 			if ((!dval && p - num > 1 && strpbrk(num, "123456789")) || !zend_finite(dval)) {
@@ -443,7 +445,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (!re) {
 		RETURN_VALIDATION_FAILED
 	}
-	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), Z_STRLEN_P(value), 0, 0, ovector, 3);
+	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), (int)Z_STRLEN_P(value), 0, 0, ovector, 3);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
 	if (matches < 0) {
@@ -455,7 +457,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	php_url *url;
-	int old_len = Z_STRLEN_P(value);
+	int old_len = (int)Z_STRLEN_P(value);
 	
 	php_filter_url(value, flags, option_array, charset TSRMLS_CC);
 
@@ -554,7 +556,7 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 	zend_string_release(sregexp);
-	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), Z_STRLEN_P(value), 0, 0, ovector, 3);
+	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), (int)Z_STRLEN_P(value), 0, 0, ovector, 3);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
 	if (matches < 0) {
@@ -564,7 +566,7 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 }
 /* }}} */
 
-static int _php_filter_validate_ipv4(char *str, int str_len, int *ip) /* {{{ */
+static int _php_filter_validate_ipv4(char *str, size_t str_len, int *ip) /* {{{ */
 {
 	const char *end = str + str_len;
 	int num, m;
@@ -599,7 +601,7 @@ static int _php_filter_validate_ipv4(char *str, int str_len, int *ip) /* {{{ */
 }
 /* }}} */
 
-static int _php_filter_validate_ipv6(char *str, int str_len TSRMLS_DC) /* {{{ */
+static int _php_filter_validate_ipv6(char *str, size_t str_len TSRMLS_DC) /* {{{ */
 {
 	int compressed = 0;
 	int blocks = 0;
@@ -792,8 +794,9 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	char *input = Z_STRVAL_P(value);
-	int input_len = Z_STRLEN_P(value);
-	int tokens, length, i, offset, exp_separator_set, exp_separator_len;
+	size_t input_len = Z_STRLEN_P(value);
+	int tokens, length, i, offset, exp_separator_set;
+	size_t exp_separator_len;
 	char separator;
 	char *exp_separator;
 	zend_long ret = 0;
