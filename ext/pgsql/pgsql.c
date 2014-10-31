@@ -87,6 +87,7 @@
 #endif
 
 #define CHECK_DEFAULT_LINK(x) if ((x) == -1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "No PostgreSQL link opened yet"); }
+#define FETCH_DEFAULT_LINK() PGG(default_link) ? (int)PGG(default_link)->handle : -1
 
 #ifndef HAVE_PQFREEMEM
 #define PQfreemem free
@@ -1272,7 +1273,8 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	PGconn *pgsql;
 	smart_str str = {0};
 	zval *args;
-	int i, connect_type = 0;
+	uint32_t i;
+	int connect_type = 0;
 	PGresult *pg_result;
 
 	args = (zval *)safe_emalloc(ZEND_NUM_ARGS(), sizeof(zval), 0);
@@ -1307,7 +1309,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	} else if (ZEND_NUM_ARGS() == 2 ) { /* Safe to add conntype_option, since 2 args was illegal */
 		connstring = Z_STRVAL(args[0]);
 		convert_to_long_ex(&args[1]);
-		connect_type = Z_LVAL(args[1]);
+		connect_type = (int)Z_LVAL(args[1]);
 	} else {
 		host = Z_STRVAL(args[0]);
 		port = Z_STRVAL(args[1]);
@@ -1560,7 +1562,7 @@ PHP_FUNCTION(pg_close)
 	}
 
 	if (argc == 0) {
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 
@@ -1607,7 +1609,7 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 	}
 	
 	if (argc == 0) {
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 	
@@ -1830,7 +1832,7 @@ PHP_FUNCTION(pg_query)
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &query, &query_len) == FAILURE) {
 			return;
 		}
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &pgsql_link, &query, &query_len) == FAILURE) {
@@ -1933,7 +1935,7 @@ PHP_FUNCTION(pg_query_params)
 		if (zend_parse_parameters(argc TSRMLS_CC, "sa", &query, &query_len, &pv_param_arr) == FAILURE) {
 			return;
 		}
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	} else {
 		if (zend_parse_parameters(argc TSRMLS_CC, "rsa", &pgsql_link, &query, &query_len, &pv_param_arr) == FAILURE) {
@@ -2049,7 +2051,7 @@ PHP_FUNCTION(pg_prepare)
 		if (zend_parse_parameters(argc TSRMLS_CC, "ss", &stmtname, &stmtname_len, &query, &query_len) == FAILURE) {
 			return;
 		}
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	} else {
 		if (zend_parse_parameters(argc TSRMLS_CC, "rss", &pgsql_link, &stmtname, &stmtname_len, &query, &query_len) == FAILURE) {
@@ -2136,7 +2138,7 @@ PHP_FUNCTION(pg_execute)
 		if (zend_parse_parameters(argc TSRMLS_CC, "sa/", &stmtname, &stmtname_len, &pv_param_arr)==FAILURE) {
 			return;
 		}
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	} else {
 		if (zend_parse_parameters(argc TSRMLS_CC, "rsa/", &pgsql_link, &stmtname, &stmtname_len, &pv_param_arr) == FAILURE) {
@@ -2898,7 +2900,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 	pgsql_result = pg_result->result;
 
 	num_fields = PQnfields(pgsql_result);
-	if (colno >= num_fields || colno < 0) {
+	if (colno >= (zend_long)num_fields || colno < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid column number '%pd'", colno);
 		RETURN_FALSE;
 	}
@@ -2938,7 +2940,7 @@ PHP_FUNCTION(pg_result_seek)
 	}
 
 	/* seek to offset */
-	pg_result->row = row;
+	pg_result->row = (int)row;
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3092,7 +3094,7 @@ PHP_FUNCTION(pg_trace)
 	PGconn *pgsql;
 	FILE *fp = NULL;
 	php_stream *stream;
-	id = PGG(default_link)? PGG(default_link)->handle : -1;
+	id = FETCH_DEFAULT_LINK();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "s|sr", &z_filename, &z_filename_len, &mode, &mode_len, &pgsql_link) == FAILURE) {
 		return;
@@ -3137,7 +3139,7 @@ PHP_FUNCTION(pg_untrace)
 	}
 
 	if (argc == 0) { 
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 
@@ -3170,7 +3172,7 @@ PHP_FUNCTION(pg_lo_create)
 	}
 	
 	if (pgsql_link == NULL) {
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 		if (id == -1) {
 			RETURN_FALSE;
@@ -3263,7 +3265,7 @@ PHP_FUNCTION(pg_lo_unlink)
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Wrong OID value passed");
 			RETURN_FALSE;
 		}
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
@@ -3273,7 +3275,7 @@ PHP_FUNCTION(pg_lo_unlink)
 			RETURN_FALSE;
 		}
 		oid = (Oid)oid_long;
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 	else {
@@ -3335,7 +3337,7 @@ PHP_FUNCTION(pg_lo_open)
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Wrong OID value passed");
 			RETURN_FALSE;
 		}
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
@@ -3345,7 +3347,7 @@ PHP_FUNCTION(pg_lo_open)
 			RETURN_FALSE;
 		}
 		oid = (Oid)oid_long;
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 	else {
@@ -3490,7 +3492,7 @@ PHP_FUNCTION(pg_lo_write)
 	}
 
 	if (argc > 2) {
-		if (z_len > str_len) {
+		if (z_len > (zend_long)str_len) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write more than buffer size %d. Tried to write %pd", str_len, z_len);
 			RETURN_FALSE;
 		}
@@ -3557,7 +3559,7 @@ PHP_FUNCTION(pg_lo_import)
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
 									  "p|z", &file_in, &name_len, &oid) == SUCCESS) {
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 	/* old calling convention, deprecated since PHP 4.2 */
@@ -3666,7 +3668,7 @@ PHP_FUNCTION(pg_lo_export)
 			RETURN_FALSE;
 		}
 		oid = (Oid)oid_long;
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
@@ -3677,7 +3679,7 @@ PHP_FUNCTION(pg_lo_export)
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Wrong OID value passed");
 			RETURN_FALSE;
 		}
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
@@ -3833,7 +3835,7 @@ PHP_FUNCTION(pg_set_error_verbosity)
 		if (zend_parse_parameters(argc TSRMLS_CC, "l", &verbosity) == FAILURE) {
 			return;
 		}
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	} else {
 		if (zend_parse_parameters(argc TSRMLS_CC, "rl", &pgsql_link, &verbosity) == FAILURE) {
@@ -3871,7 +3873,7 @@ PHP_FUNCTION(pg_set_client_encoding)
 		if (zend_parse_parameters(argc TSRMLS_CC, "s", &encoding, &encoding_len) == FAILURE) {
 			return;
 		}
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	} else {
 		if (zend_parse_parameters(argc TSRMLS_CC, "rs", &pgsql_link, &encoding, &encoding_len) == FAILURE) {
@@ -3902,7 +3904,7 @@ PHP_FUNCTION(pg_client_encoding)
 	}
 	
 	if (argc == 0) {
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 
@@ -3937,7 +3939,7 @@ PHP_FUNCTION(pg_end_copy)
 	}
 	
 	if (argc == 0) {
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	}
 
@@ -3972,7 +3974,7 @@ PHP_FUNCTION(pg_put_line)
 		if (zend_parse_parameters(argc TSRMLS_CC, "s", &query, &query_len) == FAILURE) {
 			return;
 		}
-		id = PGG(default_link) ? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(id);
 	} else {
 		if (zend_parse_parameters(argc TSRMLS_CC, "rs", &pgsql_link, &query, &query_len) == FAILURE) {
@@ -4598,7 +4600,7 @@ PHP_FUNCTION(pg_result_error_field)
 #endif
 				|PG_DIAG_CONTEXT|PG_DIAG_SOURCE_FILE|PG_DIAG_SOURCE_LINE
 				|PG_DIAG_SOURCE_FUNCTION)) {
-		field = (char *)PQresultErrorField(pgsql_result, fieldcode);
+		field = (char *)PQresultErrorField(pgsql_result, (int)fieldcode);
 		if (field == NULL) {
 			RETURN_NULL();
 		} else {
