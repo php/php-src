@@ -1756,7 +1756,7 @@ PHP_FUNCTION(pg_parameter_status)
 		id = -1;
 	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &param, &len) == SUCCESS) {
 		pgsql_link = NULL;
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 	} else {
 		RETURN_FALSE;
 	}
@@ -1789,7 +1789,7 @@ PHP_FUNCTION(pg_ping)
 		id = -1;
 	} else {
 		pgsql_link = NULL;
-		id = PGG(default_link)? PGG(default_link)->handle : -1;
+		id = FETCH_DEFAULT_LINK();
 	}
 	if (pgsql_link == NULL && id == -1) {
 		RETURN_FALSE;
@@ -2416,7 +2416,7 @@ PHP_FUNCTION(pg_field_table)
 		RETURN_FALSE;
 	}
 
-	oid = PQftable(pg_result->result, fnum);
+	oid = PQftable(pg_result->result, (int)fnum);
 
 	if (InvalidOid == oid) {
 		RETURN_FALSE;
@@ -2511,20 +2511,20 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 
 	switch (entry_type) {
 		case PHP_PG_FIELD_NAME:
-			RETURN_STRING(PQfname(pgsql_result, field));
+			RETURN_STRING(PQfname(pgsql_result, (int)field));
 			break;
 		case PHP_PG_FIELD_SIZE:
-			RETURN_LONG(PQfsize(pgsql_result, field));
+			RETURN_LONG(PQfsize(pgsql_result, (int)field));
 			break;
 		case PHP_PG_FIELD_TYPE: {
-				char *name = get_field_name(pg_result->conn, PQftype(pgsql_result, field), &EG(regular_list) TSRMLS_CC);
+				char *name = get_field_name(pg_result->conn, PQftype(pgsql_result, (int)field), &EG(regular_list) TSRMLS_CC);
 				RETVAL_STRING(name);
 				efree(name);
 			}
 			break;
 		case PHP_PG_FIELD_TYPE_OID:
 			
-			oid = PQftype(pgsql_result, field);
+			oid = PQftype(pgsql_result, (int)field);
 #if UINT_MAX > ZEND_LONG_MAX
 			if (oid > ZEND_LONG_MAX) {
 				smart_str s = {0};
@@ -2629,25 +2629,29 @@ PHP_FUNCTION(pg_fetch_result)
 			RETURN_FALSE;
 		}
 	} else {
-		pgsql_row = row;
-		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
+		if (row < 0 || row >= PQntuples(pgsql_result)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
+		pgsql_row = (int)row;
 	}
 	switch (Z_TYPE_P(field)) {
 		case IS_STRING:
 			field_offset = PQfnumber(pgsql_result, Z_STRVAL_P(field));
+			if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
+				RETURN_FALSE;
+			}
 			break;
 		default:
 			convert_to_long_ex(field);
-			field_offset = Z_LVAL_P(field);
+			if (Z_LVAL_P(field) < 0 || Z_LVAL_P(field) >= PQnfields(pgsql_result)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
+				RETURN_FALSE;
+			}
+			field_offset = (int)Z_LVAL_P(field);
 			break;
-	}
-	if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
-		RETURN_FALSE;
 	}
 
 	if (PQgetisnull(pgsql_result, pgsql_row, field_offset)) {
@@ -2714,13 +2718,13 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 	pgsql_result = pg_result->result;
 
 	if (use_row) { 
-		pgsql_row = row;
-		pg_result->row = pgsql_row;
-		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
+		if (row < 0 || row >= PQntuples(pgsql_result)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
+		pgsql_row = (int)row;
+		pg_result->row = pgsql_row;
 	} else {
 		/* If 2nd param is NULL, use internal row counter to access next row */
 		pgsql_row = pg_result->row;
@@ -2912,10 +2916,10 @@ PHP_FUNCTION(pg_fetch_all_columns)
 	}
 
 	for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
-		if (PQgetisnull(pgsql_result, pg_row, colno)) {
+		if (PQgetisnull(pgsql_result, pg_row, (int)colno)) {
 			add_next_index_null(return_value);
 		} else {
-			add_next_index_string(return_value, PQgetvalue(pgsql_result, pg_row, colno)); 
+			add_next_index_string(return_value, PQgetvalue(pgsql_result, pg_row, (int)colno)); 
 		}
 	}
 }
@@ -2980,27 +2984,31 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			RETURN_FALSE;
 		}
 	} else {
-		pgsql_row = row;
-		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
+		if (row < 0 || row >= PQntuples(pgsql_result)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %pd on PostgreSQL result index %pd",
 							row, Z_LVAL_P(result));
 			RETURN_FALSE;
 		}
+		pgsql_row = (int)row;
 	}
 
 	switch (Z_TYPE_P(field)) {
 		case IS_STRING:
 			convert_to_string_ex(field);
 			field_offset = PQfnumber(pgsql_result, Z_STRVAL_P(field));
+			if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
+				RETURN_FALSE;
+			}
 			break;
 		default:
 			convert_to_long_ex(field);
-			field_offset = Z_LVAL_P(field);
+			if (Z_LVAL_P(field) < 0 || Z_LVAL_P(field) >= PQnfields(pgsql_result)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
+				RETURN_FALSE;
+			}
+			field_offset = (int)Z_LVAL_P(field);
 			break;
-	}
-	if (field_offset < 0 || field_offset >= PQnfields(pgsql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad column offset specified");
-		RETURN_FALSE;
 	}
 
 	switch (entry_type) {
@@ -3449,7 +3457,8 @@ PHP_FUNCTION(pg_lo_read)
 {
 	zval *pgsql_id;
 	zend_long len;
-	int buf_len = PGSQL_LO_READ_BUF_SIZE, nbytes, argc = ZEND_NUM_ARGS();
+	size_t buf_len = PGSQL_LO_READ_BUF_SIZE;
+	int nbytes, argc = ZEND_NUM_ARGS();
 	zend_string *buf;
 	pgLofp *pgsql;
 
@@ -3460,7 +3469,7 @@ PHP_FUNCTION(pg_lo_read)
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
 	if (argc > 1) {
-		buf_len = len;
+		buf_len = len < 0 ? 0 : len;
 	}
 	
 	buf = zend_string_alloc(buf_len, 0);
@@ -3743,9 +3752,9 @@ PHP_FUNCTION(pg_lo_seek)
 
 #if HAVE_PG_LO64
 	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
-		result = lo_lseek64((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
+		result = lo_lseek64((PGconn *)pgsql->conn, pgsql->lofd, offset, (int)whence);
 	} else {
-		result = lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
+		result = lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, (int)offset, (int)whence);
 	}
 #else
 	result = lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
@@ -4194,7 +4203,7 @@ PHP_FUNCTION(pg_copy_from)
 					if(Z_STRLEN_P(tmp) > 0 && *(query + Z_STRLEN_P(tmp) - 1) != '\n') {
 						strlcat(query, "\n", Z_STRLEN_P(tmp) + 2);
 					}
-					if (PQputCopyData(pgsql, query, strlen(query)) != 1) {
+					if (PQputCopyData(pgsql, query, (int)strlen(query)) != 1) {
 						efree(query);
 						PHP_PQ_ERROR("copy failed: %s", pgsql);
 						RETURN_FALSE;
@@ -4272,7 +4281,7 @@ PHP_FUNCTION(pg_escape_string)
 				return;
 			}
 			pgsql_link = NULL;
-			id = PGG(default_link)? PGG(default_link)->handle : -1;
+			id = FETCH_DEFAULT_LINK();
 			break;
 
 		default:
@@ -4317,7 +4326,7 @@ PHP_FUNCTION(pg_escape_bytea)
 				return;
 			}
 			pgsql_link = NULL;
-			id = PGG(default_link)? PGG(default_link)->handle : -1;
+			id = FETCH_DEFAULT_LINK();
 			break;
 
 		default:
@@ -4490,7 +4499,7 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 				return;
 			}
 			pgsql_link = NULL;
-			id = PGG(default_link)? PGG(default_link)->handle : - 1;
+			id = FETCH_DEFAULT_LINK();
 			break;
 
 		default:
