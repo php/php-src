@@ -4639,6 +4639,8 @@ static HashTable *zend_get_import_ht(uint32_t type TSRMLS_DC) /* {{{ */
 			return CG(current_import_const);
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+
+	return NULL;
 }
 /* }}} */
 
@@ -4653,6 +4655,8 @@ static char *zend_get_use_type_str(uint32_t type) /* {{{ */
 			return " const";
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+
+	return " unknown";
 }
 /* }}} */
 
