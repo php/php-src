@@ -74,7 +74,7 @@ string(25) "2008-08-08T08:08:08+00:00"
 string(%d) "%s"
 
 --DATE_RFC7231 Constant--
-string(29) "Fri, 08 Aug 2008 07:08:08 GMT"
+string(29) "Fri, 08 Aug 2008 08:08:08 GMT"
 string(%d) "%s"
 
 --DATE_RSS Constant--
