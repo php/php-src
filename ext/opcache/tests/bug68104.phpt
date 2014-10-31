@@ -9,5 +9,9 @@ disable_functions=dl
 --FILE--
 <?php
 var_dump(is_callable("dl"));
---EXPECT--
+dl("a.so");
+?>
+--EXPECTF--
 bool(true)
+
+Warning: dl() has been disabled for security reasons in %sbug68104.php on line %d

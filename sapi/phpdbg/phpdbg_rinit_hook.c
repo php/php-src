@@ -52,7 +52,7 @@ static PHP_RINIT_FUNCTION(phpdbg_webhelper) /* {{{ */
 		return SUCCESS;
 	}
 
-#ifndef _WIN32
+#if PHPDBG_IN_DEV
 	{
 		struct sockaddr_un sock;
 		int s = socket(AF_UNIX, SOCK_STREAM, 0);

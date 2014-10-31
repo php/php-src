@@ -21,6 +21,8 @@
 #ifndef PHPDBG_H
 #define PHPDBG_H
 
+#define PHPDBG_IN_DEV 0
+
 #ifdef PHP_WIN32
 # define PHPDBG_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
