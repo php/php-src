@@ -49,6 +49,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #68331 (Session custom storage callable functions not being called) 
     (Yasuo Ohgaki)
+  . Fixed bug #68091 (Some Zend headers lack appropriate extern "C" blocks).
+    (Adam)
 
 - SOAP:
   . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
