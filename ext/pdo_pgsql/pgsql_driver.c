@@ -503,7 +503,7 @@ static int pgsql_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 	/* When deferred constraints are used the commit could
 	   fail, and a ROLLBACK implicitly ran. See bug #67462 */
 	if (!ret) {
-		dbh->in_txn = pgsql_handle_in_transaction(dbh);
+		dbh->in_txn = pgsql_handle_in_transaction(dbh TSRMLS_CC);
 	}
 
 	return ret;
