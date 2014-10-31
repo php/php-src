@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 ?? ??? 2014, PHP 5.6.3
 
 - Core:
+  . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
+    (Laruence)
   . Implemented 64-bit format codes for pack() and unpack(). (Leigh)
   . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
   . Fixed bug #67633 (A foreach on an array returned from a function not doing
