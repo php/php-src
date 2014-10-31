@@ -818,7 +818,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
  *               / %x46.72.69 ; "Fri", case-sensitive
  *               / %x53.61.74 ; "Sat", case-sensitive
  *               / %x53.75.6E ; "Sun", case-sensitive
- * 
+ *
  *  date1        = day SP month SP year
  *               ; e.g., 02 Jun 1982 *
  *  day          = 2DIGIT
@@ -1110,6 +1110,14 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 		return STR_EMPTY_ALLOC();
 	}
 
+	if (strcmp(format, DATE_FORMAT_RFC7231) == 0) {
+		t->tz_info = NULL;
+		t->zone_type = TIMELIB_ZONETYPE_ABBR;
+		t->z = 0;
+
+		localtime = 0;
+	}
+
 	if (localtime) {
 		if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
 			offset = timelib_time_offset_ctor();
@@ -1279,7 +1287,7 @@ PHPAPI zend_string *php_format_date(char *format, int format_len, time_t ts, int
 
 	t = timelib_time_ctor();
 
-	if (localtime) {
+	if (localtime && strcmp(format, DATE_FORMAT_RFC7231) != 0) {
 		tzi = get_timezone_info(TSRMLS_C);
 		t->tz_info = tzi;
 		t->zone_type = TIMELIB_ZONETYPE_ID;
