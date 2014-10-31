@@ -2642,11 +2642,20 @@ static zend_function_entry disabled_function[] = {
 
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length TSRMLS_DC) /* {{{ */
 {
-	if (zend_hash_del(CG(function_table), function_name, function_name_length+1)==FAILURE) {
+	zend_internal_function *func;
+	int retval;
+
+	if (zend_hash_find(CG(function_table), function_name, function_name_length+1, (void *)&func) == FAILURE) {
 		return FAILURE;
 	}
+
+	zend_hash_del(CG(function_table), function_name, function_name_length+1);
+
+	EG(current_module) = func->module;
 	disabled_function[0].fname = function_name;
-	return zend_register_functions(NULL, disabled_function, CG(function_table), MODULE_PERSISTENT TSRMLS_CC);
+	retval = zend_register_functions(NULL, disabled_function, CG(function_table), MODULE_PERSISTENT TSRMLS_CC);
+	EG(current_module) = NULL;
+	return retval;
 }
 /* }}} */
 
