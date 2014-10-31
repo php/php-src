@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
 
+- PDO_pgsql:
+  . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
+    when not in transaction) (Matteo)
+
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
 
