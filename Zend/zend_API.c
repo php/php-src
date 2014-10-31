@@ -2754,21 +2754,15 @@ ZEND_API ZEND_FUNCTION(display_disabled_function)
 }
 /* }}} */
 
-static zend_function_entry disabled_function[] = {
-	ZEND_FE(display_disabled_function,			NULL)
-	ZEND_FE_END
-};
-
 ZEND_API int zend_disable_function(char *function_name, size_t function_name_length TSRMLS_DC) /* {{{ */
 {
-	int ret;
-
-	ret = zend_hash_str_del(CG(function_table), function_name, function_name_length);
-	if (ret == FAILURE) {
-		return FAILURE;
+	zend_internal_function *func;
+	if ((func = zend_hash_str_find_ptr(CG(function_table), function_name, function_name_length))) {
+		func->arg_info = NULL;
+		func->handler = ZEND_FN(display_disabled_function);
+		return SUCCESS;
 	}
-	disabled_function[0].fname = function_name;
-	return zend_register_functions(NULL, disabled_function, CG(function_table), MODULE_PERSISTENT TSRMLS_CC);
+	return FAILURE;
 }
 /* }}} */
 
