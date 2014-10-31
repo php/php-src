@@ -1394,7 +1394,7 @@ CWD_API int virtual_chdir(const char *path TSRMLS_DC) /* {{{ */
 
 CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path TSRMLS_DC) TSRMLS_DC) /* {{{ */
 {
-	int length = strlen(path);
+	int length = (int)strlen(path);
 	char *temp;
 	int retval;
 	ALLOCA_FLAG(use_heap)
