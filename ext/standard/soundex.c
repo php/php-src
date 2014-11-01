@@ -78,7 +78,7 @@ PHP_FUNCTION(soundex)
 		if (code >= 'A' && code <= 'Z') {
 			if (_small == 0) {
 				/* remember first valid char */
-				soundex[_small++] = code;
+				soundex[_small++] = (char)code;
 				last = soundex_table[code - 'A'];
 			}
 			else {
@@ -88,7 +88,7 @@ PHP_FUNCTION(soundex)
 				code = soundex_table[code - 'A'];
 				if (code != last) {
 					if (code != 0) {
-						soundex[_small++] = code;
+						soundex[_small++] = (char)code;
 					}
 					last = code;
 				}

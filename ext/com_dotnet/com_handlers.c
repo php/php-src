@@ -101,7 +101,7 @@ static zval *com_read_dimension(zval *object, zval *offset, int type, zval *rv T
 		convert_to_long(offset);
 
 		if (SafeArrayGetDim(V_ARRAY(&obj->v)) == 1) {	
-			if (php_com_safearray_get_elem(&obj->v, &v, Z_LVAL_P(offset) TSRMLS_CC)) {
+			if (php_com_safearray_get_elem(&obj->v, &v, (LONG)Z_LVAL_P(offset) TSRMLS_CC)) {
 				php_com_wrap_variant(rv, &v, obj->code_page TSRMLS_CC);
 				VariantClear(&v);
 			}
@@ -145,7 +145,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 			}
 
 			convert_to_long(offset);
-			indices = Z_LVAL_P(offset);
+			indices = (LONG)Z_LVAL_P(offset);
 
 			VariantInit(&v);
 			php_com_variant_from_zval(&v, value, obj->code_page TSRMLS_CC);
@@ -250,7 +250,7 @@ static PHP_FUNCTION(com_method_handler)
 	zval *object = getThis();
 
 	Z_OBJ_HANDLER_P(object, call_method)(
-			((zend_internal_function*)EG(current_execute_data)->func)->function_name,
+			((zend_internal_function*)EX(func))->function_name,
 			Z_OBJ_P(object),
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -378,7 +378,7 @@ static int com_call_method(zend_string *method, zend_object *object, INTERNAL_FU
 
 	VariantInit(&v);
 
-	if (SUCCESS == php_com_do_invoke_byref(obj, method->val, method->len, DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args TSRMLS_CC)) {
+	if (SUCCESS == php_com_do_invoke_byref(obj, (zend_internal_function*)EX(func), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args TSRMLS_CC)) {
 		php_com_zval_from_variant(return_value, &v, obj->code_page TSRMLS_CC);
 		ret = SUCCESS;
 		VariantClear(&v);
@@ -423,14 +423,7 @@ static union _zend_function *com_constructor_get(zend_object *object TSRMLS_DC)
 	}
 }
 
-static zend_class_entry *com_class_entry_get(const zend_object *object TSRMLS_DC)
-{
-	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
-
-	return obj->ce;
-}
-
-static zend_string* com_class_name_get(const zend_object *object, int parent TSRMLS_DC)
+static zend_string* com_class_name_get(const zend_object *object TSRMLS_DC)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
 
@@ -564,7 +557,6 @@ zend_object_handlers php_com_object_handlers = {
 	com_method_get,
 	com_call_method,
 	com_constructor_get,
-	com_class_entry_get,
 	com_class_name_get,
 	com_objects_compare,
 	com_object_cast,

@@ -83,7 +83,7 @@ PHPAPI zend_string *php_uuencode(char *src, size_t src_len) /* {{{ */
 			ee = e;
 			len = ee - s;
 			if (len % 3) {
-				ee = s + (int) (floor(len / 3) * 3);
+				ee = s + (int) (floor((double)len / 3) * 3);
 			}
 		}
 		*p++ = PHP_UU_ENC(len);
@@ -173,7 +173,8 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 		s++;
 	}
 
-	if ((len = total_len > (p - dest->val))) {
+	assert(p >= dest->val);
+	if ((len = total_len > (size_t)(p - dest->val))) {
 		*p++ = PHP_UU_DEC(*s) << 2 | PHP_UU_DEC(*(s + 1)) >> 4;
 		if (len > 1) {
 			*p++ = PHP_UU_DEC(*(s + 1)) << 4 | PHP_UU_DEC(*(s + 2)) >> 2;

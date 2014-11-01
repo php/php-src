@@ -104,6 +104,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random, 0, 0, 0)
 	ZEND_ARG_INFO(0, limiter)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random_bits, 0, 0, 1)
+	ZEND_ARG_INFO(0, bits)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random_range, 0, 0, 2)
+	ZEND_ARG_INFO(0, min)
+	ZEND_ARG_INFO(0, max)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_setbit, 0, 0, 2)
 	ZEND_ARG_INFO(0, a)
 	ZEND_ARG_INFO(0, index)
@@ -161,6 +170,8 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_cmp,		arginfo_gmp_binary)
 	ZEND_FE(gmp_sign,		arginfo_gmp_unary)
 	ZEND_FE(gmp_random,		arginfo_gmp_random)
+	ZEND_FE(gmp_random_bits,  arginfo_gmp_random_bits)
+	ZEND_FE(gmp_random_range, arginfo_gmp_random_range)
 	ZEND_FE(gmp_and,		arginfo_gmp_binary)
 	ZEND_FE(gmp_or,			arginfo_gmp_binary)
 	ZEND_FE(gmp_com,		arginfo_gmp_unary)
@@ -224,16 +235,7 @@ typedef struct _gmp_temp {
 #define GMP_BIG_ENDIAN    (1 << 3)
 #define GMP_NATIVE_ENDIAN (1 << 4)
 
-#define GMP_42_OR_NEWER \
-	((__GNU_MP_VERSION >= 5) || (__GNU_MP_VERSION >= 4 && __GNU_MP_VERSION_MINOR >= 2))
-
-/* The maximum base for input and output conversions is 62 from GMP 4.2
- * onwards. */
-#if GMP_42_OR_NEWER
-#	define MAX_BASE 62
-#else
-#	define MAX_BASE 36
-#endif
+#define GMP_MAX_BASE 62
 
 #define IS_GMP(zval) \
 	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), gmp_ce TSRMLS_CC))
@@ -356,30 +358,6 @@ static inline void gmp_zval_unary_ui_op(zval *return_value, zval *a_arg, gmp_una
 #define gmp_unary_op(op)         _gmp_unary_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 #define gmp_unary_opl(op)         _gmp_unary_opl(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 #define gmp_unary_ui_op(op)      _gmp_unary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
-
-/* {{{ gmp_emalloc
- */
-static void *gmp_emalloc(size_t size)
-{
-	return emalloc(size);
-}
-/* }}} */
-
-/* {{{ gmp_erealloc
- */
-static void *gmp_erealloc(void *ptr, size_t old_size, size_t new_size)
-{
-	return erealloc(ptr, new_size);
-}
-/* }}} */
-
-/* {{{ gmp_efree
- */
-static void gmp_efree(void *ptr, size_t size)
-{
-	efree(ptr);
-}
-/* }}} */
 
 static void gmp_free_object_storage(zend_object *obj TSRMLS_DC) /* {{{ */
 {
@@ -684,8 +662,6 @@ ZEND_MINIT_FUNCTION(gmp)
 	REGISTER_LONG_CONSTANT("GMP_LITTLE_ENDIAN", GMP_LITTLE_ENDIAN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_BIG_ENDIAN", GMP_BIG_ENDIAN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_NATIVE_ENDIAN", GMP_NATIVE_ENDIAN, CONST_CS | CONST_PERSISTENT);
-
-	mp_set_memory_functions(gmp_emalloc, gmp_erealloc, gmp_efree);
 
 	return SUCCESS;
 }
@@ -1048,8 +1024,8 @@ ZEND_FUNCTION(gmp_init)
 		return;
 	}
 
-	if (base && (base < 2 || base > MAX_BASE)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d)", base, MAX_BASE);
+	if (base && (base < 2 || base > GMP_MAX_BASE)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d)", base, GMP_MAX_BASE);
 		RETURN_FALSE;
 	}
 
@@ -1204,15 +1180,10 @@ ZEND_FUNCTION(gmp_strval)
 		return;
 	}
 
-#if MAX_BASE == 62
-	/* Although the maximum base in general in GMP >= 4.2 is 62, mpz_get_str()
+	/* Although the maximum base in general in GMP is 62, mpz_get_str()
 	 * is explicitly limited to -36 when dealing with negative bases. */
-	if ((base < 2 && base > -2) || base > MAX_BASE || base < -36) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d or -2 and -36)", base, MAX_BASE);
-#else
-	if (base < 2 || base > MAX_BASE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d)", base, MAX_BASE);
-#endif
+	if ((base < 2 && base > -2) || base > GMP_MAX_BASE || base < -36) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad base for conversion: %pd (should be between 2 and %d or -2 and -36)", base, GMP_MAX_BASE);
 		RETURN_FALSE;
 	}
 
@@ -1596,14 +1567,7 @@ ZEND_FUNCTION(gmp_rootrem)
 	add_next_index_zval(return_value, &result1);
 	add_next_index_zval(return_value, &result2);
 
-#if GMP_42_OR_NEWER
 	mpz_rootrem(gmpnum_result1, gmpnum_result2, gmpnum_a, (gmp_ulong) nth);
-#else
-	mpz_root(gmpnum_result1, gmpnum_a, (gmp_ulong) nth);
-	mpz_pow_ui(gmpnum_result2, gmpnum_result1, (gmp_ulong) nth);
-	mpz_sub(gmpnum_result2, gmpnum_a, gmpnum_result2);
-	mpz_abs(gmpnum_result2, gmpnum_result2);
-#endif
 
 	FREE_GMP_TEMP(temp_a);
 }
@@ -1764,6 +1728,18 @@ ZEND_FUNCTION(gmp_sign)
 }
 /* }}} */
 
+static void gmp_init_random(TSRMLS_D)
+{
+	if (!GMPG(rand_initialized)) {
+		/* Initialize */
+		gmp_randinit_mt(GMPG(rand_state));
+		/* Seed */
+		gmp_randseed_ui(GMPG(rand_state), GENERATE_SEED());
+
+		GMPG(rand_initialized) = 1;
+	}
+}
+
 /* {{{ proto GMP gmp_random([int limiter])
    Gets random number */
 ZEND_FUNCTION(gmp_random)
@@ -1776,21 +1752,98 @@ ZEND_FUNCTION(gmp_random)
 	}
 
 	INIT_GMP_RETVAL(gmpnum_result);
+	gmp_init_random(TSRMLS_C);
 
-	if (!GMPG(rand_initialized)) {
-		/* Initialize */
-		gmp_randinit_lc_2exp_size(GMPG(rand_state), 32L);
-
-		/* Seed */
-		gmp_randseed_ui(GMPG(rand_state), GENERATE_SEED());
-
-		GMPG(rand_initialized) = 1;
-	}
 #ifdef GMP_LIMB_BITS
 	mpz_urandomb(gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * GMP_LIMB_BITS);
 #else
 	mpz_urandomb(gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * __GMP_BITS_PER_MP_LIMB);
 #endif
+}
+/* }}} */
+
+/* {{{ proto GMP gmp_random_bits(int bits)
+   Gets a random number in the range 0 to (2 ** n) - 1 */
+ZEND_FUNCTION(gmp_random_bits)
+{
+	zend_long bits;
+	mpz_ptr gmpnum_result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &bits) == FAILURE) {
+		return;
+	}
+
+	if (bits <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The number of bits must be positive");
+		RETURN_FALSE;
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	gmp_init_random(TSRMLS_C);
+
+	mpz_urandomb(gmpnum_result, GMPG(rand_state), bits);
+}
+/* }}} */
+
+/* {{{ proto GMP gmp_random_range(mixed min, mixed max)
+   Gets a random number in the range min to max */
+ZEND_FUNCTION(gmp_random_range)
+{
+	zval *min_arg, *max_arg;
+	mpz_ptr gmpnum_min, gmpnum_max, gmpnum_result;
+	gmp_temp_t temp_a, temp_b;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &min_arg, &max_arg) == FAILURE) {
+		return;
+	}
+
+	gmp_init_random(TSRMLS_C);
+
+	FETCH_GMP_ZVAL(gmpnum_max, max_arg, temp_a);
+
+	if (Z_TYPE_P(min_arg) == IS_LONG && Z_LVAL_P(min_arg) >= 0) {
+		if (mpz_cmp_ui(gmpnum_max, Z_LVAL_P(min_arg)) <= 0) {
+			FREE_GMP_TEMP(temp_a);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The minimum value must be less than the maximum value");
+			RETURN_FALSE;
+		}
+
+		INIT_GMP_RETVAL(gmpnum_result);
+
+		if (Z_LVAL_P(min_arg)) {
+			mpz_sub_ui(gmpnum_max, gmpnum_max, Z_LVAL_P(min_arg));
+		}
+
+		mpz_add_ui(gmpnum_max, gmpnum_max, 1);
+		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_max);
+
+		if (Z_LVAL_P(min_arg)) {
+			mpz_add_ui(gmpnum_result, gmpnum_result, Z_LVAL_P(min_arg));
+		}
+
+		FREE_GMP_TEMP(temp_a);
+
+	}
+	else {
+		FETCH_GMP_ZVAL_DEP(gmpnum_min, min_arg, temp_b, temp_a);
+
+		if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
+			FREE_GMP_TEMP(temp_b);
+			FREE_GMP_TEMP(temp_a);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The minimum value must be less than the maximum value");
+			RETURN_FALSE;
+		}
+
+		INIT_GMP_RETVAL(gmpnum_result);
+
+		mpz_sub(gmpnum_max, gmpnum_max, gmpnum_min);
+		mpz_add_ui(gmpnum_max, gmpnum_max, 1);
+		mpz_urandomm(gmpnum_result, GMPG(rand_state), gmpnum_max);
+		mpz_add(gmpnum_result, gmpnum_result, gmpnum_min);
+
+		FREE_GMP_TEMP(temp_b);
+		FREE_GMP_TEMP(temp_a);
+	}
 }
 /* }}} */
 
@@ -1849,7 +1902,7 @@ ZEND_FUNCTION(gmp_setbit)
 
 	if (index < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index must be greater than or equal to zero");
-		return;
+		RETURN_FALSE;
 	}
 
 	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);
@@ -1876,7 +1929,7 @@ ZEND_FUNCTION(gmp_clrbit)
 
 	if (index < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Index must be greater than or equal to zero");
-		return;
+		RETURN_FALSE;
 	}
 
 	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);

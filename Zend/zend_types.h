@@ -64,32 +64,13 @@ typedef enum {
 # endif
 #endif
 
-#define HAVE_ZEND_LONG64
-#ifdef ZEND_WIN32
-typedef __int64 zend_long64;
-typedef unsigned __int64 zend_ulong64;
-#elif SIZEOF_LONG_LONG_INT == 8
-typedef long long int zend_long64;
-typedef unsigned long long int zend_ulong64;
-#elif SIZEOF_LONG_LONG == 8
-typedef long long zend_long64;
-typedef unsigned long long zend_ulong64;
-#else
-# undef HAVE_ZEND_LONG64
-#endif
-
-/* XXX this won't work on X32 platform */
-#ifdef ZEND_ENABLE_ZVAL_LONG64
-typedef int64_t zend_intptr_t;
-typedef uint64_t zend_uintptr_t;
-#else
-typedef int32_t zend_intptr_t;
-typedef uint32_t zend_uintptr_t;
-#endif
+typedef intptr_t zend_intptr_t;
+typedef uintptr_t zend_uintptr_t;
 
 typedef struct _zend_object_handlers zend_object_handlers;
 typedef struct _zend_class_entry     zend_class_entry;
 typedef union  _zend_function        zend_function;
+typedef struct _zend_execute_data    zend_execute_data;
 
 typedef struct _zval_struct     zval;
 
@@ -140,7 +121,6 @@ struct _zval_struct {
 		uint32_t     next;                 /* hash collision chain */
 		uint32_t     cache_slot;           /* literal cache slot */
 		uint32_t     lineno;               /* line number (for ast nodes) */
-		uint32_t     silence_num;          /* BEGIN_SILENCE op number */
 	} u2;
 };
 
@@ -438,7 +418,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_OBJ_HANDLE(zval)          (Z_OBJ((zval)))->handle
 #define Z_OBJ_HANDLE_P(zval_p)      Z_OBJ_HANDLE(*(zval_p))
 
-#define Z_OBJCE(zval)				zend_get_class_entry(Z_OBJ(zval) TSRMLS_CC)
+#define Z_OBJCE(zval)				(Z_OBJ(zval)->ce)
 #define Z_OBJCE_P(zval_p)			Z_OBJCE(*(zval_p))
 
 #define Z_OBJPROP(zval)				Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)
@@ -783,6 +763,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 
 #define SEPARATE_ZVAL_NOREF(zv) do {					\
 		zval *_zv = (zv);								\
+		ZEND_ASSERT(Z_TYPE_P(_zv) != IS_REFERENCE);		\
 		if (Z_COPYABLE_P(_zv) ||						\
 		    Z_IMMUTABLE_P(_zv)) {						\
 			if (Z_REFCOUNT_P(_zv) > 1) {				\

@@ -1098,7 +1098,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 	php_stream *stream;
 	zend_string *allowed = NULL;
 	char *allowed_tags=NULL;
-	int allowed_tags_len=0;
+	size_t allowed_tags_len=0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lS", &fd, &bytes, &allowed) == FAILURE) {
 		RETURN_FALSE;
@@ -1196,8 +1196,8 @@ PHPAPI PHP_FUNCTION(fwrite)
 	zval *arg1;
 	char *arg2;
 	size_t arg2len;
-	int ret;
-	int num_bytes;
+	size_t ret;
+	size_t num_bytes;
 	zend_long arg3 = 0;
 	char *buffer = NULL;
 	php_stream *stream;
@@ -1309,7 +1309,7 @@ PHPAPI PHP_FUNCTION(fseek)
 
 	PHP_STREAM_TO_ZVAL(stream, arg1);
 
-	RETURN_LONG(php_stream_seek(stream, arg2, whence));
+	RETURN_LONG(php_stream_seek(stream, arg2, (int)whence));
 }
 /* }}} */
 
@@ -1355,7 +1355,7 @@ PHP_FUNCTION(mkdir)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	RETURN_BOOL(php_stream_mkdir(dir, mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
+	RETURN_BOOL(php_stream_mkdir(dir, (int)mode, (recursive ? PHP_STREAM_MKDIR_RECURSIVE : 0) | REPORT_ERRORS, context));
 }
 /* }}} */
 
@@ -1384,7 +1384,7 @@ PHP_FUNCTION(readfile)
 {
 	char *filename;
 	size_t filename_len;
-	int size = 0;
+	size_t size = 0;
 	zend_bool use_include_path = 0;
 	zval *zcontext = NULL;
 	php_stream *stream;
@@ -1427,7 +1427,7 @@ PHP_FUNCTION(umask)
 	if (ZEND_NUM_ARGS() == 0) {
 		umask(oldumask);
 	} else {
-		umask(arg1);
+		umask((int)arg1);
 	}
 
 	RETURN_LONG(oldumask);
@@ -1439,7 +1439,7 @@ PHP_FUNCTION(umask)
 PHPAPI PHP_FUNCTION(fpassthru)
 {
 	zval *arg1;
-	int size;
+	size_t size;
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
@@ -1852,7 +1852,7 @@ PHP_FUNCTION(fputcsv)
 	char escape_char = '\\'; /* allow this to be set as parameter */
 	php_stream *stream;
 	zval *fp = NULL, *fields = NULL;
-	int ret;
+	size_t ret;
 	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
 	size_t delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
 
@@ -1908,7 +1908,8 @@ PHP_FUNCTION(fputcsv)
 /* {{{ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC) */
 PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC)
 {
-	int count, i = 0, ret;
+	int count, i = 0;
+	size_t ret;
 	zval *field_tmp;
 	smart_str csvline = {0};
 
@@ -2486,7 +2487,7 @@ PHP_FUNCTION(fnmatch)
 		RETURN_FALSE;
 	}
 
-	RETURN_BOOL( ! fnmatch( pattern, filename, flags ));
+	RETURN_BOOL( ! fnmatch( pattern, filename, (int)flags ));
 }
 /* }}} */
 #endif

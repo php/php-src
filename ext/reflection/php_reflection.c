@@ -83,7 +83,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 /* Method macros */
 
 #define METHOD_NOTSTATIC(ce)                                                                                \
-	if (!Z_OBJ(EG(This)) || !instanceof_function(Z_OBJCE(EG(This)), ce TSRMLS_CC)) {           \
+	if (!Z_OBJ(EX(This)) || !instanceof_function(Z_OBJCE(EX(This)), ce TSRMLS_CC)) {           \
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s() cannot be called statically", get_active_function_name(TSRMLS_C));        \
 		return;                                                                                             \
 	}                                                                                                       \
@@ -116,7 +116,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 /* {{{ Smart string functions */
 typedef struct _string {
 	zend_string *buf;
-	int alloced;
+	size_t alloced;
 } string;
 
 static void string_init(string *str)
@@ -129,16 +129,16 @@ static void string_init(string *str)
 
 static string *string_printf(string *str, const char *format, ...)
 {
-	int len;
+	size_t len;
 	va_list arg;
 	char *s_tmp;
 
 	va_start(arg, format);
 	len = zend_vspprintf(&s_tmp, 0, format, arg);
 	if (len) {
-		register int nlen = (str->buf->len + 1 + len + (1024 - 1)) & ~(1024 - 1);
+		register size_t nlen = (str->buf->len + 1 + len + (1024 - 1)) & ~(1024 - 1);
 		if (str->alloced < nlen) {
-			int old_len = str->buf->len;
+			size_t old_len = str->buf->len;
 			str->alloced = nlen;
 			str->buf = zend_string_realloc(str->buf, str->alloced, 0);
 			str->buf->len = old_len;
@@ -151,11 +151,11 @@ static string *string_printf(string *str, const char *format, ...)
 	return str;
 }
 
-static string *string_write(string *str, char *buf, int len)
+static string *string_write(string *str, char *buf, size_t len)
 {
-	register int nlen = (str->buf->len + 1 + len + (1024 - 1)) & ~(1024 - 1);
+	register size_t nlen = (str->buf->len + 1 + len + (1024 - 1)) & ~(1024 - 1);
 	if (str->alloced < nlen) {
-		int old_len = str->buf->len;
+		size_t old_len = str->buf->len;
 		str->alloced = nlen;
 		str->buf = zend_string_realloc(str->buf, str->alloced, 0);
 		str->buf->len = old_len;
@@ -603,7 +603,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 				{
 					zend_string *key;
 					zend_ulong num_index;
-					uint len = mptr->common.function_name->len;
+					size_t len = mptr->common.function_name->len;
 
 					/* Do not display old-style inherited constructors */
 					if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0
@@ -809,7 +809,7 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	string param_indent;
 	zend_function *overwrites;
 	zend_string *lc_name;
-	unsigned int lc_name_len;
+	size_t lc_name_len;
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?)
 	 * What's "wrong" is that any whitespace before the doc comment start is
@@ -995,9 +995,12 @@ static int _extension_class_string(zval *el TSRMLS_DC, int num_args, va_list arg
 	int *num_classes = va_arg(args, int*);
 
 	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module && !strcasecmp(ce->info.internal.module->name, module->name)) {
-		string_printf(str, "\n");
-		_class_string(str, ce, NULL, indent TSRMLS_CC);
-		(*num_classes)++;
+		/* dump class if it is not an alias */
+		if (!zend_binary_strcasecmp(ce->name->val, ce->name->len, hash_key->key->val, hash_key->key->len)) {
+			string_printf(str, "\n");
+			_class_string(str, ce, NULL, indent TSRMLS_CC);
+			(*num_classes)++;
+		}
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
@@ -1193,7 +1196,7 @@ static void reflection_extension_factory(zval *object, const char *name_str TSRM
 {
 	reflection_object *intern;
 	zval name;
-	int name_len = strlen(name_str);
+	size_t name_len = strlen(name_str);
 	zend_string *lcname;
 	struct _zend_module_entry *module;
 
@@ -2138,7 +2141,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	/* First, find the function */
 	switch (Z_TYPE_P(reference)) {
 		case IS_STRING: {
-				unsigned int lcname_len;
+				size_t lcname_len;
 				char *lcname;
 
 				lcname_len = Z_STRLEN_P(reference);
@@ -2157,7 +2160,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		case IS_ARRAY: {
 				zval *classref;
 				zval *method;
-				unsigned int lcname_len;
+				size_t lcname_len;
 				char *lcname;
 
 				if (((classref =zend_hash_index_find(Z_ARRVAL_P(reference), 0)) == NULL)
@@ -2221,7 +2224,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	/* Now, search for the parameter */
 	arg_info = fptr->common.arg_info;
 	if (Z_TYPE_P(parameter) == IS_LONG) {
-		position= Z_LVAL_P(parameter);
+		position= (int)Z_LVAL_P(parameter);
 		if (position < 0 || (uint32_t)position >= fptr->common.num_args) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
@@ -2399,7 +2402,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 		} else {
 			zend_string *name = zend_string_init(param->arg_info->class_name, param->arg_info->class_name_len, 0);
 			ce = zend_lookup_class(name TSRMLS_CC);
-			zend_string_free(name);
+			zend_string_release(name);
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
 					"Class %s does not exist", param->arg_info->class_name);
@@ -3704,10 +3707,10 @@ ZEND_METHOD(reflection_class, getMethod)
 /* }}} */
 
 /* {{{ _addmethod */
-static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, long filter, zval *obj TSRMLS_DC)
+static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, zend_long filter, zval *obj TSRMLS_DC)
 {
 	zval method;
-	uint len = mptr->common.function_name->len;
+	size_t len = mptr->common.function_name->len;
 	zend_function *closure;
 	if (mptr->common.fn_flags & filter) {
 		if (ce == zend_ce_closure && obj && (len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
@@ -3816,7 +3819,7 @@ ZEND_METHOD(reflection_class, getProperty)
 	zend_property_info *property_info;
 	zend_string *name, *classname;
 	char *tmp, *str_name;
-	int classname_len, str_name_len;
+	size_t classname_len, str_name_len;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name) == FAILURE) {
@@ -3859,10 +3862,10 @@ ZEND_METHOD(reflection_class, getProperty)
 			if (!EG(exception)) {
 				zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Class %s does not exist", classname->val);
 			}
-			zend_string_free(classname);
+			zend_string_release(classname);
 			return;
 		}
-		zend_string_free(classname);
+		zend_string_release(classname);
 
 		if (!instanceof_function(ce, ce2 TSRMLS_CC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Fully qualified property name %s::%s does not specify a base class of %s", ce2->name->val, str_name, ce->name->val);
@@ -3919,9 +3922,14 @@ static int _adddynproperty(zval *ptr TSRMLS_DC, int num_args, va_list args, zend
 		return 0; /* non public cannot be dynamic */
 	}
 
-	if (zend_get_property_info(ce, hash_key->key, 1 TSRMLS_CC) == &EG(std_property_info)) {
-		EG(std_property_info).flags = ZEND_ACC_IMPLICIT_PUBLIC;
-		reflection_property_factory(ce, &EG(std_property_info), &property TSRMLS_CC);
+	if (zend_get_property_info(ce, hash_key->key, 1 TSRMLS_CC) == NULL) {
+		zend_property_info property_info;
+		
+		property_info.flags = ZEND_ACC_IMPLICIT_PUBLIC;
+		property_info.name = hash_key->key;
+		property_info.ce = ce;
+		property_info.offset = -1;
+		reflection_property_factory(ce, &property_info, &property TSRMLS_CC);
 		add_next_index_zval(retval, &property);
 	}
 	return 0;
@@ -4154,7 +4162,7 @@ ZEND_METHOD(reflection_class, isInstance)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	RETURN_BOOL(HAS_CLASS_ENTRY(*object) && instanceof_function(Z_OBJCE_P(object), ce TSRMLS_CC));
+	RETURN_BOOL(instanceof_function(Z_OBJCE_P(object), ce TSRMLS_CC));
 }
 /* }}} */
 
@@ -5320,11 +5328,20 @@ static int add_extension_class(zval *zv TSRMLS_DC, int num_args, va_list args, z
 	int add_reflection_class = va_arg(args, int);
 
 	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module && !strcasecmp(ce->info.internal.module->name, module->name)) {
+		zend_string *name;
+
+		if (zend_binary_strcasecmp(ce->name->val, ce->name->len, hash_key->key->val, hash_key->key->len)) {
+			/* This is an class alias, use alias name */
+			name = hash_key->key;
+		} else {
+			/* Use class name */
+			name = ce->name;
+		}
 		if (add_reflection_class) {
 			zend_reflection_class_factory(ce, &zclass TSRMLS_CC);
-			zend_hash_update(Z_ARRVAL_P(class_array), ce->name, &zclass);
+			zend_hash_update(Z_ARRVAL_P(class_array), name, &zclass);
 		} else {
-			add_next_index_str(class_array, zend_string_copy(ce->name));
+			add_next_index_str(class_array, zend_string_copy(name));
 		}
 	}
 	return ZEND_HASH_APPLY_KEEP;
@@ -5390,7 +5407,7 @@ ZEND_METHOD(reflection_extension, getDependencies)
 	while(dep->name) {
 		zend_string *relation;
 		char *rel_type;
-		int len = 0;
+		size_t len = 0;
 
 		switch(dep->type) {
 			case MODULE_DEP_REQUIRED:
@@ -6034,7 +6051,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry reflection_zend_extension_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_zend_extension, export, arginfo_reflection_extension_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
-	ZEND_ME(reflection_zend_extension, __construct, arginfo_reflection_extension___construct, 0)
+	ZEND_ME(reflection_zend_extension, __construct, arginfo_reflection_zend_extension___construct, 0)
 	ZEND_ME(reflection_zend_extension, __toString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_zend_extension, getName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_zend_extension, getVersion, arginfo_reflection__void, 0)

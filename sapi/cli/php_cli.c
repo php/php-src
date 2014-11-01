@@ -244,7 +244,7 @@ static inline int sapi_cli_select(int fd TSRMLS_DC)
 
 	PHP_SAFE_FD_SET(fd, &wfd);
 
-	tv.tv_sec = FG(default_socket_timeout);
+	tv.tv_sec = (long)FG(default_socket_timeout);
 	tv.tv_usec = 0;
 
 	ret = php_select(fd+1, &dfd, &wfd, &dfd, &tv);
@@ -1120,7 +1120,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				}
 			case PHP_MODE_REFLECTION_EXT_INFO:
 				{
-					int len = strlen(reflection_what);
+					int len = (int)strlen(reflection_what);
 					char *lcname = zend_str_tolower_dup(reflection_what, len);
 					zend_module_entry *module;
 
@@ -1258,7 +1258,7 @@ int main(int argc, char *argv[])
 				break;
 			case 'd': {
 				/* define ini entries on command line */
-				int len = strlen(php_optarg);
+				int len = (int)strlen(php_optarg);
 				char *val;
 
 				if ((val = strchr(php_optarg, '='))) {
@@ -1266,11 +1266,11 @@ int main(int argc, char *argv[])
 					if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
 						ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
 						memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
-						ini_entries_len += (val - php_optarg);
+						ini_entries_len += (int)(val - php_optarg);
 						memcpy(ini_entries + ini_entries_len, "\"", 1);
 						ini_entries_len++;
 						memcpy(ini_entries + ini_entries_len, val, len - (val - php_optarg));
-						ini_entries_len += len - (val - php_optarg);
+						ini_entries_len += len - (int)(val - php_optarg);
 						memcpy(ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
 						ini_entries_len += sizeof("\n\0\"") - 2;
 					} else {

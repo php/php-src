@@ -205,8 +205,7 @@ void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
 						array_offset = jmp_to->parent;
 						if (--nest_levels > 0) {
 							if (opline->opcode == ZEND_BRK &&
-							    (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE ||
-							     op_array->opcodes[jmp_to->brk].opcode == ZEND_SWITCH_FREE)) {
+							    op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE) {
 								dont_optimize = 1;
 								break;
 							}

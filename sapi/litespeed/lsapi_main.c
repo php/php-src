@@ -69,7 +69,7 @@
 
 #define SAPI_LSAPI_MAX_HEADER_LENGTH 2048
 
-static int  lsapi_mode       = 1;
+static int  lsapi_mode       = 0;
 static char *php_self        = "";
 static char *script_filename = "";
 static int  source_highlight = 0;
@@ -1053,6 +1053,7 @@ int main( int argc, char * argv[] )
     LSAPI_Init();
    
     LSAPI_Init_Env_Parameters( NULL );
+    lsapi_mode = 1; 
 
     slow_script_msec = LSAPI_Get_Slow_Req_Msecs();
 

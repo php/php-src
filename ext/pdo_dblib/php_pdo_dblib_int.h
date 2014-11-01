@@ -37,7 +37,7 @@
 # define DBSETOPT(a, b, c)	dbsetopt(a, b, c)
 # define SYBESMSG		SQLESMSG
 # define SYBESEOF		SQLESEOF
-# define SYBEFCON		SQLECONN		// SQLEFCON does not exist in MS SQL Server.
+# define SYBEFCON		SQLECONN		/* SQLEFCON does not exist in MS SQL Server. */
 # define SYBEMEM		SQLEMEM
 # define SYBEPWD		SQLEPWD
 
@@ -89,10 +89,10 @@ typedef unsigned char *LPBYTE;
 typedef float			DBFLT4;
 #endif
 
-int error_handler(DBPROCESS *dbproc, int severity, int dberr,
+int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	int oserr, char *dberrstr, char *oserrstr);
 
-int msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
+int pdo_dblib_msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 	int severity, char *msgtext, char *srvname, char *procname, DBUSMALLINT line);
 
 extern pdo_driver_t pdo_dblib_driver;

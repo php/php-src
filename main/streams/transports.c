@@ -393,7 +393,7 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRML
 /* Similar to recv() system call; read data from the stream, optionally
  * peeking, optionally retrieving OOB data */
 PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t buflen,
-		long flags, void **addr, socklen_t *addrlen, zend_string **textaddr
+		int flags, void **addr, socklen_t *addrlen, zend_string **textaddr
 		TSRMLS_DC)
 {
 	php_stream_xport_param param;
@@ -462,7 +462,7 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 /* Similar to send() system call; send data to the stream, optionally
  * sending it as OOB data */
 PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t buflen,
-		long flags, void *addr, socklen_t addrlen TSRMLS_DC)
+		int flags, void *addr, socklen_t addrlen TSRMLS_DC)
 {
 	php_stream_xport_param param;
 	int ret = 0;

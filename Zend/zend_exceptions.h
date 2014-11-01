@@ -30,7 +30,7 @@ ZEND_API void zend_exception_set_previous(zend_object *exception, zend_object *a
 ZEND_API void zend_exception_save(TSRMLS_D);
 ZEND_API void zend_exception_restore(TSRMLS_D);
 
-void zend_throw_exception_internal(zval *exception TSRMLS_DC);
+ZEND_API void zend_throw_exception_internal(zval *exception TSRMLS_DC);
 
 void zend_register_default_exception(TSRMLS_D);
 

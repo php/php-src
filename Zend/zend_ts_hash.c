@@ -333,7 +333,7 @@ ZEND_API int zend_ts_hash_rehash(TsHashTable *ht)
 	return retval;
 }
 
-ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, int len)
+ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, size_t len)
 {
 	zval *retval;
 
@@ -344,7 +344,7 @@ ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, int len)
 	return retval;
 }
 
-ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, int len, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zval *retval;
 
@@ -355,7 +355,7 @@ ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, int le
 	return retval;
 }
 
-ZEND_API zval *_zend_ts_hash_str_add(TsHashTable *ht, const char *key, int len, zval *pData ZEND_FILE_LINE_DC)
+ZEND_API zval *_zend_ts_hash_str_add(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC)
 {
 	zval *retval;
 

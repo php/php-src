@@ -20,9 +20,9 @@ echo "*** Testing setlocale() : usage variations ***\n";
 
 function good_locale($locale) { 
     /**
-    * Note: no_NO is a bogus locale and should not be used, see https://bugzilla.redhat.com/show_bug.cgi?id=532487
+    * Note: no_NO is a bogus locale and should not be used, see https://bugzilla.redhat.com/971416
     **/
-	return $locale !== 'tt_RU@iqtelif.UTF-8' && substr($locale, 0, 5) !== "no_NO";
+	return $locale !== 'tt_RU@iqtelif.UTF-8' && $locale !== 'no_NO.ISO-8859-1';
 }
 
 /* Prototype  : array list_system_locales( void )

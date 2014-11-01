@@ -152,6 +152,8 @@ group = @php_fpm_group@
 ; Valid syntaxes are:
 ;   'ip.add.re.ss:port'    - to listen on a TCP socket to a specific address on
 ;                            a specific port;
+;   '[ip:6:addr:ess]:port' - to listen on a TCP socket to a specific IPv6 address on
+;                            a specific port;
 ;   'port'                 - to listen on a TCP socket to all addresses on a
 ;                            specific port;
 ;   '/path/to/unix/socket' - to listen on a unix socket.

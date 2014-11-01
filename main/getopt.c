@@ -59,8 +59,16 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 {
 	static int optchr = 0;
 	static int dash = 0; /* have already seen the - */
+	static char **prev_optarg = NULL;
 
 	php_optidx = -1;
+
+	if(prev_optarg && prev_optarg != optarg) {
+		/* reset the state */
+		optchr = 0;
+		dash = 0;
+	}
+	prev_optarg = optarg;
 
 	if (*optind >= argc) {
 		return(EOF);
@@ -81,7 +89,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 	}
 	if ((argv[*optind][0] == '-') && (argv[*optind][1] == '-')) {
 		const char *pos;
-		int arg_end = strlen(argv[*optind])-1;
+		int arg_end = (int)strlen(argv[*optind])-1;
 
 		/* '--' indicates end of args if not followed by a known long option name */
 		if (argv[*optind][2] == '\0') {
@@ -111,7 +119,7 @@ PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char
 
 		optchr = 0;
 		dash = 0;
-		arg_start += strlen(opts[php_optidx].opt_name);
+		arg_start += (int)strlen(opts[php_optidx].opt_name);
 	} else {
 		if (!dash) {
 			dash = 1;

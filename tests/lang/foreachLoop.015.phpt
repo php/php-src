@@ -1,5 +1,7 @@
 --TEST--
 Directly modifying a REFERENCED array when foreach'ing over it while using &$value syntax.
+--XFAIL--
+Needs major foreach changes to get sane behavior
 --FILE--
 <?php
 

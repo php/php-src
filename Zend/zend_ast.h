@@ -115,6 +115,7 @@ enum _zend_ast_kind {
 	ZEND_AST_NEW,
 	ZEND_AST_INSTANCEOF,
 	ZEND_AST_YIELD,
+	ZEND_AST_COALESCE,
 
 	ZEND_AST_STATIC,
 	ZEND_AST_WHILE,
@@ -220,7 +221,9 @@ static zend_always_inline zval *zend_ast_get_zval(zend_ast *ast) {
 	return &((zend_ast_zval *) ast)->val;
 }
 static zend_always_inline zend_string *zend_ast_get_str(zend_ast *ast) {
-	return Z_STR_P(zend_ast_get_zval(ast));
+	zval *zv = zend_ast_get_zval(ast);
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+	return Z_STR_P(zv);
 }
 
 static zend_always_inline uint32_t zend_ast_get_num_children(zend_ast *ast) {

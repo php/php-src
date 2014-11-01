@@ -791,7 +791,7 @@ PHP_FUNCTION(mysqli_data_seek)
 		RETURN_FALSE;
 	}
 
-	if (offset < 0 || offset >= mysql_num_rows(result)) {
+	if (offset < 0 || (uint64_t)offset >= mysql_num_rows(result)) {
 		RETURN_FALSE;
 	}
 

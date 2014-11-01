@@ -43,6 +43,11 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 #define YYERROR_VERBOSE
 #define YYSTYPE zend_parser_stack_elem
 
+#ifdef _MSC_VER
+#define YYMALLOC malloc
+#define YYFREE free
+#endif
+
 %}
 
 %pure_parser
@@ -67,6 +72,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %right T_YIELD
 %left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
 %left '?' ':'
+%right T_COALESCE
 %left T_BOOLEAN_OR
 %left T_BOOLEAN_AND 
 %left '|'
@@ -221,6 +227,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_NS_C            "__NAMESPACE__ (T_NS_C)"
 %token T_NS_SEPARATOR    "\\ (T_NS_SEPARATOR)"
 %token T_ELLIPSIS        "... (T_ELLIPSIS)"
+%token T_COALESCE        "?? (T_COALESCE)"
 %token T_POW             "** (T_POW)"
 %token T_POW_EQUAL       "**= (T_POW_EQUAL)"
 
@@ -827,6 +834,8 @@ expr_without_variable:
 			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, $3, $5); }
 	|	expr '?' ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, NULL, $4); }
+	|	expr T_COALESCE expr
+			{ $$ = zend_ast_create(ZEND_AST_COALESCE, $1, $3); }
 	|	internal_functions_in_yacc { $$ = $1; }
 	|	T_INT_CAST expr		{ $$ = zend_ast_create_cast(IS_LONG, $2); }
 	|	T_DOUBLE_CAST expr	{ $$ = zend_ast_create_cast(IS_DOUBLE, $2); }
@@ -1183,7 +1192,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			
 			str = LANG_SCNG(yy_text);
 			end = memchr(str, '\n', LANG_SCNG(yy_leng));
-			yystr_len = yystrlen(yystr);
+			yystr_len = (unsigned int)yystrlen(yystr);
 			
 			if ((tok1 = memchr(yystr, '(', yystr_len)) != NULL
 				&& (tok2 = zend_memrchr(yystr, ')', yystr_len)) != NULL) {

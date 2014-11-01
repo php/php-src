@@ -182,6 +182,7 @@ void zend_optimizer_pass3(zend_op_array *op_array TSRMLS_DC)
 				break;
 
 			case ZEND_JMP_SET:
+			case ZEND_COALESCE:
 				if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 					break;
 				}

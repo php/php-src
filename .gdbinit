@@ -53,11 +53,11 @@ define dump_bt
 		printf "[%p] ", $ex
 		set $func = $ex->func
 		if $func
-			if $ex->object
+			if $ex->This->value.obj
 				if $func->common.scope
 					printf "%s->", $func->common.scope->name->val
 				else
-					printf "%s->", $ex->object->ce.name->val
+					printf "%s->", $ex->This->value.obj->ce.name->val
 				end
 			else
 				if $func->common.scope

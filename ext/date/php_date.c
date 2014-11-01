@@ -325,12 +325,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_name_from_abbr, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_offset_get, 0, 0, 2)
-	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, datetime)
+	ZEND_ARG_OBJ_INFO(0, object, DateTimeZone, 0)
+	ZEND_ARG_OBJ_INFO(0, datetime, DateTimeInterface, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_method_offset_get, 0, 0, 1)
-	ZEND_ARG_INFO(0, datetime)
+	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_transitions_get, 0, 0, 1)
@@ -1230,7 +1230,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 }
 /* }}} */
 
-PHPAPI zend_string *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC) /* {{{ */
+PHPAPI zend_string *php_format_date(char *format, size_t format_len, time_t ts, int localtime TSRMLS_DC) /* {{{ */
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
@@ -3031,7 +3031,7 @@ PHP_FUNCTION(date_format)
 }
 /* }}} */
 
-static int php_date_modify(zval *object, char *modify, int modify_len TSRMLS_DC) /* {{{ */
+static int php_date_modify(zval *object, char *modify, size_t modify_len TSRMLS_DC) /* {{{ */
 {
 	php_date_obj *dateobj;
 	timelib_time *tmp_time;
@@ -3799,7 +3799,7 @@ PHP_FUNCTION(timezone_name_from_abbr)
 }
 /* }}} */
 
-/* {{{ proto long timezone_offset_get(DateTimeZone object, DateTime object)
+/* {{{ proto long timezone_offset_get(DateTimeZone object, DateTimeInterface datetime)
    Returns the timezone offset.
 */
 PHP_FUNCTION(timezone_offset_get)
@@ -3809,13 +3809,13 @@ PHP_FUNCTION(timezone_offset_get)
 	php_date_obj        *dateobj;
 	timelib_time_offset *offset;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO", &object, date_ce_timezone, &dateobject, date_ce_date) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO", &object, date_ce_timezone, &dateobject, date_ce_interface) == FAILURE) {
 		RETURN_FALSE;
 	}
 	tzobj = Z_PHPTIMEZONE_P(object);
 	DATE_CHECK_INITIALIZED(tzobj->initialized, DateTimeZone);
 	dateobj = Z_PHPDATE_P(dateobject);
-	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTimeInterface);
 
 	switch (tzobj->type) {
 		case TIMELIB_ZONETYPE_ID:
@@ -3938,7 +3938,7 @@ PHP_FUNCTION(timezone_location_get)
 }
 /* }}} */
 
-static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *format, int format_length TSRMLS_DC) /* {{{ */
+static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *format, size_t format_length TSRMLS_DC) /* {{{ */
 {
 	timelib_time     *b = NULL, *e = NULL;
 	timelib_rel_time *p = NULL;
@@ -4221,7 +4221,7 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 /* }}} */
 
 /* {{{ date_interval_format -  */
-static zend_string *date_interval_format(char *format, int format_len, timelib_rel_time *t TSRMLS_DC)
+static zend_string *date_interval_format(char *format, size_t format_len, timelib_rel_time *t TSRMLS_DC)
 {
 	smart_str            string = {0};
 	int                  i, length, have_format_spec = 0;
@@ -4302,7 +4302,7 @@ PHP_FUNCTION(date_interval_format)
 }
 /* }}} */
 
-static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_rel_time **d, zend_long *recurrences, /*const*/ char *format, int format_length TSRMLS_DC) /* {{{ */
+static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_rel_time **d, zend_long *recurrences, /*const*/ char *format, size_t format_length TSRMLS_DC) /* {{{ */
 {
 	timelib_time     *b = NULL, *e = NULL;
 	timelib_rel_time *p = NULL;

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -218,4 +218,19 @@ check_branch_existence:
 	}
 
 	return SUCCESS;
+}
+
+void phpdbg_btree_branch_dump(phpdbg_btree_branch *branch, zend_ulong depth) {
+	if (branch) {
+		if (depth--) {
+			phpdbg_btree_branch_dump(branch->branches[0], depth);
+			phpdbg_btree_branch_dump(branch->branches[1], depth);
+		} else {
+			fprintf(stderr, "%p: %p\n", (void *) branch->result.idx, branch->result.ptr);
+		}
+	}
+}
+
+void phpdbg_btree_dump(phpdbg_btree *tree) {
+	phpdbg_btree_branch_dump(tree->branch, tree->depth);
 }

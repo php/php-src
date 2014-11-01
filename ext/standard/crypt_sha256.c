@@ -120,7 +120,7 @@ static void sha256_process_block (const void *buffer, size_t len, struct sha256_
 	/* First increment the byte count.  FIPS 180-2 specifies the possible
 	 length of the file up to 2^64 bits.  Here we only compute the
 	 number of bytes.  Do a double word increment.  */
-	ctx->total[0] += len;
+	ctx->total[0] += (uint32_t)len;
 	if (ctx->total[0] < len) {
 		++ctx->total[1];
 	}
@@ -261,7 +261,7 @@ static void sha256_process_bytes(const void *buffer, size_t len, struct sha256_c
 		size_t add = 128 - left_over > len ? len : 128 - left_over;
 
 		  memcpy(&ctx->buffer[left_over], buffer, add);
-		  ctx->buflen += add;
+		  ctx->buflen += (uint32_t)add;
 
 		if (ctx->buflen > 64) {
 			sha256_process_block(ctx->buffer, ctx->buflen & ~63, ctx);
@@ -306,7 +306,7 @@ compilers don't.  */
 			left_over -= 64;
 			memcpy(ctx->buffer, &ctx->buffer[64], left_over);
 		}
-		ctx->buflen = left_over;
+		ctx->buflen = (uint32_t)left_over;
 	}
 }
 
@@ -529,7 +529,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	}
 
 	cp = __php_stpncpy(cp, salt, MIN ((size_t) MAX (0, buflen), salt_len));
-	buflen -= MIN((size_t) MAX (0, buflen), salt_len);
+	buflen -= MIN(MAX (0, buflen), (int)salt_len);
 
 	if (buflen > 0) {
 		*cp++ = '$';
@@ -600,7 +600,7 @@ char * php_sha256_crypt(const char *key, const char *salt)
 	static int buflen;
 	int needed = (sizeof(sha256_salt_prefix) - 1
 			+ sizeof(sha256_rounds_prefix) + 9 + 1
-			+ strlen(salt) + 1 + 43 + 1);
+			+ (int)strlen(salt) + 1 + 43 + 1);
 
 	if (buflen < needed) {
 		char *new_buffer = (char *) realloc(buffer, needed);

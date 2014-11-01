@@ -2072,54 +2072,6 @@ static int php_check_dots(const char *element, int n) /* {{{ */
 
 #define IS_BACKSLASH(c) ((c) == '/')
 
-#ifdef COMPILE_DL_PHAR
-/* stupid-ass non-extern declaration in tsrm_strtok.h breaks dumbass MS compiler */
-static inline int in_character_class(char ch, const char *delim) /* {{{ */
-{
-	while (*delim) {
-		if (*delim == ch) {
-			return 1;
-		}
-		++delim;
-	}
-	return 0;
-}
-/* }}} */
-
-char *tsrm_strtok_r(char *s, const char *delim, char **last) /* {{{ */
-{
-	char *token;
-
-	if (s == NULL) {
-		s = *last;
-	}
-
-	while (*s && in_character_class(*s, delim)) {
-		++s;
-	}
-
-	if (!*s) {
-		return NULL;
-	}
-
-	token = s;
-
-	while (*s && !in_character_class(*s, delim)) {
-		++s;
-	}
-
-	if (!*s) {
-		*last = s;
-	} else {
-		*s = '\0';
-		*last = s + 1;
-	}
-
-	return token;
-}
-/* }}} */
-#endif
-
 /**
  * Remove .. and . references within a phar filename
  */
@@ -3355,6 +3307,7 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 
 	zend_try {
 		failed = 0;
+		CG(zend_lineno) = 0;
 		res = phar_orig_compile_file(file_handle, type TSRMLS_CC);
 	} zend_catch {
 		failed = 1;

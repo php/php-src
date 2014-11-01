@@ -151,7 +151,7 @@ static HashTable* spl_fixedarray_object_get_gc(zval *obj, zval **table, int *n T
 
 	if (intern->array) {
 		*table = intern->array->elements;
-		*n = intern->array->size;
+		*n = (int)intern->array->size;
 	} else {
 		*table = NULL;
 		*n = 0;
@@ -165,10 +165,10 @@ static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {
 {
 	spl_fixedarray_object *intern  = Z_SPLFIXEDARRAY_P(obj);
 	HashTable *ht = zend_std_get_properties(obj TSRMLS_CC);
-	int  i = 0;
+	zend_long  i = 0;
 
 	if (intern->array) {
-		int j = zend_hash_num_elements(ht);
+		zend_long j = zend_hash_num_elements(ht);
 
 		for (i = 0; i < intern->array->size; i++) {
 			if (!Z_ISUNDEF(intern->array->elements[i])) {

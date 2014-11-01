@@ -34,6 +34,7 @@ $obj = new Test;
 ['Test', 'id']()()('var_dump')(11);
 'id'()('id')('var_dump')(12);
 ('i' . 'd')()('var_dump')(13);
+'\id'('var_dump')(14);
 
 ?>
 --EXPECT--
@@ -51,3 +52,4 @@ int(10)
 int(11)
 int(12)
 int(13)
+int(14)

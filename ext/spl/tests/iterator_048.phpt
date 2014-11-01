@@ -13,11 +13,6 @@ class MyRecursiveRegexIterator extends RecursiveRegexIterator
 			var_dump($v);
 		}
 	}
-
-	function accept()
-	{
-		return $this->hasChildren() || parent::accept();
-	}
 }
 
 $ar = new RecursiveArrayIterator(array('Foo', array('Bar'), 'FooBar', array('Baz'), 'Biz'));

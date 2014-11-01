@@ -384,6 +384,9 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 		if (p->key) {
 			p->key = accel_new_interned_string(p->key TSRMLS_CC);
 		}
+		if (Z_FUNC(p->val)->common.function_name) {
+			Z_FUNC(p->val)->common.function_name = accel_new_interned_string(Z_FUNC(p->val)->common.function_name TSRMLS_CC);
+		}
 	}
 
 	/* class table hash keys, class names, properties, methods, constants, etc */
@@ -424,6 +427,9 @@ static void accel_use_shm_interned_strings(TSRMLS_D)
 			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			if (q->key) {
 				q->key = accel_new_interned_string(q->key TSRMLS_CC);
+			}
+			if (Z_FUNC(q->val)->common.function_name) {
+				Z_FUNC(q->val)->common.function_name = accel_new_interned_string(Z_FUNC(q->val)->common.function_name TSRMLS_CC);
 			}
 		}
 
@@ -1121,10 +1127,6 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		return new_persistent_script;
 	}
 
-	if (!compact_persistent_script(new_persistent_script)) {
-		return new_persistent_script;
-	}
-
 	/* exclusive lock */
 	zend_shared_alloc_lock(TSRMLS_C);
 
@@ -1164,10 +1166,6 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		zend_shared_alloc_unlock(TSRMLS_C);
 		return new_persistent_script;
 	}
-
-	/* cleanup after calculation */
-	new_persistent_script->mem  = ZCG(mem);
-	new_persistent_script->size = memory_used;
 
 	/* Copy into shared memory */
 	new_persistent_script = zend_accel_script_persist(new_persistent_script, &key, key_length TSRMLS_CC);

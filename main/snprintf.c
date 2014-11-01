@@ -311,7 +311,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
 /* char * ap_php_conv_10() {{{ */
-char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
+PHPAPI char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 	   register bool_int * is_negative, char *buf_end, register size_t *len)
 {
 	register char *p = buf_end;
@@ -474,7 +474,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register size_t *len) /* {{{ */
+PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register size_t *len) /* {{{ */
 {
 	register int mask = (1 << nbits) - 1;
 	register char *p = buf_end;
@@ -1248,7 +1248,7 @@ PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{
 	strx_printv(&cc, buf, len, format, ap);
 	va_end(ap);
 	if (cc >= len) {
-		cc = len -1;
+		cc = (int)len -1;
 		buf[cc] = '\0';
 	}
 	return cc;
@@ -1261,7 +1261,7 @@ PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list a
 
 	strx_printv(&cc, buf, len, format, ap);
 	if (cc >= len) {
-		cc = len -1;
+		cc = (int)len -1;
 		buf[cc] = '\0';
 	}
 	return cc;

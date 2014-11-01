@@ -187,8 +187,6 @@ void init_executor(TSRMLS_D) /* {{{ */
 
 	EG(scope) = NULL;
 
-	ZVAL_OBJ(&EG(This), NULL);
-
 	EG(active) = 1;
 }
 /* }}} */
@@ -523,7 +521,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 	} else if (Z_TYPE_P(p) == IS_CONSTANT) {
 		int refcount;
 
-		SEPARATE_ZVAL_IF_NOT_REF(p);
+		SEPARATE_ZVAL_NOREF(p);
 		MARK_CONSTANT_VISITED(p);
 		refcount =  Z_REFCOUNTED_P(p) ? Z_REFCOUNT_P(p) : 1;
 		const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p) TSRMLS_CC);
@@ -531,7 +529,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 			char *actual = Z_STRVAL_P(p);
 
 			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
-				int len;
+				size_t len;
 
 				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
 				len = Z_STRLEN_P(p) - ((colon - Z_STRVAL_P(p)) + 1);
@@ -546,7 +544,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 			} else {
 				zend_string *save = Z_STR_P(p);
 				char *slash;
-				int actual_len = Z_STRLEN_P(p);
+				size_t actual_len = Z_STRLEN_P(p);
 				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
 					actual = slash + 1;
 					actual_len -= (actual - Z_STRVAL_P(p));
@@ -601,7 +599,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 		if (Z_REFCOUNTED_P(p)) Z_SET_REFCOUNT_P(p, refcount);
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
 		zval tmp;
-		SEPARATE_ZVAL_IF_NOT_REF(p);
+		SEPARATE_ZVAL_NOREF(p);
 
 		zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope TSRMLS_CC);
 		if (inline_change) {
@@ -663,7 +661,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	zend_execute_data *call, dummy_execute_data;
 	zend_fcall_info_cache fci_cache_local;
 	zend_function *func;
-	zend_object *orig_object;
 	zend_class_entry *orig_scope;
 	zval tmp;
 
@@ -685,7 +682,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			break;
 	}
 
-	orig_object = Z_OBJ(EG(This));
 	orig_scope = EG(scope);
 
 	/* Initialize execute_data */
@@ -703,7 +699,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		dummy_execute_data = *EG(current_execute_data);
 		dummy_execute_data.prev_execute_data = EG(current_execute_data);
 		dummy_execute_data.call = NULL;
-		dummy_execute_data.prev_nested_call = NULL;
 		dummy_execute_data.opline = NULL;
 		dummy_execute_data.func = NULL;
 		EG(current_execute_data) = &dummy_execute_data;
@@ -741,7 +736,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	func = fci_cache->function_handler;
-	call = zend_vm_stack_push_call_frame(func, fci->param_count, 0, fci_cache->called_scope, fci_cache->object, NULL TSRMLS_CC);
+	call = zend_vm_stack_push_call_frame(VM_FRAME_TOP_FUNCTION,
+		func, fci->param_count, fci_cache->called_scope, fci_cache->object, NULL TSRMLS_CC);
 	calling_scope = fci_cache->calling_scope;
 	fci->object = fci_cache->object;
 	if (fci->object &&
@@ -834,19 +830,22 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	call->num_args = fci->param_count;
 
 	EG(scope) = calling_scope;
-	if (!fci->object ||
-	    (func->common.fn_flags & ZEND_ACC_STATIC)) {
-		Z_OBJ(EG(This)) = call->object = NULL;
+	if (func->common.fn_flags & ZEND_ACC_STATIC) {
+		fci->object = NULL;
+	}
+	if (!fci->object) {
+		Z_OBJ(call->This) = NULL;
+		Z_TYPE_INFO(call->This) = IS_UNDEF;
 	} else {
-		Z_OBJ(EG(This)) = fci->object;
-		Z_ADDREF(EG(This));
+		ZVAL_OBJ(&call->This, fci->object);
+		GC_REFCOUNT(fci->object)++;
 	}
 
 	if (func->type == ZEND_USER_FUNCTION) {
 		EG(scope) = func->common.scope;
 		call->symbol_table = fci->symbol_table;
 		if (EXPECTED((func->op_array.fn_flags & ZEND_ACC_GENERATOR) == 0)) {
-			zend_init_execute_data(call, &func->op_array, fci->retval, VM_FRAME_TOP_FUNCTION TSRMLS_CC);
+			zend_init_execute_data(call, &func->op_array, fci->retval TSRMLS_CC);
 			zend_execute_ex(call TSRMLS_CC);
 		} else {
 			zend_generator_create_zval(call, &func->op_array, fci->retval TSRMLS_CC);
@@ -862,7 +861,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(current_execute_data) = call;
 		if (EXPECTED(zend_execute_internal == NULL)) {
 			/* saves one function call if zend_execute_internal is not used */
-			func->internal_function.handler(fci->param_count, fci->retval TSRMLS_CC);
+			func->internal_function.handler(call, fci->retval TSRMLS_CC);
 		} else {
 			zend_execute_internal(call, fci->retval TSRMLS_CC);
 		}
@@ -892,7 +891,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (fci->object) {
 			call->prev_execute_data = EG(current_execute_data);
 			EG(current_execute_data) = call;
-			fci->object->handlers->call_method(func->common.function_name, fci->object, fci->param_count, fci->retval TSRMLS_CC);
+			fci->object->handlers->call_method(func->common.function_name, fci->object, call, fci->retval TSRMLS_CC);
 			EG(current_execute_data) = call->prev_execute_data;
 		} else {
 			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
@@ -912,11 +911,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 	}
 
-	if (Z_OBJ(EG(This))) {
-		zval_ptr_dtor(&EG(This));
+	if (fci->object) {
+		OBJ_RELEASE(fci->object);
 	}
 
-	Z_OBJ(EG(This)) = orig_object;
 	EG(scope) = orig_scope;
 	if (EG(current_execute_data) == &dummy_execute_data) {
 		EG(current_execute_data) = dummy_execute_data.prev_execute_data;
@@ -1057,7 +1055,7 @@ ZEND_API zend_class_entry *zend_lookup_class(zend_string *name TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC) /* {{{ */
+ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char *string_name TSRMLS_DC) /* {{{ */
 {
 	zval pv;
 	zend_op_array *new_op_array;
@@ -1125,7 +1123,7 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 }
 /* }}} */
 
-ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
+ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
 {
 	int result;
 

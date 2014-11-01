@@ -294,7 +294,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{{ */
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
-	__int64 t;
+	LARGE_INTEGER t;
 	const size_t path_len = strlen(path);
 	ALLOCA_FLAG(use_heap_large);
 
@@ -380,7 +380,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	}
 
 	if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-		int len = strlen(path);
+		size_t len = strlen(path);
 
 		if (path[len-4] == '.') {
 			if (_memicmp(path+len-3, "exe", 3) == 0 ||
@@ -393,10 +393,11 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	}
 
 	buf->st_nlink = 1;
-	t = data.nFileSizeHigh;
-	t = t << 32;
-	t |= data.nFileSizeLow;
-	buf->st_size = t;
+	t.HighPart = data.nFileSizeHigh;
+	t.LowPart = data.nFileSizeLow;
+	/* It's an overflow on 32 bit, however it won't fix as long
+	as zend_long is 32 bit. */
+	buf->st_size = (zend_long)t.QuadPart;
 	buf->st_atime = FileTimeToUnixTime(&data.ftLastAccessTime);
 	buf->st_ctime = FileTimeToUnixTime(&data.ftCreationTime);
 	buf->st_mtime = FileTimeToUnixTime(&data.ftLastWriteTime);
@@ -466,7 +467,7 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 		cwd[0] = '\0';
 	}
 
-	main_cwd_state.cwd_length = strlen(cwd);
+	main_cwd_state.cwd_length = (int)strlen(cwd);
 #ifdef TSRM_WIN32
 	if (main_cwd_state.cwd_length >= 2 && cwd[1] == ':') {
 		cwd[0] = toupper(cwd[0]);
@@ -1145,7 +1146,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				return -1;
 			}
 			if (save) {
-				i = strlen(data.cFileName);
+				i = (int)strlen(data.cFileName);
 				memcpy(path+j, data.cFileName, i+1);
 				j += i;
 			} else {
@@ -1179,7 +1180,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 /* returns 0 for ok, 1 for error */
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath TSRMLS_DC) /* {{{ */
 {
-	int path_length = strlen(path);
+	int path_length = (int)strlen(path);
 	char resolved_path[MAXPATHLEN];
 	int start = 1;
 	int ll = 0;
@@ -1393,7 +1394,7 @@ CWD_API int virtual_chdir(const char *path TSRMLS_DC) /* {{{ */
 
 CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path TSRMLS_DC) TSRMLS_DC) /* {{{ */
 {
-	int length = strlen(path);
+	int length = (int)strlen(path);
 	char *temp;
 	int retval;
 	ALLOCA_FLAG(use_heap)
@@ -1971,7 +1972,7 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) /* {{{ 
 	} else if (!IS_ABSOLUTE_PATH(path, strlen(path)) &&
 					VCWD_GETCWD(cwd, MAXPATHLEN)) {
 		new_state.cwd = estrdup(cwd);
-		new_state.cwd_length = strlen(cwd);
+		new_state.cwd_length = (int)strlen(cwd);
 	} else {
 		new_state.cwd = (char*)emalloc(1);
 		if (new_state.cwd == NULL) {

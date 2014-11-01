@@ -44,6 +44,7 @@
 static const char rcsid[] = "#(@) $Id$";
 
 #include <errno.h>
+#include <string.h>
 
 #ifdef HAVE_GICONV_H
 #include <giconv.h>

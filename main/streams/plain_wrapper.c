@@ -41,6 +41,7 @@
 #include "php_streams_int.h"
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
+# include "win32/time.h"
 #endif
 
 #define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC TSRMLS_CC)
@@ -324,7 +325,11 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
+#ifdef PHP_WIN32
+		int bytes_written = write(data->fd, buf, (unsigned int)count);
+#else
 		int bytes_written = write(data->fd, buf, count);
+#endif
 		if (bytes_written < 0) return 0;
 		return (size_t) bytes_written;
 	} else {
@@ -348,6 +353,34 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
+#ifdef PHP_WIN32
+		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
+
+		if (self->is_pipe || self->is_process_pipe) {
+			HANDLE ph = (HANDLE)_get_osfhandle(data->fd);
+			int retry = 0;
+			DWORD avail_read = 0;
+
+			do {
+				/* Look ahead to get the available data amount to read. Do the same
+					as read() does, however not blocking forever. In case it failed,
+					no data will be read (better than block). */
+				if (!PeekNamedPipe(ph, NULL, 0, NULL, &avail_read, NULL)) {
+					break;
+				}
+				/* If there's nothing to read, wait in 100ms periods. */
+				if (0 == avail_read) {
+					usleep(100000);
+				}
+			} while (0 == avail_read && retry++ < 320);
+
+			/* Reduce the required data amount to what is available, otherwise read()
+				will block.*/
+			if (avail_read < count) {
+				count = avail_read;
+			}
+		}
+#endif
 		ret = read(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 
 		if (ret == (size_t)-1 && errno == EINTR) {
@@ -747,8 +780,8 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 
 							GetSystemInfo(&info);
 							gran = info.dwAllocationGranularity;
-							loffs = (range->offset / gran) * gran;
-							delta = range->offset - loffs;
+							loffs = ((DWORD)range->offset / gran) * gran;
+							delta = (DWORD)range->offset - loffs;
 						}
 
 						data->last_mapped_addr = MapViewOfFile(data->file_mapping, acc, 0, loffs, range->length + delta);
@@ -1070,11 +1103,11 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 	}
 
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(url_from, strlen(url_from))) {
+	if (!php_win32_check_trailing_space(url_from, (int)strlen(url_from))) {
 		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to TSRMLS_CC);
 		return 0;
 	}
-	if (!php_win32_check_trailing_space(url_to, strlen(url_to))) {
+	if (!php_win32_check_trailing_space(url_to, (int)strlen(url_to))) {
 		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to TSRMLS_CC);
 		return 0;
 	}
@@ -1166,7 +1199,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
 		char *e;
 		zend_stat_t sb;
-		int dir_len = strlen(dir);
+		int dir_len = (int)strlen(dir);
 		int offset = 0;
 		char buf[MAXPATHLEN];
 
@@ -1240,7 +1273,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 #if PHP_WIN32
-	int url_len = strlen(url);
+	int url_len = (int)strlen(url);
 #endif
 	if (php_check_open_basedir(url TSRMLS_CC)) {
 		return 0;
@@ -1275,7 +1308,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 	mode_t mode;
 	int ret = 0;
 #if PHP_WIN32
-	int url_len = strlen(url);
+	int url_len = (int)strlen(url);
 #endif
 
 #if PHP_WIN32
@@ -1393,7 +1426,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 		return NULL;
 	}
 
-	filename_length = strlen(filename);
+	filename_length = (int)strlen(filename);
 
 	/* Relative path open */
 	if (*filename == '.' && (IS_SLASH(filename[1]) || filename[1] == '.')) {
@@ -1458,8 +1491,8 @@ not_relative_path:
 	 */
 	if (zend_is_executing(TSRMLS_C)) {
 		exec_fname = zend_get_executed_filename(TSRMLS_C);
-		exec_fname_length = strlen(exec_fname);
-		path_length = strlen(path);
+		exec_fname_length = (int)strlen(exec_fname);
+		path_length = (int)strlen(path);
 
 		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if ((exec_fname && exec_fname[0] == '[')

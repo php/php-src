@@ -535,7 +535,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 					}
 					if (n) {
 						memcpy(tp->val + l2 , cp + l1 + 1, n);
-						add_next_index_stringl(&entries, cp + l1 + 1, n);
+						add_next_index_stringl(&entries, (char *) cp + l1 + 1, n);
 					}
 					l1 = l1 + n + 1;
 					l2 = l2 + n;

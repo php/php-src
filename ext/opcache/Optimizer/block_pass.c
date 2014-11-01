@@ -169,6 +169,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			case ZEND_FE_RESET:
 			case ZEND_NEW:
 			case ZEND_JMP_SET:
+			case ZEND_COALESCE:
 				START_BLOCK_OP(ZEND_OP2(opline).opline_num);
 				START_BLOCK_OP(opno + 1);
 				break;
@@ -203,14 +204,12 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 		j = 0;
 		for (i = 0; i< op_array->last_brk_cont; i++) {
 			if (op_array->brk_cont_array[i].start >= 0 &&
-			    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
-			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_SWITCH_FREE)) {
+			    op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE) {
 				int parent = op_array->brk_cont_array[i].parent;
 
 				while (parent >= 0 &&
 				       op_array->brk_cont_array[parent].start < 0 &&
-				       op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FREE &&
-				       op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_SWITCH_FREE) {
+				       op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FREE) {
 					parent = op_array->brk_cont_array[parent].parent;
 				}
 				op_array->brk_cont_array[i].parent = parent;
@@ -224,8 +223,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			j = 0;
 			for (i = 0; i< op_array->last_brk_cont; i++) {
 				if (op_array->brk_cont_array[i].start >= 0 &&
-				    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
-				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_SWITCH_FREE)) {
+				    op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE) {
 					if (i != j) {
 						op_array->brk_cont_array[j] = op_array->brk_cont_array[i];
 					}
@@ -296,6 +294,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				case ZEND_FE_RESET:
 				case ZEND_NEW:
 				case ZEND_JMP_SET:
+				case ZEND_COALESCE:
 				case ZEND_FE_FETCH:
 					cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
 					/* break missing intentionally */
@@ -617,7 +616,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_SOURCE(opline->op1)->opcode == ZEND_QM_ASSIGN &&
 			ZEND_OP1_TYPE(VAR_SOURCE(opline->op1)) == IS_CONST &&
 			opline->opcode != ZEND_CASE &&         /* CASE _always_ expects variable */
-			opline->opcode != ZEND_FETCH_DIM_TMP_VAR &&   /* in 5.1, FETCH_DIM_TMP_VAR expects T */
+			opline->opcode != ZEND_FETCH_LIST &&
 			opline->opcode != ZEND_FE_RESET &&
 			opline->opcode != ZEND_FREE
 			) {
@@ -1056,25 +1055,6 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			COPY_NODE(opline->op1, src->op1);
 			MAKE_NOP(src);
 		} else if ((opline->opcode == ZEND_ADD_STRING ||
-					opline->opcode == ZEND_ADD_CHAR) &&
-				  	ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
-				  	VAR_SOURCE(opline->op1) &&
-				  	VAR_SOURCE(opline->op1)->opcode == ZEND_INIT_STRING) {
-			/* convert T = INIT_STRING(), T = ADD_STRING(T, X) to T = QM_ASSIGN(X) */
-			/* CHECKME: Remove ZEND_ADD_VAR optimization, since some conversions -
-			   namely, BOOL(false)->string - don't allocate memory but use empty_string
-			   and ADD_CHAR fails */
-			zend_op *src = VAR_SOURCE(opline->op1);
-			VAR_UNSET(opline->op1);
-			COPY_NODE(opline->op1, opline->op2);
-			if (opline->opcode == ZEND_ADD_CHAR) {
-				char c = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
-				ZVAL_STRINGL(&ZEND_OP1_LITERAL(opline), &c, 1);
-			}
-			SET_UNUSED(opline->op2);
-			MAKE_NOP(src);
-			opline->opcode = ZEND_QM_ASSIGN;
-		} else if ((opline->opcode == ZEND_ADD_STRING ||
 				   	opline->opcode == ZEND_ADD_CHAR ||
 				   	opline->opcode == ZEND_ADD_VAR ||
 				   	opline->opcode == ZEND_CONCAT) &&
@@ -1095,28 +1075,11 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			opline->opcode = ZEND_CONCAT;
 			literal_dtor(&ZEND_OP2_LITERAL(src)); /* will take care of empty_string too */
 			MAKE_NOP(src);
-//??? This optimization can't work anymore because ADD_VAR returns IS_TMP_VAR
-//??? and ZEND_CAST returns IS_VAR.
-//??? BTW: it wan't used for long time, because we don't use INIT_STRING
-#if 0
-		} else if (opline->opcode == ZEND_ADD_VAR &&
-					ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
-					VAR_SOURCE(opline->op1) &&
-					VAR_SOURCE(opline->op1)->opcode == ZEND_INIT_STRING) {
-			/* convert T = INIT_STRING(), T = ADD_VAR(T, X) to T = CAST(STRING, X) */
-			zend_op *src = VAR_SOURCE(opline->op1);
-			VAR_UNSET(opline->op1);
-			COPY_NODE(opline->op1, opline->op2);
-			SET_UNUSED(opline->op2);
-			MAKE_NOP(src);
-			opline->opcode = ZEND_CAST;
-			opline->extended_value = IS_STRING;
-#endif
 		} else if ((opline->opcode == ZEND_ADD_STRING ||
 					opline->opcode == ZEND_ADD_CHAR ||
 					opline->opcode == ZEND_ADD_VAR ||
 					opline->opcode == ZEND_CONCAT) &&
-					ZEND_OP1_TYPE(opline) == (IS_TMP_VAR|IS_VAR) &&
+					(ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR)) &&
 					VAR_SOURCE(opline->op1) &&
 					VAR_SOURCE(opline->op1)->opcode == ZEND_CAST &&
 					VAR_SOURCE(opline->op1)->extended_value == IS_STRING) {
@@ -1363,10 +1326,9 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 				} else if (0&& block->op1_to != block &&
 			           block->op1_to != blocks &&
 						   op_array->last_try_catch == 0 &&
-				           target->opcode != ZEND_FREE &&
-				           target->opcode != ZEND_SWITCH_FREE) {
+				           target->opcode != ZEND_FREE) {
 				    /* Block Reordering (saves one JMP on each "for" loop iteration)
-				     * It is disabled for some cases (ZEND_FREE/ZEND_SWITCH_FREE)
+				     * It is disabled for some cases (ZEND_FREE)
 				     * which may break register allocation.
             	     */
 					zend_bool can_reorder = 0;

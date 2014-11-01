@@ -373,6 +373,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
 					case ZEND_JMP_SET:
+					case ZEND_COALESCE:
 					case ZEND_NEW:
 					case ZEND_FE_RESET:
 					case ZEND_FE_FETCH:
@@ -485,7 +486,10 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 static void zend_persist_op_array(zval *zv TSRMLS_DC)
 {
-	Z_PTR_P(zv) = zend_accel_memdup(Z_PTR_P(zv), sizeof(zend_op_array));
+	memcpy(ZCG(arena_mem), Z_PTR_P(zv), sizeof(zend_op_array));
+	zend_shared_alloc_register_xlat_entry(Z_PTR_P(zv), ZCG(arena_mem));
+	Z_PTR_P(zv) = ZCG(arena_mem);
+	ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_op_array)));
 	zend_persist_op_array_ex(Z_PTR_P(zv), NULL TSRMLS_CC);
 }
 
@@ -493,7 +497,10 @@ static void zend_persist_property_info(zval *zv TSRMLS_DC)
 {
 	zend_property_info *prop;
 
-	prop = Z_PTR_P(zv) = zend_accel_memdup(Z_PTR_P(zv), sizeof(zend_property_info));
+	memcpy(ZCG(arena_mem), Z_PTR_P(zv), sizeof(zend_property_info));
+	zend_shared_alloc_register_xlat_entry(Z_PTR_P(zv), ZCG(arena_mem));
+	prop = Z_PTR_P(zv) = ZCG(arena_mem);
+	ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_property_info)));
 	zend_accel_store_interned_string(prop->name);
 	if (prop->doc_comment) {
 		if (ZCG(accel_directives).save_comments) {
@@ -513,7 +520,10 @@ static void zend_persist_class_entry(zval *zv TSRMLS_DC)
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (ce->type == ZEND_USER_CLASS) {
-		ce = Z_PTR_P(zv) = zend_accel_memdup(ce, sizeof(zend_class_entry));
+		memcpy(ZCG(arena_mem), Z_PTR_P(zv), sizeof(zend_class_entry));
+		zend_shared_alloc_register_xlat_entry(Z_PTR_P(zv), ZCG(arena_mem));
+		ce = Z_PTR_P(zv) = ZCG(arena_mem);
+		ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_class_entry)));
 		zend_accel_store_interned_string(ce->name);
 		zend_hash_persist(&ce->function_table, zend_persist_op_array TSRMLS_CC);
 		if (ce->default_properties_table) {
@@ -702,13 +712,20 @@ static void zend_accel_persist_class_table(HashTable *class_table TSRMLS_DC)
 
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, unsigned int key_length TSRMLS_DC)
 {
+	script->mem = ZCG(mem);
+
 	zend_shared_alloc_clear_xlat_table();
-	zend_hash_persist(&script->function_table, zend_persist_op_array TSRMLS_CC);
-	zend_accel_persist_class_table(&script->class_table TSRMLS_CC);
-	zend_persist_op_array_ex(&script->main_op_array, script TSRMLS_CC);
+	
+	zend_accel_store(script, sizeof(zend_persistent_script));
 	*key = zend_accel_memdup(*key, key_length + 1);
 	zend_accel_store_string(script->full_path);
-	zend_accel_store(script, sizeof(zend_persistent_script));
+
+	script->arena_mem = ZCG(arena_mem) = ZCG(mem);
+	ZCG(mem) = (void*)((char*)ZCG(mem) + script->arena_size);
+
+	zend_accel_persist_class_table(&script->class_table TSRMLS_CC);
+	zend_hash_persist(&script->function_table, zend_persist_op_array TSRMLS_CC);
+	zend_persist_op_array_ex(&script->main_op_array, script TSRMLS_CC);
 
 	return script;
 }

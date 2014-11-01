@@ -59,11 +59,9 @@ typedef union _znode_op {
 	uint32_t      constant;
 	uint32_t      var;
 	uint32_t      num;
-	zend_ulong     hash;
 	uint32_t      opline_num; /*  Needs to be signed */
 	zend_op       *jmp_addr;
 	zval          *zv;
-	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */
@@ -99,8 +97,6 @@ void zend_compile_expr(znode *node, zend_ast *ast TSRMLS_DC);
 void zend_compile_var(znode *node, zend_ast *ast, uint32_t type TSRMLS_DC);
 void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC);
 void zend_const_expr_to_zval(zval *result, zend_ast *ast TSRMLS_DC);
-
-typedef struct _zend_execute_data zend_execute_data;
 
 #define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data TSRMLS_DC
 #define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data TSRMLS_CC
@@ -222,6 +218,9 @@ typedef struct _zend_try_catch_element {
 
 /* op_array has finally blocks */
 #define ZEND_ACC_HAS_FINALLY_BLOCK		0x20000000
+
+/* internal function is allocated at arena */
+#define ZEND_ACC_ARENA_ALLOCATED		0x20000000
 
 #define ZEND_CE_IS_TRAIT(ce) (((ce)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)
 
@@ -359,23 +358,29 @@ struct _zend_execute_data {
 	zend_execute_data   *call;             /* current call                   */
 	void               **run_time_cache;
 	zend_function       *func;             /* executed op_array              */
-	uint32_t            num_args;
-	zend_uchar           flags;
-	zend_uchar           frame_kind;
+	zval                 This;
 	zend_class_entry    *called_scope;
-	zend_object         *object;
-	zend_execute_data   *prev_nested_call;
 	zend_execute_data   *prev_execute_data;
+	uint32_t             frame_info;
+	uint32_t             num_args;
 	zval                *return_value;
 	zend_class_entry    *scope;            /* function scope (self)          */
 	zend_array          *symbol_table;
 	const zend_op       *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
 	zend_object         *delayed_exception;
-	zval                 old_error_reporting;
+	uint32_t             silence_op_num;
+	uint32_t             old_error_reporting;
 };
 
-#define ZEND_CALL_CTOR               (1 << 0)
-#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 1)
+#define VM_FRAME_KIND_MASK           0x000000ff
+#define VM_FRAME_FLAGS_MASK          0xffffff00
+
+#define ZEND_CALL_CTOR               (1 << 8)
+#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 9)
+
+#define VM_FRAME_INFO(kind, flags)   ((kind) | (flags))
+#define VM_FRAME_KIND(info)          ((info) & VM_FRAME_KIND_MASK)
+#define VM_FRAME_FLAGS(info)         ((info) & VM_FRAME_FLAGS_MASK)
 
 #define ZEND_CALL_FRAME_SLOT \
 	((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
@@ -383,7 +388,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_ARG(call, n) \
 	(((zval*)(call)) + ((n) + (ZEND_CALL_FRAME_SLOT - 1)))
 
-#define EX(element) execute_data.element
+#define EX(element) 			((execute_data)->element)
 
 #define EX_VAR_2(ex, n)			((zval*)(((char*)(ex)) + ((int)(n))))
 #define EX_VAR_NUM_2(ex, n)     (((zval*)(ex)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
@@ -614,8 +619,6 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 #define ZEND_FETCH_TYPE_MASK		0x70000000
 
 #define ZEND_FETCH_STANDARD		    0x00000000
-#define ZEND_FETCH_ADD_LOCK		    0x08000000
-#define ZEND_FETCH_MAKE_REF		    0x04000000
 
 #define ZEND_ISSET				    0x02000000
 #define ZEND_ISEMPTY			    0x01000000

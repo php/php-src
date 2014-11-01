@@ -37,8 +37,9 @@ typedef struct _php_com_dotnet_object {
 	VARIANT v;
 	int modified;
 
+	int code_page;
+
 	ITypeInfo *typeinfo;
-	zend_long code_page;
 
 	zend_class_entry *ce;
 
@@ -107,9 +108,9 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 		size_t namelen, DISPID *dispid TSRMLS_DC);
 int php_com_do_invoke_by_id(php_com_dotnet_object *obj, DISPID dispid,
 		WORD flags,	VARIANT *v, int nargs, zval *args, int silent, int allow_noarg TSRMLS_DC);
-int php_com_do_invoke(php_com_dotnet_object *obj, char *name, int namelen,
+int php_com_do_invoke(php_com_dotnet_object *obj, char *name, size_t namelen,
 		WORD flags,	VARIANT *v, int nargs, zval *args, int allow_noarg TSRMLS_DC);
-int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
+int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *f,
 		WORD flags,	VARIANT *v, int nargs, zval *args TSRMLS_DC);
 
 /* com_wrapper.c */

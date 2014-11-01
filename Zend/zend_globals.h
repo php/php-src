@@ -91,7 +91,6 @@ struct _zend_compiler_globals {
 	zend_bool parse_error;
 	zend_bool in_compilation;
 	zend_bool short_tags;
-	zend_bool asp_tags;
 
 	zend_declarables declarables;
 
@@ -165,16 +164,18 @@ struct _zend_executor_globals {
 	JMP_BUF *bailout;
 
 	int error_reporting;
-	int orig_error_reporting;
 	int exit_status;
 
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
 	HashTable *zend_constants;	/* constants table */
 
-	zend_class_entry *scope;
+	zval          *vm_stack_top;
+	zval          *vm_stack_end;
+	zend_vm_stack  vm_stack;
 
-	zval This;
+	struct _zend_execute_data *current_execute_data;
+	zend_class_entry *scope;
 
 	zend_long precision;
 
@@ -194,8 +195,6 @@ struct _zend_executor_globals {
 
 	HashTable regular_list;
 	HashTable persistent_list;
-
-	zend_vm_stack argument_stack;
 
 	int user_error_handler_error_reporting;
 	zval user_error_handler;
@@ -221,11 +220,7 @@ struct _zend_executor_globals {
 	const zend_op *opline_before_exception;
 	zend_op exception_op[3];
 
-	struct _zend_execute_data *current_execute_data;
-
 	struct _zend_module_entry *current_module;
-
-	zend_property_info std_property_info;
 
 	zend_bool active;
 	zend_bool valid_symbol_table;

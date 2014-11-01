@@ -104,7 +104,7 @@ static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const voi
  */
 PHPAPI int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC)
 {
-	register unsigned int i;
+	register size_t i;
 	register int sense;
 	int big, iflag;
 	register u_char *f1, *f2, *t, *b, *tp2, *q, *l1, *l2;
@@ -264,8 +264,8 @@ COPY:	    			b = t;
  */
 static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC)
 {
-	int i, length, size2, tmp, sense;
-	u_char *f1, *f2, *s, *l2, *last, *p2;
+	size_t i, length, size2, sense;
+	u_char *f1, *f2, *s, *l2, *last, *p2, tmp;
 
 	size2 = size*2;
 	if (n <= 5) {
@@ -336,7 +336,7 @@ static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp
 static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const void *, const void * TSRMLS_DC) TSRMLS_DC)
 {
 	u_char *ai, *s, *t, *u, tmp;
-	int i;
+	size_t i;
 
 	for (ai = a+size; --n >= 1; ai += size)
 		for (t = ai; t > a; t -= size) {

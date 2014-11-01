@@ -144,7 +144,8 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 	if (old_object->ce->default_properties_count) {
 		for (i = 0; i < old_object->ce->default_properties_count; i++) {
 			zval_ptr_dtor(&new_object->properties_table[i]);
-			ZVAL_COPY(&new_object->properties_table[i], &old_object->properties_table[i]);
+			ZVAL_COPY_VALUE(&new_object->properties_table[i], &old_object->properties_table[i]);
+			zval_add_ref(&new_object->properties_table[i]);
 		}
 	}
 	if (old_object->properties) {
