@@ -804,6 +804,46 @@ PHP_RSHUTDOWN_FUNCTION(date)
  */
 #define DATE_FORMAT_RFC3339  "Y-m-d\\TH:i:sP"
 
+/*
+ * RFC7231, Section 7.1.1.1: https://www.ietf.org/rfc/rfc7231.txt
+ *
+ * IMF-fixdate  = day-name "," SP date1 SP time-of-day SP GMT
+ * fixed length/zone/capitalization subset of the format
+ * see Section 3.3 of [RFC5322]
+ *
+ *  day-name     = %x4D.6F.6E ; "Mon", case-sensitive
+ *               / %x54.75.65 ; "Tue", case-sensitive
+ *               / %x57.65.64 ; "Wed", case-sensitive
+ *               / %x54.68.75 ; "Thu", case-sensitive
+ *               / %x46.72.69 ; "Fri", case-sensitive
+ *               / %x53.61.74 ; "Sat", case-sensitive
+ *               / %x53.75.6E ; "Sun", case-sensitive
+ *
+ *  date1        = day SP month SP year
+ *               ; e.g., 02 Jun 1982 *
+ *  day          = 2DIGIT
+ *  month        = %x4A.61.6E ; "Jan", case-sensitive
+ *               / %x46.65.62 ; "Feb", case-sensitive
+ *               / %x4D.61.72 ; "Mar", case-sensitive
+ *               / %x41.70.72 ; "Apr", case-sensitive
+ *               / %x4D.61.79 ; "May", case-sensitive
+ *               / %x4A.75.6E ; "Jun", case-sensitive
+ *               / %x4A.75.6C ; "Jul", case-sensitive
+ *               / %x41.75.67 ; "Aug", case-sensitive
+ *               / %x53.65.70 ; "Sep", case-sensitive
+ *               / %x4F.63.74 ; "Oct", case-sensitive
+ *               / %x4E.6F.76 ; "Nov", case-sensitive
+ *               / %x44.65.63 ; "Dec", case-sensitive
+ *  year         = 4DIGIT *
+ *  GMT          = %x47.4D.54 ; "GMT", case-sensitive *
+ *  time-of-day  = hour ":" minute ":" second
+ *               ; 00:00:00 - 23:59:60 (leap second) *
+ *  hour         = 2DIGIT
+ *  minute       = 2DIGIT
+ *  second       = 2DIGIT
+ */
+#define DATE_FORMAT_RFC7231  "D, d M Y H:i:s \\G\\M\\T"
+
 #define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
 
 /*
@@ -852,6 +892,7 @@ PHP_MINIT_FUNCTION(date)
 	REGISTER_STRING_CONSTANT("DATE_RFC1123", DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC2822", DATE_FORMAT_RFC2822, CONST_CS | CONST_PERSISTENT);
  	REGISTER_STRING_CONSTANT("DATE_RFC3339", DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
+ 	REGISTER_STRING_CONSTANT("DATE_RFC7231", DATE_FORMAT_RFC7231, CONST_CS | CONST_PERSISTENT);
 /*
  * RSS 2.0 Specification: http://blogs.law.harvard.edu/tech/rss
  *   "All date-times in RSS conform to the Date and Time Specification of RFC 822,
@@ -1069,6 +1110,14 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 		return STR_EMPTY_ALLOC();
 	}
 
+	if (strcmp(format, DATE_FORMAT_RFC7231) == 0) {
+		t->tz_info = NULL;
+		t->zone_type = TIMELIB_ZONETYPE_ABBR;
+		t->z = 0;
+
+		localtime = 0;
+	}
+
 	if (localtime) {
 		if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
 			offset = timelib_time_offset_ctor();
@@ -1238,7 +1287,7 @@ PHPAPI zend_string *php_format_date(char *format, size_t format_len, time_t ts, 
 
 	t = timelib_time_ctor();
 
-	if (localtime) {
+	if (localtime && strcmp(format, DATE_FORMAT_RFC7231) != 0) {
 		tzi = get_timezone_info(TSRMLS_C);
 		t->tz_info = tzi;
 		t->zone_type = TIMELIB_ZONETYPE_ID;
@@ -2027,6 +2076,7 @@ static void date_register_classes(TSRMLS_D) /* {{{ */
 	REGISTER_DATE_CLASS_CONST_STRING("RFC1123", DATE_FORMAT_RFC1123);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC2822", DATE_FORMAT_RFC2822);
 	REGISTER_DATE_CLASS_CONST_STRING("RFC3339", DATE_FORMAT_RFC3339);
+	REGISTER_DATE_CLASS_CONST_STRING("RFC7231", DATE_FORMAT_RFC7231);
 	REGISTER_DATE_CLASS_CONST_STRING("RSS",     DATE_FORMAT_RFC1123);
 	REGISTER_DATE_CLASS_CONST_STRING("W3C",     DATE_FORMAT_RFC3339);
 

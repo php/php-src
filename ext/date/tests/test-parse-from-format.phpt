@@ -4,7 +4,7 @@ date_create_from_format() and date_parse_from_format().
 <?php
 date_default_timezone_set('Europe/Oslo');
 $formats = array( DATE_ATOM, DATE_COOKIE, DATE_ISO8601, DATE_RFC822,
-		DATE_RFC850, DATE_RFC1036, DATE_RFC1123, DATE_RFC2822, DATE_RFC3339,
+		DATE_RFC850, DATE_RFC1036, DATE_RFC1123, DATE_RFC2822, DATE_RFC3339, DATE_RFC7231,
 		DATE_RSS, DATE_W3C );
 
 foreach( $formats as $format )
@@ -120,9 +120,20 @@ object(DateTime)#3 (3) {
   string(6) "+02:00"
 }
 
+string(21) "D, d M Y H:i:s \G\M\T"
+string(29) "Tue, 08 Jul 2008 22:14:12 GMT"
+object(DateTime)#2 (3) {
+  ["date"]=>
+  string(26) "2008-07-08 22:14:12.000000"
+  ["timezone_type"]=>
+  int(2)
+  ["timezone"]=>
+  string(6) "GMT"
+}
+
 string(16) "D, d M Y H:i:s O"
 string(31) "Tue, 08 Jul 2008 22:14:12 +0200"
-object(DateTime)#2 (3) {
+object(DateTime)#1 (3) {
   ["date"]=>
   string(26) "2008-07-08 22:14:12.000000"
   ["timezone_type"]=>
@@ -133,7 +144,7 @@ object(DateTime)#2 (3) {
 
 string(13) "Y-m-d\TH:i:sP"
 string(25) "2008-07-08T22:14:12+02:00"
-object(DateTime)#1 (3) {
+object(DateTime)#3 (3) {
   ["date"]=>
   string(26) "2008-07-08 22:14:12.000000"
   ["timezone_type"]=>

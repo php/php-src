@@ -13,6 +13,7 @@ Date constants
         DATE_RFC1123,
         DATE_RFC2822,
         DATE_RFC3339,
+        DATE_RFC7231,
         DATE_RSS,
         DATE_W3C
     );
@@ -34,6 +35,7 @@ Date constants
         DATE_RFC1123 == DateTime::RFC1123,
         DATE_RFC2822 == DateTime::RFC2822,
         DATE_RFC3339 == DateTime::RFC3339,
+        DATE_RFC7231 == DateTime::RFC7231,
         DATE_RSS     == DateTime::RSS,
         DATE_W3C     == DateTime::W3C
     );
@@ -57,11 +59,14 @@ string(31) "Sat, 01 Jul 2006 14:27:30 +0200"
 string(31) "Tue, 30 May 2006 14:32:13 +0200"
 string(25) "2006-07-01T14:27:30+02:00"
 string(25) "2006-05-30T14:32:13+02:00"
+string(29) "Sat, 01 Jul 2006 12:27:30 GMT"
+string(29) "Tue, 30 May 2006 12:32:13 GMT"
 string(31) "Sat, 01 Jul 2006 14:27:30 +0200"
 string(31) "Tue, 30 May 2006 14:32:13 +0200"
 string(25) "2006-07-01T14:27:30+02:00"
 string(25) "2006-05-30T14:32:13+02:00"
 
+bool(true)
 bool(true)
 bool(true)
 bool(true)

@@ -24,6 +24,7 @@ $inputs = array(
 	  'DATE_RFC1123 Constant' => DATE_RFC1123,
 	  'DATE_RFC2822 Constant' => DATE_RFC2822,
 	  'DATE_RFC3339 Constant' => DATE_RFC3339,
+	  'DATE_RFC7231 Constant' => DATE_RFC7231,
 	  'DATE_RSS Constant' => DATE_RSS,
 	  'DATE_W3C Constant' => DATE_W3C,
 );
@@ -70,6 +71,10 @@ string(%d) "%s"
 
 --DATE_RFC3339 Constant--
 string(25) "2008-08-08T08:08:08+00:00"
+string(%d) "%s"
+
+--DATE_RFC7231 Constant--
+string(29) "Fri, 08 Aug 2008 08:08:08 GMT"
 string(%d) "%s"
 
 --DATE_RSS Constant--
