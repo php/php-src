@@ -1,5 +1,7 @@
 --TEST--
 Bug #68104 (Segfault while pre-evaluating a disabled function)
+--CREDITS--
+manuel <manuel@mausz.at>
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
