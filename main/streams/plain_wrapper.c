@@ -1272,6 +1272,13 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 
 static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC)
 {
+	char *p;
+	if ((p = strstr(url, "://")) != NULL) {
+		if (p < strchr(url, '/')) {
+			url = p + 3;
+		}
+	}
+
 #if PHP_WIN32
 	int url_len = (int)strlen(url);
 #endif
