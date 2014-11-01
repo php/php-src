@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ???, PHP 5.4.35
+13 Nov 2014 PHP 5.4.35
 
 - Core:
   . Fixed bug #68365 (zend_mm_heap corrupted after memory overflow in
@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - GMP:
  . Fixed bug #63595 (GMP memory management conflicts with other libraries
    using GMP). (Remi)
+
+- PDO_pgsql:
+  . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
 
 16 Oct 2014, PHP 5.4.34
 
