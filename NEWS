@@ -33,6 +33,7 @@ PHP                                                                        NEWS
     a VARCHAR column) (Keyur Govande)
 
 - PDO_pgsql:
+  . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
   . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
     when not in transaction) (Matteo)
 
