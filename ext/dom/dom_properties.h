@@ -137,6 +137,8 @@ int dom_node_text_content_write(dom_object *obj, zval *newval TSRMLS_DC);
 
 /* nodelist properties */
 int dom_nodelist_length_read(dom_object *obj, zval *retval TSRMLS_DC);
+xmlNodePtr dom_nodelist_xml_item(dom_nnodemap_object *objmap, long index);
+xmlNodePtr dom_nodelist_baseobj_item(dom_nnodemap_object *objmap, long index);
 
 /* notation properties */
 int dom_notation_public_id_read(dom_object *obj, zval *retval TSRMLS_DC);

@@ -1144,7 +1144,7 @@ static void spl_array_it_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, zend_long ar_flags, int just_array TSRMLS_DC) {
 
 	if (Z_TYPE_P(array) == IS_ARRAY) {
-		SEPARATE_ZVAL_IF_NOT_REF(array);
+		SEPARATE_ARRAY(array);
 	}
 
 	if (Z_TYPE_P(array) == IS_OBJECT && (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator)) {

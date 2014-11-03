@@ -80,7 +80,7 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 	php_stream_input_t *input = stream->abstract;
 	size_t read;
 
-	if (!SG(post_read) && SG(read_post_bytes) < input->position + count) {
+	if (!SG(post_read) && SG(read_post_bytes) < (int64_t)(input->position + count)) {
 		/* read requested data from SAPI */
 		int read_bytes = sapi_read_post_block(buf, count TSRMLS_CC);
 
@@ -323,7 +323,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			return NULL;
 		}
 		
-		fd = dup(fildes_ori);
+		fd = dup((int)fildes_ori);
 		if (fd == -1) {
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC,
 				"Error duping file descriptor " ZEND_LONG_FMT "; possibly it doesn't exist: "

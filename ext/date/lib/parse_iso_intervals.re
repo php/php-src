@@ -398,7 +398,7 @@ isoweek          = year4 "-"? "W" weekofyear;
 
 /*!max:re2c */
 
-void timelib_strtointerval(char *s, int len, 
+void timelib_strtointerval(char *s, size_t len, 
                            timelib_time **begin, timelib_time **end, 
 						   timelib_rel_time **period, int *recurrences, 
 						   struct timelib_error_container **errors)

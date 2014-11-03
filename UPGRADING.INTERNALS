@@ -3,10 +3,6 @@ $Id$
 PHP 7.0 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
-  a. Addition of do_operation and compare object handlers
-  b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
-  c. POST data handling
-  d. Arginfo changes
   e. New data types
   f. zend_parse_parameters() specs
   g. sprintf() formats
@@ -103,6 +99,16 @@ PHP 7.0 INTERNALS UPGRADE NOTES
       -                                                   ZEND_ULONG_MAX    replaces ULONG_MAX where appropriate
       -                                                   SIZEOF_ZEND_LONG  reworked SIZEOF_ZEND_LONG representing the size of zend_long datatype
       -                                                   ZEND_SIZE_MAX     Max value of size_t
+
+  k. The get_class_entry object handler is no longer available. Instead
+     zend_object.ce is always used.
+
+  l. The get_class_name object handler is now only used for displaying class
+     names in debugging functions like var_dump(). It is no longer used in
+     get_class(), get_parent_class() or similar.
+
+     The handler is now obligatory, no longer accepts a `parent` argument and
+     must return a non-NULL zend_string*, which will be released by the caller.
 
 ========================
 2. Build system changes

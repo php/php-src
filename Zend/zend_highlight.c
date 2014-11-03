@@ -54,7 +54,7 @@ ZEND_API void zend_html_putc(char c)
 }
 
 
-ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
+ZEND_API void zend_html_puts(const char *s, size_t len TSRMLS_DC)
 {
 	const unsigned char *ptr = (const unsigned char*)s, *end = ptr + len;
 	unsigned char *filtered = NULL;

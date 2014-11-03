@@ -60,7 +60,7 @@ static php_stream_filter_status_t php_mcrypt_filter(
 		if (data->blocksize) {
 			/* Blockmode cipher */
 			char *outchunk;
-			int chunklen = bucket->buflen + data->block_used, n;
+			int chunklen = (int)(bucket->buflen + data->block_used), n;
 			php_stream_bucket *newbucket;
 
 			outchunk = pemalloc(chunklen, data->persistent);
@@ -91,9 +91,9 @@ static php_stream_filter_status_t php_mcrypt_filter(
 			/* Stream cipher */
 			php_stream_bucket_make_writeable(bucket TSRMLS_CC);
 			if (data->encrypt) {
-				mcrypt_generic(data->module, bucket->buf, bucket->buflen);
+				mcrypt_generic(data->module, bucket->buf, (int)bucket->buflen);
 			} else {
-				mdecrypt_generic(data->module, bucket->buf, bucket->buflen);
+				mdecrypt_generic(data->module, bucket->buf, (int)bucket->buflen);
 			}
 			php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 
@@ -201,13 +201,13 @@ static php_stream_filter *php_mcrypt_filter_create(const char *filtername, zval 
 	if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), ZEND_STRL("key"))) &&
 		Z_TYPE_P(tmpzval) == IS_STRING) {
 		key = Z_STRVAL_P(tmpzval);
-		key_len = Z_STRLEN_P(tmpzval);
+		key_len = (int)Z_STRLEN_P(tmpzval);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "key not specified or is not a string");
 		return NULL;
 	}
 
-	mcrypt_module = mcrypt_module_open(cipher, algo_dir, mode, mode_dir);
+	mcrypt_module = mcrypt_module_open((char *)cipher, algo_dir, mode, mode_dir);
 	if (mcrypt_module == MCRYPT_FAILED) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open encryption module");
 		return NULL;

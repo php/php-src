@@ -1123,7 +1123,7 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 	return stream;
 }
 
-PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
+PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block TSRMLS_DC)
 {
 	int ret = SUCCESS;
 	int flags;

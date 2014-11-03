@@ -61,9 +61,9 @@ PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
-static int php_info_print_html_esc(const char *str, int len) /* {{{ */
+static int php_info_print_html_esc(const char *str, size_t len) /* {{{ */
 {
-	int written;
+	size_t written;
 	zend_string *new_str;
 	TSRMLS_FETCH();
 
@@ -77,7 +77,7 @@ static int php_info_print_html_esc(const char *str, int len) /* {{{ */
 static int php_info_printf(const char *fmt, ...) /* {{{ */
 {
 	char *buf;
-	int len, written;
+	size_t len, written;
 	va_list argv;
 	TSRMLS_FETCH();
 
@@ -1026,7 +1026,7 @@ PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header) /* {
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_printf("<tr class=\"h\"><th colspan=\"%d\">%s</th></tr>\n", num_cols, header );
 	} else {
-		spaces = (74 - strlen(header));
+		spaces = (int)(74 - strlen(header));
 		php_info_printf("%*s%s%*s\n", (int)(spaces/2), " ", header, (int)(spaces/2), " ");
 	}
 }
@@ -1176,7 +1176,7 @@ PHP_FUNCTION(phpinfo)
 
 	/* Andale!  Andale!  Yee-Hah! */
 	php_output_start_default(TSRMLS_C);
-	php_print_info(flag TSRMLS_CC);
+	php_print_info((int)flag TSRMLS_CC);
 	php_output_end(TSRMLS_C);
 
 	RETURN_TRUE;
@@ -1218,7 +1218,7 @@ PHP_FUNCTION(phpcredits)
 		return;
 	}
 
-	php_print_credits(flag TSRMLS_CC);
+	php_print_credits((int)flag TSRMLS_CC);
 	RETURN_TRUE;
 }
 /* }}} */

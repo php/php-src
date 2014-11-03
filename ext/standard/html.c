@@ -377,7 +377,7 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 {
 	int i;
 	enum entity_charset charset = cs_utf_8;
-	int len = 0;
+	size_t len = 0;
 	const zend_encoding *zenc;
 
 	/* Default is now UTF-8 */
@@ -1513,7 +1513,7 @@ PHP_FUNCTION(htmlspecialchars_decode)
 		return;
 	}
 
-	replaced = php_unescape_html_entities((unsigned char*)str, str_len, 0 /*!all*/, quote_style, NULL TSRMLS_CC);
+	replaced = php_unescape_html_entities((unsigned char*)str, str_len, 0 /*!all*/, (int)quote_style, NULL TSRMLS_CC);
 	if (replaced) {
 		RETURN_STR(replaced);
 	}
@@ -1547,7 +1547,7 @@ PHP_FUNCTION(html_entity_decode)
 	if (!hint_charset) {
 		default_charset = get_default_charset(TSRMLS_C);
 	}
-	replaced = php_unescape_html_entities((unsigned char*)str->val, str->len, 1 /*all*/, quote_style, (hint_charset ? hint_charset->val : default_charset) TSRMLS_CC);
+	replaced = php_unescape_html_entities((unsigned char*)str->val, str->len, 1 /*all*/, (int)quote_style, (hint_charset ? hint_charset->val : default_charset) TSRMLS_CC);
 
 	if (replaced) {
 		RETURN_STR(replaced);
@@ -1649,7 +1649,7 @@ PHP_FUNCTION(get_html_translation_table)
 
 	array_init(return_value);
 	
-	entity_table = determine_entity_table(all, doctype);
+	entity_table = determine_entity_table((int)all, doctype);
 	if (all && !CHARSET_UNICODE_COMPAT(charset)) {
 		to_uni_table = enc_to_uni_index[charset];
 	}

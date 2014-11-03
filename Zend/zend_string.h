@@ -282,6 +282,30 @@ EMPTY_SWITCH_DEFAULT_CASE()
 	return hash;
 }
 
+static zend_always_inline void zend_interned_empty_string_init(zend_string **s TSRMLS_DC)
+{
+	zend_string *str;
+
+	str = zend_string_alloc(sizeof("")-1, 1);
+	str->val[0] = '\000';
+
+#ifndef ZTS
+	*s = zend_new_interned_string(str TSRMLS_CC);
+#else
+	zend_string_hash_val(str);
+	str->gc.u.v.flags |= IS_STR_INTERNED;
+	*s = str;
+#endif
+}
+
+static zend_always_inline void zend_interned_empty_string_free(zend_string **s TSRMLS_DC)
+{
+	if (NULL != *s) {
+		free(*s);
+		*s = NULL;
+	}
+}
+
 #endif /* ZEND_STRING_H */
 
 /*

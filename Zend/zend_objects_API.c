@@ -219,106 +219,10 @@ ZEND_API void zend_object_store_ctor_failed(zend_object *obj TSRMLS_DC)
 	GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 }
 
-/* Proxy objects workings */
-typedef struct _zend_proxy_object {
-	zend_object std;
-	zval object;
-	zval property;
-} zend_proxy_object;
-
-static zend_object_handlers zend_object_proxy_handlers;
-
-ZEND_API void zend_objects_proxy_destroy(zend_object *object TSRMLS_DC)
-{
-}
-
-ZEND_API void zend_objects_proxy_free_storage(zend_proxy_object *object TSRMLS_DC)
-{
-	zval_ptr_dtor(&object->object);
-	zval_ptr_dtor(&object->property);
-	efree(object);
-}
-
-ZEND_API void zend_objects_proxy_clone(zend_proxy_object *object, zend_proxy_object **object_clone TSRMLS_DC)
-{
-	*object_clone = emalloc(sizeof(zend_proxy_object));
-	(*object_clone)->object = object->object;
-	(*object_clone)->property = object->property;
-	Z_ADDREF_P(&(*object_clone)->property);
-	Z_ADDREF_P(&(*object_clone)->object);
-}
-
-ZEND_API zend_object *zend_object_create_proxy(zval *object, zval *member TSRMLS_DC)
-{
-	zend_proxy_object *obj = emalloc(sizeof(zend_proxy_object));
-
-	GC_REFCOUNT(obj) = 1;
-	GC_TYPE_INFO(obj) = IS_OBJECT;
-	obj->std.ce = NULL;
-	obj->std.properties = NULL;
-	obj->std.guards = NULL;
-	obj->std.handlers = &zend_object_proxy_handlers;
-	
-	ZVAL_COPY(&obj->object, object);
-	ZVAL_DUP(&obj->property, member);
-
-	return (zend_object*)obj;
-}
-
-ZEND_API void zend_object_proxy_set(zval *property, zval *value TSRMLS_DC)
-{
-	zend_proxy_object *probj = (zend_proxy_object*)Z_OBJ_P(property);
-
-	if (Z_OBJ_HT(probj->object) && Z_OBJ_HT(probj->object)->write_property) {
-		Z_OBJ_HT(probj->object)->write_property(&probj->object, &probj->property, value, NULL TSRMLS_CC);
-	} else {
-		zend_error(E_WARNING, "Cannot write property of object - no write handler defined");
-	}
-}
-
-ZEND_API zval* zend_object_proxy_get(zval *property, zval *rv TSRMLS_DC)
-{
-	zend_proxy_object *probj = (zend_proxy_object*)Z_OBJ_P(property);
-
-	if (Z_OBJ_HT(probj->object) && Z_OBJ_HT(probj->object)->read_property) {
-		return Z_OBJ_HT(probj->object)->read_property(&probj->object, &probj->property, BP_VAR_R, NULL, rv TSRMLS_CC);
-	} else {
-		zend_error(E_WARNING, "Cannot read property of object - no read handler defined");
-	}
-
-	return NULL;
-}
-
 ZEND_API zend_object_handlers *zend_get_std_object_handlers(void)
 {
 	return &std_object_handlers;
 }
-
-static zend_object_handlers zend_object_proxy_handlers = {
-	ZEND_OBJECTS_STORE_HANDLERS,
-
-	NULL,						/* read_property */
-	NULL,						/* write_property */
-	NULL,						/* read dimension */
-	NULL,						/* write_dimension */
-	NULL,						/* get_property_ptr_ptr */
-	zend_object_proxy_get,		/* get */
-	zend_object_proxy_set,		/* set */
-	NULL,						/* has_property */
-	NULL,						/* unset_property */
-	NULL,						/* has_dimension */
-	NULL,						/* unset_dimension */
-	NULL,						/* get_properties */
-	NULL,						/* get_method */
-	NULL,						/* call_method */
-	NULL,						/* get_constructor */
-	NULL,						/* get_class_entry */
-	NULL,						/* get_class_name */
-	NULL,						/* compare_objects */
-	NULL,						/* cast_object */
-	NULL,						/* count_elements */
-};
-
 
 /*
  * Local variables:

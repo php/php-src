@@ -402,7 +402,7 @@ ZEND_FUNCTION(func_num_args)
 {
 	zend_execute_data *ex = EX(prev_execute_data);
 
-	if (ex->frame_kind == VM_FRAME_NESTED_FUNCTION || ex->frame_kind == VM_FRAME_TOP_FUNCTION) {
+	if (VM_FRAME_KIND(ex->frame_info) == VM_FRAME_NESTED_FUNCTION || VM_FRAME_KIND(ex->frame_info) == VM_FRAME_TOP_FUNCTION) {
 		RETURN_LONG(ex->num_args);
 	} else {
 		zend_error(E_WARNING, "func_num_args():  Called from the global scope - no function context");
@@ -430,7 +430,7 @@ ZEND_FUNCTION(func_get_arg)
 	}
 
 	ex = EX(prev_execute_data);
-	if (ex->frame_kind != VM_FRAME_NESTED_FUNCTION && ex->frame_kind != VM_FRAME_TOP_FUNCTION) {
+	if (VM_FRAME_KIND(ex->frame_info) != VM_FRAME_NESTED_FUNCTION && VM_FRAME_KIND(ex->frame_info) != VM_FRAME_TOP_FUNCTION) {
 		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
@@ -464,7 +464,7 @@ ZEND_FUNCTION(func_get_args)
 	uint32_t i;
 	zend_execute_data *ex = EX(prev_execute_data);
 
-	if (ex->frame_kind != VM_FRAME_NESTED_FUNCTION && ex->frame_kind != VM_FRAME_TOP_FUNCTION) {
+	if (VM_FRAME_KIND(ex->frame_info) != VM_FRAME_NESTED_FUNCTION && VM_FRAME_KIND(ex->frame_info) != VM_FRAME_TOP_FUNCTION) {
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
@@ -811,7 +811,7 @@ ZEND_FUNCTION(get_class)
 		}
 	}
 
-	RETURN_STR(zend_get_object_classname(Z_OBJ_P(obj) TSRMLS_CC));
+	RETURN_STR(zend_string_copy(Z_OBJCE_P(obj)->name));
 }
 /* }}} */
 
@@ -838,7 +838,6 @@ ZEND_FUNCTION(get_parent_class)
 {
 	zval *arg;
 	zend_class_entry *ce = NULL;
-	zend_string *name;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z", &arg) == FAILURE) {
 		return;
@@ -854,12 +853,7 @@ ZEND_FUNCTION(get_parent_class)
 	}
 
 	if (Z_TYPE_P(arg) == IS_OBJECT) {
-		if (Z_OBJ_HT_P(arg)->get_class_name
-			&& (name = Z_OBJ_HT_P(arg)->get_class_name(Z_OBJ_P(arg), 1 TSRMLS_CC)) != NULL) {
-			RETURN_STR(name);
-		} else {
-			ce = zend_get_class_entry(Z_OBJ_P(arg) TSRMLS_CC);
-		}
+		ce = Z_OBJ_P(arg)->ce;
 	} else if (Z_TYPE_P(arg) == IS_STRING) {
 	    ce = zend_lookup_class(Z_STR_P(arg) TSRMLS_CC);
 	}
@@ -905,7 +899,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass) /* 
 		if (!instance_ce) {
 			RETURN_FALSE;
 		}
-	} else if (Z_TYPE_P(obj) == IS_OBJECT && HAS_CLASS_ENTRY(*obj)) {
+	} else if (Z_TYPE_P(obj) == IS_OBJECT) {
 		instance_ce = Z_OBJCE_P(obj);
 	} else {
 		RETURN_FALSE;
@@ -1065,7 +1059,7 @@ ZEND_FUNCTION(get_object_vars)
 }
 /* }}} */
 
-static int same_name(const char *key, const char *name, uint32_t name_len) /* {{{ */
+static int same_name(const char *key, const char *name, size_t name_len) /* {{{ */
 {
 	char *lcname = zend_str_tolower_dup(name, name_len);
 	int ret = memcmp(lcname, key, name_len) == 0;
@@ -1089,10 +1083,6 @@ ZEND_FUNCTION(get_class_methods)
 	}
 
 	if (Z_TYPE_P(klass) == IS_OBJECT) {
-		/* TBI!! new object handlers */
-		if (!HAS_CLASS_ENTRY(*klass)) {
-			RETURN_FALSE;
-		}
 		ce = Z_OBJCE_P(klass);
 	} else if (Z_TYPE_P(klass) == IS_STRING) {
 	    ce = zend_lookup_class(Z_STR_P(klass) TSRMLS_CC);
@@ -1112,7 +1102,7 @@ ZEND_FUNCTION(get_class_methods)
 		       zend_check_protected(mptr->common.scope, EG(scope)))
 		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
 		       EG(scope) == mptr->common.scope)))) {
-			uint len = mptr->common.function_name->len;
+			size_t len = mptr->common.function_name->len;
 
 			/* Do not display old-style inherited constructors */
 			if (!key) {
@@ -1840,6 +1830,10 @@ ZEND_FUNCTION(create_function)
 			RETURN_FALSE;
 		}
 		(*func->refcount)++;
+		static_variables = func->static_variables;
+		func->static_variables = NULL;
+		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
+		func->static_variables = static_variables;
 
 		function_name = zend_string_alloc(sizeof("0lambda_")+MAX_LENGTH_OF_LONG, 0);
 		function_name->val[0] = '\0';
@@ -1847,10 +1841,6 @@ ZEND_FUNCTION(create_function)
 		do {
 			function_name->len = snprintf(function_name->val + 1, sizeof("lambda_")+MAX_LENGTH_OF_LONG, "lambda_%d", ++EG(lambda_count)) + 1;
 		} while (zend_hash_add_ptr(EG(function_table), function_name, func) == NULL);
-		static_variables = func->static_variables;
-		func->static_variables = NULL;
-		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
-		func->static_variables = static_variables;
 		RETURN_STR(function_name);
 	} else {
 		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
@@ -2185,9 +2175,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 			function_name = (func->common.scope &&
 			                 func->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
-					(object ?
-						zend_get_class_entry(object TSRMLS_CC) : 
-						func->common.scope), func)->val :
+					(object ? object->ce : func->common.scope), func)->val :
 				(func->common.function_name ? 
 					func->common.function_name->val : NULL);
 		} else {
@@ -2200,7 +2188,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 				if (func->common.scope) {
 					class_name = func->common.scope->name;
 				} else {
-					class_name = zend_get_object_classname(object TSRMLS_CC);
+					class_name = object->ce->name;
 				}
 
 				call_type = "->";
@@ -2307,7 +2295,6 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 	zend_function *func;
 	const char *function_name;
 	const char *filename;
-	zend_string *class_name;
 	const char *include_filename = NULL;
 	zval stack_frame;
 
@@ -2407,9 +2394,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			function_name = (func->common.scope &&
 			                 func->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
-					(object ?
-						zend_get_class_entry(object TSRMLS_CC) : 
-						func->common.scope), func)->val :
+					(object ? object->ce : func->common.scope), func)->val :
 				(func->common.function_name ? 
 					func->common.function_name->val : NULL);
 		} else {
@@ -2424,8 +2409,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				if (func->common.scope) {
 					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(func->common.scope->name));
 				} else {
-					class_name = zend_get_object_classname(object TSRMLS_CC);
-					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(class_name));
+					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(object->ce->name));
 					
 				}
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {

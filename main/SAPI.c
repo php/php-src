@@ -187,7 +187,7 @@ SAPI_API void sapi_handle_post(void *arg TSRMLS_DC)
 static void sapi_read_post_data(TSRMLS_D)
 {
 	sapi_post_entry *post_entry;
-	uint content_type_length = strlen(SG(request_info).content_type);
+	uint content_type_length = (uint)strlen(SG(request_info).content_type);
 	char *content_type = estrndup(SG(request_info).content_type, content_type_length);
 	char *p;
 	char oldchar=0;
@@ -252,7 +252,7 @@ SAPI_API int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC)
 		return -1;
 	}
 
-	read_bytes = sapi_module.read_post(buffer, buflen TSRMLS_CC);
+	read_bytes = (int)sapi_module.read_post(buffer, buflen TSRMLS_CC);
 
 	if (read_bytes > 0) {
 		/* gogo */
@@ -311,14 +311,14 @@ static inline char *get_default_content_type(uint prefix_len, uint *len TSRMLS_D
 
 	if (SG(default_mimetype)) {
 		mimetype = SG(default_mimetype);
-		mimetype_len = strlen(SG(default_mimetype));
+		mimetype_len = (uint)strlen(SG(default_mimetype));
 	} else {
 		mimetype = SAPI_DEFAULT_MIMETYPE;
 		mimetype_len = sizeof(SAPI_DEFAULT_MIMETYPE) - 1;
 	}
 	if (SG(default_charset)) {
 		charset = SG(default_charset);
-		charset_len = strlen(SG(default_charset));
+		charset_len = (uint)strlen(SG(default_charset));
 	} else {
 		charset = SAPI_DEFAULT_CHARSET;
 		charset_len = sizeof(SAPI_DEFAULT_CHARSET) - 1;
@@ -652,7 +652,7 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 				char sav = *colon_offset;
 
 				*colon_offset = 0;
-		        sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, strlen(sapi_header->header));
+		        sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, (int)strlen(sapi_header->header));
 				*colon_offset = sav;
 			}
 		}
@@ -806,7 +806,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					PHP_STRLCPY(newheader, "Content-type: ", newlen, sizeof("Content-type: ")-1);
 					strlcat(newheader, mimetype, newlen);
 					sapi_header.header = newheader;
-					sapi_header.header_len = newlen - 1;
+					sapi_header.header_len = (uint)(newlen - 1);
 					efree(header_line);
 				}
 				efree(mimetype);
@@ -901,7 +901,7 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 
 				if (SG(sapi_headers).http_status_line) {
 					http_status_line.header = SG(sapi_headers).http_status_line;
-					http_status_line.header_len = strlen(SG(sapi_headers).http_status_line);
+					http_status_line.header_len = (uint)strlen(SG(sapi_headers).http_status_line);
 				} else {
 					http_status_line.header = buf;
 					http_status_line.header_len = slprintf(buf, sizeof(buf), "HTTP/1.0 %d X", SG(sapi_headers).http_response_code);

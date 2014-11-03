@@ -887,22 +887,43 @@ static zend_always_inline void fast_is_not_identical_function(zval *result, zval
 	ZVAL_BOOL(result, Z_TYPE_P(result) != IS_TRUE);
 }
 
-#define ZEND_TRY_BINARY_OBJECT_OPERATION(opcode)                                                  \
-	if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, do_operation)) {                       \
-		if (SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, op2 TSRMLS_CC)) {  \
-			return SUCCESS;                                                                       \
-		}                                                                                         \
-	} else if (Z_TYPE_P(op2) == IS_OBJECT && Z_OBJ_HANDLER_P(op2, do_operation)) {                \
-		if (SUCCESS == Z_OBJ_HANDLER_P(op2, do_operation)(opcode, result, op1, op2 TSRMLS_CC)) {  \
-			return SUCCESS;                                                                       \
-		}                                                                                         \
+#define ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode, binary_op)                                            \
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT)                                                             \
+		&& op1 == result                                                                                   \
+		&& UNEXPECTED(Z_OBJ_HANDLER_P(op1, get))                                                           \
+		&& EXPECTED(Z_OBJ_HANDLER_P(op1, set))) {                                                          \
+		int ret;                                                                                           \
+		zval rv;                                                                                           \
+		zval *objval = Z_OBJ_HANDLER_P(op1, get)(op1, &rv TSRMLS_CC);                                      \
+		Z_ADDREF_P(objval);                                                                                \
+		ret = binary_op(objval, objval, op2 TSRMLS_CC);                                                    \
+		Z_OBJ_HANDLER_P(op1, set)(op1, objval TSRMLS_CC);                                                  \
+		zval_ptr_dtor(objval);                                                                             \
+		return ret;                                                                                        \
+	} else if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT)                                                      \
+		&& UNEXPECTED(Z_OBJ_HANDLER_P(op1, do_operation))) {                                               \
+		if (EXPECTED(SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, op2 TSRMLS_CC))) { \
+			return SUCCESS;                                                                                \
+		}                                                                                                  \
 	}
 
-#define ZEND_TRY_UNARY_OBJECT_OPERATION(opcode)                                                   \
-	if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, do_operation)                          \
-	 && SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, NULL TSRMLS_CC)        \
-	) {                                                                                           \
-		return SUCCESS;                                                                           \
+#define ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(opcode)                                                       \
+	if (UNEXPECTED(Z_TYPE_P(op2) == IS_OBJECT)                                                             \
+		&& UNEXPECTED(Z_OBJ_HANDLER_P(op2, do_operation))                                                  \
+		&& EXPECTED(SUCCESS == Z_OBJ_HANDLER_P(op2, do_operation)(opcode, result, op1, op2 TSRMLS_CC))) {  \
+		return SUCCESS;                                                                                    \
+	}
+
+#define ZEND_TRY_BINARY_OBJECT_OPERATION(opcode, binary_op)                                                \
+	ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode, binary_op)                                                \
+	else                                                                                                   \
+	ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(opcode)
+
+#define ZEND_TRY_UNARY_OBJECT_OPERATION(opcode)                                                            \
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT)                                                             \
+		&& UNEXPECTED(Z_OBJ_HANDLER_P(op1, do_operation))                                                  \
+		&& EXPECTED(SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, NULL TSRMLS_CC))) { \
+		return SUCCESS;                                                                                    \
 	}
 
 /* buf points to the END of the buffer */

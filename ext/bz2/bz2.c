@@ -138,22 +138,48 @@ struct php_bz2_stream_data_t {
 static size_t php_bz2iop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
-	size_t ret;
+	size_t ret = 0;
 	
-	ret = BZ2_bzread(self->bz_file, buf, count);
+	do {
+		int just_read;
+		size_t remain = count - ret;
+		int to_read = (int)(remain <= INT_MAX ? remain : INT_MAX);
 
-	if (ret == 0) {
-		stream->eof = 1;
-	}
+		just_read = BZ2_bzread(self->bz_file, buf, to_read);
+
+		if (just_read < 1) {
+			stream->eof = 0 == just_read;
+			break;
+		}
+
+		ret += just_read;
+	} while (ret < count);
 
 	return ret;
 }
 
 static size_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
+	size_t wrote = 0;
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 
-	return BZ2_bzwrite(self->bz_file, (char*)buf, count); 
+
+	do {
+		int just_wrote;
+		size_t remain = count - wrote;
+		int to_write = (int)(remain <= INT_MAX ? remain : INT_MAX);
+
+		just_wrote = BZ2_bzwrite(self->bz_file, (char*)buf, to_write);
+
+		if (just_wrote < 1) {
+			break;
+		}
+
+		wrote += just_wrote;
+
+	} while (wrote < count);
+
+	return wrote;
 }
 
 static int php_bz2iop_close(php_stream *stream, int close_handle TSRMLS_DC)
@@ -262,7 +288,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		if (stream) {
 			php_socket_t fd;
 			if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
-				bz_file = BZ2_bzdopen(fd, mode);
+				bz_file = BZ2_bzdopen((int)fd, mode);
 			}
 		}
 
@@ -439,7 +465,7 @@ static PHP_FUNCTION(bzopen)
 			RETURN_FALSE;
 		}
 		
-		bz = BZ2_bzdopen(fd, mode);
+		bz = BZ2_bzdopen((int)fd, mode);
 
 		stream = php_stream_bz2open_from_BZFILE(bz, mode, stream);
 	} else {
@@ -554,7 +580,7 @@ static PHP_FUNCTION(bzdecompress)
 	bzs.bzalloc = NULL;
 	bzs.bzfree = NULL;
 
-	if (BZ2_bzDecompressInit(&bzs, 0, small) != BZ_OK) {
+	if (BZ2_bzDecompressInit(&bzs, 0, (int)small) != BZ_OK) {
 		RETURN_FALSE;
 	}
 

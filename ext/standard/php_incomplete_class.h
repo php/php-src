@@ -28,15 +28,14 @@
 
 #define PHP_SET_CLASS_ATTRIBUTES(struc) \
 	/* OBJECTS_FIXME: Fix for new object model */	\
-	if (Z_OBJ_HT_P(struc)->get_class_entry && \
-            Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
+	if (Z_OBJCE_P(struc) == BG(incomplete_class)) {	\
 		class_name = php_lookup_class_name(struc); \
 		if (!class_name) { \
 			class_name = zend_string_init(INCOMPLETE_CLASS, sizeof(INCOMPLETE_CLASS) - 1, 0); \
 		} \
 		incomplete_class = 1; \
 	} else { \
-		class_name = zend_get_object_classname(Z_OBJ_P(struc) TSRMLS_CC); \
+		class_name = zend_string_copy(Z_OBJCE_P(struc)->name); \
 	}
 
 #define PHP_CLEANUP_CLASS_ATTRIBUTES()	\

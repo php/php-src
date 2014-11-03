@@ -382,7 +382,7 @@ PHP_FUNCTION(round)
 
 		case IS_DOUBLE:
 			return_val = (Z_TYPE_P(value) == IS_LONG) ? (double)Z_LVAL_P(value) : Z_DVAL_P(value);
-			return_val = _php_math_round(return_val, places, mode);
+			return_val = _php_math_round(return_val, (int)places, (int)mode);
 			RETURN_DOUBLE(return_val);
 			break;
 
@@ -946,7 +946,7 @@ PHP_FUNCTION(rad2deg)
 PHPAPI zend_long _php_math_basetolong(zval *arg, int base)
 {
 	zend_long num = 0, digit, onum;
-	int i;
+	zend_long i;
 	char c, *s;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
@@ -992,7 +992,7 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 {
 	zend_long num = 0;
 	double fnum = 0;
-	int i;
+	zend_long i;
 	int mode = 0;
 	char c, *s;
 	zend_long cutoff;
@@ -1029,7 +1029,7 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 				num = num * base + c;
 				break;
 			} else {
-				fnum = num;
+				fnum = (double)num;
 				mode = 1;
 			}
 			/* fall-through */
@@ -1234,10 +1234,10 @@ PHP_FUNCTION(base_convert)
 		RETURN_FALSE;
 	}
 
-	if(_php_math_basetozval(number, frombase, &temp) == FAILURE) {
+	if(_php_math_basetozval(number, (int)frombase, &temp) == FAILURE) {
 		RETURN_FALSE;
 	}
-	result = _php_math_zvaltobase(&temp, tobase TSRMLS_CC);
+	result = _php_math_zvaltobase(&temp, (int)tobase TSRMLS_CC);
 	RETVAL_STR(result);
 } 
 /* }}} */
@@ -1284,15 +1284,15 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 
 	/* calculate the length of the return buffer */
 	if (dp) {
-		integral = dp - tmpbuf->val;
+		integral = (int)(dp - tmpbuf->val);
 	} else {
 		/* no decimal point was found */
-		integral = tmpbuf->len;
+		integral = (int)tmpbuf->len;
 	}
 
 	/* allow for thousand separators */
 	if (thousand_sep) {
-		integral += thousand_sep_len * ((integral-1) / 3);
+		integral += (int)(thousand_sep_len * ((integral-1) / 3));
 	}
 	
 	reslen = integral;
@@ -1301,7 +1301,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 		reslen += dec;
 
 		if (dec_point) {
-			reslen += dec_point_len;
+			reslen += (int)dec_point_len;
 		}
 	}
 
@@ -1319,7 +1319,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	 * Take care, as the sprintf implementation may return less places than
 	 * we requested due to internal buffer limitations */
 	if (dec) {
-		int declen = dp ? s - dp : 0;
+		int declen = (int)(dp ? s - dp : 0);
 		int topad = dec > declen ? dec - declen : 0;
 
 		/* pad with '0's */
@@ -1391,7 +1391,7 @@ PHP_FUNCTION(number_format)
 		RETURN_STR(_php_math_number_format(num, 0, dec_point_chr, thousand_sep_chr));
 		break;
 	case 2:
-		RETURN_STR(_php_math_number_format(num, dec, dec_point_chr, thousand_sep_chr));
+		RETURN_STR(_php_math_number_format(num, (int)dec, dec_point_chr, thousand_sep_chr));
 		break;
 	case 4:
 		if (dec_point == NULL) {
@@ -1404,7 +1404,7 @@ PHP_FUNCTION(number_format)
 			thousand_sep_len = 1;
 		}
 
-		RETVAL_STR(_php_math_number_format_ex(num, dec,
+		RETVAL_STR(_php_math_number_format_ex(num, (int)dec,
 				dec_point, dec_point_len, thousand_sep, thousand_sep_len));
 		break;
 	default:

@@ -186,7 +186,7 @@ static HRESULT STDMETHODCALLTYPE disp_getidsofnames(
 			ret = DISP_E_UNKNOWNNAME;
 			rgDispId[i] = 0;
 		} else {
-			rgDispId[i] = Z_LVAL_P(tmp);
+			rgDispId[i] = (DISPID)Z_LVAL_P(tmp);
 		}
 
 		efree(name);
@@ -231,7 +231,7 @@ static HRESULT STDMETHODCALLTYPE disp_getdispid(
 	/* Lookup the name in the hash */
 	if ((tmp = zend_hash_str_find(disp->name_to_dispid, name, namelen)) != NULL) {
 		trace("found it\n");
-		*pid = Z_LVAL_P(tmp);
+		*pid = (DISPID)Z_LVAL_P(tmp);
 		ret = S_OK;
 	}
 

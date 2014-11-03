@@ -23,6 +23,8 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include "php_network.h"
+
 PHP_MINIT_FUNCTION(file);
 PHP_MSHUTDOWN_FUNCTION(file);
 
@@ -73,7 +75,7 @@ PHP_FUNCTION(sys_get_temp_dir);
 PHP_MINIT_FUNCTION(user_streams);
 
 PHPAPI int php_le_stream_context(TSRMLS_D);
-PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC);
+PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block TSRMLS_DC);
 PHPAPI int php_copy_file(const char *src, const char *dest TSRMLS_DC);
 PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk TSRMLS_DC);
 PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx TSRMLS_DC);

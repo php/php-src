@@ -725,7 +725,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 
 
 				case 'n':
-					*(va_arg(ap, int *)) = is_char? ((smart_string *)xbuf)->len : ((smart_str *)xbuf)->s->len;
+					*(va_arg(ap, int *)) = is_char? (int)((smart_string *)xbuf)->len : (int)((smart_str *)xbuf)->s->len;
 					goto skip_output;
 
 					/*

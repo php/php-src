@@ -372,7 +372,7 @@ static zend_string *zend_get_function_declaration(zend_function *fptr TSRMLS_DC)
 		for (i = 0; i < fptr->common.num_args;) {
 			if (arg_info->class_name) {
 				const char *class_name;
-				uint32_t class_name_len;
+				size_t class_name_len;
 				if (!strcasecmp(arg_info->class_name, "self") && fptr->common.scope) {
 					class_name = fptr->common.scope->name->val;
 					class_name_len = fptr->common.scope->name->len;

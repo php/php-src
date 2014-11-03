@@ -178,7 +178,7 @@ static PHP_INI_MH(OnSetPrecision)
 static PHP_INI_MH(OnChangeMemoryLimit)
 {
 	if (new_value) {
-		PG(memory_limit) = zend_atol(new_value->val, new_value->len);
+		PG(memory_limit) = zend_atol(new_value->val, (int)new_value->len);
 	} else {
 		PG(memory_limit) = 1<<30;		/* effectively, no limit */
 	}
@@ -364,7 +364,7 @@ static int php_get_display_errors_mode(char *value, int value_length)
  */
 static PHP_INI_MH(OnUpdateDisplayErrors)
 {
-	PG(display_errors) = (zend_bool) php_get_display_errors_mode(new_value->val, new_value->len);
+	PG(display_errors) = (zend_bool) php_get_display_errors_mode(new_value->val, (int)new_value->len);
 
 	return SUCCESS;
 }
@@ -380,10 +380,10 @@ static PHP_INI_DISP(display_errors_mode)
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 		tmp_value = (ini_entry->orig_value ? ini_entry->orig_value->val : NULL );
-		tmp_value_length = ini_entry->orig_value->len;
+		tmp_value_length = (int)ini_entry->orig_value->len;
 	} else if (ini_entry->value) {
 		tmp_value = ini_entry->value->val;
-		tmp_value_length = ini_entry->value->len;
+		tmp_value_length = (int)ini_entry->value->len;
 	} else {
 		tmp_value = NULL;
 		tmp_value_length = 0;
@@ -529,7 +529,6 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY_EX("highlight.keyword",		HL_KEYWORD_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 	PHP_INI_ENTRY_EX("highlight.string",		HL_STRING_COLOR,	PHP_INI_ALL,	NULL,			php_ini_color_displayer_cb)
 
-	STD_PHP_INI_BOOLEAN("asp_tags",				"0",		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			asp_tags,				zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_ENTRY_EX("display_errors",		"1",		PHP_INI_ALL,		OnUpdateDisplayErrors,	display_errors,			php_core_globals,	core_globals, display_errors_mode)
 	STD_PHP_INI_BOOLEAN("display_startup_errors",	"0",	PHP_INI_ALL,		OnUpdateBool,			display_startup_errors,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
@@ -673,7 +672,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 		fd = VCWD_OPEN_MODE(PG(error_log), O_CREAT | O_APPEND | O_WRONLY, 0644);
 		if (fd != -1) {
 			char *tmp;
-			int len;
+			size_t len;
 			zend_string *error_time_str;
 
 			time(&error_time);
@@ -689,8 +688,11 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 			len = spprintf(&tmp, 0, "[%s] %s%s", error_time_str->val, log_message, PHP_EOL);
 #ifdef PHP_WIN32
 			php_flock(fd, 2);
-#endif
+			/* XXX should eventually write in a loop if len > UINT_MAX */
+			php_ignore_value(write(fd, tmp, (unsigned)len));
+#else
 			php_ignore_value(write(fd, tmp, len));
+#endif
 			efree(tmp);
 			zend_string_free(error_time_str);
 			close(fd);
@@ -758,13 +760,13 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	int is_function = 0;
 
 	/* get error text into buffer and escape for html if necessary */
-	buffer_len = vspprintf(&buffer, 0, format, args);
+	buffer_len = (int)vspprintf(&buffer, 0, format, args);
 
 	if (PG(html_errors)) {
 		replace_buffer = php_escape_html_entities(buffer, buffer_len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 		efree(buffer);
 		buffer = replace_buffer->val;
-		buffer_len = replace_buffer->len;
+		buffer_len = (int)replace_buffer->len;
 	}
 
 	/* which function caused the problem if any at all */
@@ -814,9 +816,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 
 	/* if we still have memory then format the origin */
 	if (is_function) {
-		origin_len = spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
+		origin_len = (int)spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
 	} else {
-		origin_len = spprintf(&origin, 0, "%s", function);
+		origin_len = (int)spprintf(&origin, 0, "%s", function);
 	}
 
 	if (PG(html_errors)) {
@@ -838,9 +840,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			function++;
 		}
 		if (space[0] == '\0') {
-			doclen = spprintf(&docref_buf, 0, "function.%s", function);
+			doclen = (int)spprintf(&docref_buf, 0, "function.%s", function);
 		} else {
-			doclen = spprintf(&docref_buf, 0, "%s.%s", class_name, function);
+			doclen = (int)spprintf(&docref_buf, 0, "%s.%s", class_name, function);
 		}
 		while((p = strchr(docref_buf, '_')) != NULL) {
 			*p = '-';
@@ -976,7 +978,7 @@ PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const 
 		int buf_len;
 
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error, 0, buf, PHP_WIN32_ERROR_MSG_BUFFER_SIZE, NULL);
-		buf_len = strlen(buf);
+		buf_len = (int)strlen(buf);
 		if (buf_len >= 2) {
 			buf[buf_len - 1] = '\0';
 			buf[buf_len - 2] = '\0';
@@ -988,7 +990,7 @@ PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const 
 #endif
 
 /* {{{ php_html_puts */
-PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
+PHPAPI void php_html_puts(const char *str, size_t size TSRMLS_DC)
 {
 	zend_html_puts(str, size TSRMLS_CC);
 }
@@ -1002,7 +1004,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	int buffer_len, display;
 	TSRMLS_FETCH();
 
-	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
+	buffer_len = (int)vspprintf(&buffer, PG(log_errors_max_len), format, args);
 
 	/* check for repeated errors to be ignored */
 	if (PG(ignore_repeated_errors) && PG(last_error_message)) {
@@ -1338,7 +1340,7 @@ PHP_FUNCTION(set_time_limit)
 		return;
 	}
 
-	new_timeout_strlen = zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);
+	new_timeout_strlen = (int)zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);
 
 	key = zend_string_init("max_execution_time", sizeof("max_execution_time")-1, 0);
 	if (zend_alter_ini_entry_chars_ex(key, new_timeout_str, new_timeout_strlen, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC) == SUCCESS) {
@@ -2327,7 +2329,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		struct {
 			const long error_level;
 			const char *phrase;
-			const char *directives[16]; /* Remember to change this if the number of directives change */
+			const char *directives[17]; /* Remember to change this if the number of directives change */
 		} directives[2] = {
 			{
 				E_DEPRECATED,
@@ -2341,6 +2343,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 				"Directive '%s' is no longer available in PHP",
 				{
 					"allow_call_time_pass_reference",
+					"asp_tags",
 					"define_syslog_variables",
 					"highlight.bg",
 					"magic_quotes_gpc",
@@ -2526,7 +2529,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			int realfile_len;
 
 			if (expand_filepath(primary_file->filename, realfile TSRMLS_CC)) {
-				realfile_len =  strlen(realfile);
+				realfile_len =  (int)strlen(realfile);
 				zend_hash_str_add_empty_element(&EG(included_files), realfile, realfile_len);
 				primary_file->opened_path = estrndup(realfile, realfile_len);
 			}

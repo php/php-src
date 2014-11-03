@@ -221,7 +221,7 @@ php_stream_filter_status_t userfilter_filter(
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		convert_to_long(&retval);
-		ret = Z_LVAL(retval);
+		ret = (int)Z_LVAL(retval);
 	} else if (call_result == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call filter function");
 	}
@@ -287,7 +287,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		return NULL;
 	}
 
-	len = strlen(filtername);
+	len = (int)strlen(filtername);
 
 	/* determine the classname/class entry */
 	if (NULL == (fdat = zend_hash_str_find_ptr(BG(user_filter_map), (char*)filtername, len))) {

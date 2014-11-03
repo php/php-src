@@ -148,9 +148,9 @@ static PHP_MINFO_FUNCTION(ctype)
 		return; \
 	if (Z_TYPE_P(c) == IS_LONG) { \
 		if (Z_LVAL_P(c) <= 255 && Z_LVAL_P(c) >= 0) { \
-			RETURN_BOOL(iswhat(Z_LVAL_P(c))); \
+			RETURN_BOOL(iswhat((int)Z_LVAL_P(c))); \
 		} else if (Z_LVAL_P(c) >= -128 && Z_LVAL_P(c) < 0) { \
-			RETURN_BOOL(iswhat(Z_LVAL_P(c) + 256)); \
+			RETURN_BOOL(iswhat((int)Z_LVAL_P(c) + 256)); \
 		} \
 		tmp = *c; \
 		zval_copy_ctor(&tmp); \

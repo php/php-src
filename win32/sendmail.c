@@ -170,7 +170,7 @@ static zend_string *php_win32_mail_trim_header(char *header TSRMLS_DC)
 //zend_string *php_pcre_replace(zend_string *regex, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int limit, int *replace_count TSRMLS_DC);
 
 	result = php_pcre_replace(regex,
-							  header, strlen(header),
+							  header, (int)strlen(header),
 							  &replace,
 							  0,
 							  -1,
@@ -186,7 +186,7 @@ static zend_string *php_win32_mail_trim_header(char *header TSRMLS_DC)
 	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
 	result2 = php_pcre_replace(regex,
-							   result->val, result->len,
+							   result->val, (int)result->len,
 							   &replace,
 							  0,
 							  -1,
@@ -792,7 +792,7 @@ static int MailConnect()
 		return (FAILED_TO_GET_HOSTNAME);
 	}
 
-	namelen = strlen(ent->h_name);
+	namelen = (int)strlen(ent->h_name);
 
 #ifdef HAVE_IPV6
 	if (inet_pton(AF_INET, ent->h_name, &addr) == 1 || inet_pton(AF_INET6, ent->h_name, &addr6) == 1)
@@ -853,7 +853,7 @@ static int MailConnect()
 //********************************************************************/
 static int Post(LPCSTR msg)
 {
-	int len = strlen(msg);
+	int len = (int)strlen(msg);
 	int slen;
 	int index = 0;
 
