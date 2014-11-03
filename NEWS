@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #68283 (fileinfo: out-of-bounds read in elf note headers).
     (CVE-2014-3710) (Remi)
 
+- GMP:
+ . Fixed bug #63595 (GMP memory management conflicts with other libraries
+   using GMP). (Remi)
+
 16 Oct 2014, PHP 5.4.34
 
 - Fileinfo:
