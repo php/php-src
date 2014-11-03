@@ -30,7 +30,9 @@ PHPDBG_INFO(break);
 PHPDBG_INFO(classes);
 PHPDBG_INFO(funcs);
 PHPDBG_INFO(error);
+PHPDBG_INFO(constants);
 PHPDBG_INFO(vars);
+PHPDBG_INFO(globals);
 PHPDBG_INFO(literal);
 PHPDBG_INFO(memory);
 

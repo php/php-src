@@ -22,11 +22,14 @@
 #define PHPDBG_PROMPT_H
 
 /* {{{ */
+void phpdbg_string_init(char *buffer TSRMLS_DC);
 void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TSRMLS_DC);
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC);
-int phpdbg_interactive(TSRMLS_D);
+int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC);
 int phpdbg_compile(TSRMLS_D);
-void phpdbg_clean(zend_bool full TSRMLS_DC); /* }}} */
+void phpdbg_clean(zend_bool full TSRMLS_DC);
+void phpdbg_force_interruption(TSRMLS_D);
+/* }}} */
 
 /* {{{ phpdbg command handlers */
 PHPDBG_COMMAND(exec);
@@ -47,12 +50,15 @@ PHPDBG_COMMAND(clean);
 PHPDBG_COMMAND(clear);
 PHPDBG_COMMAND(help);
 PHPDBG_COMMAND(sh);
+PHPDBG_COMMAND(dl);
 PHPDBG_COMMAND(set);
 PHPDBG_COMMAND(source);
 PHPDBG_COMMAND(export);
 PHPDBG_COMMAND(register);
 PHPDBG_COMMAND(quit);
-PHPDBG_COMMAND(watch); /* }}} */
+PHPDBG_COMMAND(watch);
+PHPDBG_COMMAND(eol);
+PHPDBG_COMMAND(wait); /* }}} */
 
 /* {{{ prompt commands */
 extern const phpdbg_command_t phpdbg_prompt_commands[]; /* }}} */

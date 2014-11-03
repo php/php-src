@@ -252,6 +252,9 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						break;
 					}
 				}
+				if (Z_TYPE(c) == IS_CONSTANT_AST) {
+					break;
+				}
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
 				MAKE_NOP(opline);
 				replace_tmp_by_const(op_array, opline, tv, &c TSRMLS_CC);
@@ -303,6 +306,9 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 							Z_STRVAL(ZEND_OP2_LITERAL(opline)),
 							Z_STRLEN(ZEND_OP2_LITERAL(opline)) + 1,
 							(void **) &c) == SUCCESS) {
+						if (Z_TYPE_PP(c) == IS_CONSTANT_AST) {
+							break;
+						}
 						if (ZEND_IS_CONSTANT_TYPE(Z_TYPE_PP(c))) { 
 							if (!zend_get_persistent_constant(Z_STRVAL_PP(c), Z_STRLEN_PP(c), &t, 1 TSRMLS_CC) ||
 							    ZEND_IS_CONSTANT_TYPE(Z_TYPE(t))) {

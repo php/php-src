@@ -66,6 +66,8 @@ ZEND_FUNCTION(gmp_or);
 ZEND_FUNCTION(gmp_com);
 ZEND_FUNCTION(gmp_xor);
 ZEND_FUNCTION(gmp_random);
+ZEND_FUNCTION(gmp_random_bits);
+ZEND_FUNCTION(gmp_random_range);
 ZEND_FUNCTION(gmp_setbit);
 ZEND_FUNCTION(gmp_clrbit);
 ZEND_FUNCTION(gmp_scan0);

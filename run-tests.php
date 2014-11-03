@@ -2718,7 +2718,7 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 
 	if (is_array($type)) {
 		$output_type = $type[0] . 'ED';
-		$temp = array_intersect(array('XFAIL', 'FAIL'), $type);
+		$temp = array_intersect(array('XFAIL', 'FAIL', 'WARN'), $type);
 		$type = reset($temp);
 	} else {
 		$output_type = $type . 'ED';
@@ -2732,6 +2732,9 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	} elseif ('SKIP' == $type) {
 		junit_suite_record($suite, 'test_skip');
 		$JUNIT['files'][$file_name]['xml'] .= "<skipped>$escaped_message</skipped>\n";
+	} elseif ('WARN' == $type) {
+		junit_suite_record($suite, 'test_warn');
+		$JUNIT['files'][$file_name]['xml'] .= "<warning>$escaped_message</warning>\n";
 	} elseif('FAIL' == $type) {
 		junit_suite_record($suite, 'test_fail');
 		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$escaped_message'>$escaped_details</failure>\n";

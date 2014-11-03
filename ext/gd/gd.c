@@ -5118,10 +5118,22 @@ PHP_FUNCTION(imagescale)
 		return;
 	}
 	method = tmp_m;
-	new_width = tmp_w;
-	new_height = tmp_h;
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
+
+	if (tmp_h < 0) {
+		/* preserve ratio */
+		long src_x, src_y;
+
+		src_x = gdImageSX(im);
+		src_y = gdImageSY(im);
+		if (src_x) {
+			tmp_h = tmp_w * src_y / src_x;
+		}
+	}
+
+	new_width = tmp_w;
+	new_height = tmp_h;
 
 	if (gdImageSetInterpolationMethod(im, method)) {
 		im_scaled = gdImageScale(im, new_width, new_height);

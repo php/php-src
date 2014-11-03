@@ -311,7 +311,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
 /* char * ap_php_conv_10() {{{ */
-char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
+PHPAPI char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
 	   register bool_int * is_negative, char *buf_end, register int *len)
 {
 	register char *p = buf_end;
@@ -474,7 +474,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register int *len) /* {{{ */
+PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register int *len) /* {{{ */
 {
 	register int mask = (1 << nbits) - 1;
 	register char *p = buf_end;

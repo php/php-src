@@ -6098,7 +6098,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry reflection_zend_extension_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_zend_extension, export, arginfo_reflection_extension_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
-	ZEND_ME(reflection_zend_extension, __construct, arginfo_reflection_extension___construct, 0)
+	ZEND_ME(reflection_zend_extension, __construct, arginfo_reflection_zend_extension___construct, 0)
 	ZEND_ME(reflection_zend_extension, __toString, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_zend_extension, getName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_zend_extension, getVersion, arginfo_reflection__void, 0)

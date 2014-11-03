@@ -492,6 +492,13 @@ donote(struct magic_set *ms, void *vbuf, size_t offset, size_t size,
 	uint32_t namesz, descsz;
 	unsigned char *nbuf = CAST(unsigned char *, vbuf);
 
+	if (xnh_sizeof + offset > size) {
+		/*
+		 * We're out of note headers.
+		 */
+		return xnh_sizeof + offset;
+	}
+
 	(void)memcpy(xnh_addr, &nbuf[offset], xnh_sizeof);
 	offset += xnh_sizeof;
 

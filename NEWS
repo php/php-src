@@ -1,20 +1,52 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.6.2
+?? ??? 2014, PHP 5.6.4
+
+
+
+?? ??? 2014, PHP 5.6.3
 
 - Core:
-  . Fixed bug #67739 (Windows 8.1/Server 2012 R2 OS build number reported
-    as 6.2 (instead of 6.3)). (Christian Wenz)
+  . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
+    (Laruence)
+  . Implemented 64-bit format codes for pack() and unpack(). (Leigh)
+  . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
   . Fixed bug #67633 (A foreach on an array returned from a function not doing
     copy-on-write). (Nikita)
-  . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
+  . Fixed bug #67739 (Windows 8.1/Server 2012 R2 OS build number reported
+    as 6.2 (instead of 6.3)). (Christian Wenz)
+  . Fixed bug #67949 (DOMNodeList elements should be accessible through
+    array notation) (Florian)
+  . Fixed bug #68095 (AddressSanitizer reports a heap buffer overflow in
+    php_getopt()). (Stas)
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
+  . Fixed bug #68129 (parse_url() - incomplete support for empty usernames 
+    and passwords) (Tjerk)
+
+- phpdbg:
+  . Added XML protocol (-x command line flag). (Bob)
+  . Added hard interruptions (twice SIGINT). (Bob)
+
+- Fileinfo:
+  . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
+  . Fixed bug #68224 (buffer-overflow in libmagic/readcdf.c caught by
+    AddressSanitizer). (Remi)
+  . Fixed bug #68283 (fileinfo: out-of-bounds read in elf note headers).
+    (CVE-2014-3710) (Remi)
 
 - FPM:
   . Fixed bug #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable
     when using Apache, mod_proxy-fcgi and ProxyPass). (Remi)
   . Implemented FR #55508 (listen and listen.allowed_clients should take IPv6
     addresses). (Robin Gloster)
+
+- GD:
+  . Fixed bug #65171 (imagescale() fails without height param). (Remi)
+
+- GMP:
+  . Implemented gmp_random_range() and gmp_random_bits(). (Leigh)
+  . Fixed bug #63595 (GMP memory management conflicts with other libraries
+    using GMP). (Remi)
 
 - Reflection:
   . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
@@ -23,6 +55,41 @@ PHP                                                                        NEWS
   . Fixed bug #68074 (Allow to use system cipher list instead of hardcoded
     value). (Remi)
 
+- Mysqli:
+  . Fixed bug #68114 (linker error on some OS X machines with fixed width
+    decimal support) (Keyur Govande)
+
+- ODBC:
+  . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
+    a VARCHAR column) (Keyur Govande)
+
+- SPL:
+  . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
+
+- CURL:
+  . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
+    CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
+
+- PDO_pgsql:
+  . Fixed bug #68199 (PDO::pgsqlGetNotify doesn't support NOTIFY payloads)
+    (Matteo, Alain Laporte)
+
+16 Oct 2014, PHP 5.6.2
+
+- Core:
+  . Fixed bug #68044 (Integer overflow in unserialize() (32-bits only)).
+    (CVE-2014-3669) (Stas)
+
+- cURL:
+  . Fixed bug #68089 (NULL byte injection - cURL lib). (Stas)
+
+- EXIF:
+  . Fixed bug #68113 (Heap corruption in exif_thumbnail()). (CVE-2014-3670)
+    (Stas)
+
+- XMLRPC:
+  . Fixed bug #68027 (Global buffer overflow in mkgmtime() function).
+    (CVE-2014-3668) (Stas)
 
 02 Oct 2014, PHP 5.6.1
 
@@ -59,8 +126,6 @@ PHP                                                                        NEWS
   . Fixed bug #67839 (mysqli does not handle 4-byte floats correctly). (Keyur)
 
 - OpenSSL:
-  . Fixed bug #41631 (socket timeouts not honored in blocking SSL reads).
-    (Daniel Lowrey)
   . Fixed bug #67850 (extension won't build if openssl compiled without SSLv3).
     (Daniel Lowrey)
 

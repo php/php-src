@@ -28,15 +28,15 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-#define PHPDBG_BREAK_COMMAND_D(f, h, a, m, l, s) \
-	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[10])
+#define PHPDBG_BREAK_COMMAND_D(f, h, a, m, l, s, flags) \
+	PHPDBG_COMMAND_D_EXP(f, h, a, m, l, s, &phpdbg_prompt_commands[10], flags)
 
 /**
  * Commands
  */
 const phpdbg_command_t phpdbg_break_commands[] = {
-	PHPDBG_BREAK_COMMAND_D(at,         "specify breakpoint by location and condition",           '@', break_at,      NULL, "*c"),
-	PHPDBG_BREAK_COMMAND_D(del,        "delete breakpoint by identifier number",                 '~', break_del,     NULL, "n"),
+	PHPDBG_BREAK_COMMAND_D(at,         "specify breakpoint by location and condition",           '@', break_at,      NULL, "*c", 0),
+	PHPDBG_BREAK_COMMAND_D(del,        "delete breakpoint by identifier number",                 '~', break_del,     NULL, "n",  0),
 	PHPDBG_END_COMMAND
 };
 

@@ -2499,7 +2499,7 @@ ZEND_API void zend_post_deactivate_modules(TSRMLS_D) /* {{{ */
 /* }}} */
 
 /* return the next free module number */
-int zend_next_free_module(void) /* {{{ */
+ZEND_API int zend_next_free_module(void) /* {{{ */
 {
 	return zend_hash_num_elements(&module_registry) + 1;
 }
@@ -2635,18 +2635,15 @@ ZEND_API ZEND_FUNCTION(display_disabled_function)
 }
 /* }}} */
 
-static zend_function_entry disabled_function[] = {
-	ZEND_FE(display_disabled_function,			NULL)
-	ZEND_FE_END
-};
-
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length TSRMLS_DC) /* {{{ */
 {
-	if (zend_hash_del(CG(function_table), function_name, function_name_length+1)==FAILURE) {
-		return FAILURE;
+	zend_internal_function *func;
+	if (zend_hash_find(CG(function_table), function_name, function_name_length+1, (void **)&func)==SUCCESS) {
+		func->arg_info = NULL;
+		func->handler = ZEND_FN(display_disabled_function);
+		return SUCCESS;
 	}
-	disabled_function[0].fname = function_name;
-	return zend_register_functions(NULL, disabled_function, CG(function_table), MODULE_PERSISTENT TSRMLS_CC);
+	return FAILURE;
 }
 /* }}} */
 

@@ -2416,11 +2416,11 @@ static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel 
 					data_ptr += 8;
 					break;
 				case TAG_FMT_SINGLE:
-					memmove(data_ptr, &info_data->value.f, byte_count);
+					memmove(data_ptr, &info_value->f, 4);
 					data_ptr += 4;
 					break;
 				case TAG_FMT_DOUBLE:
-					memmove(data_ptr, &info_data->value.d, byte_count);
+					memmove(data_ptr, &info_value->d, 8);
 					data_ptr += 8;
 					break;
 			}

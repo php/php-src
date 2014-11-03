@@ -169,6 +169,11 @@ static int php_curl_option_str(php_curl *ch, long option, const char *str, const
 {
 	CURLcode error = CURLE_OK;
 
+	if (strlen(str) != len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Curl option contains invalid characters (\\0)");
+		return FAILURE;
+	}
+
 #if LIBCURL_VERSION_NUM >= 0x071100
 	if (make_copy) {
 #endif
@@ -1187,6 +1192,12 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_TCP_KEEPIDLE);
 	REGISTER_CURL_CONSTANT(CURLOPT_TCP_KEEPINTVL);
 	REGISTER_CURL_CONSTANT(CURLSSLOPT_ALLOW_BEAST);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x072200 /* Available since 7.34.0 */
+	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_0);
+	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_1);
+	REGISTER_CURL_CONSTANT(CURL_SSLVERSION_TLSv1_2);
 #endif
 
 #if CURLOPT_FTPASCII != 0
