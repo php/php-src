@@ -324,30 +324,6 @@ static void _php_gmpnum_free(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #	define MAX_BASE 36
 #endif
 
-/* {{{ gmp_emalloc
- */
-static void *gmp_emalloc(size_t size)
-{
-	return emalloc(size);
-}
-/* }}} */
-
-/* {{{ gmp_erealloc
- */
-static void *gmp_erealloc(void *ptr, size_t old_size, size_t new_size)
-{
-	return erealloc(ptr, new_size);
-}
-/* }}} */
-
-/* {{{ gmp_efree
- */
-static void gmp_efree(void *ptr, size_t size)
-{
-	efree(ptr);
-}
-/* }}} */
-
 /* {{{ ZEND_GINIT_FUNCTION
  */
 static ZEND_GINIT_FUNCTION(gmp)
@@ -368,8 +344,6 @@ ZEND_MODULE_STARTUP_D(gmp)
 	REGISTER_STRING_CONSTANT("GMP_MPIR_VERSION", (char *)mpir_version, CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_STRING_CONSTANT("GMP_VERSION", (char *)gmp_version, CONST_CS | CONST_PERSISTENT);
-
-	mp_set_memory_functions(gmp_emalloc, gmp_erealloc, gmp_efree);
 
 	return SUCCESS;
 }
