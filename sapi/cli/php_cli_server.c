@@ -732,6 +732,9 @@ static int sapi_cli_server_register_entry_cb(char **entry TSRMLS_DC, int num_arg
 			}
 		}
 		spprintf(&real_key, 0, "%s_%s", "HTTP", key);
+		if (strcmp(key, "CONTENT_TYPE") == 0 || strcmp(key, "CONTENT_LENGTH") == 0) {
+			sapi_cli_server_register_variable(track_vars_array, key, *entry TSRMLS_CC);
+		}
 		sapi_cli_server_register_variable(track_vars_array, real_key, *entry TSRMLS_CC);
 		efree(key);
 		efree(real_key);
