@@ -392,7 +392,6 @@ static PHP_MINIT_FUNCTION(mcrypt) /* {{{ */
 	/* sources for mcrypt_create_iv */
 	REGISTER_LONG_CONSTANT("MCRYPT_DEV_RANDOM", RANDOM, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MCRYPT_DEV_URANDOM", URANDOM, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MCRYPT_RAND", RAND, CONST_PERSISTENT);
 
 	/* ciphers */
 	MCRYPT_ENTRY2_2_4(3DES, "tripledes");
@@ -1415,7 +1414,6 @@ PHP_FUNCTION(mcrypt_create_iv)
 	
 	iv = ecalloc(size + 1, 1);
 	
-	if (source == RANDOM || source == URANDOM) {
 #if PHP_WIN32
 		/* random/urandom equivalent on Windows */
 		BYTE *iv_b = (BYTE *) iv;
@@ -1450,12 +1448,6 @@ PHP_FUNCTION(mcrypt_create_iv)
 			RETURN_FALSE;
 		}
 #endif
-	} else {
-		n = (int)size;
-		while (size) {
-			iv[--size] = (char) (255.0 * php_rand(TSRMLS_C) / RAND_MAX);
-		}
-	}
 	RETVAL_STRINGL(iv, n);
 	efree(iv);
 }
