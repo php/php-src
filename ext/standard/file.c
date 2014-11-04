@@ -344,7 +344,7 @@ PHP_FUNCTION(flock)
 	php_stream *stream;
 	zend_long operation = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &res, &operation, &wouldblock) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z/", &res, &operation, &wouldblock) == FAILURE) {
 		return;
 	}
 
@@ -1207,8 +1207,10 @@ PHPAPI PHP_FUNCTION(fwrite)
 
 	if (ZEND_NUM_ARGS() == 2) {
 		num_bytes = inputlen;
+	} else if (maxlen <= 0) {
+		num_bytes = 0;
 	} else {
-		num_bytes = MAX(0, MIN((size_t) maxlen, inputlen));
+		num_bytes = MIN((size_t) maxlen, inputlen);
 	}
 
 	if (!num_bytes) {
