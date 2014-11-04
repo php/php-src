@@ -63,7 +63,7 @@ function count(arr,       n, i)
 	return n;
 }
 
-/^[a-zA-Z0-9_-;]+/ {
+/^[a-zA-Z0-9_;-]+/ {
 	split($1, mod, ";");
 
 	# mini hack for pedantic awk
