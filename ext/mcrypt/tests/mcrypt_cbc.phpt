@@ -8,7 +8,7 @@ $key      = "0123456789012345";
 $secret   = "PHP Testfest 2008";
 $cipher   = MCRYPT_RIJNDAEL_128;
 
-$iv       = mcrypt_create_iv(mcrypt_get_iv_size($cipher, MCRYPT_MODE_ECB), MCRYPT_RAND);
+$iv       = mcrypt_create_iv(mcrypt_get_iv_size($cipher, MCRYPT_MODE_ECB), MCRYPT_DEV_URANDOM);
 $enc_data = mcrypt_cbc($cipher, $key, $secret, MCRYPT_ENCRYPT, $iv);
 
 // we have to trim as AES rounds the blocks and decrypt doesnt detect that
