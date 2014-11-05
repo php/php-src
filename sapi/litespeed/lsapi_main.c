@@ -478,8 +478,8 @@ static int init_request_info( TSRMLS_D )
     SG(request_info).content_length = LSAPI_GetReqBodyLen();
     SG(request_info).path_translated = estrdup( LSAPI_GetScriptFileName());
 
-    /* It is not reset by zend engine, set it to 0. */
-    SG(sapi_headers).http_response_code = 0;
+    /* It is not reset by zend engine, set it to 200. */
+    SG(sapi_headers).http_response_code = 200;
     
     pAuth = LSAPI_GetHeader( H_AUTHORIZATION );
     php_handle_auth_data(pAuth TSRMLS_CC);
