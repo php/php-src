@@ -791,7 +791,7 @@ PHP_FUNCTION(filter_input)
 /* }}} */
 
 /* {{{ proto mixed filter_var(mixed variable [, long filter [, mixed options]])
- * Returns the filtered version of the vriable.
+ * Returns the filtered version of the variable.
  */
 PHP_FUNCTION(filter_var)
 {
