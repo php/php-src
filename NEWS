@@ -63,6 +63,10 @@ PHP                                                                        NEWS
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
 
+- Session:
+  . Fixed bug #68331 (Session custom storage callable functions not being called) 
+    (Yasuo Ohgaki)
+
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
 
