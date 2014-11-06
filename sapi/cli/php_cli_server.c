@@ -68,6 +68,7 @@
 #include "zend_hash.h"
 #include "zend_modules.h"
 #include "fopen_wrappers.h"
+#include "http_status_codes.h"
 
 #include "zend_compile.h"
 #include "zend_execute.h"
@@ -203,55 +204,6 @@ typedef struct php_cli_server_http_response_status_code_pair {
 	const char *str;
 } php_cli_server_http_response_status_code_pair;
 
-static php_cli_server_http_response_status_code_pair status_map[] = {
-	{ 100, "Continue" },
-	{ 101, "Switching Protocols" },
-	{ 200, "OK" },
-	{ 201, "Created" },
-	{ 202, "Accepted" },
-	{ 203, "Non-Authoritative Information" },
-	{ 204, "No Content" },
-	{ 205, "Reset Content" },
-	{ 206, "Partial Content" },
-	{ 300, "Multiple Choices" },
-	{ 301, "Moved Permanently" },
-	{ 302, "Found" },
-	{ 303, "See Other" },
-	{ 304, "Not Modified" },
-	{ 305, "Use Proxy" },
-	{ 307, "Temporary Redirect" },
-	{ 308, "Permanent Redirect" },
-	{ 400, "Bad Request" },
-	{ 401, "Unauthorized" },
-	{ 402, "Payment Required" },
-	{ 403, "Forbidden" },
-	{ 404, "Not Found" },
-	{ 405, "Method Not Allowed" },
-	{ 406, "Not Acceptable" },
-	{ 407, "Proxy Authentication Required" },
-	{ 408, "Request Timeout" },
-	{ 409, "Conflict" },
-	{ 410, "Gone" },
-	{ 411, "Length Required" },
-	{ 412, "Precondition Failed" },
-	{ 413, "Request Entity Too Large" },
-	{ 414, "Request-URI Too Long" },
-	{ 415, "Unsupported Media Type" },
-	{ 416, "Requested Range Not Satisfiable" },
-	{ 417, "Expectation Failed" },
-	{ 426, "Upgrade Required" },
-	{ 428, "Precondition Required" },
-	{ 429, "Too Many Requests" },
-	{ 431, "Request Header Fields Too Large" },
-	{ 500, "Internal Server Error" },
-	{ 501, "Not Implemented" },
-	{ 502, "Bad Gateway" },
-	{ 503, "Service Unavailable" },
-	{ 504, "Gateway Timeout" },
-	{ 505, "HTTP Version Not Supported" },
-	{ 511, "Network Authentication Required" },
-};
-
 static php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
 	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
@@ -336,12 +288,12 @@ static int status_comp(const void *a, const void *b) /* {{{ */
 
 static const char *get_status_string(int code) /* {{{ */
 {
-	php_cli_server_http_response_status_code_pair needle, *result = NULL;
+	http_response_status_code_pair needle, *result = NULL;
 
 	needle.code = code;
 	needle.str = NULL;
 
-	result = bsearch(&needle, status_map, sizeof(status_map) / sizeof(needle), sizeof(needle), status_comp);
+	result = bsearch(&needle, http_status_map, sizeof(http_status_map) / sizeof(needle), sizeof(needle), status_comp);
 
 	if (result) {
 		return result->str;
