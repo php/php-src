@@ -233,8 +233,8 @@ if (VS_TOOLSET && VCVERS >= 1500 && PHP_MP != 'disable') {
 
 // General link flags
 
-if (VS_TOOLSET) {
-	if (VCVERS >= 1700) {
+if (VS_TOOLSET || CLANG_TOOLSET) {
+	if (VCVERS >= 1700 || CLANG_TOOLSET) {
 		DEFINE("LDFLAGS", "/nologo ");
 	} else {
 		DEFINE("LDFLAGS", "/nologo /version:" +
