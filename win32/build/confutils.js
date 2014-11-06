@@ -30,6 +30,15 @@ var PROGRAM_FILESx86 = WshShell.Environment("Process").Item("ProgramFiles(x86)")
 var VCINSTALLDIR = WshShell.Environment("Process").Item("VCINSTALLDIR");
 var PHP_SRC_DIR=FSO.GetParentFolderName(WScript.ScriptFullName);
 
+var VS_TOOLSET = true;
+var CLANG_TOOLSET = false;
+var INTEL_TOOLSET = false;
+var VCVERS = -1;
+var CLANGVERS = -1;
+var INTELVERS = -1;
+var COMPILER_NUMERIC_VERSION = -1;
+var COMPILER_NAME = "unknown";
+
 /* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();
 
@@ -1425,7 +1434,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 	sub_build += d;
 
 
-	DEFINE(bd_flags_name, " /Fd" + sub_build + " /Fp" + sub_build + " /FR" + sub_build + " ");
+	DEFINE(bd_flags_name, " /Fp" + sub_build + " /FR" + sub_build + " ");
 
 	for (i in file_list) {
 		src = file_list[i];
@@ -1609,7 +1618,7 @@ function write_summary()
 	}
 	ar[0] = ['Build type', PHP_DEBUG == "yes" ? "Debug" : "Release"];
 	ar[1] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
-	ar[2] = ['Compiler', VC_VERSIONS[VCVERS]];
+	ar[2] = ['Compiler', COMPILER_NAME];
 	ar[3] = ['Architecture', X64 ? 'x64' : 'x86'];
 	if (PHP_PGO == "yes") {
 		ar[4] = ['Optimization', "PGO"];
@@ -1877,7 +1886,7 @@ function generate_config_h()
 		outfile.WriteLine("#define " + keys[i] + " " + pieces);
 	}
 
-	if (VCVERS >= 1800) {
+	if (VS_TOOLSET && VCVERS >= 1800) {
 		outfile.WriteLine("");
 		outfile.WriteLine("#define HAVE_ACOSH 1");
 		outfile.WriteLine("#define HAVE_ASINH 1");
@@ -2282,4 +2291,102 @@ if (!MODE_PHPIZE) {
 	// compiler processes.
 	ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
 }
+
+function toolset_get_compiler()
+{
+	if (VS_TOOLSET) {
+		return PATH_PROG('cl', null, 'PHP_CL')
+	} else if (CLANG_TOOLSET) {
+		return PATH_PROG('clang-cl', null, 'PHP_CL')
+	} else if (INTEL_TOOLSET) {
+		return PATH_PROG('icl', null, 'PHP_CL')
+	}
+
+	ERROR("Wrong toolset");
+}
+
+function toolset_get_compiler_version()
+{
+	var version;
+
+	if (VS_TOOLSET) {
+		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
+
+		return version;
+	} else if (CLANG_TOOLSET) {
+		var command = 'cmd /c ""' + PHP_CL + '" -v"';
+		var full = execute(command + '" 2>&1"');
+
+		if (full.match(/clang version ([\d\.]+) \((.*)\)/)) {
+			version = RegExp.$1;
+			version = version.replace(/\./g, '');
+			version = version/100 < 1 ? version*10 : version;
+
+			return version;
+		}
+	} else if (INTEL_TOOLSET) {
+		var command = 'cmd /c ""' + PHP_CL + '" -v"';
+		var full = execute(command + '" 2>&1"');
+
+		if (full.match(/Version (\d\.\d\.\d)/)) {
+			version = RegExp.$1;
+			version = version.replace(/\./g, '');
+			version = version/100 < 1 ? version*10 : version;
+
+			return version;
+		}
+	}
+
+	ERROR("Wrong toolset");
+}
+
+function toolset_get_compiler_name()
+{
+	var version;
+
+	if (VS_TOOLSET) {
+		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
+		return VC_VERSIONS[version];
+	} else if (CLANG_TOOLSET || INTEL_TOOLSET) {
+		var command = 'cmd /c ""' + PHP_CL + '" -v"';
+		var full = execute(command + '" 2>&1"');
+
+		return full.split(/\n/)[0].replace(/\s/g, ' ');
+	}
+
+	ERROR("Wrong toolset");
+}
+
+
+function toolset_is_64()
+{
+	if (VS_TOOLSET) {
+		return probe_binary(PHP_CL, 64, null, 'PHP_CL');
+	} else if (CLANG_TOOLSET) {
+		/* Seems to be impossible to get it from the clang binary, so lets use the normal cl.exe,
+		as clang should be running in VS environment. */
+		var vs_cl = PATH_PROG('cl', null, 'PHP_CL')
+		return probe_binary(vs_cl, 64);
+	} else if (INTEL_TOOLSET) {
+
+	}
+
+	ERROR("Wrong toolset");
+}
+
+
+function toolset_get_linker()
+{
+	if (VS_TOOLSET) {
+		return PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
+	} else if (CLANG_TOOLSET) {
+		//return PATH_PROG('lld', WshShell.Environment("Process").Item("PATH"), "LINK");
+		return PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
+	} else if (INTEL_TOOLSET) {
+		return PATH_PROG('xilink', WshShell.Environment("Process").Item("PATH"), "LINK");
+	}
+
+	ERROR("Wrong toolset");
+}
+
 
