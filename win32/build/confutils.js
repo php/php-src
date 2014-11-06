@@ -2361,16 +2361,17 @@ function toolset_get_compiler_name()
 function toolset_is_64()
 {
 	if (VS_TOOLSET) {
-		return probe_binary(PHP_CL, 64, null, 'PHP_CL');
+		return probe_binary(PHP_CL, 64);
 	} else if (CLANG_TOOLSET) {
-		/* Seems to be impossible to get it from the clang binary, so lets use the normal cl.exe,
-		as clang should be running in VS environment. */
-		var vs_cl = PATH_PROG('cl', null, 'PHP_CL')
-		return probe_binary(vs_cl, 64);
+		var command = 'cmd /c ""' + PHP_CL + '" -v"';
+		var full = execute(command + '" 2>&1"');
+
+		return null != full.match(/x86_64/);
 	} else if (INTEL_TOOLSET) {
-		/*seems the easiest way as well for now */
-		var vs_cl = PATH_PROG('cl', null, 'PHP_CL')
-		return probe_binary(vs_cl, 64);
+		var command = 'cmd /c ""' + PHP_CL + '" -v"';
+		var full = execute(command + '" 2>&1"');
+
+		return null != full.match(/Intel\(R\) 64/);
 	}
 
 	ERROR("Wrong toolset");
