@@ -74,6 +74,10 @@
 # include <alloca.h>
 #endif
 
+#if defined(ZEND_WIN32)
+#include <intrin.h>
+#endif
+
 /* Only use this macro if you know for sure that all of the switches values
    are covered by its case statements */
 #if ZEND_DEBUG

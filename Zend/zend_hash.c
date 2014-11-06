@@ -100,7 +100,7 @@ static const uint32_t uninitialized_bucket = {INVALID_IDX};
 ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
 	/* Use big enough power of 2 */
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) && !defined(__clang__)
 	if (nSize <= 8) {
 		ht->nTableSize = 8;
 	} else if (nSize >= 0x80000000) {

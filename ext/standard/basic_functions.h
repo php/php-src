@@ -34,6 +34,10 @@
 
 #include "url_scanner_ex.h"
 
+#if defined(_WIN32) && defined(__clang__)
+#include <intrin.h>
+#endif
+
 extern zend_module_entry basic_functions_module;
 #define basic_functions_module_ptr &basic_functions_module
 
