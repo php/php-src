@@ -13,6 +13,6 @@ var_dump(curl_setopt($ch, CURLOPT_URL, $url));
 ?>
 Done
 --EXPECTF--
-Warning: curl_setopt(): Curl option contains invalid characters (\0) in %s/bug68089.php on line 4
+Warning: curl_setopt(): Curl option contains invalid characters (\0) in %s%ebug68089.php on line 4
 bool(false)
 Done

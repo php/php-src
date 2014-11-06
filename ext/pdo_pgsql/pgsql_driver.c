@@ -465,6 +465,15 @@ static int pdo_pgsql_check_liveness(pdo_dbh_t *dbh TSRMLS_DC)
 }
 /* }}} */
 
+static int pgsql_handle_in_transaction(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_pgsql_db_handle *H;
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	return PQtransactionStatus(H->server) > PQTRANS_IDLE;
+}
+
 static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -489,21 +498,20 @@ static int pgsql_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
 
 static int pgsql_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 {
-	return pdo_pgsql_transaction_cmd("COMMIT", dbh TSRMLS_CC);
+	int ret = pdo_pgsql_transaction_cmd("COMMIT", dbh TSRMLS_CC);
+
+	/* When deferred constraints are used the commit could
+	   fail, and a ROLLBACK implicitly ran. See bug #67462 */
+	if (!ret) {
+		dbh->in_txn = pgsql_handle_in_transaction(dbh TSRMLS_CC);
+	}
+
+	return ret;
 }
 
 static int pgsql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh TSRMLS_CC);
-}
-
-static int pgsql_handle_in_transaction(pdo_dbh_t *dbh TSRMLS_DC)
-{
-	pdo_pgsql_db_handle *H;
-
-	H = (pdo_pgsql_db_handle *)dbh->driver_data;
-
-	return PQtransactionStatus(H->server);
 }
 
 /* {{{ proto string PDO::pgsqlCopyFromArray(string $table_name , array $rows [, string $delimiter [, string $null_as ] [, string $fields])

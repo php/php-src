@@ -363,30 +363,6 @@ static inline void gmp_zval_unary_ui_op(zval *return_value, zval *a_arg, gmp_una
 #define gmp_unary_opl(op)         _gmp_unary_opl(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 #define gmp_unary_ui_op(op)      _gmp_unary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 
-/* {{{ gmp_emalloc
- */
-static void *gmp_emalloc(size_t size)
-{
-	return emalloc(size);
-}
-/* }}} */
-
-/* {{{ gmp_erealloc
- */
-static void *gmp_erealloc(void *ptr, size_t old_size, size_t new_size)
-{
-	return erealloc(ptr, new_size);
-}
-/* }}} */
-
-/* {{{ gmp_efree
- */
-static void gmp_efree(void *ptr, size_t size)
-{
-	efree(ptr);
-}
-/* }}} */
-
 static inline long gmp_get_long(zval *zv) /* {{{ */
 {
 	if (Z_TYPE_P(zv) == IS_LONG) {
@@ -733,8 +709,6 @@ ZEND_MINIT_FUNCTION(gmp)
 	REGISTER_LONG_CONSTANT("GMP_LITTLE_ENDIAN", GMP_LITTLE_ENDIAN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_BIG_ENDIAN", GMP_BIG_ENDIAN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_NATIVE_ENDIAN", GMP_NATIVE_ENDIAN, CONST_CS | CONST_PERSISTENT);
-
-	mp_set_memory_functions(gmp_emalloc, gmp_erealloc, gmp_efree);
 
 	return SUCCESS;
 }

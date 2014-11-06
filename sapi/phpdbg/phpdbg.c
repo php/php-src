@@ -549,7 +549,7 @@ static int php_sapi_phpdbg_deactivate(TSRMLS_D) /* {{{ */
 
 		php_phpdbg_globals_ctor(pg);
 
-		pg->exec = strndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
+		pg->exec = zend_strndup(PHPDBG_G(exec), PHPDBG_G(exec_len));
 		pg->exec_len = PHPDBG_G(exec_len);
 		pg->oplog = PHPDBG_G(oplog);
 		pg->prompt[0] = PHPDBG_G(prompt)[0];
@@ -779,7 +779,9 @@ const opt_struct OPTIONS[] = { /* {{{ */
 	{'S', 1, "sapi-name"},
 	{'l', 1, "listen"},
 	{'a', 1, "address-or-any"},
+#if PHPDBG_IN_DEV
 	{'x', 0, "xml output"},
+#endif
 	{'V', 0, "version"},
 	{'-', 0, NULL}
 }; /* }}} */
@@ -1039,13 +1041,7 @@ int main(int argc, char **argv) /* {{{ */
 	zend_bool remote = 0;
 	int step = 0;
 	zend_phpdbg_globals *settings = NULL;
-
-#ifdef _WIN32
-	char *bp_tmp_file = NULL;
-#else
-	char bp_tmp_file[] = "/tmp/phpdbg.XXXXXX";
-#endif
-
+	char *bp_tmp = NULL;
 	char *address;
 	int listen = -1;
 	int server = -1;
@@ -1081,29 +1077,6 @@ int main(int argc, char **argv) /* {{{ */
 #endif
 
 phpdbg_main:
-	if (!cleaning) {
-	
-#ifdef _WIN32
-		bp_tmp_file = malloc(L_tmpnam);
-
-		if (bp_tmp_file) {
-			if (!tmpnam(bp_tmp_file)) {
-				free(bp_tmp_file);
-				bp_tmp_file = NULL;
-			}
-		}
-
-		if (!bp_tmp_file) {
-			phpdbg_error("tmpfile", "", "Unable to create temporary file");
-			return 1;
-		}
-#else
-		if (!mkstemp(bp_tmp_file)) {
-			memset(bp_tmp_file, 0, sizeof(bp_tmp_file));
-		}
-#endif
-
-	}
 	ini_entries = NULL;
 	ini_entries_len = 0;
 	ini_ignore = 0;
@@ -1242,8 +1215,10 @@ phpdbg_main:
 				} else address = strdup(php_optarg);
 			} break;
 
+#if PHPDBG_IN_DEV
 			case 'x':
 				flags |= PHPDBG_WRITE_XML;
+#endif
 			break;
 
 			case 'V': {
@@ -1343,7 +1318,7 @@ phpdbg_main:
 		}
 
 		/* setup remote server if necessary */
-		if (!cleaning && listen > 0) {
+		if (cleaning <= 0 && listen > 0) {
 			server = phpdbg_open_socket(address, listen TSRMLS_CC);
 				if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream TSRMLS_CC) == FAILURE) {
 				exit(0);
@@ -1466,7 +1441,7 @@ phpdbg_main:
 
 		if (exec) { /* set execution context */
 			PHPDBG_G(exec) = phpdbg_resolve_path(exec TSRMLS_CC);
-			PHPDBG_G(exec_len) = strlen(PHPDBG_G(exec));
+			PHPDBG_G(exec_len) = PHPDBG_G(exec) ? strlen(PHPDBG_G(exec)) : 0;
 
 			free(exec);
 			exec = NULL;
@@ -1502,9 +1477,13 @@ phpdbg_main:
 		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 		zend_try {
 			phpdbg_init(init_file, init_file_len, init_file_default TSRMLS_CC);
-			PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
-			phpdbg_try_file_init(bp_tmp_file, strlen(bp_tmp_file), 0 TSRMLS_CC);
-			PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
+			if (bp_tmp) {
+				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
+				phpdbg_string_init(bp_tmp TSRMLS_CC);
+				free(bp_tmp);
+				bp_tmp = NULL;
+				PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
+			}
 		} zend_end_try();
 		PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
 		
@@ -1527,29 +1506,32 @@ phpdbg_main:
 			PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 		}
 
-		if (phpdbg_startup_run) {
-			zend_try {
-				PHPDBG_COMMAND_HANDLER(run)(NULL TSRMLS_CC);
-			} zend_end_try();
-			if (phpdbg_startup_run > 1) {
-				/* if -r is on the command line more than once just quit */
-				goto phpdbg_out;
-			}
-			phpdbg_startup_run = 0;
-		}
-
 phpdbg_interact:
 		/* phpdbg main() */
 		do {
 			zend_try {
+				if (phpdbg_startup_run) {
+					zend_bool quit_immediately = phpdbg_startup_run > 1;
+					phpdbg_startup_run = 0;
+					PHPDBG_COMMAND_HANDLER(run)(NULL TSRMLS_CC);
+					if (quit_immediately) {
+						/* if -r is on the command line more than once just quit */
+						EG(bailout) = __orig_bailout; /* reset zend_try */
+						break;
+					}
+				}
+
 				phpdbg_interactive(1 TSRMLS_CC);
 			} zend_catch {
 				if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
-					FILE *bp_tmp_fp = fopen(bp_tmp_file, "w");
+					char *bp_tmp_str;
 					PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
-					phpdbg_export_breakpoints(bp_tmp_fp TSRMLS_CC);
+					phpdbg_export_breakpoints_to_string(&bp_tmp_str TSRMLS_CC);
 					PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
-					fclose(bp_tmp_fp);
+					if (bp_tmp_str) {
+						bp_tmp = strdup(bp_tmp_str);
+						efree(bp_tmp_str);
+					}
 					cleaning = 1;
 				} else {
 					cleaning = 0;
@@ -1688,12 +1670,6 @@ phpdbg_out:
 	if (PHPDBG_G(sapi_name_ptr)) {
 		free(PHPDBG_G(sapi_name_ptr));
 	}
-
-#ifdef _WIN32
-	free(bp_tmp_file);
-#else
-	unlink(bp_tmp_file);
-#endif
 
 	return 0;
 } /* }}} */

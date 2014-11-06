@@ -25,12 +25,10 @@
 #include "phpdbg_io.h"
 
 struct win32_sigio_watcher_data {
-	zend_ulong flags;
 #ifdef ZTS
 	void ***tsrm_ls;
 #endif
 	int fd;
-	zend_uchar running;
 };
 
 void

@@ -1,19 +1,27 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2014, PHP 5.6.4
+
+
+
 ?? ??? 2014, PHP 5.6.3
 
 - Core:
-  . Fixed bug #67739 (Windows 8.1/Server 2012 R2 OS build number reported
-    as 6.2 (instead of 6.3)). (Christian Wenz)
+  . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
+    (Laruence)
+  . Implemented 64-bit format codes for pack() and unpack(). (Leigh)
+  . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
   . Fixed bug #67633 (A foreach on an array returned from a function not doing
     copy-on-write). (Nikita)
-  . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
+  . Fixed bug #67739 (Windows 8.1/Server 2012 R2 OS build number reported
+    as 6.2 (instead of 6.3)). (Christian Wenz)
+  . Fixed bug #67949 (DOMNodeList elements should be accessible through
+    array notation) (Florian)
+  . Fixed bug #68095 (AddressSanitizer reports a heap buffer overflow in
+    php_getopt()). (Stas)
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames 
     and passwords) (Tjerk)
-  . Fixed bug #67949 (DOMNodeList elements should be accessible through
-    array notation) (Florian)
-  . Implemented 64-bit format codes for pack() and unpack(). (Leigh)
 
 - phpdbg:
   . Added XML protocol (-x command line flag). (Bob)
@@ -37,6 +45,8 @@ PHP                                                                        NEWS
 
 - GMP:
   . Implemented gmp_random_range() and gmp_random_bits(). (Leigh)
+  . Fixed bug #63595 (GMP memory management conflicts with other libraries
+    using GMP). (Remi)
 
 - Reflection:
   . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
@@ -52,6 +62,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
+
+- Session:
+  . Fixed bug #68331 (Session custom storage callable functions not being called) 
+    (Yasuo Ohgaki)
 
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)

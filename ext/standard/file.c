@@ -339,16 +339,16 @@ static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
    Portable file locking */
 PHP_FUNCTION(flock)
 {
-	zval *arg1, *arg3 = NULL;
+	zval *res, *wouldblock = NULL;
 	int act;
 	php_stream *stream;
 	long operation = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &arg1, &operation, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &res, &operation, &wouldblock) == FAILURE) {
 		return;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
 	act = operation & 3;
 	if (act < 1 || act > 3) {
@@ -356,16 +356,16 @@ PHP_FUNCTION(flock)
 		RETURN_FALSE;
 	}
 
-	if (arg3 && PZVAL_IS_REF(arg3)) {
-		convert_to_long_ex(&arg3);
-		Z_LVAL_P(arg3) = 0;
+	if (wouldblock && PZVAL_IS_REF(wouldblock)) {
+		convert_to_long_ex(&wouldblock);
+		Z_LVAL_P(wouldblock) = 0;
 	}
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
-		if (operation && errno == EWOULDBLOCK && arg3 && PZVAL_IS_REF(arg3)) {
-			Z_LVAL_P(arg3) = 1;
+		if (operation && errno == EWOULDBLOCK && wouldblock && PZVAL_IS_REF(wouldblock)) {
+			Z_LVAL_P(wouldblock) = 1;
 		}
 		RETURN_FALSE;
 	}
@@ -896,14 +896,14 @@ PHP_NAMED_FUNCTION(php_if_fopen)
    Close an open file pointer */
 PHPAPI PHP_FUNCTION(fclose)
 {
-	zval *arg1;
+	zval *res;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
 	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is not a valid stream resource", stream->rsrc_id);
@@ -968,14 +968,14 @@ PHP_FUNCTION(popen)
    Close a file pointer opened by popen() */
 PHP_FUNCTION(pclose)
 {
-	zval *arg1;
+	zval *res;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
 	FG(pclose_wait) = 1;
 	zend_list_delete(stream->rsrc_id);
@@ -988,14 +988,14 @@ PHP_FUNCTION(pclose)
    Test for end-of-file on a file pointer */
 PHPAPI PHP_FUNCTION(feof)
 {
-	zval *arg1;
+	zval *res;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
 	if (php_stream_eof(stream)) {
 		RETURN_TRUE;
@@ -1009,18 +1009,18 @@ PHPAPI PHP_FUNCTION(feof)
    Get a line from file pointer */
 PHPAPI PHP_FUNCTION(fgets)
 {
-	zval *arg1;
+	zval *res;
 	long len = 1024;
 	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &arg1, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &res, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
 	if (argc == 1) {
 		/* ask streams to give us a buffer of an appropriate size */
@@ -1060,16 +1060,16 @@ exit_failed:
    Get a character from file pointer */
 PHPAPI PHP_FUNCTION(fgetc)
 {
-	zval *arg1;
+	zval *res;
 	char buf[2];
 	int result;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
 	result = php_stream_getc(stream);
 
@@ -1180,35 +1180,31 @@ PHP_FUNCTION(fscanf)
    Binary-safe file write */
 PHPAPI PHP_FUNCTION(fwrite)
 {
-	zval *arg1;
-	char *arg2;
-	int arg2len;
+	zval *res;
+	char *input;
+	int inputlen;
 	int ret;
 	int num_bytes;
-	long arg3 = 0;
-	char *buffer = NULL;
+	long maxlen = 0;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &arg1, &arg2, &arg2len, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &res, &input, &inputlen, &maxlen) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (ZEND_NUM_ARGS() == 2) {
-		num_bytes = arg2len;
+		num_bytes = inputlen;
 	} else {
-		num_bytes = MAX(0, MIN((int)arg3, arg2len));
+		num_bytes = MAX(0, MIN((int) maxlen, inputlen));
 	}
 
 	if (!num_bytes) {
 		RETURN_LONG(0);
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
-	ret = php_stream_write(stream, buffer ? buffer : arg2, num_bytes);
-	if (buffer) {
-		efree(buffer);
-	}
+	ret = php_stream_write(stream, input, num_bytes);
 
 	RETURN_LONG(ret);
 }
@@ -1218,15 +1214,15 @@ PHPAPI PHP_FUNCTION(fwrite)
    Flushes output */
 PHPAPI PHP_FUNCTION(fflush)
 {
-	zval *arg1;
+	zval *res;
 	int ret;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
 	ret = php_stream_flush(stream);
 	if (ret) {
@@ -1240,14 +1236,14 @@ PHPAPI PHP_FUNCTION(fflush)
    Rewind the position of a file pointer */
 PHPAPI PHP_FUNCTION(rewind)
 {
-	zval *arg1;
+	zval *res;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
 	if (-1 == php_stream_rewind(stream)) {
 		RETURN_FALSE;
@@ -1260,15 +1256,15 @@ PHPAPI PHP_FUNCTION(rewind)
    Get file pointer's read/write position */
 PHPAPI PHP_FUNCTION(ftell)
 {
-	zval *arg1;
+	zval *res;
 	long ret;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
 	ret = php_stream_tell(stream);
 	if (ret == -1)	{
@@ -1282,17 +1278,17 @@ PHPAPI PHP_FUNCTION(ftell)
    Seek on a file pointer */
 PHPAPI PHP_FUNCTION(fseek)
 {
-	zval *arg1;
-	long arg2, whence = SEEK_SET;
+	zval *res;
+	long offset, whence = SEEK_SET;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &arg1, &arg2, &whence) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &res, &offset, &whence) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
-	RETURN_LONG(php_stream_seek(stream, arg2, whence));
+	RETURN_LONG(php_stream_seek(stream, offset, whence));
 }
 /* }}} */
 
@@ -1394,7 +1390,7 @@ PHP_FUNCTION(readfile)
    Return or change the umask */
 PHP_FUNCTION(umask)
 {
-	long arg1 = 0;
+	long mask = 0;
 	int oldumask;
 
 	oldumask = umask(077);
@@ -1403,14 +1399,14 @@ PHP_FUNCTION(umask)
 		BG(umask) = oldumask;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &mask) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (ZEND_NUM_ARGS() == 0) {
 		umask(oldumask);
 	} else {
-		umask(arg1);
+		umask(mask);
 	}
 
 	RETURN_LONG(oldumask);
@@ -1421,15 +1417,15 @@ PHP_FUNCTION(umask)
    Output all remaining data from a file pointer */
 PHPAPI PHP_FUNCTION(fpassthru)
 {
-	zval *arg1;
+	zval *res;
 	int size;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
 	size = php_stream_passthru(stream);
 	RETURN_LONG(size);
@@ -1751,15 +1747,15 @@ safe_to_copy:
    Binary-safe file read */
 PHPAPI PHP_FUNCTION(fread)
 {
-	zval *arg1;
+	zval *res;
 	long len;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &res, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, &res);
 
 	if (len <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");

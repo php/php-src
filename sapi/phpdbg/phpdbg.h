@@ -21,6 +21,8 @@
 #ifndef PHPDBG_H
 #define PHPDBG_H
 
+#define PHPDBG_IN_DEV 0
+
 #ifdef PHP_WIN32
 # define PHPDBG_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
@@ -29,8 +31,12 @@
 # define PHPDBG_API
 #endif
 
-#include <stdint.h>
-#include <stddef.h>
+#ifndef PHP_WIN32
+#	include <stdint.h>
+#	include <stddef.h>
+#else
+#	include "win32/php_stdint.h"
+#endif
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
@@ -50,7 +56,6 @@
 #if defined(_WIN32) && !defined(__MINGW32__)
 #	include <windows.h>
 #	include "config.w32.h"
-#	include "win32/php_stdint.h"
 #	undef  strcasecmp
 #	undef  strncasecmp
 #	define strcasecmp _stricmp 
@@ -184,7 +189,7 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
 #define PHPDBG_BP_MASK                (PHPDBG_HAS_FILE_BP | PHPDBG_HAS_SYM_BP | PHPDBG_HAS_METHOD_BP | PHPDBG_HAS_OPLINE_BP | PHPDBG_HAS_COND_BP | PHPDBG_HAS_OPCODE_BP | PHPDBG_HAS_FUNCTION_OPLINE_BP | PHPDBG_HAS_METHOD_OPLINE_BP | PHPDBG_HAS_FILE_OPLINE_BP)
 #define PHPDBG_IS_STOPPING            (PHPDBG_IS_QUITTING | PHPDBG_IS_CLEANING)
 
-#define PHPDBG_PRESERVE_FLAGS_MASK    (PHPDBG_SHOW_REFCOUNTS | PHPDBG_IS_STEPONEVAL | PHPDBG_IS_BP_ENABLED | PHPDBG_STEP_OPCODE | PHPDBG_IS_QUIET | PHPDBG_IS_COLOURED)
+#define PHPDBG_PRESERVE_FLAGS_MASK    (PHPDBG_SHOW_REFCOUNTS | PHPDBG_IS_STEPONEVAL | PHPDBG_IS_BP_ENABLED | PHPDBG_STEP_OPCODE | PHPDBG_IS_QUIET | PHPDBG_IS_COLOURED | PHPDBG_IS_REMOTE | PHPDBG_WRITE_XML | PHPDBG_IS_DISCONNECTED)
 
 #ifndef _WIN32
 #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_COLOURED | PHPDBG_IS_BP_ENABLED)

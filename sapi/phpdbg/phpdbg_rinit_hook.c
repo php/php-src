@@ -52,7 +52,7 @@ static PHP_RINIT_FUNCTION(phpdbg_webhelper) /* {{{ */
 		return SUCCESS;
 	}
 
-#ifndef _WIN32
+#if PHPDBG_IN_DEV
 	{
 		struct sockaddr_un sock;
 		int s = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -99,3 +99,7 @@ zend_module_entry phpdbg_webhelper_module_entry = {
 	PHPDBG_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
+
+#ifdef COMPILE_DL_PHPDBG_WEBHELPER
+ZEND_GET_MODULE(phpdbg_webhelper)
+#endif
