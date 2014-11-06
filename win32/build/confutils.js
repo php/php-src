@@ -49,7 +49,8 @@ VC_VERSIONS[1500] = 'MSVC9 (Visual C++ 2008)';
 VC_VERSIONS[1600] = 'MSVC10 (Visual C++ 2010)';
 VC_VERSIONS[1700] = 'MSVC11 (Visual C++ 2012)';
 VC_VERSIONS[1800] = 'MSVC12 (Visual C++ 2013)';
-VC_VERSIONS[1900] = 'MSVC14 (Visual C++ 2014)';
+/* XXX update after the final rename */
+VC_VERSIONS[1900] = 'MSVC14 (Visual C++ CTP14)';
 
 var VC_VERSIONS_SHORT = new Array();
 VC_VERSIONS_SHORT[1200] = 'VC6';
