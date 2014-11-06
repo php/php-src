@@ -36,6 +36,8 @@ PHP                                                                        NEWS
   . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
   . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
     when not in transaction) (Matteo)
+  . Fixed bug #68351 (PDO::PARAM_BOOL and ATTR_EMULATE_PREPARES misbehaving)
+    (Matteo)
 
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
