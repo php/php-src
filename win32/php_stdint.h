@@ -33,7 +33,7 @@
 #error "Use this header only with Microsoft Visual C++ compilers!"
 #endif // _MSC_VER ]
 
-// Starting with VS2014, many of the C11 features are now included, so we only
+// Starting with vc14, many of the C11 features are now included, so we only
 // need many of these typedefs and defines for older VS suites
 #if _MSC_VER < 1900
 
