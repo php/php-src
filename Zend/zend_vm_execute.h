@@ -4215,12 +4215,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_error_noreturn(E_ERROR, "Cannot call constructor");
-		}
-		if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		}
-		fbc = ce->constructor;
+            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+                fbc = &zend_null_function;
+            } else {
+                zend_error_noreturn(E_ERROR, "Cannot call constructor");
+            }
+		} else {
+		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+		    }
+		    fbc = ce->constructor;
+        }
 	}
 
 	object = NULL;
@@ -5906,12 +5911,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_error_noreturn(E_ERROR, "Cannot call constructor");
-		}
-		if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		}
-		fbc = ce->constructor;
+            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+                fbc = &zend_null_function;
+            } else {
+                zend_error_noreturn(E_ERROR, "Cannot call constructor");
+            }
+		} else {
+		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+		    }
+		    fbc = ce->constructor;
+        }
 	}
 
 	object = NULL;
@@ -6951,12 +6961,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_error_noreturn(E_ERROR, "Cannot call constructor");
-		}
-		if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		}
-		fbc = ce->constructor;
+            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+                fbc = &zend_null_function;
+            } else {
+                zend_error_noreturn(E_ERROR, "Cannot call constructor");
+            }
+		} else {
+		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+		    }
+		    fbc = ce->constructor;
+        }
 	}
 
 	object = NULL;
@@ -8086,12 +8101,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_error_noreturn(E_ERROR, "Cannot call constructor");
-		}
-		if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		}
-		fbc = ce->constructor;
+            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+                fbc = &zend_null_function;
+            } else {
+                zend_error_noreturn(E_ERROR, "Cannot call constructor");
+            }
+		} else {
+		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+		    }
+		    fbc = ce->constructor;
+        }
 	}
 
 	object = NULL;
@@ -13210,12 +13230,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_error_noreturn(E_ERROR, "Cannot call constructor");
-		}
-		if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		}
-		fbc = ce->constructor;
+            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+                fbc = &zend_null_function;
+            } else {
+                zend_error_noreturn(E_ERROR, "Cannot call constructor");
+            }
+		} else {
+		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+		    }
+		    fbc = ce->constructor;
+        }
 	}
 
 	object = NULL;
@@ -14699,12 +14724,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_error_noreturn(E_ERROR, "Cannot call constructor");
-		}
-		if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		}
-		fbc = ce->constructor;
+            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+                fbc = &zend_null_function;
+            } else {
+                zend_error_noreturn(E_ERROR, "Cannot call constructor");
+            }
+		} else {
+		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+		    }
+		    fbc = ce->constructor;
+        }
 	}
 
 	object = NULL;
@@ -16145,12 +16175,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_error_noreturn(E_ERROR, "Cannot call constructor");
-		}
-		if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		}
-		fbc = ce->constructor;
+            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+                fbc = &zend_null_function;
+            } else {
+                zend_error_noreturn(E_ERROR, "Cannot call constructor");
+            }
+		} else {
+		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+		    }
+		    fbc = ce->constructor;
+        }
 	}
 
 	object = NULL;
@@ -17581,12 +17616,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_HANDLER(Z
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_error_noreturn(E_ERROR, "Cannot call constructor");
-		}
-		if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		}
-		fbc = ce->constructor;
+            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+                fbc = &zend_null_function;
+            } else {
+                zend_error_noreturn(E_ERROR, "Cannot call constructor");
+            }
+		} else {
+		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+		    }
+		    fbc = ce->constructor;
+        }
 	}
 
 	object = NULL;

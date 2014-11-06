@@ -781,6 +781,7 @@ int zend_add_literal(zend_op_array *op_array, zval *zv);
 #define ZEND_OVERLOADED_FUNCTION			3
 #define	ZEND_EVAL_CODE						4
 #define ZEND_OVERLOADED_FUNCTION_TEMPORARY	5
+#define ZEND_NULL_FUNCTION              	6
 
 /* A quick check (type == ZEND_USER_FUNCTION || type == ZEND_EVAL_CODE) */
 #define ZEND_USER_CODE(type) ((type & 1) == 0)

@@ -1888,6 +1888,10 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 }
 /* }}} */
 
+static zend_function zend_null_function = {
+    ZEND_NULL_FUNCTION
+};
+
 #define ZEND_VM_NEXT_OPCODE() \
 	CHECK_SYMBOL_TABLES() \
 	ZEND_VM_INC_OPCODE(); \

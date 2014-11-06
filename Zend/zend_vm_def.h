@@ -2428,12 +2428,17 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-			zend_error_noreturn(E_ERROR, "Cannot call constructor");
-		}
-		if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		}
-		fbc = ce->constructor;
+            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+                fbc = &zend_null_function;
+            } else {
+                zend_error_noreturn(E_ERROR, "Cannot call constructor");
+            }
+		} else {
+		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+		    }
+		    fbc = ce->constructor;
+        }
 	}
 
 	object = NULL;
