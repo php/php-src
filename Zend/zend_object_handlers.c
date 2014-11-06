@@ -641,7 +641,7 @@ write_std_property:
 			if (!zobj->properties) {
 				rebuild_object_properties(zobj);
 			}
-			zend_hash_update(zobj->properties, Z_STR_P(member), value);
+			zend_hash_add_new(zobj->properties, Z_STR_P(member), value);
 		}
 	}
 
