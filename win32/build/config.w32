@@ -3,11 +3,15 @@
 // "Master" config file; think of it as a configure.in
 // equivalent.
 
-ARG_WITH("toolset", "Toolset to use for the compilation, supported: vs, clang", "vs");
+ARG_WITH("toolset", "Toolset to use for the compilation, supported: vs, clang, intel", "vs");
 if ("clang" == PHP_TOOLSET) {
 	VS_TOOLSET = false;
 	CLANG_TOOLSET = true;
 	INTEL_TOOLSET = false;
+} else if ("intel" == PHP_TOOLSET) {
+	VS_TOOLSET = false;
+	CLANG_TOOLSET = false;
+	INTEL_TOOLSET = true;
 } else {
 	/* Visual Studio is the default toolset. */
 	PHP_TOOLSET = "no" == PHP_TOOLSET ? "vs" : PHP_TOOLSET;
@@ -56,8 +60,11 @@ if (VS_TOOLSET) {
 	AC_DEFINE('PHP_COMPILER_ID', "clang"); /* XXX something better were to write here */
 
 } else if (INTEL_TOOLSET) {
-	//INTELVERS = compiler_ver;
-	// ....
+	INTELVERS = COMPILER_NUMERIC_VERSION;
+
+	AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
+	DEFINE("PHP_COMPILER_SHORT", "icc");
+	AC_DEFINE('PHP_COMPILER_ID', "icc"); /* XXX something better were to write here */
 }
 STDOUT.WriteLine("  Detected compiler " + COMPILER_NAME);
 
@@ -427,7 +434,7 @@ ADD_SOURCES("win32", "inet.c fnmatch.c sockets.c");
 if (VS_TOOLSET && VCVERS <= 1300) {
 	ADD_SOURCES("win32", "strtoi64.c");
 }
-if (VS_TOOLSET && VCVERS >= 1400) {
+if (VS_TOOLSET && VCVERS >= 1400 || INTEL_TOOLSET) {
 	AC_DEFINE('HAVE_STRNLEN', 1);
 }
 

@@ -2328,7 +2328,7 @@ function toolset_get_compiler_version()
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
 
-		if (full.match(/Version (\d\.\d\.\d)/)) {
+		if (full.match(/Version (\d+\.\d+\.\d+)/)) {
 			version = RegExp.$1;
 			version = version.replace(/\./g, '');
 			version = version/100 < 1 ? version*10 : version;
@@ -2337,7 +2337,7 @@ function toolset_get_compiler_version()
 		}
 	}
 
-	ERROR("Wrong toolset");
+	ERROR("Failed to parse compiler out for compiler version");
 }
 
 function toolset_get_compiler_name()
@@ -2368,7 +2368,9 @@ function toolset_is_64()
 		var vs_cl = PATH_PROG('cl', null, 'PHP_CL')
 		return probe_binary(vs_cl, 64);
 	} else if (INTEL_TOOLSET) {
-
+		/*seems the easiest way as well for now */
+		var vs_cl = PATH_PROG('cl', null, 'PHP_CL')
+		return probe_binary(vs_cl, 64);
 	}
 
 	ERROR("Wrong toolset");
