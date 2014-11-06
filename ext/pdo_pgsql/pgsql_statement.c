@@ -371,6 +371,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 			((param->param_type & PDO_PARAM_INPUT_OUTPUT) != PDO_PARAM_INPUT_OUTPUT)) {
 			SEPARATE_ZVAL(&param->parameter);
 			param->param_type = PDO_PARAM_STR;
+			convert_to_boolean(param->parameter);
 			ZVAL_STRINGL(param->parameter, Z_BVAL_P(param->parameter) ? "t" : "f", 1, 1);
 		}
 	}
