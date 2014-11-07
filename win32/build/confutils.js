@@ -39,6 +39,8 @@ var INTELVERS = -1;
 var COMPILER_NUMERIC_VERSION = -1;
 var COMPILER_NAME = "unknown";
 
+var WINVER = "0x0600"; /* Vista */
+
 // There's a minimum requirement for re2c..
 var MINRE2C = "0.13.4";
 
