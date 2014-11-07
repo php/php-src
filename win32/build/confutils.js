@@ -2549,6 +2549,7 @@ function toolset_setup_common_cflags()
 		} else {
 			ADD_FLAG('CFLAGS', ' -m32 ');
 		}
+		ADD_FLAG("CFLAGS", " /fallback ");
 	}
 }
 
