@@ -232,12 +232,10 @@ function add_extra_dirs()
 		for (i = 0; i < path.length; i++) {
 			f = FSO.GetAbsolutePathName(path[i]);
 			if (FSO.FolderExists(f)) {
-				if (VS_TOOLSET) {
-					if (VCVERS <= 1200 && f.indexOf(" ") >= 0) {
-						ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
-					} else {
-						ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
-					}
+				if (VS_TOOLSET && VCVERS <= 1200 && f.indexOf(" ") >= 0) {
+					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
+				} else {
+					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
 				}
 			}
 		}
