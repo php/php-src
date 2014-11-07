@@ -297,7 +297,6 @@ typedef struct _zend_accel_shared_globals {
     unsigned long   restart_in;
 #endif
 	zend_bool       restart_in_progress;
-    time_t          revalidate_at;
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	/* Interned Strings Support */
 	char           *interned_strings_start;
