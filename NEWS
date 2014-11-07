@@ -2,8 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.20
 
+- PDO_pgsql:
+  . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
+  . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
+    when not in transaction) (Matteo)
+  . Fixed bug #68351 (PDO::PARAM_BOOL and ATTR_EMULATE_PREPARES misbehaving)
+    (Matteo)
 
-?? ??? 2014, PHP 5.5.19
+13 Nov 2014, PHP 5.5.19
 
 - Core:
   . Fixed bug #68095 (AddressSanitizer reports a heap buffer overflow in 
@@ -16,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
   . Fixed bug #68283 (fileinfo: out-of-bounds read in elf note headers).
     (CVE-2014-3710) (Remi)
+
+- FPM:
+  . Implemented FR #55508 (listen and listen.allowed_clients should take IPv6
+    addresses). (Robin Gloster)
 
 - GD:
   . Fixed bug #65171 (imagescale() fails without height param). (Remi)
@@ -31,13 +41,6 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
-
-- PDO_pgsql:
-  . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
-  . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
-    when not in transaction) (Matteo)
-  . Fixed bug #68351 (PDO::PARAM_BOOL and ATTR_EMULATE_PREPARES misbehaving)
-    (Matteo)
 
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
@@ -60,8 +63,6 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #65641 (PHP-FPM incorrectly defines the SCRIPT_NAME variable
     when using Apache, mod_proxy-fcgi and ProxyPass). (Remi)
-  . Implemented FR #55508 (listen and listen.allowed_clients should take IPv6
-    addresses). (Robin Gloster)
 
 - Reflection:
   . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
