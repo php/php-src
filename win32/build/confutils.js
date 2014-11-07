@@ -39,6 +39,9 @@ var INTELVERS = -1;
 var COMPILER_NUMERIC_VERSION = -1;
 var COMPILER_NAME = "unknown";
 
+// There's a minimum requirement for re2c..
+var MINRE2C = "0.13.4";
+
 /* Store the enabled extensions (summary + QA check) */
 var extensions_enabled = new Array();
 
@@ -2292,6 +2295,118 @@ if (!MODE_PHPIZE) {
 	ARG_ENABLE('one-shot', 'Optimize for fast build - best for release and snapshot builders, not so hot for edit-and-rebuild hacking', 'no');
 }
 
+
+function toolset_option_handle()
+{
+	if ("clang" == PHP_TOOLSET) {
+		VS_TOOLSET = false;
+		CLANG_TOOLSET = true;
+		INTEL_TOOLSET = false;
+	} else if ("intel" == PHP_TOOLSET) {
+		VS_TOOLSET = false;
+		CLANG_TOOLSET = false;
+		INTEL_TOOLSET = true;
+	} else {
+		/* Visual Studio is the default toolset. */
+		PHP_TOOLSET = "no" == PHP_TOOLSET ? "vs" : PHP_TOOLSET;
+		if (!!PHP_TOOLSET && "vs" != PHP_TOOLSET) {
+			ERROR("Unsupported toolset name '" + PHP_TOOLSET + "'");
+		}
+		VS_TOOLSET = true;
+		CLANG_TOOLSET = false;
+		INTEL_TOOLSET = false;
+	}
+}
+
+function toolset_setup_compiler()
+{
+	PHP_CL = toolset_get_compiler();
+	if (!PHP_CL) {
+		ERROR("Compiler not found");
+	}
+
+	COMPILER_NUMERIC_VERSION = toolset_get_compiler_version();
+	COMPILER_NAME = toolset_get_compiler_name();
+
+	if (VS_TOOLSET) {
+		/* For the record here: */
+		// 1200 is VC6
+		// 1300 is vs.net 2002
+		// 1310 is vs.net 2003
+		// 1400 is vs.net 2005
+		// 1500 is vs.net 2008
+		// 1600 is vs.net 2010
+		// Which version of the compiler do we have?
+		VCVERS = COMPILER_NUMERIC_VERSION;
+
+		if (VCVERS < 1500) {
+			ERROR("Unsupported MS C++ Compiler, VC9 (2008) minimum is required");
+		}
+
+		AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
+		DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
+		AC_DEFINE('PHP_COMPILER_ID', VC_VERSIONS_SHORT[VCVERS], "Compiler compatibility ID");
+	} else if (CLANG_TOOLSET) {
+		CLANGVERS = COMPILER_NUMERIC_VERSION;
+
+		AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
+		DEFINE("PHP_COMPILER_SHORT", "clang");
+		AC_DEFINE('PHP_COMPILER_ID', "clang"); /* XXX something better were to write here */
+
+	} else if (INTEL_TOOLSET) {
+		INTELVERS = COMPILER_NUMERIC_VERSION;
+
+		AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
+		DEFINE("PHP_COMPILER_SHORT", "icc");
+		AC_DEFINE('PHP_COMPILER_ID', "icc"); /* XXX something better were to write here */
+	}
+	STDOUT.WriteLine("  Detected compiler " + COMPILER_NAME);
+}
+
+function toolset_setup_project_tools()
+{
+	PATH_PROG('nmake');
+
+	// we don't want to define LIB, as that will override the default library path
+	// that is set in that env var
+	PATH_PROG('lib', null, 'MAKE_LIB');
+	if (!PATH_PROG('bison')) {
+		ERROR('bison is required')
+	}
+
+	RE2C = PATH_PROG('re2c');
+	if (RE2C) {
+		var intvers, intmin;
+		var pattern = /\./g;
+
+		RE2CVERS = probe_binary(RE2C, "version");
+		STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);
+
+		intvers = RE2CVERS.replace(pattern, '') - 0;
+		intmin = MINRE2C.replace(pattern, '') - 0;
+
+		if (intvers < intmin) {
+			STDOUT.WriteLine('WARNING: The minimum RE2C version requirement is ' + MINRE2C);
+			STDOUT.WriteLine('Parsers will not be generated. Upgrade your copy at http://sf.net/projects/re2c');
+			DEFINE('RE2C', '');
+		} else {
+			DEFINE('RE2C_FLAGS', '');
+		}
+	} else {
+		STDOUT.WriteLine('Parsers will not be regenerated');
+	}
+	PATH_PROG('zip');
+	PATH_PROG('lemon');
+
+	// avoid picking up midnight commander from cygwin
+	PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
+
+	// Try locating manifest tool
+	if (VS_TOOLSET && VCVERS > 1200) {
+		PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"));
+	}
+}
+
 function toolset_get_compiler()
 {
 	if (VS_TOOLSET) {
@@ -2302,7 +2417,7 @@ function toolset_get_compiler()
 		return PATH_PROG('icl', null, 'PHP_CL')
 	}
 
-	ERROR("Wrong toolset");
+	ERROR("Unsupported toolset");
 }
 
 function toolset_get_compiler_version()
@@ -2337,7 +2452,7 @@ function toolset_get_compiler_version()
 		}
 	}
 
-	ERROR("Failed to parse compiler out for compiler version");
+	ERROR("Failed to parse compiler version or unsupported toolset");
 }
 
 function toolset_get_compiler_name()
@@ -2354,7 +2469,7 @@ function toolset_get_compiler_name()
 		return full.split(/\n/)[0].replace(/\s/g, ' ');
 	}
 
-	ERROR("Wrong toolset");
+	WARNING("Unsupported toolset");
 }
 
 
@@ -2374,11 +2489,11 @@ function toolset_is_64()
 		return null != full.match(/Intel\(R\) 64/);
 	}
 
-	ERROR("Wrong toolset");
+	ERROR("Unsupported toolset");
 }
 
 
-function toolset_get_linker()
+function toolset_setup_linker()
 {
 	if (VS_TOOLSET) {
 		return PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
@@ -2389,7 +2504,6 @@ function toolset_get_linker()
 		return PATH_PROG('xilink', WshShell.Environment("Process").Item("PATH"), "LINK");
 	}
 
-	ERROR("Wrong toolset");
+	ERROR("Unsupported toolset");
 }
-
 
