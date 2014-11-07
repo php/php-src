@@ -556,10 +556,14 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 #ifdef CLIENT_MULTI_RESULTS
 		|CLIENT_MULTI_RESULTS
 #endif
-#ifdef CLIENT_MULTI_STATEMENTS
-		|CLIENT_MULTI_STATEMENTS
-#endif
 		;
+#ifdef CLIENT_MULTI_STATEMENTS
+	if (!driver_options) {
+		connect_opts |= CLIENT_MULTI_STATEMENTS;
+	} else if (pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_MULTI_STATEMENTS, 1 TSRMLS_CC)) {
+		connect_opts |= CLIENT_MULTI_STATEMENTS;
+	}
+#endif
 
 #if defined(PDO_USE_MYSQLND)
 	int dbname_len = 0;
