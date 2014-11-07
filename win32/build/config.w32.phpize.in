@@ -77,11 +77,8 @@ if (VS_TOOLSET && VCVERS >= 1500 && PHP_MP != 'disable') {
  * files that make up the snapshot template? */
 ARG_WITH("snapshot-template", "Path to snapshot builder template dir", "no");
 
-// General DLL link flags
-DEFINE("DLL_LDFLAGS", "/dll ");
-
-// PHP DLL link flags
-DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
+// General link flags
+toolset_setup_common_ldlags();
 
 // General libs
 // urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib

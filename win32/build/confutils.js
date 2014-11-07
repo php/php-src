@@ -2567,6 +2567,12 @@ function toolset_setup_common_cflags()
 
 function toolset_setup_common_ldlags()
 {
+	// General DLL link flags
+	DEFINE("DLL_LDFLAGS", "/dll ");
+
+	// PHP DLL link flags
+	DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
+
 	if (VS_TOOLSET) {
 		if (VCVERS >= 1700) {
 			DEFINE("LDFLAGS", "/nologo ");
