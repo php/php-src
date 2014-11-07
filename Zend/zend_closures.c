@@ -140,7 +140,7 @@ ZEND_METHOD(Closure, bind)
 	}
 
 	if (scope_arg != NULL) { /* scope argument was given */
-		if (IS_ZEND_STD_OBJECT(*scope_arg)) {
+		if (Z_TYPE_P(scope_arg) == IS_OBJECT) {
 			ce = Z_OBJCE_P(scope_arg);
 		} else if (Z_TYPE_P(scope_arg) == IS_NULL) {
 			ce = NULL;

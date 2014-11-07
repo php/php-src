@@ -201,10 +201,6 @@ engine = On
 ; http://php.net/short-open-tag
 short_open_tag = Off
 
-; Allow ASP-style <% %> tags.
-; http://php.net/asp-tags
-asp_tags = Off
-
 ; The number of significant digits displayed in floating point numbers.
 ; http://php.net/precision
 precision = 14

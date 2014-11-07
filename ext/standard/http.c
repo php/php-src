@@ -26,9 +26,9 @@
 
 /* {{{ php_url_encode_hash */
 PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
-				const char *num_prefix, int num_prefix_len,
-				const char *key_prefix, int key_prefix_len,
-				const char *key_suffix, int key_suffix_len,
+				const char *num_prefix, size_t num_prefix_len,
+				const char *key_prefix, size_t key_prefix_len,
+				const char *key_suffix, size_t key_suffix_len,
 			  zval *type, char *arg_sep, int enc_type TSRMLS_DC)
 {
 	zend_string *key = NULL;
@@ -107,7 +107,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				*p = '\0';
 			} else {
 				char *ekey;
-				int ekey_len;
+				size_t ekey_len;
 				/* Is an integer key */
 				ekey_len = spprintf(&ekey, 0, "%pd", idx);
 				newprefix_len = key_prefix_len + num_prefix_len + ekey_len + key_suffix_len + 3 /* %5B */;
@@ -194,7 +194,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				case IS_DOUBLE:
 					{
 						char *ekey;
-					  	int ekey_len;
+					  	size_t ekey_len;
 						ekey_len = spprintf(&ekey, 0, "%.*G", (int) EG(precision), Z_DVAL_P(zdata));
 						smart_str_appendl(formstr, ekey, ekey_len);
 						efree(ekey);
@@ -242,7 +242,7 @@ PHP_FUNCTION(http_build_query)
 		RETURN_FALSE;
 	}
 
-	if (php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, enc_type TSRMLS_CC) == FAILURE) {
+	if (php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, (int)enc_type TSRMLS_CC) == FAILURE) {
 		if (formstr.s) {
 			smart_str_free(&formstr);
 		}

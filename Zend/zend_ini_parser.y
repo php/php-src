@@ -43,6 +43,11 @@ int ini_parse(void);
 #define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
 #define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg
 
+#ifdef _MSC_VER
+#define YYMALLOC malloc
+#define YYFREE free
+#endif
+
 /* {{{ zend_ini_do_op()
 */
 static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
@@ -99,8 +104,8 @@ static void zend_ini_init_string(zval *result)
 */
 static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 {
-	int op1_len = Z_STRLEN_P(op1);
-	int length = op1_len + Z_STRLEN_P(op2);
+	int op1_len = (int)Z_STRLEN_P(op1);
+	int length = op1_len + (int)Z_STRLEN_P(op2);
 
 	ZVAL_NEW_STR(result, zend_string_realloc(Z_STR_P(op1), length, 1));
 	memcpy(Z_STRVAL_P(result)+op1_len, Z_STRVAL_P(op2), Z_STRLEN_P(op2));
@@ -168,7 +173,7 @@ static void ini_error(const char *msg)
 
 	currently_parsed_filename = zend_ini_scanner_get_filename(TSRMLS_C);
 	if (currently_parsed_filename) {
-		error_buf_len = 128 + strlen(msg) + strlen(currently_parsed_filename); /* should be more than enough */
+		error_buf_len = 128 + (int)strlen(msg) + (int)strlen(currently_parsed_filename); /* should be more than enough */
 		error_buf = (char *) emalloc(error_buf_len);
 
 		sprintf(error_buf, "%s in %s on line %d\n", msg, currently_parsed_filename, zend_ini_scanner_get_lineno(TSRMLS_C));

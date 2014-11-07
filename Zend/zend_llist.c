@@ -243,7 +243,7 @@ ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_ar
 }
 
 
-ZEND_API int zend_llist_count(zend_llist *l)
+ZEND_API size_t zend_llist_count(zend_llist *l)
 {
 	return l->count;
 }

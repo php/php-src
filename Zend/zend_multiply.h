@@ -84,10 +84,10 @@
 	}																\
 } while (0)
 
-#elif SIZEOF_ZEND_LONG == 4 && defined(HAVE_ZEND_LONG64)
+#elif SIZEOF_ZEND_LONG == 4
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	zend_long64 __result = (zend_long64) (a) * (zend_long64) (b);	\
+	int64_t __result = (int64_t) (a) * (int64_t) (b);				\
 	if (__result > ZEND_LONG_MAX || __result < ZEND_LONG_MIN) {		\
 		(dval) = (double) __result;									\
 		(usedval) = 1;												\
@@ -117,7 +117,7 @@
 static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, int *overflow)
 {
 	size_t res = nmemb;
-	zend_ulong m_overflow = 0;
+	size_t m_overflow = 0;
 
 	__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
 	     : "=&a"(res), "=&d" (m_overflow)
@@ -206,13 +206,13 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 	return res;
 }
 
-#elif SIZEOF_SIZE_T == 4 && defined(HAVE_ZEND_LONG64)
+#elif SIZEOF_SIZE_T == 4
 
 static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, int *overflow)
 {
-	zend_ulong64 res = (zend_ulong64)nmemb * (zend_ulong64)size + (zend_ulong64)offset;
+	uint64_t res = (uint64_t) nmemb * (uint64_t) size + (uint64_t) offset;
 
-	if (UNEXPECTED(res > (zend_ulong64)0xFFFFFFFFL)) {
+	if (UNEXPECTED(res > UINT64_C(0xFFFFFFFF))) {
 		*overflow = 1;
 		return 0;
 	}

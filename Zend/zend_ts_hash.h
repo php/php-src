@@ -102,16 +102,16 @@ void zend_ts_hash_display_pListTail(TsHashTable *ht);
 void zend_ts_hash_display(TsHashTable *ht);
 #endif
 
-ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, int len);
-ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, int len, zval *pData ZEND_FILE_LINE_DC);
-ZEND_API zval *_zend_ts_hash_str_add(TsHashTable *ht, const char *key, int len, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *zend_ts_hash_str_find(TsHashTable *ht, const char *key, size_t len);
+ZEND_API zval *_zend_ts_hash_str_update(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_ts_hash_str_add(TsHashTable *ht, const char *key, size_t len, zval *pData ZEND_FILE_LINE_DC);
 
 #define zend_ts_hash_str_update(ht, key, len, pData) \
 		_zend_ts_hash_str_update(ht, key, len, pData ZEND_FILE_LINE_CC)
 #define zend_ts_hash_str_add(ht, key, len, pData) \
 		_zend_ts_hash_str_add(ht, key, len, pData ZEND_FILE_LINE_CC)
 
-static zend_always_inline void *zend_ts_hash_str_find_ptr(TsHashTable *ht, const char *str, int len)
+static zend_always_inline void *zend_ts_hash_str_find_ptr(TsHashTable *ht, const char *str, size_t len)
 {
 	zval *zv;
 
@@ -119,7 +119,7 @@ static zend_always_inline void *zend_ts_hash_str_find_ptr(TsHashTable *ht, const
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
-static zend_always_inline void *zend_ts_hash_str_update_ptr(TsHashTable *ht, const char *str, int len, void *pData)
+static zend_always_inline void *zend_ts_hash_str_update_ptr(TsHashTable *ht, const char *str, size_t len, void *pData)
 {
 	zval tmp, *zv;
 
@@ -128,7 +128,7 @@ static zend_always_inline void *zend_ts_hash_str_update_ptr(TsHashTable *ht, con
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
-static zend_always_inline void *zend_ts_hash_str_add_ptr(TsHashTable *ht, const char *str, int len, void *pData)
+static zend_always_inline void *zend_ts_hash_str_add_ptr(TsHashTable *ht, const char *str, size_t len, void *pData)
 {
 	zval tmp, *zv;
 

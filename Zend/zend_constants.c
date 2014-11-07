@@ -161,7 +161,7 @@ void clean_non_persistent_constants(TSRMLS_D)
 	}
 }
 
-ZEND_API void zend_register_null_constant(const char *name, uint name_len, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
@@ -172,7 +172,7 @@ ZEND_API void zend_register_null_constant(const char *name, uint name_len, int f
 	zend_register_constant(&c TSRMLS_CC);
 }
 
-ZEND_API void zend_register_bool_constant(const char *name, uint name_len, zend_bool bval, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, zend_bool bval, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
@@ -183,7 +183,7 @@ ZEND_API void zend_register_bool_constant(const char *name, uint name_len, zend_
 	zend_register_constant(&c TSRMLS_CC);
 }
 
-ZEND_API void zend_register_long_constant(const char *name, uint name_len, zend_long lval, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zend_long lval, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
@@ -195,7 +195,7 @@ ZEND_API void zend_register_long_constant(const char *name, uint name_len, zend_
 }
 
 
-ZEND_API void zend_register_double_constant(const char *name, uint name_len, double dval, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_double_constant(const char *name, size_t name_len, double dval, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
@@ -207,7 +207,7 @@ ZEND_API void zend_register_double_constant(const char *name, uint name_len, dou
 }
 
 
-ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, char *strval, uint strlen, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, char *strval, size_t strlen, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
@@ -219,12 +219,12 @@ ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, ch
 }
 
 
-ZEND_API void zend_register_string_constant(const char *name, uint name_len, char *strval, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_string_constant(const char *name, size_t name_len, char *strval, int flags, int module_number TSRMLS_DC)
 {
 	zend_register_stringl_constant(name, name_len, strval, strlen(strval), flags, module_number TSRMLS_CC);
 }
 
-static zend_constant *zend_get_special_constant(const char *name, uint name_len TSRMLS_DC)
+static zend_constant *zend_get_special_constant(const char *name, size_t name_len TSRMLS_DC)
 {
 	zend_constant *c;
 	static char haltoff[] = "__COMPILER_HALT_OFFSET__";
@@ -236,7 +236,7 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 
 		/* Returned constants may be cached, so they have to be stored */
 		if (EG(scope) && EG(scope)->name) {
-			int const_name_len;
+			size_t const_name_len;
 			zend_string *const_name;
 			
 			const_name_len = sizeof("\0__CLASS__") + EG(scope)->name->len;
@@ -265,7 +265,7 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 	          !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
 		const char *cfilename;
 		zend_string *haltname;
-		int clen;
+		size_t clen;
 
 		cfilename = zend_get_executed_filename(TSRMLS_C);
 		clen = strlen(cfilename);
@@ -281,7 +281,7 @@ static zend_constant *zend_get_special_constant(const char *name, uint name_len 
 }
 
 
-ZEND_API zval *zend_get_constant_str(const char *name, uint name_len TSRMLS_DC)
+ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len TSRMLS_DC)
 {
 	zend_constant *c;
 	ALLOCA_FLAG(use_heap)
@@ -330,7 +330,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	zend_class_entry *ce = NULL;
 	zend_string *class_name;
 	const char *name = cname->val;
-	uint name_len = cname->len;
+	size_t name_len = cname->len;
 
 	/* Skip leading \\ */
 	if (name[0] == '\\') {
@@ -342,7 +342,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	if ((colon = zend_memrchr(name, ':', name_len)) &&
 	    colon > name && (*(colon - 1) == ':')) {
 		int class_name_len = colon - name - 1;
-		int const_name_len = name_len - class_name_len - 2;
+		size_t const_name_len = name_len - class_name_len - 2;
 		zend_string *constant_name = zend_string_init(colon + 1, const_name_len, 0);
 		char *lcname;
 		zval *ret_constant = NULL;
@@ -408,10 +408,10 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	if ((colon = zend_memrchr(name, '\\', name_len)) != NULL) {
 		/* compound constant name */
 		int prefix_len = colon - name;
-		int const_name_len = name_len - prefix_len - 1;
+		size_t const_name_len = name_len - prefix_len - 1;
 		const char *constant_name = colon + 1;
 		char *lcname;
-		int lcname_len;
+		size_t lcname_len;
 		ALLOCA_FLAG(use_heap)
 
 		lcname_len = prefix_len + 1 + const_name_len;

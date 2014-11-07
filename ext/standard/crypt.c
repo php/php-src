@@ -295,7 +295,7 @@ PHP_FUNCTION(crypt)
 	}
 	salt[salt_in_len] = '\0';
 
-	if ((result = php_crypt(str, str_len, salt, salt_in_len)) == NULL) {
+	if ((result = php_crypt(str, (int)str_len, salt, (int)salt_in_len)) == NULL) {
 		if (salt[0] == '*' && salt[1] == '0') {
 			RETURN_STRING("*1");
 		} else {

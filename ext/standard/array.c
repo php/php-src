@@ -331,7 +331,7 @@ PHP_FUNCTION(count)
 			}
 #ifdef HAVE_SPL
 			/* if not and the object implements Countable we call its count() method */
-			if (Z_OBJ_HT_P(array)->get_class_entry && instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
+			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
 				zend_call_method_with_0_params(array, NULL, NULL, "count", &retval);
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					RETVAL_LONG(zval_get_long(&retval));
@@ -728,7 +728,7 @@ static int php_array_user_key_compare(const void *a, const void *b TSRMLS_DC) /*
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&args[1]);
 
-	return result;
+	return result < 0 ? -1 : result > 0 ? 1 : 0;
 }
 /* }}} */
 
@@ -1301,9 +1301,10 @@ PHP_FUNCTION(array_search)
 }
 /* }}} */
 
-static int php_valid_var_name(char *var_name, int var_name_len) /* {{{ */
+static int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
 {
-	int i, ch;
+	size_t i;
+	int ch;
 
 	if (!var_name || !var_name_len) {
 		return 0;
@@ -1337,7 +1338,7 @@ static int php_valid_var_name(char *var_name, int var_name_len) /* {{{ */
 }
 /* }}} */
 
-PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, int var_name_len, zend_bool add_underscore TSRMLS_DC) /* {{{ */
+PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, size_t var_name_len, zend_bool add_underscore TSRMLS_DC) /* {{{ */
 {
 	ZVAL_NEW_STR(result, zend_string_alloc(Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0) + var_name_len, 0));
 	memcpy(Z_STRVAL_P(result), Z_STRVAL_P(prefix), Z_STRLEN_P(prefix));
@@ -1569,7 +1570,7 @@ PHP_FUNCTION(array_fill)
 	}
 
 	/* allocate an array for return */
-	array_init_size(return_value, num);
+	array_init_size(return_value, (uint32_t)num);
 
 	if (num == 0) {
 		return;
@@ -1786,10 +1787,10 @@ err:
 
 static void php_array_data_shuffle(zval *array TSRMLS_DC) /* {{{ */
 {
-	uint idx;
+	uint32_t idx, j, n_elems;
 	Bucket *p, temp;
 	HashTable *hash;
-	int j, n_elems, rnd_idx, n_left;
+	zend_long rnd_idx, n_left;
 
 	n_elems = zend_hash_num_elements(Z_ARRVAL_P(array));
 
@@ -1992,13 +1993,14 @@ PHP_FUNCTION(array_push)
 }
 /* }}} */
 
-/* {{{ void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end) */
-static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
+/* {{{ proto mixed array_pop(array stack)
+   Pops an element off the end of the array */
+PHP_FUNCTION(array_pop)
 {
 	zval *stack,	/* Input stack */
 		 *val;		/* Value to be popped */
-	zend_string *key = NULL;
-	zend_ulong index;
+	uint32_t idx;
+	Bucket *p;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/", &stack) == FAILURE) {
@@ -2014,56 +2016,118 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 		return;
 	}
 
-	/* Get the first or last value and copy it into the return value */
-	if (off_the_end) {
-		zend_hash_internal_pointer_end(Z_ARRVAL_P(stack));
-		while (1) {
-			val = zend_hash_get_current_data(Z_ARRVAL_P(stack));
-			if (!val) {
-				return;
-			} else if (Z_TYPE_P(val) == IS_INDIRECT) {
-				val = Z_INDIRECT_P(val);
-				if (Z_TYPE_P(val) == IS_UNDEF) {
-					zend_hash_move_backwards(Z_ARRVAL_P(stack));
-					continue;
-				}
-			}
-			break;
+	/* Get the last value and copy it into the return value */
+	idx = Z_ARRVAL_P(stack)->nNumUsed;
+	while (1) {
+		if (idx == 0) {
+			return;
 		}
-	} else {
-		zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
-		while (1) {
-			val = zend_hash_get_current_data(Z_ARRVAL_P(stack));
-			if (!val) {
-				return;
-			} else if (Z_TYPE_P(val) == IS_INDIRECT) {
-				val = Z_INDIRECT_P(val);
-				if (Z_TYPE_P(val) == IS_UNDEF) {
-					zend_hash_move_forward(Z_ARRVAL_P(stack));
-					continue;
-				}
-			}
+		idx--;
+		p = Z_ARRVAL_P(stack)->arData + idx;
+		val = &p->val;
+		if (Z_TYPE_P(val) == IS_INDIRECT) {
+			val = Z_INDIRECT_P(val);
+		}
+		if (Z_TYPE_P(val) != IS_UNDEF) {
 			break;
 		}
 	}
-	RETVAL_ZVAL_FAST(val);
+	ZVAL_DEREF(val);
+	ZVAL_COPY(return_value, val);
 
-	/* Delete the first or last value */
-	zend_hash_get_current_key(Z_ARRVAL_P(stack), &key, &index, 0);
-	if (key && Z_ARRVAL_P(stack) == &EG(symbol_table).ht) {
-		zend_delete_global_variable(key TSRMLS_CC);
-	} else if (key) {
-		zend_hash_del(Z_ARRVAL_P(stack), key);
-	} else {
-		zend_hash_index_del(Z_ARRVAL_P(stack), index);
+	if (!p->key && Z_ARRVAL_P(stack)->nNextFreeElement > 0 && p->h >= (zend_ulong)(Z_ARRVAL_P(stack)->nNextFreeElement - 1)) {
+		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
 	}
 
-	/* If we did a shift... re-index like it did before */
-	if (!off_the_end) {
-		unsigned int k = 0;
+	/* Delete the last value */
+	if (p->key) {
+		if (Z_ARRVAL_P(stack) == &EG(symbol_table).ht) {
+			zend_delete_global_variable(p->key TSRMLS_CC);
+		} else {
+			zend_hash_del(Z_ARRVAL_P(stack), p->key);
+		}
+	} else {
+		zend_hash_index_del(Z_ARRVAL_P(stack), p->h);
+	}
+
+	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
+}
+/* }}} */
+
+/* {{{ proto mixed array_shift(array stack)
+   Pops an element off the beginning of the array */
+PHP_FUNCTION(array_shift)
+{
+	zval *stack,	/* Input stack */
+		 *val;		/* Value to be popped */
+	uint32_t idx;
+	Bucket *p;
+
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a/", &stack) == FAILURE) {
+		return;
+	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_EX(stack, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
+
+	if (zend_hash_num_elements(Z_ARRVAL_P(stack)) == 0) {
+		return;
+	}
+
+	/* Get the first value and copy it into the return value */
+	idx = 0;
+	while (1) {
+		if (idx == Z_ARRVAL_P(stack)->nNumUsed) {
+			return;
+		}
+		p = Z_ARRVAL_P(stack)->arData + idx;
+		val = &p->val;
+		if (Z_TYPE_P(val) == IS_INDIRECT) {
+			val = Z_INDIRECT_P(val);
+		}
+		if (Z_TYPE_P(val) != IS_UNDEF) {
+			break;
+		}
+		idx++;
+	}
+	ZVAL_DEREF(val);
+	ZVAL_COPY(return_value, val);
+
+	/* Delete the first value */
+	if (p->key) {
+		if (Z_ARRVAL_P(stack) == &EG(symbol_table).ht) {
+			zend_delete_global_variable(p->key TSRMLS_CC);
+		} else {
+			zend_hash_del(Z_ARRVAL_P(stack), p->key);
+		}
+	} else {
+		zend_hash_index_del(Z_ARRVAL_P(stack), p->h);
+	}
+
+	/* re-index like it did before */
+	if (Z_ARRVAL_P(stack)->u.flags & HASH_FLAG_PACKED) {
+		uint32_t k = 0;
+
+		for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
+			p = Z_ARRVAL_P(stack)->arData + idx;
+			if (Z_TYPE(p->val) == IS_UNDEF) continue;
+			if (idx != k) {
+				Bucket *q = Z_ARRVAL_P(stack)->arData + k;
+				q->h = k;
+				q->key = NULL;
+				ZVAL_COPY_VALUE(&q->val, &p->val);
+				ZVAL_UNDEF(&p->val);										
+			}
+			k++;
+		}
+		Z_ARRVAL_P(stack)->nNumUsed = k;
+		Z_ARRVAL_P(stack)->nNextFreeElement = k;
+	} else {
+		uint32_t k = 0;
 		int should_rehash = 0;
-		uint idx;
-		Bucket *p;
 
 		for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
 			p = Z_ARRVAL_P(stack)->arData + idx;
@@ -2079,33 +2143,11 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 		}
 		Z_ARRVAL_P(stack)->nNextFreeElement = k;
 		if (should_rehash) {
-			if (Z_ARRVAL_P(stack)->u.flags & HASH_FLAG_PACKED) {
-				zend_hash_packed_to_hash(Z_ARRVAL_P(stack));
-			} else {
-				zend_hash_rehash(Z_ARRVAL_P(stack));
-			}
+			zend_hash_rehash(Z_ARRVAL_P(stack));
 		}
-	} else if (!key && Z_ARRVAL_P(stack)->nNextFreeElement > 0 && index >= (zend_ulong)(Z_ARRVAL_P(stack)->nNextFreeElement - 1)) {
-		Z_ARRVAL_P(stack)->nNextFreeElement = Z_ARRVAL_P(stack)->nNextFreeElement - 1;
 	}
 
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
-}
-/* }}} */
-
-/* {{{ proto mixed array_pop(array stack)
-   Pops an element off the end of the array */
-PHP_FUNCTION(array_pop)
-{
-	_phpi_pop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
-}
-/* }}} */
-
-/* {{{ proto mixed array_shift(array stack)
-   Pops an element off the beginning of the array */
-PHP_FUNCTION(array_shift)
-{
-	_phpi_pop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -2181,7 +2223,7 @@ PHP_FUNCTION(array_splice)
 	/* Don't create the array of removed elements if it's not going
 	 * to be used; e.g. only removing and/or replacing elements */
 	if (USED_RET()) {
-		int size = length;
+		zend_long size = length;
 
 		/* Clamp the offset.. */
 		if (offset > num_in) {
@@ -2193,17 +2235,17 @@ PHP_FUNCTION(array_splice)
 		/* ..and the length */
 		if (length < 0) {
 			size = num_in - offset + length;
-		} else if (((zend_ulong) offset + (zend_ulong) length) > (unsigned) num_in) {
+		} else if (((zend_ulong) offset + (zend_ulong) length) > (uint32_t) num_in) {
 			size = num_in - offset;
 		}
 
 		/* Initialize return value */
-		array_init_size(return_value, size > 0 ? size : 0);
+		array_init_size(return_value, size > 0 ? (uint32_t)size : 0);
 		rem_hash = Z_ARRVAL_P(return_value);
 	}
 
 	/* Perform splice */
-	new_hash = php_splice(Z_ARRVAL_P(array), offset, length, repl, repl_num, rem_hash);
+	new_hash = php_splice(Z_ARRVAL_P(array), (int)offset, (int)length, repl, (int)repl_num, rem_hash);
 
 	/* Replace input array's hashtable with the new one */
 	old_hash = *Z_ARRVAL_P(array);
@@ -2273,7 +2315,7 @@ PHP_FUNCTION(array_slice)
 	}
 
 	/* Initialize returned array */
-	array_init_size(return_value, length > 0 ? length : 0);
+	array_init_size(return_value, length > 0 ? (uint32_t)length : 0);
 
 	if (length <= 0) {
 		return;
@@ -2597,7 +2639,7 @@ PHP_FUNCTION(array_keys)
 	add_key = 1;
 
 	/* Go through input array and add keys to the return array */
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
+	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
 		if (search_value != NULL) {
 			is_equal_func(&res, search_value, entry TSRMLS_CC);
 			add_key = zval_is_true(&res);
@@ -2856,9 +2898,9 @@ PHP_FUNCTION(array_pad)
 
 	/* Pad on the right or on the left */
 	if (pad_size > 0) {
-		new_hash = php_splice(Z_ARRVAL_P(return_value), input_size, 0, pads, num_pads, NULL);
+		new_hash = php_splice(Z_ARRVAL_P(return_value), (int)input_size, 0, pads, (int)num_pads, NULL);
 	} else {
-		new_hash = php_splice(Z_ARRVAL_P(return_value), 0, 0, pads, num_pads, NULL);
+		new_hash = php_splice(Z_ARRVAL_P(return_value), 0, 0, pads, (int)num_pads, NULL);
 	}
 
 	/* Copy the result hash into return value */
@@ -3930,22 +3972,23 @@ PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 	Bucket *ab = *(Bucket **)a;
 	Bucket *bb = *(Bucket **)b;
 	int r;
-	int result = 0;
+	zend_long result;
 	zval temp;
 
 	r = 0;
 	do {
+
 		php_set_compare_func(ARRAYG(multisort_flags)[MULTISORT_TYPE][r] TSRMLS_CC);
 
 		ARRAYG(compare_func)(&temp, &ab[r].val, &bb[r].val TSRMLS_CC);
 		result = ARRAYG(multisort_flags)[MULTISORT_ORDER][r] * Z_LVAL(temp);
 		if (result != 0) {
-			return result;
+			return result > 0 ? 1 : -1;
 		}
 		r++;
 	} while (Z_TYPE(ab[r].val) != IS_UNDEF);
 
-	return result;
+	return 0;
 }
 /* }}} */
 
@@ -4036,7 +4079,7 @@ PHP_FUNCTION(array_multisort)
 					/* flag allowed here */
 					if (parse_state[MULTISORT_TYPE] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */
-						sort_type = Z_LVAL(args[i]);
+						sort_type = (int)Z_LVAL(args[i]);
 						parse_state[MULTISORT_TYPE] = 0;
 					} else {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
@@ -4164,7 +4207,7 @@ PHP_FUNCTION(array_rand)
 
 	/* Make the return value an array only if we need to pass back more than one result. */
 	if (num_req > 1) {
-		array_init_size(return_value, num_req);
+		array_init_size(return_value, (uint32_t)num_req);
 	}
 
 	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
@@ -4649,14 +4692,14 @@ PHP_FUNCTION(array_chunk)
 		size = num_in > 0 ? num_in : 1;
 	}
 
-	array_init_size(return_value, ((num_in - 1) / size) + 1);
+	array_init_size(return_value, (uint32_t)(((num_in - 1) / size) + 1));
 
 	ZVAL_UNDEF(&chunk);
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, str_key, entry) {
 		/* If new chunk, create and initialize it. */
 		if (Z_TYPE(chunk) == IS_UNDEF) {
-			array_init_size(&chunk, size);
+			array_init_size(&chunk, (uint32_t)size);
 		}
 
 		/* Add entry to the chunk, preserving keys if necessary. */

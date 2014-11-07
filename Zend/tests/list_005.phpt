@@ -35,9 +35,9 @@ var_dump($a, $b, $c);
 
 ?>
 --EXPECTF--
-string(1) "f"
-string(1) "o"
-string(1) "o"
+NULL
+NULL
+NULL
 ----
 NULL
 NULL

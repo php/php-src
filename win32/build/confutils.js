@@ -49,6 +49,8 @@ VC_VERSIONS[1500] = 'MSVC9 (Visual C++ 2008)';
 VC_VERSIONS[1600] = 'MSVC10 (Visual C++ 2010)';
 VC_VERSIONS[1700] = 'MSVC11 (Visual C++ 2012)';
 VC_VERSIONS[1800] = 'MSVC12 (Visual C++ 2013)';
+/* XXX update after the final rename */
+VC_VERSIONS[1900] = 'MSVC14 (Visual C++ CTP14)';
 
 var VC_VERSIONS_SHORT = new Array();
 VC_VERSIONS_SHORT[1200] = 'VC6';
@@ -59,6 +61,7 @@ VC_VERSIONS_SHORT[1500] = 'VC9';
 VC_VERSIONS_SHORT[1600] = 'VC10';
 VC_VERSIONS_SHORT[1700] = 'VC11';
 VC_VERSIONS_SHORT[1800] = 'VC12';
+VC_VERSIONS_SHORT[1900] = 'VC14';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -1429,7 +1432,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		obj = src.replace(re, ".obj");
 		tv += " " + sub_build + obj;
 
-		if (!MODE_PHPIZE && PHP_ONE_SHOT == "yes") {
+		if (!PHP_MP_DISABLED) {
 			if (i > 0) {
 				objs_line += " " + sub_build + obj;	
 				srcs_line += " " + dir + "\\" + src;
@@ -1448,7 +1451,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		}
 	}
 
-	if (!MODE_PHPIZE && PHP_ONE_SHOT == "yes") {
+	if (!PHP_MP_DISABLED) {
 		MFO.WriteLine(objs_line + ": " + srcs_line);
 		MFO.WriteLine("\t$(CC) $(" + flags + ") $(CFLAGS) /Fo" + sub_build + " $(" + bd_flags_name + ") /c " + srcs_line);
 	}
@@ -1531,9 +1534,11 @@ function output_as_table(header, ar_out)
 		tmin = 0;
 		tmax = 0;
 		for (k = 0; k < ar_out.length; k++) {
-			var t = ar_out[k][j].length;
-			if (t > tmax) tmax = t;
-			else if (t < tmin) tmin = t;
+			if(typeof ar_out[k][j] != 'undefined') {
+				var t = ar_out[k][j].length;
+				if (t > tmax) tmax = t;
+				else if (t < tmin) tmin = t;
+			}
 		}
 		if (tmax > header[j].length) {
 			max[j] = tmax;
@@ -1574,8 +1579,10 @@ function output_as_table(header, ar_out)
 		line = ar_out[i];
 		for (j=0; j < l; j++) {
 			out += " " + line[j];
-			for (var k = 0; k < (max[j] - line[j].length); k++){
-				out += " ";
+			if(typeof line[j] != 'undefined') {
+				for (var k = 0; k < (max[j] - line[j].length); k++){
+					out += " ";
+				}
 			}
 			out += " |";
 		}
@@ -2052,7 +2059,7 @@ function AC_DEFINE(name, value, comment, quote)
 	}
 	if (quote && typeof(value) == "string") {
 		value = '"' + value.replace(new RegExp('(["\\\\])', "g"), '\\$1') + '"';
-	} else if (value.length == 0) {
+	} else if (typeof(value) != "undefined" && value.length == 0) {
 		value = '""';
 	}
 	var item = new Array(value, comment);

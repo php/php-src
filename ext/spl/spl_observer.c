@@ -398,7 +398,7 @@ static int spl_object_storage_compare_info(zval *e1, zval *e2 TSRMLS_DC) /* {{{ 
 		return 1;
 	}
 
-	return Z_LVAL(result);
+	return Z_LVAL(result) > 0 ? 1 : (Z_LVAL(result) < 0 ? -1 : 0);
 }
 /* }}} */
 

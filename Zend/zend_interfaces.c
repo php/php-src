@@ -31,7 +31,7 @@ ZEND_API zend_class_entry *zend_ce_serializable;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
-ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, int function_name_len, zval *retval_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
+ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, size_t function_name_len, zval *retval_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
 {
 	int result;
 	zend_fcall_info fci;
@@ -282,8 +282,7 @@ ZEND_API zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *c
 	zend_class_entry *ce_it;
 
 	zend_user_it_new_iterator(ce, object, &iterator TSRMLS_CC);
-	ce_it = (Z_TYPE(iterator) == IS_OBJECT &&
-		Z_OBJ_HT(iterator)->get_class_entry) ? Z_OBJCE(iterator) : NULL;
+	ce_it = (Z_TYPE(iterator) == IS_OBJECT) ? Z_OBJCE(iterator) : NULL;
 
 	if (!ce_it || !ce_it->get_iterator || (ce_it->get_iterator == zend_user_it_get_new_iterator && Z_OBJ(iterator) == Z_OBJ_P(object))) {
 		if (!EG(exception)) {

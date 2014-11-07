@@ -88,6 +88,9 @@ static const struct cv {
 		{ 0x00000000000c1084LLU, 0x46000000000000c0LLU },
 #endif
 		"x-msi",
+	},
+	{	{ 0,			 0			},
+		NULL,
 	}
 }, clsid2desc[] = {
 	{
@@ -98,6 +101,9 @@ static const struct cv {
 #endif
 		"MSI Installer",
 	},
+	{	{ 0,			 0			},
+		NULL,
+	}
 };
 
 private const char *

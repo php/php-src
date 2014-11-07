@@ -571,7 +571,7 @@ static void json_encode_serializable_object(smart_str *buf, zval *val, int optio
 	ZVAL_STRING(&fname, "jsonSerialize");
 
 	if (FAILURE == call_user_function_ex(EG(function_table), val, &fname, &retval, 0, NULL, 1, NULL TSRMLS_CC) || Z_TYPE(retval) == IS_UNDEF) {
-		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Failed calling %s::jsonSerialize()", ce->name);
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Failed calling %s::jsonSerialize()", ce->name->val);
 		smart_str_appendl(buf, "null", sizeof("null") - 1);
 		zval_ptr_dtor(&fname);
 		return;

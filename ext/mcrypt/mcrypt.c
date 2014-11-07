@@ -573,7 +573,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Key size too large; supplied length: %d, max: %d", key_len, max_key_size);
 		key_size = max_key_size;
 	} else {
-		key_size = key_len;
+		key_size = (int)key_len;
 	}
 	memcpy(key_s, key, key_len);
 
@@ -636,12 +636,12 @@ PHP_FUNCTION(mcrypt_generic)
 	/* Check blocksize */
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size(pm->td);
-		data_size = (((data_len - 1) / block_size) + 1) * block_size;
+		data_size = ((((int)data_len - 1) / block_size) + 1) * block_size;
 		data_s = emalloc(data_size + 1);
 		memset(data_s, 0, data_size);
 		memcpy(data_s, data, data_len);
 	} else { /* It's not a block algorithm */
-		data_size = data_len;
+		data_size = (int)data_len;
 		data_s = emalloc(data_size + 1);
 		memset(data_s, 0, data_size);
 		memcpy(data_s, data, data_len);
@@ -681,12 +681,12 @@ PHP_FUNCTION(mdecrypt_generic)
 	/* Check blocksize */
 	if (mcrypt_enc_is_block_mode(pm->td) == 1) { /* It's a block algorithm */
 		block_size = mcrypt_enc_get_block_size(pm->td);
-		data_size = (((data_len - 1) / block_size) + 1) * block_size;
+		data_size = ((((int)data_len - 1) / block_size) + 1) * block_size;
 		data_s = emalloc(data_size + 1);
 		memset(data_s, 0, data_size);
 		memcpy(data_s, data, data_len);
 	} else { /* It's not a block algorithm */
-		data_size = data_len;
+		data_size = (int)data_len;
 		data_s = emalloc(data_size + 1);
 		memset(data_s, 0, data_size);
 		memcpy(data_s, data, data_len);
@@ -1238,7 +1238,7 @@ static int php_mcrypt_ensure_valid_iv(MCRYPT td, const char *iv, int iv_size TSR
 }
 /* }}} */
 
-static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, const char *data, int data_len, char *mode, const char *iv, size_t iv_len, size_t dencrypt, zval* return_value TSRMLS_DC) /* {{{ */
+static void php_mcrypt_do_crypt(char* cipher, const char *key, size_t key_len, const char *data, size_t data_len, char *mode, const char *iv, size_t iv_len, size_t dencrypt, zval* return_value TSRMLS_DC) /* {{{ */
 {
 	char *cipher_dir_string;
 	char *module_dir_string;
@@ -1254,12 +1254,12 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 		RETURN_FALSE;
 	}
 
-	if (php_mcrypt_ensure_valid_key_size(td, key_len TSRMLS_CC) == FAILURE) {
+	if (php_mcrypt_ensure_valid_key_size(td, (int)key_len TSRMLS_CC) == FAILURE) {
 		mcrypt_module_close(td);
 		RETURN_FALSE;
 	}
 
-	if (php_mcrypt_ensure_valid_iv(td, iv, iv_len TSRMLS_CC) == FAILURE) {
+	if (php_mcrypt_ensure_valid_iv(td, iv, (int)iv_len TSRMLS_CC) == FAILURE) {
 		mcrypt_module_close(td);
 		RETURN_FALSE;
 	}
@@ -1267,7 +1267,7 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 	/* Check blocksize */
 	if (mcrypt_enc_is_block_mode(td) == 1) { /* It's a block algorithm */
 		int block_size = mcrypt_enc_get_block_size(td);
-		data_size = (((data_len - 1) / block_size) + 1) * block_size;
+		data_size = ((((zend_long)data_len - 1) / block_size) + 1) * block_size;
 		data_s = emalloc(data_size + 1);
 		memset(data_s, 0, data_size);
 		memcpy(data_s, data, data_len);
@@ -1277,16 +1277,16 @@ static void php_mcrypt_do_crypt(char* cipher, const char *key, int key_len, cons
 		memcpy(data_s, data, data_len);
 	}
 
-	if (mcrypt_generic_init(td, (void *) key, key_len, (void *) iv) < 0) {
+	if (mcrypt_generic_init(td, (void *) key, (int)key_len, (void *) iv) < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Mcrypt initialisation failed");
 		mcrypt_module_close(td);
 		RETURN_FALSE;
 	}
 
 	if (dencrypt == MCRYPT_ENCRYPT) {
-		mcrypt_generic(td, data_s, data_size);
+		mcrypt_generic(td, data_s, (int)data_size);
 	} else {
-		mdecrypt_generic(td, data_s, data_size);
+		mdecrypt_generic(td, data_s, (int)data_size);
 	}
 	
 	data_s[data_size] = 0;
@@ -1424,7 +1424,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not gather sufficient random data");
 			RETURN_FALSE;
 		}
-		n = size;
+		n = (int)size;
 #else
 		int    fd;
 		size_t read_bytes = 0;
@@ -1451,7 +1451,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 		}
 #endif
 	} else {
-		n = size;
+		n = (int)size;
 		while (size) {
 			iv[--size] = (char) (255.0 * php_rand(TSRMLS_C) / RAND_MAX);
 		}

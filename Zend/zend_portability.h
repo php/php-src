@@ -196,8 +196,10 @@ char *alloca();
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
 # define ZEND_FASTCALL __attribute__((fastcall))
-#elif defined(_MSC_VER) && defined(_M_IX86)
+#elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER <= 1700
 # define ZEND_FASTCALL __fastcall
+#elif defined(_MSC_VER) && _MSC_VER >= 1800
+# define ZEND_FASTCALL __vectorcall
 #else
 # define ZEND_FASTCALL
 #endif

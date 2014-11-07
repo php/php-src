@@ -835,7 +835,7 @@ PHP_FUNCTION(clearstatcache)
 		return;
 	}
 
-	php_clear_stat_cache(clear_realpath_cache, filename, filename_len TSRMLS_CC);
+	php_clear_stat_cache(clear_realpath_cache, filename, (int)filename_len TSRMLS_CC);
 }
 /* }}} */
 

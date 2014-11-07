@@ -79,7 +79,7 @@ static PHP_INI_MH(OnUpdateTags)
 		val = strchr(key, '=');
 		if (val) {
 			char *q;
-			int keylen;
+			size_t keylen;
 			
 			*val++ = '\0';
 			for (q = key; *q; q++)
@@ -351,7 +351,7 @@ static inline void xx_mainloop(url_adapt_state_ex_t *ctx, const char *newdata, s
 	char *end, *q;
 	char *xp;
 	char *start;
-	int rest;
+	size_t rest;
 
 	smart_str_appendl(&ctx->buf, newdata, newlen);
 	
@@ -906,10 +906,13 @@ yy76:
 
 
 stop:
-	rest = YYLIMIT - start;
-	scdebug(("stopped in state %d at pos %d (%d:%c) %d\n", STATE, YYCURSOR - ctx->buf.c, *YYCURSOR, *YYCURSOR, rest));
-	/* XXX: Crash avoidance. Need to work with reporter to figure out what goes wrong */	
-	if (rest < 0) rest = 0;
+	if (YYLIMIT < start) {
+		/* XXX: Crash avoidance. Need to work with reporter to figure out what goes wrong */	
+		rest = 0;
+	} else {
+		rest = YYLIMIT - start;
+		scdebug(("stopped in state %d at pos %d (%d:%c) %d\n", STATE, YYCURSOR - ctx->buf.c, *YYCURSOR, *YYCURSOR, rest));
+	}
 	
 	if (rest) memmove(ctx->buf.s->val, start, rest);
 	ctx->buf.s->len = rest;
@@ -993,7 +996,7 @@ static int php_url_scanner_ex_deactivate(TSRMLS_D)
 	return SUCCESS;
 }
 
-static void php_url_scanner_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
+static void php_url_scanner_output_handler(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode TSRMLS_DC)
 {
 	size_t len;
 
@@ -1023,7 +1026,7 @@ static void php_url_scanner_output_handler(char *output, uint output_len, char *
 	}
 }
 
-PHPAPI int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len, int urlencode TSRMLS_DC)
+PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, size_t value_len, int urlencode TSRMLS_DC)
 {
 	smart_str val = {0};
 	zend_string *encoded;

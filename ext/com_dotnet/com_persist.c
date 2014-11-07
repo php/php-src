@@ -105,10 +105,10 @@ static ULONG STDMETHODCALLTYPE stm_release(IStream *This)
 
 static HRESULT STDMETHODCALLTYPE stm_read(IStream *This, void *pv, ULONG cb, ULONG *pcbRead)
 {
-	int nread;
+	ULONG nread;
 	FETCH_STM();
 
-	nread = php_stream_read(stm->stream, pv, cb);
+	nread = (ULONG)php_stream_read(stm->stream, pv, cb);
 
 	if (pcbRead) {
 		*pcbRead = nread > 0 ? nread : 0;
@@ -121,10 +121,10 @@ static HRESULT STDMETHODCALLTYPE stm_read(IStream *This, void *pv, ULONG cb, ULO
 
 static HRESULT STDMETHODCALLTYPE stm_write(IStream *This, void const *pv, ULONG cb, ULONG *pcbWritten)
 {
-	int nwrote;
+	ULONG nwrote;
 	FETCH_STM();
 
-	nwrote = php_stream_write(stm->stream, pv, cb);
+	nwrote = (ULONG)php_stream_write(stm->stream, pv, cb);
 
 	if (pcbWritten) {
 		*pcbWritten = nwrote > 0 ? nwrote : 0;
@@ -466,7 +466,7 @@ CPH_METHOD(LoadFromFile)
 		olefilename = php_com_string_to_olestring(fullpath, strlen(fullpath), helper->codepage TSRMLS_CC);
 		efree(fullpath);
 			
-		res = IPersistFile_Load(helper->ipf, olefilename, flags);
+		res = IPersistFile_Load(helper->ipf, olefilename, (DWORD)flags);
 		efree(olefilename);
 
 		if (FAILED(res)) {

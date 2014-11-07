@@ -121,7 +121,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	char *tmp = NULL;
 	char *ua_str = NULL;
 	zval *ua_zval = NULL, *tmpzval = NULL, ssl_proxy_peer_name;
-	int scratch_len = 0;
+	size_t scratch_len = 0;
 	int body = 0;
 	char location[HTTP_HEADER_BLOCK_SIZE];
 	zval *response_header = NULL;
@@ -132,14 +132,16 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	int eol_detect = 0;
 	char *transport_string;
 	zend_string *errstr = NULL;
-	int transport_len, have_header = 0, request_fulluri = 0, ignore_errors = 0;
+	size_t transport_len;
+	int have_header = 0;
+	zend_bool request_fulluri = 0, ignore_errors = 0;
 	char *protocol_version = NULL;
 	int protocol_version_len = 3; /* Default: "1.0" */
 	struct timeval timeout;
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
 	int redirected = ((flags & HTTP_WRAPPER_REDIRECTED) != 0);
-	int follow_location = 1;
+	zend_bool follow_location = 1;
 	php_stream_filter *transfer_encoding = NULL;
 	int response_code;
 	zend_array *symbol_table;
@@ -201,10 +203,19 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (context && (tmpzval = php_stream_context_get_option(context, wrapper->wops->label, "timeout")) != NULL) {
 		double d = zval_get_double(tmpzval);
+#ifndef PHP_WIN32
 		timeout.tv_sec = (time_t) d;
 		timeout.tv_usec = (size_t) ((d - timeout.tv_sec) * 1000000);
+#else
+		timeout.tv_sec = (long) d;
+		timeout.tv_usec = (long) ((d - timeout.tv_sec) * 1000000);
+#endif
 	} else {
+#ifndef PHP_WIN32
 		timeout.tv_sec = FG(default_socket_timeout);
+#else
+		timeout.tv_sec = (long)FG(default_socket_timeout);
+#endif
 		timeout.tv_usec = 0;
 	}
 
@@ -346,7 +357,7 @@ finish:
 	php_stream_notify_info(context, PHP_STREAM_NOTIFY_CONNECT, NULL, 0);
 
 	if (header_init && context && (tmpzval = php_stream_context_get_option(context, "http", "max_redirects")) != NULL) {
-		redirect_max = zval_get_long(tmpzval);
+		redirect_max = (int)zval_get_long(tmpzval);
 	}
 
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "method")) != NULL) {
@@ -366,7 +377,7 @@ finish:
 	}
  
 	if (context && (tmpzval = php_stream_context_get_option(context, "http", "protocol_version")) != NULL) {
-		protocol_version_len = spprintf(&protocol_version, 0, "%.1F", zval_get_double(tmpzval));
+		protocol_version_len = (int)spprintf(&protocol_version, 0, "%.1F", zval_get_double(tmpzval));
 	}
 
 	if (!scratch) {
@@ -378,7 +389,7 @@ finish:
 	/* Should we send the entire path in the request line, default to no. */
 	if (!request_fulluri && context &&
 		(tmpzval = php_stream_context_get_option(context, "http", "request_fulluri")) != NULL) {
-		request_fulluri = zend_is_true(tmpzval TSRMLS_CC) ? 1 : 0;
+		request_fulluri = zend_is_true(tmpzval TSRMLS_CC);
 	}
 
 	if (request_fulluri) {
@@ -731,7 +742,7 @@ finish:
 
 			if (!strncasecmp(http_header_line, "Location: ", 10)) {
 				if (context && (tmpzval = php_stream_context_get_option(context, "http", "follow_location")) != NULL) {
-					follow_location = zval_get_long(tmpzval);
+					follow_location = zval_is_true(tmpzval);
 				} else if (!(response_code >= 300 && response_code < 304 || 307 == response_code || 308 == response_code)) {
 					/* we shouldn't redirect automatically
 					if follow_location isn't set and response_code not in (300, 301, 302, 303 and 307) 
@@ -843,7 +854,7 @@ finish:
 #define CHECK_FOR_CNTRL_CHARS(val) { \
 	if (val) { \
 		unsigned char *s, *e; \
-		int l; \
+		size_t l; \
 		l = php_url_decode(val, strlen(val)); \
 		s = (unsigned char*)val; e = s + l; \
 		while (s < e) { \
@@ -891,7 +902,7 @@ out:
 		
 		/* Restore original chunk size now that we're done with headers */
 		if (options & STREAM_WILL_CAST)
-			php_stream_set_chunk_size(stream, chunk_size);
+			php_stream_set_chunk_size(stream, (int)chunk_size);
 
 		/* restore the users auto-detect-line-endings setting */
 		stream->flags |= eol_detect;

@@ -540,7 +540,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	intern->iterators = emalloc(sizeof(spl_sub_iterator));
 	intern->level = 0;
 	intern->mode = mode;
-	intern->flags = flags;
+	intern->flags = (int)flags;
 	intern->max_depth = -1;
 	intern->in_iteration = 0;
 	intern->ce = Z_OBJCE_P(object);
@@ -854,8 +854,11 @@ SPL_METHOD(RecursiveIteratorIterator, setMaxDepth)
 	if (max_depth < -1) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Parameter max_depth must be >= -1", 0 TSRMLS_CC);
 		return;
+	} else if (max_depth > INT_MAX) {
+		max_depth = INT_MAX;
 	}
-	object->max_depth = max_depth;
+
+	object->max_depth = (int)max_depth;
 } /* }}} */
 
 /* {{{ proto int|false RecursiveIteratorIterator::getMaxDepth()
@@ -883,7 +886,7 @@ static union _zend_function *spl_recursive_it_get_method(zend_object **zobject, 
 	zval                    *zobj;
 
 	if (!object->iterators) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The %s instance wasn't initialized properly", zend_get_class_entry(*zobject TSRMLS_CC)->name->val);
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "The %s instance wasn't initialized properly", (*zobject)->ce->name->val);
 	}
 	zobj = &object->iterators[level].zobject;
 
@@ -1423,9 +1426,9 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 
 static inline int spl_dual_it_fetch(spl_dual_it_object *intern, int check_more TSRMLS_DC);
 
-static inline int spl_cit_check_flags(int flags)
+static inline int spl_cit_check_flags(zend_long flags)
 {
-	int cnt = 0;
+	zend_long cnt = 0;
 
 	cnt += (flags & CIT_CALL_TOSTRING) ? 1 : 0;
 	cnt += (flags & CIT_TOSTRING_USE_KEY) ? 1 : 0;
@@ -2037,8 +2040,10 @@ SPL_METHOD(RegexIterator, accept)
 	
 	if (Z_TYPE(intern->current.data) == IS_UNDEF) {
 		RETURN_FALSE;
+	} else if (Z_TYPE(intern->current.data) == IS_ARRAY) {
+		RETURN_FALSE;
 	}
-	
+
 	if (intern->u.regex.flags & REGIT_USE_KEY) {
 		subject_ptr = &intern->current.key;
 	} else {
@@ -2049,10 +2054,10 @@ SPL_METHOD(RegexIterator, accept)
 	use_copy = zend_make_printable_zval(subject_ptr, &subject_copy TSRMLS_CC);
 	if (use_copy) {
 		subject = Z_STRVAL(subject_copy);
-		subject_len = Z_STRLEN(subject_copy);
+		subject_len = (int)Z_STRLEN(subject_copy);
 	} else {
 		subject = Z_STRVAL_P(subject_ptr);
-		subject_len = Z_STRLEN_P(subject_ptr);
+		subject_len = (int)Z_STRLEN_P(subject_ptr);
 	}
 
 	use_copy = 0;
@@ -2074,8 +2079,7 @@ SPL_METHOD(RegexIterator, accept)
 			ZVAL_UNDEF(&intern->current.data);
 			php_pcre_match_impl(intern->u.regex.pce, subject, subject_len, &zcount, 
 				&intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.use_flags, intern->u.regex.preg_flags, 0 TSRMLS_CC);
-			count = zend_hash_num_elements(Z_ARRVAL(intern->current.data));
-			RETVAL_BOOL(count > 0);
+			RETVAL_BOOL(Z_LVAL(zcount) > 0);
 			break;
 
 		case REGIT_MODE_SPLIT:
@@ -2254,7 +2258,7 @@ SPL_METHOD(RecursiveRegexIterator, __construct)
 SPL_METHOD(RecursiveRegexIterator, getChildren)
 {
 	spl_dual_it_object   *intern;
-	zval                 retval, regex;
+	zval                 retval;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2264,12 +2268,39 @@ SPL_METHOD(RecursiveRegexIterator, getChildren)
 
 	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &retval);
 	if (!EG(exception)) {
-		ZVAL_STR_COPY(&regex, intern->u.regex.regex);
-		spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), return_value, &retval, &regex TSRMLS_CC);
-		zval_ptr_dtor(&regex);
+		zval args[5];
+
+		ZVAL_COPY(&args[0], &retval);
+		ZVAL_STR_COPY(&args[1], intern->u.regex.regex);
+		ZVAL_LONG(&args[2], intern->u.regex.mode);
+		ZVAL_LONG(&args[3], intern->u.regex.flags);
+		ZVAL_LONG(&args[4], intern->u.regex.preg_flags);
+
+		spl_instantiate_arg_n(Z_OBJCE_P(getThis()), return_value, 5, args TSRMLS_CC);
+
+		zval_ptr_dtor(&args[1]);
 	}
 	zval_ptr_dtor(&retval);
 } /* }}} */
+
+SPL_METHOD(RecursiveRegexIterator, accept)
+{
+	spl_dual_it_object *intern;
+	
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	
+	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
+	
+	if (Z_TYPE(intern->current.data) == IS_UNDEF) {
+		RETURN_FALSE;
+	} else if (Z_TYPE(intern->current.data) == IS_ARRAY) {
+		RETURN_BOOL(zend_hash_num_elements(Z_ARRVAL(intern->current.data)) > 0);
+	}
+
+	zend_call_method_with_0_params(getThis(), spl_ce_RegexIterator, NULL, "accept", return_value);
+}
 
 #endif
 
@@ -2456,6 +2487,7 @@ ZEND_END_ARG_INFO();
 
 static const zend_function_entry spl_funcs_RecursiveRegexIterator[] = {
 	SPL_ME(RecursiveRegexIterator,  __construct,      arginfo_rec_regex_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveRegexIterator,  accept,           arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveFilterIterator, hasChildren,      arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveRegexIterator,  getChildren,      arginfo_recursive_it_void, ZEND_ACC_PUBLIC)
 	PHP_FE_END

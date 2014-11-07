@@ -119,7 +119,7 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_FETCH_UNSET                      95
 #define ZEND_FETCH_DIM_UNSET                  96
 #define ZEND_FETCH_OBJ_UNSET                  97
-#define ZEND_FETCH_DIM_TMP_VAR                98
+#define ZEND_FETCH_LIST                       98
 #define ZEND_FETCH_CONSTANT                   99
 #define ZEND_GOTO                            100
 #define ZEND_EXT_STMT                        101

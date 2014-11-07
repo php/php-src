@@ -421,6 +421,12 @@ PRIMARY MAINTAINER:  Derick Rethans <derick@derickrethans.nl>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           opcache
+PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@zend.com>, Xinchen Hui <laruence@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               5.5.0
+-------------------------------------------------------------------------------
 EXTENSION:           openssl
 PRIMARY MAINTAINER:  Wez Furlong <wez@php.net>, Pierre-Alain Joye <pajoye@php.net>
 MAINTENANCE:         Maintained

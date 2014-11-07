@@ -73,10 +73,10 @@ PHPAPI int php_header(TSRMLS_D)
 }
 
 
-PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
+PHPAPI int php_setcookie(char *name, size_t name_len, char *value, size_t value_len, time_t expires, char *path, size_t path_len, char *domain, size_t domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
 {
 	char *cookie;
-	int len=sizeof("Set-Cookie: ");
+	size_t len=sizeof("Set-Cookie: ");
 	zend_string *dt;
 	sapi_header_line ctr = {0};
 	int result;
@@ -164,7 +164,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	}
 
 	ctr.line = cookie;
-	ctr.line_len = strlen(cookie);
+	ctr.line_len = (uint)strlen(cookie);
 
 	result = sapi_header_op(SAPI_HEADER_ADD, &ctr TSRMLS_CC);
 	efree(cookie);
@@ -300,7 +300,7 @@ PHP_FUNCTION(http_response_code)
 		zend_long old_response_code;
 
 		old_response_code = SG(sapi_headers).http_response_code;
-		SG(sapi_headers).http_response_code = response_code;
+		SG(sapi_headers).http_response_code = (int)response_code;
 
 		if (old_response_code) {
 			RETURN_LONG(old_response_code);
