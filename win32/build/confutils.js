@@ -2507,3 +2507,60 @@ function toolset_setup_linker()
 	ERROR("Unsupported toolset");
 }
 
+function toolset_setup_common_cflags()
+{
+	DEFINE("CFLAGS", "/nologo $(BASE_INCLUDES) /D _WINDOWS \
+		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3 ");
+
+	if (VS_TOOLSET) {
+		ADD_FLAG("CFLAGS", " /FD ");
+
+		if (VCVERS < 1400) {
+			// Enable automatic precompiled headers
+			ADD_FLAG('CFLAGS', ' /YX ');
+
+			if (PHP_DEBUG == "yes") {
+				// Set some debug/release specific options
+				ADD_FLAG('CFLAGS', ' /GZ ');
+			}
+		}
+
+		if (VCVERS >= 1400) {
+			// fun stuff: MS deprecated ANSI stdio and similar functions
+			// disable annoying warnings.  In addition, time_t defaults
+			// to 64-bit.  Ask for 32-bit.
+			if (X64) {
+				ADD_FLAG('CFLAGS', ' /wd4996 ');
+			} else {
+				ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
+			}
+
+			if (PHP_DEBUG == "yes") {
+				// Set some debug/release specific options
+				ADD_FLAG('CFLAGS', ' /RTC1 ');
+			}
+		}
+
+	} else if (CLANG_TOOLSET) {
+		if (X64) {
+			ADD_FLAG('CFLAGS', ' -m64 ');
+		} else {
+			ADD_FLAG('CFLAGS', ' -m32 ');
+		}
+	}
+}
+
+function toolset_setup_common_ldlags()
+{
+	if (VS_TOOLSET) {
+		if (VCVERS >= 1700) {
+			DEFINE("LDFLAGS", "/nologo ");
+		} else {
+			DEFINE("LDFLAGS", "/nologo /version:" +
+					PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION);
+		}
+	} else {
+		DEFINE("LDFLAGS", "/nologo ");
+	}
+}
+
