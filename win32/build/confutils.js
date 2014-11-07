@@ -2480,10 +2480,15 @@ function toolset_is_64()
 	if (VS_TOOLSET) {
 		return probe_binary(PHP_CL, 64);
 	} else if (CLANG_TOOLSET) {
-		var command = 'cmd /c ""' + PHP_CL + '" -v"';
+		/*var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
 
-		return null != full.match(/x86_64/);
+		return null != full.match(/x86_64/);*/
+
+		/* Even executed within an environment setup with vcvars32.bat,
+		clang-cl doesn't recognize the arch toolset. But as it needs 
+		the VS environment, checking the arch of cl.exe is correct. */
+		return probe_binary(PATH_PROG('cl', null), 64);
 	} else if (INTEL_TOOLSET) {
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
@@ -2511,6 +2516,13 @@ function toolset_setup_linker()
 
 function toolset_setup_common_cflags()
 {
+	// CFLAGS for building the PHP dll
+	DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP7DLLTS_EXPORTS /D PHP_EXPORTS \
+	/D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D WINVER=" + WINVER);
+
+	DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
+
+	// General CFLAGS for building objects
 	DEFINE("CFLAGS", "/nologo $(BASE_INCLUDES) /D _WINDOWS \
 		/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3 ");
 
@@ -2545,9 +2557,9 @@ function toolset_setup_common_cflags()
 
 	} else if (CLANG_TOOLSET) {
 		if (X64) {
-			ADD_FLAG('CFLAGS', ' -m64 ');
+			ADD_FLAG('CFLAGS', '-m64');
 		} else {
-			ADD_FLAG('CFLAGS', ' -m32 ');
+			ADD_FLAG('CFLAGS', '-m32');
 		}
 		ADD_FLAG("CFLAGS", " /fallback ");
 	}
