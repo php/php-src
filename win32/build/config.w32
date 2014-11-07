@@ -3,7 +3,7 @@
 // "Master" config file; think of it as a configure.in
 // equivalent.
 
-ARG_WITH("toolset", "Toolset to use for the compilation, supported: vs, clang, intel", "vs");
+ARG_WITH("toolset", "Toolset to use for the compilation, supported: vs, clang, icc", "vs");
 toolset_option_handle();
 
 ARG_WITH('cygwin', 'Path to cygwin utilities on your system', '\\cygwin');
@@ -281,7 +281,7 @@ ADD_SOURCES("win32", "inet.c fnmatch.c sockets.c");
 if (VS_TOOLSET && VCVERS <= 1300) {
 	ADD_SOURCES("win32", "strtoi64.c");
 }
-if (VS_TOOLSET && VCVERS >= 1400 || INTEL_TOOLSET) {
+if (VS_TOOLSET && VCVERS >= 1400 || ICC_TOOLSET) {
 	AC_DEFINE('HAVE_STRNLEN', 1);
 }
 

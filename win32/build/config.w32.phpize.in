@@ -3,7 +3,7 @@
 // "Master" config file; think of it as a configure.in
 // equivalent.
 
-ARG_WITH("toolset", "Toolset to use for the compilation, supported: vs, clang, intel", "vs");
+ARG_WITH("toolset", "Toolset to use for the compilation, supported: vs, clang, icc", "vs");
 toolset_option_handle()
 
 var PHP_CYGWIN="notset";
@@ -244,7 +244,7 @@ if (VS_TOOLSET && VCVERS == 1200) {
 	AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
 }
 
-if (INTEL_TOOLSET || VS_TOOLSET && VCVERS >= 1400) {
+if (ICC_TOOLSET || VS_TOOLSET && VCVERS >= 1400) {
 	AC_DEFINE('HAVE_STRNLEN', 1);
 }
 

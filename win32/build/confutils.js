@@ -32,7 +32,7 @@ var PHP_SRC_DIR=FSO.GetParentFolderName(WScript.ScriptFullName);
 
 var VS_TOOLSET = true;
 var CLANG_TOOLSET = false;
-var INTEL_TOOLSET = false;
+var ICC_TOOLSET = false;
 var VCVERS = -1;
 var CLANGVERS = -1;
 var INTELVERS = -1;
@@ -2303,20 +2303,20 @@ function toolset_option_handle()
 	if ("clang" == PHP_TOOLSET) {
 		VS_TOOLSET = false;
 		CLANG_TOOLSET = true;
-		INTEL_TOOLSET = false;
-	} else if ("intel" == PHP_TOOLSET) {
+		ICC_TOOLSET = false;
+	} else if ("icc" == PHP_TOOLSET) {
 		VS_TOOLSET = false;
 		CLANG_TOOLSET = false;
-		INTEL_TOOLSET = true;
+		ICC_TOOLSET = true;
 	} else {
 		/* Visual Studio is the default toolset. */
 		PHP_TOOLSET = "no" == PHP_TOOLSET ? "vs" : PHP_TOOLSET;
 		if (!!PHP_TOOLSET && "vs" != PHP_TOOLSET) {
-			ERROR("Unsupported toolset name '" + PHP_TOOLSET + "'");
+			ERROR("Unsupported toolset '" + PHP_TOOLSET + "'");
 		}
 		VS_TOOLSET = true;
 		CLANG_TOOLSET = false;
-		INTEL_TOOLSET = false;
+		ICC_TOOLSET = false;
 	}
 }
 
@@ -2355,7 +2355,7 @@ function toolset_setup_compiler()
 		DEFINE("PHP_COMPILER_SHORT", "clang");
 		AC_DEFINE('PHP_COMPILER_ID', "clang"); /* XXX something better were to write here */
 
-	} else if (INTEL_TOOLSET) {
+	} else if (ICC_TOOLSET) {
 		INTELVERS = COMPILER_NUMERIC_VERSION;
 
 		AC_DEFINE('COMPILER', COMPILER_NAME, "Detected compiler version");
@@ -2415,7 +2415,7 @@ function toolset_get_compiler()
 		return PATH_PROG('cl', null, 'PHP_CL')
 	} else if (CLANG_TOOLSET) {
 		return PATH_PROG('clang-cl', null, 'PHP_CL')
-	} else if (INTEL_TOOLSET) {
+	} else if (ICC_TOOLSET) {
 		return PATH_PROG('icl', null, 'PHP_CL')
 	}
 
@@ -2441,7 +2441,7 @@ function toolset_get_compiler_version()
 
 			return version;
 		}
-	} else if (INTEL_TOOLSET) {
+	} else if (ICC_TOOLSET) {
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
 
@@ -2464,7 +2464,7 @@ function toolset_get_compiler_name()
 	if (VS_TOOLSET) {
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
 		return VC_VERSIONS[version];
-	} else if (CLANG_TOOLSET || INTEL_TOOLSET) {
+	} else if (CLANG_TOOLSET || ICC_TOOLSET) {
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
 
@@ -2489,7 +2489,7 @@ function toolset_is_64()
 		clang-cl doesn't recognize the arch toolset. But as it needs 
 		the VS environment, checking the arch of cl.exe is correct. */
 		return probe_binary(PATH_PROG('cl', null), 64);
-	} else if (INTEL_TOOLSET) {
+	} else if (ICC_TOOLSET) {
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
 
@@ -2507,7 +2507,7 @@ function toolset_setup_linker()
 	} else if (CLANG_TOOLSET) {
 		//return PATH_PROG('lld', WshShell.Environment("Process").Item("PATH"), "LINK");
 		return PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
-	} else if (INTEL_TOOLSET) {
+	} else if (ICC_TOOLSET) {
 		return PATH_PROG('xilink', WshShell.Environment("Process").Item("PATH"), "LINK");
 	}
 
