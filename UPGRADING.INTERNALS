@@ -31,7 +31,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
      Integer types
 
 	Integers do no more depend on the firm 'long' type. Instead a platform
-	dependent integer type is used, it is called zend_long. That datatype is
+	independent integer type is used, it is called zend_long. That datatype is
 	defined dynamically to guarantee the consistent 64 bit support. The zval 
 	field representing user land integer it bound to zend_long.
 
