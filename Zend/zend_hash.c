@@ -100,7 +100,7 @@ static const uint32_t uninitialized_bucket = {INVALID_IDX};
 ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
 	/* Use big enough power of 2 */
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) && !defined(__clang__)
 	if (nSize <= 8) {
 		ht->nTableSize = 8;
 	} else if (nSize >= 0x80000000) {
@@ -269,14 +269,12 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 
 	IS_CONSISTENT(ht);
 
-	CHECK_INIT(ht, 0);
-	if (ht->u.flags & HASH_FLAG_PACKED) {
+	if (UNEXPECTED(ht->nTableMask == 0)) {
+		CHECK_INIT(ht, 0);
+		goto add_to_hash; 
+	} else if (ht->u.flags & HASH_FLAG_PACKED) {
 		zend_hash_packed_to_hash(ht);
-	}
-
-	h = zend_string_hash_val(key);
-
-	if ((flag & HASH_ADD_NEW) == 0) {
+	} else if ((flag & HASH_ADD_NEW) == 0) {
 		p = zend_hash_find_bucket(ht, key);
 
 		if (p) {
@@ -302,6 +300,7 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 	
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 
+add_to_hash:
 	HANDLE_BLOCK_INTERRUPTIONS();
 	idx = ht->nNumUsed++;
 	ht->nNumOfElements++;
@@ -309,7 +308,7 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 		ht->nInternalPointer = idx;
 	}
 	p = ht->arData + idx; 
-	p->h = h;
+	p->h = h = zend_string_hash_val(key);
 	p->key = key;
 	zend_string_addref(key);
 	ZVAL_COPY_VALUE(&p->val, pData);
@@ -423,9 +422,15 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 #endif
 
 	IS_CONSISTENT(ht);
-	CHECK_INIT(ht, h < ht->nTableSize);
 
-	if (ht->u.flags & HASH_FLAG_PACKED) {
+	if (UNEXPECTED(ht->nTableMask == 0)) {
+		CHECK_INIT(ht, h < ht->nTableSize);
+		if (h < ht->nTableSize) {
+			p = ht->arData + h;
+			goto add_to_packed;
+		}
+		goto add_to_hash;
+	} else if (ht->u.flags & HASH_FLAG_PACKED) {
 		if (h < ht->nNumUsed) {
 			p = ht->arData + h;
 			if (Z_TYPE(p->val) != IS_UNDEF) {
@@ -453,6 +458,7 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 			goto convert_to_hash;
 		}
 
+add_to_packed:
 		HANDLE_BLOCK_INTERRUPTIONS();
 		/* incremental initialization of empty Buckets */
 		if ((flag & (HASH_ADD_NEW|HASH_ADD_NEXT)) == (HASH_ADD_NEW|HASH_ADD_NEXT)) {
@@ -477,7 +483,6 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 		p->h = h;
 		p->key = NULL;
 		ZVAL_COPY_VALUE(&p->val, pData);
-		Z_NEXT(p->val) = INVALID_IDX;
 
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 
@@ -485,9 +490,7 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 
 convert_to_hash:
 		zend_hash_packed_to_hash(ht);
-	}
-
-	if ((flag & HASH_ADD_NEW) == 0) {
+	} else if ((flag & HASH_ADD_NEW) == 0) {
 		p = zend_hash_index_find_bucket(ht, h);
 		if (p) {
 			if (flag & HASH_ADD) {
@@ -509,6 +512,7 @@ convert_to_hash:
 
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 
+add_to_hash:
 	HANDLE_BLOCK_INTERRUPTIONS();
 	idx = ht->nNumUsed++;
 	ht->nNumOfElements++;

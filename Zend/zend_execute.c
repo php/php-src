@@ -1292,7 +1292,7 @@ ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *
 	zend_fetch_dimension_address_read_R(result, container, dim, IS_TMP_VAR TSRMLS_CC);
 }
 
-static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, void **cache_slot, int type TSRMLS_DC)
+static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type TSRMLS_DC)
 {
     if (container_op_type != IS_UNUSED) {
 		ZVAL_DEREF(container);
@@ -1312,6 +1312,26 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			} else {
 				zend_error(E_WARNING, "Attempt to modify property of non-object");
 				ZVAL_INDIRECT(result, &EG(error_zval));
+				return;
+			}
+		}
+	}
+	if (prop_op_type == IS_CONST &&
+	    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR_EX(cache_slot))) {
+		zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 1);
+		zend_object *zobj = Z_OBJ_P(container);
+		zval *retval;
+
+		if (EXPECTED(prop_info)) {
+			retval = OBJ_PROP(zobj, prop_info->offset);
+			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+				ZVAL_INDIRECT(result, retval);
+				return;
+			}
+		} else if (EXPECTED(zobj->properties != NULL)) {
+			retval = zend_hash_find(zobj->properties, Z_STR_P(prop_ptr));
+			if (EXPECTED(retval)) {
+				ZVAL_INDIRECT(result, retval);
 				return;
 			}
 		}

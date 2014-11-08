@@ -3,33 +3,15 @@
 // "Master" config file; think of it as a configure.in
 // equivalent.
 
+ARG_WITH("toolset", "Toolset to use for the compilation, supported: vs, clang, icc", "vs");
+toolset_option_handle();
+
 ARG_WITH('cygwin', 'Path to cygwin utilities on your system', '\\cygwin');
-PHP_CL = PATH_PROG('cl', null, 'PHP_CL');
-if (!PHP_CL) {
-	ERROR("MS C++ compiler is required");
-}
 
-/* For the record here: */
-// 1200 is VC6
-// 1300 is vs.net 2002
-// 1310 is vs.net 2003
-// 1400 is vs.net 2005
-// 1500 is vs.net 2008
-// 1600 is vs.net 2010
-// Which version of the compiler do we have?
-VCVERS = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
-STDOUT.WriteLine("  Detected compiler " + VC_VERSIONS[VCVERS]);
-
-if (VCVERS < 1500) {
-	ERROR("Unsupported MS C++ Compiler, VC9 (2008) minimum is required");
-}
-
-AC_DEFINE('COMPILER', VC_VERSIONS[VCVERS], "Detected compiler version");
-DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
-AC_DEFINE('PHP_COMPILER_ID', VC_VERSIONS_SHORT[VCVERS], "Compiler compatibility ID");
+toolset_setup_compiler();
 
 // do we use x64 or 80x86 version of compiler?
-X64 = probe_binary(PHP_CL, 64, null, 'PHP_CL');
+X64 = toolset_is_64();
 if (X64) {
 	STDOUT.WriteLine("  Detected 64-bit compiler");
 } else {
@@ -38,52 +20,8 @@ if (X64) {
 AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
 DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
 
-// cygwin now ships with link.exe.  Avoid searching the cygwin path
-// for this, as we want the MS linker, not the fileutil
-PATH_PROG('link', WshShell.Environment("Process").Item("PATH"));
-PATH_PROG('nmake');
-
-// we don't want to define LIB, as that will override the default library path
-// that is set in that env var
-PATH_PROG('lib', null, 'MAKE_LIB');
-if (!PATH_PROG('bison')) {
-	ERROR('bison is required')
-}
-
-// There's a minimum requirement for re2c..
-MINRE2C = "0.13.4";
-
-RE2C = PATH_PROG('re2c');
-if (RE2C) {
-	var intvers, intmin;
-	var pattern = /\./g;
-
-	RE2CVERS = probe_binary(RE2C, "version");
-	STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);
-
-	intvers = RE2CVERS.replace(pattern, '') - 0;
-	intmin = MINRE2C.replace(pattern, '') - 0;
-
-	if (intvers < intmin) {
-		STDOUT.WriteLine('WARNING: The minimum RE2C version requirement is ' + MINRE2C);
-		STDOUT.WriteLine('Parsers will not be generated. Upgrade your copy at http://sf.net/projects/re2c');
-		DEFINE('RE2C', '');
-	} else {
-		DEFINE('RE2C_FLAGS', '');
-	}
-} else {
-	STDOUT.WriteLine('Parsers will not be regenerated');
-}
-PATH_PROG('zip');
-PATH_PROG('lemon');
-
-// avoid picking up midnight commander from cygwin
-PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
-
-// Try locating manifest tool
-if (VCVERS > 1200) {
-	PATH_PROG('mt', WshShell.Environment("Process").Item("PATH"));
-}
+toolset_setup_linker();
+toolset_setup_project_tools();
 
 // stick objects somewhere outside of the source tree
 ARG_ENABLE('object-out-dir', 'Alternate location for binary objects during build', '');
@@ -130,45 +68,11 @@ DEFINE('PHP_PREFIX', PHP_PREFIX);
 
 DEFINE("BASE_INCLUDES", "/I . /I main /I Zend /I TSRM /I ext ");
 
-// CFLAGS for building the PHP dll
-DEFINE("CFLAGS_PHP", "/D _USRDLL /D PHP7DLLTS_EXPORTS /D PHP_EXPORTS \
-/D LIBZEND_EXPORTS /D TSRM_EXPORTS /D SAPI_EXPORTS /D WINVER=0x500");
-
-DEFINE('CFLAGS_PHP_OBJ', '$(CFLAGS_PHP) $(STATIC_EXT_CFLAGS)');
-
-// General CFLAGS for building objects
-DEFINE("CFLAGS", "/nologo /FD $(BASE_INCLUDES) /D _WINDOWS \
-/D ZEND_WIN32=1 /D PHP_WIN32=1 /D WIN32 /D _MBCS /W3 ");
-
-if (VCVERS < 1400) {
-	// Enable automatic precompiled headers
-	ADD_FLAG('CFLAGS', ' /YX ');
-
-	if (PHP_DEBUG == "yes") {
-		// Set some debug/release specific options
-		ADD_FLAG('CFLAGS', ' /GZ ');
-	}
-}
-
-if (VCVERS >= 1400) {
-	// fun stuff: MS deprecated ANSI stdio and similar functions
-	// disable annoying warnings.  In addition, time_t defaults
-	// to 64-bit.  Ask for 32-bit.
-	if (X64) {
-		ADD_FLAG('CFLAGS', ' /wd4996 ');
-	} else {
-		ADD_FLAG('CFLAGS', ' /wd4996 /D_USE_32BIT_TIME_T=1 ');
-	}
-
-	if (PHP_DEBUG == "yes") {
-		// Set some debug/release specific options
-		ADD_FLAG('CFLAGS', ' /RTC1 ');
-	}
-}
+toolset_setup_common_cflags();
 
 ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
 var PHP_MP_DISABLED = true;
-if (VCVERS >= 1500 && PHP_MP != 'disable') {
+if (VS_TOOLSET && VCVERS >= 1500 && PHP_MP != 'disable') {
 		// no from disable-all 
 		if(PHP_MP == 'auto' || PHP_MP == 'no') {
 			 ADD_FLAG('CFLAGS', ' /MP ');
@@ -184,19 +88,7 @@ if (VCVERS >= 1500 && PHP_MP != 'disable') {
 }
 
 // General link flags
-
-if (VCVERS >= 1700) {
-	DEFINE("LDFLAGS", "/nologo ");
-} else {
-	DEFINE("LDFLAGS", "/nologo /version:" +
-			PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION);
-}
-
-// General DLL link flags
-DEFINE("DLL_LDFLAGS", "/dll ");
-
-// PHP DLL link flags
-DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");
+toolset_setup_common_ldlags();
 
 // General libs
 // urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib
@@ -334,7 +226,7 @@ function add_extra_dirs()
 		for (i = 0; i < path.length; i++) {
 			f = FSO.GetAbsolutePathName(path[i]);
 			if (FSO.FolderExists(f)) {
-				if (VCVERS <= 1200 && f.indexOf(" ") >= 0) {
+				if (VS_TOOLSET && VCVERS <= 1200 && f.indexOf(" ") >= 0) {
 					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
 				} else {
 					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
@@ -368,7 +260,8 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_float.c zend_string.c zend_generators.c zend_virtual_cwd.c zend_ast.c \
 	zend_inheritance.c");
 
-if (VCVERS == 1200) {
+/* XXX inspect this for other toolsets */
+if (VS_TOOLSET && VCVERS == 1200) {
 	AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
 }
 
@@ -379,10 +272,10 @@ ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 ADD_SOURCES("win32", "inet.c fnmatch.c sockets.c");
 
 // Newer versions have it
-if (VCVERS <= 1300) {
+if (VS_TOOLSET && VCVERS <= 1300) {
 	ADD_SOURCES("win32", "strtoi64.c");
 }
-if (VCVERS >= 1400) {
+if (VS_TOOLSET && VCVERS >= 1400 || ICC_TOOLSET) {
 	AC_DEFINE('HAVE_STRNLEN', 1);
 }
 
