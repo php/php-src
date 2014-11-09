@@ -126,7 +126,9 @@ string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 7 --
-string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+Warning: iconv_mime_decode() expects parameter 2 to be long, double given in %s on line %d
+string(0) ""
 
 -- Iteration 8 --
 string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
