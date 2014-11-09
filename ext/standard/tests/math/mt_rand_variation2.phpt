@@ -1,5 +1,7 @@
 --TEST--
 Test mt_rand() function : usage variations - different data types as $max argument
+--SKIPIF--
+<?php if (PHP_INT_SIZE !== 4) die("skip this test is for 32-bit only");
 --FILE--
 <?php
 /* Prototype  : int mt_rand  ([ int $min  , int $max ] )

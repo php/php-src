@@ -1,5 +1,7 @@
 --TEST--
 Test mt_srand() function : usage variations - different data types as $seed argument
+--SKIPIF--
+<?php if (PHP_INT_SIZE !== 4) die("skip this test is for 32-bit only");
 --FILE--
 <?php
 /* Prototype  : void mt_srand  ([ int $seed  ] )

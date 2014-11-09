@@ -1,5 +1,7 @@
 --TEST--
 Test rand() function : usage variations - different data types as $min argument
+--SKIPIF--
+<?php if (PHP_INT_SIZE !== 4) die("skip this test is for 32-bit only");
 --FILE--
 <?php
 /* Prototype  : int rand  ([ int $min  , int $max ] )
