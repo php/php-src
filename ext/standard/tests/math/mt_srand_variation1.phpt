@@ -110,6 +110,8 @@ NULL
 NULL
 
 -- Iteration 8 --
+
+Warning: mt_srand() expects parameter 1 to be long, double given in %s on line %d
 NULL
 
 -- Iteration 9 --

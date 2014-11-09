@@ -110,7 +110,9 @@ int(%i)
 int(%i)
 
 -- Iteration 8 --
-int(%i)
+
+Warning: rand() expects parameter 2 to be long, double given in %s on line %d
+NULL
 
 -- Iteration 9 --
 int(%i)
