@@ -15,16 +15,16 @@ var_dump(strrpos(1024, "te", -PHP_INT_MAX-1));
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos() expects parameter 3 to be long, double given in %s on line %d
 bool(false)
 
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos() expects parameter 3 to be long, double given in %s on line %d
 bool(false)
 
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos() expects parameter 3 to be long, double given in %s on line %d
 bool(false)
 
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos() expects parameter 3 to be long, double given in %s on line %d
 bool(false)
 
 Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
