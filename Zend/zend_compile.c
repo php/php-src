@@ -2985,9 +2985,7 @@ void zend_compile_global_var(zend_ast *ast TSRMLS_DC) /* {{{ */
 
 	zend_compile_expr(&name_node, name_ast TSRMLS_CC);
 	if (name_node.op_type == IS_CONST) {
-		if (Z_TYPE(name_node.u.constant) != IS_STRING) {
-			convert_to_string(&name_node.u.constant);
-		}
+		convert_to_string(&name_node.u.constant);
 	}
 
 	if (zend_try_compile_cv(&result, var_ast TSRMLS_CC) == SUCCESS) {
