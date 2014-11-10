@@ -2629,10 +2629,10 @@ function object_out_dir_option_handle()
 		}
 		PHP_OBJECT_OUT_DIR += '\\';
 	} else {
-		PHP_OBJECT_OUT_DIR = FSO.GetAbsolutePathName(".");
+		PHP_OBJECT_OUT_DIR = FSO.GetAbsolutePathName(".") + '\\';
 
 		if (X64) {
-			PHP_OBJECT_OUT_DIR += '\\x64\\';
+			PHP_OBJECT_OUT_DIR += 'x64\\';
 			if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
 				FSO.CreateFolder(PHP_OBJECT_OUT_DIR);
 			}
