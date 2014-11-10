@@ -2109,7 +2109,8 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 	zend_compile_expr(&prop_node, prop_ast TSRMLS_CC);
 
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_OBJ_R, &obj_node, &prop_node TSRMLS_CC);
-	if (opline->op2_type == IS_CONST && Z_TYPE(CONSTANT(opline->op2.constant)) == IS_STRING) {
+	if (opline->op2_type == IS_CONST) {
+		convert_to_string(&CONSTANT(opline->op2.constant));
 		zend_alloc_polymorphic_cache_slot(opline->op2.constant TSRMLS_CC);
 	}
 
@@ -2984,9 +2985,7 @@ void zend_compile_global_var(zend_ast *ast TSRMLS_DC) /* {{{ */
 
 	zend_compile_expr(&name_node, name_ast TSRMLS_CC);
 	if (name_node.op_type == IS_CONST) {
-		if (Z_TYPE(name_node.u.constant) != IS_STRING) {
-			convert_to_string(&name_node.u.constant);
-		}
+		convert_to_string(&name_node.u.constant);
 	}
 
 	if (zend_try_compile_cv(&result, var_ast TSRMLS_CC) == SUCCESS) {
@@ -4639,6 +4638,8 @@ static HashTable *zend_get_import_ht(uint32_t type TSRMLS_DC) /* {{{ */
 			return CG(current_import_const);
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+
+	return NULL;
 }
 /* }}} */
 
@@ -4653,6 +4654,8 @@ static char *zend_get_use_type_str(uint32_t type) /* {{{ */
 			return " const";
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
+
+	return " unknown";
 }
 /* }}} */
 
