@@ -3,7 +3,9 @@
 // "Master" config file; think of it as a configure.in
 // equivalent.
 
-ARG_WITH("toolset", "Toolset to use for the compilation, supported: vs, clang, icc", "vs");
+ARG_WITH("toolset", "Toolset to use for the compilation, give: vs, clang, icc. " +
+		"The only recommended and supported toolset for production use " +
+		"is Visual Studio. Use others at your own risk.", "vs");
 toolset_option_handle()
 
 var PHP_CYGWIN="notset";

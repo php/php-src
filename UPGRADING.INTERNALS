@@ -114,4 +114,17 @@ PHP 7.0 INTERNALS UPGRADE NOTES
 2. Build system changes
 ========================
 
-  
+  a. Unix build system changes
+
+  b. Windows build system changes
+
+     - Besides Visual Studio, building with Clang or Intel Composer is now
+       possible. To enable an alternative toolset, add the option
+       --with-toolset=[vs,clang,icc] to the configure line. The default
+       toolset is vs. Still clang or icc need the correct environment
+       which involves many tools from the vs toolset.
+
+       AWARENESS The only recommended and supported toolset to produce production
+       ready binaries is Visual Studio. Still other compilers can be used now for
+       testing and analyzing purposes.
+
