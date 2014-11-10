@@ -259,7 +259,9 @@ static php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
 };
 
+#if HAVE_UNISTD_H
 static int php_cli_output_is_tty = OUTPUT_NOT_CHECKED;
+#endif
 
 static size_t php_cli_server_client_send_through(php_cli_server_client *client, const char *str, size_t str_len);
 static php_cli_server_chunk *php_cli_server_chunk_heap_new_self_contained(size_t len);
