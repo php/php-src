@@ -1326,7 +1326,8 @@ ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		/* here we are sure we are dealing with an object */
 		do {
 			if (OP2_TYPE == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -1415,8 +1416,6 @@ ZEND_VM_HANDLER(91, ZEND_FETCH_OBJ_IS, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = GET_OP1_OBJ_ZVAL_PTR_DEREF(BP_VAR_IS);
@@ -1431,7 +1430,8 @@ ZEND_VM_HANDLER(91, ZEND_FETCH_OBJ_IS, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV
 		/* here we are sure we are dealing with an object */
 		do {
 			if (OP2_TYPE == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
