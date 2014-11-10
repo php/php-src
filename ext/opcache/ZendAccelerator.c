@@ -881,12 +881,12 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 int validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle TSRMLS_DC)
 {
 	if (ZCG(accel_directives).revalidate_freq &&
-	    (persistent_script->dynamic_members.revalidate >= ZCSG(revalidate_at))) {
+	    persistent_script->dynamic_members.revalidate >= ZCG(request_time)) {
 		return SUCCESS;
 	} else if (do_validate_timestamps(persistent_script, file_handle TSRMLS_CC) == FAILURE) {
 		return FAILURE;
 	} else {
-		persistent_script->dynamic_members.revalidate = ZCSG(revalidate_at);
+		persistent_script->dynamic_members.revalidate = ZCG(request_time) + ZCG(accel_directives).revalidate_freq;
 		return SUCCESS;
 	}
 }
@@ -1449,7 +1449,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		 * otherwise we have a race-condition.
 		 */
 		new_persistent_script->timestamp = timestamp;
-		new_persistent_script->dynamic_members.revalidate = ZCSG(revalidate_at);
+		new_persistent_script->dynamic_members.revalidate = ZCG(request_time) + ZCG(accel_directives).revalidate_freq;
 	}
 
 	if (file_handle->opened_path) {
@@ -2155,13 +2155,6 @@ static void accel_activate(void)
 		zend_accel_error(ACCEL_LOG_WARNING, "Internal functions count changed - was %d, now %d", ZCG(internal_functions_count), zend_hash_num_elements(&ZCG(function_table)));
 	}
 
-	if (ZCG(accel_directives).validate_timestamps) {
-		time_t now = ZCG(request_time);
-		if (now > ZCSG(revalidate_at) + (time_t)ZCG(accel_directives).revalidate_freq) {
-			ZCSG(revalidate_at) = now;
-		}
-	}
-
 	ZCG(cwd) = NULL;
 
 	SHM_PROTECT();
@@ -2621,10 +2614,6 @@ static int accel_startup(zend_extension *extension)
 	accelerator_orig_zend_resolve_path = zend_resolve_path;
 	zend_resolve_path = persistent_zend_resolve_path;
 #endif
-
-	if (ZCG(accel_directives).validate_timestamps) {
-		ZCSG(revalidate_at) = zend_accel_get_time() + ZCG(accel_directives).revalidate_freq;
-	}
 
 	/* Override chdir() function */
 	if (zend_hash_find(CG(function_table), "chdir", sizeof("chdir"), (void**)&func) == SUCCESS &&
