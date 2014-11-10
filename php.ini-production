@@ -674,7 +674,7 @@ auto_append_file =
 ; http://php.net/default-mimetype
 default_mimetype = "text/html"
 
-; PHP's default character set is set to empty.
+; PHP's default character set is set to UTF-8.
 ; http://php.net/default-charset
 default_charset = "UTF-8"
 
@@ -684,10 +684,12 @@ default_charset = "UTF-8"
 ;internal_encoding =
 
 ; PHP input character encoding is set to empty.
+; If empty, default_charset is used.
 ; http://php.net/input-encoding
 ;input_encoding =
 
 ; PHP output character encoding is set to empty.
+; If empty, default_charset is used.
 ; mbstring or iconv output handler is used.
 ; See also output_buffer.
 ; http://php.net/output-encoding
