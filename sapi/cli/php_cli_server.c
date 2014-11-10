@@ -838,7 +838,6 @@ static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, v
 		SOCKET fd;
 		int events;
 	} entries[FD_SETSIZE * 2];
-	php_socket_t fd = 0;
 	size_t i;
 	struct socket_entry *n = entries, *m;
 
