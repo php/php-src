@@ -47,7 +47,8 @@
 # include <sys/cdefs.h>
 #endif
 
-zend_stat_t;
+#include "Zend/zend_stream.h"
+
 typedef struct {
 	int gl_pathc;		/* Count of total paths so far. */
 	int gl_matchc;		/* Count of paths matching pattern. */
