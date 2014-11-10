@@ -394,6 +394,12 @@ char *alloca();
 #define ZEND_SECURE_ZERO(var, size) memset((var), 0, (size))
 #endif
 
+#ifdef ZEND_WIN32
+#define ZEND_VALID_SOCKET(sock) (INVALID_SOCKET != (sock))
+#else
+#define ZEND_VALID_SOCKET(sock) ((sock) >= 0)
+#endif
+
 #endif /* ZEND_PORTABILITY_H */
 
 /*

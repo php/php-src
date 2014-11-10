@@ -556,7 +556,7 @@ static void sapi_cli_server_flush(void *server_context TSRMLS_DC) /* {{{ */
 		return;
 	}
 
-	if (client->sock < 0) {
+	if (!ZEND_VALID_SOCKET(client->sock)) {
 		php_handle_aborted_connection();
 		return;
 	}
@@ -1338,7 +1338,7 @@ out:
 		php_network_freeaddresses(sal);
 	}
 	if (err) {
-		if (retval >= 0) {
+		if (ZEND_VALID_SOCKET(retval)) {
 			closesocket(retval);
 		}
 		if (errstr) {
@@ -2186,7 +2186,7 @@ static void php_cli_server_dtor(php_cli_server *server TSRMLS_DC) /* {{{ */
 {
 	zend_hash_destroy(&server->clients);
 	zend_hash_destroy(&server->extension_mime_types);
-	if (server->server_sock >= 0) {
+	if (ZEND_VALID_SOCKET(server->server_sock)) {
 		closesocket(server->server_sock);
 	}
 	if (server->host) {
@@ -2407,7 +2407,7 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socke
 			return FAILURE;
 		}
 		client_sock = accept(server->server_sock, sa, &socklen);
-		if (client_sock < 0) {
+		if (!ZEND_VALID_SOCKET(client_sock)) {
 			char *errstr;
 			errstr = php_socket_strerror(php_socket_errno(), NULL, 0);
 			php_cli_server_logf("Failed to accept a client (reason: %s)" TSRMLS_CC, errstr);
