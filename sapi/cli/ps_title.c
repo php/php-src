@@ -129,7 +129,9 @@ static char** save_argv;
  * This holds the 'locally' allocated environ from the save_ps_args method.
  * This is subsequently free'd at exit.
  */
+#if defined(PS_USE_CLOBBER_ARGV)
 static char** frozen_environ, **new_environ;
+#endif
 
 /*
  * Call this method early, before any code has used the original argv passed in
