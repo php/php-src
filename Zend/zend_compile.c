@@ -5468,7 +5468,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ 
 	zend_ast *var_ast = ast->child[0];
 
 	znode var_node;
-	zend_op *opline;
+	zend_op *opline = NULL;
 
 	ZEND_ASSERT(ast->kind == ZEND_AST_ISSET || ast->kind == ZEND_AST_EMPTY);
 
