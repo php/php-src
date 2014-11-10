@@ -1761,13 +1761,6 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 				/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 			}
 			ex->symbol_table = EG(active_symbol_table);
-
-			if (ex->op_array->this_var != -1 &&
-			    !*EX_CV_NUM(ex, ex->op_array->this_var) &&
-			    EG(This)) {
-			    *EX_CV_NUM(ex, ex->op_array->this_var) = (zval**)EX_CV_NUM(ex, ex->op_array->last_var + ex->op_array->this_var);
-				**EX_CV_NUM(ex, ex->op_array->this_var) = EG(This);
- 			}
 			for (i = 0; i < ex->op_array->last_var; i++) {
 				if (*EX_CV_NUM(ex, i)) {
 					zend_hash_quick_update(EG(active_symbol_table),
