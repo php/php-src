@@ -2109,7 +2109,8 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 	zend_compile_expr(&prop_node, prop_ast TSRMLS_CC);
 
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_OBJ_R, &obj_node, &prop_node TSRMLS_CC);
-	if (opline->op2_type == IS_CONST && Z_TYPE(CONSTANT(opline->op2.constant)) == IS_STRING) {
+	if (opline->op2_type == IS_CONST) {
+		convert_to_string(&CONSTANT(opline->op2.constant));
 		zend_alloc_polymorphic_cache_slot(opline->op2.constant TSRMLS_CC);
 	}
 

@@ -3986,7 +3986,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -4040,7 +4039,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -5380,7 +5378,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -5435,7 +5432,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -6619,7 +6615,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -6674,7 +6669,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -8583,7 +8577,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -8637,7 +8630,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -10956,7 +10948,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -11010,7 +11001,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -12226,7 +12216,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -12281,7 +12270,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -13438,7 +13426,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -13493,7 +13480,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -15267,7 +15253,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDL
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -15321,7 +15306,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -18762,7 +18746,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -18865,7 +18848,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -21100,7 +21082,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -21204,7 +21185,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -23276,7 +23256,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -23380,7 +23359,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -26712,7 +26690,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -26815,7 +26792,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -28462,7 +28438,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -28565,7 +28540,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCOD
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -29870,7 +29844,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -29974,7 +29947,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -31191,7 +31163,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -31295,7 +31266,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -32999,7 +32969,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -33102,7 +33071,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -36248,7 +36216,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -36351,7 +36318,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -38416,7 +38382,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -38520,7 +38485,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -40464,7 +40428,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -40568,7 +40531,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -43625,7 +43587,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
@@ -43728,7 +43689,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDL
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-				EXPECTED(Z_TYPE_P(offset) == IS_STRING) &&
 				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
