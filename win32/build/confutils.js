@@ -2583,5 +2583,37 @@ function toolset_setup_common_ldlags()
 	} else {
 		DEFINE("LDFLAGS", "/nologo ");
 	}
+
+	// we want msvcrt in the PHP DLL
+	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
+}
+
+function toolset_setup_common_libs()
+{
+	// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib
+	DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib");
+}
+
+function toolset_setup_build_mode()
+{
+	if (PHP_DEBUG == "yes") {
+		ADD_FLAG("CFLAGS", "/LDd /MDd /W3 /Gm /Od /D _DEBUG /D ZEND_DEBUG=1 " +
+			(X64?"/Zi":"/ZI"));
+		ADD_FLAG("LDFLAGS", "/debug");
+		// Avoid problems when linking to release libraries that use the release
+		// version of the libc
+		ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:msvcrt");
+	} else {
+		// Generate external debug files when --enable-debug-pack is specified
+		if (PHP_DEBUG_PACK == "yes") {
+			ADD_FLAG("CFLAGS", "/Zi");
+			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
+		}
+		// Equivalent to Release_TSInline build -> best optimization
+		ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+
+		// if you have VS.Net /GS hardens the binary against buffer overruns
+		// ADD_FLAG("CFLAGS", "/GS");
+	}
 }
 
