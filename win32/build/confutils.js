@@ -1439,7 +1439,10 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 	sub_build += d;
 
 
-	DEFINE(bd_flags_name, " /Fp" + sub_build + " /FR" + sub_build + " ");
+	DEFINE(bd_flags_name, "/Fp" + sub_build + " /FR" + sub_build + " ");
+	if (VS_TOOLSET) {
+		ADD_FLAG(bd_flags_name, "/Fd" + sub_build);
+	}
 
 	for (i in file_list) {
 		src = file_list[i];
@@ -2614,6 +2617,26 @@ function toolset_setup_build_mode()
 
 		// if you have VS.Net /GS hardens the binary against buffer overruns
 		// ADD_FLAG("CFLAGS", "/GS");
+	}
+}
+
+function object_out_dir_option_handle()
+{
+	if (PHP_OBJECT_OUT_DIR.length) {
+		PHP_OBJECT_OUT_DIR = FSO.GetAbsolutePathName(PHP_OBJECT_OUT_DIR);
+		if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
+			ERROR('you chosen output directory ' + PHP_OBJECT_OUT_DIR + ' does not exist');
+		}
+		PHP_OBJECT_OUT_DIR += '\\';
+	} else {
+		PHP_OBJECT_OUT_DIR = FSO.GetAbsolutePathName(".");
+
+		if (X64) {
+			PHP_OBJECT_OUT_DIR += '\\x64\\';
+			if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
+				FSO.CreateFolder(PHP_OBJECT_OUT_DIR);
+			}
+		}
 	}
 }
 

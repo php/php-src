@@ -27,18 +27,7 @@ toolset_setup_project_tools();
 
 // stick objects somewhere outside of the source tree
 ARG_ENABLE('object-out-dir', 'Alternate location for binary objects during build', '');
-if (PHP_OBJECT_OUT_DIR.length) {
-	PHP_OBJECT_OUT_DIR = FSO.GetAbsolutePathName(PHP_OBJECT_OUT_DIR);
-	if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
-		ERROR('you chosen output directory ' + PHP_OBJECT_OUT_DIR + ' does not exist');
-	}
-	PHP_OBJECT_OUT_DIR += '\\';
-} else if (X64) {
-	if (!FSO.FolderExists("x64")) {
-		FSO.CreateFolder("x64");
-	}
-	PHP_OBJECT_OUT_DIR = 'x64\\';
-}
+object_out_dir_option_handle();
 
 ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
 ARG_ENABLE('debug-pack', 'Release binaries with external debug symbols (--enable-debug must not be specified)', 'no');
