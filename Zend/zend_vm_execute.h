@@ -3986,7 +3986,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -4025,8 +4025,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE
 	zval *container;
 
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = opline->op1.zv;
@@ -4041,7 +4039,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -5380,7 +5378,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -5420,8 +5418,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_H
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = opline->op1.zv;
@@ -5436,7 +5432,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -6619,7 +6615,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -6659,8 +6655,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_H
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = opline->op1.zv;
@@ -6675,7 +6669,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -8583,7 +8577,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -8622,8 +8616,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HA
 	zval *container;
 
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = opline->op1.zv;
@@ -8638,7 +8630,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -10956,7 +10948,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -10995,8 +10987,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_H
 	zval *container;
 
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -11011,7 +11001,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -12226,7 +12216,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -12266,8 +12256,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HAN
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -12282,7 +12270,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -13438,7 +13426,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -13478,8 +13466,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HAN
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -13494,7 +13480,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -15267,7 +15253,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDL
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -15306,8 +15292,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HAND
 	zval *container;
 
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -15322,7 +15306,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -18762,7 +18746,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -18850,8 +18834,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_H
 	zval *container;
 
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -18866,7 +18848,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -21100,7 +21082,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -21189,8 +21171,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAN
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -21205,7 +21185,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -23276,7 +23256,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -23365,8 +23345,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAN
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -23381,7 +23359,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -26712,7 +26690,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -26800,8 +26778,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HAND
 	zval *container;
 
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -26816,7 +26792,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -28462,7 +28438,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -28550,8 +28526,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCOD
 	zval *container;
 
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -28566,7 +28540,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCOD
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -29870,7 +29844,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -29959,8 +29933,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -29975,7 +29947,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -31191,7 +31163,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -31280,8 +31252,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -31296,7 +31266,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -32999,7 +32969,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -33087,8 +33057,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_H
 	zval *container;
 
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(execute_data TSRMLS_CC);
@@ -33103,7 +33071,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_H
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -36248,7 +36216,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -36336,8 +36304,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HA
 	zval *container;
 
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_deref_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
@@ -36352,7 +36318,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HA
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CONST == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -38416,7 +38382,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -38505,8 +38471,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HAND
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_deref_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
@@ -38521,7 +38485,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_TMP_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -40464,7 +40428,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -40553,8 +40517,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HAND
 	zval *container;
 	zend_free_op free_op2;
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_deref_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
@@ -40569,7 +40531,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HAND
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_VAR == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -43625,7 +43587,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_R_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 
@@ -43713,8 +43675,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDL
 	zval *container;
 
 	zval *offset;
-	zval *retval;
-	zend_property_info *prop_info;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_deref_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
@@ -43729,7 +43689,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_IS_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDL
 		/* here we are sure we are dealing with an object */
 		do {
 			if (IS_CV == IS_CONST &&
-			    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
+				EXPECTED(Z_OBJCE_P(container) == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 				zend_property_info *prop_info = CACHED_PTR(Z_CACHE_SLOT_P(offset) + 1);
 				zend_object *zobj = Z_OBJ_P(container);
 

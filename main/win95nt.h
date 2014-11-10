@@ -55,7 +55,7 @@ typedef char * caddr_t;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 #if !NSAPI
-typedef long pid_t;
+typedef int pid_t;
 #endif
 
 /* missing in vc5 math.h */
