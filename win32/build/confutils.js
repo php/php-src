@@ -2679,3 +2679,32 @@ function setup_zts_stuff()
 	}
 }
 
+function php_build_option_handle()
+{
+	if (PHP_PHP_BUILD == 'no') {
+		if (FSO.FolderExists("..\\deps")) {
+			PHP_PHP_BUILD = "..\\deps";
+		} else {
+			if (FSO.FolderExists("..\\php_build")) {
+				PHP_PHP_BUILD = "..\\php_build";
+			} else {
+				if (X64) {
+					if (FSO.FolderExists("..\\win64build")) {
+						PHP_PHP_BUILD = "..\\win64build";
+					} else if (FSO.FolderExists("..\\php-win64-dev\\php_build")) {
+						PHP_PHP_BUILD = "..\\php-win64-dev\\php_build";
+					}
+				} else {
+					if (FSO.FolderExists("..\\win32build")) {
+						PHP_PHP_BUILD = "..\\win32build";
+					} else if (FSO.FolderExists("..\\php-win32-dev\\php_build")) {
+						PHP_PHP_BUILD = "..\\php-win32-dev\\php_build";
+					}
+				}
+			}
+		}
+		PHP_PHP_BUILD = FSO.GetAbsolutePathName(PHP_PHP_BUILD);
+	}
+	DEFINE("PHP_BUILD", PHP_PHP_BUILD);
+}
+
