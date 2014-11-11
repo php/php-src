@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames
     and passwords) (Tjerk)
 
+- CURL:
+  . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
+    CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
+
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
   . Fixed bug #68283 (fileinfo: out-of-bounds read in elf note headers).
@@ -33,12 +37,12 @@ PHP                                                                        NEWS
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
 
+- SOAP:
+  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
+    (Laruence)
+
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
-
-- CURL:
-  . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
-    CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
 
 16 Oct 2014, PHP 5.5.18
 
