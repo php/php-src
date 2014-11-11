@@ -87,33 +87,7 @@ toolset_setup_common_libs();
 // Set some debug/release specific options
 toolset_setup_build_mode();
 
-if (PHP_ZTS == "yes") {
-	ADD_FLAG("CFLAGS", "/D ZTS=1");
-	ADD_FLAG("ZTS", "1");
-} else {
-	ADD_FLAG("ZTS", "0");
-}
-
-DEFINE("PHP_ZTS_ARCHIVE_POSTFIX", PHP_ZTS == "yes" ? '' : "-nts");
-
-// set up the build dir and DLL name
-if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
-	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug_TS");
-	DEFINE("PHPDLL", "php" + PHP_VERSION + "ts_debug.dll");
-	DEFINE("PHPLIB", "php" + PHP_VERSION + "ts_debug.lib");
-} else if (PHP_DEBUG == "yes" && PHP_ZTS == "no") {
-	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug");
-	DEFINE("PHPDLL", "php" + PHP_VERSION + "_debug.dll");
-	DEFINE("PHPLIB", "php" + PHP_VERSION + "_debug.lib");
-} else if (PHP_DEBUG == "no" && PHP_ZTS == "yes") {
-	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release_TS");
-	DEFINE("PHPDLL", "php" + PHP_VERSION + "ts.dll");
-	DEFINE("PHPLIB", "php" + PHP_VERSION + "ts.lib");
-} else if (PHP_DEBUG == "no" && PHP_ZTS == "no") {
-	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release");
-	DEFINE("PHPDLL", "php" + PHP_VERSION + ".dll");
-	DEFINE("PHPLIB", "php" + PHP_VERSION + ".lib");
-}
+setup_zts_stuff();
 
 // CFLAGS, LDFLAGS and BUILD_DIR are defined
 // Add compiler and link flags if PGO options are selected

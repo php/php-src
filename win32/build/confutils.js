@@ -2640,3 +2640,42 @@ function object_out_dir_option_handle()
 	}
 }
 
+function setup_zts_stuff()
+{
+	if (PHP_ZTS == "yes") {
+		ADD_FLAG("CFLAGS", "/D ZTS=1");
+		ADD_FLAG("ZTS", "1");
+	} else {
+		ADD_FLAG("ZTS", "0");
+	}
+
+	DEFINE("PHP_ZTS_ARCHIVE_POSTFIX", PHP_ZTS == "yes" ? '' : "-nts");
+
+	// set up the build dir and DLL name
+	if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
+		DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug_TS");
+		if (!MODE_PHPIZE) {
+			DEFINE("PHPDLL", "php" + PHP_VERSION + "ts_debug.dll");
+			DEFINE("PHPLIB", "php" + PHP_VERSION + "ts_debug.lib");
+		}
+	} else if (PHP_DEBUG == "yes" && PHP_ZTS == "no") {
+		DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug");
+		if (!MODE_PHPIZE) {
+			DEFINE("PHPDLL", "php" + PHP_VERSION + "_debug.dll");
+			DEFINE("PHPLIB", "php" + PHP_VERSION + "_debug.lib");
+		}
+	} else if (PHP_DEBUG == "no" && PHP_ZTS == "yes") {
+		DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release_TS");
+		if (!MODE_PHPIZE) {
+			DEFINE("PHPDLL", "php" + PHP_VERSION + "ts.dll");
+			DEFINE("PHPLIB", "php" + PHP_VERSION + "ts.lib");
+		}
+	} else if (PHP_DEBUG == "no" && PHP_ZTS == "no") {
+		DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release");
+		if (!MODE_PHPIZE) {
+			DEFINE("PHPDLL", "php" + PHP_VERSION + ".dll");
+			DEFINE("PHPLIB", "php" + PHP_VERSION + ".lib");
+		}
+	}
+}
+
