@@ -35,7 +35,11 @@ foreach ( $variation_array as $var ) {
 *** Test substituting argument 1 with float values ***
 bool(false)
 bool(false)
+
+Warning: posix_setgid() expects parameter 1 to be long, double given in %s on line %d
 bool(false)
+
+Warning: posix_setgid() expects parameter 1 to be long, double given in %s on line %d
 bool(false)
 bool(false)
 ===DONE===

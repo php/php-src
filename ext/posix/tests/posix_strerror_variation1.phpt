@@ -88,7 +88,9 @@ Arg value -10.5
 string
 
 Arg value 101234567000 
-string
+
+Warning: posix_strerror() expects parameter 1 to be long, double given in %s on line %d
+boolean
 
 Arg value 1.07654321E-9 
 string

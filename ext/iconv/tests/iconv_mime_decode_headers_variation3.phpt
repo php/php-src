@@ -237,23 +237,9 @@ array(5) {
 }
 
 -- Iteration 7 --
-array(5) {
-  ["Subject"]=>
-  string(13) "A Sample Test"
-  ["To"]=>
-  string(19) "example@example.com"
-  ["Date"]=>
-  string(30) "Thu, 1 Jan 1970 00:00:00 +0000"
-  ["Message-Id"]=>
-  string(21) "<example@example.com>"
-  ["Received"]=>
-  array(2) {
-    [0]=>
-    string(204) "from localhost (localhost [127.0.0.1]) by localhost with SMTP id example for <example@example.com>; Thu, 1 Jan 1970 00:00:00 +0000 (UTC) (envelope-from example-return-0000-example=example.com@example.com)"
-    [1]=>
-    string(57) "(qmail 0 invoked by uid 65534); 1 Thu 2003 00:00:00 +0000"
-  }
-}
+
+Warning: iconv_mime_decode_headers() expects parameter 2 to be long, double given in %s on line %d
+bool(false)
 
 -- Iteration 8 --
 array(5) {
