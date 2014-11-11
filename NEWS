@@ -24,9 +24,9 @@ PHP                                                                        NEWS
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames 
     and passwords) (Tjerk)
 
-- phpdbg:
-  . Added XML protocol (-x command line flag). (Bob)
-  . Added hard interruptions (twice SIGINT). (Bob)
+- CURL:
+  . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
+    CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
 
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
@@ -49,35 +49,39 @@ PHP                                                                        NEWS
   . Fixed bug #63595 (GMP memory management conflicts with other libraries
     using GMP). (Remi)
 
-- Reflection:
-  . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
+- Mysqli:
+  . Fixed bug #68114 (linker error on some OS X machines with fixed width
+    decimal support) (Keyur Govande)
 
 - OpenSSL:
   . Fixed bug #68074 (Allow to use system cipher list instead of hardcoded
     value). (Remi)
 
-- Mysqli:
-  . Fixed bug #68114 (linker error on some OS X machines with fixed width
-    decimal support) (Keyur Govande)
-
 - ODBC:
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
+
+- phpdbg:
+  . Added XML protocol (-x command line flag). (Bob)
+  . Added hard interruptions (twice SIGINT). (Bob)
+
+- PDO_pgsql:
+  . Fixed bug #68199 (PDO::pgsqlGetNotify doesn't support NOTIFY payloads)
+    (Matteo, Alain Laporte)
+
+- Reflection:
+  . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
 
 - Session:
   . Fixed bug #68331 (Session custom storage callable functions not being called) 
     (Yasuo Ohgaki)
 
+- SOAP:
+  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
+    (Laruence)
+
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
-
-- CURL:
-  . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
-    CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
-
-- PDO_pgsql:
-  . Fixed bug #68199 (PDO::pgsqlGetNotify doesn't support NOTIFY payloads)
-    (Matteo, Alain Laporte)
 
 16 Oct 2014, PHP 5.6.2
 
