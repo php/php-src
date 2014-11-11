@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.20
 
+- Core:
+  . Fixed bug #68365 (zend_mm_heap corrupted after memory overflow in
+    zend_hash_copy). (Dmitry)
 
 ?? ??? 2014, PHP 5.5.19
 
