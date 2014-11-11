@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ???, PHP 5.4.35
 
+- Core:
+  . Fixed bug #68365 (zend_mm_heap corrupted after memory overflow in
+    zend_hash_copy). (Dmitry)
+
 - Fileinfo:
   . Fixed bug #68283 (fileinfo: out-of-bounds read in elf note headers).
     (CVE-2014-3710) (Remi)
