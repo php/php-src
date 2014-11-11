@@ -73,32 +73,32 @@ int(%d)
 int(-%d)
 int(-%d)
 
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+NULL
+NULL
+NULL
+NULL
 
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
 
-bool(false)
-bool(false)
+NULL
+NULL
 
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
 
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL

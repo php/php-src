@@ -428,7 +428,7 @@ PHP_FUNCTION(to_int)
 	zval *var;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 	
 	switch (Z_TYPE_P(var)) {
@@ -439,19 +439,19 @@ PHP_FUNCTION(to_int)
 				
 				/* ban leading whitespace */
 				if (isspace(Z_STRVAL_P(var)[0])) {
-					RETURN_FALSE;
+					RETURN_NULL();
 				}
 
 				errno = 0;
 				lval = ZEND_STRTOL(Z_STRVAL_P(var), &endptr, 10);
 				
 				if (errno) {
-					RETURN_FALSE;
+					RETURN_NULL();
 				}
 				
 				/* ban trailing chars */
 				if (endptr - Z_STRVAL_P(var) != Z_STRLEN_P(var)) {
-					RETURN_FALSE;
+					RETURN_NULL();
 				}
 
 				RETURN_LONG(lval);
@@ -464,14 +464,14 @@ PHP_FUNCTION(to_int)
 				 */
 				RETURN_LONG((zend_long)Z_DVAL_P(var));
 			} else {
-				RETURN_FALSE;
+				RETURN_NULL();
 			}
 
 		case IS_LONG:
 			RETURN_LONG(Z_LVAL_P(var));
 
 		default:
-			RETURN_FALSE;
+			RETURN_NULL();
 	}
 }
 /* }}} */
@@ -483,7 +483,7 @@ PHP_FUNCTION(to_float)
 	zval *var;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 	
 	switch (Z_TYPE_P(var)) {
@@ -494,14 +494,14 @@ PHP_FUNCTION(to_float)
 			
 				/* ban leading whitespace */
 				if (isspace(Z_STRVAL_P(var)[0])) {
-					RETURN_FALSE;
+					RETURN_NULL();
 				}
 
 				dval = zend_strtod(Z_STRVAL_P(var), &endptr);
 				
 				/* ban trailing chars */
 				if (endptr - Z_STRVAL_P(var) != Z_STRLEN_P(var)) {
-					RETURN_FALSE;
+					RETURN_NULL();
 				}
 				RETURN_DOUBLE(dval);
 			}	
@@ -513,7 +513,7 @@ PHP_FUNCTION(to_float)
 			RETURN_DOUBLE(Z_DVAL_P(var));
 
 		default:
-			RETURN_FALSE;
+			RETURN_NULL();
 	}
 }
 /* }}} */
@@ -524,9 +524,9 @@ PHP_FUNCTION(to_string)
 {
         zval *var;
 
-        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
-                RETURN_FALSE;
-        }
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
+		RETURN_NULL();
+	}
 
 	switch (Z_TYPE_P(var)) {
 		case IS_STRING:
@@ -574,10 +574,10 @@ PHP_FUNCTION(to_string)
 					}
 				}
 			}
-			RETURN_FALSE;
+			RETURN_NULL();
 
 		default:
-			RETURN_FALSE;
+			RETURN_NULL();
 	}
 }
 /* }}} */

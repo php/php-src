@@ -77,23 +77,23 @@ float(-%s)
 float(-%s)
 float(%s)
 
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
 
 float(1.5)
 float(1.5)
 
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+NULL
+NULL
+NULL
+NULL
+NULL
+NULL
 
 float(INF)
 float(-INF)
