@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #68351 (PDO::PARAM_BOOL and ATTR_EMULATE_PREPARES misbehaving)
     (Matteo)
 
+- zlib:
+  . Fixed bug #53829 (Compiling PHP with large file support will replace
+    function gzopen by gzopen64) (Sascha Kettler, Matteo)
+
 13 Nov 2014, PHP 5.5.19
 
 - Core:
