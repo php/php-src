@@ -2708,3 +2708,43 @@ function php_build_option_handle()
 	DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 }
 
+// Poke around for some headers
+function probe_basic_headers()
+{
+	var p;
+
+	if (PHP_PHP_BUILD != "no") {
+		php_usual_include_suspects += ";" + PHP_PHP_BUILD + "\\include";
+		php_usual_lib_suspects += ";" + PHP_PHP_BUILD + "\\lib";
+	}
+}
+
+function add_extra_dirs()
+{
+	var path, i, f;
+
+	if (PHP_EXTRA_INCLUDES.length) {
+		path = PHP_EXTRA_INCLUDES.split(';');
+		for (i = 0; i < path.length; i++) {
+			f = FSO.GetAbsolutePathName(path[i]);
+			if (FSO.FolderExists(f)) {
+				ADD_FLAG("CFLAGS", '/I "' + f + '" ');
+			}
+		}
+	}
+	if (PHP_EXTRA_LIBS.length) {
+		path = PHP_EXTRA_LIBS.split(';');
+		for (i = 0; i < path.length; i++) {
+			f = FSO.GetAbsolutePathName(path[i]);
+			if (FSO.FolderExists(f)) {
+				if (VS_TOOLSET && VCVERS <= 1200 && f.indexOf(" ") >= 0) {
+					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
+				} else {
+					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
+				}
+			}
+		}
+	}
+
+}
+
