@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 
 
 
-?? ??? 2014, PHP 5.6.3
+13 Nov 2014, PHP 5.6.3
 
 - Core:
   . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
