@@ -2717,6 +2717,10 @@ function setup_zts_stuff()
 			DEFINE("PHPLIB", "php" + PHP_VERSION + ".lib");
 		}
 	}
+
+	if (!FSO.FolderExists(get_define('BUILD_DIR'))) {
+		FSO.CreateFolder(get_define('BUILD_DIR'));
+	}
 }
 
 function php_build_option_handle()
