@@ -2,6 +2,19 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.4
 
+- Core:
+  . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
+  . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
+    (Laruence)
+
+- Session:
+  . Fixed bug #68331 (Session custom storage callable functions not being called) 
+    (Yasuo Ohgaki)
+
+- SOAP:
+  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
+    (Laruence)
+
 - zlib:
   . Fixed bug #53829 (Compiling PHP with large file support will replace
     function gzopen by gzopen64) (Sascha Kettler, Matteo)
@@ -9,9 +22,6 @@ PHP                                                                        NEWS
 13 Nov 2014, PHP 5.6.3
 
 - Core:
-  . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
-  . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
-    (Laruence)
   . Implemented 64-bit format codes for pack() and unpack(). (Leigh)
   . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
   . Fixed bug #67633 (A foreach on an array returned from a function not doing
@@ -57,13 +67,13 @@ PHP                                                                        NEWS
   . Fixed bug #68114 (linker error on some OS X machines with fixed width
     decimal support) (Keyur Govande)
 
-- OpenSSL:
-  . Fixed bug #68074 (Allow to use system cipher list instead of hardcoded
-    value). (Remi)
-
 - ODBC:
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
+
+- OpenSSL:
+  . Fixed bug #68074 (Allow to use system cipher list instead of hardcoded
+    value). (Remi)
 
 - phpdbg:
   . Added XML protocol (-x command line flag). (Bob)
@@ -76,14 +86,6 @@ PHP                                                                        NEWS
 
 - Reflection:
   . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
-
-- Session:
-  . Fixed bug #68331 (Session custom storage callable functions not being called) 
-    (Yasuo Ohgaki)
-
-- SOAP:
-  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
-    (Laruence)
 
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
