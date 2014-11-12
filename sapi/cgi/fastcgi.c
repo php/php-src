@@ -436,8 +436,10 @@ int fcgi_init(void)
 			str = getenv("_FCGI_SHUTDOWN_EVENT_");
 			if (str != NULL) {
 				zend_long ev;
+				HANDLE shutdown_event;
+
 				ZEND_ATOL(ev, str);
-				HANDLE shutdown_event = (HANDLE) ev;
+				shutdown_event = (HANDLE) ev;
 				if (!CreateThread(NULL, 0, fcgi_shutdown_thread,
 				                  shutdown_event, 0, NULL)) {
 					return -1;
