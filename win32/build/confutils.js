@@ -1336,6 +1336,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_' + EXT + ')');
 	} else {
 		ADD_FLAG("STATIC_EXT_OBJS", "$(" + EXT + "_GLOBAL_OBJS)");
+		ADD_FLAG("STATIC_EXT_OBJS_RESP", "$(" + EXT + "_GLOBAL_OBJS_RESP)");
 		ADD_FLAG("STATIC_EXT_LIBS", "$(LIBS_" + EXT + ")");
 		ADD_FLAG("STATIC_EXT_LDFLAGS", "$(LDFLAGS_" + EXT + ")");
 		ADD_FLAG("STATIC_EXT_CFLAGS", "$(CFLAGS_" + EXT + ")");
@@ -1394,9 +1395,20 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 	sym = target.toUpperCase() + "_GLOBAL_OBJS";
 	flags = "CFLAGS_" + target.toUpperCase() + '_OBJ';
 
+	var bd = get_define('BUILD_DIR');
+	var respd = bd + '\\resp';
+	if (!FSO.FolderExists(respd)) {
+		FSO.CreateFolder(respd);
+	}
+	var obj_lst_fn = respd + '\\' + sym + '.txt';
+	var resp = "";
+
 	if (configure_subst.Exists(sym)) {
 		tv = configure_subst.Item(sym);
 	} else {
+		if (FSO.FileExists(obj_lst_fn)) {
+			FSO.DeleteFile(obj_lst_fn, true);
+		}
 		tv = "";
 	}
 
@@ -1448,6 +1460,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		src = file_list[i];
 		obj = src.replace(re, ".obj");
 		tv += " " + sub_build + obj;
+		resp += " " + sub_build.replace('$(BUILD_DIR)', bd) + obj;
 
 		if (!PHP_MP_DISABLED) {
 			if (i > 0) {
@@ -1474,6 +1487,21 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 	}
 
 	DEFINE(sym, tv);
+
+	/* Generate the response file and define it to the Makefile. This can be 
+	   useful when getting the "command line too long" linker errors. */
+	var obj_lst_fh = null;
+	if (!FSO.FileExists(obj_lst_fn)) {
+		obj_lst_fh = FSO.CreateTextFile(obj_lst_fn);
+		//STDOUT.WriteLine("Creating " + obj_lst_fn);
+	} else {
+		//STDOUT.WriteLine("Appending to " + obj_lst_fn);
+		obj_lst_fh = FSO.OpenTextFile(obj_lst_fn, 8);
+	}
+
+	obj_lst_fh.Write(" " + resp);
+	obj_lst_fh.Close();
+	DEFINE(sym + "_RESP", '@"' + obj_lst_fn + '"');
 }
 
 function REMOVE_TARGET(dllname, flag)
