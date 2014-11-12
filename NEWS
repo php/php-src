@@ -7,6 +7,12 @@ PHP                                                                        NEWS
   . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
     (Laruence)
 
+- PDO_pgsql:
+  . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
+  when not in transaction) (Matteo)
+  . Fixed bug #68351 (PDO::PARAM_BOOL and ATTR_EMULATE_PREPARES misbehaving)
+  (Matteo)
+
 - phpdbg:
   . Added XML protocol (-x command line flag). (Bob)
   . Added hard interruptions (twice SIGINT). (Bob)
