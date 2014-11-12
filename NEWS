@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-30 Oct 2014, PHP 5.5.19RC1
+13 Nov 2014, PHP 5.5.19
 
 - Core:
   . Fixed bug #68095 (AddressSanitizer reports a heap buffer overflow in 
@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames
     and passwords) (Tjerk)
+    Fixed bug #68365 (zend_mm_heap corrupted after memory overflow in
+    zend_hash_copy). (Dmitry)
 
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
