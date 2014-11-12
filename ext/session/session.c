@@ -538,13 +538,6 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 
 			val = php_session_encode(&vallen TSRMLS_CC);
 			if (val) {
-				PHP_MD5_CTX context;
-				unsigned char digest[16];
-
-				/* Generate data's MD5 hash */
-				PHP_MD5Init(&context);
-				PHP_MD5Update(&context, val, vallen);
-				PHP_MD5Final(digest, &context);
 				ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
 				efree(val);
 			} else {
