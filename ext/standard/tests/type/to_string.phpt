@@ -10,6 +10,7 @@ var_dump(to_string(123.45));
 var_dump(to_string(INF));
 var_dump(to_string(-INF));
 var_dump(to_string(NAN));
+var_dump(to_string(""));
 
 echo PHP_EOL;
 
@@ -41,6 +42,7 @@ string(6) "123.45"
 string(3) "INF"
 string(4) "-INF"
 string(3) "NAN"
+string(0) ""
 
 NULL
 NULL

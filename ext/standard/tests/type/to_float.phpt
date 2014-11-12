@@ -22,6 +22,7 @@ var_dump(to_float((float)PHP_INT_MIN));
 echo PHP_EOL;
 
 // disallowed types
+var_dump(to_float(""));
 var_dump(to_float("0x10"));
 var_dump(to_float(NULL));
 var_dump(to_float(TRUE));
@@ -79,6 +80,7 @@ float(-%s)
 float(-%s)
 float(%s)
 
+NULL
 NULL
 NULL
 NULL

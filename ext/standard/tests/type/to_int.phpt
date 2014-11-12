@@ -19,6 +19,7 @@ var_dump(to_int(PHP_INT_MIN));
 echo PHP_EOL;
 
 // shouldn't pass
+var_dump(to_int(""));
 var_dump(to_int("10.0"));
 var_dump(to_int("75e-5"));
 var_dump(to_int("31e+7"));
@@ -75,6 +76,7 @@ int(%d)
 int(-%d)
 int(-%d)
 
+NULL
 NULL
 NULL
 NULL
