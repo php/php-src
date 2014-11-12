@@ -5,6 +5,13 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
 
+- PDO_pgsql:
+  . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
+  . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
+  when not in transaction) (Matteo)
+  . Fixed bug #68351 (PDO::PARAM_BOOL and ATTR_EMULATE_PREPARES misbehaving)
+  (Matteo)
+
 - zlib:
   . Fixed bug #53829 (Compiling PHP with large file support will replace
     function gzopen by gzopen64) (Sascha Kettler, Matteo)
