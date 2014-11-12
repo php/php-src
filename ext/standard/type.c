@@ -435,10 +435,15 @@ PHP_FUNCTION(to_int)
 		case IS_STRING:
 			{
 				zend_long lval;
-				char *endptr;
+				char c = Z_STRVAL_P(var)[0], *endptr;
 				
-				/* ban leading whitespace */
-				if (isspace(Z_STRVAL_P(var)[0])) {
+				/* special-case zero */
+				if (c == '0' && Z_STRLEN_P(var) == 1) {
+					RETURN_LONG(0);
+				}
+
+				/* bans leading whitespace, + sign */
+				if (!('1' <= c && c <= '9') && c != '-') {
 					RETURN_NULL();
 				}
 
@@ -490,10 +495,15 @@ PHP_FUNCTION(to_float)
 		case IS_STRING:
 			{
 				double dval;
-				char *endptr;
-			
-				/* ban leading whitespace */
-				if (isspace(Z_STRVAL_P(var)[0])) {
+				char c = Z_STRVAL_P(var)[0], *endptr;
+
+				/* special-case zero */
+				if (c == '0' && Z_STRLEN_P(var) == 1) {
+					RETURN_DOUBLE(0);
+				}
+
+				/* bans leading whitespace, + sign */
+				if (!('1' <= c && c <= '9') && c != '-') {
 					RETURN_NULL();
 				}
 

@@ -8,7 +8,7 @@ var_dump(to_int("0"));
 var_dump(to_int(0));
 var_dump(to_int(0.0));
 var_dump(to_int("10"));
-var_dump(to_int("010"));
+var_dump(to_int("-10"));
 var_dump(to_int(10));
 var_dump(to_int(10.0));
 var_dump(to_int((string)PHP_INT_MAX));
@@ -43,6 +43,8 @@ var_dump(to_int("1.5"));
 echo PHP_EOL;
 
 // reject leading, trailing chars
+var_dump(to_int("010"));
+var_dump(to_int("+10"));
 var_dump(to_int("10abc"));
 var_dump(to_int("abc10"));
 var_dump(to_int("   100    "));
@@ -65,7 +67,7 @@ int(0)
 int(0)
 int(0)
 int(10)
-int(10)
+int(-10)
 int(10)
 int(10)
 int(%d)
@@ -88,6 +90,8 @@ NULL
 NULL
 NULL
 
+NULL
+NULL
 NULL
 NULL
 NULL
