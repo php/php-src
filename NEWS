@@ -3,18 +3,18 @@ PHP                                                                        NEWS
 ?? ??? 2014, PHP 5.5.20
 
 - Core:
-  . Fixed bug #68365 (zend_mm_heap corrupted after memory overflow in
-    zend_hash_copy). (Dmitry)
+  . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
 
-?? ??? 2014, PHP 5.5.19
+13 Nov 2014, PHP 5.5.19
 
 - Core:
-  . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
   . Fixed bug #68095 (AddressSanitizer reports a heap buffer overflow in 
     php_getopt()). (Stas)
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames
     and passwords) (Tjerk)
+  . Fixed bug #68365 (zend_mm_heap corrupted after memory overflow in
+    zend_hash_copy). (Dmitry)
 
 - CURL:
   . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
