@@ -56,10 +56,6 @@ PHP                                                                        NEWS
   . Fixed bug #68074 (Allow to use system cipher list instead of hardcoded
     value). (Remi)
 
-- phpdbg:
-  . Added XML protocol (-x command line flag). (Bob)
-  . Added hard interruptions (twice SIGINT). (Bob)
-
 - PDO_pgsql:
   . Fixed bug #68199 (PDO::pgsqlGetNotify doesn't support NOTIFY payloads)
     (Matteo, Alain Laporte)
