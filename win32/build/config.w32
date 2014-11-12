@@ -14,13 +14,7 @@ toolset_setup_compiler();
 
 // do we use x64 or 80x86 version of compiler?
 X64 = toolset_is_64();
-if (X64) {
-	STDOUT.WriteLine("  Detected 64-bit compiler");
-} else {
-	STDOUT.WriteLine("  Detected 32-bit compiler");
-}
-AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
-DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
+toolset_setup_arch();
 
 toolset_setup_linker();
 toolset_setup_project_tools();

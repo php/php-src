@@ -2502,6 +2502,17 @@ function toolset_is_64()
 	ERROR("Unsupported toolset");
 }
 
+function toolset_setup_arch()
+{
+	if (X64) {
+		STDOUT.WriteLine("  Detected 64-bit compiler");
+	} else {
+		STDOUT.WriteLine("  Detected 32-bit compiler");
+	}
+	AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
+	DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
+}
+
 
 function toolset_setup_linker()
 {
