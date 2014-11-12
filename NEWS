@@ -72,6 +72,7 @@ PHP                                                                        NEWS
 - PDO_pgsql:
   . Fixed bug #68199 (PDO::pgsqlGetNotify doesn't support NOTIFY payloads)
     (Matteo, Alain Laporte)
+  . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
 
 - Reflection:
   . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
