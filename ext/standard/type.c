@@ -442,7 +442,7 @@ PHP_FUNCTION(to_int)
 					RETURN_LONG(0);
 				}
 
-				/* bans leading whitespace, + sign */
+				/* bans leading whitespace, + sign, empty string */
 				if (!('1' <= c && c <= '9') && c != '-') {
 					RETURN_NULL();
 				}
@@ -502,7 +502,7 @@ PHP_FUNCTION(to_float)
 					RETURN_DOUBLE(0);
 				}
 
-				/* bans leading whitespace, + sign */
+				/* bans leading whitespace, + sign, empty string */
 				if (!('1' <= c && c <= '9') && c != '-') {
 					RETURN_NULL();
 				}
