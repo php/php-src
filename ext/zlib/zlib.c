@@ -34,6 +34,18 @@
 #include "ext/standard/php_string.h"
 #include "php_zlib.h"
 
+/*
+ * zlib include files can define the following preprocessor defines which rename
+ * the corresponding PHP functions to gzopen64, gzseek64 and gztell64 and thereby
+ * breaking some software, most notably PEAR's Archive_Tar, which halts execution
+ * without error message on gzip compressed archivesa.
+ *
+ * This only seems to happen on 32bit systems with large file support.
+ */
+#undef gzopen
+#undef gzseek
+#undef gztell
+
 ZEND_DECLARE_MODULE_GLOBALS(zlib);
 
 /* {{{ Memory management wrappers */
