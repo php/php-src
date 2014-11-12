@@ -2066,6 +2066,7 @@ function ADD_FLAG(name, flags, target)
 	if (target != null) {
 		name = target.toUpperCase() + "_" + name;
 	}
+	flags = flags.replace(/^\s+/, "").replace(/\s+$/, "");
 	if (configure_subst.Exists(name)) {
 		var curr_flags = configure_subst.Item(name);
 
