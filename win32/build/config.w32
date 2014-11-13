@@ -146,7 +146,7 @@ ADD_SOURCES("win32", "inet.c fnmatch.c sockets.c");
 if (VS_TOOLSET && VCVERS <= 1300) {
 	ADD_SOURCES("win32", "strtoi64.c");
 }
-if (VS_TOOLSET && VCVERS >= 1400 || ICC_TOOLSET) {
+if (VS_TOOLSET && VCVERS >= 1400 || !VS_TOOLSET) {
 	AC_DEFINE('HAVE_STRNLEN', 1);
 }
 
