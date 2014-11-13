@@ -2604,6 +2604,9 @@ function toolset_setup_common_cflags()
 			ADD_FLAG('CFLAGS', '-m32');
 		}
 		ADD_FLAG("CFLAGS", " /fallback ");
+
+		var vc_ver = probe_binary(PATH_PROG('cl', null));
+		ADD_FLAG("CFLAGS", "-fms-compatibility-version=" + vc_ver);
 	}
 }
 
