@@ -39,8 +39,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 	HashPosition pos;
 	int keytype;
 	zend_string *strindex;
-	zend_long intindex = -1;
-	zend_long max_index = 0;
+	zend_ulong intindex = 0;
 	VARIANT *va;
 	zval *item;
 		
@@ -54,15 +53,15 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 			goto bogus;
 		} else if (HASH_KEY_NON_EXISTENT == keytype) {
 			break;
-		}
-		if (intindex > max_index) {
-			max_index = intindex;
+		} else if (intindex > UINT_MAX) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "COM: max number %u of elements in safe array exceeded", UINT_MAX);
+			break;
 		}
 	}
 
 	/* allocate the structure */	
 	bound.lLbound = 0;
-	bound.cElements = (ULONG)(intindex + 1);
+	bound.cElements = zend_hash_num_elements(HASH_OF(z));
 	sa = SafeArrayCreate(VT_VARIANT, 1, &bound);
 
 	/* get a lock on the array itself */
