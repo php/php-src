@@ -2480,37 +2480,47 @@ const zend_function_entry pdo_row_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static zval *row_prop_read(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC)
+static zend_always_inline zval *row_prop_read_impl(zval *object, zval *member, int type, void **cache_slot, zval *rv, int dim_access TSRMLS_DC)
 {
 	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
 	pdo_stmt_t *stmt = row->stmt;
 	int colno = -1;
 	zval zobj;
+	zend_long lval;
 
 	ZVAL_NULL(rv);
 	if (stmt) {
-		if (Z_TYPE_P(member) == IS_LONG) {
-			if (Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count) {
-				fetch_value(stmt, rv, Z_LVAL_P(member), NULL TSRMLS_CC);
-			}
-		} else {
-			convert_to_string(member);
-			/* TODO: replace this with a hash of available column names to column
-			 * numbers */
-			for (colno = 0; colno < stmt->column_count; colno++) {
-				if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
-					fetch_value(stmt, rv, colno, NULL TSRMLS_CC);
-					//???
-					//Z_SET_REFCOUNT_P(rv, 0);
-					//Z_UNSET_ISREF_P(rv);
-					return rv;
+		if (dim_access) {
+			if (Z_TYPE_P(member) == IS_LONG) {
+				if (Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count) {
+					fetch_value(stmt, rv, Z_LVAL_P(member), NULL TSRMLS_CC);
 				}
+				return rv;
 			}
-			if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
-				ZVAL_OBJ(&zobj, &stmt->std);
-				//zval_ptr_dtor(rv);
-				return std_object_handlers.read_property(&zobj, member, type, cache_slot, rv TSRMLS_CC);
+			convert_to_string(member);
+		} else {
+			if (is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0, NULL) == IS_LONG) {
+				if (lval >= 0 && lval < stmt->column_count) {
+					fetch_value(stmt, rv, lval, NULL TSRMLS_CC);
+				}
+				return rv;
 			}
+		}	
+		/* TODO: replace this with a hash of available column names to column
+		 * numbers */
+		for (colno = 0; colno < stmt->column_count; colno++) {
+			if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
+				fetch_value(stmt, rv, colno, NULL TSRMLS_CC);
+				//???
+				//Z_SET_REFCOUNT_P(rv, 0);
+				//Z_UNSET_ISREF_P(rv);
+				return rv;
+			}
+		}
+		if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
+			ZVAL_OBJ(&zobj, &stmt->std);
+			//zval_ptr_dtor(rv);
+			return std_object_handlers.read_property(&zobj, member, type, cache_slot, rv TSRMLS_CC);
 		}
 	}
 
@@ -2521,9 +2531,50 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 	return rv;
 }
 
+static zend_always_inline int row_prop_exists_impl(zval *object, zval *member, int check_empty, void **cache_slot, int dim_access TSRMLS_DC)
+{
+	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
+	pdo_stmt_t *stmt = row->stmt;
+	int colno = -1;
+	zend_long lval;
+
+	if (stmt) {
+		if (dim_access) {
+			if (Z_TYPE_P(member) == IS_LONG) {
+				return Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count;
+			}
+			convert_to_string(member);
+		} else {
+			if (is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0, NULL) == IS_LONG) {
+				return lval >= 0 && lval < stmt->column_count;
+			}
+		}
+
+		/* TODO: replace this with a hash of available column names to column
+		 * numbers */
+		for (colno = 0; colno < stmt->column_count; colno++) {
+			if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
+static zval *row_prop_read(zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC)
+{
+	return row_prop_read_impl(object, member, type, cache_slot, rv, 0 TSRMLS_CC);
+}
+
+static int row_prop_exists(zval *object, zval *member, int check_empty, void **cache_slot TSRMLS_DC)
+{
+	return row_prop_exists_impl(object, member, check_empty, cache_slot, 0 TSRMLS_CC);
+}
+
 static zval *row_dim_read(zval *object, zval *member, int type, zval *rv TSRMLS_DC)
 {
-	return row_prop_read(object, member, type, NULL, rv TSRMLS_CC);
+	return row_prop_read_impl(object, member, type, NULL, rv, 1 TSRMLS_CC);
 }
 
 static void row_prop_write(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
@@ -2536,34 +2587,9 @@ static void row_dim_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "This PDORow is not from a writable result set");
 }
 
-static int row_prop_exists(zval *object, zval *member, int check_empty, void **cache_slot TSRMLS_DC)
-{
-	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
-	pdo_stmt_t *stmt = row->stmt;
-	int colno = -1;
-
-	if (stmt) {
-		if (Z_TYPE_P(member) == IS_LONG) {
-			return Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count;
-		} else {
-			convert_to_string(member);
-
-			/* TODO: replace this with a hash of available column names to column
-			 * numbers */
-			for (colno = 0; colno < stmt->column_count; colno++) {
-				if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
-					return 1;
-				}
-			}
-		}
-	}
-
-	return 0;
-}
-
 static int row_dim_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
 {
-	return row_prop_exists(object, member, check_empty, NULL TSRMLS_CC);
+	return row_prop_exists_impl(object, member, check_empty, NULL, 1 TSRMLS_CC);
 }
 
 static void row_prop_delete(zval *object, zval *offset, void **cache_slot TSRMLS_DC)
