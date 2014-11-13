@@ -39,6 +39,14 @@ include $filename;
 
 echo "Done\n";
 ?>
+--CLEAN--
+<?php
+
+$filename = dirname(__FILE__)."/bug38779.txt";
+if (file_exists($filename)) {
+	@unlink(dirname(__FILE__)."/bug38779.txt");
+}
+?>
 --EXPECTF--	
 Parse error: %s error%sin %s on line %d
 string(6) "flush!"

@@ -395,10 +395,10 @@ stderr_last_error(char *msg)
 			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			(LPSTR)&buf,
 		0, NULL)) {
-		fprintf(stderr, "\n%s: [0x%08x]\n", msg, err);
+		fprintf(stderr, "\n%s: [0x%08lx]\n", msg, err);
 	}
 	else {
-		fprintf(stderr, "\n%s: [0x%08x] %s\n", msg, err, buf);
+		fprintf(stderr, "\n%s: [0x%08lx] %s\n", msg, err, buf);
 	}
 }
 #endif

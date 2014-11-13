@@ -1120,17 +1120,17 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 
 	if (MODE_PHPIZE) {
 		if (ld) {
-			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS) $(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
+			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 		} else {
 			ld = '@"$(LINK)"';
-			MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS) $(PHPLIB) $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
+			MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(PHPLIB) $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
 		}
 	} else {
 		if (ld) {
-			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
+			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 		} else {
 			ld = '@"$(LINK)"';
-			MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
+			MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
 		}
 	}
 
@@ -1316,10 +1316,10 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		MFO.WriteBlankLines(1);
 		if (MODE_PHPIZE) {
 			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(PHPLIB) $(BUILD_DIR)\\" + resname);
-			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS) $(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
+			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS_RESP) $(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		} else {
 			MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(DEPS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
-			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + dllname + ldflags + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
+			MFO.WriteLine("\t" + ld + " $(" + EXT + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + dllname + ldflags + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ")");
 		}
 		MFO.WriteLine("\t-@$(_VC_MANIFEST_EMBED_DLL)");
 		MFO.WriteBlankLines(1);
@@ -1336,6 +1336,7 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_' + EXT + ')');
 	} else {
 		ADD_FLAG("STATIC_EXT_OBJS", "$(" + EXT + "_GLOBAL_OBJS)");
+		ADD_FLAG("STATIC_EXT_OBJS_RESP", "$(" + EXT + "_GLOBAL_OBJS_RESP)");
 		ADD_FLAG("STATIC_EXT_LIBS", "$(LIBS_" + EXT + ")");
 		ADD_FLAG("STATIC_EXT_LDFLAGS", "$(LDFLAGS_" + EXT + ")");
 		ADD_FLAG("STATIC_EXT_CFLAGS", "$(CFLAGS_" + EXT + ")");
@@ -1394,9 +1395,20 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 	sym = target.toUpperCase() + "_GLOBAL_OBJS";
 	flags = "CFLAGS_" + target.toUpperCase() + '_OBJ';
 
+	var bd = get_define('BUILD_DIR');
+	var respd = bd + '\\resp';
+	if (!FSO.FolderExists(respd)) {
+		FSO.CreateFolder(respd);
+	}
+	var obj_lst_fn = respd + '\\' + sym + '.txt';
+	var resp = "";
+
 	if (configure_subst.Exists(sym)) {
 		tv = configure_subst.Item(sym);
 	} else {
+		if (FSO.FileExists(obj_lst_fn)) {
+			FSO.DeleteFile(obj_lst_fn, true);
+		}
 		tv = "";
 	}
 
@@ -1448,6 +1460,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 		src = file_list[i];
 		obj = src.replace(re, ".obj");
 		tv += " " + sub_build + obj;
+		resp += " " + sub_build.replace('$(BUILD_DIR)', bd) + obj;
 
 		if (!PHP_MP_DISABLED) {
 			if (i > 0) {
@@ -1474,6 +1487,21 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 	}
 
 	DEFINE(sym, tv);
+
+	/* Generate the response file and define it to the Makefile. This can be 
+	   useful when getting the "command line too long" linker errors. */
+	var obj_lst_fh = null;
+	if (!FSO.FileExists(obj_lst_fn)) {
+		obj_lst_fh = FSO.CreateTextFile(obj_lst_fn);
+		//STDOUT.WriteLine("Creating " + obj_lst_fn);
+	} else {
+		//STDOUT.WriteLine("Appending to " + obj_lst_fn);
+		obj_lst_fh = FSO.OpenTextFile(obj_lst_fn, 8);
+	}
+
+	obj_lst_fh.Write(" " + resp);
+	obj_lst_fh.Close();
+	DEFINE(sym + "_RESP", '@"' + obj_lst_fn + '"');
 }
 
 function REMOVE_TARGET(dllname, flag)
@@ -2038,6 +2066,7 @@ function ADD_FLAG(name, flags, target)
 	if (target != null) {
 		name = target.toUpperCase() + "_" + name;
 	}
+	flags = flags.replace(/^\s+/, "").replace(/\s+$/, "");
 	if (configure_subst.Exists(name)) {
 		var curr_flags = configure_subst.Item(name);
 
@@ -2502,6 +2531,17 @@ function toolset_is_64()
 	ERROR("Unsupported toolset");
 }
 
+function toolset_setup_arch()
+{
+	if (X64) {
+		STDOUT.WriteLine("  Detected 64-bit compiler");
+	} else {
+		STDOUT.WriteLine("  Detected 32-bit compiler");
+	}
+	AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
+	DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
+}
+
 
 function toolset_setup_linker()
 {
@@ -2638,5 +2678,117 @@ function object_out_dir_option_handle()
 			}
 		}
 	}
+}
+
+function setup_zts_stuff()
+{
+	if (PHP_ZTS == "yes") {
+		ADD_FLAG("CFLAGS", "/D ZTS=1");
+		ADD_FLAG("ZTS", "1");
+	} else {
+		ADD_FLAG("ZTS", "0");
+	}
+
+	DEFINE("PHP_ZTS_ARCHIVE_POSTFIX", PHP_ZTS == "yes" ? '' : "-nts");
+
+	// set up the build dir and DLL name
+	if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
+		DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug_TS");
+		if (!MODE_PHPIZE) {
+			DEFINE("PHPDLL", "php" + PHP_VERSION + "ts_debug.dll");
+			DEFINE("PHPLIB", "php" + PHP_VERSION + "ts_debug.lib");
+		}
+	} else if (PHP_DEBUG == "yes" && PHP_ZTS == "no") {
+		DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug");
+		if (!MODE_PHPIZE) {
+			DEFINE("PHPDLL", "php" + PHP_VERSION + "_debug.dll");
+			DEFINE("PHPLIB", "php" + PHP_VERSION + "_debug.lib");
+		}
+	} else if (PHP_DEBUG == "no" && PHP_ZTS == "yes") {
+		DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release_TS");
+		if (!MODE_PHPIZE) {
+			DEFINE("PHPDLL", "php" + PHP_VERSION + "ts.dll");
+			DEFINE("PHPLIB", "php" + PHP_VERSION + "ts.lib");
+		}
+	} else if (PHP_DEBUG == "no" && PHP_ZTS == "no") {
+		DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release");
+		if (!MODE_PHPIZE) {
+			DEFINE("PHPDLL", "php" + PHP_VERSION + ".dll");
+			DEFINE("PHPLIB", "php" + PHP_VERSION + ".lib");
+		}
+	}
+
+	if (!FSO.FolderExists(get_define('BUILD_DIR'))) {
+		FSO.CreateFolder(get_define('BUILD_DIR'));
+	}
+}
+
+function php_build_option_handle()
+{
+	if (PHP_PHP_BUILD == 'no') {
+		if (FSO.FolderExists("..\\deps")) {
+			PHP_PHP_BUILD = "..\\deps";
+		} else {
+			if (FSO.FolderExists("..\\php_build")) {
+				PHP_PHP_BUILD = "..\\php_build";
+			} else {
+				if (X64) {
+					if (FSO.FolderExists("..\\win64build")) {
+						PHP_PHP_BUILD = "..\\win64build";
+					} else if (FSO.FolderExists("..\\php-win64-dev\\php_build")) {
+						PHP_PHP_BUILD = "..\\php-win64-dev\\php_build";
+					}
+				} else {
+					if (FSO.FolderExists("..\\win32build")) {
+						PHP_PHP_BUILD = "..\\win32build";
+					} else if (FSO.FolderExists("..\\php-win32-dev\\php_build")) {
+						PHP_PHP_BUILD = "..\\php-win32-dev\\php_build";
+					}
+				}
+			}
+		}
+		PHP_PHP_BUILD = FSO.GetAbsolutePathName(PHP_PHP_BUILD);
+	}
+	DEFINE("PHP_BUILD", PHP_PHP_BUILD);
+}
+
+// Poke around for some headers
+function probe_basic_headers()
+{
+	var p;
+
+	if (PHP_PHP_BUILD != "no") {
+		php_usual_include_suspects += ";" + PHP_PHP_BUILD + "\\include";
+		php_usual_lib_suspects += ";" + PHP_PHP_BUILD + "\\lib";
+	}
+}
+
+function add_extra_dirs()
+{
+	var path, i, f;
+
+	if (PHP_EXTRA_INCLUDES.length) {
+		path = PHP_EXTRA_INCLUDES.split(';');
+		for (i = 0; i < path.length; i++) {
+			f = FSO.GetAbsolutePathName(path[i]);
+			if (FSO.FolderExists(f)) {
+				ADD_FLAG("CFLAGS", '/I "' + f + '" ');
+			}
+		}
+	}
+	if (PHP_EXTRA_LIBS.length) {
+		path = PHP_EXTRA_LIBS.split(';');
+		for (i = 0; i < path.length; i++) {
+			f = FSO.GetAbsolutePathName(path[i]);
+			if (FSO.FolderExists(f)) {
+				if (VS_TOOLSET && VCVERS <= 1200 && f.indexOf(" ") >= 0) {
+					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
+				} else {
+					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
+				}
+			}
+		}
+	}
+
 }
 
