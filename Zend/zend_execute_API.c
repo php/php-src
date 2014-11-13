@@ -51,8 +51,8 @@ static WNDCLASS wc;
 static HWND timeout_window;
 static HANDLE timeout_thread_event;
 static HANDLE timeout_thread_handle;
-static DWORD timeout_thread_id;
-static int timeout_thread_initialized=0;
+static unsigned timeout_thread_id;
+static volatile long timeout_thread_initialized=0;
 #endif
 
 #if 0&&ZEND_DEBUG
