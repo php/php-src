@@ -16544,12 +16544,11 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		ZVAL_COPY_VALUE(arg, varptr);
 	} else if (IS_VAR == IS_VAR &&
 		UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
-		ZVAL_COPY_VALUE(arg, varptr);
-		ZVAL_MAKE_REF(arg);
+		ZVAL_NEW_REF(arg, varptr);
 	} else {
-		ZVAL_MAKE_REF(varptr);
-		Z_ADDREF_P(varptr);
-		ZVAL_REF(arg, Z_REF_P(varptr));
+		ZVAL_NEW_REF(arg, varptr);
+		Z_ADDREF_P(arg);
+		ZVAL_REF(varptr, Z_REF_P(arg));
 	}
 
 	if (free_op1.var) {zval_ptr_dtor_nogc(free_op1.var);};
@@ -34339,12 +34338,11 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		ZVAL_COPY_VALUE(arg, varptr);
 	} else if (IS_CV == IS_VAR &&
 		UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
-		ZVAL_COPY_VALUE(arg, varptr);
-		ZVAL_MAKE_REF(arg);
+		ZVAL_NEW_REF(arg, varptr);
 	} else {
-		ZVAL_MAKE_REF(varptr);
-		Z_ADDREF_P(varptr);
-		ZVAL_REF(arg, Z_REF_P(varptr));
+		ZVAL_NEW_REF(arg, varptr);
+		Z_ADDREF_P(arg);
+		ZVAL_REF(varptr, Z_REF_P(arg));
 	}
 
 	ZEND_VM_NEXT_OPCODE();

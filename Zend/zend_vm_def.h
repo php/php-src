@@ -3124,12 +3124,11 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 		ZVAL_COPY_VALUE(arg, varptr);
 	} else if (OP1_TYPE == IS_VAR &&
 		UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
-		ZVAL_COPY_VALUE(arg, varptr);
-		ZVAL_MAKE_REF(arg);
+		ZVAL_NEW_REF(arg, varptr);
 	} else {
-		ZVAL_MAKE_REF(varptr);
-		Z_ADDREF_P(varptr);
-		ZVAL_REF(arg, Z_REF_P(varptr));
+		ZVAL_NEW_REF(arg, varptr);
+		Z_ADDREF_P(arg);
+		ZVAL_REF(varptr, Z_REF_P(arg));
 	}
 
 	FREE_OP1_VAR_PTR();
