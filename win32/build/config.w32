@@ -242,7 +242,8 @@ if (PHP_ANALYZER == "vs") {
 if (CLANG_TOOLSET) {
 	ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
 	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
-		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces -Wno-msvc-include -Wno-invalid-source-encoding");
+		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces \
+		-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas");
 	}
 }
 
