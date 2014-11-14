@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
     (Laruence)
 
+GMP:
+  . Fixed bug #68419 (build error with gmp 4.1). (Remi)
+
 - PDO_pgsql:
   . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
   when not in transaction) (Matteo)
