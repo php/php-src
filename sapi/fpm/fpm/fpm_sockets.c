@@ -85,13 +85,24 @@ static void *fpm_get_in_addr(struct sockaddr *sa) /* {{{ */
 }
 /* }}} */
 
+static int fpm_get_in_port(struct sockaddr *sa) /* {{{ */
+{
+    if (sa->sa_family == AF_INET) {
+        return ntohs(((struct sockaddr_in*)sa)->sin_port);
+    }
+
+    return ntohs(((struct sockaddr_in6*)sa)->sin6_port);
+}
+/* }}} */
+
 static int fpm_sockets_hash_op(int sock, struct sockaddr *sa, char *key, int type, int op) /* {{{ */
 {
 	if (key == NULL) {
 		switch (type) {
 			case FPM_AF_INET : {
-				key = alloca(INET6_ADDRSTRLEN);
-				inet_ntop(sa->sa_family, fpm_get_in_addr(sa), key, sizeof key);
+				key = alloca(INET6_ADDRSTRLEN+10);
+				inet_ntop(sa->sa_family, fpm_get_in_addr(sa), key, INET6_ADDRSTRLEN);
+				sprintf(key+strlen(key), ":%d", fpm_get_in_port(sa));
 				break;
 			}
 
@@ -246,7 +257,7 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 	char *addr = NULL;
 	int addr_len;
 	int port = 0;
-	int sock;
+	int sock = -1;
 	int status;
 
 	if (port_str) { /* this is host:port pair */
