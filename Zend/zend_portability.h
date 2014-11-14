@@ -394,6 +394,7 @@ char *alloca();
 #define ZEND_SECURE_ZERO(var, size) memset((var), 0, (size))
 #endif
 
+/* This check should only be used on network socket, not file descriptors */
 #ifdef ZEND_WIN32
 #define ZEND_VALID_SOCKET(sock) (INVALID_SOCKET != (sock))
 #else
