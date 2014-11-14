@@ -3057,8 +3057,12 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_callable,														arginfo_is_callable)
 
 	PHP_FE(to_int,															arginfo_to_int)
+	PHP_FE(try_int,															arginfo_to_int)
 	PHP_FE(to_float,														arginfo_to_float)
+	PHP_FE(try_float,														arginfo_to_float)
 	PHP_FE(to_string,														arginfo_to_string)
+	PHP_FE(try_string,														arginfo_to_string)
+
 
 	/* functions from file.c */
 	PHP_FE(pclose,															arginfo_pclose)
@@ -3629,6 +3633,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(standard_filters)
 	BASIC_MINIT_SUBMODULE(user_filters)
 	BASIC_MINIT_SUBMODULE(password)
+	BASIC_MINIT_SUBMODULE(type)
 
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 	BASIC_MINIT_SUBMODULE(localeconv)

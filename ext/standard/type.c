@@ -21,6 +21,17 @@
 #include "php.h"
 #include "php_incomplete_class.h"
 #include "zend_operators.h"
+#include "ext/spl/spl_exceptions.h"
+
+PHPAPI zend_class_entry *php_CastException_ce;
+
+PHP_MINIT_FUNCTION(type) /* {{{ */
+{
+	zend_class_entry ce;
+
+	INIT_CLASS_ENTRY_EX(ce, "CastException", sizeof("CastException") - 1, NULL);
+	php_CastException_ce = zend_register_internal_class_ex(&ce, spl_ce_RuntimeException TSRMLS_CC);
+}
 
 /* {{{ proto string gettype(mixed var)
    Returns the type of the variable */
@@ -479,7 +490,7 @@ static zend_always_inline zend_bool safe_cast_to_int(zval *var, zval *out)
 /* }}} */
 
 /* {{{ proto int to_int(mixed from)
-   Strictly convert the given value to an integer. */
+   Strictly convert the given value to an integer, throwing an exception on failure. */
 PHP_FUNCTION(to_int)
 {
 	zval *var;
@@ -487,7 +498,23 @@ PHP_FUNCTION(to_int)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
 		RETURN_NULL();
 	}
-	
+
+	if (!safe_cast_to_int(var, return_value)) {
+		zend_throw_exception(php_CastException_ce, "Value could not be converted to int", 0 TSRMLS_CC);
+	}
+}
+/* }}} */
+
+/* {{{ proto int try_int(mixed from)
+   Strictly convert the given value to an integer, returning NULL on failure. */
+PHP_FUNCTION(try_int)
+{
+	zval *var;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
+		RETURN_NULL();
+	}
+
 	if (!safe_cast_to_int(var, return_value)) {
 		RETURN_NULL();
 	}
@@ -539,9 +566,25 @@ static zend_always_inline zend_bool safe_cast_to_float(zval *var, zval *out)
 }
 /* }}} */
 
-/* {{{ proto float to_float(mixed from) 
-   Strictly convert the given value to a float. */
+/* {{{ proto float to_float(mixed from)
+   Strictly convert the given value to a float, throwing an exception on failure. */
 PHP_FUNCTION(to_float)
+{
+	zval *var;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	if (!safe_cast_to_float(var, return_value)) {
+		zend_throw_exception(php_CastException_ce, "Value could not be converted to float", 0 TSRMLS_CC);
+	}
+}
+/* }}} */
+
+/* {{{ proto float try_float(mixed from) 
+   Strictly convert the given value to a float, returning NULL on failure. */
+PHP_FUNCTION(try_float)
 {
 	zval *var;
 
@@ -597,8 +640,24 @@ static zend_always_inline zend_bool safe_cast_to_string(zval *var, zval *out TSR
 }
 
 /* {{{ proto string to_string(mixed from)
-   Strictly convert the given value to a string. */
+   Strictly convert the given value to a string, throwing an exception on failure. */
 PHP_FUNCTION(to_string)
+{
+	zval *var;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	if (!safe_cast_to_string(var, return_value TSRMLS_CC)) {
+		zend_throw_exception(php_CastException_ce, "Value could not be converted to string", 0 TSRMLS_CC);
+	}
+}
+/* }}} */
+
+/* {{{ proto string try_string(mixed from)
+   Strictly convert the given value to a string, returning NULL on failure. */
+PHP_FUNCTION(try_string)
 {
 	zval *var;
 

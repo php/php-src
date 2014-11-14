@@ -21,6 +21,8 @@
 #ifndef PHP_TYPE_H
 #define PHP_TYPE_H
 
+extern PHPAPI zend_class_entry *php_CastException_ce; 
+
 PHP_FUNCTION(intval);
 PHP_FUNCTION(floatval);
 PHP_FUNCTION(strval);
@@ -39,7 +41,10 @@ PHP_FUNCTION(is_object);
 PHP_FUNCTION(is_scalar);
 PHP_FUNCTION(is_callable);
 PHP_FUNCTION(to_int);
+PHP_FUNCTION(try_int);
 PHP_FUNCTION(to_float);
+PHP_FUNCTION(try_float);
 PHP_FUNCTION(to_string);
+PHP_FUNCTION(try_string);
 
 #endif
