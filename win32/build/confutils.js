@@ -1999,8 +1999,9 @@ function generate_makefile()
 		// that is part of the build dir flags (CFLAGS_BD_XXX) from being
 		// seen as a line continuation character
 		MF.WriteLine(keys[i] + "=" + 
-			//word_wrap_and_indent(1, configure_subst.Item(keys[i]), ' \\', '\t') + " "
-			configure_subst.Item(keys[i]) + " "
+			/* \s+\/ eliminates extra whitespace caused when using \ for string continuation,
+				whereby \/ is the start of the next compiler switch */
+			trim(configure_subst.Item(keys[i])).replace(/\s+\//gm, " /") + " "
 			);
 		MF.WriteBlankLines(1);
 	}
@@ -2067,7 +2068,7 @@ function ADD_FLAG(name, flags, target)
 	if (target != null) {
 		name = target.toUpperCase() + "_" + name;
 	}
-	flags = flags.replace(/^\s+/, "").replace(/\s+$/, "");
+	flags = trim(flags);
 	if (configure_subst.Exists(name)) {
 		var curr_flags = configure_subst.Item(name);
 
@@ -2796,5 +2797,10 @@ function add_extra_dirs()
 		}
 	}
 
+}
+
+function trim(s)
+{
+	return s.replace(/^\s+/, "").replace(/\s+$/, "");
 }
 
