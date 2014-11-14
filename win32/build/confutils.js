@@ -716,6 +716,7 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 			var libdir = FSO.GetParentFolderName(location);
 			libname = FSO.GetFileName(location);
 			ADD_FLAG("LDFLAGS" + target, '/libpath:"' + libdir + '" ');
+			ADD_FLAG("ARFLAGS" + target, '/libpath:"' + libdir + '" ');
 			ADD_FLAG("LIBS" + target, libname);
 
 			STDOUT.WriteLine(location);
@@ -785,6 +786,7 @@ function OLD_CHECK_LIB(libnames, target, path_to_check)
 
 		if (typeof(p) == "string") {
 			ADD_FLAG("LDFLAGS" + target, '/libpath:"' + p + '" ');
+			ADD_FLAG("ARFLAGS" + target, '/libpath:"' + p + '" ');
 			ADD_FLAG("LIBS" + target, libname);
 			have = 1;
 		} else if (p == true) {
@@ -1096,7 +1098,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		ldflags = "/dll $(LDFLAGS)";
 		manifest = "-@$(_VC_MANIFEST_EMBED_DLL)";
 	} else if (makefiletarget.match(new RegExp("\\.lib$"))) {
-		ldflags = "$(LDFLAGS)";
+		ldflags = "$(ARFLAGS)";
 		ld = "$(MAKE_LIB)";
 	} else {
 		ldflags = "$(LDFLAGS)";
@@ -1119,14 +1121,14 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 
 	if (MODE_PHPIZE) {
 		if (ld) {
-			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
+			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(PHPLIB) $(ARFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 		} else {
 			ld = '@"$(LINK)"';
 			MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(PHPLIB) $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
 		}
 	} else {
 		if (ld) {
-			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
+			MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(ARFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 		} else {
 			ld = '@"$(LINK)"';
 			MFO.WriteLine("\t" + ld + " /nologo " + " $(" + SAPI + "_GLOBAL_OBJS_RESP) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname + " /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(LDFLAGS_" + SAPI + ")");
@@ -2785,8 +2787,10 @@ function add_extra_dirs()
 			if (FSO.FolderExists(f)) {
 				if (VS_TOOLSET && VCVERS <= 1200 && f.indexOf(" ") >= 0) {
 					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
+					ADD_FLAG("ARFLAGS", '/libpath:"\\"' + f + '\\"" ');
 				} else {
 					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
+					ADD_FLAG("ARFLAGS", '/libpath:"' + f + '" ');
 				}
 			}
 		}
