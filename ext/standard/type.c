@@ -421,6 +421,63 @@ PHP_FUNCTION(is_callable)
 }
 /* }}} */
 
+/* {{{ */
+static zend_always_inline zend_bool safe_cast_to_int(zval *var, zval *out)
+{
+	switch (Z_TYPE_P(var)) {
+		case IS_STRING:
+			{
+				zend_long lval;
+				char c = Z_STRVAL_P(var)[0], *endptr;
+				
+				/* special-case zero */
+				if (c == '0' && Z_STRLEN_P(var) == 1) {
+					ZVAL_LONG(out, 0);
+					return 1;
+				}
+
+				/* bans leading whitespace, + sign, empty string */
+				if (!('1' <= c && c <= '9') && c != '-') {
+					return 0;
+				}
+
+				errno = 0;
+				lval = ZEND_STRTOL(Z_STRVAL_P(var), &endptr, 10);
+				
+				if (errno) {
+					return 0;
+				}
+				
+				/* ban trailing chars */
+				if (endptr - Z_STRVAL_P(var) != Z_STRLEN_P(var)) {
+					return 0;
+				}
+
+				ZVAL_LONG(out, lval);
+				return 1;
+			}
+
+		case IS_DOUBLE:
+			if (Z_DVAL_P(var) == (double)(zend_long) Z_DVAL_P(var)) {
+				/* Exactly representable as zend_long
+				 * We don't need to use zend_dval_to_lval here, cast is safe
+				 */
+				ZVAL_LONG(out, (zend_long)Z_DVAL_P(var));
+				return 1;
+			} else {
+				return 0;
+			}
+
+		case IS_LONG:
+			ZVAL_LONG(out, Z_LVAL_P(var));
+			return 1;
+
+		default:
+			return 0;
+	}
+}
+/* }}} */
+
 /* {{{ proto int to_int(mixed from)
    Strictly convert the given value to an integer. */
 PHP_FUNCTION(to_int)
@@ -431,52 +488,53 @@ PHP_FUNCTION(to_int)
 		RETURN_NULL();
 	}
 	
+	if (!safe_cast_to_int(var, return_value)) {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
+/* {{{ */
+static zend_always_inline zend_bool safe_cast_to_float(zval *var, zval *out)
+{
 	switch (Z_TYPE_P(var)) {
 		case IS_STRING:
 			{
-				zend_long lval;
+				double dval;
 				char c = Z_STRVAL_P(var)[0], *endptr;
-				
+
 				/* special-case zero */
 				if (c == '0' && Z_STRLEN_P(var) == 1) {
-					RETURN_LONG(0);
+					ZVAL_DOUBLE(out, 0);
+					return 1;
 				}
 
 				/* bans leading whitespace, + sign, empty string */
 				if (!('1' <= c && c <= '9') && c != '-') {
-					RETURN_NULL();
+					return 0;
 				}
 
-				errno = 0;
-				lval = ZEND_STRTOL(Z_STRVAL_P(var), &endptr, 10);
-				
-				if (errno) {
-					RETURN_NULL();
-				}
+				dval = zend_strtod(Z_STRVAL_P(var), &endptr);
 				
 				/* ban trailing chars */
 				if (endptr - Z_STRVAL_P(var) != Z_STRLEN_P(var)) {
-					RETURN_NULL();
+					return 0;
 				}
 
-				RETURN_LONG(lval);
-			}
-
-		case IS_DOUBLE:
-			if (Z_DVAL_P(var) == (double)(zend_long) Z_DVAL_P(var)) {
-				/* Exactly representable as zend_long
-				 * We don't need to use zend_dval_to_lval here, cast is safe
-				 */
-				RETURN_LONG((zend_long)Z_DVAL_P(var));
-			} else {
-				RETURN_NULL();
-			}
+				ZVAL_DOUBLE(out, dval);
+				return 1;
+			}	
 
 		case IS_LONG:
-			RETURN_LONG(Z_LVAL_P(var));
+			ZVAL_DOUBLE(out, (double)Z_LVAL_P(var));
+			return 1;
+
+		case IS_DOUBLE:
+			ZVAL_DOUBLE(out, Z_DVAL_P(var));
+			return 1;
 
 		default:
-			RETURN_NULL();
+			return 0;
 	}
 }
 /* }}} */
@@ -491,86 +549,67 @@ PHP_FUNCTION(to_float)
 		RETURN_NULL();
 	}
 	
-	switch (Z_TYPE_P(var)) {
-		case IS_STRING:
-			{
-				double dval;
-				char c = Z_STRVAL_P(var)[0], *endptr;
-
-				/* special-case zero */
-				if (c == '0' && Z_STRLEN_P(var) == 1) {
-					RETURN_DOUBLE(0);
-				}
-
-				/* bans leading whitespace, + sign, empty string */
-				if (!('1' <= c && c <= '9') && c != '-') {
-					RETURN_NULL();
-				}
-
-				dval = zend_strtod(Z_STRVAL_P(var), &endptr);
-				
-				/* ban trailing chars */
-				if (endptr - Z_STRVAL_P(var) != Z_STRLEN_P(var)) {
-					RETURN_NULL();
-				}
-				RETURN_DOUBLE(dval);
-			}	
-
-		case IS_LONG:
-			RETURN_DOUBLE((double)Z_LVAL_P(var));
-
-		case IS_DOUBLE:
-			RETURN_DOUBLE(Z_DVAL_P(var));
-
-		default:
-			RETURN_NULL();
+	if (!safe_cast_to_float(var, return_value)) {
+		RETURN_NULL();
 	}
 }
 /* }}} */
+
+/* {{{ */
+static zend_always_inline zend_bool safe_cast_to_string(zval *var, zval *out TSRMLS_DC)
+{
+	switch (Z_TYPE_P(var)) {
+		case IS_STRING:
+			ZVAL_STR(out, zend_string_copy(Z_STR_P(var)));
+			return 1;
+		
+		case IS_LONG:
+			ZVAL_STR(out, zend_long_to_str(Z_LVAL_P(var)));
+			return 1;
+
+		case IS_DOUBLE:
+			ZVAL_STR(out, strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(var)));
+			return 1;
+
+		case IS_OBJECT:
+			{
+				ZVAL_UNDEF(out);
+				if (Z_OBJ_HT_P(var)->cast_object) {
+					if (Z_OBJ_HT_P(var)->cast_object(var, out, IS_STRING TSRMLS_CC) == SUCCESS) {
+						return 1;
+					}
+				} else if (Z_OBJ_HT_P(var)->get) {
+					zval *newop = Z_OBJ_HT_P(var)->get(var, out TSRMLS_CC);
+					if (Z_TYPE_P(newop) != IS_OBJECT) {
+						/* for safety - avoid loop */
+						ZVAL_COPY_VALUE(out, newop);
+						convert_to_string(out);
+
+						return 1;
+					}
+				}
+			}
+			return 0;
+
+		default:
+			return 0;
+	}
+}
 
 /* {{{ proto string to_string(mixed from)
    Strictly convert the given value to a string. */
 PHP_FUNCTION(to_string)
 {
-        zval *var;
+	zval *var;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &var) == FAILURE) {
 		RETURN_NULL();
 	}
-
-	switch (Z_TYPE_P(var)) {
-		case IS_STRING:
-			RETURN_STR(zend_string_copy(Z_STR_P(var)));
-		
-		case IS_LONG:
-			RETURN_STR(zend_long_to_str(Z_LVAL_P(var)));
-
-		case IS_DOUBLE:
-			RETURN_STR(strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(var)));
-
-		case IS_OBJECT:
-			{
-				ZVAL_UNDEF(return_value);
-				if (Z_OBJ_HT_P(var)->cast_object) {
-					if (Z_OBJ_HT_P(var)->cast_object(var, return_value, IS_STRING TSRMLS_CC) == SUCCESS) {
-						return;
-					}
-				} else if (Z_OBJ_HT_P(var)->get) {
-					zval *newop = Z_OBJ_HT_P(var)->get(var, return_value TSRMLS_CC);
-					if (Z_TYPE_P(newop) != IS_OBJECT) {
-						/* for safety - avoid loop */
-						ZVAL_COPY_VALUE(return_value, newop);
-						convert_to_string(return_value);
-
-						return;
-					}
-				}
-			}
-			RETURN_NULL();
-
-		default:
-			RETURN_NULL();
+	
+	if (!safe_cast_to_string(var, return_value TSRMLS_CC)) {
+		RETURN_NULL();
 	}
+
 }
 /* }}} */
 
