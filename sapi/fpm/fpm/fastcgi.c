@@ -137,6 +137,7 @@ typedef union _sa_t {
 	struct sockaddr     sa;
 	struct sockaddr_un  sa_unix;
 	struct sockaddr_in  sa_inet;
+	struct sockaddr_in6 sa_inet6;
 } sa_t;
 
 static HashTable fcgi_mgmt_vars;
@@ -1094,12 +1095,17 @@ void fcgi_free_mgmt_var_cb(void * ptr)
 	pefree(*var, 1);
 }
 
-char *fcgi_get_last_client_ip() /* {{{ */
+const char *fcgi_get_last_client_ip() /* {{{ */
 {
+	static char str[INET6_ADDRSTRLEN];
+
 	if (client_sa.sa.sa_family == AF_UNIX) {
 		return NULL;
 	}
-	return inet_ntoa(client_sa.sa_inet.sin_addr);
+	if (client_sa.sa.sa_family == AF_INET) {
+		return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet.sin_addr, str, INET6_ADDRSTRLEN);
+	}
+	return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet6.sin6_addr, str, INET6_ADDRSTRLEN);
 }
 /* }}} */
 /*
