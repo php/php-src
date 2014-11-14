@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
     (Laruence)
 
+- FPM:
+  . Fixed bug #68421 (access.format='%R' doesn't log ipv6 address). (Remi)
+  . Fixed Bug #68423 (PHP-FPM will no longer load all pools). (Remi)
+
 GMP:
   . Fixed bug #68419 (build error with gmp 4.1). (Remi)
 
