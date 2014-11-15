@@ -274,13 +274,23 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 		return -1;
 	}
 
-	// strip brackets from address for getaddrinfo
-	if (addr != NULL) {
-		addr_len = strlen(addr);
-		if (addr[0] == '[' && addr[addr_len - 1] == ']') {
-			addr[addr_len - 1] = '\0';
-			addr++;
-		}
+	if (!addr) {
+		/* no address: default documented behavior, all IPv4 addresses */
+		struct sockaddr_in sa_in;
+
+		memset(&sa_in, 0, sizeof(sa_in));
+		sa_in.sin_family = AF_INET;
+		sa_in.sin_port = htons(port);
+		sa_in.sin_addr.s_addr = htonl(INADDR_ANY);
+		free(dup_address);
+		return fpm_sockets_get_listening_socket(wp, (struct sockaddr *) &sa_in, sizeof(struct sockaddr_in));
+	}
+
+	/* strip brackets from address for getaddrinfo */
+	addr_len = strlen(addr);
+	if (addr[0] == '[' && addr[addr_len - 1] == ']') {
+		addr[addr_len - 1] = '\0';
+		addr++;
 	}
 
 	memset(&hints, 0, sizeof hints);
