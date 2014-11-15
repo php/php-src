@@ -6,8 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
 
 - FPM:
+  . Fixed bug #68420 (listen=9000 listens to ipv6 localhost instead of all
+    addresses). (Remi)
   . Fixed bug #68421 (access.format='%R' doesn't log ipv6 address). (Remi)
-  . Fixed Bug #68423 (PHP-FPM will no longer load all pools). (Remi)
+  . Fixed bug #68423 (PHP-FPM will no longer load all pools). (Remi)
 
 - PDO_pgsql:
   . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
