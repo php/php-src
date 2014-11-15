@@ -1697,8 +1697,7 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 				p->key = NULL;
 			}
 		}
-	}
-	if (renumber) {
+
 		ht->nNextFreeElement = i;
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
