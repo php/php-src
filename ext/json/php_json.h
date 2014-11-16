@@ -53,6 +53,19 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth TSRMLS_DC);
 extern PHP_JSON_API zend_class_entry *php_json_serializable_ce;
 
+/* error codes */
+typedef enum {
+	PHP_JSON_ERROR_NONE = 0,
+	PHP_JSON_ERROR_DEPTH,
+	PHP_JSON_ERROR_STATE_MISMATCH,
+	PHP_JSON_ERROR_CTRL_CHAR,
+	PHP_JSON_ERROR_SYNTAX,
+	PHP_JSON_ERROR_UTF8,
+	PHP_JSON_ERROR_RECURSION,
+	PHP_JSON_ERROR_INF_OR_NAN,
+	PHP_JSON_ERROR_UNSUPPORTED_TYPE,
+	PHP_JSON_ERROR_UTF16
+} php_json_error_code;
 
 /* json_encode() options */
 #define PHP_JSON_HEX_TAG	(1<<0)
