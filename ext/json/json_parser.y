@@ -87,7 +87,7 @@ void php_json_parser_ht_append(HashTable *ht, zval *zvalue);
 %% /* Rules */
 
 start:
-		value PHP_JSON_T_EOI    { $$ = $1; INIT_PZVAL_COPY(parser->return_value, &$1); PHP_JSON_USE($2); YYACCEPT; }
+		value PHP_JSON_T_EOI    { $$ = $1; ZVAL_DUP(parser->return_value, &$1); PHP_JSON_USE($2); YYACCEPT; }
 	|	value errlex            { PHP_JSON_USE_2($$, $1, $2); }
 ;
 
