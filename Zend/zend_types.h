@@ -145,9 +145,9 @@ struct _zend_string {
 };
 
 typedef struct _Bucket {
+	zval              val;
 	zend_ulong        h;                /* hash value (or numeric index)   */
 	zend_string      *key;              /* string key or NULL for numerics */
-	zval              val;
 } Bucket;
 
 typedef struct _HashTable {	
