@@ -331,6 +331,74 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 }
 /* }}} */
 
+
+static
+zend_bool zend_do_return_type_inheritance_check(const zend_function *fe, const zend_function *proto TSRMLS_DC)
+{
+	zend_class_entry *child_ce;
+	zend_class_entry *parent_ce;
+	zend_string *child_name;
+	zend_string *parent_name;
+
+	if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+		return 0;
+	}
+
+	if (fe->common.return_type.kind != proto->common.return_type.kind) {
+		return 0;
+	}
+
+	if (fe->common.return_type.kind != IS_OBJECT) {
+		return 1;
+	}
+
+	/* For objects there are two major steps:
+	 *   1. Checking for invariance (cheap)
+	 *   2. Checking for covariance (not as cheap) */
+	child_name = fe->common.return_type.name;
+	parent_name = proto->common.return_type.name;
+
+	/* 1a. Resolve "parent" and "self" to class names */
+	if (zend_string_equals_literal_ci(child_name, "parent")) {
+		child_name = proto->common.scope->name;
+	} else if (zend_string_equals_literal_ci(child_name, "self")) {
+		child_name = fe->common.scope->name;
+	}
+
+	if (proto->common.scope->parent && zend_string_equals_literal_ci(parent_name, "parent")) {
+		parent_name = proto->common.scope->parent->name;
+	} else if (zend_string_equals_literal_ci(parent_name, "self")) {
+		parent_name = proto->common.scope->name;
+	}
+
+	/* 1b. If the type names are equal they are invariant */
+	if (zend_string_equals(child_name, parent_name)) {
+		return 1;
+	}
+
+	/* 2a. Bind the type names to class entries; fetch the class if needed
+	 */
+	if (zend_string_equals(child_name, proto->common.scope->name)) {
+		child_ce = proto->common.scope;
+	} else if (zend_string_equals(child_name, fe->common.scope->name)) {
+		child_ce = fe->common.scope;
+	} else {
+		child_ce = zend_fetch_class_by_name(child_name, NULL, 0 TSRMLS_CC);
+	}
+
+	if (proto->common.scope->parent && zend_string_equals(parent_name, proto->common.scope->parent->name)) {
+		parent_ce = proto->common.scope->parent;
+	} else if (zend_string_equals(parent_name, proto->common.scope->name)) {
+		parent_ce = proto->common.scope;
+	} else {
+		parent_ce = zend_fetch_class_by_name(parent_name, NULL, 0 TSRMLS_CC);
+	}
+
+	/* 2b. Check for covariance; if the child type is not a subclass of
+	 *     the parent then they are not covariant */
+	return instanceof_function(child_ce, parent_ce TSRMLS_CC);
+}
+
 static zend_function *do_inherit_method(zend_function *old_function, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	zend_function *new_function;
@@ -384,41 +452,9 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	}
 
 	/* Check return type compatibility */
-	if (proto->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		if (!(fe->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
-			return 0;
-		} else if (fe->common.return_type.kind != proto->common.return_type.kind) {
-			return 0;
-		} else if (fe->common.return_type.kind == IS_OBJECT) {
-			/* This must be checked at runtime */
-
-			zend_class_entry *child_ce;
-			zend_class_entry *parent_ce;
-			if (zend_string_equals_literal_ci(fe->common.return_type.name, "parent")) {
-				assert(fe->common.scope && fe->common.scope->parent);
-				child_ce = fe->common.scope->parent;
-			} else if (zend_string_equals_literal_ci(fe->common.return_type.name, "self")) {
-				assert(fe->common.scope);
-				child_ce = fe->common.scope;
-			} else {
-				child_ce = zend_fetch_class_by_name(fe->common.return_type.name, NULL, 0 TSRMLS_CC);
-			}
-			if (zend_string_equals_literal_ci(proto->common.return_type.name, "parent")) {
-				assert(proto->common.scope && proto->common.scope->parent);
-				parent_ce = proto->common.scope->parent;
-			} else if (zend_string_equals_literal_ci(proto->common.return_type.name, "self")) {
-				assert(proto->common.scope);
-				parent_ce = proto->common.scope;
-			} else {
-				parent_ce = zend_fetch_class_by_name(proto->common.return_type.name, NULL, 0 TSRMLS_CC);
-			}
-
-			if (!instanceof_function(child_ce, parent_ce TSRMLS_CC)) {
-				zend_string *method_prototype = zend_get_function_declaration(proto TSRMLS_CC);
-				zend_error(E_COMPILE_ERROR, "Declaration of %s::%s should be compatible with %s, return type mismatch", ZEND_FN_SCOPE_NAME(fe), fe->common.function_name->val, method_prototype->val);
-				zend_string_free(method_prototype);
-			}
-		}
+	if ((proto->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)
+		&& !zend_do_return_type_inheritance_check(fe, proto TSRMLS_CC)) {
+		return 0;
 	}
 
 	/* check number of arguments */
@@ -588,7 +624,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		child->common.prototype = parent->common.prototype ? parent->common.prototype : parent;
 	}
 
-	if (child->common.prototype && (child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+	if (child->common.prototype && (child->common.prototype->common.fn_flags & (ZEND_ACC_ABSTRACT | ZEND_ACC_HAS_RETURN_TYPE))) {
 		if (!zend_do_perform_implementation_check(child, child->common.prototype TSRMLS_CC)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name->val, zend_get_function_declaration(child->common.prototype TSRMLS_CC)->val);
 		}
