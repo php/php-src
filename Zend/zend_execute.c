@@ -456,15 +456,15 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(uint32_t var, const zend_e
 
 	if (EXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
 		should_free->var = NULL;
-		return Z_INDIRECT_P(ret);
-	} else if (!Z_REFCOUNTED_P(ret) || Z_REFCOUNT_P(ret) == 1) {
-		should_free->var = ret;
-		return ret;
+		ret = Z_INDIRECT_P(ret);
 	} else {
-		Z_DELREF_P(ret);
-		should_free->var = NULL;
-		return ret;
+		should_free->var = ret;
+		if (Z_REFCOUNTED_P(ret) && Z_REFCOUNT_P(ret) > 1) {
+			should_free->var = NULL;
+			Z_DELREF_P(ret);
+		}
 	}
+	return ret;
 }
 
 static inline zval *_get_zval_ptr_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
