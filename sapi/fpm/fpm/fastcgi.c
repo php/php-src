@@ -1099,13 +1099,23 @@ const char *fcgi_get_last_client_ip() /* {{{ */
 {
 	static char str[INET6_ADDRSTRLEN];
 
-	if (client_sa.sa.sa_family == AF_UNIX) {
-		return NULL;
-	}
+	/* Ipv4 */
 	if (client_sa.sa.sa_family == AF_INET) {
 		return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet.sin_addr, str, INET6_ADDRSTRLEN);
 	}
-	return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet6.sin6_addr, str, INET6_ADDRSTRLEN);
+#ifdef IN6_IS_ADDR_V4MAPPED
+	/* Ipv4-Mapped-Ipv6 */
+	if (client_sa.sa.sa_family == AF_INET6
+		&& IN6_IS_ADDR_V4MAPPED(&client_sa.sa_inet6.sin6_addr)) {
+		return inet_ntop(AF_INET, ((char *)&client_sa.sa_inet6.sin6_addr)+12, str, INET6_ADDRSTRLEN);
+	}
+#endif
+	/* Ipv6 */
+	if (client_sa.sa.sa_family == AF_INET6) {
+		return inet_ntop(client_sa.sa.sa_family, &client_sa.sa_inet6.sin6_addr, str, INET6_ADDRSTRLEN);
+	}
+	/* Unix socket */
+	return NULL;
 }
 /* }}} */
 /*
