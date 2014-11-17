@@ -8,12 +8,13 @@ FPM: Startup and connect
 include "include.inc";
 
 $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+$port = 9000+PHP_INT_SIZE;
 
 $cfg = <<<EOT
 [global]
 error_log = $logfile
 [unconfined]
-listen = 127.0.0.1:9000
+listen = 127.0.0.1:$port
 pm = dynamic
 pm.max_children = 5
 pm.start_servers = 2
@@ -26,7 +27,7 @@ if (is_resource($fpm)) {
     var_dump(fgets($tail));
     var_dump(fgets($tail));
     $i = 0;
-    while (($i++ < 30) && !($fp = @fsockopen('127.0.0.1', 9000))) {
+    while (($i++ < 30) && !($fp = @fsockopen('127.0.0.1', $port))) {
         usleep(10000);
     }
     if ($fp) {
