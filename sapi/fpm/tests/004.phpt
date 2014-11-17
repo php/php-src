@@ -1,5 +1,5 @@
 --TEST--
-FPM: Test IPv6 support
+FPM: Test IPv4/IPv6 support
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
@@ -14,7 +14,7 @@ $cfg = <<<EOT
 [global]
 error_log = $logfile
 [unconfined]
-listen = [::1]:$port
+listen = [::]:$port
 pm = dynamic
 pm.max_children = 5
 pm.start_servers = 2
@@ -27,11 +27,18 @@ if (is_resource($fpm)) {
     var_dump(fgets($tail));
     var_dump(fgets($tail));
     $i = 0;
-    while (($i++ < 30) && !($fp = fsockopen('[::1]', $port))) {
+    while (($i++ < 30) && !($fp = @fsockopen('127.0.0.1', $port))) {
         usleep(10000);
     }
     if ($fp) {
-        echo "Done\n";
+        echo "Done IPv4\n";
+        fclose($fp);
+    }
+    while (($i++ < 30) && !($fp = @fsockopen('[::1]', $port))) {
+        usleep(10000);
+    }
+    if ($fp) {
+        echo "Done IPv6\n";
         fclose($fp);
     }
     proc_terminate($fpm);
@@ -46,7 +53,8 @@ string(%d) "[%d-%s-%d %d:%d:%d] NOTICE: fpm is running, pid %d
 "
 string(%d) "[%d-%s-%d %d:%d:%d] NOTICE: ready to handle connections
 "
-Done
+Done IPv4
+Done IPv6
 --CLEAN--
 <?php
     $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
