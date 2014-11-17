@@ -1646,7 +1646,7 @@ static zend_bool zend_has_deprecated_constructor(const zend_class_entry *ce) /* 
 void zend_check_deprecated_constructor(const zend_class_entry *ce) /* {{{ */
 {
 	if (zend_has_deprecated_constructor(ce)) {
-		zend_error(E_DEPRECATED, "PHP 4 constructors will be normal methods and not constructors in a future version of PHP; %s has a deprecated constructor", ce->name->val);
+		zend_error(E_DEPRECATED, "Methods with the same name as their class will not be constructors in a future version of PHP; %s has a deprecated constructor", ce->name->val);
 	}
 }
 /* }}} */
