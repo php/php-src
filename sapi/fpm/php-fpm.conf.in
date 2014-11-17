@@ -175,7 +175,7 @@ listen = 127.0.0.1:9000
 ;listen.group = @php_fpm_group@
 ;listen.mode = 0660
  
-; List of ipv4 addresses of FastCGI clients which are allowed to connect.
+; List of addresses (IPv4/IPv6) of FastCGI clients which are allowed to connect.
 ; Equivalent to the FCGI_WEB_SERVER_ADDRS environment variable in the original
 ; PHP FCGI (5.2.2+). Makes sense only with a tcp listening socket. Each address
 ; must be separated by a comma. If this value is left blank, connections will be
