@@ -156,8 +156,8 @@ group = @php_fpm_group@
 ;                            a specific port;
 ;   'port'                 - to listen on a TCP socket to all IPv4 addresses on a
 ;                            specific port;
-;   '[::]:port'            - to listen on a TCP socket to all addresses on a
-;                            specific port;
+;   '[::]:port'            - to listen on a TCP socket to all addresses
+;                            (IPv6 and IPv4-mapped) on a specific port;
 ;   '/path/to/unix/socket' - to listen on a unix socket.
 ; Note: This value is mandatory.
 listen = 127.0.0.1:9000
