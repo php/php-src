@@ -2478,7 +2478,12 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc TSRMLS_DC) /* {{{ *
 			if (fbc) {
 				flags |= ZEND_ARG_COMPILE_TIME_BOUND;
 			}
-			opline->extended_value = flags;
+			if ((flags & ZEND_ARG_COMPILE_TIME_BOUND) && !(flags & ZEND_ARG_SEND_BY_REF)) {
+				opline->opcode = ZEND_SEND_VAR;
+				opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND;
+			} else {
+				opline->extended_value = flags;
+			}
 		} else if (fbc) {
 			opline->extended_value = ZEND_ARG_COMPILE_TIME_BOUND;
 		}

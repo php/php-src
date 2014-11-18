@@ -16482,11 +16482,8 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 	zval *varptr, *arg;
 
 	SAVE_OPLINE();
-	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
-		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF)) {
-			return ZEND_SEND_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-		}
-	} else {
+
+	if (!(opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND)) {
 		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 			return ZEND_SEND_VAR_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
@@ -16501,20 +16498,18 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 		if (IS_VAR == IS_CV) {
 			Z_ADDREF_P(varptr);
 		}
-		arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-		EX(call)->num_args = opline->op2.num;
-		ZVAL_COPY_VALUE(arg, varptr);
 	} else {
 		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
 			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :
 			!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 			zend_error(E_STRICT, "Only variables should be passed by reference");
 		}
-		arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-		EX(call)->num_args = opline->op2.num;
-		ZVAL_COPY(arg, varptr);
-		zval_ptr_dtor_nogc(free_op1);
 	}
+
+	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
+	EX(call)->num_args = opline->op2.num;
+	ZVAL_COPY_VALUE(arg, varptr);
+
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -34276,11 +34271,8 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 	zval *varptr, *arg;
 
 	SAVE_OPLINE();
-	if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) { /* Had function_ptr at compile_time */
-		if (!(opline->extended_value & ZEND_ARG_SEND_BY_REF)) {
-			return ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-		}
-	} else {
+
+	if (!(opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND)) {
 		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 			return ZEND_SEND_VAR_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
@@ -34295,20 +34287,18 @@ static int ZEND_FASTCALL  ZEND_SEND_VAR_NO_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 		if (IS_CV == IS_CV) {
 			Z_ADDREF_P(varptr);
 		}
-		arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-		EX(call)->num_args = opline->op2.num;
-		ZVAL_COPY_VALUE(arg, varptr);
 	} else {
 		if ((opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) ?
 			!(opline->extended_value & ZEND_ARG_SEND_SILENT) :
 			!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 			zend_error(E_STRICT, "Only variables should be passed by reference");
 		}
-		arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-		EX(call)->num_args = opline->op2.num;
-		ZVAL_COPY(arg, varptr);
-
 	}
+
+	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
+	EX(call)->num_args = opline->op2.num;
+	ZVAL_COPY_VALUE(arg, varptr);
+
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
