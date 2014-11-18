@@ -414,7 +414,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 				mimetype = SG(sapi_headers).mimetype;
 			} else {
 				mimetype = SG(sapi_headers).mimetype;
-				mimetype_len = s - SG(sapi_headers).mimetype;
+				mimetype_len = (int)(s - SG(sapi_headers).mimetype);
 			}
 		} else if (SG(sapi_headers).send_default_content_type) {
 			mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
@@ -429,7 +429,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 			} else {
 				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s", mimetype_len ? mimetype_len : (size_t) strlen(mimetype), mimetype, get_output_encoding(TSRMLS_C));
 			}
-			if (content_type && SUCCESS == sapi_add_header(content_type, len, 0)) {
+			if (content_type && SUCCESS == sapi_add_header(content_type, (uint)len, 0)) {
 				SG(sapi_headers).send_default_content_type = 0;
 				php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE, NULL TSRMLS_CC);
 			}
@@ -2306,7 +2306,7 @@ PHP_FUNCTION(iconv_mime_decode)
 		RETURN_FALSE;
 	}
 
-	err = _php_iconv_mime_decode(&retval, encoded_str->val, encoded_str->len, charset, NULL, mode);
+	err = _php_iconv_mime_decode(&retval, encoded_str->val, encoded_str->len, charset, NULL, (int)mode);
 	_php_iconv_show_error(err, charset, "???" TSRMLS_CC);
 
 	if (err == PHP_ICONV_ERR_SUCCESS) {
@@ -2359,7 +2359,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 		char *p, *limit;
 		const char *next_pos;
 
-		if (PHP_ICONV_ERR_SUCCESS != (err = _php_iconv_mime_decode(&decoded_header, enc_str_tmp, enc_str_len_tmp, charset, &next_pos, mode))) {
+		if (PHP_ICONV_ERR_SUCCESS != (err = _php_iconv_mime_decode(&decoded_header, enc_str_tmp, enc_str_len_tmp, charset, &next_pos, (int)mode))) {
 			smart_str_free(&decoded_header);
 			break;
 		}

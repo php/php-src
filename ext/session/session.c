@@ -506,17 +506,8 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 		PS(session_status) = php_session_active;
 	}
 	if (val) {
-		PHP_MD5_CTX context;
-
-		/* Store read data's MD5 hash */
-		PHP_MD5Init(&context);
-		PHP_MD5Update(&context, val->val, val->len);
-		PHP_MD5Final(PS(session_data_hash), &context);
-
 		php_session_decode(val->val, val->len TSRMLS_CC);
 		zend_string_release(val);
-	} else {
-		memset(PS(session_data_hash),'\0', 16);
 	}
 
 	if (!PS(use_cookies) && PS(send_cookie)) {
@@ -538,19 +529,7 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 
 			val = php_session_encode(TSRMLS_C);
 			if (val) {
-				PHP_MD5_CTX context;
-				unsigned char digest[16];
-
-				/* Generate data's MD5 hash */
-				PHP_MD5Init(&context);
-				PHP_MD5Update(&context, val->val, val->len);
-				PHP_MD5Final(digest, &context);
-				/* Write only when save is required */
-				if (memcmp(digest, PS(session_data_hash), 16)) {
-					ret = PS(mod)->s_write(&PS(mod_data), PS(id), val TSRMLS_CC);
-				} else {
-					ret = SUCCESS;
-				}
+				ret = PS(mod)->s_write(&PS(mod_data), PS(id), val TSRMLS_CC);
 				zend_string_release(val);
 			} else {
 				ret = PS(mod)->s_write(&PS(mod_data), PS(id), STR_EMPTY_ALLOC() TSRMLS_CC);
@@ -1971,7 +1950,6 @@ static PHP_FUNCTION(session_regenerate_id)
 				RETURN_FALSE;
 			}
 			zend_string_release(PS(id));
-			memset(PS(session_data_hash),'\0', 16);
 		}
 
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data) TSRMLS_CC);

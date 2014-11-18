@@ -144,30 +144,58 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sq
 
 static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC)
 {
-	
-	/* pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data; */
-	
-	char *q;
-	int l = 1;
-		
-	*quoted = q = safe_emalloc(2, unquotedlen, 3);
-	*q++ = '\'';
 
-	while (unquotedlen--) {
-		if (*unquoted == '\'') {
-			*q++ = '\'';
-			*q++ = '\'';
-			l += 2;
-		} else {
-			*q++ = *unquoted;
-			++l;
+	int useBinaryEncoding = 0;
+	const char * hex = "0123456789abcdef";
+	int i;
+	char * q;
+	*quotedlen = 0;
+	
+	/* 
+	 * Detect quoted length and if we should use binary encoding 
+	 */
+	for(i=0;i<unquotedlen;i++) {
+		if( 32 > unquoted[i] || 127 < unquoted[i] ) {
+			useBinaryEncoding = 1;
+			break;
 		}
-		unquoted++;
+		if(unquoted[i] == '\'') ++*quotedlen;
+		++*quotedlen;
+	}
+	
+	if(useBinaryEncoding) {
+		/* 
+		 * Binary safe quoting 
+		 * Will implicitly convert for all data types except Text, DateTime & SmallDateTime
+		 * 
+		 */	
+		*quotedlen = (unquotedlen * 2) + 2; /* 2 chars per byte +2 for "0x" prefix */
+		q = *quoted = emalloc(*quotedlen);
+
+		*q++ = '0';
+		*q++ = 'x';
+		for (i=0;i<unquotedlen;i++) {
+			*q++ = hex[ (*unquoted>>4)&0xF];
+			*q++ = hex[ (*unquoted++)&0xF];
+		}
+	} else {
+		/* Alpha/Numeric Quoting */
+		*quotedlen += 2; /* +2 for opening, closing quotes */
+		q  = *quoted = emalloc(*quotedlen);
+		*q++ = '\'';
+
+		for (i=0;i<unquotedlen;i++) {
+			if (unquoted[i] == '\'') {
+				*q++ = '\'';
+				*q++ = '\'';
+			} else {
+				*q++ = unquoted[i];
+			}
+		}
+		*q++ = '\'';
 	}
 
-	*q++ = '\'';
-	*q++ = '\0';
-	*quotedlen = l+1;
+	*q = 0;
 	
 	return 1;
 }
@@ -240,7 +268,7 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len T
 	}
 
 	id = emalloc(32);
-	*len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, id, (DBINT)-1);
+	*len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
 		
 	dbcancel(H->link);
 	return id;
@@ -285,7 +313,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 {
 	pdo_dblib_db_handle *H;
 	int i, nvars, nvers, ret = 0;
-	int *val;
 	
 	const pdo_dblib_keyval tdsver[] = {
 		 {"4.2",DBVERSION_42}

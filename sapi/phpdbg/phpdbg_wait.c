@@ -18,11 +18,10 @@
 
 #include "phpdbg_wait.h"
 #include "phpdbg_prompt.h"
-#include "ext/json/JSON_parser.h"
+#include "ext/standard/php_var.h"
 #include "ext/standard/basic_functions.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
-ZEND_EXTERN_MODULE_GLOBALS(json);
 
 static void phpdbg_rebuild_http_globals_array(int type, const char *name TSRMLS_DC) {
 	zval *zvp;
@@ -126,16 +125,18 @@ static int phpdbg_array_intersect(phpdbg_intersect_ptr *info, zval **ptr) {
 }
 
 void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
-#ifdef HAVE_JSON
 	zval *free_zv = NULL;
 	zval zv, *zvp;
 	HashTable *ht;
-	php_json_decode(&zv, msg, len, 1, 1000 /* enough */ TSRMLS_CC);
+	php_unserialize_data_t var_hash;
 
-	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE) {
-		phpdbg_error("wait", "type=\"invaliddata\" import=\"fail\"", "Malformed JSON was sent to this socket, arborting");
+	PHP_VAR_UNSERIALIZE_INIT(var_hash);
+	if (!php_var_unserialize(&zv, (const unsigned char **) &msg, (unsigned char *) msg + len, &var_hash TSRMLS_CC)) {
+		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+		phpdbg_error("wait", "type=\"invaliddata\" import=\"fail\"", "Malformed serialized was sent to this socket, arborting");
 		return;
 	}
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 
 	ht = Z_ARRVAL(zv);
 
@@ -339,12 +340,11 @@ void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC) {
 
 	/* Reapply raw input */
 	/* ??? */
-#endif
 }
 
 PHPDBG_COMMAND(wait) /* {{{ */
 {
-#ifdef HAVE_JSON
+#ifndef PHP_WIN32
 	struct sockaddr_un local, remote;
 	int rlen, sr, sl;
 	unlink(PHPDBG_G(socket_path));
@@ -394,7 +394,7 @@ PHPDBG_COMMAND(wait) /* {{{ */
 	efree(data);
 
 	phpdbg_notice("wait", "import=\"success\"", "Successfully imported request data, stopped before executing");
+#endif
 
 	return SUCCESS;
-#endif
 } /* }}} */

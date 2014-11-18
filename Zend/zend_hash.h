@@ -539,6 +539,19 @@ static zend_always_inline void *zend_hash_index_update_ptr(HashTable *ht, zend_u
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
+static zend_always_inline void *zend_hash_index_add_mem(HashTable *ht, zend_ulong h, void *pData, size_t size)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, NULL);
+	if ((zv = zend_hash_index_add(ht, h, &tmp))) {
+		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+		memcpy(Z_PTR_P(zv), pData, size);
+		return Z_PTR_P(zv);
+	}
+	return NULL;
+}
+
 static zend_always_inline void *zend_hash_next_index_insert_ptr(HashTable *ht, void *pData)
 {
 	zval tmp, *zv;
@@ -695,6 +708,11 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	_h = _p->h; \
 	_key = _p->key; \
 	_val = _z;
+
+#define ZEND_HASH_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_h = _p->h; \
+	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \

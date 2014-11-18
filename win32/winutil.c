@@ -79,10 +79,7 @@ void php_win32_free_rng_lock()
 
 PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{ */
 
-	unsigned int has_contextg = 0;
-
 	BOOL ret;
-	size_t i = 0;
 
 #ifdef ZTS
 	tsrm_mutex_lock(php_lock_win32_cryptoctx);
@@ -115,7 +112,8 @@ PHPAPI int php_win32_get_random_bytes(unsigned char *buf, size_t size) {  /* {{{
 		return FAILURE;
 	}
 
-	ret = CryptGenRandom(hCryptProv, size, buf);
+	/* XXX should go in the loop if size exceeds UINT_MAX */
+	ret = CryptGenRandom(hCryptProv, (DWORD)size, buf);
 
 	if (ret) {
 		return SUCCESS;

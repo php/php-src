@@ -1207,7 +1207,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 
 		for (i = 0; i < class_type->default_properties_count; i++) {
 			if (Z_TYPE(class_type->default_properties_table[i]) != IS_UNDEF) {
-				zval_update_class_constant(&class_type->default_properties_table[i], 0, i TSRMLS_CC);
+				zval_update_class_constant(&class_type->default_properties_table[i], 0, OBJ_PROP_TO_OFFSET(i) TSRMLS_CC);
 			}
 		}
 
@@ -1251,8 +1251,9 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 			if (property_info != ZEND_WRONG_PROPERTY_INFO &&
 			    property_info &&
 			    (property_info->flags & ZEND_ACC_STATIC) == 0) {
-				ZVAL_COPY_VALUE(&object->properties_table[property_info->offset], prop);
-				ZVAL_INDIRECT(prop, &object->properties_table[property_info->offset]);
+				zval *slot = OBJ_PROP(object, property_info->offset);
+				ZVAL_COPY_VALUE(slot, prop);
+				ZVAL_INDIRECT(prop, slot);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -1270,11 +1271,12 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties 
 		if (property_info != ZEND_WRONG_PROPERTY_INFO &&
 		    property_info &&
 		    (property_info->flags & ZEND_ACC_STATIC) == 0) {
-		    zval_ptr_dtor(&object->properties_table[property_info->offset]);
-			ZVAL_COPY_VALUE(&object->properties_table[property_info->offset], prop);
-			zval_add_ref(&object->properties_table[property_info->offset]);
+			zval *slot = OBJ_PROP(object, property_info->offset);
+			zval_ptr_dtor(slot);
+			ZVAL_COPY_VALUE(slot, prop);
+			zval_add_ref(slot);
 			if (object->properties) {
-				ZVAL_INDIRECT(&tmp, &object->properties_table[property_info->offset]);
+				ZVAL_INDIRECT(&tmp, slot);
 				zend_hash_update(object->properties, key, &tmp);
 			}
 		} else {
@@ -2754,21 +2756,15 @@ ZEND_API ZEND_FUNCTION(display_disabled_function)
 }
 /* }}} */
 
-static zend_function_entry disabled_function[] = {
-	ZEND_FE(display_disabled_function,			NULL)
-	ZEND_FE_END
-};
-
 ZEND_API int zend_disable_function(char *function_name, size_t function_name_length TSRMLS_DC) /* {{{ */
 {
-	int ret;
-
-	ret = zend_hash_str_del(CG(function_table), function_name, function_name_length);
-	if (ret == FAILURE) {
-		return FAILURE;
+	zend_internal_function *func;
+	if ((func = zend_hash_str_find_ptr(CG(function_table), function_name, function_name_length))) {
+		func->arg_info = NULL;
+		func->handler = ZEND_FN(display_disabled_function);
+		return SUCCESS;
 	}
-	disabled_function[0].fname = function_name;
-	return zend_register_functions(NULL, disabled_function, CG(function_table), MODULE_PERSISTENT TSRMLS_CC);
+	return FAILURE;
 }
 /* }}} */
 
@@ -3624,13 +3620,14 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
 		    (property_info_ptr->flags & ZEND_ACC_STATIC) == 0) {
 			property_info->offset = property_info_ptr->offset;
-			zval_ptr_dtor(&ce->default_properties_table[property_info->offset]);
+			zval_ptr_dtor(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
 			zend_hash_del(&ce->properties_info, name);
 		} else {
-			property_info->offset = ce->default_properties_count++;
+			property_info->offset = OBJ_PROP_TO_OFFSET(ce->default_properties_count);
+			ce->default_properties_count++;
 			ce->default_properties_table = perealloc(ce->default_properties_table, sizeof(zval) * ce->default_properties_count, ce->type == ZEND_INTERNAL_CLASS);
 		}
-		ZVAL_COPY_VALUE(&ce->default_properties_table[property_info->offset], property);
+		ZVAL_COPY_VALUE(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)], property);
 	}
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		switch(Z_TYPE_P(property)) {

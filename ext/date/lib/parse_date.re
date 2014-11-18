@@ -1721,7 +1721,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 
 /*!max:re2c */
 
-timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
+timelib_time* timelib_strtotime(char *s, size_t len, struct timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
 {
 	Scanner in;
 	int t;
@@ -1832,7 +1832,7 @@ static void timelib_time_reset_unset_fields(timelib_time *time)
 	if (time->f == TIMELIB_UNSET ) time->f = 0.0;
 }
 
-timelib_time *timelib_parse_from_format(char *format, char *string, int len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
+timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
 {
 	char       *fptr = format;
 	char       *ptr = string;

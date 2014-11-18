@@ -215,14 +215,14 @@ PHP_FUNCTION(bcadd)
 	zend_long scale_param = 0;
 	bc_num first, second, result;
 	size_t left_len, right_len;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
 	
 	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
+		scale = (int) (scale_param < 0 ? 0 : scale_param);
 	}
 
 	bc_init_num(&first TSRMLS_CC);
@@ -252,14 +252,14 @@ PHP_FUNCTION(bcsub)
 	size_t left_len, right_len;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
 	
 	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
+		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 
 	bc_init_num(&first TSRMLS_CC);
@@ -289,14 +289,14 @@ PHP_FUNCTION(bcmul)
 	size_t left_len, right_len;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
 	
 	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
+		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 	
 	bc_init_num(&first TSRMLS_CC);
@@ -326,14 +326,14 @@ PHP_FUNCTION(bcdiv)
 	size_t left_len, right_len;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
 	
 	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
+		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 	
 	bc_init_num(&first TSRMLS_CC);
@@ -417,11 +417,11 @@ PHP_FUNCTION(bcpowmod)
 	php_str2num(&second, right TSRMLS_CC);
 	php_str2num(&mod, modulous TSRMLS_CC);
 
-	scale_int = (int) ((int)scale < 0) ? 0 : scale;
+	scale_int = (int) ((int)scale < 0 ? 0 : scale);
 
 	if (bc_raisemod(first, second, mod, &result, scale_int TSRMLS_CC) != -1) {
 		if (result->n_scale > scale) {
-			result->n_scale = scale;
+			result->n_scale = (int)scale;
 		}
 		RETVAL_STR(bc_num2str(result));
 	} else {
@@ -444,14 +444,14 @@ PHP_FUNCTION(bcpow)
 	size_t left_len, right_len;
 	zend_long scale_param = 0;
 	bc_num first, second, result;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
 	
 	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
+		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 
 	bc_init_num(&first TSRMLS_CC);
@@ -481,14 +481,14 @@ PHP_FUNCTION(bcsqrt)
 	size_t left_len;
 	zend_long scale_param = 0;
 	bc_num result;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "s|l", &left, &left_len, &scale_param) == FAILURE) {
 		return;
 	}
 	
 	if (argc == 2) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
+		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 
 	bc_init_num(&result TSRMLS_CC);
@@ -516,14 +516,14 @@ PHP_FUNCTION(bccomp)
 	size_t left_len, right_len;
 	zend_long scale_param = 0;
 	bc_num first, second;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale = (int)BCG(bc_precision), argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
 	
 	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
+		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
 	}
 
 	bc_init_num(&first TSRMLS_CC);

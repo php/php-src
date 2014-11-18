@@ -255,7 +255,7 @@ static int spl_autoload(zend_string *class_name, zend_string *lc_name, const cha
 	zval result;
 	int ret;
 
-	class_file_len = spprintf(&class_file, 0, "%s%.*s", lc_name->val, ext_len, ext);
+	class_file_len = (int)spprintf(&class_file, 0, "%s%.*s", lc_name->val, ext_len, ext);
 
 #if DEFAULT_SLASH != '\\'
 	{
@@ -320,7 +320,7 @@ PHP_FUNCTION(spl_autoload)
 		pos_len = sizeof(SPL_DEFAULT_FILE_EXTENSIONS) - 1;
 	} else {
 		pos = file_exts->val;
-		pos_len = file_exts->len;
+		pos_len = (int)file_exts->len;
 	}
 
 	lc_name = zend_string_alloc(class_name->len, 0);
@@ -328,7 +328,7 @@ PHP_FUNCTION(spl_autoload)
 	while (pos && *pos && !EG(exception)) {
 		pos1 = strchr(pos, ',');
 		if (pos1) { 
-			pos1_len = pos1 - pos;
+			pos1_len = (int)(pos1 - pos);
 		} else {
 			pos1_len = pos_len;
 		}
@@ -759,7 +759,7 @@ PHPAPI zend_string *php_spl_object_hash(zval *obj TSRMLS_DC) /* {{{*/
 
 	if (!SPL_G(hash_mask_init)) {
 		if (!BG(mt_rand_is_seeded)) {
-			php_mt_srand(GENERATE_SEED() TSRMLS_CC);
+			php_mt_srand((uint32_t)GENERATE_SEED() TSRMLS_CC);
 		}
 
 		SPL_G(hash_mask_handle)   = (intptr_t)(php_mt_rand(TSRMLS_C) >> 1);

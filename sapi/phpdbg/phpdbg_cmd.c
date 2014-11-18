@@ -70,79 +70,6 @@ PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param TSRMLS_
 	}
 }
 
-PHPDBG_API phpdbg_param_type phpdbg_parse_param(const char *str, size_t len, phpdbg_param_t *param TSRMLS_DC) /* {{{ */
-{
-	char *class_name, *func_name;
-
-	if (len == 0) {
-		param->type = EMPTY_PARAM;
-		goto parsed;
-	}
-
-	if (phpdbg_is_addr(str)) {
-		param->addr = strtoul(str, 0, 16);
-		param->type = ADDR_PARAM;
-		goto parsed;
-
-	} else if (phpdbg_is_numeric(str)) {
-		param->num = strtol(str, NULL, 0);
-		param->type = NUMERIC_PARAM;
-		goto parsed;
-
-	} else if (phpdbg_is_class_method(str, len+1, &class_name, &func_name)) {
-		param->method.class = class_name;
-		param->method.name = func_name;
-		param->type = METHOD_PARAM;
-		goto parsed;
-	} else {
-		char *line_pos = strrchr(str, ':');
-
-		if (line_pos && phpdbg_is_numeric(line_pos+1)) {
-			if (strchr(str, ':') == line_pos) {
-				char path[MAXPATHLEN];
-
-				memcpy(path, str, line_pos - str);
-				path[line_pos - str] = 0;
-				*line_pos = 0;
-				param->file.name = phpdbg_resolve_path(path TSRMLS_CC);
-				param->file.line = strtol(line_pos+1, NULL, 0);
-				param->type = FILE_PARAM;
-
-				goto parsed;
-			}
-		}
-
-		line_pos = strrchr(str, '#');
-
-		if (line_pos && phpdbg_is_numeric(line_pos+1)) {
-			if (strchr(str, '#') == line_pos) {
-				param->num = strtol(line_pos + 1, NULL, 0);
-
-				if (phpdbg_is_class_method(str, line_pos - str, &class_name, &func_name)) {
-					param->method.class = class_name;
-					param->method.name = func_name;
-					param->type = NUMERIC_METHOD_PARAM;
-				} else {
-					param->len = line_pos - str;
-					param->str = estrndup(str, param->len);
-					param->type = NUMERIC_FUNCTION_PARAM;
-				}
-
-				goto parsed;
-			}
-		}
-	}
-
-	param->str = estrndup(str, len);
-	param->len = len;
-	param->type = STR_PARAM;
-
-parsed:
-	phpdbg_debug("phpdbg_parse_param(\"%s\", %lu): %s",
-		str, len, phpdbg_get_param_type(param TSRMLS_CC));
-	return param->type;
-} /* }}} */
-
 PHPDBG_API void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 {
 	if (param) {
@@ -776,80 +703,30 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async
 
 PHPDBG_API char *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
 {
+	char buf[PHPDBG_MAX_CMD];
 	char *cmd = NULL;
 	char *buffer = NULL;
 
-	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+	if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) != PHPDBG_IS_STOPPING) {
 		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && (buffered == NULL) && !phpdbg_active_sigsafe_mem(TSRMLS_C)) {
 			fflush(PHPDBG_G(io)[PHPDBG_STDOUT].ptr);
 		}
 
 		if (buffered == NULL) {
-			if (0) {
-disconnect:
-				PHPDBG_G(flags) |= (PHPDBG_IS_QUITTING|PHPDBG_IS_DISCONNECTED);
-				zend_bailout();
-				return NULL;
-			}
-
 #define USE_LIB_STAR (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT))
-
 			/* note: EOF makes readline write prompt again in local console mode - and ignored if compiled without readline */
-			/* strongly assuming to be in blocking mode... */
 #if USE_LIB_STAR
 readline:
 			if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE)
 #endif
 			{
-				char buf[PHPDBG_MAX_CMD];
-				int bytes = PHPDBG_G(input_buflen), len = 0;
-				if (PHPDBG_G(input_buflen)) {
-					memcpy(buf, PHPDBG_G(input_buffer), bytes);
-				}
-
 				phpdbg_write("prompt", "", "%s", phpdbg_get_prompt(TSRMLS_C));
-				PHPDBG_G(last_was_newline) = 1;
-
-				do {
-					int i;
-					if (bytes <= 0) { 
-						continue;
-					}
-
-					for (i = len; i < len + bytes; i++) {
-						if (buf[i] == '\x03') {
-							if (i != len + bytes - 1) {
-								memmove(buf + i, buf + i + 1, len + bytes - i - 1);
-							}
-							len--;
-							i--;
-							continue;
-						}
-						if (buf[i] == '\n') {
-							PHPDBG_G(input_buflen) = len + bytes - 1 - i;
-							if (PHPDBG_G(input_buflen)) {
-								memcpy(PHPDBG_G(input_buffer), buf + i + 1, PHPDBG_G(input_buflen));
-							}
-							if (i != PHPDBG_MAX_CMD - 1) {
-								buf[i + 1] = 0;
-							}
-							cmd = buf;
-							goto end;
-						}
-					}
-					len += bytes;
-					/* XXX export the timeout through INI??*/
-				} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1 TSRMLS_CC)) > 0);
-
-				if (bytes <= 0) {
-					goto disconnect;
-				}
-
-				cmd = buf;
+				phpdbg_consume_stdin_line(cmd = buf TSRMLS_CC);
 			}
 #if USE_LIB_STAR
 			else {
 				cmd = readline(phpdbg_get_prompt(TSRMLS_C));
+				PHPDBG_G(last_was_newline) = 1;
 			}
 
 			if (!cmd) {
@@ -863,8 +740,7 @@ readline:
 		} else {
 			cmd = buffered;
 		}
-end:
-		PHPDBG_G(last_was_newline) = 1;
+
 		buffer = estrdup(cmd);
 
 #if USE_LIB_STAR
@@ -902,3 +778,24 @@ PHPDBG_API void phpdbg_destroy_input(char **input TSRMLS_DC) /*{{{ */
 {
 	efree(*input);
 } /* }}} */
+
+PHPDBG_API int phpdbg_ask_user_permission(const char *question TSRMLS_DC) {
+	if (!(PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {
+		char buf[PHPDBG_MAX_CMD];
+		phpdbg_out("%s", question);
+		phpdbg_out(" (type y or n): ");
+
+		while (1) {
+			phpdbg_consume_stdin_line(buf TSRMLS_CC);
+			if (buf[1] == '\n' && (buf[0] == 'y' || buf[0] == 'n')) {
+				if (buf[0] == 'y') {
+					return SUCCESS;
+				}
+				return FAILURE;
+			}
+			phpdbg_out("Please enter either y (yes) or n (no): ");
+		}
+	}
+
+	return SUCCESS;
+}

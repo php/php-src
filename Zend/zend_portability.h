@@ -74,6 +74,10 @@
 # include <alloca.h>
 #endif
 
+#if defined(ZEND_WIN32)
+#include <intrin.h>
+#endif
+
 /* Only use this macro if you know for sure that all of the switches values
    are covered by its case statements */
 #if ZEND_DEBUG
@@ -196,8 +200,10 @@ char *alloca();
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)
 # define ZEND_FASTCALL __attribute__((fastcall))
-#elif defined(_MSC_VER) && defined(_M_IX86)
+#elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER <= 1700
 # define ZEND_FASTCALL __fastcall
+#elif defined(_MSC_VER) && _MSC_VER >= 1800
+# define ZEND_FASTCALL __vectorcall
 #else
 # define ZEND_FASTCALL
 #endif
@@ -386,6 +392,13 @@ char *alloca();
 #define ZEND_SECURE_ZERO(var, size) RtlSecureZeroMemory((var), (size))
 #else
 #define ZEND_SECURE_ZERO(var, size) memset((var), 0, (size))
+#endif
+
+/* This check should only be used on network socket, not file descriptors */
+#ifdef ZEND_WIN32
+#define ZEND_VALID_SOCKET(sock) (INVALID_SOCKET != (sock))
+#else
+#define ZEND_VALID_SOCKET(sock) ((sock) >= 0)
 #endif
 
 #endif /* ZEND_PORTABILITY_H */

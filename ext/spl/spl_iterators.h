@@ -134,7 +134,7 @@ typedef struct _spl_dual_it_object {
 	struct {
 		zval                 data;
 		zval                 key;
-		int                  pos;
+		zend_long            pos;
 	} current;
 	dual_it_type             dit_type;
 	union {

@@ -4717,6 +4717,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 				if (type->attributes &&
 				    (attr = zend_hash_str_find_ptr(type->attributes, SOAP_1_1_ENC_NAMESPACE":arrayType",
 				      sizeof(SOAP_1_1_ENC_NAMESPACE":arrayType")-1)) != NULL &&
+					attr->extraAttributes &&
 				    (ext = zend_hash_str_find_ptr(attr->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType")-1)) != NULL) {
 					char *end = strchr(ext->val, '[');
 					int len;
@@ -4740,6 +4741,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 					if (type->attributes &&
 					    (attr = zend_hash_str_find_ptr(type->attributes, SOAP_1_2_ENC_NAMESPACE":itemType",
 					      sizeof(SOAP_1_2_ENC_NAMESPACE":itemType")-1)) != NULL &&
+						attr->extraAttributes &&
 				    (ext = zend_hash_str_find_ptr(attr->extraAttributes, WSDL_NAMESPACE":itemType", sizeof(WSDL_NAMESPACE":arrayType")-1)) != NULL) {
 						smart_str_appends(buf, ext->val);
 						smart_str_appendc(buf, ' ');
@@ -4757,6 +4759,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 					if (type->attributes &&
 					    (attr = zend_hash_str_find_ptr(type->attributes, SOAP_1_2_ENC_NAMESPACE":arraySize",
 					      sizeof(SOAP_1_2_ENC_NAMESPACE":arraySize")-1)) != NULL &&
+						attr->extraAttributes &&
 					    (ext = zend_hash_str_find_ptr(attr->extraAttributes, WSDL_NAMESPACE":itemType", sizeof(WSDL_NAMESPACE":arraySize")-1)) != NULL) {
 						smart_str_appendc(buf, '[');
 						smart_str_appends(buf, ext->val);

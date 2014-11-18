@@ -29,7 +29,6 @@
 #include "phpdbg_print.h"
 #include "phpdbg_info.h"
 #include "phpdbg_break.h"
-#include "phpdbg_bp.h"
 #include "phpdbg_opcode.h"
 #include "phpdbg_list.h"
 #include "phpdbg_utils.h"
@@ -43,6 +42,7 @@
 #include "phpdbg_eol.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+extern int phpdbg_startup_run;
 
 #ifdef HAVE_LIBDL
 #ifdef PHP_WIN32
@@ -200,6 +200,110 @@ static inline int phpdbg_call_register(phpdbg_param_t *stack TSRMLS_DC) /* {{{ *
 	return FAILURE;
 } /* }}} */
 
+struct phpdbg_init_state {
+	int line;
+	zend_bool in_code;
+	char *code;
+	size_t code_len;
+	const char *init_file;
+};
+
+static void phpdbg_line_init(char *cmd, struct phpdbg_init_state *state TSRMLS_DC) {
+	size_t cmd_len = strlen(cmd);
+
+	state->line++;
+
+	while (cmd_len > 0L && isspace(cmd[cmd_len-1])) {
+		cmd_len--;
+	}
+
+	cmd[cmd_len] = '\0';
+
+	if (*cmd && cmd_len > 0L && cmd[0] != '#') {
+		if (cmd_len == 2) {
+			if (memcmp(cmd, "<:", sizeof("<:")-1) == SUCCESS) {
+				state->in_code = 1;
+				return;
+			} else {
+				if (memcmp(cmd, ":>", sizeof(":>")-1) == SUCCESS) {
+					state->in_code = 0;
+					state->code[state->code_len] = '\0';
+					zend_eval_stringl(state->code, state->code_len, NULL, "phpdbginit code" TSRMLS_CC);
+					free(state->code);
+					state->code = NULL;
+					return;
+				}
+			}
+		}
+
+		if (state->in_code) {
+			if (state->code == NULL) {
+				state->code = malloc(cmd_len + 1);
+			} else {
+				state->code = realloc(state->code, state->code_len + cmd_len + 1);
+			}
+
+			if (state->code) {
+				memcpy(&state->code[state->code_len], cmd, cmd_len);
+				state->code_len += cmd_len;
+			}
+
+			return;
+		}
+
+		zend_try {
+			char *input = phpdbg_read_input(cmd TSRMLS_CC);
+			phpdbg_param_t stack;
+
+			phpdbg_init_param(&stack, STACK_PARAM);
+
+			phpdbg_activate_err_buf(1 TSRMLS_CC);
+
+			if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
+				switch (phpdbg_stack_execute(&stack, 1 /* allow_async_unsafe == 1 */ TSRMLS_CC)) {
+					case FAILURE:
+						phpdbg_activate_err_buf(0 TSRMLS_CC);
+						if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
+							if (state->init_file) {
+								phpdbg_output_err_buf("initfailure", "%b file=\"%s\" line=\"%d\" input=\"%s\"", "Unrecognized command in %s:%d: %s, %b!" TSRMLS_CC, state->init_file, state->line, input);
+							} else {
+								phpdbg_output_err_buf("initfailure", "%b line=\"%d\" input=\"%s\"", "Unrecognized command on line %d: %s, %b!" TSRMLS_CC, state->line, input);
+							}
+						}
+					break;
+				}
+			}
+
+			phpdbg_activate_err_buf(0 TSRMLS_CC);
+			phpdbg_free_err_buf(TSRMLS_C);
+
+			phpdbg_stack_free(&stack);
+			phpdbg_destroy_input(&input TSRMLS_CC);
+		} zend_catch {
+			PHPDBG_G(flags) &= ~(PHPDBG_IS_RUNNING | PHPDBG_IS_CLEANING);
+			if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+				zend_bailout();
+			}
+		} zend_end_try();
+	}
+
+}
+
+void phpdbg_string_init(char *buffer TSRMLS_DC) {
+	struct phpdbg_init_state state = {0};
+	char *str = strtok(buffer, "\n");
+
+	while (str) {
+		phpdbg_line_init(str, &state TSRMLS_CC);
+
+		str = strtok(NULL, "\n");
+	}
+
+	if (state.code) {
+		free(state.code);
+	}
+}
+
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC) /* {{{ */
 {
 	struct stat sb;
@@ -207,86 +311,17 @@ void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_
 	if (init_file && VCWD_STAT(init_file, &sb) != -1) {
 		FILE *fp = fopen(init_file, "r");
 		if (fp) {
-			int line = 1;
-
 			char cmd[PHPDBG_MAX_CMD];
-			size_t cmd_len = 0L;
-			char *code = NULL;
-			size_t code_len = 0L;
-			zend_bool in_code = 0;
+			struct phpdbg_init_state state = {0};
+
+			state.init_file = init_file;
 
 			while (fgets(cmd, PHPDBG_MAX_CMD, fp) != NULL) {
-				cmd_len = strlen(cmd)-1;
-
-				while (cmd_len > 0L && isspace(cmd[cmd_len-1]))
-					cmd_len--;
-
-				cmd[cmd_len] = '\0';
-
-				if (*cmd && cmd_len > 0L && cmd[0] != '#') {
-					if (cmd_len == 2) {
-						if (memcmp(cmd, "<:", sizeof("<:")-1) == SUCCESS) {
-							in_code = 1;
-							goto next_line;
-						} else {
-							if (memcmp(cmd, ":>", sizeof(":>")-1) == SUCCESS) {
-								in_code = 0;
-								code[code_len] = '\0';
-								{
-									zend_eval_stringl(code, code_len, NULL, "phpdbginit code" TSRMLS_CC);
-								}
-								free(code);
-								code = NULL;
-								goto next_line;
-							}
-						}
-					}
-
-					if (in_code) {
-						if (code == NULL) {
-							code = malloc(cmd_len + 1);
-						} else code = realloc(code, code_len + cmd_len + 1);
-
-						if (code) {
-							memcpy(
-								&code[code_len], cmd, cmd_len);
-							code_len += cmd_len;
-						}
-						goto next_line;
-					}
-
-					{
-						char *input = phpdbg_read_input(cmd TSRMLS_CC);
-						phpdbg_param_t stack;
-
-						phpdbg_init_param(&stack, STACK_PARAM);
-
-						phpdbg_activate_err_buf(1 TSRMLS_CC);
-
-						if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
-							switch (phpdbg_stack_execute(&stack, 1 /* allow_async_unsafe == 1 */ TSRMLS_CC)) {
-								case FAILURE:
-									phpdbg_activate_err_buf(0 TSRMLS_CC);
-									if (phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
-										phpdbg_output_err_buf("initfailure", "%b file=\"%s\" line=\"%d\" input=\"%s\"", "Unrecognized command in %s:%d: %s, %b!" TSRMLS_CC, init_file, line, input);
-									}
-								break;
-							}
-						}
-
-						phpdbg_activate_err_buf(0 TSRMLS_CC);
-						phpdbg_free_err_buf(TSRMLS_C);
-
-						phpdbg_stack_free(&stack);
-						phpdbg_destroy_input(&input TSRMLS_CC);
-					}
-				}
-next_line:
-				line++;
+				phpdbg_line_init(cmd, &state TSRMLS_CC);
 			}
 
-			if (code) {
-				free(code);
+			if (state.code) {
+				free(state.code);
 			}
 
 			fclose(fp);
@@ -347,6 +382,11 @@ PHPDBG_COMMAND(exec) /* {{{ */
 			size_t res_len = strlen(res);
 
 			if ((res_len != PHPDBG_G(exec_len)) || (memcmp(res, PHPDBG_G(exec), res_len) != SUCCESS)) {
+				if (PHPDBG_G(in_execution)) {
+					if (phpdbg_ask_user_permission("Do you really want to stop execution to set a new execution context?" TSRMLS_CC) == FAILURE) {
+						return FAILURE;
+					}
+				}
 
 				if (PHPDBG_G(exec)) {
 					phpdbg_notice("exec", "type=\"unset\" context=\"%s\"", "Unsetting old execution context: %s", PHPDBG_G(exec));
@@ -370,9 +410,11 @@ PHPDBG_COMMAND(exec) /* {{{ */
 
 				phpdbg_notice("exec", "type=\"set\" context=\"%s\"", "Set execution context: %s", PHPDBG_G(exec));
 
-				if (phpdbg_compile(TSRMLS_C) == FAILURE) {
-					phpdbg_error("compile", "type=\"compilefailure\" context=\"%s\"", "Failed to compile %s", PHPDBG_G(exec));
+				if (PHPDBG_G(in_execution)) {
+					phpdbg_clean(1 TSRMLS_CC);
 				}
+
+				phpdbg_compile(TSRMLS_C);
 			} else {
 				phpdbg_notice("exec", "type=\"unchanged\"", "Execution context not changed");
 			}
@@ -391,11 +433,6 @@ int phpdbg_compile(TSRMLS_D) /* {{{ */
 
 	if (!PHPDBG_G(exec)) {
 		phpdbg_error("inactive", "type=\"nocontext\"", "No execution context");
-		return SUCCESS;
-	}
-
-	if (PHPDBG_G(in_execution)) {
-		phpdbg_error("inactive", "type=\"isrunning\"", "Cannot compile while in execution");
 		return FAILURE;
 	}
 
@@ -404,6 +441,7 @@ int phpdbg_compile(TSRMLS_D) /* {{{ */
 		zend_destroy_file_handle(&fh TSRMLS_CC);
 
 		phpdbg_notice("compile", "context=\"%s\"", "Successful compilation of %s", PHPDBG_G(exec));
+
 		return SUCCESS;
 	} else {
 		phpdbg_error("compile", "type=\"openfailure\" context=\"%s\"", "Could not open file %s", PHPDBG_G(exec));
@@ -540,14 +578,17 @@ static inline void phpdbg_handle_exception(TSRMLS_D) /* }}} */
 
 PHPDBG_COMMAND(run) /* {{{ */
 {
-	if (PHPDBG_G(in_execution)) {
-		phpdbg_error("inactive", "type=\"isrunning\"", "Cannot start another execution while one is in progress");
-		return SUCCESS;
-	}
-
 	if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
 		zend_execute_data *ex = EG(current_execute_data);
 		zend_bool restore = 1;
+
+		if (PHPDBG_G(in_execution)) {
+			if (phpdbg_ask_user_permission("Do you really want to restart execution?" TSRMLS_CC) == SUCCESS) {
+				phpdbg_startup_run++;
+				phpdbg_clean(1 TSRMLS_CC);
+			}
+			return SUCCESS;
+		}
 
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
@@ -597,12 +638,17 @@ PHPDBG_COMMAND(run) /* {{{ */
 
 		zend_try {
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
+			PHPDBG_G(flags) |= PHPDBG_IS_RUNNING;
 			zend_execute(PHPDBG_G(ops), &PHPDBG_G(retval) TSRMLS_CC);
 			PHPDBG_G(flags) ^= PHPDBG_IS_INTERACTIVE;
-			phpdbg_notice("stop", "type=\"normal\"", "Script ended normally");
 		} zend_catch {
 			PHPDBG_G(in_execution) = 0;
-			if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+
+			if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+				zend_bailout();
+			}
+
+			if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 				phpdbg_error("stop", "type=\"bailout\"", "Caught exit/error from VM");
 				restore = 0;
 			}
@@ -618,6 +664,10 @@ PHPDBG_COMMAND(run) /* {{{ */
 				phpdbg_handle_exception(TSRMLS_C);
 			}
 		}
+
+		phpdbg_clean(1 TSRMLS_CC);
+
+		PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
 	} else {
 		phpdbg_error("inactive", "type=\"nocontext\"", "Nothing to execute!");
 	}
@@ -645,12 +695,21 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	zend_bool stepping = ((PHPDBG_G(flags) & PHPDBG_IS_STEPPING) == PHPDBG_IS_STEPPING);
 	zval retval;
 
+	zend_execute_data *original_execute_data = EG(current_execute_data);
+	zend_class_entry *original_scope = EG(scope);
+	zend_vm_stack original_stack = EG(vm_stack);
+	original_stack->top = EG(vm_stack_top);
+
+	PHPDBG_OUTPUT_BACKUP();
+
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
 		phpdbg_try_access {
 			phpdbg_parse_variable(param->str, param->len, &EG(symbol_table).ht, 0, phpdbg_output_ev_variable, 0 TSRMLS_CC);
 		} phpdbg_catch_access {
 			phpdbg_error("signalsegv", "", "Could not fetch data, invalid data source");
 		} phpdbg_end_try_access();
+
+		PHPDBG_OUTPUT_BACKUP_RESTORE();
 		return SUCCESS;
 	}
 
@@ -672,6 +731,12 @@ PHPDBG_COMMAND(ev) /* {{{ */
 			phpdbg_out("\n");
 			zval_ptr_dtor(&retval);
 		}
+	} zend_catch {
+		EG(current_execute_data) = original_execute_data;
+		EG(scope) = original_scope;
+		EG(vm_stack_top) = original_stack->top;
+		EG(vm_stack_end) = original_stack->end;
+		EG(vm_stack) = original_stack;
 	} zend_end_try();
 	PHPDBG_G(flags) &= ~PHPDBG_IN_EVAL;
 
@@ -681,6 +746,8 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	}
 
 	CG(unclean_shutdown) = 0;
+
+	PHPDBG_OUTPUT_BACKUP_RESTORE();
 
 	return SUCCESS;
 } /* }}} */
@@ -1043,7 +1110,7 @@ PHPDBG_COMMAND(register) /* {{{ */
 
 			phpdbg_notice("register", "function=\"%s\"", "Registered %s", lcname);
 		} else {
-			phpdbg_error("register", "type=\"notfoundc\" function=\"%s\"", "The requested function (%s) could not be found", param->str);
+			phpdbg_error("register", "type=\"notfound\" function=\"%s\"", "The requested function (%s) could not be found", param->str);
 		}
 	} else {
 		phpdbg_error("register", "type=\"inuse\" function=\"%s\"", "The requested name (%s) is already in use", lcname);
@@ -1056,8 +1123,9 @@ PHPDBG_COMMAND(register) /* {{{ */
 PHPDBG_COMMAND(quit) /* {{{ */
 {
 	/* don't allow this to loop, ever ... */
-	if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
+	if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
 		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+		PHPDBG_G(flags) &= ~(PHPDBG_IS_RUNNING | PHPDBG_IS_CLEANING);
 		zend_bailout();
 	}
 
@@ -1067,8 +1135,9 @@ PHPDBG_COMMAND(quit) /* {{{ */
 PHPDBG_COMMAND(clean) /* {{{ */
 {
 	if (PHPDBG_G(in_execution)) {
-		phpdbg_error("inactive", "type=\"isrunning\"", "Cannot clean environment while executing");
-		return SUCCESS;
+		if (phpdbg_ask_user_permission("Do you really want to clean your current environment?" TSRMLS_CC) == FAILURE) {
+			return SUCCESS;
+		}
 	}
 
 	phpdbg_out("Cleaning Execution Environment\n");
@@ -1078,6 +1147,8 @@ PHPDBG_COMMAND(clean) /* {{{ */
 	phpdbg_writeln("clean", "functions=\"%d\"", "Functions  %d", zend_hash_num_elements(EG(function_table)));
 	phpdbg_writeln("clean", "constants=\"%d\"", "Constants  %d", zend_hash_num_elements(EG(zend_constants)));
 	phpdbg_writeln("clean", "includes=\"%d\"", "Includes   %d", zend_hash_num_elements(&EG(included_files)));
+
+	PHPDBG_G(flags) &= ~PHPDBG_IS_RUNNING;
 
 	phpdbg_clean(1 TSRMLS_CC);
 
@@ -1156,60 +1227,65 @@ int phpdbg_interactive(zend_bool allow_async_unsafe TSRMLS_DC) /* {{{ */
 
 	PHPDBG_G(flags) |= PHPDBG_IS_INTERACTIVE;
 
-	input = phpdbg_read_input(NULL TSRMLS_CC);
+	while (ret == SUCCESS || ret == FAILURE) {
+		if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_STOPPING) {
+			zend_bailout();
+		}
 
-	if (input) {
-		do {
-			phpdbg_init_param(&stack, STACK_PARAM);
+		if (!(input = phpdbg_read_input(NULL TSRMLS_CC))) {
+			break;
+		}
 
-			if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
-				phpdbg_activate_err_buf(1 TSRMLS_CC);
+
+		phpdbg_init_param(&stack, STACK_PARAM);
+
+		if (phpdbg_do_parse(&stack, input TSRMLS_CC) <= 0) {
+			phpdbg_activate_err_buf(1 TSRMLS_CC);
 
 #ifdef PHP_WIN32
 #define PARA ((phpdbg_param_t *)stack.next)->type
-				if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE && (RUN_PARAM == PARA || EVAL_PARAM == PARA)) {
-					sigio_watcher_start();
-				}
+			if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE && (RUN_PARAM == PARA || EVAL_PARAM == PARA)) {
+				sigio_watcher_start();
+			}
 #endif
-				switch (ret = phpdbg_stack_execute(&stack, allow_async_unsafe TSRMLS_CC)) {
-					case FAILURE:
-						if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-							if (!allow_async_unsafe || phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
-								phpdbg_output_err_buf(NULL, "%b", "%b" TSRMLS_CC);
-							}
+			switch (ret = phpdbg_stack_execute(&stack, allow_async_unsafe TSRMLS_CC)) {
+				case FAILURE:
+					if (!(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
+						if (!allow_async_unsafe || phpdbg_call_register(&stack TSRMLS_CC) == FAILURE) {
+							phpdbg_output_err_buf(NULL, "%b", "%b" TSRMLS_CC);
 						}
-					break;
-
-					case PHPDBG_LEAVE:
-					case PHPDBG_FINISH:
-					case PHPDBG_UNTIL:
-					case PHPDBG_NEXT: {
-						phpdbg_activate_err_buf(0 TSRMLS_CC);
-						phpdbg_free_err_buf(TSRMLS_C);
-						if (!PHPDBG_G(in_execution) && !(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-							phpdbg_error("command", "type=\"noexec\"", "Not running");
-						}
-						goto out;
 					}
-				}
+				break;
 
-				phpdbg_activate_err_buf(0 TSRMLS_CC);
-				phpdbg_free_err_buf(TSRMLS_C);
-#ifdef PHP_WIN32
-				if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE && (RUN_PARAM == PARA || EVAL_PARAM == PARA)) {
-					sigio_watcher_stop();
+				case PHPDBG_LEAVE:
+				case PHPDBG_FINISH:
+				case PHPDBG_UNTIL:
+				case PHPDBG_NEXT: {
+					phpdbg_activate_err_buf(0 TSRMLS_CC);
+					phpdbg_free_err_buf(TSRMLS_C);
+					if (!PHPDBG_G(in_execution) && !(PHPDBG_G(flags) & PHPDBG_IS_STOPPING)) {
+						phpdbg_error("command", "type=\"noexec\"", "Not running");
+					}
+					break;
 				}
-#undef PARA
-#endif
 			}
 
-			phpdbg_stack_free(&stack);
-			phpdbg_destroy_input(&input TSRMLS_CC);
-			PHPDBG_G(req_id) = 0;
-		} while ((input = phpdbg_read_input(NULL TSRMLS_CC)));
+			phpdbg_activate_err_buf(0 TSRMLS_CC);
+			phpdbg_free_err_buf(TSRMLS_C);
+#ifdef PHP_WIN32
+			if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE && (RUN_PARAM == PARA || EVAL_PARAM == PARA)) {
+				sigio_watcher_stop();
+			}
+#undef PARA
+#endif
+		}
+
+		phpdbg_stack_free(&stack);
+		phpdbg_destroy_input(&input TSRMLS_CC);
+		PHPDBG_G(req_id) = 0;
+		input = NULL;
 	}
 
-out:
 	if (input) {
 		phpdbg_stack_free(&stack);
 		phpdbg_destroy_input(&input TSRMLS_CC);
@@ -1267,6 +1343,10 @@ void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 	HashTable vars;
 
 	zend_hash_init(&vars, execute_data->func->op_array.last, NULL, NULL, 0);
+
+	if ((PHPDBG_G(flags) & PHPDBG_IS_STOPPING) && !(PHPDBG_G(flags) & PHPDBG_IS_RUNNING)) {
+		zend_bailout();
+	}
 
 	PHPDBG_G(in_execution) = 1;
 
@@ -1413,7 +1493,7 @@ void phpdbg_force_interruption(TSRMLS_D) {
 next:
 	PHPDBG_G(flags) &= ~PHPDBG_IN_SIGNAL_HANDLER;
 
-	if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
+	if (PHPDBG_G(flags) & PHPDBG_IS_STOPPING) {
 		zend_bailout();
 	}
 }

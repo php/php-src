@@ -954,12 +954,10 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 			continue;
 		}
 		prop = NULL;
-		if (prop_info->offset >= 0) {
-			if (statics && (prop_info->flags & ZEND_ACC_STATIC) != 0) {
-				prop = &ce->default_static_members_table[prop_info->offset];
-			} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
-				prop = &ce->default_properties_table[prop_info->offset];
- 			}
+		if (statics && (prop_info->flags & ZEND_ACC_STATIC) != 0) {
+			prop = &ce->default_static_members_table[prop_info->offset];
+		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
+			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 		}
 		if (!prop || Z_TYPE_P(prop) == IS_UNDEF) {
 			continue;
@@ -1830,6 +1828,10 @@ ZEND_FUNCTION(create_function)
 			RETURN_FALSE;
 		}
 		(*func->refcount)++;
+		static_variables = func->static_variables;
+		func->static_variables = NULL;
+		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
+		func->static_variables = static_variables;
 
 		function_name = zend_string_alloc(sizeof("0lambda_")+MAX_LENGTH_OF_LONG, 0);
 		function_name->val[0] = '\0';
@@ -1837,10 +1839,6 @@ ZEND_FUNCTION(create_function)
 		do {
 			function_name->len = snprintf(function_name->val + 1, sizeof("lambda_")+MAX_LENGTH_OF_LONG, "lambda_%d", ++EG(lambda_count)) + 1;
 		} while (zend_hash_add_ptr(EG(function_table), function_name, func) == NULL);
-		static_variables = func->static_variables;
-		func->static_variables = NULL;
-		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);
-		func->static_variables = static_variables;
 		RETURN_STR(function_name);
 	} else {
 		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);

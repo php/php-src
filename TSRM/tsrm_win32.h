@@ -23,6 +23,9 @@
 
 #include "TSRM.h"
 #include <windows.h>
+#if HAVE_UTIME
+# include <sys/utime.h>
+#endif
 
 struct ipc_perm {
 	int			key;

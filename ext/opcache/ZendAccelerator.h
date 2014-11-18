@@ -270,7 +270,6 @@ typedef struct _zend_accel_shared_globals {
 	LONGLONG   restart_in;
 #endif
 	zend_bool       restart_in_progress;
-    time_t          revalidate_at;
 	/* Interned Strings Support */
 	char           *interned_strings_start;
 	char           *interned_strings_top;

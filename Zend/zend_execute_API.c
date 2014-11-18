@@ -51,8 +51,8 @@ static WNDCLASS wc;
 static HWND timeout_window;
 static HANDLE timeout_thread_event;
 static HANDLE timeout_thread_handle;
-static DWORD timeout_thread_id;
-static int timeout_thread_initialized=0;
+static unsigned timeout_thread_id;
+static volatile long timeout_thread_initialized=0;
 #endif
 
 #if 0&&ZEND_DEBUG
@@ -1166,6 +1166,10 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 #ifdef ZEND_WIN32
 static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) /* {{{ */
 {
+#ifdef ZTS
+	THREAD_T thread_id = (THREAD_T)wParam;
+#endif
+
 	switch (message) {
 		case WM_DESTROY:
 			PostQuitMessage(0);
@@ -1180,7 +1184,7 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 #endif
 				SetTimer(timeout_window, wParam, lParam*1000, NULL);
 #ifdef ZTS
-				tsrm_ls = ts_resource_ex(0, &wParam);
+				tsrm_ls = ts_resource_ex(0, &thread_id);
 				if (!tsrm_ls) {
 					/* shouldn't normally happen */
 					break;
@@ -1199,7 +1203,7 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 #ifdef ZTS
 				void ***tsrm_ls;
 
-				tsrm_ls = ts_resource_ex(0, &wParam);
+				tsrm_ls = ts_resource_ex(0, &thread_id);
 				if (!tsrm_ls) {
 					/* Thread died before receiving its timeout? */
 					break;

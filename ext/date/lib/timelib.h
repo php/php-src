@@ -68,15 +68,15 @@ int timelib_valid_time(timelib_sll h, timelib_sll i, timelib_sll s);
 int timelib_valid_date(timelib_sll y, timelib_sll m, timelib_sll d);
 
 /* From parse_date.re */
-timelib_time *timelib_strtotime(char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
-timelib_time *timelib_parse_from_format(char *format, char *s, int len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
+timelib_time *timelib_strtotime(char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
+timelib_time *timelib_parse_from_format(char *format, char *s, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper);
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
 char *timelib_timezone_id_from_abbr(const char *abbr, timelib_long gmtoffset, int isdst);
 const timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
 timelib_long timelib_parse_tz_cor(char**);
 
 /* From parse_iso_intervals.re */
-void timelib_strtointerval(char *s, int len, 
+void timelib_strtointerval(char *s, size_t len, 
                            timelib_time **begin, timelib_time **end, 
 						   timelib_rel_time **period, int *recurrences, 
 						   struct timelib_error_container **errors);

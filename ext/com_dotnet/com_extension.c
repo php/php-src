@@ -393,7 +393,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 
 #define COM_ERR_CONST(x) { \
 	zend_long __tmp; \
-	ULongToUIntPtr(x, &__tmp); \
+	ULongToIntPtr(x, &__tmp); \
 	REGISTER_LONG_CONSTANT(#x, __tmp, CONST_CS|CONST_PERSISTENT); \
 }
 	
@@ -460,6 +460,10 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	COM_ERR_CONST(DISP_E_BADINDEX);
 	COM_ERR_CONST(MK_E_UNAVAILABLE);
 
+#if SIZEOF_ZEND_LONG == 8
+	COM_CONST(VT_UI8);
+	COM_CONST(VT_I8);
+#endif
 	return SUCCESS;
 }
 /* }}} */

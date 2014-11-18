@@ -199,7 +199,7 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Object not initialized");
 			break;
 		case SPL_FS_DIR:
-			intern->file_name_len = spprintf(&intern->file_name, 0, "%s%c%s",
+			intern->file_name_len = (int)spprintf(&intern->file_name, 0, "%s%c%s",
 			                                 spl_filesystem_object_get_path(intern, NULL TSRMLS_CC),
 			                                 slash, intern->u.dir.entry.d_name);
 			break;
@@ -233,7 +233,7 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TS
 	int skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	intern->type = SPL_FS_DIR;
-	intern->_path_len = strlen(path);
+	intern->_path_len = (int)strlen(path);
 	intern->u.dir.dirp = php_stream_opendir(path, REPORT_ERRORS, FG(default_context));
 
 	if (intern->_path_len > 1 && IS_SLASH_AT(path, intern->_path_len-1)) {
@@ -384,7 +384,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	}
 
 	intern->file_name = use_copy ? estrndup(path, len) : path;
-	intern->file_name_len = len;
+	intern->file_name_len = (int)len;
 
 	while (intern->file_name_len > 1 && IS_SLASH_AT(intern->file_name, intern->file_name_len-1)) {
 		intern->file_name[intern->file_name_len-1] = 0;
@@ -398,7 +398,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	p2 = 0;
 #endif
 	if (p1 || p2) {
-		intern->_path_len = (p1 > p2 ? p1 : p2) - intern->file_name;
+		intern->_path_len = (int)((p1 > p2 ? p1 : p2) - intern->file_name);
 	} else {
 		intern->_path_len = 0;
 	}
@@ -934,7 +934,8 @@ SPL_METHOD(SplFileInfo, getExtension)
 
 	p = zend_memrchr(ret->val, '.', ret->len);
 	if (p) {
-		idx = p - ret->val;
+		assert(p > ret->val);
+		idx = (int)(p - ret->val);
 		RETVAL_STRINGL(ret->val + idx + 1, ret->len - idx - 1);
 		zend_string_release(ret);
 		return;
@@ -962,7 +963,8 @@ SPL_METHOD(DirectoryIterator, getExtension)
 
 	p = zend_memrchr(fname->val, '.', fname->len);
 	if (p) {
-		idx = p - fname->val;
+		assert(p > fname->val);
+		idx = (int)(p - fname->val);
 		RETVAL_STRINGL(fname->val + idx + 1, fname->len - idx - 1);
 		zend_string_release(fname);
 	} else {
@@ -1389,7 +1391,7 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 		if (path) {
 			char *dpath = estrndup(path, path_len);
 			path_len = php_dirname(dpath, path_len);
-			spl_filesystem_object_create_info(intern, dpath, path_len, 1, ce, return_value TSRMLS_CC);
+			spl_filesystem_object_create_info(intern, dpath, (int)path_len, 1, ce, return_value TSRMLS_CC);
 			efree(dpath);
 		}
 	}
@@ -1516,9 +1518,9 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 		subdir = Z_SPLFILESYSTEM_P(return_value);
 		if (subdir) {
 			if (intern->u.dir.sub_path && intern->u.dir.sub_path[0]) {
-				subdir->u.dir.sub_path_len = spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
+				subdir->u.dir.sub_path_len = (int)spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
 			} else {
-				subdir->u.dir.sub_path_len = strlen(intern->u.dir.entry.d_name);
+				subdir->u.dir.sub_path_len = (int)strlen(intern->u.dir.entry.d_name);
 				subdir->u.dir.sub_path = estrndup(intern->u.dir.entry.d_name, subdir->u.dir.sub_path_len);
 			}
 			subdir->info_class = intern->info_class;
@@ -1553,7 +1555,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char *sub_name;
-	int len;
+	size_t len;
 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2303,7 +2305,7 @@ SPL_METHOD(SplFileObject, __construct)
 		p2 = 0;
 #endif
 		if (p1 || p2) {
-			intern->_path_len = (p1 > p2 ? p1 : p2) - tmp_path;
+			intern->_path_len = (int)((p1 > p2 ? p1 : p2) - tmp_path);
 		} else {
 			intern->_path_len = 0;
 		}
@@ -2627,7 +2629,7 @@ SPL_METHOD(SplFileObject, fputcsv)
 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
 	char *delim = NULL, *enclo = NULL;
 	size_t d_len = 0, e_len = 0;
-	int ret;
+	zend_long ret;
 	zval *fields = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|ss", &fields, &delim, &d_len, &enclo, &e_len) == SUCCESS) {
@@ -2776,7 +2778,7 @@ SPL_METHOD(SplFileObject, fseek)
 	}
 
 	spl_filesystem_file_free_line(intern TSRMLS_CC);
-	RETURN_LONG(php_stream_seek(intern->u.file.stream, pos, whence));
+	RETURN_LONG(php_stream_seek(intern->u.file.stream, pos, (int)whence));
 } /* }}} */
 
 /* {{{ proto int SplFileObject::fgetc()

@@ -38,7 +38,8 @@ class MySession2 implements SessionHandlerInterface, SessionIdInterface {
 	}
 
 	public function write($id, $data) {
-		return file_put_contents($this->path . $id, $data);
+		// Empty $data = 0 = false
+		return (bool)file_put_contents($this->path . $id, $data);
 	}
 
 	public function destroy($id) {

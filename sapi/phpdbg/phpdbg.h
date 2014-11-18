@@ -29,8 +29,12 @@
 # define PHPDBG_API
 #endif
 
-#include <stdint.h>
-#include <stddef.h>
+#ifndef PHP_WIN32
+#	include <stdint.h>
+#	include <stddef.h>
+#else
+#	include "win32/php_stdint.h"
+#endif
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
@@ -50,7 +54,6 @@
 #if defined(_WIN32) && !defined(__MINGW32__)
 #	include <windows.h>
 #	include "config.w32.h"
-#	include "win32/php_stdint.h"
 #	undef  strcasecmp
 #	undef  strncasecmp
 #	define strcasecmp _stricmp 
@@ -67,28 +70,10 @@
 # include "TSRM.h"
 #endif
 
-#define ZEND_HASH_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
-	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_ptr = Z_PTR_P(_z);
-
 #undef zend_hash_str_add
 #define zend_hash_str_add_tmp(ht, key, len, pData) \
 	_zend_hash_str_add(ht, key, len, pData ZEND_FILE_LINE_CC)
 #define zend_hash_str_add(...) zend_hash_str_add_tmp(__VA_ARGS__)
-
-static zend_always_inline void *zend_hash_index_add_mem(HashTable *ht, zend_ulong h, void *pData, size_t size)
-{
-	zval tmp, *zv;
-
-	ZVAL_PTR(&tmp, NULL);
-	if ((zv = zend_hash_index_add(ht, h, &tmp))) {
-		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
-		memcpy(Z_PTR_P(zv), pData, size);
-		return Z_PTR_P(zv);
-	}
-	return NULL;
-}
 
 #ifdef HAVE_LIBREADLINE
 #	include <readline/readline.h>
@@ -139,6 +124,7 @@ static zend_always_inline void *zend_hash_index_add_mem(HashTable *ht, zend_ulon
 #include "phpdbg_utils.h"
 #include "phpdbg_btree.h"
 #include "phpdbg_watch.h"
+#include "phpdbg_bp.h"
 #ifdef PHP_WIN32
 # include "phpdbg_sigio_win32.h"
 #endif
@@ -154,70 +140,64 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
  BEGIN: DO NOT CHANGE DO NOT CHANGE DO NOT CHANGE
 */
 
-/* {{{ tables */
-#define PHPDBG_BREAK_FILE            0
-#define PHPDBG_BREAK_SYM             1
-#define PHPDBG_BREAK_OPLINE          2
-#define PHPDBG_BREAK_METHOD          3
-#define PHPDBG_BREAK_COND            4
-#define PHPDBG_BREAK_OPCODE          5
-#define PHPDBG_BREAK_FUNCTION_OPLINE 6
-#define PHPDBG_BREAK_METHOD_OPLINE   7
-#define PHPDBG_BREAK_FILE_OPLINE     8
-#define PHPDBG_BREAK_MAP             9
-#define PHPDBG_BREAK_TABLES          10 /* }}} */
-
 /* {{{ flags */
-#define PHPDBG_HAS_FILE_BP            (1<<1)
-#define PHPDBG_HAS_SYM_BP             (1<<2)
-#define PHPDBG_HAS_OPLINE_BP          (1<<3)
-#define PHPDBG_HAS_METHOD_BP          (1<<4)
-#define PHPDBG_HAS_COND_BP            (1<<5)
-#define PHPDBG_HAS_OPCODE_BP          (1<<6)
-#define PHPDBG_HAS_FUNCTION_OPLINE_BP (1<<7)
-#define PHPDBG_HAS_METHOD_OPLINE_BP   (1<<8)
-#define PHPDBG_HAS_FILE_OPLINE_BP     (1<<9) /* }}} */
+#define PHPDBG_HAS_FILE_BP            (1ULL<<1)
+#define PHPDBG_HAS_PENDING_FILE_BP    (1ULL<<2)
+#define PHPDBG_HAS_SYM_BP             (1ULL<<3)
+#define PHPDBG_HAS_OPLINE_BP          (1ULL<<4)
+#define PHPDBG_HAS_METHOD_BP          (1ULL<<5)
+#define PHPDBG_HAS_COND_BP            (1ULL<<6)
+#define PHPDBG_HAS_OPCODE_BP          (1ULL<<7)
+#define PHPDBG_HAS_FUNCTION_OPLINE_BP (1ULL<<8)
+#define PHPDBG_HAS_METHOD_OPLINE_BP   (1ULL<<9)
+#define PHPDBG_HAS_FILE_OPLINE_BP     (1ULL<<10) /* }}} */
 
 /*
  END: DO NOT CHANGE DO NOT CHANGE DO NOT CHANGE
 */
 
-#define PHPDBG_IN_COND_BP             (1<<10)
-#define PHPDBG_IN_EVAL                (1<<11)
+#define PHPDBG_IN_COND_BP             (1ULL<<11)
+#define PHPDBG_IN_EVAL                (1ULL<<12)
 
-#define PHPDBG_IS_STEPPING            (1<<12)
-#define PHPDBG_STEP_OPCODE            (1<<13)
-#define PHPDBG_IS_QUIET               (1<<14)
-#define PHPDBG_IS_QUITTING            (1<<15)
-#define PHPDBG_IS_COLOURED            (1<<16)
-#define PHPDBG_IS_CLEANING            (1<<17)
+#define PHPDBG_IS_STEPPING            (1ULL<<13)
+#define PHPDBG_STEP_OPCODE            (1ULL<<14)
+#define PHPDBG_IS_QUIET               (1ULL<<15)
+#define PHPDBG_IS_QUITTING            (1ULL<<16)
+#define PHPDBG_IS_COLOURED            (1ULL<<17)
+#define PHPDBG_IS_CLEANING            (1ULL<<18)
+#define PHPDBG_IS_RUNNING             (1ULL<<19)
 
-#define PHPDBG_IN_UNTIL               (1<<18)
-#define PHPDBG_IN_FINISH              (1<<19)
-#define PHPDBG_IN_LEAVE               (1<<20)
+#define PHPDBG_IN_UNTIL               (1ULL<<20)
+#define PHPDBG_IN_FINISH              (1ULL<<21)
+#define PHPDBG_IN_LEAVE               (1ULL<<22)
 
-#define PHPDBG_IS_REGISTERED          (1<<21)
-#define PHPDBG_IS_STEPONEVAL          (1<<22)
-#define PHPDBG_IS_INITIALIZING        (1<<23)
-#define PHPDBG_IS_SIGNALED            (1<<24)
-#define PHPDBG_IS_INTERACTIVE         (1<<25)
-#define PHPDBG_IS_BP_ENABLED          (1<<26)
-#define PHPDBG_IS_REMOTE              (1<<27)
-#define PHPDBG_IS_DISCONNECTED        (1<<28)
-#define PHPDBG_WRITE_XML              (1<<29)
+#define PHPDBG_IS_REGISTERED          (1ULL<<23)
+#define PHPDBG_IS_STEPONEVAL          (1ULL<<24)
+#define PHPDBG_IS_INITIALIZING        (1ULL<<25)
+#define PHPDBG_IS_SIGNALED            (1ULL<<26)
+#define PHPDBG_IS_INTERACTIVE         (1ULL<<27)
+#define PHPDBG_IS_BP_ENABLED          (1ULL<<28)
+#define PHPDBG_IS_REMOTE              (1ULL<<29)
+#define PHPDBG_IS_DISCONNECTED        (1ULL<<30)
+#define PHPDBG_WRITE_XML              (1ULL<<31)
 
-#define PHPDBG_SHOW_REFCOUNTS         (1<<30)
+#define PHPDBG_SHOW_REFCOUNTS         (1ULL<<32)
 
-#define PHPDBG_IN_SIGNAL_HANDLER      (1<<30)
+#define PHPDBG_IN_SIGNAL_HANDLER      (1ULL<<33)
 
-#define PHPDBG_SEEK_MASK              (PHPDBG_IN_UNTIL|PHPDBG_IN_FINISH|PHPDBG_IN_LEAVE)
-#define PHPDBG_BP_RESOLVE_MASK	      (PHPDBG_HAS_FUNCTION_OPLINE_BP|PHPDBG_HAS_METHOD_OPLINE_BP|PHPDBG_HAS_FILE_OPLINE_BP)
-#define PHPDBG_BP_MASK                (PHPDBG_HAS_FILE_BP|PHPDBG_HAS_SYM_BP|PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_OPLINE_BP|PHPDBG_HAS_COND_BP|PHPDBG_HAS_OPCODE_BP|PHPDBG_HAS_FUNCTION_OPLINE_BP|PHPDBG_HAS_METHOD_OPLINE_BP|PHPDBG_HAS_FILE_OPLINE_BP)
+#define PHPDBG_DISCARD_OUTPUT         (1ULL<<34)
+
+#define PHPDBG_SEEK_MASK              (PHPDBG_IN_UNTIL | PHPDBG_IN_FINISH | PHPDBG_IN_LEAVE)
+#define PHPDBG_BP_RESOLVE_MASK	      (PHPDBG_HAS_FUNCTION_OPLINE_BP | PHPDBG_HAS_METHOD_OPLINE_BP | PHPDBG_HAS_FILE_OPLINE_BP)
+#define PHPDBG_BP_MASK                (PHPDBG_HAS_FILE_BP | PHPDBG_HAS_SYM_BP | PHPDBG_HAS_METHOD_BP | PHPDBG_HAS_OPLINE_BP | PHPDBG_HAS_COND_BP | PHPDBG_HAS_OPCODE_BP | PHPDBG_HAS_FUNCTION_OPLINE_BP | PHPDBG_HAS_METHOD_OPLINE_BP | PHPDBG_HAS_FILE_OPLINE_BP)
+#define PHPDBG_IS_STOPPING            (PHPDBG_IS_QUITTING | PHPDBG_IS_CLEANING)
+
+#define PHPDBG_PRESERVE_FLAGS_MASK    (PHPDBG_SHOW_REFCOUNTS | PHPDBG_IS_STEPONEVAL | PHPDBG_IS_BP_ENABLED | PHPDBG_STEP_OPCODE | PHPDBG_IS_QUIET | PHPDBG_IS_COLOURED | PHPDBG_IS_REMOTE | PHPDBG_WRITE_XML | PHPDBG_IS_DISCONNECTED)
 
 #ifndef _WIN32
-#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED|PHPDBG_IS_BP_ENABLED)
+#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_COLOURED | PHPDBG_IS_BP_ENABLED)
 #else
-#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET|PHPDBG_IS_BP_ENABLED)
+#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_BP_ENABLED)
 #endif /* }}} */
 
 /* {{{ output descriptors */
@@ -280,6 +260,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 		FILE *ptr;
 		int fd;
 	} io[PHPDBG_IO_FDS];                         /* io */
+	int eol;                                     /* type of line ending to use */
 	size_t (*php_stdiop_write)(php_stream *, const char *, size_t TSRMLS_DC);
 	int in_script_xml;                           /* in <stream> output mode */
 	struct {
@@ -305,17 +286,18 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 
 	JMP_BUF *sigsegv_bailout;                    /* bailout address for accesibility probing */
 
-	zend_ulong flags;                            /* phpdbg flags */
+	uint64_t flags;                              /* phpdbg flags */
 
 	char *socket_path;                           /* phpdbg.path ini setting */
 	char *sapi_name_ptr;                         /* store sapi name to free it if necessary to not leak memory */
 	int socket_fd;                               /* file descriptor to socket (wait command) (-1 if unused) */
 	int socket_server_fd;                        /* file descriptor to master socket (wait command) (-1 if unused) */
 #ifdef PHP_WIN32
-	HANDLE sigio_watcher_thread;                  /* sigio watcher thread handle */
+	HANDLE sigio_watcher_thread;                 /* sigio watcher thread handle */
 	struct win32_sigio_watcher_data swd;
 #endif
-	int8_t eol;
+
+	struct _zend_phpdbg_globals *backup;         /* backup of data to store */
 ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
 
 #endif

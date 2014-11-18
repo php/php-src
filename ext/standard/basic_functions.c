@@ -4962,7 +4962,7 @@ static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_
 }
 /* }}} */
 
-void php_call_shutdown_functions(TSRMLS_D) /* {{{ */
+PHPAPI void php_call_shutdown_functions(TSRMLS_D) /* {{{ */
 {
 	if (BG(user_shutdown_function_names)) {
 		zend_try {
@@ -4974,7 +4974,7 @@ void php_call_shutdown_functions(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-void php_free_shutdown_functions(TSRMLS_D) /* {{{ */
+PHPAPI void php_free_shutdown_functions(TSRMLS_D) /* {{{ */
 {
 	if (BG(user_shutdown_function_names))
 		zend_try {
