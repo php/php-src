@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fixed bug #68421 (access.format='%R' doesn't log ipv6 address). (Remi)
   . Fixed bug #68423 (PHP-FPM will no longer load all pools). (Remi)
   . Fixed bug #68428 (listen.allowed_clients is IPv4 only). (Remi)
+  . Fixed bug #68381 (fpm_unix_init_main ignores log_level).
+    (David Zuelke, Remi)
 
 GMP:
   . Fixed bug #68419 (build error with gmp 4.1). (Remi)
