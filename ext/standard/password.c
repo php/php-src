@@ -384,6 +384,7 @@ PHP_FUNCTION(password_hash)
 			efree(hash_format);
 			efree(buffer);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long");
+			RETURN_NULL();
 		} else if (buffer_len < required_salt_len) {
 			efree(hash_format);
 			efree(buffer);
