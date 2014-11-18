@@ -24,8 +24,7 @@ EOT;
 
 $fpm = run_fpm($cfg, $tail);
 if (is_resource($fpm)) {
-    var_dump(fgets($tail));
-    var_dump(fgets($tail));
+    fpm_display_log($tail, 2);
     $i = 0;
     while (($i++ < 30) && !($fp = @fsockopen('127.0.0.1', $port))) {
         usleep(10000);
@@ -49,10 +48,8 @@ if (is_resource($fpm)) {
 
 ?>
 --EXPECTF--
-string(%d) "[%d-%s-%d %d:%d:%d] NOTICE: fpm is running, pid %d
-"
-string(%d) "[%d-%s-%d %d:%d:%d] NOTICE: ready to handle connections
-"
+[%d-%s-%d %d:%d:%d] NOTICE: fpm is running, pid %d
+[%d-%s-%d %d:%d:%d] NOTICE: ready to handle connections
 Done IPv4
 Done IPv6
 --CLEAN--

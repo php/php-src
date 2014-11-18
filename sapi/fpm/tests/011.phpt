@@ -26,8 +26,7 @@ EOT;
 
 $fpm = run_fpm($cfg, $tail);
 if (is_resource($fpm)) {
-    echo fgets($tail);
-    echo fgets($tail);
+    fpm_display_log($tail, 2);
     try {
 		var_dump(strpos(run_request('127.0.0.1', $port), 'pong'));
 		echo "IPv4 ok\n";

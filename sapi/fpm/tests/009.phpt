@@ -26,8 +26,7 @@ EOT;
 
 $fpm = run_fpm($cfg, $tail);
 if (is_resource($fpm)) {
-    echo fgets($tail);
-    echo fgets($tail);
+    fpm_display_log($tail, 2);
     try {
 		var_dump(strpos(run_request('unix://'.$socket, -1), 'pong'));
 		echo "UDS ok\n";
