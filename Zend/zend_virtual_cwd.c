@@ -347,7 +347,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		/* File is a reparse point. Get the target */
 		HANDLE hLink = NULL;
 		REPARSE_DATA_BUFFER * pbuffer;
-		unsigned int retlength = 0;
+		DWORD retlength = 0;
 
 		hLink = CreateFile(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
 		if(hLink == INVALID_HANDLE_VALUE) {
@@ -898,7 +898,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			/* File is a reparse point. Get the target */
 			HANDLE hLink = NULL;
 			REPARSE_DATA_BUFFER * pbuffer;
-			unsigned int retlength = 0;
+			DWORD retlength = 0;
 			int bufindex = 0, isabsolute = 0;
 			wchar_t * reparsetarget;
 			BOOL isVolume = FALSE;
