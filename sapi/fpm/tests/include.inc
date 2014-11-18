@@ -76,6 +76,16 @@ function run_fpm_till($needle, $config, $max = 10) /* {{{ */
 }
 /* }}} */
 
+function fpm_display_log($tail, $n=1, $ignore='systemd') {
+	while ($n) {
+		$a = fgets($tail);
+		if (empty($ignore) || !strpos($a, $ignore)) {
+			echo $a;
+			$n--;
+		}
+	}
+}
+
 function run_request($host, $port, $uri='/ping', $query='') {
 	require_once 'fcgi.inc';
 	$client = new Adoy\FastCGI\Client($host, $port);
