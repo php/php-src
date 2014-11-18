@@ -1,5 +1,5 @@
 --TEST--
-FPM: Startup and connect
+FPM: Test Unix Domain Socket
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
@@ -8,12 +8,15 @@ FPM: Startup and connect
 include "include.inc";
 
 $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
+$socket  = dirname(__FILE__).'/php-fpm.sock';
 
 $cfg = <<<EOT
 [global]
 error_log = $logfile
 [unconfined]
-listen = 127.0.0.1:9000
+listen = $socket
+ping.path = /ping
+ping.response = pong
 pm = dynamic
 pm.max_children = 5
 pm.start_servers = 2
@@ -23,17 +26,16 @@ EOT;
 
 $fpm = run_fpm($cfg, $tail);
 if (is_resource($fpm)) {
-    var_dump(fgets($tail));
-    var_dump(fgets($tail));
-    $i = 0;
-    while (($i++ < 30) && !($fp = @fsockopen('127.0.0.1', 9000))) {
-        usleep(10000);
-    }
-    if ($fp) {
-        echo "Done\n";
-        fclose($fp);
-    }
-    proc_terminate($fpm);
+    echo fgets($tail);
+    echo fgets($tail);
+    try {
+		var_dump(strpos(run_request('unix://'.$socket, -1), 'pong'));
+		echo "UDS ok\n";
+	} catch (Exception $e) {
+		echo "UDS error\n";
+	}
+
+	proc_terminate($fpm);
     stream_get_contents($tail);
     fclose($tail);
     proc_close($fpm);
@@ -41,11 +43,10 @@ if (is_resource($fpm)) {
 
 ?>
 --EXPECTF--
-string(%d) "[%d-%s-%d %d:%d:%d] NOTICE: fpm is running, pid %d
-"
-string(%d) "[%d-%s-%d %d:%d:%d] NOTICE: ready to handle connections
-"
-Done
+[%d-%s-%d %d:%d:%d] NOTICE: fpm is running, pid %d
+[%d-%s-%d %d:%d:%d] NOTICE: ready to handle connections
+int(%d)
+UDS ok
 --CLEAN--
 <?php
     $logfile = dirname(__FILE__).'/php-fpm.log.tmp';
