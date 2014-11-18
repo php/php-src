@@ -385,6 +385,12 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.4
 -------------------------------------------------------------------------------
+EXTENSION:           hash
+PRIMARY MAINTAINER:  Sara Golemon <pollita@php.net>, Mike Wallner <mike@php.net>, Anatol Belski <ab@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               5.1.2
+-------------------------------------------------------------------------------
 EXTENSION:           iconv
 PRIMARY MAINTAINER:  Moriyoshi Koizumi <moriyoshi@php.net>
 MAINTENANCE:         Maintained
@@ -437,6 +443,12 @@ EXTENSION:           ming
 PRIMARY MAINTAINER:  Frank M. Kromann
 MAINTENANCE:         Unknown
 STATUS:              Experimental
+-------------------------------------------------------------------------------
+EXTENSION:           opcache
+PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@zend.com>, Xinchen Hui <laruence@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               5.5.0
 -------------------------------------------------------------------------------
 EXTENSION:           openssl
 PRIMARY MAINTAINER:  Wez Furlong <wez@php.net>, Pierre-Alain Joye <pajoye@php.net>

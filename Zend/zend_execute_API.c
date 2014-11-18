@@ -1341,6 +1341,10 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 #ifdef ZEND_WIN32
 static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) /* {{{ */
 {
+#ifdef ZTS
+	THREAD_T thread_id = (THREAD_T)wParam;
+#endif
+
 	switch (message) {
 		case WM_DESTROY:
 			PostQuitMessage(0);
@@ -1355,7 +1359,7 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 #endif
 				SetTimer(timeout_window, wParam, lParam*1000, NULL);
 #ifdef ZTS
-				tsrm_ls = ts_resource_ex(0, &wParam);
+				tsrm_ls = ts_resource_ex(0, &thread_id);
 				if (!tsrm_ls) {
 					/* shouldn't normally happen */
 					break;
@@ -1372,7 +1376,7 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 #ifdef ZTS
 				void ***tsrm_ls;
 
-				tsrm_ls = ts_resource_ex(0, &wParam);
+				tsrm_ls = ts_resource_ex(0, &thread_id);
 				if (!tsrm_ls) {
 					/* Thread died before receiving its timeout? */
 					break;
@@ -1761,13 +1765,6 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 				/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 			}
 			ex->symbol_table = EG(active_symbol_table);
-
-			if (ex->op_array->this_var != -1 &&
-			    !*EX_CV_NUM(ex, ex->op_array->this_var) &&
-			    EG(This)) {
-			    *EX_CV_NUM(ex, ex->op_array->this_var) = (zval**)EX_CV_NUM(ex, ex->op_array->last_var + ex->op_array->this_var);
-				**EX_CV_NUM(ex, ex->op_array->this_var) = EG(This);
- 			}
 			for (i = 0; i < ex->op_array->last_var; i++) {
 				if (*EX_CV_NUM(ex, i)) {
 					zend_hash_quick_update(EG(active_symbol_table),

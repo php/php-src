@@ -348,6 +348,34 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
+#ifdef PHP_WIN32
+		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
+
+		if (self->is_pipe || self->is_process_pipe) {
+			HANDLE ph = (HANDLE)_get_osfhandle(data->fd);
+			int retry = 0;
+			DWORD avail_read = 0;
+
+			do {
+				/* Look ahead to get the available data amount to read. Do the same
+					as read() does, however not blocking forever. In case it failed,
+					no data will be read (better than block). */
+				if (!PeekNamedPipe(ph, NULL, 0, NULL, &avail_read, NULL)) {
+					break;
+				}
+				/* If there's nothing to read, wait in 100ms periods. */
+				if (0 == avail_read) {
+					usleep(100000);
+				}
+			} while (0 == avail_read && retry++ < 320);
+
+			/* Reduce the required data amount to what is available, otherwise read()
+				will block.*/
+			if (avail_read < count) {
+				count = avail_read;
+			}
+		}
+#endif
 		ret = read(data->fd, buf, count);
 
 		if (ret == (size_t)-1 && errno == EINTR) {

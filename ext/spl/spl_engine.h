@@ -49,6 +49,41 @@ static inline int spl_instantiate_arg_ex2(zend_class_entry *pce, zval **retval, 
 }
 /* }}} */
 
+/* {{{ spl_instantiate_arg_n */
+static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval **retval, int argc, zval ***argv TSRMLS_DC)
+{
+	zend_function *func = pce->constructor;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+	zval *dummy;
+	zval z_name;
+
+	spl_instantiate(pce, retval, 0 TSRMLS_CC);
+
+	ZVAL_STRING(&z_name, func->common.function_name, 0);
+
+	fci.size = sizeof(zend_fcall_info);
+	fci.function_table = &pce->function_table;
+	fci.function_name = &z_name;
+	fci.object_ptr = *retval;
+	fci.symbol_table = NULL;
+	fci.retval_ptr_ptr = &dummy;
+	fci.param_count = argc;
+	fci.params = argv;
+	fci.no_separation = 1;
+
+	fcc.initialized = 1;
+	fcc.function_handler = func;
+	fcc.calling_scope = EG(scope);
+	fcc.called_scope = pce;
+	fcc.object_ptr = *retval;
+
+	zend_call_function(&fci, &fcc TSRMLS_CC);
+
+	zval_ptr_dtor(&dummy);
+}
+/* }}} */
+
 #endif /* SPL_ENGINE_H */
 
 /*

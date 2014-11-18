@@ -73,12 +73,12 @@ bool(false)
 
 -- Testing timezone_offset_get() function with an invalid values for $datetime argument --
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, object given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, object given in %s on line %d
 bool(false)
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, integer given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
-Warning: timezone_offset_get() expects parameter 2 to be DateTime, null given in %s on line %d
+Warning: timezone_offset_get() expects parameter 2 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 ===DONE===

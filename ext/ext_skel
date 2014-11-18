@@ -156,12 +156,12 @@ if test "\$PHP_$EXTNAME" != "no"; then
 
   dnl PHP_CHECK_LIBRARY(\$LIBNAME,\$LIBSYMBOL,
   dnl [
-  dnl   PHP_ADD_LIBRARY_WITH_PATH(\$LIBNAME, \$${EXTNAME}_DIR/lib, ${EXTNAME}_SHARED_LIBADD)
+  dnl   PHP_ADD_LIBRARY_WITH_PATH(\$LIBNAME, \$${EXTNAME}_DIR/\$PHP_LIBDIR, ${EXTNAME}_SHARED_LIBADD)
   dnl   AC_DEFINE(HAVE_${EXTNAME}LIB,1,[ ])
   dnl ],[
   dnl   AC_MSG_ERROR([wrong $extname lib version or lib not found])
   dnl ],[
-  dnl   -L\$${EXTNAME}_DIR/lib -lm
+  dnl   -L\$${EXTNAME}_DIR/\$PHP_LIBDIR -lm
   dnl ])
   dnl
   dnl PHP_SUBST(${EXTNAME}_SHARED_LIBADD)
