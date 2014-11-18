@@ -130,7 +130,7 @@ PHPAPI int core_globals_id;
 #ifdef PHP_WIN32
 #include "win32_internal_function_disabled.h"
 
-static php_win32_disable_functions(TSRMLS_D)
+static int php_win32_disable_functions(TSRMLS_D)
 {
 	int i;
 
