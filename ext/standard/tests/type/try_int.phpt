@@ -8,6 +8,7 @@ var_dump(try_int("0"));
 var_dump(try_int(0));
 var_dump(try_int(0.0));
 var_dump(try_int("10"));
+var_dump(try_int("+10"));
 var_dump(try_int("-10"));
 var_dump(try_int(10));
 var_dump(try_int(10.0));
@@ -45,7 +46,6 @@ echo PHP_EOL;
 
 // reject leading, trailing chars
 var_dump(try_int("010"));
-var_dump(try_int("+10"));
 var_dump(try_int("10abc"));
 var_dump(try_int("abc10"));
 var_dump(try_int("   100    "));
@@ -67,6 +67,7 @@ var_dump(try_int((string)(PHP_INT_MIN * 2)));
 int(0)
 int(0)
 int(0)
+int(10)
 int(10)
 int(-10)
 int(10)
@@ -92,7 +93,6 @@ NULL
 NULL
 NULL
 
-NULL
 NULL
 NULL
 NULL

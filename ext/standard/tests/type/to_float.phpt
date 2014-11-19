@@ -16,6 +16,7 @@ var_dump(to_float_wrapper("0"));
 var_dump(to_float_wrapper(0));
 var_dump(to_float_wrapper(0.0));
 var_dump(to_float_wrapper("10"));
+var_dump(to_float_wrapper("+10"));
 var_dump(to_float_wrapper("-10"));
 var_dump(to_float_wrapper("10.0"));
 var_dump(to_float_wrapper(10));
@@ -48,7 +49,6 @@ echo PHP_EOL;
 
 // reject leading, trailing chars
 var_dump(to_float_wrapper("010"));
-var_dump(to_float_wrapper("+10"));
 var_dump(to_float_wrapper("10abc"));
 var_dump(to_float_wrapper("abc10"));
 var_dump(to_float_wrapper("   100    "));
@@ -77,6 +77,7 @@ float(0)
 float(0)
 float(0)
 float(10)
+float(10)
 float(-10)
 float(10)
 float(10)
@@ -100,7 +101,6 @@ NULL
 float(1.5)
 float(1.5)
 
-NULL
 NULL
 NULL
 NULL

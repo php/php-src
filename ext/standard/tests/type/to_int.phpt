@@ -16,6 +16,7 @@ var_dump(to_int_wrapper("0"));
 var_dump(to_int_wrapper(0));
 var_dump(to_int_wrapper(0.0));
 var_dump(to_int_wrapper("10"));
+var_dump(to_int_wrapper("+10"));
 var_dump(to_int_wrapper("-10"));
 var_dump(to_int_wrapper(10));
 var_dump(to_int_wrapper(10.0));
@@ -53,7 +54,6 @@ echo PHP_EOL;
 
 // reject leading, trailing chars
 var_dump(to_int_wrapper("010"));
-var_dump(to_int_wrapper("+10"));
 var_dump(to_int_wrapper("10abc"));
 var_dump(to_int_wrapper("abc10"));
 var_dump(to_int_wrapper("   100    "));
@@ -75,6 +75,7 @@ var_dump(to_int_wrapper((string)(PHP_INT_MIN * 2)));
 int(0)
 int(0)
 int(0)
+int(10)
 int(10)
 int(-10)
 int(10)
@@ -100,7 +101,6 @@ NULL
 NULL
 NULL
 
-NULL
 NULL
 NULL
 NULL

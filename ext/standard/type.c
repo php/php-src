@@ -447,8 +447,8 @@ static zend_always_inline zend_bool safe_cast_to_int(zval *var, zval *out)
 					return 1;
 				}
 
-				/* bans leading whitespace, + sign, empty string */
-				if (!('1' <= c && c <= '9') && c != '-') {
+				/* bans leading whitespace, empty string */
+				if (!('1' <= c && c <= '9') && c != '-' && c != '+') {
 					return 0;
 				}
 
@@ -537,7 +537,7 @@ static zend_always_inline zend_bool safe_cast_to_float(zval *var, zval *out)
 				}
 
 				/* bans leading whitespace, + sign, empty string */
-				if (!('1' <= c && c <= '9') && c != '-') {
+				if (!('1' <= c && c <= '9') && c != '-' && c != '+') {
 					return 0;
 				}
 
