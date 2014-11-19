@@ -4199,11 +4199,19 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		}
 		if (UNEXPECTED(fbc == NULL)) {
-			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce &&
+				/* We're doing parent call, check for special methods */
+				(strcasecmp(Z_STRVAL_P(function_name), ZEND_CONSTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_DESTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_CLONE_FUNC_NAME) == 0)) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			}
 		}
 		if (IS_CONST == IS_CONST &&
-		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+			EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 			if (IS_CONST == IS_CONST) {
 				CACHE_PTR(Z_CACHE_SLOT_P(function_name), fbc);
 			} else {
@@ -4215,17 +4223,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
-                fbc = &zend_null_function;
-            } else {
-                zend_error_noreturn(E_ERROR, "Cannot call constructor");
-            }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Cannot call constructor");
+			}
 		} else {
-		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		    }
-		    fbc = ce->constructor;
-        }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+				zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+			}
+			fbc = ce->constructor;
+		}
 	}
 
 	object = NULL;
@@ -5895,11 +5903,19 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_UNUSED == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		}
 		if (UNEXPECTED(fbc == NULL)) {
-			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce &&
+				/* We're doing parent call, check for special methods */
+				(strcasecmp(Z_STRVAL_P(function_name), ZEND_CONSTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_DESTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_CLONE_FUNC_NAME) == 0)) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			}
 		}
 		if (IS_UNUSED == IS_CONST &&
-		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+			EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 			if (IS_CONST == IS_CONST) {
 				CACHE_PTR(Z_CACHE_SLOT_P(function_name), fbc);
 			} else {
@@ -5911,17 +5927,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
-                fbc = &zend_null_function;
-            } else {
-                zend_error_noreturn(E_ERROR, "Cannot call constructor");
-            }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Cannot call constructor");
+			}
 		} else {
-		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		    }
-		    fbc = ce->constructor;
-        }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+				zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+			}
+			fbc = ce->constructor;
+		}
 	}
 
 	object = NULL;
@@ -6945,11 +6961,19 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		}
 		if (UNEXPECTED(fbc == NULL)) {
-			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce &&
+				/* We're doing parent call, check for special methods */
+				(strcasecmp(Z_STRVAL_P(function_name), ZEND_CONSTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_DESTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_CLONE_FUNC_NAME) == 0)) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			}
 		}
 		if (IS_CV == IS_CONST &&
-		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+			EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 			if (IS_CONST == IS_CONST) {
 				CACHE_PTR(Z_CACHE_SLOT_P(function_name), fbc);
 			} else {
@@ -6961,17 +6985,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
-                fbc = &zend_null_function;
-            } else {
-                zend_error_noreturn(E_ERROR, "Cannot call constructor");
-            }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Cannot call constructor");
+			}
 		} else {
-		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		    }
-		    fbc = ce->constructor;
-        }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+				zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+			}
+			fbc = ce->constructor;
+		}
 	}
 
 	object = NULL;
@@ -8085,11 +8109,19 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER
 			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		}
 		if (UNEXPECTED(fbc == NULL)) {
-			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce &&
+				/* We're doing parent call, check for special methods */
+				(strcasecmp(Z_STRVAL_P(function_name), ZEND_CONSTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_DESTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_CLONE_FUNC_NAME) == 0)) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			}
 		}
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+			EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 			if (IS_CONST == IS_CONST) {
 				CACHE_PTR(Z_CACHE_SLOT_P(function_name), fbc);
 			} else {
@@ -8101,17 +8133,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMPVAR_HANDLER
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
-                fbc = &zend_null_function;
-            } else {
-                zend_error_noreturn(E_ERROR, "Cannot call constructor");
-            }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Cannot call constructor");
+			}
 		} else {
-		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		    }
-		    fbc = ce->constructor;
-        }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+				zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+			}
+			fbc = ce->constructor;
+		}
 	}
 
 	object = NULL;
@@ -13214,11 +13246,19 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		}
 		if (UNEXPECTED(fbc == NULL)) {
-			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce &&
+				/* We're doing parent call, check for special methods */
+				(strcasecmp(Z_STRVAL_P(function_name), ZEND_CONSTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_DESTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_CLONE_FUNC_NAME) == 0)) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			}
 		}
 		if (IS_CONST == IS_CONST &&
-		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+			EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 			if (IS_VAR == IS_CONST) {
 				CACHE_PTR(Z_CACHE_SLOT_P(function_name), fbc);
 			} else {
@@ -13230,17 +13270,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
-                fbc = &zend_null_function;
-            } else {
-                zend_error_noreturn(E_ERROR, "Cannot call constructor");
-            }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Cannot call constructor");
+			}
 		} else {
-		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		    }
-		    fbc = ce->constructor;
-        }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+				zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+			}
+			fbc = ce->constructor;
+		}
 	}
 
 	object = NULL;
@@ -14708,11 +14748,19 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_UNUSED == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		}
 		if (UNEXPECTED(fbc == NULL)) {
-			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce &&
+				/* We're doing parent call, check for special methods */
+				(strcasecmp(Z_STRVAL_P(function_name), ZEND_CONSTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_DESTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_CLONE_FUNC_NAME) == 0)) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			}
 		}
 		if (IS_UNUSED == IS_CONST &&
-		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+			EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 			if (IS_VAR == IS_CONST) {
 				CACHE_PTR(Z_CACHE_SLOT_P(function_name), fbc);
 			} else {
@@ -14724,17 +14772,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
-                fbc = &zend_null_function;
-            } else {
-                zend_error_noreturn(E_ERROR, "Cannot call constructor");
-            }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Cannot call constructor");
+			}
 		} else {
-		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		    }
-		    fbc = ce->constructor;
-        }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+				zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+			}
+			fbc = ce->constructor;
+		}
 	}
 
 	object = NULL;
@@ -16159,11 +16207,19 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		}
 		if (UNEXPECTED(fbc == NULL)) {
-			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce &&
+				/* We're doing parent call, check for special methods */
+				(strcasecmp(Z_STRVAL_P(function_name), ZEND_CONSTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_DESTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_CLONE_FUNC_NAME) == 0)) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			}
 		}
 		if (IS_CV == IS_CONST &&
-		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+			EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 			if (IS_VAR == IS_CONST) {
 				CACHE_PTR(Z_CACHE_SLOT_P(function_name), fbc);
 			} else {
@@ -16175,17 +16231,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
-                fbc = &zend_null_function;
-            } else {
-                zend_error_noreturn(E_ERROR, "Cannot call constructor");
-            }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Cannot call constructor");
+			}
 		} else {
-		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		    }
-		    fbc = ce->constructor;
-        }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+				zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+			}
+			fbc = ce->constructor;
+		}
 	}
 
 	object = NULL;
@@ -17600,11 +17656,19 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_HANDLER(Z
 			fbc = zend_std_get_static_method(ce, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_CONSTANT(opline->op2) + 1) : NULL));
 		}
 		if (UNEXPECTED(fbc == NULL)) {
-			zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce &&
+				/* We're doing parent call, check for special methods */
+				(strcasecmp(Z_STRVAL_P(function_name), ZEND_CONSTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_DESTRUCTOR_FUNC_NAME) == 0 ||
+					strcasecmp(Z_STRVAL_P(function_name), ZEND_CLONE_FUNC_NAME) == 0)) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", ce->name->val, Z_STRVAL_P(function_name));
+			}
 		}
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
-		    EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
-		    EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
+			EXPECTED(fbc->type <= ZEND_USER_FUNCTION) &&
+			EXPECTED((fbc->common.fn_flags & (ZEND_ACC_CALL_VIA_HANDLER|ZEND_ACC_NEVER_CACHE)) == 0)) {
 			if (IS_VAR == IS_CONST) {
 				CACHE_PTR(Z_CACHE_SLOT_P(function_name), fbc);
 			} else {
@@ -17616,17 +17680,17 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMPVAR_HANDLER(Z
 		}
 	} else {
 		if (UNEXPECTED(ce->constructor == NULL)) {
-            if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
-                fbc = &zend_null_function;
-            } else {
-                zend_error_noreturn(E_ERROR, "Cannot call constructor");
-            }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce->parent == ce) {
+				fbc = (zend_function *)&zend_pass_function;
+			} else {
+				zend_error_noreturn(E_ERROR, "Cannot call constructor");
+			}
 		} else {
-		    if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
-			    zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
-		    }
-		    fbc = ce->constructor;
-        }
+			if (Z_OBJ(EX(This)) && Z_OBJ(EX(This))->ce != ce->constructor->common.scope && (ce->constructor->common.fn_flags & ZEND_ACC_PRIVATE)) {
+				zend_error_noreturn(E_ERROR, "Cannot call private %s::__construct()", ce->name->val);
+			}
+			fbc = ce->constructor;
+		}
 	}
 
 	object = NULL;

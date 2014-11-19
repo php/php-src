@@ -71,7 +71,7 @@ static ZEND_FUNCTION(pass)
 
 static const zend_internal_function zend_pass_function = {
 	ZEND_INTERNAL_FUNCTION, /* type              */
-	0,                      /* fn_flags          */
+	ZEND_ACC_STATIC,        /* fn_flags          */
 	NULL,                   /* name              */
 	NULL,                   /* scope             */
 	NULL,                   /* prototype         */
@@ -1887,10 +1887,6 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 	}
 }
 /* }}} */
-
-static zend_function zend_null_function = {
-    ZEND_NULL_FUNCTION
-};
 
 #define ZEND_VM_NEXT_OPCODE() \
 	CHECK_SYMBOL_TABLES() \
