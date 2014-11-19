@@ -9,6 +9,9 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   h. HashTable API
   i. New portable macros for large file support
   j. New portable macros for integers
+  k. get_class_entry object handler info
+  l. get_class_name object handler info
+  m. Other portable macros info
 
 2. Build system changes
   a. Unix build system changes
@@ -109,6 +112,14 @@ PHP 7.0 INTERNALS UPGRADE NOTES
 
      The handler is now obligatory, no longer accepts a `parent` argument and
      must return a non-NULL zend_string*, which will be released by the caller.
+
+  m. Other portable macros info
+
+     ZEND_SECURE_ZERO     - zeroes chunk of memory
+     ZEND_VALID_SOCKET    - validates a php_socket_t variable 
+
+     ZEND_FASTCALL is defined to use __vectorcall convention on VS2013 and above
+     ZEND_NORETURN is defined as __declspec(noreturn) on VS
 
 ========================
 2. Build system changes
