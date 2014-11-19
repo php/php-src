@@ -128,3 +128,6 @@ PHP 7.0 INTERNALS UPGRADE NOTES
        ready binaries is Visual Studio. Still other compilers can be used now for
        testing and analyzing purposes.
 
+     - configure.js now produces response files which are passed to the linker
+       and library manager. This solves the issues with the long command lines
+       which can exceed the OS limit.
