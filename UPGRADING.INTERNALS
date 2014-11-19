@@ -124,6 +124,8 @@ PHP 7.0 INTERNALS UPGRADE NOTES
        toolset is vs. Still clang or icc need the correct environment
        which involves many tools from the vs toolset.
 
+       The toolset option is supported by phpize as well.
+
        AWARENESS The only recommended and supported toolset to produce production
        ready binaries is Visual Studio. Still other compilers can be used now for
        testing and analyzing purposes.
