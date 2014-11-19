@@ -1153,6 +1153,7 @@ static int fpm_conf_post_process(int force_daemon TSRMLS_DC) /* {{{ */
 	}
 
 	fpm_globals.log_level = fpm_global_config.log_level;
+	zlog_set_level(fpm_globals.log_level);
 
 	if (fpm_global_config.process_max < 0) {
 		zlog(ZLOG_ERROR, "process_max can't be negative");
