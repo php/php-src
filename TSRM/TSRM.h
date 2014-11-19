@@ -172,7 +172,7 @@ TSRM_API inline void *tsrm_get_ls_cache(void);
 
 #define TSRMG_STATIC(id, type, element)	(((type) (*((void ***) _tsrm_ls_cache))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
 #define TSRMLS_CACHE_EXTERN extern TSRM_TLS void *_tsrm_ls_cache
-#define TSRMLS_CACHE_DEFINE TSRM_TLS void *_tsrm_ls_cache
+#define TSRMLS_CACHE_DEFINE TSRM_TLS void *_tsrm_ls_cache = NULL
 #define TSRMLS_CACHE_UPDATE if (!TSRMLS_CACHE) _tsrm_ls_cache = tsrm_get_ls_cache()
 #define TSRMLS_CACHE _tsrm_ls_cache
 
