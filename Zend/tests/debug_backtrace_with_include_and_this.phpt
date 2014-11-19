@@ -23,15 +23,15 @@ set_error_handler(function($code, $msg, $file, $line) {
 });
 
 try {
-  (new CL())->load('class://non.existant.Class');
+  (new CL())->load('class://non.existent.Class');
 } catch (CLException $e) {
   echo $e."\n";
 }
 --EXPECTF--
-ERR#2: include(class://non.existant.Class): failed to open stream: "CLWrapper::stream_open" call failed @ include
-ERR#2: include(): Failed opening 'class://non.existant.Class' for inclusion (include_path='%s') @ include
+ERR#2: include(class://non.existent.Class): failed to open stream: "CLWrapper::stream_open" call failed @ include
+ERR#2: include(): Failed opening 'class://non.existent.Class' for inclusion (include_path='%s') @ include
 
-Fatal error: Uncaught exception 'Exception' with message 'Failed loading class://non.existant.Class' in %s
+Fatal error: Uncaught exception 'Exception' with message 'Failed loading class://non.existent.Class' in %s
 Stack trace:
 #0 %s(%d): CL->load('class://non.exi...')
 #1 {main}

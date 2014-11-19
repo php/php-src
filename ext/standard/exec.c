@@ -279,7 +279,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 				cmd->val[y++] = str[x];
 				break;
 #else
-			/* % is Windows specific for enviromental variables, ^%PATH% will 
+			/* % is Windows specific for environmental variables, ^%PATH% will 
 				output PATH whil ^%PATH^% not. escapeshellcmd->val will escape all %.
 			*/
 			case '%':

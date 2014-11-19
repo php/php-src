@@ -469,7 +469,7 @@ tail_call:
 		ht = NULL;
 		GC_SET_BLACK(GC_INFO(ref));
 
-		/* don't count references for compatibilty ??? */
+		/* don't count references for compatibility ??? */
 		if (GC_TYPE(ref) != IS_REFERENCE) {
 			count++;
 		}
@@ -515,7 +515,7 @@ tail_call:
 				ZVAL_OBJ(&tmp, obj);
 				props = get_gc(&tmp, &table, &n TSRMLS_CC);
 				while (n > 0 && !Z_REFCOUNTED(table[n-1])) {
-					/* count non-refcounted for compatibilty ??? */
+					/* count non-refcounted for compatibility ??? */
 					if (Z_TYPE(table[n-1]) != IS_UNDEF) {
 						count++;
 					}					
@@ -532,7 +532,7 @@ tail_call:
 						} else {
 							count += gc_collect_white(ref TSRMLS_CC);
 						}
-					/* count non-refcounted for compatibilty ??? */
+					/* count non-refcounted for compatibility ??? */
 					} else if (Z_TYPE(table[i]) != IS_UNDEF) {
 						count++;
 					}					
@@ -563,7 +563,7 @@ tail_call:
 		for (idx = 0; idx < ht->nNumUsed; idx++) {
 			p = ht->arData + idx;
 			if (!Z_REFCOUNTED(p->val)) {
-				/* count non-refcounted for compatibilty ??? */
+				/* count non-refcounted for compatibility ??? */
 				if (Z_TYPE(p->val) != IS_UNDEF && Z_TYPE(p->val) != IS_INDIRECT) {
 					count++;
 				}

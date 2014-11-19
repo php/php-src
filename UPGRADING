@@ -126,7 +126,7 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 - Core
-  . Instead of being undefined and platform-dependant, NaN and Infinity will
+  . Instead of being undefined and platform-dependent, NaN and Infinity will
     always be zero when casted to integer.
   . Calling a method on a non-object no longer raises a fatal error; see
     also: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object

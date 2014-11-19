@@ -273,7 +273,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv TSRMLS_DC )
 		}
 	}
 
-	/* Object wasn't successfuly converted => bail out. */
+	/* Object wasn't successfully converted => bail out. */
 	if( zstr == NULL )
 	{
 		COLLATOR_CONVERT_RETURN_FAILED( obj );

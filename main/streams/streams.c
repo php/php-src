@@ -1066,7 +1066,7 @@ PHPAPI zend_string *php_stream_get_record(php_stream *stream, size_t maxlen, con
 			 * searched for the delimiter.
 			 * The left part of the delimiter may still remain in the buffer,
 			 * so subtract up to <delim_len - 1> from buffered_len, which is
-			 * the ammount of data we skip on this search  as an optimization
+			 * the amount of data we skip on this search  as an optimization
 			 */
 			found_delim = _php_stream_search_delim(
 				stream, maxlen,

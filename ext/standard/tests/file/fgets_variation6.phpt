@@ -49,7 +49,7 @@ foreach($file_modes as $file_mode) {
 
     var_dump( fgets($file_handle) ); // try n read a line, none expected
     var_dump( ftell($file_handle) ); // file pointer position
-    var_dump( feof($file_handle) ); // ensure thta file pointer is at eof
+    var_dump( feof($file_handle) ); // ensure that file pointer is at eof
 
     //close file
     fclose($file_handle);

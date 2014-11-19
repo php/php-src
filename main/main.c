@@ -2278,7 +2278,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	/* load and startup extensions compiled as shared objects (aka DLLs)
 	   as requested by php.ini entries
-	   theese are loaded after initialization of internal extensions
+	   these are loaded after initialization of internal extensions
 	   as extensions *might* rely on things from ext/standard
 	   which is always an internal extension and to be initialized
 	   ahead of all other internals

@@ -31,7 +31,7 @@ sprintf  offers the ability to make a lot of failures since it does not know
 
 snprintf knows the buffers size and will not write behind it. But you will
          have to use either a static buffer or allocate a dynamic buffer
-         before beeing able to call the function. In other words you must
+         before being able to call the function. In other words you must
          be sure that you really know the maximum size of the buffer required.
          A bad thing is having a big maximum while in most cases you would
          only need a small buffer. If the size of the resulting string is

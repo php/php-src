@@ -788,7 +788,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		goto stat_errexit;
 	}
 
-	ssb->sb.st_mode = 0644;									/* FTP won't give us a valid mode, so aproximate one based on being readable */
+	ssb->sb.st_mode = 0644;									/* FTP won't give us a valid mode, so approximate one based on being readable */
 	php_stream_printf(stream TSRMLS_CC, "CWD %s\r\n", (resource->path != NULL ? resource->path : "/")); /* If we can CWD to it, it's a directory (maybe a link, but we can't tell) */
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {

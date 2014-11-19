@@ -184,7 +184,7 @@ static void zend_std_call_getter(zval *object, zval *member, zval *retval TSRMLS
 	/* __get handler is called with one argument:
 	      property name
 
-	   it should return whether the call was successfull or not
+	   it should return whether the call was successful or not
 	*/
 	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
 
@@ -207,7 +207,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 	     property name
 	     value to be set
 
-	   it should return whether the call was successfull or not
+	   it should return whether the call was successful or not
 	*/
 	zend_call_method_with_2_params(object, ce, &ce->__set, ZEND_SET_FUNC_NAME, &retval, member, value);
 

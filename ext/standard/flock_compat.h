@@ -21,7 +21,7 @@
 #ifndef FLOCK_COMPAT_H
 #define FLOCK_COMPAT_H
 
-/* php_flock internally uses fcntl whther or not flock is available
+/* php_flock internally uses fcntl whether or not flock is available
  * This way our php_flock even works on NFS files.
  * More info: /usr/src/linux/Documentation
  */

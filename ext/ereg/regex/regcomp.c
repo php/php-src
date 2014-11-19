@@ -450,7 +450,7 @@ int starordinary;		/* is a leading * an ordinary character? */
 	register sopno subno;
 #	define	BACKSL	(1<<CHAR_BIT)
 
-	pos = HERE();		/* repetion op, if any, covers from here */
+	pos = HERE();		/* repetition op, if any, covers from here */
 
 	assert(MORE());		/* caller should have ensured this */
 	c = GETNEXT();
