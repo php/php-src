@@ -1,5 +1,5 @@
 --TEST--
-FPM: Test for pm.start_servers notice #...
+FPM: Test for pm.start_servers default calculation message being a notice and not a warning #68458
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
