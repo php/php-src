@@ -120,6 +120,13 @@ Force to run in background and ignore daemonize option from configuration file.
 Force to stay in foreground and ignore daemonize option from configuration file.
 .TP
 .PD 0
+.B \-\-force-stderr
+.TP
+.PD 1
+.B \-O
+Force output to stderr in nodaemonize even if stderr is not a TTY.
+.TP
+.PD 0
 .B \-\-allow\-to\-run\-as\-root
 .TP
 .PD 1
