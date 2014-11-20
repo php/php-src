@@ -5020,7 +5020,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) {
+			if (OP2_TYPE == IS_CV || OP2_TYPE == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
