@@ -2,13 +2,55 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.6.4
 
-
-
-?? ??? 2014, PHP 5.6.3
-
 - Core:
+  . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
   . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
     (Laruence)
+  . Fixed bug #68355 (Inconsistency in example php.ini comments).
+    (Chris McCafferty)
+
+- FPM:
+  . Fixed bug #68420 (listen=9000 listens to ipv6 localhost instead of all
+    addresses). (Remi)
+  . Fixed bug #68421 (access.format='%R' doesn't log ipv6 address). (Remi)
+  . Fixed bug #68423 (PHP-FPM will no longer load all pools). (Remi)
+  . Fixed bug #68428 (listen.allowed_clients is IPv4 only). (Remi)
+  . Fixed bug #68381 (fpm_unix_init_main ignores log_level).
+    (David Zuelke, Remi)
+  . Fixed bug #68452 (php-fpm man page is oudated). (Remi)
+  . Fixed request #68458 (Change pm.start_servers default warning to
+    notice). (David Zuelke, Remi)
+  . Fixed request #68463 (listen.allowed_clients can silently result
+    in no allowed access). (Remi)
+
+GMP:
+  . Fixed bug #68419 (build error with gmp 4.1). (Remi)
+
+- PDO_pgsql:
+  . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
+  when not in transaction) (Matteo)
+  . Fixed bug #68351 (PDO::PARAM_BOOL and ATTR_EMULATE_PREPARES misbehaving)
+  (Matteo)
+
+- phpdbg:
+  . Added XML protocol (-x command line flag). (Bob)
+  . Added hard interruptions (twice SIGINT). (Bob)
+
+- Session:
+  . Fixed bug #68331 (Session custom storage callable functions not being called) 
+    (Yasuo Ohgaki)
+
+- SOAP:
+  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
+    (Laruence)
+
+- zlib:
+  . Fixed bug #53829 (Compiling PHP with large file support will replace
+    function gzopen by gzopen64) (Sascha Kettler, Matteo)
+
+13 Nov 2014, PHP 5.6.3
+
+- Core:
   . Implemented 64-bit format codes for pack() and unpack(). (Leigh)
   . Fixed bug #51800 (proc_open on Windows hangs forever). (Anatol)
   . Fixed bug #67633 (A foreach on an array returned from a function not doing
@@ -22,10 +64,12 @@ PHP                                                                        NEWS
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames 
     and passwords) (Tjerk)
+  . Fixed bug #68365 (zend_mm_heap corrupted after memory overflow in
+    zend_hash_copy). (Dmitry)
 
-- phpdbg:
-  . Added XML protocol (-x command line flag). (Bob)
-  . Added hard interruptions (twice SIGINT). (Bob)
+- CURL:
+  . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
+    CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
 
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
@@ -48,13 +92,6 @@ PHP                                                                        NEWS
   . Fixed bug #63595 (GMP memory management conflicts with other libraries
     using GMP). (Remi)
 
-- Reflection:
-  . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
-
-- OpenSSL:
-  . Fixed bug #68074 (Allow to use system cipher list instead of hardcoded
-    value). (Remi)
-
 - Mysqli:
   . Fixed bug #68114 (linker error on some OS X machines with fixed width
     decimal support) (Keyur Govande)
@@ -63,16 +100,20 @@ PHP                                                                        NEWS
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
 
-- SPL:
-  . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
-
-- CURL:
-  . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
-    CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
+- OpenSSL:
+  . Fixed bug #68074 (Allow to use system cipher list instead of hardcoded
+    value). (Remi)
 
 - PDO_pgsql:
   . Fixed bug #68199 (PDO::pgsqlGetNotify doesn't support NOTIFY payloads)
     (Matteo, Alain Laporte)
+  . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
+
+- Reflection:
+  . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
+
+- SPL:
+  . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
 
 16 Oct 2014, PHP 5.6.2
 
