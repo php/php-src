@@ -494,7 +494,7 @@ static void pdo_stmt_construct(pdo_stmt_t *stmt, zval *object, zend_class_entry 
 }
 /* }}} */
 
-/* {{{ proto object PDO::prepare(string statment [, array options])
+/* {{{ proto object PDO::prepare(string statement [, array options])
    Prepares a statement for execution and returns a statement object */
 static PHP_METHOD(PDO, prepare)
 {

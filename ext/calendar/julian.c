@@ -47,7 +47,7 @@
  *
  * CALENDAR OVERVIEW
  *
- *     Julias Ceasar created the calendar in 46 B.C. as a modified form of
+ *     Julius Caesar created the calendar in 46 B.C. as a modified form of
  *     the old Roman republican calendar which was based on lunar cycles.
  *     The new Julian calendar set fixed lengths for the months, abandoning
  *     the lunar cycle.  It also specified that there would be exactly 12

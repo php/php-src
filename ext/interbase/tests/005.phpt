@@ -63,7 +63,7 @@ simple default transaction test without ibase_trans()
 /*
 default transaction on default link
 First open transaction on link will be default.
-$tr_def_l1 may be ommited. All queryes without link and trans
+$tr_def_l1 may be omitted. All queryes without link and trans
 parameters run in this context
 */
     

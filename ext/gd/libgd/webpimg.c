@@ -169,7 +169,7 @@ static inline uint32 get_le32(const uint8* const data) {
  *   Y2/U2/V2: The Y/U/V data of the second image
  *
  * Returns the PSNR (http://en.wikipedia.org/wiki/Peak_signal-to-noise_ratio)
- * value computed bewteen the two images
+ * value computed between the two images
  */
 double GetPSNRYuv(const uint8* Y1,
                   const uint8* U1,
@@ -210,7 +210,7 @@ double GetPSNRYuv(const uint8* Y1,
  *   imgdata: data buffer containing webp image
  *   imgdata_size: size of the imgdata buffer
  *
- * Returns the PSNR value computed bewteen the two images
+ * Returns the PSNR value computed between the two images
  */
 double WebPGetPSNR(const uint8* Y1,
                    const uint8* U1,

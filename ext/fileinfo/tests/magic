@@ -3918,7 +3918,7 @@
 >7	string		x		version %.2s
 # We skip the path here, because it is often long (so file will
 # truncate it) and mostly redundant.
-# The inverted index functionality was added some time betwen
+# The inverted index functionality was added some time between
 # versions 11 and 15, so look for -q if version is above 14:
 >7	string		>14
 >>10	search/100	\ -q\ 		with inverted index
@@ -3972,7 +3972,7 @@
 # .cwk
 0	string	\002\000\210\003\102\117\102\117\000\001\206 Claris works document
 # .plt
-0	string	\020\341\000\000\010\010	Claris Works pallete files .plt
+0	string	\020\341\000\000\010\010	Claris Works palette files .plt
 
 # .msp a dictionary file I am not sure about this I have only one .msp file
 0	string	\002\271\262\000\040\002\000\164	Claris works dictionary
@@ -4443,9 +4443,9 @@
 >6 byte&0x04  =0x8  \b, [4-Scr]
 
 #------------------------------------------------------------------------------
-# gameboy:  file(1) magic for the Nintendo (Color) Gameboy raw ROM format
+# game boy:  file(1) magic for the Nintendo (Color) Game Boy raw ROM format
 #
-0x104 belong 0xCEED6666 Gameboy ROM:
+0x104 belong 0xCEED6666 Game Boy ROM:
 >0x134 string >\0 "%.16s"
 >0x146 byte 0x03  \b,[SGB]
 >0x147 byte 0x00  \b, [ROM ONLY]
@@ -4605,8 +4605,8 @@
 0	string		\x01ZZZZZ\x01	3DO "Opera" file system
 
 # From Gurkan Sengun <gurkan@linuks.mine.nu>, www.linuks.mine.nu
-0	string		GBS		Nintendo Gameboy Music/Audio Data
-12	string		GameBoy\ Music\ Module	Nintendo Gameboy Music Module
+0	string		GBS		Nintendo Game Boy Music/Audio Data
+12	string		GameBoy\ Music\ Module	Nintendo Game Boy Music Module
 
 # Playstations Patch Files from: From: Thomas Klausner <tk@giga.or.at>
 0	string	PPF30			Playstation Patch File version 3.0
@@ -15279,7 +15279,7 @@
 # $File: oasis,v 1.1 2011/03/15 02:09:38 christos Exp $
 # OASIS
 # Summary: OASIS stream file
-# Long descripton: Open Artwork System Interchange Standard
+# Long description: Open Artwork System Interchange Standard
 # File extension: .oas
 # Full name:	Ben Cowley (bcowley@broadcom.com)
 #		Philip Dixon (pdixon@broadcom.com)

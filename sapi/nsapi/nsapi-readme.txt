@@ -1,7 +1,7 @@
 Configuration of your Netscape/iPlanet/Sun Webserver for PHP5
 -----------------------------------------------------------------
 
-These instructions are targetted at Netscape Enterprise Web Server and
+These instructions are targeted at Netscape Enterprise Web Server and
 SUN/Netscape Alliance iPlanet Web Server and the new Sun Java System Webserver.
 On other web servers your milage may vary.
 

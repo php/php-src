@@ -44,8 +44,8 @@ require_once('skipifconnectfailure.inc');
 	if ($IS_MYSQLND) {
 		/*
 		Advantage mysqlnd -
-		The metadata mysqlnd has availabe after prepare is better than
-		the one made availabe by the MySQL Client Library (libmysql).
+		The metadata mysqlnd has available after prepare is better than
+		the one made available by the MySQL Client Library (libmysql).
 		"libmysql" will give wrong results and that is OK -
 		http://bugs.mysql.com/bug.php?id=47483
 		*/

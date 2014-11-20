@@ -391,7 +391,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 					if (zend_hash_find(HASH_OF(filterparams), "level", sizeof("level"), (void**) &tmpzval) == SUCCESS) {
 						tmp = **tmpzval;
 
-						/* Psuedo pass through to catch level validating code */
+						/* Pseudo pass through to catch level validating code */
 						goto factory_setlevel;
 					}
 					break;

@@ -231,7 +231,7 @@ frame
 - internal: has value "internal" when being an internal function call (one cannot inspect that frame)
 
 - being an error: (by type)
- - maxnum: tried to access a frame with a number heigher than existing (or &lt; 0)
+ - maxnum: tried to access a frame with a number higher than existing (or &lt; 0)
 
 ### attributes on &lt;arg> ###
 
@@ -403,7 +403,7 @@ exec
 - command executing and compiling a given file
  - &lt;exec type="unset" context="" />: indicates unsetting of the old context
  - &lt;exec type="unsetops" />: indicates unsetting of the old compiled opcodes
- - &lt;exec type="unchanged" />: same execution context choosen again
+ - &lt;exec type="unchanged" />: same execution context chosen again
  - &lt;exec type="set" context="" />: indicates setting of the new context
 - errors by tag
  - &lt;compile>
@@ -554,7 +554,7 @@ set
 
 ### breaks ###
 
-- generally enables / disables breakpoint functionality silently with no futher xml answer
+- generally enables / disables breakpoint functionality silently with no further xml answer
 - if the boolean switch is omitted, it emits current state in a &lt;setbreaks active="" /> where active is on or off
 
 ### color ###

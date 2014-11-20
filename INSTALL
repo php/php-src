@@ -155,7 +155,7 @@ Table of Contents
    a  list  of all available options along with short explanations running
    ./configure   --help.   Our  manual  documents  the  different  options
    separately.  You  will find the core options in the appendix, while the
-   different  extension  specific  options  are  descibed on the reference
+   different  extension  specific  options  are  described on the reference
    pages.
 
    When  PHP  is  configured,  you  are  ready  to build the module and/or

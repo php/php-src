@@ -2049,7 +2049,7 @@ static PHP_METHOD(PDOStatement, setFetchMode)
 /* }}} */
 
 /* {{{ proto bool PDOStatement::nextRowset()
-   Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeded, false otherwise */
+   Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeeded, false otherwise */
 
 static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 {

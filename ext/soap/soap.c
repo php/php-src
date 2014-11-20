@@ -3121,7 +3121,7 @@ PHP_METHOD(SoapClient, __doRequest)
 
 /* {{{ proto void SoapClient::__setCookie(string name [, strung value])
    Sets cookie thet will sent with SOAP request.
-   The call to this function will effect all folowing calls of SOAP methods.
+   The call to this function will effect all following calls of SOAP methods.
    If value is not specified cookie is removed. */
 PHP_METHOD(SoapClient, __setCookie)
 {

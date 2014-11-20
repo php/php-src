@@ -1138,7 +1138,7 @@ int php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node expo
 {
 	php_libxml_func_handler export_hnd;
 	
-	/* Initialize in case this module hasnt been loaded yet */
+	/* Initialize in case this module hasn't been loaded yet */
 	php_libxml_initialize();
 	export_hnd.export_func = export_function;
 

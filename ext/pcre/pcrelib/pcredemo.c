@@ -144,7 +144,7 @@ if (rc < 0)
   return 1;
   }
 
-/* Match succeded */
+/* Match succeeded */
 
 printf("\nMatch succeeded at offset %d\n", ovector[0]);
 
@@ -362,7 +362,7 @@ for (;;)
     return 1;
     }
 
-  /* Match succeded */
+  /* Match succeeded */
 
   printf("\nMatch succeeded again at offset %d\n", ovector[0]);
 

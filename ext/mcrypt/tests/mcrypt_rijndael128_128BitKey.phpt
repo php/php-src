@@ -30,7 +30,7 @@ $cipher = MCRYPT_RIJNDAEL_128;
 $mode = MCRYPT_MODE_CBC;
 $data = b'This is the secret message which must be encrypted';
 
-// keys upto 128 bits (16 bytes)
+// keys up to 128 bits (16 bytes)
 $keys = array(
    null, 
    '', 

@@ -49,7 +49,7 @@ MySQLPDOTest::skip();
 		}
 
 		if ($label !== $value) {
-			printf("[%03d + 3] Returned value seems to be wrong (%d vs. %d charachters). Check manually\n",
+			printf("[%03d + 3] Returned value seems to be wrong (%d vs. %d characters). Check manually\n",
 				$offset, strlen($label), strlen($value));
 			return false;
 		}
@@ -64,7 +64,7 @@ MySQLPDOTest::skip();
 		$ret = $stmt->fetch(PDO::FETCH_ASSOC);
 
 		if ($ret['label'] !== $value) {
-			printf("[%03d + 3] Returned value seems to be wrong (%d vs. %d charachters). Check manually\n",
+			printf("[%03d + 3] Returned value seems to be wrong (%d vs. %d characters). Check manually\n",
 				$offset, strlen($ret['label']), strlen($value));
 			return false;
 		}

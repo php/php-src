@@ -1,5 +1,5 @@
 --TEST--
-Tries to create a SplFixedArray using the fromArray() function and a multi dimentional array.
+Tries to create a SplFixedArray using the fromArray() function and a multi dimensional array.
 --CREDITS--
 Philip Norton philipnorton42@gmail.com
 --FILE--

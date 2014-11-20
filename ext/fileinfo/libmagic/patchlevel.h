@@ -351,7 +351,7 @@
  *
  * Revision 1.8  93/02/19  15:01:26  ian
  * Numerous changes from Guy Harris too numerous to mention but including
- * byte-order independance, fixing "old-style masking", etc. etc. A bugfix
+ * byte-order independence, fixing "old-style masking", etc. etc. A bugfix
  * for broken symlinks from martin@@d255s004.zfe.siemens.de.
  * 
  * Revision 1.7  93/01/05  14:57:27  ian
