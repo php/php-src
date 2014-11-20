@@ -54,7 +54,7 @@ extern "C" {
 
 PHPAPI zend_class_entry *php_create_incomplete_class(TSRMLS_D);
 PHPAPI zend_string *php_lookup_class_name(zval *object);
-PHPAPI void  php_store_class_name(zval *object, const char *name, uint32_t len);
+PHPAPI void  php_store_class_name(zval *object, const char *name, size_t len);
 
 #ifdef __cplusplus
 };

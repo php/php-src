@@ -9,7 +9,7 @@
     current locale.
    </para>
    <para>
-    When called with an integer argument theese functions 
+    When called with an integer argument these functions 
     behave exactly like their C counterparts.
    </para>
    <para>

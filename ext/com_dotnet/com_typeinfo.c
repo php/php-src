@@ -67,11 +67,11 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codep
 		hr = LoadRegTypeLib((REFGUID)&clsid, major_i, minor_i, LANG_NEUTRAL, &TL);
 
 		/* if that failed, assumed that the GUID is actually a CLSID and
-		 * attemp to get the library via an instance of that class */
+		 * attempt to get the library via an instance of that class */
 		if (FAILED(hr) && (major == NULL || minor == NULL)) {
 			IDispatch *disp = NULL;
 			ITypeInfo *info = NULL;
-			int idx;
+			UINT idx;
 
 			if (SUCCEEDED(hr = CoCreateInstance(&clsid, NULL, CLSCTX_SERVER, &IID_IDispatch, (LPVOID*)&disp)) &&
 					SUCCEEDED(hr = IDispatch_GetTypeInfo(disp, 0, LANG_NEUTRAL, &info))) {
@@ -96,7 +96,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codep
 			DWORD VersionCount;
 			char version[20];
 			char *libname;
-			DWORD libnamelen;
+			long libnamelen;
 
 			if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_CLASSES_ROOT, "TypeLib", 0, KEY_READ, &hkey) &&
 					ERROR_SUCCESS == RegQueryInfoKey(hkey, NULL, NULL, NULL, &SubKeys,
@@ -116,7 +116,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codep
 									continue;
 								}
 								/* get the default value for this key and compare */
-								libnamelen = (DWORD)strlen(search_string)+1;
+								libnamelen = (long)strlen(search_string)+1;
 								if (ERROR_SUCCESS == RegQueryValue(hsubkey, version, libname, &libnamelen)) {
 									if (0 == stricmp(libname, search_string)) {
 										char *str = NULL;

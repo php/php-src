@@ -418,7 +418,7 @@ static php_stream_wrapper_ops php_stdio_wops = {
 	NULL  /* rmdir */
 };
 
-php_stream_wrapper php_stream_php_wrapper =	{
+PHPAPI php_stream_wrapper php_stream_php_wrapper =	{
 	&php_stdio_wops,
 	NULL,
 	0, /* is_url */

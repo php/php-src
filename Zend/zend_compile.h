@@ -227,12 +227,22 @@ typedef struct _zend_try_catch_element {
 char *zend_visibility_string(uint32_t fn_flags);
 
 typedef struct _zend_property_info {
+	uint32_t offset; /* property offset for object properties or
+	                      property index for static properties */
 	uint32_t flags;
-	int offset;
 	zend_string *name;
 	zend_string *doc_comment;
 	zend_class_entry *ce;
 } zend_property_info;
+
+#define OBJ_PROP(obj, offset) \
+	((zval*)((char*)(obj) + offset))
+#define OBJ_PROP_NUM(obj, num) \
+	(&(obj)->properties_table[(num)])
+#define OBJ_PROP_TO_OFFSET(num) \
+	((uint32_t)(zend_uintptr_t)OBJ_PROP_NUM(((zend_object*)NULL), num))
+#define OBJ_PROP_TO_NUM(offset) \
+	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
 typedef struct _zend_arg_info {
 	const char *name;			// TODO: convert into zend_string ???

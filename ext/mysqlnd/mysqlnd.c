@@ -1306,7 +1306,7 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 		stream = (*p)->data->net->data->m.get_stream((*p)->data->net TSRMLS_CC);
 		DBG_INF_FMT("conn=%llu stream=%p", (*p)->data->thread_id, stream);
 		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
-										(void*)&this_fd, 1) && this_fd >= 0) {
+										(void*)&this_fd, 1) && ZEND_VALID_SOCKET(this_fd)) {
 
 			PHP_SAFE_FD_SET(this_fd, fds);
 
@@ -1336,7 +1336,7 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds 
 		stream = (*fwd)->data->net->data->m.get_stream((*fwd)->data->net TSRMLS_CC);
 		DBG_INF_FMT("conn=%llu stream=%p", (*fwd)->data->thread_id, stream);
 		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
-										(void*)&this_fd, 1) && this_fd >= 0) {
+										(void*)&this_fd, 1) && ZEND_VALID_SOCKET(this_fd)) {
 			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
 				if (disproportion) {
 					*bckwd = *fwd;

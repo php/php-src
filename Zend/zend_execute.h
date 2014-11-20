@@ -261,10 +261,7 @@ ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler
 ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode);
 
 /* former zend_execute_locks.h */
-typedef struct _zend_free_op {
-	zval *var;
-/*	int   is_var; */
-} zend_free_op;
+typedef zval* zend_free_op;
 
 ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC);
 

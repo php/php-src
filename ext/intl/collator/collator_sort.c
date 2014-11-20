@@ -482,7 +482,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 			sortKeyIndxBuf = erealloc( sortKeyIndxBuf, sortKeyIndxBufSize );
 		}
 
-		sortKeyIndxBuf[sortKeyCount].key = (char*)sortKeyBufOffset;    /* remeber just offset, cause address */
+		sortKeyIndxBuf[sortKeyCount].key = (char*)sortKeyBufOffset;    /* remember just offset, cause address */
 		                                                               /* of 'sortKeyBuf' may be changed due to realloc. */
 		sortKeyIndxBuf[sortKeyCount].zstr = hashData;
 

@@ -283,6 +283,14 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				case ZEND_ASSIGN_DIM:
 				case ZEND_SEPARATE:
 					return 0;
+				case ZEND_SEND_VAR:
+					opline->extended_value = 0;
+					opline->opcode = ZEND_SEND_VAL;
+					break;
+				case ZEND_SEND_VAR_EX:
+					opline->extended_value = 0;
+					opline->opcode = ZEND_SEND_VAL_EX;
+					break;
 				case ZEND_SEND_VAR_NO_REF:
 					if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) {
 						if (opline->extended_value & ZEND_ARG_SEND_BY_REF) {

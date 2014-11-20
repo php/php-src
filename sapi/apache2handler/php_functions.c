@@ -388,8 +388,12 @@ PHP_MINFO_FUNCTION(apache)
 		}
 		smart_str_appendc(&tmp1, ' ');
 	}
-	if (tmp1.s && (tmp1.s->len - 1) >= 0) {
-		tmp1.s->val[tmp1.s->len - 1] = '\0';
+	if (tmp1.s) {
+		if (tmp1.s->len > 0) {
+			tmp1.s->val[tmp1.s->len - 1] = '\0';
+		} else {
+			tmp1.s->val[0] = '\0';
+		}
 	}
             
 	php_info_print_table_start();

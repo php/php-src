@@ -278,7 +278,7 @@ PHP_FUNCTION(password_verify)
 	}
 	
 	/* We're using this method instead of == in order to provide
-	 * resistence towards timing attacks. This is a constant time
+	 * resistance towards timing attacks. This is a constant time
 	 * equality check that will always check every byte of both
 	 * values. */
 	for (i = 0; i < hash_len; i++) {
@@ -345,12 +345,11 @@ PHP_FUNCTION(password_hash)
 
 	if (options && (option_buffer = zend_symtable_str_find(options, "salt", sizeof("salt")-1)) != NULL) {
 		char *buffer;
-		size_t buffer_len_int = 0;
-		size_t buffer_len;
+		size_t buffer_len = 0;
 		switch (Z_TYPE_P(option_buffer)) {
 			case IS_STRING:
 				buffer = estrndup(Z_STRVAL_P(option_buffer), Z_STRLEN_P(option_buffer));
-				buffer_len_int = Z_STRLEN_P(option_buffer);
+				buffer_len = Z_STRLEN_P(option_buffer);
 				break;
 			case IS_LONG:
 			case IS_DOUBLE:
@@ -361,7 +360,7 @@ PHP_FUNCTION(password_hash)
 				convert_to_string(&cast_option_buffer);
 				if (Z_TYPE(cast_option_buffer) == IS_STRING) {
 					buffer = estrndup(Z_STRVAL(cast_option_buffer), Z_STRLEN(cast_option_buffer));
-					buffer_len_int = Z_STRLEN(cast_option_buffer);
+					buffer_len = Z_STRLEN(cast_option_buffer);
 					zval_dtor(&cast_option_buffer);
 					break;
 				}
@@ -377,16 +376,19 @@ PHP_FUNCTION(password_hash)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Non-string salt parameter supplied");
 				RETURN_NULL();
 		}
-		if (buffer_len_int < 0) {
+
+		/* XXX all the crypt related APIs work with int for string length.
+			That should be revised for size_t and then we maybe don't require
+			the > INT_MAX check. */
+		if (buffer_len > INT_MAX) {
 			efree(hash_format);
 			efree(buffer);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long");
-		}
-		buffer_len = (size_t) buffer_len_int;
-		if (buffer_len < required_salt_len) {
+			RETURN_NULL();
+		} else if (buffer_len < required_salt_len) {
 			efree(hash_format);
 			efree(buffer);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu expecting %lu", (unsigned long) buffer_len, (unsigned long) required_salt_len);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %zd expecting %zd", buffer_len, required_salt_len);
 			RETURN_NULL();
 		} else if (php_password_salt_is_alphabet(buffer, buffer_len) == FAILURE) {
 			salt = safe_emalloc(required_salt_len, 1, 1);
@@ -394,7 +396,7 @@ PHP_FUNCTION(password_hash)
 				efree(hash_format);
 				efree(buffer);
 				efree(salt);
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu", (unsigned long) buffer_len);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %zd", buffer_len);
 				RETURN_NULL();
 			}
 			salt_len = required_salt_len;

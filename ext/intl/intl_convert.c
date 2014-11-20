@@ -61,7 +61,7 @@ void intl_convert_utf8_to_utf16(
 
 	if( *status == U_ZERO_ERROR )
 	{
-		/* String is converted successfuly */
+		/* String is converted successfully */
 		(*target)[dst_len] = 0;
 		*target_len = dst_len;
 		return;

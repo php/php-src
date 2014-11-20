@@ -129,7 +129,9 @@ static char** save_argv;
  * This holds the 'locally' allocated environ from the save_ps_args method.
  * This is subsequently free'd at exit.
  */
+#if defined(PS_USE_CLOBBER_ARGV)
 static char** frozen_environ, **new_environ;
+#endif
 
 /*
  * Call this method early, before any code has used the original argv passed in
@@ -311,7 +313,7 @@ const char* ps_title_errno(int rc)
 
 #ifdef PS_USE_WIN32
     case PS_TITLE_WINDOWS_ERROR:
-        sprintf(windows_error_details, "Windows error code: %u", GetLastError());
+        sprintf(windows_error_details, "Windows error code: %lu", GetLastError());
         return windows_error_details;
 #endif
     }

@@ -27,7 +27,7 @@ stream_filter_append($fp, "myfilter");
 fwrite($fp, "This is a test.\n");
 print "Done.\n";
 fclose($fp);
-// Uncommenting the following 'print' line causes the segfault to stop occuring
+// Uncommenting the following 'print' line causes the segfault to stop occurring
 // print "2\n";  
 readfile(dirname(__FILE__)."/test.txt");
 unlink(dirname(__FILE__)."/test.txt");
