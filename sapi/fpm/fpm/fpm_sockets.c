@@ -255,6 +255,7 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 	char *dup_address = strdup(wp->config->listen_address);
 	char *port_str = strrchr(dup_address, ':');
 	char *addr = NULL;
+	char tmpbuf[INET6_ADDRSTRLEN];
 	int addr_len;
 	int port = 0;
 	int sock = -1;
@@ -302,14 +303,18 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 		return -1;
 	}
 
-	free(dup_address);
-
 	for (p = servinfo; p != NULL; p = p->ai_next) {
-		if ((sock = fpm_sockets_get_listening_socket(wp, p->ai_addr, p->ai_addrlen)) != -1) {
-			break;
+		inet_ntop(p->ai_family, fpm_get_in_addr(p->ai_addr), tmpbuf, INET6_ADDRSTRLEN);
+		if (sock < 0) {
+			if ((sock = fpm_sockets_get_listening_socket(wp, p->ai_addr, p->ai_addrlen)) != -1) {
+				zlog(ZLOG_DEBUG, "Found address for %s, socket opened on %s", dup_address, tmpbuf);
+			}
+		} else {
+			zlog(ZLOG_WARNING, "Found multiple addresses for %s, %s ignored", dup_address, tmpbuf);
 		}
 	}
 
+	free(dup_address);
 	freeaddrinfo(servinfo);
 
 	return sock;
