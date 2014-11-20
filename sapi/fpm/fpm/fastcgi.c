@@ -280,6 +280,10 @@ void fcgi_set_allowed_clients(char *ip)
 		}
 		allowed_clients[n].sa.sa_family = 0;
 		free(ip);
+		if (!n) {
+			zlog(ZLOG_ERROR, "There are no allowed addresses for this pool");
+			/* don't clear allowed_clients as it will create an "open for all" security issue */
+		}
 	}
 }
 

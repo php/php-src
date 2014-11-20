@@ -3,7 +3,7 @@
  *
  *  This file is rewriten specificly for PHPFI.  Some functionality
  *  has been removed (MIME and file attachments).  This code was 
- *  modified from code based on code writen by Jarle Aase.
+ *  modified from code based on code written by Jarle Aase.
  *
  *  This class is based on the original code by Jarle Aase, see bellow:
  *  wSendmail.cpp  It has been striped of some functionality to match
@@ -572,7 +572,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 			   pos1    = pointer IN headers where the Bcc starts
 			   '4'     = Length of the characters 'bcc:'
 			   Because we've added +4 above for parsing the Emails
-			   we've to substract them here. */
+			   we've to subtract them here. */
 			memcpy(stripped_header, headers, pos1 - headers - 4);
 			if (pos1 != pos2) {
 				/* if pos1 != pos2 , pos2 points to the rest of the headers.

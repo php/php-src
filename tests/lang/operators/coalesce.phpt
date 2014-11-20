@@ -24,7 +24,7 @@ function foobar() {
 	return ['a'];
 }
 
-var_dump($nonexistant_variable ?? 3);
+var_dump($nonexistent_variable ?? 3);
 echo PHP_EOL;
 var_dump($var ?? 3);
 var_dump($var2 ?? 3);

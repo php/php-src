@@ -827,7 +827,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 	zend_file_handle ps_handle;
 	char *full_path_ptr = NULL;
 
-	/** check that the persistant script is indeed the same file we cached
+	/** check that the persistent script is indeed the same file we cached
 	 * (if part of the path is a symlink than it possible that the user will change it)
 	 * See bug #15140
 	 */

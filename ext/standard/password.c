@@ -278,7 +278,7 @@ PHP_FUNCTION(password_verify)
 	}
 	
 	/* We're using this method instead of == in order to provide
-	 * resistence towards timing attacks. This is a constant time
+	 * resistance towards timing attacks. This is a constant time
 	 * equality check that will always check every byte of both
 	 * values. */
 	for (i = 0; i < hash_len; i++) {

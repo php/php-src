@@ -1,5 +1,5 @@
 --TEST--
-Test array_search() function : usage variations - haystack as resource/multi dimentional array
+Test array_search() function : usage variations - haystack as resource/multi dimensional array
 --FILE--
 <?php
 /*

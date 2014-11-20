@@ -67,7 +67,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codep
 		hr = LoadRegTypeLib((REFGUID)&clsid, major_i, minor_i, LANG_NEUTRAL, &TL);
 
 		/* if that failed, assumed that the GUID is actually a CLSID and
-		 * attemp to get the library via an instance of that class */
+		 * attempt to get the library via an instance of that class */
 		if (FAILED(hr) && (major == NULL || minor == NULL)) {
 			IDispatch *disp = NULL;
 			ITypeInfo *info = NULL;

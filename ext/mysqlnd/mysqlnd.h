@@ -29,7 +29,7 @@
 
 #define MYSQLND_STRING_TO_INT_CONVERSION
 /*
-  This force mysqlnd to do a single (or more depending on ammount of data)
+  This force mysqlnd to do a single (or more depending on amount of data)
   non-blocking read() calls before sending a command to the server. Useful
   for debugging, if previous function hasn't consumed all the output sent
   to it - like stmt_send_long_data() error because the data was larger that

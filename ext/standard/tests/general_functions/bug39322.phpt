@@ -1,5 +1,5 @@
 --TEST--
-Bug #39322 (proc_terminate() loosing process resource)
+Bug #39322 (proc_terminate() losing process resource)
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");

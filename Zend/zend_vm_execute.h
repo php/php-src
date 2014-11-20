@@ -5892,7 +5892,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -7274,7 +7274,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -9140,7 +9140,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -11604,7 +11604,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -14059,7 +14059,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -15735,7 +15735,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -19884,7 +19884,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -21947,7 +21947,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -27615,7 +27615,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -29112,7 +29112,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -30429,7 +30429,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -31748,7 +31748,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -33550,7 +33550,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_UNUSED == IS_CV || IS_UNUSED == IS_VAR) {
+			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -37123,7 +37123,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+			if (IS_CONST == IS_CV || IS_CONST == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -39115,7 +39115,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+			if (IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
@@ -41371,7 +41371,7 @@ num_index_prop:
 
 		result = 0;
 		if (UNEXPECTED(Z_TYPE_P(offset) != IS_LONG)) {
-			if (IS_CV == IS_CV || IS_CV == IS_VAR) {
+			if (IS_VAR == IS_CV || IS_VAR == IS_VAR) {
 				ZVAL_DEREF(offset);
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
