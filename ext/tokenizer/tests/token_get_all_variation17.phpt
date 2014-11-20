@@ -244,7 +244,7 @@ array(81) {
     [0]=>
     int(%d)
     [1]=>
-    string(17) ""Division by zero""
+    string(18) ""Division by zero""
     [2]=>
     int(5)
   }
