@@ -3,8 +3,7 @@ IntlDateFormatter: several forms of the timezone arg
 --SKIPIF--
 <?php
 if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '52.1') < 0) die('skip for ICU >= 52.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '54.1') >=  0) die('skip for ICU < 54.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1'); ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -37,10 +36,11 @@ $df = new IntlDateFormatter('es_ES', 0, 0, 'Europe/Amsterdam', 0);
 echo $df->format($ts), "\n";
 
 --EXPECTF--
-sábado%S 31 de diciembre de 2011, 23:00:00 (Hora estándar de las Azores)
-domingo%S 1 de enero de 2012, 1:00:00 (Hora estándar de Europa central)
-domingo%S 1 de enero de 2012, 0:00:00 (Hora%S estándar de Europa occidental)
-sábado%S 31 de diciembre de 2011, 19:00:00 (Hora estándar oriental)
-domingo%S 1 de enero de 2012, 1:00:00 (Hora estándar de Europa central)
-domingo%S 1 de enero de 2012, 0:00:00 (Hora%S estándar de Europa occidental)
-domingo%S 1 de enero de 2012, 1:00:00 (Hora estándar de Europa central)
+sábado, 31 de diciembre de 2011, 23:00:00 (hora estándar de las Azores)
+domingo, 1 de enero de 2012, 1:00:00 (hora estándar de Europa central)
+domingo, 1 de enero de 2012, 0:00:00 (hora estándar de Europa occidental)
+sábado, 31 de diciembre de 2011, 19:00:00 (hora estándar oriental)
+domingo, 1 de enero de 2012, 1:00:00 (hora estándar de Europa central)
+domingo, 1 de enero de 2012, 0:00:00 (hora estándar de Europa occidental)
+domingo, 1 de enero de 2012, 1:00:00 (hora estándar de Europa central)
+
