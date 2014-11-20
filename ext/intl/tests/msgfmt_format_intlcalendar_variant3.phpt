@@ -3,7 +3,8 @@ MessageFormat accepts IntlCalendar args
 --SKIPIF--
 <?php
 if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') || version_compare(INTL_ICU_VERSION, '52.1') >= 0) die('skip for ICU >= 51.2 and < 52.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '52.1') < 0) die('skip for ICU >= 52.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '54.1') >=  0) die('skip for ICU < 54.1'); ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -26,5 +27,5 @@ echo "msgf2: ", $msgf->format(array($time, 'date')), " ",
 ?>
 ==DONE==
 --EXPECT--
-Quinta-feira, 17 de Maio de 2012 5:35:36 PM ptlis
+quinta-feira, 17 de Maio de 2012 5:35:36 da tarde ptlis
 ==DONE==

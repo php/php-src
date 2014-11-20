@@ -367,7 +367,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 				case 'R': /* remote IP address */
 					if (!test) {
-						char *tmp = fcgi_get_last_client_ip();
+						const char *tmp = fcgi_get_last_client_ip();
 						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", tmp ? tmp : "-");
 					}
 					break;

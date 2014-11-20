@@ -1,9 +1,8 @@
 --TEST--
-create() icu >= 53.1 && icu < 54.1
+create() icu >= 53.1 
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '53.1') < 0) die('skip for ICU >= 53.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '54.1') >=  0) die('skip for ICU < 54.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1'); ?>
 --FILE--
 <?php
 
@@ -64,10 +63,7 @@ Locale: 'UK_UA_ODESSA'
   ULOC_REQUESTED_LOCALE = 'UK_UA_ODESSA'
   ULOC_VALID_LOCALE     = 'uk'
   ULOC_ACTUAL_LOCALE    = 'uk'
-Locale: 'uk-ua_CALIFORNIA@currency=;currency=GRN'
-  ULOC_REQUESTED_LOCALE = 'uk-ua_CALIFORNIA@currency=;currency=GRN'
-  ULOC_VALID_LOCALE     = 'root'
-  ULOC_ACTUAL_LOCALE    = 'root'
+Error creating collator with 'uk-ua_CALIFORNIA@currency=;currency=GRN' locale: collator_create: unable to open ICU collator: U_ILLEGAL_ARGUMENT_ERROR
 Locale: ''
   ULOC_REQUESTED_LOCALE = ''
   ULOC_VALID_LOCALE     = '%s'

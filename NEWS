@@ -2,8 +2,31 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.20
 
+- Core:
+  . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
 
-?? ??? 2014, PHP 5.5.19
+- FPM:
+  . Fixed bug #68420 (listen=9000 listens to ipv6 localhost instead of all
+    addresses). (Remi)
+  . Fixed bug #68421 (access.format='%R' doesn't log ipv6 address). (Remi)
+  . Fixed bug #68423 (PHP-FPM will no longer load all pools). (Remi)
+  . Fixed bug #68428 (listen.allowed_clients is IPv4 only). (Remi)
+  . Fixed bug #68381 (fpm_unix_init_main ignores log_level).
+    (David Zuelke, Remi)
+  . Fixed bug #68452 (php-fpm man page is oudated). (Remi)
+
+- PDO_pgsql:
+  . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
+  . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
+  when not in transaction) (Matteo)
+  . Fixed bug #68351 (PDO::PARAM_BOOL and ATTR_EMULATE_PREPARES misbehaving)
+  (Matteo)
+
+- zlib:
+  . Fixed bug #53829 (Compiling PHP with large file support will replace
+    function gzopen by gzopen64) (Sascha Kettler, Matteo)
+
+13 Nov 2014, PHP 5.5.19
 
 - Core:
   . Fixed bug #68095 (AddressSanitizer reports a heap buffer overflow in 
@@ -11,6 +34,12 @@ PHP                                                                        NEWS
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames
     and passwords) (Tjerk)
+  . Fixed bug #68365 (zend_mm_heap corrupted after memory overflow in
+    zend_hash_copy). (Dmitry)
+
+- CURL:
+  . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
+    CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
 
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
@@ -32,17 +61,12 @@ PHP                                                                        NEWS
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
 
-- PDO_pgsql:
-  . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
-  . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
-    when not in transaction) (Matteo)
+- SOAP:
+  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
+    (Laruence)
 
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
-
-- CURL:
-  . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
-    CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
 
 16 Oct 2014, PHP 5.5.18
 
