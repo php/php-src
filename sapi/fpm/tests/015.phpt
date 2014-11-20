@@ -36,6 +36,13 @@ if (is_resource($fpm)) {
 		echo "Started\n";
 		fclose($fp);
 	}
+	for ($i=0 ; $i<10 ; $i++) {
+		try {
+			run_request('127.0.0.1', $port);
+		} catch (Exception $e) {
+			echo "Error\n";
+		}
+	}
 	proc_terminate($fpm);
 	if (!feof($tail)) {
 		echo stream_get_contents($tail);
