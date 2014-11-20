@@ -90,7 +90,7 @@ of sljitConfigInternal.h */
 #define SLJIT_SUCCESS			0
 /* After the call of sljit_generate_code(), the error code of the compiler
    is set to this value to avoid future sljit calls (in debug mode at least).
-   The complier should be freed after sljit_generate_code(). */
+   The compiler should be freed after sljit_generate_code(). */
 #define SLJIT_ERR_COMPILED		1
 /* Cannot allocate non executable memory. */
 #define SLJIT_ERR_ALLOC_FAILED		2
@@ -898,7 +898,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_const* sljit_emit_const(struct sljit_compi
 
 /* After the code generation the address for label, jump and const instructions
    are computed. Since these structures are freed by sljit_free_compiler, the
-   addresses must be preserved by the user program elsewere. */
+   addresses must be preserved by the user program elsewhere. */
 static SLJIT_INLINE sljit_uw sljit_get_label_addr(struct sljit_label *label) { return label->addr; }
 static SLJIT_INLINE sljit_uw sljit_get_jump_addr(struct sljit_jump *jump) { return jump->addr; }
 static SLJIT_INLINE sljit_uw sljit_get_const_addr(struct sljit_const *const_) { return const_->addr; }

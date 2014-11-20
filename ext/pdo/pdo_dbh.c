@@ -472,7 +472,7 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 }
 /* }}} */
 
-/* {{{ proto object PDO::prepare(string statment [, array options])
+/* {{{ proto object PDO::prepare(string statement [, array options])
    Prepares a statement for execution and returns a statement object */
 static PHP_METHOD(PDO, prepare)
 {

@@ -4,7 +4,7 @@ Bug #26317 (military timezone offset signedness)
 date.timezone=GMT0
 --SKIPIF--
 if (!@putenv("TZ=GMT0") || getenv("TZ") != 'GMT0') {
-	die("skip unable to change TZ enviroment variable\n");
+	die("skip unable to change TZ environment variable\n");
 }
 --FILE--
 <?php

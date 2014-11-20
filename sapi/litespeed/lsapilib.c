@@ -2662,7 +2662,7 @@ static void lsapi_check_child_status( long tmCur )
     }
     if ( abs( g_prefork_server->m_iCurChildren - count ) > 1 )
     {
-        fprintf( stderr, "Children tracking is wrong: PID: %d, Cur Childen: %d, count: %d, idle: %d, dying: %d\n", getpid(), 
+        fprintf( stderr, "Children tracking is wrong: PID: %d, Cur Children: %d, count: %d, idle: %d, dying: %d\n", getpid(), 
                 g_prefork_server->m_iCurChildren, count, idle, dying );
 
     }
