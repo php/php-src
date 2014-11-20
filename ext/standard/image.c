@@ -461,7 +461,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info TSR
 	snprintf(markername, sizeof(markername), "APP%d", marker - M_APP0);
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(info), markername, strlen(markername))) == NULL) {
-		/* XXX we onyl catch the 1st tag of it's kind! */
+		/* XXX we only catch the 1st tag of it's kind! */
 		add_assoc_stringl(info, markername, buffer, length);
 	}
 
@@ -533,7 +533,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info TSRMLS_D
 			case M_APP14:
 			case M_APP15:
 				if (info) {
-					if (!php_read_APP(stream, marker, info TSRMLS_CC)) { /* read all the app markes... */
+					if (!php_read_APP(stream, marker, info TSRMLS_CC)) { /* read all the app marks... */
 						return result;
 					}
 				} else {
