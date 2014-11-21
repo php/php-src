@@ -20,8 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug #68452 (php-fpm man page is oudated). (Remi)
   . Fixed request #68458 (Change pm.start_servers default warning to
     notice). (David Zuelke, Remi)
-  . Fixed request #68463 (listen.allowed_clients can silently result
+  . Fixed bug #68463 (listen.allowed_clients can silently result
     in no allowed access). (Remi)
+  . Fixed request #68391 (php-fpm conf files loading order).
+    (Florian Margaine, Remi)
 
 GMP:
   . Fixed bug #68419 (build error with gmp 4.1). (Remi)
