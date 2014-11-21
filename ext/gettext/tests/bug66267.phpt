@@ -10,6 +10,14 @@ if (PHP_ZTS) {
 	should be even XFAIL till it's fixed there */
 	die("skip NTS only");
 }
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+	$loc = ["de_DE", "fr_FR", "en_US"];
+	foreach($loc as $l) {
+		if (!setlocale(LC_ALL, $l)) {
+			die("SKIP '$l' locale not supported.");
+		}
+	}
+}
 ?>
 --FILE--
 <?php
