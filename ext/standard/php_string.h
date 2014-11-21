@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Stig Sæther Bakken <ssb@php.net>                            |
+   |          Stig SÃ¦ther Bakken <ssb@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -78,6 +78,7 @@ PHP_FUNCTION(chunk_split);
 PHP_FUNCTION(parse_str);
 PHP_FUNCTION(str_getcsv);
 PHP_FUNCTION(bin2hex);
+PHP_FUNCTION(ts_bin2hex);
 PHP_FUNCTION(hex2bin);
 PHP_FUNCTION(similar_text);
 PHP_FUNCTION(strip_tags);
