@@ -8,6 +8,7 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #68355 (Inconsistency in example php.ini comments).
     (Chris McCafferty)
+  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
 
 - FPM:
   . Fixed bug #68420 (listen=9000 listens to ipv6 localhost instead of all
