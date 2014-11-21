@@ -4138,13 +4138,17 @@ PHP_FUNCTION(putenv)
 	if (putenv(pe.putenv_string) == 0) { /* success */
 # else
 	error_code = SetEnvironmentVariable(pe.key, value);
-#  if _MSC_VER < 1500
-	/* Yet another VC6 bug, unset may return env not found */
-	if (error_code != 0 || 
-		(error_code == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)) {
-#  else
-	if (error_code != 0) { /* success */
-#  endif
+
+	if (error_code != 0
+# ifndef ZTS
+	/* We need both SetEnvironmentVariable and _putenv here as some
+		dependency lib could use either way to read the environment.
+		Obviously the CRT version will be useful more often. But
+		generally, doing both brings us on the safe track at least
+		in NTS build. */
+	&& _putenv(pe.putenv_string) == 0
+# endif
+	) { /* success */
 # endif
 #endif
 		zend_hash_add(&BG(putenv_ht), pe.key, pe.key_len + 1, (void **) &pe, sizeof(putenv_entry), NULL);
