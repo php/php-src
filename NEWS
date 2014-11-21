@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Fixed #67959 (Segfault when calling phpversion('spl')). (Florian)
   . Implemented the RFC `Catchable "Call to a member function bar() on a
     non-object"` (Timm)
+  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
