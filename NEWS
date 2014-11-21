@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
+  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
 
 - FPM:
   . Fixed bug #68420 (listen=9000 listens to ipv6 localhost instead of all
