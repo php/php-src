@@ -46,6 +46,8 @@ int fpm_log_open(int reopen) /* {{{ */
 		if (0 > fd) {
 			zlog(ZLOG_SYSERROR, "failed to open access log (%s)", wp->config->access_log);
 			return -1;
+		} else {
+			zlog(ZLOG_DEBUG, "open access log (%s)", wp->config->access_log);
 		}
 
 		if (reopen) {
