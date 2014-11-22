@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 
 - GMP:
   . Fixed bug #68419 (build error with gmp 4.1). (Remi)
+  . Fixed bug #68478 (access.log don't use prefix). (Remi)
 
 - PDO_pgsql:
   . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
