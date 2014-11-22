@@ -1037,7 +1037,7 @@ static PHP_MINIT_FUNCTION(tidy)
 
 	REGISTER_INI_ENTRIES();
 	REGISTER_TIDY_CLASS(tidy, doc,	NULL, 0);
-	REGISTER_TIDY_CLASS(tidyNode, node,	NULL, ZEND_ACC_FINAL_CLASS);
+	REGISTER_TIDY_CLASS(tidyNode, node,	NULL, ZEND_ACC_FINAL);
 
 	tidy_object_handlers_doc.cast_object = tidy_doc_cast_handler;
 	tidy_object_handlers_node.cast_object = tidy_node_cast_handler;

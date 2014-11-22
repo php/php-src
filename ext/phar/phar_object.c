@@ -5308,11 +5308,11 @@ void phar_object_init(TSRMLS_D) /* {{{ */
 #else
 	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
 	phar_ce_archive = zend_register_internal_class(&ce TSRMLS_CC);
-	phar_ce_archive->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	phar_ce_archive->ce_flags |= ZEND_ACC_FINAL;
 
 	INIT_CLASS_ENTRY(ce, "PharData", php_archive_methods);
 	phar_ce_data = zend_register_internal_class(&ce TSRMLS_CC);
-	phar_ce_data->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	phar_ce_data->ce_flags |= ZEND_ACC_FINAL;
 #endif
 
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "BZ2", PHAR_ENT_COMPRESSED_BZ2)
