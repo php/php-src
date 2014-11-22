@@ -1200,15 +1200,15 @@ static int fpm_conf_post_process(int force_daemon TSRMLS_DC) /* {{{ */
 		return -1;
 	}
 
-	if (0 > fpm_log_open(0)) {
-		return -1;
-	}
-
 	if (0 > fpm_event_pre_init(fpm_global_config.events_mechanism)) {
 		return -1;
 	}
 
 	if (0 > fpm_conf_process_all_pools()) {
+		return -1;
+	}
+
+	if (0 > fpm_log_open(0)) {
 		return -1;
 	}
 
