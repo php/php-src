@@ -25,7 +25,7 @@ PHP                                                                        NEWS
     in no allowed access). (Remi)
   . Fixed request #68391 (php-fpm conf files loading order).
     (Florian Margaine, Remi)
-  . Fixed bug #68478 (acess_log don't use prefix). (Remi)
+  . Fixed bug #68478 (access.log don't use prefix). (Remi)
 
 - GMP:
   . Fixed bug #68419 (build error with gmp 4.1). (Remi)
