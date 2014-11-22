@@ -727,7 +727,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ce->name->val, parent_ce->name->val);
 	}
-	if (parent_ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
+	if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ce->name->val, parent_ce->name->val);
 	}
 
