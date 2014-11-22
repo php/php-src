@@ -30,7 +30,7 @@ dump_modifiers('g');
 --EXPECT--
 int(0)
 int(32)
-int(64)
+int(4)
 int(128)
 int(524288)
 int(524416)

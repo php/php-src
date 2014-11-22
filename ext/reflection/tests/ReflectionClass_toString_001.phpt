@@ -14,7 +14,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
   - Constants [3] {
     Constant [ integer IS_IMPLICIT_ABSTRACT ] { 16 }
     Constant [ integer IS_EXPLICIT_ABSTRACT ] { 32 }
-    Constant [ integer IS_FINAL ] { 64 }
+    Constant [ integer IS_FINAL ] { 4 }
   }
 
   - Static properties [0] {
