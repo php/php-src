@@ -21,6 +21,7 @@ PHP                                                                        NEWS
     in no allowed access). (Remi)
   . Fixed request #68391 (php-fpm conf files loading order).
     (Florian Margaine, Remi)
+  . Fixed bug #68478 (access.log don't use prefix). (Remi)
 
 - PDO_pgsql:
   . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
