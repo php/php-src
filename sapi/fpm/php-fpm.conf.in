@@ -131,6 +131,7 @@
 
 ; Per pool prefix
 ; It only applies on the following directives:
+; - 'access.log'
 ; - 'slowlog'
 ; - 'listen' (unixsocket)
 ; - 'chroot'

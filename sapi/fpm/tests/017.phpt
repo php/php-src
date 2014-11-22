@@ -61,7 +61,7 @@ Done
 --CLEAN--
 <?php
 	$logfile = __DIR__.'/php-fpm.log.tmp';
-	$srcfile = __DIR__.'/php-fpm.log.tmp';
+	$srcfile = __DIR__.'/php-fpm.tmp.php';
     @unlink($logfile);
     @unlink($srcfile);
 ?>
