@@ -608,7 +608,17 @@ ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend
 	return 0;
 }
 
-static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zval *arg, ulong fetch_type TSRMLS_DC)
+static inline int zend_arg_allows_null(zend_bool allow_null, zval *default_value TSRMLS_DC)
+{
+	if (allow_null < 2 || !default_value) {
+		return allow_null;
+	}
+
+	/* assuming update_constant_ex done before */
+	return Z_TYPE_P(default_value) == IS_NULL;
+}
+
+static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zval *arg, zval *defaultval, ulong fetch_type TSRMLS_DC)
 {
 	zend_arg_info *cur_arg_info;
 	char *need_msg;
@@ -638,7 +648,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
 				return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name TSRMLS_CC);
 			}
-		} else if (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null) {
+		} else if (Z_TYPE_P(arg) != IS_NULL || !zend_arg_allows_null(cur_arg_info->allow_null, defaultval TSRMLS_CC)) {
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, fetch_type, &class_name, &ce TSRMLS_CC);
 			return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "" TSRMLS_CC);
 		}
@@ -649,7 +659,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "" TSRMLS_CC);
 				}
 
-				if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
+				if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !zend_arg_allows_null(cur_arg_info->allow_null, defaultval TSRMLS_CC))) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "" TSRMLS_CC);
 				}
 				break;
@@ -658,7 +668,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", "none", "" TSRMLS_CC);
 				}
-				if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC) && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
+				if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC) && (Z_TYPE_P(arg) != IS_NULL || !zend_arg_allows_null(cur_arg_info->allow_null, defaultval TSRMLS_CC))) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "" TSRMLS_CC);
 				}
 				break;

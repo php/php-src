@@ -26,6 +26,5 @@ echo "Done\n";
 --EXPECTF--	
 int(1)
 int(5)
-int(10)
 
 Fatal error: Class 'NoSuchClass' not found in %s on line %d

@@ -1931,8 +1931,8 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 			if (class_type->u.constant.type == IS_ARRAY) {
 				cur_arg_info->type_hint = IS_ARRAY;
 				if (op == ZEND_RECV_INIT) {
-					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST) {
-						cur_arg_info->allow_null = 1;
+					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT || (Z_TYPE(initialization->u.constant) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT_AST) {
+						cur_arg_info->allow_null = (Z_TYPE(initialization->u.constant) != IS_NULL) + 1;
 					} else if (Z_TYPE(initialization->u.constant) != IS_ARRAY) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with array type hint can only be an array or NULL");
 					}
@@ -1940,8 +1940,8 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 			} else if (class_type->u.constant.type == IS_CALLABLE) {
 				cur_arg_info->type_hint = IS_CALLABLE;
 				if (op == ZEND_RECV_INIT) {
-					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) == IS_CONSTANT && !strcasecmp(Z_STRVAL(initialization->u.constant), "NULL")) || Z_TYPE(initialization->u.constant) == IS_CONSTANT_AST) {
-						cur_arg_info->allow_null = 1;
+					if (Z_TYPE(initialization->u.constant) == IS_NULL || (Z_TYPE(initialization->u.constant) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT || (Z_TYPE(initialization->u.constant) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT_AST) {
+						cur_arg_info->allow_null = (Z_TYPE(initialization->u.constant) != IS_NULL) + 1;
 					} else {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters with callable type hint can only be NULL");
 					}
