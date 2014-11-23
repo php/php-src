@@ -2675,7 +2675,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			zval *p = ZEND_CALL_ARG(call, 1);
 
 			for (i = 0; i < call->num_args; ++i) {
-				zend_verify_arg_type(fbc, i + 1, p TSRMLS_CC);
+				zend_verify_arg_type(fbc, i + 1, p, NULL TSRMLS_CC);
 				p++;
 			}
 			if (UNEXPECTED(EG(exception) != NULL)) {
@@ -3528,7 +3528,7 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 	} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 		zval *param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
 
-		zend_verify_arg_type(EX(func), arg_num, param TSRMLS_CC);
+		zend_verify_arg_type(EX(func), arg_num, param, NULL TSRMLS_CC);
 		CHECK_EXCEPTION();
 	}
 
@@ -3539,15 +3539,20 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 {
 	USE_OPLINE
 	uint32_t arg_num = opline->op1.num;
-	zval *param;
+	zval *param, default_val = {{0}};
 
 	SAVE_OPLINE();
+	if (Z_OPT_CONSTANT_P(opline->op2.zv)) {
+		ZVAL_COPY_VALUE(&default_val, opline->op2.zv);
+		zval_update_constant(&default_val, 0 TSRMLS_CC);
+	}
+
 	param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
 	if (arg_num > EX(num_args)) {
-		ZVAL_COPY_VALUE(param, opline->op2.zv);
-		if (Z_OPT_CONSTANT_P(param)) {
-			zval_update_constant(param, 0 TSRMLS_CC);
+		if (Z_TYPE(default_val) != IS_UNDEF) {
+			*param = default_val;
 		} else {
+			ZVAL_COPY_VALUE(param, opline->op2.zv);
 			/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
 			if (UNEXPECTED(Z_OPT_COPYABLE_P(param))) {
 				zval_copy_ctor_func(param);
@@ -3556,7 +3561,11 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 	}
 
 	if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
-		zend_verify_arg_type(EX(func), arg_num, param TSRMLS_CC);
+		zend_verify_arg_type(EX(func), arg_num, param, Z_TYPE(default_val) == IS_UNDEF ? NULL : &default_val TSRMLS_CC);
+	}
+
+	if (Z_TYPE(default_val) != IS_UNDEF && arg_num <= EX(num_args)) {
+		zval_dtor(&default_val);
 	}
 
 	CHECK_EXCEPTION();
@@ -3581,7 +3590,7 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 		param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
 		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 			do {			
-				zend_verify_arg_type(EX(func), arg_num, param TSRMLS_CC);
+				zend_verify_arg_type(EX(func), arg_num, param, NULL TSRMLS_CC);
 				zend_hash_next_index_insert_new(Z_ARRVAL_P(params), param);
 				if (Z_REFCOUNTED_P(param)) Z_ADDREF_P(param);
 				param++;

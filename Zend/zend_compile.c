@@ -3831,11 +3831,15 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) /* {{{ */
 		arg_info->class_name_len = 0;
 
 		if (type_ast) {
-			zend_bool has_null_default = default_ast
-				&& (Z_TYPE(default_node.u.constant) == IS_NULL
-					|| (Z_TYPE(default_node.u.constant) == IS_CONSTANT
-						&& strcasecmp(Z_STRVAL(default_node.u.constant), "NULL") == 0)
-					|| Z_TYPE(default_node.u.constant) == IS_CONSTANT_AST); // ???
+			zend_bool has_null_default = 0;
+
+			if (default_ast) {
+				if (!(has_null_default = (Z_TYPE(default_node.u.constant) == IS_NULL || (Z_TYPE(default_node.u.constant) == IS_CONSTANT && strcasecmp(Z_STRVAL(default_node.u.constant), "NULL") == 0)))) {
+					if (Z_OPT_CONSTANT(default_node.u.constant)) {
+						has_null_default = 2;
+					}
+				}
+			}
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->allow_null = has_null_default;
