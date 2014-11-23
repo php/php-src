@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #68355 (Inconsistency in example php.ini comments).
     (Chris McCafferty)
   . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
+  . Fixed bug #68446 (Array constant not accepted for array parameter default). (Bob)
 
 - FPM:
   . Fixed bug #68420 (listen=9000 listens to ipv6 localhost instead of all
