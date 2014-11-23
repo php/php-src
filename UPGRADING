@@ -76,6 +76,11 @@ PHP X.Y UPGRADE NOTES
 - parse_ini_file():
 - parse_ini_string():
   Added scanner mode INI_SCANNER_TYPED to yield typed .ini values.
+- unserialize():
+  Added second parameter for unserialize function 
+  (RFC: https://wiki.php.net/rfc/secure_unserialize) allowing to specify
+  acceptable classes: 
+  unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]);
 
 
 ========================================

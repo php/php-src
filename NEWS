@@ -17,7 +17,9 @@ PHP                                                                        NEWS
   . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
   . Fixed #67959 (Segfault when calling phpversion('spl')). (Florian)
   . Implemented the RFC `Catchable "Call to a member function bar() on a
-    non-object"` (Timm)
+    non-object"`. (Timm)
+  . Added options parameter for unserialize allowing to specify acceptable
+    classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
   . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
 
 - DBA:
