@@ -63,6 +63,7 @@ PHP X.Y UPGRADE NOTES
 
 - FPM
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes).
+  . Listen = port now listen on all addresses (IPv6 and IPv4-mapped).
 
 ========================================
 4. Deprecated Functionality
