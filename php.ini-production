@@ -607,13 +607,13 @@ html_errors = On
 ; http://php.net/variables-order
 variables_order = "GPCS"
 
-; This directive determines which super global data (G,P,C,E & S) should
-; be registered into the super global array REQUEST. If so, it also determines
-; the order in which that data is registered. The values for this directive are
-; specified in the same manner as the variables_order directive, EXCEPT one.
-; Leaving this value empty will cause PHP to use the value set in the
-; variables_order directive. It does not mean it will leave the super globals
-; array REQUEST empty.
+; This directive determines which super global data (G,P & C) should be
+; registered into the super global array REQUEST. If so, it also determines
+; the order in which that data is registered. The values for this directive
+; are specified in the same manner as the variables_order directive,
+; EXCEPT one. Leaving this value empty will cause PHP to use the value set
+; in the variables_order directive. It does not mean it will leave the super
+; globals array REQUEST empty.
 ; Default Value: None
 ; Development Value: "GP"
 ; Production Value: "GP"
