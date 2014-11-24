@@ -4,7 +4,7 @@ Test the basics to function iconv.
 Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 --SKIPIF--
 <?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
-<?php if(substr(PHP_OS, 0, 3) == 'WIN' ) {die('skip not for windows');} ?>
+<?php if(substr(PHP_OS, 0, 3) != 'WIN' ) {die('skip windows only test');} ?>
 --FILE--
 <?php
 $in_charset          = 'UTF-8';
@@ -16,4 +16,4 @@ $string_out = iconv($in_charset, $out_charset, $string_to_translate);
 var_dump($string_out);
 ?>
 --EXPECT--
-string(15) "Zlutoucky kun\n"
+string(16) "Zlutouck'y kun\n"
