@@ -774,7 +774,7 @@ static zend_bool zval_fits_type(const zval *variable, const zend_uchar type, con
 			return 1;
 
 		default:
-			assert (false && "Unknown type");
+			assert (0 && "Unknown type");
 	}
 }
 

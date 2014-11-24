@@ -332,8 +332,17 @@ char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
 /* }}} */
 
 
+/* TODO: move this elsewhere */
+static inline
+zend_bool zend_string_equals_ci(const zend_string *a, const zend_string *b) /* {{{ */
+{
+	return a->len == b->len && !zend_binary_strcasecmp(a->val, a->len, b->val, b->len);
+}
+/* }}} */
+
+
 static
-zend_bool zend_do_return_type_inheritance_check(const zend_function *fe, const zend_function *proto TSRMLS_DC)
+zend_bool zend_do_return_type_inheritance_check(const zend_function *fe, const zend_function *proto TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *child_ce;
 	zend_class_entry *parent_ce;
@@ -372,23 +381,23 @@ zend_bool zend_do_return_type_inheritance_check(const zend_function *fe, const z
 	}
 
 	/* 1b. If the type names are equal they are invariant */
-	if (zend_string_equals(child_name, parent_name)) {
+	if (zend_string_equals_ci(child_name, parent_name)) {
 		return 1;
 	}
 
 	/* 2a. Bind the type names to class entries; fetch the class if needed
 	 */
-	if (zend_string_equals(child_name, proto->common.scope->name)) {
+	if (zend_string_equals_ci(child_name, proto->common.scope->name)) {
 		child_ce = proto->common.scope;
-	} else if (zend_string_equals(child_name, fe->common.scope->name)) {
+	} else if (zend_string_equals_ci(child_name, fe->common.scope->name)) {
 		child_ce = fe->common.scope;
 	} else {
 		child_ce = zend_fetch_class_by_name(child_name, NULL, 0 TSRMLS_CC);
 	}
 
-	if (proto->common.scope->parent && zend_string_equals(parent_name, proto->common.scope->parent->name)) {
+	if (proto->common.scope->parent && zend_string_equals_ci(parent_name, proto->common.scope->parent->name)) {
 		parent_ce = proto->common.scope->parent;
-	} else if (zend_string_equals(parent_name, proto->common.scope->name)) {
+	} else if (zend_string_equals_ci(parent_name, proto->common.scope->name)) {
 		parent_ce = proto->common.scope;
 	} else {
 		parent_ce = zend_fetch_class_by_name(parent_name, NULL, 0 TSRMLS_CC);
@@ -398,6 +407,7 @@ zend_bool zend_do_return_type_inheritance_check(const zend_function *fe, const z
 	 *     the parent then they are not covariant */
 	return instanceof_function(child_ce, parent_ce TSRMLS_CC);
 }
+/* }}} */
 
 static zend_function *do_inherit_method(zend_function *old_function, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
