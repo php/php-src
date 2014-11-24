@@ -736,38 +736,101 @@ static zend_always_inline void zend_assign_to_object(zval *retval, zval *object,
 		}
 	}
 
-	/* separate our value if necessary */
-	if (value_type == IS_TMP_VAR) {
-		ZVAL_COPY_VALUE(&tmp, value);
-		value = &tmp;
-	} else if (value_type == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
-		}
-	} else if (Z_REFCOUNTED_P(value)) {
-		Z_ADDREF_P(value);
-	}
-
 	if (opcode == ZEND_ASSIGN_OBJ) {
 		if (!Z_OBJ_HT_P(object)->write_property) {
 			zend_error(E_WARNING, "Attempt to assign property of non-object");
 			if (retval) {
 				ZVAL_NULL(retval);
 			}
-			if (value_type == IS_CONST) {
-				zval_ptr_dtor(value);
-			}
 			FREE_OP(free_value);
 			return;
 		}
+
+		if (cache_slot &&
+			EXPECTED(Z_OBJCE_P(object) == CACHED_PTR_EX(cache_slot))) {
+			zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 1);
+			zend_object *zobj = Z_OBJ_P(object);
+			zval *property;
+
+			if (EXPECTED(prop_info)) {
+				property = OBJ_PROP(zobj, prop_info->offset);
+				if (Z_TYPE_P(property) != IS_UNDEF) {
+fast_assign:
+					value = zend_assign_to_variable(property, value, value_type TSRMLS_CC);
+					if (retval && !EG(exception)) {
+						ZVAL_COPY(retval, value);
+					}
+					if (value_type == IS_VAR) {
+						FREE_OP(free_value);
+					}
+					return;
+				}
+			} else {
+				if (EXPECTED(zobj->properties != NULL)) {
+					property = zend_hash_find(zobj->properties, Z_STR_P(property_name));
+					if (property) {
+						goto fast_assign;
+					}
+				}
+
+				if (!zobj->ce->__set) {
+					if (EXPECTED(zobj->properties == NULL)) {
+						rebuild_object_properties(zobj);				
+					}
+					/* separate our value if necessary */
+					if (value_type == IS_CONST) {
+						if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
+							ZVAL_COPY_VALUE(&tmp, value);
+							zval_copy_ctor_func(&tmp);
+							value = &tmp;
+						}
+					} else if (value_type != IS_TMP_VAR &&
+					           Z_REFCOUNTED_P(value)) {
+						Z_ADDREF_P(value);
+					}
+					zend_hash_add_new(zobj->properties, Z_STR_P(property_name), value);
+					if (retval && !EG(exception)) {
+						ZVAL_COPY(retval, value);
+					}
+					if (value_type == IS_VAR) {
+						FREE_OP(free_value);
+					}
+					return;
+				}
+	    	}
+		}
+
+		/* separate our value if necessary */
+		if (value_type == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
+				ZVAL_COPY_VALUE(&tmp, value);
+				zval_copy_ctor_func(&tmp);
+				value = &tmp;
+			}
+		} else if (value_type != IS_TMP_VAR &&
+		           Z_REFCOUNTED_P(value)) {
+			Z_ADDREF_P(value);
+		}
+
 		Z_OBJ_HT_P(object)->write_property(object, property_name, value, cache_slot TSRMLS_CC);
 	} else {
 		/* Note:  property_name in this case is really the array index! */
 		if (!Z_OBJ_HT_P(object)->write_dimension) {
 			zend_error_noreturn(E_ERROR, "Cannot use object as array");
 		}
+
+		/* separate our value if necessary */
+		if (value_type == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
+				ZVAL_COPY_VALUE(&tmp, value);
+				zval_copy_ctor_func(&tmp);
+				value = &tmp;
+			}
+		} else if (value_type != IS_TMP_VAR &&
+		           Z_REFCOUNTED_P(value)) {
+			Z_ADDREF_P(value);
+		}
+
 		Z_OBJ_HT_P(object)->write_dimension(object, property_name, value TSRMLS_CC);
 	}
 
