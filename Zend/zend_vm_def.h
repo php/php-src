@@ -385,7 +385,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 					if (Z_REFCOUNT_P(z) == 0) {
-						zval_dtor(z);
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
@@ -711,7 +711,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					zval_dtor(z);
+					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
 				}
 				ZVAL_COPY_VALUE(z, value);
 			}
@@ -798,7 +798,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
 
 				if (Z_REFCOUNT_P(z) == 0) {
-					zval_dtor(z);
+					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
 				}
 				ZVAL_COPY_VALUE(z, value);
 			}
@@ -2080,7 +2080,7 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP|UNUSED, TMP|VAR|CV)
 	add_string_to_string(str, str, var);
 
 	if (use_copy) {
-		zval_dtor(var);
+		zend_string_release(Z_STR_P(var));
 	}
 	/* original comment, possibly problematic:
 	 * FREE_OP is missing intentionally here - we're always working on the same temporary variable
@@ -2980,9 +2980,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 	}
 
 	exception = EG(exception);
-	if (Z_REFCOUNTED_P(EX_VAR(opline->op2.var))) {
-		zval_ptr_dtor(EX_VAR(opline->op2.var));
-	}
+	zval_ptr_dtor(EX_VAR(opline->op2.var));
 	ZVAL_OBJ(EX_VAR(opline->op2.var), EG(exception));
 	if (UNEXPECTED(EG(exception) != exception)) {
 		GC_REFCOUNT(EG(exception))++;
@@ -3269,7 +3267,7 @@ ZEND_VM_C_LABEL(send_again):
 					if (Z_TYPE(key) == IS_STRING) {
 						zend_error(E_RECOVERABLE_ERROR,
 							"Cannot unpack Traversable with string keys");
-						zval_dtor(&key);
+						zend_string_release(Z_STR(key));
 						ZEND_VM_C_GOTO(unpack_iter_dtor);
 					}
 
@@ -3721,7 +3719,7 @@ ZEND_VM_HANDLER(68, ZEND_NEW, CONST|VAR, ANY)
 		if (RETURN_VALUE_USED(opline)) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &object_zval);
 		} else {
-			zval_ptr_dtor(&object_zval);
+			OBJ_RELEASE(Z_OBJ(object_zval));
 		}
 		ZEND_VM_JMP(opline->op2.jmp_addr);
 	} else {
@@ -3799,7 +3797,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 	if (EXPECTED(EG(exception) == NULL)) {
 		ZVAL_OBJ(EX_VAR(opline->result.var), clone_call(obj TSRMLS_CC));
 		if (!RETURN_VALUE_USED(opline) || UNEXPECTED(EG(exception) != NULL)) {
-			zval_ptr_dtor(EX_VAR(opline->result.var));
+			OBJ_RELEASE(Z_OBJ_P(EX_VAR(opline->result.var)));
 		}
 	}
 	FREE_OP1_IF_VAR();
@@ -4206,7 +4204,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		}
 	}
 	if (Z_TYPE(tmp_inc_filename) != IS_UNDEF) {
-		zval_ptr_dtor(&tmp_inc_filename);
+		zend_string_release(Z_STR(tmp_inc_filename));
 	}
 	FREE_OP1();
 	if (UNEXPECTED(EG(exception) != NULL)) {
@@ -4297,8 +4295,8 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 			} else {
 				ce = zend_fetch_class_by_name(Z_STR_P(opline->op2.zv), opline->op2.zv + 1, 0 TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					if (OP1_TYPE != IS_CONST) {
-						zval_dtor(&tmp);
+					if (OP1_TYPE != IS_CONST && Z_TYPE(tmp) != IS_UNDEF) {
+						zend_string_release(Z_STR(tmp));
 					}
 					FREE_OP1();
 					HANDLE_EXCEPTION();
@@ -4317,8 +4315,8 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
 	}
 
-	if (OP1_TYPE != IS_CONST) {
-		zval_dtor(&tmp);
+	if (OP1_TYPE != IS_CONST && Z_TYPE(tmp) != IS_UNDEF) {
+		zend_string_release(Z_STR(tmp));
 	}
 	FREE_OP1();
 	CHECK_EXCEPTION();
@@ -4901,6 +4899,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		zend_free_op free_op1;
 		zval tmp, *varname = GET_OP1_ZVAL_PTR(BP_VAR_IS);
 
+		ZVAL_UNDEF(&tmp);
 		if (OP1_TYPE != IS_CONST && Z_TYPE_P(varname) != IS_STRING) {
 			ZVAL_STR(&tmp, zval_get_string(varname));
 			varname = &tmp;
@@ -4929,8 +4928,8 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 			value = zend_hash_find_ind(target_symbol_table, Z_STR_P(varname));
 		}
 
-		if (OP1_TYPE != IS_CONST && varname == &tmp) {
-			zval_dtor(&tmp);
+		if (OP1_TYPE != IS_CONST && Z_TYPE(tmp) != IS_UNDEF) {
+			zend_string_release(Z_STR(tmp));
 		}
 		FREE_OP1();
 
