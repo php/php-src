@@ -3,20 +3,20 @@ PHP                                                                        NEWS
 ?? ??? 2014, PHP 5.5.20
 
 - Core:
-  . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
-  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly 
-    triggered). (Julien)
   . Fixed bug #68091 (Some Zend headers lack appropriate extern "C" blocks).
     (Adam)
+  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly 
+    triggered). (Julien)
+  . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
 
 - FPM:
+  . Fixed bug #68381 (fpm_unix_init_main ignores log_level).
+    (David Zuelke, Remi)
   . Fixed bug #68420 (listen=9000 listens to ipv6 localhost instead of all
     addresses). (Remi)
   . Fixed bug #68421 (access.format='%R' doesn't log ipv6 address). (Remi)
   . Fixed bug #68423 (PHP-FPM will no longer load all pools). (Remi)
   . Fixed bug #68428 (listen.allowed_clients is IPv4 only). (Remi)
-  . Fixed bug #68381 (fpm_unix_init_main ignores log_level).
-    (David Zuelke, Remi)
   . Fixed bug #68452 (php-fpm man page is oudated). (Remi)
   . Fixed request #68458 (Change pm.start_servers default warning to
     notice). (David Zuelke, Remi)
