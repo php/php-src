@@ -11,6 +11,7 @@ if test "$PHP_JSON" != "no"; then
 
 PHP_NEW_EXTENSION(json,
 	  json.c \
+	  json_encoder.c \
 	  json_parser.tab.c \
 	  json_scanner.c,
 	  $ext_shared)

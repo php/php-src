@@ -16,8 +16,8 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_JSOND_SCANNER_H
-#define	PHP_JSOND_SCANNER_H
+#ifndef PHP_JSON_SCANNER_H
+#define	PHP_JSON_SCANNER_H
 
 #include "php.h"
 #include "php_json.h"
@@ -43,5 +43,5 @@ typedef struct _php_json_scanner {
 void php_json_scanner_init(php_json_scanner *scanner, char *str, int str_len, long options);
 int php_json_scan(php_json_scanner *s);
 
-#endif	/* PHP_JSOND_SCANNER_H */
+#endif	/* PHP_JSON_SCANNER_H */
 

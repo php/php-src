@@ -16,27 +16,12 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_JSON_PARSER_H
-#define	PHP_JSON_PARSER_H
+#ifndef PHP_JSON_ENCODER_H
+#define	PHP_JSON_ENCODER_H
 
 #include "php.h"
-#include "php_json_scanner.h"
+#include "zend_smart_str.h"
 
-typedef struct _php_json_parser {
-	php_json_scanner scanner;
-	zval *return_value;
-	long depth;
-	long max_depth;
-#if ZTS
-	void *zts_ctx;
-#endif
-} php_json_parser;
+void php_json_encode_zval(smart_str *buf, zval *val, int options TSRMLS_DC);
 
-void php_json_parser_init(php_json_parser *parser, zval *return_value, char *str, int str_len, long options, long max_depth TSRMLS_DC);
-
-php_json_error_code php_json_parser_error_code(php_json_parser *parser);
-
-int php_json_yyparse(php_json_parser *parser);
-
-#endif	/* PHP_JSON_PARSER_H */
-
+#endif	/* PHP_JSON_ENCODER_H */
