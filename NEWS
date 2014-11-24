@@ -458,6 +458,7 @@ PHP                                                                        NEWS
   . Fixed issue with null bytes in LDAP bindings. (Matthew Daley)
 
 - litespeed
+  . Updated LiteSpeed SAPI code to V6.6 (George Wang)
   . Fixed bug #63228 (-Werror=format-security error in lsapi code).
     (Elan Ruusamäe, George)
 
