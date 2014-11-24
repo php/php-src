@@ -14,7 +14,8 @@ echo "-- Testing fputcsv() with more than expected number of arguments --\n";
 $fields = array("fld1", "fld2");
 $delim = ";";
 $enclosure ="\"";
-var_dump( $fo->fputcsv($fields, $delim, $enclosure, $fo) );
+$escape = "\\";
+var_dump( $fo->fputcsv($fields, $delim, $enclosure, $escape, $fo) );
 
 echo "Done\n";
 --CLEAN--
@@ -30,6 +31,6 @@ Warning: SplFileObject::fputcsv() expects at least 1 parameter, 0 given in %s on
 NULL
 -- Testing fputcsv() with more than expected number of arguments --
 
-Warning: SplFileObject::fputcsv() expects at most 3 parameters, 4 given in %s on line %d
+Warning: SplFileObject::fputcsv() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 Done
