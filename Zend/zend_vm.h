@@ -21,8 +21,12 @@
 #ifndef ZEND_VM_H
 #define ZEND_VM_H
 
+BEGIN_EXTERN_C()
+
 ZEND_API void zend_vm_use_old_executor(void);
 ZEND_API void zend_vm_set_opcode_handler(zend_op* opcode);
+
+END_EXTERN_C()
 
 #define ZEND_VM_SET_OPCODE_HANDLER(opline) zend_vm_set_opcode_handler(opline)
 
