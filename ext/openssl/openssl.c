@@ -3487,8 +3487,8 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			if (pkey->pkey.ec == NULL) {
 				break;
 			}
-
-			zval ec;
+		{
+			zval *ec;
 			const EC_GROUP *ec_group;
 			int nid;
 			char *crv_sn;
@@ -3503,24 +3503,25 @@ PHP_FUNCTION(openssl_pkey_get_details)
 			if (nid == NID_undef) {
 				break;
 			}
-
-			array_init(&ec);
+			ALLOC_INIT_ZVAL(ec);
+			array_init(ec);
 
 			// Short object name
 			crv_sn = (char*) OBJ_nid2sn(nid);
 			if (crv_sn != NULL) {
-				add_assoc_string(&ec, "curve_name", crv_sn);
+				add_assoc_string(ec, "curve_name", crv_sn, 1);
 			}
 
 			obj = OBJ_nid2obj(nid);
 			if (obj != NULL) {
 				int oir_len = OBJ_obj2txt(oir_buf, sizeof(oir_buf), obj, 1);
-				add_assoc_stringl(&ec, "curve_oid", (char*)oir_buf, oir_len);
+				add_assoc_stringl(ec, "curve_oid", (char*)oir_buf, oir_len, 1);
 				ASN1_OBJECT_free(obj);
 			}
 
-			add_assoc_zval(return_value, "ec", &ec);
+			add_assoc_zval(return_value, "ec", ec);
 			break;
+		}
 #endif
 		default:
 			ktype = -1;
