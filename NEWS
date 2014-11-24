@@ -279,6 +279,9 @@ PHP                                                                        NEWS
   . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
     check). (Francisco Alonso, Jan Kaluza, Remi)
 
+- LiteSpeed:
+  . Updated LiteSpeed SAPI code from V5.5 to V6.6 (George Wang)
+
 - Network:
   . Fixed bug #67432 (Fix potential segfault in dns_get_record()).
     (CVE-2014-4049). (Sara)
