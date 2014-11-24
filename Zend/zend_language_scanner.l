@@ -1282,6 +1282,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_GLOBAL;
 }
 
+<ST_IN_SCRIPTING>"local" {
+	return T_LOCAL;
+}
+
 <ST_IN_SCRIPTING>"isset" {
 	return T_ISSET;
 }

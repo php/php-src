@@ -184,6 +184,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_USE        "use (T_USE)"
 %token T_INSTEADOF  "insteadof (T_INSTEADOF)"
 %token T_GLOBAL     "global (T_GLOBAL)"
+%token T_LOCAL      "local (T_LOCAL)"
 %token T_STATIC     "static (T_STATIC)"
 %token T_ABSTRACT   "abstract (T_ABSTRACT)"
 %token T_FINAL      "final (T_FINAL)"
@@ -235,7 +236,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> class_declaration_statement use_declaration const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type argument expr_without_variable global_var
+%type <ast> extends_from parameter optional_type argument expr_without_variable global_var local_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_expr class_name class_name_reference simple_variable internal_functions_in_yacc
@@ -245,7 +246,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> assignment_list_element array_pair encaps_var encaps_var_offset isset_variables
 %type <ast> isset_variable
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
-%type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
+%type <ast> alt_if_stmt for_exprs switch_case_list global_var_list local_var_list static_var_list
 %type <ast> echo_expr_list unset_variables catch_list parameter_list class_statement_list
 %type <ast> implements_list interface_extends_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
@@ -361,6 +362,7 @@ statement:
 	|	T_CONTINUE optional_expr ';'	{ $$ = zend_ast_create(ZEND_AST_CONTINUE, $2); }
 	|	T_RETURN optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_RETURN, $2); }
 	|	T_GLOBAL global_var_list ';'	{ $$ = $2; }
+	|	T_LOCAL local_var_list ';'	{ $$ = $2; }
 	|	T_STATIC static_var_list ';'	{ $$ = $2; }
 	|	T_ECHO echo_expr_list ';'		{ $$ = $2; }
 	|	T_INLINE_HTML { $$ = zend_ast_create(ZEND_AST_ECHO, $1); }
@@ -588,6 +590,15 @@ global_var:
 		{ $$ = zend_ast_create(ZEND_AST_GLOBAL, zend_ast_create(ZEND_AST_VAR, $1)); }
 ;
 
+local_var_list:
+		local_var_list ',' local_var { $$ = zend_ast_list_add($1, $3); }
+	|	local_var { $$ = zend_ast_create_list(1, ZEND_AST_STMT_LIST, $1); }
+;
+
+local_var:
+	simple_variable
+		{ $$ = zend_ast_create(ZEND_AST_LOCAL, zend_ast_create(ZEND_AST_VAR, $1)); }
+;
 
 static_var_list:
 		static_var_list ',' static_var { $$ = zend_ast_list_add($1, $3); }

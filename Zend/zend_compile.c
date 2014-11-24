@@ -3007,6 +3007,32 @@ void zend_compile_global_var(zend_ast *ast TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+void zend_compile_local_var(zend_ast *ast TSRMLS_DC) /* {{{ */
+{
+	zend_ast *var_ast = ast->child[0];
+	zend_ast *name_ast = var_ast->child[0];
+
+	znode name_node, result;
+
+	zend_compile_expr(&name_node, name_ast TSRMLS_CC);
+	if (name_node.op_type == IS_CONST) {
+		convert_to_string(&name_node.u.constant);
+	}
+
+	if (zend_try_compile_cv(&result, var_ast TSRMLS_CC) == SUCCESS) {
+		zend_op *opline = zend_emit_op(NULL, ZEND_BIND_GLOBAL, &result, &name_node TSRMLS_CC);
+		zend_alloc_cache_slot(opline->op2.constant TSRMLS_CC);
+	} else {
+		zend_emit_op(&result, ZEND_FETCH_W, &name_node, NULL TSRMLS_CC);
+
+		// TODO.AST Avoid double fetch
+		//opline->extended_value = ZEND_FETCH_GLOBAL_LOCK;
+
+		zend_emit_assign_ref_znode(var_ast, &result TSRMLS_CC);
+	}
+}
+/* }}} */
+
 static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_bool by_ref TSRMLS_DC) /* {{{ */
 {
 	znode var_node, result;
@@ -6037,6 +6063,9 @@ void zend_compile_stmt(zend_ast *ast TSRMLS_DC) /* {{{ */
 			break;
 		case ZEND_AST_GLOBAL:
 			zend_compile_global_var(ast TSRMLS_CC);
+			break;
+        case ZEND_AST_LOCAL:
+			zend_compile_local_var(ast TSRMLS_CC);
 			break;
 		case ZEND_AST_STATIC:
 			zend_compile_static_var(ast TSRMLS_CC);
