@@ -7,10 +7,13 @@ PHP                                                                        NEWS
     (Adam)
   . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
     (Laruence)
-  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
+  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly 
+    triggered). (Julien)
   . Fixed bug #68355 (Inconsistency in example php.ini comments).
     (Chris McCafferty)
   . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
+  . Fixed bug #68422 (Incorrect argument reflection info for array_multisort()).
+    (Alexander Lisachenko)
   . Fixed bug #68446 (Array constant not accepted for array parameter default). (Bob)
 
 - FPM:
