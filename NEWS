@@ -90,6 +90,9 @@ PHP                                                                        NEWS
   . Fixed bug #67730 (Null byte injection possible with imagexxx functions).
     (CVE-2014-5120) (Ryan Mauger)
 
+- LiteSpeed:
+  . Updated LiteSpeed SAPI code from V5.5 to V6.6 (George Wang)
+
 - Network:
   . Fixed bug #67717 (segfault in dns_get_record). (CVE-2014-3597) (Remi)
 
