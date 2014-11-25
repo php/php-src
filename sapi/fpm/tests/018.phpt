@@ -35,8 +35,11 @@ $fpm = run_fpm($cfg, $tail);
 if (is_resource($fpm)) {
     fpm_display_log($tail, 2);
     try {
-		$headers = ['HTTP_X_TEST' => 'Pass'];
-		$req = run_request('127.0.0.1', $port, $srcfile, '', $headers);
+		$headers = [
+			'HTTP_X_FOO' => 'BAR',
+			'HTTP_CONTENT_TYPE' => 'text/html; charset=UTF-8',
+		];
+		$req = run_request('127.0.0.1', $port, $srcfile, '');
 		echo strstr($req, "Test Start");
 		echo "Request ok\n";
 	} catch (Exception $e) {
@@ -55,8 +58,8 @@ Done
 [%s] NOTICE: ready to handle connections
 Test Start
 array(1) {
-  ["X-Test"]=>
-  string(4) "Pass"
+  ["X-Foo"]=>
+  string(4) "Bar"
 }
 Test End
 

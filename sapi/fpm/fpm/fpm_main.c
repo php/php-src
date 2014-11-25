@@ -1555,7 +1555,7 @@ static inline void fcgi_hash_apply(HashTable *h, fcgi_apply_func func, void *arg
 	while (p) {
 		if (EXPECTED(p->arKey != NULL)) {
 			/* Since request->env already has the terminating char, -1 to var_len */
-			func((char*)p->arKey, p->nKeyLength-1, *(char**)p->pData, strlen(*(char**)p->pData), arg TSRMLS_CC);
+			func((char*)p->arKey, p->nKeyLength, *(char**)p->pData, strlen(*(char**)p->pData), arg TSRMLS_CC);
 		}
 		p = p->pListNext;
 	}
