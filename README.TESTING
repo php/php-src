@@ -123,7 +123,7 @@ MYMAIL=qa-test@domain.com
 TMPDIR=/var/tmp
 TODAY=`date +"%Y%m%d"`
 
-# Make sure compilation enviroment is correct
+# Make sure compilation environment is correct
 CONFIGURE_OPTS='--disable-all --enable-cli --with-pcre'
 export MAKE=gmake
 export CC=gcc

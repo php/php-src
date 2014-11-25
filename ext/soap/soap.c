@@ -1259,7 +1259,7 @@ PHP_METHOD(SoapServer, setPersistence)
 		if (service->type == SOAP_CLASS) {
 			if (value == SOAP_PERSISTENCE_SESSION ||
 				value == SOAP_PERSISTENCE_REQUEST) {
-				service->soap_class.persistance = value;
+				service->soap_class.persistence = value;
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set persistence with bogus value (%pd)", value);
 				return;
@@ -1299,7 +1299,7 @@ PHP_METHOD(SoapServer, setClass)
 		service->type = SOAP_CLASS;
 		service->soap_class.ce = ce;
 
-		service->soap_class.persistance = SOAP_PERSISTENCE_REQUEST;
+		service->soap_class.persistence = SOAP_PERSISTENCE_REQUEST;
 		service->soap_class.argc = num_args;
 		if (service->soap_class.argc > 0) {
 			int i;
@@ -1657,7 +1657,7 @@ PHP_METHOD(SoapServer, handle)
 	} else if (service->type == SOAP_CLASS) {
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 		/* If persistent then set soap_obj from from the previous created session (if available) */
-		if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
+		if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
 			zval *tmp_soap;
 			zval *session_vars;
 
@@ -1741,7 +1741,7 @@ PHP_METHOD(SoapServer, handle)
 			}
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 			/* If session then update session hash with new object */
-			if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
+			if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
 				zval *tmp_soap_pp;
 				zval *session_vars = &PS(http_session_vars);
 
@@ -1848,7 +1848,7 @@ PHP_METHOD(SoapServer, handle)
 			call_status = call_user_function(NULL, soap_obj, &function_name, &retval, num_params, params TSRMLS_CC);
 			if (service->type == SOAP_CLASS) {
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
-				if (service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
+				if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
 					zval_ptr_dtor(soap_obj);
 					soap_obj = NULL;
 				}
@@ -1875,7 +1875,7 @@ PHP_METHOD(SoapServer, handle)
 		}
 		if (service->type == SOAP_CLASS) {
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
-			if (soap_obj && service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
+			if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
 #else
 			if (soap_obj) {
 #endif
@@ -1919,7 +1919,7 @@ PHP_METHOD(SoapServer, handle)
 		}
 		if (service->type == SOAP_CLASS) {
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
-			if (soap_obj && service->soap_class.persistance != SOAP_PERSISTENCE_SESSION) {
+			if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
 #else
 			if (soap_obj) {
 #endif
@@ -3113,7 +3113,7 @@ PHP_METHOD(SoapClient, __doRequest)
 
 /* {{{ proto void SoapClient::__setCookie(string name [, strung value])
    Sets cookie thet will sent with SOAP request.
-   The call to this function will effect all folowing calls of SOAP methods.
+   The call to this function will effect all following calls of SOAP methods.
    If value is not specified cookie is removed. */
 PHP_METHOD(SoapClient, __setCookie)
 {
@@ -4711,6 +4711,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 				if (type->attributes &&
 				    (attr = zend_hash_str_find_ptr(type->attributes, SOAP_1_1_ENC_NAMESPACE":arrayType",
 				      sizeof(SOAP_1_1_ENC_NAMESPACE":arrayType")-1)) != NULL &&
+					attr->extraAttributes &&
 				    (ext = zend_hash_str_find_ptr(attr->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType")-1)) != NULL) {
 					char *end = strchr(ext->val, '[');
 					int len;
@@ -4734,6 +4735,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 					if (type->attributes &&
 					    (attr = zend_hash_str_find_ptr(type->attributes, SOAP_1_2_ENC_NAMESPACE":itemType",
 					      sizeof(SOAP_1_2_ENC_NAMESPACE":itemType")-1)) != NULL &&
+						attr->extraAttributes &&
 				    (ext = zend_hash_str_find_ptr(attr->extraAttributes, WSDL_NAMESPACE":itemType", sizeof(WSDL_NAMESPACE":arrayType")-1)) != NULL) {
 						smart_str_appends(buf, ext->val);
 						smart_str_appendc(buf, ' ');
@@ -4751,6 +4753,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 					if (type->attributes &&
 					    (attr = zend_hash_str_find_ptr(type->attributes, SOAP_1_2_ENC_NAMESPACE":arraySize",
 					      sizeof(SOAP_1_2_ENC_NAMESPACE":arraySize")-1)) != NULL &&
+						attr->extraAttributes &&
 					    (ext = zend_hash_str_find_ptr(attr->extraAttributes, WSDL_NAMESPACE":itemType", sizeof(WSDL_NAMESPACE":arraySize")-1)) != NULL) {
 						smart_str_appendc(buf, '[');
 						smart_str_appends(buf, ext->val);

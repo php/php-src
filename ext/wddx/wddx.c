@@ -1046,7 +1046,7 @@ static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 
 /* {{{ php_wddx_deserialize_ex
  */
-int php_wddx_deserialize_ex(char *value, int vallen, zval *return_value)
+int php_wddx_deserialize_ex(const char *value, size_t vallen, zval *return_value)
 {
 	wddx_stack stack;
 	XML_Parser parser;
@@ -1060,7 +1060,8 @@ int php_wddx_deserialize_ex(char *value, int vallen, zval *return_value)
 	XML_SetElementHandler(parser, php_wddx_push_element, php_wddx_pop_element);
 	XML_SetCharacterDataHandler(parser, php_wddx_process_data);
 	
-	XML_Parse(parser, value, vallen, 1);
+	/* XXX value should be parsed in the loop to exhaust size_t */
+	XML_Parse(parser, value, (int)vallen, 1);
 	
 	XML_ParserFree(parser);
 

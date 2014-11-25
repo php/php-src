@@ -55,7 +55,6 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC 
 {
 	if (Z_REFCOUNTED_P(zval_ptr)) {
 		if (!Z_DELREF_P(zval_ptr)) {
-			ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
 			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
 		} else {
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(zval_ptr);
@@ -127,6 +126,65 @@ again:
 			break;
 	}
 	return result;
+}
+
+static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type TSRMLS_DC)
+{
+	do {
+		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {	
+			zend_refcounted *garbage;
+
+			if (Z_ISREF_P(variable_ptr)) {
+				variable_ptr = Z_REFVAL_P(variable_ptr);
+				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
+					break;
+				}
+			}
+			if (Z_TYPE_P(variable_ptr) == IS_OBJECT &&
+	    		UNEXPECTED(Z_OBJ_HANDLER_P(variable_ptr, set) != NULL)) {
+				Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr, value TSRMLS_CC);
+				return variable_ptr;
+			}
+			if ((value_type & (IS_VAR|IS_CV)) && variable_ptr == value) {
+				return variable_ptr;
+			}
+			garbage = Z_COUNTED_P(variable_ptr);
+			if (--GC_REFCOUNT(garbage) == 0) {
+				ZVAL_COPY_VALUE(variable_ptr, value);
+				if (value_type == IS_CONST) {
+					/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
+					if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
+						zval_copy_ctor_func(variable_ptr);
+					}
+				} else if (value_type != IS_TMP_VAR) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
+						Z_ADDREF_P(variable_ptr);
+					}
+				}
+				_zval_dtor_func_for_ptr(garbage ZEND_FILE_LINE_CC);
+				return variable_ptr;
+			} else { /* we need to split */
+				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
+				if ((Z_COLLECTABLE_P(variable_ptr)) &&
+		    		UNEXPECTED(!GC_INFO(garbage))) {
+					gc_possible_root(garbage TSRMLS_CC);
+				}
+			}
+		}
+	} while (0);
+
+	ZVAL_COPY_VALUE(variable_ptr, value);
+	if (value_type == IS_CONST) {
+		/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
+		if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
+			zval_copy_ctor_func(variable_ptr);
+		}
+	} else if (value_type != IS_TMP_VAR) {
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
+			Z_ADDREF_P(variable_ptr);
+		}
+	}
+	return variable_ptr;
 }
 
 ZEND_API int zval_update_constant(zval *pp, zend_bool inline_change TSRMLS_DC);
@@ -261,10 +319,7 @@ ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler
 ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode);
 
 /* former zend_execute_locks.h */
-typedef struct _zend_free_op {
-	zval *var;
-/*	int   is_var; */
-} zend_free_op;
+typedef zval* zend_free_op;
 
 ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC);
 

@@ -254,7 +254,7 @@ PHP_FUNCTION(com_create_instance)
 			ITypeLib_Release(TL);
 		}
 	} else if (obj->typeinfo && COMG(autoreg_on)) {
-		int idx;
+		UINT idx;
 
 		if (SUCCEEDED(ITypeInfo_GetContainingTypeLib(obj->typeinfo, &TL, &idx))) {
 			/* check if the library is already in the cache by getting its name */
@@ -693,7 +693,6 @@ PHP_FUNCTION(com_event_sink)
 {
 	zval *object, *sinkobject, *sink=NULL;
 	char *dispname = NULL, *typelibname = NULL;
-	zend_bool gotguid = 0;
 	php_com_dotnet_object *obj;
 	ITypeInfo *typeinfo = NULL;
 

@@ -1103,7 +1103,7 @@ Changes in the Zend Engine 1.0
       Use ob_start() to begin output buffering, ob_end_flush() to end
       buffering and send out the buffered contents, ob_end_clean() to
       end buffering without sending the buffered contents, and
-      ob_get_contents() to retreive the current contents of the output
+      ob_get_contents() to retrieve the current contents of the output
       buffer. Header information (header(), content type, cookies) are
       not buffered. By turning on output buffering, you can
       effectively send header information all throughout your file,

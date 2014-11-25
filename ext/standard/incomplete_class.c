@@ -150,7 +150,7 @@ PHPAPI zend_string *php_lookup_class_name(zval *object)
 
 /* {{{ php_store_class_name
  */
-PHPAPI void php_store_class_name(zval *object, const char *name, uint32_t len)
+PHPAPI void php_store_class_name(zval *object, const char *name, size_t len)
 {
 	zval val;
 	TSRMLS_FETCH();

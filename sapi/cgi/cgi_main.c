@@ -2280,7 +2280,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 				/* all remaining arguments are part of the query string
 				 * this section of code concatenates all remaining arguments
-				 * into a single string, seperating args with a &
+				 * into a single string, separating args with a &
 				 * this allows command lines like:
 				 *
 				 *  test.php v1=test v2=hello+world!

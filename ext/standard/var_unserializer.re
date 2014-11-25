@@ -224,6 +224,26 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 	return str;
 }
 
+static inline int unserialize_allowed_class(zend_string *class_name, HashTable *classes)
+{
+	zend_string *lcname;
+	int res;
+	ALLOCA_FLAG(use_heap)
+
+	if(classes == NULL) {
+		return 1;
+	}
+	if(!zend_hash_num_elements(classes)) {
+		return 0;
+	}
+
+	STR_ALLOCA_ALLOC(lcname, class_name->len, use_heap);
+	zend_str_tolower_copy(lcname->val, class_name->val, class_name->len);
+	res = zend_hash_exists(classes, lcname);
+	STR_ALLOCA_FREE(lcname, use_heap);
+	return res;
+}
+
 #define YYFILL(n) do { } while (0)
 #define YYCTYPE unsigned char
 #define YYCURSOR cursor
@@ -297,8 +317,8 @@ static inline size_t parse_uiv(const unsigned char *p)
 	return result;
 }
 
-#define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC
-#define UNSERIALIZE_PASSTHRU rval, p, max, var_hash TSRMLS_CC
+#define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes TSRMLS_DC
+#define UNSERIALIZE_PASSTHRU rval, p, max, var_hash, classes TSRMLS_CC
 
 static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, int objprops)
 {
@@ -306,7 +326,8 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend
 		zval key, *data, d, *old_data;
 
 		ZVAL_UNDEF(&key);
-		if (!php_var_unserialize(&key, p, max, NULL TSRMLS_CC)) {
+
+		if (!php_var_unserialize_ex(&key, p, max, NULL, classes TSRMLS_CC)) {
 			zval_dtor(&key);
 			return 0;
 		}
@@ -358,7 +379,7 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend
 		
 		zval_dtor(&key);
 
-		if (!php_var_unserialize(data, p, max, var_hash TSRMLS_CC)) {
+		if (!php_var_unserialize_ex(data, p, max, var_hash, classes TSRMLS_CC)) {
 			return 0;
 		}
 
@@ -466,7 +487,14 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 # pragma optimize("", on)
 #endif
 
-PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
+PHPAPI int php_var_unserialize(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC)
+{
+	HashTable *classes = NULL;
+	return php_var_unserialize_ex(UNSERIALIZE_PASSTHRU);
+}
+
+
+PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 {
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval *rval_ref;
@@ -659,7 +687,7 @@ use_double:
 	}
 
 	array_init_size(rval, elements);
-//??? we can't convert from packed to hash during unserialization, becaue
+//??? we can't convert from packed to hash during unserialization, because
 //??? reference to some zvals might be keept in var_hash (to support references)
 	zend_hash_real_init(Z_ARRVAL_P(rval), 0);
 
@@ -727,6 +755,12 @@ object ":" uiv ":" ["]	{
 	class_name = zend_string_init(str, len, 0);
 
 	do {
+		if(!unserialize_allowed_class(class_name, classes)) {
+			incomplete_class = 1;
+			ce = PHP_IC_ENTRY;
+			break;
+		}
+
 		/* Try to find class directly */
 		BG(serialize_lock)++;
 		ce = zend_lookup_class(class_name TSRMLS_CC);

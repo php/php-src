@@ -19,7 +19,7 @@ require_once('skipifconnectfailure.inc');
 
 	$idx = 0;
 	while ($row = mysqli_fetch_assoc($res)) {
-		/* mysqlnd: force seperation - create copies */
+		/* mysqlnd: force separation - create copies */
 		$references[$idx] = array(
 			'id' 		=> &$row['id'],
 			'label'	=> $row['label'] . '');
@@ -30,7 +30,7 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_data_seek($res, 0);
 	while ($row = mysqli_fetch_assoc($res)) {
-		/* mysqlnd: force seperation - create copies */
+		/* mysqlnd: force separation - create copies */
 		$references[$idx] = array(
 			'id' 		=> &$row['id'],
 			'label'	=> $row['label'] . '');
@@ -48,7 +48,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	while ($row = mysqli_fetch_assoc($res)) {
-		/* mysqlnd: force seperation - create copies*/
+		/* mysqlnd: force separation - create copies*/
 		$references[$idx] = array(
 			'id' 		=> &$row['id'],
 			'label'	=> $row['label'] . '');

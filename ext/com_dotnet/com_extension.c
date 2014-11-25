@@ -387,7 +387,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 
 #define COM_ERR_CONST(x) { \
 	zend_long __tmp; \
-	ULongToUIntPtr(x, &__tmp); \
+	ULongToIntPtr(x, &__tmp); \
 	REGISTER_LONG_CONSTANT(#x, __tmp, CONST_CS|CONST_PERSISTENT); \
 }
 	

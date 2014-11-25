@@ -602,9 +602,12 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name->val, key->val, zend_visibility_string(parent_info->flags), parent_ce->name->val, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if ((child_info->flags & ZEND_ACC_STATIC) == 0) {
-			zval_ptr_dtor(&(ce->default_properties_table[parent_info->offset]));
-			ce->default_properties_table[parent_info->offset] = ce->default_properties_table[child_info->offset];
-			ZVAL_UNDEF(&ce->default_properties_table[child_info->offset]);
+			int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
+			int child_num = OBJ_PROP_TO_NUM(child_info->offset);
+
+			zval_ptr_dtor(&(ce->default_properties_table[parent_num]));
+			ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
+			ZVAL_UNDEF(&ce->default_properties_table[child_num]);
 			child_info->offset = parent_info->offset;
 		}
 		return 0;	/* Don't copy from parent */
@@ -797,7 +800,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			if (property_info->flags & ZEND_ACC_STATIC) {
 				property_info->offset += parent_ce->default_static_members_count;
 			} else {
-				property_info->offset += parent_ce->default_properties_count;
+				property_info->offset += parent_ce->default_properties_count * sizeof(zval);
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1203,7 +1206,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 				}
 				zend_check_trait_usage(ce, cur_precedence->trait_method->ce TSRMLS_CC);
 
-				/** Ensure that the prefered method is actually available. */
+				/** Ensure that the preferred method is actually available. */
 				lcname = zend_string_alloc(cur_method_ref->method_name->len, 0);
 				zend_str_tolower_copy(lcname->val, 
 					cur_method_ref->method_name->val,
@@ -1235,7 +1238,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 
 					/* make sure that the trait method is not from a class mentioned in
 					 exclude_from_classes, for consistency */
-					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[i].ce) {
+					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[j].ce) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 								   "Inconsistent insteadof definition. "
 								   "The method %s is to be used from %s, but %s is also on the exclude list",
@@ -1421,8 +1424,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 								  || (Z_LVAL(compare_result) != 0);
 						} else {
 							not_compatible = (FAILURE == compare_function(&compare_result,
-											  &ce->default_properties_table[coliding_prop->offset],
-											  &ce->traits[i]->default_properties_table[property_info->offset] TSRMLS_CC))
+											  &ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)],
+											  &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)] TSRMLS_CC))
 								  || (Z_LVAL(compare_result) != 0);
 						}
 					} else {
@@ -1454,7 +1457,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 			if (flags & ZEND_ACC_STATIC) {
 				prop_value = &ce->traits[i]->default_static_members_table[property_info->offset];
 			} else {
-				prop_value = &ce->traits[i]->default_properties_table[property_info->offset];
+				prop_value = &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 			}
 			if (Z_REFCOUNTED_P(prop_value)) Z_ADDREF_P(prop_value);
 
@@ -1504,7 +1507,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce 
 										 lc_method_name)) {
 						zend_string_free(lc_method_name);
 						zend_error_noreturn(E_COMPILE_ERROR,
-								   "The modifiers for the trait alias %s() need to be changed in the same statment in which the alias is defined. Error",
+								   "The modifiers for the trait alias %s() need to be changed in the same statement in which the alias is defined. Error",
 								   cur_alias->trait_method->method_name->val);
 					} else {
 						zend_string_free(lc_method_name);

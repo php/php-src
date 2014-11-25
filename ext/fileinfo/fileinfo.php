@@ -3,7 +3,7 @@ if(!extension_loaded('fileinfo')) {
 	dl('fileinfo.' . PHP_SHLIB_SUFFIX);
 }
 if(!extension_loaded('fileinfo')) {
-	die("fileinfo extension is not avaliable, please compile it.\n");
+	die("fileinfo extension is not available, please compile it.\n");
 }
 
 // normal operation

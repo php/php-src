@@ -2807,7 +2807,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 	char *key;
 	smart_str result = {0};
 
-	/* we will collect all possible key lenghts */
+	/* we will collect all possible key lengths */
 	ZVAL_NULL(&dummy);
 	zend_hash_init(&num_hash, 8, NULL, NULL, 0);
 
@@ -2829,7 +2829,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 			if (len < minlen) {
 				minlen = len;
 			}
-			/* remember possible key lenght */
+			/* remember possible key length */
 			zend_hash_index_add(&num_hash, len, &dummy);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -2854,7 +2854,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 				if (len < minlen) {
 					minlen = len;
 				}
-				/* remember possible key lenght */
+				/* remember possible key length */
 				zend_hash_index_add(&num_hash, len, &dummy);
 			} else {
 				len = str_key->len;

@@ -106,16 +106,18 @@ TSRM_API void tsrm_win32_shutdown(void)
 char * tsrm_win32_get_path_sid_key(const char *pathname TSRMLS_DC)
 {
 	PSID pSid = TWG(impersonation_token_sid);
-	DWORD sid_len = pSid ? GetLengthSid(pSid) : 0;
 	TCHAR *ptcSid = NULL;
 	char *bucket_key = NULL;
+	size_t ptc_sid_len, pathname_len;
+
+	pathname_len = strlen(pathname);
 
 	if (!pSid) {
-		bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, strlen(pathname) + 1);
+		bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pathname_len + 1);
 		if (!bucket_key) {
 			return NULL;
 		}
-		memcpy(bucket_key, pathname, strlen(pathname));
+		memcpy(bucket_key, pathname, pathname_len);
 		return bucket_key;
 	}
 
@@ -123,14 +125,16 @@ char * tsrm_win32_get_path_sid_key(const char *pathname TSRMLS_DC)
 		return NULL;
 	}
 
-	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, strlen(pathname) + strlen(ptcSid) + 1);
+
+	ptc_sid_len = strlen(ptcSid);
+	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pathname_len + ptc_sid_len + 1);
 	if (!bucket_key) {
 		LocalFree(ptcSid);
 		return NULL;
 	}
 
-	memcpy(bucket_key, ptcSid, strlen(ptcSid));
-	memcpy(bucket_key + strlen(ptcSid), pathname, strlen(pathname) + 1);
+	memcpy(bucket_key, ptcSid, ptc_sid_len);
+	memcpy(bucket_key + ptc_sid_len, pathname, pathname_len + 1);
 
 	LocalFree(ptcSid);
 	return bucket_key;
@@ -139,11 +143,8 @@ char * tsrm_win32_get_path_sid_key(const char *pathname TSRMLS_DC)
 
 PSID tsrm_win32_get_token_sid(HANDLE hToken)
 {
-	BOOL bSuccess = FALSE;
 	DWORD dwLength = 0;
 	PTOKEN_USER pTokenUser = NULL;
-	PSID sid;
-	PSID *ppsid = &sid;
 	DWORD sid_len;
 	PSID pResultSid = NULL;
 
@@ -204,7 +205,6 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
 	BYTE * psec_desc = NULL;
 	BOOL fAccess = FALSE;
 
-	BOOL bucket_key_alloc = FALSE;
 	realpath_cache_bucket * bucket = NULL;
 	char * real_path = NULL;
 
@@ -242,7 +242,6 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
 		 was impersonating already, this function uses that impersonation context.
 		*/
 		if(!OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, TRUE, &thread_token)) {
-			DWORD err = GetLastError();
 			if (GetLastError() == ERROR_NO_TOKEN) {
 				if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &thread_token)) {
 					 TWG(impersonation_token) = NULL;
@@ -722,4 +721,52 @@ TSRM_API char *realpath(char *orig_path, char *buffer)
 	return buffer;
 }
 
+#if HAVE_UTIME
+static zend_always_inline void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
+{
+	// Note that LONGLONG is a 64-bit value
+	LONGLONG ll;
+
+	ll = Int32x32To64(t, 10000000) + 116444736000000000;
+	pft->dwLowDateTime = (DWORD)ll;
+	pft->dwHighDateTime = ll >> 32;
+}
+/* }}} */
+
+TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
+{
+	FILETIME mtime, atime;
+	HANDLE hFile;
+
+	hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
+				 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+
+	/* OPEN_ALWAYS mode sets the last error to ERROR_ALREADY_EXISTS but
+	   the CreateFile operation succeeds */
+	if (GetLastError() == ERROR_ALREADY_EXISTS) {
+		SetLastError(0);
+	}
+
+	if ( hFile == INVALID_HANDLE_VALUE ) {
+		return -1;
+	}
+
+	if (!buf) {
+		SYSTEMTIME st;
+		GetSystemTime(&st);
+		SystemTimeToFileTime(&st, &mtime);
+		atime = mtime;
+	} else {
+		UnixTimeToFileTime(buf->modtime, &mtime);
+		UnixTimeToFileTime(buf->actime, &atime);
+	}
+	if (!SetFileTime(hFile, NULL, &atime, &mtime)) {
+		CloseHandle(hFile);
+		return -1;
+	}
+	CloseHandle(hFile);
+	return 1;
+}
+/* }}} */
+#endif
 #endif

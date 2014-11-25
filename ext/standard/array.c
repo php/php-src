@@ -615,7 +615,7 @@ PHP_FUNCTION(usort)
 		return;
 	}
 
-	/* Increase reference counter, so the attemts to modify the array in user
+	/* Increase reference counter, so the attempts to modify the array in user
 	 * comparison function will create a copy of array and won't affect the
 	 * original array. The fact of modification is detected using refcount
 	 * comparison. The result of sorting in such case is undefined and the
@@ -660,7 +660,7 @@ PHP_FUNCTION(uasort)
 		return;
 	}
 
-	/* Increase reference counter, so the attemts to modify the array in user
+	/* Increase reference counter, so the attempts to modify the array in user
 	 * comparison function will create a copy of array and won't affect the
 	 * original array. The fact of modification is detected using refcount
 	 * comparison. The result of sorting in such case is undefined and the
@@ -748,7 +748,7 @@ PHP_FUNCTION(uksort)
 		return;
 	}
 
-	/* Increase reference counter, so the attemts to modify the array in user
+	/* Increase reference counter, so the attempts to modify the array in user
 	 * comparison function will create a copy of array and won't affect the
 	 * original array. The fact of modification is detected using refcount
 	 * comparison. The result of sorting in such case is undefined and the

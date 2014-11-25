@@ -958,7 +958,7 @@ class SplFileInfo
 	 *
 	 * @param mode              open mode
 	 * @param use_include_path  whether to search include paths (don't use)
-	 * @param context           resource context to pased to open function
+	 * @param context           resource context to passed to open function
 	 * @throw RuntimeException  if file cannot be opened (e.g. insufficient
 	 *                          access rights).
 	 * @return The opened file as a SplFileObject instance

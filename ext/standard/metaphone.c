@@ -90,7 +90,7 @@ char _codes[26] =
 /* These letters are passed through unchanged */
 #define NOCHANGE(c) (ENCODE(c) & 2)		/* FJMNR */
 
-/* These form dipthongs when preceding H */
+/* These form diphthongs when preceding H */
 #define AFFECTH(c)  (ENCODE(c) & 4)		/* CGPST */
 
 /* These make C and G soft */

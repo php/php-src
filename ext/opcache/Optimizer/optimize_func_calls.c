@@ -143,8 +143,6 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS
 				if (!(opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) && call_stack[call - 1].func) {
 					if (ARG_SHOULD_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
 						opline->extended_value |= ZEND_ARG_COMPILE_TIME_BOUND | ZEND_ARG_SEND_BY_REF;
-					} else if (opline->extended_value) {
-						opline->extended_value |= ZEND_ARG_COMPILE_TIME_BOUND;
 					} else {
 						opline->opcode = ZEND_SEND_VAR;
 						opline->extended_value = 0;

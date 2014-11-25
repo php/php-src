@@ -564,7 +564,7 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value T
 #else
 		ZVAL_LONG(&stat_blocks,-1);
 #endif
-		/* Store numeric indexes in propper order */
+		/* Store numeric indexes in proper order */
 		zend_hash_next_index_insert(HASH_OF(return_value), &stat_dev);
 		zend_hash_next_index_insert(HASH_OF(return_value), &stat_ino);
 		zend_hash_next_index_insert(HASH_OF(return_value), &stat_mode);

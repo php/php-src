@@ -243,7 +243,7 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 		xCurrent = XMLRPC_CreateValueEmpty();
 	}
 
-	/* increment recursion depth guage */
+	/* increment recursion depth gauge */
 	depth ++;
 
 	/* safety first. must have a valid element */

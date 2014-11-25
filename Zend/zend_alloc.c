@@ -30,7 +30,7 @@
  *         performed using mmap(). The result is aligned on 2M boundary.
  *
  * Large - a number of 4096K pages inside a CHUNK. Large blocks
- *         are always alligned on page boundary.
+ *         are always aligned on page boundary.
  *
  * Small - less than 3/4 of page size. Small sizes are rounded up to nearest
  *         greater predefined small size (there are 30 predefined sizes:
@@ -272,7 +272,7 @@ struct _zend_mm_page {
 };
 
 /*
- * bin - is one or few continuous pages (up to 8) used for alocation of
+ * bin - is one or few continuous pages (up to 8) used for allocation of
  * a particular "small size".
  */
 struct _zend_mm_bin {
@@ -395,10 +395,10 @@ stderr_last_error(char *msg)
 			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			(LPSTR)&buf,
 		0, NULL)) {
-		fprintf(stderr, "\n%s: [0x%08x]\n", msg, err);
+		fprintf(stderr, "\n%s: [0x%08lx]\n", msg, err);
 	}
 	else {
-		fprintf(stderr, "\n%s: [0x%08x] %s\n", msg, err, buf);
+		fprintf(stderr, "\n%s: [0x%08lx] %s\n", msg, err, buf);
 	}
 }
 #endif

@@ -635,11 +635,10 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 	zend_string_release(basename);
 
 	/* Trim off trailing whitespace characters */
-	tmp_len--;
 	while (tmp_len > 0 &&
-			(ent->d_name[tmp_len] == '\n' || ent->d_name[tmp_len] == '\r' ||
-			 ent->d_name[tmp_len] == '\t' || ent->d_name[tmp_len] == ' ')) {
-		ent->d_name[tmp_len--] = '\0';
+			(ent->d_name[tmp_len - 1] == '\n' || ent->d_name[tmp_len - 1] == '\r' ||
+			 ent->d_name[tmp_len - 1] == '\t' || ent->d_name[tmp_len - 1] == ' ')) {
+		ent->d_name[--tmp_len] = '\0';
 	}
 
 	return sizeof(php_stream_dirent);
@@ -789,7 +788,7 @@ static int php_stream_ftp_url_stat(php_stream_wrapper *wrapper, const char *url,
 		goto stat_errexit;
 	}
 
-	ssb->sb.st_mode = 0644;									/* FTP won't give us a valid mode, so aproximate one based on being readable */
+	ssb->sb.st_mode = 0644;									/* FTP won't give us a valid mode, so approximate one based on being readable */
 	php_stream_printf(stream TSRMLS_CC, "CWD %s\r\n", (resource->path != NULL ? resource->path : "/")); /* If we can CWD to it, it's a directory (maybe a link, but we can't tell) */
 	result = GET_FTP_RESULT(stream);
 	if (result < 200 || result > 299) {

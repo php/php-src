@@ -5,6 +5,7 @@ session.save_path=
 session.name=PHPSESSID
 --SKIPIF--
 <?php include('skipif.inc'); ?>
+skip - Waiting RFC patch merge
 --FILE--
 <?php
 
