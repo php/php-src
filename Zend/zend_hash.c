@@ -989,20 +989,70 @@ ZEND_API void zend_array_destroy(HashTable *ht TSRMLS_DC)
 
 ZEND_API void zend_hash_clean(HashTable *ht)
 {
-	uint32_t idx;
-	Bucket *p;
+	Bucket *p, *end;
 
 	IS_CONSISTENT(ht);
 
-	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = ht->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+	if (ht->nNumUsed) {
+		p = ht->arData;
+		end = p + ht->nNumUsed;
 		if (ht->pDestructor) {
-			ht->pDestructor(&p->val);
+			if (ht->u.flags & HASH_FLAG_PACKED) {
+				do {
+					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+						ht->pDestructor(&p->val);
+					}
+				} while (++p != end);
+			} else {
+				do {
+					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+						ht->pDestructor(&p->val);
+						if (EXPECTED(p->key)) {
+							zend_string_release(p->key);
+						}
+					}
+				} while (++p != end);
+			}
+		} else {
+			if (!(ht->u.flags & HASH_FLAG_PACKED)) {
+				do {
+					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+						if (EXPECTED(p->key)) {
+							zend_string_release(p->key);
+						}
+					}
+				} while (++p != end);
+			}
 		}
-		if (p->key) {
-			zend_string_release(p->key);
+	}
+	ht->nNumUsed = 0;
+	ht->nNumOfElements = 0;
+	ht->nNextFreeElement = 0;
+	ht->nInternalPointer = INVALID_IDX;
+	if (ht->nTableMask) {
+		if (!(ht->u.flags & HASH_FLAG_PACKED)) {
+			memset(ht->arHash, INVALID_IDX, ht->nTableSize * sizeof(uint32_t));	
 		}
+	}
+}
+
+ZEND_API void zend_symtable_clean(HashTable *ht TSRMLS_DC)
+{
+	Bucket *p, *end;
+
+	IS_CONSISTENT(ht);
+
+	if (ht->nNumUsed) {
+		p = ht->arData;
+		end = p + ht->nNumUsed;
+		do {
+			if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC TSRMLS_CC);
+				if (EXPECTED(p->key)) {
+					zend_string_release(p->key);
+				}
+			}
+		} while (++p != end);
 	}
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = 0;

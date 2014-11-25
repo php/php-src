@@ -298,7 +298,7 @@ ZEND_API void _zval_ptr_dtor_wrapper(zval *zval_ptr)
 {
 	TSRMLS_FETCH();
 
-	i_zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
+	i_zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_CC TSRMLS_CC);
 }
 
 

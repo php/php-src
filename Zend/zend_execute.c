@@ -1421,12 +1421,12 @@ ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_val
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC) /* {{{ */
 {
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
-		zend_hash_destroy(&symbol_table->ht);
+		zend_array_destroy(&symbol_table->ht TSRMLS_CC);
 		efree_size(symbol_table, sizeof(zend_array));
 	} else {
 		/* clean before putting into the cache, since clean
 		   could call dtors, which could use cached hash */
-		zend_hash_clean(&symbol_table->ht);
+		zend_symtable_clean(&symbol_table->ht TSRMLS_CC);
 		*(++EG(symtable_cache_ptr)) = symbol_table;
 	}
 }
