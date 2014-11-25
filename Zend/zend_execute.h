@@ -51,17 +51,6 @@ ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, c
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC);
 ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg TSRMLS_DC);
 
-static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
-{
-	if (Z_REFCOUNTED_P(zval_ptr)) {
-		if (!Z_DELREF_P(zval_ptr)) {
-			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
-		} else {
-			GC_ZVAL_CHECK_POSSIBLE_ROOT(zval_ptr);
-		}
-	}
-}
-
 static zend_always_inline int i_zend_is_true(zval *op TSRMLS_DC)
 {
 	int result;

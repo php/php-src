@@ -22,6 +22,8 @@
 #ifndef ZEND_VARIABLES_H
 #define ZEND_VARIABLES_H
 
+#include "zend_types.h"
+#include "zend_gc.h"
 
 BEGIN_EXTERN_C()
 
@@ -40,6 +42,17 @@ static zend_always_inline void _zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LINE
 {
 	if (Z_REFCOUNTED_P(zval_ptr) && !Z_DELREF_P(zval_ptr)) {
 		_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
+	}
+}
+
+static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
+{
+	if (Z_REFCOUNTED_P(zval_ptr)) {
+		if (!Z_DELREF_P(zval_ptr)) {
+			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
+		} else {
+			GC_ZVAL_CHECK_POSSIBLE_ROOT(zval_ptr);
+		}
 	}
 }
 
