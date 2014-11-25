@@ -14,7 +14,6 @@ PHP                                                                        NEWS
   . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
   . Fixed bug #68422 (Incorrect argument reflection info for array_multisort()).
     (Alexander Lisachenko)
-  . Fixed bug #68446 (Array constant not accepted for array parameter default). (Bob)
 
 - FPM:
   . Fixed bug #68381 (fpm_unix_init_main ignores log_level).

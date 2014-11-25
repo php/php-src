@@ -1,5 +1,7 @@
 --TEST--
 Bug #68446 (Array constant not accepted for array parameter default)
+--XFAIL--
+Not fixed yet as of 5.6.4rc1
 --FILE--
 <?php
 const FOO = [1];
