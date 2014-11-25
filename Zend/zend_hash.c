@@ -21,6 +21,7 @@
 
 #include "zend.h"
 #include "zend_globals.h"
+#include "zend_variables.h"
 
 #if ZEND_DEBUG
 /*
@@ -944,6 +945,47 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 	pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
 }
 
+ZEND_API void zend_array_destroy(HashTable *ht TSRMLS_DC)
+{
+	Bucket *p, *end;
+
+	IS_CONSISTENT(ht);
+
+	if (ht->nNumUsed) {
+		
+		/* In some rare cases destructors of regular arrays may be changed */
+		if (UNEXPECTED(ht->pDestructor != ZVAL_PTR_DTOR)) {
+			zend_hash_destroy(ht);
+			return;
+		}
+	
+		p = ht->arData;
+		end = p + ht->nNumUsed;
+		SET_INCONSISTENT(HT_IS_DESTROYING);
+
+		if (ht->u.flags & HASH_FLAG_PACKED) {
+			do {
+				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC TSRMLS_CC);
+				}
+			} while (++p != end);
+		} else {
+			do {
+				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC TSRMLS_CC);
+					if (EXPECTED(p->key)) {
+						zend_string_release(p->key);
+					}
+				}
+			} while (++p != end);
+		}
+		
+		SET_INCONSISTENT(HT_DESTROYED);
+	} else if (EXPECTED(!ht->nTableMask)) {
+		return;
+	}
+	pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
+}
 
 ZEND_API void zend_hash_clean(HashTable *ht)
 {

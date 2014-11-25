@@ -216,6 +216,7 @@ ZEND_API zval *zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint
 ZEND_API int zend_hash_rehash(HashTable *ht);
 
 ZEND_API void zend_array_dup(HashTable *target, HashTable *source);
+ZEND_API void zend_array_destroy(HashTable *ht TSRMLS_DC);
 
 #if ZEND_DEBUG
 /* debug */
