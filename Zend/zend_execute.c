@@ -574,7 +574,7 @@ ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uin
 	}
 }
 
-static int is_null_constant(zval *default_value)
+static int is_null_constant(zval *default_value TSRMLS_DC)
 {
 	if (Z_CONSTANT_P(default_value)) {
 		zval constant;
@@ -616,18 +616,18 @@ static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg,
 			if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name->val, arg TSRMLS_CC);
 			}
-		} else if (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value)))) {
+		} else if (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value TSRMLS_CC)))) {
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce TSRMLS_CC);
 			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "", arg TSRMLS_CC);
 		}
 	} else if (cur_arg_info->type_hint) {
 		if (cur_arg_info->type_hint == IS_ARRAY) {
 			ZVAL_DEREF(arg);
-			if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value))))) {
+			if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value TSRMLS_CC))))) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "", arg TSRMLS_CC);
 			}
 		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
-			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC) && (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value))))) {
+			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC) && (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value TSRMLS_CC))))) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg TSRMLS_CC);
 			}
 #if ZEND_DEBUG
