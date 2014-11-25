@@ -20,16 +20,20 @@ error_reporting=E_ALL
 	$table = sprintf("test_%s", md5(mt_rand(0, PHP_INT_MAX)));
 	$db = new PDO($dsn, $user, $pass);
 	$db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
-
 	$create = sprintf('CREATE TABLE %s(id INT)', $table);
 	$db->exec($create);
 	$db->exec(sprintf('INSERT INTO %s(id) VALUES (1)', $table));
-	$db->exec(sprintf('SELECT * FROM %s; INSERT INTO %s(id) VALUES (2)', $table, $table));
+	$stmt = $db->query(sprintf('SELECT * FROM %s; INSERT INTO %s(id) VALUES (2)', $table, $table));
+	$stmt->closeCursor();
 	$info = $db->errorInfo();
 	var_dump($info[0]);
+	$stmt = $db->query(sprintf('SELECT id FROM %s', $table));
+	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
+	// New connection, does not allow multiple statements.
 	$db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_MULTI_STATEMENTS => false));
-	$stmt = $db->exec(sprintf('SELECT * FROM %s; INSERT INTO %s(id) VALUES (3)', $table, $table));
+	$stmt = $db->query(sprintf('SELECT * FROM %s; INSERT INTO %s(id) VALUES (3)', $table, $table));
+	var_dump($stmt);
 	$info = $db->errorInfo();
 	var_dump($info[0]);
 
@@ -40,18 +44,32 @@ error_reporting=E_ALL
 	print "done!";
 ?>
 --EXPECTF--
-%unicode|string%(5) "00000"
-%unicode|string%(5) "42000"
+string(5) "00000"
 array(2) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
+    ["id"]=>
+    string(1) "1"
   }
   [1]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
+    ["id"]=>
+    string(1) "2"
+  }
+}
+bool(false)
+string(5) "42000"
+array(2) {
+  [0]=>
+  array(1) {
+    ["id"]=>
+    string(1) "1"
+  }
+  [1]=>
+  array(1) {
+    ["id"]=>
+    string(1) "2"
   }
 }
 done!
+
