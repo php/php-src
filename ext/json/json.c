@@ -195,7 +195,7 @@ static PHP_FUNCTION(json_encode)
 	zval *parameter;
 	smart_str buf = {0};
 	zend_long options = 0;
-    zend_long depth = JSON_PARSER_DEFAULT_DEPTH;
+	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ll", &parameter, &options, &depth) == FAILURE) {
 		return;
@@ -224,7 +224,7 @@ static PHP_FUNCTION(json_decode)
 	char *str;
 	size_t str_len;
 	zend_bool assoc = 0; /* return JS objects as PHP objects by default */
-	zend_long depth = JSON_PARSER_DEFAULT_DEPTH;
+	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 	zend_long options = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bll", &str, &str_len, &assoc, &depth, &options) == FAILURE) {

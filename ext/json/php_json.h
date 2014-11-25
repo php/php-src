@@ -37,20 +37,6 @@ extern zend_module_entry json_module_entry;
 #include "TSRM.h"
 #endif
 
-ZEND_BEGIN_MODULE_GLOBALS(json)
-	int encoder_depth;
-	int error_code;
-	int encode_max_depth;
-ZEND_END_MODULE_GLOBALS(json)
-
-#ifdef ZTS
-# define JSON_G(v) TSRMG(json_globals_id, zend_json_globals *, v)
-#else
-# define JSON_G(v) (json_globals.v)
-#endif
-
-PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC);
-PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth TSRMLS_DC);
 extern PHP_JSON_API zend_class_entry *php_json_serializable_ce;
 
 /* error codes */
@@ -83,9 +69,27 @@ typedef enum {
 #define PHP_JSON_OUTPUT_ARRAY	0
 #define PHP_JSON_OUTPUT_OBJECT	1
 
+/* default depth */
+#define PHP_JSON_PARSER_DEFAULT_DEPTH 512
+
+ZEND_BEGIN_MODULE_GLOBALS(json)
+	int encoder_depth;
+	int encode_max_depth;
+	php_json_error_code error_code;
+ZEND_END_MODULE_GLOBALS(json)
+
+#ifdef ZTS
+# define JSON_G(v) TSRMG(json_globals_id, zend_json_globals *, v)
+#else
+# define JSON_G(v) (json_globals.v)
+#endif
+
 /* json_decode() options */
 #define PHP_JSON_OBJECT_AS_ARRAY	(1<<0)
 #define PHP_JSON_BIGINT_AS_STRING	(1<<1)
+
+PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC);
+PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth TSRMLS_DC);
 
 static inline void php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, zend_long depth TSRMLS_DC)
 {
