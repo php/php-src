@@ -1,6 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.5.20
+?? ??? 2014, PHP 5.5.21
+
+
+
+
+11 Dec 2014, PHP 5.5.20
 
 - Core:
   . Fixed bug #68091 (Some Zend headers lack appropriate extern "C" blocks).
