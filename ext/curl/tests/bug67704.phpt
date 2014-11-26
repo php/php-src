@@ -28,8 +28,15 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
 var_dump($post_data['a']);                                                                                                                                  
 curl_close($ch);
 
+$ch = curl_init();            
+$post_data = array('a' => true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+var_dump($post_data['a']);                                                                                                                                                                                    
+curl_close($ch);
+
 ?>
 --EXPECTF--
 int(1)
 int(1)
 int(1)
+bool(true)

@@ -2070,14 +2070,16 @@ string_copy:
 					uint  string_key_len;
 					ulong num_key;
 					int numeric_key;
-					zval *current_tmp = NULL; 
+					zval tmp_current;
+					zval *tmp_current_ptr = NULL;
 					
 					if (Z_TYPE_PP(current) != IS_STRING) {
-                          			ALLOC_INIT_ZVAL(current_tmp);  
-                          			MAKE_COPY_ZVAL(current, current_tmp);
-                          			current = &current_tmp;        
-                          			convert_to_string_ex(current);                                                                                                                                                      
-                      			}
+						tmp_current = **current;
+						zval_copy_ctor(&tmp_current);
+						convert_to_string(&tmp_current);
+						tmp_current_ptr = &tmp_current;
+						current = &tmp_current_ptr;
+					}
 
 					zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
 
@@ -2135,10 +2137,9 @@ string_copy:
 					if (numeric_key) {
 						efree(string_key);
 					}
-					if (current_tmp) {
-                          			zval_dtor(current_tmp);
-                          			FREE_ZVAL(current_tmp);
-                      			}
+					if (tmp_current_ptr) {
+						zval_dtor(tmp_current_ptr);
+					}
 				}
 
 				SAVE_CURL_ERROR(ch, error);
