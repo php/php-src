@@ -21,20 +21,6 @@
 #ifndef PHPDBG_BP_H
 #define PHPDBG_BP_H
 
-/* {{{ defines */
-#define PHPDBG_BREAK_FILE            0
-#define PHPDBG_BREAK_FILE_PENDING    1
-#define PHPDBG_BREAK_SYM             2
-#define PHPDBG_BREAK_OPLINE          3
-#define PHPDBG_BREAK_METHOD          4
-#define PHPDBG_BREAK_COND            5
-#define PHPDBG_BREAK_OPCODE          6
-#define PHPDBG_BREAK_FUNCTION_OPLINE 7
-#define PHPDBG_BREAK_METHOD_OPLINE   8
-#define PHPDBG_BREAK_FILE_OPLINE     9
-#define PHPDBG_BREAK_MAP             10
-#define PHPDBG_BREAK_TABLES          11 /* }}} */
-
 /* {{{ */
 typedef struct _zend_op *phpdbg_opline_ptr_t; /* }}} */
 
@@ -117,12 +103,10 @@ typedef struct _phpdbg_breakcond_t {
 	zend_op_array  *ops;
 } phpdbg_breakcond_t;
 
-/* {{{ Resolving breaks API */
+/* {{{ Opline breaks API */
 PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC);
 PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_op_array *op_array TSRMLS_DC);
-PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRMLS_DC);
-PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint filelen, const char *cur, uint curlen, HashTable *fileht TSRMLS_DC);
-PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file TSRMLS_DC); /* }}} */
+PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRMLS_DC); /* }}} */
 
 /* {{{ Breakpoint Creation API */
 PHPDBG_API void phpdbg_set_breakpoint_file(const char* filename, long lineno TSRMLS_DC);
@@ -157,7 +141,6 @@ PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase(zend_ulong id TSRMLS_DC);
 PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable ***table, HashPosition *position TSRMLS_DC); /* }}} */
 
 /* {{{ Breakpoint Exportation API */
-PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC);
-PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str TSRMLS_DC); /* }}} */
+PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC); /* }}} */
 
 #endif /* PHPDBG_BP_H */

@@ -21,9 +21,8 @@
 #define YYFILL(n)
 
 #define NORMAL 0
-#define PRE_RAW 1
-#define RAW 2
-#define INITIAL 3
+#define RAW 1
+#define INITIAL 2
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -66,15 +65,8 @@ INPUT       [^\n\000]+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
-<*>{WS}?[\n\000] {
+<*>[\n\000] {
 	return 0;
-}
-
-<PRE_RAW, NORMAL>[-][r]{WS}?{DIGITS} {
-	char *text = yytext + 2;
-	while (*++text < '0');
-	yylval->num = atoi(text);
-	return T_REQ_ID;
 }
 
 <NORMAL>{T_IF}{WS} {
@@ -151,26 +143,19 @@ INPUT       [^\n\000]+
 }
 
 <INITIAL>{T_EVAL}{WS} {
-	YYSETCONDITION(PRE_RAW);
+	YYSETCONDITION(RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_EVAL;
 }
 <INITIAL>{T_SHELL}{WS} {
-	YYSETCONDITION(PRE_RAW);
+	YYSETCONDITION(RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_SHELL;
 }
 <INITIAL>({T_RUN}|{T_RUN_SHORT}){WS} {
-	YYSETCONDITION(PRE_RAW);
+	YYSETCONDITION(RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_RUN;
-}
-
-<PRE_RAW>. {
-	YYSETCONDITION(RAW);
-
-	YYCURSOR = LEX(text);
-	goto restart;
 }
 
 <INITIAL>. {

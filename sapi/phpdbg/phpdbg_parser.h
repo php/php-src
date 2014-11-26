@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.7.  */
+/* A Bison parser, made by GNU Bison 2.7.12-4996.  */
 
 /* Bison interface for Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -40,8 +40,8 @@
 extern int phpdbg_debug;
 #endif
 /* "%code requires" blocks.  */
-/* Line 2058 of yacc.c  */
-#line 31 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 2060 of yacc.c  */
+#line 31 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
 
 #include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -50,7 +50,7 @@ typedef void* yyscan_t;
 #endif
 
 
-/* Line 2058 of yacc.c  */
+/* Line 2060 of yacc.c  */
 #line 55 "sapi/phpdbg/phpdbg_parser.h"
 
 /* Tokens.  */
@@ -76,8 +76,7 @@ typedef void* yyscan_t;
      T_OPCODE = 272,
      T_ID = 273,
      T_INPUT = 274,
-     T_UNEXPECTED = 275,
-     T_REQ_ID = 276
+     T_UNEXPECTED = 275
    };
 #endif
 /* Tokens.  */
@@ -99,7 +98,6 @@ typedef void* yyscan_t;
 #define T_ID 273
 #define T_INPUT 274
 #define T_UNEXPECTED 275
-#define T_REQ_ID 276
 
 
 

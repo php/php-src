@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 2.7.  */
+/* A Bison parser, made by GNU Bison 2.7.12-4996.  */
 
 /* Bison implementation for Yacc-like parsers in C
    
-      Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
+      Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
    
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "2.7"
+#define YYBISON_VERSION "2.7.12-4996"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -70,7 +70,7 @@
 
 /* Copy the first part of user declarations.  */
 /* Line 371 of yacc.c  */
-#line 1 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+#line 1 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
 
  
 /*
@@ -129,7 +129,7 @@ extern int phpdbg_debug;
 #endif
 /* "%code requires" blocks.  */
 /* Line 387 of yacc.c  */
-#line 31 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+#line 31 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
 
 #include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -164,8 +164,7 @@ typedef void* yyscan_t;
      T_OPCODE = 272,
      T_ID = 273,
      T_INPUT = 274,
-     T_UNEXPECTED = 275,
-     T_REQ_ID = 276
+     T_UNEXPECTED = 275
    };
 #endif
 /* Tokens.  */
@@ -187,7 +186,6 @@ typedef void* yyscan_t;
 #define T_ID 273
 #define T_INPUT 274
 #define T_UNEXPECTED 275
-#define T_REQ_ID 276
 
 
 
@@ -218,7 +216,7 @@ int phpdbg_parse ();
 /* Copy the second part of user declarations.  */
 
 /* Line 390 of yacc.c  */
-#line 222 "sapi/phpdbg/phpdbg_parser.c"
+#line 220 "sapi/phpdbg/phpdbg_parser.c"
 
 #ifdef short
 # undef short
@@ -279,12 +277,21 @@ typedef short int yytype_int16;
 # endif
 #endif
 
+#ifndef __attribute__
+/* This feature is available in gcc versions 2.5 and later.  */
+# if (! defined __GNUC__ || __GNUC__ < 2 \
+      || (__GNUC__ == 2 && __GNUC_MINOR__ < 5))
+#  define __attribute__(Spec) /* empty */
+# endif
+#endif
+
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
 # define YYUSE(E) ((void) (E))
 #else
 # define YYUSE(E) /* empty */
 #endif
+
 
 /* Identity function, used to suppress warnings about constant conditions.  */
 #ifndef lint
@@ -436,22 +443,22 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  26
+#define YYFINAL  25
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   48
+#define YYLAST   42
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  22
+#define YYNTOKENS  21
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  6
+#define YYNNTS  5
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  28
+#define YYNRULES  25
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  43
+#define YYNSTATES  38
 
 /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   276
+#define YYMAXUTOK   275
 
 #define YYTRANSLATE(YYX)						\
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -486,7 +493,7 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21
+      15,    16,    17,    18,    19,    20
 };
 
 #if YYDEBUG
@@ -494,31 +501,30 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint8 yyprhs[] =
 {
-       0,     0,     3,     5,     7,     8,    10,    13,    16,    20,
-      25,    30,    36,    40,    46,    50,    53,    55,    57,    59,
-      61,    63,    65,    67,    69,    70,    74,    78,    81
+       0,     0,     3,     5,     7,     8,    10,    13,    17,    22,
+      27,    33,    37,    43,    47,    50,    52,    54,    56,    58,
+      60,    62,    64,    67,    70,    72
 };
 
 /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
 static const yytype_int8 yyrhs[] =
 {
-      23,     0,    -1,    24,    -1,    27,    -1,    -1,    25,    -1,
-      24,    25,    -1,    24,    26,    -1,    18,    10,    14,    -1,
-      18,    10,    12,    14,    -1,    13,    18,    10,    14,    -1,
-      13,    18,    10,    12,    14,    -1,    18,    11,    18,    -1,
-      18,    11,    18,    12,    14,    -1,    18,    12,    14,    -1,
-       6,    19,    -1,    17,    -1,    16,    -1,    15,    -1,     7,
-      -1,     8,    -1,    14,    -1,    18,    -1,    21,    -1,    -1,
-       3,    26,    19,    -1,     5,    26,    19,    -1,     4,    26,
-      -1,     4,    26,    19,    -1
+      22,     0,    -1,    23,    -1,    25,    -1,    -1,    24,    -1,
+      23,    24,    -1,    18,    10,    14,    -1,    18,    10,    12,
+      14,    -1,    13,    18,    10,    14,    -1,    13,    18,    10,
+      12,    14,    -1,    18,    11,    18,    -1,    18,    11,    18,
+      12,    14,    -1,    18,    12,    14,    -1,     6,    19,    -1,
+      17,    -1,    16,    -1,    15,    -1,     7,    -1,     8,    -1,
+      14,    -1,    18,    -1,     3,    19,    -1,     5,    19,    -1,
+       4,    -1,     4,    19,    -1
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    67,    67,    68,    69,    73,    74,    75,    79,    84,
-      89,    99,   109,   114,   120,   126,   131,   132,   133,   134,
-     135,   136,   137,   141,   142,   146,   151,   156,   160
+       0,    66,    66,    67,    68,    72,    73,    77,    82,    87,
+      97,   107,   112,   118,   124,   129,   130,   131,   132,   133,
+     134,   135,   139,   144,   149,   153
 };
 #endif
 
@@ -534,9 +540,8 @@ static const char *const yytname[] =
   "\":: (double colon)\"", "\"# (pound sign)\"", "\"protocol (file://)\"",
   "\"digits (numbers)\"", "\"literal (string)\"", "\"address\"",
   "\"opcode\"", "\"identifier (command or function name)\"",
-  "\"input (input string or data)\"", "\"input\"",
-  "\"request id (-r %d)\"", "$accept", "input", "parameters", "parameter",
-  "req_id", "full_expression", YY_NULL
+  "\"input (input string or data)\"", "\"input\"", "$accept", "input",
+  "parameters", "parameter", "full_expression", YY_NULL
 };
 #endif
 
@@ -547,24 +552,24 @@ static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276
+     275
 };
 # endif
 
 /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    22,    23,    23,    23,    24,    24,    24,    25,    25,
-      25,    25,    25,    25,    25,    25,    25,    25,    25,    25,
-      25,    25,    25,    26,    26,    27,    27,    27,    27
+       0,    21,    22,    22,    22,    23,    23,    24,    24,    24,
+      24,    24,    24,    24,    24,    24,    24,    24,    24,    24,
+      24,    24,    25,    25,    25,    25
 };
 
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     1,     0,     1,     2,     2,     3,     4,
-       4,     5,     3,     5,     3,     2,     1,     1,     1,     1,
-       1,     1,     1,     1,     0,     3,     3,     2,     3
+       0,     2,     1,     1,     0,     1,     2,     3,     4,     4,
+       5,     3,     5,     3,     2,     1,     1,     1,     1,     1,
+       1,     1,     2,     2,     1,     2
 };
 
 /* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
@@ -572,35 +577,33 @@ static const yytype_uint8 yyr2[] =
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       4,    24,    24,    24,     0,    19,    20,     0,    21,    18,
-      17,    16,    22,     0,     2,     5,     3,    23,     0,    27,
-       0,    15,     0,     0,     0,     0,     1,     6,     7,    25,
-      28,    26,     0,     0,     8,    12,    14,     0,    10,     9,
-       0,    11,    13
+       4,     0,    24,     0,     0,    18,    19,     0,    20,    17,
+      16,    15,    21,     0,     2,     5,     3,    22,    25,    23,
+      14,     0,     0,     0,     0,     1,     6,     0,     0,     7,
+      11,    13,     0,     9,     8,     0,    10,    12
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,    13,    14,    15,    18,    16
+      -1,    13,    14,    15,    16
 };
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-#define YYPACT_NINF -16
+#define YYPACT_NINF -11
 static const yytype_int8 yypact[] =
 {
-      -3,   -15,   -15,   -15,   -10,   -16,   -16,     3,   -16,   -16,
-     -16,   -16,    22,    29,    10,   -16,   -16,   -16,    11,    17,
-      19,   -16,    30,     8,    21,    27,   -16,   -16,   -16,   -16,
-     -16,   -16,    23,    28,   -16,    31,   -16,    32,   -16,   -16,
-      33,   -16,   -16
+      -3,   -10,    11,    12,    13,   -11,   -11,    15,   -11,   -11,
+     -11,   -11,    -4,    29,    10,   -11,   -11,   -11,   -11,   -11,
+     -11,    24,     7,    17,    22,   -11,   -11,     8,    23,   -11,
+      26,   -11,    25,   -11,   -11,    27,   -11,   -11
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -16,   -16,   -16,    34,     5,   -16
+     -11,   -11,   -11,    28,   -11
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
@@ -609,26 +612,26 @@ static const yytype_int8 yypgoto[] =
 #define YYTABLE_NINF -1
 static const yytype_uint8 yytable[] =
 {
-       1,     2,     3,     4,     5,     6,    17,    19,    20,    21,
+       1,     2,     3,     4,     5,     6,    22,    23,    24,    17,
        7,     8,     9,    10,    11,    12,     4,     5,     6,    28,
-      33,    22,    34,     7,     8,     9,    10,    11,    12,    26,
-      29,    17,    23,    24,    25,    37,    30,    38,    31,    35,
-      32,    36,    39,    40,     0,     0,    41,    42,    27
+      32,    29,    33,     7,     8,     9,    10,    11,    12,    25,
+      18,    19,    20,    21,    27,    30,    31,    34,    35,    36,
+       0,    37,    26
 };
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-16)))
+  (!!((Yystate) == (-11)))
 
 #define yytable_value_is_error(Yytable_value) \
   YYID (0)
 
 static const yytype_int8 yycheck[] =
 {
-       3,     4,     5,     6,     7,     8,    21,     2,     3,    19,
-      13,    14,    15,    16,    17,    18,     6,     7,     8,    14,
-      12,    18,    14,    13,    14,    15,    16,    17,    18,     0,
-      19,    21,    10,    11,    12,    12,    19,    14,    19,    18,
-      10,    14,    14,    12,    -1,    -1,    14,    14,    14
+       3,     4,     5,     6,     7,     8,    10,    11,    12,    19,
+      13,    14,    15,    16,    17,    18,     6,     7,     8,    12,
+      12,    14,    14,    13,    14,    15,    16,    17,    18,     0,
+      19,    19,    19,    18,    10,    18,    14,    14,    12,    14,
+      -1,    14,    14
 };
 
 /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -636,10 +639,9 @@ static const yytype_int8 yycheck[] =
 static const yytype_uint8 yystos[] =
 {
        0,     3,     4,     5,     6,     7,     8,    13,    14,    15,
-      16,    17,    18,    23,    24,    25,    27,    21,    26,    26,
-      26,    19,    18,    10,    11,    12,     0,    25,    26,    19,
-      19,    19,    10,    12,    14,    18,    14,    12,    14,    14,
-      12,    14,    14
+      16,    17,    18,    22,    23,    24,    25,    19,    19,    19,
+      19,    18,    10,    11,    12,     0,    24,    10,    12,    14,
+      18,    14,    12,    14,    14,    12,    14,    14
 };
 
 #define yyerrok		(yyerrstatus = 0)
@@ -759,11 +761,7 @@ yy_symbol_value_print (yyoutput, yytype, yyvaluep, tsrm_ls)
 # else
   YYUSE (yyoutput);
 # endif
-  switch (yytype)
-    {
-      default:
-        break;
-    }
+  YYUSE (yytype);
 }
 
 
@@ -1157,12 +1155,7 @@ yydestruct (yymsg, yytype, yyvaluep, tsrm_ls)
     yymsg = "Deleting";
   YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
 
-  switch (yytype)
-    {
-
-      default:
-        break;
-    }
+  YYUSE (yytype);
 }
 
 
@@ -1459,32 +1452,26 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-/* Line 1792 of yacc.c  */
-#line 68 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1802 of yacc.c  */
+#line 67 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { phpdbg_stack_push(PHPDBG_G(parser_stack), &(yyvsp[(1) - (1)])); }
     break;
 
   case 5:
-/* Line 1792 of yacc.c  */
-#line 73 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1802 of yacc.c  */
+#line 72 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { phpdbg_stack_push(PHPDBG_G(parser_stack), &(yyvsp[(1) - (1)])); }
     break;
 
   case 6:
-/* Line 1792 of yacc.c  */
-#line 74 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1802 of yacc.c  */
+#line 73 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { phpdbg_stack_push(PHPDBG_G(parser_stack), &(yyvsp[(2) - (2)])); }
     break;
 
   case 7:
-/* Line 1792 of yacc.c  */
-#line 75 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
-    { (yyval) = (yyvsp[(1) - (2)]); }
-    break;
-
-  case 8:
-/* Line 1792 of yacc.c  */
-#line 79 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1802 of yacc.c  */
+#line 77 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { 	
 		(yyval).type = FILE_PARAM;
 		(yyval).file.name = (yyvsp[(2) - (3)]).str;
@@ -1492,9 +1479,9 @@ yyreduce:
 	}
     break;
 
-  case 9:
-/* Line 1792 of yacc.c  */
-#line 84 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+  case 8:
+/* Line 1802 of yacc.c  */
+#line 82 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = NUMERIC_FILE_PARAM;
 		(yyval).file.name = (yyvsp[(1) - (4)]).str;
@@ -1502,9 +1489,9 @@ yyreduce:
 	}
     break;
 
-  case 10:
-/* Line 1792 of yacc.c  */
-#line 89 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+  case 9:
+/* Line 1802 of yacc.c  */
+#line 87 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = FILE_PARAM;
 		(yyval).file.name = malloc((yyvsp[(1) - (4)]).len + (yyvsp[(2) - (4)]).len + 1);
@@ -1517,9 +1504,9 @@ yyreduce:
 	}
     break;
 
-  case 11:
-/* Line 1792 of yacc.c  */
-#line 99 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+  case 10:
+/* Line 1802 of yacc.c  */
+#line 97 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = NUMERIC_FILE_PARAM;
 		(yyval).file.name = malloc((yyvsp[(1) - (5)]).len + (yyvsp[(2) - (5)]).len + 1);
@@ -1532,9 +1519,9 @@ yyreduce:
 	}
     break;
 
-  case 12:
-/* Line 1792 of yacc.c  */
-#line 109 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+  case 11:
+/* Line 1802 of yacc.c  */
+#line 107 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { 
 		(yyval).type = METHOD_PARAM;
 		(yyval).method.class = (yyvsp[(1) - (3)]).str;
@@ -1542,9 +1529,9 @@ yyreduce:
 	}
     break;
 
-  case 13:
-/* Line 1792 of yacc.c  */
-#line 114 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+  case 12:
+/* Line 1802 of yacc.c  */
+#line 112 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { 
 		(yyval).type = NUMERIC_METHOD_PARAM;
 		(yyval).method.class = (yyvsp[(1) - (5)]).str;
@@ -1553,9 +1540,9 @@ yyreduce:
 	}
     break;
 
-  case 14:
-/* Line 1792 of yacc.c  */
-#line 120 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+  case 13:
+/* Line 1802 of yacc.c  */
+#line 118 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = NUMERIC_FUNCTION_PARAM;
 		(yyval).str = (yyvsp[(1) - (3)]).str;
@@ -1564,9 +1551,9 @@ yyreduce:
 	}
     break;
 
-  case 15:
-/* Line 1792 of yacc.c  */
-#line 126 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+  case 14:
+/* Line 1802 of yacc.c  */
+#line 124 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = COND_PARAM; 
 		(yyval).str = (yyvsp[(2) - (2)]).str;
@@ -1574,96 +1561,90 @@ yyreduce:
 	}
     break;
 
+  case 15:
+/* Line 1802 of yacc.c  */
+#line 129 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+    { (yyval) = (yyvsp[(1) - (1)]); }
+    break;
+
   case 16:
-/* Line 1792 of yacc.c  */
-#line 131 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1802 of yacc.c  */
+#line 130 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 17:
-/* Line 1792 of yacc.c  */
-#line 132 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1802 of yacc.c  */
+#line 131 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 18:
-/* Line 1792 of yacc.c  */
-#line 133 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1802 of yacc.c  */
+#line 132 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 19:
-/* Line 1792 of yacc.c  */
-#line 134 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1802 of yacc.c  */
+#line 133 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 20:
-/* Line 1792 of yacc.c  */
-#line 135 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1802 of yacc.c  */
+#line 134 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 21:
-/* Line 1792 of yacc.c  */
-#line 136 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1802 of yacc.c  */
+#line 135 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { (yyval) = (yyvsp[(1) - (1)]); }
     break;
 
   case 22:
-/* Line 1792 of yacc.c  */
-#line 137 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
-    { (yyval) = (yyvsp[(1) - (1)]); }
+/* Line 1802 of yacc.c  */
+#line 139 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
+    { 
+		(yyval).type = EVAL_PARAM; 
+		(yyval).str = (yyvsp[(2) - (2)]).str;
+		(yyval).len = (yyvsp[(2) - (2)]).len;
+	}
     break;
 
   case 23:
-/* Line 1792 of yacc.c  */
-#line 141 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
-    { PHPDBG_G(req_id) = (yyvsp[(1) - (1)]).num; }
-    break;
-
-  case 25:
-/* Line 1792 of yacc.c  */
-#line 146 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
-    { 
-		(yyval).type = EVAL_PARAM; 
-		(yyval).str = (yyvsp[(3) - (3)]).str;
-		(yyval).len = (yyvsp[(3) - (3)]).len;
-	}
-    break;
-
-  case 26:
-/* Line 1792 of yacc.c  */
-#line 151 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 1802 of yacc.c  */
+#line 144 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { 	
 		(yyval).type = SHELL_PARAM; 
-		(yyval).str = (yyvsp[(3) - (3)]).str;
-		(yyval).len = (yyvsp[(3) - (3)]).len;
+		(yyval).str = (yyvsp[(2) - (2)]).str;
+		(yyval).len = (yyvsp[(2) - (2)]).len;
 	}
     break;
 
-  case 27:
-/* Line 1792 of yacc.c  */
-#line 156 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+  case 24:
+/* Line 1802 of yacc.c  */
+#line 149 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     {
 		(yyval).type = RUN_PARAM;
 		(yyval).len = 0;
 	}
     break;
 
-  case 28:
-/* Line 1792 of yacc.c  */
-#line 160 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+  case 25:
+/* Line 1802 of yacc.c  */
+#line 153 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
     { 	
 		(yyval).type = RUN_PARAM; 
-		(yyval).str = (yyvsp[(3) - (3)]).str;
-		(yyval).len = (yyvsp[(3) - (3)]).len;
+		(yyval).str = (yyvsp[(2) - (2)]).str;
+		(yyval).len = (yyvsp[(2) - (2)]).len;
 	}
     break;
 
 
-/* Line 1792 of yacc.c  */
-#line 1667 "sapi/phpdbg/phpdbg_parser.c"
+/* Line 1802 of yacc.c  */
+#line 1648 "sapi/phpdbg/phpdbg_parser.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1894,12 +1875,12 @@ yyreturn:
 }
 
 
-/* Line 2055 of yacc.c  */
-#line 167 "/usr/src/php-src/sapi/phpdbg/phpdbg_parser.y"
+/* Line 2050 of yacc.c  */
+#line 160 "/Users/Bob/php-src-5.6/sapi/phpdbg/phpdbg_parser.y"
 
 
 static int yyerror(void ***tsrm_ls, const char *msg) {
-	phpdbg_error("command", "type=\"parseerror\" msg=\"%s\"", "Parse Error: %s", msg);
+	phpdbg_error("Parse Error: %s", msg);
 
 	{
 		const phpdbg_param_t *top = PHPDBG_G(parser_stack);

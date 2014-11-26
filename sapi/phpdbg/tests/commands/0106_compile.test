@@ -4,9 +4,9 @@
 # expect: TEST::FORMAT
 # options: -rr
 #################################################
-#[Successful compilation of %s]
+#[Attempting compilation of %s]
+#[Success]
 #Hello World
-#[Script ended normally]
 #################################################
 <:
 define('OUT', 
