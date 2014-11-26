@@ -464,7 +464,7 @@ static void *fontFetch (char **error, void *key)
 		return NULL;
 	}
 
-	/* FIXME - This mapping stuff is imcomplete - where is the spec? */
+	/* FIXME - This mapping stuff is incomplete - where is the spec? */
 	/* EAM   - It's worse than that. It's pointless to match character encodings here.
 	 *         As currently written, the stored a->face->charmap only matches one of
 	 *         the actual charmaps and we cannot know at this stage if it is the right

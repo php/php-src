@@ -131,6 +131,7 @@
 
 ; Per pool prefix
 ; It only applies on the following directives:
+; - 'access.log'
 ; - 'slowlog'
 ; - 'listen' (unixsocket)
 ; - 'chroot'
@@ -154,9 +155,7 @@ group = @php_fpm_group@
 ;                            a specific port;
 ;   '[ip:6:addr:ess]:port' - to listen on a TCP socket to a specific IPv6 address on
 ;                            a specific port;
-;   'port'                 - to listen on a TCP socket to all IPv4 addresses on a
-;                            specific port;
-;   '[::]:port'            - to listen on a TCP socket to all addresses
+;   'port'                 - to listen on a TCP socket to all addresses
 ;                            (IPv6 and IPv4-mapped) on a specific port;
 ;   '/path/to/unix/socket' - to listen on a unix socket.
 ; Note: This value is mandatory.

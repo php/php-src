@@ -1379,7 +1379,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* ensure that the link did not die */
 			if (PGG(auto_reset_persistent) & 1) {
 				/* need to send & get something from backend to
-				   make sure we catch CONNECTION_BAD everytime */
+				   make sure we catch CONNECTION_BAD every time */
 				PGresult *pg_result;
 				pg_result = PQexec(le->ptr, "select 1");
 				PQclear(pg_result);
@@ -1484,7 +1484,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		PGG(num_links)++;
 	}
-	/* set notice processer */
+	/* set notice processor */
 	if (! PGG(ignore_notices) && Z_TYPE_P(return_value) == IS_RESOURCE) {
 		PQsetNoticeProcessor(pgsql, _php_pgsql_notice_handler, (void*)Z_RES_HANDLE_P(return_value));
 	}
@@ -4350,7 +4350,7 @@ PHP_FUNCTION(pg_escape_bytea)
 #endif
 		to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
 
-	RETVAL_STRINGL(to, to_len-1); /* to_len includes addtional '\0' */
+	RETVAL_STRINGL(to, to_len-1); /* to_len includes additional '\0' */
 }
 /* }}} */
 

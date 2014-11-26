@@ -18,7 +18,7 @@ when using wsdls and function names are similar find the best match
 	void test(int);
 	void test(string);
 	maybe use the same alogrithim as ext/java.
-investigate further http keep_alive... inital testing proved slower.. maybe php_streams will speed things up..
+investigate further http keep_alive... initial testing proved slower.. maybe php_streams will speed things up..
 provide schema 1999/2001 support....
 through memory leak testing
 possible using shared memory for sdl caching...

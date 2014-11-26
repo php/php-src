@@ -17,7 +17,10 @@ PHP                                                                        NEWS
   . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
   . Fixed #67959 (Segfault when calling phpversion('spl')). (Florian)
   . Implemented the RFC `Catchable "Call to a member function bar() on a
-    non-object"` (Timm)
+    non-object"`. (Timm)
+  . Added options parameter for unserialize allowing to specify acceptable
+    classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
+  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
@@ -33,6 +36,9 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
+
+- LiteSpeed:
+  . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
 
 - Reflection
   . Fixed inheritance chain of Reflector interface (Tjerk)

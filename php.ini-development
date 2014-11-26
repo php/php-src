@@ -289,20 +289,17 @@ serialize_precision = 17
 
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory
-; or per-virtualhost web server configuration file. This directive is
-; *NOT* affected by whether Safe Mode is turned On or Off.
+; or per-virtualhost web server configuration file.
 ; http://php.net/open-basedir
 ;open_basedir =
 
 ; This directive allows you to disable certain functions for security reasons.
-; It receives a comma-delimited list of function names. This directive is
-; *NOT* affected by whether Safe Mode is turned On or Off.
+; It receives a comma-delimited list of function names.
 ; http://php.net/disable-functions
 disable_functions =
 
 ; This directive allows you to disable certain classes for security reasons.
-; It receives a comma-delimited list of class names. This directive is
-; *NOT* affected by whether Safe Mode is turned On or Off.
+; It receives a comma-delimited list of class names.
 ; http://php.net/disable-classes
 disable_classes =
 
@@ -607,13 +604,13 @@ html_errors = On
 ; http://php.net/variables-order
 variables_order = "GPCS"
 
-; This directive determines which super global data (G,P,C,E & S) should
-; be registered into the super global array REQUEST. If so, it also determines
-; the order in which that data is registered. The values for this directive are
-; specified in the same manner as the variables_order directive, EXCEPT one.
-; Leaving this value empty will cause PHP to use the value set in the
-; variables_order directive. It does not mean it will leave the super globals
-; array REQUEST empty.
+; This directive determines which super global data (G,P & C) should be
+; registered into the super global array REQUEST. If so, it also determines
+; the order in which that data is registered. The values for this directive
+; are specified in the same manner as the variables_order directive,
+; EXCEPT one. Leaving this value empty will cause PHP to use the value set
+; in the variables_order directive. It does not mean it will leave the super
+; globals array REQUEST empty.
 ; Default Value: None
 ; Development Value: "GP"
 ; Production Value: "GP"
@@ -1024,7 +1021,7 @@ smtp_port = 25
 
 ; Force the addition of the specified parameters to be passed as extra parameters
 ; to the sendmail binary. These parameters will always replace the value of
-; the 5th parameter to mail(), even in safe mode.
+; the 5th parameter to mail().
 ;mail.force_extra_parameters =
 
 ; Add X-PHP-Originating-Script: that will include uid of the script followed by the filename

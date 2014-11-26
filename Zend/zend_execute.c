@@ -574,7 +574,22 @@ ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uin
 	}
 }
 
-static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg TSRMLS_DC)
+static int is_null_constant(zval *default_value TSRMLS_DC)
+{
+	if (Z_CONSTANT_P(default_value)) {
+		zval constant;
+
+		ZVAL_COPY_VALUE(&constant, default_value);
+		zval_update_constant(&constant, 0 TSRMLS_CC);
+		if (Z_TYPE(constant) == IS_NULL) {
+			return 1;
+		}
+		zval_dtor(&constant);
+	}
+	return 0;
+}
+
+static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value TSRMLS_DC)
 {
 	zend_arg_info *cur_arg_info;
 	char *need_msg;
@@ -601,18 +616,18 @@ static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg 
 			if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name->val, arg TSRMLS_CC);
 			}
-		} else if (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null) {
+		} else if (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value TSRMLS_CC)))) {
 			need_msg = zend_verify_arg_class_kind(cur_arg_info, &class_name, &ce TSRMLS_CC);
 			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "", arg TSRMLS_CC);
 		}
 	} else if (cur_arg_info->type_hint) {
 		if (cur_arg_info->type_hint == IS_ARRAY) {
 			ZVAL_DEREF(arg);
-			if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
+			if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value TSRMLS_CC))))) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "", arg TSRMLS_CC);
 			}
 		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
-			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC) && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
+			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC) && (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value TSRMLS_CC))))) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg TSRMLS_CC);
 			}
 #if ZEND_DEBUG
@@ -682,7 +697,7 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t ar
 static zend_always_inline void zend_assign_to_object(zval *retval, zval *object, uint32_t object_op_type, zval *property_name, int value_type, const znode_op *value_op, const zend_execute_data *execute_data, int opcode, void **cache_slot TSRMLS_DC)
 {
 	zend_free_op free_value;
- 	zval *value = get_zval_ptr(value_type, value_op, execute_data, &free_value, BP_VAR_R);
+ 	zval *value = get_zval_ptr_deref(value_type, value_op, execute_data, &free_value, BP_VAR_R);
  	zval tmp;
 
  	if (object_op_type != IS_UNUSED) {
@@ -726,38 +741,101 @@ static zend_always_inline void zend_assign_to_object(zval *retval, zval *object,
 		}
 	}
 
-	/* separate our value if necessary */
-	if (value_type == IS_TMP_VAR) {
-		ZVAL_COPY_VALUE(&tmp, value);
-		value = &tmp;
-	} else if (value_type == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
-			ZVAL_COPY_VALUE(&tmp, value);
-			zval_copy_ctor_func(&tmp);
-			value = &tmp;
-		}
-	} else if (Z_REFCOUNTED_P(value)) {
-		Z_ADDREF_P(value);
-	}
-
 	if (opcode == ZEND_ASSIGN_OBJ) {
 		if (!Z_OBJ_HT_P(object)->write_property) {
 			zend_error(E_WARNING, "Attempt to assign property of non-object");
 			if (retval) {
 				ZVAL_NULL(retval);
 			}
-			if (value_type == IS_CONST) {
-				zval_ptr_dtor(value);
-			}
 			FREE_OP(free_value);
 			return;
 		}
+
+		if (cache_slot &&
+			EXPECTED(Z_OBJCE_P(object) == CACHED_PTR_EX(cache_slot))) {
+			zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 1);
+			zend_object *zobj = Z_OBJ_P(object);
+			zval *property;
+
+			if (EXPECTED(prop_info)) {
+				property = OBJ_PROP(zobj, prop_info->offset);
+				if (Z_TYPE_P(property) != IS_UNDEF) {
+fast_assign:
+					value = zend_assign_to_variable(property, value, value_type TSRMLS_CC);
+					if (retval && !EG(exception)) {
+						ZVAL_COPY(retval, value);
+					}
+					if (value_type == IS_VAR) {
+						FREE_OP(free_value);
+					}
+					return;
+				}
+			} else {
+				if (EXPECTED(zobj->properties != NULL)) {
+					property = zend_hash_find(zobj->properties, Z_STR_P(property_name));
+					if (property) {
+						goto fast_assign;
+					}
+				}
+
+				if (!zobj->ce->__set) {
+					if (EXPECTED(zobj->properties == NULL)) {
+						rebuild_object_properties(zobj);				
+					}
+					/* separate our value if necessary */
+					if (value_type == IS_CONST) {
+						if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
+							ZVAL_COPY_VALUE(&tmp, value);
+							zval_copy_ctor_func(&tmp);
+							value = &tmp;
+						}
+					} else if (value_type != IS_TMP_VAR &&
+					           Z_REFCOUNTED_P(value)) {
+						Z_ADDREF_P(value);
+					}
+					zend_hash_add_new(zobj->properties, Z_STR_P(property_name), value);
+					if (retval && !EG(exception)) {
+						ZVAL_COPY(retval, value);
+					}
+					if (value_type == IS_VAR) {
+						FREE_OP(free_value);
+					}
+					return;
+				}
+	    	}
+		}
+
+		/* separate our value if necessary */
+		if (value_type == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
+				ZVAL_COPY_VALUE(&tmp, value);
+				zval_copy_ctor_func(&tmp);
+				value = &tmp;
+			}
+		} else if (value_type != IS_TMP_VAR &&
+		           Z_REFCOUNTED_P(value)) {
+			Z_ADDREF_P(value);
+		}
+
 		Z_OBJ_HT_P(object)->write_property(object, property_name, value, cache_slot TSRMLS_CC);
 	} else {
 		/* Note:  property_name in this case is really the array index! */
 		if (!Z_OBJ_HT_P(object)->write_dimension) {
 			zend_error_noreturn(E_ERROR, "Cannot use object as array");
 		}
+
+		/* separate our value if necessary */
+		if (value_type == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE_P(value))) {
+				ZVAL_COPY_VALUE(&tmp, value);
+				zval_copy_ctor_func(&tmp);
+				value = &tmp;
+			}
+		} else if (value_type != IS_TMP_VAR &&
+		           Z_REFCOUNTED_P(value)) {
+			Z_ADDREF_P(value);
+		}
+
 		Z_OBJ_HT_P(object)->write_dimension(object, property_name, value TSRMLS_CC);
 	}
 
@@ -818,65 +896,6 @@ static void zend_assign_to_string_offset(zval *str, zend_long offset, zval *valu
 			ZVAL_NEW_STR(result, zend_string_init(Z_STRVAL_P(str) + offset, 1, 0));
 		}
 	}
-}
-
-static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type TSRMLS_DC)
-{
-	do {
-		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {	
-			zend_refcounted *garbage;
-
-			if (Z_ISREF_P(variable_ptr)) {
-				variable_ptr = Z_REFVAL_P(variable_ptr);
-				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
-					break;
-				}
-			}
-			if (Z_TYPE_P(variable_ptr) == IS_OBJECT &&
-	    		UNEXPECTED(Z_OBJ_HANDLER_P(variable_ptr, set) != NULL)) {
-				Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr, value TSRMLS_CC);
-				return variable_ptr;
-			}
-			if ((value_type & (IS_VAR|IS_CV)) && variable_ptr == value) {
-				return variable_ptr;
-			}
-			garbage = Z_COUNTED_P(variable_ptr);
-			if (--GC_REFCOUNT(garbage) == 0) {
-				ZVAL_COPY_VALUE(variable_ptr, value);
-				if (value_type == IS_CONST) {
-					/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
-					if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
-						zval_copy_ctor_func(variable_ptr);
-					}
-				} else if (value_type != IS_TMP_VAR) {
-					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
-						Z_ADDREF_P(variable_ptr);
-					}
-				}
-				_zval_dtor_func_for_ptr(garbage ZEND_FILE_LINE_CC);
-				return variable_ptr;
-			} else { /* we need to split */
-				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
-				if ((Z_COLLECTABLE_P(variable_ptr)) &&
-		    		UNEXPECTED(!GC_INFO(garbage))) {
-					gc_possible_root(garbage TSRMLS_CC);
-				}
-			}
-		}
-	} while (0);
-
-	ZVAL_COPY_VALUE(variable_ptr, value);
-	if (value_type == IS_CONST) {
-		/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
-			zval_copy_ctor_func(variable_ptr);
-		}
-	} else if (value_type != IS_TMP_VAR) {
-		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
-			Z_ADDREF_P(variable_ptr);
-		}
-	}
-	return variable_ptr;
 }
 
 /* Utility Functions for Extensions */
@@ -1407,12 +1426,12 @@ ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_val
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table TSRMLS_DC) /* {{{ */
 {
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
-		zend_hash_destroy(&symbol_table->ht);
+		zend_array_destroy(&symbol_table->ht TSRMLS_CC);
 		efree_size(symbol_table, sizeof(zend_array));
 	} else {
 		/* clean before putting into the cache, since clean
 		   could call dtors, which could use cached hash */
-		zend_hash_clean(&symbol_table->ht);
+		zend_symtable_clean(&symbol_table->ht TSRMLS_CC);
 		*(++EG(symtable_cache_ptr)) = symbol_table;
 	}
 }

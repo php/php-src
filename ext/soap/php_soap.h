@@ -92,7 +92,7 @@ struct _soapService {
 		zend_class_entry *ce;
 		zval *argv;
 		int argc;
-		int persistance;
+		int persistence;
 	} soap_class;
 
 	zval soap_object;

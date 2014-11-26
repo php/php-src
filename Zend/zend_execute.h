@@ -51,18 +51,6 @@ ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, c
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC);
 ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg TSRMLS_DC);
 
-static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
-{
-	if (Z_REFCOUNTED_P(zval_ptr)) {
-		if (!Z_DELREF_P(zval_ptr)) {
-			ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
-			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
-		} else {
-			GC_ZVAL_CHECK_POSSIBLE_ROOT(zval_ptr);
-		}
-	}
-}
-
 static zend_always_inline int i_zend_is_true(zval *op TSRMLS_DC)
 {
 	int result;
@@ -127,6 +115,65 @@ again:
 			break;
 	}
 	return result;
+}
+
+static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type TSRMLS_DC)
+{
+	do {
+		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {	
+			zend_refcounted *garbage;
+
+			if (Z_ISREF_P(variable_ptr)) {
+				variable_ptr = Z_REFVAL_P(variable_ptr);
+				if (EXPECTED(!Z_REFCOUNTED_P(variable_ptr))) {
+					break;
+				}
+			}
+			if (Z_TYPE_P(variable_ptr) == IS_OBJECT &&
+	    		UNEXPECTED(Z_OBJ_HANDLER_P(variable_ptr, set) != NULL)) {
+				Z_OBJ_HANDLER_P(variable_ptr, set)(variable_ptr, value TSRMLS_CC);
+				return variable_ptr;
+			}
+			if ((value_type & (IS_VAR|IS_CV)) && variable_ptr == value) {
+				return variable_ptr;
+			}
+			garbage = Z_COUNTED_P(variable_ptr);
+			if (--GC_REFCOUNT(garbage) == 0) {
+				ZVAL_COPY_VALUE(variable_ptr, value);
+				if (value_type == IS_CONST) {
+					/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
+					if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
+						zval_copy_ctor_func(variable_ptr);
+					}
+				} else if (value_type != IS_TMP_VAR) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
+						Z_ADDREF_P(variable_ptr);
+					}
+				}
+				_zval_dtor_func_for_ptr(garbage ZEND_FILE_LINE_CC);
+				return variable_ptr;
+			} else { /* we need to split */
+				/* optimized version of GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr) */
+				if ((Z_COLLECTABLE_P(variable_ptr)) &&
+		    		UNEXPECTED(!GC_INFO(garbage))) {
+					gc_possible_root(garbage TSRMLS_CC);
+				}
+			}
+		}
+	} while (0);
+
+	ZVAL_COPY_VALUE(variable_ptr, value);
+	if (value_type == IS_CONST) {
+		/* IS_CONST can't be IS_OBJECT, IS_RESOURCE or IS_REFERENCE */
+		if (UNEXPECTED(Z_OPT_COPYABLE_P(variable_ptr))) {
+			zval_copy_ctor_func(variable_ptr);
+		}
+	} else if (value_type != IS_TMP_VAR) {
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
+			Z_ADDREF_P(variable_ptr);
+		}
+	}
+	return variable_ptr;
 }
 
 ZEND_API int zval_update_constant(zval *pp, zend_bool inline_change TSRMLS_DC);

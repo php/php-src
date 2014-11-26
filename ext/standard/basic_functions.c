@@ -549,12 +549,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_multisort, 0, 0, 1)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_ASC_or_SORT_DESC)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_REGULAR_or_SORT_NUMERIC_or_SORT_STRING)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arr2)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_ASC_or_SORT_DESC)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_REGULAR_or_SORT_NUMERIC_or_SORT_STRING)
-	ZEND_ARG_VARIADIC_INFO(ZEND_SEND_PREFER_REF, more_array_and_sort_options)
+	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, sort_order)
+	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, sort_flags)
+	ZEND_ARG_VARIADIC_INFO(ZEND_SEND_PREFER_REF, arr2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_rand, 0, 0, 1)
@@ -4114,13 +4111,17 @@ PHP_FUNCTION(putenv)
 	if (putenv(pe.putenv_string) == 0) { /* success */
 # else
 	error_code = SetEnvironmentVariable(pe.key, value);
-#  if _MSC_VER < 1500
-	/* Yet another VC6 bug, unset may return env not found */
-	if (error_code != 0 || 
-		(error_code == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)) {
-#  else
-	if (error_code != 0) { /* success */
-#  endif
+
+	if (error_code != 0
+# ifndef ZTS
+	/* We need both SetEnvironmentVariable and _putenv here as some
+		dependency lib could use either way to read the environment.
+		Obviously the CRT version will be useful more often. But
+		generally, doing both brings us on the safe track at least
+		in NTS build. */
+	&& _putenv(pe.putenv_string) == 0
+# endif
+	) { /* success */
 # endif
 #endif
 		zend_hash_str_add_mem(&BG(putenv_ht), pe.key, pe.key_len, &pe, sizeof(putenv_entry));

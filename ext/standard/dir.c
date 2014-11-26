@@ -517,7 +517,7 @@ no_results:
 				continue;
 			}
 		}
-		/* we need to do this everytime since GLOB_ONLYDIR does not guarantee that
+		/* we need to do this every time since GLOB_ONLYDIR does not guarantee that
 		 * all directories will be filtered. GNU libc documentation states the
 		 * following: 
 		 * If the information about the type of the file is easily available 

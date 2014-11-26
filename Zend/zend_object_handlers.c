@@ -545,51 +545,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 		} else if (EXPECTED(zobj->properties != NULL)) {
 			if ((variable_ptr = zend_hash_find(zobj->properties, Z_STR_P(member))) != NULL) {
 found:
-				/* if we already have this value there, we don't actually need to do anything */
-				if (EXPECTED(variable_ptr != value)) {
-					/* if we are assigning reference, we shouldn't move it, but instead assign variable
-					   to the same pointer */
-					if (Z_ISREF_P(variable_ptr)) {
-						zval garbage;
-
-						ZVAL_COPY_VALUE(&garbage, Z_REFVAL_P(variable_ptr)); /* old value should be destroyed */
-
-						/* To check: can't *variable_ptr be some system variable like error_zval here? */
-						if (UNEXPECTED(Z_REFCOUNTED_P(value))) {
-							if (EXPECTED(!Z_ISREF_P(value))) {
-								Z_ADDREF_P(value);
-							} else {
-								if (Z_REFCOUNT_P(value) == 1) {
-									ZVAL_UNREF(value);
-								} else {
-									value = Z_REFVAL_P(value);
-								}
-								if (Z_REFCOUNTED_P(value)) {
-									if (UNEXPECTED(Z_REFVAL_P(variable_ptr) == value)) {
-										goto exit;
-									}
-									Z_ADDREF_P(value);
-								}
-							}
-						}
-						ZVAL_COPY_VALUE(Z_REFVAL_P(variable_ptr), value);
-						zval_ptr_dtor(&garbage);
-					} else {
-						zval garbage;
-
-						ZVAL_COPY_VALUE(&garbage, variable_ptr);
-
-						/* if we assign referenced variable, we should separate it */
-						ZVAL_COPY_VALUE(variable_ptr, value);
-						if (Z_REFCOUNTED_P(variable_ptr)) {
-							Z_ADDREF_P(variable_ptr);
-							if (Z_ISREF_P(variable_ptr)) {
-								SEPARATE_ZVAL(variable_ptr);
-							}
-						}
-						zval_ptr_dtor(&garbage);
-					}
-				}
+				zend_assign_to_variable(variable_ptr, value, (IS_VAR|IS_TMP_VAR) TSRMLS_CC);
 				goto exit;
 			}
 		}
