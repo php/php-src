@@ -43,10 +43,6 @@ PHP                                                                        NEWS
   . Fixed bug #68351 (PDO::PARAM_BOOL and ATTR_EMULATE_PREPARES misbehaving)
   (Matteo)
 
-- phpdbg:
-  . Added XML protocol (-x command line flag). (Bob)
-  . Added hard interruptions (twice SIGINT). (Bob)
-
 - Session:
   . Fixed bug #68331 (Session custom storage callable functions not being called) 
     (Yasuo Ohgaki)
