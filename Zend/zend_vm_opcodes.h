@@ -178,5 +178,5 @@ ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
 #define ZEND_ASSIGN_POW                      167
 #define ZEND_BIND_GLOBAL                     168
 #define ZEND_COALESCE                        169
-
+#define ZEND_BIND_LOCAL                      170
 #endif

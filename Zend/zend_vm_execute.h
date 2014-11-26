@@ -348,7 +348,63 @@ ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 			zend_timeout(0);
 		}
 #endif
-
+        
+        printf("call %s\n", zend_get_opcode_name(execute_data->opline->opcode));
+        
+        switch(execute_data->opline->op1_type) {
+            case IS_UNUSED:
+                printf("op1:unused\n");
+                break;
+            case IS_CONST:
+                switch(execute_data->opline->op1.zv->u1.v.type) {
+                    case IS_NULL:
+                    case IS_LONG:
+                    case IS_RESOURCE:
+                    printf("op1 IS_CONST:%ld\n",execute_data->opline->op1.zv->value.lval);
+                    break;
+                    case IS_DOUBLE:
+                    printf("op1 IS_CONST:%g\n",execute_data->opline->op1.zv->value.lval);
+                    
+                    break;
+                    case IS_STRING:
+                    printf("op1 IS_CONST:%s\n",execute_data->opline->op1.zv->value.str->val);
+                    break;
+                }
+                break;
+            case IS_VAR:
+            case IS_TMP_VAR:
+            case IS_CV:
+                printf("op1 var: ");
+                printf("op1:%u\n",execute_data->opline->op1.var);
+                break;
+        }
+         switch(execute_data->opline->op2_type) {
+            case IS_UNUSED:
+                printf("op2:unused\n");
+                break;
+            case IS_CONST:
+                switch(execute_data->opline->op2.zv->u1.v.type) {
+                    case IS_NULL:
+                    case IS_LONG:
+                    case IS_RESOURCE:
+                    printf("op2 IS_CONST:%ld\n",execute_data->opline->op2.zv->value.lval);
+                    break;
+                    case IS_DOUBLE:
+                    printf("op2 IS_CONST:%g\n",execute_data->opline->op2.zv->value.lval);
+                    
+                    break;
+                    case IS_STRING:
+                    printf("op2 IS_CONST:%s\n",execute_data->opline->op2.zv->value.str->val);
+                    break;
+                }
+                break;
+            case IS_VAR:
+            case IS_TMP_VAR:
+            case IS_CV:
+                printf("op2 var: ");
+                printf("op2:%u\n",execute_data->opline->op2.var);
+                break;
+        }
 		if (UNEXPECTED((ret = OPLINE->handler(execute_data TSRMLS_CC)) != 0)) {
 			if (EXPECTED(ret > 0)) {
 				execute_data = EG(current_execute_data);
@@ -37433,7 +37489,51 @@ static int ZEND_FASTCALL  ZEND_BIND_GLOBAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
+static int ZEND_FASTCALL  ZEND_BIND_LOCAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
 
+    zval *varname;
+	zval *value;
+	zval *variable_ptr;
+    zend_array *local_symbol_table;
+	Bucket *p;
+	uint32_t idx;
+    zend_execute_data *local_execute_data = execute_data;
+
+	SAVE_OPLINE();
+    
+    varname = opline->op2.zv;
+    //current function up level function
+    if(local_execute_data->func) {
+        printf("===========bind local variable=============\n");
+        printf("current opcode %s\n", zend_get_opcode_name(local_execute_data->opline->opcode));
+        printf("function name %s, len %d\n", local_execute_data->func->common.function_name->val,local_execute_data->func->common.function_name->len);
+        local_execute_data = local_execute_data->prev_execute_data;
+        
+        printf("pre opcode %s\n", zend_get_opcode_name(local_execute_data->opline->opcode));
+         
+    } else {
+        printf("Set global variable\n");
+    }
+    
+    if(local_execute_data->symbol_table) {
+        printf("have symbol_table\n");
+        value = zend_hash_find(&local_execute_data->symbol_table->ht, Z_STR_P(varname));
+        if (UNEXPECTED(value == NULL)) {
+            printf("not finded\n");
+        } else {
+             printf("finded\n");
+        }
+    } else {
+        printf("no symbol_table\n");
+    }
+    
+    printf("set variable:%s\n",Z_STRVAL_P(varname));
+    printf("===========bind local variable=============\n");
+    CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -48854,8 +48954,29 @@ void zend_init_opcodes_handlers(void)
   	ZEND_COALESCE_SPEC_CV_HANDLER,
   	ZEND_COALESCE_SPEC_CV_HANDLER,
   	ZEND_COALESCE_SPEC_CV_HANDLER,
-  	ZEND_NULL_HANDLER
+  	ZEND_NULL_HANDLER,
+    ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+    ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+    ZEND_BIND_LOCAL_SPEC_CV_CONST_HANDLER,
   };
+
   zend_opcode_handlers = (opcode_handler_t*)labels;
 }
 static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)
@@ -48879,6 +49000,7 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend
 			_UNUSED_CODE, /* 15             */
 			_CV_CODE      /* 16 = IS_CV     */
 		};
+        //printf("opcode:%s,op1:%d,op2:%d\n", zend_get_opcode_name(opcode),op->op1_type,op->op2_type);
 		return zend_opcode_handlers[opcode * 25 + zend_vm_decode[op->op1_type] * 5 + zend_vm_decode[op->op2_type]];
 }
 
