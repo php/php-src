@@ -68,11 +68,10 @@ int json_yydebug = 1;
 %code {
 int php_json_yylex(union YYSTYPE *value, php_json_parser *parser);
 void php_json_yyerror(php_json_parser *parser, char const *msg);
-void php_json_parser_object_to_zval(php_json_parser *parser, zval *zv, HashTable *ht);
-void php_json_parser_array_to_zval(zval *zv, HashTable *ht);
-void php_json_parser_ht_init(HashTable **ht, uint nSize);
-void php_json_parser_ht_update(php_json_parser *parser, HashTable *ht, zval *zkey, zval *zvalue);
-void php_json_parser_ht_append(HashTable *ht, zval *zvalue);
+void php_json_parser_object_init(php_json_parser *parser, zval *object);
+void php_json_parser_object_update(php_json_parser *parser, zval *object, zval *zkey, zval *zvalue);
+void php_json_parser_array_init(zval *object);
+void php_json_parser_array_append(zval *array, zval *zvalue);
 
 #define PHP_JSON_DEPTH_DEC --parser->depth
 #define PHP_JSON_DEPTH_INC \
@@ -100,12 +99,12 @@ object_end:
 ;
 
 members:
-		/* empty */             { php_json_parser_object_init(&$$); }
+		/* empty */             { php_json_parser_object_init(parser, &$$); }
 	|	member
 ;
 
 member:
-		pair                    { php_json_parser_object_init(&$$); php_json_parser_object_update(parser, &$$, &$1.key, &$1.val); }
+		pair                    { php_json_parser_object_init(parser, &$$); php_json_parser_object_update(parser, &$$, &$1.key, &$1.val); }
 	|	member ',' pair         { php_json_parser_object_update(parser, &$1, &$3.key, &$3.val); $$ = $1; }
 	|	member errlex           { PHP_JSON_USE_2($$, $1, $2); }
 ;
@@ -174,8 +173,9 @@ php_json_error_code php_json_parser_error_code(php_json_parser *parser)
 	return parser->scanner.errcode;
 }
 
-void php_json_parser_object_init(zval *object)
+void php_json_parser_object_init(php_json_parser *parser, zval *object)
 {
+	TSRMLS_FETCH_FROM_CTX(parser->zts_ctx);
 	object_init(object);
 }
 
@@ -204,7 +204,7 @@ void php_json_parser_object_update(php_json_parser *parser, zval *object, zval *
 
 void php_json_parser_array_init(zval *array)
 {
-	array_init(object);
+	array_init(array);
 }
 
 void php_json_parser_array_append(zval *array, zval *zvalue)
