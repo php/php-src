@@ -2764,7 +2764,7 @@ PHP_FUNCTION(curl_setopt)
 	zend_long        options;
 	php_curl   *ch;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &zid, &options, &zvalue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz/", &zid, &options, &zvalue) == FAILURE) {
 		return;
 	}
 
