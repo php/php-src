@@ -5524,13 +5524,11 @@ void zend_compile_silence(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 	znode silence_node;
-	uint32_t opline_num;
-	zend_op *begin_silence, *end_silence;
+	uint32_t begin_opline_num, end_opline_num;
+	zend_brk_cont_element *brk_cont_element;
 
-	opline_num = get_next_op_number(CG(active_op_array));
-	begin_silence = zend_emit_op_tmp(&silence_node, ZEND_BEGIN_SILENCE, NULL, NULL TSRMLS_CC);
-	/* pair BEGIN_SILENCE and END_SILENCE opcodes */
-	begin_silence->op2.num = opline_num;
+	begin_opline_num = get_next_op_number(CG(active_op_array));
+	zend_emit_op_tmp(&silence_node, ZEND_BEGIN_SILENCE, NULL, NULL TSRMLS_CC);
 
 	if (expr_ast->kind == ZEND_AST_VAR) {
 		/* For @$var we need to force a FETCH instruction, otherwise the CV access will
@@ -5540,9 +5538,15 @@ void zend_compile_silence(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 		zend_compile_expr(result, expr_ast TSRMLS_CC);
 	}
 
-	end_silence = zend_emit_op(NULL, ZEND_END_SILENCE, &silence_node, NULL TSRMLS_CC);
-	/* pair BEGIN_SILENCE and END_SILENCE opcodes */
-	end_silence->op2.num = opline_num;
+	end_opline_num = get_next_op_number(CG(active_op_array));
+	zend_emit_op(NULL, ZEND_END_SILENCE, &silence_node, NULL TSRMLS_CC);
+
+	/* Store BEGIN_SILENCE/END_SILENCE pair to restore previous
+	 * EG(error_reporting) value on exception */
+	brk_cont_element = get_next_brk_cont_element(CG(active_op_array));
+	brk_cont_element->start = begin_opline_num;
+	brk_cont_element->cont = brk_cont_element->brk = end_opline_num;
+	brk_cont_element->parent = -1;
 }
 /* }}} */
 

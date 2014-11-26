@@ -5113,10 +5113,6 @@ ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 
 	SAVE_OPLINE();
 	ZVAL_LONG(EX_VAR(opline->result.var), EG(error_reporting));
-	if (EX(silence_op_num) == -1) {
-		EX(silence_op_num) = opline->op2.num;
-		EX(old_error_reporting) = EG(error_reporting);
-	}
 
 	if (EG(error_reporting)) {
 		do {
@@ -5153,9 +5149,6 @@ ZEND_VM_HANDLER(58, ZEND_END_SILENCE, TMP, ANY)
 	SAVE_OPLINE();
 	if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(opline->op1.var)) != 0) {
 		EG(error_reporting) = Z_LVAL_P(EX_VAR(opline->op1.var));
-	}
-	if (EX(silence_op_num) == opline->op2.num) {
-		EX(silence_op_num) = -1;
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -5522,16 +5515,15 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
 						zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
 					}
+				} else if (brk_opline->opcode == ZEND_END_SILENCE) {
+					/* restore previous error_reporting value */
+					if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(brk_opline->op1.var)) != 0) {
+						EG(error_reporting) = Z_LVAL_P(EX_VAR(brk_opline->op1.var));
+					}
 				}
 			}
 		}
 	}
-
-	/* restore previous error_reporting value */
-	if (!EG(error_reporting) && EX(silence_op_num) != -1 && EX(old_error_reporting) != 0) {
-		EG(error_reporting) = EX(old_error_reporting);
-	}
-	EX(silence_op_num) = -1;
 
 	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
 		if (EX(delayed_exception)) {

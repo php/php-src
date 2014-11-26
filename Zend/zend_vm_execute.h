@@ -1029,10 +1029,6 @@ static int ZEND_FASTCALL  ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	SAVE_OPLINE();
 	ZVAL_LONG(EX_VAR(opline->result.var), EG(error_reporting));
-	if (EX(silence_op_num) == -1) {
-		EX(silence_op_num) = opline->op2.num;
-		EX(old_error_reporting) = EG(error_reporting);
-	}
 
 	if (EG(error_reporting)) {
 		do {
@@ -1264,16 +1260,15 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
 						zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
 					}
+				} else if (brk_opline->opcode == ZEND_END_SILENCE) {
+					/* restore previous error_reporting value */
+					if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(brk_opline->op1.var)) != 0) {
+						EG(error_reporting) = Z_LVAL_P(EX_VAR(brk_opline->op1.var));
+					}
 				}
 			}
 		}
 	}
-
-	/* restore previous error_reporting value */
-	if (!EG(error_reporting) && EX(silence_op_num) != -1 && EX(old_error_reporting) != 0) {
-		EG(error_reporting) = EX(old_error_reporting);
-	}
-	EX(silence_op_num) = -1;
 
 	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
 		if (EX(delayed_exception)) {
@@ -10250,9 +10245,6 @@ static int ZEND_FASTCALL  ZEND_END_SILENCE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	SAVE_OPLINE();
 	if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(opline->op1.var)) != 0) {
 		EG(error_reporting) = Z_LVAL_P(EX_VAR(opline->op1.var));
-	}
-	if (EX(silence_op_num) == opline->op2.num) {
-		EX(silence_op_num) = -1;
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
