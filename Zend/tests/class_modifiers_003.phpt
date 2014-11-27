@@ -1,5 +1,5 @@
 --TEST--
-Check if final abstract classes are indeed final
+Check if final abstract classes enforces static methods
 --SKIPIF--
 <?php if (version_compare(zend_version(), '2.4.0', '<=')) die('skip ZendEngine 2.4 or later needed'); ?>
 --FILE--
@@ -7,18 +7,12 @@ Check if final abstract classes are indeed final
 
 final abstract class A
 {
-	public static $c = "foo\n";
-
-	public static function display($name)
+	public function display($name)
 	{
         echo "Hello $name\n";
     }
 }
 
-class B extends A
-{
-}
-
 ?>
 --EXPECTF--
-Fatal error: Class %s may not inherit from final class (%s) in %s on line %d
+Fatal error: Class %s contains non-static method (%s) and therefore cannot be declared 'abstract final' in %s on line %d
