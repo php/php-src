@@ -532,12 +532,19 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 		    (dst_num < op_array->try_catch_array[i].try_op ||
 		     dst_num > op_array->try_catch_array[i].finally_end)) {
 			/* we have a jump out of try block that needs executing finally */
+			uint32_t fast_call_var;
+			
+			/* Must be ZEND_FAST_RET */
+			ZEND_ASSERT(op_array->opcodes[op_array->try_catch_array[i].finally_end].opcode == ZEND_FAST_RET);
+			fast_call_var = op_array->opcodes[op_array->try_catch_array[i].finally_end].op1.var;
 
 			/* generate a FAST_CALL to finally block */
 		    start_op = get_next_op_number(op_array);
 
 			opline = get_next_op(op_array TSRMLS_CC);
 			opline->opcode = ZEND_FAST_CALL;
+			opline->result_type = IS_TMP_VAR;
+			opline->result.var = fast_call_var;
 			SET_UNUSED(opline->op1);
 			SET_UNUSED(opline->op2);
 			zend_adjust_fast_call(op_array, start_op,
@@ -550,6 +557,8 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 				/* generate a FAST_CALL to hole CALL_FROM_FINALLY */
 				opline = get_next_op(op_array TSRMLS_CC);
 				opline->opcode = ZEND_FAST_CALL;
+				opline->result_type = IS_TMP_VAR;
+				opline->result.var = fast_call_var;
 				SET_UNUSED(opline->op1);
 				SET_UNUSED(opline->op2);
 				zend_resolve_fast_call(op_array, start_op + 1, op_array->try_catch_array[i].finally_op - 2 TSRMLS_CC);
@@ -569,6 +578,8 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 
 					opline = get_next_op(op_array TSRMLS_CC);
 					opline->opcode = ZEND_FAST_CALL;
+					opline->result_type = IS_TMP_VAR;
+					opline->result.var = fast_call_var;
 					SET_UNUSED(opline->op1);
 					SET_UNUSED(opline->op2);
 					opline->op1.opline_num = op_array->try_catch_array[i].finally_op;

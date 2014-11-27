@@ -558,19 +558,23 @@ ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uin
 		fclass = "";
 	}
 
-	if (arg && zf->common.type == ZEND_USER_FUNCTION) {
-		ZVAL_COPY_VALUE(&old_arg, arg);
-		ZVAL_UNDEF(arg);
-	}
+	if (zf->common.type == ZEND_USER_FUNCTION) {
+		if (arg) {
+			ZVAL_COPY_VALUE(&old_arg, arg);
+			ZVAL_UNDEF(arg);
+		}
 
-	if (zf->common.type == ZEND_USER_FUNCTION && ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind, ptr->func->op_array.filename->val, ptr->opline->lineno);
+		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+			zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind, ptr->func->op_array.filename->val, ptr->opline->lineno);
+		} else {
+			zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
+		}
+
+		if (arg) {
+			ZVAL_COPY_VALUE(arg, &old_arg);
+		}
 	} else {
 		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
-	}
-
-	if (arg && zf->common.type == ZEND_USER_FUNCTION) {
-		ZVAL_COPY_VALUE(arg, &old_arg);
 	}
 }
 
@@ -1485,8 +1489,6 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
 	EX(return_value) = return_value;
-	EX(delayed_exception) = NULL;
-	EX(silence_op_num) = -1;
 
 	/* Handle arguments */
 	first_extra_arg = op_array->num_args;
@@ -1552,8 +1554,6 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 	EX(scope) = EG(scope);
-	EX(delayed_exception) = NULL;
-	EX(silence_op_num) = -1;
 
 	zend_attach_symbol_table(execute_data);
 
@@ -1579,8 +1579,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 	EX(scope) = EG(scope);
-	EX(delayed_exception) = NULL;
-	EX(silence_op_num) = -1;
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
 		zend_attach_symbol_table(execute_data);

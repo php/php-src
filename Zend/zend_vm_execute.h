@@ -1029,10 +1029,6 @@ static int ZEND_FASTCALL  ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	SAVE_OPLINE();
 	ZVAL_LONG(EX_VAR(opline->result.var), EG(error_reporting));
-	if (EX(silence_op_num) == -1) {
-		EX(silence_op_num) = opline->op2.num;
-		EX(old_error_reporting) = EG(error_reporting);
-	}
 
 	if (EG(error_reporting)) {
 		do {
@@ -1218,6 +1214,7 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 		}
 		if (op_num < EX(func)->op_array.try_catch_array[i].finally_op) {
 			finally_op_num = EX(func)->op_array.try_catch_array[i].finally_op;
+			finally_op_end = EX(func)->op_array.try_catch_array[i].finally_end;
 		}
 		if (op_num >= EX(func)->op_array.try_catch_array[i].finally_op &&
 				op_num < EX(func)->op_array.try_catch_array[i].finally_end) {
@@ -1264,40 +1261,47 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
 						zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
 					}
+				} else if (brk_opline->opcode == ZEND_END_SILENCE) {
+					/* restore previous error_reporting value */
+					if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(brk_opline->op1.var)) != 0) {
+						EG(error_reporting) = Z_LVAL_P(EX_VAR(brk_opline->op1.var));
+					}
 				}
 			}
 		}
 	}
 
-	/* restore previous error_reporting value */
-	if (!EG(error_reporting) && EX(silence_op_num) != -1 && EX(old_error_reporting) != 0) {
-		EG(error_reporting) = EX(old_error_reporting);
-	}
-	EX(silence_op_num) = -1;
-
 	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
-		if (EX(delayed_exception)) {
-			zend_exception_set_previous(EG(exception), EX(delayed_exception) TSRMLS_CC);
+		zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
+
+		if (Z_OBJ_P(fast_call)) {
+			zend_exception_set_previous(EG(exception), Z_OBJ_P(fast_call) TSRMLS_CC);
 		}
-		EX(delayed_exception) = EG(exception);
+		Z_OBJ_P(fast_call) = EG(exception);
 		EG(exception) = NULL;
-		EX(fast_ret) = NULL;
+		fast_call->u2.lineno = (uint32_t)-1;
 		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[finally_op_num]);
 		ZEND_VM_CONTINUE();
 	} else if (catch_op_num) {
 		if (finally_op_end && catch_op_num > finally_op_end) {
 			/* we are going out of current finally scope */
-			if (EX(delayed_exception)) {
-				zend_exception_set_previous(EG(exception), EX(delayed_exception) TSRMLS_CC);
-				EX(delayed_exception) = NULL;
+			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
+
+			if (Z_OBJ_P(fast_call)) {
+				zend_exception_set_previous(EG(exception), Z_OBJ_P(fast_call) TSRMLS_CC);
+				Z_OBJ_P(fast_call) = NULL;
 			}
 		}
 		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[catch_op_num]);
 		ZEND_VM_CONTINUE();
 	} else {
-		if (EX(delayed_exception)) {
-			zend_exception_set_previous(EG(exception), EX(delayed_exception) TSRMLS_CC);
-			EX(delayed_exception) = NULL;
+		if (finally_op_end) {
+			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
+
+			if (Z_OBJ_P(fast_call)) {
+				zend_exception_set_previous(EG(exception), Z_OBJ_P(fast_call) TSRMLS_CC);
+				Z_OBJ_P(fast_call) = NULL;
+			}
 		}
 		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
 			return ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -1348,10 +1352,14 @@ static int ZEND_FASTCALL  ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 static int ZEND_FASTCALL  ZEND_DISCARD_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	if (EX(delayed_exception) != NULL) {
+	USE_OPLINE
+	zval *fast_call = EX_VAR(opline->op1.var);
+
+	/* check for delayed exception */
+	if (Z_OBJ_P(fast_call) != NULL) {
 		/* discard the previously thrown exception */
-		OBJ_RELEASE(EX(delayed_exception));
-		EX(delayed_exception) = NULL;
+		OBJ_RELEASE(Z_OBJ_P(fast_call));
+		Z_OBJ_P(fast_call) = NULL;
 	}
 
 	ZEND_VM_NEXT_OPCODE();
@@ -1360,6 +1368,7 @@ static int ZEND_FASTCALL  ZEND_DISCARD_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL  ZEND_FAST_CALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zval *fast_call = EX_VAR(opline->result.var);
 
 	if ((opline->extended_value & ZEND_FAST_CALL_FROM_CATCH) &&
 	    UNEXPECTED(EG(prev_exception) != NULL)) {
@@ -1367,18 +1376,24 @@ static int ZEND_FASTCALL  ZEND_FAST_CALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
 		ZEND_VM_CONTINUE();
 	}
-	EX(fast_ret) = opline;
-	EX(delayed_exception) = NULL;
+	/* set no delayed exception */
+	Z_OBJ_P(fast_call) = NULL;
+	/* set return address */
+	fast_call->u2.lineno = opline - EX(func)->op_array.opcodes;
 	ZEND_VM_SET_OPCODE(opline->op1.jmp_addr);
 	ZEND_VM_CONTINUE();
 }
 
 static int ZEND_FASTCALL  ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	if (EX(fast_ret)) {
-		ZEND_VM_SET_OPCODE(EX(fast_ret) + 1);
-		if ((EX(fast_ret)->extended_value & ZEND_FAST_CALL_FROM_FINALLY)) {
-			EX(fast_ret) = &EX(func)->op_array.opcodes[EX(fast_ret)->op2.opline_num];
+	USE_OPLINE
+	zval *fast_call = EX_VAR(opline->op1.var);
+
+	if (fast_call->u2.lineno != (uint32_t)-1) {
+		const zend_op *fast_ret = EX(func)->op_array.opcodes + fast_call->u2.lineno;
+		ZEND_VM_SET_OPCODE(fast_ret + 1);
+		if (fast_ret->extended_value & ZEND_FAST_CALL_FROM_FINALLY) {
+			fast_call->u2.lineno = fast_ret->op2.opline_num;
 		}
 		ZEND_VM_CONTINUE();
 	} else {
@@ -1389,8 +1404,8 @@ static int ZEND_FASTCALL  ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
 			ZEND_VM_CONTINUE();
 		} else {
-			EG(exception) = EX(delayed_exception);
-			EX(delayed_exception) = NULL;
+			EG(exception) = Z_OBJ_P(fast_call);
+			Z_OBJ_P(fast_call) = NULL;
 			if (opline->extended_value == ZEND_FAST_RET_TO_CATCH) {
 				ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
 				ZEND_VM_CONTINUE();
@@ -10250,9 +10265,6 @@ static int ZEND_FASTCALL  ZEND_END_SILENCE_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	SAVE_OPLINE();
 	if (!EG(error_reporting) && Z_LVAL_P(EX_VAR(opline->op1.var)) != 0) {
 		EG(error_reporting) = Z_LVAL_P(EX_VAR(opline->op1.var));
-	}
-	if (EX(silence_op_num) == opline->op2.num) {
-		EX(silence_op_num) = -1;
 	}
 	ZEND_VM_NEXT_OPCODE();
 }

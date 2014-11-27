@@ -2130,6 +2130,7 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 	return zend_mm_alloc_huge(AG(mm_heap), size);
 }
 
+#if ZEND_DEBUG
 # define _ZEND_BIN_FREE(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void ZEND_FASTCALL _efree_ ## _size(void *ptr) { \
 		TSRMLS_FETCH(); \
@@ -2144,6 +2145,18 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 			zend_mm_free_small(AG(mm_heap), ptr, _num); \
 		} \
 	}
+#else
+# define _ZEND_BIN_FREE(_num, _size, _elements, _pages, x, y) \
+	ZEND_API void ZEND_FASTCALL _efree_ ## _size(void *ptr) { \
+		TSRMLS_FETCH(); \
+		ZEND_MM_CUSTOM_DEALLOCATOR(ptr); \
+		{ \
+			zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE); \
+			ZEND_MM_CHECK(chunk->heap == AG(mm_heap), "zend_mm_heap corrupted"); \
+			zend_mm_free_small(AG(mm_heap), ptr, _num); \
+		} \
+	}
+#endif
 
 ZEND_MM_BINS_INFO(_ZEND_BIN_FREE, x, y)
 

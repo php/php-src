@@ -641,7 +641,7 @@ static int gc_collect_roots(TSRMLS_D)
 
 static void gc_remove_nested_data_from_buffer(zend_refcounted *ref TSRMLS_DC)
 {
-	HashTable *ht;
+	HashTable *ht = NULL;
 	uint idx;
 	Bucket *p;
 

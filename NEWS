@@ -34,6 +34,9 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
 
+- Filter:
+  . New FILTER_VALIDATE_DOMAIN and better RFC conformance for FILTER_VALIDATE_URL. (Kevin Dunglas)
+
 - FPM:
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
 
