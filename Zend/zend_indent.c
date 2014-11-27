@@ -31,7 +31,7 @@
 #define zendleng LANG_SCNG(yy_leng)
 
 
-static void handle_whitespace(int *emit_whitespace)
+static void handle_whitespace(unsigned int *emit_whitespace)
 {
 	unsigned char c;
 	int i;

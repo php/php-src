@@ -558,19 +558,23 @@ ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uin
 		fclass = "";
 	}
 
-	if (arg && zf->common.type == ZEND_USER_FUNCTION) {
-		ZVAL_COPY_VALUE(&old_arg, arg);
-		ZVAL_UNDEF(arg);
-	}
+	if (zf->common.type == ZEND_USER_FUNCTION) {
+		if (arg) {
+			ZVAL_COPY_VALUE(&old_arg, arg);
+			ZVAL_UNDEF(arg);
+		}
 
-	if (zf->common.type == ZEND_USER_FUNCTION && ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind, ptr->func->op_array.filename->val, ptr->opline->lineno);
+		if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
+			zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind, ptr->func->op_array.filename->val, ptr->opline->lineno);
+		} else {
+			zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
+		}
+
+		if (arg) {
+			ZVAL_COPY_VALUE(arg, &old_arg);
+		}
 	} else {
 		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
-	}
-
-	if (arg && zf->common.type == ZEND_USER_FUNCTION) {
-		ZVAL_COPY_VALUE(arg, &old_arg);
 	}
 }
 

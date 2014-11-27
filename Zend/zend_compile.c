@@ -1811,7 +1811,7 @@ static inline uint32_t zend_delayed_compile_begin(TSRMLS_D) /* {{{ */
 
 static zend_op *zend_delayed_compile_end(uint32_t offset TSRMLS_DC) /* {{{ */
 {
-	zend_op *opline, *oplines = zend_stack_base(&CG(delayed_oplines_stack));
+	zend_op *opline = NULL, *oplines = zend_stack_base(&CG(delayed_oplines_stack));
 	uint32_t i, count = zend_stack_count(&CG(delayed_oplines_stack));
 
 	ZEND_ASSERT(count > offset);
@@ -3434,7 +3434,7 @@ void zend_compile_if(zend_ast *ast TSRMLS_DC) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
-	uint32_t *jmp_opnums;
+	uint32_t *jmp_opnums = NULL;
 	
 	if (list->children > 1) {
 		jmp_opnums = safe_emalloc(sizeof(uint32_t), list->children - 1, 0);
@@ -5807,14 +5807,14 @@ void zend_compile_encaps_list(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 
 void zend_compile_magic_const(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 {
-	zend_class_entry *ce = CG(active_class_entry);
-
 	if (zend_try_ct_eval_magic_const(&result->u.constant, ast TSRMLS_CC)) {
 		result->op_type = IS_CONST;
 		return;
 	}
 
-	ZEND_ASSERT(ast->attr == T_CLASS_C && ce && ZEND_CE_IS_TRAIT(ce));
+	ZEND_ASSERT(ast->attr == T_CLASS_C &&
+	            CG(active_class_entry) &&
+	            ZEND_CE_IS_TRAIT(CG(active_class_entry)));
 
 	{
 		zend_ast *const_ast = zend_ast_create(ZEND_AST_CONST,
@@ -5945,10 +5945,11 @@ void zend_compile_const_expr_resolve_class_name(zend_ast **ast_ptr TSRMLS_DC) /*
 void zend_compile_const_expr_magic_const(zend_ast **ast_ptr TSRMLS_DC) /* {{{ */
 {
 	zend_ast *ast = *ast_ptr;
-	zend_class_entry *ce = CG(active_class_entry);
 
 	/* Other cases already resolved by constant folding */
-	ZEND_ASSERT(ast->attr == T_CLASS_C && ce && ZEND_CE_IS_TRAIT(ce));
+	ZEND_ASSERT(ast->attr == T_CLASS_C &&
+	            CG(active_class_entry) &&
+	            ZEND_CE_IS_TRAIT(CG(active_class_entry)));
 
 	{
 		zval const_zv;
