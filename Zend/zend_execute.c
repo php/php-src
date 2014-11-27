@@ -1485,7 +1485,6 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
 	EX(return_value) = return_value;
-	EX(delayed_exception) = NULL;
 
 	/* Handle arguments */
 	first_extra_arg = op_array->num_args;
@@ -1551,7 +1550,6 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 	EX(scope) = EG(scope);
-	EX(delayed_exception) = NULL;
 
 	zend_attach_symbol_table(execute_data);
 
@@ -1577,7 +1575,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 	EX(scope) = EG(scope);
-	EX(delayed_exception) = NULL;
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
 		zend_attach_symbol_table(execute_data);

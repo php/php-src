@@ -133,7 +133,7 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*) object;
 	zend_execute_data *ex = generator->execute_data;
-	uint32_t op_num, finally_op_num;
+	uint32_t op_num, finally_op_num, finally_op_end;
 	int i;
 
 	if (!ex || !(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)) {
@@ -146,6 +146,7 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 
 	/* Find next finally block */
 	finally_op_num = 0;
+	finally_op_end = 0;
 	for (i = 0; i < ex->func->op_array.last_try_catch; i++) {
 		zend_try_catch_element *try_catch = &ex->func->op_array.try_catch_array[i];
 
@@ -155,14 +156,17 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 
 		if (op_num < try_catch->finally_op) {
 			finally_op_num = try_catch->finally_op;
+			finally_op_end = try_catch->finally_end;
 		}
 	}
 
 	/* If a finally block was found we jump directly to it and
 	 * resume the generator. */
 	if (finally_op_num) {
+		zval *fast_call = EX_VAR_2(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
+
+		fast_call->u2.lineno = (uint32_t)-1;
 		ex->opline = &ex->func->op_array.opcodes[finally_op_num];
-		ex->fast_ret = NULL;
 		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
 		zend_generator_resume(generator TSRMLS_CC);
 	}

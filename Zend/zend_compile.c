@@ -159,6 +159,7 @@ void zend_init_compiler_context(TSRMLS_D) /* {{{ */
 	CG(context).current_brk_cont = -1;
 	CG(context).backpatch_count = 0;
 	CG(context).in_finally = 0;
+	CG(context).fast_call_var = -1;
 	CG(context).labels = NULL;
 }
 /* }}} */
@@ -3126,7 +3127,9 @@ void zend_compile_return(zend_ast *ast TSRMLS_DC) /* {{{ */
 	zend_free_foreach_and_switch_variables(TSRMLS_C);
 
 	if (CG(context).in_finally) {
-		zend_emit_op(NULL, ZEND_DISCARD_EXCEPTION, NULL, NULL TSRMLS_CC);
+		opline = zend_emit_op(NULL, ZEND_DISCARD_EXCEPTION, NULL, NULL TSRMLS_CC);
+		opline->op1_type = IS_TMP_VAR;
+		opline->op1.var = CG(context).fast_call_var;
 	}
 
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
@@ -3621,8 +3624,15 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) /* {{{ */
 	if (finally_ast) {
 		uint32_t opnum_jmp = get_next_op_number(CG(active_op_array)) + 1;
 
+		if (!(CG(active_op_array)->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)) {
+			CG(active_op_array)->fn_flags |= ZEND_ACC_HAS_FINALLY_BLOCK;
+			CG(context).fast_call_var = get_temporary_variable(CG(active_op_array));
+		}
+
 		opline = zend_emit_op(NULL, ZEND_FAST_CALL, NULL, NULL TSRMLS_CC);
 		opline->op1.opline_num = opnum_jmp + 1;
+		opline->result_type = IS_TMP_VAR;
+		opline->result.var = CG(context).fast_call_var;
 
 		zend_emit_op(NULL, ZEND_JMP, NULL, NULL TSRMLS_CC);
 
@@ -3633,9 +3643,10 @@ void zend_compile_try(zend_ast *ast TSRMLS_DC) /* {{{ */
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_op = opnum_jmp + 1;
 		CG(active_op_array)->try_catch_array[try_catch_offset].finally_end
 			= get_next_op_number(CG(active_op_array));
-		CG(active_op_array)->fn_flags |= ZEND_ACC_HAS_FINALLY_BLOCK;
 
-		zend_emit_op(NULL, ZEND_FAST_RET, NULL, NULL TSRMLS_CC);
+		opline = zend_emit_op(NULL, ZEND_FAST_RET, NULL, NULL TSRMLS_CC);
+		opline->op1_type = IS_TMP_VAR;
+		opline->op1.var = CG(context).fast_call_var;
 
 		zend_update_jump_target_to_next(opnum_jmp TSRMLS_CC);
 	}
