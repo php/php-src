@@ -2068,7 +2068,9 @@ ZEND_VM_HANDLER(56, ZEND_ADD_VAR, TMP|UNUSED, TMP|VAR|CV)
 	}
 
 	if (Z_TYPE_P(var) != IS_STRING) {
-		ZVAL_DEREF(var);
+		if (OP2_TYPE != IS_TMP_VAR) {
+			ZVAL_DEREF(var);
+		}
 		if (Z_TYPE_P(var) != IS_STRING) {
 			use_copy = zend_make_printable_zval(var, &var_copy TSRMLS_CC);
 
@@ -2395,12 +2397,10 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 		zend_free_op free_op2;
 		zend_class_entry *called_scope;
 		zend_object *object;
-		zval *function_name_ptr;
 
 		SAVE_OPLINE();
-		function_name_ptr = function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
+		function_name = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 
-		ZVAL_DEREF(function_name);
 		if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
 			if (Z_STRVAL_P(function_name)[0] == '\\') {
 				lcname = zend_string_alloc(Z_STRLEN_P(function_name) - 1, 0);
@@ -2425,10 +2425,9 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			if (object) {
 				GC_REFCOUNT(object)++;
 			}
-			if (OP2_TYPE == IS_VAR && Z_REFCOUNT_P(function_name) == 1 &&
-			    fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
+			if (OP2_TYPE == IS_VAR && (fbc->common.fn_flags & ZEND_ACC_CLOSURE)) {
 				/* Delay closure destruction until its invocation */
-				fbc->common.prototype = (zend_function*)Z_OBJ_P(function_name_ptr);
+				fbc->common.prototype = (zend_function*)Z_OBJ_P(free_op2);
 			} else if (OP2_TYPE == IS_CV) {
 				FREE_OP2();
 			}
@@ -4327,8 +4326,8 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	}
 	if (OP1_TYPE != IS_UNUSED) {
 		ZVAL_DEREF(container);
-		SEPARATE_ZVAL_NOREF(container);
 	}
+	SEPARATE_ZVAL_NOREF(container);
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	if (OP1_TYPE != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -4411,7 +4410,9 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	}
 	offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	ZVAL_DEREF(container);
+	if (OP1_TYPE != IS_UNUSED) {
+		ZVAL_DEREF(container);
+	}
 	if (OP1_TYPE == IS_UNUSED || Z_TYPE_P(container) == IS_OBJECT) {
 		if (Z_OBJ_HT_P(container)->unset_property) {
 			Z_OBJ_HT_P(container)->unset_property(container, offset, ((OP2_TYPE == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(offset)) : NULL) TSRMLS_CC);
