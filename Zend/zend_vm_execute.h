@@ -1512,7 +1512,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			if (object) {
 				GC_REFCOUNT(object)++;
 			}
-			if (IS_CONST == IS_VAR && 0 && Z_REFCOUNT_P(function_name) == 1 &&
+			if (IS_CONST == IS_VAR && Z_REFCOUNT_P(function_name) == 1 &&
 			    fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
 				fbc->common.prototype = (zend_function*)Z_OBJ_P(function_name_ptr);
@@ -1849,7 +1849,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			if (object) {
 				GC_REFCOUNT(object)++;
 			}
-			if (IS_TMP_VAR == IS_VAR && 1 && Z_REFCOUNT_P(function_name) == 1 &&
+			if (IS_TMP_VAR == IS_VAR && Z_REFCOUNT_P(function_name) == 1 &&
 			    fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
 				fbc->common.prototype = (zend_function*)Z_OBJ_P(function_name_ptr);
@@ -2035,7 +2035,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			if (object) {
 				GC_REFCOUNT(object)++;
 			}
-			if (IS_VAR == IS_VAR && (free_op2 != NULL) && Z_REFCOUNT_P(function_name) == 1 &&
+			if (IS_VAR == IS_VAR && Z_REFCOUNT_P(function_name) == 1 &&
 			    fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
 				fbc->common.prototype = (zend_function*)Z_OBJ_P(function_name_ptr);
@@ -2258,7 +2258,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			if (object) {
 				GC_REFCOUNT(object)++;
 			}
-			if (IS_CV == IS_VAR && 0 && Z_REFCOUNT_P(function_name) == 1 &&
+			if (IS_CV == IS_VAR && Z_REFCOUNT_P(function_name) == 1 &&
 			    fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
 				fbc->common.prototype = (zend_function*)Z_OBJ_P(function_name_ptr);
