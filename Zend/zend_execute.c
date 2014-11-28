@@ -1494,7 +1494,7 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	if (UNEXPECTED((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0)) {
 		first_extra_arg--;
 	}
-	num_args = EX(num_args);
+	num_args = EX_NUM_ARGS();
 	if (UNEXPECTED(num_args > first_extra_arg)) {
 		zval *end, *src, *dst;
 
@@ -1587,7 +1587,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 		if (UNEXPECTED((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0)) {
 			first_extra_arg--;
 		}
-		num_args = EX(num_args);
+		num_args = EX_NUM_ARGS();
 		if (UNEXPECTED(num_args > first_extra_arg)) {
 			zval *end, *src, *dst;
 
@@ -1655,7 +1655,7 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	 * restore it simply by replacing a pointer.
 	 */
 	zend_execute_data *execute_data;
-	uint32_t num_args = call->num_args;
+	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 	size_t stack_size = (ZEND_CALL_FRAME_SLOT + MAX(op_array->last_var + op_array->T, num_args)) * sizeof(zval);
 
 	EG(vm_stack) = zend_vm_stack_new_page(
@@ -1673,7 +1673,7 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 		call->called_scope,
 		Z_OBJ(call->This),
 		NULL TSRMLS_CC);
-	EX(num_args) = num_args;
+	EX_NUM_ARGS() = num_args;
 
 	/* copy arguments */
 	if (num_args > 0) {

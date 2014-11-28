@@ -51,7 +51,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 	TSRMLS_FETCH();
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -87,7 +87,7 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 	TSRMLS_FETCH();
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -111,7 +111,7 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array
 	int arg_count;
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -133,7 +133,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 	int arg_count;
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -920,7 +920,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		return FAILURE;
 	}
 
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (num_args > arg_count) {
 		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",

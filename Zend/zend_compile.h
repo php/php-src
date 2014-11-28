@@ -373,7 +373,6 @@ struct _zend_execute_data {
 	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
 	uint32_t             frame_info;
-	uint32_t             num_args;
 	zval                *return_value;
 	zend_array          *symbol_table;
 };
@@ -394,6 +393,9 @@ struct _zend_execute_data {
 #define ZEND_CALL_ARG(call, n) \
 	(((zval*)(call)) + ((n) + (ZEND_CALL_FRAME_SLOT - 1)))
 
+#define ZEND_CALL_NUM_ARGS(call) \
+	(call)->This.u2.num_args
+
 #define EX(element) 			((execute_data)->element)
 
 #define EX_VAR_2(ex, n)			((zval*)(((char*)(ex)) + ((int)(n))))
@@ -403,6 +405,8 @@ struct _zend_execute_data {
 #define EX_VAR_NUM(n)			EX_VAR_NUM_2(execute_data, n)
 
 #define EX_VAR_TO_NUM(n)		(EX_VAR_2(NULL, n) - EX_VAR_NUM_2(NULL, 0))
+
+#define EX_NUM_ARGS()			ZEND_CALL_NUM_ARGS(execute_data)
 
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)

@@ -787,7 +787,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
 					if (i) {
 						/* hack to clean up the stack */
-						call->num_args = i;
+						ZEND_CALL_NUM_ARGS(call) = i;
 						zend_vm_stack_free_args(call TSRMLS_CC);
 					}
 					zend_vm_stack_free_call_frame(call TSRMLS_CC);
@@ -827,7 +827,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			ZVAL_COPY(param, &fci->params[i]);
 		}
 	}
-	call->num_args = fci->param_count;
+	ZEND_CALL_NUM_ARGS(call) = fci->param_count;
 
 	EG(scope) = calling_scope;
 	if (func->common.fn_flags & ZEND_ACC_STATIC) {

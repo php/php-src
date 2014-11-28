@@ -2674,7 +2674,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			uint32_t i;
 			zval *p = ZEND_CALL_ARG(call, 1);
 
-			for (i = 0; i < call->num_args; ++i) {
+			for (i = 0; i < ZEND_CALL_NUM_ARGS(call); ++i) {
 				zend_verify_arg_type(fbc, i + 1, p, NULL TSRMLS_CC);
 				p++;
 			}
@@ -3000,7 +3000,7 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 	SAVE_OPLINE();
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	EX(call)->num_args = opline->op2.num;
+	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
 	ZVAL_COPY_VALUE(arg, value);
 	if (OP1_TYPE == IS_CONST) {
 		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
@@ -3022,7 +3022,7 @@ ZEND_VM_HANDLER(116, ZEND_SEND_VAL_EX, CONST|TMP, ANY)
 	}
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	EX(call)->num_args = opline->op2.num;
+	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
 	ZVAL_COPY_VALUE(arg, value);
 	if (OP1_TYPE == IS_CONST) {
 		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
@@ -3040,7 +3040,7 @@ ZEND_VM_HANDLER(117, ZEND_SEND_VAR, VAR|CV, ANY)
 
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	EX(call)->num_args = opline->op2.num;
+	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
 	if ((OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) && Z_ISREF_P(varptr)) {
 		ZVAL_COPY(arg, Z_REFVAL_P(varptr));
 		FREE_OP1();
@@ -3085,7 +3085,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 	}
 
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	EX(call)->num_args = opline->op2.num;
+	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
 	ZVAL_COPY_VALUE(arg, varptr);
 
 	CHECK_EXCEPTION();
@@ -3106,7 +3106,7 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 	}
 
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	EX(call)->num_args = opline->op2.num;
+	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(varptr == &EG(error_zval))) {
 		ZVAL_NEW_REF(arg, &EG(uninitialized_zval));
 		ZEND_VM_NEXT_OPCODE();
@@ -3139,7 +3139,7 @@ ZEND_VM_HANDLER(66, ZEND_SEND_VAR_EX, VAR|CV, ANY)
 	}
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	EX(call)->num_args = opline->op2.num;
+	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
 	if ((OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) && Z_ISREF_P(varptr)) {
 		ZVAL_COPY(arg, Z_REFVAL_P(varptr));
 		FREE_OP1();
@@ -3161,7 +3161,7 @@ ZEND_VM_HANDLER(165, ZEND_SEND_UNPACK, ANY, ANY)
 	SAVE_OPLINE();
 
 	args = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	arg_num = EX(call)->num_args + 1;
+	arg_num = ZEND_CALL_NUM_ARGS(EX(call)) + 1;
 
 ZEND_VM_C_LABEL(send_again):
 	switch (Z_TYPE_P(args)) {
@@ -3212,7 +3212,7 @@ ZEND_VM_C_LABEL(send_again):
 					ZVAL_COPY(top, arg);
 				}
 
-				EX(call)->num_args++;
+				ZEND_CALL_NUM_ARGS(EX(call))++;
 				arg_num++;
 			} ZEND_HASH_FOREACH_END();
 
@@ -3293,7 +3293,7 @@ ZEND_VM_C_LABEL(send_again):
 				zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, 1 TSRMLS_CC);
 				top = ZEND_CALL_ARG(EX(call), arg_num);
 				ZVAL_COPY_VALUE(top, arg);
-				EX(call)->num_args++;
+				ZEND_CALL_NUM_ARGS(EX(call))++;
 
 				iter->funcs->move_forward(iter TSRMLS_CC);
 				if (UNEXPECTED(EG(exception) != NULL)) {
@@ -3425,7 +3425,7 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 			} else {
 				ZVAL_COPY(param, arg);
 			}
-			EX(call)->num_args++;
+			ZEND_CALL_NUM_ARGS(EX(call))++;
 			arg_num++;
 			param++;
 		} ZEND_HASH_FOREACH_END();
@@ -3507,7 +3507,7 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, VAR|CV, ANY)
 		ZVAL_COPY(param, arg);
 	}
 
-	EX(call)->num_args = opline->op2.num;
+	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
 
 	FREE_OP1();
 	CHECK_EXCEPTION();
@@ -3520,7 +3520,7 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 	uint32_t arg_num = opline->op1.num;
 
 	SAVE_OPLINE();
-	if (UNEXPECTED(arg_num > EX(num_args))) {
+	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
 		zend_verify_missing_arg(execute_data, arg_num TSRMLS_CC);
 		CHECK_EXCEPTION();
 	} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
@@ -3541,7 +3541,7 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 
 	SAVE_OPLINE();
 	param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
-	if (arg_num > EX(num_args)) {
+	if (arg_num > EX_NUM_ARGS()) {
 		ZVAL_COPY_VALUE(param, opline->op2.zv);
 		if (Z_OPT_CONSTANT_P(param)) {
 			zval_update_constant(param, 0 TSRMLS_CC);
@@ -3565,7 +3565,7 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 {
 	USE_OPLINE
 	uint32_t arg_num = opline->op1.num;
-	uint32_t arg_count = EX(num_args);
+	uint32_t arg_count = EX_NUM_ARGS();
 	zval *params;
 
 	SAVE_OPLINE();

@@ -121,6 +121,7 @@ struct _zval_struct {
 		uint32_t     next;                 /* hash collision chain */
 		uint32_t     cache_slot;           /* literal cache slot */
 		uint32_t     lineno;               /* line number (for ast nodes) */
+		uint32_t     num_args;             /* arguments number for EX(This) */
 	} u2;
 };
 
