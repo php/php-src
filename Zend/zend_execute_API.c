@@ -1532,7 +1532,7 @@ ZEND_API zend_array *zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 	for (i = 0; i < ex->func->op_array.last_var; i++) {
 		zval zv;
 
-		ZVAL_INDIRECT(&zv, EX_VAR_NUM_2(ex, i));
+		ZVAL_INDIRECT(&zv, ZEND_CALL_VAR_NUM(ex, i));
 		zend_hash_add_new(&symbol_table->ht,
 			ex->func->op_array.vars[i], &zv);
 	}

@@ -58,7 +58,7 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 				zend_op *brk_opline = op_array->opcodes + brk_cont->brk;
 
 				if (brk_opline->opcode == ZEND_FREE) {
-					zval *var = EX_VAR_2(execute_data, brk_opline->op1.var);
+					zval *var = EX_VAR(brk_opline->op1.var);
 					zval_ptr_dtor_nogc(var);
 				}
 			}
@@ -163,7 +163,7 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 	/* If a finally block was found we jump directly to it and
 	 * resume the generator. */
 	if (finally_op_num) {
-		zval *fast_call = EX_VAR_2(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
+		zval *fast_call = ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
 
 		fast_call->u2.lineno = (uint32_t)-1;
 		ex->opline = &ex->func->op_array.opcodes[finally_op_num];

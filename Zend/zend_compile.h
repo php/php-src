@@ -403,8 +403,14 @@ struct _zend_execute_data {
 #define ZEND_CALL_FRAME_SLOT \
 	((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
 
+#define ZEND_CALL_VAR(call, n) \
+	((zval*)(((char*)(call)) + ((int)(n))))
+
+#define ZEND_CALL_VAR_NUM(call, n) \
+	(((zval*)(call)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
+
 #define ZEND_CALL_ARG(call, n) \
-	(((zval*)(call)) + ((n) + (ZEND_CALL_FRAME_SLOT - 1)))
+	ZEND_CALL_VAR_NUM(call, ((int)(n)) - 1)
 
 #define EX(element) 			((execute_data)->element)
 
@@ -412,13 +418,10 @@ struct _zend_execute_data {
 #define EX_CALL_KIND()			ZEND_CALL_KIND(execute_data)
 #define EX_NUM_ARGS()			ZEND_CALL_NUM_ARGS(execute_data)
 
-#define EX_VAR_2(ex, n)			((zval*)(((char*)(ex)) + ((int)(n))))
-#define EX_VAR_NUM_2(ex, n)     (((zval*)(ex)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
+#define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
+#define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
 
-#define EX_VAR(n)				EX_VAR_2(execute_data, n)
-#define EX_VAR_NUM(n)			EX_VAR_NUM_2(execute_data, n)
-
-#define EX_VAR_TO_NUM(n)		(EX_VAR_2(NULL, n) - EX_VAR_NUM_2(NULL, 0))
+#define EX_VAR_TO_NUM(n)		(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0))
 
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)

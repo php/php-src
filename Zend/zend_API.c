@@ -4127,7 +4127,7 @@ ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data) /* {{{ */
 				if (ex->func) {
 					if (ZEND_USER_CODE(ex->func->type)) {
 						if (ex->func->op_array.this_var != -1) {
-							zval *this_var = EX_VAR_2(ex, ex->func->op_array.this_var);
+							zval *this_var = ZEND_CALL_VAR(ex, ex->func->op_array.this_var);
 							if (this_var != EX(return_value)) {
 								zval_ptr_dtor(this_var);
 								ZVAL_NULL(this_var);

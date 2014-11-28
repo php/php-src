@@ -447,7 +447,7 @@ ZEND_FUNCTION(func_get_arg)
 		first_extra_arg--;
 	}
 	if (requested_offset >= first_extra_arg && (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg)) {
-		arg = EX_VAR_NUM_2(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - first_extra_arg);
+		arg = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - first_extra_arg);
 	} else {
 		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
 	}
@@ -496,7 +496,7 @@ ZEND_FUNCTION(func_get_args)
 				q++;
 				i++;
 			}
-			p = EX_VAR_NUM_2(ex, ex->func->op_array.last_var + ex->func->op_array.T);
+			p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
 		}
 		while (i < arg_count) {
 			q->h = i;
@@ -2070,7 +2070,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array TS
 					p++;
 					i++;
 				}
-				p = EX_VAR_NUM_2(call, call->func->op_array.last_var + call->func->op_array.T);
+				p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 			}
 		}
 

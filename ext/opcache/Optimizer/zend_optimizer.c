@@ -65,7 +65,7 @@ int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 		    (op_array->vars[i]->h == hash_value &&
 		     op_array->vars[i]->len == name->len &&
 		     memcmp(op_array->vars[i]->val, name->val, name->len) == 0)) {
-			return (int)(zend_intptr_t)EX_VAR_NUM_2(NULL, i);
+			return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
 		}
 		i++;
 	}
@@ -96,7 +96,7 @@ int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 		}
 	}
 	
-	return (int)(zend_intptr_t)EX_VAR_NUM_2(NULL, i);
+	return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
 }
 
 int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC)
