@@ -1484,7 +1484,6 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 {
 	uint32_t first_extra_arg, num_args;
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
-	ZEND_ASSERT(EX(scope) == EG(scope));
 
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
@@ -1553,7 +1552,6 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
 	EX(return_value) = return_value;
-	EX(scope) = EG(scope);
 
 	zend_attach_symbol_table(execute_data);
 
@@ -1578,7 +1576,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 	EX(opline) = op_array->opcodes;
 	EX(call) = NULL;
 	EX(return_value) = return_value;
-	EX(scope) = EG(scope);
 
 	if (UNEXPECTED(EX(symbol_table) != NULL)) {
 		zend_attach_symbol_table(execute_data);
@@ -1690,7 +1687,6 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	}
 
 	EX(symbol_table) = NULL;
-	EX(scope) = EG(scope);
 
 	i_init_func_execute_data(execute_data, op_array, return_value TSRMLS_CC);
 

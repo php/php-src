@@ -306,7 +306,7 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		original_stack->top = EG(vm_stack_top);
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
-		EG(scope) = generator->execute_data->scope;
+		EG(scope) = generator->execute_data->func->common.scope;
 		EG(vm_stack_top) = generator->stack->top;
 		EG(vm_stack_end) = generator->stack->end;
 		EG(vm_stack) = generator->stack;

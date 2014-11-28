@@ -375,7 +375,6 @@ struct _zend_execute_data {
 	uint32_t             frame_info;
 	uint32_t             num_args;
 	zval                *return_value;
-	zend_class_entry    *scope;            /* function scope (self)          */
 	zend_array          *symbol_table;
 };
 
