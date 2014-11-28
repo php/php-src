@@ -1736,9 +1736,9 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 
 ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 {
-	vm_frame_kind frame_kind = VM_FRAME_KIND(EX(frame_info));
+	zend_call_kind call_kind = EX_CALL_KIND();
 
-	if (frame_kind == VM_FRAME_NESTED_FUNCTION) {
+	if (call_kind == ZEND_CALL_NESTED_FUNCTION) {
 		zend_object *object;
 
 		i_free_compiled_variables(execute_data TSRMLS_CC);
@@ -1780,7 +1780,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		LOAD_OPLINE();
 		ZEND_VM_INC_OPCODE();
 		ZEND_VM_LEAVE();
-	} else if (frame_kind == VM_FRAME_NESTED_CODE) {
+	} else if (call_kind == ZEND_CALL_NESTED_CODE) {
 		zend_detach_symbol_table(execute_data);
 		destroy_op_array(&EX(func)->op_array TSRMLS_CC);
 		efree_size(EX(func), sizeof(zend_op_array));
@@ -1798,7 +1798,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		ZEND_VM_INC_OPCODE();
 		ZEND_VM_LEAVE();
 	} else {
-		if (frame_kind == VM_FRAME_TOP_FUNCTION) {
+		if (call_kind == ZEND_CALL_TOP_FUNCTION) {
 			i_free_compiled_variables(execute_data TSRMLS_CC);
 			if (UNEXPECTED(EX(symbol_table) != NULL)) {
 				zend_clean_and_cache_symbol_table(EX(symbol_table) TSRMLS_CC);
@@ -1808,7 +1808,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			if ((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) && EX(func)->op_array.prototype) {
 				OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
 			}
-		} else /* if (frame_kind == VM_FRAME_TOP_CODE) */ {
+		} else /* if (call_kind == ZEND_CALL_TOP_CODE) */ {
 			zend_array *symbol_table = EX(symbol_table);
 			zend_execute_data *old_execute_data;
 
@@ -2233,7 +2233,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 		GC_REFCOUNT(obj)++; /* For $this pointer */
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, called_scope, obj, EX(call) TSRMLS_CC);
 
 	FREE_OP2();
@@ -2356,7 +2356,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 		}
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, ce, object, EX(call) TSRMLS_CC);
 	
 	if (OP2_TYPE == IS_UNUSED) {
@@ -2385,7 +2385,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			CACHE_PTR(Z_CACHE_SLOT_P(opline->op2.zv), fbc);
 		}
 
-		EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+		EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 			fbc, opline->extended_value, NULL, NULL, EX(call) TSRMLS_CC);
 
 		/*CHECK_EXCEPTION();*/
@@ -2505,7 +2505,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
 			ZEND_VM_CONTINUE(); /* Never reached */
 		}
-		EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+		EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 			fbc, opline->extended_value, called_scope, object, EX(call) TSRMLS_CC);
 
 		CHECK_EXCEPTION();
@@ -2559,7 +2559,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMP|VAR|CV)
 		object = NULL;
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		func, opline->extended_value, called_scope, object, EX(call) TSRMLS_CC);
 
 	FREE_OP2();
@@ -2591,7 +2591,7 @@ ZEND_VM_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST)
 		CACHE_PTR(Z_CACHE_SLOT_P(opline->op2.zv), fbc);
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, NULL, NULL, EX(call) TSRMLS_CC);
 
 	ZEND_VM_NEXT_OPCODE();
@@ -2615,7 +2615,7 @@ ZEND_VM_HANDLER(61, ZEND_INIT_FCALL, ANY, CONST)
 		CACHE_PTR(Z_CACHE_SLOT_P(fname), fbc);
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_FUNCTION,
+	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, NULL, NULL, EX(call) TSRMLS_CC);
 
 	FREE_OP2();
@@ -2743,9 +2743,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			if (EXPECTED(zend_execute_ex == execute_ex)) {
 				ZEND_VM_ENTER();
 			} else {
-				call->frame_info = VM_FRAME_INFO(
-					VM_FRAME_TOP_FUNCTION,
-					VM_FRAME_FLAGS(call->frame_info));
+				ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 				zend_execute_ex(call TSRMLS_CC);
 			}
 		}
@@ -3716,10 +3714,8 @@ ZEND_VM_HANDLER(68, ZEND_NEW, CONST|VAR, ANY)
 	} else {
 		/* We are not handling overloaded classes right now */
 		EX(call) = zend_vm_stack_push_call_frame(
-			VM_FRAME_INFO(
-				VM_FRAME_NESTED_FUNCTION,
-				RETURN_VALUE_USED(opline) ?
-					ZEND_CALL_CTOR : (ZEND_CALL_CTOR | ZEND_CALL_CTOR_RESULT_UNUSED)),
+				ZEND_CALL_FUNCTION | ZEND_CALL_CTOR |
+				(RETURN_VALUE_USED(opline) ? 0 : ZEND_CALL_CTOR_RESULT_UNUSED),
 			constructor,
 			opline->extended_value,
 			ce,
@@ -4210,7 +4206,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 
 		new_op_array->scope = EG(scope); /* ??? */
 
-		call = zend_vm_stack_push_call_frame(VM_FRAME_NESTED_CODE,
+		call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_CODE,
 			(zend_function*)new_op_array, 0, EX(called_scope), Z_OBJ(EX(This)), NULL TSRMLS_CC);
 
 		if (EX(symbol_table)) {
@@ -4224,7 +4220,7 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		if (EXPECTED(zend_execute_ex == execute_ex)) {
 			ZEND_VM_ENTER();
 		} else {
-			call->frame_info = VM_FRAME_TOP_CODE;
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
 			zend_execute_ex(call TSRMLS_CC);
 		}
 
@@ -5487,8 +5483,8 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			zend_vm_stack_free_args(EX(call) TSRMLS_CC);
 
 			if (Z_OBJ(call->This)) {
-				if (call->frame_info & ZEND_CALL_CTOR) {
-					if (!(call->frame_info & ZEND_CALL_CTOR_RESULT_UNUSED)) {
+				if (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR) {
+					if (!(ZEND_CALL_INFO(call) & ZEND_CALL_CTOR_RESULT_UNUSED)) {
 						GC_REFCOUNT(Z_OBJ(call->This))--;
 					}
 					if (GC_REFCOUNT(Z_OBJ(call->This)) == 1) {

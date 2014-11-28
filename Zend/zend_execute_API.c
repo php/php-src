@@ -736,7 +736,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	func = fci_cache->function_handler;
-	call = zend_vm_stack_push_call_frame(VM_FRAME_TOP_FUNCTION,
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION,
 		func, fci->param_count, fci_cache->called_scope, fci_cache->object, NULL TSRMLS_CC);
 	calling_scope = fci_cache->calling_scope;
 	fci->object = fci_cache->object;
@@ -835,9 +835,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 	if (!fci->object) {
 		Z_OBJ(call->This) = NULL;
-		Z_TYPE_INFO(call->This) = IS_UNDEF;
 	} else {
-		ZVAL_OBJ(&call->This, fci->object);
+		Z_OBJ(call->This) = fci->object;
 		GC_REFCOUNT(fci->object)++;
 	}
 

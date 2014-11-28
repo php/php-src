@@ -1667,7 +1667,7 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	EG(vm_stack_end) = EG(vm_stack)->end;
 
 	execute_data = zend_vm_stack_push_call_frame(
-		VM_FRAME_TOP_FUNCTION,
+		ZEND_CALL_TOP_FUNCTION,
 		(zend_function*)op_array,
 		num_args,
 		call->called_scope,

@@ -112,7 +112,7 @@ struct _zval_struct {
 				zend_uchar    type,			/* active type */
 				zend_uchar    type_flags,
 				zend_uchar    const_flags,
-				zend_uchar    reserved)	    /* various IS_VAR flags */
+				zend_uchar    reserved)	    /* call info for EX(This) */
 		} v;
 		uint32_t type_info;
 	} u1;
