@@ -1,5 +1,7 @@
 --TEST--
 Testing xpath() with invalid XML
+--SKIPIF--
+<?php PHP_INT_SIZE == 4 or die("skip - 32-bit only");
 --FILE--
 <?php
 $xml = simplexml_load_string("XXXXXXX^",$x,0x6000000000000001);
