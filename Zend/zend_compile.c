@@ -5720,8 +5720,21 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast TSRMLS_DC) /* 
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot access self::class when no class scope is active");
 			}
-			result->op_type = IS_CONST;
-			ZVAL_STR_COPY(&result->u.constant, CG(active_class_entry)->name);
+			if (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) {
+				zval class_str_zv;
+				zend_ast *class_str_ast, *class_const_ast;
+
+				ZVAL_STRING(&class_str_zv, "class");
+				class_str_ast = zend_ast_create_zval(&class_str_zv);
+				class_const_ast = zend_ast_create(ZEND_AST_CLASS_CONST, name_ast, class_str_ast);
+
+				zend_compile_expr(result, class_const_ast TSRMLS_CC);
+
+				zval_ptr_dtor(&class_str_zv);
+			} else {
+				result->op_type = IS_CONST;
+				ZVAL_STR_COPY(&result->u.constant, CG(active_class_entry)->name);
+			}
 			break;
         case ZEND_FETCH_CLASS_STATIC:
         case ZEND_FETCH_CLASS_PARENT:
