@@ -2,6 +2,7 @@
 Test function posix_seteuid() by substituting argument 1 with float values.
 --SKIPIF--
 <?php 
+        PHP_INT_SIZE == 4 or die("skip - 32-bit only");
         if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
         if(posix_geteuid() == 0) print "skip - Cannot run test as root.";
 ?>

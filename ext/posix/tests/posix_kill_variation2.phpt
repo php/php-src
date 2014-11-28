@@ -2,6 +2,7 @@
 Test posix_kill() function : usage variations  - second parameter type
 --SKIPIF--
 <?php 
+    PHP_INT_SIZE == 4 or die("skip - 32-bit only");
 	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
 ?>
 --FILE--
