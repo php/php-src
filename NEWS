@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.6.5
 
+- Core:
+  . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
+
 - mbstring:
   . Fixed bug #68504 (--with-libmbfl configure option not present on Windows).
     (Ashesh Vashi)
