@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Added options parameter for unserialize allowing to specify acceptable
     classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
   . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
+  . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
