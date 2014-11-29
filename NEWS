@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #68504 (--with-libmbfl configure option not present on Windows).
     (Ashesh Vashi)
 
+- SPL:
+  . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
+    breaks the RecursiveIterator). (Paul Garvin)
 
 11 Dec 2014, PHP 5.5.20
 
