@@ -1206,7 +1206,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 				}
 				zend_check_trait_usage(ce, cur_precedence->trait_method->ce TSRMLS_CC);
 
-				/** Ensure that the prefered method is actually available. */
+				/** Ensure that the preferred method is actually available. */
 				lcname = zend_string_alloc(cur_method_ref->method_name->len, 0);
 				zend_str_tolower_copy(lcname->val, 
 					cur_method_ref->method_name->val,
@@ -1238,7 +1238,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 
 					/* make sure that the trait method is not from a class mentioned in
 					 exclude_from_classes, for consistency */
-					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[i].ce) {
+					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[j].ce) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 								   "Inconsistent insteadof definition. "
 								   "The method %s is to be used from %s, but %s is also on the exclude list",
@@ -1507,7 +1507,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce 
 										 lc_method_name)) {
 						zend_string_free(lc_method_name);
 						zend_error_noreturn(E_COMPILE_ERROR,
-								   "The modifiers for the trait alias %s() need to be changed in the same statment in which the alias is defined. Error",
+								   "The modifiers for the trait alias %s() need to be changed in the same statement in which the alias is defined. Error",
 								   cur_alias->trait_method->method_name->val);
 					} else {
 						zend_string_free(lc_method_name);

@@ -112,7 +112,7 @@ struct _zval_struct {
 				zend_uchar    type,			/* active type */
 				zend_uchar    type_flags,
 				zend_uchar    const_flags,
-				zend_uchar    reserved)	    /* various IS_VAR flags */
+				zend_uchar    reserved)	    /* call info for EX(This) */
 		} v;
 		uint32_t type_info;
 	} u1;
@@ -121,6 +121,7 @@ struct _zval_struct {
 		uint32_t     next;                 /* hash collision chain */
 		uint32_t     cache_slot;           /* literal cache slot */
 		uint32_t     lineno;               /* line number (for ast nodes) */
+		uint32_t     num_args;             /* arguments number for EX(This) */
 	} u2;
 };
 
@@ -145,9 +146,9 @@ struct _zend_string {
 };
 
 typedef struct _Bucket {
+	zval              val;
 	zend_ulong        h;                /* hash value (or numeric index)   */
 	zend_string      *key;              /* string key or NULL for numerics */
-	zval              val;
 } Bucket;
 
 typedef struct _HashTable {	

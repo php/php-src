@@ -21,7 +21,11 @@
 #ifndef ZEND_VM_OPCODES_H
 #define ZEND_VM_OPCODES_H
 
+BEGIN_EXTERN_C()
+
 ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);
+
+END_EXTERN_C()
 
 #define ZEND_NOP                               0
 #define ZEND_ADD                               1

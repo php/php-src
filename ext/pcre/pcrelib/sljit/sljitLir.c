@@ -1428,7 +1428,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump* sljit_emit_cmp(struct sljit_compiler
 #endif
 
 	if (SLJIT_UNLIKELY((src1 & SLJIT_IMM) && !(src2 & SLJIT_IMM))) {
-		/* Immediate is prefered as second argument by most architectures. */
+		/* Immediate is preferred as second argument by most architectures. */
 		switch (condition) {
 		case SLJIT_C_LESS:
 			condition = SLJIT_C_GREATER;

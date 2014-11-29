@@ -25,7 +25,7 @@
 #include "ZendAccelerator.h"
 
 #define VAR_NUM(v) EX_VAR_TO_NUM(v)
-#define NUM_VAR(v) ((uint32_t)(zend_uintptr_t)EX_VAR_NUM_2(0, v))
+#define NUM_VAR(v) ((uint32_t)(zend_uintptr_t)ZEND_CALL_VAR_NUM(0, v))
 
 #define INV_COND(op)       ((op) == ZEND_JMPZ    ? ZEND_JMPNZ    : ZEND_JMPZ)
 #define INV_EX_COND(op)    ((op) == ZEND_JMPZ_EX ? ZEND_JMPNZ    : ZEND_JMPZ)

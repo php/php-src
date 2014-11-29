@@ -37,7 +37,7 @@ void phpdbg_restore_frame(TSRMLS_D) /* {{{ */
 	/* move things back */
 	EG(current_execute_data) = PHPDBG_FRAME(execute_data);
 
-	EG(scope) = PHPDBG_EX(scope);
+	EG(scope) = PHPDBG_EX(func)->op_array.scope;
 } /* }}} */
 
 void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
@@ -79,7 +79,7 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 		PHPDBG_FRAME(execute_data) = EG(current_execute_data);
 		EG(current_execute_data) = execute_data;
 
-		EG(scope) = PHPDBG_EX(scope);
+		EG(scope) = PHPDBG_EX(func)->op_array.scope;
 	}
 
 	phpdbg_notice("frame", "id=\"%d\"", "Switched to frame #%d", frame);

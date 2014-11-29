@@ -85,13 +85,24 @@ static void *fpm_get_in_addr(struct sockaddr *sa) /* {{{ */
 }
 /* }}} */
 
+static int fpm_get_in_port(struct sockaddr *sa) /* {{{ */
+{
+    if (sa->sa_family == AF_INET) {
+        return ntohs(((struct sockaddr_in*)sa)->sin_port);
+    }
+
+    return ntohs(((struct sockaddr_in6*)sa)->sin6_port);
+}
+/* }}} */
+
 static int fpm_sockets_hash_op(int sock, struct sockaddr *sa, char *key, int type, int op) /* {{{ */
 {
 	if (key == NULL) {
 		switch (type) {
 			case FPM_AF_INET : {
-				key = alloca(INET6_ADDRSTRLEN);
-				inet_ntop(sa->sa_family, fpm_get_in_addr(sa), key, sizeof key);
+				key = alloca(INET6_ADDRSTRLEN+10);
+				inet_ntop(sa->sa_family, fpm_get_in_addr(sa), key, INET6_ADDRSTRLEN);
+				sprintf(key+strlen(key), ":%d", fpm_get_in_port(sa));
 				break;
 			}
 
@@ -244,9 +255,10 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 	char *dup_address = strdup(wp->config->listen_address);
 	char *port_str = strrchr(dup_address, ':');
 	char *addr = NULL;
+	char tmpbuf[INET6_ADDRSTRLEN];
 	int addr_len;
 	int port = 0;
-	int sock;
+	int sock = -1;
 	int status;
 
 	if (port_str) { /* this is host:port pair */
@@ -256,6 +268,8 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 	} else if (strlen(dup_address) == strspn(dup_address, "0123456789")) { /* this is port */
 		port = atoi(dup_address);
 		port_str = dup_address;
+		/* IPv6 catch-all + IPv4-mapped */
+		addr = "::";
 	}
 
 	if (port == 0) {
@@ -263,13 +277,11 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 		return -1;
 	}
 
-	// strip brackets from address for getaddrinfo
-	if (addr != NULL) {
-		addr_len = strlen(addr);
-		if (addr[0] == '[' && addr[addr_len - 1] == ']') {
-			addr[addr_len - 1] = '\0';
-			addr++;
-		}
+	/* strip brackets from address for getaddrinfo */
+	addr_len = strlen(addr);
+	if (addr[0] == '[' && addr[addr_len - 1] == ']') {
+		addr[addr_len - 1] = '\0';
+		addr++;
 	}
 
 	memset(&hints, 0, sizeof hints);
@@ -281,14 +293,18 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 		return -1;
 	}
 
-	free(dup_address);
-
 	for (p = servinfo; p != NULL; p = p->ai_next) {
-		if ((sock = fpm_sockets_get_listening_socket(wp, p->ai_addr, p->ai_addrlen)) != -1) {
-			break;
+		inet_ntop(p->ai_family, fpm_get_in_addr(p->ai_addr), tmpbuf, INET6_ADDRSTRLEN);
+		if (sock < 0) {
+			if ((sock = fpm_sockets_get_listening_socket(wp, p->ai_addr, p->ai_addrlen)) != -1) {
+				zlog(ZLOG_DEBUG, "Found address for %s, socket opened on %s", addr, tmpbuf);
+			}
+		} else {
+			zlog(ZLOG_WARNING, "Found multiple addresses for %s, %s ignored", addr, tmpbuf);
 		}
 	}
 
+	free(dup_address);
 	freeaddrinfo(servinfo);
 
 	return sock;

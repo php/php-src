@@ -1601,7 +1601,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 #else
 	ZVAL_LONG(&stat_blocks,-1);
 #endif
-	/* Store numeric indexes in propper order */
+	/* Store numeric indexes in proper order */
 	zend_hash_next_index_insert(HASH_OF(return_value), &stat_dev);
 	zend_hash_next_index_insert(HASH_OF(return_value), &stat_ino);
 	zend_hash_next_index_insert(HASH_OF(return_value), &stat_mode);

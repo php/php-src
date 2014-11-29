@@ -437,7 +437,7 @@ static void _free_odbc_result(zend_resource *rsrc TSRMLS_DC)
 						(SQLUSMALLINT) SQL_COMMIT);
 #endif
 			rc = SQLFreeStmt(res->stmt,SQL_DROP);
-			/* We don't want the connection to be closed after the last statment has been closed
+			/* We don't want the connection to be closed after the last statement has been closed
 			 * Connections will be closed on shutdown
 			 * zend_list_delete(res->conn_ptr->id);
 			 */
@@ -2493,8 +2493,8 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
  *
  * We do have to hash non-persistent connections, and reuse connections.
  * In the case where two connects were being made, without closing the first
- * connect, access violations were occuring.  This is because some of the
- * "globals" in this module should actualy be per-connection variables.  I
+ * connect, access violations were occurring.  This is because some of the
+ * "globals" in this module should actually be per-connection variables.  I
  * simply fixed things to get them working for now.  Shane
  */
 /* {{{ odbc_do_connect */

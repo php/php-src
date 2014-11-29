@@ -14,6 +14,7 @@
   +----------------------------------------------------------------------+
   | Authors: Derick Rethans <derick@php.net>                             |
   |          Pierre-A. Joye <pierre@php.net>                             |
+  |          Kévin Dunglas <dunglas@gmail.com>                           |
   +----------------------------------------------------------------------+
 */
 
@@ -79,6 +80,8 @@
 
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
+
+static int _php_filter_validate_ipv6(char *str, size_t str_len TSRMLS_DC);
 
 static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
 	zend_long ctx_value;
@@ -452,6 +455,65 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 }
+
+static int _php_filter_validate_domain(char * domain, int len, zend_long flags) /* {{{ */
+{
+	char *e, *s, *t;
+	size_t l;
+	int hostname = flags & FILTER_FLAG_HOSTNAME;
+	unsigned char i = 1;
+
+	s = domain;
+	l = len;
+	e = domain + l;
+	t = e - 1;
+
+	/* Ignore trailing dot */
+	if (*t == '.') {
+		e = t;
+		l--;
+	}
+
+	/* The total length cannot exceed 253 characters (final dot not included) */
+	if (l > 253) {
+		return 0;
+	}
+
+	/* First char must be alphanumeric */
+	if(*s == '.' || (hostname && !isalnum((int)*(unsigned char *)s))) { 
+		return 0;
+	}
+
+	while (s < e) {
+		if (*s == '.') {
+			/* The first and the last character of a label must be alphanumeric */
+			if (*(s + 1) == '.' || (hostname && (!isalnum((int)*(unsigned char *)(s - 1)) || !isalnum((int)*(unsigned char *)(s + 1))))) {
+				return 0;
+			}
+
+			/* Reset label length counter */
+			i = 1;
+		} else {
+			if (i > 63 || (hostname && *s != '-' && !isalnum((int)*(unsigned char *)s))) {
+				return 0;
+			}
+
+			i++;
+		}
+
+		s++;
+	}
+	
+	return 1;
+}
+/* }}} */
+
+void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+{		
+	if (!_php_filter_validate_domain(Z_STRVAL_P(value), Z_STRLEN_P(value), flags)) {
+		RETURN_VALIDATION_FAILED
+	}
+}
 /* }}} */
 
 void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
@@ -473,25 +535,28 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	if (url->scheme != NULL && (!strcasecmp(url->scheme, "http") || !strcasecmp(url->scheme, "https"))) {
-		char *e, *s;
+		char *e, *s, *t;
+		size_t l;
 
 		if (url->host == NULL) {
 			goto bad_url;
 		}
 
-		e = url->host + strlen(url->host);
 		s = url->host;
+		l = strlen(s);
+		e = url->host + l;
+		t = e - 1;
 
-		/* First char of hostname must be alphanumeric */
-		if(!isalnum((int)*(unsigned char *)s)) { 
-			goto bad_url;
+		/* An IPv6 enclosed by square brackets is a valid hostname */
+		if (*s == '[' && *t == ']' && _php_filter_validate_ipv6((s + 1), l - 2 TSRMLS_CC)) {
+			php_url_free(url);
+			return;
 		}
 
-		while (s < e) {
-			if (!isalnum((int)*(unsigned char *)s) && *s != '-' && *s != '.') {
-				goto bad_url;
-			}
-			s++;
+		// Validate domain
+		if (!_php_filter_validate_domain(url->host, l, FILTER_FLAG_HOSTNAME)) {
+			php_url_free(url);
+			RETURN_VALIDATION_FAILED
 		}
 	}
 

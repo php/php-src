@@ -560,7 +560,7 @@ PHP_FUNCTION(unpack)
 {
 	char *format, *input;
 	zend_string *formatarg, *inputarg;
-	size_t formatlen, inputpos, inputlen;
+	zend_long formatlen, inputpos, inputlen;
 	int i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &formatarg, 
@@ -717,7 +717,7 @@ PHP_FUNCTION(unpack)
 				inputpos = 0;
 			}
 
-			if ((size >=0 && (inputpos + size) <= inputlen) || (size < 0 && -size <= (inputlen - inputpos))) {
+			if ((inputpos + size) <= inputlen) {
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */

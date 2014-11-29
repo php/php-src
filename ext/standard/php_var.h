@@ -57,6 +57,7 @@ PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t 
 PHPAPI int php_var_unserialize(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
 PHPAPI int php_var_unserialize_ref(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
 PHPAPI int php_var_unserialize_intern(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
+PHPAPI int php_var_unserialize_ex(zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes TSRMLS_DC);
 
 #define PHP_VAR_SERIALIZE_INIT(d) \
 do  { \

@@ -346,8 +346,8 @@ ZEND_API char *zend_get_type_by_const(int type);
 
 #define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT()
 #define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)
-#define ARG_COUNT(dummy)					EX(num_args)
-#define ZEND_NUM_ARGS()						EX(num_args)
+#define ARG_COUNT(dummy)					EX_NUM_ARGS()
+#define ZEND_NUM_ARGS()						EX_NUM_ARGS()
 #define ZEND_WRONG_PARAM_COUNT()					{ zend_wrong_param_count(TSRMLS_C); return; }
 #define ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)		{ zend_wrong_param_count(TSRMLS_C); return ret; }
 
@@ -712,7 +712,7 @@ ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int chec
 		const int _flags = (flags); \
 		int _min_num_args = (min_num_args); \
 		int _max_num_args = (max_num_args); \
-		int _num_args = EX(num_args); \
+		int _num_args = EX_NUM_ARGS(); \
 		int _i; \
 		zval *_real_arg, *_arg = NULL; \
 		zend_expected_type _expected_type = IS_UNDEF; \

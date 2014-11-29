@@ -150,7 +150,7 @@ class DateFormatter {
 	  *                          time patterns, parsing as much as possible to obtain a value.
           *                          'false' sets the parser to strictly parse strings into dates. 
 	  *                          Extra space, unrecognized tokens, or invalid values 
-	  *                          ("Feburary 30th") are not accepted.
+	  *                          ("February 30th") are not accepted.
 	  *
           * @return boolean          'true' if successful; 'false' if an error occurred. 
 	  */
@@ -338,7 +338,7 @@ class DateFormatter {
 	  *                          time patterns, parsing as much as possible to obtain a value.
           *                          'false' sets the parser to strictly parse strings into dates. 
 	  *                          Extra space, unrecognized tokens, or invalid values 
-	  *                          ("Feburary 30th") are not accepted.
+	  *                          ("February 30th") are not accepted.
 	  *
           * @return boolean          'true' if successful; 'false' if an error occurred. 
 	  */

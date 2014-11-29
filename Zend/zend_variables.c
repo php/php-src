@@ -45,7 +45,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 					/* break possible cycles */
 					GC_TYPE(arr) = IS_NULL;
 					GC_REMOVE_FROM_BUFFER(arr);
-					zend_hash_destroy(&arr->ht);
+					zend_array_destroy(&arr->ht TSRMLS_CC);
 					efree_size(arr, sizeof(zend_array));
 				}
 				break;
@@ -77,7 +77,9 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)p;
 				if (--GC_REFCOUNT(ref) == 0) {
-					zval_ptr_dtor(&ref->val);
+					TSRMLS_FETCH();
+
+					i_zval_ptr_dtor(&ref->val ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
 					efree_size(ref, sizeof(zend_reference));
 				}
 				break;
@@ -105,7 +107,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 					/* break possible cycles */
 					GC_TYPE(arr) = IS_NULL;
 					GC_REMOVE_FROM_BUFFER(arr);
-					zend_hash_destroy(&arr->ht);
+					zend_array_destroy(&arr->ht TSRMLS_CC);
 					efree_size(arr, sizeof(zend_array));
 				}
 				break;
@@ -134,8 +136,9 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 			}
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)p;
+				TSRMLS_FETCH();
 
-				zval_ptr_dtor(&ref->val);
+				i_zval_ptr_dtor(&ref->val ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
 				efree_size(ref, sizeof(zend_reference));
 				break;
 			}
@@ -293,7 +296,9 @@ ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue)
 
 ZEND_API void _zval_ptr_dtor_wrapper(zval *zval_ptr)
 {
-	zval_ptr_dtor(zval_ptr);
+	TSRMLS_FETCH();
+
+	i_zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_CC TSRMLS_CC);
 }
 
 

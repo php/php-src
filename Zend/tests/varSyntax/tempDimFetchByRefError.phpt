@@ -1,5 +1,5 @@
 --TEST--
-Passing a dimention fetch on a temporary by reference is not allowed
+Passing a dimension fetch on a temporary by reference is not allowed
 --FILE--
 <?php
 

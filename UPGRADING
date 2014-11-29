@@ -63,6 +63,7 @@ PHP X.Y UPGRADE NOTES
 
 - FPM
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes).
+  . Listen = port now listen on all addresses (IPv6 and IPv4-mapped).
 
 ========================================
 4. Deprecated Functionality
@@ -76,6 +77,11 @@ PHP X.Y UPGRADE NOTES
 - parse_ini_file():
 - parse_ini_string():
   Added scanner mode INI_SCANNER_TYPED to yield typed .ini values.
+- unserialize():
+  Added second parameter for unserialize function 
+  (RFC: https://wiki.php.net/rfc/secure_unserialize) allowing to specify
+  acceptable classes: 
+  unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]);
 
 
 ========================================
@@ -126,7 +132,7 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 - Core
-  . Instead of being undefined and platform-dependant, NaN and Infinity will
+  . Instead of being undefined and platform-dependent, NaN and Infinity will
     always be zero when casted to integer.
   . Calling a method on a non-object no longer raises a fatal error; see
     also: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object

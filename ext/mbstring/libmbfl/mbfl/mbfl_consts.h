@@ -45,7 +45,7 @@
 #define MBFL_ENCTYPE_ENC_STRM	0x00002000
 #define MBFL_ENCTYPE_GL_UNSAFE	0x00004000
 
-/* wchar plane, special charactor */
+/* wchar plane, special character */
 #define MBFL_WCSPLANE_MASK			0xffff
 #define MBFL_WCSPLANE_UCS2MAX		0x00010000
 #define MBFL_WCSPLANE_UTF32MAX		0x00110000

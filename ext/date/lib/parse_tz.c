@@ -336,7 +336,7 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 {
 	uint32_t i;
 
-	/* If there is no transistion time, we pick the first one, if that doesn't
+	/* If there is no transition time, we pick the first one, if that doesn't
 	 * exist we return NULL */
 	if (!tz->timecnt || !tz->trans) {
 		*transition_time = 0;
@@ -346,8 +346,8 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 		return NULL;
 	}
 
-	/* If the TS is lower than the first transistion time, then we scan over
-	 * all the transistion times to find the first non-DST one, or the first
+	/* If the TS is lower than the first transition time, then we scan over
+	 * all the transition times to find the first non-DST one, or the first
 	 * one in case there are only DST entries. Not sure which smartass came up
 	 * with this idea in the first though :) */
 	if (ts < tz->trans[0]) {
