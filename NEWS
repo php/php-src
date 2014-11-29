@@ -44,6 +44,10 @@ PHP                                                                        NEWS
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
 
+- pcntl:
+  . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
+    when setting SIG_DFL). (Julien)
+
 - Reflection
   . Fixed inheritance chain of Reflector interface (Tjerk)
 
