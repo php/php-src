@@ -1,5 +1,7 @@
 --TEST--
 Test chunk_split() function : usage variations - unexpected values for 'chunklen' argument(Bug#42796)
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])

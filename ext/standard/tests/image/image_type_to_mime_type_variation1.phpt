@@ -1,5 +1,7 @@
 --TEST--
 Test image_type_to_mime_type() function : usage variations  - Pass different data types as imagetype
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : string image_type_to_mime_type(int imagetype)

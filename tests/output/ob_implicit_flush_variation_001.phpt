@@ -1,5 +1,7 @@
 --TEST--
 Test ob_implicit_flush() function : usage variation 
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : void ob_implicit_flush([int flag])

@@ -1,7 +1,7 @@
 --TEST--
 Test xml_error_string() function : usage variations  - test different types for code
 --SKIPIF--
-<?php 
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 if (!extension_loaded("xml")) {
 	print "skip - XML extension not loaded"; 
 }	 
