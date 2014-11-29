@@ -1083,7 +1083,7 @@ static zend_always_inline int _z_param_long(zval *arg, zend_long *dest, zend_boo
 
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
 			if (EXPECTED(type != 0)) {
-				if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
+				if (UNEXPECTED(zend_isnan(d))) {
 					return 0;
 				}
 				if (UNEXPECTED(d > ZEND_LONG_MAX || d < ZEND_LONG_MIN)) {
