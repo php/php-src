@@ -57,6 +57,8 @@ PHP                                                                        NEWS
 - SPL:
   . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
     nor curruption state). (Julien)
+  . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
+    breaks the RecursiveIterator). (Paul Garvin)
 
 - Standard:
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)
