@@ -35,7 +35,7 @@ function foo_static() {
 /* Part 2:
  * Storing a reference to the result of a function in a static variable.
  * Same as Part 1 but:
- * The return statment transports a copy of the value to return. In other 
+ * The return statement transports a copy of the value to return. In other 
  * words the return value of bar_global() is a temporary variable only valid
  * after the function call bar_global() is done in current local scope.
  */

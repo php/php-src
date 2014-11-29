@@ -22,6 +22,8 @@
 #ifndef ZEND_VARIABLES_H
 #define ZEND_VARIABLES_H
 
+#include "zend_types.h"
+#include "zend_gc.h"
 
 BEGIN_EXTERN_C()
 
@@ -40,6 +42,17 @@ static zend_always_inline void _zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LINE
 {
 	if (Z_REFCOUNTED_P(zval_ptr) && !Z_DELREF_P(zval_ptr)) {
 		_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
+	}
+}
+
+static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
+{
+	if (Z_REFCOUNTED_P(zval_ptr)) {
+		if (!Z_DELREF_P(zval_ptr)) {
+			_zval_dtor_func_for_ptr(Z_COUNTED_P(zval_ptr) ZEND_FILE_LINE_RELAY_CC);
+		} else {
+			GC_ZVAL_CHECK_POSSIBLE_ROOT(zval_ptr);
+		}
 	}
 }
 
@@ -93,7 +106,7 @@ static zend_always_inline void _zval_opt_copy_ctor_no_imm(zval *zvalue ZEND_FILE
 
 ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args, zend_hash_key *key);
 
-ZEND_API int zend_print_variable(zval *var TSRMLS_DC);
+ZEND_API size_t zend_print_variable(zval *var TSRMLS_DC);
 ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC);

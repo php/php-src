@@ -1475,7 +1475,7 @@ static void php_oci_pconnection_list_np_dtor(zend_resource *entry TSRMLS_DC)
 		 * semantics. With the PECL OCI 1.3.x extensions, we release pconnections when oci_close
 		 * takes the refcount to zero.
 		 *
-		 * If oci_old_close_semantics is set, we artifically bump up the refcount and decremented
+		 * If oci_old_close_semantics is set, we artificially bump up the refcount and decremented
 		 * only at request shutdown.
 		 */
 		php_oci_connection_release(connection TSRMLS_CC);

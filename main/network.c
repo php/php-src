@@ -1126,17 +1126,19 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block TSRMLS_DC)
 {
 	int ret = SUCCESS;
-	int flags;
-	int myflag = 0;
 
 #ifdef PHP_WIN32
+	u_long flags;
+
 	/* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
 	flags = !block;
 	if (ioctlsocket(socketd, FIONBIO, &flags) == SOCKET_ERROR) {
 		ret = FAILURE;
 	}
 #else
-	flags = fcntl(socketd, F_GETFL);
+	int myflag = 0;
+	int flags = fcntl(socketd, F_GETFL);
+
 #ifdef O_NONBLOCK
 	myflag = O_NONBLOCK; /* POSIX version */
 #elif defined(O_NDELAY)

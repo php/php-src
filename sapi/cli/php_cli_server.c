@@ -259,7 +259,9 @@ static php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
 };
 
+#if HAVE_UNISTD_H
 static int php_cli_output_is_tty = OUTPUT_NOT_CHECKED;
+#endif
 
 static size_t php_cli_server_client_send_through(php_cli_server_client *client, const char *str, size_t str_len);
 static php_cli_server_chunk *php_cli_server_chunk_heap_new_self_contained(size_t len);
@@ -556,7 +558,7 @@ static void sapi_cli_server_flush(void *server_context TSRMLS_DC) /* {{{ */
 		return;
 	}
 
-	if (client->sock < 0) {
+	if (!ZEND_VALID_SOCKET(client->sock)) {
 		php_handle_aborted_connection();
 		return;
 	}
@@ -838,7 +840,6 @@ static int php_cli_server_poller_iter_on_active(php_cli_server_poller *poller, v
 		SOCKET fd;
 		int events;
 	} entries[FD_SETSIZE * 2];
-	php_socket_t fd = 0;
 	size_t i;
 	struct socket_entry *n = entries, *m;
 
@@ -1338,7 +1339,7 @@ out:
 		php_network_freeaddresses(sal);
 	}
 	if (err) {
-		if (retval >= 0) {
+		if (ZEND_VALID_SOCKET(retval)) {
 			closesocket(retval);
 		}
 		if (errstr) {
@@ -2186,7 +2187,7 @@ static void php_cli_server_dtor(php_cli_server *server TSRMLS_DC) /* {{{ */
 {
 	zend_hash_destroy(&server->clients);
 	zend_hash_destroy(&server->extension_mime_types);
-	if (server->server_sock >= 0) {
+	if (ZEND_VALID_SOCKET(server->server_sock)) {
 		closesocket(server->server_sock);
 	}
 	if (server->host) {
@@ -2407,7 +2408,7 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socke
 			return FAILURE;
 		}
 		client_sock = accept(server->server_sock, sa, &socklen);
-		if (client_sock < 0) {
+		if (!ZEND_VALID_SOCKET(client_sock)) {
 			char *errstr;
 			errstr = php_socket_strerror(php_socket_errno(), NULL, 0);
 			php_cli_server_logf("Failed to accept a client (reason: %s)" TSRMLS_CC, errstr);

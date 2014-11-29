@@ -110,7 +110,7 @@ typedef struct _php_output_context {
 #define PHP_OUTPUT_TSRMLS(ctx) TSRMLS_FETCH_FROM_CTX((ctx)->tsrm_ls)
 
 /* old-style, stateless callback */
-typedef void (*php_output_handler_func_t)(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC);
+typedef void (*php_output_handler_func_t)(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode TSRMLS_DC);
 /* new-style, opaque context callback */
 typedef int (*php_output_handler_context_func_t)(void **handler_context, php_output_context *output_context);
 /* output handler context dtor */
@@ -150,6 +150,8 @@ ZEND_BEGIN_MODULE_GLOBALS(output)
 	int output_start_lineno;
 	int flags;
 ZEND_END_MODULE_GLOBALS(output)
+
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(output);
 
 /* there should not be a need to use OG() from outside of output.c */
 #ifdef ZTS
@@ -206,8 +208,8 @@ PHPAPI void php_output_set_implicit_flush(int flush TSRMLS_DC);
 PHPAPI const char *php_output_get_start_filename(TSRMLS_D);
 PHPAPI int php_output_get_start_lineno(TSRMLS_D);
 
-PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC);
-PHPAPI int php_output_write(const char *str, size_t len TSRMLS_DC);
+PHPAPI size_t php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC);
+PHPAPI size_t php_output_write(const char *str, size_t len TSRMLS_DC);
 
 PHPAPI int php_output_flush(TSRMLS_D);
 PHPAPI void php_output_flush_all(TSRMLS_D);

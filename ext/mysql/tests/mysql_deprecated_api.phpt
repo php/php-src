@@ -13,7 +13,7 @@ error_reporting=E_ALL | E_NOTICE | E_STRICT
 /*
   We use an extra test to cover deprecation warning.
   Due to this extra test we can silence deprecation warnings
-  in have other test using @ operator without loosing the information
+  in have other test using @ operator without losing the information
   which function is deprecated and, without reducing test portability.
 */
 include "table.inc";

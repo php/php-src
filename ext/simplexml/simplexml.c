@@ -267,10 +267,8 @@ static zval *sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, z
 		name = NULL;
 	} else {
 		if (Z_TYPE_P(member) != IS_STRING) {
-			tmp_zv = *member;
-			zval_copy_ctor(&tmp_zv);
+			ZVAL_STR(&tmp_zv, zval_get_string(member));
 			member = &tmp_zv;
-			convert_to_string(member);
 		}
 		name = Z_STRVAL_P(member);
 	}
@@ -476,9 +474,7 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 		}
 	} else {
 		if (Z_TYPE_P(member) != IS_STRING) {
-			trim_zv = *member;
-			zval_copy_ctor(&trim_zv);
-			convert_to_string(&trim_zv);
+			ZVAL_STR(&trim_zv, zval_get_string(member));
 			php_trim(Z_STRVAL(trim_zv), Z_STRLEN(trim_zv), NULL, 0, &tmp_zv, 3 TSRMLS_CC);
 			zval_dtor(&trim_zv);
 			member = &tmp_zv;
@@ -736,10 +732,8 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 	zval            tmp_zv;
 
 	if (Z_TYPE_P(member) != IS_STRING && Z_TYPE_P(member) != IS_LONG) {
-		tmp_zv = *member;
-		zval_copy_ctor(&tmp_zv);
+		ZVAL_STR(&tmp_zv, zval_get_string(member));
 		member = &tmp_zv;
-		convert_to_string(member);
 	}
 
 	sxe = Z_SXEOBJ_P(object);
@@ -866,10 +860,8 @@ static void sxe_prop_dim_delete(zval *object, zval *member, zend_bool elements, 
 	int             test = 0;
 
 	if (Z_TYPE_P(member) != IS_STRING && Z_TYPE_P(member) != IS_LONG) {
-		tmp_zv = *member;
-		zval_copy_ctor(&tmp_zv);
+		ZVAL_STR(&tmp_zv, zval_get_string(member));
 		member = &tmp_zv;
-		convert_to_string(member);
 	}
 
 	sxe = Z_SXEOBJ_P(object);

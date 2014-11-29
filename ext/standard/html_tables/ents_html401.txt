@@ -1,4 +1,4 @@
-#039 0027 //artifical; there's no &apos; in HTML 4.01
+#039 0027 //artificial; there's no &apos; in HTML 4.01
 nbsp 00A0
 iexcl 00A1
 cent 00A2

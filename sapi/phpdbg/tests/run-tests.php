@@ -389,7 +389,7 @@ namespace phpdbg\testing {
 									} break;
 									
 									default: {
-										$this->$chunks[0] = $chunks[1];
+										$this->{$chunks[0]} = $chunks[1];
 									}	
 								}
 							} else switch(substr($trim, 1, 1)) {

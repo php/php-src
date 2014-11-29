@@ -532,12 +532,19 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 		    (dst_num < op_array->try_catch_array[i].try_op ||
 		     dst_num > op_array->try_catch_array[i].finally_end)) {
 			/* we have a jump out of try block that needs executing finally */
+			uint32_t fast_call_var;
+			
+			/* Must be ZEND_FAST_RET */
+			ZEND_ASSERT(op_array->opcodes[op_array->try_catch_array[i].finally_end].opcode == ZEND_FAST_RET);
+			fast_call_var = op_array->opcodes[op_array->try_catch_array[i].finally_end].op1.var;
 
 			/* generate a FAST_CALL to finally block */
 		    start_op = get_next_op_number(op_array);
 
 			opline = get_next_op(op_array TSRMLS_CC);
 			opline->opcode = ZEND_FAST_CALL;
+			opline->result_type = IS_TMP_VAR;
+			opline->result.var = fast_call_var;
 			SET_UNUSED(opline->op1);
 			SET_UNUSED(opline->op2);
 			zend_adjust_fast_call(op_array, start_op,
@@ -550,6 +557,8 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 				/* generate a FAST_CALL to hole CALL_FROM_FINALLY */
 				opline = get_next_op(op_array TSRMLS_CC);
 				opline->opcode = ZEND_FAST_CALL;
+				opline->result_type = IS_TMP_VAR;
+				opline->result.var = fast_call_var;
 				SET_UNUSED(opline->op1);
 				SET_UNUSED(opline->op2);
 				zend_resolve_fast_call(op_array, start_op + 1, op_array->try_catch_array[i].finally_op - 2 TSRMLS_CC);
@@ -569,6 +578,8 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 
 					opline = get_next_op(op_array TSRMLS_CC);
 					opline->opcode = ZEND_FAST_CALL;
+					opline->result_type = IS_TMP_VAR;
+					opline->result.var = fast_call_var;
 					SET_UNUSED(opline->op1);
 					SET_UNUSED(opline->op2);
 					opline->op1.opline_num = op_array->try_catch_array[i].finally_op;
@@ -708,20 +719,20 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 		if (opline->op1_type == IS_CONST) {
 			opline->op1.zv = &op_array->literals[opline->op1.constant];
 		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op1.var = (uint32_t)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->op1.var);
+			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op1.var);
 		}
 		if (opline->op2_type == IS_CONST) {
 			opline->op2.zv = &op_array->literals[opline->op2.constant];
 		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op2.var = (uint32_t)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->op2.var);
+			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op2.var);
 		}
 		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->result.var = (uint32_t)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->result.var);
+			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->result.var);
 		}
 		switch (opline->opcode) {
 			case ZEND_DECLARE_INHERITED_CLASS:
 			case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
-				opline->extended_value = (uint32_t)(zend_intptr_t)EX_VAR_NUM_2(NULL, op_array->last_var + opline->extended_value);
+				opline->extended_value = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->extended_value);
 				break;
 			case ZEND_GOTO:
 				if (Z_TYPE_P(opline->op2.zv) != IS_LONG) {

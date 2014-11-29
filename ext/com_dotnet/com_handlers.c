@@ -101,7 +101,7 @@ static zval *com_read_dimension(zval *object, zval *offset, int type, zval *rv T
 		convert_to_long(offset);
 
 		if (SafeArrayGetDim(V_ARRAY(&obj->v)) == 1) {	
-			if (php_com_safearray_get_elem(&obj->v, &v, Z_LVAL_P(offset) TSRMLS_CC)) {
+			if (php_com_safearray_get_elem(&obj->v, &v, (LONG)Z_LVAL_P(offset) TSRMLS_CC)) {
 				php_com_wrap_variant(rv, &v, obj->code_page TSRMLS_CC);
 				VariantClear(&v);
 			}
@@ -145,7 +145,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 			}
 
 			convert_to_long(offset);
-			indices = Z_LVAL_P(offset);
+			indices = (LONG)Z_LVAL_P(offset);
 
 			VariantInit(&v);
 			php_com_variant_from_zval(&v, value, obj->code_page TSRMLS_CC);

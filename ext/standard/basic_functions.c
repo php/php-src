@@ -549,12 +549,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_multisort, 0, 0, 1)
 	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arr1) /* ARRAY_INFO(0, arg1, 0) */
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_ASC_or_SORT_DESC)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_REGULAR_or_SORT_NUMERIC_or_SORT_STRING)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, arr2)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_ASC_or_SORT_DESC)
-	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, SORT_REGULAR_or_SORT_NUMERIC_or_SORT_STRING)
-	ZEND_ARG_VARIADIC_INFO(ZEND_SEND_PREFER_REF, more_array_and_sort_options)
+	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, sort_order)
+	ZEND_ARG_INFO(ZEND_SEND_PREFER_REF, sort_flags)
+	ZEND_ARG_VARIADIC_INFO(ZEND_SEND_PREFER_REF, arr2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_rand, 0, 0, 1)
@@ -3952,7 +3949,7 @@ PHP_FUNCTION(long2ip)
 	/* "It's a long but it's not, PHP ints are signed */
 	char *ip;
 	size_t ip_len;
-	zend_ulong n;
+	uint32_t n;
 	struct in_addr myaddr;
 #ifdef HAVE_INET_PTON
 	char str[40];
@@ -4076,7 +4073,7 @@ PHP_FUNCTION(putenv)
 #endif
 	}
 
-	pe.key_len = strlen(pe.key);
+	pe.key_len = (int)strlen(pe.key);
 #ifdef PHP_WIN32
 	if (equals) {
 		if (pe.key_len < setting_len - 1) {
@@ -4114,13 +4111,17 @@ PHP_FUNCTION(putenv)
 	if (putenv(pe.putenv_string) == 0) { /* success */
 # else
 	error_code = SetEnvironmentVariable(pe.key, value);
-#  if _MSC_VER < 1500
-	/* Yet another VC6 bug, unset may return env not found */
-	if (error_code != 0 || 
-		(error_code == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)) {
-#  else
-	if (error_code != 0) { /* success */
-#  endif
+
+	if (error_code != 0
+# ifndef ZTS
+	/* We need both SetEnvironmentVariable and _putenv here as some
+		dependency lib could use either way to read the environment.
+		Obviously the CRT version will be useful more often. But
+		generally, doing both brings us on the safe track at least
+		in NTS build. */
+	&& _putenv(pe.putenv_string) == 0
+# endif
+	) { /* success */
 # endif
 #endif
 		zend_hash_str_add_mem(&BG(putenv_ht), pe.key, pe.key_len, &pe, sizeof(putenv_entry));
@@ -4289,7 +4290,7 @@ PHP_FUNCTION(getopt)
 
 			opts->need_param = 0;
 			opts->opt_name = estrdup(arg_str->val);
-			len = strlen(opts->opt_name);
+			len = (int)strlen(opts->opt_name);
 			if ((len > 0) && (opts->opt_name[len - 1] == ':')) {
 				opts->need_param++;
 				opts->opt_name[len - 1] = '\0';
@@ -4345,7 +4346,7 @@ PHP_FUNCTION(getopt)
 		}
 
 		/* Add this option / argument pair to the result hash. */
-		optname_len = strlen(optname);
+		optname_len = (int)strlen(optname);
 		if (!(optname_len > 1 && optname[0] == '0') && is_numeric_string(optname, optname_len, NULL, NULL, NULL, 0) == IS_LONG) {
 			/* numeric string */
 			int optname_int = atoi(optname);
@@ -4400,9 +4401,9 @@ PHP_FUNCTION(sleep)
 		RETURN_FALSE;
 	}
 #ifdef PHP_SLEEP_NON_VOID
-	RETURN_LONG(php_sleep(num));
+	RETURN_LONG(php_sleep((unsigned int)num));
 #else
-	php_sleep(num);
+	php_sleep((unsigned int)num);
 #endif
 
 }
@@ -4422,7 +4423,7 @@ PHP_FUNCTION(usleep)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of microseconds must be greater than or equal to 0");
 		RETURN_FALSE;
 	}
-	usleep(num);
+	usleep((unsigned int)num);
 #endif
 }
 /* }}} */
@@ -4449,7 +4450,7 @@ PHP_FUNCTION(time_nanosleep)
 	}
 
 	php_req.tv_sec = (time_t) tv_sec;
-	php_req.tv_nsec = tv_nsec;
+	php_req.tv_nsec = (long)tv_nsec;
 	if (!nanosleep(&php_req, &php_rem)) {
 		RETURN_TRUE;
 	} else if (errno == EINTR) {
@@ -4554,7 +4555,7 @@ PHP_FUNCTION(get_cfg_var)
 		return;
 	}
 
-	retval = cfg_get_entry(varname, varname_len);
+	retval = cfg_get_entry(varname, (uint)varname_len);
 
 	if (retval) {
 		if (Z_TYPE_P(retval) == IS_ARRAY) {
@@ -4637,7 +4638,7 @@ PHP_FUNCTION(error_log)
 	}
 
 	if (argc > 1) {
-		opt_err = erropt;
+		opt_err = (int)erropt;
 	}
 
 	if (_php_error_log_ex(opt_err, message, message_len, opt, headers TSRMLS_CC) == FAILURE) {
@@ -4655,7 +4656,7 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers T
 }
 /* }}} */
 
-PHPAPI int _php_error_log_ex(int opt_err, char *message, int message_len, char *opt, char *headers TSRMLS_DC) /* {{{ */
+PHPAPI int _php_error_log_ex(int opt_err, char *message, size_t message_len, char *opt, char *headers TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream = NULL;
 
@@ -4962,7 +4963,7 @@ static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_
 }
 /* }}} */
 
-void php_call_shutdown_functions(TSRMLS_D) /* {{{ */
+PHPAPI void php_call_shutdown_functions(TSRMLS_D) /* {{{ */
 {
 	if (BG(user_shutdown_function_names)) {
 		zend_try {
@@ -4974,7 +4975,7 @@ void php_call_shutdown_functions(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-void php_free_shutdown_functions(TSRMLS_D) /* {{{ */
+PHPAPI void php_free_shutdown_functions(TSRMLS_D) /* {{{ */
 {
 	if (BG(user_shutdown_function_names))
 		zend_try {
@@ -5212,7 +5213,7 @@ PHP_FUNCTION(ini_get)
 		return;
 	}
 
-	str = zend_ini_string(varname, varname_len, 0);
+	str = zend_ini_string(varname, (uint)varname_len, 0);
 
 	if (!str) {
 		RETURN_FALSE;
@@ -5322,7 +5323,7 @@ PHP_FUNCTION(ini_set)
 		return;
 	}
 
-	old_value = zend_ini_string(varname->val, varname->len, 0);
+	old_value = zend_ini_string(varname->val, (int)varname->len, 0);
 
 	/* copy to return here, because alter might free it! */
 	if (old_value) {
@@ -5331,7 +5332,7 @@ PHP_FUNCTION(ini_set)
 		RETVAL_FALSE;
 	}
 
-#define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, var_len, ini, sizeof(ini))
+#define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, (int)var_len, ini, sizeof(ini))
 	/* open basedir check */
 	if (PG(open_basedir)) {
 		if (_CHECK_PATH(varname->val, varname->len, "error_log") ||
@@ -5592,7 +5593,7 @@ PHP_FUNCTION(getprotobynumber)
 		return;
 	}
 
-	ent = getprotobynumber(proto);
+	ent = getprotobynumber((int)proto);
 
 	if (ent == NULL) {
 		RETURN_FALSE;
@@ -5790,7 +5791,7 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			}
 
 			if (!(Z_STRLEN_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, NULL, 0) == IS_LONG) {
-				zend_ulong key = (zend_ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
+				zend_ulong key = (zend_ulong) zend_atol(Z_STRVAL_P(arg1), (int)Z_STRLEN_P(arg1));
 				if ((find_hash = zend_hash_index_find(Z_ARRVAL_P(arr), key)) == NULL) {
 					array_init(&hash);
 					find_hash = zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash);
@@ -5878,7 +5879,7 @@ PHP_FUNCTION(parse_ini_file)
 	fh.type = ZEND_HANDLE_FILENAME;
 
 	array_init(return_value);
-	if (zend_parse_ini_file(&fh, 0, scanner_mode, ini_parser_cb, return_value TSRMLS_CC) == FAILURE) {
+	if (zend_parse_ini_file(&fh, 0, (int)scanner_mode, ini_parser_cb, return_value TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -5917,7 +5918,7 @@ PHP_FUNCTION(parse_ini_string)
 	memset(string + str_len, 0, ZEND_MMAP_AHEAD);
 
 	array_init(return_value);
-	if (zend_parse_ini_string(string, 0, scanner_mode, ini_parser_cb, return_value TSRMLS_CC) == FAILURE) {
+	if (zend_parse_ini_string(string, 0, (int)scanner_mode, ini_parser_cb, return_value TSRMLS_CC) == FAILURE) {
 		zval_dtor(return_value);
 		RETVAL_FALSE;
 	}

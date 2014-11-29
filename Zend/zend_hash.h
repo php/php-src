@@ -32,6 +32,7 @@
 #define HASH_ADD				(1<<1)
 #define HASH_UPDATE_INDIRECT	(1<<2)
 #define HASH_ADD_NEW			(1<<3)
+#define HASH_ADD_NEXT			(1<<4)
 
 #define INVALID_IDX ((uint32_t) -1)
 
@@ -170,9 +171,10 @@ ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *p
 ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
 
 typedef struct _HashPointer {
-	HashPosition pos;
-	HashTable *ht;
-	zend_ulong h;
+	HashPosition  pos;
+	HashTable    *ht;
+	zend_ulong    h;
+	zend_string  *key;
 } HashPointer;
 
 #define zend_hash_has_more_elements(ht) \
@@ -214,6 +216,8 @@ ZEND_API zval *zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint
 ZEND_API int zend_hash_rehash(HashTable *ht);
 
 ZEND_API void zend_array_dup(HashTable *target, HashTable *source);
+ZEND_API void zend_array_destroy(HashTable *ht TSRMLS_DC);
+ZEND_API void zend_symtable_clean(HashTable *ht TSRMLS_DC);
 
 #if ZEND_DEBUG
 /* debug */
@@ -537,6 +541,19 @@ static zend_always_inline void *zend_hash_index_update_ptr(HashTable *ht, zend_u
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
+static zend_always_inline void *zend_hash_index_add_mem(HashTable *ht, zend_ulong h, void *pData, size_t size)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, NULL);
+	if ((zv = zend_hash_index_add(ht, h, &tmp))) {
+		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+		memcpy(Z_PTR_P(zv), pData, size);
+		return Z_PTR_P(zv);
+	}
+	return NULL;
+}
+
 static zend_always_inline void *zend_hash_next_index_insert_ptr(HashTable *ht, void *pData)
 {
 	zval tmp, *zv;
@@ -693,6 +710,11 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	_h = _p->h; \
 	_key = _p->key; \
 	_val = _z;
+
+#define ZEND_HASH_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
+	ZEND_HASH_FOREACH(ht, 0); \
+	_h = _p->h; \
+	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \

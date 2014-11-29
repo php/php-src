@@ -55,7 +55,6 @@
 
 #define INC_OUTPUTPOS(a,b) \
 	if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) { \
-		efree(argv);	\
 		efree(formatcodes);	\
 		efree(formatargs);	\
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow in format string", code); \
@@ -210,7 +209,6 @@ PHP_FUNCTION(pack)
 			case 'J':
 			case 'P':
 #if SIZEOF_ZEND_LONG < 8
-					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
@@ -562,7 +560,7 @@ PHP_FUNCTION(unpack)
 {
 	char *format, *input;
 	zend_string *formatarg, *inputarg;
-	size_t formatlen, inputpos, inputlen;
+	zend_long formatlen, inputpos, inputlen;
 	int i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &formatarg, 
@@ -719,7 +717,7 @@ PHP_FUNCTION(unpack)
 				inputpos = 0;
 			}
 
-			if ((size >=0 && (inputpos + size) <= inputlen) || (size < 0 && -size <= (inputlen - inputpos))) {
+			if ((inputpos + size) <= inputlen) {
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
@@ -914,7 +912,7 @@ PHP_FUNCTION(unpack)
 					case 'P': {
 						int issigned = 0;
 						int *map = machine_endian_longlong_map;
-						long v = 0;
+						zend_long v = 0;
 
 						if (type == 'q' || type == 'Q') {
 							issigned = input[inputpos + (machine_little_endian ? 7 : 0)] & 0x80;
@@ -929,9 +927,9 @@ PHP_FUNCTION(unpack)
 						v = php_unpack(&input[inputpos], 8, issigned, map);
 
 						if (type == 'q') {
-							v = (signed long int) v;
+							v = (zend_long) v;
 						} else {
-							v = (unsigned long int) v;
+							v = (zend_ulong) v;
 						}
 
 						add_assoc_long(return_value, n, v);

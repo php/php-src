@@ -25,6 +25,9 @@
 union _zend_function;
 struct _zend_property_info;
 
+#define ZEND_WRONG_PROPERTY_INFO \
+	((struct _zend_property_info*)((zend_intptr_t)-1))
+
 /* The following rule applies to read_property() and read_dimension() implementations:
    If you return a zval which is not otherwise referenced by the extension or the engine's
    symbol table, its reference count should be 0.

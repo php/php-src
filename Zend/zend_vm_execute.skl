@@ -34,7 +34,7 @@ ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array, zval *return_value
 		return;
 	}
 
-	execute_data = zend_vm_stack_push_call_frame(VM_FRAME_TOP_CODE,
+	execute_data = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_CODE,
 		(zend_function*)op_array, 0, EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL, EG(current_execute_data) ? Z_OBJ(EG(current_execute_data)->This) : NULL, NULL TSRMLS_CC);
 	if (EG(current_execute_data)) {
 		execute_data->symbol_table = zend_rebuild_symbol_table(TSRMLS_C);

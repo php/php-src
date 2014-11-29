@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -25,7 +25,7 @@
 #include "phpdbg_cmd.h"
 
 #ifdef _WIN32
-# include "phpdbg_win.h"
+#	include "phpdbg_win.h"
 #endif
 
 #define PHPDBG_WATCH(name) PHPDBG_COMMAND(watch_##name)
@@ -37,46 +37,48 @@ PHPDBG_WATCH(array);
 PHPDBG_WATCH(delete);
 PHPDBG_WATCH(recursive);
 
-/**
- * Commands
- */
-
-static const phpdbg_command_t phpdbg_watch_commands[] = {
-	PHPDBG_COMMAND_D_EX(array,      "create watchpoint on an array", 'a', watch_array,     NULL, "s"),
-	PHPDBG_COMMAND_D_EX(delete,     "delete watchpoint",             'd', watch_delete,    NULL, "s"),
-	PHPDBG_COMMAND_D_EX(recursive,  "create recursive watchpoints",  'r', watch_recursive, NULL, "s"),
-	PHPDBG_END_COMMAND
-};
+extern const phpdbg_command_t phpdbg_watch_commands[];
 
 /* Watchpoint functions/typedefs */
 
 typedef enum {
 	WATCH_ON_ZVAL,
 	WATCH_ON_HASHTABLE,
+	WATCH_ON_REFCOUNTED,
 } phpdbg_watchtype;
 
 
-#define PHPDBG_WATCH_SIMPLE	0x0
-#define PHPDBG_WATCH_RECURSIVE	0x1
+#define PHPDBG_WATCH_SIMPLE     0x0
+#define PHPDBG_WATCH_RECURSIVE  0x1
+#define PHPDBG_WATCH_ARRAY      0x2
+#define PHPDBG_WATCH_OBJECT     0x4
 
 typedef struct _phpdbg_watchpoint_t phpdbg_watchpoint_t;
 
 struct _phpdbg_watchpoint_t {
+	union {
+		zval *zv;
+		HashTable *ht;
+		zend_refcounted *ref;
+		void *ptr;
+	} addr;
+	size_t size;
+	phpdbg_watchtype type;
+	char flags;
 	phpdbg_watchpoint_t *parent;
 	HashTable *parent_container;
 	char *name_in_parent;
 	size_t name_in_parent_len;
 	char *str;
 	size_t str_len;
-	union {
-		zval *zv;
-		HashTable *ht;
-		void *ptr;
-	} addr;
-	size_t size;
-	phpdbg_watchtype type;
-	char flags;
 };
+
+typedef struct {
+	phpdbg_watchpoint_t watch;
+	unsigned int num;
+	unsigned int refs;
+	HashTable watches;
+} phpdbg_watch_collision;
 
 void phpdbg_setup_watchpoints(TSRMLS_D);
 
@@ -102,11 +104,11 @@ void phpdbg_watch_efree(void *ptr);
 static long phpdbg_pagesize;
 
 static zend_always_inline void *phpdbg_get_page_boundary(void *addr) {
-	return (void *)((size_t)addr & ~(phpdbg_pagesize - 1));
+	return (void *) ((size_t) addr & ~(phpdbg_pagesize - 1));
 }
 
 static zend_always_inline size_t phpdbg_get_total_page_size(void *addr, size_t size) {
-	return (size_t)phpdbg_get_page_boundary((void *)((size_t)addr + size - 1)) - (size_t)phpdbg_get_page_boundary(addr) + phpdbg_pagesize;
+	return (size_t) phpdbg_get_page_boundary((void *) ((size_t) addr + size - 1)) - (size_t) phpdbg_get_page_boundary(addr) + phpdbg_pagesize;
 }
 
 #endif

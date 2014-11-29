@@ -386,7 +386,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 					if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "level", sizeof("level") - 1))) {
 						ZVAL_COPY_VALUE(&tmp, tmpzval);
 
-						/* Psuedo pass through to catch level validating code */
+						/* Pseudo pass through to catch level validating code */
 						goto factory_setlevel;
 					}
 					break;

@@ -2016,7 +2016,7 @@ static PHP_METHOD(PDOStatement, setFetchMode)
 /* }}} */
 
 /* {{{ proto bool PDOStatement::nextRowset()
-   Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeded, false otherwise */
+   Advances to the next rowset in a multi-rowset statement handle. Returns true if it succeeded, false otherwise */
 
 static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 {
@@ -2486,12 +2486,18 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 	pdo_stmt_t *stmt = row->stmt;
 	int colno = -1;
 	zval zobj;
+	zend_long lval;
 
 	ZVAL_NULL(rv);
 	if (stmt) {
 		if (Z_TYPE_P(member) == IS_LONG) {
 			if (Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count) {
 				fetch_value(stmt, rv, Z_LVAL_P(member), NULL TSRMLS_CC);
+			}
+		} else if (Z_TYPE_P(member) == IS_STRING
+			   && is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0, NULL) == IS_LONG)	{
+			if (lval >= 0 && lval < stmt->column_count) {
+				fetch_value(stmt, rv, lval, NULL TSRMLS_CC);
 			}
 		} else {
 			convert_to_string(member);
@@ -2541,19 +2547,24 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, void **c
 	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
 	pdo_stmt_t *stmt = row->stmt;
 	int colno = -1;
+	zend_long lval;
 
 	if (stmt) {
 		if (Z_TYPE_P(member) == IS_LONG) {
 			return Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count;
+		} else if (Z_TYPE_P(member) == IS_STRING) {
+			if (is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0, NULL) == IS_LONG)	{
+				return lval >=0 && lval < stmt->column_count;
+			}
 		} else {
 			convert_to_string(member);
+		}
 
-			/* TODO: replace this with a hash of available column names to column
-			 * numbers */
-			for (colno = 0; colno < stmt->column_count; colno++) {
-				if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
-					return 1;
-				}
+		/* TODO: replace this with a hash of available column names to column
+		 * numbers */
+		for (colno = 0; colno < stmt->column_count; colno++) {
+			if (strcmp(stmt->columns[colno].name, Z_STRVAL_P(member)) == 0) {
+				return 1;
 			}
 		}
 	}

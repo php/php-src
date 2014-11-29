@@ -281,7 +281,7 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode TSRML
 		return FAILURE;
 	}
 
-	yy_scan_buffer(buf, size TSRMLS_CC);
+	yy_scan_buffer(buf, (unsigned int)size TSRMLS_CC);
 
 	return SUCCESS;
 }
@@ -291,7 +291,7 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode TSRML
 */
 int zend_ini_prepare_string_for_scanning(char *str, int scanner_mode TSRMLS_DC)
 {
-	int len = strlen(str);
+	int len = (int)strlen(str);
 
 	if (init_ini_scanner(scanner_mode, NULL TSRMLS_CC) == FAILURE) {
 		return FAILURE;

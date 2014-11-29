@@ -174,7 +174,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 		}
 
 		if (stmt) {
-			/* always propogate the error code back up to the dbh,
+			/* always propagate the error code back up to the dbh,
 			 * so that we can catch the error information when execute
 			 * is called via query.  See Bug #33707 */
 			if (H->einfo.errmsg) {

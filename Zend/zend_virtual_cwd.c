@@ -347,7 +347,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		/* File is a reparse point. Get the target */
 		HANDLE hLink = NULL;
 		REPARSE_DATA_BUFFER * pbuffer;
-		unsigned int retlength = 0;
+		DWORD retlength = 0;
 
 		hLink = CreateFile(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
 		if(hLink == INVALID_HANDLE_VALUE) {
@@ -380,7 +380,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 	}
 
 	if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-		int len = strlen(path);
+		size_t len = strlen(path);
 
 		if (path[len-4] == '.') {
 			if (_memicmp(path+len-3, "exe", 3) == 0 ||
@@ -467,7 +467,7 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 		cwd[0] = '\0';
 	}
 
-	main_cwd_state.cwd_length = strlen(cwd);
+	main_cwd_state.cwd_length = (int)strlen(cwd);
 #ifdef TSRM_WIN32
 	if (main_cwd_state.cwd_length >= 2 && cwd[1] == ':') {
 		cwd[0] = toupper(cwd[0]);
@@ -898,7 +898,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			/* File is a reparse point. Get the target */
 			HANDLE hLink = NULL;
 			REPARSE_DATA_BUFFER * pbuffer;
-			unsigned int retlength = 0;
+			DWORD retlength = 0;
 			int bufindex = 0, isabsolute = 0;
 			wchar_t * reparsetarget;
 			BOOL isVolume = FALSE;
@@ -1146,7 +1146,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				return -1;
 			}
 			if (save) {
-				i = strlen(data.cFileName);
+				i = (int)strlen(data.cFileName);
 				memcpy(path+j, data.cFileName, i+1);
 				j += i;
 			} else {
@@ -1180,7 +1180,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 /* returns 0 for ok, 1 for error */
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath TSRMLS_DC) /* {{{ */
 {
-	int path_length = strlen(path);
+	int path_length = (int)strlen(path);
 	char resolved_path[MAXPATHLEN];
 	int start = 1;
 	int ll = 0;
@@ -1394,7 +1394,7 @@ CWD_API int virtual_chdir(const char *path TSRMLS_DC) /* {{{ */
 
 CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path TSRMLS_DC) TSRMLS_DC) /* {{{ */
 {
-	int length = strlen(path);
+	int length = (int)strlen(path);
 	char *temp;
 	int retval;
 	ALLOCA_FLAG(use_heap)
@@ -1540,55 +1540,6 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC) /* {{{ */
 /* }}} */
 
 #if HAVE_UTIME
-#ifdef TSRM_WIN32
-static void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
-{
-	// Note that LONGLONG is a 64-bit value
-	LONGLONG ll;
-
-	ll = Int32x32To64(t, 10000000) + 116444736000000000;
-	pft->dwLowDateTime = (DWORD)ll;
-	pft->dwHighDateTime = ll >> 32;
-}
-/* }}} */
-
-TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
-{
-	FILETIME mtime, atime;
-	HANDLE hFile;
-
-	hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
-				 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-
-	/* OPEN_ALWAYS mode sets the last error to ERROR_ALREADY_EXISTS but
-	   the CreateFile operation succeeds */
-	if (GetLastError() == ERROR_ALREADY_EXISTS) {
-		SetLastError(0);
-	}
-
-	if ( hFile == INVALID_HANDLE_VALUE ) {
-		return -1;
-	}
-
-	if (!buf) {
-		SYSTEMTIME st;
-		GetSystemTime(&st);
-		SystemTimeToFileTime(&st, &mtime);
-		atime = mtime;
-	} else {
-		UnixTimeToFileTime(buf->modtime, &mtime);
-		UnixTimeToFileTime(buf->actime, &atime);
-	}
-	if (!SetFileTime(hFile, NULL, &atime, &mtime)) {
-		CloseHandle(hFile);
-		return -1;
-	}
-	CloseHandle(hFile);
-	return 1;
-}
-/* }}} */
-#endif
-
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
@@ -1972,7 +1923,7 @@ CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC) /* {{{ 
 	} else if (!IS_ABSOLUTE_PATH(path, strlen(path)) &&
 					VCWD_GETCWD(cwd, MAXPATHLEN)) {
 		new_state.cwd = estrdup(cwd);
-		new_state.cwd_length = strlen(cwd);
+		new_state.cwd_length = (int)strlen(cwd);
 	} else {
 		new_state.cwd = (char*)emalloc(1);
 		if (new_state.cwd == NULL) {

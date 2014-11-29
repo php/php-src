@@ -61,7 +61,7 @@ PHPAPI void php_url_free(php_url *theurl)
 
 /* {{{ php_replace_controlchars
  */
-PHPAPI char *php_replace_controlchars_ex(char *str, int len)
+PHPAPI char *php_replace_controlchars_ex(char *str, size_t len)
 {
 	unsigned char *s = (unsigned char *)str;
 	unsigned char *e = (unsigned char *)str + len;
@@ -94,7 +94,7 @@ PHPAPI php_url *php_url_parse(char const *str)
 
 /* {{{ php_url_parse
  */
-PHPAPI php_url *php_url_parse_ex(char const *str, int length)
+PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 {
 	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
@@ -481,7 +481,7 @@ static unsigned char hexchars[] = "0123456789ABCDEF";
 
 /* {{{ php_url_encode
  */
-PHPAPI zend_string *php_url_encode(char const *s, int len)
+PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 {
 	register unsigned char c;
 	unsigned char *to;
@@ -572,7 +572,7 @@ PHP_FUNCTION(urldecode)
 
 /* {{{ php_url_decode
  */
-PHPAPI int php_url_decode(char *str, int len)
+PHPAPI size_t php_url_decode(char *str, size_t len)
 {
 	char *dest = str;
 	char *data = str;
@@ -603,7 +603,7 @@ PHPAPI int php_url_decode(char *str, int len)
 
 /* {{{ php_raw_url_encode
  */
-PHPAPI zend_string *php_raw_url_encode(char const *s, int len)
+PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 {
 	register int x, y;
 	zend_string *str;
@@ -679,7 +679,7 @@ PHP_FUNCTION(rawurldecode)
 
 /* {{{ php_raw_url_decode
  */
-PHPAPI int php_raw_url_decode(char *str, int len)
+PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 {
 	char *dest = str;
 	char *data = str;

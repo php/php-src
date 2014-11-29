@@ -69,8 +69,8 @@ typedef struct ftpbuf
 	ftptype_t	type;			/* current transfer type */
 	int		pasv;			/* 0=off; 1=pasv; 2=ready */
 	php_sockaddr_storage	pasvaddr;	/* passive mode address */
-	zend_long	timeout_sec;	/* User configureable timeout (seconds) */
-	int			autoseek;	/* User configureable autoseek flag */
+	zend_long	timeout_sec;	/* User configurable timeout (seconds) */
+	int			autoseek;	/* User configurable autoseek flag */
 
 	int				nb;		/* "nonblocking" transfer in progress */
 	databuf_t		*data;	/* Data connection for "nonblocking" transfers */

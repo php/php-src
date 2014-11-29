@@ -30,7 +30,7 @@
  *         performed using mmap(). The result is aligned on 2M boundary.
  *
  * Large - a number of 4096K pages inside a CHUNK. Large blocks
- *         are always alligned on page boundary.
+ *         are always aligned on page boundary.
  *
  * Small - less than 3/4 of page size. Small sizes are rounded up to nearest
  *         greater predefined small size (there are 30 predefined sizes:
@@ -272,7 +272,7 @@ struct _zend_mm_page {
 };
 
 /*
- * bin - is one or few continuous pages (up to 8) used for alocation of
+ * bin - is one or few continuous pages (up to 8) used for allocation of
  * a particular "small size".
  */
 struct _zend_mm_bin {
@@ -395,10 +395,10 @@ stderr_last_error(char *msg)
 			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			(LPSTR)&buf,
 		0, NULL)) {
-		fprintf(stderr, "\n%s: [0x%08x]\n", msg, err);
+		fprintf(stderr, "\n%s: [0x%08lx]\n", msg, err);
 	}
 	else {
-		fprintf(stderr, "\n%s: [0x%08x] %s\n", msg, err, buf);
+		fprintf(stderr, "\n%s: [0x%08lx] %s\n", msg, err, buf);
 	}
 }
 #endif
@@ -482,7 +482,11 @@ static void zend_mm_munmap(void *addr, size_t size)
 static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 {
 #if defined(__GNUC__)
+# if SIZEOF_ZEND_LONG == SIZEOF_LONG
 	return __builtin_ctzl(~bitset);
+# else
+	return __builtin_ctzll(~bitset);
+# endif
 #elif defined(_WIN32)
 	unsigned long index;
 
@@ -519,7 +523,11 @@ static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 static zend_always_inline int zend_mm_bitset_ntz(zend_mm_bitset bitset)
 {
 #if defined(__GNUC__)
+# if SIZEOF_ZEND_LONG == SIZEOF_LONG
 	return __builtin_ctzl(bitset);
+# else
+	return __builtin_ctzll(bitset);
+# endif
 #elif defined(_WIN32)
 	unsigned long index;
 
@@ -962,9 +970,9 @@ not_found:
 				if (heap->real_size + ZEND_MM_CHUNK_SIZE > heap->limit) {
 					if (heap->overflow == 0) {
 #if ZEND_DEBUG
-						zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+						zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-						zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, ZEND_MM_PAGE_SIZE * pages_count);
+						zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)", heap->limit, ZEND_MM_PAGE_SIZE * pages_count);
 #endif
 						return NULL;
 					}
@@ -976,9 +984,9 @@ not_found:
 #if !ZEND_MM_LIMIT
 					zend_mm_safe_error(heap, "Out of memory");
 #elif ZEND_DEBUG
-					zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %lu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
+					zend_mm_safe_error(heap, "Out of memory (allocated %zu) at %s:%d (tried to allocate %zu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
 #else
-					zend_mm_safe_error(heap, "Out of memory (allocated %ld) (tried to allocate %lu bytes)", heap->real_size, ZEND_MM_PAGE_SIZE * pages_count);
+					zend_mm_safe_error(heap, "Out of memory (allocated %zu) (tried to allocate %zu bytes)", heap->real_size, ZEND_MM_PAGE_SIZE * pages_count);
 #endif
 					return NULL;
 				}
@@ -1020,7 +1028,7 @@ found:
 
 static zend_always_inline void *zend_mm_alloc_large(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	int pages_count = ZEND_MM_SIZE_TO_NUM(size, ZEND_MM_PAGE_SIZE);
+	int pages_count = (int)ZEND_MM_SIZE_TO_NUM(size, ZEND_MM_PAGE_SIZE);
 #if ZEND_DEBUG
 	void *ptr = zend_mm_alloc_pages(heap, pages_count, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 #else
@@ -1253,7 +1261,7 @@ static zend_always_inline zend_mm_debug_info *zend_mm_get_debug_info(zend_mm_hea
 
 	ZEND_MM_CHECK(page_offset != 0, "zend_mm_heap corrupted");
 	chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE);
-	page_num = page_offset / ZEND_MM_PAGE_SIZE;
+	page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 	info = chunk->map[page_num];
 	ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
 	if (EXPECTED(info & ZEND_MM_IS_SRUN)) {
@@ -1318,7 +1326,7 @@ static zend_always_inline void zend_mm_free_heap(zend_mm_heap *heap, void *ptr Z
 		}
 	} else {
 		zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE);
-		int page_num = page_offset / ZEND_MM_PAGE_SIZE;
+		int page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 		zend_mm_page_info info = chunk->map[page_num];
 
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
@@ -1349,7 +1357,7 @@ static size_t zend_mm_size(zend_mm_heap *heap, void *ptr ZEND_FILE_LINE_DC ZEND_
 		zend_mm_page_info info;
 
 		chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE);
-		page_num = page_offset / ZEND_MM_PAGE_SIZE;
+		page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 		info = chunk->map[page_num];
 		ZEND_MM_CHECK(chunk->heap == heap, "zend_mm_heap corrupted");
 		if (EXPECTED(info & ZEND_MM_IS_SRUN)) {
@@ -1415,9 +1423,9 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size ZEN
 				if (heap->real_size + (new_size - old_size) > heap->limit) {
 					if (heap->overflow == 0) {
 #if ZEND_DEBUG
-						zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted at %s:%d (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+						zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-						zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted (tried to allocate " ZEND_ULONG_FMT " bytes)", heap->limit, size);
+						zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)", heap->limit, size);
 #endif
 						return NULL;
 					}
@@ -1443,7 +1451,7 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size ZEN
 		}
 	} else {
 		zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE);
-		int page_num = page_offset / ZEND_MM_PAGE_SIZE;
+		int page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 		zend_mm_page_info info = chunk->map[page_num];
 #if ZEND_DEBUG
 		size_t real_size = size;
@@ -1486,8 +1494,8 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size ZEN
 					return ptr;
 				} else if (new_size < old_size) {
 					/* free tail pages */
-					int new_pages_count = new_size / ZEND_MM_PAGE_SIZE;
-					int rest_pages_count = (old_size - new_size) / ZEND_MM_PAGE_SIZE;
+					int new_pages_count = (int)(new_size / ZEND_MM_PAGE_SIZE);
+					int rest_pages_count = (int)((old_size - new_size) / ZEND_MM_PAGE_SIZE);
 
 #if ZEND_MM_STAT
 					heap->size -= rest_pages_count * ZEND_MM_PAGE_SIZE;
@@ -1505,8 +1513,8 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size ZEN
 #endif
 					return ptr;
 				} else /* if (new_size > old_size) */ {
-					int new_pages_count = new_size / ZEND_MM_PAGE_SIZE;
-					int old_pages_count = old_size / ZEND_MM_PAGE_SIZE;
+					int new_pages_count = (int)(new_size / ZEND_MM_PAGE_SIZE);
+					int old_pages_count = (int)(old_size / ZEND_MM_PAGE_SIZE);
 
 					/* try to allocate tail pages after this block */
 					if (page_num + new_pages_count <= ZEND_MM_PAGES &&
@@ -1641,9 +1649,9 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	if (heap->real_size + new_size > heap->limit) {
 		if (heap->overflow == 0) {
 #if ZEND_DEBUG
-			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted at %s:%d (tried to allocate %lu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
+			zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)", heap->limit, __zend_filename, __zend_lineno, size);
 #else
-			zend_mm_safe_error(heap, "Allowed memory size of " ZEND_ULONG_FMT " bytes exhausted (tried to allocate %lu bytes)", heap->limit, size);
+			zend_mm_safe_error(heap, "Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)", heap->limit, size);
 #endif
 			return NULL;
 		}
@@ -1655,9 +1663,9 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 #if !ZEND_MM_LIMIT
 		zend_mm_safe_error(heap, "Out of memory");
 #elif ZEND_DEBUG
-		zend_mm_safe_error(heap, "Out of memory (allocated %ld) at %s:%d (tried to allocate %lu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
+		zend_mm_safe_error(heap, "Out of memory (allocated %zu) at %s:%d (tried to allocate %zu bytes)", heap->real_size, __zend_filename, __zend_lineno, size);
 #else
-		zend_mm_safe_error(heap, "Out of memory (allocated %ld) (tried to allocate %lu bytes)", heap->real_size, size);
+		zend_mm_safe_error(heap, "Out of memory (allocated %zu) (tried to allocate %zu bytes)", heap->real_size, size);
 #endif
 		return NULL;
 	}
@@ -2122,6 +2130,7 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 	return zend_mm_alloc_huge(AG(mm_heap), size);
 }
 
+#if ZEND_DEBUG
 # define _ZEND_BIN_FREE(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void ZEND_FASTCALL _efree_ ## _size(void *ptr) { \
 		TSRMLS_FETCH(); \
@@ -2136,6 +2145,18 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 			zend_mm_free_small(AG(mm_heap), ptr, _num); \
 		} \
 	}
+#else
+# define _ZEND_BIN_FREE(_num, _size, _elements, _pages, x, y) \
+	ZEND_API void ZEND_FASTCALL _efree_ ## _size(void *ptr) { \
+		TSRMLS_FETCH(); \
+		ZEND_MM_CUSTOM_DEALLOCATOR(ptr); \
+		{ \
+			zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE); \
+			ZEND_MM_CHECK(chunk->heap == AG(mm_heap), "zend_mm_heap corrupted"); \
+			zend_mm_free_small(AG(mm_heap), ptr, _num); \
+		} \
+	}
+#endif
 
 ZEND_MM_BINS_INFO(_ZEND_BIN_FREE, x, y)
 

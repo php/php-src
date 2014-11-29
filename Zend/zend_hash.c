@@ -21,6 +21,7 @@
 
 #include "zend.h"
 #include "zend_globals.h"
+#include "zend_variables.h"
 
 #if ZEND_DEBUG
 /*
@@ -99,19 +100,34 @@ static const uint32_t uninitialized_bucket = {INVALID_IDX};
 
 ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
-	uint32_t i = 3;
-
-	SET_INCONSISTENT(HT_OK);
-
-	if (nSize >= 0x80000000) {
+	/* Use big enough power of 2 */
+#if defined(PHP_WIN32) && !defined(__clang__)
+	if (nSize <= 8) {
+		ht->nTableSize = 8;
+	} else if (nSize >= 0x80000000) {
 		/* prevent overflow */
 		ht->nTableSize = 0x80000000;
 	} else {
-		while ((1U << i) < nSize) {
-			i++;
+		ht->nTableSize = 1U << __lzcnt(nSize);
+		if (ht->nTableSize < nSize) {
+			ht->nTableSize <<= 1;
 		}
-		ht->nTableSize = 1 << i;
 	}
+#else
+	/* size should be between 8 and 0x80000000 */
+	nSize = (nSize <= 8 ? 8 : (nSize >= 0x80000000 ? 0x80000000 : nSize));
+# if defined(__GNUC__)
+	ht->nTableSize =  0x2 << (__builtin_clz(nSize - 1) ^ 0x1f);
+# else
+	nSize -= 1;
+	nSize |= (nSize >> 1);
+	nSize |= (nSize >> 2);
+	nSize |= (nSize >> 4);
+	nSize |= (nSize >> 8);
+	nSize |= (nSize >> 16);
+	ht->nTableSize = nSize + 1;
+# endif
+#endif
 
 	ht->nTableMask = 0;	/* 0 means that ht->arBuckets is uninitialized */
 	ht->nNumUsed = 0;
@@ -121,11 +137,7 @@ ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestru
 	ht->arHash = (uint32_t*)&uninitialized_bucket;
 	ht->pDestructor = pDestructor;
 	ht->nInternalPointer = INVALID_IDX;
-	if (persistent) {
-		ht->u.flags = HASH_FLAG_PERSISTENT | HASH_FLAG_APPLY_PROTECTION;
-	} else {
-		ht->u.flags = HASH_FLAG_APPLY_PROTECTION;
-	}
+	ht->u.flags = (persistent ? HASH_FLAG_PERSISTENT : 0) | HASH_FLAG_APPLY_PROTECTION;
 }
 
 static void zend_hash_packed_grow(HashTable *ht)
@@ -258,14 +270,12 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 
 	IS_CONSISTENT(ht);
 
-	CHECK_INIT(ht, 0);
-	if (ht->u.flags & HASH_FLAG_PACKED) {
+	if (UNEXPECTED(ht->nTableMask == 0)) {
+		CHECK_INIT(ht, 0);
+		goto add_to_hash; 
+	} else if (ht->u.flags & HASH_FLAG_PACKED) {
 		zend_hash_packed_to_hash(ht);
-	}
-
-	h = zend_string_hash_val(key);
-
-	if ((flag & HASH_ADD_NEW) == 0) {
+	} else if ((flag & HASH_ADD_NEW) == 0) {
 		p = zend_hash_find_bucket(ht, key);
 
 		if (p) {
@@ -291,6 +301,7 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 	
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 
+add_to_hash:
 	HANDLE_BLOCK_INTERRUPTIONS();
 	idx = ht->nNumUsed++;
 	ht->nNumOfElements++;
@@ -298,7 +309,7 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 		ht->nInternalPointer = idx;
 	}
 	p = ht->arData + idx; 
-	p->h = h;
+	p->h = h = zend_string_hash_val(key);
 	p->key = key;
 	zend_string_addref(key);
 	ZVAL_COPY_VALUE(&p->val, pData);
@@ -412,9 +423,15 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 #endif
 
 	IS_CONSISTENT(ht);
-	CHECK_INIT(ht, h < ht->nTableSize);
 
-	if (ht->u.flags & HASH_FLAG_PACKED) {
+	if (UNEXPECTED(ht->nTableMask == 0)) {
+		CHECK_INIT(ht, h < ht->nTableSize);
+		if (h < ht->nTableSize) {
+			p = ht->arData + h;
+			goto add_to_packed;
+		}
+		goto add_to_hash;
+	} else if (ht->u.flags & HASH_FLAG_PACKED) {
 		if (h < ht->nNumUsed) {
 			p = ht->arData + h;
 			if (Z_TYPE(p->val) != IS_UNDEF) {
@@ -442,13 +459,18 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 			goto convert_to_hash;
 		}
 
+add_to_packed:
 		HANDLE_BLOCK_INTERRUPTIONS();
 		/* incremental initialization of empty Buckets */
-		if (h >= ht->nNumUsed) {
-			Bucket *q = ht->arData + ht->nNumUsed;
-			while (q != p) {
-				ZVAL_UNDEF(&q->val);
-				q++;
+		if ((flag & (HASH_ADD_NEW|HASH_ADD_NEXT)) == (HASH_ADD_NEW|HASH_ADD_NEXT)) {
+			ht->nNumUsed = h + 1;
+		} else if (h >= ht->nNumUsed) {
+			if (h > ht->nNumUsed) {
+				Bucket *q = ht->arData + ht->nNumUsed;
+				while (q != p) {
+					ZVAL_UNDEF(&q->val);
+					q++;
+				}
 			}
 			ht->nNumUsed = h + 1;
 		}
@@ -462,7 +484,6 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 		p->h = h;
 		p->key = NULL;
 		ZVAL_COPY_VALUE(&p->val, pData);
-		Z_NEXT(p->val) = INVALID_IDX;
 
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 
@@ -470,9 +491,7 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 
 convert_to_hash:
 		zend_hash_packed_to_hash(ht);
-	}
-
-	if ((flag & HASH_ADD_NEW) == 0) {
+	} else if ((flag & HASH_ADD_NEW) == 0) {
 		p = zend_hash_index_find_bucket(ht, h);
 		if (p) {
 			if (flag & HASH_ADD) {
@@ -494,6 +513,7 @@ convert_to_hash:
 
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 
+add_to_hash:
 	HANDLE_BLOCK_INTERRUPTIONS();
 	idx = ht->nNumUsed++;
 	ht->nNumOfElements++;
@@ -537,12 +557,12 @@ ZEND_API zval *_zend_hash_index_update(HashTable *ht, zend_ulong h, zval *pData 
 
 ZEND_API zval *_zend_hash_next_index_insert(HashTable *ht, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEXT ZEND_FILE_LINE_RELAY_CC);
 }
 
 ZEND_API zval *_zend_hash_next_index_insert_new(HashTable *ht, zval *pData ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEW ZEND_FILE_LINE_RELAY_CC);
+	return _zend_hash_index_add_or_update_i(ht, ht->nNextFreeElement, pData, HASH_ADD | HASH_ADD_NEW | HASH_ADD_NEXT ZEND_FILE_LINE_RELAY_CC);
 }
 
 static void zend_hash_do_resize(HashTable *ht)
@@ -925,23 +945,114 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 	pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
 }
 
-
-ZEND_API void zend_hash_clean(HashTable *ht)
+ZEND_API void zend_array_destroy(HashTable *ht TSRMLS_DC)
 {
-	uint32_t idx;
-	Bucket *p;
+	Bucket *p, *end;
 
 	IS_CONSISTENT(ht);
 
-	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = ht->arData + idx;
-		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+	if (ht->nNumUsed) {
+		
+		/* In some rare cases destructors of regular arrays may be changed */
+		if (UNEXPECTED(ht->pDestructor != ZVAL_PTR_DTOR)) {
+			zend_hash_destroy(ht);
+			return;
+		}
+	
+		p = ht->arData;
+		end = p + ht->nNumUsed;
+		SET_INCONSISTENT(HT_IS_DESTROYING);
+
+		if (ht->u.flags & HASH_FLAG_PACKED) {
+			do {
+				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC TSRMLS_CC);
+				}
+			} while (++p != end);
+		} else {
+			do {
+				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC TSRMLS_CC);
+					if (EXPECTED(p->key)) {
+						zend_string_release(p->key);
+					}
+				}
+			} while (++p != end);
+		}
+		
+		SET_INCONSISTENT(HT_DESTROYED);
+	} else if (EXPECTED(!ht->nTableMask)) {
+		return;
+	}
+	pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
+}
+
+ZEND_API void zend_hash_clean(HashTable *ht)
+{
+	Bucket *p, *end;
+
+	IS_CONSISTENT(ht);
+
+	if (ht->nNumUsed) {
+		p = ht->arData;
+		end = p + ht->nNumUsed;
 		if (ht->pDestructor) {
-			ht->pDestructor(&p->val);
+			if (ht->u.flags & HASH_FLAG_PACKED) {
+				do {
+					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+						ht->pDestructor(&p->val);
+					}
+				} while (++p != end);
+			} else {
+				do {
+					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+						ht->pDestructor(&p->val);
+						if (EXPECTED(p->key)) {
+							zend_string_release(p->key);
+						}
+					}
+				} while (++p != end);
+			}
+		} else {
+			if (!(ht->u.flags & HASH_FLAG_PACKED)) {
+				do {
+					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+						if (EXPECTED(p->key)) {
+							zend_string_release(p->key);
+						}
+					}
+				} while (++p != end);
+			}
 		}
-		if (p->key) {
-			zend_string_release(p->key);
+	}
+	ht->nNumUsed = 0;
+	ht->nNumOfElements = 0;
+	ht->nNextFreeElement = 0;
+	ht->nInternalPointer = INVALID_IDX;
+	if (ht->nTableMask) {
+		if (!(ht->u.flags & HASH_FLAG_PACKED)) {
+			memset(ht->arHash, INVALID_IDX, ht->nTableSize * sizeof(uint32_t));	
 		}
+	}
+}
+
+ZEND_API void zend_symtable_clean(HashTable *ht TSRMLS_DC)
+{
+	Bucket *p, *end;
+
+	IS_CONSISTENT(ht);
+
+	if (ht->nNumUsed) {
+		p = ht->arData;
+		end = p + ht->nNumUsed;
+		do {
+			if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
+				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC TSRMLS_CC);
+				if (EXPECTED(p->key)) {
+					zend_string_release(p->key);
+				}
+			}
+		} while (++p != end);
 	}
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = 0;
@@ -1678,8 +1789,7 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 				p->key = NULL;
 			}
 		}
-	}
-	if (renumber) {
+
 		ht->nNextFreeElement = i;
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
@@ -1745,11 +1855,12 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 					return result;
 				}
 			} else { /* string indices */
-				result = (p1->key ? p1->key->len : 0) - (p2->key ? p2->key->len : 0);
-				if (result != 0) {
+				size_t len0 = (p1->key ? p1->key->len : 0);
+				size_t len1 = (p2->key ? p2->key->len : 0);
+				if (len0 != len1) {
 					HASH_UNPROTECT_RECURSION(ht1); 
 					HASH_UNPROTECT_RECURSION(ht2); 
-					return result;
+					return len0 > len1 ? 1 : -1;
 				}
 				result = memcmp(p1->key->val, p2->key->val, p1->key->len);
 				if (result != 0) {

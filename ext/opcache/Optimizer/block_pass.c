@@ -204,7 +204,8 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 		j = 0;
 		for (i = 0; i< op_array->last_brk_cont; i++) {
 			if (op_array->brk_cont_array[i].start >= 0 &&
-			    op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE) {
+			    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
+			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
 				int parent = op_array->brk_cont_array[i].parent;
 
 				while (parent >= 0 &&
@@ -223,7 +224,8 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			j = 0;
 			for (i = 0; i< op_array->last_brk_cont; i++) {
 				if (op_array->brk_cont_array[i].start >= 0 &&
-				    op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE) {
+				    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
+				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
 					if (i != j) {
 						op_array->brk_cont_array[j] = op_array->brk_cont_array[i];
 					}
@@ -616,7 +618,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			VAR_SOURCE(opline->op1)->opcode == ZEND_QM_ASSIGN &&
 			ZEND_OP1_TYPE(VAR_SOURCE(opline->op1)) == IS_CONST &&
 			opline->opcode != ZEND_CASE &&         /* CASE _always_ expects variable */
-			opline->opcode != ZEND_FETCH_LIST &&   /* in 5.1, FETCH_DIM_TMP_VAR expects T */
+			opline->opcode != ZEND_FETCH_LIST &&
 			opline->opcode != ZEND_FE_RESET &&
 			opline->opcode != ZEND_FREE
 			) {

@@ -35,7 +35,7 @@
 #include "zend_stack.h"
 #include "php_output.h"
 
-ZEND_DECLARE_MODULE_GLOBALS(output);
+PHPAPI ZEND_DECLARE_MODULE_GLOBALS(output);
 
 const char php_output_default_handler_name[sizeof("default output handler")] = "default output handler";
 const char php_output_devnull_handler_name[sizeof("null output handler")] = "null output handler";
@@ -86,12 +86,12 @@ static inline void php_output_init_globals(zend_output_globals *G)
 /* }}} */
 
 /* {{{ stderr/stdout writer if not PHP_OUTPUT_ACTIVATED */
-static int php_output_stdout(const char *str, size_t str_len)
+static size_t php_output_stdout(const char *str, size_t str_len)
 {
 	fwrite(str, 1, str_len, stdout);
 	return str_len;
 }
-static int php_output_stderr(const char *str, size_t str_len)
+static size_t php_output_stderr(const char *str, size_t str_len)
 {
 	fwrite(str, 1, str_len, stderr);
 /* See http://support.microsoft.com/kb/190351 */
@@ -100,7 +100,7 @@ static int php_output_stderr(const char *str, size_t str_len)
 #endif
 	return str_len;
 }
-static int (*php_output_direct)(const char *str, size_t str_len) = php_output_stderr;
+static size_t (*php_output_direct)(const char *str, size_t str_len) = php_output_stderr;
 /* }}} */
 
 /* {{{ void php_output_header(TSRMLS_D) */
@@ -238,15 +238,8 @@ PHPAPI int php_output_get_status(TSRMLS_D)
 
 /* {{{ int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
  * Unbuffered write */
-PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
+PHPAPI size_t php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
 {
-#if PHP_DEBUG
-	if (len > UINT_MAX) {
-		php_error(E_WARNING, "Attempt to output more than UINT_MAX bytes at once; "
-				"output will be truncated %lu => %lu",
-				(unsigned long) len, (unsigned long) (len % UINT_MAX));
-	}
-#endif
 	if (OG(flags) & PHP_OUTPUT_DISABLED) {
 		return 0;
 	}
@@ -259,21 +252,14 @@ PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
 
 /* {{{ int php_output_write(const char *str, size_t len TSRMLS_DC)
  * Buffered write */
-PHPAPI int php_output_write(const char *str, size_t len TSRMLS_DC)
+PHPAPI size_t php_output_write(const char *str, size_t len TSRMLS_DC)
 {
-#if PHP_DEBUG
-	if (len > UINT_MAX) {
-		php_error(E_WARNING, "Attempt to output more than UINT_MAX bytes at once; "
-				"output will be truncated %lu => %lu",
-				(unsigned long) len, (unsigned long) (len % UINT_MAX));
-	}
-#endif
 	if (OG(flags) & PHP_OUTPUT_DISABLED) {
 		return 0;
 	}
 	if (OG(flags) & PHP_OUTPUT_ACTIVATED) {
 		php_output_op(PHP_OUTPUT_HANDLER_WRITE, str, len TSRMLS_CC);
-		return (int) len;
+		return len;
 	}
 	return php_output_direct(str, len);
 }
@@ -1272,7 +1258,7 @@ static int php_output_handler_compat_func(void **handler_context, php_output_con
 
 	if (func) {
 		char *out_str = NULL;
-		uint out_len = 0;
+		size_t out_len = 0;
 
 		func(output_context->in.data, output_context->in.used, &out_str, &out_len, output_context->op TSRMLS_CC);
 

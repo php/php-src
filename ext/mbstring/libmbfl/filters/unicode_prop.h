@@ -22,7 +22,7 @@
  *
  */
 
-/* charactor property table */
+/* character property table */
 #define MBFL_CHP_CTL		0x01
 #define MBFL_CHP_DIGIT		0x02
 #define MBFL_CHP_UALPHA		0x04

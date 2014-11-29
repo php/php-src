@@ -14,7 +14,7 @@ function_exists('mb_strtoupper') or die("skip mb_strtoupper() is not available i
 
 /*
  * Pass a Japanese string and a mixed Japanese and ASCII string to mb_strtolower
- * to check correct conversion is occuring (Japanese characters should not be converted).
+ * to check correct conversion is occurring (Japanese characters should not be converted).
  */
 
 echo "*** Testing mb_strtoupper() : usage variations ***\n";

@@ -61,7 +61,8 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 {
 	FILE *fp;
 	char *buf;
-	int l = 0, pclose_return;
+	size_t l = 0;
+	int pclose_return;
 	char *b, *d=NULL;
 	php_stream *stream;
 	size_t buflen, bufl = 0;
@@ -115,8 +116,8 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 			} else if (type == 2) {
 				/* strip trailing whitespaces */
 				l = bufl;
-				while (l-- && isspace(((unsigned char *)buf)[l]));
-				if (l != (int)(bufl - 1)) {
+				while (l >= 1 && l-- && isspace(((unsigned char *)buf)[l]));
+				if (l != (bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
 				}
@@ -128,8 +129,8 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 			/* strip trailing whitespaces if we have not done so already */
 			if ((type == 2 && buf != b) || type != 2) {
 				l = bufl;
-				while (l-- && isspace(((unsigned char *)buf)[l]));
-				if (l != (int)(bufl - 1)) {
+				while (l >= 1 && l-- && isspace(((unsigned char *)buf)[l]));
+				if (l != (bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
 				}
@@ -240,10 +241,12 @@ PHP_FUNCTION(passthru)
 */
 PHPAPI zend_string *php_escape_shell_cmd(char *str)
 {
-	register int x, y, l = strlen(str);
-	char *p = NULL;
+	register int x, y, l = (int)strlen(str);
 	size_t estimate = (2 * l) + 1;
 	zend_string *cmd;
+#ifndef PHP_WIN32
+	char *p = NULL;
+#endif
 
 	TSRMLS_FETCH();
 
@@ -276,7 +279,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 				cmd->val[y++] = str[x];
 				break;
 #else
-			/* % is Windows specific for enviromental variables, ^%PATH% will 
+			/* % is Windows specific for environmental variables, ^%PATH% will 
 				output PATH whil ^%PATH^% not. escapeshellcmd->val will escape all %.
 			*/
 			case '%':
@@ -333,7 +336,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
  */
 PHPAPI zend_string *php_escape_shell_arg(char *str)
 {
-	int x, y = 0, l = strlen(str);
+	int x, y = 0, l = (int)strlen(str);
 	zend_string *cmd;
 	size_t estimate = (4 * l) + 3;
 

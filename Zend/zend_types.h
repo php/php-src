@@ -64,28 +64,8 @@ typedef enum {
 # endif
 #endif
 
-#define HAVE_ZEND_LONG64
-#ifdef ZEND_WIN32
-typedef __int64 zend_long64;
-typedef unsigned __int64 zend_ulong64;
-#elif SIZEOF_LONG_LONG_INT == 8
-typedef long long int zend_long64;
-typedef unsigned long long int zend_ulong64;
-#elif SIZEOF_LONG_LONG == 8
-typedef long long zend_long64;
-typedef unsigned long long zend_ulong64;
-#else
-# undef HAVE_ZEND_LONG64
-#endif
-
-/* XXX this won't work on X32 platform */
-#ifdef ZEND_ENABLE_ZVAL_LONG64
-typedef int64_t zend_intptr_t;
-typedef uint64_t zend_uintptr_t;
-#else
-typedef int32_t zend_intptr_t;
-typedef uint32_t zend_uintptr_t;
-#endif
+typedef intptr_t zend_intptr_t;
+typedef uintptr_t zend_uintptr_t;
 
 typedef struct _zend_object_handlers zend_object_handlers;
 typedef struct _zend_class_entry     zend_class_entry;
@@ -134,7 +114,7 @@ struct _zval_struct {
 				zend_uchar    type,			/* active type */
 				zend_uchar    type_flags,
 				zend_uchar    const_flags,
-				zend_uchar    reserved)	    /* various IS_VAR flags */
+				zend_uchar    reserved)	    /* call info for EX(This) */
 		} v;
 		uint32_t type_info;
 	} u1;
@@ -143,6 +123,7 @@ struct _zval_struct {
 		uint32_t     next;                 /* hash collision chain */
 		uint32_t     cache_slot;           /* literal cache slot */
 		uint32_t     lineno;               /* line number (for ast nodes) */
+		uint32_t     num_args;             /* arguments number for EX(This) */
 	} u2;
 };
 
@@ -170,9 +151,9 @@ struct _zend_string {
 };
 
 typedef struct _Bucket {
+	zval              val;
 	zend_ulong        h;                /* hash value (or numeric index)   */
 	zend_string      *key;              /* string key or NULL for numerics */
-	zval              val;
 } Bucket;
 
 typedef struct _HashTable {	

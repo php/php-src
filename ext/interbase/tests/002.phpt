@@ -3,7 +3,7 @@ InterBase: connect, close and pconnect
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
-<?php /* $Id$ */
+<?php
 
 	require("interbase.inc");
     

@@ -233,10 +233,11 @@ static int php_sockop_flush(php_stream *stream TSRMLS_DC)
 
 static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC)
 {
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 #if ZEND_WIN32
 	return 0;
 #else
+	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
+
 	return zend_fstat(sock->socket, &ssb->sb);
 #endif
 }
@@ -251,7 +252,11 @@ static inline int sock_sendto(php_netstream_data_t *sock, const char *buf, size_
 
 		return (ret == SOCK_CONN_ERR) ? -1 : ret;
 	}
+#ifdef PHP_WIN32
+	return ((ret = send(sock->socket, buf, buflen > INT_MAX ? INT_MAX : (int)buflen, flags)) == SOCK_CONN_ERR) ? -1 : ret;
+#else
 	return ((ret = send(sock->socket, buf, buflen, flags)) == SOCK_CONN_ERR) ? -1 : ret;
+#endif
 }
 
 static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t buflen, int flags,

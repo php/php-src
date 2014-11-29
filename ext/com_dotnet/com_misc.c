@@ -36,7 +36,11 @@ void php_com_throw_exception(HRESULT code, char *message TSRMLS_DC)
 		message = php_win32_error_to_msg(code);
 		free_msg = 1;
 	}
+#if SIZEOF_ZEND_LONG == 8
+	zend_throw_exception(php_com_exception_class_entry, message, (zend_long)(uint32_t)code TSRMLS_CC);
+#else
 	zend_throw_exception(php_com_exception_class_entry, message, (zend_long)code TSRMLS_CC);
+#endif
 	if (free_msg) {
 		LocalFree(message);
 	}
