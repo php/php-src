@@ -152,16 +152,9 @@ array(4) {
 }
 
 -- Iteration 7 --
-array(4) {
-  ["one"]=>
-  int(1)
-  [0]=>
-  int(2)
-  ["three"]=>
-  int(3)
-  [1]=>
-  int(4)
-}
+
+Warning: array_slice() expects parameter 2 to be long, double given in %s on line %d
+NULL
 
 -- Iteration 8 --
 array(4) {
