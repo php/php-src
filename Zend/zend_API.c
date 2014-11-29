@@ -407,7 +407,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 								if (zend_isnan(d)) {
 									return "long";
 								}
-								if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
+								if (!ZEND_DOUBLE_FITS_LONG(d)) {
 									if (c == 'L') {
 										*p = (d > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
 									} else {
@@ -425,7 +425,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 						if (zend_isnan(Z_DVAL_P(arg))) {
 							return "long";
 						}
-						if (Z_DVAL_P(arg) > ZEND_LONG_MAX || Z_DVAL_P(arg) < ZEND_LONG_MIN) {
+						if (!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg))) {
 							if (c == 'L') {
 								*p = (Z_DVAL_P(arg) > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
 							} else {

@@ -1067,7 +1067,7 @@ static zend_always_inline int _z_param_long(zval *arg, zend_long *dest, zend_boo
 		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
 			return 0;
 		}
-		if (UNEXPECTED(Z_DVAL_P(arg) > ZEND_LONG_MAX || Z_DVAL_P(arg) < ZEND_LONG_MIN)) {
+		if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg)))) {
 			/* Ironically, the strict parameter makes zpp *non*-strict here */
 			if (strict) {
 				*dest = (Z_DVAL_P(arg) > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
@@ -1086,7 +1086,7 @@ static zend_always_inline int _z_param_long(zval *arg, zend_long *dest, zend_boo
 				if (UNEXPECTED(zend_isnan(d))) {
 					return 0;
 				}
-				if (UNEXPECTED(d > ZEND_LONG_MAX || d < ZEND_LONG_MIN)) {
+				if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(d))) {
 					if (strict) {
 						*dest = (d > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
 					} else {

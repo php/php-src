@@ -100,8 +100,8 @@ Warning: chunk_split(): Chunk length should be greater than zero in %schunk_spli
 bool(false)
 -- Iteration 3 --
 
-Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
-bool(false)
+Warning: chunk_split() expects parameter 2 to be long, double given in %s on line %d
+NULL
 -- Iteration 4 --
 
 Warning: chunk_split(): Chunk length should be greater than zero in %schunk_split_variation2.php on line %d
