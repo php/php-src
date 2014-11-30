@@ -214,7 +214,8 @@ void php_json_parser_array_append(zval *array, zval *zvalue)
 	
 int php_json_yylex(union YYSTYPE *value, php_json_parser *parser)
 {
-	int token = php_json_scan(&parser->scanner);
+	TSRMLS_FETCH_FROM_CTX(parser->zts_ctx);
+	int token = php_json_scan(&parser->scanner TSRMLS_CC);
 	value->value = parser->scanner.value;
 	return token;
 }

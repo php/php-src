@@ -40,6 +40,8 @@
 #define PHP_JSON_SCANNER_COPY_UTF() php_json_scanner_copy_string(s, 5)
 #define PHP_JSON_SCANNER_COPY_UTF_SP() php_json_scanner_copy_string(s, 11)
 
+#define PHP_JSON_INT_MAX_LENGTH (MAX_LENGTH_OF_LONG - 1)
+
 
 static void php_json_scanner_copy_string(php_json_scanner *s, int esc_size)
 {
@@ -87,7 +89,7 @@ void php_json_scanner_init(php_json_scanner *s, char *str, int str_len, long opt
 	PHP_JSON_CONDITION_SET(JS);
 }
 
-int php_json_scan(php_json_scanner *s)
+int php_json_scan(php_json_scanner *s TSRMLS_DC)
 {
 	ZVAL_NULL(&s->value);
 	
@@ -160,7 +162,7 @@ std:
 		size_t digits = (size_t) (s->cursor - s->token - negative);
 		if (digits >= PHP_JSON_INT_MAX_LENGTH) {
 			if (digits == PHP_JSON_INT_MAX_LENGTH) {
-				int cmp = strncmp((char *) (s->token + negative), PHP_JSON_INT_MAX_DIGITS, PHP_JSON_INT_MAX_LENGTH);
+				int cmp = strncmp((char *) (s->token + negative), LONG_MIN_DIGITS, PHP_JSON_INT_MAX_LENGTH);
 				if (!(cmp < 0 || (cmp == 0 && negative))) {
 					bigint = 1;
 				}
@@ -172,7 +174,7 @@ std:
 			ZVAL_LONG(&s->value, strtol((char *) s->token, NULL, 10));
 			return PHP_JSON_T_INT;
 		} else if (s->options & PHP_JSON_BIGINT_AS_STRING) {
-			ZVAL_STRINGL(&s->value, (char *) s->token, s->cursor - s->token, 1);
+			ZVAL_STRINGL(&s->value, (char *) s->token, s->cursor - s->token);
 			return PHP_JSON_T_STRING;
 		} else {
 			ZVAL_DOUBLE(&s->value, zend_strtod((char *) s->token, NULL));
@@ -241,7 +243,7 @@ std:
 		}
 		str = emalloc(len + 1);
 		str[len] = 0;
-		ZVAL_STRINGL(&s->value, str, len, 0);
+		ZVAL_STRINGL(&s->value, str, len);
 		if (s->str_esc) {
 			s->pstr = (php_json_ctype *) Z_STRVAL(s->value);
 			s->cursor = s->str_start;
