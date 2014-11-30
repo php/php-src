@@ -30,6 +30,10 @@
 #include "php_json.h"
 #include <zend_exceptions.h>
 
+ZEND_DECLARE_MODULE_GLOBALS(json)
+
+static const char digits[] = "0123456789abcdef";
+
 static void json_escape_string(smart_str *buf, char *s, size_t len, int options TSRMLS_DC);
 
 static int json_determine_array_type(zval *val TSRMLS_DC) /* {{{ */
