@@ -54,6 +54,6 @@ rmdir($td);
 ?>
 --EXPECTF--
 Bug66405 file3.csv
-string %s%ebug66405%efile1.txt
-string %s%ebug66405%efile2.md
-string %s%ebug66405%etestsubdir%efile3.csv
+string %sbug66405%efile1.txt
+string %sbug66405%efile2.md
+string %sbug66405%etestsubdir%efile3.csv
