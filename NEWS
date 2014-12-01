@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #60704 (unlink() bug with some files path).
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
 
+- cURL:
+  . Fixed bug #67643 (curl_multi_getcontent returns '' when
+    CURLOPT_RETURNTRANSFER isn't set). (Jille Timmermans)
+
 - Date:
   . Implemented FR #68268 (DatePeriod: Getter for start date, end date and 
     interval). (Marc Bennewitz)
