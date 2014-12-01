@@ -4493,7 +4493,7 @@ PHP_METHOD(DatePeriod, getStartDate)
 	dpobj = (php_period_obj *)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	php_date_instantiate(dpobj->start_ce, return_value TSRMLS_CC);
-	dateobj = (php_date_obj *)zend_object_store_get_object(return_value);
+	dateobj = (php_date_obj *)zend_object_store_get_object(return_value TSRMLS_CC);
 	dateobj->time = timelib_time_ctor();
 	*dateobj->time = *dpobj->start;
 	if (dpobj->start->tz_abbr) {
@@ -4520,7 +4520,7 @@ PHP_METHOD(DatePeriod, getEndDate)
         dpobj = (php_period_obj *)zend_object_store_get_object(getThis() TSRMLS_CC);
 
         php_date_instantiate(dpobj->start_ce, return_value TSRMLS_CC);
-        dateobj = (php_date_obj *)zend_object_store_get_object(return_value);
+        dateobj = (php_date_obj *)zend_object_store_get_object(return_value TSRMLS_CC);
         dateobj->time = timelib_time_ctor();
         *dateobj->time = *dpobj->end;
         if (dpobj->end->tz_abbr) {
