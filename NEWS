@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 5.6.5
 
 - Core:
+  . Fixed bug #60704 (unlink() bug with some files path).
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
 
 - mbstring:
