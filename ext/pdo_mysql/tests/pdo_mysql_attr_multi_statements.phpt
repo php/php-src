@@ -29,6 +29,9 @@ error_reporting=E_ALL
 	var_dump($info[0]);
 	$stmt = $db->query(sprintf('SELECT id FROM %s', $table));
 	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+        // A single query with a trailing delimiter.
+	$stmt = $db->query('SELECT 1 AS value;');
+	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
 	// New connection, does not allow multiple statements.
 	$db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_MULTI_STATEMENTS => false));
@@ -39,6 +42,9 @@ error_reporting=E_ALL
 
 	$stmt = $db->query(sprintf('SELECT id FROM %s', $table));
 	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+        // A single query with a trailing delimiter.
+        $stmt = $db->query('SELECT 1 AS value;');
+        var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 
 	$db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
 	print "done!";
@@ -57,6 +63,13 @@ array(2) {
     string(1) "2"
   }
 }
+array(1) {
+  [0]=>
+  array(1) {
+    ["value"]=>
+    string(1) "1"
+  }
+}
 bool(false)
 string(5) "42000"
 array(2) {
@@ -69,6 +82,13 @@ array(2) {
   array(1) {
     ["id"]=>
     string(1) "2"
+  }
+}
+array(1) {
+  [0]=>
+  array(1) {
+    ["value"]=>
+    string(1) "1"
   }
 }
 done!
