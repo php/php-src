@@ -398,6 +398,9 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		if (ce->ce_flags & ZEND_ACC_FINAL) {
 			string_printf(str, "final ");
 		}
+		if (ce->ce_flags & ZEND_ACC_STATIC) {
+			string_printf(str, "static ");
+		}
 		string_printf(str, "class ");
 	}
 	string_printf(str, "%s", ce->name->val);
@@ -4052,7 +4055,7 @@ ZEND_METHOD(reflection_class, isInstantiable)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS)) {
+	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_STATIC | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS)) {
 		RETURN_FALSE;
 	}
 
@@ -4078,7 +4081,7 @@ ZEND_METHOD(reflection_class, isCloneable)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS)) {
+	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_STATIC | ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS)) {
 		RETURN_FALSE;
 	}
 	if (!Z_ISUNDEF(intern->obj)) {
@@ -4120,6 +4123,14 @@ ZEND_METHOD(reflection_class, isTrait)
 ZEND_METHOD(reflection_class, isFinal)
 {
 	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_FINAL);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionClass::isStatic()
+   Returns whether this class is final */
+ZEND_METHOD(reflection_class, isStatic)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_STATIC);
 }
 /* }}} */
 
@@ -5897,6 +5908,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, isTrait, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isAbstract, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isFinal, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, isStatic, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getModifiers, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isInstance, arginfo_reflection_class_isInstance, 0)
 	ZEND_ME(reflection_class, newInstance, arginfo_reflection_class_newInstance, 0)
@@ -6145,7 +6157,8 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_FINAL", ZEND_ACC_FINAL);
-
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_STATIC", ZEND_ACC_STATIC);
+	
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionObject", reflection_object_functions);
 	_reflection_entry.create_object = reflection_objects_new;
 	reflection_object_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_class_ptr TSRMLS_CC);

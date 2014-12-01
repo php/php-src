@@ -11,10 +11,11 @@ echo $rc;
 --EXPECTF--
 Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
-  - Constants [3] {
+  - Constants [4] {
     Constant [ integer IS_IMPLICIT_ABSTRACT ] { 16 }
     Constant [ integer IS_EXPLICIT_ABSTRACT ] { 32 }
     Constant [ integer IS_FINAL ] { 4 }
+    Constant [ integer IS_STATIC ] { 1 }
   }
 
   - Static properties [0] {
@@ -34,7 +35,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Property [ <default> public $name ]
   }
 
-  - Methods [49] {
+  - Methods [50] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -225,6 +226,12 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method isFinal ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method isStatic ] {
 
       - Parameters [0] {
       }

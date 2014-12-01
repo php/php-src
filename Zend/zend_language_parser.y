@@ -445,6 +445,7 @@ class_modifiers:
 class_modifier:
 		T_ABSTRACT 		{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
 	|	T_FINAL 		{ $$ = ZEND_ACC_FINAL; }
+	|	T_STATIC 		{ $$ = ZEND_ACC_STATIC; }
 ;
 
 trait_declaration_statement:
