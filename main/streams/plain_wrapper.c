@@ -1262,15 +1262,12 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, i
 		url += sizeof("file://") - 1;
 	}
 
-#if PHP_WIN32
-	int url_len = (int)strlen(url);
-#endif
 	if (php_check_open_basedir(url TSRMLS_CC)) {
 		return 0;
 	}
 
 #if PHP_WIN32
-	if (!php_win32_check_trailing_space(url, url_len)) {
+	if (!php_win32_check_trailing_space(url, (int)strlen(url))) {
 		php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "%s", strerror(ENOENT));
 		return 0;
 	}
