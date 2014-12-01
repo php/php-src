@@ -65,14 +65,101 @@ struct _zend_bigint {
 
 /*** INTERNAL MACROS ***/
 
-#define int_abs(n) ((n) >= 0 ? n : -n) 
+#define int_abs(n) ((n) >= 0 ? (n) : -(n)) 
 #define int_sgn(n) ((n) > 0 ? 1 : ((n) < 0 ? -1 : 0))
 
+
+#define mp_sgn(mp) (USED(mp) ? ((SIGN(mp) == MP_NEG) ? -1 : 1) : 0)
+
+/* used for checking if a number fits within a 32-bit unsigned int */
+#define BITMASK_32 0xFFFFFFFFL
+
+/* used for checking if a number fits within a LibTomMath "digit" */
+#define BITMASK_DIGIT ((1 << DIGIT_BIT) - 1) 
+
+#define FITS_DIGIT(long) ((zend_ulong)(int_abs(long) & BITMASK_DIGIT) == (zend_ulong)int_abs(long))
+
+/* Convenience macro to create a temporary mpz_t from a zend_long
+ * Used when LibTomMath has no function for an operation taking a long */
+#define WITH_TEMP_MP_FROM_ZEND_LONG(long, temp, codeblock) { \
+	mp_int temp;								\
+	mp_init(&temp);								\
+	zend_bigint_long_to_mp_int(long, &temp);	\
+	codeblock									\
+	mp_clear(&temp);							\
+}
+
 /*** INTERNAL FUNCTIONS ***/
+
+static void zend_bigint_long_to_mp_int(zend_long value, mp_int *mp)
+{
+	zend_ulong ulong_value = (value >= 0) ? value : -value;
+
+	/* mp_set_int only uses 32 bits of an unsigned long
+	   so if zend_long is too big, we need to do multiple ops */
+#if SIZEOF_ZEND_LONG > 4
+	if (ulong_value != (ulong_value & BITMASK_32)) {
+#	if defined(mp_import)
+		/* FIXME: This code is currently untested! */
+		mp_import(mp, 1, 1, sizeof(ulong_value), 0, 0, &ulong_value);
+		mp_neg(&mp, &mp);
+		return;
+#	elif SIZEOF_ZEND_LONG == 8
+		mp_int tmp;
+
+		mp_init_set_int(&tmp, ulong_value & BITMASK_32);
+
+		mp_set_int(mp, (ulong_value >> 32) & BITMASK_32);
+		mp_mul_2d(mp, 32, mp);
+		mp_or(mp, &tmp, mp);
+
+		if (value < 0) {
+			mp_neg(mp, mp);
+		}
+
+		mp_clear(&tmp);
+		return;
+#	else
+#		error SIZEOF_ZEND_LONG other than 4 or 8 unsupported
+#	endif
+	}
+#endif
+	
+	mp_set_int(mp, ulong_value);
+	if (value < 0) {
+		mp_neg(mp, mp);
+	}
+}
+
+static zend_long zend_bigint_mp_int_to_long(mp_int *mp)
+{
+#	if SIZEOF_ZEND_LONG == 4
+		/* mp_get_int always returns 32 bits */
+		return mp_get_int(mp) * ((SIGN(mp) == MP_NEG) ? -1 : 1);
+# 	elif SIZEOF_ZEND_LONG == 8
+		mp_int tmp;
+		zend_ulong ulong_value = 0;
+		zend_long value;
+
+		mp_init_copy(&tmp, mp);
+		
+		ulong_value = mp_get_int(&tmp);
+		mp_div_2d(&tmp, 32, &tmp, NULL);
+		ulong_value |= mp_get_int(&tmp) << 32;
+
+		mp_clear(&tmp);
+
+		value = ulong_value * ((SIGN(mp) == MP_NEG) ? -1 : 1);
+		return value;
+#	else
+#		error SIZEOF_ZEND_LONG other than 4 or 8 unsupported
+#	endif
+}
 
 /* Called by zend_startup */
 void zend_startup_bigint(void)
 {
+	
 }
 
 /*** INITIALISERS ***/
@@ -198,11 +285,7 @@ ZEND_API void zend_bigint_init_strtol(zend_bigint *big, const char *str, char** 
 ZEND_API void zend_bigint_init_from_long(zend_bigint *big, zend_long value) /* {{{ */
 {
 	zend_bigint_init(big);
-	/* FIXME: Handle >32-bit longs */
-	mp_set_int(&big->mp, int_abs(value));
-	if (int_sgn(value) == -1) {
-		mp_neg(&big->mp, &big->mp);
-	}
+	zend_bigint_long_to_mp_int(value, &big->mp);
 }
 /* }}} */
 
@@ -214,7 +297,7 @@ ZEND_API void zend_bigint_init_from_double(zend_bigint *big, double value) /* {{
 	/* prevents crash and ensures zed_dval_to_lval conformity */
 	if (zend_finite(value) && !zend_isnan(value)) {
 		/* FIXME: Handle larger doubles */
-		zend_bigint_init_from_long(big, zend_dval_to_lval(value));
+		zend_bigint_long_to_mp_int(zend_dval_to_lval(value), &big->mp);
 	}
 }
 /* }}} */
@@ -266,7 +349,8 @@ ZEND_API zend_bool zend_bigint_can_fit_long(const zend_bigint *big) /* {{{ */
 /* Returns sign of bigint (-1 for negative, 0 for zero or 1 for positive) */
 ZEND_API int zend_bigint_sign(const zend_bigint *big) /* {{{ */
 {
-	return SIGN(&big->mp);
+	
+	return mp_sgn(&big->mp);
 }
 /* }}} */
 
@@ -299,15 +383,15 @@ ZEND_API zend_bool zend_bigint_long_divisible(zend_long num, const zend_bigint *
 /* Converts to long; if it won't fit, wraps around (like zend_dval_to_lval) */
 ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big) /* {{{ */
 {
-	/* FIXME: reimplement dval_to_lval algo and handle larger nos */
-	return mp_get_int(&big->mp) * SIGN(&big->mp);
+	/* FIXME: reimplement dval_to_lval algo */
+	return zend_bigint_mp_int_to_long(&big->mp);
 }
 
 /* Converts to long; if it won't fit, saturates (caps at ZEND_LONG_MAX/_MIN) */
 ZEND_API zend_long zend_bigint_to_long_saturate(const zend_bigint *big) /* {{{ */
 {
 	/* FIXME: reimplement saturation algo and handle larger nos */
-	return mp_get_int(&big->mp) * SIGN(&big->mp);
+	return zend_bigint_mp_int_to_long(&big->mp);
 }
 /* }}} */
 
@@ -317,7 +401,7 @@ ZEND_API zend_long zend_bigint_to_long_ex(const zend_bigint *big, zend_bool *ove
 {
 	/* FIXME: reimplement saturation algo and handle larger nos */
 	*overflow = 0;
-	return mp_get_int(&big->mp) * SIGN(&big->mp);
+	return zend_bigint_mp_int_to_long(&big->mp);
 }
 /* }}} */
 
@@ -331,7 +415,7 @@ ZEND_API zend_ulong zend_bigint_to_ulong(const zend_bigint *big) /* {{{ */
 /* Converts to bool */
 ZEND_API zend_bool zend_bigint_to_bool(const zend_bigint *big) /* {{{ */
 {
-	return SIGN(&big->mp) ? 1 : 0;
+	return USED(&big->mp) ? 1 : 0;
 }
 /* }}} */
 
@@ -427,11 +511,16 @@ ZEND_API void zend_bigint_add(zend_bigint *out, const zend_bigint *op1, const ze
 /* Adds a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_add_long(zend_bigint *out, const zend_bigint *op1, zend_long op2) /* {{{ */
 {
-	/* FIXME: Handle large op2 */
-	if (int_sgn(op2) >= 1) {
-		mp_add_d(&op1->mp, op2, &out->mp);
+	if (FITS_DIGIT(op2)) {
+		if (int_sgn(op2) >= 1) {
+			mp_add_d(&op1->mp, op2, &out->mp);
+		} else {
+			mp_sub_d(&op1->mp, -op2, &out->mp);
+		}
 	} else {
-		mp_sub_d(&op1->mp, -op2, &out->mp);
+		WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
+			mp_add(&op1->mp, &op2_mp, &out->mp);
+		})
 	}
 }
 /* }}} */
@@ -439,7 +528,9 @@ ZEND_API void zend_bigint_add_long(zend_bigint *out, const zend_bigint *op1, zen
 /* Adds a long and a long and stores result in out */
 ZEND_API void zend_bigint_long_add_long(zend_bigint *out, zend_long op1, zend_long op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	WITH_TEMP_MP_FROM_ZEND_LONG(op1, op1_mp, WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
+		mp_add(&op1_mp, &op2_mp, &out->mp);
+	}))
 }
 /* }}} */
 
@@ -453,11 +544,16 @@ ZEND_API void zend_bigint_subtract(zend_bigint *out, const zend_bigint *op1, con
 /* Subtracts a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_subtract_long(zend_bigint *out, const zend_bigint *op1, zend_long op2) /* {{{ */
 {
-	/* FIXME: Handle large op2 */
-	if (int_sgn(op2) >= 1) {
-		mp_sub_d(&op1->mp, op2, &out->mp);
+	if (FITS_DIGIT(op2)) {
+		if (int_sgn(op2) >= 1) {
+			mp_sub_d(&op1->mp, op2, &out->mp);
+		} else {
+			mp_add_d(&op1->mp, -op2, &out->mp);
+		}
 	} else {
-		mp_add_d(&op1->mp, -op2, &out->mp);
+		WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
+			mp_add(&op1->mp, &op2_mp, &out->mp);
+		})
 	}
 }
 /* }}} */
@@ -465,14 +561,25 @@ ZEND_API void zend_bigint_subtract_long(zend_bigint *out, const zend_bigint *op1
 /* Subtracts a long and a long and stores result in out */
 ZEND_API void zend_bigint_long_subtract_long(zend_bigint *out, zend_long op1, zend_long op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	WITH_TEMP_MP_FROM_ZEND_LONG(op1, op1_mp, WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
+		mp_sub(&op1_mp, &op2_mp, &out->mp);
+	}))
 }
 /* }}} */
 
 /* Subtracts a long and a bigint and stores result in out */
 ZEND_API void zend_bigint_long_subtract(zend_bigint *out, zend_long op1, const zend_bigint *op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	/* TODO: Rather than having _long_subtract detect negation, maybe make a
+	 * _negate function?
+	 */
+	if (op1 == 0) {
+		mp_neg(&op2->mp, &out->mp);
+	} else {
+		/* b - a is just -(a - b) */
+		zend_bigint_subtract_long(out, op2, op1);
+		mp_neg(&out->mp, &out->mp);
+	}
 }
 /* }}} */
 
