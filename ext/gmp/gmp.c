@@ -104,6 +104,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random, 0, 0, 0)
 	ZEND_ARG_INFO(0, limiter)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random_seed, 0, 0, 1)
+	ZEND_ARG_INFO(0, seed)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_random_bits, 0, 0, 1)
 	ZEND_ARG_INFO(0, bits)
 ZEND_END_ARG_INFO()
@@ -170,6 +174,7 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_cmp,		arginfo_gmp_binary)
 	ZEND_FE(gmp_sign,		arginfo_gmp_unary)
 	ZEND_FE(gmp_random,		arginfo_gmp_random)
+	ZEND_FE(gmp_random_seed,	arginfo_gmp_random_seed)
 	ZEND_FE(gmp_random_bits,  arginfo_gmp_random_bits)
 	ZEND_FE(gmp_random_range, arginfo_gmp_random_range)
 	ZEND_FE(gmp_and,		arginfo_gmp_binary)
@@ -1759,6 +1764,33 @@ ZEND_FUNCTION(gmp_random)
 #else
 	mpz_urandomb(gmpnum_result, GMPG(rand_state), GMP_ABS (limiter) * __GMP_BITS_PER_MP_LIMB);
 #endif
+}
+/* }}} */
+
+/* {{{ proto GMP gmp_random_seed(mixed seed)
+   Seed the RNG */
+ZEND_FUNCTION(gmp_random_seed)
+{
+	zval *seed;
+	mpz_ptr gmpnum_seed;
+	gmp_temp_t temp_a;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &seed) == FAILURE) {
+		return;
+	}
+
+	gmp_init_random(TSRMLS_C);
+
+	if (Z_TYPE_P(seed) == IS_LONG && Z_LVAL_P(seed) >= 0) {
+		gmp_randseed_ui(GMPG(rand_state), Z_LVAL_P(seed));
+	}
+	else {
+		FETCH_GMP_ZVAL(gmpnum_seed, seed, temp_a);
+
+		gmp_randseed(GMPG(rand_state), gmpnum_seed);
+
+		FREE_GMP_TEMP(temp_a);
+	}
 }
 /* }}} */
 

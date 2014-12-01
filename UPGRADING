@@ -87,7 +87,8 @@ PHP X.Y UPGRADE NOTES
 ========================================
 6. New Functions
 ========================================
-
+- GMP
+  Added gmp_random_seed()
 
 ========================================
 7. New Classes and Interfaces
