@@ -490,7 +490,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 			} else {
 				intern->file_name = estrndup(source->file_name, source->file_name_len);
 				intern->file_name_len = source->file_name_len;
-				intern->_path = spl_filesystem_object_get_path(source, (size_t *)&intern->_path_len TSRMLS_CC);
+				intern->_path = spl_filesystem_object_get_path(source, &intern->_path_len TSRMLS_CC);
 				intern->_path = estrndup(intern->_path, intern->_path_len);
 			}
 			break;
@@ -514,7 +514,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 			} else {
 				intern->file_name = source->file_name;
 				intern->file_name_len = source->file_name_len;
-				intern->_path = spl_filesystem_object_get_path(source, (size_t *)&intern->_path_len TSRMLS_CC);
+				intern->_path = spl_filesystem_object_get_path(source, &intern->_path_len TSRMLS_CC);
 				intern->_path = estrndup(intern->_path, intern->_path_len);
 
 				intern->u.file.open_mode = "r";
