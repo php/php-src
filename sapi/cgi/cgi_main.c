@@ -1735,7 +1735,8 @@ int main(int argc, char *argv[])
 {
 	int free_query_string = 0;
 	int exit_status = SUCCESS;
-	int cgi = 0, c, i, len;
+	int cgi = 0, c, i;
+	size_t len;
 	zend_file_handle file_handle;
 	char *s;
 
@@ -1745,7 +1746,7 @@ int main(int argc, char *argv[])
 	int orig_optind = php_optind;
 	char *orig_optarg = php_optarg;
 	char *script_file = NULL;
-	int ini_entries_len = 0;
+	size_t ini_entries_len = 0;
 	/* end of temporary locals */
 
 #ifdef ZTS
@@ -1849,7 +1850,7 @@ int main(int argc, char *argv[])
 				break;
 			case 'd': {
 				/* define ini entries on command line */
-				int len = strlen(php_optarg);
+				size_t len = strlen(php_optarg);
 				char *val;
 
 				if ((val = strchr(php_optarg, '='))) {
@@ -2290,7 +2291,7 @@ consult the installation file that came with this distribution, or visit \n\
 				 *  test.php v1=test "v2=hello world!"
 				*/
 				if (!SG(request_info).query_string && argc > php_optind) {
-					int slen = strlen(PG(arg_separator).input);
+					size_t slen = strlen(PG(arg_separator).input);
 					len = 0;
 					for (i = php_optind; i < argc; i++) {
 						if (i < (argc - 1)) {
