@@ -204,7 +204,7 @@ PHP_FUNCTION(crypt)
 			salt[salt_in_len] = '\0';
 
 			crypt_res = php_sha512_crypt_r(str, salt, output, needed);
-			if (!crypt_res) {
+			if (!crypt_res || (salt[0]=='*' && salt[1]=='0')) {
 				if (salt[0]=='*' && salt[1]=='0') {
 					RETVAL_STRING("*1", 1);
 				} else {
@@ -227,7 +227,7 @@ PHP_FUNCTION(crypt)
 			salt[salt_in_len] = '\0';
 
 			crypt_res = php_sha256_crypt_r(str, salt, output, needed);
-			if (!crypt_res) {
+			if (!crypt_res || (salt[0]=='*' && salt[1]=='0')) {
 				if (salt[0]=='*' && salt[1]=='0') {
 					RETVAL_STRING("*1", 1);
 				} else {
@@ -251,7 +251,7 @@ PHP_FUNCTION(crypt)
 			memset(output, 0, PHP_MAX_SALT_LEN + 1);
 
 			crypt_res = php_crypt_blowfish_rn(str, salt, output, sizeof(output));
-			if (!crypt_res) {
+			if (!crypt_res || (salt[0]=='*' && salt[1]=='0')) {
 				if (salt[0]=='*' && salt[1]=='0') {
 					RETVAL_STRING("*1", 1);
 				} else {
@@ -267,7 +267,7 @@ PHP_FUNCTION(crypt)
 			_crypt_extended_init_r();
 
 			crypt_res = _crypt_extended_r(str, salt, &buffer);
-			if (!crypt_res) {
+			if (!crypt_res || (salt[0]=='*' && salt[1]=='0')) {
 				if (salt[0]=='*' && salt[1]=='0') {
 					RETURN_STRING("*1", 1);
 				} else {
@@ -291,7 +291,7 @@ PHP_FUNCTION(crypt)
 #    error Data struct used by crypt_r() is unknown. Please report.
 #  endif
 		crypt_res = crypt_r(str, salt, &buffer);
-		if (!crypt_res) {
+		if (!crypt_res || (salt[0]=='*' && salt[1]=='0')) {
 				if (salt[0]=='*' && salt[1]=='0') {
 					RETURN_STRING("*1", 1);
 				} else {
