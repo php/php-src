@@ -44,6 +44,8 @@ if (!MySQLPDOTest::isPDOMySQLnd())
 		// Using native PS for proc, since emulated fails.
 		printf("Native PS...\n");
 		foreach (array(false, true) as $multi) {
+			$value = $multi ? 'true' : 'false';
+			echo "\nTesting with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to {$value}\n";
 			$dsn = MySQLPDOTest::getDSN();
 			$user = PDO_MYSQL_TEST_USER;
 			$pass = PDO_MYSQL_TEST_PASS;
@@ -86,6 +88,8 @@ MySQLPDOTest::dropTestTable();
 ?>
 --EXPECTF--
 Native PS...
+
+Testing with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to false
 array(3) {
   [0]=>
   array(1) {
@@ -169,6 +173,8 @@ array(3) {
 }
 bool(false)
 string(5) "42000"
+
+Testing with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to true
 array(3) {
   [0]=>
   array(1) {
