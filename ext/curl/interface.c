@@ -2587,7 +2587,9 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 					uint   string_key_len;
 					ulong  num_key;
 					int    numeric_key;
-
+					zval tmp_current;
+					zval *tmp_current_ptr = NULL;
+					
 					zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
 
 					/* Pretend we have a string_key here */
@@ -2636,9 +2638,14 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 						}
 						continue;
 					}
-
-					SEPARATE_ZVAL(current);
-					convert_to_string_ex(current);
+					
+					if (Z_TYPE_PP(current) != IS_STRING) {
+						tmp_current = **current;
+						zval_copy_ctor(&tmp_current);
+						convert_to_string(&tmp_current);
+						tmp_current_ptr = &tmp_current;
+						current = &tmp_current_ptr;
+					}
 
 					postval = Z_STRVAL_PP(current);
 
@@ -2685,6 +2692,9 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 
 					if (numeric_key) {
 						efree(string_key);
+					}
+					if (tmp_current_ptr) {
+						zval_dtor(tmp_current_ptr);
 					}
 				}
 
