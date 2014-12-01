@@ -540,6 +540,22 @@ void zend_do_free(znode *op1) /* {{{ */
 }
 /* }}} */
 
+uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
+{
+	uint32_t new_flags = flags | new_flag;
+	if ((flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flag & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
+	}
+	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
+	}
+	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_FINAL)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class");
+	}
+	return new_flags;
+}
+/* }}} */
+
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
