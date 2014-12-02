@@ -342,6 +342,7 @@ static inline int zend_add_literal_string(zend_op_array *op_array, zend_string *
 	*str = Z_STR(zv);
 	return ret;
 }
+/* }}} */
 
 static int zend_add_func_name_literal(zend_op_array *op_array, zend_string *name TSRMLS_DC) /* {{{ */
 {
