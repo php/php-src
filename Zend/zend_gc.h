@@ -96,6 +96,7 @@ typedef struct _zend_gc_globals {
 
 	uint32_t gc_runs;
 	uint32_t collected;
+	long duration;
 
 #if GC_BENCH
 	uint32_t root_buf_length;
