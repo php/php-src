@@ -248,3 +248,6 @@ if (CLANG_TOOLSET) {
 	}
 }
 
+ARG_WITH("codegen-arch", "Architecture for code generation: ia32, sse, sse2, avx, avx2", "no");
+toolset_setup_codegen_arch();
+

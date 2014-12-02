@@ -2544,6 +2544,20 @@ function toolset_setup_arch()
 	DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
 }
 
+function toolset_setup_codegen_arch()
+{
+	if("no" == PHP_CODEGEN_ARCH) {
+		return;
+	}
+
+	if (VS_TOOLSET) {
+		var arc = PHP_CODEGEN_ARCH.toUpperCase();
+
+		if ("AVX2" == arc || "AVX" == arc || "SSE2" == arc || "SSE" == arc || "IA32" == arc) {
+			ADD_FLAG("CFLAGS", "/arch:" + arc);
+		}
+	}
+}
 
 function toolset_setup_linker()
 {
