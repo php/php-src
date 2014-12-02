@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Upgraded crypt_blowfish to version 1.3. (Leigh)
   . Fixed bug #60704 (unlink() bug with some files path).
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
+  . Fixed bug #68536 (pack for 64bits integer is broken on bigendian). (Remi)
 
 - cURL:
   . Fixed bug #67643 (curl_multi_getcontent returns '' when
