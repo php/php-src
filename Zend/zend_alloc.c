@@ -764,7 +764,9 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 			offset = alignment - offset;
 			zend_mm_munmap(ptr, offset);
 			ptr = (char*)ptr + offset;
-		} else {
+			alignment -= offset;
+		}
+		if (alignment > REAL_PAGE_SIZE) {
 			zend_mm_munmap((char*)ptr + size, alignment - REAL_PAGE_SIZE);
 		}
 # ifdef MADV_HUGEPAGE
