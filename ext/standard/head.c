@@ -40,11 +40,13 @@ PHP_FUNCTION(header)
 {
 	zend_bool rep = 1;
 	sapi_header_line ctr = {0};
+	size_t len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &ctr.line,
-				&ctr.line_len, &rep, &ctr.response_code) == FAILURE)
+				&len, &rep, &ctr.response_code) == FAILURE)
 		return;
 
+	ctr.line_len = (uint)len;
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr TSRMLS_CC);
 }
 /* }}} */
@@ -54,11 +56,13 @@ PHP_FUNCTION(header)
 PHP_FUNCTION(header_remove)
 {
 	sapi_header_line ctr = {0};
+	size_t len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ctr.line,
-	                          &ctr.line_len) == FAILURE)
+	                          &len) == FAILURE)
 		return;
 
+	ctr.line_len = (uint)len;
 	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr TSRMLS_CC);
 }
 /* }}} */
