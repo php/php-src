@@ -55,6 +55,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->refcount = (uint32_t *) emalloc(sizeof(uint32_t));
 	*op_array->refcount = 1;
 	op_array->last = 0;
+	op_array->opcodes = NULL;
 	op_array_alloc_ops(op_array, initial_ops_size);
 
 	op_array->last_var = 0;
