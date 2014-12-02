@@ -271,7 +271,7 @@ static void print_extensions(TSRMLS_D)
 #define STDOUT_FILENO 1
 #endif
 
-static inline size_t sapi_cgi_single_write(const char *str, uint str_length TSRMLS_DC)
+static inline size_t sapi_cgi_single_write(const char *str, size_t str_length TSRMLS_DC)
 {
 #ifdef PHP_WRITE_STDOUT
 	int ret;
@@ -313,7 +313,8 @@ static size_t sapi_fcgi_ub_write(const char *str, size_t str_length TSRMLS_DC)
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	while (remaining > 0) {
-		zend_long ret = fcgi_write(request, FCGI_STDOUT, ptr, remaining);
+		int to_write = remaining > INT_MAX ? INT_MAX : (int)remaining;
+		int ret = fcgi_write(request, FCGI_STDOUT, ptr, to_write);
 
 		if (ret <= 0) {
 			php_handle_aborted_connection();
@@ -517,7 +518,14 @@ static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 
 	count_bytes = MIN(count_bytes, remaining_bytes);
 	while (read_bytes < count_bytes) {
+#ifdef PHP_WIN32
+		size_t diff = count_bytes - read_bytes;
+		unsigned int to_read = (diff > UINT_MAX) ? UINT_MAX : (unsigned int)diff;
+
+		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, to_read);
+#else
 		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
+#endif
 		if (tmp_read_bytes <= 0) {
 			break;
 		}
@@ -537,7 +545,10 @@ static size_t sapi_fcgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 		count_bytes = remaining;
 	}
 	while (read_bytes < count_bytes) {
-		tmp_read_bytes = fcgi_read(request, buffer + read_bytes, count_bytes - read_bytes);
+		size_t diff = count_bytes - read_bytes;
+		int to_read = (diff > INT_MAX) ? INT_MAX : (int)diff;
+
+		tmp_read_bytes = fcgi_read(request, buffer + read_bytes, to_read);
 		if (tmp_read_bytes <= 0) {
 			break;
 		}
@@ -558,7 +569,7 @@ static char *sapi_fcgi_getenv(char *name, size_t name_len TSRMLS_DC)
 	 * of a request.  So we have to do our own lookup to get env
 	 * vars.  This could probably be faster somehow.  */
 	fcgi_request *request = (fcgi_request*) SG(server_context);
-	char *ret = fcgi_getenv(request, name, name_len);
+	char *ret = fcgi_getenv(request, name, (int)name_len);
 
 	if (ret) return ret;
 	/*  if cgi, or fastcgi and not found in fcgi env
@@ -566,10 +577,10 @@ static char *sapi_fcgi_getenv(char *name, size_t name_len TSRMLS_DC)
 	return getenv(name);
 }
 
-static char *_sapi_cgi_putenv(char *name, int name_len, char *value)
+static char *_sapi_cgi_putenv(char *name, size_t name_len, char *value)
 {
 #if !HAVE_SETENV || !HAVE_UNSETENV
-	int len;
+	size_t len;
 	char *buf;
 #endif
 
@@ -686,10 +697,10 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 		}
 
 		if (path_info) {
-			unsigned int path_info_len = strlen(path_info);
+			size_t path_info_len = strlen(path_info);
 
 			if (script_name) {
-				unsigned int script_name_len = strlen(script_name);
+				size_t script_name_len = strlen(script_name);
 
 				php_self_len = script_name_len + path_info_len;
 				php_self = do_alloca(php_self_len + 1, use_heap);
@@ -734,12 +745,12 @@ static void sapi_cgi_log_message(char *message TSRMLS_DC)
 
 		request = (fcgi_request*) SG(server_context);
 		if (request) {
-			int len = strlen(message);
+			int len = (int)strlen(message);
 			char *buf = malloc(len+2);
 
 			memcpy(buf, message, len);
 			memcpy(buf + len, "\n", sizeof("\n"));
-			fcgi_write(request, FCGI_STDERR, buf, len+1);
+			fcgi_write(request, FCGI_STDERR, buf, (int)(len+1));
 			free(buf);
 		} else {
 			fprintf(stderr, "%s\n", message);
@@ -756,7 +767,7 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 {
 	char *ptr;
 	user_config_cache_entry *new_entry, *entry;
-	time_t request_time = sapi_get_request_time(TSRMLS_C);
+	time_t request_time = (time_t)sapi_get_request_time(TSRMLS_C);
 
 	/* Find cached config entry: If not found, create one */
 	if ((entry = zend_hash_str_find_ptr(&CGIG(user_config_cache), path, path_len)) == NULL) {
