@@ -1099,7 +1099,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags, obj_dir)
 		manifest = "-@$(_VC_MANIFEST_EMBED_DLL)";
 	} else if (makefiletarget.match(new RegExp("\\.lib$"))) {
 		ldflags = "$(ARFLAGS)";
-		ld = "$(MAKE_LIB)";
+		ld = "@$(MAKE_LIB)";
 	} else {
 		ldflags = "$(LDFLAGS)";
 		manifest = "-@$(_VC_MANIFEST_EMBED_EXE)";

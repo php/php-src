@@ -5457,12 +5457,14 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	uint32_t op_num = EG(opline_before_exception) - EX(func)->op_array.opcodes;
 	int i;
 	uint32_t catch_op_num = 0, finally_op_num = 0, finally_op_end = 0;
+	int in_finally = 0;
 
 	for (i = 0; i < EX(func)->op_array.last_try_catch; i++) {
 		if (EX(func)->op_array.try_catch_array[i].try_op > op_num) {
 			/* further blocks will not be relevant... */
 			break;
 		}
+		in_finally = 0;
 		if (op_num < EX(func)->op_array.try_catch_array[i].catch_op) {
 			catch_op_num = EX(func)->op_array.try_catch_array[i].catch_op;
 		}
@@ -5473,6 +5475,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		if (op_num >= EX(func)->op_array.try_catch_array[i].finally_op &&
 				op_num < EX(func)->op_array.try_catch_array[i].finally_end) {
 			finally_op_end = EX(func)->op_array.try_catch_array[i].finally_end;
+			in_finally = 1;
 		}
 	}
 
@@ -5528,7 +5531,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
 		zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
 
-		if (Z_OBJ_P(fast_call)) {
+		if (in_finally && Z_OBJ_P(fast_call)) {
 			zend_exception_set_previous(EG(exception), Z_OBJ_P(fast_call) TSRMLS_CC);
 		} 
 		Z_OBJ_P(fast_call) = EG(exception);
@@ -5536,8 +5539,8 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		fast_call->u2.lineno = (uint32_t)-1;
 		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[finally_op_num]);
 		ZEND_VM_CONTINUE();
-	} else if (catch_op_num) {
-		if (finally_op_end && catch_op_num > finally_op_end) {
+	} else {
+		if (in_finally) {
 			/* we are going out of current finally scope */
 			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
 
@@ -5546,18 +5549,10 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 				Z_OBJ_P(fast_call) = NULL;
 			}
 		}
-		ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[catch_op_num]);
-		ZEND_VM_CONTINUE();
-	} else {
-		if (finally_op_end) {
-			zval *fast_call = EX_VAR(EX(func)->op_array.opcodes[finally_op_end].op1.var);
-
-			if (Z_OBJ_P(fast_call)) {
-				zend_exception_set_previous(EG(exception), Z_OBJ_P(fast_call) TSRMLS_CC);
-				Z_OBJ_P(fast_call) = NULL;
-			}
-		}
-		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+		if (catch_op_num) {
+			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[catch_op_num]);
+			ZEND_VM_CONTINUE();
+		} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
 			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_GENERATOR_RETURN);
 		} else {
 			ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
