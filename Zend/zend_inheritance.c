@@ -1126,7 +1126,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 					zend_get_function_declaration(existing_fn)->val);
 			}
 			return;
-		} else if ((existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+		} else if (existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT) {
 			/* two traits can't define the same non-abstract method */
 #if 1
 			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",

@@ -1090,11 +1090,14 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
  * calling zend_merge_properties(). */
 ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties ZEND_FILE_LINE_DC) /* {{{ */
 {
-	if (class_type->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-		char *what =   (class_type->ce_flags & ZEND_ACC_INTERFACE)                ? "interface"
-					 :((class_type->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) ? "trait"
-					 :                                                              "abstract class";
-		zend_error(E_ERROR, "Cannot instantiate %s %s", what, class_type->name->val);
+	if (class_type->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		if (class_type->ce_flags & ZEND_ACC_INTERFACE) {
+			zend_error_noreturn(E_ERROR, "Cannot instantiate interface %s", class_type->name->val);
+		} else if (class_type->ce_flags & ZEND_ACC_TRAIT) {
+			zend_error_noreturn(E_ERROR, "Cannot instantiate trait %s", class_type->name->val);
+		} else {
+			zend_error_noreturn(E_ERROR, "Cannot instantiate abstract class %s", class_type->name->val);
+		}
 	}
 
 	zend_update_class_constants(class_type);
