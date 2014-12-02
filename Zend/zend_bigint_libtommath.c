@@ -75,7 +75,7 @@ struct _zend_bigint {
 #define BITMASK_32 0xFFFFFFFFL
 
 /* used for checking if a number fits within a LibTomMath "digit" */
-#define BITMASK_DIGIT ((1 << DIGIT_BIT) - 1) 
+#define BITMASK_DIGIT (((zend_ulong)1 << DIGIT_BIT) - 1) 
 
 #define FITS_DIGIT(long) ((zend_ulong)(int_abs(long) & BITMASK_DIGIT) == (zend_ulong)int_abs(long))
 
@@ -357,24 +357,62 @@ ZEND_API int zend_bigint_sign(const zend_bigint *big) /* {{{ */
 /* Returns true if bigint is divisible by a bigint */
 ZEND_API zend_bool zend_bigint_divisible(const zend_bigint *num, const zend_bigint *divisor) /* {{{ */
 {
-	/* FIXME: non-stub */
-	return 0;
+	/* TODO: Refactor division so we don't have to do it twice for LibTomMath */
+	mp_int remainder;
+	zend_bool result;
+
+	mp_init(&remainder);
+
+	mp_div(&num->mp, &divisor->mp, NULL, &remainder);
+	result = USED(&remainder) ? 0 : 1;
+
+	mp_clear(&remainder);
+
+	return result;
 }
 /* }}} */
 
 /* Returns true if bigint is divisible by a long */
 ZEND_API zend_bool zend_bigint_divisible_long(const zend_bigint *num, zend_long divisor) /* {{{ */
 {
-	/* FIXME: non-stub */
-	return 0;
+	/* TODO: Refactor division so we don't have to do it twice for LibTomMath */
+	mp_int remainder;
+	zend_bool result;
+
+	mp_init(&remainder);
+
+	if (FITS_DIGIT(divisor)) {
+		mp_div_d(&num->mp, int_abs(divisor), NULL, &remainder);
+	} else {
+		WITH_TEMP_MP_FROM_ZEND_LONG(divisor, divisor_mp, {
+			mp_div(&num->mp, &divisor_mp, NULL, &remainder);
+		})
+	}
+	result = USED(&remainder) ? 0 : 1;
+
+	mp_clear(&remainder);
+
+	return result;
 }
 /* }}} */
 
 /* Returns true if long is divisible by a bigint */
 ZEND_API zend_bool zend_bigint_long_divisible(zend_long num, const zend_bigint *divisor) /* {{{ */
 {
-	/* FIXME: non-stub */
-	return 0;
+	/* TODO: Refactor division so we don't have to do it twice for LibTomMath */
+	mp_int remainder;
+	zend_bool result;
+
+	mp_init(&remainder);
+
+	WITH_TEMP_MP_FROM_ZEND_LONG(num, num_mp, {
+		mp_div(&num_mp, &divisor->mp, NULL, &remainder);
+	})
+	result = USED(&remainder) ? 0 : 1;
+
+	mp_clear(&remainder);
+
+	return result;
 }
 /* }}} */
 
@@ -561,6 +599,7 @@ ZEND_API void zend_bigint_subtract_long(zend_bigint *out, const zend_bigint *op1
 /* Subtracts a long and a long and stores result in out */
 ZEND_API void zend_bigint_long_subtract_long(zend_bigint *out, zend_long op1, zend_long op2) /* {{{ */
 {
+	/* TODO: Use mp_sub_d where possible, to allocate only one temp mp_int */
 	WITH_TEMP_MP_FROM_ZEND_LONG(op1, op1_mp, WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
 		mp_sub(&op1_mp, &op2_mp, &out->mp);
 	}))
@@ -586,7 +625,7 @@ ZEND_API void zend_bigint_long_subtract(zend_bigint *out, zend_long op1, const z
 /* Multiplies two bigints and stores result in out */
 ZEND_API void zend_bigint_multiply(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	mp_mul(&op1->mp, &op2->mp, &out->mp);
 }
 /* }}} */
 
@@ -594,72 +633,108 @@ ZEND_API void zend_bigint_multiply(zend_bigint *out, const zend_bigint *op1, con
 ZEND_API void zend_bigint_multiply_long(zend_bigint *out, const zend_bigint *op1, zend_long op2) /* {{{ */
 {
 	/* FIXME: Non-stub */
+	if (FITS_DIGIT(op2)) {
+		mp_mul_d(&op1->mp, int_abs(op2), &out->mp);
+		if (op2 < 0) {
+			/* (a * -b) = -ab = -(a * b)
+			 * (-a * -b) = ab = -(-a * b)
+			 */
+			mp_neg(&out->mp, &out->mp);
+		}
+	} else {
+		WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
+			mp_mul(&op1->mp, &op2_mp, &out->mp);
+		})
+	}
 }
 /* }}} */
 
 /* Multiplies a long and a long and stores result in out */
 ZEND_API void zend_bigint_long_multiply_long(zend_bigint *out, zend_long op1, zend_long op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	WITH_TEMP_MP_FROM_ZEND_LONG(op1, op1_mp, WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
+		mp_mul(&op1_mp, &op2_mp, &out->mp);
+	}))
 }
 /* }}} */
 
 /* Raises a bigint base to an unsigned long power and stores result in out */
 ZEND_API void zend_bigint_pow_ulong(zend_bigint *out, const zend_bigint *base, zend_ulong power) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	if (!FITS_DIGIT(power)) {
+		zend_error_noreturn(E_ERROR, "Exponent too large");
+	}
+
+	mp_expt_d(&base->mp, power, &out->mp);
 }
 /* }}} */
 
 /* Raises a long base to an unsigned long power and stores result in out */
 ZEND_API void zend_bigint_long_pow_ulong(zend_bigint *out, zend_long base, zend_ulong power) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	if (!FITS_DIGIT(power)) {
+		zend_error_noreturn(E_ERROR, "Exponent too large");
+	}
+
+	WITH_TEMP_MP_FROM_ZEND_LONG(base, base_mp, {
+		mp_expt_d(&base_mp, power, &out->mp);
+	})
 }
 /* }}} */
 
 /* Divides a bigint by a bigint and stores result in out */
 ZEND_API void zend_bigint_divide(zend_bigint *out, const zend_bigint *num, const zend_bigint *divisor) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	mp_div(&num->mp, &divisor->mp, &out->mp, NULL);
 }
 /* }}} */
 
 /* Divides a bigint by a bigint and returns result as a double */
 ZEND_API double zend_bigint_divide_as_double(const zend_bigint *num, const zend_bigint *divisor) /* {{{ */
 {
-	/* FIXME: Non-stub */
-	return NAN;
+	/* FIXME: Higher precision? */
+	return zend_bigint_to_double(num) / zend_bigint_to_double(divisor);
 }
 /* }}} */
 
 /* Divides a bigint by a long and stores result in out */
 ZEND_API void zend_bigint_divide_long(zend_bigint *out, const zend_bigint *num, zend_long divisor) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	if (FITS_DIGIT(divisor)) {
+		mp_div_d(&num->mp, int_abs(divisor), &out->mp, NULL);
+		if (divisor < 0) {
+			mp_neg(&out->mp, &out->mp);
+		}
+	} else {
+		WITH_TEMP_MP_FROM_ZEND_LONG(divisor, divisor_mp, {
+			mp_div(&num->mp, &divisor_mp, &out->mp, NULL);
+		})
+	}
 }
 /* }}} */
 
 /* Divides a bigint by a long and returns result as a double */
 ZEND_API double zend_bigint_divide_long_as_double(const zend_bigint *num, zend_long divisor) /* {{{ */
 {
-	/* FIXME: Non-stub */
-	return NAN;
+	/* FIXME: Higher precision? */
+	return zend_bigint_to_double(num) / (double)divisor;
 }
 /* }}} */
 
 /* Divides a long by a bigint and stores result in out */
 ZEND_API void zend_bigint_long_divide(zend_bigint *out, zend_long num, const zend_bigint *divisor) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	WITH_TEMP_MP_FROM_ZEND_LONG(num, num_mp, {
+		mp_div(&num_mp, &divisor->mp, &out->mp, NULL);
+	})
 }
 /* }}} */
 
 /* Divides a long by a bigint and returns result as a double */
 ZEND_API double zend_bigint_long_divide_as_double(zend_long num, const zend_bigint *divisor) /* {{{ */
 {
-	/* FIXME: Non-stub */
-	return NAN;
+	/* FIXME: Higher precision? */
+	return (double)num / zend_bigint_to_double(divisor);
 }
 /* }}} */
 
