@@ -56,7 +56,7 @@ PHP_FUNCTION(header)
 PHP_FUNCTION(header_remove)
 {
 	sapi_header_line ctr = {0};
-	size_t len;
+	size_t len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ctr.line,
 	                          &len) == FAILURE)
