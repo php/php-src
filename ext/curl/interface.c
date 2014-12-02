@@ -2524,10 +2524,22 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue TSRMLS_DC) 
 				 zend_hash_get_current_data(ph, (void **) &current) == SUCCESS;
 				 zend_hash_move_forward(ph)
 			) {
-				SEPARATE_ZVAL(current);
-				convert_to_string_ex(current);
+				zval tmp_current;
+				zval *tmp_current_ptr = NULL;
+
+				if (Z_TYPE_PP(current) != IS_STRING) {
+					tmp_current = **current;
+					zval_copy_ctor(&tmp_current);
+					convert_to_string(&tmp_current);
+					tmp_current_ptr = &tmp_current;
+					current = &tmp_current_ptr;
+				}
 
 				slist = curl_slist_append(slist, Z_STRVAL_PP(current));
+
+				if (tmp_current_ptr) {
+					zval_dtor(tmp_current_ptr);
+				}
 				if (!slist) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not build curl_slist");
 					return 1;

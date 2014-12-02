@@ -31,7 +31,27 @@ curl_close($ch);
 $ch = curl_init();            
 $post_data = array('a' => true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
-var_dump($post_data['a']);                                                                                                                                                                                    
+var_dump($post_data['a']);
+curl_close($ch);
+
+$ch = curl_init();
+$header = array('a' => 1);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+var_dump($header['a']);
+curl_close($ch);
+
+$ch = curl_init();
+$one = 1;
+$header = array('a' => $one);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+var_dump($header['a']);
+curl_close($ch);
+
+$ch = curl_init();
+$two_with_ref = 2;
+$header = array('a' => &$two_with_ref);
+curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+var_dump($header['a']);
 curl_close($ch);
 
 ?>
@@ -40,3 +60,6 @@ int(1)
 int(1)
 int(1)
 bool(true)
+int(1)
+int(1)
+int(2)
