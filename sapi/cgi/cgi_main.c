@@ -1197,7 +1197,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 			char *orig_path_info = env_path_info;
 			char *orig_script_name = env_script_name;
 			char *orig_script_filename = env_script_filename;
-			int script_path_translated_len;
+			size_t script_path_translated_len;
 
 			if (!env_document_root && PG(doc_root)) {
 				env_document_root = CGI_PUTENV("DOCUMENT_ROOT", PG(doc_root));
@@ -1238,7 +1238,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 				(real_path = tsrm_realpath(script_path_translated, NULL TSRMLS_CC)) == NULL)
 			) {
 				char *pt = estrndup(script_path_translated, script_path_translated_len);
-				int len = script_path_translated_len;
+				size_t len = script_path_translated_len;
 				char *ptr;
 
 				while ((ptr = strrchr(pt, '/')) || (ptr = strrchr(pt, '\\'))) {
@@ -1259,8 +1259,8 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 						 * we have to play the game of hide and seek to figure
 						 * out what SCRIPT_NAME should be
 						 */
-						int slen = len - strlen(pt);
-						int pilen = env_path_info ? strlen(env_path_info) : 0;
+						size_t slen = len - strlen(pt);
+						size_t pilen = env_path_info ? strlen(env_path_info) : 0;
 						char *path_info = env_path_info ? env_path_info + pilen - slen : NULL;
 
 						if (orig_path_info != path_info) {
@@ -1296,8 +1296,8 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 						 * SCRIPT_FILENAME minus SCRIPT_NAME
 						 */
 						if (env_document_root) {
-							int l = strlen(env_document_root);
-							int path_translated_len = 0;
+							size_t l = strlen(env_document_root);
+							size_t path_translated_len = 0;
 							char *path_translated = NULL;
 
 							if (l && env_document_root[l - 1] == '/') {
@@ -1326,8 +1326,8 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 									strstr(pt, env_script_name)
 						) {
 							/* PATH_TRANSLATED = PATH_TRANSLATED - SCRIPT_NAME + PATH_INFO */
-							int ptlen = strlen(pt) - strlen(env_script_name);
-							int path_translated_len = ptlen + (env_path_info ? strlen(env_path_info) : 0);
+							size_t ptlen = strlen(pt) - strlen(env_script_name);
+							size_t path_translated_len = ptlen + (env_path_info ? strlen(env_path_info) : 0);
 							char *path_translated = NULL;
 
 							path_translated = (char *) emalloc(path_translated_len + 1);
