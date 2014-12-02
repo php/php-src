@@ -691,6 +691,12 @@ static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry
 	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && iface->interface_gets_implemented && iface->interface_gets_implemented(iface, ce) == FAILURE) {
 		zend_error(E_CORE_ERROR, "Class %s could not implement interface %s", ce->name->val, iface->name->val);
 	}
+	if (iface->ce_flags & ZEND_ACC_PRIVATE) {
+		/* Inspect if class and implemented interface are in the same namespace */
+		if (!zend_is_same_namespace(ce->name->val, iface->name->val)) {
+			zend_error(E_ERROR, "Class %s cannot implement package private interface %s", ce->name->val, iface->name->val);
+		}
+	}
 	if (ce == iface) {
 		zend_error(E_ERROR, "Interface %s cannot implement itself", ce->name->val);
 	}
@@ -783,6 +789,12 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		/* Class must not extend a final class */
 		if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ce->name->val, parent_ce->name->val);
+		}
+	}
+	if (parent_ce->ce_flags & ZEND_ACC_PRIVATE) {
+		/* Inspect if class and extended class are in the same namespace */
+		if (!zend_is_same_namespace(ce->name->val, parent_ce->name->val)) {
+			zend_error(E_ERROR, "Class %s cannot extend package private class %s", ce->name->val, parent_ce->name->val);
 		}
 	}
 
@@ -1002,6 +1014,17 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 }
 /* }}} */
 
+ZEND_API void do_implement_trait(zend_class_entry *ce, zend_class_entry *trait_ce) /* {{{ */
+{
+	if (trait_ce->ce_flags & ZEND_ACC_PRIVATE) {
+		/* Inspect if class and consumed trait are in the same namespace */
+		if (!zend_is_same_namespace(ce->name->val, trait_ce->name->val)) {
+			zend_error(E_ERROR, "Class %s cannot use package private trait %s", ce->name->val, trait_ce->name->val);
+		}
+	}
+}
+/* }}} */
+
 ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *trait) /* {{{ */
 {
 	uint32_t i, ignore = 0;
@@ -1028,6 +1051,8 @@ ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *tr
 		}
 		ce->traits[ce->num_traits++] = trait;
 	}
+
+	do_implement_trait(ce, trait);
 }
 /* }}} */
 

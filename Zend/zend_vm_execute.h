@@ -2724,6 +2724,7 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		ce = Z_CE_P(EX_VAR(opline->op1.var));
 	}
+
 	if (UNEXPECTED((ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0)) {
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 			zend_error_noreturn(E_ERROR, "Cannot instantiate interface %s", ce->name->val);
@@ -2733,6 +2734,23 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error_noreturn(E_ERROR, "Cannot instantiate abstract class %s", ce->name->val);
 		}
 	}
+
+	/* Inspect at runtime for package package private restrictions */
+	if (ce->ce_flags & ZEND_ACC_PRIVATE) {
+		/* Instantiation can only happen under same namespace */
+		if (EG(scope) == NULL) {
+			/* In a top-level scope, class cannot be in a namespace */
+			if (strchr(ce->name->val, '\\') != NULL) {
+				zend_error_noreturn(E_ERROR, "Top level scope cannot instantiate package private class %s", ce->name->val);
+			}
+		} else {
+			/* In a class scope, class to be instantiated must match namespaces */
+			if (!zend_is_same_namespace(ce->name->val, EG(scope)->name->val)) {
+				zend_error_noreturn(E_ERROR, "Class %s cannot instantiate package private class %s", EG(scope)->name->val, ce->name->val);
+			}
+		}
+	}
+
 	object_init_ex(&object_zval, ce);
 	constructor = Z_OBJ_HT(object_zval)->get_constructor(Z_OBJ(object_zval));
 
@@ -11854,6 +11872,7 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	} else {
 		ce = Z_CE_P(EX_VAR(opline->op1.var));
 	}
+
 	if (UNEXPECTED((ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0)) {
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 			zend_error_noreturn(E_ERROR, "Cannot instantiate interface %s", ce->name->val);
@@ -11863,6 +11882,23 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error_noreturn(E_ERROR, "Cannot instantiate abstract class %s", ce->name->val);
 		}
 	}
+
+	/* Inspect at runtime for package package private restrictions */
+	if (ce->ce_flags & ZEND_ACC_PRIVATE) {
+		/* Instantiation can only happen under same namespace */
+		if (EG(scope) == NULL) {
+			/* In a top-level scope, class cannot be in a namespace */
+			if (strchr(ce->name->val, '\\') != NULL) {
+				zend_error_noreturn(E_ERROR, "Top level scope cannot instantiate package private class %s", ce->name->val);
+			}
+		} else {
+			/* In a class scope, class to be instantiated must match namespaces */
+			if (!zend_is_same_namespace(ce->name->val, EG(scope)->name->val)) {
+				zend_error_noreturn(E_ERROR, "Class %s cannot instantiate package private class %s", EG(scope)->name->val, ce->name->val);
+			}
+		}
+	}
+
 	object_init_ex(&object_zval, ce);
 	constructor = Z_OBJ_HT(object_zval)->get_constructor(Z_OBJ(object_zval));
 

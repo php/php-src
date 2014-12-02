@@ -535,6 +535,9 @@ void zend_do_free(znode *op1) /* {{{ */
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
+	if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple access type modifiers are not allowed");
+	}
 	if ((flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flag & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
 	}
