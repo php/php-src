@@ -29,7 +29,7 @@ int php_init_config(TSRMLS_D);
 int php_shutdown_config(void);
 void php_ini_register_extensions(TSRMLS_D);
 PHPAPI zval *cfg_get_entry_ex(zend_string *name);
-PHPAPI zval *cfg_get_entry(const char *name, uint name_length);
+PHPAPI zval *cfg_get_entry(const char *name, size_t name_length);
 PHPAPI int cfg_get_long(const char *varname, zend_long *result);
 PHPAPI int cfg_get_double(const char *varname, double *result);
 PHPAPI int cfg_get_string(const char *varname, char **result);
@@ -37,8 +37,8 @@ PHPAPI int php_parse_user_ini_file(const char *dirname, char *ini_filename, Hash
 PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int stage TSRMLS_DC);
 PHPAPI int php_ini_has_per_dir_config(void);
 PHPAPI int php_ini_has_per_host_config(void);
-PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC);
-PHPAPI void php_ini_activate_per_host_config(const char *host, uint host_len TSRMLS_DC);
+PHPAPI void php_ini_activate_per_dir_config(char *path, size_t path_len TSRMLS_DC);
+PHPAPI void php_ini_activate_per_host_config(const char *host, size_t host_len TSRMLS_DC);
 PHPAPI HashTable* php_ini_get_configuration_hash(void);
 END_EXTERN_C()
 

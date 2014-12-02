@@ -752,7 +752,7 @@ static void sapi_cgi_log_message(char *message TSRMLS_DC)
 
 /* {{{ php_cgi_ini_activate_user_config
  */
-static void php_cgi_ini_activate_user_config(char *path, int path_len, const char *doc_root, int doc_root_len, int start TSRMLS_DC)
+static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len, int start TSRMLS_DC)
 {
 	char *ptr;
 	user_config_cache_entry *new_entry, *entry;
@@ -770,9 +770,9 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 	/* Check whether cache entry has expired and rescan if it is */
 	if (request_time > entry->expires) {
 		char *real_path = NULL;
-		int real_path_len;
+		size_t real_path_len;
 		char *s1, *s2;
-		int s_len;
+		size_t s_len;
 
 		/* Clear the expired config */
 		zend_hash_clean(entry->user_config);
@@ -831,7 +831,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 static int sapi_cgi_activate(TSRMLS_D)
 {
 	char *path, *doc_root, *server_name;
-	uint path_len, doc_root_len, server_name_len;
+	size_t path_len, doc_root_len, server_name_len;
 
 	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
 	if (!SG(request_info).path_translated) {
@@ -898,7 +898,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 				doc_root = estrndup(doc_root, doc_root_len);
 				zend_str_tolower(doc_root, doc_root_len);
 #endif
-				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, doc_root_len - 1 TSRMLS_CC);
+				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, (doc_root_len > 0 && (doc_root_len - 1)) TSRMLS_CC);
 				
 #ifdef PHP_WIN32
 				efree(doc_root);
