@@ -2805,6 +2805,31 @@ ZEND_VM_C_LABEL(fcall_end):
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(170, ZEND_VERIFY_RETURN_TYPE, ANY, VAR|UNUSED)
+{
+	USE_OPLINE
+	zval *retval_ptr;
+	zend_free_op free_op1, free_op2;
+	zend_type_decl *return_type = NULL;
+	zend_class_entry *ce = NULL;
+
+	SAVE_OPLINE();
+	retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	if (OP1_TYPE == IS_UNUSED || Z_ISNULL_P(retval_ptr)) {
+		zend_return_type_error(E_RECOVERABLE_ERROR, EX(func), retval_ptr, NULL TSRMLS_CC);
+	} else {
+		return_type = &EX(func)->common.return_type;
+		ce = Z_CE_P(EX_VAR(opline->op2.var));
+
+		if (!zval_fits_type(retval_ptr, return_type->kind, ce TSRMLS_CC)) {
+			zend_return_type_error(E_RECOVERABLE_ERROR, EX(func), retval_ptr, NULL TSRMLS_CC);
+		}
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE

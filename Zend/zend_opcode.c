@@ -93,6 +93,8 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->run_time_cache = NULL;
 	op_array->last_cache_slot = 0;
 
+	zend_type_decl_ctor(&op_array->return_type, IS_UNDEF, NULL);
+
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
 	zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_ctor_handler, op_array TSRMLS_CC);
@@ -377,6 +379,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 		}
 		efree(op_array->arg_info);
 	}
+
+	zend_type_decl_dtor(&op_array->return_type);
 }
 
 void init_op(zend_op *op TSRMLS_DC)
@@ -757,6 +761,11 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 			case ZEND_FE_RESET:
 			case ZEND_FE_FETCH:
 				opline->op2.jmp_addr = &op_array->opcodes[opline->op2.opline_num];
+				break;
+			case ZEND_VERIFY_RETURN_TYPE:
+				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+					MAKE_NOP(opline);
+				}
 				break;
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:

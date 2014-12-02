@@ -53,6 +53,7 @@
 PHPAPI zend_class_entry *reflector_ptr;
 PHPAPI zend_class_entry *reflection_exception_ptr;
 PHPAPI zend_class_entry *reflection_ptr;
+PHPAPI zend_class_entry *reflection_type_ptr;
 PHPAPI zend_class_entry *reflection_function_abstract_ptr;
 PHPAPI zend_class_entry *reflection_function_ptr;
 PHPAPI zend_class_entry *reflection_parameter_ptr;
@@ -203,7 +204,8 @@ typedef enum {
 	REF_TYPE_FUNCTION,
 	REF_TYPE_PARAMETER,
 	REF_TYPE_PROPERTY,
-	REF_TYPE_DYNAMIC_PROPERTY
+	REF_TYPE_DYNAMIC_PROPERTY,
+	REF_TYPE_TYPE
 } reflection_type_t;
 
 /* Struct for reflection objects */
@@ -315,6 +317,7 @@ static void reflection_free_objects_storage(zend_object *object TSRMLS_DC) /* {{
 			zend_string_release(prop_reference->prop.name);
 			efree(intern->ptr);
 			break;
+		case REF_TYPE_TYPE:
 		case REF_TYPE_OTHER:
 			break;
 		}
@@ -1293,6 +1296,20 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 }
 /* }}} */
 
+/* {{{ reflection_type_factory */
+static void reflection_type_factory(zend_type_decl *type, zval *object TSRMLS_DC)
+{
+	zend_class_entry *ce = reflection_type_ptr;
+	reflection_object *intern;
+
+	reflection_instantiate(ce, object TSRMLS_CC);
+	intern = Z_REFLECTION_P(object);
+	intern->ptr = type;
+	intern->ref_type = REF_TYPE_TYPE;
+	intern->ce = ce;
+}
+/* }}} */
+
 /* {{{ reflection_property_factory */
 static void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop, zval *object TSRMLS_DC)
 {
@@ -2000,6 +2017,33 @@ ZEND_METHOD(reflection_function, returnsReference)
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	RETURN_BOOL((fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionFunction::hasReturnType()
+   Returns whether this function has a return type */
+ZEND_METHOD(reflection_function, hasReturnType)
+{
+	reflection_object *intern;
+	zend_function *func;
+
+	GET_REFLECTION_OBJECT_PTR(func);
+
+	RETURN_BOOL(func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE);
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionFunction::getReturnType()
+   Gets the return type as a string; "" if there is not a return type */
+ZEND_METHOD(reflection_function, getReturnType)
+{
+	reflection_object *intern;
+	zend_function *func;
+
+	GET_REFLECTION_OBJECT_PTR(func);
+
+	reflection_type_factory(&func->common.return_type, return_value TSRMLS_CC);
+
 }
 /* }}} */
 
@@ -5652,6 +5696,57 @@ ZEND_METHOD(reflection_zend_extension, getCopyright)
 }
 /* }}} */
 
+/* {{{ proto public static mixed ReflectionType::export(string name [, bool return]) throws ReflectionException
+   Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
+ZEND_METHOD(reflection_type, export)
+{
+	_reflection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_method_ptr, 1);
+}
+/* }}} */
+
+/* {{{ */
+ZEND_METHOD(reflection_type, getKind) 
+{
+	reflection_object *intern;
+	zend_type_decl *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(type);
+
+	RETURN_LONG(type->kind);
+}
+/* }}} */
+
+/* {{{ */
+ZEND_METHOD(reflection_type, __toString)
+{
+	reflection_object *intern;
+	zend_type_decl *type;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(type);
+
+	switch (type->kind) {
+		case IS_CALLABLE:
+			RETURN_STRING("callable");
+
+		case IS_ARRAY:
+			RETURN_STRING("array");
+
+		case IS_OBJECT:
+			RETURN_STRINGL(type->name->val, type->name->len);
+
+		case IS_UNDEF:
+		default:
+			RETURN_EMPTY_STRING();
+	}
+}
+/* }}} */
+
 /* {{{ method tables */
 static const zend_function_entry reflection_exception_functions[] = {
 	PHP_FE_END
@@ -5723,6 +5818,8 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, getShortName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getStartLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getStaticVariables, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, hasReturnType, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, getReturnType, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, returnsReference, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
@@ -6058,6 +6155,15 @@ static const zend_function_entry reflection_zend_extension_functions[] = {
 	ZEND_ME(reflection_zend_extension, getCopyright, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
+
+static const zend_function_entry reflection_type_functions[] = {
+	ZEND_ME(reflection_type, export, arginfo_reflection_extension_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_ME(reflection_type, __toString, arginfo_reflection__void, ZEND_ACC_PUBLIC)
+	ZEND_MALIAS(reflection_type, getName, __toString, arginfo_reflection__void, ZEND_ACC_PUBLIC)
+
+	ZEND_ME(reflection_type, getKind, arginfo_reflection__void, 0)
+	PHP_FE_END
+};
 /* }}} */
 
 const zend_function_entry reflection_ext_functions[] = { /* {{{ */
@@ -6173,6 +6279,16 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_zend_extension_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	zend_class_implements(reflection_zend_extension_ptr TSRMLS_CC, 1, reflector_ptr);
 	zend_declare_property_string(reflection_zend_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionType", reflection_type_functions);
+	_reflection_entry.create_object = reflection_objects_new;
+	reflection_type_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
+	zend_class_implements(reflection_type_ptr TSRMLS_CC, 1, reflector_ptr);
+
+	REGISTER_REFLECTION_CLASS_CONST_LONG(type, "IS_UNDECLARED", IS_UNDEF);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(type, "IS_ARRAY", IS_ARRAY);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(type, "IS_CALLABLE", IS_CALLABLE);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(type, "IS_OBJECT", IS_OBJECT);
 
 	return SUCCESS;
 } /* }}} */
