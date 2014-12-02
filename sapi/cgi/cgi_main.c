@@ -1664,7 +1664,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	char *s, *p;
-	int  len = 0;
+	size_t len = 0;
 	ALLOCA_FLAG(use_heap)
 
 	if (h->header_len > 0) {
@@ -1673,9 +1673,9 @@ static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS
 			len = p - h->header;
 		}
 		if (len > 0) {
-			while (len > 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t')) {
+			do {
 				len--;
-			}
+			} while (len != 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t'));
 			if (len) {
 				s = do_alloca(len + 1, use_heap);
 				memcpy(s, h->header, len);
