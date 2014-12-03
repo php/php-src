@@ -23,6 +23,7 @@ env:
 before_install:
     - sudo cp ./travis/de /var/lib/locales/supported.d/de
     - sudo dpkg-reconfigure locales
+    - ./travis/install.sh
 
 before_script:
     # Compile PHP
