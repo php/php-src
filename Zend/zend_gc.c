@@ -21,6 +21,14 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#ifdef PHP_WIN32
+#include "win32/time.h"
+#elif defined(NETWARE)
+#include <sys/timeval.h>
+#include <sys/time.h>
+#else
+#include <sys/time.h>
+#endif
 
 /* one (0) is reserved */
 #define GC_ROOT_BUFFER_MAX_ENTRIES 10001
@@ -68,6 +76,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals TSRMLS_DC)
 
 	gc_globals->gc_runs = 0;
 	gc_globals->collected = 0;
+	gc_globals->duration = 0;
 
 #if GC_BENCH
 	gc_globals->root_buf_length = 0;
@@ -99,6 +108,7 @@ ZEND_API void gc_reset(TSRMLS_D)
 {
 	GC_G(gc_runs) = 0;
 	GC_G(collected) = 0;
+	GC_G(duration) = 0;
 	GC_G(gc_full) = 0;
 
 #if GC_BENCH
@@ -709,6 +719,10 @@ tail_call:
 ZEND_API int gc_collect_cycles(TSRMLS_D)
 {
 	int count = 0;
+#ifdef HAVE_GETTIMEOFDAY
+	struct timeval start = {0}, end = {0};
+	double gc_timing = 1;
+#endif
 
 	if (GC_G(roots).next != &GC_G(roots)) {
 		gc_root_buffer *current, *orig_next_to_free;
@@ -718,6 +732,13 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 		if (GC_G(gc_active)) {
 			return 0;
 		}
+
+#ifdef HAVE_GETTIMEOFDAY
+		if (gettimeofday(&start, NULL)) {
+			gc_timing = 0;
+		}
+#endif
+
 		GC_G(gc_runs)++;
 		GC_G(gc_active) = 1;
 		gc_mark_roots(TSRMLS_C);
@@ -832,6 +853,12 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 
 		GC_G(collected) += count;
 		GC_G(next_to_free) = orig_next_to_free;
+
+#ifdef HAVE_GETTIMEOFDAY
+		if (gc_timing == 1 && gettimeofday(&end, NULL) == 0) {
+			GC_G(duration) += (((end.tv_sec - start.tv_sec) * 1000000) + (end.tv_usec - start.tv_usec));
+		}
+#endif
 	}
 
 	return count;
