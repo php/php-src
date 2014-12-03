@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #60704 (unlink() bug with some files path).
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
   . Fixed bug #68536 (pack for 64bits integer is broken on bigendian). (Remi)
+  . Fixed bug #55541 (errors spawn MessageBox, which blocks test automation).
+    (Anatol)
+  . Fixed bug #68297 (Application Popup provides too few information). (Anatol)
 
 - cURL:
   . Fixed bug #67643 (curl_multi_getcontent returns '' when
