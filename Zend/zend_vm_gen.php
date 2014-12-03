@@ -140,7 +140,7 @@ $op1_get_zval_ptr = array(
 	"CONST"  => "opline->op1.zv",
 	"UNUSED" => "NULL",
 	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op1.var TSRMLS_CC)",
-	"TMPVAR" => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC)",
+	"TMPVAR" => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
 );
 
 $op2_get_zval_ptr = array(
@@ -150,7 +150,7 @@ $op2_get_zval_ptr = array(
 	"CONST"  => "opline->op2.zv",
 	"UNUSED" => "NULL",
 	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op2.var TSRMLS_CC)",
-	"TMPVAR" => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC)",
+	"TMPVAR" => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
 );
 
 $op1_get_zval_ptr_ptr = array(
