@@ -2192,7 +2192,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		if (ptr->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)ptr->arg_info;
 			
-			internal_function->arg_info = (zend_arg_info*)ptr->arg_info+1;
+			internal_function->arg_info = (zend_internal_arg_info*)ptr->arg_info+1;
 			internal_function->num_args = ptr->num_args;
 			/* Currently you cannot denote that the function can accept less arguments than num_args */
 			if (info->required_num_args == -1) {

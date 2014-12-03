@@ -3833,14 +3833,12 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) /* {{{ */
 		opline->op1.num = i + 1;
 
 		arg_info = &arg_infos[i];
-		arg_info->name = estrndup(name->val, name->len);
-		arg_info->name_len = (uint32_t)name->len;
+		arg_info->name = zend_string_copy(name);
 		arg_info->pass_by_reference = is_ref;
 		arg_info->is_variadic = is_variadic;
 		arg_info->type_hint = 0;
 		arg_info->allow_null = 1;
 		arg_info->class_name = NULL;
-		arg_info->class_name_len = 0;
 
 		if (type_ast) {
 			zend_bool has_null_default = default_ast
@@ -3877,10 +3875,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) /* {{{ */
 				}
 
 				arg_info->type_hint = IS_OBJECT;
-				arg_info->class_name = estrndup(class_name->val, class_name->len);
-				arg_info->class_name_len = (uint32_t)class_name->len;
-
-				zend_string_release(class_name);
+				arg_info->class_name = class_name;
 
 				if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant)) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "

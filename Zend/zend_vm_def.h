@@ -2666,7 +2666,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			zval *p = ZEND_CALL_ARG(call, 1);
 
 			for (i = 0; i < ZEND_CALL_NUM_ARGS(call); ++i) {
-				zend_verify_arg_type(fbc, i + 1, p, NULL TSRMLS_CC);
+				zend_verify_internal_arg_type(fbc, i + 1, p TSRMLS_CC);
 				p++;
 			}
 			if (UNEXPECTED(EG(exception) != NULL)) {
