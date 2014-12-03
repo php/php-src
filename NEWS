@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
     breaks the RecursiveIterator). (Paul Garvin)
+  . Fixed bug #65213 (cannot cast SplFileInfo to boolean) (Tjerk)
 
 11 Dec 2014, PHP 5.5.20
 
