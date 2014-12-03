@@ -795,6 +795,11 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	zend_update_inherited_handler(__callstatic);
 #endif
 
+#if ZEND_EXTENSION_API_NO >= PHP_5_6_X_API_NO
+/* 5.6 stuff */
+	zend_update_inherited_handler(__debugInfo);
+#endif
+
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 /* 5.4 traits */
 	if (ce->trait_aliases) {
