@@ -301,11 +301,14 @@ PHP 5.6 UPGRADE NOTES
   Added PDO::pgsqlGetNotify($result_type = PDO::FETCH_USE_DEFAULT, $ms_timeout = 0)
   Added PDO::pgsqlGetPid()
 
-- Zip:
-  Added ZipArchive::setPassword($password)
+- Reflection
+  Added ReflectionFunction::isVariadic() and ReflectionParameter::isVariadic().
 
 - SPL
   Added SplFileObject::fread($length) to complement fwrite() method (>= 5.5.11)
+
+- Zip:
+  Added ZipArchive::setPassword($password)
 
 ========================================
 7. New Classes and Interfaces
