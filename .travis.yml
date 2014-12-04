@@ -1,8 +1,4 @@
-language: php
-
-php:
-    # We only specify one version so we only get one worker
-    - 5.4
+language: c
 
 notifications:
     email: 
@@ -27,6 +23,7 @@ env:
 before_install:
     - sudo cp ./travis/de /var/lib/locales/supported.d/de
     - sudo dpkg-reconfigure locales
+    - ./travis/install.sh
 
 before_script:
     # Compile PHP
