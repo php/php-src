@@ -37,6 +37,7 @@ PHP_FUNCTION(pcntl_wait);
 PHP_FUNCTION(pcntl_wifexited);
 PHP_FUNCTION(pcntl_wifstopped);
 PHP_FUNCTION(pcntl_wifsignaled);
+PHP_FUNCTION(pcntl_wifcontinued);
 PHP_FUNCTION(pcntl_wexitstatus);
 PHP_FUNCTION(pcntl_wtermsig);
 PHP_FUNCTION(pcntl_wstopsig);
