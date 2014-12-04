@@ -3504,7 +3504,7 @@ ZEND_API int zend_fcall_info_argp(zend_fcall_info *fci TSRMLS_DC, int argc, zval
 		fci->params = (zval *) erealloc(fci->params, fci->param_count * sizeof(zval));
 
 		for (i = 0; i < argc; ++i) {
-			ZVAL_COPY_VALUE(&fci->params[i], &argv[i]);
+			ZVAL_COPY(&fci->params[i], &argv[i]);
 		}
 	}
 
@@ -3529,7 +3529,7 @@ ZEND_API int zend_fcall_info_argv(zend_fcall_info *fci TSRMLS_DC, int argc, va_l
 
 		for (i = 0; i < argc; ++i) {
 			arg = va_arg(*argv, zval *);
-			ZVAL_COPY_VALUE(&fci->params[i], arg);
+			ZVAL_COPY(&fci->params[i], arg);
 		}
 	}
 
