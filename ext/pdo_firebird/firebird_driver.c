@@ -23,9 +23,7 @@
 #define _GNU_SOURCE
 
 #include "php.h"
-#ifdef ZEND_ENGINE_2
-# include "zend_exceptions.h"
-#endif
+#include "zend_exceptions.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
