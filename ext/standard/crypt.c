@@ -196,7 +196,6 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 		} else if (
 				salt[0] == '$' &&
 				salt[1] == '2' &&
-				salt[2] >= 'a' && salt[2] <= 'z' &&
 				salt[3] == '$' &&
 				salt[4] >= '0' && salt[4] <= '3' &&
 				salt[5] >= '0' && salt[5] <= '9' &&
@@ -219,7 +218,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 			_crypt_extended_init_r();
 
 			crypt_res = _crypt_extended_r(password, salt, &buffer);
-			if (!crypt_res) {
+			if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
 				return NULL;
 			} else {
 				result = zend_string_init(crypt_res, strlen(crypt_res), 0);
@@ -240,8 +239,8 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 #    error Data struct used by crypt_r() is unknown. Please report.
 #  endif
 		crypt_res = crypt_r(password, salt, &buffer);
-		if (!crypt_res) {
-			return FAILURE;
+		if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
+			return NULL;
 		} else {
 			result = zend_string_init(crypt_res, strlen(crypt_res), 0);
 			return result;

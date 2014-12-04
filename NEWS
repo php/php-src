@@ -44,6 +44,10 @@ PHP                                                                        NEWS
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
 
+- pcntl:
+  . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
+    when setting SIG_DFL). (Julien)
+
 - Reflection
   . Fixed inheritance chain of Reflector interface (Tjerk)
 
@@ -57,6 +61,8 @@ PHP                                                                        NEWS
 - SPL:
   . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
     nor curruption state). (Julien)
+  . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
+    breaks the RecursiveIterator). (Paul Garvin)
 
 - Standard:
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)

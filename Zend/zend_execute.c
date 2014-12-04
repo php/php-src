@@ -525,16 +525,28 @@ static inline zval* make_real_object(zval *object_ptr TSRMLS_DC)
 	return object;
 }
 
-ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC)
+ZEND_API char * zend_verify_internal_arg_class_kind(const zend_internal_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC)
 {
 	zend_string *key;
 	ALLOCA_FLAG(use_heap);
 
-	STR_ALLOCA_INIT(key, cur_arg_info->class_name, cur_arg_info->class_name_len, use_heap);
+	STR_ALLOCA_INIT(key, cur_arg_info->class_name, strlen(cur_arg_info->class_name), use_heap);
 	*pce = zend_fetch_class(key, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD) TSRMLS_CC);
 	STR_ALLOCA_FREE(key, use_heap);
 
 	*class_name = (*pce) ? (*pce)->name->val : (char*)cur_arg_info->class_name;
+	if (*pce && (*pce)->ce_flags & ZEND_ACC_INTERFACE) {
+		return "implement interface ";
+	} else {
+		return "be an instance of ";
+	}
+}
+
+ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC)
+{
+	*pce = zend_fetch_class(cur_arg_info->class_name, (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD) TSRMLS_CC);
+
+	*class_name = (*pce) ? (*pce)->name->val : cur_arg_info->class_name->val;
 	if (*pce && (*pce)->ce_flags & ZEND_ACC_INTERFACE) {
 		return "implement interface ";
 	} else {
@@ -591,6 +603,55 @@ static int is_null_constant(zval *default_value TSRMLS_DC)
 		zval_dtor(&constant);
 	}
 	return 0;
+}
+
+static void zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg TSRMLS_DC)
+{
+	zend_internal_arg_info *cur_arg_info;
+	char *need_msg;
+	zend_class_entry *ce;
+
+	if (UNEXPECTED(!zf->internal_function.arg_info)) {
+		return;
+	}
+
+	if (EXPECTED(arg_num <= zf->internal_function.num_args)) {
+		cur_arg_info = &zf->internal_function.arg_info[arg_num-1];
+	} else if (zf->internal_function.fn_flags & ZEND_ACC_VARIADIC) {
+		cur_arg_info = &zf->internal_function.arg_info[zf->internal_function.num_args-1];
+	} else {
+		return;
+	}
+
+	if (cur_arg_info->class_name) {
+		char *class_name;
+
+		ZVAL_DEREF(arg);
+		if (Z_TYPE_P(arg) == IS_OBJECT) {
+			need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info*)cur_arg_info, &class_name, &ce TSRMLS_CC);
+			if (!ce || !instanceof_function(Z_OBJCE_P(arg), ce TSRMLS_CC)) {
+				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, "instance of ", Z_OBJCE_P(arg)->name->val, arg TSRMLS_CC);
+			}
+		} else if (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null) {
+			need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info*)cur_arg_info, &class_name, &ce TSRMLS_CC);
+			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, need_msg, class_name, zend_zval_type_name(arg), "", arg TSRMLS_CC);
+		}
+	} else if (cur_arg_info->type_hint) {
+		if (cur_arg_info->type_hint == IS_ARRAY) {
+			ZVAL_DEREF(arg);
+			if (Z_TYPE_P(arg) != IS_ARRAY && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
+				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", zend_zval_type_name(arg), "", arg TSRMLS_CC);
+			}
+		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
+			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL TSRMLS_CC) && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
+				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg TSRMLS_CC);
+			}
+#if ZEND_DEBUG
+		} else {
+			zend_error(E_ERROR, "Unknown typehint");
+#endif
+		}
+	}
 }
 
 static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value TSRMLS_DC)

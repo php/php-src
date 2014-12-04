@@ -76,6 +76,18 @@ int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
+int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *path) /* {{{ */
+{
+	if (wp->socket_uid != -1 || wp->socket_gid != -1) {
+		if (0 > chown(path, wp->socket_uid, wp->socket_gid)) {
+			zlog(ZLOG_SYSERROR, "failed to chown() the socket '%s'", wp->config->listen_address);
+			return -1;
+		}
+	}
+	return 0;
+}
+/* }}} */
+
 static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 {
 	struct passwd *pwd;
@@ -187,7 +199,9 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 			return -1;
 		}
 	} else if (made_chroot) {
-		chdir("/");
+		if (0 > chdir("/")) {
+			zlog(ZLOG_WARNING, "[pool %s] failed to chdir(/)", wp->config->name);
+		}
 	}
 
 	if (is_root) {

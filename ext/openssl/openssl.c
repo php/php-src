@@ -3595,6 +3595,7 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 	char * filename = NULL;
 	size_t filename_len = 0;
 	zend_resource *key_resource = NULL;
+	int pem_write = 0;
 	EVP_PKEY * key;
 	BIO * bio_out = NULL;
 	const EVP_CIPHER * cipher;
@@ -3629,7 +3630,19 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 		} else {
 			cipher = NULL;
 		}
-		if (PEM_write_bio_PrivateKey(bio_out, key, cipher, (unsigned char *)passphrase, passphrase_len, NULL, NULL)) {
+
+		switch (EVP_PKEY_type(key->type)) {
+#ifdef HAVE_EVP_PKEY_EC
+			case EVP_PKEY_EC:
+				pem_write = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get1_EC_KEY(key), cipher, (unsigned char *)passphrase, passphrase_len, NULL, NULL);
+				break;
+#endif
+			default:
+				pem_write = PEM_write_bio_PrivateKey(bio_out, key, cipher, (unsigned char *)passphrase, passphrase_len, NULL, NULL);
+				break;
+		}
+
+		if (pem_write) {
 			/* Success!
 			 * If returning the output as a string, do so now */
 			RETVAL_TRUE;
@@ -3653,6 +3666,7 @@ PHP_FUNCTION(openssl_pkey_export)
 	struct php_x509_request req;
 	zval * zpkey, * args = NULL, *out;
 	char * passphrase = NULL; size_t passphrase_len = 0;
+	int pem_write = 0;
 	zend_resource *key_resource = NULL;
 	EVP_PKEY * key;
 	BIO * bio_out = NULL;
@@ -3684,7 +3698,19 @@ PHP_FUNCTION(openssl_pkey_export)
 		} else {
 			cipher = NULL;
 		}
-		if (PEM_write_bio_PrivateKey(bio_out, key, cipher, (unsigned char *)passphrase, passphrase_len, NULL, NULL)) {
+
+		switch (EVP_PKEY_type(key->type)) {
+#ifdef HAVE_EVP_PKEY_EC
+			case EVP_PKEY_EC:
+				pem_write = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get1_EC_KEY(key), cipher, (unsigned char *)passphrase, passphrase_len, NULL, NULL);
+				break;
+#endif
+			default:
+				pem_write = PEM_write_bio_PrivateKey(bio_out, key, cipher, (unsigned char *)passphrase, passphrase_len, NULL, NULL);
+				break;
+		}
+
+		if (pem_write) {
 			/* Success!
 			 * If returning the output as a string, do so now */
 
@@ -3853,6 +3879,39 @@ PHP_FUNCTION(openssl_pkey_get_details)
 #ifdef HAVE_EVP_PKEY_EC
 		case EVP_PKEY_EC:
 			ktype = OPENSSL_KEYTYPE_EC;
+			if (pkey->pkey.ec != NULL) {
+				zval ec;
+				const EC_GROUP *ec_group;
+				int nid;
+				char *crv_sn;
+				ASN1_OBJECT *obj;
+				// openssl recommends a buffer length of 80
+				char oir_buf[80];
+
+				ec_group = EC_KEY_get0_group(EVP_PKEY_get1_EC_KEY(pkey));
+
+				// Curve nid (numerical identifier) used for ASN1 mapping
+				nid = EC_GROUP_get_curve_name(ec_group);
+				if (nid == NID_undef) {
+					break;
+				}
+				array_init(&ec);
+
+				// Short object name
+				crv_sn = (char*) OBJ_nid2sn(nid);
+				if (crv_sn != NULL) {
+					add_assoc_string(&ec, "curve_name", crv_sn);
+				}
+
+				obj = OBJ_nid2obj(nid);
+				if (obj != NULL) {
+					int oir_len = OBJ_obj2txt(oir_buf, sizeof(oir_buf), obj, 1);
+					add_assoc_stringl(&ec, "curve_oid", (char*)oir_buf, oir_len);
+					ASN1_OBJECT_free(obj);
+				}
+
+				add_assoc_zval(return_value, "ec", &ec);
+			}
 			break;
 #endif
 		default:

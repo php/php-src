@@ -2,6 +2,10 @@
 FPM: Test various messages on start, from master and childs
 --SKIPIF--
 <?php include "skipif.inc"; ?>
+--XFAIL--
+randomly intermittently failing all the time in CI,
+ERROR: unable to read what child say: Bad file descriptor (9)
+catch_workers_output = yes seems not reliable
 --FILE--
 <?php
 
