@@ -36,6 +36,9 @@ PHP                                                                        NEWS
     breaks the RecursiveIterator). (Paul Garvin)
   . Fixed bug #68479 (Added escape parameter to SplFileObject::fputcsv). (Salathe)
 
+- SQLite:
+  . Fixed bug #68120 (Update bundled libsqlite to 3.8.7.2). (Anatol)
+
 11 Dec 2014, PHP 5.6.4
 
 - Core:
