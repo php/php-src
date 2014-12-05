@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
   . Fixed bug #65576 (Constructor from trait conflicts with inherited
     constructor). (dunglas at gmail dot com)
+  . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class 
+    modifier. (Guilherme Blanco)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
