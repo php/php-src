@@ -29,6 +29,9 @@ PHP                                                                        NEWS
   . Fixed bug #65213 (cannot cast SplFileInfo to boolean) (Tjerk)
   . Fixed bug #68479 (Added escape parameter to SplFileObject::fputcsv). (Salathe)
 
+- SQLite:
+  . Fixed bug #68120 (Update bundled libsqlite to 3.8.7.2). (Anatol)
+
 11 Dec 2014, PHP 5.5.20
 
 - Core:
