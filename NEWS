@@ -63,6 +63,7 @@ PHP                                                                        NEWS
     nor curruption state). (Julien)
   . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
     breaks the RecursiveIterator). (Paul Garvin)
+  . Fixed bug #68479 (Added escape parameter to SplFileObject::fputcsv). (Salathe)
 
 - Standard:
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)
