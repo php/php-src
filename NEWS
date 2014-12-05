@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
     when setting SIG_DFL). (Julien)
 
+- PDO_mysql
+  . Fixed bug #68424 (Add new PDO mysql connection attr to control multi
+    statements option). (peter dot wolanin at acquia dot com)
+
 - SPL:
   . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
     breaks the RecursiveIterator). (Paul Garvin)
