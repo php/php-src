@@ -100,7 +100,7 @@ $op1_type = array(
 	"CONST"  => "IS_CONST",
 	"UNUSED" => "IS_UNUSED",
 	"CV"     => "IS_CV",
-	"TMPVAR" => "???",
+	"TMPVAR" => "(IS_TMP_VAR|IS_VAR)",
 );
 
 $op2_type = array(
@@ -110,7 +110,7 @@ $op2_type = array(
 	"CONST"  => "IS_CONST",
 	"UNUSED" => "IS_UNUSED",
 	"CV"     => "IS_CV",
-	"TMPVAR" => "???",
+	"TMPVAR" => "(IS_TMP_VAR|IS_VAR)",
 );
 
 $op1_free = array(
