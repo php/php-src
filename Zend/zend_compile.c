@@ -4457,12 +4457,6 @@ void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 
 		zend_op *opline;
 
-		/* Traits can not implement interfaces */
-		if (ZEND_CE_IS_TRAIT(CG(active_class_entry))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' "
-				"since it is a Trait", name->val, CG(active_class_entry)->name->val);
-		}
-
 		if (!zend_is_const_default_class_ref(class_ast)) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use '%s' as interface name as it is reserved", name->val);
@@ -4536,12 +4530,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	if (extends_ast) {
-		if (ZEND_CE_IS_TRAIT(ce)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. "
-				"Traits can only be composed from other traits with the 'use' keyword. Error",
-				name->val);
-		}
-
 		if (!zend_is_const_default_class_ref(extends_ast)) {
 			zend_string *extends_name = zend_ast_get_str(extends_ast);
 			zend_error_noreturn(E_COMPILE_ERROR,
