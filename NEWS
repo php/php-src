@@ -33,6 +33,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
     breaks the RecursiveIterator). (Paul Garvin)
+  . Fixed bug #68479 (Added escape parameter to SplFileObject::fputcsv). (Salathe)
 
 11 Dec 2014, PHP 5.6.4
 
