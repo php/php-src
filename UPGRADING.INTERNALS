@@ -12,6 +12,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   k. get_class_entry object handler info
   l. get_class_name object handler info
   m. Other portable macros info
+  n. ZEND_ENGINE_2 removal
 
 2. Build system changes
   a. Unix build system changes
@@ -120,6 +121,8 @@ PHP 7.0 INTERNALS UPGRADE NOTES
 
      ZEND_FASTCALL is defined to use __vectorcall convention on VS2013 and above
      ZEND_NORETURN is defined as __declspec(noreturn) on VS
+
+  n. The ZEND_ENGINE_2 macro has been removed. A ZEND_ENGINE_3 macro has been added.
 
 ========================
 2. Build system changes
