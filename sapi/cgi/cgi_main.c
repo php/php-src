@@ -274,7 +274,7 @@ static void print_extensions(TSRMLS_D)
 #define STDOUT_FILENO 1
 #endif
 
-static inline size_t sapi_cgi_single_write(const char *str, uint str_length TSRMLS_DC)
+static inline size_t sapi_cgi_single_write(const char *str, size_t str_length TSRMLS_DC)
 {
 #ifdef PHP_WRITE_STDOUT
 	int ret;
@@ -316,7 +316,8 @@ static size_t sapi_fcgi_ub_write(const char *str, size_t str_length TSRMLS_DC)
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	while (remaining > 0) {
-		zend_long ret = fcgi_write(request, FCGI_STDOUT, ptr, remaining);
+		int to_write = remaining > INT_MAX ? INT_MAX : (int)remaining;
+		int ret = fcgi_write(request, FCGI_STDOUT, ptr, to_write);
 
 		if (ret <= 0) {
 			php_handle_aborted_connection();
@@ -520,7 +521,14 @@ static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 
 	count_bytes = MIN(count_bytes, remaining_bytes);
 	while (read_bytes < count_bytes) {
+#ifdef PHP_WIN32
+		size_t diff = count_bytes - read_bytes;
+		unsigned int to_read = (diff > UINT_MAX) ? UINT_MAX : (unsigned int)diff;
+
+		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, to_read);
+#else
 		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
+#endif
 		if (tmp_read_bytes <= 0) {
 			break;
 		}
@@ -540,7 +548,10 @@ static size_t sapi_fcgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 		count_bytes = remaining;
 	}
 	while (read_bytes < count_bytes) {
-		tmp_read_bytes = fcgi_read(request, buffer + read_bytes, count_bytes - read_bytes);
+		size_t diff = count_bytes - read_bytes;
+		int to_read = (diff > INT_MAX) ? INT_MAX : (int)diff;
+
+		tmp_read_bytes = fcgi_read(request, buffer + read_bytes, to_read);
 		if (tmp_read_bytes <= 0) {
 			break;
 		}
@@ -561,7 +572,7 @@ static char *sapi_fcgi_getenv(char *name, size_t name_len TSRMLS_DC)
 	 * of a request.  So we have to do our own lookup to get env
 	 * vars.  This could probably be faster somehow.  */
 	fcgi_request *request = (fcgi_request*) SG(server_context);
-	char *ret = fcgi_getenv(request, name, name_len);
+	char *ret = fcgi_getenv(request, name, (int)name_len);
 
 	if (ret) return ret;
 	/*  if cgi, or fastcgi and not found in fcgi env
@@ -569,10 +580,10 @@ static char *sapi_fcgi_getenv(char *name, size_t name_len TSRMLS_DC)
 	return getenv(name);
 }
 
-static char *_sapi_cgi_putenv(char *name, int name_len, char *value)
+static char *_sapi_cgi_putenv(char *name, size_t name_len, char *value)
 {
 #if !HAVE_SETENV || !HAVE_UNSETENV
-	int len;
+	size_t len;
 	char *buf;
 #endif
 
@@ -689,10 +700,10 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 		}
 
 		if (path_info) {
-			unsigned int path_info_len = strlen(path_info);
+			size_t path_info_len = strlen(path_info);
 
 			if (script_name) {
-				unsigned int script_name_len = strlen(script_name);
+				size_t script_name_len = strlen(script_name);
 
 				php_self_len = script_name_len + path_info_len;
 				php_self = do_alloca(php_self_len + 1, use_heap);
@@ -737,12 +748,12 @@ static void sapi_cgi_log_message(char *message TSRMLS_DC)
 
 		request = (fcgi_request*) SG(server_context);
 		if (request) {
-			int len = strlen(message);
+			int len = (int)strlen(message);
 			char *buf = malloc(len+2);
 
 			memcpy(buf, message, len);
 			memcpy(buf + len, "\n", sizeof("\n"));
-			fcgi_write(request, FCGI_STDERR, buf, len+1);
+			fcgi_write(request, FCGI_STDERR, buf, (int)(len+1));
 			free(buf);
 		} else {
 			fprintf(stderr, "%s\n", message);
@@ -755,11 +766,11 @@ static void sapi_cgi_log_message(char *message TSRMLS_DC)
 
 /* {{{ php_cgi_ini_activate_user_config
  */
-static void php_cgi_ini_activate_user_config(char *path, int path_len, const char *doc_root, int doc_root_len, int start TSRMLS_DC)
+static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len, int start TSRMLS_DC)
 {
 	char *ptr;
 	user_config_cache_entry *new_entry, *entry;
-	time_t request_time = sapi_get_request_time(TSRMLS_C);
+	time_t request_time = (time_t)sapi_get_request_time(TSRMLS_C);
 
 	/* Find cached config entry: If not found, create one */
 	if ((entry = zend_hash_str_find_ptr(&CGIG(user_config_cache), path, path_len)) == NULL) {
@@ -773,9 +784,9 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 	/* Check whether cache entry has expired and rescan if it is */
 	if (request_time > entry->expires) {
 		char *real_path = NULL;
-		int real_path_len;
+		size_t real_path_len;
 		char *s1, *s2;
-		int s_len;
+		size_t s_len;
 
 		/* Clear the expired config */
 		zend_hash_clean(entry->user_config);
@@ -834,7 +845,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 static int sapi_cgi_activate(TSRMLS_D)
 {
 	char *path, *doc_root, *server_name;
-	uint path_len, doc_root_len, server_name_len;
+	size_t path_len, doc_root_len, server_name_len;
 
 	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
 	if (!SG(request_info).path_translated) {
@@ -901,7 +912,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 				doc_root = estrndup(doc_root, doc_root_len);
 				zend_str_tolower(doc_root, doc_root_len);
 #endif
-				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, doc_root_len - 1 TSRMLS_CC);
+				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, (doc_root_len > 0 && (doc_root_len - 1)) TSRMLS_CC);
 				
 #ifdef PHP_WIN32
 				efree(doc_root);
@@ -1200,7 +1211,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 			char *orig_path_info = env_path_info;
 			char *orig_script_name = env_script_name;
 			char *orig_script_filename = env_script_filename;
-			int script_path_translated_len;
+			size_t script_path_translated_len;
 
 			if (!env_document_root && PG(doc_root)) {
 				env_document_root = CGI_PUTENV("DOCUMENT_ROOT", PG(doc_root));
@@ -1241,7 +1252,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 				(real_path = tsrm_realpath(script_path_translated, NULL TSRMLS_CC)) == NULL)
 			) {
 				char *pt = estrndup(script_path_translated, script_path_translated_len);
-				int len = script_path_translated_len;
+				size_t len = script_path_translated_len;
 				char *ptr;
 
 				while ((ptr = strrchr(pt, '/')) || (ptr = strrchr(pt, '\\'))) {
@@ -1262,8 +1273,8 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 						 * we have to play the game of hide and seek to figure
 						 * out what SCRIPT_NAME should be
 						 */
-						int slen = len - strlen(pt);
-						int pilen = env_path_info ? strlen(env_path_info) : 0;
+						size_t slen = len - strlen(pt);
+						size_t pilen = env_path_info ? strlen(env_path_info) : 0;
 						char *path_info = env_path_info ? env_path_info + pilen - slen : NULL;
 
 						if (orig_path_info != path_info) {
@@ -1299,8 +1310,8 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 						 * SCRIPT_FILENAME minus SCRIPT_NAME
 						 */
 						if (env_document_root) {
-							int l = strlen(env_document_root);
-							int path_translated_len = 0;
+							size_t l = strlen(env_document_root);
+							size_t path_translated_len = 0;
 							char *path_translated = NULL;
 
 							if (l && env_document_root[l - 1] == '/') {
@@ -1329,8 +1340,8 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 									strstr(pt, env_script_name)
 						) {
 							/* PATH_TRANSLATED = PATH_TRANSLATED - SCRIPT_NAME + PATH_INFO */
-							int ptlen = strlen(pt) - strlen(env_script_name);
-							int path_translated_len = ptlen + (env_path_info ? strlen(env_path_info) : 0);
+							size_t ptlen = strlen(pt) - strlen(env_script_name);
+							size_t path_translated_len = ptlen + (env_path_info ? strlen(env_path_info) : 0);
 							char *path_translated = NULL;
 
 							path_translated = (char *) emalloc(path_translated_len + 1);
@@ -1670,16 +1681,18 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	char *s, *p;
-	int  len;
+	size_t len = 0;
 	ALLOCA_FLAG(use_heap)
 
 	if (h->header_len > 0) {
 		p = strchr(h->header, ':');
-		len = p - h->header;
-		if (p && (len > 0)) {
-			while (len > 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t')) {
+		if (NULL != p) {
+			len = p - h->header;
+		}
+		if (len > 0) {
+			do {
 				len--;
-			}
+			} while (len != 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t'));
 			if (len) {
 				s = do_alloca(len + 1, use_heap);
 				memcpy(s, h->header, len);
@@ -1739,7 +1752,8 @@ int main(int argc, char *argv[])
 {
 	int free_query_string = 0;
 	int exit_status = SUCCESS;
-	int cgi = 0, c, i, len;
+	int cgi = 0, c, i;
+	size_t len;
 	zend_file_handle file_handle;
 	char *s;
 
@@ -1749,7 +1763,7 @@ int main(int argc, char *argv[])
 	int orig_optind = php_optind;
 	char *orig_optarg = php_optarg;
 	char *script_file = NULL;
-	int ini_entries_len = 0;
+	size_t ini_entries_len = 0;
 	/* end of temporary locals */
 
 #ifdef ZTS
@@ -1854,7 +1868,7 @@ int main(int argc, char *argv[])
 				break;
 			case 'd': {
 				/* define ini entries on command line */
-				int len = strlen(php_optarg);
+				size_t len = strlen(php_optarg);
 				char *val;
 
 				if ((val = strchr(php_optarg, '='))) {
@@ -2295,7 +2309,7 @@ consult the installation file that came with this distribution, or visit \n\
 				 *  test.php v1=test "v2=hello world!"
 				*/
 				if (!SG(request_info).query_string && argc > php_optind) {
-					int slen = strlen(PG(arg_separator).input);
+					size_t slen = strlen(PG(arg_separator).input);
 					len = 0;
 					for (i = php_optind; i < argc; i++) {
 						if (i < (argc - 1)) {

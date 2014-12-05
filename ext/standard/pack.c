@@ -560,7 +560,7 @@ PHP_FUNCTION(unpack)
 {
 	char *format, *input;
 	zend_string *formatarg, *inputarg;
-	size_t formatlen, inputpos, inputlen;
+	zend_long formatlen, inputpos, inputlen;
 	int i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &formatarg, 
@@ -717,7 +717,7 @@ PHP_FUNCTION(unpack)
 				inputpos = 0;
 			}
 
-			if ((size >=0 && (inputpos + size) <= inputlen) || (size < 0 && -size <= (inputlen - inputpos))) {
+			if ((inputpos + size) <= inputlen) {
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
@@ -1105,26 +1105,26 @@ PHP_MINIT_FUNCTION(pack)
 		machine_endian_longlong_map[1] = size - 7;
 		machine_endian_longlong_map[2] = size - 6;
 		machine_endian_longlong_map[3] = size - 5;
-		machine_endian_longlong_map[0] = size - 4;
-		machine_endian_longlong_map[1] = size - 3;
-		machine_endian_longlong_map[2] = size - 2;
-		machine_endian_longlong_map[3] = size - 1;
+		machine_endian_longlong_map[4] = size - 4;
+		machine_endian_longlong_map[5] = size - 3;
+		machine_endian_longlong_map[6] = size - 2;
+		machine_endian_longlong_map[7] = size - 1;
 		big_endian_longlong_map[0] = size - 8;
 		big_endian_longlong_map[1] = size - 7;
 		big_endian_longlong_map[2] = size - 6;
 		big_endian_longlong_map[3] = size - 5;
-		big_endian_longlong_map[0] = size - 4;
-		big_endian_longlong_map[1] = size - 3;
-		big_endian_longlong_map[2] = size - 2;
-		big_endian_longlong_map[3] = size - 1;
+		big_endian_longlong_map[4] = size - 4;
+		big_endian_longlong_map[5] = size - 3;
+		big_endian_longlong_map[6] = size - 2;
+		big_endian_longlong_map[7] = size - 1;
 		little_endian_longlong_map[0] = size - 1;
 		little_endian_longlong_map[1] = size - 2;
 		little_endian_longlong_map[2] = size - 3;
 		little_endian_longlong_map[3] = size - 4;
-		little_endian_longlong_map[0] = size - 5;
-		little_endian_longlong_map[1] = size - 6;
-		little_endian_longlong_map[2] = size - 7;
-		little_endian_longlong_map[3] = size - 8;
+		little_endian_longlong_map[4] = size - 5;
+		little_endian_longlong_map[5] = size - 6;
+		little_endian_longlong_map[6] = size - 7;
+		little_endian_longlong_map[7] = size - 8;
 #endif
 	}
 

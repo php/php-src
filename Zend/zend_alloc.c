@@ -106,7 +106,15 @@
 # endif
 # ifndef MAP_POPULATE
 #  define MAP_POPULATE 0
+# endif
+#  if defined(_SC_PAGESIZE) || (_SC_PAGE_SIZE)
+#    define REAL_PAGE_SIZE _real_page_size
+static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
+#  endif
 #endif
+
+#ifndef REAL_PAGE_SIZE
+# define REAL_PAGE_SIZE ZEND_MM_PAGE_SIZE
 #endif
 
 #ifndef ZEND_MM_STAT
@@ -739,10 +747,10 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 
 		/* chunk has to be aligned */
 		zend_mm_munmap(ptr, size);
-		ptr = zend_mm_mmap(size + alignment - ZEND_MM_PAGE_SIZE);
+		ptr = zend_mm_mmap(size + alignment - REAL_PAGE_SIZE);
 #ifdef _WIN32
 		offset = ZEND_MM_ALIGNED_OFFSET(ptr, alignment);
-		zend_mm_munmap(ptr, size + alignment - ZEND_MM_PAGE_SIZE);
+		zend_mm_munmap(ptr, size + alignment - REAL_PAGE_SIZE);
 		ptr = zend_mm_mmap_fixed((void*)((char*)ptr + (alignment - offset)), size);
 		offset = ZEND_MM_ALIGNED_OFFSET(ptr, alignment);
 		if (offset != 0) {
@@ -756,8 +764,10 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 			offset = alignment - offset;
 			zend_mm_munmap(ptr, offset);
 			ptr = (char*)ptr + offset;
-		} else {
-			zend_mm_munmap((char*)ptr + size, alignment - ZEND_MM_PAGE_SIZE);
+			alignment -= offset;
+		}
+		if (alignment > REAL_PAGE_SIZE) {
+			zend_mm_munmap((char*)ptr + size, alignment - REAL_PAGE_SIZE);
 		}
 # ifdef MADV_HUGEPAGE
 	    madvise(ptr, size, MADV_HUGEPAGE);
@@ -1394,7 +1404,7 @@ static void *zend_mm_realloc_heap(zend_mm_heap *heap, void *ptr, size_t size ZEN
 #if ZEND_DEBUG
 			size = real_size;
 #endif
-			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, ZEND_MM_PAGE_SIZE);
+			new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);
 			if (new_size == old_size) {
 #if ZEND_DEBUG
 				zend_mm_change_huge_block_size(heap, ptr, new_size, real_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1642,7 +1652,7 @@ static void zend_mm_change_huge_block_size(zend_mm_heap *heap, void *ptr, size_t
 
 static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, ZEND_MM_PAGE_SIZE);
+	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);
 	void *ptr;
 
 #if ZEND_MM_LIMIT
@@ -2418,6 +2428,13 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 	ts_allocate_id(&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
 #else
 	alloc_globals_ctor(&alloc_globals);
+#endif
+#ifndef _WIN32
+#  if defined(_SC_PAGESIZE)
+	REAL_PAGE_SIZE = sysconf(_SC_PAGESIZE);
+#  elif defined(_SC_PAGE_SIZE)
+	REAL_PAGE_SIZE = sysconf(_SC_PAGE_SIZE);
+#  endif
 #endif
 }
 

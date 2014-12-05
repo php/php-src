@@ -1300,7 +1300,7 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind TSRMLS_DC)
 		if (funcs->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)funcs->arg_info;
 
-			ifunc->arg_info = (zend_arg_info*)funcs->arg_info + 1;
+			ifunc->arg_info = (zend_internal_arg_info*)funcs->arg_info + 1;
 			ifunc->num_args = funcs->num_args;
 			if (info->required_num_args == -1) {
 				ifunc->required_num_args = funcs->num_args;

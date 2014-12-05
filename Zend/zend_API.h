@@ -35,7 +35,7 @@ BEGIN_EXTERN_C()
 typedef struct _zend_function_entry {
 	const char *fname;
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
-	const struct _zend_arg_info *arg_info;
+	const struct _zend_internal_arg_info *arg_info;
 	uint32_t num_args;
 	uint32_t flags;
 } zend_function_entry;
@@ -98,16 +98,16 @@ typedef struct _zend_fcall_info_cache {
 
 #define ZEND_FE_END            { NULL, NULL, NULL, 0, 0 }
 
-#define ZEND_ARG_INFO(pass_by_ref, name)							{ #name, sizeof(#name)-1, NULL, 0, 0, pass_by_ref, 0, 0 },
-#define ZEND_ARG_PASS_INFO(pass_by_ref)								{ NULL, 0, NULL, 0, 0, pass_by_ref, 0, 0 },
-#define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null) { #name, sizeof(#name)-1, #classname, sizeof(#classname)-1, IS_OBJECT, pass_by_ref, allow_null, 0 },
-#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null) { #name, sizeof(#name)-1, NULL, 0, IS_ARRAY, pass_by_ref, allow_null, 0 },
-#define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, sizeof(#name)-1, NULL, 0, type_hint, pass_by_ref, allow_null, 0 },
-#define ZEND_ARG_VARIADIC_INFO(pass_by_ref, name) 					{ #name, sizeof(#name)-1, NULL, 0, 0, pass_by_ref, 0, 1 },
+#define ZEND_ARG_INFO(pass_by_ref, name)							 { #name, NULL, 0, pass_by_ref, 0, 0 },
+#define ZEND_ARG_PASS_INFO(pass_by_ref)								 { NULL,  NULL, 0, pass_by_ref, 0, 0 },
+#define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null)  { #name, #classname, IS_OBJECT, pass_by_ref, allow_null, 0 },
+#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null)           { #name, NULL, IS_ARRAY, pass_by_ref, allow_null, 0 },
+#define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, NULL, type_hint, pass_by_ref, allow_null, 0 },
+#define ZEND_ARG_VARIADIC_INFO(pass_by_ref, name) 					 { #name, NULL, 0, pass_by_ref, 0, 1 },
 
 #define ZEND_BEGIN_ARG_INFO_EX(name, _unused, return_reference, required_num_args)	\
-	static const zend_arg_info name[] = {																		\
-		{ NULL, 0, NULL, required_num_args, 0, return_reference, 0, 0 },
+	static const zend_internal_arg_info name[] = {																		\
+		{ (const char*)(zend_uintptr_t)(required_num_args), NULL, 0, return_reference, 0, 0 },
 #define ZEND_BEGIN_ARG_INFO(name, _unused)	\
 	ZEND_BEGIN_ARG_INFO_EX(name, 0, ZEND_RETURN_VALUE, -1)
 #define ZEND_END_ARG_INFO()		};
@@ -346,8 +346,8 @@ ZEND_API char *zend_get_type_by_const(int type);
 
 #define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT()
 #define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)
-#define ARG_COUNT(dummy)					EX(num_args)
-#define ZEND_NUM_ARGS()						EX(num_args)
+#define ARG_COUNT(dummy)					EX_NUM_ARGS()
+#define ZEND_NUM_ARGS()						EX_NUM_ARGS()
 #define ZEND_WRONG_PARAM_COUNT()					{ zend_wrong_param_count(TSRMLS_C); return; }
 #define ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)		{ zend_wrong_param_count(TSRMLS_C); return ret; }
 
@@ -712,7 +712,7 @@ ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int chec
 		const int _flags = (flags); \
 		int _min_num_args = (min_num_args); \
 		int _max_num_args = (max_num_args); \
-		int _num_args = EX(num_args); \
+		int _num_args = EX_NUM_ARGS(); \
 		int _i; \
 		zval *_real_arg, *_arg = NULL; \
 		zend_expected_type _expected_type = IS_UNDEF; \

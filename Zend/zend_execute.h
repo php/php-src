@@ -48,6 +48,7 @@ ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 
+ZEND_API char * zend_verify_internal_arg_class_kind(const zend_internal_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC);
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC);
 ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg TSRMLS_DC);
 
@@ -209,7 +210,7 @@ static zend_always_inline zval* zend_vm_stack_alloc(size_t size TSRMLS_DC)
 	return (zval*)top;
 }
 
-static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint32_t frame_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
+static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
 {
 	uint32_t used_stack = ZEND_CALL_FRAME_SLOT + num_args;
 	zend_execute_data *call;
@@ -219,11 +220,11 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint3
 	}
 	call = (zend_execute_data*)zend_vm_stack_alloc(used_stack * sizeof(zval) TSRMLS_CC);
 	call->func = func;
-	ZVAL_OBJ(&call->This, object);
+	Z_OBJ(call->This) = object;
+	ZEND_SET_CALL_INFO(call, call_info);
+	ZEND_CALL_NUM_ARGS(call) = 0;
 	call->called_scope = called_scope;
 	call->prev_execute_data = prev;
-	call->frame_info = frame_info;
-	call->num_args = 0;
 	return call;
 }
 
@@ -231,9 +232,9 @@ static zend_always_inline void zend_vm_stack_free_extra_args(zend_execute_data *
 {
 	uint32_t first_extra_arg = call->func->op_array.num_args - ((call->func->common.fn_flags & ZEND_ACC_VARIADIC) != 0);
 
- 	if (UNEXPECTED(call->num_args > first_extra_arg)) {
- 		zval *end = EX_VAR_NUM_2(call, call->func->op_array.last_var + call->func->op_array.T);
- 		zval *p = end + (call->num_args - first_extra_arg);
+ 	if (UNEXPECTED(ZEND_CALL_NUM_ARGS(call) > first_extra_arg)) {
+ 		zval *end = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
+ 		zval *p = end + (ZEND_CALL_NUM_ARGS(call) - first_extra_arg);
 		do {
 			p--;
 			zval_ptr_dtor_nogc(p);
@@ -243,7 +244,7 @@ static zend_always_inline void zend_vm_stack_free_extra_args(zend_execute_data *
 
 static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call TSRMLS_DC)
 {
-	uint32_t num_args = call->num_args;	
+	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 
 	if (num_args > 0) {
 		zval *end = ZEND_CALL_ARG(call, 1);

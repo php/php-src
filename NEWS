@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Added options parameter for unserialize allowing to specify acceptable
     classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
   . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
+  . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
@@ -43,6 +44,10 @@ PHP                                                                        NEWS
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
 
+- pcntl:
+  . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
+    when setting SIG_DFL). (Julien)
+
 - Reflection
   . Fixed inheritance chain of Reflector interface (Tjerk)
 
@@ -56,6 +61,8 @@ PHP                                                                        NEWS
 - SPL:
   . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
     nor curruption state). (Julien)
+  . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
+    breaks the RecursiveIterator). (Paul Garvin)
 
 - Standard:
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)

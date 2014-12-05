@@ -245,26 +245,33 @@ typedef struct _zend_property_info {
 #define OBJ_PROP_TO_NUM(offset) \
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
+/* arg_info for internal functions */
+typedef struct _zend_internal_arg_info { 
+	const char *name;
+	const char *class_name;
+	zend_uchar type_hint;
+	zend_uchar pass_by_reference;
+	zend_bool allow_null;
+	zend_bool is_variadic;
+} zend_internal_arg_info;
+
+/* arg_info for user functions */
 typedef struct _zend_arg_info {
-	const char *name;			// TODO: convert into zend_string ???
-	uint32_t name_len;
-	const char *class_name;		// TODO: convert into zend_string ???
-	uint32_t class_name_len;
+	zend_string *name;
+	zend_string *class_name;
 	zend_uchar type_hint;
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_arg_info;
 
-/* the following structure repeats the layout of zend_arg_info,
+/* the following structure repeats the layout of zend_internal_arg_info,
  * but its fields have different meaning. It's used as the first element of
  * arg_info array to define properties of internal functions.
  */
 typedef struct _zend_internal_function_info {
-	const char *_name;
-	uint32_t _name_len;
+	zend_uintptr_t required_num_args;
 	const char *_class_name;
-	uint32_t required_num_args;
 	zend_uchar _type_hint;
 	zend_bool return_reference;
 	zend_bool _allow_null;
@@ -330,7 +337,7 @@ typedef struct _zend_internal_function {
 	zend_function *prototype;
 	uint32_t num_args;
 	uint32_t required_num_args;
-	zend_arg_info *arg_info;
+	zend_internal_arg_info *arg_info;
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -357,12 +364,12 @@ union _zend_function {
 	zend_internal_function internal_function;
 };
 
-typedef enum _vm_frame_kind {
-	VM_FRAME_NESTED_FUNCTION,	/* stackless VM call to function */
-	VM_FRAME_NESTED_CODE,		/* stackless VM call to include/require/eval */
-	VM_FRAME_TOP_FUNCTION,		/* direct VM call to function from external C code */
-	VM_FRAME_TOP_CODE			/* direct VM call to "main" code from external C code */
-} vm_frame_kind;
+typedef enum _zend_call_kind {
+	ZEND_CALL_NESTED_FUNCTION,	/* stackless VM call to function */
+	ZEND_CALL_NESTED_CODE,		/* stackless VM call to include/require/eval */
+	ZEND_CALL_TOP_FUNCTION,		/* direct VM call to function from external C code */
+	ZEND_CALL_TOP_CODE			/* direct VM call to "main" code from external C code */
+} zend_call_kind;
 
 struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
@@ -372,38 +379,56 @@ struct _zend_execute_data {
 	zval                 This;
 	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
-	uint32_t             frame_info;
-	uint32_t             num_args;
 	zval                *return_value;
-	zend_class_entry    *scope;            /* function scope (self)          */
 	zend_array          *symbol_table;
 };
 
-#define VM_FRAME_KIND_MASK           0x000000ff
-#define VM_FRAME_FLAGS_MASK          0xffffff00
+#define ZEND_CALL_FUNCTION           (0 << 0)
+#define ZEND_CALL_CODE               (1 << 0)
+#define ZEND_CALL_NESTED             (0 << 1)
+#define ZEND_CALL_TOP                (1 << 1)
+#define ZEND_CALL_CTOR               (1 << 2)
+#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 3)
 
-#define ZEND_CALL_CTOR               (1 << 8)
-#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 9)
+#define ZEND_CALL_INFO(call) \
+	(Z_TYPE_INFO((call)->This) >> 24)
 
-#define VM_FRAME_INFO(kind, flags)   ((kind) | (flags))
-#define VM_FRAME_KIND(info)          ((info) & VM_FRAME_KIND_MASK)
-#define VM_FRAME_FLAGS(info)         ((info) & VM_FRAME_FLAGS_MASK)
+#define ZEND_CALL_KIND(call) \
+	(ZEND_CALL_INFO(call) & (ZEND_CALL_CODE | ZEND_CALL_TOP))
+
+#define ZEND_SET_CALL_INFO(call, info) do { \
+		Z_TYPE_INFO((call)->This) = IS_OBJECT_EX | ((info) << 24); \
+	} while (0)
+	
+#define ZEND_ADD_CALL_FLAG(call, info) do { \
+		Z_TYPE_INFO((call)->This) |= ((info) << 24); \
+	} while (0)
+
+#define ZEND_CALL_NUM_ARGS(call) \
+	(call)->This.u2.num_args
 
 #define ZEND_CALL_FRAME_SLOT \
 	((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
 
+#define ZEND_CALL_VAR(call, n) \
+	((zval*)(((char*)(call)) + ((int)(n))))
+
+#define ZEND_CALL_VAR_NUM(call, n) \
+	(((zval*)(call)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
+
 #define ZEND_CALL_ARG(call, n) \
-	(((zval*)(call)) + ((n) + (ZEND_CALL_FRAME_SLOT - 1)))
+	ZEND_CALL_VAR_NUM(call, ((int)(n)) - 1)
 
 #define EX(element) 			((execute_data)->element)
 
-#define EX_VAR_2(ex, n)			((zval*)(((char*)(ex)) + ((int)(n))))
-#define EX_VAR_NUM_2(ex, n)     (((zval*)(ex)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
+#define EX_CALL_INFO()			ZEND_CALL_INFO(execute_data)
+#define EX_CALL_KIND()			ZEND_CALL_KIND(execute_data)
+#define EX_NUM_ARGS()			ZEND_CALL_NUM_ARGS(execute_data)
 
-#define EX_VAR(n)				EX_VAR_2(execute_data, n)
-#define EX_VAR_NUM(n)			EX_VAR_NUM_2(execute_data, n)
+#define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
+#define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
 
-#define EX_VAR_TO_NUM(n)		(EX_VAR_2(NULL, n) - EX_VAR_NUM_2(NULL, 0))
+#define EX_VAR_TO_NUM(n)		(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0))
 
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)

@@ -802,7 +802,7 @@ PHPAPI int php_ini_has_per_dir_config(void)
 
 /* {{{ php_ini_activate_per_dir_config
  */
-PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC)
+PHPAPI void php_ini_activate_per_dir_config(char *path, size_t path_len TSRMLS_DC)
 {
 	zval *tmp2;
 	char *ptr;
@@ -853,7 +853,7 @@ PHPAPI int php_ini_has_per_host_config(void)
 
 /* {{{ php_ini_activate_per_host_config
  */
-PHPAPI void php_ini_activate_per_host_config(const char *host, uint host_len TSRMLS_DC)
+PHPAPI void php_ini_activate_per_host_config(const char *host, size_t host_len TSRMLS_DC)
 {
 	zval *tmp;
 
@@ -876,7 +876,7 @@ PHPAPI zval *cfg_get_entry_ex(zend_string *name)
 
 /* {{{ cfg_get_entry
  */
-PHPAPI zval *cfg_get_entry(const char *name, uint name_length)
+PHPAPI zval *cfg_get_entry(const char *name, size_t name_length)
 {
 	return zend_hash_str_find(&configuration_hash, name, name_length);
 }

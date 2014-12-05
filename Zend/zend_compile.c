@@ -273,7 +273,7 @@ static int lookup_cv(zend_op_array *op_array, zend_string* name TSRMLS_DC) /* {{
 		     op_array->vars[i]->len == name->len &&
 		     memcmp(op_array->vars[i]->val, name->val, name->len) == 0)) {
 			zend_string_release(name);
-			return (int)(zend_intptr_t)EX_VAR_NUM_2(NULL, i);
+			return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
 		}
 		i++;
 	}
@@ -285,7 +285,7 @@ static int lookup_cv(zend_op_array *op_array, zend_string* name TSRMLS_DC) /* {{
 	}
 
 	op_array->vars[i] = zend_new_interned_string(name TSRMLS_CC);
-	return (int)(zend_intptr_t)EX_VAR_NUM_2(NULL, i);
+	return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
 }
 /* }}} */
 
@@ -342,6 +342,7 @@ static inline int zend_add_literal_string(zend_op_array *op_array, zend_string *
 	*str = Z_STR(zv);
 	return ret;
 }
+/* }}} */
 
 static int zend_add_func_name_literal(zend_op_array *op_array, zend_string *name TSRMLS_DC) /* {{{ */
 {
@@ -3832,14 +3833,12 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) /* {{{ */
 		opline->op1.num = i + 1;
 
 		arg_info = &arg_infos[i];
-		arg_info->name = estrndup(name->val, name->len);
-		arg_info->name_len = (uint32_t)name->len;
+		arg_info->name = zend_string_copy(name);
 		arg_info->pass_by_reference = is_ref;
 		arg_info->is_variadic = is_variadic;
 		arg_info->type_hint = 0;
 		arg_info->allow_null = 1;
 		arg_info->class_name = NULL;
-		arg_info->class_name_len = 0;
 
 		if (type_ast) {
 			zend_bool has_null_default = default_ast
@@ -3876,10 +3875,7 @@ void zend_compile_params(zend_ast *ast TSRMLS_DC) /* {{{ */
 				}
 
 				arg_info->type_hint = IS_OBJECT;
-				arg_info->class_name = estrndup(class_name->val, class_name->len);
-				arg_info->class_name_len = (uint32_t)class_name->len;
-
-				zend_string_release(class_name);
+				arg_info->class_name = class_name;
 
 				if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant)) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
@@ -5720,8 +5716,21 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast TSRMLS_DC) /* 
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot access self::class when no class scope is active");
 			}
-			result->op_type = IS_CONST;
-			ZVAL_STR_COPY(&result->u.constant, CG(active_class_entry)->name);
+			if (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) {
+				zval class_str_zv;
+				zend_ast *class_str_ast, *class_const_ast;
+
+				ZVAL_STRING(&class_str_zv, "class");
+				class_str_ast = zend_ast_create_zval(&class_str_zv);
+				class_const_ast = zend_ast_create(ZEND_AST_CLASS_CONST, name_ast, class_str_ast);
+
+				zend_compile_expr(result, class_const_ast TSRMLS_CC);
+
+				zval_ptr_dtor(&class_str_zv);
+			} else {
+				result->op_type = IS_CONST;
+				ZVAL_STR_COPY(&result->u.constant, CG(active_class_entry)->name);
+			}
 			break;
         case ZEND_FETCH_CLASS_STATIC:
         case ZEND_FETCH_CLASS_PARENT:

@@ -283,25 +283,40 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 
 		if (fe_arg_info->class_name) {
 			zend_string *fe_class_name, *proto_class_name;
+			const char *class_name;
 
-			if (!strcasecmp(fe_arg_info->class_name, "parent") && proto->common.scope) {
-				fe_class_name = zend_string_copy(proto->common.scope->name);
-			} else if (!strcasecmp(fe_arg_info->class_name, "self") && fe->common.scope) {
-				fe_class_name = zend_string_copy(fe->common.scope->name);
+			if (fe->type == ZEND_INTERNAL_FUNCTION) {				
+				fe_class_name = NULL;
+				class_name = ((zend_internal_arg_info*)fe_arg_info)->class_name;
 			} else {
-				fe_class_name = zend_string_init(
-					fe_arg_info->class_name,
-					fe_arg_info->class_name_len, 0);
+				fe_class_name = fe_arg_info->class_name;
+				class_name = fe_arg_info->class_name->val;
+			}
+			if (!strcasecmp(class_name, "parent") && proto->common.scope) {
+				fe_class_name = zend_string_copy(proto->common.scope->name);
+			} else if (!strcasecmp(class_name, "self") && fe->common.scope) {
+				fe_class_name = zend_string_copy(fe->common.scope->name);
+			} else if (fe_class_name) {
+				zend_string_addref(fe_class_name);
+			} else {
+				fe_class_name = zend_string_init(class_name, strlen(class_name), 0);
 			}
 
-			if (!strcasecmp(proto_arg_info->class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
-				proto_class_name = zend_string_copy(proto->common.scope->parent->name);
-			} else if (!strcasecmp(proto_arg_info->class_name, "self") && proto->common.scope) {
-				proto_class_name = zend_string_copy(proto->common.scope->name);
+			if (proto->type == ZEND_INTERNAL_FUNCTION) {				
+				proto_class_name = NULL;
+				class_name = ((zend_internal_arg_info*)proto_arg_info)->class_name;
 			} else {
-				proto_class_name = zend_string_init(
-					proto_arg_info->class_name,
-					proto_arg_info->class_name_len, 0);
+				proto_class_name = proto_arg_info->class_name;
+				class_name = proto_arg_info->class_name->val;
+			}
+			if (!strcasecmp(class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
+				proto_class_name = zend_string_copy(proto->common.scope->parent->name);
+			} else if (!strcasecmp(class_name, "self") && proto->common.scope) {
+				proto_class_name = zend_string_copy(proto->common.scope->name);
+			} else if (proto_class_name) {
+				zend_string_addref(proto_class_name);
+			} else {
+				proto_class_name = zend_string_init(class_name, strlen(class_name), 0);
 			}
 
 			if (strcasecmp(fe_class_name->val, proto_class_name->val)!=0) {
@@ -373,15 +388,21 @@ static zend_string *zend_get_function_declaration(zend_function *fptr TSRMLS_DC)
 			if (arg_info->class_name) {
 				const char *class_name;
 				size_t class_name_len;
-				if (!strcasecmp(arg_info->class_name, "self") && fptr->common.scope) {
+
+				if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+					class_name = ((zend_internal_arg_info*)arg_info)->class_name;
+					class_name_len = strlen(class_name);
+				} else {
+					class_name = arg_info->class_name->val;
+					class_name_len = arg_info->class_name->len;
+				}
+
+				if (!strcasecmp(class_name, "self") && fptr->common.scope) {
 					class_name = fptr->common.scope->name->val;
 					class_name_len = fptr->common.scope->name->len;
-				} else if (!strcasecmp(arg_info->class_name, "parent") && fptr->common.scope->parent) {
+				} else if (!strcasecmp(class_name, "parent") && fptr->common.scope->parent) {
 					class_name = fptr->common.scope->parent->name->val;
 					class_name_len = fptr->common.scope->parent->name->len;
-				} else {
-					class_name = arg_info->class_name;
-					class_name_len = arg_info->class_name_len;
 				}
 
 				smart_str_appendl(&str, class_name, class_name_len);
@@ -403,7 +424,11 @@ static zend_string *zend_get_function_declaration(zend_function *fptr TSRMLS_DC)
 			smart_str_appendc(&str, '$');
 
 			if (arg_info->name) {
-				smart_str_appendl(&str, arg_info->name, arg_info->name_len);
+				if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+					smart_str_appends(&str, ((zend_internal_arg_info*)arg_info)->name);
+				} else {
+					smart_str_appendl(&str, arg_info->name->val, arg_info->name->len);
+				}
 			} else {
 				smart_str_appends(&str, "param");
 				smart_str_append_unsigned(&str, i);

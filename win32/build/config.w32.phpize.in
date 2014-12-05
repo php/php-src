@@ -126,3 +126,7 @@ DEFINE('SNAPSHOT_TEMPLATE', PHP_SNAPSHOT_TEMPLATE);
 
 AC_DEFINE("PHP_DIR", PHP_DIR);
 DEFINE("PHP_DIR", PHP_DIR);
+
+ARG_WITH("codegen-arch", "Architecture for code generation", "no");
+toolset_setup_codegen_arch();
+

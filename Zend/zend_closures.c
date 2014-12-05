@@ -182,6 +182,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object TSRML
 	zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
 
 	invoke->common = closure->func.common;
+	/* TODO: return ZEND_INTERNAL_FUNCTION, but arg_info representation is suitable for ZEND_USER_FUNCTION ??? */
 	invoke->type = ZEND_INTERNAL_FUNCTION;
 	invoke->internal_function.fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_CALL_VIA_HANDLER | (closure->func.common.fn_flags & ZEND_ACC_RETURN_REFERENCE);
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
@@ -370,7 +371,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 				if (arg_info->name) {
 					name = zend_strpprintf(0, "%s$%s",
 							arg_info->pass_by_reference ? "&" : "",
-							arg_info->name);
+							arg_info->name->val);
 				} else {
 					name = zend_strpprintf(0, "%s$param%d",
 							arg_info->pass_by_reference ? "&" : "",

@@ -51,7 +51,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 	TSRMLS_FETCH();
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -87,7 +87,7 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 	TSRMLS_FETCH();
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -111,7 +111,7 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array
 	int arg_count;
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -133,7 +133,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 	int arg_count;
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -920,7 +920,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		return FAILURE;
 	}
 
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (num_args > arg_count) {
 		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
@@ -2192,7 +2192,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		if (ptr->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)ptr->arg_info;
 			
-			internal_function->arg_info = (zend_arg_info*)ptr->arg_info+1;
+			internal_function->arg_info = (zend_internal_arg_info*)ptr->arg_info+1;
 			internal_function->num_args = ptr->num_args;
 			/* Currently you cannot denote that the function can accept less arguments than num_args */
 			if (info->required_num_args == -1) {
@@ -3504,7 +3504,7 @@ ZEND_API int zend_fcall_info_argp(zend_fcall_info *fci TSRMLS_DC, int argc, zval
 		fci->params = (zval *) erealloc(fci->params, fci->param_count * sizeof(zval));
 
 		for (i = 0; i < argc; ++i) {
-			ZVAL_COPY_VALUE(&fci->params[i], &argv[i]);
+			ZVAL_COPY(&fci->params[i], &argv[i]);
 		}
 	}
 
@@ -3529,7 +3529,7 @@ ZEND_API int zend_fcall_info_argv(zend_fcall_info *fci TSRMLS_DC, int argc, va_l
 
 		for (i = 0; i < argc; ++i) {
 			arg = va_arg(*argv, zval *);
-			ZVAL_COPY_VALUE(&fci->params[i], arg);
+			ZVAL_COPY(&fci->params[i], arg);
 		}
 	}
 
@@ -4127,7 +4127,7 @@ ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data) /* {{{ */
 				if (ex->func) {
 					if (ZEND_USER_CODE(ex->func->type)) {
 						if (ex->func->op_array.this_var != -1) {
-							zval *this_var = EX_VAR_2(ex, ex->func->op_array.this_var);
+							zval *this_var = ZEND_CALL_VAR(ex, ex->func->op_array.this_var);
 							if (this_var != EX(return_value)) {
 								zval_ptr_dtor(this_var);
 								ZVAL_NULL(this_var);
