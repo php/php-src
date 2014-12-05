@@ -25,10 +25,10 @@
 #include "zend_compile.h"
 #include "zend_build.h"
 
-/* The first number is the engine version and the rest is the date.
+/* The first number is the engine version and the rest is the date (YYYYMMDD).
  * This way engine 2/3 API no. is always greater than engine 1 API no..
  */
-#define ZEND_EXTENSION_API_NO	220140815
+#define ZEND_EXTENSION_API_NO	320140815
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
