@@ -989,23 +989,36 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMP|VAR|CV, ANY)
+ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMPVAR|CV, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *z;
 
 	SAVE_OPLINE();
-	z = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	z = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
-	zend_print_variable(z TSRMLS_CC);
+	if (Z_TYPE_P(z) == IS_STRING) {
+		zend_string *str = Z_STR_P(z);
+
+		if (str->len != 0) {
+			zend_write(str->val, str->len);
+		}
+	} else {
+		zend_string *str = _zval_get_string_func(z TSRMLS_CC);
+
+		if (str->len != 0) {
+			zend_write(str->val, str->len);
+		}
+		zend_string_release(str);
+	}
 
 	FREE_OP1();
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(41, ZEND_PRINT, CONST|TMP|VAR|CV, ANY)
+ZEND_VM_HANDLER(41, ZEND_PRINT, CONST|TMPVAR|CV, ANY)
 {
 	USE_OPLINE
 
