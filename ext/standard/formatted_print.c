@@ -28,6 +28,7 @@
 #ifdef HAVE_LOCALE_H
 #include <locale.h>
 #ifdef ZTS
+#include "ext/standard/php_string.h"
 #define LCONV_DECIMAL_POINT (*lconv.decimal_point)
 #else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)

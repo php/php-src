@@ -557,6 +557,11 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		|CLIENT_MULTI_RESULTS
 #endif
 		;
+#if defined(PDO_USE_MYSQLND)
+	int dbname_len = 0;
+	int password_len = 0;
+#endif
+
 #ifdef CLIENT_MULTI_STATEMENTS
 	if (!driver_options) {
 		connect_opts |= CLIENT_MULTI_STATEMENTS;
@@ -565,10 +570,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 #endif
 
-#if defined(PDO_USE_MYSQLND)
-	int dbname_len = 0;
-	int password_len = 0;
-#endif
 	PDO_DBG_ENTER("pdo_mysql_handle_factory");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 #ifdef CLIENT_MULTI_RESULTS
