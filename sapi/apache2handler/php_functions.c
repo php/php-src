@@ -288,8 +288,8 @@ PHP_FUNCTION(apache_setenv)
 PHP_FUNCTION(apache_getenv)
 {
 	php_struct *ctx;
-	char *variable=NULL;
-	int variable_len;
+	char *variable;
+	size_t variable_len;
 	zend_bool walk_to_top = 0;
 	int arg_count = ZEND_NUM_ARGS();
 	char *env_val=NULL;
