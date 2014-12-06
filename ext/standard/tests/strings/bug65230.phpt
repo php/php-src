@@ -21,7 +21,7 @@ function test($locale, $value)
 	printf(" sep: %s\n", $sep);
 	printf("  %%f: %f\n", $value);
 	printf("  %%F: %F\n", $value);
-	printf("date: %s\n", strftime('%x'));
+	printf("date: %s\n", strftime('%x', mktime(0, 0, 0, 12, 5, 2014)));
 	printf("\n");
 }
 
