@@ -5361,7 +5361,10 @@ void zend_compile_print(znode *result, zend_ast *ast) /* {{{ */
 	znode expr_node;
 	zend_compile_expr(&expr_node, expr_ast);
 
-	zend_emit_op_tmp(result, ZEND_PRINT, &expr_node, NULL);
+	zend_emit_op(NULL, ZEND_ECHO, &expr_node, NULL);
+
+	result->op_type = IS_CONST;
+	ZVAL_LONG(&result->u.constant, 1);
 }
 /* }}} */
 

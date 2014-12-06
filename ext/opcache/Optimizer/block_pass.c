@@ -645,24 +645,8 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			MAKE_NOP(src);
 		}
 
-		/* T = PRINT(X), F(T) => ECHO(X), F(1) */
-		if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
-			VAR_SOURCE(opline->op1) &&
-			VAR_SOURCE(opline->op1)->opcode == ZEND_PRINT &&
-			opline->opcode != ZEND_CASE && opline->opcode != ZEND_FREE) {
-			ZEND_OP1_TYPE(opline) = IS_CONST;
-			LITERAL_LONG(opline->op1, 1);
-		}
-
-		if (ZEND_OP2_TYPE(opline) == IS_TMP_VAR &&
-			VAR_SOURCE(opline->op2) &&
-			VAR_SOURCE(opline->op2)->opcode == ZEND_PRINT) {
-			ZEND_OP2_TYPE(opline) = IS_CONST;
-			LITERAL_LONG(opline->op2, 1);
-		}
-
 		/* T = CAST(X, String), ECHO(T) => NOP, ECHO(X) */
-		if ((opline->opcode == ZEND_ECHO || opline->opcode == ZEND_PRINT) &&
+		if (opline->opcode == ZEND_ECHO &&
 			ZEND_OP1_TYPE(opline) & (IS_TMP_VAR|IS_VAR) &&
 			VAR_SOURCE(opline->op1) &&
 			VAR_SOURCE(opline->op1)->opcode == ZEND_CAST &&
@@ -670,18 +654,6 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			zend_op *src = VAR_SOURCE(opline->op1);
 			COPY_NODE(opline->op1, src->op1);
 			MAKE_NOP(src);
-		}
-
-		/* T = PRINT(X), FREE(T) => ECHO(X) */
-		if (opline->opcode == ZEND_FREE &&
-			ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
-			VAR_SOURCE(opline->op1)) {
-			zend_op *src = VAR_SOURCE(opline->op1);
-			if (src->opcode == ZEND_PRINT) {
-				src->opcode = ZEND_ECHO;
-				ZEND_RESULT_TYPE(src) = IS_UNUSED;
-				MAKE_NOP(opline);
-			}
 		}
 
        /* T = BOOL(X), FREE(T) => NOP */
@@ -1858,10 +1830,6 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 							literal_dtor(&ZEND_OP1_LITERAL(opline));
 						}
 						MAKE_NOP(opline);
-						break;
-					case ZEND_PRINT:
-						opline->opcode = ZEND_ECHO;
-						ZEND_RESULT_TYPE(opline) = IS_UNUSED;
 						break;
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
