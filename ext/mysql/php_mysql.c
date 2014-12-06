@@ -35,13 +35,7 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/basic_functions.h"
 
-#ifdef ZEND_ENGINE_2
-# include "zend_exceptions.h"
-#else
-  /* PHP 4 compat */
-# define OnUpdateLong	OnUpdateInt
-# define E_STRICT		E_NOTICE
-#endif
+#include "zend_exceptions.h"
 
 #if HAVE_MYSQL
 
@@ -2081,7 +2075,6 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 	mysql_row_length_type *mysql_row_lengths;
 #endif
 
-#ifdef ZEND_ENGINE_2
 	if (into_object) {
 		zend_string *class_name = NULL;
 
@@ -2100,7 +2093,6 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		}
 		result_type = MYSQL_ASSOC;
 	} else
-#endif
 	{
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &res, &result_type) == FAILURE) {
 			return;
@@ -2168,7 +2160,6 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 	mysqlnd_fetch_into(mysql_result, ((result_type & MYSQL_NUM)? MYSQLND_FETCH_NUM:0) | ((result_type & MYSQL_ASSOC)? MYSQLND_FETCH_ASSOC:0), return_value, MYSQLND_MYSQL);
 #endif
 
-#ifdef ZEND_ENGINE_2
 	/* mysqlnd might return FALSE if no more rows */
 	if (into_object && Z_TYPE_P(return_value) != IS_FALSE) {
 		zval dataset;
@@ -2231,7 +2222,6 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Class %s does not have a constructor hence you cannot use ctor_params", ce->name->val);
 		}
 	}
-#endif
 
 }
 /* }}} */

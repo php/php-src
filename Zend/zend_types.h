@@ -698,7 +698,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 #define ZVAL_COPY_VALUE(z, v)							\
 	do {												\
 		zval *_z1 = (z);								\
-		zval *_z2 = (v);								\
+		const zval *_z2 = (v);							\
 		(_z1)->value = (_z2)->value;					\
 		Z_TYPE_INFO_P(_z1) = Z_TYPE_INFO_P(_z2);		\
 	} while (0)
@@ -706,7 +706,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 #define ZVAL_COPY(z, v)									\
 	do {												\
 		zval *__z1 = (z);								\
-		zval *__z2 = (v);								\
+		const zval *__z2 = (v);							\
 		ZVAL_COPY_VALUE(__z1, __z2);					\
 		if (Z_OPT_REFCOUNTED_P(__z1)) {					\
 			Z_ADDREF_P(__z1);							\
@@ -716,7 +716,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 #define ZVAL_DUP(z, v)									\
 	do {												\
 		zval *__z1 = (z);								\
-		zval *__z2 = (v);								\
+		const zval *__z2 = (v);							\
 		ZVAL_COPY_VALUE(__z1, __z2);					\
 		zval_opt_copy_ctor(__z1);						\
 	} while (0)
