@@ -38,7 +38,12 @@
 
 #ifdef HAVE_LOCALE_H
 #include <locale.h>
+#ifdef ZTS
+#include "ext/standard/php_string.h"
+#define LCONV_DECIMAL_POINT (*lconv.decimal_point)
+#else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
+#endif
 #else
 #define LCONV_DECIMAL_POINT '.'
 #endif
@@ -607,7 +612,11 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 	char char_buf[2];			/* for printing %% and %<unknown> */
 
 #ifdef HAVE_LOCALE_H
+#ifdef ZTS
+	struct lconv lconv;
+#else
 	struct lconv *lconv = NULL;
+#endif
 #endif
 
 	/*
@@ -1017,9 +1026,13 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 						s_len = 3;
 					} else {
 #ifdef HAVE_LOCALE_H
+#ifdef ZTS
+						localeconv_r(&lconv);
+#else
 						if (!lconv) {
 							lconv = localeconv();
 						}
+#endif
 #endif
 						s = php_conv_fp((*fmt == 'f')?'F':*fmt, fp_num, alternate_form,
 						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
@@ -1074,9 +1087,13 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 					 * * We use &num_buf[ 1 ], so that we have room for the sign
 					 */
 #ifdef HAVE_LOCALE_H
+#ifdef ZTS
+					localeconv_r(&lconv);
+#else
 					if (!lconv) {
 						lconv = localeconv();
 					}
+#endif
 #endif
 					s = php_gcvt(fp_num, precision, (*fmt=='H' || *fmt == 'k') ? '.' : LCONV_DECIMAL_POINT, (*fmt == 'G' || *fmt == 'H')?'E':'e', &num_buf[1]);
 					if (*s == '-') {

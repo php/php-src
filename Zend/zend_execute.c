@@ -1015,6 +1015,7 @@ static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht
 	zend_ulong hval;
 	zend_bool key_needs_release = 0;
 
+try_again:
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
 		hval = Z_LVAL_P(dim);
 num_index:
@@ -1110,6 +1111,9 @@ str_index:
 			case IS_TRUE:
 				hval = 1;
 				goto num_index;
+			case IS_REFERENCE:
+				dim = Z_REFVAL_P(dim);
+				goto try_again;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
 				retval = (type == BP_VAR_W || type == BP_VAR_RW) ?
@@ -1127,6 +1131,7 @@ static zend_never_inline zend_long zend_check_string_offset(zval *container, zva
 		zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
 	}
 
+try_again:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		zend_uchar type;
 
@@ -1148,6 +1153,9 @@ static zend_never_inline zend_long zend_check_string_offset(zval *container, zva
 			case IS_TRUE:
 				zend_error(E_NOTICE, "String offset cast occurred");
 				break;
+			case IS_REFERENCE:
+				dim = Z_REFVAL_P(dim);
+				goto try_again;
 			default:
 				zend_error(E_WARNING, "Illegal offset type");
 				break;
@@ -1283,13 +1291,13 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 {
 	zval *retval;
 
-	ZVAL_DEREF(container);
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 		retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type TSRMLS_CC);
 		ZVAL_COPY(result, retval);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_long offset;
 
+try_again:
 		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 			switch(Z_TYPE_P(dim)) {
 				/* case IS_LONG: */
@@ -1312,6 +1320,9 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 						zend_error(E_NOTICE, "String offset cast occurred");
 					}
 					break;
+				case IS_REFERENCE:
+					dim = Z_REFVAL_P(dim);
+					goto try_again;
 				default:
 					zend_error(E_WARNING, "Illegal offset type");
 					break;

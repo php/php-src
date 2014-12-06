@@ -22,7 +22,7 @@
 #endif
 #include "php.h"
 #if HAVE_ZIP
-#ifdef ZEND_ENGINE_2
+#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 
 #include "php_streams.h"
 #include "ext/standard/file.h"
@@ -348,5 +348,5 @@ php_stream_wrapper php_stream_zip_wrapper = {
 	NULL,
 	0 /* is_url */
 };
-#endif /* ZEND_ENGINE_2 */
+#endif /* defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3) */
 #endif /* HAVE_ZIP */
