@@ -27,7 +27,11 @@
 
 #ifdef HAVE_LOCALE_H
 #include <locale.h>
+#ifdef ZTS
+#define LCONV_DECIMAL_POINT (*lconv.decimal_point)
+#else
 #define LCONV_DECIMAL_POINT (*lconv->decimal_point)
+#endif
 #else
 #define LCONV_DECIMAL_POINT '.'
 #endif
@@ -214,7 +218,11 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	char *s = NULL;
 	int s_len = 0, is_negative = 0;
 #ifdef HAVE_LOCALE_H
+#ifdef ZTS
+	struct lconv lconv;
+#else
 	struct lconv *lconv;
+#endif
 #endif
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
@@ -246,7 +254,11 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 		case 'f':
 		case 'F':
 #ifdef HAVE_LOCALE_H
+#ifdef ZTS
+			localeconv_r(&lconv);
+#else
 			lconv = localeconv();
+#endif
 #endif
 			s = php_conv_fp((fmt == 'f')?'F':fmt, number, 0, precision,
 						(fmt == 'f')?LCONV_DECIMAL_POINT:'.',
@@ -270,7 +282,11 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 			 * * We use &num_buf[ 1 ], so that we have room for the sign
 			 */
 #ifdef HAVE_LOCALE_H
+#ifdef ZTS
+			localeconv_r(&lconv);
+#else
 			lconv = localeconv();
+#endif
 #endif
 			s = php_gcvt(number, precision, LCONV_DECIMAL_POINT, (fmt == 'G')?'E':'e', &num_buf[1]);
 			is_negative = 0;

@@ -4,10 +4,6 @@ Bug #12647 (Locale settings affecting float parsing)
 precision=14
 --SKIPIF--
 <?php  # try to activate a german locale
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    /* skip on windows until #63688 was fixed */
-    die('skip');
-}
 if (setlocale(LC_NUMERIC, "de_DE.UTF-8", "de_DE", "de", "german", "ge", "de_DE.ISO-8859-1") === FALSE) {
 	print "skip Can't find german locale";
 }
