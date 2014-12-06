@@ -767,15 +767,27 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	zend_string *key;
 	zval *zv;
 
-	if ((ce->ce_flags & ZEND_ACC_INTERFACE)
-		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ce->name->val, parent_ce->name->val);
-	}
-	if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ce->name->val, parent_ce->name->val);
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		/* Interface can only inherit other interfaces */
+		if (!(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ce->name->val, parent_ce->name->val);
+		}
+	} else {
+		/* Class declaration must not extend traits or interfaces */
+		if (parent_ce->ce_flags & ZEND_ACC_INTERFACE) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from interface %s", ce->name->val, parent_ce->name->val);
+		} else if (parent_ce->ce_flags & ZEND_ACC_TRAIT) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from trait %s", ce->name->val, parent_ce->name->val);
+		}
+
+		/* Class must not extend a final class */
+		if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ce->name->val, parent_ce->name->val);
+		}
 	}
 
 	ce->parent = parent_ce;
+
 	/* Copy serialize/unserialize callbacks */
 	if (!ce->serialize) {
 		ce->serialize   = parent_ce->serialize;
