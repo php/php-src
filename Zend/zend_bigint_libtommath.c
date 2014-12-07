@@ -28,35 +28,38 @@
 #include "zend_bigint.h"
 #include "zend_string.h"
 
-/* These custom allocators are commented out since they are useless unless
- * libtommath is built with XMALLOC defined, otherwise it just uses libc
+/* Here we define custom allocators to be used by LibTomMath
+ * emalloc/realloc/free are macros, not functions, so we need wrappers to pass
+ * them as our custom allocators
  */
-
-#if 0
-/* emalloc/realloc/free are macros, not functions, so we need wrappers to pass
-   as our custom allocators */
-void* XMALLOC(size_t size)
+static void* zend_bigint_malloc(size_t size)
 {
 	return emalloc(size);
 }
+#define XMALLOC zend_bigint_malloc
 
-void* XREALLOC(void *ptr, size_t size)
+static void* zend_bigint_realloc(void *ptr, size_t size)
 {
 	return erealloc(ptr, size);
 }
+#define XREALLOC zend_bigint_realloc
 
-void* XCALLOC(size_t num, size_t size)
+static void* zend_bigint_calloc(size_t num, size_t size)
 {
 	return ecalloc(num, size);
 }
+#define XCALLOC zend_bigint_calloc
 
-void XFREE(void *ptr)
+static void zend_bigint_free(void *ptr)
 {
 	efree(ptr);
 }
-#endif
+#define XFREE zend_bigint_free
 
 #include "tommath.h"
+
+/* We'll build libtommath as part of this file */
+#include "libtommath/mpi.c"
 
 struct _zend_bigint {
     zend_refcounted   gc;

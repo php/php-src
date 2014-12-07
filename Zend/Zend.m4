@@ -447,15 +447,6 @@ AC_ARG_ENABLE(bigint-gmp,
   PHP_ADD_INCLUDE($GMP_DIR/include)
   AC_DEFINE([ZEND_HAVE_GMP], 1, [Define whether GMP is available and to be used by bigints])
 ], [
-  for i in $PHP_TOMMATH /usr/local /usr; do
-    test -f $i/include/tommath.h && TOMMATH_DIR=$i && break
-  done
-
-  if test -z "$TOMMATH_DIR"; then
-    AC_MSG_ERROR(Unable to locate tommath.h)
-  fi
-  PHP_ADD_LIBRARY_WITH_PATH(tommath, $TOMMATH_DIR/$PHP_LIBDIR, TOMMATH_SHARED_LIBADD)
-  PHP_ADD_INCLUDE($TOMMATH_DIR/include)
   AC_DEFINE([ZEND_HAVE_LIBTOMMATH], 1, [Define whether LibTomMath is available and to be used by bigints])
 ])
 
