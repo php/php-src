@@ -86,22 +86,17 @@ ZEND_API void zend_bigint_release(zend_bigint *big);
 
 /*** INFORMATION ***/
 
-/* Returns true if bigint can fit into an unsigned long without truncation */
+/* Returns true if bigint can fit into type without truncation
+   ulong is zend_ulong, long is zend_long */
 ZEND_API zend_bool zend_bigint_can_fit_ulong(const zend_bigint *big);
-
-/* Returns true if bigint can fit into a long without truncation */
 ZEND_API zend_bool zend_bigint_can_fit_long(const zend_bigint *big);
 
 /* Returns sign of bigint (-1 for negative, 0 for zero or 1 for positive) */
 ZEND_API int zend_bigint_sign(const zend_bigint *big);
 
-/* Returns true if bigint is divisible by a bigint */
+/* Returns true if two integers divisible (i.e. num mod divisor == 0) */
 ZEND_API zend_bool zend_bigint_divisible(const zend_bigint *num, const zend_bigint *divisor);
-
-/* Returns true if bigint is divisible by a long */
 ZEND_API zend_bool zend_bigint_divisible_long(const zend_bigint *num, zend_long divisor);
-
-/* Returns true if long is divisible by a bigint */
 ZEND_API zend_bool zend_bigint_long_divisible(zend_long num, const zend_bigint *divisor);
 
 /*** CONVERTORS ***/
@@ -147,109 +142,72 @@ ZEND_API char* zend_bigint_to_string_base(const zend_bigint *big, int base);
  * great power comes great responsibility.
  */
 
-/* Adds two bigints and stores result in out */
+/* Adds two integers */
 ZEND_API void zend_bigint_add(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
-
-/* Adds a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_add_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
-
-/* Adds a long and a long and stores result in out */
 ZEND_API void zend_bigint_long_add_long(zend_bigint *out, zend_long op1, zend_long op2);
 
-/* Subtracts two bigints and stores result in out */
+/* Subtracts two integers */
 ZEND_API void zend_bigint_subtract(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
-
-/* Subtracts a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_subtract_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
-
-/* Subtracts a long and a bigint and stores result in out */
 ZEND_API void zend_bigint_long_subtract(zend_bigint *out, zend_long op1, const zend_bigint *op2);
-
-/* Subtracts a long and a long and stores result in out */
 ZEND_API void zend_bigint_long_subtract_long(zend_bigint *out, zend_long op1, zend_long op2);
 
-/* Multiplies two bigints and stores result in out */
+/* Multiplies two integers */
 ZEND_API void zend_bigint_multiply(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
-
-/* Multiplies a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_multiply_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
-
-/* Multiplies a long and a long and stores result in out */
 ZEND_API void zend_bigint_long_multiply_long(zend_bigint *out, zend_long op1, zend_long op2);
 
-/* Raises a bigint base to an unsigned long power and stores result in out */
+/* Raises an integer base to an integer power */
 ZEND_API void zend_bigint_pow_ulong(zend_bigint *out, const zend_bigint *base, zend_ulong power);
-
-/* Raises a long base to an unsigned long power and stores result in out */
 ZEND_API void zend_bigint_long_pow_ulong(zend_bigint *out, zend_long base, zend_ulong power);
 
-/* Divides a bigint by a bigint and stores result in out */
+/* Divides an integer by an integer
+ * _as_double functions may provide better precision than converting to double
+ * and doing a floating-point division
+ */
 ZEND_API void zend_bigint_divide(zend_bigint *out, const zend_bigint *big, const zend_bigint *divisor);
-
-/* Divides a bigint by a bigint and returns result as a double */
 ZEND_API double zend_bigint_divide_as_double(const zend_bigint *num, const zend_bigint *divisor);
-
-/* Divides a bigint by a long and stores result in out */
 ZEND_API void zend_bigint_divide_long(zend_bigint *out, const zend_bigint *big, zend_long divisor);
-
-/* Divides a bigint by a long and returns result as a double */
 ZEND_API double zend_bigint_divide_long_as_double(const zend_bigint *num, zend_long divisor);
-
-/* Divides a long by a bigint and stores result in out */
 ZEND_API void zend_bigint_long_divide(zend_bigint *out, zend_long big, const zend_bigint *divisor);
-
-/* Divides a long by a bigint and returns result as a double */
 ZEND_API double zend_bigint_long_divide_as_double(zend_long num, const zend_bigint *divisor);
 
-/* Finds the remainder of the division of a bigint by a bigint and stores result in out */
+/* Finds the remainder of the division of two integers */
 ZEND_API void zend_bigint_modulus(zend_bigint *out, const zend_bigint *num, const zend_bigint *divisor);
-
-/* Finds the remainder of the division of a bigint by a long and stores result in out */
 ZEND_API void zend_bigint_modulus_long(zend_bigint *out, const zend_bigint *num, zend_long divisor);
-
-/* Finds the remainder of the division of a long by a bigint and stores result in out */
 ZEND_API void zend_bigint_long_modulus(zend_bigint *out, zend_long num, const zend_bigint *divisor);
 
-/* Finds the one's complement of a bigint and stores result in out */
+/* Finds the one's complement of an integer */
 ZEND_API void zend_bigint_ones_complement(zend_bigint *out, const zend_bigint *op);
 
-/* Finds the bitwise OR of a bigint and a bigint and stores result in out */
+/* Finds the bitwise OR of two integers */
 ZEND_API void zend_bigint_or(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
-
-/* Finds the bitwise OR of a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_or_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 
-/* Finds the bitwise AND of a bigint and a bigint and stores result in out */
+/* Finds the bitwise AND of two integers */
 ZEND_API void zend_bigint_and(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
-
-/* Finds the bitwise AND of a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_and_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 
-/* Finds the bitwise XOR of a bigint and a bigint and stores result in out */
+/* Finds the bitwise XOR of two integers */
 ZEND_API void zend_bigint_xor(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
-
-/* Finds the bitwise XOR of a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_xor_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 
-/* Shifts a bigint left by an unsigned long and stores result in out */
+/* Shifts an integer left by an integer number of bits */
 ZEND_API void zend_bigint_shift_left_ulong(zend_bigint *out, const zend_bigint *num, zend_ulong shift);
-
-/* Shifts a long left by an unsigned long and stores result in out */
 ZEND_API void zend_bigint_long_shift_left_ulong(zend_bigint *out, zend_long num, zend_ulong shift);
 
-/* Shifts a bigint right by an unsigned long and stores result in out */
+/* Shifts an integer right by an integer number of bits */
 ZEND_API void zend_bigint_shift_right_ulong(zend_bigint *out, const zend_bigint *num, zend_ulong shift);
 
-/* Compares a bigint and a bigint and returns result (negative if op1 > op2, zero if op1 == op2, positive if op1 < op2) */
+/* Compares two numbers
+ * Result is negative if op1 > op2, zero if op1 == op2, positive if op1 < op2)
+ */
 ZEND_API int zend_bigint_cmp(const zend_bigint *op1, const zend_bigint *op2);
-
-/* Compares a bigint and a long and returns result (negative if op1 > op2, zero if op1 == op2, positive if op1 < op2) */
 ZEND_API int zend_bigint_cmp_long(const zend_bigint *op1, zend_long op2);
-
-/* Compares a bigint and a double and returns result (negative if op1 > op2, zero if op1 == op2, positive if op1 < op2) */
 ZEND_API int zend_bigint_cmp_double(const zend_bigint *op1, double op2);
 
-/* Finds the absolute value of a bigint and stores result in out */
+/* Finds the absolute value of an integer */
 ZEND_API void zend_bigint_abs(zend_bigint *out, const zend_bigint *big);
 
 #endif
