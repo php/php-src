@@ -35,27 +35,28 @@ void zend_startup_bigint(void);
 
 /*** INITIALISERS ***/
 
-/* Allocates a bigint and returns pointer, does NOT initialise
- * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
+/* HERE BE DRAGONS: Memory allocated internally to hold bigint data is always
+ * non-persistent - even if the zend_bigint struct itself is persistent,
+ * the data it points is not.
+ */
+
+/* Allocates a bigint and returns pointer, does NOT initialise */
 ZEND_API zend_bigint* zend_bigint_alloc(void);
 
-/* Initialises a bigint
- * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
+/* Initialises a bigint */
 ZEND_API void zend_bigint_init(zend_bigint *big);
 
-/* Convenience function: Allocates and initialises a bigint, returns pointer
- * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
+/* Convenience function: Allocates and initialises a bigint, returns pointer */
 ZEND_API zend_bigint* zend_bigint_init_alloc(void);
 
 /* Initialises a bigint from a string with the specified base (in range 2-36)
  * Returns FAILURE on failure (if the string is not entirely numeric), else SUCCESS
- * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
+ */
 ZEND_API int zend_bigint_init_from_string(zend_bigint *big, const char *str, int base);
 
 /* Initialises a bigint from a string with the specified base (in range 2-36)
  * Takes a length - due to an extra memory allocation, this function is slower
- * Returns FAILURE on failure, else SUCCESS
- * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
+ * Returns FAILURE on failure, else SUCCESS */
 ZEND_API int zend_bigint_init_from_string_length(zend_bigint *big, const char *str, size_t length, int base);
 
 /* Intialises a bigint from a C-string with the specified base (10 or 16)
@@ -65,18 +66,16 @@ ZEND_API int zend_bigint_init_from_string_length(zend_bigint *big, const char *s
  * Stops at first non-valid character, else null byte
  * If there are no valid characters, the bigint is initialised to zero
  * This behaviour is supposed to match that of strtol but is not exactly the same
- * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
+ */
 ZEND_API void zend_bigint_init_strtol(zend_bigint *big, const char *str, char** endptr, int base);
 
 /* Initialises a bigint from a long */
 ZEND_API void zend_bigint_init_from_long(zend_bigint *big, zend_long value);
 
-/* Initialises a bigint from a double
- * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
+/* Initialises a bigint from a double */
 ZEND_API void zend_bigint_init_from_double(zend_bigint *big, double value);
 
-/* Initialises a bigint and duplicates a bigint to it (copies value)
- * HERE BE DRAGONS: Memory allocated internally by gmp is non-persistent */
+/* Initialises a bigint and duplicates a bigint to it (copies value) */
 ZEND_API void zend_bigint_init_dup(zend_bigint *big, const zend_bigint *source);
 
 /* Destroys a bigint (does NOT deallocate) */
