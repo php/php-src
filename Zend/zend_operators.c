@@ -2201,11 +2201,11 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 			return SUCCESS;
 		case TYPE_PAIR(IS_LONG, IS_BIGINT):
 			if (CAN_OVERWRITE()) {
-				zend_bigint_long_or(Z_BIG_P(result), Z_LVAL_P(op1), Z_BIG_P(op2));
+				zend_bigint_or_long(Z_BIG_P(result), Z_BIG_P(op2), Z_LVAL_P(op1));
 				FREE_OP1_OP2_COPY_ONLY();
 			} else {
 				zend_bigint *out = zend_bigint_init_alloc();
-				zend_bigint_long_or(out, Z_LVAL_P(op1), Z_BIG_P(op2));
+				zend_bigint_or_long(out, Z_BIG_P(op2), Z_LVAL_P(op1));
 				FREE_OP1_OP2();
 				ZVAL_BIGINT(result, out);
 			}
@@ -2288,11 +2288,11 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 			return SUCCESS;
 		case TYPE_PAIR(IS_LONG, IS_BIGINT):
 			if (CAN_OVERWRITE()) {
-				zend_bigint_long_and(Z_BIG_P(result), Z_LVAL_P(op1), Z_BIG_P(op2));
+				zend_bigint_and_long(Z_BIG_P(result), Z_BIG_P(op2), Z_LVAL_P(op1));
 				FREE_OP1_OP2_COPY_ONLY();
 			} else {
 				zend_bigint *out = zend_bigint_init_alloc();
-				zend_bigint_long_and(out, Z_LVAL_P(op1), Z_BIG_P(op2));
+				zend_bigint_and_long(out, Z_BIG_P(op2), Z_LVAL_P(op1));
 				FREE_OP1_OP2();
 				ZVAL_BIGINT(result, out);
 			}
@@ -2375,11 +2375,11 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 			return SUCCESS;
 		case TYPE_PAIR(IS_LONG, IS_BIGINT):
 			if (CAN_OVERWRITE()) {
-				zend_bigint_long_xor(Z_BIG_P(result), Z_LVAL_P(op1), Z_BIG_P(op2));
+				zend_bigint_xor_long(Z_BIG_P(result), Z_BIG_P(op2), Z_LVAL_P(op1));
 				FREE_OP1_OP2_COPY_ONLY();
 			} else {
 				zend_bigint *out = zend_bigint_init_alloc();
-				zend_bigint_long_xor(out, Z_LVAL_P(op1), Z_BIG_P(op2));
+				zend_bigint_xor_long(out, Z_BIG_P(op2), Z_LVAL_P(op1));
 				FREE_OP1_OP2();
 				ZVAL_BIGINT(result, out);
 			}

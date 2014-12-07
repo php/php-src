@@ -94,13 +94,10 @@ ZEND_API void zend_bigint_long_modulus(zend_bigint *out, zend_long num, const ze
 ZEND_API void zend_bigint_ones_complement(zend_bigint *out, const zend_bigint *op);
 ZEND_API void zend_bigint_or(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_or_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
-ZEND_API void zend_bigint_long_or(zend_bigint *out, zend_long op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_and(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_and_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
-ZEND_API void zend_bigint_long_and(zend_bigint *out, zend_long op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_xor(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_xor_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
-ZEND_API void zend_bigint_long_xor(zend_bigint *out, zend_long op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_shift_left_ulong(zend_bigint *out, const zend_bigint *num, zend_ulong shift);
 ZEND_API void zend_bigint_long_shift_left_ulong(zend_bigint *out, zend_long num, zend_ulong shift);
 ZEND_API void zend_bigint_shift_right_ulong(zend_bigint *out, const zend_bigint *num, zend_ulong shift);

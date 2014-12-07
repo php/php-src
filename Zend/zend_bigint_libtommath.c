@@ -783,13 +783,6 @@ ZEND_API void zend_bigint_or_long(zend_bigint *out, const zend_bigint *op1, zend
 }
 /* }}} */
 
-/* Finds the bitwise OR of a long and a bigint and stores result in out */
-ZEND_API void zend_bigint_long_or(zend_bigint *out, zend_long op1, const zend_bigint *op2) /* {{{ */
-{
-	/* FIXME: Non-stub */
-}
-/* }}} */
-
 /* Finds the bitwise AND of a bigint and a bigint and stores result in out */
 ZEND_API void zend_bigint_and(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
@@ -804,13 +797,6 @@ ZEND_API void zend_bigint_and_long(zend_bigint *out, const zend_bigint *op1, zen
 }
 /* }}} */
 
-/* Finds the bitwise AND of a long and a bigint and stores result in out */
-ZEND_API void zend_bigint_long_and(zend_bigint *out, zend_long op1, const zend_bigint *op2) /* {{{ */
-{
-	/* FIXME: Non-stub */
-}
-/* }}} */
-
 /* Finds the bitwise XOR of a bigint and a bigint and stores result in out */
 ZEND_API void zend_bigint_xor(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
@@ -820,13 +806,6 @@ ZEND_API void zend_bigint_xor(zend_bigint *out, const zend_bigint *op1, const ze
 
 /* Finds the bitwise XOR of a bigint and a long and stores result in out */
 ZEND_API void zend_bigint_xor_long(zend_bigint *out, const zend_bigint *op1, zend_long op2) /* {{{ */
-{
-	/* FIXME: Non-stub */
-}
-/* }}} */
-
-/* Finds the bitwise XOR of a long and a bigint and stores result in out */
-ZEND_API void zend_bigint_long_xor(zend_bigint *out, zend_long op1, const zend_bigint *op2) /* {{{ */
 {
 	/* FIXME: Non-stub */
 }
