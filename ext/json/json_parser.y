@@ -85,7 +85,7 @@ void php_json_parser_array_append(zval *array, zval *zvalue);
 %% /* Rules */
 
 start:
-		value PHP_JSON_T_EOI    { $$ = $1; ZVAL_DUP(parser->return_value, &$1); PHP_JSON_USE($2); YYACCEPT; }
+		value PHP_JSON_T_EOI    { $$ = $1; *parser->return_value = $1; PHP_JSON_USE($2); YYACCEPT; }
 	|	value errlex            { PHP_JSON_USE_2($$, $1, $2); }
 ;
 
