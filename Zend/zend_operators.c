@@ -84,7 +84,11 @@ static const unsigned char tolower_map[256] = {
 
 #define FREE_OP1_OP2_COPY_ONLY() if (op1 == &op1_copy) { zval_dtor(op1); } if (op2 == &op2_copy) { zval_dtor(op2); }
 
-#define CAN_OVERWRITE() (Z_TYPE_P(result) == IS_BIGINT && Z_REFCOUNT_P(result) == 1)
+/* We can't just check the result is a bigint and overwrite, sadly, because if
+ * the result is uninitialised memory, then it might happen to look like a
+ * bigint pointer and kaboom!
+ */
+#define CAN_OVERWRITE() (op1 == result && Z_TYPE_P(result) == IS_BIGINT && Z_REFCOUNT_P(result) == 1)
 
 ZEND_API int zend_atoi(const char *str, int str_len) /* {{{ */
 {
