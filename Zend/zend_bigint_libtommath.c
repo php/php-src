@@ -509,6 +509,7 @@ ZEND_API zend_string* zend_bigint_to_zend_string(const zend_bigint *big, int per
 {
 	int size;
 	zend_string *str;
+	CHECK_ERROR(mp_radix_size(&big->mp, 10, &size));
 	str = zend_string_alloc(size - 1, persistent);
 	CHECK_ERROR(mp_toradix(&big->mp, str->val, 10));
 	return str;
