@@ -26,7 +26,7 @@
 
 /* Generated on an Octa-ALPHA 300MHz CPU & 2.5GB RAM monster */
 static uint prime_numbers[] =
-	{5, 11, 19, 53, 107, 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407, 130987, 262237, 524521, 1048793 };
+	{5, 11, 19, 53, 97, 193, 389, 769, 1543, 3079, 6151, 12289, 24593, 49157, 98317, 196613, 393241, 786433, 1572869, 3145739, 6291469, 12582917, 25165843, 50331653, 100663319, 201326611, 402653189, 805306457, 1610612741 };
 static uint num_prime_numbers = sizeof(prime_numbers) / sizeof(uint);
 
 void zend_accel_hash_clean(zend_accel_hash *accel_hash)
