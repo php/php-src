@@ -575,7 +575,7 @@ ZEND_API void zend_bigint_subtract_long(zend_bigint *out, const zend_bigint *op1
 		}
 	} else {
 		WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
-			CHECK_ERROR(mp_add(&op1->mp, &op2_mp, &out->mp));
+			CHECK_ERROR(mp_sub(&op1->mp, &op2_mp, &out->mp));
 		})
 	}
 }
