@@ -448,6 +448,7 @@ AC_ARG_ENABLE(bigint-gmp,
   AC_DEFINE([ZEND_HAVE_GMP], 1, [Define whether GMP is available and to be used by bigints])
 ], [
   AC_DEFINE([ZEND_HAVE_LIBTOMMATH], 1, [Define whether LibTomMath is available and to be used by bigints])
+  PHP_ADD_INCLUDE(Zend/libtommath)
 ])
 
 
