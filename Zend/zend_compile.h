@@ -161,7 +161,6 @@ typedef struct _zend_try_catch_element {
 /* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
 #define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
-#define ZEND_ACC_FINAL_CLASS	            0x40
 #define ZEND_ACC_INTERFACE		            0x80
 #define ZEND_ACC_TRAIT						0x120
 
@@ -476,6 +475,7 @@ ZEND_API binary_op_type get_binary_op(int opcode);
 void zend_stop_lexing(TSRMLS_D);
 void zend_emit_final_return(zval *zv TSRMLS_DC);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
+uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
 zend_ast *zend_ast_append_doc_comment(zend_ast *list TSRMLS_DC);
 void zend_handle_encoding_declaration(zend_ast *ast TSRMLS_DC);

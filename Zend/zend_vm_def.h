@@ -3850,9 +3850,11 @@ ZEND_VM_HANDLER(68, ZEND_NEW, CONST|VAR, ANY)
 	} else {
 		ce = Z_CE_P(EX_VAR(opline->op1.var));
 	}
-	if (UNEXPECTED((ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0)) {
+	if (UNEXPECTED((ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_STATIC|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0)) {
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 			zend_error_noreturn(E_ERROR, "Cannot instantiate interface %s", ce->name->val);
+		} else if (ce->ce_flags & ZEND_ACC_STATIC) {
+			zend_error_noreturn(E_ERROR, "Cannot instantiate static class %s", ce->name->val);
 		} else if ((ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 			zend_error_noreturn(E_ERROR, "Cannot instantiate trait %s", ce->name->val);
 		} else {

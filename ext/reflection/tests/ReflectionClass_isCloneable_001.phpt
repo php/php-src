@@ -28,6 +28,12 @@ $obj = new ReflectionObject($bar);
 var_dump($obj->isCloneable());
 $h = clone $foo;
 
+static class woo {}
+
+print "User static class\n";
+$obj = new ReflectionClass('woo');
+var_dump($obj->isCloneable());
+
 print "Closure\n";
 $closure = function () { };
 $obj = new ReflectionClass($closure);
@@ -57,6 +63,8 @@ bool(true)
 bool(true)
 User class - private __clone
 bool(false)
+bool(false)
+User static class
 bool(false)
 Closure
 bool(true)

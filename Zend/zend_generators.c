@@ -671,7 +671,7 @@ void zend_register_generator_ce(TSRMLS_D) /* {{{ */
 
 	INIT_CLASS_ENTRY(ce, "Generator", generator_functions);
 	zend_ce_generator = zend_register_internal_class(&ce TSRMLS_CC);
-	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL;
 	zend_ce_generator->create_object = zend_generator_create;
 	zend_ce_generator->serialize = zend_class_serialize_deny;
 	zend_ce_generator->unserialize = zend_class_unserialize_deny;
