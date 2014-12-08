@@ -578,8 +578,11 @@ PHP_FUNCTION(mcrypt_generic_init)
 
 	if (iv_len != iv_size) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Iv size incorrect; supplied length: %d, needed: %d", iv_len, iv_size);
+		if (iv_len > iv_size) {
+			iv_len = iv_size;
+		}
 	}
-	memcpy(iv_s, iv, iv_size);
+	memcpy(iv_s, iv, iv_len);
 
 	mcrypt_generic_deinit(pm->td);
 	result = mcrypt_generic_init(pm->td, key_s, key_size, iv_s);
@@ -600,8 +603,9 @@ PHP_FUNCTION(mcrypt_generic_init)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error");
 				break;
 		}
+	} else {
+		pm->init = 1;
 	}
-	pm->init = 1;
 	RETVAL_LONG(result);
 
 	efree(iv_s);
