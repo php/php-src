@@ -465,9 +465,9 @@ ZEND_API double zend_bigint_to_double(const zend_bigint *big) /* {{{ */
 	/* from http://github.com/libtom/libtommath/issues/3#issuecomment-5668076
 	   having it depend on library internals is bad, but sadly not yet a function
 	   FIXME: TODO: Replace with built-in LibTomMath function once available */
-	static const int PRECISION = 53;
-	static const int NEED_DIGITS = (PRECISION + 2 * DIGIT_BIT - 2) / DIGIT_BIT;
-	static const double DIGIT_MULTI = (mp_digit)1 << DIGIT_BIT;
+	const int PRECISION = 53;
+	const int NEED_DIGITS = (PRECISION + 2 * DIGIT_BIT - 2) / DIGIT_BIT;
+	const double DIGIT_MULTI = (mp_digit)1 << DIGIT_BIT;
 
 	mp_int *a = (mp_int*)&big->mp;
 	int i, limit;
