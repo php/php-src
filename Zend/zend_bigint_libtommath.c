@@ -711,14 +711,14 @@ ZEND_API double zend_bigint_long_divide_as_double(zend_long num, const zend_bigi
 
 ZEND_API void zend_bigint_modulus(zend_bigint *out, const zend_bigint *num, const zend_bigint *divisor) /* {{{ */
 {
-	CHECK_ERROR(mp_mod(&num->mp, &divisor->mp, &out->mp));
+	CHECK_ERROR(mp_div(&num->mp, &divisor->mp, NULL, &out->mp));
 }
 /* }}} */
 
 ZEND_API void zend_bigint_modulus_long(zend_bigint *out, const zend_bigint *num, zend_long divisor) /* {{{ */
 {
 	WITH_TEMP_MP_FROM_ZEND_LONG(divisor, divisor_mp, {
-		CHECK_ERROR(mp_mod(&num->mp, &divisor_mp, &out->mp));
+		CHECK_ERROR(mp_div(&num->mp, &divisor_mp, NULL, &out->mp));
 	})
 }
 /* }}} */
@@ -726,7 +726,7 @@ ZEND_API void zend_bigint_modulus_long(zend_bigint *out, const zend_bigint *num,
 ZEND_API void zend_bigint_long_modulus(zend_bigint *out, zend_long num, const zend_bigint *divisor) /* {{{ */
 {
 	WITH_TEMP_MP_FROM_ZEND_LONG(num, num_mp, {
-		CHECK_ERROR(mp_mod(&num_mp, &divisor->mp, &out->mp));
+		CHECK_ERROR(mp_div(&num_mp, &divisor->mp, NULL, &out->mp));
 	})
 }
 /* }}} */
