@@ -766,18 +766,18 @@ static zend_always_inline void zend_assign_to_object(zval *retval, zval *object,
 
 	if (object_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 		do {
-			if (Z_ISREF_P(object)) {
-				object = Z_REFVAL_P(object);
-				if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
-					break;
-				}
-			}
-			if (UNEXPECTED(object == &EG(error_zval))) {
+			if (object_op_type == IS_VAR && UNEXPECTED(object == &EG(error_zval))) {
 				if (retval) {
  					ZVAL_NULL(retval);
 				}
 				FREE_OP(free_value);
 				return;
+			}
+			if (Z_ISREF_P(object)) {
+				object = Z_REFVAL_P(object);
+				if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+					break;
+				}
 			}
 			if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE ||
 		    	(Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
@@ -1189,6 +1189,7 @@ static zend_always_inline void zend_fetch_dimension_address(zval *result, zval *
 {
     zval *retval;
 
+try_again:
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 		SEPARATE_ARRAY(container);
 fetch_from_array:
@@ -1259,6 +1260,9 @@ convert_to_array:
 			/* for read-mode only */
 			ZVAL_NULL(result);
 		}
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
+		container = Z_REFVAL_P(container);
+		goto try_again;
 	} else {
 		if (type == BP_VAR_UNSET) {
 			zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
@@ -1383,12 +1387,18 @@ ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *
 
 static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type TSRMLS_DC)
 {
-    if (container_op_type != IS_UNUSED) {
-		ZVAL_DEREF(container);
-		if (UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
-			if (UNEXPECTED(container == &EG(error_zval))) {
+    if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
+		do {
+			if (container_op_type != IS_VAR && UNEXPECTED(container == &EG(error_zval))) {
 				ZVAL_INDIRECT(result, &EG(error_zval));
 				return;
+			}
+
+			if (Z_ISREF_P(container)) {
+				container = Z_REFVAL_P(container);
+				if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+					break;
+				}
 			}
 
 			/* this should modify object only if it's empty */
@@ -1402,7 +1412,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				ZVAL_INDIRECT(result, &EG(error_zval));
 				return;
 			}
-		}
+		} while (0);
 	}
 	if (prop_op_type == IS_CONST &&
 	    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR_EX(cache_slot))) {
