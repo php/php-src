@@ -1277,13 +1277,14 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 {
 	zval *retval;
 
+try_again:
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 		retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type TSRMLS_CC);
 		ZVAL_COPY(result, retval);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_long offset;
 
-try_again:
+try_string_offset:
 		if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 			switch(Z_TYPE_P(dim)) {
 				/* case IS_LONG: */
@@ -1305,7 +1306,7 @@ try_again:
 					break;
 				case IS_REFERENCE:
 					dim = Z_REFVAL_P(dim);
-					goto try_again;
+					goto try_string_offset;
 				default:
 					zend_error(E_WARNING, "Illegal offset type");
 					break;
@@ -1345,6 +1346,9 @@ try_again:
 				ZVAL_NULL(result);
 			}
 		}
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
+		container = Z_REFVAL_P(container);
+		goto try_again;
 	} else {
 		ZVAL_NULL(result);
 	}
