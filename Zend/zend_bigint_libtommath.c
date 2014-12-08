@@ -783,7 +783,7 @@ ZEND_API void zend_bigint_xor_long(zend_bigint *out, const zend_bigint *op1, zen
 
 ZEND_API void zend_bigint_shift_left_ulong(zend_bigint *out, const zend_bigint *num, zend_ulong shift) /* {{{ */
 {
-	if (shift < INT_MIN || shift > INT_MAX) {
+	if (shift > INT_MAX) {
 		zend_error_noreturn(E_ERROR, "Exponent too large");
 	}
 
@@ -793,7 +793,7 @@ ZEND_API void zend_bigint_shift_left_ulong(zend_bigint *out, const zend_bigint *
 
 ZEND_API void zend_bigint_long_shift_left_ulong(zend_bigint *out, zend_long num, zend_ulong shift) /* {{{ */
 {
-	if (shift < INT_MIN || shift > INT_MAX) {
+	if (shift > INT_MAX) {
 		zend_error_noreturn(E_ERROR, "Exponent too large");
 	}
 
@@ -806,7 +806,7 @@ ZEND_API void zend_bigint_long_shift_left_ulong(zend_bigint *out, zend_long num,
 
 ZEND_API void zend_bigint_shift_right_ulong(zend_bigint *out, const zend_bigint *num, zend_ulong shift) /* {{{ */
 {
-	if (shift < INT_MIN || shift > INT_MAX) {
+	if (shift > INT_MAX) {
 		zend_error_noreturn(E_ERROR, "Exponent too large");
 	}
 
