@@ -3842,7 +3842,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint
 	if (!strncmp(mname, ZEND_CLONE_FUNC_NAME, mname_len)) {
 		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
 	} else if (!strncmp(mname, ZEND_CONSTRUCTOR_FUNC_NAME, mname_len)) {
-		if (ce->constructor) {
+		if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 			zend_error(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
 		}
 		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR;
@@ -3867,7 +3867,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint
 		zend_str_tolower_copy(lowercase_name, ce->name, ce->name_length);
 		lowercase_name = (char*)zend_new_interned_string(lowercase_name, ce->name_length + 1, 1 TSRMLS_CC);
 		if (!memcmp(mname, lowercase_name, mname_len)) {
-			if (ce->constructor) {
+			if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 				zend_error(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
 			}
 			ce->constructor = fe;
