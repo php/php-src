@@ -13518,7 +13518,7 @@ num_index_dim:
 //???		}
 		Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
 
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 		ZEND_VM_CONTINUE(); /* bailed out before */
 	} else {
@@ -16350,7 +16350,7 @@ num_index_dim:
 //???		}
 		Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
 
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 		ZEND_VM_CONTINUE(); /* bailed out before */
 	} else {
@@ -17790,7 +17790,7 @@ num_index_dim:
 //???		}
 		Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
 		zval_ptr_dtor_nogc(free_op2);
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 		ZEND_VM_CONTINUE(); /* bailed out before */
 	} else {
@@ -19088,7 +19088,7 @@ num_index_dim:
 //???		}
 		Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
 
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 		ZEND_VM_CONTINUE(); /* bailed out before */
 	} else {
@@ -21177,7 +21177,7 @@ num_index_dim:
 //???		}
 		Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
 
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 		ZEND_VM_CONTINUE(); /* bailed out before */
 	} else {
@@ -22572,7 +22572,7 @@ num_index_dim:
 //???		}
 		Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
 		zval_ptr_dtor_nogc(free_op2);
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 		ZEND_VM_CONTINUE(); /* bailed out before */
 	} else {
@@ -26131,7 +26131,7 @@ num_index_dim:
 //???		}
 		Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
 
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 		ZEND_VM_CONTINUE(); /* bailed out before */
 	} else {
@@ -30129,7 +30129,7 @@ num_index_dim:
 //???		}
 		Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
 
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 		ZEND_VM_CONTINUE(); /* bailed out before */
 	} else {
@@ -32084,7 +32084,7 @@ num_index_dim:
 //???		}
 		Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
 		zval_ptr_dtor_nogc(free_op2);
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 		ZEND_VM_CONTINUE(); /* bailed out before */
 	} else {

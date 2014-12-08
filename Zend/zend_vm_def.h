@@ -4555,7 +4555,7 @@ ZEND_VM_C_LABEL(num_index_dim):
 //???		}
 		Z_OBJ_HT_P(container)->unset_dimension(container, offset TSRMLS_CC);
 		FREE_OP2();
-	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
 		ZEND_VM_CONTINUE(); /* bailed out before */
 	} else {
