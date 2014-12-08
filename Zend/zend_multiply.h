@@ -114,7 +114,7 @@
 
 #elif SIZEOF_ZEND_LONG == 4
 
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\
 	int64_t __result = (int64_t) (a) * (int64_t) (b);				\
 	if (__result > ZEND_LONG_MAX || __result < ZEND_LONG_MIN) {		\
 		zend_bigint *__out = zend_bigint_init_alloc();				\
