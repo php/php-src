@@ -62,8 +62,8 @@ static void zend_bigint_free(void *ptr)
 #include "libtommath/mpi.c"
 
 struct _zend_bigint {
-    zend_refcounted   gc;
-    mp_int            mp;
+	zend_refcounted   gc;
+	mp_int			mp;
 };
 
 /*** INTERNAL MACROS ***/
@@ -71,6 +71,7 @@ struct _zend_bigint {
 #define int_abs(n) ((n) >= 0 ? (n) : -(n)) 
 #define int_sgn(n) ((n) > 0 ? 1 : ((n) < 0 ? -1 : 0))
 
+#define double_sgn(n) ((n) > 0 ? 1 : ((n) < 0 ? -1 : 0))
 
 #define mp_sgn(mp) (USED(mp) ? ((SIGN(mp) == MP_NEG) ? -1 : 1) : 0)
 
@@ -82,11 +83,18 @@ struct _zend_bigint {
 
 #define FITS_DIGIT(long) ((zend_ulong)(int_abs(long) & BITMASK_DIGIT) == (zend_ulong)int_abs(long))
 
+#define CHECK_ERROR(expr) do { 									\
+	int error_code;												\
+	if ((error_code = (expr)) != MP_OKAY) {						\
+		zend_error(E_ERROR, mp_error_to_string(error_code));	\
+	}															\
+} while (0)
+
 /* Convenience macro to create a temporary mpz_t from a zend_long
  * Used when LibTomMath has no function for an operation taking a long */
 #define WITH_TEMP_MP_FROM_ZEND_LONG(long, temp, codeblock) { \
 	mp_int temp;								\
-	mp_init(&temp);								\
+	CHECK_ERROR(mp_init(&temp));				\
 	zend_bigint_long_to_mp_int(long, &temp);	\
 	codeblock									\
 	mp_clear(&temp);							\
@@ -94,31 +102,25 @@ struct _zend_bigint {
 
 /*** INTERNAL FUNCTIONS ***/
 
-static void zend_bigint_long_to_mp_int(zend_long value, mp_int *mp)
+static void zend_bigint_ulong_to_mp_int(zend_ulong value, mp_int *mp)
 {
-	zend_ulong ulong_value = (value >= 0) ? value : -value;
-
 	/* mp_set_int only uses 32 bits of an unsigned long
 	   so if zend_long is too big, we need to do multiple ops */
 #if SIZEOF_ZEND_LONG > 4
-	if (ulong_value != (ulong_value & BITMASK_32)) {
+	if (value != (value & BITMASK_32)) {
 #	if defined(mp_import)
 		/* FIXME: This code is currently untested! */
-		mp_import(mp, 1, 1, sizeof(ulong_value), 0, 0, &ulong_value);
-		mp_neg(&mp, &mp);
+		mp_import(mp, 1, 1, sizeof(value), 0, 0, &value);
 		return;
 #	elif SIZEOF_ZEND_LONG == 8
 		mp_int tmp;
 
-		mp_init_set_int(&tmp, ulong_value & BITMASK_32);
+		mp_init_set_int(&tmp, value & BITMASK_32);
 
-		mp_set_int(mp, (ulong_value >> 32) & BITMASK_32);
+		mp_set_int(mp, (value >> 32) & BITMASK_32);
+
 		mp_mul_2d(mp, 32, mp);
 		mp_or(mp, &tmp, mp);
-
-		if (value < 0) {
-			mp_neg(mp, mp);
-		}
 
 		mp_clear(&tmp);
 		return;
@@ -127,8 +129,16 @@ static void zend_bigint_long_to_mp_int(zend_long value, mp_int *mp)
 #	endif
 	}
 #endif
-	
-	mp_set_int(mp, ulong_value);
+
+	mp_set_int(mp, value);
+}
+
+static void zend_bigint_long_to_mp_int(zend_long value, mp_int *mp)
+{
+	zend_ulong ulong_value = (value >= 0) ? value : -value;
+
+	zend_bigint_ulong_to_mp_int(ulong_value, mp);
+
 	if (value < 0) {
 		mp_neg(mp, mp);
 	}
@@ -144,8 +154,8 @@ static zend_long zend_bigint_mp_int_to_long(mp_int *mp)
 		zend_ulong ulong_value = 0;
 		zend_long value;
 
-		mp_init_copy(&tmp, mp);
-		
+		CHECK_ERROR(mp_init_copy(&tmp, mp));
+
 		ulong_value = mp_get_int(&tmp);
 		mp_div_2d(&tmp, 32, &tmp, NULL);
 		ulong_value |= mp_get_int(&tmp) << 32;
@@ -161,9 +171,19 @@ static zend_long zend_bigint_mp_int_to_long(mp_int *mp)
 
 /* All documentation for bigint functions is found in zend_bigint.h */
 
+mp_int ZEND_LONG_MAX_mp, ZEND_LONG_MIN_mp;
+mp_int ZEND_ULONG_MAX_mp;
+
 void zend_startup_bigint(void)
 {
-	
+	CHECK_ERROR(mp_init_multi(
+		&ZEND_LONG_MAX_mp, &ZEND_LONG_MIN_mp,
+		&ZEND_ULONG_MAX_mp,
+		NULL
+	));
+	zend_bigint_long_to_mp_int(ZEND_LONG_MAX, &ZEND_LONG_MAX_mp);
+	zend_bigint_long_to_mp_int(ZEND_LONG_MIN, &ZEND_LONG_MAX_mp);
+	zend_bigint_ulong_to_mp_int(ZEND_ULONG_MAX, &ZEND_ULONG_MAX_mp);
 }
 
 /*** INITIALISERS ***/
@@ -178,7 +198,7 @@ ZEND_API void zend_bigint_init(zend_bigint *big) /* {{{ */
 {
 	GC_REFCOUNT(big) = 1;
 	GC_TYPE_INFO(big) = IS_BIGINT;
-	mp_init(&big->mp);
+	CHECK_ERROR(mp_init(&big->mp));
 }
 /* }}} */
 
@@ -285,7 +305,7 @@ ZEND_API void zend_bigint_init_from_double(zend_bigint *big, double value) /* {{
 ZEND_API void zend_bigint_init_dup(zend_bigint *big, const zend_bigint *source) /* {{{ */
 {
 	zend_bigint_init(big);
-	mp_copy(&source->mp, &big->mp);
+	CHECK_ERROR(mp_copy(&source->mp, &big->mp));
 }
 /* }}} */
 
@@ -308,21 +328,40 @@ ZEND_API void zend_bigint_release(zend_bigint *big) /* {{{ */
 
 ZEND_API zend_bool zend_bigint_can_fit_ulong(const zend_bigint *big) /* {{{ */
 {
-	/* FIXME: non-stub */
-	return 0;
+#	if SIZEOF_ZEND_LONG == 4
+		if (mp_count_bits(&big->mp) < 32) {
+			return 1;
+		}
+#	elif SIZEOF_ZEND_LONG == 8
+		if (mp_count_bits(&big->mp) < 64) {
+			return 1;
+		}
+#	else
+#		error SIZEOF_ZEND_LONG other than 4 or 8 unsupported
+#	endif
+	return (mp_cmp(&big->mp, &ZEND_ULONG_MAX_mp) <= 0 && mp_sgn(&big->mp) >= 0);
 }
 /* }}} */
 
 ZEND_API zend_bool zend_bigint_can_fit_long(const zend_bigint *big) /* {{{ */
 {
-	/* FIXME: non-stub */
-	return 0;
+#	if SIZEOF_ZEND_LONG == 4
+		if (mp_count_bits(&big->mp) < 31) {
+			return 1;
+		}
+#	elif SIZEOF_ZEND_LONG == 8
+		if (mp_count_bits(&big->mp) < 63) {
+			return 1;
+		}
+#	else
+#		error SIZEOF_ZEND_LONG other than 4 or 8 unsupported
+#	endif
+	return (mp_cmp(&big->mp, &ZEND_LONG_MAX_mp) <= 0 && mp_cmp(&big->mp, &ZEND_LONG_MIN_mp) >= 0);
 }
 /* }}} */
 
 ZEND_API int zend_bigint_sign(const zend_bigint *big) /* {{{ */
 {
-	
 	return mp_sgn(&big->mp);
 }
 /* }}} */
@@ -333,9 +372,9 @@ ZEND_API zend_bool zend_bigint_divisible(const zend_bigint *num, const zend_bigi
 	mp_int remainder;
 	zend_bool result;
 
-	mp_init(&remainder);
+	CHECK_ERROR(mp_init(&remainder));
 
-	mp_div(&num->mp, &divisor->mp, NULL, &remainder);
+	CHECK_ERROR(mp_div(&num->mp, &divisor->mp, NULL, &remainder));
 	result = USED(&remainder) ? 0 : 1;
 
 	mp_clear(&remainder);
@@ -350,13 +389,13 @@ ZEND_API zend_bool zend_bigint_divisible_long(const zend_bigint *num, zend_long 
 	mp_int remainder;
 	zend_bool result;
 
-	mp_init(&remainder);
+	CHECK_ERROR(mp_init(&remainder));
 
 	if (FITS_DIGIT(divisor)) {
-		mp_div_d(&num->mp, int_abs(divisor), NULL, &remainder);
+		CHECK_ERROR(mp_div_d(&num->mp, int_abs(divisor), NULL, &remainder));
 	} else {
 		WITH_TEMP_MP_FROM_ZEND_LONG(divisor, divisor_mp, {
-			mp_div(&num->mp, &divisor_mp, NULL, &remainder);
+			CHECK_ERROR(mp_div(&num->mp, &divisor_mp, NULL, &remainder));
 		})
 	}
 	result = USED(&remainder) ? 0 : 1;
@@ -373,10 +412,10 @@ ZEND_API zend_bool zend_bigint_long_divisible(zend_long num, const zend_bigint *
 	mp_int remainder;
 	zend_bool result;
 
-	mp_init(&remainder);
+	CHECK_ERROR(mp_init(&remainder));
 
 	WITH_TEMP_MP_FROM_ZEND_LONG(num, num_mp, {
-		mp_div(&num_mp, &divisor->mp, NULL, &remainder);
+		CHECK_ERROR(mp_div(&num_mp, &divisor->mp, NULL, &remainder));
 	})
 	result = USED(&remainder) ? 0 : 1;
 
@@ -459,9 +498,9 @@ ZEND_API char* zend_bigint_to_string(const zend_bigint *big) /* {{{ */
 {
 	int size;
 	char *str;
-	mp_radix_size(&big->mp, 10, &size);
+	CHECK_ERROR(mp_radix_size(&big->mp, 10, &size));
 	str = emalloc(size);
-	mp_toradix(&big->mp, str, 10);
+	CHECK_ERROR(mp_toradix(&big->mp, str, 10));
 	return str;
 }
 /* }}} */
@@ -471,7 +510,7 @@ ZEND_API zend_string* zend_bigint_to_zend_string(const zend_bigint *big, int per
 	int size;
 	zend_string *str;
 	str = zend_string_alloc(size - 1, persistent);
-	mp_toradix(&big->mp, str->val, 10);
+	CHECK_ERROR(mp_toradix(&big->mp, str->val, 10));
 	return str;
 }
 /* }}} */
@@ -480,9 +519,9 @@ ZEND_API char* zend_bigint_to_string_base(const zend_bigint *big, int base) /* {
 {
 	int size;
 	char *str;
-	mp_radix_size(&big->mp, base, &size);
+	CHECK_ERROR(mp_radix_size(&big->mp, base, &size));
 	str = emalloc(size);
-	mp_toradix(&big->mp, str, base);
+	CHECK_ERROR(mp_toradix(&big->mp, str, base));
 	return str;
 }
 /* }}} */
@@ -491,7 +530,7 @@ ZEND_API char* zend_bigint_to_string_base(const zend_bigint *big, int base) /* {
 
 ZEND_API void zend_bigint_add(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
-	mp_add(&op1->mp, &op2->mp, &out->mp);
+	CHECK_ERROR(mp_add(&op1->mp, &op2->mp, &out->mp));
 }
 /* }}} */
 
@@ -499,13 +538,13 @@ ZEND_API void zend_bigint_add_long(zend_bigint *out, const zend_bigint *op1, zen
 {
 	if (FITS_DIGIT(op2)) {
 		if (int_sgn(op2) >= 1) {
-			mp_add_d(&op1->mp, op2, &out->mp);
+			CHECK_ERROR(mp_add_d(&op1->mp, op2, &out->mp));
 		} else {
-			mp_sub_d(&op1->mp, -op2, &out->mp);
+			CHECK_ERROR(mp_sub_d(&op1->mp, -op2, &out->mp));
 		}
 	} else {
 		WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
-			mp_add(&op1->mp, &op2_mp, &out->mp);
+			CHECK_ERROR(mp_add(&op1->mp, &op2_mp, &out->mp));
 		})
 	}
 }
@@ -514,14 +553,14 @@ ZEND_API void zend_bigint_add_long(zend_bigint *out, const zend_bigint *op1, zen
 ZEND_API void zend_bigint_long_add_long(zend_bigint *out, zend_long op1, zend_long op2) /* {{{ */
 {
 	WITH_TEMP_MP_FROM_ZEND_LONG(op1, op1_mp, WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
-		mp_add(&op1_mp, &op2_mp, &out->mp);
+		CHECK_ERROR(mp_add(&op1_mp, &op2_mp, &out->mp));
 	}))
 }
 /* }}} */
 
 ZEND_API void zend_bigint_subtract(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
-	mp_sub(&op1->mp, &op2->mp, &out->mp);
+	CHECK_ERROR(mp_sub(&op1->mp, &op2->mp, &out->mp));
 }
 /* }}} */
 
@@ -529,13 +568,13 @@ ZEND_API void zend_bigint_subtract_long(zend_bigint *out, const zend_bigint *op1
 {
 	if (FITS_DIGIT(op2)) {
 		if (int_sgn(op2) >= 1) {
-			mp_sub_d(&op1->mp, op2, &out->mp);
+			CHECK_ERROR(mp_sub_d(&op1->mp, op2, &out->mp));
 		} else {
-			mp_add_d(&op1->mp, -op2, &out->mp);
+			CHECK_ERROR(mp_add_d(&op1->mp, -op2, &out->mp));
 		}
 	} else {
 		WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
-			mp_add(&op1->mp, &op2_mp, &out->mp);
+			CHECK_ERROR(mp_add(&op1->mp, &op2_mp, &out->mp));
 		})
 	}
 }
@@ -545,7 +584,7 @@ ZEND_API void zend_bigint_long_subtract_long(zend_bigint *out, zend_long op1, ze
 {
 	/* TODO: Use mp_sub_d where possible, to allocate only one temp mp_int */
 	WITH_TEMP_MP_FROM_ZEND_LONG(op1, op1_mp, WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
-		mp_sub(&op1_mp, &op2_mp, &out->mp);
+		CHECK_ERROR(mp_sub(&op1_mp, &op2_mp, &out->mp));
 	}))
 }
 /* }}} */
@@ -556,35 +595,34 @@ ZEND_API void zend_bigint_long_subtract(zend_bigint *out, zend_long op1, const z
 	 * _negate function?
 	 */
 	if (op1 == 0) {
-		mp_neg(&op2->mp, &out->mp);
+		CHECK_ERROR(mp_neg(&op2->mp, &out->mp));
 	} else {
 		/* b - a is just -(a - b) */
 		zend_bigint_subtract_long(out, op2, op1);
-		mp_neg(&out->mp, &out->mp);
+		CHECK_ERROR(mp_neg(&out->mp, &out->mp));
 	}
 }
 /* }}} */
 
 ZEND_API void zend_bigint_multiply(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
-	mp_mul(&op1->mp, &op2->mp, &out->mp);
+	CHECK_ERROR(mp_mul(&op1->mp, &op2->mp, &out->mp));
 }
 /* }}} */
 
 ZEND_API void zend_bigint_multiply_long(zend_bigint *out, const zend_bigint *op1, zend_long op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
 	if (FITS_DIGIT(op2)) {
-		mp_mul_d(&op1->mp, int_abs(op2), &out->mp);
+		CHECK_ERROR(mp_mul_d(&op1->mp, int_abs(op2), &out->mp));
 		if (op2 < 0) {
 			/* (a * -b) = -ab = -(a * b)
 			 * (-a * -b) = ab = -(-a * b)
 			 */
-			mp_neg(&out->mp, &out->mp);
+			CHECK_ERROR(mp_neg(&out->mp, &out->mp));
 		}
 	} else {
 		WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
-			mp_mul(&op1->mp, &op2_mp, &out->mp);
+			CHECK_ERROR(mp_mul(&op1->mp, &op2_mp, &out->mp));
 		})
 	}
 }
@@ -593,7 +631,7 @@ ZEND_API void zend_bigint_multiply_long(zend_bigint *out, const zend_bigint *op1
 ZEND_API void zend_bigint_long_multiply_long(zend_bigint *out, zend_long op1, zend_long op2) /* {{{ */
 {
 	WITH_TEMP_MP_FROM_ZEND_LONG(op1, op1_mp, WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
-		mp_mul(&op1_mp, &op2_mp, &out->mp);
+		CHECK_ERROR(mp_mul(&op1_mp, &op2_mp, &out->mp));
 	}))
 }
 /* }}} */
@@ -604,7 +642,7 @@ ZEND_API void zend_bigint_pow_ulong(zend_bigint *out, const zend_bigint *base, z
 		zend_error_noreturn(E_ERROR, "Exponent too large");
 	}
 
-	mp_expt_d(&base->mp, power, &out->mp);
+	CHECK_ERROR(mp_expt_d(&base->mp, power, &out->mp));
 }
 /* }}} */
 
@@ -615,14 +653,14 @@ ZEND_API void zend_bigint_long_pow_ulong(zend_bigint *out, zend_long base, zend_
 	}
 
 	WITH_TEMP_MP_FROM_ZEND_LONG(base, base_mp, {
-		mp_expt_d(&base_mp, power, &out->mp);
+		CHECK_ERROR(mp_expt_d(&base_mp, power, &out->mp));
 	})
 }
 /* }}} */
 
 ZEND_API void zend_bigint_divide(zend_bigint *out, const zend_bigint *num, const zend_bigint *divisor) /* {{{ */
 {
-	mp_div(&num->mp, &divisor->mp, &out->mp, NULL);
+	CHECK_ERROR(mp_div(&num->mp, &divisor->mp, &out->mp, NULL));
 }
 /* }}} */
 
@@ -636,13 +674,13 @@ ZEND_API double zend_bigint_divide_as_double(const zend_bigint *num, const zend_
 ZEND_API void zend_bigint_divide_long(zend_bigint *out, const zend_bigint *num, zend_long divisor) /* {{{ */
 {
 	if (FITS_DIGIT(divisor)) {
-		mp_div_d(&num->mp, int_abs(divisor), &out->mp, NULL);
+		CHECK_ERROR(mp_div_d(&num->mp, int_abs(divisor), &out->mp, NULL));
 		if (divisor < 0) {
-			mp_neg(&out->mp, &out->mp);
+			CHECK_ERROR(mp_neg(&out->mp, &out->mp));
 		}
 	} else {
 		WITH_TEMP_MP_FROM_ZEND_LONG(divisor, divisor_mp, {
-			mp_div(&num->mp, &divisor_mp, &out->mp, NULL);
+			CHECK_ERROR(mp_div(&num->mp, &divisor_mp, &out->mp, NULL));
 		})
 	}
 }
@@ -658,7 +696,7 @@ ZEND_API double zend_bigint_divide_long_as_double(const zend_bigint *num, zend_l
 ZEND_API void zend_bigint_long_divide(zend_bigint *out, zend_long num, const zend_bigint *divisor) /* {{{ */
 {
 	WITH_TEMP_MP_FROM_ZEND_LONG(num, num_mp, {
-		mp_div(&num_mp, &divisor->mp, &out->mp, NULL);
+		CHECK_ERROR(mp_div(&num_mp, &divisor->mp, &out->mp, NULL));
 	})
 }
 /* }}} */
@@ -672,104 +710,144 @@ ZEND_API double zend_bigint_long_divide_as_double(zend_long num, const zend_bigi
 
 ZEND_API void zend_bigint_modulus(zend_bigint *out, const zend_bigint *num, const zend_bigint *divisor) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	CHECK_ERROR(mp_mod(&num->mp, &divisor->mp, &out->mp));
 }
 /* }}} */
 
 ZEND_API void zend_bigint_modulus_long(zend_bigint *out, const zend_bigint *num, zend_long divisor) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	WITH_TEMP_MP_FROM_ZEND_LONG(divisor, divisor_mp, {
+		CHECK_ERROR(mp_mod(&num->mp, &divisor_mp, &out->mp));
+	})
 }
 /* }}} */
 
 ZEND_API void zend_bigint_long_modulus(zend_bigint *out, zend_long num, const zend_bigint *divisor) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	WITH_TEMP_MP_FROM_ZEND_LONG(num, num_mp, {
+		CHECK_ERROR(mp_mod(&num_mp, &divisor->mp, &out->mp));
+	})
 }
 /* }}} */
 
 ZEND_API void zend_bigint_ones_complement(zend_bigint *out, const zend_bigint *op) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	/* A one's complement, aka bitwise NOT, is actually just -a - 1 */
+	CHECK_ERROR(mp_neg(&op->mp, &out->mp));
+	CHECK_ERROR(mp_sub_d(&out->mp, 1, &out->mp));
 }
 /* }}} */
 
 ZEND_API void zend_bigint_or(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	CHECK_ERROR(mp_or(&op1->mp, &op2->mp, &out->mp));
 }
 /* }}} */
 
 ZEND_API void zend_bigint_or_long(zend_bigint *out, const zend_bigint *op1, zend_long op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
+		CHECK_ERROR(mp_or(&op1->mp, &op2_mp, &out->mp));
+	})
 }
 /* }}} */
 
 ZEND_API void zend_bigint_and(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	CHECK_ERROR(mp_and(&op1->mp, &op2->mp, &out->mp));
 }
 /* }}} */
 
 ZEND_API void zend_bigint_and_long(zend_bigint *out, const zend_bigint *op1, zend_long op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
+		CHECK_ERROR(mp_and(&op1->mp, &op2_mp, &out->mp));
+	})
 }
 /* }}} */
 
 ZEND_API void zend_bigint_xor(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	CHECK_ERROR(mp_xor(&op1->mp, &op2->mp, &out->mp));
 }
 /* }}} */
 
 ZEND_API void zend_bigint_xor_long(zend_bigint *out, const zend_bigint *op1, zend_long op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
+		CHECK_ERROR(mp_xor(&op1->mp, &op2_mp, &out->mp));
+	})
 }
 /* }}} */
 
 ZEND_API void zend_bigint_shift_left_ulong(zend_bigint *out, const zend_bigint *num, zend_ulong shift) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	if (shift < INT_MIN || shift > INT_MAX) {
+		zend_error_noreturn(E_ERROR, "Exponent too large");
+	}
+
+	CHECK_ERROR(mp_mul_2d(&num->mp, shift, &out->mp));
 }
 /* }}} */
 
 ZEND_API void zend_bigint_long_shift_left_ulong(zend_bigint *out, zend_long num, zend_ulong shift) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	if (shift < INT_MIN || shift > INT_MAX) {
+		zend_error_noreturn(E_ERROR, "Exponent too large");
+	}
+
+
+	WITH_TEMP_MP_FROM_ZEND_LONG(num, num_mp, {
+		CHECK_ERROR(mp_mul_2d(&num_mp, shift, &out->mp));
+	})
 }
 /* }}} */
 
 ZEND_API void zend_bigint_shift_right_ulong(zend_bigint *out, const zend_bigint *num, zend_ulong shift) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	if (shift < INT_MIN || shift > INT_MAX) {
+		zend_error_noreturn(E_ERROR, "Exponent too large");
+	}
+
+	CHECK_ERROR(mp_div_2d(&num->mp, shift, &out->mp, NULL));
 }
 /* }}} */
 
 ZEND_API int zend_bigint_cmp(const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
-	return -1;
+	return mp_cmp(&op1->mp, &op2->mp);
 }
 /* }}} */
 
 ZEND_API int zend_bigint_cmp_long(const zend_bigint *op1, zend_long op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
-	return -1;
+	int provisional_sign =mp_sgn(&op1->mp) - int_sgn(op2);
+	if (provisional_sign != 0) {
+		return provisional_sign;
+	} else if (FITS_DIGIT(op2) && op2 > 0) {
+		return mp_cmp_d(&op1->mp, op2);
+	} else {
+		WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
+			provisional_sign = mp_cmp(&op1->mp, &op2_mp);
+		})
+		return provisional_sign;
+	}
 }
 /* }}} */
 
 ZEND_API int zend_bigint_cmp_double(const zend_bigint *op1, double op2) /* {{{ */
 {
-	/* FIXME: Non-stub */
-	return -1;
+	int provisional_sign = mp_sgn(&op1->mp) - double_sgn(op2);
+	if (provisional_sign != 0) {
+		return provisional_sign;
+	} else {
+		/* FIXME: Handle larger doubles */
+		return zend_bigint_cmp_long(op1, zend_dval_to_lval(op2));
+	}
 }
 /* }}} */
 
 ZEND_API void zend_bigint_abs(zend_bigint *out, const zend_bigint *big) /* {{{ */
 {
-	/* FIXME: Non-stub */
+	CHECK_ERROR(mp_abs(&big->mp, &out->mp));
 }
