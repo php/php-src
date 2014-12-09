@@ -257,8 +257,6 @@ typedef struct _zend_try_catch_element {
 /* Function has a return type hint (or class has such non-private function) */
 #define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
 
-#define ZEND_CE_IS_TRAIT(ce) (((ce)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)
-
 char *zend_visibility_string(uint32_t fn_flags);
 
 typedef struct _zend_property_info {

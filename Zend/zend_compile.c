@@ -4005,7 +4005,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 {
 	zend_class_entry *ce = CG(active_class_entry);
 	zend_bool in_interface = (ce->ce_flags & ZEND_ACC_INTERFACE) != 0;
-	zend_bool in_trait = ZEND_CE_IS_TRAIT(ce);
+	zend_bool in_trait = (ce->ce_flags & ZEND_ACC_TRAIT) != 0;
 	zend_bool is_public = (op_array->fn_flags & ZEND_ACC_PUBLIC) != 0;
 	zend_bool is_static = (op_array->fn_flags & ZEND_ACC_STATIC) != 0;
 
@@ -4367,7 +4367,7 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 		zend_string *name = zend_ast_get_str(name_ast);
 		zval value_zv;
 
-		if (ZEND_CE_IS_TRAIT(ce)) {
+		if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
 			return;
 		}
@@ -5071,7 +5071,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			break;
 		case T_CLASS_C:
 			if (ce) {
-				if (ZEND_CE_IS_TRAIT(ce)) {
+				if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
 					return 0;
 				} else {
 					ZVAL_STR_COPY(zv, ce->name);
@@ -5081,7 +5081,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			}
 			break;
 		case T_TRAIT_C:
-			if (ce && ZEND_CE_IS_TRAIT(ce)) {
+			if (ce && (ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
 				ZVAL_STR_COPY(zv, ce->name);
 			} else {
 				ZVAL_EMPTY_STRING(zv);
@@ -5968,7 +5968,7 @@ void zend_compile_magic_const(znode *result, zend_ast *ast) /* {{{ */
 
 	ZEND_ASSERT(ast->attr == T_CLASS_C &&
 	            CG(active_class_entry) &&
-	            ZEND_CE_IS_TRAIT(CG(active_class_entry)));
+	            (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != 0);
 
 	{
 		zend_ast *const_ast = zend_ast_create(ZEND_AST_CONST,
@@ -6103,7 +6103,7 @@ void zend_compile_const_expr_magic_const(zend_ast **ast_ptr) /* {{{ */
 	/* Other cases already resolved by constant folding */
 	ZEND_ASSERT(ast->attr == T_CLASS_C &&
 	            CG(active_class_entry) &&
-	            ZEND_CE_IS_TRAIT(CG(active_class_entry)));
+	            (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != 0);
 
 	{
 		zval const_zv;
