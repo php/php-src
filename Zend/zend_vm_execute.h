@@ -12137,21 +12137,21 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (IS_VAR != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC);
-	}
-
-	value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-
-	if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
-
-		FREE_OP(free_op_data1);
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+	do {
+		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+				break;
+			}
 		}
-	} else {
+
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
 			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
@@ -12206,9 +12206,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 				}
 			}
 		}
-
-		FREE_OP(free_op_data1);
-	}
+	} while (0);
 
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -12548,62 +12546,60 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CONST(incdec_t
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_VAR != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(retval);
-		}
-		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		SEPARATE_ZVAL_NOREF(zptr);
-
-		incdec_op(zptr);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_COPY(retval, zptr);
-		}
-	} else {
-		zval rv;
-
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+	do {
+		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
 				}
-				ZVAL_COPY_VALUE(z, value);
-			}
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			SEPARATE_ZVAL_IF_NOT_REF(z);
-			incdec_op(z);
-			ZVAL_COPY_VALUE(retval, z);
-			Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			SELECTIVE_PZVAL_LOCK(retval, opline);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(retval);
+				break;
 			}
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			incdec_op(zptr);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(retval, zptr);
+			}
+		} else {
+			zval rv;
+
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				SEPARATE_ZVAL_IF_NOT_REF(z);
+				incdec_op(z);
+				ZVAL_COPY_VALUE(retval, z);
+				Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				SELECTIVE_PZVAL_LOCK(retval, opline);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
+				}
+			}
+		}
+	} while (0);
 
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	CHECK_EXCEPTION();
@@ -12638,56 +12634,54 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_VAR != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		ZVAL_NULL(retval);
-		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		ZVAL_COPY_VALUE(retval, zptr);
-		zval_opt_copy_ctor(zptr);
-
-		incdec_op(zptr);
-	} else {
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval rv;
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-			zval z_copy;
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
-				}
-				ZVAL_COPY_VALUE(z, value);
+	do {
+		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+				break;
 			}
-			ZVAL_DUP(retval, z);
-			ZVAL_DUP(&z_copy, z);
-			incdec_op(&z_copy);
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			zval_ptr_dtor(&z_copy);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			ZVAL_NULL(retval);
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			ZVAL_COPY_VALUE(retval, zptr);
+			zval_opt_copy_ctor(zptr);
+
+			incdec_op(zptr);
+		} else {
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval rv;
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+				zval z_copy;
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				ZVAL_DUP(retval, z);
+				ZVAL_DUP(&z_copy, z);
+				incdec_op(&z_copy);
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				zval_ptr_dtor(&z_copy);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+			}
+		}
+	} while (0);
 
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	CHECK_EXCEPTION();
@@ -15017,21 +15011,21 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (IS_VAR != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC);
-	}
-
-	value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-
-	if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
-
-		FREE_OP(free_op_data1);
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+	do {
+		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+				break;
+			}
 		}
-	} else {
+
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
 			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
@@ -15086,9 +15080,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 				}
 			}
 		}
-
-		FREE_OP(free_op_data1);
-	}
+	} while (0);
 
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -15428,62 +15420,60 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CV(incdec_t in
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_VAR != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(retval);
-		}
-		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		SEPARATE_ZVAL_NOREF(zptr);
-
-		incdec_op(zptr);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_COPY(retval, zptr);
-		}
-	} else {
-		zval rv;
-
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+	do {
+		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
 				}
-				ZVAL_COPY_VALUE(z, value);
-			}
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			SEPARATE_ZVAL_IF_NOT_REF(z);
-			incdec_op(z);
-			ZVAL_COPY_VALUE(retval, z);
-			Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			SELECTIVE_PZVAL_LOCK(retval, opline);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(retval);
+				break;
 			}
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			incdec_op(zptr);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(retval, zptr);
+			}
+		} else {
+			zval rv;
+
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				SEPARATE_ZVAL_IF_NOT_REF(z);
+				incdec_op(z);
+				ZVAL_COPY_VALUE(retval, z);
+				Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				SELECTIVE_PZVAL_LOCK(retval, opline);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
+				}
+			}
+		}
+	} while (0);
 
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	CHECK_EXCEPTION();
@@ -15518,56 +15508,54 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t i
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_VAR != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		ZVAL_NULL(retval);
-		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		ZVAL_COPY_VALUE(retval, zptr);
-		zval_opt_copy_ctor(zptr);
-
-		incdec_op(zptr);
-	} else {
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval rv;
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-			zval z_copy;
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
-				}
-				ZVAL_COPY_VALUE(z, value);
+	do {
+		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+				break;
 			}
-			ZVAL_DUP(retval, z);
-			ZVAL_DUP(&z_copy, z);
-			incdec_op(&z_copy);
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			zval_ptr_dtor(&z_copy);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			ZVAL_NULL(retval);
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			ZVAL_COPY_VALUE(retval, zptr);
+			zval_opt_copy_ctor(zptr);
+
+			incdec_op(zptr);
+		} else {
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval rv;
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+				zval z_copy;
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				ZVAL_DUP(retval, z);
+				ZVAL_DUP(&z_copy, z);
+				incdec_op(&z_copy);
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				zval_ptr_dtor(&z_copy);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+			}
+		}
+	} while (0);
 
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	CHECK_EXCEPTION();
@@ -16557,21 +16545,21 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMPVAR(int (*
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (IS_VAR != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC);
-	}
-
-	value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-
-	if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
-		zval_ptr_dtor_nogc(free_op2);
-		FREE_OP(free_op_data1);
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+	do {
+		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+				break;
+			}
 		}
-	} else {
+
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
 			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
@@ -16626,10 +16614,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMPVAR(int (*
 				}
 			}
 		}
-
-		zval_ptr_dtor_nogc(free_op2);
-		FREE_OP(free_op_data1);
-	}
+	} while (0);
 
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
@@ -16971,62 +16956,60 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_TMPVAR(incdec_
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_VAR != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-		zval_ptr_dtor_nogc(free_op2);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(retval);
-		}
-		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		SEPARATE_ZVAL_NOREF(zptr);
-
-		incdec_op(zptr);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_COPY(retval, zptr);
-		}
-	} else {
-		zval rv;
-
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+	do {
+		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
 				}
-				ZVAL_COPY_VALUE(z, value);
-			}
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			SEPARATE_ZVAL_IF_NOT_REF(z);
-			incdec_op(z);
-			ZVAL_COPY_VALUE(retval, z);
-			Z_OBJ_HT_P(object)->write_property(object, property, z, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			SELECTIVE_PZVAL_LOCK(retval, opline);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(retval);
+				break;
 			}
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			incdec_op(zptr);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(retval, zptr);
+			}
+		} else {
+			zval rv;
+
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				SEPARATE_ZVAL_IF_NOT_REF(z);
+				incdec_op(z);
+				ZVAL_COPY_VALUE(retval, z);
+				Z_OBJ_HT_P(object)->write_property(object, property, z, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				SELECTIVE_PZVAL_LOCK(retval, opline);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
+				}
+			}
+		}
+	} while (0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
@@ -17062,56 +17045,54 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_TMPVAR(incdec
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_VAR != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-		zval_ptr_dtor_nogc(free_op2);
-		ZVAL_NULL(retval);
-		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		ZVAL_COPY_VALUE(retval, zptr);
-		zval_opt_copy_ctor(zptr);
-
-		incdec_op(zptr);
-	} else {
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval rv;
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-			zval z_copy;
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
-				}
-				ZVAL_COPY_VALUE(z, value);
+	do {
+		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+				break;
 			}
-			ZVAL_DUP(retval, z);
-			ZVAL_DUP(&z_copy, z);
-			incdec_op(&z_copy);
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			zval_ptr_dtor(&z_copy);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			ZVAL_NULL(retval);
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			ZVAL_COPY_VALUE(retval, zptr);
+			zval_opt_copy_ctor(zptr);
+
+			incdec_op(zptr);
+		} else {
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval rv;
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+				zval z_copy;
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				ZVAL_DUP(retval, z);
+				ZVAL_DUP(&z_copy, z);
+				incdec_op(&z_copy);
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				zval_ptr_dtor(&z_copy);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+			}
+		}
+	} while (0);
 
 	zval_ptr_dtor_nogc(free_op2);
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
@@ -17973,21 +17954,21 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (IS_UNUSED != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC);
-	}
-
-	value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-
-	if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
-
-		FREE_OP(free_op_data1);
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+	do {
+		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+				break;
+			}
 		}
-	} else {
+
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
 			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
@@ -18042,9 +18023,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 				}
 			}
 		}
-
-		FREE_OP(free_op_data1);
-	}
+	} while (0);
 
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -18348,62 +18327,60 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incde
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_UNUSED != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(retval);
-		}
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		SEPARATE_ZVAL_NOREF(zptr);
-
-		incdec_op(zptr);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_COPY(retval, zptr);
-		}
-	} else {
-		zval rv;
-
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+	do {
+		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
 				}
-				ZVAL_COPY_VALUE(z, value);
-			}
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			SEPARATE_ZVAL_IF_NOT_REF(z);
-			incdec_op(z);
-			ZVAL_COPY_VALUE(retval, z);
-			Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			SELECTIVE_PZVAL_LOCK(retval, opline);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(retval);
+				break;
 			}
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			incdec_op(zptr);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(retval, zptr);
+			}
+		} else {
+			zval rv;
+
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				SEPARATE_ZVAL_IF_NOT_REF(z);
+				incdec_op(z);
+				ZVAL_COPY_VALUE(retval, z);
+				Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				SELECTIVE_PZVAL_LOCK(retval, opline);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
+				}
+			}
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -18438,56 +18415,54 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incd
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_UNUSED != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		ZVAL_NULL(retval);
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		ZVAL_COPY_VALUE(retval, zptr);
-		zval_opt_copy_ctor(zptr);
-
-		incdec_op(zptr);
-	} else {
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval rv;
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-			zval z_copy;
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
-				}
-				ZVAL_COPY_VALUE(z, value);
+	do {
+		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+				break;
 			}
-			ZVAL_DUP(retval, z);
-			ZVAL_DUP(&z_copy, z);
-			incdec_op(&z_copy);
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			zval_ptr_dtor(&z_copy);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			ZVAL_NULL(retval);
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			ZVAL_COPY_VALUE(retval, zptr);
+			zval_opt_copy_ctor(zptr);
+
+			incdec_op(zptr);
+		} else {
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval rv;
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+				zval z_copy;
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				ZVAL_DUP(retval, z);
+				ZVAL_DUP(&z_copy, z);
+				incdec_op(&z_copy);
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				zval_ptr_dtor(&z_copy);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+			}
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -20165,21 +20140,21 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (IS_UNUSED != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC);
-	}
-
-	value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-
-	if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
-
-		FREE_OP(free_op_data1);
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+	do {
+		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+				break;
+			}
 		}
-	} else {
+
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
 			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
@@ -20234,9 +20209,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 				}
 			}
 		}
-
-		FREE_OP(free_op_data1);
-	}
+	} while (0);
 
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -20540,62 +20513,60 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_UNUSED != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(retval);
-		}
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		SEPARATE_ZVAL_NOREF(zptr);
-
-		incdec_op(zptr);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_COPY(retval, zptr);
-		}
-	} else {
-		zval rv;
-
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+	do {
+		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
 				}
-				ZVAL_COPY_VALUE(z, value);
-			}
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			SEPARATE_ZVAL_IF_NOT_REF(z);
-			incdec_op(z);
-			ZVAL_COPY_VALUE(retval, z);
-			Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			SELECTIVE_PZVAL_LOCK(retval, opline);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(retval);
+				break;
 			}
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			incdec_op(zptr);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(retval, zptr);
+			}
+		} else {
+			zval rv;
+
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				SEPARATE_ZVAL_IF_NOT_REF(z);
+				incdec_op(z);
+				ZVAL_COPY_VALUE(retval, z);
+				Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				SELECTIVE_PZVAL_LOCK(retval, opline);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
+				}
+			}
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -20630,56 +20601,54 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_UNUSED != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		ZVAL_NULL(retval);
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		ZVAL_COPY_VALUE(retval, zptr);
-		zval_opt_copy_ctor(zptr);
-
-		incdec_op(zptr);
-	} else {
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval rv;
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-			zval z_copy;
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
-				}
-				ZVAL_COPY_VALUE(z, value);
+	do {
+		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+				break;
 			}
-			ZVAL_DUP(retval, z);
-			ZVAL_DUP(&z_copy, z);
-			incdec_op(&z_copy);
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			zval_ptr_dtor(&z_copy);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			ZVAL_NULL(retval);
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			ZVAL_COPY_VALUE(retval, zptr);
+			zval_opt_copy_ctor(zptr);
+
+			incdec_op(zptr);
+		} else {
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval rv;
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+				zval z_copy;
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				ZVAL_DUP(retval, z);
+				ZVAL_DUP(&z_copy, z);
+				incdec_op(&z_copy);
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				zval_ptr_dtor(&z_copy);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+			}
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -21559,21 +21528,21 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(int
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (IS_UNUSED != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC);
-	}
-
-	value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-
-	if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
-		zval_ptr_dtor_nogc(free_op2);
-		FREE_OP(free_op_data1);
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+	do {
+		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+				break;
+			}
 		}
-	} else {
+
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
 			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
@@ -21628,10 +21597,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(int
 				}
 			}
 		}
-
-		zval_ptr_dtor_nogc(free_op2);
-		FREE_OP(free_op_data1);
-	}
+	} while (0);
 
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -21936,62 +21902,60 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_TMPVAR(incd
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_UNUSED != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-		zval_ptr_dtor_nogc(free_op2);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(retval);
-		}
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		SEPARATE_ZVAL_NOREF(zptr);
-
-		incdec_op(zptr);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_COPY(retval, zptr);
-		}
-	} else {
-		zval rv;
-
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+	do {
+		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
 				}
-				ZVAL_COPY_VALUE(z, value);
-			}
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			SEPARATE_ZVAL_IF_NOT_REF(z);
-			incdec_op(z);
-			ZVAL_COPY_VALUE(retval, z);
-			Z_OBJ_HT_P(object)->write_property(object, property, z, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			SELECTIVE_PZVAL_LOCK(retval, opline);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(retval);
+				break;
 			}
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			incdec_op(zptr);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(retval, zptr);
+			}
+		} else {
+			zval rv;
+
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				SEPARATE_ZVAL_IF_NOT_REF(z);
+				incdec_op(z);
+				ZVAL_COPY_VALUE(retval, z);
+				Z_OBJ_HT_P(object)->write_property(object, property, z, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				SELECTIVE_PZVAL_LOCK(retval, opline);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
+				}
+			}
+		}
+	} while (0);
 
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -22027,56 +21991,54 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_TMPVAR(inc
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_UNUSED != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-		zval_ptr_dtor_nogc(free_op2);
-		ZVAL_NULL(retval);
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		ZVAL_COPY_VALUE(retval, zptr);
-		zval_opt_copy_ctor(zptr);
-
-		incdec_op(zptr);
-	} else {
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval rv;
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-			zval z_copy;
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
-				}
-				ZVAL_COPY_VALUE(z, value);
+	do {
+		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+				break;
 			}
-			ZVAL_DUP(retval, z);
-			ZVAL_DUP(&z_copy, z);
-			incdec_op(&z_copy);
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			zval_ptr_dtor(&z_copy);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			ZVAL_NULL(retval);
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			ZVAL_COPY_VALUE(retval, zptr);
+			zval_opt_copy_ctor(zptr);
+
+			incdec_op(zptr);
+		} else {
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval rv;
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+				zval z_copy;
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				ZVAL_DUP(retval, z);
+				ZVAL_DUP(&z_copy, z);
+				incdec_op(&z_copy);
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				zval_ptr_dtor(&z_copy);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+			}
+		}
+	} while (0);
 
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -24547,21 +24509,21 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (IS_CV != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC);
-	}
-
-	value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-
-	if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
-
-		FREE_OP(free_op_data1);
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+	do {
+		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+				break;
+			}
 		}
-	} else {
+
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
 			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
@@ -24616,9 +24578,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 				}
 			}
 		}
-
-		FREE_OP(free_op_data1);
-	}
+	} while (0);
 
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -24957,62 +24917,60 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t 
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_CV != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(retval);
-		}
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		SEPARATE_ZVAL_NOREF(zptr);
-
-		incdec_op(zptr);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_COPY(retval, zptr);
-		}
-	} else {
-		zval rv;
-
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+	do {
+		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
 				}
-				ZVAL_COPY_VALUE(z, value);
-			}
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			SEPARATE_ZVAL_IF_NOT_REF(z);
-			incdec_op(z);
-			ZVAL_COPY_VALUE(retval, z);
-			Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			SELECTIVE_PZVAL_LOCK(retval, opline);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(retval);
+				break;
 			}
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			incdec_op(zptr);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(retval, zptr);
+			}
+		} else {
+			zval rv;
+
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				SEPARATE_ZVAL_IF_NOT_REF(z);
+				incdec_op(z);
+				ZVAL_COPY_VALUE(retval, z);
+				Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				SELECTIVE_PZVAL_LOCK(retval, opline);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
+				}
+			}
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -25047,56 +25005,54 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_CV != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		ZVAL_NULL(retval);
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		ZVAL_COPY_VALUE(retval, zptr);
-		zval_opt_copy_ctor(zptr);
-
-		incdec_op(zptr);
-	} else {
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval rv;
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-			zval z_copy;
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
-				}
-				ZVAL_COPY_VALUE(z, value);
+	do {
+		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+				break;
 			}
-			ZVAL_DUP(retval, z);
-			ZVAL_DUP(&z_copy, z);
-			incdec_op(&z_copy);
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			zval_ptr_dtor(&z_copy);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			ZVAL_NULL(retval);
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			ZVAL_COPY_VALUE(retval, zptr);
+			zval_opt_copy_ctor(zptr);
+
+			incdec_op(zptr);
+		} else {
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval rv;
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+				zval z_copy;
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				ZVAL_DUP(retval, z);
+				ZVAL_DUP(&z_copy, z);
+				incdec_op(&z_copy);
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CONST == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				zval_ptr_dtor(&z_copy);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+			}
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -28756,21 +28712,21 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (IS_CV != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC);
-	}
-
-	value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-
-	if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
-
-		FREE_OP(free_op_data1);
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+	do {
+		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+				break;
+			}
 		}
-	} else {
+
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
 			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
@@ -28825,9 +28781,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 				}
 			}
 		}
-
-		FREE_OP(free_op_data1);
-	}
+	} while (0);
 
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -29166,62 +29120,60 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t inc
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_CV != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(retval);
-		}
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		SEPARATE_ZVAL_NOREF(zptr);
-
-		incdec_op(zptr);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_COPY(retval, zptr);
-		}
-	} else {
-		zval rv;
-
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+	do {
+		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
 				}
-				ZVAL_COPY_VALUE(z, value);
-			}
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			SEPARATE_ZVAL_IF_NOT_REF(z);
-			incdec_op(z);
-			ZVAL_COPY_VALUE(retval, z);
-			Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			SELECTIVE_PZVAL_LOCK(retval, opline);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(retval);
+				break;
 			}
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			incdec_op(zptr);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(retval, zptr);
+			}
+		} else {
+			zval rv;
+
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				SEPARATE_ZVAL_IF_NOT_REF(z);
+				incdec_op(z);
+				ZVAL_COPY_VALUE(retval, z);
+				Z_OBJ_HT_P(object)->write_property(object, property, z, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				SELECTIVE_PZVAL_LOCK(retval, opline);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
+				}
+			}
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -29256,56 +29208,54 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t in
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_CV != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-
-		ZVAL_NULL(retval);
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		ZVAL_COPY_VALUE(retval, zptr);
-		zval_opt_copy_ctor(zptr);
-
-		incdec_op(zptr);
-	} else {
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval rv;
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-			zval z_copy;
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
-				}
-				ZVAL_COPY_VALUE(z, value);
+	do {
+		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+				break;
 			}
-			ZVAL_DUP(retval, z);
-			ZVAL_DUP(&z_copy, z);
-			incdec_op(&z_copy);
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			zval_ptr_dtor(&z_copy);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			ZVAL_NULL(retval);
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			ZVAL_COPY_VALUE(retval, zptr);
+			zval_opt_copy_ctor(zptr);
+
+			incdec_op(zptr);
+		} else {
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval rv;
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+				zval z_copy;
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				ZVAL_DUP(retval, z);
+				ZVAL_DUP(&z_copy, z);
+				incdec_op(&z_copy);
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, ((IS_CV == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				zval_ptr_dtor(&z_copy);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+			}
+		}
+	} while (0);
 
 
 	CHECK_EXCEPTION();
@@ -30807,21 +30757,21 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMPVAR(int (*b
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an object");
 	}
 
-	if (IS_CV != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC);
-	}
-
-	value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-
-	if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to assign property of non-object");
-		zval_ptr_dtor_nogc(free_op2);
-		FREE_OP(free_op_data1);
-
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+	do {
+		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to assign property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+				break;
+			}
 		}
-	} else {
+
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
 			&& EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
@@ -30876,10 +30826,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMPVAR(int (*b
 				}
 			}
 		}
-
-		zval_ptr_dtor_nogc(free_op2);
-		FREE_OP(free_op_data1);
-	}
+	} while (0);
 
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -31220,62 +31167,60 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_TMPVAR(incdec_t
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_CV != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-		zval_ptr_dtor_nogc(free_op2);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_NULL(retval);
-		}
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		SEPARATE_ZVAL_NOREF(zptr);
-
-		incdec_op(zptr);
-		if (RETURN_VALUE_USED(opline)) {
-			ZVAL_COPY(retval, zptr);
-		}
-	} else {
-		zval rv;
-
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+	do {
+		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC);
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
 				}
-				ZVAL_COPY_VALUE(z, value);
-			}
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			SEPARATE_ZVAL_IF_NOT_REF(z);
-			incdec_op(z);
-			ZVAL_COPY_VALUE(retval, z);
-			Z_OBJ_HT_P(object)->write_property(object, property, z, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			SELECTIVE_PZVAL_LOCK(retval, opline);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			if (RETURN_VALUE_USED(opline)) {
-				ZVAL_NULL(retval);
+				break;
 			}
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			SEPARATE_ZVAL_NOREF(zptr);
+
+			incdec_op(zptr);
+			if (RETURN_VALUE_USED(opline)) {
+				ZVAL_COPY(retval, zptr);
+			}
+		} else {
+			zval rv;
+
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				SEPARATE_ZVAL_IF_NOT_REF(z);
+				incdec_op(z);
+				ZVAL_COPY_VALUE(retval, z);
+				Z_OBJ_HT_P(object)->write_property(object, property, z, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				SELECTIVE_PZVAL_LOCK(retval, opline);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_NULL(retval);
+				}
+			}
+		}
+	} while (0);
 
 	zval_ptr_dtor_nogc(free_op2);
 
@@ -31311,56 +31256,54 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_TMPVAR(incdec_
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (IS_CV != IS_UNUSED) {
-		object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-	}
-
-	if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-		zval_ptr_dtor_nogc(free_op2);
-		ZVAL_NULL(retval);
-
-		CHECK_EXCEPTION();
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	/* here we are sure we are dealing with an object */
-
-	if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
-		&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
-
-		ZVAL_DEREF(zptr);
-		ZVAL_COPY_VALUE(retval, zptr);
-		zval_opt_copy_ctor(zptr);
-
-		incdec_op(zptr);
-	} else {
-		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval rv;
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
-			zval z_copy;
-
-			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
-				zval rv;
-				zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
-
-				if (Z_REFCOUNT_P(z) == 0) {
-					zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
-				}
-				ZVAL_COPY_VALUE(z, value);
+	do {
+		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
+			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+				break;
 			}
-			ZVAL_DUP(retval, z);
-			ZVAL_DUP(&z_copy, z);
-			incdec_op(&z_copy);
-			if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
-			Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
-			zval_ptr_dtor(&z_copy);
-			zval_ptr_dtor(z);
-		} else {
-			zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-			ZVAL_NULL(retval);
 		}
-	}
+
+		/* here we are sure we are dealing with an object */
+
+		if (EXPECTED(Z_OBJ_HT_P(object)->get_property_ptr_ptr)
+			&& EXPECTED((zptr = Z_OBJ_HT_P(object)->get_property_ptr_ptr(object, property, BP_VAR_RW, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC)) != NULL)) {
+
+			ZVAL_DEREF(zptr);
+			ZVAL_COPY_VALUE(retval, zptr);
+			zval_opt_copy_ctor(zptr);
+
+			incdec_op(zptr);
+		} else {
+			if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
+				zval rv;
+				zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL), &rv TSRMLS_CC);
+				zval z_copy;
+
+				if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
+					zval rv;
+					zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+					if (Z_REFCOUNT_P(z) == 0) {
+						zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+					}
+					ZVAL_COPY_VALUE(z, value);
+				}
+				ZVAL_DUP(retval, z);
+				ZVAL_DUP(&z_copy, z);
+				incdec_op(&z_copy);
+				if (Z_REFCOUNTED_P(z)) Z_ADDREF_P(z);
+				Z_OBJ_HT_P(object)->write_property(object, property, &z_copy, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX(run_time_cache) + Z_CACHE_SLOT_P(property)) : NULL) TSRMLS_CC);
+				zval_ptr_dtor(&z_copy);
+				zval_ptr_dtor(z);
+			} else {
+				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
+				ZVAL_NULL(retval);
+			}
+		}
+	} while (0);
 
 	zval_ptr_dtor_nogc(free_op2);
 
