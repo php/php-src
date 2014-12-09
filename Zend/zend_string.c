@@ -46,6 +46,7 @@ static void _str_dtor(zval *zv)
 void zend_interned_strings_init(TSRMLS_D)
 {
 #ifndef ZTS
+	uint32_t i;
 	zend_string *str;
 
 	zend_hash_init(&CG(interned_strings), 1024, NULL, _str_dtor, 1);
@@ -53,7 +54,9 @@ void zend_interned_strings_init(TSRMLS_D)
 	CG(interned_strings).nTableMask = CG(interned_strings).nTableSize - 1;
 	CG(interned_strings).arData = (Bucket*) pecalloc(CG(interned_strings).nTableSize, sizeof(Bucket), 1);
 	CG(interned_strings).arHash = (uint32_t*) pecalloc(CG(interned_strings).nTableSize, sizeof(uint32_t), 1);
-	memset(CG(interned_strings).arHash, INVALID_IDX, CG(interned_strings).nTableSize * sizeof(uint32_t));
+	for (i = 0; i < CG(interned_strings).nTableSize; i++) {
+		CG(interned_strings).arHash[i] = INVALID_IDX;
+	}
 
 	/* interned empty string */
 	str = zend_string_alloc(sizeof("")-1, 1);
@@ -93,11 +96,9 @@ static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 	idx = CG(interned_strings).arHash[nIndex];
 	while (idx != INVALID_IDX) {
 		p = CG(interned_strings).arData + idx;
-		if ((p->h == h) && (p->key->len == str->len)) {
-			if (!memcmp(p->key->val, str->val, str->len)) {
-				zend_string_release(str);
-				return p->key;
-			}
+		if (zend_string_equals(p->key.s, str)) {
+			zend_string_release(str);
+			return p->key.s;
 		}
 		idx = Z_NEXT(p->val);
 	}
@@ -127,12 +128,11 @@ static zend_string *zend_new_interned_string_int(zend_string *str TSRMLS_DC)
 	idx = CG(interned_strings).nNumUsed++;
 	CG(interned_strings).nNumOfElements++;
 	p = CG(interned_strings).arData + idx;
-	p->h = h;
-	p->key = str;
+	p->key.s = str;
 	Z_STR(p->val) = str;
 	Z_TYPE_INFO(p->val) = IS_INTERNED_STRING_EX;
 	nIndex = h & CG(interned_strings).nTableMask;
-	Z_NEXT(p->val) = CG(interned_strings).arHash[nIndex];
+	ZVAL_STR_KEY_NEXT(p->val, CG(interned_strings).arHash[nIndex]);
 	CG(interned_strings).arHash[nIndex] = idx;
 		
 	HANDLE_UNBLOCK_INTERRUPTIONS();
@@ -153,8 +153,8 @@ static void zend_interned_strings_snapshot_int(TSRMLS_D)
 	while (idx > 0) {
 		idx--;
 		p = CG(interned_strings).arData + idx;
-		ZEND_ASSERT(GC_FLAGS(p->key) & IS_STR_PERSISTENT);
-		GC_FLAGS(p->key) |= IS_STR_PERMANENT;
+		ZEND_ASSERT(GC_FLAGS(p->key.s) & IS_STR_PERSISTENT);
+		GC_FLAGS(p->key.s) |= IS_STR_PERMANENT;
 	}
 #endif
 }
@@ -170,15 +170,14 @@ static void zend_interned_strings_restore_int(TSRMLS_D)
 	while (idx > 0) {
 		idx--;
 		p = CG(interned_strings).arData + idx;
-		if (GC_FLAGS(p->key) & IS_STR_PERMANENT) break;
+		if (GC_FLAGS(p->key.s) & IS_STR_PERMANENT) break;
 		CG(interned_strings).nNumUsed--;
 		CG(interned_strings).nNumOfElements--;
 
-		GC_FLAGS(p->key) &= ~IS_STR_INTERNED;
-		GC_REFCOUNT(p->key) = 1;
-		zend_string_free(p->key);
-
-		nIndex = p->h & CG(interned_strings).nTableMask;
+		GC_FLAGS(p->key.s) &= ~IS_STR_INTERNED;
+		GC_REFCOUNT(p->key.s) = 1;
+		nIndex = p->key.s->h & CG(interned_strings).nTableMask;
+		zend_string_free(p->key.s);
 		if (CG(interned_strings).arHash[nIndex] == idx) {
 			CG(interned_strings).arHash[nIndex] = Z_NEXT(p->val);
 		} else {
@@ -186,7 +185,7 @@ static void zend_interned_strings_restore_int(TSRMLS_D)
 			while (Z_NEXT(CG(interned_strings).arData[prev].val) != idx) {
 				prev = Z_NEXT(CG(interned_strings).arData[prev].val);
  			}
-			Z_NEXT(CG(interned_strings).arData[prev].val) = Z_NEXT(p->val);
+			ZVAL_STR_KEY_NEXT(CG(interned_strings).arData[prev].val, Z_NEXT(p->val));
  		}
  	}
 #endif

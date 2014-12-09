@@ -24,23 +24,39 @@
 
 #include "zend.h"
 
-#define HASH_KEY_IS_STRING 1
-#define HASH_KEY_IS_LONG 2
-#define HASH_KEY_NON_EXISTENT 3
+#define HASH_KEY_IS_LONG			0
+#define HASH_KEY_IS_STRING			1
+#define HASH_KEY_NON_EXISTENT		2
 
-#define HASH_UPDATE 			(1<<0)
-#define HASH_ADD				(1<<1)
-#define HASH_UPDATE_INDIRECT	(1<<2)
-#define HASH_ADD_NEW			(1<<3)
-#define HASH_ADD_NEXT			(1<<4)
+#define HASH_NEXT_MASK				0x7fffffff
+#define HASH_KEY_MASK				0x80000000
 
-#define INVALID_IDX ((uint32_t) -1)
+#define HASH_UPDATE					(1<<0)
+#define HASH_ADD					(1<<1)
+#define HASH_UPDATE_INDIRECT		(1<<2)
+#define HASH_ADD_NEW				(1<<3)
+#define HASH_ADD_NEXT				(1<<4)
 
-#define HASH_FLAG_PERSISTENT       (1<<0)
-#define HASH_FLAG_APPLY_PROTECTION (1<<1)
-#define HASH_FLAG_PACKED           (1<<2)
+#define INVALID_IDX					HASH_NEXT_MASK
 
-#define HASH_MASK_CONSISTENCY      0x60
+#define HASH_FLAG_PERSISTENT		(1<<0)
+#define HASH_FLAG_APPLY_PROTECTION	(1<<1)
+#define HASH_FLAG_PACKED			(1<<2)
+
+#define HASH_MASK_CONSISTENCY		0x60
+
+#define Z_NEXT(zval)				((zval).u2.next & HASH_NEXT_MASK)
+#define Z_NEXT_P(zval_p)			Z_NEXT(*(zval_p))
+
+#define Z_IS_NUM_KEY(zval)			(!((zval).u2.next & HASH_KEY_MASK))
+#define Z_IS_STR_KEY(zval)			((zval).u2.next & HASH_KEY_MASK)
+#define ZVAL_NEXT(zval, n)			(zval).u2.next = ((zval).u2.next & HASH_KEY_MASK) | n 
+#define ZVAL_NUM_KEY_NEXT(zval, n)	(zval).u2.next = n
+#define ZVAL_STR_KEY_NEXT(zval, n)	(zval).u2.next = n | HASH_KEY_MASK
+#define ZVAL_NUM_KEY(zval)			(zval).u2.next = (zval).u2.next & HASH_NEXT_MASK
+#define ZVAL_STR_KEY(zval)			(zval).u2.next = (zval).u2.next | HASH_KEY_MASK
+
+#define BUCKET_HASH_VAL(bucket)		(Z_IS_STR_KEY((bucket)->val)? (bucket)->key.s->h : (bucket)->key.h)
 
 typedef struct _zend_hash_key {
 	zend_ulong h;
@@ -67,10 +83,10 @@ ZEND_API void zend_hash_to_packed(HashTable *ht);
 
 /* additions/updates/changes */
 ZEND_API zval *_zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *pData, uint32_t flag ZEND_FILE_LINE_DC);
-ZEND_API zval *_zend_hash_update(HashTable *ht, zend_string *key,zval *pData ZEND_FILE_LINE_DC);
-ZEND_API zval *_zend_hash_update_ind(HashTable *ht, zend_string *key,zval *pData ZEND_FILE_LINE_DC);
-ZEND_API zval *_zend_hash_add(HashTable *ht, zend_string *key,zval *pData ZEND_FILE_LINE_DC);
-ZEND_API zval *_zend_hash_add_new(HashTable *ht, zend_string *key,zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_update(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_update_ind(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_add(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC);
+ZEND_API zval *_zend_hash_add_new(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC);
 
 #define zend_hash_update(ht, key, pData) \
 		_zend_hash_update(ht, key, pData ZEND_FILE_LINE_CC)
@@ -673,58 +689,106 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_FOREACH_NUM_KEY(ht, _h) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h;
+	if (Z_IS_NUM_KEY(_p->val)) { \
+		_h = _p->key.h; \
+	} else { \
+		_h = _p->key.s->h; \
+	}
 
 #define ZEND_HASH_FOREACH_STR_KEY(ht, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_key = _p->key;
+	if (Z_IS_STR_KEY(_p->val)) { \
+		_key = _p->key.s; \
+	} else { \
+		_key = NULL; \
+	} \
 		
 #define ZEND_HASH_FOREACH_KEY(ht, _h, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_key = _p->key;
+	if (Z_IS_STR_KEY(_p->val)) { \
+		_h = _p->key.s->h; \
+		_key = _p->key.s; \
+	} else { \
+		_h = _p->key.h; \
+		_key = NULL; \
+	}
 
 #define ZEND_HASH_FOREACH_NUM_KEY_VAL(ht, _h, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
+	if (Z_IS_NUM_KEY(_p->val)) { \
+		_h = _p->key.h; \
+	} else { \
+		_h = _p->key.s->h; \
+	} \
 	_val = _z;
 		
 #define ZEND_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_key = _p->key; \
+	if (Z_IS_STR_KEY(_p->val)) { \
+		_key = _p->key.s; \
+	} else { \
+		_key = NULL; \
+	} \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_KEY_VAL(ht, _h, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_key = _p->key; \
+	if (Z_IS_STR_KEY(_p->val)) { \
+		_h = _p->key.s->h; \
+		_key = _p->key.s; \
+	} else { \
+		_h = _p->key.h; \
+		_key = NULL; \
+	} \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_STR_KEY_VAL_IND(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 1); \
-	_key = _p->key; \
+	if (Z_IS_STR_KEY(_p->val)) { \
+		_key = _p->key.s; \
+	} else { \
+		_key = NULL; \
+	} \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 1); \
-	_h = _p->h; \
-	_key = _p->key; \
+	if (Z_IS_STR_KEY(_p->val)) { \
+		_h = _p->key.s->h; \
+		_key = _p->key.s; \
+	} else { \
+		_h = _p->key.h; \
+		_key = NULL; \
+	} \
 	_val = _z;
 
 #define ZEND_HASH_FOREACH_NUM_KEY_PTR(ht, _h, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
+	if (Z_IS_NUM_KEY(_p->val)) { \
+		_h = _p->key.h; \
+	} else { \
+		_h = _p->key.s->h; \
+	} \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_FOREACH_STR_KEY_PTR(ht, _key, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_key = _p->key; \
+	if (Z_IS_STR_KEY(_p->val)) { \
+		_key = _p->key.s; \
+	} else { \
+		_key = NULL; \
+	} \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_FOREACH_KEY_PTR(ht, _h, _key, _ptr) \
 	ZEND_HASH_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_key = _p->key; \
+	if (Z_IS_STR_KEY(_p->val)) { \
+		_h = _p->key.s->h; \
+		_key = _p->key.s; \
+	} else { \
+		_h = _p->key.h; \
+		_key = NULL; \
+	} \
 	_ptr = Z_PTR_P(_z);
 
 #define ZEND_HASH_REVERSE_FOREACH_VAL(ht, _val) \
@@ -741,14 +805,24 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_REVERSE_FOREACH_KEY_VAL(ht, _h, _key, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 0); \
-	_h = _p->h; \
-	_key = _p->key; \
+	if (Z_IS_STR_KEY(_p->val)) { \
+		_h = _p->key.s->h; \
+		_key = _p->key.s; \
+	} else { \
+		_h = _p->key.h; \
+		_key = NULL; \
+	} \
 	_val = _z;
 
 #define ZEND_HASH_REVERSE_FOREACH_KEY_VAL_IND(ht, _h, _key, _val) \
 	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
-	_h = _p->h; \
-	_key = _p->key; \
+	if (Z_IS_STR_KEY(_p->val)) { \
+		_h = _p->key.s->h; \
+		_key = _p->key.s; \
+	} else { \
+		_h = _p->key.h; \
+		_key = NULL; \
+	} \
 	_val = _z;
 
 #define ZEND_HASH_APPLY_PROTECTION(ht) \

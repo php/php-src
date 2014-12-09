@@ -485,8 +485,8 @@ ZEND_FUNCTION(func_get_args)
 		p = ZEND_CALL_ARG(ex, 1);
 		if (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg) {
 			while (i < first_extra_arg) {
-				q->h = i;
-				q->key = NULL;
+				q->key.h = i;
+				ZVAL_NUM_KEY(q->val);
 				if (!Z_ISREF_P(p)) {
 					ZVAL_COPY(&q->val, p);
 				} else {
@@ -499,8 +499,8 @@ ZEND_FUNCTION(func_get_args)
 			p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
 		}
 		while (i < arg_count) {
-			q->h = i;
-			q->key = NULL;
+			q->key.h = i;
+			ZVAL_NUM_KEY(q->val);
 			if (!Z_ISREF_P(p)) {
 				ZVAL_COPY(&q->val, p);
 			} else {
