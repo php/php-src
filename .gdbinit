@@ -326,10 +326,10 @@ define ____print_ht
 				set $n = $n - 1
 			end
 			printf "[%d] ", $i
-			if $p->key 
-				printf "%s => ", $p->key->val
+			if $p->val.u2.next & 0x80000000
+				printf "%s => ", $p->key.s->val
 			else
-				printf "%d => ", $p->h
+				printf "%d => ", $p->key.h
 			end
 			if $arg1 == 0
 				printf "%p\n", (zval *)&$p->val

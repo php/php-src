@@ -112,7 +112,7 @@ static void spl_array_update_pos(HashTable *ht, spl_array_object* intern) /* {{{
 {
 	uint pos = intern->pos;
 	if (pos != INVALID_IDX) {
-		intern->pos_h = ht->arData[pos].h;
+		intern->pos_h = BUCKET_HASH_VAL(&ht->arData[pos]);
 	}
 } /* }}} */
 

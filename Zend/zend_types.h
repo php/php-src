@@ -145,10 +145,14 @@ struct _zend_string {
 	char              val[1];
 };
 
+typedef union _Key {
+	zend_ulong        h;              /* numeric index   */
+	zend_string      *s;              /* string key */
+} Key;
+
 typedef struct _Bucket {
 	zval              val;
-	zend_ulong        h;                /* hash value (or numeric index)   */
-	zend_string      *key;              /* string key or NULL for numerics */
+	Key               key;
 } Bucket;
 
 typedef struct _HashTable {	
@@ -248,9 +252,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_TYPE_INFO(zval)			(zval).u1.type_info
 #define Z_TYPE_INFO_P(zval_p)		Z_TYPE_INFO(*(zval_p))
-
-#define Z_NEXT(zval)				(zval).u2.next
-#define Z_NEXT_P(zval_p)			Z_NEXT(*(zval_p))
 
 #define Z_CACHE_SLOT(zval)			(zval).u2.cache_slot
 #define Z_CACHE_SLOT_P(zval_p)		Z_CACHE_SLOT(*(zval_p))

@@ -2792,7 +2792,7 @@ static int php_strtr_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 	Bucket *f = (Bucket *) a;
 	Bucket *s = (Bucket *) b;
 
-	return f->h > s->h ? -1 : 1;
+	return BUCKET_HASH_VAL(f) > BUCKET_HASH_VAL(s) ? -1 : 1;
 }
 /* }}} */
 
