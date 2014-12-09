@@ -401,11 +401,10 @@ static inline zval *_get_zval_ptr(int op_type, znode_op node, const zend_execute
 		case IS_VAR:
 			return _get_zval_ptr_var(node.var, execute_data, should_free);
 		case IS_CV:
+		default:
+			ZEND_ASSERT(op_type == IS_CV);
 			*should_free = NULL;
 			return _get_zval_ptr_cv(execute_data, node.var, type TSRMLS_CC);
-		default:
-			*should_free = NULL;
-			return NULL;
 	}
 }
 
@@ -420,11 +419,10 @@ static inline zval *_get_zval_ptr_deref(int op_type, znode_op node, const zend_e
 		case IS_VAR:
 			return _get_zval_ptr_var_deref(node.var, execute_data, should_free);
 		case IS_CV:
+		default:
+			ZEND_ASSERT(op_type == IS_CV);
 			*should_free = NULL;
 			return _get_zval_ptr_cv_deref(execute_data, node.var, type TSRMLS_CC);
-		default:
-			*should_free = NULL;
-			return NULL;
 	}
 }
 
@@ -508,20 +506,23 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 }
 
 /* this should modify object only if it's empty */
-static inline zval* make_real_object(zval *object_ptr TSRMLS_DC)
+static inline int make_real_object(zval **object_ptr TSRMLS_DC)
 {
-	zval *object = object_ptr;
+	zval *object = *object_ptr;
 
 	ZVAL_DEREF(object);
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		if (Z_TYPE_P(object) <= IS_FALSE
+		if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)
 			|| (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0)) {
 			zval_ptr_dtor_nogc(object);
 			object_init(object);
 			zend_error(E_WARNING, "Creating default object from empty value");
+		} else {
+			return 0;
 		}
 	}
-	return object;
+	*object_ptr = object;
+	return 1;
 }
 
 ZEND_API char * zend_verify_internal_arg_class_kind(const zend_internal_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC)

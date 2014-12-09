@@ -347,10 +347,10 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 	}
 
 	do {
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -358,8 +358,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 				break;
 			}
 		}
-
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
@@ -759,8 +757,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|C
 
 	do {
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(retval);
@@ -848,8 +845,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 
 	do {
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				ZVAL_NULL(retval);
 				break;

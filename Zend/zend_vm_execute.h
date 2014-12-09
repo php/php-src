@@ -12138,10 +12138,10 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 	}
 
 	do {
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -12149,8 +12149,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 				break;
 			}
 		}
-
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
@@ -12548,8 +12546,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CONST(incdec_t
 
 	do {
 		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(retval);
@@ -12636,8 +12633,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CONST(incdec_
 
 	do {
 		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				ZVAL_NULL(retval);
 				break;
@@ -15012,10 +15008,10 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 	}
 
 	do {
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -15023,8 +15019,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 				break;
 			}
 		}
-
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
@@ -15422,8 +15416,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_CV(incdec_t in
 
 	do {
 		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(retval);
@@ -15510,8 +15503,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_CV(incdec_t i
 
 	do {
 		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				ZVAL_NULL(retval);
 				break;
@@ -16546,10 +16538,10 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMPVAR(int (*
 	}
 
 	do {
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -16557,8 +16549,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMPVAR(int (*
 				break;
 			}
 		}
-
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
@@ -16958,8 +16948,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_VAR_TMPVAR(incdec_
 
 	do {
 		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(retval);
@@ -17047,8 +17036,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_VAR_TMPVAR(incdec
 
 	do {
 		if (IS_VAR != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				ZVAL_NULL(retval);
 				break;
@@ -17955,10 +17943,10 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 	}
 
 	do {
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -17966,8 +17954,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 				break;
 			}
 		}
-
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
@@ -18329,8 +18315,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CONST(incde
 
 	do {
 		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(retval);
@@ -18417,8 +18402,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CONST(incd
 
 	do {
 		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				ZVAL_NULL(retval);
 				break;
@@ -20141,10 +20125,10 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 	}
 
 	do {
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -20152,8 +20136,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 				break;
 			}
 		}
-
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
@@ -20515,8 +20497,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_CV(incdec_t
 
 	do {
 		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(retval);
@@ -20603,8 +20584,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_CV(incdec_
 
 	do {
 		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				ZVAL_NULL(retval);
 				break;
@@ -21529,10 +21509,10 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(int
 	}
 
 	do {
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -21540,8 +21520,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(int
 				break;
 			}
 		}
-
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
@@ -21904,8 +21882,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_UNUSED_TMPVAR(incd
 
 	do {
 		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(retval);
@@ -21993,8 +21970,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_UNUSED_TMPVAR(inc
 
 	do {
 		if (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				ZVAL_NULL(retval);
 				break;
@@ -24510,10 +24486,10 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 	}
 
 	do {
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -24521,8 +24497,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 				break;
 			}
 		}
-
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
@@ -24919,8 +24893,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CONST(incdec_t 
 
 	do {
 		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(retval);
@@ -25007,8 +24980,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CONST(incdec_t
 
 	do {
 		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				ZVAL_NULL(retval);
 				break;
@@ -28713,10 +28685,10 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 	}
 
 	do {
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -28724,8 +28696,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 				break;
 			}
 		}
-
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
@@ -29122,8 +29092,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_CV(incdec_t inc
 
 	do {
 		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(retval);
@@ -29210,8 +29179,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_CV(incdec_t in
 
 	do {
 		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				ZVAL_NULL(retval);
 				break;
@@ -30758,10 +30726,10 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMPVAR(int (*b
 	}
 
 	do {
+		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+
 		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -30769,8 +30737,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMPVAR(int (*b
 				break;
 			}
 		}
-
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 
 		/* here we are sure we are dealing with an object */
 		if (opline->extended_value == ZEND_ASSIGN_OBJ
@@ -31169,8 +31135,7 @@ static int ZEND_FASTCALL zend_pre_incdec_property_helper_SPEC_CV_TMPVAR(incdec_t
 
 	do {
 		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC);
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_NULL(retval);
@@ -31258,8 +31223,7 @@ static int ZEND_FASTCALL zend_post_incdec_property_helper_SPEC_CV_TMPVAR(incdec_
 
 	do {
 		if (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-			object = make_real_object(object TSRMLS_CC); /* this should modify object only if it's empty */
-			if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
+			if (UNEXPECTED(!make_real_object(&object TSRMLS_CC))) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 				ZVAL_NULL(retval);
 				break;
