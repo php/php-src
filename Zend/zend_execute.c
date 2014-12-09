@@ -390,39 +390,43 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(const zend_execu
 	return ret;
 }
 
-static inline zval *_get_zval_ptr(int op_type, znode_op node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
+static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
 {
-	switch (op_type) {
-		case IS_CONST:
-			*should_free = NULL;
-			return node.zv;
-		case IS_TMP_VAR:
+	if (op_type & (IS_TMP_VAR|IS_VAR)) {
+		if (op_type == IS_TMP_VAR) {
 			return _get_zval_ptr_tmp(node.var, execute_data, should_free);
-		case IS_VAR:
+		} else {
+			ZEND_ASSERT(op_type == IS_VAR);
 			return _get_zval_ptr_var(node.var, execute_data, should_free);
-		case IS_CV:
-		default:
+		}
+	} else {		
+		*should_free = NULL;
+		if (op_type == IS_CONST) {
+			return node.zv;
+		} else {
 			ZEND_ASSERT(op_type == IS_CV);
-			*should_free = NULL;
 			return _get_zval_ptr_cv(execute_data, node.var, type TSRMLS_CC);
+		}
 	}
 }
 
-static inline zval *_get_zval_ptr_deref(int op_type, znode_op node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
+static zend_always_inline zval *_get_zval_ptr_deref(int op_type, znode_op node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC)
 {
-	switch (op_type) {
-		case IS_CONST:
-			*should_free = NULL;
-			return node.zv;
-		case IS_TMP_VAR:
+	if (op_type & (IS_TMP_VAR|IS_VAR)) {
+		if (op_type == IS_TMP_VAR) {
 			return _get_zval_ptr_tmp(node.var, execute_data, should_free);
-		case IS_VAR:
+		} else {
+			ZEND_ASSERT(op_type == IS_VAR);
 			return _get_zval_ptr_var_deref(node.var, execute_data, should_free);
-		case IS_CV:
-		default:
+		}
+	} else {		
+		*should_free = NULL;
+		if (op_type == IS_CONST) {
+			return node.zv;
+		} else {
 			ZEND_ASSERT(op_type == IS_CV);
-			*should_free = NULL;
 			return _get_zval_ptr_cv_deref(execute_data, node.var, type TSRMLS_CC);
+		}
 	}
 }
 
@@ -927,6 +931,39 @@ static zend_always_inline void zend_assign_to_object_dim(zval *retval, zval *obj
 	zval_ptr_dtor(value);
 	if (value_type == IS_VAR) {
 		FREE_OP(free_value);
+	}
+}
+
+static void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value, zval *retval, int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC))
+{
+	zval *z;
+	zval rv;
+
+	if (Z_OBJ_HT_P(object)->read_dimension &&
+		(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv TSRMLS_CC)) != NULL) {
+
+		if (Z_TYPE_P(z) == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+			zval rv;
+			zval *value = Z_OBJ_HT_P(z)->get(z, &rv TSRMLS_CC);
+
+			if (Z_REFCOUNT_P(z) == 0) {
+				zend_objects_store_del(Z_OBJ_P(z) TSRMLS_CC);
+			}
+			ZVAL_COPY_VALUE(z, value);
+		}
+		ZVAL_DEREF(z);
+		SEPARATE_ZVAL_NOREF(z);
+		binary_op(z, z, value TSRMLS_CC);
+		Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
+		if (retval) {
+			ZVAL_COPY(retval, z);
+		}
+		zval_ptr_dtor(z);
+	} else {
+		zend_error(E_WARNING, "Attempt to assign property of non-object");
+		if (retval) {
+			ZVAL_NULL(retval);
+		}
 	}
 }
 
