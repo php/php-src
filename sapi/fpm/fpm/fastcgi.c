@@ -977,6 +977,7 @@ int fcgi_flush(fcgi_request *req, int close)
 
 	if (safe_write(req, req->out_buf, len) != len) {
 		req->keep = 0;
+	        req->out_pos = req->out_buf;
 		return 0;
 	}
 
