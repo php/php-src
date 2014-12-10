@@ -54,6 +54,9 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 PHPAPI FILE * _php_stream_open_wrapper_as_file(char * path, char * mode, int options, zend_string **opened_path STREAMS_DC);
 #define php_stream_open_wrapper_as_file(path, mode, options, opened_path) _php_stream_open_wrapper_as_file((path), (mode), (options), (opened_path) STREAMS_CC)
 
+PHPAPI int _php_stream_freopen(char *filename, char *mode, php_stream *stream STREAMS_DC TSRMLS_DC);
+#define php_stream_freopen(filename, mode, stream) _php_stream_freopen((filename), (mode), (stream) STREAMS_CC TSRMLS_CC)
+
 END_EXTERN_C()
 
 /*
