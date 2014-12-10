@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - Date:
   . Implemented FR #68268 (DatePeriod: Getter for start date, end date and 
     interval). (Marc Bennewitz)
+  . Fixed day_of_week function as it could sometimes return negative values
+    internally. (Derick)
 
 - Fileinfo:
   . Fixed bug #68398 (msooxml matches too many archives). (Anatol)
@@ -30,6 +32,9 @@ PHP                                                                        NEWS
 - mbstring:
   . Fixed bug #68504 (--with-libmbfl configure option not present on Windows).
     (Ashesh Vashi)
+
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
 
 - OpenSSL:
   . Improved handling of OPENSSL_KEYTYPE_EC keys. (Dominic Luechinger)
