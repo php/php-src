@@ -16,6 +16,11 @@ PHP                                                                        NEWS
     (Alexander Lisachenko)
   . Fixed bug #68446 (Array constant not accepted for array parameter default).
     (Bob, Dmitry)
+  . Fixed bug #68545 (NULL pointer dereference in unserialize.c). (Anatol)
+
+- Date:
+  . Fixed day_of_week function as it could sometimes return negative values
+    internally. (Derick)
 
 - FPM:
   . Fixed bug #68381 (fpm_unix_init_main ignores log_level).
@@ -36,6 +41,9 @@ PHP                                                                        NEWS
 
 - GMP:
   . Fixed bug #68419 (build error with gmp 4.1). (Remi)
+
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
 
 - PDO_pgsql:
   . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
