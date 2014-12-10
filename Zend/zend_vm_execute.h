@@ -13027,9 +13027,10 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
 	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+		zend_long offset;
 
 		dim = opline->op2.zv;
-		zend_long offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
+		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
 
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
@@ -14547,9 +14548,10 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
 	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+		zend_long offset;
 
 		dim = NULL;
-		zend_long offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
+		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
 
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
@@ -15894,9 +15896,10 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
 	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+		zend_long offset;
 
 		dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-		zend_long offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
+		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
 
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
@@ -17423,9 +17426,10 @@ try_assign_dim_array:
 		zval_ptr_dtor_nogc(free_op2);
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
 	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+		zend_long offset;
 
 		dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-		zend_long offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
+		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
 		zval_ptr_dtor_nogc(free_op2);
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
@@ -25622,9 +25626,10 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
 	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+		zend_long offset;
 
 		dim = opline->op2.zv;
-		zend_long offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
+		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
 
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
@@ -27947,9 +27952,10 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
 	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+		zend_long offset;
 
 		dim = NULL;
-		zend_long offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
+		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
 
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
@@ -29633,9 +29639,10 @@ try_assign_dim_array:
 
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
 	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+		zend_long offset;
 
 		dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-		zend_long offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
+		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
 
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
@@ -31674,9 +31681,10 @@ try_assign_dim_array:
 		zval_ptr_dtor_nogc(free_op2);
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
 	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+		zend_long offset;
 
 		dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-		zend_long offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
+		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W TSRMLS_CC);
 		zval_ptr_dtor_nogc(free_op2);
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL) TSRMLS_CC);
