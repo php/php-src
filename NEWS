@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly 
     triggered). (Julien)
   . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
+  . Fixed bug #68545 (NULL pointer dereference in unserialize.c). (Anatol)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
