@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-27 Nov 2014, PHP 5.5.20RC1
+11 Dec 2014, PHP 5.5.20
 
 - Core:
   . Fixed bug #68091 (Some Zend headers lack appropriate extern "C" blocks).
@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly 
     triggered). (Julien)
   . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
+
+- Date:
+  . Fixed day_of_week function as it could sometimes return negative values
+    internally. (Derick)
 
 - FPM:
   . Fixed bug #68381 (fpm_unix_init_main ignores log_level).
@@ -25,6 +29,9 @@ PHP                                                                        NEWS
   . Fixed request #68391 (php-fpm conf files loading order).
     (Florian Margaine, Remi)
   . Fixed bug #68478 (access.log don't use prefix). (Remi)
+
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
 
 - PDO_pgsql:
   . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
