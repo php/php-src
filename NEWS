@@ -11,6 +11,7 @@ PHP                                                                        NEWS
   . Fixed bug #68297 (Application Popup provides too few information). (Anatol)
   . Fixed bug #65769 (localeconv() broken in TS builds). (Anatol)
   . Fixed bug #65230 (setting locale randomly broken). (Anatol)
+  . Fixed bug #68545 (NULL pointer dereference in unserialize.c). (Anatol)
 
 - cURL:
   . Fixed bug #67643 (curl_multi_getcontent returns '' when
