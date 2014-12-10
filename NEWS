@@ -16,11 +16,18 @@ PHP                                                                        NEWS
   . Fixed bug #67643 (curl_multi_getcontent returns '' when
     CURLOPT_RETURNTRANSFER isn't set). (Jille Timmermans)
 
-- mbstring:
+- Date:
+  . Fixed day_of_week function as it could sometimes return negative values
+    internally. (Derick)
+
+- Mbstring:
   . Fixed bug #68504 (--with-libmbfl configure option not present on Windows).
     (Ashesh Vashi)
 
-- pcntl:
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
+
+- Pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
     when setting SIG_DFL). (Julien)
 
