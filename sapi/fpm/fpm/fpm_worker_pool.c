@@ -15,6 +15,7 @@
 #include "fpm_shm.h"
 #include "fpm_scoreboard.h"
 #include "fpm_conf.h"
+#include "fpm_unix.h"
 
 struct fpm_worker_pool_s *fpm_worker_all_pools;
 
@@ -29,6 +30,7 @@ void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
 	if (wp->home) {
 		free(wp->home);
 	}
+	fpm_unix_free_socket_premissions(wp);
 	free(wp);
 }
 /* }}} */

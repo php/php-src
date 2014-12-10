@@ -64,7 +64,13 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval *rval)
 
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 {
-	var_dtor_entries *var_hash = (*var_hashx)->last_dtor;
+	var_dtor_entries *var_hash;
+
+	if (!var_hashx || !*var_hashx) {
+		return;
+	}
+
+	var_hash = (*var_hashx)->last_dtor;
 #if VAR_ENTRIES_DBG
 	fprintf(stderr, "var_push_dtor(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
 #endif

@@ -134,7 +134,7 @@ $op2_free = array(
 );
 
 $op1_get_zval_ptr = array(
-	"ANY"    => "get_zval_ptr(opline->op1_type, &opline->op1, execute_data, &free_op1, \\1)",
+	"ANY"    => "get_zval_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
 	"VAR"    => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
 	"CONST"  => "opline->op1.zv",
@@ -144,7 +144,7 @@ $op1_get_zval_ptr = array(
 );
 
 $op2_get_zval_ptr = array(
-	"ANY"    => "get_zval_ptr(opline->op2_type, &opline->op2, execute_data, &free_op2, \\1)",
+	"ANY"    => "get_zval_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
 	"VAR"    => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
 	"CONST"  => "opline->op2.zv",
@@ -154,7 +154,7 @@ $op2_get_zval_ptr = array(
 );
 
 $op1_get_zval_ptr_ptr = array(
-	"ANY"    => "get_zval_ptr_ptr(opline->op1_type, &opline->op1, execute_data, &free_op1, \\1)",
+	"ANY"    => "get_zval_ptr_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
 	"TMP"    => "NULL",
 	"VAR"    => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
 	"CONST"  => "NULL",
@@ -164,7 +164,7 @@ $op1_get_zval_ptr_ptr = array(
 );
 
 $op2_get_zval_ptr_ptr = array(
-	"ANY"    => "get_zval_ptr_ptr(opline->op2_type, &opline->op2, execute_data, &free_op2, \\1)",
+	"ANY"    => "get_zval_ptr_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
 	"TMP"    => "NULL",
 	"VAR"    => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
 	"CONST"  => "NULL",
@@ -174,7 +174,7 @@ $op2_get_zval_ptr_ptr = array(
 );
 
 $op1_get_zval_ptr_deref = array(
-	"ANY"    => "get_zval_ptr_deref(opline->op1_type, &opline->op1, execute_data, &free_op1, \\1)",
+	"ANY"    => "get_zval_ptr_deref(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
 	"VAR"    => "_get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1)",
 	"CONST"  => "opline->op1.zv",
@@ -184,7 +184,7 @@ $op1_get_zval_ptr_deref = array(
 );
 
 $op2_get_zval_ptr_deref = array(
-	"ANY"    => "get_zval_ptr_deref(opline->op2_type, &opline->op2, execute_data, &free_op2, \\1)",
+	"ANY"    => "get_zval_ptr_deref(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
 	"VAR"    => "_get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2)",
 	"CONST"  => "opline->op2.zv",
@@ -194,7 +194,7 @@ $op2_get_zval_ptr_deref = array(
 );
 
 $op1_get_zval_ptr_ptr_undef = array(
-	"ANY"    => "get_zval_ptr_ptr_undef(opline->op1_type, &opline->op1, execute_data, &free_op1, \\1)",
+	"ANY"    => "get_zval_ptr_ptr_undef(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
 	"TMP"    => "NULL",
 	"VAR"    => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
 	"CONST"  => "NULL",
@@ -204,7 +204,7 @@ $op1_get_zval_ptr_ptr_undef = array(
 );
 
 $op2_get_zval_ptr_ptr_undef = array(
-	"ANY"    => "get_zval_ptr_ptr_undef(opline->op2_type, &opline->op2, execute_data, &free_op2, \\1)",
+	"ANY"    => "get_zval_ptr_ptr_undef(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
 	"TMP"    => "NULL",
 	"VAR"    => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
 	"CONST"  => "NULL",
@@ -214,7 +214,7 @@ $op2_get_zval_ptr_ptr_undef = array(
 );
 
 $op1_get_obj_zval_ptr = array(
-	"ANY"    => "get_obj_zval_ptr(opline->op1_type, &opline->op1, execute_data, &free_op1, \\1)",
+	"ANY"    => "get_obj_zval_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
 	"VAR"    => "_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1)",
 	"CONST"  => "opline->op1.zv",
@@ -224,7 +224,7 @@ $op1_get_obj_zval_ptr = array(
 );
 
 $op2_get_obj_zval_ptr = array(
-	"ANY"    => "get_obj_zval_ptr(opline->op2_type, &opline->op2, execute_data, &free_op2, \\1)",
+	"ANY"    => "get_obj_zval_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
 	"VAR"    => "_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2)",
 	"CONST"  => "opline->op2.zv",
@@ -234,7 +234,7 @@ $op2_get_obj_zval_ptr = array(
 );
 
 $op1_get_obj_zval_ptr_deref = array(
-	"ANY"    => "get_obj_zval_ptr(opline->op1_type, &opline->op1, execute_data, &free_op1, \\1)",
+	"ANY"    => "get_obj_zval_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1)",
 	"VAR"    => "_get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1)",
 	"CONST"  => "opline->op1.zv",
@@ -244,7 +244,7 @@ $op1_get_obj_zval_ptr_deref = array(
 );
 
 $op2_get_obj_zval_ptr_deref = array(
-	"ANY"    => "get_obj_zval_ptr(opline->op2_type, &opline->op2, execute_data, &free_op2, \\1)",
+	"ANY"    => "get_obj_zval_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
 	"TMP"    => "_get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2)",
 	"VAR"    => "_get_zval_ptr_var_deref(opline->op2.var, execute_data, &free_op2)",
 	"CONST"  => "opline->op2.zv",
@@ -254,7 +254,7 @@ $op2_get_obj_zval_ptr_deref = array(
 );
 
 $op1_get_obj_zval_ptr_ptr = array(
-	"ANY"    => "get_obj_zval_ptr_ptr(opline->op1_type, &opline->op1, execute_data, &free_op1, \\1)",
+	"ANY"    => "get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
 	"TMP"    => "NULL",
 	"VAR"    => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
 	"CONST"  => "NULL",
@@ -264,12 +264,32 @@ $op1_get_obj_zval_ptr_ptr = array(
 );
 
 $op2_get_obj_zval_ptr_ptr = array(
-	"ANY"    => "get_obj_zval_ptr_ptr(opline->op2_type, &opline->op2, execute_data, &free_op2, \\1)",
+	"ANY"    => "get_obj_zval_ptr_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
 	"TMP"    => "NULL",
 	"VAR"    => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
 	"CONST"  => "NULL",
 	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
 	"CV"     => "_get_zval_ptr_cv_\\1(execute_data, opline->op2.var TSRMLS_CC)",
+	"TMPVAR" => "???",
+);
+
+$op1_get_obj_zval_ptr_ptr_undef = array(
+	"ANY"    => "get_obj_zval_ptr_ptr(opline->op1_type, opline->op1, execute_data, &free_op1, \\1)",
+	"TMP"    => "NULL",
+	"VAR"    => "_get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1)",
+	"CONST"  => "NULL",
+	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"     => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op1.var TSRMLS_CC)",
+	"TMPVAR" => "???",
+);
+
+$op2_get_obj_zval_ptr_ptr_undef = array(
+	"ANY"    => "get_obj_zval_ptr_ptr(opline->op2_type, opline->op2, execute_data, &free_op2, \\1)",
+	"TMP"    => "NULL",
+	"VAR"    => "_get_zval_ptr_ptr_var(opline->op2.var, execute_data, &free_op2)",
+	"CONST"  => "NULL",
+	"UNUSED" => "_get_obj_zval_ptr_unused(execute_data)",
+	"CV"     => "_get_zval_ptr_cv_undef_\\1(execute_data, opline->op2.var TSRMLS_CC)",
 	"TMPVAR" => "???",
 );
 
@@ -384,6 +404,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 		$op1_get_obj_zval_ptr, $op2_get_obj_zval_ptr,
 		$op1_get_obj_zval_ptr_deref, $op2_get_obj_zval_ptr_deref,
 		$op1_get_obj_zval_ptr_ptr, $op2_get_obj_zval_ptr_ptr,
+		$op1_get_obj_zval_ptr_ptr_undef, $op2_get_obj_zval_ptr_ptr_undef,
 		$op1_free, $op2_free,
 		$op1_free_op, $op2_free_op, $op1_free_op_if_var, $op2_free_op_if_var,
 		$op1_free_op_var_ptr, $op2_free_op_var_ptr, $prefix;
@@ -409,6 +430,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			"/GET_OP2_OBJ_ZVAL_PTR_DEREF\(([^)]*)\)/",
 			"/GET_OP1_OBJ_ZVAL_PTR_PTR\(([^)]*)\)/",
 			"/GET_OP2_OBJ_ZVAL_PTR_PTR\(([^)]*)\)/",
+			"/GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF\(([^)]*)\)/",
+			"/GET_OP2_OBJ_ZVAL_PTR_PTR_UNDEF\(([^)]*)\)/",
 			"/FREE_OP1\(\)/",
 			"/FREE_OP2\(\)/",
 			"/FREE_OP1_IF_VAR\(\)/",
@@ -445,6 +468,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			$op2_get_obj_zval_ptr_deref[$op2],
 			$op1_get_obj_zval_ptr_ptr[$op1],
 			$op2_get_obj_zval_ptr_ptr[$op2],
+			$op1_get_obj_zval_ptr_ptr_undef[$op1],
+			$op2_get_obj_zval_ptr_ptr_undef[$op2],
 			$op1_free_op[$op1],
 			$op2_free_op[$op2],
 			$op1_free_op_if_var[$op1],

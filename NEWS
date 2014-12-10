@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
 
+- Date:
+  . Fixed day_of_week function as it could sometimes return negative values
+    internally. (Derick)
+
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
 
@@ -43,6 +47,9 @@ PHP                                                                        NEWS
 
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
+
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
 
 - pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
