@@ -9,6 +9,8 @@
 
 int fpm_unix_resolve_socket_premissions(struct fpm_worker_pool_s *wp);
 int fpm_unix_set_socket_premissions(struct fpm_worker_pool_s *wp, const char *path);
+int fpm_unix_free_socket_premissions(struct fpm_worker_pool_s *wp);
+
 int fpm_unix_init_child(struct fpm_worker_pool_s *wp);
 int fpm_unix_init_main();
 

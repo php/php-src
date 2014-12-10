@@ -123,6 +123,10 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "group",                     &fpm_conf_set_string,      WPO(group) },
 	{ "listen",                    &fpm_conf_set_string,      WPO(listen_address) },
 	{ "listen.backlog",            &fpm_conf_set_integer,     WPO(listen_backlog) },
+#ifdef HAVE_FPM_ACL
+	{ "listen.acl_users",          &fpm_conf_set_string,      WPO(listen_acl_users) },
+	{ "listen.acl_groups",         &fpm_conf_set_string,      WPO(listen_acl_groups) },
+#endif
 	{ "listen.owner",              &fpm_conf_set_string,      WPO(listen_owner) },
 	{ "listen.group",              &fpm_conf_set_string,      WPO(listen_group) },
 	{ "listen.mode",               &fpm_conf_set_string,      WPO(listen_mode) },
@@ -1583,6 +1587,10 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tgroup = %s",                      STR2STR(wp->config->group));
 		zlog(ZLOG_NOTICE, "\tlisten = %s",                     STR2STR(wp->config->listen_address));
 		zlog(ZLOG_NOTICE, "\tlisten.backlog = %d",             wp->config->listen_backlog);
+#ifdef HAVE_FPM_ACL
+		zlog(ZLOG_NOTICE, "\tlisten.acl_users = %s",           STR2STR(wp->config->listen_acl_users));
+		zlog(ZLOG_NOTICE, "\tlisten.acl_groups = %s",          STR2STR(wp->config->listen_acl_groups));
+#endif
 		zlog(ZLOG_NOTICE, "\tlisten.owner = %s",               STR2STR(wp->config->listen_owner));
 		zlog(ZLOG_NOTICE, "\tlisten.group = %s",               STR2STR(wp->config->listen_group));
 		zlog(ZLOG_NOTICE, "\tlisten.mode = %s",                STR2STR(wp->config->listen_mode));
