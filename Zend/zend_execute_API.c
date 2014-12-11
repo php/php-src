@@ -501,12 +501,6 @@ ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ *
 }
 /* }}} */
 
-ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
-{
-	return i_zend_is_true(op TSRMLS_CC);
-}
-/* }}} */
-
 #define IS_VISITED_CONSTANT			0x80
 #define IS_CONSTANT_VISITED(p)		(Z_TYPE_P(p) & IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) |= IS_VISITED_CONSTANT

@@ -40,7 +40,6 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value TSRMLS_DC);
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value TSRMLS_DC);
-ZEND_API int zend_is_true(zval *op TSRMLS_DC);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name TSRMLS_DC);
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *key, int use_autoload TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
@@ -51,72 +50,6 @@ ZEND_API int zend_eval_stringl_ex(char *str, size_t str_len, zval *retval_ptr, c
 ZEND_API char * zend_verify_internal_arg_class_kind(const zend_internal_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC);
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, char **class_name, zend_class_entry **pce TSRMLS_DC);
 ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uint32_t arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind, zval *arg TSRMLS_DC);
-
-static zend_always_inline int i_zend_is_true(zval *op TSRMLS_DC)
-{
-	int result;
-
-again:
-	switch (Z_TYPE_P(op)) {
-		case IS_UNDEF:
-		case IS_NULL:
-		case IS_FALSE:
-			result = 0;
-			break;
-		case IS_TRUE:
-			result = 1;
-			break;
-		case IS_LONG:
-			result = (Z_LVAL_P(op)?1:0);
-			break;
-		case IS_RESOURCE:
-			result = (Z_RES_HANDLE_P(op)?1:0);
-			break;
-		case IS_DOUBLE:
-			result = (Z_DVAL_P(op) ? 1 : 0);
-			break;
-		case IS_STRING:
-			if (Z_STRLEN_P(op) == 0
-				|| (Z_STRLEN_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
-				result = 0;
-			} else {
-				result = 1;
-			}
-			break;
-		case IS_ARRAY:
-			result = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			break;
-		case IS_OBJECT:
-			if (Z_OBJ_HT_P(op)->cast_object) {
-				zval tmp;
-				if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, _IS_BOOL TSRMLS_CC) == SUCCESS) {
-					result = Z_TYPE(tmp) == IS_TRUE;
-					break;
-				}
-				zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to boolean", Z_OBJ_P(op)->ce->name->val);
-			} else if (Z_OBJ_HT_P(op)->get) {
-				zval rv;
-				zval *tmp = Z_OBJ_HT_P(op)->get(op, &rv TSRMLS_CC);
-				if (Z_TYPE_P(tmp) != IS_OBJECT) {
-					/* for safety - avoid loop */
-					convert_to_boolean(tmp);
-					result = Z_TYPE_P(tmp) == IS_TRUE;
-					zval_ptr_dtor(tmp);
-					break;
-				}
-			}
-			result = 1;
-			break;
-		case IS_REFERENCE:
-			op = Z_REFVAL_P(op);
-			goto again;
-			break;
-		default:
-			result = 0;
-			break;
-	}
-	return result;
-}
 
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type TSRMLS_DC)
 {

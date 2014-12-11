@@ -252,7 +252,61 @@ ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2
 #define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
 
-ZEND_API int zval_is_true(zval *op);
+
+ZEND_API int zend_is_true(zval *op TSRMLS_DC);
+ZEND_API int zend_object_is_true(zval *op TSRMLS_DC);
+
+#define zval_is_true(op) \
+	zend_is_true(op TSRMLS_CC)
+
+static zend_always_inline int i_zend_is_true(zval *op TSRMLS_DC)
+{
+	int result;
+
+again:
+	switch (Z_TYPE_P(op)) {
+		case IS_UNDEF:
+		case IS_NULL:
+		case IS_FALSE:
+			result = 0;
+			break;
+		case IS_TRUE:
+			result = 1;
+			break;
+		case IS_LONG:
+			result = (Z_LVAL_P(op)?1:0);
+			break;
+		case IS_RESOURCE:
+			result = (Z_RES_HANDLE_P(op)?1:0);
+			break;
+		case IS_DOUBLE:
+			result = (Z_DVAL_P(op) ? 1 : 0);
+			break;
+		case IS_STRING:
+			if (Z_STRLEN_P(op) == 0
+				|| (Z_STRLEN_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
+				result = 0;
+			} else {
+				result = 1;
+			}
+			break;
+		case IS_ARRAY:
+			result = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
+			break;
+		case IS_OBJECT:
+			result = zend_object_is_true(op TSRMLS_CC);
+			break;
+		case IS_REFERENCE:
+			op = Z_REFVAL_P(op);
+			goto again;
+			break;
+		default:
+			result = 0;
+			break;
+	}
+	return result;
+}
+
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC);

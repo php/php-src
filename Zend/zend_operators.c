@@ -259,49 +259,6 @@ try_again:
 
 /* }}} */
 
-/* {{{ zendi_convert_to_boolean */
-#define zendi_convert_to_boolean(op, holder, result)				\
-	if (op==result) {												\
-		convert_to_boolean(op);										\
-	} else if (Z_TYPE_P(op) != IS_FALSE &&							\
-	           Z_TYPE_P(op) != IS_TRUE) {							\
-		switch (Z_TYPE_P(op)) {										\
-			case IS_NULL:											\
-				ZVAL_BOOL(&holder, 0);								\
-				break;												\
-			case IS_RESOURCE:										\
-				ZVAL_BOOL(&holder, Z_RES_HANDLE_P(op) ? 1 : 0);		\
-				break;												\
-			case IS_LONG:											\
-				ZVAL_BOOL(&holder, Z_LVAL_P(op) ? 1 : 0);			\
-				break;												\
-			case IS_DOUBLE:											\
-				ZVAL_BOOL(&holder, Z_DVAL_P(op) ? 1 : 0);			\
-				break;												\
-			case IS_STRING:											\
-				if (Z_STRLEN_P(op) == 0								\
-					|| (Z_STRLEN_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {	\
-					ZVAL_BOOL(&holder, 0);							\
-				} else {											\
-					ZVAL_BOOL(&holder, 1);							\
-				}													\
-				break;												\
-			case IS_ARRAY:											\
-				ZVAL_BOOL(&holder, zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);	\
-				break;												\
-			case IS_OBJECT:											\
-				ZVAL_DUP(&(holder), (op));							\
-				convert_to_boolean(&(holder));						\
-				break;												\
-			default:												\
-				ZVAL_BOOL(&holder, 0);								\
-				break;												\
-		}															\
-		(op) = &(holder);											\
-	}
-
-/* }}} */
-
 /* {{{ convert_object_to_type */
 #define convert_object_to_type(op, dst, ctype, conv_func)									\
 	ZVAL_UNDEF(dst);																		\
@@ -1263,8 +1220,7 @@ ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 				}
 			}
 			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BOOL_XOR, boolean_xor_function);
-			zendi_convert_to_boolean(op1, op1_copy, result);
-			op1_val = (Z_TYPE_P(op1) == IS_TRUE);
+			op1_val = zval_is_true(op1);
 		}
 	} while (0);
 	do {
@@ -1284,8 +1240,7 @@ ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 				}
 			}
 			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BOOL_XOR);
-			zendi_convert_to_boolean(op2, op2_copy, result);
-			op2_val = (Z_TYPE_P(op2) == IS_TRUE);
+			op2_val = zval_is_true(op2);
 		}
 	} while (0);
 
@@ -1315,9 +1270,7 @@ ZEND_API int boolean_not_function(zval *result, zval *op1 TSRMLS_DC) /* {{{ */
 		}
 		ZEND_TRY_UNARY_OBJECT_OPERATION(ZEND_BOOL_NOT);
 
-		zendi_convert_to_boolean(op1, op1_copy, result);
-
-		ZVAL_BOOL(result, Z_TYPE_P(op1) == IS_FALSE);
+		ZVAL_BOOL(result, !zval_is_true(op1));
 	}
 	return SUCCESS;
 }
@@ -1953,20 +1906,16 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 				}
 				if (!converted) {
 					if (Z_TYPE_P(op1) == IS_NULL || Z_TYPE_P(op1) == IS_FALSE) {
-						zendi_convert_to_boolean(op2, op2_copy, result);
-						ZVAL_LONG(result, (Z_TYPE_P(op2) == IS_TRUE) ? -1 : 0);
+						ZVAL_LONG(result, zval_is_true(op2) ? -1 : 0);
 						return SUCCESS;
 					} else if (Z_TYPE_P(op2) == IS_NULL || Z_TYPE_P(op2) == IS_FALSE) {
-						zendi_convert_to_boolean(op1, op1_copy, result);
-						ZVAL_LONG(result, (Z_TYPE_P(op1) == IS_TRUE) ? 1 : 0);
+						ZVAL_LONG(result, zval_is_true(op1) ? 1 : 0);
 						return SUCCESS;
 					} else if (Z_TYPE_P(op1) == IS_TRUE) {
-						zendi_convert_to_boolean(op2, op2_copy, result);
-						ZVAL_LONG(result, (Z_TYPE_P(op2) == IS_TRUE) ? 0 : 1);
+						ZVAL_LONG(result, zval_is_true(op2) ? 0 : 1);
 						return SUCCESS;
 					} else if (Z_TYPE_P(op2) == IS_TRUE) {
-						zendi_convert_to_boolean(op1, op1_copy, result);
-						ZVAL_LONG(result, (Z_TYPE_P(op1) == IS_TRUE) ? 0 : -1);
+						ZVAL_LONG(result, zval_is_true(op1) ? 0 : -1);
 						return SUCCESS;
 					} else {
 						zendi_convert_scalar_to_number(op1, op1_copy, result);
@@ -2384,10 +2333,33 @@ try_again:
 }
 /* }}} */
 
-ZEND_API int zval_is_true(zval *op) /* {{{ */
+ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
 {
-	convert_to_boolean(op);
-	return (Z_TYPE_P(op) == IS_TRUE ? 1 : 0);
+	return i_zend_is_true(op TSRMLS_CC);
+}
+/* }}} */
+
+ZEND_API int zend_object_is_true(zval *op TSRMLS_DC) /* {{{ */
+{
+	if (Z_OBJ_HT_P(op)->cast_object) {
+		zval tmp;
+		if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, _IS_BOOL TSRMLS_CC) == SUCCESS) {
+			return Z_TYPE(tmp) == IS_TRUE;
+		}
+		zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to boolean", Z_OBJ_P(op)->ce->name->val);
+	} else if (Z_OBJ_HT_P(op)->get) {
+		int result;
+		zval rv;
+		zval *tmp = Z_OBJ_HT_P(op)->get(op, &rv TSRMLS_CC);
+
+		if (Z_TYPE_P(tmp) != IS_OBJECT) {
+			/* for safety - avoid loop */
+			result = i_zend_is_true(tmp TSRMLS_CC);
+			zval_ptr_dtor(tmp);
+			return result;
+		}
+	}
+	return 1;
 }
 /* }}} */
 
