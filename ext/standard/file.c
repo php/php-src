@@ -919,7 +919,7 @@ PHPAPI PHP_FUNCTION(freopen)
 		RETURN_FALSE;
 	}
 
-	PHP_STREAM_TO_ZVAL(stream, &arg1);
+	PHP_STREAM_TO_ZVAL(stream, arg1);
 
 	if (stream->wrapper != &php_plain_files_wrapper && stream->wrapper != &php_stream_php_wrapper) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid file", stream->res->handle);
