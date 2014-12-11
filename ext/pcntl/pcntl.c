@@ -57,11 +57,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_waitpid, 0, 0, 2)
 	ZEND_ARG_INFO(0, pid)
 	ZEND_ARG_INFO(1, status)
 	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(1, rusage)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wait, 0, 0, 1)
 	ZEND_ARG_INFO(1, status)
 	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(1, rusage)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal, 0, 0, 2)
@@ -577,27 +579,87 @@ PHP_FUNCTION(pcntl_alarm)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_waitpid(int pid, int &status, int options)
+#define PHP_RUSAGE_PARA(from, to, field) \
+	add_assoc_long(to, #field, from.field)
+#if !defined(_OSD_POSIX) && !defined(__BEOS__) /* BS2000 has only a few fields in the rusage struct */
+	#define PHP_RUSAGE_SPECIAL(from, to) \
+		PHP_RUSAGE_PARA(from, to, ru_oublock); \
+		PHP_RUSAGE_PARA(from, to, ru_inblock); \
+		PHP_RUSAGE_PARA(from, to, ru_msgsnd); \
+		PHP_RUSAGE_PARA(from, to, ru_msgrcv); \
+		PHP_RUSAGE_PARA(from, to, ru_maxrss); \
+		PHP_RUSAGE_PARA(from, to, ru_ixrss); \
+		PHP_RUSAGE_PARA(from, to, ru_idrss); \
+		PHP_RUSAGE_PARA(from, to, ru_minflt); \
+		PHP_RUSAGE_PARA(from, to, ru_majflt); \
+		PHP_RUSAGE_PARA(from, to, ru_nsignals); \
+		PHP_RUSAGE_PARA(from, to, ru_nvcsw); \
+		PHP_RUSAGE_PARA(from, to, ru_nivcsw); \
+		PHP_RUSAGE_PARA(from, to, ru_nswap);
+#else /*_OSD_POSIX*/
+	#define PHP_RUSAGE_SPECIAL(from, to)
+#endif
+
+#define PHP_RUSAGE_COMMON(from ,to) \
+	PHP_RUSAGE_PARA(from, to, ru_utime.tv_usec); \
+	PHP_RUSAGE_PARA(from, to, ru_utime.tv_sec); \
+	PHP_RUSAGE_PARA(from, to, ru_stime.tv_usec); \
+	PHP_RUSAGE_PARA(from, to, ru_stime.tv_sec);
+
+#define PHP_RUSAGE_TO_ARRAY(from, to) \
+	if (to) { \
+		PHP_RUSAGE_SPECIAL(from, to) \
+		PHP_RUSAGE_COMMON(from, to); \
+	}
+
+/* {{{ proto int pcntl_waitpid(int pid, int &status, int options, array &$rusage)
    Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_waitpid)
 {
 	zend_long pid, options = 0;
-	zval *z_status = NULL;
+	zval *z_status = NULL, *z_rusage = NULL;
 	int status;
 	pid_t child_id;
+#ifdef HAVE_WAIT4
+	struct rusage rusage;
+#endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz/|l", &pid, &z_status, &options) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz/|lz/", &pid, &z_status, &options, &z_rusage) == FAILURE)
 		return;
 
 	convert_to_long_ex(z_status);
 
 	status = Z_LVAL_P(z_status);
 
+#ifdef HAVE_WAIT4
+	if (z_rusage) {
+		if (Z_TYPE_P(z_rusage) != IS_ARRAY) {
+			zval_dtor(z_rusage);
+			array_init(z_rusage);
+		} else {
+			zend_hash_clean(Z_ARRVAL_P(z_rusage));
+		}
+	}
+
+	if (z_rusage) {
+		memset(&rusage, 0, sizeof(struct rusage));
+		child_id = wait4((pid_t) pid, &status, options, &rusage);
+	} else {
+		child_id = waitpid((pid_t) pid, &status, options);
+	}
+#else
 	child_id = waitpid((pid_t) pid, &status, options);
+#endif
 
 	if (child_id < 0) {
 		PCNTL_G(last_error) = errno;
 	}
+
+#ifdef HAVE_WAIT4
+	if (child_id > 0) {
+		PHP_RUSAGE_TO_ARRAY(rusage, z_rusage);
+	}
+#endif
 
 	Z_LVAL_P(z_status) = status;
 
@@ -605,26 +667,40 @@ PHP_FUNCTION(pcntl_waitpid)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_wait(int &status)
+/* {{{ proto int pcntl_wait(int &status, int $options, array &$rusage)
    Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_wait)
 {
 	zend_long options = 0;
-	zval *z_status = NULL;
+	zval *z_status = NULL, *z_rusage = NULL;
 	int status;
 	pid_t child_id;
+#ifdef HAVE_WAIT3
+	struct rusage rusage;
+#endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/|l", &z_status, &options) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/|lz/", &z_status, &options, &z_rusage) == FAILURE)
 		return;
 
 	convert_to_long_ex(z_status);
 
 	status = Z_LVAL_P(z_status);
 #ifdef HAVE_WAIT3
-	if(options) {
-		child_id = wait3(&status, options, NULL);
+	if (z_rusage) {
+		if (Z_TYPE_P(z_rusage) != IS_ARRAY) {
+			zval_dtor(z_rusage);
+			array_init(z_rusage);
+		} else {
+			zend_hash_clean(Z_ARRVAL_P(z_rusage));
+		}
 	}
-	else {
+
+	if (z_rusage) {
+		memset(&rusage, 0, sizeof(struct rusage));
+		child_id = wait3(&status, options, &rusage);
+	} else if (options) {
+		child_id = wait3(&status, options, NULL);
+	} else {
 		child_id = wait(&status);
 	}
 #else
@@ -634,13 +710,23 @@ PHP_FUNCTION(pcntl_wait)
 		PCNTL_G(last_error) = errno;
 	}
 
+#ifdef HAVE_WAIT3
+	if (child_id > 0) {
+		PHP_RUSAGE_TO_ARRAY(rusage, z_rusage);
+	}
+#endif
 	Z_LVAL_P(z_status) = status;
 
 	RETURN_LONG((zend_long) child_id);
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifexited(int status)
+#undef PHP_RUSAGE_PARA
+#undef PHP_RUSAGE_SPECIAL
+#undef PHP_RUSAGE_COMMON
+#undef PHP_RUSAGE_TO_ARRAY
+
+/* {{{ proto bool pcntl_wifexited(int status) 
    Returns true if the child status code represents a successful exit */
 PHP_FUNCTION(pcntl_wifexited)
 {
