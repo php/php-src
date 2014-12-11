@@ -660,6 +660,12 @@ static zend_bool validate_constant_array(zval *val) {
 				HashPosition pos;
 				zval **entry;
 
+				if (++Z_ARRVAL_P(val)->nApplyCount > 1) {
+					--Z_ARRVAL_P(val)->nApplyCount;
+					zend_error(E_WARNING, "Constants cannot be recursive arrays");
+					return 0;
+				}
+
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(val), &pos);
 				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(val), (void **)&entry, &pos) == SUCCESS) {
 					if (!validate_constant_array(*entry)) {
@@ -667,6 +673,8 @@ static zend_bool validate_constant_array(zval *val) {
 					}
 					zend_hash_move_forward_ex(Z_ARRVAL_P(val), &pos);
 				}
+
+				--Z_ARRVAL_P(val)->nApplyCount;
 				return 1;
 			}
 			break;
