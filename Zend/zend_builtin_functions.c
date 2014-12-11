@@ -646,6 +646,78 @@ ZEND_FUNCTION(error_reporting)
 /* }}} */
 
 
+static zend_bool validate_constant_array(zval *val) {
+	switch (Z_TYPE_P(val)) {
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_STRING:
+		case IS_BOOL:
+		case IS_RESOURCE:
+		case IS_NULL:
+			return 1;
+		case IS_ARRAY:
+			{
+				HashPosition pos;
+				zval **entry;
+
+				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(val), &pos);
+				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(val), (void **)&entry, &pos) == SUCCESS) {
+					if (!validate_constant_array(*entry)) {
+						return 0;
+					}
+					zend_hash_move_forward_ex(Z_ARRVAL_P(val), &pos);
+				}
+				return 1;
+			}
+			break;
+		default:
+			zend_error(E_WARNING, "Constants may only evaluate to scalar values or arrays");
+			return 0;
+	}
+}
+
+static zval* copy_constant_array(zval *val) {
+	int orig_array_size = zend_hash_num_elements(Z_ARRVAL_P(val));
+	HashPosition pos;
+	zval **entry;
+	zval *retval;
+
+	MAKE_STD_ZVAL(retval);
+	array_init_size(retval, orig_array_size);
+
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(val), &pos);
+	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(val), (void **)&entry, &pos) == SUCCESS) {
+		ulong num_key;
+		char *string_key;
+		uint string_key_len;
+		int key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(val), &string_key, &string_key_len, &num_key, 0, &pos);
+		zval *newentry = *entry;
+
+		if (Z_TYPE_P(newentry) == IS_ARRAY) {
+			newentry = copy_constant_array(newentry);
+		/* constant arrays can't contain references */
+		} else if (Z_ISREF_P(newentry)) {
+			SEPARATE_ZVAL(&newentry);
+		} else {
+			Z_ADDREF_P(newentry);
+		}
+
+		switch (key_type) {
+			case HASH_KEY_IS_STRING:
+				zend_hash_update(Z_ARRVAL_P(retval), string_key, string_key_len, &newentry, sizeof(zval *), NULL);
+				break;
+
+			case HASH_KEY_IS_LONG:	
+				zend_hash_index_update(Z_ARRVAL_P(retval), num_key, &newentry, sizeof(zval *), NULL);
+				break;
+		}
+
+		zend_hash_move_forward_ex(Z_ARRVAL_P(val), &pos);
+	}
+
+	return retval;
+}
+
 /* {{{ proto bool define(string constant_name, mixed value, boolean case_insensitive=false)
    Define a new constant */
 ZEND_FUNCTION(define)
@@ -680,7 +752,13 @@ repeat:
 		case IS_BOOL:
 		case IS_RESOURCE:
 		case IS_NULL:
+			break;
 		case IS_ARRAY:
+			if (!validate_constant_array(val)) {
+				RETURN_FALSE;
+			} else {
+				val = val_free = copy_constant_array(val);
+			}
 			break;
 		case IS_OBJECT:
 			if (!val_free) {

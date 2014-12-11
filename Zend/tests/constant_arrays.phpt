@@ -6,9 +6,6 @@ Constant arrays
 define('FOOBAR', [1, 2, 3, ['foo' => 'bar']]);
 const FOO_BAR = [1, 2, 3, ['foo' => 'bar']];
 
-var_dump(FOOBAR);
-var_dump(FOO_BAR);
-
 $x = FOOBAR;
 $x[0] = 7;
 var_dump($x, FOOBAR);
@@ -16,33 +13,18 @@ var_dump($x, FOOBAR);
 $x = FOO_BAR;
 $x[0] = 7;
 var_dump($x, FOO_BAR);
---EXPECT--
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  array(1) {
-    ["foo"]=>
-    string(3) "bar"
-  }
-}
-array(4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  array(1) {
-    ["foo"]=>
-    string(3) "bar"
-  }
-}
+
+// ensure references are removed
+$x = 7;
+$y = [&$x];
+define('QUX', $y);
+$y[0] = 3;
+var_dump($x, $y, QUX);
+
+// ensure objects not allowed in arrays
+var_dump(define('ELEPHPANT', [new StdClass]));
+
+--EXPECTF--
 array(4) {
   [0]=>
   int(7)
@@ -95,3 +77,15 @@ array(4) {
     string(3) "bar"
   }
 }
+int(3)
+array(1) {
+  [0]=>
+  int(3)
+}
+array(1) {
+  [0]=>
+  int(7)
+}
+
+Warning: Constants may only evaluate to scalar values or arrays in %s on line %d
+bool(false)
