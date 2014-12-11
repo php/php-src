@@ -2848,7 +2848,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	
 			zend_vm_stack_free_call_frame(call TSRMLS_CC);
 		} else {
-			zval *return_value;
+			zval *return_value = NULL;
 
 			call->symbol_table = NULL;
 			if (RETURN_VALUE_USED(opline)) {
@@ -2856,8 +2856,6 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 
 				ZVAL_NULL(return_value);
 				Z_VAR_FLAGS_P(return_value) = 0;
-			} else {
-				return_value = NULL;
 			}
 
 			call->prev_execute_data = execute_data;
