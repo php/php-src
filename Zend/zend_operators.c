@@ -220,45 +220,6 @@ try_again:
 
 /* }}} */
 
-/* {{{ zendi_convert_to_long */
-#define zendi_convert_to_long(op, holder, result)					\
-	if (op == result) {												\
-		convert_to_long(op);										\
-	} else if (Z_TYPE_P(op) != IS_LONG) {							\
-		switch (Z_TYPE_P(op)) {										\
-			case IS_NULL:											\
-			case IS_FALSE:											\
-				ZVAL_LONG(&(holder), 0);							\
-				break;												\
-			case IS_TRUE:											\
-				ZVAL_LONG(&(holder), 1);							\
-				break;												\
-			case IS_DOUBLE:											\
-				ZVAL_LONG(&holder, zend_dval_to_lval(Z_DVAL_P(op)));\
-				break;												\
-			case IS_STRING:											\
-				ZVAL_LONG(&holder, ZEND_STRTOL(Z_STRVAL_P(op), NULL, 10));\
-				break;												\
-			case IS_ARRAY:											\
-				ZVAL_LONG(&holder, zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);	\
-				break;												\
-			case IS_OBJECT:											\
-				ZVAL_DUP(&(holder), (op));							\
-				convert_to_long_base(&(holder), 10);				\
-				break;												\
-			case IS_RESOURCE:										\
-				ZVAL_LONG(&holder, Z_RES_HANDLE_P(op));				\
-				break;												\
-			default:												\
-				zend_error(E_WARNING, "Cannot convert to ordinal value");	\
-				ZVAL_LONG(&holder, 0);								\
-				break;												\
-		}															\
-		(op) = &(holder);											\
-	}
-
-/* }}} */
-
 /* {{{ convert_object_to_type */
 #define convert_object_to_type(op, dst, ctype, conv_func)									\
 	ZVAL_UNDEF(dst);																		\
@@ -1156,44 +1117,52 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 
 ZEND_API int mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	zval op1_copy, op2_copy;
-	zend_long op1_lval;
+	zend_long op1_lval, op2_lval;
 
 	do {
 		if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
 			if (Z_ISREF_P(op1)) {
 				op1 = Z_REFVAL_P(op1);
-				if (Z_TYPE_P(op1) == IS_LONG) break;
+				if (Z_TYPE_P(op1) == IS_LONG) {
+					op1_lval = Z_LVAL_P(op1);
+					break;
+				}
 			}
 			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_MOD, mod_function);
-			zendi_convert_to_long(op1, op1_copy, result);
+			op1_lval = _zval_get_long_func(op1 TSRMLS_CC);
+		} else {
+			op1_lval = Z_LVAL_P(op1);
 		}
 	} while (0);
-	op1_lval = Z_LVAL_P(op1);
 	do {
 		if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 			if (Z_ISREF_P(op2)) {
 				op2 = Z_REFVAL_P(op2);
-				if (Z_TYPE_P(op2) == IS_LONG) break;
+				if (Z_TYPE_P(op2) == IS_LONG) {
+					op2_lval = Z_LVAL_P(op2);
+					break;
+				}
 			}
 			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_MOD);
-			zendi_convert_to_long(op2, op2_copy, result);
+			op2_lval = _zval_get_long_func(op2 TSRMLS_CC);
+		} else {
+			op2_lval = Z_LVAL_P(op2);
 		}
 	} while (0);
 
-	if (Z_LVAL_P(op2) == 0) {
+	if (op2_lval == 0) {
 		zend_error(E_WARNING, "Division by zero");
 		ZVAL_BOOL(result, 0);
 		return FAILURE;			/* modulus by zero */
 	}
 
-	if (Z_LVAL_P(op2) == -1) {
+	if (op2_lval == -1) {
 		/* Prevent overflow error/crash if op1==LONG_MIN */
 		ZVAL_LONG(result, 0);
 		return SUCCESS;
 	}
 
-	ZVAL_LONG(result, op1_lval % Z_LVAL_P(op2));
+	ZVAL_LONG(result, op1_lval % op2_lval);
 	return SUCCESS;
 }
 /* }}} */
@@ -1310,8 +1279,7 @@ try_again:
 
 ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	zval op1_copy, op2_copy;
-	zend_long op1_lval;
+	zend_long op1_lval, op2_lval;
 
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 		ZVAL_LONG(result, Z_LVAL_P(op1) | Z_LVAL_P(op2));
@@ -1348,23 +1316,25 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 
 	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
 		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_OR, bitwise_or_function);
-		zendi_convert_to_long(op1, op1_copy, result);
+		op1_lval = _zval_get_long_func(op1 TSRMLS_CC);
+	} else {
+		op1_lval = Z_LVAL_P(op1);
 	}
-	op1_lval = Z_LVAL_P(op1);
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_OR);
-		zendi_convert_to_long(op2, op2_copy, result);
+		op2_lval = _zval_get_long_func(op2 TSRMLS_CC);
+	} else {
+		op2_lval = Z_LVAL_P(op2);
 	}
 
-	ZVAL_LONG(result, op1_lval | Z_LVAL_P(op2));
+	ZVAL_LONG(result, op1_lval | op2_lval);
 	return SUCCESS;
 }
 /* }}} */
 
 ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	zval op1_copy, op2_copy;
-	zend_long op1_lval;
+	zend_long op1_lval, op2_lval;
 
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 		ZVAL_LONG(result, Z_LVAL_P(op1) & Z_LVAL_P(op2));
@@ -1400,24 +1370,26 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
-		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_AND, bitwise_and_function);
-		zendi_convert_to_long(op1, op1_copy, result);
+		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_AND, bitwise_or_function);
+		op1_lval = _zval_get_long_func(op1 TSRMLS_CC);
+	} else {
+		op1_lval = Z_LVAL_P(op1);
 	}
-	op1_lval = Z_LVAL_P(op1);
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_AND);
-		zendi_convert_to_long(op2, op2_copy, result);
+		op2_lval = _zval_get_long_func(op2 TSRMLS_CC);
+	} else {
+		op2_lval = Z_LVAL_P(op2);
 	}
 
-	ZVAL_LONG(result, op1_lval & Z_LVAL_P(op2));
+	ZVAL_LONG(result, op1_lval & op2_lval);
 	return SUCCESS;
 }
 /* }}} */
 
 ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	zval op1_copy, op2_copy;
-	zend_long op1_lval;
+	zend_long op1_lval, op2_lval;
 
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG) && EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 		ZVAL_LONG(result, Z_LVAL_P(op1) ^ Z_LVAL_P(op2));
@@ -1453,104 +1425,123 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
-		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_XOR, bitwise_xor_function);
-		zendi_convert_to_long(op1, op1_copy, result);
+		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_XOR, bitwise_or_function);
+		op1_lval = _zval_get_long_func(op1 TSRMLS_CC);
+	} else {
+		op1_lval = Z_LVAL_P(op1);
 	}
-	op1_lval = Z_LVAL_P(op1);
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_XOR);
-		zendi_convert_to_long(op2, op2_copy, result);
+		op2_lval = _zval_get_long_func(op2 TSRMLS_CC);
+	} else {
+		op2_lval = Z_LVAL_P(op2);
 	}
 
-	ZVAL_LONG(result, op1_lval ^ Z_LVAL_P(op2));
+	ZVAL_LONG(result, op1_lval ^ op2_lval);
 	return SUCCESS;
 }
 /* }}} */
 
 ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	zval op1_copy, op2_copy;
-	zend_long op1_lval;
+	zend_long op1_lval, op2_lval;
 
 	do {
 		if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
 			if (Z_ISREF_P(op1)) {
 				op1 = Z_REFVAL_P(op1);
-				if (Z_TYPE_P(op1) == IS_LONG) break;
+				if (Z_TYPE_P(op1) == IS_LONG) {
+					op1_lval = Z_LVAL_P(op1);
+					break;
+				}
 			}
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_SL, shift_left_function);
-			zendi_convert_to_long(op1, op1_copy, result);
+			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_SL, mod_function);
+			op1_lval = _zval_get_long_func(op1 TSRMLS_CC);
+		} else {
+			op1_lval = Z_LVAL_P(op1);
 		}
 	} while (0);
-	op1_lval = Z_LVAL_P(op1);
 	do {
 		if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 			if (Z_ISREF_P(op2)) {
 				op2 = Z_REFVAL_P(op2);
-				if (Z_TYPE_P(op2) == IS_LONG) break;
+				if (Z_TYPE_P(op2) == IS_LONG) {
+					op2_lval = Z_LVAL_P(op2);
+					break;
+				}
 			}
 			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_SL);
-			zendi_convert_to_long(op2, op2_copy, result);
+			op2_lval = _zval_get_long_func(op2 TSRMLS_CC);
+		} else {
+			op2_lval = Z_LVAL_P(op2);
 		}
 	} while (0);
 
 	/* prevent wrapping quirkiness on some processors where << 64 + x == << x */
-	if (Z_LVAL_P(op2) >= SIZEOF_ZEND_LONG * 8) {
-		ZVAL_LONG(result, 0);
-		return SUCCESS;
+	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
+		if (EXPECTED(op2_lval > 0)) {
+			ZVAL_LONG(result, 0);
+			return SUCCESS;
+		} else {
+			zend_error(E_WARNING, "Bit shift by negative number");
+			ZVAL_FALSE(result);
+			return FAILURE;
+		}
 	}
 
-	if (Z_LVAL_P(op2) < 0) {
-		zend_error(E_WARNING, "Bit shift by negative number");
-		ZVAL_FALSE(result);
-		return FAILURE;
-	}
-
-	ZVAL_LONG(result, op1_lval << Z_LVAL_P(op2));
+	ZVAL_LONG(result, op1_lval << op2_lval);
 	return SUCCESS;
 }
 /* }}} */
 
 ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	zval op1_copy, op2_copy;
-	zend_long op1_lval;
+	zend_long op1_lval, op2_lval;
 
 	do {
 		if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
 			if (Z_ISREF_P(op1)) {
 				op1 = Z_REFVAL_P(op1);
-				if (Z_TYPE_P(op1) == IS_LONG) break;
+				if (Z_TYPE_P(op1) == IS_LONG) {
+					op1_lval = Z_LVAL_P(op1);
+					break;
+				}
 			}
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_SR, shift_right_function);
-			zendi_convert_to_long(op1, op1_copy, result);
+			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_SR, mod_function);
+			op1_lval = _zval_get_long_func(op1 TSRMLS_CC);
+		} else {
+			op1_lval = Z_LVAL_P(op1);
 		}
 	} while (0);
-	op1_lval = Z_LVAL_P(op1);
 	do {
 		if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
 			if (Z_ISREF_P(op2)) {
 				op2 = Z_REFVAL_P(op2);
-				if (Z_TYPE_P(op2) == IS_LONG) break;
+				if (Z_TYPE_P(op2) == IS_LONG) {
+					op2_lval = Z_LVAL_P(op2);
+					break;
+				}
 			}
 			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_SR);
-			zendi_convert_to_long(op2, op2_copy, result);
+			op2_lval = _zval_get_long_func(op2 TSRMLS_CC);
+		} else {
+			op2_lval = Z_LVAL_P(op2);
 		}
 	} while (0);
 
 	/* prevent wrapping quirkiness on some processors where >> 64 + x == >> x */
-	if (Z_LVAL_P(op2) >= SIZEOF_ZEND_LONG * 8) {
-		ZVAL_LONG(result, (Z_LVAL_P(op1) < 0) ? -1 : 0);
-		return SUCCESS;
+	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
+		if (EXPECTED(op2_lval > 0)) {
+			ZVAL_LONG(result, (op1_lval < 0) ? -1 : 0);
+			return SUCCESS;
+		} else {
+			zend_error(E_WARNING, "Bit shift by negative number");
+			ZVAL_FALSE(result);
+			return FAILURE;
+		}
 	}
 
-	if (Z_LVAL_P(op2) < 0) {
-		zend_error(E_WARNING, "Bit shift by negative number");
-		ZVAL_FALSE(result);
-		return FAILURE;
-	}
-
-	ZVAL_LONG(result, op1_lval >> Z_LVAL_P(op2));
+	ZVAL_LONG(result, op1_lval >> op2_lval);
 	return SUCCESS;
 }
 /* }}} */
