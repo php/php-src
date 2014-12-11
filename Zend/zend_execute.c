@@ -934,7 +934,7 @@ static zend_always_inline void zend_assign_to_object_dim(zval *retval, zval *obj
 	}
 }
 
-static void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value, zval *retval, int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC))
+static void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value, zval *retval, int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) TSRMLS_DC)
 {
 	zval *z;
 	zval rv;

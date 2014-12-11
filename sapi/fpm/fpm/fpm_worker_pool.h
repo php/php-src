@@ -42,6 +42,10 @@ struct fpm_worker_pool_s {
 	/* for ondemand PM */
 	struct fpm_event_s *ondemand_event;
 	int socket_event_set;
+
+#ifdef HAVE_FPM_ACL
+	void *socket_acl;
+#endif
 };
 
 struct fpm_worker_pool_s *fpm_worker_pool_alloc();

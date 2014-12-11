@@ -102,6 +102,11 @@ typedef union _zend_value {
 	void             *ptr;
 	zend_class_entry *ce;
 	zend_function    *func;
+	struct {
+		ZEND_ENDIAN_LOHI(
+			uint32_t w1,
+			uint32_t w2)
+	} ww;
 } zend_value;
 
 struct _zval_struct {
@@ -695,30 +700,64 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	return --GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
+#if SIZEOF_ZEND_LONG == 4
+# define ZVAL_COPY_VALUE_EX(z, v, gc, t)				\
+	do {												\
+		uint32_t _w2;									\
+		gc = v->value.counted;							\
+		_w2 = v->value.ww.w2;							\
+		t = Z_TYPE_INFO_P(v);							\
+		z->value.counted = gc;							\
+		z->value.ww.w2 = _w2;							\
+		Z_TYPE_INFO_P(z) = t;							\
+	} while (0)
+#elif SIZEOF_ZEND_LONG == 8
+# define ZVAL_COPY_VALUE_EX(z, v, gc, t)				\
+	do {												\
+		gc = v->value.counted;							\
+		t = Z_TYPE_INFO_P(v);							\
+		z->value.counted = gc;							\
+		Z_TYPE_INFO_P(z) = t;							\
+	} while (0)
+#else
+# error "Unknbown SIZEOF_ZEND_LONG"
+#endif
+
 #define ZVAL_COPY_VALUE(z, v)							\
 	do {												\
 		zval *_z1 = (z);								\
 		const zval *_z2 = (v);							\
-		(_z1)->value = (_z2)->value;					\
-		Z_TYPE_INFO_P(_z1) = Z_TYPE_INFO_P(_z2);		\
+		zend_refcounted *_gc;							\
+		uint32_t _t;									\
+		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);			\
 	} while (0)
 
 #define ZVAL_COPY(z, v)									\
 	do {												\
-		zval *__z1 = (z);								\
-		const zval *__z2 = (v);							\
-		ZVAL_COPY_VALUE(__z1, __z2);					\
-		if (Z_OPT_REFCOUNTED_P(__z1)) {					\
-			Z_ADDREF_P(__z1);							\
+		zval *_z1 = (z);								\
+		const zval *_z2 = (v);							\
+		zend_refcounted *_gc;							\
+		uint32_t _t;									\
+		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);			\
+		if ((_t & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0) { \
+			GC_REFCOUNT(_gc)++;							\
 		}												\
 	} while (0)
 
 #define ZVAL_DUP(z, v)									\
 	do {												\
-		zval *__z1 = (z);								\
-		const zval *__z2 = (v);							\
-		ZVAL_COPY_VALUE(__z1, __z2);					\
-		zval_opt_copy_ctor(__z1);						\
+		zval *_z1 = (z);								\
+		const zval *_z2 = (v);							\
+		zend_refcounted *_gc;							\
+		uint32_t _t;									\
+		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);			\
+		if ((_t & ((IS_TYPE_REFCOUNTED|IS_TYPE_IMMUTABLE) << Z_TYPE_FLAGS_SHIFT)) != 0) { \
+			if ((_t & ((IS_TYPE_COPYABLE|IS_TYPE_IMMUTABLE) << Z_TYPE_FLAGS_SHIFT)) != 0) { \
+				_zval_copy_ctor_func(_z1 ZEND_FILE_LINE_CC); \
+			} else {									\
+				GC_REFCOUNT(_gc)++;						\
+			}											\
+		}												\
 	} while (0)
 
 #define ZVAL_DEREF(z) do {								\
