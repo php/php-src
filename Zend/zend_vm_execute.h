@@ -590,7 +590,7 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 			zend_vm_stack_free_call_frame(call TSRMLS_CC);
 		} else {
-			zval *return_value = NULL;
+			zval *return_value;
 
 			call->symbol_table = NULL;
 			if (RETURN_VALUE_USED(opline)) {
@@ -598,6 +598,8 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 				ZVAL_NULL(return_value);
 				Z_VAR_FLAGS_P(return_value) = 0;
+			} else {
+				return_value = NULL;
 			}
 
 			call->prev_execute_data = execute_data;
