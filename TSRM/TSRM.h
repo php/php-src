@@ -177,7 +177,7 @@ TSRM_API inline void *tsrm_get_ls_cache(void);
 #define TSRMLS_CACHE _tsrm_ls_cache
 
 /* BC only */
-#define TSRMLS_D
+#define TSRMLS_D void
 #define TSRMLS_DC
 #define TSRMLS_C	
 #define TSRMLS_CC
