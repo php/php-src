@@ -680,6 +680,7 @@ repeat:
 		case IS_BOOL:
 		case IS_RESOURCE:
 		case IS_NULL:
+		case IS_ARRAY:
 			break;
 		case IS_OBJECT:
 			if (!val_free) {
@@ -696,7 +697,7 @@ repeat:
 			}
 			/* no break */
 		default:
-			zend_error(E_WARNING,"Constants may only evaluate to scalar values");
+			zend_error(E_WARNING, "Constants may only evaluate to scalar values or arrays");
 			if (val_free) {
 				zval_ptr_dtor(&val_free);
 			}
