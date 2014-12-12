@@ -12,7 +12,6 @@ PHP                                                                        NEWS
   . Fixed bug #68297 (Application Popup provides too few information). (Anatol)
   . Fixed bug #65769 (localeconv() broken in TS builds). (Anatol)
   . Fixed bug #65230 (setting locale randomly broken). (Anatol)
-  . Fixed bug #68545 (NULL pointer dereference in unserialize.c). (Anatol)
   . Fixed bug #68583 (Crash in timeout thread). (Anatol)
 
 - cURL:
@@ -22,8 +21,6 @@ PHP                                                                        NEWS
 - Date:
   . Implemented FR #68268 (DatePeriod: Getter for start date, end date and 
     interval). (Marc Bennewitz)
-  . Fixed day_of_week function as it could sometimes return negative values
-    internally. (Derick)
 
 - Fileinfo:
   . Fixed bug #68398 (msooxml matches too many archives). (Anatol)
@@ -57,7 +54,7 @@ PHP                                                                        NEWS
 - SQLite:
   . Fixed bug #68120 (Update bundled libsqlite to 3.8.7.2). (Anatol)
 
-11 Dec 2014, PHP 5.6.4
+18 Dec 2014, PHP 5.6.4
 
 - Core:
   . Fixed bug #68091 (Some Zend headers lack appropriate extern "C" blocks).
@@ -71,8 +68,13 @@ PHP                                                                        NEWS
   . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
   . Fixed bug #68422 (Incorrect argument reflection info for array_multisort()).
     (Alexander Lisachenko)
+  . Fixed bug #68545 (NULL pointer dereference in unserialize.c). (Anatol)
   . Fixed bug #68446 (Array constant not accepted for array parameter default).
     (Bob, Dmitry)
+
+- Date:
+  . Fixed day_of_week function as it could sometimes return negative values
+    internally. (Derick)
 
 - FPM:
   . Fixed bug #68381 (fpm_unix_init_main ignores log_level).
