@@ -1144,8 +1144,8 @@ static int ZEND_FASTCALL  ZEND_TICKS_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	if (++EG(ticks_count)>=opline->extended_value) {
-		EG(ticks_count)=0;
+	if ((uint32_t)++EG(ticks_count) >= opline->extended_value) {
+		EG(ticks_count) = 0;
 		if (zend_ticks_function) {
 			zend_ticks_function(opline->extended_value TSRMLS_CC);
 		}

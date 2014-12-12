@@ -1127,7 +1127,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties TSRMLS_DC) 
 }
 /* }}} */
 
-static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS_DC) /* {{{ */
+static int zval_update_class_constant(zval *pp, int is_static, uint32_t offset TSRMLS_DC) /* {{{ */
 {
 	ZVAL_DEREF(pp);
 	if (Z_CONSTANT_P(pp)) {
@@ -2195,7 +2195,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			internal_function->arg_info = (zend_internal_arg_info*)ptr->arg_info+1;
 			internal_function->num_args = ptr->num_args;
 			/* Currently you cannot denote that the function can accept less arguments than num_args */
-			if (info->required_num_args == -1) {
+			if (info->required_num_args == (zend_uintptr_t)-1) {
 				internal_function->required_num_args = ptr->num_args;
 			} else {
 				internal_function->required_num_args = info->required_num_args;

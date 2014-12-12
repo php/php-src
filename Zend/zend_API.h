@@ -525,7 +525,7 @@ ZEND_API zend_array *zend_rebuild_symbol_table(TSRMLS_D);
 ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data);
 ZEND_API void zend_detach_symbol_table(zend_execute_data *execute_data);
 ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force TSRMLS_DC);
-ZEND_API int zend_set_local_var_str(const char *name, int len, zval *value, int force TSRMLS_DC);
+ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, int force TSRMLS_DC);
 
 ZEND_API zend_string *zend_find_alias_name(zend_class_entry *ce, zend_string *name);
 ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_function *f);

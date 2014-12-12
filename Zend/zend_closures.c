@@ -436,7 +436,7 @@ static const zend_function_entry closure_functions[] = {
 	ZEND_ME(Closure, bind, arginfo_closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_MALIAS(Closure, bindTo, bind, arginfo_closure_bindto, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, call, arginfo_closure_call, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	ZEND_FE_END
 };
 
 void zend_register_closure_ce(TSRMLS_D) /* {{{ */

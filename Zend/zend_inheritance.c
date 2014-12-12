@@ -591,7 +591,7 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 }
 /* }}} */
 
-static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_property_info *parent_info, zend_string *key, zend_class_entry *ce TSRMLS_DC) /* {{{ */
+static zend_bool do_inherit_property_access_check(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *child_info;
 	zend_class_entry *parent_ce = ce->parent;
@@ -831,7 +831,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->properties_info, key, property_info) {
-		if (do_inherit_property_access_check(&ce->properties_info, property_info, key, ce TSRMLS_CC)) {
+		if (do_inherit_property_access_check(property_info, key, ce TSRMLS_CC)) {
 			if (ce->type & ZEND_INTERNAL_CLASS) {
 				property_info = zend_duplicate_property_info_internal(property_info);
 			} else {

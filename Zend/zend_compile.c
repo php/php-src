@@ -1033,7 +1033,7 @@ void zend_do_early_binding(TSRMLS_D) /* {{{ */
 				    if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
 						uint32_t *opline_num = &CG(active_op_array)->early_binding;
 
-						while (*opline_num != -1) {
+						while (*opline_num != (uint32_t)-1) {
 							opline_num = &CG(active_op_array)->opcodes[*opline_num].result.opline_num;
 						}
 						*opline_num = opline - CG(active_op_array)->opcodes;
@@ -1074,13 +1074,13 @@ void zend_do_early_binding(TSRMLS_D) /* {{{ */
 
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
-	if (op_array->early_binding != -1) {
+	if (op_array->early_binding != (uint32_t)-1) {
 		zend_bool orig_in_compilation = CG(in_compilation);
 		uint32_t opline_num = op_array->early_binding;
 		zend_class_entry *ce;
 
 		CG(in_compilation) = 1;
-		while (opline_num != -1) {
+		while (opline_num != (uint32_t)-1) {
 			if ((ce = zend_lookup_class(Z_STR_P(RT_CONSTANT(op_array, op_array->opcodes[opline_num-1].op2)) TSRMLS_CC)) != NULL) {
 				do_bind_inherited_class(op_array, &op_array->opcodes[opline_num], EG(class_table), ce, 0 TSRMLS_CC);
 			}
@@ -1973,7 +1973,7 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 
 	/* there is a chance someone is accessing $this */
 	if (ast->kind != ZEND_AST_ZVAL
-		&& CG(active_op_array)->scope && CG(active_op_array)->this_var == -1
+		&& CG(active_op_array)->scope && CG(active_op_array)->this_var == (uint32_t)-1
 	) {
 		zend_string *key = zend_string_init("this", sizeof("this") - 1, 0);
 		CG(active_op_array)->this_var = lookup_cv(CG(active_op_array), key TSRMLS_CC);

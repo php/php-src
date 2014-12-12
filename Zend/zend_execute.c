@@ -1168,7 +1168,7 @@ str_index:
 	return retval;
 }
 
-static zend_never_inline zend_long zend_check_string_offset(zval *container, zval *dim, int type TSRMLS_DC)
+static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type TSRMLS_DC)
 {
 	zend_long offset;
 
@@ -1211,7 +1211,7 @@ try_again:
 
 static zend_always_inline zend_long zend_fetch_string_offset(zval *container, zval *dim, int type TSRMLS_DC)
 {
-	zend_long offset = zend_check_string_offset(container, dim, type TSRMLS_CC);
+	zend_long offset = zend_check_string_offset(dim, type TSRMLS_CC);
 
 	if (Z_REFCOUNTED_P(container)) {
 		if (Z_REFCOUNT_P(container) > 1) {
@@ -1250,7 +1250,7 @@ convert_to_array:
 			goto fetch_from_array;
 		}
 
-		zend_check_string_offset(container, dim, type TSRMLS_CC);
+		zend_check_string_offset(dim, type TSRMLS_CC);
 		
 		ZVAL_INDIRECT(result, NULL); /* wrong string offset */
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
@@ -1666,7 +1666,7 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		} while (var != end);
 	}
 
-	if (op_array->this_var != -1 && EXPECTED(Z_OBJ(EX(This)))) {
+	if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
 		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
@@ -1691,7 +1691,7 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 
 	zend_attach_symbol_table(execute_data);
 
-	if (op_array->this_var != -1 && EXPECTED(Z_OBJ(EX(This)))) {
+	if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
 		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
@@ -1762,7 +1762,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 		}
 	}
 
-	if (op_array->this_var != -1 && EXPECTED(Z_OBJ(EX(This)))) {
+	if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
 		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}

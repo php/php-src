@@ -5513,8 +5513,8 @@ ZEND_VM_HANDLER(105, ZEND_TICKS, ANY, ANY)
 	USE_OPLINE
 
 	SAVE_OPLINE();
-	if (++EG(ticks_count)>=opline->extended_value) {
-		EG(ticks_count)=0;
+	if ((uint32_t)++EG(ticks_count) >= opline->extended_value) {
+		EG(ticks_count) = 0;
 		if (zend_ticks_function) {
 			zend_ticks_function(opline->extended_value TSRMLS_CC);
 		}
