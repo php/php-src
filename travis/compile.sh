@@ -4,11 +4,13 @@ if [[ "$ENABLE_MAINTAINER_ZTS" == 1 ]]; then
 else
 	TS="";
 fi
+
 if [[ "$ENABLE_DEBUG" == 1 ]]; then
 	DEBUG="--enable-debug";
 else
 	DEBUG="";
 fi
+
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
 	HOMEBREW_PATH="$(brew --prefix)";
 	export YACC="$(brew --prefix bison27)/bin/yacc";
@@ -17,7 +19,12 @@ if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
 	export DYLD_FALLBACK_LIBRARY_PATH="$HOMEBREW_PATH/lib:$DYLD_FALLBACK_LIBRARY_PATH";
 	export C_INCLUDE_PATH="$HOMEBREW_PATH/include:$C_INCLUDE_PATH";
 	export CPLUS_INCLUDE_PATH="$HOMEBREW_PATH/include:$CPLUS_INCLUDE_PATH";
+	if [[ "$CC" = "gcc" ]]; then
+		export CXX=g++-4.8
+		export CC=gcc-4.8
+	fi
 fi
+
 ./buildconf --force
 ./configure --quiet \
 $DEBUG \
