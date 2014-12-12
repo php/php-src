@@ -234,13 +234,6 @@ void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
 ZEND_API void zend_fetch_dimension_by_zval(zval *result, zval *container, zval *dim TSRMLS_DC);
 
-#ifdef ZEND_WIN32
-void zend_init_timeout_thread(void);
-void zend_shutdown_timeout_thread(void);
-#define WM_REGISTER_ZEND_TIMEOUT		(WM_USER+1)
-#define WM_UNREGISTER_ZEND_TIMEOUT		(WM_USER+2)
-#endif
-
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data_ptr, uint32_t var);
 
 #define ZEND_USER_OPCODE_CONTINUE   0 /* execute next opcode */
