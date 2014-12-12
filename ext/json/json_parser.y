@@ -176,7 +176,11 @@ php_json_error_code php_json_parser_error_code(php_json_parser *parser)
 void php_json_parser_object_init(php_json_parser *parser, zval *object)
 {
 	TSRMLS_FETCH_FROM_CTX(parser->zts_ctx);
-	object_init(object);
+	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
+		array_init(object);
+	} else {
+		object_init(object);
+	}
 }
 
 void php_json_parser_object_update(php_json_parser *parser, zval *object, zval *zkey, zval *zvalue)
@@ -190,17 +194,16 @@ void php_json_parser_object_update(php_json_parser *parser, zval *object, zval *
 	} else {
 		if (key_len == 0) {
 			key = "_empty_";
-			key_len = sizeof("_empty_");
+			key_len = sizeof("_empty_") - 1;
 		}
 		add_property_zval_ex(object, key, key_len, zvalue TSRMLS_CC);
-		/*
+
 		if (Z_REFCOUNTED_P(zvalue)) {
 			Z_DELREF_P(zvalue);
 		}
-		*/
 	}
+	zval_dtor(zkey);
 }
-
 
 void php_json_parser_array_init(zval *array)
 {
