@@ -8,10 +8,10 @@ elif [[ $TRAVIS_OS_NAME == 'osx' ]]; then
   export HOMEBREW_SOURCEFORGE_MIRROR="heanet";
   brew update;
   # install dependencies for building php
-  brew install bison27 re2c gmp4 icu4c mcrypt gettext readline;
-  brew link --force gettext readline icu4c;
+  brew install bison27 re2c gmp4 icu4c mcrypt gettext readline | cat;
+  brew link --force gettext readline icu4c | cat;
   pg_ctl -D /usr/local/var/postgres start
-  brew install https://raw.githubusercontent.com/Homebrew/homebrew/8103ff98f9d4c6c99ef69a90f6999047695a436f/Library/Formula/mysql.rb
+  brew install https://raw.githubusercontent.com/Homebrew/homebrew/8103ff98f9d4c6c99ef69a90f6999047695a436f/Library/Formula/mysql.rb | cat
   unset TMPDIR
   mysql_install_db --verbose --user=`whoami` --basedir="$(brew --prefix mysql)" --datadir=/usr/local/var/mysql --tmpdir=/tmp
   mysql.server start
