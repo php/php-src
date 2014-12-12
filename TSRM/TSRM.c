@@ -286,7 +286,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	tsrm_tls_set(*thread_resources_ptr);
 
 	if (tsrm_new_thread_begin_handler) {
-		tsrm_new_thread_begin_handler(thread_id, &((*thread_resources_ptr)->storage));
+		tsrm_new_thread_begin_handler(thread_id);
 	}
 	for (i=0; i<id_count; i++) {
 		if (resource_types_table[i].done) {
@@ -301,7 +301,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	}
 
 	if (tsrm_new_thread_end_handler) {
-		tsrm_new_thread_end_handler(thread_id, &((*thread_resources_ptr)->storage));
+		tsrm_new_thread_end_handler(thread_id);
 	}
 
 	tsrm_mutex_unlock(tsmm_mutex);

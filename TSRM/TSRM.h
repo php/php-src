@@ -129,8 +129,8 @@ TSRM_API void ts_free_id(ts_rsrc_id id);
 #define TSRM_ERROR_LEVEL_CORE	2
 #define TSRM_ERROR_LEVEL_INFO	3
 
-typedef void (*tsrm_thread_begin_func_t)(THREAD_T thread_id, void ***tsrm_ls);
-typedef void (*tsrm_thread_end_func_t)(THREAD_T thread_id, void ***tsrm_ls);
+typedef void (*tsrm_thread_begin_func_t)(THREAD_T thread_id);
+typedef void (*tsrm_thread_end_func_t)(THREAD_T thread_id);
 
 
 TSRM_API int tsrm_error(int level, const char *format, ...);
