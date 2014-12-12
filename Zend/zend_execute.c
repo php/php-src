@@ -1666,12 +1666,12 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		} while (var != end);
 	}
 
-	if (op_array->this_var != -1 && Z_OBJ(EX(This))) {
+	if (op_array->this_var != -1 && EXPECTED(Z_OBJ(EX(This)))) {
 		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
 
-	if (!op_array->run_time_cache && op_array->last_cache_slot) {
+	if (UNEXPECTED(!op_array->run_time_cache)) {
 		op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
 	}
 	EX_LOAD_RUN_TIME_CACHE(op_array);
@@ -1691,12 +1691,12 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 
 	zend_attach_symbol_table(execute_data);
 
-	if (op_array->this_var != -1 && Z_OBJ(EX(This))) {
+	if (op_array->this_var != -1 && EXPECTED(Z_OBJ(EX(This)))) {
 		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
 
-	if (!op_array->run_time_cache && op_array->last_cache_slot) {
+	if (!op_array->run_time_cache) {
 		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
 	}
 	EX_LOAD_RUN_TIME_CACHE(op_array);
@@ -1762,12 +1762,12 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 		}
 	}
 
-	if (op_array->this_var != -1 && Z_OBJ(EX(This))) {
+	if (op_array->this_var != -1 && EXPECTED(Z_OBJ(EX(This)))) {
 		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
 
-	if (!op_array->run_time_cache && op_array->last_cache_slot) {
+	if (!op_array->run_time_cache) {
 		if (op_array->function_name) {
 			op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
 		} else {
