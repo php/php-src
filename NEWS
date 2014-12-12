@@ -84,6 +84,10 @@ PHP                                                                        NEWS
   . Added intdiv() function. (Andrea)
   . Improved precision of log() function for base 2 and 10. (Marc Bennewitz)
 
+- Streams:
+  . Fixed bug #68532 (convert.base64-encode omits padding bytes).
+    (blaesius at krumedia dot de)
+
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
 
