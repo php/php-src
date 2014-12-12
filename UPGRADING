@@ -68,6 +68,8 @@ PHP 5.6 UPGRADE NOTES
 - Added constant scalar expressions syntax.
   (https://wiki.php.net/rfc/const_scalar_exprs)
 
+- Arrays are now permitted as constant values.
+
 - Added dedicated syntax for variadic functions.
   (https://wiki.php.net/rfc/variadics)
 
