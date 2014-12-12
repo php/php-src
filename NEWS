@@ -11,16 +11,11 @@ PHP                                                                        NEWS
   . Fixed bug #68297 (Application Popup provides too few information). (Anatol)
   . Fixed bug #65769 (localeconv() broken in TS builds). (Anatol)
   . Fixed bug #65230 (setting locale randomly broken). (Anatol)
-  . Fixed bug #68545 (NULL pointer dereference in unserialize.c). (Anatol)
   . Fixed bug #68583 (Crash in timeout thread). (Anatol)
 
 - cURL:
   . Fixed bug #67643 (curl_multi_getcontent returns '' when
     CURLOPT_RETURNTRANSFER isn't set). (Jille Timmermans)
-
-- Date:
-  . Fixed day_of_week function as it could sometimes return negative values
-    internally. (Derick)
 
 - Mbstring:
   . Fixed bug #68504 (--with-libmbfl configure option not present on Windows).
@@ -46,7 +41,7 @@ PHP                                                                        NEWS
 - SQLite:
   . Fixed bug #68120 (Update bundled libsqlite to 3.8.7.2). (Anatol)
 
-11 Dec 2014, PHP 5.5.20
+18 Dec 2014, PHP 5.5.20
 
 - Core:
   . Fixed bug #68091 (Some Zend headers lack appropriate extern "C" blocks).
@@ -54,6 +49,11 @@ PHP                                                                        NEWS
   . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly 
     triggered). (Julien)
   . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
+  . Fixed bug #68545 (NULL pointer dereference in unserialize.c). (Anatol)
+
+- Date:
+  . Fixed day_of_week function as it could sometimes return negative values
+    internally. (Derick)
 
 - FPM:
   . Fixed bug #68381 (fpm_unix_init_main ignores log_level).
