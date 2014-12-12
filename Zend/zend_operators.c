@@ -1169,7 +1169,6 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 
 ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
-	zval op1_copy, op2_copy;
 	int op1_val, op2_val;
 
 	do {
@@ -1220,8 +1219,6 @@ ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 
 ZEND_API int boolean_not_function(zval *result, zval *op1 TSRMLS_DC) /* {{{ */
 {
-	zval op1_copy;
-
 	if (Z_TYPE_P(op1) < IS_TRUE) {
 		ZVAL_TRUE(result);
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_TRUE)) {
