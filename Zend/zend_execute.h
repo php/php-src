@@ -143,15 +143,10 @@ static zend_always_inline zval* zend_vm_stack_alloc(size_t size TSRMLS_DC)
 	return (zval*)top;
 }
 
-static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
+static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(uint32_t call_info, zend_function *func, uint32_t used_stack, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
 {
-	uint32_t used_stack = ZEND_CALL_FRAME_SLOT + num_args;
-	zend_execute_data *call;
-	
-	if (ZEND_USER_CODE(func->type)) {
-		used_stack += func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args);
-	}
-	call = (zend_execute_data*)zend_vm_stack_alloc(used_stack * sizeof(zval) TSRMLS_CC);
+	zend_execute_data *call = (zend_execute_data*)zend_vm_stack_alloc(used_stack TSRMLS_CC);
+
 	call->func = func;
 	Z_OBJ(call->This) = object;
 	ZEND_SET_CALL_INFO(call, call_info);
@@ -159,6 +154,24 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint3
 	call->called_scope = called_scope;
 	call->prev_execute_data = prev;
 	return call;
+}
+
+static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, zend_function *func)
+{
+	uint32_t used_stack = ZEND_CALL_FRAME_SLOT + num_args;
+	
+	if (ZEND_USER_CODE(func->type)) {
+		used_stack += func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args);
+	}
+	return used_stack * sizeof(zval);
+}
+
+static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev TSRMLS_DC)
+{
+	uint32_t used_stack = zend_vm_calc_used_stack(num_args, func);
+	
+	return zend_vm_stack_push_call_frame_ex(call_info,
+		func, used_stack, called_scope, object, prev TSRMLS_CC);
 }
 
 static zend_always_inline void zend_vm_stack_free_extra_args(zend_execute_data *call TSRMLS_DC)

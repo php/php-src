@@ -2509,6 +2509,10 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	opline = &CG(active_op_array)->opcodes[opnum_init];
 	opline->extended_value = arg_count;
 
+	if (opline->opcode == ZEND_INIT_FCALL) {
+		opline->op1.num = zend_vm_calc_used_stack(arg_count, fbc);
+	}
+
 	call_flags = (opline->opcode == ZEND_NEW ? ZEND_CALL_CTOR : 0);
 	opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL TSRMLS_CC);
 	opline->op1.num = call_flags;
@@ -2662,7 +2666,7 @@ static int zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t
 
 	opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, NULL TSRMLS_CC);
 	opline->extended_value = num_args;
-
+	opline->op1.num = zend_vm_calc_used_stack(num_args, fbc);
 	opline->op2_type = IS_CONST;
 	LITERAL_STR(opline->op2, lcname);
 	zend_alloc_cache_slot(opline->op2.constant TSRMLS_CC);

@@ -1656,8 +1656,8 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER
 		CACHE_PTR(Z_CACHE_SLOT_P(fname), fbc);
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL, NULL, EX(call) TSRMLS_CC);
+	EX(call) = zend_vm_stack_push_call_frame_ex(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->op1.num, NULL, NULL, EX(call) TSRMLS_CC);
 
 	ZEND_VM_NEXT_OPCODE();
 }

@@ -2736,8 +2736,8 @@ ZEND_VM_HANDLER(61, ZEND_INIT_FCALL, ANY, CONST)
 		CACHE_PTR(Z_CACHE_SLOT_P(fname), fbc);
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->extended_value, NULL, NULL, EX(call) TSRMLS_CC);
+	EX(call) = zend_vm_stack_push_call_frame_ex(ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->op1.num, NULL, NULL, EX(call) TSRMLS_CC);
 
 	FREE_OP2();
 
