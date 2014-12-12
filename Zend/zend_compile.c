@@ -545,6 +545,22 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
+{
+	uint32_t new_flags = flags | new_flag;
+	if ((flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flag & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
+	}
+	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
+	}
+	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_FINAL)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class");
+	}
+	return new_flags;
+}
+/* }}} */
+
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
@@ -4440,12 +4456,6 @@ void zend_compile_implements(znode *class_node, zend_ast *ast TSRMLS_DC) /* {{{ 
 
 		zend_op *opline;
 
-		/* Traits can not implement interfaces */
-		if (ZEND_CE_IS_TRAIT(CG(active_class_entry))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' "
-				"since it is a Trait", name->val, CG(active_class_entry)->name->val);
-		}
-
 		if (!zend_is_const_default_class_ref(class_ast)) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use '%s' as interface name as it is reserved", name->val);
@@ -4521,12 +4531,6 @@ void zend_compile_class_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 	}
 
 	if (extends_ast) {
-		if (ZEND_CE_IS_TRAIT(ce)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. "
-				"Traits can only be composed from other traits with the 'use' keyword. Error",
-				name->val);
-		}
-
 		if (!zend_is_const_default_class_ref(extends_ast)) {
 			zend_string *extends_name = zend_ast_get_str(extends_ast);
 			zend_error_noreturn(E_COMPILE_ERROR,
