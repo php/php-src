@@ -56,6 +56,10 @@ PHP                                                                        NEWS
 - SQLite:
   . Fixed bug #68120 (Update bundled libsqlite to 3.8.7.2). (Anatol)
 
+- Streams:
+  . Fixed bug #68532 (convert.base64-encode omits padding bytes).
+    (blaesius at krumedia dot de)
+
 18 Dec 2014, PHP 5.6.4
 
 - Core:
