@@ -818,9 +818,6 @@ void zend_shutdown(TSRMLS_D) /* {{{ */
 #ifdef ZEND_SIGNALS
 	zend_signal_shutdown(TSRMLS_C);
 #endif
-#ifdef ZEND_WIN32
-	zend_shutdown_timeout_thread();
-#endif
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 
 	if (EG(active))
