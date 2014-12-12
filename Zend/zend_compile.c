@@ -545,6 +545,19 @@ void zend_do_free(znode *op1 TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
+{
+	uint32_t new_flags = flags | new_flag;
+	if ((flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flag & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
+	}
+	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
+	}
+	return new_flags;
+}
+/* }}} */
+
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
@@ -3916,24 +3929,41 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 {
 	zend_class_entry *ce = CG(active_class_entry);
 	zend_bool in_interface = (ce->ce_flags & ZEND_ACC_INTERFACE) != 0;
+	zend_bool in_abstract  = (ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) != 0;
+	zend_bool in_final = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
 	zend_bool in_trait = ZEND_CE_IS_TRAIT(ce);
+	zend_bool is_abstract = (op_array->fn_flags & ZEND_ACC_ABSTRACT) != 0;
 	zend_bool is_public = (op_array->fn_flags & ZEND_ACC_PUBLIC) != 0;
 	zend_bool is_static = (op_array->fn_flags & ZEND_ACC_STATIC) != 0;
 
 	zend_string *lcname;
+
+	if (in_abstract && in_final) {
+		if (is_abstract) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s contains abstract static method (%s) and "
+				"therefore cannot be declared 'abstract final'", ce->name->val, name->val);
+		}
+
+		if (!is_static) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s contains non-static method (%s) and "
+				"therefore cannot be declared 'abstract final'", ce->name->val, name->val);
+		}
+	}
 
 	if (in_interface) {
 		if ((op_array->fn_flags & ZEND_ACC_PPP_MASK) != ZEND_ACC_PUBLIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface method "
 				"%s::%s() must be omitted", ce->name->val, name->val);
 		}
+
 		op_array->fn_flags |= ZEND_ACC_ABSTRACT;
-	} else if (is_static && (op_array->fn_flags & ZEND_ACC_ABSTRACT)) {
+		is_abstract = (op_array->fn_flags & ZEND_ACC_ABSTRACT) != 0;
+	} else if (is_static && is_abstract) {
 		zend_error(E_STRICT, "Static function %s::%s() should not be abstract",
 			ce->name->val, name->val);
 	}
 
-	if (op_array->fn_flags & ZEND_ACC_ABSTRACT) {
+	if (is_abstract) {
 		if (op_array->fn_flags & ZEND_ACC_PRIVATE) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private",
 				in_interface ? "Interface" : "Abstract", ce->name->val, name->val);
@@ -4209,17 +4239,30 @@ void zend_compile_func_decl(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
 
 void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 {
+	zend_class_entry *ce = CG(active_class_entry);
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t flags = list->attr;
-	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i, children = list->children;
 	zend_string *doc_comment = NULL;
 
-	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+	zend_bool in_interface = (ce->ce_flags & ZEND_ACC_INTERFACE) != 0;
+	zend_bool in_abstract  = (ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) != 0;
+	zend_bool in_final = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+	zend_bool is_abstract = (flags & ZEND_ACC_ABSTRACT) != 0;
+	zend_bool is_final = (flags & ZEND_ACC_FINAL) != 0;
+	zend_bool is_static = (flags & ZEND_ACC_STATIC) != 0;
+
+	// Fail if abstract final class' properties are not static
+	if (in_abstract && in_final && !is_static) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Class %s contains non-static property declaration "
+			"and therefore cannot be declared 'abstract final'", ce->name->val);
+	}
+
+	if (in_interface) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Interfaces may not include member variables");
 	}
 
-	if (flags & ZEND_ACC_ABSTRACT) {
+	if (is_abstract) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Properties cannot be declared abstract");
 	}
 
@@ -4236,7 +4279,7 @@ void zend_compile_prop_decl(zend_ast *ast TSRMLS_DC) /* {{{ */
 		zend_string *name = zend_ast_get_str(name_ast);
 		zval value_zv;
 
-		if (flags & ZEND_ACC_FINAL) {
+		if (is_final) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, "
 				"the final modifier is allowed only for methods and classes",
 				ce->name->val, name->val);
