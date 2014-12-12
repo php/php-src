@@ -32,12 +32,6 @@
 #include "zend_language_scanner.h"
 #include "zend_inheritance.h"
 
-#define CONSTANT_EX(op_array, op) \
-	(op_array)->literals[op]
-
-#define CONSTANT(op) \
-	CONSTANT_EX(CG(active_op_array), op)
-
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
 		if ((src)->op_type == IS_CONST) { \
@@ -50,7 +44,7 @@
 #define GET_NODE(target, src) do { \
 		(target)->op_type = src ## _type; \
 		if ((target)->op_type == IS_CONST) { \
-			(target)->u.constant = CONSTANT(src.constant); \
+			ZVAL_COPY_VALUE(&(target)->u.constant, CT_CONSTANT(src)); \
 		} else { \
 			(target)->u.op = src; \
 		} \
@@ -291,11 +285,11 @@ static int lookup_cv(zend_op_array *op_array, zend_string* name TSRMLS_DC) /* {{
 
 void zend_del_literal(zend_op_array *op_array, int n) /* {{{ */
 {
-	zval_dtor(&CONSTANT_EX(op_array, n));
+	zval_dtor(CT_CONSTANT_EX(op_array, n));
 	if (n + 1 == op_array->last_literal) {
 		op_array->last_literal--;
 	} else {
-		ZVAL_UNDEF(&CONSTANT_EX(op_array, n));
+		ZVAL_UNDEF(CT_CONSTANT_EX(op_array, n));
 	}
 }
 /* }}} */
@@ -310,7 +304,7 @@ static inline void zend_insert_literal(zend_op_array *op_array, zval *zv, int li
 			Z_TYPE_FLAGS_P(zv) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 		}
 	}
-	ZVAL_COPY_VALUE(&CONSTANT_EX(op_array, literal_position), zv);
+	ZVAL_COPY_VALUE(CT_CONSTANT_EX(op_array, literal_position), zv);
 	Z_CACHE_SLOT(op_array->literals[literal_position]) = -1;
 }
 /* }}} */
@@ -752,13 +746,13 @@ static void str_dtor(zval *zv)  /* {{{ */ {
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC) /* {{{ */
 {
 	zend_label *dest;
-	zend_long current, distance;
+	int current, distance;
 	zval *label;
 
 	if (pass2) {
-		label = opline->op2.zv;
+		label = RT_CONSTANT(op_array, opline->op2);
 	} else {
-		label = &CONSTANT_EX(op_array, opline->op2.constant);
+		label = CT_CONSTANT_EX(op_array, opline->op2.constant);
 	}
 	if (CG(context).labels == NULL ||
 	    (dest = zend_hash_find_ptr(CG(context).labels, Z_STR_P(label))) == NULL) {
@@ -888,11 +882,11 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 	zval *op1, *op2;
 
 	if (compile_time) {
-		op1 = &CONSTANT_EX(op_array, opline->op1.constant);
-		op2 = &CONSTANT_EX(op_array, opline->op2.constant);
+		op1 = CT_CONSTANT_EX(op_array, opline->op1.constant);
+		op2 = CT_CONSTANT_EX(op_array, opline->op2.constant);
 	} else {
-		op1 = opline->op1.zv;
-		op2 = opline->op2.zv;
+		op1 = RT_CONSTANT(op_array, opline->op1);
+		op2 = RT_CONSTANT(op_array, opline->op2);
 	}
 
 	function = zend_hash_find_ptr(function_table, Z_STR_P(op1));
@@ -928,11 +922,11 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 	zval *op1, *op2;
 
 	if (compile_time) {
-		op1 = &CONSTANT_EX(op_array, opline->op1.constant);
-		op2 = &CONSTANT_EX(op_array, opline->op2.constant);
+		op1 = CT_CONSTANT_EX(op_array, opline->op1.constant);
+		op2 = CT_CONSTANT_EX(op_array, opline->op2.constant);
 	} else {
-		op1 = opline->op1.zv;
-		op2 = opline->op2.zv;
+		op1 = RT_CONSTANT(op_array, opline->op1);
+		op2 = RT_CONSTANT(op_array, opline->op2);
 	}
 	if ((ce = zend_hash_find_ptr(class_table, Z_STR_P(op1))) == NULL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(op1));
@@ -965,11 +959,11 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 	zval *op1, *op2;
 
 	if (compile_time) {
-		op1 = &CONSTANT_EX(op_array, opline->op1.constant);
-		op2 = &CONSTANT_EX(op_array, opline->op2.constant);
+		op1 = CT_CONSTANT_EX(op_array, opline->op1.constant);
+		op2 = CT_CONSTANT_EX(op_array, opline->op2.constant);
 	} else {
-		op1 = opline->op1.zv;
-		op2 = opline->op2.zv;
+		op1 = RT_CONSTANT(op_array, opline->op1);
+		op2 = RT_CONSTANT(op_array, opline->op2);
 	}
 
 	ce = zend_hash_find_ptr(class_table, Z_STR_P(op1));
@@ -1032,7 +1026,7 @@ void zend_do_early_binding(TSRMLS_D) /* {{{ */
 				zval *parent_name;
 				zend_class_entry *ce;
 
-				parent_name = &CONSTANT(fetch_class_opline->op2.constant);
+				parent_name = CT_CONSTANT(fetch_class_opline->op2);
 				if (((ce = zend_lookup_class(Z_STR_P(parent_name) TSRMLS_CC)) == NULL) ||
 				    ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) &&
 				     (ce->type == ZEND_INTERNAL_CLASS))) {
@@ -1071,7 +1065,7 @@ void zend_do_early_binding(TSRMLS_D) /* {{{ */
 			return;
 	}
 
-	zend_hash_del(table, Z_STR(CONSTANT(opline->op1.constant)));
+	zend_hash_del(table, Z_STR_P(CT_CONSTANT(opline->op1)));
 	zend_del_literal(CG(active_op_array), opline->op1.constant);
 	zend_del_literal(CG(active_op_array), opline->op2.constant);
 	MAKE_NOP(opline);
@@ -1087,7 +1081,7 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS
 
 		CG(in_compilation) = 1;
 		while (opline_num != -1) {
-			if ((ce = zend_lookup_class(Z_STR_P(op_array->opcodes[opline_num-1].op2.zv) TSRMLS_CC)) != NULL) {
+			if ((ce = zend_lookup_class(Z_STR_P(RT_CONSTANT(op_array, op_array->opcodes[opline_num-1].op2)) TSRMLS_CC)) != NULL) {
 				do_bind_inherited_class(op_array, &op_array->opcodes[opline_num], EG(class_table), ce, 0 TSRMLS_CC);
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
@@ -2112,7 +2106,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_OBJ_R, &obj_node, &prop_node TSRMLS_CC);
 	if (opline->op2_type == IS_CONST) {
-		convert_to_string(&CONSTANT(opline->op2.constant));
+		convert_to_string(CT_CONSTANT(opline->op2));
 		zend_alloc_polymorphic_cache_slot(opline->op2.constant TSRMLS_CC);
 	}
 
@@ -2509,6 +2503,10 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	opline = &CG(active_op_array)->opcodes[opnum_init];
 	opline->extended_value = arg_count;
 
+	if (opline->opcode == ZEND_INIT_FCALL) {
+		opline->op1.num = zend_vm_calc_used_stack(arg_count, fbc);
+	}
+
 	call_flags = (opline->opcode == ZEND_NEW ? ZEND_CALL_CTOR : 0);
 	opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL TSRMLS_CC);
 	opline->op1.num = call_flags;
@@ -2662,7 +2660,7 @@ static int zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t
 
 	opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, NULL TSRMLS_CC);
 	opline->extended_value = num_args;
-
+	opline->op1.num = zend_vm_calc_used_stack(num_args, fbc);
 	opline->op2_type = IS_CONST;
 	LITERAL_STR(opline->op2, lcname);
 	zend_alloc_cache_slot(opline->op2.constant TSRMLS_CC);
@@ -3515,7 +3513,7 @@ void zend_compile_switch(zend_ast *ast TSRMLS_DC) /* {{{ */
 		opline = zend_emit_op(NULL, ZEND_CASE, &expr_node, &cond_node TSRMLS_CC);
 		SET_NODE(opline->result, &case_node);
 		if (opline->op1_type == IS_CONST) {
-			zval_copy_ctor(&CONSTANT(opline->op1.constant));
+			zval_copy_ctor(CT_CONSTANT(opline->op1));
 		}
 
 		jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &case_node, 0 TSRMLS_CC);

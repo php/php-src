@@ -402,7 +402,7 @@ static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, const 
 	} else {		
 		*should_free = NULL;
 		if (op_type == IS_CONST) {
-			return node.zv;
+			return EX_CONSTANT(node);
 		} else {
 			ZEND_ASSERT(op_type == IS_CV);
 			return _get_zval_ptr_cv(execute_data, node.var, type TSRMLS_CC);
@@ -422,7 +422,7 @@ static zend_always_inline zval *_get_zval_ptr_deref(int op_type, znode_op node, 
 	} else {		
 		*should_free = NULL;
 		if (op_type == IS_CONST) {
-			return node.zv;
+			return EX_CONSTANT(node);
 		} else {
 			ZEND_ASSERT(op_type == IS_CV);
 			return _get_zval_ptr_cv_deref(execute_data, node.var, type TSRMLS_CC);
@@ -1674,7 +1674,8 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
 		op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
 	}
-	EX(run_time_cache) = op_array->run_time_cache;
+	EX_LOAD_RUN_TIME_CACHE(op_array);
+	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
 }
@@ -1698,7 +1699,8 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
 		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
 	}
-	EX(run_time_cache) = op_array->run_time_cache;
+	EX_LOAD_RUN_TIME_CACHE(op_array);
+	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
 }
@@ -1772,7 +1774,8 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 			op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
 		}
 	}
-	EX(run_time_cache) = op_array->run_time_cache;
+	EX_LOAD_RUN_TIME_CACHE(op_array);
+	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
 }
@@ -1897,8 +1900,7 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 	OPLINE = new_op
 
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
-	CHECK_SYMBOL_TABLES() \
-	OPLINE = ((zend_op*)(((char*)opline)+(offset)))
+	ZEND_VM_SET_OPCODE(ZEND_OFFSET_TO_OPLINE(opline, offset))
 
 #define ZEND_VM_JMP(new_op) \
 	if (EXPECTED(!EG(exception))) { \

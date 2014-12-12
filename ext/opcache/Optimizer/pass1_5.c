@@ -401,7 +401,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRML
 						opline->result_type = IS_UNUSED;
 						opline->op1.constant = send1_opline->op1.constant;
 						opline->op2.constant = send2_opline->op1.constant;
-						opline->result.zv = NULL;
+						opline->result.num = 0;
 
 						literal_dtor(&ZEND_OP2_LITERAL(init_opline));
 						MAKE_NOP(init_opline);

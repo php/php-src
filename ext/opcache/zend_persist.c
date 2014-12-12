@@ -345,18 +345,21 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		op_array->opcodes = persist_ptr;
 	} else {
 		zend_op *new_opcodes = zend_accel_memdup(op_array->opcodes, sizeof(zend_op) * op_array->last);
+#if ZEND_USE_ABS_CONST_ADDR || ZEND_USE_ABS_JMP_ADDR
 		zend_op *opline = new_opcodes;
 		zend_op *end = new_opcodes + op_array->last;
 		int offset = 0;
 
 		for (; opline < end ; opline++, offset++) {
+# if ZEND_USE_ABS_CONST_ADDR
 			if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 				opline->op1.zv = (zval*)((char*)opline->op1.zv + ((char*)op_array->literals - (char*)orig_literals));
 			}
 			if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 				opline->op2.zv = (zval*)((char*)opline->op2.zv + ((char*)op_array->literals - (char*)orig_literals));
 			}
-
+# endif
+# if ZEND_USE_ABS_JMP_ADDR
 			if (ZEND_DONE_PASS_TWO(op_array)) {
 				/* fix jumps to point to new array */
 				switch (opline->opcode) {
@@ -381,7 +384,9 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 						break;
 				}
 			}
+# endif
 		}
+#endif
 
 		efree(op_array->opcodes);
 		op_array->opcodes = new_opcodes;

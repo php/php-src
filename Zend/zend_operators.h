@@ -252,7 +252,61 @@ ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2
 #define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
 
-ZEND_API int zval_is_true(zval *op);
+
+ZEND_API int zend_is_true(zval *op TSRMLS_DC);
+ZEND_API int zend_object_is_true(zval *op TSRMLS_DC);
+
+#define zval_is_true(op) \
+	zend_is_true(op TSRMLS_CC)
+
+static zend_always_inline int i_zend_is_true(zval *op TSRMLS_DC)
+{
+	int result;
+
+again:
+	switch (Z_TYPE_P(op)) {
+		case IS_UNDEF:
+		case IS_NULL:
+		case IS_FALSE:
+			result = 0;
+			break;
+		case IS_TRUE:
+			result = 1;
+			break;
+		case IS_LONG:
+			result = (Z_LVAL_P(op)?1:0);
+			break;
+		case IS_RESOURCE:
+			result = (Z_RES_HANDLE_P(op)?1:0);
+			break;
+		case IS_DOUBLE:
+			result = (Z_DVAL_P(op) ? 1 : 0);
+			break;
+		case IS_STRING:
+			if (Z_STRLEN_P(op) == 0
+				|| (Z_STRLEN_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
+				result = 0;
+			} else {
+				result = 1;
+			}
+			break;
+		case IS_ARRAY:
+			result = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
+			break;
+		case IS_OBJECT:
+			result = zend_object_is_true(op TSRMLS_CC);
+			break;
+		case IS_REFERENCE:
+			op = Z_REFVAL_P(op);
+			goto again;
+			break;
+		default:
+			result = 0;
+			break;
+	}
+	return result;
+}
+
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC);
@@ -389,6 +443,33 @@ static zend_always_inline int fast_increment_function(zval *op1)
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
+#elif defined(__GNUC__) && defined(__powerpc64__)
+                __asm__(
+                        "ld 14, 0(%0)\n\t"
+                        "li 15, 1\n\t"
+                        "li 16, 0\n\t"
+                        "mtxer 16\n\t"
+                        "addo. 14, 14, 15\n\t"
+                        "std 14, 0(%0)\n\t"
+                        "bns+  0f\n\t"
+                        "xor 14, 14, 14\n\t"
+                        "lis 15, 0x43e00000@h\n\t"
+                        "ori 15, 15, 0x43e00000@l\n\t"
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+                        "stw 14, 0(%0)\n\t"
+                        "stw 15, 0x4(%0)\n\t"
+#else
+                        "stw 14, 0x4(%0)\n\t"
+                        "stw 15, 0(%0)\n\t"
+#endif
+                        "li 14, %1\n\t"
+                        "stw 14, %c2(%0)\n"
+                        "0:"
+                        :
+                        : "r"(&op1->value),
+                          "n"(IS_DOUBLE),
+                          "n"(ZVAL_OFFSETOF_TYPE)
+                        : "r14", "r15", "r16", "cc");
 #else
 		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MAX)) {
 			/* switch to double */
@@ -431,6 +512,33 @@ static zend_always_inline int fast_decrement_function(zval *op1)
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
+#elif defined(__GNUC__) && defined(__powerpc64__)
+                __asm__(
+                        "ld 14, 0(%0)\n\t"
+                        "li 15, 1\n\t"
+                        "li 16, 0\n\t"
+                        "mtxer 16\n\t"
+                        "subo. 14, 14, 15\n\t"
+                        "std 14, 0(%0)\n\t"
+                        "bns+  0f\n\t"
+                        "xor 14, 14, 14\n\t"
+                        "lis 15, 0xc3e00000@h\n\t"
+                        "ori 15, 15, 0xc3e00000@l\n\t"
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+                        "stw 14, 0(%0)\n\t"
+                        "stw 15, 0x4(%0)\n\t"
+#else
+                        "stw 14, 0x4(%0)\n\t"
+                        "stw 15, 0(%0)\n\t"
+#endif
+                        "li 14, %1\n\t"
+                        "stw 14, %c2(%0)\n"
+                        "0:"
+                        :
+                        : "r"(&op1->value),
+                          "n"(IS_DOUBLE),
+                          "n"(ZVAL_OFFSETOF_TYPE)
+                        : "r14", "r15", "r16", "cc");
 #else
 		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_LONG_MIN)) {
 			/* switch to double */
@@ -494,6 +602,36 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "rax","cc");
+#elif defined(__GNUC__) && defined(__powerpc64__)
+                __asm__(
+                        "ld 14, 0(%1)\n\t"
+                        "ld 15, 0(%2)\n\t"
+                        "li 16, 0 \n\t"
+                        "mtxer 16\n\t"
+                        "addo. 14, 14, 15\n\t"
+                        "bso- 0f\n\t"
+                        "std 14, 0(%0)\n\t"
+                        "li 14, %3\n\t"
+                        "stw 14, %c5(%0)\n\t"
+                        "b 1f\n"
+                        "0:\n\t"
+                        "lfd 0, 0(%1)\n\t"
+                        "lfd 1, 0(%2)\n\t"
+                        "fcfid 0, 0\n\t"
+                        "fcfid 1, 1\n\t"
+                        "fadd 0, 0, 1\n\t"
+                        "li 14, %4\n\t"
+                        "stw 14, %c5(%0)\n\t"
+                        "stfd 0, 0(%0)\n"
+                        "1:"
+                        :
+                        : "r"(&result->value),
+                          "r"(&op1->value),
+                          "r"(&op2->value),
+                          "n"(IS_LONG),
+                          "n"(IS_DOUBLE),
+                          "n"(ZVAL_OFFSETOF_TYPE)
+                        : "r14","r15","r16","fr0","fr1","cc");
 #else
 			/*
 			 * 'result' may alias with op1 or op2, so we need to
@@ -583,6 +721,36 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			  "n"(IS_DOUBLE),
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "rax","cc");
+#elif defined(__GNUC__) && defined(__powerpc64__)
+                __asm__(
+                        "ld 14, 0(%1)\n\t"
+                        "ld 15, 0(%2)\n\t"
+                        "li 16, 0\n\t"
+                        "mtxer 16\n\t"
+                        "subo. 14, 14, 15\n\t"
+                        "bso- 0f\n\t"
+                        "std 14, 0(%0)\n\t"
+                        "li 14, %3\n\t"
+                        "stw 14, %c5(%0)\n\t"
+                        "b 1f\n"
+                        "0:\n\t"
+                        "lfd 0, 0(%1)\n\t"
+                        "lfd 1, 0(%2)\n\t"
+                        "fcfid 0, 0\n\t"
+                        "fcfid 1, 1\n\t"
+                        "fsub 0, 0, 1\n\t"
+                        "li 14, %4\n\t"
+                        "stw 14, %c5(%0)\n\t"
+                        "stfd 0, 0(%0)\n"
+                        "1:"
+                        :
+                        : "r"(&result->value),
+                          "r"(&op1->value),
+                          "r"(&op2->value),
+                          "n"(IS_LONG),
+                          "n"(IS_DOUBLE),
+                          "n"(ZVAL_OFFSETOF_TYPE)
+                        : "r14","r15","r16","fr0","fr1","cc");
 #else
 			ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
 
