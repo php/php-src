@@ -352,13 +352,6 @@ ZEND_API zend_class_entry *zend_fetch_class(const char *class_name, uint class_n
 ZEND_API zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
-#ifdef ZEND_WIN32
-void zend_init_timeout_thread(void);
-void zend_shutdown_timeout_thread(void);
-#define WM_REGISTER_ZEND_TIMEOUT		(WM_USER+1)
-#define WM_UNREGISTER_ZEND_TIMEOUT		(WM_USER+2)
-#endif
-
 #define zendi_zval_copy_ctor(p) zval_copy_ctor(&(p))
 #define zendi_zval_dtor(p) zval_dtor(&(p))
 
