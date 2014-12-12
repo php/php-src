@@ -64,7 +64,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 		} break;
 
 		case IS_CONST:
-			asprintf(&decode, "C%u", phpdbg_decode_literal(ops, op->zv TSRMLS_CC));
+			asprintf(&decode, "C%u", phpdbg_decode_literal(ops, RT_CONSTANT(ops, *op) TSRMLS_CC));
 		break;
 
 		case IS_UNUSED:
@@ -86,7 +86,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 #ifdef ZEND_FAST_CALL
 	case ZEND_FAST_CALL:
 #endif
-			asprintf(&decode[1], "J%ld", op->op1.jmp_addr - ops->opcodes);
+			asprintf(&decode[1], "J%ld", OP_JMP_ADDR(op, op->op1) - ops->opcodes);
 		goto format;
 
 	case ZEND_JMPZNZ:
@@ -103,7 +103,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 	case ZEND_JMP_SET:
 #endif
 		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
-		asprintf(&decode[2], "J%ld", op->op2.jmp_addr - ops->opcodes);
+		asprintf(&decode[2], "J%ld", OP_JMP_ADDR(op, op->op2) - ops->opcodes);
 	goto result;
 
 	case ZEND_RECV_INIT:

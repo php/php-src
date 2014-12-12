@@ -454,7 +454,7 @@ static zend_string *zend_get_function_declaration(zend_function *fptr TSRMLS_DC)
 						}
 					}
 					if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
-						zval *zv = precv->op2.zv;
+						zval *zv = RT_CONSTANT(&fptr->op_array, precv->op2);
 
 						if (Z_TYPE_P(zv) == IS_CONSTANT) {
 							smart_str_append(&str, Z_STR_P(zv));

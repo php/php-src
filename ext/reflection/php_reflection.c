@@ -722,7 +722,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			zend_class_entry *old_scope;
 
 			string_write(str, " = ", sizeof(" = ")-1);
-			ZVAL_DUP(&zv, precv->op2.zv);
+			ZVAL_DUP(&zv, RT_CONSTANT(&fptr->op_array, precv->op2));
 			old_scope = EG(scope);
 			EG(scope) = fptr->common.scope;
 			zval_update_constant_ex(&zv, 1, NULL TSRMLS_CC);
@@ -2618,7 +2618,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 		return;
 	}
 
-	ZVAL_COPY_VALUE(return_value, precv->op2.zv);
+	ZVAL_COPY_VALUE(return_value, RT_CONSTANT(&param->fptr->op_array, precv->op2));
 	if (Z_CONSTANT_P(return_value)) {
 		zend_class_entry *old_scope = EG(scope);
 
@@ -2648,7 +2648,7 @@ ZEND_METHOD(reflection_parameter, isDefaultValueConstant)
 	}
 
 	precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
-	if (precv && Z_TYPE_P(precv->op2.zv) == IS_CONSTANT) {
+	if (precv && Z_TYPE_P(RT_CONSTANT(&param->fptr->op_array, precv->op2)) == IS_CONSTANT) {
 		RETURN_TRUE;
 	}
 
@@ -2673,8 +2673,8 @@ ZEND_METHOD(reflection_parameter, getDefaultValueConstantName)
 	}
 
 	precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
-	if (precv && Z_TYPE_P(precv->op2.zv) == IS_CONSTANT) {
-		RETURN_STR(zend_string_copy(Z_STR_P(precv->op2.zv)));
+	if (precv && Z_TYPE_P(RT_CONSTANT(&param->fptr->op_array, precv->op2)) == IS_CONSTANT) {
+		RETURN_STR(zend_string_copy(Z_STR_P(RT_CONSTANT(&param->fptr->op_array, precv->op2))));
 	}
 }
 /* }}} */

@@ -56,13 +56,34 @@ typedef struct _zend_compiler_context {
 	HashTable *labels;
 } zend_compiler_context;
 
+/* On 64-bi systems less optimal, but more compact VM code leads to better
+ * performance. So on 32-bit systems we use absolute addresses for jump
+ * targets and constants, but on 64-bit systems realtive 32-bit offsets */
+#if SIZEOF_SIZE_T == 4
+# define ZEND_USE_ABS_JMP_ADDR      1
+# define ZEND_USE_ABS_CONST_ADDR    1
+# define ZEND_EX_USE_LITERALS       0
+# define ZEND_EX_USE_RUN_TIME_CACHE 1
+#else
+# define ZEND_USE_ABS_JMP_ADDR      0
+# define ZEND_USE_ABS_CONST_ADDR    0
+# define ZEND_EX_USE_LITERALS       1
+# define ZEND_EX_USE_RUN_TIME_CACHE 1
+#endif
+
 typedef union _znode_op {
 	uint32_t      constant;
 	uint32_t      var;
 	uint32_t      num;
 	uint32_t      opline_num; /*  Needs to be signed */
+#if ZEND_USE_ABS_JMP_ADDR
 	zend_op       *jmp_addr;
+#else
+	uint32_t      jmp_offset;
+#endif
+#if ZEND_USE_ABS_CONST_ADDR
 	zval          *zv;
+#endif
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */
@@ -112,8 +133,8 @@ struct _zend_op {
 	znode_op op1;
 	znode_op op2;
 	znode_op result;
-	zend_ulong extended_value;
-	uint lineno;
+	uint32_t extended_value;
+	uint32_t lineno;
 	zend_uchar opcode;
 	zend_uchar op1_type;
 	zend_uchar op2_type;
@@ -374,12 +395,17 @@ typedef enum _zend_call_kind {
 struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
-	void               **run_time_cache;
+	zval                *return_value;
 	zend_function       *func;             /* executed op_array              */
 	zval                 This;
+#if ZEND_EX_USE_RUN_TIME_CACHE
+	void               **run_time_cache;
+#endif
+#if ZEND_EX_USE_LITERALS
+	zval                *literals;
+#endif
 	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
-	zval                *return_value;
 	zend_array          *symbol_table;
 };
 
@@ -429,6 +455,136 @@ struct _zend_execute_data {
 #define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
 
 #define EX_VAR_TO_NUM(n)		(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0))
+
+#define ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline_num) \
+	((char*)&(op_array)->opcodes[opline_num] - (char*)(opline))
+
+#define ZEND_OFFSET_TO_OPLINE(base, offset) \
+	((zend_op*)(((char*)(base)) + (int)offset))
+
+#define ZEND_OFFSET_TO_OPLINE_NUM(op_array, base, offset) \
+	(ZEND_OFFSET_TO_OPLINE(base, offset) - op_array->opcodes)
+
+#if ZEND_USE_ABS_JMP_ADDR
+
+/* run-time jump target */
+# define OP_JMP_ADDR(opline, node) \
+	(node).jmp_addr
+
+/* convert jump target from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \
+		(node).jmp_addr = (op_array)->opcodes + (node).opline_num; \
+	} while (0)
+
+/* convert jump target back from run-time to compile-time */
+# define ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, node) do { \
+		(node).opline_num = (node).jmp_addr - (op_array)->opcodes; \
+	} while (0)
+
+#else
+
+/* run-time jump target */
+# define OP_JMP_ADDR(opline, node) \
+	ZEND_OFFSET_TO_OPLINE(opline, (node).jmp_offset)
+
+/* convert jump target from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \
+		(node).jmp_offset = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, (node).opline_num); \
+	} while (0)
+
+/* convert jump target back from run-time to compile-time */
+# define ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, node) do { \
+		(node).opline_num = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, (node).jmp_offset); \
+	} while (0)		
+
+#endif
+
+/* constant-time constant */
+# define CT_CONSTANT_EX(op_array, num) \
+	((op_array)->literals + (num))
+
+# define CT_CONSTANT(node) \
+	CT_CONSTANT_EX(CG(active_op_array), (node).constant)
+
+#if ZEND_USE_ABS_CONST_ADDR
+
+/* run-time constant */
+# define RT_CONSTANT_EX(base, node) \
+	(node).zv
+
+/* convert constant from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, node) do { \
+		(node).zv = CT_CONSTANT_EX(op_array, (node).constant); \
+	} while (0)
+
+/* convert constant back from run-time to compile-time */
+# define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, node) do { \
+		(node).constant = (node).zv - (op_array)->literals; \
+	} while (0)
+
+#else
+
+/* run-time constant */
+# define RT_CONSTANT_EX(base, node) \
+	((zval*)(((char*)(base)) + (node).constant))
+
+/* convert constant from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, node) do { \
+		(node).constant *= sizeof(zval); \
+	} while (0)
+
+/* convert constant back from run-time to compile-time (do nothing) */
+# define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, node) do { \
+		(node).constant /= sizeof(zval); \
+	} while (0)
+
+#endif
+
+#if ZEND_EX_USE_LITERALS
+
+# define EX_LITERALS() \
+	EX(literals)
+
+# define EX_LOAD_LITERALS(op_array) do { \
+		EX(literals) = (op_array)->literals; \
+	} while (0)
+
+#else
+
+# define EX_LITERALS() \
+	EX(func)->op_array.literals
+
+# define EX_LOAD_LITERALS(op_array) do { \
+	} while (0)
+
+#endif
+
+/* run-time constant */
+#define RT_CONSTANT(op_array, node) \
+	RT_CONSTANT_EX((op_array)->literals, node)
+
+/* constant in currently executed function */
+#define EX_CONSTANT(node) \
+	RT_CONSTANT_EX(EX_LITERALS(), node)
+
+#if ZEND_EX_USE_RUN_TIME_CACHE
+
+# define EX_RUN_TIME_CACHE() \
+	EX(run_time_cache)
+
+# define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
+		EX(run_time_cache) = (op_array)->run_time_cache; \
+	} while (0)
+
+#else
+
+# define EX_RUN_TIME_CACHE() \
+	EX(func)->op_array.run_time_cache
+
+# define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
+	} while (0)
+
+#endif
 
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)
