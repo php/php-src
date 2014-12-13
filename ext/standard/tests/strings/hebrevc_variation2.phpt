@@ -78,7 +78,7 @@ $inputs =  array (
 // loop through with each element of the $texts array to test hebrevc() function
 $count = 1;
 
-$hebrew_text = "The hebrevcc function converts logical Hebrew text to visual text.\nThis function is similar to hebrevc() with the difference that it converts newlines (\n) to '<br>\n'.\nThe function tries to avoid breaking words.\n";
+$hebrew_text = "The hebrevcc function converts logical Hebrew text to visual text.\nThis function is similar to hebrevc() with the difference that it converts newlines (\n) to '<br />\n'.\nThe function tries to avoid breaking words.\n";
 
 foreach($inputs as $max_chars_per_line) {
   echo "-- Iteration $count --\n";

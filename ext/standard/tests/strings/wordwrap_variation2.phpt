@@ -13,7 +13,7 @@ Test wordwrap() function : usage variations  - unexpected values for width argum
 echo "*** Testing wordwrap() : usage variations ***\n";
 // initialize all required variables
 $str = 'testing wordwrap function';
-$break = '<br />\n';
+$break = '<br>\n';
 $cut = true;
 
 // resource var 
@@ -107,8 +107,8 @@ echo "Done\n";
 string(25) "testing
 wordwrap
 function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
 
 Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
@@ -116,16 +116,16 @@ bool(false)
 string(25) "testing
 wordwrap
 function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(223) "<br />\nt<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\n<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\n<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(223) "<br>\nt<br>\ne<br>\ns<br>\nt<br>\ni<br>\nn<br>\ng<br>\n<br>\nw<br>\no<br>\nr<br>\nd<br>\nw<br>\nr<br>\na<br>\np<br>\n<br>\nf<br>\nu<br>\nn<br>\nc<br>\nt<br>\ni<br>\no<br>\nn"
 -- Iteration 3 --
 string(25) "testing
 wordwrap
 function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(223) "<br />\nt<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\n<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\n<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(223) "<br>\nt<br>\ne<br>\ns<br>\nt<br>\ni<br>\nn<br>\ng<br>\n<br>\nw<br>\no<br>\nr<br>\nd<br>\nw<br>\nr<br>\na<br>\np<br>\n<br>\nf<br>\nu<br>\nn<br>\nc<br>\nt<br>\ni<br>\no<br>\nn"
 -- Iteration 4 --
 
 Warning: wordwrap() expects parameter 2 to be long, array given in %s on line %d
@@ -195,15 +195,15 @@ NULL
 string(25) "testing
 wordwrap
 function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(199) "t<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(199) "t<br>\ne<br>\ns<br>\nt<br>\ni<br>\nn<br>\ng<br>\nw<br>\no<br>\nr<br>\nd<br>\nw<br>\nr<br>\na<br>\np<br>\nf<br>\nu<br>\nn<br>\nc<br>\nt<br>\ni<br>\no<br>\nn"
 -- Iteration 10 --
 string(25) "testing
 wordwrap
 function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
 
 Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
@@ -211,15 +211,15 @@ bool(false)
 string(25) "testing
 wordwrap
 function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(199) "t<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(199) "t<br>\ne<br>\ns<br>\nt<br>\ni<br>\nn<br>\ng<br>\nw<br>\no<br>\nr<br>\nd<br>\nw<br>\nr<br>\na<br>\np<br>\nf<br>\nu<br>\nn<br>\nc<br>\nt<br>\ni<br>\no<br>\nn"
 -- Iteration 12 --
 string(25) "testing
 wordwrap
 function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
 
 Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
@@ -266,8 +266,8 @@ NULL
 string(25) "testing
 wordwrap
 function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
 
 Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
@@ -275,8 +275,8 @@ bool(false)
 string(25) "testing
 wordwrap
 function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
 
 Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
@@ -323,8 +323,8 @@ NULL
 string(25) "testing
 wordwrap
 function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
 
 Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
@@ -332,8 +332,8 @@ bool(false)
 string(25) "testing
 wordwrap
 function"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
+string(39) "testing<br>\nwordwrap<br>\nfunction"
 
 Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
