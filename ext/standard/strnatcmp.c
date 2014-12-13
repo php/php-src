@@ -117,11 +117,11 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 		ca = *ap; cb = *bp;
 
 		/* skip over leading zeros */
-		while (leading && ca == '0' && (ap+1 < aend) && isdigit(*(ap+1))) {
+		while (leading && ca == '0' && (ap+1 < aend) && isdigit((int)(unsigned char)*(ap+1))) {
 			ca = *++ap;
 		}
 
-		while (leading && cb == '0' && (bp+1 < bend) && isdigit(*(bp+1))) {
+		while (leading && cb == '0' && (bp+1 < bend) && isdigit((int)(unsigned char)*(bp+1))) {
 			cb = *++bp;
 		}
 
