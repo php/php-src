@@ -135,8 +135,8 @@ array(1) {
 }
 -- Iteration 7 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %s on line %d
-bool(false)
+Warning: str_split() expects parameter 2 to be long, double given in %s on line %d
+NULL
 -- Iteration 8 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %s on line %d

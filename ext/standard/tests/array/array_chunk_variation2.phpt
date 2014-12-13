@@ -1,5 +1,7 @@
 --TEST--
 Test array_chunk() function : usage variations - unexpected values for 'size' argument 
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])

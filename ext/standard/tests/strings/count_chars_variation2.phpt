@@ -1,5 +1,7 @@
 --TEST--
 Test count_chars() function : usage variations - test values for $mode argument
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 

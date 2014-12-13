@@ -112,10 +112,14 @@ string(20) "Jan 01 1970 00:00:10"
 string(20) "Dec 31 1969 23:59:50"
 
 --float 12.3456789000e10--
-string(20) "Mar 26 1935 04:50:16"
+
+Warning: gmstrftime() expects parameter 2 to be long, double given in %s on line %d
+bool(false)
 
 --float -12.3456789000e10--
-string(20) "Oct 08 2004 19:09:44"
+
+Warning: gmstrftime() expects parameter 2 to be long, double given in %s on line %d
+bool(false)
 
 --float .5--
 string(20) "Jan 01 1970 00:00:00"

@@ -131,7 +131,7 @@ bool(false)
 
 -- Iteration 7 --
 
-Warning: iconv_strpos(): Offset not contained in string. in %s on line %d
+Warning: iconv_strpos() expects parameter 3 to be long, double given in %s on line %d
 bool(false)
 
 -- Iteration 8 --

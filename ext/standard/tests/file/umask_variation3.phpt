@@ -4,6 +4,7 @@ Test umask() function : usage variation
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
+if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. only for Non Windows');
 }

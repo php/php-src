@@ -1,5 +1,7 @@
 --TEST--
 Test array_change_key_case() function : usage variations - Pass different data types as $case arg
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : array array_change_key_case(array $input [, int $case])

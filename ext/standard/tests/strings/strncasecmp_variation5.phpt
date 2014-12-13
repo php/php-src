@@ -1,5 +1,7 @@
 --TEST--
 Test strncasecmp() function : usage variations - unexpected values for 'len'
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : int strncasecmp ( string $str1, string $str2, int $len );
