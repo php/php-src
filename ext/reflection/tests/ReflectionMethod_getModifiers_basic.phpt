@@ -60,7 +60,7 @@ class TestClass
 class DerivedClass extends TestClass {}
 
 interface TestInterface {
-	public function int();
+	public function inter();
 	public function __clone();
 }
 
@@ -222,7 +222,7 @@ Modifiers for method TestClass::__autoload():
 0x08010100
 
 
-Modifiers for method TestInterface::int():
+Modifiers for method TestInterface::inter():
 0x08000102
 
 

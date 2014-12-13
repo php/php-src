@@ -692,10 +692,72 @@ static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg,
 			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value))))) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
 			}
-#if ZEND_DEBUG
 		} else {
-			zend_error(E_ERROR, "Unknown typehint");
+			ZVAL_DEREF(arg);
+
+			if (Z_TYPE_P(arg) == IS_NULL) {
+				if (!(cur_arg_info->allow_null || (default_value && is_null_constant(default_value)))) {
+failure:
+					zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "", arg);
+				}
+				return;
+			}
+
+			switch (cur_arg_info->type_hint) {
+				case IS_LONG: {
+					zend_long dest;
+					if (_z_param_long(arg, &dest, NULL, 0, 0)) {
+						if (Z_TYPE_P(arg) != IS_LONG) {
+							zval_dtor(arg);
+						}
+						ZVAL_LONG(arg, dest);
+					} else {
+						goto failure;
+					}
+				}
+				break;
+				case IS_DOUBLE: {
+					double dest;
+					if (_z_param_double(arg, &dest, NULL, 0)) {
+						if (Z_TYPE_P(arg) != IS_DOUBLE) {
+							zval_dtor(arg);
+						}
+						ZVAL_DOUBLE(arg, dest);
+					} else {
+						goto failure;
+					}
+				}
+				break;
+				case IS_STRING: {
+					zend_string *dest;
+					if (_z_param_str(arg, &dest, 0)) {
+						if (Z_TYPE_P(arg) != IS_STRING) {
+							zval_dtor(arg);
+						}
+						ZVAL_STR(arg, dest);
+					} else {
+						goto failure;
+					}
+				}
+				break;
+				case _IS_BOOL: {
+					zend_bool dest;
+					if (_z_param_bool(arg, &dest, NULL, 0)) {
+						if (Z_TYPE_P(arg) != IS_TRUE && Z_TYPE_P(arg) != IS_FALSE) {
+							zval_dtor(arg);
+						}
+						ZVAL_BOOL(arg, dest);
+					} else {
+						goto failure;
+					}
+				}
+				break;
+				default:
+#if ZEND_DEBUG
+					zend_error(E_ERROR, "Unknown typehint");
 #endif
+				break;
+			}
 		}
 	}
 }
@@ -725,6 +787,11 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_n
 			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "", NULL);
 		} else if (cur_arg_info->type_hint == IS_CALLABLE) {
 			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", "none", "", NULL);
+		} else if (cur_arg_info->type_hint == IS_LONG
+			|| cur_arg_info->type_hint == IS_DOUBLE
+			|| cur_arg_info->type_hint == IS_STRING
+			|| cur_arg_info->type_hint == _IS_BOOL) {
+			zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), "none", "", NULL);
 #if ZEND_DEBUG
 		} else {
 			zend_error(E_ERROR, "Unknown typehint");
