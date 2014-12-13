@@ -48,7 +48,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 /* is easy to generalize ... but not needed for now */
-PHPDBG_API int phpdbg_consume_stdin_line(char *buf TSRMLS_DC) {
+PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
 	int bytes = PHPDBG_G(input_buflen), len = 0;
 
 	if (PHPDBG_G(input_buflen)) {
@@ -85,7 +85,7 @@ PHPDBG_API int phpdbg_consume_stdin_line(char *buf TSRMLS_DC) {
 		}
 
 		len += bytes;
-	} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1 TSRMLS_CC)) > 0);
+	} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1)) > 0);
 
 	if (bytes <= 0) {
 		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
@@ -96,7 +96,7 @@ PHPDBG_API int phpdbg_consume_stdin_line(char *buf TSRMLS_DC) {
 	return bytes;
 }
 
-PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo TSRMLS_DC) {
+PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo) {
 	int got_now, i = len, j;
 	char *p = ptr;
 #ifndef PHP_WIN32
@@ -177,16 +177,16 @@ PHPDBG_API int phpdbg_send_bytes(int sock, const char *ptr, int len) {
 }
 
 
-PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo TSRMLS_DC) {
+PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo) {
 	if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
-		return phpdbg_consume_bytes(sock, ptr, len, tmo TSRMLS_CC);
+		return phpdbg_consume_bytes(sock, ptr, len, tmo);
 	}
 
 	return read(sock, ptr, len);
 }
 
 
-PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len TSRMLS_DC) {
+PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len) {
 	if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 		return phpdbg_send_bytes(sock, ptr, len);
 	}
@@ -195,9 +195,9 @@ PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len TSRMLS_DC) 
 }
 
 
-PHPDBG_API int phpdbg_open_socket(const char *interface, unsigned short port TSRMLS_DC) {
+PHPDBG_API int phpdbg_open_socket(const char *interface, unsigned short port) {
 	struct addrinfo res;
-	int fd = phpdbg_create_listenable_socket(interface, port, &res TSRMLS_CC);
+	int fd = phpdbg_create_listenable_socket(interface, port, &res);
 
 	if (fd == -1) {
 		return -1;
@@ -214,7 +214,7 @@ PHPDBG_API int phpdbg_open_socket(const char *interface, unsigned short port TSR
 }
 
 
-PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short port, struct addrinfo *addr_res TSRMLS_DC) {
+PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short port, struct addrinfo *addr_res) {
 	int sock = -1, rc;
 	int reuse = 1;
 	struct in6_addr serveraddr;

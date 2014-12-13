@@ -71,7 +71,7 @@ struct	sockaddr_un {
 
 PHP_SOCKETS_API int php_sockets_le_socket(void);
 PHP_SOCKETS_API php_socket *php_create_socket(void);
-PHP_SOCKETS_API void php_destroy_socket(zend_resource *rsrc TSRMLS_DC);
+PHP_SOCKETS_API void php_destroy_socket(zend_resource *rsrc);
 
 #define php_sockets_le_socket_name "Socket"
 
@@ -81,7 +81,7 @@ PHP_SOCKETS_API void php_destroy_socket(zend_resource *rsrc TSRMLS_DC);
 			(socket)->error = _err; \
 			SOCKETS_G(last_error) = _err; \
 			if (_err != EAGAIN && _err != EWOULDBLOCK && _err != EINPROGRESS) { \
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s [%d]: %s", msg, _err, sockets_strerror(_err TSRMLS_CC)); \
+				php_error_docref(NULL, E_WARNING, "%s [%d]: %s", msg, _err, sockets_strerror(_err)); \
 			} \
 		} while (0)
 
@@ -104,8 +104,8 @@ enum sockopt_return {
 	SOCKOPT_SUCCESS
 };
 
-char *sockets_strerror(int error TSRMLS_DC);
-php_socket *socket_import_file_descriptor(PHP_SOCKET sock TSRMLS_DC);
+char *sockets_strerror(int error);
+php_socket *socket_import_file_descriptor(PHP_SOCKET sock);
 
 #else
 #define phpext_sockets_ptr NULL

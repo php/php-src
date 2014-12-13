@@ -45,7 +45,7 @@ static zend_always_inline void _zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LINE
 	}
 }
 
-static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
+static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
 {
 	if (Z_REFCOUNTED_P(zval_ptr)) {
 		if (!Z_DELREF_P(zval_ptr)) {
@@ -104,9 +104,9 @@ static zend_always_inline void _zval_opt_copy_ctor_no_imm(zval *zvalue ZEND_FILE
 	}
 }
 
-ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args, zend_hash_key *key);
+ZEND_API int zval_copy_static_var(zval *p, int num_args, va_list args, zend_hash_key *key);
 
-ZEND_API size_t zend_print_variable(zval *var TSRMLS_DC);
+ZEND_API size_t zend_print_variable(zval *var);
 ZEND_API void _zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC);
 ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC);

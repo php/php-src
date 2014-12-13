@@ -129,7 +129,7 @@
 # include "phpdbg_sigio_win32.h"
 #endif
 
-int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC);
+int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
 
 #define PHPDBG_NEXT   2
 #define PHPDBG_UNTIL  3
@@ -252,7 +252,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	int vmret;                                   /* return from last opcode handler execution */
 	zend_bool in_execution;                      /* in execution? */
 
-	zend_op_array *(*compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
+	zend_op_array *(*compile_file)(zend_file_handle *file_handle, int type);
 	HashTable file_sources;
 
 	FILE *oplog;                                 /* opline log */
@@ -261,7 +261,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 		int fd;
 	} io[PHPDBG_IO_FDS];                         /* io */
 	int eol;                                     /* type of line ending to use */
-	size_t (*php_stdiop_write)(php_stream *, const char *, size_t TSRMLS_DC);
+	size_t (*php_stdiop_write)(php_stream *, const char *, size_t);
 	int in_script_xml;                           /* in <stream> output mode */
 	struct {
 		zend_bool active;

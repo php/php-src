@@ -44,7 +44,7 @@ typedef struct {
 
 
 /* {{{ */
-zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
+zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval *object, int by_ref)
 {
 	php_mysqli_result_iterator *iterator;
 
@@ -52,7 +52,7 @@ zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval 
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 	iterator = ecalloc(1, sizeof(php_mysqli_result_iterator));
-	zend_iterator_init(&iterator->intern TSRMLS_CC);
+	zend_iterator_init(&iterator->intern);
 
 	ZVAL_COPY(&iterator->intern.data, object);
 	iterator->intern.funcs = &php_mysqli_result_iterator_funcs;
@@ -64,7 +64,7 @@ zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval 
 /* }}} */
 
 /* {{{ */
-static void php_mysqli_result_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
+static void php_mysqli_result_iterator_dtor(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*)iter;
 
@@ -75,7 +75,7 @@ static void php_mysqli_result_iterator_dtor(zend_object_iterator *iter TSRMLS_DC
 /* }}} */
 
 /* {{{ */
-static int php_mysqli_result_iterator_valid(zend_object_iterator *iter TSRMLS_DC)
+static int php_mysqli_result_iterator_valid(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 
@@ -84,7 +84,7 @@ static int php_mysqli_result_iterator_valid(zend_object_iterator *iter TSRMLS_DC
 /* }}} */
 
 /* {{{ */
-static zval *php_mysqli_result_iterator_current_data(zend_object_iterator *iter TSRMLS_DC)
+static zval *php_mysqli_result_iterator_current_data(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 
@@ -93,7 +93,7 @@ static zval *php_mysqli_result_iterator_current_data(zend_object_iterator *iter 
 /* }}} */
 
 /* {{{ */
-static void php_mysqli_result_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
+static void php_mysqli_result_iterator_move_forward(zend_object_iterator *iter)
 {
 
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
@@ -103,7 +103,7 @@ static void php_mysqli_result_iterator_move_forward(zend_object_iterator *iter T
 	MYSQLI_FETCH_RESOURCE_BY_OBJ(result, MYSQL_RES *, intern, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	zval_ptr_dtor(&iterator->current_row);
-	php_mysqli_fetch_into_hash_aux(&iterator->current_row, result, MYSQLI_ASSOC TSRMLS_CC);
+	php_mysqli_fetch_into_hash_aux(&iterator->current_row, result, MYSQLI_ASSOC);
 	if (Z_TYPE(iterator->current_row) == IS_ARRAY) {
 		iterator->row_num++;
 	}
@@ -111,7 +111,7 @@ static void php_mysqli_result_iterator_move_forward(zend_object_iterator *iter T
 /* }}} */
 
 /* {{{ */
-static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter TSRMLS_DC)
+static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 	mysqli_object *intern = iterator->result;
@@ -125,19 +125,19 @@ static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter TSRMLS_
 #else
 		if (result->eof) {
 #endif
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Data fetched with MYSQLI_USE_RESULT can be iterated only once");
+			php_error_docref(NULL, E_WARNING, "Data fetched with MYSQLI_USE_RESULT can be iterated only once");
 			return;
 		}
 	} else {
 		mysql_data_seek(result, 0);
 	}
 	iterator->row_num = -1;
-	php_mysqli_result_iterator_move_forward(iter TSRMLS_CC);
+	php_mysqli_result_iterator_move_forward(iter);
 }
 /* }}} */
 
 /* {{{ php_mysqli_result_iterator_current_key */
-static void php_mysqli_result_iterator_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
+static void php_mysqli_result_iterator_current_key(zend_object_iterator *iter, zval *key)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 

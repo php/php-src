@@ -30,12 +30,12 @@ typedef php_stream *(php_stream_transport_factory_func)(const char *proto, size_
 		const char *resourcename, size_t resourcenamelen,
 		const char *persistent_id, int options, int flags,
 		struct timeval *timeout,
-		php_stream_context *context STREAMS_DC TSRMLS_DC);
+		php_stream_context *context STREAMS_DC);
 typedef php_stream_transport_factory_func *php_stream_transport_factory;
 
 BEGIN_EXTERN_C()
-PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory TSRMLS_DC);
-PHPAPI int php_stream_xport_unregister(const char *protocol TSRMLS_DC);
+PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory);
+PHPAPI int php_stream_xport_unregister(const char *protocol);
 
 #define STREAM_XPORT_CLIENT			0
 #define STREAM_XPORT_SERVER			1
@@ -52,10 +52,10 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 		php_stream_context *context,
 		zend_string **error_string,
 		int *error_code
-		STREAMS_DC TSRMLS_DC);
+		STREAMS_DC);
 
 #define php_stream_xport_create(name, namelen, options, flags, persistent_id, timeout, context, estr, ecode) \
-	_php_stream_xport_create(name, namelen, options, flags, persistent_id, timeout, context, estr, ecode STREAMS_CC TSRMLS_CC)
+	_php_stream_xport_create(name, namelen, options, flags, persistent_id, timeout, context, estr, ecode STREAMS_CC)
 
 /* Bind the stream to a local address */
 PHPAPI int php_stream_xport_bind(php_stream *stream,
@@ -102,12 +102,12 @@ enum php_stream_xport_send_recv_flags {
  * peeking, optionally retrieving OOB data */
 PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t buflen,
 		int flags, void **addr, socklen_t *addrlen,
-		zend_string **textaddr TSRMLS_DC);
+		zend_string **textaddr);
 
 /* Similar to send() system call; send data to the stream, optionally
  * sending it as OOB data */
 PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t buflen,
-		int flags, void *addr, socklen_t addrlen TSRMLS_DC);
+		int flags, void *addr, socklen_t addrlen);
 
 typedef enum {
 	STREAM_SHUT_RD,
@@ -117,7 +117,7 @@ typedef enum {
 
 /* Similar to shutdown() system call; shut down part of a full-duplex
  * connection */
-PHPAPI int php_stream_xport_shutdown(php_stream *stream, stream_shutdown_t how TSRMLS_DC);
+PHPAPI int php_stream_xport_shutdown(php_stream *stream, stream_shutdown_t how);
 END_EXTERN_C()
 
 
@@ -186,8 +186,8 @@ typedef enum {
 /* These functions provide crypto support on the underlying transport */
 
 BEGIN_EXTERN_C()
-PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_crypt_method_t crypto_method, php_stream *session_stream TSRMLS_DC);
-PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRMLS_DC);
+PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_crypt_method_t crypto_method, php_stream *session_stream);
+PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate);
 END_EXTERN_C()
 
 typedef struct _php_stream_xport_crypto_param {

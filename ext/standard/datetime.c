@@ -49,9 +49,9 @@ char *day_short_names[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-/* {{{ PHPAPI char *php_std_date(time_t t TSRMLS_DC)
+/* {{{ PHPAPI char *php_std_date(time_t t)
    Return date string in standard format for http headers */
-PHPAPI char *php_std_date(time_t t TSRMLS_DC)
+PHPAPI char *php_std_date(time_t t)
 {
 	struct tm *tm1, tmbuf;
 	char *str;
@@ -92,7 +92,7 @@ PHP_FUNCTION(strptime)
 	struct tm  parsed_time;
 	char      *unparsed_part;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &ts, &ts_length, &format, &format_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &ts, &ts_length, &format, &format_length) == FAILURE) {
 		return;
 	}
 

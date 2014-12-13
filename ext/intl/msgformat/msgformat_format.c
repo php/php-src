@@ -32,7 +32,7 @@
 #endif
 
 /* {{{ */
-static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *return_value TSRMLS_DC)
+static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *return_value)
 {
 	int count;
 	UChar* formatted = NULL;
@@ -45,7 +45,7 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 	zend_hash_init(args_copy, count, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(args_copy, Z_ARRVAL_P(args), (copy_ctor_func_t)zval_add_ref);
 
-	umsg_format_helper(mfo, args_copy, &formatted, &formatted_len TSRMLS_CC);
+	umsg_format_helper(mfo, args_copy, &formatted, &formatted_len);
 
 	zend_hash_destroy(args_copy);
 	efree(args_copy);
@@ -74,11 +74,11 @@ PHP_FUNCTION( msgfmt_format )
 
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oa",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa",
 		&object, MessageFormatter_ce_ptr,  &args ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_format: unable to parse input params", 0 TSRMLS_CC );
+			"msgfmt_format: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -86,7 +86,7 @@ PHP_FUNCTION( msgfmt_format )
 	/* Fetch the object. */
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
-	msgfmt_do_format(mfo, args, return_value TSRMLS_CC);
+	msgfmt_do_format(mfo, args, return_value);
 }
 /* }}} */
 
@@ -108,23 +108,23 @@ PHP_FUNCTION( msgfmt_format_message )
 	MessageFormatter_object *mfo = &mf;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "ssa",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "ssa",
 		  &slocale, &slocale_len, &pattern, &pattern_len, &args ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_format_message: unable to parse input params", 0 TSRMLS_CC );
+			"msgfmt_format_message: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
 
-	msgformat_data_init(&mfo->mf_data TSRMLS_CC);
+	msgformat_data_init(&mfo->mf_data);
 
 	if(pattern && pattern_len) {
 		intl_convert_utf8_to_utf16(&spattern, &spattern_len, pattern, pattern_len, &INTL_DATA_ERROR_CODE(mfo));
 		if( U_FAILURE(INTL_DATA_ERROR_CODE((mfo))) )
 		{
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"msgfmt_format_message: error converting pattern to UTF-16", 0 TSRMLS_CC );
+				"msgfmt_format_message: error converting pattern to UTF-16", 0 );
 			RETURN_FALSE;
 		}
 	} else {
@@ -133,13 +133,13 @@ PHP_FUNCTION( msgfmt_format_message )
 	}
 
 	if(slocale_len == 0) {
-		slocale = intl_locale_get_default(TSRMLS_C);
+		slocale = intl_locale_get_default();
 	}
 
 #ifdef MSG_FORMAT_QUOTE_APOS
 	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
 		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
-			"msgfmt_format_message: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
+			"msgfmt_format_message: error converting pattern to quote-friendly format", 0 );
 		RETURN_FALSE;
 	}
 #endif
@@ -151,10 +151,10 @@ PHP_FUNCTION( msgfmt_format_message )
 	}
 	INTL_METHOD_CHECK_STATUS(mfo, "Creating message formatter failed");
 
-	msgfmt_do_format(mfo, args, return_value TSRMLS_CC);
+	msgfmt_do_format(mfo, args, return_value);
 
 	/* drop the temporary formatter */
-	msgformat_data_free(&mfo->mf_data TSRMLS_CC);
+	msgformat_data_free(&mfo->mf_data);
 }
 /* }}} */
 

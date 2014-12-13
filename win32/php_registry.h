@@ -2,7 +2,7 @@
 #define PHP_REGISTRY_H
 
 
-void UpdateIniFromRegistry(char *path TSRMLS_DC);
+void UpdateIniFromRegistry(char *path);
 char *GetIniPathFromRegistry();
 
 #endif /* PHP_REGISTRY_H */

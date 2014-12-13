@@ -50,9 +50,9 @@ PHPAPI zend_class_entry  *spl_ce_SplMinHeap;
 PHPAPI zend_class_entry  *spl_ce_SplPriorityQueue;
 
 
-typedef void (*spl_ptr_heap_dtor_func)(zval * TSRMLS_DC);
-typedef void (*spl_ptr_heap_ctor_func)(zval * TSRMLS_DC);
-typedef int  (*spl_ptr_heap_cmp_func)(zval *, zval *, zval * TSRMLS_DC);
+typedef void (*spl_ptr_heap_dtor_func)(zval *);
+typedef void (*spl_ptr_heap_ctor_func)(zval *);
+typedef int  (*spl_ptr_heap_cmp_func)(zval *, zval *, zval *);
 
 typedef struct _spl_ptr_heap {
 	zval                    *elements;
@@ -91,21 +91,21 @@ static inline spl_heap_object *spl_heap_from_obj(zend_object *obj) /* {{{ */ {
 
 #define Z_SPLHEAP_P(zv)  spl_heap_from_obj(Z_OBJ_P((zv)))
 
-static void spl_ptr_heap_zval_dtor(zval *elem TSRMLS_DC) { /* {{{ */
+static void spl_ptr_heap_zval_dtor(zval *elem) { /* {{{ */
 	if (!Z_ISUNDEF_P(elem)) {
 		zval_ptr_dtor(elem);
 	}
 }
 /* }}} */
 
-static void spl_ptr_heap_zval_ctor(zval *elem TSRMLS_DC) { /* {{{ */
+static void spl_ptr_heap_zval_ctor(zval *elem) { /* {{{ */
 	if (Z_REFCOUNTED_P(elem)) {
 		Z_ADDREF_P(elem);
 	}
 }
 /* }}} */
 
-static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, zend_long *result TSRMLS_DC) { /* {{{ */
+static int spl_ptr_heap_cmp_cb_helper(zval *object, spl_heap_object *heap_object, zval *a, zval *b, zend_long *result) { /* {{{ */
 	zval zresult;
 
 	zend_call_method_with_2_params(object, heap_object->std.ce, &heap_object->fptr_cmp, "compare", &zresult, a, b);
@@ -145,7 +145,7 @@ static zval *spl_pqueue_extract_helper(zval *value, int flags) /* {{{ */
 }
 /* }}} */
 
-static int spl_ptr_heap_zval_max_cmp(zval *a, zval *b, zval *object TSRMLS_DC) { /* {{{ */
+static int spl_ptr_heap_zval_max_cmp(zval *a, zval *b, zval *object) { /* {{{ */
 	zval result;
 
 	if (EG(exception)) {
@@ -156,7 +156,7 @@ static int spl_ptr_heap_zval_max_cmp(zval *a, zval *b, zval *object TSRMLS_DC) {
 		spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 		if (heap_object->fptr_cmp) {
 			zend_long lval = 0;
-			if (spl_ptr_heap_cmp_cb_helper(object, heap_object, a, b, &lval TSRMLS_CC) == FAILURE) {
+			if (spl_ptr_heap_cmp_cb_helper(object, heap_object, a, b, &lval) == FAILURE) {
 				/* exception or call failure */
 				return 0;
 			}
@@ -164,12 +164,12 @@ static int spl_ptr_heap_zval_max_cmp(zval *a, zval *b, zval *object TSRMLS_DC) {
 		}
 	}
 
-	compare_function(&result, a, b TSRMLS_CC);
+	compare_function(&result, a, b);
 	return (int)Z_LVAL(result);
 }
 /* }}} */
 
-static int spl_ptr_heap_zval_min_cmp(zval *a, zval *b, zval *object TSRMLS_DC) { /* {{{ */
+static int spl_ptr_heap_zval_min_cmp(zval *a, zval *b, zval *object) { /* {{{ */
 	zval result;
 
 	if (EG(exception)) {
@@ -180,7 +180,7 @@ static int spl_ptr_heap_zval_min_cmp(zval *a, zval *b, zval *object TSRMLS_DC) {
 		spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 		if (heap_object->fptr_cmp) {
 			zend_long lval = 0;
-			if (spl_ptr_heap_cmp_cb_helper(object, heap_object, a, b, &lval TSRMLS_CC) == FAILURE) {
+			if (spl_ptr_heap_cmp_cb_helper(object, heap_object, a, b, &lval) == FAILURE) {
 				/* exception or call failure */
 				return 0;
 			}
@@ -188,12 +188,12 @@ static int spl_ptr_heap_zval_min_cmp(zval *a, zval *b, zval *object TSRMLS_DC) {
 		}
 	}
 
-	compare_function(&result, b, a TSRMLS_CC);
+	compare_function(&result, b, a);
 	return (int)Z_LVAL(result);
 }
 /* }}} */
 
-static int spl_ptr_pqueue_zval_cmp(zval *a, zval *b, zval *object TSRMLS_DC) { /* {{{ */
+static int spl_ptr_pqueue_zval_cmp(zval *a, zval *b, zval *object) { /* {{{ */
 	zval result;
 	zval *a_priority_p = spl_pqueue_extract_helper(a, SPL_PQUEUE_EXTR_PRIORITY);
 	zval *b_priority_p = spl_pqueue_extract_helper(b, SPL_PQUEUE_EXTR_PRIORITY);
@@ -211,7 +211,7 @@ static int spl_ptr_pqueue_zval_cmp(zval *a, zval *b, zval *object TSRMLS_DC) { /
 		spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 		if (heap_object->fptr_cmp) {
 			zend_long lval = 0;
-			if (spl_ptr_heap_cmp_cb_helper((zval *)object, heap_object, a_priority_p, b_priority_p, &lval TSRMLS_CC) == FAILURE) {
+			if (spl_ptr_heap_cmp_cb_helper((zval *)object, heap_object, a_priority_p, b_priority_p, &lval) == FAILURE) {
 				/* exception or call failure */
 				return 0;
 			}
@@ -219,7 +219,7 @@ static int spl_ptr_pqueue_zval_cmp(zval *a, zval *b, zval *object TSRMLS_DC) { /
 		}
 	}
 
-	compare_function(&result, a_priority_p, b_priority_p TSRMLS_CC);
+	compare_function(&result, a_priority_p, b_priority_p);
 	return (int)Z_LVAL(result);
 }
 /* }}} */
@@ -240,7 +240,7 @@ static spl_ptr_heap *spl_ptr_heap_init(spl_ptr_heap_cmp_func cmp, spl_ptr_heap_c
 }
 /* }}} */
 
-static void spl_ptr_heap_insert(spl_ptr_heap *heap, zval *elem, void *cmp_userdata TSRMLS_DC) { /* {{{ */
+static void spl_ptr_heap_insert(spl_ptr_heap *heap, zval *elem, void *cmp_userdata) { /* {{{ */
 	int i;
 
 	if (heap->count+1 > heap->max_size) {
@@ -250,10 +250,10 @@ static void spl_ptr_heap_insert(spl_ptr_heap *heap, zval *elem, void *cmp_userda
 		heap->max_size *= 2;
 	}
 
-	heap->ctor(elem TSRMLS_CC);
+	heap->ctor(elem);
 
 	/* sifting up */
-	for (i = heap->count++; i > 0 && heap->cmp(&heap->elements[(i-1)/2], elem, cmp_userdata TSRMLS_CC) < 0; i = (i-1)/2) {
+	for (i = heap->count++; i > 0 && heap->cmp(&heap->elements[(i-1)/2], elem, cmp_userdata) < 0; i = (i-1)/2) {
 		heap->elements[i] = heap->elements[(i-1)/2];
 	}
 
@@ -275,7 +275,7 @@ static zval *spl_ptr_heap_top(spl_ptr_heap *heap) { /* {{{ */
 }
 /* }}} */
 
-static void spl_ptr_heap_delete_top(spl_ptr_heap *heap, zval *elem, void *cmp_userdata TSRMLS_DC) { /* {{{ */
+static void spl_ptr_heap_delete_top(spl_ptr_heap *heap, zval *elem, void *cmp_userdata) { /* {{{ */
 	int i, j;
 	const int limit = (heap->count-1)/2;
 	zval *bottom;
@@ -291,12 +291,12 @@ static void spl_ptr_heap_delete_top(spl_ptr_heap *heap, zval *elem, void *cmp_us
 	for (i = 0; i < limit; i = j) {
 		/* Find smaller child */
 		j = i * 2 + 1;
-		if(j != heap->count && heap->cmp(&heap->elements[j+1], &heap->elements[j], cmp_userdata TSRMLS_CC) > 0) {
+		if(j != heap->count && heap->cmp(&heap->elements[j+1], &heap->elements[j], cmp_userdata) > 0) {
 			j++; /* next child is bigger */
 		}
 
 		/* swap elements between two levels */
-		if(heap->cmp(bottom, &heap->elements[j], cmp_userdata TSRMLS_CC) < 0) {
+		if(heap->cmp(bottom, &heap->elements[j], cmp_userdata) < 0) {
 			heap->elements[i] = heap->elements[j];
 		} else {
 			break;
@@ -309,11 +309,11 @@ static void spl_ptr_heap_delete_top(spl_ptr_heap *heap, zval *elem, void *cmp_us
 	}
 
 	ZVAL_COPY_VALUE(&heap->elements[i], bottom);
-	heap->dtor(elem TSRMLS_CC);
+	heap->dtor(elem);
 }
 /* }}} */
 
-static spl_ptr_heap *spl_ptr_heap_clone(spl_ptr_heap *from TSRMLS_DC) { /* {{{ */
+static spl_ptr_heap *spl_ptr_heap_clone(spl_ptr_heap *from) { /* {{{ */
 	int i;
 
 	spl_ptr_heap *heap = emalloc(sizeof(spl_ptr_heap));
@@ -329,18 +329,18 @@ static spl_ptr_heap *spl_ptr_heap_clone(spl_ptr_heap *from TSRMLS_DC) { /* {{{ *
 	memcpy(heap->elements, from->elements, sizeof(zval)*from->max_size);
 
 	for (i=0; i < heap->count; ++i) {
-		heap->ctor(&heap->elements[i] TSRMLS_CC);
+		heap->ctor(&heap->elements[i]);
 	}
 
 	return heap;
 }
 /* }}} */
 
-static void spl_ptr_heap_destroy(spl_ptr_heap *heap TSRMLS_DC) { /* {{{ */
+static void spl_ptr_heap_destroy(spl_ptr_heap *heap) { /* {{{ */
 	int i;
 
 	for (i=0; i < heap->count; ++i) {
-		heap->dtor(&heap->elements[i] TSRMLS_CC);
+		heap->dtor(&heap->elements[i]);
 	}
 
 	efree(heap->elements);
@@ -354,14 +354,14 @@ static int spl_ptr_heap_count(spl_ptr_heap *heap) { /* {{{ */
 /* }}} */
 /* }}} */
 
-zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
+zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 
-static void spl_heap_object_free_storage(zend_object *object TSRMLS_DC) /* {{{ */
+static void spl_heap_object_free_storage(zend_object *object) /* {{{ */
 {
 	int i;
 	spl_heap_object *intern = spl_heap_from_obj(object);
 
-	zend_object_std_dtor(&intern->std TSRMLS_CC);
+	zend_object_std_dtor(&intern->std);
 
 	for (i = 0; i < intern->heap->count; ++i) {
 		if (!Z_ISUNDEF(intern->heap->elements[i])) {
@@ -369,7 +369,7 @@ static void spl_heap_object_free_storage(zend_object *object TSRMLS_DC) /* {{{ *
 		}
 	}
 
-	spl_ptr_heap_destroy(intern->heap TSRMLS_CC);
+	spl_ptr_heap_destroy(intern->heap);
 
 	zval_ptr_dtor(&intern->retval);
 
@@ -380,7 +380,7 @@ static void spl_heap_object_free_storage(zend_object *object TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
-static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *orig, int clone_orig TSRMLS_DC) /* {{{ */
+static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *orig, int clone_orig) /* {{{ */
 {
 	spl_heap_object   *intern;
 	zend_class_entry  *parent = class_type;
@@ -388,7 +388,7 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 
 	intern = ecalloc(1, sizeof(spl_heap_object) + sizeof(zval) * (parent->default_properties_count - 1));
 
-	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
+	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 
 	intern->flags      = 0;
@@ -401,7 +401,7 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 
 		if (clone_orig) {
 			int i;
-			intern->heap = spl_ptr_heap_clone(other->heap TSRMLS_CC);
+			intern->heap = spl_ptr_heap_clone(other->heap);
 			for (i = 0; i < intern->heap->count; ++i) {
 				if (Z_REFCOUNTED(intern->heap->elements[i])) {
 					Z_ADDREF(intern->heap->elements[i]);
@@ -445,7 +445,7 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 	}
 
 	if (!parent) { /* this must never happen */
-		php_error_docref(NULL TSRMLS_CC, E_COMPILE_ERROR, "Internal compiler error, Class is not child of SplHeap");
+		php_error_docref(NULL, E_COMPILE_ERROR, "Internal compiler error, Class is not child of SplHeap");
 	}
 
 	if (inherited) {
@@ -463,27 +463,27 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 }
 /* }}} */
 
-static zend_object *spl_heap_object_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
+static zend_object *spl_heap_object_new(zend_class_entry *class_type) /* {{{ */
 {
-	return spl_heap_object_new_ex(class_type, NULL, 0 TSRMLS_CC);
+	return spl_heap_object_new_ex(class_type, NULL, 0);
 }
 /* }}} */
 
-static zend_object *spl_heap_object_clone(zval *zobject TSRMLS_DC) /* {{{ */
+static zend_object *spl_heap_object_clone(zval *zobject) /* {{{ */
 {
 	zend_object        *old_object;
 	zend_object        *new_object;
 
 	old_object  = Z_OBJ_P(zobject);
-	new_object = spl_heap_object_new_ex(old_object->ce, zobject, 1 TSRMLS_CC);
+	new_object = spl_heap_object_new_ex(old_object->ce, zobject, 1);
 
-	zend_objects_clone_members(new_object, old_object TSRMLS_CC);
+	zend_objects_clone_members(new_object, old_object);
 
 	return new_object;
 }
 /* }}} */
 
-static int spl_heap_object_count_elements(zval *object, zend_long *count TSRMLS_DC) /* {{{ */
+static int spl_heap_object_count_elements(zval *object, zend_long *count) /* {{{ */
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(object);
 
@@ -507,7 +507,7 @@ static int spl_heap_object_count_elements(zval *object, zend_long *count TSRMLS_
 } 
 /* }}} */
 
-static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zval *obj, int *is_temp TSRMLS_DC) { /* {{{ */
+static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zval *obj, int *is_temp) { /* {{{ */
 	spl_heap_object *intern  = Z_SPLHEAP_P(obj);
 	zval tmp, heap_array;
 	zend_string *pnstr;
@@ -528,12 +528,12 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 
 		zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
-		pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1 TSRMLS_CC);
+		pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1);
 		ZVAL_LONG(&tmp, intern->flags);
 		zend_hash_update(intern->debug_info, pnstr, &tmp);
 		zend_string_release(pnstr);
 
-		pnstr = spl_gen_private_prop_name(ce, "isCorrupted", sizeof("isCorrupted")-1 TSRMLS_CC);
+		pnstr = spl_gen_private_prop_name(ce, "isCorrupted", sizeof("isCorrupted")-1);
 		ZVAL_BOOL(&tmp, intern->heap->flags&SPL_HEAP_CORRUPTED);
 		zend_hash_update(intern->debug_info, pnstr, &tmp);
 		zend_string_release(pnstr);
@@ -547,7 +547,7 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 			}
 		}
 
-		pnstr = spl_gen_private_prop_name(ce, "heap", sizeof("heap")-1 TSRMLS_CC);
+		pnstr = spl_gen_private_prop_name(ce, "heap", sizeof("heap")-1);
 		zend_hash_update(intern->debug_info, pnstr, &heap_array);
 		zend_string_release(pnstr);
 	}
@@ -556,15 +556,15 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 }
 /* }}} */
 
-static HashTable* spl_heap_object_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{ */
+static HashTable* spl_heap_object_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 {
-	return spl_heap_object_get_debug_info_helper(spl_ce_SplHeap, obj, is_temp TSRMLS_CC);
+	return spl_heap_object_get_debug_info_helper(spl_ce_SplHeap, obj, is_temp);
 }
 /* }}} */
 
-static HashTable* spl_pqueue_object_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{ */
+static HashTable* spl_pqueue_object_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 {
-	return spl_heap_object_get_debug_info_helper(spl_ce_SplPriorityQueue, obj, is_temp TSRMLS_CC);
+	return spl_heap_object_get_debug_info_helper(spl_ce_SplPriorityQueue, obj, is_temp);
 }
 /* }}} */
 
@@ -605,19 +605,19 @@ SPL_METHOD(SplHeap, insert)
 	zval *value;
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 		return;
 	}
 
 	intern = Z_SPLHEAP_P(getThis());
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
 	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-	spl_ptr_heap_insert(intern->heap, value, getThis() TSRMLS_CC);
+	spl_ptr_heap_insert(intern->heap, value, getThis());
 
 	RETURN_TRUE;
 } 
@@ -637,14 +637,14 @@ SPL_METHOD(SplHeap, extract)
 	intern = Z_SPLHEAP_P(getThis());
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
-	spl_ptr_heap_delete_top(intern->heap, &value, getThis() TSRMLS_CC);
+	spl_ptr_heap_delete_top(intern->heap, &value, getThis());
 
 	if (Z_ISUNDEF(value)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0);
 		return;
 	}
 
@@ -659,14 +659,14 @@ SPL_METHOD(SplPriorityQueue, insert)
 	zval *data, *priority, elem;
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &data, &priority) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &data, &priority) == FAILURE) {
 		return;
 	}
 
 	intern = Z_SPLHEAP_P(getThis());
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
@@ -677,7 +677,7 @@ SPL_METHOD(SplPriorityQueue, insert)
 	add_assoc_zval_ex(&elem, "data", sizeof("data") - 1, data);
 	add_assoc_zval_ex(&elem, "priority", sizeof("priority") - 1, priority);
 
-	spl_ptr_heap_insert(intern->heap, &elem, getThis() TSRMLS_CC);
+	spl_ptr_heap_insert(intern->heap, &elem, getThis());
 
 	RETURN_TRUE;
 } 
@@ -697,14 +697,14 @@ SPL_METHOD(SplPriorityQueue, extract)
 	intern = Z_SPLHEAP_P(getThis());
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
-	spl_ptr_heap_delete_top(intern->heap, &value, getThis() TSRMLS_CC);
+	spl_ptr_heap_delete_top(intern->heap, &value, getThis());
 
 	if (Z_ISUNDEF(value)) {
-		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0);
 		return;
 	}
 
@@ -739,14 +739,14 @@ SPL_METHOD(SplPriorityQueue, top)
 	intern = Z_SPLHEAP_P(getThis());
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
 	value = spl_ptr_heap_top(intern->heap);
 
 	if (!value) {
-		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty heap", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty heap", 0);
 		return;
 	}
 
@@ -769,7 +769,7 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 	zend_long value;
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &value) == FAILURE) {
 		return;
 	}
 
@@ -837,11 +837,11 @@ SPL_METHOD(SplPriorityQueue, compare)
 {
 	zval *a, *b;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &a, &b) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a, &b) == FAILURE) {
 		return;
 	}
 
-	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL TSRMLS_CC));
+	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL));
 } 
 /* }}} */
 
@@ -859,14 +859,14 @@ SPL_METHOD(SplHeap, top)
 	intern = Z_SPLHEAP_P(getThis());
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
 	value = spl_ptr_heap_top(intern->heap);
 
 	if (!value) {
-		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty heap", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty heap", 0);
 		return;
 	}
 
@@ -880,11 +880,11 @@ SPL_METHOD(SplMinHeap, compare)
 {
 	zval *a, *b;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &a, &b) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a, &b) == FAILURE) {
 		return;
 	}
 
-	RETURN_LONG(spl_ptr_heap_zval_min_cmp(a, b, NULL TSRMLS_CC));
+	RETURN_LONG(spl_ptr_heap_zval_min_cmp(a, b, NULL));
 } 
 /* }}} */
 
@@ -894,42 +894,42 @@ SPL_METHOD(SplMaxHeap, compare)
 {
 	zval *a, *b;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &a, &b) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a, &b) == FAILURE) {
 		return;
 	}
 
-	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL TSRMLS_CC));
+	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL));
 } 
 /* }}} */
 
-static void spl_heap_it_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static void spl_heap_it_dtor(zend_object_iterator *iter) /* {{{ */
 {
 	spl_heap_it *iterator = (spl_heap_it *)iter;
 
-	zend_user_it_invalidate_current(iter TSRMLS_CC);
+	zend_user_it_invalidate_current(iter);
 	zval_ptr_dtor(&iterator->intern.it.data);
 }
 /* }}} */
 
-static void spl_heap_it_rewind(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static void spl_heap_it_rewind(zend_object_iterator *iter) /* {{{ */
 {
 	/* do nothing, the iterator always points to the top element */
 }
 /* }}} */
 
-static int spl_heap_it_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static int spl_heap_it_valid(zend_object_iterator *iter) /* {{{ */
 {
 	return ((Z_SPLHEAP_P(&iter->data))->heap->count != 0 ? SUCCESS : FAILURE);
 }
 /* }}} */
 
-static zval *spl_heap_it_get_current_data(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static zval *spl_heap_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 {
 	spl_heap_object *object = Z_SPLHEAP_P(&iter->data);
 	zval *element = &object->heap->elements[0];
 
 	if (object->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return NULL;
 	}
 
@@ -941,13 +941,13 @@ static zval *spl_heap_it_get_current_data(zend_object_iterator *iter TSRMLS_DC) 
 }
 /* }}} */
 
-static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 {
 	spl_heap_object *object = Z_SPLHEAP_P(&iter->data);
 	zval *element = &object->heap->elements[0];
 
 	if (object->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return NULL;
 	}
 
@@ -963,7 +963,7 @@ static zval *spl_pqueue_it_get_current_data(zend_object_iterator *iter TSRMLS_DC
 }
 /* }}} */
 
-static void spl_heap_it_get_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC) /* {{{ */
+static void spl_heap_it_get_current_key(zend_object_iterator *iter, zval *key) /* {{{ */
 {
 	spl_heap_object *object = Z_SPLHEAP_P(&iter->data);
 
@@ -971,21 +971,21 @@ static void spl_heap_it_get_current_key(zend_object_iterator *iter, zval *key TS
 }
 /* }}} */
 
-static void spl_heap_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static void spl_heap_it_move_forward(zend_object_iterator *iter) /* {{{ */
 {
 	spl_heap_object *object = Z_SPLHEAP_P(&iter->data);
 	zval elem;
 
 	if (object->heap->flags & SPL_HEAP_CORRUPTED) {
-		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
 		return;
 	}
 
-	spl_ptr_heap_delete_top(object->heap, &elem, &iter->data TSRMLS_CC);
+	spl_ptr_heap_delete_top(object->heap, &elem, &iter->data);
 
 	zval_ptr_dtor(&elem);
 
-	zend_user_it_invalidate_current(iter TSRMLS_CC);
+	zend_user_it_invalidate_current(iter);
 }
 /* }}} */
 
@@ -1009,7 +1009,7 @@ SPL_METHOD(SplHeap, next)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
 	zval elem;
-	spl_ptr_heap_delete_top(intern->heap, &elem, getThis() TSRMLS_CC);
+	spl_ptr_heap_delete_top(intern->heap, &elem, getThis());
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1108,19 +1108,19 @@ zend_object_iterator_funcs spl_pqueue_it_funcs = {
 	spl_heap_it_rewind
 };
 
-zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
+zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	spl_heap_it     *iterator;
 	spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 
 	if (by_ref) {
-		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
 		return NULL;
 	}
 
 	iterator = emalloc(sizeof(spl_heap_it));
 	
-	zend_iterator_init(&iterator->intern.it TSRMLS_CC);
+	zend_iterator_init(&iterator->intern.it);
 
 	ZVAL_COPY(&iterator->intern.it.data, object);
 	iterator->intern.it.funcs = &spl_heap_it_funcs;
@@ -1132,19 +1132,19 @@ zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, 
 }
 /* }}} */
 
-zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
+zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	spl_heap_it     *iterator;
 	spl_heap_object *heap_object = Z_SPLHEAP_P(object);
 
 	if (by_ref) {
-		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0 TSRMLS_CC);
+		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
 		return NULL;
 	}
 
 	iterator = emalloc(sizeof(spl_heap_it));
 
-	zend_iterator_init((zend_object_iterator*)iterator TSRMLS_CC);
+	zend_iterator_init((zend_object_iterator*)iterator);
 
 	ZVAL_COPY(&iterator->intern.it.data, object);
 	iterator->intern.it.funcs = &spl_pqueue_it_funcs;

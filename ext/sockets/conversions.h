@@ -39,7 +39,7 @@ typedef void (to_zval_read_field)(const char *data, zval *zv, res_context *ctx);
 extern const struct key_value empty_key_value_list[];
 
 /* AUX FUNCTIONS */
-void err_msg_dispose(struct err_s *err TSRMLS_DC);
+void err_msg_dispose(struct err_s *err);
 void allocations_dispose(zend_llist **allocations);
 
 /* CONVERSION FUNCTIONS */

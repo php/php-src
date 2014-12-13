@@ -119,30 +119,30 @@ extern ZEND_API zend_gc_globals gc_globals;
 #endif
 
 BEGIN_EXTERN_C()
-ZEND_API int  gc_collect_cycles(TSRMLS_D);
-ZEND_API void gc_possible_root(zend_refcounted *ref TSRMLS_DC);
-ZEND_API void gc_remove_from_buffer(zend_refcounted *ref TSRMLS_DC);
-ZEND_API void gc_globals_ctor(TSRMLS_D);
-ZEND_API void gc_globals_dtor(TSRMLS_D);
-ZEND_API void gc_init(TSRMLS_D);
-ZEND_API void gc_reset(TSRMLS_D);
+ZEND_API int  gc_collect_cycles(void);
+ZEND_API void gc_possible_root(zend_refcounted *ref);
+ZEND_API void gc_remove_from_buffer(zend_refcounted *ref);
+ZEND_API void gc_globals_ctor(void);
+ZEND_API void gc_globals_dtor(void);
+ZEND_API void gc_init(void);
+ZEND_API void gc_reset(void);
 END_EXTERN_C()
 
 #define GC_ZVAL_CHECK_POSSIBLE_ROOT(z) \
-	gc_check_possible_root((z) TSRMLS_CC)
+	gc_check_possible_root((z))
 
 #define GC_REMOVE_FROM_BUFFER(p) do { \
 		zend_refcounted *_p = (zend_refcounted*)(p); \
 		if (GC_ADDRESS(GC_INFO(_p))) { \
-			gc_remove_from_buffer(_p TSRMLS_CC); \
+			gc_remove_from_buffer(_p); \
 		} \
 	} while (0)
 
-static zend_always_inline void gc_check_possible_root(zval *z TSRMLS_DC)
+static zend_always_inline void gc_check_possible_root(zval *z)
 {
 	ZVAL_DEREF(z);
 	if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
-		gc_possible_root(Z_COUNTED_P(z) TSRMLS_CC);
+		gc_possible_root(Z_COUNTED_P(z));
 	}
 }
 

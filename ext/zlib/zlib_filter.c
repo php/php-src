@@ -76,7 +76,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
 
-		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 
 		while (bin < (unsigned int) bucket->buflen) {
 
@@ -98,7 +98,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				data->finished = '\1';
 			} else if (status != Z_OK) {
 				/* Something bad happened */
-				php_stream_bucket_delref(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket);
 				/* reset these because despite the error the filter may be used again */
 				data->strm.next_in = data->inbuf;
 				data->strm.avail_in = 0;
@@ -112,20 +112,20 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				php_stream_bucket *out_bucket;
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
-				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0 TSRMLS_CC);
-				php_stream_bucket_append(buckets_out, out_bucket TSRMLS_CC);
+				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				php_stream_bucket_append(buckets_out, out_bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
 			} else if (status == Z_STREAM_END && data->strm.avail_out >= data->outbuf_len) {
 				/* no more data to decompress, and nothing was spat out */
-				php_stream_bucket_delref(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket);
 				return PSFS_PASS_ON;
 			}
 
 		}
 		consumed += bucket->buflen;
-		php_stream_bucket_delref(bucket TSRMLS_CC);
+		php_stream_bucket_delref(bucket);
 	}
 
 	if (!data->finished && flags & PSFS_FLAG_FLUSH_CLOSE) {
@@ -136,8 +136,8 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
-				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0 TSRMLS_CC);
-				php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
+				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				php_stream_bucket_append(buckets_out, bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
@@ -152,7 +152,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 	return exit_status;
 }
 
-static void php_zlib_inflate_dtor(php_stream_filter *thisfilter TSRMLS_DC)
+static void php_zlib_inflate_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
 		php_zlib_filter_data *data = Z_PTR(thisfilter->abstract);
@@ -201,7 +201,7 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 
 		bucket = buckets_in->head;
 
-		bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
+		bucket = php_stream_bucket_make_writeable(bucket);
 
 		while (bin < (unsigned int) bucket->buflen) {
 			desired = bucket->buflen - bin;
@@ -214,7 +214,7 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 			status = deflate(&(data->strm), flags & PSFS_FLAG_FLUSH_CLOSE ? Z_FULL_FLUSH : (flags & PSFS_FLAG_FLUSH_INC ? Z_SYNC_FLUSH : Z_NO_FLUSH));
 			if (status != Z_OK) {
 				/* Something bad happened */
-				php_stream_bucket_delref(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket);
 				return PSFS_ERR_FATAL;
 			}
 			desired -= data->strm.avail_in; /* desired becomes what we consumed this round through */
@@ -226,15 +226,15 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 				php_stream_bucket *out_bucket;
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
-				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0 TSRMLS_CC);
-				php_stream_bucket_append(buckets_out, out_bucket TSRMLS_CC);
+				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				php_stream_bucket_append(buckets_out, out_bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
 			}
 		}
 		consumed += bucket->buflen;
-		php_stream_bucket_delref(bucket TSRMLS_CC);
+		php_stream_bucket_delref(bucket);
 	}
 
 	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
@@ -245,8 +245,8 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
-				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0 TSRMLS_CC);
-				php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
+				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				php_stream_bucket_append(buckets_out, bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
@@ -261,7 +261,7 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 	return exit_status;
 }
 
-static void php_zlib_deflate_dtor(php_stream_filter *thisfilter TSRMLS_DC)
+static void php_zlib_deflate_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
 		php_zlib_filter_data *data = Z_PTR(thisfilter->abstract);
@@ -282,7 +282,7 @@ static php_stream_filter_ops php_zlib_deflate_ops = {
 
 /* {{{ zlib.* common factory */
 
-static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
+static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, int persistent)
 {
 	php_stream_filter_ops *fops = NULL;
 	php_zlib_filter_data *data;
@@ -291,7 +291,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_zlib_filter_data), persistent);
 	if (!data) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes", sizeof(php_zlib_filter_data));
+		php_error_docref(NULL, E_WARNING, "Failed allocating %zd bytes", sizeof(php_zlib_filter_data));
 		return NULL;
 	}
 
@@ -303,14 +303,14 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	data->strm.avail_out = data->outbuf_len = data->inbuf_len = 0x8000;
 	data->strm.next_in = data->inbuf = (Bytef *) pemalloc(data->inbuf_len, persistent);
 	if (!data->inbuf) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes", data->inbuf_len);
+		php_error_docref(NULL, E_WARNING, "Failed allocating %zd bytes", data->inbuf_len);
 		pefree(data, persistent);
 		return NULL;
 	}
 	data->strm.avail_in = 0;
 	data->strm.next_out = data->outbuf = (Bytef *) pemalloc(data->outbuf_len, persistent);
 	if (!data->outbuf) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes", data->outbuf_len);
+		php_error_docref(NULL, E_WARNING, "Failed allocating %zd bytes", data->outbuf_len);
 		pefree(data->inbuf, persistent);
 		pefree(data, persistent);
 		return NULL;
@@ -332,7 +332,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				ZVAL_DUP(&tmp, tmpzval);
 				convert_to_long(&tmp);
 				if (Z_LVAL(tmp) < -MAX_WBITS || Z_LVAL(tmp) > MAX_WBITS + 32) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
+					php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
 				} else {
 					windowBits = Z_LVAL(tmp);
 				}
@@ -365,7 +365,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 						/* Memory Level (1 - 9) */
 						if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > MAX_MEM_LEVEL) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for memory level. (%pd)", Z_LVAL(tmp));
+							php_error_docref(NULL, E_WARNING, "Invalid parameter give for memory level. (%pd)", Z_LVAL(tmp));
 						} else {
 							memLevel = Z_LVAL(tmp);
 						}
@@ -377,7 +377,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 
 						/* log-2 base of history window (9 - 15) */
 						if (Z_LVAL(tmp) < -MAX_WBITS || Z_LVAL(tmp) > MAX_WBITS + 16) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
+							php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (%pd)", Z_LVAL(tmp));
 						} else {
 							windowBits = Z_LVAL(tmp);
 						}
@@ -400,13 +400,13 @@ factory_setlevel:
 
 					/* Set compression level within reason (-1 == default, 0 == none, 1-9 == least to most compression */
 					if (Z_LVAL(tmp) < -1 || Z_LVAL(tmp) > 9) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid compression level specified. (%pd)", Z_LVAL(tmp));
+						php_error_docref(NULL, E_WARNING, "Invalid compression level specified. (%pd)", Z_LVAL(tmp));
 					} else {
 						level = Z_LVAL(tmp);
 					}
 					break;
 				default:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid filter parameter, ignored");
+					php_error_docref(NULL, E_WARNING, "Invalid filter parameter, ignored");
 			}
 		}
 		status = deflateInit2(&(data->strm), level, Z_DEFLATED, windowBits, memLevel, 0);

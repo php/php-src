@@ -32,7 +32,7 @@ struct php_gz_stream_data_t	{
 	php_stream *stream;
 };
 
-static size_t php_gziop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static size_t php_gziop_read(php_stream *stream, char *buf, size_t count)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 	int read;
@@ -47,7 +47,7 @@ static size_t php_gziop_read(php_stream *stream, char *buf, size_t count TSRMLS_
 	return (size_t)((read < 0) ? 0 : read);
 }
 
-static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 	int wrote;
@@ -58,14 +58,14 @@ static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count 
 	return (size_t)((wrote < 0) ? 0 : wrote);
 }
 
-static int php_gziop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
+static int php_gziop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 
 	assert(self != NULL);
 
 	if (whence == SEEK_END) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SEEK_END is not supported");
+		php_error_docref(NULL, E_WARNING, "SEEK_END is not supported");
 		return -1;
 	}
 	*newoffs = gzseek(self->gz_file, offset, whence);
@@ -73,7 +73,7 @@ static int php_gziop_seek(php_stream *stream, zend_off_t offset, int whence, zen
 	return (*newoffs < 0) ? -1 : 0;
 }
 
-static int php_gziop_close(php_stream *stream, int close_handle TSRMLS_DC)
+static int php_gziop_close(php_stream *stream, int close_handle)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 	int ret = EOF;
@@ -93,7 +93,7 @@ static int php_gziop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	return ret;
 }
 
-static int php_gziop_flush(php_stream *stream TSRMLS_DC)
+static int php_gziop_flush(php_stream *stream)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *) stream->abstract;
 
@@ -111,7 +111,7 @@ php_stream_ops php_stream_gzio_ops = {
 };
 
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, 
-							  char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+							  char **opened_path, php_stream_context *context STREAMS_DC)
 {
 	struct php_gz_stream_data_t *self;
 	php_stream *stream = NULL, *innerstream = NULL;
@@ -119,7 +119,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 	/* sanity check the stream: it can be either read-only or write-only */
 	if (strchr(mode, '+')) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot open a zlib stream for reading and writing at the same time!");
+			php_error_docref(NULL, E_WARNING, "cannot open a zlib stream for reading and writing at the same time!");
 		}
 		return NULL;
 	}
@@ -152,7 +152,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 
 			efree(self);
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "gzopen failed");
+				php_error_docref(NULL, E_WARNING, "gzopen failed");
 			}
 		}
 

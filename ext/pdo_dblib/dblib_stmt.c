@@ -95,7 +95,7 @@ static char *pdo_dblib_get_field_name(int type)
 }
 /* }}} */
 
-static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
+static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
@@ -106,7 +106,7 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
-static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
+static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	
@@ -115,7 +115,7 @@ static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
-static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
+static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
@@ -124,7 +124,7 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	ret = dbresults(H->link);
 
 	if (FAIL == ret) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbresults() returned FAIL" TSRMLS_CC);		
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbresults() returned FAIL");		
 		return 0;
 	}
 	
@@ -138,7 +138,7 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
-static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
+static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
@@ -146,7 +146,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	
 	dbsetuserdata(H->link, (BYTE*) &S->err);
 	
-	pdo_dblib_stmt_cursor_closer(stmt TSRMLS_CC);
+	pdo_dblib_stmt_cursor_closer(stmt);
 	
 	if (FAIL == dbcmd(H->link, stmt->active_query_string)) {
 		return 0;
@@ -156,7 +156,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		return 0;
 	}
 	
-	ret = pdo_dblib_stmt_next_rowset(stmt TSRMLS_CC);
+	ret = pdo_dblib_stmt_next_rowset(stmt);
 	
 	stmt->row_count = DBCOUNT(H->link);
 	stmt->column_count = dbnumcols(H->link);
@@ -165,7 +165,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 }
 
 static int pdo_dblib_stmt_fetch(pdo_stmt_t *stmt,
-	enum pdo_fetch_orientation ori, zend_long offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, zend_long offset)
 {
 	
 	RETCODE ret;
@@ -176,7 +176,7 @@ static int pdo_dblib_stmt_fetch(pdo_stmt_t *stmt,
 	ret = dbnextrow(H->link);
 	
 	if (FAIL == ret) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbnextrow() returned FAIL" TSRMLS_CC);
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbnextrow() returned FAIL");
 		return 0;
 	}
 		
@@ -187,7 +187,7 @@ static int pdo_dblib_stmt_fetch(pdo_stmt_t *stmt,
 	return 1;	
 }
 
-static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
+static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
@@ -207,7 +207,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 }
 
 static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
-	 zend_ulong *len, int *caller_frees TSRMLS_DC)
+	 zend_ulong *len, int *caller_frees)
 {
 	
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
@@ -275,12 +275,12 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 }
 
 static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
-		enum pdo_param_event event_type TSRMLS_DC)
+		enum pdo_param_event event_type)
 {
 	return 1;
 }
 
-static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value TSRMLS_DC)
+static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;

@@ -368,7 +368,6 @@ static ZEND_NORETURN void zend_mm_safe_error(zend_mm_heap *heap,
 #endif
 	size_t size)
 {
-	TSRMLS_FETCH();
 
 	heap->overflow = 1;
 	zend_try {
@@ -1836,7 +1835,7 @@ static zend_long zend_mm_find_leaks(zend_mm_heap *heap, zend_mm_chunk *p, int i,
 	return count;
 }
 
-static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
+static void zend_mm_check_leaks(zend_mm_heap *heap)
 {
 	zend_mm_huge_list *list;
 	zend_mm_chunk *p;
@@ -1859,12 +1858,12 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 		leak.lineno = list->dbg.lineno;
 		leak.orig_lineno = list->dbg.orig_lineno;
 
-		zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL TSRMLS_CC);
-		zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak TSRMLS_CC);
+		zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
+		zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak);
 //???		repeated = zend_mm_find_leaks_huge(segment, p);
 		total += 1 + repeated;
 		if (repeated) {
-			zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated TSRMLS_CC);
+			zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated);
 		}
 
 		list = list->next;
@@ -1892,8 +1891,8 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 							leak.lineno = dbg->lineno;
 							leak.orig_lineno = dbg->orig_lineno;
 
-							zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL TSRMLS_CC);
-							zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak TSRMLS_CC);
+							zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
+							zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak);
 
 							dbg->size = 0;
 							dbg->filename = NULL;
@@ -1903,7 +1902,7 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 							           zend_mm_find_leaks(heap, p, i + bin_pages[bin_num], &leak);
 							total += 1 + repeated;
 							if (repeated) {
-								zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated TSRMLS_CC);
+								zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated);
 							}
 						}
 						dbg = (zend_mm_debug_info*)((char*)dbg + bin_data_size[bin_num]);
@@ -1921,15 +1920,15 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 					leak.lineno = dbg->lineno;
 					leak.orig_lineno = dbg->orig_lineno;
 
-					zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL TSRMLS_CC);
-					zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak TSRMLS_CC);
+					zend_message_dispatcher(ZMSG_LOG_SCRIPT_NAME, NULL);
+					zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, &leak);
 
 					zend_mm_bitset_reset_range(p->free_map, i, pages_count);
 
 					repeated = zend_mm_find_leaks(heap, p, i + pages_count, &leak);
 					total += 1 + repeated;
 					if (repeated) {
-						zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated TSRMLS_CC);
+						zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *)(zend_uintptr_t)repeated);
 					}
 					i += pages_count;
 				}
@@ -1940,12 +1939,12 @@ static void zend_mm_check_leaks(zend_mm_heap *heap TSRMLS_DC)
 		p = p->next;
 	} while (p != heap->main_chunk);
 	if (total) {
-		zend_message_dispatcher(ZMSG_MEMORY_LEAKS_GRAND_TOTAL, &total TSRMLS_CC);
+		zend_message_dispatcher(ZMSG_MEMORY_LEAKS_GRAND_TOTAL, &total);
 	}
 }
 #endif
 
-void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent TSRMLS_DC)
+void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 {
 	zend_mm_chunk *p;
 	zend_mm_huge_list *list;
@@ -1958,7 +1957,7 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent TSRMLS_DC)
 
 #if ZEND_DEBUG
 	if (!silent) {
-		zend_mm_check_leaks(heap TSRMLS_CC);
+		zend_mm_check_leaks(heap);
 	}
 #endif
 
@@ -2086,7 +2085,7 @@ static int alloc_globals_id;
 static zend_alloc_globals alloc_globals;
 #endif
 
-ZEND_API int is_zend_mm(TSRMLS_D)
+ZEND_API int is_zend_mm(void)
 {
 #if ZEND_MM_CUSTOM
 	return !AG(mm_heap)->use_custom_heap;
@@ -2126,7 +2125,6 @@ ZEND_MM_BINS_INFO(_ZEND_BIN_ALLOCATOR, x, y)
 
 ZEND_API void* ZEND_FASTCALL _emalloc_large(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	TSRMLS_FETCH();
 
 	ZEND_MM_CUSTOM_ALLOCATOR(size);
 	return zend_mm_alloc_large(AG(mm_heap), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -2134,7 +2132,6 @@ ZEND_API void* ZEND_FASTCALL _emalloc_large(size_t size ZEND_FILE_LINE_DC ZEND_F
 
 ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 {
-	TSRMLS_FETCH();
 
 	ZEND_MM_CUSTOM_ALLOCATOR(size);
 	return zend_mm_alloc_huge(AG(mm_heap), size);
@@ -2172,7 +2169,6 @@ ZEND_MM_BINS_INFO(_ZEND_BIN_FREE, x, y)
 
 ZEND_API void ZEND_FASTCALL _efree_large(void *ptr, size_t size)
 {
-	TSRMLS_FETCH();
 
 	ZEND_MM_CUSTOM_DEALLOCATOR(ptr);
 	{
@@ -2190,7 +2186,6 @@ ZEND_API void ZEND_FASTCALL _efree_large(void *ptr, size_t size)
 
 ZEND_API void ZEND_FASTCALL _efree_huge(void *ptr, size_t size)
 {
-	TSRMLS_FETCH();
 
 	ZEND_MM_CUSTOM_DEALLOCATOR(ptr);
 	// TODO: use size???
@@ -2200,7 +2195,6 @@ ZEND_API void ZEND_FASTCALL _efree_huge(void *ptr, size_t size)
 
 ZEND_API void* ZEND_FASTCALL _emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	TSRMLS_FETCH();
 
 #if ZEND_MM_CUSTOM
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
@@ -2212,7 +2206,6 @@ ZEND_API void* ZEND_FASTCALL _emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 
 ZEND_API void ZEND_FASTCALL _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	TSRMLS_FETCH();
 
 #if ZEND_MM_CUSTOM
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
@@ -2225,7 +2218,6 @@ ZEND_API void ZEND_FASTCALL _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_OR
 
 ZEND_API void* ZEND_FASTCALL _erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	TSRMLS_FETCH();
 
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
 		return AG(mm_heap)->_realloc(ptr, size);
@@ -2279,7 +2271,6 @@ ZEND_API void* ZEND_FASTCALL _ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_D
 {
 	void *p;
 #ifdef ZEND_SIGNALS
-	TSRMLS_FETCH();
 #endif
 	HANDLE_BLOCK_INTERRUPTIONS();
 
@@ -2298,7 +2289,6 @@ ZEND_API char* ZEND_FASTCALL _estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_
 	size_t length;
 	char *p;
 #ifdef ZEND_SIGNALS
-	TSRMLS_FETCH();
 #endif
 
 	HANDLE_BLOCK_INTERRUPTIONS();
@@ -2318,7 +2308,6 @@ ZEND_API char* ZEND_FASTCALL _estrndup(const char *s, size_t length ZEND_FILE_LI
 {
 	char *p;
 #ifdef ZEND_SIGNALS
-	TSRMLS_FETCH();
 #endif
 
 	HANDLE_BLOCK_INTERRUPTIONS();
@@ -2339,7 +2328,6 @@ ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 {
 	char *p;
 #ifdef ZEND_SIGNALS
-	TSRMLS_FETCH();
 #endif
 
 	HANDLE_BLOCK_INTERRUPTIONS();
@@ -2358,7 +2346,7 @@ ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 }
 
 
-ZEND_API int zend_set_memory_limit(size_t memory_limit TSRMLS_DC)
+ZEND_API int zend_set_memory_limit(size_t memory_limit)
 {
 #if ZEND_MM_LIMIT
 	AG(mm_heap)->limit = (memory_limit >= ZEND_MM_CHUNK_SIZE) ? memory_limit : ZEND_MM_CHUNK_SIZE;
@@ -2366,7 +2354,7 @@ ZEND_API int zend_set_memory_limit(size_t memory_limit TSRMLS_DC)
 	return SUCCESS;
 }
 
-ZEND_API size_t zend_memory_usage(int real_usage TSRMLS_DC)
+ZEND_API size_t zend_memory_usage(int real_usage)
 {
 #if ZEND_MM_STAT
 	if (real_usage) {
@@ -2379,7 +2367,7 @@ ZEND_API size_t zend_memory_usage(int real_usage TSRMLS_DC)
 	return 0;
 }
 
-ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC)
+ZEND_API size_t zend_memory_peak_usage(int real_usage)
 {
 #if ZEND_MM_STAT
 	if (real_usage) {
@@ -2391,12 +2379,12 @@ ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC)
 	return 0;
 }
 
-ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
+ZEND_API void shutdown_memory_manager(int silent, int full_shutdown)
 {
-	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent TSRMLS_CC);
+	zend_mm_shutdown(AG(mm_heap), full_shutdown, silent);
 }
 
-static void alloc_globals_ctor(zend_alloc_globals *alloc_globals TSRMLS_DC)
+static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 {
 #if ZEND_MM_CUSTOM
 	char *tmp = getenv("USE_ZEND_ALLOC");
@@ -2416,13 +2404,13 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals TSRMLS_DC)
 }
 
 #ifdef ZTS
-static void alloc_globals_dtor(zend_alloc_globals *alloc_globals TSRMLS_DC)
+static void alloc_globals_dtor(zend_alloc_globals *alloc_globals)
 {
-	shutdown_memory_manager(1, 1 TSRMLS_CC);
+	shutdown_memory_manager(1, 1);
 }
 #endif
 
-ZEND_API void start_memory_manager(TSRMLS_D)
+ZEND_API void start_memory_manager(void)
 {
 #ifdef ZTS
 	ts_allocate_id(&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
@@ -2438,7 +2426,7 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 #endif
 }
 
-ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap TSRMLS_DC)
+ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap)
 {
 	zend_mm_heap *old_heap;
 

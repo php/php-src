@@ -62,18 +62,18 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 
 #ifdef PDO_USE_MYSQLND
 #include "ext/mysqlnd/mysqlnd_reverse_api.h"
-static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
+static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv)
 {
-	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce() TSRMLS_CC)) {
+	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce())) {
 		pdo_dbh_t * dbh = Z_PDO_DBH_P(zv);
 
 		if (!dbh) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to retrieve handle from object store");
+			php_error_docref(NULL, E_WARNING, "Failed to retrieve handle from object store");
 			return NULL;
 		}
 
 		if (dbh->driver != &pdo_mysql_driver) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);
+			php_error_docref(NULL, E_WARNING, "Provided PDO instance is not using MySQL but %s", dbh->driver->driver_name);
 			return NULL;
 		}
 
@@ -132,7 +132,7 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MULTI_STATEMENTS", (zend_long)PDO_MYSQL_ATTR_MULTI_STATEMENTS);
 
 #ifdef PDO_USE_MYSQLND
-	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api TSRMLS_CC);
+	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
 #endif
 
 	return php_pdo_register_driver(&pdo_mysql_driver);
@@ -176,7 +176,7 @@ static PHP_MINFO_FUNCTION(pdo_mysql)
 static PHP_RINIT_FUNCTION(pdo_mysql)
 {	
 	if (PDO_MYSQL_G(debug)) {
-		MYSQLND_DEBUG *dbg = mysqlnd_debug_init(mysqlnd_debug_std_no_trace_funcs TSRMLS_CC);
+		MYSQLND_DEBUG *dbg = mysqlnd_debug_init(mysqlnd_debug_std_no_trace_funcs);
 		if (!dbg) {
 			return FAILURE;
 		}

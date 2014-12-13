@@ -24,6 +24,6 @@
 
 PHPDBG_COMMAND(wait);
 
-void phpdbg_webdata_decompress(char *msg, int len TSRMLS_DC);
+void phpdbg_webdata_decompress(char *msg, int len);
 
 #endif /* PHPDBG_WAIT_H */

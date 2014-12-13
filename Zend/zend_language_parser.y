@@ -283,8 +283,8 @@ top_statement:
 	|	class_declaration_statement		{ $$ = $1; }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
-			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset(TSRMLS_C)));
-			  zend_stop_lexing(TSRMLS_C); }
+			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset()));
+			  zend_stop_lexing(); }
 	|	T_NAMESPACE namespace_name ';'
 			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, $2, NULL);
 			  RESET_DOC_COMMENT(); }
@@ -368,7 +368,7 @@ statement:
 		foreach_statement
 			{ $$ = zend_ast_create(ZEND_AST_FOREACH, $3, $7, $5, $9); }
 	|	T_DECLARE '(' const_list ')'
-			{ zend_handle_encoding_declaration($3 TSRMLS_CC); }
+			{ zend_handle_encoding_declaration($3); }
 		declare_statement
 			{ $$ = zend_ast_create(ZEND_AST_DECLARE, $3, $6); }
 	|	';'	/* empty statement */ { $$ = NULL; }
@@ -606,7 +606,7 @@ class_statement_list:
 
 class_statement:
 		variable_modifiers property_list ';'
-			{ $$ = zend_ast_append_doc_comment($2 TSRMLS_CC); $$->attr = $1; }
+			{ $$ = zend_ast_append_doc_comment($2); $$->attr = $1; }
 	|	T_CONST class_const_list ';'
 			{ $$ = $2; RESET_DOC_COMMENT(); }
 	|	T_USE name_list trait_adaptations
@@ -1171,8 +1171,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 		return yystrlen(yystr);
 	}
 	{
-		TSRMLS_FETCH();
-		if (CG(parse_error) == 0) {
+			if (CG(parse_error) == 0) {
 			char buffer[120];
 			const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
 			unsigned int len = 0, toklen = 0, yystr_len;

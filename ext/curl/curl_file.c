@@ -35,20 +35,20 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	size_t fname_len, mime_len, postname_len;
 	zval *cf = return_value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ss", &fname, &fname_len, &mime, &mime_len, &postname, &postname_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ss", &fname, &fname_len, &mime, &mime_len, &postname, &postname_len) == FAILURE) {
 		return;
 	}
 
 	if (fname) {
-		zend_update_property_string(curl_CURLFile_class, cf, "name", sizeof("name")-1, fname TSRMLS_CC);
+		zend_update_property_string(curl_CURLFile_class, cf, "name", sizeof("name")-1, fname);
 	}
 
 	if (mime) {
-		zend_update_property_string(curl_CURLFile_class, cf, "mime", sizeof("mime")-1, mime TSRMLS_CC);
+		zend_update_property_string(curl_CURLFile_class, cf, "mime", sizeof("mime")-1, mime);
 	}
 
 	if (postname) {
-		zend_update_property_string(curl_CURLFile_class, cf, "postname", sizeof("postname")-1, postname TSRMLS_CC);
+		zend_update_property_string(curl_CURLFile_class, cf, "postname", sizeof("postname")-1, postname);
 	}
 }
 
@@ -76,7 +76,7 @@ static void curlfile_get_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	res = zend_read_property(curl_CURLFile_class, getThis(), name, strlen(name), 1 TSRMLS_CC);
+	res = zend_read_property(curl_CURLFile_class, getThis(), name, strlen(name), 1);
 	RETURN_ZVAL(res, 1, 0);
 }
 
@@ -85,10 +85,10 @@ static void curlfile_set_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 	char *arg = NULL;
 	size_t arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
 		return;
 	}
-	zend_update_property_string(curl_CURLFile_class, getThis(), name, strlen(name), arg TSRMLS_CC);
+	zend_update_property_string(curl_CURLFile_class, getThis(), name, strlen(name), arg);
 }
 
 /* {{{ proto string CURLFile::getFilename()
@@ -135,8 +135,8 @@ ZEND_METHOD(CURLFile, setPostFilename)
    Unserialization handler */
 ZEND_METHOD(CURLFile, __wakeup)
 {
-	zend_update_property_string(curl_CURLFile_class, getThis(), "name", sizeof("name")-1, "" TSRMLS_CC);
-	zend_throw_exception(NULL, "Unserialization of CURLFile instances is not allowed", 0 TSRMLS_CC);
+	zend_update_property_string(curl_CURLFile_class, getThis(), "name", sizeof("name")-1, "");
+	zend_throw_exception(NULL, "Unserialization of CURLFile instances is not allowed", 0);
 }
 /* }}} */
 
@@ -162,14 +162,14 @@ static const zend_function_entry curlfile_funcs[] = {
 	PHP_FE_END
 };
 
-void curlfile_register_class(TSRMLS_D)
+void curlfile_register_class(void)
 {
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY( ce, "CURLFile", curlfile_funcs );
-	curl_CURLFile_class = zend_register_internal_class(&ce TSRMLS_CC);
-	zend_declare_property_string(curl_CURLFile_class, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
-	zend_declare_property_string(curl_CURLFile_class, "mime", sizeof("mime")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
-	zend_declare_property_string(curl_CURLFile_class, "postname", sizeof("postname")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+	curl_CURLFile_class = zend_register_internal_class(&ce);
+	zend_declare_property_string(curl_CURLFile_class, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
+	zend_declare_property_string(curl_CURLFile_class, "mime", sizeof("mime")-1, "", ZEND_ACC_PUBLIC);
+	zend_declare_property_string(curl_CURLFile_class, "postname", sizeof("postname")-1, "", ZEND_ACC_PUBLIC);
 }
 
 #endif

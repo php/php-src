@@ -42,14 +42,14 @@ const phpdbg_command_t phpdbg_break_commands[] = {
 
 PHPDBG_BREAK(at) /* {{{ */
 {
-	phpdbg_set_breakpoint_at(param TSRMLS_CC);
+	phpdbg_set_breakpoint_at(param);
 
 	return SUCCESS;
 } /* }}} */
 
 PHPDBG_BREAK(del) /* {{{ */
 {
-	phpdbg_delete_breakpoint(param->num TSRMLS_CC);
+	phpdbg_delete_breakpoint(param->num);
 
 	return SUCCESS;
 } /* }}} */

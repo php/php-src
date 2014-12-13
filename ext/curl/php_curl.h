@@ -114,8 +114,8 @@ PHP_FUNCTION(curl_pause);
 PHP_FUNCTION(curl_file_create);
 
 
-void _php_curl_multi_close(zend_resource * TSRMLS_DC);
-void _php_curl_share_close(zend_resource * TSRMLS_DC);
+void _php_curl_multi_close(zend_resource *);
+void _php_curl_share_close(zend_resource *);
 
 typedef struct {
 	zval       				func_name;
@@ -197,9 +197,9 @@ typedef struct {
 
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
-void _php_curl_verify_handlers(php_curl *ch, int reporterror TSRMLS_DC);
+void _php_curl_verify_handlers(php_curl *ch, int reporterror);
 
-void curlfile_register_class(TSRMLS_D);
+void curlfile_register_class(void);
 PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;
 
 #else

@@ -71,21 +71,21 @@ static inline void clone_indices(php_com_saproxy *dest, php_com_saproxy *src, in
 	}
 }
 
-static zval *saproxy_property_read(zval *object, zval *member, int type, void **cahce_slot, zval *rv TSRMLS_DC)
+static zval *saproxy_property_read(zval *object, zval *member, int type, void **cahce_slot, zval *rv)
 {
 	ZVAL_NULL(rv);
 
-	php_com_throw_exception(E_INVALIDARG, "safearray has no properties" TSRMLS_CC);
+	php_com_throw_exception(E_INVALIDARG, "safearray has no properties");
 
 	return rv;
 }
 
-static void saproxy_property_write(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
+static void saproxy_property_write(zval *object, zval *member, zval *value, void **cache_slot)
 {
-	php_com_throw_exception(E_INVALIDARG, "safearray has no properties" TSRMLS_CC);
+	php_com_throw_exception(E_INVALIDARG, "safearray has no properties");
 }
 
-static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *rv TSRMLS_DC)
+static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *rv)
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	UINT dims, i;
@@ -114,20 +114,20 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 
 		res = php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
 			   	Z_STRLEN(proxy->indices[0]), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v,
-			   	proxy->dimensions, args, 0 TSRMLS_CC);
+			   	proxy->dimensions, args, 0);
 
 		if (res == SUCCESS) {
-			php_com_zval_from_variant(rv, &v, proxy->obj->code_page TSRMLS_CC);
+			php_com_zval_from_variant(rv, &v, proxy->obj->code_page);
 			VariantClear(&v);
 		} else if (res == DISP_E_BADPARAMCOUNT) {
 			/* return another proxy */
-			php_com_saproxy_create(object, rv, offset TSRMLS_CC);
+			php_com_saproxy_create(object, rv, offset);
 		}
 
 		return rv;
 
 	} else if (!V_ISARRAY(&proxy->obj->v)) {
-		php_com_throw_exception(E_INVALIDARG, "invalid read from com proxy object" TSRMLS_CC);
+		php_com_throw_exception(E_INVALIDARG, "invalid read from com proxy object");
 		return rv;
 	}
 
@@ -141,7 +141,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 
 	if ((UINT) proxy->dimensions >= dims) {
 		/* too many dimensions */
-		php_com_throw_exception(E_INVALIDARG, "too many dimensions!" TSRMLS_CC);
+		php_com_throw_exception(E_INVALIDARG, "too many dimensions!");
 		return rv;
 	}
 
@@ -150,7 +150,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 	SafeArrayGetUBound(sa, proxy->dimensions, &ubound);
 
 	if (Z_LVAL_P(offset) < lbound || Z_LVAL_P(offset) > ubound) {
-		php_com_throw_exception(DISP_E_BADINDEX, "index out of bounds" TSRMLS_CC);
+		php_com_throw_exception(DISP_E_BADINDEX, "index out of bounds");
 		return rv;
 	}
 	
@@ -188,22 +188,22 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 		efree(indices);
 
 		if (SUCCEEDED(res)) {
-			php_com_wrap_variant(rv, &v, proxy->obj->code_page TSRMLS_CC);
+			php_com_wrap_variant(rv, &v, proxy->obj->code_page);
 		} else {
-			php_com_throw_exception(res, NULL TSRMLS_CC);
+			php_com_throw_exception(res, NULL);
 		}
 
 		VariantClear(&v);
 		
 	} else {
 		/* return another proxy */
-		php_com_saproxy_create(object, rv, offset TSRMLS_CC);
+		php_com_saproxy_create(object, rv, offset);
 	}
 
 	return rv;
 }
 
-static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
+static void saproxy_write_dimension(zval *object, zval *offset, zval *value)
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	UINT dims, i;
@@ -226,7 +226,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		VariantInit(&v);
 		if (SUCCESS == php_com_do_invoke(proxy->obj, Z_STRVAL(proxy->indices[0]),
 					Z_STRLEN(proxy->indices[0]), DISPATCH_PROPERTYPUT, &v, proxy->dimensions + 1,
-					args, 0 TSRMLS_CC)) {
+					args, 0)) {
 			VariantClear(&v);
 		}
 
@@ -253,7 +253,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		}
 
 		VariantInit(&v);
-		php_com_variant_from_zval(&v, value, proxy->obj->code_page TSRMLS_CC);
+		php_com_variant_from_zval(&v, value, proxy->obj->code_page);
 
 		if (V_VT(&v) != vt) {
 			VariantChangeType(&v, &v, 0, vt);
@@ -269,54 +269,54 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value TSRM
 		VariantClear(&v);
 
 		if (FAILED(res)) {
-			php_com_throw_exception(res, NULL TSRMLS_CC);
+			php_com_throw_exception(res, NULL);
 		}
 	} else {
-		php_com_throw_exception(E_NOTIMPL, "invalid write to com proxy object" TSRMLS_CC);
+		php_com_throw_exception(E_NOTIMPL, "invalid write to com proxy object");
 	}
 }
 
 #if 0
-static void saproxy_object_set(zval **property, zval *value TSRMLS_DC)
+static void saproxy_object_set(zval **property, zval *value)
 {
 }
 
-static zval *saproxy_object_get(zval *property TSRMLS_DC)
+static zval *saproxy_object_get(zval *property)
 {
 	/* Not yet implemented in the engine */
 	return NULL;
 }
 #endif
 
-static int saproxy_property_exists(zval *object, zval *member, int check_empty, void **cache_slot TSRMLS_DC)
+static int saproxy_property_exists(zval *object, zval *member, int check_empty, void **cache_slot)
 {
 	/* no properties */
 	return 0;
 }
 
-static int saproxy_dimension_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+static int saproxy_dimension_exists(zval *object, zval *member, int check_empty)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Operation not yet supported on a COM object");
+	php_error_docref(NULL, E_WARNING, "Operation not yet supported on a COM object");
 	return 0;
 }
 
-static void saproxy_property_delete(zval *object, zval *member, void **cache_slot TSRMLS_DC)
+static void saproxy_property_delete(zval *object, zval *member, void **cache_slot)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a COM object");
+	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
 }
 
-static void saproxy_dimension_delete(zval *object, zval *offset TSRMLS_DC)
+static void saproxy_dimension_delete(zval *object, zval *offset)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a COM object");
+	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
 }
 
-static HashTable *saproxy_properties_get(zval *object TSRMLS_DC)
+static HashTable *saproxy_properties_get(zval *object)
 {
 	/* no properties */
 	return NULL;
 }
 
-static union _zend_function *saproxy_method_get(zend_object **object, zend_string *name, const zval *key TSRMLS_DC)
+static union _zend_function *saproxy_method_get(zend_object **object, zend_string *name, const zval *key)
 {
 	/* no methods */
 	return NULL;
@@ -327,28 +327,28 @@ static int saproxy_call_method(zend_string *method, zend_object *object, INTERNA
 	return FAILURE;
 }
 
-static union _zend_function *saproxy_constructor_get(zend_object *object TSRMLS_DC)
+static union _zend_function *saproxy_constructor_get(zend_object *object)
 {
 	/* user cannot instantiate */
 	return NULL;
 }
 
-static zend_string* saproxy_class_name_get(const zend_object *object TSRMLS_DC)
+static zend_string* saproxy_class_name_get(const zend_object *object)
 {
 	return zend_string_copy(php_com_saproxy_class_entry->name);
 }
 
-static int saproxy_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
+static int saproxy_objects_compare(zval *object1, zval *object2)
 {
 	return -1;
 }
 
-static int saproxy_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+static int saproxy_object_cast(zval *readobj, zval *writeobj, int type)
 {
 	return FAILURE;
 }
 
-static int saproxy_count_elements(zval *object, zend_long *count TSRMLS_DC)
+static int saproxy_count_elements(zval *object, zend_long *count)
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	LONG ubound, lbound;
@@ -365,7 +365,7 @@ static int saproxy_count_elements(zval *object, zend_long *count TSRMLS_DC)
 	return SUCCESS;
 }
 
-static void saproxy_free_storage(zend_object *object TSRMLS_DC)
+static void saproxy_free_storage(zend_object *object)
 {
 	php_com_saproxy *proxy = (php_com_saproxy *)object;
 //???	int i;
@@ -380,7 +380,7 @@ static void saproxy_free_storage(zend_object *object TSRMLS_DC)
 	efree(proxy->indices);
 }
 
-static zend_object* saproxy_clone(zval *object TSRMLS_DC)
+static zend_object* saproxy_clone(zval *object)
 {
 	php_com_saproxy *proxy = (php_com_saproxy *)Z_OBJ_P(object);
 	php_com_saproxy *cloneproxy;
@@ -421,7 +421,7 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_count_elements
 };
 
-int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index TSRMLS_DC)
+int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index)
 {
 	php_com_saproxy *proxy, *rel = NULL;
 
@@ -447,7 +447,7 @@ int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index TSRMLS
 
 	ZVAL_DUP(&proxy->indices[proxy->dimensions-1], index);
 
-	zend_object_std_init(&proxy->std, php_com_saproxy_class_entry TSRMLS_CC);
+	zend_object_std_init(&proxy->std, php_com_saproxy_class_entry);
 	proxy->std.handlers = &php_com_saproxy_handlers;
 	ZVAL_OBJ(proxy_out, &proxy->std);
 	
@@ -456,7 +456,7 @@ int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index TSRMLS
 
 /* iterator */
 
-static void saproxy_iter_dtor(zend_object_iterator *iter TSRMLS_DC)
+static void saproxy_iter_dtor(zend_object_iterator *iter)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)Z_PTR(iter->data);
 
@@ -466,14 +466,14 @@ static void saproxy_iter_dtor(zend_object_iterator *iter TSRMLS_DC)
 	efree(I);
 }
 
-static int saproxy_iter_valid(zend_object_iterator *iter TSRMLS_DC)
+static int saproxy_iter_valid(zend_object_iterator *iter)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)Z_PTR(iter->data);
 
 	return (I->key < I->imax) ? SUCCESS : FAILURE;
 }
 
-static zval* saproxy_iter_get_data(zend_object_iterator *iter TSRMLS_DC)
+static zval* saproxy_iter_get_data(zend_object_iterator *iter)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)Z_PTR(iter->data);
 	VARIANT v;
@@ -497,13 +497,13 @@ static zval* saproxy_iter_get_data(zend_object_iterator *iter TSRMLS_DC)
 	}
 
 	ZVAL_NULL(&I->data);
-	php_com_wrap_variant(&I->data, &v, I->proxy->obj->code_page TSRMLS_CC);
+	php_com_wrap_variant(&I->data, &v, I->proxy->obj->code_page);
 	VariantClear(&v);
 
 	return &I->data;
 }
 
-static void saproxy_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
+static void saproxy_iter_get_key(zend_object_iterator *iter, zval *key)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)Z_PTR(iter->data);
 
@@ -514,7 +514,7 @@ static void saproxy_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC
 	}
 }
 
-static int saproxy_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)
+static int saproxy_iter_move_forwards(zend_object_iterator *iter)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)Z_PTR(iter->data);
 
@@ -535,7 +535,7 @@ static zend_object_iterator_funcs saproxy_iter_funcs = {
 };
 
 
-zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC)
+zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *object, int by_ref)
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	php_com_saproxy_iter *I;

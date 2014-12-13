@@ -24,8 +24,8 @@
 
 static zend_class_entry zend_iterator_class_entry;
 
-static void iter_wrapper_free(zend_object *object TSRMLS_DC);
-static void iter_wrapper_dtor(zend_object *object TSRMLS_DC);
+static void iter_wrapper_free(zend_object *object);
+static void iter_wrapper_dtor(zend_object *object);
 
 static zend_object_handlers iterator_object_handlers = {
 	0,
@@ -58,37 +58,37 @@ static zend_object_handlers iterator_object_handlers = {
 	NULL  /* compare */
 };
 
-ZEND_API void zend_register_iterator_wrapper(TSRMLS_D)
+ZEND_API void zend_register_iterator_wrapper(void)
 {
 	INIT_CLASS_ENTRY(zend_iterator_class_entry, "__iterator_wrapper", NULL);
 }
 
-static void iter_wrapper_free(zend_object *object TSRMLS_DC)
+static void iter_wrapper_free(zend_object *object)
 {
 	zend_object_iterator *iter = (zend_object_iterator*)object;
-	iter->funcs->dtor(iter TSRMLS_CC);
+	iter->funcs->dtor(iter);
 }
 
-static void iter_wrapper_dtor(zend_object *object TSRMLS_DC)
+static void iter_wrapper_dtor(zend_object *object)
 {
 }
 
-ZEND_API void zend_iterator_init(zend_object_iterator *iter TSRMLS_DC)
+ZEND_API void zend_iterator_init(zend_object_iterator *iter)
 {
-	zend_object_std_init(&iter->std, &zend_iterator_class_entry TSRMLS_CC);
+	zend_object_std_init(&iter->std, &zend_iterator_class_entry);
 	iter->std.handlers = &iterator_object_handlers;
 }
 
-ZEND_API void zend_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
+ZEND_API void zend_iterator_dtor(zend_object_iterator *iter)
 {
 	if (--GC_REFCOUNT(iter) > 0) {
 		return;
 	}
 
-	zend_objects_store_del(&iter->std TSRMLS_CC);
+	zend_objects_store_del(&iter->std);
 }
 
-ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr TSRMLS_DC)
+ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr)
 {
 	if (Z_TYPE_P(array_ptr) &&
 	    Z_OBJ_HT_P(array_ptr) == &iterator_object_handlers) {

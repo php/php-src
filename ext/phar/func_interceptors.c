@@ -38,14 +38,14 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 		goto skip_phar;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|z", &filename, &filename_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|z", &filename, &filename_len, &zcontext) == FAILURE) {
 		return;
 	}
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
 		int arch_len, entry_len, fname_len;
-		fname = (char*)zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename();
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
@@ -54,7 +54,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
+		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 			php_stream_context *context = NULL;
 			php_stream *stream;
 			char *name;
@@ -64,7 +64,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 			/* retrieving a file within the current directory, so use this if possible */
-			entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
+			entry = phar_fix_filepath(entry, &entry_len, 1);
 
 			if (entry[0] == '/') {
 				spprintf(&name, 4096, "phar://%s%s", arch, entry);
@@ -112,7 +112,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 	}
 
 	/* Parse arguments */
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
 		goto skip_phar;
 	}
 
@@ -121,13 +121,13 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 		int arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 
-		fname = (char*)zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename();
 
 		if (strncasecmp(fname, "phar://", 7)) {
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
+		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 			char *name;
 			phar_archive_data *phar;
 
@@ -138,17 +138,17 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 
 			if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
 				efree(arch);
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "length must be greater than or equal to zero");
+				php_error_docref(NULL, E_WARNING, "length must be greater than or equal to zero");
 				RETURN_FALSE;
 			}
 
 			/* retrieving a file defaults to within the current directory, so use this if possible */
-			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 				efree(arch);
 				goto skip_phar;
 			}
 			if (use_include_path) {
-				if ((entry = phar_find_in_include_path(entry, entry_len, NULL TSRMLS_CC))) {
+				if ((entry = phar_find_in_include_path(entry, entry_len, NULL))) {
 					name = entry;
 					goto phar_it;
 				} else {
@@ -157,7 +157,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 					goto skip_phar;
 				}
 			} else {
-				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
+				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
 				if (entry[0] == '/') {
 					if (!zend_hash_str_exists(&(phar->manifest), entry + 1, entry_len - 1)) {
 						/* this file is not in the phar, use the original path */
@@ -195,7 +195,7 @@ phar_it:
 			}
 
 			if (offset > 0 && php_stream_seek(stream, offset, SEEK_SET) < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position %pd in the stream", offset);
+				php_error_docref(NULL, E_WARNING, "Failed to seek to position %pd in the stream", offset);
 				php_stream_close(stream);
 				RETURN_FALSE;
 			}
@@ -238,7 +238,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		&& !cached_phars.arHash) {
 		goto skip_phar;
 	}
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
 		goto skip_phar;
 	}
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
@@ -247,13 +247,13 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		php_stream_context *context = NULL;
 		char *name;
 		phar_archive_data *phar;
-		fname = (char*)zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename();
 
 		if (strncasecmp(fname, "phar://", 7)) {
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (FAILURE == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
+		if (FAILURE == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 			goto skip_phar;
 		}
 
@@ -262,12 +262,12 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 		entry_len = filename_len;
 		/* retrieving a file defaults to within the current directory, so use this if possible */
-		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 			efree(arch);
 			goto skip_phar;
 		}
 		if (use_include_path) {
-			if (!(entry = phar_find_in_include_path(entry, entry_len, NULL TSRMLS_CC))) {
+			if (!(entry = phar_find_in_include_path(entry, entry_len, NULL))) {
 				/* this file is not in the phar, use the original path */
 				efree(arch);
 				goto skip_phar;
@@ -275,7 +275,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 				name = entry;
 			}
 		} else {
-			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
+			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
 			if (entry[0] == '/') {
 				if (!zend_hash_str_exists(&(phar->manifest), entry + 1, entry_len - 1)) {
 					/* this file is not in the phar, use the original path */
@@ -334,7 +334,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		/* no need to check, include_path not even specified in fopen/ no active phars */
 		goto skip_phar;
 	}
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "ps|br", &filename, &filename_len, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "ps|br", &filename, &filename_len, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
 		goto skip_phar;
 	}
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
@@ -343,13 +343,13 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		php_stream_context *context = NULL;
 		char *name;
 		phar_archive_data *phar;
-		fname = (char*)zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename();
 
 		if (strncasecmp(fname, "phar://", 7)) {
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (FAILURE == phar_split_fname(fname, fname_len, &arch, (int *)&arch_len, &entry, (int *)&entry_len, 2, 0 TSRMLS_CC)) {
+		if (FAILURE == phar_split_fname(fname, fname_len, &arch, (int *)&arch_len, &entry, (int *)&entry_len, 2, 0)) {
 			goto skip_phar;
 		}
 
@@ -358,12 +358,12 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 		entry_len = filename_len;
 		/* retrieving a file defaults to within the current directory, so use this if possible */
-		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 			efree(arch);
 			goto skip_phar;
 		}
 		if (use_include_path) {
-			if (!(entry = phar_find_in_include_path(entry, entry_len, NULL TSRMLS_CC))) {
+			if (!(entry = phar_find_in_include_path(entry, entry_len, NULL))) {
 				/* this file is not in the phar, use the original path */
 				efree(arch);
 				goto skip_phar;
@@ -371,7 +371,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 				name = entry;
 			}
 		} else {
-			entry = phar_fix_filepath(estrndup(entry, entry_len), (int *)&entry_len, 1 TSRMLS_CC);
+			entry = phar_fix_filepath(estrndup(entry, entry_len), (int *)&entry_len, 1);
 			if (entry[0] == '/') {
 				if (!zend_hash_str_exists(&(phar->manifest), entry + 1, entry_len - 1)) {
 					/* this file is not in the phar, use the original path */
@@ -433,7 +433,7 @@ skip_phar:
 
 /* {{{ php_stat
  */
-static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value TSRMLS_DC)
+static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 {
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
 		 stat_size, stat_atime, stat_mtime, stat_ctime, stat_blksize, stat_blocks;
@@ -512,7 +512,7 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value T
 		case S_IFDIR: RETURN_STRING("dir");
 		case S_IFREG: RETURN_STRING("file");
 		}
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown file type (%u)", stat_sb->st_mode & S_IFMT);
+		php_error_docref(NULL, E_NOTICE, "Unknown file type (%u)", stat_sb->st_mode & S_IFMT);
 		RETURN_STRING("unknown");
 	case FS_IS_W:
 		RETURN_BOOL((stat_sb->st_mode & wmask) != 0);
@@ -597,7 +597,7 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value T
 
 		return;
 	}
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Didn't understand stat call");
+	php_error_docref(NULL, E_WARNING, "Didn't understand stat call");
 	RETURN_FALSE;
 }
 /* }}} */
@@ -615,7 +615,7 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 		phar_entry_info *data = NULL;
 		phar_archive_data *phar;
 
-		fname = (char*)zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename();
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
@@ -633,19 +633,19 @@ static void phar_file_stat(const char *filename, php_stat_len filename_length, i
 			phar = PHAR_G(last_phar);
 			goto splitted;
 		}
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
+		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 
 			efree(entry);
 			entry = estrndup(filename, filename_length);
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = (int) filename_length;
-			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+			if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 				efree(arch);
 				efree(entry);
 				goto skip_phar;
 			}
 splitted:
-			entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
+			entry = phar_fix_filepath(entry, &entry_len, 1);
 			if (entry[0] == '/') {
 				if (NULL != (data = zend_hash_str_find_ptr(&(phar->manifest), entry + 1, entry_len - 1))) {
 					efree(entry);
@@ -690,7 +690,7 @@ notfound:
 				PHAR_G(cwd) = "/";
 				PHAR_G(cwd_len) = 0;
 				/* clean path without cwd */
-				entry = phar_fix_filepath(entry, &entry_len, 1 TSRMLS_CC);
+				entry = phar_fix_filepath(entry, &entry_len, 1);
 				if (NULL != (data = zend_hash_str_find_ptr(&(phar->manifest), entry + 1, entry_len - 1))) {
 					PHAR_G(cwd) = save;
 					PHAR_G(cwd_len) = save_len;
@@ -729,7 +729,7 @@ notfound:
 				efree(arch);
 				/* Error Occurred */
 				if (!IS_EXISTS_CHECK(type)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);
+					php_error_docref(NULL, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);
 				}
 				RETURN_FALSE;
 			}
@@ -789,7 +789,7 @@ statme_baby:
 			sb.st_blksize = -1;
 			sb.st_blocks = -1;
 #endif
-			phar_fancy_stat(&sb, type, return_value TSRMLS_CC);
+			phar_fancy_stat(&sb, type, return_value);
 			return;
 		}
 	}
@@ -807,7 +807,7 @@ void fname(INTERNAL_FUNCTION_PARAMETERS) { \
 		char *filename; \
 		size_t filename_len; \
 		\
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) { \
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) { \
 			return; \
 		} \
 		\
@@ -899,13 +899,13 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 		&& !cached_phars.arHash) {
 		goto skip_phar;
 	}
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
 		goto skip_phar;
 	}
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
 		int arch_len, entry_len, fname_len;
-		fname = (char*)zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename();
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
@@ -914,7 +914,7 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
+		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 			phar_archive_data *phar;
 
 			efree(entry);
@@ -922,10 +922,10 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 			/* retrieving a file within the current directory, so use this if possible */
-			if (SUCCESS == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+			if (SUCCESS == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 				phar_entry_info *etemp;
 
-				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
+				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
 				if (entry[0] == '/') {
 					if (NULL != (etemp = zend_hash_str_find_ptr(&(phar->manifest), entry + 1, entry_len - 1))) {
 						/* this file is not in the current directory, use the original path */
@@ -966,13 +966,13 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 		&& !cached_phars.arHash) {
 		goto skip_phar;
 	}
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
 		goto skip_phar;
 	}
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
 		char *arch, *entry, *fname;
 		int arch_len, entry_len, fname_len;
-		fname = (char*)zend_get_executed_filename(TSRMLS_C);
+		fname = (char*)zend_get_executed_filename();
 
 		/* we are checking for existence of a file within the relative path.  Chances are good that this is
 		   retrieving something from within the phar archive */
@@ -981,7 +981,7 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
+		if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0)) {
 			phar_archive_data *phar;
 
 			efree(entry);
@@ -989,10 +989,10 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 			/* fopen within phar, if :// is not in the url, then prepend phar://<archive>/ */
 			entry_len = filename_len;
 			/* retrieving a file within the current directory, so use this if possible */
-			if (SUCCESS == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+			if (SUCCESS == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 				phar_entry_info *etemp;
 
-				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
+				entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
 				if (entry[0] == '/') {
 					if (NULL != (etemp = zend_hash_str_find_ptr(&(phar->manifest), entry + 1, entry_len - 1))) {
 						/* this file is not in the current directory, use the original path */
@@ -1028,8 +1028,8 @@ PharFileFunction(phar_lstat, FS_LSTAT, orig_lstat)
 PharFileFunction(phar_stat, FS_STAT, orig_stat)
 /* }}} */
 
-/* {{{ void phar_intercept_functions(TSRMLS_D) */
-void phar_intercept_functions(TSRMLS_D)
+/* {{{ void phar_intercept_functions(void) */
+void phar_intercept_functions(void)
 {
 	if (!PHAR_G(request_init)) {
 		PHAR_G(cwd) = NULL;
@@ -1039,14 +1039,14 @@ void phar_intercept_functions(TSRMLS_D)
 }
 /* }}} */
 
-/* {{{ void phar_release_functions(TSRMLS_D) */
-void phar_release_functions(TSRMLS_D)
+/* {{{ void phar_release_functions(void) */
+void phar_release_functions(void)
 {
 	PHAR_G(intercepted) = 0;
 }
 /* }}} */
 
-/* {{{ void phar_intercept_functions_init(TSRMLS_D) */
+/* {{{ void phar_intercept_functions_init(void) */
 #define PHAR_INTERCEPT(func) \
 	PHAR_G(orig_##func) = NULL; \
 	if (NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \
@@ -1054,7 +1054,7 @@ void phar_release_functions(TSRMLS_D)
 		orig->internal_function.handler = phar_##func; \
 	}
 
-void phar_intercept_functions_init(TSRMLS_D)
+void phar_intercept_functions_init(void)
 {
 	zend_function *orig;
 
@@ -1084,14 +1084,14 @@ void phar_intercept_functions_init(TSRMLS_D)
 }
 /* }}} */
 
-/* {{{ void phar_intercept_functions_shutdown(TSRMLS_D) */
+/* {{{ void phar_intercept_functions_shutdown(void) */
 #define PHAR_RELEASE(func) \
 	if (PHAR_G(orig_##func) && NULL != (orig = zend_hash_str_find_ptr(CG(function_table), #func, sizeof(#func)-1))) { \
 		orig->internal_function.handler = PHAR_G(orig_##func); \
 	} \
 	PHAR_G(orig_##func) = NULL;
 
-void phar_intercept_functions_shutdown(TSRMLS_D)
+void phar_intercept_functions_shutdown(void)
 {
 	zend_function *orig;
 
@@ -1145,7 +1145,7 @@ static struct _phar_orig_functions {
 	void        (*orig_stat)(INTERNAL_FUNCTION_PARAMETERS);
 } phar_orig_functions = {NULL};
 
-void phar_save_orig_functions(TSRMLS_D) /* {{{ */
+void phar_save_orig_functions(void) /* {{{ */
 {
 	phar_orig_functions.orig_fopen             = PHAR_G(orig_fopen);
 	phar_orig_functions.orig_file_get_contents = PHAR_G(orig_file_get_contents);
@@ -1172,7 +1172,7 @@ void phar_save_orig_functions(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-void phar_restore_orig_functions(TSRMLS_D) /* {{{ */
+void phar_restore_orig_functions(void) /* {{{ */
 {
 	PHAR_G(orig_fopen)             = phar_orig_functions.orig_fopen;
 	PHAR_G(orig_file_get_contents) = phar_orig_functions.orig_file_get_contents;

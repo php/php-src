@@ -83,8 +83,8 @@ typedef struct _zend_reference  zend_reference;
 typedef struct _zend_ast_ref    zend_ast_ref;
 typedef struct _zend_ast        zend_ast;
 
-typedef int  (*compare_func_t)(const void *, const void * TSRMLS_DC);
-typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t TSRMLS_DC);
+typedef int  (*compare_func_t)(const void *, const void *);
+typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t);
 typedef void (*dtor_func_t)(zval *pDest);
 typedef void (*copy_ctor_func_t)(zval *pElement);
 
@@ -427,10 +427,10 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_OBJCE(zval)				(Z_OBJ(zval)->ce)
 #define Z_OBJCE_P(zval_p)			Z_OBJCE(*(zval_p))
 
-#define Z_OBJPROP(zval)				Z_OBJ_HT((zval))->get_properties(&(zval) TSRMLS_CC)
+#define Z_OBJPROP(zval)				Z_OBJ_HT((zval))->get_properties(&(zval))
 #define Z_OBJPROP_P(zval_p)			Z_OBJPROP(*(zval_p))
 
-#define Z_OBJDEBUG(zval,tmp)		(Z_OBJ_HANDLER((zval),get_debug_info)?Z_OBJ_HANDLER((zval),get_debug_info)(&(zval),&tmp TSRMLS_CC):(tmp=0,Z_OBJ_HANDLER((zval),get_properties)?Z_OBJPROP(zval):NULL))
+#define Z_OBJDEBUG(zval,tmp)		(Z_OBJ_HANDLER((zval),get_debug_info)?Z_OBJ_HANDLER((zval),get_debug_info)(&(zval),&tmp):(tmp=0,Z_OBJ_HANDLER((zval),get_properties)?Z_OBJPROP(zval):NULL))
 #define Z_OBJDEBUG_P(zval_p,tmp)	Z_OBJDEBUG(*(zval_p), tmp)
 
 #define Z_RES(zval)					(zval).value.res

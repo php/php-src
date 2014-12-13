@@ -7,7 +7,6 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 #define EXP_STR(x) STR(x)
 
 static void* zend_mm_mem_alloc(zend_mm_storage *storage, size_t size, size_t alignment) {
-	TSRMLS_FETCH();
 
 	if (EXPECTED(size == PHPDBG_SIGSAFE_MEM_SIZE && !PHPDBG_G(sigsafe_mem).allocated)) {
 		PHPDBG_G(sigsafe_mem).allocated = 1;
@@ -28,7 +27,7 @@ static void* zend_mm_mem_alloc(zend_mm_storage *storage, size_t size, size_t ali
 static void zend_mm_mem_free(zend_mm_storage *storage, void *ptr, size_t size) {
 }
 
-void phpdbg_set_sigsafe_mem(char *buffer TSRMLS_DC) {
+void phpdbg_set_sigsafe_mem(char *buffer) {
 	phpdbg_signal_safe_mem *mem = &PHPDBG_G(sigsafe_mem);
 	mem->mem = buffer;
 	mem->allocated = 0;
@@ -38,19 +37,19 @@ void phpdbg_set_sigsafe_mem(char *buffer TSRMLS_DC) {
 
 	mem->heap = zend_mm_startup_ex(&mem->storage);
 
-	mem->old_heap = zend_mm_set_heap(mem->heap TSRMLS_CC);
+	mem->old_heap = zend_mm_set_heap(mem->heap);
 }
 
-zend_mm_heap *phpdbg_original_heap_sigsafe_mem(TSRMLS_D) {
+zend_mm_heap *phpdbg_original_heap_sigsafe_mem(void) {
 	return PHPDBG_G(sigsafe_mem).old_heap;
 }
 
-void phpdbg_clear_sigsafe_mem(TSRMLS_D) {
-	zend_mm_set_heap(phpdbg_original_heap_sigsafe_mem(TSRMLS_C) TSRMLS_CC);
+void phpdbg_clear_sigsafe_mem(void) {
+	zend_mm_set_heap(phpdbg_original_heap_sigsafe_mem());
 	PHPDBG_G(sigsafe_mem).mem = NULL;
 }
 
-zend_bool phpdbg_active_sigsafe_mem(TSRMLS_D) {
+zend_bool phpdbg_active_sigsafe_mem(void) {
 	return !!PHPDBG_G(sigsafe_mem).mem;
 }
 

@@ -60,22 +60,22 @@ typedef struct {
 
 #define PHP_STREAM_MMAP_ALL 0
 
-#define php_stream_mmap_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_SUPPORTED, NULL TSRMLS_CC) == 0 ? 1 : 0)
+#define php_stream_mmap_supported(stream)	(_php_stream_set_option((stream), PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_SUPPORTED, NULL) == 0 ? 1 : 0)
 
 /* Returns 1 if the stream in its current state can be memory mapped,
  * 0 otherwise */
 #define php_stream_mmap_possible(stream)			(!php_stream_is_filtered((stream)) && php_stream_mmap_supported((stream)))
 
 BEGIN_EXTERN_C()
-PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t length, php_stream_mmap_operation_t mode, size_t *mapped_len TSRMLS_DC);
-#define php_stream_mmap_range(stream, offset, length, mode, mapped_len)	_php_stream_mmap_range((stream), (offset), (length), (mode), (mapped_len) TSRMLS_CC)
+PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t length, php_stream_mmap_operation_t mode, size_t *mapped_len);
+#define php_stream_mmap_range(stream, offset, length, mode, mapped_len)	_php_stream_mmap_range((stream), (offset), (length), (mode), (mapped_len))
 
 /* un-maps the last mapped range */
-PHPAPI int _php_stream_mmap_unmap(php_stream *stream TSRMLS_DC);
-#define php_stream_mmap_unmap(stream)				_php_stream_mmap_unmap((stream) TSRMLS_CC)
+PHPAPI int _php_stream_mmap_unmap(php_stream *stream);
+#define php_stream_mmap_unmap(stream)				_php_stream_mmap_unmap((stream))
 
-PHPAPI int _php_stream_mmap_unmap_ex(php_stream *stream, zend_off_t readden TSRMLS_DC);
-#define php_stream_mmap_unmap_ex(stream, readden)			_php_stream_mmap_unmap_ex((stream), (readden) TSRMLS_CC)
+PHPAPI int _php_stream_mmap_unmap_ex(php_stream *stream, zend_off_t readden);
+#define php_stream_mmap_unmap_ex(stream, readden)			_php_stream_mmap_unmap_ex((stream), (readden))
 END_EXTERN_C()
 
 /*

@@ -34,13 +34,13 @@ enum {
 	PHPDBG_EOL_CR /* MAC */
 };
 
-int phpdbg_eol_global_update(char *name TSRMLS_DC);
+int phpdbg_eol_global_update(char *name);
 
 char *phpdbg_eol_name(int id);
 
 char *phpdbg_eol_rep(int id);
 
-void phpdbg_eol_convert(char **str, int *len TSRMLS_DC);
+void phpdbg_eol_convert(char **str, int *len);
 
 #endif /* PHPDBG_EOL_H */
 

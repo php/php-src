@@ -44,7 +44,7 @@ struct php_zip_stream_data_t {
 
 
 /* {{{ php_zip_ops_read */
-static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 {
 	ssize_t n = 0;
 	STREAM_DATA_FROM_STREAM();
@@ -55,7 +55,7 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRML
 			int ze, se;
 			zip_file_error_get(self->zf, &ze, &se);
 			stream->eof = 1;
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zip stream error: %s", zip_file_strerror(self->zf));
+			php_error_docref(NULL, E_WARNING, "Zip stream error: %s", zip_file_strerror(self->zf));
 			return 0;
 		}
 		/* cast count to signed value to avoid possibly negative n
@@ -71,7 +71,7 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count TSRML
 /* }}} */
 
 /* {{{ php_zip_ops_write */
-static size_t php_zip_ops_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static size_t php_zip_ops_write(php_stream *stream, const char *buf, size_t count)
 {
 	if (!stream) {
 		return 0;
@@ -82,7 +82,7 @@ static size_t php_zip_ops_write(php_stream *stream, const char *buf, size_t coun
 /* }}} */
 
 /* {{{ php_zip_ops_close */
-static int php_zip_ops_close(php_stream *stream, int close_handle TSRMLS_DC)
+static int php_zip_ops_close(php_stream *stream, int close_handle)
 {
 	STREAM_DATA_FROM_STREAM();
 	if (close_handle) {
@@ -103,7 +103,7 @@ static int php_zip_ops_close(php_stream *stream, int close_handle TSRMLS_DC)
 /* }}} */
 
 /* {{{ php_zip_ops_flush */
-static int php_zip_ops_flush(php_stream *stream TSRMLS_DC)
+static int php_zip_ops_flush(php_stream *stream)
 {
 	if (!stream) {
 		return 0;
@@ -113,7 +113,7 @@ static int php_zip_ops_flush(php_stream *stream TSRMLS_DC)
 }
 /* }}} */
 
-static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC) /* {{{ */
+static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ */
 {
 	struct zip_stat sb;
 	const char *path = stream->orig_path;
@@ -148,7 +148,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 	memcpy(file_dirname, path, path_len - fragment_len);
 	file_dirname[path_len - fragment_len] = '\0';
 
-	file_basename = php_basename((char *)path, path_len - fragment_len, NULL, 0 TSRMLS_CC);
+	file_basename = php_basename((char *)path, path_len - fragment_len, NULL, 0);
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
@@ -200,7 +200,7 @@ php_stream_ops php_stream_zipio_ops = {
 };
 
 /* {{{ php_stream_zip_open */
-php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC TSRMLS_DC)
+php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC)
 {
 	struct zip_file *zf = NULL;
 	int err = 0;
@@ -254,7 +254,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 											const char *mode,
 											int options,
 											char **opened_path,
-											php_stream_context *context STREAMS_DC TSRMLS_DC)
+											php_stream_context *context STREAMS_DC)
 {
 	int path_len;
 
@@ -292,7 +292,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 	memcpy(file_dirname, path, path_len - fragment_len);
 	file_dirname[path_len - fragment_len] = '\0';
 
-	file_basename = php_basename(path, path_len - fragment_len, NULL, 0 TSRMLS_CC);
+	file_basename = php_basename(path, path_len - fragment_len, NULL, 0);
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {

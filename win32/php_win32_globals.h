@@ -43,8 +43,8 @@ struct _php_win32_core_globals {
 	HashTable *registry_directories;
 };
 
-void php_win32_core_globals_ctor(void *vg TSRMLS_DC);
-void php_win32_core_globals_dtor(void *vg TSRMLS_DC);
+void php_win32_core_globals_ctor(void *vg);
+void php_win32_core_globals_dtor(void *vg);
 PHP_RSHUTDOWN_FUNCTION(win32_core_globals);
 
 #endif

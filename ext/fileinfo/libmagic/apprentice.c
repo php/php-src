@@ -960,7 +960,6 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 
 	php_stream *stream;
 
-	TSRMLS_FETCH();
 
 	ms->file = fn;
 	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
@@ -1151,7 +1150,6 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 	php_stream *dir;
 	php_stream_dirent d;
  
-	TSRMLS_FETCH();
 
 	memset(mset, 0, sizeof(mset));
 	ms->flags |= MAGIC_CHECK;	/* Enable checks for parsed files */
@@ -2608,7 +2606,6 @@ apprentice_map(struct magic_set *ms, const char *fn)
 	php_stream_statbuf st;
 
 
-	TSRMLS_FETCH();
 
 	if ((map = CAST(struct magic_map *, ecalloc(1, sizeof(*map)))) == NULL) {
 		file_oomem(ms, sizeof(*map));
@@ -2761,7 +2758,6 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 	uint32_t i;
 	php_stream *stream;
 
-	TSRMLS_FETCH();
 
 	dbname = mkdbname(ms, fn, 0);
 
@@ -2820,7 +2816,6 @@ mkdbname(struct magic_set *ms, const char *fn, int strip)
 {
 	const char *p, *q;
 	char *buf;
-	TSRMLS_FETCH();
 
 	if (strip) {
 		if ((p = strrchr(fn, '/')) != NULL)

@@ -34,7 +34,6 @@ void zend_accel_error(int type, const char *format, ...)
 	time_t timestamp;
 	char *time_string;
 	FILE * fLog = NULL;
-	TSRMLS_FETCH();
 
 	if (type > ZCG(accel_directives).log_verbosity_level) {
 		return;

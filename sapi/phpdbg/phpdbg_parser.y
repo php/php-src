@@ -180,11 +180,11 @@ static int yyerror(void ***tsrm_ls, const char *msg) {
 	return 0;
 }
 
-int phpdbg_do_parse(phpdbg_param_t *stack, char *input TSRMLS_DC) {
-	phpdbg_init_lexer(stack, input TSRMLS_CC);
+int phpdbg_do_parse(phpdbg_param_t *stack, char *input) {
+	phpdbg_init_lexer(stack, input);
 
 #ifdef ZTS
-	return yyparse(TSRMLS_C);
+	return yyparse();
 #else
 	return yyparse(NULL);
 #endif

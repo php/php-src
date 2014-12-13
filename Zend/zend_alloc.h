@@ -211,14 +211,14 @@ zend_always_inline static void * __zend_realloc(void *p, size_t len)
 #define perealloc_recoverable_rel(ptr, size, persistent) ((persistent)?__zend_realloc((ptr), (size)):erealloc_recoverable_rel((ptr), (size)))
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
 
-ZEND_API int zend_set_memory_limit(size_t memory_limit TSRMLS_DC);
+ZEND_API int zend_set_memory_limit(size_t memory_limit);
 
-ZEND_API void start_memory_manager(TSRMLS_D);
-ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC);
-ZEND_API int is_zend_mm(TSRMLS_D);
+ZEND_API void start_memory_manager(void);
+ZEND_API void shutdown_memory_manager(int silent, int full_shutdown);
+ZEND_API int is_zend_mm(void);
 
-ZEND_API size_t zend_memory_usage(int real_usage TSRMLS_DC);
-ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC);
+ZEND_API size_t zend_memory_usage(int real_usage);
+ZEND_API size_t zend_memory_peak_usage(int real_usage);
 
 /* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)	\
@@ -237,7 +237,7 @@ ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC);
 typedef struct _zend_mm_heap zend_mm_heap;
 
 ZEND_API zend_mm_heap *zend_mm_startup(void);
-ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent TSRMLS_DC);
+ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, int full_shutdown, int silent);
 ZEND_API void*  ZEND_FASTCALL _zend_mm_alloc(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API void   ZEND_FASTCALL _zend_mm_free(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API void*  ZEND_FASTCALL _zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
@@ -253,7 +253,7 @@ ZEND_API size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *p ZE
 #define zend_mm_realloc_rel(heap, p, size)	_zend_mm_realloc((heap), (p), (size) ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_CC)
 #define zend_mm_block_size_rel(heap, p)		_zend_mm_block_size((heap), (p) ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 
-ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap TSRMLS_DC);
+ZEND_API zend_mm_heap *zend_mm_set_heap(zend_mm_heap *new_heap);
 
 ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void* (*_malloc)(size_t),

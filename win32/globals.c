@@ -28,13 +28,13 @@ PHPAPI int php_win32_core_globals_id;
 php_win32_core_globals the_php_win32_core_globals;
 #endif
 
-void php_win32_core_globals_ctor(void *vg TSRMLS_DC)
+void php_win32_core_globals_ctor(void *vg)
 {
 	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
 	memset(wg, 0, sizeof(*wg));
 }
 
-void php_win32_core_globals_dtor(void *vg TSRMLS_DC)
+void php_win32_core_globals_dtor(void *vg)
 {
 	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
 

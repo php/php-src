@@ -29,7 +29,7 @@ typedef struct {
 	int seeded;
 } php_lcg_globals;
 
-PHPAPI double php_combined_lcg(TSRMLS_D);
+PHPAPI double php_combined_lcg(void);
 PHP_FUNCTION(lcg_value);
 
 PHP_MINIT_FUNCTION(lcg);

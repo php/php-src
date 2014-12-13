@@ -31,7 +31,7 @@ PHP_FUNCTION(unixtojd)
 	time_t ts = 0;
 	struct tm *ta, tmbuf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &ts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &ts) == FAILURE) {
 		return;
 	}	
 
@@ -55,7 +55,7 @@ PHP_FUNCTION(jdtounix)
 {
 	zend_long uday;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uday) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &uday) == FAILURE) {
 		return;
 	}	
 	uday -= 2440588 /* J.D. of 1.1.1970 */;

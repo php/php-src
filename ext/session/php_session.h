@@ -221,11 +221,11 @@ typedef struct ps_serializer_struct {
 #define PS_SERIALIZER_ENTRY(x) \
 	{ #x, PS_SERIALIZER_ENCODE_NAME(x), PS_SERIALIZER_DECODE_NAME(x) }
 
-PHPAPI void session_adapt_url(const char *, size_t, char **, size_t * TSRMLS_DC);
+PHPAPI void session_adapt_url(const char *, size_t, char **, size_t *);
 
-PHPAPI void php_add_session_var(zend_string *name TSRMLS_DC);
-PHPAPI zval *php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash TSRMLS_DC);
-PHPAPI zval *php_get_session_var(zend_string *name TSRMLS_DC);
+PHPAPI void php_add_session_var(zend_string *name);
+PHPAPI zval *php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash);
+PHPAPI zval *php_get_session_var(zend_string *name);
 
 PHPAPI int php_session_register_module(ps_module *);
 
@@ -233,17 +233,17 @@ PHPAPI int php_session_register_serializer(const char *name,
 	        zend_string *(*encode)(PS_SERIALIZER_ENCODE_ARGS),
 	        int (*decode)(PS_SERIALIZER_DECODE_ARGS));
 
-PHPAPI void php_session_set_id(char *id TSRMLS_DC);
-PHPAPI void php_session_start(TSRMLS_D);
+PHPAPI void php_session_set_id(char *id);
+PHPAPI void php_session_start(void);
 
-PHPAPI ps_module *_php_find_ps_module(char *name TSRMLS_DC);
-PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
+PHPAPI ps_module *_php_find_ps_module(char *name);
+PHPAPI const ps_serializer *_php_find_ps_serializer(char *name);
 
 PHPAPI int php_session_valid_key(const char *key);
-PHPAPI void php_session_reset_id(TSRMLS_D);
+PHPAPI void php_session_reset_id(void);
 
 #define PS_ADD_VARL(name) do {										\
-	php_add_session_var(name TSRMLS_CC);							\
+	php_add_session_var(name);							\
 } while (0)
 
 #define PS_ADD_VAR(name) PS_ADD_VARL(name)
@@ -264,11 +264,11 @@ PHPAPI void php_session_reset_id(TSRMLS_D);
 	HashTable *_ht = Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars)));	\
 	ZEND_HASH_FOREACH_KEY(_ht, num_key, key) {						\
 		if (key == NULL) {											\
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE,				\
+			php_error_docref(NULL, E_NOTICE,				\
 					"Skipping numeric key %pd", num_key);			\
 			continue;												\
 		}															\
-		if ((struc = php_get_session_var(key TSRMLS_CC))) {			\
+		if ((struc = php_get_session_var(key))) {			\
 			code;		 											\
 		} 															\
 	} ZEND_HASH_FOREACH_END();										\

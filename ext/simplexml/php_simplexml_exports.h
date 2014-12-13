@@ -35,11 +35,11 @@
 		__n = (__s)->node->node; \
 	} else { \
 		__n = NULL; \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Node no longer exists"); \
+		php_error_docref(NULL, E_WARNING, "Node no longer exists"); \
 	} \
 }
 
-PHP_SXE_API zend_object *sxe_object_new(zend_class_entry *ce TSRMLS_DC);
+PHP_SXE_API zend_object *sxe_object_new(zend_class_entry *ce);
 
 static inline php_sxe_object *php_sxe_fetch_object(zend_object *obj) /* {{{ */ {
 	return (php_sxe_object *)((char*)(obj) - XtOffsetOf(php_sxe_object, zo));

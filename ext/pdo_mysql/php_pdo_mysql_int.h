@@ -150,9 +150,9 @@ typedef struct {
 
 extern pdo_driver_t pdo_mysql_driver;
 
-extern int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC);
-#define pdo_mysql_error(s) _pdo_mysql_error(s, NULL, __FILE__, __LINE__ TSRMLS_CC)
-#define pdo_mysql_error_stmt(s) _pdo_mysql_error(stmt->dbh, stmt, __FILE__, __LINE__ TSRMLS_CC)
+extern int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
+#define pdo_mysql_error(s) _pdo_mysql_error(s, NULL, __FILE__, __LINE__)
+#define pdo_mysql_error_stmt(s) _pdo_mysql_error(stmt->dbh, stmt, __FILE__, __LINE__)
 
 extern struct pdo_stmt_methods mysql_stmt_methods;
 

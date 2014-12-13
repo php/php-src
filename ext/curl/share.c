@@ -57,7 +57,7 @@ PHP_FUNCTION(curl_share_close)
 	zval *z_sh;
 	php_curlsh *sh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_sh) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_sh) == FAILURE) {
 		return;
 	}
 
@@ -66,7 +66,7 @@ PHP_FUNCTION(curl_share_close)
 }
 /* }}} */
 
-static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue, zval *return_value TSRMLS_DC) /* {{{ */
+static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
 {
 	CURLSHcode error = CURLSHE_OK;
 
@@ -78,7 +78,7 @@ static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid curl share configuration option");
+			php_error_docref(NULL, E_WARNING, "Invalid curl share configuration option");
 			error = CURLSHE_BAD_OPTION; 
 			break;
 	}
@@ -99,13 +99,13 @@ PHP_FUNCTION(curl_share_setopt)
 	zend_long        options;
 	php_curlsh *sh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &zid, &options, &zvalue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlz", &zid, &options, &zvalue) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(sh, php_curlsh *, zid, -1, le_curl_share_handle_name, le_curl_share_handle);
 
-	if (!_php_curl_share_setopt(sh, options, zvalue, return_value TSRMLS_CC)) {
+	if (!_php_curl_share_setopt(sh, options, zvalue, return_value)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -113,7 +113,7 @@ PHP_FUNCTION(curl_share_setopt)
 }
 /* }}} */
 
-void _php_curl_share_close(zend_resource *rsrc TSRMLS_DC) /* {{{ */
+void _php_curl_share_close(zend_resource *rsrc) /* {{{ */
 {
 	php_curlsh *sh = (php_curlsh *)rsrc->ptr;
 	if (sh) {

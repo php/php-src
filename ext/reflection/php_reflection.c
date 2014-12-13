@@ -44,7 +44,7 @@
 #define reflection_update_property(object, name, value) do { \
 		zval member; \
 		ZVAL_STRINGL(&member, name, sizeof(name)-1); \
-		zend_std_write_property(object, &member, value, NULL TSRMLS_CC); \
+		zend_std_write_property(object, &member, value, NULL); \
 		if (Z_REFCOUNTED_P(value)) Z_DELREF_P(value); \
 		zval_ptr_dtor(&member); \
 	} while (0)
@@ -83,14 +83,14 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 /* Method macros */
 
 #define METHOD_NOTSTATIC(ce)                                                                                \
-	if (!Z_OBJ(EX(This)) || !instanceof_function(Z_OBJCE(EX(This)), ce TSRMLS_CC)) {           \
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s() cannot be called statically", get_active_function_name(TSRMLS_C));        \
+	if (!Z_OBJ(EX(This)) || !instanceof_function(Z_OBJCE(EX(This)), ce)) {           \
+		php_error_docref(NULL, E_ERROR, "%s() cannot be called statically", get_active_function_name());        \
 		return;                                                                                             \
 	}                                                                                                       \
 
 /* Exception throwing macro */
 #define _DO_THROW(msg)                                                                                      \
-	zend_throw_exception(reflection_exception_ptr, msg, 0 TSRMLS_CC);                                       \
+	zend_throw_exception(reflection_exception_ptr, msg, 0);                                       \
 	return;                                                                                                 \
 
 #define RETURN_ON_EXCEPTION                                                                                 \
@@ -102,7 +102,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 	intern = Z_REFLECTION_P(getThis());                                                      				\
 	if (intern == NULL || intern->ptr == NULL) {                                                            \
 		RETURN_ON_EXCEPTION                                                                                 \
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Failed to retrieve the reflection object");                    \
+		php_error_docref(NULL, E_ERROR, "Internal error: Failed to retrieve the reflection object");                    \
 	}                                                                                                       \
 
 #define GET_REFLECTION_OBJECT_PTR(target)                                                                   \
@@ -111,7 +111,7 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 
 /* Class constants */
 #define REGISTER_REFLECTION_CLASS_CONST_LONG(class_name, const_name, value)                                        \
-	zend_declare_class_constant_long(reflection_ ## class_name ## _ptr, const_name, sizeof(const_name)-1, (zend_long)value TSRMLS_CC);
+	zend_declare_class_constant_long(reflection_ ## class_name ## _ptr, const_name, sizeof(const_name)-1, (zend_long)value);
 
 /* {{{ Smart string functions */
 typedef struct _string {
@@ -226,7 +226,7 @@ static inline reflection_object *reflection_object_from_obj(zend_object *obj) /*
 
 static zend_object_handlers reflection_object_handlers;
 
-static zval *_default_load_entry(zval *object, char *name, size_t name_len TSRMLS_DC) /* {{{ */
+static zval *_default_load_entry(zval *object, char *name, size_t name_len) /* {{{ */
 {
 	zval *value;
 
@@ -236,11 +236,11 @@ static zval *_default_load_entry(zval *object, char *name, size_t name_len TSRML
 	return value;
 }
 
-static void _default_get_entry(zval *object, char *name, int name_len, zval *return_value TSRMLS_DC) /* {{{ */
+static void _default_get_entry(zval *object, char *name, int name_len, zval *return_value) /* {{{ */
 {
 	zval *value;
 
-	if ((value = _default_load_entry(object, name, name_len TSRMLS_CC)) == NULL) {
+	if ((value = _default_load_entry(object, name, name_len)) == NULL) {
 		RETURN_FALSE;
 	}
 	ZVAL_DUP(return_value, value);
@@ -248,7 +248,7 @@ static void _default_get_entry(zval *object, char *name, int name_len, zval *ret
 /* }}} */
 
 #ifdef ilia_0
-static void _default_lookup_entry(zval *object, char *name, int name_len, zval **return_value TSRMLS_DC) /* {{{ */
+static void _default_lookup_entry(zval *object, char *name, int name_len, zval **return_value) /* {{{ */
 {
 	zval **value;
 
@@ -261,7 +261,7 @@ static void _default_lookup_entry(zval *object, char *name, int name_len, zval *
 /* }}} */
 #endif
 
-static zend_function *_copy_function(zend_function *fptr TSRMLS_DC) /* {{{ */
+static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 {
 	if (fptr
 		&& fptr->type == ZEND_INTERNAL_FUNCTION
@@ -279,7 +279,7 @@ static zend_function *_copy_function(zend_function *fptr TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void _free_function(zend_function *fptr TSRMLS_DC) /* {{{ */
+static void _free_function(zend_function *fptr) /* {{{ */
 {
 	if (fptr
 		&& fptr->type == ZEND_INTERNAL_FUNCTION
@@ -291,7 +291,7 @@ static void _free_function(zend_function *fptr TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void reflection_free_objects_storage(zend_object *object TSRMLS_DC) /* {{{ */
+static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 {
 	reflection_object *intern = reflection_object_from_obj(object);
 	parameter_reference *reference;
@@ -301,11 +301,11 @@ static void reflection_free_objects_storage(zend_object *object TSRMLS_DC) /* {{
 		switch (intern->ref_type) {
 		case REF_TYPE_PARAMETER:
 			reference = (parameter_reference*)intern->ptr;
-			_free_function(reference->fptr TSRMLS_CC);
+			_free_function(reference->fptr);
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_FUNCTION:
-			_free_function(intern->ptr TSRMLS_CC);
+			_free_function(intern->ptr);
 			break;
 		case REF_TYPE_PROPERTY:
 			efree(intern->ptr);
@@ -321,40 +321,40 @@ static void reflection_free_objects_storage(zend_object *object TSRMLS_DC) /* {{
 	}
 	intern->ptr = NULL;
 	zval_ptr_dtor(&intern->obj);
-	zend_object_std_dtor(object TSRMLS_CC);
+	zend_object_std_dtor(object);
 }
 /* }}} */
 
-static zend_object *reflection_objects_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
+static zend_object *reflection_objects_new(zend_class_entry *class_type) /* {{{ */
 {
 	reflection_object *intern;
 
 	intern = ecalloc(1, sizeof(reflection_object) + sizeof(zval) * (class_type->default_properties_count - 1));
 	intern->zo.ce = class_type;
 
-	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
+	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
 	intern->zo.handlers = &reflection_object_handlers;
 	return &intern->zo;
 }
 /* }}} */
 
-static zval *reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC) /* {{{ */
+static zval *reflection_instantiate(zend_class_entry *pce, zval *object) /* {{{ */
 {
 	object_init_ex(object, pce);
 	return object;
 }
 /* }}} */
 
-static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC);
-static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char* indent TSRMLS_DC);
-static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC);
-static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC);
-static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC);
-static void _zend_extension_string(string *str, zend_extension *extension, char *indent TSRMLS_DC);
+static void _const_string(string *str, char *name, zval *value, char *indent);
+static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char* indent);
+static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent);
+static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent);
+static void _extension_string(string *str, zend_module_entry *module, char *indent);
+static void _zend_extension_string(string *str, zend_extension *extension, char *indent);
 
 /* {{{ _class_string */
-static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC)
+static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent)
 {
 	int count, count_static_props = 0, count_static_funcs = 0, count_shadow_props = 0;
 	string sub_indent;
@@ -427,7 +427,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 	/* Constants */
 	if (&ce->constants_table) {
-		zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t) zval_update_constant, (void*)1 TSRMLS_CC);
+		zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t) zval_update_constant, (void*)1);
 		string_printf(str, "\n");
 		count = zend_hash_num_elements(&ce->constants_table);
 		string_printf(str, "%s  - Constants [%d] {\n", indent, count);
@@ -442,7 +442,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			while ((value = zend_hash_get_current_data_ex(&ce->constants_table, &pos)) != NULL) {
 				zend_hash_get_current_key_ex(&ce->constants_table, &key, &num_index, 0, &pos);
 
-				_const_string(str, key->val, value, indent TSRMLS_CC);
+				_const_string(str, key->val, value, indent);
 				zend_hash_move_forward_ex(&ce->constants_table, &pos);
 			}
 		}
@@ -479,7 +479,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 			while ((prop = zend_hash_get_current_data_ptr_ex(&ce->properties_info, &pos)) != NULL) {
 				if ((prop->flags & ZEND_ACC_STATIC) && !(prop->flags & ZEND_ACC_SHADOW)) {
-					_property_string(str, prop, NULL, sub_indent.buf->val TSRMLS_CC);
+					_property_string(str, prop, NULL, sub_indent.buf->val);
 				}
 
 				zend_hash_move_forward_ex(&ce->properties_info, &pos);
@@ -521,7 +521,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 				{
 					string_printf(str, "\n");
-					_function_string(str, mptr, ce, sub_indent.buf->val TSRMLS_CC);
+					_function_string(str, mptr, ce, sub_indent.buf->val);
 				}
 				zend_hash_move_forward_ex(&ce->function_table, &pos);
 			}
@@ -543,7 +543,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 			while ((prop = zend_hash_get_current_data_ptr_ex(&ce->properties_info, &pos)) != NULL) {
 				if (!(prop->flags & (ZEND_ACC_STATIC|ZEND_ACC_SHADOW))) {
-					_property_string(str, prop, NULL, sub_indent.buf->val TSRMLS_CC);
+					_property_string(str, prop, NULL, sub_indent.buf->val);
 				}
 				zend_hash_move_forward_ex(&ce->properties_info, &pos);
 			}
@@ -553,7 +553,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 	if (obj && Z_TYPE_P(obj) == IS_OBJECT && Z_OBJ_HT_P(obj)->get_properties) {
 		string       dyn;
-		HashTable    *properties = Z_OBJ_HT_P(obj)->get_properties(obj TSRMLS_CC);
+		HashTable    *properties = Z_OBJ_HT_P(obj)->get_properties(obj);
 		HashPosition pos;
 		zval         **prop;
 
@@ -571,7 +571,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 					if (prop_name->len && prop_name->val[0]) { /* skip all private and protected properties */
 						if (!zend_hash_exists(&ce->properties_info, prop_name)) {
 							count++;
-							_property_string(&dyn, NULL, prop_name->val, sub_indent.buf->val TSRMLS_CC);
+							_property_string(&dyn, NULL, prop_name->val, sub_indent.buf->val);
 						}
 					}
 				}
@@ -615,16 +615,16 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 						/* see if this is a closure */
 						if (ce == zend_ce_closure && obj && (len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 							&& memcmp(mptr->common.function_name->val, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-							&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj) TSRMLS_CC)) != NULL)
+							&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
 						{
 							mptr = closure;
 						} else {
 							closure = NULL;
 						}
 						string_printf(&dyn, "\n");
-						_function_string(&dyn, mptr, ce, sub_indent.buf->val TSRMLS_CC);
+						_function_string(&dyn, mptr, ce, sub_indent.buf->val);
 						count++;
-						_free_function(closure TSRMLS_CC);
+						_free_function(closure);
 					}
 				}
 				zend_hash_move_forward_ex(&ce->function_table, &pos);
@@ -647,7 +647,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 /* }}} */
 
 /* {{{ _const_string */
-static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC)
+static void _const_string(string *str, char *name, zval *value, char *indent)
 {
 	char *type = zend_zval_type_name(value);
 	zend_string *value_str = zval_get_string(value);
@@ -679,7 +679,7 @@ static zend_op* _get_recv_op(zend_op_array *op_array, uint32_t offset)
 /* }}} */
 
 /* {{{ _parameter_string */
-static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, uint32_t required, char* indent TSRMLS_DC)
+static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, uint32_t required, char* indent)
 {
 	string_printf(str, "Parameter #%d [ ", offset);
 	if (offset >= required) {
@@ -725,7 +725,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 			ZVAL_DUP(&zv, RT_CONSTANT(&fptr->op_array, precv->op2));
 			old_scope = EG(scope);
 			EG(scope) = fptr->common.scope;
-			zval_update_constant_ex(&zv, 1, NULL TSRMLS_CC);
+			zval_update_constant_ex(&zv, 1, NULL);
 			EG(scope) = old_scope;
 			if (Z_TYPE(zv) == IS_TRUE) {
 				string_write(str, "true", sizeof("true")-1);
@@ -755,7 +755,7 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 /* }}} */
 
 /* {{{ _function_parameter_string */
-static void _function_parameter_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
+static void _function_parameter_string(string *str, zend_function *fptr, char* indent)
 {
 	struct _zend_arg_info *arg_info = fptr->common.arg_info;
 	uint32_t i, required = fptr->common.required_num_args;
@@ -768,7 +768,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 	string_printf(str, "%s- Parameters [%d] {\n", indent, fptr->common.num_args);
 	for (i = 0; i < fptr->common.num_args; i++) {
 		string_printf(str, "%s  ", indent);
-		_parameter_string(str, fptr, arg_info, i, required, indent TSRMLS_CC);
+		_parameter_string(str, fptr, arg_info, i, required, indent);
 		string_write(str, "\n", sizeof("\n")-1);
 		arg_info++;
 	}
@@ -777,7 +777,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 /* }}} */
 
 /* {{{ _function_closure_string */
-static void _function_closure_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
+static void _function_closure_string(string *str, zend_function *fptr, char* indent)
 {
 	uint32_t i, count;
 	zend_ulong num_index;
@@ -810,7 +810,7 @@ static void _function_closure_string(string *str, zend_function *fptr, char* ind
 /* }}} */
 
 /* {{{ _function_string */
-static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char* indent TSRMLS_DC)
+static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char* indent)
 {
 	string param_indent;
 	zend_function *overwrites;
@@ -906,16 +906,16 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	string_init(&param_indent);
 	string_printf(&param_indent, "%s  ", indent);
 	if (fptr->common.fn_flags & ZEND_ACC_CLOSURE) {
-		_function_closure_string(str, fptr, param_indent.buf->val TSRMLS_CC);
+		_function_closure_string(str, fptr, param_indent.buf->val);
 	}
-	_function_parameter_string(str, fptr, param_indent.buf->val TSRMLS_CC);
+	_function_parameter_string(str, fptr, param_indent.buf->val);
 	string_free(&param_indent);
 	string_printf(str, "%s}\n", indent);
 }
 /* }}} */
 
 /* {{{ _property_string */
-static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC)
+static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent)
 {
 	const char *class_name;
 
@@ -955,7 +955,7 @@ static void _property_string(string *str, zend_property_info *prop, char *prop_n
 }
 /* }}} */
 
-static int _extension_ini_string(zval *el TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int _extension_ini_string(zval *el, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zend_ini_entry *ini_entry = (zend_ini_entry*)Z_PTR_P(el);
 	string *str = va_arg(args, string *);
@@ -992,7 +992,7 @@ static int _extension_ini_string(zval *el TSRMLS_DC, int num_args, va_list args,
 }
 /* }}} */
 
-static int _extension_class_string(zval *el TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int _extension_class_string(zval *el, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zend_class_entry *ce = (zend_class_entry*)Z_PTR_P(el);
 	string *str = va_arg(args, string *);
@@ -1004,7 +1004,7 @@ static int _extension_class_string(zval *el TSRMLS_DC, int num_args, va_list arg
 		/* dump class if it is not an alias */
 		if (!zend_binary_strcasecmp(ce->name->val, ce->name->len, hash_key->key->val, hash_key->key->len)) {
 			string_printf(str, "\n");
-			_class_string(str, ce, NULL, indent TSRMLS_CC);
+			_class_string(str, ce, NULL, indent);
 			(*num_classes)++;
 		}
 	}
@@ -1012,7 +1012,7 @@ static int _extension_class_string(zval *el TSRMLS_DC, int num_args, va_list arg
 }
 /* }}} */
 
-static int _extension_const_string(zval *el TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int _extension_const_string(zval *el, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zend_constant *constant = (zend_constant*)Z_PTR_P(el);
 	string *str = va_arg(args, string *);
@@ -1021,14 +1021,14 @@ static int _extension_const_string(zval *el TSRMLS_DC, int num_args, va_list arg
 	int *num_classes = va_arg(args, int*);
 
 	if (constant->module_number  == module->module_number) {
-		_const_string(str, constant->name->val, &constant->value, indent TSRMLS_CC);
+		_const_string(str, constant->name->val, &constant->value, indent);
 		(*num_classes)++;
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
-static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC) /* {{{ */
+static void _extension_string(string *str, zend_module_entry *module, char *indent) /* {{{ */
 {
 	string_printf(str, "%sExtension [ ", indent);
 	if (module->type == MODULE_PERSISTENT) {
@@ -1079,7 +1079,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 	{
 		string str_ini;
 		string_init(&str_ini);
-		zend_hash_apply_with_arguments(EG(ini_directives) TSRMLS_CC, (apply_func_args_t) _extension_ini_string, 3, &str_ini, indent, module->module_number);
+		zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) _extension_ini_string, 3, &str_ini, indent, module->module_number);
 		if (str_ini.buf->len > 0) {
 			string_printf(str, "\n  - INI {\n");
 			string_append(str, &str_ini);
@@ -1093,7 +1093,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 		int num_constants = 0;
 
 		string_init(&str_constants);
-		zend_hash_apply_with_arguments(EG(zend_constants) TSRMLS_CC, (apply_func_args_t) _extension_const_string, 4, &str_constants, indent, module, &num_constants);
+		zend_hash_apply_with_arguments(EG(zend_constants), (apply_func_args_t) _extension_const_string, 4, &str_constants, indent, module, &num_constants);
 		if (num_constants) {
 			string_printf(str, "\n  - Constants [%d] {\n", num_constants);
 			string_append(str, &str_constants);
@@ -1115,7 +1115,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 					string_printf(str, "\n  - Functions {\n");
 					first = 0;
 				}
-				_function_string(str, fptr, NULL, "    " TSRMLS_CC);
+				_function_string(str, fptr, NULL, "    ");
 			}
 			zend_hash_move_forward_ex(CG(function_table), &iterator);
 		}
@@ -1132,7 +1132,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 		string_init(&sub_indent);
 		string_printf(&sub_indent, "%s    ", indent);
 		string_init(&str_classes);
-		zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) _extension_class_string, 4, &str_classes, sub_indent.buf->val, module, &num_classes);
+		zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) _extension_class_string, 4, &str_classes, sub_indent.buf->val, module, &num_classes);
 		if (num_classes) {
 			string_printf(str, "\n  - Classes [%d] {", num_classes);
 			string_append(str, &str_classes);
@@ -1146,7 +1146,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 }
 /* }}} */
 
-static void _zend_extension_string(string *str, zend_extension *extension, char *indent TSRMLS_DC) /* {{{ */
+static void _zend_extension_string(string *str, zend_extension *extension, char *indent) /* {{{ */
 {
 	string_printf(str, "%sZend Extension [ %s ", indent, extension->name);
 
@@ -1182,13 +1182,13 @@ static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
 /* }}} */
 
 /* {{{ zend_reflection_class_factory */
-PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC)
+PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object)
 {
 	reflection_object *intern;
 	zval name;
 
 	ZVAL_STR_COPY(&name, ce->name);
-	reflection_instantiate(reflection_class_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_class_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = ce;
 	intern->ref_type = REF_TYPE_OTHER;
@@ -1198,7 +1198,7 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSR
 /* }}} */
 
 /* {{{ reflection_extension_factory */
-static void reflection_extension_factory(zval *object, const char *name_str TSRMLS_DC)
+static void reflection_extension_factory(zval *object, const char *name_str)
 {
 	reflection_object *intern;
 	zval name;
@@ -1214,7 +1214,7 @@ static void reflection_extension_factory(zval *object, const char *name_str TSRM
 		return;
 	}
 
-	reflection_instantiate(reflection_extension_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_extension_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	ZVAL_STRINGL(&name, module->name, name_len);
 	intern->ptr = module;
@@ -1225,7 +1225,7 @@ static void reflection_extension_factory(zval *object, const char *name_str TSRM
 /* }}} */
 
 /* {{{ reflection_parameter_factory */
-static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, uint32_t offset, uint32_t required, zval *object TSRMLS_DC)
+static void reflection_parameter_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, uint32_t offset, uint32_t required, zval *object)
 {
 	reflection_object *intern;
 	parameter_reference *reference;
@@ -1240,7 +1240,7 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 	} else {
 		ZVAL_NULL(&name);
 	}
-	reflection_instantiate(reflection_parameter_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_parameter_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	reference = (parameter_reference*) emalloc(sizeof(parameter_reference));
 	reference->arg_info = arg_info;
@@ -1259,14 +1259,14 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 /* }}} */
 
 /* {{{ reflection_function_factory */
-static void reflection_function_factory(zend_function *function, zval *closure_object, zval *object TSRMLS_DC)
+static void reflection_function_factory(zend_function *function, zval *closure_object, zval *object)
 {
 	reflection_object *intern;
 	zval name;
 
 	ZVAL_STR_COPY(&name, function->common.function_name);
 
-	reflection_instantiate(reflection_function_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_function_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = function;
 	intern->ref_type = REF_TYPE_FUNCTION;
@@ -1280,7 +1280,7 @@ static void reflection_function_factory(zend_function *function, zval *closure_o
 /* }}} */
 
 /* {{{ reflection_method_factory */
-static void reflection_method_factory(zend_class_entry *ce, zend_function *method, zval *closure_object, zval *object TSRMLS_DC)
+static void reflection_method_factory(zend_class_entry *ce, zend_function *method, zval *closure_object, zval *object)
 {
 	reflection_object *intern;
 	zval name;
@@ -1289,7 +1289,7 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 	ZVAL_STR_COPY(&name, (method->common.scope && method->common.scope->trait_aliases)?
 			zend_resolve_method_name(ce, method) : method->common.function_name);
 	ZVAL_STR_COPY(&classname, method->common.scope->name);
-	reflection_instantiate(reflection_method_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_method_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	intern->ptr = method;
 	intern->ref_type = REF_TYPE_FUNCTION;
@@ -1304,7 +1304,7 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 /* }}} */
 
 /* {{{ reflection_property_factory */
-static void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop, zval *object TSRMLS_DC)
+static void reflection_property_factory(zend_class_entry *ce, zend_property_info *prop, zval *object)
 {
 	reflection_object *intern;
 	zval name;
@@ -1335,7 +1335,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	ZVAL_STRINGL(&name, prop_name, prop_name_len);
 	ZVAL_STR_COPY(&classname, prop->ce->name);
 
-	reflection_instantiate(reflection_property_ptr, object TSRMLS_CC);
+	reflection_instantiate(reflection_property_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->ce = ce;
@@ -1362,13 +1362,13 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	zend_fcall_info_cache fcc;
 
 	if (ctor_argc == 1) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &argument_ptr, &return_output) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &argument_ptr, &return_output) == FAILURE) {
 			return;
 		}
 		ZVAL_COPY_VALUE(&params[0], argument_ptr);
 		ZVAL_NULL(&params[1]);
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|b", &argument_ptr, &argument2_ptr, &return_output) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz|b", &argument_ptr, &argument2_ptr, &return_output) == FAILURE) {
 			return;
 		}
 		ZVAL_COPY_VALUE(&params[0], argument_ptr);
@@ -1398,7 +1398,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	fcc.called_scope = Z_OBJCE(reflector);
 	fcc.object = Z_OBJ(reflector);
 
-	result = zend_call_function(&fci, &fcc TSRMLS_CC);
+	result = zend_call_function(&fci, &fcc);
 
 	zval_ptr_dtor(&retval);
 
@@ -1424,7 +1424,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	fci.params = params;
 	fci.no_separation = 1;
 
-	result = zend_call_function(&fci, NULL TSRMLS_CC);
+	result = zend_call_function(&fci, NULL);
 
 	zval_ptr_dtor(&fci.function_name);
 
@@ -1456,12 +1456,12 @@ static parameter_reference *_reflection_param_get_default_param(INTERNAL_FUNCTIO
 		if (EG(exception) && EG(exception)->ce == reflection_exception_ptr) {
 			return NULL;
 		}
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Failed to retrieve the reflection object");
+		php_error_docref(NULL, E_ERROR, "Internal error: Failed to retrieve the reflection object");
 	}
 
 	param = intern->ptr;
 	if (param->fptr->type != ZEND_USER_FUNCTION) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Cannot determine default value for internal functions");
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Cannot determine default value for internal functions");
 		return NULL;
 	}
 
@@ -1480,7 +1480,7 @@ static zend_op *_reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAMETERS
 
 	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
 	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Internal error: Failed to retrieve the default value");
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Internal error: Failed to retrieve the default value");
 		return NULL;
 	}
 
@@ -1505,7 +1505,7 @@ ZEND_METHOD(reflection, export)
 	zend_bool return_output = 0;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|b", &object, reflector_ptr, &return_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &object, reflector_ptr, &return_output) == FAILURE) {
 		return;
 	}
 #else
@@ -1518,7 +1518,7 @@ ZEND_METHOD(reflection, export)
 
 	/* Invoke the __toString() method */
 	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1);
-	result= call_user_function_ex(NULL, object, &fname, &retval, 0, NULL, 0, NULL TSRMLS_CC);
+	result= call_user_function_ex(NULL, object, &fname, &retval, 0, NULL, 0, NULL);
 	zval_dtor(&fname);
 
 	if (result == FAILURE) {
@@ -1527,7 +1527,7 @@ ZEND_METHOD(reflection, export)
 	}
 
 	if (Z_TYPE(retval) == IS_UNDEF) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::__toString() did not return anything", Z_OBJCE_P(object)->name->val);
+		php_error_docref(NULL, E_WARNING, "%s::__toString() did not return anything", Z_OBJCE_P(object)->name->val);
 		RETURN_FALSE;
 	}
 
@@ -1535,7 +1535,7 @@ ZEND_METHOD(reflection, export)
 		ZVAL_COPY_VALUE(return_value, &retval);
 	} else {
 		/* No need for _r variant, return of __toString should always be a string */
-		zend_print_zval(&retval, 0 TSRMLS_CC);
+		zend_print_zval(&retval, 0);
 		zend_printf("\n");
 		zval_ptr_dtor(&retval);
 	}
@@ -1548,7 +1548,7 @@ ZEND_METHOD(reflection, getModifierNames)
 {
 	zend_long modifiers;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &modifiers) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &modifiers) == FAILURE) {
 		return;
 	}
 
@@ -1610,10 +1610,10 @@ ZEND_METHOD(reflection_function, __construct)
 		return;
 	}
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "O", &closure, zend_ce_closure) == SUCCESS) {
-		fptr = (zend_function*)zend_get_closure_method_def(closure TSRMLS_CC);
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "O", &closure, zend_ce_closure) == SUCCESS) {
+		fptr = (zend_function*)zend_get_closure_method_def(closure);
 		Z_ADDREF_P(closure);
-	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == SUCCESS) {
+	} else if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == SUCCESS) {
 		char *nsname;
 
 		lcname = zend_str_tolower_dup(name_str, name_len);
@@ -1627,7 +1627,7 @@ ZEND_METHOD(reflection_function, __construct)
 
 		if ((fptr = zend_hash_str_find_ptr(EG(function_table), nsname, name_len)) == NULL) {
 			efree(lcname);
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Function %s() does not exist", name_str);
 			return;
 		}
@@ -1662,7 +1662,7 @@ ZEND_METHOD(reflection_function, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	string_init(&str);
-	_function_string(&str, fptr, intern->ce, "" TSRMLS_CC);
+	_function_string(&str, fptr, intern->ce, "");
 	RETURN_STR(str.buf);
 }
 /* }}} */
@@ -1674,7 +1674,7 @@ ZEND_METHOD(reflection_function, getName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	_default_get_entry(getThis(), "name", sizeof("name")-1, return_value TSRMLS_CC);
+	_default_get_entry(getThis(), "name", sizeof("name")-1, return_value);
 }
 /* }}} */
 
@@ -1705,7 +1705,7 @@ ZEND_METHOD(reflection_function, getClosureThis)
 	}
 	GET_REFLECTION_OBJECT();
 	if (!Z_ISUNDEF(intern->obj)) {
-		closure_this = zend_get_closure_this_ptr(&intern->obj TSRMLS_CC);
+		closure_this = zend_get_closure_this_ptr(&intern->obj);
 		if (!Z_ISUNDEF_P(closure_this)) {
 			RETURN_ZVAL(closure_this, 1, 0);
 		}
@@ -1725,9 +1725,9 @@ ZEND_METHOD(reflection_function, getClosureScopeClass)
 	}
 	GET_REFLECTION_OBJECT();
 	if (!Z_ISUNDEF(intern->obj)) {
-		closure_func = zend_get_closure_method_def(&intern->obj TSRMLS_CC);
+		closure_func = zend_get_closure_method_def(&intern->obj);
 		if (closure_func && closure_func->common.scope) {
-			zend_reflection_class_factory(closure_func->common.scope, return_value TSRMLS_CC);
+			zend_reflection_class_factory(closure_func->common.scope, return_value);
 		}
 	}
 }
@@ -1745,7 +1745,7 @@ ZEND_METHOD(reflection_function, getClosure)
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	zend_create_closure(return_value, fptr, NULL, NULL TSRMLS_CC);
+	zend_create_closure(return_value, fptr, NULL, NULL);
 }
 /* }}} */
 
@@ -1879,7 +1879,7 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 	/* Return an empty array in case no static variables exist */
 	array_init(return_value);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.static_variables != NULL) {
-		zend_hash_apply_with_argument(fptr->op_array.static_variables, (apply_func_arg_t) zval_update_constant_inline_change, fptr->common.scope TSRMLS_CC);
+		zend_hash_apply_with_argument(fptr->op_array.static_variables, (apply_func_arg_t) zval_update_constant_inline_change, fptr->common.scope);
 		zend_hash_copy(Z_ARRVAL_P(return_value), fptr->op_array.static_variables, zval_add_ref);
 	}
 }
@@ -1900,7 +1900,7 @@ ZEND_METHOD(reflection_function, invoke)
 	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &params, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &params, &num_args) == FAILURE) {
 		return;
 	}
 
@@ -1920,10 +1920,10 @@ ZEND_METHOD(reflection_function, invoke)
 	fcc.called_scope = NULL;
 	fcc.object = NULL;
 
-	result = zend_call_function(&fci, &fcc TSRMLS_CC);
+	result = zend_call_function(&fci, &fcc);
 
 	if (result == FAILURE) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Invocation of function %s() failed", fptr->common.function_name->val);
 		return;
 	}
@@ -1951,7 +1951,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	METHOD_NOTSTATIC(reflection_function_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &param_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &param_array) == FAILURE) {
 		return;
 	}
 
@@ -1980,7 +1980,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	fcc.called_scope = NULL;
 	fcc.object = NULL;
 
-	result = zend_call_function(&fci, &fcc TSRMLS_CC);
+	result = zend_call_function(&fci, &fcc);
 
 	for (i = 0; i < argc; i++) {
 		zval_ptr_dtor(&params[i]);
@@ -1988,7 +1988,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	efree(params);
 
 	if (result == FAILURE) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Invocation of function %s() failed", fptr->common.function_name->val);
 		return;
 	}
@@ -2059,7 +2059,7 @@ ZEND_METHOD(reflection_function, getParameters)
 	for (i = 0; i < fptr->common.num_args; i++) {
 		zval parameter;
 
-		reflection_parameter_factory(_copy_function(fptr TSRMLS_CC), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, arg_info, i, fptr->common.required_num_args, &parameter TSRMLS_CC);
+		reflection_parameter_factory(_copy_function(fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, arg_info, i, fptr->common.required_num_args, &parameter);
 		add_next_index_zval(return_value, &parameter);
 
 		arg_info++;
@@ -2084,7 +2084,7 @@ ZEND_METHOD(reflection_function, getExtension)
 
 	internal = (zend_internal_function *)fptr;
 	if (internal->module) {
-		reflection_extension_factory(return_value, internal->module->name TSRMLS_CC);
+		reflection_extension_factory(return_value, internal->module->name);
 	} else {
 		RETURN_NULL();
 	}
@@ -2139,7 +2139,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	zend_bool is_closure = 0;
 	zend_bool is_invoke = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &reference, &parameter) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &reference, &parameter) == FAILURE) {
 		return;
 	}
 
@@ -2159,7 +2159,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				lcname = zend_str_tolower_dup(Z_STRVAL_P(reference), lcname_len);
 				if ((fptr = zend_hash_str_find_ptr(EG(function_table), lcname, lcname_len)) == NULL) {
 					efree(lcname);
-					zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Function %s() does not exist", Z_STRVAL_P(reference));
 					return;
 				}
@@ -2185,8 +2185,8 @@ ZEND_METHOD(reflection_parameter, __construct)
 					ce = Z_OBJCE_P(classref);
 				} else {
 					convert_to_string_ex(classref);
-					if ((ce = zend_lookup_class(Z_STR_P(classref) TSRMLS_CC)) == NULL) {
-						zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+					if ((ce = zend_lookup_class(Z_STR_P(classref))) == NULL) {
+						zend_throw_exception_ex(reflection_exception_ptr, 0,
 								"Class %s does not exist", Z_STRVAL_P(classref));
 						return;
 					}
@@ -2198,14 +2198,14 @@ ZEND_METHOD(reflection_parameter, __construct)
 				if (ce == zend_ce_closure && Z_TYPE_P(classref) == IS_OBJECT
 					&& (lcname_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 					&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-					&& (fptr = zend_get_closure_invoke_method(Z_OBJ_P(classref) TSRMLS_CC)) != NULL)
+					&& (fptr = zend_get_closure_invoke_method(Z_OBJ_P(classref))) != NULL)
 				{					
 					/* nothing to do. don't set is_closure since is the invoke handler,
 					   not the closure itself */
 					is_invoke = 1;
 				} else if ((fptr = zend_hash_str_find_ptr(&ce->function_table, lcname, lcname_len)) == NULL) {
 					efree(lcname);
-					zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Method %s::%s() does not exist", ce->name->val, Z_STRVAL_P(method));
 					return;
 				}
@@ -2216,12 +2216,12 @@ ZEND_METHOD(reflection_parameter, __construct)
 		case IS_OBJECT: {
 				ce = Z_OBJCE_P(reference);
 
-				if (instanceof_function(ce, zend_ce_closure TSRMLS_CC)) {
-					fptr = (zend_function *)zend_get_closure_method_def(reference TSRMLS_CC);
+				if (instanceof_function(ce, zend_ce_closure)) {
+					fptr = (zend_function *)zend_get_closure_method_def(reference);
 					Z_ADDREF_P(reference);
 					is_closure = 1;
 				} else if ((fptr = zend_hash_str_find_ptr(&ce->function_table, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME))) == NULL) {
-					zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Method %s::%s() does not exist", ce->name->val, ZEND_INVOKE_FUNC_NAME);
 					return;
 				}
@@ -2329,7 +2329,7 @@ ZEND_METHOD(reflection_parameter, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 	string_init(&str);
-	_parameter_string(&str, param->fptr, param->arg_info, param->offset, param->required, "" TSRMLS_CC);
+	_parameter_string(&str, param->fptr, param->arg_info, param->offset, param->required, "");
 	RETURN_STR(str.buf);
 }
 /* }}} */
@@ -2341,7 +2341,7 @@ ZEND_METHOD(reflection_parameter, getName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	_default_get_entry(getThis(), "name", sizeof("name")-1, return_value TSRMLS_CC);
+	_default_get_entry(getThis(), "name", sizeof("name")-1, return_value);
 }
 /* }}} */
 
@@ -2358,9 +2358,9 @@ ZEND_METHOD(reflection_parameter, getDeclaringFunction)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (!param->fptr->common.scope) {
-		reflection_function_factory(_copy_function(param->fptr TSRMLS_CC), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, return_value TSRMLS_CC);
+		reflection_function_factory(_copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, return_value);
 	} else {
-		reflection_method_factory(param->fptr->common.scope, _copy_function(param->fptr TSRMLS_CC), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, return_value TSRMLS_CC);
+		reflection_method_factory(param->fptr->common.scope, _copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, return_value);
 	}
 }
 /* }}} */
@@ -2378,7 +2378,7 @@ ZEND_METHOD(reflection_parameter, getDeclaringClass)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->fptr->common.scope) {
-		zend_reflection_class_factory(param->fptr->common.scope, return_value TSRMLS_CC);
+		zend_reflection_class_factory(param->fptr->common.scope, return_value);
 	}
 }
 /* }}} */
@@ -2422,19 +2422,19 @@ ZEND_METHOD(reflection_parameter, getClass)
 		if (0 == zend_binary_strcasecmp(class_name, class_name_len, "self", sizeof("self")- 1)) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter uses 'self' as type hint but function is not a class member!");
 				return;
 			}
 		} else if (0 == zend_binary_strcasecmp(class_name, class_name_len, "parent", sizeof("parent")- 1)) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter uses 'parent' as type hint but function is not a class member!");
 				return;
 			}
 			if (!ce->parent) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter uses 'parent' as type hint although class does not have a parent!");
 				return;
 			}
@@ -2442,18 +2442,18 @@ ZEND_METHOD(reflection_parameter, getClass)
 		} else {
 			if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
 				zend_string *name = zend_string_init(class_name, class_name_len, 0);
-				ce = zend_lookup_class(name TSRMLS_CC);
+				ce = zend_lookup_class(name);
 				zend_string_release(name);
 			} else {
-				ce = zend_lookup_class(param->arg_info->class_name TSRMLS_CC);
+				ce = zend_lookup_class(param->arg_info->class_name);
 			}
 			if (!ce) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Class %s does not exist", class_name);
 				return;
 			}
 		}
-		zend_reflection_class_factory(ce, return_value TSRMLS_CC);
+		zend_reflection_class_factory(ce, return_value);
 	}
 }
 /* }}} */
@@ -2623,7 +2623,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 		zend_class_entry *old_scope = EG(scope);
 
 		EG(scope) = param->fptr->common.scope;
-		zval_update_constant_ex(return_value, 0, NULL TSRMLS_CC);
+		zval_update_constant_ex(return_value, 0, NULL);
 		EG(scope) = old_scope;
 	} else {
 		zval_copy_ctor(return_value);
@@ -2717,12 +2717,12 @@ ZEND_METHOD(reflection_method, __construct)
 	size_t name_len, tmp_len;
 	zval ztmp;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "zs", &classname, &name_str, &name_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
 			return;
 		}
 		if ((tmp = strstr(name_str, "::")) == NULL) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Invalid method name %s", name_str);
+			zend_throw_exception_ex(reflection_exception_ptr, 0, "Invalid method name %s", name_str);
 			return;
 		}
 		classname = &ztmp;
@@ -2746,8 +2746,8 @@ ZEND_METHOD(reflection_method, __construct)
 	/* Find the class entry */
 	switch (Z_TYPE_P(classname)) {
 		case IS_STRING:
-			if ((ce = zend_lookup_class(Z_STR_P(classname) TSRMLS_CC)) == NULL) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			if ((ce = zend_lookup_class(Z_STR_P(classname))) == NULL) {
+				zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Class %s does not exist", Z_STRVAL_P(classname));
 				if (classname == &ztmp) {
 					zval_dtor(&ztmp);
@@ -2776,12 +2776,12 @@ ZEND_METHOD(reflection_method, __construct)
 
 	if (ce == zend_ce_closure && orig_obj && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 		&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-		&& (mptr = zend_get_closure_invoke_method(Z_OBJ_P(orig_obj) TSRMLS_CC)) != NULL)
+		&& (mptr = zend_get_closure_invoke_method(Z_OBJ_P(orig_obj))) != NULL)
 	{
 		/* do nothing, mptr already set */
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, name_len)) == NULL) {
 		efree(lcname);
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Method %s::%s() does not exist", ce->name->val, name_str);
 		return;
 	}
@@ -2810,7 +2810,7 @@ ZEND_METHOD(reflection_method, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
 	string_init(&str);
-	_function_string(&str, mptr, intern->ce, "" TSRMLS_CC);
+	_function_string(&str, mptr, intern->ce, "");
 	RETURN_STR(str.buf);
 }
 /* }}} */
@@ -2827,13 +2827,13 @@ ZEND_METHOD(reflection_method, getClosure)
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC)  {
-		zend_create_closure(return_value, mptr, mptr->common.scope, NULL TSRMLS_CC);
+		zend_create_closure(return_value, mptr, mptr->common.scope, NULL);
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
 			return;
 		}
 
-		if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope TSRMLS_CC)) {
+		if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope)) {
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
 			/* Returns from this function */
 		}
@@ -2844,7 +2844,7 @@ ZEND_METHOD(reflection_method, getClosure)
 		{
 			RETURN_ZVAL(obj, 1, 0);
 		} else {
-			zend_create_closure(return_value, mptr, mptr->common.scope, obj TSRMLS_CC);
+			zend_create_closure(return_value, mptr, mptr->common.scope, obj);
 		}
 	}
 }
@@ -2873,11 +2873,11 @@ ZEND_METHOD(reflection_method, invoke)
 		 && intern->ignore_visibility == 0)
 	{
 		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Trying to invoke abstract method %s::%s()",
 				mptr->common.scope->name->val, mptr->common.function_name->val);
 		} else {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Trying to invoke %s method %s::%s() from scope %s",
 				mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
 				mptr->common.scope->name->val, mptr->common.function_name->val,
@@ -2886,7 +2886,7 @@ ZEND_METHOD(reflection_method, invoke)
 		return;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &params, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &params, &num_args) == FAILURE) {
 		return;
 	}
 
@@ -2907,7 +2907,7 @@ ZEND_METHOD(reflection_method, invoke)
 
 		obj_ce = Z_OBJCE(params[0]);
 
-		if (!instanceof_function(obj_ce, mptr->common.scope TSRMLS_CC)) {
+		if (!instanceof_function(obj_ce, mptr->common.scope)) {
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
 			/* Returns from this function */
 		}
@@ -2931,10 +2931,10 @@ ZEND_METHOD(reflection_method, invoke)
 	fcc.called_scope = intern->ce;
 	fcc.object = object;
 
-	result = zend_call_function(&fci, &fcc TSRMLS_CC);
+	result = zend_call_function(&fci, &fcc);
 
 	if (result == FAILURE) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Invocation of method %s::%s() failed", mptr->common.scope->name->val, mptr->common.function_name->val);
 		return;
 	}
@@ -2964,7 +2964,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o!a", &object, &param_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!a", &object, &param_array) == FAILURE) {
 		return;
 	}
 
@@ -2973,11 +2973,11 @@ ZEND_METHOD(reflection_method, invokeArgs)
 		 && intern->ignore_visibility == 0)
 	{
 		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Trying to invoke abstract method %s::%s()",
 				mptr->common.scope->name->val, mptr->common.function_name->val);
 		} else {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Trying to invoke %s method %s::%s() from scope %s",
 				mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
 				mptr->common.scope->name->val, mptr->common.function_name->val,
@@ -3007,7 +3007,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	} else {
 		if (!object) {
 			efree(params);
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Trying to invoke non static method %s::%s() without an object",
 				mptr->common.scope->name->val, mptr->common.function_name->val);
 			return;
@@ -3015,7 +3015,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 
 		obj_ce = Z_OBJCE_P(object);
 
-		if (!instanceof_function(obj_ce, mptr->common.scope TSRMLS_CC)) {
+		if (!instanceof_function(obj_ce, mptr->common.scope)) {
 			efree(params);
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
 			/* Returns from this function */
@@ -3043,10 +3043,10 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	 */
 	if (mptr->type == ZEND_INTERNAL_FUNCTION &&
 		(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0) {
-		fcc.function_handler = _copy_function(mptr TSRMLS_CC);
+		fcc.function_handler = _copy_function(mptr);
 	}
 
-	result = zend_call_function(&fci, &fcc TSRMLS_CC);
+	result = zend_call_function(&fci, &fcc);
 
 	for (i = 0; i < argc; i++) {
 		zval_ptr_dtor(&params[i]);
@@ -3054,7 +3054,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	efree(params);
 
 	if (result == FAILURE) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Invocation of method %s::%s() failed", mptr->common.scope->name->val, mptr->common.function_name->val);
 		return;
 	}
@@ -3147,7 +3147,7 @@ ZEND_METHOD(reflection_function, inNamespace)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -3170,7 +3170,7 @@ ZEND_METHOD(reflection_function, getNamespaceName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -3193,7 +3193,7 @@ ZEND_METHOD(reflection_function, getShortName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -3269,7 +3269,7 @@ ZEND_METHOD(reflection_method, getDeclaringClass)
 		return;
 	}
 
-	zend_reflection_class_factory(mptr->common.scope, return_value TSRMLS_CC);
+	zend_reflection_class_factory(mptr->common.scope, return_value);
 }
 /* }}} */
 
@@ -3288,12 +3288,12 @@ ZEND_METHOD(reflection_method, getPrototype)
 	}
 
 	if (!mptr->common.prototype) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Method %s::%s does not have a prototype", intern->ce->name->val, mptr->common.function_name->val);
 		return;
 	}
 
-	reflection_method_factory(mptr->common.prototype->common.scope, mptr->common.prototype, NULL, return_value TSRMLS_CC);
+	reflection_method_factory(mptr->common.prototype->common.scope, mptr->common.prototype, NULL, return_value);
 }
 /* }}} */
 
@@ -3304,7 +3304,7 @@ ZEND_METHOD(reflection_method, setAccessible)
 	reflection_object *intern;
 	zend_bool visible;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &visible) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &visible) == FAILURE) {
 		return;
 	}
 
@@ -3336,11 +3336,11 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 	zend_class_entry *ce;
 
 	if (is_object) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &argument) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &argument) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/", &argument) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/", &argument) == FAILURE) {
 			return;
 		}
 	}
@@ -3361,9 +3361,9 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 		}
 	} else {
 		convert_to_string_ex(argument);
-		if ((ce = zend_lookup_class(Z_STR_P(argument) TSRMLS_CC)) == NULL) {
+		if ((ce = zend_lookup_class(Z_STR_P(argument))) == NULL) {
 			if (!EG(exception)) {
-				zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Class %s does not exist", Z_STRVAL_P(argument));
+				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class %s does not exist", Z_STRVAL_P(argument));
 			}
 			return;
 		}
@@ -3386,7 +3386,7 @@ ZEND_METHOD(reflection_class, __construct)
 /* }}} */
 
 /* {{{ add_class_vars */
-static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value TSRMLS_DC)
+static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value)
 {
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
@@ -3418,7 +3418,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		/* this is necessary to make it able to work with default array
 		* properties, returned to user */
 		if (Z_CONSTANT(prop_copy)) {
-			zval_update_constant(&prop_copy, 1 TSRMLS_CC);
+			zval_update_constant(&prop_copy, 1);
 		}
 
 		zend_hash_update(Z_ARRVAL_P(return_value), key, &prop_copy);
@@ -3439,10 +3439,10 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	zend_update_class_constants(ce TSRMLS_CC);
+	zend_update_class_constants(ce);
 
 	array_init(return_value);
-	add_class_vars(ce, 1, return_value TSRMLS_CC);
+	add_class_vars(ce, 1, return_value);
 }
 /* }}} */
 
@@ -3455,19 +3455,19 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 	zend_string *name;
 	zval *prop, *def_value = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|z", &name, &def_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|z", &name, &def_value) == FAILURE) {
 		return;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	zend_update_class_constants(ce TSRMLS_CC);
-	prop = zend_std_get_static_property(ce, name, 1, NULL TSRMLS_CC);
+	zend_update_class_constants(ce);
+	prop = zend_std_get_static_property(ce, name, 1, NULL);
 	if (!prop) {
 		if (def_value) {
 			RETURN_ZVAL(def_value, 1, 0);
 		} else {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Class %s does not have a property named %s", ce->name->val, name->val);
 		}
 		return;
@@ -3486,16 +3486,16 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	zend_string *name;
 	zval *variable_ptr, *value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz", &name, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz", &name, &value) == FAILURE) {
 		return;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	zend_update_class_constants(ce TSRMLS_CC);
-	variable_ptr = zend_std_get_static_property(ce, name, 1, NULL TSRMLS_CC);
+	zend_update_class_constants(ce);
+	variable_ptr = zend_std_get_static_property(ce, name, 1, NULL);
 	if (!variable_ptr) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Class %s does not have a property named %s", ce->name->val, name->val);
 		return;
 	}
@@ -3516,9 +3516,9 @@ ZEND_METHOD(reflection_class, getDefaultProperties)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
-	zend_update_class_constants(ce TSRMLS_CC);
-	add_class_vars(ce, 1, return_value TSRMLS_CC);
-	add_class_vars(ce, 0, return_value TSRMLS_CC);
+	zend_update_class_constants(ce);
+	add_class_vars(ce, 1, return_value);
+	add_class_vars(ce, 0, return_value);
 }
 /* }}} */
 
@@ -3535,7 +3535,7 @@ ZEND_METHOD(reflection_class, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	string_init(&str);
-	_class_string(&str, ce, &intern->obj, "" TSRMLS_CC);
+	_class_string(&str, ce, &intern->obj, "");
 	RETURN_STR(str.buf);
 }
 /* }}} */
@@ -3547,7 +3547,7 @@ ZEND_METHOD(reflection_class, getName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	_default_get_entry(getThis(), "name", sizeof("name")-1, return_value TSRMLS_CC);
+	_default_get_entry(getThis(), "name", sizeof("name")-1, return_value);
 }
 /* }}} */
 
@@ -3666,7 +3666,7 @@ ZEND_METHOD(reflection_class, getConstructor)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (ce->constructor) {
-		reflection_method_factory(ce, ce->constructor, NULL, return_value TSRMLS_CC);
+		reflection_method_factory(ce, ce->constructor, NULL, return_value);
 	} else {
 		RETURN_NULL();
 	}
@@ -3683,7 +3683,7 @@ ZEND_METHOD(reflection_class, hasMethod)
 	size_t name_len;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -3713,7 +3713,7 @@ ZEND_METHOD(reflection_class, getMethod)
 	size_t name_len;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -3721,26 +3721,26 @@ ZEND_METHOD(reflection_class, getMethod)
 	lc_name = zend_str_tolower_dup(name, name_len);
 	if (ce == zend_ce_closure && !Z_ISUNDEF(intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-		&& (mptr = zend_get_closure_invoke_method(Z_OBJ(intern->obj) TSRMLS_CC)) != NULL)
+		&& (mptr = zend_get_closure_invoke_method(Z_OBJ(intern->obj))) != NULL)
 	{
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
-		reflection_method_factory(ce, mptr, NULL, return_value TSRMLS_CC);
+		reflection_method_factory(ce, mptr, NULL, return_value);
 		efree(lc_name);
 	} else if (ce == zend_ce_closure && Z_ISUNDEF(intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 		&& memcmp(lc_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(Z_OBJ(obj_tmp) TSRMLS_CC)) != NULL) {
+		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(Z_OBJ(obj_tmp))) != NULL) {
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
-		reflection_method_factory(ce, mptr, NULL, return_value TSRMLS_CC);
+		reflection_method_factory(ce, mptr, NULL, return_value);
 		zval_dtor(&obj_tmp);
 		efree(lc_name);
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lc_name, name_len)) != NULL) {
-		reflection_method_factory(ce, mptr, NULL, return_value TSRMLS_CC);
+		reflection_method_factory(ce, mptr, NULL, return_value);
 		efree(lc_name);
 	} else {
 		efree(lc_name);
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Method %s does not exist", name);
 		return;
 	}
@@ -3748,7 +3748,7 @@ ZEND_METHOD(reflection_class, getMethod)
 /* }}} */
 
 /* {{{ _addmethod */
-static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, zend_long filter, zval *obj TSRMLS_DC)
+static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, zend_long filter, zval *obj)
 {
 	zval method;
 	size_t len = mptr->common.function_name->len;
@@ -3756,21 +3756,21 @@ static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, 
 	if (mptr->common.fn_flags & filter) {
 		if (ce == zend_ce_closure && obj && (len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 			&& memcmp(mptr->common.function_name->val, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
-			&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj) TSRMLS_CC)) != NULL)
+			&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
 		{
 			mptr = closure;
 		}
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself, even if we have a
 		   closure */
-		reflection_method_factory(ce, mptr, NULL, &method TSRMLS_CC);
+		reflection_method_factory(ce, mptr, NULL, &method);
 		add_next_index_zval(retval, &method);
 	}
 }
 /* }}} */
 
 /* {{{ _addmethod */
-static int _addmethod_va(zval *el TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int _addmethod_va(zval *el, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zend_function *mptr = (zend_function*)Z_PTR_P(el);
 	zend_class_entry *ce = *va_arg(args, zend_class_entry**);
@@ -3778,7 +3778,7 @@ static int _addmethod_va(zval *el TSRMLS_DC, int num_args, va_list args, zend_ha
 	long filter = va_arg(args, long);
 	zval *obj = va_arg(args, zval *);
 
-	_addmethod(mptr, ce, retval, filter, obj TSRMLS_CC);
+	_addmethod(mptr, ce, retval, filter, obj);
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
@@ -3794,7 +3794,7 @@ ZEND_METHOD(reflection_class, getMethods)
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (argc) {
-		if (zend_parse_parameters(argc TSRMLS_CC, "|l", &filter) == FAILURE) {
+		if (zend_parse_parameters(argc, "|l", &filter) == FAILURE) {
 			return;
 		}
 	} else {
@@ -3805,12 +3805,12 @@ ZEND_METHOD(reflection_class, getMethods)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(&ce->function_table TSRMLS_CC, (apply_func_args_t) _addmethod_va, 4, &ce, return_value, filter, intern->obj);
-	if (Z_TYPE(intern->obj) != IS_UNDEF && instanceof_function(ce, zend_ce_closure TSRMLS_CC)) {
-		zend_function *closure = zend_get_closure_invoke_method(Z_OBJ(intern->obj) TSRMLS_CC);
+	zend_hash_apply_with_arguments(&ce->function_table, (apply_func_args_t) _addmethod_va, 4, &ce, return_value, filter, intern->obj);
+	if (Z_TYPE(intern->obj) != IS_UNDEF && instanceof_function(ce, zend_ce_closure)) {
+		zend_function *closure = zend_get_closure_invoke_method(Z_OBJ(intern->obj));
 		if (closure) {
-			_addmethod(closure, ce, return_value, filter, &intern->obj TSRMLS_CC);
-			_free_function(closure TSRMLS_CC);
+			_addmethod(closure, ce, return_value, filter, &intern->obj);
+			_free_function(closure);
 		}
 	}
 }
@@ -3827,7 +3827,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 	zval property;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
 	}
 
@@ -3840,7 +3840,7 @@ ZEND_METHOD(reflection_class, hasProperty)
 	} else {
 		if (Z_TYPE(intern->obj) != IS_UNDEF && Z_OBJ_HANDLER(intern->obj, has_property)) {
 			ZVAL_STR_COPY(&property, name);
-			if (Z_OBJ_HANDLER(intern->obj, has_property)(&intern->obj, &property, 2, NULL TSRMLS_CC)) {
+			if (Z_OBJ_HANDLER(intern->obj, has_property)(&intern->obj, &property, 2, NULL)) {
 				zval_ptr_dtor(&property);
 				RETURN_TRUE;
 			}
@@ -3863,26 +3863,26 @@ ZEND_METHOD(reflection_class, getProperty)
 	size_t classname_len, str_name_len;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 	if ((property_info = zend_hash_find_ptr(&ce->properties_info, name)) != NULL) {
 		if ((property_info->flags & ZEND_ACC_SHADOW) == 0) {
-			reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
+			reflection_property_factory(ce, property_info, return_value);
 			return;
 		}
 	} else if (Z_TYPE(intern->obj) != IS_UNDEF) {
 		/* Check for dynamic properties */
-		if (zend_hash_exists(Z_OBJ_HT(intern->obj)->get_properties(&intern->obj TSRMLS_CC), name)) {
+		if (zend_hash_exists(Z_OBJ_HT(intern->obj)->get_properties(&intern->obj), name)) {
 			zend_property_info property_info_tmp;
 			property_info_tmp.flags = ZEND_ACC_IMPLICIT_PUBLIC;
 			property_info_tmp.name = zend_string_copy(name);
 			property_info_tmp.doc_comment = NULL;
 			property_info_tmp.ce = ce;
 
-			reflection_property_factory(ce, &property_info_tmp, return_value TSRMLS_CC);
+			reflection_property_factory(ce, &property_info_tmp, return_value);
 			intern = Z_REFLECTION_P(return_value);
 			intern->ref_type = REF_TYPE_DYNAMIC_PROPERTY;
 			return;
@@ -3898,34 +3898,34 @@ ZEND_METHOD(reflection_class, getProperty)
 		str_name_len = name->len - (classname_len + 2);
 		str_name = tmp + 2;
 
-		ce2 = zend_lookup_class(classname TSRMLS_CC);
+		ce2 = zend_lookup_class(classname);
 		if (!ce2) {
 			if (!EG(exception)) {
-				zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Class %s does not exist", classname->val);
+				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class %s does not exist", classname->val);
 			}
 			zend_string_release(classname);
 			return;
 		}
 		zend_string_release(classname);
 
-		if (!instanceof_function(ce, ce2 TSRMLS_CC)) {
-			zend_throw_exception_ex(reflection_exception_ptr, -1 TSRMLS_CC, "Fully qualified property name %s::%s does not specify a base class of %s", ce2->name->val, str_name, ce->name->val);
+		if (!instanceof_function(ce, ce2)) {
+			zend_throw_exception_ex(reflection_exception_ptr, -1, "Fully qualified property name %s::%s does not specify a base class of %s", ce2->name->val, str_name, ce->name->val);
 			return;
 		}
 		ce = ce2;
 
 		if ((property_info = zend_hash_str_find_ptr(&ce->properties_info, str_name, str_name_len)) != NULL && (property_info->flags & ZEND_ACC_SHADOW) == 0) {
-			reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
+			reflection_property_factory(ce, property_info, return_value);
 			return;
 		}
 	}
-	zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+	zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Property %s does not exist", str_name);
 }
 /* }}} */
 
 /* {{{ _addproperty */
-static int _addproperty(zval *el TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int _addproperty(zval *el, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval property;
 	zend_property_info *pptr = (zend_property_info*)Z_PTR_P(el);
@@ -3938,7 +3938,7 @@ static int _addproperty(zval *el TSRMLS_DC, int num_args, va_list args, zend_has
 	}
 
 	if (pptr->flags	& filter) {
-		reflection_property_factory(ce, pptr, &property TSRMLS_CC);
+		reflection_property_factory(ce, pptr, &property);
 		add_next_index_zval(retval, &property);
 	}
 	return 0;
@@ -3946,7 +3946,7 @@ static int _addproperty(zval *el TSRMLS_DC, int num_args, va_list args, zend_has
 /* }}} */
 
 /* {{{ _adddynproperty */
-static int _adddynproperty(zval *ptr TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int _adddynproperty(zval *ptr, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zval property;
 	zend_class_entry *ce = *va_arg(args, zend_class_entry**);
@@ -3963,14 +3963,14 @@ static int _adddynproperty(zval *ptr TSRMLS_DC, int num_args, va_list args, zend
 		return 0; /* non public cannot be dynamic */
 	}
 
-	if (zend_get_property_info(ce, hash_key->key, 1 TSRMLS_CC) == NULL) {
+	if (zend_get_property_info(ce, hash_key->key, 1) == NULL) {
 		zend_property_info property_info;
 		
 		property_info.flags = ZEND_ACC_IMPLICIT_PUBLIC;
 		property_info.name = hash_key->key;
 		property_info.ce = ce;
 		property_info.offset = -1;
-		reflection_property_factory(ce, &property_info, &property TSRMLS_CC);
+		reflection_property_factory(ce, &property_info, &property);
 		add_next_index_zval(retval, &property);
 	}
 	return 0;
@@ -3988,7 +3988,7 @@ ZEND_METHOD(reflection_class, getProperties)
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	if (argc) {
-		if (zend_parse_parameters(argc TSRMLS_CC, "|l", &filter) == FAILURE) {
+		if (zend_parse_parameters(argc, "|l", &filter) == FAILURE) {
 			return;
 		}
 	} else {
@@ -3999,11 +3999,11 @@ ZEND_METHOD(reflection_class, getProperties)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(&ce->properties_info TSRMLS_CC, (apply_func_args_t) _addproperty, 3, &ce, return_value, filter);
+	zend_hash_apply_with_arguments(&ce->properties_info, (apply_func_args_t) _addproperty, 3, &ce, return_value, filter);
 
 	if (Z_TYPE(intern->obj) != IS_UNDEF && (filter & ZEND_ACC_PUBLIC) != 0 && Z_OBJ_HT(intern->obj)->get_properties) {
-		HashTable *properties = Z_OBJ_HT(intern->obj)->get_properties(&intern->obj TSRMLS_CC);
-		zend_hash_apply_with_arguments(properties TSRMLS_CC, (apply_func_args_t) _adddynproperty, 2, &ce, return_value);
+		HashTable *properties = Z_OBJ_HT(intern->obj)->get_properties(&intern->obj);
+		zend_hash_apply_with_arguments(properties, (apply_func_args_t) _adddynproperty, 2, &ce, return_value);
 	}
 }
 /* }}} */
@@ -4017,7 +4017,7 @@ ZEND_METHOD(reflection_class, hasConstant)
 	zend_string *name;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
 	}
 
@@ -4042,7 +4042,7 @@ ZEND_METHOD(reflection_class, getConstants)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 	array_init(return_value);
-	zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t)zval_update_constant_inline_change, ce TSRMLS_CC);
+	zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t)zval_update_constant_inline_change, ce);
 	zend_hash_copy(Z_ARRVAL_P(return_value), &ce->constants_table, zval_add_ref_unref);
 }
 /* }}} */
@@ -4057,12 +4057,12 @@ ZEND_METHOD(reflection_class, getConstant)
 	zend_string *name;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
-	zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t)zval_update_constant_inline_change, ce TSRMLS_CC);
+	zend_hash_apply_with_argument(&ce->constants_table, (apply_func_arg_t)zval_update_constant_inline_change, ce);
 	if ((value = zend_hash_find(&ce->constants_table, name)) == NULL) {
 		RETURN_FALSE;
 	}
@@ -4199,11 +4199,11 @@ ZEND_METHOD(reflection_class, isInstance)
 	zval *object;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &object) == FAILURE) {
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	RETURN_BOOL(instanceof_function(Z_OBJCE_P(object), ce TSRMLS_CC));
+	RETURN_BOOL(instanceof_function(Z_OBJCE_P(object), ce));
 }
 /* }}} */
 
@@ -4223,7 +4223,7 @@ ZEND_METHOD(reflection_class, newInstance)
 
 	old_scope = EG(scope);
 	EG(scope) = ce;
-	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value) TSRMLS_CC);
+	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value));
 	EG(scope) = old_scope;
 
 	/* Run the constructor if there is one */
@@ -4234,12 +4234,12 @@ ZEND_METHOD(reflection_class, newInstance)
 		zend_fcall_info_cache fcc;
 
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Access to non-public constructor of class %s", ce->name->val);
+			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ce->name->val);
 			zval_dtor(return_value);
 			RETURN_NULL();
 		}
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &params, &num_args) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &params, &num_args) == FAILURE) {
 			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
@@ -4264,18 +4264,18 @@ ZEND_METHOD(reflection_class, newInstance)
 		fcc.called_scope = Z_OBJCE_P(return_value);
 		fcc.object = Z_OBJ_P(return_value);
 
-		ret = zend_call_function(&fci, &fcc TSRMLS_CC);
+		ret = zend_call_function(&fci, &fcc);
 		zval_ptr_dtor(&retval);
 		for (i = 0; i < num_args; i++) {
 			zval_ptr_dtor(&params[i]);
 		}
 		if (ret == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invocation of %s's constructor failed", ce->name->val);
+			php_error_docref(NULL, E_WARNING, "Invocation of %s's constructor failed", ce->name->val);
 			zval_dtor(return_value);
 			RETURN_NULL();
 		}
 	} else if (ZEND_NUM_ARGS()) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name->val);
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name->val);
 	}
 }
 /* }}} */
@@ -4291,7 +4291,7 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (ce->create_object != NULL && ce->ce_flags & ZEND_ACC_FINAL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s is an internal class marked as final that cannot be instantiated without invoking its constructor", ce->name->val);
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s is an internal class marked as final that cannot be instantiated without invoking its constructor", ce->name->val);
 	}
 
 	object_init_ex(return_value, ce);
@@ -4313,7 +4313,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|h", &args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|h", &args) == FAILURE) {
 		return;
 	}
 
@@ -4325,7 +4325,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 
 	old_scope = EG(scope);
 	EG(scope) = ce;
-	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value) TSRMLS_CC);
+	constructor = Z_OBJ_HT_P(return_value)->get_constructor(Z_OBJ_P(return_value));
 	EG(scope) = old_scope;
 
 	/* Run the constructor if there is one */
@@ -4335,7 +4335,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		zend_fcall_info_cache fcc;
 
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Access to non-public constructor of class %s", ce->name->val);
+			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ce->name->val);
 			zval_dtor(return_value);
 			RETURN_NULL();
 		}
@@ -4365,7 +4365,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fcc.called_scope = Z_OBJCE_P(return_value);
 		fcc.object = Z_OBJ_P(return_value);
 
-		ret = zend_call_function(&fci, &fcc TSRMLS_CC);
+		ret = zend_call_function(&fci, &fcc);
 		zval_ptr_dtor(&retval);
 		if (params) {
 			for (i = 0; i < argc; i++) {
@@ -4375,12 +4375,12 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		}
 		if (ret == FAILURE) {
 			zval_ptr_dtor(&retval);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invocation of %s's constructor failed", ce->name->val);
+			php_error_docref(NULL, E_WARNING, "Invocation of %s's constructor failed", ce->name->val);
 			zval_dtor(return_value);
 			RETURN_NULL();
 		}
 	} else if (argc) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name->val);
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name->val);
 	}
 }
 /* }}} */
@@ -4405,7 +4405,7 @@ ZEND_METHOD(reflection_class, getInterfaces)
 
 		for (i=0; i < ce->num_interfaces; i++) {
 			zval interface;
-			zend_reflection_class_factory(ce->interfaces[i], &interface TSRMLS_CC);
+			zend_reflection_class_factory(ce->interfaces[i], &interface);
 			zend_hash_update(Z_ARRVAL_P(return_value), ce->interfaces[i]->name, &interface);
 		}
 	}
@@ -4451,7 +4451,7 @@ ZEND_METHOD(reflection_class, getTraits)
 
 	for (i=0; i < ce->num_traits; i++) {
 		zval trait;
-		zend_reflection_class_factory(ce->traits[i], &trait TSRMLS_CC);
+		zend_reflection_class_factory(ce->traits[i], &trait);
 		zend_hash_update(Z_ARRVAL_P(return_value), ce->traits[i]->name, &trait);
 	}
 }
@@ -4523,7 +4523,7 @@ ZEND_METHOD(reflection_class, getParentClass)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if (ce->parent) {
-		zend_reflection_class_factory(ce->parent, return_value TSRMLS_CC);
+		zend_reflection_class_factory(ce->parent, return_value);
 	} else {
 		RETURN_FALSE;
 	}
@@ -4541,23 +4541,23 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &class_name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &class_name) == FAILURE) {
 		return;
 	}
 
 	switch (Z_TYPE_P(class_name)) {
 		case IS_STRING:
-			if ((class_ce = zend_lookup_class(Z_STR_P(class_name) TSRMLS_CC)) == NULL) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			if ((class_ce = zend_lookup_class(Z_STR_P(class_name))) == NULL) {
+				zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Class %s does not exist", Z_STRVAL_P(class_name));
 				return;
 			}
 			break;
 		case IS_OBJECT:
-			if (instanceof_function(Z_OBJCE_P(class_name), reflection_class_ptr TSRMLS_CC)) {
+			if (instanceof_function(Z_OBJCE_P(class_name), reflection_class_ptr)) {
 				argument = Z_REFLECTION_P(class_name);
 				if (argument == NULL || argument->ptr == NULL) {
-					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Failed to retrieve the argument's reflection object");
+					php_error_docref(NULL, E_ERROR, "Internal error: Failed to retrieve the argument's reflection object");
 					/* Bails out */
 				}
 				class_ce = argument->ptr;
@@ -4565,12 +4565,12 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 			}
 			/* no break */
 		default:
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter one must either be a string or a ReflectionClass object");
 			return;
 	}
 
-	RETURN_BOOL((ce != class_ce && instanceof_function(ce, class_ce TSRMLS_CC)));
+	RETURN_BOOL((ce != class_ce && instanceof_function(ce, class_ce)));
 }
 /* }}} */
 
@@ -4585,23 +4585,23 @@ ZEND_METHOD(reflection_class, implementsInterface)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &interface) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &interface) == FAILURE) {
 		return;
 	}
 
 	switch (Z_TYPE_P(interface)) {
 		case IS_STRING:
-			if ((interface_ce = zend_lookup_class(Z_STR_P(interface) TSRMLS_CC)) == NULL) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			if ((interface_ce = zend_lookup_class(Z_STR_P(interface))) == NULL) {
+				zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Interface %s does not exist", Z_STRVAL_P(interface));
 				return;
 			}
 			break;
 		case IS_OBJECT:
-			if (instanceof_function(Z_OBJCE_P(interface), reflection_class_ptr TSRMLS_CC)) {
+			if (instanceof_function(Z_OBJCE_P(interface), reflection_class_ptr)) {
 				argument = Z_REFLECTION_P(interface);
 				if (argument == NULL || argument->ptr == NULL) {
-					php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Failed to retrieve the argument's reflection object");
+					php_error_docref(NULL, E_ERROR, "Internal error: Failed to retrieve the argument's reflection object");
 					/* Bails out */
 				}
 				interface_ce = argument->ptr;
@@ -4609,17 +4609,17 @@ ZEND_METHOD(reflection_class, implementsInterface)
 			}
 			/* no break */
 		default:
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter one must either be a string or a ReflectionClass object");
 			return;
 	}
 
 	if (!(interface_ce->ce_flags & ZEND_ACC_INTERFACE)) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Interface %s is a Class", interface_ce->name->val);
 		return;
 	}
-	RETURN_BOOL(instanceof_function(ce, interface_ce TSRMLS_CC));
+	RETURN_BOOL(instanceof_function(ce, interface_ce));
 }
 /* }}} */
 
@@ -4656,7 +4656,7 @@ ZEND_METHOD(reflection_class, getExtension)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	if ((ce->type == ZEND_INTERNAL_CLASS) && ce->info.internal.module) {
-		reflection_extension_factory(return_value, ce->info.internal.module->name TSRMLS_CC);
+		reflection_extension_factory(return_value, ce->info.internal.module->name);
 	}
 }
 /* }}} */
@@ -4693,7 +4693,7 @@ ZEND_METHOD(reflection_class, inNamespace)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -4716,7 +4716,7 @@ ZEND_METHOD(reflection_class, getNamespaceName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -4739,7 +4739,7 @@ ZEND_METHOD(reflection_class, getShortName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC)) == NULL) {
+	if ((name = _default_load_entry(getThis(), "name", sizeof("name")-1)) == NULL) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(name) == IS_STRING
@@ -4790,7 +4790,7 @@ ZEND_METHOD(reflection_property, __construct)
 	zend_property_info *property_info = NULL;
 	property_reference *reference;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &classname, &name_str, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -4803,8 +4803,8 @@ ZEND_METHOD(reflection_property, __construct)
 	/* Find the class entry */
 	switch (Z_TYPE_P(classname)) {
 		case IS_STRING:
-			if ((ce = zend_lookup_class(Z_STR_P(classname) TSRMLS_CC)) == NULL) {
-				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			if ((ce = zend_lookup_class(Z_STR_P(classname))) == NULL) {
+				zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Class %s does not exist", Z_STRVAL_P(classname));
 				return;
 			}
@@ -4822,12 +4822,12 @@ ZEND_METHOD(reflection_property, __construct)
 	if ((property_info = zend_hash_str_find_ptr(&ce->properties_info, name_str, name_len)) == NULL || (property_info->flags & ZEND_ACC_SHADOW)) {
 		/* Check for dynamic properties */
 		if (property_info == NULL && Z_TYPE_P(classname) == IS_OBJECT && Z_OBJ_HT_P(classname)->get_properties) {
-			if (zend_hash_str_exists(Z_OBJ_HT_P(classname)->get_properties(classname TSRMLS_CC), name_str, name_len)) {
+			if (zend_hash_str_exists(Z_OBJ_HT_P(classname)->get_properties(classname), name_str, name_len)) {
 				dynam_prop = 1;
 			}
 		}
 		if (dynam_prop == 0) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Property %s::$%s does not exist", ce->name->val, name_str);
+			zend_throw_exception_ex(reflection_exception_ptr, 0, "Property %s::$%s does not exist", ce->name->val, name_str);
 			return;
 		}
 	}
@@ -4887,7 +4887,7 @@ ZEND_METHOD(reflection_property, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 	string_init(&str);
-	_property_string(&str, &ref->prop, NULL, "" TSRMLS_CC);
+	_property_string(&str, &ref->prop, NULL, "");
 	RETURN_STR(str.buf);
 }
 /* }}} */
@@ -4899,7 +4899,7 @@ ZEND_METHOD(reflection_property, getName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	_default_get_entry(getThis(), "name", sizeof("name")-1, return_value TSRMLS_CC);
+	_default_get_entry(getThis(), "name", sizeof("name")-1, return_value);
 }
 /* }}} */
 
@@ -4985,16 +4985,16 @@ ZEND_METHOD(reflection_property, getValue)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(ref->prop.flags & (ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC)) && intern->ignore_visibility == 0) {
-		name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC);
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		name = _default_load_entry(getThis(), "name", sizeof("name")-1);
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Cannot access non-public member %s::%s", intern->ce->name->val, Z_STRVAL_P(name));
 		return;
 	}
 
 	if ((ref->prop.flags & ZEND_ACC_STATIC)) {
-		zend_update_class_constants(intern->ce TSRMLS_CC);
+		zend_update_class_constants(intern->ce);
 		if (Z_TYPE(CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]) == IS_UNDEF) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Could not find the property %s::%s", intern->ce->name->val, ref->prop.name->val);
+			php_error_docref(NULL, E_ERROR, "Internal error: Could not find the property %s::%s", intern->ce->name->val, ref->prop.name->val);
 			/* Bails out */
 		}
 		ZVAL_DUP(return_value, &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]);
@@ -5002,12 +5002,12 @@ ZEND_METHOD(reflection_property, getValue)
 		const char *class_name, *prop_name;
 		size_t prop_name_len;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &object) == FAILURE) {
 			return;
 		}
 
 		zend_unmangle_property_name_ex(ref->prop.name, &class_name, &prop_name, &prop_name_len);
-		member_p = zend_read_property(ref->ce, object, prop_name, prop_name_len, 1 TSRMLS_CC);
+		member_p = zend_read_property(ref->ce, object, prop_name, prop_name_len, 1);
 		ZVAL_DUP(return_value, member_p);
 	}
 }
@@ -5028,22 +5028,22 @@ ZEND_METHOD(reflection_property, setValue)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(ref->prop.flags & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
-		name = _default_load_entry(getThis(), "name", sizeof("name")-1 TSRMLS_CC);
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		name = _default_load_entry(getThis(), "name", sizeof("name")-1);
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Cannot access non-public member %s::%s", intern->ce->name->val, Z_STRVAL_P(name));
 		return;
 	}
 
 	if ((ref->prop.flags & ZEND_ACC_STATIC)) {
-		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &tmp, &value) == FAILURE) {
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &tmp, &value) == FAILURE) {
 				return;
 			}
 		}
-		zend_update_class_constants(intern->ce TSRMLS_CC);
+		zend_update_class_constants(intern->ce);
 
 		if (Z_TYPE(CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset]) == IS_UNDEF) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Could not find the property %s::%s", intern->ce->name->val, ref->prop.name->val);
+			php_error_docref(NULL, E_ERROR, "Internal error: Could not find the property %s::%s", intern->ce->name->val, ref->prop.name->val);
 			/* Bails out */
 		}
 		variable_ptr = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];
@@ -5078,12 +5078,12 @@ ZEND_METHOD(reflection_property, setValue)
 		const char *class_name, *prop_name;
 		size_t prop_name_len;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "oz", &object, &value) == FAILURE) {
 			return;
 		}
 
 		zend_unmangle_property_name_ex(ref->prop.name, &class_name, &prop_name, &prop_name_len);
-		zend_update_property(ref->ce, object, prop_name, prop_name_len, value TSRMLS_CC);
+		zend_update_property(ref->ce, object, prop_name, prop_name_len, value);
 	}
 }
 /* }}} */
@@ -5122,7 +5122,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 		tmp_ce = tmp_ce->parent;
 	}
 
-	zend_reflection_class_factory(ce, return_value TSRMLS_CC);
+	zend_reflection_class_factory(ce, return_value);
 }
 /* }}} */
 
@@ -5151,7 +5151,7 @@ ZEND_METHOD(reflection_property, setAccessible)
 	reflection_object *intern;
 	zend_bool visible;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &visible) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &visible) == FAILURE) {
 		return;
 	}
 
@@ -5186,7 +5186,7 @@ ZEND_METHOD(reflection_extension, __construct)
 	size_t name_len;
 	ALLOCA_FLAG(use_heap)
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -5199,7 +5199,7 @@ ZEND_METHOD(reflection_extension, __construct)
 	zend_str_tolower_copy(lcname, name_str, name_len);
 	if ((module = zend_hash_str_find_ptr(&module_registry, lcname, name_len)) == NULL) {
 		free_alloca(lcname, use_heap);
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Extension %s does not exist", name_str);
 		return;
 	}
@@ -5225,7 +5225,7 @@ ZEND_METHOD(reflection_extension, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(module);
 	string_init(&str);
-	_extension_string(&str, module, "" TSRMLS_CC);
+	_extension_string(&str, module, "");
 	RETURN_STR(str.buf);
 }
 /* }}} */
@@ -5237,7 +5237,7 @@ ZEND_METHOD(reflection_extension, getName)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	_default_get_entry(getThis(), "name", sizeof("name")-1, return_value TSRMLS_CC);
+	_default_get_entry(getThis(), "name", sizeof("name")-1, return_value);
 }
 /* }}} */
 
@@ -5282,7 +5282,7 @@ ZEND_METHOD(reflection_extension, getFunctions)
 	while ((fptr = zend_hash_get_current_data_ptr_ex(CG(function_table), &iterator)) != NULL) {
 		if (fptr->common.type==ZEND_INTERNAL_FUNCTION
 			&& fptr->internal_function.module == module) {
-			reflection_function_factory(fptr, NULL, &function TSRMLS_CC);
+			reflection_function_factory(fptr, NULL, &function);
 			zend_hash_update(Z_ARRVAL_P(return_value), fptr->common.function_name, &function);
 		}
 		zend_hash_move_forward_ex(CG(function_table), &iterator);
@@ -5290,7 +5290,7 @@ ZEND_METHOD(reflection_extension, getFunctions)
 }
 /* }}} */
 
-static int _addconstant(zval *el TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
+static int _addconstant(zval *el, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	zval const_val;
 	zend_constant *constant = (zend_constant*)Z_PTR_P(el);
@@ -5318,12 +5318,12 @@ ZEND_METHOD(reflection_extension, getConstants)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(zend_constants) TSRMLS_CC, (apply_func_args_t) _addconstant, 2, return_value, module->module_number);
+	zend_hash_apply_with_arguments(EG(zend_constants), (apply_func_args_t) _addconstant, 2, return_value, module->module_number);
 }
 /* }}} */
 
 /* {{{ _addinientry */
-static int _addinientry(zval *el TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int _addinientry(zval *el, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zend_ini_entry *ini_entry = (zend_ini_entry*)Z_PTR_P(el);
 	zval *retval = va_arg(args, zval*);
@@ -5356,12 +5356,12 @@ ZEND_METHOD(reflection_extension, getINIEntries)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(ini_directives) TSRMLS_CC, (apply_func_args_t) _addinientry, 2, return_value, module->module_number);
+	zend_hash_apply_with_arguments(EG(ini_directives), (apply_func_args_t) _addinientry, 2, return_value, module->module_number);
 }
 /* }}} */
 
 /* {{{ add_extension_class */
-static int add_extension_class(zval *zv TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int add_extension_class(zval *zv, int num_args, va_list args, zend_hash_key *hash_key)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 	zval *class_array = va_arg(args, zval*), zclass;
@@ -5379,7 +5379,7 @@ static int add_extension_class(zval *zv TSRMLS_DC, int num_args, va_list args, z
 			name = ce->name;
 		}
 		if (add_reflection_class) {
-			zend_reflection_class_factory(ce, &zclass TSRMLS_CC);
+			zend_reflection_class_factory(ce, &zclass);
 			zend_hash_update(Z_ARRVAL_P(class_array), name, &zclass);
 		} else {
 			add_next_index_str(class_array, zend_string_copy(name));
@@ -5402,7 +5402,7 @@ ZEND_METHOD(reflection_extension, getClasses)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) add_extension_class, 3, return_value, module, 1);
+	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) add_extension_class, 3, return_value, module, 1);
 }
 /* }}} */
 
@@ -5419,7 +5419,7 @@ ZEND_METHOD(reflection_extension, getClassNames)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table) TSRMLS_CC, (apply_func_args_t) add_extension_class, 3, return_value, module, 0);
+	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) add_extension_class, 3, return_value, module, 0);
 }
 /* }}} */
 
@@ -5502,7 +5502,7 @@ ZEND_METHOD(reflection_extension, info)
 	}
 	GET_REFLECTION_OBJECT_PTR(module);
 
-	php_info_print_module(module TSRMLS_CC);
+	php_info_print_module(module);
 }
 /* }}} */
 
@@ -5557,7 +5557,7 @@ ZEND_METHOD(reflection_zend_extension, __construct)
 	char *name_str;
 	size_t name_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -5569,7 +5569,7 @@ ZEND_METHOD(reflection_zend_extension, __construct)
 
 	extension = zend_get_extension(name_str);
 	if (!extension) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Zend Extension %s does not exist", name_str);
 		return;
 	}
@@ -5594,7 +5594,7 @@ ZEND_METHOD(reflection_zend_extension, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(extension);
 	string_init(&str);
-	_zend_extension_string(&str, extension, "" TSRMLS_CC);
+	_zend_extension_string(&str, extension, "");
 	RETURN_STR(str.buf);
 }
 /* }}} */
@@ -6110,19 +6110,19 @@ const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 static zend_object_handlers *zend_std_obj_handlers;
 
 /* {{{ _reflection_write_property */
-static void _reflection_write_property(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
+static void _reflection_write_property(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	if ((Z_TYPE_P(member) == IS_STRING)
 		&& zend_hash_exists(&Z_OBJCE_P(object)->properties_info, Z_STR_P(member))
 		&& ((Z_STRLEN_P(member) == sizeof("name") - 1  && !memcmp(Z_STRVAL_P(member), "name",  sizeof("name")))
 			|| (Z_STRLEN_P(member) == sizeof("class") - 1 && !memcmp(Z_STRVAL_P(member), "class", sizeof("class")))))
 	{
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Cannot set read-only property %s::$%s", Z_OBJCE_P(object)->name->val, Z_STRVAL_P(member));
 	}
 	else
 	{
-		zend_std_obj_handlers->write_property(object, member, value, cache_slot TSRMLS_CC);
+		zend_std_obj_handlers->write_property(object, member, value, cache_slot);
 	}
 }
 /* }}} */
@@ -6139,38 +6139,38 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_object_handlers.write_property = _reflection_write_property;
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionException", reflection_exception_functions);
-	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
+	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_exception_get_default());
 
 	INIT_CLASS_ENTRY(_reflection_entry, "Reflection", reflection_functions);
-	reflection_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
+	reflection_ptr = zend_register_internal_class(&_reflection_entry);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "Reflector", reflector_functions);
-	reflector_ptr = zend_register_internal_interface(&_reflection_entry TSRMLS_CC);
+	reflector_ptr = zend_register_internal_interface(&_reflection_entry);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionFunctionAbstract", reflection_function_abstract_functions);
 	_reflection_entry.create_object = reflection_objects_new;
-	reflection_function_abstract_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	zend_class_implements(reflection_function_abstract_ptr TSRMLS_CC, 1, reflector_ptr);
-	zend_declare_property_string(reflection_function_abstract_ptr, "name", sizeof("name")-1, "", ZEND_ACC_ABSTRACT TSRMLS_CC);
+	reflection_function_abstract_ptr = zend_register_internal_class(&_reflection_entry);
+	zend_class_implements(reflection_function_abstract_ptr, 1, reflector_ptr);
+	zend_declare_property_string(reflection_function_abstract_ptr, "name", sizeof("name")-1, "", ZEND_ACC_ABSTRACT);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionFunction", reflection_function_functions);
 	_reflection_entry.create_object = reflection_objects_new;
-	reflection_function_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_function_abstract_ptr TSRMLS_CC);
-	zend_declare_property_string(reflection_function_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+	reflection_function_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_function_abstract_ptr);
+	zend_declare_property_string(reflection_function_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(function, "IS_DEPRECATED", ZEND_ACC_DEPRECATED);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionParameter", reflection_parameter_functions);
 	_reflection_entry.create_object = reflection_objects_new;
-	reflection_parameter_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	zend_class_implements(reflection_parameter_ptr TSRMLS_CC, 1, reflector_ptr);
-	zend_declare_property_string(reflection_parameter_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+	reflection_parameter_ptr = zend_register_internal_class(&_reflection_entry);
+	zend_class_implements(reflection_parameter_ptr, 1, reflector_ptr);
+	zend_declare_property_string(reflection_parameter_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionMethod", reflection_method_functions);
 	_reflection_entry.create_object = reflection_objects_new;
-	reflection_method_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_function_abstract_ptr TSRMLS_CC);
-	zend_declare_property_string(reflection_method_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
-	zend_declare_property_string(reflection_method_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+	reflection_method_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_function_abstract_ptr);
+	zend_declare_property_string(reflection_method_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
+	zend_declare_property_string(reflection_method_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_STATIC", ZEND_ACC_STATIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(method, "IS_PUBLIC", ZEND_ACC_PUBLIC);
@@ -6181,9 +6181,9 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionClass", reflection_class_functions);
 	_reflection_entry.create_object = reflection_objects_new;
-	reflection_class_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	zend_class_implements(reflection_class_ptr TSRMLS_CC, 1, reflector_ptr);
-	zend_declare_property_string(reflection_class_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+	reflection_class_ptr = zend_register_internal_class(&_reflection_entry);
+	zend_class_implements(reflection_class_ptr, 1, reflector_ptr);
+	zend_declare_property_string(reflection_class_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
@@ -6191,14 +6191,14 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionObject", reflection_object_functions);
 	_reflection_entry.create_object = reflection_objects_new;
-	reflection_object_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_class_ptr TSRMLS_CC);
+	reflection_object_ptr = zend_register_internal_class_ex(&_reflection_entry, reflection_class_ptr);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionProperty", reflection_property_functions);
 	_reflection_entry.create_object = reflection_objects_new;
-	reflection_property_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	zend_class_implements(reflection_property_ptr TSRMLS_CC, 1, reflector_ptr);
-	zend_declare_property_string(reflection_property_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
-	zend_declare_property_string(reflection_property_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+	reflection_property_ptr = zend_register_internal_class(&_reflection_entry);
+	zend_class_implements(reflection_property_ptr, 1, reflector_ptr);
+	zend_declare_property_string(reflection_property_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
+	zend_declare_property_string(reflection_property_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC);
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_STATIC", ZEND_ACC_STATIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PUBLIC", ZEND_ACC_PUBLIC);
@@ -6207,15 +6207,15 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionExtension", reflection_extension_functions);
 	_reflection_entry.create_object = reflection_objects_new;
-	reflection_extension_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	zend_class_implements(reflection_extension_ptr TSRMLS_CC, 1, reflector_ptr);
-	zend_declare_property_string(reflection_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+	reflection_extension_ptr = zend_register_internal_class(&_reflection_entry);
+	zend_class_implements(reflection_extension_ptr, 1, reflector_ptr);
+	zend_declare_property_string(reflection_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionZendExtension", reflection_zend_extension_functions);
 	_reflection_entry.create_object = reflection_objects_new;
-	reflection_zend_extension_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
-	zend_class_implements(reflection_zend_extension_ptr TSRMLS_CC, 1, reflector_ptr);
-	zend_declare_property_string(reflection_zend_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+	reflection_zend_extension_ptr = zend_register_internal_class(&_reflection_entry);
+	zend_class_implements(reflection_zend_extension_ptr, 1, reflector_ptr);
+	zend_declare_property_string(reflection_zend_extension_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
 
 	return SUCCESS;
 } /* }}} */

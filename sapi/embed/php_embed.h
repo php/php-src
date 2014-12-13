@@ -54,7 +54,7 @@
   } zend_catch { \
     /* int exit_status = EG(exit_status); */ \
   } zend_end_try(); \
-  php_embed_shutdown(TSRMLS_C); \
+  php_embed_shutdown(); \
 }
 
 #ifndef PHP_WIN32
@@ -65,7 +65,7 @@
 
 BEGIN_EXTERN_C() 
 EMBED_SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC);
-EMBED_SAPI_API void php_embed_shutdown(TSRMLS_D);
+EMBED_SAPI_API void php_embed_shutdown(void);
 extern EMBED_SAPI_API sapi_module_struct php_embed_module;
 END_EXTERN_C()
 

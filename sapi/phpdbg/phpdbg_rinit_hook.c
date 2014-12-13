@@ -68,18 +68,18 @@ static PHP_RINIT_FUNCTION(phpdbg_webhelper) /* {{{ */
 
 		char *msg = NULL;
 		char msglen[5] = {0};
-		phpdbg_webdata_compress(&msg, (int *)msglen TSRMLS_CC);
+		phpdbg_webdata_compress(&msg, (int *)msglen);
 
 		send(s, msglen, 4, 0);
 		send(s, msg, *(int *) msglen, 0);
 
 		while ((buflen = recv(s, buf, sizeof(buf) - 1, 0)) > 0) {
-			php_write(buf, buflen TSRMLS_CC);
+			php_write(buf, buflen);
 		}
 
 		close(s);
 
-		php_output_flush_all(TSRMLS_C);
+		php_output_flush_all();
 		zend_bailout();
 	}
 #endif

@@ -63,7 +63,6 @@ FILE *fopencookie(void *cookie, const char *mode, COOKIE_IO_FUNCTIONS_T *funcs)
 static int stream_cookie_reader(void *cookie, char *buffer, int size)
 {
 	int ret;
-	TSRMLS_FETCH();
 
 	ret = php_stream_read((php_stream*)cookie, buffer, size);
 	return ret;
@@ -71,14 +70,12 @@ static int stream_cookie_reader(void *cookie, char *buffer, int size)
 
 static int stream_cookie_writer(void *cookie, const char *buffer, int size)
 {
-	TSRMLS_FETCH();
 
 	return php_stream_write((php_stream *)cookie, (char *)buffer, size);
 }
 
 static PHP_FPOS_T stream_cookie_seeker(void *cookie, zend_off_t position, int whence)
 {
-	TSRMLS_FETCH();
 
 	return (PHP_FPOS_T)php_stream_seek((php_stream *)cookie, position, whence);
 }
@@ -86,7 +83,6 @@ static PHP_FPOS_T stream_cookie_seeker(void *cookie, zend_off_t position, int wh
 static int stream_cookie_closer(void *cookie)
 {
 	php_stream *stream = (php_stream*)cookie;
-	TSRMLS_FETCH();
 
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
@@ -96,7 +92,6 @@ static int stream_cookie_closer(void *cookie)
 static ssize_t stream_cookie_reader(void *cookie, char *buffer, size_t size)
 {
 	ssize_t ret;
-	TSRMLS_FETCH();
 
 	ret = php_stream_read(((php_stream *)cookie), buffer, size);
 	return ret;
@@ -104,7 +99,6 @@ static ssize_t stream_cookie_reader(void *cookie, char *buffer, size_t size)
 
 static ssize_t stream_cookie_writer(void *cookie, const char *buffer, size_t size)
 {
-	TSRMLS_FETCH();
 
 	return php_stream_write(((php_stream *)cookie), (char *)buffer, size);
 }
@@ -112,7 +106,6 @@ static ssize_t stream_cookie_writer(void *cookie, const char *buffer, size_t siz
 # ifdef COOKIE_SEEKER_USES_OFF64_T
 static int stream_cookie_seeker(void *cookie, __off64_t *position, int whence)
 {
-	TSRMLS_FETCH();
 
 	*position = php_stream_seek((php_stream *)cookie, (zend_off_t)*position, whence);
 
@@ -124,7 +117,6 @@ static int stream_cookie_seeker(void *cookie, __off64_t *position, int whence)
 # else
 static int stream_cookie_seeker(void *cookie, zend_off_t position, int whence)
 {
-	TSRMLS_FETCH();
 
 	return php_stream_seek((php_stream *)cookie, position, whence);
 }
@@ -133,7 +125,6 @@ static int stream_cookie_seeker(void *cookie, zend_off_t position, int whence)
 static int stream_cookie_closer(void *cookie)
 {
 	php_stream *stream = (php_stream*)cookie;
-	TSRMLS_FETCH();
 
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
@@ -197,7 +188,7 @@ void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *resul
 /* }}} */
 
 /* {{{ php_stream_cast */
-PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err TSRMLS_DC)
+PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err)
 {
 	int flags = castas & PHP_STREAM_CAST_MASK;
 	castas &= ~PHP_STREAM_CAST_MASK;
@@ -208,7 +199,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
 			zend_off_t dummy;
 
-			stream->ops->seek(stream, stream->position, SEEK_SET, &dummy TSRMLS_CC);
+			stream->ops->seek(stream, stream->position, SEEK_SET, &dummy);
 			stream->readpos = stream->writepos = 0;
 		}
 	}
@@ -228,7 +219,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		if (php_stream_is(stream, PHP_STREAM_IS_STDIO) &&
 			stream->ops->cast &&
 			!php_stream_is_filtered(stream) &&
-			stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS
+			stream->ops->cast(stream, castas, ret) == SUCCESS
 		) {
 			goto exit_success;
 		}
@@ -265,12 +256,12 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			b) no memory
 			-> lets bail
 		*/
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "fopencookie failed");
+		php_error_docref(NULL, E_ERROR, "fopencookie failed");
 		return FAILURE;
 #endif
 
-		if (!php_stream_is_filtered(stream) && stream->ops->cast && stream->ops->cast(stream, castas, NULL TSRMLS_CC) == SUCCESS) {
-			if (FAILURE == stream->ops->cast(stream, castas, ret TSRMLS_CC)) {
+		if (!php_stream_is_filtered(stream) && stream->ops->cast && stream->ops->cast(stream, castas, NULL) == SUCCESS) {
+			if (FAILURE == stream->ops->cast(stream, castas, ret)) {
 				return FAILURE;
 			}
 			goto exit_success;
@@ -304,9 +295,9 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	}
 
 	if (php_stream_is_filtered(stream)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot cast a filtered stream on this system");
+		php_error_docref(NULL, E_WARNING, "cannot cast a filtered stream on this system");
 		return FAILURE;
-	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS) {
+	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret) == SUCCESS) {
 		goto exit_success;
 	}
 
@@ -319,7 +310,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			"select()able descriptor"
 		};
 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot represent a stream of type %s as a %s", stream->ops->label, cast_names[castas]);
+		php_error_docref(NULL, E_WARNING, "cannot represent a stream of type %s as a %s", stream->ops->label, cast_names[castas]);
 	}
 
 	return FAILURE;
@@ -334,7 +325,7 @@ exit_success:
 		 * will be accessing the stream.  Emit a warning so that the end-user will
 		 * know that they should try something else */
 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, ZEND_LONG_FMT " bytes of buffered data lost during stream conversion!", (zend_long)(stream->writepos - stream->readpos));
+		php_error_docref(NULL, E_WARNING, ZEND_LONG_FMT " bytes of buffered data lost during stream conversion!", (zend_long)(stream->writepos - stream->readpos));
 	}
 
 	if (castas == PHP_STREAM_AS_STDIO && ret) {
@@ -351,7 +342,7 @@ exit_success:
 /* }}} */
 
 /* {{{ php_stream_open_wrapper_as_file */
-PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
+PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int options, char **opened_path STREAMS_DC)
 {
 	FILE *fp = NULL;
 	php_stream *stream = NULL;
@@ -374,7 +365,7 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 /* }}} */
 
 /* {{{ php_stream_make_seekable */
-PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC TSRMLS_DC)
+PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC)
 {
 	if (newstream == NULL) {
 		return PHP_STREAM_FAILED;

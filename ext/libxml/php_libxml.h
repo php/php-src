@@ -88,25 +88,25 @@ static inline php_libxml_node_object *php_libxml_node_fetch_object(zend_object *
 
 #define Z_LIBXML_NODE_P(zv) php_libxml_node_fetch_object(Z_OBJ_P((zv)))
 
-typedef void * (*php_libxml_export_node) (zval *object TSRMLS_DC);
+typedef void * (*php_libxml_export_node) (zval *object);
 
-PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data TSRMLS_DC);
-PHP_LIBXML_API int php_libxml_decrement_node_ptr(php_libxml_node_object *object TSRMLS_DC);
-PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp TSRMLS_DC);
-PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object TSRMLS_DC);
-PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object TSRMLS_DC);
+PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data);
+PHP_LIBXML_API int php_libxml_decrement_node_ptr(php_libxml_node_object *object);
+PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp);
+PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object);
+PHP_LIBXML_API xmlNodePtr php_libxml_import_node(zval *object);
 PHP_LIBXML_API zval *php_libxml_register_export(zend_class_entry *ce, php_libxml_export_node export_function);
 /* When an explicit freeing of node and children is required */
-PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node TSRMLS_DC);
+PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node);
 /* When object dtor is called as node may still be referenced */
-PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *object TSRMLS_DC);
+PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *object);
 PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...);
 PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
-PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext TSRMLS_DC);
-PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg TSRMLS_DC);
-PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable TSRMLS_DC);
+PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext);
+PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg);
+PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable);
 
 /* Init/shutdown functions*/
 PHP_LIBXML_API void php_libxml_initialize(void);

@@ -164,8 +164,8 @@ struct st_mysqli_warning {
 typedef struct _mysqli_property_entry {
 	const char *pname;
 	size_t pname_length;
-	zval *(*r_func)(mysqli_object *obj, zval *retval TSRMLS_DC);
-	int (*w_func)(mysqli_object *obj, zval *value TSRMLS_DC);
+	zval *(*r_func)(mysqli_object *obj, zval *retval);
+	int (*w_func)(mysqli_object *obj, zval *value);
 } mysqli_property_entry;
 
 typedef struct {
@@ -209,12 +209,12 @@ extern zend_class_entry *mysqli_exception_class_entry;
 extern int php_le_pmysqli(void);
 extern void php_mysqli_dtor_p_elements(void *data);
 
-extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status TSRMLS_DC);
+extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status);
 
 extern zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
-extern zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
+extern zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 
-extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend_long fetchtype TSRMLS_DC);
+extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend_long fetchtype);
 
 #ifdef HAVE_SPL
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
@@ -234,22 +234,22 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 	zend_class_entry ce; \
 	INIT_CLASS_ENTRY(ce, name,class_functions); \
 	ce.create_object = mysqli_objects_new; \
-	mysqli_entry = zend_register_internal_class(&ce TSRMLS_CC); \
+	mysqli_entry = zend_register_internal_class(&ce); \
 } \
 
 #define MYSQLI_REGISTER_RESOURCE_EX(__ptr, __zval)  \
 	(Z_MYSQLI_P(__zval))->ptr = __ptr;
 
 #define MYSQLI_RETURN_RESOURCE(__ptr, __ce) \
-	RETVAL_OBJ(mysqli_objects_new(__ce TSRMLS_CC)); \
+	RETVAL_OBJ(mysqli_objects_new(__ce)); \
 	MYSQLI_REGISTER_RESOURCE_EX(__ptr, return_value)
 
 #define MYSQLI_REGISTER_RESOURCE(__ptr, __ce) \
 {\
 	zval *object = getThis(); \
-	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry TSRMLS_CC)) { \
+	if (!object || !instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry)) { \
 		object = return_value; \
-		ZVAL_OBJ(object, mysqli_objects_new(__ce TSRMLS_CC)); \
+		ZVAL_OBJ(object, mysqli_objects_new(__ce)); \
 	} \
 	MYSQLI_REGISTER_RESOURCE_EX(__ptr, object)\
 }
@@ -259,12 +259,12 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 	MYSQLI_RESOURCE *my_res; \
 	mysqli_object *intern = Z_MYSQLI_P(__id); \
 	if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {\
-  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name->val);\
+  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name->val);\
   		RETURN_NULL();\
   	}\
 	__ptr = (__type)my_res->ptr; \
 	if (__check && my_res->status < __check) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
+		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
 		RETURN_NULL();\
 	}\
 }
@@ -273,12 +273,12 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 { \
 	MYSQLI_RESOURCE *my_res; \
 	if (!(my_res = (MYSQLI_RESOURCE *)(__obj->ptr))) {\
-  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name->val);\
+  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name->val);\
   		return;\
   	}\
 	__ptr = (__type)my_res->ptr; \
 	if (__check && my_res->status < __check) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
+		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
 		return;\
 	}\
 }
@@ -288,7 +288,7 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 	MYSQLI_FETCH_RESOURCE((__ptr), MY_MYSQL *, (__id), "mysqli_link", (__check)); \
 	if (!(__ptr)->mysql) { \
 		mysqli_object *intern = Z_MYSQLI_P(__id); \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
+		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
 		RETURN_NULL(); \
 	} \
 }
@@ -298,7 +298,7 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 	MYSQLI_FETCH_RESOURCE((__ptr), MY_STMT *, (__id), "mysqli_stmt", (__check)); \
 	if (!(__ptr)->stmt) { \
 		mysqli_object *intern = Z_MYSQLI_P(__id); \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
+		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name->val); \
 		RETURN_NULL();\
 	} \
 }

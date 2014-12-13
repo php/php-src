@@ -94,15 +94,15 @@ TSRMLS_CACHE_EXTERN;
 #define	SHM_RND		FILE_MAP_WRITE
 #define	SHM_REMAP	FILE_MAP_COPY
 
-char * tsrm_win32_get_path_sid_key(const char *pathname  TSRMLS_DC);
+char * tsrm_win32_get_path_sid_key(const char *pathname );
 
 TSRM_API void tsrm_win32_startup(void);
 TSRM_API void tsrm_win32_shutdown(void);
 
-TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env TSRMLS_DC);
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env);
 TSRM_API FILE *popen(const char *command, const char *type);
 TSRM_API int pclose(FILE *stream);
-TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC);
+TSRM_API int tsrm_win32_access(const char *pathname, int mode);
 TSRM_API int win32_utime(const char *filename, struct utimbuf *buf);
 
 TSRM_API int shmget(int key, int size, int flags);

@@ -218,7 +218,7 @@ done:
 #undef YYLIMIT
 #undef YYMARKER
 
-static inline void tag_arg(url_adapt_state_ex_t *ctx, char quotes, char type TSRMLS_DC)
+static inline void tag_arg(url_adapt_state_ex_t *ctx, char quotes, char type)
 {
 	char f = 0;
 
@@ -343,10 +343,10 @@ static inline void handle_arg(STD_PARA)
 static inline void handle_val(STD_PARA, char quotes, char type) 
 {
 	smart_str_setl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2);
-	tag_arg(ctx, quotes, type TSRMLS_CC);
+	tag_arg(ctx, quotes, type);
 }
 
-static inline void xx_mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen TSRMLS_DC)
+static inline void xx_mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen)
 {
 	char *end, *q;
 	char *xp;
@@ -918,7 +918,7 @@ stop:
 	ctx->buf.s->len = rest;
 }
 
-char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen TSRMLS_DC)
+char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen)
 {
 	char *result;
 	smart_str surl = {0};
@@ -944,14 +944,14 @@ char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const cha
 }
 
 
-static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_bool do_flush TSRMLS_DC)
+static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_bool do_flush)
 {
 	url_adapt_state_ex_t *ctx;
 	char *retval;
 
 	ctx = &BG(url_adapt_state_ex);
 
-	xx_mainloop(ctx, src, srclen TSRMLS_CC);
+	xx_mainloop(ctx, src, srclen);
 
 	if (!ctx->result.s) {
 		smart_str_appendl(&ctx->result, "", 0);
@@ -971,7 +971,7 @@ static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_
 	return retval;
 }
 
-static int php_url_scanner_ex_activate(TSRMLS_D)
+static int php_url_scanner_ex_activate(void)
 {
 	url_adapt_state_ex_t *ctx;
 	
@@ -982,7 +982,7 @@ static int php_url_scanner_ex_activate(TSRMLS_D)
 	return SUCCESS;
 }
 
-static int php_url_scanner_ex_deactivate(TSRMLS_D)
+static int php_url_scanner_ex_deactivate(void)
 {
 	url_adapt_state_ex_t *ctx;
 	
@@ -996,12 +996,12 @@ static int php_url_scanner_ex_deactivate(TSRMLS_D)
 	return SUCCESS;
 }
 
-static void php_url_scanner_output_handler(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode TSRMLS_DC)
+static void php_url_scanner_output_handler(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode)
 {
 	size_t len;
 
 	if (BG(url_adapt_state_ex).url_app.s->len != 0) {
-		*handled_output = url_adapt_ext(output, output_len, &len, (zend_bool) (mode & (PHP_OUTPUT_HANDLER_END | PHP_OUTPUT_HANDLER_CONT | PHP_OUTPUT_HANDLER_FLUSH | PHP_OUTPUT_HANDLER_FINAL) ? 1 : 0) TSRMLS_CC);
+		*handled_output = url_adapt_ext(output, output_len, &len, (zend_bool) (mode & (PHP_OUTPUT_HANDLER_END | PHP_OUTPUT_HANDLER_CONT | PHP_OUTPUT_HANDLER_FLUSH | PHP_OUTPUT_HANDLER_FINAL) ? 1 : 0));
 		if (sizeof(uint) < sizeof(size_t)) {
 			if (len > UINT_MAX)
 				len = UINT_MAX;
@@ -1026,14 +1026,14 @@ static void php_url_scanner_output_handler(char *output, size_t output_len, char
 	}
 }
 
-PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, size_t value_len, int urlencode TSRMLS_DC)
+PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, size_t value_len, int urlencode)
 {
 	smart_str val = {0};
 	zend_string *encoded;
 	
 	if (!BG(url_adapt_state_ex).active) {
-		php_url_scanner_ex_activate(TSRMLS_C);
-		php_output_start_internal(ZEND_STRL("URL-Rewriter"), php_url_scanner_output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
+		php_url_scanner_ex_activate();
+		php_output_start_internal(ZEND_STRL("URL-Rewriter"), php_url_scanner_output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
 		BG(url_adapt_state_ex).active = 1;
 	}
 
@@ -1067,7 +1067,7 @@ PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, siz
 	return SUCCESS;
 }
 
-PHPAPI int php_url_scanner_reset_vars(TSRMLS_D)
+PHPAPI int php_url_scanner_reset_vars(void)
 {
 	if (BG(url_adapt_state_ex).form_app.s) {
 		BG(url_adapt_state_ex).form_app.s->len = 0;
@@ -1106,7 +1106,7 @@ PHP_RINIT_FUNCTION(url_scanner)
 PHP_RSHUTDOWN_FUNCTION(url_scanner)
 {
 	if (BG(url_adapt_state_ex).active) {
-		php_url_scanner_ex_deactivate(TSRMLS_C);
+		php_url_scanner_ex_deactivate();
 		BG(url_adapt_state_ex).active = 0;
 	}
 

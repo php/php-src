@@ -100,16 +100,16 @@ static int		ftp_getresp(ftpbuf_t *ftp);
 static int		ftp_type(ftpbuf_t *ftp, ftptype_t type);
 
 /* opens up a data stream */
-static databuf_t*	ftp_getdata(ftpbuf_t *ftp TSRMLS_DC);
+static databuf_t*	ftp_getdata(ftpbuf_t *ftp);
 
 /* accepts the data connection, returns updated data buffer */
-static databuf_t*	data_accept(databuf_t *data, ftpbuf_t *ftp TSRMLS_DC);
+static databuf_t*	data_accept(databuf_t *data, ftpbuf_t *ftp);
 
 /* closes the data connection, returns NULL */
 static databuf_t*	data_close(ftpbuf_t *ftp, databuf_t *data);
 
 /* generic file lister */
-static char**		ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC);
+static char**		ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path);
 
 /* IP and port conversion box */
 union ipbox {
@@ -121,7 +121,7 @@ union ipbox {
 /* {{{ ftp_open
  */
 ftpbuf_t*
-ftp_open(const char *host, short port, zend_long timeout_sec TSRMLS_DC)
+ftp_open(const char *host, short port, zend_long timeout_sec)
 {
 	ftpbuf_t		*ftp;
 	socklen_t		 size;
@@ -136,7 +136,7 @@ ftp_open(const char *host, short port, zend_long timeout_sec TSRMLS_DC)
 
 	ftp->fd = php_network_connect_socket_to_host(host,
 			(unsigned short) (port ? port : 21), SOCK_STREAM,
-			0, &tv, NULL, NULL, NULL, 0, STREAM_SOCKOP_NONE TSRMLS_CC);
+			0, &tv, NULL, NULL, NULL, 0, STREAM_SOCKOP_NONE);
 	if (ftp->fd == -1) {
 		goto bail;
 	}
@@ -148,7 +148,7 @@ ftp_open(const char *host, short port, zend_long timeout_sec TSRMLS_DC)
 	size = sizeof(ftp->localaddr);
 	memset(&ftp->localaddr, 0, size);
 	if (getsockname(ftp->fd, (struct sockaddr*) &ftp->localaddr, &size) != 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "getsockname failed: %s (%d)", strerror(errno), errno);
+		php_error_docref(NULL, E_WARNING, "getsockname failed: %s (%d)", strerror(errno), errno);
 		goto bail;
 	}
 
@@ -179,8 +179,7 @@ ftp_close(ftpbuf_t *ftp)
 		data_close(ftp, ftp->data);
 	}
 	if (ftp->stream && ftp->closestream) {
-		TSRMLS_FETCH();
-		php_stream_close(ftp->stream);
+			php_stream_close(ftp->stream);
 	}
 	if (ftp->fd != -1) {
 #if HAVE_OPENSSL_EXT
@@ -244,7 +243,7 @@ ftp_quit(ftpbuf_t *ftp)
 /* {{{ ftp_login
  */
 int
-ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
+ftp_login(ftpbuf_t *ftp, const char *user, const char *pass)
 {
 #if HAVE_OPENSSL_EXT
 	SSL_CTX	*ctx = NULL;
@@ -281,7 +280,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 		
 		ctx = SSL_CTX_new(SSLv23_client_method());
 		if (ctx == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create the SSL context");
+			php_error_docref(NULL, E_WARNING, "failed to create the SSL context");
 			return 0;
 		}
 
@@ -292,7 +291,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 
 		ftp->ssl_handle = SSL_new(ctx);
 		if (ftp->ssl_handle == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create the SSL handle");
+			php_error_docref(NULL, E_WARNING, "failed to create the SSL handle");
 			SSL_CTX_free(ctx);
 			return 0;
 		}
@@ -300,7 +299,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 		SSL_set_fd(ftp->ssl_handle, ftp->fd);
 
 		if (SSL_connect(ftp->ssl_handle) <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL/TLS handshake failed");
+			php_error_docref(NULL, E_WARNING, "SSL/TLS handshake failed");
 			SSL_shutdown(ftp->ssl_handle);
 			SSL_free(ftp->ssl_handle);
 			return 0;
@@ -649,18 +648,18 @@ ftp_alloc(ftpbuf_t *ftp, const zend_long size, zend_string **response)
 /* {{{ ftp_nlist
  */
 char**
-ftp_nlist(ftpbuf_t *ftp, const char *path TSRMLS_DC)
+ftp_nlist(ftpbuf_t *ftp, const char *path)
 {
-	return ftp_genlist(ftp, "NLST", path TSRMLS_CC);
+	return ftp_genlist(ftp, "NLST", path);
 }
 /* }}} */
 
 /* {{{ ftp_list
  */
 char**
-ftp_list(ftpbuf_t *ftp, const char *path, int recursive TSRMLS_DC)
+ftp_list(ftpbuf_t *ftp, const char *path, int recursive)
 {
-	return ftp_genlist(ftp, ((recursive) ? "LIST -R" : "LIST"), path TSRMLS_CC);
+	return ftp_genlist(ftp, ((recursive) ? "LIST -R" : "LIST"), path);
 }
 /* }}} */
 
@@ -791,7 +790,7 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 /* {{{ ftp_get
  */
 int
-ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos TSRMLS_DC)
+ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos)
 {
 	databuf_t		*data = NULL;
 	size_t			rcvd;
@@ -804,7 +803,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 		goto bail;
 	}
 
-	if ((data = ftp_getdata(ftp TSRMLS_CC)) == NULL) {
+	if ((data = ftp_getdata(ftp)) == NULL) {
 		goto bail;
 	}
 	
@@ -827,7 +826,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 		goto bail;
 	}
 
-	if ((data = data_accept(data, ftp TSRMLS_CC)) == NULL) {
+	if ((data = data_accept(data, ftp)) == NULL) {
 		goto bail;
 	}
 
@@ -883,7 +882,7 @@ bail:
 /* {{{ ftp_put
  */
 int
-ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos TSRMLS_DC)
+ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos)
 {
 	databuf_t		*data = NULL;
 	zend_long			size;
@@ -897,7 +896,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, z
 	if (!ftp_type(ftp, type)) {
 		goto bail;
 	}
-	if ((data = ftp_getdata(ftp TSRMLS_CC)) == NULL) {
+	if ((data = ftp_getdata(ftp)) == NULL) {
 		goto bail;
 	}
 	ftp->data = data;	
@@ -918,7 +917,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, z
 	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125)) {
 		goto bail;
 	}
-	if ((data = data_accept(data, ftp TSRMLS_CC)) == NULL) {
+	if ((data = data_accept(data, ftp)) == NULL) {
 		goto bail;
 	}
 
@@ -1364,7 +1363,7 @@ my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrl
 /* {{{ ftp_getdata
  */
 databuf_t*
-ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
+ftp_getdata(ftpbuf_t *ftp)
 {
 	int			fd = -1;
 	databuf_t		*data;
@@ -1389,7 +1388,7 @@ ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 	sa = (struct sockaddr *) &ftp->localaddr;
 	/* bind/listen */
 	if ((fd = socket(sa->sa_family, SOCK_STREAM, 0)) == SOCK_ERR) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "socket() failed: %s (%d)", strerror(errno), errno);
+		php_error_docref(NULL, E_WARNING, "socket() failed: %s (%d)", strerror(errno), errno);
 		goto bail;
 	}
 
@@ -1404,7 +1403,7 @@ ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 		tv.tv_sec = ftp->timeout_sec;
 		tv.tv_usec = 0;
 		if (php_connect_nonb(fd, (struct sockaddr*) &ftp->pasvaddr, size, &tv) == -1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_connect_nonb() failed: %s (%d)", strerror(errno), errno);
+			php_error_docref(NULL, E_WARNING, "php_connect_nonb() failed: %s (%d)", strerror(errno), errno);
 			goto bail;
 		}
 
@@ -1422,17 +1421,17 @@ ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 	size = php_sockaddr_size(&addr);
 
 	if (bind(fd, (struct sockaddr*) &addr, size) != 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "bind() failed: %s (%d)", strerror(errno), errno);
+		php_error_docref(NULL, E_WARNING, "bind() failed: %s (%d)", strerror(errno), errno);
 		goto bail;
 	}
 
 	if (getsockname(fd, (struct sockaddr*) &addr, &size) != 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "getsockname() failed: %s (%d)", strerror(errno), errno);
+		php_error_docref(NULL, E_WARNING, "getsockname() failed: %s (%d)", strerror(errno), errno);
 		goto bail;
 	}
 
 	if (listen(fd, 5) != 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "listen() failed: %s (%d)", strerror(errno), errno);
+		php_error_docref(NULL, E_WARNING, "listen() failed: %s (%d)", strerror(errno), errno);
 		goto bail;
 	}
 
@@ -1486,7 +1485,7 @@ bail:
 /* {{{ data_accept
  */
 databuf_t*
-data_accept(databuf_t *data, ftpbuf_t *ftp TSRMLS_DC)
+data_accept(databuf_t *data, ftpbuf_t *ftp)
 {
 	php_sockaddr_storage addr;
 	socklen_t			size;
@@ -1516,7 +1515,7 @@ data_accepted:
 	if (ftp->use_ssl && ftp->use_ssl_for_data) {
 		ctx = SSL_CTX_new(SSLv23_client_method());
 		if (ctx == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_accept: failed to create the SSL context");
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to create the SSL context");
 			return 0;
 		}
 
@@ -1527,7 +1526,7 @@ data_accepted:
 
 		data->ssl_handle = SSL_new(ctx);
 		if (data->ssl_handle == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_accept: failed to create the SSL handle");
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to create the SSL handle");
 			SSL_CTX_free(ctx);
 			return 0;
 		}
@@ -1540,7 +1539,7 @@ data_accepted:
 		}
 			
 		if (SSL_connect(data->ssl_handle) <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_accept: SSL/TLS handshake failed");
+			php_error_docref(NULL, E_WARNING, "data_accept: SSL/TLS handshake failed");
 			SSL_shutdown(data->ssl_handle);
 			SSL_free(data->ssl_handle);
 			return 0;
@@ -1604,7 +1603,7 @@ data_close(ftpbuf_t *ftp, databuf_t *data)
 /* {{{ ftp_genlist
  */
 char**
-ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
+ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 {
 	php_stream	*tmpstream = NULL;
 	databuf_t	*data = NULL;
@@ -1618,7 +1617,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 
 
 	if ((tmpstream = php_stream_fopen_tmpfile()) == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create temporary file.  Check permissions in temporary files directory.");
+		php_error_docref(NULL, E_WARNING, "Unable to create temporary file.  Check permissions in temporary files directory.");
 		return NULL;
 	}
 
@@ -1626,7 +1625,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 		goto bail;
 	}
 
-	if ((data = ftp_getdata(ftp TSRMLS_CC)) == NULL) {
+	if ((data = ftp_getdata(ftp)) == NULL) {
 		goto bail;
 	}
 	ftp->data = data;	
@@ -1646,7 +1645,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 	}
 
 	/* pull data buffer into tmpfile */
-	if ((data = data_accept(data, ftp TSRMLS_CC)) == NULL) {
+	if ((data = data_accept(data, ftp)) == NULL) {
 		goto bail;
 	}
 	size = 0;
@@ -1711,7 +1710,7 @@ bail:
 /* {{{ ftp_nb_get
  */
 int
-ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos TSRMLS_DC)
+ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, zend_long resumepos)
 {
 	databuf_t		*data = NULL;
 	char			arg[11];
@@ -1724,7 +1723,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 		goto bail;
 	}
 
-	if ((data = ftp_getdata(ftp TSRMLS_CC)) == NULL) {
+	if ((data = ftp_getdata(ftp)) == NULL) {
 		goto bail;
 	}
 
@@ -1745,7 +1744,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 		goto bail;
 	}
 
-	if ((data = data_accept(data, ftp TSRMLS_CC)) == NULL) {
+	if ((data = data_accept(data, ftp)) == NULL) {
 		goto bail;
 	}
 
@@ -1754,7 +1753,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 	ftp->lastch = 0;
 	ftp->nb = 1;
 
-	return (ftp_nb_continue_read(ftp TSRMLS_CC));
+	return (ftp_nb_continue_read(ftp));
 
 bail:
 	ftp->data = data_close(ftp, data);
@@ -1765,7 +1764,7 @@ bail:
 /* {{{ ftp_nb_continue_read
  */
 int
-ftp_nb_continue_read(ftpbuf_t *ftp TSRMLS_DC)
+ftp_nb_continue_read(ftpbuf_t *ftp)
 {
 	databuf_t	*data = NULL;
 	char		*ptr;
@@ -1828,7 +1827,7 @@ bail:
 /* {{{ ftp_nb_put
  */
 int
-ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos TSRMLS_DC)
+ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, zend_long startpos)
 {
 	databuf_t		*data = NULL;
 	char			arg[11];
@@ -1839,7 +1838,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type
 	if (!ftp_type(ftp, type)) {
 		goto bail;
 	}
-	if ((data = ftp_getdata(ftp TSRMLS_CC)) == NULL) {
+	if ((data = ftp_getdata(ftp)) == NULL) {
 		goto bail;
 	}
 	if (startpos > 0) {
@@ -1858,7 +1857,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type
 	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125)) {
 		goto bail;
 	}
-	if ((data = data_accept(data, ftp TSRMLS_CC)) == NULL) { 
+	if ((data = data_accept(data, ftp)) == NULL) { 
 		goto bail;
 	}
 	ftp->data = data;
@@ -1866,7 +1865,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type
 	ftp->lastch = 0;
 	ftp->nb = 1;
 
-	return (ftp_nb_continue_write(ftp TSRMLS_CC));
+	return (ftp_nb_continue_write(ftp));
 
 bail:
 	ftp->data = data_close(ftp, data);
@@ -1878,7 +1877,7 @@ bail:
 /* {{{ ftp_nb_continue_write
  */
 int
-ftp_nb_continue_write(ftpbuf_t *ftp TSRMLS_DC)
+ftp_nb_continue_write(ftpbuf_t *ftp)
 {
 	long			size;
 	char			*ptr;

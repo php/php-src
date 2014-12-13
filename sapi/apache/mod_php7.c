@@ -30,13 +30,13 @@
 
 /* {{{ Prototypes
  */
-int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC);
+int apache_php_module_main(request_rec *r, int display_source_mode);
 static void php_save_umask(void);
 static void php_restore_umask(void);
-static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC);
-static char *sapi_apache_read_cookies(TSRMLS_D);
-static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC);
-static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC);
+static int sapi_apache_read_post(char *buffer, uint count_bytes);
+static char *sapi_apache_read_cookies(void);
+static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers);
+static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers);
 static int send_php(request_rec *r, int display_source_mode, char *filename);
 static int send_parsed_php(request_rec * r);
 static int send_parsed_php_source(request_rec * r);
@@ -92,7 +92,7 @@ static void php_save_umask(void)
 
 /* {{{ sapi_apache_ub_write
  */
-static int sapi_apache_ub_write(const char *str, uint str_length TSRMLS_DC)
+static int sapi_apache_ub_write(const char *str, uint str_length)
 {
 	int ret=0;
 		
@@ -108,7 +108,7 @@ static int sapi_apache_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 /* {{{ sapi_apache_flush
  */
-static void sapi_apache_flush(void *server_context TSRMLS_DC)
+static void sapi_apache_flush(void *server_context)
 {
 	if (server_context) {
 #if MODULE_MAGIC_NUMBER > 19970110
@@ -122,7 +122,7 @@ static void sapi_apache_flush(void *server_context TSRMLS_DC)
 
 /* {{{ sapi_apache_read_post
  */
-static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
+static int sapi_apache_read_post(char *buffer, uint count_bytes)
 {
 	int total_read_bytes=0, read_bytes;
 	request_rec *r = (request_rec *) SG(server_context);
@@ -155,7 +155,7 @@ static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 
 /* {{{ sapi_apache_read_cookies
  */
-static char *sapi_apache_read_cookies(TSRMLS_D)
+static char *sapi_apache_read_cookies(void)
 {
 	return (char *) table_get(((request_rec *) SG(server_context))->subprocess_env, "HTTP_COOKIE");
 }
@@ -163,7 +163,7 @@ static char *sapi_apache_read_cookies(TSRMLS_D)
 
 /* {{{ sapi_apache_header_handler
  */
-static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_header_op_enum op, sapi_headers_struct *sapi_headers)
 {
 	char *header_name, *header_content, *p;
 	request_rec *r = (request_rec *) SG(server_context);
@@ -218,7 +218,7 @@ static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_head
 
 /* {{{ sapi_apache_send_headers
  */
-static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers)
 {
 	request_rec *r = SG(server_context);
 	const char *sline = SG(sapi_headers).http_status_line;
@@ -251,7 +251,7 @@ static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 /* {{{ sapi_apache_register_server_variables
  */
-static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_DC)
+static void sapi_apache_register_server_variables(zval *track_vars_array)
 {
 	register int i;
 	array_header *arr = table_elts(((request_rec *) SG(server_context))->subprocess_env);
@@ -270,8 +270,8 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 			val = "";
 		}
 		val_len = strlen(val);
-		if (sapi_module.input_filter(PARSE_SERVER, elts[i].key, &val, val_len, &new_val_len TSRMLS_CC)) {
-			php_register_variable_safe(elts[i].key, val, new_val_len, track_vars_array TSRMLS_CC);
+		if (sapi_module.input_filter(PARSE_SERVER, elts[i].key, &val, val_len, &new_val_len)) {
+			php_register_variable_safe(elts[i].key, val, new_val_len, track_vars_array);
 		}
 	}
 
@@ -284,11 +284,11 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	if (symbol_table
 		&& !zend_hash_str_exists(symbol_table, "PATH_TRANSLATED", sizeof("PATH_TRANSLATED")-1)
 		&& (path_translated = zend_hash_str_find(symbol_table, "SCRIPT_FILENAME", sizeof("SCRIPT_FILENAME")-1)) != NULL) {
-		php_register_variable("PATH_TRANSLATED", Z_STRVAL_P(path_translated), track_vars_array TSRMLS_CC);
+		php_register_variable("PATH_TRANSLATED", Z_STRVAL_P(path_translated), track_vars_array);
 	}
 
-	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &((request_rec *) SG(server_context))->uri, strlen(((request_rec *) SG(server_context))->uri), &new_val_len TSRMLS_CC)) {
-		php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, track_vars_array TSRMLS_CC);
+	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &((request_rec *) SG(server_context))->uri, strlen(((request_rec *) SG(server_context))->uri), &new_val_len)) {
+		php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, track_vars_array);
 	}
 }
 /* }}} */
@@ -307,7 +307,7 @@ static int php_apache_startup(sapi_module_struct *sapi_module)
 
 /* {{{ php_apache_log_message
  */
-static void php_apache_log_message(char *message TSRMLS_DC)
+static void php_apache_log_message(char *message)
 {
 	if (SG(server_context)) {
 #if MODULE_MAGIC_NUMBER >= 19970831
@@ -325,9 +325,8 @@ static void php_apache_log_message(char *message TSRMLS_DC)
  */
 static void php_apache_request_shutdown(void *dummy)
 {
-	TSRMLS_FETCH();
 
-	php_output_set_status(PHP_OUTPUT_DISABLED TSRMLS_CC);
+	php_output_set_status(PHP_OUTPUT_DISABLED);
 	if (AP(in_request)) {
 		AP(in_request) = 0;
 		php_request_shutdown(dummy);
@@ -342,7 +341,7 @@ static void php_apache_request_shutdown(void *dummy)
 
 /* {{{ php_apache_sapi_activate
  */
-static int php_apache_sapi_activate(TSRMLS_D)
+static int php_apache_sapi_activate(void)
 {
 	request_rec *r = (request_rec *) SG(server_context); 
 
@@ -369,7 +368,7 @@ static int php_apache_sapi_activate(TSRMLS_D)
 
 /* {{{ php_apache_get_stat
  */
-static struct stat *php_apache_get_stat(TSRMLS_D)
+static struct stat *php_apache_get_stat(void)
 {
 	return &((request_rec *) SG(server_context))->finfo;
 }
@@ -377,7 +376,7 @@ static struct stat *php_apache_get_stat(TSRMLS_D)
 
 /* {{{ php_apache_getenv
  */
-static char *php_apache_getenv(char *name, size_t name_len TSRMLS_DC)
+static char *php_apache_getenv(char *name, size_t name_len)
 {
 	if (SG(server_context) == NULL) {
 		return NULL;
@@ -389,7 +388,7 @@ static char *php_apache_getenv(char *name, size_t name_len TSRMLS_DC)
 
 /* {{{ sapi_apache_get_fd
  */
-static int sapi_apache_get_fd(int *nfd TSRMLS_DC)
+static int sapi_apache_get_fd(int *nfd)
 {
 #if PHP_APACHE_HAVE_CLIENT_FD
 	request_rec *r = SG(server_context);
@@ -408,7 +407,7 @@ static int sapi_apache_get_fd(int *nfd TSRMLS_DC)
 
 /* {{{ sapi_apache_force_http_10
  */
-static int sapi_apache_force_http_10(TSRMLS_D)
+static int sapi_apache_force_http_10(void)
 {
 	request_rec *r = SG(server_context);
 	
@@ -420,7 +419,7 @@ static int sapi_apache_force_http_10(TSRMLS_D)
 
 /* {{{ sapi_apache_get_target_uid
  */
-static int sapi_apache_get_target_uid(uid_t *obj TSRMLS_DC)
+static int sapi_apache_get_target_uid(uid_t *obj)
 {
 	*obj = ap_user_id;
 	return SUCCESS;
@@ -429,7 +428,7 @@ static int sapi_apache_get_target_uid(uid_t *obj TSRMLS_DC)
 
 /* {{{ sapi_apache_get_target_gid
  */
-static int sapi_apache_get_target_gid(gid_t *obj TSRMLS_DC)
+static int sapi_apache_get_target_gid(gid_t *obj)
 {
 	*obj = ap_group_id;
 	return SUCCESS;
@@ -438,7 +437,7 @@ static int sapi_apache_get_target_gid(gid_t *obj TSRMLS_DC)
 
 /* {{{ php_apache_get_request_time
  */
-static double php_apache_get_request_time(TSRMLS_D)
+static double php_apache_get_request_time(void)
 {
 	return (double) ((request_rec *)SG(server_context))->request_time;
 }
@@ -446,7 +445,7 @@ static double php_apache_get_request_time(TSRMLS_D)
 
 /* {{{ sapi_apache_child_terminate
  */
-static void sapi_apache_child_terminate(TSRMLS_D)
+static void sapi_apache_child_terminate(void)
 {
 #ifndef MULTITHREAD
 	ap_child_terminate((request_rec *)SG(server_context));
@@ -517,7 +516,7 @@ static void php_restore_umask(void)
 
 /* {{{ init_request_info
  */
-static void init_request_info(TSRMLS_D)
+static void init_request_info(void)
 {
 	request_rec *r = ((request_rec *) SG(server_context));
 	char *content_length = (char *) table_get(r->subprocess_env, "CONTENT_LENGTH");
@@ -564,7 +563,7 @@ static void init_request_info(TSRMLS_D)
 
 /* {{{ php_apache_alter_ini_entries
  */
-static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry TSRMLS_DC)
+static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry)
 {
 	zend_string *key = STR_INIT(per_dir_entry->key, per_dir_entry->key_length, 0);
 	zend_alter_ini_entry_chars(key, per_dir_entry->value, per_dir_entry->value_length, per_dir_entry->type, per_dir_entry->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE);
@@ -575,7 +574,7 @@ static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry TSRMLS_
 
 /* {{{ php_apache_get_default_mimetype
  */
-static char *php_apache_get_default_mimetype(request_rec *r TSRMLS_DC)
+static char *php_apache_get_default_mimetype(request_rec *r)
 {
 	
 	char *mimetype;
@@ -583,7 +582,7 @@ static char *php_apache_get_default_mimetype(request_rec *r TSRMLS_DC)
 		/* Assume output will be of the default MIME type.  Individual
 		   scripts may change this later. */
 		char *tmpmimetype;
-		tmpmimetype = sapi_get_default_content_type(TSRMLS_C);
+		tmpmimetype = sapi_get_default_content_type();
 		mimetype = pstrdup(r->pool, tmpmimetype);
 		efree(tmpmimetype);
 	} else {
@@ -599,7 +598,6 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 {
 	int retval;
 	HashTable *per_dir_conf;
-	TSRMLS_FETCH();
 
 	if (AP(in_request)) {
 		zend_file_handle fh;
@@ -609,7 +607,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		fh.free_filename = 0;
 		fh.type = ZEND_HANDLE_FILENAME;
 
-		zend_execute_scripts(ZEND_INCLUDE TSRMLS_CC, NULL, 1, &fh);
+		zend_execute_scripts(ZEND_INCLUDE, NULL, 1, &fh);
 		return OK;
 	}
 
@@ -624,16 +622,16 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 
 		per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php7_module);
 		if (per_dir_conf) {
-			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
+			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries);
 		}
 		
 		/* If PHP parser engine has been turned off with an "engine off"
 		 * directive, then decline to handle this request
 		 */
 		if (!AP(engine)) {
-			r->content_type = php_apache_get_default_mimetype(r TSRMLS_CC);
+			r->content_type = php_apache_get_default_mimetype(r);
 			zend_try {
-				zend_ini_deactivate(TSRMLS_C);
+				zend_ini_deactivate();
 			} zend_end_try();
 			return DECLINED;
 		}
@@ -645,7 +643,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 #if MODULE_MAGIC_NUMBER > 19961007
 		if ((retval = setup_client_block(r, REQUEST_CHUNKED_DECHUNK))) {
 			zend_try {
-				zend_ini_deactivate(TSRMLS_C);
+				zend_ini_deactivate();
 			} zend_end_try();
 			return retval;
 		}
@@ -655,7 +653,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 #if MODULE_MAGIC_NUMBER < 19970912
 			if ((retval = set_last_modified(r, r->finfo.st_mtime))) {
 				zend_try {
-					zend_ini_deactivate(TSRMLS_C);
+					zend_ini_deactivate();
 				} zend_end_try();
 				return retval;
 			}
@@ -667,7 +665,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		}
 		/* Assume output will be of the default MIME type.  Individual
 		   scripts may change this later in the request. */
-		r->content_type = php_apache_get_default_mimetype(r TSRMLS_CC);
+		r->content_type = php_apache_get_default_mimetype(r);
 
 		/* Init timeout */
 		hard_timeout("send", r);
@@ -676,8 +674,8 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		add_common_vars(r);
 		add_cgi_vars(r);
 
-		init_request_info(TSRMLS_C);
-		apache_php_module_main(r, display_source_mode TSRMLS_CC);
+		init_request_info();
+		apache_php_module_main(r, display_source_mode);
 
 		/* Done, restore umask, turn off timeout, close file and return */
 		php_restore_umask();
@@ -693,10 +691,9 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 static int send_parsed_php(request_rec * r)
 {
 	int result = send_php(r, 0, NULL);
-	TSRMLS_FETCH();
  
 	ap_table_setn(r->notes, "mod_php_memory_usage",
-		ap_psprintf(r->pool, "%lu", zend_memory_peak_usage(1 TSRMLS_CC)));
+		ap_psprintf(r->pool, "%lu", zend_memory_peak_usage(1)));
 
 	return result;
 }
@@ -904,18 +901,17 @@ static CONST_PREFIX char *php_apache_phpini_set(cmd_parms *cmd, HashTable *conf,
 static int php_xbithack_handler(request_rec * r)
 {
 	HashTable *per_dir_conf;
-	TSRMLS_FETCH();
 
 	if (!(r->finfo.st_mode & S_IXUSR)) {
 		return DECLINED;
 	}
 	per_dir_conf = (HashTable *) get_module_config(r->per_dir_config, &php7_module);
 	if (per_dir_conf) {
-		zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries TSRMLS_CC);
+		zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries);
 	}
 	if(!AP(xbithack)) {
 		zend_try {
-			zend_ini_deactivate(TSRMLS_C);
+			zend_ini_deactivate();
 		} zend_end_try();
 		return DECLINED;
 	}
@@ -973,8 +969,7 @@ static void php_init_handler(server_rec *s, pool *p)
 	}
 #if MODULE_MAGIC_NUMBER >= 19980527
 	{
-		TSRMLS_FETCH();
-		if (PG(expose_php)) {
+			if (PG(expose_php)) {
 			ap_add_version_component("PHP/" PHP_VERSION);
 		}
 	}

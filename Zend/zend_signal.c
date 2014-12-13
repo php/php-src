@@ -51,8 +51,8 @@ ZEND_API int zend_signal_globals_id;
 zend_signal_globals_t zend_signal_globals;
 #endif
 
-static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context TSRMLS_DC);
-static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*) TSRMLS_DC);
+static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context);
+static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*));
 
 #ifdef __CYGWIN__
 #define TIMEOUT_SIG SIGALRM
@@ -74,7 +74,6 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 {
 	int errno_save = errno;
 	zend_signal_queue_t *queue, *qtmp;
-	TSRMLS_FETCH();
 
 	if (SIGG(active)) {
 		if (SIGG(depth) == 0) { /* try to handle signal */
@@ -83,13 +82,13 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 			}
 			if (SIGG(running) == 0) {
 				SIGG(running) = 1;
-				zend_signal_handler(signo, siginfo, context TSRMLS_CC);
+				zend_signal_handler(signo, siginfo, context);
 
 				queue = SIGG(phead);
 				SIGG(phead) = NULL;
 
 				while (queue) {
-					zend_signal_handler(queue->zend_signal.signo, queue->zend_signal.siginfo, queue->zend_signal.context TSRMLS_CC);
+					zend_signal_handler(queue->zend_signal.signo, queue->zend_signal.siginfo, queue->zend_signal.context);
 					qtmp = queue->next;
 					queue->next = SIGG(pavail);
 					queue->zend_signal.signo = 0;
@@ -123,7 +122,7 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 		}
 	} else {
 		/* need to just run handler if we're inactive and getting a signal */
-		zend_signal_handler(signo, siginfo, context TSRMLS_CC);
+		zend_signal_handler(signo, siginfo, context);
 	}
 
 	errno = errno_save;
@@ -131,7 +130,7 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 
 /* {{{ zend_signal_handler_unblock
  * Handle deferred signal from HANDLE_UNBLOCK_ALARMS */
-ZEND_API void zend_signal_handler_unblock(TSRMLS_D)
+ZEND_API void zend_signal_handler_unblock(void)
 {
 	zend_signal_queue_t *queue;
 	zend_signal_t zend_signal;
@@ -154,7 +153,7 @@ ZEND_API void zend_signal_handler_unblock(TSRMLS_D)
 /* {{{ zend_signal_handler
  *  Call the previously registered handler for a signal
  */
-static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context TSRMLS_DC)
+static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 {
 	int errno_save = errno;
 	struct sigaction sa = {{0}};
@@ -192,7 +191,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context TSR
 
 /* {{{ zend_sigaction
  *  Register a signal handler that will be deferred in critical sections */
-ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact TSRMLS_DC)
+ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigaction *oldact)
 {
 	struct sigaction sa = {{0}};
 	sigset_t sigset;
@@ -230,7 +229,7 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
 
 /* {{{ zend_signal
  *  Register a signal handler that will be deferred in critical sections */
-ZEND_API int zend_signal(int signo, void (*handler)(int) TSRMLS_DC)
+ZEND_API int zend_signal(int signo, void (*handler)(int))
 {
 	struct sigaction sa = {{0}};
 
@@ -238,7 +237,7 @@ ZEND_API int zend_signal(int signo, void (*handler)(int) TSRMLS_DC)
 	sa.sa_handler = handler;
 	sa.sa_mask    = global_sigmask;
 
-	return zend_sigaction(signo, &sa, NULL TSRMLS_CC);
+	return zend_sigaction(signo, &sa, NULL);
 }
 /* }}} */
 
@@ -246,7 +245,7 @@ ZEND_API int zend_signal(int signo, void (*handler)(int) TSRMLS_DC)
  *  Set a handler for a signal we want to defer.
  *  Previously set handler must have been saved before.
  */
-static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*) TSRMLS_DC)
+static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void*))
 {
 	struct sigaction sa = {{0}};
 
@@ -277,14 +276,14 @@ static int zend_signal_register(int signo, void (*handler)(int, siginfo_t*, void
 
 /* {{{ zend_signal_activate
  *  Install our signal handlers, per request */
-void zend_signal_activate(TSRMLS_D)
+void zend_signal_activate(void)
 {
 	int x;
 
 	memcpy(&SIGG(handlers), &global_orig_handlers, sizeof(global_orig_handlers));
 
 	for (x=0; x < sizeof(zend_sigs) / sizeof(*zend_sigs); x++) {
-		zend_signal_register(zend_sigs[x], zend_signal_handler_defer TSRMLS_CC);
+		zend_signal_register(zend_sigs[x], zend_signal_handler_defer);
 	}
 
 	SIGG(active) = 1;
@@ -293,7 +292,7 @@ void zend_signal_activate(TSRMLS_D)
 
 /* {{{ zend_signal_deactivate
  * */
-void zend_signal_deactivate(TSRMLS_D)
+void zend_signal_deactivate(void)
 {
 	int x;
 	struct sigaction sa = {{0}};
@@ -320,7 +319,7 @@ void zend_signal_deactivate(TSRMLS_D)
 }
 /* }}} */
 
-static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals TSRMLS_DC)
+static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals)
 {
 	size_t x;
 
@@ -335,7 +334,7 @@ static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals 
 	}
 }
 
-static void zend_signal_globals_dtor(zend_signal_globals_t *zend_signal_globals TSRMLS_DC)
+static void zend_signal_globals_dtor(zend_signal_globals_t *zend_signal_globals)
 {
 	zend_signal_globals->blocked = -1;
 }
@@ -392,7 +391,7 @@ void zend_signal_startup()
 
 /* {{{ zend_signal_shutdown
  * called by zend_shutdown */
-void zend_signal_shutdown(TSRMLS_D)
+void zend_signal_shutdown(void)
 {
 #ifndef ZTS
 	zend_signal_globals_dtor(&zend_signal_globals);

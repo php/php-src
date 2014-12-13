@@ -41,7 +41,7 @@
 #define COMMIT			1
 #define RETAIN			2
 
-#define CHECK_LINK(link) { if (link==-1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "A link to the server could not be established"); RETURN_FALSE; } }
+#define CHECK_LINK(link) { if (link==-1) { php_error_docref(NULL, E_WARNING, "A link to the server could not be established"); RETURN_FALSE; } }
 
 ZEND_DECLARE_MODULE_GLOBALS(ibase)
 static PHP_GINIT_FUNCTION(ibase);
@@ -502,7 +502,7 @@ PHP_FUNCTION(ibase_errcode)
 /* }}} */
 
 /* print interbase error and save it for ibase_errmsg() */
-void _php_ibase_error(TSRMLS_D) /* {{{ */
+void _php_ibase_error(void) /* {{{ */
 {
 	char *s = IBG(errmsg);
 	ISC_STATUS *statusp = IB_STATUS;
@@ -514,17 +514,17 @@ void _php_ibase_error(TSRMLS_D) /* {{{ */
 		s = IBG(errmsg) + strlen(IBG(errmsg));
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", IBG(errmsg));
+	php_error_docref(NULL, E_WARNING, "%s", IBG(errmsg));
 }
 /* }}} */
 
 /* print php interbase module error and save it for ibase_errmsg() */
-void _php_ibase_module_error(char *msg TSRMLS_DC, ...) /* {{{ */
+void _php_ibase_module_error(char *msg, ...) /* {{{ */
 {
 	va_list ap;
 
 #ifdef ZTS
-	va_start(ap, TSRMLS_C);
+	va_start(ap, );
 #else
 	va_start(ap, msg);
 #endif
@@ -535,7 +535,7 @@ void _php_ibase_module_error(char *msg TSRMLS_DC, ...) /* {{{ */
 
 	IBG(sql_code) = -999; /* no SQL error */
 
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", IBG(errmsg));
+	php_error_docref(NULL, E_WARNING, "%s", IBG(errmsg));
 }
 /* }}} */
 
@@ -575,7 +575,7 @@ void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 
 /* destructors ---------------------- */
 
-static void _php_ibase_commit_link(ibase_db_link *link TSRMLS_DC) /* {{{ */
+static void _php_ibase_commit_link(ibase_db_link *link) /* {{{ */
 {
 	unsigned short i = 0, j;
 	ibase_tr_list *l;
@@ -589,7 +589,7 @@ static void _php_ibase_commit_link(ibase_db_link *link TSRMLS_DC) /* {{{ */
 				if (p->trans->handle != NULL) {
 					IBDEBUG("Committing default transaction...");
 					if (isc_commit_transaction(IB_STATUS, &p->trans->handle)) {
-						_php_ibase_error(TSRMLS_C);
+						_php_ibase_error();
 					}
 				}
 				efree(p->trans); /* default transaction is not a registered resource: clean up */
@@ -598,7 +598,7 @@ static void _php_ibase_commit_link(ibase_db_link *link TSRMLS_DC) /* {{{ */
 					/* non-default trans might have been rolled back by other call of this dtor */
 					IBDEBUG("Rolling back other transactions...");
 					if (isc_rollback_transaction(IB_STATUS, &p->trans->handle)) {
-						_php_ibase_error(TSRMLS_C);
+						_php_ibase_error();
 					}
 				}
 				/* set this link pointer to NULL in the transaction */
@@ -616,26 +616,26 @@ static void _php_ibase_commit_link(ibase_db_link *link TSRMLS_DC) /* {{{ */
 	link->tr_list = NULL;
 	
 	for (e = link->event_head; e; e = e->event_next) {
-		_php_ibase_free_event(e TSRMLS_CC);
+		_php_ibase_free_event(e);
 		e->link = NULL;
 	}
 }
 
 /* }}} */
 
-static void php_ibase_commit_link_rsrc(zend_resource *rsrc TSRMLS_DC) /* {{{ */
+static void php_ibase_commit_link_rsrc(zend_resource *rsrc) /* {{{ */
 {
 	ibase_db_link *link = (ibase_db_link *) rsrc->ptr;
 
-	_php_ibase_commit_link(link TSRMLS_CC);
+	_php_ibase_commit_link(link);
 }
 /* }}} */
 
-static void _php_ibase_close_link(zend_resource *rsrc TSRMLS_DC) /* {{{ */
+static void _php_ibase_close_link(zend_resource *rsrc) /* {{{ */
 {
 	ibase_db_link *link = (ibase_db_link *) rsrc->ptr;
 
-	_php_ibase_commit_link(link TSRMLS_CC);
+	_php_ibase_commit_link(link);
 	if (link->handle != NULL) {
 		IBDEBUG("Closing normal link...");
 		isc_detach_database(IB_STATUS, &link->handle);
@@ -645,11 +645,11 @@ static void _php_ibase_close_link(zend_resource *rsrc TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void _php_ibase_close_plink(zend_resource *rsrc TSRMLS_DC) /* {{{ */
+static void _php_ibase_close_plink(zend_resource *rsrc) /* {{{ */
 {
 	ibase_db_link *link = (ibase_db_link *) rsrc->ptr;
 
-	_php_ibase_commit_link(link TSRMLS_CC);
+	_php_ibase_commit_link(link);
 	IBDEBUG("Closing permanent link...");
 	if (link->handle != NULL) {
 		isc_detach_database(IB_STATUS, &link->handle);
@@ -660,7 +660,7 @@ static void _php_ibase_close_plink(zend_resource *rsrc TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void _php_ibase_free_trans(zend_resource *rsrc TSRMLS_DC) /* {{{ */
+static void _php_ibase_free_trans(zend_resource *rsrc) /* {{{ */
 {
 	ibase_trans *trans = (ibase_trans *)rsrc->ptr;
 	unsigned short i;
@@ -669,7 +669,7 @@ static void _php_ibase_free_trans(zend_resource *rsrc TSRMLS_DC) /* {{{ */
 	if (trans->handle != NULL) {
 		IBDEBUG("Rolling back unhandled transaction...");
 		if (isc_rollback_transaction(IB_STATUS, &trans->handle)) {
-			_php_ibase_error(TSRMLS_C);
+			_php_ibase_error();
 		}
 	}
 
@@ -694,7 +694,6 @@ static void _php_ibase_free_trans(zend_resource *rsrc TSRMLS_DC) /* {{{ */
 /* TODO this function should be part of either Zend or PHP API */
 static PHP_INI_DISP(php_ibase_password_displayer_cb)
 {
-	TSRMLS_FETCH();
 
 	if ((type == PHP_INI_DISPLAY_ORIG && ini_entry->orig_value) 
 			|| (type == PHP_INI_DISPLAY_ACTIVE && ini_entry->value)) {
@@ -847,7 +846,7 @@ static char const dpb_args[] = {
 	0, isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name, 0
 };
 	
-int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db TSRMLS_DC)
+int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db)
 {
 	short i, dpb_len, buf_len = 257-2;  /* version byte at the front, and a null at the end */
 	char dpb_buffer[257] = { isc_dpb_version1, 0 }, *dpb;
@@ -873,7 +872,7 @@ int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db T
 		buf_len -= dpb_len;
 	}
 	if (isc_attach_database(IB_STATUS, (short)len[DB], args[DB], db, (short)(dpb-dpb_buffer), dpb_buffer)) {
-		_php_ibase_error(TSRMLS_C);
+		_php_ibase_error();
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -892,7 +891,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ssssllsl",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|ssssllsl",
 			&args[DB], &len[DB], &args[USER], &len[USER], &args[PASS], &len[PASS],
 			&args[CSET], &len[CSET], &largs[BUF], &largs[DLECT], &args[ROLE], &len[ROLE],
 			&largs[SYNC])) {
@@ -975,12 +974,12 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 		/* no link found, so we have to open one */
 	
 		if ((l = INI_INT("ibase.max_links")) != -1 && IBG(num_links) >= l) {
-			_php_ibase_module_error("Too many open links (%ld)" TSRMLS_CC, IBG(num_links));
+			_php_ibase_module_error("Too many open links (%ld)", IBG(num_links));
 			RETURN_FALSE;
 		}
 	
 		/* create the ib_link */
-		if (FAILURE == _php_ibase_attach_db(args, len, largs, &db_handle TSRMLS_CC)) {
+		if (FAILURE == _php_ibase_attach_db(args, len, largs, &db_handle)) {
 			RETURN_FALSE;
 		}
 	
@@ -1060,7 +1059,7 @@ PHP_FUNCTION(ibase_close)
 
 	RESET_ERRMSG;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &link_arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &link_arg) == FAILURE) {
 		return;
 	}
 	
@@ -1098,7 +1097,7 @@ PHP_FUNCTION(ibase_drop_db)
 
 	RESET_ERRMSG;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &link_arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &link_arg) == FAILURE) {
 		return;
 	}
 	
@@ -1113,7 +1112,7 @@ PHP_FUNCTION(ibase_drop_db)
 	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, LE_LINK, le_link, le_plink);
 
 	if (isc_drop_database(IB_STATUS, &ib_link->handle)) {
-		_php_ibase_error(TSRMLS_C);
+		_php_ibase_error();
 		RETURN_FALSE;
 	}
 
@@ -1159,7 +1158,7 @@ PHP_FUNCTION(ibase_trans)
 		ISC_TEB *teb;
 		zval *args = NULL;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &argn) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argn) == FAILURE) {
 			efree(ib_link);
 			RETURN_FALSE;
 		}
@@ -1250,7 +1249,7 @@ PHP_FUNCTION(ibase_trans)
 	
 	/* start the transaction */
 	if (result) {
-		_php_ibase_error(TSRMLS_C);
+		_php_ibase_error();
 		efree(ib_link);
 		RETURN_FALSE;
 	}
@@ -1283,10 +1282,10 @@ PHP_FUNCTION(ibase_trans)
 }
 /* }}} */
 
-int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRMLS_DC) /* {{{ */
+int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans) /* {{{ */
 {
 	if (ib_link == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database link");
+		php_error_docref(NULL, E_WARNING, "Invalid database link");
 		return FAILURE;
 	}
 
@@ -1310,7 +1309,7 @@ int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRMLS_DC) 
 		}
 		if (tr->handle == NULL) {
 			if (isc_start_transaction(IB_STATUS, &tr->handle, 1, &ib_link->handle, 0, NULL)) {
-				_php_ibase_error(TSRMLS_C);
+				_php_ibase_error();
 				return FAILURE;
 			}
 		}
@@ -1330,7 +1329,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 
 	RESET_ERRMSG;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &arg) == FAILURE) {
 		return;
 	}
 
@@ -1338,7 +1337,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK, le_link, le_plink);
 		if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 			/* this link doesn't have a default transaction */
-			_php_ibase_module_error("Default link has no default transaction" TSRMLS_CC);
+			_php_ibase_module_error("Default link has no default transaction");
 			RETURN_FALSE;
 		}
 		trans = ib_link->tr_list->trans;
@@ -1352,7 +1351,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 
 			if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 				/* this link doesn't have a default transaction */
-				_php_ibase_module_error("Link has no default transaction" TSRMLS_CC);
+				_php_ibase_module_error("Link has no default transaction");
 				RETURN_FALSE;
 			}
 			trans = ib_link->tr_list->trans;
@@ -1375,7 +1374,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 	}
 	
 	if (result) {
-		_php_ibase_error(TSRMLS_C);
+		_php_ibase_error();
 		RETURN_FALSE;
 	}
 
@@ -1434,13 +1433,13 @@ PHP_FUNCTION(ibase_gen_id)
 
 	RESET_ERRMSG;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr", &generator, &gen_len,
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr", &generator, &gen_len,
 			&inc, &link)) {
 		RETURN_FALSE;
 	}
 	
 	if (gen_len > 31) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid generator name");
+		php_error_docref(NULL, E_WARNING, "Invalid generator name");
 		RETURN_FALSE;
 	}
 
@@ -1461,7 +1460,7 @@ PHP_FUNCTION(ibase_gen_id)
 	/* execute the query */
 	if (isc_dsql_exec_immed2(IB_STATUS, &ib_link->handle, &trans->handle, 0, query,
 			SQL_DIALECT_CURRENT, NULL, &out_sqlda)) {
-		_php_ibase_error(TSRMLS_C);
+		_php_ibase_error();
 		RETURN_FALSE;
 	}
 

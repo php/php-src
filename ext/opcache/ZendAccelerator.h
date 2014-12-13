@@ -296,17 +296,17 @@ extern zend_accel_globals accel_globals;
 
 extern char *zps_api_failure_reason;
 
-void accel_shutdown(TSRMLS_D);
-void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC);
-void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason TSRMLS_DC);
-int  validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle TSRMLS_DC);
-int  zend_accel_invalidate(const char *filename, int filename_len, zend_bool force TSRMLS_DC);
-int  zend_accel_script_optimize(zend_persistent_script *persistent_script TSRMLS_DC);
-int  accelerator_shm_read_lock(TSRMLS_D);
-void accelerator_shm_read_unlock(TSRMLS_D);
+void accel_shutdown(void);
+void zend_accel_schedule_restart(zend_accel_restart_reason reason);
+void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);
+int  validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
+int  zend_accel_invalidate(const char *filename, int filename_len, zend_bool force);
+int  zend_accel_script_optimize(zend_persistent_script *persistent_script);
+int  accelerator_shm_read_lock(void);
+void accelerator_shm_read_unlock(void);
 
-char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_length, int *key_len TSRMLS_DC);
-zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
+char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_length, int *key_len);
+zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 
 #if !defined(ZEND_DECLARE_INHERITED_CLASS_DELAYED)
 # define ZEND_DECLARE_INHERITED_CLASS_DELAYED 145
@@ -317,7 +317,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 #define IS_ACCEL_INTERNED(str) \
 	((char*)(str) >= ZCSG(interned_strings_start) && (char*)(str) < ZCSG(interned_strings_end))
 
-zend_string *accel_new_interned_string(zend_string *str TSRMLS_DC);
+zend_string *accel_new_interned_string(zend_string *str);
 
 # define ZEND_RESULT_TYPE(opline)	(opline)->result_type
 # define ZEND_RESULT(opline)		(opline)->result

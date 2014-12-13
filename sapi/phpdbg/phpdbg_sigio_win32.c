@@ -36,7 +36,7 @@ SigIoWatcherThread(VOID *p)
 #endif
 
 top:
-	(void)phpdbg_consume_bytes(swd->fd, &sig, 1, -1 TSRMLS_CC);
+	(void)phpdbg_consume_bytes(swd->fd, &sig, 1, -1);
 
 
 	if (3 == sig) {
@@ -47,11 +47,11 @@ top:
 			}
 		}
 		if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
-			phpdbg_set_sigsafe_mem(&sig TSRMLS_CC);
+			phpdbg_set_sigsafe_mem(&sig);
 			zend_try {
-				phpdbg_force_interruption(TSRMLS_C);
+				phpdbg_force_interruption();
 			} zend_end_try();
-			phpdbg_clear_sigsafe_mem(TSRMLS_C);
+			phpdbg_clear_sigsafe_mem();
 			goto end;
 		}
 		if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
@@ -72,7 +72,6 @@ session. */
 void
 sigio_watcher_start(void)
 {
-	TSRMLS_FETCH();
 
 	PHPDBG_G(swd).fd = PHPDBG_G(io)[PHPDBG_STDIN].fd;
 #ifdef ZTS
@@ -92,7 +91,6 @@ void
 sigio_watcher_stop(void)
 {
 	DWORD waited;
-	TSRMLS_FETCH();
 
 	if (INVALID_HANDLE_VALUE == PHPDBG_G(sigio_watcher_thread)) {
 		/* it probably did bail out already */

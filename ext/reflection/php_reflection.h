@@ -42,7 +42,7 @@ extern PHPAPI zend_class_entry *reflection_property_ptr;
 extern PHPAPI zend_class_entry *reflection_extension_ptr;
 extern PHPAPI zend_class_entry *reflection_zend_extension_ptr;
 
-PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC);
+PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object);
 	
 END_EXTERN_C()
 

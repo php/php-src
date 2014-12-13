@@ -35,7 +35,7 @@ extern zend_module_entry ereg_module_entry;
 # define PHP_EREG_API
 #endif
 
-PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended TSRMLS_DC);
+PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended);
 
 PHP_FUNCTION(ereg);
 PHP_FUNCTION(eregi);

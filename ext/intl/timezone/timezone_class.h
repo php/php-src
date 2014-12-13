@@ -60,16 +60,16 @@ static inline TimeZone_object *php_intl_timezone_fetch_object(zend_object *obj) 
 #define TIMEZONE_METHOD_FETCH_OBJECT\
 	TIMEZONE_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (to->utimezone == NULL) { \
-		intl_errors_set(&to->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlTimeZone", 0 TSRMLS_CC); \
+		intl_errors_set(&to->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlTimeZone", 0); \
 		RETURN_FALSE; \
 	}
 
-zval *timezone_convert_to_datetimezone(const TimeZone *timeZone, intl_error *outside_error, const char *func, zval *ret TSRMLS_DC);
-TimeZone *timezone_process_timezone_argument(zval *zv_timezone, intl_error *error, const char *func TSRMLS_DC);
+zval *timezone_convert_to_datetimezone(const TimeZone *timeZone, intl_error *outside_error, const char *func, zval *ret);
+TimeZone *timezone_process_timezone_argument(zval *zv_timezone, intl_error *error, const char *func);
 
-void timezone_object_construct(const TimeZone *zone, zval *object, int owned TSRMLS_DC);
+void timezone_object_construct(const TimeZone *zone, zval *object, int owned);
 
-void timezone_register_IntlTimeZone_class(TSRMLS_D);
+void timezone_register_IntlTimeZone_class(void);
 
 extern zend_class_entry *TimeZone_ce_ptr;
 extern zend_object_handlers TimeZone_handlers;

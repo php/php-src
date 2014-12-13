@@ -27,7 +27,7 @@
 
 #include <zend_exceptions.h>
 
-static int create_transliterator( char *str_id, int str_id_len, zend_long direction, zval *object TSRMLS_DC )
+static int create_transliterator( char *str_id, int str_id_len, zend_long direction, zval *object )
 {
 	Transliterator_object *to;
 	UChar	              *ustr_id    = NULL;
@@ -35,12 +35,12 @@ static int create_transliterator( char *str_id, int str_id_len, zend_long direct
 	UTransliterator       *utrans;
 	UParseError           parse_error   = {0, -1};
 
-	intl_error_reset( NULL TSRMLS_CC );
+	intl_error_reset( NULL );
 
 	if( ( direction != TRANSLITERATOR_FORWARD ) && (direction != TRANSLITERATOR_REVERSE ) )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_create: invalid direction", 0 TSRMLS_CC );
+			"transliterator_create: invalid direction", 0 );
 		return FAILURE;
 	}
 
@@ -51,8 +51,8 @@ static int create_transliterator( char *str_id, int str_id_len, zend_long direct
 	intl_convert_utf8_to_utf16( &ustr_id, &ustr_id_len, str_id, str_id_len, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to ) ) )
 	{
-		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) TSRMLS_CC );
-		intl_error_set_custom_msg( NULL, "String conversion of id to UTF-16 failed", 0 TSRMLS_CC );
+		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
+		intl_error_set_custom_msg( NULL, "String conversion of id to UTF-16 failed", 0 );
 		zval_dtor( object );
 		return FAILURE;
 	}
@@ -67,29 +67,29 @@ static int create_transliterator( char *str_id, int str_id_len, zend_long direct
 	if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to ) ) )
 	{
 		char *buf = NULL;
-		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) TSRMLS_CC );
+		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
 		spprintf( &buf, 0, "transliterator_create: unable to open ICU transliterator"
 			" with id \"%s\"", str_id );
 		if( buf == NULL ) {
 			intl_error_set_custom_msg( NULL,
-				"transliterator_create: unable to open ICU transliterator", 0 TSRMLS_CC );
+				"transliterator_create: unable to open ICU transliterator", 0 );
 		}
 		else
 		{
-			intl_error_set_custom_msg( NULL, buf, /* copy message */ 1 TSRMLS_CC );
+			intl_error_set_custom_msg( NULL, buf, /* copy message */ 1 );
 			efree( buf );
 		}
 		zval_dtor( object );
 		return FAILURE;
 	}
 	
-	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) TSRMLS_CC );
+	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
 	if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to ) ) )
 	{
-		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) TSRMLS_CC );
+		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
 		intl_error_set_custom_msg( NULL,
-			"transliterator_create: internal constructor call failed", 0 TSRMLS_CC );
+			"transliterator_create: internal constructor call failed", 0 );
 		zval_dtor( object );
 		return FAILURE;
 	}
@@ -112,16 +112,16 @@ PHP_FUNCTION( transliterator_create )
 	
 	(void) to; /* unused */
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
 		&str_id, &str_id_len, &direction ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_create: bad arguments", 0 TSRMLS_CC );
+			"transliterator_create: bad arguments", 0 );
 		RETURN_NULL();
 	}
 
 	object = return_value;
-	res = create_transliterator( str_id, str_id_len, direction, object TSRMLS_CC );
+	res = create_transliterator( str_id, str_id_len, direction, object );
 	if( res == FAILURE )
 		RETURN_NULL();
 	
@@ -146,18 +146,18 @@ PHP_FUNCTION( transliterator_create_from_rules )
 					       0x61, 0x6E, 0x73, 0x50, 0x48, 0x50, 0}; /* RulesTransPHP */
 	TRANSLITERATOR_METHOD_INIT_VARS;
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
 		&str_rules, &str_rules_len, &direction ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_create_from_rules: bad arguments", 0 TSRMLS_CC );
+			"transliterator_create_from_rules: bad arguments", 0 );
 		RETURN_NULL();
 	}
 
 	if( ( direction != TRANSLITERATOR_FORWARD ) && (direction != TRANSLITERATOR_REVERSE ) )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_create_from_rules: invalid direction", 0 TSRMLS_CC );
+			"transliterator_create_from_rules: invalid direction", 0 );
 		RETURN_NULL();
 	}
 
@@ -178,7 +178,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 		efree( ustr_rules );
 	}
 	
-	intl_error_set_code( NULL, INTL_DATA_ERROR_CODE( to ) TSRMLS_CC );
+	intl_error_set_code( NULL, INTL_DATA_ERROR_CODE( to ) );
 	if( U_FAILURE( INTL_DATA_ERROR_CODE( to ) ) )
 	{
 		char *msg = NULL;
@@ -189,13 +189,13 @@ PHP_FUNCTION( transliterator_create_from_rules )
 		smart_str_free( &parse_error_str );
 		if( msg != NULL )
 		{
-			intl_errors_set_custom_msg( INTL_DATA_ERROR_P( to ), msg, 1 TSRMLS_CC );
+			intl_errors_set_custom_msg( INTL_DATA_ERROR_P( to ), msg, 1 );
 			efree( msg );
 		}
 		zval_dtor( return_value );
 		RETURN_NULL();
     }
-	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) TSRMLS_CC );
+	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
 	INTL_CTOR_CHECK_STATUS( to, "transliterator_create_from_rules: internal constructor call failed" );
 }
@@ -211,11 +211,11 @@ PHP_FUNCTION( transliterator_create_inverse )
 	UTransliterator       *utrans;
 	TRANSLITERATOR_METHOD_INIT_VARS;
 
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Transliterator_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_create_inverse: bad arguments", 0 TSRMLS_CC );
+			"transliterator_create_inverse: bad arguments", 0 );
 		RETURN_NULL();
 	}
 
@@ -229,7 +229,7 @@ PHP_FUNCTION( transliterator_create_inverse )
 	utrans = utrans_openInverse( to_orig->utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	INTL_CTOR_CHECK_STATUS( to, "transliterator_create_inverse: could not create "
 		"inverse ICU transliterator" );
-	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) TSRMLS_CC );
+	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
 	/* no need to close the transliterator manually on construction error */
 	INTL_CTOR_CHECK_STATUS( to, "transliterator_create: internal constructor call failed" );
 }
@@ -246,7 +246,7 @@ PHP_FUNCTION( transliterator_list_ids )
 	int32_t		  elem_len;
 	UErrorCode	  status = U_ZERO_ERROR;
 	
-	intl_error_reset( NULL TSRMLS_CC );
+	intl_error_reset( NULL );
 
 	if( zend_parse_parameters_none() == FAILURE )
 	{
@@ -254,7 +254,7 @@ PHP_FUNCTION( transliterator_list_ids )
 		 * null on bad parameter types, except on constructors and factory
 		 * methods */
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_list_ids: bad arguments", 0 TSRMLS_CC );
+			"transliterator_list_ids: bad arguments", 0 );
 		RETURN_FALSE;
 	}
 
@@ -284,13 +284,13 @@ PHP_FUNCTION( transliterator_list_ids )
 	}
 	uenum_close( en );
 
-	intl_error_set_code( NULL, status TSRMLS_CC );
+	intl_error_set_code( NULL, status );
 	if( U_FAILURE( status ) )
 	{
 		zval_dtor( return_value );
 		RETVAL_FALSE;
 		intl_error_set_custom_msg( NULL, "transliterator_list_ids: "
-			"Failed to build array of registered transliterators", 0 TSRMLS_CC );
+			"Failed to build array of registered transliterators", 0 );
 	}
 }
 /* }}} */
@@ -320,16 +320,16 @@ PHP_FUNCTION( transliterator_transliterate )
 	{
 		/* in non-OOP version, accept both a transliterator and a string */
 		zval *arg1;
-		if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "zs|ll",
+		if( zend_parse_parameters( ZEND_NUM_ARGS(), "zs|ll",
 			&arg1, &str, &str_len, &start, &limit ) == FAILURE )
 		{
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"transliterator_transliterate: bad arguments", 0 TSRMLS_CC );
+				"transliterator_transliterate: bad arguments", 0 );
 			RETURN_FALSE;
 		}
 		
 		if( Z_TYPE_P( arg1 ) == IS_OBJECT &&
-			instanceof_function( Z_OBJCE_P( arg1 ), Transliterator_ce_ptr TSRMLS_CC ) )
+			instanceof_function( Z_OBJCE_P( arg1 ), Transliterator_ce_ptr ) )
 		{
 			object = arg1;
 		}
@@ -343,11 +343,11 @@ PHP_FUNCTION( transliterator_transliterate )
 			}
 			object = &tmp_object;
 			res = create_transliterator( Z_STRVAL_P( arg1 ), Z_STRLEN_P( arg1 ),
-					TRANSLITERATOR_FORWARD, object TSRMLS_CC );
+					TRANSLITERATOR_FORWARD, object );
 			if( res == FAILURE )
 			{
-				zend_string *message = intl_error_get_message( NULL TSRMLS_CC );
-				php_error_docref0( NULL TSRMLS_CC, E_WARNING, "Could not create "
+				zend_string *message = intl_error_get_message( NULL );
+				php_error_docref0( NULL, E_WARNING, "Could not create "
 					"transliterator with ID \"%s\" (%s)", Z_STRVAL_P( arg1 ), message->val );
 				zend_string_free( message );
 				/* don't set U_ILLEGAL_ARGUMENT_ERROR to allow fetching of inner error */
@@ -355,11 +355,11 @@ PHP_FUNCTION( transliterator_transliterate )
 			}
 		}
 	}
-	else if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s|ll",
+	else if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|ll",
 		&str, &str_len, &start, &limit ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_transliterate: bad arguments", 0 TSRMLS_CC );
+			"transliterator_transliterate: bad arguments", 0 );
 		RETURN_FALSE;
 	}
 	
@@ -367,7 +367,7 @@ PHP_FUNCTION( transliterator_transliterate )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"transliterator_transliterate: \"end\" argument should be "
-			"either non-negative or -1", 0 TSRMLS_CC );
+			"either non-negative or -1", 0 );
 		RETURN_FALSE;
 	}
 
@@ -375,7 +375,7 @@ PHP_FUNCTION( transliterator_transliterate )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"transliterator_transliterate: \"start\" argument should be "
-			"non-negative and not bigger than \"end\" (if defined)", 0 TSRMLS_CC );
+			"non-negative and not bigger than \"end\" (if defined)", 0 );
 		RETURN_FALSE;
 	}
 
@@ -399,7 +399,7 @@ PHP_FUNCTION( transliterator_transliterate )
 		if(msg != NULL )
 		{
 			intl_errors_set( TRANSLITERATOR_ERROR_P( to ), U_ILLEGAL_ARGUMENT_ERROR,
-				msg, 1 TSRMLS_CC );
+				msg, 1 );
 			efree( msg );
 		}
 		RETVAL_FALSE;
@@ -424,20 +424,20 @@ PHP_FUNCTION( transliterator_transliterate )
 			uresult = safe_emalloc( uresult_len, sizeof( UChar ), 1 * sizeof( UChar ) );
 			capacity = uresult_len + 1;
 
-			intl_error_reset( TRANSLITERATOR_ERROR_P( to ) TSRMLS_CC );
+			intl_error_reset( TRANSLITERATOR_ERROR_P( to ) );
 		}
 		else if(TRANSLITERATOR_ERROR_CODE( to ) == U_STRING_NOT_TERMINATED_WARNING )
 		{
 			uresult = safe_erealloc( uresult, uresult_len, sizeof( UChar ), 1 * sizeof( UChar ) );
 			
-			intl_error_reset( TRANSLITERATOR_ERROR_P( to ) TSRMLS_CC );
+			intl_error_reset( TRANSLITERATOR_ERROR_P( to ) );
 			break;
 		}
 		else if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to ) ) )
 		{
-			intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) TSRMLS_CC );
+			intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
 			intl_errors_set_custom_msg( TRANSLITERATOR_ERROR_P( to ),
-				"transliterator_transliterate: transliteration failed", 0 TSRMLS_CC );
+				"transliterator_transliterate: transliteration failed", 0 );
 			goto cleanup;
 		}
 		else
@@ -472,7 +472,7 @@ PHP_METHOD( Transliterator, __construct )
 	/* this constructor shouldn't be called as it's private */
 	zend_throw_exception( NULL,
 		"An object of this type cannot be created with the new operator.",
-		0 TSRMLS_CC );
+		0 );
 }
 
 /* {{{ proto int transliterator_get_error_code( Transliterator trans )
@@ -483,11 +483,11 @@ PHP_FUNCTION( transliterator_get_error_code )
 {
 	TRANSLITERATOR_METHOD_INIT_VARS
 
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Transliterator_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_get_error_code: unable to parse input params", 0 TSRMLS_CC );
+			"transliterator_get_error_code: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -511,11 +511,11 @@ PHP_FUNCTION( transliterator_get_error_message )
 	zend_string* message = NULL;
 	TRANSLITERATOR_METHOD_INIT_VARS
 
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Transliterator_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_get_error_message: unable to parse input params", 0 TSRMLS_CC );
+			"transliterator_get_error_message: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -527,7 +527,7 @@ PHP_FUNCTION( transliterator_get_error_message )
 		RETURN_FALSE;
 
 	/* Return last error message. */
-	message = intl_error_get_message( TRANSLITERATOR_ERROR_P( to ) TSRMLS_CC );
+	message = intl_error_get_message( TRANSLITERATOR_ERROR_P( to ) );
 	RETURN_STR( message );
 }
 /* }}} */

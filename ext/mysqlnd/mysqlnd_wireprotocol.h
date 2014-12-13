@@ -36,13 +36,13 @@ PHPAPI extern const char mysqlnd_read_body_name[];
 
 
 /* Packet handling */
-#define PACKET_WRITE(packet, conn)	((packet)->header.m->write_to_net((packet), (conn) TSRMLS_CC))
-#define PACKET_READ(packet, conn)	((packet)->header.m->read_from_net((packet), (conn) TSRMLS_CC))
+#define PACKET_WRITE(packet, conn)	((packet)->header.m->write_to_net((packet), (conn)))
+#define PACKET_READ(packet, conn)	((packet)->header.m->read_from_net((packet), (conn)))
 #define PACKET_FREE(packet) \
 	do { \
 		DBG_INF_FMT("PACKET_FREE(%p)", packet); \
 		if ((packet)) { \
-			((packet)->header.m->free_mem((packet), FALSE TSRMLS_CC)); \
+			((packet)->header.m->free_mem((packet), FALSE)); \
 		} \
 	} while (0);
 
@@ -51,9 +51,9 @@ PHPAPI extern const char * const mysqlnd_command_to_text[COM_END];
 /* Low-level extraction functionality */
 typedef struct st_mysqlnd_packet_methods {
 	size_t				struct_size;
-	enum_func_status	(*read_from_net)(void * packet, MYSQLND_CONN_DATA * conn TSRMLS_DC);
-	size_t				(*write_to_net)(void * packet, MYSQLND_CONN_DATA * conn TSRMLS_DC);
-	void				(*free_mem)(void *packet, zend_bool stack_allocation TSRMLS_DC);
+	enum_func_status	(*read_from_net)(void * packet, MYSQLND_CONN_DATA * conn);
+	size_t				(*write_to_net)(void * packet, MYSQLND_CONN_DATA * conn);
+	void				(*free_mem)(void *packet, zend_bool stack_allocation);
 } mysqlnd_packet_methods;
 
 
@@ -308,20 +308,20 @@ PHPAPI const extern char * const mysqlnd_empty_string;
 
 enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-										 zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC);
+										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
 
 enum_func_status php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-										 zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC);
+										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
 enum_func_status php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-										 zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC);
+										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
 
-PHPAPI MYSQLND_PROTOCOL * mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC);
-PHPAPI void mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol TSRMLS_DC);
+PHPAPI MYSQLND_PROTOCOL * mysqlnd_protocol_init(zend_bool persistent);
+PHPAPI void mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol);
 
 #endif /* MYSQLND_WIREPROTOCOL_H */
 

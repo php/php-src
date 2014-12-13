@@ -27,7 +27,7 @@ PHP_FUNCTION(gettype)
 {
 	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
 
@@ -74,7 +74,7 @@ PHP_FUNCTION(gettype)
 
 		case IS_RESOURCE:
 			{
-				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg) TSRMLS_CC);
+				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg));
 
 				if (type_name) {
 					RETVAL_STRING("resource");
@@ -96,7 +96,7 @@ PHP_FUNCTION(settype)
 	char *type;
 	size_t type_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &var, &type, &type_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &var, &type, &type_len) == FAILURE) {
 		return;
 	}
 
@@ -123,10 +123,10 @@ PHP_FUNCTION(settype)
 	} else if (!strcasecmp(type, "null")) {
 		convert_to_null(var);
 	} else if (!strcasecmp(type, "resource")) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot convert to resource type");
+		php_error_docref(NULL, E_WARNING, "Cannot convert to resource type");
 		RETURN_FALSE;
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type");
+		php_error_docref(NULL, E_WARNING, "Invalid type");
 		RETURN_FALSE;
 	}
 	RETVAL_TRUE;
@@ -144,7 +144,7 @@ PHP_FUNCTION(intval)
 		WRONG_PARAM_COUNT;
 	}
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &num, &base) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &num, &base) == FAILURE) {
 		return;
 	}
 #else
@@ -166,7 +166,7 @@ PHP_FUNCTION(floatval)
 {
 	zval *num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &num) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &num) == FAILURE) {
 		return;
 	}
 
@@ -181,11 +181,11 @@ PHP_FUNCTION(boolval)
 {
 	zval *val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &val) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &val) == FAILURE) {
 		return;
 	}
 
-	RETURN_BOOL(zend_is_true(val TSRMLS_CC));
+	RETURN_BOOL(zend_is_true(val));
 }
 /* }}} */
 
@@ -194,7 +194,7 @@ PHP_FUNCTION(boolval)
 PHP_FUNCTION(strval)
 {
 	zval *num;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &num) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &num) == FAILURE) {
 		return;
 	}
 
@@ -207,7 +207,7 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 	zval *arg;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		RETURN_FALSE;
 	}
 	ZVAL_DEREF(arg);
@@ -225,7 +225,7 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 				RETURN_FALSE;
 			}
 		} else if (type == IS_RESOURCE) {
-			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg) TSRMLS_CC);
+			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg));
 			if (!type_name) {
 				RETURN_FALSE;
 			}
@@ -262,7 +262,7 @@ PHP_FUNCTION(is_bool)
 {
 	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -322,7 +322,7 @@ PHP_FUNCTION(is_numeric)
 {
 	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
 
@@ -354,7 +354,7 @@ PHP_FUNCTION(is_scalar)
 	zval *arg;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
 #else
@@ -390,7 +390,7 @@ PHP_FUNCTION(is_callable)
 	zend_bool syntax_only = 0;
 	int check_flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|bz/", &var,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|bz/", &var,
 							  &syntax_only, &callable_name) == FAILURE) {
 		return;
 	}
@@ -399,7 +399,7 @@ PHP_FUNCTION(is_callable)
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}
 	if (ZEND_NUM_ARGS() > 2) {
-		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error TSRMLS_CC);
+		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
 		zval_dtor(callable_name);
 		//??? is it necessary to be consistent with old PHP ("\0" support)
 		if (UNEXPECTED(name->len) != strlen(name->val)) {
@@ -409,7 +409,7 @@ PHP_FUNCTION(is_callable)
 			ZVAL_STR(callable_name, name);
 		}
 	} else {
-		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error TSRMLS_CC);
+		retval = zend_is_callable_ex(var, NULL, check_flags, NULL, NULL, &error);
 	}
 	if (error) {
 		/* ignore errors */

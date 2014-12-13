@@ -85,7 +85,7 @@ PHP_INI_BEGIN()
 	 STD_PHP_INI_ENTRY("assert.quiet_eval", "0",	PHP_INI_ALL,	OnUpdateBool,		quiet_eval,		 	zend_assert_globals,		assert_globals)
 PHP_INI_END()
 
-static void php_assert_init_globals(zend_assert_globals *assert_globals_p TSRMLS_DC) /* {{{ */
+static void php_assert_init_globals(zend_assert_globals *assert_globals_p) /* {{{ */
 {
 	ZVAL_UNDEF(&assert_globals_p->callback);
 	assert_globals_p->cb = NULL;
@@ -149,7 +149,7 @@ PHP_FUNCTION(assert)
 		RETURN_TRUE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|s", &assertion, &description, &description_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|s", &assertion, &description, &description_len) == FAILURE) {
 		return;
 	}
 
@@ -164,13 +164,13 @@ PHP_FUNCTION(assert)
 			EG(error_reporting) = 0;
 		}
 
-		compiled_string_description = zend_make_compiled_string_description("assert code" TSRMLS_CC);
-		if (zend_eval_stringl(myeval, Z_STRLEN_P(assertion), &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
+		compiled_string_description = zend_make_compiled_string_description("assert code");
+		if (zend_eval_stringl(myeval, Z_STRLEN_P(assertion), &retval, compiled_string_description) == FAILURE) {
 			efree(compiled_string_description);
 			if (description_len == 0) {
-				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s", PHP_EOL, myeval);
+				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s", PHP_EOL, myeval);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, description, myeval);
+				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, description, myeval);
 			}
 			if (ASSERTG(bail)) {
 				zend_bailout();
@@ -202,8 +202,8 @@ PHP_FUNCTION(assert)
 		zval *args = safe_emalloc(description_len == 0 ? 3 : 4, sizeof(zval), 0);
 		zval retval;
 		int i;
-		uint lineno = zend_get_executed_lineno(TSRMLS_C);
-		const char *filename = zend_get_executed_filename(TSRMLS_C);
+		uint lineno = zend_get_executed_lineno();
+		const char *filename = zend_get_executed_filename();
 
 		ZVAL_STRING(&args[0], SAFE_STRING(filename));
 		ZVAL_LONG (&args[1], lineno);
@@ -213,14 +213,14 @@ PHP_FUNCTION(assert)
 
 		/* XXX do we want to check for error here? */
 		if (description_len == 0) {
-			call_user_function(CG(function_table), NULL, &ASSERTG(callback), &retval, 3, args TSRMLS_CC);
+			call_user_function(CG(function_table), NULL, &ASSERTG(callback), &retval, 3, args);
 			for (i = 0; i <= 2; i++) {
 				zval_ptr_dtor(&(args[i]));
 			}
 		} else {
 			ZVAL_STRINGL(&args[3], SAFE_STRING(description), description_len);
 
-			call_user_function(CG(function_table), NULL, &ASSERTG(callback), &retval, 4, args TSRMLS_CC);
+			call_user_function(CG(function_table), NULL, &ASSERTG(callback), &retval, 4, args);
 			for (i = 0; i <= 3; i++) {
 				zval_ptr_dtor(&(args[i]));
 			}
@@ -233,15 +233,15 @@ PHP_FUNCTION(assert)
 	if (ASSERTG(warning)) {
 		if (description_len == 0) {
 			if (myeval) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assertion \"%s\" failed", myeval);
+				php_error_docref(NULL, E_WARNING, "Assertion \"%s\" failed", myeval);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assertion failed");
+				php_error_docref(NULL, E_WARNING, "Assertion failed");
 			}
 		} else {
 			if (myeval) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s: \"%s\" failed", description, myeval);
+				php_error_docref(NULL, E_WARNING, "%s: \"%s\" failed", description, myeval);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s failed", description);
+				php_error_docref(NULL, E_WARNING, "%s failed", description);
 			}
 		}
 	}
@@ -262,7 +262,7 @@ PHP_FUNCTION(assert_options)
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
-	if (zend_parse_parameters(ac TSRMLS_CC, "l|z", &what, &value) == FAILURE) {
+	if (zend_parse_parameters(ac, "l|z", &what, &value) == FAILURE) {
 		return;
 	}
 
@@ -272,7 +272,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.active", sizeof("assert.active")-1, 0);
-			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 			zend_string_release(key);
 			zend_string_release(value_str);
 		}
@@ -284,7 +284,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.bail", sizeof("assert.bail")-1, 0);
-			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 			zend_string_release(key);
 			zend_string_release(value_str);
 		}
@@ -296,7 +296,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.quiet_eval", sizeof("assert.quiet_eval")-1, 0);
-			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 			zend_string_release(key);
 			zend_string_release(value_str);
 		}
@@ -308,7 +308,7 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.warning", sizeof("assert.warning")-1, 0);
-			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 			zend_string_release(key);
 			zend_string_release(value_str);
 		}
@@ -332,7 +332,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown value %pd", what);
+		php_error_docref(NULL, E_WARNING, "Unknown value %pd", what);
 		break;
 	}
 

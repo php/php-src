@@ -22,7 +22,7 @@
 #include "dirstream.h"
 
 BEGIN_EXTERN_C()
-void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_dir TSRMLS_DC);
+void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_dir);
 END_EXTERN_C()
 
 php_stream_ops phar_dir_ops = {
@@ -40,7 +40,7 @@ php_stream_ops phar_dir_ops = {
 /**
  * Used for closedir($fp) where $fp is an opendir('phar://...') directory handle
  */
-static int phar_dir_close(php_stream *stream, int close_handle TSRMLS_DC)  /* {{{ */
+static int phar_dir_close(php_stream *stream, int close_handle)  /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
@@ -58,7 +58,7 @@ static int phar_dir_close(php_stream *stream, int close_handle TSRMLS_DC)  /* {{
 /**
  * Used for seeking on a phar directory handle
  */
-static int phar_dir_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC) /* {{{ */
+static int phar_dir_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset) /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
@@ -90,7 +90,7 @@ static int phar_dir_seek(php_stream *stream, zend_off_t offset, int whence, zend
 /**
  * Used for readdir() on an opendir()ed phar directory handle
  */
-static size_t phar_dir_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
+static size_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	size_t to_read;
 	HashTable *data = (HashTable *)stream->abstract;
@@ -119,7 +119,7 @@ static size_t phar_dir_read(php_stream *stream, char *buf, size_t count TSRMLS_D
 /**
  * Dummy: Used for writing to a phar directory (i.e. not used)
  */
-static size_t phar_dir_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
+static size_t phar_dir_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
 	return 0;
 }
@@ -128,7 +128,7 @@ static size_t phar_dir_write(php_stream *stream, const char *buf, size_t count T
 /**
  * Dummy: Used for flushing writes to a phar directory (i.e. not used)
  */
-static int phar_dir_flush(php_stream *stream TSRMLS_DC) /* {{{ */
+static int phar_dir_flush(php_stream *stream) /* {{{ */
 {
 	return EOF;
 }
@@ -152,7 +152,7 @@ static int phar_add_empty(HashTable *ht, char *arKey, uint nKeyLength)  /* {{{ *
 /**
  * Used for sorting directories alphabetically
  */
-static int phar_compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{ */
+static int phar_compare_dir_name(const void *a, const void *b)  /* {{{ */
 {
 	Bucket *f;
 	Bucket *s;
@@ -177,7 +177,7 @@ static int phar_compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{
  * files in a phar and retrieving its relative path.  From this, construct
  * a list of files/directories that are "in" the directory represented by dir
  */
-static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC) /* {{{ */
+static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 {
 	HashTable *data;
 	int dirlen = strlen(dir);
@@ -285,7 +285,7 @@ PHAR_ADD_ENTRY:
 
 	if (FAILURE != zend_hash_has_more_elements(data)) {
 		efree(dir);
-		if (zend_hash_sort(data, zend_qsort, phar_compare_dir_name, 0 TSRMLS_CC) == FAILURE) {
+		if (zend_hash_sort(data, zend_qsort, phar_compare_dir_name, 0) == FAILURE) {
 			FREE_HASHTABLE(data);
 			return NULL;
 		}
@@ -300,7 +300,7 @@ PHAR_ADD_ENTRY:
 /**
  * Open a directory handle within a phar archive
  */
-php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
+php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
 	php_stream *ret;
@@ -311,39 +311,39 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	phar_entry_info *entry = NULL;
 	uint host_len;
 
-	if ((resource = phar_parse_url(wrapper, path, mode, options TSRMLS_CC)) == NULL) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar url \"%s\" is unknown", path);
+	if ((resource = phar_parse_url(wrapper, path, mode, options)) == NULL) {
+		php_stream_wrapper_log_error(wrapper, options, "phar url \"%s\" is unknown", path);
 		return NULL;
 	}
 
 	/* we must have at the very least phar://alias.phar/ */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		if (resource->host && !resource->path) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", path, resource->host);
+			php_stream_wrapper_log_error(wrapper, options, "phar error: no directory in \"%s\", must have at least phar://%s/ for root directory (always use full path to a new phar)", path, resource->host);
 			php_url_free(resource);
 			return NULL;
 		}
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\", must have at least phar://%s/", path, path);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: invalid url \"%s\", must have at least phar://%s/", path, path);
 		return NULL;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar url \"%s\"", path);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar url \"%s\"", path);
 		return NULL;
 	}
 
 	host_len = strlen(resource->host);
-	phar_request_initialize(TSRMLS_C);
+	phar_request_initialize();
 	internal_file = resource->path + 1; /* strip leading "/" */
 
-	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
+	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error)) {
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "%s", error);
+			php_stream_wrapper_log_error(wrapper, options, "%s", error);
 			efree(error);
 		} else {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar file \"%s\" is unknown", resource->host);
+			php_stream_wrapper_log_error(wrapper, options, "phar file \"%s\" is unknown", resource->host);
 		}
 		php_url_free(resource);
 		return NULL;
@@ -356,7 +356,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	if (*internal_file == '\0') {
 		/* root directory requested */
 		internal_file = estrndup(internal_file - 1, 1);
-		ret = phar_make_dirstream(internal_file, &phar->manifest TSRMLS_CC);
+		ret = phar_make_dirstream(internal_file, &phar->manifest);
 		php_url_free(resource);
 		return ret;
 	}
@@ -376,7 +376,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		}
 		internal_file = estrdup(internal_file);
 		php_url_free(resource);
-		return phar_make_dirstream(internal_file, &phar->manifest TSRMLS_CC);
+		return phar_make_dirstream(internal_file, &phar->manifest);
 	} else {
 		int i_len = strlen(internal_file);
 
@@ -391,7 +391,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 					internal_file = estrndup(internal_file,
 							i_len);
 					php_url_free(resource);
-					return phar_make_dirstream(internal_file, &phar->manifest TSRMLS_CC);
+					return phar_make_dirstream(internal_file, &phar->manifest);
 				}
 			}
 
@@ -409,7 +409,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 /**
  * Make a new directory within a phar archive
  */
-int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mode, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
+int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mode, int options, php_stream_context *context) /* {{{ */
 {
 	phar_entry_info entry, *e;
 	phar_archive_data *phar = NULL;
@@ -419,12 +419,12 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	uint host_len;
 
 	/* pre-readonly check, we need to know if this is a data phar */
-	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, &entry2, &entry_len, 2, 2 TSRMLS_CC)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\", no phar archive specified", url_from);
+	if (FAILURE == phar_split_fname(url_from, strlen(url_from), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\", no phar archive specified", url_from);
 		return 0;
 	}
 
-	if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+	if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 		phar = NULL;
 	}
 
@@ -432,63 +432,63 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	efree(entry2);
 
 	if (PHAR_G(readonly) && (!phar || !phar->is_data)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\", write operations disabled", url_from);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\", write operations disabled", url_from);
 		return 0;
 	}
 
-	if ((resource = phar_parse_url(wrapper, url_from, "w", options TSRMLS_CC)) == NULL) {
+	if ((resource = phar_parse_url(wrapper, url_from, "w", options)) == NULL) {
 		return 0;
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", url_from);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: invalid url \"%s\"", url_from);
 		return 0;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar stream url \"%s\"", url_from);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar stream url \"%s\"", url_from);
 		return 0;
 	}
 
 	host_len = strlen(resource->host);
 
-	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, resource->host, error);
+	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error)) {
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, resource->host, error);
 		efree(error);
 		php_url_free(resource);
 		return 0;
 	}
 
-	if ((e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 2, &error, 1 TSRMLS_CC))) {
+	if ((e = phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 2, &error, 1))) {
 		/* directory exists, or is a subdirectory of an existing file */
 		if (e->is_temp_dir) {
 			efree(e->filename);
 			efree(e);
 		}
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", directory already exists", resource->path+1, resource->host);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", directory already exists", resource->path+1, resource->host);
 		php_url_free(resource);
 		return 0;
 	}
 
 	if (error) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
 		efree(error);
 		php_url_free(resource);
 		return 0;
 	}
 
-	if (phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 0, &error, 1 TSRMLS_CC)) {
+	if (phar_get_entry_info_dir(phar, resource->path + 1, strlen(resource->path + 1), 0, &error, 1)) {
 		/* entry exists as a file */
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", file already exists", resource->path+1, resource->host);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", file already exists", resource->path+1, resource->host);
 		php_url_free(resource);
 		return 0;
 	}
 
 	if (error) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
 		efree(error);
 		php_url_free(resource);
 		return 0;
@@ -518,22 +518,22 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 	entry.old_flags = PHAR_ENT_PERM_DEF_DIR;
 
 	if (NULL == zend_hash_str_add_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", entry.filename, phar->fname);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", adding to manifest failed", entry.filename, phar->fname);
 		efree(error);
 		efree(entry.filename);
 		return 0;
 	}
 
-	phar_flush(phar, 0, 0, 0, &error TSRMLS_CC);
+	phar_flush(phar, 0, 0, 0, &error);
 
 	if (error) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", entry.filename, phar->fname, error);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", entry.filename, phar->fname, error);
 		zend_hash_str_del(&phar->manifest, entry.filename, entry.filename_len);
 		efree(error);
 		return 0;
 	}
 
-	phar_add_virtual_dirs(phar, entry.filename, entry.filename_len TSRMLS_CC);
+	phar_add_virtual_dirs(phar, entry.filename, entry.filename_len);
 	return 1;
 }
 /* }}} */
@@ -541,7 +541,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 /**
  * Remove a directory within a phar archive
  */
-int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
+int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context) /* {{{ */
 {
 	phar_entry_info *entry;
 	phar_archive_data *phar = NULL;
@@ -554,12 +554,12 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	uint path_len;
 
 	/* pre-readonly check, we need to know if this is a data phar */
-	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, &entry2, &entry_len, 2, 2 TSRMLS_CC)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\", no phar archive specified, or phar archive does not exist", url);
+	if (FAILURE == phar_split_fname(url, strlen(url), &arch, &arch_len, &entry2, &entry_len, 2, 2)) {
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\", no phar archive specified, or phar archive does not exist", url);
 		return 0;
 	}
 
-	if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
+	if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 		phar = NULL;
 	}
 
@@ -567,31 +567,31 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	efree(entry2);
 
 	if (PHAR_G(readonly) && (!phar || !phar->is_data)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot rmdir directory \"%s\", write operations disabled", url);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot rmdir directory \"%s\", write operations disabled", url);
 		return 0;
 	}
 
-	if ((resource = phar_parse_url(wrapper, url, "w", options TSRMLS_CC)) == NULL) {
+	if ((resource = phar_parse_url(wrapper, url, "w", options)) == NULL) {
 		return 0;
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: invalid url \"%s\"", url);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: invalid url \"%s\"", url);
 		return 0;
 	}
 
 	if (strcasecmp("phar", resource->scheme)) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: not a phar stream url \"%s\"", url);
+		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar stream url \"%s\"", url);
 		return 0;
 	}
 
 	host_len = strlen(resource->host);
 
-	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error TSRMLS_CC)) {
-		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, resource->host, error);
+	if (FAILURE == phar_get_archive(&phar, resource->host, host_len, NULL, 0, &error)) {
+		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", error retrieving phar information: %s", resource->path+1, resource->host, error);
 		efree(error);
 		php_url_free(resource);
 		return 0;
@@ -599,12 +599,12 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 
 	path_len = strlen(resource->path+1);
 
-	if (!(entry = phar_get_entry_info_dir(phar, resource->path + 1, path_len, 2, &error, 1 TSRMLS_CC))) {
+	if (!(entry = phar_get_entry_info_dir(phar, resource->path + 1, path_len, 2, &error, 1))) {
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
+			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", resource->path+1, resource->host, error);
 			efree(error);
 		} else {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\" in phar \"%s\", directory does not exist", resource->path+1, resource->host);
+			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", directory does not exist", resource->path+1, resource->host);
 		}
 		php_url_free(resource);
 		return 0;
@@ -618,7 +618,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 			if (str_key->len > path_len && 
 				memcmp(str_key->val, resource->path+1, path_len) == 0 && 
 				IS_SLASH(str_key->val[path_len])) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: Directory not empty");
+				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
 					efree(entry->filename);
 					efree(entry);
@@ -635,7 +635,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 			if (str_key->len > path_len && 
 				memcmp(str_key->val, resource->path+1, path_len) == 0 && 
 				IS_SLASH(str_key->val[path_len])) {
-				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: Directory not empty");
+				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
 					efree(entry->filename);
 					efree(entry);
@@ -653,10 +653,10 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	} else {
 		entry->is_deleted = 1;
 		entry->is_modified = 1;
-		phar_flush(phar, 0, 0, 0, &error TSRMLS_CC);
+		phar_flush(phar, 0, 0, 0, &error);
 
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", entry->filename, phar->fname, error);
+			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", entry->filename, phar->fname, error);
 			php_url_free(resource);
 			efree(error);
 			return 0;

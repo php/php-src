@@ -33,12 +33,12 @@ const char HARDCODED_INI[] =
 	"max_execution_time=0\n"
 	"max_input_time=-1\n\0";
 
-static char* php_embed_read_cookies(TSRMLS_D)
+static char* php_embed_read_cookies(void)
 {
 	return NULL;
 }
 
-static int php_embed_deactivate(TSRMLS_D)
+static int php_embed_deactivate(void)
 {
 	fflush(stdout);
 	return SUCCESS;
@@ -61,7 +61,7 @@ static inline size_t php_embed_single_write(const char *str, size_t str_length)
 }
 
 
-static size_t php_embed_ub_write(const char *str, size_t str_length TSRMLS_DC)
+static size_t php_embed_ub_write(const char *str, size_t str_length)
 {
 	const char *ptr = str;
 	size_t remaining = str_length;
@@ -79,25 +79,25 @@ static size_t php_embed_ub_write(const char *str, size_t str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void php_embed_flush(void *server_context TSRMLS_DC)
+static void php_embed_flush(void *server_context)
 {
 	if (fflush(stdout)==EOF) {
 		php_handle_aborted_connection();
 	}
 }
 
-static void php_embed_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
+static void php_embed_send_header(sapi_header_struct *sapi_header, void *server_context)
 {
 }
 
-static void php_embed_log_message(char *message TSRMLS_DC)
+static void php_embed_log_message(char *message)
 {
 	fprintf (stderr, "%s\n", message);
 }
 
-static void php_embed_register_variables(zval *track_vars_array TSRMLS_DC)
+static void php_embed_register_variables(zval *track_vars_array)
 {
-	php_import_environment_variables(track_vars_array TSRMLS_CC);
+	php_import_environment_variables(track_vars_array);
 }
 
 static int php_embed_startup(sapi_module_struct *sapi_module)
@@ -205,22 +205,22 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC)
   SG(request_info).argc=argc;
   SG(request_info).argv=argv;
 
-  if (php_request_startup(TSRMLS_C)==FAILURE) {
-	  php_module_shutdown(TSRMLS_C);
+  if (php_request_startup()==FAILURE) {
+	  php_module_shutdown();
 	  return FAILURE;
   }
   
   SG(headers_sent) = 1;
   SG(request_info).no_headers = 1;
-  php_register_variable("PHP_SELF", "-", NULL TSRMLS_CC);
+  php_register_variable("PHP_SELF", "-", NULL);
 
   return SUCCESS;
 }
 
-EMBED_SAPI_API void php_embed_shutdown(TSRMLS_D)
+EMBED_SAPI_API void php_embed_shutdown(void)
 {
 	php_request_shutdown((void *) 0);
-	php_module_shutdown(TSRMLS_C);
+	php_module_shutdown();
 	sapi_shutdown();
 #ifdef ZTS
     tsrm_shutdown();

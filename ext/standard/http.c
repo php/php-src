@@ -29,7 +29,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *num_prefix, size_t num_prefix_len,
 				const char *key_prefix, size_t key_prefix_len,
 				const char *key_suffix, size_t key_suffix_len,
-			  zval *type, char *arg_sep, int enc_type TSRMLS_DC)
+			  zval *type, char *arg_sep, int enc_type)
 {
 	zend_string *key = NULL;
 	char *newprefix, *p;
@@ -62,7 +62,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				const char *tmp;
 
 				zend_object *zobj = Z_OBJ_P(type);
-				if (zend_check_property_access(zobj, key TSRMLS_CC) != SUCCESS) {
+				if (zend_check_property_access(zobj, key) != SUCCESS) {
 					/* private or protected property access outside of the class */
 					continue;
 				}
@@ -138,7 +138,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
 				ht->u.v.nApplyCount++;
 			}
-			php_url_encode_hash_ex(HASH_OF(zdata), formstr, NULL, 0, newprefix, newprefix_len, "%5D", 3, (Z_TYPE_P(zdata) == IS_OBJECT ? zdata : NULL), arg_sep, enc_type TSRMLS_CC);
+			php_url_encode_hash_ex(HASH_OF(zdata), formstr, NULL, 0, newprefix, newprefix_len, "%5D", 3, (Z_TYPE_P(zdata) == IS_OBJECT ? zdata : NULL), arg_sep, enc_type);
 			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
 				ht->u.v.nApplyCount--;
 			}
@@ -233,16 +233,16 @@ PHP_FUNCTION(http_build_query)
 	smart_str formstr = {0};
 	zend_long enc_type = PHP_QUERY_RFC1738;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ssl", &formdata, &prefix, &prefix_len, &arg_sep, &arg_sep_len, &enc_type) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|ssl", &formdata, &prefix, &prefix_len, &arg_sep, &arg_sep_len, &enc_type) != SUCCESS) {
 		RETURN_FALSE;
 	}
 
 	if (Z_TYPE_P(formdata) != IS_ARRAY && Z_TYPE_P(formdata) != IS_OBJECT) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter 1 expected to be Array or Object.  Incorrect value given");
+		php_error_docref(NULL, E_WARNING, "Parameter 1 expected to be Array or Object.  Incorrect value given");
 		RETURN_FALSE;
 	}
 
-	if (php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, (int)enc_type TSRMLS_CC) == FAILURE) {
+	if (php_url_encode_hash_ex(HASH_OF(formdata), &formstr, prefix, prefix_len, NULL, 0, NULL, 0, (Z_TYPE_P(formdata) == IS_OBJECT ? formdata : NULL), arg_sep, (int)enc_type) == FAILURE) {
 		if (formstr.s) {
 			smart_str_free(&formstr);
 		}

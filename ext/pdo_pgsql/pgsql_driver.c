@@ -62,7 +62,7 @@ static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 	return tmp;
 }
 
-int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *msg, const char *file, int line TSRMLS_DC) /* {{{ */
+int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *msg, const char *file, int line) /* {{{ */
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_error_type *pdo_err = stmt ? &stmt->error_code : &dbh->error_code;
@@ -93,7 +93,7 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 	}
 
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(), einfo->errcode TSRMLS_CC, "SQLSTATE[%s] [%d] %s",
+		zend_throw_exception_ex(php_pdo_get_exception(), einfo->errcode, "SQLSTATE[%s] [%d] %s",
 				*pdo_err, einfo->errcode, einfo->errmsg);
 	}
 
@@ -107,7 +107,7 @@ static void _pdo_pgsql_notice(pdo_dbh_t *dbh, const char *message) /* {{{ */
 }
 /* }}} */
 
-static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC) /* {{{ */
+static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info) /* {{{ */
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_pgsql_error_info *einfo = &H->einfo;
@@ -122,19 +122,19 @@ static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 /* }}} */
 
 /* {{{ pdo_pgsql_create_lob_stream */
-static size_t pgsql_lob_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static size_t pgsql_lob_write(php_stream *stream, const char *buf, size_t count)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
 	return lo_write(self->conn, self->lfd, (char*)buf, count);
 }
 
-static size_t pgsql_lob_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static size_t pgsql_lob_read(php_stream *stream, char *buf, size_t count)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
 	return lo_read(self->conn, self->lfd, buf, count);
 }
 
-static int pgsql_lob_close(php_stream *stream, int close_handle TSRMLS_DC)
+static int pgsql_lob_close(php_stream *stream, int close_handle)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
 
@@ -146,13 +146,13 @@ static int pgsql_lob_close(php_stream *stream, int close_handle TSRMLS_DC)
 	return 0;
 }
 
-static int pgsql_lob_flush(php_stream *stream TSRMLS_DC)
+static int pgsql_lob_flush(php_stream *stream)
 {
 	return 0;
 }
 
 static int pgsql_lob_seek(php_stream *stream, zend_off_t offset, int whence,
-		zend_off_t *newoffset TSRMLS_DC)
+		zend_off_t *newoffset)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
 	int pos = lo_lseek(self->conn, self->lfd, offset, whence);
@@ -172,7 +172,7 @@ php_stream_ops pdo_pgsql_lob_stream_ops = {
 	NULL
 };
 
-php_stream *pdo_pgsql_create_lob_stream(zval *dbh, int lfd, Oid oid TSRMLS_DC)
+php_stream *pdo_pgsql_create_lob_stream(zval *dbh, int lfd, Oid oid)
 {
 	php_stream *stm;
 	struct pdo_pgsql_lob_self *self = ecalloc(1, sizeof(*self));
@@ -195,7 +195,7 @@ php_stream *pdo_pgsql_create_lob_stream(zval *dbh, int lfd, Oid oid TSRMLS_DC)
 }
 /* }}} */
 
-static int pgsql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
+static int pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	if (H) {
@@ -214,7 +214,7 @@ static int pgsql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	pdo_pgsql_stmt *S = ecalloc(1, sizeof(pdo_pgsql_stmt));
@@ -230,7 +230,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_
 	stmt->methods = &pgsql_stmt_methods;
 
 	scrollable = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
-		PDO_CURSOR_FWDONLY TSRMLS_CC) == PDO_CURSOR_SCROLL;
+		PDO_CURSOR_FWDONLY) == PDO_CURSOR_SCROLL;
 
 	if (scrollable) {
 		if (S->cursor_name) {
@@ -239,14 +239,14 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_
 		spprintf(&S->cursor_name, 0, "pdo_crsr_%08x", ++H->stmt_counter);
 		emulate = 1;
 	} else if (driver_options) {
-		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, H->disable_native_prepares TSRMLS_CC) == 1) {
-			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
+		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT, H->disable_native_prepares) == 1) {
+			php_error_docref(NULL, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
 			emulate = 1;
 		}
-		if (pdo_attr_lval(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares TSRMLS_CC) == 1) {
+		if (pdo_attr_lval(driver_options, PDO_ATTR_EMULATE_PREPARES, H->emulate_prepares) == 1) {
 			emulate = 1;
 		}
-		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_PREPARES, H->disable_prepares TSRMLS_CC) == 1) {
+		if (pdo_attr_lval(driver_options, PDO_PGSQL_ATTR_DISABLE_PREPARES, H->disable_prepares) == 1) {
 			execute_only = 1;
 		}
 	} else {
@@ -257,7 +257,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_
 	if (!emulate && PQprotocolVersion(H->server) > 2) {
 		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
 		stmt->named_rewrite_template = "$%d";
-		ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len TSRMLS_CC);
+		ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len);
 
 		if (ret == 1) {
 			/* query was re-written */
@@ -287,7 +287,7 @@ static int pgsql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_
 	return 1;
 }
 
-static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len TSRMLS_DC)
+static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	PGresult *res;
@@ -316,7 +316,7 @@ static zend_long pgsql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sq
 	return ret;
 }
 
-static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC)
+static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype)
 {
 	unsigned char *escaped;
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -345,7 +345,7 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	return 1;
 }
 
-static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC)
+static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	char *id = NULL;
@@ -377,7 +377,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 	return id;
 }
 
-static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value TSRMLS_DC)
+static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
@@ -461,7 +461,7 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 }
 
 /* {{{ */
-static int pdo_pgsql_check_liveness(pdo_dbh_t *dbh TSRMLS_DC)
+static int pdo_pgsql_check_liveness(pdo_dbh_t *dbh)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	if (PQstatus(H->server) == CONNECTION_BAD) {
@@ -471,7 +471,7 @@ static int pdo_pgsql_check_liveness(pdo_dbh_t *dbh TSRMLS_DC)
 }
 /* }}} */
 
-static int pgsql_handle_in_transaction(pdo_dbh_t *dbh TSRMLS_DC)
+static int pgsql_handle_in_transaction(pdo_dbh_t *dbh)
 {
 	pdo_pgsql_db_handle *H;
 
@@ -480,7 +480,7 @@ static int pgsql_handle_in_transaction(pdo_dbh_t *dbh TSRMLS_DC)
 	return PQtransactionStatus(H->server) > PQTRANS_IDLE;
 }
 
-static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
+static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 	PGresult *res;
@@ -497,27 +497,27 @@ static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
 	return ret;
 }
 
-static int pgsql_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
+static int pgsql_handle_begin(pdo_dbh_t *dbh)
 {
-	return pdo_pgsql_transaction_cmd("BEGIN", dbh TSRMLS_CC);
+	return pdo_pgsql_transaction_cmd("BEGIN", dbh);
 }
 
-static int pgsql_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
+static int pgsql_handle_commit(pdo_dbh_t *dbh)
 {
-	int ret = pdo_pgsql_transaction_cmd("COMMIT", dbh TSRMLS_CC);
+	int ret = pdo_pgsql_transaction_cmd("COMMIT", dbh);
 
 	/* When deferred constraints are used the commit could
 	   fail, and a ROLLBACK implicitly ran. See bug #67462 */
 	if (!ret) {
-		dbh->in_txn = pgsql_handle_in_transaction(dbh TSRMLS_CC);
+		dbh->in_txn = pgsql_handle_in_transaction(dbh);
 	}
 
 	return ret;
 }
 
-static int pgsql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
+static int pgsql_handle_rollback(pdo_dbh_t *dbh)
 {
-	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh TSRMLS_CC);
+	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh);
 }
 
 /* {{{ proto string PDO::pgsqlCopyFromArray(string $table_name , array $rows [, string $delimiter [, string $null_as ] [, string $fields])
@@ -536,14 +536,14 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s/a|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s/a|sss",
 					&table_name, &table_name_len, &pg_rows,
 					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		return;
 	}
 
 	if (!zend_hash_num_elements(Z_ARRVAL_P(pg_rows))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot copy from an empty array");
+		php_error_docref(NULL, E_WARNING, "Cannot copy from an empty array");
 		RETURN_FALSE;
 	}
 
@@ -645,7 +645,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 	ExecStatusType status;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss",
 				&table_name, &table_name_len, &filename, &filename_len,
 				&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		return;
@@ -746,7 +746,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss",
 					&table_name, &table_name_len, &filename, &filename_len,
 					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		return;
@@ -839,7 +839,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sss",
 		&table_name, &table_name_len,
 		&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		return;
@@ -944,7 +944,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 	int mode = INV_READ;
 	char *end_ptr;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s",
 				&oidstr, &oidstrlen, &modestr, &modestrlen)) {
 		RETURN_FALSE;
 	}
@@ -967,7 +967,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 	lfd = lo_open(H->server, oid, mode);
 
 	if (lfd >= 0) {
-		php_stream *stream = pdo_pgsql_create_lob_stream(getThis(), lfd, oid TSRMLS_CC);
+		php_stream *stream = pdo_pgsql_create_lob_stream(getThis(), lfd, oid);
 		if (stream) {
 			php_stream_to_zval(stream, return_value);
 			return;
@@ -991,7 +991,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 	char *oidstr, *end_ptr;
 	size_t oidlen;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 				&oidstr, &oidlen)) {
 		RETURN_FALSE;
 	}
@@ -1027,7 +1027,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 	zend_long ms_timeout = 0;
 	PGnotify *pgsql_notify;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|ll",
 				&result_type, &ms_timeout)) {
 		RETURN_FALSE;
 	}
@@ -1040,12 +1040,12 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 	}
 
 	if (result_type != PDO_FETCH_BOTH && result_type != PDO_FETCH_ASSOC && result_type != PDO_FETCH_NUM) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid result type");
+		php_error_docref(NULL, E_WARNING, "Invalid result type");
  		RETURN_FALSE;
 	}
 
 	if (ms_timeout < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid timeout");
+		php_error_docref(NULL, E_WARNING, "Invalid timeout");
  		RETURN_FALSE;
 	}
 
@@ -1115,7 +1115,7 @@ static const zend_function_entry dbh_methods[] = {
 	PHP_FE_END
 };
 
-static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
+static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, int kind)
 {
 	switch (kind) {
 		case PDO_DBH_DRIVER_METHOD_KIND_DBH:
@@ -1125,7 +1125,7 @@ static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, i
 	}
 }
 
-static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_DC)
+static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
@@ -1136,7 +1136,7 @@ static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val TSRMLS_D
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT:
 			convert_to_long(val);
-			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
+			php_error_docref(NULL, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
 			H->disable_native_prepares = Z_LVAL_P(val);
 			return 1;
 		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
@@ -1166,7 +1166,7 @@ static struct pdo_dbh_methods pgsql_methods = {
 	pgsql_handle_in_transaction,
 };
 
-static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
+static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
 {
 	pdo_pgsql_db_handle *H;
 	int ret = 0;
@@ -1190,7 +1190,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	if (driver_options) {
-		connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
+		connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30);
 	}
 
 	if (dbh->password) {
@@ -1253,7 +1253,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 cleanup:
 	dbh->methods = &pgsql_methods;
 	if (!ret) {
-		pgsql_handle_closer(dbh TSRMLS_CC);
+		pgsql_handle_closer(dbh);
 	}
 
 	return ret;

@@ -41,4 +41,4 @@
 
 zval *php_apache_request_new(request_rec *r);
 
-int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRMLS_DC);
+int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret);

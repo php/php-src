@@ -62,13 +62,13 @@ struct st_mysqlnd_plugin_trace_log
 	struct st_mysqlnd_plugin_header plugin_header;
 	struct
 	{
-		MYSQLND_DEBUG * (*trace_instance_init)(const char * skip_functions[] TSRMLS_DC);
+		MYSQLND_DEBUG * (*trace_instance_init)(const char * skip_functions[]);
 	} methods;
 };
 
-void mysqlnd_debug_trace_plugin_register(TSRMLS_D);
+void mysqlnd_debug_trace_plugin_register(void);
 
-PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC);
+PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 
 
 #if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400))

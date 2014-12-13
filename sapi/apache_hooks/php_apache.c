@@ -105,7 +105,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-static void php_apache_globals_ctor(php_apache_info_struct *apache_globals TSRMLS_DC)
+static void php_apache_globals_ctor(php_apache_info_struct *apache_globals)
 {
 	apache_globals->in_request = 0;
 }
@@ -113,20 +113,20 @@ static void php_apache_globals_ctor(php_apache_info_struct *apache_globals TSRML
 
 #define APREQ_GET_THIS(ZVAL)		if (NULL == (ZVAL = getThis())) { \
 										php_error(E_WARNING, "%s(): underlying ApacheRequest object missing", \
-											get_active_function_name(TSRMLS_C)); \
+											get_active_function_name()); \
 										RETURN_FALSE; \
 									}
 #define APREQ_GET_REQUEST(ZVAL, R)	APREQ_GET_THIS(ZVAL); \
-									R = get_apache_request(ZVAL TSRMLS_CC)
+									R = get_apache_request(ZVAL)
 
-static void php_apache_request_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void php_apache_request_free(zend_rsrc_list_entry *rsrc)
 {
 	zval *z = (zval *)rsrc->ptr;
 /*	fprintf(stderr, "%s() %p\n", __FUNCTION__, z); */
 	zval_ptr_dtor(&z);
 }
 
-static request_rec *get_apache_request(zval *z TSRMLS_DC)
+static request_rec *get_apache_request(zval *z)
 {
 	request_rec *r;
 	zval **addr;
@@ -137,28 +137,28 @@ static request_rec *get_apache_request(zval *z TSRMLS_DC)
 	}
 
 	if (Z_TYPE_P(z) != IS_OBJECT) {
-		php_error(E_WARNING, "%s(): wrapper is not an object", get_active_function_name(TSRMLS_C));
+		php_error(E_WARNING, "%s(): wrapper is not an object", get_active_function_name());
 		return NULL;
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(z), 0, (void **)&addr) == FAILURE) {
-		php_error(E_WARNING, "%s(): underlying object missing", get_active_function_name(TSRMLS_C));
+		php_error(E_WARNING, "%s(): underlying object missing", get_active_function_name());
 		return NULL;
 	}
 
 	r = (request_rec *)Z_LVAL_PP(addr);
 	if (!r) {
-		php_error(E_WARNING, "%s(): request_rec invalid", get_active_function_name(TSRMLS_C));
+		php_error(E_WARNING, "%s(): request_rec invalid", get_active_function_name());
 		return NULL;
 	}
 
 	return r;
 }
 
-/* {{{ php_apache_request_new(request_rec *r TSRMLS_DC)
+/* {{{ php_apache_request_new(request_rec *r)
  * create a new zval-instance for ApacheRequest that wraps request_rec
  */
-zval *php_apache_request_new(request_rec *r TSRMLS_DC)
+zval *php_apache_request_new(request_rec *r)
 {
 	zval *req;
 	zval *addr;
@@ -210,7 +210,7 @@ static void apache_request_string_slot(int offset, INTERNAL_FUNCTION_PARAMETERS)
 	int new_value_len;
 	char **target;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &new_value, &new_value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &new_value, &new_value_len) == FAILURE) {
 		return;
 	}
 
@@ -260,7 +260,7 @@ static void apache_request_int_slot(int offset, INTERNAL_FUNCTION_PARAMETERS)
 	long old_value, new_value;
 	long *target;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &new_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &new_value) == FAILURE) {
 		return;
 	}
 
@@ -504,7 +504,7 @@ PHP_FUNCTION(apache_request_content_length)
 	long zlen;
 	request_rec *r;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &zlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &zlen) == FAILURE) {
 		return;
 	}
 
@@ -584,7 +584,7 @@ static void add_header_to_table(table *t, INTERNAL_FUNCTION_PARAMETERS)
 	zend_bool replace = 0;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|zb", &first, &second, &replace) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|zb", &first, &second, &replace) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -614,7 +614,7 @@ static void add_header_to_table(table *t, INTERNAL_FUNCTION_PARAMETERS)
 							break;
 						case HASH_KEY_IS_LONG:
 						default:
-							php_error(E_WARNING, "%s(): Can only add STRING keys to headers!", get_active_function_name(TSRMLS_C));
+							php_error(E_WARNING, "%s(): Can only add STRING keys to headers!", get_active_function_name());
 							break;
 					}
 
@@ -715,7 +715,7 @@ PHP_FUNCTION(apache_request_remote_host)
 	request_rec *r;
 	char *res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &type) == FAILURE) {
 		return;
 	}
 
@@ -743,7 +743,7 @@ PHP_FUNCTION(apache_request_update_mtime)
 	request_rec *r;
 	long mtime = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &mtime) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &mtime) == FAILURE) {
 		return;
 	}
 
@@ -931,7 +931,7 @@ PHP_FUNCTION(apache_request_basic_auth_pw)
 	const char *pw;
 	long status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zpw) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zpw) == FAILURE) {
 	    return;
 	}
 
@@ -963,7 +963,7 @@ PHP_FUNCTION(apache_request_send_http_header)
     char *type = NULL;
     int typelen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS()  TSRMLS_CC, "|s", &type, &typelen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() , "|s", &type, &typelen) == FAILURE) {
         return;
 	}
 
@@ -1034,7 +1034,7 @@ PHP_FUNCTION(apache_request_send_error_response)
     request_rec *r;
 	long rec = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &rec) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &rec) == FAILURE) {
 		return;
 	}
 
@@ -1049,7 +1049,7 @@ PHP_FUNCTION(apache_request_set_content_length)
     zval *id;
     request_rec *r;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &length) == FAILURE) {
 		return;
 	}
 
@@ -1092,7 +1092,7 @@ PHP_FUNCTION(apache_request_rputs)
     zval *id;
     request_rec *r;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buffer, &buffer_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &buffer, &buffer_len) == FAILURE) {
 		return;
 	}
 
@@ -1136,7 +1136,7 @@ PHP_FUNCTION(apache_request_log_error)
     long facility = APLOG_ERR;
     request_rec *r;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &z_errstr, &z_errstr_len, &facility) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &z_errstr, &z_errstr_len, &facility) == FAILURE) {
 		return;
 	}
 
@@ -1158,7 +1158,7 @@ PHP_FUNCTION(apache_request_sub_req_lookup_uri)
 	int file_len;
     request_rec *r, *sub_r;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &file, &file_len) == FAILURE) {
 		return;
 	}
 
@@ -1168,7 +1168,7 @@ PHP_FUNCTION(apache_request_sub_req_lookup_uri)
     if (!sub_r) {
         RETURN_FALSE;
     }
-    return_value = php_apache_request_new(sub_r TSRMLS_CC);
+    return_value = php_apache_request_new(sub_r);
 }
 /* }}} */
 
@@ -1183,7 +1183,7 @@ PHP_FUNCTION(apache_request_sub_req_lookup_file)
 	int file_len;
     request_rec *r, *sub_r;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &file, &file_len) == FAILURE) {
 		return;
 	}
 
@@ -1194,7 +1194,7 @@ PHP_FUNCTION(apache_request_sub_req_lookup_file)
     if (!sub_r) {
         RETURN_FALSE;
     }
-    return_value = php_apache_request_new(sub_r TSRMLS_CC);
+    return_value = php_apache_request_new(sub_r);
 }
 /* }}} */
 
@@ -1209,7 +1209,7 @@ PHP_FUNCTION(apache_request_sub_req_method_uri)
 	int file_len, method_len;
     request_rec *r, *sub_r;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &method, &method_len, &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &method, &method_len, &file, &file_len) == FAILURE) {
 		return;
 	}
 
@@ -1220,7 +1220,7 @@ PHP_FUNCTION(apache_request_sub_req_method_uri)
     if (!sub_r) {
         RETURN_FALSE;
     }
-    return_value = php_apache_request_new(sub_r TSRMLS_CC);
+    return_value = php_apache_request_new(sub_r);
 }
 /* }}} */
 
@@ -1255,7 +1255,7 @@ PHP_FUNCTION(apache_request_internal_redirect)
 	int new_uri_len;
     request_rec *r;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &new_uri, &new_uri_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &new_uri, &new_uri_len) == FAILURE) {
 		return;
 	}
 
@@ -1271,7 +1271,7 @@ PHP_FUNCTION(apache_request_send_header_field)
     zval *id;
     request_rec *r;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &fieldname, &fieldname_len, &fieldval, &fieldval_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &fieldname, &fieldname_len, &fieldval, &fieldval_len) == FAILURE) {
 		return;
 	}
 
@@ -1394,14 +1394,14 @@ static PHP_MINIT_FUNCTION(apache)
 #ifdef ZTS
 	ts_allocate_id(&php_apache_info_id, sizeof(php_apache_info_struct), (ts_allocate_ctor) php_apache_globals_ctor, NULL);
 #else
-	php_apache_globals_ctor(&php_apache_info TSRMLS_CC);
+	php_apache_globals_ctor(&php_apache_info);
 #endif
 	REGISTER_INI_ENTRIES();
 
 
 	le_apachereq = zend_register_list_destructors_ex(php_apache_request_free, NULL, "ApacheRequest", module_number);
 	INIT_OVERLOADED_CLASS_ENTRY(ce, "ApacheRequest", php_apache_request_class_functions, NULL, NULL, NULL);
-	apacherequest_class_entry = zend_register_internal_class_ex(&ce, NULL TSRMLS_CC);
+	apacherequest_class_entry = zend_register_internal_class_ex(&ce, NULL);
 
 	REGISTER_LONG_CONSTANT("OK",				OK,					CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DECLINED",			DECLINED,			CONST_CS | CONST_PERSISTENT);
@@ -1551,7 +1551,7 @@ PHP_FUNCTION(apache_note)
 	int arg_name_len, arg_val_len;
 	char *note_val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &arg_name, &arg_name_len, &arg_val, &arg_val_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &arg_name, &arg_name_len, &arg_val, &arg_val_len) == FAILURE) {
 		return;
 	}
 
@@ -1714,7 +1714,7 @@ PHP_FUNCTION(virtual)
 	int filename_len;
 	request_rec *rr = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
@@ -1732,8 +1732,8 @@ PHP_FUNCTION(virtual)
 		RETURN_FALSE;
 	}
 
-	php_output_end_all(TSRMLS_C);
-	php_header(TSRMLS_C);
+	php_output_end_all();
+	php_header();
 
 	if (run_sub_req(rr)) {
 		php_error(E_WARNING, "Unable to include '%s' - request execution failed", filename);
@@ -1811,7 +1811,7 @@ PHP_FUNCTION(apache_setenv)
 	char *var = NULL, *val = NULL;
 	request_rec *r = (request_rec *) SG(server_context);
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &var, &var_len, &val, &val_len, &top) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &var, &var_len, &val, &val_len, &top) == FAILURE) {
         RETURN_FALSE;
 	}
 
@@ -1835,7 +1835,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	int filename_len;
 	request_rec *rr=NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 

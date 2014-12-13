@@ -122,7 +122,7 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos);
 
 /* {{{ php_release_sysvshm
  */
-static void php_release_sysvshm(zend_resource *rsrc TSRMLS_DC)
+static void php_release_sysvshm(zend_resource *rsrc)
 {
 	sysvshm_shm *shm_ptr = (sysvshm_shm *) rsrc->ptr;
 	shmdt((void *) shm_ptr->ptr);
@@ -152,12 +152,12 @@ PHP_FUNCTION(shm_attach)
 	sysvshm_chunk_head *chunk_ptr;
 	zend_long shm_key, shm_id, shm_size = php_sysvshm.init_mem, shm_flag = 0666;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|ll", &shm_key, &shm_size, &shm_flag)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|ll", &shm_key, &shm_size, &shm_flag)) {
 		return;
 	}
 
 	if (shm_size < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Segment size must be greater than zero");
+		php_error_docref(NULL, E_WARNING, "Segment size must be greater than zero");
 		RETURN_FALSE;
   	}
 
@@ -166,19 +166,19 @@ PHP_FUNCTION(shm_attach)
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {
 		if (shm_size < sizeof(sysvshm_chunk_head)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%px: memorysize too small", shm_key);
+			php_error_docref(NULL, E_WARNING, "failed for key 0x%px: memorysize too small", shm_key);
 			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 		if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL)) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%px: %s", shm_key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "failed for key 0x%px: %s", shm_key, strerror(errno));
 			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%px: %s", shm_key, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "failed for key 0x%px: %s", shm_key, strerror(errno));
 		efree(shm_list_ptr);
 		RETURN_FALSE;
 	}
@@ -208,7 +208,7 @@ PHP_FUNCTION(shm_detach)
 	zval *shm_id;
 	sysvshm_shm *shm_list_ptr;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &shm_id)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shm_id)) {
 		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
@@ -223,13 +223,13 @@ PHP_FUNCTION(shm_remove)
 	zval *shm_id;
 	sysvshm_shm *shm_list_ptr;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &shm_id)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shm_id)) {
 		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	
 	if (shmctl(shm_list_ptr->id, IPC_RMID, NULL) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x, id %ld: %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
+		php_error_docref(NULL, E_WARNING, "failed for key 0x%x, id %ld: %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -248,16 +248,16 @@ PHP_FUNCTION(shm_put_var)
 	smart_str shm_var = {0};
 	php_serialize_data_t var_hash;
 
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz", &shm_id, &shm_key, &arg_var)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rlz", &shm_id, &shm_key, &arg_var)) {
 		return;
 	}
 	
 	/* setup string-variable and serialize */
 	PHP_VAR_SERIALIZE_INIT(var_hash);
-	php_var_serialize(&shm_var, arg_var, &var_hash TSRMLS_CC);
+	php_var_serialize(&shm_var, arg_var, &var_hash);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 	
-	shm_list_ptr = zend_fetch_resource(shm_id TSRMLS_CC, -1, PHP_SHM_RSRC_NAME, NULL, 1, php_sysvshm.le_shm);
+	shm_list_ptr = zend_fetch_resource(shm_id, -1, PHP_SHM_RSRC_NAME, NULL, 1, php_sysvshm.le_shm);
 	if (!shm_list_ptr) {
 		smart_str_free(&shm_var);
 		RETURN_FALSE;
@@ -270,7 +270,7 @@ PHP_FUNCTION(shm_put_var)
 	smart_str_free(&shm_var);
 	
 	if (ret == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "not enough shared memory left");
+		php_error_docref(NULL, E_WARNING, "not enough shared memory left");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -289,7 +289,7 @@ PHP_FUNCTION(shm_get_var)
 	sysvshm_chunk *shm_var;
 	php_unserialize_data_t var_hash;
 	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &shm_id, &shm_key)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
 		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
@@ -299,15 +299,15 @@ PHP_FUNCTION(shm_get_var)
 	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
 
 	if (shm_varpos < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable key %pd doesn't exist", shm_key);
+		php_error_docref(NULL, E_WARNING, "variable key %pd doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
 	shm_var = (sysvshm_chunk*) ((char *)shm_list_ptr->ptr + shm_varpos);
 	shm_data = &shm_var->mem;
 	
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if (php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash TSRMLS_CC) != 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable data in shared memory is corrupted");
+	if (php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash) != 1) {
+		php_error_docref(NULL, E_WARNING, "variable data in shared memory is corrupted");
 		RETVAL_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
@@ -322,7 +322,7 @@ PHP_FUNCTION(shm_has_var)
 	zend_long shm_key;
 	sysvshm_shm *shm_list_ptr;
 	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &shm_id, &shm_key)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
 		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
@@ -338,7 +338,7 @@ PHP_FUNCTION(shm_remove_var)
 	zend_long shm_key, shm_varpos;
 	sysvshm_shm *shm_list_ptr;
 	
-	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &shm_id, &shm_key)) {
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
 		return;
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
@@ -346,7 +346,7 @@ PHP_FUNCTION(shm_remove_var)
 	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
 
 	if (shm_varpos < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "variable key %pd doesn't exist", shm_key);
+		php_error_docref(NULL, E_WARNING, "variable key %pd doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
 	php_remove_shm_data((shm_list_ptr->ptr), shm_varpos);

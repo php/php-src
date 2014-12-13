@@ -91,8 +91,8 @@ struct _zend_module_entry {
 #else
 	void* globals_ptr;
 #endif
-	void (*globals_ctor)(void *global TSRMLS_DC);
-	void (*globals_dtor)(void *global TSRMLS_DC);
+	void (*globals_ctor)(void *global);
+	void (*globals_dtor)(void *global);
 	int (*post_deactivate_func)(void);
 	int module_started;
 	unsigned char type;
@@ -125,8 +125,8 @@ struct _zend_module_dep {
 extern ZEND_API HashTable module_registry;
 
 void module_destructor(zend_module_entry *module);
-int module_registry_request_startup(zend_module_entry *module TSRMLS_DC);
-int module_registry_unload_temp(const zend_module_entry *module TSRMLS_DC);
+int module_registry_request_startup(zend_module_entry *module);
+int module_registry_unload_temp(const zend_module_entry *module);
 
 #endif
 

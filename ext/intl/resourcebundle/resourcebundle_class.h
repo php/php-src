@@ -43,14 +43,14 @@ static inline ResourceBundle_object *php_intl_resourcebundle_fetch_object(zend_o
 	INTL_METHOD_FETCH_OBJECT(INTL_RESOURCEBUNDLE, rb);					\
 	if (RESOURCEBUNDLE_OBJECT(rb) == NULL) {						\
 		intl_errors_set(&rb->error, U_ILLEGAL_ARGUMENT_ERROR,		\
-				"Found unconstructed ResourceBundle", 0 TSRMLS_CC);	\
+				"Found unconstructed ResourceBundle", 0);	\
 		RETURN_FALSE;												\
 	}
 
 
 #define RESOURCEBUNDLE_OBJECT(rb)			(rb)->me
 
-void resourcebundle_register_class( TSRMLS_D );
+void resourcebundle_register_class( void );
 extern zend_class_entry *ResourceBundle_ce_ptr;
 
 PHP_FUNCTION( resourcebundle_create );

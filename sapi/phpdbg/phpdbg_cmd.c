@@ -44,7 +44,7 @@ static inline const char *phpdbg_command_name(const phpdbg_command_t *command, c
 	return buffer;
 }
 
-PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param) /* {{{ */
 {
 	switch (param->type) {
 		case STACK_PARAM:
@@ -70,7 +70,7 @@ PHPDBG_API const char *phpdbg_get_param_type(const phpdbg_param_t *param TSRMLS_
 	}
 }
 
-PHPDBG_API void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_clear_param(phpdbg_param_t *param) /* {{{ */
 {
 	if (param) {
 		switch (param->type) {
@@ -91,7 +91,7 @@ PHPDBG_API void phpdbg_clear_param(phpdbg_param_t *param TSRMLS_DC) /* {{{ */
 
 } /* }}} */
 
-PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer TSRMLS_DC) /* {{{ */
+PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **pointer) /* {{{ */
 {
 	switch (param->type) {
 		case STR_PARAM:
@@ -133,7 +133,7 @@ PHPDBG_API char* phpdbg_param_tostring(const phpdbg_param_t *param, char **point
 	return *pointer;
 } /* }}} */
 
-PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* dest TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* dest) /* {{{ */
 {
 	switch ((dest->type = src->type)) {
 		case STACK_PARAM:
@@ -191,7 +191,7 @@ PHPDBG_API void phpdbg_copy_param(const phpdbg_param_t* src, phpdbg_param_t* des
 	}
 } /* }}} */
 
-PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param) /* {{{ */
 {
 	zend_ulong hash = param->type;
 
@@ -246,7 +246,7 @@ PHPDBG_API zend_ulong phpdbg_hash_param(const phpdbg_param_t *param TSRMLS_DC) /
 	return hash;
 } /* }}} */
 
-PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_param_t *r TSRMLS_DC) /* {{{ */
+PHPDBG_API zend_bool phpdbg_match_param(const phpdbg_param_t *l, const phpdbg_param_t *r) /* {{{ */
 {
 	if (l && r) {
 		if (l->type == r->type) {
@@ -446,7 +446,7 @@ PHPDBG_API void phpdbg_stack_push(phpdbg_param_t *stack, phpdbg_param_t *param) 
 	stack->len++;
 } /* }}} */
 
-PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack TSRMLS_DC) {
+PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param_t **stack) {
 	if (command) {
 		char buffer[128] = {0,};
 		const phpdbg_param_t *top = (stack != NULL) ? *stack : NULL;
@@ -492,7 +492,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 	phpdbg_error("command", "type=\"wrongarg\" command=\"%s\" expected=\"%s\" got=\"%s\" num=\"%lu\"", "The command \"%s\" expected %s and got %s at parameter %lu", \
 		phpdbg_command_name(command, buffer), \
 		(e),\
-		phpdbg_get_param_type((a) TSRMLS_CC), \
+		phpdbg_get_param_type((a)), \
 		current); \
 	return FAILURE; \
 }
@@ -544,7 +544,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 }
 
 /* {{{ */
-PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top TSRMLS_DC) {
+PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *commands, const phpdbg_command_t *parent, phpdbg_param_t **top) {
 	const phpdbg_command_t *command = commands;
 	phpdbg_param_t *name = *top;
 	const phpdbg_command_t *matched[3] = {NULL, NULL, NULL};
@@ -628,7 +628,7 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 	}
 
 	if (command->subs && (*top) && ((*top)->type == STR_PARAM)) {
-		return phpdbg_stack_resolve(command->subs, command, top TSRMLS_CC);
+		return phpdbg_stack_resolve(command->subs, command, top);
 	} else {
 		return command;
 	}
@@ -637,7 +637,7 @@ PHPDBG_API const phpdbg_command_t *phpdbg_stack_resolve(const phpdbg_command_t *
 } /* }}} */
 
 /* {{{ */
-PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe TSRMLS_DC) {
+PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async_unsafe) {
 	phpdbg_param_t *top = NULL;
 	const phpdbg_command_t *handler = NULL;
 
@@ -655,29 +655,29 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async
 
 	switch (top->type) {
 		case EVAL_PARAM:
-			phpdbg_activate_err_buf(0 TSRMLS_CC);
-			phpdbg_free_err_buf(TSRMLS_C);
-			return PHPDBG_COMMAND_HANDLER(ev)(top TSRMLS_CC);
+			phpdbg_activate_err_buf(0);
+			phpdbg_free_err_buf();
+			return PHPDBG_COMMAND_HANDLER(ev)(top);
 
 		case RUN_PARAM:
 			if (!allow_async_unsafe) {
 				phpdbg_error("signalsegv", "command=\"run\"", "run command is disallowed during hard interrupt");
 			}
-			phpdbg_activate_err_buf(0 TSRMLS_CC);
-			phpdbg_free_err_buf(TSRMLS_C);
-			return PHPDBG_COMMAND_HANDLER(run)(top TSRMLS_CC);
+			phpdbg_activate_err_buf(0);
+			phpdbg_free_err_buf();
+			return PHPDBG_COMMAND_HANDLER(run)(top);
 
 		case SHELL_PARAM:
 			if (!allow_async_unsafe) {
 				phpdbg_error("signalsegv", "command=\"sh\"", "sh command is disallowed during hard interrupt");
 				return FAILURE;
 			}
-			phpdbg_activate_err_buf(0 TSRMLS_CC);
-			phpdbg_free_err_buf(TSRMLS_C);
-			return PHPDBG_COMMAND_HANDLER(sh)(top TSRMLS_CC);
+			phpdbg_activate_err_buf(0);
+			phpdbg_free_err_buf();
+			return PHPDBG_COMMAND_HANDLER(sh)(top);
 
 		case STR_PARAM: {
-			handler = phpdbg_stack_resolve(phpdbg_prompt_commands, NULL, &top TSRMLS_CC);
+			handler = phpdbg_stack_resolve(phpdbg_prompt_commands, NULL, &top);
 
 			if (handler) {
 				if (!allow_async_unsafe && !(handler->flags & PHPDBG_ASYNC_SAFE)) {
@@ -685,10 +685,10 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async
 					return FAILURE;
 				}
 
-				if (phpdbg_stack_verify(handler, &top TSRMLS_CC) == SUCCESS) {
-					phpdbg_activate_err_buf(0 TSRMLS_CC);
-					phpdbg_free_err_buf(TSRMLS_C);
-					return handler->handler(top TSRMLS_CC);
+				if (phpdbg_stack_verify(handler, &top) == SUCCESS) {
+					phpdbg_activate_err_buf(0);
+					phpdbg_free_err_buf();
+					return handler->handler(top);
 				}
 			}
 		} return FAILURE;
@@ -701,14 +701,14 @@ PHPDBG_API int phpdbg_stack_execute(phpdbg_param_t *stack, zend_bool allow_async
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_API char *phpdbg_read_input(char *buffered TSRMLS_DC) /* {{{ */
+PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 {
 	char buf[PHPDBG_MAX_CMD];
 	char *cmd = NULL;
 	char *buffer = NULL;
 
 	if ((PHPDBG_G(flags) & (PHPDBG_IS_STOPPING | PHPDBG_IS_RUNNING)) != PHPDBG_IS_STOPPING) {
-		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && (buffered == NULL) && !phpdbg_active_sigsafe_mem(TSRMLS_C)) {
+		if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) && (buffered == NULL) && !phpdbg_active_sigsafe_mem()) {
 			fflush(PHPDBG_G(io)[PHPDBG_STDOUT].ptr);
 		}
 
@@ -720,12 +720,12 @@ readline:
 			if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE)
 #endif
 			{
-				phpdbg_write("prompt", "", "%s", phpdbg_get_prompt(TSRMLS_C));
-				phpdbg_consume_stdin_line(cmd = buf TSRMLS_CC);
+				phpdbg_write("prompt", "", "%s", phpdbg_get_prompt());
+				phpdbg_consume_stdin_line(cmd = buf);
 			}
 #if USE_LIB_STAR
 			else {
-				cmd = readline(phpdbg_get_prompt(TSRMLS_C));
+				cmd = readline(phpdbg_get_prompt());
 				PHPDBG_G(last_was_newline) = 1;
 			}
 
@@ -774,19 +774,19 @@ readline:
 	return buffer;
 } /* }}} */
 
-PHPDBG_API void phpdbg_destroy_input(char **input TSRMLS_DC) /*{{{ */
+PHPDBG_API void phpdbg_destroy_input(char **input) /*{{{ */
 {
 	efree(*input);
 } /* }}} */
 
-PHPDBG_API int phpdbg_ask_user_permission(const char *question TSRMLS_DC) {
+PHPDBG_API int phpdbg_ask_user_permission(const char *question) {
 	if (!(PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {
 		char buf[PHPDBG_MAX_CMD];
 		phpdbg_out("%s", question);
 		phpdbg_out(" (type y or n): ");
 
 		while (1) {
-			phpdbg_consume_stdin_line(buf TSRMLS_CC);
+			phpdbg_consume_stdin_line(buf);
 			if (buf[1] == '\n' && (buf[0] == 'y' || buf[0] == 'n')) {
 				if (buf[0] == 'y') {
 					return SUCCESS;

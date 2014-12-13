@@ -79,11 +79,11 @@ typedef struct {
 
 extern pdo_driver_t pdo_pgsql_driver;
 
-extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *msg, const char *file, int line TSRMLS_DC);
-#define pdo_pgsql_error(d,e,z)	_pdo_pgsql_error(d, NULL, e, z, NULL, __FILE__, __LINE__ TSRMLS_CC)
-#define pdo_pgsql_error_msg(d,e,m)	_pdo_pgsql_error(d, NULL, e, NULL, m, __FILE__, __LINE__ TSRMLS_CC)
-#define pdo_pgsql_error_stmt(s,e,z)	_pdo_pgsql_error(s->dbh, s, e, z, NULL, __FILE__, __LINE__ TSRMLS_CC)
-#define pdo_pgsql_error_stmt_msg(s,e,m)	_pdo_pgsql_error(s->dbh, s, e, NULL, m, __FILE__, __LINE__ TSRMLS_CC)
+extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *msg, const char *file, int line);
+#define pdo_pgsql_error(d,e,z)	_pdo_pgsql_error(d, NULL, e, z, NULL, __FILE__, __LINE__)
+#define pdo_pgsql_error_msg(d,e,m)	_pdo_pgsql_error(d, NULL, e, NULL, m, __FILE__, __LINE__)
+#define pdo_pgsql_error_stmt(s,e,z)	_pdo_pgsql_error(s->dbh, s, e, z, NULL, __FILE__, __LINE__)
+#define pdo_pgsql_error_stmt_msg(s,e,m)	_pdo_pgsql_error(s->dbh, s, e, NULL, m, __FILE__, __LINE__)
 
 extern struct pdo_stmt_methods pgsql_stmt_methods;
 
@@ -109,7 +109,7 @@ enum pdo_pgsql_specific_constants {
 	PGSQL_TRANSACTION_UNKNOWN = PQTRANS_UNKNOWN
 };
 
-php_stream *pdo_pgsql_create_lob_stream(zval *pdh, int lfd, Oid oid TSRMLS_DC);
+php_stream *pdo_pgsql_create_lob_stream(zval *pdh, int lfd, Oid oid);
 extern php_stream_ops pdo_pgsql_lob_stream_ops;
 
 #endif /* PHP_PDO_PGSQL_INT_H */
