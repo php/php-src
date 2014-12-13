@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015 PHP 5.4.40
 
+- GD:
+  . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (Remi)
+
 - SOAP:
   . Fixed bug #69152 (Type Confusion Infoleak Vulnerability in unserialize()
     with SoapFault). (Dmitry)
