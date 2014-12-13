@@ -1,5 +1,7 @@
 --TEST--
 Test str_pad() function : usage variations - unexpected inputs for '$pad_type' argument
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : string str_pad  ( string $input  , int $pad_length  [, string $pad_string  [, int $pad_type  ]] )

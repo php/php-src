@@ -436,7 +436,7 @@ static const zend_function_entry closure_functions[] = {
 	ZEND_ME(Closure, bind, arginfo_closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_MALIAS(Closure, bindTo, bind, arginfo_closure_bindto, ZEND_ACC_PUBLIC)
 	ZEND_ME(Closure, call, arginfo_closure_call, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	ZEND_FE_END
 };
 
 void zend_register_closure_ce(TSRMLS_D) /* {{{ */
@@ -445,7 +445,7 @@ void zend_register_closure_ce(TSRMLS_D) /* {{{ */
 
 	INIT_CLASS_ENTRY(ce, "Closure", closure_functions);
 	zend_ce_closure = zend_register_internal_class(&ce TSRMLS_CC);
-	zend_ce_closure->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	zend_ce_closure->ce_flags |= ZEND_ACC_FINAL;
 	zend_ce_closure->create_object = zend_closure_new;
 	zend_ce_closure->serialize = zend_class_serialize_deny;
 	zend_ce_closure->unserialize = zend_class_unserialize_deny;

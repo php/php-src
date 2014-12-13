@@ -89,6 +89,13 @@ ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_l
 
 END_EXTERN_C()
 
+#if SIZEOF_ZEND_LONG == 4
+#	define ZEND_DOUBLE_FITS_LONG(d) (!((d) > ZEND_LONG_MAX || (d) < ZEND_LONG_MIN))
+#else
+	/* >= as (double)ZEND_LONG_MAX is outside signed range */
+#	define ZEND_DOUBLE_FITS_LONG(d) (!((d) >= ZEND_LONG_MAX || (d) < ZEND_LONG_MIN))
+#endif
+
 #if ZEND_DVAL_TO_LVAL_CAST_OK
 static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
@@ -103,7 +110,7 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
 	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
 		return 0;
-	} else if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
+	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
 		double	two_pow_32 = pow(2., 32.),
 				dmod;
 
@@ -122,8 +129,7 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 {
 	if (UNEXPECTED(!zend_finite(d)) || UNEXPECTED(zend_isnan(d))) {
 		return 0;
-	/* >= as (double)ZEND_LONG_MAX is outside signed range */
-	} else if (d >= ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
+	} else if (!ZEND_DOUBLE_FITS_LONG(d)) {
 		double	two_pow_64 = pow(2., 64.),
 				dmod;
 

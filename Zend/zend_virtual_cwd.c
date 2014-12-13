@@ -620,7 +620,7 @@ static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {
 
 CWD_API void realpath_cache_clean(TSRMLS_D) /* {{{ */
 {
-	int i;
+	uint32_t i;
 
 	for (i = 0; i < sizeof(CWDG(realpath_cache))/sizeof(CWDG(realpath_cache)[0]); i++) {
 		realpath_cache_bucket *p = CWDG(realpath_cache)[i];

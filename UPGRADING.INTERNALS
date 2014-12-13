@@ -13,6 +13,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   l. get_class_name object handler info
   m. Other portable macros info
   n. ZEND_ENGINE_2 removal
+  o. Updated final class modifier
 
 2. Build system changes
   a. Unix build system changes
@@ -123,6 +124,9 @@ PHP 7.0 INTERNALS UPGRADE NOTES
      ZEND_NORETURN is defined as __declspec(noreturn) on VS
 
   n. The ZEND_ENGINE_2 macro has been removed. A ZEND_ENGINE_3 macro has been added.
+  
+  o. Removed ZEND_ACC_FINAL_CLASS in favour of ZEND_ACC_FINAL, turning final class
+     modifier now a different class entry flag. Update your extensions.
 
 ========================
 2. Build system changes

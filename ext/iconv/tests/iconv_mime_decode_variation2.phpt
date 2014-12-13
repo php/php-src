@@ -2,6 +2,7 @@
 Test iconv_mime_decode() function : usage variations - Pass different data types to mode arg
 --SKIPIF--
 <?php
+PHP_INT_SIZE == 4 or die('skip');
 extension_loaded('iconv') or die('skip');
 function_exists('iconv_mime_decode') or die("skip iconv_mime_decode() is not available in this build");
 ?>
@@ -126,7 +127,9 @@ string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
 
 -- Iteration 7 --
-string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"
+
+Warning: iconv_mime_decode() expects parameter 2 to be long, double given in %s on line %d
+string(0) ""
 
 -- Iteration 8 --
 string(52) "5375626a6563743a205072c3bc66756e67205072c3bc66756e67"

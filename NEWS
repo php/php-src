@@ -22,6 +22,10 @@ PHP                                                                        NEWS
     classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
   . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
+  . Fixed bug #65576 (Constructor from trait conflicts with inherited
+    constructor). (dunglas at gmail dot com)
+  . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class 
+    modifier. (Guilherme Blanco)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
@@ -81,6 +85,10 @@ PHP                                                                        NEWS
   . Fix user session handlers (See rfc:session.user.return-value). (Sara)
   . Added intdiv() function. (Andrea)
   . Improved precision of log() function for base 2 and 10. (Marc Bennewitz)
+
+- Streams:
+  . Fixed bug #68532 (convert.base64-encode omits padding bytes).
+    (blaesius at krumedia dot de)
 
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)

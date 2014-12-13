@@ -1,5 +1,7 @@
 --TEST--
 Test strcspn() function : usage variations - unexpected values of len argument
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : proto int strcspn(string str, string mask [, int start [, int len]])

@@ -124,12 +124,9 @@ array(2) {
   int(100)
 }
 -- Iteration 3 --
-array(2) {
-  [-1097262584]=>
-  int(100)
-  [0]=>
-  int(100)
-}
+
+Warning: array_fill() expects parameter 1 to be long, double given in /Users/ajf/Projects/2014/PHP/php-src/ext/standard/tests/array/array_fill_variation1.php on line 92
+NULL
 -- Iteration 4 --
 array(2) {
   [0]=>

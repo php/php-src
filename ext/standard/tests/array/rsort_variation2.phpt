@@ -1,5 +1,7 @@
 --TEST--
 Test rsort() function : usage variations - Pass different data types as $sort_flags arg
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])

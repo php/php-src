@@ -431,7 +431,7 @@ class_declaration_statement:
 class_type:
 		T_CLASS				{ $$ = 0; }
 	|	T_ABSTRACT T_CLASS	{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
-	|	T_FINAL T_CLASS		{ $$ = ZEND_ACC_FINAL_CLASS; }
+	|	T_FINAL T_CLASS		{ $$ = ZEND_ACC_FINAL; }
 	|	T_TRAIT				{ $$ = ZEND_ACC_TRAIT; }
 ;
 

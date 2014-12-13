@@ -591,7 +591,7 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 }
 /* }}} */
 
-static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_property_info *parent_info, zend_string *key, zend_class_entry *ce TSRMLS_DC) /* {{{ */
+static zend_bool do_inherit_property_access_check(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *child_info;
 	zend_class_entry *parent_ce = ce->parent;
@@ -727,7 +727,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ce->name->val, parent_ce->name->val);
 	}
-	if (parent_ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
+	if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ce->name->val, parent_ce->name->val);
 	}
 
@@ -831,7 +831,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->properties_info, key, property_info) {
-		if (do_inherit_property_access_check(&ce->properties_info, property_info, key, ce TSRMLS_CC)) {
+		if (do_inherit_property_access_check(property_info, key, ce TSRMLS_CC)) {
 			if (ce->type & ZEND_INTERNAL_CLASS) {
 				property_info = zend_duplicate_property_info_internal(property_info);
 			} else {
@@ -992,7 +992,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 	if (!strncmp(mname->val, ZEND_CLONE_FUNC_NAME, mname->len)) {
 		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
 	} else if (!strncmp(mname->val, ZEND_CONSTRUCTOR_FUNC_NAME, mname->len)) {
-		if (ce->constructor) {
+		if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name->val);
 		}
 		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR;
@@ -1019,7 +1019,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		zend_str_tolower_copy(lowercase_name->val, ce->name->val, ce->name->len);
 		lowercase_name = zend_new_interned_string(lowercase_name TSRMLS_CC);
 		if (!memcmp(mname->val, lowercase_name->val, mname->len)) {
-			if (ce->constructor) {
+			if (ce->constructor  && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name->val);
 			}
 			ce->constructor = fe;

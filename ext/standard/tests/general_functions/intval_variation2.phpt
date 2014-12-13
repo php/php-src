@@ -1,5 +1,7 @@
 --TEST--
 Test intval() function : usage variation 
+--SKIPIF--
+<?php if (PHP_INT_SIZE !== 4) die("skip this test is for 32-bit only");
 --FILE--
 <?php
 /* Prototype  : int intval(mixed var [, int base])
@@ -113,10 +115,12 @@ int(1)
 int(1)
 
 --float 12.3456789000e10--
-int(1)
+Error: 2 - intval() expects parameter 2 to be long, double given, %s(%d)
+NULL
 
 --float -12.3456789000e10--
-int(1)
+Error: 2 - intval() expects parameter 2 to be long, double given, %s(%d)
+NULL
 
 --float .5--
 int(1)

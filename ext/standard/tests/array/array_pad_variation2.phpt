@@ -1,5 +1,7 @@
 --TEST--
 Test array_pad() function : usage variations - unexpected values for 'pad_size' argument(Bug#43482)
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : array array_pad(array $input, int $pad_size, mixed $pad_value)

@@ -628,7 +628,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_declare_property_null(ce, "embedded", 			sizeof("embedded") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(ce, "reconnect",			sizeof("reconnect") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
 	zend_declare_property_null(ce, "report_mode", 		sizeof("report_mode") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);
-	ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	ce->ce_flags |= ZEND_ACC_FINAL;
 	zend_hash_add_ptr(&classes, ce->name, &mysqli_driver_properties);
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli", mysqli_link_class_entry, mysqli_link_methods);
@@ -658,7 +658,7 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_warning", mysqli_warning_class_entry, mysqli_warning_methods);
 	ce = mysqli_warning_class_entry;
-	ce->ce_flags |= ZEND_ACC_FINAL_CLASS | ZEND_ACC_PROTECTED;
+	ce->ce_flags |= ZEND_ACC_FINAL;
 	zend_hash_init(&mysqli_warning_properties, 0, NULL, free_prop_handler, 1);
 	MYSQLI_ADD_PROPERTIES(&mysqli_warning_properties, mysqli_warning_property_entries);
 	zend_declare_property_null(ce, "message", 	sizeof("message") - 1, ZEND_ACC_PUBLIC TSRMLS_CC);

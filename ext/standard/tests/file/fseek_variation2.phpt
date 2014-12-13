@@ -2,6 +2,8 @@
 Test fseek() function : usage variations  - different types for whence
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : proto int fseek(resource fp, int offset [, int whence])

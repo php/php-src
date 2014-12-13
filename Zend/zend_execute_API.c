@@ -218,7 +218,7 @@ void shutdown_destructors(TSRMLS_D) /* {{{ */
 		EG(symbol_table).ht.pDestructor = zend_unclean_zval_ptr_dtor;
 	}
 	zend_try {
-		int symbols;
+		uint32_t symbols;
 		do {
 			symbols = zend_hash_num_elements(&EG(symbol_table).ht);
 			zend_hash_reverse_apply(&EG(symbol_table).ht, (apply_func_t) zval_call_destructor TSRMLS_CC);
@@ -1542,7 +1542,7 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force TSRMLS
 }
 /* }}} */
 
-ZEND_API int zend_set_local_var_str(const char *name, int len, zval *value, int force TSRMLS_DC) /* {{{ */
+ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, int force TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 
