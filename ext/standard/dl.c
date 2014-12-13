@@ -242,7 +242,7 @@ PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
 
 PHP_MINFO_FUNCTION(dl)
 {
-	PUTS("Dynamic Library support not available<br />.\n");
+	PUTS("Dynamic Library support not available<br>.\n");
 }
 
 #endif

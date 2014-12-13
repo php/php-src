@@ -14,7 +14,7 @@ Test wordwrap() function : usage variations  - unexpected values for str argumen
 echo "*** Testing wordwrap() : usage variations ***\n";
 // initialize all required variables
 $width = 3;
-$break = '<br />\n';
+$break = '<br>\n';
 $cut = true;
 
 // resource variable
@@ -123,37 +123,37 @@ string(5) "12345"
 string(5) "12345"
 string(5) "12345"
 string(5) "12345"
-string(13) "123<br />\n45"
+string(%d) "123<br>\n45"
 -- Iteration 4 --
 string(5) "-2345"
 string(5) "-2345"
 string(5) "-2345"
 string(5) "-2345"
-string(13) "-23<br />\n45"
+string(%d) "-23<br>\n45"
 -- Iteration 5 --
 string(4) "10.5"
 string(4) "10.5"
 string(4) "10.5"
 string(4) "10.5"
-string(12) "10.<br />\n5"
+string(%d) "10.<br>\n5"
 -- Iteration 6 --
 string(5) "-10.5"
 string(5) "-10.5"
 string(5) "-10.5"
 string(5) "-10.5"
-string(13) "-10<br />\n.5"
+string(%d) "-10<br>\n.5"
 -- Iteration 7 --
 string(12) "101234567000"
 string(12) "101234567000"
 string(12) "101234567000"
 string(12) "101234567000"
-string(36) "101<br />\n234<br />\n567<br />\n000"
+string(%d) "101<br>\n234<br>\n567<br>\n000"
 -- Iteration 8 --
 string(13) "1.07654321E-9"
 string(13) "1.07654321E-9"
 string(13) "1.07654321E-9"
 string(13) "1.07654321E-9"
-string(45) "1.0<br />\n765<br />\n432<br />\n1E-<br />\n9"
+string(%d) "1.0<br>\n765<br>\n432<br>\n1E-<br>\n9"
 -- Iteration 9 --
 string(3) "0.5"
 string(3) "0.5"

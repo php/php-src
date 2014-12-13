@@ -360,7 +360,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 					SysFreeString(e.bstrDescription);
 				}
 				if (PG(html_errors)) {
-					spprintf(&msg, 0, "<b>Source:</b> %s<br/><b>Description:</b> %s",
+					spprintf(&msg, 0, "<b>Source:</b> %s<br><b>Description:</b> %s",
 						source ? source : "Unknown",
 						desc ? desc : "Unknown");
 				} else {
