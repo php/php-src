@@ -30,6 +30,9 @@ PHP                                                                        NEWS
 - FPM:
   . Fix request #68526 (Implement POSIX Access Control List for UDS). (Remi)
 
+- GD:
+  . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (Jan Bee, Remi)
+
 - mbstring:
   . Fixed bug #68504 (--with-libmbfl configure option not present on Windows).
     (Ashesh Vashi)
