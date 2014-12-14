@@ -28,6 +28,7 @@
     modifier. (Guilherme Blanco)
   . is_long() & is_integer() is now an alias of is_int(). (Kalle)
   . Implemented FR #55467 (phpinfo: PHP Variables with $ and single quotes). (Kalle)
+  . Fixed bug #55415 (php_info produces invalid anchor names). (Kalle, Johannes)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
