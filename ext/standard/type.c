@@ -271,10 +271,10 @@ PHP_FUNCTION(is_bool)
 }
 /* }}} */
 
-/* {{{ proto bool is_integer(mixed var)
+/* {{{ proto bool is_int(mixed var)
    Returns true if variable is an integer
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
-PHP_FUNCTION(is_integer)
+PHP_FUNCTION(is_int)
 {
 	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
 }
