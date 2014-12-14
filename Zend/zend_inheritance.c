@@ -283,25 +283,40 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 
 		if (fe_arg_info->class_name) {
 			zend_string *fe_class_name, *proto_class_name;
+			const char *class_name;
 
-			if (!strcasecmp(fe_arg_info->class_name, "parent") && proto->common.scope) {
-				fe_class_name = zend_string_copy(proto->common.scope->name);
-			} else if (!strcasecmp(fe_arg_info->class_name, "self") && fe->common.scope) {
-				fe_class_name = zend_string_copy(fe->common.scope->name);
+			if (fe->type == ZEND_INTERNAL_FUNCTION) {				
+				fe_class_name = NULL;
+				class_name = ((zend_internal_arg_info*)fe_arg_info)->class_name;
 			} else {
-				fe_class_name = zend_string_init(
-					fe_arg_info->class_name,
-					fe_arg_info->class_name_len, 0);
+				fe_class_name = fe_arg_info->class_name;
+				class_name = fe_arg_info->class_name->val;
+			}
+			if (!strcasecmp(class_name, "parent") && proto->common.scope) {
+				fe_class_name = zend_string_copy(proto->common.scope->name);
+			} else if (!strcasecmp(class_name, "self") && fe->common.scope) {
+				fe_class_name = zend_string_copy(fe->common.scope->name);
+			} else if (fe_class_name) {
+				zend_string_addref(fe_class_name);
+			} else {
+				fe_class_name = zend_string_init(class_name, strlen(class_name), 0);
 			}
 
-			if (!strcasecmp(proto_arg_info->class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
-				proto_class_name = zend_string_copy(proto->common.scope->parent->name);
-			} else if (!strcasecmp(proto_arg_info->class_name, "self") && proto->common.scope) {
-				proto_class_name = zend_string_copy(proto->common.scope->name);
+			if (proto->type == ZEND_INTERNAL_FUNCTION) {				
+				proto_class_name = NULL;
+				class_name = ((zend_internal_arg_info*)proto_arg_info)->class_name;
 			} else {
-				proto_class_name = zend_string_init(
-					proto_arg_info->class_name,
-					proto_arg_info->class_name_len, 0);
+				proto_class_name = proto_arg_info->class_name;
+				class_name = proto_arg_info->class_name->val;
+			}
+			if (!strcasecmp(class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
+				proto_class_name = zend_string_copy(proto->common.scope->parent->name);
+			} else if (!strcasecmp(class_name, "self") && proto->common.scope) {
+				proto_class_name = zend_string_copy(proto->common.scope->name);
+			} else if (proto_class_name) {
+				zend_string_addref(proto_class_name);
+			} else {
+				proto_class_name = zend_string_init(class_name, strlen(class_name), 0);
 			}
 
 			if (strcasecmp(fe_class_name->val, proto_class_name->val)!=0) {
@@ -373,15 +388,21 @@ static zend_string *zend_get_function_declaration(zend_function *fptr TSRMLS_DC)
 			if (arg_info->class_name) {
 				const char *class_name;
 				size_t class_name_len;
-				if (!strcasecmp(arg_info->class_name, "self") && fptr->common.scope) {
+
+				if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+					class_name = ((zend_internal_arg_info*)arg_info)->class_name;
+					class_name_len = strlen(class_name);
+				} else {
+					class_name = arg_info->class_name->val;
+					class_name_len = arg_info->class_name->len;
+				}
+
+				if (!strcasecmp(class_name, "self") && fptr->common.scope) {
 					class_name = fptr->common.scope->name->val;
 					class_name_len = fptr->common.scope->name->len;
-				} else if (!strcasecmp(arg_info->class_name, "parent") && fptr->common.scope->parent) {
+				} else if (!strcasecmp(class_name, "parent") && fptr->common.scope->parent) {
 					class_name = fptr->common.scope->parent->name->val;
 					class_name_len = fptr->common.scope->parent->name->len;
-				} else {
-					class_name = arg_info->class_name;
-					class_name_len = arg_info->class_name_len;
 				}
 
 				smart_str_appendl(&str, class_name, class_name_len);
@@ -403,7 +424,11 @@ static zend_string *zend_get_function_declaration(zend_function *fptr TSRMLS_DC)
 			smart_str_appendc(&str, '$');
 
 			if (arg_info->name) {
-				smart_str_appendl(&str, arg_info->name, arg_info->name_len);
+				if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+					smart_str_appends(&str, ((zend_internal_arg_info*)arg_info)->name);
+				} else {
+					smart_str_appendl(&str, arg_info->name->val, arg_info->name->len);
+				}
 			} else {
 				smart_str_appends(&str, "param");
 				smart_str_append_unsigned(&str, i);
@@ -429,7 +454,7 @@ static zend_string *zend_get_function_declaration(zend_function *fptr TSRMLS_DC)
 						}
 					}
 					if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
-						zval *zv = precv->op2.zv;
+						zval *zv = RT_CONSTANT(&fptr->op_array, precv->op2);
 
 						if (Z_TYPE_P(zv) == IS_CONSTANT) {
 							smart_str_append(&str, Z_STR_P(zv));
@@ -566,7 +591,7 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 }
 /* }}} */
 
-static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_property_info *parent_info, zend_string *key, zend_class_entry *ce TSRMLS_DC) /* {{{ */
+static zend_bool do_inherit_property_access_check(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *child_info;
 	zend_class_entry *parent_ce = ce->parent;
@@ -702,7 +727,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ce->name->val, parent_ce->name->val);
 	}
-	if (parent_ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
+	if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ce->name->val, parent_ce->name->val);
 	}
 
@@ -806,7 +831,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->properties_info, key, property_info) {
-		if (do_inherit_property_access_check(&ce->properties_info, property_info, key, ce TSRMLS_CC)) {
+		if (do_inherit_property_access_check(property_info, key, ce TSRMLS_CC)) {
 			if (ce->type & ZEND_INTERNAL_CLASS) {
 				property_info = zend_duplicate_property_info_internal(property_info);
 			} else {
@@ -967,7 +992,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 	if (!strncmp(mname->val, ZEND_CLONE_FUNC_NAME, mname->len)) {
 		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
 	} else if (!strncmp(mname->val, ZEND_CONSTRUCTOR_FUNC_NAME, mname->len)) {
-		if (ce->constructor) {
+		if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name->val);
 		}
 		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR;
@@ -994,7 +1019,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		zend_str_tolower_copy(lowercase_name->val, ce->name->val, ce->name->len);
 		lowercase_name = zend_new_interned_string(lowercase_name TSRMLS_CC);
 		if (!memcmp(mname->val, lowercase_name->val, mname->len)) {
-			if (ce->constructor) {
+			if (ce->constructor  && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name->val);
 			}
 			ce->constructor = fe;
@@ -1206,7 +1231,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 				}
 				zend_check_trait_usage(ce, cur_precedence->trait_method->ce TSRMLS_CC);
 
-				/** Ensure that the prefered method is actually available. */
+				/** Ensure that the preferred method is actually available. */
 				lcname = zend_string_alloc(cur_method_ref->method_name->len, 0);
 				zend_str_tolower_copy(lcname->val, 
 					cur_method_ref->method_name->val,
@@ -1238,7 +1263,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 
 					/* make sure that the trait method is not from a class mentioned in
 					 exclude_from_classes, for consistency */
-					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[i].ce) {
+					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[j].ce) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 								   "Inconsistent insteadof definition. "
 								   "The method %s is to be used from %s, but %s is also on the exclude list",
@@ -1507,7 +1532,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce 
 										 lc_method_name)) {
 						zend_string_free(lc_method_name);
 						zend_error_noreturn(E_COMPILE_ERROR,
-								   "The modifiers for the trait alias %s() need to be changed in the same statment in which the alias is defined. Error",
+								   "The modifiers for the trait alias %s() need to be changed in the same statement in which the alias is defined. Error",
 								   cur_alias->trait_method->method_name->val);
 					} else {
 						zend_string_free(lc_method_name);

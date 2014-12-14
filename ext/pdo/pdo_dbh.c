@@ -472,7 +472,7 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 }
 /* }}} */
 
-/* {{{ proto object PDO::prepare(string statment [, array options])
+/* {{{ proto object PDO::prepare(string statement [, array options])
    Prepares a statement for execution and returns a statement object */
 static PHP_METHOD(PDO, prepare)
 {
@@ -1300,7 +1300,7 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind TSRMLS_DC)
 		if (funcs->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)funcs->arg_info;
 
-			ifunc->arg_info = (zend_arg_info*)funcs->arg_info + 1;
+			ifunc->arg_info = (zend_internal_arg_info*)funcs->arg_info + 1;
 			ifunc->num_args = funcs->num_args;
 			if (info->required_num_args == -1) {
 				ifunc->required_num_args = funcs->num_args;

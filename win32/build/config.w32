@@ -3,7 +3,9 @@
 // "Master" config file; think of it as a configure.in
 // equivalent.
 
-ARG_WITH("toolset", "Toolset to use for the compilation, supported: vs, clang, icc", "vs");
+ARG_WITH("toolset", "Toolset to use for the compilation, give: vs, clang, icc. " +
+		"The only recommended and supported toolset for production use " +
+		"is Visual Studio. Use others at your own risk.", "vs");
 toolset_option_handle();
 
 ARG_WITH('cygwin', 'Path to cygwin utilities on your system', '\\cygwin');
@@ -12,31 +14,14 @@ toolset_setup_compiler();
 
 // do we use x64 or 80x86 version of compiler?
 X64 = toolset_is_64();
-if (X64) {
-	STDOUT.WriteLine("  Detected 64-bit compiler");
-} else {
-	STDOUT.WriteLine("  Detected 32-bit compiler");
-}
-AC_DEFINE('ARCHITECTURE', X64 ? 'x64' : 'x86', "Detected compiler architecture");
-DEFINE("PHP_ARCHITECTURE", X64 ? 'x64' : 'x86');
+toolset_setup_arch();
 
 toolset_setup_linker();
 toolset_setup_project_tools();
 
 // stick objects somewhere outside of the source tree
 ARG_ENABLE('object-out-dir', 'Alternate location for binary objects during build', '');
-if (PHP_OBJECT_OUT_DIR.length) {
-	PHP_OBJECT_OUT_DIR = FSO.GetAbsolutePathName(PHP_OBJECT_OUT_DIR);
-	if (!FSO.FolderExists(PHP_OBJECT_OUT_DIR)) {
-		ERROR('you chosen output directory ' + PHP_OBJECT_OUT_DIR + ' does not exist');
-	}
-	PHP_OBJECT_OUT_DIR += '\\';
-} else if (X64) {
-	if (!FSO.FolderExists("x64")) {
-		FSO.CreateFolder("x64");
-	}
-	PHP_OBJECT_OUT_DIR = 'x64\\';
-}
+object_out_dir_option_handle();
 
 ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
 ARG_ENABLE('debug-pack', 'Release binaries with external debug symbols (--enable-debug must not be specified)', 'no');
@@ -91,61 +76,12 @@ if (VS_TOOLSET && VCVERS >= 1500 && PHP_MP != 'disable') {
 toolset_setup_common_ldlags();
 
 // General libs
-// urlmon.lib ole32.lib oleaut32.lib uuid.lib gdi32.lib winspool.lib comdlg32.lib
-DEFINE("LIBS", "kernel32.lib ole32.lib user32.lib advapi32.lib shell32.lib ws2_32.lib Dnsapi.lib");
+toolset_setup_common_libs();
 
 // Set some debug/release specific options
-if (PHP_DEBUG == "yes") {
-	ADD_FLAG("CFLAGS", "/LDd /MDd /W3 /Gm /Od /D _DEBUG /D ZEND_DEBUG=1 " +
-		(X64?"/Zi":"/ZI"));
-	ADD_FLAG("LDFLAGS", "/debug");
-	// Avoid problems when linking to release libraries that use the release
-	// version of the libc
-	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:msvcrt");
-} else {
-	// Generate external debug files when --enable-debug-pack is specified
-	if (PHP_DEBUG_PACK == "yes") {
-		ADD_FLAG("CFLAGS", "/Zi");
-		ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
-	}
-	// Equivalent to Release_TSInline build -> best optimization
-	ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+toolset_setup_build_mode();
 
-	// if you have VS.Net /GS hardens the binary against buffer overruns
-	// ADD_FLAG("CFLAGS", "/GS");
-}
-
-if (PHP_ZTS == "yes") {
-	ADD_FLAG("CFLAGS", "/D ZTS=1");
-	ADD_FLAG("ZTS", "1");
-} else {
-	ADD_FLAG("ZTS", "0");
-}
-
-DEFINE("PHP_ZTS_ARCHIVE_POSTFIX", PHP_ZTS == "yes" ? '' : "-nts");
-
-
-// we want msvcrt in the PHP DLL
-ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
-
-// set up the build dir and DLL name
-if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
-	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug_TS");
-	DEFINE("PHPDLL", "php" + PHP_VERSION + "ts_debug.dll");
-	DEFINE("PHPLIB", "php" + PHP_VERSION + "ts_debug.lib");
-} else if (PHP_DEBUG == "yes" && PHP_ZTS == "no") {
-	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Debug");
-	DEFINE("PHPDLL", "php" + PHP_VERSION + "_debug.dll");
-	DEFINE("PHPLIB", "php" + PHP_VERSION + "_debug.lib");
-} else if (PHP_DEBUG == "no" && PHP_ZTS == "yes") {
-	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release_TS");
-	DEFINE("PHPDLL", "php" + PHP_VERSION + "ts.dll");
-	DEFINE("PHPLIB", "php" + PHP_VERSION + "ts.lib");
-} else if (PHP_DEBUG == "no" && PHP_ZTS == "no") {
-	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release");
-	DEFINE("PHPDLL", "php" + PHP_VERSION + ".dll");
-	DEFINE("PHPLIB", "php" + PHP_VERSION + ".lib");
-}
+setup_zts_stuff();
 
 // CFLAGS, LDFLAGS and BUILD_DIR are defined
 // Add compiler and link flags if PGO options are selected
@@ -161,32 +97,7 @@ else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
 // Find the php_build dir - it contains headers and libraries
 // that we need
 ARG_WITH('php-build', 'Path to where you extracted the development libraries (http://wiki.php.net/internals/windows/libs). Assumes that it is a sibling of this source dir (..\\deps) if not specified', 'no');
-
-if (PHP_PHP_BUILD == 'no') {
-	if (FSO.FolderExists("..\\deps")) {
-		PHP_PHP_BUILD = "..\\deps";
-	} else {
-		if (FSO.FolderExists("..\\php_build")) {
-			PHP_PHP_BUILD = "..\\php_build";
-		} else {
-			if (X64) {
-				if (FSO.FolderExists("..\\win64build")) {
-					PHP_PHP_BUILD = "..\\win64build";
-				} else if (FSO.FolderExists("..\\php-win64-dev\\php_build")) {
-					PHP_PHP_BUILD = "..\\php-win64-dev\\php_build";
-				}
-			} else {
-				if (FSO.FolderExists("..\\win32build")) {
-					PHP_PHP_BUILD = "..\\win32build";
-				} else if (FSO.FolderExists("..\\php-win32-dev\\php_build")) {
-					PHP_PHP_BUILD = "..\\php-win32-dev\\php_build";
-				}
-			}
-		}
-	}
-	PHP_PHP_BUILD = FSO.GetAbsolutePathName(PHP_PHP_BUILD);
-}
-DEFINE("PHP_BUILD", PHP_PHP_BUILD);
+php_build_option_handle();
 
 ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
 ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
@@ -196,46 +107,7 @@ var php_usual_lib_suspects = PHP_PHP_BUILD+"\\lib";
 
 ADD_FLAG("CFLAGS", '/I "' + php_usual_include_suspects + '" ');
 ADD_FLAG("LDFLAGS", '/libpath:"' + php_usual_lib_suspects + '" ');
-
-// Poke around for some headers
-function probe_basic_headers()
-{
-	var p;
-
-	if (PHP_PHP_BUILD != "no") {
-		php_usual_include_suspects += ";" + PHP_PHP_BUILD + "\\include";
-		php_usual_lib_suspects += ";" + PHP_PHP_BUILD + "\\lib";
-	}
-}
-
-function add_extra_dirs()
-{
-	var path, i, f;
-
-	if (PHP_EXTRA_INCLUDES.length) {
-		path = PHP_EXTRA_INCLUDES.split(';');
-		for (i = 0; i < path.length; i++) {
-			f = FSO.GetAbsolutePathName(path[i]);
-			if (FSO.FolderExists(f)) {
-				ADD_FLAG("CFLAGS", '/I "' + f + '" ');
-			}
-		}
-	}
-	if (PHP_EXTRA_LIBS.length) {
-		path = PHP_EXTRA_LIBS.split(';');
-		for (i = 0; i < path.length; i++) {
-			f = FSO.GetAbsolutePathName(path[i]);
-			if (FSO.FolderExists(f)) {
-				if (VS_TOOLSET && VCVERS <= 1200 && f.indexOf(" ") >= 0) {
-					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
-				} else {
-					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
-				}
-			}
-		}
-	}
-
-}
+ADD_FLAG("ARFLAGS", '/nologo /libpath:"' + php_usual_lib_suspects + '" ');
 
 probe_basic_headers();
 add_extra_dirs();
@@ -275,7 +147,7 @@ ADD_SOURCES("win32", "inet.c fnmatch.c sockets.c");
 if (VS_TOOLSET && VCVERS <= 1300) {
 	ADD_SOURCES("win32", "strtoi64.c");
 }
-if (VS_TOOLSET && VCVERS >= 1400 || ICC_TOOLSET) {
+if (VS_TOOLSET && VCVERS >= 1400 || !VS_TOOLSET) {
 	AC_DEFINE('HAVE_STRNLEN', 1);
 }
 
@@ -367,4 +239,15 @@ if (PHP_ANALYZER == "vs") {
 } else {
 	PHP_ANALYZER = "no"
 }
+
+if (CLANG_TOOLSET) {
+	ARG_WITH("uncritical-warn-choke", "Disable some uncritical warnings", "yes");
+	if (PHP_UNCRITICAL_WARN_CHOKE != "no") {
+		ADD_FLAG("CFLAGS", "-Wno-ignored-attributes -Wno-deprecated-declarations -Wno-missing-braces \
+		-Wno-logical-op-parentheses -Wno-msvc-include -Wno-invalid-source-encoding -Wno-unknown-pragmas");
+	}
+}
+
+ARG_WITH("codegen-arch", "Architecture for code generation: ia32, sse, sse2, avx, avx2", "no");
+toolset_setup_codegen_arch();
 

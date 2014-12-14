@@ -304,7 +304,7 @@ static sljit_uw patch_pc_relative_loads(sljit_uw *last_pc_patch, sljit_uw *code_
 	return counter;
 }
 
-/* In some rare ocasions we may need future patches. The probability is close to 0 in practice. */
+/* In some rare occasions we may need future patches. The probability is close to 0 in practice. */
 struct future_patch {
 	struct future_patch* next;
 	sljit_si index;
@@ -1205,7 +1205,7 @@ static sljit_si generate_int(struct sljit_compiler *compiler, sljit_si reg, slji
 	sljit_uw imm2;
 	sljit_si rol;
 
-	/* Step1: Search a zero byte (8 continous zero bit). */
+	/* Step1: Search a zero byte (8 continuous zero bit). */
 	mask = 0xff000000;
 	rol = 8;
 	while(1) {

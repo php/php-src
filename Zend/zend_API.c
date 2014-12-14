@@ -51,7 +51,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
 	TSRMLS_FETCH();
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -87,7 +87,7 @@ ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
 	TSRMLS_FETCH();
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -111,7 +111,7 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array
 	int arg_count;
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -133,7 +133,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 	int arg_count;
 
 	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (param_count>arg_count) {
 		return FAILURE;
@@ -404,14 +404,16 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), p, &d, -1)) == 0) {
 								return "long";
 							} else if (type == IS_DOUBLE) {
-								if (c == 'L') {
-									if (d > ZEND_LONG_MAX) {
-										*p = ZEND_LONG_MAX;
-										break;
-									} else if (d < ZEND_LONG_MIN) {
-										*p = ZEND_LONG_MIN;
-										break;
+								if (zend_isnan(d)) {
+									return "long";
+								}
+								if (!ZEND_DOUBLE_FITS_LONG(d)) {
+									if (c == 'L') {
+										*p = (d > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
+									} else {
+										return "long";
 									}
+									break;
 								}
 
 								*p = zend_dval_to_lval(d);
@@ -420,14 +422,16 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 						break;
 
 					case IS_DOUBLE:
-						if (c == 'L') {
-							if (Z_DVAL_P(arg) > ZEND_LONG_MAX) {
-								*p = ZEND_LONG_MAX;
-								break;
-							} else if (Z_DVAL_P(arg) < ZEND_LONG_MIN) {
-								*p = ZEND_LONG_MIN;
-								break;
+						if (zend_isnan(Z_DVAL_P(arg))) {
+							return "long";
+						}
+						if (!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg))) {
+							if (c == 'L') {
+								*p = (Z_DVAL_P(arg) > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
+							} else {
+								return "long";
 							}
+							break;
 						}
 					case IS_NULL:
 					case IS_FALSE:
@@ -920,7 +924,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		return FAILURE;
 	}
 
-	arg_count = EG(current_execute_data)->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
 
 	if (num_args > arg_count) {
 		zend_error(E_WARNING, "%s(): could not obtain parameters for parsing",
@@ -1127,7 +1131,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties TSRMLS_DC) 
 }
 /* }}} */
 
-static int zval_update_class_constant(zval *pp, int is_static, int offset TSRMLS_DC) /* {{{ */
+static int zval_update_class_constant(zval *pp, int is_static, uint32_t offset TSRMLS_DC) /* {{{ */
 {
 	ZVAL_DEREF(pp);
 	if (Z_CONSTANT_P(pp)) {
@@ -2192,10 +2196,10 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		if (ptr->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)ptr->arg_info;
 			
-			internal_function->arg_info = (zend_arg_info*)ptr->arg_info+1;
+			internal_function->arg_info = (zend_internal_arg_info*)ptr->arg_info+1;
 			internal_function->num_args = ptr->num_args;
 			/* Currently you cannot denote that the function can accept less arguments than num_args */
-			if (info->required_num_args == -1) {
+			if (info->required_num_args == (zend_uintptr_t)-1) {
 				internal_function->required_num_args = ptr->num_args;
 			} else {
 				internal_function->required_num_args = info->required_num_args;
@@ -3504,7 +3508,7 @@ ZEND_API int zend_fcall_info_argp(zend_fcall_info *fci TSRMLS_DC, int argc, zval
 		fci->params = (zval *) erealloc(fci->params, fci->param_count * sizeof(zval));
 
 		for (i = 0; i < argc; ++i) {
-			ZVAL_COPY_VALUE(&fci->params[i], &argv[i]);
+			ZVAL_COPY(&fci->params[i], &argv[i]);
 		}
 	}
 
@@ -3529,7 +3533,7 @@ ZEND_API int zend_fcall_info_argv(zend_fcall_info *fci TSRMLS_DC, int argc, va_l
 
 		for (i = 0; i < argc; ++i) {
 			arg = va_arg(*argv, zval *);
-			ZVAL_COPY_VALUE(&fci->params[i], arg);
+			ZVAL_COPY(&fci->params[i], arg);
 		}
 	}
 
@@ -4127,7 +4131,7 @@ ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data) /* {{{ */
 				if (ex->func) {
 					if (ZEND_USER_CODE(ex->func->type)) {
 						if (ex->func->op_array.this_var != -1) {
-							zval *this_var = EX_VAR_2(ex, ex->func->op_array.this_var);
+							zval *this_var = ZEND_CALL_VAR(ex, ex->func->op_array.this_var);
 							if (this_var != EX(return_value)) {
 								zval_ptr_dtor(this_var);
 								ZVAL_NULL(this_var);

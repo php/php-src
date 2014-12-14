@@ -58,7 +58,7 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 				zend_op *brk_opline = op_array->opcodes + brk_cont->brk;
 
 				if (brk_opline->opcode == ZEND_FREE) {
-					zval *var = EX_VAR_2(execute_data, brk_opline->op1.var);
+					zval *var = EX_VAR(brk_opline->op1.var);
 					zval_ptr_dtor_nogc(var);
 				}
 			}
@@ -133,7 +133,7 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*) object;
 	zend_execute_data *ex = generator->execute_data;
-	uint32_t op_num, finally_op_num;
+	uint32_t op_num, finally_op_num, finally_op_end;
 	int i;
 
 	if (!ex || !(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)) {
@@ -146,6 +146,7 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 
 	/* Find next finally block */
 	finally_op_num = 0;
+	finally_op_end = 0;
 	for (i = 0; i < ex->func->op_array.last_try_catch; i++) {
 		zend_try_catch_element *try_catch = &ex->func->op_array.try_catch_array[i];
 
@@ -155,14 +156,18 @@ static void zend_generator_dtor_storage(zend_object *object TSRMLS_DC) /* {{{ */
 
 		if (op_num < try_catch->finally_op) {
 			finally_op_num = try_catch->finally_op;
+			finally_op_end = try_catch->finally_end;
 		}
 	}
 
 	/* If a finally block was found we jump directly to it and
 	 * resume the generator. */
 	if (finally_op_num) {
+		zval *fast_call = ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
+
+		Z_OBJ_P(fast_call) = NULL;
+		fast_call->u2.lineno = (uint32_t)-1;
 		ex->opline = &ex->func->op_array.opcodes[finally_op_num];
-		ex->fast_ret = NULL;
 		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
 		zend_generator_resume(generator TSRMLS_CC);
 	}
@@ -302,7 +307,7 @@ ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ 
 		original_stack->top = EG(vm_stack_top);
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
-		EG(scope) = generator->execute_data->scope;
+		EG(scope) = generator->execute_data->func->common.scope;
 		EG(vm_stack_top) = generator->stack->top;
 		EG(vm_stack_end) = generator->stack->end;
 		EG(vm_stack) = generator->stack;
@@ -666,7 +671,7 @@ void zend_register_generator_ce(TSRMLS_D) /* {{{ */
 
 	INIT_CLASS_ENTRY(ce, "Generator", generator_functions);
 	zend_ce_generator = zend_register_internal_class(&ce TSRMLS_CC);
-	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL;
 	zend_ce_generator->create_object = zend_generator_create;
 	zend_ce_generator->serialize = zend_class_serialize_deny;
 	zend_ce_generator->unserialize = zend_class_unserialize_deny;

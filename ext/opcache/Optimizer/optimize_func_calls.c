@@ -80,11 +80,13 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS
 
 					if (fcall->opcode == ZEND_INIT_FCALL_BY_NAME) {
 						fcall->opcode = ZEND_INIT_FCALL;
+						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
 						Z_CACHE_SLOT(op_array->literals[fcall->op2.constant + 1]) = Z_CACHE_SLOT(op_array->literals[fcall->op2.constant]);
 						literal_dtor(&ZEND_OP2_LITERAL(fcall));
 						fcall->op2.constant = fcall->op2.constant + 1;
 					} else if (fcall->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 						fcall->opcode = ZEND_INIT_FCALL;
+						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
 						Z_CACHE_SLOT(op_array->literals[fcall->op2.constant + 1]) = Z_CACHE_SLOT(op_array->literals[fcall->op2.constant]);
 						literal_dtor(&op_array->literals[fcall->op2.constant]);
 						literal_dtor(&op_array->literals[fcall->op2.constant + 2]);
@@ -92,17 +94,6 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS
 					} else {
 						ZEND_ASSERT(0);
 					}
-				} else if (call_stack[call].opline &&
-				           call_stack[call].opline->opcode == ZEND_INIT_FCALL_BY_NAME &&
-				           call_stack[call].opline->extended_value == 0 &&
-						   ZEND_OP2_IS_CONST_STRING(call_stack[call].opline)) {
-
-					zend_op *fcall = call_stack[call].opline;
-
-					fcall->opcode = ZEND_INIT_FCALL;
-					Z_CACHE_SLOT(op_array->literals[fcall->op2.constant + 1]) = Z_CACHE_SLOT(op_array->literals[fcall->op2.constant]);
-					literal_dtor(&ZEND_OP2_LITERAL(fcall));
-					fcall->op2.constant = fcall->op2.constant + 1;
 				}
 				call_stack[call].func = NULL;
 				call_stack[call].opline = NULL;
@@ -143,8 +134,6 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx TSRMLS
 				if (!(opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) && call_stack[call - 1].func) {
 					if (ARG_SHOULD_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
 						opline->extended_value |= ZEND_ARG_COMPILE_TIME_BOUND | ZEND_ARG_SEND_BY_REF;
-					} else if (opline->extended_value) {
-						opline->extended_value |= ZEND_ARG_COMPILE_TIME_BOUND;
 					} else {
 						opline->opcode = ZEND_SEND_VAR;
 						opline->extended_value = 0;

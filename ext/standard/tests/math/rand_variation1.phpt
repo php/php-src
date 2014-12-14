@@ -1,5 +1,7 @@
 --TEST--
 Test rand() function : usage variations - different data types as $min argument
+--SKIPIF--
+<?php if (PHP_INT_SIZE !== 4) die("skip this test is for 32-bit only");
 --FILE--
 <?php
 /* Prototype  : int rand  ([ int $min  , int $max ] )
@@ -110,7 +112,9 @@ int(%i)
 int(%i)
 
 -- Iteration 8 --
-int(%i)
+
+Warning: rand() expects parameter 1 to be long, double given in %s on line %d
+NULL
 
 -- Iteration 9 --
 int(%i)

@@ -197,8 +197,18 @@ PHPAPI struct lconv *localeconv_r(struct lconv *out)
 	tsrm_mutex_lock( locale_mutex );
 # endif
 
+#if defined(PHP_WIN32) && defined(ZTS)
+	{
+		/* Even with the enabled per thread locale, localeconv
+			won't check any locale change in the master thread. */
+		_locale_t cur = _get_current_locale();
+
+		res = cur->locinfo->lconv;
+	}
+#else
 	/* localeconv doesn't return an error condition */
 	res = localeconv();
+#endif
 
 	*out = *res;
 
@@ -1662,18 +1672,11 @@ static int php_needle_char(zval *needle, char *target TSRMLS_DC)
 			*target = (char)(int)Z_DVAL_P(needle);
 			return SUCCESS;
 		case IS_OBJECT:
-			{
-				zval holder;
-			   
-				ZVAL_LONG(&holder, zval_get_long(needle));
-
-				*target = (char)Z_LVAL(holder);
-				return SUCCESS;
-			}
-		default: {
+			*target = (char) zval_get_long(needle);
+			return SUCCESS;
+		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "needle is not a string or an integer");
 			return FAILURE;
-		 }
 	}
 }
 /* }}} */
@@ -2807,7 +2810,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 	char *key;
 	smart_str result = {0};
 
-	/* we will collect all possible key lenghts */
+	/* we will collect all possible key lengths */
 	ZVAL_NULL(&dummy);
 	zend_hash_init(&num_hash, 8, NULL, NULL, 0);
 
@@ -2829,7 +2832,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 			if (len < minlen) {
 				minlen = len;
 			}
-			/* remember possible key lenght */
+			/* remember possible key length */
 			zend_hash_index_add(&num_hash, len, &dummy);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -2854,7 +2857,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 				if (len < minlen) {
 					minlen = len;
 				}
-				/* remember possible key lenght */
+				/* remember possible key length */
 				zend_hash_index_add(&num_hash, len, &dummy);
 			} else {
 				len = str_key->len;

@@ -2059,7 +2059,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 @@ -1519,7 +1697,7 @@
      if ( c->bytes_sent >= c->bytes_to_send )
  	{
- 	/* This conection is finished! */
+ 	/* This connection is finished! */
 -	clear_connection( c, tvP );
 +	clear_connection( c, tvP, 1 );
  	return;

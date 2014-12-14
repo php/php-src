@@ -1,5 +1,7 @@
 --TEST--
 Test strrpos() function : usage variations - unexpected inputs for 'haystack', 'needle' & 'offset' arguments
+--SKIPIF--
+<?php if (PHP_INT_SIZE !== 4) die("skip this test is for 32-bit only");
 --FILE--
 <?php
 /* Prototype  : int strrpos ( string $haystack, string $needle [, int $offset] );
@@ -110,7 +112,7 @@ Warning: strrpos(): Offset is greater than the length of haystack string in %s o
 bool(false)
 -- Iteration 7 --
 
-Warning: strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: strrpos() expects parameter 3 to be long, double given in %s on line %d
 bool(false)
 -- Iteration 8 --
 bool(false)

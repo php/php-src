@@ -47,18 +47,19 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSR
 
 ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
 {
-	int i;
+	int i, count;
 
 	if (object->guards) {
 		zend_hash_destroy(object->guards);
 		FREE_HASHTABLE(object->guards);
 	}
 	if (object->properties) {
-		zend_hash_destroy(object->properties);
+		zend_array_destroy(object->properties TSRMLS_CC);
 		FREE_HASHTABLE(object->properties);
 	}
-	for (i = 0; i < object->ce->default_properties_count; i++) {
-		zval_ptr_dtor(&object->properties_table[i]);
+	count = object->ce->default_properties_count;
+	for (i = 0; i < count; i++) {
+		i_zval_ptr_dtor(&object->properties_table[i] ZEND_FILE_LINE_CC TSRMLS_CC);
 	}
 }
 

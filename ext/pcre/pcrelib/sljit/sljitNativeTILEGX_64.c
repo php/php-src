@@ -1843,7 +1843,7 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 				if (src1 != dst)
 					overflow_ra = reg_map[src1];
 				else {
-					/* Rare ocasion. */
+					/* Rare occasion. */
 					FAIL_IF(ADD(TMP_EREG2, reg_map[src1], ZERO));
 					overflow_ra = TMP_EREG2;
 				}

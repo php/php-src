@@ -664,7 +664,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_exception___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, previous)
 ZEND_END_ARG_INFO()
 
-const static zend_function_entry default_exception_functions[] = {
+static const zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(exception, __construct, arginfo_exception___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(exception, getMessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
@@ -675,7 +675,7 @@ const static zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, getPrevious, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getTraceAsString, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, __toString, NULL, 0)
-	{NULL, NULL, NULL}
+	ZEND_FE_END
 };
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_error_exception___construct, 0, 0, 0)
@@ -690,7 +690,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry error_exception_functions[] = {
 	ZEND_ME(error_exception, __construct, arginfo_error_exception___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(error_exception, getSeverity, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	{NULL, NULL, NULL}
+	ZEND_FE_END
 };
 /* }}} */
 

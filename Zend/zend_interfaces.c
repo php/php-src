@@ -499,7 +499,7 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 /* {{{ function tables */
 const zend_function_entry zend_funcs_aggregate[] = {
 	ZEND_ABSTRACT_ME(iterator, getIterator, NULL)
-	{NULL, NULL, NULL}
+	ZEND_FE_END
 };
 
 const zend_function_entry zend_funcs_iterator[] = {
@@ -508,7 +508,7 @@ const zend_function_entry zend_funcs_iterator[] = {
 	ZEND_ABSTRACT_ME(iterator, key,      NULL)
 	ZEND_ABSTRACT_ME(iterator, valid,    NULL)
 	ZEND_ABSTRACT_ME(iterator, rewind,   NULL)
-	{NULL, NULL, NULL}
+	ZEND_FE_END
 };
 
 const zend_function_entry *zend_funcs_traversable    = NULL;
@@ -531,7 +531,7 @@ const zend_function_entry zend_funcs_arrayaccess[] = {
 	ZEND_ABSTRACT_ME(arrayaccess, offsetGet,    arginfo_arrayaccess_offset_get)
 	ZEND_ABSTRACT_ME(arrayaccess, offsetSet,    arginfo_arrayaccess_offset_value)
 	ZEND_ABSTRACT_ME(arrayaccess, offsetUnset,  arginfo_arrayaccess_offset)
-	{NULL, NULL, NULL}
+	ZEND_FE_END
 };
 
 ZEND_BEGIN_ARG_INFO(arginfo_serializable_serialize, 0)
@@ -541,7 +541,7 @@ ZEND_END_ARG_INFO()
 const zend_function_entry zend_funcs_serializable[] = {
 	ZEND_ABSTRACT_ME(serializable, serialize,   NULL)
 	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)
-	{NULL, NULL, NULL}
+	ZEND_FE_END
 };
 /* }}} */
 

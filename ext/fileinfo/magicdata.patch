@@ -56,3 +56,28 @@ index 26b2869..bcd0f43 100644
 -- 
 2.0.3
 
+From 71d04468a5777fe43064af02f06d74cb60feafab Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Andreas=20K=C3=B6hler?= <andi5.py@gmx.net>
+Date: Sat, 14 Jun 2014 03:04:28 +0200
+Subject: [PATCH] Fix regex in msooxml to avoid matching other archives.
+
+---
+ magic/Magdir/msooxml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/magic/Magdir/msooxml b/magic/Magdir/msooxml
+index c908b71..5ff3760 100644
+--- a/magic/Magdir/msooxml
++++ b/magic/Magdir/msooxml
+@@ -16,7 +16,7 @@
+ 0		string		PK\003\004
+ !:strength +10
+ # make sure the first file is correct
+->0x1E		regex		\[Content_Types\]\.xml|_rels/\.rels
++>0x1E		regex		\\[Content_Types\\]\\.xml|_rels/\\.rels
+ # skip to the second local file header
+ # since some documents include a 520-byte extra field following the file
+ # header, we need to scan for the next header
+-- 
+2.0.0
+

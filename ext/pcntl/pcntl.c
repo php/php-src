@@ -873,6 +873,7 @@ PHP_FUNCTION(pcntl_signal)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
 		}
+		zend_hash_index_del(&PCNTL_G(php_signal_table), signo);
 		RETURN_TRUE;
 	}
 	
@@ -1211,6 +1212,7 @@ static void pcntl_signal_handler(int signo)
 		PCNTL_G(head) = psig;
 	}
 	PCNTL_G(tail) = psig;
+	PCNTL_G(pending_signals) = 1;
 }
 
 void pcntl_signal_dispatch()
@@ -1220,6 +1222,10 @@ void pcntl_signal_dispatch()
 	sigset_t mask;
 	sigset_t old_mask;
 	TSRMLS_FETCH();
+
+	if(!PCNTL_G(pending_signals)) {
+		return;
+	}
 		
 	/* Mask all signals */
 	sigfillset(&mask);
@@ -1256,6 +1262,8 @@ void pcntl_signal_dispatch()
 		PCNTL_G(spares) = queue;
 		queue = next;
 	}
+
+	PCNTL_G(pending_signals) = 0;
 
 	/* Re-enable queue */
 	PCNTL_G(processing_signal_queue) = 0;

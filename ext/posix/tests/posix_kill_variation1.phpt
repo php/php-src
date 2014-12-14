@@ -1,7 +1,8 @@
 --TEST--
 Test posix_kill() function : usage variations  - first parameter type
 --SKIPIF--
-<?php 
+<?php
+    PHP_INT_SIZE == 4 or die("skip - 32-bit only");
 	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
 ?>
 --FILE--
@@ -89,6 +90,8 @@ Arg value -10.5
 bool(false)
 
 Arg value 101234567000 
+
+Warning: posix_kill() expects parameter 1 to be long, double given in %s on line %d
 bool(false)
 
 Arg value 1.07654321E-9 

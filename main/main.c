@@ -130,7 +130,7 @@ PHPAPI int core_globals_id;
 #ifdef PHP_WIN32
 #include "win32_internal_function_disabled.h"
 
-static php_win32_disable_functions(TSRMLS_D)
+static int php_win32_disable_functions(TSRMLS_D)
 {
 	int i;
 
@@ -1121,8 +1121,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		if (!module_initialized || PG(log_errors)) {
 			char *log_buffer;
 #ifdef PHP_WIN32
-			if ((type == E_CORE_ERROR || type == E_CORE_WARNING) && PG(display_startup_errors)) {
-				MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
+			if (type == E_CORE_ERROR || type == E_CORE_WARNING) {
+				syslog(LOG_ALERT, "PHP %s: %s (%s)", error_type_str, buffer, GetCommandLine());
 			}
 #endif
 			spprintf(&log_buffer, 0, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
@@ -2278,7 +2278,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	/* load and startup extensions compiled as shared objects (aka DLLs)
 	   as requested by php.ini entries
-	   theese are loaded after initialization of internal extensions
+	   these are loaded after initialization of internal extensions
 	   as extensions *might* rely on things from ext/standard
 	   which is always an internal extension and to be initialized
 	   ahead of all other internals

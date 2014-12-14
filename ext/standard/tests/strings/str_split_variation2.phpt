@@ -111,8 +111,8 @@ Warning: str_split(): The length of each segment must be greater than zero in %s
 bool(false)
 --Iteration 3 --
 
-Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d
-bool(false)
+Warning: str_split() expects parameter 2 to be long, double given in %s on line %d
+NULL
 --Iteration 4 --
 
 Warning: str_split(): The length of each segment must be greater than zero in %sstr_split_variation2.php on line %d

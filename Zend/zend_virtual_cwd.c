@@ -347,7 +347,7 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		/* File is a reparse point. Get the target */
 		HANDLE hLink = NULL;
 		REPARSE_DATA_BUFFER * pbuffer;
-		unsigned int retlength = 0;
+		DWORD retlength = 0;
 
 		hLink = CreateFile(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
 		if(hLink == INVALID_HANDLE_VALUE) {
@@ -620,7 +620,7 @@ static inline zend_ulong realpath_cache_key(const char *path, int path_len) /* {
 
 CWD_API void realpath_cache_clean(TSRMLS_D) /* {{{ */
 {
-	int i;
+	uint32_t i;
 
 	for (i = 0; i < sizeof(CWDG(realpath_cache))/sizeof(CWDG(realpath_cache)[0]); i++) {
 		realpath_cache_bucket *p = CWDG(realpath_cache)[i];
@@ -898,7 +898,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			/* File is a reparse point. Get the target */
 			HANDLE hLink = NULL;
 			REPARSE_DATA_BUFFER * pbuffer;
-			unsigned int retlength = 0;
+			DWORD retlength = 0;
 			int bufindex = 0, isabsolute = 0;
 			wchar_t * reparsetarget;
 			BOOL isVolume = FALSE;
@@ -1540,55 +1540,6 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC) /* {{{ */
 /* }}} */
 
 #if HAVE_UTIME
-#ifdef TSRM_WIN32
-static void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
-{
-	// Note that LONGLONG is a 64-bit value
-	LONGLONG ll;
-
-	ll = Int32x32To64(t, 10000000) + 116444736000000000;
-	pft->dwLowDateTime = (DWORD)ll;
-	pft->dwHighDateTime = ll >> 32;
-}
-/* }}} */
-
-TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
-{
-	FILETIME mtime, atime;
-	HANDLE hFile;
-
-	hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
-				 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-
-	/* OPEN_ALWAYS mode sets the last error to ERROR_ALREADY_EXISTS but
-	   the CreateFile operation succeeds */
-	if (GetLastError() == ERROR_ALREADY_EXISTS) {
-		SetLastError(0);
-	}
-
-	if ( hFile == INVALID_HANDLE_VALUE ) {
-		return -1;
-	}
-
-	if (!buf) {
-		SYSTEMTIME st;
-		GetSystemTime(&st);
-		SystemTimeToFileTime(&st, &mtime);
-		atime = mtime;
-	} else {
-		UnixTimeToFileTime(buf->modtime, &mtime);
-		UnixTimeToFileTime(buf->actime, &atime);
-	}
-	if (!SetFileTime(hFile, NULL, &atime, &mtime)) {
-		CloseHandle(hFile);
-		return -1;
-	}
-	CloseHandle(hFile);
-	return 1;
-}
-/* }}} */
-#endif
-
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;

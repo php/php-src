@@ -31,10 +31,10 @@
 #define zendleng LANG_SCNG(yy_leng)
 
 
-static void handle_whitespace(int *emit_whitespace)
+static void handle_whitespace(unsigned int *emit_whitespace)
 {
 	unsigned char c;
-	int i;
+	unsigned int i;
 
 	for (c=0; c<128; c++) {
 		if (emit_whitespace[c]>0) {

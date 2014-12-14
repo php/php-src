@@ -52,16 +52,38 @@ typedef struct _zend_compiler_context {
 	int        current_brk_cont;
 	int        backpatch_count;
 	int        in_finally;
+	uint32_t   fast_call_var;
 	HashTable *labels;
 } zend_compiler_context;
+
+/* On 64-bi systems less optimal, but more compact VM code leads to better
+ * performance. So on 32-bit systems we use absolute addresses for jump
+ * targets and constants, but on 64-bit systems realtive 32-bit offsets */
+#if SIZEOF_SIZE_T == 4
+# define ZEND_USE_ABS_JMP_ADDR      1
+# define ZEND_USE_ABS_CONST_ADDR    1
+# define ZEND_EX_USE_LITERALS       0
+# define ZEND_EX_USE_RUN_TIME_CACHE 1
+#else
+# define ZEND_USE_ABS_JMP_ADDR      0
+# define ZEND_USE_ABS_CONST_ADDR    0
+# define ZEND_EX_USE_LITERALS       1
+# define ZEND_EX_USE_RUN_TIME_CACHE 1
+#endif
 
 typedef union _znode_op {
 	uint32_t      constant;
 	uint32_t      var;
 	uint32_t      num;
 	uint32_t      opline_num; /*  Needs to be signed */
+#if ZEND_USE_ABS_JMP_ADDR
 	zend_op       *jmp_addr;
+#else
+	uint32_t      jmp_offset;
+#endif
+#if ZEND_USE_ABS_CONST_ADDR
 	zval          *zv;
+#endif
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */
@@ -111,8 +133,8 @@ struct _zend_op {
 	znode_op op1;
 	znode_op op2;
 	znode_op result;
-	zend_ulong extended_value;
-	uint lineno;
+	uint32_t extended_value;
+	uint32_t lineno;
 	zend_uchar opcode;
 	zend_uchar op1_type;
 	zend_uchar op2_type;
@@ -160,7 +182,6 @@ typedef struct _zend_try_catch_element {
 /* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
 #define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
-#define ZEND_ACC_FINAL_CLASS	            0x40
 #define ZEND_ACC_INTERFACE		            0x80
 #define ZEND_ACC_TRAIT						0x120
 
@@ -244,26 +265,33 @@ typedef struct _zend_property_info {
 #define OBJ_PROP_TO_NUM(offset) \
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
+/* arg_info for internal functions */
+typedef struct _zend_internal_arg_info { 
+	const char *name;
+	const char *class_name;
+	zend_uchar type_hint;
+	zend_uchar pass_by_reference;
+	zend_bool allow_null;
+	zend_bool is_variadic;
+} zend_internal_arg_info;
+
+/* arg_info for user functions */
 typedef struct _zend_arg_info {
-	const char *name;			// TODO: convert into zend_string ???
-	uint32_t name_len;
-	const char *class_name;		// TODO: convert into zend_string ???
-	uint32_t class_name_len;
+	zend_string *name;
+	zend_string *class_name;
 	zend_uchar type_hint;
 	zend_uchar pass_by_reference;
 	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_arg_info;
 
-/* the following structure repeats the layout of zend_arg_info,
+/* the following structure repeats the layout of zend_internal_arg_info,
  * but its fields have different meaning. It's used as the first element of
  * arg_info array to define properties of internal functions.
  */
 typedef struct _zend_internal_function_info {
-	const char *_name;
-	uint32_t _name_len;
+	zend_uintptr_t required_num_args;
 	const char *_class_name;
-	uint32_t required_num_args;
 	zend_uchar _type_hint;
 	zend_bool return_reference;
 	zend_bool _allow_null;
@@ -329,7 +357,7 @@ typedef struct _zend_internal_function {
 	zend_function *prototype;
 	uint32_t num_args;
 	uint32_t required_num_args;
-	zend_arg_info *arg_info;
+	zend_internal_arg_info *arg_info;
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -356,57 +384,206 @@ union _zend_function {
 	zend_internal_function internal_function;
 };
 
-typedef enum _vm_frame_kind {
-	VM_FRAME_NESTED_FUNCTION,	/* stackless VM call to function */
-	VM_FRAME_NESTED_CODE,		/* stackless VM call to include/require/eval */
-	VM_FRAME_TOP_FUNCTION,		/* direct VM call to function from external C code */
-	VM_FRAME_TOP_CODE			/* direct VM call to "main" code from external C code */
-} vm_frame_kind;
+typedef enum _zend_call_kind {
+	ZEND_CALL_NESTED_FUNCTION,	/* stackless VM call to function */
+	ZEND_CALL_NESTED_CODE,		/* stackless VM call to include/require/eval */
+	ZEND_CALL_TOP_FUNCTION,		/* direct VM call to function from external C code */
+	ZEND_CALL_TOP_CODE			/* direct VM call to "main" code from external C code */
+} zend_call_kind;
 
 struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
-	void               **run_time_cache;
+	zval                *return_value;
 	zend_function       *func;             /* executed op_array              */
 	zval                 This;
+#if ZEND_EX_USE_RUN_TIME_CACHE
+	void               **run_time_cache;
+#endif
+#if ZEND_EX_USE_LITERALS
+	zval                *literals;
+#endif
 	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
-	uint32_t             frame_info;
-	uint32_t             num_args;
-	zval                *return_value;
-	zend_class_entry    *scope;            /* function scope (self)          */
 	zend_array          *symbol_table;
-	const zend_op       *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
-	zend_object         *delayed_exception;
-	uint32_t             silence_op_num;
-	uint32_t             old_error_reporting;
 };
 
-#define VM_FRAME_KIND_MASK           0x000000ff
-#define VM_FRAME_FLAGS_MASK          0xffffff00
+#define ZEND_CALL_FUNCTION           (0 << 0)
+#define ZEND_CALL_CODE               (1 << 0)
+#define ZEND_CALL_NESTED             (0 << 1)
+#define ZEND_CALL_TOP                (1 << 1)
+#define ZEND_CALL_CTOR               (1 << 2)
+#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 3)
 
-#define ZEND_CALL_CTOR               (1 << 8)
-#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 9)
+#define ZEND_CALL_INFO(call) \
+	(Z_TYPE_INFO((call)->This) >> 24)
 
-#define VM_FRAME_INFO(kind, flags)   ((kind) | (flags))
-#define VM_FRAME_KIND(info)          ((info) & VM_FRAME_KIND_MASK)
-#define VM_FRAME_FLAGS(info)         ((info) & VM_FRAME_FLAGS_MASK)
+#define ZEND_CALL_KIND(call) \
+	(ZEND_CALL_INFO(call) & (ZEND_CALL_CODE | ZEND_CALL_TOP))
+
+#define ZEND_SET_CALL_INFO(call, info) do { \
+		Z_TYPE_INFO((call)->This) = IS_OBJECT_EX | ((info) << 24); \
+	} while (0)
+	
+#define ZEND_ADD_CALL_FLAG(call, info) do { \
+		Z_TYPE_INFO((call)->This) |= ((info) << 24); \
+	} while (0)
+
+#define ZEND_CALL_NUM_ARGS(call) \
+	(call)->This.u2.num_args
 
 #define ZEND_CALL_FRAME_SLOT \
 	((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
 
+#define ZEND_CALL_VAR(call, n) \
+	((zval*)(((char*)(call)) + ((int)(n))))
+
+#define ZEND_CALL_VAR_NUM(call, n) \
+	(((zval*)(call)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
+
 #define ZEND_CALL_ARG(call, n) \
-	(((zval*)(call)) + ((n) + (ZEND_CALL_FRAME_SLOT - 1)))
+	ZEND_CALL_VAR_NUM(call, ((int)(n)) - 1)
 
 #define EX(element) 			((execute_data)->element)
 
-#define EX_VAR_2(ex, n)			((zval*)(((char*)(ex)) + ((int)(n))))
-#define EX_VAR_NUM_2(ex, n)     (((zval*)(ex)) + (ZEND_CALL_FRAME_SLOT + ((int)(n))))
+#define EX_CALL_INFO()			ZEND_CALL_INFO(execute_data)
+#define EX_CALL_KIND()			ZEND_CALL_KIND(execute_data)
+#define EX_NUM_ARGS()			ZEND_CALL_NUM_ARGS(execute_data)
 
-#define EX_VAR(n)				EX_VAR_2(execute_data, n)
-#define EX_VAR_NUM(n)			EX_VAR_NUM_2(execute_data, n)
+#define EX_VAR(n)				ZEND_CALL_VAR(execute_data, n)
+#define EX_VAR_NUM(n)			ZEND_CALL_VAR_NUM(execute_data, n)
 
-#define EX_VAR_TO_NUM(n)		(EX_VAR_2(NULL, n) - EX_VAR_NUM_2(NULL, 0))
+#define EX_VAR_TO_NUM(n)		(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0))
+
+#define ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline_num) \
+	((char*)&(op_array)->opcodes[opline_num] - (char*)(opline))
+
+#define ZEND_OFFSET_TO_OPLINE(base, offset) \
+	((zend_op*)(((char*)(base)) + (int)offset))
+
+#define ZEND_OFFSET_TO_OPLINE_NUM(op_array, base, offset) \
+	(ZEND_OFFSET_TO_OPLINE(base, offset) - op_array->opcodes)
+
+#if ZEND_USE_ABS_JMP_ADDR
+
+/* run-time jump target */
+# define OP_JMP_ADDR(opline, node) \
+	(node).jmp_addr
+
+/* convert jump target from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \
+		(node).jmp_addr = (op_array)->opcodes + (node).opline_num; \
+	} while (0)
+
+/* convert jump target back from run-time to compile-time */
+# define ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, node) do { \
+		(node).opline_num = (node).jmp_addr - (op_array)->opcodes; \
+	} while (0)
+
+#else
+
+/* run-time jump target */
+# define OP_JMP_ADDR(opline, node) \
+	ZEND_OFFSET_TO_OPLINE(opline, (node).jmp_offset)
+
+/* convert jump target from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \
+		(node).jmp_offset = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, (node).opline_num); \
+	} while (0)
+
+/* convert jump target back from run-time to compile-time */
+# define ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, node) do { \
+		(node).opline_num = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, (node).jmp_offset); \
+	} while (0)		
+
+#endif
+
+/* constant-time constant */
+# define CT_CONSTANT_EX(op_array, num) \
+	((op_array)->literals + (num))
+
+# define CT_CONSTANT(node) \
+	CT_CONSTANT_EX(CG(active_op_array), (node).constant)
+
+#if ZEND_USE_ABS_CONST_ADDR
+
+/* run-time constant */
+# define RT_CONSTANT_EX(base, node) \
+	(node).zv
+
+/* convert constant from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, node) do { \
+		(node).zv = CT_CONSTANT_EX(op_array, (node).constant); \
+	} while (0)
+
+/* convert constant back from run-time to compile-time */
+# define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, node) do { \
+		(node).constant = (node).zv - (op_array)->literals; \
+	} while (0)
+
+#else
+
+/* run-time constant */
+# define RT_CONSTANT_EX(base, node) \
+	((zval*)(((char*)(base)) + (node).constant))
+
+/* convert constant from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, node) do { \
+		(node).constant *= sizeof(zval); \
+	} while (0)
+
+/* convert constant back from run-time to compile-time (do nothing) */
+# define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, node) do { \
+		(node).constant /= sizeof(zval); \
+	} while (0)
+
+#endif
+
+#if ZEND_EX_USE_LITERALS
+
+# define EX_LITERALS() \
+	EX(literals)
+
+# define EX_LOAD_LITERALS(op_array) do { \
+		EX(literals) = (op_array)->literals; \
+	} while (0)
+
+#else
+
+# define EX_LITERALS() \
+	EX(func)->op_array.literals
+
+# define EX_LOAD_LITERALS(op_array) do { \
+	} while (0)
+
+#endif
+
+/* run-time constant */
+#define RT_CONSTANT(op_array, node) \
+	RT_CONSTANT_EX((op_array)->literals, node)
+
+/* constant in currently executed function */
+#define EX_CONSTANT(node) \
+	RT_CONSTANT_EX(EX_LITERALS(), node)
+
+#if ZEND_EX_USE_RUN_TIME_CACHE
+
+# define EX_RUN_TIME_CACHE() \
+	EX(run_time_cache)
+
+# define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
+		EX(run_time_cache) = (op_array)->run_time_cache; \
+	} while (0)
+
+#else
+
+# define EX_RUN_TIME_CACHE() \
+	EX(func)->op_array.run_time_cache
+
+# define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
+	} while (0)
+
+#endif
 
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)

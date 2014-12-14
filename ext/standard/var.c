@@ -990,7 +990,7 @@ PHP_FUNCTION(serialize)
 }
 /* }}} */
 
-/* {{{ proto mixed unserialize(string variable_representation)
+/* {{{ proto mixed unserialize(string variable_representation[, bool|array allowed_classes])
    Takes a string representation of variable and recreates it */
 PHP_FUNCTION(unserialize)
 {
@@ -998,8 +998,10 @@ PHP_FUNCTION(unserialize)
 	size_t buf_len;
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
+	zval *options = NULL, *classes = NULL;
+	HashTable *class_hash = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|a", &buf, &buf_len, &options) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1009,8 +1011,32 @@ PHP_FUNCTION(unserialize)
 
 	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-	if (!php_var_unserialize(return_value, &p, p + buf_len, &var_hash TSRMLS_CC)) {
+	if(options != NULL) {
+		classes = zend_hash_str_find(Z_ARRVAL_P(options), "allowed_classes", sizeof("allowed_classes")-1);
+		if(classes && (Z_TYPE_P(classes) == IS_ARRAY || !zend_is_true(classes TSRMLS_CC))) {
+			ALLOC_HASHTABLE(class_hash);
+			zend_hash_init(class_hash, (Z_TYPE_P(classes) == IS_ARRAY)?zend_hash_num_elements(Z_ARRVAL_P(classes)):0, NULL, NULL, 0);
+		}
+		if(class_hash && Z_TYPE_P(classes) == IS_ARRAY) {
+			zval *entry;
+			zend_string *lcname;
+
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(classes), entry) {
+				convert_to_string_ex(entry);
+				lcname = zend_string_alloc(Z_STRLEN_P(entry), 0);
+				zend_str_tolower_copy(lcname->val, Z_STRVAL_P(entry), Z_STRLEN_P(entry));
+				zend_hash_add_empty_element(class_hash, lcname);
+		        zend_string_release(lcname);
+			} ZEND_HASH_FOREACH_END();
+		}
+	}
+
+	if (!php_var_unserialize_ex(return_value, &p, p + buf_len, &var_hash, class_hash TSRMLS_CC)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+		if(class_hash) {
+			zend_hash_destroy(class_hash);
+			FREE_HASHTABLE(class_hash);
+		}
 		zval_dtor(return_value);
 		if (!EG(exception)) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset " ZEND_LONG_FMT " of %d bytes", (zend_long)((char*)p - buf), buf_len);
@@ -1018,6 +1044,10 @@ PHP_FUNCTION(unserialize)
 		RETURN_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	if(class_hash) {
+		zend_hash_destroy(class_hash);
+		FREE_HASHTABLE(class_hash);
+	}
 }
 /* }}} */
 

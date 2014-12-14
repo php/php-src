@@ -490,7 +490,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 			} else {
 				intern->file_name = estrndup(source->file_name, source->file_name_len);
 				intern->file_name_len = source->file_name_len;
-				intern->_path = spl_filesystem_object_get_path(source, (size_t *)&intern->_path_len TSRMLS_CC);
+				intern->_path = spl_filesystem_object_get_path(source, &intern->_path_len TSRMLS_CC);
 				intern->_path = estrndup(intern->_path, intern->_path_len);
 			}
 			break;
@@ -514,7 +514,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 			} else {
 				intern->file_name = source->file_name;
 				intern->file_name_len = source->file_name_len;
-				intern->_path = spl_filesystem_object_get_path(source, (size_t *)&intern->_path_len TSRMLS_CC);
+				intern->_path = spl_filesystem_object_get_path(source, &intern->_path_len TSRMLS_CC);
 				intern->_path = estrndup(intern->_path, intern->_path_len);
 
 				intern->u.file.open_mode = "r";
@@ -1506,27 +1506,23 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	
 	spl_filesystem_object_get_file_name(intern TSRMLS_CC);
 
-	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_CURRENT_AS_PATHNAME)) {
-		RETURN_STRINGL(intern->file_name, intern->file_name_len);
-	} else {
-		ZVAL_LONG(&zflags, intern->flags);
-		ZVAL_STRINGL(&zpath, intern->file_name, intern->file_name_len);
-		spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), return_value, &zpath, &zflags TSRMLS_CC);
-		zval_ptr_dtor(&zpath);
-		zval_ptr_dtor(&zflags);
-		
-		subdir = Z_SPLFILESYSTEM_P(return_value);
-		if (subdir) {
-			if (intern->u.dir.sub_path && intern->u.dir.sub_path[0]) {
-				subdir->u.dir.sub_path_len = (int)spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
-			} else {
-				subdir->u.dir.sub_path_len = (int)strlen(intern->u.dir.entry.d_name);
-				subdir->u.dir.sub_path = estrndup(intern->u.dir.entry.d_name, subdir->u.dir.sub_path_len);
-			}
-			subdir->info_class = intern->info_class;
-			subdir->file_class = intern->file_class;
-			subdir->oth = intern->oth;
+	ZVAL_LONG(&zflags, intern->flags);
+	ZVAL_STRINGL(&zpath, intern->file_name, intern->file_name_len);
+	spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), return_value, &zpath, &zflags TSRMLS_CC);
+	zval_ptr_dtor(&zpath);
+	zval_ptr_dtor(&zflags);
+	
+	subdir = Z_SPLFILESYSTEM_P(return_value);
+	if (subdir) {
+		if (intern->u.dir.sub_path && intern->u.dir.sub_path[0]) {
+			subdir->u.dir.sub_path_len = (int)spprintf(&subdir->u.dir.sub_path, 0, "%s%c%s", intern->u.dir.sub_path, slash, intern->u.dir.entry.d_name);
+		} else {
+			subdir->u.dir.sub_path_len = (int)strlen(intern->u.dir.entry.d_name);
+			subdir->u.dir.sub_path = estrndup(intern->u.dir.entry.d_name, subdir->u.dir.sub_path_len);
 		}
+		subdir->info_class = intern->info_class;
+		subdir->file_class = intern->file_class;
+		subdir->oth = intern->oth;
 	}
 }
 /* }}} */
@@ -2621,20 +2617,27 @@ SPL_METHOD(SplFileObject, fgetcsv)
 }
 /* }}} */
 
-/* {{{ proto int SplFileObject::fputcsv(array fields, [string delimiter [, string enclosure]])
+/* {{{ proto int SplFileObject::fputcsv(array fields, [string delimiter [, string enclosure [, string escape]]])
    Output a field array as a CSV line */
 SPL_METHOD(SplFileObject, fputcsv)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure, escape = intern->u.file.escape;
-	char *delim = NULL, *enclo = NULL;
-	size_t d_len = 0, e_len = 0;
+	char *delim = NULL, *enclo = NULL, *esc = NULL;
+	size_t d_len = 0, e_len = 0, esc_len = 0;
 	zend_long ret;
 	zval *fields = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|ss", &fields, &delim, &d_len, &enclo, &e_len) == SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|sss", &fields, &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
 		switch(ZEND_NUM_ARGS())
 		{
+		case 4:
+			if (esc_len != 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
+				RETURN_FALSE;
+			}
+			escape = esc[0];
+			/* no break */
 		case 3:
 			if (e_len != 1) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
@@ -3010,6 +3013,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fputcsv, 0, 0, 1)
 	ZEND_ARG_INFO(0, fields)
 	ZEND_ARG_INFO(0, delimiter)
 	ZEND_ARG_INFO(0, enclosure)
+	ZEND_ARG_INFO(0, escape)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_flock, 0, 0, 1) 

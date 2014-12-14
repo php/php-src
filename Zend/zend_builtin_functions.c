@@ -402,8 +402,8 @@ ZEND_FUNCTION(func_num_args)
 {
 	zend_execute_data *ex = EX(prev_execute_data);
 
-	if (VM_FRAME_KIND(ex->frame_info) == VM_FRAME_NESTED_FUNCTION || VM_FRAME_KIND(ex->frame_info) == VM_FRAME_TOP_FUNCTION) {
-		RETURN_LONG(ex->num_args);
+	if (!(ZEND_CALL_INFO(ex) & ZEND_CALL_CODE)) {
+		RETURN_LONG(ZEND_CALL_NUM_ARGS(ex));
 	} else {
 		zend_error(E_WARNING, "func_num_args():  Called from the global scope - no function context");
 		RETURN_LONG(-1);
@@ -430,12 +430,12 @@ ZEND_FUNCTION(func_get_arg)
 	}
 
 	ex = EX(prev_execute_data);
-	if (VM_FRAME_KIND(ex->frame_info) != VM_FRAME_NESTED_FUNCTION && VM_FRAME_KIND(ex->frame_info) != VM_FRAME_TOP_FUNCTION) {
+	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
 		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
 
-	arg_count = ex->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(ex);
 
 	if (requested_offset >= arg_count) {
 		zend_error(E_WARNING, "func_get_arg():  Argument " ZEND_LONG_FMT " not passed to function", requested_offset);
@@ -446,8 +446,8 @@ ZEND_FUNCTION(func_get_arg)
 	if (ex->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
 		first_extra_arg--;
 	}
-	if (requested_offset >= first_extra_arg && (ex->num_args > first_extra_arg)) {
-		arg = EX_VAR_NUM_2(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - first_extra_arg);
+	if (requested_offset >= first_extra_arg && (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg)) {
+		arg = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - first_extra_arg);
 	} else {
 		arg = ZEND_CALL_ARG(ex, requested_offset + 1);
 	}
@@ -464,12 +464,12 @@ ZEND_FUNCTION(func_get_args)
 	uint32_t i;
 	zend_execute_data *ex = EX(prev_execute_data);
 
-	if (VM_FRAME_KIND(ex->frame_info) != VM_FRAME_NESTED_FUNCTION && VM_FRAME_KIND(ex->frame_info) != VM_FRAME_TOP_FUNCTION) {
+	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
 		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
 		RETURN_FALSE;
 	}
 
-	arg_count = ex->num_args;
+	arg_count = ZEND_CALL_NUM_ARGS(ex);
 
 	array_init_size(return_value, arg_count);
 	if (arg_count) {
@@ -483,7 +483,7 @@ ZEND_FUNCTION(func_get_args)
 		i = 0;
 		q = Z_ARRVAL_P(return_value)->arData;
 		p = ZEND_CALL_ARG(ex, 1);
-		if (ex->num_args > first_extra_arg) {
+		if (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg) {
 			while (i < first_extra_arg) {
 				q->h = i;
 				q->key = NULL;
@@ -496,7 +496,7 @@ ZEND_FUNCTION(func_get_args)
 				q++;
 				i++;
 			}
-			p = EX_VAR_NUM_2(ex, ex->func->op_array.last_var + ex->func->op_array.T);
+			p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
 		}
 		while (i < arg_count) {
 			q->h = i;
@@ -2050,7 +2050,7 @@ ZEND_FUNCTION(get_defined_constants)
 
 static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array TSRMLS_DC) /* {{{ */
 {
-	uint32_t num_args = call->num_args;
+	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 
 	array_init_size(arg_array, num_args);
 	if (num_args) {
@@ -2063,14 +2063,14 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array TS
 			if (call->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
 			 	first_extra_arg--;
 			}
-			if (call->num_args > first_extra_arg) {
+			if (ZEND_CALL_NUM_ARGS(call) > first_extra_arg) {
 				while (i < first_extra_arg) {
 					if (Z_REFCOUNTED_P(p)) Z_ADDREF_P(p);
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
 					p++;
 					i++;
 				}
-				p = EX_VAR_NUM_2(call, call->func->op_array.last_var + call->func->op_array.T);
+				p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 			}
 		}
 

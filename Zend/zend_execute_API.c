@@ -46,13 +46,10 @@ ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, {{0}, {{0}}, {0}}, 
 ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL, NULL };
 
 #ifdef ZEND_WIN32
-#include <process.h>
-static WNDCLASS wc;
-static HWND timeout_window;
-static HANDLE timeout_thread_event;
-static HANDLE timeout_thread_handle;
-static DWORD timeout_thread_id;
-static int timeout_thread_initialized=0;
+#ifdef ZTS
+__declspec(thread)
+#endif
+HANDLE tq_timer = NULL;
 #endif
 
 #if 0&&ZEND_DEBUG
@@ -221,7 +218,7 @@ void shutdown_destructors(TSRMLS_D) /* {{{ */
 		EG(symbol_table).ht.pDestructor = zend_unclean_zval_ptr_dtor;
 	}
 	zend_try {
-		int symbols;
+		uint32_t symbols;
 		do {
 			symbols = zend_hash_num_elements(&EG(symbol_table).ht);
 			zend_hash_reverse_apply(&EG(symbol_table).ht, (apply_func_t) zval_call_destructor TSRMLS_CC);
@@ -501,12 +498,6 @@ ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ *
 }
 /* }}} */
 
-ZEND_API int zend_is_true(zval *op TSRMLS_DC) /* {{{ */
-{
-	return i_zend_is_true(op TSRMLS_CC);
-}
-/* }}} */
-
 #define IS_VISITED_CONSTANT			0x80
 #define IS_CONSTANT_VISITED(p)		(Z_TYPE_P(p) & IS_VISITED_CONSTANT)
 #define MARK_CONSTANT_VISITED(p)	Z_TYPE_INFO_P(p) |= IS_VISITED_CONSTANT
@@ -736,7 +727,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 
 	func = fci_cache->function_handler;
-	call = zend_vm_stack_push_call_frame(VM_FRAME_TOP_FUNCTION,
+	call = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_FUNCTION,
 		func, fci->param_count, fci_cache->called_scope, fci_cache->object, NULL TSRMLS_CC);
 	calling_scope = fci_cache->calling_scope;
 	fci->object = fci_cache->object;
@@ -787,7 +778,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
 					if (i) {
 						/* hack to clean up the stack */
-						call->num_args = i;
+						ZEND_CALL_NUM_ARGS(call) = i;
 						zend_vm_stack_free_args(call TSRMLS_CC);
 					}
 					zend_vm_stack_free_call_frame(call TSRMLS_CC);
@@ -827,7 +818,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			ZVAL_COPY(param, &fci->params[i]);
 		}
 	}
-	call->num_args = fci->param_count;
+	ZEND_CALL_NUM_ARGS(call) = fci->param_count;
 
 	EG(scope) = calling_scope;
 	if (func->common.fn_flags & ZEND_ACC_STATIC) {
@@ -835,9 +826,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	}
 	if (!fci->object) {
 		Z_OBJ(call->This) = NULL;
-		Z_TYPE_INFO(call->This) = IS_UNDEF;
 	} else {
-		ZVAL_OBJ(&call->This, fci->object);
+		Z_OBJ(call->This) = fci->object;
 		GC_REFCOUNT(fci->object)++;
 	}
 
@@ -1164,111 +1154,19 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 /* }}} */
 
 #ifdef ZEND_WIN32
-static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) /* {{{ */
+VOID CALLBACK tq_timer_cb(PVOID arg, BOOLEAN timed_out)
 {
-	switch (message) {
-		case WM_DESTROY:
-			PostQuitMessage(0);
-			break;
-		case WM_REGISTER_ZEND_TIMEOUT:
-			/* wParam is the thread id pointer, lParam is the timeout amount in seconds */
-			if (lParam == 0) {
-				KillTimer(timeout_window, wParam);
-			} else {
-#ifdef ZTS
-				void ***tsrm_ls;
-#endif
-				SetTimer(timeout_window, wParam, lParam*1000, NULL);
-#ifdef ZTS
-				tsrm_ls = ts_resource_ex(0, &wParam);
-				if (!tsrm_ls) {
-					/* shouldn't normally happen */
-					break;
-				}
-#endif
-				EG(timed_out) = 0;
-			}
-			break;
-		case WM_UNREGISTER_ZEND_TIMEOUT:
-			/* wParam is the thread id pointer */
-			KillTimer(timeout_window, wParam);
-			break;
-		case WM_TIMER: {
-#ifdef ZTS
-				void ***tsrm_ls;
+	zend_bool *php_timed_out;
 
-				tsrm_ls = ts_resource_ex(0, &wParam);
-				if (!tsrm_ls) {
-					/* Thread died before receiving its timeout? */
-					break;
-				}
-#endif
-				KillTimer(timeout_window, wParam);
-				EG(timed_out) = 1;
-			}
-			break;
-		default:
-			return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-	return 0;
-}
-/* }}} */
-
-static unsigned __stdcall timeout_thread_proc(void *pArgs) /* {{{ */
-{
-	MSG message;
-
-	wc.style=0;
-	wc.lpfnWndProc = zend_timeout_WndProc;
-	wc.cbClsExtra=0;
-	wc.cbWndExtra=0;
-	wc.hInstance=NULL;
-	wc.hIcon=NULL;
-	wc.hCursor=NULL;
-	wc.hbrBackground=(HBRUSH)(COLOR_BACKGROUND + 5);
-	wc.lpszMenuName=NULL;
-	wc.lpszClassName = "Zend Timeout Window";
-	if (!RegisterClass(&wc)) {
-		return -1;
-	}
-	timeout_window = CreateWindow(wc.lpszClassName, wc.lpszClassName, 0, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, NULL, NULL);
-	SetEvent(timeout_thread_event);
-	while (GetMessage(&message, NULL, 0, 0)) {
-		SendMessage(timeout_window, message.message, message.wParam, message.lParam);
-		if (message.message == WM_QUIT) {
-			break;
-		}
-	}
-	DestroyWindow(timeout_window);
-	UnregisterClass(wc.lpszClassName, NULL);
-	SetEvent(timeout_thread_handle);
-	return 0;
-}
-/* }}} */
-
-void zend_init_timeout_thread(void) /* {{{ */
-{
-	timeout_thread_event = CreateEvent(NULL, FALSE, FALSE, NULL);
-	timeout_thread_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
-	_beginthreadex(NULL, 0, timeout_thread_proc, NULL, 0, &timeout_thread_id);
-	WaitForSingleObject(timeout_thread_event, INFINITE);
-}
-/* }}} */
-
-void zend_shutdown_timeout_thread(void) /* {{{ */
-{
-	if (!timeout_thread_initialized) {
+	/* The doc states it'll be always true, however it theoretically
+		could be FALSE when the thread was signaled. */
+	if (!timed_out) {
 		return;
 	}
-	PostThreadMessage(timeout_thread_id, WM_QUIT, 0, 0);
 
-	/* Wait for thread termination */
-	WaitForSingleObject(timeout_thread_handle, 5000);
-	CloseHandle(timeout_thread_handle);
-	timeout_thread_initialized = 0;
+	php_timed_out = (zend_bool *)arg;
+	*php_timed_out = 1;
 }
-/* }}} */
-
 #endif
 
 /* This one doesn't exists on QNX */
@@ -1286,13 +1184,28 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 	if(!seconds) {
 		return;
 	}
-	if (timeout_thread_initialized == 0 && InterlockedIncrement(&timeout_thread_initialized) == 1) {
-		/* We start up this process-wide thread here and not in zend_startup(), because if Zend
-		 * is initialized inside a DllMain(), you're not supposed to start threads from it.
-		 */
-		zend_init_timeout_thread();
+
+        /* Don't use ChangeTimerQueueTimer() as it will not restart an expired
+		timer, so we could end up with just an ignored timeout. Instead
+		delete and recreate. */
+	if (NULL != tq_timer) {
+		if (!DeleteTimerQueueTimer(NULL, tq_timer, NULL)) {
+			EG(timed_out) = 0;
+			tq_timer = NULL;
+			zend_error(E_ERROR, "Could not delete queued timer");
+			return;
+		}
+		tq_timer = NULL;
 	}
-	PostThreadMessage(timeout_thread_id, WM_REGISTER_ZEND_TIMEOUT, (WPARAM) GetCurrentThreadId(), (LPARAM) seconds);
+
+	/* XXX passing NULL means the default timer queue provided by the system is used */
+	if (!CreateTimerQueueTimer(&tq_timer, NULL, (WAITORTIMERCALLBACK)tq_timer_cb, (VOID*)&EG(timed_out), seconds*1000, 0, WT_EXECUTEONLYONCE)) {
+		EG(timed_out) = 0;
+		tq_timer = NULL;
+		zend_error(E_ERROR, "Could not queue new timer");
+		return;
+	}
+	EG(timed_out) = 0;
 #else
 #	ifdef HAVE_SETITIMER
 	{
@@ -1334,9 +1247,16 @@ void zend_set_timeout(zend_long seconds, int reset_signals) /* {{{ */
 void zend_unset_timeout(TSRMLS_D) /* {{{ */
 {
 #ifdef ZEND_WIN32
-	if(timeout_thread_initialized) {
-		PostThreadMessage(timeout_thread_id, WM_UNREGISTER_ZEND_TIMEOUT, (WPARAM) GetCurrentThreadId(), (LPARAM) 0);
+	if (NULL != tq_timer) {
+		if (!DeleteTimerQueueTimer(NULL, tq_timer, NULL)) {
+			EG(timed_out) = 0;
+			tq_timer = NULL;
+			zend_error(E_ERROR, "Could not delete queued timer");
+			return;
+		}
+		tq_timer = NULL;
 	}
+	EG(timed_out) = 0;
 #else
 #	ifdef HAVE_SETITIMER
 	if (EG(timeout_seconds)) {
@@ -1529,7 +1449,7 @@ ZEND_API zend_array *zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 	for (i = 0; i < ex->func->op_array.last_var; i++) {
 		zval zv;
 
-		ZVAL_INDIRECT(&zv, EX_VAR_NUM_2(ex, i));
+		ZVAL_INDIRECT(&zv, ZEND_CALL_VAR_NUM(ex, i));
 		zend_hash_add_new(&symbol_table->ht,
 			ex->func->op_array.vars[i], &zv);
 	}
@@ -1622,7 +1542,7 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force TSRMLS
 }
 /* }}} */
 
-ZEND_API int zend_set_local_var_str(const char *name, int len, zval *value, int force TSRMLS_DC) /* {{{ */
+ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, int force TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 

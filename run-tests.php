@@ -240,6 +240,7 @@ $ini_overwrites = array(
 		'ignore_repeated_errors=0',
 		'precision=14',
 		'memory_limit=128M',
+		'log_errors_max_len=0',
 		'opcache.fast_shutdown=0',
 		'opcache.file_update_protection=0',
 	);
@@ -313,7 +314,7 @@ VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
 define('PHP_QA_EMAIL', 'qa-reports@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 define('QA_REPORTS_PAGE', 'http://qa.php.net/reports');
-define('TRAVIS_CI' , (bool) getenv('TRAVIS_PHP_VERSION'));
+define('TRAVIS_CI' , (bool) getenv('TRAVIS'));
 
 function save_or_mail_results()
 {
@@ -342,7 +343,7 @@ function save_or_mail_results()
 		if ($just_save_results || TRAVIS_CI || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
 			/*
 			 * Collect information about the host system for our report
-			 * Fetch phpinfo() output so that we can see the PHP enviroment
+			 * Fetch phpinfo() output so that we can see the PHP environment
 			 * Make an archive of all the failed tests
 			 * Send an email
 			 */

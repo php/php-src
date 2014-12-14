@@ -9,6 +9,11 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   h. HashTable API
   i. New portable macros for large file support
   j. New portable macros for integers
+  k. get_class_entry object handler info
+  l. get_class_name object handler info
+  m. Other portable macros info
+  n. ZEND_ENGINE_2 removal
+  o. Updated final class modifier
 
 2. Build system changes
   a. Unix build system changes
@@ -110,8 +115,39 @@ PHP 7.0 INTERNALS UPGRADE NOTES
      The handler is now obligatory, no longer accepts a `parent` argument and
      must return a non-NULL zend_string*, which will be released by the caller.
 
+  m. Other portable macros info
+
+     ZEND_SECURE_ZERO     - zeroes chunk of memory
+     ZEND_VALID_SOCKET    - validates a php_socket_t variable 
+
+     ZEND_FASTCALL is defined to use __vectorcall convention on VS2013 and above
+     ZEND_NORETURN is defined as __declspec(noreturn) on VS
+
+  n. The ZEND_ENGINE_2 macro has been removed. A ZEND_ENGINE_3 macro has been added.
+  
+  o. Removed ZEND_ACC_FINAL_CLASS in favour of ZEND_ACC_FINAL, turning final class
+     modifier now a different class entry flag. Update your extensions.
+
 ========================
 2. Build system changes
 ========================
 
-  
+  a. Unix build system changes
+
+  b. Windows build system changes
+
+     - Besides Visual Studio, building with Clang or Intel Composer is now
+       possible. To enable an alternative toolset, add the option
+       --with-toolset=[vs,clang,icc] to the configure line. The default
+       toolset is vs. Still clang or icc need the correct environment
+       which involves many tools from the vs toolset.
+
+       The toolset option is supported by phpize as well.
+
+       AWARENESS The only recommended and supported toolset to produce production
+       ready binaries is Visual Studio. Still other compilers can be used now for
+       testing and analyzing purposes.
+
+     - configure.js now produces response files which are passed to the linker
+       and library manager. This solves the issues with the long command lines
+       which can exceed the OS limit.

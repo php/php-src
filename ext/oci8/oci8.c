@@ -148,7 +148,7 @@ ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */
 
-#ifdef ZEND_ENGINE_2
+#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 
 /* {{{ Function arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_define_by_name, 0, 0, 3)
@@ -645,7 +645,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_trim_method, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-#else /* ZEND_ENGINE_2 */
+#else /* defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3) */
 /* {{{ Keep the old arginfo behavior when building with PHP 4 */
 
 static unsigned char arginfo_ocifetchinto[]  = { 2, BYREF_NONE, BYREF_FORCE };
@@ -755,7 +755,7 @@ static unsigned char arginfo_oci_bind_array_by_name[] = { 3, BYREF_NONE, BYREF_N
 #define arginfo_oci_collection_trim_method				NULL
 #define arginfo_oci_collection_free_method				NULL
 /* }}} */
-#endif /* ZEND_ENGINE_2 */
+#endif /* defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3) */
 
 /* {{{ extension function prototypes
 */
@@ -1475,7 +1475,7 @@ static void php_oci_pconnection_list_np_dtor(zend_resource *entry TSRMLS_DC)
 		 * semantics. With the PECL OCI 1.3.x extensions, we release pconnections when oci_close
 		 * takes the refcount to zero.
 		 *
-		 * If oci_old_close_semantics is set, we artifically bump up the refcount and decremented
+		 * If oci_old_close_semantics is set, we artificially bump up the refcount and decremented
 		 * only at request shutdown.
 		 */
 		php_oci_connection_release(connection TSRMLS_CC);

@@ -1,5 +1,7 @@
 --TEST--
 Test stripos() function : usage variations - unexpected inputs for 'haystack', 'needle' & 'offset' arguments
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : int stripos ( string $haystack, string $needle [, int $offset] );

@@ -2,6 +2,7 @@
 Test posix_getpgid() function : variation 
 --SKIPIF--
 <?php 
+PHP_INT_SIZE == 4 or die("skip - 32-bit only");
 if((!extension_loaded("posix")) || (!function_exists("posix_getpgid"))) {
 	 print "skip - POSIX extension not loaded or posix_getpgid() does not exist";
 } 
@@ -95,6 +96,8 @@ Arg value -10.5
 valid output
 
 Arg value 101234567000 
+
+Warning: posix_getpgid() expects parameter 1 to be long, double given in %s on line %d
 valid output
 
 Arg value 1.07654321E-9 

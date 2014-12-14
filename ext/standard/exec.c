@@ -242,9 +242,11 @@ PHP_FUNCTION(passthru)
 PHPAPI zend_string *php_escape_shell_cmd(char *str)
 {
 	register int x, y, l = (int)strlen(str);
-	char *p = NULL;
 	size_t estimate = (2 * l) + 1;
 	zend_string *cmd;
+#ifndef PHP_WIN32
+	char *p = NULL;
+#endif
 
 	TSRMLS_FETCH();
 
@@ -277,7 +279,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 				cmd->val[y++] = str[x];
 				break;
 #else
-			/* % is Windows specific for enviromental variables, ^%PATH% will 
+			/* % is Windows specific for environmental variables, ^%PATH% will 
 				output PATH whil ^%PATH^% not. escapeshellcmd->val will escape all %.
 			*/
 			case '%':

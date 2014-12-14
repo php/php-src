@@ -21,13 +21,13 @@ echo "*** Testing mcrypt_encrypt() : TripleDES functionality ***\n";
 //test tripledes, aes
 //test different lengths of key, iv
 //test no iv being passed on CBC, ECB 
-//test upto 32 bytes with unlimited strength
+//test up to 32 bytes with unlimited strength
 
 $cipher = MCRYPT_TRIPLEDES;
 $mode = MCRYPT_MODE_CBC;
 $data = b'This is the secret message which must be encrypted';
 
-// tripledes uses keys upto 192 bits (24 bytes)
+// tripledes uses keys up to 192 bits (24 bytes)
 $keys = array(
    b'12345678', 
    b'12345678901234567890', 

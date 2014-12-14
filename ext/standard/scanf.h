@@ -23,7 +23,7 @@
 
 
 #define SCAN_MAX_ARGS   0xFF    /* Maximum number of variable which can be      */
-                                /* passed to (f|s)scanf. This is an artifical   */
+                                /* passed to (f|s)scanf. This is an artificial   */
                                 /* upper limit to keep resources in check and   */
                                 /* minimize the possibility of exploits         */
 

@@ -65,7 +65,7 @@ int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 		    (op_array->vars[i]->h == hash_value &&
 		     op_array->vars[i]->len == name->len &&
 		     memcmp(op_array->vars[i]->val, name->val, name->len) == 0)) {
-			return (int)(zend_intptr_t)EX_VAR_NUM_2(NULL, i);
+			return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
 		}
 		i++;
 	}
@@ -96,7 +96,7 @@ int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 		}
 	}
 	
-	return (int)(zend_intptr_t)EX_VAR_NUM_2(NULL, i);
+	return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
 }
 
 int zend_optimizer_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC)
@@ -283,6 +283,14 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				case ZEND_ASSIGN_DIM:
 				case ZEND_SEPARATE:
 					return 0;
+				case ZEND_SEND_VAR:
+					opline->extended_value = 0;
+					opline->opcode = ZEND_SEND_VAL;
+					break;
+				case ZEND_SEND_VAR_EX:
+					opline->extended_value = 0;
+					opline->opcode = ZEND_SEND_VAL_EX;
+					break;
 				case ZEND_SEND_VAR_NO_REF:
 					if (opline->extended_value & ZEND_ARG_COMPILE_TIME_BOUND) {
 						if (opline->extended_value & ZEND_ARG_SEND_BY_REF) {
@@ -420,20 +428,20 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 	end = opline + op_array->last;
 	while (opline < end) {
 		if (opline->op1_type == IS_CONST) {
-			opline->op1.constant = opline->op1.zv - op_array->literals;
+			ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline->op1);
 		}
 		if (opline->op2_type == IS_CONST) {
-			opline->op2.constant = opline->op2.zv - op_array->literals;
+			ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline->op2);
 		}
 		switch (opline->opcode) {
 			case ZEND_JMP:
 			case ZEND_GOTO:
 			case ZEND_FAST_CALL:
-				ZEND_OP1(opline).opline_num = ZEND_OP1(opline).jmp_addr - op_array->opcodes;
+				ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, ZEND_OP1(opline));
 				break;
 			case ZEND_JMPZNZ:
 				/* relative offset into absolute index */
-				opline->extended_value = (zend_op*)(((char*)opline) + opline->extended_value) - op_array->opcodes;
+				opline->extended_value = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value);
 				/* break omitted intentionally */
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
@@ -444,7 +452,7 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_NEW:
 			case ZEND_FE_RESET:
 			case ZEND_FE_FETCH:
-				ZEND_OP2(opline).opline_num = ZEND_OP2(opline).jmp_addr - op_array->opcodes;
+				ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
 				break;
 		}
 		opline++;
@@ -458,20 +466,20 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 	end = opline + op_array->last;
 	while (opline < end) {
 		if (opline->op1_type == IS_CONST) {
-			opline->op1.zv = &op_array->literals[opline->op1.constant];
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
 		}
 		if (opline->op2_type == IS_CONST) {
-			opline->op2.zv = &op_array->literals[opline->op2.constant];
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
 		}
 		switch (opline->opcode) {
 			case ZEND_JMP:
 			case ZEND_GOTO:
 			case ZEND_FAST_CALL:
-				ZEND_OP1(opline).jmp_addr = &op_array->opcodes[ZEND_OP1(opline).opline_num];
+				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, ZEND_OP1(opline));
 				break;
 			case ZEND_JMPZNZ:
 				/* absolute index to relative offset */
-				opline->extended_value = (char*)(op_array->opcodes + opline->extended_value) - (char*)opline;
+				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
 				/* break omitted intentionally */
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
@@ -482,7 +490,7 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_NEW:
 			case ZEND_FE_RESET:
 			case ZEND_FE_FETCH:
-				ZEND_OP2(opline).jmp_addr = &op_array->opcodes[ZEND_OP2(opline).opline_num];
+				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
 				break;
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
