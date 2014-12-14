@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 7.0.0
 
@@ -26,6 +26,7 @@ PHP                                                                        NEWS
     constructor). (dunglas at gmail dot com)
   . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class 
     modifier. (Guilherme Blanco)
+  . is_long() and is_int() are now an alias of is_integer(). (Kalle)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
