@@ -24,7 +24,7 @@ Warning: IntlCalendar::setTime() expects exactly 1 parameter, 2 given in %s on l
 Warning: IntlCalendar::setTime(): intlcal_set_time: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlCalendar::setTime() expects parameter 1 to be double, string given in %s on line %d
+Warning: IntlCalendar::setTime() expects parameter 1 to be float, string given in %s on line %d
 
 Warning: IntlCalendar::setTime(): intlcal_set_time: bad arguments in %s on line %d
 bool(false)

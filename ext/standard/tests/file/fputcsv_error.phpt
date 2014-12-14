@@ -70,7 +70,7 @@ NULL
 Warning: fputcsv() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: fputcsv() expects parameter 1 to be resource, double given in %s on line %d
+Warning: fputcsv() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 -- Iteration 4 --
 

@@ -148,15 +148,15 @@ bool(false)
 bool(false)
 -- Iteration 19 --
 
-Warning: stripos() expects parameter 3 to be long, object given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, object given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 -- Iteration 21 --
 
-Warning: stripos() expects parameter 3 to be long, string given in %s on line %d
+Warning: stripos() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 -- Iteration 22 --
 bool(false)

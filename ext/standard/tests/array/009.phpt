@@ -500,7 +500,7 @@ NULL
 Warning: key() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: key() expects parameter 1 to be array, double given in %s on line %d
+Warning: key() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 Warning: key() expects parameter 1 to be array, string given in %s on line %d
@@ -509,7 +509,7 @@ NULL
 Warning: current() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: current() expects parameter 1 to be array, double given in %s on line %d
+Warning: current() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 Warning: current() expects parameter 1 to be array, string given in %s on line %d
@@ -518,7 +518,7 @@ NULL
 Warning: next() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: next() expects parameter 1 to be array, double given in %s on line %d
+Warning: next() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 Warning: next() expects parameter 1 to be array, string given in %s on line %d
@@ -527,7 +527,7 @@ NULL
 Warning: reset() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: reset() expects parameter 1 to be array, double given in %s on line %d
+Warning: reset() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 Warning: reset() expects parameter 1 to be array, string given in %s on line %d

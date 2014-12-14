@@ -130,13 +130,13 @@ FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer 
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer given
 
 -- float 10.5 --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, double given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, float given
 
 -- float -10.5 --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, double given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, float given
 
 -- float .5 --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, double given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, float given
 
 -- empty array --
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, array given

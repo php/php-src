@@ -36,7 +36,7 @@ bool(false)
 bool(true)
 bool(true)
 
-Warning: pspell_clear_session() expects parameter 1 to be long, object given in %s on line %d
+Warning: pspell_clear_session() expects parameter 1 to be integer, object given in %s on line %d
 NULL
 bool(true)
 bool(false)

@@ -40,7 +40,7 @@ try {
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: SplFixedArray::__construct() expects parameter 1 to be long, string given in %s on line %d
+Warning: SplFixedArray::__construct() expects parameter 1 to be integer, string given in %s on line %d
 Index invalid or out of range
 Index invalid or out of range
 Index invalid or out of range

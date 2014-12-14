@@ -676,7 +676,7 @@ END_EXTERN_C()
 #ifdef FAST_ZPP
 
 #define Z_EXPECTED_TYPES(_) \
-	_(Z_EXPECTED_LONG,		"long") \
+	_(Z_EXPECTED_LONG,		"integer") \
 	_(Z_EXPECTED_BOOL,		"boolean") \
 	_(Z_EXPECTED_STRING,	"string") \
 	_(Z_EXPECTED_ARRAY,		"array") \
@@ -684,7 +684,7 @@ END_EXTERN_C()
 	_(Z_EXPECTED_RESOURCE,	"resource") \
 	_(Z_EXPECTED_PATH,		"a valid path") \
 	_(Z_EXPECTED_OBJECT,	"object") \
-	_(Z_EXPECTED_DOUBLE,	"double")
+	_(Z_EXPECTED_DOUBLE,	"float")
 
 #define Z_EXPECTED_TYPE_ENUM(id, str) id,
 #define Z_EXPECTED_TYPE_STR(id, str)  str,

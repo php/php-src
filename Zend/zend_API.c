@@ -168,7 +168,7 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 		case IS_LONG:
 			return "integer";
 		case IS_DOUBLE:
-			return "double";
+			return "float";
 		case IS_STRING:
 			return "string";
 		case IS_OBJECT:
@@ -400,16 +400,16 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 							int type;
 
 							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), p, &d, -1)) == 0) {
-								return "long";
+								return "integer";
 							} else if (type == IS_DOUBLE) {
 								if (zend_isnan(d)) {
-									return "long";
+									return "integer";
 								}
 								if (!ZEND_DOUBLE_FITS_LONG(d)) {
 									if (c == 'L') {
 										*p = (d > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
 									} else {
-										return "long";
+										return "integer";
 									}
 									break;
 								}
@@ -421,13 +421,13 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 
 					case IS_DOUBLE:
 						if (zend_isnan(Z_DVAL_P(arg))) {
-							return "long";
+							return "integer";
 						}
 						if (!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg))) {
 							if (c == 'L') {
 								*p = (Z_DVAL_P(arg) > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
 							} else {
-								return "long";
+								return "integer";
 							}
 							break;
 						}
@@ -443,7 +443,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_OBJECT:
 					case IS_RESOURCE:
 					default:
-						return "long";
+						return "integer";
 				}
 			}
 			break;
@@ -464,7 +464,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 							int type;
 
 							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &l, p, -1)) == 0) {
-								return "double";
+								return "float";
 							} else if (type == IS_LONG) {
 								*p = (double) l;
 							}
@@ -484,7 +484,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					case IS_OBJECT:
 					case IS_RESOURCE:
 					default:
-						return "double";
+						return "float";
 				}
 			}
 			break;

@@ -1488,7 +1488,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 			return SUCCESS;
 		case IS_DOUBLE:
 			ce = Z_OBJCE_P(readobj);
-			zend_error(E_NOTICE, "Object of class %s could not be converted to double", ce->name->val);
+			zend_error(E_NOTICE, "Object of class %s could not be converted to float", ce->name->val);
 			if (readobj == writeobj) {
 				zval_dtor(readobj);
 			}

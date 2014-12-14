@@ -155,47 +155,47 @@ NULL
 int(-2345)
 
 -- Iteration 5 --
-Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, float given in %s on line %d
 NULL
 float(10.5)
 
-Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, float given in %s on line %d
 NULL
 float(10.5)
 
 -- Iteration 6 --
-Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, float given in %s on line %d
 NULL
 float(-10.5)
 
-Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, float given in %s on line %d
 NULL
 float(-10.5)
 
 -- Iteration 7 --
-Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, float given in %s on line %d
 NULL
 float(123456789000)
 
-Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, float given in %s on line %d
 NULL
 float(123456789000)
 
 -- Iteration 8 --
-Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, float given in %s on line %d
 NULL
 float(1.23456789E-9)
 
-Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, float given in %s on line %d
 NULL
 float(1.23456789E-9)
 
 -- Iteration 9 --
-Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, float given in %s on line %d
 NULL
 float(0.5)
 
-Warning: array_unshift() expects parameter 1 to be array, double given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, float given in %s on line %d
 NULL
 float(0.5)
 
