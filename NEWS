@@ -48,6 +48,7 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
+  . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
