@@ -168,7 +168,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								size_t * switch_to_auth_protocol_len,
 								zend_uchar ** switch_to_auth_protocol_data,
 								size_t * switch_to_auth_protocol_data_len
-								TSRMLS_DC)
+								)
 {
 	enum_func_status ret = FAIL;
 	const MYSQLND_CHARSET * old_cs = conn->charset;

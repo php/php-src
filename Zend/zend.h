@@ -52,8 +52,8 @@
 # define HANDLE_UNBLOCK_INTERRUPTIONS()		ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
 #endif
 
-#define INTERNAL_FUNCTION_PARAMETERS zend_execute_data *execute_data, zval *return_value TSRMLS_DC
-#define INTERNAL_FUNCTION_PARAM_PASSTHRU execute_data, return_value TSRMLS_CC
+#define INTERNAL_FUNCTION_PARAMETERS zend_execute_data *execute_data, zval *return_value
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU execute_data, return_value
 
 #define USED_RET() \
 	(!EX(prev_execute_data) || \

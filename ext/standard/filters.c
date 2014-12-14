@@ -40,7 +40,7 @@ static php_stream_filter_status_t strfilter_rot13_filter(
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
 	int flags
-	TSRMLS_DC)
+	)
 {
 	php_stream_bucket *bucket;
 	size_t consumed = 0;
@@ -88,7 +88,7 @@ static php_stream_filter_status_t strfilter_toupper_filter(
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
 	int flags
-	TSRMLS_DC)
+	)
 {
 	php_stream_bucket *bucket;
 	size_t consumed = 0;
@@ -116,7 +116,7 @@ static php_stream_filter_status_t strfilter_tolower_filter(
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
 	int flags
-	TSRMLS_DC)
+	)
 {
 	php_stream_bucket *bucket;
 	size_t consumed = 0;
@@ -207,7 +207,7 @@ static php_stream_filter_status_t strfilter_strip_tags_filter(
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
 	int flags
-	TSRMLS_DC)
+	)
 {
 	php_stream_bucket *bucket;
 	size_t consumed = 0;
@@ -1726,7 +1726,7 @@ static php_stream_filter_status_t strfilter_convert_filter(
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
 	int flags
-	TSRMLS_DC)
+	)
 {
 	php_stream_bucket *bucket = NULL;
 	size_t consumed = 0;
@@ -1845,7 +1845,7 @@ static php_stream_filter_status_t consumed_filter_filter(
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
 	int flags
-	TSRMLS_DC)
+	)
 {
 	php_consumed_filter_data *data = (php_consumed_filter_data *)Z_PTR(thisfilter->abstract);
 	php_stream_bucket *bucket;
@@ -2058,7 +2058,7 @@ static php_stream_filter_status_t php_chunked_filter(
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
 	int flags
-	TSRMLS_DC)
+	)
 {
 	php_stream_bucket *bucket;
 	size_t consumed = 0;
@@ -2144,7 +2144,7 @@ PHP_MINIT_FUNCTION(standard_filters)
 		if (FAILURE == php_stream_filter_register_factory(
 					standard_filters[i].ops->label,
 					standard_filters[i].factory
-					TSRMLS_CC)) {
+					)) {
 			return FAILURE;
 		}
 	}

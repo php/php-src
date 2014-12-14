@@ -196,7 +196,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 PHPAPI int php_stream_xport_bind(php_stream *stream,
 		const char *name, size_t namelen,
 		zend_string **error_text
-		TSRMLS_DC)
+		)
 {
 	php_stream_xport_param param;
 	int ret;
@@ -227,7 +227,7 @@ PHPAPI int php_stream_xport_connect(php_stream *stream,
 		struct timeval *timeout,
 		zend_string **error_text,
 		int *error_code
-		TSRMLS_DC)
+		)
 {
 	php_stream_xport_param param;
 	int ret;
@@ -286,7 +286,7 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 		void **addr, socklen_t *addrlen,
 		struct timeval *timeout,
 		zend_string **error_text
-		TSRMLS_DC)
+		)
 {
 	php_stream_xport_param param;
 	int ret;
@@ -322,7 +322,7 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
 		zend_string **textaddr,
 		void **addr, socklen_t *addrlen
-		TSRMLS_DC)
+		)
 {
 	php_stream_xport_param param;
 	int ret;
@@ -394,7 +394,7 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate)
  * peeking, optionally retrieving OOB data */
 PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t buflen,
 		int flags, void **addr, socklen_t *addrlen, zend_string **textaddr
-		TSRMLS_DC)
+		)
 {
 	php_stream_xport_param param;
 	int ret = 0;

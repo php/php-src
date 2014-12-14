@@ -39,7 +39,6 @@ void phpdbg_init_lexer (phpdbg_param_t *stack, char *input) {
 }
 
 int phpdbg_lex (phpdbg_param_t* yylval) {
-	TSRMLS_FETCH(); /* Slow, but this is not a major problem here. TODO: Use TSRMLS_DC */
 
 restart:
 	LEX(text) = YYCURSOR;

@@ -560,7 +560,7 @@ void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 		ZEND_FETCH_RESOURCE(*trans, ibase_trans *, link_id, -1, LE_TRANS, le_trans);
 		if ((*trans)->link_cnt > 1) {
 			_php_ibase_module_error("Link id is ambiguous: transaction spans multiple connections."
-				TSRMLS_CC);
+				);
 			return;
 		}				
 		*ib_link = (*trans)->db_link[0];

@@ -32,13 +32,13 @@
 /* To check php_session_valid_key()/php_session_reset_id() */
 #define PHP_SESSION_STRICT 1
 
-#define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name TSRMLS_DC
-#define PS_CLOSE_ARGS void **mod_data TSRMLS_DC
-#define PS_READ_ARGS void **mod_data, zend_string *key, zend_string **val TSRMLS_DC
-#define PS_WRITE_ARGS void **mod_data, zend_string *key, zend_string *val TSRMLS_DC
-#define PS_DESTROY_ARGS void **mod_data, zend_string *key TSRMLS_DC
-#define PS_GC_ARGS void **mod_data, int maxlifetime, int *nrdels TSRMLS_DC
-#define PS_CREATE_SID_ARGS void **mod_data TSRMLS_DC
+#define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name
+#define PS_CLOSE_ARGS void **mod_data
+#define PS_READ_ARGS void **mod_data, zend_string *key, zend_string **val
+#define PS_WRITE_ARGS void **mod_data, zend_string *key, zend_string *val
+#define PS_DESTROY_ARGS void **mod_data, zend_string *key
+#define PS_GC_ARGS void **mod_data, int maxlifetime, int *nrdels
+#define PS_CREATE_SID_ARGS void **mod_data
 
 /* default create id function */
 PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS);
@@ -198,7 +198,7 @@ ZEND_TSRMLS_CACHE_EXTERN;
 #endif
 
 #define PS_SERIALIZER_ENCODE_ARGS TSRMLS_D
-#define PS_SERIALIZER_DECODE_ARGS const char *val, int vallen TSRMLS_DC
+#define PS_SERIALIZER_DECODE_ARGS const char *val, int vallen
 
 typedef struct ps_serializer_struct {
 	const char *name;

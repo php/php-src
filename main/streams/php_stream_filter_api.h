@@ -90,7 +90,7 @@ typedef struct _php_stream_filter_ops {
 			php_stream_bucket_brigade *buckets_out,
 			size_t *bytes_consumed,
 			int flags
-			TSRMLS_DC);
+			);
 	
 	void (*dtor)(php_stream_filter *thisfilter);
 	

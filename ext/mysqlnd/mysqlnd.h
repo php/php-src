@@ -104,12 +104,12 @@ PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn,
 PHPAPI void _mysqlnd_debug(const char *mode);
 
 /* Query */
-#define mysqlnd_fetch_into(result, flags, ret_val, ext)	(result)->m.fetch_into((result), (flags), (ret_val), (ext) TSRMLS_CC ZEND_FILE_LINE_CC)
+#define mysqlnd_fetch_into(result, flags, ret_val, ext)	(result)->m.fetch_into((result), (flags), (ret_val), (ext) ZEND_FILE_LINE_CC)
 #define mysqlnd_fetch_row_c(result)						(result)->m.fetch_row_c((result))
-#define mysqlnd_fetch_all(result, flags, return_value)	(result)->m.fetch_all((result), (flags), (return_value) TSRMLS_CC ZEND_FILE_LINE_CC)
+#define mysqlnd_fetch_all(result, flags, return_value)	(result)->m.fetch_all((result), (flags), (return_value) ZEND_FILE_LINE_CC)
 #define mysqlnd_result_fetch_field_data(res,offset,ret)	(res)->m.fetch_field_data((res), (offset), (ret))
-#define mysqlnd_get_connection_stats(conn, values)		((conn)->data)->m->get_statistics((conn)->data,  (values) TSRMLS_CC ZEND_FILE_LINE_CC)
-#define mysqlnd_get_client_stats(values)				_mysqlnd_get_client_stats((values) TSRMLS_CC ZEND_FILE_LINE_CC)
+#define mysqlnd_get_connection_stats(conn, values)		((conn)->data)->m->get_statistics((conn)->data,  (values) ZEND_FILE_LINE_CC)
+#define mysqlnd_get_client_stats(values)				_mysqlnd_get_client_stats((values) ZEND_FILE_LINE_CC)
 
 #define mysqlnd_close(conn,is_forced)					(conn)->m->close((conn), (is_forced))
 #define mysqlnd_query(conn, query_str, query_len)		((conn)->data)->m->query((conn)->data, (query_str), (query_len))
@@ -257,7 +257,7 @@ PHPAPI zend_ulong mysqlnd_old_escape_string(char * newstr, const char * escapest
 
 
 /* Performance statistics */
-PHPAPI void			_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC);
+PHPAPI void			_mysqlnd_get_client_stats(zval *return_value ZEND_FILE_LINE_DC);
 
 /* double check the class name to avoid naming conflicts when using these: */
 #define MYSQLND_METHOD(class, method) php_##class##_##method##_pub

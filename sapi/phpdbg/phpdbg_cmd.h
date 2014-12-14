@@ -169,7 +169,7 @@ PHPDBG_API void phpdbg_param_debug(const phpdbg_param_t *param, const char *msg)
 
 #define PHPDBG_COMMAND(name) int phpdbg_do_##name(const phpdbg_param_t *param)
 
-#define PHPDBG_COMMAND_ARGS param TSRMLS_CC
+#define PHPDBG_COMMAND_ARGS param
 
 #define PHPDBG_END_COMMAND {NULL, 0, NULL, 0, '\0', NULL, NULL, NULL, NULL, 0}
 

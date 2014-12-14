@@ -1714,7 +1714,7 @@ MYSQLND_METHOD(mysqlnd_res, field_tell)(const MYSQLND_RES * const result)
 static void
 MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int flags,
 										zval *return_value,
-										enum_mysqlnd_extension extension TSRMLS_DC ZEND_FILE_LINE_DC)
+										enum_mysqlnd_extension extension ZEND_FILE_LINE_DC)
 {
 	zend_bool fetched_anything;
 
@@ -1773,7 +1773,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result)
 
 /* {{{ mysqlnd_res::fetch_all */
 static void
-MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int flags, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int flags, zval *return_value ZEND_FILE_LINE_DC)
 {
 	zval  row;
 	zend_ulong i = 0;

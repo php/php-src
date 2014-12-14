@@ -385,7 +385,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	 * at this time. */
 	if (stmt->methods->param_hook) {
 		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_NORMALIZE
-				TSRMLS_CC)) {
+				)) {
 			if (param->name) {
 				zend_string_release(param->name);
 				param->name = NULL;
@@ -411,7 +411,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	/* tell the driver we just created a parameter */
 	if (stmt->methods->param_hook) {
 		if (!stmt->methods->param_hook(stmt, pparam, PDO_PARAM_EVT_ALLOC
-					TSRMLS_CC)) {
+					)) {
 			/* undo storage allocation; the hash will free the parameter
 			 * name if required */
 			if (pparam->name) {

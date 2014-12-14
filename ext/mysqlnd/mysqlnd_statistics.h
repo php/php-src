@@ -157,7 +157,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 
 #endif /* MYSQLND_CORE_STATISTICS_DISABLED */
 
-PHPAPI void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC);
+PHPAPI void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value ZEND_FILE_LINE_DC);
 
 PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count);
 PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats);

@@ -549,7 +549,7 @@ mysqlnd_run_authentication(
 			zend_ulong mysql_flags,
 			zend_bool silent,
 			zend_bool is_change_user
-			TSRMLS_DC)
+			)
 {
 	enum_func_status ret = FAIL;
 	zend_bool first_call = TRUE;
@@ -622,7 +622,7 @@ mysqlnd_run_authentication(
 											scrambled_data, scrambled_data_len,
 											&switch_to_auth_protocol, &switch_to_auth_protocol_len,
 											&switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
-											TSRMLS_CC);
+											);
 			} else {
 				ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, passwd_len, db, db_len, silent,
 											   first_call,
@@ -679,7 +679,7 @@ mysqlnd_connect_run_authentication(
 			const MYSQLND_PACKET_GREET * const greet_packet,
 			const MYSQLND_OPTIONS * const options,
 			zend_ulong mysql_flags
-			TSRMLS_DC)
+			)
 {
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_connect_run_authentication");
@@ -2302,7 +2302,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const conn,
 												enum mysqlnd_option option,
 												const char * const value
-												TSRMLS_DC)
+												)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, set_client_option);
 	enum_func_status ret = PASS;
@@ -2473,7 +2473,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 														enum mysqlnd_option option,
 														const char * const key,
 														const char * const value
-														TSRMLS_DC)
+														)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, set_client_option_2d);
 	enum_func_status ret = PASS;
@@ -2616,10 +2616,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, 
 /* {{{ mysqlnd_conn_data::get_connection_stats */
 static void
 MYSQLND_METHOD(mysqlnd_conn_data, get_connection_stats)(const MYSQLND_CONN_DATA * const conn,
-												   zval * return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+												   zval * return_value ZEND_FILE_LINE_DC)
 {
 	DBG_ENTER("mysqlnd_conn_data::get_connection_stats");
-	mysqlnd_fill_stats_hash(conn->stats, mysqlnd_stats_values_names, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
+	mysqlnd_fill_stats_hash(conn->stats, mysqlnd_stats_values_names, return_value ZEND_FILE_LINE_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */

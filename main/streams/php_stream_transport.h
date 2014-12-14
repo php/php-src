@@ -61,7 +61,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 PHPAPI int php_stream_xport_bind(php_stream *stream,
 		const char *name, size_t namelen,
 		zend_string **error_text
-		TSRMLS_DC);
+		);
 
 /* Connect to a remote address */
 PHPAPI int php_stream_xport_connect(php_stream *stream,
@@ -70,13 +70,13 @@ PHPAPI int php_stream_xport_connect(php_stream *stream,
 		struct timeval *timeout,
 		zend_string **error_text,
 		int *error_code
-		TSRMLS_DC);
+		);
 
 /* Prepare to listen */
 PHPAPI int php_stream_xport_listen(php_stream *stream,
 		int backlog,
 		zend_string **error_text
-		TSRMLS_DC);
+		);
 
 /* Get the next client and their address as a string, or the underlying address
  * structure.  You must efree either of these if you request them */
@@ -85,13 +85,13 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 		void **addr, socklen_t *addrlen,
 		struct timeval *timeout,
 		zend_string **error_text
-		TSRMLS_DC);
+		);
 
 /* Get the name of either the socket or it's peer */
 PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
 		zend_string **textaddr,
 		void **addr, socklen_t *addrlen
-		TSRMLS_DC);
+		);
 
 enum php_stream_xport_send_recv_flags {
 	STREAM_OOB = 1,

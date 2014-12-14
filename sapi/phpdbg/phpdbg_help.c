@@ -180,7 +180,7 @@ static int get_command(
 	const char *key, size_t len,      /* pointer and length of key */
 	phpdbg_command_t const **command, /* address of first matching command  */
 	phpdbg_command_t const * commands /* command table to be scanned */
-	TSRMLS_DC)
+	)
 {
 	const phpdbg_command_t *c;
 	unsigned int num_matches = 0;

@@ -64,7 +64,7 @@ mysqlnd_minfo_dump_plugin_stats(zval *el, void * argument)
 		zval values;
 		snprintf(buf, sizeof(buf), "%s statistics", plugin_header->plugin_name);
 
-		mysqlnd_fill_stats_hash(plugin_header->plugin_stats.values, plugin_header->plugin_stats.names, &values TSRMLS_CC ZEND_FILE_LINE_CC); 
+		mysqlnd_fill_stats_hash(plugin_header->plugin_stats.values, plugin_header->plugin_stats.names, &values ZEND_FILE_LINE_CC); 
 
 		php_info_print_table_start();
 		php_info_print_table_header(2, buf, "");

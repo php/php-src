@@ -377,7 +377,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 			&zfuncname,
 			&zretval,
 			4, args,
-			0, NULL	TSRMLS_CC);
+			0, NULL	);
 
 	if (call_result == SUCCESS && Z_TYPE(zretval) != IS_UNDEF && zval_is_true(&zretval)) {
 		/* the stream is now open! */
@@ -452,7 +452,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 			&zfuncname,
 			&zretval,
 			2, args,
-			0, NULL	TSRMLS_CC);
+			0, NULL	);
 
 	if (call_result == SUCCESS && Z_TYPE(zretval) != IS_UNDEF && zval_is_true(&zretval)) {
 		/* the stream is now open! */
@@ -1107,7 +1107,7 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 			&zfuncname,
 			&zretval,
 			1, args,
-			0, NULL	TSRMLS_CC);
+			0, NULL	);
 
 	if (call_result == SUCCESS && (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE)) {
 		ret = (Z_TYPE(zretval) == IS_TRUE);
@@ -1152,7 +1152,7 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 			&zfuncname,
 			&zretval,
 			2, args,
-			0, NULL	TSRMLS_CC);
+			0, NULL	);
 
 	if (call_result == SUCCESS && (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE)) {
 		ret = (Z_TYPE(zretval) == IS_TRUE);
@@ -1199,7 +1199,7 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 			&zfuncname,
 			&zretval,
 			3, args,
-			0, NULL	TSRMLS_CC);
+			0, NULL	);
 
 	if (call_result == SUCCESS && (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE)) {
 		ret = (Z_TYPE(zretval) == IS_TRUE);
@@ -1246,7 +1246,7 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
 			&zfuncname,
 			&zretval,
 			2, args,
-			0, NULL	TSRMLS_CC);
+			0, NULL	);
 
 	if (call_result == SUCCESS && (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE)) {
 		ret = (Z_TYPE(zretval) == IS_TRUE);
@@ -1317,7 +1317,7 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 			&zfuncname,
 			&zretval,
 			3, args,
-			0, NULL	TSRMLS_CC);
+			0, NULL	);
 
 	if (call_result == SUCCESS && (Z_TYPE(zretval) == IS_FALSE || Z_TYPE(zretval) == IS_TRUE)) {
 		ret = Z_TYPE(zretval) == IS_TRUE;
@@ -1365,7 +1365,7 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 			&zfuncname,
 			&zretval,
 			2, args,
-			0, NULL	TSRMLS_CC);
+			0, NULL	);
 
 	if (call_result == SUCCESS && Z_TYPE(zretval) == IS_ARRAY) {
 		/* We got the info we needed */

@@ -477,7 +477,7 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 #define DO_BINARY_UI_OP_EX(op, uop, check_b_zero)       \
 	gmp_zval_binary_ui_op(                              \
 		result, op1, op2, op, (gmp_binary_ui_op_t) uop, \
-		check_b_zero TSRMLS_CC                          \
+		check_b_zero                          \
 	);                                                  \
 	return SUCCESS;
 

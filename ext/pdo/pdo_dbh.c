@@ -500,7 +500,7 @@ static PHP_METHOD(PDO, prepare)
 			pdo_raise_impl_error(dbh, NULL, "HY000", 
 				"PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
 				"the classname must be a string specifying an existing class"
-				TSRMLS_CC);
+				);
 			PDO_HANDLE_DBH_ERR();
 			RETURN_FALSE;
 		}
@@ -522,7 +522,7 @@ static PHP_METHOD(PDO, prepare)
 				pdo_raise_impl_error(dbh, NULL, "HY000", 
 					"PDO::ATTR_STATEMENT_CLASS requires format array(classname, ctor_args); "
 					"ctor_args must be an array"
-				TSRMLS_CC);
+				);
 				PDO_HANDLE_DBH_ERR();
 				RETURN_FALSE;
 			}
@@ -538,7 +538,7 @@ static PHP_METHOD(PDO, prepare)
 	if (!pdo_stmt_instantiate(dbh, return_value, dbstmt_ce, &ctor_args)) {
 		pdo_raise_impl_error(dbh, NULL, "HY000", 
 			"failed to instantiate user-supplied statement class"
-			TSRMLS_CC);
+			);
 		PDO_HANDLE_DBH_ERR();
 		RETURN_FALSE;
 	}
@@ -756,7 +756,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 			if (dbh->is_persistent) {
 				pdo_raise_impl_error(dbh, NULL, "HY000", 
 					"PDO::ATTR_STATEMENT_CLASS cannot be used with persistent PDO instances"
-					TSRMLS_CC);
+					);
 				PDO_HANDLE_DBH_ERR();
 				return FAILURE;
 			}
@@ -768,7 +768,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 				pdo_raise_impl_error(dbh, NULL, "HY000", 
 					"PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
 					"the classname must be a string specifying an existing class"
-					TSRMLS_CC);
+					);
 				PDO_HANDLE_DBH_ERR();
 				return FAILURE;
 			}
@@ -794,7 +794,7 @@ static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value) /*
 					pdo_raise_impl_error(dbh, NULL, "HY000", 
 						"PDO::ATTR_STATEMENT_CLASS requires format array(classname, array(ctor_args)); "
 						"ctor_args must be an array"
-					TSRMLS_CC);
+					);
 					PDO_HANDLE_DBH_ERR();
 					return FAILURE;
 				}

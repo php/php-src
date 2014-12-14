@@ -169,7 +169,7 @@ php_stream_filter_status_t userfilter_filter(
 			php_stream_bucket_brigade *buckets_out,
 			size_t *bytes_consumed,
 			int flags
-			TSRMLS_DC)
+			)
 {
 	int ret = PSFS_ERR_FATAL;
 	zval *obj = &thisfilter->abstract;

@@ -272,7 +272,7 @@ PHP_FUNCTION(stream_socket_accept)
 				zpeername ? &peername : NULL,
 				NULL, NULL,
 				&tv, &errstr
-				TSRMLS_CC) && clistream) {
+				) && clistream) {
 
 		if (peername) {
 			ZVAL_STR(zpeername, peername);
@@ -307,7 +307,7 @@ PHP_FUNCTION(stream_socket_get_name)
 	if (0 != php_stream_xport_get_name(stream, want_peer,
 				&name,
 				NULL, NULL
-				TSRMLS_CC)) {
+				)) {
 		RETURN_FALSE;
 	}
 
@@ -376,7 +376,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 
 	recvd = php_stream_xport_recvfrom(stream, read_buf->val, to_read, (int)flags, NULL, NULL,
 			zremote ? &remote_addr : NULL
-			TSRMLS_CC);
+			);
 
 	if (recvd >= 0) {
 		if (zremote) {

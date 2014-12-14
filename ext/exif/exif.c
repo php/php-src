@@ -50,11 +50,11 @@
 #undef EXIF_DEBUG
 
 #ifdef EXIF_DEBUG
-#define EXIFERR_DC , const char *_file, size_t _line TSRMLS_DC
-#define EXIFERR_CC , __FILE__, __LINE__ TSRMLS_CC
+#define EXIFERR_DC , const char *_file, size_t _line
+#define EXIFERR_CC , __FILE__, __LINE__
 #else
-#define EXIFERR_DC TSRMLS_DC
-#define EXIFERR_CC TSRMLS_CC
+#define EXIFERR_DC
+#define EXIFERR_CC
 #endif
 
 #undef EXIF_JPEG2000
@@ -2644,7 +2644,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 					ByteCount,
 					zend_multibyte_fetch_encoding(ImageInfo->encode_unicode),
 					zend_multibyte_fetch_encoding(decode)
-					TSRMLS_CC) == (size_t)-1) {
+					) == (size_t)-1) {
 				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 			}
 			return len;
@@ -2665,7 +2665,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 					ByteCount,
 					zend_multibyte_fetch_encoding(ImageInfo->encode_jis),
 					zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_jis_be : ImageInfo->decode_jis_le)
-					TSRMLS_CC) == (size_t)-1) {
+					) == (size_t)-1) {
 				len = exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
 			}
 			return len;
@@ -2704,7 +2704,7 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
 			ByteCount,
 			zend_multibyte_fetch_encoding(ImageInfo->encode_unicode),
 			zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_unicode_be : ImageInfo->decode_unicode_le)
-			TSRMLS_CC) == (size_t)-1) {
+			) == (size_t)-1) {
 		xp_field->size = exif_process_string_raw(&xp_field->value, szValuePtr, ByteCount);
 	}
 	return xp_field->size;

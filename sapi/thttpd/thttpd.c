@@ -354,7 +354,7 @@ static int php_thttpd_startup(sapi_module_struct *sapi_module)
 #if PHP_API_VERSION >= 20020918
 	if (php_module_startup(sapi_module, &php_thttpd_module, 1) == FAILURE) {
 #else
-	/* No TSRMLS_CC here to zend_startup_module() as 5.6 and older does not have that parameter */
+	/* No here to zend_startup_module() as 5.6 and older does not have that parameter */
 	if (php_module_startup(sapi_module) == FAILURE
 			|| zend_startup_module(&php_thttpd_module) == FAILURE) {
 #endif

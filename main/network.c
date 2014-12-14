@@ -417,7 +417,7 @@ static inline void sub_times(struct timeval a, struct timeval b, struct timeval 
 /* {{{ php_network_bind_socket_to_local_addr */
 php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
 		int socktype, long sockopts, zend_string **error_string, int *error_code
-		TSRMLS_DC)
+		)
 {
 	int num_addrs, n, err = 0;
 	php_socket_t sock;
@@ -602,7 +602,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 		/* output address */
 		struct sockaddr **addr,
 		socklen_t *addrlen
-		TSRMLS_DC)
+		)
 {
 	if (addr) {
 		*addr = emalloc(sl);
@@ -663,7 +663,7 @@ PHPAPI int php_network_get_peer_name(php_socket_t sock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen
-		TSRMLS_DC)
+		)
 {
 	php_sockaddr_storage sa;
 	socklen_t sl = sizeof(sa);
@@ -673,7 +673,7 @@ PHPAPI int php_network_get_peer_name(php_socket_t sock,
 		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 				textaddr,
 				addr, addrlen
-				TSRMLS_CC);
+				);
 		return 0;
 	}
 	return -1;
@@ -683,7 +683,7 @@ PHPAPI int php_network_get_sock_name(php_socket_t sock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen
-		TSRMLS_DC)
+		)
 {
 	php_sockaddr_storage sa;
 	socklen_t sl = sizeof(sa);
@@ -693,7 +693,7 @@ PHPAPI int php_network_get_sock_name(php_socket_t sock,
 		php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 				textaddr,
 				addr, addrlen
-				TSRMLS_CC);
+				);
 		return 0;
 	}
 	return -1;
@@ -717,7 +717,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		struct timeval *timeout,
 		zend_string **error_string,
 		int *error_code
-		TSRMLS_DC)
+		)
 {
 	php_socket_t clisock = -1;
 	int error = 0, n;
@@ -739,7 +739,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 			php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 					textaddr,
 					addr, addrlen
-					TSRMLS_CC);
+					);
 		} else {
 			error = php_socket_errno();
 		}
@@ -768,7 +768,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
 		int *error_code, char *bindto, unsigned short bindport, long sockopts
-		TSRMLS_DC)
+		)
 {
 	int num_addrs, n, fatal = 0;
 	php_socket_t sock;

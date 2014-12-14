@@ -323,8 +323,8 @@ static inline size_t parse_uiv(const unsigned char *p)
 	return result;
 }
 
-#define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes TSRMLS_DC
-#define UNSERIALIZE_PASSTHRU rval, p, max, var_hash, classes TSRMLS_CC
+#define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes
+#define UNSERIALIZE_PASSTHRU rval, p, max, var_hash, classes
 
 static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, int objprops)
 {

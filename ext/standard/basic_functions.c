@@ -4879,8 +4879,7 @@ static int user_shutdown_function_call(zval *zv) /* {{{ */
 				&shutdown_function_entry->arguments[0],
 				&retval,
 				shutdown_function_entry->arg_count - 1,
-				shutdown_function_entry->arguments + 1
-				TSRMLS_CC ) == SUCCESS)
+				shutdown_function_entry->arguments + 1) == SUCCESS)
 	{
 		zval_dtor(&retval);
 	}
@@ -4902,7 +4901,7 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 								&retval,
 								tick_fe->arg_count - 1,
 								tick_fe->arguments + 1
-								TSRMLS_CC) == SUCCESS) {
+								) == SUCCESS) {
 			zval_dtor(&retval);
 
 		} else {

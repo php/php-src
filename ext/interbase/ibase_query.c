@@ -1107,7 +1107,7 @@ PHP_FUNCTION(ibase_query)
 
 				if (PG(sql_safe_mode)) {
 					_php_ibase_module_error("CREATE DATABASE is not allowed in SQL safe mode"
-						TSRMLS_CC);
+						);
 
 				} else if (((l = INI_INT("ibase.max_links")) != -1) && (IBG(num_links) >= l)) {
 					_php_ibase_module_error("CREATE DATABASE is not allowed: maximum link count "
@@ -1572,7 +1572,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 								item == isc_info_error || i >= sizeof(bl_info)) {
 
 								_php_ibase_module_error("Could not determine BLOB size (internal error)"
-									TSRMLS_CC);
+									);
 								goto _php_ibase_fetch_error;
 							}								
 

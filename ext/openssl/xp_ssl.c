@@ -1370,7 +1370,7 @@ static void enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *
 int php_openssl_setup_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
 		php_stream_xport_crypto_param *cparam
-		TSRMLS_DC) /* {{{ */
+		) /* {{{ */
 {
 	const SSL_METHOD *method;
 	long ssl_ctx_options;
@@ -1596,7 +1596,7 @@ static int capture_peer_certs(php_stream *stream, php_openssl_netstream_data_t *
 static int php_openssl_enable_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
 		php_stream_xport_crypto_param *cparam
-		TSRMLS_DC)
+		)
 {
 	int n;
 	int retry = 1;
@@ -1913,7 +1913,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 			xparam->inputs.timeout,
 			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 			&xparam->outputs.error_code
-			TSRMLS_CC);
+			);
 
 	if (clisock >= 0) {
 		php_openssl_netstream_data_t *clisockdata;

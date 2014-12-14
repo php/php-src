@@ -244,7 +244,7 @@ static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb)
 
 static inline int sock_sendto(php_netstream_data_t *sock, const char *buf, size_t buflen, int flags,
 		struct sockaddr *addr, socklen_t addrlen
-		TSRMLS_DC)
+		)
 {
 	int ret;
 	if (addr) {
@@ -262,7 +262,7 @@ static inline int sock_sendto(php_netstream_data_t *sock, const char *buf, size_
 static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t buflen, int flags,
 		zend_string **textaddr,
 		struct sockaddr **addr, socklen_t *addrlen
-		TSRMLS_DC)
+		)
 {
 	php_sockaddr_storage sa;
 	socklen_t sl = sizeof(sa);
@@ -353,7 +353,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 							xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
 							xparam->want_addr ? &xparam->outputs.addr : NULL,
 							xparam->want_addr ? &xparam->outputs.addrlen : NULL
-							TSRMLS_CC);
+							);
 					return PHP_STREAM_OPTION_RETURN_OK;
 
 				case STREAM_XPORT_OP_GET_PEER_NAME:
@@ -361,7 +361,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 							xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
 							xparam->want_addr ? &xparam->outputs.addr : NULL,
 							xparam->want_addr ? &xparam->outputs.addrlen : NULL
-							TSRMLS_CC);
+							);
 					return PHP_STREAM_OPTION_RETURN_OK;
 
 				case STREAM_XPORT_OP_SEND:
@@ -396,7 +396,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 							xparam->want_textaddr ? &xparam->outputs.textaddr : NULL,
 							xparam->want_addr ? &xparam->outputs.addr : NULL,
 							xparam->want_addr ? &xparam->outputs.addrlen : NULL
-							TSRMLS_CC);
+							);
 					return PHP_STREAM_OPTION_RETURN_OK;
 
 
@@ -647,7 +647,7 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 			sockopts,
 			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 			&err
-			TSRMLS_CC);
+			);
 	
 	if (host) {
 		efree(host);
@@ -733,7 +733,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 			bindto,
 			bindport,
 			sockopts
-			TSRMLS_CC);
+			);
 	
 	ret = sock->socket == -1 ? -1 : 0;
 	xparam->outputs.error_code = err;
@@ -771,7 +771,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 			xparam->inputs.timeout,
 			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 			&xparam->outputs.error_code
-			TSRMLS_CC);
+			);
 
 	if (clisock >= 0) {
 		php_netstream_data_t *clisockdata;

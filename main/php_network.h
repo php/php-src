@@ -236,7 +236,7 @@ PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
 		int *error_code, char *bindto, unsigned short bindport, long sockopts
-		TSRMLS_DC);
+		);
 
 PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		const struct sockaddr *addr,
@@ -251,7 +251,7 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 
 PHPAPI php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
 		int socktype, long sockopts, zend_string **error_string, int *error_code
-		TSRMLS_DC);
+		);
 
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		zend_string **textaddr,
@@ -260,19 +260,19 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		struct timeval *timeout,
 		zend_string **error_string,
 		int *error_code
-		TSRMLS_DC);
+		);
 
 PHPAPI int php_network_get_sock_name(php_socket_t sock, 
 		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen
-		TSRMLS_DC);
+		);
 	
 PHPAPI int php_network_get_peer_name(php_socket_t sock, 
 		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen
-		TSRMLS_DC);
+		);
 
 PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short port);
 PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr);
@@ -303,7 +303,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 		/* output address */
 		struct sockaddr **addr,
 		socklen_t *addrlen
-		TSRMLS_DC);
+		);
 
 PHPAPI int php_network_parse_network_address_with_port(const char *addr,
 		zend_long addrlen, struct sockaddr *sa, socklen_t *sl);

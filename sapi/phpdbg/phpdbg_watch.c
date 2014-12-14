@@ -525,7 +525,7 @@ int phpdbg_watchpoint_segfault_handler(siginfo_t *info, void *context) {
 #else
 		info->si_addr
 #endif
-		TSRMLS_CC);
+		);
 
 	if (watch == NULL) {
 		return FAILURE;

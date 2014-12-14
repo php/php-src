@@ -188,8 +188,8 @@ enum {
 #define YYMARKER q
 #define STATE ctx->state
 
-#define STD_PARA url_adapt_state_ex_t *ctx, char *start, char *YYCURSOR TSRMLS_DC
-#define STD_ARGS ctx, start, xp TSRMLS_CC
+#define STD_PARA url_adapt_state_ex_t *ctx, char *start, char *YYCURSOR
+#define STD_ARGS ctx, start, xp
 
 #if SCANNER_DEBUG
 #define scdebug(x) printf x

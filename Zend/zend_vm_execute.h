@@ -331,7 +331,7 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend
 #define ZEND_VM_LEAVE()            return  2
 #define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 
-#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC
+#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data
 
 ZEND_API void execute_ex(zend_execute_data *execute_data)
 {

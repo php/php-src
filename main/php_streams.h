@@ -301,7 +301,7 @@ PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_A
 PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 #endif
 
-/* php_stream_printf macro & function require TSRMLS_CC */
+/* php_stream_printf macro & function require */
 #define php_stream_printf _php_stream_printf
 
 PHPAPI int _php_stream_eof(php_stream *stream);

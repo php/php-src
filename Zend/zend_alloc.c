@@ -2116,7 +2116,6 @@ ZEND_API int is_zend_mm(void)
 
 # define _ZEND_BIN_ALLOCATOR(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void* ZEND_FASTCALL _emalloc_ ## _size(void) { \
-		TSRMLS_FETCH(); \
 		ZEND_MM_CUSTOM_ALLOCATOR(_size); \
 		return zend_mm_alloc_small(AG(mm_heap), _size, _num ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC); \
 	}
@@ -2140,7 +2139,6 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 #if ZEND_DEBUG
 # define _ZEND_BIN_FREE(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void ZEND_FASTCALL _efree_ ## _size(void *ptr) { \
-		TSRMLS_FETCH(); \
 		ZEND_MM_CUSTOM_DEALLOCATOR(ptr); \
 		{ \
 			size_t page_offset = ZEND_MM_ALIGNED_OFFSET(ptr, ZEND_MM_CHUNK_SIZE); \
@@ -2155,7 +2153,6 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 #else
 # define _ZEND_BIN_FREE(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void ZEND_FASTCALL _efree_ ## _size(void *ptr) { \
-		TSRMLS_FETCH(); \
 		ZEND_MM_CUSTOM_DEALLOCATOR(ptr); \
 		{ \
 			zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE); \
@@ -2225,7 +2222,7 @@ ZEND_API void* ZEND_FASTCALL _erealloc(void *ptr, size_t size, int allow_failure
 	return zend_mm_realloc_heap(AG(mm_heap), ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
 
-ZEND_API size_t ZEND_FASTCALL _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+ZEND_API size_t ZEND_FASTCALL _zend_mem_block_size(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	if (UNEXPECTED(AG(mm_heap)->use_custom_heap)) {
 		return 0;

@@ -127,7 +127,7 @@ pthread_mutex_t mtx_res = PTHREAD_MUTEX_INITIALIZER;
 
 static void __attribute__((constructor)) init()
 {
-	php_embed_init(0, NULL PTSRMLS_CC);
+	php_embed_init(0, NULL P);
 }
 
 static void __attribute__((destructor)) fini()

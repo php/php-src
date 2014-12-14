@@ -58,7 +58,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
 	int flags
-	TSRMLS_DC)
+	)
 {
 	php_zlib_filter_data *data;
 	php_stream_bucket *bucket;
@@ -181,7 +181,7 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
 	int flags
-	TSRMLS_DC)
+	)
 {
 	php_zlib_filter_data *data;
 	php_stream_bucket *bucket;

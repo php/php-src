@@ -197,7 +197,7 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 
 /* {{{ mysqlnd_fill_stats_hash */
 PHPAPI void
-mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value ZEND_FILE_LINE_DC)
 {
 	unsigned int i;
 
@@ -214,7 +214,7 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 
 /* {{{ _mysqlnd_get_client_stats */
 PHPAPI void
-_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+_mysqlnd_get_client_stats(zval *return_value ZEND_FILE_LINE_DC)
 {
 	MYSQLND_STATS stats, *stats_ptr = mysqlnd_global_stats;
 	DBG_ENTER("_mysqlnd_get_client_stats");
@@ -222,7 +222,7 @@ _mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 		memset(&stats, 0, sizeof(stats));
 		stats_ptr = &stats;
 	}
-	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
+	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value ZEND_FILE_LINE_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */

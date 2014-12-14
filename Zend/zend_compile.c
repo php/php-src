@@ -607,7 +607,7 @@ void *zend_hash_find_ptr_lc(HashTable *ht, const char *str, size_t len) {
 
 zend_string *zend_resolve_non_class_name(
 	zend_string *name, uint32_t type, zend_bool *is_fully_qualified,
-	zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC
+	zend_bool case_sensitive, HashTable *current_import_sub
 ) {
 	char *compound;
 	*is_fully_qualified = 0;

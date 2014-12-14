@@ -120,8 +120,8 @@ void zend_compile_var(znode *node, zend_ast *ast, uint32_t type);
 void zend_eval_const_expr(zend_ast **ast_ptr);
 void zend_const_expr_to_zval(zval *result, zend_ast *ast);
 
-#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data TSRMLS_DC
-#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data TSRMLS_CC
+#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
+#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
 
 typedef int (*user_opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
 typedef int (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
