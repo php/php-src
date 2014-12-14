@@ -26,7 +26,7 @@
     constructor). (dunglas at gmail dot com)
   . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class 
     modifier. (Guilherme Blanco)
-  . is_long() and is_int() are now an alias of is_integer(). (Kalle)
+  . is_long() & is_integer() is now an alias of is_int(). (Kalle)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
