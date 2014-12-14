@@ -37,11 +37,11 @@ echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing wordwrap() : basic functionality ***
-string(96) "The quick brown foooooooooox jummmmmmmmmmmmped over the lazzzzzzzzzzzy
+string(%d) "The quick brown foooooooooox jummmmmmmmmmmmped over the lazzzzzzzzzzzy
 doooooooooooooooooooooog."
-string(96) "The quick brown foooooooooox jummmmmmmmmmmmped over the lazzzzzzzzzzzy
+string(%d) "The quick brown foooooooooox jummmmmmmmmmmmped over the lazzzzzzzzzzzy
 doooooooooooooooooooooog."
-string(103) "The quick brown foooooooooox jummmmmmmmmmmmped over the lazzzzzzzzzzzy<br>\ndoooooooooooooooooooooog."
-string(178) "The quick<br>\nbrown<br>\nfooooooooo<br>\nox<br>\njummmmmmmm<br>\nmmmmped<br>\nover the<br>\nlazzzzzzzz<br>\nzzzy<br>\ndooooooooo<br>\noooooooooo<br>\nooog."
-string(138) "The quick<br>\nbrown<br>\nfoooooooooox<br>\njummmmmmmmmmmmped<br>\nover the<br>\nlazzzzzzzzzzzy<br>\ndoooooooooooooooooooooog."
+string(%d) "The quick brown foooooooooox jummmmmmmmmmmmped over the lazzzzzzzzzzzy<br>\ndoooooooooooooooooooooog."
+string(%d) "The quick<br>\nbrown<br>\nfooooooooo<br>\nox<br>\njummmmmmmm<br>\nmmmmped<br>\nover the<br>\nlazzzzzzzz<br>\nzzzy<br>\ndooooooooo<br>\noooooooooo<br>\nooog."
+string(%d) "The quick<br>\nbrown<br>\nfoooooooooox<br>\njummmmmmmmmmmmped<br>\nover the<br>\nlazzzzzzzzzzzy<br>\ndoooooooooooooooooooooog."
 Done
