@@ -392,7 +392,7 @@ PHP_FUNCTION(cal_from_jd)
 	char date[16];
 	struct cal_entry_t *calendar;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS()TSRMLS_CC, "ll", &jd, &cal) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &jd, &cal) == FAILURE) {
 		RETURN_FALSE;
 	}
 

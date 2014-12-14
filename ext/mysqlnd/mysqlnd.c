@@ -440,9 +440,7 @@ mysqlnd_switch_to_ssl_if_needed(
 			MYSQLND_CONN_DATA * conn,
 			const MYSQLND_PACKET_GREET * const greet_packet,
 			const MYSQLND_OPTIONS * const options,
-			zend_ulong mysql_flags
-			TSRMLS_DC
-		)
+			zend_ulong mysql_flags)
 {
 	enum_func_status ret = FAIL;
 	const MYSQLND_CHARSET * charset;

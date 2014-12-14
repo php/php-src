@@ -34,9 +34,7 @@ static zend_object_handlers NumberFormatter_handlers;
  */
 
 /* {{{ NumberFormatter_objects_dtor */
-static void NumberFormatter_object_dtor(
-	zend_object *object
-	TSRMLS_DC )
+static void NumberFormatter_object_dtor(zend_object *object)
 {
 	zend_objects_destroy_object( object );
 }

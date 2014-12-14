@@ -197,7 +197,7 @@ ZEND_TSRMLS_CACHE_EXTERN;
 #define PS(v) (ps_globals.v)
 #endif
 
-#define PS_SERIALIZER_ENCODE_ARGS TSRMLS_D
+#define PS_SERIALIZER_ENCODE_ARGS void
 #define PS_SERIALIZER_DECODE_ARGS const char *val, int vallen
 
 typedef struct ps_serializer_struct {
