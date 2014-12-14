@@ -74,7 +74,7 @@ static http_response_status_code_pair http_status_map[] = {
 	{ 505, "HTTP Version Not Supported" },
 	{ 511, "Network Authentication Required" },
 	/* to allow search with while() loop */
-	{ 0, NULL }
+	{ 1000, NULL }
 };
 
-#endif HTTP_STATUS_CODES_H
+#endif /* HTTP_STATUS_CODES_H */

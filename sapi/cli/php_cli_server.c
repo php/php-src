@@ -276,8 +276,8 @@ static char *get_last_error() /* {{{ */
 
 static int status_comp(const void *a, const void *b) /* {{{ */
 {
-	const php_cli_server_http_response_status_code_pair *pa = (const php_cli_server_http_response_status_code_pair *) a;
-	const php_cli_server_http_response_status_code_pair *pb = (const php_cli_server_http_response_status_code_pair *) b;
+	const http_response_status_code_pair *pa = (const http_response_status_code_pair *) a;
+	const http_response_status_code_pair *pb = (const http_response_status_code_pair *) b;
 
 	if (pa->code < pb->code) {
 		return -1;
