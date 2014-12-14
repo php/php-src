@@ -2546,6 +2546,19 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_is_callable, 0, 0, 1)
 	ZEND_ARG_INFO(0, syntax_only)
 	ZEND_ARG_INFO(1, callable_name)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_to_int, 0, 0, 1)
+	ZEND_ARG_INFO(0, from)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_to_float, 0, 0, 1)
+	ZEND_ARG_INFO(0, from)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_to_string, 0, 0, 1)
+	ZEND_ARG_INFO(0, from)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 /* {{{ uniqid.c */
 #ifdef HAVE_GETTIMEOFDAY
@@ -3039,6 +3052,14 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_object,														arginfo_is_object)
 	PHP_FE(is_scalar,														arginfo_is_scalar)
 	PHP_FE(is_callable,														arginfo_is_callable)
+
+	PHP_FE(to_int,															arginfo_to_int)
+	PHP_FE(try_int,															arginfo_to_int)
+	PHP_FE(to_float,														arginfo_to_float)
+	PHP_FE(try_float,														arginfo_to_float)
+	PHP_FE(to_string,														arginfo_to_string)
+	PHP_FE(try_string,														arginfo_to_string)
+
 
 	/* functions from file.c */
 	PHP_FE(pclose,															arginfo_pclose)
@@ -3609,6 +3630,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(standard_filters)
 	BASIC_MINIT_SUBMODULE(user_filters)
 	BASIC_MINIT_SUBMODULE(password)
+	BASIC_MINIT_SUBMODULE(type)
 
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 	BASIC_MINIT_SUBMODULE(localeconv)
