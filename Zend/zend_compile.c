@@ -3091,11 +3091,7 @@ static void zend_free_foreach_and_switch_variables(void) /* {{{ */
 
 	opnum_start = get_next_op_number(CG(active_op_array));
 
-#ifdef ZTS
-	zend_stack_apply_with_argument(&CG(loop_var_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element, void *)) generate_free_loop_var, NULL);
-#else
 	zend_stack_apply(&CG(loop_var_stack), ZEND_STACK_APPLY_TOPDOWN, (int (*)(void *element)) generate_free_loop_var);
-#endif
 
 	opnum_end = get_next_op_number(CG(active_op_array));
 
