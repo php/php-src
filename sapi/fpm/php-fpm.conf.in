@@ -176,7 +176,7 @@ listen = 127.0.0.1:9000
 ;listen.group = @php_fpm_group@
 ;listen.mode = 0660
 ; When POSIX Access Control Lists are supported you can set them using
-; these options, value is a coma separated list of user/group names.
+; these options, value is a comma separated list of user/group names.
 ; When set, listen.owner and listen.group are ignored
 ;listen.acl_users =
 ;listen.acl_groups =
