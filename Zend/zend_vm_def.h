@@ -2771,11 +2771,9 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	LOAD_OPLINE();
 
 	if (UNEXPECTED(fbc->type == ZEND_INTERNAL_FUNCTION)) {
-		int should_change_scope = 0;
 		zval *ret;
 
 		if (fbc->common.scope) {
-			should_change_scope = 1;
 			/* TODO: we don't set scope if we call an object method ??? */
 			/* See: ext/pdo_sqlite/tests/pdo_fetch_func_001.phpt */
 #if 1
@@ -2806,7 +2804,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 				if (RETURN_VALUE_USED(opline)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
 				}
-				if (UNEXPECTED(should_change_scope)) {
+				if (UNEXPECTED(fbc->common.scope)) {
 					ZEND_VM_C_GOTO(fcall_end_change_scope);
 				} else {
 					ZEND_VM_C_GOTO(fcall_end);
@@ -2832,7 +2830,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			zval_ptr_dtor(ret);
 		}
 
-		if (UNEXPECTED(should_change_scope)) {
+		if (UNEXPECTED(fbc->common.scope)) {
 			ZEND_VM_C_GOTO(fcall_end_change_scope);
 		} else {
 			ZEND_VM_C_GOTO(fcall_end);
