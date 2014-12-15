@@ -3428,13 +3428,8 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	}
 
 	/* copy the argument array */
-	RETVAL_ZVAL(&args[0], 1, 0);
-	if (Z_ARRVAL_P(return_value) == &EG(symbol_table).ht) {		
-		HashTable *old_ht = Z_ARRVAL_P(return_value);
-
-		ZVAL_NEW_ARR(return_value);
-		zend_array_dup(Z_ARRVAL_P(return_value), old_ht);
-	}
+	ZVAL_NEW_ARR(return_value);
+	zend_array_dup(Z_ARRVAL_P(return_value), Z_ARRVAL(args[0]));
 
 	/* go through the lists and look for common values */
 	while (Z_TYPE(ptrs[0]->val) != IS_UNDEF) {
@@ -3851,13 +3846,8 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	}
 
 	/* copy the argument array */
-	RETVAL_ZVAL(&args[0], 1, 0);
-	if (Z_ARRVAL_P(return_value) == &EG(symbol_table).ht) {
-		HashTable *old_ht = Z_ARRVAL_P(return_value);
-
-		ZVAL_NEW_ARR(return_value);
-		zend_array_dup(Z_ARRVAL_P(return_value), old_ht);
-	}
+	ZVAL_NEW_ARR(return_value);
+	zend_array_dup(Z_ARRVAL_P(return_value), Z_ARRVAL(args[0]));
 
 	/* go through the lists and look for values of ptr[0] that are not in the others */
 	while (Z_TYPE(ptrs[0]->val) != IS_UNDEF) {
