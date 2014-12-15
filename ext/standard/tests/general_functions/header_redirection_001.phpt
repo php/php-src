@@ -6,6 +6,6 @@ Location: headers change the status code
 header('Location: http://example.com/');
 ?>
 --EXPECTHEADERS--
-Status: 302 Found
+Status: 302 Moved Temporarily
 Location: http://example.com/
 --EXPECT--

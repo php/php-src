@@ -69,7 +69,6 @@
 #include "php_globals.h"
 #include "php_main.h"
 #include "fopen_wrappers.h"
-#include "http_status_codes.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/url.h"
 
@@ -351,6 +350,56 @@ static void sapi_fcgi_flush(void *server_context TSRMLS_DC)
 
 #define SAPI_CGI_MAX_HEADER_LENGTH 1024
 
+typedef struct _http_error {
+  int code;
+  const char* msg;
+} http_error;
+
+static const http_error http_error_codes[] = {
+	{100, "Continue"},
+	{101, "Switching Protocols"},
+	{200, "OK"},
+	{201, "Created"},
+	{202, "Accepted"},
+	{203, "Non-Authoritative Information"},
+	{204, "No Content"},
+	{205, "Reset Content"},
+	{206, "Partial Content"},
+	{300, "Multiple Choices"},
+	{301, "Moved Permanently"},
+	{302, "Moved Temporarily"},
+	{303, "See Other"},
+	{304, "Not Modified"},
+	{305, "Use Proxy"},
+	{400, "Bad Request"},
+	{401, "Unauthorized"},
+	{402, "Payment Required"},
+	{403, "Forbidden"},
+	{404, "Not Found"},
+	{405, "Method Not Allowed"},
+	{406, "Not Acceptable"},
+	{407, "Proxy Authentication Required"},
+	{408, "Request Time-out"},
+	{409, "Conflict"},
+	{410, "Gone"},
+	{411, "Length Required"},
+	{412, "Precondition Failed"},
+	{413, "Request Entity Too Large"},
+	{414, "Request-URI Too Large"},
+	{415, "Unsupported Media Type"},
+	{428, "Precondition Required"},
+	{429, "Too Many Requests"},
+	{431, "Request Header Fields Too Large"},
+	{500, "Internal Server Error"},
+	{501, "Not Implemented"},
+	{502, "Bad Gateway"},
+	{503, "Service Unavailable"},
+	{504, "Gateway Time-out"},
+	{505, "HTTP Version not supported"},
+	{511, "Network Authentication Required"},
+	{0,   NULL}
+};
+
 static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char buf[SAPI_CGI_MAX_HEADER_LENGTH];
@@ -401,7 +450,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 					h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 				}
 				if (!has_status) {
-					http_response_status_code_pair *err = (http_response_status_code_pair*)http_status_map;
+					http_error *err = (http_error*)http_error_codes;
 
 					while (err->code != 0) {
 						if (err->code == SG(sapi_headers).http_response_code) {
@@ -409,8 +458,8 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 						}
 						err++;
 					}
-					if (err->str) {
-						len = slprintf(buf, sizeof(buf), "Status: %d %s\r\n", SG(sapi_headers).http_response_code, err->str);
+					if (err->msg) {
+						len = slprintf(buf, sizeof(buf), "Status: %d %s\r\n", SG(sapi_headers).http_response_code, err->msg);
 					} else {
 						len = slprintf(buf, sizeof(buf), "Status: %d\r\n", SG(sapi_headers).http_response_code);
 					}
