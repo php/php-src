@@ -1466,17 +1466,14 @@ ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data) /* {{{ *
 		if (zv) {
 			if (Z_TYPE_P(zv) == IS_INDIRECT) {
 				zval *val = Z_INDIRECT_P(zv);
-				if (Z_TYPE_P(val) == IS_UNDEF) {
-					ZVAL_UNDEF(EX_VAR_NUM(i));
-				} else {
-					ZVAL_COPY_VALUE(EX_VAR_NUM(i), val);
-				}
+
+				ZVAL_COPY_VALUE(EX_VAR_NUM(i), val);
 			} else {
 				ZVAL_COPY_VALUE(EX_VAR_NUM(i), zv);
 			}
 		} else {
 			ZVAL_UNDEF(EX_VAR_NUM(i));
-			zv = zend_hash_update(ht, op_array->vars[i], EX_VAR_NUM(i));
+			zv = zend_hash_add_new(ht, op_array->vars[i], EX_VAR_NUM(i));
 		}
 		ZVAL_INDIRECT(zv, EX_VAR_NUM(i));
 	}

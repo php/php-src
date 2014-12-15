@@ -22,8 +22,6 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 - Core
-  . Added null coalesce operator (??).
-    (RFC: https://wiki.php.net/rfc/isset_ternary)
   . list() now always supports ArrayAccess and never supports strings.
     Previously both were accepted in some situations and not in others.
     (RFC: https://wiki.php.net/rfc/fix_list_behavior_inconsistency)
@@ -36,6 +34,7 @@ PHP X.Y UPGRADE NOTES
     around.
   . Removed ASP (<%) and script (<script language=php>) tags.
     (RFC: https://wiki.php.net/rfc/remove_alternative_php_tags)
+  . call_user_method() and call_user_method_array() no longer exists.
 
 - DBA
   . dba_delete() now returns false if the key was not found for the inifile
@@ -51,6 +50,8 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 - Core
+  . Added null coalesce operator (??).
+    (RFC: https://wiki.php.net/rfc/isset_ternary)
   . Support for strings with length >= 2^31 bytes in 64 bit builds
   . Closure::call() method added
 
@@ -137,6 +138,3 @@ PHP X.Y UPGRADE NOTES
     always be zero when casted to integer.
   . Calling a method on a non-object no longer raises a fatal error; see
     also: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object
-
-- Standard
-  . call_user_method() and call_user_method_array() no longer exists.

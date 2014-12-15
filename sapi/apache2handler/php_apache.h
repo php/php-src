@@ -70,9 +70,9 @@ void php_ap2_register_hook(apr_pool_t *p);
 #define APR_ARRAY_FOREACH_CLOSE() }}
 
 typedef struct {
-	long engine;
-	long xbithack;
-	long last_modified;
+	zend_bool engine;
+	zend_bool xbithack;
+	zend_bool last_modified;
 } php_apache2_info_struct;
 
 extern zend_module_entry apache2_module_entry;
