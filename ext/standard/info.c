@@ -37,7 +37,7 @@
 #ifdef HAVE_SYS_UTSNAME_H
 #include <sys/utsname.h>
 #endif
-
+#include "url.h"
 
 #ifdef PHP_WIN32
 typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
