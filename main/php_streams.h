@@ -210,6 +210,8 @@ struct _php_stream  {
 	zend_resource *ctx;
 	int flags;	/* PHP_STREAM_FLAG_XXX */
 
+	int eof;
+
 	/* buffer */
 	zend_off_t position; /* of underlying stream */
 	unsigned char *readbuf;
@@ -219,8 +221,6 @@ struct _php_stream  {
 
 	/* how much data to read when filling buffer */
 	size_t chunk_size;
-
-	int eof;
 
 #if ZEND_DEBUG
 	const char *open_filename;
