@@ -7,6 +7,6 @@ header("HTTP/1.1 418 I'm a Teapot");
 header('Location: http://example.com/');
 ?>
 --EXPECTHEADERS--
-Status: 302 Moved Temporarily
+Status: 302 Found
 Location: http://example.com/
 --EXPECT--
