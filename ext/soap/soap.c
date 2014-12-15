@@ -645,6 +645,9 @@ PHP_MINIT_FUNCTION(soap)
 {
 	zend_class_entry ce;
 
+#if defined(COMPILE_DL_SOAP) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	/* TODO: add ini entry for always use soap errors */
 	php_soap_prepare_globals();
 	ZEND_INIT_MODULE_GLOBALS(soap, php_soap_init_globals, NULL);
