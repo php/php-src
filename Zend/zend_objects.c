@@ -167,9 +167,9 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 				zval_add_ref(&new_prop);
 			}
 			if (key) {
-				zend_hash_update(new_object->properties, key, &new_prop);
+				zend_hash_add_new(new_object->properties, key, &new_prop);
 			} else {
-				zend_hash_index_update(new_object->properties, num_key, &new_prop);
+				zend_hash_index_add_new(new_object->properties, num_key, &new_prop);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
