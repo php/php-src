@@ -17,7 +17,7 @@ var_dump(phpinfo(INFO_LICENSE));
 
 ?>
 --EXPECTF--
-<!DOCTYPE %s>
+%a<!DOCTYPE %s>
 %a</html>bool(true)
 --
 
