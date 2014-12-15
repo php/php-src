@@ -85,6 +85,7 @@
 #include "breakiterator/breakiterator_iterators.h"
 
 #include "idn/idn.h"
+#include "uchar/uchar.h"
 
 #if U_ICU_VERSION_MAJOR_NUM * 1000 + U_ICU_VERSION_MINOR_NUM >= 4002
 # include "spoofchecker/spoofchecker_class.h"
@@ -1002,6 +1003,9 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* 'Converter' class for codepage conversions */
 	php_converter_minit(INIT_FUNC_ARGS_PASSTHRU);
+
+	/* IntlChar class */
+	php_uchar_minit(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
