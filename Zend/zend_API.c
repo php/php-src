@@ -1882,7 +1882,6 @@ static int zend_startup_module_zval(zval *zv) /* {{{ */
 }
 /* }}} */
 
-
 static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func_t compare) /* {{{ */
 {
 	Bucket *b1 = base;
