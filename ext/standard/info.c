@@ -143,7 +143,13 @@ PHPAPI void php_info_print_module(zend_module_entry *zend_module) /* {{{ */
 {
 	if (zend_module->info_func || zend_module->version) {
 		if (!sapi_module.phpinfo_as_text) {
-			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", zend_module->name, zend_module->name);
+			int len = 0;
+			zend_string *url_name = php_url_encode(zend_module->name, strlen(zend_module->name), &len);
+
+			php_strtolower(url_name->val, url_name->len);
+			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", url_name->val, zend_module->name);
+
+			efree(url_name);
 		} else {
 			php_info_print_table_start();
 			php_info_print_table_header(1, zend_module->name);
@@ -206,8 +212,9 @@ static void php_print_gpcse_array(char *name, uint name_length)
 				php_info_print("<td class=\"e\">");
 			}
 
+			php_info_print("$");
 			php_info_print(name);
-			php_info_print("[\"");
+			php_info_print("['");
 
 			if (string_key != NULL) {
 				if (!sapi_module.phpinfo_as_text) {
@@ -218,7 +225,7 @@ static void php_print_gpcse_array(char *name, uint name_length)
 			} else {
 				php_info_printf(ZEND_ULONG_FMT, num_key);
 			}
-			php_info_print("\"]");
+			php_info_print("']");
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("</td><td class=\"v\">");
 			} else {
