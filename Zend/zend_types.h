@@ -194,7 +194,7 @@ struct _zend_object {
 
 struct _zend_resource {
 	zend_refcounted   gc;
-	zend_long         handle; // TODO: may be removed ???
+	int               handle; // TODO: may be removed ???
 	int               type;
 	void             *ptr;
 };
