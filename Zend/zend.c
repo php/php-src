@@ -567,7 +567,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #else
 	extern zend_ini_scanner_globals ini_scanner_globals;
 	extern zend_php_scanner_globals language_scanner_globals;
-	ZEND_TSRMLS_CACHE_UPDATE;
 #endif
 
 	start_memory_manager();
