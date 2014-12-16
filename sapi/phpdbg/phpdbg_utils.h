@@ -98,7 +98,7 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv);
 #define PHPDBG_OUTPUT_BACKUP_DEFINES() \
 	zend_output_globals *output_globals_ptr; \
 	zend_output_globals original_output_globals; \
-	output_globals_ptr = (zend_output_globals *) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(output_globals_id)];
+	output_globals_ptr = (zend_output_globals *) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(output_globals_id)];
 #else
 #define PHPDBG_OUTPUT_BACKUP_DEFINES() \
 	zend_output_globals *output_globals_ptr; \

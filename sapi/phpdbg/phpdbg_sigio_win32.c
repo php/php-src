@@ -31,9 +31,6 @@ SigIoWatcherThread(VOID *p)
 {
 	zend_uchar sig;
 	struct win32_sigio_watcher_data *swd = (struct win32_sigio_watcher_data *)p;
-#ifdef ZTS
-	void ***tsrm_ls = swd->tsrm_ls;
-#endif
 
 top:
 	(void)phpdbg_consume_bytes(swd->fd, &sig, 1, -1);
@@ -41,12 +38,12 @@ top:
 
 	if (3 == sig) {
 		/* XXX completely not sure it is done right here */
-		if (PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE) {
+		if (*swd->flags & PHPDBG_IS_INTERACTIVE) {
 			if (raise(sig)) {
 				goto top;
 			}
 		}
-		if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
+		if (*swd->flags & PHPDBG_IS_SIGNALED) {
 			phpdbg_set_sigsafe_mem(&sig);
 			zend_try {
 				phpdbg_force_interruption();
@@ -54,8 +51,8 @@ top:
 			phpdbg_clear_sigsafe_mem();
 			goto end;
 		}
-		if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
-			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
+		if (!(*swd->flags & PHPDBG_IS_INTERACTIVE)) {
+			*swd->flags |= PHPDBG_IS_SIGNALED;
 		}
 end:
 		/* XXX set signaled flag to the caller thread, question is - whether it's needed */
@@ -75,7 +72,7 @@ sigio_watcher_start(void)
 
 	PHPDBG_G(swd).fd = PHPDBG_G(io)[PHPDBG_STDIN].fd;
 #ifdef ZTS
-	PHPDBG_G(swd).tsrm_ls = tsrm_ls;
+	PHPDBG_G(swd).flags = &PHPDBG_G(flags);
 #endif
 
 	PHPDBG_G(sigio_watcher_thread) = CreateThread(

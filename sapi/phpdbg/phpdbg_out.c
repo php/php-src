@@ -1175,11 +1175,7 @@ PHPDBG_API int phpdbg_output_err_buf(const char *tag, const char *xmlfmt, const 
 
 	PHPDBG_G(err_buf).active = 0;
 
-#ifdef ZTS
-	va_start(args, tsrm_ls);
-#else
 	va_start(args, strfmt);
-#endif
 	len = phpdbg_vprint(PHPDBG_G(err_buf).type, PHPDBG_G(err_buf).fd, tag ? tag : PHPDBG_G(err_buf).tag, xmlfmt, strfmt, args);
 	va_end(args);
 

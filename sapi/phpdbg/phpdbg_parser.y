@@ -19,7 +19,7 @@
 #include "phpdbg_lexer.h"
 
 #undef yyerror
-static int yyerror(void ***tsrm_ls, const char *msg);
+static int yyerror(const char *msg);
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
@@ -35,8 +35,6 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 typedef void* yyscan_t;
 #endif
 }
-
-%parse-param { void *tsrm_ls }
 
 %output  "sapi/phpdbg/phpdbg_parser.c"
 %defines "sapi/phpdbg/phpdbg_parser.h"
@@ -166,7 +164,7 @@ full_expression
 
 %%
 
-static int yyerror(void ***tsrm_ls, const char *msg) {
+static int yyerror(const char *msg) {
 	phpdbg_error("command", "type=\"parseerror\" msg=\"%s\"", "Parse Error: %s", msg);
 
 	{
@@ -183,9 +181,5 @@ static int yyerror(void ***tsrm_ls, const char *msg) {
 int phpdbg_do_parse(phpdbg_param_t *stack, char *input) {
 	phpdbg_init_lexer(stack, input);
 
-#ifdef ZTS
 	return yyparse();
-#else
-	return yyparse(NULL);
-#endif
 }
