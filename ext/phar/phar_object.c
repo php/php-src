@@ -546,7 +546,8 @@ PHP_METHOD(Phar, webPhar)
 {
 	zval *mimeoverride = NULL, *rewrite = NULL;
 	char *alias = NULL, *error, *index_php = NULL, *f404 = NULL, *ru = NULL;
-	size_t alias_len = 0, f404_len = 0, free_pathinfo = 0, ru_len = 0;
+	size_t alias_len = 0, f404_len = 0, free_pathinfo = 0;
+	int  ru_len = 0;
 	char *fname, *path_info, *mime_type = NULL, *entry, *pt;
 	const char *basename;
 	size_t fname_len, index_php_len = 0;
@@ -729,7 +730,7 @@ PHP_METHOD(Phar, webPhar)
 	}
 
 	if (entry_len) {
-		phar_postprocess_ru_web(fname, fname_len, &entry, (int *)&entry_len, &ru, (int *)&ru_len);
+		phar_postprocess_ru_web(fname, fname_len, &entry, &entry_len, &ru, &ru_len);
 	}
 
 	if (!entry_len || (entry_len == 1 && entry[0] == '/')) {
@@ -1999,7 +2000,7 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 	zend_class_entry *ce;
 	char *error;
 	const char *pcr_error;
-	size_t ext_len = ext ? strlen(ext) : 0;
+	int ext_len = ext ? strlen(ext) : 0;
 	int oldname_len;
 	phar_archive_data *pphar = NULL;
 	php_stream_statbuf ssb;
@@ -2050,7 +2051,7 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 					ext = "phar";
 			}
 		}
-	} else if (phar_path_check(&ext, (int *)&ext_len, &pcr_error) > pcr_is_ok) {
+	} else if (phar_path_check(&ext, &ext_len, &pcr_error) > pcr_is_ok) {
 
 		if (phar->is_data) {
 			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "data phar converted from \"%s\" has invalid extension %s", phar->fname, ext);
