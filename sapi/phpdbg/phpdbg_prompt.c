@@ -306,7 +306,7 @@ void phpdbg_string_init(char *buffer TSRMLS_DC) {
 
 void phpdbg_try_file_init(char *init_file, size_t init_file_len, zend_bool free_init TSRMLS_DC) /* {{{ */
 {
-	struct stat sb;
+	zend_stat_t sb;
 
 	if (init_file && VCWD_STAT(init_file, &sb) != -1) {
 		FILE *fp = fopen(init_file, "r");
@@ -374,7 +374,7 @@ void phpdbg_init(char *init_file, size_t init_file_len, zend_bool use_default TS
 
 PHPDBG_COMMAND(exec) /* {{{ */
 {
-	struct stat sb;
+	zend_stat_t sb;
 
 	if (VCWD_STAT(param->str, &sb) != FAILURE) {
 		if (sb.st_mode & (S_IFREG|S_IFLNK)) {
