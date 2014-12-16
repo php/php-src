@@ -386,8 +386,9 @@ PHPDBG_INFO(classes) /* {{{ */
 		phpdbg_print_class_name(ce);
 
 		if (ce->parent) {
+			zend_class_entry *pce;
 			phpdbg_xml("<parents %r>");
-			zend_class_entry *pce = ce->parent;
+			pce = ce->parent;
 			do {
 				phpdbg_out("|-------- ");
 				phpdbg_print_class_name(pce);
