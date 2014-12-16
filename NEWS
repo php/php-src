@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . Fixed bug #65769 (localeconv() broken in TS builds). (Anatol)
   . Fixed bug #65230 (setting locale randomly broken). (Anatol)
   . Fixed bug #68583 (Crash in timeout thread). (Anatol)
+  . Fixed bug #68594 (Use after free vulnerability in unserialize()).
+    (CVE-2014-8142) (Stefan Esser)
 
 - cURL:
   . Fixed bug #67643 (curl_multi_getcontent returns '' when
