@@ -94,8 +94,8 @@ typedef struct {
 #include <signal.h>
 #endif
 
-typedef void (*ts_allocate_ctor)(void *, void ***);
-typedef void (*ts_allocate_dtor)(void *, void ***);
+typedef void (*ts_allocate_ctor)(void *);
+typedef void (*ts_allocate_dtor)(void *);
 
 #define THREAD_HASH_OF(thr,ts)  (unsigned long)thr%(unsigned long)ts
 

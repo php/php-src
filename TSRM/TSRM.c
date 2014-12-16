@@ -181,7 +181,7 @@ TSRM_API void tsrm_shutdown(void)
 				for (j=0; j<p->count; j++) {
 					if (p->storage[j]) {
 						if (resource_types_table && !resource_types_table[j].done && resource_types_table[j].dtor) {
-							resource_types_table[j].dtor(p->storage[j], &p->storage);
+							resource_types_table[j].dtor(p->storage[j]);
 						}
 						free(p->storage[j]);
 					}
@@ -256,7 +256,7 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 				for (j=p->count; j<id_count; j++) {
 					p->storage[j] = (void *) malloc(resource_types_table[j].size);
 					if (resource_types_table[j].ctor) {
-						resource_types_table[j].ctor(p->storage[j], &p->storage);
+						resource_types_table[j].ctor(p->storage[j]);
 					}
 				}
 				p->count = id_count;
@@ -295,7 +295,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 		{
 			(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
 			if (resource_types_table[i].ctor) {
-				resource_types_table[i].ctor((*thread_resources_ptr)->storage[i], &(*thread_resources_ptr)->storage);
+				resource_types_table[i].ctor((*thread_resources_ptr)->storage[i]);
 			}
 		}
 	}
@@ -394,7 +394,7 @@ void tsrm_free_interpreter_context(void *context)
 
 		for (i=0; i<thread_resources->count; i++) {
 			if (resource_types_table[i].dtor) {
-				resource_types_table[i].dtor(thread_resources->storage[i], &thread_resources->storage);
+				resource_types_table[i].dtor(thread_resources->storage[i]);
 			}
 		}
 		for (i=0; i<thread_resources->count; i++) {
@@ -459,7 +459,7 @@ void ts_free_thread(void)
 		if (thread_resources->thread_id == thread_id) {
 			for (i=0; i<thread_resources->count; i++) {
 				if (resource_types_table[i].dtor) {
-					resource_types_table[i].dtor(thread_resources->storage[i], &thread_resources->storage);
+					resource_types_table[i].dtor(thread_resources->storage[i]);
 				}
 			}
 			for (i=0; i<thread_resources->count; i++) {
@@ -501,7 +501,7 @@ void ts_free_worker_threads(void)
 		if (thread_resources->thread_id != thread_id) {
 			for (i=0; i<thread_resources->count; i++) {
 				if (resource_types_table[i].dtor) {
-					resource_types_table[i].dtor(thread_resources->storage[i], &thread_resources->storage);
+					resource_types_table[i].dtor(thread_resources->storage[i]);
 				}
 			}
 			for (i=0; i<thread_resources->count; i++) {
@@ -547,7 +547,7 @@ void ts_free_id(ts_rsrc_id id)
 			while (p) {
 				if (p->count > j && p->storage[j]) {
 					if (resource_types_table && resource_types_table[j].dtor) {
-						resource_types_table[j].dtor(p->storage[j], &p->storage);
+						resource_types_table[j].dtor(p->storage[j]);
 					}
 					free(p->storage[j]);
 					p->storage[j] = NULL;
