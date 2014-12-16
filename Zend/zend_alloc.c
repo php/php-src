@@ -2403,7 +2403,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 #ifdef ZTS
 static void alloc_globals_dtor(zend_alloc_globals *alloc_globals)
 {
-	shutdown_memory_manager(1, 1);
+	zend_mm_shutdown(alloc_globals->mm_heap, 1, 1);
 }
 #endif
 
