@@ -42,6 +42,11 @@ PHP X.Y UPGRADE NOTES
     It will now produce 2, not 1.
   . Function parameters with duplicate name are not allowed anymore. Definitions
     like “function foo($x,$x) {}” will lead to compile time error.
+  . Indirect variable, property and method references are now interpreted with
+    left-to-right semantics. See details in:
+	https://wiki.php.net/rfc/uniform_variable_syntax#semantic_differences_in_existing_syntax 
+  . The global keyword now only accepts simple variables. See details in:
+    https://wiki.php.net/rfc/uniform_variable_syntax#global_keyword_takes_only_simple_variables
 
 - DBA
   . dba_delete() now returns false if the key was not found for the inifile
