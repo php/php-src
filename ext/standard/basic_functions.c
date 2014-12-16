@@ -3452,9 +3452,9 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 
 static void basic_globals_dtor(php_basic_globals *basic_globals_p) /* {{{ */
 {
-	if (BG(url_adapt_state_ex).tags) {
-		zend_hash_destroy(BG(url_adapt_state_ex).tags);
-		free(BG(url_adapt_state_ex).tags);
+	if (basic_globals_p->url_adapt_state_ex.tags) {
+		zend_hash_destroy(basic_globals_p->url_adapt_state_ex.tags);
+		free(basic_globals_p->url_adapt_state_ex.tags);
 	}
 }
 /* }}} */
