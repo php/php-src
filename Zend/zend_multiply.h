@@ -224,6 +224,30 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 	return res;
 }
 
+#elif defined(__GNUC__) && defined(__powerpc64__)
+
+static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, int *overflow)
+{
+        size_t res;
+        unsigned long m_overflow;
+
+        __asm__ ("mulld %0,%2,%3\n\t"
+                 "mulhdu %1,%2,%3\n\t"
+                 "addc %0,%0,%4\n\t"
+                 "addze %1,%1\n"
+             : "=&r"(res), "=&r"(m_overflow)
+             : "r"(nmemb),
+               "r"(size),
+               "r"(offset));
+
+        if (UNEXPECTED(m_overflow)) {
+                *overflow = 1;
+                return 0;
+        }
+        *overflow = 0;
+        return res;
+}
+
 #elif SIZEOF_SIZE_T == 4
 
 static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, size_t offset, int *overflow)
