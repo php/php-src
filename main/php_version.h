@@ -4,6 +4,6 @@
 #define PHP_MINOR_VERSION 4
 #define PHP_RELEASE_VERSION 36
 
-#define PHP_EXTRA_VERSION "-dev"
-#define PHP_VERSION "5.4.36-dev"
+#define PHP_EXTRA_VERSION ""
+#define PHP_VERSION "5.4.36"
 #define PHP_VERSION_ID 50436
