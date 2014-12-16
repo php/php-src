@@ -170,10 +170,10 @@ TSRM_API inline void *tsrm_get_ls_cache(void);
 #define TSRMLS_SET_CTX(ctx)		ctx = (void ***) tsrm_get_ls_cache()
 #define TSRMG(id, type, element)	(((type) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
 
-#define TSRMG_STATIC(id, type, element)	(((type) (*((void ***) _tsrm_ls_cache))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
-#define TSRMLS_CACHE_EXTERN extern TSRM_TLS void *_tsrm_ls_cache
-#define TSRMLS_CACHE_DEFINE TSRM_TLS void *_tsrm_ls_cache = NULL
-#define TSRMLS_CACHE_UPDATE if (!TSRMLS_CACHE) _tsrm_ls_cache = tsrm_get_ls_cache()
+#define TSRMG_STATIC(id, type, element)	(((type) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
+#define TSRMLS_CACHE_EXTERN extern TSRM_TLS void *TSRMLS_CACHE
+#define TSRMLS_CACHE_DEFINE TSRM_TLS void *TSRMLS_CACHE = NULL
+#define TSRMLS_CACHE_UPDATE if (!TSRMLS_CACHE) TSRMLS_CACHE = tsrm_get_ls_cache()
 #define TSRMLS_CACHE _tsrm_ls_cache
 
 /* BC only */
