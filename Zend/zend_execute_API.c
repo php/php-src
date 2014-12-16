@@ -815,7 +815,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 			ZVAL_COPY(param, &fci->params[i]);
 		}
 	}
-	ZEND_CALL_NUM_ARGS(call) = fci->param_count;
 
 	EG(scope) = calling_scope;
 	if (func->common.fn_flags & ZEND_ACC_STATIC) {

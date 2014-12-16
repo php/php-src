@@ -1561,7 +1561,7 @@ static PHP_FUNCTION(preg_split)
 	/* Get function parameters and do error checking */	
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|ll", &regex,
-							  &subject, &subject_len, &limit_val, &flags) == FAILURE) {
+							  &subject, &limit_val, &flags) == FAILURE) {
 		RETURN_FALSE;
 	}
 #else

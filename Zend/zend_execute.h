@@ -143,14 +143,14 @@ static zend_always_inline zval* zend_vm_stack_alloc(size_t size)
 	return (zval*)top;
 }
 
-static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(uint32_t call_info, zend_function *func, uint32_t used_stack, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev)
+static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(uint32_t used_stack, uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev)
 {
 	zend_execute_data *call = (zend_execute_data*)zend_vm_stack_alloc(used_stack);
 
 	call->func = func;
 	Z_OBJ(call->This) = object;
 	ZEND_SET_CALL_INFO(call, call_info);
-	ZEND_CALL_NUM_ARGS(call) = 0;
+	ZEND_CALL_NUM_ARGS(call) = num_args;
 	call->called_scope = called_scope;
 	call->prev_execute_data = prev;
 	return call;
@@ -170,8 +170,8 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint3
 {
 	uint32_t used_stack = zend_vm_calc_used_stack(num_args, func);
 	
-	return zend_vm_stack_push_call_frame_ex(call_info,
-		func, used_stack, called_scope, object, prev);
+	return zend_vm_stack_push_call_frame_ex(used_stack, call_info,
+		func, num_args, called_scope, object, prev);
 }
 
 static zend_always_inline void zend_vm_stack_free_extra_args(zend_execute_data *call)
