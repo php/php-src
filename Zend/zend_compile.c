@@ -2407,6 +2407,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc TSRMLS_DC) /* {{{ *
 			zend_compile_expr(&arg_node, arg->child[0] TSRMLS_CC);
 			opline = zend_emit_op(NULL, ZEND_SEND_UNPACK, &arg_node, NULL TSRMLS_CC);
 			opline->op2.num = arg_count;
+			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, arg_count);
 			continue;
 		}
 
@@ -2469,6 +2470,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc TSRMLS_DC) /* {{{ *
 		SET_NODE(opline->op1, &arg_node);
 		SET_UNUSED(opline->op2);
 		opline->op2.opline_num = arg_num;
+		opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, arg_num);
 
 		if (opcode == ZEND_SEND_VAR_NO_REF) {
 			if (fbc) {
@@ -2696,7 +2698,7 @@ int zend_compile_func_cufa(znode *result, zend_ast_list *args, zend_string *lcna
 		return FAILURE;
 	}
 
-	zend_compile_init_user_func(args->child[0], 1, lcname TSRMLS_CC);
+	zend_compile_init_user_func(args->child[0], 0, lcname TSRMLS_CC);
 	zend_compile_expr(&arg_node, args->child[1] TSRMLS_CC);
 	zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, NULL TSRMLS_CC);
 	zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL TSRMLS_CC);
@@ -2737,7 +2739,8 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 			opline = zend_emit_op(NULL, ZEND_SEND_VAL, &arg_node, NULL TSRMLS_CC);
 		}
 
-		opline->op2.opline_num = i;
+		opline->op2.num = i;
+		opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, i);
 	}
 	zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL TSRMLS_CC);
 

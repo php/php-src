@@ -2736,8 +2736,9 @@ ZEND_VM_HANDLER(61, ZEND_INIT_FCALL, ANY, CONST)
 		CACHE_PTR(Z_CACHE_SLOT_P(fname), fbc);
 	}
 
-	EX(call) = zend_vm_stack_push_call_frame_ex(ZEND_CALL_NESTED_FUNCTION,
-		fbc, opline->op1.num, NULL, NULL, EX(call) TSRMLS_CC);
+	EX(call) = zend_vm_stack_push_call_frame_ex(
+		opline->op1.num, ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, NULL, NULL, EX(call) TSRMLS_CC);
 
 	FREE_OP2();
 
@@ -3126,8 +3127,7 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 
 	SAVE_OPLINE();
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, value);
 	if (OP1_TYPE == IS_CONST) {
 		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
@@ -3148,8 +3148,7 @@ ZEND_VM_HANDLER(116, ZEND_SEND_VAL_EX, CONST|TMP, ANY)
 		zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.num);
 	}
 	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, value);
 	if (OP1_TYPE == IS_CONST) {
 		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
@@ -3166,8 +3165,7 @@ ZEND_VM_HANDLER(117, ZEND_SEND_VAR, VAR|CV, ANY)
 	zend_free_op free_op1;
 
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (Z_ISREF_P(varptr)) {
 		ZVAL_COPY(arg, Z_REFVAL_P(varptr));
 		FREE_OP1();
@@ -3211,8 +3209,7 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR|CV, ANY)
 		}
 	}
 
-	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, varptr);
 
 	CHECK_EXCEPTION();
@@ -3232,8 +3229,7 @@ ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, ANY)
 		zend_error_noreturn(E_ERROR, "Only variables can be passed by reference");
 	}
 
-	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(varptr == &EG(error_zval))) {
 		ZVAL_NEW_REF(arg, &EG(uninitialized_zval));
 		ZEND_VM_NEXT_OPCODE();
@@ -3265,8 +3261,7 @@ ZEND_VM_HANDLER(66, ZEND_SEND_VAR_EX, VAR|CV, ANY)
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_REF);
 	}
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	arg = ZEND_CALL_ARG(EX(call), opline->op2.num);
-	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	if (Z_ISREF_P(varptr)) {
 		ZVAL_COPY(arg, Z_REFVAL_P(varptr));
 		FREE_OP1();
@@ -3477,7 +3472,6 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY)
 		zval *arg, *param, tmp;
 
 ZEND_VM_C_LABEL(send_array):
-		arg_num = 1;
 		ht = Z_ARRVAL_P(args);
 		zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht) TSRMLS_CC);
 
@@ -3487,7 +3481,7 @@ ZEND_VM_C_LABEL(send_array):
 
 			/* check if any of arguments are going to be passed by reference */
 			for (i = 0; i < zend_hash_num_elements(ht); i++) {
-				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num + i)) {
+				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, i)) {
 					separate = 1;
 					break;
 				}
@@ -3498,7 +3492,8 @@ ZEND_VM_C_LABEL(send_array):
 			}
 		}
 
-		param = ZEND_CALL_ARG(EX(call), arg_num);
+		arg_num = 1;
+		param = ZEND_CALL_ARG(EX(call), 1);
 		ZEND_HASH_FOREACH_VAL(ht, arg) {
 			if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 				// TODO: Scalar values don't have reference counters anymore.
@@ -3577,7 +3572,7 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, VAR|CV, ANY)
 	zend_free_op free_op1;
 
 	arg = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	param = ZEND_CALL_ARG(EX(call), opline->op2.num);
+	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 		// TODO: Scalar values don't have reference counters anymore.
@@ -3641,8 +3636,6 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, VAR|CV, ANY)
 	} else {
 		ZVAL_COPY(param, arg);
 	}
-
-	ZEND_CALL_NUM_ARGS(EX(call)) = opline->op2.num;
 
 	FREE_OP1();
 	CHECK_EXCEPTION();
@@ -5670,11 +5663,86 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		}
 	}
 
-	if (EX(call)) {
+	if (UNEXPECTED(EX(call))) {
 		zend_execute_data *call = EX(call);
+		zend_op *opline = EX(func)->op_array.opcodes + op_num;
+		int level;
+		int do_exit;
+
 		do {
 			/* If the exception was thrown during a function call there might be
 			 * arguments pushed to the stack that have to be dtor'ed. */
+
+			/* find the number of actually passed arguments */
+			level = 0;
+			do_exit = 0;
+			do {
+				switch (opline->opcode) {
+					case ZEND_DO_FCALL:
+						level++;
+						break;										
+					case ZEND_INIT_FCALL:
+					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_USER_CALL:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_NEW:
+						if (level == 0) {
+							ZEND_CALL_NUM_ARGS(call) = 0;
+							do_exit = 1;							
+						}
+						level--;
+						break;
+					case ZEND_SEND_VAL:
+					case ZEND_SEND_VAL_EX:
+					case ZEND_SEND_VAR:
+					case ZEND_SEND_VAR_EX:
+					case ZEND_SEND_REF:
+					case ZEND_SEND_VAR_NO_REF:
+					case ZEND_SEND_USER:
+						if (level == 0) {
+							ZEND_CALL_NUM_ARGS(call) = opline->op2.num;
+							do_exit = 1;							
+						}
+						break;
+					case ZEND_SEND_ARRAY:
+					case ZEND_SEND_UNPACK:
+						if (level == 0) {
+							do_exit = 1;
+						}
+						break;
+				}
+				if (!do_exit) {
+					opline--;
+				}
+			} while (!do_exit);
+			if (call->prev_execute_data) {
+				/* skip current call region */
+				level = 0;
+				do_exit = 0;
+				do {
+					switch (opline->opcode) {
+						case ZEND_DO_FCALL:
+							level++;
+							break;										
+						case ZEND_INIT_FCALL:
+						case ZEND_INIT_FCALL_BY_NAME:
+						case ZEND_INIT_NS_FCALL_BY_NAME:
+						case ZEND_INIT_USER_CALL:
+						case ZEND_INIT_METHOD_CALL:
+						case ZEND_INIT_STATIC_METHOD_CALL:
+						case ZEND_NEW:
+							if (level == 0) {
+								do_exit = 1;							
+							}
+							level--;
+							break;
+					}
+					opline--;
+				} while (!do_exit);
+			}
+
 			zend_vm_stack_free_args(EX(call) TSRMLS_CC);
 
 			if (Z_OBJ(call->This)) {
