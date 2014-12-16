@@ -366,21 +366,15 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend
 		} else {
 			/* object properties should include no integers */
 			convert_to_string(&key);
-//???
-#if 1
-			data = zend_hash_update_ind(ht, Z_STR(key), &d);
-#else
-			if ((data = zend_hash_find(ht, Z_STR(key))) != NULL) {
-				if (Z_TYPE_P(data) == IS_INDIRECT) {
-					data = Z_INDIRECT_P(data);
+			if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
+				if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+					old_data = Z_INDIRECT_P(old_data);
 				}
-				zval_ptr_dtor(data);
-//???				var_push_dtor(var_hash, data);
-				ZVAL_UNDEF(data);
-			} else {
-				data = zend_hash_update(ht, Z_STR(key), &d);
-			}
-#endif
+				zval_ptr_dtor(old_data);
+				var_push_dtor(var_hash, old_data);
+				ZVAL_UNDEF(old_data);
+			} 
+			data = zend_hash_update(ht, Z_STR(key), &d);
 		}
 		
 		zval_dtor(&key);
