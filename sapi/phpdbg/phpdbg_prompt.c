@@ -698,9 +698,10 @@ PHPDBG_COMMAND(ev) /* {{{ */
 	zend_execute_data *original_execute_data = EG(current_execute_data);
 	zend_class_entry *original_scope = EG(scope);
 	zend_vm_stack original_stack = EG(vm_stack);
-	original_stack->top = EG(vm_stack_top);
 
 	PHPDBG_OUTPUT_BACKUP();
+
+	original_stack->top = EG(vm_stack_top);
 
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
 		phpdbg_try_access {
@@ -1072,7 +1073,7 @@ PHPDBG_COMMAND(dl) /* {{{ */
 
 PHPDBG_COMMAND(source) /* {{{ */
 {
-	struct stat sb;
+	zend_stat_t sb;
 
 	if (VCWD_STAT(param->str, &sb) != -1) {
 		phpdbg_try_file_init(param->str, param->len, 0 TSRMLS_CC);
