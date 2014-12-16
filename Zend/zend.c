@@ -487,7 +487,11 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 
 static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{{ */
 {
-	zend_ini_shutdown(executor_globals->ini_directives);
+#ifdef ZTS
+	zend_ini_dtor(executor_globals->ini_directives);
+#else
+	zend_ini_shutdown();
+#endif
 	if (&executor_globals->persistent_list != global_persistent_list) {
 		zend_destroy_rsrc_list(&executor_globals->persistent_list);
 	}

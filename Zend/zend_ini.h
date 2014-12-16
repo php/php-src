@@ -62,9 +62,10 @@ struct _zend_ini_entry {
 
 BEGIN_EXTERN_C()
 ZEND_API int zend_ini_startup(void);
-ZEND_API int zend_ini_shutdown(HashTable *ini_directives);
+ZEND_API int zend_ini_shutdown(void);
 ZEND_API int zend_ini_global_shutdown(void);
 ZEND_API int zend_ini_deactivate(void);
+ZEND_API void zend_ini_dtor(HashTable *ini_directives);
 
 ZEND_API int zend_copy_ini_directives(void);
 

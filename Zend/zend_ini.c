@@ -114,11 +114,17 @@ ZEND_API int zend_ini_startup(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_ini_shutdown(HashTable *ini_directives) /* {{{ */
+ZEND_API int zend_ini_shutdown(void) /* {{{ */
+{
+	zend_ini_dtor(EG(ini_directives));
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API void zend_ini_dtor(HashTable *ini_directives) /* {{{ */
 {
 	zend_hash_destroy(ini_directives);
 	free(ini_directives);
-	return SUCCESS;
 }
 /* }}} */
 
