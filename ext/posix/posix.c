@@ -1322,6 +1322,12 @@ PHP_FUNCTION(posix_getrlimit)
 
 #endif /* HAVE_GETRLIMIT */
 
+void php_posix_set_last_error(int error TSRMLS_DC) /* {{{ */
+{
+	POSIX_G(last_error) = error;
+}
+/* }}} */
+
 /* {{{ proto int posix_get_last_error(void)
    Retrieve the error number set by the last posix function which failed. */
 PHP_FUNCTION(posix_get_last_error)
