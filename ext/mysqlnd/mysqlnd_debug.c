@@ -28,12 +28,6 @@
 static const char * const mysqlnd_debug_default_trace_file = "/tmp/mysqlnd.trace";
 static const char * const mysqlnd_debug_empty_string = "";
 
-#ifdef ZTS 
-#define MYSQLND_ZTS(self) TSRMLS_D = (self)->TSRMLS_C
-#else
-#define MYSQLND_ZTS(self)
-#endif
-
 
 /* {{{ mysqlnd_debug::open */
 static enum_func_status
