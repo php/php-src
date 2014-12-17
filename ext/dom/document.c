@@ -132,7 +132,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_loadxml, 0, 0, 1)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_savexml, 0, 0, 0)
-	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 1)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_construct, 0, 0, 0)
@@ -1605,11 +1604,23 @@ PHP_FUNCTION(dom_document_savexml)
 	xmlChar *mem;
 	dom_object *intern, *nodeobj;
 	dom_doc_propsptr doc_props;
-	int size, format, saveempty = 0;
+	int size, format, saveempty = 0, type = 0, one_size;
 	zend_long options = 0;
+	dom_nnodemap_object *objmap;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|O!l", &id, dom_document_class_entry, &nodep, dom_node_class_entry, &options) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|o!l", &id, dom_document_class_entry, &nodep, &options) == FAILURE) {
 		return;
+	}
+
+	if (nodep != NULL) {
+		if (instanceof_function(Z_OBJCE_P(nodep), dom_node_class_entry TSRMLS_CC)) {
+			type = 1;
+		} else if (instanceof_function(Z_OBJCE_P(nodep), dom_nodelist_class_entry TSRMLS_CC)) {
+			type = 2;
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument, expect DOMNode or DOMNodeList");
+			RETURN_FALSE;
+		}
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1617,7 +1628,7 @@ PHP_FUNCTION(dom_document_savexml)
 	doc_props = dom_get_doc_props(intern->document);
 	format = doc_props->formatoutput;
 
-	if (nodep != NULL) {
+	if (type == 1) {
 		/* Dump contents of Node */
 		DOM_GET_OBJ(node, nodep, xmlNodePtr, nodeobj);
 		if (node->doc != docp) {
@@ -1643,6 +1654,38 @@ PHP_FUNCTION(dom_document_savexml)
 			RETURN_FALSE;
 		}
 		RETVAL_STRING((char *) mem);
+		xmlBufferFree(buf);
+	} else if (type == 2) {
+		intern = Z_DOMOBJ_P(nodep);
+		objmap = (dom_nnodemap_object *)intern->ptr;
+		node = dom_object_get_node(objmap->baseobj);
+
+		buf = xmlBufferCreate();
+		if (!buf) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not fetch buffer");
+			RETURN_FALSE;
+		}
+
+		if (node && node->children) {
+			node = node->children;
+
+			while (node = xmlNextElementSibling(node)) {
+				one_size = xmlNodeDump(buf, NULL, node, 0, format);
+				if (one_size >= 0) {
+					size += one_size;
+				} else {
+					size = -1;
+					break;
+				}
+			}
+		}
+
+		if (size == -1) {
+			RETVAL_FALSE;
+		} else {
+			mem = (xmlChar*) xmlBufferContent(buf);
+			RETVAL_STRINGL((const char*) mem, size);
+		}
 		xmlBufferFree(buf);
 	} else {
 		if (options & LIBXML_SAVE_NOEMPTYTAG) {
@@ -2118,13 +2161,23 @@ PHP_FUNCTION(dom_document_save_html)
 	xmlBufferPtr buf;
 	dom_object *intern, *nodeobj;
 	xmlChar *mem = NULL;
-	int size = 0, format;
+	int size = 0, format, type = 0, one_size;
 	dom_doc_propsptr doc_props;
+	dom_nnodemap_object *objmap;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
-		"O|O!", &id, dom_document_class_entry, &nodep, dom_node_class_entry)
-		== FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|o!", &id, dom_document_class_entry, &nodep) == FAILURE) {
 		return;
+	}
+
+	if (nodep != NULL) {
+		if (instanceof_function(Z_OBJCE_P(nodep), dom_node_class_entry TSRMLS_CC)) {
+			type = 1;
+		} else if (instanceof_function(Z_OBJCE_P(nodep), dom_nodelist_class_entry TSRMLS_CC)) {
+			type = 2;
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument, expect DOMNode or DOMNodeList");
+			RETURN_FALSE;
+		}
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -2132,7 +2185,7 @@ PHP_FUNCTION(dom_document_save_html)
 	doc_props = dom_get_doc_props(intern->document);
 	format = doc_props->formatoutput;
 
-	if (nodep != NULL) {
+	if (type == 1) {
 		/* Dump contents of Node */
 		DOM_GET_OBJ(node, nodep, xmlNodePtr, nodeobj);
 		if (node->doc != docp) {
@@ -2147,8 +2200,6 @@ PHP_FUNCTION(dom_document_save_html)
 		}
 		
 		if (node->type == XML_DOCUMENT_FRAG_NODE) {
-			int one_size;
-
 			for (node = node->children; node; node = node->next) {
 				one_size = htmlNodeDump(buf, docp, node);
 
@@ -2172,6 +2223,38 @@ PHP_FUNCTION(dom_document_save_html)
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error dumping HTML node");
 			RETVAL_FALSE;
+		}
+		xmlBufferFree(buf);
+	} else if (type == 2) {
+		intern = Z_DOMOBJ_P(nodep);
+		objmap = (dom_nnodemap_object *)intern->ptr;
+		node = dom_object_get_node(objmap->baseobj);
+
+		buf = xmlBufferCreate();
+		if (!buf) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not fetch buffer");
+			RETURN_FALSE;
+		}
+
+		if (node && node->children) {
+			node = node->children;
+
+			while (node = xmlNextElementSibling(node)) {
+				one_size = htmlNodeDump(buf, NULL, node);
+				if (one_size >= 0) {
+					size += one_size;
+				} else {
+					size = -1;
+					break;
+				}
+			}
+		}
+
+		if (size == -1) {
+			RETVAL_FALSE;
+		} else {
+			mem = (xmlChar*) xmlBufferContent(buf);
+			RETVAL_STRINGL((const char*) mem, size);
 		}
 		xmlBufferFree(buf);
 	} else {
