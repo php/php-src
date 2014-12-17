@@ -1405,6 +1405,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->__call = NULL;
 		ce->__callstatic = NULL;
 		ce->__tostring = NULL;
+		ce->__hash = NULL;
 		ce->create_object = NULL;
 		ce->get_iterator = NULL;
 		ce->iterator_funcs.funcs = NULL;
@@ -4069,6 +4070,12 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 					"public visibility and cannot be static");
 			}
 			ce->__tostring = (zend_function *) op_array;
+		} else if (zend_string_equals_literal(lcname, ZEND_HASH_FUNC_NAME)) {
+			if (!is_public || is_static) {
+				zend_error(E_WARNING, "The magic method __hash() must have "
+					"public visibility and cannot be static");
+			}
+			ce->__hash = (zend_function *) op_array;
 		} else if (zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __invoke() must have "

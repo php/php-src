@@ -1576,6 +1576,33 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 }
 /* }}} */
 
+/* {{{ */
+ZEND_API int zend_object_offset(const zval *offset, zval *result TSRMLS_DC)
+{
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcc;
+
+	memset(&fci, 0, sizeof(zend_fcall_info));
+	memset(&fcc, 0, sizeof(zend_fcall_info_cache));
+
+	fci.size = sizeof(zend_fcall_info);
+	fci.function_table = &Z_OBJCE_P(offset)->function_table;
+	fci.object = Z_OBJ_P(offset);
+	fci.retval = result;
+	fci.no_separation = 1;
+	ZVAL_STRING(&fci.function_name, ZEND_HASH_FUNC_NAME);
+
+	fcc.initialized = 1;
+	fcc.function_handler = Z_OBJCE_P(offset)->__hash;
+	fcc.calling_scope = EG(scope);
+	fcc.called_scope = Z_OBJCE_P(offset);
+	fcc.object = Z_OBJ_P(offset);
+
+	return zend_call_function(&fci, &fcc TSRMLS_CC);
+}
+/* }}} */
+
+
 /*
  * Local variables:
  * tab-width: 4

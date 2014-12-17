@@ -4073,8 +4073,17 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSE
 		zval *offset = GET_OP2_ZVAL_PTR(BP_VAR_R);
 		zend_string *str;
 		zend_ulong hval;
+		zval obj_key;
+		int free_key = 0;
 
 ZEND_VM_C_LABEL(add_again):
+		if(UNEXPECTED(Z_TYPE_P(offset) == IS_OBJECT && Z_OBJCE_P(offset)->__hash)) {
+			if(zend_object_offset(offset, &obj_key TSRMLS_CC) == SUCCESS) {
+				free_key = 1;
+				offset = &obj_key;
+			}
+		}
+
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -4112,6 +4121,9 @@ ZEND_VM_C_LABEL(str_index):
 				zval_ptr_dtor(expr_ptr);
 				/* do nothing */
 				break;
+		}
+		if(free_key) {
+			zval_dtor(offset);
 		}
 		FREE_OP2();
 	} else {
@@ -4476,10 +4488,19 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMPVAR|CV)
 ZEND_VM_C_LABEL(unset_dim_again):
 	if (OP1_TYPE != IS_UNUSED && EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 		HashTable *ht;
+		zval obj_key;
+		int free_key = 0;
 
 ZEND_VM_C_LABEL(offset_again):
+		if(UNEXPECTED(Z_TYPE_P(offset) == IS_OBJECT && Z_OBJCE_P(offset)->__hash)) {
+			if(zend_object_offset(offset, &obj_key TSRMLS_CC) == SUCCESS) {
+				free_key = 1;
+				offset = &obj_key;
+			}
+		}
 		SEPARATE_ARRAY(container);
 		ht = Z_ARRVAL_P(container);
+
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
@@ -4521,6 +4542,9 @@ ZEND_VM_C_LABEL(num_index_dim):
 			default:
 				zend_error(E_WARNING, "Illegal offset type in unset");
 				break;
+		}
+		if(free_key) {
+			zval_dtor(offset);
 		}
 		FREE_OP2();
 	} else if (OP1_TYPE == IS_UNUSED || EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
@@ -5115,8 +5139,17 @@ ZEND_VM_C_LABEL(isset_dim_obj_again):
 		HashTable *ht = Z_ARRVAL_P(container);
 		zval *value;
 		zend_string *str;
+		int free_key = 0;
+		zval obj_key;
 
 ZEND_VM_C_LABEL(isset_again):
+		if(UNEXPECTED(Z_TYPE_P(offset) == IS_OBJECT && Z_OBJCE_P(offset)->__hash)) {
+			if(zend_object_offset(offset, &obj_key TSRMLS_CC) == SUCCESS) {
+				free_key = 1;
+				offset = &obj_key;
+			}
+		}
+
 		if (EXPECTED(Z_TYPE_P(offset) == IS_STRING)) {
 			str = Z_STR_P(offset);
 			if (OP2_TYPE != IS_CONST) {
@@ -5155,6 +5188,9 @@ ZEND_VM_C_LABEL(num_index_prop):
 					value = NULL;
 					break;
 			}
+		}
+		if(free_key) {
+			zval_dtor(offset);
 		}
 
 		if (opline->extended_value & ZEND_ISSET) {
