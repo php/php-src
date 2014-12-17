@@ -27,28 +27,9 @@
 #include <main/php_ini.h>
 #include <zend_ini.h>
 
-#ifdef ZTS
-#define PTSRMLS_D        void ****ptsrm_ls
-#define PTSRMLS_DC       , PTSRMLS_D
-#define PTSRMLS_C        &tsrm_ls
-#define PTSRMLS_CC       , PTSRMLS_C
-
-#define PHP_EMBED_START_BLOCK(x,y) { \
-    void ***tsrm_ls; \
-    php_embed_init(x, y PTSRMLS_CC); \
-    zend_first_try {
-
-#else
-#define PTSRMLS_D
-#define PTSRMLS_DC
-#define PTSRMLS_C
-#define PTSRMLS_CC
-
 #define PHP_EMBED_START_BLOCK(x,y) { \
     php_embed_init(x, y); \
     zend_first_try {
-
-#endif
 
 #define PHP_EMBED_END_BLOCK() \
   } zend_catch { \
@@ -63,8 +44,12 @@
     #define EMBED_SAPI_API 
 #endif 
 
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_EXTERN;
+#endif
+
 BEGIN_EXTERN_C() 
-EMBED_SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC);
+EMBED_SAPI_API int php_embed_init(int argc, char **argv);
 EMBED_SAPI_API void php_embed_shutdown(void);
 extern EMBED_SAPI_API sapi_module_struct php_embed_module;
 END_EXTERN_C()

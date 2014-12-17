@@ -33,6 +33,10 @@ const char HARDCODED_INI[] =
 	"max_execution_time=0\n"
 	"max_input_time=-1\n\0";
 
+#if defined(PHP_WIN32) && defined(ZTS)
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
+
 static char* php_embed_read_cookies(void)
 {
 	return NULL;
@@ -152,12 +156,9 @@ static const zend_function_entry additional_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-EMBED_SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC)
+EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 {
 	zend_llist global_vars;
-#ifdef ZTS
-	void ***tsrm_ls = NULL;
-#endif
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -172,8 +173,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv PTSRMLS_DC)
 
 #ifdef ZTS
   tsrm_startup(1, 1, 0, NULL);
-  tsrm_ls = ts_resource(0);
-  *ptsrm_ls = tsrm_ls;
+  (void)ts_resource(0);
+  ZEND_TSRMLS_CACHE_UPDATE;
 #endif
 
   sapi_startup(&php_embed_module);
