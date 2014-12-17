@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 7.0.0
 
@@ -26,6 +26,9 @@ PHP                                                                        NEWS
     constructor). (dunglas at gmail dot com)
   . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class 
     modifier. (Guilherme Blanco)
+  . is_long() & is_integer() is now an alias of is_int(). (Kalle)
+  . Implemented FR #55467 (phpinfo: PHP Variables with $ and single quotes). (Kalle)
+  . Fixed bug #55415 (php_info produces invalid anchor names). (Kalle, Johannes)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
@@ -48,6 +51,7 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
+  . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)

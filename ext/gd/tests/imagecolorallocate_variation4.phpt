@@ -8,6 +8,7 @@ if(!extension_loaded('gd')) {
 if(!function_exists('imagecreatetruecolor')) {
     die('skip imagecreatetruecolor function is not available');
 }
+if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php

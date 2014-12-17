@@ -1,5 +1,7 @@
 --TEST--
 Test strncmp() function : usage variations - different lengths(all types)
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : int strncmp ( string $str1, string $str2, int $len );

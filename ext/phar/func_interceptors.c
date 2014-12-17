@@ -339,7 +339,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 	}
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
-		size_t arch_len, entry_len, fname_len;
+		int arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 		char *name;
 		phar_archive_data *phar;
@@ -349,7 +349,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 			goto skip_phar;
 		}
 		fname_len = strlen(fname);
-		if (FAILURE == phar_split_fname(fname, fname_len, &arch, (int *)&arch_len, &entry, (int *)&entry_len, 2, 0 TSRMLS_CC)) {
+		if (FAILURE == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 2, 0 TSRMLS_CC)) {
 			goto skip_phar;
 		}
 
@@ -371,7 +371,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 				name = entry;
 			}
 		} else {
-			entry = phar_fix_filepath(estrndup(entry, entry_len), (int *)&entry_len, 1 TSRMLS_CC);
+			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1 TSRMLS_CC);
 			if (entry[0] == '/') {
 				if (!zend_hash_str_exists(&(phar->manifest), entry + 1, entry_len - 1)) {
 					/* this file is not in the phar, use the original path */

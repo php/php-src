@@ -404,14 +404,16 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), p, &d, -1)) == 0) {
 								return "long";
 							} else if (type == IS_DOUBLE) {
-								if (c == 'L') {
-									if (d > ZEND_LONG_MAX) {
-										*p = ZEND_LONG_MAX;
-										break;
-									} else if (d < ZEND_LONG_MIN) {
-										*p = ZEND_LONG_MIN;
-										break;
+								if (zend_isnan(d)) {
+									return "long";
+								}
+								if (!ZEND_DOUBLE_FITS_LONG(d)) {
+									if (c == 'L') {
+										*p = (d > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
+									} else {
+										return "long";
 									}
+									break;
 								}
 
 								*p = zend_dval_to_lval(d);
@@ -420,14 +422,16 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 						break;
 
 					case IS_DOUBLE:
-						if (c == 'L') {
-							if (Z_DVAL_P(arg) > ZEND_LONG_MAX) {
-								*p = ZEND_LONG_MAX;
-								break;
-							} else if (Z_DVAL_P(arg) < ZEND_LONG_MIN) {
-								*p = ZEND_LONG_MIN;
-								break;
+						if (zend_isnan(Z_DVAL_P(arg))) {
+							return "long";
+						}
+						if (!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg))) {
+							if (c == 'L') {
+								*p = (Z_DVAL_P(arg) > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
+							} else {
+								return "long";
 							}
+							break;
 						}
 					case IS_NULL:
 					case IS_FALSE:
@@ -1879,7 +1883,6 @@ static int zend_startup_module_zval(zval *zv TSRMLS_DC) /* {{{ */
 	return zend_startup_module_ex(module TSRMLS_CC);
 }
 /* }}} */
-
 
 static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func_t compare TSRMLS_DC) /* {{{ */
 {

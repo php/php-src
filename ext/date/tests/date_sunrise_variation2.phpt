@@ -1,5 +1,7 @@
 --TEST--
 Test date_sunrise() function : usage variation - Passing unexpected values to second argument format.
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 4) echo "skip this test is for 32-bit only"; ?>
 --FILE--
 <?php
 /* Prototype  : mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
@@ -114,12 +116,12 @@ bool(false)
 
 --float 12.3456789000e10--
 
-Warning: date_sunrise(): Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be long, double given in %s on line %d
 bool(false)
 
 --float -12.3456789000e10--
 
-Warning: date_sunrise(): Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be long, double given in %s on line %d
 bool(false)
 
 --float .5--

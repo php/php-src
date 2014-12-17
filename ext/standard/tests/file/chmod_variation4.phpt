@@ -1,5 +1,7 @@
 --TEST--
 Test chmod() function : second parameter variation 
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : bool chmod(string filename, int mode)

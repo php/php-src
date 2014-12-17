@@ -532,9 +532,9 @@ static const zend_function_entry apache_functions[] = {
 };
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("xbithack",		"0",	PHP_INI_ALL,	OnUpdateLong,	xbithack,	php_apache2_info_struct, php_apache2_info)
-	STD_PHP_INI_ENTRY("engine",		"1",	PHP_INI_ALL,	OnUpdateLong,	engine, 	php_apache2_info_struct, php_apache2_info)
-	STD_PHP_INI_ENTRY("last_modified",	"0",	PHP_INI_ALL,	OnUpdateLong,	last_modified,	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_ENTRY("xbithack",		"0",	PHP_INI_ALL,	OnUpdateBool,	xbithack,	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_ENTRY("engine",		"1",	PHP_INI_ALL,	OnUpdateBool,	engine, 	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_ENTRY("last_modified",	"0",	PHP_INI_ALL,	OnUpdateBool,	last_modified,	php_apache2_info_struct, php_apache2_info)
 PHP_INI_END()
 
 static PHP_MINIT_FUNCTION(apache)

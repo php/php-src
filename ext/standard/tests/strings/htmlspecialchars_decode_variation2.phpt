@@ -102,7 +102,9 @@ string(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 =
 string(104) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. " double quote string "</html>"
 
 -- Iteration 3 --
-string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"
+
+Warning: htmlspecialchars_decode() expects parameter 2 to be long, double given in %s on line %d
+NULL
 
 -- Iteration 4 --
 string(114) "<html>Roy&#039;s height > Sam&#039;s height. 13 < 15. 1111 & 0000 = 0000. &quot; double quote string &quot;</html>"

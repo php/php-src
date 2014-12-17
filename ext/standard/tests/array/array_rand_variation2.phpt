@@ -1,5 +1,7 @@
 --TEST--
 Test array_rand() function : usage variations - unexpected values for 'num_req' parameter
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : mixed array_rand(array input [, int num_req])

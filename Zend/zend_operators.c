@@ -1162,6 +1162,9 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 		return SUCCESS;
 	}
 
+	if (op1 == result) {
+		zval_dtor(result);
+	}
 	ZVAL_LONG(result, op1_lval % op2_lval);
 	return SUCCESS;
 }
@@ -1324,6 +1327,9 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 		op2_lval = Z_LVAL_P(op2);
 	}
 
+	if (op1 == result) {
+		zval_dtor(result);
+	}
 	ZVAL_LONG(result, op1_lval | op2_lval);
 	return SUCCESS;
 }
@@ -1379,6 +1385,9 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 		op2_lval = Z_LVAL_P(op2);
 	}
 
+	if (op1 == result) {
+		zval_dtor(result);
+	}
 	ZVAL_LONG(result, op1_lval & op2_lval);
 	return SUCCESS;
 }
@@ -1434,6 +1443,9 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 		op2_lval = Z_LVAL_P(op2);
 	}
 
+	if (op1 == result) {
+		zval_dtor(result);
+	}
 	ZVAL_LONG(result, op1_lval ^ op2_lval);
 	return SUCCESS;
 }
@@ -1486,6 +1498,9 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 		}
 	}
 
+	if (op1 == result) {
+		zval_dtor(result);
+	}
 	ZVAL_LONG(result, op1_lval << op2_lval);
 	return SUCCESS;
 }
@@ -1538,6 +1553,9 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 		}
 	}
 
+	if (op1 == result) {
+		zval_dtor(result);
+	}
 	ZVAL_LONG(result, op1_lval >> op2_lval);
 	return SUCCESS;
 }

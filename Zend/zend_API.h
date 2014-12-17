@@ -1064,10 +1064,16 @@ static zend_always_inline int _z_param_long(zval *arg, zend_long *dest, zend_boo
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		*dest = Z_LVAL_P(arg);
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
-		if (strict && UNEXPECTED(Z_DVAL_P(arg) > ZEND_LONG_MAX)) {
-			*dest = ZEND_LONG_MAX;
-		} else if (strict && UNEXPECTED(Z_DVAL_P(arg) < ZEND_LONG_MIN)) {
-			*dest = ZEND_LONG_MIN;
+		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
+			return 0;
+		}
+		if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg)))) {
+			/* Ironically, the strict parameter makes zpp *non*-strict here */
+			if (strict) {
+				*dest = (Z_DVAL_P(arg) > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
+			} else {
+				return 0;
+			}
 		} else {
 			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
 		}
@@ -1077,10 +1083,15 @@ static zend_always_inline int _z_param_long(zval *arg, zend_long *dest, zend_boo
 
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
 			if (EXPECTED(type != 0)) {
-				if (strict && UNEXPECTED(d > ZEND_LONG_MAX)) {
-					*dest = ZEND_LONG_MAX;
-				} else if (strict && UNEXPECTED(d < ZEND_LONG_MIN)) {
-					*dest = ZEND_LONG_MIN;
+				if (UNEXPECTED(zend_isnan(d))) {
+					return 0;
+				}
+				if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(d))) {
+					if (strict) {
+						*dest = (d > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
+					} else {
+						return 0;
+					}
 				} else {
 					*dest = zend_dval_to_lval(d);
 				}

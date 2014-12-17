@@ -276,12 +276,12 @@ php_apache_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
 		if (!val) {
 			val = "";
 		}
-		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), (size_t *)&new_val_len TSRMLS_CC)) {
+		if (sapi_module.input_filter(PARSE_SERVER, key, &val, strlen(val), &new_val_len TSRMLS_CC)) {
 			php_register_variable_safe(key, val, new_val_len, track_vars_array TSRMLS_CC);
 		}
 	APR_ARRAY_FOREACH_CLOSE()
 
-	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), (size_t *)&new_val_len TSRMLS_CC)) {
+	if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &ctx->r->uri, strlen(ctx->r->uri), &new_val_len TSRMLS_CC)) {
 		php_register_variable_safe("PHP_SELF", ctx->r->uri, new_val_len, track_vars_array TSRMLS_CC);
 	}
 }

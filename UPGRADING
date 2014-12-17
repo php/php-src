@@ -22,8 +22,6 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 - Core
-  . Added null coalesce operator (??).
-    (RFC: https://wiki.php.net/rfc/isset_ternary)
   . list() now always supports ArrayAccess and never supports strings.
     Previously both were accepted in some situations and not in others.
     (RFC: https://wiki.php.net/rfc/fix_list_behavior_inconsistency)
@@ -36,6 +34,19 @@ PHP X.Y UPGRADE NOTES
     around.
   . Removed ASP (<%) and script (<script language=php>) tags.
     (RFC: https://wiki.php.net/rfc/remove_alternative_php_tags)
+  . call_user_method() and call_user_method_array() no longer exists.
+  . PHP 7 doesn't keep original values of arguments passed to user functions,
+    so func_get_arg() and func_get_args() will return current value of argument
+    instead of the actually passed. The following code is going to be affected:
+    function foo($x) { $x = 2; return func_get_arg(0);} var_dump(foo(1));
+    It will now produce 2, not 1.
+  . Function parameters with duplicate name are not allowed anymore. Definitions
+    like “function foo($x,$x) {}” will lead to compile time error.
+  . Indirect variable, property and method references are now interpreted with
+    left-to-right semantics. See details in:
+	https://wiki.php.net/rfc/uniform_variable_syntax#semantic_differences_in_existing_syntax 
+  . The global keyword now only accepts simple variables. See details in:
+    https://wiki.php.net/rfc/uniform_variable_syntax#global_keyword_takes_only_simple_variables
 
 - DBA
   . dba_delete() now returns false if the key was not found for the inifile
@@ -51,6 +62,8 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 - Core
+  . Added null coalesce operator (??).
+    (RFC: https://wiki.php.net/rfc/isset_ternary)
   . Support for strings with length >= 2^31 bytes in 64 bit builds
   . Closure::call() method added
 
@@ -137,6 +150,3 @@ PHP X.Y UPGRADE NOTES
     always be zero when casted to integer.
   . Calling a method on a non-object no longer raises a fatal error; see
     also: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object
-
-- Standard
-  . call_user_method() and call_user_method_array() no longer exists.

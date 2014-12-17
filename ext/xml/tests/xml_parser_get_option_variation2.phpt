@@ -1,7 +1,7 @@
 --TEST--
 Test xml_parser_get_option() function : usage variations
 --SKIPIF--
-<?php 
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 if (!extension_loaded("xml")) {
 	print "skip - XML extension not loaded"; 
 }	 
