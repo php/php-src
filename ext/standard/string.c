@@ -3163,7 +3163,12 @@ PHP_FUNCTION(addcslashes)
 	if (what->len == 0) {
 		RETURN_STRINGL(str->val, str->len);
 	}
-
+	
+	if (what->len >= 256 ) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "charlist more than 256 bytes");
+        	RETURN_FALSE;
+	}
+	
 	RETURN_STR(php_addcslashes(str->val, str->len, 0, what->val, what->len TSRMLS_CC));
 }
 /* }}} */
