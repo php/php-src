@@ -93,6 +93,8 @@ PHP_FUNCTION(str_word_count);
 PHP_FUNCTION(str_split);
 PHP_FUNCTION(strpbrk);
 PHP_FUNCTION(substr_compare);
+PHP_FUNCTION(str_inc);
+PHP_FUNCTION(str_dec);
 #ifdef HAVE_STRCOLL
 PHP_FUNCTION(strcoll);
 #endif

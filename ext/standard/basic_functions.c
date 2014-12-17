@@ -2456,6 +2456,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_substr_compare, 0, 0, 3)
 	ZEND_ARG_INFO(0, length)
 	ZEND_ARG_INFO(0, case_sensitivity)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_str_inc_dec, 0)
+	ZEND_ARG_INFO(0, str)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ syslog.c */
 #ifdef HAVE_SYSLOG_H
@@ -2730,6 +2734,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(str_split,														arginfo_str_split)
 	PHP_FE(strpbrk,															arginfo_strpbrk)
 	PHP_FE(substr_compare,													arginfo_substr_compare)
+	PHP_FE(str_inc,														arginfo_str_inc_dec)
+	PHP_FE(str_dec,														arginfo_str_inc_dec)
 
 #ifdef HAVE_STRCOLL
 	PHP_FE(strcoll,															arginfo_strcoll)

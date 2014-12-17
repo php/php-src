@@ -44,6 +44,7 @@
 #define LONG_SIGN_MASK (((zend_long)1) << (8*sizeof(zend_long)-1))
 
 BEGIN_EXTERN_C()
+ZEND_API void increment_string(zval *str);
 ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);

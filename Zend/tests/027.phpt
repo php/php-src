@@ -11,12 +11,14 @@ var_dump(${${$a}}('foo') == 'FOO');
 
 $a = 'b';
 $b = 'c';
-$c = 'strtoupper';
+${"1"} = 'strtoupper';
 $strtoupper = 'strtolower';
 
 var_dump(${${++$a}}('FOO') == 'foo');
 
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
+
+Notice: String increment is deprecated, use str_inc() instead in %s on line 14
 bool(true)

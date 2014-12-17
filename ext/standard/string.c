@@ -5433,6 +5433,120 @@ PHP_FUNCTION(substr_compare)
 }
 /* }}} */
 
+PHP_FUNCTION(str_inc)
+{
+	char *str;
+	int str_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZVAL_STRINGL(return_value, str, str_len, 1);
+	increment_string(return_value);
+}
+
+#define LOWER_CASE 1
+#define UPPER_CASE 2
+#define NUMERIC 3
+
+static void decrement_string(zval *str) /* {{{ */
+{
+        int carry=0;
+        int pos=Z_STRLEN_P(str)-1;
+        char *s=Z_STRVAL_P(str);
+        char *t;
+        int last=0; /* Shut up the compiler warning */
+        int ch;
+
+        if (Z_STRLEN_P(str) == 0) {
+                str_efree(Z_STRVAL_P(str));
+                Z_STRVAL_P(str) = estrndup("-1", sizeof("-1")-1);
+                Z_STRLEN_P(str) = 2;
+                return;
+        }
+
+        if (IS_INTERNED(s)) {
+                Z_STRVAL_P(str) = s = estrndup(s, Z_STRLEN_P(str));
+        }
+
+        while (pos >= 0) {
+                ch = s[pos];
+                if (ch >= 'a' && ch <= 'z') {
+                        if (ch == 'a') {
+                                s[pos] = 'z';
+                                carry=1;
+                        } else {
+                                s[pos]--;
+                                carry=0;
+                        }
+                        last=LOWER_CASE;
+                } else if (ch >= 'A' && ch <= 'Z') {
+                        if (ch == 'A') {
+                                s[pos] = 'Z';
+                                carry=1;
+                        } else {
+                                s[pos]--;
+                                carry=0;
+                        }
+                        last=UPPER_CASE;
+                } else if (ch >= '0' && ch <= '9') {
+                        if (ch == '0') {
+                                s[pos] = '9';
+                                carry=1;
+                        } else {
+                                s[pos]--;
+                                carry=0;
+                        }
+                        last = NUMERIC;
+                } else {
+                        carry=0;
+                        break;
+                }
+                if (carry == 0) {
+                        break;
+                }
+                pos--;
+        }
+
+        if (carry) {
+                if (Z_STRLEN_P(str) > 1) {
+                        t = (char *) emalloc(Z_STRLEN_P(str)-1+1);
+                        memcpy(t, Z_STRVAL_P(str), Z_STRLEN_P(str) - 1);
+                        Z_STRLEN_P(str)--;
+                        t[Z_STRLEN_P(str)] = '\0';
+                        switch (last) {
+                                case NUMERIC:
+                                        t[Z_STRLEN_P(str) - 1] = '9';
+                                        break;
+                                case UPPER_CASE:
+                                        t[0] = 'Z';
+                                        break;
+                                case LOWER_CASE:
+                                        t[0] = 'z';
+                                        break;
+                        }
+                        str_efree(Z_STRVAL_P(str));
+                        Z_STRVAL_P(str) = t;
+                } else {
+                        s[0] = '0';
+                }
+        }
+}
+
+PHP_FUNCTION(str_dec)
+{
+	char *str;
+	int str_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZVAL_STRINGL(return_value, str, str_len, 1);
+	decrement_string(return_value);
+}
+
 /*
  * Local variables:
  * tab-width: 4
