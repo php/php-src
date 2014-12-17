@@ -30,18 +30,16 @@ ZEND_BEGIN_MODULE_GLOBALS(extname)
 ZEND_END_MODULE_GLOBALS(extname)
 */
 
-/* In every utility function you add that needs to use variables 
-   in php_extname_globals, call TSRMLS_FETCH(); after declaring other 
-   variables used by that function, or better yet, pass in
-   after the last function argument and declare your utility function
-   with after the last declared argument.  Always refer to
-   the globals in your function as EXTNAME_G(variable).  You are 
-   encouraged to rename these macros something shorter, see
+/* Always refer to the globals in your function as EXTNAME_G(variable).
+   You are encouraged to rename these macros something shorter, see
    examples in any other php module directory.
 */
 
 #ifdef ZTS
-#define EXTNAME_G(v) TSRMG(extname_globals_id, zend_extname_globals *, v)
+#define EXTNAME_G(v) ZEND_TSRMG(extname_globals_id, zend_extname_globals *, v)
+#ifdef COMPILE_DL_EXTNAME
+ZEND_TSRMLS_CACHE_EXTERN;
+#endif
 #else
 #define EXTNAME_G(v) (extname_globals.v)
 #endif

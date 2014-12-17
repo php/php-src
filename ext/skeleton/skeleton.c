@@ -95,6 +95,9 @@ PHP_MSHUTDOWN_FUNCTION(extname)
  */
 PHP_RINIT_FUNCTION(extname)
 {
+#if defined(COMPILE_DL_EXTNAME) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -150,6 +153,9 @@ zend_module_entry extname_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_EXTNAME
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(extname)
 #endif
 
