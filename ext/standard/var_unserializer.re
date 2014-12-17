@@ -370,11 +370,9 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend
 				if (Z_TYPE_P(old_data) == IS_INDIRECT) {
 					old_data = Z_INDIRECT_P(old_data);
 				}
-				zval_ptr_dtor(old_data);
 				var_push_dtor(var_hash, old_data);
-				ZVAL_UNDEF(old_data);
 			} 
-			data = zend_hash_update(ht, Z_STR(key), &d);
+			data = zend_hash_update_ind(ht, Z_STR(key), &d);
 		}
 		
 		zval_dtor(&key);
