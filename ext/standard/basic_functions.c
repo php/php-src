@@ -2242,9 +2242,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_strripos, 0, 0, 2)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_strrchr, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strrchr, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, needle)
+	ZEND_ARG_INFO(0, part)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_chunk_split, 0, 0, 1)

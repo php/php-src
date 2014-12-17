@@ -2089,7 +2089,7 @@ PHP_FUNCTION(strripos)
 }
 /* }}} */
 
-/* {{{ proto string strrchr(string haystack, string needle)
+/* {{{ proto string strrchr(string haystack, string needle [, bool part])
    Finds the last occurrence of a character in a string within another */
 PHP_FUNCTION(strrchr)
 {
@@ -2097,8 +2097,9 @@ PHP_FUNCTION(strrchr)
 	zend_string *haystack;
 	const char *found = NULL;
 	zend_long found_offset;
+	zend_bool part = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz", &haystack, &needle) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz|b", &haystack, &needle, &part) == FAILURE) {
 		return;
 	}
 
@@ -2115,7 +2116,11 @@ PHP_FUNCTION(strrchr)
 
 	if (found) {
 		found_offset = found - haystack->val;
-		RETURN_STRINGL(found, haystack->len - found_offset);
+		if (part) {
+			RETURN_STRINGL(haystack->val, found_offset);
+		} else {
+			RETURN_STRINGL(found, haystack->len - found_offset);
+		}
 	} else {
 		RETURN_FALSE;
 	}
