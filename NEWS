@@ -83,6 +83,9 @@ PHP                                                                        NEWS
     (Florian Margaine, Remi)
   . Fixed bug #68478 (access.log don't use prefix). (Remi)
 
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
+
 - PDO_pgsql:
   . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
   . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
