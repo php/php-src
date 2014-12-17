@@ -176,7 +176,7 @@ string(3) "123" >= float(2.5)
 string(3) "123" >= int(0)
 string(3) "123" < string(6) "string"
 string(3) "123" >= string(3) "123"
-string(3) "123" >= string(3) "2.5"
+string(3) "123" < string(3) "2.5"
 string(3) "123" >= NULL
 string(3) "123" >= bool(true)
 string(3) "123" >= bool(false)
@@ -192,7 +192,7 @@ string(3) "2.5" >= int(1)
 string(3) "2.5" >= float(2.5)
 string(3) "2.5" >= int(0)
 string(3) "2.5" < string(6) "string"
-string(3) "2.5" < string(3) "123"
+string(3) "2.5" >= string(3) "123"
 string(3) "2.5" >= string(3) "2.5"
 string(3) "2.5" >= NULL
 string(3) "2.5" >= bool(true)
