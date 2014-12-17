@@ -400,14 +400,14 @@ GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag, int *ZeroD
 		scd->lastbit = (2+count)*8 ;
 	}
 
-	ret = 0;
-	for (i = scd->curbit, j = 0; j < code_size; ++i, ++j)
-		if (i < CSD_BUF_SIZE * 8) {
+	if ((scd->curbit + code_size - 1) >= (CSD_BUF_SIZE * 8)) {
+		ret = -1;
+	} else {
+		ret = 0;
+		for (i = scd->curbit, j = 0; j < code_size; ++i, ++j) {
 			ret |= ((scd->buf[i / 8] & (1 << (i % 8))) != 0) << j;
-		} else {
-			ret = -1;
-			break;
 		}
+	}
 
 	scd->curbit += code_size;
 	return ret;
