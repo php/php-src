@@ -1,7 +1,8 @@
 --TEST--
 Test curl_version() function : usage variations - test values for $ascii argument
 --SKIPIF--
-<?php if (!extension_loaded("curl")) exit("skip curl extension not loaded"); ?>
+<?php if (!extension_loaded("curl")) exit("skip curl extension not loaded");
+if (PHP_INT_SIZE != 8) die('skip 64-bit only'); ?>
 --FILE--
 <?php
 

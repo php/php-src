@@ -4,6 +4,7 @@ Test mb_split() function : usage variations  - different parameter types for lim
 <?php
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_split') or die("skip mb_split() is not available in this build");
+if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php
