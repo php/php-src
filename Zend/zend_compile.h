@@ -433,7 +433,7 @@ struct _zend_execute_data {
 	(call)->This.u2.num_args
 
 #define ZEND_CALL_FRAME_SLOT \
-	((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
+	((int)((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval))))
 
 #define ZEND_CALL_VAR(call, n) \
 	((zval*)(((char*)(call)) + ((int)(n))))
