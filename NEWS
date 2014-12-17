@@ -80,6 +80,8 @@ PHP                                                                        NEWS
   . Fixed bug #68545 (NULL pointer dereference in unserialize.c). (Anatol)
   . Fixed bug #68446 (Array constant not accepted for array parameter default).
     (Bob, Dmitry)
+  . Fixed bug #68594 (Use after free vulnerability in unserialize()).
+    (CVE-2014-8142) (Stefan Esser)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
