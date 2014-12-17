@@ -1003,6 +1003,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	char *buffer;
 	int buffer_len, display;
 	TSRMLS_FETCH();
+    int thrownexception = 0;
 
 	buffer_len = (int)vspprintf(&buffer, PG(log_errors_max_len), format, args);
 
@@ -1020,31 +1021,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		}
 	} else {
 		display = 1;
-	}
-
-	/* store the error if it has changed */
-	if (display) {
-#ifdef ZEND_SIGNALS
-		HANDLE_BLOCK_INTERRUPTIONS();
-#endif
-		if (PG(last_error_message)) {
-			free(PG(last_error_message));
-			PG(last_error_message) = NULL;
-		}
-		if (PG(last_error_file)) {
-			free(PG(last_error_file));
-			PG(last_error_file) = NULL;
-		}
-#ifdef ZEND_SIGNALS
-		HANDLE_UNBLOCK_INTERRUPTIONS();
-#endif
-		if (!error_filename) {
-			error_filename = "Unknown";
-		}
-		PG(last_error_type) = type;
-		PG(last_error_message) = strdup(buffer);
-		PG(last_error_file) = strdup(error_filename);
-		PG(last_error_lineno) = error_lineno;
 	}
 
 	/* according to error handling mode, suppress error, throw exception or show it */
@@ -1072,10 +1048,38 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				 */
 				if (EG(error_handling) == EH_THROW && !EG(exception)) {
 					zend_throw_error_exception(EG(exception_class), buffer, 0, type TSRMLS_CC);
+                    thrownexception = 1;
 				}
 				efree(buffer);
-				return;
+                break;
 		}
+	}
+
+	/* store the error if it has changed */
+	if (display && !thrownexception ) {
+#ifdef ZEND_SIGNALS
+		HANDLE_BLOCK_INTERRUPTIONS();
+#endif
+		if (PG(last_error_message)) {
+			free(PG(last_error_message));
+			PG(last_error_message) = NULL;
+		}
+		if (PG(last_error_file)) {
+			free(PG(last_error_file));
+			PG(last_error_file) = NULL;
+		}
+#ifdef ZEND_SIGNALS
+		HANDLE_UNBLOCK_INTERRUPTIONS();
+#endif
+		if (!error_filename) {
+			error_filename = "Unknown";
+		}
+		PG(last_error_type) = type;
+		PG(last_error_message) = strdup(buffer);
+		PG(last_error_file) = strdup(error_filename);
+		PG(last_error_lineno) = error_lineno;
+    } else if( thrownexception ) {
+      return;
 	}
 
 	/* display/log the error if necessary */
