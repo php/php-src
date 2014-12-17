@@ -4,7 +4,8 @@ Test gzopen() function : usage variation
 <?php 
 if (!extension_loaded("zlib")) {
 	print "skip - zlib extension not loaded"; 
-}	 
+}
+if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php

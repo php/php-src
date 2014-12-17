@@ -4,6 +4,7 @@ Test mb_encode_mimeheader() function : usage variations - Pass different data ty
 <?php
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_encode_mimeheader') or die("skip mb_encode_mimeheader() is not available in this build");
+if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php
