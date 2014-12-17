@@ -37,9 +37,6 @@ PHP                                                                        NEWS
   . Fixed bug #68504 (--with-libmbfl configure option not present on Windows).
     (Ashesh Vashi)
 
-- Mcrypt:
-  . Fixed possible read after end of buffer and use after free. (Dmitry)
-
 - OpenSSL:
   . Improved handling of OPENSSL_KEYTYPE_EC keys. (Dominic Luechinger)
 
@@ -103,6 +100,9 @@ PHP                                                                        NEWS
   . Fixed request #68391 (php-fpm conf files loading order).
     (Florian Margaine, Remi)
   . Fixed bug #68478 (access.log don't use prefix). (Remi)
+
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
 
 - GMP:
   . Fixed bug #68419 (build error with gmp 4.1). (Remi)
