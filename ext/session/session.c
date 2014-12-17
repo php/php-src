@@ -2069,7 +2069,7 @@ static PHP_FUNCTION(session_destroy)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-
+	/* Non active session is handled by php_session_destory() */
 	RETURN_BOOL(php_session_destroy(TSRMLS_C) == SUCCESS);
 }
 /* }}} */
@@ -2088,6 +2088,10 @@ static PHP_FUNCTION(session_unset)
 		/* Clean $_SESSION. */
 		zend_hash_clean(ht_sess_var);
 	}
+	/* FIXME:
+	   This function may return FALSE, yet has void return type in proto.
+	RETURN_TRUE;
+	*/
 }
 /* }}} */
 
@@ -2095,6 +2099,16 @@ static PHP_FUNCTION(session_unset)
    Write session data and end session */
 static PHP_FUNCTION(session_write_close)
 {
+	/* FIXME:
+	   Other session functions raise error for invalid usage.
+	   Since object based save handler registers this function, this may be
+	   be called for inactive session and raises error during shutdown.
+	   Fix this behavior, leave as it is now or only return TRUE/FALSE?
+	if (PS(session_status) != php_session_active) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Trying to close inactive session");
+		return;
+	}
+	*/
 	php_session_flush(TSRMLS_C);
 }
 /* }}} */
@@ -2103,6 +2117,10 @@ static PHP_FUNCTION(session_write_close)
    Abort session and end session. Session data will not be written */
 static PHP_FUNCTION(session_abort)
 {
+	if (PS(session_status) != php_session_active) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Trying to abort inactive session");
+		return;
+	}
 	php_session_abort(TSRMLS_C);
 }
 /* }}} */
@@ -2111,6 +2129,10 @@ static PHP_FUNCTION(session_abort)
    Reset session data from saved session data */
 static PHP_FUNCTION(session_reset)
 {
+	if (PS(session_status) != php_session_active) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Trying to reset inactive session");
+		return;
+	}
 	php_session_reset(TSRMLS_C);
 }
 /* }}} */
