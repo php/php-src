@@ -192,7 +192,7 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call T
 {
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 
-	if (num_args > 0) {
+	if (EXPECTED(num_args > 0)) {
 		zval *end = ZEND_CALL_ARG(call, 1);
 		zval *p = end + num_args;
 
