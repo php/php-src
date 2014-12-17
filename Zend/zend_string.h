@@ -279,6 +279,8 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 		case 0: break;
 EMPTY_SWITCH_DEFAULT_CASE()
 	}
+
+	ZEND_ASSERT(hash != 0);
 	return hash;
 }
 

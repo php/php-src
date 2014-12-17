@@ -4,6 +4,7 @@ Test mb_strpos() function : usage variations - pass different data types as $off
 <?php
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_strpos') or die("skip mb_strpos() is not available in this build");
+if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php
