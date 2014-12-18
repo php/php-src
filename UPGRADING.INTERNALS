@@ -14,6 +14,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   m. Other portable macros info
   n. ZEND_ENGINE_2 removal
   o. Updated final class modifier
+  p. TSRM changes
 
 2. Build system changes
   a. Unix build system changes
@@ -127,6 +128,47 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   
   o. Removed ZEND_ACC_FINAL_CLASS in favour of ZEND_ACC_FINAL, turning final class
      modifier now a different class entry flag. Update your extensions.
+
+  p. TSRM changes
+
+     The TSRM layer undergone significant changes. It is not necessary anymore to 
+     pass the tsrm_ls pointer explicitly. The TSRMLS_* macros should not be used
+     in any new developments.
+
+     The recommended way accessing globals in TS builds is by implementing it
+     to use a local thread unique pointer to the corresponding data pool. These
+     are the new macros that serve to achieve this goal:
+
+     - ZEND_TSRMG - based on TSRMG and if static pointer for data pool access is
+       implemented, will use it
+     - ZEND_TSRMLS_CACHE_EXTERN - to be used in a header shared across multiple
+       C/C++ files
+     - ZEND_TSRMLS_CACHE_DEFINE - to be used in the main extension C/C++ file
+     - ZEND_TSRMLS_CACHE_UPDATE - to be integrated at the top of the globals
+       ctor or RINIT function
+     - ZEND_ENABLE_STATIC_TSRMLS_CACHE - to be used in the config.[m4|w32] for
+       enabling the globals access per thread unique pointer
+     - TSRMLS_CACHE - expands to the variable name which links to the thread
+       unique data pool
+
+     Note that usually it will work without implementing the globals access per
+     a thread unique pointer, however it might cause a slowdown. The reason is
+     that the access model to the extension/SAPI own globals as well as the
+     access to the core globals is determined in the compilation phase depending
+     on whether ZEND_ENABLE_STATIC_TSRMLS_CACHE macro is defined. 
+
+     Due to the current compiler evolution state, the TSRMLS_CACHE pointer
+     (when implemented) has to be present and updated in every binary unit which
+     is not compiled statically into PHP. So any DLL, DSO, EXE, etc. has to take
+     care about defining and updating it's TSRMLS cache. An update should happen
+     before any globals was accessed.
+
+     Porting an extension or SAPI is usually as easy as removing all the TSRMLS_*
+     ocurrences and integrating the macros mentioned above. However if tsrm_ls
+     is used explicitly, its usage can considered obsolete in most cases.
+     Additionally, if an extension triggers its own threads, TSRMLS_CACHE shouldn't
+     be passed to that threads directly.
+
 
 ========================
 2. Build system changes
