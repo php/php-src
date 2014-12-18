@@ -6,7 +6,7 @@
 
 #define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
 
-inline int convert_cp(UChar32* pcp, zval *zcp TSRMLS_DC) {
+inline int convert_cp(UChar32* pcp, zval *zcp) {
 	zend_long cp = -1;
 	if (Z_TYPE_P(zcp) == IS_LONG) {
 		cp = Z_LVAL_P(zcp);
@@ -14,18 +14,18 @@ inline int convert_cp(UChar32* pcp, zval *zcp TSRMLS_DC) {
 		int i = 0;
 		U8_NEXT(Z_STRVAL_P(zcp), i, Z_STRLEN_P(zcp), cp);
 		if (i != Z_STRLEN_P(zcp)) {
-			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR TSRMLS_CC);
-			intl_error_set_custom_msg(NULL, "Passing a UTF-8 character for codepoint requires a string which is exactly one UTF-8 codepoint long.", 0 TSRMLS_CC);
+			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+			intl_error_set_custom_msg(NULL, "Passing a UTF-8 character for codepoint requires a string which is exactly one UTF-8 codepoint long.", 0);
 			return FAILURE;
 		}
 	} else {
-		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR TSRMLS_CC);
-		intl_error_set_custom_msg(NULL, "Invalid parameter for unicode point.  Must be either integer or UTF-8 sequence.", 0 TSRMLS_CC);
+		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+		intl_error_set_custom_msg(NULL, "Invalid parameter for unicode point.  Must be either integer or UTF-8 sequence.", 0);
 		return FAILURE;
 	}
 	if ((cp < UCHAR_MIN_VALUE) || (cp > UCHAR_MAX_VALUE)) {
-		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR TSRMLS_CC);
-		intl_error_set_custom_msg(NULL, "Codepoint out of range", 0 TSRMLS_CC);
+		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+		intl_error_set_custom_msg(NULL, "Codepoint out of range", 0);
 		return FAILURE;
 	}
 	*pcp = (UChar32)cp;
@@ -45,8 +45,8 @@ IC_METHOD(chr) {
 	char buffer[5];
 	int buffer_len = 0;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
@@ -70,8 +70,8 @@ IC_METHOD(ord) {
 	UChar32 cp;
 	zval *zcp;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
@@ -89,8 +89,8 @@ IC_METHOD(hasBinaryProperty) {
 	zend_long prop;
 	zval *zcp;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &zcp, &prop) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &zcp, &prop) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
@@ -108,8 +108,8 @@ IC_METHOD(getIntPropertyValue) {
 	zend_long prop;
 	zval *zcp;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &zcp, &prop) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &zcp, &prop) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
@@ -124,7 +124,7 @@ ZEND_END_ARG_INFO();
 IC_METHOD(getIntPropertyMinValue) {
 	zend_long prop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &prop) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &prop) == FAILURE) {
 		return;
 	}
 
@@ -139,7 +139,7 @@ ZEND_END_ARG_INFO();
 IC_METHOD(getIntPropertyMaxValue) {
 	zend_long prop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &prop) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &prop) == FAILURE) {
 		return;
 	}
 
@@ -155,8 +155,8 @@ IC_METHOD(getNumericValue) {
 	UChar32 cp;
 	zval *zcp;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
@@ -171,18 +171,12 @@ ZEND_END_ARG_INFO();
 typedef struct _enumCharType_data {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
-#ifdef ZTS
-	TSRMLS_D;
-#endif
 } enumCharType_data;
 static UBool enumCharType_callback(enumCharType_data *context,
                                    UChar32 start, UChar32 limit,
                                    UCharCategory type) {
 	zval retval;
 	zval args[3];
-#ifdef ZTS
-	TSRMLS_D = context->TSRMLS_C;
-#endif
 
 	ZVAL_NULL(&retval);
 	/* Note that $start is INclusive, whiel $limit is EXclusive
@@ -196,9 +190,9 @@ static UBool enumCharType_callback(enumCharType_data *context,
 	context->fci.param_count = 3;
 	context->fci.params = args;
 
-	if (zend_call_function(&context->fci, &context->fci_cache TSRMLS_CC) == FAILURE) {
-		intl_error_set_code(NULL, U_INTERNAL_PROGRAM_ERROR TSRMLS_CC);
-		intl_errors_set_custom_msg(NULL, "enumCharTypes callback failed", 0 TSRMLS_CC);
+	if (zend_call_function(&context->fci, &context->fci_cache) == FAILURE) {
+		intl_error_set_code(NULL, U_INTERNAL_PROGRAM_ERROR);
+		intl_errors_set_custom_msg(NULL, "enumCharTypes callback failed", 0);
 		zval_dtor(&retval);
 		return 0;
 	}
@@ -208,12 +202,9 @@ static UBool enumCharType_callback(enumCharType_data *context,
 IC_METHOD(enumCharTypes) {
 	enumCharType_data context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "f", &context.fci, &context.fci_cache) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &context.fci, &context.fci_cache) == FAILURE) {
 		return;
 	}
-#ifdef ZTS
-	context.TSRMLS_C = TSRMLS_C;
-#endif
 	u_enumCharTypes((UCharEnumTypeRange*)enumCharType_callback, &context);
 }
 /* }}} */
@@ -226,8 +217,8 @@ IC_METHOD(getBlockCode) {
 	UChar32 cp;
 	zval *zcp;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
@@ -248,8 +239,8 @@ IC_METHOD(charName) {
 	zend_string *buffer = NULL;
 	int32_t buffer_len;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &zcp, &nameChoice) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &nameChoice) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
@@ -277,7 +268,7 @@ IC_METHOD(charFromName) {
 	UChar32 ret;
 	UErrorCode error = U_ZERO_ERROR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &name, &name_len, &nameChoice) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &name, &name_len, &nameChoice) == FAILURE) {
 		return;
 	}
 
@@ -297,18 +288,12 @@ ZEND_END_ARG_INFO();
 typedef struct _enumCharNames_data {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
-#ifdef ZTS
-	TSRMLS_D;
-#endif
 } enumCharNames_data;
 static UBool enumCharNames_callback(enumCharNames_data *context,
                                     UChar32 code, UCharNameChoice nameChoice,
                                     const char *name, int32_t length) {
 	zval retval;
 	zval args[3];
-#ifdef ZTS
-	TSRMLS_D = context->TSRMLS_C;
-#endif
 
 	ZVAL_NULL(&retval);
 	ZVAL_LONG(&args[0], code);
@@ -319,9 +304,9 @@ static UBool enumCharNames_callback(enumCharNames_data *context,
 	context->fci.param_count = 3;
 	context->fci.params = args;
 
-	if (zend_call_function(&context->fci, &context->fci_cache TSRMLS_CC) == FAILURE) {
-		intl_error_set_code(NULL, U_INTERNAL_PROGRAM_ERROR TSRMLS_CC);
-		intl_error_set_custom_msg(NULL, "enumCharNames callback failed", 0 TSRMLS_CC);
+	if (zend_call_function(&context->fci, &context->fci_cache) == FAILURE) {
+		intl_error_set_code(NULL, U_INTERNAL_PROGRAM_ERROR);
+		intl_error_set_custom_msg(NULL, "enumCharNames callback failed", 0);
 		zval_dtor(&retval);
 		zval_dtor(&args[2]);
 		return 0;
@@ -337,15 +322,12 @@ IC_METHOD(enumCharNames) {
 	zend_long nameChoice = U_UNICODE_CHAR_NAME;
 	UErrorCode error = U_ZERO_ERROR;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zzf|l", &zstart, &zlimit, &context.fci, &context.fci_cache, &nameChoice) == FAILURE) ||
-	    (convert_cp(&start, zstart TSRMLS_CC) == FAILURE) ||
-	    (convert_cp(&limit, zlimit TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "zzf|l", &zstart, &zlimit, &context.fci, &context.fci_cache, &nameChoice) == FAILURE) ||
+	    (convert_cp(&start, zstart) == FAILURE) ||
+	    (convert_cp(&limit, zlimit) == FAILURE)) {
 		return;
 	}
 
-#ifdef ZTS
-	context.TSRMLS_C = TSRMLS_C;
-#endif
 	u_enumCharNames(start, limit, (UEnumCharNamesFn*)enumCharNames_callback, &context, nameChoice, &error);
 	INTL_CHECK_STATUS(error, NULL);
 }
@@ -361,7 +343,7 @@ IC_METHOD(getPropertyName) {
 	zend_long nameChoice = U_LONG_PROPERTY_NAME;
 	const char *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &property, &nameChoice) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &property, &nameChoice) == FAILURE) {
 		return;
 	}
 
@@ -369,8 +351,8 @@ IC_METHOD(getPropertyName) {
 	if (ret) {
 		RETURN_STRING(ret);
 	} else {
-		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR TSRMLS_CC);
-		intl_error_set_custom_msg(NULL, "Failed to get property name", 0 TSRMLS_CC);
+		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+		intl_error_set_custom_msg(NULL, "Failed to get property name", 0);
 		RETURN_FALSE;
 	}
 }
@@ -384,7 +366,7 @@ IC_METHOD(getPropertyEnum) {
 	char *alias;
 	size_t alias_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &alias, &alias_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &alias, &alias_len) == FAILURE) {
 		return;
 	}
 
@@ -401,7 +383,7 @@ ZEND_END_ARG_INFO();
 IC_METHOD(getPropertyValueName) {
 	zend_long property, value, nameChoice = U_LONG_PROPERTY_NAME;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll|l", &property, &value, &nameChoice) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l", &property, &value, &nameChoice) == FAILURE) {
 		return;
 	}
 
@@ -419,7 +401,7 @@ IC_METHOD(getPropertyValueEnum) {
 	char *name;
 	size_t name_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &property, &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &property, &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -436,8 +418,8 @@ IC_METHOD(foldCase) {
 	zval *zcp;
 	zend_long options = U_FOLD_CASE_DEFAULT;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &zcp, &options) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &options) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
@@ -464,15 +446,15 @@ IC_METHOD(digit) {
 	zend_long radix = 10;
 	int ret;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &zcp, &radix) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &radix) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
 	ret = u_digit(cp, radix);
 	if (ret < 0) {
-		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR TSRMLS_CC);
-		intl_error_set_custom_msg(NULL, "Invalid digit", 0 TSRMLS_CC);
+		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+		intl_error_set_custom_msg(NULL, "Invalid digit", 0);
 		RETURN_FALSE;
 	}
 	RETURN_LONG(ret);
@@ -487,7 +469,7 @@ ZEND_END_ARG_INFO();
 IC_METHOD(forDigit) {
 	zend_long digit, radix = 10;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &digit, &radix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &digit, &radix) == FAILURE) {
 		return;
 	}
 
@@ -505,8 +487,8 @@ IC_METHOD(charAge) {
 	UVersionInfo version;
 	int i;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
@@ -528,8 +510,8 @@ IC_METHOD(getUnicodeVersion) {
 	UVersionInfo version;
 	int i;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
@@ -553,8 +535,8 @@ IC_METHOD(getFC_NFKC_Closure) {
 	int32_t closure_len, ret_len;
 	UErrorCode error = U_ZERO_ERROR;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
+	    (convert_cp(&cp, zcp) == FAILURE)) {
 		return;
 	}
 
@@ -586,8 +568,8 @@ ZEND_BEGIN_ARG_INFO_EX(name##_arginfo, 0, ZEND_RETURN_VALUE, 1) \
 ZEND_END_ARG_INFO(); \
 IC_METHOD(name) { \
 	UChar32 cp; zval *zcp; \
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcp) == FAILURE) || \
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) { return; } \
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) || \
+	    (convert_cp(&cp, zcp) == FAILURE)) { return; } \
 	RETURN_BOOL(u_##name(cp)); \
 }
 IC_BOOL_METHOD_CHAR(isUAlphabetic)
@@ -628,8 +610,8 @@ ZEND_BEGIN_ARG_INFO_EX(name##_arginfo, 0, ZEND_RETURN_VALUE, 1) \
 ZEND_END_ARG_INFO(); \
 IC_METHOD(name) { \
 	UChar32 cp; zval *zcp; \
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcp) == FAILURE) || \
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) { return; } \
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) || \
+	    (convert_cp(&cp, zcp) == FAILURE)) { return; } \
 	RETURN_LONG(u_##name(cp)); \
 }
 IC_INT_METHOD_CHAR(charDirection)
@@ -652,8 +634,8 @@ ZEND_BEGIN_ARG_INFO_EX(name##_arginfo, 0, ZEND_RETURN_VALUE, 1) \
 ZEND_END_ARG_INFO(); \
 IC_METHOD(name) { \
 	UChar32 cp, ret; zval *zcp; \
-	if ((zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zcp) == FAILURE) || \
-	    (convert_cp(&cp, zcp TSRMLS_CC) == FAILURE)) { return; } \
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) || \
+	    (convert_cp(&cp, zcp) == FAILURE)) { return; } \
 	ret = u_##name(cp); \
 	if (Z_TYPE_P(zcp) == IS_STRING) { \
 		char buffer[5]; \
@@ -743,12 +725,12 @@ int php_uchar_minit(INIT_FUNC_ARGS) {
 	zend_class_entry tmp, *ce;
 
 	INIT_CLASS_ENTRY(tmp, "IntlChar", intlchar_methods);
-	ce = zend_register_internal_class(&tmp TSRMLS_CC);
+	ce = zend_register_internal_class(&tmp);
 
 #define IC_CONSTL(name, val) \
-	zend_declare_class_constant_long(ce, name, strlen(name), val TSRMLS_CC);
+	zend_declare_class_constant_long(ce, name, strlen(name), val);
 
-	zend_declare_class_constant_string(ce, "UNICODE_VERSION", sizeof("UNICODE_VERISON")-1, U_UNICODE_VERSION TSRMLS_CC);
+	zend_declare_class_constant_string(ce, "UNICODE_VERSION", sizeof("UNICODE_VERISON")-1, U_UNICODE_VERSION);
 	IC_CONSTL("CODEPOINT_MIN", UCHAR_MIN_VALUE)
 	IC_CONSTL("CODEPOINT_MAX", UCHAR_MAX_VALUE)
 
