@@ -74,15 +74,15 @@ PHP_FUNCTION(sys_get_temp_dir);
 
 PHP_MINIT_FUNCTION(user_streams);
 
-PHPAPI int php_le_stream_context(TSRMLS_D);
-PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block TSRMLS_DC);
-PHPAPI int php_copy_file(const char *src, const char *dest TSRMLS_DC);
-PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk TSRMLS_DC);
-PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx TSRMLS_DC);
-PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options TSRMLS_DC);
-PHPAPI int php_mkdir(const char *dir, zend_long mode TSRMLS_DC);
-PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value TSRMLS_DC);
-PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC);
+PHPAPI int php_le_stream_context(void);
+PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block);
+PHPAPI int php_copy_file(const char *src, const char *dest);
+PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_chk);
+PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_chk, php_stream_context *ctx);
+PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options);
+PHPAPI int php_mkdir(const char *dir, zend_long mode);
+PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value);
+PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char);
 
 #define META_DEF_BUFSIZE 8192
 
@@ -114,7 +114,7 @@ typedef struct _php_meta_tags_data {
 	int in_meta;
 } php_meta_tags_data;
 
-php_meta_tags_token php_next_meta_token(php_meta_tags_data * TSRMLS_DC);
+php_meta_tags_token php_next_meta_token(php_meta_tags_data *);
 
 typedef struct {
 	int pclose_ret;
@@ -132,7 +132,7 @@ typedef struct {
 } php_file_globals;
 
 #ifdef ZTS
-#define FG(v) TSRMG(file_globals_id, php_file_globals *, v)
+#define FG(v) ZEND_TSRMG(file_globals_id, php_file_globals *, v)
 extern PHPAPI int file_globals_id;
 #else
 #define FG(v) (file_globals.v)

@@ -94,7 +94,6 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 {
 	int ret, did = 0;
 	int mime = ms->flags & MAGIC_MIME;
-	TSRMLS_FETCH();
 
 	if (ms->flags & MAGIC_APPLE)
 		return 0;

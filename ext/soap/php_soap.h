@@ -193,14 +193,17 @@ extern zend_module_entry soap_module_entry;
 ZEND_EXTERN_MODULE_GLOBALS(soap)
 
 #ifdef ZTS
-# define SOAP_GLOBAL(v) TSRMG(soap_globals_id, zend_soap_globals *, v)
+# define SOAP_GLOBAL(v) ZEND_TSRMG(soap_globals_id, zend_soap_globals *, v)
+# ifdef COMPILE_DL_SOAP
+ZEND_TSRMLS_CACHE_EXTERN;
+# endif
 #else
 # define SOAP_GLOBAL(v) (soap_globals.v)
 #endif
 
 extern zend_class_entry* soap_var_class_entry;
 
-void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
+void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
 
 #define soap_error0(severity, format) \
 	php_error(severity, "SOAP-ERROR: " format)

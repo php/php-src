@@ -26,8 +26,8 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 	zval *args;
 	int status;
 
-	if (!option_array || !zend_is_callable(option_array, IS_CALLABLE_CHECK_NO_ACCESS, NULL TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument is expected to be a valid callback");
+	if (!option_array || !zend_is_callable(option_array, IS_CALLABLE_CHECK_NO_ACCESS, NULL)) {
+		php_error_docref(NULL, E_WARNING, "First argument is expected to be a valid callback");
 		zval_ptr_dtor(value);
 		ZVAL_NULL(value);
 		return;
@@ -35,7 +35,7 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 
 	args = safe_emalloc(sizeof(zval), 1, 0);
 	ZVAL_COPY(&args[0], value);
-	status = call_user_function_ex(EG(function_table), NULL, option_array, &retval, 1, args, 0, NULL TSRMLS_CC);
+	status = call_user_function_ex(EG(function_table), NULL, option_array, &retval, 1, args, 0, NULL);
 
 	if (status == SUCCESS && !Z_ISUNDEF(retval)) {
 		zval_ptr_dtor(value);

@@ -303,8 +303,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 -	if (f == NULL) {
 +	php_stream *stream;
 +
-+	TSRMLS_FETCH();
-+
+++
 +	ms->file = fn;
 +	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
 +
@@ -367,8 +366,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 +	php_stream *dir;
 +	php_stream_dirent d;
 + 
-+	TSRMLS_FETCH();
- 
++ 
  	memset(mset, 0, sizeof(mset));
  	ms->flags |= MAGIC_CHECK;	/* Enable checks for parsed files */
  
@@ -551,8 +549,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 -	fd = -1;
 -	if ((map = CAST(struct magic_map *, calloc(1, sizeof(*map)))) == NULL) {
 +
-+	TSRMLS_FETCH();
-+
+++
 +	if ((map = CAST(struct magic_map *, ecalloc(1, sizeof(*map)))) == NULL) {
  		file_oomem(ms, sizeof(*map));
 +		efree(map);
@@ -710,8 +707,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	uint32_t i;
 +	php_stream *stream;
 +
-+	TSRMLS_FETCH();
- 
++ 
 -	dbname = mkdbname(ms, fn, 1);
 +	dbname = mkdbname(ms, fn, 0);
  
@@ -771,8 +767,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  {
  	const char *p, *q;
  	char *buf;
-+	TSRMLS_FETCH();
- 
++ 
  	if (strip) {
  		if ((p = strrchr(fn, '/')) != NULL)
 @@ -2775,16 +2842,18 @@
@@ -1628,8 +1623,7 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
 -	ssize_t nch;
 -	struct stat tstatbuf;
 -#endif
-+	TSRMLS_FETCH();
- 
++ 
  	if (ms->flags & MAGIC_APPLE)
  		return 0;
 -	if (fn == NULL)
@@ -2082,8 +2076,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
 -			goto done;
 +	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0) {
 +		php_socket_t fd;
-+		TSRMLS_FETCH();
-+		if (stream && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0)) {
++	+		if (stream && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0)) {
 +			if ((m = file_trycdf(ms, fd, ubuf, nb)) != 0) {
 +				if ((ms->flags & MAGIC_DEBUG) != 0)
 +					(void)fprintf(stderr, "cdf %d\n", m);
@@ -2177,8 +2170,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
 +	zend_string *res;
 +	zval repl;
 +	int  rep_cnt = 0;
-+	TSRMLS_FETCH();
- 
++ 
  	(void)setlocale(LC_CTYPE, "C");
 -	rc = regcomp(&rx, pat, REG_EXTENDED);
 -	if (rc) {
@@ -2200,7 +2192,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
 +
 +	opts |= PCRE_MULTILINE;
 +	convert_libmagic_pattern(&patt, pat, strlen(pat), opts);
-+	if ((pce = pcre_get_compiled_regex_cache(Z_STR(patt) TSRMLS_CC)) == NULL) {
++	if ((pce = pcre_get_compiled_regex_cache(Z_STR(patt))) == NULL) {
 +		zval_ptr_dtor(&patt);
 +		rep_cnt = -1;
 +		goto out;
@@ -2208,7 +2200,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
 +	zval_ptr_dtor(&patt);
 +
 +	ZVAL_STRING(&repl, rep);
-+	res = php_pcre_replace_impl(pce, ms->o.buf, strlen(ms->o.buf), &repl, 0, -1, &rep_cnt TSRMLS_CC);
++	res = php_pcre_replace_impl(pce, ms->o.buf, strlen(ms->o.buf), &repl, 0, -1, &rep_cnt);
 +
 +	zval_ptr_dtor(&repl);
 +	if (NULL == res) {
@@ -2432,8 +2424,7 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
 -	int	ispipe = 0;
 -	off_t	pos = (off_t)-1;
 +	int no_in_stream = 0;
-+	TSRMLS_FETCH();
-+
+++
 +	if (!inname && !stream) {
 +		return NULL;
 +	}
@@ -2790,8 +2781,7 @@ diff -u libmagic.orig/print.c libmagic/print.c
  {
  	va_list va;
 +	char *expanded_format;
-+	TSRMLS_FETCH();
- 
++ 
 -	/* cuz we use stdout for most, stderr here */
 -	(void) fflush(stdout); 
 -
@@ -2805,7 +2795,7 @@ diff -u libmagic.orig/print.c libmagic/print.c
  	va_end(va);
 -	(void) fputc('\n', stderr);
 +	
-+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Warning: %s", expanded_format);
++	php_error_docref(NULL, E_NOTICE, "Warning: %s", expanded_format);
 +
 +	free(expanded_format);
  }
@@ -3103,8 +3093,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 +	int re_options, rv = -1;
 +	pcre_extra *re_extra;
 +	zend_string *pattern;
-+	TSRMLS_FETCH();
-+	
+++	
  	if (strchr(m->desc, '%') == NULL)
  		return 0;
  
@@ -3115,7 +3104,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 -		(void)regerror(rc, &rx, errmsg, sizeof(errmsg));
 -		file_magerror(ms, "regex error %d, (%s)", rc, errmsg);
 +	pattern = zend_string_init("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
-+	if ((pce = pcre_get_compiled_regex(pattern, &re_extra, &re_options TSRMLS_CC)) == NULL) {
++	if ((pce = pcre_get_compiled_regex(pattern, &re_extra, &re_options)) == NULL) {
 +		rv = -1;
  	} else {
 -		rc = regexec(&rx, m->desc, 0, 0, 0);
@@ -3380,8 +3369,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 +		zval pattern;
 +		int options = 0;
 +		pcre_cache_entry *pce;
-+		TSRMLS_FETCH();
-+		
++	+		
 +		options |= PCRE_MULTILINE;
 +		
 +		if (m->str_flags & STRING_IGNORE_CASE) {
@@ -3391,7 +3379,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 +		convert_libmagic_pattern(&pattern, (char *)m->value.s, m->vallen, options);
 +		
 +		l = v = 0;
-+		if ((pce = pcre_get_compiled_regex_cache(Z_STR(pattern) TSRMLS_CC)) == NULL) {
++		if ((pce = pcre_get_compiled_regex_cache(Z_STR(pattern))) == NULL) {
 +			zval_ptr_dtor(&pattern);
 +			return -1;
 +		} else {
@@ -3407,7 +3395,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 +			haystack = estrndup(ms->search.s, ms->search.s_len);
 +
 +			/* match v = 0, no match v = 1 */
-+			php_pcre_match_impl(pce, haystack, ms->search.s_len, &retval, &subpats, 1, 1, PREG_OFFSET_CAPTURE, 0 TSRMLS_CC);
++			php_pcre_match_impl(pce, haystack, ms->search.s_len, &retval, &subpats, 1, 1, PREG_OFFSET_CAPTURE, 0);
 +			/* Free haystack */
 +			efree(haystack);
 +			

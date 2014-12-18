@@ -199,14 +199,14 @@ ZEND_API zend_ast *zend_ast_create_decl(
 ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...);
 ZEND_API zend_ast *zend_ast_list_add(zend_ast *list, zend_ast *op);
 
-ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope TSRMLS_DC);
+ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope);
 
 ZEND_API zend_ast *zend_ast_copy(zend_ast *ast);
 ZEND_API void zend_ast_destroy(zend_ast *ast);
 ZEND_API void zend_ast_destroy_and_free(zend_ast *ast);
 
-typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr TSRMLS_DC);
-ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn TSRMLS_DC);
+typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr);
+ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn);
 
 static zend_always_inline zend_bool zend_ast_is_list(zend_ast *ast) {
 	return (ast->kind >> ZEND_AST_IS_LIST_SHIFT) & 1;

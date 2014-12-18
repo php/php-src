@@ -42,7 +42,7 @@ PHP_FUNCTION(mysqli_embedded_server_start)
 	HashPosition pos;
 	int index, rc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "laa", &start, &args, &grps) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "laa", &start, &args, &grps) == FAILURE) {
 		return;
 	}
 

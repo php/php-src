@@ -34,7 +34,7 @@ static inline NumberFormatter_object *php_intl_number_format_fetch_object(zend_o
 }
 #define Z_INTL_NUMBERFORMATTER_P(zv) php_intl_number_format_fetch_object(Z_OBJ_P(zv))
 
-void formatter_register_class( TSRMLS_D );
+void formatter_register_class( void );
 extern zend_class_entry *NumberFormatter_ce_ptr;
 
 /* Auxiliary macros */
@@ -47,7 +47,7 @@ extern zend_class_entry *NumberFormatter_ce_ptr;
 	if (FORMATTER_OBJECT(nfo) == NULL) \
 	{ \
 		intl_errors_set(&nfo->nf_data.error, U_ILLEGAL_ARGUMENT_ERROR, \
-				"Found unconstructed NumberFormatter", 0 TSRMLS_CC); \
+				"Found unconstructed NumberFormatter", 0); \
 		RETURN_FALSE; \
 	}
 

@@ -216,7 +216,7 @@ PHP_FUNCTION(readline)
 	size_t prompt_len;
 	char *result;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!", &prompt, &prompt_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &prompt, &prompt_len)) {
 		RETURN_FALSE;
 	}
 
@@ -243,7 +243,7 @@ PHP_FUNCTION(readline_info)
 	size_t what_len, oldval;
 	char *oldstr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sz", &what, &what_len, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sz", &what, &what_len, &value) == FAILURE) {
 		return;
 	}
 
@@ -338,7 +338,7 @@ PHP_FUNCTION(readline_add_history)
 	char *arg;
 	size_t arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -398,11 +398,11 @@ PHP_FUNCTION(readline_read_history)
 	char *arg = NULL;
 	size_t arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
-	if (php_check_open_basedir(arg TSRMLS_CC)) {
+	if (php_check_open_basedir(arg)) {
 		RETURN_FALSE;
 	}
 
@@ -422,11 +422,11 @@ PHP_FUNCTION(readline_write_history)
 	char *arg = NULL;
 	size_t arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
-	if (php_check_open_basedir(arg TSRMLS_CC)) {
+	if (php_check_open_basedir(arg)) {
 		RETURN_FALSE;
 	}
 
@@ -481,13 +481,12 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 	zval params[3];
 	int i;
 	char **matches = NULL;
-	TSRMLS_FETCH();
 
 	_readline_string_zval(&params[0], text);
 	_readline_long_zval(&params[1], start);
 	_readline_long_zval(&params[2], end);
 
-	if (call_user_function(CG(function_table), NULL, &_readline_completion, &_readline_array, 3, params TSRMLS_CC) == SUCCESS) {
+	if (call_user_function(CG(function_table), NULL, &_readline_completion, &_readline_array, 3, params) == SUCCESS) {
 		if (Z_TYPE(_readline_array) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL(_readline_array))) {
 				matches = rl_completion_matches(text,_readline_command_generator);
@@ -515,12 +514,12 @@ PHP_FUNCTION(readline_completion_function)
 	zval *arg = NULL;
 	zend_string *name = NULL;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg)) {
 		RETURN_FALSE;
 	}
 
-	if (!zend_is_callable(arg, 0, &name TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name->val);
+	if (!zend_is_callable(arg, 0, &name)) {
+		php_error_docref(NULL, E_WARNING, "%s is not callable", name->val);
 		zend_string_release(name);
 		RETURN_FALSE;
 	}
@@ -544,13 +543,12 @@ static void php_rl_callback_handler(char *the_line)
 {
 	zval params[1];
 	zval dummy;
-	TSRMLS_FETCH();
 
 	ZVAL_NULL(&dummy);
 
 	_readline_string_zval(&params[0], the_line);
 
-	call_user_function(CG(function_table), NULL, &_prepped_callback, &dummy, 1, params TSRMLS_CC);
+	call_user_function(CG(function_table), NULL, &_prepped_callback, &dummy, 1, params);
 
 	zval_ptr_dtor(&params[0]);
 	zval_dtor(&dummy);
@@ -565,12 +563,12 @@ PHP_FUNCTION(readline_callback_handler_install)
 	char *prompt;
 	size_t prompt_len;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &prompt, &prompt_len, &callback)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &prompt, &prompt_len, &callback)) {
 		return;
 	}
 
-	if (!zend_is_callable(callback, 0, &name TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name->val);
+	if (!zend_is_callable(callback, 0, &name)) {
+		php_error_docref(NULL, E_WARNING, "%s is not callable", name->val);
 		zend_string_release(name);
 		RETURN_FALSE;
 	}

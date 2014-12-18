@@ -35,7 +35,7 @@ void spoofchecker_register_constants(INIT_FUNC_ARGS)
 		return;
 	}
 
-	#define SPOOFCHECKER_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_long(Spoofchecker_ce_ptr, ZEND_STRS( #x ) - 1, USPOOF_##x TSRMLS_CC);
+	#define SPOOFCHECKER_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_long(Spoofchecker_ce_ptr, ZEND_STRS( #x ) - 1, USPOOF_##x);
 
 	SPOOFCHECKER_EXPOSE_CLASS_CONST(SINGLE_SCRIPT_CONFUSABLE)
 	SPOOFCHECKER_EXPOSE_CLASS_CONST(MIXED_SCRIPT_CONFUSABLE)

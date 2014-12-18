@@ -24,7 +24,7 @@
 #include "resourcebundle/resourcebundle_class.h"
 
 /* {{{ ResourceBundle_extract_value */
-void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *source TSRMLS_DC ) 
+void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *source ) 
 {
 	UResType               restype;
 	const UChar*           ufield;
@@ -71,11 +71,11 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 			newrb = Z_INTL_RESOURCEBUNDLE_P(return_value);
 			newrb->me = source->child;
 			source->child = NULL;
-			intl_errors_reset(INTL_DATA_ERROR_P(source) TSRMLS_CC);
+			intl_errors_reset(INTL_DATA_ERROR_P(source));
 			break;
 
 		default:
-			intl_errors_set(INTL_DATA_ERROR_P(source), U_ILLEGAL_ARGUMENT_ERROR, "Unknown resource type", 0 TSRMLS_CC);
+			intl_errors_set(INTL_DATA_ERROR_P(source), U_ILLEGAL_ARGUMENT_ERROR, "Unknown resource type", 0);
 			RETURN_FALSE;
 			break;
 	}

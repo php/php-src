@@ -200,7 +200,7 @@ ZEND_BEGIN_MODULE_GLOBALS(date)
 ZEND_END_MODULE_GLOBALS(date)
 
 #ifdef ZTS
-#define DATEG(v) TSRMG(date_globals_id, zend_date_globals *, v)
+#define DATEG(v) ZEND_TSRMG(date_globals_id, zend_date_globals *, v)
 #else
 #define DATEG(v) (date_globals.v)
 #endif
@@ -208,24 +208,24 @@ ZEND_END_MODULE_GLOBALS(date)
 /* Backwards compatibility wrapper */
 PHPAPI zend_long php_parse_date(char *string, zend_long *now);
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
-PHPAPI int php_idate(char format, time_t ts, int localtime TSRMLS_DC);
+PHPAPI int php_idate(char format, time_t ts, int localtime);
 #if HAVE_STRFTIME
 #define _php_strftime php_strftime
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 #endif
-PHPAPI zend_string *php_format_date(char *format, size_t format_len, time_t ts, int localtime TSRMLS_DC);
+PHPAPI zend_string *php_format_date(char *format, size_t format_len, time_t ts, int localtime);
 
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);
-PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D);
+PHPAPI timelib_tzinfo *get_timezone_info(void);
 
 /* Grabbing CE's so that other exts can use the date objects too */
 PHPAPI zend_class_entry *php_date_get_date_ce(void);
 PHPAPI zend_class_entry *php_date_get_timezone_ce(void);
 
 /* Functions for creating DateTime objects, and initializing them from a string */
-PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC);
-PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, size_t time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC);
+PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object);
+PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, size_t time_str_len, char *format, zval *timezone_object, int ctor);
 
 
 #endif /* PHP_DATE_H */

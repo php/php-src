@@ -31,6 +31,6 @@ PHP_FUNCTION(grapheme_stristr);
 PHP_FUNCTION(grapheme_extract);
 
 void grapheme_register_constants( INIT_FUNC_ARGS );
-void grapheme_close_global_iterator( TSRMLS_D );
+void grapheme_close_global_iterator( void );
 
 #endif // GRAPHEME_GRAPHEME_H

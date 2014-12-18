@@ -254,6 +254,9 @@ zend_module_entry com_dotnet_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_COM_DOTNET
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(com_dotnet)
 #endif
 
@@ -309,9 +312,9 @@ static PHP_INI_MH(OnTypeLibFileUpdate)
 			ptr--;
 		}
 
-		if ((pTL = php_com_load_typelib_via_cache(typelib_name, COMG(code_page), &cached TSRMLS_CC)) != NULL) {
+		if ((pTL = php_com_load_typelib_via_cache(typelib_name, COMG(code_page), &cached)) != NULL) {
 			if (!cached) {
-				php_com_import_typelib(pTL, mode, COMG(code_page) TSRMLS_CC);
+				php_com_import_typelib(pTL, mode, COMG(code_page));
 			}
 			ITypeLib_Release(pTL);
 		}
@@ -337,6 +340,9 @@ PHP_INI_END()
  */
 static PHP_GINIT_FUNCTION(com_dotnet)
 {
+#if defined(COMPILE_DL_COM_DOTNET) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	memset(com_dotnet_globals, 0, sizeof(*com_dotnet_globals));
 	com_dotnet_globals->code_page = CP_ACP;
 }
@@ -352,24 +358,24 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	php_com_persist_minit(INIT_FUNC_ARGS_PASSTHRU);
 
 	INIT_CLASS_ENTRY(ce, "com_exception", NULL);
-	php_com_exception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
+	php_com_exception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default());
 	php_com_exception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 /*	php_com_exception_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 
 	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", NULL);
-	php_com_saproxy_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_com_saproxy_class_entry = zend_register_internal_class(&ce);
 	php_com_saproxy_class_entry->ce_flags |= ZEND_ACC_FINAL;
 /*	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
 	
 	INIT_CLASS_ENTRY(ce, "variant", NULL);
 	ce.create_object = php_com_object_new;
-	php_com_variant_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_com_variant_class_entry = zend_register_internal_class(&ce);
 	php_com_variant_class_entry->get_iterator = php_com_iter_get;
 
 	INIT_CLASS_ENTRY(ce, "com", NULL);
 	ce.create_object = php_com_object_new;
-	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry TSRMLS_CC);
+	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry);
 	tmp->get_iterator = php_com_iter_get;
 
 	zend_ts_hash_init(&php_com_typelibraries, 0, NULL, php_com_typelibrary_dtor, 1);
@@ -377,7 +383,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 #if HAVE_MSCOREE_H
 	INIT_CLASS_ENTRY(ce, "dotnet", NULL);
 	ce.create_object = php_com_object_new;
-	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry TSRMLS_CC);
+	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry);
 	tmp->get_iterator = php_com_iter_get;
 #endif
 
@@ -469,7 +475,7 @@ PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 	UNREGISTER_INI_ENTRIES();
 #if HAVE_MSCOREE_H
 	if (COMG(dotnet_runtime_stuff)) {
-		php_com_dotnet_mshutdown(TSRMLS_C);
+		php_com_dotnet_mshutdown();
 	}
 #endif
 
@@ -493,7 +499,7 @@ PHP_RSHUTDOWN_FUNCTION(com_dotnet)
 {
 #if HAVE_MSCOREE_H
 	if (COMG(dotnet_runtime_stuff)) {
-		php_com_dotnet_rshutdown(TSRMLS_C);
+		php_com_dotnet_rshutdown();
 	}
 #endif
 	COMG(rshutdown_started) = 1;

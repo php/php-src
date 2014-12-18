@@ -71,7 +71,7 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
 	int flags
-	TSRMLS_DC)
+	)
 {
 	php_bz2_filter_data *data;
 	php_stream_bucket *bucket;
@@ -91,13 +91,13 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
 
-		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 		while (bin < bucket->buflen) {
 			if (data->status == PHP_BZ2_UNITIALIZED) {
 				status = BZ2_bzDecompressInit(streamp, 0, data->small_footprint);
 
 				if (BZ_OK != status) {
-					php_stream_bucket_delref(bucket TSRMLS_CC);
+					php_stream_bucket_delref(bucket);
 					return PSFS_ERR_FATAL;
 				}
 
@@ -127,7 +127,7 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 				}
 			} else if (status != BZ_OK) {
 				/* Something bad happened */
-				php_stream_bucket_delref(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket);
 				return PSFS_ERR_FATAL;
 			}
 			desired -= data->strm.avail_in; /* desired becomes what we consumed this round through */
@@ -139,19 +139,19 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				php_stream_bucket *out_bucket;
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
-				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0 TSRMLS_CC);
-				php_stream_bucket_append(buckets_out, out_bucket TSRMLS_CC);
+				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				php_stream_bucket_append(buckets_out, out_bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
 			} else if (status == BZ_STREAM_END && data->strm.avail_out >= data->outbuf_len) {
 				/* no more data to decompress, and nothing was spat out */
-				php_stream_bucket_delref(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket);
 				return PSFS_PASS_ON;
 			}
 		}
 
-		php_stream_bucket_delref(bucket TSRMLS_CC);
+		php_stream_bucket_delref(bucket);
 	}
 
 	if ((data->status == PHP_BZ2_RUNNING) && (flags & PSFS_FLAG_FLUSH_CLOSE)) {
@@ -162,8 +162,8 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
-				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0 TSRMLS_CC);
-				php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
+				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				php_stream_bucket_append(buckets_out, bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
@@ -180,7 +180,7 @@ static php_stream_filter_status_t php_bz2_decompress_filter(
 	return exit_status;
 }
 
-static void php_bz2_decompress_dtor(php_stream_filter *thisfilter TSRMLS_DC)
+static void php_bz2_decompress_dtor(php_stream_filter *thisfilter)
 {
 	if (thisfilter && Z_PTR(thisfilter->abstract)) {
 		php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
@@ -209,7 +209,7 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 	php_stream_bucket_brigade *buckets_out,
 	size_t *bytes_consumed,
 	int flags
-	TSRMLS_DC)
+	)
 {
 	php_bz2_filter_data *data;
 	php_stream_bucket *bucket;
@@ -227,7 +227,7 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
 
-		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 
 		while (bin < bucket->buflen) {
 			desired = bucket->buflen - bin;
@@ -240,7 +240,7 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 			status = BZ2_bzCompress(&(data->strm), flags & PSFS_FLAG_FLUSH_CLOSE ? BZ_FINISH : (flags & PSFS_FLAG_FLUSH_INC ? BZ_FLUSH : BZ_RUN));
 			if (status != BZ_RUN_OK && status != BZ_FLUSH_OK && status != BZ_FINISH_OK) {
 				/* Something bad happened */
-				php_stream_bucket_delref(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket);
 				return PSFS_ERR_FATAL;
 			}
 			desired -= data->strm.avail_in; /* desired becomes what we consumed this round through */
@@ -253,14 +253,14 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 				php_stream_bucket *out_bucket;
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
-				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0 TSRMLS_CC);
-				php_stream_bucket_append(buckets_out, out_bucket TSRMLS_CC);
+				out_bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				php_stream_bucket_append(buckets_out, out_bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
 			}
 		}
-		php_stream_bucket_delref(bucket TSRMLS_CC);
+		php_stream_bucket_delref(bucket);
 	}
 
 	if (flags & PSFS_FLAG_FLUSH_CLOSE) {
@@ -271,8 +271,8 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 			if (data->strm.avail_out < data->outbuf_len) {
 				size_t bucketlen = data->outbuf_len - data->strm.avail_out;
 
-				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0 TSRMLS_CC);
-				php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
+				bucket = php_stream_bucket_new(stream, estrndup(data->outbuf, bucketlen), bucketlen, 1, 0);
+				php_stream_bucket_append(buckets_out, bucket);
 				data->strm.avail_out = data->outbuf_len;
 				data->strm.next_out = data->outbuf;
 				exit_status = PSFS_PASS_ON;
@@ -286,7 +286,7 @@ static php_stream_filter_status_t php_bz2_compress_filter(
 	return exit_status;
 }
 
-static void php_bz2_compress_dtor(php_stream_filter *thisfilter TSRMLS_DC)
+static void php_bz2_compress_dtor(php_stream_filter *thisfilter)
 {
 	if (Z_PTR(thisfilter->abstract)) {
 		php_bz2_filter_data *data = Z_PTR(thisfilter->abstract);
@@ -307,7 +307,7 @@ static php_stream_filter_ops php_bz2_compress_ops = {
 
 /* {{{ bzip2.* common factory */
 
-static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
+static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, int persistent)
 {
 	php_stream_filter_ops *fops = NULL;
 	php_bz2_filter_data *data;
@@ -316,7 +316,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_bz2_filter_data), persistent);
 	if (!data) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zu bytes", sizeof(php_bz2_filter_data));
+		php_error_docref(NULL, E_WARNING, "Failed allocating %zu bytes", sizeof(php_bz2_filter_data));
 		return NULL;
 	}
 
@@ -329,14 +329,14 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 	data->strm.avail_out = data->outbuf_len = data->inbuf_len = 2048;
 	data->strm.next_in = data->inbuf = (char *) pemalloc(data->inbuf_len, persistent);
 	if (!data->inbuf) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zu bytes", data->inbuf_len);
+		php_error_docref(NULL, E_WARNING, "Failed allocating %zu bytes", data->inbuf_len);
 		pefree(data, persistent);
 		return NULL;
 	}
 	data->strm.avail_in = 0;
 	data->strm.next_out = data->outbuf = (char *) pemalloc(data->outbuf_len, persistent);
 	if (!data->outbuf) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zu bytes", data->outbuf_len);
+		php_error_docref(NULL, E_WARNING, "Failed allocating %zu bytes", data->outbuf_len);
 		pefree(data->inbuf, persistent);
 		pefree(data, persistent);
 		return NULL;
@@ -351,7 +351,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 
 			if (Z_TYPE_P(filterparams) == IS_ARRAY || Z_TYPE_P(filterparams) == IS_OBJECT) {
 				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "concatenated", sizeof("concatenated")-1))) {
-					data->expect_concatenated = zend_is_true(tmpzval TSRMLS_CC);
+					data->expect_concatenated = zend_is_true(tmpzval);
 					tmpzval = NULL;
 				}
 
@@ -361,7 +361,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 			}
 
 			if (tmpzval) {
-				data->small_footprint = zend_is_true(tmpzval TSRMLS_CC);
+				data->small_footprint = zend_is_true(tmpzval);
 			}
 		}
 
@@ -382,7 +382,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					ZVAL_DUP(&tmp, tmpzval);
 					convert_to_long(&tmp);
 					if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > 9) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%pd)", Z_LVAL_P(tmpzval));
+						php_error_docref(NULL, E_WARNING, "Invalid parameter given for number of blocks to allocate. (%pd)", Z_LVAL_P(tmpzval));
 					} else {
 						blockSize100k = (int)Z_LVAL(tmp);
 					}
@@ -396,7 +396,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 					convert_to_long(&tmp);
 
 					if (Z_LVAL(tmp) < 0 || Z_LVAL(tmp) > 250) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter given for work factor. (%pd)", Z_LVAL(tmp));
+						php_error_docref(NULL, E_WARNING, "Invalid parameter given for work factor. (%pd)", Z_LVAL(tmp));
 					} else {
 						workFactor = (int)Z_LVAL(tmp);
 					}

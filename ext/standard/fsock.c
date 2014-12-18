@@ -51,7 +51,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	RETVAL_FALSE;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/z/d", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/z/d", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -92,7 +92,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		efree(hostname);
 	}
 	if (stream == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:" ZEND_LONG_FMT " (%s)", host, port, errstr == NULL ? "Unknown error" : errstr->val);
+		php_error_docref(NULL, E_WARNING, "unable to connect to %s:" ZEND_LONG_FMT " (%s)", host, port, errstr == NULL ? "Unknown error" : errstr->val);
 	}
 
 	if (hashkey) {

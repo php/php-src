@@ -29,7 +29,7 @@
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
 
-static zval *com_property_read(zval *object, zval *member, int type, void **cahce_slot, zval *rv TSRMLS_DC)
+static zval *com_property_read(zval *object, zval *member, int type, void **cahce_slot, zval *rv)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -45,22 +45,22 @@ static zval *com_property_read(zval *object, zval *member, int type, void **cahc
 		convert_to_string_ex(member);
 
 		res = php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
-				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1 TSRMLS_CC);
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1);
 
 		if (res == SUCCESS) {
-			php_com_zval_from_variant(rv, &v, obj->code_page TSRMLS_CC);
+			php_com_zval_from_variant(rv, &v, obj->code_page);
 			VariantClear(&v);
 		} else if (res == DISP_E_BADPARAMCOUNT) {
-			php_com_saproxy_create(object, rv, member TSRMLS_CC);
+			php_com_saproxy_create(object, rv, member);
 		}
 	} else {
-		php_com_throw_exception(E_INVALIDARG, "this variant has no properties" TSRMLS_CC);
+		php_com_throw_exception(E_INVALIDARG, "this variant has no properties");
 	}
 
 	return rv;
 }
 
-static void com_property_write(zval *object, zval *member, zval *value, void **cache_slot TSRMLS_DC)
+static void com_property_write(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -72,15 +72,15 @@ static void com_property_write(zval *object, zval *member, zval *value, void **c
 
 		convert_to_string_ex(member);
 		if (SUCCESS == php_com_do_invoke(obj, Z_STRVAL_P(member), Z_STRLEN_P(member),
-				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, value, 0 TSRMLS_CC)) {
+				DISPATCH_PROPERTYPUT|DISPATCH_PROPERTYPUTREF, &v, 1, value, 0)) {
 			VariantClear(&v);
 		}
 	} else {
-		php_com_throw_exception(E_INVALIDARG, "this variant has no properties" TSRMLS_CC);
+		php_com_throw_exception(E_INVALIDARG, "this variant has no properties");
 	}
 }
 
-static zval *com_read_dimension(zval *object, zval *offset, int type, zval *rv TSRMLS_DC)
+static zval *com_read_dimension(zval *object, zval *offset, int type, zval *rv)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -93,30 +93,30 @@ static zval *com_read_dimension(zval *object, zval *offset, int type, zval *rv T
 		VariantInit(&v);
 
 		if (SUCCESS == php_com_do_invoke_by_id(obj, DISPID_VALUE,
-				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 1, offset, 0, 0 TSRMLS_CC)) {
-			php_com_zval_from_variant(rv, &v, obj->code_page TSRMLS_CC);
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 1, offset, 0, 0)) {
+			php_com_zval_from_variant(rv, &v, obj->code_page);
 			VariantClear(&v);
 		}
 	} else if (V_ISARRAY(&obj->v)) {
 		convert_to_long(offset);
 
 		if (SafeArrayGetDim(V_ARRAY(&obj->v)) == 1) {	
-			if (php_com_safearray_get_elem(&obj->v, &v, (LONG)Z_LVAL_P(offset) TSRMLS_CC)) {
-				php_com_wrap_variant(rv, &v, obj->code_page TSRMLS_CC);
+			if (php_com_safearray_get_elem(&obj->v, &v, (LONG)Z_LVAL_P(offset))) {
+				php_com_wrap_variant(rv, &v, obj->code_page);
 				VariantClear(&v);
 			}
 		} else {
-			php_com_saproxy_create(object, rv, offset TSRMLS_CC);
+			php_com_saproxy_create(object, rv, offset);
 		}
 
 	} else {
-		php_com_throw_exception(E_INVALIDARG, "this variant is not an array type" TSRMLS_CC);
+		php_com_throw_exception(E_INVALIDARG, "this variant is not an array type");
 	}
 
 	return rv;
 }
 
-static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
+static void com_write_dimension(zval *object, zval *offset, zval *value)
 {
 	php_com_dotnet_object *obj;
 	zval args[2];
@@ -132,7 +132,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 		VariantInit(&v);
 
 		if (SUCCESS == php_com_do_invoke_by_id(obj, DISPID_VALUE,
-				DISPATCH_METHOD|DISPATCH_PROPERTYPUT, &v, 2, args, 0, 0 TSRMLS_CC)) {
+				DISPATCH_METHOD|DISPATCH_PROPERTYPUT, &v, 2, args, 0, 0)) {
 			VariantClear(&v);
 		}
 	} else if (V_ISARRAY(&obj->v)) {
@@ -148,7 +148,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 			indices = (LONG)Z_LVAL_P(offset);
 
 			VariantInit(&v);
-			php_com_variant_from_zval(&v, value, obj->code_page TSRMLS_CC);
+			php_com_variant_from_zval(&v, value, obj->code_page);
 
 			if (V_VT(&v) != vt) {
 				VariantChangeType(&v, &v, 0, vt);
@@ -163,32 +163,32 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 			VariantClear(&v);
 
 			if (FAILED(res)) {
-				php_com_throw_exception(res, NULL TSRMLS_CC);
+				php_com_throw_exception(res, NULL);
 			}
 
 		} else {
-			php_com_throw_exception(DISP_E_BADINDEX, "this variant has multiple dimensions; you can't set a new value without specifying *all* dimensions" TSRMLS_CC);
+			php_com_throw_exception(DISP_E_BADINDEX, "this variant has multiple dimensions; you can't set a new value without specifying *all* dimensions");
 		}
 
 	} else {
-		php_com_throw_exception(E_INVALIDARG, "this variant is not an array type" TSRMLS_CC);
+		php_com_throw_exception(E_INVALIDARG, "this variant is not an array type");
 	}
 }
 
 #if 0
-static void com_object_set(zval **property, zval *value TSRMLS_DC)
+static void com_object_set(zval **property, zval *value)
 {
 	/* Not yet implemented in the engine */
 }
 
-static zval *com_object_get(zval *property TSRMLS_DC)
+static zval *com_object_get(zval *property)
 {
 	/* Not yet implemented in the engine */
 	return NULL;
 }
 #endif
 
-static int com_property_exists(zval *object, zval *member, int check_empty, void **cache_slot TSRMLS_DC)
+static int com_property_exists(zval *object, zval *member, int check_empty, void **cache_slot)
 {
 	DISPID dispid;
 	php_com_dotnet_object *obj;
@@ -197,7 +197,7 @@ static int com_property_exists(zval *object, zval *member, int check_empty, void
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		convert_to_string_ex(member);
-		if (SUCCEEDED(php_com_get_id_of_name(obj, Z_STRVAL_P(member), Z_STRLEN_P(member), &dispid TSRMLS_CC))) {
+		if (SUCCEEDED(php_com_get_id_of_name(obj, Z_STRVAL_P(member), Z_STRLEN_P(member), &dispid))) {
 			/* TODO: distinguish between property and method! */
 			return 1;
 		}
@@ -208,23 +208,23 @@ static int com_property_exists(zval *object, zval *member, int check_empty, void
 	return 0;
 }
 
-static int com_dimension_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+static int com_dimension_exists(zval *object, zval *member, int check_empty)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Operation not yet supported on a COM object");
+	php_error_docref(NULL, E_WARNING, "Operation not yet supported on a COM object");
 	return 0;
 }
 
-static void com_property_delete(zval *object, zval *member, void **cache_slot TSRMLS_DC)
+static void com_property_delete(zval *object, zval *member, void **cache_slot)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a COM object");
+	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
 }
 
-static void com_dimension_delete(zval *object, zval *offset TSRMLS_DC)
+static void com_dimension_delete(zval *object, zval *offset)
 {
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a COM object");
+	php_error_docref(NULL, E_WARNING, "Cannot delete properties from a COM object");
 }
 
-static HashTable *com_properties_get(zval *object TSRMLS_DC)
+static HashTable *com_properties_get(zval *object)
 {
 	/* TODO: use type-info to get all the names and values ?
 	 * DANGER: if we do that, there is a strong possibility for
@@ -255,7 +255,7 @@ static PHP_FUNCTION(com_method_handler)
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-static union _zend_function *com_method_get(zend_object **object_ptr, zend_string *name, const zval *key TSRMLS_DC)
+static union _zend_function *com_method_get(zend_object **object_ptr, zend_string *name, const zval *key)
 {
 	zend_internal_function f, *fptr = NULL;
 	union _zend_function *func;
@@ -266,7 +266,7 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 		return NULL;
 	}
 
-	if (FAILED(php_com_get_id_of_name(obj, name->val, name->len, &dummy TSRMLS_CC))) {
+	if (FAILED(php_com_get_id_of_name(obj, name->val, name->len, &dummy))) {
 		return NULL;
 	}
 
@@ -293,7 +293,7 @@ static union _zend_function *com_method_get(zend_object **object_ptr, zend_strin
 			int i;
 
 			if (SUCCEEDED(ITypeInfo_GetTypeComp(obj->typeinfo, &comp))) {
-				olename = php_com_string_to_olestring(name->val, name->len, obj->code_page TSRMLS_CC);
+				olename = php_com_string_to_olestring(name->val, name->len, obj->code_page);
 				lhash = LHashValOfNameSys(SYS_WIN32, LOCALE_SYSTEM_DEFAULT, olename);
 
 				if (SUCCEEDED(ITypeComp_Bind(comp, olename, lhash, INVOKE_FUNC, &TI, &kind, &bindptr))) {
@@ -378,8 +378,8 @@ static int com_call_method(zend_string *method, zend_object *object, INTERNAL_FU
 
 	VariantInit(&v);
 
-	if (SUCCESS == php_com_do_invoke_byref(obj, (zend_internal_function*)EX(func), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args TSRMLS_CC)) {
-		php_com_zval_from_variant(return_value, &v, obj->code_page TSRMLS_CC);
+	if (SUCCESS == php_com_do_invoke_byref(obj, (zend_internal_function*)EX(func), DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, nargs, args)) {
+		php_com_zval_from_variant(return_value, &v, obj->code_page);
 		ret = SUCCESS;
 		VariantClear(&v);
 	}
@@ -391,7 +391,7 @@ static int com_call_method(zend_string *method, zend_object *object, INTERNAL_FU
 	return ret;
 }
 
-static union _zend_function *com_constructor_get(zend_object *object TSRMLS_DC)
+static union _zend_function *com_constructor_get(zend_object *object)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *) object;
 	static zend_internal_function c, d, v;
@@ -423,7 +423,7 @@ static union _zend_function *com_constructor_get(zend_object *object TSRMLS_DC)
 	}
 }
 
-static zend_string* com_class_name_get(const zend_object *object TSRMLS_DC)
+static zend_string* com_class_name_get(const zend_object *object)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object *)object;
 
@@ -431,7 +431,7 @@ static zend_string* com_class_name_get(const zend_object *object TSRMLS_DC)
 }
 
 /* This compares two variants for equality */
-static int com_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
+static int com_objects_compare(zval *object1, zval *object2)
 {
 	php_com_dotnet_object *obja, *objb;
 	int ret;
@@ -463,7 +463,7 @@ static int com_objects_compare(zval *object1, zval *object2 TSRMLS_DC)
 	return ret;
 }
 
-static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
+static int com_object_cast(zval *readobj, zval *writeobj, int type)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -476,7 +476,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		if (SUCCESS != php_com_do_invoke_by_id(obj, DISPID_VALUE,
-				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1, 0 TSRMLS_CC)) {
+				DISPATCH_METHOD|DISPATCH_PROPERTYGET, &v, 0, NULL, 1, 0)) {
 			VariantCopy(&v, &obj->v);
 		}
 	} else {
@@ -506,7 +506,7 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 	}
 
 	if (SUCCEEDED(res)) {
-		php_com_zval_from_variant(writeobj, &v, obj->code_page TSRMLS_CC);
+		php_com_zval_from_variant(writeobj, &v, obj->code_page);
 	}
 
 	VariantClear(&v);
@@ -515,10 +515,10 @@ static int com_object_cast(zval *readobj, zval *writeobj, int type TSRMLS_DC)
 		return SUCCESS;
 	}
 
-	return zend_std_cast_object_tostring(readobj, writeobj, type TSRMLS_CC);
+	return zend_std_cast_object_tostring(readobj, writeobj, type);
 }
 
-static int com_object_count(zval *object, zend_long *count TSRMLS_DC)
+static int com_object_count(zval *object, zend_long *count)
 {
 	php_com_dotnet_object *obj;
 	LONG ubound = 0, lbound = 0;
@@ -566,7 +566,7 @@ zend_object_handlers php_com_object_handlers = {
 	NULL,									/* get_gc */
 };
 
-void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable TSRMLS_DC)
+void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable)
 {
 	if (obj->sink_dispatch) {
 		IConnectionPointContainer *cont;
@@ -590,7 +590,7 @@ void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable TSR
 	}
 }
 
-void php_com_object_free_storage(zend_object *object TSRMLS_DC)
+void php_com_object_free_storage(zend_object *object)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object*)object;
 
@@ -600,7 +600,7 @@ void php_com_object_free_storage(zend_object *object TSRMLS_DC)
 	}
 
 	if (obj->sink_dispatch) {
-		php_com_object_enable_event_sink(obj, FALSE TSRMLS_CC);
+		php_com_object_enable_event_sink(obj, FALSE);
 		IDispatch_Release(obj->sink_dispatch);
 		obj->sink_dispatch = NULL;
 	}
@@ -617,7 +617,7 @@ void php_com_object_free_storage(zend_object *object TSRMLS_DC)
 	}
 }
 
-zend_object* php_com_object_clone(zval *object TSRMLS_DC)
+zend_object* php_com_object_clone(zval *object)
 {
 	php_com_dotnet_object *cloneobj, *origobject;
 
@@ -641,11 +641,11 @@ zend_object* php_com_object_clone(zval *object TSRMLS_DC)
 	return (zend_object*)cloneobj;
 }
 
-zend_object* php_com_object_new(zend_class_entry *ce TSRMLS_DC)
+zend_object* php_com_object_new(zend_class_entry *ce)
 {
 	php_com_dotnet_object *obj;
 
-	php_com_initialize(TSRMLS_C);
+	php_com_initialize();
 	obj = emalloc(sizeof(*obj));
 	memset(obj, 0, sizeof(*obj));
 
@@ -653,7 +653,7 @@ zend_object* php_com_object_new(zend_class_entry *ce TSRMLS_DC)
 	obj->code_page = CP_ACP;
 	obj->ce = ce;
 
-	zend_object_std_init(&obj->zo, ce TSRMLS_CC);
+	zend_object_std_init(&obj->zo, ce);
 	obj->zo.handlers = &php_com_object_handlers;
 
 	return (zend_object*)obj;

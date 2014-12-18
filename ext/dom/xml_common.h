@@ -59,7 +59,7 @@ static inline dom_object *php_dom_obj_from_obj(zend_object *obj) {
 
 PHP_DOM_EXPORT extern zend_class_entry *dom_node_class_entry;
 PHP_DOM_EXPORT dom_object *php_dom_object_get_data(xmlNodePtr obj);
-PHP_DOM_EXPORT zend_bool php_dom_create_object(xmlNodePtr obj, zval* return_value, dom_object *domobj TSRMLS_DC);
+PHP_DOM_EXPORT zend_bool php_dom_create_object(xmlNodePtr obj, zval* return_value, dom_object *domobj);
 PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 
 #define DOM_XMLNS_NAMESPACE \
@@ -68,7 +68,7 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 #define NODE_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_LIBXML_NODE_P(__id); \
 	if (__intern->node == NULL || !(__ptr = (__prtype)__intern->node->node)) { \
-  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", \
+  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", \
 			__intern->std.ce->name->val);\
   		RETURN_NULL();\
   	} \
@@ -78,18 +78,18 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 	__intern = Z_LIBXML_NODE_P(__id); \
 	if (__intern->document != NULL) { \
 		if (!(__ptr = (__prtype)__intern->document->ptr)) { \
-  			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
+  			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
   			RETURN_NULL();\
   		} \
 	} \
 }
 
 #define DOM_RET_OBJ(obj, ret, domobject) \
-	*ret = php_dom_create_object(obj, return_value, domobject TSRMLS_CC)
+	*ret = php_dom_create_object(obj, return_value, domobject)
 
 #define DOM_GET_THIS(zval) \
 	if (NULL == (zval = getThis())) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing"); \
+		php_error_docref(NULL, E_WARNING, "Underlying object missing"); \
 		RETURN_FALSE; \
 	}
 

@@ -22,7 +22,7 @@
 #ifndef PHP_SCHEMA_H
 #define PHP_SCHEMA_H
 
-int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC);
+int load_schema(sdlCtx *ctx, xmlNodePtr schema);
 void schema_pass2(sdlCtx *ctx);
 
 void delete_model(zval *zv);

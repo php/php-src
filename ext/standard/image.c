@@ -100,7 +100,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 
 /* {{{ php_handle_gif
  * routine to handle GIF files. If only everything were that easy... ;} */
-static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_gif (php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
 	unsigned char dim[5];
@@ -123,7 +123,7 @@ static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
 
 /* {{{ php_handle_psd
  */
-static struct gfxinfo *php_handle_psd (php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_psd (php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
 	unsigned char dim[8];
@@ -144,7 +144,7 @@ static struct gfxinfo *php_handle_psd (php_stream * stream TSRMLS_DC)
 
 /* {{{ php_handle_bmp
  */
-static struct gfxinfo *php_handle_bmp (php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_bmp (php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
 	unsigned char dim[16];
@@ -195,7 +195,7 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 /* {{{ php_handle_swc
  */
-static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_swc(php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
 
@@ -268,7 +268,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 
 /* {{{ php_handle_swf
  */
-static struct gfxinfo *php_handle_swf (php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_swf (php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
 	long bits;
@@ -294,7 +294,7 @@ static struct gfxinfo *php_handle_swf (php_stream * stream TSRMLS_DC)
 
 /* {{{ php_handle_png
  * routine to handle PNG files */
-static struct gfxinfo *php_handle_png (php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_png (php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
 	unsigned char dim[9];
@@ -362,7 +362,7 @@ static struct gfxinfo *php_handle_png (php_stream * stream TSRMLS_DC)
 
 /* {{{ php_read2
  */
-static unsigned short php_read2(php_stream * stream TSRMLS_DC)
+static unsigned short php_read2(php_stream * stream)
 {
 	unsigned char a[2];
 
@@ -375,7 +375,7 @@ static unsigned short php_read2(php_stream * stream TSRMLS_DC)
 
 /* {{{ php_next_marker
  * get next marker byte from file */
-static unsigned int php_next_marker(php_stream * stream, int last_marker, int comment_correction, int ff_read TSRMLS_DC)
+static unsigned int php_next_marker(php_stream * stream, int last_marker, int comment_correction, int ff_read)
 {
 	int a=0, marker;
 
@@ -423,9 +423,9 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int co
 
 /* {{{ php_skip_variable
  * skip over a variable-length block; assumes proper length marker */
-static int php_skip_variable(php_stream * stream TSRMLS_DC)
+static int php_skip_variable(php_stream * stream)
 {
-	zend_off_t length = ((unsigned int)php_read2(stream TSRMLS_CC));
+	zend_off_t length = ((unsigned int)php_read2(stream));
 
 	if (length < 2)	{
 		return 0;
@@ -438,14 +438,14 @@ static int php_skip_variable(php_stream * stream TSRMLS_DC)
 
 /* {{{ php_read_APP
  */
-static int php_read_APP(php_stream * stream, unsigned int marker, zval *info TSRMLS_DC)
+static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 {
 	unsigned short length;
 	char *buffer;
 	char markername[16];
 	zval *tmp;
 
-	length = php_read2(stream TSRMLS_CC);
+	length = php_read2(stream);
 	if (length < 2)	{
 		return 0;
 	}
@@ -472,14 +472,14 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info TSR
 
 /* {{{ php_handle_jpeg
    main loop to parse JPEG structure */
-static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info TSRMLS_DC) 
+static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info) 
 {
 	struct gfxinfo *result = NULL;
 	unsigned int marker = M_PSEUDO;
 	unsigned short length, ff_read=1;
 
 	for (;;) {
-		marker = php_next_marker(stream, marker, 1, ff_read TSRMLS_CC);
+		marker = php_next_marker(stream, marker, 1, ff_read);
 		ff_read = 0;
 		switch (marker) {
 			case M_SOF0:
@@ -498,10 +498,10 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info TSRMLS_D
 				if (result == NULL) {
 					/* handle SOFn block */
 					result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
-					length = php_read2(stream TSRMLS_CC);
+					length = php_read2(stream);
 					result->bits     = php_stream_getc(stream);
-					result->height   = php_read2(stream TSRMLS_CC);
-					result->width    = php_read2(stream TSRMLS_CC);
+					result->height   = php_read2(stream);
+					result->width    = php_read2(stream);
 					result->channels = php_stream_getc(stream);
 					if (!info || length < 8) { /* if we don't want an extanded info -> return */
 						return result;
@@ -510,7 +510,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info TSRMLS_D
 						return result;
 					}
 				} else {
-					if (!php_skip_variable(stream TSRMLS_CC)) {
+					if (!php_skip_variable(stream)) {
 						return result;
 					}
 				}
@@ -533,11 +533,11 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info TSRMLS_D
 			case M_APP14:
 			case M_APP15:
 				if (info) {
-					if (!php_read_APP(stream, marker, info TSRMLS_CC)) { /* read all the app marks... */
+					if (!php_read_APP(stream, marker, info)) { /* read all the app marks... */
 						return result;
 					}
 				} else {
-					if (!php_skip_variable(stream TSRMLS_CC)) {
+					if (!php_skip_variable(stream)) {
 						return result;
 					}
 				}
@@ -548,7 +548,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info TSRMLS_D
 				return result;	/* we're about to hit image data, or are at EOF. stop processing. */
 			
 			default:
-				if (!php_skip_variable(stream TSRMLS_CC)) { /* anything else isn't interesting */
+				if (!php_skip_variable(stream)) { /* anything else isn't interesting */
 					return result;
 				}
 				break;
@@ -561,7 +561,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info TSRMLS_D
 
 /* {{{ php_read4
  */
-static unsigned int php_read4(php_stream * stream TSRMLS_DC)
+static unsigned int php_read4(php_stream * stream)
 {
 	unsigned char a[4];
 
@@ -601,7 +601,7 @@ static unsigned int php_read4(php_stream * stream TSRMLS_DC)
 
 /* {{{ php_handle_jpc
    Main loop to parse JPEG2000 raw codestream structure */
-static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_jpc(php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
 	unsigned short dummy_short;
@@ -621,24 +621,24 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 
 	/* Ensure that this marker is SIZ (as is mandated by the standard) */
 	if (first_marker_id != JPEG2000_MARKER_SIZ) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "JPEG2000 codestream corrupt(Expected SIZ marker not found after SOC)");
+		php_error_docref(NULL, E_WARNING, "JPEG2000 codestream corrupt(Expected SIZ marker not found after SOC)");
 		return NULL;
 	}
 
 	result = (struct gfxinfo *)ecalloc(1, sizeof(struct gfxinfo));
 
-	dummy_short = php_read2(stream TSRMLS_CC); /* Lsiz */
-	dummy_short = php_read2(stream TSRMLS_CC); /* Rsiz */
-	result->width = php_read4(stream TSRMLS_CC); /* Xsiz */
-	result->height = php_read4(stream TSRMLS_CC); /* Ysiz */
+	dummy_short = php_read2(stream); /* Lsiz */
+	dummy_short = php_read2(stream); /* Rsiz */
+	result->width = php_read4(stream); /* Xsiz */
+	result->height = php_read4(stream); /* Ysiz */
 
 #if MBO_0
-	php_read4(stream TSRMLS_CC); /* XOsiz */
-	php_read4(stream TSRMLS_CC); /* YOsiz */
-	php_read4(stream TSRMLS_CC); /* XTsiz */
-	php_read4(stream TSRMLS_CC); /* YTsiz */
-	php_read4(stream TSRMLS_CC); /* XTOsiz */
-	php_read4(stream TSRMLS_CC); /* YTOsiz */
+	php_read4(stream); /* XOsiz */
+	php_read4(stream); /* YOsiz */
+	php_read4(stream); /* XTsiz */
+	php_read4(stream); /* YTsiz */
+	php_read4(stream); /* XTOsiz */
+	php_read4(stream); /* YTOsiz */
 #else
 	if (php_stream_seek(stream, 24, SEEK_CUR)) {
 		efree(result);
@@ -646,7 +646,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 	}
 #endif
 
-	result->channels = php_read2(stream TSRMLS_CC); /* Csiz */
+	result->channels = php_read2(stream); /* Csiz */
 	if (result->channels == 0 && php_stream_eof(stream) || result->channels > 256) {
 		efree(result);
 		return NULL;
@@ -673,7 +673,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 
 /* {{{ php_handle_jp2
    main loop to parse JPEG 2000 JP2 wrapper format structure */
-static struct gfxinfo *php_handle_jp2(php_stream *stream TSRMLS_DC)
+static struct gfxinfo *php_handle_jp2(php_stream *stream)
 {
 	struct gfxinfo *result = NULL;
 	unsigned int box_length;
@@ -691,7 +691,7 @@ static struct gfxinfo *php_handle_jp2(php_stream *stream TSRMLS_DC)
 
 	for (;;)
 	{
-		box_length = php_read4(stream TSRMLS_CC); /* LBox */
+		box_length = php_read4(stream); /* LBox */
 		/* TBox */
 		if (php_stream_read(stream, (void *)&box_type, sizeof(box_type)) != sizeof(box_type)) {
 			/* Use this as a general "out of stream" error */
@@ -708,7 +708,7 @@ static struct gfxinfo *php_handle_jp2(php_stream *stream TSRMLS_DC)
 			/* Skip the first 3 bytes to emulate the file type examination */
 			php_stream_seek(stream, 3, SEEK_CUR);
 
-			result = php_handle_jpc(stream TSRMLS_CC);
+			result = php_handle_jpc(stream);
 			break;
 		}
 
@@ -724,7 +724,7 @@ static struct gfxinfo *php_handle_jp2(php_stream *stream TSRMLS_DC)
 	}
 
 	if (result == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "JP2 file has no codestreams at root level");
+		php_error_docref(NULL, E_WARNING, "JP2 file has no codestreams at root level");
 	}
 
 	return result;
@@ -800,7 +800,7 @@ static unsigned php_ifd_get32u(void *Long, int motorola_intel)
 
 /* {{{ php_handle_tiff
    main loop to parse TIFF structure */
-static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int motorola_intel TSRMLS_DC)
+static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int motorola_intel)
 {
 	struct gfxinfo *result = NULL;
 	int i, num_entries;
@@ -881,7 +881,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int mot
 
 /* {{{ php_handle_psd
  */
-static struct gfxinfo *php_handle_iff(php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_iff(php_stream * stream)
 {
 	struct gfxinfo * result;
 	unsigned char a[10];
@@ -942,7 +942,7 @@ static struct gfxinfo *php_handle_iff(php_stream * stream TSRMLS_DC)
  * int Number of columns
  * int Number of rows
  */
-static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check TSRMLS_DC)
+static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 {
 	int i, width = 0, height = 0;
 
@@ -997,11 +997,11 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check T
 
 /* {{{ php_handle_wbmp
 */
-static struct gfxinfo *php_handle_wbmp(php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_wbmp(php_stream * stream)
 {
 	struct gfxinfo *result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
 
-	if (!php_get_wbmp(stream, &result, 0 TSRMLS_CC)) {
+	if (!php_get_wbmp(stream, &result, 0)) {
 		efree(result);
 		return NULL;
 	}
@@ -1012,7 +1012,7 @@ static struct gfxinfo *php_handle_wbmp(php_stream * stream TSRMLS_DC)
 
 /* {{{ php_get_xbm
  */
-static int php_get_xbm(php_stream *stream, struct gfxinfo **result TSRMLS_DC)
+static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
 {
     char *fline;
     char *iname;
@@ -1072,17 +1072,17 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result TSRMLS_DC)
 
 /* {{{ php_handle_xbm
  */
-static struct gfxinfo *php_handle_xbm(php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_xbm(php_stream * stream)
 {
 	struct gfxinfo *result;
-	php_get_xbm(stream, &result TSRMLS_CC);
+	php_get_xbm(stream, &result);
 	return result;
 }
 /* }}} */
 
 /* {{{ php_handle_ico
  */
-static struct gfxinfo *php_handle_ico(php_stream * stream TSRMLS_DC)
+static struct gfxinfo *php_handle_ico(php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
 	unsigned char dim[16];
@@ -1162,7 +1162,7 @@ PHP_FUNCTION(image_type_to_mime_type)
 {
 	zend_long p_image_type;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &p_image_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &p_image_type) == FAILURE) {
 		return;
 	}
 
@@ -1177,7 +1177,7 @@ PHP_FUNCTION(image_type_to_extension)
 	zend_long image_type;
 	zend_bool inc_dot=1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|b", &image_type, &inc_dot) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|b", &image_type, &inc_dot) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1221,13 +1221,13 @@ PHP_FUNCTION(image_type_to_extension)
 
 /* {{{ php_imagetype
    detect filetype from first bytes */
-PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
+PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 {
 	char tmp[12];
 
 	if ( !filetype) filetype = tmp;
 	if((php_stream_read(stream, filetype, 3)) != 3) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Read error!");
+		php_error_docref(NULL, E_NOTICE, "Read error!");
 		return IMAGE_FILETYPE_UNKNOWN;
 	}
 
@@ -1238,13 +1238,13 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 		return IMAGE_FILETYPE_JPEG;
 	} else if (!memcmp(filetype, php_sig_png, 3)) {
 		if (php_stream_read(stream, filetype+3, 5) != 5) {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Read error!");
+			php_error_docref(NULL, E_NOTICE, "Read error!");
 			return IMAGE_FILETYPE_UNKNOWN;
 		}
 		if (!memcmp(filetype, php_sig_png, 8)) {
 			return IMAGE_FILETYPE_PNG;
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PNG file corrupted by ASCII conversion");
+			php_error_docref(NULL, E_WARNING, "PNG file corrupted by ASCII conversion");
 			return IMAGE_FILETYPE_UNKNOWN;
 		}
 	} else if (!memcmp(filetype, php_sig_swf, 3)) {
@@ -1260,7 +1260,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 	}
 
 	if (php_stream_read(stream, filetype+3, 1) != 1) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Read error!");
+		php_error_docref(NULL, E_NOTICE, "Read error!");
 		return IMAGE_FILETYPE_UNKNOWN;
 	}
 /* BYTES READ: 4 */
@@ -1275,7 +1275,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 	}
 
 	if (php_stream_read(stream, filetype+4, 8) != 8) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Read error!");
+		php_error_docref(NULL, E_NOTICE, "Read error!");
 		return IMAGE_FILETYPE_UNKNOWN;
 	}
 /* BYTES READ: 12 */
@@ -1284,10 +1284,10 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 	}
 
 /* AFTER ALL ABOVE FAILED */
-	if (php_get_wbmp(stream, NULL, 1 TSRMLS_CC)) {
+	if (php_get_wbmp(stream, NULL, 1)) {
 		return IMAGE_FILETYPE_WBMP;
 	}
-	if (php_get_xbm(stream, NULL TSRMLS_CC)) {
+	if (php_get_xbm(stream, NULL)) {
 		return IMAGE_FILETYPE_XBM;
 	}
 	return IMAGE_FILETYPE_UNKNOWN;
@@ -1303,60 +1303,60 @@ static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNA
 		RETURN_FALSE;
 	}
 
-	itype = php_getimagetype(stream, NULL TSRMLS_CC);
+	itype = php_getimagetype(stream, NULL);
 	switch( itype) {
 		case IMAGE_FILETYPE_GIF:
-			result = php_handle_gif(stream TSRMLS_CC);
+			result = php_handle_gif(stream);
 			break;
 		case IMAGE_FILETYPE_JPEG:
 			if (info) {
-				result = php_handle_jpeg(stream, info TSRMLS_CC);
+				result = php_handle_jpeg(stream, info);
 			} else {
-				result = php_handle_jpeg(stream, NULL TSRMLS_CC);
+				result = php_handle_jpeg(stream, NULL);
 			}
 			break;
 		case IMAGE_FILETYPE_PNG:
-			result = php_handle_png(stream TSRMLS_CC);
+			result = php_handle_png(stream);
 			break;
 		case IMAGE_FILETYPE_SWF:
-			result = php_handle_swf(stream TSRMLS_CC);
+			result = php_handle_swf(stream);
 			break;
 		case IMAGE_FILETYPE_SWC:
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
-			result = php_handle_swc(stream TSRMLS_CC);
+			result = php_handle_swc(stream);
 #else
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "The image is a compressed SWF file, but you do not have a static version of the zlib extension enabled");
+			php_error_docref(NULL, E_NOTICE, "The image is a compressed SWF file, but you do not have a static version of the zlib extension enabled");
 #endif
 			break;
 		case IMAGE_FILETYPE_PSD:
-			result = php_handle_psd(stream TSRMLS_CC);
+			result = php_handle_psd(stream);
 			break;
 		case IMAGE_FILETYPE_BMP:
-			result = php_handle_bmp(stream TSRMLS_CC);
+			result = php_handle_bmp(stream);
 			break;
 		case IMAGE_FILETYPE_TIFF_II:
-			result = php_handle_tiff(stream, NULL, 0 TSRMLS_CC);
+			result = php_handle_tiff(stream, NULL, 0);
 			break;
 		case IMAGE_FILETYPE_TIFF_MM:
-			result = php_handle_tiff(stream, NULL, 1 TSRMLS_CC);
+			result = php_handle_tiff(stream, NULL, 1);
 			break;
 		case IMAGE_FILETYPE_JPC:
-			result = php_handle_jpc(stream TSRMLS_CC);
+			result = php_handle_jpc(stream);
 			break;
 		case IMAGE_FILETYPE_JP2:
-			result = php_handle_jp2(stream TSRMLS_CC);
+			result = php_handle_jp2(stream);
 			break;
 		case IMAGE_FILETYPE_IFF:
-			result = php_handle_iff(stream TSRMLS_CC);
+			result = php_handle_iff(stream);
 			break;
 		case IMAGE_FILETYPE_WBMP:
-			result = php_handle_wbmp(stream TSRMLS_CC);
+			result = php_handle_wbmp(stream);
 			break;
 		case IMAGE_FILETYPE_XBM:
-			result = php_handle_xbm(stream TSRMLS_CC);
+			result = php_handle_xbm(stream);
 			break;
 		case IMAGE_FILETYPE_ICO:
-			result = php_handle_ico(stream TSRMLS_CC);
+			result = php_handle_ico(stream);
 			break;
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
@@ -1396,7 +1396,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	size_t input_len;
 	const int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|z/", &input, &input_len, &info) == FAILURE) {
+	if (zend_parse_parameters(argc, "s|z/", &input, &input_len, &info) == FAILURE) {
 			return;
 	}
 

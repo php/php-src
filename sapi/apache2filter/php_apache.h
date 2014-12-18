@@ -54,8 +54,8 @@ char *get_php_config(void *conf, char *name, size_t name_len);
 void apply_config(void *);
 extern const command_rec php_dir_cmds[];
 
-static size_t php_apache_read_stream(void *, char *, size_t TSRMLS_DC);
-static size_t php_apache_fsizer_stream(void * TSRMLS_DC);
+static size_t php_apache_read_stream(void *, char *, size_t);
+static size_t php_apache_fsizer_stream(void *);
 
 #define APR_ARRAY_FOREACH_OPEN(arr, key, val) 		\
 {													\

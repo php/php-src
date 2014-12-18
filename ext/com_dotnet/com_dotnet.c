@@ -121,7 +121,7 @@ struct dotnet_runtime_stuff {
 	DISPID create_instance;
 };
 
-static HRESULT dotnet_init(char **p_where TSRMLS_DC)
+static HRESULT dotnet_init(char **p_where)
 {
 	HRESULT hr;
 	struct dotnet_runtime_stuff *stuff;
@@ -197,17 +197,17 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	char *where = "";
 	IUnknown *unk = NULL;
 
-	php_com_initialize(TSRMLS_C);
+	php_com_initialize();
 	stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
 	if (stuff == NULL) {
-		hr = dotnet_init(&where TSRMLS_CC);
+		hr = dotnet_init(&where);
 		if (FAILED(hr)) {
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
 			snprintf(buf, sizeof(buf), "Failed to init .Net runtime [%s] %s", where, err);
 			if (err)
 				LocalFree(err);
-			php_com_throw_exception(hr, buf TSRMLS_CC);
+			php_com_throw_exception(hr, buf);
 			ZEND_CTOR_MAKE_NULL();
 			return;
 		}
@@ -222,7 +222,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] %s", where, err);
 			if (err)
 				LocalFree(err);
-			php_com_throw_exception(hr, buf TSRMLS_CC);
+			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
 			return;
 		}
@@ -235,7 +235,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] %s", where, err);
 			if (err)
 				LocalFree(err);
-			php_com_throw_exception(hr, buf TSRMLS_CC);
+			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
 			return;
 		}
@@ -243,17 +243,17 @@ PHP_FUNCTION(com_dotnet_create_instance)
 
 	obj = CDNO_FETCH(object);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l",
 			&assembly_name, &assembly_name_len,
 			&datatype_name, &datatype_name_len,
 			&obj->code_page)) {
-		php_com_throw_exception(E_INVALIDARG, "Could not create .Net object - invalid arguments!" TSRMLS_CC);
+		php_com_throw_exception(E_INVALIDARG, "Could not create .Net object - invalid arguments!");
 		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 
-	oletype = php_com_string_to_olestring(datatype_name, datatype_name_len, obj->code_page TSRMLS_CC);
-	oleassembly = php_com_string_to_olestring(assembly_name, assembly_name_len, obj->code_page TSRMLS_CC);
+	oletype = php_com_string_to_olestring(datatype_name, datatype_name_len, obj->code_page);
+	oleassembly = php_com_string_to_olestring(assembly_name, assembly_name_len, obj->code_page);
 	oletype_sys = SysAllocString(oletype);
 	oleassembly_sys = SysAllocString(oleassembly);
 	where = "CreateInstance";
@@ -313,14 +313,14 @@ PHP_FUNCTION(com_dotnet_create_instance)
 		if (err && err[0]) {
 			LocalFree(err);
 		}
-		php_com_throw_exception(hr, buf TSRMLS_CC);
+		php_com_throw_exception(hr, buf);
 		ZEND_CTOR_MAKE_NULL();
 		return;
 	}
 }
 /* }}} */
 
-void php_com_dotnet_mshutdown(TSRMLS_D)
+void php_com_dotnet_mshutdown(void)
 {
 	struct dotnet_runtime_stuff *stuff = COMG(dotnet_runtime_stuff);
 	
@@ -336,7 +336,7 @@ void php_com_dotnet_mshutdown(TSRMLS_D)
 	COMG(dotnet_runtime_stuff) = NULL;
 }
 
-void php_com_dotnet_rshutdown(TSRMLS_D)
+void php_com_dotnet_rshutdown(void)
 {
 	struct dotnet_runtime_stuff *stuff = COMG(dotnet_runtime_stuff);
 	

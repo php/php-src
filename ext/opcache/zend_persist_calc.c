@@ -35,7 +35,7 @@
 		ADD_DUP_SIZE((str), _STR_HEADER_SIZE + (str)->len + 1)
 # define ADD_INTERNED_STRING(str, do_free) do { \
 		if (!IS_ACCEL_INTERNED(str)) { \
-			zend_string *tmp = accel_new_interned_string(str TSRMLS_CC); \
+			zend_string *tmp = accel_new_interned_string(str); \
 			if (tmp != (str)) { \
 				if (do_free) { \
 					/*zend_string_release(str);*/ \
@@ -47,9 +47,9 @@
 		} \
 	} while (0)
 
-static void zend_persist_zval_calc(zval *z TSRMLS_DC);
+static void zend_persist_zval_calc(zval *z);
 
-static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *pElement TSRMLS_DC) TSRMLS_DC)
+static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *pElement))
 {
 	uint idx;
 	Bucket *p;
@@ -74,23 +74,23 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 			GC_FLAGS(p->key) |= flags;
 		}
 
-		pPersistElement(&p->val TSRMLS_CC);
+		pPersistElement(&p->val);
 	}
 }
 
-static void zend_persist_ast_calc(zend_ast *ast TSRMLS_DC)
+static void zend_persist_ast_calc(zend_ast *ast)
 {
 	uint32_t i;
 
 	if (ast->kind == ZEND_AST_ZVAL) {
 		ADD_SIZE(sizeof(zend_ast_zval));
-		zend_persist_zval_calc(zend_ast_get_zval(ast) TSRMLS_CC);
+		zend_persist_zval_calc(zend_ast_get_zval(ast));
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		ADD_SIZE(sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * list->children);
 		for (i = 0; i < list->children; i++) {
 			if (list->child[i]) {
-				zend_persist_ast_calc(list->child[i] TSRMLS_CC);
+				zend_persist_ast_calc(list->child[i]);
 			}
 		}
 	} else {
@@ -98,13 +98,13 @@ static void zend_persist_ast_calc(zend_ast *ast TSRMLS_DC)
 		ADD_SIZE(sizeof(zend_ast) - sizeof(zend_ast *) + sizeof(zend_ast *) * children);
 		for (i = 0; i < children; i++) {
 			if (ast->child[i]) {
-				zend_persist_ast_calc(ast->child[i] TSRMLS_CC);
+				zend_persist_ast_calc(ast->child[i]);
 			}
 		}
 	}
 }
 
-static void zend_persist_zval_calc(zval *z TSRMLS_DC)
+static void zend_persist_zval_calc(zval *z)
 {
 	zend_uchar flags;
 	uint size;
@@ -123,27 +123,27 @@ static void zend_persist_zval_calc(zval *z TSRMLS_DC)
 			size = zend_shared_memdup_size(Z_ARR_P(z), sizeof(zend_array));
 			if (size) {
 				ADD_SIZE(size);
-				zend_hash_persist_calc(Z_ARRVAL_P(z), zend_persist_zval_calc TSRMLS_CC);
+				zend_hash_persist_calc(Z_ARRVAL_P(z), zend_persist_zval_calc);
 			}
 			break;
 		case IS_REFERENCE:
 			size = zend_shared_memdup_size(Z_REF_P(z), sizeof(zend_reference));
 			if (size) {
 				ADD_SIZE(size);
-				zend_persist_zval_calc(Z_REFVAL_P(z) TSRMLS_CC);
+				zend_persist_zval_calc(Z_REFVAL_P(z));
 			}
 			break;
 		case IS_CONSTANT_AST:
 			size = zend_shared_memdup_size(Z_AST_P(z), sizeof(zend_ast_ref));
 			if (size) {
 				ADD_SIZE(size);
-				zend_persist_ast_calc(Z_ASTVAL_P(z) TSRMLS_CC);
+				zend_persist_ast_calc(Z_ASTVAL_P(z));
 			}
 			break;
 	}
 }
 
-static void zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
+static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 {
 	if (op_array->type != ZEND_USER_FUNCTION) {
 		return;
@@ -151,7 +151,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
 
 	if (op_array->static_variables) {
 		ADD_DUP_SIZE(op_array->static_variables, sizeof(HashTable));
-		zend_hash_persist_calc(op_array->static_variables, zend_persist_zval_calc TSRMLS_CC);
+		zend_hash_persist_calc(op_array->static_variables, zend_persist_zval_calc);
 	}
 
 	if (zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
@@ -170,7 +170,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
 		zval *end = p + op_array->last_literal;
 		ADD_DUP_SIZE(op_array->literals, sizeof(zval) * op_array->last_literal);
 		while (p < end) {
-			zend_persist_zval_calc(p TSRMLS_CC);
+			zend_persist_zval_calc(p);
 			p++;
 		}
 	}
@@ -230,13 +230,13 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array TSRMLS_DC)
 	}
 }
 
-static void zend_persist_op_array_calc(zval *zv TSRMLS_DC)
+static void zend_persist_op_array_calc(zval *zv)
 {
 	ADD_ARENA_SIZE(sizeof(zend_op_array));
-	zend_persist_op_array_calc_ex(Z_PTR_P(zv) TSRMLS_CC);
+	zend_persist_op_array_calc_ex(Z_PTR_P(zv));
 }
 
-static void zend_persist_property_info_calc(zval *zv TSRMLS_DC)
+static void zend_persist_property_info_calc(zval *zv)
 {
 	zend_property_info *prop = Z_PTR_P(zv);
 
@@ -247,20 +247,20 @@ static void zend_persist_property_info_calc(zval *zv TSRMLS_DC)
 	}
 }
 
-static void zend_persist_class_entry_calc(zval *zv TSRMLS_DC)
+static void zend_persist_class_entry_calc(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (ce->type == ZEND_USER_CLASS) {
 		ADD_ARENA_SIZE(sizeof(zend_class_entry));
 		ADD_INTERNED_STRING(ce->name, 0);
-		zend_hash_persist_calc(&ce->function_table, zend_persist_op_array_calc TSRMLS_CC);
+		zend_hash_persist_calc(&ce->function_table, zend_persist_op_array_calc);
 		if (ce->default_properties_table) {
 		    int i;
 
 			ADD_SIZE(sizeof(zval) * ce->default_properties_count);
 			for (i = 0; i < ce->default_properties_count; i++) {
-				zend_persist_zval_calc(&ce->default_properties_table[i] TSRMLS_CC);
+				zend_persist_zval_calc(&ce->default_properties_table[i]);
 			}
 		}
 		if (ce->default_static_members_table) {
@@ -268,10 +268,10 @@ static void zend_persist_class_entry_calc(zval *zv TSRMLS_DC)
 
 			ADD_SIZE(sizeof(zval) * ce->default_static_members_count);
 			for (i = 0; i < ce->default_static_members_count; i++) {
-				zend_persist_zval_calc(&ce->default_static_members_table[i] TSRMLS_CC);
+				zend_persist_zval_calc(&ce->default_static_members_table[i]);
 			}
 		}
-		zend_hash_persist_calc(&ce->constants_table, zend_persist_zval_calc TSRMLS_CC);
+		zend_hash_persist_calc(&ce->constants_table, zend_persist_zval_calc);
 
 		if (ZEND_CE_FILENAME(ce)) {
 			ADD_STRING(ZEND_CE_FILENAME(ce));
@@ -280,7 +280,7 @@ static void zend_persist_class_entry_calc(zval *zv TSRMLS_DC)
 			ADD_STRING(ZEND_CE_DOC_COMMENT(ce));
 		}
 
-		zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc TSRMLS_CC);
+		zend_hash_persist_calc(&ce->properties_info, zend_persist_property_info_calc);
 
 		if (ce->trait_aliases) {
 			int i = 0;
@@ -329,12 +329,12 @@ static void zend_persist_class_entry_calc(zval *zv TSRMLS_DC)
 	}
 }
 
-static void zend_accel_persist_class_table_calc(HashTable *class_table TSRMLS_DC)
+static void zend_accel_persist_class_table_calc(HashTable *class_table)
 {
-	zend_hash_persist_calc(class_table, zend_persist_class_entry_calc TSRMLS_CC);
+	zend_hash_persist_calc(class_table, zend_persist_class_entry_calc);
 }
 
-uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length TSRMLS_DC)
+uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length)
 {
 	new_persistent_script->mem = NULL;
 	new_persistent_script->size = 0;
@@ -346,9 +346,9 @@ uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_scrip
 	ADD_DUP_SIZE(key, key_length + 1);
 	ADD_STRING(new_persistent_script->full_path);
 
-	zend_accel_persist_class_table_calc(&new_persistent_script->class_table TSRMLS_CC);
-	zend_hash_persist_calc(&new_persistent_script->function_table, zend_persist_op_array_calc TSRMLS_CC);
-	zend_persist_op_array_calc_ex(&new_persistent_script->main_op_array TSRMLS_CC);
+	zend_accel_persist_class_table_calc(&new_persistent_script->class_table);
+	zend_hash_persist_calc(&new_persistent_script->function_table, zend_persist_op_array_calc);
+	zend_persist_op_array_calc_ex(&new_persistent_script->main_op_array);
 
 	new_persistent_script->size += new_persistent_script->arena_size;
 

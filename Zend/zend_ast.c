@@ -23,12 +23,12 @@
 #include "zend_API.h"
 #include "zend_operators.h"
 
-static inline void *zend_ast_alloc(size_t size TSRMLS_DC) {
+static inline void *zend_ast_alloc(size_t size) {
 	return zend_arena_alloc(&CG(ast_arena), size);
 }
 
-static inline void *zend_ast_realloc(void *old, size_t old_size, size_t new_size TSRMLS_DC) {
-	void *new = zend_ast_alloc(new_size TSRMLS_CC);
+static inline void *zend_ast_realloc(void *old, size_t old_size, size_t new_size) {
+	void *new = zend_ast_alloc(new_size);
 	memcpy(new, old, old_size);
 	return new;
 }
@@ -43,9 +43,8 @@ static inline size_t zend_ast_list_size(uint32_t children) {
 
 ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
 	zend_ast_znode *ast;
-	TSRMLS_FETCH();
 
-	ast = zend_ast_alloc(sizeof(zend_ast_znode) TSRMLS_CC);
+	ast = zend_ast_alloc(sizeof(zend_ast_znode));
 	ast->kind = ZEND_AST_ZNODE;
 	ast->attr = 0;
 	ast->lineno = CG(zend_lineno);
@@ -55,9 +54,8 @@ ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
 
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
 	zend_ast_zval *ast;
-	TSRMLS_FETCH();
 
-	ast = zend_ast_alloc(sizeof(zend_ast_zval) TSRMLS_CC);
+	ast = zend_ast_alloc(sizeof(zend_ast_zval));
 	ast->kind = ZEND_AST_ZVAL;
 	ast->attr = attr;
 	ZVAL_COPY_VALUE(&ast->val, zv);
@@ -70,9 +68,8 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2
 ) {
 	zend_ast_decl *ast;
-	TSRMLS_FETCH();
 
-	ast = zend_ast_alloc(sizeof(zend_ast_decl) TSRMLS_CC);
+	ast = zend_ast_alloc(sizeof(zend_ast_decl));
 	ast->kind = kind;
 	ast->attr = 0;
 	ast->start_lineno = start_lineno;
@@ -91,9 +88,8 @@ ZEND_API zend_ast *zend_ast_create_decl(
 static zend_ast *zend_ast_create_from_va_list(zend_ast_kind kind, zend_ast_attr attr, va_list va) {
 	uint32_t i, children = kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
 	zend_ast *ast;
-	TSRMLS_FETCH();
 
-	ast = zend_ast_alloc(zend_ast_size(children) TSRMLS_CC);
+	ast = zend_ast_alloc(zend_ast_size(children));
 	ast->kind = kind;
 	ast->attr = attr;
 	ast->lineno = (uint32_t) -1;
@@ -140,9 +136,8 @@ ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...) {
 ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...) {
 	zend_ast *ast;
 	zend_ast_list *list;
-	TSRMLS_FETCH();
 
-	ast = zend_ast_alloc(zend_ast_list_size(4) TSRMLS_CC);
+	ast = zend_ast_alloc(zend_ast_list_size(4));
 	list = (zend_ast_list *) ast;
 	list->kind = kind;
 	list->attr = 0;
@@ -169,15 +164,14 @@ static inline zend_bool is_power_of_two(uint32_t n) {
 ZEND_API zend_ast *zend_ast_list_add(zend_ast *ast, zend_ast *op) {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	if (list->children >= 4 && is_power_of_two(list->children)) {
-		TSRMLS_FETCH();
-		list = zend_ast_realloc(list,
-			zend_ast_list_size(list->children), zend_ast_list_size(list->children * 2) TSRMLS_CC);
+			list = zend_ast_realloc(list,
+			zend_ast_list_size(list->children), zend_ast_list_size(list->children * 2));
 	}
 	list->child[list->children++] = op;
 	return (zend_ast *) list;
 }
 
-static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr TSRMLS_DC)
+static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 {
 	switch (Z_TYPE_P(offset)) {
 		case IS_UNDEF:
@@ -208,7 +202,7 @@ static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr TS
  	}
 }
 
-ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope TSRMLS_DC)
+ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
 {
 	zval op1, op2;
 
@@ -216,9 +210,9 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 		case ZEND_AST_BINARY_OP:
 		{
 			binary_op_type op = get_binary_op(ast->attr);
-			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
-			zend_ast_evaluate(&op2, ast->child[1], scope TSRMLS_CC);
-			op(result, &op1, &op2 TSRMLS_CC);
+			zend_ast_evaluate(&op1, ast->child[0], scope);
+			zend_ast_evaluate(&op2, ast->child[1], scope);
+			op(result, &op1, &op2);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
@@ -229,9 +223,9 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			/* op1 > op2 is the same as op2 < op1 */
 			binary_op_type op = ast->kind == ZEND_AST_GREATER
 				? is_smaller_function : is_smaller_or_equal_function;
-			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
-			zend_ast_evaluate(&op2, ast->child[1], scope TSRMLS_CC);
-			op(result, &op2, &op1 TSRMLS_CC);
+			zend_ast_evaluate(&op1, ast->child[0], scope);
+			zend_ast_evaluate(&op2, ast->child[1], scope);
+			op(result, &op2, &op1);
 			zval_dtor(&op1);
 			zval_dtor(&op2);
 			break;
@@ -239,8 +233,8 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 		case ZEND_AST_UNARY_OP:
 		{
 			unary_op_type op = get_unary_op(ast->attr);
-			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
-			op(result, &op1 TSRMLS_CC);
+			zend_ast_evaluate(&op1, ast->child[0], scope);
+			op(result, &op1);
 			zval_dtor(&op1);
 			break;
 		}
@@ -250,22 +244,22 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			if (scope) {
 				/* class constants may be updated in-place */
 				if (Z_OPT_CONSTANT_P(zv)) {
-					zval_update_constant_ex(zv, 1, scope TSRMLS_CC);
+					zval_update_constant_ex(zv, 1, scope);
 				}
 				ZVAL_DUP(result, zv);
 			} else {
 				ZVAL_DUP(result, zv);
 				if (Z_OPT_CONSTANT_P(result)) {
-					zval_update_constant_ex(result, 1, scope TSRMLS_CC);
+					zval_update_constant_ex(result, 1, scope);
 				}
 			}
 			break;
 		}
 		case ZEND_AST_AND:
-			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
-			if (zend_is_true(&op1 TSRMLS_CC)) {
-				zend_ast_evaluate(&op2, ast->child[1], scope TSRMLS_CC);
-				ZVAL_BOOL(result, zend_is_true(&op2 TSRMLS_CC));
+			zend_ast_evaluate(&op1, ast->child[0], scope);
+			if (zend_is_true(&op1)) {
+				zend_ast_evaluate(&op2, ast->child[1], scope);
+				ZVAL_BOOL(result, zend_is_true(&op2));
 				zval_dtor(&op2);
 			} else {
 				ZVAL_BOOL(result, 0);
@@ -273,40 +267,40 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 			zval_dtor(&op1);
 			break;
 		case ZEND_AST_OR:
-			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
-			if (zend_is_true(&op1 TSRMLS_CC)) {
+			zend_ast_evaluate(&op1, ast->child[0], scope);
+			if (zend_is_true(&op1)) {
 				ZVAL_BOOL(result, 1);
 			} else {
-				zend_ast_evaluate(&op2, ast->child[1], scope TSRMLS_CC);
-				ZVAL_BOOL(result, zend_is_true(&op2 TSRMLS_CC));
+				zend_ast_evaluate(&op2, ast->child[1], scope);
+				ZVAL_BOOL(result, zend_is_true(&op2));
 				zval_dtor(&op2);
 			}
 			zval_dtor(&op1);
 			break;
 		case ZEND_AST_CONDITIONAL:
-			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
-			if (zend_is_true(&op1 TSRMLS_CC)) {
+			zend_ast_evaluate(&op1, ast->child[0], scope);
+			if (zend_is_true(&op1)) {
 				if (!ast->child[1]) {
 					*result = op1;
 				} else {
-					zend_ast_evaluate(result, ast->child[1], scope TSRMLS_CC);
+					zend_ast_evaluate(result, ast->child[1], scope);
 					zval_dtor(&op1);
 				}
 			} else {
-				zend_ast_evaluate(result, ast->child[2], scope TSRMLS_CC);
+				zend_ast_evaluate(result, ast->child[2], scope);
 				zval_dtor(&op1);
 			}
 			break;
 		case ZEND_AST_UNARY_PLUS:
 			ZVAL_LONG(&op1, 0);
-			zend_ast_evaluate(&op2, ast->child[0], scope TSRMLS_CC);
-			add_function(result, &op1, &op2 TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->child[0], scope);
+			add_function(result, &op1, &op2);
 			zval_dtor(&op2);
 			break;
 		case ZEND_AST_UNARY_MINUS:
 			ZVAL_LONG(&op1, 0);
-			zend_ast_evaluate(&op2, ast->child[0], scope TSRMLS_CC);
-			sub_function(result, &op1, &op2 TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->child[0], scope);
+			sub_function(result, &op1, &op2);
 			zval_dtor(&op2);
 			break;
 		case ZEND_AST_ARRAY:
@@ -317,21 +311,21 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 				for (i = 0; i < list->children; i++) {
 					zend_ast *elem = list->child[i];
 					if (elem->child[1]) {
-						zend_ast_evaluate(&op1, elem->child[1], scope TSRMLS_CC);
+						zend_ast_evaluate(&op1, elem->child[1], scope);
 					} else {
 						ZVAL_UNDEF(&op1);
 					}
-					zend_ast_evaluate(&op2, elem->child[0], scope TSRMLS_CC);
-					zend_ast_add_array_element(result, &op1, &op2 TSRMLS_CC);
+					zend_ast_evaluate(&op2, elem->child[0], scope);
+					zend_ast_add_array_element(result, &op1, &op2);
 				}
 			}
 			break;
 		case ZEND_AST_DIM:
-			zend_ast_evaluate(&op1, ast->child[0], scope TSRMLS_CC);
-			zend_ast_evaluate(&op2, ast->child[1], scope TSRMLS_CC);
+			zend_ast_evaluate(&op1, ast->child[0], scope);
+			zend_ast_evaluate(&op2, ast->child[1], scope);
 			{
 				zval tmp;
-				zend_fetch_dimension_by_zval(&tmp, &op1, &op2 TSRMLS_CC);
+				zend_fetch_dimension_by_zval(&tmp, &op1, &op2);
 				ZVAL_ZVAL(result, &tmp, 1, 1);
 			}
 			zval_dtor(&op1);
@@ -429,17 +423,17 @@ ZEND_API void zend_ast_destroy_and_free(zend_ast *ast) {
 	zend_ast_destroy_ex(ast, 1);
 }
 
-ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn TSRMLS_DC) {
+ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
 	if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		uint32_t i;
 		for (i = 0; i < list->children; ++i) {
-			fn(&list->child[i] TSRMLS_CC);
+			fn(&list->child[i]);
 		}
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; ++i) {
-			fn(&ast->child[i] TSRMLS_CC);
+			fn(&ast->child[i]);
 		}
 	}
 }

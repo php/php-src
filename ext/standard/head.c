@@ -42,12 +42,12 @@ PHP_FUNCTION(header)
 	sapi_header_line ctr = {0};
 	size_t len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &ctr.line,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|bl", &ctr.line,
 				&len, &rep, &ctr.response_code) == FAILURE)
 		return;
 
 	ctr.line_len = (uint)len;
-	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr TSRMLS_CC);
+	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr);
 }
 /* }}} */
 
@@ -58,18 +58,18 @@ PHP_FUNCTION(header_remove)
 	sapi_header_line ctr = {0};
 	size_t len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ctr.line,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &ctr.line,
 	                          &len) == FAILURE)
 		return;
 
 	ctr.line_len = (uint)len;
-	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr TSRMLS_CC);
+	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr);
 }
 /* }}} */
 
-PHPAPI int php_header(TSRMLS_D)
+PHPAPI int php_header(void)
 {
-	if (sapi_send_headers(TSRMLS_C)==FAILURE || SG(request_info).headers_only) {
+	if (sapi_send_headers()==FAILURE || SG(request_info).headers_only) {
 		return 0; /* don't allow output */
 	} else {
 		return 1; /* allow output */
@@ -77,7 +77,7 @@ PHPAPI int php_header(TSRMLS_D)
 }
 
 
-PHPAPI int php_setcookie(char *name, size_t name_len, char *value, size_t value_len, time_t expires, char *path, size_t path_len, char *domain, size_t domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
+PHPAPI int php_setcookie(char *name, size_t name_len, char *value, size_t value_len, time_t expires, char *path, size_t path_len, char *domain, size_t domain_len, int secure, int url_encode, int httponly)
 {
 	char *cookie;
 	size_t len=sizeof("Set-Cookie: ");
@@ -120,7 +120,7 @@ PHPAPI int php_setcookie(char *name, size_t name_len, char *value, size_t value_
 		 * so in order to force cookies to be deleted, even on MSIE, we
 		 * pick an expiry date in the past
 		 */
-		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, 1, 0 TSRMLS_CC);
+		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, 1, 0);
 		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s; Max-Age=0", name, dt->val);
 		zend_string_free(dt);
 	} else {
@@ -129,7 +129,7 @@ PHPAPI int php_setcookie(char *name, size_t name_len, char *value, size_t value_
 			const char *p;
 			char tsdelta[13];
 			strlcat(cookie, COOKIE_EXPIRES, len + 100);
-			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
+			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0);
 			/* check to make sure that the year does not exceed 4 digits in length */
 			p = zend_memrchr(dt->val, '-', dt->len);
 			if (!p || *(p + 5) != ' ') {
@@ -170,7 +170,7 @@ PHPAPI int php_setcookie(char *name, size_t name_len, char *value, size_t value_
 	ctr.line = cookie;
 	ctr.line_len = (uint)strlen(cookie);
 
-	result = sapi_header_op(SAPI_HEADER_ADD, &ctr TSRMLS_CC);
+	result = sapi_header_op(SAPI_HEADER_ADD, &ctr);
 	efree(cookie);
 	return result;
 }
@@ -186,13 +186,13 @@ PHP_FUNCTION(setcookie)
 	zend_bool secure = 0, httponly = 0;
 	size_t name_len, value_len = 0, path_len = 0, domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|slssbb", &name,
 							  &name_len, &value, &value_len, &expires, &path,
 							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
 		return;
 	}
 
-	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure, 1, httponly TSRMLS_CC) == SUCCESS) {
+	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure, 1, httponly) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -209,13 +209,13 @@ PHP_FUNCTION(setrawcookie)
 	zend_bool secure = 0, httponly = 0;
 	size_t name_len, value_len = 0, path_len = 0, domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssbb", &name,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|slssbb", &name,
 							  &name_len, &value, &value_len, &expires, &path,
 							  &path_len, &domain, &domain_len, &secure, &httponly) == FAILURE) {
 		return;
 	}
 
-	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure, 0, httponly TSRMLS_CC) == SUCCESS) {
+	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure, 0, httponly) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
@@ -232,12 +232,12 @@ PHP_FUNCTION(headers_sent)
 	const char *file="";
 	int line=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z/z/", &arg1, &arg2) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z/z/", &arg1, &arg2) == FAILURE)
 		return;
 
 	if (SG(headers_sent)) {
-		line = php_output_get_start_lineno(TSRMLS_C);
-		file = php_output_get_start_filename(TSRMLS_C);
+		line = php_output_get_start_lineno();
+		file = php_output_get_start_filename();
 	}
 
 	switch(ZEND_NUM_ARGS()) {
@@ -264,7 +264,7 @@ PHP_FUNCTION(headers_sent)
 
 /* {{{ php_head_apply_header_list_to_hash
    Turn an llist of sapi_header_struct headers into a numerically indexed zval hash */
-static void php_head_apply_header_list_to_hash(void *data, void *arg TSRMLS_DC)
+static void php_head_apply_header_list_to_hash(void *data, void *arg)
 {
 	sapi_header_struct *sapi_header = (sapi_header_struct *)data;
 
@@ -285,7 +285,7 @@ PHP_FUNCTION(headers_list)
 		RETURN_FALSE;
 	}
 	array_init(return_value);
-	zend_llist_apply_with_argument(&SG(sapi_headers).headers, php_head_apply_header_list_to_hash, return_value TSRMLS_CC);
+	zend_llist_apply_with_argument(&SG(sapi_headers).headers, php_head_apply_header_list_to_hash, return_value);
 }
 /* }}} */
 
@@ -295,7 +295,7 @@ PHP_FUNCTION(http_response_code)
 {
 	zend_long response_code = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &response_code) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &response_code) == FAILURE) {
 		return;
 	}
 

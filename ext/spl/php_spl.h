@@ -67,7 +67,7 @@ ZEND_BEGIN_MODULE_GLOBALS(spl)
 ZEND_END_MODULE_GLOBALS(spl)
 
 #ifdef ZTS
-# define SPL_G(v) TSRMG(spl_globals_id, zend_spl_globals *, v)
+# define SPL_G(v) ZEND_TSRMG(spl_globals_id, zend_spl_globals *, v)
 extern int spl_globals_id;
 #else
 # define SPL_G(v) (spl_globals.v)
@@ -79,7 +79,7 @@ PHP_FUNCTION(class_parents);
 PHP_FUNCTION(class_implements);
 PHP_FUNCTION(class_uses);
 
-PHPAPI zend_string *php_spl_object_hash(zval *obj TSRMLS_DC);
+PHPAPI zend_string *php_spl_object_hash(zval *obj);
 
 #endif /* PHP_SPL_H */
 

@@ -57,7 +57,7 @@
 	if ((a) < 0 || ((INT_MAX - outputpos)/((int)b)) < (a)) { \
 		efree(formatcodes);	\
 		efree(formatargs);	\
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow in format string", code); \
+		php_error_docref(NULL, E_WARNING, "Type %c: integer overflow in format string", code); \
 		RETURN_FALSE; \
 	} \
 	outputpos += (a)*(b);
@@ -122,7 +122,7 @@ PHP_FUNCTION(pack)
 	int outputpos = 0, outputsize = 0;
 	char *output;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &argv, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &argv, &num_args) == FAILURE) {
 		return;
 	}
 
@@ -168,7 +168,7 @@ PHP_FUNCTION(pack)
 			case 'X':	
 			case '@':
 				if (arg < 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: '*' ignored", code);
+					php_error_docref(NULL, E_WARNING, "Type %c: '*' ignored", code);
 					arg = 1;
 				}
 				break;
@@ -182,7 +182,7 @@ PHP_FUNCTION(pack)
 				if (currentarg >= num_args) {
 					efree(formatcodes);
 					efree(formatargs);
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough arguments", code);
+					php_error_docref(NULL, E_WARNING, "Type %c: not enough arguments", code);
 					RETURN_FALSE;
 				}
 
@@ -211,7 +211,7 @@ PHP_FUNCTION(pack)
 #if SIZEOF_ZEND_LONG < 8
 					efree(formatcodes);
 					efree(formatargs);
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
+					php_error_docref(NULL, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
 					RETURN_FALSE;
 #endif
 			case 'c': 
@@ -237,7 +237,7 @@ PHP_FUNCTION(pack)
 				if (currentarg > num_args) {
 					efree(formatcodes);
 					efree(formatargs);
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: too few arguments", code);
+					php_error_docref(NULL, E_WARNING, "Type %c: too few arguments", code);
 					RETURN_FALSE;
 				}
 				break;
@@ -245,7 +245,7 @@ PHP_FUNCTION(pack)
 			default:
 				efree(formatcodes);
 				efree(formatargs);
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: unknown format code", code);
+				php_error_docref(NULL, E_WARNING, "Type %c: unknown format code", code);
 				RETURN_FALSE;
 		}
 
@@ -254,7 +254,7 @@ PHP_FUNCTION(pack)
 	}
 
 	if (currentarg < num_args) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d arguments unused", (num_args - currentarg));
+		php_error_docref(NULL, E_WARNING, "%d arguments unused", (num_args - currentarg));
 	}
 
 	/* Calculate output length and upper bound while processing*/
@@ -317,7 +317,7 @@ PHP_FUNCTION(pack)
 				outputpos -= arg;
 
 				if (outputpos < 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: outside of string", code);
+					php_error_docref(NULL, E_WARNING, "Type %c: outside of string", code);
 					outputpos = 0;
 				}
 				break;
@@ -368,7 +368,7 @@ PHP_FUNCTION(pack)
 
 				outputpos--;
 				if(arg > str->len) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough characters in string", code);
+					php_error_docref(NULL, E_WARNING, "Type %c: not enough characters in string", code);
 					arg = str->len;
 				}
 
@@ -382,7 +382,7 @@ PHP_FUNCTION(pack)
 					} else if (n >= 'a' && n <= 'f') {
 						n -= ('a' - 10);
 					} else {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: illegal hex digit %c", code, n);
+						php_error_docref(NULL, E_WARNING, "Type %c: illegal hex digit %c", code, n);
 						n = 0;
 					}
 
@@ -563,7 +563,7 @@ PHP_FUNCTION(unpack)
 	zend_long formatlen, inputpos, inputlen;
 	int i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &formatarg, 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &formatarg, 
 		&inputarg) == FAILURE) {
 		return;
 	}
@@ -677,7 +677,7 @@ PHP_FUNCTION(unpack)
 				size = 8;
 				break;
 #else
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
+				php_error_docref(NULL, E_WARNING, "64-bit format codes are not available for 32-bit versions of PHP");
 				zval_dtor(return_value);
 				RETURN_FALSE;
 #endif
@@ -693,7 +693,7 @@ PHP_FUNCTION(unpack)
 				break;
 
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid format type %c", type);
+				php_error_docref(NULL, E_WARNING, "Invalid format type %c", type);
 				zval_dtor(return_value);
 				RETURN_FALSE;
 				break;
@@ -713,7 +713,7 @@ PHP_FUNCTION(unpack)
 			}
 
 			if (size != 0 && size != -1 && INT_MAX - size + 1 < inputpos) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: integer overflow", type);
+				php_error_docref(NULL, E_WARNING, "Type %c: integer overflow", type);
 				inputpos = 0;
 			}
 
@@ -963,7 +963,7 @@ PHP_FUNCTION(unpack)
 							i = arg - 1;		/* Break out of for loop */
 
 							if (arg >= 0) {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: outside of string", type);
+								php_error_docref(NULL, E_WARNING, "Type %c: outside of string", type);
 							}
 						}
 						break;
@@ -972,7 +972,7 @@ PHP_FUNCTION(unpack)
 						if (arg <= inputlen) {
 							inputpos = arg;
 						} else {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: outside of string", type);
+							php_error_docref(NULL, E_WARNING, "Type %c: outside of string", type);
 						}
 
 						i = arg - 1;	/* Done, break out of for loop */
@@ -982,7 +982,7 @@ PHP_FUNCTION(unpack)
 				inputpos += size;
 				if (inputpos < 0) {
 					if (size != -1) { /* only print warning if not working with * */
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: outside of string", type);
+						php_error_docref(NULL, E_WARNING, "Type %c: outside of string", type);
 					}
 					inputpos = 0;
 				}
@@ -990,7 +990,7 @@ PHP_FUNCTION(unpack)
 				/* Reached end of input for '*' repeater */
 				break;
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough input, need %d, have %d", type, size, inputlen - inputpos);
+				php_error_docref(NULL, E_WARNING, "Type %c: not enough input, need %d, have %d", type, size, inputlen - inputpos);
 				zval_dtor(return_value);
 				RETURN_FALSE;
 			}

@@ -47,7 +47,7 @@ PHPAPI zend_class_entry *spl_ce_RangeException;
 PHPAPI zend_class_entry *spl_ce_UnderflowException;
 PHPAPI zend_class_entry *spl_ce_UnexpectedValueException;
 
-#define spl_ce_Exception zend_exception_get_default(TSRMLS_C)
+#define spl_ce_Exception zend_exception_get_default()
 
 /* {{{ PHP_MINIT_FUNCTION(spl_exceptions) */
 PHP_MINIT_FUNCTION(spl_exceptions)

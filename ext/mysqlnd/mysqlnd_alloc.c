@@ -172,7 +172,7 @@ void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 		TRACE_ALLOC_INF_FMT("file=%-15s line=%4d", fn? fn + 1:__zend_orig_filename, __zend_orig_lineno);
 	}
 #endif
-	TRACE_ALLOC_INF_FMT("before: %lu", zend_memory_usage(FALSE TSRMLS_CC));
+	TRACE_ALLOC_INF_FMT("before: %lu", zend_memory_usage(FALSE));
 
 #if PHP_DEBUG
 	/* -1 is also "true" */
@@ -186,7 +186,7 @@ void * _mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D)
 	}
 #endif
 
-	TRACE_ALLOC_INF_FMT("after : %lu", zend_memory_usage(FALSE TSRMLS_CC));
+	TRACE_ALLOC_INF_FMT("after : %lu", zend_memory_usage(FALSE));
 	TRACE_ALLOC_INF_FMT("size=%lu ptr=%p", size, ret);
 	if (ret && collect_memory_statistics) {
 		*(size_t *) ret = size;
@@ -482,7 +482,7 @@ void * _mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 	}
 #endif
 	TRACE_ALLOC_INF_FMT("ptr=%p new_size=%lu ", new_size, ptr); 
-	TRACE_ALLOC_INF_FMT("before: %lu", zend_memory_usage(TRUE TSRMLS_CC));
+	TRACE_ALLOC_INF_FMT("before: %lu", zend_memory_usage(TRUE));
 
 #if PHP_DEBUG
 	/* -1 is also "true" */

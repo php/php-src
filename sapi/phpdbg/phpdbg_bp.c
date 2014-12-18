@@ -29,24 +29,24 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 /* {{{ private api functions */
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array* TSRMLS_DC);
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function* TSRMLS_DC);
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array* TSRMLS_DC);
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t TSRMLS_DC);
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar TSRMLS_DC);
-static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data TSRMLS_DC); /* }}} */
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array*);
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function*);
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array*);
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t);
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar);
+static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data); /* }}} */
 
 /*
 * Note:
 *	A break point must always set the correct id and type
 *	A set breakpoint function must always map new points
 */
-static inline void _phpdbg_break_mapping(int id, HashTable *table TSRMLS_DC)
+static inline void _phpdbg_break_mapping(int id, HashTable *table)
 {
 	zend_hash_index_update_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], id, table);
 }
 
-#define PHPDBG_BREAK_MAPPING(id, table) _phpdbg_break_mapping(id, table TSRMLS_CC)
+#define PHPDBG_BREAK_MAPPING(id, table) _phpdbg_break_mapping(id, table)
 #define PHPDBG_BREAK_UNMAPPING(id) \
 	zend_hash_index_del(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], (id))
 
@@ -89,7 +89,7 @@ static void phpdbg_opline_breaks_dtor(zval *data) /* {{{ */
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_reset_breakpoints(TSRMLS_D) /* {{{ */
+PHPDBG_API void phpdbg_reset_breakpoints(void) /* {{{ */
 {
 	HashTable *table;
 
@@ -102,14 +102,14 @@ PHPDBG_API void phpdbg_reset_breakpoints(TSRMLS_D) /* {{{ */
 	} ZEND_HASH_FOREACH_END();
 } /* }}} */
 
-PHPDBG_API void phpdbg_export_breakpoints(FILE *handle TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_export_breakpoints(FILE *handle) /* {{{ */
 {
 	char *string;
-	phpdbg_export_breakpoints_to_string(&string TSRMLS_CC);
+	phpdbg_export_breakpoints_to_string(&string);
 	fputs(string, handle);
 }
 
-PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str) /* {{{ */
 {
 	HashTable *table;
 	zend_ulong id = 0L;
@@ -222,7 +222,7 @@ PHPDBG_API void phpdbg_export_breakpoints_to_string(char **str TSRMLS_DC) /* {{{
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	char realpath[MAXPATHLEN];
@@ -282,7 +282,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRML
 
 				phpdbg_debug("Compare against loaded %s\n", file);
 
-				if (!(pending = ((fileht = phpdbg_resolve_pending_file_break_ex(file->val, file->len, path_str, broken TSRMLS_CC)) == NULL))) {
+				if (!(pending = ((fileht = phpdbg_resolve_pending_file_break_ex(file->val, file->len, path_str, broken)) == NULL))) {
 					new_break = *(phpdbg_breakfile_t *) zend_hash_index_find_ptr(broken, line_num);
 					break;
 				}
@@ -304,7 +304,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file(const char *path, long line_num TSRML
 	}
 } /* }}} */
 
-PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint filelen, zend_string *cur, HashTable *fileht TSRMLS_DC) /* {{{ */
+PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uint filelen, zend_string *cur, HashTable *fileht) /* {{{ */
 {
 	phpdbg_debug("file: %s, filelen: %u, cur: %s, curlen %u, pos: %c, memcmp: %d\n", file, filelen, cur, curlen, filelen > curlen ? file[filelen - curlen - 1] : '?', filelen > curlen ? memcmp(file + filelen - curlen, cur, curlen) : 0);
 
@@ -345,7 +345,7 @@ PHPDBG_API HashTable *phpdbg_resolve_pending_file_break_ex(const char *file, uin
 	return NULL;
 } /* }}} */
 
-PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file) /* {{{ */
 {
 	HashTable *fileht;
 	uint filelen = strlen(file);
@@ -356,11 +356,11 @@ PHPDBG_API void phpdbg_resolve_pending_file_break(const char *file TSRMLS_DC) /*
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING], cur, fileht) {
 		phpdbg_debug("check bp: %s\n", cur);
 
-		phpdbg_resolve_pending_file_break_ex(file, filelen, cur, fileht TSRMLS_CC);
+		phpdbg_resolve_pending_file_break_ex(file, filelen, cur, fileht);
 	} ZEND_HASH_FOREACH_END();
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_symbol(const char *name, size_t name_len TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_symbol(const char *name, size_t name_len) /* {{{ */
 {
 	if (!zend_hash_str_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], name, name_len)) {
 		phpdbg_breaksymbol_t new_break;
@@ -380,7 +380,7 @@ PHPDBG_API void phpdbg_set_breakpoint_symbol(const char *name, size_t name_len T
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_method(const char *class_name, const char *func_name TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_method(const char *class_name, const char *func_name) /* {{{ */
 {
 	HashTable class_breaks, *class_table;
 	size_t class_len = strlen(class_name);
@@ -415,7 +415,7 @@ PHPDBG_API void phpdbg_set_breakpoint_method(const char *class_name, const char 
 	efree(lcname);
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline) /* {{{ */
 {
 	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], opline)) {
 		phpdbg_breakline_t new_break;
@@ -436,7 +436,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline(zend_ulong opline TSRMLS_DC) /* {{{
 	}
 } /* }}} */
 
-PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_op_array *op_array TSRMLS_DC) /* {{{ */
+PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_op_array *op_array) /* {{{ */
 {
 	phpdbg_breakline_t opline_break;
 	if (op_array->last <= brake->opline_num) {
@@ -472,7 +472,7 @@ PHPDBG_API int phpdbg_resolve_op_array_break(phpdbg_breakopline_t *brake, zend_o
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array) /* {{{ */
 {
 	HashTable *func_table = &PHPDBG_G(bp)[PHPDBG_BREAK_FUNCTION_OPLINE];
 	HashTable *oplines_table;
@@ -491,7 +491,7 @@ PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC
 	}
 
 	ZEND_HASH_FOREACH_PTR(oplines_table, brake) {
-		if (phpdbg_resolve_op_array_break(brake, op_array TSRMLS_CC) == SUCCESS) {
+		if (phpdbg_resolve_op_array_break(brake, op_array) == SUCCESS) {
 			phpdbg_breakline_t *opline_break;
 
 			zend_hash_internal_pointer_end(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
@@ -508,7 +508,7 @@ PHPDBG_API void phpdbg_resolve_op_array_breaks(zend_op_array *op_array TSRMLS_DC
 	} ZEND_HASH_FOREACH_END();
 } /* }}} */
 
-PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRMLS_DC) /* {{{ */
+PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break) /* {{{ */
 {
 	HashTable *func_table = EG(function_table);
 	zend_function *func;
@@ -516,7 +516,7 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRML
 	if (new_break->func_name == NULL) {
 		if (EG(current_execute_data) == NULL) {
 			if (PHPDBG_G(ops) != NULL && !memcmp(PHPDBG_G(ops)->filename, new_break->class_name, new_break->class_len)) {
-				if (phpdbg_resolve_op_array_break(new_break, PHPDBG_G(ops) TSRMLS_CC) == SUCCESS) {
+				if (phpdbg_resolve_op_array_break(new_break, PHPDBG_G(ops)) == SUCCESS) {
 					return SUCCESS;
 				} else {
 					return 2;
@@ -528,7 +528,7 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRML
 			do {
 				zend_op_array *op_array = &execute_data->func->op_array;
 				if (op_array->function_name == NULL && op_array->scope == NULL && new_break->class_len == op_array->filename->len && !memcmp(op_array->filename->val, new_break->class_name, new_break->class_len)) {
-					if (phpdbg_resolve_op_array_break(new_break, op_array TSRMLS_CC) == SUCCESS) {
+					if (phpdbg_resolve_op_array_break(new_break, op_array) == SUCCESS) {
 						return SUCCESS;
 					} else {
 						return 2;
@@ -564,14 +564,14 @@ PHPDBG_API int phpdbg_resolve_opline_break(phpdbg_breakopline_t *new_break TSRML
 		return 2;
 	}
 
-	if (phpdbg_resolve_op_array_break(new_break, &func->op_array TSRMLS_CC) == FAILURE) {
+	if (phpdbg_resolve_op_array_break(new_break, &func->op_array) == FAILURE) {
 		return 2;
 	}
 
 	return SUCCESS;
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const char *method, zend_ulong opline TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const char *method, zend_ulong opline) /* {{{ */
 {
 	phpdbg_breakopline_t new_break;
 	HashTable class_breaks, *class_table;
@@ -585,7 +585,7 @@ PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const cha
 	new_break.opline_num = opline;
 	new_break.opline = 0;
 
-	switch (phpdbg_resolve_opline_break(&new_break TSRMLS_CC)) {
+	switch (phpdbg_resolve_opline_break(&new_break)) {
 		case FAILURE:
 			phpdbg_notice("breakpoint", "pending=\"pending\" id=\"%d\" method=\"%::%s\" num=\"%ld\"", "Pending breakpoint #%d at %s::%s#%ld", new_break.id, new_break.class_name, new_break.func_name, opline);
 			break;
@@ -623,7 +623,7 @@ PHPDBG_API void phpdbg_set_breakpoint_method_opline(const char *class, const cha
 	zend_hash_index_update_mem(method_table, opline, &new_break, sizeof(phpdbg_breakopline_t));
 }
 
-PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, zend_ulong opline TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, zend_ulong opline) /* {{{ */
 {
 	phpdbg_breakopline_t new_break;
 	HashTable func_breaks, *func_table;
@@ -636,7 +636,7 @@ PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, zend
 	new_break.opline_num = opline;
 	new_break.opline = 0;
 
-	switch (phpdbg_resolve_opline_break(&new_break TSRMLS_CC)) {
+	switch (phpdbg_resolve_opline_break(&new_break)) {
 		case FAILURE:
 			phpdbg_notice("breakpoint", "pending=\"pending\" id=\"%d\" function=\"%s\" num=\"%ld\"", "Pending breakpoint #%d at %s#%ld", new_break.id, new_break.func_name, opline);
 			break;
@@ -668,7 +668,7 @@ PHPDBG_API void phpdbg_set_breakpoint_function_opline(const char *function, zend
 	zend_hash_index_update_mem(func_table, opline, &new_break, sizeof(phpdbg_breakopline_t));
 }
 
-PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, zend_ulong opline TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, zend_ulong opline) /* {{{ */
 {
 	phpdbg_breakopline_t new_break;
 	HashTable file_breaks, *file_table;
@@ -681,7 +681,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, zend_ulong o
 	new_break.opline_num = opline;
 	new_break.opline = 0;
 
-	switch (phpdbg_resolve_opline_break(&new_break TSRMLS_CC)) {
+	switch (phpdbg_resolve_opline_break(&new_break)) {
 		case FAILURE:
 			phpdbg_notice("breakpoint", "pending=\"pending\" id=\"%d\" file=\"%s\" num=\"%ld\"", "Pending breakpoint #%d at %s:%ld", new_break.id, new_break.class_name, opline);
 			break;
@@ -713,7 +713,7 @@ PHPDBG_API void phpdbg_set_breakpoint_file_opline(const char *file, zend_ulong o
 	zend_hash_index_update_mem(file_table, opline, &new_break, sizeof(phpdbg_breakopline_t));
 }
 
-PHPDBG_API void phpdbg_set_breakpoint_opcode(const char *name, size_t name_len TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_opcode(const char *name, size_t name_len) /* {{{ */
 {
 	phpdbg_breakop_t new_break;
 	zend_ulong hash = zend_hash_func(name, name_len);
@@ -735,7 +735,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opcode(const char *name, size_t name_len T
 	PHPDBG_BREAK_MAPPING(new_break.id, &PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE]);
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline) /* {{{ */
 {
 	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (zend_ulong) opline)) {
 		phpdbg_breakline_t new_break;
@@ -754,7 +754,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRML
 	}
 } /* }}} */
 
-static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, const phpdbg_param_t *param, const char *expr, size_t expr_len, zend_ulong hash TSRMLS_DC) /* {{{ */
+static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, const phpdbg_param_t *param, const char *expr, size_t expr_len, zend_ulong hash) /* {{{ */
 {
 	phpdbg_breakcond_t new_break;
 	uint32_t cops = CG(compiler_options);
@@ -766,7 +766,7 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 	if (param) {
 		new_break.paramed = 1;
 		phpdbg_copy_param(
-			param, &new_break.param TSRMLS_CC);
+			param, &new_break.param);
 	} else {
 		new_break.paramed = 0;
 	}
@@ -785,7 +785,7 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 	Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
 	Z_TYPE_INFO(pv) = IS_STRING;
 
-	new_break.ops = zend_compile_string(&pv, "Conditional Breakpoint Code" TSRMLS_CC);
+	new_break.ops = zend_compile_string(&pv, "Conditional Breakpoint Code");
 
 	zval_dtor(&pv);
 
@@ -805,20 +805,20 @@ static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, co
 	CG(compiler_options) = cops;
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_expression(const char *expr, size_t expr_len TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_expression(const char *expr, size_t expr_len) /* {{{ */
 {
 	zend_ulong expr_hash = zend_inline_hash_func(expr, expr_len);
 	phpdbg_breakcond_t new_break;
 
 	if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], expr_hash)) {
 		phpdbg_create_conditional_break(
-			&new_break, NULL, expr, expr_len, expr_hash TSRMLS_CC);
+			&new_break, NULL, expr, expr_len, expr_hash);
 	} else {
 		phpdbg_error("breakpoint", "type=\"exists\" expression=\"%s\"", "Conditional break %s exists", expr);
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param) /* {{{ */
 {
 	phpdbg_breakcond_t new_break;
 	phpdbg_param_t *condition;
@@ -829,7 +829,7 @@ PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param TSRMLS_DC) 
 		hash = zend_inline_hash_func(condition->str, condition->len);
 
 		if (!zend_hash_index_exists(&PHPDBG_G(bp)[PHPDBG_BREAK_COND], hash)) {
-			phpdbg_create_conditional_break(&new_break, param, condition->str, condition->len, hash TSRMLS_CC);
+			phpdbg_create_conditional_break(&new_break, param, condition->str, condition->len, hash);
 		} else {
 			phpdbg_notice("breakpoint", "type=\"exists\" arg=\"%s\"", "Conditional break %s exists at the specified location", condition->str);
 		}
@@ -837,7 +837,7 @@ PHPDBG_API void phpdbg_set_breakpoint_at(const phpdbg_param_t *param TSRMLS_DC) 
 
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array *op_array) /* {{{ */
 {
 	HashTable *breaks;
 	phpdbg_breakbase_t *brake;
@@ -866,7 +866,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_file(zend_op_array *op_
 	return NULL;
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function *fbc) /* {{{ */
 {
 	const char *fname;
 	size_t flen;
@@ -880,7 +880,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function *f
 
 	if (ops->scope) {
 		/* find method breaks here */
-		return phpdbg_find_breakpoint_method(ops TSRMLS_CC);
+		return phpdbg_find_breakpoint_method(ops);
 	}
 
 	if (ops->function_name) {
@@ -894,7 +894,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function *f
 	return zend_hash_str_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], fname, flen);
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array *ops TSRMLS_DC) /* {{{ */
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array *ops) /* {{{ */
 {
 	HashTable *class_table;
 	phpdbg_breakbase_t *brake = NULL;
@@ -911,7 +911,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array *o
 	return brake;
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ */
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t opline) /* {{{ */
 {
 	phpdbg_breakline_t *brake;
 
@@ -922,7 +922,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_pt
 	return (phpdbg_breakbase_t *) brake;
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar opcode TSRMLS_DC) /* {{{ */
+static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar opcode) /* {{{ */
 {
 	const char *opname = phpdbg_decode_opcode(opcode);
 
@@ -933,7 +933,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(zend_uchar opcod
 	return zend_hash_index_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_OPCODE], zend_hash_func(opname, strlen(opname)));
 } /* }}} */
 
-static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
+static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend_execute_data *execute_data) /* {{{ */
 {
 	zend_function *function = execute_data->func;
 
@@ -960,8 +960,8 @@ static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend
 		} break;
 
 		case FILE_PARAM: {
-			if (param->file.line == zend_get_executed_lineno(TSRMLS_C)) {
-				const char *str = zend_get_executed_filename(TSRMLS_C);
+			if (param->file.line == zend_get_executed_lineno()) {
+				const char *str = zend_get_executed_filename();
 				size_t lengths[2] = {strlen(param->file.name), strlen(str)};
 
 				if (lengths[0] == lengths[1]) {
@@ -1005,7 +1005,7 @@ static inline zend_bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend
 	return 0;
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
+static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data) /* {{{ */
 {
 	phpdbg_breakcond_t *bp;
 	int breakpoint = FAILURE;
@@ -1021,20 +1021,20 @@ static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execut
 		}
 
 		if (bp->paramed) {
-			if (!phpdbg_find_breakpoint_param(&bp->param, execute_data TSRMLS_CC)) {
+			if (!phpdbg_find_breakpoint_param(&bp->param, execute_data)) {
 				continue;
 			}
 		}
 
 		EG(no_extensions) = 1;
 
-		zend_rebuild_symbol_table(TSRMLS_C);
+		zend_rebuild_symbol_table();
 
 		zend_try {
 			PHPDBG_G(flags) |= PHPDBG_IN_COND_BP;
-			zend_execute(bp->ops, &retval TSRMLS_CC);
+			zend_execute(bp->ops, &retval);
 #if PHP_VERSION_ID >= 50700
-			if (zend_is_true(&retval TSRMLS_CC)) {
+			if (zend_is_true(&retval)) {
 #else
 			if (zend_is_true(&retval)) {
 #endif
@@ -1056,7 +1056,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execut
 	return (breakpoint == SUCCESS) ? ((phpdbg_breakbase_t *) bp) : NULL;
 } /* }}} */
 
-PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakpoint(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
+PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakpoint(zend_execute_data *execute_data) /* {{{ */
 {
 	phpdbg_breakbase_t *base = NULL;
 
@@ -1067,28 +1067,28 @@ PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakpoint(zend_execute_data *execute
 	/* conditions cannot be executed by eval()'d code */
 	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL) &&
 		(PHPDBG_G(flags) & PHPDBG_HAS_COND_BP) &&
-		(base = phpdbg_find_conditional_breakpoint(execute_data TSRMLS_CC))) {
+		(base = phpdbg_find_conditional_breakpoint(execute_data))) {
 		goto result;
 	}
 
-	if ((PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP) && (base = phpdbg_find_breakpoint_file(&execute_data->func->op_array TSRMLS_CC))) {
+	if ((PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP) && (base = phpdbg_find_breakpoint_file(&execute_data->func->op_array))) {
 		goto result;
 	}
 
 	if (PHPDBG_G(flags) & (PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_SYM_BP)) {
 		/* check we are at the beginning of the stack */
 		if (execute_data->opline == execute_data->func->op_array.opcodes) {
-			if ((base = phpdbg_find_breakpoint_symbol(execute_data->func TSRMLS_CC))) {
+			if ((base = phpdbg_find_breakpoint_symbol(execute_data->func))) {
 				goto result;
 			}
 		}
 	}
 
-	if ((PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP) && (base = phpdbg_find_breakpoint_opline((phpdbg_opline_ptr_t) execute_data->opline TSRMLS_CC))) {
+	if ((PHPDBG_G(flags) & PHPDBG_HAS_OPLINE_BP) && (base = phpdbg_find_breakpoint_opline((phpdbg_opline_ptr_t) execute_data->opline))) {
 		goto result;
 	}
 
-	if ((PHPDBG_G(flags) & PHPDBG_HAS_OPCODE_BP) && (base = phpdbg_find_breakpoint_opcode(execute_data->opline->opcode TSRMLS_CC))) {
+	if ((PHPDBG_G(flags) & PHPDBG_HAS_OPCODE_BP) && (base = phpdbg_find_breakpoint_opcode(execute_data->opline->opcode))) {
 		goto result;
 	}
 
@@ -1103,14 +1103,14 @@ result:
 	return base;
 } /* }}} */
 
-PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num) /* {{{ */
 {
 	HashTable *table;
 	phpdbg_breakbase_t *brake;
 	zend_string *strkey;
 	zend_ulong numkey;
 
-	if ((brake = phpdbg_find_breakbase_ex(num, &table, &numkey, &strkey TSRMLS_CC))) {
+	if ((brake = phpdbg_find_breakbase_ex(num, &table, &numkey, &strkey))) {
 		int type = brake->type;
 		char *name = NULL;
 		size_t name_len = 0L;
@@ -1167,7 +1167,7 @@ PHPDBG_API void phpdbg_delete_breakpoint(zend_ulong num TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_clear_breakpoints(TSRMLS_D) /* {{{ */
+PHPDBG_API void phpdbg_clear_breakpoints(void) /* {{{ */
 {
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING]);
@@ -1186,16 +1186,16 @@ PHPDBG_API void phpdbg_clear_breakpoints(TSRMLS_D) /* {{{ */
 	PHPDBG_G(bp_count) = 0;
 } /* }}} */
 
-PHPDBG_API void phpdbg_hit_breakpoint(phpdbg_breakbase_t *brake, zend_bool output TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_hit_breakpoint(phpdbg_breakbase_t *brake, zend_bool output) /* {{{ */
 {
 	brake->hits++;
 
 	if (output) {
-		phpdbg_print_breakpoint(brake TSRMLS_CC);
+		phpdbg_print_breakpoint(brake);
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake) /* {{{ */
 {
 	if (!brake)
 		goto unknown;
@@ -1213,8 +1213,8 @@ PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* 
 			phpdbg_notice("breakpoint", "id=\"%d\" function=\"%s\" file=\"%s\" line=\"%ld\" hits=\"%lu\"", "Breakpoint #%d in %s() at %s:%u, hits: %lu",
 				((phpdbg_breaksymbol_t*)brake)->id,
 				((phpdbg_breaksymbol_t*)brake)->symbol,
-				zend_get_executed_filename(TSRMLS_C),
-				zend_get_executed_lineno(TSRMLS_C),
+				zend_get_executed_filename(),
+				zend_get_executed_lineno(),
 				((phpdbg_breakfile_t*)brake)->hits);
 		} break;
 
@@ -1222,8 +1222,8 @@ PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* 
 			phpdbg_notice("breakpoint", "id=\"%d\" opline=\"%#lx\" file=\"%s\" line=\"%ld\" hits=\"%lu\"", "Breakpoint #%d in %#lx at %s:%u, hits: %lu",
 				((phpdbg_breakline_t*)brake)->id,
 				((phpdbg_breakline_t*)brake)->opline,
-				zend_get_executed_filename(TSRMLS_C),
-				zend_get_executed_lineno(TSRMLS_C),
+				zend_get_executed_filename(),
+				zend_get_executed_lineno(),
 				((phpdbg_breakline_t*)brake)->hits);
 		} break;
 
@@ -1233,8 +1233,8 @@ PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* 
 				((phpdbg_breakopline_t*)brake)->class_name,
 				((phpdbg_breakopline_t*)brake)->func_name,
 				((phpdbg_breakopline_t*)brake)->opline_num,
-				zend_get_executed_filename(TSRMLS_C),
-				zend_get_executed_lineno(TSRMLS_C),
+				zend_get_executed_filename(),
+				zend_get_executed_lineno(),
 				((phpdbg_breakopline_t*)brake)->hits);
 		} break;
 
@@ -1243,8 +1243,8 @@ PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* 
 				((phpdbg_breakopline_t*)brake)->id,
 				((phpdbg_breakopline_t*)brake)->func_name,
 				((phpdbg_breakopline_t*)brake)->opline_num,
-				zend_get_executed_filename(TSRMLS_C),
-				zend_get_executed_lineno(TSRMLS_C),
+				zend_get_executed_filename(),
+				zend_get_executed_lineno(),
 				((phpdbg_breakopline_t*)brake)->hits);
 		} break;
 
@@ -1252,8 +1252,8 @@ PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* 
 			 phpdbg_notice("breakpoint", "id=\"%d\" num=\"%lu\" file=\"%s\" line=\"%ld\" hits=\"%lu\"", "Breakpoint #%d in #%lu at %s:%u, hits: %lu",
 				((phpdbg_breakopline_t*)brake)->id,
 				((phpdbg_breakopline_t*)brake)->opline_num,
-				zend_get_executed_filename(TSRMLS_C),
-				zend_get_executed_lineno(TSRMLS_C),
+				zend_get_executed_filename(),
+				zend_get_executed_lineno(),
 				((phpdbg_breakopline_t*)brake)->hits);
 		} break;
 
@@ -1261,8 +1261,8 @@ PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* 
 			 phpdbg_notice("breakpoint", "id=\"%d\" opcode=\"%s\" file=\"%s\" line=\"%ld\" hits=\"%lu\"", "Breakpoint #%d in %s at %s:%u, hits: %lu",
 				((phpdbg_breakop_t*)brake)->id,
 				((phpdbg_breakop_t*)brake)->name,
-				zend_get_executed_filename(TSRMLS_C),
-				zend_get_executed_lineno(TSRMLS_C),
+				zend_get_executed_filename(),
+				zend_get_executed_lineno(),
 				((phpdbg_breakop_t*)brake)->hits);
 		} break;
 
@@ -1271,8 +1271,8 @@ PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* 
 				((phpdbg_breakmethod_t*)brake)->id,
 				((phpdbg_breakmethod_t*)brake)->class_name,
 				((phpdbg_breakmethod_t*)brake)->func_name,
-				zend_get_executed_filename(TSRMLS_C),
-				zend_get_executed_lineno(TSRMLS_C),
+				zend_get_executed_filename(),
+				zend_get_executed_lineno(),
 				((phpdbg_breakmethod_t*)brake)->hits);
 		} break;
 
@@ -1281,10 +1281,10 @@ PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* 
 				char *param;
 				phpdbg_notice("breakpoint", "id=\"%d\" location=\"%s\" eval=\"%s\" file=\"%s\" line=\"%ld\" hits=\"%lu\"", "Conditional breakpoint #%d: at %s if %s at %s:%u, hits: %lu",
 					((phpdbg_breakcond_t*)brake)->id,
-					phpdbg_param_tostring(&((phpdbg_breakcond_t*)brake)->param, &param TSRMLS_CC),
+					phpdbg_param_tostring(&((phpdbg_breakcond_t*)brake)->param, &param),
 					((phpdbg_breakcond_t*)brake)->code,
-					zend_get_executed_filename(TSRMLS_C),
-					zend_get_executed_lineno(TSRMLS_C),
+					zend_get_executed_filename(),
+					zend_get_executed_lineno(),
 					((phpdbg_breakcond_t*)brake)->hits);
 				if (param)
 					free(param);
@@ -1292,8 +1292,8 @@ PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* 
 				phpdbg_notice("breakpoint", "id=\"%d\" eval=\"%s\" file=\"%s\" line=\"%ld\" hits=\"%lu\"", "Conditional breakpoint #%d: on %s == true at %s:%u, hits: %lu",
 					((phpdbg_breakcond_t*)brake)->id,
 					((phpdbg_breakcond_t*)brake)->code,
-					zend_get_executed_filename(TSRMLS_C),
-					zend_get_executed_lineno(TSRMLS_C),
+					zend_get_executed_filename(),
+					zend_get_executed_lineno(),
 					((phpdbg_breakcond_t*)brake)->hits);
 			}
 
@@ -1302,49 +1302,49 @@ PHPDBG_API void phpdbg_print_breakpoint(phpdbg_breakbase_t *brake TSRMLS_DC) /* 
 		default: {
 unknown:
 			phpdbg_notice("breakpoint", "id=\"\" file=\"%s\" line=\"%ld\" hits=\"%lu\"", "Unknown breakpoint at %s:%u",
-				zend_get_executed_filename(TSRMLS_C),
-				zend_get_executed_lineno(TSRMLS_C));
+				zend_get_executed_filename(),
+				zend_get_executed_lineno());
 		}
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_enable_breakpoint(zend_ulong id TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_enable_breakpoint(zend_ulong id) /* {{{ */
 {
-	phpdbg_breakbase_t *brake = phpdbg_find_breakbase(id TSRMLS_CC);
+	phpdbg_breakbase_t *brake = phpdbg_find_breakbase(id);
 
 	if (brake) {
 		brake->disabled = 0;
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_disable_breakpoint(zend_ulong id TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_disable_breakpoint(zend_ulong id) /* {{{ */
 {
-	phpdbg_breakbase_t *brake = phpdbg_find_breakbase(id TSRMLS_CC);
+	phpdbg_breakbase_t *brake = phpdbg_find_breakbase(id);
 
 	if (brake) {
 		brake->disabled = 1;
 	}
 } /* }}} */
 
-PHPDBG_API void phpdbg_enable_breakpoints(TSRMLS_D) /* {{{ */
+PHPDBG_API void phpdbg_enable_breakpoints(void) /* {{{ */
 {
 	PHPDBG_G(flags) |= PHPDBG_IS_BP_ENABLED;
 } /* }}} */
 
-PHPDBG_API void phpdbg_disable_breakpoints(TSRMLS_D) { /* {{{ */
+PHPDBG_API void phpdbg_disable_breakpoints(void) { /* {{{ */
 	PHPDBG_G(flags) &= ~PHPDBG_IS_BP_ENABLED;
 } /* }}} */
 
-PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase(zend_ulong id TSRMLS_DC) /* {{{ */
+PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase(zend_ulong id) /* {{{ */
 {
 	HashTable *table;
 	zend_string *strkey;
 	zend_ulong numkey;
 
-	return phpdbg_find_breakbase_ex(id, &table, &numkey, &strkey TSRMLS_CC);
+	return phpdbg_find_breakbase_ex(id, &table, &numkey, &strkey);
 } /* }}} */
 
-PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable **table, zend_ulong *numkey, zend_string **strkey TSRMLS_DC) /* {{{ */
+PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable **table, zend_ulong *numkey, zend_string **strkey) /* {{{ */
 {
 	if ((*table = zend_hash_index_find_ptr(&PHPDBG_G(bp)[PHPDBG_BREAK_MAP], id))) {
 		phpdbg_breakbase_t *brake;
@@ -1359,7 +1359,7 @@ PHPDBG_API phpdbg_breakbase_t *phpdbg_find_breakbase_ex(zend_ulong id, HashTable
 	return NULL;
 } /* }}} */
 
-PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
+PHPDBG_API void phpdbg_print_breakpoints(zend_ulong type) /* {{{ */
 {
 	phpdbg_xml("<breakpoints %r>");
 

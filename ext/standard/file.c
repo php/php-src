@@ -138,7 +138,7 @@ php_file_globals file_globals;
 /* sharing globals is *evil* */
 static int le_stream_context = FAILURE;
 
-PHPAPI int php_le_stream_context(TSRMLS_D)
+PHPAPI int php_le_stream_context(void)
 {
 	return le_stream_context;
 }
@@ -156,7 +156,7 @@ static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
 	php_stream_context_free(context);
 }
 
-static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
+static void file_globals_ctor(php_file_globals *file_globals_p)
 {
 	FG(pclose_ret) = 0;
 	FG(pclose_wait) = 0;
@@ -165,7 +165,7 @@ static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
 	FG(wrapper_errors) = NULL;
 }
 
-static void file_globals_dtor(php_file_globals *file_globals_p TSRMLS_DC)
+static void file_globals_dtor(php_file_globals *file_globals_p)
 {
 }
 
@@ -183,7 +183,7 @@ PHP_MINIT_FUNCTION(file)
 #ifdef ZTS
 	ts_allocate_id(&file_globals_id, sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
 #else
-	file_globals_ctor(&file_globals TSRMLS_CC);
+	file_globals_ctor(&file_globals);
 #endif
 
 	REGISTER_INI_ENTRIES();
@@ -327,7 +327,7 @@ PHP_MINIT_FUNCTION(file)
 PHP_MSHUTDOWN_FUNCTION(file) /* {{{ */
 {
 #ifndef ZTS
-	file_globals_dtor(&file_globals TSRMLS_CC);
+	file_globals_dtor(&file_globals);
 #endif
 	return SUCCESS;
 }
@@ -344,7 +344,7 @@ PHP_FUNCTION(flock)
 	php_stream *stream;
 	zend_long operation = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z/", &res, &operation, &wouldblock) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|z/", &res, &operation, &wouldblock) == FAILURE) {
 		return;
 	}
 
@@ -352,7 +352,7 @@ PHP_FUNCTION(flock)
 
 	act = operation & 3;
 	if (act < 1 || act > 3) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal operation argument");
+		php_error_docref(NULL, E_WARNING, "Illegal operation argument");
 		RETURN_FALSE;
 	}
 
@@ -393,7 +393,7 @@ PHP_FUNCTION(get_meta_tags)
 	memset(&md, 0, sizeof(md));
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &filename, &filename_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &filename, &filename_len, &use_include_path) == FAILURE) {
 		return;
 	}
 
@@ -408,7 +408,7 @@ PHP_FUNCTION(get_meta_tags)
 
 	tok_last = TOK_EOF;
 
-	while (!done && (tok = php_next_meta_token(&md TSRMLS_CC)) != TOK_EOF) {
+	while (!done && (tok = php_next_meta_token(&md)) != TOK_EOF) {
 		if (tok == TOK_ID) {
 			if (tok_last == TOK_OPENTAG) {
 				md.in_meta = !strcasecmp("meta", md.token_data);
@@ -533,12 +533,12 @@ PHP_FUNCTION(file_get_contents)
 	zend_string *contents;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
 		return;
 	}
 
 	if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length must be greater than or equal to zero");
+		php_error_docref(NULL, E_WARNING, "length must be greater than or equal to zero");
 		RETURN_FALSE;
 	}
 
@@ -552,13 +552,13 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	if (offset > 0 && php_stream_seek(stream, offset, SEEK_SET) < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to seek to position " ZEND_LONG_FMT " in the stream", offset);
+		php_error_docref(NULL, E_WARNING, "Failed to seek to position " ZEND_LONG_FMT " in the stream", offset);
 		php_stream_close(stream);
 		RETURN_FALSE;
 	}
 
 	if (maxlen > INT_MAX) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "maxlen truncated from %pd to %d bytes", maxlen, INT_MAX);
+		php_error_docref(NULL, E_WARNING, "maxlen truncated from %pd to %d bytes", maxlen, INT_MAX);
 		maxlen = INT_MAX;
 	}
 	if ((contents = php_stream_copy_to_mem(stream, maxlen, 0)) != NULL) {
@@ -587,7 +587,7 @@ PHP_FUNCTION(file_put_contents)
 	char mode[3] = "wb";
 	char ret_ok = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/|lr!", &filename, &filename_len, &data, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pz/|lr!", &filename, &filename_len, &data, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -603,7 +603,7 @@ PHP_FUNCTION(file_put_contents)
 		/* check to make sure we are dealing with a regular file */
 		if (php_memnstr(filename, "://", sizeof("://") - 1, filename + filename_len)) {
 			if (strncasecmp(filename, "file://", sizeof("file://") - 1)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Exclusive locks may only be set for regular files");
+				php_error_docref(NULL, E_WARNING, "Exclusive locks may only be set for regular files");
 				RETURN_FALSE;
 			}
 		}
@@ -618,7 +618,7 @@ PHP_FUNCTION(file_put_contents)
 
 	if (flags & LOCK_EX && (!php_stream_supports_lock(stream) || php_stream_lock(stream, LOCK_EX))) {
 		php_stream_close(stream);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Exclusive locks are not supported for this stream");
+		php_error_docref(NULL, E_WARNING, "Exclusive locks are not supported for this stream");
 		RETURN_FALSE;
 	}
 
@@ -633,7 +633,7 @@ PHP_FUNCTION(file_put_contents)
 				ret_ok = 0;
 			} else {
 				if (len > ZEND_LONG_MAX) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "content truncated from %zu to " ZEND_LONG_FMT " bytes", len, ZEND_LONG_MAX);
+					php_error_docref(NULL, E_WARNING, "content truncated from %zu to " ZEND_LONG_FMT " bytes", len, ZEND_LONG_MAX);
 					len = ZEND_LONG_MAX;
 				}
 				numbytes = len;
@@ -651,7 +651,7 @@ PHP_FUNCTION(file_put_contents)
 			if (Z_STRLEN_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
 				if (numbytes != Z_STRLEN_P(data)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %pl of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
+					php_error_docref(NULL, E_WARNING, "Only %pl of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
 					numbytes = -1;
 				}
 			}
@@ -668,7 +668,7 @@ PHP_FUNCTION(file_put_contents)
 						numbytes += str->len;
 						bytes_written = php_stream_write(stream, str->val, str->len);
 						if (bytes_written != str->len) {
-							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %zd bytes to %s", str->len, filename);
+							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", str->len, filename);
 							ret_ok = 0;
 							zend_string_release(str);
 							break;
@@ -683,10 +683,10 @@ PHP_FUNCTION(file_put_contents)
 			if (Z_OBJ_HT_P(data) != NULL) {
 				zval out;
 
-				if (zend_std_cast_object_tostring(data, &out, IS_STRING TSRMLS_CC) == SUCCESS) {
+				if (zend_std_cast_object_tostring(data, &out, IS_STRING) == SUCCESS) {
 					numbytes = php_stream_write(stream, Z_STRVAL(out), Z_STRLEN(out));
 					if (numbytes != Z_STRLEN(out)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %pd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
+						php_error_docref(NULL, E_WARNING, "Only %pd of %zd bytes written, possibly out of free disk space", numbytes, Z_STRLEN(out));
 						numbytes = -1;
 					}
 					zval_dtor(&out);
@@ -728,11 +728,11 @@ PHP_FUNCTION(file)
 	zend_string *target_buf;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|lr!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|lr!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'" ZEND_LONG_FMT "' flag is not supported", flags);
+		php_error_docref(NULL, E_WARNING, "'" ZEND_LONG_FMT "' flag is not supported", flags);
 		RETURN_FALSE;
 	}
 
@@ -754,7 +754,7 @@ PHP_FUNCTION(file)
 		s = target_buf->val;
 		e = target_buf->val + target_buf->len;
 
-		if (!(p = (char*)php_stream_locate_eol(stream, target_buf TSRMLS_CC))) {
+		if (!(p = (char*)php_stream_locate_eol(stream, target_buf))) {
 			p = e;
 			goto parse_eol;
 		}
@@ -811,22 +811,22 @@ PHP_FUNCTION(tempnam)
 	int fd;
 	zend_string *p;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps", &dir, &dir_len, &prefix, &prefix_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps", &dir, &dir_len, &prefix, &prefix_len) == FAILURE) {
 		return;
 	}
 
-	if (php_check_open_basedir(dir TSRMLS_CC)) {
+	if (php_check_open_basedir(dir)) {
 		RETURN_FALSE;
 	}
 
-	p = php_basename(prefix, prefix_len, NULL, 0 TSRMLS_CC);
+	p = php_basename(prefix, prefix_len, NULL, 0);
 	if (p->len > 64) {
 		p->val[63] = '\0';
 	}
 
 	RETVAL_FALSE;
 
-	if ((fd = php_open_temporary_fd_ex(dir, p->val, &opened_path, 1 TSRMLS_CC)) >= 0) {
+	if ((fd = php_open_temporary_fd_ex(dir, p->val, &opened_path, 1)) >= 0) {
 		close(fd);
 		// TODO: avoid reallocation ???
 		RETVAL_STRING(opened_path);
@@ -867,7 +867,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	php_stream *stream;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps|br", &filename, &filename_len, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps|br", &filename, &filename_len, &mode, &mode_len, &use_include_path, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -891,7 +891,7 @@ PHPAPI PHP_FUNCTION(fclose)
 	php_stream *stream;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 #else
@@ -903,7 +903,7 @@ PHPAPI PHP_FUNCTION(fclose)
 	PHP_STREAM_TO_ZVAL(stream, res);
 
 	if ((stream->flags & PHP_STREAM_FLAG_NO_FCLOSE) != 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%pd is not a valid stream resource", stream->res->handle);
+		php_error_docref(NULL, E_WARNING, "%pd is not a valid stream resource", stream->res->handle);
 		RETURN_FALSE;
 	}
 
@@ -927,7 +927,7 @@ PHP_FUNCTION(popen)
 	php_stream *stream;
 	char *posix_mode;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps", &command, &command_len, &mode, &mode_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps", &command, &command_len, &mode, &mode_len) == FAILURE) {
 		return;
 	}
 
@@ -943,7 +943,7 @@ PHP_FUNCTION(popen)
 
 	fp = VCWD_POPEN(command, posix_mode);
 	if (!fp) {
-		php_error_docref2(NULL TSRMLS_CC, command, posix_mode, E_WARNING, "%s", strerror(errno));
+		php_error_docref2(NULL, command, posix_mode, E_WARNING, "%s", strerror(errno));
 		efree(posix_mode);
 		RETURN_FALSE;
 	}
@@ -951,7 +951,7 @@ PHP_FUNCTION(popen)
 	stream = php_stream_fopen_from_pipe(fp, mode);
 
 	if (stream == NULL)	{
-		php_error_docref2(NULL TSRMLS_CC, command, mode, E_WARNING, "%s", strerror(errno));
+		php_error_docref2(NULL, command, mode, E_WARNING, "%s", strerror(errno));
 		RETVAL_FALSE;
 	} else {
 		php_stream_to_zval(stream, return_value);
@@ -968,7 +968,7 @@ PHP_FUNCTION(pclose)
 	zval *res;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -988,7 +988,7 @@ PHPAPI PHP_FUNCTION(feof)
 	zval *res;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1013,7 +1013,7 @@ PHPAPI PHP_FUNCTION(fgets)
 	size_t line_len = 0;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &res, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &res, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1027,7 +1027,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		}
 	} else if (argc > 1) {
 		if (len <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
+			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
 		}
 
@@ -1067,7 +1067,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 	int result;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1100,7 +1100,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 	char *allowed_tags=NULL;
 	size_t allowed_tags_len=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lS", &fd, &bytes, &allowed) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|lS", &fd, &bytes, &allowed) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1108,7 +1108,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	if (ZEND_NUM_ARGS() >= 2) {
 		if (bytes <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
+			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
 		}
 
@@ -1161,11 +1161,11 @@ PHP_FUNCTION(fscanf)
 	size_t len;
 	void *what;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs*", &file_handle, &format, &format_len, &args, &argc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs*", &file_handle, &format, &format_len, &args, &argc) == FAILURE) {
 		return;
 	}
 
-	what = zend_fetch_resource(file_handle TSRMLS_CC, -1, "File-Handle", &type, 2, php_file_le_stream(), php_file_le_pstream());
+	what = zend_fetch_resource(file_handle, -1, "File-Handle", &type, 2, php_file_le_stream(), php_file_le_pstream());
 
 	/* we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
 	 * with a leak if we have an invalid filehandle. This needs changing
@@ -1179,7 +1179,7 @@ PHP_FUNCTION(fscanf)
 		RETURN_FALSE;
 	}
 
-	result = php_sscanf_internal(buf, format, argc, args, 0, return_value TSRMLS_CC);
+	result = php_sscanf_internal(buf, format, argc, args, 0, return_value);
 
 	efree(buf);
 
@@ -1201,7 +1201,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 	zend_long maxlen = 0;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &res, &input, &inputlen, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &res, &input, &inputlen, &maxlen) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1233,7 +1233,7 @@ PHPAPI PHP_FUNCTION(fflush)
 	int ret;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1254,7 +1254,7 @@ PHPAPI PHP_FUNCTION(rewind)
 	zval *res;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1275,7 +1275,7 @@ PHPAPI PHP_FUNCTION(ftell)
 	zend_long ret;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1297,7 +1297,7 @@ PHPAPI PHP_FUNCTION(fseek)
 	zend_long offset, whence = SEEK_SET;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &res, &offset, &whence) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|l", &res, &offset, &whence) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1311,24 +1311,24 @@ PHPAPI PHP_FUNCTION(fseek)
 */
 
 /* DEPRECATED APIs: Use php_stream_mkdir() instead */
-PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options TSRMLS_DC)
+PHPAPI int php_mkdir_ex(const char *dir, zend_long mode, int options)
 {
 	int ret;
 
-	if (php_check_open_basedir(dir TSRMLS_CC)) {
+	if (php_check_open_basedir(dir)) {
 		return -1;
 	}
 
 	if ((ret = VCWD_MKDIR(dir, (mode_t)mode)) < 0 && (options & REPORT_ERRORS)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 	}
 
 	return ret;
 }
 
-PHPAPI int php_mkdir(const char *dir, zend_long mode TSRMLS_DC)
+PHPAPI int php_mkdir(const char *dir, zend_long mode)
 {
-	return php_mkdir_ex(dir, mode, REPORT_ERRORS TSRMLS_CC);
+	return php_mkdir_ex(dir, mode, REPORT_ERRORS);
 }
 /* }}} */
 
@@ -1343,7 +1343,7 @@ PHP_FUNCTION(mkdir)
 	zend_bool recursive = 0;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|lbr", &dir, &dir_len, &mode, &recursive, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|lbr", &dir, &dir_len, &mode, &recursive, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1362,7 +1362,7 @@ PHP_FUNCTION(rmdir)
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &dir, &dir_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|r", &dir, &dir_len, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1384,7 +1384,7 @@ PHP_FUNCTION(readfile)
 	php_stream *stream;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1414,7 +1414,7 @@ PHP_FUNCTION(umask)
 		BG(umask) = oldumask;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &mask) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &mask) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1436,7 +1436,7 @@ PHPAPI PHP_FUNCTION(fpassthru)
 	size_t size;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &res) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1457,30 +1457,30 @@ PHP_FUNCTION(rename)
 	php_stream_wrapper *wrapper;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp|r", &old_name, &old_name_len, &new_name, &new_name_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp|r", &old_name, &old_name_len, &new_name, &new_name_len, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0 TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0);
 
 	if (!wrapper || !wrapper->wops) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate stream wrapper");
+		php_error_docref(NULL, E_WARNING, "Unable to locate stream wrapper");
 		RETURN_FALSE;
 	}
 
 	if (!wrapper->wops->rename) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s wrapper does not support renaming", wrapper->wops->label ? wrapper->wops->label : "Source");
+		php_error_docref(NULL, E_WARNING, "%s wrapper does not support renaming", wrapper->wops->label ? wrapper->wops->label : "Source");
 		RETURN_FALSE;
 	}
 
-	if (wrapper != php_stream_locate_url_wrapper(new_name, NULL, 0 TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot rename a file across wrapper types");
+	if (wrapper != php_stream_locate_url_wrapper(new_name, NULL, 0)) {
+		php_error_docref(NULL, E_WARNING, "Cannot rename a file across wrapper types");
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	RETURN_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context TSRMLS_CC));
+	RETURN_BOOL(wrapper->wops->rename(wrapper, old_name, new_name, 0, context));
 }
 /* }}} */
 
@@ -1494,24 +1494,24 @@ PHP_FUNCTION(unlink)
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|r", &filename, &filename_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|r", &filename, &filename_len, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
+	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
 
 	if (!wrapper || !wrapper->wops) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate stream wrapper");
+		php_error_docref(NULL, E_WARNING, "Unable to locate stream wrapper");
 		RETURN_FALSE;
 	}
 
 	if (!wrapper->wops->unlink) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s does not allow unlinking", wrapper->wops->label ? wrapper->wops->label : "Wrapper");
+		php_error_docref(NULL, E_WARNING, "%s does not allow unlinking", wrapper->wops->label ? wrapper->wops->label : "Wrapper");
 		RETURN_FALSE;
 	}
-	RETURN_BOOL(wrapper->wops->unlink(wrapper, filename, REPORT_ERRORS, context TSRMLS_CC));
+	RETURN_BOOL(wrapper->wops->unlink(wrapper, filename, REPORT_ERRORS, context));
 }
 /* }}} */
 
@@ -1523,14 +1523,14 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 	zend_long size;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &fp, &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &fp, &size) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, fp);
 
 	if (!php_stream_truncate_supported(stream)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't truncate this stream!");
+		php_error_docref(NULL, E_WARNING, "Can't truncate this stream!");
 		RETURN_FALSE;
 	}
 
@@ -1552,7 +1552,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &fp) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &fp) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1642,17 +1642,17 @@ PHP_FUNCTION(copy)
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp|r", &source, &source_len, &target, &target_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp|r", &source, &source_len, &target, &target_len, &zcontext) == FAILURE) {
 		return;
 	}
 
-	if (php_check_open_basedir(source TSRMLS_CC)) {
+	if (php_check_open_basedir(source)) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	if (php_copy_file_ctx(source, target, 0, context TSRMLS_CC) == SUCCESS) {
+	if (php_copy_file_ctx(source, target, 0, context) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1662,23 +1662,23 @@ PHP_FUNCTION(copy)
 
 /* {{{ php_copy_file
  */
-PHPAPI int php_copy_file(const char *src, const char *dest TSRMLS_DC)
+PHPAPI int php_copy_file(const char *src, const char *dest)
 {
-	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
+	return php_copy_file_ctx(src, dest, 0, NULL);
 }
 /* }}} */
 
 /* {{{ php_copy_file_ex
  */
-PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_flg TSRMLS_DC)
+PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_flg)
 {
-	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
+	return php_copy_file_ctx(src, dest, 0, NULL);
 }
 /* }}} */
 
 /* {{{ php_copy_file_ctx
  */
-PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
+PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php_stream_context *ctx)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
@@ -1695,7 +1695,7 @@ PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php
 			return ret;
 	}
 	if (S_ISDIR(src_s.sb.st_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument to copy() function cannot be a directory");
+		php_error_docref(NULL, E_WARNING, "The first argument to copy() function cannot be a directory");
 		return FAILURE;
 	}
 
@@ -1710,7 +1710,7 @@ PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php
 			return ret;
 	}
 	if (S_ISDIR(dest_s.sb.st_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument to copy() function cannot be a directory");
+		php_error_docref(NULL, E_WARNING, "The second argument to copy() function cannot be a directory");
 		return FAILURE;
 	}
 	if (!src_s.sb.st_ino || !dest_s.sb.st_ino) {
@@ -1726,10 +1726,10 @@ no_stat:
 		char *sp, *dp;
 		int res;
 
-		if ((sp = expand_filepath(src, NULL TSRMLS_CC)) == NULL) {
+		if ((sp = expand_filepath(src, NULL)) == NULL) {
 			return ret;
 		}
-		if ((dp = expand_filepath(dest, NULL TSRMLS_CC)) == NULL) {
+		if ((dp = expand_filepath(dest, NULL)) == NULL) {
 			efree(sp);
 			goto safe_to_copy;
 		}
@@ -1778,14 +1778,14 @@ PHPAPI PHP_FUNCTION(fread)
 	zend_long len;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &res, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &res, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
 	if (len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
+		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 
@@ -1797,7 +1797,7 @@ PHPAPI PHP_FUNCTION(fread)
 }
 /* }}} */
 
-static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len, const char delimiter TSRMLS_DC) /* {{{ */
+static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len, const char delimiter) /* {{{ */
 {
 	int inc_len;
 	unsigned char last_chars[2] = { 0, 0 };
@@ -1850,7 +1850,7 @@ PHP_FUNCTION(fputcsv)
 	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
 	size_t delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra|sss",
 			&fp, &fields, &delimiter_str, &delimiter_str_len,
 			&enclosure_str, &enclosure_str_len,
 			&escape_str, &escape_str_len) == FAILURE) {
@@ -1860,10 +1860,10 @@ PHP_FUNCTION(fputcsv)
 	if (delimiter_str != NULL) {
 		/* Make sure that there is at least one character in string */
 		if (delimiter_str_len < 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
+			php_error_docref(NULL, E_WARNING, "delimiter must be a character");
 			RETURN_FALSE;
 		} else if (delimiter_str_len > 1) {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "delimiter must be a single character");
+			php_error_docref(NULL, E_NOTICE, "delimiter must be a single character");
 		}
 
 		/* use first character from string */
@@ -1872,10 +1872,10 @@ PHP_FUNCTION(fputcsv)
 
 	if (enclosure_str != NULL) {
 		if (enclosure_str_len < 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
+			php_error_docref(NULL, E_WARNING, "enclosure must be a character");
 			RETURN_FALSE;
 		} else if (enclosure_str_len > 1) {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "enclosure must be a single character");
+			php_error_docref(NULL, E_NOTICE, "enclosure must be a single character");
 		}
 		/* use first character from string */
 		enclosure = *enclosure_str;
@@ -1883,10 +1883,10 @@ PHP_FUNCTION(fputcsv)
 
 	if (escape_str != NULL) {
 		if (escape_str_len < 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
+			php_error_docref(NULL, E_WARNING, "escape must be a character");
 			RETURN_FALSE;
 		} else if (escape_str_len > 1) {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "escape must be a single character");
+			php_error_docref(NULL, E_NOTICE, "escape must be a single character");
 		}
 		/* use first character from string */
 		escape_char = *escape_str;
@@ -1894,13 +1894,13 @@ PHP_FUNCTION(fputcsv)
 
 	PHP_STREAM_TO_ZVAL(stream, fp);
 
-	ret = php_fputcsv(stream, fields, delimiter, enclosure, escape_char TSRMLS_CC);
+	ret = php_fputcsv(stream, fields, delimiter, enclosure, escape_char);
 	RETURN_LONG(ret);
 }
 /* }}} */
 
-/* {{{ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC) */
-PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC)
+/* {{{ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char) */
+PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char)
 {
 	int count, i = 0;
 	size_t ret;
@@ -1982,7 +1982,7 @@ PHP_FUNCTION(fgetcsv)
 		char *escape_str = NULL;
 		size_t escape_str_len = 0;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|zsss",
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|zsss",
 			&fd, &len_zv, &delimiter_str, &delimiter_str_len,
 			&enclosure_str, &enclosure_str_len,
 			&escape_str, &escape_str_len) == FAILURE
@@ -1993,10 +1993,10 @@ PHP_FUNCTION(fgetcsv)
 		if (delimiter_str != NULL) {
 			/* Make sure that there is at least one character in string */
 			if (delimiter_str_len < 1) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "delimiter must be a character");
+				php_error_docref(NULL, E_WARNING, "delimiter must be a character");
 				RETURN_FALSE;
 			} else if (delimiter_str_len > 1) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "delimiter must be a single character");
+				php_error_docref(NULL, E_NOTICE, "delimiter must be a single character");
 			}
 
 			/* use first character from string */
@@ -2005,10 +2005,10 @@ PHP_FUNCTION(fgetcsv)
 
 		if (enclosure_str != NULL) {
 			if (enclosure_str_len < 1) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "enclosure must be a character");
+				php_error_docref(NULL, E_WARNING, "enclosure must be a character");
 				RETURN_FALSE;
 			} else if (enclosure_str_len > 1) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "enclosure must be a single character");
+				php_error_docref(NULL, E_NOTICE, "enclosure must be a single character");
 			}
 
 			/* use first character from string */
@@ -2017,10 +2017,10 @@ PHP_FUNCTION(fgetcsv)
 
 		if (escape_str != NULL) {
 			if (escape_str_len < 1) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be character");
+				php_error_docref(NULL, E_WARNING, "escape must be character");
 				RETURN_FALSE;
 			} else if (escape_str_len > 1) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "escape must be a single character");
+				php_error_docref(NULL, E_NOTICE, "escape must be a single character");
 			}
 
 			escape = escape_str[0];
@@ -2029,7 +2029,7 @@ PHP_FUNCTION(fgetcsv)
 		if (len_zv != NULL && Z_TYPE_P(len_zv) != IS_NULL) {
 			len = zval_get_long(len_zv);
 			if (len < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
+				php_error_docref(NULL, E_WARNING, "Length parameter may not be negative");
 				RETURN_FALSE;
 			} else if (len == 0) {
 				len = -1;
@@ -2053,11 +2053,11 @@ PHP_FUNCTION(fgetcsv)
 		}
 	}
 
-	php_fgetcsv(stream, delimiter, enclosure, escape, buf_len, buf, return_value TSRMLS_CC);
+	php_fgetcsv(stream, delimiter, enclosure, escape, buf_len, buf, return_value);
 }
 /* }}} */
 
-PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value TSRMLS_DC) /* {{{ */
+PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char escape_char, size_t buf_len, char *buf, zval *return_value) /* {{{ */
 {
 	char *temp, *tptr, *bptr, *line_end, *limit;
 	size_t temp_len, line_end_len;
@@ -2072,7 +2072,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 	/* Strip trailing space from buf, saving end of line in case required for enclosure field */
 
 	bptr = buf;
-	tptr = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter TSRMLS_CC);
+	tptr = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter);
 	line_end_len = buf_len - (size_t)(tptr - buf);
 	line_end = limit = tptr;
 
@@ -2170,7 +2170,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 								bptr = buf = new_buf;
 								hunk_begin = buf;
 
-								line_end = limit = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter TSRMLS_CC);
+								line_end = limit = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter);
 								line_end_len = buf_len - (size_t)(limit - buf);
 
 								state = 0;
@@ -2296,7 +2296,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, char
 			memcpy(tptr, hunk_begin, bptr - hunk_begin);
 			tptr += (bptr - hunk_begin);
 
-			comp_end = (char *)php_fgetcsv_lookup_trailing_spaces(temp, tptr - temp, delimiter TSRMLS_CC);
+			comp_end = (char *)php_fgetcsv_lookup_trailing_spaces(temp, tptr - temp, delimiter);
 			if (*bptr == delimiter) {
 				bptr++;
 			}
@@ -2325,7 +2325,7 @@ PHP_FUNCTION(realpath)
 	char resolved_path_buff[MAXPATHLEN];
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 #else
@@ -2335,7 +2335,7 @@ PHP_FUNCTION(realpath)
 #endif
 
 	if (VCWD_REALPATH(filename, resolved_path_buff)) {
-		if (php_check_open_basedir(resolved_path_buff TSRMLS_CC)) {
+		if (php_check_open_basedir(resolved_path_buff)) {
 			RETURN_FALSE;
 		}
 
@@ -2357,7 +2357,7 @@ PHP_FUNCTION(realpath)
 
 /* {{{ php_next_meta_token
    Tokenizes an HTML file for get_meta_tags */
-php_meta_tags_token php_next_meta_token(php_meta_tags_data *md TSRMLS_DC)
+php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 {
 	int ch = 0, compliment;
 	char buff[META_DEF_BUFSIZE + 1];
@@ -2468,16 +2468,16 @@ PHP_FUNCTION(fnmatch)
 	size_t pattern_len, filename_len;
 	zend_long flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp|l", &pattern, &pattern_len, &filename, &filename_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp|l", &pattern, &pattern_len, &filename, &filename_len, &flags) == FAILURE) {
 		return;
 	}
 
 	if (filename_len >= MAXPATHLEN) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		php_error_docref(NULL, E_WARNING, "Filename exceeds the maximum allowed length of %d characters", MAXPATHLEN);
 		RETURN_FALSE;
 	}
 	if (pattern_len >= MAXPATHLEN) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Pattern exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		php_error_docref(NULL, E_WARNING, "Pattern exceeds the maximum allowed length of %d characters", MAXPATHLEN);
 		RETURN_FALSE;
 	}
 
@@ -2493,7 +2493,7 @@ PHP_FUNCTION(sys_get_temp_dir)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_STRING((char *)php_get_temporary_directory(TSRMLS_C));
+	RETURN_STRING((char *)php_get_temporary_directory());
 }
 /* }}} */
 

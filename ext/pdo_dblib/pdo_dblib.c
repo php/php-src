@@ -91,7 +91,6 @@ int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 {
 	pdo_dblib_err *einfo;
 	char *state = "HY000";
-	TSRMLS_FETCH();
 
 	if(dbproc) {
 		einfo = (pdo_dblib_err*)dbgetuserdata(dbproc);
@@ -136,7 +135,6 @@ int pdo_dblib_msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 	int severity, char *msgtext, char *srvname, char *procname, DBUSMALLINT line)
 {
 	pdo_dblib_err *einfo;
-	TSRMLS_FETCH();
 
 	if (severity) {
 		einfo = (pdo_dblib_err*)dbgetuserdata(dbproc);

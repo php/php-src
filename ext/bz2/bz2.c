@@ -135,7 +135,7 @@ struct php_bz2_stream_data_t {
 
 /* {{{ BZip2 stream implementation */
 
-static size_t php_bz2iop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static size_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 {
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 	size_t ret = 0;
@@ -158,7 +158,7 @@ static size_t php_bz2iop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	return ret;
 }
 
-static size_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static size_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count)
 {
 	size_t wrote = 0;
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
@@ -182,7 +182,7 @@ static size_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count
 	return wrote;
 }
 
-static int php_bz2iop_close(php_stream *stream, int close_handle TSRMLS_DC)
+static int php_bz2iop_close(php_stream *stream, int close_handle)
 {
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 	int ret = EOF;
@@ -200,7 +200,7 @@ static int php_bz2iop_close(php_stream *stream, int close_handle TSRMLS_DC)
 	return ret;
 }
 
-static int php_bz2iop_flush(php_stream *stream TSRMLS_DC)
+static int php_bz2iop_flush(php_stream *stream)
 {
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 	return BZ2_bzflush(self->bz_file);
@@ -219,7 +219,7 @@ php_stream_ops php_stream_bz2io_ops = {
 
 /* {{{ Bzip2 stream openers */
 PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz, 
-														const char *mode, php_stream *innerstream STREAMS_DC TSRMLS_DC)
+														const char *mode, php_stream *innerstream STREAMS_DC)
 {
 	struct php_bz2_stream_data_t *self;
 	
@@ -236,7 +236,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 											const char *mode,
 											int options,
 											char **opened_path,
-											php_stream_context *context STREAMS_DC TSRMLS_DC)
+											php_stream_context *context STREAMS_DC)
 {
 	php_stream *retstream = NULL, *stream = NULL;
 	char *path_copy = NULL;
@@ -250,12 +250,12 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	}
 
 #ifdef VIRTUAL_DIR
-	virtual_filepath_ex(path, &path_copy, NULL TSRMLS_CC);
+	virtual_filepath_ex(path, &path_copy, NULL);
 #else
 	path_copy = path;
 #endif
 
-	if (php_check_open_basedir(path_copy TSRMLS_CC)) {
+	if (php_check_open_basedir(path_copy)) {
 #ifdef VIRTUAL_DIR
 		efree(path_copy);
 #endif
@@ -301,7 +301,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	}
 	
 	if (bz_file) {
-		retstream = _php_stream_bz2open_from_BZFILE(bz_file, mode, stream STREAMS_REL_CC TSRMLS_CC);
+		retstream = _php_stream_bz2open_from_BZFILE(bz_file, mode, stream STREAMS_REL_CC);
 		if (retstream) {
 			return retstream;
 		}
@@ -341,15 +341,15 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int);
 
 static PHP_MINIT_FUNCTION(bz2)
 {
-	php_register_url_stream_wrapper("compress.bzip2", &php_stream_bzip2_wrapper TSRMLS_CC);
-	php_stream_filter_register_factory("bzip2.*", &php_bz2_filter_factory TSRMLS_CC);
+	php_register_url_stream_wrapper("compress.bzip2", &php_stream_bzip2_wrapper);
+	php_stream_filter_register_factory("bzip2.*", &php_bz2_filter_factory);
 	return SUCCESS;
 }
 
 static PHP_MSHUTDOWN_FUNCTION(bz2)
 {
-	php_unregister_url_stream_wrapper("compress.bzip2" TSRMLS_CC);
-	php_stream_filter_unregister_factory("bzip2.*" TSRMLS_CC);
+	php_unregister_url_stream_wrapper("compress.bzip2");
+	php_stream_filter_unregister_factory("bzip2.*");
 
 	return SUCCESS;
 }
@@ -373,14 +373,14 @@ static PHP_FUNCTION(bzread)
 	php_stream *stream;
 	zend_string *data;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &bz, &len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &bz, &len)) {
 		RETURN_FALSE;
 	}
 
 	php_stream_from_zval(stream, bz);
 
 	if ((len + 1) < 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length may not be negative");
+		php_error_docref(NULL, E_WARNING, "length may not be negative");
 		RETURN_FALSE;
 	}
 	data = zend_string_alloc(len, 0);
@@ -402,19 +402,19 @@ static PHP_FUNCTION(bzopen)
 	BZFILE   *bz;     /* The compressed file stream */
 	php_stream *stream = NULL;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &file, &mode, &mode_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &file, &mode, &mode_len) == FAILURE) {
 		return;
 	}
 
 	if (mode_len != 1 || (mode[0] != 'r' && mode[0] != 'w')) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%s' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.", mode);
+		php_error_docref(NULL, E_WARNING, "'%s' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.", mode);
 		RETURN_FALSE;
 	}
 
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_P(file) == IS_STRING) {
 		if (Z_STRLEN_P(file) == 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "filename cannot be empty");
+			php_error_docref(NULL, E_WARNING, "filename cannot be empty");
 			RETURN_FALSE;
 		}
 		
@@ -432,10 +432,10 @@ static PHP_FUNCTION(bzopen)
 		stream_mode_len = strlen(stream->mode);
 		
 		if (stream_mode_len != 1 && !(stream_mode_len == 2 && memchr(stream->mode, 'b', 2))) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot use stream opened in mode '%s'", stream->mode);
+			php_error_docref(NULL, E_WARNING, "cannot use stream opened in mode '%s'", stream->mode);
 			RETURN_FALSE;
 		} else if (stream_mode_len == 1 && stream->mode[0] != 'r' && stream->mode[0] != 'w' && stream->mode[0] != 'a' && stream->mode[0] != 'x') {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot use stream opened in mode '%s'", stream->mode);
+			php_error_docref(NULL, E_WARNING, "cannot use stream opened in mode '%s'", stream->mode);
 			RETURN_FALSE;
 		}
 
@@ -443,7 +443,7 @@ static PHP_FUNCTION(bzopen)
 			case 'r':
 				/* only "r" and "rb" are supported */
 				if (stream->mode[0] != mode[0] && !(stream_mode_len == 2 && stream->mode[1] != mode[0])) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot read from a stream opened in write only mode");
+					php_error_docref(NULL, E_WARNING, "cannot read from a stream opened in write only mode");
 					RETURN_FALSE;
 				}
 				break;
@@ -452,7 +452,7 @@ static PHP_FUNCTION(bzopen)
 				if (stream->mode[0] != mode[0] && !(stream_mode_len == 2 && stream->mode[1] != mode[0])
 					&& stream->mode[0] != 'a' && !(stream_mode_len == 2 && stream->mode[1] != 'a')
 					&& stream->mode[0] != 'x' && !(stream_mode_len == 2 && stream->mode[1] != 'x')) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot write to a stream opened in read only mode");
+					php_error_docref(NULL, E_WARNING, "cannot write to a stream opened in read only mode");
 					RETURN_FALSE;
 				}
 				break;
@@ -469,7 +469,7 @@ static PHP_FUNCTION(bzopen)
 
 		stream = php_stream_bz2open_from_BZFILE(bz, mode, stream);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "first parameter has to be string or file-resource");
+		php_error_docref(NULL, E_WARNING, "first parameter has to be string or file-resource");
 		RETURN_FALSE;
 	}
 
@@ -522,7 +522,7 @@ static PHP_FUNCTION(bzcompress)
 
 	argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
 		return;
 	}
 
@@ -573,7 +573,7 @@ static PHP_FUNCTION(bzdecompress)
 #endif
 	bz_stream bzs;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &source, &source_len, &small)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &small)) {
 		RETURN_FALSE;
 	}
 
@@ -624,7 +624,7 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	int           errnum;  /* Error number */
 	struct php_bz2_stream_data_t *self;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &bzp) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &bzp) == FAILURE) {
 		return;
 	}
 

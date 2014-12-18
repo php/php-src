@@ -36,7 +36,7 @@ const zend_function_entry mysqli_exception_methods[] = {
 };
 /* }}} */
 
-void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...)
+void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, ...)
 {
 	zval	sql_ex;
 	va_list arg;
@@ -47,7 +47,7 @@ void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char 
 	va_end(arg);;
 
 	if (!(MyG(report_mode) & MYSQLI_REPORT_STRICT)) {
-	 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%s/%d): %s", sqlstate, errorno, message);
+	 	php_error_docref(NULL, E_WARNING, "(%s/%d): %s", sqlstate, errorno, message);
 		efree(message);
 		return;
 	}
@@ -56,21 +56,21 @@ void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char 
 
 	if (message) {
 		zend_update_property_string(mysqli_exception_class_entry, &sql_ex, "message", sizeof("message") - 1,
-									message TSRMLS_CC);
+									message);
 	}
 
 	if (sqlstate) {
 		zend_update_property_string(mysqli_exception_class_entry, &sql_ex, "sqlstate", sizeof("sqlstate") - 1,
-									sqlstate TSRMLS_CC);
+									sqlstate);
 	} else {
 		zend_update_property_string(mysqli_exception_class_entry, &sql_ex, "sqlstate", sizeof("sqlstate") - 1,
-									"00000" TSRMLS_CC);
+									"00000");
 	}
 
 	efree(message);
-	zend_update_property_long(mysqli_exception_class_entry, &sql_ex, "code", sizeof("code") - 1, errorno TSRMLS_CC);
+	zend_update_property_long(mysqli_exception_class_entry, &sql_ex, "code", sizeof("code") - 1, errorno);
 
-	zend_throw_exception_object(&sql_ex TSRMLS_CC);
+	zend_throw_exception_object(&sql_ex);
 }
 
 /*

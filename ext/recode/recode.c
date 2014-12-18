@@ -149,25 +149,25 @@ PHP_FUNCTION(recode_string)
 	size_t req_len, str_len;
 	char *req, *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &req, &req_len, &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &req, &req_len, &str, &str_len) == FAILURE) {
 		return;
 	}
 
 	request = recode_new_request(ReSG(outer));
 
 	if (request == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot allocate request structure");
+		php_error_docref(NULL, E_WARNING, "Cannot allocate request structure");
 		RETURN_FALSE;
 	}
 
 	if (!recode_scan_request(request, req)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", req);
+		php_error_docref(NULL, E_WARNING, "Illegal recode request '%s'", req);
 		goto error_exit;
 	}
 	
 	recode_buffer_to_buffer(request, str, str_len, &r, &r_len, &r_alen);
 	if (!r) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed.");
+		php_error_docref(NULL, E_WARNING, "Recoding failed.");
 error_exit:
 		RETVAL_FALSE;
 	} else {
@@ -192,7 +192,7 @@ PHP_FUNCTION(recode_file)
 	php_stream *instream, *outstream;
 	FILE  *in_fp,  *out_fp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "srr", &req, &req_len, &input, &output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "srr", &req, &req_len, &input, &output) == FAILURE) {
 	 	return;
 	}
 
@@ -209,17 +209,17 @@ PHP_FUNCTION(recode_file)
 
 	request = recode_new_request(ReSG(outer));
 	if (request == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot allocate request structure");
+		php_error_docref(NULL, E_WARNING, "Cannot allocate request structure");
 		RETURN_FALSE;
 	}
 
 	if (!recode_scan_request(request, req)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal recode request '%s'", req);
+		php_error_docref(NULL, E_WARNING, "Illegal recode request '%s'", req);
 		goto error_exit;
 	}
 	
 	if (!recode_file_to_file(request, in_fp, out_fp)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Recoding failed.");
+		php_error_docref(NULL, E_WARNING, "Recoding failed.");
 		goto error_exit;
 	}
 

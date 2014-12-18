@@ -23,6 +23,6 @@
 
 #include "resourcebundle/resourcebundle_class.h"
 
-void resourcebundle_extract_value( zval *target, ResourceBundle_object *source TSRMLS_DC);
+void resourcebundle_extract_value( zval *target, ResourceBundle_object *source);
 
 #endif // #ifndef RESOURCEBUNDLE_CLASS_H

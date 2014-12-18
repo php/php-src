@@ -31,9 +31,8 @@ int phpdbg_exception_handler_win32(EXCEPTION_POINTERS *xp) {
 	CONTEXT *xc = xp->ContextRecord;
 
 	if(xr->ExceptionCode == EXCEPTION_ACCESS_VIOLATION) {
-		TSRMLS_FETCH();
-
-		if (phpdbg_watchpoint_segfault_handler((void *)xr->ExceptionInformation[1] TSRMLS_CC) == SUCCESS) {
+	
+		if (phpdbg_watchpoint_segfault_handler((void *)xr->ExceptionInformation[1]) == SUCCESS) {
 			return EXCEPTION_CONTINUE_EXECUTION;
 		}
 	}

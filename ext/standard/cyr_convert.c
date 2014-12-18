@@ -187,7 +187,7 @@ _cyr_mac = {
 };
 /* }}} */
 
-/* {{{ static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to TSRMLS_DC)
+/* {{{ static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to)
 * This is the function that performs real in-place conversion of the string 
 * between charsets. 
 * Parameters:
@@ -201,7 +201,7 @@ _cyr_mac = {
 *    d - x-cp866
 *    m - x-mac-cyrillic
 *****************************************************************************/
-static char * php_convert_cyr_string(unsigned char *str, size_t length, char from, char to TSRMLS_DC)
+static char * php_convert_cyr_string(unsigned char *str, size_t length, char from, char to)
 {
 	const unsigned char *from_table, *to_table;
 	unsigned char tmp;
@@ -228,7 +228,7 @@ static char * php_convert_cyr_string(unsigned char *str, size_t length, char fro
 		case 'K':
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown source charset: %c", from);
+			php_error_docref(NULL, E_WARNING, "Unknown source charset: %c", from);
 			break;
 	}
 
@@ -250,7 +250,7 @@ static char * php_convert_cyr_string(unsigned char *str, size_t length, char fro
 		case 'K':
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown destination charset: %c", to);
+			php_error_docref(NULL, E_WARNING, "Unknown destination charset: %c", to);
 			break;
 	}
 
@@ -274,13 +274,13 @@ PHP_FUNCTION(convert_cyr_string)
 	size_t input_len, fr_cs_len, to_cs_len;
 	zend_string *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
 		return;
 	}
 
 	str = zend_string_init(input, input_len, 0);
 
-	php_convert_cyr_string((unsigned char *) str->val, str->len, fr_cs[0], to_cs[0] TSRMLS_CC);
+	php_convert_cyr_string((unsigned char *) str->val, str->len, fr_cs[0], to_cs[0]);
 	RETVAL_NEW_STR(str);
 }
 /* }}} */

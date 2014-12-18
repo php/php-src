@@ -73,7 +73,7 @@
 static int le_proc_open;
 
 /* {{{ _php_array_to_envp */
-static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent TSRMLS_DC)
+static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent)
 {
 	zval *element;
 	php_process_env_t env;
@@ -186,7 +186,7 @@ static void _php_free_envp(php_process_env_t env, int is_persistent)
 /* }}} */
 
 /* {{{ proc_open_rsrc_dtor */
-static void proc_open_rsrc_dtor(zend_resource *rsrc TSRMLS_DC)
+static void proc_open_rsrc_dtor(zend_resource *rsrc)
 {
 	struct php_process_handle *proc = (struct php_process_handle*)rsrc->ptr;
 	int i;
@@ -262,7 +262,7 @@ PHP_FUNCTION(proc_terminate)
 	struct php_process_handle *proc;
 	zend_long sig_no = SIGTERM;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zproc, &sig_no) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &zproc, &sig_no) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -291,7 +291,7 @@ PHP_FUNCTION(proc_close)
 	zval *zproc;
 	struct php_process_handle *proc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zproc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zproc) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -319,7 +319,7 @@ PHP_FUNCTION(proc_get_status)
 	int running = 1, signaled = 0, stopped = 0;
 	int exitcode = -1, termsig = 0, stopsig = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zproc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zproc) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -459,7 +459,7 @@ PHP_FUNCTION(proc_open)
 	php_file_descriptor_t slave_pty = -1;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz/|s!a!a!", &command,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "saz/|s!a!a!", &command,
 				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment,
 				&other_options) == FAILURE) {
 		RETURN_FALSE;
@@ -488,7 +488,7 @@ PHP_FUNCTION(proc_open)
 	command_len = strlen(command);
 
 	if (environment) {
-		env = _php_array_to_envp(environment, is_persistent TSRMLS_CC);
+		env = _php_array_to_envp(environment, is_persistent);
 	} else {
 		memset(&env, 0, sizeof(env));
 	}
@@ -508,7 +508,7 @@ PHP_FUNCTION(proc_open)
 		zval *ztype;
 
 		if (str_index) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "descriptor spec must be an integer indexed array");
+			php_error_docref(NULL, E_WARNING, "descriptor spec must be an integer indexed array");
 			goto exit_fail;
 		}
 
@@ -528,27 +528,27 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 			descriptors[ndesc].childend = dup_fd_as_handle((int)fd);
 			if (descriptors[ndesc].childend == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to dup File-Handle for descriptor %d", nindex);
+				php_error_docref(NULL, E_WARNING, "unable to dup File-Handle for descriptor %d", nindex);
 				goto exit_fail;
 			}
 #else
 			descriptors[ndesc].childend = dup(fd);
 			if (descriptors[ndesc].childend < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to dup File-Handle for descriptor %pd - %s", nindex, strerror(errno));
+				php_error_docref(NULL, E_WARNING, "unable to dup File-Handle for descriptor %pd - %s", nindex, strerror(errno));
 				goto exit_fail;
 			}
 #endif
 			descriptors[ndesc].mode = DESC_FILE;
 
 		} else if (Z_TYPE_P(descitem) != IS_ARRAY) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Descriptor item must be either an array or a File-Handle");
+			php_error_docref(NULL, E_WARNING, "Descriptor item must be either an array or a File-Handle");
 			goto exit_fail;
 		} else {
 
 			if ((ztype = zend_hash_index_find(Z_ARRVAL_P(descitem), 0)) != NULL) {
 				convert_to_string_ex(ztype);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing handle qualifier in array");
+				php_error_docref(NULL, E_WARNING, "Missing handle qualifier in array");
 				goto exit_fail;
 			}
 
@@ -559,14 +559,14 @@ PHP_FUNCTION(proc_open)
 				if ((zmode = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
 					convert_to_string_ex(zmode);
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing mode parameter for 'pipe'");
+					php_error_docref(NULL, E_WARNING, "Missing mode parameter for 'pipe'");
 					goto exit_fail;
 				}
 
 				descriptors[ndesc].mode = DESC_PIPE;
 
 				if (0 != pipe(newpipe)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to create pipe %s", strerror(errno));
+					php_error_docref(NULL, E_WARNING, "unable to create pipe %s", strerror(errno));
 					goto exit_fail;
 				}
 
@@ -598,14 +598,14 @@ PHP_FUNCTION(proc_open)
 				if ((zfile = zend_hash_index_find(Z_ARRVAL_P(descitem), 1)) != NULL) {
 					convert_to_string_ex(zfile);
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing file name parameter for 'file'");
+					php_error_docref(NULL, E_WARNING, "Missing file name parameter for 'file'");
 					goto exit_fail;
 				}
 
 				if ((zmode = zend_hash_index_find(Z_ARRVAL_P(descitem), 2)) != NULL) {
 					convert_to_string_ex(zmode);
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing mode parameter for 'file'");
+					php_error_docref(NULL, E_WARNING, "Missing mode parameter for 'file'");
 					goto exit_fail;
 				}
 
@@ -638,7 +638,7 @@ PHP_FUNCTION(proc_open)
 					/* open things up */
 					dev_ptmx = open("/dev/ptmx", O_RDWR);
 					if (dev_ptmx == -1) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to open /dev/ptmx, errno %d", errno);
+						php_error_docref(NULL, E_WARNING, "failed to open /dev/ptmx, errno %d", errno);
 						goto exit_fail;
 					}
 					grantpt(dev_ptmx);
@@ -646,7 +646,7 @@ PHP_FUNCTION(proc_open)
 					slave_pty = open(ptsname(dev_ptmx), O_RDWR);
 
 					if (slave_pty == -1) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to open slave pty, errno %d", errno);
+						php_error_docref(NULL, E_WARNING, "failed to open slave pty, errno %d", errno);
 						goto exit_fail;
 					}
 				}
@@ -655,11 +655,11 @@ PHP_FUNCTION(proc_open)
 				descriptors[ndesc].parentend = dup(dev_ptmx);
 				descriptors[ndesc].mode_flags = O_RDWR;
 #else
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "pty pseudo terminal not supported on this system");
+				php_error_docref(NULL, E_WARNING, "pty pseudo terminal not supported on this system");
 				goto exit_fail;
 #endif
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not a valid descriptor spec/mode", Z_STRVAL_P(ztype));
+				php_error_docref(NULL, E_WARNING, "%s is not a valid descriptor spec/mode", Z_STRVAL_P(ztype));
 				goto exit_fail;
 			}
 		}
@@ -673,7 +673,7 @@ PHP_FUNCTION(proc_open)
 		char *getcwd_result;
 		getcwd_result = VCWD_GETCWD(cur_cwd, MAXPATHLEN);
 		if (!getcwd_result) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot get current directory");
+			php_error_docref(NULL, E_WARNING, "Cannot get current directory");
 			goto exit_fail;
 		}
 		cwd = cur_cwd;
@@ -738,7 +738,7 @@ PHP_FUNCTION(proc_open)
 				CloseHandle(descriptors[i].parentend);
 			}
 		}
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "CreateProcess failed, error code - %u", dw);
+		php_error_docref(NULL, E_WARNING, "CreateProcess failed, error code - %u", dw);
 		goto exit_fail;
 	}
 
@@ -787,7 +787,7 @@ PHP_FUNCTION(proc_open)
 			if (descriptors[i].parentend)
 				close(descriptors[i].parentend);
 		}
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "procve failed - %s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "procve failed - %s", strerror(errno));
 		goto exit_fail;
 	}
 #elif HAVE_FORK
@@ -856,7 +856,7 @@ PHP_FUNCTION(proc_open)
 				close(descriptors[i].parentend);
 		}
 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "fork failed - %s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "fork failed - %s", strerror(errno));
 
 		goto exit_fail;
 

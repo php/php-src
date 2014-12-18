@@ -30,59 +30,59 @@
 #include "mysqli_fe.h"
 
 #define MAP_PROPERTY_MYG_BOOL_READ(name, value) \
-static zval *name(mysqli_object *obj, zval *retval TSRMLS_DC) \
+static zval *name(mysqli_object *obj, zval *retval) \
 { \
 	ZVAL_BOOL(retval, MyG(value)); \
 	return retval; \
 } \
 
 #define MAP_PROPERTY_MYG_BOOL_WRITE(name, value) \
-static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
+static int name(mysqli_object *obj, zval *value) \
 { \
 	MyG(value) = Z_LVAL_P(value) > 0; \
 	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_READ(name, value) \
-static zval *name(mysqli_object *obj, zval *retval TSRMLS_DC) \
+static zval *name(mysqli_object *obj, zval *retval) \
 { \
 	ZVAL_LONG(retval, MyG(value)); \
 	return retval; \
 } \
 
 #define MAP_PROPERTY_MYG_LONG_WRITE(name, value) \
-static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
+static int name(mysqli_object *obj, zval *value) \
 { \
 	MyG(value) = Z_LVAL_P(value); \
 	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_READ(name, value) \
-static zval *name(mysqli_object *obj, zval *retval TSRMLS_DC) \
+static zval *name(mysqli_object *obj, zval *retval) \
 { \
 	ZVAL_STRING(retval, MyG(value)); \
 	return retval; \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_WRITE(name, value) \
-static int name(mysqli_object *obj, zval *value TSRMLS_DC) \
+static int name(mysqli_object *obj, zval *value) \
 { \
 	MyG(value) = Z_STRVAL_P(value); \
 	return SUCCESS; \
 } \
 
 /* {{{ property driver_report_write */
-static int driver_report_write(mysqli_object *obj, zval *value TSRMLS_DC)
+static int driver_report_write(mysqli_object *obj, zval *value)
 {
 	MyG(report_mode) = Z_LVAL_P(value);
 	/*FIXME*/
-	/* zend_replace_error_handling(MyG(report_mode) & MYSQLI_REPORT_STRICT ? EH_THROW : EH_NORMAL, NULL, NULL TSRMLS_CC); */
+	/* zend_replace_error_handling(MyG(report_mode) & MYSQLI_REPORT_STRICT ? EH_THROW : EH_NORMAL, NULL, NULL); */
 	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property driver_embedded_read */
-static zval *driver_embedded_read(mysqli_object *obj, zval *retval TSRMLS_DC)
+static zval *driver_embedded_read(mysqli_object *obj, zval *retval)
 {
 #ifdef HAVE_EMBEDDED_MYSQLI
 	ZVAL_BOOL(retval, 1);
@@ -94,7 +94,7 @@ static zval *driver_embedded_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 /* }}} */
 
 /* {{{ property driver_client_version_read */
-static zval *driver_client_version_read(mysqli_object *obj, zval *retval TSRMLS_DC)
+static zval *driver_client_version_read(mysqli_object *obj, zval *retval)
 {
 	ZVAL_LONG(retval, MYSQL_VERSION_ID);
 	return retval;
@@ -102,7 +102,7 @@ static zval *driver_client_version_read(mysqli_object *obj, zval *retval TSRMLS_
 /* }}} */
 
 /* {{{ property driver_client_info_read */
-static zval *driver_client_info_read(mysqli_object *obj, zval *retval TSRMLS_DC)
+static zval *driver_client_info_read(mysqli_object *obj, zval *retval)
 {
 	ZVAL_STRING(retval, (char *)mysql_get_client_info());
 	return retval;
@@ -110,7 +110,7 @@ static zval *driver_client_info_read(mysqli_object *obj, zval *retval TSRMLS_DC)
 /* }}} */
 
 /* {{{ property driver_driver_version_read */
-static zval *driver_driver_version_read(mysqli_object *obj, zval *retval TSRMLS_DC)
+static zval *driver_driver_version_read(mysqli_object *obj, zval *retval)
 {
 	ZVAL_LONG(retval, MYSQLI_VERSION_ID);
 	return retval;

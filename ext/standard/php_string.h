@@ -121,31 +121,31 @@ PHPAPI struct lconv *localeconv_r(struct lconv *out);
 PHPAPI char *php_strtoupper(char *s, size_t len);
 PHPAPI char *php_strtolower(char *s, size_t len);
 PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size_t trlen);
-PHPAPI zend_string *php_addslashes(char *str, size_t length, int should_free TSRMLS_DC);
-PHPAPI zend_string *php_addcslashes(const char *str, size_t length, int freeit, char *what, size_t wlength TSRMLS_DC);
-PHPAPI void php_stripslashes(char *str, size_t *len TSRMLS_DC);
+PHPAPI zend_string *php_addslashes(char *str, size_t length, int should_free);
+PHPAPI zend_string *php_addcslashes(const char *str, size_t length, int freeit, char *what, size_t wlength);
+PHPAPI void php_stripslashes(char *str, size_t *len);
 PHPAPI void php_stripcslashes(char *str, size_t *len);
-PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t sufflen TSRMLS_DC);
+PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t sufflen);
 PHPAPI size_t php_dirname(char *str, size_t len);
 PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len);
 PHPAPI zend_string *php_str_to_str_ex(char *haystack, size_t length, char *needle,
 		size_t needle_len, char *str, size_t str_len, int case_sensitivity, size_t *replace_count);
 PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle,
 		size_t needle_len, char *str, size_t str_len);
-PHPAPI char *php_trim(char *c, size_t len, char *what, size_t what_len, zval *return_value, int mode TSRMLS_DC);
+PHPAPI char *php_trim(char *c, size_t len, char *what, size_t what_len, zval *return_value, int mode);
 PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *state, char *allow, size_t allow_len);
 PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, char *allow, size_t allow_len, zend_bool allow_tag_spaces);
 PHPAPI size_t php_char_to_str_ex(char *str, size_t len, char from, char *to, size_t to_len, zval *result, int case_sensitivity, size_t *replace_count);
 PHPAPI size_t php_char_to_str(char *str, size_t len, char from, char *to, size_t to_len, zval *result);
-PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value TSRMLS_DC);
+PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value);
 PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit);
 
 PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end); 
 PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end); 
 
-PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC);
-PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
-PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive);
+PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
+PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
 
 #ifndef HAVE_STRERROR
 PHPAPI char *php_strerror(int errnum);

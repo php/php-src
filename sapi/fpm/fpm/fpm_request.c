@@ -104,14 +104,13 @@ void fpm_request_reading_headers() /* {{{ */
 
 void fpm_request_info() /* {{{ */
 {
-	TSRMLS_FETCH();
 	struct fpm_scoreboard_proc_s *proc;
-	char *request_uri = fpm_php_request_uri(TSRMLS_C);
-	char *request_method = fpm_php_request_method(TSRMLS_C);
-	char *script_filename = fpm_php_script_filename(TSRMLS_C);
-	char *query_string = fpm_php_query_string(TSRMLS_C);
-	char *auth_user = fpm_php_auth_user(TSRMLS_C);
-	size_t content_length = fpm_php_content_length(TSRMLS_C);
+	char *request_uri = fpm_php_request_uri();
+	char *request_method = fpm_php_request_method();
+	char *script_filename = fpm_php_script_filename();
+	char *query_string = fpm_php_query_string();
+	char *auth_user = fpm_php_auth_user();
+	size_t content_length = fpm_php_content_length();
 	struct timeval now;
 
 	fpm_clock_get(&now);
@@ -172,14 +171,14 @@ void fpm_request_executing() /* {{{ */
 }
 /* }}} */
 
-void fpm_request_end(TSRMLS_D) /* {{{ */
+void fpm_request_end(void) /* {{{ */
 {
 	struct fpm_scoreboard_proc_s *proc;
 	struct timeval now;
 #ifdef HAVE_TIMES
 	struct tms cpu;
 #endif
-	size_t memory = zend_memory_peak_usage(1 TSRMLS_CC);
+	size_t memory = zend_memory_peak_usage(1);
 
 	fpm_clock_get(&now);
 #ifdef HAVE_TIMES

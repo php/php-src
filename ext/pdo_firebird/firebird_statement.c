@@ -30,7 +30,7 @@
 
 #include <time.h>
 	
-#define RECORD_ERROR(stmt) _firebird_error(NULL, stmt,  __FILE__, __LINE__ TSRMLS_CC)
+#define RECORD_ERROR(stmt) _firebird_error(NULL, stmt,  __FILE__, __LINE__)
 
 /* free the allocated space for passing field values to the db and back */
 static void free_sqlda(XSQLDA const *sqlda) /* {{{ */
@@ -48,7 +48,7 @@ static void free_sqlda(XSQLDA const *sqlda) /* {{{ */
 /* }}} */
 	
 /* called by PDO to clean up a statement handle */
-static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static int firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	int result = 1, i;
@@ -84,7 +84,7 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 /* }}} */
 
 /* called by PDO to execute a prepared query */
-static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
@@ -153,7 +153,7 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 /* called by PDO to fetch the next row from a statement */
 static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
-	enum pdo_fetch_orientation ori, zend_long offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, zend_long offset)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
@@ -180,7 +180,7 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
 /* }}} */
 
 /* called by PDO to retrieve information about the fields being returned */
-static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
+static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	struct pdo_column_data *col = &stmt->columns[colno];
@@ -219,7 +219,7 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ 
 
 /* fetch a blob into a fetch buffer */
 static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ */
-	zend_ulong *len, ISC_QUAD *blob_id TSRMLS_DC)
+	zend_ulong *len, ISC_QUAD *blob_id)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
@@ -296,7 +296,7 @@ fetch_blob_end:
 /* }}} */
 
 static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{{ */
-	zend_ulong *len, int *caller_frees TSRMLS_DC)
+	zend_ulong *len, int *caller_frees)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	XSQLVAR const *var = &S->out_sqlda.sqlvar[colno];
@@ -400,7 +400,7 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					break;
 				case SQL_BLOB:
 					return firebird_fetch_blob(stmt,colno,ptr,len,
-						(ISC_QUAD*)var->sqldata TSRMLS_CC);
+						(ISC_QUAD*)var->sqldata);
 			}
 		}
 	}
@@ -408,7 +408,7 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 }
 /* }}} */
 
-static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param TSRMLS_DC)
+static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
@@ -447,7 +447,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param T
 }	
 
 static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, /* {{{ */
-	enum pdo_param_event event_type TSRMLS_DC)
+	enum pdo_param_event event_type)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	XSQLDA *sqlda = param->is_param ? S->in_sqlda : &S->out_sqlda;
@@ -530,7 +530,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 					zval_ptr_dtor(parameter);
 					ZVAL_STR(parameter, php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0));
 				} else {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
+					pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
 					return 0;
 				}
 			}
@@ -542,7 +542,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 					return 0;
 	
 				case SQL_BLOB:
-					return firebird_bind_blob(stmt, (ISC_QUAD*)var->sqldata, parameter TSRMLS_CC);
+					return firebird_bind_blob(stmt, (ISC_QUAD*)var->sqldata, parameter);
 			}
 							
 			/* check if a NULL should be inserted */
@@ -617,7 +617,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			zval_ptr_dtor(parameter);
 			ZVAL_NULL(parameter);
 			
-			if (firebird_stmt_get_col(stmt, param->paramno, &value, &value_len, &caller_frees TSRMLS_CC)) {
+			if (firebird_stmt_get_col(stmt, param->paramno, &value, &value_len, &caller_frees)) {
 				switch (PDO_PARAM_TYPE(param->param_type)) {
 					case PDO_PARAM_STR:
 						if (value) {
@@ -654,7 +654,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 }
 /* }}} */
 
-static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val TSRMLS_DC) /* {{{ */
+static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	
@@ -675,7 +675,7 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *v
 }
 /* }}} */
 
-static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val TSRMLS_DC) /* {{{ */
+static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	
@@ -694,7 +694,7 @@ static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval *v
 }
 /* }}} */
 
-static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	

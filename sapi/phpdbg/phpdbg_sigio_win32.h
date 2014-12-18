@@ -25,9 +25,7 @@
 #include "phpdbg_io.h"
 
 struct win32_sigio_watcher_data {
-#ifdef ZTS
-	void ***tsrm_ls;
-#endif
+	uint64_t *flags;
 	int fd;
 };
 

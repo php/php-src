@@ -86,7 +86,7 @@ static void php_ns_config(php_ns_context *ctx, char global);
  */
 
 static int
-php_ns_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
+php_ns_sapi_ub_write(const char *str, uint str_length)
 {
 	int n;
 	uint sent = 0;
@@ -111,7 +111,7 @@ php_ns_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
  */
 
 static int
-php_ns_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
+php_ns_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers)
 {
 	char *header_name, *header_content;
 	char *p;
@@ -145,7 +145,7 @@ php_ns_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct 
  */
 
 static int
-php_ns_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+php_ns_sapi_send_headers(sapi_headers_struct *sapi_headers)
 {
 	if(SG(sapi_headers).send_default_content_type) {
 		Ns_ConnSetRequiredHeaders(NSG(conn), "text/html", 0);
@@ -162,7 +162,7 @@ php_ns_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
  */
 
 static int
-php_ns_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
+php_ns_sapi_read_post(char *buf, uint count_bytes)
 {
 	uint max_read;
 	uint total_read = 0;
@@ -185,7 +185,7 @@ php_ns_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
  * the HTTP request header
  */
 	
-static char *php_ns_sapi_read_cookies(TSRMLS_D)
+static char *php_ns_sapi_read_cookies(void)
 {
 	int i;
 	char *http_cookie = NULL;
@@ -295,13 +295,13 @@ php_ns_startup(sapi_module_struct *sapi_module)
  */
 
 #define ADD_STRINGX(name, buf)										\
-	php_register_variable(name, buf, track_vars_array TSRMLS_CC)
+	php_register_variable(name, buf, track_vars_array)
 
 #define ADD_STRING(name)										\
 	ADD_STRINGX(name, buf)
 
 static void
-php_ns_sapi_register_variables(zval *track_vars_array TSRMLS_DC)
+php_ns_sapi_register_variables(zval *track_vars_array)
 {
 	int i;
 	char buf[NS_BUF_SIZE + 1];
@@ -402,7 +402,7 @@ static sapi_module_struct aolserver_sapi_module = {
  */
 
 static int
-php_ns_module_main(TSRMLS_D)
+php_ns_module_main(void)
 {
 	zend_file_handle file_handle;
 
@@ -412,11 +412,11 @@ php_ns_module_main(TSRMLS_D)
 	file_handle.opened_path = NULL;
 	
 	php_ns_config(global_context, 0);
-	if (php_request_startup(TSRMLS_C) == FAILURE) {
+	if (php_request_startup() == FAILURE) {
 		return NS_ERROR;
 	}
 	
-	php_execute_script(&file_handle TSRMLS_CC);
+	php_execute_script(&file_handle);
 	php_request_shutdown(NULL);
 
 	return NS_OK;
@@ -428,7 +428,7 @@ php_ns_module_main(TSRMLS_D)
  */
 
 static void 
-php_ns_request_ctor(TSRMLS_D)
+php_ns_request_ctor(void)
 {
 	char *server;
 	Ns_DString ds;
@@ -477,7 +477,7 @@ php_ns_request_ctor(TSRMLS_D)
  */
 
 static void
-php_ns_request_dtor(TSRMLS_D)
+php_ns_request_dtor(void)
 {
 	free(SG(request_info).path_translated);
 	if (SG(request_info).query_string)
@@ -494,17 +494,16 @@ static int
 php_ns_request_handler(void *context, Ns_Conn *conn)
 {
 	int status = NS_OK;
-	TSRMLS_FETCH();
 	
 	NSG(conn) = conn;
 	
 	SG(server_context) = global_context;
 
-	php_ns_request_ctor(TSRMLS_C);
+	php_ns_request_ctor();
 	
-	status = php_ns_module_main(TSRMLS_C);
+	status = php_ns_module_main();
 	
-	php_ns_request_dtor(TSRMLS_C);
+	php_ns_request_dtor();
 
 	return status;
 }

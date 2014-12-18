@@ -48,14 +48,14 @@
 #define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */ 
 
 #ifdef PHP_WIN32
-#define GENERATE_SEED() (((zend_long) (time(0) * GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg(TSRMLS_C))))
+#define GENERATE_SEED() (((zend_long) (time(0) * GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 #else
-#define GENERATE_SEED() (((zend_long) (time(0) * getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg(TSRMLS_C))))
+#define GENERATE_SEED() (((zend_long) (time(0) * getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
 #endif
 
-PHPAPI void php_srand(zend_long seed TSRMLS_DC);
-PHPAPI zend_long php_rand(TSRMLS_D);
-PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC);
-PHPAPI php_uint32 php_mt_rand(TSRMLS_D);
+PHPAPI void php_srand(zend_long seed);
+PHPAPI zend_long php_rand(void);
+PHPAPI void php_mt_srand(php_uint32 seed);
+PHPAPI php_uint32 php_mt_rand(void);
 
 #endif	/* PHP_RAND_H */

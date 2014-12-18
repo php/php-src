@@ -25,10 +25,10 @@
 
 #define CREDIT_LINE(module, authors) php_info_print_table_row(2, module, authors)
 
-PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
+PHPAPI void php_print_credits(int flag) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text && flag & PHP_CREDITS_FULLPAGE) {
-		php_print_info_htmlhead(TSRMLS_C);
+		php_print_info_htmlhead();
 	}
 
 	if (!sapi_module.phpinfo_as_text) {
