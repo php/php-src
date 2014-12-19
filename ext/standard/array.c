@@ -3420,10 +3420,12 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			*list++ = *p;
 		}
 		ZVAL_UNDEF(&list->val);
-		if (behavior == INTERSECT_NORMAL) {
-			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), intersect_data_compare_func);
-		} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
-			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), intersect_key_compare_func);
+		if (hash->nNumOfElements > 1) {
+			if (behavior == INTERSECT_NORMAL) {
+				zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), intersect_data_compare_func);
+			} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
+				zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), intersect_key_compare_func);
+			}
 		}
 	}
 
@@ -3838,10 +3840,12 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			*list++ = *p;
 		}
 		ZVAL_UNDEF(&list->val);
-		if (behavior == DIFF_NORMAL) {
-			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), diff_data_compare_func);
-		} else if (behavior & DIFF_ASSOC) { /* triggered also when DIFF_KEY */
-			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), diff_key_compare_func);
+		if (hash->nNumOfElements > 1) {
+			if (behavior == DIFF_NORMAL) {
+				zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), diff_data_compare_func);
+			} else if (behavior & DIFF_ASSOC) { /* triggered also when DIFF_KEY */
+				zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), diff_key_compare_func);
+			}
 		}
 	}
 
