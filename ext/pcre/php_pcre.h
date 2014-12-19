@@ -47,7 +47,7 @@ typedef struct {
 	int capture_count;
 	int name_count;
 #if HAVE_SETLOCALE
-	char *locale;
+	zend_string *locale;
 	unsigned const char *tables;
 #endif
 	int compile_options;

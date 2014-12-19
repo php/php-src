@@ -168,7 +168,7 @@ typedef struct _php_basic_globals {
 	HashTable putenv_ht;
 	zval  strtok_zval;
 	char *strtok_string;
-	char *locale_string;
+	zend_string *locale_string;
 	char *strtok_last;
 	char strtok_table[256];
 	zend_ulong strtok_len;

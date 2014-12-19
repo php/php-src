@@ -23,6 +23,7 @@
 #include "php_globals.h"
 #include "php_pcre.h"
 #include "ext/standard/info.h"
+#include "ext/standard/basic_functions.h"
 #include "zend_smart_str.h"
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
@@ -96,7 +97,9 @@ static void php_free_pcre_cache(zval *data) /* {{{ */
 	}
 #if HAVE_SETLOCALE
 	if ((void*)pce->tables) pefree((void*)pce->tables, 1);
-	pefree(pce->locale, 1);
+	if (pce->locale) {
+		zend_string_release(pce->locale);
+	}
 #endif
 	pefree(pce, 1);
 }
@@ -238,41 +241,24 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	int					 do_study = 0;
 	int					 poptions = 0;
 	unsigned const char *tables = NULL;
-#if HAVE_SETLOCALE
-	char				*locale;
-#endif
 	pcre_cache_entry	*pce;
 	pcre_cache_entry	 new_entry;
 	int					 rc;
-
-#if HAVE_SETLOCALE
-# if defined(PHP_WIN32) && defined(ZTS)
-	_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
-# endif
-	locale = setlocale(LC_CTYPE, NULL);
-#endif
 
 	/* Try to lookup the cached regex entry, and if successful, just pass
 	   back the compiled pattern, otherwise go on and compile it. */
 	pce = zend_hash_find_ptr(&PCRE_G(pcre_cache), regex);
 	if (pce) {
-		/*
-		 * We use a quick pcre_fullinfo() check to see whether cache is corrupted, and if it
-		 * is, we flush it and compile the pattern from scratch.
-		 */
-//???		int	count = 0;
-//???
-//???		if (pcre_fullinfo(pce->re, NULL, PCRE_INFO_CAPTURECOUNT, &count) == PCRE_ERROR_BADMAGIC) {
-//???			zend_hash_clean(&PCRE_G(pcre_cache));
-//???		} else {
 #if HAVE_SETLOCALE
-			if (!strcmp(pce->locale, locale)) {
+		if (pce->locale == BG(locale_string) ||
+		    (pce->locale && BG(locale_string) &&
+		     pce->locale->len == BG(locale_string)->len &&
+		     !memcmp(pce->locale->val, BG(locale_string)->val, pce->locale->len))) {
+			return pce;
+		}
+#else
+		return pce;
 #endif
-				return pce;
-#if HAVE_SETLOCALE
-			}
-#endif
-//???		}
 	}
 	
 	p = regex->val;
@@ -389,8 +375,10 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	}
 
 #if HAVE_SETLOCALE
-	if (strcmp(locale, "C"))
+	if (BG(locale_string) &&
+	    (!BG(locale_string)->len != 1 || !BG(locale_string)->val[0] != 'C')) {
 		tables = pcre_maketables();
+	}
 #endif
 
 	/* Compile pattern and display a warning if compilation failed. */
@@ -451,7 +439,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	new_entry.preg_options = poptions;
 	new_entry.compile_options = coptions;
 #if HAVE_SETLOCALE
-	new_entry.locale = pestrdup(locale, 1);
+	new_entry.locale = BG(locale_string) ? zend_string_dup(BG(locale_string), 1) : NULL;
 	new_entry.tables = tables;
 #endif
 

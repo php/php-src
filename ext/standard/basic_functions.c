@@ -3760,9 +3760,7 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 		setlocale(LC_ALL, "C");
 		setlocale(LC_CTYPE, "");
 		zend_update_current_locale();
-	}
-	if (BG(locale_string)) {
-		efree(BG(locale_string));
+		zend_string_release(BG(locale_string));
 		BG(locale_string) = NULL;
 	}
 
