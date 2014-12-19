@@ -175,9 +175,9 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 						jmp_to = &op_array->brk_cont_array[array_offset];
 						array_offset = jmp_to->parent;
 						if (--nest_levels > 0) {
-							if (opline->opcode == ZEND_BRK &&
-							    (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE ||
-							     op_array->opcodes[jmp_to->brk].opcode == ZEND_SWITCH_FREE)) {
+							if (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE ||
+							    op_array->opcodes[jmp_to->brk].opcode == ZEND_SWITCH_FREE
+							) {
 								dont_optimize = 1;
 								break;
 							}

@@ -37,6 +37,10 @@ PHP                                                                        NEWS
   . Fixed bug #68504 (--with-libmbfl configure option not present on Windows).
     (Ashesh Vashi)
 
+- Opcache:
+  . Fixed bug #67111 (Memory leak when using "continue 2" inside two foreach
+    loops). (Nikita)
+
 - OpenSSL:
   . Improved handling of OPENSSL_KEYTYPE_EC keys. (Dominic Luechinger)
 
