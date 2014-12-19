@@ -31,6 +31,10 @@ PHP                                                                        NEWS
 - Mcrypt:
   . Fixed possible read after end of buffer and use after free. (Dmitry)
 
+- Opcache:
+  . Fixed bug #67111 (Memory leak when using "continue 2" inside two foreach
+    loops). (Nikita)
+
 - Pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
     when setting SIG_DFL). (Julien)
