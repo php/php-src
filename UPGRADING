@@ -47,6 +47,10 @@ PHP X.Y UPGRADE NOTES
 	https://wiki.php.net/rfc/uniform_variable_syntax#semantic_differences_in_existing_syntax 
   . The global keyword now only accepts simple variables. See details in:
     https://wiki.php.net/rfc/uniform_variable_syntax#global_keyword_takes_only_simple_variables
+  . Added \u{xxxxxx} Unicode Codepoint Escape Syntax for double-quoted strings
+    and heredocs. While \u does not not become a syntax error, so existing
+    strings like "\u202e" will be unchanged, \u{ followed by an invalid sequence
+    will now error.
 
 - DBA
   . dba_delete() now returns false if the key was not found for the inifile
