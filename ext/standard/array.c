@@ -3979,7 +3979,70 @@ PHP_FUNCTION(array_diff_ukey)
    Returns the entries of arr1 that have values which are not present in any of the others arguments. */
 PHP_FUNCTION(array_diff)
 {
-	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_NORMAL, DIFF_COMP_DATA_INTERNAL, DIFF_COMP_KEY_INTERNAL);
+	zval *args;
+	int argc, i;
+	uint32_t num;
+	HashTable exclude;
+	zval *value;
+	zend_string *str, *key;
+	zend_long idx;
+
+	if (ZEND_NUM_ARGS() < 2) {
+		php_error_docref(NULL, E_WARNING, "at least 2 parameters are required, %d given", ZEND_NUM_ARGS());
+		return;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		return;
+	}
+
+	if (Z_TYPE(args[0]) != IS_ARRAY) {
+		php_error_docref(NULL, E_WARNING, "Argument #1 is not an array");
+		RETURN_NULL();
+	}
+
+	/* count number of elements */
+	num = 0;
+	for (i = 1; i < argc; i++) {
+		if (Z_TYPE(args[i]) != IS_ARRAY) {
+			php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+			RETURN_NULL();
+		}
+		num += zend_hash_num_elements(Z_ARRVAL(args[i]));
+	}
+
+	if (num == 0) {
+		ZVAL_COPY(return_value, &args[0]);
+		return;
+	}
+
+	/* create exclude map */
+	zend_hash_init(&exclude, num, NULL, NULL, 0);
+	for (i = 1; i < argc; i++) {
+		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(args[i]), value) {
+			str = zval_get_string(value);
+			zend_hash_add_empty_element(&exclude, str);
+			zend_string_release(str);
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	/* copy all elements of first array that are not in exclude set */
+	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL(args[0])));
+	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL(args[0]), idx, key, value) {
+		str = zval_get_string(value);
+		if (!zend_hash_exists(&exclude, str)) {
+			if (key) {
+				zval_add_ref(value);
+				zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+			} else {
+				zval_add_ref(value);
+				zend_hash_index_add_new(Z_ARRVAL_P(return_value), idx, value);
+			}
+		}
+		zend_string_release(str);
+	} ZEND_HASH_FOREACH_END();
+
+	zend_hash_destroy(&exclude);
 }
 /* }}} */
 
