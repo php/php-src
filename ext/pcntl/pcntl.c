@@ -639,9 +639,7 @@ PHP_FUNCTION(pcntl_waitpid)
 		} else {
 			zend_hash_clean(Z_ARRVAL_P(z_rusage));
 		}
-	}
 
-	if (z_rusage) {
 		memset(&rusage, 0, sizeof(struct rusage));
 		child_id = wait4((pid_t) pid, &status, options, &rusage);
 	} else {
@@ -693,9 +691,7 @@ PHP_FUNCTION(pcntl_wait)
 		} else {
 			zend_hash_clean(Z_ARRVAL_P(z_rusage));
 		}
-	}
 
-	if (z_rusage) {
 		memset(&rusage, 0, sizeof(struct rusage));
 		child_id = wait3(&status, options, &rusage);
 	} else if (options) {
