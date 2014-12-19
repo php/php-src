@@ -618,9 +618,6 @@ IC_INT_METHOD_CHAR(charDirection)
 IC_INT_METHOD_CHAR(charType)
 IC_INT_METHOD_CHAR(getCombiningClass)
 IC_INT_METHOD_CHAR(charDigitValue)
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 52
-IC_INT_METHOD_CHAR(getBidiPairedBracket)
-#endif /* ICU >= 5.2 */
 #undef IC_INT_METHOD_CHAR
 /* }}} */
 
@@ -651,6 +648,9 @@ IC_CHAR_METHOD_CHAR(charMirror)
 IC_CHAR_METHOD_CHAR(tolower)
 IC_CHAR_METHOD_CHAR(toupper)
 IC_CHAR_METHOD_CHAR(totitle)
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 52
+IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
+#endif /* ICU >= 5.2 */
 #undef IC_CHAR_METHOD_CHAR
 /* }}} */
 
