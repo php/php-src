@@ -449,8 +449,8 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 			}
 		} else if (EXPECTED(h < ht->nTableSize)) {
 			p = ht->arData + h;
-		} else if (h < ht->nTableSize * 2 &&
-				   ht->nTableSize - ht->nNumOfElements < ht->nTableSize / 2) {
+		} else if ((h >> 1) < ht->nTableSize &&
+		           (ht->nTableSize >> 1) < ht->nNumOfElements) {
 			zend_hash_packed_grow(ht);
 			p = ht->arData + h;
 		} else {
