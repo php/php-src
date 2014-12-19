@@ -4274,7 +4274,11 @@ PHP_FUNCTION(setlocale)
 
 				zend_string_release(loc);
 			}
-			RETURN_STR(zend_string_copy(BG(locale_string)));
+			if (BG(locale_string)) {
+				RETURN_STR(zend_string_copy(BG(locale_string)));
+			} else {
+				RETURN_EMPTY_STRING();
+			}
 		}
 		zend_string_release(loc);
 
