@@ -402,6 +402,8 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 		}
 	} while (0);
 
+	FREE_OP(free_op_data1);
+	FREE_OP2();
 	FREE_OP1_VAR_PTR();
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();

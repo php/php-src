@@ -12251,6 +12251,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 		}
 	} while (0);
 
+	FREE_OP(free_op_data1);
+
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -15120,6 +15122,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 		}
 	} while (0);
 
+	FREE_OP(free_op_data1);
+
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -16645,6 +16649,8 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMPVAR(int (*
 		}
 	} while (0);
 
+	FREE_OP(free_op_data1);
+	zval_ptr_dtor_nogc(free_op2);
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -18044,6 +18050,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 			}
 		}
 	} while (0);
+
+	FREE_OP(free_op_data1);
+
 
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -20224,6 +20233,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 		}
 	} while (0);
 
+	FREE_OP(free_op_data1);
+
+
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
 	ZEND_VM_INC_OPCODE();
@@ -21601,6 +21613,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(int
 			}
 		}
 	} while (0);
+
+	FREE_OP(free_op_data1);
+	zval_ptr_dtor_nogc(free_op2);
 
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -24558,6 +24573,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 			}
 		}
 	} while (0);
+
+	FREE_OP(free_op_data1);
+
 
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
@@ -28757,6 +28775,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 		}
 	} while (0);
 
+	FREE_OP(free_op_data1);
+
+
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
 	ZEND_VM_INC_OPCODE();
@@ -30792,6 +30813,9 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMPVAR(int (*b
 			}
 		}
 	} while (0);
+
+	FREE_OP(free_op_data1);
+	zval_ptr_dtor_nogc(free_op2);
 
 	/* assign_obj has two opcodes! */
 	CHECK_EXCEPTION();
