@@ -521,16 +521,18 @@ PHPAPI pcre* pcre_get_compiled_regex_ex(zend_string *regex, pcre_extra **extra, 
 /* {{{ add_offset_pair */
 static inline void add_offset_pair(zval *result, char *str, int len, int offset, char *name)
 {
-	zval match_pair;
+	zval match_pair, tmp;
 
 	array_init_size(&match_pair, 2);
 
 	/* Add (match, offset) to the return value */
-	add_next_index_stringl(&match_pair, str, len);
-	add_next_index_long(&match_pair, offset);
+	ZVAL_STRINGL(&tmp, str, len);
+	zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
+	ZVAL_LONG(&tmp, offset);
+	zend_hash_next_index_insert_new(Z_ARRVAL(match_pair), &tmp);
 	
 	if (name) {
-		zval_add_ref(&match_pair);
+		Z_ADDREF(match_pair);
 		zend_hash_str_update(Z_ARRVAL_P(result), name, strlen(name), &match_pair);
 	}
 	zend_hash_next_index_insert(Z_ARRVAL_P(result), &match_pair);
@@ -1588,7 +1590,7 @@ static PHP_FUNCTION(preg_split)
 PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
 	zend_long limit_val, zend_long flags)
 {
-	pcre_extra		*extra = NULL;		/* Holds results of studying */
+	pcre_extra		*extra = pce->extra;/* Holds results of studying */
 	pcre			*re_bump = NULL;	/* Regex instance for empty matches */
 	pcre_extra		*extra_bump = NULL;	/* Almost dummy */
 	pcre_extra		 extra_data;		/* Used locally for exec options */
@@ -1603,6 +1605,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 	int				 no_empty;			/* If NO_EMPTY flag is set */
 	int				 delim_capture; 	/* If delimiters should be captured */
 	int				 offset_capture;	/* If offsets should be captured */
+	zval			 tmp;
 	ALLOCA_FLAG(use_heap);
 
 	no_empty = flags & PREG_SPLIT_NO_EMPTY;
@@ -1664,8 +1667,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 					add_offset_pair(return_value, last_match, (int)(&subject[offsets[0]]-last_match), next_offset, NULL);
 				} else {
 					/* Add the piece to the return value */
-					add_next_index_stringl(return_value, last_match,
-								   	   &subject[offsets[0]]-last_match);
+					ZVAL_STRINGL(&tmp, last_match, &subject[offsets[0]]-last_match);
+					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 				}
 
 				/* One less left to do */
@@ -1685,9 +1688,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 						if (offset_capture) {
 							add_offset_pair(return_value, &subject[offsets[i<<1]], match_len, offsets[i<<1], NULL);
 						} else {
-							add_next_index_stringl(return_value,
-												   &subject[offsets[i<<1]],
-												   match_len);
+							ZVAL_STRINGL(&tmp, &subject[offsets[i<<1]], match_len);
+							zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 						}
 					}
 				}
@@ -1746,7 +1748,8 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, char *subject, int subjec
 			add_offset_pair(return_value, &subject[start_offset], subject_len - start_offset, start_offset, NULL);
 		} else {
 			/* Add the last piece to the return value */
-			add_next_index_stringl(return_value, last_match, subject + subject_len - last_match);
+			ZVAL_STRINGL(&tmp, last_match, subject + subject_len - last_match);
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
 	}
 
