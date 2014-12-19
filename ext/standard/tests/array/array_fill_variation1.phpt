@@ -125,7 +125,7 @@ array(2) {
 }
 -- Iteration 3 --
 
-Warning: array_fill() expects parameter 1 to be long, double given in %s/ext/standard/tests/array/array_fill_variation1.php on line 92
+Warning: array_fill() expects parameter 1 to be long, double given in %s%eext%estandard%etests%earray%earray_fill_variation1.php on line 92
 NULL
 -- Iteration 4 --
 array(2) {
