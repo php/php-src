@@ -941,6 +941,85 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 						*t++ = *s;
 					}
 					break;
+				/* UTF-8 codepoint escape, format: /\\u\{\x+\}/ */
+				case 'u':
+					{
+						/* cache where we started so we can parse after validating */
+						char *start = s + 1;
+						size_t len = 0;
+						zend_bool valid = 1;
+						unsigned long codepoint;
+
+						if (*start != '{') {
+							/* we silently let this pass to avoid breaking code
+							 * with JSON in string literals (e.g. "\"\u202e\""
+							 */
+							*t++ = '\\';
+							*t++ = 'u';
+							break;
+						} else {
+							/* on the other hand, invalid \u{blah} errors */
+							s++;
+							len++;
+							s++;
+							while (*s != '}') {
+								if (!ZEND_IS_HEX(*s)) {
+									valid = 0;
+									break;
+								} else {
+									len++;
+								}
+								s++;
+							}
+							if (*s == '}') {
+								valid = 1;
+								len++;
+							}
+						}
+
+						/* \u{} is invalid */
+						if (len <= 2) {
+							valid = 0;
+						}
+
+						if (!valid) {
+							zend_error(E_COMPILE_ERROR, "Invalid UTF-8 codepoint escape sequence");
+						}
+
+						errno = 0;
+						codepoint = strtoul(start + 1, NULL, 16);
+
+						/* per RFC 3629, UTF-8 can only represent 21 bits */
+						if (codepoint > 0x10FFFF || errno) {
+							zend_error_noreturn(E_COMPILE_ERROR, "Invalid UTF-8 codepoint escape sequence: Codepoint too large");
+						}
+
+						/* based on https://en.wikipedia.org/wiki/UTF-8#Sample_code */
+						size_t byte_len = 0;
+						if (codepoint < 0x80) {
+							byte_len = 1;
+							*t++ = codepoint;
+						} else if (codepoint <= 0x7FF) {
+							byte_len = 2;
+							*t++ = (codepoint >> 6) + 0xC0;
+							*t++ = (codepoint & 0x3F) + 0x80;
+						} else if (codepoint <= 0xFFFF) {
+							byte_len = 3;
+							*t++ = (codepoint >> 12) + 0xE0;
+							*t++ = ((codepoint >> 6) & 0x3F) + 0x80;
+							*t++ = (codepoint & 0x3F) + 0x80;
+						} else if (codepoint <= 0x10FFFF) {
+							byte_len = 4;
+							*t++ = (codepoint >> 18) + 0xF0;
+							*t++ = ((codepoint >> 12) & 0x3F) + 0x80;
+							*t++ = ((codepoint >> 6) & 0x3F) + 0x80;
+							*t++ = (codepoint & 0x3F) + 0x80;
+						}
+
+						Z_STRLEN_P(zendlval) -= 2; /* \u */
+						Z_STRLEN_P(zendlval) -= (len - byte_len);
+					}
+					break;
 				default:
 					/* check for an octal */
 					if (ZEND_IS_OCT(*s)) {
