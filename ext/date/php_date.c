@@ -1446,39 +1446,20 @@ PHP_FUNCTION(strtotime)
 	int error1, error2;
 	struct timelib_error_container *error;
 	zend_long preset_ts = 0, ts;
-
 	timelib_time *t, *now;
 	timelib_tzinfo *tzi;
 
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "s|l", &times, &time_len, &preset_ts) == FAILURE || !time_len) {
+		RETURN_FALSE;
+	}
+
 	tzi = get_timezone_info();
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "sl", &times, &time_len, &preset_ts) != FAILURE) {
-		/* We have an initial timestamp */
-		now = timelib_time_ctor();
-
-		initial_ts = emalloc(25);
-		snprintf(initial_ts, 24, "@" ZEND_LONG_FMT " UTC", preset_ts);
-		t = timelib_strtotime(initial_ts, strlen(initial_ts), NULL, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper); /* we ignore the error here, as this should never fail */
-		timelib_update_ts(t, tzi);
-		now->tz_info = tzi;
-		now->zone_type = TIMELIB_ZONETYPE_ID;
-		timelib_unixtime2local(now, t->sse);
-		timelib_time_dtor(t);
-		efree(initial_ts);
-	} else if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &times, &time_len, &preset_ts) != FAILURE) {
-		/* We have no initial timestamp */
-		now = timelib_time_ctor();
-		now->tz_info = tzi;
-		now->zone_type = TIMELIB_ZONETYPE_ID;
-		timelib_unixtime2local(now, (timelib_sll) time(NULL));
-	} else {
-		RETURN_FALSE;
-	}
-
-	if (!time_len) {
-		timelib_time_dtor(now);	
-		RETURN_FALSE;
-	}
+	now = timelib_time_ctor();
+	now->tz_info = tzi;
+	now->zone_type = TIMELIB_ZONETYPE_ID;
+	timelib_unixtime2local(now, 
+		(ZEND_NUM_ARGS() == 2) ? (timelib_sll) preset_ts : (timelib_sll) time(NULL));
 
 	t = timelib_strtotime(times, time_len, &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	error1 = error->error_count;
