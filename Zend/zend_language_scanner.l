@@ -949,6 +949,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 						size_t len = 0;
 						zend_bool valid = 1;
 						unsigned long codepoint;
+						size_t byte_len = 0;
 
 						if (*start != '{') {
 							/* we silently let this pass to avoid breaking code
@@ -995,7 +996,6 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 						}
 
 						/* based on https://en.wikipedia.org/wiki/UTF-8#Sample_code */
-						size_t byte_len = 0;
 						if (codepoint < 0x80) {
 							byte_len = 1;
 							*t++ = codepoint;
