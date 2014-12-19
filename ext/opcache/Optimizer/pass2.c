@@ -189,11 +189,10 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 					int nest_levels;
 					int dont_optimize = 0;
 
-					if (ZEND_OP2_TYPE(opline) != IS_CONST) {
-						break;
-					}
-					convert_to_long(&ZEND_OP2_LITERAL(opline));
-					nest_levels = ZEND_OP2_LITERAL(opline).value.lval;
+					ZEND_ASSERT(ZEND_OP2_TYPE(opline) == IS_CONST);
+					ZEND_ASSERT(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG);
+
+					nest_levels = Z_LVAL(ZEND_OP2_LITERAL(opline));
 
 					array_offset = ZEND_OP1(opline).opline_num;
 					while (1) {
@@ -204,8 +203,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 						jmp_to = &op_array->brk_cont_array[array_offset];
 						array_offset = jmp_to->parent;
 						if (--nest_levels > 0) {
-							if (opline->opcode == ZEND_BRK &&
-							    op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE) {
+							if (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE) {
 								dont_optimize = 1;
 								break;
 							}
