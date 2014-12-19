@@ -382,12 +382,20 @@ ZEND_BEGIN_ARG_INFO_EX(getPropertyValueName_arginfo, 0, ZEND_RETURN_VALUE, 2)
 ZEND_END_ARG_INFO();
 IC_METHOD(getPropertyValueName) {
 	zend_long property, value, nameChoice = U_LONG_PROPERTY_NAME;
+	const char *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l", &property, &value, &nameChoice) == FAILURE) {
 		return;
 	}
 
-	RETURN_STRING(u_getPropertyValueName((UProperty)property, value, (UPropertyNameChoice)nameChoice));
+	ret = u_getPropertyValueName((UProperty)property, value, (UPropertyNameChoice)nameChoice);
+	if (ret) {
+		RETURN_STRING(ret);
+	} else {
+		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+		intl_error_set_custom_msg(NULL, "Failed to get property name", 0);
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -414,7 +422,7 @@ ZEND_BEGIN_ARG_INFO_EX(foldCase_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, foldCase)
 ZEND_END_ARG_INFO();
 IC_METHOD(foldCase) {
-	UChar32 cp;
+	UChar32 cp, ret;
 	zval *zcp;
 	zend_long options = U_FOLD_CASE_DEFAULT;
 
@@ -423,14 +431,15 @@ IC_METHOD(foldCase) {
 		return;
 	}
 
+	ret = u_foldCase(cp, options);
 	if (Z_TYPE_P(zcp) == IS_STRING) {
 		char buffer[5];
 		int buffer_len = 0;
-		U8_APPEND_UNSAFE(buffer, buffer_len, u_foldCase(cp, options));
+		U8_APPEND_UNSAFE(buffer, buffer_len, ret);
 		buffer[buffer_len] = 0;
 		RETURN_STRINGL(buffer, buffer_len);
 	} else {
-		RETURN_LONG(u_foldCase(cp, options));
+		RETURN_LONG(ret);
 	}
 }
 /* }}} */
@@ -500,22 +509,15 @@ IC_METHOD(charAge) {
 }
 /* }}} */
 
-/* {{{ proto array IntlChar::getUnicodeVersion(int|string $char) */
-ZEND_BEGIN_ARG_INFO_EX(getUnicodeVersion_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, codepoint)
+/* {{{ proto array IntlChar::getUnicodeVersion() */
+ZEND_BEGIN_ARG_INFO_EX(getUnicodeVersion_arginfo, 0, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO();
 IC_METHOD(getUnicodeVersion) {
-	UChar32 cp;
-	zval *zcp;
 	UVersionInfo version;
 	int i;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
-		return;
-	}
 
-	u_charAge(cp, version);
+	u_getUnicodeVersion(version);
 	array_init(return_value);
 	for(i = 0; i < U_MAX_VERSION_LENGTH; ++i) {
 		add_next_index_long(return_value, version[i]);
@@ -648,9 +650,9 @@ IC_CHAR_METHOD_CHAR(charMirror)
 IC_CHAR_METHOD_CHAR(tolower)
 IC_CHAR_METHOD_CHAR(toupper)
 IC_CHAR_METHOD_CHAR(totitle)
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 52
+#if U_ICU_VERSION_MAJOR_NUM >= 52
 IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
-#endif /* ICU >= 5.2 */
+#endif /* ICU >= 52 */
 #undef IC_CHAR_METHOD_CHAR
 /* }}} */
 
@@ -688,9 +690,9 @@ static zend_function_entry intlchar_methods[] = {
 	IC_ME(charDirection)
 	IC_ME(isMirrored)
 	IC_ME(charMirror)
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 52
+#if U_ICU_VERSION_MAJOR_NUM >= 52
 	IC_ME(getBidiPairedBracket)
-#endif /* ICU >= 5.2 */
+#endif /* ICU >= 52 */
 	IC_ME(charType)
 	IC_ME(enumCharTypes)
 	IC_ME(getCombiningClass)
