@@ -1224,7 +1224,7 @@ PHP_FUNCTION(array_walk_recursive)
  * 0 = return boolean
  * 1 = return key
  */
-static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
+static zend_always_inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
 {
 	zval *value,				/* value to check for */
 		 *array,				/* array to check in */
