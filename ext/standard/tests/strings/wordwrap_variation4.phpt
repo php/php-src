@@ -15,7 +15,7 @@ echo "*** Testing wordwrap() : usage variations ***\n";
 // initialize all required variables
 $str = 'testing wordwrap function';
 $width = 10;
-$break = '<br />\n';
+$break = '<br>\n';
 
 // get an unset variable
 $unset_var = true;
@@ -88,23 +88,23 @@ echo "Done\n";
 
 --- Testing wordwrap() by supplying different values for 'cut' argument ---
 -- Iteration 1 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 2 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 3 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 4 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 5 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 6 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 7 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 8 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 9 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 10 --
 
 Warning: wordwrap() expects parameter 4 to be boolean, array given in %s on line %d
@@ -126,19 +126,19 @@ NULL
 Warning: wordwrap() expects parameter 4 to be boolean, array given in %s on line %d
 NULL
 -- Iteration 15 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 16 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 17 --
 
 Warning: wordwrap() expects parameter 4 to be boolean, object given in %s on line %d
 NULL
 -- Iteration 18 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 19 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 20 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- Iteration 21 --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 Done

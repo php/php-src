@@ -33,9 +33,13 @@ file_put_contents($filename, $data);
 var_dump(highlight_file($filename));
 
 
-@unlink($filename);
 echo "Done\n";
 ?>
+--CLEAN--
+<?php
+
+@unlink(dirname(__FILE__) . '/highlight_file.dat');
+
 --EXPECTF--	
 Warning: highlight_file() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
@@ -53,7 +57,7 @@ bool(false)
 </span>
 </code>bool(true)
 <code><span style="color: #000000">
-<br /><span style="color: #0000BB">&lt;?php&nbsp;<br />&nbsp;</span><span style="color: #007700">class&nbsp;</span><span style="color: #0000BB">test&nbsp;</span><span style="color: #007700">{&nbsp;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;</span><span style="color: #0000BB">$var&nbsp;</span><span style="color: #007700">=&nbsp;</span><span style="color: #0000BB">1</span><span style="color: #007700">;&nbsp;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;function&nbsp;</span><span style="color: #0000BB">foo</span><span style="color: #007700">()&nbsp;{&nbsp;echo&nbsp;</span><span style="color: #DD0000">"foo"</span><span style="color: #007700">;&nbsp;}<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;function&nbsp;</span><span style="color: #0000BB">bar</span><span style="color: #007700">()&nbsp;{&nbsp;</span><span style="color: #0000BB">var_dump</span><span style="color: #007700">(</span><span style="color: #0000BB">test</span><span style="color: #007700">::</span><span style="color: #0000BB">foo</span><span style="color: #007700">());&nbsp;}<br />&nbsp;}&nbsp;&nbsp;<br /></span><span style="color: #0000BB">?&gt;</span>
+<br><span style="color: #0000BB">&lt;?php&nbsp;<br>&nbsp;</span><span style="color: #007700">class&nbsp;</span><span style="color: #0000BB">test&nbsp;</span><span style="color: #007700">{&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;</span><span style="color: #0000BB">$var&nbsp;</span><span style="color: #007700">=&nbsp;</span><span style="color: #0000BB">1</span><span style="color: #007700">;&nbsp;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;private&nbsp;function&nbsp;</span><span style="color: #0000BB">foo</span><span style="color: #007700">()&nbsp;{&nbsp;echo&nbsp;</span><span style="color: #DD0000">"foo"</span><span style="color: #007700">;&nbsp;}<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;public&nbsp;function&nbsp;</span><span style="color: #0000BB">bar</span><span style="color: #007700">()&nbsp;{&nbsp;</span><span style="color: #0000BB">var_dump</span><span style="color: #007700">(</span><span style="color: #0000BB">test</span><span style="color: #007700">::</span><span style="color: #0000BB">foo</span><span style="color: #007700">());&nbsp;}<br>&nbsp;}&nbsp;&nbsp;<br></span><span style="color: #0000BB">?&gt;</span>
 </span>
 </code>bool(true)
 Done

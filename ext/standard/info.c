@@ -35,7 +35,7 @@
 #include "zend_extensions.h"
 #include "zend_highlight.h"
 #ifdef HAVE_SYS_UTSNAME_H
-#include <sys/utsname.h>
+# include <sys/utsname.h>
 #endif
 
 
@@ -148,7 +148,7 @@ PHPAPI void php_info_print_module(zend_module_entry *zend_module TSRMLS_DC) /* {
 {
 	if (zend_module->info_func || zend_module->version) {
 		if (!sapi_module.phpinfo_as_text) {
-			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", zend_module->name, zend_module->name);
+			php_info_printf("<h2 id=\"module_%s\">%s</h2>\n", zend_module->name, zend_module->name);
 		} else {
 			php_info_print_table_start();
 			php_info_print_table_header(1, zend_module->name);
@@ -668,12 +668,17 @@ PHPAPI char *php_get_uname(char mode)
  */
 PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 {
-	php_info_print("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"DTD/xhtml1-transitional.dtd\">\n");
-	php_info_print("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
+	php_info_print("<!DOCTYPE html>\n");
+	php_info_print("<html>");
 	php_info_print("<head>\n");
+
+	/* Here should be used ini.default_charset value, but I am not a C programmer
+	    and really don't know how to do it. ~Kubo2  */
+	php_info_print("<meta charset=\"utf-8\">\n");
+
 	php_info_print_style(TSRMLS_C);
 	php_info_print("<title>phpinfo()</title>");
-	php_info_print("<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW,NOARCHIVE\" />");
+	php_info_print("<meta name=\"robots\" content=\"noindex,nofollow,noarchive\">");
 	php_info_print("</head>\n");
 	php_info_print("<body><div class=\"center\">\n");
 }
@@ -720,12 +725,14 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	        the_time = time(NULL);
 	        ta = php_localtime_r(&the_time, &tmbuf);
 
-            php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
-	        if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
-		        php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
-	        } else {
-		        php_info_print(PHP_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
-			}
+			php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
+				if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
+					php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP easter-egg logo\">");
+				} else {
+					php_info_print(PHP_LOGO_DATA_URI "\" alt=\"PHP logo\">");
+				}
+			php_info_print("</a>");
+
 		}
 
 		if (!sapi_module.phpinfo_as_text) {
@@ -828,10 +835,10 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_box_start(0);
 		if (!sapi_module.phpinfo_as_text) {
 			php_info_print("<a href=\"http://www.zend.com/\"><img border=\"0\" src=\"");
-			php_info_print(ZEND_LOGO_DATA_URI "\" alt=\"Zend logo\" /></a>\n");
+			php_info_print(ZEND_LOGO_DATA_URI "\" alt=\"Zend logo\"></a>\n");
 		}
 		php_info_print("This program makes use of the Zend Scripting Language Engine:");
-		php_info_print(!sapi_module.phpinfo_as_text?"<br />":"\n");
+		php_info_print( !sapi_module.phpinfo_as_text? "<br>" : "\n" );
 		if (sapi_module.phpinfo_as_text) {
 			php_info_print(zend_version);
 		} else {
@@ -1016,7 +1023,7 @@ PHPAPI void php_info_print_box_end(void) /* {{{ */
 PHPAPI void php_info_print_hr(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
-		php_info_print("<hr />\n");
+		php_info_print("<hr>\n");
 	} else {
 		php_info_print("\n\n _______________________________________________________________________\n\n");
 	}

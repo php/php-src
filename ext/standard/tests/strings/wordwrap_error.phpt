@@ -17,7 +17,7 @@ var_dump( wordwrap() );
 echo "\n-- Testing wordwrap() function with more than expected no. of arguments --\n";
 $str = 'testing wordwrap function';
 $width = 10;
-$break = '<br />\n';
+$break = '<br>\n';
 $cut = true;
 $extra_arg = "extra_arg";
 
@@ -66,13 +66,13 @@ NULL
 
 -- Testing wordwrap() function with negative/zero value for width argument --
 -- width = 0 & cut = false --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- width = 0 & cut = true --
 
 Warning: wordwrap(): Can't force cut when width is zero in %s on line %d
 bool(false)
 -- width = -10 & cut = false --
-string(39) "testing<br />\nwordwrap<br />\nfunction"
+string(%d) "testing<br>\nwordwrap<br>\nfunction"
 -- width = -10 & cut = true --
-string(223) "<br />\nt<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\n<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\n<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
+string(%d) "<br>\nt<br>\ne<br>\ns<br>\nt<br>\ni<br>\nn<br>\ng<br>\n<br>\nw<br>\no<br>\nr<br>\nd<br>\nw<br>\nr<br>\na<br>\np<br>\n<br>\nf<br>\nu<br>\nn<br>\nc<br>\nt<br>\ni<br>\no<br>\nn"
 Done

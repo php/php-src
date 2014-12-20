@@ -55,8 +55,8 @@ string(%d) "No syntax errors detected in %s006.test.php
 "
 string(%d) "No input file specified.
 "
-string(%d) "<br />
-<b>Parse error</b>: %s expecting %s{%s in <b>%s006.test.php</b> on line <b>5</b><br />
+string(%d) "<br>
+<b>Parse error</b>: %s expecting %s{%s in <b>%s006.test.php</b> on line <b>5</b><br>
 Errors parsing %s006.test.php
 "
 Done

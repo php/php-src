@@ -45,7 +45,7 @@ function Namespace_End_Handler($parser, $prefix) {
 }
 
 function DefaultHandler( $parser, $data ) {
-   print( 'DefaultHandler Called<br/>' );
+   print( 'DefaultHandler Called<br>' );
 }
 ?>
 --EXPECT--

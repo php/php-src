@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 18 Dec 2014, PHP 5.6.4
 
 - Core:
+  . phpinfo() + error messages: migration from xhtml to HTML — Living Standard.
+    (Kubo2)
   . Fixed bug #68091 (Some Zend headers lack appropriate extern "C" blocks).
     (Adam)
   . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
