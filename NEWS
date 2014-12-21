@@ -31,6 +31,7 @@
   . Fixed bug #55415 (php_info produces invalid anchor names). (Kalle, Johannes)
   . Added ?? operator. (Andrea)
   . Added \u{xxxxx} Unicode Codepoint Escape Syntax. (Andrea)
+  . Fixed oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values

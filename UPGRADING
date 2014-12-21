@@ -72,6 +72,7 @@ PHP X.Y UPGRADE NOTES
   . Closure::call() method added
   . Added \u{xxxxxx} Unicode Codepoint Escape Syntax for double-quoted strings
     and heredocs.
+  . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
 
 - Standard
   . intdiv() function for integer division added.
