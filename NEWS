@@ -71,7 +71,7 @@
     statements option). (peter dot wolanin at acquia dot com)
 
 - Reflection
-  . Fixed inheritance chain of Reflector interface (Tjerk)
+  . Fixed inheritance chain of Reflector interface. (Tjerk)
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
