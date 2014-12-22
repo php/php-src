@@ -32,13 +32,8 @@
 #	define TSRM_API
 #endif
 
-#ifdef _WIN64
-typedef __int64 tsrm_intptr_t;
-typedef unsigned __int64 tsrm_uintptr_t;
-#else
-typedef long tsrm_intptr_t;
-typedef unsigned long tsrm_uintptr_t;
-#endif
+typedef intptr_t tsrm_intptr_t;
+typedef uintptr_t tsrm_uintptr_t;
 
 /* Only compile multi-threading functions if we're in ZTS mode */
 #ifdef ZTS
