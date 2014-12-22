@@ -883,12 +883,11 @@ send_array:
 		zend_vm_stack_extend_call_frame(&EX(call), 0, zend_hash_num_elements(ht));
 
 		if (opline->op1_type != IS_CONST && opline->op1_type != IS_TMP_VAR && Z_IMMUTABLE_P(args)) {
-			uint32_t i;
 			int separate = 0;
 
 			/* check if any of arguments are going to be passed by reference */
-			for (i = 0; i < zend_hash_num_elements(ht); i++) {
-				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, i)) {
+			for (arg_num = 0; arg_num < zend_hash_num_elements(ht); arg_num) {
+				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num + 1)) {
 					separate = 1;
 					break;
 				}
