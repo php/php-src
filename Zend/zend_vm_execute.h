@@ -886,7 +886,7 @@ send_array:
 			int separate = 0;
 
 			/* check if any of arguments are going to be passed by reference */
-			for (arg_num = 0; arg_num < zend_hash_num_elements(ht); arg_num) {
+			for (arg_num = 0; arg_num < zend_hash_num_elements(ht); arg_num++) {
 				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num + 1)) {
 					separate = 1;
 					break;
