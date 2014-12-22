@@ -3884,6 +3884,11 @@ void zend_compile_params(zend_ast *ast) /* {{{ */
 	/* These are assigned at the end to avoid unitialized memory in case of an error */
 	op_array->num_args = list->children;
 	op_array->arg_info = arg_infos;
+
+	/* Don't count the variadic argument */
+	if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+		op_array->num_args--;
+	}		
 }
 /* }}} */
 

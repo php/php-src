@@ -261,9 +261,14 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	 * go through all the parameters of the function and not just those present in the
 	 * prototype. */
 	num_args = proto->common.num_args;
-	if ((proto->common.fn_flags & ZEND_ACC_VARIADIC)
-		&& fe->common.num_args > proto->common.num_args) {
-		num_args = fe->common.num_args;
+	if (proto->common.fn_flags & ZEND_ACC_VARIADIC) {
+		num_args++;
+        if (fe->common.num_args >= proto->common.num_args) {
+			num_args = fe->common.num_args;
+			if (fe->common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+		}
 	}
 
 	for (i = 0; i < num_args; i++) {
@@ -273,7 +278,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		if (i < proto->common.num_args) {
 			proto_arg_info = &proto->common.arg_info[i];
 		} else {
-			proto_arg_info = &proto->common.arg_info[proto->common.num_args-1];
+			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
 		}
 
 		if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
@@ -380,11 +385,15 @@ static zend_string *zend_get_function_declaration(zend_function *fptr) /* {{{ */
 	smart_str_appendc(&str, '(');
 
 	if (fptr->common.arg_info) {
-		uint32_t i, required;
+		uint32_t i, num_args, required;
 		zend_arg_info *arg_info = fptr->common.arg_info;
 
 		required = fptr->common.required_num_args;
-		for (i = 0; i < fptr->common.num_args;) {
+		num_args = fptr->common.num_args;
+		if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
+			num_args++;
+		}
+		for (i = 0; i < num_args;) {
 			if (arg_info->class_name) {
 				const char *class_name;
 				size_t class_name_len;
@@ -486,7 +495,7 @@ static zend_string *zend_get_function_declaration(zend_function *fptr) /* {{{ */
 				}
 			}
 
-			if (++i < fptr->common.num_args) {
+			if (++i < num_args) {
 				smart_str_appends(&str, ", ");
 			}
 			arg_info++;

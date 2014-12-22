@@ -2206,6 +2206,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 			if (ptr->arg_info[ptr->num_args].is_variadic) {
 				internal_function->fn_flags |= ZEND_ACC_VARIADIC;
+				/* Don't count the variadic argument */
+				internal_function->num_args--;
 			}
 		} else {
 			internal_function->arg_info = NULL;

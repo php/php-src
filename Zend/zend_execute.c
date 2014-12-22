@@ -622,7 +622,7 @@ static void zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, z
 	if (EXPECTED(arg_num <= zf->internal_function.num_args)) {
 		cur_arg_info = &zf->internal_function.arg_info[arg_num-1];
 	} else if (zf->internal_function.fn_flags & ZEND_ACC_VARIADIC) {
-		cur_arg_info = &zf->internal_function.arg_info[zf->internal_function.num_args-1];
+		cur_arg_info = &zf->internal_function.arg_info[zf->internal_function.num_args];
 	} else {
 		return;
 	}
@@ -671,7 +671,7 @@ static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg,
 	if (EXPECTED(arg_num <= zf->common.num_args)) {
 		cur_arg_info = &zf->common.arg_info[arg_num-1];
 	} else if (zf->common.fn_flags & ZEND_ACC_VARIADIC) {
-		cur_arg_info = &zf->common.arg_info[zf->common.num_args-1];
+		cur_arg_info = &zf->common.arg_info[zf->common.num_args];
 	} else {
 		return;
 	}
@@ -720,7 +720,7 @@ static inline int zend_verify_missing_arg_type(zend_function *zf, uint32_t arg_n
 	if (EXPECTED(arg_num <= zf->common.num_args)) {
 		cur_arg_info = &zf->common.arg_info[arg_num-1];
 	} else if (zf->common.fn_flags & ZEND_ACC_VARIADIC) {
-		cur_arg_info = &zf->common.arg_info[zf->common.num_args-1];
+		cur_arg_info = &zf->common.arg_info[zf->common.num_args];
 	} else {
 		return 1;
 	}
@@ -1626,9 +1626,6 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 
 	/* Handle arguments */
 	first_extra_arg = op_array->num_args;
-	if (UNEXPECTED((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0)) {
-		first_extra_arg--;
-	}
 	num_args = EX_NUM_ARGS();
 	if (UNEXPECTED(num_args > first_extra_arg)) {
 		zval *end, *src, *dst;
@@ -1721,9 +1718,6 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 		
 		/* Handle arguments */
 		first_extra_arg = op_array->num_args;
-		if (UNEXPECTED((op_array->fn_flags & ZEND_ACC_VARIADIC) != 0)) {
-			first_extra_arg--;
-		}
 		num_args = EX_NUM_ARGS();
 		if (UNEXPECTED(num_args > first_extra_arg)) {
 			zval *end, *src, *dst;

@@ -368,7 +368,12 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array);
 	}
 	if (op_array->arg_info) {
-		for (i=0; i<op_array->num_args; i++) {
+		uint32_t num_args = op_array->num_args;
+
+		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+			num_args++;
+		}
+		for (i = 0; i < num_args; i++) {
 			zend_string_release(op_array->arg_info[i].name);
 			if (op_array->arg_info[i].class_name) {
 				zend_string_release(op_array->arg_info[i].class_name);

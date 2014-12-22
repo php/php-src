@@ -51,6 +51,7 @@ PHP X.Y UPGRADE NOTES
     and heredocs means that \u{ followed by an invalid sequence will now error.
     However, \u without a following { is unaffected, so "\u202e" won't error and
     will work the same as before.
+  . zend_function.common.num_args don't include the variadic argument anymore.
 
 - DBA
   . dba_delete() now returns false if the key was not found for the inifile

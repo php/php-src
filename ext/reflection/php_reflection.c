@@ -758,15 +758,19 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 static void _function_parameter_string(string *str, zend_function *fptr, char* indent)
 {
 	struct _zend_arg_info *arg_info = fptr->common.arg_info;
-	uint32_t i, required = fptr->common.required_num_args;
+	uint32_t i, num_args, required = fptr->common.required_num_args;
 
 	if (!arg_info) {
 		return;
 	}
 
+	num_args = fptr->common.num_args;
+	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
+		num_args++;
+	}
 	string_printf(str, "\n");
-	string_printf(str, "%s- Parameters [%d] {\n", indent, fptr->common.num_args);
-	for (i = 0; i < fptr->common.num_args; i++) {
+	string_printf(str, "%s- Parameters [%d] {\n", indent, num_args);
+	for (i = 0; i < num_args; i++) {
 		string_printf(str, "%s  ", indent);
 		_parameter_string(str, fptr, arg_info, i, required, indent);
 		string_write(str, "\n", sizeof("\n")-1);
@@ -2019,11 +2023,17 @@ ZEND_METHOD(reflection_function, getNumberOfParameters)
 {
 	reflection_object *intern;
 	zend_function *fptr;
+	uint32_t num_args;
 
 	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	RETURN_LONG(fptr->common.num_args);
+	num_args = fptr->common.num_args;
+	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
+		num_args++;
+	}
+
+	RETURN_LONG(num_args);
 }
 /* }}} */
 
@@ -2047,16 +2057,20 @@ ZEND_METHOD(reflection_function, getParameters)
 {
 	reflection_object *intern;
 	zend_function *fptr;
-	uint32_t i;
+	uint32_t i, num_args;
 	struct _zend_arg_info *arg_info;
 
 	METHOD_NOTSTATIC(reflection_function_abstract_ptr);
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	arg_info= fptr->common.arg_info;
+	num_args = fptr->common.num_args;
+	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
+		num_args++;
+	}
 
 	array_init(return_value);
-	for (i = 0; i < fptr->common.num_args; i++) {
+	for (i = 0; i < num_args; i++) {
 		zval parameter;
 
 		reflection_parameter_factory(_copy_function(fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, arg_info, i, fptr->common.required_num_args, &parameter);
@@ -2135,6 +2149,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	zend_function *fptr;
 	struct _zend_arg_info *arg_info;
 	int position;
+	uint32_t num_args;
 	zend_class_entry *ce = NULL;
 	zend_bool is_closure = 0;
 	zend_bool is_invoke = 0;
@@ -2235,9 +2250,13 @@ ZEND_METHOD(reflection_parameter, __construct)
 
 	/* Now, search for the parameter */
 	arg_info = fptr->common.arg_info;
+	num_args = fptr->common.num_args;
+	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
+		num_args++;
+	}
 	if (Z_TYPE_P(parameter) == IS_LONG) {
 		position= (int)Z_LVAL_P(parameter);
-		if (position < 0 || (uint32_t)position >= fptr->common.num_args) {
+		if (position < 0 || (uint32_t)position >= num_args) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
 					zend_string_release(fptr->common.function_name);
@@ -2256,7 +2275,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		position= -1;
 		convert_to_string_ex(parameter);
 		if (!is_invoke && fptr->type == ZEND_INTERNAL_FUNCTION) {
-			for (i = 0; i < fptr->common.num_args; i++) {
+			for (i = 0; i < num_args; i++) {
 				if (arg_info[i].name) {
 					if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, Z_STRVAL_P(parameter)) == 0) {
 						position= i;
@@ -2266,7 +2285,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				}
 			}
 		} else {
-			for (i = 0; i < fptr->common.num_args; i++) {
+			for (i = 0; i < num_args; i++) {
 				if (arg_info[i].name) {
 					if (strcmp(arg_info[i].name->val, Z_STRVAL_P(parameter)) == 0) {
 						position= i;

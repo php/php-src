@@ -361,11 +361,15 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 		}
 
 		if (arg_info) {
-			uint32_t i, required = closure->func.common.required_num_args;
+			uint32_t i, num_args, required = closure->func.common.required_num_args;
 
 			array_init(&val);
 
-			for (i = 0; i < closure->func.common.num_args; i++) {
+			num_args = closure->func.common.num_args;
+			if (closure->func.common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+			for (i = 0; i < num_args; i++) {
 				zend_string *name;
 				zval info;
 				if (arg_info->name) {
