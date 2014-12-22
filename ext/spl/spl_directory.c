@@ -616,7 +616,7 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_tem
 		if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
 			ZVAL_STRINGL(&tmp, intern->_path, intern->_path_len);
 		} else {
-			ZVAL_BOOL(&tmp, 0);
+			ZVAL_FALSE(&tmp);
 		}
 		zend_symtable_update(rv, pnstr, &tmp);
 		zend_string_release(pnstr);

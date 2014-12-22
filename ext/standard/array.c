@@ -1250,7 +1250,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 		zval res;					/* comparison result */
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 			ZVAL_DEREF(entry);
-			is_identical_function(&res, value, entry);
+			fast_is_identical_function(&res, value, entry);
 			if (Z_TYPE(res) == IS_TRUE) {
 				if (behavior == 0) {
 					RETURN_TRUE;

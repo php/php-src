@@ -393,7 +393,7 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 		case IS_TRUE:
 			break;
 		case IS_NULL:
-			ZVAL_BOOL(op, 0);
+			ZVAL_FALSE(op);
 			break;
 		case IS_RESOURCE: {
 				zend_long l = (Z_RES_HANDLE_P(op) ? 1 : 0);
@@ -414,9 +414,9 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 
 				if (str->len == 0
 					|| (str->len == 1 && str->val[0] == '0')) {
-					ZVAL_BOOL(op, 0);
+					ZVAL_FALSE(op);
 				} else {
-					ZVAL_BOOL(op, 1);
+					ZVAL_TRUE(op);
 				}
 				zend_string_release(str);
 			}
@@ -436,7 +436,7 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 				if (Z_TYPE(dst) == IS_FALSE || Z_TYPE(dst) == IS_TRUE) {
 					ZVAL_COPY_VALUE(op, &dst);
 				} else {
-					ZVAL_BOOL(op, 1);
+					ZVAL_TRUE(op);
 				}
 				break;
 			}
@@ -1045,7 +1045,7 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			case TYPE_PAIR(IS_LONG, IS_LONG):
 				if (Z_LVAL_P(op2) == 0) {
 					zend_error(E_WARNING, "Division by zero");
-					ZVAL_BOOL(result, 0);
+					ZVAL_FALSE(result);
 					return FAILURE;			/* division by zero */
 				} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_LONG_MIN) {
 					/* Prevent overflow error/crash */
@@ -1062,7 +1062,7 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			case TYPE_PAIR(IS_DOUBLE, IS_LONG):
 				if (Z_LVAL_P(op2) == 0) {
 					zend_error(E_WARNING, "Division by zero");
-					ZVAL_BOOL(result, 0);
+					ZVAL_FALSE(result);
 					return FAILURE;			/* division by zero */
 				}
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) / (double)Z_LVAL_P(op2));
@@ -1071,7 +1071,7 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			case TYPE_PAIR(IS_LONG, IS_DOUBLE):
 				if (Z_DVAL_P(op2) == 0) {
 					zend_error(E_WARNING, "Division by zero");
-					ZVAL_BOOL(result, 0);
+					ZVAL_FALSE(result);
 					return FAILURE;			/* division by zero */
 				}
 				ZVAL_DOUBLE(result, (double)Z_LVAL_P(op1) / Z_DVAL_P(op2));
@@ -1080,7 +1080,7 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
 				if (Z_DVAL_P(op2) == 0) {
 					zend_error(E_WARNING, "Division by zero");
-					ZVAL_BOOL(result, 0);
+					ZVAL_FALSE(result);
 					return FAILURE;			/* division by zero */
 				}
 				ZVAL_DOUBLE(result, Z_DVAL_P(op1) / Z_DVAL_P(op2));
@@ -1143,7 +1143,7 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
 
 	if (op2_lval == 0) {
 		zend_error(E_WARNING, "Division by zero");
-		ZVAL_BOOL(result, 0);
+		ZVAL_FALSE(result);
 		return FAILURE;			/* modulus by zero */
 	}
 
@@ -1961,14 +1961,14 @@ static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
 ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		ZVAL_BOOL(result, 0);
+		ZVAL_FALSE(result);
 		return SUCCESS;
 	}
 	switch (Z_TYPE_P(op1)) {
 		case IS_NULL:
 		case IS_FALSE:
 		case IS_TRUE:
-			ZVAL_BOOL(result, 1);
+			ZVAL_TRUE(result);
 			break;
 		case IS_LONG:
 			ZVAL_BOOL(result, Z_LVAL_P(op1) == Z_LVAL_P(op2));
@@ -1981,7 +1981,7 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			break;
 		case IS_STRING:
 			if (Z_STR_P(op1) == Z_STR_P(op2)) {
-				ZVAL_BOOL(result, 1);
+				ZVAL_TRUE(result);
 			} else {
 				ZVAL_BOOL(result, (Z_STRLEN_P(op1) == Z_STRLEN_P(op2))
 					&& (!memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1))));
@@ -1995,11 +1995,11 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			if (Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2)) {
 				ZVAL_BOOL(result, Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			} else {
-				ZVAL_BOOL(result, 0);
+				ZVAL_FALSE(result);
 			}
 			break;
 		default:
-			ZVAL_BOOL(result, 0);
+			ZVAL_FALSE(result);
 			return FAILURE;
 	}
 	return SUCCESS;

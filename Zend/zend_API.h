@@ -610,8 +610,8 @@ END_EXTERN_C()
 #define RETVAL_RES(r)			 		ZVAL_RES(return_value, r)
 #define RETVAL_OBJ(r)			 		ZVAL_OBJ(return_value, r)
 #define RETVAL_ZVAL(zv, copy, dtor)		ZVAL_ZVAL(return_value, zv, copy, dtor)
-#define RETVAL_FALSE  					ZVAL_BOOL(return_value, 0)
-#define RETVAL_TRUE   					ZVAL_BOOL(return_value, 1)
+#define RETVAL_FALSE  					ZVAL_FALSE(return_value)
+#define RETVAL_TRUE   					ZVAL_TRUE(return_value)
 
 #define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
 #define RETURN_NULL() 					{ RETVAL_NULL(); return;}

@@ -864,7 +864,7 @@ static zend_always_inline int fast_mod_function(zval *result, zval *op1, zval *o
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
 				zend_error(E_WARNING, "Division by zero");
-				ZVAL_BOOL(result, 0);
+				ZVAL_FALSE(result);
 				return FAILURE;
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
@@ -1043,7 +1043,7 @@ static zend_always_inline void fast_is_smaller_or_equal_function(zval *result, z
 static zend_always_inline void fast_is_identical_function(zval *result, zval *op1, zval *op2)
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		ZVAL_BOOL(result, 0);
+		ZVAL_FALSE(result);
 		return;
 	}
 	is_identical_function(result, op1, op2);
@@ -1052,7 +1052,7 @@ static zend_always_inline void fast_is_identical_function(zval *result, zval *op
 static zend_always_inline void fast_is_not_identical_function(zval *result, zval *op1, zval *op2)
 {
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		ZVAL_BOOL(result, 1);
+		ZVAL_TRUE(result);
 		return;
 	}
 	is_identical_function(result, op1, op2);

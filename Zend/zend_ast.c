@@ -262,14 +262,14 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *s
 				ZVAL_BOOL(result, zend_is_true(&op2));
 				zval_dtor(&op2);
 			} else {
-				ZVAL_BOOL(result, 0);
+				ZVAL_FALSE(result);
 			}
 			zval_dtor(&op1);
 			break;
 		case ZEND_AST_OR:
 			zend_ast_evaluate(&op1, ast->child[0], scope);
 			if (zend_is_true(&op1)) {
-				ZVAL_BOOL(result, 1);
+				ZVAL_TRUE(result);
 			} else {
 				zend_ast_evaluate(&op2, ast->child[1], scope);
 				ZVAL_BOOL(result, zend_is_true(&op2));
