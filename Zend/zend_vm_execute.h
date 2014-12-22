@@ -535,9 +535,10 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		if (fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 			uint32_t i;
+			uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 			zval *p = ZEND_CALL_ARG(call, 1);
 
-			for (i = 0; i < ZEND_CALL_NUM_ARGS(call); ++i) {
+			for (i = 0; i < num_args; ++i) {
 				zend_verify_internal_arg_type(fbc, i + 1, p);
 				p++;
 			}

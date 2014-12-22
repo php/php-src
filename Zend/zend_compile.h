@@ -832,9 +832,6 @@ int zend_add_literal(zend_op_array *op_array, zval *zv);
 
 static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
-	if (UNEXPECTED(zf->common.arg_info == NULL)) {
-		return 0;
-	}
 	arg_num--;
 	if (UNEXPECTED(arg_num >= zf->common.num_args)) {
 		if (EXPECTED((zf->common.fn_flags & ZEND_ACC_VARIADIC) == 0)) {
