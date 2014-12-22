@@ -1224,12 +1224,11 @@ PHP_FUNCTION(array_walk_recursive)
  * 0 = return boolean
  * 1 = return key
  */
-static zend_always_inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
+static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
 {
 	zval *value,				/* value to check for */
 		 *array,				/* array to check in */
-		 *entry,				/* pointer to array entry */
-		  res;					/* comparison result */
+		 *entry;				/* pointer to array entry */
 	zend_ulong num_idx;
 	zend_string *str_idx;
 	zend_bool strict = 0;		/* strict comparison or not */
@@ -1248,6 +1247,7 @@ static zend_always_inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, in
 #endif
 
 	if (strict) {
+		zval res;					/* comparison result */
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 			ZVAL_DEREF(entry);
 			is_identical_function(&res, value, entry);
@@ -1266,7 +1266,7 @@ static zend_always_inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, in
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
-			if (fast_equal_check_function(&res, value, entry)) {
+			if (fast_equal_check_function(value, entry)) {
 				if (behavior == 0) {
 					RETURN_TRUE;
 				} else {

@@ -467,7 +467,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		case IS_RESOURCE: {
 			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
-			int len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, Z_RES_HANDLE_P(op));
+			int len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
 			ZVAL_NEW_STR(op, zend_string_init(buf, len, 0));
 			break;
 		}
@@ -742,7 +742,7 @@ try_again:
 			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
 			int len;
 
-			len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, Z_RES_HANDLE_P(op));
+			len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
 			return zend_string_init(buf, len, 0);
 		}
 		case IS_LONG: {
@@ -1815,7 +1815,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 					ZVAL_LONG(result, 0);
 					return SUCCESS;
 				}
-				zendi_smart_strcmp(result, op1, op2);
+				ZVAL_LONG(result, zendi_smart_strcmp(op1, op2));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_NULL, IS_STRING):
@@ -2539,15 +2539,15 @@ ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3) /* {{{ *
 }
 /* }}} */
 
-ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
+ZEND_API zend_long zendi_smart_strcmp(zval *s1, zval *s2) /* {{{ */
 {
 	int ret1, ret2;
 	int oflow1, oflow2;
 	zend_long lval1 = 0, lval2 = 0;
 	double dval1 = 0.0, dval2 = 0.0;
 
-	if ((ret1=is_numeric_string_ex(Z_STRVAL_P(s1), Z_STRLEN_P(s1), &lval1, &dval1, 0, &oflow1)) &&
-		(ret2=is_numeric_string_ex(Z_STRVAL_P(s2), Z_STRLEN_P(s2), &lval2, &dval2, 0, &oflow2))) {
+	if ((ret1 = is_numeric_string_ex(Z_STRVAL_P(s1), Z_STRLEN_P(s1), &lval1, &dval1, 0, &oflow1)) &&
+		(ret2 = is_numeric_string_ex(Z_STRVAL_P(s2), Z_STRLEN_P(s2), &lval2, &dval2, 0, &oflow2))) {
 #if ZEND_ULONG_MAX == 0xFFFFFFFF
 		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
 			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
@@ -2559,18 +2559,16 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
 			 * double comparison may have resulted in crucial accuracy lost */
 			goto string_cmp;
 		}
-		if ((ret1==IS_DOUBLE) || (ret2==IS_DOUBLE)) {
-			if (ret1!=IS_DOUBLE) {
+		if ((ret1 == IS_DOUBLE) || (ret2 == IS_DOUBLE)) {
+			if (ret1 != IS_DOUBLE) {
 				if (oflow2) {
 					/* 2nd operand is integer > LONG_MAX (oflow2==1) or < LONG_MIN (-1) */
-					ZVAL_LONG(result, -1 * oflow2);
-					return;
+					return -1 * oflow2;
 				}
 				dval1 = (double) lval1;
-			} else if (ret2!=IS_DOUBLE) {
+			} else if (ret2 != IS_DOUBLE) {
 				if (oflow1) {
-					ZVAL_LONG(result, oflow1);
-					return;
+					return oflow1;
 				}
 				dval2 = (double) lval2;
 			} else if (dval1 == dval2 && !zend_finite(dval1)) {
@@ -2578,15 +2576,16 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
 				 * so a numeric comparison would be inaccurate */
 				goto string_cmp;
 			}
-			Z_DVAL_P(result) = dval1 - dval2;
-			ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL_P(result)));
+			dval1 = dval1 - dval2;
+			return ZEND_NORMALIZE_BOOL(dval1);
 		} else { /* they both have to be long's */
-			ZVAL_LONG(result, lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0));
+			return lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0);
 		}
 	} else {
+		int strcmp_ret;
 string_cmp:
-		Z_LVAL_P(result) = zend_binary_strcmp(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2));
-		ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_LVAL_P(result)));
+		strcmp_ret = zend_binary_strcmp(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2));
+		return ZEND_NORMALIZE_BOOL(strcmp_ret);
 	}
 }
 /* }}} */

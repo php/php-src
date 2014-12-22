@@ -337,7 +337,7 @@ ZEND_API int zend_binary_strncasecmp(const char *s1, size_t len1, const char *s2
 ZEND_API int zend_binary_strcasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2);
 ZEND_API int zend_binary_strncasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
 
-ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
+ZEND_API zend_long zendi_smart_strcmp(zval *s1, zval *s2);
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2);
 ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2);
 ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2);
@@ -878,8 +878,9 @@ static zend_always_inline int fast_mod_function(zval *result, zval *op1, zval *o
 	return mod_function(result, op1, op2);
 }
 
-static zend_always_inline int fast_equal_check_function(zval *result, zval *op1, zval *op2)
+static zend_always_inline int fast_equal_check_function(zval *op1, zval *op2)
 {
+	zval result;
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			return Z_LVAL_P(op1) == Z_LVAL_P(op2);
@@ -903,13 +904,12 @@ static zend_always_inline int fast_equal_check_function(zval *result, zval *op1,
 					return memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0;
 				}
 			} else {
-				zendi_smart_strcmp(result, op1, op2);
-				return Z_LVAL_P(result) == 0;
+				return zendi_smart_strcmp(op1, op2) == 0;
 			}
 		}
 	}
-	compare_function(result, op1, op2);
-	return Z_LVAL_P(result) == 0;
+	compare_function(&result, op1, op2);
+	return Z_LVAL(result) == 0;
 }
 
 static zend_always_inline void fast_equal_function(zval *result, zval *op1, zval *op2)
@@ -944,8 +944,7 @@ static zend_always_inline void fast_equal_function(zval *result, zval *op1, zval
 					return;
 				}
 			} else {
-				zendi_smart_strcmp(result, op1, op2);
-				ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
+				ZVAL_BOOL(result, zendi_smart_strcmp(op1, op2) == 0);
 				return;
 			}
 		}
@@ -986,8 +985,7 @@ static zend_always_inline void fast_not_equal_function(zval *result, zval *op1, 
 					return;
 				}
 			} else {
-				zendi_smart_strcmp(result, op1, op2);
-				ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
+				ZVAL_BOOL(result, zendi_smart_strcmp(op1, op2) != 0);
 				return;
 			}
 		}
