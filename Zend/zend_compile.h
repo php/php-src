@@ -835,13 +835,14 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 	if (UNEXPECTED(zf->common.arg_info == NULL)) {
 		return 0;
 	}
-	if (UNEXPECTED(arg_num > zf->common.num_args)) {
+	arg_num--;
+	if (UNEXPECTED(arg_num >= zf->common.num_args)) {
 		if (EXPECTED((zf->common.fn_flags & ZEND_ACC_VARIADIC) == 0)) {
 			return 0;
 		}
 		arg_num = zf->common.num_args;
 	}
-	return UNEXPECTED((zf->common.arg_info[arg_num-1].pass_by_reference & mask) != 0);
+	return UNEXPECTED((zf->common.arg_info[arg_num].pass_by_reference & mask) != 0);
 }
 
 #define ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \

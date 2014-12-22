@@ -443,9 +443,6 @@ ZEND_FUNCTION(func_get_arg)
 	}
 
 	first_extra_arg = ex->func->op_array.num_args;
-	if (ex->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
-		first_extra_arg--;
-	}
 	if (requested_offset >= first_extra_arg && (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg)) {
 		arg = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - first_extra_arg);
 	} else {
@@ -476,9 +473,6 @@ ZEND_FUNCTION(func_get_args)
 		Bucket *q;		
 
 		first_extra_arg = ex->func->op_array.num_args;
-		if (ex->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
-			first_extra_arg--;
-		}
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		i = 0;
 		q = Z_ARRVAL_P(return_value)->arData;
@@ -2136,9 +2130,6 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		if (call->func->type == ZEND_USER_FUNCTION) {
 			uint32_t first_extra_arg = call->func->op_array.num_args;
 			
-			if (call->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
-			 	first_extra_arg--;
-			}
 			if (ZEND_CALL_NUM_ARGS(call) > first_extra_arg) {
 				while (i < first_extra_arg) {
 					if (Z_REFCOUNTED_P(p)) Z_ADDREF_P(p);
