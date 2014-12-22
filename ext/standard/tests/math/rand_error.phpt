@@ -13,6 +13,6 @@ Warning: rand() expects exactly 2 parameters, 1 given in %s on line 2
 
 Warning: rand() expects exactly 2 parameters, 3 given in %s on line 3
 
-Warning: rand() expects parameter 1 to be long, string given in %s on line 4
+Warning: rand() expects parameter 1 to be integer, string given in %s on line 4
 
-Warning: rand() expects parameter 2 to be long, string given in %s on line 5
+Warning: rand() expects parameter 2 to be integer, string given in %s on line 5

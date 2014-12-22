@@ -98,7 +98,7 @@ Warning: ftruncate() expects parameter 1 to be resource, integer given in %s on 
 bool(false)
 -- Iteration 3 --
 
-Warning: ftruncate() expects parameter 1 to be resource, double given in %s on line %d
+Warning: ftruncate() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 -- Iteration 4 --
 

@@ -135,15 +135,15 @@ Argument 2 passed to timezone_offset_get() must implement interface DateTimeInte
 bool(false)
 
 -- float 10.5 --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, double given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, float given
 bool(false)
 
 -- float -10.5 --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, double given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, float given
 bool(false)
 
 -- float .5 --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, double given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, float given
 bool(false)
 
 -- empty array --

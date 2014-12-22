@@ -31,6 +31,8 @@
   . Fixed bug #55415 (php_info produces invalid anchor names). (Kalle, Johannes)
   . Added ?? operator. (Andrea)
   . Added \u{xxxxx} Unicode Codepoint Escape Syntax. (Andrea)
+  . Fixed oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
+  . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint and conversion error messages. (Andrea)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
@@ -70,7 +72,7 @@
     statements option). (peter dot wolanin at acquia dot com)
 
 - Reflection
-  . Fixed inheritance chain of Reflector interface (Tjerk)
+  . Fixed inheritance chain of Reflector interface. (Tjerk)
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)

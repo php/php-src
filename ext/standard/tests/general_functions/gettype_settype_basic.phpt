@@ -357,7 +357,7 @@ bool(true)
 float(%d)
 string(6) "double"
 -- Iteration 14 --
-8: Object of class point could not be converted to double
+8: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"
@@ -416,7 +416,7 @@ bool(true)
 float(%d)
 string(6) "double"
 -- Iteration 14 --
-8: Object of class point could not be converted to double
+8: Object of class point could not be converted to float
 bool(true)
 float(1)
 string(6) "double"

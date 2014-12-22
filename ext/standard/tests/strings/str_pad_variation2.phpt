@@ -102,15 +102,15 @@ string(11) "Test string"
 string(1012) "Test string                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "
 -- Iteration 8 --
 
-Warning: str_pad() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_pad() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 9 --
 
-Warning: str_pad() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_pad() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: str_pad() expects parameter 2 to be long, array given in %s on line %d
+Warning: str_pad() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 11 --
 string(11) "Test string"
@@ -126,11 +126,11 @@ string(11) "Test string"
 string(11) "Test string"
 -- Iteration 17 --
 
-Warning: str_pad() expects parameter 2 to be long, object given in %s on line %d
+Warning: str_pad() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: str_pad() expects parameter 2 to be long, resource given in %s on line %d
+Warning: str_pad() expects parameter 2 to be integer, resource given in %s on line %d
 NULL
 -- Iteration 19 --
 string(11) "Test string"

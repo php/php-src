@@ -110,27 +110,27 @@ NULL
 
 -- Iteration 5 --
 
-Warning: readdir() expects parameter 1 to be resource, double given in %s on line %d
+Warning: readdir() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 6 --
 
-Warning: readdir() expects parameter 1 to be resource, double given in %s on line %d
+Warning: readdir() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: readdir() expects parameter 1 to be resource, double given in %s on line %d
+Warning: readdir() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: readdir() expects parameter 1 to be resource, double given in %s on line %d
+Warning: readdir() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: readdir() expects parameter 1 to be resource, double given in %s on line %d
+Warning: readdir() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
 -- Iteration 10 --

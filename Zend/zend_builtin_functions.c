@@ -688,6 +688,71 @@ ZEND_FUNCTION(error_reporting)
 }
 /* }}} */
 
+static int validate_constant_array(HashTable *ht) /* {{{ */
+{
+	int ret = 1;
+	zval *val;
+
+	ht->u.v.nApplyCount++;
+	ZEND_HASH_FOREACH_VAL_IND(ht, val) {
+		ZVAL_DEREF(val);
+		if (Z_REFCOUNTED_P(val)) {
+			if (Z_TYPE_P(val) == IS_ARRAY) {
+				if (!Z_IMMUTABLE_P(val)) {
+					if (Z_ARRVAL_P(val)->u.v.nApplyCount > 0) {
+						zend_error(E_WARNING, "Constants cannot be recursive arrays");
+						ret = 0;
+						break;
+					} else if (!validate_constant_array(Z_ARRVAL_P(val))) {
+						ret = 0;
+						break;
+					}
+				}
+			} else if (Z_TYPE_P(val) != IS_STRING && Z_TYPE_P(val) != IS_RESOURCE) {
+				zend_error(E_WARNING, "Constants may only evaluate to scalar values or arrays");
+				ret = 0;
+				break;
+			}				
+		}
+	} ZEND_HASH_FOREACH_END();
+	ht->u.v.nApplyCount--;
+	return ret;
+}
+/* }}} */
+
+static void copy_constant_array(zval *dst, zval *src) /* {{{ */
+{
+	zend_string *key;
+	zend_ulong idx;
+	zval *new_val, *val;
+
+	array_init_size(dst, zend_hash_num_elements(Z_ARRVAL_P(src)));
+	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(src), idx, key, val) {
+		/* constant arrays can't contain references */
+		if (Z_ISREF_P(val)) {
+			if (Z_REFCOUNT_P(val) == 1) {
+				ZVAL_UNREF(val);
+			} else {
+				Z_DELREF_P(val);
+				val = Z_REFVAL_P(val);
+			}
+		}
+		if (key) {
+			new_val = zend_hash_add_new(Z_ARRVAL_P(dst), key, val);
+		} else {
+			new_val = zend_hash_index_add_new(Z_ARRVAL_P(dst), idx, val);
+		}		
+		if (Z_TYPE_P(val) == IS_ARRAY) {
+			if (!Z_IMMUTABLE_P(val)) {
+				copy_constant_array(new_val, val);
+			}
+		} else if (Z_REFCOUNTED_P(val)) {
+			Z_ADDREF_P(val);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
 /* {{{ proto bool define(string constant_name, mixed value, boolean case_insensitive=false)
    Define a new constant */
 ZEND_FUNCTION(define)
@@ -733,6 +798,16 @@ repeat:
 		case IS_RESOURCE:
 		case IS_NULL:
 			break;
+		case IS_ARRAY:
+			if (!Z_IMMUTABLE_P(val)) {
+				if (!validate_constant_array(Z_ARRVAL_P(val))) {
+					RETURN_FALSE;
+				} else {
+					copy_constant_array(&c.value, val);
+					goto register_constant;
+				}
+			}
+			break;
 		case IS_OBJECT:
 			if (Z_TYPE(val_free) == IS_UNDEF) {
 				if (Z_OBJ_HT_P(val)->get) {
@@ -749,13 +824,14 @@ repeat:
 			}
 			/* no break */
 		default:
-			zend_error(E_WARNING,"Constants may only evaluate to scalar values");
+			zend_error(E_WARNING, "Constants may only evaluate to scalar values or arrays");
 			zval_ptr_dtor(&val_free);
 			RETURN_FALSE;
 	}
 	
 	ZVAL_DUP(&c.value, val);
 	zval_ptr_dtor(&val_free);
+register_constant:
 	c.flags = case_sensitive; /* non persistent */
 	c.name = zend_string_copy(name);
 	c.module_number = PHP_USER_CONSTANT;

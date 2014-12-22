@@ -35,14 +35,14 @@ foreach ( $variation_array as $var ) {
 --EXPECTF--
 *** Test substituting argument 1 with array values ***
 
-Warning: proc_nice() expects parameter 1 to be long, array given in %s on line %d
+Warning: proc_nice() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
-Warning: proc_nice() expects parameter 1 to be long, array given in %s on line %d
+Warning: proc_nice() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
-Warning: proc_nice() expects parameter 1 to be long, array given in %s on line %d
+Warning: proc_nice() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
-Warning: proc_nice() expects parameter 1 to be long, array given in %s on line %d
+Warning: proc_nice() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)

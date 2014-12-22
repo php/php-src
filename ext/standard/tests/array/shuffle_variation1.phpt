@@ -118,27 +118,27 @@ bool(false)
 
 -- Iteration 5 --
 
-Warning: shuffle() expects parameter 1 to be array, double given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: shuffle() expects parameter 1 to be array, double given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
 -- Iteration 7 --
 
-Warning: shuffle() expects parameter 1 to be array, double given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
 -- Iteration 8 --
 
-Warning: shuffle() expects parameter 1 to be array, double given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
 -- Iteration 9 --
 
-Warning: shuffle() expects parameter 1 to be array, double given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
 -- Iteration 10 --

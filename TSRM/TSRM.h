@@ -155,7 +155,7 @@ TSRM_API void *tsrm_new_interpreter_context(void);
 TSRM_API void *tsrm_set_interpreter_context(void *new_ctx);
 TSRM_API void tsrm_free_interpreter_context(void *context);
 
-TSRM_API inline void *tsrm_get_ls_cache(void);
+TSRM_API void *tsrm_get_ls_cache(void);
 
 #ifdef TSRM_WIN32
 # define TSRM_TLS __declspec(thread)

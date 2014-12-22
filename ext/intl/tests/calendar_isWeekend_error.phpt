@@ -25,12 +25,12 @@ var_dump(intlcal_is_weekend(1));
 Warning: IntlCalendar::isWeekend(): intlcal_is_weekend: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlCalendar::isWeekend() expects parameter 1 to be double, string given in %s on line %d
+Warning: IntlCalendar::isWeekend() expects parameter 1 to be float, string given in %s on line %d
 
 Warning: IntlCalendar::isWeekend(): intlcal_is_weekend: bad arguments in %s on line %d
 bool(false)
 
-Warning: intlcal_is_weekend() expects parameter 2 to be double, string given in %s on line %d
+Warning: intlcal_is_weekend() expects parameter 2 to be float, string given in %s on line %d
 
 Warning: intlcal_is_weekend(): intlcal_is_weekend: bad arguments in %s on line %d
 bool(false)

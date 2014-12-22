@@ -113,7 +113,7 @@ NULL
 
 -- Iteration 8 --
 
-Warning: srand() expects parameter 1 to be long, double given in %s on line %d
+Warning: srand() expects parameter 1 to be integer, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
@@ -142,37 +142,37 @@ NULL
 
 -- Iteration 17 --
 
-Warning: srand() expects parameter 1 to be long, string given in %s on line %d
+Warning: srand() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: srand() expects parameter 1 to be long, string given in %s on line %d
+Warning: srand() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: srand() expects parameter 1 to be long, array given in %s on line %d
+Warning: srand() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: srand() expects parameter 1 to be long, string given in %s on line %d
+Warning: srand() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: srand() expects parameter 1 to be long, string given in %s on line %d
+Warning: srand() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: srand() expects parameter 1 to be long, string given in %s on line %d
+Warning: srand() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: srand() expects parameter 1 to be long, object given in %s on line %d
+Warning: srand() expects parameter 1 to be integer, object given in %s on line %d
 NULL
 
 -- Iteration 24 --
@@ -183,6 +183,6 @@ NULL
 
 -- Iteration 26 --
 
-Warning: srand() expects parameter 1 to be long, resource given in %s on line %d
+Warning: srand() expects parameter 1 to be integer, resource given in %s on line %d
 NULL
 ===Done===

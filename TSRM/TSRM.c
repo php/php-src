@@ -795,7 +795,7 @@ void tsrm_error_set(int level, char *debug_filename)
 #endif
 }
 
-TSRM_API inline void *tsrm_get_ls_cache(void)
+TSRM_API void *tsrm_get_ls_cache(void)
 {
 	return tsrm_tls_get();
 }

@@ -30,7 +30,7 @@ Warning: IntlGregorianCalendar::isLeapYear() expects exactly 1 parameter, 0 give
 Warning: IntlGregorianCalendar::isLeapYear(): intlgregcal_is_leap_year: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlGregorianCalendar::isLeapYear() expects parameter 1 to be long, string given in %s on line %d
+Warning: IntlGregorianCalendar::isLeapYear() expects parameter 1 to be integer, string given in %s on line %d
 
 Warning: IntlGregorianCalendar::isLeapYear(): intlgregcal_is_leap_year: bad arguments in %s on line %d
 bool(false)
