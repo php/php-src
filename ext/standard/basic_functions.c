@@ -4937,15 +4937,11 @@ static int user_tick_function_compare(user_tick_function_entry * tick_fe1, user_
 	int ret;
 
 	if (Z_TYPE_P(func1) == IS_STRING && Z_TYPE_P(func2) == IS_STRING) {
-		ret = (zend_binary_zval_strcmp(func1, func2) == 0);
+		ret = zend_binary_zval_strcmp(func1, func2) == 0;
 	} else if (Z_TYPE_P(func1) == IS_ARRAY && Z_TYPE_P(func2) == IS_ARRAY) {
-		zval result;
-		zend_compare_arrays(&result, func1, func2);
-		ret = (Z_LVAL(result) == 0);
+		ret = zend_compare_arrays(func1, func2) == 0;
 	} else if (Z_TYPE_P(func1) == IS_OBJECT && Z_TYPE_P(func2) == IS_OBJECT) {
-		zval result;
-		zend_compare_objects(&result, func1, func2);
-		ret = (Z_LVAL(result) == 0);
+		ret = zend_compare_objects(func1, func2) == 0;
 	} else {
 		ret = 0;
 	}

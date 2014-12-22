@@ -338,9 +338,9 @@ ZEND_API int zend_binary_strcasecmp_l(const char *s1, size_t len1, const char *s
 ZEND_API int zend_binary_strncasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
 
 ZEND_API zend_long zendi_smart_strcmp(zval *s1, zval *s2);
-ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2);
-ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2);
-ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2);
+ZEND_API int zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2);
+ZEND_API int zend_compare_arrays(zval *a1, zval *a2);
+ZEND_API int zend_compare_objects(zval *o1, zval *o2);
 
 ZEND_API int zend_atoi(const char *str, int str_len);
 ZEND_API zend_long zend_atol(const char *str, int str_len);

@@ -1286,8 +1286,6 @@ ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{
 }
 /* }}} */
 
-int zend_compare_symbol_tables_i(HashTable *ht1, HashTable *ht2);
-
 static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
 	zend_object *zobj1, *zobj2;
@@ -1343,7 +1341,7 @@ static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		if (!zobj2->properties) {
 			rebuild_object_properties(zobj2);
 		}
-		return zend_compare_symbol_tables_i(zobj1->properties, zobj2->properties);
+		return zend_compare_symbol_tables(zobj1->properties, zobj2->properties);
 	}
 }
 /* }}} */

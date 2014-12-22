@@ -1791,7 +1791,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_ARRAY, IS_ARRAY):
-				zend_compare_arrays(result, op1, op2);
+				ZVAL_LONG(result, zend_compare_arrays(op1, op2));
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_NULL, IS_NULL):
@@ -2601,35 +2601,28 @@ static int hash_zval_compare_function(zval *z1, zval *z2) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_compare_symbol_tables_i(HashTable *ht1, HashTable *ht2) /* {{{ */
+ZEND_API int zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2) /* {{{ */
 {
 	return ht1 == ht2 ? 0 : zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0);
 }
 /* }}} */
 
-ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2) /* {{{ */
+ZEND_API int zend_compare_arrays(zval *a1, zval *a2) /* {{{ */
 {
-	ZVAL_LONG(result, ht1 == ht2 ? 0 : zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0));
+	return zend_compare_symbol_tables(Z_ARRVAL_P(a1), Z_ARRVAL_P(a2));
 }
 /* }}} */
 
-ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2) /* {{{ */
-{
-	zend_compare_symbol_tables(result, Z_ARRVAL_P(a1), Z_ARRVAL_P(a2));
-}
-/* }}} */
-
-ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2) /* {{{ */
+ZEND_API int zend_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
 	if (Z_OBJ_P(o1) == Z_OBJ_P(o2)) {
-		ZVAL_LONG(result, 0);
-		return;
+		return 0;
 	}
 
 	if (Z_OBJ_HT_P(o1)->compare_objects == NULL) {
-		ZVAL_LONG(result, 1);
+		return 1;
 	} else {
-		ZVAL_LONG(result, Z_OBJ_HT_P(o1)->compare_objects(o1, o2));
+		return Z_OBJ_HT_P(o1)->compare_objects(o1, o2);
 	}
 }
 /* }}} */

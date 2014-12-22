@@ -949,15 +949,13 @@ static int spl_array_compare_objects(zval *o1, zval *o2) /* {{{ */
 	spl_array_object	*intern1,
 						*intern2;
 	int					result	= 0;
-	zval				temp_zv;
 
 	intern1	= Z_SPLARRAY_P(o1);
 	intern2	= Z_SPLARRAY_P(o2);
 	ht1		= spl_array_get_hash_table(intern1, 0);
 	ht2		= spl_array_get_hash_table(intern2, 0);
 
-	zend_compare_symbol_tables(&temp_zv, ht1, ht2);
-	result = (int)Z_LVAL(temp_zv);
+	result = zend_compare_symbol_tables(ht1, ht2);
 	/* if we just compared std.properties, don't do it again */
 	if (result == 0 &&
 			!(ht1 == intern1->std.properties && ht2 == intern2->std.properties)) {
