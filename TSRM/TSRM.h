@@ -20,6 +20,8 @@
 # include <tsrm_config.h>
 #endif
 
+#include "main/php_stdint.h"
+
 #ifdef TSRM_WIN32
 #	ifdef TSRM_EXPORTS
 #		define TSRM_API __declspec(dllexport)
