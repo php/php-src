@@ -326,10 +326,11 @@ static inline size_t parse_uiv(const unsigned char *p)
 #define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes
 #define UNSERIALIZE_PASSTHRU rval, p, max, var_hash, classes
 
-static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, int objprops)
+static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, int objprops)
 {
 	while (elements-- > 0) {
 		zval key, *data, d, *old_data;
+		zend_ulong idx;
 
 		ZVAL_UNDEF(&key);
 
@@ -338,41 +339,55 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend
 			return 0;
 		}
 
-		if (Z_TYPE(key) != IS_LONG && Z_TYPE(key) != IS_STRING) {
-			zval_dtor(&key);
-			return 0;
-		}
-
 		data = NULL;
 		ZVAL_UNDEF(&d);
 
 		if (!objprops) {
-			switch (Z_TYPE(key)) {
-			case IS_LONG:
-				if ((old_data = zend_hash_index_find(ht, Z_LVAL(key))) != NULL) {
+			if (Z_TYPE(key) == IS_LONG) {
+				idx = Z_LVAL(key);
+numeric_key:
+				if (UNEXPECTED((old_data = zend_hash_index_find(ht, idx)) != NULL)) {
 					//??? update hash
 					var_push_dtor(var_hash, old_data);
+					data = zend_hash_index_update(ht, idx, &d);
+				} else {
+					data = zend_hash_index_add_new(ht, idx, &d);
 				}
-				data = zend_hash_index_update(ht, Z_LVAL(key), &d);
-				break;
-			case IS_STRING:
-				if ((old_data = zend_symtable_find(ht, Z_STR(key))) != NULL) {
+			} else if (Z_TYPE(key) == IS_STRING) {
+				if (UNEXPECTED(ZEND_HANDLE_NUMERIC(Z_STR(key), idx))) {
+					goto numeric_key; 
+				}
+				if (UNEXPECTED((old_data = zend_hash_find(ht, Z_STR(key))) != NULL)) {
 					//??? update hash
 					var_push_dtor(var_hash, old_data);
+					data = zend_hash_update(ht, Z_STR(key), &d);
+				} else {
+					data = zend_hash_add_new(ht, Z_STR(key), &d);
 				}
-				data = zend_symtable_update(ht, Z_STR(key), &d);
-				break;
+			} else {
+				zval_dtor(&key);
+				return 0;
 			}
 		} else {
-			/* object properties should include no integers */
-			convert_to_string(&key);
-			if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
-				if (Z_TYPE_P(old_data) == IS_INDIRECT) {
-					old_data = Z_INDIRECT_P(old_data);
+			if (EXPECTED(Z_TYPE(key) == IS_STRING)) {
+string_key:
+				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
+					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+						old_data = Z_INDIRECT_P(old_data);
+					}
+					var_push_dtor(var_hash, old_data);
+					data = zend_hash_update_ind(ht, Z_STR(key), &d);
+				} else {
+					data = zend_hash_add_new(ht, Z_STR(key), &d);
 				}
-				var_push_dtor(var_hash, old_data);
-			} 
-			data = zend_hash_update_ind(ht, Z_STR(key), &d);
+			} else if (Z_TYPE(key) == IS_LONG) {
+				/* object properties should include no integers */
+				convert_to_string(&key);
+				goto string_key;
+			} else {
+				zval_dtor(&key);
+				return 0;
+			}
 		}
 		
 		zval_dtor(&key);
