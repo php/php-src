@@ -1106,24 +1106,30 @@ ZEND_FUNCTION(get_object_vars)
 
 	zobj = Z_OBJ_P(obj);
 
-	array_init_size(return_value, zend_hash_num_elements(properties));
+	if (!zobj->ce->default_properties_count && properties == zobj->properties) {
+		/* fast copy */
+		ZVAL_NEW_ARR(return_value);
+		zend_array_dup(Z_ARRVAL_P(return_value), properties);
+	} else {
+		array_init_size(return_value, zend_hash_num_elements(properties));
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(properties, key, value) {
-		if (key) {
-			if (zend_check_property_access(zobj, key) == SUCCESS) {
-				/* Not separating references */
-				if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-				if (key->val[0] == 0) {
-					const char *prop_name, *class_name;
-					size_t prop_len;
-					zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
-					zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
-				} else {
-					zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+		ZEND_HASH_FOREACH_STR_KEY_VAL_IND(properties, key, value) {
+			if (key) {
+				if (zend_check_property_access(zobj, key) == SUCCESS) {
+					/* Not separating references */
+					if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+					if (key->val[0] == 0) {
+						const char *prop_name, *class_name;
+						size_t prop_len;
+						zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
+						zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
+					} else {
+						zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+					}
 				}
 			}
-		}
-	} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 /* }}} */
 
