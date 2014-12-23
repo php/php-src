@@ -89,7 +89,7 @@ static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 {
-	if (!CG(multibyte)) {
+	if (!CG(multibyte) || !new_value) {
 		return FAILURE;
 	}
 	if (!zend_multibyte_get_functions()) {
