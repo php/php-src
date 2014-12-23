@@ -240,7 +240,7 @@ try_again:
 
 /* }}} */
 
-#define convert_op1_op2_long(op1, op1_lval, op2, op2_lval, op, op_func) \ 
+#define convert_op1_op2_long(op1, op1_lval, op2, op2_lval, op, op_func) \
 	do {																\
 		if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {						\
 			if (Z_ISREF_P(op1)) {										\
@@ -270,7 +270,7 @@ try_again:
 		} else {														\
 			op2_lval = Z_LVAL_P(op2);									\
 		}																\
-	} while (0);														\
+	} while (0);
 
 ZEND_API void convert_to_long(zval *op) /* {{{ */
 {
