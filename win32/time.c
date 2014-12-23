@@ -27,7 +27,9 @@
 
 typedef VOID (WINAPI *MyGetSystemTimeAsFileTime)(LPFILETIME lpSystemTimeAsFileTime);
 
-static MyGetSystemTimeAsFileTime get_time_func(void)
+static MyGetSystemTimeAsFileTime timefunc = NULL;
+
+static zend_always_inline MyGetSystemTimeAsFileTime get_time_func(void)
 {
 	MyGetSystemTimeAsFileTime timefunc = NULL;
 	HMODULE hMod = LoadLibrary("kernel32.dll");
@@ -45,19 +47,16 @@ static MyGetSystemTimeAsFileTime get_time_func(void)
 	return timefunc;
 }
 
-int getfilesystemtime(struct timeval *tv)
+static zend_always_inline int getfilesystemtime(struct timeval *tv)
 {
 	FILETIME ft;
 	unsigned __int64 ff = 0;
-	MyGetSystemTimeAsFileTime timefunc;
 	ULARGE_INTEGER fft;
 
-	timefunc = get_time_func();
-	if (timefunc) {
-		timefunc(&ft);
-	} else {
-		GetSystemTimeAsFileTime(&ft);
+	if (!timefunc) {
+		timefunc = get_time_func();
 	}
+	timefunc(&ft);
 
         /*
 	 * Do not cast a pointer to a FILETIME structure to either a 
