@@ -788,48 +788,73 @@ static inline int php_charmask(unsigned char *input, size_t len, char *mask)
  * mode 3 : trim left and right
  * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
  */
-PHPAPI char *php_trim(char *c, size_t len, char *what, size_t what_len, zval *return_value, int mode)
+PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int mode)
 {
+	const char *c = str->val;
+	size_t len = str->len;
 	register size_t i;
 	size_t trimmed = 0;
 	char mask[256];
 
 	if (what) {
 		php_charmask((unsigned char*)what, what_len, mask);
-	} else {
-		php_charmask((unsigned char*)" \n\r\t\v\0", 6, mask);
-	}
 
-	if (mode & 1) {
-		for (i = 0; i < len; i++) {
-			if (mask[(unsigned char)c[i]]) {
-				trimmed++;
-			} else {
-				break;
-			}
-		}
-		len -= trimmed;
-		c += trimmed;
-	}
-	if (mode & 2) {
-		if (len > 0) {
-			i = len - 1;
-			do {
+		if (mode & 1) {
+			for (i = 0; i < len; i++) {
 				if (mask[(unsigned char)c[i]]) {
-					len--;
+					trimmed++;
 				} else {
 					break;
 				}
-			} while (i-- != 0);
+			}
+			len -= trimmed;
+			c += trimmed;
+		}
+		if (mode & 2) {
+			if (len > 0) {
+				i = len - 1;
+				do {
+					if (mask[(unsigned char)c[i]]) {
+						len--;
+					} else {
+						break;
+					}
+				} while (i-- != 0);
+			}
+		}
+	} else {
+		if (mode & 1) {
+			for (i = 0; i < len; i++) {
+				if ((unsigned char)c[i] <= ' ' &&
+				    (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' || c[i] == '\t' || c[i] == '\v' || c[i] == '\0')) {
+					trimmed++;
+				} else {
+					break;
+				}
+			}
+			len -= trimmed;
+			c += trimmed;
+		}
+		if (mode & 2) {
+			if (len > 0) {
+				i = len - 1;
+				do {
+					if ((unsigned char)c[i] <= ' ' &&
+					    (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' || c[i] == '\t' || c[i] == '\v' || c[i] == '\0')) {
+						len--;
+					} else {
+						break;
+					}
+				} while (i-- != 0);
+			}
 		}
 	}
 
-	if (return_value) {
-		RETVAL_STRINGL(c, len);
+	if (str->len == len) {
+		return zend_string_copy(str);
 	} else {
-		return estrndup(c, len);
+		return zend_string_init(c, len, 0);
 	}
-	return "";
 }
 /* }}} */
 
@@ -853,7 +878,7 @@ static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	php_trim(str->val, str->len, (what ? what->val : NULL), (what ? what->len : 0), return_value, mode);
+	ZVAL_STR(return_value, php_trim(str, (what ? what->val : NULL), (what ? what->len : 0), mode));
 }
 /* }}} */
 

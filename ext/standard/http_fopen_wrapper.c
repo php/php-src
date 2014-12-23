@@ -118,7 +118,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	int use_ssl;
 	int use_proxy = 0;
 	char *scratch = NULL;
-	char *tmp = NULL;
+	zend_string *tmp = NULL;
 	char *ua_str = NULL;
 	zval *ua_zval = NULL, *tmpzval = NULL, ssl_proxy_peer_name;
 	size_t scratch_len = 0;
@@ -440,88 +440,96 @@ finish:
 			smart_str_0(&tmpstr);
 			/* Remove newlines and spaces from start and end. there's at least one extra \r\n at the end that needs to go. */
 			if (tmpstr.s) {
-				tmp = php_trim(tmpstr.s->val, tmpstr.s->len, NULL, 0, NULL, 3);
+				tmp = php_trim(tmpstr.s, NULL, 0, 3);
 				smart_str_free(&tmpstr);
 			}
-		}
-		if (Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval)) {
+		} else if (Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval)) {
 			/* Remove newlines and spaces from start and end php_trim will estrndup() */
-			tmp = php_trim(Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval), NULL, 0, NULL, 3);
+			tmp = php_trim(Z_STR_P(tmpzval), NULL, 0, 3);
 		}
-		if (tmp && tmp[0] != '\0') {
+		if (tmp && tmp->len) {
 			char *s;
+			char *t;
 
-			user_headers = estrdup(tmp);
+			user_headers = estrndup(tmp->val, tmp->len);
+
+			if (IS_INTERNED(tmp)) {
+				tmp = zend_string_init(tmp->val, tmp->len, 0);
+			} else if (GC_REFCOUNT(tmp) > 1) {
+				GC_REFCOUNT(tmp)--;
+				tmp = zend_string_init(tmp->val, tmp->len, 0);
+			}
 
 			/* Make lowercase for easy comparison against 'standard' headers */
-			php_strtolower(tmp, strlen(tmp));
+			php_strtolower(tmp->val, tmp->len);
+			t = tmp->val;
 
 			if (!header_init) {
 				/* strip POST headers on redirect */
-				strip_header(user_headers, tmp, "content-length:");
-				strip_header(user_headers, tmp, "content-type:");
+				strip_header(user_headers, t, "content-length:");
+				strip_header(user_headers, t, "content-type:");
 			}
 
-			if ((s = strstr(tmp, "user-agent:")) && 
-			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			if ((s = strstr(t, "user-agent:")) && 
+			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' || 
 			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_USER_AGENT;
 			}
-			if ((s = strstr(tmp, "host:")) &&
-			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			if ((s = strstr(t, "host:")) &&
+			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' || 
 			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_HOST;
 			}
-			if ((s = strstr(tmp, "from:")) &&
-			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			if ((s = strstr(t, "from:")) &&
+			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' || 
 			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_FROM;
 				}
-			if ((s = strstr(tmp, "authorization:")) &&
-			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			if ((s = strstr(t, "authorization:")) &&
+			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' || 
 			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_AUTH;
 			}
-			if ((s = strstr(tmp, "content-length:")) &&
-			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			if ((s = strstr(t, "content-length:")) &&
+			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' || 
 			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_CONTENT_LENGTH;
 			}
-			if ((s = strstr(tmp, "content-type:")) &&
-			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			if ((s = strstr(t, "content-type:")) &&
+			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' || 
 			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_TYPE;
 			}
-			if ((s = strstr(tmp, "connection:")) &&
-			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			if ((s = strstr(t, "connection:")) &&
+			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' || 
 			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_CONNECTION;
 			}
 			/* remove Proxy-Authorization header */
-			if (use_proxy && use_ssl && (s = strstr(tmp, "proxy-authorization:")) &&
-			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			if (use_proxy && use_ssl && (s = strstr(t, "proxy-authorization:")) &&
+			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' || 
 			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				char *p = s + sizeof("proxy-authorization:") - 1;
 				
-				while (s > tmp && (*(s-1) == ' ' || *(s-1) == '\t')) s--;
+				while (s > t && (*(s-1) == ' ' || *(s-1) == '\t')) s--;
 				while (*p != 0 && *p != '\r' && *p != '\n') p++;
 				while (*p == '\r' || *p == '\n') p++;
 				if (*p == 0) {
-					if (s == tmp) {
+					if (s == t) {
 						efree(user_headers);
 						user_headers = NULL;
 					} else {
-						while (s > tmp && (*(s-1) == '\r' || *(s-1) == '\n')) s--;
-						user_headers[s - tmp] = 0;
+						while (s > t && (*(s-1) == '\r' || *(s-1) == '\n')) s--;
+						user_headers[s - t] = 0;
 					}
 				} else {
-					memmove(user_headers + (s - tmp), user_headers + (p - tmp), strlen(p) + 1);
+					memmove(user_headers + (s - t), user_headers + (p - t), strlen(p) + 1);
 				}
 			}
 
 		}
 		if (tmp) {
-			efree(tmp);
+			zend_string_release(tmp);
 		}
 	}
 
