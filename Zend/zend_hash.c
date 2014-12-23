@@ -564,7 +564,7 @@ static void zend_hash_do_resize(HashTable *ht)
 
 	IS_CONSISTENT(ht);
 
-	if (ht->nNumUsed < ht->nNumOfElements) {
+	if (ht->nNumUsed > ht->nNumOfElements) {
 		HANDLE_BLOCK_INTERRUPTIONS();
 		zend_hash_rehash(ht);
 		HANDLE_UNBLOCK_INTERRUPTIONS();
