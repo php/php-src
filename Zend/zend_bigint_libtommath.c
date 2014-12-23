@@ -810,7 +810,17 @@ ZEND_API void zend_bigint_shift_right_ulong(zend_bigint *out, const zend_bigint 
 		zend_error_noreturn(E_ERROR, "Exponent too large");
 	}
 
-	CHECK_ERROR(mp_div_2d(&num->mp, shift, &out->mp, NULL));
+	/* LibTomMath's mp_div_2d does a logical right shift
+	 * in order to correctly mimick a two's-complement arithmetic right-shift,
+	 * we just need to do a one's complement first */
+	if (SIGN(&num->mp) == MP_NEG) {
+		zend_bigint_ones_complement(out, num);
+		CHECK_ERROR(mp_div_2d(&out->mp, shift, &out->mp, NULL));
+		zend_bigint_ones_complement(out, out);
+	/* No mimickry needed for positive op1 :) */
+	} else {
+		CHECK_ERROR(mp_div_2d(&num->mp, shift, &out->mp, NULL));
+	}
 }
 /* }}} */
 
