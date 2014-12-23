@@ -651,7 +651,7 @@ ZEND_FUNCTION(each)
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "value", sizeof("value")-1, entry);
 
 	/* add the key elements */
-	if (zend_hash_get_current_key(target_hash, &key, &num_key, 0) == HASH_KEY_IS_STRING) {
+	if (zend_hash_get_current_key(target_hash, &key, &num_key) == HASH_KEY_IS_STRING) {
 		ZVAL_STR_COPY(&tmp, key);
 		if (Z_REFCOUNTED(tmp)) Z_ADDREF(tmp);
 	} else {

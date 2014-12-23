@@ -432,19 +432,12 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		count = zend_hash_num_elements(&ce->constants_table);
 		string_printf(str, "%s  - Constants [%d] {\n", indent, count);
 		if (count > 0) {
-			HashPosition pos;
-			zval *value;
 			zend_string *key;
-			zend_ulong num_index;
+			zval *value;
 
-			zend_hash_internal_pointer_reset_ex(&ce->constants_table, &pos);
-
-			while ((value = zend_hash_get_current_data_ex(&ce->constants_table, &pos)) != NULL) {
-				zend_hash_get_current_key_ex(&ce->constants_table, &key, &num_index, 0, &pos);
-
+			ZEND_HASH_FOREACH_STR_KEY_VAL(&ce->constants_table, key, value) {
 				_const_string(str, key->val, value, indent);
-				zend_hash_move_forward_ex(&ce->constants_table, &pos);
-			}
+			} ZEND_HASH_FOREACH_END();
 		}
 		string_printf(str, "%s  }\n", indent);
 	}
@@ -567,7 +560,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 				zend_string *prop_name;
 				zend_ulong index;
 
-				if (zend_hash_get_current_key_ex(properties, &prop_name, &index, 0, &pos) == HASH_KEY_IS_STRING) {
+				if (zend_hash_get_current_key_ex(properties, &prop_name, &index, &pos) == HASH_KEY_IS_STRING) {
 					if (prop_name->len && prop_name->val[0]) { /* skip all private and protected properties */
 						if (!zend_hash_exists(&ce->properties_info, prop_name)) {
 							count++;
@@ -608,7 +601,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 					/* Do not display old-style inherited constructors */
 					if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0
 						|| mptr->common.scope == ce
-						|| zend_hash_get_current_key_ex(&ce->function_table, &key, &num_index, 0, &pos) != HASH_KEY_IS_STRING
+						|| zend_hash_get_current_key_ex(&ce->function_table, &key, &num_index, &pos) != HASH_KEY_IS_STRING
 						|| zend_binary_strcasecmp(key->val, key->len, mptr->common.function_name->val, len) == 0)
 					{
 						zend_function *closure;
@@ -805,7 +798,7 @@ static void _function_closure_string(string *str, zend_function *fptr, char* ind
 	zend_hash_internal_pointer_reset_ex(static_variables, &pos);
 	i = 0;
 	while (i < count) {
-		zend_hash_get_current_key_ex(static_variables, &key, &num_index, 0, &pos);
+		zend_hash_get_current_key_ex(static_variables, &key, &num_index, &pos);
 		string_printf(str, "%s    Variable #%d [ $%s ]\n", indent, i++, key->val);
 		zend_hash_move_forward_ex(static_variables, &pos);
 	}

@@ -47,7 +47,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 	zend_hash_internal_pointer_reset_ex(HASH_OF(z), &pos);
 	for (;; zend_hash_move_forward_ex(HASH_OF(z), &pos)) {
 
-		keytype = zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &intindex, 0, &pos);
+		keytype = zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &intindex, &pos);
 
 		if (HASH_KEY_IS_STRING == keytype) {
 			goto bogus;
@@ -74,7 +74,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 		if (NULL == (item = zend_hash_get_current_data_ex(HASH_OF(z), &pos))) {
 			break;
 		}
-		zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &intindex, 0, &pos);
+		zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &intindex, &pos);
 		php_com_variant_from_zval(&va[intindex], item, codepage);		
 	}
 

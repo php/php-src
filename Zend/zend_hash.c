@@ -1625,7 +1625,7 @@ ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
 
 
 /* This function should be made binary safe  */
-ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, zend_bool duplicate, HashPosition *pos)
+ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, HashPosition *pos)
 {
 	uint32_t idx = *pos;
 	Bucket *p;
@@ -1634,11 +1634,7 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str
 	if (idx != INVALID_IDX) {
 		p = ht->arData + idx;
 		if (p->key) {
-			if (duplicate) {
-				*str_index = zend_string_copy(p->key);
-			} else {
-				*str_index = p->key;
-			}
+			*str_index = p->key;
 			return HASH_KEY_IS_STRING;
 		} else {
 			*num_index = p->h;

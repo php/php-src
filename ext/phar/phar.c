@@ -1960,7 +1960,7 @@ woohoo:
 			zend_ulong unused;
 
 			for (zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_fname_map));
-				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_fname_map), &str_key, &unused, 0, &PHAR_GLOBALS->phar_fname_map.nInternalPointer);
+				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&(PHAR_GLOBALS->phar_fname_map), &str_key, &unused);
 				zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map))
 			) {
 				if (str_key->len > (uint) filename_len) {
@@ -1979,7 +1979,7 @@ woohoo:
 
 			if (PHAR_G(manifest_cached)) {
 				for (zend_hash_internal_pointer_reset(&cached_phars);
-					HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&cached_phars, &str_key, &unused, 0, &cached_phars.nInternalPointer);
+					HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&cached_phars, &str_key, &unused);
 					zend_hash_move_forward(&cached_phars)
 				) {
 					if (str_key->len > (uint) filename_len) {
