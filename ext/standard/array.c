@@ -240,9 +240,17 @@ PHP_FUNCTION(ksort)
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/|l", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sort_type)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	php_set_compare_func(sort_type);
 
@@ -1366,9 +1374,18 @@ PHP_FUNCTION(extract)
 	int extract_refs = 0;
 	zend_array *symbol_table;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_ARRAY(var_array)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(extract_type)
+		Z_PARAM_ZVAL_EX(prefix, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	extract_refs = (extract_type & EXTR_REFS);
 	if (extract_refs) {
