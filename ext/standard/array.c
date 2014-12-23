@@ -2677,11 +2677,9 @@ PHP_FUNCTION(array_keys)
 	     *entry,				/* An entry in the input array */
 	       res,					/* Result of comparison */
 	       new_val;				/* New value */
-	int    add_key;				/* Flag to indicate whether a key should be added */
 	zend_bool strict = 0;		/* do strict comparison */
 	zend_ulong num_idx;
 	zend_string *str_idx;
-	int (*is_equal_func)(zval *, zval *, zval *) = is_equal_function;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|zb", &input, &search_value, &strict) == FAILURE) {
@@ -2696,34 +2694,47 @@ PHP_FUNCTION(array_keys)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	if (strict) {
-		is_equal_func = is_identical_function;
-	}
-
 	/* Initialize return array */
 	if (search_value != NULL) {
 		array_init(return_value);
+		
+		if (strict) {
+			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
+				fast_is_identical_function(&res, search_value, entry);
+				if (Z_TYPE(res) == IS_TRUE) {
+					if (str_idx) {
+						ZVAL_STR_COPY(&new_val, str_idx);
+					} else {
+						ZVAL_LONG(&new_val, num_idx);
+					}
+					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &new_val);
+				}
+			} ZEND_HASH_FOREACH_END();
+		} else {
+			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
+				if (fast_equal_check_function(search_value, entry)) {
+					if (str_idx) {
+						ZVAL_STR_COPY(&new_val, str_idx);
+					} else {
+						ZVAL_LONG(&new_val, num_idx);
+					}
+					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &new_val);
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
-	}
-	add_key = 1;
 
-	/* Go through input array and add keys to the return array */
-	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
-		if (search_value != NULL) {
-			is_equal_func(&res, search_value, entry);
-			add_key = zval_is_true(&res);
-		}
-
-		if (add_key) {
+		/* Go through input array and add keys to the return array */
+		ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
 			if (str_idx) {
 				ZVAL_STR_COPY(&new_val, str_idx);
 			} else {
 				ZVAL_LONG(&new_val, num_idx);
 			}
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &new_val);
-		}
-	} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 /* }}} */
 
