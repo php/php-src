@@ -89,13 +89,13 @@ static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 {
-	if (!CG(multibyte) || !new_value) {
+	if (!CG(multibyte)) {
 		return FAILURE;
 	}
 	if (!zend_multibyte_get_functions()) {
 		return SUCCESS;
 	}
-	return zend_multibyte_set_script_encoding_by_string(new_value->val, new_value->len);
+	return zend_multibyte_set_script_encoding_by_string(new_value ? new_value->val : NULL, new_value ? new_value->len : 0);
 }
 /* }}} */
 
