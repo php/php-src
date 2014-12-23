@@ -48,9 +48,9 @@ const phpdbg_command_t phpdbg_set_commands[] = {
 PHPDBG_SET(prompt) /* {{{ */
 {
 	if (!param || param->type == EMPTY_PARAM) {
-		phpdbg_writeln("setprompt", "str=\"%s\"", "Current prompt: %s", phpdbg_get_prompt(TSRMLS_C));
+		phpdbg_writeln("setprompt", "str=\"%s\"", "Current prompt: %s", phpdbg_get_prompt());
 	} else {
-		phpdbg_set_prompt(param->str TSRMLS_CC);
+		phpdbg_set_prompt(param->str);
 	}
 
 	return SUCCESS;
@@ -62,12 +62,12 @@ PHPDBG_SET(break) /* {{{ */
 		case NUMERIC_PARAM: {
 			if (param->next) {
 				if (param->next->num) {
-					phpdbg_enable_breakpoint(param->num TSRMLS_CC);
+					phpdbg_enable_breakpoint(param->num);
 				} else {
-					phpdbg_disable_breakpoint(param->num TSRMLS_CC);
+					phpdbg_disable_breakpoint(param->num);
 				}
 			} else {
-				phpdbg_breakbase_t *brake = phpdbg_find_breakbase(param->num TSRMLS_CC);
+				phpdbg_breakbase_t *brake = phpdbg_find_breakbase(param->num);
 				if (brake) {
 					phpdbg_writeln("setbreak", "id=\"%ld\" active=\"%s\"", "Breakpoint #%ld %s", param->num, brake->disabled ? "off" : "on");
 				} else {
@@ -90,9 +90,9 @@ PHPDBG_SET(breaks) /* {{{ */
 	} else switch (param->type) {
 		case NUMERIC_PARAM: {
 			if (param->num) {
-				phpdbg_enable_breakpoints(TSRMLS_C);
+				phpdbg_enable_breakpoints();
 			} else {
-				phpdbg_disable_breakpoints(TSRMLS_C);
+				phpdbg_disable_breakpoints();
 			}
 		} break;
 
@@ -106,31 +106,31 @@ PHPDBG_SET(breaks) /* {{{ */
 #ifndef _WIN32
 PHPDBG_SET(color) /* {{{ */
 {
-	const phpdbg_color_t *color = phpdbg_get_color(param->next->str, param->next->len TSRMLS_CC);
+	const phpdbg_color_t *color = phpdbg_get_color(param->next->str, param->next->len);
 
 	if (!color) {
 		phpdbg_error("setcolor", "type=\"nocolor\"", "Failed to find the requested color (%s)", param->next->str);
 		return SUCCESS;
 	}
 
-	switch (phpdbg_get_element(param->str, param->len TSRMLS_CC)) {
+	switch (phpdbg_get_element(param->str, param->len)) {
 		case PHPDBG_COLOR_PROMPT:
 			phpdbg_notice("setcolor", "type=\"prompt\" color=\"%s\" code=\"%s\"", "setting prompt color to %s (%s)", color->name, color->code);
 			if (PHPDBG_G(prompt)[1]) {
 				free(PHPDBG_G(prompt)[1]);
 				PHPDBG_G(prompt)[1]=NULL;
 			}
-			phpdbg_set_color(PHPDBG_COLOR_PROMPT, color TSRMLS_CC);
+			phpdbg_set_color(PHPDBG_COLOR_PROMPT, color);
 		break;
 
 		case PHPDBG_COLOR_ERROR:
 			phpdbg_notice("setcolor", "type=\"error\" color=\"%s\" code=\"%s\"", "setting error color to %s (%s)", color->name, color->code);
-			phpdbg_set_color(PHPDBG_COLOR_ERROR, color TSRMLS_CC);
+			phpdbg_set_color(PHPDBG_COLOR_ERROR, color);
 		break;
 
 		case PHPDBG_COLOR_NOTICE:
 			phpdbg_notice("setcolor", "type=\"notice\" color=\"%s\" code=\"%s\"", "setting notice color to %s (%s)", color->name, color->code);
-			phpdbg_set_color(PHPDBG_COLOR_NOTICE, color TSRMLS_CC);
+			phpdbg_set_color(PHPDBG_COLOR_NOTICE, color);
 		break;
 
 		default:

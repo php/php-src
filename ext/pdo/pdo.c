@@ -77,7 +77,7 @@ PDO_API char *php_pdo_str_tolower_dup(const char *src, int len) /* {{{ */
 }
 /* }}} */
 
-PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC) /* {{{ */
+PDO_API zend_class_entry *php_pdo_get_exception_base(int root) /* {{{ */
 {
 #if defined(HAVE_SPL)
 	if (!root) {
@@ -93,7 +93,7 @@ PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC) /* {{{ 
 		}
 	}
 #endif
-	return zend_exception_get_default(TSRMLS_C);
+	return zend_exception_get_default();
 }
 /* }}} */
 
@@ -309,7 +309,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source, zend_ulong data_s
 /* }}} */
 
 static const char digit_vec[] = "0123456789";
-PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC) /* {{{ */
+PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64) /* {{{ */
 {
 	char buffer[65];
 	char outbuf[65] = "";
@@ -368,12 +368,12 @@ PHP_MINIT_FUNCTION(pdo)
 
 	INIT_CLASS_ENTRY(ce, "PDOException", NULL);
 
- 	pdo_exception_ce = zend_register_internal_class_ex(&ce, php_pdo_get_exception_base(0 TSRMLS_CC) TSRMLS_CC);
+ 	pdo_exception_ce = zend_register_internal_class_ex(&ce, php_pdo_get_exception_base(0));
 
-	zend_declare_property_null(pdo_exception_ce, "errorInfo", sizeof("errorInfo")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_null(pdo_exception_ce, "errorInfo", sizeof("errorInfo")-1, ZEND_ACC_PUBLIC);
 
-	pdo_dbh_init(TSRMLS_C);
-	pdo_stmt_init(TSRMLS_C);
+	pdo_dbh_init();
+	pdo_stmt_init();
 
 	return SUCCESS;
 }

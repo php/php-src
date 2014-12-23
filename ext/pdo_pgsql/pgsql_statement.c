@@ -44,7 +44,7 @@
 #define TEXTOID     25
 #define OIDOID      26
 
-static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
+static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
@@ -113,7 +113,7 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
-static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
+static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	pdo_pgsql_db_handle *H = S->H;
@@ -240,7 +240,7 @@ stmt_retry:
 }
 
 static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
-		enum pdo_param_event event_type TSRMLS_DC)
+		enum pdo_param_event event_type)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
@@ -266,7 +266,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 							ZEND_ATOL(param->paramno, namevar + 1);
 							param->paramno--;
 						} else {
-							pdo_raise_impl_error(stmt->dbh, stmt, "HY093", param->name->val TSRMLS_CC);
+							pdo_raise_impl_error(stmt->dbh, stmt, "HY093", param->name->val);
 							return 0;
 						}
 					}
@@ -386,7 +386,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 }
 
 static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
-	enum pdo_fetch_orientation ori, zend_long offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, zend_long offset)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
@@ -433,7 +433,7 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 	}
 }
 
-static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
+static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
@@ -493,7 +493,7 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees  TSRMLS_DC)
+static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees )
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
@@ -532,7 +532,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulon
 					Oid oid = (Oid)strtoul(*ptr, &end_ptr, 10);
 					int loid = lo_open(S->H->server, oid, INV_READ);
 					if (loid >= 0) {
-						*ptr = (char*)pdo_pgsql_create_lob_stream(&stmt->database_object_handle, loid, oid TSRMLS_CC);
+						*ptr = (char*)pdo_pgsql_create_lob_stream(&stmt->database_object_handle, loid, oid);
 						*len = 0;
 						return *ptr ? 1 : 0;
 					}
@@ -572,7 +572,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulon
 	return 1;
 }
 
-static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value TSRMLS_DC)
+static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	PGresult *res;
@@ -615,7 +615,7 @@ done:
 	return 1;
 }
 
-static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
+static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt)
 {
 	return 1;
 }

@@ -33,7 +33,7 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 
-void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
+void zend_optimizer_pass2(zend_op_array *op_array)
 {
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;
@@ -47,7 +47,7 @@ void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
 			case ZEND_DIV:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
-						convert_scalar_to_number(&ZEND_OP1_LITERAL(opline) TSRMLS_CC);
+						convert_scalar_to_number(&ZEND_OP1_LITERAL(opline));
 					}
 				}
 				/* break missing *intentionally* - the assign_op's may only optimize op2 */
@@ -61,7 +61,7 @@ void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
 				}
 				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
-						convert_scalar_to_number(&ZEND_OP2_LITERAL(opline) TSRMLS_CC);
+						convert_scalar_to_number(&ZEND_OP2_LITERAL(opline));
 					}
 				}
 				break;
@@ -119,7 +119,7 @@ void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
 				/* convert Ti = JMPZ_EX(C, L) => Ti = QM_ASSIGN(C)
 				   in case we know it wouldn't jump */
 				} else if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline) TSRMLS_CC);
+					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
 					if (opline->opcode == ZEND_JMPZ_EX) {
 						should_jmp = !should_jmp;
 					}
@@ -133,7 +133,7 @@ void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
-					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline) TSRMLS_CC);
+					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
 
 					if (opline->opcode == ZEND_JMPZ) {
 						should_jmp = !should_jmp;
@@ -169,7 +169,7 @@ void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
 			case ZEND_JMPZNZ:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					int opline_num;
-					if (zend_is_true(&ZEND_OP1_LITERAL(opline) TSRMLS_CC)) {
+					if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
 						opline_num = opline->extended_value; /* JMPNZ */
 					} else {
 						opline_num = ZEND_OP2(opline).opline_num; /* JMPZ */
@@ -189,11 +189,10 @@ void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
 					int nest_levels;
 					int dont_optimize = 0;
 
-					if (ZEND_OP2_TYPE(opline) != IS_CONST) {
-						break;
-					}
-					convert_to_long(&ZEND_OP2_LITERAL(opline));
-					nest_levels = ZEND_OP2_LITERAL(opline).value.lval;
+					ZEND_ASSERT(ZEND_OP2_TYPE(opline) == IS_CONST);
+					ZEND_ASSERT(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG);
+
+					nest_levels = Z_LVAL(ZEND_OP2_LITERAL(opline));
 
 					array_offset = ZEND_OP1(opline).opline_num;
 					while (1) {
@@ -204,8 +203,7 @@ void zend_optimizer_pass2(zend_op_array *op_array TSRMLS_DC)
 						jmp_to = &op_array->brk_cont_array[array_offset];
 						array_offset = jmp_to->parent;
 						if (--nest_levels > 0) {
-							if (opline->opcode == ZEND_BRK &&
-							    op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE) {
+							if (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE) {
 								dont_optimize = 1;
 								break;
 							}

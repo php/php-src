@@ -39,7 +39,7 @@ yes
     CPPFLAGS=$old_CPPFLAGS
   fi
 
-  PHP_NEW_EXTENSION(filter, filter.c sanitizing_filters.c logical_filters.c callback_filter.c, $ext_shared)
+  PHP_NEW_EXTENSION(filter, filter.c sanitizing_filters.c logical_filters.c callback_filter.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(FILTER_SHARED_LIBADD)
 
   PHP_INSTALL_HEADERS([ext/filter/php_filter.h])

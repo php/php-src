@@ -120,31 +120,31 @@ Error: 8 - Array to string conversion, %ssplit_variation_003.php(%d)
 
 Arg value Array 
 Error: 8192 - Function split() is deprecated, %s(73)
-Error: 2 - split() expects parameter 3 to be long, array given, %s(73)
+Error: 2 - split() expects parameter 3 to be integer, array given, %s(73)
 NULL
 Error: 8 - Array to string conversion, %ssplit_variation_003.php(%d)
 
 Arg value Array 
 Error: 8192 - Function split() is deprecated, %s(73)
-Error: 2 - split() expects parameter 3 to be long, array given, %s(73)
+Error: 2 - split() expects parameter 3 to be integer, array given, %s(73)
 NULL
 Error: 8 - Array to string conversion, %ssplit_variation_003.php(%d)
 
 Arg value Array 
 Error: 8192 - Function split() is deprecated, %s(73)
-Error: 2 - split() expects parameter 3 to be long, array given, %s(73)
+Error: 2 - split() expects parameter 3 to be integer, array given, %s(73)
 NULL
 Error: 8 - Array to string conversion, %ssplit_variation_003.php(%d)
 
 Arg value Array 
 Error: 8192 - Function split() is deprecated, %s(73)
-Error: 2 - split() expects parameter 3 to be long, array given, %s(73)
+Error: 2 - split() expects parameter 3 to be integer, array given, %s(73)
 NULL
 Error: 8 - Array to string conversion, %ssplit_variation_003.php(%d)
 
 Arg value Array 
 Error: 8192 - Function split() is deprecated, %s(73)
-Error: 2 - split() expects parameter 3 to be long, array given, %s(73)
+Error: 2 - split() expects parameter 3 to be integer, array given, %s(73)
 NULL
 
 Arg value  
@@ -191,28 +191,28 @@ array(1) {
 
 Arg value  
 Error: 8192 - Function split() is deprecated, %s(73)
-Error: 2 - split() expects parameter 3 to be long, string given, %s(73)
+Error: 2 - split() expects parameter 3 to be integer, string given, %s(73)
 NULL
 
 Arg value  
 Error: 8192 - Function split() is deprecated, %s(73)
-Error: 2 - split() expects parameter 3 to be long, string given, %s(73)
+Error: 2 - split() expects parameter 3 to be integer, string given, %s(73)
 NULL
 
 Arg value string 
 Error: 8192 - Function split() is deprecated, %s(73)
-Error: 2 - split() expects parameter 3 to be long, string given, %s(73)
+Error: 2 - split() expects parameter 3 to be integer, string given, %s(73)
 NULL
 
 Arg value string 
 Error: 8192 - Function split() is deprecated, %s(73)
-Error: 2 - split() expects parameter 3 to be long, string given, %s(73)
+Error: 2 - split() expects parameter 3 to be integer, string given, %s(73)
 NULL
 Error: 4096 - Object of class stdClass could not be converted to string, %s(72)
 
 Arg value  
 Error: 8192 - Function split() is deprecated, %s(73)
-Error: 2 - split() expects parameter 3 to be long, object given, %s(73)
+Error: 2 - split() expects parameter 3 to be integer, object given, %s(73)
 NULL
 
 Arg value  

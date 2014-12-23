@@ -59,7 +59,7 @@ typedef enum
 
 PHP_MINIT_FUNCTION(imagetypes);
 
-PHPAPI int php_getimagetype(php_stream *stream, char *filetype TSRMLS_DC);
+PHPAPI int php_getimagetype(php_stream *stream, char *filetype);
 
 PHPAPI char * php_image_type_to_mime_type(int image_type);
 

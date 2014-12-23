@@ -18,4 +18,4 @@ imageellipse($image, 200, 150, 300, 'wrong param', 16777215);
 
 ?>
 --EXPECTF--
-Warning: imageellipse() expects parameter 5 to be long, %s given in %s on line %d
+Warning: imageellipse() expects parameter 5 to be integer, %s given in %s on line %d

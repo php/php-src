@@ -151,27 +151,27 @@ typedef int (*verify_path_func)(const cwd_state *);
 
 CWD_API void virtual_cwd_startup(void);
 CWD_API void virtual_cwd_shutdown(void);
-CWD_API int virtual_cwd_activate(TSRMLS_D);
-CWD_API int virtual_cwd_deactivate(TSRMLS_D);
-CWD_API char *virtual_getcwd_ex(size_t *length TSRMLS_DC);
-CWD_API char *virtual_getcwd(char *buf, size_t size TSRMLS_DC);
-CWD_API int virtual_chdir(const char *path TSRMLS_DC);
-CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path TSRMLS_DC) TSRMLS_DC);
-CWD_API int virtual_filepath(const char *path, char **filepath TSRMLS_DC);
-CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path TSRMLS_DC);
-CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC);
-CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC);
-CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...);
-CWD_API int virtual_creat(const char *path, mode_t mode TSRMLS_DC);
-CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC);
-CWD_API int virtual_stat(const char *path, zend_stat_t *buf TSRMLS_DC);
-CWD_API int virtual_lstat(const char *path, zend_stat_t *buf TSRMLS_DC);
-CWD_API int virtual_unlink(const char *path TSRMLS_DC);
-CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC);
-CWD_API int virtual_rmdir(const char *pathname TSRMLS_DC);
-CWD_API DIR *virtual_opendir(const char *pathname TSRMLS_DC);
-CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC);
-CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC);
+CWD_API int virtual_cwd_activate(void);
+CWD_API int virtual_cwd_deactivate(void);
+CWD_API char *virtual_getcwd_ex(size_t *length);
+CWD_API char *virtual_getcwd(char *buf, size_t size);
+CWD_API int virtual_chdir(const char *path);
+CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path));
+CWD_API int virtual_filepath(const char *path, char **filepath);
+CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path);
+CWD_API char *virtual_realpath(const char *path, char *real_path);
+CWD_API FILE *virtual_fopen(const char *path, const char *mode);
+CWD_API int virtual_open(const char *path, int flags, ...);
+CWD_API int virtual_creat(const char *path, mode_t mode);
+CWD_API int virtual_rename(const char *oldname, const char *newname);
+CWD_API int virtual_stat(const char *path, zend_stat_t *buf);
+CWD_API int virtual_lstat(const char *path, zend_stat_t *buf);
+CWD_API int virtual_unlink(const char *path);
+CWD_API int virtual_mkdir(const char *pathname, mode_t mode);
+CWD_API int virtual_rmdir(const char *pathname);
+CWD_API DIR *virtual_opendir(const char *pathname);
+CWD_API FILE *virtual_popen(const char *command, const char *type);
+CWD_API int virtual_access(const char *pathname, int mode);
 #if defined(TSRM_WIN32)
 /* these are not defined in win32 headers */
 #ifndef W_OK
@@ -189,11 +189,11 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC);
 #endif
 
 #if HAVE_UTIME
-CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC);
+CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);
 #endif
-CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC);
+CWD_API int virtual_chmod(const char *filename, mode_t mode);
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
-CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link TSRMLS_DC);
+CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link);
 #endif
 
 /* One of the following constants must be used as the last argument
@@ -203,9 +203,9 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 #define CWD_FILEPATH 1 /* resolve symlinks if file is exist otherwise expand */
 #define CWD_REALPATH 2 /* call realpath(), resolve symlinks. File must exist */
 
-CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath TSRMLS_DC);
+CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath);
 
-CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC);
+CWD_API char *tsrm_realpath(const char *path, char *real_path);
 
 #define REALPATH_CACHE_TTL  (2*60) /* 2 minutes */
 #define REALPATH_CACHE_SIZE 0      /* disabled while php.ini isn't loaded */
@@ -237,18 +237,18 @@ typedef struct _virtual_cwd_globals {
 
 #ifdef ZTS
 extern ts_rsrc_id cwd_globals_id;
-# define CWDG(v) TSRMG(cwd_globals_id, virtual_cwd_globals *, v)
+# define CWDG(v) ZEND_TSRMG(cwd_globals_id, virtual_cwd_globals *, v)
 #else
 extern virtual_cwd_globals cwd_globals;
 # define CWDG(v) (cwd_globals.v)
 #endif
 
-CWD_API void realpath_cache_clean(TSRMLS_D);
-CWD_API void realpath_cache_del(const char *path, int path_len TSRMLS_DC);
-CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t TSRMLS_DC);
-CWD_API zend_long realpath_cache_size(TSRMLS_D);
-CWD_API zend_long realpath_cache_max_buckets(TSRMLS_D);
-CWD_API realpath_cache_bucket** realpath_cache_get_buckets(TSRMLS_D);
+CWD_API void realpath_cache_clean(void);
+CWD_API void realpath_cache_del(const char *path, int path_len);
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t);
+CWD_API zend_long realpath_cache_size(void);
+CWD_API zend_long realpath_cache_max_buckets(void);
+CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 
 /* The actual macros to be used in programs using TSRM
  * If the program defines VIRTUAL_DIR it will use the
@@ -257,33 +257,33 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(TSRMLS_D);
 
 #ifdef VIRTUAL_DIR
 
-#define VCWD_GETCWD(buff, size) virtual_getcwd(buff, size TSRMLS_CC)
-#define VCWD_FOPEN(path, mode) virtual_fopen(path, mode TSRMLS_CC)
+#define VCWD_GETCWD(buff, size) virtual_getcwd(buff, size)
+#define VCWD_FOPEN(path, mode) virtual_fopen(path, mode)
 /* Because open() has two modes, we have to macros to replace it */
-#define VCWD_OPEN(path, flags) virtual_open(path TSRMLS_CC, flags)
-#define VCWD_OPEN_MODE(path, flags, mode) virtual_open(path TSRMLS_CC, flags, mode)
-#define VCWD_CREAT(path, mode) virtual_creat(path, mode TSRMLS_CC)
-#define VCWD_CHDIR(path) virtual_chdir(path TSRMLS_CC)
-#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, virtual_chdir TSRMLS_CC)
+#define VCWD_OPEN(path, flags) virtual_open(path, flags)
+#define VCWD_OPEN_MODE(path, flags, mode) virtual_open(path, flags, mode)
+#define VCWD_CREAT(path, mode) virtual_creat(path, mode)
+#define VCWD_CHDIR(path) virtual_chdir(path)
+#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, virtual_chdir)
 #define VCWD_GETWD(buf)
-#define VCWD_REALPATH(path, real_path) virtual_realpath(path, real_path TSRMLS_CC)
-#define VCWD_RENAME(oldname, newname) virtual_rename(oldname, newname TSRMLS_CC)
-#define VCWD_STAT(path, buff) virtual_stat(path, buff TSRMLS_CC)
-# define VCWD_LSTAT(path, buff) virtual_lstat(path, buff TSRMLS_CC)
-#define VCWD_UNLINK(path) virtual_unlink(path TSRMLS_CC)
-#define VCWD_MKDIR(pathname, mode) virtual_mkdir(pathname, mode TSRMLS_CC)
-#define VCWD_RMDIR(pathname) virtual_rmdir(pathname TSRMLS_CC)
-#define VCWD_OPENDIR(pathname) virtual_opendir(pathname TSRMLS_CC)
-#define VCWD_POPEN(command, type) virtual_popen(command, type TSRMLS_CC)
-#define VCWD_ACCESS(pathname, mode) virtual_access(pathname, mode TSRMLS_CC)
+#define VCWD_REALPATH(path, real_path) virtual_realpath(path, real_path)
+#define VCWD_RENAME(oldname, newname) virtual_rename(oldname, newname)
+#define VCWD_STAT(path, buff) virtual_stat(path, buff)
+# define VCWD_LSTAT(path, buff) virtual_lstat(path, buff)
+#define VCWD_UNLINK(path) virtual_unlink(path)
+#define VCWD_MKDIR(pathname, mode) virtual_mkdir(pathname, mode)
+#define VCWD_RMDIR(pathname) virtual_rmdir(pathname)
+#define VCWD_OPENDIR(pathname) virtual_opendir(pathname)
+#define VCWD_POPEN(command, type) virtual_popen(command, type)
+#define VCWD_ACCESS(pathname, mode) virtual_access(pathname, mode)
 #if HAVE_UTIME
-#define VCWD_UTIME(path, time) virtual_utime(path, time TSRMLS_CC)
+#define VCWD_UTIME(path, time) virtual_utime(path, time)
 #endif
-#define VCWD_CHMOD(path, mode) virtual_chmod(path, mode TSRMLS_CC)
+#define VCWD_CHMOD(path, mode) virtual_chmod(path, mode)
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
-#define VCWD_CHOWN(path, owner, group) virtual_chown(path, owner, group, 0 TSRMLS_CC)
+#define VCWD_CHOWN(path, owner, group) virtual_chown(path, owner, group, 0)
 #if HAVE_LCHOWN
-#define VCWD_LCHOWN(path, owner, group) virtual_chown(path, owner, group, 1 TSRMLS_CC)
+#define VCWD_LCHOWN(path, owner, group) virtual_chown(path, owner, group, 1)
 #endif
 #endif
 
@@ -312,12 +312,12 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(TSRMLS_D);
 #define VCWD_OPENDIR(pathname) opendir(pathname)
 #define VCWD_POPEN(command, type) popen(command, type)
 #if defined(TSRM_WIN32)
-#define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode TSRMLS_CC)
+#define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode)
 #else
 #define VCWD_ACCESS(pathname, mode) access(pathname, mode)
 #endif
 
-#define VCWD_REALPATH(path, real_path) tsrm_realpath(path, real_path TSRMLS_CC)
+#define VCWD_REALPATH(path, real_path) tsrm_realpath(path, real_path)
 
 #if HAVE_UTIME
 # ifdef TSRM_WIN32

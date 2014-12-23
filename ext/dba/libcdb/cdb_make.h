@@ -54,11 +54,11 @@ struct cdb_make {
 	php_stream * fp;
 };
 
-int cdb_make_start(struct cdb_make *, php_stream * TSRMLS_DC);
-int cdb_make_addbegin(struct cdb_make *, unsigned int, unsigned int TSRMLS_DC);
-int cdb_make_addend(struct cdb_make *, unsigned int, unsigned int, uint32 TSRMLS_DC);
-int cdb_make_add(struct cdb_make *, char *, unsigned int, char *, unsigned int TSRMLS_DC);
-int cdb_make_finish(struct cdb_make * TSRMLS_DC);
+int cdb_make_start(struct cdb_make *, php_stream *);
+int cdb_make_addbegin(struct cdb_make *, unsigned int, unsigned int);
+int cdb_make_addend(struct cdb_make *, unsigned int, unsigned int, uint32);
+int cdb_make_add(struct cdb_make *, char *, unsigned int, char *, unsigned int);
+int cdb_make_finish(struct cdb_make *);
 char *cdb_make_version();
 
 #endif

@@ -202,7 +202,7 @@ PHP_FUNCTION(convert_uuencode)
 {
 	zend_string *src;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &src) == FAILURE || src->len < 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &src) == FAILURE || src->len < 1) {
 		RETURN_FALSE;
 	}
 
@@ -217,12 +217,12 @@ PHP_FUNCTION(convert_uudecode)
 	zend_string *src;
 	zend_string *dest;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &src) == FAILURE || src->len < 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &src) == FAILURE || src->len < 1) {
 		RETURN_FALSE;
 	}
 
 	if ((dest = php_uudecode(src->val, src->len)) == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The given parameter is not a valid uuencoded string");
+		php_error_docref(NULL, E_WARNING, "The given parameter is not a valid uuencoded string");
 		RETURN_FALSE;
 	}
 

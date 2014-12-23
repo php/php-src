@@ -72,11 +72,11 @@ ZEND_GET_MODULE(xsl)
 #endif
 
 /* {{{ xsl_objects_free_storage */
-void xsl_objects_free_storage(zend_object *object TSRMLS_DC)
+void xsl_objects_free_storage(zend_object *object)
 {
 	xsl_object *intern = php_xsl_fetch_object(object);
 
-	zend_object_std_dtor(&intern->std TSRMLS_CC);
+	zend_object_std_dtor(&intern->std);
 
 	zend_hash_destroy(intern->parameter);
 	FREE_HASHTABLE(intern->parameter);
@@ -90,7 +90,7 @@ void xsl_objects_free_storage(zend_object *object TSRMLS_DC)
 	}
 
 	if (intern->doc) {
-		php_libxml_decrement_doc_ref(intern->doc TSRMLS_CC);
+		php_libxml_decrement_doc_ref(intern->doc);
 		efree(intern->doc);
 	}
 
@@ -110,14 +110,14 @@ void xsl_objects_free_storage(zend_object *object TSRMLS_DC)
 /* }}} */
 
 /* {{{ xsl_objects_new */
-zend_object *xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
+zend_object *xsl_objects_new(zend_class_entry *class_type)
 {
 	xsl_object *intern;
 
 	intern = ecalloc(1, sizeof(xsl_object) + sizeof(zval) * (class_type->default_properties_count - 1));
 	intern->securityPrefs = XSL_SECPREF_DEFAULT;
 
-	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
+	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 	ALLOC_HASHTABLE(intern->parameter);
 	zend_hash_init(intern->parameter, 0, NULL, ZVAL_PTR_DTOR, 0);
@@ -197,25 +197,25 @@ zval *xsl_object_get_data(void *obj)
 /* }}} */
 
 /* {{{ xsl_object_set_data */
-static void xsl_object_set_data(void *obj, zval *wrapper TSRMLS_DC)
+static void xsl_object_set_data(void *obj, zval *wrapper)
 {
 	((xsltStylesheetPtr) obj)->_private = wrapper;
 }
 /* }}} */
 
 /* {{{ php_xsl_set_object */
-void php_xsl_set_object(zval *wrapper, void *obj TSRMLS_DC)
+void php_xsl_set_object(zval *wrapper, void *obj)
 {
 	xsl_object *object;
 
 	object = Z_XSL_P(wrapper);
 	object->ptr = obj;
-	xsl_object_set_data(obj, wrapper TSRMLS_CC);
+	xsl_object_set_data(obj, wrapper);
 }
 /* }}} */
 
 /* {{{ php_xsl_create_object */
-void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return_value  TSRMLS_DC)
+void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return_value )
 {
 	zval *wrapper;
 	zend_class_entry *ce;
@@ -243,7 +243,7 @@ void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return
 	if (!wrapper_in) {
 		object_init_ex(wrapper, ce);
 	}
-	php_xsl_set_object(wrapper, (void *) obj TSRMLS_CC);
+	php_xsl_set_object(wrapper, (void *) obj);
 
 	return;
 }

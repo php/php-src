@@ -33,9 +33,9 @@
 #include <locale.h>
 #endif
 
-PHPAPI zend_string *php_pcre_replace(zend_string *regex, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int limit, int *replace_count TSRMLS_DC);
-PHPAPI pcre* pcre_get_compiled_regex(zend_string *regex, pcre_extra **extra, int *options TSRMLS_DC);
-PHPAPI pcre* pcre_get_compiled_regex_ex(zend_string *regex, pcre_extra **extra, int *preg_options, int *coptions TSRMLS_DC);
+PHPAPI zend_string *php_pcre_replace(zend_string *regex, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int limit, int *replace_count);
+PHPAPI pcre* pcre_get_compiled_regex(zend_string *regex, pcre_extra **extra, int *options);
+PHPAPI pcre* pcre_get_compiled_regex_ex(zend_string *regex, pcre_extra **extra, int *preg_options, int *coptions);
 
 extern zend_module_entry pcre_module_entry;
 #define pcre_module_ptr &pcre_module_entry
@@ -47,26 +47,26 @@ typedef struct {
 	int capture_count;
 	int name_count;
 #if HAVE_SETLOCALE
-	char *locale;
+	zend_string *locale;
 	unsigned const char *tables;
 #endif
 	int compile_options;
 	int refcount;
 } pcre_cache_entry;
 
-PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex TSRMLS_DC);
+PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex);
 
 PHPAPI void  php_pcre_match_impl(  pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
-	zval *subpats, int global, int use_flags, zend_long flags, zend_long start_offset TSRMLS_DC);
+	zval *subpats, int global, int use_flags, zend_long flags, zend_long start_offset);
 
 PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value, 
-	int is_callable_replace, int limit, int *replace_count TSRMLS_DC);
+	int is_callable_replace, int limit, int *replace_count);
 
 PHPAPI void  php_pcre_split_impl(  pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
-	zend_long limit_val, zend_long flags TSRMLS_DC);
+	zend_long limit_val, zend_long flags);
 
 PHPAPI void  php_pcre_grep_impl(   pcre_cache_entry *pce, zval *input, zval *return_value,
-	zend_long flags TSRMLS_DC);
+	zend_long flags);
 
 ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	HashTable pcre_cache;
@@ -79,7 +79,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 ZEND_END_MODULE_GLOBALS(pcre)
 
 #ifdef ZTS
-# define PCRE_G(v) TSRMG(pcre_globals_id, zend_pcre_globals *, v)
+# define PCRE_G(v) ZEND_TSRMG(pcre_globals_id, zend_pcre_globals *, v)
 #else
 # define PCRE_G(v)	(pcre_globals.v)
 #endif

@@ -21,6 +21,6 @@
 #ifndef CSS_H
 #define CSS_H
 
-PHPAPI void php_info_print_css(TSRMLS_D);
+PHPAPI void php_info_print_css(void);
 
 #endif

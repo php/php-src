@@ -26,9 +26,9 @@ BEGIN_EXTERN_C()
 /*
   Define functions for FP initialization and de-initialization.
 */
-extern ZEND_API void zend_init_fpu(TSRMLS_D);
-extern ZEND_API void zend_shutdown_fpu(TSRMLS_D);
-extern ZEND_API void zend_ensure_fpu_mode(TSRMLS_D);
+extern ZEND_API void zend_init_fpu(void);
+extern ZEND_API void zend_shutdown_fpu(void);
+extern ZEND_API void zend_ensure_fpu_mode(void);
 
 END_EXTERN_C()
 

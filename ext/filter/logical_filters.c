@@ -81,9 +81,9 @@
 #define FORMAT_IPV4    4
 #define FORMAT_IPV6    6
 
-static int _php_filter_validate_ipv6(char *str, size_t str_len TSRMLS_DC);
+static int _php_filter_validate_ipv6(char *str, size_t str_len);
 
-static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
+static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
 	zend_long ctx_value;
 	int sign = 0, digit = 0;
 	const char *end = str + str_len;
@@ -135,7 +135,7 @@ static int php_filter_parse_int(const char *str, size_t str_len, zend_long *ret 
 }
 /* }}} */
 
-static int php_filter_parse_octal(const char *str, size_t str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
+static int php_filter_parse_octal(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
 	zend_ulong ctx_value = 0;
 	const char *end = str + str_len;
 
@@ -158,7 +158,7 @@ static int php_filter_parse_octal(const char *str, size_t str_len, zend_long *re
 }
 /* }}} */
 
-static int php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret TSRMLS_DC) { /* {{{ */
+static int php_filter_parse_hex(const char *str, size_t str_len, zend_long *ret) { /* {{{ */
 	zend_ulong ctx_value = 0;
 	const char *end = str + str_len;
 	zend_ulong n;
@@ -225,18 +225,18 @@ void php_filter_int(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		p++; len--;
 		if (allow_hex && (*p == 'x' || *p == 'X')) {
 			p++; len--;
-			if (php_filter_parse_hex(p, len, &ctx_value TSRMLS_CC) < 0) {
+			if (php_filter_parse_hex(p, len, &ctx_value) < 0) {
 				error = 1;
 			}
 		} else if (allow_octal) {
-			if (php_filter_parse_octal(p, len, &ctx_value TSRMLS_CC) < 0) {
+			if (php_filter_parse_octal(p, len, &ctx_value) < 0) {
 				error = 1;
 			}
 		} else if (len != 0) {
 			error = 1;
 		}
 	} else {
-		if (php_filter_parse_int(p, len, &ctx_value TSRMLS_CC) < 0) {
+		if (php_filter_parse_int(p, len, &ctx_value) < 0) {
 			error = 1;
 		}
 	}
@@ -347,7 +347,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	if (decimal_set) {
 		if (decimal_len != 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "decimal separator must be one char");
+			php_error_docref(NULL, E_WARNING, "decimal separator must be one char");
 			RETURN_VALIDATION_FAILED
 		} else {
 			dec_sep = *decimal;
@@ -440,11 +440,11 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	FETCH_LONG_OPTION(option_flags, "flags");
 
 	if (!regexp_set) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'regexp' option missing");
+		php_error_docref(NULL, E_WARNING, "'regexp' option missing");
 		RETURN_VALIDATION_FAILED
 	}
 
-	re = pcre_get_compiled_regex(regexp, &pcre_extra, &preg_options TSRMLS_CC);
+	re = pcre_get_compiled_regex(regexp, &pcre_extra, &preg_options);
 	if (!re) {
 		RETURN_VALIDATION_FAILED
 	}
@@ -521,7 +521,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	php_url *url;
 	int old_len = (int)Z_STRLEN_P(value);
 	
-	php_filter_url(value, flags, option_array, charset TSRMLS_CC);
+	php_filter_url(value, flags, option_array, charset);
 
 	if (Z_TYPE_P(value) != IS_STRING || old_len != Z_STRLEN_P(value)) {
 		RETURN_VALIDATION_FAILED
@@ -548,7 +548,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		t = e - 1;
 
 		/* An IPv6 enclosed by square brackets is a valid hostname */
-		if (*s == '[' && *t == ']' && _php_filter_validate_ipv6((s + 1), l - 2 TSRMLS_CC)) {
+		if (*s == '[' && *t == ']' && _php_filter_validate_ipv6((s + 1), l - 2)) {
 			php_url_free(url);
 			return;
 		}
@@ -615,7 +615,7 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	sregexp = zend_string_init(regexp, sizeof(regexp) - 1, 0);
-	re = pcre_get_compiled_regex(sregexp, &pcre_extra, &preg_options TSRMLS_CC);
+	re = pcre_get_compiled_regex(sregexp, &pcre_extra, &preg_options);
 	if (!re) {
 		zend_string_release(sregexp);
 		RETURN_VALIDATION_FAILED
@@ -666,7 +666,7 @@ static int _php_filter_validate_ipv4(char *str, size_t str_len, int *ip) /* {{{ 
 }
 /* }}} */
 
-static int _php_filter_validate_ipv6(char *str, size_t str_len TSRMLS_DC) /* {{{ */
+static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
 {
 	int compressed = 0;
 	int blocks = 0;
@@ -805,7 +805,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		case FORMAT_IPV6:
 			{
 				int res = 0;
-				res = _php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value) TSRMLS_CC);
+				res = _php_filter_validate_ipv6(Z_STRVAL_P(value), Z_STRLEN_P(value));
 				if (res < 1) {
 					RETURN_VALIDATION_FAILED
 				}
@@ -870,7 +870,7 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	FETCH_STRING_OPTION(exp_separator, "separator");
 
 	if (exp_separator_set && exp_separator_len != 1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Separator must be exactly one character long");
+		php_error_docref(NULL, E_WARNING, "Separator must be exactly one character long");
 		RETURN_VALIDATION_FAILED;
 	}
 
@@ -910,7 +910,7 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			/* The current token did not end with e.g. a "." */
 			RETURN_VALIDATION_FAILED
 		}
-		if (php_filter_parse_hex(input + offset, length, &ret TSRMLS_CC) < 0) {
+		if (php_filter_parse_hex(input + offset, length, &ret) < 0) {
 			/* The current token is no valid hexadecimal digit */
 			RETURN_VALIDATION_FAILED
 		}

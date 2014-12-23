@@ -47,30 +47,30 @@
 
 /* {{{ flatfile_store
  */
-int flatfile_store(flatfile *dba, datum key_datum, datum value_datum, int mode TSRMLS_DC) {
+int flatfile_store(flatfile *dba, datum key_datum, datum value_datum, int mode) {
 	if (mode == FLATFILE_INSERT) {
-		if (flatfile_findkey(dba, key_datum TSRMLS_CC)) {
+		if (flatfile_findkey(dba, key_datum)) {
 			return 1;
 		}
 		php_stream_seek(dba->fp, 0L, SEEK_END);
-		php_stream_printf(dba->fp TSRMLS_CC, "%zu\n", key_datum.dsize);
+		php_stream_printf(dba->fp, "%zu\n", key_datum.dsize);
 		php_stream_flush(dba->fp);
 		if (php_stream_write(dba->fp, key_datum.dptr, key_datum.dsize) < key_datum.dsize) {
 			return -1;
 		}
-		php_stream_printf(dba->fp TSRMLS_CC, "%zu\n", value_datum.dsize);
+		php_stream_printf(dba->fp, "%zu\n", value_datum.dsize);
 		php_stream_flush(dba->fp);
 		if (php_stream_write(dba->fp, value_datum.dptr, value_datum.dsize) < value_datum.dsize) {
 			return -1;
 		}
 	} else { /* FLATFILE_REPLACE */
-		flatfile_delete(dba, key_datum TSRMLS_CC);
-		php_stream_printf(dba->fp TSRMLS_CC, "%zu\n", key_datum.dsize);
+		flatfile_delete(dba, key_datum);
+		php_stream_printf(dba->fp, "%zu\n", key_datum.dsize);
 		php_stream_flush(dba->fp);
 		if (php_stream_write(dba->fp, key_datum.dptr, key_datum.dsize) < key_datum.dsize) {
 			return -1;
 		}
-		php_stream_printf(dba->fp TSRMLS_CC, "%zu\n", value_datum.dsize);
+		php_stream_printf(dba->fp, "%zu\n", value_datum.dsize);
 		if (php_stream_write(dba->fp, value_datum.dptr, value_datum.dsize) < value_datum.dsize) {
 			return -1;
 		}
@@ -83,11 +83,11 @@ int flatfile_store(flatfile *dba, datum key_datum, datum value_datum, int mode T
 
 /* {{{ flatfile_fetch
  */
-datum flatfile_fetch(flatfile *dba, datum key_datum TSRMLS_DC) {
+datum flatfile_fetch(flatfile *dba, datum key_datum) {
 	datum value_datum = {NULL, 0};
 	char buf[16];
 
-	if (flatfile_findkey(dba, key_datum TSRMLS_CC)) {
+	if (flatfile_findkey(dba, key_datum)) {
 		if (php_stream_gets(dba->fp, buf, sizeof(buf))) {
 			value_datum.dsize = atoi(buf);
 			value_datum.dptr = safe_emalloc(value_datum.dsize, 1, 1);
@@ -103,7 +103,7 @@ datum flatfile_fetch(flatfile *dba, datum key_datum TSRMLS_DC) {
 
 /* {{{ flatfile_delete
  */
-int flatfile_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
+int flatfile_delete(flatfile *dba, datum key_datum) {
 	char *key = key_datum.dptr;
 	size_t size = key_datum.dsize;
 	size_t buf_size = FLATFILE_BLOCK_SIZE;
@@ -161,7 +161,7 @@ int flatfile_delete(flatfile *dba, datum key_datum TSRMLS_DC) {
 
 /* {{{ flatfile_findkey
  */
-int flatfile_findkey(flatfile *dba, datum key_datum TSRMLS_DC) {
+int flatfile_findkey(flatfile *dba, datum key_datum) {
 	size_t buf_size = FLATFILE_BLOCK_SIZE;
 	char *buf = emalloc(buf_size);
 	size_t num;
@@ -209,7 +209,7 @@ int flatfile_findkey(flatfile *dba, datum key_datum TSRMLS_DC) {
 
 /* {{{ flatfile_firstkey
  */
-datum flatfile_firstkey(flatfile *dba TSRMLS_DC) {
+datum flatfile_firstkey(flatfile *dba) {
 	datum res;
 	size_t num;
 	size_t buf_size = FLATFILE_BLOCK_SIZE;
@@ -257,7 +257,7 @@ datum flatfile_firstkey(flatfile *dba TSRMLS_DC) {
 
 /* {{{ flatfile_nextkey
  */
-datum flatfile_nextkey(flatfile *dba TSRMLS_DC) {
+datum flatfile_nextkey(flatfile *dba) {
 	datum res;
 	size_t num;
 	size_t buf_size = FLATFILE_BLOCK_SIZE;

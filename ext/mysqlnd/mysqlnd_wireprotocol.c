@@ -35,10 +35,10 @@
 #define	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, buf_size, packet_type_as_text, packet_type) \
 	{ \
 		DBG_INF_FMT("buf=%p size=%u", (buf), (buf_size)); \
-		if (FAIL == mysqlnd_read_header((conn)->net, &((packet)->header), (conn)->stats, ((conn)->error_info) TSRMLS_CC)) {\
+		if (FAIL == mysqlnd_read_header((conn)->net, &((packet)->header), (conn)->stats, ((conn)->error_info))) {\
 			CONN_SET_STATE(conn, CONN_QUIT_SENT); \
 			SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);\
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysqlnd_server_gone); \
+			php_error_docref(NULL, E_WARNING, "%s", mysqlnd_server_gone); \
 			DBG_ERR_FMT("Can't read %s's header", (packet_type_as_text)); \
 			DBG_RETURN(FAIL);\
 		}\
@@ -47,10 +47,10 @@
 						(buf_size), (packet)->header.size, (packet)->header.size - (buf_size)); \
 						DBG_RETURN(FAIL); \
 		}\
-		if (FAIL == conn->net->data->m.receive_ex((conn)->net, (buf), (packet)->header.size, (conn)->stats, ((conn)->error_info) TSRMLS_CC)) { \
+		if (FAIL == conn->net->data->m.receive_ex((conn)->net, (buf), (packet)->header.size, (conn)->stats, ((conn)->error_info))) { \
 			CONN_SET_STATE(conn, CONN_QUIT_SENT); \
 			SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);\
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysqlnd_server_gone); \
+			php_error_docref(NULL, E_WARNING, "%s", mysqlnd_server_gone); \
 			DBG_ERR_FMT("Empty '%s' packet body", (packet_type_as_text)); \
 			DBG_RETURN(FAIL);\
 		} \
@@ -63,7 +63,7 @@
 
 #define BAIL_IF_NO_MORE_DATA \
 	if ((size_t)(p - begin) > packet->header.size) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Premature end of data (mysqlnd_wireprotocol.c:%u)", __LINE__); \
+		php_error_docref(NULL, E_WARNING, "Premature end of data (mysqlnd_wireprotocol.c:%u)", __LINE__); \
 		goto premature_end; \
 	} \
 
@@ -233,7 +233,7 @@ php_mysqlnd_net_store_length_size(uint64_t length)
 static enum_func_status
 php_mysqlnd_read_error_from_line(zend_uchar *buf, size_t buf_len,
 								char *error, int error_buf_len,
-								unsigned int *error_no, char *sqlstate TSRMLS_DC)
+								unsigned int *error_no, char *sqlstate)
 {
 	zend_uchar *p = buf;
 	int error_msg_len= 0;
@@ -276,13 +276,13 @@ end:
 /* {{{ mysqlnd_read_header */
 static enum_func_status
 mysqlnd_read_header(MYSQLND_NET * net, MYSQLND_PACKET_HEADER * header,
-					MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC)
+					MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info)
 {
 	zend_uchar buffer[MYSQLND_HEADER_SIZE];
 
 	DBG_ENTER(mysqlnd_read_header_name);
 	DBG_INF_FMT("compressed=%u", net->data->compressed);
-	if (FAIL == net->data->m.receive_ex(net, buffer, MYSQLND_HEADER_SIZE, conn_stats, error_info TSRMLS_CC)) {
+	if (FAIL == net->data->m.receive_ex(net, buffer, MYSQLND_HEADER_SIZE, conn_stats, error_info)) {
 		DBG_RETURN(FAIL);
 	}
 
@@ -318,7 +318,7 @@ mysqlnd_read_header(MYSQLND_NET * net, MYSQLND_PACKET_HEADER * header,
 
 /* {{{ php_mysqlnd_greet_read */
 static enum_func_status
-php_mysqlnd_greet_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_greet_read(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	zend_uchar buf[2048];
 	zend_uchar *p = buf;
@@ -350,7 +350,7 @@ php_mysqlnd_greet_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
-										 TSRMLS_CC);
+										);
 		/*
 		  The server doesn't send sqlstate in the greet packet.
 		  It's a bug#26426 , so we have to set it correctly ourselves.
@@ -445,7 +445,7 @@ php_mysqlnd_greet_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("GREET packet %d bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "GREET packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "GREET packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -454,7 +454,7 @@ premature_end:
 
 /* {{{ php_mysqlnd_greet_free_mem */
 static
-void php_mysqlnd_greet_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+void php_mysqlnd_greet_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	MYSQLND_PACKET_GREET *p= (MYSQLND_PACKET_GREET *) _packet;
 	if (p->server_version) {
@@ -480,7 +480,7 @@ void php_mysqlnd_greet_free_mem(void * _packet, zend_bool stack_allocation TSRML
 
 /* {{{ php_mysqlnd_auth_write */
 static
-size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	zend_uchar buffer[AUTH_WRITE_BUFFER_LEN];
 	zend_uchar *p = buffer + MYSQLND_HEADER_SIZE; /* start after the header */
@@ -517,7 +517,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 			const char * const msg = "Authentication data too long. "
 				"Won't fit into the buffer and will be truncated. Authentication will thus fail";
 			SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, msg);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", msg);
+			php_error_docref(NULL, E_WARNING, "%s", msg);
 			DBG_RETURN(0);
 		}		
 		
@@ -647,12 +647,12 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 	if (packet->is_change_user_packet) {
 		if (PASS != conn->m->simple_command(conn, COM_CHANGE_USER, buffer + MYSQLND_HEADER_SIZE, p - buffer - MYSQLND_HEADER_SIZE,
 										   PROT_LAST /* the caller will handle the OK packet */,
-										   packet->silent, TRUE TSRMLS_CC)) {
+										   packet->silent, TRUE)) {
 			DBG_RETURN(0);
 		}
 		DBG_RETURN(p - buffer - MYSQLND_HEADER_SIZE);
 	} else {
-		size_t sent = conn->net->data->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
+		size_t sent = conn->net->data->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info);
 		if (!sent) {
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
 		}
@@ -664,7 +664,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 
 /* {{{ php_mysqlnd_auth_free_mem */
 static
-void php_mysqlnd_auth_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+void php_mysqlnd_auth_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	if (!stack_allocation) {
 		MYSQLND_PACKET_AUTH * p = (MYSQLND_PACKET_AUTH *) _packet;
@@ -678,7 +678,7 @@ void php_mysqlnd_auth_free_mem(void * _packet, zend_bool stack_allocation TSRMLS
 
 /* {{{ php_mysqlnd_auth_response_read */
 static enum_func_status
-php_mysqlnd_auth_response_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_auth_response_read(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	zend_uchar local_buf[AUTH_RESP_BUFFER_SIZE];
 	size_t buf_len = conn->net->cmd_buffer.buffer? conn->net->cmd_buffer.length: AUTH_RESP_BUFFER_SIZE;
@@ -710,7 +710,7 @@ php_mysqlnd_auth_response_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_D
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
-										 TSRMLS_CC);
+										);
 		DBG_RETURN(PASS);
 	}
 	if (0xFE == packet->response_code) {
@@ -761,7 +761,7 @@ php_mysqlnd_auth_response_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_D
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("OK packet %d bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "AUTH_RESPONSE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "AUTH_RESPONSE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -770,7 +770,7 @@ premature_end:
 
 /* {{{ php_mysqlnd_auth_response_free_mem */
 static void
-php_mysqlnd_auth_response_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+php_mysqlnd_auth_response_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	MYSQLND_PACKET_AUTH_RESPONSE * p = (MYSQLND_PACKET_AUTH_RESPONSE *) _packet;
 	if (p->message) {
@@ -798,7 +798,7 @@ php_mysqlnd_auth_response_free_mem(void * _packet, zend_bool stack_allocation TS
 
 /* {{{ php_mysqlnd_change_auth_response_write */
 static size_t
-php_mysqlnd_change_auth_response_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_change_auth_response_write(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	MYSQLND_PACKET_CHANGE_AUTH_RESPONSE *packet= (MYSQLND_PACKET_CHANGE_AUTH_RESPONSE *) _packet;
 	zend_uchar * buffer = conn->net->cmd_buffer.length >= packet->auth_data_len? conn->net->cmd_buffer.buffer : mnd_emalloc(packet->auth_data_len);
@@ -812,7 +812,7 @@ php_mysqlnd_change_auth_response_write(void * _packet, MYSQLND_CONN_DATA * conn 
 	}
 
 	{
-		size_t sent = conn->net->data->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
+		size_t sent = conn->net->data->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info);
 		if (buffer != conn->net->cmd_buffer.buffer) {
 			mnd_efree(buffer);
 		}
@@ -827,7 +827,7 @@ php_mysqlnd_change_auth_response_write(void * _packet, MYSQLND_CONN_DATA * conn 
 
 /* {{{ php_mysqlnd_change_auth_response_free_mem */
 static void
-php_mysqlnd_change_auth_response_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+php_mysqlnd_change_auth_response_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	if (!stack_allocation) {
 		MYSQLND_PACKET_CHANGE_AUTH_RESPONSE * p = (MYSQLND_PACKET_CHANGE_AUTH_RESPONSE *) _packet;
@@ -841,7 +841,7 @@ php_mysqlnd_change_auth_response_free_mem(void * _packet, zend_bool stack_alloca
 
 /* {{{ php_mysqlnd_ok_read */
 static enum_func_status
-php_mysqlnd_ok_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_ok_read(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	zend_uchar local_buf[OK_BUFFER_SIZE];
 	size_t buf_len = conn->net->cmd_buffer.buffer? conn->net->cmd_buffer.length : OK_BUFFER_SIZE;
@@ -865,7 +865,7 @@ php_mysqlnd_ok_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
-										 TSRMLS_CC);
+										);
 		DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
 		DBG_RETURN(PASS);
 	}
@@ -902,7 +902,7 @@ php_mysqlnd_ok_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("OK packet %d bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "OK packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "OK packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -911,7 +911,7 @@ premature_end:
 
 /* {{{ php_mysqlnd_ok_free_mem */
 static void
-php_mysqlnd_ok_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+php_mysqlnd_ok_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	MYSQLND_PACKET_OK *p= (MYSQLND_PACKET_OK *) _packet;
 	if (p->message) {
@@ -927,7 +927,7 @@ php_mysqlnd_ok_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
 
 /* {{{ php_mysqlnd_eof_read */
 static enum_func_status
-php_mysqlnd_eof_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_eof_read(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	/*
 	  EOF packet is since 4.1 five bytes long,
@@ -955,7 +955,7 @@ php_mysqlnd_eof_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error, sizeof(packet->error),
 										 &packet->error_no, packet->sqlstate
-										 TSRMLS_CC);
+										);
 		DBG_RETURN(PASS);
 	}
 
@@ -985,7 +985,7 @@ php_mysqlnd_eof_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("EOF packet %d bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "EOF packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "EOF packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -994,7 +994,7 @@ premature_end:
 
 /* {{{ php_mysqlnd_eof_free_mem */
 static
-void php_mysqlnd_eof_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+void php_mysqlnd_eof_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	if (!stack_allocation) {
 		mnd_pefree(_packet, ((MYSQLND_PACKET_EOF *)_packet)->header.persistent);
@@ -1004,7 +1004,7 @@ void php_mysqlnd_eof_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_
 
 
 /* {{{ php_mysqlnd_cmd_write */
-size_t php_mysqlnd_cmd_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+size_t php_mysqlnd_cmd_write(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	/* Let's have some space, which we can use, if not enough, we will allocate new buffer */
 	MYSQLND_PACKET_COMMAND * packet= (MYSQLND_PACKET_COMMAND *) _packet;
@@ -1027,14 +1027,14 @@ size_t php_mysqlnd_cmd_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_PACKETS_SENT_CMD);
 
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
-	net->data->m.consume_uneaten_data(net, packet->command TSRMLS_CC);
+	net->data->m.consume_uneaten_data(net, packet->command);
 #endif
 
 	if (!packet->argument || !packet->arg_len) {
 		zend_uchar buffer[MYSQLND_HEADER_SIZE + 1];
 
 		int1store(buffer + MYSQLND_HEADER_SIZE, packet->command);
-		sent = net->data->m.send_ex(net, buffer, 1, conn->stats, conn->error_info TSRMLS_CC);
+		sent = net->data->m.send_ex(net, buffer, 1, conn->stats, conn->error_info);
 	} else {
 		size_t tmp_len = packet->arg_len + 1 + MYSQLND_HEADER_SIZE;
 		zend_uchar *tmp, *p;
@@ -1049,7 +1049,7 @@ size_t php_mysqlnd_cmd_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 
 		memcpy(p, packet->argument, packet->arg_len);
 
-		sent = net->data->m.send_ex(net, tmp, tmp_len - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
+		sent = net->data->m.send_ex(net, tmp, tmp_len - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info);
 		if (tmp != net->cmd_buffer.buffer) {
 			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CMD_BUFFER_TOO_SMALL);
 			mnd_efree(tmp);
@@ -1070,7 +1070,7 @@ end:
 
 /* {{{ php_mysqlnd_cmd_free_mem */
 static
-void php_mysqlnd_cmd_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+void php_mysqlnd_cmd_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	if (!stack_allocation) {
 		MYSQLND_PACKET_COMMAND * p = (MYSQLND_PACKET_COMMAND *) _packet;
@@ -1082,7 +1082,7 @@ void php_mysqlnd_cmd_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_
 
 /* {{{ php_mysqlnd_rset_header_read */
 static enum_func_status
-php_mysqlnd_rset_header_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_rset_header_read(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	enum_func_status ret = PASS;
 	size_t buf_len = conn->net->cmd_buffer.length;
@@ -1108,7 +1108,7 @@ php_mysqlnd_rset_header_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error_info.error, sizeof(packet->error_info.error),
 										 &packet->error_info.error_no, packet->error_info.sqlstate
-										 TSRMLS_CC);
+										);
 		DBG_INF_FMT("conn->server_status=%u", conn->upsert_status->server_status);
 		DBG_RETURN(PASS);
 	}
@@ -1178,7 +1178,7 @@ php_mysqlnd_rset_header_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	DBG_RETURN(ret);
 premature_end:
 	DBG_ERR_FMT("RSET_HEADER packet %d bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "RSET_HEADER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "RSET_HEADER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -1187,7 +1187,7 @@ premature_end:
 
 /* {{{ php_mysqlnd_rset_header_free_mem */
 static
-void php_mysqlnd_rset_header_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+void php_mysqlnd_rset_header_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	MYSQLND_PACKET_RSET_HEADER *p= (MYSQLND_PACKET_RSET_HEADER *) _packet;
 	DBG_ENTER("php_mysqlnd_rset_header_free_mem");
@@ -1221,7 +1221,7 @@ static size_t rset_field_offsets[] =
 
 /* {{{ php_mysqlnd_rset_field_read */
 static enum_func_status
-php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	/* Should be enough for the metadata of a single row */
 	MYSQLND_PACKET_RES_FIELD *packet = (MYSQLND_PACKET_RES_FIELD *) _packet;
@@ -1250,7 +1250,7 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
 										 packet->error_info.error, sizeof(packet->error_info.error),
 										 &packet->error_info.error_no, packet->error_info.sqlstate
-										 TSRMLS_CC);
+										);
 		DBG_ERR_FMT("Server error : (%u) %s", packet->error_info.error_no, packet->error_info.error);
 		DBG_RETURN(PASS);
 	} else if (EODATA_MARKER == *p && packet->header.size < 8) {
@@ -1285,7 +1285,7 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	/* 1 byte length */
 	if (12 != *p) {
 		DBG_ERR_FMT("Protocol error. Server sent false length. Expected 12 got %d", (int) *p);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol error. Server sent false length. Expected 12");
+		php_error_docref(NULL, E_WARNING, "Protocol error. Server sent false length. Expected 12");
 	}
 
 	p++;
@@ -1408,12 +1408,12 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 
 faulty_or_fake:
 	DBG_ERR_FMT("Protocol error. Server sent NULL_LENGTH. The server is faulty");
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Protocol error. Server sent NULL_LENGTH."
+	php_error_docref(NULL, E_WARNING, "Protocol error. Server sent NULL_LENGTH."
 					 " The server is faulty");
 	DBG_RETURN(FAIL);
 premature_end:
 	DBG_ERR_FMT("RSET field packet %d bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Result set field packet "MYSQLND_SZ_T_SPEC" bytes "
+	php_error_docref(NULL, E_WARNING, "Result set field packet "MYSQLND_SZ_T_SPEC" bytes "
 			 		"shorter than expected", p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -1422,7 +1422,7 @@ premature_end:
 
 /* {{{ php_mysqlnd_rset_field_free_mem */
 static
-void php_mysqlnd_rset_field_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+void php_mysqlnd_rset_field_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	MYSQLND_PACKET_RES_FIELD *p = (MYSQLND_PACKET_RES_FIELD *) _packet;
 	/* p->metadata was passed to us as temporal buffer */
@@ -1438,7 +1438,7 @@ static enum_func_status
 php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_set_memory_pool,
 						MYSQLND_MEMORY_POOL_CHUNK ** buffer,
 						size_t * data_size, zend_bool persistent_alloc,
-						unsigned int prealloc_more_bytes TSRMLS_DC)
+						unsigned int prealloc_more_bytes)
 {
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_HEADER header;
@@ -1457,7 +1457,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 
 	*data_size = prealloc_more_bytes;
 	while (1) {
-		if (FAIL == mysqlnd_read_header(conn->net, &header, conn->stats, conn->error_info TSRMLS_CC)) {
+		if (FAIL == mysqlnd_read_header(conn->net, &header, conn->stats, conn->error_info)) {
 			ret = FAIL;
 			break;
 		}
@@ -1466,7 +1466,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 
 		if (first_iteration) {
 			first_iteration = FALSE;
-			*buffer = result_set_memory_pool->get_chunk(result_set_memory_pool, *data_size TSRMLS_CC);
+			*buffer = result_set_memory_pool->get_chunk(result_set_memory_pool, *data_size);
 			if (!*buffer) {
 				ret = FAIL;
 				break;
@@ -1481,7 +1481,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 			/*
 			  We have to realloc the buffer.
 			*/
-			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size TSRMLS_CC)) {
+			if (FAIL == (*buffer)->resize_chunk((*buffer), *data_size)) {
 				SET_OOM_ERROR(*conn->error_info);
 				ret = FAIL;
 				break;
@@ -1490,7 +1490,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 			p = (*buffer)->ptr + (*data_size - header.size);
 		}
 
-		if (PASS != (ret = conn->net->data->m.receive_ex(conn->net, p, header.size, conn->stats, conn->error_info TSRMLS_CC))) {
+		if (PASS != (ret = conn->net->data->m.receive_ex(conn->net, p, header.size, conn->stats, conn->error_info))) {
 			DBG_ERR("Empty row packet body");
 			php_error(E_WARNING, "Empty row packet body");
 			break;
@@ -1501,7 +1501,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 		}
 	}
 	if (ret == FAIL && *buffer) {
-		(*buffer)->free_chunk((*buffer) TSRMLS_CC);
+		(*buffer)->free_chunk((*buffer));
 		*buffer = NULL;
 	}
 	*data_size -= prealloc_more_bytes;
@@ -1514,7 +1514,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 enum_func_status
 php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 									  unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									  zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
+									  zend_bool as_int_or_float, MYSQLND_STATS * stats)
 {
 	unsigned int i;
 	zend_uchar *p = row_buffer->ptr;
@@ -1549,7 +1549,7 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 			statistic = STAT_BINARY_TYPE_FETCHED_NULL;
 		} else {
 			enum_mysqlnd_field_types type = fields_metadata[i].type;
-			mysqlnd_ps_fetch_functions[type].func(current_field, &fields_metadata[i], 0, &p TSRMLS_CC);
+			mysqlnd_ps_fetch_functions[type].func(current_field, &fields_metadata[i], 0, &p);
 
 			if (MYSQLND_G(collect_statistics)) {
 				switch (fields_metadata[i].type) {
@@ -1604,7 +1604,7 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
+									zend_bool as_int_or_float, MYSQLND_STATS * stats)
 {
 	unsigned int i;
 	zval *current_field, *end_field, *start_field;
@@ -1724,7 +1724,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				  Definitely not nice, _hackish_ :(, but works.
 				*/
 				zend_uchar *start = bit_area;
-				ps_fetch_from_1_to_8_bytes(current_field, &(fields_metadata[i]), 0, &p, len TSRMLS_CC);
+				ps_fetch_from_1_to_8_bytes(current_field, &(fields_metadata[i]), 0, &p, len);
 				/*
 				  We have advanced in ps_fetch_from_1_to_8_bytes. We should go back because
 				  later in this function there will be an advancement.
@@ -1756,11 +1756,11 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
+									zend_bool as_int_or_float, MYSQLND_STATS * stats)
 {
 	enum_func_status ret;
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_zval");
-	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats TSRMLS_CC);
+	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1770,11 +1770,11 @@ php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer,
 enum_func_status
 php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
-									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC)
+									zend_bool as_int_or_float, MYSQLND_STATS * stats)
 {
 	enum_func_status ret;
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_c");
-	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats TSRMLS_CC);
+	ret = php_mysqlnd_rowp_read_text_protocol_aux(row_buffer, fields, field_count, fields_metadata, as_int_or_float, stats);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1786,7 +1786,7 @@ php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
   if PS => packet->fields is passed from outside
 */
 static enum_func_status
-php_mysqlnd_rowp_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_rowp_read(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	zend_uchar *p;
 	enum_func_status ret = PASS;
@@ -1803,7 +1803,7 @@ php_mysqlnd_rowp_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 
 	ret = php_mysqlnd_read_row_ex(conn, packet->result_set_memory_pool, &packet->row_buffer, &data_size,
 								  packet->persistent_alloc, post_alloc_for_bit_fields
-								  TSRMLS_CC);
+								 );
 	if (FAIL == ret) {
 		goto end;
 	}
@@ -1828,7 +1828,7 @@ php_mysqlnd_rowp_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 										 sizeof(packet->error_info.error),
 										 &packet->error_info.error_no,
 										 packet->error_info.sqlstate
-										 TSRMLS_CC);
+										);
 	} else if (EODATA_MARKER == *p && data_size < 8) { /* EOF */
 		packet->eof = TRUE;
 		p++;
@@ -1878,14 +1878,14 @@ end:
 
 /* {{{ php_mysqlnd_rowp_free_mem */
 static void
-php_mysqlnd_rowp_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+php_mysqlnd_rowp_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	MYSQLND_PACKET_ROW *p;
 
 	DBG_ENTER("php_mysqlnd_rowp_free_mem");
 	p = (MYSQLND_PACKET_ROW *) _packet;
 	if (p->row_buffer) {
-		p->row_buffer->free_chunk(p->row_buffer TSRMLS_CC);
+		p->row_buffer->free_chunk(p->row_buffer);
 		p->row_buffer = NULL;
 	}
 	DBG_INF_FMT("stack_allocation=%u persistent=%u", (int)stack_allocation, (int)p->header.persistent);
@@ -1906,7 +1906,7 @@ php_mysqlnd_rowp_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
 
 /* {{{ php_mysqlnd_stats_read */
 static enum_func_status
-php_mysqlnd_stats_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_stats_read(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	MYSQLND_PACKET_STATS *packet= (MYSQLND_PACKET_STATS *) _packet;
 	size_t buf_len = conn->net->cmd_buffer.length;
@@ -1928,7 +1928,7 @@ php_mysqlnd_stats_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 
 /* {{{ php_mysqlnd_stats_free_mem */
 static
-void php_mysqlnd_stats_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+void php_mysqlnd_stats_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	MYSQLND_PACKET_STATS *p= (MYSQLND_PACKET_STATS *) _packet;
 	if (p->message) {
@@ -1948,7 +1948,7 @@ void php_mysqlnd_stats_free_mem(void * _packet, zend_bool stack_allocation TSRML
 
 /* {{{ php_mysqlnd_prepare_read */
 static enum_func_status
-php_mysqlnd_prepare_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_prepare_read(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	/* In case of an error, we should have place to put it */
 	size_t buf_len = conn->net->cmd_buffer.length;
@@ -1974,7 +1974,7 @@ php_mysqlnd_prepare_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 										 sizeof(packet->error_info.error),
 										 &packet->error_info.error_no,
 										 packet->error_info.sqlstate
-										 TSRMLS_CC);
+										);
 		DBG_RETURN(PASS);
 	}
 
@@ -2015,7 +2015,7 @@ php_mysqlnd_prepare_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("PREPARE packet %d bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "PREPARE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "PREPARE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -2024,7 +2024,7 @@ premature_end:
 
 /* {{{ php_mysqlnd_prepare_free_mem */
 static void
-php_mysqlnd_prepare_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+php_mysqlnd_prepare_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	MYSQLND_PACKET_PREPARE_RESPONSE *p= (MYSQLND_PACKET_PREPARE_RESPONSE *) _packet;
 	if (!stack_allocation) {
@@ -2036,7 +2036,7 @@ php_mysqlnd_prepare_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_D
 
 /* {{{ php_mysqlnd_chg_user_read */
 static enum_func_status
-php_mysqlnd_chg_user_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_chg_user_read(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	/* There could be an error message */
 	size_t buf_len = conn->net->cmd_buffer.length;
@@ -2071,7 +2071,7 @@ php_mysqlnd_chg_user_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 										 sizeof(packet->error_info.error),
 										 &packet->error_info.error_no,
 										 packet->error_info.sqlstate
-										 TSRMLS_CC);
+										);
 	}
 	BAIL_IF_NO_MORE_DATA;
 	if (packet->response_code == 0xFE && packet->header.size > (size_t) (p - buf)) {
@@ -2090,7 +2090,7 @@ php_mysqlnd_chg_user_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	DBG_RETURN(PASS);
 premature_end:
 	DBG_ERR_FMT("CHANGE_USER packet %d bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "CHANGE_USER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "CHANGE_USER packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 						 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -2099,7 +2099,7 @@ premature_end:
 
 /* {{{ php_mysqlnd_chg_user_free_mem */
 static void
-php_mysqlnd_chg_user_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+php_mysqlnd_chg_user_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	MYSQLND_PACKET_CHG_USER_RESPONSE * p = (MYSQLND_PACKET_CHG_USER_RESPONSE *) _packet;
 
@@ -2124,7 +2124,7 @@ php_mysqlnd_chg_user_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_
 
 /* {{{ php_mysqlnd_sha256_pk_request_write */
 static
-size_t php_mysqlnd_sha256_pk_request_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+size_t php_mysqlnd_sha256_pk_request_write(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	zend_uchar buffer[MYSQLND_HEADER_SIZE + 1];
 	size_t sent;
@@ -2132,7 +2132,7 @@ size_t php_mysqlnd_sha256_pk_request_write(void * _packet, MYSQLND_CONN_DATA * c
 	DBG_ENTER("php_mysqlnd_sha256_pk_request_write");
 
 	int1store(buffer + MYSQLND_HEADER_SIZE, '\1');
-	sent = conn->net->data->m.send_ex(conn->net, buffer, 1, conn->stats, conn->error_info TSRMLS_CC);
+	sent = conn->net->data->m.send_ex(conn->net, buffer, 1, conn->stats, conn->error_info);
 
 	DBG_RETURN(sent);
 }
@@ -2141,7 +2141,7 @@ size_t php_mysqlnd_sha256_pk_request_write(void * _packet, MYSQLND_CONN_DATA * c
 
 /* {{{ php_mysqlnd_sha256_pk_request_free_mem */
 static
-void php_mysqlnd_sha256_pk_request_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+void php_mysqlnd_sha256_pk_request_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	if (!stack_allocation) {
 		MYSQLND_PACKET_SHA256_PK_REQUEST * p = (MYSQLND_PACKET_SHA256_PK_REQUEST *) _packet;
@@ -2155,7 +2155,7 @@ void php_mysqlnd_sha256_pk_request_free_mem(void * _packet, zend_bool stack_allo
 
 /* {{{ php_mysqlnd_sha256_pk_request_response_read */
 static enum_func_status
-php_mysqlnd_sha256_pk_request_response_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+php_mysqlnd_sha256_pk_request_response_read(void * _packet, MYSQLND_CONN_DATA * conn)
 {
 	zend_uchar buf[SHA256_PK_REQUEST_RESP_BUFFER_SIZE];
 	zend_uchar *p = buf;
@@ -2180,7 +2180,7 @@ php_mysqlnd_sha256_pk_request_response_read(void * _packet, MYSQLND_CONN_DATA * 
 
 premature_end:
 	DBG_ERR_FMT("OK packet %d bytes shorter than expected", p - begin - packet->header.size);
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "SHA256_PK_REQUEST_RESPONSE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+	php_error_docref(NULL, E_WARNING, "SHA256_PK_REQUEST_RESPONSE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
 					 p - begin - packet->header.size);
 	DBG_RETURN(FAIL);
 }
@@ -2189,7 +2189,7 @@ premature_end:
 
 /* {{{ php_mysqlnd_sha256_pk_request_response_free_mem */
 static void
-php_mysqlnd_sha256_pk_request_response_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+php_mysqlnd_sha256_pk_request_response_free_mem(void * _packet, zend_bool stack_allocation)
 {
 	MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE * p = (MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE *) _packet;
 	if (p->public_key) {
@@ -2305,7 +2305,7 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 
 /* {{{ mysqlnd_protocol::get_greet_packet */
 static struct st_mysqlnd_packet_greet *
-MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_greet * packet = mnd_pecalloc(1, packet_methods[PROT_GREET_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_greet_packet");
@@ -2320,7 +2320,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet)(MYSQLND_PROTOCOL * const prot
 
 /* {{{ mysqlnd_protocol::get_auth_packet */
 static struct st_mysqlnd_packet_auth *
-MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_auth * packet = mnd_pecalloc(1, packet_methods[PROT_AUTH_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_auth_packet");
@@ -2335,7 +2335,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet)(MYSQLND_PROTOCOL * const proto
 
 /* {{{ mysqlnd_protocol::get_auth_response_packet */
 static struct st_mysqlnd_packet_auth_response *
-MYSQLND_METHOD(mysqlnd_protocol, get_auth_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_auth_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_auth_response * packet = mnd_pecalloc(1, packet_methods[PROT_AUTH_RESP_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_auth_response_packet");
@@ -2350,7 +2350,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_auth_response_packet)(MYSQLND_PROTOCOL * co
 
 /* {{{ mysqlnd_protocol::get_change_auth_response_packet */
 static struct st_mysqlnd_packet_change_auth_response *
-MYSQLND_METHOD(mysqlnd_protocol, get_change_auth_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_change_auth_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_change_auth_response * packet = mnd_pecalloc(1, packet_methods[PROT_CHANGE_AUTH_RESP_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_change_auth_response_packet");
@@ -2365,7 +2365,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_change_auth_response_packet)(MYSQLND_PROTOC
 
 /* {{{ mysqlnd_protocol::get_ok_packet */
 static struct st_mysqlnd_packet_ok *
-MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_ok * packet = mnd_pecalloc(1, packet_methods[PROT_OK_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_ok_packet");
@@ -2380,7 +2380,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_ok_packet)(MYSQLND_PROTOCOL * const protoco
 
 /* {{{ mysqlnd_protocol::get_eof_packet */
 static struct st_mysqlnd_packet_eof *
-MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_eof * packet = mnd_pecalloc(1, packet_methods[PROT_EOF_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_eof_packet");
@@ -2395,7 +2395,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_eof_packet)(MYSQLND_PROTOCOL * const protoc
 
 /* {{{ mysqlnd_protocol::get_command_packet */
 static struct st_mysqlnd_packet_command *
-MYSQLND_METHOD(mysqlnd_protocol, get_command_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_command_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_command * packet = mnd_pecalloc(1, packet_methods[PROT_CMD_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_command_packet");
@@ -2410,7 +2410,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_command_packet)(MYSQLND_PROTOCOL * const pr
 
 /* {{{ mysqlnd_protocol::get_rset_packet */
 static struct st_mysqlnd_packet_rset_header *
-MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_rset_header * packet = mnd_pecalloc(1, packet_methods[PROT_RSET_HEADER_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_rset_header_packet");
@@ -2425,7 +2425,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_rset_header_packet)(MYSQLND_PROTOCOL * cons
 
 /* {{{ mysqlnd_protocol::get_result_field_packet */
 static struct st_mysqlnd_packet_res_field *
-MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_res_field * packet = mnd_pecalloc(1, packet_methods[PROT_RSET_FLD_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_result_field_packet");
@@ -2440,7 +2440,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_result_field_packet)(MYSQLND_PROTOCOL * con
 
 /* {{{ mysqlnd_protocol::get_row_packet */
 static struct st_mysqlnd_packet_row *
-MYSQLND_METHOD(mysqlnd_protocol, get_row_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_row_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_row * packet = mnd_pecalloc(1, packet_methods[PROT_ROW_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_row_packet");
@@ -2455,7 +2455,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_row_packet)(MYSQLND_PROTOCOL * const protoc
 
 /* {{{ mysqlnd_protocol::get_stats_packet */
 static struct st_mysqlnd_packet_stats *
-MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_stats * packet = mnd_pecalloc(1, packet_methods[PROT_STATS_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_stats_packet");
@@ -2470,7 +2470,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet)(MYSQLND_PROTOCOL * const prot
 
 /* {{{ mysqlnd_protocol::get_prepare_response_packet */
 static struct st_mysqlnd_packet_prepare_response *
-MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_prepare_response * packet = mnd_pecalloc(1, packet_methods[PROT_PREPARE_RESP_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_prepare_response_packet");
@@ -2485,7 +2485,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet)(MYSQLND_PROTOCOL *
 
 /* {{{ mysqlnd_protocol::get_change_user_response_packet */
 static struct st_mysqlnd_packet_chg_user_resp*
-MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_chg_user_resp * packet = mnd_pecalloc(1, packet_methods[PROT_CHG_USER_RESP_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_change_user_response_packet");
@@ -2500,7 +2500,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOC
 
 /* {{{ mysqlnd_protocol::get_sha256_pk_request_packet */
 static struct st_mysqlnd_packet_sha256_pk_request *
-MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_sha256_pk_request * packet = mnd_pecalloc(1, packet_methods[PROT_SHA256_PK_REQUEST_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_sha256_pk_request_packet");
@@ -2515,7 +2515,7 @@ MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_packet)(MYSQLND_PROTOCOL 
 
 /* {{{ mysqlnd_protocol::get_sha256_pk_request_response_packet */
 static struct st_mysqlnd_packet_sha256_pk_request_response *
-MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent)
 {
 	struct st_mysqlnd_packet_sha256_pk_request_response * packet = mnd_pecalloc(1, packet_methods[PROT_SHA256_PK_REQUEST_RESPONSE_PACKET].struct_size, persistent);
 	DBG_ENTER("mysqlnd_protocol::get_sha256_pk_request_response_packet");
@@ -2550,11 +2550,11 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_protocol_init */
 PHPAPI MYSQLND_PROTOCOL *
-mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC)
+mysqlnd_protocol_init(zend_bool persistent)
 {
 	MYSQLND_PROTOCOL * ret;
 	DBG_ENTER("mysqlnd_protocol_init");
-	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_protocol_decoder(persistent TSRMLS_CC);
+	ret = MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_object_factory).get_protocol_decoder(persistent);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -2562,7 +2562,7 @@ mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC)
 
 /* {{{ mysqlnd_protocol_free */
 PHPAPI void
-mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol TSRMLS_DC)
+mysqlnd_protocol_free(MYSQLND_PROTOCOL * const protocol)
 {
 	DBG_ENTER("mysqlnd_protocol_free");
 

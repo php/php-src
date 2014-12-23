@@ -120,7 +120,7 @@ static zend_module_entry php_pi3web_module = {
 };
 
 
-static int zend_pi3web_ub_write(const char *str, uint str_length TSRMLS_DC)
+static int zend_pi3web_ub_write(const char *str, uint str_length)
 {
 	DWORD num_bytes = str_length;
 	LPCONTROL_BLOCK cb;
@@ -136,19 +136,19 @@ static int zend_pi3web_ub_write(const char *str, uint str_length TSRMLS_DC)
 }
 
 
-static int sapi_pi3web_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_pi3web_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers)
 {
 	return SAPI_HEADER_ADD;
 }
 
 
-static void accumulate_header_length(sapi_header_struct *sapi_header, uint *total_length TSRMLS_DC)
+static void accumulate_header_length(sapi_header_struct *sapi_header, uint *total_length)
 {
 	*total_length += sapi_header->header_len+2;
 }
 
 
-static void concat_header(sapi_header_struct *sapi_header, char **combined_headers_ptr TSRMLS_DC)
+static void concat_header(sapi_header_struct *sapi_header, char **combined_headers_ptr)
 {
 	memcpy(*combined_headers_ptr, sapi_header->header, sapi_header->header_len);
 	*combined_headers_ptr += sapi_header->header_len;
@@ -159,7 +159,7 @@ static void concat_header(sapi_header_struct *sapi_header, char **combined_heade
 }
 
 
-static int sapi_pi3web_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_pi3web_send_headers(sapi_headers_struct *sapi_headers)
 {
 	uint total_length = 2;		/* account for the trailing \r\n */
 	char *combined_headers, *combined_headers_ptr;
@@ -170,19 +170,19 @@ static int sapi_pi3web_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 
 
  	if (SG(sapi_headers).send_default_content_type) {
-		sapi_get_default_content_type_header(&default_content_type TSRMLS_CC);
-		accumulate_header_length(&default_content_type, (void *) &total_length TSRMLS_CC);
+		sapi_get_default_content_type_header(&default_content_type);
+		accumulate_header_length(&default_content_type, (void *) &total_length);
 	}
-	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t) accumulate_header_length, (void *) &total_length TSRMLS_CC);
+	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t) accumulate_header_length, (void *) &total_length);
 
 	/* Generate headers */
 	combined_headers = (char *) emalloc(total_length+1);
 	combined_headers_ptr = combined_headers;
 	if (SG(sapi_headers).send_default_content_type) {
-		concat_header(&default_content_type, (void *) &combined_headers_ptr TSRMLS_CC);
+		concat_header(&default_content_type, (void *) &combined_headers_ptr);
 		sapi_free_header(&default_content_type); /* we no longer need it */
 	}
-	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t) concat_header, (void *) &combined_headers_ptr TSRMLS_CC);
+	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t) concat_header, (void *) &combined_headers_ptr);
 	*combined_headers_ptr++ = '\r';
 	*combined_headers_ptr++ = '\n';
 	*combined_headers_ptr = 0;
@@ -209,7 +209,7 @@ static int php_pi3web_startup(sapi_module_struct *sapi_module)
 }
 
 
-static int sapi_pi3web_read_post(char *buffer, uint count_bytes TSRMLS_DC)
+static int sapi_pi3web_read_post(char *buffer, uint count_bytes)
 {
 	LPCONTROL_BLOCK lpCB = (LPCONTROL_BLOCK) SG(server_context);
 	DWORD read_from_buf=0;
@@ -242,7 +242,7 @@ static int sapi_pi3web_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 }
 
 
-static char *sapi_pi3web_read_cookies(TSRMLS_D)
+static char *sapi_pi3web_read_cookies(void)
 {
 	LPCONTROL_BLOCK lpCB = (LPCONTROL_BLOCK) SG(server_context);
 	char variable_buf[PI3WEB_SERVER_VAR_BUF_SIZE];
@@ -263,7 +263,7 @@ static char *sapi_pi3web_read_cookies(TSRMLS_D)
 	return NULL;
 }
 
-static void init_request_info(LPCONTROL_BLOCK lpCB TSRMLS_DC)
+static void init_request_info(LPCONTROL_BLOCK lpCB)
 {
 	SG(server_context) = lpCB;
 	SG(request_info).request_method  = lpCB->lpszMethod;
@@ -277,7 +277,7 @@ static void init_request_info(LPCONTROL_BLOCK lpCB TSRMLS_DC)
 	SG(sapi_headers).http_response_code = 200;
 }
 
-static void sapi_pi3web_register_variables(zval *track_vars_array TSRMLS_DC)
+static void sapi_pi3web_register_variables(zval *track_vars_array)
 {
 	char static_variable_buf[PI3WEB_SERVER_VAR_BUF_SIZE];
 	char *variable_buf;
@@ -296,11 +296,11 @@ static void sapi_pi3web_register_variables(zval *track_vars_array TSRMLS_DC)
 		variable_len = PI3WEB_SERVER_VAR_BUF_SIZE;
 		if (lpCB->GetServerVariable(lpCB->ConnID, pKey, static_variable_buf, &variable_len)
 			&& (variable_len > 1)) {
-			php_register_variable(pKey, static_variable_buf, track_vars_array TSRMLS_CC);
+			php_register_variable(pKey, static_variable_buf, track_vars_array);
 		} else if (PIPlatform_getLastError()==PIAPI_EINVAL) {
 			variable_buf = (char *) emalloc(variable_len);
 			if (lpCB->GetServerVariable(lpCB->ConnID, pKey, variable_buf, &variable_len)) {
-				php_register_variable(pKey, variable_buf, track_vars_array TSRMLS_CC);
+				php_register_variable(pKey, variable_buf, track_vars_array);
 			}
 			efree(variable_buf);
 		}
@@ -312,7 +312,7 @@ static void sapi_pi3web_register_variables(zval *track_vars_array TSRMLS_DC)
 	variable_len = PI3WEB_SERVER_VAR_BUF_SIZE;
 	if (lpCB->GetServerVariable(lpCB->ConnID, "SCRIPT_NAME", static_variable_buf, &variable_len)
 		&& (variable_len > 1)) {
-		php_register_variable("PHP_SELF", static_variable_buf, track_vars_array TSRMLS_CC);
+		php_register_variable("PHP_SELF", static_variable_buf, track_vars_array);
 	}
 }
 
@@ -346,7 +346,6 @@ MODULE_API DWORD PHP7_wrapper(LPCONTROL_BLOCK lpCB)
 {
 	zend_file_handle file_handle = {0};
 	int iRet = PIAPI_COMPLETED;
-	TSRMLS_FETCH();
 
 	zend_first_try {
 		file_handle.filename = lpCB->lpszFileName;
@@ -354,20 +353,20 @@ MODULE_API DWORD PHP7_wrapper(LPCONTROL_BLOCK lpCB)
 		file_handle.type = ZEND_HANDLE_FILENAME;
 		file_handle.opened_path = NULL;
 
-		init_request_info(lpCB TSRMLS_CC);
-		php_request_startup(TSRMLS_C);
+		init_request_info(lpCB);
+		php_request_startup();
 
 		switch ( lpCB->dwBehavior ) {
 			case PHP_MODE_STANDARD:
-				iRet = ( php_execute_script( &file_handle TSRMLS_CC ) ) ?
+				iRet = ( php_execute_script( &file_handle ) ) ?
 					PIAPI_COMPLETED : PIAPI_ERROR;
 				break;
 			case PHP_MODE_HIGHLIGHT: {
 				zend_syntax_highlighter_ini syntax_highlighter_ini;
-				if ( open_file_for_scanning( &file_handle TSRMLS_CC ) == SUCCESS )
+				if ( open_file_for_scanning( &file_handle ) == SUCCESS )
 					{
 					php_get_highlight_struct( &syntax_highlighter_ini );
-					zend_highlight( &syntax_highlighter_ini TSRMLS_CC );
+					zend_highlight( &syntax_highlighter_ini );
 					}
 				else
 					{
@@ -381,11 +380,11 @@ MODULE_API DWORD PHP7_wrapper(LPCONTROL_BLOCK lpCB)
 				ctr.line = "Content-Type: text/plain";
 				ctr.line_len = strlen(ctr.line);
 				
-				sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+				sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 			  }
-				if ( open_file_for_scanning( &file_handle TSRMLS_CC ) == SUCCESS )
+				if ( open_file_for_scanning( &file_handle ) == SUCCESS )
 					{
-					zend_indent(TSRMLS_C);
+					zend_indent();
 					}
 				else
 					{
@@ -393,7 +392,7 @@ MODULE_API DWORD PHP7_wrapper(LPCONTROL_BLOCK lpCB)
 					};
 				break;
 			case PHP_MODE_LINT:
-				iRet = (php_lint_script(&file_handle TSRMLS_CC) == SUCCESS) ?
+				iRet = (php_lint_script(&file_handle) == SUCCESS) ?
 					PIAPI_COMPLETED : PIAPI_ERROR;
 				break;
 			default:

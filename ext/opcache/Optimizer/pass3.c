@@ -53,7 +53,7 @@
 	}										\
 	jmp_hitlist[jmp_hitlist_count++] = ZEND_OP2(&op_array->opcodes[target]).opline_num;
 
-void zend_optimizer_pass3(zend_op_array *op_array TSRMLS_DC)
+void zend_optimizer_pass3(zend_op_array *op_array)
 {
 	zend_op *opline;
 	zend_op *end = op_array->opcodes + op_array->last;

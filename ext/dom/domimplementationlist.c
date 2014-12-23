@@ -52,7 +52,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementationList-length
 Since: 
 */
-int dom_domimplementationlist_length_read(dom_object *obj, zval *retval TSRMLS_DC)
+int dom_domimplementationlist_length_read(dom_object *obj, zval *retval)
 {
 	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;

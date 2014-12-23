@@ -50,10 +50,10 @@ extern zend_module_entry zip_module_entry;
 /* {{{ ZIP_OPENBASEDIR_CHECKPATH(filename) */
 #if PHP_API_VERSION < 20100412
 # define ZIP_OPENBASEDIR_CHECKPATH(filename) \
-	(PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename TSRMLS_CC)
+	(PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(filename)
 #else
 #define ZIP_OPENBASEDIR_CHECKPATH(filename) \
-	php_check_open_basedir(filename TSRMLS_CC)
+	php_check_open_basedir(filename)
 #endif
 /* }}} */
 
@@ -90,8 +90,8 @@ static inline ze_zip_object *php_zip_fetch_object(zend_object *obj) {
 
 #define Z_ZIP_P(zv) php_zip_fetch_object(Z_OBJ_P((zv)))
 
-php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC TSRMLS_DC);
+php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC);
+php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC);
 
 extern php_stream_wrapper php_stream_zip_wrapper;
 

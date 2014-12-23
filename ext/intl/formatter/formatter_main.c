@@ -36,11 +36,11 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sl|s",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sl|s",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_create: unable to parse input parameters", 0 TSRMLS_CC );
+			"numfmt_create: unable to parse input parameters", 0 );
 		Z_OBJ_P(return_value) = NULL;
 		return;
 	}
@@ -56,7 +56,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if(locale_len == 0) {
-		locale = intl_locale_get_default(TSRMLS_C);
+		locale = intl_locale_get_default();
 	}
 
 	/* Create an ICU number formatter. */
@@ -96,7 +96,7 @@ PHP_METHOD( NumberFormatter, __construct )
 	numfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zend_object_store_ctor_failed(Z_OBJ(orig_this) TSRMLS_CC);
+		zend_object_store_ctor_failed(Z_OBJ(orig_this));
 		zval_dtor(&orig_this);
 		ZEND_CTOR_MAKE_NULL();
 	}
@@ -113,11 +113,11 @@ PHP_FUNCTION( numfmt_get_error_code )
 	FORMATTER_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_get_error_code: unable to parse input params", 0 TSRMLS_CC );
+			"numfmt_get_error_code: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -140,11 +140,11 @@ PHP_FUNCTION( numfmt_get_error_message )
 	FORMATTER_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_get_error_message: unable to parse input params", 0 TSRMLS_CC );
+			"numfmt_get_error_message: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -152,7 +152,7 @@ PHP_FUNCTION( numfmt_get_error_message )
 	nfo = Z_INTL_NUMBERFORMATTER_P(object);
 
 	/* Return last error message. */
-	message = intl_error_get_message( INTL_DATA_ERROR_P(nfo) TSRMLS_CC );
+	message = intl_error_get_message( INTL_DATA_ERROR_P(nfo) );
 	RETURN_STR(message);
 }
 /* }}} */

@@ -122,7 +122,7 @@ xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index) /* {{{ */
 }
 /* }}} */
 
-static void php_dom_iterator_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static void php_dom_iterator_dtor(zend_object_iterator *iter) /* {{{ */
 {
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
@@ -131,7 +131,7 @@ static void php_dom_iterator_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
-static int php_dom_iterator_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static int php_dom_iterator_valid(zend_object_iterator *iter) /* {{{ */
 {
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
@@ -144,7 +144,7 @@ static int php_dom_iterator_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
-zval *php_dom_iterator_current_data(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+zval *php_dom_iterator_current_data(zend_object_iterator *iter) /* {{{ */
 {
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
@@ -152,12 +152,12 @@ zval *php_dom_iterator_current_data(zend_object_iterator *iter TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC) /* {{{ */
+static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) /* {{{ */
 {
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 	zval *object = &iterator->intern.data;
 
-	if (instanceof_function(Z_OBJCE_P(object), dom_nodelist_class_entry TSRMLS_CC)) {
+	if (instanceof_function(Z_OBJCE_P(object), dom_nodelist_class_entry)) {
 		ZVAL_LONG(key, iter->index);
 	} else {
 		dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
@@ -172,7 +172,7 @@ static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key T
 }
 /* }}} */
 
-static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 {
 	zval *object;
 	xmlNodePtr curnode = NULL, basenode;
@@ -232,7 +232,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC) 
 	}
 err:
 	if (curnode) {
-		php_dom_create_object(curnode, &iterator->curobj, objmap->baseobj TSRMLS_CC);
+		php_dom_create_object(curnode, &iterator->curobj, objmap->baseobj);
 	}
 }
 /* }}} */
@@ -246,7 +246,7 @@ zend_object_iterator_funcs php_dom_iterator_funcs = {
 	NULL
 };
 
-zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
+zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	dom_object *intern;
 	dom_nnodemap_object *objmap;
@@ -260,7 +260,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 	iterator = emalloc(sizeof(php_dom_iterator));
-	zend_iterator_init(&iterator->intern TSRMLS_CC);
+	zend_iterator_init(&iterator->intern);
 
 	ZVAL_COPY(&iterator->intern.data, object);
 	iterator->intern.funcs = &php_dom_iterator_funcs;
@@ -309,7 +309,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 	}
 err:
 	if (curnode) {
-		php_dom_create_object(curnode, &iterator->curobj, objmap->baseobj TSRMLS_CC);
+		php_dom_create_object(curnode, &iterator->curobj, objmap->baseobj);
 	}
 
 	return &iterator->intern;

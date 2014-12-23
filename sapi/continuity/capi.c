@@ -127,7 +127,7 @@ PHP_MINFO_FUNCTION(continuity)
 /*
  * sapi_capi_ub_write: Write len bytes to the connection output.
  */
-static int sapi_capi_ub_write(const char *str, unsigned int str_length TSRMLS_DC)
+static int sapi_capi_ub_write(const char *str, unsigned int str_length)
 {
    int retval;
    capi_request_context *rc;
@@ -143,7 +143,7 @@ static int sapi_capi_ub_write(const char *str, unsigned int str_length TSRMLS_DC
  * sapi_capi_header_handler: Add/update response headers with those provided
  * by the PHP engine.
  */
-static int sapi_capi_header_handler(sapi_header_struct * sapi_header, sapi_headers_struct * sapi_headers TSRMLS_DC)
+static int sapi_capi_header_handler(sapi_header_struct * sapi_header, sapi_headers_struct * sapi_headers)
 {
    char *header_name, *header_content, *p;
    capi_request_context *rc = (capi_request_context *) SG(server_context);
@@ -174,7 +174,7 @@ static int sapi_capi_header_handler(sapi_header_struct * sapi_header, sapi_heade
  * sapi_capi_send_headers: Transmit the headers to the client. This has the
  * effect of starting the response under Continuity.
  */
-static int sapi_capi_send_headers(sapi_headers_struct * sapi_headers TSRMLS_DC)
+static int sapi_capi_send_headers(sapi_headers_struct * sapi_headers)
 {
    int retval;
    capi_request_context *rc = (capi_request_context *) SG(server_context);
@@ -195,7 +195,7 @@ static int sapi_capi_send_headers(sapi_headers_struct * sapi_headers TSRMLS_DC)
 
 }
 
-static int sapi_capi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
+static int sapi_capi_read_post(char *buffer, uint count_bytes)
 {
    unsigned int max_read, total_read = 0;
    capi_request_context *rc = (capi_request_context *) SG(server_context);
@@ -221,7 +221,7 @@ static int sapi_capi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 /*
  * sapi_capi_read_cookies: Return cookie information into PHP.
  */
-static char *sapi_capi_read_cookies(TSRMLS_D)
+static char *sapi_capi_read_cookies(void)
 {
    char *cookie_string;
    capi_request_context *rc = (capi_request_context *) SG(server_context);
@@ -230,7 +230,7 @@ static char *sapi_capi_read_cookies(TSRMLS_D)
    return cookie_string;
 }
 
-static void sapi_capi_register_server_variables(zval * track_vars_array TSRMLS_DC)
+static void sapi_capi_register_server_variables(zval * track_vars_array)
 {
    capi_request_context *rc = (capi_request_context *) SG(server_context);
    size_t i;
@@ -240,101 +240,101 @@ static void sapi_capi_register_server_variables(zval * track_vars_array TSRMLS_D
    /* PHP_SELF and REQUEST_URI */
    value = lstFset_get(rc->t->vars, "uri");
    if (value != NULL) {
-      php_register_variable("PHP_SELF", value, track_vars_array TSRMLS_CC);
-      php_register_variable("REQUEST_URI", value, track_vars_array TSRMLS_CC);
+      php_register_variable("PHP_SELF", value, track_vars_array);
+      php_register_variable("REQUEST_URI", value, track_vars_array);
    }
  
    /* COUNTRY CODE */
    value = lstFset_get(rc->t->vars, "ccode");
    if(value!=NULL)
-     php_register_variable("COUNTRY_CODE", value, track_vars_array TSRMLS_CC);
+     php_register_variable("COUNTRY_CODE", value, track_vars_array);
 
    /* argv */
    value = lstFset_get(rc->t->vars, "query");
    if (value != NULL)
-      php_register_variable("argv", value, track_vars_array TSRMLS_CC);
+      php_register_variable("argv", value, track_vars_array);
 
    /* GATEWAY_INTERFACE */
-   php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_CC);
+   php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array);
 
    /* SERVER_NAME and HTTP_HOST */
    value = lstFset_get(rc->t->req_hdrs, "host");
    if (value != NULL) {
-      php_register_variable("HTTP_HOST", value, track_vars_array TSRMLS_CC);
+      php_register_variable("HTTP_HOST", value, track_vars_array);
       /* TODO: This should probably scrub the port value if one is present. */
-      php_register_variable("SERVER_NAME", value, track_vars_array TSRMLS_CC);
+      php_register_variable("SERVER_NAME", value, track_vars_array);
    }
    /* SERVER_SOFTWARE */
    value = lstFset_get(rc->t->res_hdrs, "Server");
    if (value != NULL)
-      php_register_variable("SERVER_SOFTWARE", value, track_vars_array TSRMLS_CC);
+      php_register_variable("SERVER_SOFTWARE", value, track_vars_array);
 
    /* SERVER_PROTOCOL */
    value = lstFset_get(rc->t->vars, "protocol");
    if (value != NULL)
-      php_register_variable("SERVER_PROTOCOL", value, track_vars_array TSRMLS_CC);
+      php_register_variable("SERVER_PROTOCOL", value, track_vars_array);
 
    /* REQUEST_METHOD */
    value = lstFset_get(rc->t->vars, "method");
    if (value != NULL)
-      php_register_variable("REQUEST_METHOD", value, track_vars_array TSRMLS_CC);
+      php_register_variable("REQUEST_METHOD", value, track_vars_array);
 
    /* QUERY_STRING */
    value = lstFset_get(rc->t->vars, "query");
    if (value != NULL)
-      php_register_variable("QUERY_STRING", value, track_vars_array TSRMLS_CC);
+      php_register_variable("QUERY_STRING", value, track_vars_array);
 
    /* DOCUMENT_ROOT */
    value = lstFset_get(rc->t->vars, "docroot");
    if (value != NULL)
-      php_register_variable("DOCUMENT_ROOT", value, track_vars_array TSRMLS_CC);
+      php_register_variable("DOCUMENT_ROOT", value, track_vars_array);
 
    /* HTTP_ACCEPT */
    value = lstFset_get(rc->t->req_hdrs, "accept");
    if (value != NULL)
-      php_register_variable("HTTP_ACCEPT", value, track_vars_array TSRMLS_CC);
+      php_register_variable("HTTP_ACCEPT", value, track_vars_array);
 
    /* HTTP_ACCEPT_CHARSET */
    value = lstFset_get(rc->t->req_hdrs, "accept-charset");
    if (value != NULL)
-      php_register_variable("HTTP_ACCEPT_CHARSET", value, track_vars_array TSRMLS_CC);
+      php_register_variable("HTTP_ACCEPT_CHARSET", value, track_vars_array);
 
    /* HTTP_ACCEPT_ENCODING */
    value = lstFset_get(rc->t->req_hdrs, "accept-encoding");
    if (value != NULL)
-      php_register_variable("HTTP_ACCEPT_ENCODING", value, track_vars_array TSRMLS_CC);
+      php_register_variable("HTTP_ACCEPT_ENCODING", value, track_vars_array);
 
    /* HTTP_ACCEPT_LANGUAGE */
    value = lstFset_get(rc->t->req_hdrs, "accept-language");
    if (value != NULL)
-      php_register_variable("HTTP_ACCEPT_LANGUAGE", value, track_vars_array TSRMLS_CC);
+      php_register_variable("HTTP_ACCEPT_LANGUAGE", value, track_vars_array);
 
    /* HTTP_CONNECTION */
    value = lstFset_get(rc->t->req_hdrs, "connection");
    if (value != NULL)
-      php_register_variable("HTTP_CONNECTION", value, track_vars_array TSRMLS_CC);
+      php_register_variable("HTTP_CONNECTION", value, track_vars_array);
 
    /* HTTP_REFERER */
    value = lstFset_get(rc->t->req_hdrs, "referer");
    if (value != NULL)
-      php_register_variable("HTTP_REFERER", value, track_vars_array TSRMLS_CC);
+      php_register_variable("HTTP_REFERER", value, track_vars_array);
 
    /* HTTP_USER_AGENT */
    value = lstFset_get(rc->t->req_hdrs, "user-agent");
    if (value != NULL)
-      php_register_variable("HTTP_USER_AGENT", value, track_vars_array TSRMLS_CC);
+      php_register_variable("HTTP_USER_AGENT", value, track_vars_array);
 
    /* REMOTE_ADDR */
    utlFip_to_str(rc->t->cli_ipv4_addr, buf, sizeof(buf));
-   php_register_variable("REMOTE_ADDR", buf, track_vars_array TSRMLS_CC);
+   php_register_variable("REMOTE_ADDR", buf, track_vars_array);
 
    /* REMOTE_PORT */
 
    /* SCRIPT_FILENAME and PATH_TRANSLATED */
    value = lstFset_get(rc->t->vars, "path");
    if (value != NULL) {
-      php_register_variable("SCRIPT_FILENAME", value, track_vars_array TSRMLS_CC);
-      php_register_variable("PATH_TRANSLATED", value, track_vars_array TSRMLS_CC);
+      php_register_variable("SCRIPT_FILENAME", value, track_vars_array);
+      php_register_variable("PATH_TRANSLATED", value, track_vars_array);
    }
    /* SERVER_ADMIN */
    /* Not applicable */
@@ -343,7 +343,7 @@ static void sapi_capi_register_server_variables(zval * track_vars_array TSRMLS_D
 
 }
 
-static void capi_log_message(char *message TSRMLS_DC)
+static void capi_log_message(char *message)
 {
    capi_request_context *rc = (capi_request_context *) SG(server_context);
    logFmsg(0, "mod/php: %s", message);
@@ -408,7 +408,7 @@ static void capi_free(void *addr)
       free(addr);
 }
 
-static void capi_request_ctor(NSLS_D TSRMLS_DC)
+static void capi_request_ctor(NSLS_D)
 {
    char *query_string = lstFset_get(NSG(t->vars), "query");
    char *uri = lstFset_get(NSG(t->vars), "uri");
@@ -427,7 +427,7 @@ static void capi_request_ctor(NSLS_D TSRMLS_DC)
    SG(sapi_headers).http_response_code = 200;
 }
 
-static void capi_request_dtor(NSLS_D TSRMLS_DC)
+static void capi_request_dtor(NSLS_D)
 {
    capi_free(SG(request_info).query_string);
    capi_free(SG(request_info).request_uri);
@@ -436,11 +436,11 @@ static void capi_request_dtor(NSLS_D TSRMLS_DC)
    capi_free(SG(request_info).content_type);
 }
 
-int capi_module_main(NSLS_D TSRMLS_DC)
+int capi_module_main(NSLS_D)
 {
    zend_file_handle file_handle;
 
-   if (php_request_startup(TSRMLS_C) == FAILURE) {
+   if (php_request_startup() == FAILURE) {
       return FAILURE;
    }
    file_handle.type = ZEND_HANDLE_FILENAME;
@@ -448,7 +448,7 @@ int capi_module_main(NSLS_D TSRMLS_DC)
    file_handle.free_filename = 0;
    file_handle.opened_path = NULL;
 
-   php_execute_script(&file_handle TSRMLS_CC);
+   php_execute_script(&file_handle);
    php_request_shutdown(NULL);
 
    return SUCCESS;
@@ -475,17 +475,16 @@ int phpFservice(httpTtrans * t, lstTset * opts)
    int retval;
    capi_request_context *request_context;
 
-   TSRMLS_FETCH();
-
+   
    request_context = (capi_request_context *) malloc(sizeof(capi_request_context));
    request_context->t = t;
    request_context->read_post_bytes = -1;
 
    SG(server_context) = request_context;
 
-   capi_request_ctor(NSLS_C TSRMLS_CC);
-   retval = capi_module_main(NSLS_C TSRMLS_CC);
-   capi_request_dtor(NSLS_C TSRMLS_CC);
+   capi_request_ctor(NSLS_C);
+   retval = capi_module_main(NSLS_C);
+   capi_request_dtor(NSLS_C);
 
    free(request_context);
 

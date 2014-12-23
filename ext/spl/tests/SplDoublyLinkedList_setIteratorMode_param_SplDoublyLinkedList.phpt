@@ -8,4 +8,4 @@ $dll = new SplDoublyLinkedList(2);
 $dll->setIteratorMode(new SplDoublyLinkedList(2));
 ?>
 --EXPECTF--
-Warning: SplDoublyLinkedList::setIteratorMode() expects parameter 1 to be long, object given in %s on line %d
+Warning: SplDoublyLinkedList::setIteratorMode() expects parameter 1 to be integer, object given in %s on line %d

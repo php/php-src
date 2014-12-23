@@ -39,7 +39,7 @@ static php_webjames_globals webjames_globals;
 
 #define WG(v) (webjames_globals.v)
 
-static int sapi_webjames_ub_write(const char *str, uint str_length TSRMLS_DC)
+static int sapi_webjames_ub_write(const char *str, uint str_length)
 /*unbuffered write - send data straight out to socket*/
 {
 	int totalbytes = 0;
@@ -61,7 +61,7 @@ static int sapi_webjames_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return totalbytes;
 }
 
-static void sapi_webjames_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC)
+static void sapi_webjames_send_header(sapi_header_struct *sapi_header, void *server_context)
 /*send an HTTP header*/
 {
 	char *header = sapi_header->header;
@@ -84,7 +84,7 @@ static void sapi_webjames_send_header(sapi_header_struct *sapi_header, void *ser
 	}
 }
 
-static int sapi_webjames_read_post(char *buffer, uint count_bytes TSRMLS_DC)
+static int sapi_webjames_read_post(char *buffer, uint count_bytes)
 /*read some of the post data*/
 {
 	if (WG(conn)->body==NULL) return 0;
@@ -94,26 +94,26 @@ static int sapi_webjames_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	return count_bytes;
 }
 
-static char *sapi_webjames_read_cookies(TSRMLS_D)
+static char *sapi_webjames_read_cookies(void)
 {
 	return WG(conn)->cookie;
 }
 
 #define BUF_SIZE 512
 #define ADD_STRING(name,string)\
-	php_register_variable(name, string, track_vars_array TSRMLS_CC)
+	php_register_variable(name, string, track_vars_array)
 
 #define ADD_NUM(name,field) {\
 	snprintf(buf, BUF_SIZE, "%d", WG(conn)->field);\
-	php_register_variable(name, buf, track_vars_array TSRMLS_CC);\
+	php_register_variable(name, buf, track_vars_array);\
 }
 
 #define ADD_FIELD(name, field) \
 	if (WG(conn)->field) { \
-		php_register_variable(name, WG(conn)->field, track_vars_array TSRMLS_CC); \
+		php_register_variable(name, WG(conn)->field, track_vars_array); \
 	}
 
-static void sapi_webjames_register_variables(zval *track_vars_array TSRMLS_DC)
+static void sapi_webjames_register_variables(zval *track_vars_array)
 {
 	char buf[BUF_SIZE + 1];
 	char *docroot;
@@ -163,7 +163,7 @@ static void sapi_webjames_register_variables(zval *track_vars_array TSRMLS_DC)
 	ADD_FIELD("HTTP_ACCEPT_ENCODING", acceptencoding);
 }
 
-static void webjames_module_main(TSRMLS_D)
+static void webjames_module_main(void)
 {
 	zend_file_handle file_handle;
 	FILE *fp=NULL;
@@ -208,18 +208,17 @@ static void webjames_module_main(TSRMLS_D)
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
-	if (php_request_startup(TSRMLS_C) == FAILURE) {
+	if (php_request_startup() == FAILURE) {
 		return;
 	}
 	
-	php_execute_script(&file_handle TSRMLS_CC);
+	php_execute_script(&file_handle);
 	php_request_shutdown(NULL);
 }
 
 static void webjames_php_close(struct connection *conn, int force)
 /*called by webjames if it wants to close the connection*/
 {
-	TSRMLS_FETCH();
 
 	php_request_shutdown(NULL);
 	WG(oldclose)(conn,force);
@@ -228,14 +227,13 @@ static void webjames_php_close(struct connection *conn, int force)
 void webjames_php_request(struct connection *conn)
 /*called by WebJames to start handler*/
 {
-	TSRMLS_FETCH();
 
 	WG(conn) = conn;
 	WG(bodyread) = 0;
 	WG(oldclose) = conn->close;
 	conn->close=webjames_php_close;
 
-	webjames_module_main(TSRMLS_C);
+	webjames_module_main();
 
 	WG(oldclose)(WG(conn), 0);
 }
@@ -309,7 +307,6 @@ static sapi_module_struct sapi_module = {
 int webjames_php_init(void)
 /*called when WebJames initialises*/
 {
-	TSRMLS_FETCH();
 	if (strcmp(configuration.webjames_h_revision,WEBJAMES_H_REVISION)!=0) {
 		/*This file was compiled against a different revision of
 		  webjames.h than webjames was, which could be bad news*/

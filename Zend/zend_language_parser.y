@@ -54,10 +54,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %expect 2
 
 %code requires {
-#ifdef ZTS
-# define YYPARSE_PARAM tsrm_ls
-# define YYLEX_PARAM tsrm_ls
-#endif
 }
 
 %destructor { zend_ast_destroy($$); } <ast>
@@ -70,6 +66,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_LOGICAL_AND
 %right T_PRINT
 %right T_YIELD
+%right T_DOUBLE_ARROW
 %left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
 %left '?' ':'
 %right T_COALESCE
@@ -93,7 +90,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_ELSE 
 %left T_ENDIF 
 %right T_STATIC T_ABSTRACT T_FINAL T_PRIVATE T_PROTECTED T_PUBLIC
-%right T_DOUBLE_ARROW
 
 %token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
 %token <ast> T_DNUMBER   "floating-point number (T_DNUMBER)"
@@ -287,8 +283,8 @@ top_statement:
 	|	class_declaration_statement		{ $$ = $1; }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
-			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset(TSRMLS_C)));
-			  zend_stop_lexing(TSRMLS_C); }
+			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset()));
+			  zend_stop_lexing(); }
 	|	T_NAMESPACE namespace_name ';'
 			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, $2, NULL);
 			  RESET_DOC_COMMENT(); }
@@ -372,7 +368,7 @@ statement:
 		foreach_statement
 			{ $$ = zend_ast_create(ZEND_AST_FOREACH, $3, $7, $5, $9); }
 	|	T_DECLARE '(' const_list ')'
-			{ zend_handle_encoding_declaration($3 TSRMLS_CC); }
+			{ zend_handle_encoding_declaration($3); }
 		declare_statement
 			{ $$ = zend_ast_create(ZEND_AST_DECLARE, $3, $6); }
 	|	';'	/* empty statement */ { $$ = NULL; }
@@ -435,7 +431,7 @@ class_declaration_statement:
 class_type:
 		T_CLASS				{ $$ = 0; }
 	|	T_ABSTRACT T_CLASS	{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
-	|	T_FINAL T_CLASS		{ $$ = ZEND_ACC_FINAL_CLASS; }
+	|	T_FINAL T_CLASS		{ $$ = ZEND_ACC_FINAL; }
 	|	T_TRAIT				{ $$ = ZEND_ACC_TRAIT; }
 ;
 
@@ -610,7 +606,7 @@ class_statement_list:
 
 class_statement:
 		variable_modifiers property_list ';'
-			{ $$ = zend_ast_append_doc_comment($2 TSRMLS_CC); $$->attr = $1; }
+			{ $$ = zend_ast_append_doc_comment($2); $$->attr = $1; }
 	|	T_CONST class_const_list ';'
 			{ $$ = $2; RESET_DOC_COMMENT(); }
 	|	T_USE name_list trait_adaptations
@@ -1175,8 +1171,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 		return yystrlen(yystr);
 	}
 	{
-		TSRMLS_FETCH();
-		if (CG(parse_error) == 0) {
+			if (CG(parse_error) == 0) {
 			char buffer[120];
 			const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
 			unsigned int len = 0, toklen = 0, yystr_len;

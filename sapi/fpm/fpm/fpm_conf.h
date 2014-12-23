@@ -58,6 +58,7 @@ struct fpm_worker_pool_config_s {
 	char *group;
 	char *listen_address;
 	int listen_backlog;
+	/* Using chown */
 	char *listen_owner;
 	char *listen_group;
 	char *listen_mode;
@@ -90,6 +91,11 @@ struct fpm_worker_pool_config_s {
 	struct key_value_s *php_values;
 #ifdef HAVE_APPARMOR
 	char *apparmor_hat;
+#endif
+#ifdef HAVE_FPM_ACL
+	/* Using Posix ACL */
+	char *listen_acl_users;
+	char *listen_acl_groups;
 #endif
 };
 

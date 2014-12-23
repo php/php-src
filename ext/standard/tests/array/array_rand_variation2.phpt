@@ -1,5 +1,7 @@
 --TEST--
 Test array_rand() function : usage variations - unexpected values for 'num_req' parameter
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : mixed array_rand(array input [, int num_req])
@@ -179,27 +181,27 @@ NULL
 
 -- Iteration 16 --
 
-Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_rand() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_rand() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_rand() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: array_rand() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_rand() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: array_rand() expects parameter 2 to be long, object given in %s on line %d
+Warning: array_rand() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 
 -- Iteration 21 --

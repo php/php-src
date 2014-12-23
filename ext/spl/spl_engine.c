@@ -32,7 +32,7 @@
 #include "spl_array.h"
 
 /* {{{ spl_instantiate */
-PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
+PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object)
 {
 	object_init_ex(object, pce);
 	Z_SET_REFCOUNT_P(object, 1);
@@ -40,7 +40,7 @@ PHPAPI void spl_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC)
 }
 /* }}} */
 
-PHPAPI zend_long spl_offset_convert_to_long(zval *offset TSRMLS_DC) /* {{{ */
+PHPAPI zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 {
 	zend_ulong idx;
 

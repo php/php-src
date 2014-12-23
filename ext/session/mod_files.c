@@ -118,7 +118,7 @@ static void ps_files_close(ps_files *data)
 	}
 }
 
-static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
+static void ps_files_open(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
@@ -134,7 +134,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		ps_files_close(data);
 
 		if (php_session_valid_key(key) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The session id is too long or contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
+			php_error_docref(NULL, E_WARNING, "The session id is too long or contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
 			return;
 		}
 
@@ -150,7 +150,7 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 #else
 		/* Check to make sure that the opened file is not outside of allowable dirs. 
 		   This is not 100% safe but it's hard to do something better without O_NOFOLLOW */
-		if(PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf TSRMLS_CC)) {
+		if(PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
 			return;
 		}
 		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY, data->filemode);
@@ -173,16 +173,16 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 #  define FD_CLOEXEC 1
 # endif
 			if (fcntl(data->fd, F_SETFD, FD_CLOEXEC)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "fcntl(%d, F_SETFD, FD_CLOEXEC) failed: %s (%d)", data->fd, strerror(errno), errno);
+				php_error_docref(NULL, E_WARNING, "fcntl(%d, F_SETFD, FD_CLOEXEC) failed: %s (%d)", data->fd, strerror(errno), errno);
 			}
 #endif
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "open(%s, O_RDWR) failed: %s (%d)", buf, strerror(errno), errno);
+			php_error_docref(NULL, E_WARNING, "open(%s, O_RDWR) failed: %s (%d)", buf, strerror(errno), errno);
 		}
 	}
 }
 
-static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
+static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 {
 	DIR *dir;
 	char dentry[sizeof(struct dirent) + MAXPATHLEN];
@@ -195,7 +195,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 
 	dir = opendir(dirname);
 	if (!dir) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ps_files_cleanup_dir: opendir(%s) failed: %s (%d)", dirname, strerror(errno), errno);
+		php_error_docref(NULL, E_NOTICE, "ps_files_cleanup_dir: opendir(%s) failed: %s (%d)", dirname, strerror(errno), errno);
 		return (0);
 	}
 
@@ -235,7 +235,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 	return (nrdels);
 }
 
-static int ps_files_key_exists(ps_files *data, const char *key TSRMLS_DC)
+static int ps_files_key_exists(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
 	zend_stat_t sbuf;
@@ -263,9 +263,9 @@ PS_OPEN_FUNC(files)
 
 	if (*save_path == '\0') {
 		/* if save path is an empty string, determine the temporary dir */
-		save_path = php_get_temporary_directory(TSRMLS_C);
+		save_path = php_get_temporary_directory();
 
-		if (php_check_open_basedir(save_path TSRMLS_CC)) {
+		if (php_check_open_basedir(save_path)) {
 			return FAILURE;
 		}
 	}
@@ -309,7 +309,7 @@ PS_OPEN_FUNC(files)
 	data->basedir = estrndup(save_path, data->basedir_len);
 
 	if (PS_GET_MOD_DATA()) {
-		ps_close_files(mod_data TSRMLS_CC);
+		ps_close_files(mod_data);
 	}
 	PS_SET_MOD_DATA(data);
 
@@ -341,24 +341,24 @@ PS_READ_FUNC(files)
 
 	/* If strict mode, check session id existence */
 	if (PS(use_strict_mode) &&
-		ps_files_key_exists(data, key? key->val : NULL TSRMLS_CC) == FAILURE) {
+		ps_files_key_exists(data, key? key->val : NULL) == FAILURE) {
 		/* key points to PS(id), but cannot change here. */
 		if (key) {
 			zend_string_release(PS(id));
 			PS(id) = NULL;
 		}
-		PS(id) = PS(mod)->s_create_sid((void **)&data TSRMLS_CC);
+		PS(id) = PS(mod)->s_create_sid((void **)&data);
 		if (!PS(id)) {
 			return FAILURE;
 		}
 		if (PS(use_cookies)) {
 			PS(send_cookie) = 1;
 		}
-		php_session_reset_id(TSRMLS_C);
+		php_session_reset_id();
 		PS(session_status) = php_session_active;
 	}
 
-	ps_files_open(data, PS(id)->val TSRMLS_CC);
+	ps_files_open(data, PS(id)->val);
 	if (data->fd < 0) {
 		return FAILURE;
 	}
@@ -385,9 +385,9 @@ PS_READ_FUNC(files)
 
 	if (n != sbuf.st_size) {
 		if (n == -1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "read failed: %s (%d)", strerror(errno), errno);
+			php_error_docref(NULL, E_WARNING, "read failed: %s (%d)", strerror(errno), errno);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "read returned less bytes than requested");
+			php_error_docref(NULL, E_WARNING, "read returned less bytes than requested");
 		}
 		zend_string_release(*val);
 		return FAILURE;
@@ -401,7 +401,7 @@ PS_WRITE_FUNC(files)
 	zend_long n;
 	PS_FILES_DATA;
 
-	ps_files_open(data, key->val TSRMLS_CC);
+	ps_files_open(data, key->val);
 	if (data->fd < 0) {
 		return FAILURE;
 	}
@@ -421,9 +421,9 @@ PS_WRITE_FUNC(files)
 
 	if (n != val->len) {
 		if (n == -1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
+			php_error_docref(NULL, E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "write wrote less bytes than requested");
+			php_error_docref(NULL, E_WARNING, "write wrote less bytes than requested");
 		}
 		return FAILURE;
 	}
@@ -464,7 +464,7 @@ PS_GC_FUNC(files)
 	   an external entity (i.e. find -ctime x | xargs rm) */
 
 	if (data->dirdepth == 0) {
-		*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime TSRMLS_CC);
+		*nrdels = ps_files_cleanup_dir(data->basedir, maxlifetime);
 	}
 
 	return SUCCESS;
@@ -477,9 +477,9 @@ PS_CREATE_SID_FUNC(files)
 	PS_FILES_DATA;
 
 	do {
-		sid = php_session_create_id((void**)&data TSRMLS_CC);
+		sid = php_session_create_id((void**)&data);
 		/* Check collision */
-		if (data && ps_files_key_exists(data, sid? sid->val : NULL TSRMLS_CC) == SUCCESS) {
+		if (data && ps_files_key_exists(data, sid? sid->val : NULL) == SUCCESS) {
 			if (sid) {
 				zend_string_release(sid);
 				sid = NULL;

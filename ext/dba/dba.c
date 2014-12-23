@@ -200,7 +200,7 @@ ZEND_GET_MODULE(dba)
 /* these are used to get the standard arguments */
 
 /* {{{ php_dba_myke_key */
-static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS_DC)
+static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 {
 	if (Z_TYPE_P(key) == IS_ARRAY) {
 		zval *group, *name;
@@ -208,7 +208,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 		size_t len;
 	
 		if (zend_hash_num_elements(Z_ARRVAL_P(key)) != 2) {
-			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Key does not have exactly two elements: (key, name)");
+			php_error_docref(NULL, E_RECOVERABLE_ERROR, "Key does not have exactly two elements: (key, name)");
 			return -1;
 		}
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(key), &pos);
@@ -245,10 +245,10 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 	zval *key;													\
 	char *key_str, *key_free;									\
 	size_t key_len; 											\
-	if (zend_parse_parameters(ac TSRMLS_CC, "zr", &key, &id) == FAILURE) { 	\
+	if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) { 	\
 		return; 												\
 	} 															\
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {\
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {\
 		RETURN_FALSE;											\
 	}
 
@@ -259,19 +259,19 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 	zend_long skip = 0;  											\
 	switch(ac) {												\
 	case 2: 													\
-		if (zend_parse_parameters(ac TSRMLS_CC, "zr", &key, &id) == FAILURE) { \
+		if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) { \
 			return;												\
 		} 														\
 		break;  												\
 	case 3: 													\
-		if (zend_parse_parameters(ac TSRMLS_CC, "zlr", &key, &skip, &id) == FAILURE) { \
+		if (zend_parse_parameters(ac, "zlr", &key, &skip, &id) == FAILURE) { \
 			return;												\
 		} 														\
 		break;  												\
 	default:													\
 		WRONG_PARAM_COUNT; 										\
 	} 															\
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {\
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {\
 		RETURN_FALSE;											\
 	}
 
@@ -298,14 +298,14 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 /* check whether the user has write access */
 #define DBA_WRITE_CHECK \
 	if(info->mode != DBA_WRITER && info->mode != DBA_TRUNC && info->mode != DBA_CREAT) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You cannot perform a modification to a database without proper access"); \
+		php_error_docref(NULL, E_WARNING, "You cannot perform a modification to a database without proper access"); \
 		RETURN_FALSE; \
 	}
 
 /* the same check, but with a call to DBA_ID_DONE before returning */
 #define DBA_WRITE_CHECK_WITH_ID \
 	if(info->mode != DBA_WRITER && info->mode != DBA_TRUNC && info->mode != DBA_CREAT) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You cannot perform a modification to a database without proper access"); \
+		php_error_docref(NULL, E_WARNING, "You cannot perform a modification to a database without proper access"); \
 		DBA_ID_DONE; \
 		RETURN_FALSE; \
 	}
@@ -387,7 +387,7 @@ static int le_pdb;
 /* }}} */
 
 /* {{{ dba_fetch_resource
-PHPAPI void dba_fetch_resource(dba_info **pinfo, zval **id TSRMLS_DC)
+PHPAPI void dba_fetch_resource(dba_info **pinfo, zval **id)
 {
 	dba_info *info;
 	DBA_ID_FETCH
@@ -408,10 +408,10 @@ PHPAPI dba_handler *dba_get_handler(const char* handler_name)
 
 /* {{{ dba_close 
  */ 
-static void dba_close(dba_info *info TSRMLS_DC)
+static void dba_close(dba_info *info)
 {
 	if (info->hnd) {
-		info->hnd->close(info TSRMLS_CC);
+		info->hnd->close(info);
 	}
 	if (info->path) {
 		pefree(info->path, info->flags&DBA_PERSISTENT);
@@ -439,28 +439,28 @@ static void dba_close(dba_info *info TSRMLS_DC)
 
 /* {{{ dba_close_rsrc
  */
-static void dba_close_rsrc(zend_resource *rsrc TSRMLS_DC)
+static void dba_close_rsrc(zend_resource *rsrc)
 {
 	dba_info *info = (dba_info *)rsrc->ptr; 
 
-	dba_close(info TSRMLS_CC);
+	dba_close(info);
 }
 /* }}} */
 
 /* {{{ dba_close_pe_rsrc_deleter */
-int dba_close_pe_rsrc_deleter(zval *el, void *pDba TSRMLS_DC)
+int dba_close_pe_rsrc_deleter(zval *el, void *pDba)
 {
 	return ((zend_resource *)Z_PTR_P(el))->ptr == pDba ? ZEND_HASH_APPLY_REMOVE: ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
 /* {{{ dba_close_pe_rsrc */
-static void dba_close_pe_rsrc(zend_resource *rsrc TSRMLS_DC)
+static void dba_close_pe_rsrc(zend_resource *rsrc)
 {
 	dba_info *info = (dba_info *)rsrc->ptr; 
 
 	/* closes the resource by calling dba_close_rsrc() */
-	zend_hash_apply_with_argument(&EG(persistent_list), dba_close_pe_rsrc_deleter, info TSRMLS_CC);
+	zend_hash_apply_with_argument(&EG(persistent_list), dba_close_pe_rsrc_deleter, info);
 }
 /* }}} */
 
@@ -472,17 +472,17 @@ ZEND_INI_MH(OnUpdateDefaultHandler)
 
 	if (!new_value->len) {
 		DBA_G(default_hptr) = NULL;
-		return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	}
 
 	for (hptr = handler; hptr->name && strcasecmp(hptr->name, new_value->val); hptr++);
 
 	if (!hptr->name) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such handler: %s", new_value->val);
+		php_error_docref(NULL, E_WARNING, "No such handler: %s", new_value->val);
 		return FAILURE;
 	}
 	DBA_G(default_hptr) = hptr;
-	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 
 PHP_INI_BEGIN()
@@ -560,11 +560,11 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	char *key_str, *key_free;
 	size_t key_len;
 
-	if (zend_parse_parameters(ac TSRMLS_CC, "zsr", &key, &val, &val_len, &id) == FAILURE) {
+	if (zend_parse_parameters(ac, "zsr", &key, &val, &val_len, &id) == FAILURE) {
 		return;
 	}
 
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
 		RETURN_FALSE;
 	}
 
@@ -572,7 +572,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	DBA_WRITE_CHECK_WITH_ID;
 
-	if (info->hnd->update(info, key_str, key_len, val, val_len, mode TSRMLS_CC) == SUCCESS) {
+	if (info->hnd->update(info, key_str, key_len, val, val_len, mode) == SUCCESS) {
 		DBA_ID_DONE;
 		RETURN_TRUE;
 	}
@@ -586,7 +586,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 /* {{{ php_find_dbm
  */
-dba_info *php_dba_find(const char* path TSRMLS_DC)
+dba_info *php_dba_find(const char* path)
 {
 	zend_resource *le;
 	dba_info *info;
@@ -681,7 +681,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (ac==2) {
 		hptr = DBA_G(default_hptr);
 		if (!hptr) {
-			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "No default handler selected");
+			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "No default handler selected");
 			FREENOW;
 			RETURN_FALSE;
 		}
@@ -690,7 +690,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (!hptr->name) {
-		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "No such handler: %s", Z_STRVAL(args[2]));
+		php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "No such handler: %s", Z_STRVAL(args[2]));
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -721,13 +721,13 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 'l':
 			lock_flag = DBA_LOCK_ALL;
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
-				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_NOTICE, "Handler %s does locking internally", hptr->name);
+				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_NOTICE, "Handler %s does locking internally", hptr->name);
 			}
 			break;
 		default:
 		case '-':
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
-				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Locking cannot be disabled for handler %s", hptr->name);
+				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Locking cannot be disabled for handler %s", hptr->name);
 				FREENOW;
 				RETURN_FALSE;
 			}
@@ -776,7 +776,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			file_mode = "w+b";
 			break;
 		default:
-			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Illegal DBA mode");
+			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Illegal DBA mode");
 			FREENOW;
 			RETURN_FALSE;
 	}
@@ -789,17 +789,17 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (*pmode=='t') {
 		pmode++;
 		if (!lock_flag) {
-			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "You cannot combine modifiers - (no lock) and t (test lock)");
+			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "You cannot combine modifiers - (no lock) and t (test lock)");
 			FREENOW;
 			RETURN_FALSE;
 		}
 		if (!lock_mode) {
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
-				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Handler %s uses its own locking which doesn't support mode modifier t (test lock)", hptr->name);
+				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Handler %s uses its own locking which doesn't support mode modifier t (test lock)", hptr->name);
 				FREENOW;
 				RETURN_FALSE;
 			} else {
-				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Handler %s doesn't uses locking for this mode which makes modifier t (test lock) obsolete", hptr->name);
+				php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Handler %s doesn't uses locking for this mode which makes modifier t (test lock) obsolete", hptr->name);
 				FREENOW;
 				RETURN_FALSE;
 			}
@@ -808,7 +808,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	}
 	if (*pmode) {
-		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Illegal DBA mode");
+		php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Illegal DBA mode");
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -827,7 +827,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	 * the problem is some systems would allow read during write
 	 */
 	if (hptr->flags & DBA_LOCK_ALL) {
-		if ((other = php_dba_find(info->path TSRMLS_CC)) != NULL) {
+		if ((other = php_dba_find(info->path)) != NULL) {
 			if (   ( (lock_mode&LOCK_EX)        && (other->lock.mode&(LOCK_EX|LOCK_SH)) )
 			    || ( (other->lock.mode&LOCK_EX) && (lock_mode&(LOCK_EX|LOCK_SH))        )
 			   ) {
@@ -882,7 +882,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			efree(lock_name);
 		}
 		if (!info->lock.fp) {
-			dba_close(info TSRMLS_CC);
+			dba_close(info);
 			/* stream operation already wrote an error message */
 			FREENOW;
 			RETURN_FALSE;
@@ -903,7 +903,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			info->fp = php_stream_open_wrapper(info->path, file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|persistent_flag, NULL);
 		}
 		if (!info->fp) {
-			dba_close(info TSRMLS_CC);
+			dba_close(info);
 			/* stream operation already wrote an error message */
 			FREENOW;
 			RETURN_FALSE;
@@ -913,8 +913,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			 * file contents with O_APPEND being set.
 			 */
 			if (SUCCESS != php_stream_cast(info->fp, PHP_STREAM_AS_FD, (void*)&info->fd, 1)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not cast stream");
-				dba_close(info TSRMLS_CC);
+				php_error_docref(NULL, E_WARNING, "Could not cast stream");
+				dba_close(info);
 				FREENOW;
 				RETURN_FALSE;
 #ifdef F_SETFL
@@ -927,9 +927,9 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	}
 
-	if (error || hptr->open(info, &error TSRMLS_CC) != SUCCESS) {
-		dba_close(info TSRMLS_CC);
-		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Driver initialization failed for handler: %s%s%s", hptr->name, error?": ":"", error?error:"");
+	if (error || hptr->open(info, &error) != SUCCESS) {
+		dba_close(info);
+		php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Driver initialization failed for handler: %s%s%s", hptr->name, error?": ":"", error?error:"");
 		FREENOW;
 		RETURN_FALSE;
 	}
@@ -944,8 +944,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		new_le.type = le_pdb;
 		new_le.ptr = info;
 		if (zend_hash_str_update_mem(&EG(persistent_list), key, keylen, &new_le, sizeof(zend_resource)) == NULL) {
-			dba_close(info TSRMLS_CC);
-			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Could not register persistent resource");
+			dba_close(info);
+			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Could not register persistent resource");
 			FREENOW;
 			RETURN_FALSE;
 		}
@@ -980,7 +980,7 @@ PHP_FUNCTION(dba_close)
 	zval *id;
 	dba_info *info = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
 		return;
 	}
 
@@ -996,7 +996,7 @@ PHP_FUNCTION(dba_exists)
 {
 	DBA_ID_GET2;
 
-	if(info->hnd->exists(info, key_str, key_len TSRMLS_CC) == SUCCESS) {
+	if(info->hnd->exists(info, key_str, key_len) == SUCCESS) {
 		DBA_ID_DONE;
 		RETURN_TRUE;
 	}
@@ -1016,7 +1016,7 @@ PHP_FUNCTION(dba_fetch)
 	if (ac==3) {
 		if (!strcmp(info->hnd->name, "cdb")) {
 			if (skip < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s accepts only skip values greater than or equal to zero, using skip=0", info->hnd->name);
+				php_error_docref(NULL, E_NOTICE, "Handler %s accepts only skip values greater than or equal to zero, using skip=0", info->hnd->name);
 				skip = 0;
 			}
 		} else if (!strcmp(info->hnd->name, "inifile")) {
@@ -1027,17 +1027,17 @@ PHP_FUNCTION(dba_fetch)
 			 * value to 0 ensures the first value. 
 			 */
 			if (skip < -1) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s accepts only skip value -1 and greater, using skip=0", info->hnd->name);
+				php_error_docref(NULL, E_NOTICE, "Handler %s accepts only skip value -1 and greater, using skip=0", info->hnd->name);
 				skip = 0;
 			}
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s does not support optional skip parameter, the value will be ignored", info->hnd->name);
+			php_error_docref(NULL, E_NOTICE, "Handler %s does not support optional skip parameter, the value will be ignored", info->hnd->name);
 			skip = 0;			
 		}
 	} else {
 		skip = 0; 
 	}
-	if((val = info->hnd->fetch(info, key_str, key_len, skip, &len TSRMLS_CC)) != NULL) {
+	if((val = info->hnd->fetch(info, key_str, key_len, skip, &len)) != NULL) {
 		DBA_ID_DONE;
 		RETVAL_STRINGL(val, len);
 		efree(val);
@@ -1059,12 +1059,12 @@ PHP_FUNCTION(dba_key_split)
 	if (ZEND_NUM_ARGS() != 1) {
 		WRONG_PARAM_COUNT;
 	}
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z", &zkey) == SUCCESS) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &zkey) == SUCCESS) {
 		if (Z_TYPE_P(zkey) == IS_NULL || (Z_TYPE_P(zkey) == IS_FALSE)) {
 			RETURN_BOOL(0);
 		}
 	}
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &key, &key_len) == FAILURE) {
 		RETURN_BOOL(0);
 	}
 	array_init(return_value);
@@ -1087,13 +1087,13 @@ PHP_FUNCTION(dba_firstkey)
 	zval *id;
 	dba_info *info = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
 		return;
 	}
 
 	DBA_FETCH_RESOURCE(info, id);
 
-	fkey = info->hnd->firstkey(info, &len TSRMLS_CC);
+	fkey = info->hnd->firstkey(info, &len);
 
 	if (fkey) {
 		RETVAL_STRINGL(fkey, len);
@@ -1114,13 +1114,13 @@ PHP_FUNCTION(dba_nextkey)
 	zval *id;
 	dba_info *info = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
 		return;
 	}
 
 	DBA_FETCH_RESOURCE(info, id);
 
-	nkey = info->hnd->nextkey(info, &len TSRMLS_CC);
+	nkey = info->hnd->nextkey(info, &len);
 
 	if (nkey) {
 		RETVAL_STRINGL(nkey, len);
@@ -1141,7 +1141,7 @@ PHP_FUNCTION(dba_delete)
 	
 	DBA_WRITE_CHECK_WITH_ID;
 	
-	if(info->hnd->delete(info, key_str, key_len TSRMLS_CC) == SUCCESS)
+	if(info->hnd->delete(info, key_str, key_len) == SUCCESS)
 	{
 		DBA_ID_DONE;
 		RETURN_TRUE;
@@ -1176,7 +1176,7 @@ PHP_FUNCTION(dba_optimize)
 	zval *id;
 	dba_info *info = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
 		return;
 	}
 
@@ -1184,7 +1184,7 @@ PHP_FUNCTION(dba_optimize)
 
 	DBA_WRITE_CHECK;
 
-	if (info->hnd->optimize(info TSRMLS_CC) == SUCCESS) {
+	if (info->hnd->optimize(info) == SUCCESS) {
 		RETURN_TRUE;
 	}
 
@@ -1199,13 +1199,13 @@ PHP_FUNCTION(dba_sync)
 	zval *id;
 	dba_info *info = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
 		return;
 	}
 
 	DBA_FETCH_RESOURCE(info, id);
 
-	if (info->hnd->sync(info TSRMLS_CC) == SUCCESS) {
+	if (info->hnd->sync(info) == SUCCESS) {
 		RETURN_TRUE;
 	}
 
@@ -1220,7 +1220,7 @@ PHP_FUNCTION(dba_handlers)
 	dba_handler *hptr;
 	zend_bool full_info = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &full_info) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_info) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1229,7 +1229,7 @@ PHP_FUNCTION(dba_handlers)
 	for(hptr = handler; hptr->name; hptr++) {
 		if (full_info) {
 			// TODO: avoid reallocation ???
-			char *str = hptr->info(hptr, NULL TSRMLS_CC);
+			char *str = hptr->info(hptr, NULL);
 			add_assoc_string(return_value, hptr->name, str);
 			efree(str);
 		} else {

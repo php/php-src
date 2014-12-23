@@ -53,21 +53,21 @@ static struct st_mysqlnd_plugin_core mysqlnd_plugin_core =
 
 
 /* {{{ mysqlnd_library_end */
-PHPAPI void mysqlnd_library_end(TSRMLS_D)
+PHPAPI void mysqlnd_library_end(void)
 {
 	if (mysqlnd_library_initted == TRUE) {
-		mysqlnd_plugin_subsystem_end(TSRMLS_C);
+		mysqlnd_plugin_subsystem_end();
 		mysqlnd_stats_end(mysqlnd_global_stats);
 		mysqlnd_global_stats = NULL;
 		mysqlnd_library_initted = FALSE;
-		mysqlnd_reverse_api_end(TSRMLS_C);
+		mysqlnd_reverse_api_end();
 	}
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_library_init */
-PHPAPI void mysqlnd_library_init(TSRMLS_D)
+PHPAPI void mysqlnd_library_init(void)
 {
 	if (mysqlnd_library_initted == FALSE) {
 		mysqlnd_library_initted = TRUE;
@@ -76,18 +76,18 @@ PHPAPI void mysqlnd_library_init(TSRMLS_D)
 		_mysqlnd_init_ps_subsystem();
 		/* Should be calloc, as mnd_calloc will reference LOCK_access*/
 		mysqlnd_stats_init(&mysqlnd_global_stats, STAT_LAST);
-		mysqlnd_plugin_subsystem_init(TSRMLS_C);
+		mysqlnd_plugin_subsystem_init();
 		{
 			mysqlnd_plugin_core.plugin_header.plugin_stats.values = mysqlnd_global_stats;
-			mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_core TSRMLS_CC);
+			mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_core);
 		}
 #if defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1
-		mysqlnd_example_plugin_register(TSRMLS_C);
+		mysqlnd_example_plugin_register();
 #endif
-		mysqlnd_debug_trace_plugin_register(TSRMLS_C);
-		mysqlnd_register_builtin_authentication_plugins(TSRMLS_C);
+		mysqlnd_debug_trace_plugin_register();
+		mysqlnd_register_builtin_authentication_plugins();
 
-		mysqlnd_reverse_api_init(TSRMLS_C);
+		mysqlnd_reverse_api_init();
 	}
 }
 /* }}} */
@@ -99,9 +99,7 @@ static void
 mysqlnd_error_list_pdtor(void * pDest)
 {
 	MYSQLND_ERROR_LIST_ELEMENT * element = (MYSQLND_ERROR_LIST_ELEMENT *) pDest;
-#ifdef ZTS
-	TSRMLS_FETCH();
-#endif
+
 	DBG_ENTER("mysqlnd_error_list_pdtor");
 	if (element->error) {
 		mnd_pefree(element->error, TRUE);
@@ -113,7 +111,7 @@ mysqlnd_error_list_pdtor(void * pDest)
 
 /* {{{ mysqlnd_object_factory::get_connection */
 static MYSQLND *
-MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent)
 {
 	size_t alloc_size_ret = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
 	size_t alloc_size_ret_data = sizeof(MYSQLND_CONN_DATA) + mysqlnd_plugin_count() * sizeof(void *);
@@ -142,16 +140,16 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent TSRM
 	data->persistent = persistent;
 	data->m = mysqlnd_conn_data_get_methods();
 	CONN_SET_STATE(data, CONN_ALLOCED);
-	data->m->get_reference(data TSRMLS_CC);
+	data->m->get_reference(data);
 
-	if (PASS != data->m->init(data TSRMLS_CC)) {
-		new_object->m->dtor(new_object TSRMLS_CC);
+	if (PASS != data->m->init(data)) {
+		new_object->m->dtor(new_object);
 		DBG_RETURN(NULL);
 	}
 
 	data->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
 	if (!data->error_info->error_list) {
-		new_object->m->dtor(new_object TSRMLS_CC);
+		new_object->m->dtor(new_object);
 		DBG_RETURN(NULL);
 	} else {
 		zend_llist_init(data->error_info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t)mysqlnd_error_list_pdtor, persistent);
@@ -164,7 +162,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(zend_bool persistent TSRM
 
 /* {{{ mysqlnd_object_factory::clone_connection_object */
 static MYSQLND *
-MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_cloned TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_cloned)
 {
 	size_t alloc_size_ret = sizeof(MYSQLND) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND * new_object;
@@ -181,9 +179,9 @@ MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_
 	new_object->persistent = to_be_cloned->persistent;
 	new_object->m = to_be_cloned->m;
 
-	new_object->data = to_be_cloned->data->m->get_reference(to_be_cloned->data TSRMLS_CC);
+	new_object->data = to_be_cloned->data->m->get_reference(to_be_cloned->data);
 	if (!new_object->data) {
-		new_object->m->dtor(new_object TSRMLS_CC);
+		new_object->m->dtor(new_object);
 		new_object = NULL;
 	}
 	DBG_RETURN(new_object);
@@ -193,7 +191,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_
 
 /* {{{ mysqlnd_object_factory::get_prepared_statement */
 static MYSQLND_STMT *
-MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn)
 {
 	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_STMT * ret = mnd_pecalloc(1, alloc_size, conn->persistent);
@@ -228,7 +226,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 		  be destructed till there is open statements. The last statement
 		  or normal query result will close it then.
 		*/
-		stmt->conn = conn->m->get_reference(conn TSRMLS_CC);
+		stmt->conn = conn->m->get_reference(conn);
 		stmt->error_info->error_list = mnd_pecalloc(1, sizeof(zend_llist), ret->persistent);
 		if (!stmt->error_info->error_list) {
 			break;
@@ -241,7 +239,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 
 	SET_OOM_ERROR(*conn->error_info);
 	if (ret) {
-		ret->m->dtor(ret, TRUE TSRMLS_CC);
+		ret->m->dtor(ret, TRUE);
 		ret = NULL;
 	}
 	DBG_RETURN(NULL);
@@ -251,7 +249,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 
 /* {{{ mysqlnd_object_factory::get_io_channel */
 PHPAPI MYSQLND_NET *
-MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
 	size_t net_alloc_size = sizeof(MYSQLND_NET) + mysqlnd_plugin_count() * sizeof(void *);
 	size_t net_data_alloc_size = sizeof(MYSQLND_NET_DATA) + mysqlnd_plugin_count() * sizeof(void *);
@@ -265,8 +263,8 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYS
 		net->persistent = net->data->persistent = persistent;
 		net->data->m = *mysqlnd_net_get_methods();
 
-		if (PASS != net->data->m.init(net, stats, error_info TSRMLS_CC)) {
-			net->data->m.dtor(net, stats, error_info TSRMLS_CC);
+		if (PASS != net->data->m.init(net, stats, error_info)) {
+			net->data->m.dtor(net, stats, error_info);
 			net = NULL;
 		}
 	} else {
@@ -286,7 +284,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYS
 
 /* {{{ mysqlnd_object_factory::get_protocol_decoder */
 static MYSQLND_PROTOCOL *
-MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)(zend_bool persistent TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)(zend_bool persistent)
 {
 	size_t alloc_size = sizeof(MYSQLND_PROTOCOL) + mysqlnd_plugin_count() * sizeof(void *);
 	MYSQLND_PROTOCOL *ret = mnd_pecalloc(1, alloc_size, persistent);

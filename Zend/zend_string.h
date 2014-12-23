@@ -25,13 +25,13 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API extern zend_string *(*zend_new_interned_string)(zend_string *str TSRMLS_DC);
-ZEND_API extern void (*zend_interned_strings_snapshot)(TSRMLS_D);
-ZEND_API extern void (*zend_interned_strings_restore)(TSRMLS_D);
+ZEND_API extern zend_string *(*zend_new_interned_string)(zend_string *str);
+ZEND_API extern void (*zend_interned_strings_snapshot)(void);
+ZEND_API extern void (*zend_interned_strings_restore)(void);
 
 ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
-void zend_interned_strings_init(TSRMLS_D);
-void zend_interned_strings_dtor(TSRMLS_D);
+void zend_interned_strings_init(void);
+void zend_interned_strings_dtor(void);
 
 END_EXTERN_C()
 
@@ -279,10 +279,12 @@ static zend_always_inline zend_ulong zend_inline_hash_func(const char *str, size
 		case 0: break;
 EMPTY_SWITCH_DEFAULT_CASE()
 	}
+
+	ZEND_ASSERT(hash != 0);
 	return hash;
 }
 
-static zend_always_inline void zend_interned_empty_string_init(zend_string **s TSRMLS_DC)
+static zend_always_inline void zend_interned_empty_string_init(zend_string **s)
 {
 	zend_string *str;
 
@@ -290,7 +292,7 @@ static zend_always_inline void zend_interned_empty_string_init(zend_string **s T
 	str->val[0] = '\000';
 
 #ifndef ZTS
-	*s = zend_new_interned_string(str TSRMLS_CC);
+	*s = zend_new_interned_string(str);
 #else
 	zend_string_hash_val(str);
 	str->gc.u.v.flags |= IS_STR_INTERNED;
@@ -298,7 +300,7 @@ static zend_always_inline void zend_interned_empty_string_init(zend_string **s T
 #endif
 }
 
-static zend_always_inline void zend_interned_empty_string_free(zend_string **s TSRMLS_DC)
+static zend_always_inline void zend_interned_empty_string_free(zend_string **s)
 {
 	if (NULL != *s) {
 		free(*s);

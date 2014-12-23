@@ -102,27 +102,27 @@ bool(false)
 
 Arg value: 10.5 (type: double)
 
-Warning: get_class() expects parameter 1 to be object, double given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, float given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value: -10.5 (type: double)
 
-Warning: get_class() expects parameter 1 to be object, double given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, float given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value: 101234567000 (type: double)
 
-Warning: get_class() expects parameter 1 to be object, double given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, float given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value: 1.07654321E-9 (type: double)
 
-Warning: get_class() expects parameter 1 to be object, double given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, float given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value: 0.5 (type: double)
 
-Warning: get_class() expects parameter 1 to be object, double given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, float given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value: Array (type: array)

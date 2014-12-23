@@ -35,9 +35,9 @@ typedef struct {
 	int				tz_set; /* if we've already the time zone in sub-formats */
 } msgformat_data;
 
-msgformat_data* msgformat_data_create( TSRMLS_D );
-void msgformat_data_init( msgformat_data* mf_data TSRMLS_DC );
-void msgformat_data_free( msgformat_data* mf_data TSRMLS_DC );
+msgformat_data* msgformat_data_create( void );
+void msgformat_data_init( msgformat_data* mf_data );
+void msgformat_data_free( msgformat_data* mf_data );
 
 #ifdef MSG_FORMAT_QUOTE_APOS
 int msgformat_fix_quotes(UChar **spattern, uint32_t *spattern_len, UErrorCode *ec);

@@ -54,7 +54,7 @@ PHP_FUNCTION(uniqid)
 	size_t prefix_len = 0;
 	struct timeval tv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sb", &prefix, &prefix_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sb", &prefix, &prefix_len,
 							  &more_entropy)) {
 		return;
 	}
@@ -62,7 +62,7 @@ PHP_FUNCTION(uniqid)
 #if HAVE_USLEEP && !defined(PHP_WIN32)
 	if (!more_entropy) {
 #if defined(__CYGWIN__)
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must use 'more entropy' under CYGWIN");
+		php_error_docref(NULL, E_WARNING, "You must use 'more entropy' under CYGWIN");
 		RETURN_FALSE;
 #else
 		usleep(1);
@@ -77,7 +77,7 @@ PHP_FUNCTION(uniqid)
 	 * digits for usecs.
 	 */
 	if (more_entropy) {
-		uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, sec, usec, php_combined_lcg(TSRMLS_C) * 10);
+		uniqid = strpprintf(0, "%s%08x%05x%.8F", prefix, sec, usec, php_combined_lcg() * 10);
 	} else {
 		uniqid = strpprintf(0, "%s%08x%05x", prefix, sec, usec);
 	}

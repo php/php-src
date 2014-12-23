@@ -36,10 +36,10 @@ PHP_FUNCTION( msgfmt_get_pattern )
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, MessageFormatter_ce_ptr ) == FAILURE )
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
-			"msgfmt_get_pattern: unable to parse input params", 0 TSRMLS_CC );
+			"msgfmt_get_pattern: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
@@ -68,11 +68,11 @@ PHP_FUNCTION( msgfmt_set_pattern )
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, MessageFormatter_ce_ptr, &value, &value_len ) == FAILURE )
 	{
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
-			"msgfmt_set_pattern: unable to parse input params", 0 TSRMLS_CC);
+			"msgfmt_set_pattern: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
 
@@ -85,7 +85,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 #ifdef MSG_FORMAT_QUOTE_APOS
 	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
 		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
-			"msgfmt_set_pattern: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
+			"msgfmt_set_pattern: error converting pattern to quote-friendly format", 0 );
 		RETURN_FALSE;
 	}
 #endif
@@ -124,11 +124,11 @@ PHP_FUNCTION( msgfmt_get_locale )
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_locale: unable to parse input params", 0 TSRMLS_CC );
+			"msgfmt_get_locale: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}

@@ -14,4 +14,4 @@ $result = imagestring($image, 1, 5, 'string', 'String', 1);
 
 ?>
 --EXPECTF--
-Warning: imagestring() expects parameter 4 to be long, %s given in %s on line %d
+Warning: imagestring() expects parameter 4 to be integer, %s given in %s on line %d

@@ -5,7 +5,7 @@ ARG_ENABLE("soap", "SOAP support", "no");
 
 if (PHP_SOAP != "no") {
 	if (PHP_LIBXML == "yes" && ADD_EXTENSION_DEP('soap', 'libxml')) {
-		EXTENSION('soap', 'soap.c php_encoding.c php_http.c php_packet_soap.c php_schema.c php_sdl.c php_xml.c');
+		EXTENSION('soap', 'soap.c php_encoding.c php_http.c php_packet_soap.c php_schema.c php_sdl.c php_xml.c', null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE('HAVE_PHP_SOAP', 1, "SOAP support");
 
 		if (!PHP_SOAP_SHARED) {

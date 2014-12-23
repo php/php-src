@@ -126,13 +126,13 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 	void *context;
 	php_stream *stream = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &algo, &algo_len, &data, &data_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &algo, &algo_len, &data, &data_len, &raw_output) == FAILURE) {
 		return;
 	}
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
 		RETURN_FALSE;
 	}
 	if (isfilename) {
@@ -243,14 +243,14 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 	void *context;
 	php_stream *stream = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|b", &algo, &algo_len, &data, &data_len, 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|b", &algo, &algo_len, &data, &data_len, 
 																  &key, &key_len, &raw_output) == FAILURE) {
 		return;
 	}
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
 		RETURN_FALSE;
 	}
 	if (isfilename) {
@@ -336,20 +336,20 @@ PHP_FUNCTION(hash_init)
 	const php_hash_ops *ops;
 	php_hash_data *hash;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|ls", &algo, &algo_len, &options, &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters(argc, "s|ls", &algo, &algo_len, &options, &key, &key_len) == FAILURE) {
 		return;
 	}
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
 		RETURN_FALSE;
 	}
 
 	if (options & PHP_HASH_HMAC &&
 		key_len <= 0) {
 		/* Note: a zero length key is no key at all */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "HMAC requested without a key");
+		php_error_docref(NULL, E_WARNING, "HMAC requested without a key");
 		RETURN_FALSE;
 	}
 
@@ -399,7 +399,7 @@ PHP_FUNCTION(hash_update)
 	char *data;
 	size_t data_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &zhash, &data, &data_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &zhash, &data, &data_len) == FAILURE) {
 		return;
 	}
 
@@ -420,7 +420,7 @@ PHP_FUNCTION(hash_update_stream)
 	php_stream *stream = NULL;
 	zend_long length = -1, didread = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|l", &zhash, &zstream, &length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|l", &zhash, &zstream, &length) == FAILURE) {
 		return;
 	}
 
@@ -459,7 +459,7 @@ PHP_FUNCTION(hash_update_file)
 	char *filename, buf[1024];
 	size_t filename_len, n;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|r", &zhash, &filename, &filename_len, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -491,7 +491,7 @@ PHP_FUNCTION(hash_final)
 	zend_string *digest;
 	int digest_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|b", &zhash, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &zhash, &raw_output) == FAILURE) {
 		return;
 	}
 
@@ -554,7 +554,7 @@ PHP_FUNCTION(hash_copy)
 	void *context;
 	int res;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zhash) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zhash) == FAILURE) {
 		return;
 	}
 
@@ -609,28 +609,28 @@ PHP_FUNCTION(hash_pbkdf2)
 	const php_hash_ops *ops;
 	void *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sssl|lb", &algo, &algo_len, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sssl|lb", &algo, &algo_len, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output) == FAILURE) {
 		return;
 	}
 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", algo);
 		RETURN_FALSE;
 	}
 
 	if (iterations <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Iterations must be a positive integer: " ZEND_LONG_FMT, iterations);
+		php_error_docref(NULL, E_WARNING, "Iterations must be a positive integer: " ZEND_LONG_FMT, iterations);
 		RETURN_FALSE;
 	}
 
 	if (length < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
+		php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
 		RETURN_FALSE;
 	}
 
 	if (salt_len > INT_MAX - 4) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long, max of INT_MAX - 4 bytes: %zd supplied", salt_len);
+		php_error_docref(NULL, E_WARNING, "Supplied salt is too long, max of INT_MAX - 4 bytes: %zd supplied", salt_len);
 		RETURN_FALSE;
 	}
 
@@ -729,18 +729,18 @@ PHP_FUNCTION(hash_equals)
 	char *known_str, *user_str;
 	int result = 0, j;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &known_zval, &user_zval) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &known_zval, &user_zval) == FAILURE) {
 		return;
 	}
 
 	/* We only allow comparing string to prevent unexpected results. */
 	if (Z_TYPE_P(known_zval) != IS_STRING) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected known_string to be a string, %s given", zend_zval_type_name(known_zval));
+		php_error_docref(NULL, E_WARNING, "Expected known_string to be a string, %s given", zend_zval_type_name(known_zval));
 		RETURN_FALSE;
 	}
 
 	if (Z_TYPE_P(user_zval) != IS_STRING) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected user_string to be a string, %s given", zend_zval_type_name(user_zval));
+		php_error_docref(NULL, E_WARNING, "Expected user_string to be a string, %s given", zend_zval_type_name(user_zval));
 		RETURN_FALSE;
 	}
 
@@ -762,7 +762,7 @@ PHP_FUNCTION(hash_equals)
 
 /* Module Housekeeping */
 
-static void php_hash_dtor(zend_resource *rsrc TSRMLS_DC) /* {{{ */
+static void php_hash_dtor(zend_resource *rsrc) /* {{{ */
 {
 	php_hash_data *hash = (php_hash_data*)rsrc->ptr;
 
@@ -820,9 +820,9 @@ static void mhash_init(INIT_FUNC_ARGS)
 		}
 
 		len = slprintf(buf, 127, "MHASH_%s", algorithm.mhash_name, strlen(algorithm.mhash_name));
-		zend_register_long_constant(buf, len, algorithm.value, CONST_CS | CONST_PERSISTENT, module_number TSRMLS_CC);
+		zend_register_long_constant(buf, len, algorithm.value, CONST_CS | CONST_PERSISTENT, module_number);
 	}
-	zend_register_internal_module(&mhash_module_entry TSRMLS_CC);
+	zend_register_internal_module(&mhash_module_entry);
 }
 
 /* {{{ proto string mhash(int hash, string data [, string key])
@@ -832,7 +832,7 @@ PHP_FUNCTION(mhash)
 	zval *z_algorithm;
 	zend_long algorithm;
 
-	if (zend_parse_parameters(1 TSRMLS_CC, "z", &z_algorithm) == FAILURE) {
+	if (zend_parse_parameters(1, "z", &z_algorithm) == FAILURE) {
 		return;
 	}
 
@@ -864,7 +864,7 @@ PHP_FUNCTION(mhash_get_hash_name)
 {
 	zend_long algorithm;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &algorithm) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &algorithm) == FAILURE) {
 		return;
 	}
 
@@ -895,7 +895,7 @@ PHP_FUNCTION(mhash_get_block_size)
 {
 	zend_long algorithm;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &algorithm) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &algorithm) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
@@ -924,13 +924,13 @@ PHP_FUNCTION(mhash_keygen_s2k)
 	size_t password_len, salt_len;
 	char padded_salt[SALT_SIZE];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lssl", &algorithm, &password, &password_len, &salt, &salt_len, &l_bytes) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lssl", &algorithm, &password, &password_len, &salt, &salt_len, &l_bytes) == FAILURE) {
 		return;
 	}
 
 	bytes = (int)l_bytes;
 	if (bytes <= 0){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "the byte parameter must be greater than 0");
+		php_error_docref(NULL, E_WARNING, "the byte parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 

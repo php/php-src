@@ -118,27 +118,27 @@ NULL
 
 -- Iteration 5 --
 
-Warning: reset() expects parameter 1 to be array, double given in %s on line %d
+Warning: reset() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 6 --
 
-Warning: reset() expects parameter 1 to be array, double given in %s on line %d
+Warning: reset() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: reset() expects parameter 1 to be array, double given in %s on line %d
+Warning: reset() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: reset() expects parameter 1 to be array, double given in %s on line %d
+Warning: reset() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: reset() expects parameter 1 to be array, double given in %s on line %d
+Warning: reset() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 10 --

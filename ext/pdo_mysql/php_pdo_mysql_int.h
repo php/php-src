@@ -83,7 +83,10 @@ ZEND_END_MODULE_GLOBALS(pdo_mysql)
 ZEND_EXTERN_MODULE_GLOBALS(pdo_mysql)
 
 #ifdef ZTS
-#define PDO_MYSQL_G(v) TSRMG(pdo_mysql_globals_id, zend_pdo_mysql_globals *, v)
+#define PDO_MYSQL_G(v) ZEND_TSRMG(pdo_mysql_globals_id, zend_pdo_mysql_globals *, v)
+# ifdef COMPILE_DL_PDO_MYSQL
+ZEND_TSRMLS_CACHE_EXTERN;
+# endif
 #else
 #define PDO_MYSQL_G(v) (pdo_mysql_globals.v)
 #endif
@@ -147,9 +150,9 @@ typedef struct {
 
 extern pdo_driver_t pdo_mysql_driver;
 
-extern int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC);
-#define pdo_mysql_error(s) _pdo_mysql_error(s, NULL, __FILE__, __LINE__ TSRMLS_CC)
-#define pdo_mysql_error_stmt(s) _pdo_mysql_error(stmt->dbh, stmt, __FILE__, __LINE__ TSRMLS_CC)
+extern int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
+#define pdo_mysql_error(s) _pdo_mysql_error(s, NULL, __FILE__, __LINE__)
+#define pdo_mysql_error_stmt(s) _pdo_mysql_error(stmt->dbh, stmt, __FILE__, __LINE__)
 
 extern struct pdo_stmt_methods mysql_stmt_methods;
 

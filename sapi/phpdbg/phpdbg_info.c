@@ -46,15 +46,15 @@ const phpdbg_command_t phpdbg_info_commands[] = {
 
 PHPDBG_INFO(break) /* {{{ */
 {
-	phpdbg_print_breakpoints(PHPDBG_BREAK_FILE TSRMLS_CC);
-	phpdbg_print_breakpoints(PHPDBG_BREAK_SYM TSRMLS_CC);
-	phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD TSRMLS_CC);
-	phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE TSRMLS_CC);
-	phpdbg_print_breakpoints(PHPDBG_BREAK_FILE_OPLINE TSRMLS_CC);
-	phpdbg_print_breakpoints(PHPDBG_BREAK_FUNCTION_OPLINE TSRMLS_CC);
-	phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD_OPLINE TSRMLS_CC);
-	phpdbg_print_breakpoints(PHPDBG_BREAK_COND TSRMLS_CC);
-	phpdbg_print_breakpoints(PHPDBG_BREAK_OPCODE TSRMLS_CC);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_FILE);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_SYM);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_FILE_OPLINE);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_FUNCTION_OPLINE);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD_OPLINE);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_COND);
+	phpdbg_print_breakpoints(PHPDBG_BREAK_OPCODE);
 
 	return SUCCESS;
 } /* }}} */
@@ -153,19 +153,19 @@ PHPDBG_INFO(constants) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static int phpdbg_arm_auto_global(zend_auto_global *auto_global TSRMLS_DC) {
+static int phpdbg_arm_auto_global(zend_auto_global *auto_global) {
 	if (auto_global->armed) {
 		if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
 			phpdbg_notice("variableinfo", "unreachable=\"%.*s\"", "Cannot show information about superglobal variable %.*s", auto_global->name->len, auto_global->name->val);
 		} else {
-			auto_global->armed = auto_global->auto_global_callback(auto_global->name TSRMLS_CC);
+			auto_global->armed = auto_global->auto_global_callback(auto_global->name);
 		}
 	}
 
 	return 0;
 }
 
-static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
+static int phpdbg_print_symbols(zend_bool show_globals) {
 	HashTable vars;
 	zend_array *symtable;
 	zend_string *var;
@@ -178,9 +178,9 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 
 	if (show_globals) {
 		/* that array should only be manipulated during init, so safe for async access during execution */
-		zend_hash_apply(CG(auto_globals), (apply_func_t) phpdbg_arm_auto_global TSRMLS_CC);
+		zend_hash_apply(CG(auto_globals), (apply_func_t) phpdbg_arm_auto_global);
 		symtable = &EG(symbol_table);
-	} else if (!(symtable = zend_rebuild_symbol_table(TSRMLS_C))) {
+	} else if (!(symtable = zend_rebuild_symbol_table())) {
 		phpdbg_error("inactive", "type=\"symbol_table\"", "No active symbol table!");
 		return SUCCESS;
 	}
@@ -189,7 +189,7 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 
 	phpdbg_try_access {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(&symtable->ht, var, data) {
-			if (zend_is_auto_global(var TSRMLS_CC) ^ !show_globals) {
+			if (zend_is_auto_global(var) ^ !show_globals) {
 				zend_hash_update(&vars, var, data);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -226,7 +226,7 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 				switch (Z_TYPE_P(data)) {
 					case IS_RESOURCE:
 						phpdbg_try_access {
-							const char *type = zend_rsrc_list_get_rsrc_type(Z_RES_P(data) TSRMLS_CC);
+							const char *type = zend_rsrc_list_get_rsrc_type(Z_RES_P(data));
 							VARIABLEINFO("type=\"%s\"", "\n|-------(typeof)------> (%s)\n", type ? type : "unknown");
 						} phpdbg_catch_access {
 							VARIABLEINFO("type=\"unknown\"", "\n|-------(typeof)------> (unknown)\n");
@@ -276,12 +276,12 @@ static int phpdbg_print_symbols(zend_bool show_globals TSRMLS_DC) {
 
 PHPDBG_INFO(vars) /* {{{ */
 {
-	return phpdbg_print_symbols(0 TSRMLS_CC);
+	return phpdbg_print_symbols(0);
 }
 
 PHPDBG_INFO(globals) /* {{{ */
 {
-	return phpdbg_print_symbols(1 TSRMLS_CC);
+	return phpdbg_print_symbols(1);
 }
 
 PHPDBG_INFO(literal) /* {{{ */
@@ -309,7 +309,7 @@ PHPDBG_INFO(literal) /* {{{ */
 		while (literal < ops->last_literal) {
 			if (Z_TYPE(ops->literals[literal]) != IS_NULL) {
 				phpdbg_write("literal", "id=\"%u\"", "|-------- C%u -------> [", literal);
-				zend_print_zval(&ops->literals[literal], 0 TSRMLS_CC);
+				zend_print_zval(&ops->literals[literal], 0);
 				phpdbg_out("]\n");
 			}
 			literal++;
@@ -328,16 +328,16 @@ PHPDBG_INFO(memory) /* {{{ */
 	zend_bool is_mm;
 
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
-		heap = zend_mm_set_heap(phpdbg_original_heap_sigsafe_mem(TSRMLS_C) TSRMLS_CC);
+		heap = zend_mm_set_heap(phpdbg_original_heap_sigsafe_mem());
 	}
-	if ((is_mm = is_zend_mm(TSRMLS_C))) {
-		used = zend_memory_usage(0 TSRMLS_CC);
-		real = zend_memory_usage(1 TSRMLS_CC);
-		peak_used = zend_memory_peak_usage(0 TSRMLS_CC);
-		peak_real = zend_memory_peak_usage(1 TSRMLS_CC);
+	if ((is_mm = is_zend_mm())) {
+		used = zend_memory_usage(0);
+		real = zend_memory_usage(1);
+		peak_used = zend_memory_peak_usage(0);
+		peak_real = zend_memory_peak_usage(1);
 	}
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
-		zend_mm_set_heap(heap TSRMLS_CC);
+		zend_mm_set_heap(heap);
 	}
 
 	if (is_mm) {
@@ -354,7 +354,7 @@ PHPDBG_INFO(memory) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static inline void phpdbg_print_class_name(zend_class_entry *ce TSRMLS_DC) /* {{{ */
+static inline void phpdbg_print_class_name(zend_class_entry *ce) /* {{{ */
 {
 	const char *visibility = ce->type == ZEND_USER_CLASS ? "User" : "Internal";
 	const char *type = (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface" : (ce->ce_flags & ZEND_ACC_ABSTRACT) ? "Abstract Class" : "Class";
@@ -383,14 +383,15 @@ PHPDBG_INFO(classes) /* {{{ */
 
 	/* once added, assume that classes are stable... until shutdown. */
 	ZEND_HASH_FOREACH_PTR(&classes, ce) {
-		phpdbg_print_class_name(ce TSRMLS_CC);
+		phpdbg_print_class_name(ce);
 
 		if (ce->parent) {
+			zend_class_entry *pce;
 			phpdbg_xml("<parents %r>");
-			zend_class_entry *pce = ce->parent;
+			pce = ce->parent;
 			do {
 				phpdbg_out("|-------- ");
-				phpdbg_print_class_name(pce TSRMLS_CC);
+				phpdbg_print_class_name(pce);
 			} while ((pce = pce->parent));
 			phpdbg_xml("</parents>");
 		}

@@ -18,11 +18,11 @@ typedef struct {
 
 #include "phpdbg.h"
 
-zend_bool phpdbg_active_sigsafe_mem(TSRMLS_D);
+zend_bool phpdbg_active_sigsafe_mem(void);
 
-void phpdbg_set_sigsafe_mem(char *mem TSRMLS_DC);
-void phpdbg_clear_sigsafe_mem(TSRMLS_D);
+void phpdbg_set_sigsafe_mem(char *mem);
+void phpdbg_clear_sigsafe_mem(void);
 
-zend_mm_heap *phpdbg_original_heap_sigsafe_mem(TSRMLS_D);
+zend_mm_heap *phpdbg_original_heap_sigsafe_mem(void);
 
 #endif

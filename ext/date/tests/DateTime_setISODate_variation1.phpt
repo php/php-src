@@ -145,7 +145,7 @@ object(DateTime)#%d (3) {
 -- int -12345 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(28) "-12345-02-15 08:34:10.000000"
+  string(28) "-12345-02-11 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -165,7 +165,7 @@ object(DateTime)#%d (3) {
 -- float -10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(27) "-0010-02-19 08:34:10.000000"
+  string(27) "-0010-02-14 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -184,22 +184,22 @@ object(DateTime)#%d (3) {
 
 -- empty array --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, array given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, array given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, array given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, array given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
@@ -264,42 +264,42 @@ object(DateTime)#%d (3) {
 
 -- empty string DQ --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, string given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, object given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, object given in %s on line %d
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, object given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, object given in %s on line %d
 bool(false)
 
 -- undefined var --
@@ -324,6 +324,6 @@ object(DateTime)#%d (3) {
 
 -- resource --
 
-Warning: DateTime::setISODate() expects parameter 1 to be long, resource given in %s on line %d
+Warning: DateTime::setISODate() expects parameter 1 to be integer, resource given in %s on line %d
 bool(false)
 ===DONE===

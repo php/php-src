@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 7.0.0
 
@@ -22,6 +22,21 @@ PHP                                                                        NEWS
     classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
   . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
+  . Fixed bug #65576 (Constructor from trait conflicts with inherited
+    constructor). (dunglas at gmail dot com)
+  . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class 
+    modifier. (Guilherme Blanco)
+  . is_long() & is_integer() is now an alias of is_int(). (Kalle)
+  . Implemented FR #55467 (phpinfo: PHP Variables with $ and single quotes). (Kalle)
+  . Fixed bug #55415 (php_info produces invalid anchor names). (Kalle, Johannes)
+  . Added ?? operator. (Andrea)
+  . Added \u{xxxxx} Unicode Codepoint Escape Syntax. (Andrea)
+  . Fixed oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
+  . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint and conversion error messages. (Andrea)
+
+- Date:
+  . Fixed day_of_week function as it could sometimes return negative values
+    internally. (Derick)
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
@@ -40,9 +55,13 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
+  . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
+
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
 
 - pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
@@ -53,7 +72,7 @@ PHP                                                                        NEWS
     statements option). (peter dot wolanin at acquia dot com)
 
 - Reflection
-  . Fixed inheritance chain of Reflector interface (Tjerk)
+  . Fixed inheritance chain of Reflector interface. (Tjerk)
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
@@ -74,6 +93,10 @@ PHP                                                                        NEWS
   . Fix user session handlers (See rfc:session.user.return-value). (Sara)
   . Added intdiv() function. (Andrea)
   . Improved precision of log() function for base 2 and 10. (Marc Bennewitz)
+
+- Streams:
+  . Fixed bug #68532 (convert.base64-encode omits padding bytes).
+    (blaesius at krumedia dot de)
 
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)

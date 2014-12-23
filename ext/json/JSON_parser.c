@@ -291,7 +291,7 @@ static int dehexchar(char c)
 }
 
 
-static void json_create_zval(zval *z, smart_str *buf, int type, int options TSRMLS_DC)
+static void json_create_zval(zval *z, smart_str *buf, int type, int options)
 {
     if (type == IS_LONG)
     {
@@ -393,11 +393,11 @@ static void utf16_to_utf8(smart_str *buf, unsigned short utf16)
     }
 }
 
-static inline void add_assoc_or_property(int assoc, zval *target, smart_str *key, zval *zv TSRMLS_DC)
+static inline void add_assoc_or_property(int assoc, zval *target, smart_str *key, zval *zv)
 {
 	zend_bool empty_key = !key->s || key->s->len == 0;
 	if (!assoc) {
-		add_property_zval_ex(target, empty_key ? "_empty_" : key->s->val, empty_key ? sizeof("_empty_")-1 : key->s->len, zv TSRMLS_CC);
+		add_property_zval_ex(target, empty_key ? "_empty_" : key->s->val, empty_key ? sizeof("_empty_")-1 : key->s->len, zv);
 		if (Z_REFCOUNTED_P(zv)) Z_DELREF_P(zv);
 	} else {
 		add_assoc_zval_ex(target, empty_key ? "" : key->s->val, empty_key ? 0 : key->s->len, zv);
@@ -407,7 +407,7 @@ static inline void add_assoc_or_property(int assoc, zval *target, smart_str *key
 	}
 }
 
-static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int assoc TSRMLS_DC)
+static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int assoc)
 {
     zval *root = &jp->the_zstack[up];
     zval *child = &jp->the_zstack[cur];
@@ -419,7 +419,7 @@ static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int ass
     }
     else if (up_mode == MODE_OBJECT)
     {
-		add_assoc_or_property(assoc, root, key, child TSRMLS_CC);
+		add_assoc_or_property(assoc, root, key, child);
     }
 }
 
@@ -444,7 +444,7 @@ static void attach_zval(JSON_parser jp, int up, int cur, smart_str *key, int ass
     machine with a stack.
 */
 int
-parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int options TSRMLS_DC)
+parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int options)
 {
     int next_char;  /* the next character */
     int next_class;  /* the next character class */
@@ -557,9 +557,9 @@ parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, 
                     zval mval;
                     smart_str_0(&buf);
 
-                    json_create_zval(&mval, &buf, type, options TSRMLS_CC);
+                    json_create_zval(&mval, &buf, type, options);
 
-					add_assoc_or_property(assoc, &jp->the_zstack[jp->top], &key, &mval TSRMLS_CC);
+					add_assoc_or_property(assoc, &jp->the_zstack[jp->top], &key, &mval);
 
                     if (buf.s) { buf.s->len = 0; }
                     JSON_RESET_TYPE();
@@ -580,7 +580,7 @@ parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, 
                     zval mval;
                     smart_str_0(&buf);
 
-                    json_create_zval(&mval, &buf, type, options TSRMLS_CC);
+                    json_create_zval(&mval, &buf, type, options);
                     add_next_index_zval(&jp->the_zstack[jp->top], &mval);
                     buf.s->len = 0;
                     JSON_RESET_TYPE();
@@ -615,7 +615,7 @@ parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, 
 					}
 
                     if (jp->top > 1) {
-                        attach_zval(jp, jp->top - 1, jp->top, &key, assoc TSRMLS_CC);
+                        attach_zval(jp, jp->top - 1, jp->top, &key, assoc);
                     }
 
                     JSON_RESET_TYPE();
@@ -640,7 +640,7 @@ parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, 
 					}
 
                     if (jp->top > 1) {
-                        attach_zval(jp, jp->top - 1, jp->top, &key, assoc TSRMLS_CC);
+                        attach_zval(jp, jp->top - 1, jp->top, &key, assoc);
                     }
 
                     JSON_RESET_TYPE();
@@ -689,14 +689,14 @@ parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, 
                      jp->stack[jp->top] == MODE_ARRAY))
                 {
                     smart_str_0(&buf);
-                    json_create_zval(&mval, &buf, type, options TSRMLS_CC);
+                    json_create_zval(&mval, &buf, type, options);
                 }
 
                 switch (jp->stack[jp->top]) {
                     case MODE_OBJECT:
                         if (pop(jp, MODE_OBJECT) && push(jp, MODE_KEY)) {
                             if (type != -1) {
-								add_assoc_or_property(assoc, &jp->the_zstack[jp->top], &key, &mval TSRMLS_CC);
+								add_assoc_or_property(assoc, &jp->the_zstack[jp->top], &key, &mval);
                             }
                             jp->state = KE;
                         }

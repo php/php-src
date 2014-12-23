@@ -46,7 +46,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-line-number
 Since: 
 */
-int dom_domlocator_line_number_read(dom_object *obj, zval *retval TSRMLS_DC)
+int dom_domlocator_line_number_read(dom_object *obj, zval *retval)
 {
 	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;
@@ -59,7 +59,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-column-number
 Since: 
 */
-int dom_domlocator_column_number_read(dom_object *obj, zval *retval TSRMLS_DC)
+int dom_domlocator_column_number_read(dom_object *obj, zval *retval)
 {
 	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;
@@ -72,7 +72,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-offset
 Since: 
 */
-int dom_domlocator_offset_read(dom_object *obj, zval *retval TSRMLS_DC)
+int dom_domlocator_offset_read(dom_object *obj, zval *retval)
 {
 	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;
@@ -85,7 +85,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-node
 Since: 
 */
-int dom_domlocator_related_node_read(dom_object *obj, zval *retval TSRMLS_DC)
+int dom_domlocator_related_node_read(dom_object *obj, zval *retval)
 {
 	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;
@@ -98,7 +98,7 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-uri
 Since: 
 */
-int dom_domlocator_uri_read(dom_object *obj, zval *retval TSRMLS_DC)
+int dom_domlocator_uri_read(dom_object *obj, zval *retval)
 {
 	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;

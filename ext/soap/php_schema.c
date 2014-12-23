@@ -95,16 +95,16 @@ static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlCh
 	return enc;
 }
 
-static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlAttrPtr tns, int import TSRMLS_DC) {
+static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlAttrPtr tns, int import) {
 	if (location != NULL &&
 	    !zend_hash_str_exists(&ctx->docs, (char*)location, xmlStrlen(location))) {
 		xmlDocPtr doc;
 		xmlNodePtr schema;
 		xmlAttrPtr new_tns;
 
-		sdl_set_uri_credentials(ctx, (char*)location TSRMLS_CC);
-		doc = soap_xmlParseFile((char*)location TSRMLS_CC);
-		sdl_restore_uri_credentials(ctx TSRMLS_CC);
+		sdl_set_uri_credentials(ctx, (char*)location);
+		doc = soap_xmlParseFile((char*)location);
+		sdl_restore_uri_credentials(ctx);
 
 		if (doc == NULL) {
 			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
@@ -136,7 +136,7 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 			}
 		}
 		zend_hash_str_add_ptr(&ctx->docs, (char*)location, xmlStrlen(location), doc);
-		load_schema(ctx, schema TSRMLS_CC);
+		load_schema(ctx, schema);
 	}
 }
 
@@ -160,7 +160,7 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
   Content: ((include | import | redefine | annotation)*, (((simpleType | complexType | group | attributeGroup) | element | attribute | notation), annotation*)*)
 </schema>
 */
-int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC)
+int load_schema(sdlCtx *ctx, xmlNodePtr schema)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr tns;
@@ -202,7 +202,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC)
 	    		uri = xmlBuildURI(location->children->content, base);
 			    xmlFree(base);
 				}
-				schema_load_file(ctx, NULL, uri, tns, 0 TSRMLS_CC);
+				schema_load_file(ctx, NULL, uri, tns, 0);
 				xmlFree(uri);
 			}
 
@@ -222,7 +222,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC)
 	    		uri = xmlBuildURI(location->children->content, base);
 			    xmlFree(base);
 				}
-				schema_load_file(ctx, NULL, uri, tns, 0 TSRMLS_CC);
+				schema_load_file(ctx, NULL, uri, tns, 0);
 				xmlFree(uri);
 				/* TODO: <redefine> support */
 			}
@@ -251,7 +251,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema TSRMLS_DC)
 			    xmlFree(base);
 				}
 			}
-			schema_load_file(ctx, ns, uri, tns, 1 TSRMLS_CC);
+			schema_load_file(ctx, ns, uri, tns, 1);
 			if (uri != NULL) {xmlFree(uri);}
 		} else if (node_is_equal(trav,"annotation")) {
 			/* TODO: <annotation> support */

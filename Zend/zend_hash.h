@@ -122,15 +122,15 @@ ZEND_API zval *zend_hash_str_add_empty_element(HashTable *ht, const char *key, s
 #define ZEND_HASH_APPLY_REMOVE				1<<0
 #define ZEND_HASH_APPLY_STOP				1<<1
 
-typedef int (*apply_func_t)(zval *pDest TSRMLS_DC);
-typedef int (*apply_func_arg_t)(zval *pDest, void *argument TSRMLS_DC);
-typedef int (*apply_func_args_t)(zval *pDest TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key);
+typedef int (*apply_func_t)(zval *pDest);
+typedef int (*apply_func_arg_t)(zval *pDest, void *argument);
+typedef int (*apply_func_args_t)(zval *pDest, int num_args, va_list args, zend_hash_key *hash_key);
 
 ZEND_API void zend_hash_graceful_destroy(HashTable *ht);
 ZEND_API void zend_hash_graceful_reverse_destroy(HashTable *ht);
-ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC);
-ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void * TSRMLS_DC);
-ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int, ...);
+ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func);
+ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void *);
+ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t apply_func, int, ...);
 
 /* This function should be used with special care (in other words,
  * it should usually not be used).  When used with the ZEND_HASH_APPLY_STOP
@@ -138,7 +138,7 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht TSRMLS_DC, apply_func
  * Also, it does not provide the same kind of reentrancy protection that
  * the standard apply functions do.
  */
-ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSRMLS_DC);
+ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func);
 
 
 /* Deletes */
@@ -200,9 +200,9 @@ typedef struct _HashPointer {
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor);
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, zend_bool overwrite ZEND_FILE_LINE_DC);
 ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, merge_checker_func_t pMergeSource, void *pParam);
-ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, zend_bool renumber TSRMLS_DC);
-ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered TSRMLS_DC);
-ZEND_API zval *zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag TSRMLS_DC);
+ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, zend_bool renumber);
+ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered);
+ZEND_API zval *zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag);
 
 #define zend_hash_merge(target, source, pCopyConstructor, overwrite)					\
 	_zend_hash_merge(target, source, pCopyConstructor, overwrite ZEND_FILE_LINE_CC)
@@ -216,8 +216,8 @@ ZEND_API zval *zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint
 ZEND_API int zend_hash_rehash(HashTable *ht);
 
 ZEND_API void zend_array_dup(HashTable *target, HashTable *source);
-ZEND_API void zend_array_destroy(HashTable *ht TSRMLS_DC);
-ZEND_API void zend_symtable_clean(HashTable *ht TSRMLS_DC);
+ZEND_API void zend_array_destroy(HashTable *ht);
+ZEND_API void zend_symtable_clean(HashTable *ht);
 
 #if ZEND_DEBUG
 /* debug */

@@ -375,7 +375,7 @@ PHP_FUNCTION(parse_url)
 	php_url *resource;
 	zend_long key = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &key) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &key) == FAILURE) {
 		return;
 	}
 
@@ -412,7 +412,7 @@ PHP_FUNCTION(parse_url)
 				if (resource->fragment != NULL) RETVAL_STRING(resource->fragment);
 				break;
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL component identifier " ZEND_LONG_FMT, key);
+				php_error_docref(NULL, E_WARNING, "Invalid URL component identifier " ZEND_LONG_FMT, key);
 				RETVAL_FALSE;
 		}
 		goto done;
@@ -534,7 +534,7 @@ PHP_FUNCTION(urlencode)
 	zend_string *in_str;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &in_str) == FAILURE) {
 		return;
 	}
 #else
@@ -554,7 +554,7 @@ PHP_FUNCTION(urldecode)
 	zend_string *in_str, *out_str;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &in_str) == FAILURE) {
 		return;
 	}
 #else
@@ -641,7 +641,7 @@ PHP_FUNCTION(rawurlencode)
 	zend_string *in_str;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &in_str) == FAILURE) {
 		return;
 	}
 #else
@@ -661,7 +661,7 @@ PHP_FUNCTION(rawurldecode)
 	zend_string *in_str, *out_str;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &in_str) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &in_str) == FAILURE) {
 		return;
 	}
 #else
@@ -717,10 +717,10 @@ PHP_FUNCTION(get_headers)
 	HashTable *hashT;
 	zend_long format = 0;
                 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &url, &url_len, &format) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &url, &url_len, &format) == FAILURE) {
 		return;
 	}
-	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc(TSRMLS_C));
+	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc());
 
 	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
 		RETURN_FALSE;

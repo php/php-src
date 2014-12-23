@@ -120,7 +120,7 @@ PHP_INI_END()
 
 
 
-static void php_apache_globals_ctor(php_apache_info_struct *apache_globals TSRMLS_DC)
+static void php_apache_globals_ctor(php_apache_info_struct *apache_globals)
 {
 	apache_globals->in_request = 0;
 }
@@ -131,7 +131,7 @@ static PHP_MINIT_FUNCTION(apache)
 #ifdef ZTS
 	ts_allocate_id(&php_apache_info_id, sizeof(php_apache_info_struct), (ts_allocate_ctor) php_apache_globals_ctor, NULL);
 #else
-	php_apache_globals_ctor(&php_apache_info TSRMLS_CC);
+	php_apache_globals_ctor(&php_apache_info);
 #endif
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -298,11 +298,11 @@ PHP_FUNCTION(apache_child_terminate)
 		ap_child_terminate( ((request_rec *)SG(server_context)) );
 		RETURN_TRUE;
 	} else { /* tell them to get lost! */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is disabled");
+		php_error_docref(NULL, E_WARNING, "This function is disabled");
 		RETURN_FALSE;
 	}
 #else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is not supported in this build");
+		php_error_docref(NULL, E_WARNING, "This function is not supported in this build");
 		RETURN_FALSE;
 #endif
 }
@@ -316,7 +316,7 @@ PHP_FUNCTION(apache_note)
 	int note_name_len, note_val_len;
 	char *old_val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
 		return;
 	}
 
@@ -350,29 +350,29 @@ PHP_FUNCTION(virtual)
 	int filename_len;
 	request_rec *rr = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 	
 	if (!(rr = sub_req_lookup_uri (filename, ((request_rec *) SG(server_context))))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
+		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
 		if (rr)
 			destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
 	if (rr->status != 200) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - error finding URI", filename);
+		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - error finding URI", filename);
 		if (rr)
 			destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
-	php_output_end_all(TSRMLS_C);
-	php_header(TSRMLS_C);
+	php_output_end_all();
+	php_header();
 
 	if (run_sub_req(rr)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - request execution failed", filename);
+		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - request execution failed", filename);
 		if (rr)
 			destroy_sub_req (rr);
 		RETURN_FALSE;
@@ -440,7 +440,7 @@ PHP_FUNCTION(apache_setenv)
 	char *var = NULL, *val = NULL;
 	request_rec *r = (request_rec *) SG(server_context);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &var, &var_len, &val, &val_len, &top) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &var, &var_len, &val, &val_len, &top) == FAILURE) {
 		return;
 	}
 
@@ -462,12 +462,12 @@ PHP_FUNCTION(apache_lookup_uri)
 	int filename_len;
 	request_rec *rr=NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
 	if (!(rr = sub_req_lookup_uri(filename, ((request_rec *) SG(server_context))))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "URI lookup failed '%s'", filename);
+		php_error_docref(NULL, E_WARNING, "URI lookup failed '%s'", filename);
 		RETURN_FALSE;
 	}
 
@@ -540,12 +540,12 @@ PHP_FUNCTION(apache_exec_uri)
 	int filename_len;
 	request_rec *rr=NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
 	if(!(rr = ap_sub_req_lookup_uri(filename, ((request_rec *) SG(server_context))))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "URI lookup failed", filename);
+		php_error_docref(NULL, E_WARNING, "URI lookup failed", filename);
 		RETURN_FALSE;
 	}
 

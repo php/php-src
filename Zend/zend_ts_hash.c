@@ -144,35 +144,35 @@ ZEND_API void zend_ts_hash_graceful_destroy(TsHashTable *ht)
 #endif
 }
 
-ZEND_API void zend_ts_hash_apply(TsHashTable *ht, apply_func_t apply_func TSRMLS_DC)
+ZEND_API void zend_ts_hash_apply(TsHashTable *ht, apply_func_t apply_func)
 {
 	begin_write(ht);
-	zend_hash_apply(TS_HASH(ht), apply_func TSRMLS_CC);
+	zend_hash_apply(TS_HASH(ht), apply_func);
 	end_write(ht);
 }
 
-ZEND_API void zend_ts_hash_apply_with_argument(TsHashTable *ht, apply_func_arg_t apply_func, void *argument TSRMLS_DC)
+ZEND_API void zend_ts_hash_apply_with_argument(TsHashTable *ht, apply_func_arg_t apply_func, void *argument)
 {
 	begin_write(ht);
-	zend_hash_apply_with_argument(TS_HASH(ht), apply_func, argument TSRMLS_CC);
+	zend_hash_apply_with_argument(TS_HASH(ht), apply_func, argument);
 	end_write(ht);
 }
 
-ZEND_API void zend_ts_hash_apply_with_arguments(TsHashTable *ht TSRMLS_DC, apply_func_args_t apply_func, int num_args, ...)
+ZEND_API void zend_ts_hash_apply_with_arguments(TsHashTable *ht, apply_func_args_t apply_func, int num_args, ...)
 {
 	va_list args;
 
 	va_start(args, num_args);
 	begin_write(ht);
-	zend_hash_apply_with_arguments(TS_HASH(ht) TSRMLS_CC, apply_func, num_args, args);
+	zend_hash_apply_with_arguments(TS_HASH(ht), apply_func, num_args, args);
 	end_write(ht);
 	va_end(args);
 }
 
-ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_func TSRMLS_DC)
+ZEND_API void zend_ts_hash_reverse_apply(TsHashTable *ht, apply_func_t apply_func)
 {
 	begin_write(ht);
-	zend_hash_reverse_apply(TS_HASH(ht), apply_func TSRMLS_CC);
+	zend_hash_reverse_apply(TS_HASH(ht), apply_func);
 	end_write(ht);
 }
 
@@ -276,36 +276,36 @@ ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, co
 	end_read(source);
 }
 
-ZEND_API int zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber TSRMLS_DC)
+ZEND_API int zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber)
 {
 	int retval;
 
 	begin_write(ht);
-	retval = zend_hash_sort(TS_HASH(ht), sort_func, compare_func, renumber TSRMLS_CC);
+	retval = zend_hash_sort(TS_HASH(ht), sort_func, compare_func, renumber);
 	end_write(ht);
 
 	return retval;
 }
 
-ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered TSRMLS_DC)
+ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered)
 {
 	int retval;
 
 	begin_read(ht1);
 	begin_read(ht2);
-	retval = zend_hash_compare(TS_HASH(ht1), TS_HASH(ht2), compar, ordered TSRMLS_CC);
+	retval = zend_hash_compare(TS_HASH(ht1), TS_HASH(ht2), compar, ordered);
 	end_read(ht2);
 	end_read(ht1);
 
 	return retval;
 }
 
-ZEND_API zval *zend_ts_hash_minmax(TsHashTable *ht, compare_func_t compar, int flag TSRMLS_DC)
+ZEND_API zval *zend_ts_hash_minmax(TsHashTable *ht, compare_func_t compar, int flag)
 {
 	zval *retval;
 
 	begin_read(ht);
-	retval = zend_hash_minmax(TS_HASH(ht), compar, flag TSRMLS_CC);
+	retval = zend_hash_minmax(TS_HASH(ht), compar, flag);
 	end_read(ht);
 
 	return retval;

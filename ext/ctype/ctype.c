@@ -144,7 +144,7 @@ static PHP_MINFO_FUNCTION(ctype)
  */
 #define CTYPE(iswhat) \
 	zval *c, tmp; \
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &c) == FAILURE) \
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &c) == FAILURE) \
 		return; \
 	if (Z_TYPE_P(c) == IS_LONG) { \
 		if (Z_LVAL_P(c) <= 255 && Z_LVAL_P(c) >= 0) { \

@@ -35,15 +35,15 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	int         spattern_len = 0;
 	zval*       object;
 	MessageFormatter_object* mfo;
-	intl_error_reset( NULL TSRMLS_CC );
+	intl_error_reset( NULL );
 
 	object = return_value;
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "ss",
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "ss",
 		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_create: unable to parse input parameters", 0 TSRMLS_CC );
+			"msgfmt_create: unable to parse input parameters", 0 );
 		Z_OBJ_P(return_value) = NULL;
 		return;
 	}
@@ -61,7 +61,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if(locale_len == 0) {
-		locale = intl_locale_get_default(TSRMLS_C);
+		locale = intl_locale_get_default();
 	}
 
 #ifdef MSG_FORMAT_QUOTE_APOS
@@ -71,7 +71,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 #endif
 
 	if ((mfo)->mf_data.orig_format) {
-		msgformat_data_free(&mfo->mf_data TSRMLS_CC);
+		msgformat_data_free(&mfo->mf_data);
 	}
 
 	(mfo)->mf_data.orig_format = estrndup(pattern, pattern_len);
@@ -114,7 +114,7 @@ PHP_METHOD( MessageFormatter, __construct )
 	msgfmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zend_object_store_ctor_failed(Z_OBJ(orig_this) TSRMLS_CC);
+		zend_object_store_ctor_failed(Z_OBJ(orig_this));
 		zval_dtor(&orig_this);
 		ZEND_CTOR_MAKE_NULL();
 	}
@@ -132,11 +132,11 @@ PHP_FUNCTION( msgfmt_get_error_code )
 	MessageFormatter_object*  mfo     = NULL;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_error_code: unable to parse input params", 0 TSRMLS_CC );
+			"msgfmt_get_error_code: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -160,11 +160,11 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	MessageFormatter_object*  mfo     = NULL;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_error_message: unable to parse input params", 0 TSRMLS_CC );
+			"msgfmt_get_error_message: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -172,7 +172,7 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	mfo = Z_INTL_MESSAGEFORMATTER_P( object );
 
 	/* Return last error message. */
-	message = intl_error_get_message( &mfo->mf_data.error TSRMLS_CC );
+	message = intl_error_get_message( &mfo->mf_data.error );
 	RETURN_STR(message);
 }
 /* }}} */

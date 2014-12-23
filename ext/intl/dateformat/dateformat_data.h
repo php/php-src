@@ -30,8 +30,8 @@ typedef struct {
 	UDateFormat *  udatf;
 } dateformat_data;
 
-dateformat_data* dateformat_data_create( TSRMLS_D );
-void dateformat_data_init( dateformat_data* datef_data TSRMLS_DC );
-void dateformat_data_free( dateformat_data* datef_data TSRMLS_DC );
+dateformat_data* dateformat_data_create( void );
+void dateformat_data_init( dateformat_data* datef_data );
+void dateformat_data_free( dateformat_data* datef_data );
 
 #endif // DATE_FORMAT_DATA_H

@@ -59,18 +59,18 @@ PHP_FUNCTION(readlink)
 	char buff[MAXPATHLEN];
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &link, &link_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &link, &link_len) == FAILURE) {
 		return;
 	}
 
-	if (php_check_open_basedir(link TSRMLS_CC)) {
+	if (php_check_open_basedir(link)) {
 		RETURN_FALSE;
 	}
 
 	ret = php_sys_readlink(link, buff, MAXPATHLEN-1);
 
 	if (ret == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 	/* Append NULL to the end of the string */
@@ -90,21 +90,21 @@ PHP_FUNCTION(linkinfo)
 	zend_stat_t sb;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &link, &link_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &link, &link_len) == FAILURE) {
 		return;
 	}
 
 	dirname = estrndup(link, link_len);
 	dir_len = php_dirname(dirname, link_len);
 
-	if (php_check_open_basedir(dirname TSRMLS_CC)) {
+	if (php_check_open_basedir(dirname)) {
 		efree(dirname);
 		RETURN_FALSE;
 	}
 
 	ret = VCWD_LSTAT(link, &sb);
 	if (ret == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		efree(dirname);
 		RETURN_LONG(-1L);
 	}
@@ -126,35 +126,35 @@ PHP_FUNCTION(symlink)
 	char dirname[MAXPATHLEN];
 	size_t len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
 	}
 	
-	if (!expand_filepath(frompath, source_p TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
+	if (!expand_filepath(frompath, source_p)) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
 	memcpy(dirname, source_p, sizeof(source_p));
 	len = php_dirname(dirname, strlen(dirname));
 
-	if (!expand_filepath_ex(topath, dest_p, dirname, len TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
+	if (!expand_filepath_ex(topath, dest_p, dirname, len)) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
-	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ||
-		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
+	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) ||
+		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) ) 
 	{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to symlink to a URL");
+		php_error_docref(NULL, E_WARNING, "Unable to symlink to a URL");
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
+	if (php_check_open_basedir(dest_p)) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(source_p TSRMLS_CC)) {
+	if (php_check_open_basedir(source_p)) {
 		RETURN_FALSE;
 	}
 
@@ -164,7 +164,7 @@ PHP_FUNCTION(symlink)
 	ret = symlink(topath, source_p);
 
 	if (ret == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -182,27 +182,27 @@ PHP_FUNCTION(link)
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
 	}
 
-	if (!expand_filepath(frompath, source_p TSRMLS_CC) || !expand_filepath(topath, dest_p TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such file or directory");
+	if (!expand_filepath(frompath, source_p) || !expand_filepath(topath, dest_p)) {
+		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
 	}
 
-	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ||
-		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
+	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) ||
+		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) ) 
 	{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to link to a URL");
+		php_error_docref(NULL, E_WARNING, "Unable to link to a URL");
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(dest_p TSRMLS_CC)) {
+	if (php_check_open_basedir(dest_p)) {
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(source_p TSRMLS_CC)) {
+	if (php_check_open_basedir(source_p)) {
 		RETURN_FALSE;
 	}
 
@@ -212,7 +212,7 @@ PHP_FUNCTION(link)
 	ret = link(dest_p, source_p);	
 #endif	
 	if (ret == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 

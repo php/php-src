@@ -43,7 +43,7 @@ static int le_bucket;
 #define GET_FILTER_FROM_OBJ()	{ \
 	zval **tmp; \
 	if (FAILURE == zend_hash_index_find(Z_OBJPROP_P(this_ptr), 0, (void**)&tmp)) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "filter property vanished"); \
+		php_error_docref(NULL, E_WARNING, "filter property vanished"); \
 		RETURN_FALSE; \
 	} \
 	ZEND_FETCH_RESOURCE(filter, php_stream_filter*, tmp, -1, "filter", le_userfilters); \
@@ -80,7 +80,7 @@ static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
 {
 	php_stream_bucket *bucket = (php_stream_bucket *)res->ptr;
 	if (bucket) {
-		php_stream_bucket_delref(bucket TSRMLS_CC);
+		php_stream_bucket_delref(bucket);
 		bucket = NULL;
 	}
 }
@@ -90,11 +90,11 @@ PHP_MINIT_FUNCTION(user_filters)
 	zend_class_entry *php_user_filter;
 	/* init the filter class ancestor */
 	INIT_CLASS_ENTRY(user_filter_class_entry, "php_user_filter", user_filter_class_funcs);
-	if ((php_user_filter = zend_register_internal_class(&user_filter_class_entry TSRMLS_CC)) == NULL) {
+	if ((php_user_filter = zend_register_internal_class(&user_filter_class_entry)) == NULL) {
 		return FAILURE;
 	}
-	zend_declare_property_string(php_user_filter, "filtername", sizeof("filtername")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
-	zend_declare_property_string(php_user_filter, "params", sizeof("params")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_string(php_user_filter, "filtername", sizeof("filtername")-1, "", ZEND_ACC_PUBLIC);
+	zend_declare_property_string(php_user_filter, "params", sizeof("params")-1, "", ZEND_ACC_PUBLIC);
 
 	/* init the filter resource; it has no dtor, as streams will always clean it up
 	 * at the correct time */
@@ -135,7 +135,7 @@ PHP_RSHUTDOWN_FUNCTION(user_filters)
 	return SUCCESS;
 }
 
-static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
+static void userfilter_dtor(php_stream_filter *thisfilter)
 {
 	zval *obj = &thisfilter->abstract;
 	zval func_name;
@@ -153,7 +153,7 @@ static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 			&func_name,
 			&retval,
 			0, NULL,
-			0, NULL TSRMLS_CC);
+			0, NULL);
 
 	zval_ptr_dtor(&retval);
 	zval_ptr_dtor(&func_name);
@@ -169,7 +169,7 @@ php_stream_filter_status_t userfilter_filter(
 			php_stream_bucket_brigade *buckets_out,
 			size_t *bytes_consumed,
 			int flags
-			TSRMLS_DC)
+			)
 {
 	int ret = PSFS_ERR_FATAL;
 	zval *obj = &thisfilter->abstract;
@@ -215,7 +215,7 @@ php_stream_filter_status_t userfilter_filter(
 			&func_name,
 			&retval,
 			4, args,
-			0, NULL TSRMLS_CC);
+			0, NULL);
 
 	zval_ptr_dtor(&func_name);
 
@@ -223,7 +223,7 @@ php_stream_filter_status_t userfilter_filter(
 		convert_to_long(&retval);
 		ret = (int)Z_LVAL(retval);
 	} else if (call_result == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call filter function");
+		php_error_docref(NULL, E_WARNING, "failed to call filter function");
 	}
 
 	if (bytes_consumed) {
@@ -233,18 +233,18 @@ php_stream_filter_status_t userfilter_filter(
 	if (buckets_in->head) {
 		php_stream_bucket *bucket = buckets_in->head;
 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
+		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
 		while ((bucket = buckets_in->head)) {
 			/* Remove unconsumed buckets from the brigade */
-			php_stream_bucket_unlink(bucket TSRMLS_CC);
-			php_stream_bucket_delref(bucket TSRMLS_CC);
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
 		}
 	}
 	if (ret != PSFS_PASS_ON) {
 		php_stream_bucket *bucket = buckets_out->head;
 		while (bucket != NULL) {
-			php_stream_bucket_unlink(bucket TSRMLS_CC);
-			php_stream_bucket_delref(bucket TSRMLS_CC);
+			php_stream_bucket_unlink(bucket);
+			php_stream_bucket_delref(bucket);
 			bucket = buckets_out->head;
 		}
 	}
@@ -253,7 +253,7 @@ php_stream_filter_status_t userfilter_filter(
 	 * keeping a reference to the stream resource here would prevent it
 	 * from being destroyed properly */
 	ZVAL_STRINGL(&zpropname, "stream", sizeof("stream")-1);
-	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname, NULL TSRMLS_CC);
+	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname, NULL);
 	zval_ptr_dtor(&zpropname);
 
 	zval_ptr_dtor(&args[3]);
@@ -271,7 +271,7 @@ static php_stream_filter_ops userfilter_ops = {
 };
 
 static php_stream_filter *user_filter_factory_create(const char *filtername,
-		zval *filterparams, int persistent TSRMLS_DC)
+		zval *filterparams, int persistent)
 {
 	struct php_user_filter_data *fdat = NULL;
 	php_stream_filter *filter;
@@ -282,7 +282,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	
 	/* some sanity checks */
 	if (persistent) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+		php_error_docref(NULL, E_WARNING,
 				"cannot use a user-space filter with a persistent stream");
 		return NULL;
 	}
@@ -317,7 +317,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			efree(wildcard);
 		}
 		if (fdat == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			php_error_docref(NULL, E_WARNING,
 					"Err, filter \"%s\" is not in the user-filter map, but somehow the user-filter-factory was invoked for it!?", filtername);
 			return NULL;
 		}
@@ -325,8 +325,8 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 	/* bind the classname to the actual class */
 	if (fdat->ce == NULL) {
-		if (NULL == (fdat->ce = zend_lookup_class(fdat->classname TSRMLS_CC))) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+		if (NULL == (fdat->ce = zend_lookup_class(fdat->classname))) {
+			php_error_docref(NULL, E_WARNING,
 					"user-filter \"%s\" requires class \"%s\", but that class is not defined",
 					filtername, fdat->classname->val);
 			return NULL;
@@ -359,7 +359,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 			&func_name,
 			&retval,
 			0, NULL,
-			0, NULL TSRMLS_CC);
+			0, NULL);
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
 		if (Z_TYPE(retval) == IS_FALSE) {
@@ -368,7 +368,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 			/* Kill the filter (safely) */
 			ZVAL_UNDEF(&filter->abstract);
-			php_stream_filter_free(filter TSRMLS_CC);
+			php_stream_filter_free(filter);
 
 			/* Kill the object */
 			zval_ptr_dtor(&obj);
@@ -409,7 +409,7 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 	php_stream_bucket_brigade *brigade;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &zbrigade) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zbrigade) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -417,7 +417,7 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 
 	ZVAL_NULL(return_value);
 
-	if (brigade->head && (bucket = php_stream_bucket_make_writeable(brigade->head TSRMLS_CC))) {
+	if (brigade->head && (bucket = php_stream_bucket_make_writeable(brigade->head))) {
 		ZEND_REGISTER_RESOURCE(&zbucket, bucket, le_bucket);
 		object_init(return_value);
 		add_property_zval(return_value, "bucket", &zbucket);
@@ -437,12 +437,12 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	php_stream_bucket_brigade *brigade;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zo", &zbrigade, &zobject) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zo", &zbrigade, &zobject) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (NULL == (pzbucket = zend_hash_str_find(Z_OBJPROP_P(zobject), "bucket", sizeof("bucket")-1))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Object has no bucket property");
+		php_error_docref(NULL, E_WARNING, "Object has no bucket property");
 		RETURN_FALSE;
 	}
 
@@ -451,7 +451,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 
 	if (NULL != (pzdata = zend_hash_str_find(Z_OBJPROP_P(zobject), "data", sizeof("data")-1)) && Z_TYPE_P(pzdata) == IS_STRING) {
 		if (!bucket->own_buf) {
-			bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
+			bucket = php_stream_bucket_make_writeable(bucket);
 		}
 		if ((int)bucket->buflen != Z_STRLEN_P(pzdata)) {
 			bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(pzdata), bucket->is_persistent);
@@ -461,9 +461,9 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if (append) {
-		php_stream_bucket_append(brigade, bucket TSRMLS_CC);
+		php_stream_bucket_append(brigade, bucket);
 	} else {
-		php_stream_bucket_prepend(brigade, bucket TSRMLS_CC);
+		php_stream_bucket_prepend(brigade, bucket);
 	}
 	/* This is a hack necessary to accommodate situations where bucket is appended to the stream
  	 * multiple times. See bug35916.phpt for reference.
@@ -501,7 +501,7 @@ PHP_FUNCTION(stream_bucket_new)
 	size_t buffer_len;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zstream, &buffer, &buffer_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &zstream, &buffer, &buffer_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -513,7 +513,7 @@ PHP_FUNCTION(stream_bucket_new)
 
 	memcpy(pbuffer, buffer, buffer_len);
 
-	bucket = php_stream_bucket_new(stream, pbuffer, buffer_len, 1, php_stream_is_persistent(stream) TSRMLS_CC);
+	bucket = php_stream_bucket_new(stream, pbuffer, buffer_len, 1, php_stream_is_persistent(stream));
 	
 	if (bucket == NULL) {
 		RETURN_FALSE;
@@ -562,19 +562,19 @@ PHP_FUNCTION(stream_filter_register)
 	zend_string *filtername, *classname;
 	struct php_user_filter_data *fdat;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &filtername, &classname) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &filtername, &classname) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	RETVAL_FALSE;
 
 	if (!filtername->len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filter name cannot be empty");
+		php_error_docref(NULL, E_WARNING, "Filter name cannot be empty");
 		return;
 	}
 
 	if (!classname->len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Class name cannot be empty");
+		php_error_docref(NULL, E_WARNING, "Class name cannot be empty");
 		return;
 	}
 
@@ -587,7 +587,7 @@ PHP_FUNCTION(stream_filter_register)
 	fdat->classname = zend_string_copy(classname);
 
 	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL &&
-			php_stream_filter_register_factory_volatile(filtername->val, &user_filter_factory TSRMLS_CC) == SUCCESS) {
+			php_stream_filter_register_factory_volatile(filtername->val, &user_filter_factory) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		zend_string_release(classname);

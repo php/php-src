@@ -24,7 +24,7 @@ Warning: IntlTimeZone::getDisplayName() expects parameter 1 to be boolean, array
 Warning: IntlTimeZone::getDisplayName(): intltz_get_display_name: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlTimeZone::getDisplayName() expects parameter 2 to be long, array given in %s on line %d
+Warning: IntlTimeZone::getDisplayName() expects parameter 2 to be integer, array given in %s on line %d
 
 Warning: IntlTimeZone::getDisplayName(): intltz_get_display_name: bad arguments in %s on line %d
 bool(false)

@@ -38,7 +38,7 @@
 
 /* {{{ php_srand
  */
-PHPAPI void php_srand(zend_long seed TSRMLS_DC)
+PHPAPI void php_srand(zend_long seed)
 {
 #ifdef ZTS
 	BG(rand_seed) = (unsigned int) seed;
@@ -59,12 +59,12 @@ PHPAPI void php_srand(zend_long seed TSRMLS_DC)
 
 /* {{{ php_rand
  */
-PHPAPI zend_long php_rand(TSRMLS_D)
+PHPAPI zend_long php_rand(void)
 {
 	zend_long ret;
 
 	if (!BG(rand_is_seeded)) {
-		php_srand(GENERATE_SEED() TSRMLS_CC);
+		php_srand(GENERATE_SEED());
 	}
 
 #ifdef ZTS
@@ -171,7 +171,7 @@ static inline void php_mt_initialize(php_uint32 seed, php_uint32 *state)
 
 /* {{{ php_mt_reload
  */
-static inline void php_mt_reload(TSRMLS_D)
+static inline void php_mt_reload(void)
 {
 	/* Generate N new values in state
 	   Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
@@ -192,11 +192,11 @@ static inline void php_mt_reload(TSRMLS_D)
 
 /* {{{ php_mt_srand
  */
-PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC)
+PHPAPI void php_mt_srand(php_uint32 seed)
 {
 	/* Seed the generator with a simple uint32 */
 	php_mt_initialize(seed, BG(state));
-	php_mt_reload(TSRMLS_C);
+	php_mt_reload();
 
 	/* Seed only once */
 	BG(mt_rand_is_seeded) = 1;
@@ -205,7 +205,7 @@ PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC)
 
 /* {{{ php_mt_rand
  */
-PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
+PHPAPI php_uint32 php_mt_rand(void)
 {
 	/* Pull a 32-bit integer from the generator state
 	   Every other access function simply transforms the numbers extracted here */
@@ -213,7 +213,7 @@ PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
 	register php_uint32 s1;
 
 	if (BG(left) == 0) {
-		php_mt_reload(TSRMLS_C);
+		php_mt_reload();
 	}
 	--BG(left);
 		
@@ -231,13 +231,13 @@ PHP_FUNCTION(srand)
 {
 	zend_long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &seed) == FAILURE)
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
 		seed = GENERATE_SEED();
 
-	php_srand(seed TSRMLS_CC);
+	php_srand(seed);
 }
 /* }}} */
 
@@ -247,13 +247,13 @@ PHP_FUNCTION(mt_srand)
 {
 	zend_long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &seed) == FAILURE) 
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
 		seed = GENERATE_SEED();
 
-	php_mt_srand(seed TSRMLS_CC);
+	php_mt_srand(seed);
 }
 /* }}} */
 
@@ -293,10 +293,10 @@ PHP_FUNCTION(rand)
 	zend_long number;
 	int  argc = ZEND_NUM_ARGS();
 
-	if (argc != 0 && zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE)
+	if (argc != 0 && zend_parse_parameters(argc, "ll", &min, &max) == FAILURE)
 		return;
 
-	number = php_rand(TSRMLS_C);
+	number = php_rand();
 	if (argc == 2) {
 		RAND_RANGE(number, min, max, PHP_RAND_MAX);
 	}
@@ -315,16 +315,16 @@ PHP_FUNCTION(mt_rand)
 	int  argc = ZEND_NUM_ARGS();
 
 	if (argc != 0) {
-		if (zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE) {
+		if (zend_parse_parameters(argc, "ll", &min, &max) == FAILURE) {
 			return;
 		} else if (max < min) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
+			php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
 			RETURN_FALSE;
 		}
 	}
 
 	if (!BG(mt_rand_is_seeded)) {
-		php_mt_srand(GENERATE_SEED() TSRMLS_CC);
+		php_mt_srand(GENERATE_SEED());
 	}
 
 	/*
@@ -335,7 +335,7 @@ PHP_FUNCTION(mt_rand)
 	 * Update: 
 	 * I talked with Cokus via email and it won't ruin the algorithm
 	 */
-	number = (zend_long) (php_mt_rand(TSRMLS_C) >> 1);
+	number = (zend_long) (php_mt_rand() >> 1);
 	if (argc == 2) {
 		RAND_RANGE(number, min, max, PHP_MT_RAND_MAX);
 	}

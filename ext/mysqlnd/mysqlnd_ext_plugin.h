@@ -22,32 +22,32 @@
 #ifndef MYSQLND_EXT_PLUGIN_H
 #define MYSQLND_EXT_PLUGIN_H
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data(const MYSQLND * conn, unsigned int plugin_id TSRMLS_DC);
-#define mysqlnd_plugin_get_plugin_connection_data(c, p_id) _mysqlnd_plugin_get_plugin_connection_data((c), (p_id) TSRMLS_CC)
+PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data(const MYSQLND * conn, unsigned int plugin_id);
+#define mysqlnd_plugin_get_plugin_connection_data(c, p_id) _mysqlnd_plugin_get_plugin_connection_data((c), (p_id))
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data_data(const MYSQLND_CONN_DATA * conn, unsigned int plugin_id TSRMLS_DC);
-#define mysqlnd_plugin_get_plugin_connection_data_data(c, p_id) _mysqlnd_plugin_get_plugin_connection_data_data((c), (p_id) TSRMLS_CC)
+PHPAPI void ** _mysqlnd_plugin_get_plugin_connection_data_data(const MYSQLND_CONN_DATA * conn, unsigned int plugin_id);
+#define mysqlnd_plugin_get_plugin_connection_data_data(c, p_id) _mysqlnd_plugin_get_plugin_connection_data_data((c), (p_id))
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_result_data(const MYSQLND_RES * result, unsigned int plugin_id TSRMLS_DC);
-#define mysqlnd_plugin_get_plugin_result_data(r, p_id) _mysqlnd_plugin_get_plugin_result_data((r), (p_id) TSRMLS_CC)
+PHPAPI void ** _mysqlnd_plugin_get_plugin_result_data(const MYSQLND_RES * result, unsigned int plugin_id);
+#define mysqlnd_plugin_get_plugin_result_data(r, p_id) _mysqlnd_plugin_get_plugin_result_data((r), (p_id))
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_result_unbuffered_data(const MYSQLND_RES_UNBUFFERED * result, unsigned int plugin_id TSRMLS_DC);
-#define mysqlnd_plugin_get_plugin_result_unbuffered_data(r, p_id) _mysqlnd_plugin_get_plugin_result_unbuffered_data((r), (p_id) TSRMLS_CC)
+PHPAPI void ** _mysqlnd_plugin_get_plugin_result_unbuffered_data(const MYSQLND_RES_UNBUFFERED * result, unsigned int plugin_id);
+#define mysqlnd_plugin_get_plugin_result_unbuffered_data(r, p_id) _mysqlnd_plugin_get_plugin_result_unbuffered_data((r), (p_id))
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_result_buffered_data_zval(const MYSQLND_RES_BUFFERED_ZVAL * result, unsigned int plugin_id TSRMLS_DC);
-#define mysqlnd_plugin_get_plugin_result_buffered_data_zval(r, p_id) _mysqlnd_plugin_get_plugin_result_buffered_data_zval((r), (p_id) TSRMLS_CC)
+PHPAPI void ** _mysqlnd_plugin_get_plugin_result_buffered_data_zval(const MYSQLND_RES_BUFFERED_ZVAL * result, unsigned int plugin_id);
+#define mysqlnd_plugin_get_plugin_result_buffered_data_zval(r, p_id) _mysqlnd_plugin_get_plugin_result_buffered_data_zval((r), (p_id))
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_result_buffered_data_c(const MYSQLND_RES_BUFFERED_C * result, unsigned int plugin_id TSRMLS_DC);
-#define mysqlnd_plugin_get_plugin_result_buffered_data_c(r, p_id) _mysqlnd_plugin_get_plugin_result_buffered_data_c((r), (p_id) TSRMLS_CC)
+PHPAPI void ** _mysqlnd_plugin_get_plugin_result_buffered_data_c(const MYSQLND_RES_BUFFERED_C * result, unsigned int plugin_id);
+#define mysqlnd_plugin_get_plugin_result_buffered_data_c(r, p_id) _mysqlnd_plugin_get_plugin_result_buffered_data_c((r), (p_id))
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_stmt_data(const MYSQLND_STMT * stmt, unsigned int plugin_id TSRMLS_DC);
-#define mysqlnd_plugin_get_plugin_stmt_data(s, p_id) _mysqlnd_plugin_get_plugin_stmt_data((s), (p_id) TSRMLS_CC)
+PHPAPI void ** _mysqlnd_plugin_get_plugin_stmt_data(const MYSQLND_STMT * stmt, unsigned int plugin_id);
+#define mysqlnd_plugin_get_plugin_stmt_data(s, p_id) _mysqlnd_plugin_get_plugin_stmt_data((s), (p_id))
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsigned int plugin_id TSRMLS_DC);
-#define mysqlnd_plugin_get_plugin_protocol_data(p, p_id) _mysqlnd_plugin_get_plugin_protocol_data((p), (p_id) TSRMLS_CC)
+PHPAPI void ** _mysqlnd_plugin_get_plugin_protocol_data(const MYSQLND_PROTOCOL * protocol, unsigned int plugin_id);
+#define mysqlnd_plugin_get_plugin_protocol_data(p, p_id) _mysqlnd_plugin_get_plugin_protocol_data((p), (p_id))
 
-PHPAPI void ** _mysqlnd_plugin_get_plugin_net_data(const MYSQLND_NET * net, unsigned int plugin_id TSRMLS_DC);
-#define mysqlnd_plugin_get_plugin_net_data(n, p_id) _mysqlnd_plugin_get_plugin_net_data((n), (p_id) TSRMLS_CC)
+PHPAPI void ** _mysqlnd_plugin_get_plugin_net_data(const MYSQLND_NET * net, unsigned int plugin_id);
+#define mysqlnd_plugin_get_plugin_net_data(n, p_id) _mysqlnd_plugin_get_plugin_net_data((n), (p_id))
 
 
 PHPAPI struct st_mysqlnd_conn_methods * mysqlnd_conn_get_methods();

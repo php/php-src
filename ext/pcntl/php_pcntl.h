@@ -69,6 +69,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	int processing_signal_queue;
 	struct php_pcntl_pending_signal *head, *tail, *spares;
 	int last_error;
+	volatile char pending_signals;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
 #ifdef ZTS

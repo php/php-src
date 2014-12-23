@@ -75,9 +75,9 @@ static inline xsl_object *php_xsl_fetch_object(zend_object *obj) {
 
 #define Z_XSL_P(zv) php_xsl_fetch_object(Z_OBJ_P((zv)))
 
-void php_xsl_set_object(zval *wrapper, void *obj TSRMLS_DC);
-void xsl_objects_free_storage(zend_object *object TSRMLS_DC);
-void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return_value  TSRMLS_DC);
+void php_xsl_set_object(zval *wrapper, void *obj);
+void xsl_objects_free_storage(zend_object *object);
+void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return_value );
 
 void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
 void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
@@ -85,12 +85,12 @@ void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
 #define REGISTER_XSL_CLASS(ce, name, parent_ce, funcs, entry) \
 INIT_CLASS_ENTRY(ce, name, funcs); \
 ce.create_object = xsl_objects_new; \
-entry = zend_register_internal_class_ex(&ce, parent_ce TSRMLS_CC);
+entry = zend_register_internal_class_ex(&ce, parent_ce);
 
 #define XSL_DOMOBJ_NEW(zval, obj, ret) \
-	zval = php_xsl_create_object(obj, ret, zval, return_value TSRMLS_CC); \
+	zval = php_xsl_create_object(obj, ret, zval, return_value); \
 	if (ZVAL_IS_NULL(zval)) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object"); \
+		php_error_docref(NULL, E_WARNING, "Cannot create required DOM object"); \
 		RETURN_FALSE; \
 	}
 
@@ -114,9 +114,9 @@ ZEND_END_MODULE_GLOBALS(xsl)
 
 /* In every utility function you add that needs to use variables 
    in php_xsl_globals, call TSRM_FETCH(); after declaring other 
-   variables used by that function, or better yet, pass in TSRMLS_CC
+   variables used by that function, or better yet, pass in
    after the last function argument and declare your utility function
-   with TSRMLS_DC after the last declared argument.  Always refer to
+   with after the last declared argument.  Always refer to
    the globals in your function as XSL_G(variable).  You are 
    encouraged to rename these macros something shorter, see
    examples in any other php module directory.

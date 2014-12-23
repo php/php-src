@@ -128,10 +128,10 @@ bool(false)
 Warning: fopen(10.5): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: fclose() expects parameter 1 to be resource, double given in %s on line %d
+Warning: fclose() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 
-Warning: feof() expects parameter 1 to be resource, double given in %s on line %d
+Warning: feof() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 -- Iteration 4 --
 

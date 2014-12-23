@@ -37,7 +37,7 @@ static inline IntlDateFormatter_object *php_intl_dateformatter_fetch_object(zend
 }
 #define Z_INTL_DATEFORMATTER_P(zv) php_intl_dateformatter_fetch_object(Z_OBJ_P(zv))
 
-void dateformat_register_IntlDateFormatter_class( TSRMLS_D );
+void dateformat_register_IntlDateFormatter_class( void );
 extern zend_class_entry *IntlDateFormatter_ce_ptr;
 
 /* Auxiliary macros */
@@ -48,7 +48,7 @@ extern zend_class_entry *IntlDateFormatter_ce_ptr;
 		DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;	\
 	if (dfo->datef_data.udatf == NULL)				\
 	{												\
-		intl_errors_set(&dfo->datef_data.error, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlDateFormatter", 0 TSRMLS_CC); \
+		intl_errors_set(&dfo->datef_data.error, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlDateFormatter", 0); \
 		RETURN_FALSE;								\
 	}
 

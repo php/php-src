@@ -42,10 +42,10 @@ typedef enum {
 
 typedef struct _spl_filesystem_object  spl_filesystem_object;
 
-typedef void (*spl_foreign_dtor_t)(spl_filesystem_object *object TSRMLS_DC);
-typedef void (*spl_foreign_clone_t)(spl_filesystem_object *src, spl_filesystem_object *dst TSRMLS_DC);
+typedef void (*spl_foreign_dtor_t)(spl_filesystem_object *object);
+typedef void (*spl_foreign_clone_t)(spl_filesystem_object *src, spl_filesystem_object *dst);
 
-PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, size_t *len TSRMLS_DC);
+PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, size_t *len);
 
 typedef struct _spl_other_handler {
 	spl_foreign_dtor_t     dtor;
@@ -112,15 +112,15 @@ static inline spl_filesystem_object *spl_filesystem_from_obj(zend_object *obj) /
 
 #define Z_SPLFILESYSTEM_P(zv)  spl_filesystem_from_obj(Z_OBJ_P((zv)))
 
-static inline spl_filesystem_iterator* spl_filesystem_object_to_iterator(spl_filesystem_object *obj TSRMLS_DC)
+static inline spl_filesystem_iterator* spl_filesystem_object_to_iterator(spl_filesystem_object *obj)
 {
 	obj->it = ecalloc(1, sizeof(spl_filesystem_iterator));
 	obj->it->object = (void *)obj;
-	zend_iterator_init(&obj->it->intern TSRMLS_CC);
+	zend_iterator_init(&obj->it->intern);
 	return obj->it;
 }
 
-static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_filesystem_iterator *it TSRMLS_DC)
+static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_filesystem_iterator *it)
 {
 	return (spl_filesystem_object*)it->object;
 }

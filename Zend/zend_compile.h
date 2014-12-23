@@ -56,13 +56,34 @@ typedef struct _zend_compiler_context {
 	HashTable *labels;
 } zend_compiler_context;
 
+/* On 64-bi systems less optimal, but more compact VM code leads to better
+ * performance. So on 32-bit systems we use absolute addresses for jump
+ * targets and constants, but on 64-bit systems realtive 32-bit offsets */
+#if SIZEOF_SIZE_T == 4
+# define ZEND_USE_ABS_JMP_ADDR      1
+# define ZEND_USE_ABS_CONST_ADDR    1
+# define ZEND_EX_USE_LITERALS       0
+# define ZEND_EX_USE_RUN_TIME_CACHE 1
+#else
+# define ZEND_USE_ABS_JMP_ADDR      0
+# define ZEND_USE_ABS_CONST_ADDR    0
+# define ZEND_EX_USE_LITERALS       1
+# define ZEND_EX_USE_RUN_TIME_CACHE 1
+#endif
+
 typedef union _znode_op {
 	uint32_t      constant;
 	uint32_t      var;
 	uint32_t      num;
 	uint32_t      opline_num; /*  Needs to be signed */
+#if ZEND_USE_ABS_JMP_ADDR
 	zend_op       *jmp_addr;
+#else
+	uint32_t      jmp_offset;
+#endif
+#if ZEND_USE_ABS_CONST_ADDR
 	zval          *zv;
+#endif
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */
@@ -92,15 +113,15 @@ typedef union _zend_parser_stack_elem {
 	zend_ulong num;
 } zend_parser_stack_elem;
 
-void zend_compile_top_stmt(zend_ast *ast TSRMLS_DC);
-void zend_compile_stmt(zend_ast *ast TSRMLS_DC);
-void zend_compile_expr(znode *node, zend_ast *ast TSRMLS_DC);
-void zend_compile_var(znode *node, zend_ast *ast, uint32_t type TSRMLS_DC);
-void zend_eval_const_expr(zend_ast **ast_ptr TSRMLS_DC);
-void zend_const_expr_to_zval(zval *result, zend_ast *ast TSRMLS_DC);
+void zend_compile_top_stmt(zend_ast *ast);
+void zend_compile_stmt(zend_ast *ast);
+void zend_compile_expr(znode *node, zend_ast *ast);
+void zend_compile_var(znode *node, zend_ast *ast, uint32_t type);
+void zend_eval_const_expr(zend_ast **ast_ptr);
+void zend_const_expr_to_zval(zval *result, zend_ast *ast);
 
-#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data TSRMLS_DC
-#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data TSRMLS_CC
+#define ZEND_OPCODE_HANDLER_ARGS zend_execute_data *execute_data
+#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU execute_data
 
 typedef int (*user_opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
 typedef int (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
@@ -112,8 +133,8 @@ struct _zend_op {
 	znode_op op1;
 	znode_op op2;
 	znode_op result;
-	zend_ulong extended_value;
-	uint lineno;
+	uint32_t extended_value;
+	uint32_t lineno;
 	zend_uchar opcode;
 	zend_uchar op1_type;
 	zend_uchar op2_type;
@@ -161,7 +182,6 @@ typedef struct _zend_try_catch_element {
 /* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
 #define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
-#define ZEND_ACC_FINAL_CLASS	            0x40
 #define ZEND_ACC_INTERFACE		            0x80
 #define ZEND_ACC_TRAIT						0x120
 
@@ -374,12 +394,17 @@ typedef enum _zend_call_kind {
 struct _zend_execute_data {
 	const zend_op       *opline;           /* executed opline                */
 	zend_execute_data   *call;             /* current call                   */
-	void               **run_time_cache;
+	zval                *return_value;
 	zend_function       *func;             /* executed op_array              */
 	zval                 This;
+#if ZEND_EX_USE_RUN_TIME_CACHE
+	void               **run_time_cache;
+#endif
+#if ZEND_EX_USE_LITERALS
+	zval                *literals;
+#endif
 	zend_class_entry    *called_scope;
 	zend_execute_data   *prev_execute_data;
-	zval                *return_value;
 	zend_array          *symbol_table;
 };
 
@@ -408,7 +433,7 @@ struct _zend_execute_data {
 	(call)->This.u2.num_args
 
 #define ZEND_CALL_FRAME_SLOT \
-	((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval)))
+	((int)((ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval)) - 1) / ZEND_MM_ALIGNED_SIZE(sizeof(zval))))
 
 #define ZEND_CALL_VAR(call, n) \
 	((zval*)(((char*)(call)) + ((int)(n))))
@@ -430,6 +455,136 @@ struct _zend_execute_data {
 
 #define EX_VAR_TO_NUM(n)		(ZEND_CALL_VAR(NULL, n) - ZEND_CALL_VAR_NUM(NULL, 0))
 
+#define ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline_num) \
+	((char*)&(op_array)->opcodes[opline_num] - (char*)(opline))
+
+#define ZEND_OFFSET_TO_OPLINE(base, offset) \
+	((zend_op*)(((char*)(base)) + (int)offset))
+
+#define ZEND_OFFSET_TO_OPLINE_NUM(op_array, base, offset) \
+	(ZEND_OFFSET_TO_OPLINE(base, offset) - op_array->opcodes)
+
+#if ZEND_USE_ABS_JMP_ADDR
+
+/* run-time jump target */
+# define OP_JMP_ADDR(opline, node) \
+	(node).jmp_addr
+
+/* convert jump target from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \
+		(node).jmp_addr = (op_array)->opcodes + (node).opline_num; \
+	} while (0)
+
+/* convert jump target back from run-time to compile-time */
+# define ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, node) do { \
+		(node).opline_num = (node).jmp_addr - (op_array)->opcodes; \
+	} while (0)
+
+#else
+
+/* run-time jump target */
+# define OP_JMP_ADDR(opline, node) \
+	ZEND_OFFSET_TO_OPLINE(opline, (node).jmp_offset)
+
+/* convert jump target from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, node) do { \
+		(node).jmp_offset = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, (node).opline_num); \
+	} while (0)
+
+/* convert jump target back from run-time to compile-time */
+# define ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, node) do { \
+		(node).opline_num = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, (node).jmp_offset); \
+	} while (0)		
+
+#endif
+
+/* constant-time constant */
+# define CT_CONSTANT_EX(op_array, num) \
+	((op_array)->literals + (num))
+
+# define CT_CONSTANT(node) \
+	CT_CONSTANT_EX(CG(active_op_array), (node).constant)
+
+#if ZEND_USE_ABS_CONST_ADDR
+
+/* run-time constant */
+# define RT_CONSTANT_EX(base, node) \
+	(node).zv
+
+/* convert constant from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, node) do { \
+		(node).zv = CT_CONSTANT_EX(op_array, (node).constant); \
+	} while (0)
+
+/* convert constant back from run-time to compile-time */
+# define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, node) do { \
+		(node).constant = (node).zv - (op_array)->literals; \
+	} while (0)
+
+#else
+
+/* run-time constant */
+# define RT_CONSTANT_EX(base, node) \
+	((zval*)(((char*)(base)) + (node).constant))
+
+/* convert constant from compile-time to run-time */
+# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, node) do { \
+		(node).constant *= sizeof(zval); \
+	} while (0)
+
+/* convert constant back from run-time to compile-time (do nothing) */
+# define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, node) do { \
+		(node).constant /= sizeof(zval); \
+	} while (0)
+
+#endif
+
+#if ZEND_EX_USE_LITERALS
+
+# define EX_LITERALS() \
+	EX(literals)
+
+# define EX_LOAD_LITERALS(op_array) do { \
+		EX(literals) = (op_array)->literals; \
+	} while (0)
+
+#else
+
+# define EX_LITERALS() \
+	EX(func)->op_array.literals
+
+# define EX_LOAD_LITERALS(op_array) do { \
+	} while (0)
+
+#endif
+
+/* run-time constant */
+#define RT_CONSTANT(op_array, node) \
+	RT_CONSTANT_EX((op_array)->literals, node)
+
+/* constant in currently executed function */
+#define EX_CONSTANT(node) \
+	RT_CONSTANT_EX(EX_LITERALS(), node)
+
+#if ZEND_EX_USE_RUN_TIME_CACHE
+
+# define EX_RUN_TIME_CACHE() \
+	EX(run_time_cache)
+
+# define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
+		EX(run_time_cache) = (op_array)->run_time_cache; \
+	} while (0)
+
+#else
+
+# define EX_RUN_TIME_CACHE() \
+	EX(func)->op_array.run_time_cache
+
+# define EX_LOAD_RUN_TIME_CACHE(op_array) do { \
+	} while (0)
+
+#endif
+
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)
 #define IS_VAR		(1<<2)
@@ -442,65 +597,65 @@ struct _zend_execute_data {
 
 BEGIN_EXTERN_C()
 
-void init_compiler(TSRMLS_D);
-void shutdown_compiler(TSRMLS_D);
-void zend_init_compiler_data_structures(TSRMLS_D);
-void zend_init_compiler_context(TSRMLS_D);
+void init_compiler(void);
+void shutdown_compiler(void);
+void zend_init_compiler_data_structures(void);
+void zend_init_compiler_context(void);
 
-extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
-extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
+extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
+extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename);
 
-ZEND_API int lex_scan(zval *zendlval TSRMLS_DC);
-void startup_scanner(TSRMLS_D);
-void shutdown_scanner(TSRMLS_D);
+ZEND_API int lex_scan(zval *zendlval);
+void startup_scanner(void);
+void shutdown_scanner(void);
 
-ZEND_API zend_string *zend_set_compiled_filename(zend_string *new_compiled_filename TSRMLS_DC);
-ZEND_API void zend_restore_compiled_filename(zend_string *original_compiled_filename TSRMLS_DC);
-ZEND_API zend_string *zend_get_compiled_filename(TSRMLS_D);
-ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
-ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
+ZEND_API zend_string *zend_set_compiled_filename(zend_string *new_compiled_filename);
+ZEND_API void zend_restore_compiled_filename(zend_string *original_compiled_filename);
+ZEND_API zend_string *zend_get_compiled_filename(void);
+ZEND_API int zend_get_compiled_lineno(void);
+ZEND_API size_t zend_get_scanned_file_offset(void);
 
 ZEND_API zend_string *zend_get_compiled_variable_name(const zend_op_array *op_array, uint32_t var);
 
 #ifdef ZTS
-const char *zend_get_zendtext(TSRMLS_D);
-int zend_get_zendleng(TSRMLS_D);
+const char *zend_get_zendtext(void);
+int zend_get_zendleng(void);
 #endif
 
 
-typedef int (*unary_op_type)(zval *, zval * TSRMLS_DC);
-typedef int (*binary_op_type)(zval *, zval *, zval * TSRMLS_DC);
+typedef int (*unary_op_type)(zval *, zval *);
+typedef int (*binary_op_type)(zval *, zval *, zval *);
 ZEND_API unary_op_type get_unary_op(int opcode);
 ZEND_API binary_op_type get_binary_op(int opcode);
 
-void zend_stop_lexing(TSRMLS_D);
-void zend_emit_final_return(zval *zv TSRMLS_DC);
+void zend_stop_lexing(void);
+void zend_emit_final_return(zval *zv);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
-zend_ast *zend_ast_append_doc_comment(zend_ast *list TSRMLS_DC);
-void zend_handle_encoding_declaration(zend_ast *ast TSRMLS_DC);
+zend_ast *zend_ast_append_doc_comment(zend_ast *list);
+void zend_handle_encoding_declaration(zend_ast *ast);
 
 /* parser-driven code generators */
-void zend_do_free(znode *op1 TSRMLS_DC);
+void zend_do_free(znode *op1);
 
-ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time TSRMLS_DC);
-ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC);
-ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time TSRMLS_DC);
-ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS_DC);
+ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time);
+ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time);
+ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time);
+ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array);
 
 /* Functions for a null terminated pointer list, used for traits parsing and compilation */
-void zend_init_list(void *result, void *item TSRMLS_DC);
-void zend_add_to_list(void *result, void *item TSRMLS_DC);
+void zend_init_list(void *result, void *item);
+void zend_add_to_list(void *result, void *item);
 
-void zend_do_extended_info(TSRMLS_D);
-void zend_do_extended_fcall_begin(TSRMLS_D);
-void zend_do_extended_fcall_end(TSRMLS_D);
+void zend_do_extended_info(void);
+void zend_do_extended_fcall_begin(void);
+void zend_do_extended_fcall_end(void);
 
-void zend_verify_namespace(TSRMLS_D);
-void zend_do_end_compilation(TSRMLS_D);
+void zend_verify_namespace(void);
+void zend_do_end_compilation(void);
 
-void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
-void zend_release_labels(int temporary TSRMLS_DC);
+void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2);
+void zend_release_labels(int temporary);
 
 ZEND_API void function_add_ref(zend_function *function);
 
@@ -508,22 +663,22 @@ ZEND_API void function_add_ref(zend_function *function);
 
 
 /* helper functions in zend_language_scanner.l */
-ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
-ZEND_API zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC);
-ZEND_API zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC);
-ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval *retval, int file_count, ...);
-ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC);
-ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size TSRMLS_DC);
-ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC);
-ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC);
-ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC);
-ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce TSRMLS_DC);
-ZEND_API void zend_cleanup_internal_classes(TSRMLS_D);
+ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type);
+ZEND_API zend_op_array *compile_string(zval *source_string, char *filename);
+ZEND_API zend_op_array *compile_filename(int type, zval *filename);
+ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...);
+ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
+ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
+ZEND_API void destroy_op_array(zend_op_array *op_array);
+ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
+ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce);
+ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
+ZEND_API void zend_cleanup_internal_classes(void);
 ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array);
-ZEND_API int clean_non_persistent_function_full(zval *zv TSRMLS_DC);
-ZEND_API int clean_non_persistent_class_full(zval *zv TSRMLS_DC);
+ZEND_API int clean_non_persistent_function_full(zval *zv);
+ZEND_API int clean_non_persistent_class_full(zval *zv);
 
-ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
+ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void zend_function_dtor(zval *zv);
 ZEND_API void destroy_zend_class(zval *zv);
 void zend_class_add_ref(zval *zv);
@@ -536,19 +691,19 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 #define ZEND_FUNCTION_DTOR zend_function_dtor
 #define ZEND_CLASS_DTOR destroy_zend_class
 
-zend_op *get_next_op(zend_op_array *op_array TSRMLS_DC);
-void init_op(zend_op *op TSRMLS_DC);
+zend_op *get_next_op(zend_op_array *op_array);
+void init_op(zend_op *op);
 int get_next_op_number(zend_op_array *op_array);
-int print_class(zend_class_entry *class_entry TSRMLS_DC);
+int print_class(zend_class_entry *class_entry);
 void print_op_array(zend_op_array *op_array, int optimizations);
-ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC);
+ZEND_API int pass_two(zend_op_array *op_array);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
-ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
-ZEND_API char *zend_make_compiled_string_description(const char *name TSRMLS_DC);
-ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers TSRMLS_DC);
+ZEND_API zend_bool zend_is_compiling(void);
+ZEND_API char *zend_make_compiled_string_description(const char *name);
+ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(zend_string *name);
 
-typedef zend_bool (*zend_auto_global_callback)(zend_string *name TSRMLS_DC);
+typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
 	zend_string *name;
 	zend_auto_global_callback auto_global_callback;
@@ -556,14 +711,14 @@ typedef struct _zend_auto_global {
 	zend_bool armed;
 } zend_auto_global;
 
-ZEND_API int zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global_callback auto_global_callback TSRMLS_DC);
-ZEND_API void zend_activate_auto_globals(TSRMLS_D);
-ZEND_API zend_bool zend_is_auto_global(zend_string *name TSRMLS_DC);
+ZEND_API int zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global_callback auto_global_callback);
+ZEND_API void zend_activate_auto_globals(void);
+ZEND_API zend_bool zend_is_auto_global(zend_string *name);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 
-int zendlex(zend_parser_stack_elem *elem TSRMLS_DC);
+int zendlex(zend_parser_stack_elem *elem);
 
-int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
+int zend_add_literal(zend_op_array *op_array, zval *zv);
 
 /* BEGIN: OPCODES */
 
@@ -677,16 +832,14 @@ int zend_add_literal(zend_op_array *op_array, zval *zv TSRMLS_DC);
 
 static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
-	if (UNEXPECTED(zf->common.arg_info == NULL)) {
-		return 0;
-	}
-	if (UNEXPECTED(arg_num > zf->common.num_args)) {
+	arg_num--;
+	if (UNEXPECTED(arg_num >= zf->common.num_args)) {
 		if (EXPECTED((zf->common.fn_flags & ZEND_ACC_VARIADIC) == 0)) {
 			return 0;
 		}
 		arg_num = zf->common.num_args;
 	}
-	return UNEXPECTED((zf->common.arg_info[arg_num-1].pass_by_reference & mask) != 0);
+	return UNEXPECTED((zf->common.arg_info[arg_num].pass_by_reference & mask) != 0);
 }
 
 #define ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \

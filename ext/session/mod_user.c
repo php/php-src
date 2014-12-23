@@ -47,10 +47,10 @@ ps_module ps_mod_user = {
 	ZVAL_STR_COPY(a, vl);							\
 }
 
-static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval TSRMLS_DC)
+static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 {
 	int i;
-	if (call_user_function(EG(function_table), NULL, func, retval, argc, argv TSRMLS_CC) == FAILURE) {
+	if (call_user_function(EG(function_table), NULL, func, retval, argc, argv) == FAILURE) {
 		zval_ptr_dtor(retval);
 		ZVAL_UNDEF(retval);
 	} else if (Z_ISUNDEF_P(retval)) {
@@ -81,7 +81,7 @@ static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval TSRML
 			ret = SUCCESS; \
 		} else { \
 			if (!EG(exception)) { \
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, \
+				php_error_docref(NULL, E_WARNING, \
 				                 "Session callback expects true/false return value"); \
 			} \
 			ret = FAILURE; \
@@ -96,7 +96,7 @@ PS_OPEN_FUNC(user)
 	STDVARS;
 	
 	if (Z_ISUNDEF(PSF(open))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+		php_error_docref(NULL, E_WARNING,
 			"user session functions not defined");
 			
 		return FAILURE;
@@ -105,7 +105,7 @@ PS_OPEN_FUNC(user)
 	SESS_ZVAL_STRING((char*)save_path, &args[0]);
 	SESS_ZVAL_STRING((char*)session_name, &args[1]);
 
-	ps_call_handler(&PSF(open), 2, args, &retval TSRMLS_CC);
+	ps_call_handler(&PSF(open), 2, args, &retval);
 	PS(mod_user_implemented) = 1;
 
 	FINISH;
@@ -122,7 +122,7 @@ PS_CLOSE_FUNC(user)
 	}
 
 	zend_try {
-		ps_call_handler(&PSF(close), 0, NULL, &retval TSRMLS_CC);
+		ps_call_handler(&PSF(close), 0, NULL, &retval);
 	} zend_catch {
 		bailout = 1;
 	} zend_end_try();
@@ -146,7 +146,7 @@ PS_READ_FUNC(user)
 
 	SESS_ZVAL_STR(key, &args[0]);
 
-	ps_call_handler(&PSF(read), 1, args, &retval TSRMLS_CC);
+	ps_call_handler(&PSF(read), 1, args, &retval);
 
 	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) == IS_STRING) {
@@ -167,7 +167,7 @@ PS_WRITE_FUNC(user)
 	SESS_ZVAL_STR(key, &args[0]);
 	SESS_ZVAL_STR(val, &args[1]);
 
-	ps_call_handler(&PSF(write), 2, args, &retval TSRMLS_CC);
+	ps_call_handler(&PSF(write), 2, args, &retval);
 
 	FINISH;
 }
@@ -179,7 +179,7 @@ PS_DESTROY_FUNC(user)
 
 	SESS_ZVAL_STR(key, &args[0]);
 
-	ps_call_handler(&PSF(destroy), 1, args, &retval TSRMLS_CC);
+	ps_call_handler(&PSF(destroy), 1, args, &retval);
 
 	FINISH;
 }
@@ -191,7 +191,7 @@ PS_GC_FUNC(user)
 
 	SESS_ZVAL_LONG(maxlifetime, &args[0]);
 
-	ps_call_handler(&PSF(gc), 1, args, &retval TSRMLS_CC);
+	ps_call_handler(&PSF(gc), 1, args, &retval);
 
 	FINISH;
 }
@@ -203,7 +203,7 @@ PS_CREATE_SID_FUNC(user)
 		zend_string *id = NULL;
 		zval retval;
 
-		ps_call_handler(&PSF(create_sid), 0, NULL, &retval TSRMLS_CC);
+		ps_call_handler(&PSF(create_sid), 0, NULL, &retval);
 
 		if (!Z_ISUNDEF(retval)) {
 			if (Z_TYPE(retval) == IS_STRING) {
@@ -211,12 +211,12 @@ PS_CREATE_SID_FUNC(user)
 			}
 			zval_ptr_dtor(&retval);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "No session id returned by function");
+			php_error_docref(NULL, E_ERROR, "No session id returned by function");
 			return NULL;
 		}
 
 		if (!id) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Session id must be a string");
+			php_error_docref(NULL, E_ERROR, "Session id must be a string");
 			return NULL;
 		}
 
@@ -224,7 +224,7 @@ PS_CREATE_SID_FUNC(user)
 	}
 
 	/* function as defined by PS_MOD */
-	return php_session_create_id(mod_data TSRMLS_CC);
+	return php_session_create_id(mod_data);
 }
 
 /*

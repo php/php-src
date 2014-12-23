@@ -27,9 +27,9 @@ PHP_FUNCTION(getmypid);
 PHP_FUNCTION(getmyinode);
 PHP_FUNCTION(getlastmod);
 
-PHPAPI void php_statpage(TSRMLS_D);
-PHPAPI time_t php_getlastmod(TSRMLS_D);
-extern zend_long php_getuid(TSRMLS_D);
-extern zend_long php_getgid(TSRMLS_D);
+PHPAPI void php_statpage(void);
+PHPAPI time_t php_getlastmod(void);
+extern zend_long php_getuid(void);
+extern zend_long php_getgid(void);
 
 #endif

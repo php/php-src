@@ -32,9 +32,9 @@ ZEND_API zend_gc_globals gc_globals;
 #endif
 
 #define GC_REMOVE_FROM_ROOTS(current) \
-	gc_remove_from_roots((current) TSRMLS_CC)
+	gc_remove_from_roots((current))
 
-static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root TSRMLS_DC)
+static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
 {
 	root->next->prev = root->prev;
 	root->prev->next = root->next;
@@ -43,7 +43,7 @@ static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root TSRMLS_
 	GC_BENCH_DEC(root_buf_length);
 }
 
-static void root_buffer_dtor(zend_gc_globals *gc_globals TSRMLS_DC)
+static void root_buffer_dtor(zend_gc_globals *gc_globals)
 {
 	if (gc_globals->buf) {
 		free(gc_globals->buf);
@@ -51,7 +51,7 @@ static void root_buffer_dtor(zend_gc_globals *gc_globals TSRMLS_DC)
 	}	
 }
 
-static void gc_globals_ctor_ex(zend_gc_globals *gc_globals TSRMLS_DC)
+static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 {
 	gc_globals->gc_enabled = 0;
 	gc_globals->gc_active = 0;
@@ -79,7 +79,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals TSRMLS_DC)
 #endif
 }
 
-ZEND_API void gc_globals_ctor(TSRMLS_D)
+ZEND_API void gc_globals_ctor(void)
 {
 #ifdef ZTS
 	ts_allocate_id(&gc_globals_id, sizeof(zend_gc_globals), (ts_allocate_ctor) gc_globals_ctor_ex, (ts_allocate_dtor) root_buffer_dtor);
@@ -88,14 +88,14 @@ ZEND_API void gc_globals_ctor(TSRMLS_D)
 #endif
 }
 
-ZEND_API void gc_globals_dtor(TSRMLS_D)
+ZEND_API void gc_globals_dtor(void)
 {
 #ifndef ZTS
-	root_buffer_dtor(&gc_globals TSRMLS_DC);
+	root_buffer_dtor(&gc_globals);
 #endif
 }
 
-ZEND_API void gc_reset(TSRMLS_D)
+ZEND_API void gc_reset(void)
 {
 	GC_G(gc_runs) = 0;
 	GC_G(collected) = 0;
@@ -126,16 +126,16 @@ ZEND_API void gc_reset(TSRMLS_D)
 	}
 }
 
-ZEND_API void gc_init(TSRMLS_D)
+ZEND_API void gc_init(void)
 {
 	if (GC_G(buf) == NULL && GC_G(gc_enabled)) {
 		GC_G(buf) = (gc_root_buffer*) malloc(sizeof(gc_root_buffer) * GC_ROOT_BUFFER_MAX_ENTRIES);
 		GC_G(last_unused) = &GC_G(buf)[GC_ROOT_BUFFER_MAX_ENTRIES];
-		gc_reset(TSRMLS_C);
+		gc_reset();
 	}
 }
 
-ZEND_API void gc_possible_root(zend_refcounted *ref TSRMLS_DC)
+ZEND_API void gc_possible_root(zend_refcounted *ref)
 {
 	GC_BENCH_INC(zval_possible_root);
 
@@ -156,7 +156,7 @@ ZEND_API void gc_possible_root(zend_refcounted *ref TSRMLS_DC)
 					return;
 				}
 				GC_REFCOUNT(ref)++;
-				gc_collect_cycles(TSRMLS_C);
+				gc_collect_cycles();
 				GC_REFCOUNT(ref)--;
 				newRoot = GC_G(unused);
 				if (!newRoot) {
@@ -182,7 +182,7 @@ ZEND_API void gc_possible_root(zend_refcounted *ref TSRMLS_DC)
 	}
 }
 
-ZEND_API void gc_remove_from_buffer(zend_refcounted *ref TSRMLS_DC)
+ZEND_API void gc_remove_from_buffer(zend_refcounted *ref)
 {
 	gc_root_buffer *root;
 
@@ -197,7 +197,7 @@ ZEND_API void gc_remove_from_buffer(zend_refcounted *ref TSRMLS_DC)
 	}
 }
 
-static void gc_scan_black(zend_refcounted *ref TSRMLS_DC)
+static void gc_scan_black(zend_refcounted *ref)
 {
 	HashTable *ht;
 	uint idx;
@@ -219,7 +219,7 @@ tail_call:
 			HashTable *props;
 
 			ZVAL_OBJ(&tmp, obj);
-			props = get_gc(&tmp, &table, &n TSRMLS_CC);
+			props = get_gc(&tmp, &table, &n);
 			while (n > 0 && !Z_REFCOUNTED(table[n-1])) n--;
 			for (i = 0; i < n; i++) {
 				if (Z_REFCOUNTED(table[i])) {
@@ -231,7 +231,7 @@ tail_call:
 						if (!props && i == n - 1) {
 							goto tail_call;
 						} else {
-							gc_scan_black(ref TSRMLS_CC);
+							gc_scan_black(ref);
 						}
 					}
 				}
@@ -273,13 +273,13 @@ tail_call:
 			if (idx == ht->nNumUsed-1) {
 				goto tail_call;
 			} else {
-				gc_scan_black(ref TSRMLS_CC);
+				gc_scan_black(ref);
 			}
 		}
 	}
 }
 
-static void gc_mark_grey(zend_refcounted *ref TSRMLS_DC)
+static void gc_mark_grey(zend_refcounted *ref)
 {
     HashTable *ht;
     uint idx;
@@ -303,7 +303,7 @@ tail_call:
 				HashTable *props;
 
 				ZVAL_OBJ(&tmp, obj);
-				props = get_gc(&tmp, &table, &n TSRMLS_CC);
+				props = get_gc(&tmp, &table, &n);
 
 				while (n > 0 && !Z_REFCOUNTED(table[n-1])) n--;
 				for (i = 0; i < n; i++) {
@@ -315,7 +315,7 @@ tail_call:
 						if (!props && i == n - 1) {
 							goto tail_call;
 						} else {
-							gc_mark_grey(ref TSRMLS_CC);
+							gc_mark_grey(ref);
 						}
 					}
 				}
@@ -355,25 +355,25 @@ tail_call:
 			if (idx == ht->nNumUsed-1) {
 				goto tail_call;
 			} else {
-				gc_mark_grey(ref TSRMLS_CC);
+				gc_mark_grey(ref);
 			}
 		}
 	}
 }
 
-static void gc_mark_roots(TSRMLS_D)
+static void gc_mark_roots(void)
 {
 	gc_root_buffer *current = GC_G(roots).next;
 
 	while (current != &GC_G(roots)) {
 		if (GC_GET_COLOR(GC_INFO(current->ref)) == GC_PURPLE) {
-			gc_mark_grey(current->ref TSRMLS_CC);
+			gc_mark_grey(current->ref);
 		}
 		current = current->next;
 	}
 }
 
-static void gc_scan(zend_refcounted *ref TSRMLS_DC)
+static void gc_scan(zend_refcounted *ref)
 {
     HashTable *ht;
     uint idx;
@@ -383,7 +383,7 @@ tail_call:
 	if (GC_GET_COLOR(GC_INFO(ref)) == GC_GREY) {
 		ht = NULL;
 		if (GC_REFCOUNT(ref) > 0) {
-			gc_scan_black(ref TSRMLS_CC);
+			gc_scan_black(ref);
 		} else {
 			GC_SET_COLOR(GC_INFO(ref), GC_WHITE);
 			if (GC_TYPE(ref) == IS_OBJECT && EG(objects_store).object_buckets) {
@@ -398,7 +398,7 @@ tail_call:
 					HashTable *props;
 					
 					ZVAL_OBJ(&tmp, obj);
-					props = get_gc(&tmp, &table, &n TSRMLS_CC);
+					props = get_gc(&tmp, &table, &n);
 					while (n > 0 && !Z_REFCOUNTED(table[n-1])) n--;
 					for (i = 0; i < n; i++) {
 						if (Z_REFCOUNTED(table[i])) {
@@ -406,7 +406,7 @@ tail_call:
 							if (!props && i == n - 1) {
 								goto tail_call;
 							} else {
-								gc_scan(ref TSRMLS_CC);
+								gc_scan(ref);
 							}
 						}
 					}
@@ -441,23 +441,23 @@ tail_call:
 			if (idx == ht->nNumUsed-1) {
 				goto tail_call;
 			} else {
-				gc_scan(ref TSRMLS_CC);
+				gc_scan(ref);
 			}
 		}
 	}
 }
 
-static void gc_scan_roots(TSRMLS_D)
+static void gc_scan_roots(void)
 {
 	gc_root_buffer *current = GC_G(roots).next;
 
 	while (current != &GC_G(roots)) {
-		gc_scan(current->ref TSRMLS_CC);
+		gc_scan(current->ref);
 		current = current->next;
 	}
 }
 
-static int gc_collect_white(zend_refcounted *ref TSRMLS_DC)
+static int gc_collect_white(zend_refcounted *ref)
 {
 	int count = 0;
 	HashTable *ht;
@@ -513,7 +513,7 @@ tail_call:
 				HashTable *props;
 				
 				ZVAL_OBJ(&tmp, obj);
-				props = get_gc(&tmp, &table, &n TSRMLS_CC);
+				props = get_gc(&tmp, &table, &n);
 				while (n > 0 && !Z_REFCOUNTED(table[n-1])) {
 					/* count non-refcounted for compatibility ??? */
 					if (Z_TYPE(table[n-1]) != IS_UNDEF) {
@@ -530,7 +530,7 @@ tail_call:
 						if (!props && i == n - 1) {
 							goto tail_call;
 						} else {
-							count += gc_collect_white(ref TSRMLS_CC);
+							count += gc_collect_white(ref);
 						}
 					/* count non-refcounted for compatibility ??? */
 					} else if (Z_TYPE(table[i]) != IS_UNDEF) {
@@ -576,14 +576,14 @@ tail_call:
 			if (idx == ht->nNumUsed-1) {
 				goto tail_call;
 			} else {
-				count += gc_collect_white(ref TSRMLS_CC);
+				count += gc_collect_white(ref);
 			}
 		}
 	}
 	return count;
 }
 
-static int gc_collect_roots(TSRMLS_D)
+static int gc_collect_roots(void)
 {
 	int count = 0;
 	gc_root_buffer *current = GC_G(roots).next;
@@ -601,7 +601,7 @@ static int gc_collect_roots(TSRMLS_D)
 	while (current != &GC_G(roots)) {
 		if (GC_GET_COLOR(GC_INFO(current->ref)) == GC_WHITE) {
 			GC_REFCOUNT(current->ref)++;
-			count += gc_collect_white(current->ref TSRMLS_CC);
+			count += gc_collect_white(current->ref);
 		}
 		current = current->next;
 	}
@@ -613,7 +613,7 @@ static int gc_collect_roots(TSRMLS_D)
 			GC_SET_BLACK(GC_INFO(current->ref));
 			current = current->next;
 		}
-		gc_reset(TSRMLS_C);
+		gc_reset();
 		return 0;
 	}
 
@@ -639,7 +639,7 @@ static int gc_collect_roots(TSRMLS_D)
 	return count;
 }
 
-static void gc_remove_nested_data_from_buffer(zend_refcounted *ref TSRMLS_DC)
+static void gc_remove_nested_data_from_buffer(zend_refcounted *ref)
 {
 	HashTable *ht = NULL;
 	uint idx;
@@ -661,7 +661,7 @@ tail_call:
 				HashTable *props;
 
 				ZVAL_OBJ(&tmp, obj);
-				props = get_gc(&tmp, &table, &n TSRMLS_CC);
+				props = get_gc(&tmp, &table, &n);
 
 				while (n > 0 && !Z_REFCOUNTED(table[n-1])) n--;
 				for (i = 0; i < n; i++) {
@@ -670,7 +670,7 @@ tail_call:
 						if (!props && i == n - 1) {
 							goto tail_call;
 						} else {
-							gc_remove_nested_data_from_buffer(ref TSRMLS_CC);
+							gc_remove_nested_data_from_buffer(ref);
 						}
 					}
 				}
@@ -700,13 +700,13 @@ tail_call:
 			if (idx == ht->nNumUsed-1) {
 				goto tail_call;
 			} else {
-				gc_remove_nested_data_from_buffer(ref TSRMLS_CC);
+				gc_remove_nested_data_from_buffer(ref);
 			}
 		}
 	}
 }
 
-ZEND_API int gc_collect_cycles(TSRMLS_D)
+ZEND_API int gc_collect_cycles(void)
 {
 	int count = 0;
 
@@ -720,9 +720,9 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 		}
 		GC_G(gc_runs)++;
 		GC_G(gc_active) = 1;
-		gc_mark_roots(TSRMLS_C);
-		gc_scan_roots(TSRMLS_C);
-		count = gc_collect_roots(TSRMLS_C);
+		gc_mark_roots();
+		gc_scan_roots();
+		count = gc_collect_roots();
 		GC_G(gc_active) = 0;
 
 		if (GC_G(to_free).next == &GC_G(to_free)) {
@@ -764,7 +764,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 					GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 					if (obj->handlers->dtor_obj) {
 						GC_REFCOUNT(obj)++;
-						obj->handlers->dtor_obj(obj TSRMLS_CC);
+						obj->handlers->dtor_obj(obj);
 						GC_REFCOUNT(obj)--;
 					}
 				}
@@ -777,7 +777,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 		while (current != &to_free) {
 			GC_G(next_to_free) = current->next;
 			if (GC_REFCOUNT(current->ref) > current->refcount) {
-				gc_remove_nested_data_from_buffer(current->ref TSRMLS_CC);
+				gc_remove_nested_data_from_buffer(current->ref);
 			}
 			current = GC_G(next_to_free);
 		}
@@ -797,7 +797,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 					GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
 					if (obj->handlers->free_obj) {
 						GC_REFCOUNT(obj)++;
-						obj->handlers->free_obj(obj TSRMLS_CC);
+						obj->handlers->free_obj(obj);
 						GC_REFCOUNT(obj)--;
 					}
 				}
@@ -821,7 +821,7 @@ ZEND_API int gc_collect_cycles(TSRMLS_D)
 				if (EG(objects_store).object_buckets &&
 				    IS_OBJ_VALID(EG(objects_store).object_buckets[obj->handle])) {
 
-					zend_objects_store_free(obj TSRMLS_CC);
+					zend_objects_store_free(obj);
 				}
 			} else {
 				GC_REMOVE_FROM_BUFFER(p);

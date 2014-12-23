@@ -28,10 +28,10 @@ PHPDBG_API int phpdbg_is_numeric(const char*);
 PHPDBG_API int phpdbg_is_empty(const char*);
 PHPDBG_API int phpdbg_is_addr(const char*);
 PHPDBG_API int phpdbg_is_class_method(const char*, size_t, char**, char**);
-PHPDBG_API const char *phpdbg_current_file(TSRMLS_D);
-PHPDBG_API char *phpdbg_resolve_path(const char* TSRMLS_DC);
+PHPDBG_API const char *phpdbg_current_file(void);
+PHPDBG_API char *phpdbg_resolve_path(const char*);
 PHPDBG_API char *phpdbg_trim(const char*, size_t, size_t*);
-PHPDBG_API const zend_function *phpdbg_get_function(const char*, const char* TSRMLS_DC);
+PHPDBG_API const zend_function *phpdbg_get_function(const char*, const char*);
 
 /* {{{ Color Management */
 #define PHPDBG_COLOR_LEN 12
@@ -63,42 +63,42 @@ typedef struct _phpdbg_element_t {
 	int			id;
 } phpdbg_element_t;
 
-PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_length TSRMLS_DC);
-PHPDBG_API void phpdbg_set_color(int element, const phpdbg_color_t *color TSRMLS_DC);
-PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_length TSRMLS_DC);
-PHPDBG_API const phpdbg_color_t *phpdbg_get_colors(TSRMLS_D);
-PHPDBG_API int phpdbg_get_element(const char *name, size_t len TSRMLS_DC); /* }}} */
+PHPDBG_API const phpdbg_color_t *phpdbg_get_color(const char *name, size_t name_length);
+PHPDBG_API void phpdbg_set_color(int element, const phpdbg_color_t *color);
+PHPDBG_API void phpdbg_set_color_ex(int element, const char *name, size_t name_length);
+PHPDBG_API const phpdbg_color_t *phpdbg_get_colors(void);
+PHPDBG_API int phpdbg_get_element(const char *name, size_t len); /* }}} */
 
 /* {{{ Prompt Management */
-PHPDBG_API void phpdbg_set_prompt(const char* TSRMLS_DC);
-PHPDBG_API const char *phpdbg_get_prompt(TSRMLS_D); /* }}} */
+PHPDBG_API void phpdbg_set_prompt(const char*);
+PHPDBG_API const char *phpdbg_get_prompt(void); /* }}} */
 
 /* {{{ Console Width */
-PHPDBG_API int phpdbg_get_terminal_width(TSRMLS_D); /* }}} */
+PHPDBG_API int phpdbg_get_terminal_width(void); /* }}} */
 
 PHPDBG_API void phpdbg_set_async_io(int fd);
 
-int phpdbg_rebuild_symtable(TSRMLS_D);
+int phpdbg_rebuild_symtable(void);
 
-int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry **ce TSRMLS_DC);
+int phpdbg_safe_class_lookup(const char *name, int name_length, zend_class_entry **ce);
 
 char *phpdbg_get_property_key(char *key);
 
-typedef int (*phpdbg_parse_var_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval *zv TSRMLS_DC);
-typedef int (*phpdbg_parse_var_with_arg_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval *zv, void *arg TSRMLS_DC);
+typedef int (*phpdbg_parse_var_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval *zv);
+typedef int (*phpdbg_parse_var_with_arg_func)(char *name, size_t len, char *keyname, size_t keylen, HashTable *parent, zval *zv, void *arg);
 
-PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent TSRMLS_DC);
-PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, zend_bool silent, void *arg TSRMLS_DC);
+PHPDBG_API int phpdbg_parse_variable(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_func callback, zend_bool silent);
+PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable *parent, size_t i, phpdbg_parse_var_with_arg_func callback, zend_bool silent, void *arg);
 
-int phpdbg_is_auto_global(char *name, int len TSRMLS_DC);
+int phpdbg_is_auto_global(char *name, int len);
 
-PHPDBG_API void phpdbg_xml_var_dump(zval *zv TSRMLS_DC);
+PHPDBG_API void phpdbg_xml_var_dump(zval *zv);
 
 #ifdef ZTS
 #define PHPDBG_OUTPUT_BACKUP_DEFINES() \
 	zend_output_globals *output_globals_ptr; \
 	zend_output_globals original_output_globals; \
-	output_globals_ptr = (zend_output_globals *) (*((void ***) tsrm_ls))[TSRM_UNSHUFFLE_RSRC_ID(output_globals_id)];
+	output_globals_ptr = (zend_output_globals *) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(output_globals_id)];
 #else
 #define PHPDBG_OUTPUT_BACKUP_DEFINES() \
 	zend_output_globals *output_globals_ptr; \
@@ -109,14 +109,14 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv TSRMLS_DC);
 #define PHPDBG_OUTPUT_BACKUP_SWAP() \
 	original_output_globals = *output_globals_ptr; \
 	memset(output_globals_ptr, 0, sizeof(zend_output_globals)); \
-	php_output_activate(TSRMLS_C);
+	php_output_activate();
 
 #define PHPDBG_OUTPUT_BACKUP() \
 	PHPDBG_OUTPUT_BACKUP_DEFINES() \
 	PHPDBG_OUTPUT_BACKUP_SWAP()
 
 #define PHPDBG_OUTPUT_BACKUP_RESTORE() \
-	php_output_deactivate(TSRMLS_C); \
+	php_output_deactivate(); \
 	*output_globals_ptr = original_output_globals;
 
 #endif /* PHPDBG_UTILS_H */
