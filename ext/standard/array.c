@@ -1248,10 +1248,11 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 
 	if (strict) {
 		zval res;					/* comparison result */
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), entry) {
 			ZVAL_DEREF(entry);
 			fast_is_identical_function(&res, value, entry);
 			if (Z_TYPE(res) == IS_TRUE) {
+				ZEND_HASH_FOREACH_CURRENT_KEY(Z_ARRVAL_P(array), num_idx, str_idx);
 				if (behavior == 0) {
 					RETURN_TRUE;
 				} else {
@@ -1265,8 +1266,9 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 			}
 		} ZEND_HASH_FOREACH_END();
 	} else {
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), entry) {
 			if (fast_equal_check_function(value, entry)) {
+				ZEND_HASH_FOREACH_CURRENT_KEY(Z_ARRVAL_P(array), num_idx, str_idx);
 				if (behavior == 0) {
 					RETURN_TRUE;
 				} else {
@@ -2674,8 +2676,6 @@ PHP_FUNCTION(array_keys)
 {
 	zval *input,				/* Input array */
 	     *search_value = NULL,	/* Value to search for */
-	     *entry,				/* An entry in the input array */
-	       res,					/* Result of comparison */
 	       new_val;				/* New value */
 	zend_bool strict = 0;		/* do strict comparison */
 	zend_ulong num_idx;
@@ -2696,12 +2696,15 @@ PHP_FUNCTION(array_keys)
 
 	/* Initialize return array */
 	if (search_value != NULL) {
+		zval *entry; /* An entry in the input array */
+		zval  res; /* Result of comparison */
 		array_init(return_value);
 		
 		if (strict) {
-			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(input), entry) {
 				fast_is_identical_function(&res, search_value, entry);
 				if (Z_TYPE(res) == IS_TRUE) {
+					ZEND_HASH_FOREACH_CURRENT_KEY(Z_ARRVAL_P(input), num_idx, str_idx);
 					if (str_idx) {
 						ZVAL_STR_COPY(&new_val, str_idx);
 					} else {
@@ -2711,8 +2714,9 @@ PHP_FUNCTION(array_keys)
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(input), entry) {
 				if (fast_equal_check_function(search_value, entry)) {
+					ZEND_HASH_FOREACH_CURRENT_KEY(Z_ARRVAL_P(input), num_idx, str_idx);
 					if (str_idx) {
 						ZVAL_STR_COPY(&new_val, str_idx);
 					} else {
@@ -2726,7 +2730,7 @@ PHP_FUNCTION(array_keys)
 		array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
 
 		/* Go through input array and add keys to the return array */
-		ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
+		ZEND_HASH_FOREACH_KEY_IND(Z_ARRVAL_P(input), num_idx, str_idx) {
 			if (str_idx) {
 				ZVAL_STR_COPY(&new_val, str_idx);
 			} else {
@@ -2826,6 +2830,7 @@ zend_bool array_column_param_helper(zval *param,
 			return 0;
 	}
 }
+/* }}} */
 
 /* {{{ proto array array_column(array input, mixed column_key[, mixed index_key])
    Return the values from a single column in the input array, identified by the
@@ -4043,9 +4048,10 @@ PHP_FUNCTION(array_diff)
 
 	/* copy all elements of first array that are not in exclude set */
 	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL(args[0])));
-	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL(args[0]), idx, key, value) {
+	ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(args[0]), value) {
 		str = zval_get_string(value);
 		if (!zend_hash_exists(&exclude, str)) {
+			ZEND_HASH_FOREACH_CURRENT_KEY(Z_ARRVAL(args[0]), idx, key);
 			if (key) {
 				zval_add_ref(value);
 				zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);

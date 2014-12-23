@@ -678,6 +678,11 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_FOREACH_STR_KEY(ht, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_key = _p->key;
+
+#define ZEND_HASH_FOREACH_KEY_IND(ht, _h, _key) \
+	ZEND_HASH_FOREACH(ht, 1); \
+	_h = _p->h; \
+	_key = _p->key;
 		
 #define ZEND_HASH_FOREACH_KEY(ht, _h, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
@@ -749,6 +754,19 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	ZEND_HASH_REVERSE_FOREACH(ht, 1); \
 	_h = _p->h; \
 	_key = _p->key; \
+	_val = _z;
+
+#define ZEND_HASH_FOREACH_CURRENT_KEY(ht, _h, _key) \
+	_h = _p->h; \
+	_key = _p->key;
+
+#define ZEND_HASH_FOREACH_CURRENT_STR_KEY(ht, _key) \
+	_key = _p->key;
+
+#define ZEND_HASH_FOREACH_CURRENT_NUM_KEY(ht, _h) \
+	_h = _p->h;
+
+#define ZEND_HASH_FOREACH_CURRENT_VAL(ht, _val) \
 	_val = _z;
 
 #define ZEND_HASH_APPLY_PROTECTION(ht) \
