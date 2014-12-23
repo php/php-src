@@ -295,7 +295,7 @@ try_again:
 			}															\
 			op2 = &op2_copy;											\
 		}																\
-	} while (0);														\
+	} while (0);
 
 ZEND_API void convert_to_long(zval *op) /* {{{ */
 {
