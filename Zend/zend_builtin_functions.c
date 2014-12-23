@@ -456,7 +456,7 @@ ZEND_FUNCTION(func_get_arg)
    Get an array of the arguments that were passed to the function */
 ZEND_FUNCTION(func_get_args)
 {
-	zval *p;
+	zval *p, *q;
 	uint32_t arg_count, first_extra_arg;
 	uint32_t i;
 	zend_execute_data *ex = EX(prev_execute_data);
@@ -470,44 +470,47 @@ ZEND_FUNCTION(func_get_args)
 
 	array_init_size(return_value, arg_count);
 	if (arg_count) {
-		Bucket *q;		
-
 		first_extra_arg = ex->func->op_array.num_args;
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
-		i = 0;
-		q = Z_ARRVAL_P(return_value)->arData;
-		p = ZEND_CALL_ARG(ex, 1);
-		if (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg) {
-			while (i < first_extra_arg) {
-				q->h = i;
-				q->key = NULL;
-				if (!Z_ISREF_P(p)) {
-					ZVAL_COPY(&q->val, p);
-				} else {
-					ZVAL_DUP(&q->val, Z_REFVAL_P(p));
-			    }
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			i = 0;
+			p = ZEND_CALL_ARG(ex, 1);
+			if (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg) {
+				while (i < first_extra_arg) {
+					q = p;
+					ZVAL_DEREF(q);
+					if (Z_OPT_REFCOUNTED_P(q)) Z_ADDREF_P(q);
+					ZEND_HASH_FILL_ADD(q);
+//					q->h = i;
+//					q->key = NULL;
+//					if (!Z_ISREF_P(p)) {
+//						ZVAL_COPY(&q->val, p);
+//					} else {
+//						ZVAL_COPY(&q->val, Z_REFVAL_P(p));
+//				    }
+					p++;
+//					q++;
+					i++;
+				}
+				p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
+			}
+			while (i < arg_count) {
+				q = p;
+				ZVAL_DEREF(q);
+				if (Z_OPT_REFCOUNTED_P(q)) Z_ADDREF_P(q);
+				ZEND_HASH_FILL_ADD(q);
+//				q->h = i;
+//				q->key = NULL;
+//				if (!Z_ISREF_P(p)) {
+//					ZVAL_COPY(&q->val, p);
+//				} else {
+//					ZVAL_COPY(&q->val, Z_REFVAL_P(p));
+//			    }
 				p++;
-				q++;
+//				q++;
 				i++;
 			}
-			p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
-		}
-		while (i < arg_count) {
-			q->h = i;
-			q->key = NULL;
-			if (!Z_ISREF_P(p)) {
-				ZVAL_COPY(&q->val, p);
-			} else {
-				ZVAL_DUP(&q->val, Z_REFVAL_P(p));
-		    }
-			p++;
-			q++;
-			i++;
-		}
-		Z_ARRVAL_P(return_value)->nNumUsed = i;
-		Z_ARRVAL_P(return_value)->nNumOfElements = i;
-		Z_ARRVAL_P(return_value)->nNextFreeElement = i + 1;
-		Z_ARRVAL_P(return_value)->nInternalPointer = 0;
+		} ZEND_HASH_FILL_END();
 	}
 }
 /* }}} */
@@ -2133,26 +2136,30 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		uint32_t i = 0;
 		zval *p = ZEND_CALL_ARG(call, 1);
 
-		if (call->func->type == ZEND_USER_FUNCTION) {
-			uint32_t first_extra_arg = call->func->op_array.num_args;
+		zend_hash_real_init(Z_ARRVAL_P(arg_array), 1);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(arg_array)) {
+			if (call->func->type == ZEND_USER_FUNCTION) {
+				uint32_t first_extra_arg = call->func->op_array.num_args;
 			
-			if (ZEND_CALL_NUM_ARGS(call) > first_extra_arg) {
-				while (i < first_extra_arg) {
-					if (Z_REFCOUNTED_P(p)) Z_ADDREF_P(p);
-					zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
-					p++;
-					i++;
+				if (ZEND_CALL_NUM_ARGS(call) > first_extra_arg) {
+					while (i < first_extra_arg) {
+						if (Z_OPT_REFCOUNTED_P(p)) Z_ADDREF_P(p);
+						ZEND_HASH_FILL_ADD(p);
+						zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
+						p++;
+						i++;
+					}
+					p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 				}
-				p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 			}
-		}
 
-		while (i < num_args) {
-			if (Z_REFCOUNTED_P(p)) Z_ADDREF_P(p);
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
-			p++;
-			i++;
-		}
+			while (i < num_args) {
+				if (Z_OPT_REFCOUNTED_P(p)) Z_ADDREF_P(p);
+				ZEND_HASH_FILL_ADD(p);
+				p++;
+				i++;
+			}
+		} ZEND_HASH_FILL_END();
 	}
 }
 /* }}} */

@@ -3698,21 +3698,24 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 		zval *param;
 
 		array_init_size(params, arg_count - arg_num + 1);
-		param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
-		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
-			do {			
-				zend_verify_arg_type(EX(func), arg_num, param, NULL);
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(params), param);
-				if (Z_REFCOUNTED_P(param)) Z_ADDREF_P(param);
-				param++;
-			} while (++arg_num <= arg_count);
-		} else {
-			do {
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(params), param);
-				if (Z_REFCOUNTED_P(param)) Z_ADDREF_P(param);
-				param++;
-			} while (++arg_num <= arg_count);
-		}
+		zend_hash_real_init(Z_ARRVAL_P(params), 1);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(params)) {
+			param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
+			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
+				do {			
+					zend_verify_arg_type(EX(func), arg_num, param, NULL);
+					if (Z_OPT_REFCOUNTED_P(param)) Z_ADDREF_P(param);
+					ZEND_HASH_FILL_ADD(param);
+					param++;
+				} while (++arg_num <= arg_count);
+			} else {
+				do {
+					if (Z_OPT_REFCOUNTED_P(param)) Z_ADDREF_P(param);
+					ZEND_HASH_FILL_ADD(param);
+					param++;
+				} while (++arg_num <= arg_count);
+			}
+		} ZEND_HASH_FILL_END();
 	} else {
 		array_init(params);
 	}

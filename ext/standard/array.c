@@ -2724,16 +2724,18 @@ PHP_FUNCTION(array_keys)
 		}
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
-
-		/* Go through input array and add keys to the return array */
-		ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
-			if (str_idx) {
-				ZVAL_STR_COPY(&new_val, str_idx);
-			} else {
-				ZVAL_LONG(&new_val, num_idx);
-			}
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &new_val);
-		} ZEND_HASH_FOREACH_END();
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			/* Go through input array and add keys to the return array */
+			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(input), num_idx, str_idx, entry) {
+				if (str_idx) {
+					ZVAL_STR_COPY(&new_val, str_idx);
+				} else {
+					ZVAL_LONG(&new_val, num_idx);
+				}
+				ZEND_HASH_FILL_ADD(&new_val);
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FILL_END();
 	}
 }
 /* }}} */
@@ -2751,12 +2753,15 @@ PHP_FUNCTION(array_values)
 
 	/* Initialize return array */
 	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
+	zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 
 	/* Go through input array and add values to the return array */
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
-		zval_add_ref(entry);
-		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), entry);
-	} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
+			zval_add_ref(entry);
+			ZEND_HASH_FILL_ADD(entry);
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FILL_END();
 }
 /* }}} */
 

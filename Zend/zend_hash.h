@@ -759,6 +759,33 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_INC_APPLY_COUNT(ht) ((ht)->u.flags += (1 << ZEND_HASH_APPLY_SHIFT))
 #define ZEND_HASH_DEC_APPLY_COUNT(ht) ((ht)->u.flags -= (1 << ZEND_HASH_APPLY_SHIFT))
 
+
+/* The following macros are useful to insert a sequence of new elements 
+ * of packed array. They may be use insted of series of
+ * zend_hash_next_index_insert_new()
+ * (HashTable must have enough free buckets).
+ */
+#define ZEND_HASH_FILL_PACKED(ht) do { \
+		HashTable *__fill_ht = (ht); \
+		Bucket *__fill_bkt = __fill_ht->arData + __fill_ht->nNumUsed; \
+		uint32_t __fill_idx = __fill_ht->nNumUsed; \
+		ZEND_ASSERT(__fill_ht->u.flags & HASH_FLAG_PACKED);
+
+#define ZEND_HASH_FILL_ADD(_val) do { \
+		ZVAL_COPY_VALUE(&__fill_bkt->val, _val); \
+		__fill_bkt->h = (__fill_idx); \
+		__fill_bkt->key = NULL; \
+		__fill_bkt++; \
+		__fill_idx++; \
+	} while (0)
+	
+#define ZEND_HASH_FILL_END() \
+		__fill_ht->nNumUsed = __fill_idx; \
+		__fill_ht->nNumOfElements = __fill_idx; \
+		__fill_ht->nNextFreeElement = __fill_idx + 1; \
+		__fill_ht->nInternalPointer = 0; \
+	} while (0)
+
 #endif							/* ZEND_HASH_H */
 
 /*
