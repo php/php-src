@@ -2519,13 +2519,12 @@ ZEND_VM_C_LABEL(try_function_name):
 				lcname = zend_string_alloc(Z_STRLEN_P(function_name) - 1, 0);
 				zend_str_tolower_copy(lcname->val, Z_STRVAL_P(function_name) + 1, Z_STRLEN_P(function_name) - 1);
 			} else {
-				lcname = zend_string_alloc(Z_STRLEN_P(function_name), 0);
-				zend_str_tolower_copy(lcname->val, Z_STRVAL_P(function_name), Z_STRLEN_P(function_name));
+				lcname = zend_string_tolower(Z_STR_P(function_name));
 			}
 			if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 			}
-			zend_string_free(lcname);
+			zend_string_release(lcname);
 			FREE_OP2();
 
 			fbc = Z_FUNC_P(func);
