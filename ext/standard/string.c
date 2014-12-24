@@ -1419,9 +1419,7 @@ PHP_FUNCTION(strtolower)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	result = zend_string_init(str->val, str->len, 0);
-	php_strtolower(result->val, result->len);
-	RETURN_NEW_STR(result);
+	RETURN_STR(zend_string_tolower(str));
 }
 /* }}} */
 
