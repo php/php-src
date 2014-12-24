@@ -2988,8 +2988,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		return 0;
 	}
 
-	lmname = zend_string_alloc(mlen, 0);
-	zend_str_tolower_copy(lmname->val, mname->val, mlen);
+	lmname = zend_string_tolower(mname);
 	if (strict_class &&
 	    fcc->calling_scope &&
 		zend_string_equals_literal(lmname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
@@ -3154,7 +3153,7 @@ get_function_via_handler:
 			if (error) zend_spprintf(error, 0, "function '%s' does not exist", mname->val);
 		}
 	}
-	zend_string_free(lmname);
+	zend_string_release(lmname);
 	zend_string_release(mname);
 
 	if (fcc->object) {

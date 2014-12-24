@@ -2342,6 +2342,34 @@ ZEND_API void zend_str_tolower(char *str, size_t length) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_string *zend_string_tolower(zend_string *str) /* {{{ */
+{
+	register unsigned char *p = (unsigned char*)str->val;
+	register unsigned char *end = p + str->len;
+
+	while (p < end) {
+		if (*p != zend_tolower_ascii(*p)) {
+			zend_string *res = zend_string_alloc(str->len, 0);
+			register unsigned char *r;
+
+			if (p != (unsigned char*)str->val) {
+				memcpy(res->val, str->val, p - (unsigned char*)str->val);
+			}
+			r = p + (res->val - str->val);
+			while (p < end) {
+				*r = zend_tolower_ascii(*p);
+				p++;
+				r++;
+			}
+			*r = '\0';
+			return res;
+		}
+		p++;
+	}
+	return zend_string_copy(str);
+}
+/* }}} */
+
 ZEND_API int zend_binary_strcmp(const char *s1, size_t len1, const char *s2, size_t len2) /* {{{ */
 {
 	int retval;
