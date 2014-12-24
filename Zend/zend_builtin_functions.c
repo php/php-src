@@ -1139,6 +1139,7 @@ ZEND_FUNCTION(get_object_vars)
 static int same_name(zend_string *key, zend_string *name) /* {{{ */
 {
 	zend_string *lcname;
+	int ret;
 
 	if (key == name) {
 		return 1;
@@ -1147,7 +1148,7 @@ static int same_name(zend_string *key, zend_string *name) /* {{{ */
 		return 0;
 	}
 	lcname = zend_string_tolower(name);	
-	int ret = memcmp(lcname->val, key->val, key->len) == 0;
+	ret = memcmp(lcname->val, key->val, key->len) == 0;
 	zend_string_release(lcname);
 	return ret;
 }
@@ -2612,7 +2613,6 @@ ZEND_FUNCTION(get_extension_funcs)
 {
 	zend_string *extension_name;
 	zend_string *lcname;
-	size_t extension_name_len;
 	int array;
 	zend_module_entry *module;
 	zend_function *zif;
