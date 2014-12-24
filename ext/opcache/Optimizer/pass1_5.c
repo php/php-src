@@ -512,9 +512,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						}
 					}
 				} else if ((CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN) == 0 &&
-					(!zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring") - 1) ||
-					 zend_ini_long("mbstring.func_overload",
-						 sizeof("mbstring.func_overload") - 1, 0) < 2 /* MB_OVERLOAD_STRING */) &&
 					Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("strlen") - 1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)), "strlen", sizeof("strlen") - 1)) {
 					zval t;
