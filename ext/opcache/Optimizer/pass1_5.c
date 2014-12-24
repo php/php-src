@@ -450,9 +450,11 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 							MAKE_NOP(opline);
 						}
 					}
-				} else if (Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("strlen")-1 &&
-					!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)),
-						"strlen", sizeof("strlen")-1)) {
+				} else if ((!zend_hash_exists(&module_registry, "mbstring", sizeof("mbstring")) ||
+							zend_ini_long("mbstring.func_overload",
+								sizeof("mbstring.func_overload"), 0) < 2 /* MB_OVERLOAD_STRING */) &&
+						Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("strlen") - 1 &&
+						!memcmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), "strlen", sizeof("strlen") - 1)) {
 					zval t;
 
 					ZVAL_LONG(&t, Z_STRLEN(ZEND_OP1_LITERAL(opline - 1)));

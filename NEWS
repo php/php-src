@@ -38,6 +38,8 @@ PHP                                                                        NEWS
     (Ashesh Vashi)
 
 - Opcache:
+  . Fixed bug #68644 (strlen incorrect : mbstring + func_overload=2 +UTF-8
+    + Opcache). (Laruence)
   . Fixed bug #67111 (Memory leak when using "continue 2" inside two foreach
     loops). (Nikita)
 
