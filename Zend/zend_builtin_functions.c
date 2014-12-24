@@ -2613,7 +2613,6 @@ ZEND_FUNCTION(get_extension_funcs)
 {
 	zend_string *extension_name;
 	zend_string *lcname;
-	size_t extension_name_len;
 	int array;
 	zend_module_entry *module;
 	zend_function *zif;
