@@ -249,7 +249,7 @@ PHP_FUNCTION(ksort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 #endif
 
 	php_set_compare_func(sort_type);
