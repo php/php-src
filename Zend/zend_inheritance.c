@@ -143,6 +143,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 			lc_parent_class_name = zend_string_tolower(ce->parent->name);
 			if (!zend_hash_exists(&ce->function_table, lc_parent_class_name) &&
 					(function = zend_hash_find_ptr(&ce->parent->function_table, lc_parent_class_name)) != NULL) {
+				CHECK_CLASS_CASE_ZSTR(ce->parent->name,ce->parent);
 				if (function->common.fn_flags & ZEND_ACC_CTOR) {
 					/* inherit parent's constructor */
 					if (function->type == ZEND_INTERNAL_FUNCTION) {

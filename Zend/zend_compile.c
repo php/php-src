@@ -2652,6 +2652,7 @@ static int zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t
 	lcname = zend_string_tolower(name);
 
 	fbc = zend_hash_find_ptr(CG(function_table), lcname);
+	CHECK_FUNCTION_CASE_ZSTR(name,fbc);
 	if (!fbc || (fbc->type == ZEND_INTERNAL_FUNCTION &&
 		(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
 	) {
@@ -2815,6 +2816,7 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 		lcname = zend_string_tolower(Z_STR_P(name));
 
 		fbc = zend_hash_find_ptr(CG(function_table), lcname);
+		CHECK_FUNCTION_CASE_ZSTR(Z_STR_P(name),fbc);
 		if (!fbc || (fbc->type == ZEND_INTERNAL_FUNCTION &&
 			(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
 		) {
@@ -4757,6 +4759,7 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 				case T_FUNCTION:
 				{
 					zend_function *fn = zend_hash_find_ptr(CG(function_table), lookup_name);
+					CHECK_FUNCTION_CASE_ZSTR(new_name,fn);
 					if (fn && fn->type == ZEND_USER_FUNCTION
 						&& fn->op_array.filename == CG(compiled_filename)
 					) {

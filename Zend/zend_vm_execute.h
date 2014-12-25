@@ -1585,6 +1585,7 @@ try_function_name:
 			zend_string_release(lcname);
 
 			fbc = Z_FUNC_P(func);
+			CHECK_FUNCTION_CASE_ZSTR(Z_STR_P(function_name),fbc);
 			called_scope = NULL;
 			object = NULL;
 		} else if (IS_CONST != IS_CONST &&
@@ -1968,6 +1969,7 @@ try_function_name:
 			zend_string_release(lcname);
 
 			fbc = Z_FUNC_P(func);
+			CHECK_FUNCTION_CASE_ZSTR(Z_STR_P(function_name),fbc);
 			called_scope = NULL;
 			object = NULL;
 		} else if (IS_CV != IS_CONST &&
@@ -2158,6 +2160,7 @@ try_function_name:
 			zval_ptr_dtor_nogc(free_op2);
 
 			fbc = Z_FUNC_P(func);
+			CHECK_FUNCTION_CASE_ZSTR(Z_STR_P(function_name),fbc);
 			called_scope = NULL;
 			object = NULL;
 		} else if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&

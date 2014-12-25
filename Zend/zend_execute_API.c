@@ -943,6 +943,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 		if (!key) {
 			zend_string_release(lc_name);
 		}
+		CHECK_CLASS_CASE_ZSTR(name,ce);
 		return ce;
 	}
 
@@ -1030,6 +1031,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	if (!key) {
 		zend_string_release(lc_name);
 	}
+	CHECK_CLASS_CASE_ZSTR(name,ce);
 	return ce;
 }
 /* }}} */

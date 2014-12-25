@@ -2751,6 +2751,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		/* Check if function with given name exists.
 		 * This may be a compound name that includes namespace name */
 		if (EXPECTED((fcc->function_handler = zend_hash_find_ptr(EG(function_table), lmname)) != NULL)) {
+			CHECK_FUNCTION_CASE_ZSTR(Z_STR_P(callable),fcc->function_handler);
 			if (lmname != Z_STR_P(callable)) {
 				STR_ALLOCA_FREE(lmname, use_heap);
 			}
@@ -2763,6 +2764,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			}
 			zend_str_tolower(lmname->val, lmname->len);
 			if ((fcc->function_handler = zend_hash_find_ptr(EG(function_table), lmname)) != NULL) {
+				CHECK_FUNCTION_CASE_ZSTR(Z_STR_P(callable),fcc->function_handler);
 				STR_ALLOCA_FREE(lmname, use_heap);
 				return 1;
 			}
@@ -2832,6 +2834,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			retval = 1;
 		}
 	} else if ((fcc->function_handler = zend_hash_find_ptr(ftable, lmname)) != NULL) {
+		CHECK_METHOD_CASE_ZSTR(mname,fcc->function_handler);
 		retval = 1;
 		if ((fcc->function_handler->op_array.fn_flags & ZEND_ACC_CHANGED) &&
 		    !strict_class && EG(scope) &&
@@ -3942,6 +3945,7 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 			}
 			if (name->len == f->common.function_name->len &&
 			    !strncasecmp(name->val, f->common.function_name->val, f->common.function_name->len)) {
+				CHECK_METHOD_CASE_ZSTR(name,f);
 				return f->common.function_name;
 			}
 			return zend_find_alias_name(f->common.scope, name);

@@ -2528,6 +2528,7 @@ ZEND_VM_C_LABEL(try_function_name):
 			FREE_OP2();
 
 			fbc = Z_FUNC_P(func);
+			CHECK_FUNCTION_CASE_ZSTR(Z_STR_P(function_name),fbc);
 			called_scope = NULL;
 			object = NULL;
 		} else if (OP2_TYPE != IS_CONST &&
