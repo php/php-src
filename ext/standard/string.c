@@ -1368,20 +1368,49 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
 }
 /* }}} */
 
+/* {{{ php_string_toupper
+ */
+PHPAPI zend_string *php_string_toupper(zend_string *s)
+{
+	unsigned char *c, *e;
+
+	c = (unsigned char *)s->val;
+	e = c + s->len;
+
+	while (c < e) {
+		if (!isupper(*c)) {
+			register unsigned char *r;
+			zend_string *res = zend_string_alloc(s->len, 0);
+
+			if (c != (unsigned char*)s->val) {
+				memcpy(res->val, s->val, c - (unsigned char*)s->val);
+			}
+			r = c + (res->val - s->val);
+			while (c < e) {
+				*r = toupper(*c);
+				r++;
+				c++;
+			}
+			*r = '\0';
+			return res;
+		}
+		c++;
+	}
+	return zend_string_copy(s);
+}
+/* }}} */
+
 /* {{{ proto string strtoupper(string str)
    Makes a string uppercase */
 PHP_FUNCTION(strtoupper)
 {
 	zend_string *arg;
-	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &arg) == FAILURE) {
 		return;
 	}
 
-	result = zend_string_init(arg->val, arg->len, 0);
-	php_strtoupper(result->val, result->len);
-	RETURN_NEW_STR(result);
+	RETURN_STR(php_string_toupper(arg));
 }
 /* }}} */
 
@@ -1402,12 +1431,43 @@ PHPAPI char *php_strtolower(char *s, size_t len)
 }
 /* }}} */
 
+/* {{{ php_string_tolower
+ */
+PHPAPI zend_string *php_string_tolower(zend_string *s)
+{
+	unsigned char *c, *e;
+
+	c = (unsigned char *)s->val;
+	e = c + s->len;
+
+	while (c < e) {
+		if (!islower(*c)) {
+			register unsigned char *r;
+			zend_string *res = zend_string_alloc(s->len, 0);
+
+			if (c != (unsigned char*)s->val) {
+				memcpy(res->val, s->val, c - (unsigned char*)s->val);
+			}
+			r = c + (res->val - s->val);
+			while (c < e) {
+				*r = tolower(*c);
+				r++;
+				c++;
+			}
+			*r = '\0';
+			return res;
+		}
+		c++;
+	}
+	return zend_string_copy(s);
+}
+/* }}} */
+
 /* {{{ proto string strtolower(string str)
    Makes a string lowercase */
 PHP_FUNCTION(strtolower)
 {
 	zend_string *str;
-	zend_string *result;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
@@ -1419,9 +1479,7 @@ PHP_FUNCTION(strtolower)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	result = zend_string_init(str->val, str->len, 0);
-	php_strtolower(result->val, result->len);
-	RETURN_NEW_STR(result);
+	RETURN_STR(php_string_tolower(str));
 }
 /* }}} */
 

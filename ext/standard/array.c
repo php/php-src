@@ -2848,6 +2848,7 @@ zend_bool array_column_param_helper(zval *param,
 			return 0;
 	}
 }
+/* }}} */
 
 /* {{{ proto array array_column(array input, mixed column_key[, mixed index_key])
    Return the values from a single column in the input array, identified by the
@@ -3075,11 +3076,10 @@ PHP_FUNCTION(array_change_key_case)
 		if (!string_key) {
 			zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry);
 		} else {
-			new_key = zend_string_init(string_key->val, string_key->len, 0);
 			if (change_to_upper) {
-				php_strtoupper(new_key->val, new_key->len);
+				new_key = php_string_toupper(string_key);
 			} else {
-				php_strtolower(new_key->val, new_key->len);
+				new_key = php_string_tolower(string_key);
 			}
 			zend_hash_update(Z_ARRVAL_P(return_value), new_key, entry);
 			zend_string_release(new_key);
