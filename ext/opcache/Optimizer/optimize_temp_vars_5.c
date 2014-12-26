@@ -38,54 +38,6 @@
 		max = i;				\
 	}
 	
-void optimize_adjust_fcall_stack_size(zend_op_array *callee, uint32_t delta, zend_optimizer_ctx *ctx) {
-	zval *val;
-	zend_op *start, *end;
-	zend_op_array *op_array;
-	zend_string *name;
-
-	if (!delta || !callee->function_name) {
-		return;
-	}
-
-	name = zend_string_tolower(callee->function_name);
-	op_array = &ctx->script->main_op_array;
-	start = op_array->opcodes;
-	end = op_array->opcodes + op_array->last - 1;
-	while (start < end) {
-		if (start->opcode == ZEND_INIT_FCALL) {
-			zval *zv = RT_CONSTANT(op_array, start->op2);
-			if (Z_STR_P(zv) == name ||
-					((Z_STRLEN_P(zv) == name->len) &&
-					 !memcmp(Z_STRVAL_P(zv), name->val, name->len))) {
-				start->op1.num -= (delta * sizeof(zval));
-			}
-		}
-		start++;
-	}
-
-	ZEND_HASH_REVERSE_FOREACH_VAL(&ctx->script->function_table, val) {
-		op_array = Z_PTR_P(val);
-		if (op_array == callee) {
-			continue; /* we can not break here */
-		}
-		start = op_array->opcodes;
-		end = op_array->opcodes + op_array->last - 1;
-		while (start < end) {
-			if (start->opcode == ZEND_INIT_FCALL) {
-				zval *zv = RT_CONSTANT(op_array, start->op2);
-				if (Z_STR_P(zv) == name ||
-						((Z_STRLEN_P(zv) == name->len) &&
-						 !memcmp(Z_STRVAL_P(zv), name->val, name->len))) {
-					start->op1.num -= (delta * sizeof(zval));
-				}
-			}
-			start++;
-		}
-	} ZEND_HASH_FOREACH_END();
-	zend_string_release(name);
-}
-
 void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	int T = op_array->T;
@@ -228,8 +180,5 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 	}
 
 	zend_arena_release(&ctx->arena, checkpoint);
-	if (op_array->scope == NULL) {
-		optimize_adjust_fcall_stack_size(op_array, op_array->T - (max + 1), ctx);
-	}
 	op_array->T = max + 1;
 }
