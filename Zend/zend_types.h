@@ -157,15 +157,6 @@ typedef struct _Bucket {
 } Bucket;
 
 typedef struct _HashTable {	
-	uint32_t          nTableSize;
-	uint32_t          nTableMask;
-	uint32_t          nNumUsed;
-	uint32_t          nNumOfElements;
-	zend_long         nNextFreeElement;
-	Bucket           *arData;
-	uint32_t         *arHash;
-	dtor_func_t       pDestructor;
-	uint32_t          nInternalPointer; 
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_3(
@@ -175,6 +166,15 @@ typedef struct _HashTable {
 		} v;
 		uint32_t flags;
 	} u;
+	uint32_t          nTableSize;
+	uint32_t          nTableMask;
+	uint32_t          nNumUsed;
+	uint32_t          nNumOfElements;
+	uint32_t          nInternalPointer; 
+	zend_long         nNextFreeElement;
+	Bucket           *arData;
+	uint32_t         *arHash;
+	dtor_func_t       pDestructor;
 } HashTable;
 
 struct _zend_array {

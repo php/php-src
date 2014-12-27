@@ -74,7 +74,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	uint idx;
 	Bucket *p;
 
-	if (!ht->nTableMask) {
+	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
@@ -111,7 +111,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	uint idx;
 	Bucket *p;
 
-	if (!ht->nTableMask) {
+	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
