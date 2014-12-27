@@ -1437,17 +1437,17 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes */
 static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 {
-	zval tmp;
+	zend_string *tmp;
 	void *re = NULL;
 
 	if (!new_value) {
 		new_value = entry->orig_value;
 	}
-	php_trim(new_value->val, new_value->len, NULL, 0, &tmp, 3);
+	tmp = php_trim(new_value, NULL, 0, 3);
 
-	if (Z_STRLEN(tmp) > 0) {
-		if (!(re = _php_mb_compile_regex(Z_STRVAL(tmp)))) {
-			zval_dtor(&tmp);
+	if (tmp->len > 0) {
+		if (!(re = _php_mb_compile_regex(tmp->val))) {
+			zend_string_release(tmp);
 			return FAILURE;
 		}
 	}
@@ -1458,7 +1458,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 
 	MBSTRG(http_output_conv_mimetypes) = re;
 
-	zval_dtor(&tmp);
+	zend_string_release(tmp);
 	return SUCCESS;
 }
 /* }}} */

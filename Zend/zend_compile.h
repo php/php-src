@@ -412,8 +412,9 @@ struct _zend_execute_data {
 #define ZEND_CALL_CODE               (1 << 0)
 #define ZEND_CALL_NESTED             (0 << 1)
 #define ZEND_CALL_TOP                (1 << 1)
-#define ZEND_CALL_CTOR               (1 << 2)
-#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 3)
+#define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
+#define ZEND_CALL_CTOR               (1 << 3)
+#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 4)
 
 #define ZEND_CALL_INFO(call) \
 	(Z_TYPE_INFO((call)->This) >> 24)
@@ -832,16 +833,14 @@ int zend_add_literal(zend_op_array *op_array, zval *zv);
 
 static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
-	if (UNEXPECTED(zf->common.arg_info == NULL)) {
-		return 0;
-	}
-	if (UNEXPECTED(arg_num > zf->common.num_args)) {
+	arg_num--;
+	if (UNEXPECTED(arg_num >= zf->common.num_args)) {
 		if (EXPECTED((zf->common.fn_flags & ZEND_ACC_VARIADIC) == 0)) {
 			return 0;
 		}
 		arg_num = zf->common.num_args;
 	}
-	return UNEXPECTED((zf->common.arg_info[arg_num-1].pass_by_reference & mask) != 0);
+	return UNEXPECTED((zf->common.arg_info[arg_num].pass_by_reference & mask) != 0);
 }
 
 #define ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \

@@ -47,7 +47,7 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 }
 /* }}} */
 
-static void fpm_php_disable(char *value, int (*zend_disable)(char *, uint)) /* {{{ */
+static void fpm_php_disable(char *value, int (*zend_disable)(char *, size_t)) /* {{{ */
 {
 	char *s = 0, *e = value;
 
@@ -130,6 +130,7 @@ static int fpm_php_apply_defines(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	return 0;
 }
+/* }}} */
 
 static int fpm_php_set_allowed_clients(struct fpm_worker_pool_s *wp) /* {{{ */
 {

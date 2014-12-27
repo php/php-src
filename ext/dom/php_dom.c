@@ -447,7 +447,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 		}
 
 		if (zend_hash_get_current_key_ex(prop_handlers, &string_key,
-			&num_key, 0, &pos) != HASH_KEY_IS_STRING) {
+			&num_key, &pos) != HASH_KEY_IS_STRING) {
 			continue;
 		}
 

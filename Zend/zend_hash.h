@@ -39,6 +39,7 @@
 #define HASH_FLAG_PERSISTENT       (1<<0)
 #define HASH_FLAG_APPLY_PROTECTION (1<<1)
 #define HASH_FLAG_PACKED           (1<<2)
+#define HASH_FLAG_INITIALIZED      (1<<3)
 
 #define HASH_MASK_CONSISTENCY      0x60
 
@@ -163,7 +164,7 @@ ZEND_API zend_bool zend_hash_index_exists(const HashTable *ht, zend_ulong h);
 	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTENT ? FAILURE : SUCCESS)
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, zend_bool duplicate, HashPosition *pos);
+ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, zend_string **str_index, zend_ulong *num_index, HashPosition *pos);
 ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
 ZEND_API zval *zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos);
@@ -183,8 +184,8 @@ typedef struct _HashPointer {
 	zend_hash_move_forward_ex(ht, &(ht)->nInternalPointer)
 #define zend_hash_move_backwards(ht) \
 	zend_hash_move_backwards_ex(ht, &(ht)->nInternalPointer)
-#define zend_hash_get_current_key(ht, str_index, num_index, duplicate) \
-	zend_hash_get_current_key_ex(ht, str_index, num_index, duplicate, &(ht)->nInternalPointer)
+#define zend_hash_get_current_key(ht, str_index, num_index) \
+	zend_hash_get_current_key_ex(ht, str_index, num_index, &(ht)->nInternalPointer)
 #define zend_hash_get_current_key_zval(ht, key) \
 	zend_hash_get_current_key_zval_ex(ht, key, &(ht)->nInternalPointer)
 #define zend_hash_get_current_key_type(ht) \
@@ -758,6 +759,33 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_GET_APPLY_COUNT(ht) ((ht)->u.flags >> ZEND_HASH_APPLY_SHIFT)
 #define ZEND_HASH_INC_APPLY_COUNT(ht) ((ht)->u.flags += (1 << ZEND_HASH_APPLY_SHIFT))
 #define ZEND_HASH_DEC_APPLY_COUNT(ht) ((ht)->u.flags -= (1 << ZEND_HASH_APPLY_SHIFT))
+
+
+/* The following macros are useful to insert a sequence of new elements 
+ * of packed array. They may be use insted of series of
+ * zend_hash_next_index_insert_new()
+ * (HashTable must have enough free buckets).
+ */
+#define ZEND_HASH_FILL_PACKED(ht) do { \
+		HashTable *__fill_ht = (ht); \
+		Bucket *__fill_bkt = __fill_ht->arData + __fill_ht->nNumUsed; \
+		uint32_t __fill_idx = __fill_ht->nNumUsed; \
+		ZEND_ASSERT(__fill_ht->u.flags & HASH_FLAG_PACKED);
+
+#define ZEND_HASH_FILL_ADD(_val) do { \
+		ZVAL_COPY_VALUE(&__fill_bkt->val, _val); \
+		__fill_bkt->h = (__fill_idx); \
+		__fill_bkt->key = NULL; \
+		__fill_bkt++; \
+		__fill_idx++; \
+	} while (0)
+	
+#define ZEND_HASH_FILL_END() \
+		__fill_ht->nNumUsed = __fill_idx; \
+		__fill_ht->nNumOfElements = __fill_idx; \
+		__fill_ht->nNextFreeElement = __fill_idx + 1; \
+		__fill_ht->nInternalPointer = 0; \
+	} while (0)
 
 #endif							/* ZEND_HASH_H */
 

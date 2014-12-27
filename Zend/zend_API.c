@@ -2206,6 +2206,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 			if (ptr->arg_info[ptr->num_args].is_variadic) {
 				internal_function->fn_flags |= ZEND_ACC_VARIADIC;
+				/* Don't count the variadic argument */
+				internal_function->num_args--;
 			}
 		} else {
 			internal_function->arg_info = NULL;
@@ -2760,6 +2762,8 @@ ZEND_API int zend_disable_function(char *function_name, size_t function_name_len
 {
 	zend_internal_function *func;
 	if ((func = zend_hash_str_find_ptr(CG(function_table), function_name, function_name_length))) {
+	    func->fn_flags &= ~(ZEND_ACC_VARIADIC | ZEND_ACC_HAS_TYPE_HINTS);
+		func->num_args = 0;
 		func->arg_info = NULL;
 		func->handler = ZEND_FN(display_disabled_function);
 		return SUCCESS;
@@ -2986,8 +2990,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		return 0;
 	}
 
-	lmname = zend_string_alloc(mlen, 0);
-	zend_str_tolower_copy(lmname->val, mname->val, mlen);
+	lmname = zend_string_tolower(mname);
 	if (strict_class &&
 	    fcc->calling_scope &&
 		zend_string_equals_literal(lmname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
@@ -3152,7 +3155,7 @@ get_function_via_handler:
 			if (error) zend_spprintf(error, 0, "function '%s' does not exist", mname->val);
 		}
 	}
-	zend_string_free(lmname);
+	zend_string_release(lmname);
 	zend_string_release(mname);
 
 	if (fcc->object) {

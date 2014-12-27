@@ -456,7 +456,8 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 	int				new_value = 0;
 	zend_long            cnt = 0;
 	int				retval = SUCCESS;
-	zval            tmp_zv, trim_zv, zval_copy;
+	zval            tmp_zv, zval_copy;
+	zend_string    *trim_str;
 
 	sxe = Z_SXEOBJ_P(object);
 
@@ -474,9 +475,9 @@ static int sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_bool
 		}
 	} else {
 		if (Z_TYPE_P(member) != IS_STRING) {
-			ZVAL_STR(&trim_zv, zval_get_string(member));
-			php_trim(Z_STRVAL(trim_zv), Z_STRLEN(trim_zv), NULL, 0, &tmp_zv, 3);
-			zval_dtor(&trim_zv);
+			trim_str = zval_get_string(member);
+			ZVAL_STR(&tmp_zv, php_trim(trim_str, NULL, 0, 3));
+			zend_string_release(trim_str);
 			member = &tmp_zv;
 		}
 

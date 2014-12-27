@@ -1312,6 +1312,8 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 			}
 			if (funcs->arg_info[funcs->num_args].is_variadic) {
 				ifunc->fn_flags |= ZEND_ACC_VARIADIC;
+				/* Don't count the variadic argument */
+				ifunc->num_args--;
 			}
 		} else {
 			ifunc->arg_info = NULL;

@@ -9,7 +9,7 @@ AC_DEFUN([LIBZEND_BISON_CHECK],[
   # non-working versions, e.g. "3.0 3.2";
   # remove "none" when introducing the first incompatible bison version an 
   # separate any following additions by spaces
-  bison_version_exclude="3.0"
+  bison_version_exclude=""
 
   # for standalone build of Zend Engine
   test -z "$SED" && SED=sed

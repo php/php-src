@@ -100,16 +100,16 @@ PHP_FUNCTION(ezmlm_hash)
    Send an email message */
 PHP_FUNCTION(mail)
 {
-	char *to=NULL, *message=NULL, *headers=NULL, *headers_trimmed=NULL;
+	char *to=NULL, *message=NULL;
 	char *subject=NULL;
-	zend_string *extra_cmd=NULL;
-	size_t to_len, message_len, headers_len = 0;
+	zend_string *extra_cmd=NULL, *headers=NULL, *headers_trimmed=NULL;
+	size_t to_len, message_len;
 	size_t subject_len, i;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
 	char *p, *e;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|sS",	&to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &headers_len, &extra_cmd) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|SS",	&to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &extra_cmd) == FAILURE) {
 		return;
 	}
 
@@ -118,8 +118,8 @@ PHP_FUNCTION(mail)
 	MAIL_ASCIIZ_CHECK(subject, subject_len);
 	MAIL_ASCIIZ_CHECK(message, message_len);
 	if (headers) {
-		MAIL_ASCIIZ_CHECK(headers, headers_len);
-		headers_trimmed = php_trim(headers, headers_len, NULL, 0, NULL, 2);
+		MAIL_ASCIIZ_CHECK(headers->val, headers->len);
+		headers_trimmed = php_trim(headers, NULL, 0, 2);
 	}
 	if (extra_cmd) {
 		MAIL_ASCIIZ_CHECK(extra_cmd->val, extra_cmd->len);
@@ -171,14 +171,14 @@ PHP_FUNCTION(mail)
 		extra_cmd = php_escape_shell_cmd(extra_cmd->val);
 	}
 
-	if (php_mail(to_r, subject_r, message, headers_trimmed, extra_cmd ? extra_cmd->val : NULL)) {
+	if (php_mail(to_r, subject_r, message, headers_trimmed ? headers_trimmed->val : NULL, extra_cmd ? extra_cmd->val : NULL)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
 
 	if (headers_trimmed) {
-		efree(headers_trimmed);
+		zend_string_release(headers_trimmed);
 	}
 
 	if (extra_cmd) {

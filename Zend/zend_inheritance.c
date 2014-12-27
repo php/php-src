@@ -138,11 +138,9 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 		zend_string *lc_class_name;
 		zend_string *lc_parent_class_name;
 
-		lc_class_name = zend_string_alloc(ce->name->len, 0);
-		zend_str_tolower_copy(lc_class_name->val, ce->name->val, ce->name->len);
+		lc_class_name = zend_string_tolower(ce->name);
 		if (!zend_hash_exists(&ce->function_table, lc_class_name)) {
-			lc_parent_class_name = zend_string_alloc(ce->parent->name->len, 0);
-			zend_str_tolower_copy(lc_parent_class_name->val, ce->parent->name->val, ce->parent->name->len);
+			lc_parent_class_name = zend_string_tolower(ce->parent->name);
 			if (!zend_hash_exists(&ce->function_table, lc_parent_class_name) &&
 					(function = zend_hash_find_ptr(&ce->parent->function_table, lc_parent_class_name)) != NULL) {
 				if (function->common.fn_flags & ZEND_ACC_CTOR) {
@@ -166,7 +164,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 			}
 			zend_string_release(lc_parent_class_name);
 		}
-		zend_string_free(lc_class_name);
+		zend_string_release(lc_class_name);
 	}
 	ce->constructor = ce->parent->constructor;
 }
@@ -261,9 +259,14 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	 * go through all the parameters of the function and not just those present in the
 	 * prototype. */
 	num_args = proto->common.num_args;
-	if ((proto->common.fn_flags & ZEND_ACC_VARIADIC)
-		&& fe->common.num_args > proto->common.num_args) {
-		num_args = fe->common.num_args;
+	if (proto->common.fn_flags & ZEND_ACC_VARIADIC) {
+		num_args++;
+        if (fe->common.num_args >= proto->common.num_args) {
+			num_args = fe->common.num_args;
+			if (fe->common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+		}
 	}
 
 	for (i = 0; i < num_args; i++) {
@@ -273,7 +276,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		if (i < proto->common.num_args) {
 			proto_arg_info = &proto->common.arg_info[i];
 		} else {
-			proto_arg_info = &proto->common.arg_info[proto->common.num_args-1];
+			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
 		}
 
 		if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
@@ -380,11 +383,15 @@ static zend_string *zend_get_function_declaration(zend_function *fptr) /* {{{ */
 	smart_str_appendc(&str, '(');
 
 	if (fptr->common.arg_info) {
-		uint32_t i, required;
+		uint32_t i, num_args, required;
 		zend_arg_info *arg_info = fptr->common.arg_info;
 
 		required = fptr->common.required_num_args;
-		for (i = 0; i < fptr->common.num_args;) {
+		num_args = fptr->common.num_args;
+		if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
+			num_args++;
+		}
+		for (i = 0; i < num_args;) {
 			if (arg_info->class_name) {
 				const char *class_name;
 				size_t class_name_len;
@@ -486,7 +493,7 @@ static zend_string *zend_get_function_declaration(zend_function *fptr) /* {{{ */
 				}
 			}
 
-			if (++i < fptr->common.num_args) {
+			if (++i < num_args) {
 				smart_str_appends(&str, ", ");
 			}
 			arg_info++;
@@ -1014,8 +1021,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 	} else if (!strncmp(mname->val, ZEND_DEBUGINFO_FUNC_NAME, mname->len)) {
 		ce->__debugInfo = fe;
 	} else if (ce->name->len == mname->len) {
-		zend_string *lowercase_name = zend_string_alloc(ce->name->len, 0);
-		zend_str_tolower_copy(lowercase_name->val, ce->name->val, ce->name->len);
+		zend_string *lowercase_name = zend_string_tolower(ce->name);
 		lowercase_name = zend_new_interned_string(lowercase_name);
 		if (!memcmp(mname->val, lowercase_name->val, mname->len)) {
 			if (ce->constructor  && (!ce->parent || ce->constructor != ce->parent->constructor)) {
@@ -1143,8 +1149,7 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK));
 				}
 
-				lcname = zend_string_alloc(alias->alias->len, 0);
-				zend_str_tolower_copy(lcname->val, alias->alias->val, alias->alias->len);
+				lcname = zend_string_tolower(alias->alias);
 				zend_add_trait_method(ce, alias->alias->val, lcname, &fn_copy, overriden);
 				zend_string_release(lcname);
 
@@ -1231,13 +1236,10 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 				zend_check_trait_usage(ce, cur_precedence->trait_method->ce);
 
 				/** Ensure that the preferred method is actually available. */
-				lcname = zend_string_alloc(cur_method_ref->method_name->len, 0);
-				zend_str_tolower_copy(lcname->val, 
-					cur_method_ref->method_name->val,
-					cur_method_ref->method_name->len);
+				lcname = zend_string_tolower(cur_method_ref->method_name);
 				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
 												 lcname);
-				zend_string_free(lcname);
+				zend_string_release(lcname);
 				if (!method_exists) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 							   "A precedence rule was defined for %s::%s but this method does not exist",
@@ -1291,13 +1293,10 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 				zend_check_trait_usage(ce, cur_method_ref->ce);
 
 				/** And, ensure that the referenced method is resolvable, too. */
-				lcname = zend_string_alloc(cur_method_ref->method_name->len, 0);
-				zend_str_tolower_copy(lcname->val,
-					cur_method_ref->method_name->val,
-					cur_method_ref->method_name->len);
+				lcname = zend_string_tolower(cur_method_ref->method_name);
 				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
 						lcname);
-				zend_string_free(lcname);
+				zend_string_release(lcname);
 
 				if (!method_exists) {
 					zend_error_noreturn(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", cur_method_ref->ce->name->val, cur_method_ref->method_name->val);
@@ -1321,11 +1320,8 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 			j = 0;
 			while (precedences[i]->exclude_from_classes[j].ce) {
 				if (precedences[i]->exclude_from_classes[j].ce == trait) {
-					zend_string *lcname = zend_string_alloc(precedences[i]->trait_method->method_name->len, 0);
-										
-					zend_str_tolower_copy(lcname->val,
-						precedences[i]->trait_method->method_name->val,
-						precedences[i]->trait_method->method_name->len);
+					zend_string *lcname =										
+						zend_string_tolower(precedences[i]->trait_method->method_name);
 					if (zend_hash_add_empty_element(exclude_table, lcname) == NULL) {
 						zend_string_release(lcname);
 						zend_error_noreturn(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", precedences[i]->trait_method->method_name->val, trait->name->val);
@@ -1522,19 +1518,16 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce)
 						2) it is just a plain old inconsitency/typo/bug
 						   as in the case where alias is set. */
 
-					lc_method_name = zend_string_alloc(cur_alias->trait_method->method_name->len, 0);
-					zend_str_tolower_copy(
-						lc_method_name->val,
-						cur_alias->trait_method->method_name->val,
-						cur_alias->trait_method->method_name->len);
+					lc_method_name = zend_string_tolower(
+						cur_alias->trait_method->method_name);
 					if (zend_hash_exists(&ce->function_table,
 										 lc_method_name)) {
-						zend_string_free(lc_method_name);
+						zend_string_release(lc_method_name);
 						zend_error_noreturn(E_COMPILE_ERROR,
 								   "The modifiers for the trait alias %s() need to be changed in the same statement in which the alias is defined. Error",
 								   cur_alias->trait_method->method_name->val);
 					} else {
-						zend_string_free(lc_method_name);
+						zend_string_release(lc_method_name);
 						zend_error_noreturn(E_COMPILE_ERROR,
 								   "The modifiers of the trait method %s() are changed, but this method does not exist. Error",
 								   cur_alias->trait_method->method_name->val);

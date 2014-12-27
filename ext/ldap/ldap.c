@@ -1328,7 +1328,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		ldap_mods[i]->mod_op = oper | LDAP_MOD_BVALUES;
 		ldap_mods[i]->mod_type = NULL;
 
-		if (zend_hash_get_current_key(Z_ARRVAL_P(entry), &attribute, &index, 0) == HASH_KEY_IS_STRING) {
+		if (zend_hash_get_current_key(Z_ARRVAL_P(entry), &attribute, &index) == HASH_KEY_IS_STRING) {
 			ldap_mods[i]->mod_type = estrndup(attribute->val, attribute->len);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Unknown attribute in the data");
@@ -1602,7 +1602,7 @@ PHP_FUNCTION(ldap_modify_batch)
 
 			for (j = 0; j < num_modprops; j++) {
 				/* are the keys strings? */
-				if (zend_hash_get_current_key(Z_ARRVAL_P(mod), &modkey, &tmpUlong, 0) != HASH_KEY_IS_STRING) {
+				if (zend_hash_get_current_key(Z_ARRVAL_P(mod), &modkey, &tmpUlong) != HASH_KEY_IS_STRING) {
 					php_error_docref(NULL, E_WARNING, "Each entry of modifications array must be string-indexed");
 					RETURN_FALSE;
 				}

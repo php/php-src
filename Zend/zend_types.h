@@ -157,15 +157,6 @@ typedef struct _Bucket {
 } Bucket;
 
 typedef struct _HashTable {	
-	uint32_t          nTableSize;
-	uint32_t          nTableMask;
-	uint32_t          nNumUsed;
-	uint32_t          nNumOfElements;
-	zend_long         nNextFreeElement;
-	Bucket           *arData;
-	uint32_t         *arHash;
-	dtor_func_t       pDestructor;
-	uint32_t          nInternalPointer; 
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_3(
@@ -175,6 +166,15 @@ typedef struct _HashTable {
 		} v;
 		uint32_t flags;
 	} u;
+	uint32_t          nTableSize;
+	uint32_t          nTableMask;
+	uint32_t          nNumUsed;
+	uint32_t          nNumOfElements;
+	uint32_t          nInternalPointer; 
+	zend_long         nNextFreeElement;
+	Bucket           *arData;
+	uint32_t         *arHash;
+	dtor_func_t       pDestructor;
 } HashTable;
 
 struct _zend_array {
@@ -264,7 +264,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))
 
 #define Z_TYPE_FLAGS_SHIFT			8
-#define Z_CONST_FLAGS_SHIFT			8
+#define Z_CONST_FLAGS_SHIFT			16
 
 #define GC_REFCOUNT(p)				((zend_refcounted*)(p))->refcount
 #define GC_TYPE(p)					((zend_refcounted*)(p))->u.v.type
@@ -286,10 +286,10 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 /* zval.u1.v.type_flags */
 #define IS_TYPE_CONSTANT			(1<<0)
-#define IS_TYPE_REFCOUNTED			(1<<1)
-#define IS_TYPE_COLLECTABLE			(1<<2)
-#define IS_TYPE_COPYABLE			(1<<3)
-#define IS_TYPE_IMMUTABLE			(1<<4)
+#define IS_TYPE_IMMUTABLE			(1<<1)
+#define IS_TYPE_REFCOUNTED			(1<<2)
+#define IS_TYPE_COLLECTABLE			(1<<3)
+#define IS_TYPE_COPYABLE			(1<<4)
 
 /* extended types */
 #define IS_INTERNED_STRING_EX		IS_STRING

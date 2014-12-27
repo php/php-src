@@ -2078,9 +2078,18 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 	if (into_object) {
 		zend_string *class_name = NULL;
 
+#ifndef FAST_ZPP
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|Sz", &res, &class_name, &ctor_params) == FAILURE) {
 			return;
 		}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_ZVAL(res)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(class_name)
+		Z_PARAM_ZVAL(ctor_params)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 		if (ZEND_NUM_ARGS() < 2) {
 			ce = zend_standard_class_def;
@@ -2092,11 +2101,18 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			return;
 		}
 		result_type = MYSQL_ASSOC;
-	} else
-	{
+	} else {
+#ifndef FAST_ZPP
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &res, &result_type) == FAILURE) {
 			return;
 		}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_RESOURCE(res)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(result_type)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 		if (!result_type) {
 			/* result_type might have been set outside, so only overwrite when not set */
 			result_type = MYSQL_BOTH;

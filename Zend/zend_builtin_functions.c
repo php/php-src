@@ -443,9 +443,6 @@ ZEND_FUNCTION(func_get_arg)
 	}
 
 	first_extra_arg = ex->func->op_array.num_args;
-	if (ex->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
-		first_extra_arg--;
-	}
 	if (requested_offset >= first_extra_arg && (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg)) {
 		arg = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T) + (requested_offset - first_extra_arg);
 	} else {
@@ -459,7 +456,7 @@ ZEND_FUNCTION(func_get_arg)
    Get an array of the arguments that were passed to the function */
 ZEND_FUNCTION(func_get_args)
 {
-	zval *p;
+	zval *p, *q;
 	uint32_t arg_count, first_extra_arg;
 	uint32_t i;
 	zend_execute_data *ex = EX(prev_execute_data);
@@ -473,47 +470,47 @@ ZEND_FUNCTION(func_get_args)
 
 	array_init_size(return_value, arg_count);
 	if (arg_count) {
-		Bucket *q;		
-
 		first_extra_arg = ex->func->op_array.num_args;
-		if (ex->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
-			first_extra_arg--;
-		}
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
-		i = 0;
-		q = Z_ARRVAL_P(return_value)->arData;
-		p = ZEND_CALL_ARG(ex, 1);
-		if (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg) {
-			while (i < first_extra_arg) {
-				q->h = i;
-				q->key = NULL;
-				if (!Z_ISREF_P(p)) {
-					ZVAL_COPY(&q->val, p);
-				} else {
-					ZVAL_DUP(&q->val, Z_REFVAL_P(p));
-			    }
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			i = 0;
+			p = ZEND_CALL_ARG(ex, 1);
+			if (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg) {
+				while (i < first_extra_arg) {
+					q = p;
+					ZVAL_DEREF(q);
+					if (Z_OPT_REFCOUNTED_P(q)) Z_ADDREF_P(q);
+					ZEND_HASH_FILL_ADD(q);
+//					q->h = i;
+//					q->key = NULL;
+//					if (!Z_ISREF_P(p)) {
+//						ZVAL_COPY(&q->val, p);
+//					} else {
+//						ZVAL_COPY(&q->val, Z_REFVAL_P(p));
+//				    }
+					p++;
+//					q++;
+					i++;
+				}
+				p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
+			}
+			while (i < arg_count) {
+				q = p;
+				ZVAL_DEREF(q);
+				if (Z_OPT_REFCOUNTED_P(q)) Z_ADDREF_P(q);
+				ZEND_HASH_FILL_ADD(q);
+//				q->h = i;
+//				q->key = NULL;
+//				if (!Z_ISREF_P(p)) {
+//					ZVAL_COPY(&q->val, p);
+//				} else {
+//					ZVAL_COPY(&q->val, Z_REFVAL_P(p));
+//			    }
 				p++;
-				q++;
+//				q++;
 				i++;
 			}
-			p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
-		}
-		while (i < arg_count) {
-			q->h = i;
-			q->key = NULL;
-			if (!Z_ISREF_P(p)) {
-				ZVAL_COPY(&q->val, p);
-			} else {
-				ZVAL_DUP(&q->val, Z_REFVAL_P(p));
-		    }
-			p++;
-			q++;
-			i++;
-		}
-		Z_ARRVAL_P(return_value)->nNumUsed = i;
-		Z_ARRVAL_P(return_value)->nNumOfElements = i;
-		Z_ARRVAL_P(return_value)->nNextFreeElement = i + 1;
-		Z_ARRVAL_P(return_value)->nInternalPointer = 0;
+		} ZEND_HASH_FILL_END();
 	}
 }
 /* }}} */
@@ -654,7 +651,7 @@ ZEND_FUNCTION(each)
 	zend_hash_str_add_new(Z_ARRVAL_P(return_value), "value", sizeof("value")-1, entry);
 
 	/* add the key elements */
-	if (zend_hash_get_current_key(target_hash, &key, &num_key, 0) == HASH_KEY_IS_STRING) {
+	if (zend_hash_get_current_key(target_hash, &key, &num_key) == HASH_KEY_IS_STRING) {
 		ZVAL_STR_COPY(&tmp, key);
 		if (Z_REFCOUNTED(tmp)) Z_ADDREF(tmp);
 	} else {
@@ -1112,32 +1109,47 @@ ZEND_FUNCTION(get_object_vars)
 
 	zobj = Z_OBJ_P(obj);
 
-	array_init_size(return_value, zend_hash_num_elements(properties));
+	if (!zobj->ce->default_properties_count && properties == zobj->properties) {
+		/* fast copy */
+		ZVAL_NEW_ARR(return_value);
+		zend_array_dup(Z_ARRVAL_P(return_value), properties);
+	} else {
+		array_init_size(return_value, zend_hash_num_elements(properties));
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(properties, key, value) {
-		if (key) {
-			if (zend_check_property_access(zobj, key) == SUCCESS) {
-				/* Not separating references */
-				if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-				if (key->val[0] == 0) {
-					const char *prop_name, *class_name;
-					size_t prop_len;
-					zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
-					zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
-				} else {
-					zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+		ZEND_HASH_FOREACH_STR_KEY_VAL_IND(properties, key, value) {
+			if (key) {
+				if (zend_check_property_access(zobj, key) == SUCCESS) {
+					/* Not separating references */
+					if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+					if (key->val[0] == 0) {
+						const char *prop_name, *class_name;
+						size_t prop_len;
+						zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
+						zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
+					} else {
+						zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+					}
 				}
 			}
-		}
-	} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 /* }}} */
 
-static int same_name(const char *key, const char *name, size_t name_len) /* {{{ */
+static int same_name(zend_string *key, zend_string *name) /* {{{ */
 {
-	char *lcname = zend_str_tolower_dup(name, name_len);
-	int ret = memcmp(lcname, key, name_len) == 0;
-	efree(lcname);
+	zend_string *lcname;
+	int ret;
+
+	if (key == name) {
+		return 1;
+	}
+	if (key->len != name->len) {
+		return 0;
+	}
+	lcname = zend_string_tolower(name);	
+	ret = memcmp(lcname->val, key->val, key->len) == 0;
+	zend_string_release(lcname);
 	return ret;
 }
 /* }}} */
@@ -1188,8 +1200,7 @@ ZEND_FUNCTION(get_class_methods)
 
 				if (mptr->type == ZEND_USER_FUNCTION &&
 				    *mptr->op_array.refcount > 1 &&
-			    	(len != key->len ||
-			    	 !same_name(key->val, mptr->common.function_name->val, len))) {
+			    	 !same_name(key, mptr->common.function_name)) {
 					ZVAL_STR_COPY(&method_name, zend_find_alias_name(mptr->common.scope, key));
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 				} else {
@@ -1231,10 +1242,9 @@ ZEND_FUNCTION(method_exists)
 		RETURN_FALSE;
 	}
 
-	lcname = zend_string_alloc(method_name->len, 0);
-	zend_str_tolower_copy(lcname->val, method_name->val, method_name->len);
+	lcname = zend_string_tolower(method_name);
 	if (zend_hash_exists(&ce->function_table, lcname)) {
-		zend_string_free(lcname);
+		zend_string_release(lcname);
 		RETURN_TRUE;
 	} else {
 		union _zend_function *func = NULL;
@@ -1250,16 +1260,16 @@ ZEND_FUNCTION(method_exists)
 				RETVAL_BOOL(func->common.scope == zend_ce_closure
 					&& zend_string_equals_literal(method_name, ZEND_INVOKE_FUNC_NAME));
 					
-				zend_string_free(lcname);
+				zend_string_release(lcname);
 				zend_string_release(func->common.function_name);
 				efree(func);
 				return;
 			}
-			efree(lcname);
+			zend_string_release(lcname);
 			RETURN_TRUE;
 		}
 	}
-	efree(lcname);
+	zend_string_release(lcname);
 	RETURN_FALSE;
 }
 /* }}} */
@@ -1337,11 +1347,10 @@ ZEND_FUNCTION(class_exists)
 			lc_name = zend_string_alloc(class_name->len - 1, 0);
 			zend_str_tolower_copy(lc_name->val, class_name->val + 1, class_name->len - 1);
 		} else {
-			lc_name = zend_string_alloc(class_name->len, 0);
-			zend_str_tolower_copy(lc_name->val, class_name->val, class_name->len);
+			lc_name = zend_string_tolower(class_name);
 		}
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-		zend_string_free(lc_name);
+		zend_string_release(lc_name);
 		RETURN_BOOL(ce && !((ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT)) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
 	}
 
@@ -1380,11 +1389,10 @@ ZEND_FUNCTION(interface_exists)
 			lc_name = zend_string_alloc(iface_name->len - 1, 0);
 			zend_str_tolower_copy(lc_name->val, iface_name->val + 1, iface_name->len - 1);
 		} else {
-			lc_name = zend_string_alloc(iface_name->len, 0);
-			zend_str_tolower_copy(lc_name->val, iface_name->val, iface_name->len);
+			lc_name = zend_string_tolower(iface_name);
 		}
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-		zend_string_free(lc_name);
+		zend_string_release(lc_name);
 		RETURN_BOOL(ce && ce->ce_flags & ZEND_ACC_INTERFACE);
 	}
 
@@ -1423,11 +1431,10 @@ ZEND_FUNCTION(trait_exists)
 			lc_name = zend_string_alloc(trait_name->len - 1, 0);
 			zend_str_tolower_copy(lc_name->val, trait_name->val + 1, trait_name->len - 1);
 		} else {
-			lc_name = zend_string_alloc(trait_name->len, 0);
-			zend_str_tolower_copy(lc_name->val, trait_name->val, trait_name->len);
+			lc_name = zend_string_tolower(trait_name);
 		}
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
-		zend_string_free(lc_name);
+		zend_string_release(lc_name);
 		RETURN_BOOL(ce && ((ce->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
 	}
   
@@ -1444,32 +1451,30 @@ ZEND_FUNCTION(trait_exists)
    Checks if the function exists */
 ZEND_FUNCTION(function_exists)
 {
-	char *name;
-	size_t name_len;
+	zend_string *name;
 	zend_function *func;
 	zend_string *lcname;
 	
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(name, name_len)
+		Z_PARAM_STR(name)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	if (name[0] == '\\') {
+	if (name->val[0] == '\\') {
 		/* Ignore leading "\" */
-		lcname = zend_string_alloc(name_len - 1, 0);
-		zend_str_tolower_copy(lcname->val, name + 1, name_len - 1);
+		lcname = zend_string_alloc(name->len - 1, 0);
+		zend_str_tolower_copy(lcname->val, name->val + 1, name->len - 1);
 	} else {
-		lcname = zend_string_alloc(name_len, 0);
-		zend_str_tolower_copy(lcname->val, name, name_len);
+		lcname = zend_string_tolower(name);
 	}
 	
 	func = zend_hash_find_ptr(EG(function_table), lcname);	
-	zend_string_free(lcname);
+	zend_string_release(lcname);
 
 	/*
 	 * A bit of a hack, but not a bad one: we see if the handler of the function
@@ -1742,8 +1747,7 @@ static int copy_class_or_interface_name(zval *el, int num_args, va_list args, ze
 	if ((hash_key->key && hash_key->key->val[0] != 0)
 		&& (comply_mask == (ce->ce_flags & mask))) {
 		if (ce->refcount > 1 && 
-		    (ce->name->len != hash_key->key->len || 
-		     !same_name(hash_key->key->val, ce->name->val, ce->name->len))) {
+		    !same_name(hash_key->key, ce->name)) {
 			add_next_index_str(array, zend_string_copy(hash_key->key));
 		} else {
 			add_next_index_str(array, zend_string_copy(ce->name));
@@ -2133,29 +2137,30 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		uint32_t i = 0;
 		zval *p = ZEND_CALL_ARG(call, 1);
 
-		if (call->func->type == ZEND_USER_FUNCTION) {
-			uint32_t first_extra_arg = call->func->op_array.num_args;
+		zend_hash_real_init(Z_ARRVAL_P(arg_array), 1);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(arg_array)) {
+			if (call->func->type == ZEND_USER_FUNCTION) {
+				uint32_t first_extra_arg = call->func->op_array.num_args;
 			
-			if (call->func->op_array.fn_flags & ZEND_ACC_VARIADIC) {
-			 	first_extra_arg--;
-			}
-			if (ZEND_CALL_NUM_ARGS(call) > first_extra_arg) {
-				while (i < first_extra_arg) {
-					if (Z_REFCOUNTED_P(p)) Z_ADDREF_P(p);
-					zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
-					p++;
-					i++;
+				if (ZEND_CALL_NUM_ARGS(call) > first_extra_arg) {
+					while (i < first_extra_arg) {
+						if (Z_OPT_REFCOUNTED_P(p)) Z_ADDREF_P(p);
+						ZEND_HASH_FILL_ADD(p);
+						zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
+						p++;
+						i++;
+					}
+					p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 				}
-				p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 			}
-		}
 
-		while (i < num_args) {
-			if (Z_REFCOUNTED_P(p)) Z_ADDREF_P(p);
-			zend_hash_next_index_insert_new(Z_ARRVAL_P(arg_array), p);
-			p++;
-			i++;
-		}
+			while (i < num_args) {
+				if (Z_OPT_REFCOUNTED_P(p)) Z_ADDREF_P(p);
+				ZEND_HASH_FILL_ADD(p);
+				p++;
+				i++;
+			}
+		} ZEND_HASH_FILL_END();
 	}
 }
 /* }}} */
@@ -2585,22 +2590,20 @@ ZEND_FUNCTION(debug_backtrace)
    Returns true if the named extension is loaded */
 ZEND_FUNCTION(extension_loaded)
 {
-	char *extension_name;
-	size_t extension_name_len;
+	zend_string *extension_name;
 	zend_string *lcname;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &extension_name, &extension_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &extension_name) == FAILURE) {
 		return;
 	}
 
-	lcname = zend_string_alloc(extension_name_len, 0);
-	zend_str_tolower_copy(lcname->val, extension_name, extension_name_len);
+	lcname = zend_string_tolower(extension_name);
 	if (zend_hash_exists(&module_registry, lcname)) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
-	zend_string_free(lcname);
+	zend_string_release(lcname);
 }
 /* }}} */
 
@@ -2608,24 +2611,22 @@ ZEND_FUNCTION(extension_loaded)
    Returns an array with the names of functions belonging to the named extension */
 ZEND_FUNCTION(get_extension_funcs)
 {
-	char *extension_name;
+	zend_string *extension_name;
 	zend_string *lcname;
-	size_t extension_name_len;
 	int array;
 	zend_module_entry *module;
 	zend_function *zif;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &extension_name, &extension_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &extension_name) == FAILURE) {
 		return;
 	}
-	if (strncasecmp(extension_name, "zend", sizeof("zend"))) {
-		lcname = zend_string_alloc(extension_name_len, 0);
-		zend_str_tolower_copy(lcname->val, extension_name, extension_name_len);
+	if (strncasecmp(extension_name->val, "zend", sizeof("zend"))) {
+		lcname = zend_string_tolower(extension_name);
 	} else {
 		lcname = zend_string_init("core", sizeof("core")-1, 0);
 	}
 	module = zend_hash_find_ptr(&module_registry, lcname);
-	zend_string_free(lcname);
+	zend_string_release(lcname);
 	if (!module) {
 		RETURN_FALSE;
 	}

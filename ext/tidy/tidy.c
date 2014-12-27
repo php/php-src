@@ -747,7 +747,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type)
 			break;
 
 		case _IS_BOOL:
-			ZVAL_BOOL(out, TRUE);
+			ZVAL_TRUE(out);
 			break;
 
 		case IS_STRING:
@@ -780,7 +780,7 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type)
 			break;
 
 		case _IS_BOOL:
-			ZVAL_BOOL(out, TRUE);
+			ZVAL_TRUE(out);
 			break;
 
 		case IS_STRING:

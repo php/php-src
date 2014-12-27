@@ -85,9 +85,9 @@ static int driver_report_write(mysqli_object *obj, zval *value)
 static zval *driver_embedded_read(mysqli_object *obj, zval *retval)
 {
 #ifdef HAVE_EMBEDDED_MYSQLI
-	ZVAL_BOOL(retval, 1);
+	ZVAL_TRUE(retval);
 #else
-	ZVAL_BOOL(retval, 0);
+	ZVAL_FALSE(retval);
 #endif
 	return retval;
 }

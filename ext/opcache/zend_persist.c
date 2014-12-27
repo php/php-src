@@ -74,7 +74,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	uint idx;
 	Bucket *p;
 
-	if (!ht->nTableMask) {
+	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
@@ -111,7 +111,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	uint idx;
 	Bucket *p;
 
-	if (!ht->nTableMask) {
+	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
@@ -419,10 +419,14 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			ZEND_ASSERT(new_ptr != NULL);
 			op_array->arg_info = new_ptr;
 		} else {
-			uint32_t i;
+			uint32_t i, num_args;
 
-			zend_accel_store(op_array->arg_info, sizeof(zend_arg_info) * op_array->num_args);
-			for (i = 0; i < op_array->num_args; i++) {
+			num_args = op_array->num_args;
+			if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+			zend_accel_store(op_array->arg_info, sizeof(zend_arg_info) * num_args);
+			for (i = 0; i < num_args; i++) {
 				if (op_array->arg_info[i].name) {
 					zend_accel_store_interned_string(op_array->arg_info[i].name);
 				}

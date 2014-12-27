@@ -788,48 +788,73 @@ static inline int php_charmask(unsigned char *input, size_t len, char *mask)
  * mode 3 : trim left and right
  * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
  */
-PHPAPI char *php_trim(char *c, size_t len, char *what, size_t what_len, zval *return_value, int mode)
+PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int mode)
 {
+	const char *c = str->val;
+	size_t len = str->len;
 	register size_t i;
 	size_t trimmed = 0;
 	char mask[256];
 
 	if (what) {
 		php_charmask((unsigned char*)what, what_len, mask);
-	} else {
-		php_charmask((unsigned char*)" \n\r\t\v\0", 6, mask);
-	}
 
-	if (mode & 1) {
-		for (i = 0; i < len; i++) {
-			if (mask[(unsigned char)c[i]]) {
-				trimmed++;
-			} else {
-				break;
-			}
-		}
-		len -= trimmed;
-		c += trimmed;
-	}
-	if (mode & 2) {
-		if (len > 0) {
-			i = len - 1;
-			do {
+		if (mode & 1) {
+			for (i = 0; i < len; i++) {
 				if (mask[(unsigned char)c[i]]) {
-					len--;
+					trimmed++;
 				} else {
 					break;
 				}
-			} while (i-- != 0);
+			}
+			len -= trimmed;
+			c += trimmed;
+		}
+		if (mode & 2) {
+			if (len > 0) {
+				i = len - 1;
+				do {
+					if (mask[(unsigned char)c[i]]) {
+						len--;
+					} else {
+						break;
+					}
+				} while (i-- != 0);
+			}
+		}
+	} else {
+		if (mode & 1) {
+			for (i = 0; i < len; i++) {
+				if ((unsigned char)c[i] <= ' ' &&
+				    (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' || c[i] == '\t' || c[i] == '\v' || c[i] == '\0')) {
+					trimmed++;
+				} else {
+					break;
+				}
+			}
+			len -= trimmed;
+			c += trimmed;
+		}
+		if (mode & 2) {
+			if (len > 0) {
+				i = len - 1;
+				do {
+					if ((unsigned char)c[i] <= ' ' &&
+					    (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' || c[i] == '\t' || c[i] == '\v' || c[i] == '\0')) {
+						len--;
+					} else {
+						break;
+					}
+				} while (i-- != 0);
+			}
 		}
 	}
 
-	if (return_value) {
-		RETVAL_STRINGL(c, len);
+	if (str->len == len) {
+		return zend_string_copy(str);
 	} else {
-		return estrndup(c, len);
+		return zend_string_init(c, len, 0);
 	}
-	return "";
 }
 /* }}} */
 
@@ -853,7 +878,7 @@ static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	php_trim(str->val, str->len, (what ? what->val : NULL), (what ? what->len : 0), return_value, mode);
+	ZVAL_STR(return_value, php_trim(str, (what ? what->val : NULL), (what ? what->len : 0), mode));
 }
 /* }}} */
 
@@ -1343,20 +1368,49 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
 }
 /* }}} */
 
+/* {{{ php_string_toupper
+ */
+PHPAPI zend_string *php_string_toupper(zend_string *s)
+{
+	unsigned char *c, *e;
+
+	c = (unsigned char *)s->val;
+	e = c + s->len;
+
+	while (c < e) {
+		if (!isupper(*c)) {
+			register unsigned char *r;
+			zend_string *res = zend_string_alloc(s->len, 0);
+
+			if (c != (unsigned char*)s->val) {
+				memcpy(res->val, s->val, c - (unsigned char*)s->val);
+			}
+			r = c + (res->val - s->val);
+			while (c < e) {
+				*r = toupper(*c);
+				r++;
+				c++;
+			}
+			*r = '\0';
+			return res;
+		}
+		c++;
+	}
+	return zend_string_copy(s);
+}
+/* }}} */
+
 /* {{{ proto string strtoupper(string str)
    Makes a string uppercase */
 PHP_FUNCTION(strtoupper)
 {
 	zend_string *arg;
-	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &arg) == FAILURE) {
 		return;
 	}
 
-	result = zend_string_init(arg->val, arg->len, 0);
-	php_strtoupper(result->val, result->len);
-	RETURN_NEW_STR(result);
+	RETURN_STR(php_string_toupper(arg));
 }
 /* }}} */
 
@@ -1377,12 +1431,43 @@ PHPAPI char *php_strtolower(char *s, size_t len)
 }
 /* }}} */
 
+/* {{{ php_string_tolower
+ */
+PHPAPI zend_string *php_string_tolower(zend_string *s)
+{
+	unsigned char *c, *e;
+
+	c = (unsigned char *)s->val;
+	e = c + s->len;
+
+	while (c < e) {
+		if (!islower(*c)) {
+			register unsigned char *r;
+			zend_string *res = zend_string_alloc(s->len, 0);
+
+			if (c != (unsigned char*)s->val) {
+				memcpy(res->val, s->val, c - (unsigned char*)s->val);
+			}
+			r = c + (res->val - s->val);
+			while (c < e) {
+				*r = tolower(*c);
+				r++;
+				c++;
+			}
+			*r = '\0';
+			return res;
+		}
+		c++;
+	}
+	return zend_string_copy(s);
+}
+/* }}} */
+
 /* {{{ proto string strtolower(string str)
    Makes a string lowercase */
 PHP_FUNCTION(strtolower)
 {
 	zend_string *str;
-	zend_string *result;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
@@ -1394,9 +1479,7 @@ PHP_FUNCTION(strtolower)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	result = zend_string_init(str->val, str->len, 0);
-	php_strtolower(result->val, result->len);
-	RETURN_NEW_STR(result);
+	RETURN_STR(php_string_tolower(str));
 }
 /* }}} */
 

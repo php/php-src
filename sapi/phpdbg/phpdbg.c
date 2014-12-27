@@ -283,16 +283,16 @@ static PHP_FUNCTION(phpdbg_exec)
 				PHPDBG_G(exec_len) = exec->len;
 
 				if (result) {
-					ZVAL_BOOL(return_value, 1);
+					ZVAL_TRUE(return_value);
 				}
 			} else {
 				zend_error(E_WARNING, "Failed to set execution context (%s), not a regular file or symlink", exec);
-				ZVAL_BOOL(return_value, 0);
+				ZVAL_FALSE(return_value);
 			}
 		} else {
 			zend_error(E_WARNING, "Failed to set execution context (%s) the file does not exist", exec);
 
-			ZVAL_BOOL(return_value, 0);
+			ZVAL_FALSE(return_value);
 		}
 	}
 } /* }}} */

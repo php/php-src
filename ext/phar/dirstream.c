@@ -97,7 +97,7 @@ static size_t phar_dir_read(php_stream *stream, char *buf, size_t count) /* {{{ 
 	zend_string *str_key;
 	zend_ulong unused;
 
-	if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(data, &str_key, &unused, 0, &data->nInternalPointer)) {
+	if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key(data, &str_key, &unused)) {
 		return 0;
 	}
 
@@ -199,7 +199,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest) /* {{{ */
 	zend_hash_internal_pointer_reset(manifest);
 
 	while (FAILURE != zend_hash_has_more_elements(manifest)) {
-		if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(manifest, &str_key, &unused, 0, &manifest->nInternalPointer)) {
+		if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key(manifest, &str_key, &unused)) {
 			break;
 		}
 
@@ -384,8 +384,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		zend_hash_internal_pointer_reset(&phar->manifest);
 		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
 			if (HASH_KEY_NON_EXISTENT != 
-					zend_hash_get_current_key_ex(
-						&phar->manifest, &str_key, &unused, 0, &phar->manifest.nInternalPointer)) {
+					zend_hash_get_current_key(&phar->manifest, &str_key, &unused)) {
 				if (str_key->len > (uint)i_len && 0 == memcmp(str_key->val, internal_file, i_len)) {
 					/* directory found */
 					internal_file = estrndup(internal_file,
@@ -612,7 +611,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 
 	if (!entry->is_deleted) {
 		for (zend_hash_internal_pointer_reset(&phar->manifest);
-			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&phar->manifest, &str_key, &unused, 0, &phar->manifest.nInternalPointer);
+			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&phar->manifest, &str_key, &unused);
 			zend_hash_move_forward(&phar->manifest)
 		) {
 			if (str_key->len > path_len && 
@@ -629,7 +628,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 		}
 
 		for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
-			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&phar->virtual_dirs, &str_key, &unused, 0, &phar->virtual_dirs.nInternalPointer);
+			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&phar->virtual_dirs, &str_key, &unused);
 			zend_hash_move_forward(&phar->virtual_dirs)) {
 	
 			if (str_key->len > path_len && 

@@ -301,12 +301,12 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZVAL_PTR_DTOR;
-	ht->u.flags = HASH_FLAG_APPLY_PROTECTION;
+	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED) | HASH_FLAG_APPLY_PROTECTION;
 	ht->arData = NULL;
 	ht->arHash = NULL;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
-	if (!ht->nTableMask) {
+	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
@@ -382,10 +382,10 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
-	ht->u.flags = 0;
+	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
-	if (!ht->nTableMask) {
+	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
@@ -458,10 +458,10 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = zend_destroy_property_info;
-	ht->u.flags = 0;
+	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
-	if (!ht->nTableMask) {
+	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}

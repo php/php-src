@@ -1117,8 +1117,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	if (EXPECTED(key != NULL)) {
 		lc_function_name = Z_STR_P(key);
 	} else {
-		lc_function_name = zend_string_alloc(function_name->len, 0);
-		zend_str_tolower_copy(lc_function_name->val, function_name->val, function_name->len);
+		lc_function_name = zend_string_tolower(function_name);
 	}
 
 	if (function_name->len == ce->name->len && ce->constructor) {
@@ -1138,7 +1137,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			fbc = Z_FUNC_P(func);
 		} else {
 			if (UNEXPECTED(!key)) {
-				zend_string_free(lc_function_name);
+				zend_string_release(lc_function_name);
 			}
 			if (ce->__call &&
 			    Z_OBJ(EG(current_execute_data)->This) &&
@@ -1189,7 +1188,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	}
 
 	if (UNEXPECTED(!key)) {
-		zend_string_free(lc_function_name);
+		zend_string_release(lc_function_name);
 	}
 
 	return fbc;
@@ -1286,8 +1285,6 @@ ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{
 }
 /* }}} */
 
-int zend_compare_symbol_tables_i(HashTable *ht1, HashTable *ht2);
-
 static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
 	zend_object *zobj1, *zobj2;
@@ -1343,7 +1340,7 @@ static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		if (!zobj2->properties) {
 			rebuild_object_properties(zobj2);
 		}
-		return zend_compare_symbol_tables_i(zobj1->properties, zobj2->properties);
+		return zend_compare_symbol_tables(zobj1->properties, zobj2->properties);
 	}
 }
 /* }}} */

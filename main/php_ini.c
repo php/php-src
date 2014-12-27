@@ -782,7 +782,7 @@ PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int
 
 	/* Walk through config hash and alter matching ini entries using the values found in the hash */
 	for (zend_hash_internal_pointer_reset(source_hash);
-		zend_hash_get_current_key(source_hash, &str, &num_index, 0) == HASH_KEY_IS_STRING;
+		zend_hash_get_current_key(source_hash, &str, &num_index) == HASH_KEY_IS_STRING;
 		zend_hash_move_forward(source_hash)
 	) {
 		data = zend_hash_get_current_data(source_hash);

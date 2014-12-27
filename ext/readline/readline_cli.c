@@ -409,7 +409,7 @@ static char *cli_completion_generator_ht(const char *text, int textlen, int *sta
 		(*state)++;
 	}
 	while(zend_hash_has_more_elements(ht) == SUCCESS) {
-		zend_hash_get_current_key(ht, &name, &number, 0);
+		zend_hash_get_current_key(ht, &name, &number);
 		if (!textlen || !strncmp(name->val, text, textlen)) {
 			if (pData) {
 				*pData = zend_hash_get_current_data_ptr(ht);

@@ -1023,8 +1023,7 @@ PHP_FUNCTION(unserialize)
 
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(classes), entry) {
 				convert_to_string_ex(entry);
-				lcname = zend_string_alloc(Z_STRLEN_P(entry), 0);
-				zend_str_tolower_copy(lcname->val, Z_STRVAL_P(entry), Z_STRLEN_P(entry));
+				lcname = zend_string_tolower(Z_STR_P(entry));
 				zend_hash_add_empty_element(class_hash, lcname);
 		        zend_string_release(lcname);
 			} ZEND_HASH_FOREACH_END();

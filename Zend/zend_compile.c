@@ -343,8 +343,7 @@ static int zend_add_func_name_literal(zend_op_array *op_array, zend_string *name
 	int ret = zend_add_literal_string(op_array, &name);
 
 	/* Lowercased name */
-	zend_string *lc_name = zend_string_alloc(name->len, 0);
-	zend_str_tolower_copy(lc_name->val, name->val, name->len);
+	zend_string *lc_name = zend_string_tolower(name);
 	zend_add_literal_string(op_array, &lc_name);
 
 	return ret;
@@ -360,8 +359,7 @@ static int zend_add_ns_func_name_literal(zend_op_array *op_array, zend_string *n
 	int ret = zend_add_literal_string(op_array, &name);
 
 	/* Lowercased name */
-	zend_string *lc_name = zend_string_alloc(name->len, 0);
-	zend_str_tolower_copy(lc_name->val, name->val, name->len);
+	zend_string *lc_name = zend_string_tolower(name);
 	zend_add_literal_string(op_array, &lc_name);
 
 	/* Lowercased unqualfied name */
@@ -381,8 +379,7 @@ static int zend_add_class_name_literal(zend_op_array *op_array, zend_string *nam
 	int ret = zend_add_literal_string(op_array, &name);
 
 	/* Lowercased name */
-	zend_string *lc_name = zend_string_alloc(name->len, 0);
-	zend_str_tolower_copy(lc_name->val, name->val, name->len);
+	zend_string *lc_name = zend_string_tolower(name);
 	zend_add_literal_string(op_array, &lc_name);
 
 	zend_alloc_cache_slot(ret);
@@ -410,8 +407,7 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zend_string *nam
 		zend_add_literal_string(op_array, &tmp_name);
 
 		/* lowercased namespace name & lowercased constant name */
-		tmp_name = zend_string_alloc(name->len, 0);
-		zend_str_tolower_copy(tmp_name->val, name->val, name->len);
+		tmp_name = zend_string_tolower(name);
 		zend_add_literal_string(op_array, &tmp_name);
 
 		if (!unqualified) {
@@ -2628,8 +2624,7 @@ int zend_compile_func_defined(znode *result, zend_ast_list *args) /* {{{ */
 	/* Lowercase constant name in a separate literal */
 	{
 		zval c;
-		zend_string *lcname = zend_string_alloc(name->len, 0);
-		zend_str_tolower_copy(lcname->val, name->val, name->len);
+		zend_string *lcname = zend_string_tolower(name);
 		ZVAL_NEW_STR(&c, lcname);
 		zend_add_literal(CG(active_op_array), &c);
 	}
@@ -2648,14 +2643,13 @@ static int zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t
 	}
 
 	name = zend_ast_get_str(name_ast);
-	lcname = zend_string_alloc(name->len, 0);
-	zend_str_tolower_copy(lcname->val, name->val, name->len);
+	lcname = zend_string_tolower(name);
 
 	fbc = zend_hash_find_ptr(CG(function_table), lcname);
 	if (!fbc || (fbc->type == ZEND_INTERNAL_FUNCTION &&
 		(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
 	) {
-		zend_string_free(lcname);
+		zend_string_release(lcname);
 		return FAILURE;
 	}
 
@@ -2808,11 +2802,11 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 
 	{
 		zval *name = &name_node.u.constant;
-		zend_string *lcname = zend_string_alloc(Z_STRLEN_P(name), 0);
+		zend_string *lcname;
 		zend_function *fbc;
 		zend_op *opline;
 
-		zend_str_tolower_copy(lcname->val, Z_STRVAL_P(name), Z_STRLEN_P(name));
+		lcname = zend_string_tolower(Z_STR_P(name));
 
 		fbc = zend_hash_find_ptr(CG(function_table), lcname);
 		if (!fbc || (fbc->type == ZEND_INTERNAL_FUNCTION &&
@@ -3884,6 +3878,11 @@ void zend_compile_params(zend_ast *ast) /* {{{ */
 	/* These are assigned at the end to avoid unitialized memory in case of an error */
 	op_array->num_args = list->children;
 	op_array->arg_info = arg_infos;
+
+	/* Don't count the variadic argument */
+	if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
+		op_array->num_args--;
+	}		
 }
 /* }}} */
 
@@ -3951,8 +3950,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	op_array->scope = ce;
 	op_array->function_name = zend_string_copy(name);
 
-	lcname = zend_string_alloc(name->len, 0);
-	zend_str_tolower_copy(lcname->val, name->val, name->len);
+	lcname = zend_string_tolower(name);
 	lcname = zend_new_interned_string(lcname);
 
 	if (zend_hash_add_ptr(&ce->function_table, lcname, op_array) == NULL) {
@@ -4092,8 +4090,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 
 	op_array->function_name = name = zend_prefix_with_ns(name);
 
-	lcname = zend_string_alloc(name->len, 0);
-	zend_str_tolower_copy(lcname->val, name->val, name->len);
+	lcname = zend_string_tolower(name);
 
 	if (CG(current_import_function)) {
 		zend_string *import_name = zend_hash_find_ptr(CG(current_import_function), lcname);
@@ -4481,8 +4478,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			name->val);
 	}
 
-	lcname = zend_string_alloc(name->len, 0);
-	zend_str_tolower_copy(lcname->val, name->val, name->len);
+	lcname = zend_string_tolower(name);
 
 	if (CG(current_import)) {
 		import_name = zend_hash_find_ptr(CG(current_import), lcname);
@@ -4492,8 +4488,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		name = zend_prefix_with_ns(name);
 
 		zend_string_release(lcname);
-		lcname = zend_string_alloc(name->len, 0);
-		zend_str_tolower_copy(lcname->val, name->val, name->len);
+		lcname = zend_string_tolower(name);
 	} else {
 		zend_string_addref(name);
 	}
@@ -4720,8 +4715,7 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 		if (case_sensitive) {
 			lookup_name = zend_string_copy(new_name);
 		} else {
-			lookup_name = zend_string_alloc(new_name->len, 0);
-			zend_str_tolower_copy(lookup_name->val, new_name->val, new_name->len);
+			lookup_name = zend_string_tolower(new_name);
 		}
 
 		if (type == T_CLASS && (zend_string_equals_literal(lookup_name, "self")

@@ -211,13 +211,12 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 {
 	zend_string *lc_name;
 
-	lc_name = zend_string_alloc(method->len, 0);
-	zend_str_tolower_copy(lc_name->val, method->val, method->len);
+	lc_name = zend_string_tolower(method);
 	if (zend_string_equals_literal(method, ZEND_INVOKE_FUNC_NAME)) {
-		zend_string_free(lc_name);
+		zend_string_release(lc_name);
 		return zend_get_closure_invoke_method(*object);
 	}
-	zend_string_free(lc_name);
+	zend_string_release(lc_name);
 	return std_object_handlers.get_method(object, method, key);
 }
 /* }}} */
@@ -361,11 +360,15 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 		}
 
 		if (arg_info) {
-			uint32_t i, required = closure->func.common.required_num_args;
+			uint32_t i, num_args, required = closure->func.common.required_num_args;
 
 			array_init(&val);
 
-			for (i = 0; i < closure->func.common.num_args; i++) {
+			num_args = closure->func.common.num_args;
+			if (closure->func.common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+			for (i = 0; i < num_args; i++) {
 				zend_string *name;
 				zval info;
 				if (arg_info->name) {
