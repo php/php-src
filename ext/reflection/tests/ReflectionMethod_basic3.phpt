@@ -38,7 +38,7 @@ class TestClass
 class DerivedClass extends TestClass {}
 
 interface TestInterface {
-    public function inter();
+    public function int();
 }
 
 reflectMethod("DerivedClass", "foo");
@@ -46,7 +46,7 @@ reflectMethod("TestClass", "stat");
 reflectMethod("TestClass", "priv");
 reflectMethod("TestClass", "prot");
 reflectMethod("DerivedClass", "prot");
-reflectMethod("TestInterface", "inter");
+reflectMethod("TestInterface", "int");
 reflectMethod("ReflectionProperty", "__construct");
 reflectMethod("TestClass", "__destruct");
 
@@ -124,11 +124,11 @@ bool(true)
 
 **********************************
 **********************************
-Reflecting on method TestInterface::inter()
+Reflecting on method TestInterface::int()
 
 
 getName():
-string(5) "inter"
+string(3) "int"
 
 isInternal():
 bool(false)

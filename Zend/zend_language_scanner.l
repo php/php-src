@@ -1309,32 +1309,32 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_VAR;
 }
 
-<ST_IN_SCRIPTING>("int"|"integer") {
-	return T_INT_TYPE;
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
+	return T_INT_CAST;
 }
 
-<ST_IN_SCRIPTING>"float" {
-	return T_FLOAT_TYPE;
-}
-
-<ST_IN_SCRIPTING>"string" {
-	return T_STRING_TYPE;
-}
-
-<ST_IN_SCRIPTING>("bool"|"boolean") {
-	return T_BOOL_TYPE;
-}
-
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("real"|"double"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("real"|"double"|"float"){TABS_AND_SPACES}")" {
 	return T_DOUBLE_CAST;
 }
 
-<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("binary"){TABS_AND_SPACES}")" {
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("string"|"binary"){TABS_AND_SPACES}")" {
 	return T_STRING_CAST;
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"array"{TABS_AND_SPACES}")" {
+	return T_ARRAY_CAST;
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"object"{TABS_AND_SPACES}")" {
 	return T_OBJECT_CAST;
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("bool"|"boolean"){TABS_AND_SPACES}")" {
+	return T_BOOL_CAST;
+}
+
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("unset"){TABS_AND_SPACES}")" {
+	return T_UNSET_CAST;
 }
 
 <ST_IN_SCRIPTING>"eval" {

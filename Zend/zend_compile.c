@@ -32,6 +32,22 @@
 #include "zend_language_scanner.h"
 #include "zend_inheritance.h"
 
+struct _scalar_typehint_info {
+	const char* name;
+	const size_t name_len;
+	const zend_uchar type;
+};
+
+static const struct _scalar_typehint_info scalar_typehints[] = {
+	{"int", sizeof("int") - 1, IS_LONG},
+	{"integer", sizeof("integer") - 1, IS_LONG},
+	{"float", sizeof("float") - 1, IS_DOUBLE},
+	{"string", sizeof("string") - 1, IS_STRING},
+	{"bool", sizeof("bool") - 1, _IS_BOOL},
+	{"boolean", sizeof("boolean") - 1, _IS_BOOL},
+	{NULL, 0, IS_UNDEF}
+};
+
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
 		if ((src)->op_type == IS_CONST) { \
@@ -3949,7 +3965,17 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 				}
 			} else {
 				zend_string *class_name = zend_ast_get_str(type_ast);
+				const struct _scalar_typehint_info *info = &scalar_typehints[0];
 
+				while (info->name) {
+					if (class_name->len == info->name_len
+						&& zend_binary_strcasecmp(class_name->val, info->name_len, info->name, info->name_len) == 0) {
+						arg_info->type_hint = info->type;
+						goto done;
+					}
+					info++;
+				}
+				
 				if (zend_is_const_default_class_ref(type_ast)) {
 					class_name = zend_resolve_class_name_ast(type_ast);
 				} else {
@@ -3959,9 +3985,15 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 				arg_info->type_hint = IS_OBJECT;
 				arg_info->class_name = class_name;
 
+done:
 				if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant)) {
+					if (arg_info->class_name) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with a class type hint can only be NULL");
+					} else if (Z_TYPE(default_node.u.constant) != arg_info->type_hint) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+							"with a %s type hint can only be %s or NULL", class_name->val, class_name->val);
+					}
 				}
 			}
 		}
@@ -4558,6 +4590,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	zend_op *opline;
 	znode declare_node, extends_node;
+	const struct _scalar_typehint_info *info = &scalar_typehints[0];
 
 	if (CG(active_class_entry)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
@@ -4587,6 +4620,14 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	if (import_name && !zend_string_equals_str_ci(lcname, import_name)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
 			"because the name is already in use", name->val);
+	}
+
+	while (info->name) {
+		if (lcname->len == info->name_len && strcmp(lcname->val, info->name) == 0) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
+				"because %s is a type name", name->val, info->name);
+		}
+		info++;
 	}
 
 	name = zend_new_interned_string(name);
