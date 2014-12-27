@@ -83,7 +83,7 @@ static zend_function_entry accel_functions[] = {
 	{ NULL, NULL, NULL, 0, 0 }
 };
 
-static int validate_api_restriction(TSRMLS_D)
+static int validate_api_restriction(void)
 {
 	if (ZCG(accel_directives).restrict_api && *ZCG(accel_directives).restrict_api) {
 		int len = strlen(ZCG(accel_directives).restrict_api);
@@ -217,7 +217,7 @@ static ZEND_INI_MH(OnEnable)
 	if (stage == ZEND_INI_STAGE_STARTUP ||
 	    stage == ZEND_INI_STAGE_SHUTDOWN ||
 	    stage == ZEND_INI_STAGE_DEACTIVATE) {
-		return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+		return OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	} else {
 		/* It may be only temporary disabled */
 		zend_bool *p;
@@ -278,7 +278,7 @@ ZEND_INI_BEGIN()
 #endif
 ZEND_INI_END()
 
-static int filename_is_in_cache(char *filename, int filename_len TSRMLS_DC)
+static int filename_is_in_cache(char *filename, int filename_len)
 {
 	char *key;
 	int key_length;
@@ -292,14 +292,14 @@ static int filename_is_in_cache(char *filename, int filename_len TSRMLS_DC)
 		persistent_script = zend_accel_hash_find(&ZCSG(hash), filename, filename_len);
 		if (persistent_script) {
 			return !persistent_script->corrupted &&
-				validate_timestamp_and_record(persistent_script, &handle TSRMLS_CC) == SUCCESS;
+				validate_timestamp_and_record(persistent_script, &handle) == SUCCESS;
 		}
 	}
 
-	if ((key = accel_make_persistent_key_ex(&handle, filename_len, &key_length TSRMLS_CC)) != NULL) {
+	if ((key = accel_make_persistent_key_ex(&handle, filename_len, &key_length)) != NULL) {
 		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length);
 		return persistent_script && !persistent_script->corrupted &&
-			validate_timestamp_and_record(persistent_script, &handle TSRMLS_CC) == SUCCESS;
+			validate_timestamp_and_record(persistent_script, &handle) == SUCCESS;
 	}
 
 	return 0;
@@ -315,7 +315,7 @@ static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 	    Z_STRLEN(zfilename) == 0) {
 		return 0;
 	}
-	return filename_is_in_cache(Z_STRVAL(zfilename), Z_STRLEN(zfilename) TSRMLS_CC);
+	return filename_is_in_cache(Z_STRVAL(zfilename), Z_STRLEN(zfilename));
 }
 
 static void accel_file_exists(INTERNAL_FUNCTION_PARAMETERS)
@@ -354,7 +354,7 @@ static ZEND_MINIT_FUNCTION(zend_accelerator)
 	return SUCCESS;
 }
 
-void zend_accel_override_file_functions(TSRMLS_D)
+void zend_accel_override_file_functions(void)
 {
 	zend_function *old_function;
 	if (ZCG(enabled) && accel_startup_ok && ZCG(accel_directives).file_override_enabled) {
@@ -379,7 +379,7 @@ static ZEND_MSHUTDOWN_FUNCTION(zend_accelerator)
 	(void)type; /* keep the compiler happy */
 
 	UNREGISTER_INI_ENTRIES();
-	accel_shutdown(TSRMLS_C);
+	accel_shutdown();
 	return SUCCESS;
 }
 
@@ -452,14 +452,14 @@ static zend_module_entry accel_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-int start_accel_module(TSRMLS_D)
+int start_accel_module(void)
 {
-	return zend_startup_module(&accel_module_entry TSRMLS_CC);
+	return zend_startup_module(&accel_module_entry);
 }
 
 /* {{{ proto array accelerator_get_scripts()
    Get the scripts which are accelerated by ZendAccelerator */
-static int accelerator_get_scripts(zval *return_value TSRMLS_DC)
+static int accelerator_get_scripts(zval *return_value)
 {
 	uint i;
 	zval persistent_script_report;
@@ -468,7 +468,7 @@ static int accelerator_get_scripts(zval *return_value TSRMLS_DC)
 	struct timeval exec_time;
 	struct timeval fetch_time;
 
-	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled) || accelerator_shm_read_lock(TSRMLS_C) != SUCCESS) {
+	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
 		return 0;
 	}
 
@@ -502,7 +502,7 @@ static int accelerator_get_scripts(zval *return_value TSRMLS_DC)
 			zend_hash_str_update(Z_ARRVAL_P(return_value), cache_entry->key, cache_entry->key_length, &persistent_script_report);
 		}
 	}
-	accelerator_shm_read_unlock(TSRMLS_C);
+	accelerator_shm_read_unlock();
 
 	return 1;
 }
@@ -515,11 +515,11 @@ static ZEND_FUNCTION(opcache_get_status)
 	zval memory_usage, statistics, scripts;
 	zend_bool fetch_scripts = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &fetch_scripts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &fetch_scripts) == FAILURE) {
 		return;
 	}
 	
-	if (!validate_api_restriction(TSRMLS_C)) {
+	if (!validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 
@@ -574,13 +574,13 @@ static ZEND_FUNCTION(opcache_get_status)
 
 	if (fetch_scripts) {
 		/* accelerated scripts */
-		if (accelerator_get_scripts(&scripts TSRMLS_CC)) {
+		if (accelerator_get_scripts(&scripts)) {
 			add_assoc_zval(return_value, "scripts", &scripts);
 		}
 	}
 }
 
-static int add_blacklist_path(zend_blacklist_entry *p, zval *return_value TSRMLS_DC)
+static int add_blacklist_path(zend_blacklist_entry *p, zval *return_value)
 {
 	add_next_index_stringl(return_value, p->path, p->path_length);
 	return 0;
@@ -596,7 +596,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 		RETURN_FALSE;
 	}
 
-	if (!validate_api_restriction(TSRMLS_C)) {
+	if (!validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 
@@ -642,7 +642,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 
 	/* blacklist */
 	array_init(&blacklist);
-	zend_accel_blacklist_apply(&accel_blacklist, add_blacklist_path, &blacklist TSRMLS_CC);
+	zend_accel_blacklist_apply(&accel_blacklist, add_blacklist_path, &blacklist);
 	add_assoc_zval(return_value, "blacklist", &blacklist);
 }
 
@@ -654,7 +654,7 @@ static ZEND_FUNCTION(opcache_reset)
 		RETURN_FALSE;
 	}
 
-	if (!validate_api_restriction(TSRMLS_C)) {
+	if (!validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 
@@ -662,7 +662,7 @@ static ZEND_FUNCTION(opcache_reset)
 		RETURN_FALSE;
 	}
 
-	zend_accel_schedule_restart(ACCEL_RESTART_USER TSRMLS_CC);
+	zend_accel_schedule_restart(ACCEL_RESTART_USER);
 	RETURN_TRUE;
 }
 
@@ -674,15 +674,15 @@ static ZEND_FUNCTION(opcache_invalidate)
 	size_t script_name_len;
 	zend_bool force = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &script_name, &script_name_len, &force) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &script_name, &script_name_len, &force) == FAILURE) {
 		return;
 	}
 
-	if (!validate_api_restriction(TSRMLS_C)) {
+	if (!validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 
-	if (zend_accel_invalidate(script_name, script_name_len, force TSRMLS_CC) == SUCCESS) {
+	if (zend_accel_invalidate(script_name, script_name_len, force) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -697,7 +697,7 @@ static ZEND_FUNCTION(opcache_compile_file)
 	zend_op_array *op_array = NULL;
 	zend_execute_data *orig_execute_data = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &script_name, &script_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &script_name, &script_name_len) == FAILURE) {
 		return;
 	}
 
@@ -714,20 +714,20 @@ static ZEND_FUNCTION(opcache_compile_file)
 	orig_execute_data = EG(current_execute_data);
 
 	zend_try {
-		op_array = persistent_compile_file(&handle, ZEND_INCLUDE TSRMLS_CC);
+		op_array = persistent_compile_file(&handle, ZEND_INCLUDE);
 	} zend_catch {
 		EG(current_execute_data) = orig_execute_data;
 		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s", handle.filename);
 	} zend_end_try();
 
 	if(op_array != NULL) {
-		destroy_op_array(op_array TSRMLS_CC);
+		destroy_op_array(op_array);
 		efree(op_array);
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
 	}
-	zend_destroy_file_handle(&handle TSRMLS_CC);
+	zend_destroy_file_handle(&handle);
 }
 
 /* {{{ proto bool opcache_is_script_cached(string $script)
@@ -737,7 +737,7 @@ static ZEND_FUNCTION(opcache_is_script_cached)
 	char *script_name;
 	size_t script_name_len;
 
-	if (!validate_api_restriction(TSRMLS_C)) {
+	if (!validate_api_restriction()) {
 		RETURN_FALSE;
 	}
 
@@ -745,9 +745,9 @@ static ZEND_FUNCTION(opcache_is_script_cached)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &script_name, &script_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &script_name, &script_name_len) == FAILURE) {
 		return;
 	}
 
-	RETURN_BOOL(filename_is_in_cache(script_name, script_name_len TSRMLS_CC));
+	RETURN_BOOL(filename_is_in_cache(script_name, script_name_len));
 }

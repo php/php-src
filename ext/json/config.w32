@@ -4,13 +4,8 @@
 ARG_ENABLE("json", "JavaScript Object Serialization support", "yes");
 
 if (PHP_JSON != "no") {
-	EXTENSION('json', 'json.c', PHP_JSON_SHARED, "");
-	PHP_NEW_EXTENSION(json,
-		 json.c \
-		 json_encoder.c \
-		 json_parser.tab.c \
-		 json_scanner.c,
-		 $ext_shared)
+	EXTENSION('json', 'json.c', PHP_JSON_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+	ADD_SOURCES(configure_module_dirname, "json_encoder.c json_parser.tab.c json_scanner.c", "json");
 	PHP_INSTALL_HEADERS("ext/json/", "php_json.h");
 }
 

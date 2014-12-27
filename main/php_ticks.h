@@ -21,14 +21,14 @@
 #ifndef PHP_TICKS_H
 #define PHP_TICKS_H
 
-int php_startup_ticks(TSRMLS_D);
-void php_deactivate_ticks(TSRMLS_D);
-void php_shutdown_ticks(TSRMLS_D);
-void php_run_ticks(int count TSRMLS_DC);
+int php_startup_ticks(void);
+void php_deactivate_ticks(void);
+void php_shutdown_ticks(void);
+void php_run_ticks(int count);
 
 BEGIN_EXTERN_C()
-PHPAPI void php_add_tick_function(void (*func)(int) TSRMLS_DC);
-PHPAPI void php_remove_tick_function(void (*func)(int) TSRMLS_DC);
+PHPAPI void php_add_tick_function(void (*func)(int));
+PHPAPI void php_remove_tick_function(void (*func)(int));
 END_EXTERN_C()
 
 #endif

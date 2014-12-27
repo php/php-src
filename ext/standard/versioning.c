@@ -215,7 +215,7 @@ PHP_FUNCTION(version_compare)
 	int compare, argc;
 
 	argc = ZEND_NUM_ARGS();
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|s", &v1, &v1_len, &v2,
+	if (zend_parse_parameters(argc, "ss|s", &v1, &v1_len, &v2,
 							  &v2_len, &op, &op_len) == FAILURE) {
 		return;
 	}

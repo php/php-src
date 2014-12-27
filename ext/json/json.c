@@ -90,7 +90,7 @@ static PHP_MINIT_FUNCTION(json)
 	zend_class_entry ce;
 
 	INIT_CLASS_ENTRY(ce, "JsonSerializable", json_serializable_interface);
-	php_json_serializable_ce = zend_register_internal_interface(&ce TSRMLS_CC);
+	php_json_serializable_ce = zend_register_internal_interface(&ce);
 
 	REGISTER_LONG_CONSTANT("JSON_HEX_TAG",  PHP_JSON_HEX_TAG,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_HEX_AMP",  PHP_JSON_HEX_AMP,  CONST_CS | CONST_PERSISTENT);
@@ -124,6 +124,9 @@ static PHP_MINIT_FUNCTION(json)
 */
 static PHP_GINIT_FUNCTION(json)
 {
+#if defined(COMPILE_DL_JSON) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	json_globals->encoder_depth = 0;
 	json_globals->error_code = 0;
 	json_globals->encode_max_depth = 0;
@@ -152,6 +155,9 @@ zend_module_entry json_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_JSON
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(json)
 #endif
 
@@ -166,18 +172,17 @@ static PHP_MINFO_FUNCTION(json)
 }
 /* }}} */
 
-
-PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC) /* {{{ */
+PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options) /* {{{ */
 {
-	php_json_encode_zval(buf, val, options TSRMLS_CC);
+	php_json_encode_zval(buf, val, options);
 }
 /* }}} */
 
-PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth TSRMLS_DC) /* {{{ */
+PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth) /* {{{ */
 {
 	php_json_parser parser;
 
-	php_json_parser_init(&parser, return_value, str, str_len, options, depth TSRMLS_CC);
+	php_json_parser_init(&parser, return_value, str, str_len, options, depth);
 
 	if (php_json_yyparse(&parser)) {
 		JSON_G(error_code) = php_json_parser_error_code(&parser);
@@ -195,7 +200,7 @@ static PHP_FUNCTION(json_encode)
 	zend_long options = 0;
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ll", &parameter, &options, &depth) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|ll", &parameter, &options, &depth) == FAILURE) {
 		return;
 	}
 
@@ -203,7 +208,7 @@ static PHP_FUNCTION(json_encode)
 
 	JSON_G(encode_max_depth) = depth;
 
-	php_json_encode(&buf, parameter, options TSRMLS_CC);
+	php_json_encode(&buf, parameter, options);
 
 	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 		smart_str_free(&buf);
@@ -225,7 +230,7 @@ static PHP_FUNCTION(json_decode)
 	zend_long depth = PHP_JSON_PARSER_DEFAULT_DEPTH;
 	zend_long options = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bll", &str, &str_len, &assoc, &depth, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|bll", &str, &str_len, &assoc, &depth, &options) == FAILURE) {
 		return;
 	}
 
@@ -242,7 +247,7 @@ static PHP_FUNCTION(json_decode)
 		options &= ~PHP_JSON_OBJECT_AS_ARRAY;
 	}
 
-	php_json_decode_ex(return_value, str, str_len, options, depth TSRMLS_CC);
+	php_json_decode_ex(return_value, str, str_len, options, depth);
 }
 /* }}} */
 

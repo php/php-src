@@ -151,7 +151,7 @@ static char *ErrorMessages[] =
  * Returns NULL on error, or the new char* buffer on success.
  * You have to take care and efree() the buffer on your own.
  */
-static zend_string *php_win32_mail_trim_header(char *header TSRMLS_DC)
+static zend_string *php_win32_mail_trim_header(char *header)
 {
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
@@ -167,14 +167,14 @@ static zend_string *php_win32_mail_trim_header(char *header TSRMLS_DC)
 	ZVAL_STRINGL(&replace, PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE));
 	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_REPLACE, sizeof(PHP_WIN32_MAIL_UNIFY_REPLACE)-1, 0);
 
-//zend_string *php_pcre_replace(zend_string *regex, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int limit, int *replace_count TSRMLS_DC);
+//zend_string *php_pcre_replace(zend_string *regex, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int limit, int *replace_count);
 
 	result = php_pcre_replace(regex,
 							  header, (int)strlen(header),
 							  &replace,
 							  0,
 							  -1,
-							  NULL TSRMLS_CC);
+							  NULL);
 
 	if (NULL == result) {
 		zval_ptr_dtor(&replace);
@@ -190,7 +190,7 @@ static zend_string *php_win32_mail_trim_header(char *header TSRMLS_DC)
 							   &replace,
 							  0,
 							  -1,
-							  NULL TSRMLS_CC);
+							  NULL);
 	return result;
 #else
 	/* In case we don't have PCRE support (for whatever reason...) simply do nothing and return the unmodified header */
@@ -213,7 +213,7 @@ static zend_string *php_win32_mail_trim_header(char *header TSRMLS_DC)
 //********************************************************************/
 PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			  char *headers, char *Subject, char *mailTo, char *data,
-			  char *mailCc, char *mailBcc, char *mailRPath TSRMLS_DC)
+			  char *mailCc, char *mailBcc, char *mailRPath)
 {
 	int ret;
 	char *RPath = NULL;
@@ -240,7 +240,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		zend_string *headers_trim;
 
 		/* Use PCRE to trim the header into the right format */
-		if (NULL == (headers_trim = php_win32_mail_trim_header(headers TSRMLS_CC))) {
+		if (NULL == (headers_trim = php_win32_mail_trim_header(headers))) {
 			*error = W32_SM_PCRE_ERROR;
 			return FAILURE;
 		}
@@ -302,7 +302,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			MailHost, !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc->val, error_message TSRMLS_CC);
+		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc->val, error_message);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
@@ -383,7 +383,7 @@ PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle,
 // History:
 //*******************************************************************/
 static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data, 
-			 char *headers, char *headers_lc, char **error_message TSRMLS_DC)
+			 char *headers, char *headers_lc, char **error_message)
 {
 	int res;
 	char *p;
@@ -608,9 +608,9 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 
 	/* send message header */
 	if (Subject == NULL) {
-		res = PostHeader(RPath, "No Subject", mailTo, stripped_header TSRMLS_CC);
+		res = PostHeader(RPath, "No Subject", mailTo, stripped_header);
 	} else {
-		res = PostHeader(RPath, Subject, mailTo, stripped_header TSRMLS_CC);
+		res = PostHeader(RPath, Subject, mailTo, stripped_header);
 	}
 	if (stripped_header) {
 		efree(stripped_header);
@@ -683,7 +683,7 @@ static int addToHeader(char **header_buffer, const char *specifier, char *string
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders TSRMLS_DC)
+static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 {
 	/* Print message header according to RFC 822 */
 	/* Return-path, Received, Date, From, Subject, Sender, To, cc */
@@ -706,7 +706,7 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders T
 
 	if (!xheaders || !strstr(headers_lc, "date:")) {
 		time_t tNow = time(NULL);
-		zend_string *dt = php_format_date("r", 1, tNow, 1 TSRMLS_CC);
+		zend_string *dt = php_format_date("r", 1, tNow, 1);
 
 		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", dt->val);
 		zend_string_free(dt);

@@ -129,7 +129,7 @@ typedef struct buf_area buffy;
 /*
  * Do format conversion placing the output in buffer
  */
-static int format_converter(register buffy *odp, const char *fmt, zend_bool escape_xml, va_list ap TSRMLS_DC) {
+static int format_converter(register buffy *odp, const char *fmt, zend_bool escape_xml, va_list ap) {
 	char *sp;
 	char *bep;
 	int cc = 0;
@@ -333,7 +333,7 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 			switch (*fmt) {
 				case 'Z':
 					zvp = (zval *) va_arg(ap, zval *);
-					free_zcopy = zend_make_printable_zval(zvp, &zcopy TSRMLS_CC);
+					free_zcopy = zend_make_printable_zval(zvp, &zcopy);
 					if (free_zcopy) {
 						zvp = &zcopy;
 					}
@@ -814,7 +814,7 @@ skip_output:
 	return (cc);
 }
 
-static void strx_printv(int *ccp, char *buf, size_t len, const char *format, zend_bool escape_xml, va_list ap TSRMLS_DC) {
+static void strx_printv(int *ccp, char *buf, size_t len, const char *format, zend_bool escape_xml, va_list ap) {
 	buffy od;
 	int cc;
 
@@ -834,7 +834,7 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format, zen
 	/*
 	 * Do the conversion
 	 */
-	cc = format_converter(&od, format, escape_xml, ap TSRMLS_CC);
+	cc = format_converter(&od, format, escape_xml, ap);
 	if (len != 0 && od.nextb <= od.buf_end) {
 		*(od.nextb) = '\0';
 	}
@@ -843,26 +843,26 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format, zen
 	}
 }
 
-static int phpdbg_xml_vsnprintf(char *buf, size_t len, const char *format, zend_bool escape_xml, va_list ap TSRMLS_DC) {
+static int phpdbg_xml_vsnprintf(char *buf, size_t len, const char *format, zend_bool escape_xml, va_list ap) {
 	int cc;
 
-	strx_printv(&cc, buf, len, format, escape_xml, ap TSRMLS_CC);
+	strx_printv(&cc, buf, len, format, escape_xml, ap);
 	return (cc);
 }
 
-PHPDBG_API int phpdbg_xml_vasprintf(char **buf, const char *format, zend_bool escape_xml, va_list ap TSRMLS_DC) {
+PHPDBG_API int phpdbg_xml_vasprintf(char **buf, const char *format, zend_bool escape_xml, va_list ap) {
 	va_list ap2;
 	int cc;
 
 	va_copy(ap2, ap);
-	cc = phpdbg_xml_vsnprintf(NULL, 0, format, escape_xml, ap2 TSRMLS_CC);
+	cc = phpdbg_xml_vsnprintf(NULL, 0, format, escape_xml, ap2);
 	va_end(ap2);
 
 	*buf = NULL;
 
 	if (cc >= 0) {
 		if ((*buf = emalloc(++cc)) != NULL) {
-			if ((cc = phpdbg_xml_vsnprintf(*buf, cc, format, escape_xml, ap TSRMLS_CC)) < 0) {
+			if ((cc = phpdbg_xml_vsnprintf(*buf, cc, format, escape_xml, ap)) < 0) {
 				efree(*buf);
 				*buf = NULL;
 			}
@@ -873,23 +873,23 @@ PHPDBG_API int phpdbg_xml_vasprintf(char **buf, const char *format, zend_bool es
 }
 /* copy end */
 
-PHPDBG_API int _phpdbg_xml_asprintf(char **buf TSRMLS_DC, const char *format, zend_bool escape_xml, ...) {
+PHPDBG_API int _phpdbg_xml_asprintf(char **buf, const char *format, zend_bool escape_xml, ...) {
 	int ret;
 	va_list va;
 
 	va_start(va, escape_xml);
-	ret = phpdbg_xml_vasprintf(buf, format, escape_xml, va TSRMLS_CC);
+	ret = phpdbg_xml_vasprintf(buf, format, escape_xml, va);
 	va_end(va);
 
 	return ret;
 }
 
-PHPDBG_API int _phpdbg_asprintf(char **buf TSRMLS_DC, const char *format, ...) {
+PHPDBG_API int _phpdbg_asprintf(char **buf, const char *format, ...) {
 	int ret;
 	va_list va;
 
 	va_start(va, format);
-	ret = phpdbg_xml_vasprintf(buf, format, 0, va TSRMLS_CC);
+	ret = phpdbg_xml_vasprintf(buf, format, 0, va);
 	va_end(va);
 
 	return ret;
@@ -949,13 +949,13 @@ static void phpdbg_encode_ctrl_chars(char **buf, int *buflen) {
 	*buflen = len;
 }
 
-static int phpdbg_process_print(int fd, int type, const char *tag, const char *msg, int msglen, const char *xml, int xmllen TSRMLS_DC) {
+static int phpdbg_process_print(int fd, int type, const char *tag, const char *msg, int msglen, const char *xml, int xmllen) {
 	char *msgout = NULL, *buf;
 	int msgoutlen, xmloutlen, buflen;
 	const char *severity;
 
 	if ((PHPDBG_G(flags) & PHPDBG_WRITE_XML) && PHPDBG_G(in_script_xml) && PHPDBG_G(in_script_xml) != type) {
-		phpdbg_mixed_write(fd, ZEND_STRL("</stream>") TSRMLS_CC);
+		phpdbg_mixed_write(fd, ZEND_STRL("</stream>"));
 		PHPDBG_G(in_script_xml) = 0;
 	}
 
@@ -964,9 +964,9 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 			severity = "error";
 			if (!PHPDBG_G(last_was_newline)) {
 				if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
-					phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>\n" "</phpdbg>") TSRMLS_CC);
+					phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>\n" "</phpdbg>"));
 				} else {
-					phpdbg_mixed_write(fd, ZEND_STRL("\n") TSRMLS_CC);
+					phpdbg_mixed_write(fd, ZEND_STRL("\n"));
 				}
 				PHPDBG_G(last_was_newline) = 1;
 			}
@@ -981,9 +981,9 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 			severity = "notice";
 			if (!PHPDBG_G(last_was_newline)) {
 				if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
-					phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>\n" "</phpdbg>") TSRMLS_CC);
+					phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>\n" "</phpdbg>"));
 				} else {
-					phpdbg_mixed_write(fd, ZEND_STRL("\n") TSRMLS_CC);
+					phpdbg_mixed_write(fd, ZEND_STRL("\n"));
 				}
 				PHPDBG_G(last_was_newline) = 1;
 			}
@@ -1027,18 +1027,18 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 					if (PHPDBG_G(in_script_xml) != type) {
 						char *stream_buf;
 						int stream_buflen = phpdbg_asprintf(&stream_buf, "<stream type=\"%s\">", type == P_STDERR ? "stderr" : "stdout");
-						phpdbg_mixed_write(fd, stream_buf, stream_buflen TSRMLS_CC);
+						phpdbg_mixed_write(fd, stream_buf, stream_buflen);
 						efree(stream_buf);
 						PHPDBG_G(in_script_xml) = type;
 					}
-					encoded = php_escape_html_entities((unsigned char *) msg, msglen, 0, ENT_NOQUOTES, PG(internal_encoding) && PG(internal_encoding)[0] ? PG(internal_encoding) : (SG(default_charset) ? SG(default_charset) : "UTF-8") TSRMLS_CC);
+					encoded = php_escape_html_entities((unsigned char *) msg, msglen, 0, ENT_NOQUOTES, PG(internal_encoding) && PG(internal_encoding)[0] ? PG(internal_encoding) : (SG(default_charset) ? SG(default_charset) : "UTF-8"));
 					buflen = encoded->len;
 					memcpy(buf = emalloc(buflen + 1), encoded->val, buflen);
 					phpdbg_encode_ctrl_chars(&buf, &buflen);
-					phpdbg_mixed_write(fd, buf, buflen TSRMLS_CC);
+					phpdbg_mixed_write(fd, buf, buflen);
 					efree(buf);
 				} else {
-					phpdbg_mixed_write(fd, msg, msglen TSRMLS_CC);
+					phpdbg_mixed_write(fd, msg, msglen);
 				}
 				return msglen;
 			}
@@ -1076,12 +1076,12 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 		}
 
 		phpdbg_encode_ctrl_chars(&xmlout, &xmloutlen);
-		phpdbg_eol_convert(&xmlout, &xmloutlen TSRMLS_CC);
-		phpdbg_mixed_write(fd, xmlout, xmloutlen TSRMLS_CC);
+		phpdbg_eol_convert(&xmlout, &xmloutlen);
+		phpdbg_mixed_write(fd, xmlout, xmloutlen);
 		efree(xmlout);
 	} else if (msgout) {
-		phpdbg_eol_convert(&msgout, &msgoutlen TSRMLS_CC);
-		phpdbg_mixed_write(fd, msgout, msgoutlen TSRMLS_CC);
+		phpdbg_eol_convert(&msgout, &msgoutlen);
+		phpdbg_mixed_write(fd, msgout, msgoutlen);
 	}
 
 	if (PHPDBG_G(req_id) && (PHPDBG_G(flags) & PHPDBG_WRITE_XML)) {
@@ -1095,7 +1095,7 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 	return msgout ? msgoutlen : xmloutlen;
 } /* }}} */
 
-PHPDBG_API int phpdbg_vprint(int type TSRMLS_DC, int fd, const char *tag, const char *xmlfmt, const char *strfmt, va_list args) {
+PHPDBG_API int phpdbg_vprint(int type, int fd, const char *tag, const char *xmlfmt, const char *strfmt, va_list args) {
 	char *msg = NULL, *xml = NULL;
 	int msglen = 0, xmllen = 0;
 	int len;
@@ -1103,14 +1103,14 @@ PHPDBG_API int phpdbg_vprint(int type TSRMLS_DC, int fd, const char *tag, const 
 
 	if (strfmt != NULL && strlen(strfmt) > 0L) {
 		va_copy(argcpy, args);
-		msglen = phpdbg_xml_vasprintf(&msg, strfmt, 0, argcpy TSRMLS_CC);
+		msglen = phpdbg_xml_vasprintf(&msg, strfmt, 0, argcpy);
 		va_end(argcpy);
 	}
 
 	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
 		if (xmlfmt != NULL && strlen(xmlfmt) > 0L) {
 			va_copy(argcpy, args);
-			xmllen = phpdbg_xml_vasprintf(&xml, xmlfmt, 1, argcpy TSRMLS_CC);
+			xmllen = phpdbg_xml_vasprintf(&xml, xmlfmt, 1, argcpy);
 			va_end(argcpy);
 		} else {
 			xml = estrdup("");
@@ -1118,7 +1118,7 @@ PHPDBG_API int phpdbg_vprint(int type TSRMLS_DC, int fd, const char *tag, const 
 	}
 
 	if (PHPDBG_G(err_buf).active && type != P_STDOUT && type != P_STDERR) {
-		phpdbg_free_err_buf(TSRMLS_C);
+		phpdbg_free_err_buf();
 
 		PHPDBG_G(err_buf).type = type;
 		PHPDBG_G(err_buf).fd = fd;
@@ -1133,7 +1133,7 @@ PHPDBG_API int phpdbg_vprint(int type TSRMLS_DC, int fd, const char *tag, const 
 		return msglen;
 	}
 
-	len = phpdbg_process_print(fd, type, tag, msg, msglen, xml, xmllen TSRMLS_CC);
+	len = phpdbg_process_print(fd, type, tag, msg, msglen, xml, xmllen);
 
 	if (msg) {
 		efree(msg);
@@ -1146,7 +1146,7 @@ PHPDBG_API int phpdbg_vprint(int type TSRMLS_DC, int fd, const char *tag, const 
 	return len;
 }
 
-PHPDBG_API void phpdbg_free_err_buf(TSRMLS_D) {
+PHPDBG_API void phpdbg_free_err_buf(void) {
 	if (PHPDBG_G(err_buf).type == 0) {
 		return;
 	}
@@ -1160,11 +1160,11 @@ PHPDBG_API void phpdbg_free_err_buf(TSRMLS_D) {
 	}
 }
 
-PHPDBG_API void phpdbg_activate_err_buf(zend_bool active TSRMLS_DC) {
+PHPDBG_API void phpdbg_activate_err_buf(zend_bool active) {
 	PHPDBG_G(err_buf).active = active;
 }
 
-PHPDBG_API int phpdbg_output_err_buf(const char *tag, const char *xmlfmt, const char *strfmt TSRMLS_DC, ...) {
+PHPDBG_API int phpdbg_output_err_buf(const char *tag, const char *xmlfmt, const char *strfmt, ...) {
 	int len;
 	va_list args;
 	int errbuf_active = PHPDBG_G(err_buf).active;
@@ -1175,21 +1175,17 @@ PHPDBG_API int phpdbg_output_err_buf(const char *tag, const char *xmlfmt, const 
 
 	PHPDBG_G(err_buf).active = 0;
 
-#ifdef ZTS
-	va_start(args, tsrm_ls);
-#else
 	va_start(args, strfmt);
-#endif
-	len = phpdbg_vprint(PHPDBG_G(err_buf).type TSRMLS_CC, PHPDBG_G(err_buf).fd, tag ? tag : PHPDBG_G(err_buf).tag, xmlfmt, strfmt, args);
+	len = phpdbg_vprint(PHPDBG_G(err_buf).type, PHPDBG_G(err_buf).fd, tag ? tag : PHPDBG_G(err_buf).tag, xmlfmt, strfmt, args);
 	va_end(args);
 
 	PHPDBG_G(err_buf).active = errbuf_active;
-	phpdbg_free_err_buf(TSRMLS_C);
+	phpdbg_free_err_buf();
 
 	return len;
 }
 
-PHPDBG_API int phpdbg_print(int type TSRMLS_DC, int fd, const char *tag, const char *xmlfmt, const char *strfmt, ...) {
+PHPDBG_API int phpdbg_print(int type, int fd, const char *tag, const char *xmlfmt, const char *strfmt, ...) {
 	va_list args;
 	int len;
 
@@ -1198,13 +1194,13 @@ PHPDBG_API int phpdbg_print(int type TSRMLS_DC, int fd, const char *tag, const c
 	}
 
 	va_start(args, strfmt);
-	len = phpdbg_vprint(type TSRMLS_CC, fd, tag, xmlfmt, strfmt, args);
+	len = phpdbg_vprint(type, fd, tag, xmlfmt, strfmt, args);
 	va_end(args);
 
 	return len;
 }
 
-PHPDBG_API int phpdbg_xml_internal(int fd TSRMLS_DC, const char *fmt, ...) {
+PHPDBG_API int phpdbg_xml_internal(int fd, const char *fmt, ...) {
 	int len = 0;
 
 	if (PHPDBG_G(flags) & PHPDBG_DISCARD_OUTPUT) {
@@ -1217,40 +1213,40 @@ PHPDBG_API int phpdbg_xml_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 		int buflen;
 
 		va_start(args, fmt);
-		buflen = phpdbg_xml_vasprintf(&buffer, fmt, 1, args TSRMLS_CC);
+		buflen = phpdbg_xml_vasprintf(&buffer, fmt, 1, args);
 		va_end(args);
 
 		phpdbg_encode_ctrl_chars(&buffer, &buflen);
 
 		if (PHPDBG_G(in_script_xml)) {
-			phpdbg_mixed_write(fd, ZEND_STRL("</stream>") TSRMLS_CC);
+			phpdbg_mixed_write(fd, ZEND_STRL("</stream>"));
 			PHPDBG_G(in_script_xml) = 0;
 		}
 
-		len = phpdbg_mixed_write(fd, buffer, buflen TSRMLS_CC);
+		len = phpdbg_mixed_write(fd, buffer, buflen);
 		efree(buffer);
 	}
 
 	return len;
 }
 
-PHPDBG_API int phpdbg_log_internal(int fd TSRMLS_DC, const char *fmt, ...) {
+PHPDBG_API int phpdbg_log_internal(int fd, const char *fmt, ...) {
 	va_list args;
 	char *buffer;
 	int buflen;
 	int len = 0;
 
 	va_start(args, fmt);
-	buflen = phpdbg_xml_vasprintf(&buffer, fmt, 0, args TSRMLS_CC);
+	buflen = phpdbg_xml_vasprintf(&buffer, fmt, 0, args);
 	va_end(args);
 
-	len = phpdbg_mixed_write(fd, buffer, buflen TSRMLS_CC);
+	len = phpdbg_mixed_write(fd, buffer, buflen);
 	efree(buffer);
 
 	return len;
 }
 
-PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...) {
+PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) {
 	va_list args;
 	char *buffer;
 	int buflen;
@@ -1261,7 +1257,7 @@ PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 	}
 
 	va_start(args, fmt);
-	buflen = phpdbg_xml_vasprintf(&buffer, fmt, 0, args TSRMLS_CC);
+	buflen = phpdbg_xml_vasprintf(&buffer, fmt, 0, args);
 	va_end(args);
 
 	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
@@ -1270,26 +1266,26 @@ PHPDBG_API int phpdbg_out_internal(int fd TSRMLS_DC, const char *fmt, ...) {
 
 		msglen = phpdbg_encode_xml(&msg, buffer, buflen, 256, NULL);
 		phpdbg_encode_ctrl_chars(&msg, &msglen);
-		phpdbg_eol_convert(&msg, &msglen TSRMLS_CC);
+		phpdbg_eol_convert(&msg, &msglen);
 
 		if (PHPDBG_G(in_script_xml)) {
-			phpdbg_mixed_write(fd, ZEND_STRL("</stream>") TSRMLS_CC);
+			phpdbg_mixed_write(fd, ZEND_STRL("</stream>"));
 			PHPDBG_G(in_script_xml) = 0;
 		}
 
-		phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>") TSRMLS_CC);
-		len = phpdbg_mixed_write(fd, msg, msglen TSRMLS_CC);
-		phpdbg_mixed_write(fd, ZEND_STRL("</phpdbg>") TSRMLS_CC);
+		phpdbg_mixed_write(fd, ZEND_STRL("<phpdbg>"));
+		len = phpdbg_mixed_write(fd, msg, msglen);
+		phpdbg_mixed_write(fd, ZEND_STRL("</phpdbg>"));
 	} else {
-		phpdbg_eol_convert(&buffer, &buflen TSRMLS_CC);
-		len = phpdbg_mixed_write(fd, buffer, buflen TSRMLS_CC);
+		phpdbg_eol_convert(&buffer, &buflen);
+		len = phpdbg_mixed_write(fd, buffer, buflen);
 	}
 
 	return len;
 }
 
 
-PHPDBG_API int phpdbg_rlog_internal(int fd TSRMLS_DC, const char *fmt, ...) { /* {{{ */
+PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) { /* {{{ */
 	int rc = 0;
 
 	va_list args;
@@ -1308,10 +1304,10 @@ PHPDBG_API int phpdbg_rlog_internal(int fd TSRMLS_DC, const char *fmt, ...) { /*
 #endif
 		phpdbg_asprintf(&buffer, friendly, tp.tv_usec/1000);
 		phpdbg_asprintf(&format, "[%s]: %s\n", buffer, fmt);
-		rc = phpdbg_xml_vasprintf(&outbuf, format, 0, args TSRMLS_CC);
+		rc = phpdbg_xml_vasprintf(&outbuf, format, 0, args);
 
 		if (outbuf) {
-			rc = phpdbg_mixed_write(fd, outbuf, rc TSRMLS_CC);
+			rc = phpdbg_mixed_write(fd, outbuf, rc);
 			efree(outbuf);
 		}
 

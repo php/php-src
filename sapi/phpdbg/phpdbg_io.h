@@ -21,15 +21,15 @@
 
 #include "phpdbg.h"
 
-PHPDBG_API int phpdbg_consume_stdin_line(char *buf TSRMLS_DC);
+PHPDBG_API int phpdbg_consume_stdin_line(char *buf);
 
-PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo TSRMLS_DC);
+PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo);
 PHPDBG_API int phpdbg_send_bytes(int sock, const char *ptr, int len);
-PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo TSRMLS_DC);
-PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len TSRMLS_DC);
+PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo);
+PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len);
 
-PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short port, struct addrinfo *res TSRMLS_DC);
-PHPDBG_API int phpdbg_open_socket(const char *interface, unsigned short port TSRMLS_DC);
+PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short port, struct addrinfo *res);
+PHPDBG_API int phpdbg_open_socket(const char *interface, unsigned short port);
 PHPDBG_API void phpdbg_close_socket(int sock);
 
 #endif /* PHPDBG_IO_H */

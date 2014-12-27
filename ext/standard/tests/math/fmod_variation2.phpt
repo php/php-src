@@ -138,37 +138,37 @@ float(NAN)
 
 -- Iteration 17 --
 
-Warning: fmod() expects parameter 2 to be double, string given in %s on line %d
+Warning: fmod() expects parameter 2 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: fmod() expects parameter 2 to be double, string given in %s on line %d
+Warning: fmod() expects parameter 2 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: fmod() expects parameter 2 to be double, array given in %s on line %d
+Warning: fmod() expects parameter 2 to be float, array given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: fmod() expects parameter 2 to be double, string given in %s on line %d
+Warning: fmod() expects parameter 2 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: fmod() expects parameter 2 to be double, string given in %s on line %d
+Warning: fmod() expects parameter 2 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: fmod() expects parameter 2 to be double, string given in %s on line %d
+Warning: fmod() expects parameter 2 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: fmod() expects parameter 2 to be double, object given in %s on line %d
+Warning: fmod() expects parameter 2 to be float, object given in %s on line %d
 NULL
 
 -- Iteration 24 --
@@ -179,6 +179,6 @@ float(NAN)
 
 -- Iteration 26 --
 
-Warning: fmod() expects parameter 2 to be double, resource given in %s on line %d
+Warning: fmod() expects parameter 2 to be float, resource given in %s on line %d
 NULL
 ===Done===

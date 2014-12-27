@@ -14,7 +14,7 @@ PHP_NEW_EXTENSION(json,
 	  json_encoder.c \
 	  json_parser.tab.c \
 	  json_scanner.c,
-	  $ext_shared)
+	  $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_INSTALL_HEADERS([ext/json], [php_json.h])
   PHP_ADD_MAKEFILE_FRAGMENT()
   PHP_SUBST(JSON_SHARED_LIBADD)

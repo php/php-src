@@ -123,7 +123,7 @@ static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 	return PDO_ODBC_CONV_NOT_REQUIRED;
 }
 
-static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S TSRMLS_DC)
+static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S)
 {
 	if (S->cols) {
 		int i;
@@ -138,7 +138,7 @@ static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S TSRMLS_DC)
 	}
 }
 
-static int odbc_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
+static int odbc_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 
@@ -150,7 +150,7 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		S->stmt = SQL_NULL_HANDLE;
 	}
 
-	free_cols(stmt, S TSRMLS_CC);
+	free_cols(stmt, S);
 	if (S->convbuf) {
 		efree(S->convbuf);
 	}
@@ -159,7 +159,7 @@ static int odbc_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
-static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
+static int odbc_stmt_execute(pdo_stmt_t *stmt)
 {
 	RETCODE rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
@@ -280,7 +280,7 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 }
 
 static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
-		enum pdo_param_event event_type TSRMLS_DC)
+		enum pdo_param_event event_type)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	RETCODE rc;
@@ -524,7 +524,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 }
 
 static int odbc_stmt_fetch(pdo_stmt_t *stmt,
-	enum pdo_fetch_orientation ori, zend_long offset TSRMLS_DC)
+	enum pdo_fetch_orientation ori, zend_long offset)
 {
 	RETCODE rc;
 	SQLSMALLINT odbcori;
@@ -561,7 +561,7 @@ static int odbc_stmt_fetch(pdo_stmt_t *stmt,
 	return 0;
 }
 
-static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
+static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	struct pdo_column_data *col = &stmt->columns[colno];
@@ -628,7 +628,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
-static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees TSRMLS_DC)
+static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	pdo_odbc_column *C = &S->cols[colno];
@@ -755,7 +755,7 @@ in_data:
 	return 1;
 }
 
-static int odbc_stmt_set_param(pdo_stmt_t *stmt, zend_long attr, zval *val TSRMLS_DC)
+static int odbc_stmt_set_param(pdo_stmt_t *stmt, zend_long attr, zval *val)
 {
 	SQLRETURN rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
@@ -782,7 +782,7 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, zend_long attr, zval *val TSRML
 	}
 }
 
-static int odbc_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val TSRMLS_DC)
+static int odbc_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 {
 	SQLRETURN rc;
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
@@ -814,7 +814,7 @@ static int odbc_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val TSRMLS
 	}
 }
 
-static int odbc_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
+static int odbc_stmt_next_rowset(pdo_stmt_t *stmt)
 {
 	SQLRETURN rc;
 	SQLSMALLINT colcount;
@@ -829,7 +829,7 @@ static int odbc_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 		return 0;
 	}
 
-	free_cols(stmt, S TSRMLS_CC);
+	free_cols(stmt, S);
 	/* how many columns do we have ? */
 	SQLNumResultCols(S->stmt, &colcount);
 	stmt->column_count = (int)colcount;

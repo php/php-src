@@ -63,7 +63,7 @@ const char *zend_vm_opcodes_map[170] = {
 	"ZEND_ASSIGN",
 	"ZEND_ASSIGN_REF",
 	"ZEND_ECHO",
-	"ZEND_PRINT",
+	NULL,
 	"ZEND_JMP",
 	"ZEND_JMPZ",
 	"ZEND_JMPNZ",

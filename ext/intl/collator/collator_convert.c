@@ -225,7 +225,7 @@ zval* collator_convert_zstr_utf8_to_utf16( zval* utf8_zval, zval *rv )
 /* {{{ collator_convert_object_to_string
  * Convert object to UTF16-encoded string.
  */
-zval* collator_convert_object_to_string( zval* obj, zval *rv TSRMLS_DC )
+zval* collator_convert_object_to_string( zval* obj, zval *rv )
 {
 	zval* zstr        = NULL;
 	UErrorCode status = U_ZERO_ERROR;
@@ -241,7 +241,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv TSRMLS_DC )
 	/* Try object's handlers. */
 	if( Z_OBJ_HT_P(obj)->get )
 	{
-		zstr = Z_OBJ_HT_P(obj)->get( obj, rv TSRMLS_CC );
+		zstr = Z_OBJ_HT_P(obj)->get( obj, rv );
 
 		switch( Z_TYPE_P( zstr ) )
 		{
@@ -265,7 +265,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv TSRMLS_DC )
 	{
 		zstr = rv;
 
-		if( Z_OBJ_HT_P(obj)->cast_object( obj, zstr, IS_STRING CAST_OBJECT_SHOULD_FREE TSRMLS_CC ) == FAILURE )
+		if( Z_OBJ_HT_P(obj)->cast_object( obj, zstr, IS_STRING CAST_OBJECT_SHOULD_FREE ) == FAILURE )
 		{
 			/* cast_object failed => bail out. */
 			zval_ptr_dtor( zstr );
@@ -400,9 +400,8 @@ zval* collator_make_printable_zval( zval* arg, zval *rv)
 
 	if( Z_TYPE_P(arg) != IS_STRING )
 	{
-	    TSRMLS_FETCH();
-	    
-		use_copy = zend_make_printable_zval(arg, &arg_copy TSRMLS_CC);
+	    	    
+		use_copy = zend_make_printable_zval(arg, &arg_copy);
 
 		if( use_copy )
 		{

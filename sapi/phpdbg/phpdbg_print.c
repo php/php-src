@@ -42,7 +42,7 @@ const phpdbg_command_t phpdbg_print_commands[] = {
 PHPDBG_PRINT(opline) /* {{{ */
 {
 	if (PHPDBG_G(in_execution) && EG(current_execute_data)) {
-		phpdbg_print_opline(EG(current_execute_data), 1 TSRMLS_CC);
+		phpdbg_print_opline(EG(current_execute_data), 1);
 	} else {
 		phpdbg_error("inactive", "type=\"execution\"", "Not Executing!");
 	}
@@ -50,7 +50,7 @@ PHPDBG_PRINT(opline) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC) /* {{{ */
+static inline void phpdbg_print_function_helper(zend_function *method) /* {{{ */
 {
 	switch (method->type) {
 		case ZEND_USER_FUNCTION: {
@@ -79,7 +79,7 @@ static inline void phpdbg_print_function_helper(zend_function *method TSRMLS_DC)
 
 				zend_hash_init(&vars, op_array->last, NULL, NULL, 0);
 				do {
-					char *decode = phpdbg_decode_opline(op_array, opline, &vars TSRMLS_CC);
+					char *decode = phpdbg_decode_opline(op_array, opline, &vars);
 					if (decode != NULL) {
 						phpdbg_writeln("print", "line=\"%u\" opline=\"%p\" opcode=\"%s\" op=\"%s\"", "\t\tL%u\t%p %-30s %s",
 							opline->lineno,
@@ -110,13 +110,13 @@ PHPDBG_PRINT(exec) /* {{{ */
 {
 	if (PHPDBG_G(exec)) {
 		if (!PHPDBG_G(ops) && !(PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER)) {
-			phpdbg_compile(TSRMLS_C);
+			phpdbg_compile();
 		}
 
 		if (PHPDBG_G(ops)) {
 			phpdbg_notice("printinfo", "file=\"%s\" num=\"%d\"", "Context %s (%d ops)", PHPDBG_G(exec), PHPDBG_G(ops)->last);
 
-			phpdbg_print_function_helper((zend_function*) PHPDBG_G(ops) TSRMLS_CC);
+			phpdbg_print_function_helper((zend_function*) PHPDBG_G(ops));
 		}
 	} else {
 		phpdbg_error("inactive", "type=\"nocontext\"", "No execution context set");
@@ -142,7 +142,7 @@ PHPDBG_PRINT(stack) /* {{{ */
 				phpdbg_notice("printinfo", "opline=\"%p\" num=\"%d\"", "Stack @ %p (%d ops)", ops, ops->last);
 			}
 		}
-		phpdbg_print_function_helper((zend_function*) ops TSRMLS_CC);
+		phpdbg_print_function_helper((zend_function*) ops);
 	} else {
 		phpdbg_error("inactive", "type=\"execution\"", "Not Executing!");
 	}
@@ -154,7 +154,7 @@ PHPDBG_PRINT(class) /* {{{ */
 {
 	zend_class_entry *ce;
 
-	if (phpdbg_safe_class_lookup(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
+	if (phpdbg_safe_class_lookup(param->str, param->len, &ce) == SUCCESS) {
 		phpdbg_notice("printinfo", "type=\"%s\" flag=\"%s\" class=\"%s\" num=\"%d\"", "%s %s: %s (%d methods)",
 			(ce->type == ZEND_USER_CLASS) ?
 				"User" : "Internal",
@@ -172,7 +172,7 @@ PHPDBG_PRINT(class) /* {{{ */
 			zend_function *method;
 
 			ZEND_HASH_FOREACH_PTR(&ce->function_table, method) {
-				phpdbg_print_function_helper(method TSRMLS_CC);
+				phpdbg_print_function_helper(method);
 			} ZEND_HASH_FOREACH_END();
 		}
 
@@ -188,7 +188,7 @@ PHPDBG_PRINT(method) /* {{{ */
 {
 	zend_class_entry *ce;
 
-	if (phpdbg_safe_class_lookup(param->method.class, strlen(param->method.class), &ce TSRMLS_CC) == SUCCESS) {
+	if (phpdbg_safe_class_lookup(param->method.class, strlen(param->method.class), &ce) == SUCCESS) {
 		zend_function *fbc;
 		zend_string *lcname = zend_string_alloc(strlen(param->method.name), 0);
 		zend_str_tolower_copy(lcname->val, param->method.name, lcname->len);
@@ -199,7 +199,7 @@ PHPDBG_PRINT(method) /* {{{ */
 				fbc->common.function_name->val,
 				(fbc->type == ZEND_USER_FUNCTION) ? fbc->op_array.last : 0);
 
-			phpdbg_print_function_helper(fbc TSRMLS_CC);
+			phpdbg_print_function_helper(fbc);
 		} else {
 			phpdbg_error("print", "type=\"nomethod\" method=\"%s::%s\"", "The method %s::%s could not be found", param->method.class, param->method.name);
 		}
@@ -248,7 +248,7 @@ PHPDBG_PRINT(func) /* {{{ */
 				fbc->common.function_name->val,
 				(fbc->type == ZEND_USER_FUNCTION) ? fbc->op_array.last : 0);
 
-			phpdbg_print_function_helper(fbc TSRMLS_CC);
+			phpdbg_print_function_helper(fbc);
 		} else {
 			phpdbg_error("print", "type=\"nofunction\" function=\"%s\"", "The function %s could not be found", func_name);
 		}

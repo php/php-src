@@ -26,6 +26,6 @@
 PHP_FUNCTION(strptime);
 #endif 
 
-PHPAPI char *php_std_date(time_t t TSRMLS_DC);
+PHPAPI char *php_std_date(time_t t);
 
 #endif /* DATETIME_H */

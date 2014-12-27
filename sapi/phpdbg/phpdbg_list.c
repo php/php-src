@@ -47,22 +47,22 @@ const phpdbg_command_t phpdbg_list_commands[] = {
 
 PHPDBG_LIST(lines) /* {{{ */
 {
-	if (!PHPDBG_G(exec) && !zend_is_executing(TSRMLS_C)) {
+	if (!PHPDBG_G(exec) && !zend_is_executing()) {
 		phpdbg_error("inactive", "type=\"execution\"", "Not executing, and execution context not set");
 		return SUCCESS;
 	}
 
 	switch (param->type) {
 		case NUMERIC_PARAM: {
-			const char *char_file = phpdbg_current_file(TSRMLS_C);
+			const char *char_file = phpdbg_current_file();
 			zend_string *file = zend_string_init(char_file, strlen(char_file), 0);
-			phpdbg_list_file(file, param->num < 0 ? 1 - param->num : param->num, (param->num < 0 ? param->num : 0) + zend_get_executed_lineno(TSRMLS_C), 0 TSRMLS_CC);
+			phpdbg_list_file(file, param->num < 0 ? 1 - param->num : param->num, (param->num < 0 ? param->num : 0) + zend_get_executed_lineno(), 0);
 			efree(file);
 		} break;
 
 		case FILE_PARAM: {
 			zend_string *file = zend_string_init(param->file.name, strlen(param->file.name), 0);
-			phpdbg_list_file(file, param->file.line, 0, 0 TSRMLS_CC);
+			phpdbg_list_file(file, param->file.line, 0, 0);
 			efree(file);
 		} break;
 
@@ -74,7 +74,7 @@ PHPDBG_LIST(lines) /* {{{ */
 
 PHPDBG_LIST(func) /* {{{ */
 {
-	phpdbg_list_function_byname(param->str, param->len TSRMLS_CC);
+	phpdbg_list_function_byname(param->str, param->len);
 
 	return SUCCESS;
 } /* }}} */
@@ -83,12 +83,12 @@ PHPDBG_LIST(method) /* {{{ */
 {
 	zend_class_entry *ce;
 
-	if (phpdbg_safe_class_lookup(param->method.class, strlen(param->method.class), &ce TSRMLS_CC) == SUCCESS) {
+	if (phpdbg_safe_class_lookup(param->method.class, strlen(param->method.class), &ce) == SUCCESS) {
 		zend_function *function;
 		char *lcname = zend_str_tolower_dup(param->method.name, strlen(param->method.name));
 
 		if ((function = zend_hash_str_find_ptr(&ce->function_table, lcname, strlen(lcname)))) {
-			phpdbg_list_function(function TSRMLS_CC);
+			phpdbg_list_function(function);
 		} else {
 			phpdbg_error("list", "type=\"notfound\" method=\"%s::%s\"", "Could not find %s::%s", param->method.class, param->method.name);
 		}
@@ -105,10 +105,10 @@ PHPDBG_LIST(class) /* {{{ */
 {
 	zend_class_entry *ce;
 
-	if (phpdbg_safe_class_lookup(param->str, param->len, &ce TSRMLS_CC) == SUCCESS) {
+	if (phpdbg_safe_class_lookup(param->str, param->len, &ce) == SUCCESS) {
 		if (ce->type == ZEND_USER_CLASS) {
 			if (ce->info.user.filename) {
-				phpdbg_list_file(ce->info.user.filename, ce->info.user.line_end - ce->info.user.line_start + 1, ce->info.user.line_start, 0 TSRMLS_CC);
+				phpdbg_list_file(ce->info.user.filename, ce->info.user.line_end - ce->info.user.line_start + 1, ce->info.user.line_start, 0);
 			} else {
 				phpdbg_error("list", "type=\"nosource\" class=\"%s\"", "The source of the requested class (%s) cannot be found", ce->name);
 			}
@@ -122,7 +122,7 @@ PHPDBG_LIST(class) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-void phpdbg_list_file(zend_string *filename, uint count, int offset, uint highlight TSRMLS_DC) /* {{{ */
+void phpdbg_list_file(zend_string *filename, uint count, int offset, uint highlight) /* {{{ */
 {
 	uint line, lastline;
 	phpdbg_file_source *data;
@@ -176,7 +176,7 @@ void phpdbg_list_file(zend_string *filename, uint count, int offset, uint highli
 	phpdbg_xml("</list>");
 } /* }}} */
 
-void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
+void phpdbg_list_function(const zend_function *fbc) /* {{{ */
 {
 	const zend_op_array *ops;
 
@@ -187,10 +187,10 @@ void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
 
 	ops = (zend_op_array *) fbc;
 
-	phpdbg_list_file(ops->filename, ops->line_end - ops->line_start + 1, ops->line_start, 0 TSRMLS_CC);
+	phpdbg_list_file(ops->filename, ops->line_end - ops->line_start + 1, ops->line_start, 0);
 } /* }}} */
 
-void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC) /* {{{ */
+void phpdbg_list_function_byname(const char *str, size_t len) /* {{{ */
 {
 	HashTable *func_table = EG(function_table);
 	zend_function* fbc;
@@ -220,7 +220,7 @@ void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC) /* {{{ *
 
 	phpdbg_try_access {
 		if ((fbc = zend_hash_str_find_ptr(func_table, func_name, func_name_len))) {
-			phpdbg_list_function(fbc TSRMLS_CC);
+			phpdbg_list_function(fbc);
 		} else {
 			phpdbg_error("list", "type=\"nofunction\" function=\"%s\"", "Function %s not found", func_name);
 		}
@@ -231,7 +231,7 @@ void phpdbg_list_function_byname(const char *str, size_t len TSRMLS_DC) /* {{{ *
 	efree(func_name);
 } /* }}} */
 
-zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type TSRMLS_DC) {
+zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type) {
 	phpdbg_file_source data, *dataptr;
 	zend_file_handle fake = {{0}};
 	zend_op_array *ret;
@@ -240,7 +240,7 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type TSRMLS_DC) {
 	char *bufptr, *endptr;
 	char resolved_path_buf[MAXPATHLEN];
 
-	zend_stream_fixup(file, &data.buf, &data.len TSRMLS_CC);
+	zend_stream_fixup(file, &data.buf, &data.len);
 
 	data.filename = filename;
 	data.line[0] = 0;
@@ -279,12 +279,12 @@ zend_op_array *phpdbg_compile_file(zend_file_handle *file, int type TSRMLS_DC) {
 	dataptr = erealloc(dataptr, sizeof(phpdbg_file_source) + sizeof(uint) * line);
 
 	zend_hash_str_add_ptr(&PHPDBG_G(file_sources), filename, strlen(filename), dataptr);
-	phpdbg_resolve_pending_file_break(filename TSRMLS_CC);
+	phpdbg_resolve_pending_file_break(filename);
 
-	ret = PHPDBG_G(compile_file)(&fake, type TSRMLS_CC);
+	ret = PHPDBG_G(compile_file)(&fake, type);
 
 	fake.opened_path = NULL;
-	zend_file_handle_dtor(&fake TSRMLS_CC);
+	zend_file_handle_dtor(&fake);
 
 	return ret;
 }
@@ -302,7 +302,7 @@ void phpdbg_free_file_source(phpdbg_file_source *data) {
 	efree(data);
 }
 
-void phpdbg_init_list(TSRMLS_D) {
+void phpdbg_init_list(void) {
 	PHPDBG_G(compile_file) = zend_compile_file;
 	zend_hash_init(&PHPDBG_G(file_sources), 1, NULL, (dtor_func_t) phpdbg_free_file_source, 0);
 	zend_compile_file = phpdbg_compile_file;

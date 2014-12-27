@@ -34,7 +34,7 @@
  *	if set to 1 - store any error encountered  in the parameter parse_error  
  *	if set to 0 - no need to store any error encountered  in the parameter parse_error  
 */
-static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* text_to_parse, int32_t text_len, int32_t *parse_pos, zval *return_value TSRMLS_DC)
+static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* text_to_parse, int32_t text_len, int32_t *parse_pos, zval *return_value)
 {
 	double	result =  0;
 	UDate 	timestamp   =0;
@@ -62,7 +62,7 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* tex
 }
 /* }}} */
 
-static void add_to_localtime_arr( IntlDateFormatter_object *dfo, zval* return_value, const UCalendar *parsed_calendar, zend_long calendar_field, char* key_name TSRMLS_DC)
+static void add_to_localtime_arr( IntlDateFormatter_object *dfo, zval* return_value, const UCalendar *parsed_calendar, zend_long calendar_field, char* key_name)
 {
 	zend_long calendar_field_val = ucal_get( parsed_calendar, calendar_field, &INTL_DATA_ERROR_CODE(dfo));	
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing - localtime failed : could not get a field from calendar" );
@@ -81,7 +81,7 @@ static void add_to_localtime_arr( IntlDateFormatter_object *dfo, zval* return_va
 /* {{{
  * Internal function which calls the udat_parseCalendar
 */
-static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* text_to_parse, int32_t text_len, int32_t *parse_pos, zval *return_value TSRMLS_DC)
+static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* text_to_parse, int32_t text_len, int32_t *parse_pos, zval *return_value)
 {
 	UCalendar      *parsed_calendar = NULL;
 	UChar*  	text_utf16  = NULL;
@@ -104,14 +104,14 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 
 	array_init( return_value );
 	/* Add  entries from various fields of the obtained parsed_calendar */
-	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_SECOND, CALENDAR_SEC TSRMLS_CC);
-	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_MINUTE, CALENDAR_MIN TSRMLS_CC);
-	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_HOUR_OF_DAY, CALENDAR_HOUR TSRMLS_CC);
-	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_YEAR, CALENDAR_YEAR TSRMLS_CC); 
-	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_DAY_OF_MONTH, CALENDAR_MDAY TSRMLS_CC);
-	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_DAY_OF_WEEK, CALENDAR_WDAY TSRMLS_CC);
-	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_DAY_OF_YEAR, CALENDAR_YDAY TSRMLS_CC);
-	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_MONTH, CALENDAR_MON TSRMLS_CC);
+	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_SECOND, CALENDAR_SEC);
+	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_MINUTE, CALENDAR_MIN);
+	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_HOUR_OF_DAY, CALENDAR_HOUR);
+	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_YEAR, CALENDAR_YEAR); 
+	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_DAY_OF_MONTH, CALENDAR_MDAY);
+	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_DAY_OF_WEEK, CALENDAR_WDAY);
+	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_DAY_OF_YEAR, CALENDAR_YDAY);
+	add_to_localtime_arr( dfo, return_value, parsed_calendar, UCAL_MONTH, CALENDAR_MON);
 
 	/* Is in DST? */
 	isInDST = ucal_inDaylightTime(parsed_calendar	, &INTL_DATA_ERROR_CODE(dfo));
@@ -135,9 +135,9 @@ PHP_FUNCTION(datefmt_parse)
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|z/!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|z/!",
 		&object, IntlDateFormatter_ce_ptr, &text_to_parse, &text_len, &z_parse_pos ) == FAILURE ){
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_parse: unable to parse input params", 0 TSRMLS_CC );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_parse: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
@@ -152,7 +152,7 @@ PHP_FUNCTION(datefmt_parse)
 			RETURN_FALSE;
 		}
 	}
-	internal_parse_to_timestamp( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, return_value TSRMLS_CC);
+	internal_parse_to_timestamp( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, return_value);
 	if(z_parse_pos) {
 		zval_dtor(z_parse_pos);
 		ZVAL_LONG(z_parse_pos, parse_pos);
@@ -174,9 +174,9 @@ PHP_FUNCTION(datefmt_localtime)
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|z!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|z!",
 		&object, IntlDateFormatter_ce_ptr, &text_to_parse, &text_len, &z_parse_pos ) == FAILURE ){
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_parse_to_localtime: unable to parse input params", 0 TSRMLS_CC );
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_parse_to_localtime: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
@@ -191,7 +191,7 @@ PHP_FUNCTION(datefmt_localtime)
 			RETURN_FALSE;
 		}
 	}
-	internal_parse_to_localtime( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, return_value TSRMLS_CC);
+	internal_parse_to_localtime( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, return_value);
 	if (z_parse_pos) {
 		zval_dtor(z_parse_pos);
 		ZVAL_LONG(z_parse_pos, parse_pos);

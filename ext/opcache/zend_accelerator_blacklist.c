@@ -237,7 +237,6 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	char buf[MAXPATHLEN + 1], real_path[MAXPATHLEN + 1], *blacklist_path = NULL;
 	FILE *fp;
 	int path_length, blacklist_path_length;
-	TSRMLS_FETCH();
 
 	if ((fp = fopen(filename, "r")) == NULL) {
 		zend_accel_error(ACCEL_LOG_WARNING, "Cannot load blacklist file: %s\n", filename);
@@ -288,9 +287,9 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 
 		path_dup = zend_strndup(pbuf, path_length);
 		if (blacklist_path) {
-			expand_filepath_ex(path_dup, real_path, blacklist_path, blacklist_path_length TSRMLS_CC);
+			expand_filepath_ex(path_dup, real_path, blacklist_path, blacklist_path_length);
 		} else {
-			expand_filepath(path_dup, real_path TSRMLS_CC);
+			expand_filepath(path_dup, real_path);
 		}
 		path_length = strlen(real_path);
 
@@ -358,11 +357,11 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 	return ret;
 }
 
-void zend_accel_blacklist_apply(zend_blacklist *blacklist, blacklist_apply_func_arg_t func, void *argument TSRMLS_DC)
+void zend_accel_blacklist_apply(zend_blacklist *blacklist, blacklist_apply_func_arg_t func, void *argument)
 {
 	int i;
 
 	for (i = 0; i < blacklist->pos; i++) {
-		func(&blacklist->entries[i], argument TSRMLS_CC);
+		func(&blacklist->entries[i], argument);
 	}
 }

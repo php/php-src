@@ -157,7 +157,6 @@ int zend_shared_alloc_startup(size_t requested_size)
 	const zend_shared_memory_handler_entry *he;
 	int res = ALLOC_FAILURE;
 
-	TSRMLS_FETCH();
 
 	/* shared_free must be valid before we call zend_shared_alloc()
 	 * - make it temporarily point to a local variable
@@ -298,7 +297,6 @@ void *zend_shared_alloc(size_t size)
 {
 	int i;
 	unsigned int block_size = ZEND_ALIGNED_SIZE(size);
-	TSRMLS_FETCH();
 
 #if 1
 	if (!ZCG(locked)) {
@@ -335,7 +333,7 @@ int zend_shared_memdup_size(void *source, size_t size)
 	return ZEND_ALIGNED_SIZE(size);
 }
 
-void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source TSRMLS_DC)
+void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source)
 {
 	void *old_p, *retval;
 
@@ -353,10 +351,10 @@ void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source TSRML
 	return retval;
 }
 
-void zend_shared_alloc_safe_unlock(TSRMLS_D)
+void zend_shared_alloc_safe_unlock(void)
 {
 	if (ZCG(locked)) {
-		zend_shared_alloc_unlock(TSRMLS_C);
+		zend_shared_alloc_unlock();
 	}
 }
 
@@ -366,7 +364,7 @@ static FLOCK_STRUCTURE(mem_write_lock, F_WRLCK, SEEK_SET, 0, 1);
 static FLOCK_STRUCTURE(mem_write_unlock, F_UNLCK, SEEK_SET, 0, 1);
 #endif
 
-void zend_shared_alloc_lock(TSRMLS_D)
+void zend_shared_alloc_lock(void)
 {
 #ifndef ZEND_WIN32
 
@@ -405,7 +403,7 @@ void zend_shared_alloc_lock(TSRMLS_D)
 	zend_hash_init(&xlat_table, 128, NULL, NULL, 1);
 }
 
-void zend_shared_alloc_unlock(TSRMLS_D)
+void zend_shared_alloc_unlock(void)
 {
 	/* Destroy translation table */
 	zend_hash_destroy(&xlat_table);
@@ -476,7 +474,7 @@ const char *zend_accel_get_shared_model(void)
 	return g_shared_model;
 }
 
-void zend_accel_shared_protect(int mode TSRMLS_DC)
+void zend_accel_shared_protect(int mode)
 {
 #ifdef HAVE_MPROTECT
 	int i;

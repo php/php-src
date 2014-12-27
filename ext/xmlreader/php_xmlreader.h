@@ -51,7 +51,7 @@ PHP_MSHUTDOWN_FUNCTION(xmlreader);
 PHP_MINFO_FUNCTION(xmlreader);
 
 #define REGISTER_XMLREADER_CLASS_CONST_LONG(const_name, value) \
-	zend_declare_class_constant_long(xmlreader_class_entry, const_name, sizeof(const_name)-1, (zend_long)value TSRMLS_CC);
+	zend_declare_class_constant_long(xmlreader_class_entry, const_name, sizeof(const_name)-1, (zend_long)value);
 
 #ifdef ZTS
 #define XMLREADER_G(v) TSRMG(xmlreader_globals_id, zend_xmlreader_globals *, v)

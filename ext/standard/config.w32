@@ -20,7 +20,8 @@ EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
 	url_scanner_ex.c ftp_fopen_wrapper.c http_fopen_wrapper.c \
 	php_fopen_wrapper.c credits.c css.c var_unserializer.c ftok.c sha1.c \
 	user_filters.c uuencode.c filters.c proc_open.c password.c \
-	streamsfuncs.c http.c flock_compat.c", false /* never shared */);
+	streamsfuncs.c http.c flock_compat.c", false /* never shared */,
+	'/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 	PHP_INSTALL_HEADERS("", "ext/standard");
 if (PHP_MBREGEX != "no") {
 	CHECK_HEADER_ADD_INCLUDE("oniguruma.h", "CFLAGS_STANDARD", PHP_MBREGEX + ";ext\\mbstring\\oniguruma")   

@@ -39,13 +39,12 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 			}
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
-				TSRMLS_FETCH();
-
+			
 				if (arr != &EG(symbol_table)) {
 					/* break possible cycles */
 					GC_TYPE(arr) = IS_NULL;
 					GC_REMOVE_FROM_BUFFER(arr);
-					zend_array_destroy(&arr->ht TSRMLS_CC);
+					zend_array_destroy(&arr->ht);
 					efree_size(arr, sizeof(zend_array));
 				}
 				break;
@@ -59,15 +58,13 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 			}
 		case IS_OBJECT: {
 				zend_object *obj = (zend_object*)p;
-				TSRMLS_FETCH();
-
+			
 				OBJ_RELEASE(obj);
 				break;
 			}
 		case IS_RESOURCE: {
 				zend_resource *res = (zend_resource*)p;
-				TSRMLS_FETCH();
-
+			
 				if (--GC_REFCOUNT(res) == 0) {
 					/* destroy resource */
 					zend_list_free(res);
@@ -77,9 +74,8 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)p;
 				if (--GC_REFCOUNT(ref) == 0) {
-					TSRMLS_FETCH();
-
-					i_zval_ptr_dtor(&ref->val ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
+				
+					i_zval_ptr_dtor(&ref->val ZEND_FILE_LINE_RELAY_CC);
 					efree_size(ref, sizeof(zend_reference));
 				}
 				break;
@@ -101,13 +97,12 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 			}
 		case IS_ARRAY: {
 				zend_array *arr = (zend_array*)p;
-				TSRMLS_FETCH();
-
+			
 				if (arr != &EG(symbol_table)) {
 					/* break possible cycles */
 					GC_TYPE(arr) = IS_NULL;
 					GC_REMOVE_FROM_BUFFER(arr);
-					zend_array_destroy(&arr->ht TSRMLS_CC);
+					zend_array_destroy(&arr->ht);
 					efree_size(arr, sizeof(zend_array));
 				}
 				break;
@@ -121,24 +116,21 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 			}
 		case IS_OBJECT: {
 				zend_object *obj = (zend_object*)p;
-				TSRMLS_FETCH();
-
-				zend_objects_store_del(obj TSRMLS_CC);
+			
+				zend_objects_store_del(obj);
 				break;
 			}
 		case IS_RESOURCE: {
 				zend_resource *res = (zend_resource*)p;
-				TSRMLS_FETCH();
-
+			
 				/* destroy resource */
 				zend_list_free(res);
 				break;
 			}
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)p;
-				TSRMLS_FETCH();
-
-				i_zval_ptr_dtor(&ref->val ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
+			
+				i_zval_ptr_dtor(&ref->val ZEND_FILE_LINE_RELAY_CC);
 				efree_size(ref, sizeof(zend_reference));
 				break;
 			}
@@ -241,8 +233,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			break;
 		case IS_ARRAY: {
 				HashTable *ht;
-				TSRMLS_FETCH();
-
+			
 				if (Z_ARR_P(zvalue) == &EG(symbol_table)) {
 					return; /* do nothing */
 				}
@@ -269,9 +260,9 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 }
 
 
-ZEND_API size_t zend_print_variable(zval *var TSRMLS_DC) 
+ZEND_API size_t zend_print_variable(zval *var) 
 {
-	return zend_print_zval(var, 0 TSRMLS_CC);
+	return zend_print_zval(var, 0);
 }
 
 
@@ -296,9 +287,8 @@ ZEND_API void _zval_internal_dtor_wrapper(zval *zvalue)
 
 ZEND_API void _zval_ptr_dtor_wrapper(zval *zval_ptr)
 {
-	TSRMLS_FETCH();
 
-	i_zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_CC TSRMLS_CC);
+	i_zval_ptr_dtor(zval_ptr ZEND_FILE_LINE_CC);
 }
 
 
@@ -308,7 +298,7 @@ ZEND_API void _zval_internal_ptr_dtor_wrapper(zval *zval_ptr)
 }
 #endif
 
-ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+ZEND_API int zval_copy_static_var(zval *p, int num_args, va_list args, zend_hash_key *key) /* {{{ */
 {
 	zend_array *symbol_table;
 	HashTable *target = va_arg(args, HashTable*);
@@ -318,7 +308,7 @@ ZEND_API int zval_copy_static_var(zval *p TSRMLS_DC, int num_args, va_list args,
 	if (Z_CONST_FLAGS_P(p) & (IS_LEXICAL_VAR|IS_LEXICAL_REF)) {
 		is_ref = Z_CONST_FLAGS_P(p) & IS_LEXICAL_REF;
     
-		symbol_table = zend_rebuild_symbol_table(TSRMLS_C);
+		symbol_table = zend_rebuild_symbol_table();
 		p = zend_hash_find(&symbol_table->ht, key->key);
 		if (!p) {
 			p = &tmp;

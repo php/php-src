@@ -26,7 +26,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-static inline uint32_t phpdbg_decode_literal(zend_op_array *ops, zval *literal TSRMLS_DC) /* {{{ */
+static inline uint32_t phpdbg_decode_literal(zend_op_array *ops, zval *literal) /* {{{ */
 {
 	int iter = 0;
 
@@ -40,7 +40,7 @@ static inline uint32_t phpdbg_decode_literal(zend_op_array *ops, zval *literal T
 	return 0;
 } /* }}} */
 
-static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t type, HashTable *vars TSRMLS_DC) /* {{{ */
+static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t type, HashTable *vars) /* {{{ */
 {
 	char *decode = NULL;
 
@@ -64,7 +64,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 		} break;
 
 		case IS_CONST:
-			asprintf(&decode, "C%u", phpdbg_decode_literal(ops, RT_CONSTANT(ops, *op) TSRMLS_CC));
+			asprintf(&decode, "C%u", phpdbg_decode_literal(ops, RT_CONSTANT(ops, *op)));
 		break;
 
 		case IS_UNUSED:
@@ -74,7 +74,7 @@ static inline char *phpdbg_decode_op(zend_op_array *ops, znode_op *op, uint32_t 
 	return decode;
 } /* }}} */
 
-char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRMLS_DC) /*{{{ */
+char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars) /*{{{ */
 {
 	char *decode[4] = {NULL, NULL, NULL, NULL};
 
@@ -90,7 +90,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 		goto format;
 
 	case ZEND_JMPZNZ:
-			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
+			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars);
 			asprintf(&decode[2], "J%u or J%llu", op->op2.opline_num, op->extended_value);
 		goto result;
 
@@ -102,7 +102,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 #ifdef ZEND_JMP_SET
 	case ZEND_JMP_SET:
 #endif
-		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
+		decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars);
 		asprintf(&decode[2], "J%ld", OP_JMP_ADDR(op, op->op2) - ops->opcodes);
 	goto result;
 
@@ -110,10 +110,10 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *op, HashTable *vars TSRM
 		goto result;
 
 		default: {
-			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars TSRMLS_CC);
-			decode[2] = phpdbg_decode_op(ops, &op->op2, op->op2_type, vars TSRMLS_CC);
+			decode[1] = phpdbg_decode_op(ops, &op->op1, op->op1_type, vars);
+			decode[2] = phpdbg_decode_op(ops, &op->op2, op->op2_type, vars);
 result:
-			decode[3] = phpdbg_decode_op(ops, &op->result, op->result_type, vars TSRMLS_CC);
+			decode[3] = phpdbg_decode_op(ops, &op->result, op->result_type, vars);
 format:
 			asprintf(&decode[0],
 				"%-20s %-20s %-20s",
@@ -133,7 +133,7 @@ format:
 	return decode[0];
 } /* }}} */
 
-void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
+void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, zend_bool ignore_flags) /* {{{ */
 {
 	/* force out a line while stepping so the user knows what is happening */
 	if (ignore_flags ||
@@ -142,7 +142,7 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 		(PHPDBG_G(oplog)))) {
 
 		zend_op *opline = (zend_op *) execute_data->opline;
-		char *decode = phpdbg_decode_opline(&execute_data->func->op_array, opline, vars TSRMLS_CC);
+		char *decode = phpdbg_decode_opline(&execute_data->func->op_array, opline, vars);
 
 		if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) || (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
 			/* output line info */
@@ -169,9 +169,9 @@ void phpdbg_print_opline_ex(zend_execute_data *execute_data, HashTable *vars, ze
 	}
 } /* }}} */
 
-void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
+void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags) /* {{{ */
 {
-	phpdbg_print_opline_ex(execute_data, NULL, ignore_flags TSRMLS_CC);
+	phpdbg_print_opline_ex(execute_data, NULL, ignore_flags);
 } /* }}} */
 
 const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */

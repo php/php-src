@@ -135,15 +135,15 @@ Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, 
 bool(false)
 
 -- float 10.5 --
-Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, double given
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, float given
 bool(false)
 
 -- float -10.5 --
-Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, double given
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, float given
 bool(false)
 
 -- float .5 --
-Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, double given
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, float given
 bool(false)
 
 -- empty array --

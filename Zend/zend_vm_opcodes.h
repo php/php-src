@@ -68,7 +68,6 @@ END_EXTERN_C()
 #define ZEND_ASSIGN                           38
 #define ZEND_ASSIGN_REF                       39
 #define ZEND_ECHO                             40
-#define ZEND_PRINT                            41
 #define ZEND_JMP                              42
 #define ZEND_JMPZ                             43
 #define ZEND_JMPNZ                            44

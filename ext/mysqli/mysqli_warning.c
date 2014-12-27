@@ -53,7 +53,7 @@ void php_clear_warnings(MYSQLI_WARNING *w)
 #ifndef MYSQLI_USE_MYSQLND
 /* {{{ MYSQLI_WARNING *php_new_warning */
 static
-MYSQLI_WARNING *php_new_warning(const char *reason, int errorno TSRMLS_DC)
+MYSQLI_WARNING *php_new_warning(const char *reason, int errorno)
 {
 	MYSQLI_WARNING *w;
 
@@ -69,8 +69,8 @@ MYSQLI_WARNING *php_new_warning(const char *reason, int errorno TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql TSRMLS_DC) */
-MYSQLI_WARNING *php_get_warnings(MYSQL *mysql TSRMLS_DC)
+/* {{{ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql) */
+MYSQLI_WARNING *php_get_warnings(MYSQL *mysql)
 {
 	MYSQLI_WARNING *w, *first = NULL, *prev = NULL;
 	MYSQL_RES		*result;
@@ -83,7 +83,7 @@ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql TSRMLS_DC)
 	result = mysql_store_result(mysql);
 
 	while ((row = mysql_fetch_row(result))) {
-		w = php_new_warning(row[2], atoi(row[1]) TSRMLS_CC);
+		w = php_new_warning(row[2], atoi(row[1]));
 		if (!first) {
 			first = w;
 		}
@@ -99,7 +99,7 @@ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql TSRMLS_DC)
 #else
 /* {{{ MYSQLI_WARNING *php_new_warning */
 static
-MYSQLI_WARNING *php_new_warning(const zval * reason, int errorno TSRMLS_DC)
+MYSQLI_WARNING *php_new_warning(const zval * reason, int errorno)
 {
 	MYSQLI_WARNING *w;
 
@@ -118,18 +118,18 @@ MYSQLI_WARNING *php_new_warning(const zval * reason, int errorno TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql TSRMLS_DC) */
-MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC)
+/* {{{ MYSQLI_WARNING *php_get_warnings(MYSQL *mysql) */
+MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 {
 	MYSQLI_WARNING	*w, *first = NULL, *prev = NULL;
 	MYSQL_RES		*result;
 	zval			row;
 
-	if (mysql->m->query(mysql, "SHOW WARNINGS", 13 TSRMLS_CC)) {
+	if (mysql->m->query(mysql, "SHOW WARNINGS", 13)) {
 		return NULL;
 	}
 
-	result = mysql->m->use_result(mysql, 0 TSRMLS_CC);
+	result = mysql->m->use_result(mysql, 0);
 
 	for (;;) {
 		zval *entry;
@@ -153,7 +153,7 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC)
 		/* 2. Here comes the reason */
 		entry = zend_hash_get_current_data(Z_ARRVAL(row));
 
-		w = php_new_warning(entry, errno TSRMLS_CC);
+		w = php_new_warning(entry, errno);
 		/*
 		  Don't destroy entry, because the row destroy will decrease
 		  the refcounter. Decreased twice then mysqlnd_free_result()
@@ -184,7 +184,7 @@ PHP_METHOD(mysqli_warning, next)
 	mysqli_object *obj = Z_MYSQLI_P(getThis());
 
 	if (obj->ptr) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 										 &mysqli_warning, mysqli_warning_class_entry) == FAILURE) {
 			return;
 		}
@@ -203,7 +203,7 @@ PHP_METHOD(mysqli_warning, next)
 
 /* {{{ property mysqli_warning_message */
 static
-zval *mysqli_warning_message(mysqli_object *obj, zval *retval TSRMLS_DC)
+zval *mysqli_warning_message(mysqli_object *obj, zval *retval)
 {
 	MYSQLI_WARNING *w;
 
@@ -219,7 +219,7 @@ zval *mysqli_warning_message(mysqli_object *obj, zval *retval TSRMLS_DC)
 
 /* {{{ property mysqli_warning_sqlstate */
 static
-zval *mysqli_warning_sqlstate(mysqli_object *obj, zval *retval TSRMLS_DC)
+zval *mysqli_warning_sqlstate(mysqli_object *obj, zval *retval)
 {
 	MYSQLI_WARNING *w;
 
@@ -235,7 +235,7 @@ zval *mysqli_warning_sqlstate(mysqli_object *obj, zval *retval TSRMLS_DC)
 
 /* {{{ property mysqli_warning_error */
 static
-zval *mysqli_warning_errno(mysqli_object *obj, zval *retval TSRMLS_DC)
+zval *mysqli_warning_errno(mysqli_object *obj, zval *retval)
 {
 	MYSQLI_WARNING *w;
 
@@ -262,7 +262,7 @@ PHP_METHOD(mysqli_warning, __construct)
 	if (ZEND_NUM_ARGS() != 1) {
 		WRONG_PARAM_COUNT;
 	}
-	if (zend_parse_parameters(1 TSRMLS_CC, "o", &z)==FAILURE) {
+	if (zend_parse_parameters(1, "o", &z)==FAILURE) {
 		return;
 	}
 	obj = Z_MYSQLI_P(z);
@@ -272,12 +272,12 @@ PHP_METHOD(mysqli_warning, __construct)
 		MYSQLI_FETCH_RESOURCE_CONN(mysql, z, MYSQLI_STATUS_VALID);
 		if (mysql_warning_count(mysql->mysql)) {
 #ifndef MYSQLI_USE_MYSQLND
-			w = php_get_warnings(mysql->mysql TSRMLS_CC);
+			w = php_get_warnings(mysql->mysql);
 #else
-			w = php_get_warnings(mysql->mysql->data TSRMLS_CC);
+			w = php_get_warnings(mysql->mysql->data);
 #endif
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No warnings found");
+			php_error_docref(NULL, E_WARNING, "No warnings found");
 			RETURN_FALSE;
 		}
 	} else if (obj->zo.ce == mysqli_stmt_class_entry) {
@@ -286,17 +286,17 @@ PHP_METHOD(mysqli_warning, __construct)
 #ifndef MYSQLI_USE_MYSQLND
 		hdl = mysqli_stmt_get_connection(stmt->stmt);
 		if (mysql_warning_count(hdl)) {
-			w = php_get_warnings(hdl TSRMLS_CC);
+			w = php_get_warnings(hdl);
 #else
 		if (mysqlnd_stmt_warning_count(stmt->stmt)) {
-			w = php_get_warnings(mysqli_stmt_get_connection(stmt->stmt) TSRMLS_CC);
+			w = php_get_warnings(mysqli_stmt_get_connection(stmt->stmt));
 #endif
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No warnings found");
+			php_error_docref(NULL, E_WARNING, "No warnings found");
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid class argument");
+		php_error_docref(NULL, E_WARNING, "invalid class argument");
 		RETURN_FALSE;
 	}
 
@@ -304,7 +304,7 @@ PHP_METHOD(mysqli_warning, __construct)
 	mysqli_resource->ptr = mysqli_resource->info = (void *)w;
 	mysqli_resource->status = MYSQLI_STATUS_VALID;
 
-	if (!getThis() || !instanceof_function(Z_OBJCE_P(getThis()), mysqli_warning_class_entry TSRMLS_CC)) {
+	if (!getThis() || !instanceof_function(Z_OBJCE_P(getThis()), mysqli_warning_class_entry)) {
 		MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_warning_class_entry);
 	} else {
 		(Z_MYSQLI_P(getThis()))->ptr = mysqli_resource;

@@ -19,15 +19,15 @@
 #include "phpdbg_webdata_transfer.h"
 #include "ext/standard/php_var.h"
 
-static int phpdbg_is_auto_global(char *name, int len TSRMLS_DC) {
+static int phpdbg_is_auto_global(char *name, int len) {
 	int ret;
 	zend_string *str = zend_string_init(name, len, 0);
-	ret = zend_is_auto_global(str TSRMLS_CC);
+	ret = zend_is_auto_global(str);
 	efree(str);
 	return ret;
 }
 
-PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
+PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len) {
 	zval array;
 	HashTable *ht;
 	zval zv[9] = {{{0}}};
@@ -37,11 +37,11 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
 
 	/* fetch superglobals */
 	{
-		phpdbg_is_auto_global(ZEND_STRL("GLOBALS") TSRMLS_CC);
+		phpdbg_is_auto_global(ZEND_STRL("GLOBALS"));
 		/* might be JIT */
-		phpdbg_is_auto_global(ZEND_STRL("_ENV") TSRMLS_CC);
-		phpdbg_is_auto_global(ZEND_STRL("_SERVER") TSRMLS_CC);
-		phpdbg_is_auto_global(ZEND_STRL("_REQUEST") TSRMLS_CC);
+		phpdbg_is_auto_global(ZEND_STRL("_ENV"));
+		phpdbg_is_auto_global(ZEND_STRL("_SERVER"));
+		phpdbg_is_auto_global(ZEND_STRL("_REQUEST"));
 		array_init(&zv[1]);
 		zend_hash_copy(Z_ARRVAL(zv[1]), &EG(symbol_table).ht, NULL);
 		Z_ARRVAL(zv[1])->pDestructor = NULL; /* we're operating on a copy! Don't double free zvals */
@@ -165,7 +165,7 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len TSRMLS_DC) {
 		smart_str buf = {0};
 
 		PHP_VAR_SERIALIZE_INIT(var_hash);
-		php_var_serialize(&buf, &array, &var_hash TSRMLS_CC);
+		php_var_serialize(&buf, &array, &var_hash);
 		PHP_VAR_SERIALIZE_DESTROY(var_hash);
 		*msg = buf.s->val;
 		*len = buf.s->len;

@@ -53,7 +53,7 @@ static PHP_INI_MH(OnUpdateEol)
 		return FAILURE;
 	}
 
-	return phpdbg_eol_global_update(new_value->val TSRMLS_CC);
+	return phpdbg_eol_global_update(new_value->val);
 }
 
 PHP_INI_BEGIN()
@@ -64,9 +64,9 @@ PHP_INI_END()
 static zend_bool phpdbg_booted = 0;
 
 #if PHP_VERSION_ID >= 50500
-void (*zend_execute_old)(zend_execute_data *execute_data TSRMLS_DC);
+void (*zend_execute_old)(zend_execute_data *execute_data);
 #else
-void (*zend_execute_old)(zend_op_array *op_array TSRMLS_DC);
+void (*zend_execute_old)(zend_op_array *op_array);
 #endif
 
 static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
@@ -164,9 +164,8 @@ static void php_phpdbg_destroy_bp_condition(zval *data) /* {{{ */
 
 	if (brake) {
 		if (brake->ops) {
-			TSRMLS_FETCH();
-
-			destroy_op_array(brake->ops TSRMLS_CC);
+		
+			destroy_op_array(brake->ops);
 			efree(brake->ops);
 		}
 		efree((char*) brake->code);
@@ -177,9 +176,8 @@ static void php_phpdbg_destroy_registered(zval *data) /* {{{ */
 {
 	zend_function *function = (zend_function *) Z_PTR_P(data);
 
-	TSRMLS_FETCH();
 
-	destroy_zend_function(function TSRMLS_CC);
+	destroy_zend_function(function);
 } /* }}} */
 
 
@@ -248,7 +246,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 	}
 
 	if (PHPDBG_G(ops)) {
-		destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
+		destroy_op_array(PHPDBG_G(ops));
 		efree(PHPDBG_G(ops));
 		PHPDBG_G(ops) = NULL;
 	}
@@ -265,7 +263,7 @@ static PHP_FUNCTION(phpdbg_exec)
 {
 	zend_string *exec;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &exec) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &exec) == FAILURE) {
 		return;
 	}
 
@@ -307,7 +305,7 @@ static PHP_FUNCTION(phpdbg_break_next)
 		return;
 	}
     
-	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) EG(current_execute_data)->opline + 1 TSRMLS_CC);
+	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) EG(current_execute_data)->opline + 1);
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_file(string file, integer line) */
@@ -317,11 +315,11 @@ static PHP_FUNCTION(phpdbg_break_file)
 	size_t   flen = 0;
 	long     line;
     
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &file, &flen, &line) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &file, &flen, &line) == FAILURE) {
 		return;
 	}
 
-	phpdbg_set_breakpoint_file(file, line TSRMLS_CC);
+	phpdbg_set_breakpoint_file(file, line);
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_method(string class, string method) */
@@ -330,11 +328,11 @@ static PHP_FUNCTION(phpdbg_break_method)
 	char *class = NULL, *method = NULL;
 	size_t clen = 0, mlen = 0;
     
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &class, &clen, &method, &mlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &class, &clen, &method, &mlen) == FAILURE) {
 		return;
 	}
 
-	phpdbg_set_breakpoint_method(class, method TSRMLS_CC);
+	phpdbg_set_breakpoint_method(class, method);
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_function(string function) */
@@ -343,11 +341,11 @@ static PHP_FUNCTION(phpdbg_break_function)
 	char    *function = NULL;
 	size_t   function_len;
     
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &function, &function_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &function, &function_len) == FAILURE) {
 		return;
 	}
 
-	phpdbg_set_breakpoint_symbol(function, function_len TSRMLS_CC);
+	phpdbg_set_breakpoint_symbol(function, function_len);
 } /* }}} */
 
 /* {{{ proto void phpdbg_clear(void)
@@ -372,7 +370,7 @@ static PHP_FUNCTION(phpdbg_color)
 	char *color = NULL;
 	size_t color_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &element, &color, &color_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &element, &color, &color_len) == FAILURE) {
 		return;
 	}
 
@@ -380,7 +378,7 @@ static PHP_FUNCTION(phpdbg_color)
 		case PHPDBG_COLOR_NOTICE:
 		case PHPDBG_COLOR_ERROR:
 		case PHPDBG_COLOR_PROMPT:
-			phpdbg_set_color_ex(element, color, color_len TSRMLS_CC);
+			phpdbg_set_color_ex(element, color, color_len);
 		break;
 
 		default: zend_error(E_ERROR, "phpdbg detected an incorrect color constant");
@@ -393,11 +391,11 @@ static PHP_FUNCTION(phpdbg_prompt)
 	char *prompt = NULL;
 	size_t prompt_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &prompt, &prompt_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &prompt, &prompt_len) == FAILURE) {
 		return;
 	}
 
-	phpdbg_set_prompt(prompt TSRMLS_CC);
+	phpdbg_set_prompt(prompt);
 } /* }}} */
 
 ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_next_arginfo, 0, 0, 0)
@@ -473,18 +471,18 @@ static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* 
 	return SUCCESS;
 } /* }}} */
 
-static char* php_sapi_phpdbg_read_cookies(TSRMLS_D) /* {{{ */
+static char* php_sapi_phpdbg_read_cookies(void) /* {{{ */
 {
 	return NULL;
 } /* }}} */
 
-static int php_sapi_phpdbg_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC) /* {{{ */
+static int php_sapi_phpdbg_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s) /* {{{ */
 {
 	return 0;
 }
 /* }}} */
 
-static int php_sapi_phpdbg_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC) /* {{{ */
+static int php_sapi_phpdbg_send_headers(sapi_headers_struct *sapi_headers) /* {{{ */
 {
 	/* We do nothing here, this function is needed to prevent that the fallback
 	 * header handling is called. */
@@ -492,12 +490,12 @@ static int php_sapi_phpdbg_send_headers(sapi_headers_struct *sapi_headers TSRMLS
 }
 /* }}} */
 
-static void php_sapi_phpdbg_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC) /* {{{ */
+static void php_sapi_phpdbg_send_header(sapi_header_struct *sapi_header, void *server_context) /* {{{ */
 {
 }
 /* }}} */
 
-static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
+static void php_sapi_phpdbg_log_message(char *message) /* {{{ */
 {
 	/*
 	* We must not request TSRM before being boot
@@ -517,13 +515,13 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 			case E_USER_ERROR:
 			case E_PARSE:
 			case E_RECOVERABLE_ERROR: {
-				const char *file_char = zend_get_executed_filename(TSRMLS_C);
+				const char *file_char = zend_get_executed_filename();
 				zend_string *file = zend_string_init(file_char, strlen(file_char), 0); 
-				phpdbg_list_file(file, 3, zend_get_executed_lineno(TSRMLS_C) - 1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
+				phpdbg_list_file(file, 3, zend_get_executed_lineno() - 1, zend_get_executed_lineno());
 				efree(file);
 
 				do {
-					switch (phpdbg_interactive(1 TSRMLS_CC)) {
+					switch (phpdbg_interactive(1)) {
 						case PHPDBG_LEAVE:
 						case PHPDBG_FINISH:
 						case PHPDBG_UNTIL:
@@ -539,7 +537,7 @@ static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int php_sapi_phpdbg_deactivate(TSRMLS_D) /* {{{ */
+static int php_sapi_phpdbg_deactivate(void) /* {{{ */
 {
 	if ((PHPDBG_G(flags) & PHPDBG_IS_STOPPING) == PHPDBG_IS_CLEANING) {
 		zend_phpdbg_globals *pg = PHPDBG_G(backup) = calloc(1, sizeof(zend_phpdbg_globals));
@@ -566,41 +564,41 @@ static int php_sapi_phpdbg_deactivate(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-static void php_sapi_phpdbg_register_vars(zval *track_vars_array TSRMLS_DC) /* {{{ */
+static void php_sapi_phpdbg_register_vars(zval *track_vars_array) /* {{{ */
 {
 	size_t len;
 	char  *docroot = "";
 
 	/* In phpdbg mode, we consider the environment to be a part of the server variables
 	*/
-	php_import_environment_variables(track_vars_array TSRMLS_CC);
+	php_import_environment_variables(track_vars_array);
 
 	if (PHPDBG_G(exec)) {
 		len = PHPDBG_G(exec_len);
-		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
-			php_register_variable("PHP_SELF", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len)) {
+			php_register_variable("PHP_SELF", PHPDBG_G(exec), track_vars_array);
 		}
-		if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_NAME", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
-			php_register_variable("SCRIPT_NAME", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+		if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_NAME", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len)) {
+			php_register_variable("SCRIPT_NAME", PHPDBG_G(exec), track_vars_array);
 		}
 
-		if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_FILENAME", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
-			php_register_variable("SCRIPT_FILENAME", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+		if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_FILENAME", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len)) {
+			php_register_variable("SCRIPT_FILENAME", PHPDBG_G(exec), track_vars_array);
 		}
-		if (sapi_module.input_filter(PARSE_SERVER, "PATH_TRANSLATED", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
-			php_register_variable("PATH_TRANSLATED", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+		if (sapi_module.input_filter(PARSE_SERVER, "PATH_TRANSLATED", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len)) {
+			php_register_variable("PATH_TRANSLATED", PHPDBG_G(exec), track_vars_array);
 		}
 	}
 
 	/* any old docroot will do */
 	len = 0;
-	if (sapi_module.input_filter(PARSE_SERVER, "DOCUMENT_ROOT", &docroot, len, &len TSRMLS_CC)) {
-		php_register_variable("DOCUMENT_ROOT", docroot, track_vars_array TSRMLS_CC);
+	if (sapi_module.input_filter(PARSE_SERVER, "DOCUMENT_ROOT", &docroot, len, &len)) {
+		php_register_variable("DOCUMENT_ROOT", docroot, track_vars_array);
 	}
 }
 /* }}} */
 
-static inline size_t php_sapi_phpdbg_ub_write(const char *message, size_t length TSRMLS_DC) /* {{{ */
+static inline size_t php_sapi_phpdbg_ub_write(const char *message, size_t length) /* {{{ */
 {
 	if (PHPDBG_G(socket_fd) != -1 && !(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
 		send(PHPDBG_G(socket_fd), message, length, 0);
@@ -614,7 +612,7 @@ typedef struct {
 	int fd;
 } php_stdio_stream_data;
 
-static size_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) {
+static size_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t count) {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
 	while (data->fd >= 0) {
@@ -635,25 +633,24 @@ static size_t phpdbg_stdiop_write(php_stream *stream, const char *buf, size_t co
 		break;
 	}
 
-	return PHPDBG_G(php_stdiop_write)(stream, buf, count TSRMLS_CC);
+	return PHPDBG_G(php_stdiop_write)(stream, buf, count);
 }
 
 #if PHP_VERSION_ID >= 50700
-static inline void php_sapi_phpdbg_flush(void *context TSRMLS_DC)  /* {{{ */
+static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 {
 #else
 static inline void php_sapi_phpdbg_flush(void *context)  /* {{{ */
 {
-	TSRMLS_FETCH();
 #endif
 
-	if (!phpdbg_active_sigsafe_mem(TSRMLS_C)) {
+	if (!phpdbg_active_sigsafe_mem()) {
 		fflush(PHPDBG_G(io)[PHPDBG_STDOUT].ptr);
 	}
 } /* }}} */
 
 /* copied from sapi/cli/php_cli.c cli_register_file_handles */
-static void phpdbg_register_file_handles(TSRMLS_D) /* {{{ */
+static void phpdbg_register_file_handles(void) /* {{{ */
 {
 	zval zin, zout, zerr;
 	php_stream *s_in, *s_out, *s_err;
@@ -685,19 +682,19 @@ static void phpdbg_register_file_handles(TSRMLS_D) /* {{{ */
 	ic.flags = CONST_CS;
 	ic.name = zend_string_init(ZEND_STRL("STDIN"), 0);
 	ic.module_number = 0;
-	zend_register_constant(&ic TSRMLS_CC);
+	zend_register_constant(&ic);
 
 	oc.value = zout;
 	oc.flags = CONST_CS;
 	oc.name = zend_string_init(ZEND_STRL("STDOUT"), 0);
 	oc.module_number = 0;
-	zend_register_constant(&oc TSRMLS_CC);
+	zend_register_constant(&oc);
 
 	ec.value = zerr;
 	ec.flags = CONST_CS;
 	ec.name = zend_string_init(ZEND_STRL("STDERR"), 0);
 	ec.module_number = 0;
-	zend_register_constant(&ec TSRMLS_CC);
+	zend_register_constant(&ec);
 }
 /* }}} */
 
@@ -783,7 +780,7 @@ void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */
 	INI_DEFAULT("report_zend_debug", "0");
 } /* }}} */
 
-static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
+static void phpdbg_welcome(zend_bool cleaning) /* {{{ */
 {
 	/* print blurb */
 	if (!cleaning) {
@@ -811,7 +808,6 @@ static void phpdbg_welcome(zend_bool cleaning TSRMLS_DC) /* {{{ */
 
 static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 {
-	TSRMLS_FETCH();
 
 	if (PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE) {
 		/* we quit remote consoles on recv SIGINT */
@@ -825,11 +821,11 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 			if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
 				char mem[PHPDBG_SIGSAFE_MEM_SIZE + 1];
 
-				phpdbg_set_sigsafe_mem(mem TSRMLS_CC);
+				phpdbg_set_sigsafe_mem(mem);
 				zend_try {
-					phpdbg_force_interruption(TSRMLS_C);
+					phpdbg_force_interruption();
 				} zend_end_try()
-				phpdbg_clear_sigsafe_mem(TSRMLS_C);
+				phpdbg_clear_sigsafe_mem();
 				return;
 			}
 			PHPDBG_G(flags) |= PHPDBG_IS_SIGNALED;
@@ -848,7 +844,7 @@ static void phpdbg_remote_close(int socket, FILE *stream) {
 }
 
 /* don't inline this, want to debug it easily, will inline when done */
-static int phpdbg_remote_init(const char* address, unsigned short port, int server, int *socket, FILE **stream TSRMLS_DC) {
+static int phpdbg_remote_init(const char* address, unsigned short port, int server, int *socket, FILE **stream) {
 	phpdbg_remote_close(*socket, *stream);
 
 	if (server < 0) {
@@ -890,7 +886,6 @@ void phpdbg_sigio_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 	int flags;
 	size_t newlen;
 	size_t i/*, last_nl*/;
-	TSRMLS_FETCH();
 
 //	if (!(info->si_band & POLLIN)) {
 //		return; /* Not interested in writeablility etc., just interested in incoming data */
@@ -914,11 +909,11 @@ void phpdbg_sigio_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 						break; /* or quit ??? */
 					}
 					if (PHPDBG_G(flags) & PHPDBG_IS_SIGNALED) {
-						phpdbg_set_sigsafe_mem(mem TSRMLS_CC);
+						phpdbg_set_sigsafe_mem(mem);
 						zend_try {
-							phpdbg_force_interruption(TSRMLS_C);
+							phpdbg_force_interruption();
 						} zend_end_try();
-						phpdbg_clear_sigsafe_mem(TSRMLS_C);
+						phpdbg_clear_sigsafe_mem();
 						break;
 					}
 					if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
@@ -941,7 +936,6 @@ void phpdbg_sigio_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 {
 	int is_handled = FAILURE;
-	TSRMLS_FETCH();
 
 	switch (sig) {
 		case SIGBUS:
@@ -949,10 +943,10 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 			if (PHPDBG_G(sigsegv_bailout)) {
 				LONGJMP(*PHPDBG_G(sigsegv_bailout), FAILURE);
 			}
-			is_handled = phpdbg_watchpoint_segfault_handler(info, context TSRMLS_CC);
+			is_handled = phpdbg_watchpoint_segfault_handler(info, context);
 			if (is_handled == FAILURE) {
 #ifdef ZEND_SIGNALS
-				zend_sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL TSRMLS_CC);
+				zend_sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
 #else
 				sigaction(sig, &PHPDBG_G(old_sigsegv_signal), NULL);
 #endif
@@ -967,10 +961,9 @@ static inline zend_mm_heap *phpdbg_mm_get_heap() /* {{{ */
 {
 	zend_mm_heap *mm_heap;
 
-	TSRMLS_FETCH();
 
-	mm_heap = zend_mm_set_heap(NULL TSRMLS_CC);
-	zend_mm_set_heap(mm_heap TSRMLS_CC);
+	mm_heap = zend_mm_set_heap(NULL);
+	zend_mm_set_heap(mm_heap);
 
 	return mm_heap;
 } /* }}} */
@@ -1205,7 +1198,7 @@ phpdbg_main:
 					PHP_VERSION,
 					get_zend_version()
 				);
-				sapi_deactivate(TSRMLS_C);
+				sapi_deactivate();
 				sapi_shutdown();
 				return 0;
 			} break;
@@ -1295,8 +1288,8 @@ phpdbg_main:
 
 		/* setup remote server if necessary */
 		if (cleaning <= 0 && listen > 0) {
-			server = phpdbg_open_socket(address, listen TSRMLS_CC);
-				if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream TSRMLS_CC) == FAILURE) {
+			server = phpdbg_open_socket(address, listen);
+				if (-1 > server || phpdbg_remote_init(address, listen, server, &socket, &stream) == FAILURE) {
 				exit(0);
 			}
 
@@ -1321,26 +1314,26 @@ phpdbg_main:
 			_free = phpdbg_free_wrapper;
 		}
 
-		zend_activate(TSRMLS_C);
+		zend_activate();
 
-		phpdbg_init_list(TSRMLS_C);
+		phpdbg_init_list();
 
 		PHPDBG_G(original_free_function) = _free;
 		_free = phpdbg_watch_efree;
 
 		zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc);
 
-		phpdbg_setup_watchpoints(TSRMLS_C);
+		phpdbg_setup_watchpoints();
 
 #if defined(ZEND_SIGNALS) && !defined(_WIN32)
 		zend_try {
-			zend_signal_activate(TSRMLS_C);
+			zend_signal_activate();
 		} zend_end_try();
 #endif
 
 #if defined(ZEND_SIGNALS) && !defined(_WIN32)
-		zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal) TSRMLS_CC); } zend_end_try();
-		zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal) TSRMLS_CC); } zend_end_try();
+		zend_try { zend_sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
+		zend_try { zend_sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal)); } zend_end_try();
 #elif !defined(_WIN32)
 		sigaction(SIGSEGV, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
 		sigaction(SIGBUS, &signal_struct, &PHPDBG_G(old_sigsegv_signal));
@@ -1348,12 +1341,12 @@ phpdbg_main:
 
 		PHPDBG_G(sapi_name_ptr) = sapi_name;
 
-		php_output_activate(TSRMLS_C);
-		php_output_deactivate(TSRMLS_C);
+		php_output_activate();
+		php_output_deactivate();
 
-		php_output_activate(TSRMLS_C);
+		php_output_activate();
 
-		if (php_request_startup(TSRMLS_C) == SUCCESS) {
+		if (php_request_startup() == SUCCESS) {
 			int i;
 
 			SG(request_info).argc = argc - php_optind + 1;
@@ -1363,7 +1356,7 @@ phpdbg_main:
 			}
 			SG(request_info).argv[i] = exec ? estrdup(exec) : estrdup("");
 
-			php_hash_environment(TSRMLS_C);
+			php_hash_environment();
 		}
 
 		/* do not install sigint handlers for remote consoles */
@@ -1372,7 +1365,7 @@ phpdbg_main:
 		if (listen < 0) {
 #endif
 #if defined(ZEND_SIGNALS) && !defined(_WIN32)
-			zend_try { zend_signal(SIGINT, phpdbg_sigint_handler TSRMLS_CC); } zend_end_try();
+			zend_try { zend_signal(SIGINT, phpdbg_sigint_handler); } zend_end_try();
 #else
 			signal(SIGINT, phpdbg_sigint_handler);
 #endif
@@ -1423,7 +1416,7 @@ phpdbg_main:
 #endif
 
 		if (exec) { /* set execution context */
-			PHPDBG_G(exec) = phpdbg_resolve_path(exec TSRMLS_CC);
+			PHPDBG_G(exec) = phpdbg_resolve_path(exec);
 			PHPDBG_G(exec_len) = PHPDBG_G(exec) ? strlen(PHPDBG_G(exec)) : 0;
 
 			free(exec);
@@ -1439,19 +1432,19 @@ phpdbg_main:
 		}
 
 		/* set default colors */
-		phpdbg_set_color_ex(PHPDBG_COLOR_PROMPT,  PHPDBG_STRL("white-bold") TSRMLS_CC);
-		phpdbg_set_color_ex(PHPDBG_COLOR_ERROR,   PHPDBG_STRL("red-bold") TSRMLS_CC);
-		phpdbg_set_color_ex(PHPDBG_COLOR_NOTICE,  PHPDBG_STRL("green") TSRMLS_CC);
+		phpdbg_set_color_ex(PHPDBG_COLOR_PROMPT,  PHPDBG_STRL("white-bold"));
+		phpdbg_set_color_ex(PHPDBG_COLOR_ERROR,   PHPDBG_STRL("red-bold"));
+		phpdbg_set_color_ex(PHPDBG_COLOR_NOTICE,  PHPDBG_STRL("green"));
 
 		/* set default prompt */
-		phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT TSRMLS_CC);
+		phpdbg_set_prompt(PHPDBG_DEFAULT_PROMPT);
 
 		/* Make stdin, stdout and stderr accessible from PHP scripts */
-		phpdbg_register_file_handles(TSRMLS_C);
+		phpdbg_register_file_handles();
 
 		if (show_banner && cleaning < 2) {
 			/* print blurb */
-			phpdbg_welcome(cleaning == 1 TSRMLS_CC);
+			phpdbg_welcome(cleaning == 1);
 		}
 
 		cleaning = -1;
@@ -1459,10 +1452,10 @@ phpdbg_main:
 		/* initialize from file */
 		PHPDBG_G(flags) |= PHPDBG_IS_INITIALIZING;
 		zend_try {
-			phpdbg_init(init_file, init_file_len, init_file_default TSRMLS_CC);
+			phpdbg_init(init_file, init_file_len, init_file_default);
 			if (bp_tmp) {
 				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
-				phpdbg_string_init(bp_tmp TSRMLS_CC);
+				phpdbg_string_init(bp_tmp);
 				free(bp_tmp);
 				bp_tmp = NULL;
 				PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
@@ -1480,7 +1473,7 @@ phpdbg_main:
 			if (settings) {
 				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
 			}
-			phpdbg_compile(TSRMLS_C);
+			phpdbg_compile();
 			PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
 		}
 
@@ -1500,7 +1493,7 @@ phpdbg_interact:
 				if (phpdbg_startup_run) {
 					zend_bool quit_immediately = phpdbg_startup_run > 1;
 					phpdbg_startup_run = 0;
-					PHPDBG_COMMAND_HANDLER(run)(NULL TSRMLS_CC);
+					PHPDBG_COMMAND_HANDLER(run)(NULL);
 					if (quit_immediately) {
 						/* if -r is on the command line more than once just quit */
 						EG(bailout) = __orig_bailout; /* reset zend_try */
@@ -1508,12 +1501,12 @@ phpdbg_interact:
 					}
 				}
 
-				phpdbg_interactive(1 TSRMLS_CC);
+				phpdbg_interactive(1);
 			} zend_catch {
 				if ((PHPDBG_G(flags) & PHPDBG_IS_CLEANING)) {
 					char *bp_tmp_str;
 					PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
-					phpdbg_export_breakpoints_to_string(&bp_tmp_str TSRMLS_CC);
+					phpdbg_export_breakpoints_to_string(&bp_tmp_str);
 					PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
 					if (bp_tmp_str) {
 						bp_tmp = strdup(bp_tmp_str);
@@ -1531,7 +1524,7 @@ phpdbg_interact:
 					
 						if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 							/* renegociate connections */
-							phpdbg_remote_init(address, listen, server, &socket, &stream TSRMLS_CC);
+							phpdbg_remote_init(address, listen, server, &socket, &stream);
 				
 							/* set streams */
 							if (stream) {
@@ -1615,8 +1608,8 @@ phpdbg_out:
 		PG(report_memleaks) = 0;
 
 		if ((PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_CLEANING) {
-			php_free_shutdown_functions(TSRMLS_C);
-			zend_objects_store_mark_destructed(&EG(objects_store) TSRMLS_CC);
+			php_free_shutdown_functions();
+			zend_objects_store_mark_destructed(&EG(objects_store));
 		}
 
 		/* sapi_module.deactivate is where to backup things, last chance before mm_shutdown... */
@@ -1634,10 +1627,10 @@ phpdbg_out:
 			settings = PHPDBG_G(backup);
 		}
 
-		php_output_deactivate(TSRMLS_C);
+		php_output_deactivate();
 
 		zend_try {
-			php_module_shutdown(TSRMLS_C);
+			php_module_shutdown();
 		} zend_end_try();
 
 		sapi_shutdown();

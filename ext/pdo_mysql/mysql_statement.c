@@ -33,18 +33,18 @@
 #include "php_pdo_mysql_int.h"
 
 #ifdef PDO_USE_MYSQLND
-#	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_mysqlnd(stmt TSRMLS_CC)
+#	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_mysqlnd(stmt)
 #	define pdo_free_bound_result(res) zval_dtor(res.zv)
 #	define pdo_mysql_stmt_close(stmt) mysqlnd_stmt_close(stmt, 0)
 #else
-#	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_libmysql(stmt TSRMLS_CC)
+#	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_libmysql(stmt)
 #	define pdo_free_bound_result(res) efree(res.buffer)
 #	define pdo_mysql_stmt_close(stmt) mysql_stmt_close(stmt)
 #endif
 
 
 
-static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
@@ -114,7 +114,7 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt) /* {{{ */
 {
 	zend_long row_count;
 	pdo_mysql_stmt *S = stmt->driver_data;
@@ -125,7 +125,7 @@ static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -159,7 +159,7 @@ static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 /* }}} */
 
 #ifndef PDO_USE_MYSQLND
-static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_mysql_stmt *S = stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -263,14 +263,14 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt TSRMLS_DC) 
 		}
 	}
 
-	pdo_mysql_stmt_set_row_count(stmt TSRMLS_CC);
+	pdo_mysql_stmt_set_row_count(stmt);
 	PDO_DBG_RETURN(1);
 }
 /* }}} */
 #endif
 
 #ifdef PDO_USE_MYSQLND
-static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_mysql_stmt *S = stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -306,13 +306,13 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt TSRMLS_DC) /
 		}
 	}
 
-	pdo_mysql_stmt_set_row_count(stmt TSRMLS_CC);
+	pdo_mysql_stmt_set_row_count(stmt);
 	PDO_DBG_RETURN(1);
 }
 /* }}} */
 #endif
 
-static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -334,11 +334,11 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		PDO_DBG_RETURN(0);
 	}
 
-	PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt TSRMLS_CC));
+	PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
 }
 /* }}} */
 
-static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
@@ -424,14 +424,14 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
 	} else {
-		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt TSRMLS_CC));
+		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
 	}
 #else
 	if (mysql_next_result(H->server) > 0) {
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
 	} else {
-		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt TSRMLS_CC));
+		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt));
 	}
 #endif
 }
@@ -450,7 +450,7 @@ static const char * const pdo_param_event_names[] =
 };
 
 
-static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type) /* {{{ */
 {
 	zval *parameter;
 #ifndef PDO_USE_MYSQLND
@@ -528,7 +528,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 							if (stm) {
 								ZVAL_STR(parameter, php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0));
 							} else {
-								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource" TSRMLS_CC);
+								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
 								return 0;
 							}
 						}
@@ -608,7 +608,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 }
 /* }}} */
 
-static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori, zend_long offset) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 #if PDO_USE_MYSQLND
@@ -672,7 +672,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 }
 /* }}} */
 
-static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
@@ -722,7 +722,7 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
@@ -823,7 +823,7 @@ static char *type_to_name_native(int type) /* {{{ */
 #undef PDO_MYSQL_NATIVE_TYPE_NAME
 } /* }}} */
 
-static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	const MYSQL_FIELD *F;
@@ -893,7 +893,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *retu
 	PDO_DBG_RETURN(SUCCESS);
 } /* }}} */
 
-static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 

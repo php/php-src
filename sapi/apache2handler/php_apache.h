@@ -70,16 +70,17 @@ void php_ap2_register_hook(apr_pool_t *p);
 #define APR_ARRAY_FOREACH_CLOSE() }}
 
 typedef struct {
-	long engine;
-	long xbithack;
-	long last_modified;
+	zend_bool engine;
+	zend_bool xbithack;
+	zend_bool last_modified;
 } php_apache2_info_struct;
 
 extern zend_module_entry apache2_module_entry;
 
 #ifdef ZTS
 extern int php_apache2_info_id;
-#define AP2(v) TSRMG(php_apache2_info_id, php_apache2_info_struct *, v)
+#define AP2(v) ZEND_TSRMG(php_apache2_info_id, php_apache2_info_struct *, v)
+ZEND_TSRMLS_CACHE_EXTERN;
 #else
 extern php_apache2_info_struct php_apache2_info;
 #define AP2(v) (php_apache2_info.v)

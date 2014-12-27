@@ -26,7 +26,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-void phpdbg_restore_frame(TSRMLS_D) /* {{{ */
+void phpdbg_restore_frame(void) /* {{{ */
 {
 	if (PHPDBG_FRAME(num) == 0) {
 		return;
@@ -40,7 +40,7 @@ void phpdbg_restore_frame(TSRMLS_D) /* {{{ */
 	EG(scope) = PHPDBG_EX(func)->op_array.scope;
 } /* }}} */
 
-void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
+void phpdbg_switch_frame(int frame) /* {{{ */
 {
 	zend_execute_data *execute_data = PHPDBG_FRAME(num)?PHPDBG_FRAME(execute_data):EG(current_execute_data);
 	int i = 0;
@@ -70,7 +70,7 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 		return;
 	}
 
-	phpdbg_restore_frame(TSRMLS_C);
+	phpdbg_restore_frame();
 
 	if (frame > 0) {
 		PHPDBG_FRAME(num) = frame;
@@ -85,14 +85,14 @@ void phpdbg_switch_frame(int frame TSRMLS_DC) /* {{{ */
 	phpdbg_notice("frame", "id=\"%d\"", "Switched to frame #%d", frame);
 
 	{
-		const char *file_chr = zend_get_executed_filename(TSRMLS_C);
+		const char *file_chr = zend_get_executed_filename();
 		zend_string *file = zend_string_init(file_chr, strlen(file_chr), 0);
-		phpdbg_list_file(file, 3, zend_get_executed_lineno(TSRMLS_C) - 1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
+		phpdbg_list_file(file, 3, zend_get_executed_lineno() - 1, zend_get_executed_lineno());
 		efree(file);
 	}
 } /* }}} */
 
-static void phpdbg_dump_prototype(zval *tmp TSRMLS_DC) /* {{{ */
+static void phpdbg_dump_prototype(zval *tmp) /* {{{ */
 {
 	zval *funcname, *class, class_zv, *type, *args, *argstmp;
 
@@ -129,7 +129,7 @@ static void phpdbg_dump_prototype(zval *tmp TSRMLS_DC) /* {{{ */
 
 		phpdbg_try_access {
 			/* assuming no autoloader call is necessary, class should have been loaded if it's in backtrace ... */
-			if ((func = phpdbg_get_function(Z_STRVAL_P(funcname), class ? Z_STRVAL_P(class) : NULL TSRMLS_CC))) {
+			if ((func = phpdbg_get_function(Z_STRVAL_P(funcname), class ? Z_STRVAL_P(class) : NULL))) {
 				arginfo = func->common.arg_info;
 			}
 		} phpdbg_end_try_access();
@@ -153,7 +153,7 @@ static void phpdbg_dump_prototype(zval *tmp TSRMLS_DC) /* {{{ */
 			}
 			++j;
 
-			zend_print_flat_zval_r(argstmp TSRMLS_CC);
+			zend_print_flat_zval_r(argstmp);
 
 			phpdbg_xml("</arg>");
 		} ZEND_HASH_FOREACH_END();
@@ -166,7 +166,7 @@ static void phpdbg_dump_prototype(zval *tmp TSRMLS_DC) /* {{{ */
 	phpdbg_out(")");
 }
 
-void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
+void phpdbg_dump_backtrace(size_t num) /* {{{ */
 {
 	HashPosition position;
 	zval zbacktrace;
@@ -184,7 +184,7 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 	}
 
 	phpdbg_try_access {
-		zend_fetch_debug_backtrace(&zbacktrace, 0, 0, limit TSRMLS_CC);
+		zend_fetch_debug_backtrace(&zbacktrace, 0, 0, limit);
 	} phpdbg_catch_access {
 		phpdbg_error("signalsegv", "", "Couldn't fetch backtrace, invalid data source");
 		return;
@@ -207,13 +207,13 @@ void phpdbg_dump_backtrace(size_t num TSRMLS_DC) /* {{{ */
 		if (file) { /* userland */
 			phpdbg_out("frame #%d: ", i);
 			phpdbg_xml("<frame %r id=\"%d\" file=\"%s\" line=\"%d\"", i, Z_STRVAL_P(file), Z_LVAL_P(line));
-			phpdbg_dump_prototype(tmp TSRMLS_CC);
+			phpdbg_dump_prototype(tmp);
 			phpdbg_out(" at %s:%ld\n", Z_STRVAL_P(file), Z_LVAL_P(line));
 			i++;
 		} else {
 			phpdbg_out(" => ");
 			phpdbg_xml("<frame %r id=\"%d\" internal=\"internal\"", i);
-			phpdbg_dump_prototype(tmp TSRMLS_CC);
+			phpdbg_dump_prototype(tmp);
 			phpdbg_out(" (internal function)\n");
 		}
 	}

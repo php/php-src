@@ -40,14 +40,14 @@ struct cdb {
 
 uint32 cdb_hash(char *, unsigned int);
 
-void cdb_free(struct cdb * TSRMLS_DC);
-void cdb_init(struct cdb *, php_stream *fp TSRMLS_DC);
+void cdb_free(struct cdb *);
+void cdb_init(struct cdb *, php_stream *fp);
 
-int cdb_read(struct cdb *, char *, unsigned int, uint32 TSRMLS_DC);
+int cdb_read(struct cdb *, char *, unsigned int, uint32);
 
-void cdb_findstart(struct cdb * TSRMLS_DC);
-int cdb_findnext(struct cdb *, char *, unsigned int TSRMLS_DC);
-int cdb_find(struct cdb *, char *, unsigned int TSRMLS_DC);
+void cdb_findstart(struct cdb *);
+int cdb_findnext(struct cdb *, char *, unsigned int);
+int cdb_find(struct cdb *, char *, unsigned int);
 
 #define cdb_datapos(c) ((c)->dpos)
 #define cdb_datalen(c) ((c)->dlen)

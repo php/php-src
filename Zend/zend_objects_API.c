@@ -40,7 +40,7 @@ ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
 	objects->object_buckets = NULL;
 }
 
-ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TSRMLS_DC)
+ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 {
 	uint32_t i;
 
@@ -51,14 +51,14 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 			if (!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
 				GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 				GC_REFCOUNT(obj)++;
-				obj->handlers->dtor_obj(obj TSRMLS_CC);
+				obj->handlers->dtor_obj(obj);
 				GC_REFCOUNT(obj)--;
 			}
 		}
 	}
 }
 
-ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects TSRMLS_DC)
+ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects)
 {
 	uint32_t i;
 
@@ -74,7 +74,7 @@ ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects TSR
 	}
 }
 
-ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects TSRMLS_DC)
+ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects)
 {
 	uint32_t i;
 
@@ -87,7 +87,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 				GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
 				if (obj->handlers->free_obj) {
 					GC_REFCOUNT(obj)++;
-					obj->handlers->free_obj(obj TSRMLS_CC);
+					obj->handlers->free_obj(obj);
 					GC_REFCOUNT(obj)--;
 				}
 			}
@@ -110,7 +110,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 
 /* Store objects API */
 
-ZEND_API void zend_objects_store_put(zend_object *object TSRMLS_DC)
+ZEND_API void zend_objects_store_put(zend_object *object)
 {
 	int handle;
 
@@ -132,7 +132,7 @@ ZEND_API void zend_objects_store_put(zend_object *object TSRMLS_DC)
             SET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[handle], EG(objects_store).free_list_head);	\
 			EG(objects_store).free_list_head = handle;
 
-ZEND_API void zend_objects_store_free(zend_object *object TSRMLS_DC) /* {{{ */
+ZEND_API void zend_objects_store_free(zend_object *object) /* {{{ */
 {
 	uint32_t handle = object->handle;
 	void *ptr = ((char*)object) - object->handlers->offset;
@@ -143,7 +143,7 @@ ZEND_API void zend_objects_store_free(zend_object *object TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
+ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 {
 	/*	Make sure we hold a reference count during the destructor call
 		otherwise, when the destructor ends the storage might be freed
@@ -160,7 +160,7 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 				if (object->handlers->dtor_obj) {
 					GC_REFCOUNT(object)++;
 					zend_try {
-						object->handlers->dtor_obj(object TSRMLS_CC);
+						object->handlers->dtor_obj(object);
 					} zend_catch {
 						failure = 1;
 					} zend_end_try();
@@ -178,7 +178,7 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
 					if (object->handlers->free_obj) {
 						zend_try {
 							GC_REFCOUNT(object)++;
-							object->handlers->free_obj(object TSRMLS_CC);
+							object->handlers->free_obj(object);
 							GC_REFCOUNT(object)--;
 						} zend_catch {
 							failure = 1;
@@ -208,13 +208,13 @@ ZEND_API void zend_objects_store_del(zend_object *object TSRMLS_DC) /* {{{ */
  * from the constructor function.  You MUST NOT use this function for any other
  * weird games, or call it at any other time after the object is constructed.
  * */
-ZEND_API void zend_object_store_set_object(zval *zobject, zend_object *object TSRMLS_DC)
+ZEND_API void zend_object_store_set_object(zval *zobject, zend_object *object)
 {
 	EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zobject)] = object;
 }
 
 /* Called when the ctor was terminated by an exception */
-ZEND_API void zend_object_store_ctor_failed(zend_object *obj TSRMLS_DC)
+ZEND_API void zend_object_store_ctor_failed(zend_object *obj)
 {
 	GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 }

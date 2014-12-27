@@ -27,12 +27,12 @@ zend_class_entry *Transliterator_ce_ptr = NULL;
 
 zend_object_handlers Transliterator_handlers;
 
-/* {{{ int transliterator_object_construct( zval *object, UTransliterator *utrans, UErrorCode *status TSRMLS_DC )
+/* {{{ int transliterator_object_construct( zval *object, UTransliterator *utrans, UErrorCode *status )
  * Initialize internals of Transliterator_object.
  */
 int transliterator_object_construct( zval *object,
 									 UTransliterator *utrans,
-									 UErrorCode *status TSRMLS_DC )
+									 UErrorCode *status )
 {
 	const UChar           *ustr_id;
 	int32_t               ustr_id_len;
@@ -56,7 +56,7 @@ int transliterator_object_construct( zval *object,
 	}
 
 	zend_update_property_stringl(Transliterator_ce_ptr, object,
-		"id", sizeof( "id" ) - 1, str_id, str_id_len TSRMLS_CC );
+		"id", sizeof( "id" ) - 1, str_id, str_id_len );
 	efree( str_id );
 	return SUCCESS;
 }
@@ -69,19 +69,19 @@ int transliterator_object_construct( zval *object,
 /* {{{ void transliterator_object_init( Transliterator_object* to )
  * Initialize internals of Transliterator_object.
  */
-static void transliterator_object_init( Transliterator_object* to TSRMLS_DC )
+static void transliterator_object_init( Transliterator_object* to )
 {
 	if( !to )
 		return;
 
-	intl_error_init( TRANSLITERATOR_ERROR_P( to ) TSRMLS_CC );
+	intl_error_init( TRANSLITERATOR_ERROR_P( to ) );
 }
 /* }}} */
 
 /* {{{ void transliterator_object_destroy( Transliterator_object* to )
  * Clean up mem allocted by internals of Transliterator_object
  */
-static void transliterator_object_destroy( Transliterator_object* to TSRMLS_DC )
+static void transliterator_object_destroy( Transliterator_object* to )
 {
 	if( !to )
 		return;
@@ -92,40 +92,40 @@ static void transliterator_object_destroy( Transliterator_object* to TSRMLS_DC )
 		to->utrans = NULL;
 	}
 
-	intl_error_reset( TRANSLITERATOR_ERROR_P( to ) TSRMLS_CC );
+	intl_error_reset( TRANSLITERATOR_ERROR_P( to ) );
 }
 /* }}} */
 
 /* {{{ Transliterator_objects_dtor */
 static void Transliterator_objects_dtor(
-	zend_object *object TSRMLS_DC )
+	zend_object *object )
 {
-	zend_objects_destroy_object( object TSRMLS_CC );
+	zend_objects_destroy_object( object );
 }
 /* }}} */
 
 /* {{{ Transliterator_objects_free */
-static void Transliterator_objects_free( zend_object *object TSRMLS_DC )
+static void Transliterator_objects_free( zend_object *object )
 {
 	Transliterator_object* to = php_intl_transliterator_fetch_object(object);
 
-	zend_object_std_dtor( &to->zo TSRMLS_CC );
+	zend_object_std_dtor( &to->zo );
 
-	transliterator_object_destroy( to TSRMLS_CC );
+	transliterator_object_destroy( to );
 }
 /* }}} */
 
 /* {{{ Transliterator_object_create */
 static zend_object *Transliterator_object_create(
-	zend_class_entry *ce TSRMLS_DC )
+	zend_class_entry *ce )
 {
 	Transliterator_object* intern;
 
 	intern = ecalloc( 1, sizeof( Transliterator_object ) + sizeof(zval) * (ce->default_properties_count - 1));
 
-	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
+	zend_object_std_init( &intern->zo, ce );
     object_properties_init( &intern->zo, ce );
-	transliterator_object_init( intern TSRMLS_CC );
+	transliterator_object_init( intern );
 
 	intern->zo.handlers = &Transliterator_handlers;
 
@@ -138,19 +138,19 @@ static zend_object *Transliterator_object_create(
  */
 
 /* {{{ clone handler for Transliterator */
-static zend_object *Transliterator_clone_obj( zval *object TSRMLS_DC )
+static zend_object *Transliterator_clone_obj( zval *object )
 {
 	Transliterator_object *to_orig,
 	                      *to_new;
 	zend_object 		  *ret_val;
-	intl_error_reset( NULL TSRMLS_CC );
+	intl_error_reset( NULL );
 
 	to_orig = Z_INTL_TRANSLITERATOR_P( object );
-	intl_error_reset( INTL_DATA_ERROR_P( to_orig ) TSRMLS_CC );
-	ret_val = Transliterator_ce_ptr->create_object( Z_OBJCE_P( object ) TSRMLS_CC );
+	intl_error_reset( INTL_DATA_ERROR_P( to_orig ) );
+	ret_val = Transliterator_ce_ptr->create_object( Z_OBJCE_P( object ) );
 	to_new  = php_intl_transliterator_fetch_object( ret_val );
 
-	zend_objects_clone_members( &to_new->zo, &to_orig->zo TSRMLS_CC );
+	zend_objects_clone_members( &to_new->zo, &to_orig->zo );
 
 	if( to_orig->utrans != NULL )
 	{
@@ -165,7 +165,7 @@ static zend_object *Transliterator_clone_obj( zval *object TSRMLS_DC )
 
 		ZVAL_OBJ(&tempz, ret_val);
 		transliterator_object_construct( &tempz, utrans,
-			TRANSLITERATOR_ERROR_CODE_P( to_orig ) TSRMLS_CC );
+			TRANSLITERATOR_ERROR_CODE_P( to_orig ) );
 
 		if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to_orig ) ) )
 		{
@@ -173,16 +173,16 @@ static zend_object *Transliterator_clone_obj( zval *object TSRMLS_DC )
 err:
 
 			if( utrans != NULL )
-				transliterator_object_destroy( to_new TSRMLS_CC );
+				transliterator_object_destroy( to_new );
 
 			/* set the error anyway, in case in the future we decide not to
 			 * throw an error. It also helps build the error message */
-			intl_error_set_code( NULL, INTL_DATA_ERROR_CODE( to_orig ) TSRMLS_CC );
+			intl_error_set_code( NULL, INTL_DATA_ERROR_CODE( to_orig ) );
 			intl_errors_set_custom_msg( TRANSLITERATOR_ERROR_P( to_orig ),
-				"Could not clone transliterator", 0 TSRMLS_CC );
+				"Could not clone transliterator", 0 );
 
-			err_msg = intl_error_get_message( TRANSLITERATOR_ERROR_P( to_orig ) TSRMLS_CC );
-			php_error_docref( NULL TSRMLS_CC, E_ERROR, "%s", err_msg->val );
+			err_msg = intl_error_get_message( TRANSLITERATOR_ERROR_P( to_orig ) );
+			php_error_docref( NULL, E_ERROR, "%s", err_msg->val );
 			zend_string_free( err_msg ); /* if it's changed into a warning */
 			/* do not destroy tempz; we need to return something */
 		}
@@ -190,7 +190,7 @@ err:
 	else
 	{
 		/* We shouldn't have unconstructed objects in the first place */
-		php_error_docref( NULL TSRMLS_CC, E_WARNING,
+		php_error_docref( NULL, E_WARNING,
 			"Cloning unconstructed transliterator." );
 	}
 
@@ -216,7 +216,7 @@ err:
 	}
 
 /* {{{ get_property_ptr_ptr handler */
-static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, int type, void **cache_slot TSRMLS_DC )
+static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, int type, void **cache_slot )
 {
 	zval *retval;
 
@@ -229,7 +229,7 @@ static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, in
 	}
 	else
 	{
-		retval = std_object_handlers.get_property_ptr_ptr( object, member, type, cache_slot TSRMLS_CC );
+		retval = std_object_handlers.get_property_ptr_ptr( object, member, type, cache_slot );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -239,7 +239,7 @@ static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, in
 /* }}} */
 
 /* {{{ read_property handler */
-static zval *Transliterator_read_property( zval *object, zval *member, int type, void **cache_slot, zval *rv TSRMLS_DC )
+static zval *Transliterator_read_property( zval *object, zval *member, int type, void **cache_slot, zval *rv )
 {
 	zval *retval;
 
@@ -249,12 +249,12 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
 		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
 	{
-		php_error_docref0( NULL TSRMLS_CC, E_WARNING, "The property \"id\" is read-only" );
+		php_error_docref0( NULL, E_WARNING, "The property \"id\" is read-only" );
 		retval = &EG( uninitialized_zval );
 	}
 	else
 	{
-		retval = std_object_handlers.read_property( object, member, type, cache_slot, rv TSRMLS_CC );
+		retval = std_object_handlers.read_property( object, member, type, cache_slot, rv );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -266,7 +266,7 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 
 /* {{{ write_property handler */
 static void Transliterator_write_property( zval *object, zval *member, zval *value,
-	void **cache_slot TSRMLS_DC )
+	void **cache_slot )
 {
 	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
 
@@ -274,11 +274,11 @@ static void Transliterator_write_property( zval *object, zval *member, zval *val
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
 		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
 	{
-		php_error_docref0( NULL TSRMLS_CC, E_WARNING, "The property \"id\" is read-only" );
+		php_error_docref0( NULL, E_WARNING, "The property \"id\" is read-only" );
 	}
 	else
 	{
-		std_object_handlers.write_property( object, member, value, cache_slot TSRMLS_CC );
+		std_object_handlers.write_property( object, member, value, cache_slot );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -339,14 +339,14 @@ zend_function_entry Transliterator_class_functions[] = {
 /* {{{ transliterator_register_Transliterator_class
  * Initialize 'Transliterator' class
  */
-void transliterator_register_Transliterator_class( TSRMLS_D )
+void transliterator_register_Transliterator_class( void )
 {
 	zend_class_entry ce;
 
 	/* Create and register 'Transliterator' class. */
 	INIT_CLASS_ENTRY( ce, "Transliterator", Transliterator_class_functions );
 	ce.create_object = Transliterator_object_create;
-	Transliterator_ce_ptr = zend_register_internal_class( &ce TSRMLS_CC );
+	Transliterator_ce_ptr = zend_register_internal_class( &ce );
 	memcpy( &Transliterator_handlers, zend_get_std_object_handlers(),
 		sizeof Transliterator_handlers );
 	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
@@ -366,7 +366,7 @@ void transliterator_register_Transliterator_class( TSRMLS_D )
 		return;
 	}
 	zend_declare_property_null( Transliterator_ce_ptr,
-		"id", sizeof( "id" ) - 1, ZEND_ACC_PUBLIC TSRMLS_CC );
+		"id", sizeof( "id" ) - 1, ZEND_ACC_PUBLIC );
 
 	/* constants are declared in transliterator_register_constants, called from MINIT */
 

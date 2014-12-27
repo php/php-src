@@ -57,11 +57,11 @@
 
 /* {{{ php_statpage
  */
-PHPAPI void php_statpage(TSRMLS_D)
+PHPAPI void php_statpage(void)
 {
 	zend_stat_t *pstat;
 
-	pstat = sapi_get_stat(TSRMLS_C);
+	pstat = sapi_get_stat();
 
 	if (BG(page_uid)==-1 || BG(page_gid)==-1) {
 		if(pstat) {
@@ -79,16 +79,16 @@ PHPAPI void php_statpage(TSRMLS_D)
 
 /* {{{ php_getuid
  */
-zend_long php_getuid(TSRMLS_D)
+zend_long php_getuid(void)
 {
-	php_statpage(TSRMLS_C);
+	php_statpage();
 	return (BG(page_uid));
 }
 /* }}} */
 
-zend_long php_getgid(TSRMLS_D)
+zend_long php_getgid(void)
 {
-	php_statpage(TSRMLS_C);
+	php_statpage();
 	return (BG(page_gid));
 }
 
@@ -102,7 +102,7 @@ PHP_FUNCTION(getmyuid)
 		return;
 	}
 	
-	uid = php_getuid(TSRMLS_C);
+	uid = php_getuid();
 	if (uid < 0) {
 		RETURN_FALSE;
 	} else {
@@ -121,7 +121,7 @@ PHP_FUNCTION(getmygid)
 		return;
 	}
 	
-	gid = php_getgid(TSRMLS_C);
+	gid = php_getgid();
 	if (gid < 0) {
 		RETURN_FALSE;
 	} else {
@@ -157,7 +157,7 @@ PHP_FUNCTION(getmyinode)
 		return;
 	}
 
-	php_statpage(TSRMLS_C);
+	php_statpage();
 	if (BG(page_inode) < 0) {
 		RETURN_FALSE;
 	} else {
@@ -166,9 +166,9 @@ PHP_FUNCTION(getmyinode)
 }
 /* }}} */
 
-PHPAPI time_t php_getlastmod(TSRMLS_D)
+PHPAPI time_t php_getlastmod(void)
 {
-	php_statpage(TSRMLS_C);
+	php_statpage();
 	return BG(page_mtime);
 }
 
@@ -182,7 +182,7 @@ PHP_FUNCTION(getlastmod)
 		return;
 	}
 
-	lm = php_getlastmod(TSRMLS_C);
+	lm = php_getlastmod();
 	if (lm < 0) {
 		RETURN_FALSE;
 	} else {

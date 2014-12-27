@@ -45,7 +45,7 @@ float(3.829113652)
 float(3.848471992)
 float(3.848471992)
 
-Warning: asinh() expects parameter 1 to be double, string given in %s on line %d
+Warning: asinh() expects parameter 1 to be float, string given in %s on line %d
 NULL
 float(7.60090271)
 

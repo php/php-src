@@ -180,15 +180,15 @@ string(109) ".The hebrev function converts logical Hebrew text to visual text
 "
 -- Iteration 10 --
 
-Warning: hebrev() expects parameter 2 to be long, array given in %s on line %d
+Warning: hebrev() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: hebrev() expects parameter 2 to be long, array given in %s on line %d
+Warning: hebrev() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: hebrev() expects parameter 2 to be long, array given in %s on line %d
+Warning: hebrev() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 13 --
 string(109) "xttel uaisv
@@ -230,11 +230,11 @@ string(109) ".The hebrev function converts logical Hebrew text to visual text
 "
 -- Iteration 19 --
 
-Warning: hebrev() expects parameter 2 to be long, string given in %s on line %d
+Warning: hebrev() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: hebrev() expects parameter 2 to be long, string given in %s on line %d
+Warning: hebrev() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 21 --
 
@@ -274,11 +274,11 @@ tionfuncThe .
 "
 -- Iteration 24 --
 
-Warning: hebrev() expects parameter 2 to be long, object given in %s on line %d
+Warning: hebrev() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 -- Iteration 25 --
 
-Warning: hebrev() expects parameter 2 to be long, resource given in %s on line %d
+Warning: hebrev() expects parameter 2 to be integer, resource given in %s on line %d
 NULL
 -- Iteration 26 --
 string(109) ".The hebrev function converts logical Hebrew text to visual text

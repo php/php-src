@@ -110,10 +110,10 @@ DBA_UPDATE_FUNC(gdbm)
 		case 1:
 			return FAILURE;
 		case -1:
-			php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
+			php_error_docref2(NULL, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
 			return FAILURE;
 		default:
-			php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "Unknown return value");
+			php_error_docref2(NULL, key, val, E_WARNING, "Unknown return value");
 			return FAILURE;
 	}
 }

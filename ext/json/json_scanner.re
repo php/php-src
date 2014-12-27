@@ -89,7 +89,7 @@ void php_json_scanner_init(php_json_scanner *s, char *str, int str_len, long opt
 	PHP_JSON_CONDITION_SET(JS);
 }
 
-int php_json_scan(php_json_scanner *s TSRMLS_DC)
+int php_json_scan(php_json_scanner *s)
 {
 	ZVAL_NULL(&s->value);
 	

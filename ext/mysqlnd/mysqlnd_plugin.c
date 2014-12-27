@@ -27,7 +27,7 @@
 
 /*--------------------------------------------------------------------*/
 #if defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1
-static enum_func_status mysqlnd_example_plugin_end(void * p TSRMLS_DC);
+static enum_func_status mysqlnd_example_plugin_end(void * p);
 
 static MYSQLND_STATS * mysqlnd_plugin_example_stats = NULL;
 
@@ -67,7 +67,7 @@ static struct st_mysqlnd_typeii_plugin_example mysqlnd_example_plugin =
 
 /* {{{ mysqlnd_example_plugin_end */
 static 
-enum_func_status mysqlnd_example_plugin_end(void * p TSRMLS_DC)
+enum_func_status mysqlnd_example_plugin_end(void * p)
 {
 	struct st_mysqlnd_typeii_plugin_example * plugin = (struct st_mysqlnd_typeii_plugin_example *) p;
 	DBG_ENTER("mysqlnd_example_plugin_end");
@@ -80,11 +80,11 @@ enum_func_status mysqlnd_example_plugin_end(void * p TSRMLS_DC)
 
 /* {{{ mysqlnd_example_plugin_register */
 void
-mysqlnd_example_plugin_register(TSRMLS_D)
+mysqlnd_example_plugin_register(void)
 {
 	mysqlnd_stats_init(&mysqlnd_plugin_example_stats, EXAMPLE_STAT_LAST);
 	mysqlnd_example_plugin.plugin_header.plugin_stats.values = mysqlnd_plugin_example_stats;
-	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_example_plugin TSRMLS_CC);
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_example_plugin);
 }
 /* }}} */
 #endif /* defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1 */
@@ -97,7 +97,7 @@ static unsigned int mysqlnd_plugins_counter = 0;
 
 /* {{{ mysqlnd_plugin_subsystem_init */
 void
-mysqlnd_plugin_subsystem_init(TSRMLS_D)
+mysqlnd_plugin_subsystem_init(void)
 {
 	zend_hash_init(&mysqlnd_registered_plugins, 4 /* initial hash size */, NULL /* hash_func */, NULL /* dtor */, TRUE /* pers */);
 }
@@ -106,11 +106,11 @@ mysqlnd_plugin_subsystem_init(TSRMLS_D)
 
 /* {{{ mysqlnd_plugin_end_apply_func */
 int
-mysqlnd_plugin_end_apply_func(zval *el TSRMLS_DC)
+mysqlnd_plugin_end_apply_func(zval *el)
 {
 	struct st_mysqlnd_plugin_header * plugin_header = (struct st_mysqlnd_plugin_header *)Z_PTR_P(el);
 	if (plugin_header->m.plugin_shutdown) {
-		plugin_header->m.plugin_shutdown(plugin_header TSRMLS_CC);
+		plugin_header->m.plugin_shutdown(plugin_header);
 	}
 	return ZEND_HASH_APPLY_REMOVE;
 }
@@ -119,9 +119,9 @@ mysqlnd_plugin_end_apply_func(zval *el TSRMLS_DC)
 
 /* {{{ mysqlnd_plugin_subsystem_end */
 void
-mysqlnd_plugin_subsystem_end(TSRMLS_D)
+mysqlnd_plugin_subsystem_end(void)
 {
-	zend_hash_apply(&mysqlnd_registered_plugins, mysqlnd_plugin_end_apply_func TSRMLS_CC);
+	zend_hash_apply(&mysqlnd_registered_plugins, mysqlnd_plugin_end_apply_func);
 	zend_hash_destroy(&mysqlnd_registered_plugins);
 }
 /* }}} */
@@ -130,20 +130,19 @@ mysqlnd_plugin_subsystem_end(TSRMLS_D)
 /* {{{ mysqlnd_plugin_register */
 PHPAPI unsigned int mysqlnd_plugin_register()
 {
-	TSRMLS_FETCH();
-	return mysqlnd_plugin_register_ex(NULL TSRMLS_CC);
+	return mysqlnd_plugin_register_ex(NULL);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_plugin_register_ex */
-PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin TSRMLS_DC)
+PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin)
 {
 	if (plugin) {
 		if (plugin->plugin_api_version == MYSQLND_PLUGIN_API_VERSION) {
 			zend_hash_str_update_ptr(&mysqlnd_registered_plugins, plugin->plugin_name, strlen(plugin->plugin_name), plugin);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Plugin API version mismatch while loading plugin %s. Expected %d, got %d",
+			php_error_docref(NULL, E_WARNING, "Plugin API version mismatch while loading plugin %s. Expected %d, got %d",
 							plugin->plugin_name, MYSQLND_PLUGIN_API_VERSION, plugin->plugin_api_version);
 			return 0xCAFE;
 		}
@@ -154,7 +153,7 @@ PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header *
 
 
 /* {{{ mysqlnd_plugin_find */
-PHPAPI void * _mysqlnd_plugin_find(const char * const name TSRMLS_DC)
+PHPAPI void * _mysqlnd_plugin_find(const char * const name)
 {
 	void * plugin;
 	if ((plugin = zend_hash_str_find_ptr(&mysqlnd_registered_plugins, name, strlen(name))) != NULL) {
@@ -167,7 +166,7 @@ PHPAPI void * _mysqlnd_plugin_find(const char * const name TSRMLS_DC)
 
 
 /* {{{ _mysqlnd_plugin_apply_with_argument */
-PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void * argument TSRMLS_DC)
+PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void * argument)
 {
 	/* Note: We want to be thread-safe (read-only), so we can use neither
 	 * zend_hash_apply_with_argument nor zend_hash_internal_pointer_reset and
@@ -177,9 +176,9 @@ PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, voi
 	int result;
 
 	ZEND_HASH_FOREACH_VAL(&mysqlnd_registered_plugins, val) {
-		result = apply_func(val, argument TSRMLS_CC);
+		result = apply_func(val, argument);
 		if (result & ZEND_HASH_APPLY_REMOVE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mysqlnd_plugin_apply_with_argument must not remove table entries");
+			php_error_docref(NULL, E_WARNING, "mysqlnd_plugin_apply_with_argument must not remove table entries");
 		}
 		if (result & ZEND_HASH_APPLY_STOP) {
 			break;

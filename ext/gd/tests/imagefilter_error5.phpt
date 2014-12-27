@@ -14,5 +14,5 @@ $image = imagecreatetruecolor(180, 30);
 var_dump(imagefilter($image, IMG_FILTER_SMOOTH, 'wrong parameter'));
 ?>
 --EXPECTF--
-Warning: imagefilter() expects parameter 3 to be double, %unicode_string_optional% given in %s on line %d
+Warning: imagefilter() expects parameter 3 to be float, %unicode_string_optional% given in %s on line %d
 bool(false)

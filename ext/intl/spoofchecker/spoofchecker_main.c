@@ -32,7 +32,7 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 	zval *error_code = NULL;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 	
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &text, &text_len, &error_code)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|z", &text, &text_len, &error_code)) {
 		return;
 	}
 	
@@ -41,7 +41,7 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 	ret = uspoof_checkUTF8(co->uspoof, text, text_len, NULL, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		RETURN_TRUE;
 	}
 	
@@ -64,7 +64,7 @@ PHP_METHOD(Spoofchecker, areConfusable)
 	zval *error_code = NULL;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 	
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|z", &s1, &s1_len,
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|z", &s1, &s1_len,
 										 &s2, &s2_len, &error_code)) {
 		return;
 	}
@@ -74,7 +74,7 @@ PHP_METHOD(Spoofchecker, areConfusable)
 	ret = uspoof_areConfusableUTF8(co->uspoof, s1, s1_len, s2, s2_len, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		RETURN_TRUE;
 	}
 	
@@ -95,7 +95,7 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
 	size_t locales_len;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 	
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &locales, &locales_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &locales, &locales_len)) {
 		return;
 	}
 
@@ -104,7 +104,7 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
 	uspoof_setAllowedLocales(co->uspoof, locales, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		return;
 	}
 }
@@ -118,7 +118,7 @@ PHP_METHOD(Spoofchecker, setChecks)
 	zend_long checks;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 		
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &checks)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &checks)) {
 		return;
 	}
 
@@ -127,7 +127,7 @@ PHP_METHOD(Spoofchecker, setChecks)
 	uspoof_setChecks(co->uspoof, checks, SPOOFCHECKER_ERROR_CODE_P(co));
 
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 	}
 }
 /* }}} */

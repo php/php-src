@@ -121,10 +121,10 @@ int phar_is_tar(char *buf, char *fname) /* {{{ */
 }
 /* }}} */
 
-int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error TSRMLS_DC) /* {{{ */
+int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_archive_data *phar;
-	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error TSRMLS_CC);
+	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error);
 
 	if (FAILURE == ret) {
 		return FAILURE;
@@ -155,7 +155,7 @@ int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_l
 }
 /* }}} */
 
-static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRMLS_DC) /* {{{ */
+static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* {{{ */
 {
 	char *metadata;
 	size_t save = php_stream_tell(fp), read;
@@ -170,7 +170,7 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRM
 		return FAILURE;
 	}
 
-	if (phar_parse_metadata(&metadata, &entry->metadata, entry->uncompressed_filesize TSRMLS_CC) == FAILURE) {
+	if (phar_parse_metadata(&metadata, &entry->metadata, entry->uncompressed_filesize) == FAILURE) {
 		/* if not valid serialized data, it is a regular string */
 		efree(metadata);
 		php_stream_seek(fp, save, SEEK_SET);
@@ -192,7 +192,7 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRM
 }
 /* }}} */
 
-int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error TSRMLS_DC) /* {{{ */
+int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error) /* {{{ */
 {
 	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
@@ -264,7 +264,7 @@ int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, 
 				}
 bail:
 				php_stream_close(fp);
-				phar_destroy_phar_data(myphar TSRMLS_CC);
+				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
 			curloc = php_stream_tell(fp);
@@ -285,7 +285,7 @@ bail:
 # define PHAR_GET_32(buffer) (php_uint32) *(buffer)
 #endif
 			myphar->sig_flags = PHAR_GET_32(buf);
-			if (FAILURE == phar_verify_signature(fp, php_stream_tell(fp) - size - 512, myphar->sig_flags, buf + 8, size - 8, fname, &myphar->signature, &myphar->sig_len, error TSRMLS_CC)) {
+			if (FAILURE == phar_verify_signature(fp, php_stream_tell(fp) - size - 512, myphar->sig_flags, buf + 8, size - 8, fname, &myphar->signature, &myphar->sig_len, error)) {
 				if (error) {
 					char *save = *error;
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" signature cannot be verified: %s", fname, save);
@@ -303,7 +303,7 @@ bail:
 						spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 					}
 					php_stream_close(fp);
-					phar_destroy_phar_data(myphar TSRMLS_CC);
+					phar_destroy_phar_data(myphar);
 					return FAILURE;
 				}
 			}
@@ -315,7 +315,7 @@ bail:
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
 				php_stream_close(fp);
-				phar_destroy_phar_data(myphar TSRMLS_CC);
+				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
 
@@ -344,7 +344,7 @@ bail:
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (invalid entry size)", fname);
 				}
 				php_stream_close(fp);
-				phar_destroy_phar_data(myphar TSRMLS_CC);
+				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
 			entry.filename = pemalloc(entry.filename_len+1, myphar->is_persistent);
@@ -356,7 +356,7 @@ bail:
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
 				php_stream_close(fp);
-				phar_destroy_phar_data(myphar TSRMLS_CC);
+				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
 			entry.filename[entry.filename_len] = '\0';
@@ -372,7 +372,7 @@ bail:
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
 				php_stream_close(fp);
-				phar_destroy_phar_data(myphar TSRMLS_CC);
+				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
 
@@ -384,7 +384,7 @@ bail:
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
 				php_stream_close(fp);
-				phar_destroy_phar_data(myphar TSRMLS_CC);
+				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
 			continue;
@@ -433,7 +433,7 @@ bail:
 		}
 		last_was_longlink = 0;
 
-		phar_add_virtual_dirs(myphar, entry.filename, entry.filename_len TSRMLS_CC);
+		phar_add_virtual_dirs(myphar, entry.filename, entry.filename_len);
 
 		if (sum1 != sum2) {
 			if (error) {
@@ -441,7 +441,7 @@ bail:
 			}
 			pefree(entry.filename, myphar->is_persistent);
 			php_stream_close(fp);
-			phar_destroy_phar_data(myphar TSRMLS_CC);
+			phar_destroy_phar_data(myphar);
 			return FAILURE;
 		}
 
@@ -473,14 +473,14 @@ bail:
 				}
 				pefree(entry.filename, entry.is_persistent);
 				php_stream_close(fp);
-				phar_destroy_phar_data(myphar TSRMLS_CC);
+				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
 			entry.link = estrdup(hdr->linkname);
 		} else if (entry.tar_type == TAR_SYMLINK) {
 			entry.link = estrdup(hdr->linkname);
 		}
-		phar_set_inode(&entry TSRMLS_CC);
+		phar_set_inode(&entry);
 		newentry = zend_hash_str_add_mem(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
 
 		if (entry.is_persistent) {
@@ -488,12 +488,12 @@ bail:
 		}
 
 		if (entry.filename_len >= sizeof(".phar/.metadata")-1 && !memcmp(entry.filename, ".phar/.metadata", sizeof(".phar/.metadata")-1)) {
-			if (FAILURE == phar_tar_process_metadata(newentry, fp TSRMLS_CC)) {
+			if (FAILURE == phar_tar_process_metadata(newentry, fp)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has invalid metadata in magic file \"%s\"", fname, entry.filename);
 				}
 				php_stream_close(fp);
-				phar_destroy_phar_data(myphar TSRMLS_CC);
+				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
 		}
@@ -505,7 +505,7 @@ bail:
 					spprintf(error, 4096, "phar error: tar-based phar \"%s\" has alias that is larger than 511 bytes, cannot process", fname);
 				}
 				php_stream_close(fp);
-				phar_destroy_phar_data(myphar TSRMLS_CC);
+				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
 
@@ -526,7 +526,7 @@ bail:
 					}
 
 					php_stream_close(fp);
-					phar_destroy_phar_data(myphar TSRMLS_CC);
+					phar_destroy_phar_data(myphar);
 					return FAILURE;
 				}
 
@@ -540,7 +540,7 @@ bail:
 				}
 
 				php_stream_close(fp);
-				phar_destroy_phar_data(myphar TSRMLS_CC);
+				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
 		}
@@ -555,7 +555,7 @@ bail:
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
 				php_stream_close(fp);
-				phar_destroy_phar_data(myphar TSRMLS_CC);
+				phar_destroy_phar_data(myphar);
 				return FAILURE;
 			}
 		}
@@ -567,7 +567,7 @@ bail:
 				spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 			}
 			php_stream_close(fp);
-			phar_destroy_phar_data(myphar TSRMLS_CC);
+			phar_destroy_phar_data(myphar);
 			return FAILURE;
 		}
 	} while (!php_stream_eof(fp));
@@ -581,7 +581,7 @@ bail:
 	/* ensure signature set */
 	if (!myphar->is_data && PHAR_G(require_hash) && !myphar->signature) {
 		php_stream_close(fp);
-		phar_destroy_phar_data(myphar TSRMLS_CC);
+		phar_destroy_phar_data(myphar);
 		if (error) {
 			spprintf(error, 0, "tar-based phar \"%s\" does not have a signature", fname);
 		}
@@ -606,14 +606,14 @@ bail:
 		}
 	}
 
-	phar_request_initialize(TSRMLS_C);
+	phar_request_initialize();
 
 	if (NULL == (actual = zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len, myphar))) {
 		if (error) {
 			spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\" to phar registry", fname);
 		}
 		php_stream_close(fp);
-		phar_destroy_phar_data(myphar TSRMLS_CC);
+		phar_destroy_phar_data(myphar);
 		return FAILURE;
 	}
 
@@ -625,7 +625,7 @@ bail:
 		myphar->is_temporary_alias = 0;
 
 		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len))) {
-			if (SUCCESS != phar_free_alias(fd_ptr, actual_alias, myphar->alias_len TSRMLS_CC)) {
+			if (SUCCESS != phar_free_alias(fd_ptr, actual_alias, myphar->alias_len)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 				}
@@ -640,7 +640,7 @@ bail:
 
 		if (alias_len) {
 			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len))) {
-				if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len TSRMLS_CC)) {
+				if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 					}
@@ -675,7 +675,7 @@ struct _phar_pass_tar_info {
 	char **error;
 };
 
-static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument TSRMLS_DC) /* {{{ */
+static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument) /* {{{ */
 {
 	tar_header header;
 	size_t pos;
@@ -695,7 +695,7 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument TSRM
 		}
 	}
 
-	phar_add_virtual_dirs(entry->phar, entry->filename, entry->filename_len TSRMLS_CC);
+	phar_add_virtual_dirs(entry->phar, entry->filename, entry->filename_len);
 	memset((char *) &header, 0, sizeof(header));
 
 	if (entry->filename_len > 100) {
@@ -771,18 +771,18 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument TSRM
 
 	/* write contents */
 	if (entry->uncompressed_filesize) {
-		if (FAILURE == phar_open_entry_fp(entry, fp->error, 0 TSRMLS_CC)) {
+		if (FAILURE == phar_open_entry_fp(entry, fp->error, 0)) {
 			return ZEND_HASH_APPLY_STOP;
 		}
 
-		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0 TSRMLS_CC)) {
+		if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
 			if (fp->error) {
 				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written, seek failed", entry->phar->fname, entry->filename);
 			}
 			return ZEND_HASH_APPLY_STOP;
 		}
 
-		if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0 TSRMLS_CC), fp->new, entry->uncompressed_filesize, NULL)) {
+		if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(entry, 0), fp->new, entry->uncompressed_filesize, NULL)) {
 			if (fp->error) {
 				spprintf(fp->error, 4096, "tar-based phar \"%s\" cannot be created, contents of file \"%s\" could not be written", entry->phar->fname, entry->filename);
 			}
@@ -823,13 +823,13 @@ static int phar_tar_writeheaders_int(phar_entry_info *entry, void *argument TSRM
 }
 /* }}} */
 
-static int phar_tar_writeheaders(zval *zv, void *argument TSRMLS_DC) /* {{{ */
+static int phar_tar_writeheaders(zval *zv, void *argument) /* {{{ */
 {
-	return phar_tar_writeheaders_int(Z_PTR_P(zv), argument TSRMLS_CC);
+	return phar_tar_writeheaders_int(Z_PTR_P(zv), argument);
 }
 /* }}} */
 
-int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error TSRMLS_DC) /* {{{ */
+int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error) /* {{{ */
 {
 	php_serialize_data_t metadata_hash;
 
@@ -839,7 +839,7 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error TS
 
 	entry->metadata_str.s = NULL;
 	PHP_VAR_SERIALIZE_INIT(metadata_hash);
-	php_var_serialize(&entry->metadata_str, metadata, &metadata_hash TSRMLS_CC);
+	php_var_serialize(&entry->metadata_str, metadata, &metadata_hash);
 	PHP_VAR_SERIALIZE_DESTROY(metadata_hash);
 	entry->uncompressed_filesize = entry->compressed_filesize = entry->metadata_str.s ? entry->metadata_str.s->len : 0;
 
@@ -865,7 +865,7 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error TS
 }
 /* }}} */
 
-static int phar_tar_setupmetadata(zval *zv, void *argument TSRMLS_DC) /* {{{ */
+static int phar_tar_setupmetadata(zval *zv, void *argument) /* {{{ */
 {
 	int lookfor_len;
 	struct _phar_pass_tar_info *i = (struct _phar_pass_tar_info *)argument;
@@ -874,7 +874,7 @@ static int phar_tar_setupmetadata(zval *zv, void *argument TSRMLS_DC) /* {{{ */
 
 	if (entry->filename_len >= sizeof(".phar/.metadata") && !memcmp(entry->filename, ".phar/.metadata", sizeof(".phar/.metadata")-1)) {
 		if (entry->filename_len == sizeof(".phar/.metadata.bin")-1 && !memcmp(entry->filename, ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1)) {
-			return phar_tar_setmetadata(&entry->phar->metadata, entry, error TSRMLS_CC);
+			return phar_tar_setmetadata(&entry->phar->metadata, entry, error);
 		}
 		/* search for the file this metadata entry references */
 		if (entry->filename_len >= sizeof(".phar/.metadata/") + sizeof("/.metadata.bin") - 1 && !zend_hash_str_exists(&(entry->phar->manifest), entry->filename + sizeof(".phar/.metadata/") - 1, entry->filename_len - (sizeof("/.metadata.bin") - 1 + sizeof(".phar/.metadata/") - 1))) {
@@ -900,7 +900,7 @@ static int phar_tar_setupmetadata(zval *zv, void *argument TSRMLS_DC) /* {{{ */
 
 	if (NULL != (metadata = zend_hash_str_find_ptr(&(entry->phar->manifest), lookfor, lookfor_len))) {
 		int ret;
-		ret = phar_tar_setmetadata(&entry->metadata, metadata, error TSRMLS_CC);
+		ret = phar_tar_setmetadata(&entry->metadata, metadata, error);
 		efree(lookfor);
 		return ret;
 	}
@@ -917,11 +917,11 @@ static int phar_tar_setupmetadata(zval *zv, void *argument TSRMLS_DC) /* {{{ */
 		return ZEND_HASH_APPLY_STOP;
 	}
 
-	return phar_tar_setmetadata(&entry->metadata, metadata, error TSRMLS_CC);
+	return phar_tar_setmetadata(&entry->metadata, metadata, error);
 }
 /* }}} */
 
-int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error TSRMLS_DC) /* {{{ */
+int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error) /* {{{ */
 {
 	phar_entry_info entry = {0};
 	static const char newstub[] = "<?php // tar-based phar archive stub file\n__HALT_COMPILER();";
@@ -1137,7 +1137,7 @@ nostub:
 	if (Z_TYPE(phar->metadata) != IS_UNDEF) {
 		phar_entry_info *mentry;
 		if (NULL != (mentry = zend_hash_str_find_ptr(&(phar->manifest), ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1))) {
-			if (ZEND_HASH_APPLY_KEEP != phar_tar_setmetadata(&phar->metadata, mentry, error TSRMLS_CC)) {
+			if (ZEND_HASH_APPLY_KEEP != phar_tar_setmetadata(&phar->metadata, mentry, error)) {
 				if (closeoldfile) {
 					php_stream_close(oldfile);
 				}
@@ -1160,7 +1160,7 @@ nostub:
 				return EOF;
 			}
 
-			if (ZEND_HASH_APPLY_KEEP != phar_tar_setmetadata(&phar->metadata, mentry, error TSRMLS_CC)) {
+			if (ZEND_HASH_APPLY_KEEP != phar_tar_setmetadata(&phar->metadata, mentry, error)) {
 				zend_hash_str_del(&(phar->manifest), ".phar/.metadata.bin", sizeof(".phar/.metadata.bin")-1);
 				if (closeoldfile) {
 					php_stream_close(oldfile);
@@ -1170,7 +1170,7 @@ nostub:
 		}
 	}
 
-	zend_hash_apply_with_argument(&phar->manifest, phar_tar_setupmetadata, (void *) &pass TSRMLS_CC);
+	zend_hash_apply_with_argument(&phar->manifest, phar_tar_setupmetadata, (void *) &pass);
 
 	if (error && *error) {
 		if (closeoldfile) {
@@ -1182,11 +1182,11 @@ nostub:
 		return EOF;
 	}
 
-	zend_hash_apply_with_argument(&phar->manifest, phar_tar_writeheaders, (void *) &pass TSRMLS_CC);
+	zend_hash_apply_with_argument(&phar->manifest, phar_tar_writeheaders, (void *) &pass);
 
 	/* add signature for executable tars or tars explicitly set with setSignatureAlgorithm */
 	if (!phar->is_data || phar->sig_flags) {
-		if (FAILURE == phar_create_signature(phar, newfile, &signature, &signature_length, error TSRMLS_CC)) {
+		if (FAILURE == phar_create_signature(phar, newfile, &signature, &signature_length, error)) {
 			if (error) {
 				char *save = *error;
 				spprintf(error, 0, "phar error: unable to write signature to tar-based phar: %s", save);
@@ -1236,7 +1236,7 @@ nostub:
 		efree(signature);
 		entry.uncompressed_filesize = entry.compressed_filesize = signature_length + 8;
 		/* throw out return value and write the signature */
-		entry.filename_len = phar_tar_writeheaders_int(&entry, (void *)&pass TSRMLS_CC);
+		entry.filename_len = phar_tar_writeheaders_int(&entry, (void *)&pass);
 
 		if (error && *error) {
 			if (closeoldfile) {
@@ -1301,7 +1301,7 @@ nostub:
 #define MAX_WBITS 15
 #endif
 			add_assoc_long(&filterparams, "window", MAX_WBITS + 16);
-			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp) TSRMLS_CC);
+			filter = php_stream_filter_create("zlib.deflate", &filterparams, php_stream_is_persistent(phar->fp));
 			zval_dtor(&filterparams);
 
 			if (!filter) {
@@ -1317,18 +1317,18 @@ nostub:
 			php_stream_filter_append(&phar->fp->writefilters, filter);
 			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);
-			php_stream_filter_remove(filter, 1 TSRMLS_CC);
+			php_stream_filter_remove(filter, 1);
 			php_stream_close(phar->fp);
 			/* use the temp stream as our base */
 			phar->fp = newfile;
 		} else if (phar->flags & PHAR_FILE_COMPRESSED_BZ2) {
 			php_stream_filter *filter;
 
-			filter = php_stream_filter_create("bzip2.compress", NULL, php_stream_is_persistent(phar->fp) TSRMLS_CC);
+			filter = php_stream_filter_create("bzip2.compress", NULL, php_stream_is_persistent(phar->fp));
 			php_stream_filter_append(&phar->fp->writefilters, filter);
 			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);
-			php_stream_filter_remove(filter, 1 TSRMLS_CC);
+			php_stream_filter_remove(filter, 1);
 			php_stream_close(phar->fp);
 			/* use the temp stream as our base */
 			phar->fp = newfile;

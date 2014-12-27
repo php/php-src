@@ -119,7 +119,7 @@ zend_module_entry sysvmsg_module_entry = {
 ZEND_GET_MODULE(sysvmsg)
 #endif
 
-static void sysvmsg_release(zend_resource *rsrc TSRMLS_DC)
+static void sysvmsg_release(zend_resource *rsrc)
 {
 	sysvmsg_queue_t *mq = (sysvmsg_queue_t *) rsrc->ptr;
 	efree(mq);
@@ -160,7 +160,7 @@ PHP_FUNCTION(msg_set_queue)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra", &queue, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra", &queue, &data) == FAILURE) {
 		return;
 	}
 
@@ -203,7 +203,7 @@ PHP_FUNCTION(msg_stat_queue)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &queue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &queue) == FAILURE) {
 		return;
 	}
 
@@ -232,7 +232,7 @@ PHP_FUNCTION(msg_queue_exists)
 {
 	zend_long key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &key) == FAILURE)	{
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &key) == FAILURE)	{
 		return;
 	}
 
@@ -252,7 +252,7 @@ PHP_FUNCTION(msg_get_queue)
 	zend_long perms = 0666;
 	sysvmsg_queue_t *mq;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &key, &perms) == FAILURE)	{
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &key, &perms) == FAILURE)	{
 		return;
 	}
 
@@ -264,12 +264,12 @@ PHP_FUNCTION(msg_get_queue)
 		/* doesn't already exist; create it */
 		mq->id = msgget(key, IPC_CREAT | IPC_EXCL | perms);
 		if (mq->id < 0)	{
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%lx: %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "failed for key 0x%lx: %s", key, strerror(errno));
 			efree(mq);
 			RETURN_FALSE;
 		}
 	}
-	RETVAL_ZVAL(zend_list_insert(mq, le_sysvmsg TSRMLS_CC), 0, 0);
+	RETVAL_ZVAL(zend_list_insert(mq, le_sysvmsg), 0, 0);
 }
 /* }}} */
 
@@ -280,7 +280,7 @@ PHP_FUNCTION(msg_remove_queue)
 	zval *queue;
 	sysvmsg_queue_t *mq = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &queue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &queue) == FAILURE) {
 		return;
 	}
 
@@ -308,21 +308,21 @@ PHP_FUNCTION(msg_receive)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz/lz/|blz/",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlz/lz/|blz/",
 				&queue, &desiredmsgtype, &out_msgtype, &maxsize,
 				&out_message, &do_unserialize, &flags, &zerrcode) == FAILURE) {
 		return;
 	}
 
 	if (maxsize <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "maximum size of the message has to be greater than zero");
+		php_error_docref(NULL, E_WARNING, "maximum size of the message has to be greater than zero");
 		return;
 	}
 
 	if (flags != 0) {
 		if (flags & PHP_MSG_EXCEPT) {
 #ifndef MSG_EXCEPT
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "MSG_EXCEPT is not supported on your system");
+			php_error_docref(NULL, E_WARNING, "MSG_EXCEPT is not supported on your system");
 			RETURN_FALSE;
 #else
 			realflags |= MSG_EXCEPT;
@@ -364,8 +364,8 @@ PHP_FUNCTION(msg_receive)
 			const unsigned char *p = (const unsigned char *) messagebuffer->mtext;
 
 			PHP_VAR_UNSERIALIZE_INIT(var_hash);
-			if (!php_var_unserialize(&tmp, &p, p + result, &var_hash TSRMLS_CC)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "message corrupted");
+			if (!php_var_unserialize(&tmp, &p, p + result, &var_hash)) {
+				php_error_docref(NULL, E_WARNING, "message corrupted");
 				RETVAL_FALSE;
 			} else {
 				ZVAL_COPY_VALUE(out_message, &tmp);
@@ -395,7 +395,7 @@ PHP_FUNCTION(msg_send)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlz|bbz/",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlz|bbz/",
 				&queue, &msgtype, &message, &do_serialize, &blocking, &zerror) == FAILURE) {
 		return;
 	}
@@ -407,7 +407,7 @@ PHP_FUNCTION(msg_send)
 		php_serialize_data_t var_hash;
 
 		PHP_VAR_SERIALIZE_INIT(var_hash);
-		php_var_serialize(&msg_var, message, &var_hash TSRMLS_CC);
+		php_var_serialize(&msg_var, message, &var_hash);
 		PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
 		/* NB: php_msgbuf is 1 char bigger than a long, so there is no need to
@@ -437,7 +437,7 @@ PHP_FUNCTION(msg_send)
 				message_len = spprintf(&p, 0, "%F", Z_DVAL_P(message));
 				break;
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Message parameter must be either a string or a number.");
+				php_error_docref(NULL, E_WARNING, "Message parameter must be either a string or a number.");
 				RETURN_FALSE;
 		}
 
@@ -457,7 +457,7 @@ PHP_FUNCTION(msg_send)
 	efree(messagebuffer);
 
 	if (result == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "msgsnd failed: %s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "msgsnd failed: %s", strerror(errno));
 		if (zerror) {
 			ZVAL_LONG(zerror, errno);
 		}

@@ -93,7 +93,10 @@ ZEND_BEGIN_MODULE_GLOBALS(gmp)
 ZEND_END_MODULE_GLOBALS(gmp)
 
 #ifdef ZTS
-#define GMPG(v) TSRMG(gmp_globals_id, zend_gmp_globals *, v)
+#define GMPG(v) ZEND_TSRMG(gmp_globals_id, zend_gmp_globals *, v)
+#ifdef COMPILE_DL_GMP
+ZEND_TSRMLS_CACHE_EXTERN;
+#endif
 #else
 #define GMPG(v) (gmp_globals.v)
 #endif

@@ -125,23 +125,23 @@ Error: 2 - call_user_func_array() expects parameter 2 to be array, integer given
 NULL
 
 --float 10.5--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, double given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, float given, %s(%d)
 NULL
 
 --float -10.5--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, double given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, float given, %s(%d)
 NULL
 
 --float 12.3456789000e10--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, double given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, float given, %s(%d)
 NULL
 
 --float -12.3456789000e10--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, double given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, float given, %s(%d)
 NULL
 
 --float .5--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, double given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, float given, %s(%d)
 NULL
 
 --uppercase NULL--

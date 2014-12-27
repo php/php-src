@@ -69,6 +69,7 @@
 #include "php_globals.h"
 #include "php_main.h"
 #include "fopen_wrappers.h"
+#include "http_status_codes.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/url.h"
 
@@ -97,7 +98,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 struct sigaction act, old_term, old_quit, old_int;
 #endif
 
-static void (*php_php_import_environment_variables)(zval *array_ptr TSRMLS_DC);
+static void (*php_php_import_environment_variables)(zval *array_ptr);
 
 #ifndef PHP_WIN32
 /* these globals used for forking children on unix systems */
@@ -198,7 +199,10 @@ static void user_config_cache_entry_dtor(zval *el)
 
 #ifdef ZTS
 static int php_cgi_globals_id;
-#define CGIG(v) TSRMG(php_cgi_globals_id, php_cgi_globals_struct *, v)
+#define CGIG(v) ZEND_TSRMG(php_cgi_globals_id, php_cgi_globals_struct *, v)
+#if defined(PHP_WIN32)
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 #else
 static php_cgi_globals_struct php_cgi_globals;
 #define CGIG(v) (php_cgi_globals.v)
@@ -217,14 +221,14 @@ static php_cgi_globals_struct php_cgi_globals;
 #define TRANSLATE_SLASHES(path)
 #endif
 
-static int print_module_info(zval *element TSRMLS_DC)
+static int print_module_info(zval *element)
 {
 	zend_module_entry *module = Z_PTR_P(element);
 	php_printf("%s\n", module->name);
 	return ZEND_HASH_APPLY_KEEP;
 }
 
-static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
+static int module_name_cmp(const void *a, const void *b)
 {
 	Bucket *f = (Bucket *) a;
 	Bucket *s = (Bucket *) b;
@@ -233,37 +237,37 @@ static int module_name_cmp(const void *a, const void *b TSRMLS_DC)
 						((zend_module_entry *)Z_PTR(s->val))->name);
 }
 
-static void print_modules(TSRMLS_D)
+static void print_modules(void)
 {
 	HashTable sorted_registry;
 
 	zend_hash_init(&sorted_registry, 64, NULL, NULL, 1);
 	zend_hash_copy(&sorted_registry, &module_registry, NULL);
-	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0 TSRMLS_CC);
-	zend_hash_apply(&sorted_registry, print_module_info TSRMLS_CC);
+	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0);
+	zend_hash_apply(&sorted_registry, print_module_info);
 	zend_hash_destroy(&sorted_registry);
 }
 
-static int print_extension_info(zend_extension *ext, void *arg TSRMLS_DC)
+static int print_extension_info(zend_extension *ext, void *arg)
 {
 	php_printf("%s\n", ext->name);
 	return 0;
 }
 
-static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s TSRMLS_DC)
+static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s)
 {
 	return strcmp(	((zend_extension *)(*f)->data)->name,
 					((zend_extension *)(*s)->data)->name);
 }
 
-static void print_extensions(TSRMLS_D)
+static void print_extensions(void)
 {
 	zend_llist sorted_exts;
 
 	zend_llist_copy(&sorted_exts, &zend_extensions);
 	sorted_exts.dtor = NULL;
-	zend_llist_sort(&sorted_exts, extension_name_cmp TSRMLS_CC);
-	zend_llist_apply_with_argument(&sorted_exts, (llist_apply_with_arg_func_t) print_extension_info, NULL TSRMLS_CC);
+	zend_llist_sort(&sorted_exts, extension_name_cmp);
+	zend_llist_apply_with_argument(&sorted_exts, (llist_apply_with_arg_func_t) print_extension_info, NULL);
 	zend_llist_destroy(&sorted_exts);
 }
 
@@ -271,7 +275,7 @@ static void print_extensions(TSRMLS_D)
 #define STDOUT_FILENO 1
 #endif
 
-static inline size_t sapi_cgi_single_write(const char *str, size_t str_length TSRMLS_DC)
+static inline size_t sapi_cgi_single_write(const char *str, size_t str_length)
 {
 #ifdef PHP_WRITE_STDOUT
 	int ret;
@@ -287,14 +291,14 @@ static inline size_t sapi_cgi_single_write(const char *str, size_t str_length TS
 #endif
 }
 
-static size_t sapi_cgi_ub_write(const char *str, size_t str_length TSRMLS_DC)
+static size_t sapi_cgi_ub_write(const char *str, size_t str_length)
 {
 	const char *ptr = str;
 	size_t remaining = str_length;
 	size_t ret;
 
 	while (remaining > 0) {
-		ret = sapi_cgi_single_write(ptr, remaining TSRMLS_CC);
+		ret = sapi_cgi_single_write(ptr, remaining);
 		if (!ret) {
 			php_handle_aborted_connection();
 			return str_length - remaining;
@@ -306,7 +310,7 @@ static size_t sapi_cgi_ub_write(const char *str, size_t str_length TSRMLS_DC)
 	return str_length;
 }
 
-static size_t sapi_fcgi_ub_write(const char *str, size_t str_length TSRMLS_DC)
+static size_t sapi_fcgi_ub_write(const char *str, size_t str_length)
 {
 	const char *ptr = str;
 	size_t remaining = str_length;
@@ -327,14 +331,14 @@ static size_t sapi_fcgi_ub_write(const char *str, size_t str_length TSRMLS_DC)
 	return str_length;
 }
 
-static void sapi_cgi_flush(void *server_context TSRMLS_DC)
+static void sapi_cgi_flush(void *server_context)
 {
 	if (fflush(stdout) == EOF) {
 		php_handle_aborted_connection();
 	}
 }
 
-static void sapi_fcgi_flush(void *server_context TSRMLS_DC)
+static void sapi_fcgi_flush(void *server_context)
 {
 	fcgi_request *request = (fcgi_request*) server_context;
 
@@ -350,57 +354,7 @@ static void sapi_fcgi_flush(void *server_context TSRMLS_DC)
 
 #define SAPI_CGI_MAX_HEADER_LENGTH 1024
 
-typedef struct _http_error {
-  int code;
-  const char* msg;
-} http_error;
-
-static const http_error http_error_codes[] = {
-	{100, "Continue"},
-	{101, "Switching Protocols"},
-	{200, "OK"},
-	{201, "Created"},
-	{202, "Accepted"},
-	{203, "Non-Authoritative Information"},
-	{204, "No Content"},
-	{205, "Reset Content"},
-	{206, "Partial Content"},
-	{300, "Multiple Choices"},
-	{301, "Moved Permanently"},
-	{302, "Moved Temporarily"},
-	{303, "See Other"},
-	{304, "Not Modified"},
-	{305, "Use Proxy"},
-	{400, "Bad Request"},
-	{401, "Unauthorized"},
-	{402, "Payment Required"},
-	{403, "Forbidden"},
-	{404, "Not Found"},
-	{405, "Method Not Allowed"},
-	{406, "Not Acceptable"},
-	{407, "Proxy Authentication Required"},
-	{408, "Request Time-out"},
-	{409, "Conflict"},
-	{410, "Gone"},
-	{411, "Length Required"},
-	{412, "Precondition Failed"},
-	{413, "Request Entity Too Large"},
-	{414, "Request-URI Too Large"},
-	{415, "Unsupported Media Type"},
-	{428, "Precondition Required"},
-	{429, "Too Many Requests"},
-	{431, "Request Header Fields Too Large"},
-	{500, "Internal Server Error"},
-	{501, "Not Implemented"},
-	{502, "Bad Gateway"},
-	{503, "Service Unavailable"},
-	{504, "Gateway Time-out"},
-	{505, "HTTP Version not supported"},
-	{511, "Network Authentication Required"},
-	{0,   NULL}
-};
-
-static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 {
 	char buf[SAPI_CGI_MAX_HEADER_LENGTH];
 	sapi_header_struct *h;
@@ -450,7 +404,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 					h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 				}
 				if (!has_status) {
-					http_error *err = (http_error*)http_error_codes;
+					http_response_status_code_pair *err = (http_response_status_code_pair*)http_status_map;
 
 					while (err->code != 0) {
 						if (err->code == SG(sapi_headers).http_response_code) {
@@ -458,8 +412,8 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 						}
 						err++;
 					}
-					if (err->msg) {
-						len = slprintf(buf, sizeof(buf), "Status: %d %s\r\n", SG(sapi_headers).http_response_code, err->msg);
+					if (err->str) {
+						len = slprintf(buf, sizeof(buf), "Status: %d %s\r\n", SG(sapi_headers).http_response_code, err->str);
 					} else {
 						len = slprintf(buf, sizeof(buf), "Status: %d\r\n", SG(sapi_headers).http_response_code);
 					}
@@ -506,7 +460,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 # define STDIN_FILENO 0
 #endif
 
-static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
+static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes)
 {
 	size_t read_bytes = 0;
 	int tmp_read_bytes;
@@ -534,7 +488,7 @@ static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 	return read_bytes;
 }
 
-static size_t sapi_fcgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
+static size_t sapi_fcgi_read_post(char *buffer, size_t count_bytes)
 {
 	size_t read_bytes = 0;
 	int tmp_read_bytes;
@@ -557,12 +511,12 @@ static size_t sapi_fcgi_read_post(char *buffer, size_t count_bytes TSRMLS_DC)
 	return read_bytes;
 }
 
-static char *sapi_cgi_getenv(char *name, size_t name_len TSRMLS_DC)
+static char *sapi_cgi_getenv(char *name, size_t name_len)
 {
 	return getenv(name);
 }
 
-static char *sapi_fcgi_getenv(char *name, size_t name_len TSRMLS_DC)
+static char *sapi_fcgi_getenv(char *name, size_t name_len)
 {
 	/* when php is started by mod_fastcgi, no regular environment
 	 * is provided to PHP.  It is always sent to PHP at the start
@@ -622,30 +576,30 @@ static char *_sapi_cgi_putenv(char *name, size_t name_len, char *value)
 	return getenv(name);
 }
 
-static char *sapi_cgi_read_cookies(TSRMLS_D)
+static char *sapi_cgi_read_cookies(void)
 {
 	return getenv("HTTP_COOKIE");
 }
 
-static char *sapi_fcgi_read_cookies(TSRMLS_D)
+static char *sapi_fcgi_read_cookies(void)
 {
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	return FCGI_GETENV(request, "HTTP_COOKIE");
 }
 
-static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC)
+static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
 {
 	zval *array_ptr = (zval*)arg;	
 	int filter_arg = (Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV]))?PARSE_ENV:PARSE_SERVER;
 	size_t new_val_len;
 
-	if (sapi_module.input_filter(filter_arg, var, &val, strlen(val), &new_val_len TSRMLS_CC)) {
-		php_register_variable_safe(var, val, new_val_len, array_ptr TSRMLS_CC);
+	if (sapi_module.input_filter(filter_arg, var, &val, strlen(val), &new_val_len)) {
+		php_register_variable_safe(var, val, new_val_len, array_ptr);
 	}
 }
 
-static void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
+static void cgi_php_import_environment_variables(zval *array_ptr)
 {
 	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
 		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
@@ -664,15 +618,15 @@ static void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	}
 
 	/* call php's original import as a catch-all */
-	php_php_import_environment_variables(array_ptr TSRMLS_CC);
+	php_php_import_environment_variables(array_ptr);
 
 	if (fcgi_is_fastcgi()) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
-		fcgi_loadenv(request, cgi_php_load_env_var, array_ptr TSRMLS_CC);
+		fcgi_loadenv(request, cgi_php_load_env_var, array_ptr);
 	}
 }
 
-static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
+static void sapi_cgi_register_variables(zval *track_vars_array)
 {
 	size_t php_self_len;
 	char *php_self;
@@ -680,7 +634,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 	/* In CGI mode, we consider the environment to be a part of the server
 	 * variables
 	 */
-	php_import_environment_variables(track_vars_array TSRMLS_CC);
+	php_import_environment_variables(track_vars_array);
 
 	if (CGIG(fix_pathinfo)) {
 		char *script_name = SG(request_info).request_uri;
@@ -723,8 +677,8 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 		}
 
 		/* Build the special-case PHP_SELF variable for the CGI version */
-		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, php_self_len, &php_self_len TSRMLS_CC)) {
-			php_register_variable_safe("PHP_SELF", php_self, php_self_len, track_vars_array TSRMLS_CC);
+		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, php_self_len, &php_self_len)) {
+			php_register_variable_safe("PHP_SELF", php_self, php_self_len, track_vars_array);
 		}
 		if (free_php_self) {
 			free_alloca(php_self, use_heap);
@@ -732,13 +686,13 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 	} else {
 		php_self = SG(request_info).request_uri ? SG(request_info).request_uri : "";
 		php_self_len = strlen(php_self);
-		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, php_self_len, &php_self_len TSRMLS_CC)) {
-			php_register_variable_safe("PHP_SELF", php_self, php_self_len, track_vars_array TSRMLS_CC);
+		if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &php_self, php_self_len, &php_self_len)) {
+			php_register_variable_safe("PHP_SELF", php_self, php_self_len, track_vars_array);
 		}
 	}
 }
 
-static void sapi_cgi_log_message(char *message TSRMLS_DC)
+static void sapi_cgi_log_message(char *message)
 {
 	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
 		fcgi_request *request;
@@ -763,11 +717,11 @@ static void sapi_cgi_log_message(char *message TSRMLS_DC)
 
 /* {{{ php_cgi_ini_activate_user_config
  */
-static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len, int start TSRMLS_DC)
+static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len, int start)
 {
 	char *ptr;
 	user_config_cache_entry *new_entry, *entry;
-	time_t request_time = (time_t)sapi_get_request_time(TSRMLS_C);
+	time_t request_time = (time_t)sapi_get_request_time();
 
 	/* Find cached config entry: If not found, create one */
 	if ((entry = zend_hash_str_find_ptr(&CGIG(user_config_cache), path, path_len)) == NULL) {
@@ -789,7 +743,7 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 		zend_hash_clean(entry->user_config);
 
 		if (!IS_ABSOLUTE_PATH(path, path_len)) {
-			real_path = tsrm_realpath(path, NULL TSRMLS_CC);
+			real_path = tsrm_realpath(path, NULL);
 			if (real_path == NULL) {
 				return;
 			}
@@ -820,12 +774,12 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 			ptr = s2 + start;  /* start is the point where doc_root ends! */
 			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
 				*ptr = 0;
-				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config TSRMLS_CC);
+				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config);
 				*ptr = '/';
 				ptr++;
 			}
 		} else {
-			php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config TSRMLS_CC);
+			php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config);
 		}
 
 		if (real_path) {
@@ -835,11 +789,11 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 	}
 
 	/* Activate ini entries with values from the user config hash */
-	php_ini_activate_config(entry->user_config, PHP_INI_PERDIR, PHP_INI_STAGE_HTACCESS TSRMLS_CC);
+	php_ini_activate_config(entry->user_config, PHP_INI_PERDIR, PHP_INI_STAGE_HTACCESS);
 }
 /* }}} */
 
-static int sapi_cgi_activate(TSRMLS_D)
+static int sapi_cgi_activate(void)
 {
 	char *path, *doc_root, *server_name;
 	size_t path_len, doc_root_len, server_name_len;
@@ -863,7 +817,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 			server_name_len = strlen(server_name);
 			server_name = estrndup(server_name, server_name_len);
 			zend_str_tolower(server_name, server_name_len);
-			php_ini_activate_per_host_config(server_name, server_name_len TSRMLS_CC);
+			php_ini_activate_per_host_config(server_name, server_name_len);
 			efree(server_name);
 		}
 	}
@@ -887,7 +841,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 		path[path_len] = 0;
 
 		/* Activate per-dir-system-configuration defined in php.ini and stored into configuration_hash during startup */
-		php_ini_activate_per_dir_config(path, path_len TSRMLS_CC); /* Note: for global settings sake we check from root to path */
+		php_ini_activate_per_dir_config(path, path_len); /* Note: for global settings sake we check from root to path */
 
 		/* Load and activate user ini files in path starting from DOCUMENT_ROOT */
 		if (PG(user_ini_filename) && *PG(user_ini_filename)) {
@@ -909,7 +863,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 				doc_root = estrndup(doc_root, doc_root_len);
 				zend_str_tolower(doc_root, doc_root_len);
 #endif
-				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, (doc_root_len > 0 && (doc_root_len - 1)) TSRMLS_CC);
+				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, (doc_root_len > 0 && (doc_root_len - 1)));
 				
 #ifdef PHP_WIN32
 				efree(doc_root);
@@ -923,7 +877,7 @@ static int sapi_cgi_activate(TSRMLS_D)
 	return SUCCESS;
 }
 
-static int sapi_cgi_deactivate(TSRMLS_D)
+static int sapi_cgi_deactivate(void)
 {
 	/* flush only when SAPI was started. The reasons are:
 		1. SAPI Deactivate is called from two places: module init and request shutdown
@@ -939,7 +893,7 @@ static int sapi_cgi_deactivate(TSRMLS_D)
 				php_handle_aborted_connection();
 			}
 		} else {
-			sapi_cgi_flush(SG(server_context) TSRMLS_CC);
+			sapi_cgi_flush(SG(server_context));
 		}
 	}
 	return SUCCESS;
@@ -1146,7 +1100,7 @@ static int is_valid_path(const char *path)
   Comments in the code below refer to using the above URL in a request
 
  */
-static void init_request_info(fcgi_request *request TSRMLS_DC)
+static void init_request_info(fcgi_request *request)
 {
 	char *env_script_filename = CGI_GETENV("SCRIPT_FILENAME");
 	char *env_path_translated = CGI_GETENV("PATH_TRANSLATED");
@@ -1246,7 +1200,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 #ifdef PHP_WIN32
 				script_path_translated[script_path_translated_len-1] == '\\' ||
 #endif
-				(real_path = tsrm_realpath(script_path_translated, NULL TSRMLS_CC)) == NULL)
+				(real_path = tsrm_realpath(script_path_translated, NULL)) == NULL)
 			) {
 				char *pt = estrndup(script_path_translated, script_path_translated_len);
 				size_t len = script_path_translated_len;
@@ -1436,7 +1390,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 
 		/* The CGI RFC allows servers to pass on unvalidated Authorization data */
 		auth = CGI_GETENV("HTTP_AUTHORIZATION");
-		php_handle_auth_data(auth TSRMLS_CC);
+		php_handle_auth_data(auth);
 	}
 }
 /* }}} */
@@ -1480,8 +1434,11 @@ PHP_INI_END()
 
 /* {{{ php_cgi_globals_ctor
  */
-static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals TSRMLS_DC)
+static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 {
+#ifdef ZTS 
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	php_cgi_globals->rfc2616_headers = 0;
 	php_cgi_globals->nph = 0;
 	php_cgi_globals->check_shebang_line = 1;
@@ -1504,7 +1461,7 @@ static PHP_MINIT_FUNCTION(cgi)
 #ifdef ZTS
 	ts_allocate_id(&php_cgi_globals_id, sizeof(php_cgi_globals_struct), (ts_allocate_ctor) php_cgi_globals_ctor, NULL);
 #else
-	php_cgi_globals_ctor(&php_cgi_globals TSRMLS_CC);
+	php_cgi_globals_ctor(&php_cgi_globals);
 #endif
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -1541,7 +1498,7 @@ PHP_FUNCTION(apache_child_terminate) /* {{{ */
 }
 /* }}} */
 
-static void add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC) /* {{{ */
+static void add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg) /* {{{ */
 {
 	zval *return_value = (zval*)arg;
 	char *str = NULL;
@@ -1598,7 +1555,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	if (fcgi_is_fastcgi()) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
 
-		fcgi_loadenv(request, add_request_header, return_value TSRMLS_CC);
+		fcgi_loadenv(request, add_request_header, return_value);
 	} else {
 		char buf[128];
 		char **env, *p, *q, *var, *val, *t = buf;
@@ -1672,7 +1629,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 }
 /* }}} */
 
-static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS_DC) /* {{{ */
+static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{{ */
 {
 	char *s, *p;
 	size_t len = 0;
@@ -1712,7 +1669,7 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 		RETURN_FALSE;
 	}
 	array_init(return_value);
-	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value TSRMLS_CC);
+	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
 }
 /* }}} */
 
@@ -1809,6 +1766,7 @@ int main(int argc, char *argv[])
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
 	tsrm_ls = ts_resource(0);
+	ZEND_TSRMLS_CACHE_UPDATE;
 #endif
 
 	sapi_startup(&cgi_sapi_module);
@@ -2138,7 +2096,7 @@ consult the installation file that came with this distribution, or visit \n\
 					no_headers = 1;
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
-					php_output_end_all(TSRMLS_C);
+					php_output_end_all();
 					exit_status = 0;
 					goto out;
 			}
@@ -2157,7 +2115,7 @@ consult the installation file that came with this distribution, or visit \n\
 #endif
 		while (!fastcgi || fcgi_accept_request(request) >= 0) {
 			SG(server_context) = fastcgi ? (void *) request : (void *) 1;
-			init_request_info(request TSRMLS_CC);
+			init_request_info(request);
 
 			if (!cgi && !fastcgi) {
 				while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
@@ -2187,16 +2145,16 @@ consult the installation file that came with this distribution, or visit \n\
 							if (script_file) {
 								efree(script_file);
 							}
-							if (php_request_startup(TSRMLS_C) == FAILURE) {
+							if (php_request_startup() == FAILURE) {
 								SG(server_context) = NULL;
-								php_module_shutdown(TSRMLS_C);
+								php_module_shutdown();
 								return FAILURE;
 							}
 							if (no_headers) {
 								SG(headers_sent) = 1;
 								SG(request_info).no_headers = 1;
 							}
-							php_print_info(0xFFFFFFFF TSRMLS_CC);
+							php_print_info(0xFFFFFFFF);
 							php_request_shutdown((void *) 0);
 							fcgi_shutdown();
 							exit_status = 0;
@@ -2213,11 +2171,11 @@ consult the installation file that came with this distribution, or visit \n\
 							}
 							SG(headers_sent) = 1;
 							php_printf("[PHP Modules]\n");
-							print_modules(TSRMLS_C);
+							print_modules();
 							php_printf("\n[Zend Modules]\n");
-							print_extensions(TSRMLS_C);
+							print_extensions();
 							php_printf("\n");
-							php_output_end_all(TSRMLS_C);
+							php_output_end_all();
 							fcgi_shutdown();
 							exit_status = 0;
 							goto out;
@@ -2237,9 +2195,9 @@ consult the installation file that came with this distribution, or visit \n\
 								efree(script_file);
 							}
 							no_headers = 1;
-							if (php_request_startup(TSRMLS_C) == FAILURE) {
+							if (php_request_startup() == FAILURE) {
 								SG(server_context) = NULL;
-								php_module_shutdown(TSRMLS_C);
+								php_module_shutdown();
 								return FAILURE;
 							}
 							if (no_headers) {
@@ -2261,7 +2219,7 @@ consult the installation file that came with this distribution, or visit \n\
 							break;
 
 						case 'z': /* load extension file */
-							zend_load_extension(php_optarg TSRMLS_CC);
+							zend_load_extension(php_optarg);
 							break;
 
 						default:
@@ -2346,12 +2304,12 @@ consult the installation file that came with this distribution, or visit \n\
 
 			/* request startup only after we've done all we can to
 			 * get path_translated */
-			if (php_request_startup(TSRMLS_C) == FAILURE) {
+			if (php_request_startup() == FAILURE) {
 				if (fastcgi) {
 					fcgi_finish_request(request, 1);
 				}
 				SG(server_context) = NULL;
-				php_module_shutdown(TSRMLS_C);
+				php_module_shutdown();
 				return FAILURE;
 			}
 			if (no_headers) {
@@ -2365,7 +2323,7 @@ consult the installation file that came with this distribution, or visit \n\
 				2. we are running as cgi or fastcgi
 			*/
 			if (cgi || fastcgi || SG(request_info).path_translated) {
-				if (php_fopen_primary_script(&file_handle TSRMLS_CC) == FAILURE) {
+				if (php_fopen_primary_script(&file_handle) == FAILURE) {
 					zend_try {
 						if (errno == EACCES) {
 							SG(sapi_headers).http_response_code = 403;
@@ -2392,7 +2350,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 					php_request_shutdown((void *) 0);
 					SG(server_context) = NULL;
-					php_module_shutdown(TSRMLS_C);
+					php_module_shutdown();
 					sapi_shutdown();
 #ifdef ZTS
 					tsrm_shutdown();
@@ -2475,11 +2433,11 @@ consult the installation file that came with this distribution, or visit \n\
 
 			switch (behavior) {
 				case PHP_MODE_STANDARD:
-					php_execute_script(&file_handle TSRMLS_CC);
+					php_execute_script(&file_handle);
 					break;
 				case PHP_MODE_LINT:
 					PG(during_request_startup) = 0;
-					exit_status = php_lint_script(&file_handle TSRMLS_CC);
+					exit_status = php_lint_script(&file_handle);
 					if (exit_status == SUCCESS) {
 						zend_printf("No syntax errors detected in %s\n", file_handle.filename);
 					} else {
@@ -2487,9 +2445,9 @@ consult the installation file that came with this distribution, or visit \n\
 					}
 					break;
 				case PHP_MODE_STRIP:
-					if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
-						zend_strip(TSRMLS_C);
-						zend_file_handle_dtor(&file_handle TSRMLS_CC);
+					if (open_file_for_scanning(&file_handle) == SUCCESS) {
+						zend_strip();
+						zend_file_handle_dtor(&file_handle);
 						php_output_teardown();
 					}
 					return SUCCESS;
@@ -2498,13 +2456,13 @@ consult the installation file that came with this distribution, or visit \n\
 					{
 						zend_syntax_highlighter_ini syntax_highlighter_ini;
 
-						if (open_file_for_scanning(&file_handle TSRMLS_CC) == SUCCESS) {
+						if (open_file_for_scanning(&file_handle) == SUCCESS) {
 							php_get_highlight_struct(&syntax_highlighter_ini);
-							zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
+							zend_highlight(&syntax_highlighter_ini);
 							if (fastcgi) {
 								goto fastcgi_request_done;
 							}
-							zend_file_handle_dtor(&file_handle TSRMLS_CC);
+							zend_file_handle_dtor(&file_handle);
 							php_output_teardown();
 						}
 						return SUCCESS;
@@ -2513,9 +2471,9 @@ consult the installation file that came with this distribution, or visit \n\
 #if 0
 				/* Zeev might want to do something with this one day */
 				case PHP_MODE_INDENT:
-					open_file_for_scanning(&file_handle TSRMLS_CC);
-					zend_indent(TSRMLS_C);
-					zend_file_handle_dtor(&file_handle TSRMLS_CC);
+					open_file_for_scanning(&file_handle);
+					zend_indent();
+					zend_file_handle_dtor(&file_handle);
 					php_output_teardown();
 					return SUCCESS;
 					break;
@@ -2620,7 +2578,7 @@ parent_out:
 #endif
 
 	SG(server_context) = NULL;
-	php_module_shutdown(TSRMLS_C);
+	php_module_shutdown();
 	sapi_shutdown();
 
 #ifdef ZTS

@@ -158,14 +158,13 @@ errlex:
 	
 %% /* Functions */
 
-void php_json_parser_init(php_json_parser *parser, zval *return_value, char *str, int str_len, long options, long max_depth TSRMLS_DC)
+void php_json_parser_init(php_json_parser *parser, zval *return_value, char *str, int str_len, long options, long max_depth)
 {
 	memset(parser, 0, sizeof(php_json_parser));
 	php_json_scanner_init(&parser->scanner, str, str_len, options);
 	parser->depth = 1;
 	parser->max_depth = max_depth;
 	parser->return_value = return_value;
-	TSRMLS_SET_CTX(parser->zts_ctx);
 }
 
 php_json_error_code php_json_parser_error_code(php_json_parser *parser)
@@ -175,7 +174,6 @@ php_json_error_code php_json_parser_error_code(php_json_parser *parser)
 
 void php_json_parser_object_init(php_json_parser *parser, zval *object)
 {
-	TSRMLS_FETCH_FROM_CTX(parser->zts_ctx);
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
 		array_init(object);
 	} else {
@@ -187,7 +185,6 @@ void php_json_parser_object_update(php_json_parser *parser, zval *object, zval *
 {
 	char *key = Z_STRVAL_P(zkey);
 	int key_len = Z_STRLEN_P(zkey);
-	TSRMLS_FETCH_FROM_CTX(parser->zts_ctx);
 
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
 		add_assoc_zval_ex(object, key, key_len, zvalue);
@@ -217,8 +214,7 @@ void php_json_parser_array_append(zval *array, zval *zvalue)
 	
 int php_json_yylex(union YYSTYPE *value, php_json_parser *parser)
 {
-	TSRMLS_FETCH_FROM_CTX(parser->zts_ctx);
-	int token = php_json_scan(&parser->scanner TSRMLS_CC);
+	int token = php_json_scan(&parser->scanner);
 	value->value = parser->scanner.value;
 	return token;
 }

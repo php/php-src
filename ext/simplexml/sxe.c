@@ -47,7 +47,7 @@ PHP_METHOD(ce_SimpleXMLIterator, rewind)
 	}
 
 	iter.sxe = Z_SXEOBJ_P(getThis());
-	ce_SimpleXMLElement->iterator_funcs.funcs->rewind((zend_object_iterator*)&iter TSRMLS_CC);
+	ce_SimpleXMLElement->iterator_funcs.funcs->rewind((zend_object_iterator*)&iter);
 }
 /* }}} */
 
@@ -120,7 +120,7 @@ PHP_METHOD(ce_SimpleXMLIterator, next)
 	}
 
 	iter.sxe = Z_SXEOBJ_P(getThis());
-	ce_SimpleXMLElement->iterator_funcs.funcs->move_forward((zend_object_iterator*)&iter TSRMLS_CC);
+	ce_SimpleXMLElement->iterator_funcs.funcs->move_forward((zend_object_iterator*)&iter);
 }
 /* }}} */
 
@@ -199,11 +199,11 @@ PHP_MINIT_FUNCTION(sxe) /* {{{ */
 	ce_SimpleXMLElement = pce;
 
 	INIT_CLASS_ENTRY_EX(sxi, "SimpleXMLIterator", sizeof("SimpleXMLIterator") - 1, funcs_SimpleXMLIterator);
-	ce_SimpleXMLIterator = zend_register_internal_class_ex(&sxi, ce_SimpleXMLElement TSRMLS_CC);
+	ce_SimpleXMLIterator = zend_register_internal_class_ex(&sxi, ce_SimpleXMLElement);
 	ce_SimpleXMLIterator->create_object = ce_SimpleXMLElement->create_object;
 
-	zend_class_implements(ce_SimpleXMLIterator TSRMLS_CC, 1, spl_ce_RecursiveIterator);
-	zend_class_implements(ce_SimpleXMLIterator TSRMLS_CC, 1, spl_ce_Countable);
+	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_RecursiveIterator);
+	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_Countable);
 
 	return SUCCESS;
 }

@@ -42,7 +42,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 				(s_array)->in_trigger = TRUE; \
 				MYSQLND_STATS_UNLOCK((s_array)); \
 																						\
-				(s_array)->triggers[(statistic)]((s_array), (statistic), (val) TSRMLS_CC); \
+				(s_array)->triggers[(statistic)]((s_array), (statistic), (val)); \
 																						\
 				MYSQLND_STATS_LOCK((s_array)); \
 				(s_array)->in_trigger = FALSE; \
@@ -157,13 +157,13 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 
 #endif /* MYSQLND_CORE_STATISTICS_DISABLED */
 
-PHPAPI void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC);
+PHPAPI void mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value ZEND_FILE_LINE_DC);
 
 PHPAPI void mysqlnd_stats_init(MYSQLND_STATS ** stats, size_t statistic_count);
 PHPAPI void mysqlnd_stats_end(MYSQLND_STATS * stats);
 
-PHPAPI mysqlnd_stat_trigger mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats stat, mysqlnd_stat_trigger trigger TSRMLS_DC);
-PHPAPI mysqlnd_stat_trigger mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats TSRMLS_DC);
+PHPAPI mysqlnd_stat_trigger mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats stat, mysqlnd_stat_trigger trigger);
+PHPAPI mysqlnd_stat_trigger mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats);
 
 #endif	/* MYSQLND_STATISTICS_H */
 

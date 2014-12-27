@@ -39,7 +39,7 @@ PHP_FUNCTION(confirm_extname_compiled)
 	size_t arg_len, len;
 	char *strg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -95,6 +95,9 @@ PHP_MSHUTDOWN_FUNCTION(extname)
  */
 PHP_RINIT_FUNCTION(extname)
 {
+#if defined(COMPILE_DL_EXTNAME) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE;
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -150,6 +153,9 @@ zend_module_entry extname_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_EXTNAME
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE;
+#endif
 ZEND_GET_MODULE(extname)
 #endif
 

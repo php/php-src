@@ -264,7 +264,7 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE type);
 * startup / shutdown *
 *********************/
 
-static void destroy_server_data(xmlrpc_server_data *server TSRMLS_DC)
+static void destroy_server_data(xmlrpc_server_data *server)
 {
 	if (server) {
 		XMLRPC_ServerDestroy(server->server_ptr);
@@ -278,11 +278,11 @@ static void destroy_server_data(xmlrpc_server_data *server TSRMLS_DC)
 
 /* called when server is being destructed. either when xmlrpc_server_destroy
  * is called, or when request ends.  */
-static void xmlrpc_server_destructor(zend_resource *rsrc TSRMLS_DC)
+static void xmlrpc_server_destructor(zend_resource *rsrc)
 {
 	if (rsrc && rsrc->ptr) {
 		rsrc->gc.refcount++;
-		destroy_server_data((xmlrpc_server_data*) rsrc->ptr TSRMLS_CC);
+		destroy_server_data((xmlrpc_server_data*) rsrc->ptr);
 		rsrc->gc.refcount--;
 	}
 }
@@ -498,7 +498,7 @@ static XMLRPC_VECTOR_TYPE determine_vector_type (HashTable *ht)
 }
 
 /* recursively convert php values into xmlrpc values */
-static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int depth TSRMLS_DC)
+static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int depth)
 {
 	XMLRPC_VALUE xReturn = NULL;
 
@@ -550,7 +550,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 
 						ht = HASH_OF(&val);
 						if (ht && ht->u.v.nApplyCount > 1) {
-							php_error_docref(NULL TSRMLS_CC, E_ERROR, "XML-RPC doesn't support circular references");
+							php_error_docref(NULL, E_ERROR, "XML-RPC doesn't support circular references");
 							return NULL;
 						}
 
@@ -572,12 +572,12 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 									spprintf(&num_str, 0, "%ld", num_index);
 								}
 
-								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(num_str, pIter, depth++ TSRMLS_CC));
+								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(num_str, pIter, depth++));
 								if (num_str) {
 									efree(num_str);
 								}
 							} else {
-								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(my_key->val, pIter, depth++ TSRMLS_CC));
+								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(my_key->val, pIter, depth++));
 							}
 							if (ht) {
 								ht->u.v.nApplyCount--;
@@ -594,9 +594,9 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 	return xReturn;
 }
 
-static XMLRPC_VALUE PHP_to_XMLRPC(zval* root_val TSRMLS_DC)
+static XMLRPC_VALUE PHP_to_XMLRPC(zval* root_val)
 {
-	return PHP_to_XMLRPC_worker(NULL, root_val, 0 TSRMLS_CC);
+	return PHP_to_XMLRPC_worker(NULL, root_val, 0);
 }
 
 /* recursively convert xmlrpc values into php values */
@@ -669,7 +669,7 @@ PHP_FUNCTION(xmlrpc_encode_request)
 	size_t method_len;
 	php_output_options out;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!z|a", &method, &method_len, &vals, &out_opts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!z|a", &method, &method_len, &vals, &out_opts) == FAILURE) {
 		return;
 	}
 
@@ -687,7 +687,7 @@ PHP_FUNCTION(xmlrpc_encode_request)
 				XMLRPC_RequestSetRequestType(xRequest, xmlrpc_request_call);
 			}
 			if (Z_TYPE_P(vals) != IS_NULL) {
-				XMLRPC_RequestSetData(xRequest, PHP_to_XMLRPC(vals TSRMLS_CC));
+				XMLRPC_RequestSetData(xRequest, PHP_to_XMLRPC(vals));
 			}
 
 			outBuf = XMLRPC_REQUEST_ToXML(xRequest, 0);
@@ -713,13 +713,13 @@ PHP_FUNCTION(xmlrpc_encode)
 	zval *arg1;
 	char *outBuf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg1) == FAILURE) {
 		return;
 	}
 
 	if (USED_RET()) {
 		/* convert native php type to xmlrpc type */
-		xOut = PHP_to_XMLRPC(arg1 TSRMLS_CC);
+		xOut = PHP_to_XMLRPC(arg1);
 
 		/* generate raw xml from xmlrpc data */
 		outBuf = XMLRPC_VALUE_ToXML(xOut, 0);
@@ -777,7 +777,7 @@ PHP_FUNCTION(xmlrpc_decode_request)
 	zval *method;
 	size_t xml_len, encoding_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/|s", &xml, &xml_len, &method, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/|s", &xml, &xml_len, &method, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 
@@ -794,7 +794,7 @@ PHP_FUNCTION(xmlrpc_decode)
 	char *arg1, *arg2 = NULL;
 	size_t arg1_len, arg2_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &arg1, &arg1_len, &arg2, &arg2_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &arg1, &arg1_len, &arg2, &arg2_len) == FAILURE) {
 		return;
 	}
 
@@ -840,7 +840,7 @@ PHP_FUNCTION(xmlrpc_server_destroy)
 	int bSuccess = FAILURE;
 	xmlrpc_server_data *server;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
 		return;
 	}
 
@@ -865,7 +865,6 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
 	zval* php_function;
 	zval xmlrpc_params;
 	zval callback_params[3];
-	TSRMLS_FETCH();
 
 	zval_ptr_dtor(&pData->xmlrpc_method);
 	zval_ptr_dtor(&pData->return_data);
@@ -887,13 +886,13 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
 	/* Use same C function for all methods */
 
 	/* php func prototype: function user_func($method_name, $xmlrpc_params, $user_params) */
-	call_user_function(CG(function_table), NULL, &pData->php_function, &pData->return_data, 3, callback_params TSRMLS_CC);
+	call_user_function(CG(function_table), NULL, &pData->php_function, &pData->return_data, 3, callback_params);
 
 	pData->php_executed = 1;
 
 	zval_ptr_dtor(&xmlrpc_params);
 
-	return PHP_to_XMLRPC(&pData->return_data TSRMLS_CC);
+	return PHP_to_XMLRPC(&pData->return_data);
 }
 /* }}} */
 
@@ -906,15 +905,14 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 	zval callback_params[1];
 	zend_string *php_function_name;
 	xmlrpc_callback_data* pData = (xmlrpc_callback_data*)data;
-	TSRMLS_FETCH();
 
 	/* setup data hoojum */
 	ZVAL_COPY_VALUE(&callback_params[0], &pData->caller_params);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL(pData->server->introspection_map), php_function) {
-		if (zend_is_callable(php_function, 0, &php_function_name TSRMLS_CC)) {
+		if (zend_is_callable(php_function, 0, &php_function_name)) {
 			/* php func prototype: function string user_func($user_params) */
-			if (call_user_function(CG(function_table), NULL, php_function, &retval, 1, callback_params TSRMLS_CC) == SUCCESS) {
+			if (call_user_function(CG(function_table), NULL, php_function, &retval, 1, callback_params) == SUCCESS) {
 				XMLRPC_VALUE xData;
 				STRUCT_XMLRPC_ERROR err = {0};
 
@@ -925,25 +923,25 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 
 				if (xData) {
 					if (!XMLRPC_ServerAddIntrospectionData(server, xData)) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to add introspection data returned from %s(), improper element structure", php_function_name->val);
+						php_error_docref(NULL, E_WARNING, "Unable to add introspection data returned from %s(), improper element structure", php_function_name->val);
 					}
 					XMLRPC_CleanupValue(xData);
 				} else {
 					/* could not create description */
 					if (err.xml_elem_error.parser_code) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %s()", 
+						php_error_docref(NULL, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %s()", 
 								err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error, php_function_name->val);
 					} else {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to add introspection data returned from %s()", php_function_name->val);
+						php_error_docref(NULL, E_WARNING, "Unable to add introspection data returned from %s()", php_function_name->val);
 					}
 				}
 				zval_ptr_dtor(&retval);
 			} else {
 				/* user func failed */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error calling user introspection callback: %s()", php_function_name->val);
+				php_error_docref(NULL, E_WARNING, "Error calling user introspection callback: %s()", php_function_name->val);
 			}
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid callback '%s' passed", php_function_name->val);
+			php_error_docref(NULL, E_WARNING, "Invalid callback '%s' passed", php_function_name->val);
 		}
 		zend_string_release(php_function_name);
 	} ZEND_HASH_FOREACH_END();
@@ -962,7 +960,7 @@ PHP_FUNCTION(xmlrpc_server_register_method)
 	zval *handle, *method_name;
 	xmlrpc_server_data* server;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz", &handle, &method_key, &method_key_len, &method_name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz", &handle, &method_key, &method_key_len, &method_name) == FAILURE) {
 		return;
 	}
 
@@ -992,7 +990,7 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback)
 	zval *method_name, *handle;
 	xmlrpc_server_data* server;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz", &handle, &method_name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &handle, &method_name) == FAILURE) {
 		return;
 	}
 
@@ -1024,7 +1022,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 	php_output_options out;
 	int argc = ZEND_NUM_ARGS();
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rsz|a", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|a", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
 		return;
 	}
 	/* user output options */
@@ -1063,7 +1061,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 		if (xAnswer && out.b_php_out) {
 			XMLRPC_to_PHP(xAnswer, &data.return_data);
 		} else if (data.php_executed && !out.b_php_out && !xAnswer) {
-			xAnswer = PHP_to_XMLRPC(&data.return_data TSRMLS_CC);
+			xAnswer = PHP_to_XMLRPC(&data.return_data);
 		}
 
 		/* should we return data as xml? */
@@ -1120,13 +1118,13 @@ PHP_FUNCTION(xmlrpc_server_add_introspection_data)
 	xmlrpc_server_data* server;
 	XMLRPC_VALUE xDesc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra", &handle, &desc) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra", &handle, &desc) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(server, xmlrpc_server_data*, handle, -1, "xmlrpc server", le_xmlrpc_server);
 
-	xDesc = PHP_to_XMLRPC(desc TSRMLS_CC);
+	xDesc = PHP_to_XMLRPC(desc);
 	if (xDesc) {
 		int retval = XMLRPC_ServerAddIntrospectionData(server->server_ptr, xDesc);
 		XMLRPC_CleanupValue(xDesc);
@@ -1143,7 +1141,7 @@ PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 	char *arg1;
 	size_t arg1_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg1, &arg1_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg1, &arg1_len) == FAILURE) {
 		return;
 	}
 
@@ -1157,13 +1155,13 @@ PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 		} else {
 			/* could not create description */
 			if (err.xml_elem_error.parser_code) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to create introspection data", 
+				php_error_docref(NULL, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to create introspection data", 
 						err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error);
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid xml structure. Unable to create introspection data");
+				php_error_docref(NULL, E_WARNING, "Invalid xml structure. Unable to create introspection data");
 			}
 
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "xml parse error. no method description created");
+			php_error_docref(NULL, E_WARNING, "xml parse error. no method description created");
 		}
 	}
 }
@@ -1257,7 +1255,6 @@ XMLRPC_VECTOR_TYPE xmlrpc_str_as_vector_type(const char* str) /* {{{ */
 int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 {
 	int bSuccess = FAILURE;
-	TSRMLS_FETCH();
 
 	/* we only really care about strings because they can represent
 	 * base64 and datetime.  all other types have corresponding php types
@@ -1304,7 +1301,6 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval* newvalue) /* {{{ */
 {
 	XMLRPC_VALUE_TYPE type = xmlrpc_none;
-	TSRMLS_FETCH();
 
 	if (value) {
 		switch (Z_TYPE_P(value)) {
@@ -1378,7 +1374,7 @@ PHP_FUNCTION(xmlrpc_set_type)
 	size_t type_len;
 	XMLRPC_VALUE_TYPE vtype;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/s", &arg, &type, &type_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/s", &arg, &type, &type_len) == FAILURE) {
 		return;
 	}
 
@@ -1402,7 +1398,7 @@ PHP_FUNCTION(xmlrpc_get_type)
 	XMLRPC_VALUE_TYPE type;
 	XMLRPC_VECTOR_TYPE vtype = xmlrpc_vector_none;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
 
@@ -1421,7 +1417,7 @@ PHP_FUNCTION(xmlrpc_is_fault)
 {
 	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &arg) == FAILURE) {
 		return;
 	}
 

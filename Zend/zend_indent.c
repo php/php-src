@@ -47,7 +47,7 @@ static void handle_whitespace(unsigned int *emit_whitespace)
 }
 
 
-ZEND_API void zend_indent(TSRMLS_D)
+ZEND_API void zend_indent(void)
 {
 	zval token;
 	int token_type;
@@ -60,7 +60,7 @@ ZEND_API void zend_indent(TSRMLS_D)
 
 	/* highlight stuff coming back from zendlex() */
 	ZVAL_UNDEF(&token);
-	while ((token_type=lex_scan(&token TSRMLS_CC))) {
+	while ((token_type=lex_scan(&token))) {
 		switch (token_type) {
 			case T_INLINE_HTML:
 				zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));

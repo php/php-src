@@ -316,7 +316,6 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 	int staticAssign[STATIC_LIST_SIZE];
 	int *nassign = staticAssign;
 	int objIndex, xpgSize, nspace = STATIC_LIST_SIZE;
-	TSRMLS_FETCH();
 
 	/*
 	 * Initialize an array that records the number of times a variable
@@ -394,7 +393,7 @@ notXpg:
 		gotSequential = 1;
 		if (gotXpg) {
 mixedXPG:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
+			php_error_docref(NULL, E_WARNING, "%s", "cannot mix \"%\" and \"%n$\" conversion specifiers");
 			goto error;
 		}
 
@@ -445,7 +444,7 @@ xpgCheckDone:
 				/* problem - cc                                               */
 				/*
 				if (flags & SCAN_WIDTH) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Field width may not be specified in %c conversion");
+					php_error_docref(NULL, E_WARNING, "Field width may not be specified in %c conversion");
 					goto error;
 				}
 				*/
@@ -476,11 +475,11 @@ xpgCheckDone:
 				}
 				break;
 badSet:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unmatched [ in format string");
+				php_error_docref(NULL, E_WARNING, "Unmatched [ in format string");
 				goto error;
 
 			default: {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad scan conversion character \"%c\"", *ch);
+				php_error_docref(NULL, E_WARNING, "Bad scan conversion character \"%c\"", *ch);
 				goto error;
 			}
 		}
@@ -530,14 +529,14 @@ badSet:
 	}
 	for (i = 0; i < numVars; i++) {
 		if (nassign[i] > 1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "Variable is assigned by multiple \"%n$\" conversion specifiers");
+			php_error_docref(NULL, E_WARNING, "%s", "Variable is assigned by multiple \"%n$\" conversion specifiers");
 			goto error;
 		} else if (!xpgSize && (nassign[i] == 0)) {
 			/*
 			 * If the space is empty, and xpgSize is 0 (means XPG wasn't
 			 * used, and/or numVars != 0), then too many vars were given
 			 */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Variable is not assigned by any conversion specifiers");
+			php_error_docref(NULL, E_WARNING, "Variable is not assigned by any conversion specifiers");
 			goto error;
 		}
 	}
@@ -549,9 +548,9 @@ badSet:
 
 badIndex:
 	if (gotXpg) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", "\"%n$\" argument index out of range");
+		php_error_docref(NULL, E_WARNING, "%s", "\"%n$\" argument index out of range");
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Different numbers of variable names and field specifiers");
+		php_error_docref(NULL, E_WARNING, "Different numbers of variable names and field specifiers");
 	}
 
 error:
@@ -578,7 +577,7 @@ error:
 
 PHPAPI int php_sscanf_internal( char *string, char *format,
 				int argCount, zval *args,
-				int varStart, zval *return_value TSRMLS_DC)
+				int varStart, zval *return_value)
 {
 	int  numVars, nconversions, totalVars = -1;
 	int  i, result;
@@ -625,7 +624,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	if (numVars) {
 		for (i = varStart;i < argCount;i++){
 			if ( ! Z_ISREF(args[ i ] ) ) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter %d must be passed by reference", i);
+				php_error_docref(NULL, E_WARNING, "Parameter %d must be passed by reference", i);
 				scan_set_error_return(numVars, return_value);
 				return SCAN_ERROR_VAR_PASSED_BYVAL;
 			}

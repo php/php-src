@@ -79,7 +79,7 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_readline);
 static char php_last_char = '\0';
 static FILE *pager_pipe = NULL;
 
-static size_t readline_shell_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
+static size_t readline_shell_write(const char *str, size_t str_length) /* {{{ */
 {
 	if (CLIR_G(prompt_str)) {
 		smart_str_appendl(CLIR_G(prompt_str), str, str_length);
@@ -97,7 +97,7 @@ static size_t readline_shell_write(const char *str, size_t str_length TSRMLS_DC)
 }
 /* }}} */
 
-static size_t readline_shell_ub_write(const char *str, size_t str_length TSRMLS_DC) /* {{{ */
+static size_t readline_shell_ub_write(const char *str, size_t str_length) /* {{{ */
 {
 	/* We just store the last char here and then pass back to the
 	   caller (sapi_cli_single_write in sapi/cli) which will actually
@@ -107,7 +107,7 @@ static size_t readline_shell_ub_write(const char *str, size_t str_length TSRMLS_
 }
 /* }}} */
 
-static void cli_readline_init_globals(zend_cli_readline_globals *rg TSRMLS_DC)
+static void cli_readline_init_globals(zend_cli_readline_globals *rg)
 {
 	rg->pager = NULL;
 	rg->prompt = NULL;
@@ -134,7 +134,7 @@ typedef enum {
 	outside,
 } php_code_type;
 
-static zend_string *cli_get_prompt(char *block, char prompt TSRMLS_DC) /* {{{ */
+static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 {
 	smart_str retval = {0};
 	char *prompt_spec = CLIR_G(prompt) ? CLIR_G(prompt) : DEFAULT_PROMPT;
@@ -189,7 +189,7 @@ static zend_string *cli_get_prompt(char *block, char prompt TSRMLS_DC) /* {{{ */
 
 				CLIR_G(prompt_str) = &retval;
 				zend_try {
-					zend_eval_stringl(code, prompt_end - prompt_spec - 1, NULL, "php prompt code" TSRMLS_CC);
+					zend_eval_stringl(code, prompt_end - prompt_spec - 1, NULL, "php prompt code");
 				} zend_end_try();
 				CLIR_G(prompt_str) = NULL;
 				efree(code);
@@ -204,7 +204,7 @@ static zend_string *cli_get_prompt(char *block, char prompt TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int cli_is_valid_code(char *code, int len, zend_string **prompt TSRMLS_DC) /* {{{ */
+static int cli_is_valid_code(char *code, int len, zend_string **prompt) /* {{{ */
 {
 	int valid_end = 1, last_valid_end;
 	int brackets_count = 0;
@@ -365,29 +365,29 @@ static int cli_is_valid_code(char *code, int len, zend_string **prompt TSRMLS_DC
 	switch (code_type) {
 		default:
 			if (brace_count) {
-				*prompt = cli_get_prompt("php", '(' TSRMLS_CC);
+				*prompt = cli_get_prompt("php", '(');
 			} else if (brackets_count) {
-				*prompt = cli_get_prompt("php", '{' TSRMLS_CC);
+				*prompt = cli_get_prompt("php", '{');
 			} else {
-				*prompt = cli_get_prompt("php", '>' TSRMLS_CC);
+				*prompt = cli_get_prompt("php", '>');
 			}
 			break;
 		case sstring:
 		case sstring_esc:
-			*prompt = cli_get_prompt("php", '\'' TSRMLS_CC);
+			*prompt = cli_get_prompt("php", '\'');
 			break;
 		case dstring:
 		case dstring_esc:
-			*prompt = cli_get_prompt("php", '"' TSRMLS_CC);
+			*prompt = cli_get_prompt("php", '"');
 			break;
 		case comment_block:
-			*prompt = cli_get_prompt("/* ", '>' TSRMLS_CC);
+			*prompt = cli_get_prompt("/* ", '>');
 			break;
 		case heredoc:
-			*prompt = cli_get_prompt("<<<", '>' TSRMLS_CC);
+			*prompt = cli_get_prompt("<<<", '>');
 			break;
 		case outside:
-			*prompt = cli_get_prompt("   ", '>' TSRMLS_CC);
+			*prompt = cli_get_prompt("   ", '>');
 			break;
 	}
 
@@ -399,7 +399,7 @@ static int cli_is_valid_code(char *code, int len, zend_string **prompt TSRMLS_DC
 }
 /* }}} */
 
-static char *cli_completion_generator_ht(const char *text, int textlen, int *state, HashTable *ht, void **pData TSRMLS_DC) /* {{{ */
+static char *cli_completion_generator_ht(const char *text, int textlen, int *state, HashTable *ht, void **pData) /* {{{ */
 {
 	zend_string *name;
 	zend_ulong number;
@@ -425,12 +425,12 @@ static char *cli_completion_generator_ht(const char *text, int textlen, int *sta
 	return NULL;
 } /* }}} */
 
-static char *cli_completion_generator_var(const char *text, int textlen, int *state TSRMLS_DC) /* {{{ */
+static char *cli_completion_generator_var(const char *text, int textlen, int *state) /* {{{ */
 {
 	char *retval, *tmp;
 	zend_array *symbol_table = &EG(symbol_table);
 
-	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, symbol_table ? &symbol_table->ht : NULL, NULL TSRMLS_CC);
+	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, symbol_table ? &symbol_table->ht : NULL, NULL);
 	if (retval) {
 		retval = malloc(strlen(tmp) + 2);
 		retval[0] = '$';
@@ -440,11 +440,11 @@ static char *cli_completion_generator_var(const char *text, int textlen, int *st
 	return retval;
 } /* }}} */
 
-static char *cli_completion_generator_ini(const char *text, int textlen, int *state TSRMLS_DC) /* {{{ */
+static char *cli_completion_generator_ini(const char *text, int textlen, int *state) /* {{{ */
 {
 	char *retval, *tmp;
 
-	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, EG(ini_directives), NULL TSRMLS_CC);
+	tmp = retval = cli_completion_generator_ht(text + 1, textlen - 1, state, EG(ini_directives), NULL);
 	if (retval) {
 		retval = malloc(strlen(tmp) + 2);
 		retval[0] = '#';
@@ -454,10 +454,10 @@ static char *cli_completion_generator_ini(const char *text, int textlen, int *st
 	return retval;
 } /* }}} */
 
-static char *cli_completion_generator_func(const char *text, int textlen, int *state, HashTable *ht TSRMLS_DC) /* {{{ */
+static char *cli_completion_generator_func(const char *text, int textlen, int *state, HashTable *ht) /* {{{ */
 {
 	zend_function *func;
-	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func TSRMLS_CC);
+	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&func);
 	if (retval) {
 		rl_completion_append_character = '(';
 		retval = strdup(func->common.function_name->val);
@@ -466,10 +466,10 @@ static char *cli_completion_generator_func(const char *text, int textlen, int *s
 	return retval;
 } /* }}} */
 
-static char *cli_completion_generator_class(const char *text, int textlen, int *state TSRMLS_DC) /* {{{ */
+static char *cli_completion_generator_class(const char *text, int textlen, int *state) /* {{{ */
 {
 	zend_class_entry *ce;
-	char *retval = cli_completion_generator_ht(text, textlen, state, EG(class_table), (void**)&ce TSRMLS_CC);
+	char *retval = cli_completion_generator_ht(text, textlen, state, EG(class_table), (void**)&ce);
 	if (retval) {
 		rl_completion_append_character = '\0';
 		retval = strdup(ce->name->val);
@@ -478,10 +478,10 @@ static char *cli_completion_generator_class(const char *text, int textlen, int *
 	return retval;
 } /* }}} */
 
-static char *cli_completion_generator_define(const char *text, int textlen, int *state, HashTable *ht TSRMLS_DC) /* {{{ */
+static char *cli_completion_generator_define(const char *text, int textlen, int *state, HashTable *ht) /* {{{ */
 {
 	zend_class_entry **pce;
-	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&pce TSRMLS_CC);
+	char *retval = cli_completion_generator_ht(text, textlen, state, ht, (void**)&pce);
 	if (retval) {
 		rl_completion_append_character = '\0';
 		retval = strdup(retval);
@@ -505,15 +505,14 @@ TODO:
 */
 	char *retval = NULL;
 	int textlen = strlen(text);
-	TSRMLS_FETCH();
 
 	if (!index) {
 		cli_completion_state = 0;
 	}
 	if (text[0] == '$') {
-		retval = cli_completion_generator_var(text, textlen, &cli_completion_state TSRMLS_CC);
+		retval = cli_completion_generator_var(text, textlen, &cli_completion_state);
 	} else if (text[0] == '#') {
-		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state TSRMLS_CC);
+		retval = cli_completion_generator_ini(text, textlen, &cli_completion_state);
 	} else {
 		char *lc_text, *class_name_end;
 		int class_name_len;
@@ -525,7 +524,7 @@ TODO:
 			class_name_len = class_name_end - text;
 			class_name = zend_string_alloc(class_name_len, 0);
 			zend_str_tolower_copy(class_name->val, text, class_name_len);
-			if ((ce = zend_lookup_class(class_name TSRMLS_CC)) == NULL) {
+			if ((ce = zend_lookup_class(class_name)) == NULL) {
 				zend_string_release(class_name);
 				return NULL;
 			}
@@ -538,19 +537,19 @@ TODO:
 		switch (cli_completion_state) {
 			case 0:
 			case 1:
-				retval = cli_completion_generator_func(lc_text, textlen, &cli_completion_state, ce ? &ce->function_table : EG(function_table) TSRMLS_CC);
+				retval = cli_completion_generator_func(lc_text, textlen, &cli_completion_state, ce ? &ce->function_table : EG(function_table));
 				if (retval) {
 					break;
 				}
 			case 2:
 			case 3:
-				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants) TSRMLS_CC);
+				retval = cli_completion_generator_define(text, textlen, &cli_completion_state, ce ? &ce->constants_table : EG(zend_constants));
 				if (retval || ce) {
 					break;
 				}
 			case 4:
 			case 5:
-				retval = cli_completion_generator_class(lc_text, textlen, &cli_completion_state TSRMLS_CC);
+				retval = cli_completion_generator_class(lc_text, textlen, &cli_completion_state);
 				break;
 			default:
 				break;
@@ -578,12 +577,12 @@ static char **cli_code_completion(const char *text, int start, int end) /* {{{ *
 }
 /* }}} */
 
-static int readline_shell_run(TSRMLS_D) /* {{{ */
+static int readline_shell_run(void) /* {{{ */
 {
 	char *line;
 	size_t size = 4096, pos = 0, len;
 	char *code = emalloc(size);
-	zend_string *prompt = cli_get_prompt("php", '>' TSRMLS_CC);
+	zend_string *prompt = cli_get_prompt("php", '>');
 	char *history_file;
 	int history_lines_to_write = 0;
 
@@ -597,7 +596,7 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 		prepend_file.type = ZEND_HANDLE_FILENAME;
 		prepend_file_p = &prepend_file;
 
-		zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, prepend_file_p);
+		zend_execute_scripts(ZEND_REQUIRE, NULL, 1, prepend_file_p);
 	}
 
 	history_file = tilde_expand("~/.php_history");
@@ -626,13 +625,13 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 				param++;
 				cmd = zend_string_init(&line[1], param - &line[1] - 1, 0);
 
-				zend_alter_ini_entry_chars_ex(cmd, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0 TSRMLS_CC);
+				zend_alter_ini_entry_chars_ex(cmd, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
 				zend_string_release(cmd);
 				add_history(line);
 
 				zend_string_release(prompt);
 				/* TODO: This might be wrong! */
-				prompt = cli_get_prompt("php", '>' TSRMLS_CC);
+				prompt = cli_get_prompt("php", '>');
 				continue;
 			}
 		}
@@ -654,7 +653,7 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 		free(line);
 		zend_string_release(prompt);
 
-		if (!cli_is_valid_code(code, pos, &prompt TSRMLS_CC)) {
+		if (!cli_is_valid_code(code, pos, &prompt)) {
 			continue;
 		}
 
@@ -668,17 +667,17 @@ static int readline_shell_run(TSRMLS_D) /* {{{ */
 		}
 
 		zend_try {
-			zend_eval_stringl(code, pos, NULL, "php shell code" TSRMLS_CC);
+			zend_eval_stringl(code, pos, NULL, "php shell code");
 		} zend_end_try();
 
 		pos = 0;
 					
 		if (!pager_pipe && php_last_char != '\0' && php_last_char != '\n') {
-			php_write("\n", 1 TSRMLS_CC);
+			php_write("\n", 1);
 		}
 
 		if (EG(exception)) {
-			zend_exception_error(EG(exception), E_WARNING TSRMLS_CC);
+			zend_exception_error(EG(exception), E_WARNING);
 		}
 
 		if (pager_pipe) {

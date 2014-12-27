@@ -34,7 +34,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 								 intl_error *err,
 								 Calendar*& cal,
 								 zend_long& cal_int_type,
-								 bool& calendar_owned TSRMLS_DC)
+								 bool& calendar_owned)
 {
 	char *msg;
 	UErrorCode status = UErrorCode();
@@ -56,7 +56,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 					"calendar) or IntlDateFormatter::GREGORIAN. "
 					"Alternatively, it can be an IntlCalendar object",
 					func_name);
-			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
+			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
 			efree(msg);
 			return FAILURE;
 		} else if (v == (zend_long)UCAL_TRADITIONAL) {
@@ -70,13 +70,13 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 
 	} else if (Z_TYPE_P(calendar_zv) == IS_OBJECT &&
 			instanceof_function_ex(Z_OBJCE_P(calendar_zv),
-			Calendar_ce_ptr, 0 TSRMLS_CC)) {
+			Calendar_ce_ptr, 0)) {
 
-		cal = calendar_fetch_native_calendar(calendar_zv TSRMLS_CC);
+		cal = calendar_fetch_native_calendar(calendar_zv);
 		if (cal == NULL) {
 			spprintf(&msg, 0, "%s: Found unconstructed IntlCalendar object",
 					func_name);
-			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
+			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
 			efree(msg);
 			return FAILURE;
 		}
@@ -87,7 +87,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 	} else {
 		spprintf(&msg, 0, "%s: Invalid calendar argument; should be an integer "
 				"or an IntlCalendar instance", func_name);
-		intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
+		intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
 		efree(msg);
 		return FAILURE;
 	}
@@ -97,7 +97,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 	}
 	if (U_FAILURE(status)) {
 		spprintf(&msg, 0, "%s: Failure instantiating calendar", func_name);
-		intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
+		intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);
 		efree(msg);
 		return FAILURE;
 	}

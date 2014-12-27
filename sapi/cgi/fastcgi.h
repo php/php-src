@@ -108,7 +108,7 @@ typedef struct _fcgi_end_request_rec {
 
 /* FastCGI client API */
 
-typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC);
+typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
 
 typedef struct _fcgi_request fcgi_request;
 
@@ -127,7 +127,7 @@ char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
 char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value);
 char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int hash_value, char* val);
-void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array TSRMLS_DC);
+void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array);
 
 int fcgi_read(fcgi_request *req, char *str, int len);
 

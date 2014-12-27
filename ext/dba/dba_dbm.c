@@ -195,7 +195,7 @@ DBA_INFO_FUNC(dbm)
 #if DBA_GDBM
 	if (!strcmp(DBM_VERSION, "GDBM"))
 	{
-		return dba_info_gdbm(hnd, info TSRMLS_CC);
+		return dba_info_gdbm(hnd, info);
 	}
 #endif
 	return estrdup(DBM_VERSION);

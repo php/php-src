@@ -118,7 +118,7 @@ if (!function_exists('mysqli_stmt_get_result'))
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_result::data_seek() expects parameter 1 to be long, double given in %s on line %d
+Warning: mysqli_result::data_seek() expects parameter 1 to be integer, float given in %s on line %d
 
 Warning: mysqli_data_seek(): Couldn't fetch mysqli_result in %s on line %d
 

@@ -36,12 +36,12 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	size_t			rules_len;
 	zend_bool	compiled	= 0;
 	UErrorCode	status		= U_ZERO_ERROR;
-	intl_error_reset(NULL TSRMLS_CC);
+	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b",
 			&rules, &rules_len, &compiled) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_create_instance: bad arguments", 0 TSRMLS_CC);
+			"rbbi_create_instance: bad arguments", 0);
 		Z_OBJ_P(return_value) = NULL;
 		return;
 	}
@@ -56,12 +56,12 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 				== FAILURE) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"rbbi_create_instance: rules were not a valid UTF-8 string",
-				0 TSRMLS_CC);
+				0);
 			RETURN_NULL();
 		}
 
 		rbbi = new RuleBasedBreakIterator(rulesStr, parseError, status);
-		intl_error_set_code(NULL, status TSRMLS_CC);
+		intl_error_set_code(NULL, status);
 		if (U_FAILURE(status)) {
 			char *msg;
 			smart_str parse_error_str;
@@ -69,7 +69,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			spprintf(&msg, 0, "rbbi_create_instance: unable to create "
 				"RuleBasedBreakIterator from rules (%s)", parse_error_str.s? parse_error_str.s->val : "");
 			smart_str_free(&parse_error_str);
-			intl_error_set_custom_msg(NULL, msg, 1 TSRMLS_CC);
+			intl_error_set_custom_msg(NULL, msg, 1);
 			efree(msg);
 			delete rbbi;
 			Z_OBJ_P(return_value) = NULL;
@@ -80,19 +80,19 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		rbbi = new RuleBasedBreakIterator((uint8_t*)rules, rules_len, status);
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "rbbi_create_instance: unable to "
-				"create instance from compiled rules", 0 TSRMLS_CC);
+				"create instance from compiled rules", 0);
 			Z_OBJ_P(return_value) = NULL;
 			return;
 		}
 #else
 		intl_error_set(NULL, U_UNSUPPORTED_ERROR, "rbbi_create_instance: "
-			"compiled rules require ICU >= 4.8", 0 TSRMLS_CC);
+			"compiled rules require ICU >= 4.8", 0);
 		Z_OBJ_P(return_value) = NULL;
 		return;
 #endif
 	}
 
-	breakiterator_object_create(return_value, rbbi, 0 TSRMLS_CC);
+	breakiterator_object_create(return_value, rbbi, 0);
 }
 
 U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
@@ -103,7 +103,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 	_php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
-		zend_object_store_ctor_failed(Z_OBJ(orig_this) TSRMLS_CC);
+		zend_object_store_ctor_failed(Z_OBJ(orig_this));
 		zval_dtor(&orig_this);
 		ZEND_CTOR_MAKE_NULL();
 	}
@@ -116,7 +116,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_rules: bad arguments", 0 TSRMLS_CC);
+			"rbbi_get_rules: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -130,7 +130,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 	{
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"rbbi_hash_code: Error converting result to UTF-8 string",
-				0 TSRMLS_CC);
+				0);
 		RETURN_FALSE;
 	}
 	RETVAL_STRINGL(str, str_len);
@@ -145,7 +145,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_rule_status: bad arguments", 0 TSRMLS_CC);
+			"rbbi_get_rule_status: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -161,7 +161,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_rule_status_vec: bad arguments", 0 TSRMLS_CC);
+			"rbbi_get_rule_status_vec: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -183,7 +183,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 		delete[] rules;
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"rbbi_get_rule_status_vec: failed obtaining the status values",
-				0 TSRMLS_CC);
+				0);
 		RETURN_FALSE;
 	}
 
@@ -202,7 +202,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_get_binary_rules: bad arguments", 0 TSRMLS_CC);
+			"rbbi_get_binary_rules: bad arguments", 0);
 		RETURN_FALSE;
 	}
 
@@ -214,7 +214,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 	if (rules_len > INT_MAX - 1) {
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"rbbi_get_binary_rules: the rules are too large",
-				0 TSRMLS_CC);
+				0);
 		RETURN_FALSE;
 	}
 

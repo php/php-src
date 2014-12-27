@@ -61,22 +61,22 @@ extern const zend_property_info mysqli_warning_property_info_entries[];
 extern int php_le_pmysqli(void);
 extern void php_mysqli_dtor_p_elements(void *data);
 
-extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status TSRMLS_DC);
+extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status);
 
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
-extern void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC);
+extern void php_clear_stmt_bind(MY_STMT *stmt);
 extern void php_clear_mysql(MY_MYSQL *);
 #ifdef MYSQLI_USE_MYSQLND
-extern MYSQLI_WARNING *php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC);
+extern MYSQLI_WARNING *php_get_warnings(MYSQLND_CONN_DATA * mysql);
 #else
-extern MYSQLI_WARNING *php_get_warnings(MYSQL * mysql TSRMLS_DC);
+extern MYSQLI_WARNING *php_get_warnings(MYSQL * mysql);
 #endif
 
 extern void php_clear_warnings(MYSQLI_WARNING *w);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
-extern void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error TSRMLS_DC);
-extern void php_mysqli_report_index(const char *query, unsigned int status TSRMLS_DC);
-extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...);
+extern void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error);
+extern void php_mysqli_report_index(const char *query, unsigned int status);
+extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, ...);
 
 #ifdef HAVE_SPL
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
@@ -84,7 +84,7 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 
 #define PHP_MYSQLI_EXPORT(__type) PHP_MYSQLI_API __type
 
-PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry * TSRMLS_DC);
+PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *);
 
 #define MYSQLI_DISABLE_MQ if (mysql->multi_query) { \
 	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF); \
@@ -136,12 +136,12 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry * TSRMLS_DC
 
 #define MYSQLI_REPORT_MYSQL_ERROR(mysql) \
 if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && mysql_errno(mysql)) { \
-	php_mysqli_report_error(mysql_sqlstate(mysql), mysql_errno(mysql), mysql_error(mysql) TSRMLS_CC); \
+	php_mysqli_report_error(mysql_sqlstate(mysql), mysql_errno(mysql), mysql_error(mysql)); \
 }
 
 #define MYSQLI_REPORT_STMT_ERROR(stmt) \
 if ((MyG(report_mode) & MYSQLI_REPORT_ERROR) && mysql_stmt_errno(stmt)) { \
-	php_mysqli_report_error(mysql_stmt_sqlstate(stmt), mysql_stmt_errno(stmt), mysql_stmt_error(stmt) TSRMLS_CC); \
+	php_mysqli_report_error(mysql_stmt_sqlstate(stmt), mysql_stmt_errno(stmt), mysql_stmt_error(stmt)); \
 }
 
 void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_connect, zend_bool in_ctor);

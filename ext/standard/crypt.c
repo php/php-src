@@ -98,7 +98,7 @@
 #define PHP_STD_DES_CRYPT 1
 #endif
 
-#define PHP_CRYPT_RAND php_rand(TSRMLS_C)
+#define PHP_CRYPT_RAND php_rand()
 
 PHP_MINIT_FUNCTION(crypt) /* {{{ */
 {
@@ -267,14 +267,14 @@ PHP_FUNCTION(crypt)
 	 * available (passing always 2-character salt). At least for glibc6.1 */
 	memset(&salt[1], '$', PHP_MAX_SALT_LEN - 1);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &str, &str_len, &salt_in, &salt_in_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &salt_in, &salt_in_len) == FAILURE) {
 		return;
 	}
 
 	if (salt_in) {
 		memcpy(salt, salt_in, MIN(PHP_MAX_SALT_LEN, salt_in_len));
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash.");
+		php_error_docref(NULL, E_NOTICE, "No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash.");
 	}
 
 	/* The automatic salt generation covers standard DES, md5-crypt and Blowfish (simple) */
