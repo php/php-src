@@ -26,6 +26,7 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #68398 (msooxml matches too many archives). (Anatol)
+  . Fixed bug #68665 (invalid free). (honey@internot.info)
 
 - FPM:
   . Fixed request #68526 (Implement POSIX Access Control List for UDS). (Remi)
