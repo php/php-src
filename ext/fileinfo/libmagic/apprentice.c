@@ -1197,7 +1197,6 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 				if ((filearr = CAST(char **,
 				    erealloc(filearr, mlen))) == NULL) {
 					file_oomem(ms, mlen);
-					efree(mfn);
 					php_stream_closedir(dir);
 					errs++;
 					goto out;
