@@ -867,6 +867,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload_register, 0, 0, 0)
 	ZEND_ARG_INFO(0, autoload_function)
+	ZEND_ARG_INFO(0, throw)
+	ZEND_ARG_INFO(0, prepend)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_spl_autoload_unregister, 0, 0, 1)
