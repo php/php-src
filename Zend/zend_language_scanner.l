@@ -1935,7 +1935,6 @@ inline_char_handler:
 		// TODO: avoid reallocation ???
 		SCNG(output_filter)((unsigned char **)&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval));
 		ZVAL_STRINGL(zendlval, str, sz);
-		efree(s);
 	}
 	return T_CONSTANT_ENCAPSED_STRING;
 }
