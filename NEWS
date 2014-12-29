@@ -1,4 +1,4 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.6.5
 
@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . Fixed bug #68583 (Crash in timeout thread). (Anatol)
   . Fixed bug #65576 (Constructor from trait conflicts with inherited
     constructor). (dunglas at gmail dot com)
+  . Fixed bug #68676 (Explicit Double Free). (Kalle)
 
 - cURL:
   . Fixed bug #67643 (curl_multi_getcontent returns '' when
