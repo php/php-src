@@ -2744,6 +2744,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	zend_execute_data *call = EX(call);
 	zend_function *fbc = call->func;
 	zend_object *object = Z_OBJ(call->This);
+	zval *ret;
 
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
@@ -2843,18 +2844,16 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	
 			zend_vm_stack_free_call_frame(call);
 		} else {
-			zval *return_value = NULL;
-
+			ret = NULL;
 			call->symbol_table = NULL;
 			if (RETURN_VALUE_USED(opline)) {
-				return_value = EX_VAR(opline->result.var);
-
-				ZVAL_NULL(return_value);
-				Z_VAR_FLAGS_P(return_value) = 0;
+				ret = EX_VAR(opline->result.var);
+				ZVAL_NULL(ret);
+				Z_VAR_FLAGS_P(ret) = 0;
 			}
 
 			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, return_value);
+			i_init_func_execute_data(call, &fbc->op_array, ret);
 
 			if (EXPECTED(zend_execute_ex == execute_ex)) {
 				ZEND_VM_ENTER();
