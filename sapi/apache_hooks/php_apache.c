@@ -594,7 +594,7 @@ static void add_header_to_table(table *t, INTERNAL_FUNCTION_PARAMETERS)
 			case 3:
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(first), &pos);
 				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(first), (void **)&entry, &pos) == SUCCESS) {
-					switch(zend_hash_get_current_key_ex(Z_ARRVAL_P(first), &string_key, &string_key_len, &num_key, 0, &pos)) {
+					switch(zend_hash_get_current_key_ex(Z_ARRVAL_P(first), &string_key, &string_key_len, &num_key, &pos)) {
 						case HASH_KEY_IS_STRING:
 							if (zend_hash_find(Z_ARRVAL_P(first), string_key, string_key_len, (void **)&value) == FAILURE) {
 								zend_hash_move_forward_ex(Z_ARRVAL_P(first), &pos);

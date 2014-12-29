@@ -439,7 +439,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	new_entry.preg_options = poptions;
 	new_entry.compile_options = coptions;
 #if HAVE_SETLOCALE
-	new_entry.locale = BG(locale_string) ? zend_string_dup(BG(locale_string), 1) : NULL;
+	new_entry.locale = BG(locale_string) ? 
+		((GC_FLAGS(BG(locale_string)) & IS_STR_PERSISTENT) ?
+			zend_string_copy(BG(locale_string)) :
+			zend_string_init(BG(locale_string)->val, BG(locale_string)->len, 1)) :
+		NULL;
 	new_entry.tables = tables;
 #endif
 

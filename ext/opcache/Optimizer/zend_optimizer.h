@@ -36,7 +36,7 @@
 #define ZEND_OPTIMIZER_PASS_9		(1<<8)   /* TMP VAR usage                */
 #define ZEND_OPTIMIZER_PASS_10		(1<<9)   /* NOP removal                 */
 #define ZEND_OPTIMIZER_PASS_11		(1<<10)  /* Merge equal constants       */
-#define ZEND_OPTIMIZER_PASS_12		(1<<11)
+#define ZEND_OPTIMIZER_PASS_12		(1<<11)  /* Adjust used stack           */ 
 #define ZEND_OPTIMIZER_PASS_13		(1<<12)
 #define ZEND_OPTIMIZER_PASS_14		(1<<13)
 

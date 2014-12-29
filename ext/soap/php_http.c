@@ -809,7 +809,7 @@ try_again:
 				smart_str_append_const(&soap_headers, "Cookie: ");
 				for (i = 0; i < n; i++) {
 					data = zend_hash_get_current_data(Z_ARRVAL_P(cookies));
-					zend_hash_get_current_key_ex(Z_ARRVAL_P(cookies), &key, NULL, 0, NULL);
+					zend_hash_get_current_key_ex(Z_ARRVAL_P(cookies), &key, NULL, NULL);
 
 					if (Z_TYPE_P(data) == IS_ARRAY) {
 					  zval *value;
@@ -822,9 +822,9 @@ try_again:
 						      ((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 2)) == NULL ||
 						       in_domain(phpurl->host,Z_STRVAL_P(tmp))) &&
 						      (use_ssl || (tmp = zend_hash_index_find(Z_ARRVAL_P(data), 3)) == NULL)) {
-								smart_str_appendl(&soap_headers, key->val, key->len);
+								smart_str_append(&soap_headers, key);
 								smart_str_appendc(&soap_headers, '=');
-								smart_str_appendl(&soap_headers, Z_STRVAL_P(value), Z_STRLEN_P(value));
+								smart_str_append(&soap_headers, Z_STR_P(value));
 								smart_str_appendc(&soap_headers, ';');
 							}
 						}

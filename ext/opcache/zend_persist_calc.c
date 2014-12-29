@@ -54,7 +54,7 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 	uint idx;
 	Bucket *p;
 
-	if (!ht->nTableMask) {
+	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		return;
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {

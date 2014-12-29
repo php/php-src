@@ -972,7 +972,7 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht) /*
 
 	if (Z_TYPE(intern->array) == IS_OBJECT) {
 		do {
-			if (zend_hash_get_current_key_ex(aht, &string_key, &num_key, 0, &intern->pos) == HASH_KEY_IS_STRING) {
+			if (zend_hash_get_current_key_ex(aht, &string_key, &num_key, &intern->pos) == HASH_KEY_IS_STRING) {
 				data = zend_hash_get_current_data_ex(aht, &intern->pos);
 				if (data && Z_TYPE_P(data) == IS_INDIRECT &&
 				    Z_TYPE_P(data = Z_INDIRECT_P(data)) == IS_UNDEF) {

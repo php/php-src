@@ -412,8 +412,9 @@ struct _zend_execute_data {
 #define ZEND_CALL_CODE               (1 << 0)
 #define ZEND_CALL_NESTED             (0 << 1)
 #define ZEND_CALL_TOP                (1 << 1)
-#define ZEND_CALL_CTOR               (1 << 2)
-#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 3)
+#define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
+#define ZEND_CALL_CTOR               (1 << 3)
+#define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 4)
 
 #define ZEND_CALL_INFO(call) \
 	(Z_TYPE_INFO((call)->This) >> 24)

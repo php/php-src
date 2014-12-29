@@ -570,7 +570,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn)
 				zend_ulong num_key;
 				size_t value_len = strlen(*entry_value);
 				
-				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, 0, &pos_value)) {
+				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, &pos_value)) {
 					ca_payload_len += php_mysqlnd_net_store_length_size(s_len);
 					ca_payload_len += s_len;
 					ca_payload_len += php_mysqlnd_net_store_length_size(value_len);
@@ -606,7 +606,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn)
 					unsigned int s_len;
 					zend_ulong num_key;
 					size_t value_len = strlen(*entry_value);
-					if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, 0, &pos_value)) {
+					if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, &pos_value)) {
 						/* copy key */
 						p = php_mysqlnd_net_store_length(p, s_len);
 						memcpy(p, s_key, s_len);

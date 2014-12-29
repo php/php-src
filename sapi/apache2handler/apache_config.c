@@ -157,8 +157,8 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 //???	zend_hash_merge_ex(&n->config, &e->config, NULL, sizeof(php_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
 #if STAS_0
 	for (zend_hash_internal_pointer_reset(&d->config);
-			zend_hash_get_current_key_ex(&d->config, &str, &str_len, 
-				&num_index, 0, NULL) == HASH_KEY_IS_STRING;
+			zend_hash_get_current_key(&d->config, &str, &str_len, 
+				&num_index) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&d->config)) {
 		pe = NULL;
 		zend_hash_get_current_data(&d->config, (void **) &data);

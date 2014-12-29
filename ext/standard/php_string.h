@@ -120,6 +120,8 @@ PHPAPI struct lconv *localeconv_r(struct lconv *out);
 
 PHPAPI char *php_strtoupper(char *s, size_t len);
 PHPAPI char *php_strtolower(char *s, size_t len);
+PHPAPI zend_string *php_string_toupper(zend_string *s);
+PHPAPI zend_string *php_string_tolower(zend_string *s);
 PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size_t trlen);
 PHPAPI zend_string *php_addslashes(char *str, size_t length, int should_free);
 PHPAPI zend_string *php_addcslashes(const char *str, size_t length, int freeit, char *what, size_t wlength);

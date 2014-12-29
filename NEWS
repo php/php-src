@@ -33,6 +33,7 @@
   . Added \u{xxxxx} Unicode Codepoint Escape Syntax. (Andrea)
   . Fixed oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
   . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint and conversion error messages. (Andrea)
+  . Implemented FR #55428 (E_RECOVERABLE_ERROR when output buffering in output buffering handler). (Kalle)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
@@ -62,6 +63,10 @@
 
 - Mcrypt:
   . Fixed possible read after end of buffer and use after free. (Dmitry)
+
+- Opcache:
+  . Fixed bug #68644 (strlen incorrect : mbstring + func_overload=2 +UTF-8
+    + Opcache). (Laruence)
 
 - pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler

@@ -1,4 +1,4 @@
-$Id$
+﻿$Id$
 
 PHP X.Y UPGRADE NOTES
 
@@ -52,6 +52,8 @@ PHP X.Y UPGRADE NOTES
     However, \u without a following { is unaffected, so "\u202e" won't error and
     will work the same as before.
   . zend_function.common.num_args don't include the variadic argument anymore.
+  . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
+    output buffer is created in an output buffer handler.
 
 - DBA
   . dba_delete() now returns false if the key was not found for the inifile

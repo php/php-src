@@ -195,7 +195,8 @@ ps_fetch_float(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_l
 #ifdef HAVE_DECIMAL_FP_SUPPORT
 	{
 		typedef float dec32 __attribute__((mode(SD)));
-		dec32 d32val = fval;
+		/* volatile so the compiler will not optimize away the conversion */
+		volatile dec32 d32val = fval;
 
 		/* The following cast is guaranteed to do the right thing */
 		dval = (double) d32val;

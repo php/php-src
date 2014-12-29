@@ -498,6 +498,26 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 	}
 }
 
+static void zend_accel_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+{
+	zend_function *func;
+	zend_op *opline, *end;
+
+	opline = op_array->opcodes;
+	end = opline + op_array->last;
+	while (opline < end) {
+		if (opline->opcode == ZEND_INIT_FCALL) {
+			func = zend_hash_find_ptr(
+				&ctx->script->function_table,
+				Z_STR_P(RT_CONSTANT(op_array, opline->op2)));
+			if (func) {
+				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, func);
+			}
+		}
+		opline++;
+	}
+}
+
 int zend_accel_script_optimize(zend_persistent_script *script)
 {
 	uint idx, j;
@@ -535,6 +555,38 @@ int zend_accel_script_optimize(zend_persistent_script *script)
 					HashTable *ht = op_array->static_variables;
 					*op_array = *orig_op_array;
 					op_array->static_variables = ht;
+				}
+			}
+		}
+	}
+
+	if (ZEND_OPTIMIZER_PASS_12 & OPTIMIZATION_LEVEL) {
+		zend_accel_adjust_fcall_stack_size(&script->main_op_array, &ctx);
+
+		for (idx = 0; idx < script->function_table.nNumUsed; idx++) {
+			p = script->function_table.arData + idx;
+			if (Z_TYPE(p->val) == IS_UNDEF) continue;
+			op_array = (zend_op_array*)Z_PTR(p->val);
+			zend_accel_adjust_fcall_stack_size(op_array, &ctx);
+		}
+
+		for (idx = 0; idx < script->class_table.nNumUsed; idx++) {
+			p = script->class_table.arData + idx;
+			if (Z_TYPE(p->val) == IS_UNDEF) continue;
+			ce = (zend_class_entry*)Z_PTR(p->val);
+			for (j = 0; j < ce->function_table.nNumUsed; j++) {
+				q = ce->function_table.arData + j;
+				if (Z_TYPE(q->val) == IS_UNDEF) continue;
+				op_array = (zend_op_array*)Z_PTR(q->val);
+				if (op_array->scope == ce) {
+					zend_accel_adjust_fcall_stack_size(op_array, &ctx);
+				} else if (op_array->type == ZEND_USER_FUNCTION) {
+					zend_op_array *orig_op_array;
+					if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, q->key)) != NULL) {
+						HashTable *ht = op_array->static_variables;
+						*op_array = *orig_op_array;
+						op_array->static_variables = ht;
+					}
 				}
 			}
 		}

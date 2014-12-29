@@ -367,6 +367,7 @@ ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2);
 ZEND_API void zend_str_tolower(char *str, size_t length);
 ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, size_t length);
 ZEND_API char *zend_str_tolower_dup(const char *source, size_t length);
+ZEND_API zend_string *zend_string_tolower(zend_string *str);
 
 ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
 ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
@@ -831,6 +832,36 @@ static zend_always_inline int fast_equal_check_function(zval *op1, zval *op2)
 			} else {
 				return zendi_smart_strcmp(op1, op2) == 0;
 			}
+		}
+	}
+	compare_function(&result, op1, op2);
+	return Z_LVAL(result) == 0;
+}
+
+static zend_always_inline int fast_equal_check_long(zval *op1, zval *op2)
+{
+	zval result;
+	if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+		return Z_LVAL_P(op1) == Z_LVAL_P(op2);
+	}
+	compare_function(&result, op1, op2);
+	return Z_LVAL(result) == 0;
+}
+
+static zend_always_inline int fast_equal_check_string(zval *op1, zval *op2)
+{
+	zval result;
+	if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
+		if (Z_STR_P(op1) == Z_STR_P(op2)) {
+			return 1;
+		} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
+			if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
+				return 0;
+			} else {
+				return memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0;
+			}
+		} else {
+			return zendi_smart_strcmp(op1, op2) == 0;
 		}
 	}
 	compare_function(&result, op1, op2);
