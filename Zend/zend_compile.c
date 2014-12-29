@@ -1292,9 +1292,9 @@ int zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global
 	auto_global.auto_global_callback = auto_global_callback;
 	auto_global.jit = jit;
 
-	retval = zend_hash_add_mem(CG(auto_globals), name, &auto_global, sizeof(zend_auto_global)) != NULL ? SUCCESS : FAILURE;
+	retval = zend_hash_add_mem(CG(auto_globals), auto_global.name, &auto_global, sizeof(zend_auto_global)) != NULL ? SUCCESS : FAILURE;
 
-	zend_string_release(auto_global.name);
+	zend_string_release(name);
 	return retval;
 }
 /* }}} */
