@@ -36,7 +36,7 @@ PHP_FUNCTION( numfmt_format )
 	zend_long type = FORMAT_TYPE_DEFAULT;
 	UChar format_buf[32];
 	UChar* formatted = format_buf;
-	int formatted_len = USIZE(format_buf);
+	int32_t formatted_len = USIZE(format_buf);
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -139,11 +139,11 @@ PHP_FUNCTION( numfmt_format_currency )
 	double     number;
 	UChar      format_buf[32];
 	UChar*     formatted     = format_buf;
-	int        formatted_len = USIZE(format_buf);
+	int32_t    formatted_len = USIZE(format_buf);
 	char*      currency      = NULL;
-	size_t        currency_len  = 0;
+	size_t     currency_len  = 0;
 	UChar*     scurrency     = NULL;
-	int        scurrency_len = 0;
+	int32_t    scurrency_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */

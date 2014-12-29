@@ -30,7 +30,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
 	char*       pattern;
-	size_t         locale_len = 0, pattern_len = 0;
+	size_t      locale_len = 0, pattern_len = 0;
 	UChar*      spattern     = NULL;
 	int         spattern_len = 0;
 	zval*       object;

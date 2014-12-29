@@ -23,7 +23,7 @@
 #include "intl_error.h"
 
 typedef struct {
-	// error hangling
+	// error handling
 	intl_error      error;
 
 	// formatter handling
