@@ -240,18 +240,12 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 	size_t		region_len	= 0;
 	int32_t	offset,
 			*offsetp	= NULL;
-	int		arg3isnull	= 0;
+	zend_bool arg3isnull = 1;
+
 	intl_error_reset(NULL);
 
-	/* must come before zpp because zpp would convert the arg in the stack to 0 */
-	if (ZEND_NUM_ARGS() == 3) {
-		zval *dummy, *zvoffset;
-		arg3isnull = zend_get_parameters_ex(3, &dummy, &dummy, &zvoffset)
-				!= FAILURE && Z_TYPE_P(zvoffset) == IS_NULL;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s!l",
-			&zoneType, &region, &region_len, &offset_arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s!l!",
+			&zoneType, &region, &region_len, &offset_arg, &arg3isnull) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_create_time_zone_id_enumeration: bad arguments", 0);
 		RETURN_FALSE;
@@ -264,18 +258,15 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() == 3) {
+	if (!arg3isnull) {
 		if (offset_arg < (zend_long)INT32_MIN || offset_arg > (zend_long)INT32_MAX) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intltz_create_time_zone_id_enumeration: offset out of bounds", 0);
 			RETURN_FALSE;
 		}
-		
-		if (!arg3isnull) {
-			offset = (int32_t)offset_arg;
-			offsetp = &offset;
-		} //else leave offsetp NULL
-	}
+		offset = (int32_t)offset_arg;
+		offsetp = &offset;
+	} //else leave offsetp NULL
 
 	StringEnumeration *se;
 	UErrorCode uec = UErrorCode();
