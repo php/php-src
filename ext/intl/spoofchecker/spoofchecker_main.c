@@ -70,9 +70,11 @@ PHP_METHOD(Spoofchecker, areConfusable)
 	}
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
-
-	ret = uspoof_areConfusableUTF8(co->uspoof, s1, s1_len, s2, s2_len, SPOOFCHECKER_ERROR_CODE_P(co));
-
+	if(s1_len > INT32_MAX || s2_len > INT32_MAX) {
+		SPOOFCHECKER_ERROR_CODE(co) = U_BUFFER_OVERFLOW_ERROR;
+	} else {
+		ret = uspoof_areConfusableUTF8(co->uspoof, s1, (int32_t)s1_len, s2, (int32_t)s2_len, SPOOFCHECKER_ERROR_CODE_P(co));
+	}
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
 		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		RETURN_TRUE;

@@ -81,7 +81,7 @@ typedef struct _intl_data {
 #define INTL_METHOD_RETVAL_UTF8(obj, ustring, ulen, free_it)									\
 {																								\
 	char *u8value;																				\
-	int u8len;																					\
+	size_t u8len;																				\
 	intl_convert_utf16_to_utf8(&u8value, &u8len, ustring, ulen, &INTL_DATA_ERROR_CODE((obj)));	\
 	if((free_it)) {																				\
 		efree(ustring);																			\
@@ -96,14 +96,14 @@ typedef struct _intl_data {
 #define INTL_CHECK_LOCALE_LEN(locale_len)												\
 	if((locale_len) > INTL_MAX_LOCALE_LEN) {											\
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,									\
-	"Locale string too long, should be no longer than 80 characters", 0 );	\
+		"Locale string too long, should be no longer than 80 characters", 0 );			\
 		RETURN_NULL();																	\
 	}
 
 #define INTL_CHECK_LOCALE_LEN_OBJ(locale_len, object)									\
 	if((locale_len) > INTL_MAX_LOCALE_LEN) {											\
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,									\
-	"Locale string too long, should be no longer than 80 characters", 0 );	\
+		"Locale string too long, should be no longer than 80 characters", 0 );			\
 		zval_dtor(object);																\
 		ZVAL_NULL(object);																\
 		RETURN_NULL();																	\

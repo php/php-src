@@ -37,7 +37,7 @@ int transliterator_object_construct( zval *object,
 	const UChar           *ustr_id;
 	int32_t               ustr_id_len;
 	char                  *str_id;
-	int                   str_id_len;
+	size_t                str_id_len;
 	Transliterator_object *to;
 
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK;

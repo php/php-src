@@ -76,10 +76,10 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 /* {{{ ResourceBundle_ctor */
 static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
-	const char	*bundlename;
-	size_t			bundlename_len = 0;
-	const char	*locale;
-	size_t			locale_len = 0;
+	const char *bundlename;
+	size_t		bundlename_len = 0;
+	const char *locale;
+	size_t		locale_len = 0;
 	zend_bool	fallback = 1;
 
 	zval                  *object = return_value;
@@ -179,7 +179,7 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 
 	if(Z_TYPE_P(offset) == IS_LONG) {
 		is_numeric = 1;
-		meindex = Z_LVAL_P(offset);
+		meindex = (int32_t)Z_LVAL_P(offset);
 		rb->child = ures_getByIndex( rb->me, meindex, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else if(Z_TYPE_P(offset) == IS_STRING) {
 		mekey = Z_STRVAL_P(offset);

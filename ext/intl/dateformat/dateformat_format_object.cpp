@@ -63,7 +63,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	zval				*object,
 						*format = NULL;
 	const char			*locale_str	= NULL;
-	size_t					locale_len;
+	size_t				locale_len;
 	bool				pattern		= false;
 	UDate				date;
 	TimeZone			*timeZone	= NULL;
@@ -209,7 +209,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 	{
 		char *ret_str;
-		int ret_str_len;
+		size_t ret_str_len;
 		UnicodeString result = UnicodeString();
 		df->format(date, result);
 

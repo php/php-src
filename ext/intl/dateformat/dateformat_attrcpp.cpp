@@ -45,7 +45,7 @@ static inline DateFormat *fetch_datefmt(IntlDateFormatter_object *dfo) {
 U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 {
 	char *str;
-	int str_len;
+	size_t str_len;
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",

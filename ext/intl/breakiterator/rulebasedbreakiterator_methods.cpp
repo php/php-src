@@ -33,7 +33,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object		= getThis();
 	char		*rules;
-	size_t			rules_len;
+	size_t		rules_len;
 	zend_bool	compiled	= 0;
 	UErrorCode	status		= U_ZERO_ERROR;
 	intl_error_reset(NULL);
@@ -123,7 +123,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 	BREAKITER_METHOD_FETCH_OBJECT;
 
 	char *str;
-	int str_len;
+	size_t str_len;
 	const UnicodeString rules = fetch_rbbi(bio)->getRules();
 
 	if (intl_charFromString(rules, &str, &str_len, BREAKITER_ERROR_CODE_P(bio)) == FAILURE)

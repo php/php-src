@@ -168,11 +168,11 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter)
 	 * No need to do anything, the engine increments ->index */
 
 	const char	*s = Z_STRVAL(bio->text);
-	int32_t		slen = Z_STRLEN(bio->text);
+	size_t		slen = Z_STRLEN(bio->text);
 	zend_string	*res;
 
 	if (next == BreakIterator::DONE) {
-		next = slen;
+		next = (int32_t)slen;
 	}
 	assert(next <= slen && next >= cur);
 	res = zend_string_alloc(next - cur, 0);

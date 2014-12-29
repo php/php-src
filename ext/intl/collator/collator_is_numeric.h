@@ -21,6 +21,6 @@
 #include <php.h>
 #include <unicode/uchar.h>
 
-zend_uchar collator_is_numeric( UChar *str, int length, zend_long *lval, double *dval, int allow_errors );
+zend_uchar collator_is_numeric( UChar *str, int32_t length, zend_long *lval, double *dval, int allow_errors );
 
 #endif // COLLATOR_IS_NUMERIC_H

@@ -102,10 +102,10 @@ PHP_FUNCTION( numfmt_get_attribute )
 PHP_FUNCTION( numfmt_get_text_attribute )
 {
 	zend_long   attribute;
-	UChar  value_buf[64];
-	int    value_buf_size = USIZE( value_buf );
-	UChar* value  = value_buf;
-	int    length = 0;
+	UChar   value_buf[64];
+	int32_t value_buf_size = USIZE( value_buf );
+	UChar*  value  = value_buf;
+	int32_t length = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -207,7 +207,7 @@ PHP_FUNCTION( numfmt_set_attribute )
  */
 PHP_FUNCTION( numfmt_set_text_attribute )
 {
-	int slength = 0;
+	int32_t slength = 0;
 	UChar *svalue = NULL;
 	zend_long attribute;
 	char *value;
@@ -252,7 +252,7 @@ PHP_FUNCTION( numfmt_get_symbol )
 	zend_long symbol;
 	UChar value_buf[4];
 	UChar *value = value_buf;
-	int length = USIZE(value_buf);
+	int32_t length = USIZE(value_buf);
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -297,11 +297,11 @@ PHP_FUNCTION( numfmt_get_symbol )
  */
 PHP_FUNCTION( numfmt_set_symbol )
 {
-	zend_long       symbol;
+	zend_long  symbol;
 	char*      value     = NULL;
-	size_t        value_len = 0;
+	size_t     value_len = 0;
 	UChar*     svalue  = 0;
-	int        slength = 0;
+	int32_t    slength = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -344,9 +344,9 @@ PHP_FUNCTION( numfmt_set_symbol )
  */
 PHP_FUNCTION( numfmt_get_pattern )
 {
-	UChar  value_buf[64];
-	int    length = USIZE( value_buf );
-	UChar* value  = value_buf;
+	UChar   value_buf[64];
+	int32_t length = USIZE( value_buf );
+	UChar*  value  = value_buf;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -388,7 +388,7 @@ PHP_FUNCTION( numfmt_set_pattern )
 {
 	char*       value = NULL;
 	size_t      value_len = 0;
-	int         slength = 0;
+	int32_t     slength = 0;
 	UChar*	    svalue  = NULL;
 	FORMATTER_METHOD_INIT_VARS;
 

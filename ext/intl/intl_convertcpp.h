@@ -25,8 +25,8 @@
 
 #include <unicode/unistr.h>
 
-int intl_stringFromChar(UnicodeString &ret, char *str, int32_t str_len, UErrorCode *status);
+int intl_stringFromChar(UnicodeString &ret, char *str, size_t str_len, UErrorCode *status);
 
-int intl_charFromString(const UnicodeString &from, char **res, int *res_len, UErrorCode *status);
+int intl_charFromString(const UnicodeString &from, char **res, size_t *res_len, UErrorCode *status);
 
 #endif /* INTL_CONVERTCPP_H */
