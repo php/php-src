@@ -2765,7 +2765,36 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 
 	LOAD_OPLINE();
 
-	if (UNEXPECTED(fbc->type == ZEND_INTERNAL_FUNCTION)) {
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
+		EG(scope) = fbc->common.scope;
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				zend_generator_create_zval(call, &fbc->op_array, EX_VAR(opline->result.var));
+			} else {
+				zend_vm_stack_free_args(call);
+			}
+	
+			zend_vm_stack_free_call_frame(call);
+		} else {
+			ret = NULL;
+			call->symbol_table = NULL;
+			if (RETURN_VALUE_USED(opline)) {
+				ret = EX_VAR(opline->result.var);
+				ZVAL_NULL(ret);
+				Z_VAR_FLAGS_P(ret) = 0;
+			}
+
+			call->prev_execute_data = execute_data;
+			i_init_func_execute_data(call, &fbc->op_array, ret);
+
+			if (EXPECTED(zend_execute_ex == execute_ex)) {
+				ZEND_VM_ENTER();
+			} else {
+				ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+				zend_execute_ex(call);
+			}
+		}
+	} else if (EXPECTED(fbc->type < ZEND_USER_FUNCTION)) {
 		int should_change_scope = 0;
 		zval *ret;
 
@@ -2832,35 +2861,6 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			ZEND_VM_C_GOTO(fcall_end_change_scope);
 		} else {
 			ZEND_VM_C_GOTO(fcall_end);
-		}
-	} else if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-		EG(scope) = fbc->common.scope;
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (RETURN_VALUE_USED(opline)) {
-				zend_generator_create_zval(call, &fbc->op_array, EX_VAR(opline->result.var));
-			} else {
-				zend_vm_stack_free_args(call);
-			}
-	
-			zend_vm_stack_free_call_frame(call);
-		} else {
-			ret = NULL;
-			call->symbol_table = NULL;
-			if (RETURN_VALUE_USED(opline)) {
-				ret = EX_VAR(opline->result.var);
-				ZVAL_NULL(ret);
-				Z_VAR_FLAGS_P(ret) = 0;
-			}
-
-			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, ret);
-
-			if (EXPECTED(zend_execute_ex == execute_ex)) {
-				ZEND_VM_ENTER();
-			} else {
-				ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
-				zend_execute_ex(call);
-			}
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
 		EG(scope) = fbc->common.scope;
