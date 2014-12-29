@@ -706,7 +706,7 @@ failure:
 			switch (cur_arg_info->type_hint) {
 				case IS_LONG: {
 					zend_long dest;
-					if (_z_param_long(arg, &dest, NULL, 0, 0)) {
+					if (zend_parse_arg_long(arg, &dest, NULL, 0, 0)) {
 						if (Z_TYPE_P(arg) != IS_LONG) {
 							zval_dtor(arg);
 						}
@@ -718,7 +718,7 @@ failure:
 				break;
 				case IS_DOUBLE: {
 					double dest;
-					if (_z_param_double(arg, &dest, NULL, 0)) {
+					if (zend_parse_arg_double(arg, &dest, NULL, 0)) {
 						if (Z_TYPE_P(arg) != IS_DOUBLE) {
 							zval_dtor(arg);
 						}
@@ -730,7 +730,7 @@ failure:
 				break;
 				case IS_STRING: {
 					zend_string *dest;
-					if (_z_param_str(arg, &dest, 0)) {
+					if (zend_parse_arg_str(arg, &dest, 0)) {
 						if (Z_TYPE_P(arg) != IS_STRING) {
 							zval_dtor(arg);
 						}
@@ -742,7 +742,7 @@ failure:
 				break;
 				case _IS_BOOL: {
 					zend_bool dest;
-					if (_z_param_bool(arg, &dest, NULL, 0)) {
+					if (zend_parse_arg_bool(arg, &dest, NULL, 0)) {
 						if (Z_TYPE_P(arg) != IS_TRUE && Z_TYPE_P(arg) != IS_FALSE) {
 							zval_dtor(arg);
 						}
