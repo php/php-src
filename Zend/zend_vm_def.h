@@ -2854,7 +2854,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		zend_vm_stack_free_call_frame(call);
 
 		if (!RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(ret);
+			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
 
 		if (UNEXPECTED(should_change_scope)) {
