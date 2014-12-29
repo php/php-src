@@ -144,46 +144,55 @@ static void zend_bigint_long_to_mp_int(zend_long value, mp_int *mp)
 	}
 }
 
-static zend_long zend_bigint_mp_int_to_long(mp_int *mp)
+static zend_ulong zend_bigint_mp_int_to_ulong(mp_int *mp)
 {
 #	if SIZEOF_ZEND_LONG == 4
 		/* mp_get_int always returns 32 bits */
-		return mp_get_int(mp) * ((SIGN(mp) == MP_NEG) ? -1 : 1);
+		return mp_get_int(mp);
 # 	elif SIZEOF_ZEND_LONG == 8
 		mp_int tmp;
-		zend_ulong ulong_value = 0;
-		zend_long value;
+		zend_ulong value = 0;
 
 		CHECK_ERROR(mp_init_copy(&tmp, mp));
 
-		ulong_value = mp_get_int(&tmp);
+		value = mp_get_int(&tmp);
 		mp_div_2d(&tmp, 32, &tmp, NULL);
-		ulong_value |= mp_get_int(&tmp) << 32;
+		value |= mp_get_int(&tmp) << 32;
 
 		mp_clear(&tmp);
 
-		value = ulong_value * ((SIGN(mp) == MP_NEG) ? -1 : 1);
 		return value;
 #	else
 #		error SIZEOF_ZEND_LONG other than 4 or 8 unsupported
 #	endif
 }
 
+static zend_long zend_bigint_mp_int_to_long(mp_int *mp)
+{
+	return zend_bigint_mp_int_to_ulong(mp) * ((SIGN(mp) == MP_NEG) ? -1 : 1);
+}
+
 /* All documentation for bigint functions is found in zend_bigint.h */
 
 mp_int ZEND_LONG_MAX_mp, ZEND_LONG_MIN_mp;
 mp_int ZEND_ULONG_MAX_mp;
+mp_int two_pow_bits_mp;
 
 void zend_startup_bigint(void)
 {
 	CHECK_ERROR(mp_init_multi(
 		&ZEND_LONG_MAX_mp, &ZEND_LONG_MIN_mp,
 		&ZEND_ULONG_MAX_mp,
+		&two_pow_bits_mp,
 		NULL
 	));
 	zend_bigint_long_to_mp_int(ZEND_LONG_MAX, &ZEND_LONG_MAX_mp);
 	zend_bigint_long_to_mp_int(ZEND_LONG_MIN, &ZEND_LONG_MAX_mp);
 	zend_bigint_ulong_to_mp_int(ZEND_ULONG_MAX, &ZEND_ULONG_MAX_mp);
+
+	/* either 2^32 or 2^64 */
+	mp_set_int(&two_pow_bits_mp, 1);
+	mp_mul_2d(&two_pow_bits_mp, SIZEOF_ZEND_LONG * 8, &two_pow_bits_mp);
 }
 
 /*** INITIALISERS ***/
@@ -429,21 +438,44 @@ ZEND_API zend_bool zend_bigint_long_divisible(zend_long num, const zend_bigint *
 
 ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big) /* {{{ */
 {
-	/* FIXME: reimplement dval_to_lval algo */
-	return zend_bigint_mp_int_to_long(&big->mp);
+	mp_int bmod;
+	zend_long result;
+
+	mp_init(&bmod);
+
+	mp_mod_2d(&big->mp, SIZEOF_ZEND_LONG * 8, &bmod);
+
+	if (SIGN(&bmod) == MP_NEG) {
+		/* we're going to make this number positive */
+
+		mp_add(&bmod, &two_pow_bits_mp, &bmod);
+	}
+
+	/* ulong -> long conversion is deliberate */
+	result = (zend_long)zend_bigint_mp_int_to_ulong(&bmod);
+
+	mp_clear(&bmod);
+	
+	return result;
 }
 
 ZEND_API zend_long zend_bigint_to_long_saturate(const zend_bigint *big) /* {{{ */
 {
-	/* FIXME: reimplement saturation algo and handle larger nos */
-	return zend_bigint_mp_int_to_long(&big->mp);
+	if (zend_bigint_can_fit_long(big)) {
+		return zend_bigint_mp_int_to_long(&big->mp);
+	} else {
+		if (SIGN(&big->mp) == MP_NEG) {
+			return ZEND_LONG_MIN;
+		} else {
+			return ZEND_LONG_MAX;
+		}
+	}
 }
 /* }}} */
 
 ZEND_API zend_long zend_bigint_to_long_ex(const zend_bigint *big, zend_bool *overflow) /* {{{ */
 {
-	/* FIXME: reimplement saturation algo and handle larger nos */
-	*overflow = 0;
+	*overflow = !zend_bigint_can_fit_long(big);
 	return zend_bigint_mp_int_to_long(&big->mp);
 }
 /* }}} */

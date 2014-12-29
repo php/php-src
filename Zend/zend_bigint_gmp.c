@@ -342,7 +342,8 @@ ZEND_API zend_long zend_bigint_to_long(const zend_bigint *big) /* {{{ */
 		mpz_clear(two_pow_bits);
 	}
 	
-	result = mpz_get_si(bmod);
+	/* ulong -> long conversion is deliberate */
+	result = (zend_long)mpz_get_ui(bmod);
 	mpz_clear(bmod);
 	
 	return result;
