@@ -56,6 +56,10 @@
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
     when setting SIG_DFL). (Julien)
 
+- PCRE:
+  . Fixed bug #66679 (Alignment Bug in PCRE 8.34 upstream).
+    (Rainer Jung, Anatol Belski)
+
 - PDO_mysql:
   . Fixed bug #68424 (Add new PDO mysql connection attr to control multi
     statements option). (peter dot wolanin at acquia dot com)
