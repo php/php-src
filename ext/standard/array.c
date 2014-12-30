@@ -2207,21 +2207,34 @@ PHP_FUNCTION(array_unshift)
 {
 	zval   *args,			/* Function arguments array */
 		   *stack;			/* Input stack */
-	HashTable *new_hash;	/* New hashtable for the stack */
-	HashTable  old_hash;
+	HashTable new_hash;		/* New hashtable for the stack */
 	int argc;				/* Number of function arguments */
+	int i;
+	zend_string *key;
+	zval *value;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/+", &stack, &args, &argc) == FAILURE) {
 		return;
 	}
 
-	/* Use splice to insert the elements at the beginning. Destroy old
-	 * hashtable and replace it with new one */
-	new_hash = php_splice(Z_ARRVAL_P(stack), 0, 0, &args[0], argc, NULL);
-	old_hash = *Z_ARRVAL_P(stack);
-	*Z_ARRVAL_P(stack) = *new_hash;
-	FREE_HASHTABLE(new_hash);
-	zend_hash_destroy(&old_hash);
+	zend_hash_init(&new_hash, zend_hash_num_elements(Z_ARRVAL_P(stack)) + argc, NULL, ZVAL_PTR_DTOR, 0);
+	for (i = 0; i < argc; i++) {
+		if (Z_REFCOUNTED(args[i])) {
+			Z_ADDREF(args[i]);
+		}
+		zend_hash_next_index_insert_new(&new_hash, &args[i]);
+	}
+	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(Z_ARRVAL_P(stack), key, value) {
+		if (key) {
+			zend_hash_add_new(&new_hash, key, value);
+		} else {
+			zend_hash_next_index_insert_new(&new_hash, value);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	Z_ARRVAL_P(stack)->pDestructor = NULL;
+	zend_hash_destroy(Z_ARRVAL_P(stack));
+	*Z_ARRVAL_P(stack) = new_hash;
 
 	/* Clean up and return the number of elements in the stack */
 	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));
