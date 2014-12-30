@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Fixed bug #67643 (curl_multi_getcontent returns '' when
     CURLOPT_RETURNTRANSFER isn't set). (Jille Timmermans)
 
+- Fileinfo:
+  . Fixed bug #68671 (incorrect expression in libmagic).
+    (Joshua Rogers, Anatol Belski)
+
 - GD:
   . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (Jan Bee, Remi)
 
