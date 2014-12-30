@@ -2989,15 +2989,13 @@ PHP_FUNCTION(array_pad)
 {
 	zval  *input;		/* Input array */
 	zval  *pad_value;	/* Padding value obviously */
-	zval  *pads;		/* Array to pass to splice */
-	HashTable *new_hash;/* Return value from splice */
-	HashTable  old_hash;
 	zend_long pad_size;		/* Size to pad to */
 	zend_long pad_size_abs;	/* Absolute value of pad_size */
 	zend_long input_size;		/* Size of the input array */
 	zend_long num_pads;		/* How many pads do we need */
-	int	do_pad;			/* Whether we should do padding at all */
-	int	i;
+	zend_long i;
+	zend_string *key;
+	zval *value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "alz", &input, &pad_size, &pad_value) == FAILURE) {
 		return;
@@ -3006,48 +3004,43 @@ PHP_FUNCTION(array_pad)
 	/* Do some initial calculations */
 	input_size = zend_hash_num_elements(Z_ARRVAL_P(input));
 	pad_size_abs = ZEND_ABS(pad_size);
-	if (pad_size_abs < 0) {
+	if (pad_size_abs < 0 || pad_size_abs - input_size > Z_L(1048576)) {
 		php_error_docref(NULL, E_WARNING, "You may only pad up to 1048576 elements at a time");
-		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
-	do_pad = (input_size >= pad_size_abs) ? 0 : 1;
-
-	/* Copy the original array */
-	RETVAL_ZVAL(input, 1, 0);
-
-	/* If no need to pad, no need to continue */
-	if (!do_pad) {
+	
+	if (input_size >= pad_size_abs) {		
+		/* Copy the original array */
+		ZVAL_COPY(return_value, input);
 		return;
 	}
 
-	/* Populate the pads array */
 	num_pads = pad_size_abs - input_size;
-	if (num_pads > Z_L(1048576)) {
-		php_error_docref(NULL, E_WARNING, "You may only pad up to 1048576 elements at a time");
-		zval_dtor(return_value);
-		RETURN_FALSE;
-	}
-	pads = (zval *)safe_emalloc(num_pads, sizeof(zval), 0);
-	for (i = 0; i < num_pads; i++) {
-		ZVAL_COPY_VALUE(&pads[i], pad_value);
+	array_init_size(return_value, pad_size_abs);
+	if (Z_REFCOUNTED_P(pad_value)) {
+		GC_REFCOUNT(Z_COUNTED_P(pad_value)) += num_pads;
 	}
 
-	/* Pad on the right or on the left */
+	if (pad_size < 0) {
+		for (i = 0; i < num_pads; i++) {
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), pad_value);
+		}		
+	}
+	
+	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(Z_ARRVAL_P(input), key, value) {
+		zval_add_ref(value);
+		if (key) {
+			zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
+		} else {
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), value);
+		}
+	} ZEND_HASH_FOREACH_END();
+	
 	if (pad_size > 0) {
-		new_hash = php_splice(Z_ARRVAL_P(return_value), (int)input_size, 0, pads, (int)num_pads, NULL);
-	} else {
-		new_hash = php_splice(Z_ARRVAL_P(return_value), 0, 0, pads, (int)num_pads, NULL);
+		for (i = 0; i < num_pads; i++) {
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), pad_value);
+		}		
 	}
-
-	/* Copy the result hash into return value */
-	old_hash = *Z_ARRVAL_P(return_value);
-	*Z_ARRVAL_P(return_value) = *new_hash;
-	FREE_HASHTABLE(new_hash);
-	zend_hash_destroy(&old_hash);
-
-	/* Clean up */
-	efree(pads);
 }
 /* }}} */
 
