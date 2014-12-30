@@ -1907,20 +1907,14 @@ PHP_FUNCTION(shuffle)
 }
 /* }}} */
 
-PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval *list, int list_count, HashTable *removed) /* {{{ */
+static void php_splice(HashTable *in_hash, int offset, int length, HashTable *replace, HashTable *removed) /* {{{ */
 {
-	HashTable 	*out_hash = NULL;	/* Output hashtable */
+	HashTable 	 out_hash;			/* Output hashtable */
 	int			 num_in,			/* Number of entries in the input hashtable */
-				 pos,				/* Current position in the hashtable */
-				 i;					/* Loop counter */
+				 pos;				/* Current position in the hashtable */
 	uint         idx;
 	Bucket		*p;					/* Pointer to hash bucket */
 	zval		*entry;				/* Hash entry */
-
-	/* If input hash doesn't exist, we have nothing to do */
-	if (!in_hash) {
-		return NULL;
-	}
 
 	/* Get number of entries in the input hash */
 	num_in = zend_hash_num_elements(in_hash);
@@ -1940,8 +1934,7 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval *l
 	}
 
 	/* Create and initialize output hash */
-	ALLOC_HASHTABLE(out_hash);
-	zend_hash_init(out_hash, (length > 0 ? num_in - length : 0) + list_count, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(&out_hash, (length > 0 ? num_in - length : 0) + (replace ? zend_hash_num_elements(replace) : 0), NULL, ZVAL_PTR_DTOR, 0);
 
 	/* Start at the beginning of the input hash and copy entries to output hash until offset is reached */
 	for (pos = 0, idx = 0; pos < offset && idx < in_hash->nNumUsed; idx++) {
@@ -1950,15 +1943,12 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval *l
 		pos++;
 		/* Get entry and increase reference count */
 		entry = &p->val;
-		if (Z_REFCOUNTED_P(entry)) {
-			Z_ADDREF_P(entry);
-		}
 
 		/* Update output hash depending on key type */
 		if (p->key == NULL) {
-			zend_hash_next_index_insert(out_hash, entry);
+			zend_hash_next_index_insert_new(&out_hash, entry);
 		} else {
-			zend_hash_update(out_hash, p->key, entry);
+			zend_hash_add_new(&out_hash, p->key, entry);
 		}
 	}
 
@@ -1973,23 +1963,40 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval *l
 				Z_ADDREF_P(entry);
 			}
 			if (p->key == NULL) {
-				zend_hash_next_index_insert(removed, entry);
+				zend_hash_next_index_insert_new(removed, entry);
+				zend_hash_index_del(in_hash, p->h);
 			} else {
-				zend_hash_update(removed, p->key, entry);
+				zend_hash_add_new(removed, p->key, entry);
+				if (in_hash == &EG(symbol_table).ht) {
+					zend_delete_global_variable(p->key);
+				} else {
+					zend_hash_del(in_hash, p->key);
+				}
 			}
 		}
 	} else { /* otherwise just skip those entries */
-		for ( ; pos < offset + length && idx < in_hash->nNumUsed; pos++, idx++);
+		for ( ; pos < offset + length && idx < in_hash->nNumUsed; idx++) {
+			p = in_hash->arData + idx;
+			if (Z_TYPE(p->val) == IS_UNDEF) continue;
+			pos++;
+			if (p->key == NULL) {
+				zend_hash_index_del(in_hash, p->h);
+			} else {
+				if (in_hash == &EG(symbol_table).ht) {
+					zend_delete_global_variable(p->key);
+				} else {
+					zend_hash_del(in_hash, p->key);
+				}
+			}
+		}
 	}
 
 	/* If there are entries to insert.. */
-	if (list != NULL) {
-		/* ..for each one, create a new zval, copy entry into it and copy it into the output hash */
-		for (i = 0; i < list_count; i++) {
-			entry = &list[i];
+	if (replace) {
+		ZEND_HASH_FOREACH_VAL_IND(replace, entry) {
 			if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
-			zend_hash_next_index_insert(out_hash, entry);
-		}
+			zend_hash_next_index_insert_new(&out_hash, entry);
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	/* Copy the remaining input hash entries to the output hash */
@@ -1997,18 +2004,18 @@ PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval *l
 		p = in_hash->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		entry = &p->val;
-		if (Z_REFCOUNTED_P(entry)) {
-			Z_ADDREF_P(entry);
-		}
 		if (p->key == NULL) {
-			zend_hash_next_index_insert(out_hash, entry);
+			zend_hash_next_index_insert_new(&out_hash, entry);
 		} else {
-			zend_hash_update(out_hash, p->key, entry);
+			zend_hash_add_new(&out_hash, p->key, entry);
 		}
 	}
 
-	zend_hash_internal_pointer_reset(out_hash);
-	return out_hash;
+	zend_hash_internal_pointer_reset(&out_hash);
+
+	in_hash->pDestructor = NULL;
+	zend_hash_destroy(in_hash);
+	*in_hash = out_hash;
 }
 /* }}} */
 
@@ -2224,7 +2231,7 @@ PHP_FUNCTION(array_unshift)
 		}
 		zend_hash_next_index_insert_new(&new_hash, &args[i]);
 	}
-	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(Z_ARRVAL_P(stack), key, value) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
 		if (key) {
 			zend_hash_add_new(&new_hash, key, value);
 		} else {
@@ -2246,17 +2253,10 @@ PHP_FUNCTION(array_unshift)
 PHP_FUNCTION(array_splice)
 {
 	zval *array,				/* Input array */
-		 *repl_array = NULL,	/* Replacement array */
-		 *repl = NULL;			/* Replacement elements */
-	HashTable *new_hash = NULL,	/* Output array's hash */
-	          *rem_hash = NULL;	/* Removed elements' hash */
-	HashTable  old_hash;
-	uint    idx;
-	Bucket *p;					/* Bucket used for traversing hash */
-	zend_long	i,
-			offset,
-			length = 0,
-			repl_num = 0;		/* Number of replacement elements */
+		 *repl_array = NULL;	/* Replacement array */
+	HashTable  *rem_hash = NULL;
+	zend_long offset,
+			length = 0;
 	int		num_in;				/* Number of elements in the input array */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/l|lz/", &array, &offset, &length, &repl_array) == FAILURE) {
@@ -2271,16 +2271,7 @@ PHP_FUNCTION(array_splice)
 
 	if (ZEND_NUM_ARGS() == 4) {
 		/* Make sure the last argument, if passed, is an array */
-		convert_to_array(repl_array);
-
-		/* Create the array of replacement elements */
-		repl_num = zend_hash_num_elements(Z_ARRVAL_P(repl_array));
-		repl = (zval *)safe_emalloc(repl_num, sizeof(zval), 0);
-		for (idx = 0, i = 0; idx < Z_ARRVAL_P(repl_array)->nNumUsed; idx++) {
-			p = Z_ARRVAL_P(repl_array)->arData + idx;
-			if (Z_TYPE(p->val) == IS_UNDEF) continue;
-			ZVAL_COPY_VALUE(&repl[i++], &p->val);
-		}
+		convert_to_array_ex(repl_array);
 	}
 
 	/* Don't create the array of removed elements if it's not going
@@ -2308,18 +2299,7 @@ PHP_FUNCTION(array_splice)
 	}
 
 	/* Perform splice */
-	new_hash = php_splice(Z_ARRVAL_P(array), (int)offset, (int)length, repl, (int)repl_num, rem_hash);
-
-	/* Replace input array's hashtable with the new one */
-	old_hash = *Z_ARRVAL_P(array);
-	*Z_ARRVAL_P(array) = *new_hash;
-	FREE_HASHTABLE(new_hash);
-	zend_hash_destroy(&old_hash);
-
-	/* Clean up */
-	if (ZEND_NUM_ARGS() == 4) {
-		efree(repl);
-	}
+	php_splice(Z_ARRVAL_P(array), (int)offset, (int)length, repl_array ? Z_ARRVAL_P(repl_array) : NULL, rem_hash);
 }
 /* }}} */
 
@@ -3041,7 +3021,9 @@ PHP_FUNCTION(array_pad)
 	}
 	
 	ZEND_HASH_FOREACH_STR_KEY_VAL_IND(Z_ARRVAL_P(input), key, value) {
-		zval_add_ref(value);
+		if (Z_REFCOUNTED_P(value)) {
+			Z_ADDREF_P(value);
+		}
 		if (key) {
 			zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
 		} else {
