@@ -3731,10 +3731,10 @@ PHP_FUNCTION(pg_lo_export)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	if (lo_export(pgsql, oid, file_out)) {
-		RETURN_TRUE;
+	if (lo_export(pgsql, oid, file_out) == -1) {
+		RETURN_FALSE;
 	}
-	RETURN_FALSE;
+	RETURN_TRUE;
 }
 /* }}} */
 

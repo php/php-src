@@ -60,6 +60,9 @@
   . Fixed bug #66679 (Alignment Bug in PCRE 8.34 upstream).
     (Rainer Jung, Anatol Belski)
 
+- pgsql:
+  . Fixed bug #68697 (lo_export return -1 on failure). (Ondřej Surý)
+
 - PDO_mysql:
   . Fixed bug #68424 (Add new PDO mysql connection attr to control multi
     statements option). (peter dot wolanin at acquia dot com)
