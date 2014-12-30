@@ -30,7 +30,9 @@
 
 - Fileinfo:
   . Fixed bug #68398 (msooxml matches too many archives). (Anatol)
-  . Fixed bug #68665 (invalid free). (honey@internot.info)
+  . Fixed bug #68665 (invalid free in libmagic). (Joshua Rogers, Anatol Belski)
+  . Fixed bug #68671 (incorrect expression in libmagic).
+    (Joshua Rogers, Anatol Belski)
 
 - FPM:
   . Fixed request #68526 (Implement POSIX Access Control List for UDS). (Remi)
