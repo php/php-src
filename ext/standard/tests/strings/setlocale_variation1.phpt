@@ -14,7 +14,7 @@ if (setlocale(LC_ALL, "en_US.utf8", "Ko_KR.utf8", "zh_CN.utf8") === false) {
 /* Prototype  : string setlocale (int $category , string $locale [,string $..] )
               : string setlocale(int $category , array $locale);
  * Description: Sets locale information.Returns the new current locale , or FALSE
-                if locale functinality is not implemented in this platform.
+                if locale functionality is not implemented in this platform.
  * Source code: ext/standard/string.c
 */
 

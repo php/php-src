@@ -35,7 +35,7 @@ names.
 Older names will become aliases of new functions for backward
 compatibility.
 
-Manual will be updated when this change is commited to CVS source.
+Manual will be updated when this change is committed to CVS source.
 
 ==== Configure Option Notes ====
 You cannot specify PostgreSQL source directly to build PostgreSQL
@@ -43,7 +43,7 @@ module with specific version. You need to install PostgreSQL
 somewhere in your system to build PHP with PostgreSQL support.
 
 ==== Note For PostgreSQL 7.2 ====
-I've tested upto 7.2.2.
+I've tested up to 7.2.2.
 
 ==== TODO List ===
 Make pg_convert() smater. 

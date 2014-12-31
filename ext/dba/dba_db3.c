@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,9 +37,8 @@
 
 static void php_dba_db3_errcall_fcn(const char *errpfx, char *msg)
 {
-	TSRMLS_FETCH();
 	
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
+	php_error_docref(NULL, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
 }
 
 #define DB3_DATA dba_db3_data *dba = info->dbf
@@ -81,8 +80,8 @@ DBA_OPEN_FUNC(db3)
 	}
 
 	if (info->argc > 0) {
-		convert_to_long_ex(info->argv[0]);
-		filemode = Z_LVAL_PP(info->argv[0]);
+		convert_to_long_ex(&info->argv[0]);
+		filemode = Z_LVAL(info->argv[0]);
 	}
 
 #ifdef DB_FCNTL_LOCKING
@@ -187,7 +186,7 @@ DBA_FIRSTKEY_FUNC(db3)
 	}
 
 	/* we should introduce something like PARAM_PASSTHRU... */
-	return dba_nextkey_db3(info, newlen TSRMLS_CC);
+	return dba_nextkey_db3(info, newlen);
 }
 
 DBA_NEXTKEY_FUNC(db3)

@@ -4,7 +4,7 @@ mb_http_output()
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--
 <?php
-//TODO: Add more encoding. Wrong paramter type test.
+//TODO: Add more encoding. Wrong parameter type test.
 //$debug = true;
 ini_set('include_path', dirname(__FILE__));
 include_once('common.inc');
@@ -49,12 +49,12 @@ $enc = mb_http_output();
 print "$enc\n";
 
 $r = mb_http_output($t_ary);
-($r === FALSE) ? print "OK_BAD_ARY_SET\n" : print "NG_BAD_ARY_SET\n";
+($r === NULL) ? print "OK_BAD_ARY_SET\n" : print "NG_BAD_ARY_SET\n";
 $enc = mb_http_output();
 print "$enc\n";
 
 $r = mb_http_output($t_obj);
-($r === FALSE) ? print "OK_BAD_OBJ_SET\n" : print "NG_BAD_OBJ_SET\n";
+($r === NULL) ? print "OK_BAD_OBJ_SET\n" : print "NG_BAD_OBJ_SET\n";
 $enc = mb_http_output();
 print "$enc\n";
 

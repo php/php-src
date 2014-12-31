@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,7 +53,10 @@ ZEND_BEGIN_MODULE_GLOBALS(com_dotnet)
 ZEND_END_MODULE_GLOBALS(com_dotnet)
 
 #ifdef ZTS
-# define COMG(v) TSRMG(com_dotnet_globals_id, zend_com_dotnet_globals *, v)
+# define COMG(v) ZEND_TSRMG(com_dotnet_globals_id, zend_com_dotnet_globals *, v)
+# ifdef COMPILE_DL_COM_DOTNET
+ZEND_TSRMLS_CACHE_EXTERN;
+# endif
 #else
 # define COMG(v) (com_dotnet_globals.v)
 #endif

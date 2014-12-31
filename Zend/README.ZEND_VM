@@ -6,7 +6,7 @@ fields and using different execution methods (call threading, switch threading
 and direct threading). As a result ZE2 got more than 20% speedup on raw PHP
 code execution (with specialized executor and direct threading execution
 method). As in most PHP applications raw execution speed isn't the limiting
-factor but system calls and database callls are, your mileage with this patch
+factor but system calls and database calls are, your mileage with this patch
 will vary.
 
 Most parts of the old zend_execute.c go into zend_vm_def.h. Here you can

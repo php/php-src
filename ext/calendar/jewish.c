@@ -272,6 +272,7 @@
 #define HALAKIM_PER_METONIC_CYCLE (HALAKIM_PER_LUNAR_CYCLE * (12 * 19 + 7))
 
 #define JEWISH_SDN_OFFSET 347997
+#define JEWISH_SDN_MAX 324542846L /* 12/13/887605, greater value raises interger overflow */
 #define NEW_MOON_OF_CREATION 31524
 
 #define SUNDAY    0
@@ -381,12 +382,12 @@ char *JewishMonthHebName[14] =
  * (called dehiyyot) delays it.  These 4 rules can delay the start of the
  * year by as much as 2 days.
  */
-static long int Tishri1(
+static zend_long Tishri1(
 						   int metonicYear,
-						   long int moladDay,
-						   long int moladHalakim)
+						   zend_long moladDay,
+						   zend_long moladHalakim)
 {
-	long int tishri1;
+	zend_long tishri1;
 	int dow;
 	int leapYear;
 	int lastWasLeapYear;
@@ -428,10 +429,10 @@ static long int Tishri1(
  */
 static void MoladOfMetonicCycle(
 								   int metonicCycle,
-								   long int *pMoladDay,
-								   long int *pMoladHalakim)
+								   zend_long *pMoladDay,
+								   zend_long *pMoladHalakim)
 {
-	register unsigned long int r1, r2, d1, d2;
+	register zend_ulong r1, r2, d1, d2;
 
 	/* Start with the time of the first molad after creation. */
 	r1 = NEW_MOON_OF_CREATION;
@@ -467,14 +468,14 @@ static void MoladOfMetonicCycle(
  * us to avoid calculating the length of the year in most cases.
  */
 static void FindTishriMolad(
-							   long int inputDay,
+							   zend_long inputDay,
 							   int *pMetonicCycle,
 							   int *pMetonicYear,
-							   long int *pMoladDay,
-							   long int *pMoladHalakim)
+							   zend_long *pMoladDay,
+							   zend_long *pMoladHalakim)
 {
-	long int moladDay;
-	long int moladHalakim;
+	zend_long moladDay;
+	zend_long moladHalakim;
 	int metonicCycle;
 	int metonicYear;
 
@@ -522,8 +523,8 @@ static void FindStartOfYear(
 							   int year,
 							   int *pMetonicCycle,
 							   int *pMetonicYear,
-							   long int *pMoladDay,
-							   long int *pMoladHalakim,
+							   zend_long *pMoladDay,
+							   zend_long *pMoladHalakim,
 							   int *pTishri1)
 {
 	*pMetonicCycle = (year - 1) / 19;
@@ -545,21 +546,21 @@ static void FindStartOfYear(
  * range 1 to 13 inclusive; *pDay will be in the range 1 to 30 inclusive.
  */
 void SdnToJewish(
-					long int sdn,
+					zend_long sdn,
 					int *pYear,
 					int *pMonth,
 					int *pDay)
 {
-	long int inputDay;
-	long int day;
-	long int halakim;
+	zend_long inputDay;
+	zend_long day;
+	zend_long halakim;
 	int metonicCycle;
 	int metonicYear;
 	int tishri1;
 	int tishri1After;
 	int yearLength;
 
-	if (sdn <= JEWISH_SDN_OFFSET) {
+	if (sdn <= JEWISH_SDN_OFFSET || sdn > JEWISH_SDN_MAX) {
 		*pYear = 0;
 		*pMonth = 0;
 		*pDay = 0;
@@ -683,18 +684,18 @@ void SdnToJewish(
  * value.  To verify that a date is valid, convert it to SDN and then back
  * and compare with the original.
  */
-long int JewishToSdn(
+zend_long JewishToSdn(
 						int year,
 						int month,
 						int day)
 {
-	long int sdn;
+	zend_long sdn;
 	int metonicCycle;
 	int metonicYear;
 	int tishri1;
 	int tishri1After;
-	long int moladDay;
-	long int moladHalakim;
+	zend_long moladDay;
+	zend_long moladHalakim;
 	int yearLength;
 	int lengthOfAdarIAndII;
 

@@ -41,6 +41,7 @@ test_open_basedir_after("linkinfo");
 ?>
 --CLEAN--
 <?php
+chdir(__DIR__);
 require_once "open_basedir.inc";
 delete_directories();
 ?>

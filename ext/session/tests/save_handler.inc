@@ -31,7 +31,7 @@ function write($id, $session_data) {
     if ($fp = fopen($session_file, "w")) {
         $return = fwrite($fp, $session_data);
         fclose($fp);
-        return $return;
+        return (bool)$return;
     }
     return false;
 }
@@ -40,7 +40,8 @@ function destroy($id) {
     global $session_save_path, $name;
     echo "Destroy [${session_save_path},${id}]\n";
     $session_file = "$session_save_path/".SESSION_FILE_PREFIX.$id;
-    return unlink($session_file);
+    unlink($session_file);
+    return true;
 }
 
 function gc($maxlifetime) {

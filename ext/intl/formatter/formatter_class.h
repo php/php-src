@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,24 +25,29 @@
 #include "formatter_data.h"
 
 typedef struct {
-	zend_object     zo;
 	formatter_data  nf_data;
+	zend_object     zo;
 } NumberFormatter_object;
 
-void formatter_register_class( TSRMLS_D );
+static inline NumberFormatter_object *php_intl_number_format_fetch_object(zend_object *obj) {
+	return (NumberFormatter_object *)((char*)(obj) - XtOffsetOf(NumberFormatter_object, zo));
+}
+#define Z_INTL_NUMBERFORMATTER_P(zv) php_intl_number_format_fetch_object(Z_OBJ_P(zv))
+
+void formatter_register_class( void );
 extern zend_class_entry *NumberFormatter_ce_ptr;
 
 /* Auxiliary macros */
 
 #define FORMATTER_METHOD_INIT_VARS				INTL_METHOD_INIT_VARS(NumberFormatter, nfo)
 #define FORMATTER_OBJECT(nfo)					(nfo)->nf_data.unum
-#define FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(NumberFormatter, nfo)
+#define FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_NUMBERFORMATTER, nfo)
 #define FORMATTER_METHOD_FETCH_OBJECT \
 	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (FORMATTER_OBJECT(nfo) == NULL) \
 	{ \
 		intl_errors_set(&nfo->nf_data.error, U_ILLEGAL_ARGUMENT_ERROR, \
-				"Found unconstructed NumberFormatter", 0 TSRMLS_CC); \
+				"Found unconstructed NumberFormatter", 0); \
 		RETURN_FALSE; \
 	}
 

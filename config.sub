@@ -1011,7 +1011,7 @@ case $basic_machine in
 		;;
 	ppc64)	basic_machine=powerpc64-unknown
 		;;
-	ppc64-*) basic_machine=powerpc64-`echo $basic_machine | sed 's/^[^-]*-//'`
+	ppc64-* | ppc64p7-*) basic_machine=powerpc64-`echo $basic_machine | sed 's/^[^-]*-//'`
 		;;
 	ppc64le | powerpc64little | ppc64-le | powerpc64-little)
 		basic_machine=powerpc64le-unknown

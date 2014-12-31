@@ -9,8 +9,8 @@ if(!extension_loaded('sysvsem') || !extension_loaded('sysvshm')) {
 --FILE--
 <?php
 $MEMSIZE = 512;  //  size of shared memory to allocate
-$SEMKEY	 =   1;  //  Semaphore key
-$SHMKEY	 =   2;  //  Shared memory key
+$SEMKEY	 =   ftok(__FILE__, 'P');  //  Semaphore key
+$SHMKEY	 =   ftok(__FILE__, 'Q');  //  Shared memory key
 
 echo "Start.\n";
 // Get semaphore
@@ -23,11 +23,11 @@ echo "Got semaphore $sem_id.\n";
 
 // Accuire semaphore
 if (! sem_acquire($sem_id)) {
-	echo "Fail to aquire semaphore $sem_id.\n";
+	echo "Fail to acquire semaphore $sem_id.\n";
 	sem_remove($sem_id);
 	exit;
 }
-echo "Success aquire semaphore $sem_id.\n";
+echo "Success acquire semaphore $sem_id.\n";
 
 $shm_id =   shm_attach($SHMKEY, $MEMSIZE);
 if ($shm_id === FALSE) {
@@ -100,7 +100,7 @@ echo "End.\n";
 --EXPECTF--
 Start.
 Got semaphore Resource id #%i.
-Success aquire semaphore Resource id #%i.
+Success acquire semaphore Resource id #%i.
 Success to attach shared memory : %s.
 Write var1 to shared memory.
 Write var2 to shared memory.

@@ -50,7 +50,7 @@ if test "$PHP_CGI" != "no"; then
     esac
 
     dnl Select SAPI
-    PHP_SELECT_SAPI(cgi, program, cgi_main.c fastcgi.c,, '$(SAPI_CGI_PATH)')
+    PHP_SELECT_SAPI(cgi, program, cgi_main.c fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, '$(SAPI_CGI_PATH)')
 
     case $host_alias in
       *aix*)
@@ -71,6 +71,8 @@ if test "$PHP_CGI" != "no"; then
     dnl Expose to Makefile
     PHP_SUBST(SAPI_CGI_PATH)
     PHP_SUBST(BUILD_CGI)
+
+    PHP_OUTPUT(sapi/cgi/php-cgi.1)
 else
   AC_MSG_RESULT(yes)
 fi

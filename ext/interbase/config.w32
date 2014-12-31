@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_WITH("interbase", "InterBase support", "no");

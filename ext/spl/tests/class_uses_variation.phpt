@@ -16,8 +16,8 @@ var_dump(class_uses(new fs));
 var_dump(class_uses('fs'));
 
 echo "\n--- testing autoload ---\n";
-var_dump(class_uses('non-existent'));
-var_dump(class_uses('non-existent2', false));
+var_dump(class_uses('non_existent'));
+var_dump(class_uses('non_existent2', false));
 
 
 function __autoload($classname) {
@@ -35,11 +35,11 @@ array(0) {
 }
 
 --- testing autoload ---
-attempting to autoload non-existent
+attempting to autoload non_existent
 
-Warning: class_uses(): Class non-existent does not exist and could not be loaded in %s on line %d
+Warning: class_uses(): Class non_existent does not exist and could not be loaded in %s on line %d
 bool(false)
 
-Warning: class_uses(): Class non-existent2 does not exist in %s on line %d
+Warning: class_uses(): Class non_existent2 does not exist in %s on line %d
 bool(false)
 ===DONE===

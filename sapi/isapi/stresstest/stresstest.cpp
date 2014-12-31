@@ -529,7 +529,7 @@ int main(int argc, char* argv[])
 		    0,
 		    NULL 
 		);
-		fprintf(stderr,"Error: Dll 'php5isapi.dll' not found -%d\n%s\n", GetLastError(), lpMsgBuf);
+		fprintf(stderr,"Error: Dll 'php7isapi.dll' not found -%d\n%s\n", GetLastError(), lpMsgBuf);
 		free (module);
 		free(filelist);
 		LocalFree( lpMsgBuf );
@@ -796,7 +796,7 @@ BOOL WINAPI ServerSupportFunction(HCONN hConn, DWORD dwHSERequest,
 
 	switch(dwHSERequest) {
 		case (HSE_REQ_SEND_RESPONSE_HEADER) :
-			lpszRespBuf = (char *)xmalloc(*lpdwSize);//+ 80);//accomodate our header
+			lpszRespBuf = (char *)xmalloc(*lpdwSize);//+ 80);//accommodate our header
 			if (!lpszRespBuf)
 				return FALSE;
 			wsprintf(lpszRespBuf,"%s",

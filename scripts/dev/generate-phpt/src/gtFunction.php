@@ -19,7 +19,7 @@ class gtFunction extends gtTestSubject {
 
 
   /**
-   * Get the names of function argments and initialise mandatory and optional argument arrays
+   * Get the names of function arguments and initialise mandatory and optional argument arrays
    *
    */
   public function setArgumentNames() {

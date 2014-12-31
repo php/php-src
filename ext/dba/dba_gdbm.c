@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,8 +54,8 @@ DBA_OPEN_FUNC(gdbm)
 		return FAILURE; /* not possible */
 
 	if(info->argc > 0) {
-		convert_to_long_ex(info->argv[0]);
-		filemode = Z_LVAL_PP(info->argv[0]);
+		convert_to_long_ex(&info->argv[0]);
+		filemode = Z_LVAL(info->argv[0]);
 	}
 
 	dbf = gdbm_open(info->path, 0, gmode, filemode, NULL);
@@ -110,10 +110,10 @@ DBA_UPDATE_FUNC(gdbm)
 		case 1:
 			return FAILURE;
 		case -1:
-			php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
+			php_error_docref2(NULL, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
 			return FAILURE;
 		default:
-			php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "Unknown return value");
+			php_error_docref2(NULL, key, val, E_WARNING, "Unknown return value");
 			return FAILURE;
 	}
 }

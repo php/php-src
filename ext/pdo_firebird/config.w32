@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_WITH("pdo-firebird", "Firebird support for PDO", "no");

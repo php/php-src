@@ -4,7 +4,7 @@ Phar and RecursiveDirectoryIterator
 <?php
 if (!extension_loaded("phar")) die("skip");
 if (!extension_loaded("spl")) die("skip SPL not available");
-if (version_compare(PHP_VERSION, "6.0", "<")) die("skip requires Unicode support");
+if (version_compare(PHP_VERSION, "6.0", "!=")) die("skip requires Unicode support");
 ?>
 --INI--
 phar.require_hash=0
@@ -31,7 +31,7 @@ foreach($it as $name => $ent)
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
+unlink(dirname(__FILE__) . '/files/phar_oo_005U.phar.php');
 __halt_compiler();
 ?>
 --EXPECT--

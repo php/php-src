@@ -45,8 +45,8 @@ pg_query('DROP SCHEMA phptests');
 
 ?>
 --EXPECTF--
-string(37) "DELETE FROM foo WHERE id=1 AND id2=2;"
-string(46) "DELETE FROM phptests.foo WHERE id=2 AND id2=3;"
+string(43) "DELETE FROM "foo" WHERE "id"=1 AND "id2"=2;"
+string(54) "DELETE FROM "phptests"."foo" WHERE "id"=2 AND "id2"=3;"
 array(2) {
   [0]=>
   array(2) {

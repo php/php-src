@@ -2,7 +2,8 @@
 
 ini_set('date.timezone', 'GMT');
 
-$fname = dirname(__FILE__) . '/phar_oo_test.phar.php';
+$tname = basename(current(get_included_files()), ".php");
+$fname = dirname(__FILE__) . "/$tname.phar.php";
 $pname = 'phar://' . $fname;
 $file = (binary)'<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 

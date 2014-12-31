@@ -48,8 +48,8 @@ str_dump($a, $b);
 --EXPECT--
 *** Testing strnatcasecmp() : variation ***
 int(1)
-int(6)
-int(-2)
+int(1)
+int(-1)
 int(-1)
 int(0)
 int(0)

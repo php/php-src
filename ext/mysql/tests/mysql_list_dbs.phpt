@@ -27,7 +27,9 @@ if (!$num = mysql_num_rows($res))
 	printf("[004] Empty database list? [%d] %s\n", mysql_errno($link), mysql_error($link));
 
 $row = mysql_fetch_array($res, MYSQL_NUM);
-if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($row[0])) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && 
+    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+    !is_unicode($row[0])) {
 	printf("[005] Check for unicode support\n");
 	var_inspect($row);
 }

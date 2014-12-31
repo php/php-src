@@ -2,11 +2,12 @@
 // vim:ft=javascript
 
 EXTENSION("pcre", "php_pcre.c", false /* never shared */,
-		"-Iext/pcre/pcrelib");
-ADD_SOURCES("ext/pcre/pcrelib", "pcre_chartables.c pcre_ucd.c pcre_compile.c pcre_config.c pcre_exec.c pcre_fullinfo.c pcre_get.c pcre_globals.c pcre_maketables.c pcre_newline.c pcre_ord2utf8.c pcre_refcount.c pcre_study.c pcre_tables.c pcre_valid_utf8.c pcre_version.c pcre_xclass.c", "pcre");
+		"-Iext/pcre/pcrelib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+ADD_SOURCES("ext/pcre/pcrelib", "pcre_chartables.c pcre_ucd.c pcre_compile.c pcre_config.c pcre_exec.c pcre_fullinfo.c pcre_get.c pcre_globals.c pcre_maketables.c pcre_newline.c pcre_ord2utf8.c pcre_refcount.c pcre_study.c pcre_tables.c pcre_valid_utf8.c pcre_version.c pcre_xclass.c pcre_jit_compile.c", "pcre");
 ADD_DEF_FILE("ext\\pcre\\php_pcre.def");
 
 AC_DEFINE('HAVE_BUNDLED_PCRE', 1, 'Using bundled PCRE library');
 AC_DEFINE('HAVE_PCRE', 1, 'Have PCRE library');
 PHP_PCRE="yes";
 PHP_INSTALL_HEADERS("ext/pcre", "php_pcre.h pcrelib/");
+ADD_FLAG("CFLAGS_PCRE", " /D HAVE_CONFIG_H");

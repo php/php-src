@@ -115,7 +115,7 @@ fclose( $file_handle );
 -- int 0 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1962-12-02 08:34:10"
+  string(26) "1962-12-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -125,7 +125,7 @@ object(DateTime)#%d (3) {
 -- int 1 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1963-01-02 08:34:10"
+  string(26) "1963-01-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -135,7 +135,7 @@ object(DateTime)#%d (3) {
 -- int 12345 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2991-09-02 08:34:10"
+  string(26) "2991-09-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -145,7 +145,7 @@ object(DateTime)#%d (3) {
 -- int -12345 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "0934-03-02 08:34:10"
+  string(26) "0934-03-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -155,7 +155,7 @@ object(DateTime)#%d (3) {
 -- float 10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1963-10-02 08:34:10"
+  string(26) "1963-10-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -165,7 +165,7 @@ object(DateTime)#%d (3) {
 -- float -10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1962-02-02 08:34:10"
+  string(26) "1962-02-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -175,7 +175,7 @@ object(DateTime)#%d (3) {
 -- float .5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1962-12-02 08:34:10"
+  string(26) "1962-12-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -184,28 +184,28 @@ object(DateTime)#%d (3) {
 
 -- empty array --
 
-Warning: date_date_set() expects parameter 3 to be long, array given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: date_date_set() expects parameter 3 to be long, array given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: date_date_set() expects parameter 3 to be long, array given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: date_date_set() expects parameter 3 to be long, array given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1962-12-02 08:34:10"
+  string(26) "1962-12-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -215,7 +215,7 @@ object(DateTime)#%d (3) {
 -- lowercase null --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1962-12-02 08:34:10"
+  string(26) "1962-12-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -225,7 +225,7 @@ object(DateTime)#%d (3) {
 -- lowercase true --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1963-01-02 08:34:10"
+  string(26) "1963-01-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -235,7 +235,7 @@ object(DateTime)#%d (3) {
 -- lowercase false --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1962-12-02 08:34:10"
+  string(26) "1962-12-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -245,7 +245,7 @@ object(DateTime)#%d (3) {
 -- uppercase TRUE --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1963-01-02 08:34:10"
+  string(26) "1963-01-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -255,7 +255,7 @@ object(DateTime)#%d (3) {
 -- uppercase FALSE --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1962-12-02 08:34:10"
+  string(26) "1962-12-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -264,48 +264,48 @@ object(DateTime)#%d (3) {
 
 -- empty string DQ --
 
-Warning: date_date_set() expects parameter 3 to be long, string given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: date_date_set() expects parameter 3 to be long, string given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: date_date_set() expects parameter 3 to be long, string given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: date_date_set() expects parameter 3 to be long, string given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: date_date_set() expects parameter 3 to be long, string given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: date_date_set() expects parameter 3 to be long, string given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
 
-Warning: date_date_set() expects parameter 3 to be long, object given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, object given in %s on line %d
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: date_date_set() expects parameter 3 to be long, object given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, object given in %s on line %d
 bool(false)
 
 -- undefined var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1962-12-02 08:34:10"
+  string(26) "1962-12-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -315,7 +315,7 @@ object(DateTime)#%d (3) {
 -- unset var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "1962-12-02 08:34:10"
+  string(26) "1962-12-02 08:34:10.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -324,6 +324,6 @@ object(DateTime)#%d (3) {
 
 -- resource --
 
-Warning: date_date_set() expects parameter 3 to be long, resource given in %s on line %d
+Warning: date_date_set() expects parameter 3 to be integer, resource given in %s on line %d
 bool(false)
 ===DONE===

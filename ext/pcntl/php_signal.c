@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,13 +23,12 @@
 #include "Zend/zend.h"
 #include "Zend/zend_signal.h"
 
-/* php_signal using sigaction is derrived from Advanced Programing
+/* php_signal using sigaction is derived from Advanced Programing
  * in the Unix Environment by W. Richard Stevens p 298. */
 Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 {
 	struct sigaction act,oact;
 #ifdef ZEND_SIGNALS
-	TSRMLS_FETCH();
 #endif
 	act.sa_handler = func;
 	if (mask_all) {
@@ -48,7 +47,7 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 #endif
 	}
 #ifdef ZEND_SIGNALS
-	if (zend_sigaction(signo, &act, &oact TSRMLS_CC) < 0)
+	if (zend_sigaction(signo, &act, &oact) < 0)
 #else
 	if (sigaction(signo, &act, &oact) < 0)
 #endif

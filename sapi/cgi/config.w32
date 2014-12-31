@@ -4,7 +4,7 @@
 ARG_ENABLE('cgi', 'Build CGI version of PHP', 'yes');
 
 if (PHP_CGI == "yes") {
-	ADD_FLAG("LDFLAGS_CGI", "/stack:8388608");
-	SAPI('cgi', 'cgi_main.c fastcgi.c', 'php-cgi.exe');
+	ADD_FLAG("LDFLAGS_CGI", "/stack:67108864");
+	SAPI('cgi', 'cgi_main.c fastcgi.c', 'php-cgi.exe', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 	ADD_FLAG('LIBS_CGI', 'ws2_32.lib kernel32.lib advapi32.lib');
 }

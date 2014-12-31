@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(pi3web, for Pi3Web support,
-[  --with-pi3web[=DIR]     Build PHP as Pi3Web module], no, no)
+[  --with-pi3web[=DIR]       Build PHP as Pi3Web module], no, no)
 
 if test "$PHP_PI3WEB" != "no"; then
   if test "$PHP_PI3WEB" = "yes"; then
@@ -17,7 +17,7 @@ if test "$PHP_PI3WEB" != "no"; then
   PHP_ADD_INCLUDE($PI3PATH/PiAPI)
   PHP_ADD_INCLUDE($PI3PATH/Pi2API)
   PHP_ADD_INCLUDE($PI3PATH/Pi3API)
-  PHP_ADD_INCLUDE($PI3PATH/PHP5)
+  PHP_ADD_INCLUDE($PI3PATH/PHP7)
   PHP_SELECT_SAPI(pi3web, shared, pi3web_sapi.c)
   INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)$PI3PATH/bin/"
 fi

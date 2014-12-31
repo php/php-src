@@ -48,11 +48,9 @@ $inputs = array(
       'int 0' => 0,
       'int 1' => 1,
       'int 12345' => 12345,
-      'int -12345' => -12345,
 
       // float data
       'float 10.5' => 10.5,
-      'float -10.5' => -10.5,
       'float .5' => .5,
 
       // array data
@@ -123,14 +121,8 @@ FAILED: DateTimeZone::__construct(): Unknown or bad timezone (1)
 -- int 12345 --
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone (12345)
 
--- int -12345 --
-FAILED: DateTimeZone::__construct(): Unknown or bad timezone (-12345)
-
 -- float 10.5 --
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone (10.5)
-
--- float -10.5 --
-FAILED: DateTimeZone::__construct(): Unknown or bad timezone (-10.5)
 
 -- float .5 --
 FAILED: DateTimeZone::__construct(): Unknown or bad timezone (0.5)

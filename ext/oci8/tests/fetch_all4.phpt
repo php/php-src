@@ -51,10 +51,10 @@ oci8_test_sql_execute($c, $stmtarray);
 Test 1
 int(0)
 array(2) {
-  [%u|b%"MYCOL1"]=>
+  ["MYCOL1"]=>
   array(0) {
   }
-  [%u|b%"MYCOL2"]=>
+  ["MYCOL2"]=>
   array(0) {
   }
 }

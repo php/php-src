@@ -39,7 +39,7 @@ $root = $dom->documentElement;
 
 $children = $root->childNodes;
 $len = $children->length;
-echo "orignal has $len nodes\n";
+echo "original has $len nodes\n";
 for ($index = $children->length - 1; $index >=0; $index--) {
 	echo "node $index\n";
 	$current = $children->item($index);
@@ -58,7 +58,7 @@ for ($index = 0; $index < $children->length; $index++) {
 }
 
 --EXPECTF--
-orignal has 5 nodes
+original has 5 nodes
 node 4
 Course: no title:DOMText
 ~string(1) "

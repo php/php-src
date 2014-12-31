@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: ascmagic.c,v 1.84 2011/12/08 12:38:24 rrt Exp $")
+FILE_RCSID("@(#)$File: ascmagic.c,v 1.88 2014/02/12 23:20:53 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -72,7 +72,7 @@ file_ascmagic(struct magic_set *ms, const unsigned char *buf, size_t nbytes,
 	int text)
 {
 	unichar *ubuf = NULL;
-	size_t ulen;
+	size_t ulen = 0;
 	int rv = 1;
 
 	const char *code = NULL;
@@ -134,18 +134,20 @@ file_ascmagic_with_encoding(struct magic_set *ms, const unsigned char *buf,
 		goto done;
 	}
 
-	if ((ms->flags & MAGIC_NO_CHECK_SOFT) == 0) {
+	if (ulen > 0 && (ms->flags & MAGIC_NO_CHECK_SOFT) == 0) {
 		/* Convert ubuf to UTF-8 and try text soft magic */
 		/* malloc size is a conservative overestimate; could be
 		   improved, or at least realloced after conversion. */
 		mlen = ulen * 6;
-		utf8_buf = emalloc(mlen);
-
+		if ((utf8_buf = CAST(unsigned char *, emalloc(mlen))) == NULL) {
+			file_oomem(ms, mlen);
+			goto done;
+		}
 		if ((utf8_end = encode_utf8(utf8_buf, mlen, ubuf, ulen))
 		    == NULL)
 			goto done;
 		if ((rv = file_softmagic(ms, utf8_buf,
-		    (size_t)(utf8_end - utf8_buf), TEXTTEST, text)) == 0)
+		    (size_t)(utf8_end - utf8_buf), 0, TEXTTEST, text)) == 0)
 			rv = -1;
 	}
 
@@ -209,6 +211,7 @@ file_ascmagic_with_encoding(struct magic_set *ms, const unsigned char *buf,
 				case 0:
 					if (file_printf(ms, ", ") == -1)
 						goto done;
+					break;
 				case -1:
 					goto done;
 				default:

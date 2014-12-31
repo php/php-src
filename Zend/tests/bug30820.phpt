@@ -2,6 +2,7 @@
 Bug #30820 (static member conflict with $this->member silently ignored)
 --INI--
 error_reporting=4095
+opcache.optimization_level=0
 --FILE--
 <?php
 class Blah {

@@ -50,7 +50,7 @@ var_dump( uasort($array_arg) );
 echo "-- Testing uasort() function with non-existent compare function --\n";
 var_dump( uasort($array_arg, 'non_existent') );
 
-// With non existent comparison function and extra arguemnt
+// With non existent comparison function and extra argument
 echo "-- Testing uasort() function with non-existent compare function and extra argument --\n";
 var_dump( uasort($array_arg, 'non_existent', $extra_arg) );
 

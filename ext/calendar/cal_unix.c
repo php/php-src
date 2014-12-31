@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@ PHP_FUNCTION(unixtojd)
 	time_t ts = 0;
 	struct tm *ta, tmbuf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &ts) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &ts) == FAILURE) {
 		return;
 	}	
 
@@ -53,9 +53,9 @@ PHP_FUNCTION(unixtojd)
    Convert Julian Day to UNIX timestamp */
 PHP_FUNCTION(jdtounix)
 {
-	long uday;
+	zend_long uday;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uday) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &uday) == FAILURE) {
 		return;
 	}	
 	uday -= 2440588 /* J.D. of 1.1.1970 */;

@@ -14,7 +14,7 @@ echo "*** Testing uasort() : 'cmp_function' with reference arguments ***\n";
 
 // comparison function
 /* Prototype : int cmp(mixed &$value1, mixed &$value2)
- * Parameters : $value1 and $value2 - values recieved by reference 
+ * Parameters : $value1 and $value2 - values received by reference 
  * Return value : 0 - if both values are same
  *                1 - if value1 is greater than value2
  *               -1 - if value1 is less than value2

@@ -13,7 +13,7 @@ echo transliterator_transliterate("\x8F", $str), "\n";
 echo intl_get_error_message(), "\n";
 
 class A {
-function __toString() { return "inexistant id"; }
+function __toString() { return "inexistent id"; }
 }
 
 echo transliterator_transliterate(new A(), $str), "\n";
@@ -29,9 +29,9 @@ Warning: transliterator_transliterate(): Could not create transliterator with ID
 
 String conversion of id to UTF-16 failed: U_INVALID_CHAR_FOUND
 
-Warning: transliterator_transliterate(): transliterator_create: unable to open ICU transliterator with id "inexistant id" in %s on line %d
+Warning: transliterator_transliterate(): transliterator_create: unable to open ICU transliterator with id "inexistent id" in %s on line %d
 
-Warning: transliterator_transliterate(): Could not create transliterator with ID "inexistant id" (transliterator_create: unable to open ICU transliterator with id "inexistant id": U_INVALID_ID) in %s on line %d
+Warning: transliterator_transliterate(): Could not create transliterator with ID "inexistent id" (transliterator_create: unable to open ICU transliterator with id "inexistent id": U_INVALID_ID) in %s on line %d
 
-transliterator_create: unable to open ICU transliterator with id "inexistant id": U_INVALID_ID
+transliterator_create: unable to open ICU transliterator with id "inexistent id": U_INVALID_ID
 Done.

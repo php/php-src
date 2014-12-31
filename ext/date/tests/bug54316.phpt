@@ -12,7 +12,7 @@ var_dump($dt);
 --EXPECT--
 object(DateTime)#1 (3) {
   ["date"]=>
-  string(19) "2011-02-02 00:00:00"
+  string(26) "2011-02-02 00:00:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -20,7 +20,7 @@ object(DateTime)#1 (3) {
 }
 object(DateTime)#2 (3) {
   ["date"]=>
-  string(19) "1970-01-01 00:00:00"
+  string(26) "1970-01-01 00:00:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

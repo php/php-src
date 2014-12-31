@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,7 +30,6 @@
 #include "php.h"
 #include "php_math.h"
 #include "php_rand.h"
-#include "php_lcg.h"
 
 #include "basic_functions.h"
 
@@ -39,7 +38,7 @@
 
 /* {{{ php_srand
  */
-PHPAPI void php_srand(long seed TSRMLS_DC)
+PHPAPI void php_srand(zend_long seed)
 {
 #ifdef ZTS
 	BG(rand_seed) = (unsigned int) seed;
@@ -60,12 +59,12 @@ PHPAPI void php_srand(long seed TSRMLS_DC)
 
 /* {{{ php_rand
  */
-PHPAPI long php_rand(TSRMLS_D)
+PHPAPI zend_long php_rand(void)
 {
-	long ret;
+	zend_long ret;
 
 	if (!BG(rand_is_seeded)) {
-		php_srand(GENERATE_SEED() TSRMLS_CC);
+		php_srand(GENERATE_SEED());
 	}
 
 #ifdef ZTS
@@ -172,7 +171,7 @@ static inline void php_mt_initialize(php_uint32 seed, php_uint32 *state)
 
 /* {{{ php_mt_reload
  */
-static inline void php_mt_reload(TSRMLS_D)
+static inline void php_mt_reload(void)
 {
 	/* Generate N new values in state
 	   Made clearer and faster by Matthew Bellew (matthew.bellew@home.com) */
@@ -193,11 +192,11 @@ static inline void php_mt_reload(TSRMLS_D)
 
 /* {{{ php_mt_srand
  */
-PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC)
+PHPAPI void php_mt_srand(php_uint32 seed)
 {
 	/* Seed the generator with a simple uint32 */
 	php_mt_initialize(seed, BG(state));
-	php_mt_reload(TSRMLS_C);
+	php_mt_reload();
 
 	/* Seed only once */
 	BG(mt_rand_is_seeded) = 1;
@@ -206,7 +205,7 @@ PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC)
 
 /* {{{ php_mt_rand
  */
-PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
+PHPAPI php_uint32 php_mt_rand(void)
 {
 	/* Pull a 32-bit integer from the generator state
 	   Every other access function simply transforms the numbers extracted here */
@@ -214,7 +213,7 @@ PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
 	register php_uint32 s1;
 
 	if (BG(left) == 0) {
-		php_mt_reload(TSRMLS_C);
+		php_mt_reload();
 	}
 	--BG(left);
 		
@@ -230,15 +229,15 @@ PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
    Seeds random number generator */
 PHP_FUNCTION(srand)
 {
-	long seed = 0;
+	zend_long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &seed) == FAILURE)
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
 		seed = GENERATE_SEED();
 
-	php_srand(seed TSRMLS_CC);
+	php_srand(seed);
 }
 /* }}} */
 
@@ -246,15 +245,15 @@ PHP_FUNCTION(srand)
    Seeds Mersenne Twister random number generator */
 PHP_FUNCTION(mt_srand)
 {
-	long seed = 0;
+	zend_long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE) 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &seed) == FAILURE) 
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
 		seed = GENERATE_SEED();
 
-	php_mt_srand(seed TSRMLS_CC);
+	php_mt_srand(seed);
 }
 /* }}} */
 
@@ -272,7 +271,7 @@ PHP_FUNCTION(mt_srand)
  * We have a problem here in that only n==M will get mapped to b which
  # means the chances of getting b is much much less than getting any of
  # the other values in the range.  We can fix this by increasing our range
- # artifically and using:
+ # artificially and using:
  #
  #               n' = a + n(b-a+1)/M
  *
@@ -289,15 +288,15 @@ PHP_FUNCTION(mt_srand)
    Returns a random number */
 PHP_FUNCTION(rand)
 {
-	long min;
-	long max;
-	long number;
+	zend_long min;
+	zend_long max;
+	zend_long number;
 	int  argc = ZEND_NUM_ARGS();
 
-	if (argc != 0 && zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE)
+	if (argc != 0 && zend_parse_parameters(argc, "ll", &min, &max) == FAILURE)
 		return;
 
-	number = php_rand(TSRMLS_C);
+	number = php_rand();
 	if (argc == 2) {
 		RAND_RANGE(number, min, max, PHP_RAND_MAX);
 	}
@@ -310,22 +309,22 @@ PHP_FUNCTION(rand)
    Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
 {
-	long min;
-	long max;
-	long number;
+	zend_long min;
+	zend_long max;
+	zend_long number;
 	int  argc = ZEND_NUM_ARGS();
 
 	if (argc != 0) {
-		if (zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE) {
+		if (zend_parse_parameters(argc, "ll", &min, &max) == FAILURE) {
 			return;
 		} else if (max < min) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "max(%ld) is smaller than min(%ld)", max, min);
+			php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
 			RETURN_FALSE;
 		}
 	}
 
 	if (!BG(mt_rand_is_seeded)) {
-		php_mt_srand(GENERATE_SEED() TSRMLS_CC);
+		php_mt_srand(GENERATE_SEED());
 	}
 
 	/*
@@ -336,7 +335,7 @@ PHP_FUNCTION(mt_rand)
 	 * Update: 
 	 * I talked with Cokus via email and it won't ruin the algorithm
 	 */
-	number = (long) (php_mt_rand(TSRMLS_C) >> 1);
+	number = (zend_long) (php_mt_rand() >> 1);
 	if (argc == 2) {
 		RAND_RANGE(number, min, max, PHP_MT_RAND_MAX);
 	}

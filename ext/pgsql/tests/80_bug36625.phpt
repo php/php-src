@@ -1,5 +1,5 @@
 --TEST--
-Bug #36625 (pg_trace() does not work)
+Bug #36625 (8.0+) (pg_trace() does not work)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -37,10 +37,18 @@ array_walk($trace, 'search_trace_file');
 var_dump($found > 0);
 var_dump(file_exists($tracefile));
 
+@unlink($tracefile);
+
 ?>
 ===DONE===
 --CLEAN--
-<?php unlink($tracefile); ?>
+<?php
+
+$tracefile = dirname(__FILE__) . '/trace.tmp';
+
+unlink($tracefile);
+
+?>
 --EXPECTF--
 bool(false)
 resource(%d) of type (pgsql result)

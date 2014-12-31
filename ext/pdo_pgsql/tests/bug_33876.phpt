@@ -54,7 +54,7 @@ echo "EMUL\n";
 
 
 $res = $db->prepare('SELECT foo from test where bar = ?', array(
-	PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT => true));
+	PDO::ATTR_EMULATE_PREPARES => true));
 
 # this is the portable approach to binding a bool
 $res->bindValue(1, false, PDO::PARAM_BOOL);
@@ -82,7 +82,7 @@ else
 # false -> "" as string, which pgsql doesn't like
 if (!$res->execute(array(false))) {
 	$err = $res->errorInfo();
-	// Strip additional lines ouputted by recent PgSQL versions
+	// Strip additional lines outputted by recent PgSQL versions
 	$err[2] = trim(current(explode("\n", $err[2])));
 	print_r($err);
 } else {

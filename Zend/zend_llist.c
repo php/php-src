@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -126,32 +126,26 @@ ZEND_API void zend_llist_clean(zend_llist *l)
 }
 
 
-ZEND_API void *zend_llist_remove_tail(zend_llist *l)
+ZEND_API void zend_llist_remove_tail(zend_llist *l)
 {
-	zend_llist_element *old_tail;
-	void *data;
-
-	if ((old_tail = l->tail)) {
-		if (old_tail->prev) {
-			old_tail->prev->next = NULL;
-		} else {
-			l->head = NULL;
-		}
-        
-		data = old_tail->data;
-
-		l->tail = old_tail->prev;
-		if (l->dtor) {
-			l->dtor(data);
-		}
-		pefree(old_tail, l->persistent);
-
-		--l->count;
-
-		return data;
+	zend_llist_element *old_tail = l->tail;
+	if (!old_tail) {
+		return;
 	}
 
-	return NULL;
+	if (old_tail->prev) {
+		old_tail->prev->next = NULL;
+	} else {
+		l->head = NULL;
+	}
+
+	l->tail = old_tail->prev;
+	--l->count;
+	
+	if (l->dtor) {
+		l->dtor(old_tail->data);
+	}
+	pefree(old_tail, l->persistent);
 }
 
 
@@ -183,16 +177,16 @@ ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data))
 }
 
 
-ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t func TSRMLS_DC)
+ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t func)
 {
 	zend_llist_element *element;
 
 	for (element=l->head; element; element=element->next) {
-		func(element->data TSRMLS_CC);
+		func(element->data);
 	}
 }
 
-ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func TSRMLS_DC)
+ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func)
 {
 	size_t i;
 
@@ -211,7 +205,7 @@ ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func TSRM
 		*ptr++ = element;
 	}
 
-	zend_qsort(elements, l->count, sizeof(zend_llist_element *), (compare_func_t) comp_func TSRMLS_CC);
+	zend_qsort(elements, l->count, sizeof(zend_llist_element *), (compare_func_t) comp_func);
 
 	l->head = elements[0];
 	elements[0]->prev = NULL;
@@ -226,30 +220,30 @@ ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func TSRM
 }
 
 
-ZEND_API void zend_llist_apply_with_argument(zend_llist *l, llist_apply_with_arg_func_t func, void *arg TSRMLS_DC)
+ZEND_API void zend_llist_apply_with_argument(zend_llist *l, llist_apply_with_arg_func_t func, void *arg)
 {
 	zend_llist_element *element;
 
 	for (element=l->head; element; element=element->next) {
-		func(element->data, arg TSRMLS_CC);
+		func(element->data, arg);
 	}
 }
 
 
-ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_args_func_t func TSRMLS_DC, int num_args, ...)
+ZEND_API void zend_llist_apply_with_arguments(zend_llist *l, llist_apply_with_args_func_t func, int num_args, ...)
 {
 	zend_llist_element *element;
 	va_list args;
 
 	va_start(args, num_args);
 	for (element=l->head; element; element=element->next) {
-		func(element->data, num_args, args TSRMLS_CC);
+		func(element->data, num_args, args);
 	}
 	va_end(args);
 }
 
 
-ZEND_API int zend_llist_count(zend_llist *l)
+ZEND_API size_t zend_llist_count(zend_llist *l)
 {
 	return l->count;
 }

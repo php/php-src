@@ -1,5 +1,5 @@
 --TEST--
-Check that SplObjectStorage::unserialize throws exception when NULL passed
+Check that SplObjectStorage::unserialize doesn't throws exception when NULL passed
 --CREDITS--
 PHPNW Testfest 2009 - Simon Westcott (swestcott@gmail.com)
 --FILE--
@@ -14,6 +14,6 @@ try {
 }
 
 ?>
+Done
 --EXPECTF--
-Empty serialized string cannot be empty
-
+Done

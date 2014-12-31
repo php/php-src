@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -89,13 +89,13 @@ PHP_HASH_API void make_sha1_digest(char *sha1str, unsigned char *digest)
 PHP_FUNCTION(sha1)
 {
 	char *arg;
-	int arg_len;
+	size_t arg_len;
 	zend_bool raw_output = 0;
 	char sha1str[41];
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 
@@ -104,10 +104,10 @@ PHP_FUNCTION(sha1)
 	PHP_SHA1Update(&context, arg, arg_len);
 	PHP_SHA1Final(digest, &context);
 	if (raw_output) {
-		RETURN_STRINGL(digest, 20, 1);
+		RETURN_STRINGL(digest, 20);
 	} else {
 		make_sha1_digest(sha1str, digest);
-		RETVAL_STRING(sha1str, 1);
+		RETVAL_STRING(sha1str);
 	}
 
 }
@@ -128,7 +128,7 @@ PHP_FUNCTION(sha1_file)
 	int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 	
@@ -152,10 +152,10 @@ PHP_FUNCTION(sha1_file)
 	}
 
 	if (raw_output) {
-		RETURN_STRINGL(digest, 20, 1);
+		RETURN_STRINGL(digest, 20);
 	} else {
 		make_sha1_digest(sha1str, digest);
-		RETVAL_STRING(sha1str, 1);
+		RETVAL_STRING(sha1str);
 	}
 }
 /* }}} */
@@ -321,7 +321,7 @@ static void SHA1Transform(php_hash_uint32 state[5], const unsigned char block[64
 	state[4] += e;
 
 	/* Zeroize sensitive information. */
-	memset((unsigned char*) x, 0, sizeof(x));
+	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
 /* }}} */
 
@@ -400,7 +400,7 @@ PHP_HASH_API void PHP_SHA1Final(unsigned char digest[20], PHP_SHA1_CTX * context
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -511,7 +511,7 @@ static void SHA256Transform(php_hash_uint32 state[8], const unsigned char block[
 	state[7] += h;
 
 	/* Zeroize sensitive information. */
-	memset((unsigned char*) x, 0, sizeof(x));
+	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
 /* }}} */
 
@@ -607,7 +607,7 @@ PHP_HASH_API void PHP_SHA224Final(unsigned char digest[28], PHP_SHA224_CTX * con
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -684,7 +684,7 @@ PHP_HASH_API void PHP_SHA256Final(unsigned char digest[32], PHP_SHA256_CTX * con
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -821,7 +821,7 @@ static void SHA512Transform(php_hash_uint64 state[8], const unsigned char block[
 	state[7] += h;
 
 	/* Zeroize sensitive information. */
-	memset((unsigned char*) x, 0, sizeof(x));
+	ZEND_SECURE_ZERO((unsigned char*) x, sizeof(x));
 }
 /* }}} */
 
@@ -906,7 +906,7 @@ PHP_HASH_API void PHP_SHA384Final(unsigned char digest[48], PHP_SHA384_CTX * con
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 
@@ -1020,7 +1020,7 @@ PHP_HASH_API void PHP_SHA512Final(unsigned char digest[64], PHP_SHA512_CTX * con
 
 	/* Zeroize sensitive information.
 	 */
-	memset((unsigned char*) context, 0, sizeof(*context));
+	ZEND_SECURE_ZERO((unsigned char*) context, sizeof(*context));
 }
 /* }}} */
 

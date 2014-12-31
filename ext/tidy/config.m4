@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(tidy,for TIDY support,
-[  --with-tidy[=DIR]       Include TIDY support])
+[  --with-tidy[=DIR]         Include TIDY support])
 
 if test "$PHP_TIDY" != "no"; then
 
@@ -38,7 +38,7 @@ if test "$PHP_TIDY" != "no"; then
   ],[],[])
 
 
-  PHP_NEW_EXTENSION(tidy, tidy.c, $ext_shared)
+  PHP_NEW_EXTENSION(tidy, tidy.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(TIDY_SHARED_LIBADD)
   AC_DEFINE(HAVE_TIDY,1,[ ])
 fi

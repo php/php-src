@@ -73,7 +73,7 @@ $unexpected_values = array (
 );
 
 // loop though each element of the array and check the working of sort()
-// when $array arugment is supplied with different values from $unexpected_values 
+// when $array argument is supplied with different values from $unexpected_values 
 echo "\n-- Testing sort() by supplying different unexpected values for 'array' argument --\n";
 echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n"; 
 
@@ -150,68 +150,68 @@ Warning: sort() expects parameter 1 to be array, integer given in %s on line %d
 bool(false)
 -- Iteration 5 --
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 6 --
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 7 --
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 8 --
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 9 --
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 
-Warning: sort() expects parameter 1 to be array, double given in %s on line %d
+Warning: sort() expects parameter 1 to be array, float given in %s on line %d
 bool(false)
 -- Iteration 10 --
 

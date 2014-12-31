@@ -12,7 +12,7 @@ Win32 Debug_TS
 	php_build\mssql-70\include\sqlfront.h
 	php_build\mssql-70\lib\ntwdblib.lib
 
-php_build is a directory at the same level as php5.
+php_build is a directory at the same level as php7.
 
 Start Visual Studio, load php_modules.dsw, select the MSSQL projects,
 configuration and build it.

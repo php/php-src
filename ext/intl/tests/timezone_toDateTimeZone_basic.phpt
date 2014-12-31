@@ -26,7 +26,7 @@ do_test(IntlTimeZone::createTimeZone('GMT+0405'), true);
 --EXPECTF--
 string(3) "CET"
 int(3600000)
-string(13) "Europe/Berlin"
+string(%d) "%rEurope\/Berlin|CET%r"
 int(3600)
 string(16) "Europe/Amsterdam"
 int(3600000)

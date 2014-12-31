@@ -45,12 +45,12 @@ int(%d)
 NULL
 NULL
 
-Warning: srand() expects parameter 1 to be long, array given in %s on line %d
+Warning: srand() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 NULL
 NULL
 
-Warning: mt_srand() expects parameter 1 to be long, array given in %s on line %d
+Warning: mt_srand() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 int(%d)
 

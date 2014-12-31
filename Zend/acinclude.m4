@@ -3,8 +3,13 @@ dnl
 dnl This file contains local autoconf functions.
 
 AC_DEFUN([LIBZEND_BISON_CHECK],[
-  # we only support certain bison versions
-  bison_version_list="1.28 1.35 1.75 1.875 2.0 2.1 2.2 2.3 2.4 2.4.1 2.4.2 2.4.3 2.5 2.5.1 2.6 2.6.1 2.6.2"
+  # we only support certain bison versions;
+  # min: 2.4 (i.e. 204, major * 100 + minor for easier comparison)
+  bison_version_min="204"
+  # non-working versions, e.g. "3.0 3.2";
+  # remove "none" when introducing the first incompatible bison version an 
+  # separate any following additions by spaces
+  bison_version_exclude=""
 
   # for standalone build of Zend Engine
   test -z "$SED" && SED=sed
@@ -12,23 +17,27 @@ AC_DEFUN([LIBZEND_BISON_CHECK],[
   bison_version=none
   if test "$YACC"; then
     AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
-      bison_version_vars=`bison --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /' | tr -d a-z`
+      bison_version_vars=`$YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /g' | tr -d a-z`
       php_cv_bison_version=invalid
       if test -n "$bison_version_vars"; then
         set $bison_version_vars
         bison_version="${1}.${2}"
-        for bison_check_version in $bison_version_list; do
-          if test "$bison_version" = "$bison_check_version"; then
-            php_cv_bison_version="$bison_check_version (ok)"
-            break
-          fi
-        done
+        bison_version_num="`expr ${1} \* 100 + ${2}`"
+        if test $bison_version_num -ge $bison_version_min; then
+          php_cv_bison_version="$bison_version (ok)"
+          for bison_check_version in $bison_version_exclude; do
+            if test "$bison_version" = "$bison_check_version"; then
+              php_cv_bison_version=invalid
+              break
+            fi
+          done
+        fi
       fi
     ])
   fi
   case $php_cv_bison_version in
     ""|invalid[)]
-      bison_msg="bison versions supported for regeneration of the Zend/PHP parsers: $bison_version_list (found: $bison_version)."
+      bison_msg="This bison version is not supported for regeneration of the Zend/PHP parsers (found: $bison_version, min: $bison_version_min, excluded: $bison_version_exclude)."
       AC_MSG_WARN([$bison_msg])
       YACC="exit 0;"
       ;;

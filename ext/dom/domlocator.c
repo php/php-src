@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,10 +46,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-line-number
 Since: 
 */
-int dom_domlocator_line_number_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_domlocator_line_number_read(dom_object *obj, zval *retval)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, "TEST", 1);
+	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;
 }
 
@@ -60,10 +59,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-column-number
 Since: 
 */
-int dom_domlocator_column_number_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_domlocator_column_number_read(dom_object *obj, zval *retval)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, "TEST", 1);
+	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;
 }
 
@@ -74,10 +72,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-offset
 Since: 
 */
-int dom_domlocator_offset_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_domlocator_offset_read(dom_object *obj, zval *retval)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, "TEST", 1);
+	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;
 }
 
@@ -88,10 +85,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-node
 Since: 
 */
-int dom_domlocator_related_node_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_domlocator_related_node_read(dom_object *obj, zval *retval)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, "TEST", 1);
+	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;
 }
 
@@ -102,10 +98,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-uri
 Since: 
 */
-int dom_domlocator_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_domlocator_uri_read(dom_object *obj, zval *retval)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, "TEST", 1);
+	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;
 }
 

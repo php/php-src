@@ -486,7 +486,7 @@ $test->headers_expect = array();
 $soap_tests['GroupC'][] = $test;
 
 // echoMeStringRequest with endpoint header destination, must understand,
-// invalid namespace, should recieve a fault
+// invalid namespace, should receive a fault
 $test = new SOAP_Test('echoVoid(echoMeStringRequest invalid namespace)', NULL);
 $test->headers[] = new SoapHeader('http://unknown.org/echoheader/','echoMeStringRequest', 'hello world', 1, SOAP_ACTOR_NEXT);
 $test->headers_expect = array();

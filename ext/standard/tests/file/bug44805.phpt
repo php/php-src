@@ -22,7 +22,7 @@ readfile($file2);
 if (file_exists($file1)) {
 	unlink($file1);
 }
-if (file_exists($file1)) {
+if (file_exists($file2)) {
 	unlink($file2);
 }
 ?>

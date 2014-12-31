@@ -97,6 +97,6 @@ array(1) {
 }
 Native Prepared Statements...
 
-Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '%SSELECT label FROM test ORDER BY id ASC LIMIT 1' at line %d in %s on line %d
+Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near '%SSELECT label FROM test ORDER BY id ASC LIMIT 1' at line %d in %s on line %d
 
-Fatal error: Call to a member function errorInfo() on a non-object in %s on line %d
+Catchable fatal error: Call to a member function errorInfo() on boolean in %s on line %d

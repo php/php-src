@@ -13,6 +13,4 @@ mb_ereg_search_regs();
 --EXPECTF--
 Warning: mb_ereg_search_init(): Empty pattern in %s on line %d
 
-Warning: mb_split(): Empty regular expression in %s on line %d
-
 Warning: mb_ereg_search_regs(): No regex given in %s on line %d

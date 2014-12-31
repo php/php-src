@@ -1,5 +1,5 @@
 --TEST--
-Test array_key_exists() function : usage variations - Pass differnt data types to $search arg
+Test array_key_exists() function : usage variations - Pass different data types to $search arg
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
@@ -124,27 +124,27 @@ NULL
 
 -- Iteration 5 --
 
-Warning: array_key_exists() expects parameter 2 to be array, double given in %s on line %d
+Warning: array_key_exists() expects parameter 2 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 6 --
 
-Warning: array_key_exists() expects parameter 2 to be array, double given in %s on line %d
+Warning: array_key_exists() expects parameter 2 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 7 --
 
-Warning: array_key_exists() expects parameter 2 to be array, double given in %s on line %d
+Warning: array_key_exists() expects parameter 2 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 8 --
 
-Warning: array_key_exists() expects parameter 2 to be array, double given in %s on line %d
+Warning: array_key_exists() expects parameter 2 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
 
-Warning: array_key_exists() expects parameter 2 to be array, double given in %s on line %d
+Warning: array_key_exists() expects parameter 2 to be array, float given in %s on line %d
 NULL
 
 -- Iteration 10 --

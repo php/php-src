@@ -139,6 +139,6 @@ Warning: mysql_field_seek(): Field %d is invalid for MySQL result index %d in %s
 bool(false)
 bool(false)
 
-Warning: mysql_field_seek(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_field_seek(): supplied resource is not a valid MySQL result resource in %s on line %d
 bool(false)
 done!

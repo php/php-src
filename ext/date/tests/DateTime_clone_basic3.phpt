@@ -32,7 +32,7 @@ var_dump($d2_clone);
 -- Create a DateTime object --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-02-03 12:34:41"
+  string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>
@@ -42,7 +42,7 @@ object(DateTime)#%d (3) {
 -- Add some properties --
 object(DateTime)#%d (5) {
   ["date"]=>
-  string(19) "2009-02-03 12:34:41"
+  string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>
@@ -56,7 +56,7 @@ object(DateTime)#%d (5) {
 -- clone it --
 object(DateTime)#%d (5) {
   ["date"]=>
-  string(19) "2009-02-03 12:34:41"
+  string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>
@@ -70,7 +70,7 @@ object(DateTime)#%d (5) {
 -- Add some more properties --
 object(DateTime)#%d (7) {
   ["date"]=>
-  string(19) "2009-02-03 12:34:41"
+  string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>
@@ -88,7 +88,7 @@ object(DateTime)#%d (7) {
 -- clone it --
 object(DateTime)#%d (7) {
   ["date"]=>
-  string(19) "2009-02-03 12:34:41"
+  string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>

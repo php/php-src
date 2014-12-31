@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -127,7 +127,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	} else if (*pooling_val == '\0' || strcasecmp(pooling_val, "off") == 0) {
 		pdo_odbc_pool_on = SQL_CP_OFF;
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error in pdo_odbc.connection_pooling configuration.  Value MUST be one of 'strict', 'relaxed' or 'off'");
+		php_error_docref(NULL, E_ERROR, "Error in pdo_odbc.connection_pooling configuration.  Value MUST be one of 'strict', 'relaxed' or 'off'");
 		return FAILURE;
 	}
 

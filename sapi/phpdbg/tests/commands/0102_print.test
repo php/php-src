@@ -1,0 +1,27 @@
+#################################################
+# name: print
+# purpose: test print commands
+# expect: TEST::FORMAT
+# options: -rr
+#################################################
+#[User Class: test (3 methods)]
+#L%d-%d test::testMethod() %s
+#		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>            
+#	L%d-%d test::testPrivateMethod() %s
+#		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>            
+#	L%d-%d test::testProtectedMethod() %s
+#		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>            
+#[User Method testMethod (1 ops)]
+#	L%d-%d test::testMethod() %s
+#		L%d	%s ZEND_RETURN                    C%d                   <unused>             <unused>   
+#################################################
+<:
+class test {
+        public function testMethod(){}
+        private function testPrivateMethod(){}
+        protected function testProtectedMethod(){}
+}
+:>
+print class test
+print method test::testMethod
+q

@@ -69,7 +69,7 @@ $unexpected_values = array (
 );
 
 // loop though each element of the array and check the working of krsort()
-// when 'sort_flags' arugment is supplied with different values
+// when 'sort_flags' argument is supplied with different values
 echo "\n-- Testing krsort() by supplying different unexpected values for 'sort_flags' argument --\n";
 
 $counter = 1;
@@ -210,7 +210,7 @@ array(3) {
 }
 -- Iteration 13 --
 
-Warning: krsort() expects parameter 2 to be long, string given in %s on line %d
+Warning: krsort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -222,7 +222,7 @@ array(3) {
 }
 -- Iteration 14 --
 
-Warning: krsort() expects parameter 2 to be long, string given in %s on line %d
+Warning: krsort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -234,7 +234,7 @@ array(3) {
 }
 -- Iteration 15 --
 
-Warning: krsort() expects parameter 2 to be long, string given in %s on line %d
+Warning: krsort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -246,7 +246,7 @@ array(3) {
 }
 -- Iteration 16 --
 
-Warning: krsort() expects parameter 2 to be long, string given in %s on line %d
+Warning: krsort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -258,7 +258,7 @@ array(3) {
 }
 -- Iteration 17 --
 
-Warning: krsort() expects parameter 2 to be long, object given in %s on line %d
+Warning: krsort() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -270,7 +270,7 @@ array(3) {
 }
 -- Iteration 18 --
 
-Warning: krsort() expects parameter 2 to be long, string given in %s on line %d
+Warning: krsort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -282,7 +282,7 @@ array(3) {
 }
 -- Iteration 19 --
 
-Warning: krsort() expects parameter 2 to be long, string given in %s on line %d
+Warning: krsort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -294,7 +294,7 @@ array(3) {
 }
 -- Iteration 20 --
 
-Warning: krsort() expects parameter 2 to be long, resource given in %s on line %d
+Warning: krsort() expects parameter 2 to be integer, resource given in %s on line %d
 bool(false)
 array(3) {
   [10]=>

@@ -94,7 +94,7 @@ var_dump( current($temp_array, $temp_array) );
 var_dump( reset($temp_array, $temp_array) );
 var_dump( next($temp_array, $temp_array) );
 
-// invalid args type, valid arguement: array 
+// invalid args type, valid argument: array 
 $int_var = 1;
 $float_var = 1.5;
 $string = "string";
@@ -500,7 +500,7 @@ NULL
 Warning: key() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: key() expects parameter 1 to be array, double given in %s on line %d
+Warning: key() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 Warning: key() expects parameter 1 to be array, string given in %s on line %d
@@ -509,7 +509,7 @@ NULL
 Warning: current() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: current() expects parameter 1 to be array, double given in %s on line %d
+Warning: current() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 Warning: current() expects parameter 1 to be array, string given in %s on line %d
@@ -518,7 +518,7 @@ NULL
 Warning: next() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: next() expects parameter 1 to be array, double given in %s on line %d
+Warning: next() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 Warning: next() expects parameter 1 to be array, string given in %s on line %d
@@ -527,7 +527,7 @@ NULL
 Warning: reset() expects parameter 1 to be array, integer given in %s on line %d
 NULL
 
-Warning: reset() expects parameter 1 to be array, double given in %s on line %d
+Warning: reset() expects parameter 1 to be array, float given in %s on line %d
 NULL
 
 Warning: reset() expects parameter 1 to be array, string given in %s on line %d

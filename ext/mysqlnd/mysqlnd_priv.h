@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -40,13 +40,6 @@
 #ifndef pestrndup
 #define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
 #endif
-
-#define mysqlnd_array_init(arg, field_count) \
-{ \
-	ALLOC_HASHTABLE_REL(Z_ARRVAL_P(arg));\
-	zend_hash_init(Z_ARRVAL_P(arg), (field_count), NULL, ZVAL_PTR_DTOR, 0); \
-	Z_TYPE_P(arg) = IS_ARRAY;\
-}
 
 #define MYSQLND_STR_W_LEN(str)  str, (sizeof(str) - 1)
 
@@ -155,11 +148,11 @@
 
 #define SET_STMT_ERROR(stmt, a, b, c)	SET_CLIENT_ERROR(*(stmt)->error_info, a, b, c)
 
-#define CONN_GET_STATE(c)		(c)->m->get_state((c) TSRMLS_CC)
-#define CONN_SET_STATE(c, s)	(c)->m->set_state((c), (s) TSRMLS_CC)
+#define CONN_GET_STATE(c)		(c)->m->get_state((c))
+#define CONN_SET_STATE(c, s)	(c)->m->set_state((c), (s))
 
 /* PS stuff */
-typedef void (*ps_field_fetch_func)(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC);
+typedef void (*ps_field_fetch_func)(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row);
 struct st_mysqlnd_perm_bind {
 	ps_field_fetch_func func;
 	/* should be signed int */
@@ -171,6 +164,10 @@ struct st_mysqlnd_perm_bind {
 
 extern struct st_mysqlnd_perm_bind mysqlnd_ps_fetch_functions[MYSQL_TYPE_LAST + 1];
 
+enum_func_status mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything);
+enum_func_status mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int flags, zend_bool * fetched_anything);
+
+
 PHPAPI extern const char * const mysqlnd_old_passwd;
 PHPAPI extern const char * const mysqlnd_out_of_sync;
 PHPAPI extern const char * const mysqlnd_server_gone;
@@ -180,24 +177,26 @@ PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_object_factory);
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn);
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn_data);
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_res);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_result_unbuffered);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_result_buffered);
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_protocol);
 PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_net);
 
-enum_func_status mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zend_bool * is_warning TSRMLS_DC);
+enum_func_status mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zend_bool * is_warning);
 
 
 
 void _mysqlnd_init_ps_subsystem();/* This one is private, mysqlnd_library_init() will call it */
 void _mysqlnd_init_ps_fetch_subsystem();
 
-void ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row, unsigned int byte_count TSRMLS_DC);
+void ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row, unsigned int byte_count);
 
-void mysqlnd_plugin_subsystem_init(TSRMLS_D);
-void mysqlnd_plugin_subsystem_end(TSRMLS_D);
+void mysqlnd_plugin_subsystem_init(void);
+void mysqlnd_plugin_subsystem_end(void);
 
-void mysqlnd_register_builtin_authentication_plugins(TSRMLS_D);
+void mysqlnd_register_builtin_authentication_plugins(void);
 
-void mysqlnd_example_plugin_register(TSRMLS_D);
+void mysqlnd_example_plugin_register(void);
 
 struct st_mysqlnd_packet_greet;
 struct st_mysqlnd_authentication_plugin;
@@ -210,7 +209,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 						const char * const db,
 						const size_t db_len,
 						const MYSQLND_OPTIONS * const options,
-						unsigned long mysql_flags,
+						zend_ulong mysql_flags,
 						unsigned int server_charset_no,
 						zend_bool use_full_blown_auth_packet,
 						const char * const auth_protocol,
@@ -220,7 +219,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 						size_t * switch_to_auth_protocol_len,
 						zend_uchar ** switch_to_auth_protocol_data,
 						size_t * switch_to_auth_protocol_data_len
-						TSRMLS_DC);
+						);
 
 enum_func_status
 mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
@@ -239,7 +238,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								size_t * switch_to_auth_protocol_len,
 								zend_uchar ** switch_to_auth_protocol_data,
 								size_t * switch_to_auth_protocol_data_len
-								TSRMLS_DC);
+								);
 
 #endif	/* MYSQLND_PRIV_H */
 

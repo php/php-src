@@ -1,5 +1,5 @@
 --TEST--
-Bug #47322 (sscanf %d does't work)
+Bug #47322 (sscanf %d doesn't work)
 --FILE--
 <?php
 

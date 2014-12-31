@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #define PHP_JSON_H
 
 #define PHP_JSON_VERSION "1.2.1"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str_public.h"
 
 extern zend_module_entry json_module_entry;
 #define phpext_json_ptr &json_module_entry
@@ -44,14 +44,17 @@ ZEND_BEGIN_MODULE_GLOBALS(json)
 ZEND_END_MODULE_GLOBALS(json)
 
 #ifdef ZTS
-# define JSON_G(v) TSRMG(json_globals_id, zend_json_globals *, v)
+# define JSON_G(v) ZEND_TSRMG(json_globals_id, zend_json_globals *, v)
+# ifdef COMPILE_DL_JSON
+ZEND_TSRMLS_CACHE_EXTERN;
+# endif
 #else
 # define JSON_G(v) (json_globals.v)
 #endif
 
-PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_DC);
-PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len, int options, long depth TSRMLS_DC);
-extern zend_class_entry *php_json_serializable_ce;
+PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options);
+PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth);
+extern PHP_JSON_API zend_class_entry *php_json_serializable_ce;
 
 
 /* json_encode() options */
@@ -74,9 +77,9 @@ extern zend_class_entry *php_json_serializable_ce;
 #define PHP_JSON_OBJECT_AS_ARRAY	(1<<0)
 #define PHP_JSON_BIGINT_AS_STRING	(1<<1)
 
-static inline void php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, long depth TSRMLS_DC)
+static inline void php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, zend_long depth)
 {
-	php_json_decode_ex(return_value, str, str_len, assoc ? PHP_JSON_OBJECT_AS_ARRAY : 0, depth TSRMLS_CC);
+	php_json_decode_ex(return_value, str, str_len, assoc ? PHP_JSON_OBJECT_AS_ARRAY : 0, depth);
 }
 
 

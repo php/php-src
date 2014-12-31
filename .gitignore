@@ -9,6 +9,7 @@
 *.gcno
 *.la
 *.lo
+*.loT
 *.o
 *.a
 *.ncb
@@ -19,6 +20,7 @@
 *.tgz
 *.tar.gz
 *.tar.bz2
+*.tar.xz
 .FBCIndex
 .FBCLockFolder
 .deps
@@ -81,7 +83,7 @@ mkinstalldirs
 modules
 php
 php-*.tar.gz
-php5.spec
+php7.spec
 php_lcov.info
 php_test_results_*.txt
 php_version.h
@@ -117,6 +119,12 @@ tests/*/*.php
 tests/*/*.exp
 tests/*/*.log
 tests/*/*.sh
+tests/*/*/*.diff
+tests/*/*/*.out
+tests/*/*/*.php
+tests/*/*/*.exp
+tests/*/*/*.log
+tests/*/*/*.sh
 */tests/*.diff
 */tests/*.out
 */tests/*.php
@@ -129,6 +137,12 @@ tests/*/*.sh
 */tests/*/*.exp
 */tests/*/*.log
 */tests/*/*.sh
+*/tests/*/*/*.diff
+*/tests/*/*/*.out
+*/tests/*/*/*.php
+*/tests/*/*/*.exp
+*/tests/*/*/*.log
+*/tests/*/*/*.sh
 */*/tests/*.diff
 */*/tests/*.out
 */*/tests/*.php
@@ -141,6 +155,18 @@ tests/*/*.sh
 */*/tests/*/*.exp
 */*/tests/*/*.log
 */*/tests/*/*.sh
+*/*/tests/*/*/*.diff
+*/*/tests/*/*/*.out
+*/*/tests/*/*/*.php
+*/*/tests/*/*/*.exp
+*/*/tests/*/*/*.log
+*/*/tests/*/*/*.sh
+*/*/tests/*/*/*/*.diff
+*/*/tests/*/*/*/*.out
+*/*/tests/*/*/*/*.php
+*/*/tests/*/*/*/*.exp
+*/*/tests/*/*/*/*.log
+*/*/tests/*/*/*/*.sh
 
 # Extension specifc ignores
 ext/*/configure.in
@@ -206,6 +232,8 @@ ext/pdo_sqlite/sqlite3.h
 ext/pdo_sqlite/tests/*.db
 ext/pdo_sqlite/tests/*.tmp
 ext/phar/phar.phar
+ext/phar/phar.1
+ext/phar/phar.phar.1
 ext/pspell/tests/*.tmp
 ext/reflection/xml
 ext/reflection/html
@@ -233,16 +261,20 @@ pear/phpize
 pear/run-tests
 pear/php-config
 pear/scripts
-sapi/apache/libphp5.module
-sapi/apache2handler/libphp5.module
-sapi/apache_hooks/libphp5.module
+sapi/apache/libphp7.module
+sapi/apache2handler/libphp7.module
+sapi/apache_hooks/libphp7.module
 sapi/cgi/php-cgi
+sapi/cgi/php-cgi.1
 sapi/cli/php.1
 sapi/fpm/php-fpm
 sapi/fpm/php-fpm.1
 sapi/fpm/init.d.php-fpm
 sapi/fpm/php-fpm.conf
 sapi/fpm/fpm/php-cgi
+sapi/phpdbg/phpdbg_parser.c
+sapi/phpdbg/phpdbg_parser.h
+sapi/phpdbg/phpdbg
 scripts/php-config
 scripts/phpize
 scripts/man1/*.1

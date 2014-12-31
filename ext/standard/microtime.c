@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,7 +55,7 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_bool get_as_float = 0;
 	struct timeval tp = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &get_as_float) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &get_as_float) == FAILURE) {
 		return;
 	}
 
@@ -70,7 +70,7 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (mode) {
 		timelib_time_offset *offset;
 
-		offset = timelib_get_time_zone_info(tp.tv_sec, get_timezone_info(TSRMLS_C));
+		offset = timelib_get_time_zone_info(tp.tv_sec, get_timezone_info());
 				
 		array_init(return_value);
 		add_assoc_long(return_value, "sec", tp.tv_sec);
@@ -84,7 +84,7 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		char ret[100];
 
 		snprintf(ret, 100, "%.8F %ld", tp.tv_usec / MICRO_IN_SEC, tp.tv_sec);
-		RETURN_STRING(ret, 1);
+		RETURN_STRING(ret);
 	}
 }
 
@@ -111,10 +111,10 @@ PHP_FUNCTION(gettimeofday)
 PHP_FUNCTION(getrusage)
 {
 	struct rusage usg;
-	long pwho = 0;
+	zend_long pwho = 0;
 	int who = RUSAGE_SELF;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &pwho) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &pwho) == FAILURE) {
 		return;
 	}
 	

@@ -95,6 +95,7 @@ echo "Done";
 --> x:/blah.com   : NULL
 --> x://::abc/?   : bool(false)
 --> http://::?   : NULL
+--> http://::#   : NULL
 --> x://::6.5   : int(6)
 --> http://?:/   : NULL
 --> http://@?:/   : NULL
@@ -108,6 +109,7 @@ echo "Done";
 --> http://[x:80]/   : NULL
 -->    : NULL
 --> /   : NULL
+--> /rest/Users?filter={"id":"123"}   : NULL
 --> http:///blah.com   : bool(false)
 --> http://:80   : bool(false)
 --> http://user@:80   : bool(false)
@@ -117,6 +119,7 @@ echo "Done";
 --> http://@:/   : bool(false)
 --> http://:/   : bool(false)
 --> http://?   : bool(false)
+--> http://#   : bool(false)
 --> http://?:   : bool(false)
 --> http://:?   : bool(false)
 --> http://blah.com:123456   : bool(false)

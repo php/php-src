@@ -5,6 +5,7 @@ rewriter correctly handles attribute names which contain dashes
 --INI--
 session.use_cookies=0
 session.use_only_cookies=0
+session.use_strict_mode=0
 session.cache_limiter=
 session.use_trans_sid=1
 session.name=PHPSESSID

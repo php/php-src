@@ -1,8 +1,8 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,7 @@ extern zend_module_entry ereg_module_entry;
 # define PHP_EREG_API
 #endif
 
-PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended TSRMLS_DC);
+PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended);
 
 PHP_FUNCTION(ereg);
 PHP_FUNCTION(eregi);
@@ -54,7 +54,7 @@ ZEND_END_MODULE_GLOBALS(ereg)
 PHP_MINFO_FUNCTION(ereg);
 
 #ifdef ZTS
-#define EREG(v) TSRMG(ereg_globals_id, zend_ereg_globals *, v)
+#define EREG(v) ZEND_TSRMG(ereg_globals_id, zend_ereg_globals *, v)
 #else
 #define EREG(v) (ereg_globals.v)
 #endif

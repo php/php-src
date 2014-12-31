@@ -18,7 +18,7 @@ if (!extension_loaded('sockets')) {
     if (!socket_set_nonblock($socket)) {
         die('Unable to set nonblocking mode for socket');
     }
-    socket_recvfrom($socket, $buf, 12, 0, $from, $port); // cause warning
+    var_dump(socket_recvfrom($socket, $buf, 12, 0, $from, $port)); //false (EAGAIN, no warning)
     $address = sprintf("/tmp/%s.sock", uniqid());
     if (!socket_bind($socket, $address)) {
         die("Unable to bind to $address");
@@ -53,8 +53,7 @@ if (!extension_loaded('sockets')) {
 ?>
 --EXPECTF--
 Warning: socket_create(): Unable to create socket [%d]: Protocol not supported in %s on line %d
-
-Warning: socket_recvfrom(): unable to recvfrom [%d]: Resource temporarily unavailable in %s on line %d
+bool(false)
 
 Warning: socket_sendto() expects at least 5 parameters, 4 given in %s on line %d
 bool(false)

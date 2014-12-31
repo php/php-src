@@ -16,6 +16,12 @@ DBA TCADB handler test
 	require_once dirname(__FILE__) .'/dba_handler.inc';
 ?>
 ===DONE===
+--CLEAN--
+<?php 
+$db_filename = $db_file = dirname(__FILE__) .'/test0.tch';
+@unlink($db_filename);
+@unlink($db_filename.'.lck');
+?>
 --EXPECT--
 database handler: tcadb
 3NYNYY

@@ -4,11 +4,12 @@ curl_setopt basic tests with CURLOPT_STDERR.
 Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
-<?php if (!extension_loaded("curl") || false === getenv('PHP_CURL_HTTP_REMOTE_SERVER')) print "skip need PHP_CURL_HTTP_REMOTE_SERVER environment variable"; ?>
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 
-$host = getenv('PHP_CURL_HTTP_REMOTE_SERVER');
+include 'server.inc';
+$host = curl_cli_server_start();
 
 // start testing
 echo "*** Testing curl_setopt with CURLOPT_STDERR\n";
@@ -48,5 +49,4 @@ curl_close($ch);
 *** Testing curl_setopt with CURLOPT_STDERR
 string(%d) "%S"
 string(%d) "%S"
-* Closing connection #%d
 

@@ -37,7 +37,7 @@ object(DateTimeExt1)#%d (5) {
   ["property2"]=>
   string(5) "Hello"
   ["date"]=>
-  string(19) "2009-02-03 12:34:41"
+  string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>
@@ -49,7 +49,7 @@ object(DateTimeExt1)#%d (5) {
   ["property2"]=>
   string(5) "Hello"
   ["date"]=>
-  string(19) "2009-02-03 12:34:41"
+  string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>
@@ -65,7 +65,7 @@ object(DateTimeExt2)#%d (7) {
   ["property2"]=>
   string(5) "Hello"
   ["date"]=>
-  string(19) "2009-02-03 12:34:41"
+  string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>
@@ -81,7 +81,7 @@ object(DateTimeExt2)#%d (7) {
   ["property2"]=>
   string(5) "Hello"
   ["date"]=>
-  string(19) "2009-02-03 12:34:41"
+  string(26) "2009-02-03 12:34:41.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>

@@ -1,6 +1,11 @@
-/-- This set of tests checks local-specific features, using the fr_FR locale. 
-    It is not Perl-compatible. There is different version called wintestinput3
-  f  or use on Windows, where the locale is called "french". --/
+/-- This set of tests checks local-specific features, using the "fr_FR" locale. 
+    It is not Perl-compatible. When run via RunTest, the locale is edited to
+    be whichever of "fr_FR", "french", or "fr" is found to exist. There is
+    different version of this file called wintestinput3 for use on Windows,
+    where the locale is called "french" and the tests are run using
+    RunTest.bat. --/
+
+< forbid 8W 
 
 /^[\w]+/
     *** Failers

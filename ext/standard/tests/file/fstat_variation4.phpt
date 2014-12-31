@@ -1,5 +1,5 @@
 --TEST--
-Test function fstat() by substituting agument 1 with float values.
+Test function fstat() by substituting argument 1 with float values.
 --FILE--
 <?php
 $variation_array = array(
@@ -18,18 +18,18 @@ foreach ( $variation_array as $var ) {
 ===DONE===
 --EXPECTF--
 
-Warning: fstat() expects parameter 1 to be resource, double given in %s on line %d
+Warning: fstat() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 
-Warning: fstat() expects parameter 1 to be resource, double given in %s on line %d
+Warning: fstat() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 
-Warning: fstat() expects parameter 1 to be resource, double given in %s on line %d
+Warning: fstat() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 
-Warning: fstat() expects parameter 1 to be resource, double given in %s on line %d
+Warning: fstat() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 
-Warning: fstat() expects parameter 1 to be resource, double given in %s on line %d
+Warning: fstat() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 ===DONE===

@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(pgsql,for PostgreSQL support,
-[  --with-pgsql[=DIR]      Include PostgreSQL support.  DIR is the PostgreSQL
+[  --with-pgsql[=DIR]        Include PostgreSQL support.  DIR is the PostgreSQL
                           base install directory or the path to pg_config])
 
 if test "$PHP_PGSQL" != "no"; then
@@ -94,6 +94,8 @@ if test "$PHP_PGSQL" != "no"; then
   AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[Whether libpq is compiled with --enable-multibyte]))
   AC_CHECK_LIB(pq, lo_create, AC_DEFINE(HAVE_PG_LO_CREATE,1,[PostgreSQL 8.1 or later]))
   AC_CHECK_LIB(pq, lo_import_with_oid, AC_DEFINE(HAVE_PG_LO_IMPORT_WITH_OID,1,[PostgreSQL 8.4 or later]))
+  AC_CHECK_LIB(pq, lo_truncate, AC_DEFINE(HAVE_PG_LO_TRUNCATE,1,[PostgreSQL 8.3 or later]))
+  AC_CHECK_LIB(pq, lo_truncate64, AC_DEFINE(HAVE_PG_LO64,1,[PostgreSQL 9.3 or later]))
   AC_CHECK_LIB(pq, PQescapeLiteral, AC_DEFINE(HAVE_PQESCAPELITERAL,1,[PostgreSQL 9.0 or later]))
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS
@@ -103,7 +105,7 @@ if test "$PHP_PGSQL" != "no"; then
 
   PHP_ADD_INCLUDE($PGSQL_INCLUDE)
 
-  PHP_NEW_EXTENSION(pgsql, pgsql.c, $ext_shared)
+  PHP_NEW_EXTENSION(pgsql, pgsql.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi
 
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -54,7 +54,7 @@ static void _zend_qsort_swap(void *a, void *b, size_t siz)
 	}
 }
 
-ZEND_API void zend_qsort_r(void *base, size_t nmemb, size_t siz, compare_r_func_t compare, void *arg TSRMLS_DC)
+ZEND_API void zend_qsort_r(void *base, size_t nmemb, size_t siz, compare_r_func_t compare, void *arg)
 {
 	void           *begin_stack[QSORT_STACK_SIZE];
 	void           *end_stack[QSORT_STACK_SIZE];
@@ -74,17 +74,17 @@ ZEND_API void zend_qsort_r(void *base, size_t nmemb, size_t siz, compare_r_func_
 		end   = end_stack[loop];
 
 		while (begin < end) {
-			offset = (end - begin) >> 1;
+			offset = (end - begin) >> Z_L(1);
 			_zend_qsort_swap(begin, begin + (offset - (offset % siz)), siz);
 
 			seg1 = begin + siz;
 			seg2 = end;
 
 			while (1) {
-				for (; seg1 < seg2 && compare(begin, seg1 TSRMLS_CC, arg) > 0;
+				for (; seg1 < seg2 && compare(begin, seg1, arg) > 0;
 				     seg1 += siz);
 
-				for (; seg2 >= seg1 && compare(seg2, begin TSRMLS_CC, arg) > 0;
+				for (; seg2 >= seg1 && compare(seg2, begin, arg) > 0;
 				     seg2 -= siz);
 				
 				if (seg1 >= seg2)
@@ -118,9 +118,9 @@ ZEND_API void zend_qsort_r(void *base, size_t nmemb, size_t siz, compare_r_func_
 	}
 }
 
-ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t compare TSRMLS_DC)
+ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t compare)
 {
-	zend_qsort_r(base, nmemb, siz, (compare_r_func_t)compare, NULL TSRMLS_CC);
+	zend_qsort_r(base, nmemb, siz, (compare_r_func_t)compare, NULL);
 }
 
 /* 

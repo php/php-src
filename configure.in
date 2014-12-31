@@ -95,10 +95,10 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #define zend_isinf(a) 0
 #endif
 
-#ifdef HAVE_FINITE
-#define zend_finite(a) finite(a)
-#elif defined(HAVE_ISFINITE) || defined(isfinite)
+#if defined(HAVE_ISFINITE) || defined(isfinite)
 #define zend_finite(a) isfinite(a)
+#elif defined(HAVE_FINITE)
+#define zend_finite(a) finite(a)
 #elif defined(fpclassify)
 #define zend_finite(a) ((fpclassify((a))!=FP_INFINITE&&fpclassify((a))!=FP_NAN)?1:0)
 #else
@@ -117,8 +117,8 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #undef PTHREADS
 ])
 
-PHP_MAJOR_VERSION=5
-PHP_MINOR_VERSION=6
+PHP_MAJOR_VERSION=7
+PHP_MINOR_VERSION=0
 PHP_RELEASE_VERSION=0
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
@@ -333,12 +333,12 @@ case $host_alias in
     ;;
   *netware*)
     PHP_BUILD_PROGRAM
-    PHP_ADD_SOURCES(/main, internal_functions.c,,PHP_GLOBAL_OBJS)
-    PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS, PHP_GLOBAL_OBJS)
-    PHP5LIB_SHARED_LIBADD=\$\(EXTRA_LIBS\)
+    PHP_ADD_SOURCES(/main, internal_functions.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_GLOBAL_OBJS)
+    PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_GLOBAL_OBJS)
+    PHP7LIB_SHARED_LIBADD=\$\(EXTRA_LIBS\)
     EXTENSION_DIR=sys:/php$PHP_MAJOR_VERSION/ext
-    PHP_SUBST(PHP5LIB_SHARED_LIBADD)
-    PHP_SHARED_MODULE(php5lib, PHP_GLOBAL_OBJS, netware)
+    PHP_SUBST(PHP7LIB_SHARED_LIBADD)
+    PHP_SHARED_MODULE(php7lib, PHP_GLOBAL_OBJS, netware)
     ;;
 esac
 
@@ -572,6 +572,9 @@ PHP_CHECK_SIZEOF(intmax_t, 0)
 PHP_CHECK_SIZEOF(ssize_t, 8)
 PHP_CHECK_SIZEOF(ptrdiff_t, 8)
 
+dnl Check stdint types (must be after header check)
+PHP_CHECK_STDINT_TYPES
+
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
 dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exists
@@ -784,7 +787,12 @@ if test "$PHP_GCOV" = "yes"; then
     AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
   fi
   
-  ltp_version_list="1.5 1.6 1.7 1.9"
+  dnl min: 1.5 (i.e. 105, major * 100 + minor for easier comparison)
+  ltp_version_min="105"
+  dnl non-working versions, e.g. "1.8 1.18";
+  dnl remove "none" when introducing the first incompatible LTP version an 
+  dnl separate any following additions by spaces
+  ltp_version_exclude="1.8"
 
   AC_CHECK_PROG(LTP, lcov, lcov)
   AC_CHECK_PROG(LTP_GENHTML, genhtml, genhtml)
@@ -794,21 +802,30 @@ if test "$PHP_GCOV" = "yes"; then
   if test "$LTP"; then
     AC_CACHE_CHECK([for ltp version], php_cv_ltp_version, [
       php_cv_ltp_version=invalid
-      ltp_version=`$LTP -v 2>/dev/null | $SED -e 's/^.* //'`
-      for ltp_check_version in $ltp_version_list; do
-        if test "$ltp_version" = "$ltp_check_version"; then
-          php_cv_ltp_version="$ltp_check_version (ok)"
+      ltp_version_vars=`$LTP -v 2>/dev/null | $SED -e 's/^.* //' -e 's/\./ /g' | tr -d a-z`
+      if test -n "$ltp_version_vars"; then
+        set $ltp_version_vars
+        ltp_version="${1}.${2}"
+        ltp_version_num="`expr ${1} \* 100 + ${2}`"
+        if test $ltp_version_num -ge $ltp_version_min; then
+          php_cv_ltp_version="$ltp_version (ok)"
+          for ltp_check_version in $ltp_version_exclude; do
+            if test "$ltp_version" = "$ltp_check_version"; then
+              php_cv_ltp_version=invalid
+              break
+            fi
+          done
         fi
-      done
+      fi
     ])
   else
-    ltp_msg="To enable code coverage reporting you must have one of the following LTP versions installed: $ltp_version_list"      
+    ltp_msg="To enable code coverage reporting you must have LTP installed"      
     AC_MSG_ERROR([$ltp_msg])
   fi
 
   case $php_cv_ltp_version in
     ""|invalid[)]
-      ltp_msg="You must have one of the following versions of LTP: $ltp_version_list (found: $ltp_version)."
+      ltp_msg="This LTP version is not supported (found: $ltp_version, min: $ltp_version_min, excluded: $ltp_version_exclude)."
       AC_MSG_ERROR([$ltp_msg])
       LTP="exit 0;"
       ;;
@@ -1006,7 +1023,7 @@ dnl Check if all enabled by default extensions should be disabled
 dnl
 
 AC_ARG_ENABLE(all,
-[ --disable-all   Disable all extensions which are enabled by default
+[  --disable-all           Disable all extensions which are enabled by default
 ], [
   PHP_ENABLE_ALL=$enableval
 ])
@@ -1437,20 +1454,20 @@ PHP_SUBST(install_binary_targets)
 
 PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
 
-PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c)
+PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
        fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c \
-       output.c getopt.c)
+       output.c getopt.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
        plain_wrapper.c userspace.c transports.c xp_socket.c mmap.c \
-       glob_wrapper.c)
+       glob_wrapper.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
-PHP_ADD_SOURCES(/main, internal_functions.c,, sapi)
+PHP_ADD_SOURCES(/main, internal_functions.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, sapi)
 
 case $host_alias in
   *netware*)
@@ -1458,25 +1475,24 @@ case $host_alias in
     PHP_ADD_BUILD_DIR(netware)
     ;;
   *)
-    PHP_ADD_SOURCES_X(/main, internal_functions_cli.c,, PHP_BINARY_OBJS)
+    PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_BINARY_OBJS)
     ;;
 esac
 
 PHP_ADD_SOURCES(Zend, \
     zend_language_parser.c zend_language_scanner.c \
     zend_ini_parser.c zend_ini_scanner.c \
-    zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c zend_dtrace.c \
+    zend_alloc.c zend_compile.c zend_constants.c zend_dtrace.c \
     zend_execute_API.c zend_highlight.c zend_llist.c \
-    zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
+    zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
     zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
     zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c \
     zend_ini.c zend_qsort.c zend_multibyte.c zend_ts_hash.c zend_stream.c \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
-    zend_closures.c zend_float.c zend_string.c zend_signal.c zend_generators.c)
-
-if test -r "$abs_srcdir/Zend/zend_objects.c"; then
-  PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c zend_default_classes.c)
-fi
+    zend_closures.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
+    zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
+    zend_default_classes.c zend_inheritance.c, \
+	-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 dnl Selectively disable optimization due to high RAM usage during
 dnl compiling the executor.
@@ -1486,7 +1502,7 @@ else
   flag=
 fi
 
-PHP_ADD_SOURCES_X(Zend, zend_execute.c,,PHP_GLOBAL_OBJS,,$flag)
+PHP_ADD_SOURCES_X(Zend, zend_execute.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,PHP_GLOBAL_OBJS,,$flag)
 
 PHP_ADD_BUILD_DIR(main main/streams)
 PHP_ADD_BUILD_DIR(TSRM)
@@ -1505,7 +1521,7 @@ $php_shtool mkdir -p pear/scripts
 $php_shtool mkdir -p scripts
 $php_shtool mkdir -p scripts/man1
 
-ALL_OUTPUT_FILES="php5.spec main/build-defs.h \
+ALL_OUTPUT_FILES="php7.spec main/build-defs.h \
 scripts/phpize scripts/man1/phpize.1 \
 scripts/php-config scripts/man1/php-config.1 \
 $PHP_OUTPUT_FILES"
@@ -1582,7 +1598,7 @@ cat <<X
 | see the file debug.log for error messages.                         |
 |                                                                    |
 | If you are unable to fix this, send the file debug.log to the      |
-| php-install@lists.php.net mailing list and include appropiate      |
+| php-install@lists.php.net mailing list and include appropriate      |
 | information about your setup.                                      |
 X
   fi

@@ -357,7 +357,7 @@ var_dump($global_var);
 test_unset3();
 var_dump($global_var);
 
-//Note: No error conditions relating to passing arugments can be tested
+//Note: No error conditions relating to passing arguments can be tested
 // because these are not functions but statements, it will result in syntax error.
 ?>
 ===DONE===

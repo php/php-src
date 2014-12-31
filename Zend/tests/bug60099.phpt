@@ -7,4 +7,4 @@ namespace foo {
 
 ?>
 --EXPECTF--
-Fatal error: __HALT_COMPILER() can only be used from the outermost scope in %s on line %d
+Parse error: syntax error, unexpected end of file in %s on line %d

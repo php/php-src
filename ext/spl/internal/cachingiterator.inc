@@ -23,7 +23,7 @@
  *       flag CALL_TOSTRING to do the conversion when the actual element
  *       is being fetched. Otherwise the conversion would happen with the
  *       already changed iterator. If you do not need this then it you should
- *       omit this flag because it costs unneccessary work and time.
+ *       omit this flag because it costs unnecessary work and time.
  */
 class CachingIterator implements OuterIterator
 {

@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
-// Used by php5dllts.rc
+// Used by php7dllts.rc
 //
 
 // Next default values for new objects

@@ -19,15 +19,15 @@ $statement = oci_parse($c, $create);
 oci_execute($statement);
 
 $create_pkg = "
-CREATE OR REPLACE PACKAGE ARRAYBINDPKG1 AS 
+CREATE OR REPLACE PACKAGE BUG51253_PKG AS 
   TYPE ARRTYPE IS TABLE OF VARCHAR(20) INDEX BY BINARY_INTEGER; 
   PROCEDURE iobind(c1 IN OUT ARRTYPE); 
-END ARRAYBINDPKG1;";
+END BUG51253_PKG;";
 $statement = oci_parse($c, $create_pkg);
 oci_execute($statement);
 
 $create_pkg_body = "
-CREATE OR REPLACE PACKAGE BODY ARRAYBINDPKG1 AS 
+CREATE OR REPLACE PACKAGE BODY BUG51253_PKG AS 
   CURSOR CUR IS SELECT name FROM bind_test;
   PROCEDURE iobind(c1 IN OUT ARRTYPE) IS
     BEGIN
@@ -45,12 +45,12 @@ CREATE OR REPLACE PACKAGE BODY ARRAYBINDPKG1 AS
       END IF;
     END LOOP;
   END iobind;
-END ARRAYBINDPKG1;";
+END BUG51253_PKG;";
 $statement = oci_parse($c, $create_pkg_body);
 oci_execute($statement);
 
 echo "Test 1\n";
-$statement = oci_parse($c, "BEGIN ARRAYBINDPKG1.iobind(:c1); END;");
+$statement = oci_parse($c, "BEGIN bug51253_pkg.iobind(:c1); END;");
 $array1 = array("one", "two", "three", "four", "five");
 $array2 = $array1;
 oci_bind_array_by_name($statement, ":c1", $array2, 5, -1, SQLT_CHR);
@@ -61,7 +61,7 @@ var_dump($array2);
 
 
 echo "Test 2\n";
-$statement = oci_parse($c, "BEGIN ARRAYBINDPKG1.iobind(:c1); END;");
+$statement = oci_parse($c, "BEGIN bug51253_pkg.iobind(:c1); END;");
 $array1 = array("one", "two", "three", "four", "five");
 $array2 = &$array1;
 oci_bind_array_by_name($statement, ":c1", $array2, 5, -1, SQLT_CHR);
@@ -72,7 +72,7 @@ var_dump($array2);
 
 
 echo "Test 3\n";
-$statement = oci_parse($c, "BEGIN ARRAYBINDPKG1.iobind(:c1); END;");
+$statement = oci_parse($c, "BEGIN bug51253_pkg.iobind(:c1); END;");
 $array1 = array("one", "two", "three", "four", "five");
 $array2 = &$array1;
 oci_bind_array_by_name($statement, ":c1", $array1, 5, -1, SQLT_CHR);
@@ -82,7 +82,7 @@ var_dump($array1);
 var_dump($array2);
 
 // Cleanup
-$statement = oci_parse($c, "DROP PACKAGE ARRAYBINDPKG1");
+$statement = oci_parse($c, "DROP PACKAGE BUG51253_PKG");
 @oci_execute($statement);
 $statement = oci_parse($c, "DROP TABLE BIND_TEST");
 @oci_execute($statement);

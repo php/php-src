@@ -13,7 +13,7 @@ PHP Testfest Berlin 2009-05-10
     }
     // needed because of #ifdef HAVE_CTERMID in posix.c
     if (!function_exists('posix_ctermid')) { 
-        die('SKIP - Fuction posix_ctermid() not available');
+        die('SKIP - Function posix_ctermid() not available');
     }
 ?>
 --FILE--

@@ -15,7 +15,7 @@ ob_start();
 
 echo "*** Testing session_set_save_handler() : error functionality ***\n";
 
-function callback() { }
+function callback() { return true; }
 
 session_set_save_handler("callback", "callback", "callback", "callback", "callback", "callback");
 session_set_save_handler("callback", "echo", "callback", "callback", "callback", "callback");
@@ -39,4 +39,3 @@ Warning: session_set_save_handler(): Argument 4 is not a valid callback in %s on
 Warning: session_set_save_handler(): Argument 5 is not a valid callback in %s on line %d
 
 Warning: session_set_save_handler(): Argument 6 is not a valid callback in %s on line %d
-

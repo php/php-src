@@ -1,5 +1,5 @@
 #  +----------------------------------------------------------------------+
-#  | PHP Version 5                                                        |
+#  | PHP Version 7                                                        |
 #  +----------------------------------------------------------------------+
 #  | Copyright (c) 1997-2008 The PHP Group                                |
 #  +----------------------------------------------------------------------+
@@ -62,9 +62,9 @@ Zend\zend_language_scanner.c: Zend\zend_language_scanner.l
 !endif
 
 !if $(PGOMGR) != ""
-PHP5_PGD_OPTION=/PGD:$(PGOPGD_DIR)\php5.pgd
+PHP7_PGD_OPTION=/PGD:$(PGOPGD_DIR)\php7.pgd
 !else
-PHP5_PGD_OPTION=
+PHP7_PGD_OPTION=
 !endif
 
 PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
@@ -89,7 +89,8 @@ $(PHPDLL_RES): win32\build\template.rc
 		win32\build\template.rc
 
 $(BUILD_DIR)\$(PHPDLL): generated_files $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
-	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP5_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
+#	@$(CC) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /link /out:$(BUILD_DIR)\$(PHPDLL) $(PHP7_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
+	@"$(LINK)" $(PHP_GLOBAL_OBJS_RESP) $(STATIC_EXT_OBJS_RESP) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP7_PGD_OPTION) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS)
 	-@$(_VC_MANIFEST_EMBED_DLL)
 
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
@@ -157,19 +158,14 @@ build-dist: $(BUILD_DIR)\deplister.exe
 	$(BUILD_DIR)\php.exe -d date.timezone=UTC -n -dphar.readonly=0 win32/build/mkdist.php "$(BUILD_DIR)" "$(PHP_BUILD)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS) $(PHP_EXTRA_DIST_FILES)" "$(PECL_TARGETS) $(PECL_EXTRA_DIST_FILES)" "$(SNAPSHOT_TEMPLATE)"
 	cd $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-$(ZIP) -9 -q -r ..\php-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip .
-	cd ..\..
 	cd $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
 	-$(ZIP) -9 -q -r ..\pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip .
-	cd ..\..
 	cd $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING)
 	-$(ZIP) -9 -q -r ..\php-test-pack-$(PHP_VERSION_STRING).zip .
-	cd ..\..
 	cd $(BUILD_DIR)
 	-$(ZIP) -9 -q php-debug-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip *.pdb
-	cd
-	cd
 	-$(ZIP) -9 -q -r php-devel-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip $(BUILD_DIR_DEV_NAME)
-	cd ..\..
+	cd $(BUILD_DIR)
 
 dist: all build-dist
 snap: build-snap build-devel build-dist
@@ -183,7 +179,7 @@ msi-installer: dist
 # need to redirect, since INSTALL is a file in the root...
 install: really-install install-sdk
 
-build-lib:
+build-lib: build-ext-libs
 	@if not exist $(BUILD_DIR_DEV)\lib mkdir $(BUILD_DIR_DEV)\lib >nul
 	@copy $(BUILD_DIR)\$(PHPLIB) $(BUILD_DIR_DEV)\lib /y >nul
 

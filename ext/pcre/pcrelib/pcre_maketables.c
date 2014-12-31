@@ -64,12 +64,15 @@ Arguments:   none
 Returns:     pointer to the contiguous block of data
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 const unsigned char *
 pcre_maketables(void)
-#else
+#elif defined COMPILE_PCRE16
 const unsigned char *
 pcre16_maketables(void)
+#elif defined COMPILE_PCRE32
+const unsigned char *
+pcre32_maketables(void)
 #endif
 {
 unsigned char *yield, *p;
@@ -93,13 +96,17 @@ for (i = 0; i < 256; i++) *p++ = tolower(i);
 for (i = 0; i < 256; i++) *p++ = islower(i)? toupper(i) : tolower(i);
 
 /* Then the character class tables. Don't try to be clever and save effort on
-exclusive ones - in some locales things may be different. Note that the table
-for "space" includes everything "isspace" gives, including VT in the default
-locale. This makes it work for the POSIX class [:space:]. Note also that it is
-possible for a character to be alnum or alpha without being lower or upper,
-such as "male and female ordinals" (\xAA and \xBA) in the fr_FR locale (at
-least under Debian Linux's locales as of 12/2005). So we must test for alnum
-specially. */
+exclusive ones - in some locales things may be different.
+
+Note that the table for "space" includes everything "isspace" gives, including
+VT in the default locale. This makes it work for the POSIX class [:space:].
+From release 8.34 is is also correct for Perl space, because Perl added VT at
+release 5.18.
+
+Note also that it is possible for a character to be alnum or alpha without
+being lower or upper, such as "male and female ordinals" (\xAA and \xBA) in the
+fr_FR locale (at least under Debian Linux's locales as of 12/2005). So we must
+test for alnum specially. */
 
 memset(p, 0, cbit_length);
 for (i = 0; i < 256; i++)
@@ -118,14 +125,15 @@ for (i = 0; i < 256; i++)
   }
 p += cbit_length;
 
-/* Finally, the character type table. In this, we exclude VT from the white
-space chars, because Perl doesn't recognize it as such for \s and for comments
-within regexes. */
+/* Finally, the character type table. In this, we used to exclude VT from the
+white space chars, because Perl didn't recognize it as such for \s and for
+comments within regexes. However, Perl changed at release 5.18, so PCRE changed
+at release 8.34. */
 
 for (i = 0; i < 256; i++)
   {
   int x = 0;
-  if (i != 0x0b && isspace(i)) x += ctype_space;
+  if (isspace(i)) x += ctype_space;
   if (isalpha(i)) x += ctype_letter;
   if (isdigit(i)) x += ctype_digit;
   if (isxdigit(i)) x += ctype_xdigit;

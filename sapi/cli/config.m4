@@ -6,6 +6,23 @@ PHP_ARG_ENABLE(cli,,
 [  --disable-cli           Disable building CLI version of PHP
                           (this forces --without-pear)], yes, no)
 
+AC_CHECK_FUNCS(setproctitle)
+
+AC_CHECK_HEADERS([sys/pstat.h])
+
+AC_CACHE_CHECK([for PS_STRINGS], [cli_cv_var_PS_STRINGS],
+[AC_TRY_LINK(
+[#include <machine/vmparam.h>
+#include <sys/exec.h>
+],
+[PS_STRINGS->ps_nargvstr = 1;
+PS_STRINGS->ps_argvstr = "foo";],
+[cli_cv_var_PS_STRINGS=yes],
+[cli_cv_var_PS_STRINGS=no])])
+if test "$cli_cv_var_PS_STRINGS" = yes ; then
+  AC_DEFINE([HAVE_PS_STRINGS], [], [Define to 1 if the PS_STRINGS thing exists.])
+fi
+
 AC_MSG_CHECKING(for CLI build)
 if test "$PHP_CLI" != "no"; then
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cli/Makefile.frag)
@@ -14,7 +31,7 @@ if test "$PHP_CLI" != "no"; then
   SAPI_CLI_PATH=sapi/cli/php
 
   dnl Select SAPI
-  PHP_SELECT_SAPI(cli, program, php_cli.c php_http_parser.c php_cli_server.c,, '$(SAPI_CLI_PATH)')
+  PHP_SELECT_SAPI(cli, program, php_cli.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, '$(SAPI_CLI_PATH)')
 
   case $host_alias in
   *aix*)
@@ -28,7 +45,7 @@ if test "$PHP_CLI" != "no"; then
     BUILD_CLI="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_CLI_OBJS:.lo=.o) \$(PHP_FRAMEWORKS) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_CLI_PATH)"
     ;;
   *netware*)
-    BUILD_CLI="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_BINARY_OBJS) \$(PHP_CLI_OBJS) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -Lnetware -lphp5lib -o \$(SAPI_CLI_PATH)"
+    BUILD_CLI="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_BINARY_OBJS) \$(PHP_CLI_OBJS) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -Lnetware -lphp7lib -o \$(SAPI_CLI_PATH)"
     ;;
   *)
     BUILD_CLI="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_CLI_OBJS) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_CLI_PATH)"

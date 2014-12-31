@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<books>
+ <book>
+  <title>The Grapes of Wrath</title>
+  <author>John Steinbeck</author>
+ </book>
+ <book is-hardback="true">
+  <title>The Pearl</title>
+  <author>John Steinbeck</author>
+ </book>
+</books>

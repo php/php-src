@@ -36,7 +36,7 @@ extern "C" {
 #define ONIGURUMA
 #define ONIGURUMA_VERSION_MAJOR   5
 #define ONIGURUMA_VERSION_MINOR   9
-#define ONIGURUMA_VERSION_TEENY   2
+#define ONIGURUMA_VERSION_TEENY   5
 
 #ifdef __cplusplus
 # ifndef  HAVE_PROTOTYPES
@@ -96,8 +96,13 @@ extern "C" {
 #define UChar OnigUChar
 #endif
 
-typedef unsigned char  OnigUChar;
+#ifdef _WIN32
+# include <windows.h>
+typedef ULONG_PTR OnigCodePoint;
+#else
 typedef unsigned long  OnigCodePoint;
+#endif
+typedef unsigned char  OnigUChar;
 typedef unsigned int   OnigCtype;
 typedef unsigned int   OnigDistance;
 

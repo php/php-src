@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,11 +25,11 @@
 
 /* {{{ apache_php_module_main
  */
-int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
+int apache_php_module_main(request_rec *r, int display_source_mode)
 {
 	zend_file_handle file_handle;
 
-	if (php_request_startup(TSRMLS_C) == FAILURE) {
+	if (php_request_startup() == FAILURE) {
 		return FAILURE;
 	}
 	/* sending a file handle to another dll is not working
@@ -39,7 +39,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 		zend_syntax_highlighter_ini syntax_highlighter_ini;
 
 		php_get_highlight_struct(&syntax_highlighter_ini);
-		if (highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini TSRMLS_CC)){
+		if (highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini)){
 			return OK;
 		} else {
 			return NOT_FOUND;
@@ -50,7 +50,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 		file_handle.filename = SG(request_info).path_translated;
 		file_handle.opened_path = NULL;
 		file_handle.free_filename = 0;
-		(void) php_execute_script(&file_handle TSRMLS_CC);
+		(void) php_execute_script(&file_handle);
 	}
 	AP(in_request) = 0;
 	
@@ -60,7 +60,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 
 /* {{{ apache_php_module_hook
  */
-int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRMLS_DC)
+int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret)
 {
 	zend_file_handle file_handle;
 	zval *req;
@@ -70,24 +70,24 @@ int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRM
 	signal(SIGCHLD, sigchld_handler);
 #endif
     if(AP(current_hook) == AP_RESPONSE) {
-        if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
+        if (php_request_startup_for_hook() == FAILURE)
             return FAILURE;
     }
     else {
-        if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
+        if (php_request_startup_for_hook() == FAILURE)
             return FAILURE;
     }
 
     req = php_apache_request_new(r);
-    php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+    php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER]);
 
     switch(handler->type) {
         case AP_HANDLER_TYPE_FILE:
-            php_register_variable("PHP_SELF_HOOK", handler->name, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+            php_register_variable("PHP_SELF_HOOK", handler->name, PG(http_globals)[TRACK_VARS_SERVER]);
 	        memset(&file_handle, 0, sizeof(file_handle));
 	        file_handle.type = ZEND_HANDLE_FILENAME;
 	        file_handle.filename = handler->name;
-	        (void) php_execute_simple_script(&file_handle, ret TSRMLS_CC);
+	        (void) php_execute_simple_script(&file_handle, ret);
             break;
         case AP_HANDLER_TYPE_METHOD:
             if( (tmp = strstr(handler->name, "::")) != NULL &&  *(tmp+2) != '\0' ) {
@@ -99,7 +99,7 @@ int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRM
                 ALLOC_ZVAL(method);
                 ZVAL_STRING(method, tmp +2, 1);
                 *tmp = ':';
-                call_user_function_ex(EG(function_table), &class, method, ret, 0, NULL, 0, NULL TSRMLS_CC);
+                call_user_function_ex(EG(function_table), &class, method, ret, 0, NULL, 0, NULL);
                 zval_dtor(class);
                 zval_dtor(method);
             }

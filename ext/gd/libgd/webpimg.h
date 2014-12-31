@@ -57,7 +57,7 @@ typedef enum WebPResultType {
  *      3. p_Y/p_U/p_V : pointer to the Y/U/V data buffer (this routine will
  *                       allocate memory for the buffer, fill the buffer with
  *                       appropriate data and transfer owner ship of the buffer
- *                       to caller. Caller is reponsible for freeing the memory).
+ *                       to caller. Caller is responsible for freeing the memory).
  *                       Note that the memory for Y, U, V buffers is alloacted
  *                       in one chunk, hence one should call free(*p_Y) only.
  *                       Do not try to free the U and V buffers.
@@ -84,7 +84,7 @@ WebPResult WebPDecode(const uint8* data,
  *                               height.
  *      6. y_stride: The width (in bytes) of one row of Y data. This may not
  *                   match width if there is end of row padding (e.g., for 32
- *                   bit row aligment).
+ *                   bit row alignment).
  *      7. QP: the quantization parameter. This parameter controls the
  *             compression vs quality tradeoff. Use smaller numbers for better
  *             quality (compression will be lesser) and vice versa. 20 is a

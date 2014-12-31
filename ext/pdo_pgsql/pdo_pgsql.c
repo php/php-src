@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -86,11 +86,12 @@ ZEND_GET_MODULE(pdo_pgsql)
 PHP_MINIT_FUNCTION(pdo_pgsql)
 {
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT", PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT);
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_IDLE", (long)PGSQL_TRANSACTION_IDLE);
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_ACTIVE", (long)PGSQL_TRANSACTION_ACTIVE);
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INTRANS", (long)PGSQL_TRANSACTION_INTRANS);
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INERROR", (long)PGSQL_TRANSACTION_INERROR);
-	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_UNKNOWN", (long)PGSQL_TRANSACTION_UNKNOWN);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_ATTR_DISABLE_PREPARES", PDO_PGSQL_ATTR_DISABLE_PREPARES);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_IDLE", (zend_long)PGSQL_TRANSACTION_IDLE);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_ACTIVE", (zend_long)PGSQL_TRANSACTION_ACTIVE);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INTRANS", (zend_long)PGSQL_TRANSACTION_INTRANS);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INERROR", (zend_long)PGSQL_TRANSACTION_INERROR);
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_UNKNOWN", (zend_long)PGSQL_TRANSACTION_UNKNOWN);
 
 	php_pdo_register_driver(&pdo_pgsql_driver);
 	return SUCCESS;

@@ -8,7 +8,7 @@ the original run-tests.php script.  server-tests is *not* used by
 'make test'.  server-tests was developed to provide support for
 testing PHP under it's primary environment, HTTP, and can run the
 PHP tests under any of the SAPI modules that are direct executables, 
-or are accessable via HTTP.
+or are accessible via HTTP.
 
 [New features]
 ----------------
@@ -95,7 +95,7 @@ include:
   $filename     full native path to file, will become PATH_TRANSLATED
   $filepath     =dirname($filename)
   $scriptname   this is what will become SCRIPT_NAME unless you override it
-  $docroot      the equivelant of DOCUMENT_ROOT under Apache
+  $docroot      the equivalent of DOCUMENT_ROOT under Apache
   $cwd          the directory that the test is being initiated from
   $this->conf   all server-tests configuration vars
   $this->env    all environment variables that will get passed to the test
@@ -105,7 +105,7 @@ include:
 This section is also eval'd, and is similar in nature to --ENV--.  However,
 this section is used to build the url used in an HTTP request.  Valid values
 to set in this section would include:
-  SCRIPT_NAME   The inital part of the request url
+  SCRIPT_NAME   The initial part of the request url
   PATH_INFO     The pathinfo part of a request url
   FRAGMENT      The fragment section of a url (after #)
   QUERY_STRING  The query part of a url (after ?)

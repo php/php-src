@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,7 +53,7 @@ php_phttpd_startup(sapi_module_struct *sapi_module)
 }
 
 static int
-php_phttpd_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
+php_phttpd_sapi_ub_write(const char *str, uint str_length)
 {
     int sent_bytes;
 
@@ -67,7 +67,7 @@ php_phttpd_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 }
 
 static int
-php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
+php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers)
 {
     char *header_name, *header_content;
     char *p;
@@ -94,7 +94,7 @@ php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 }
 
 static int
-php_phttpd_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+php_phttpd_sapi_send_headers(sapi_headers_struct *sapi_headers)
 {
     if (SG(sapi_headers).send_default_content_type) {
 		fd_printf(PHG(cip)->fd,"Content-Type: text/html\n");
@@ -106,7 +106,7 @@ php_phttpd_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 }
 
 static char *
-php_phttpd_sapi_read_cookies(TSRMLS_D)
+php_phttpd_sapi_read_cookies(void)
 {
 
 /*
@@ -126,7 +126,7 @@ php_phttpd_sapi_read_cookies(TSRMLS_D)
 }
 
 static int
-php_phttpd_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
+php_phttpd_sapi_read_post(char *buf, uint count_bytes)
 {
 /*
     uint max_read;
@@ -181,7 +181,7 @@ static sapi_module_struct phttpd_sapi_module = {
 };
 
 static void
-php_phttpd_request_ctor(TSRMLS_D TSRMLS_DC)
+php_phttpd_request_ctor(void)
 {
 	memset(&SG(request_info), 0, sizeof(sapi_globals_struct)); /* pfusch! */
 
@@ -232,19 +232,19 @@ php_phttpd_request_ctor(TSRMLS_D TSRMLS_DC)
 }
 
 static void
-php_phttpd_request_dtor(TSRMLS_D TSRMLS_DC)
+php_phttpd_request_dtor(void)
 {
     free(SG(request_info).path_translated);
 }
 
 
-int php_doit(TSRMLS_D)
+int php_doit(void)
 {
 	struct stat sb;
 	zend_file_handle file_handle;
 	struct httpinfo *hip = PHG(cip)->hip;
 
-	if (php_request_startup(TSRMLS_C) == FAILURE) {
+	if (php_request_startup() == FAILURE) {
         return -1;
     }
 
@@ -253,9 +253,9 @@ int php_doit(TSRMLS_D)
     file_handle.free_filename = 0;
 
 /*
-	php_phttpd_hash_environment(TSRMLS_C);
+	php_phttpd_hash_environment();
 */
-	php_execute_script(&file_handle TSRMLS_CC);
+	php_execute_script(&file_handle);
 	php_request_shutdown(NULL);
 
 	return SG(sapi_headers).http_response_code;
@@ -281,16 +281,15 @@ int pm_request(struct connectioninfo *cip)
 {
 	struct httpinfo *hip = cip->hip;
 	int status;
-	TSRMLS_FETCH();
 
 	if (strcasecmp(hip->method, "GET") == 0 || 
 	    strcasecmp(hip->method, "HEAD") == 0 ||
 	    strcasecmp(hip->method, "POST") == 0) {
 		PHG(cip) = cip;
 		
-		php_phttpd_request_ctor(TSRMLS_C);
-		status = php_doit(TSRMLS_C);
-		php_phttpd_request_dtor(TSRMLS_C);
+		php_phttpd_request_ctor();
+		status = php_doit();
+		php_phttpd_request_dtor();
 
 		return status;	
 	} else {

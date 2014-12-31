@@ -30,7 +30,7 @@ $multiline_string = <<<EOT
 &quot;This is a double quoted string&quot;
 EOT;
 
-// heredoc with diferent whitespaces
+// heredoc with different whitespaces
 $diff_whitespaces = <<<EOT
 <html>Roy&#039;s height\r &gt; Sam\t&#039;s height
 1111\t\t &amp; 0000\v\v = \f0000

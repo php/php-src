@@ -143,7 +143,9 @@ int fpm_env_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	fpm_env_setproctitle(title);
 	efree(title);
 
-	clearenv();
+	if (wp->config->clear_env) {
+		clearenv();
+	}
 
 	for (kv = wp->config->env; kv; kv = kv->next) {
 		setenv(kv->key, kv->value, 1);
@@ -210,7 +212,7 @@ int fpm_env_init_main() /* {{{ */
 #ifndef HAVE_SETPROCTITLE
 #ifdef __linux__
 	/*
-	 * This piece of code has been inspirated from nginx and pureftpd code, whic
+	 * This piece of code has been inspirated from nginx and pureftpd code, which
 	 * are under BSD licence.
 	 *
 	 * To change the process title in Linux we have to set argv[1] to NULL

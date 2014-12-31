@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -187,7 +187,7 @@ _cyr_mac = {
 };
 /* }}} */
 
-/* {{{ static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to TSRMLS_DC)
+/* {{{ static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to)
 * This is the function that performs real in-place conversion of the string 
 * between charsets. 
 * Parameters:
@@ -201,11 +201,11 @@ _cyr_mac = {
 *    d - x-cp866
 *    m - x-mac-cyrillic
 *****************************************************************************/
-static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to TSRMLS_DC)
+static char * php_convert_cyr_string(unsigned char *str, size_t length, char from, char to)
 {
 	const unsigned char *from_table, *to_table;
 	unsigned char tmp;
-	int i;
+	size_t i;
 
 	from_table = NULL;
 	to_table   = NULL;
@@ -228,7 +228,7 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 		case 'K':
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown source charset: %c", from);
+			php_error_docref(NULL, E_WARNING, "Unknown source charset: %c", from);
 			break;
 	}
 
@@ -250,7 +250,7 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 		case 'K':
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown destination charset: %c", to);
+			php_error_docref(NULL, E_WARNING, "Unknown destination charset: %c", to);
 			break;
 	}
 
@@ -258,8 +258,7 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 	if (!str)
 		return (char *)str;
 	
-	for( i = 0; i<length; i++)
-	{
+	for (i = 0; i < length; i++) {
 		tmp = (from_table == NULL)? str[i] : from_table[ str[i] ];
 		str[i] = (to_table == NULL) ? tmp : to_table[tmp + 256];
 	}
@@ -272,17 +271,17 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 PHP_FUNCTION(convert_cyr_string)
 {
 	char *input, *fr_cs, *to_cs;
-	int input_len, fr_cs_len, to_cs_len;
-	unsigned char *str;
+	size_t input_len, fr_cs_len, to_cs_len;
+	zend_string *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
 		return;
 	}
 
-	str = (unsigned char*) estrndup(input, input_len);
+	str = zend_string_init(input, input_len, 0);
 
-	php_convert_cyr_string(str, input_len, fr_cs[0], to_cs[0] TSRMLS_CC);
-	RETVAL_STRING((char *)str, 0);
+	php_convert_cyr_string((unsigned char *) str->val, str->len, fr_cs[0], to_cs[0]);
+	RETVAL_NEW_STR(str);
 }
 /* }}} */
 

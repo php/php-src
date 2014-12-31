@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(apxs2,,
-[  --with-apxs2[=FILE]     Build shared Apache 2.0 Handler module. FILE is the optional
+[  --with-apxs2[=FILE]       Build shared Apache 2.0 Handler module. FILE is the optional
                           pathname to the Apache apxs tool [apxs]], no, no)
 
 AC_MSG_CHECKING([for Apache 2.0 handler-module support via DSO through APXS])
@@ -56,12 +56,12 @@ if test "$PHP_APXS2" != "no"; then
     esac
   done
 
-  APACHE_CFLAGS="$APACHE_CPPFLAGS -I$APXS_INCLUDEDIR $APR_CFLAGS $APU_CFLAGS"
+  APACHE_CFLAGS="$APACHE_CPPFLAGS -I$APXS_INCLUDEDIR $APR_CFLAGS $APU_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 
   # Test that we're trying to configure with apache 2.x
   PHP_AP_EXTRACT_VERSION($APXS_HTTPD)
   if test "$APACHE_VERSION" -le 2000000; then
-    AC_MSG_ERROR([You have enabled Apache 2 support while your server is Apache 1.3.  Please use the appropiate switch --with-apxs (without the 2)])
+    AC_MSG_ERROR([You have enabled Apache 2 support while your server is Apache 1.3.  Please use the appropriate switch --with-apxs (without the 2)])
   elif test "$APACHE_VERSION" -lt 2000044; then
     AC_MSG_ERROR([Please note that Apache version >= 2.0.44 is required])
   fi
@@ -70,20 +70,20 @@ if test "$PHP_APXS2" != "no"; then
   if test -z `$APXS -q SYSCONFDIR`; then
     INSTALL_IT="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                  $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
-                       -i -n php5"
+                       -i -n php7"
   else
     APXS_SYSCONFDIR='$(INSTALL_ROOT)'`$APXS -q SYSCONFDIR`
     INSTALL_IT="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                 \$(mkinstalldirs) '$APXS_SYSCONFDIR' && \
                  $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
                        -S SYSCONFDIR='$APXS_SYSCONFDIR' \
-                       -i -a -n php5"
+                       -i -a -n php7"
   fi
 
   case $host_alias in
   *aix*)
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-brtl -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
-    PHP_SELECT_SAPI(apache2handler, shared, mod_php5.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
+    PHP_SELECT_SAPI(apache2handler, shared, mod_php7.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL" 
     ;;
   *darwin*)
@@ -99,19 +99,19 @@ if test "$PHP_APXS2" != "no"; then
     fi
     MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
     PHP_SUBST(MH_BUNDLE_FLAGS)
-    PHP_SELECT_SAPI(apache2handler, bundle, mod_php5.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
-    SAPI_SHARED=libs/libphp5.so
+    PHP_SELECT_SAPI(apache2handler, bundle, mod_php7.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
+    SAPI_SHARED=libs/libphp7.so
     INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
     ;;
   *beos*)
     if test -f _APP_; then `rm _APP_`; fi
     `ln -s $APXS_BINDIR/httpd _APP_`
     EXTRA_LIBS="$EXTRA_LIBS _APP_"
-    PHP_SELECT_SAPI(apache2handler, shared, mod_php5.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
+    PHP_SELECT_SAPI(apache2handler, shared, mod_php7.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
     ;;
   *)
-    PHP_SELECT_SAPI(apache2handler, shared, mod_php5.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS) 
+    PHP_SELECT_SAPI(apache2handler, shared, mod_php7.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS) 
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
     ;;
   esac

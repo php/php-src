@@ -1,6 +1,128 @@
 News about PCRE releases
 ------------------------
 
+Release 8.35 04-April-2014
+--------------------------
+
+There have been performance improvements for classes containing non-ASCII
+characters and the "auto-possessification" feature has been extended. Other
+minor improvements have been implemented and bugs fixed. There is a new callout
+feature to enable applications to do detailed stack checks at compile time, to
+avoid running out of stack for deeply nested parentheses. The JIT compiler has
+been extended with experimental support for ARM-64, MIPS-64, and PPC-LE.
+
+
+Release 8.34 15-December-2013
+-----------------------------
+
+As well as fixing the inevitable bugs, performance has been improved by
+refactoring and extending the amount of "auto-possessification" that PCRE does.
+Other notable changes:
+
+.  Implemented PCRE_INFO_MATCH_EMPTY, which yields 1 if the pattern can match
+   an empty string. If it can, pcretest shows this in its information output.
+
+.  A back reference to a named subpattern when there is more than one of the
+   same name now checks them in the order in which they appear in the pattern.
+   The first one that is set is used for the reference. Previously only the
+   first one was inspected. This change makes PCRE more compatible with Perl.
+
+.  Unicode character properties were updated from Unicode 6.3.0.
+
+.  The character VT has been added to the set of characters that match \s and
+   are generally treated as white space, following this same change in Perl
+   5.18. There is now no difference between "Perl space" and "POSIX space".
+
+.  Perl has changed its handling of \8 and \9. If there is no previously
+   encountered capturing group of those numbers, they are treated as the
+   literal characters 8 and 9 instead of a binary zero followed by the
+   literals. PCRE now does the same.
+
+.  Following Perl, added \o{} to specify codepoints in octal, making it
+   possible to specify values greater than 0777 and also making them
+   unambiguous.
+
+.  In UCP mode, \s was not matching two of the characters that Perl matches,
+   namely NEL (U+0085) and MONGOLIAN VOWEL SEPARATOR (U+180E), though they
+   were matched by \h.
+
+.  Add JIT support for the 64 bit TileGX architecture.
+
+.  Upgraded the handling of the POSIX classes [:graph:], [:print:], and
+   [:punct:] when PCRE_UCP is set so as to include the same characters as Perl
+   does in Unicode mode.
+
+.  Perl no longer allows group names to start with digits, so I have made this
+   change also in PCRE.
+
+.  Added support for [[:<:]] and [[:>:]] as used in the BSD POSIX library to
+   mean "start of word" and "end of word", respectively, as a transition aid.
+
+
+Release 8.33 28-May-2013
+--------------------------
+
+A number of bugs are fixed, and some performance improvements have been made.
+There are also some new features, of which these are the most important:
+
+.  The behaviour of the backtracking verbs has been rationalized and
+   documented in more detail.
+
+.  JIT now supports callouts and all of the backtracking verbs.
+
+.  Unicode validation has been updated in the light of Unicode Corrigendum #9,
+   which points out that "non characters" are not "characters that may not
+   appear in Unicode strings" but rather "characters that are reserved for
+   internal use and have only local meaning".
+
+.  (*LIMIT_MATCH=d) and (*LIMIT_RECURSION=d) have been added so that the
+   creator of a pattern can specify lower (but not higher) limits for the
+   matching process.
+
+.  The PCRE_NEVER_UTF option is available to prevent pattern-writers from using
+   the (*UTF) feature, as this could be a security issue.
+
+
+Release 8.32 30-November-2012
+-----------------------------
+
+This release fixes a number of bugs, but also has some new features. These are
+the highlights:
+
+.  There is now support for 32-bit character strings and UTF-32. Like the
+   16-bit support, this is done by compiling a separate 32-bit library.
+
+.  \X now matches a Unicode extended grapheme cluster.
+
+.  Case-independent matching of Unicode characters that have more than one
+   "other case" now makes all three (or more) characters equivalent. This
+   applies, for example, to Greek Sigma, which has two lowercase versions.
+
+.  Unicode character properties are updated to Unicode 6.2.0.
+
+.  The EBCDIC support, which had decayed, has had a spring clean.
+
+.  A number of JIT optimizations have been added, which give faster JIT
+   execution speed. In addition, a new direct interface to JIT execution is
+   available. This bypasses some of the sanity checks of pcre_exec() to give a
+   noticeable speed-up.
+
+.  A number of issues in pcregrep have been fixed, making it more compatible
+   with GNU grep. In particular, --exclude and --include (and variants) apply
+   to all files now, not just those obtained from scanning a directory
+   recursively. In Windows environments, the default action for directories is
+   now "skip" instead of "read" (which provokes an error).
+
+.  If the --only-matching (-o) option in pcregrep is specified multiple
+   times, each one causes appropriate output. For example, -o1 -o2 outputs the
+   substrings matched by the 1st and 2nd capturing parentheses. A separating
+   string can be specified by --om-separator (default empty).
+
+.  When PCRE is built via Autotools using a version of gcc that has the
+   "visibility" feature, it is used to hide internal library functions that are
+   not part of the public API.
+
+
 Release 8.31 06-July-2012
 -------------------------
 
@@ -9,7 +131,7 @@ This is mainly a bug-fixing release, with a small number of developments:
 . The JIT compiler now supports partial matching and the (*MARK) and
   (*COMMIT) verbs.
 
-. PCRE_INFO_MAXLOOKBEHIND can be used to find the longest lookbehing in a
+. PCRE_INFO_MAXLOOKBEHIND can be used to find the longest lookbehind in a
   pattern.
 
 . There should be a performance improvement when using the heap instead of the
@@ -551,7 +673,7 @@ some of the new functionality in Perl 5.005.
 Another (I hope this is the last!) change has been made to the API for the
 pcre_compile() function. An additional argument has been added to make it
 possible to pass over a pointer to character tables built in the current
-locale by pcre_maketables(). To use the default tables, this new arguement
+locale by pcre_maketables(). To use the default tables, this new argument
 should be passed as NULL.
 
           IMPORTANT FOR THOSE UPGRADING FROM VERSION 2.05

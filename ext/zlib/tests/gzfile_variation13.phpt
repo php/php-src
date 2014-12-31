@@ -1,5 +1,5 @@
 --TEST--
-Test function gzfile() by substituting agument 2 with object values.
+Test function gzfile() by substituting argument 2 with object values.
 --SKIPIF--
 <?php
 if (!extension_loaded('zlib')) die ('skip zlib extension not available in this build');
@@ -44,8 +44,8 @@ foreach ( $variation as $var ) {
 ?>
 ===DONE===
 --EXPECTF--
-Error: 2 - gzfile() expects parameter 2 to be long, object given, %s(%d)
+Error: 2 - gzfile() expects parameter 2 to be integer, object given, %s(%d)
 NULL
-Error: 2 - gzfile() expects parameter 2 to be long, object given, %s(%d)
+Error: 2 - gzfile() expects parameter 2 to be integer, object given, %s(%d)
 NULL
 ===DONE===

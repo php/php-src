@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -197,16 +197,16 @@ const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 
 /* {{{ mysqlnd_fill_stats_hash */
 PHPAPI void
-mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING * names, zval *return_value ZEND_FILE_LINE_DC)
 {
 	unsigned int i;
 
-	mysqlnd_array_init(return_value, stats->count);
+	array_init_size(return_value, stats->count);
 	for (i = 0; i < stats->count; i++) {
 		char tmp[25];
 
 		sprintf((char *)&tmp, MYSQLND_LLU_SPEC, stats->values[i]);
-		add_assoc_string_ex(return_value, names[i].s, names[i].l + 1, tmp, 1);
+		add_assoc_string_ex(return_value, names[i].s, names[i].l, tmp);
 	}
 }
 /* }}} */
@@ -214,7 +214,7 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 
 /* {{{ _mysqlnd_get_client_stats */
 PHPAPI void
-_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
+_mysqlnd_get_client_stats(zval *return_value ZEND_FILE_LINE_DC)
 {
 	MYSQLND_STATS stats, *stats_ptr = mysqlnd_global_stats;
 	DBG_ENTER("_mysqlnd_get_client_stats");
@@ -222,7 +222,7 @@ _mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_LINE_DC)
 		memset(&stats, 0, sizeof(stats));
 		stats_ptr = &stats;
 	}
-	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value TSRMLS_CC ZEND_FILE_LINE_CC);
+	mysqlnd_fill_stats_hash(stats_ptr, mysqlnd_stats_values_names, return_value ZEND_FILE_LINE_CC);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -264,7 +264,7 @@ mysqlnd_stats_end(MYSQLND_STATS * stats)
 
 /* {{{ mysqlnd_stats_set_trigger */
 PHPAPI mysqlnd_stat_trigger
-mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats statistic, mysqlnd_stat_trigger trigger TSRMLS_DC)
+mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_stats statistic, mysqlnd_stat_trigger trigger)
 {
 	mysqlnd_stat_trigger ret = NULL;
 	DBG_ENTER("mysqlnd_stats_set_trigger");
@@ -281,7 +281,7 @@ mysqlnd_stats_set_trigger(MYSQLND_STATS * const stats, enum_mysqlnd_collected_st
 
 /* {{{ mysqlnd_stats_set_handler */
 PHPAPI mysqlnd_stat_trigger
-mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats TSRMLS_DC)
+mysqlnd_stats_reset_triggers(MYSQLND_STATS * const stats)
 {
 	mysqlnd_stat_trigger ret = NULL;
 	DBG_ENTER("mysqlnd_stats_reset_trigger");

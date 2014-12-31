@@ -17,7 +17,7 @@ var_dump($meta);
 --EXPECT--
 array(3) {
   ["num"]=>
-  array(6) {
+  array(7) {
     ["num"]=>
     int(1)
     ["type"]=>
@@ -30,9 +30,11 @@ array(3) {
     bool(false)
     ["array dims"]=>
     int(0)
+    ["is enum"]=>
+    bool(false)
   }
   ["str"]=>
-  array(6) {
+  array(7) {
     ["num"]=>
     int(2)
     ["type"]=>
@@ -45,9 +47,11 @@ array(3) {
     bool(false)
     ["array dims"]=>
     int(0)
+    ["is enum"]=>
+    bool(false)
   }
   ["bin"]=>
-  array(6) {
+  array(7) {
     ["num"]=>
     int(3)
     ["type"]=>
@@ -60,5 +64,7 @@ array(3) {
     bool(false)
     ["array dims"]=>
     int(0)
+    ["is enum"]=>
+    bool(false)
   }
 }

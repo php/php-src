@@ -40,6 +40,10 @@ struct fpm_global_config_s {
 	int rlimit_files;
 	int rlimit_core;
 	char *events_mechanism;
+#ifdef HAVE_SYSTEMD
+	int systemd_watchdog;
+	int systemd_interval;
+#endif
 };
 
 extern struct fpm_global_config_s fpm_global_config;
@@ -54,6 +58,7 @@ struct fpm_worker_pool_config_s {
 	char *group;
 	char *listen_address;
 	int listen_backlog;
+	/* Using chown */
 	char *listen_owner;
 	char *listen_group;
 	char *listen_mode;
@@ -79,10 +84,19 @@ struct fpm_worker_pool_config_s {
 	char *chroot;
 	char *chdir;
 	int catch_workers_output;
+	int clear_env;
 	char *security_limit_extensions;
 	struct key_value_s *env;
 	struct key_value_s *php_admin_values;
 	struct key_value_s *php_values;
+#ifdef HAVE_APPARMOR
+	char *apparmor_hat;
+#endif
+#ifdef HAVE_FPM_ACL
+	/* Using Posix ACL */
+	char *listen_acl_users;
+	char *listen_acl_groups;
+#endif
 };
 
 struct ini_value_parser_s {

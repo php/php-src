@@ -39,29 +39,6 @@ struct listening_socket_s {
 
 static struct fpm_array_s sockets_list;
 
-static int fpm_sockets_resolve_af_inet(char *node, char *service, struct sockaddr_in *addr) /* {{{ */
-{
-	struct addrinfo *res;
-	struct addrinfo hints;
-	int ret;
-
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
-	ret = getaddrinfo(node, service, &hints, &res);
-
-	if (ret != 0) {
-		zlog(ZLOG_ERROR, "can't resolve hostname '%s%s%s': getaddrinfo said: %s%s%s\n",
-					node, service ? ":" : "", service ? service : "",
-					gai_strerror(ret), ret == EAI_SYSTEM ? ", system error: " : "", ret == EAI_SYSTEM ? strerror(errno) : "");
-		return -1;
-	}
-
-	*addr = *(struct sockaddr_in *) res->ai_addr;
-	freeaddrinfo(res);
-	return 0;
-}
-/* }}} */
-
 enum { FPM_GET_USE_SOCKET = 1, FPM_STORE_SOCKET = 2, FPM_STORE_USE_SOCKET = 3 };
 
 static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
@@ -98,14 +75,34 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 }
 /* }}} */
 
+static void *fpm_get_in_addr(struct sockaddr *sa) /* {{{ */
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+/* }}} */
+
+static int fpm_get_in_port(struct sockaddr *sa) /* {{{ */
+{
+    if (sa->sa_family == AF_INET) {
+        return ntohs(((struct sockaddr_in*)sa)->sin_port);
+    }
+
+    return ntohs(((struct sockaddr_in6*)sa)->sin6_port);
+}
+/* }}} */
+
 static int fpm_sockets_hash_op(int sock, struct sockaddr *sa, char *key, int type, int op) /* {{{ */
 {
 	if (key == NULL) {
 		switch (type) {
 			case FPM_AF_INET : {
-				struct sockaddr_in *sa_in = (struct sockaddr_in *) sa;
-				key = alloca(sizeof("xxx.xxx.xxx.xxx:ppppp"));
-				sprintf(key, "%u.%u.%u.%u:%u", IPQUAD(&sa_in->sin_addr), (unsigned int) ntohs(sa_in->sin_port));
+				key = alloca(INET6_ADDRSTRLEN+10);
+				inet_ntop(sa->sa_family, fpm_get_in_addr(sa), key, INET6_ADDRSTRLEN);
+				sprintf(key+strlen(key), ":%d", fpm_get_in_port(sa));
 				break;
 			}
 
@@ -167,7 +164,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 {
 	int flags = 1;
 	int sock;
-	mode_t saved_umask;
+	mode_t saved_umask = 0;
 
 	sock = socket(sa->sa_family, SOCK_STREAM, 0);
 
@@ -176,11 +173,14 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 		return -1;
 	}
 
-	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &flags, sizeof(flags));
+	if (0 > setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &flags, sizeof(flags))) {
+		zlog(ZLOG_WARNING, "failed to change socket attribute");
+	}
 
 	if (wp->listen_address_domain == FPM_AF_UNIX) {
 		if (fpm_socket_unix_test_connect((struct sockaddr_un *)sa, socklen) == 0) {
 			zlog(ZLOG_ERROR, "An another FPM instance seems to already listen on %s", ((struct sockaddr_un *) sa)->sun_path);
+			close(sock);
 			return -1;
 		}
 		unlink( ((struct sockaddr_un *) sa)->sun_path);
@@ -192,6 +192,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 		if (wp->listen_address_domain == FPM_AF_UNIX) {
 			umask(saved_umask);
 		}
+		close(sock);
 		return -1;
 	}
 
@@ -200,16 +201,15 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 		umask(saved_umask);
 
-		if (wp->socket_uid != -1 || wp->socket_gid != -1) {
-			if (0 > chown(path, wp->socket_uid, wp->socket_gid)) {
-				zlog(ZLOG_SYSERROR, "failed to chown() the socket '%s'", wp->config->listen_address);
-				return -1;
-			}
+		if (0 > fpm_unix_set_socket_premissions(wp, path)) {
+			close(sock);
+			return -1;
 		}
 	}
 
 	if (0 > listen(sock, wp->config->listen_backlog)) {
 		zlog(ZLOG_SYSERROR, "failed to listen to address '%s'", wp->config->listen_address);
+		close(sock);
 		return -1;
 	}
 
@@ -248,11 +248,15 @@ enum fpm_address_domain fpm_sockets_domain_from_address(char *address) /* {{{ */
 
 static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* {{{ */
 {
-	struct sockaddr_in sa_in;
+	struct addrinfo hints, *servinfo, *p;
 	char *dup_address = strdup(wp->config->listen_address);
-	char *port_str = strchr(dup_address, ':');
+	char *port_str = strrchr(dup_address, ':');
 	char *addr = NULL;
+	char tmpbuf[INET6_ADDRSTRLEN];
+	int addr_len;
 	int port = 0;
+	int sock = -1;
+	int status;
 
 	if (port_str) { /* this is host:port pair */
 		*port_str++ = '\0';
@@ -261,6 +265,8 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 	} else if (strlen(dup_address) == strspn(dup_address, "0123456789")) { /* this is port */
 		port = atoi(dup_address);
 		port_str = dup_address;
+		/* IPv6 catch-all + IPv4-mapped */
+		addr = "::";
 	}
 
 	if (port == 0) {
@@ -268,23 +274,37 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 		return -1;
 	}
 
-	memset(&sa_in, 0, sizeof(sa_in));
-
-	if (addr) {
-		sa_in.sin_addr.s_addr = inet_addr(addr);
-		if (sa_in.sin_addr.s_addr == INADDR_NONE) { /* do resolve */
-			if (0 > fpm_sockets_resolve_af_inet(addr, NULL, &sa_in)) {
-				return -1;
-			}
-			zlog(ZLOG_NOTICE, "address '%s' resolved as %u.%u.%u.%u", addr, IPQUAD(&sa_in.sin_addr));
-		}
-	} else {
-		sa_in.sin_addr.s_addr = htonl(INADDR_ANY);
+	/* strip brackets from address for getaddrinfo */
+	addr_len = strlen(addr);
+	if (addr[0] == '[' && addr[addr_len - 1] == ']') {
+		addr[addr_len - 1] = '\0';
+		addr++;
 	}
-	sa_in.sin_family = AF_INET;
-	sa_in.sin_port = htons(port);
+
+	memset(&hints, 0, sizeof hints);
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+
+	if ((status = getaddrinfo(addr, port_str, &hints, &servinfo)) != 0) {
+		zlog(ZLOG_ERROR, "getaddrinfo: %s\n", gai_strerror(status));
+		return -1;
+	}
+
+	for (p = servinfo; p != NULL; p = p->ai_next) {
+		inet_ntop(p->ai_family, fpm_get_in_addr(p->ai_addr), tmpbuf, INET6_ADDRSTRLEN);
+		if (sock < 0) {
+			if ((sock = fpm_sockets_get_listening_socket(wp, p->ai_addr, p->ai_addrlen)) != -1) {
+				zlog(ZLOG_DEBUG, "Found address for %s, socket opened on %s", addr, tmpbuf);
+			}
+		} else {
+			zlog(ZLOG_WARNING, "Found multiple addresses for %s, %s ignored", addr, tmpbuf);
+		}
+	}
+
 	free(dup_address);
-	return fpm_sockets_get_listening_socket(wp, (struct sockaddr *) &sa_in, sizeof(struct sockaddr_in));
+	freeaddrinfo(servinfo);
+
+	return sock;
 }
 /* }}} */
 
@@ -399,7 +419,19 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 		zlog(ZLOG_SYSERROR, "failed to retrieve TCP_INFO for socket");
 		return -1;
 	}
+#if defined(__FreeBSD__)
+	if (info.__tcpi_sacked == 0) {
+		return -1;
+	}
 
+	if (cur_lq) {
+		*cur_lq = info.__tcpi_unacked;
+	}
+
+	if (max_lq) {
+		*max_lq = info.__tcpi_sacked;
+	}
+#else
 	/* kernel >= 2.6.24 return non-zero here, that means operation is supported */
 	if (info.tcpi_sacked == 0) {
 		return -1;
@@ -412,6 +444,7 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 	if (max_lq) {
 		*max_lq = info.tcpi_sacked;
 	}
+#endif
 
 	return 0;
 }
@@ -468,6 +501,7 @@ int fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen) /* {{
 	}
 
 	if (connect(fd, (struct sockaddr *)sock, socklen) == -1) {
+		close(fd);
 		return -1;
 	}
 

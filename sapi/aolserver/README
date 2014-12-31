@@ -60,7 +60,7 @@ Then enable the PHP module:
 
 ns_section "ns/server/${servername}/modules"
 ...
-ns_param php ${bindir}/libphp5.so
+ns_param php ${bindir}/libphp7.so
 
 
 =============================================================================

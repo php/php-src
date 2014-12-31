@@ -18,5 +18,5 @@ var_dump(ftp_login($ftp, 'user', 'pass'));
 ftp_close($ftp);
 ?>
 --EXPECTF--
-Warning: ftp_login(): bogus msg in %sbug37799.php on line 8
+Warning: ftp_login(): %rdummy|bogus msg%r in %sbug37799.php on line 8
 bool(false)

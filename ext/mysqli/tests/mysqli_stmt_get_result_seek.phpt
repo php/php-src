@@ -67,8 +67,8 @@ if (!function_exists('mysqli_stmt_get_result'))
 	if (false !== ($tmp = $res->data_seek($res->num_rows + 1)))
 		printf("[012] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
 
-	if (false !== ($tmp = $res->data_seek(PHP_INT_MAX + 1)))
-		printf("[013] Expecting boolean/false got %s/%s\n", gettype($tmp), $tmp);
+	if (NULL !== ($tmp = $res->data_seek(PHP_INT_MAX + 1)))
+		printf("[013] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
 
 	for ($i = 0; $i < 100; $i++) {
 		/* intentionally out of range! */
@@ -118,6 +118,7 @@ if (!function_exists('mysqli_stmt_get_result'))
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Warning: mysqli_result::data_seek() expects parameter 1 to be integer, float given in %s on line %d
 
 Warning: mysqli_data_seek(): Couldn't fetch mysqli_result in %s on line %d
 

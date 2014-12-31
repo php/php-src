@@ -152,37 +152,37 @@ bool(false)
 
 -- Iteration 17 --
 
-Warning: log() expects parameter 2 to be double, string given in %s on line %d
+Warning: log() expects parameter 2 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: log() expects parameter 2 to be double, string given in %s on line %d
+Warning: log() expects parameter 2 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: log() expects parameter 2 to be double, array given in %s on line %d
+Warning: log() expects parameter 2 to be float, array given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: log() expects parameter 2 to be double, string given in %s on line %d
+Warning: log() expects parameter 2 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: log() expects parameter 2 to be double, string given in %s on line %d
+Warning: log() expects parameter 2 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: log() expects parameter 2 to be double, string given in %s on line %d
+Warning: log() expects parameter 2 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: log() expects parameter 2 to be double, object given in %s on line %d
+Warning: log() expects parameter 2 to be float, object given in %s on line %d
 NULL
 
 -- Iteration 24 --
@@ -197,6 +197,6 @@ bool(false)
 
 -- Iteration 26 --
 
-Warning: log() expects parameter 2 to be double, resource given in %s on line %d
+Warning: log() expects parameter 2 to be float, resource given in %s on line %d
 NULL
 ===Done===

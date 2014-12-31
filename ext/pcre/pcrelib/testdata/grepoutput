@@ -93,6 +93,7 @@ RC=0
 ---------------------------- Test 13 -----------------------------
 Here is the pattern again.
 That time it was on a line by itself.
+seventeen
 This line contains pattern not on a line by itself.
 RC=0
 ---------------------------- Test 14 -----------------------------
@@ -370,11 +371,11 @@ RC=2
 ---------------------------- Test 34 -----------------------------
 RC=2
 ---------------------------- Test 35 -----------------------------
+./testdata/grepinput8
 ./testdata/grepinputx
 RC=0
 ---------------------------- Test 36 -----------------------------
 ./testdata/grepinput3
-./testdata/grepinput8
 ./testdata/grepinputx
 RC=0
 ---------------------------- Test 37 -----------------------------
@@ -643,6 +644,7 @@ testdata/grepinputv:fox jumps
 testdata/grepinputx:complete pair
 testdata/grepinputx:That was a complete pair
 testdata/grepinputx:complete pair
+testdata/grepinput3:triple:	t7_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
 RC=0
 ---------------------------- Test 85 -----------------------------
 ./testdata/grepinput3:Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -667,4 +669,77 @@ The quick brown f x jumps over the lazy dog.
 RC=0
 ---------------------------- Test 93 -----------------------------
 The quick brown f x jumps over the lazy dog.
+RC=0
+---------------------------- Test 94 -----------------------------
+./testdata/grepinput8
+./testdata/grepinputx
+RC=0
+---------------------------- Test 95 -----------------------------
+testdata/grepinputx:complete pair
+testdata/grepinputx:That was a complete pair
+testdata/grepinputx:complete pair
+RC=0
+---------------------------- Test 96 -----------------------------
+./testdata/grepinput3
+./testdata/grepinput8
+./testdata/grepinputx
+RC=0
+---------------------------- Test 97 -----------------------------
+./testdata/grepinput3
+./testdata/grepinputx
+RC=0
+---------------------------- Test 98 -----------------------------
+./testdata/grepinputx
+RC=0
+---------------------------- Test 99 -----------------------------
+./testdata/grepinput3
+./testdata/grepinputx
+RC=0
+---------------------------- Test 100 ------------------------------
+./testdata/grepinput:zerothe.
+./testdata/grepinput:zeroa
+./testdata/grepinput:zerothe.
+RC=0
+---------------------------- Test 101 ------------------------------
+./testdata/grepinput:[1;31m.[00m|[1;31mzero[00m|[1;31mthe[00m|[1;31m.[00m
+./testdata/grepinput:[1;31mzero[00m|[1;31ma[00m
+./testdata/grepinput:[1;31m.[00m|[1;31mzero[00m|[1;31mthe[00m|[1;31m.[00m
+RC=0
+---------------------------- Test 102 -----------------------------
+2:
+5:
+7:
+9:
+12:
+14:
+RC=0
+---------------------------- Test 103 -----------------------------
+RC=0
+---------------------------- Test 104 -----------------------------
+2:
+5:
+7:
+9:
+12:
+14:
+RC=0
+---------------------------- Test 105 -----------------------------
+[1;31m[00mtriple:	t1_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t2_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	
+[1;31m[00mLorem [1;31mipsum[00m dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+[1;31m[00m
+[1;31m[00mtriple:	t3_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t4_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t5_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	
+[1;31m[00mo_txt
+[1;31m[00m
+[1;31m[00mtriple:	t6_txt	s2_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+[1;31m[00m
+[1;31m[00mtriple:	t7_txt	s1_tag	s_txt	p_tag	p_txt	o_tag	o_txt
+RC=0
+---------------------------- Test 106 -----------------------------
+a
 RC=0

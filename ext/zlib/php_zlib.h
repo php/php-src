@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,16 +49,16 @@ typedef struct _php_zlib_context {
 
 ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	/* variables for transparent gzip encoding */
-	int compression_coding;
-	long output_compression;
-	long output_compression_level;
+	zend_long output_compression;
+	zend_long output_compression_level;
 	char *output_handler;
 	php_zlib_context *ob_gzhandler;
-	long output_compression_default;
+	zend_long output_compression_default;
     zend_bool handler_registered;
+	int compression_coding;
 ZEND_END_MODULE_GLOBALS(zlib);
 
-php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC);
 extern php_stream_ops php_stream_gzio_ops;
 extern php_stream_wrapper php_stream_gzip_wrapper;
 extern php_stream_filter_factory php_zlib_filter_factory;
@@ -68,7 +68,7 @@ extern zend_module_entry php_zlib_module_entry;
 
 #ifdef ZTS
 # include "TSRM.h"
-# define ZLIBG(v) TSRMG(zlib_globals_id, zend_zlib_globals *, v)
+# define ZLIBG(v) ZEND_TSRMG(zlib_globals_id, zend_zlib_globals *, v)
 #else
 # define ZLIBG(v) (zlib_globals.v)
 #endif

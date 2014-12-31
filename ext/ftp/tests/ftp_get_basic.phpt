@@ -27,7 +27,7 @@ var_dump(ftp_get($ftp, $tmpfname, 'binary data.bin', FTP_BINARY));
 var_dump(urlencode(file_get_contents($tmpfname)));
 unlink($tmpfname);
 
-//test non-existant file request 
+//test non-existent file request 
 ftp_get($ftp, $tmpfname ,'a warning.txt', FTP_ASCII);
 ?>
 --EXPECTF--

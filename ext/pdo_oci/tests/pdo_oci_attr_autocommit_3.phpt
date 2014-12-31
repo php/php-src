@@ -1,5 +1,5 @@
 --TEST--
-PDO_OCI: Atrribute: closing a connection in non-autocommit mode commits data
+PDO_OCI: Attribute: closing a connection in non-autocommit mode commits data
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_oci')) die('skip not loaded');

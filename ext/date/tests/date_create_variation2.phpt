@@ -132,17 +132,17 @@ bool(false)
 
 -- float 10.5 --
 
-Warning: date_create() expects parameter 2 to be DateTimeZone, double given in %s on line %d
+Warning: date_create() expects parameter 2 to be DateTimeZone, float given in %s on line %d
 bool(false)
 
 -- float -10.5 --
 
-Warning: date_create() expects parameter 2 to be DateTimeZone, double given in %s on line %d
+Warning: date_create() expects parameter 2 to be DateTimeZone, float given in %s on line %d
 bool(false)
 
 -- float .5 --
 
-Warning: date_create() expects parameter 2 to be DateTimeZone, double given in %s on line %d
+Warning: date_create() expects parameter 2 to be DateTimeZone, float given in %s on line %d
 bool(false)
 
 -- empty array --
@@ -168,7 +168,7 @@ bool(false)
 -- uppercase NULL --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2005-07-14 22:30:41"
+  string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -178,7 +178,7 @@ object(DateTime)#%d (3) {
 -- lowercase null --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2005-07-14 22:30:41"
+  string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -248,7 +248,7 @@ bool(false)
 -- undefined var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2005-07-14 22:30:41"
+  string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -258,7 +258,7 @@ object(DateTime)#%d (3) {
 -- unset var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2005-07-14 22:30:41"
+  string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

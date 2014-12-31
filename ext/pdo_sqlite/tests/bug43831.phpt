@@ -44,7 +44,7 @@ var_dump($bar);
 --EXPECTF--
 Bar
 Bar
-object(MyPDO)#%d (0) {
+object(PDO)#%d (0) {
 }
 object(MyPDO)#%d (0) {
 }

@@ -1378,7 +1378,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
         /* Here we call the headers_complete callback. This is somewhat
          * different than other callbacks because if the user returns 1, we
          * will interpret that as saying that this message has no body. This
-         * is needed for the annoying case of recieving a response to a HEAD
+         * is needed for the annoying case of receiving a response to a HEAD
          * request.
          */
         if (settings->on_headers_complete) {
@@ -1431,7 +1431,9 @@ size_t php_http_parser_execute (php_http_parser *parser,
       }
 
       case s_body_identity:
-        to_read = MIN(pe - p, (size_t)parser->content_length);
+        assert(pe >= p);
+
+        to_read = MIN((size_t)(pe - p), (size_t)parser->content_length);
         if (to_read > 0) {
           if (settings->on_body) settings->on_body(parser, p, to_read);
           p += to_read - 1;
@@ -1515,8 +1517,9 @@ size_t php_http_parser_execute (php_http_parser *parser,
       case s_chunk_data:
       {
         assert(parser->flags & F_CHUNKED);
+        assert(pe >= p);
 
-        to_read = MIN(pe - p, (size_t)(parser->content_length));
+        to_read = MIN((size_t)(pe - p), (size_t)(parser->content_length));
 
         if (to_read > 0) {
           if (settings->on_body) settings->on_body(parser, p, to_read);

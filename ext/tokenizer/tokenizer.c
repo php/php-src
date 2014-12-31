@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -101,10 +101,10 @@ PHP_MINFO_FUNCTION(tokenizer)
 }
 /* }}} */
 
-static void tokenize(zval *return_value TSRMLS_DC)
+static void tokenize(zval *return_value)
 {
 	zval token;
-	zval *keyword;
+	zval keyword;
 	int token_type;
 	zend_bool destroy;
 	int token_line = 1;
@@ -113,7 +113,7 @@ static void tokenize(zval *return_value TSRMLS_DC)
 	array_init(return_value);
 
 	ZVAL_NULL(&token);
-	while ((token_type = lex_scan(&token TSRMLS_CC))) {
+	while ((token_type = lex_scan(&token))) {
 		destroy = 1;
 		switch (token_type) {
 			case T_CLOSE_TAG:
@@ -130,20 +130,19 @@ static void tokenize(zval *return_value TSRMLS_DC)
 		}
 
 		if (token_type >= 256) {
-			MAKE_STD_ZVAL(keyword);
-			array_init(keyword);
-			add_next_index_long(keyword, token_type);
+			array_init(&keyword);
+			add_next_index_long(&keyword, token_type);
 			if (token_type == T_END_HEREDOC) {
 				if (CG(increment_lineno)) {
 					token_line = ++CG(zend_lineno);
 					CG(increment_lineno) = 0;
 				}
 			}
-			add_next_index_stringl(keyword, (char *)zendtext, zendleng, 1);
-			add_next_index_long(keyword, token_line);
-			add_next_index_zval(return_value, keyword);
+			add_next_index_stringl(&keyword, (char *)zendtext, zendleng);
+			add_next_index_long(&keyword, token_line);
+			add_next_index_zval(return_value, &keyword);
 		} else {
-			add_next_index_stringl(return_value, (char *)zendtext, zendleng, 1);
+			add_next_index_stringl(return_value, (char *)zendtext, zendleng);
 		}
 		if (destroy && Z_TYPE(token) != IS_NULL) {
 			zval_dtor(&token);
@@ -158,12 +157,11 @@ static void tokenize(zval *return_value TSRMLS_DC)
 			) {
 				// fetch the rest into a T_INLINE_HTML
 				if (zendcursor != zendlimit) {
-					MAKE_STD_ZVAL(keyword);
-					array_init(keyword);
-					add_next_index_long(keyword, T_INLINE_HTML);
-					add_next_index_stringl(keyword, (char *)zendcursor, zendlimit - zendcursor, 1);
-					add_next_index_long(keyword, token_line);
-					add_next_index_zval(return_value, keyword);
+					array_init(&keyword);
+					add_next_index_long(&keyword, T_INLINE_HTML);
+					add_next_index_stringl(&keyword, (char *)zendcursor, zendlimit - zendcursor);
+					add_next_index_long(&keyword, token_line);
+					add_next_index_zval(return_value, &keyword);
 				}
 				break;
 			}
@@ -179,30 +177,28 @@ static void tokenize(zval *return_value TSRMLS_DC)
  */
 PHP_FUNCTION(token_get_all)
 {
-	char *source = NULL;
-	int argc = ZEND_NUM_ARGS();
-	int source_len;
-	zval source_z;
+	zend_string *source;
+	zval source_zval;
 	zend_lex_state original_lex_state;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &source) == FAILURE) {
 		return;
 	}
 
-	ZVAL_STRINGL(&source_z, source, source_len, 1);
-	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
+	ZVAL_STR_COPY(&source_zval, source);
+	zend_save_lexical_state(&original_lex_state);
 
-	if (zend_prepare_string_for_scanning(&source_z, "" TSRMLS_CC) == FAILURE) {
-		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
+	if (zend_prepare_string_for_scanning(&source_zval, "") == FAILURE) {
+		zend_restore_lexical_state(&original_lex_state);
 		RETURN_FALSE;
 	}
 
 	LANG_SCNG(yy_state) = yycINITIAL;
 
-	tokenize(return_value TSRMLS_CC);
+	tokenize(return_value);
 	
-	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
-	zval_dtor(&source_z);
+	zend_restore_lexical_state(&original_lex_state);
+	zval_dtor(&source_zval);
 }
 /* }}} */
 
@@ -210,13 +206,13 @@ PHP_FUNCTION(token_get_all)
  */
 PHP_FUNCTION(token_name)
 {
-	int argc = ZEND_NUM_ARGS();
-	long type;
+	zend_long type;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "l", &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &type) == FAILURE) {
 		return;
 	}
-	RETVAL_STRING(get_token_type_name(type), 1);
+
+	RETVAL_STRING(get_token_type_name(type));
 }
 /* }}} */
 

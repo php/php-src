@@ -31,6 +31,9 @@
           echo $_FILES['file']['name'] . '|' . $_FILES['file']['type'];
       }
       break;
+    case 'method':
+      echo $_SERVER['REQUEST_METHOD'];
+      break;
     default:
       echo "Hello World!\n";
       echo "Hello World!";

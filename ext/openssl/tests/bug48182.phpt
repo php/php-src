@@ -1,91 +1,49 @@
 --TEST--
-#48182,ssl handshake fails during asynchronous socket connection
+Bug #48182: ssl handshake fails during asynchronous socket connection
 --SKIPIF--
 <?php 
-if (!extension_loaded("openssl")) die("skip, openssl required");
-if (!extension_loaded("pcntl")) die("skip, pcntl required");
-if (OPENSSL_VERSION_NUMBER < 0x009070af) die("skip");
-?>
+if (!extension_loaded("openssl")) die("skip openssl not loaded");
+if (!function_exists("proc_open")) die("skip no proc_open");
+if (OPENSSL_VERSION_NUMBER < 0x009070af) die("skip openssl version too low");
 --FILE--
 <?php
+$serverCode = <<<'CODE'
+    $serverUri = "ssl://127.0.0.1:64321";
+    $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
+    $serverCtx = stream_context_create(['ssl' => [
+        'local_cert' => __DIR__ . '/bug54992.pem'
+    ]]);
 
-function ssl_server($port) {
-	$host = 'ssl://127.0.0.1'.':'.$port;
-	$flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
-	$data = "Sending bug48182\n";
+    $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
+    phpt_notify();
 
-	$pem = dirname(__FILE__) . '/bug46127.pem';
-	$ssl_params = array( 'verify_peer' => false, 'allow_self_signed' => true, 'local_cert' => $pem);
-	$ssl = array('ssl' => $ssl_params);
+    $client = @stream_socket_accept($server, 1);
 
-	$context = stream_context_create($ssl);
-	$sock = stream_socket_server($host, $errno, $errstr, $flags, $context);
-	if (!$sock) return false;
+    $data = "Sending bug48182\n" . fread($client, 8192);
+    fwrite($client, $data);
+CODE;
 
-	$link = stream_socket_accept($sock);
-	if (!$link) return false; // bad link?
+$clientCode = <<<'CODE'
+    $serverUri = "ssl://127.0.0.1:64321";
+    $clientFlags = STREAM_CLIENT_CONNECT | STREAM_CLIENT_ASYNC_CONNECT;
+    $clientCtx = stream_context_create(['ssl' => [
+        'cafile' => __DIR__ . '/bug54992-ca.pem',
+        'peer_name' => 'bug54992.local'
+    ]]);
 
-	$r = array($link);
-	$w = array();
-	$e = array();
-	if (stream_select($r, $w, $e, 1, 0) != 0)
-		$data .= fread($link, 8192);
+    phpt_wait();
+    $client = stream_socket_client($serverUri, $errno, $errstr, 10, $clientFlags, $clientCtx);
 
-	$r = array();
-	$w = array($link);
-	if (stream_select($r, $w, $e, 1, 0) != 0)
-		$wrote = fwrite($link, $data, strlen($data));
+    $data = "Sending data over to SSL server in async mode with contents like Hello World\n";
 
-	// close stuff
-	fclose($link);
-	fclose($sock);
-
-	exit;
-}
-
-function ssl_async_client($port) {
-	$host = 'ssl://127.0.0.1'.':'.$port;
-	$flags = STREAM_CLIENT_CONNECT | STREAM_CLIENT_ASYNC_CONNECT;
-	$data = "Sending data over to SSL server in async mode with contents like Hello World\n";
-
-	$socket = stream_socket_client($host, $errno, $errstr, 10, $flags);
-	stream_set_blocking($socket, 0);
-
-	while ($socket && $data) {
-		$wrote = fwrite($socket, $data, strlen($data));
-		$data = substr($data, $wrote);
-	}
-
-	$r = array($socket);
-	$w = array();
-	$e = array();
-	if (stream_select($r, $w, $e, 1, 0) != 0) 
-	{
-		$data .= fread($socket, 1024);
-	}
-
-	echo "$data";
-
-	fclose($socket);
-}
+    fwrite($client, $data);
+    echo fread($client, 1024);
+CODE;
 
 echo "Running bug48182\n";
 
-$port = rand(15000, 32000);
-
-$pid = pcntl_fork();
-if ($pid == 0) { // child
-	ssl_server($port);
-	exit;
-}
-
-// client or failed
-sleep(1);
-ssl_async_client($port);
-
-pcntl_waitpid($pid, $status);
-
-?>
+include 'ServerClientTestCase.inc';
+ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
 Running bug48182
 Sending bug48182

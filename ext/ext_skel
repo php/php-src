@@ -12,7 +12,7 @@ echo ""
 echo "  --extname=module   module is the name of your extension"
 echo "  --proto=file       file contains prototypes of functions to create"
 echo "  --stubs=file       generate only function stubs in file"
-echo "  --xml              generate xml documentation to be added to phpdoc-cvs"
+echo "  --xml              generate xml documentation to be added to phpdoc-svn"
 echo "  --skel=dir         path to the skeleton directory"
 echo "  --full-xml         generate xml documentation for a self-contained extension"
 echo "                     (not yet implemented)"
@@ -156,17 +156,17 @@ if test "\$PHP_$EXTNAME" != "no"; then
 
   dnl PHP_CHECK_LIBRARY(\$LIBNAME,\$LIBSYMBOL,
   dnl [
-  dnl   PHP_ADD_LIBRARY_WITH_PATH(\$LIBNAME, \$${EXTNAME}_DIR/lib, ${EXTNAME}_SHARED_LIBADD)
+  dnl   PHP_ADD_LIBRARY_WITH_PATH(\$LIBNAME, \$${EXTNAME}_DIR/\$PHP_LIBDIR, ${EXTNAME}_SHARED_LIBADD)
   dnl   AC_DEFINE(HAVE_${EXTNAME}LIB,1,[ ])
   dnl ],[
   dnl   AC_MSG_ERROR([wrong $extname lib version or lib not found])
   dnl ],[
-  dnl   -L\$${EXTNAME}_DIR/lib -lm
+  dnl   -L\$${EXTNAME}_DIR/\$PHP_LIBDIR -lm
   dnl ])
   dnl
   dnl PHP_SUBST(${EXTNAME}_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION($extname, $extname.c, \$ext_shared)
+  PHP_NEW_EXTENSION($extname, $extname.c, \$ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi
 eof
 
@@ -182,16 +182,48 @@ cat >config.w32 <<eof
 // ARG_ENABLE("$extname", "enable $extname support", "no");
 
 if (PHP_$EXTNAME != "no") {
-	EXTENSION("$extname", "$extname.c");
+	EXTENSION("$extname", "$extname.c", PHP_EXTNAME_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 }
 
 eof
 
-$ECHO_N " .svnignore$ECHO_C"
-cat >.svnignore <<eof
+$ECHO_N " .gitignore$ECHO_C"
+cat >.gitignore <<eof
 .deps
 *.lo
 *.la
+.libs
+acinclude.m4
+aclocal.m4
+autom4te.cache
+build
+config.guess
+config.h
+config.h.in
+config.log
+config.nice
+config.status
+config.sub
+configure
+configure.in
+include
+install-sh
+libtool
+ltmain.sh
+Makefile
+Makefile.fragments
+Makefile.global
+Makefile.objects
+missing
+mkinstalldirs
+modules
+run-tests.php
+tests/*/*.diff
+tests/*/*.out
+tests/*/*.php
+tests/*/*.exp
+tests/*/*.log
+tests/*/*.sh
 eof
 
 $ECHO_N " $extname.c$ECHO_C"
@@ -288,7 +320,7 @@ To use your new extension, you will have to execute the following steps:
 3.  $ ./buildconf
 4.  $ ./configure --[with|enable]-$extname
 5.  $ make
-6.  $ ./php -f ext/$extname/$extname.php
+6.  $ ./sapi/cli/php -f ext/$extname/$extname.php
 7.  $ vi ext/$extname/$extname.c
 8.  $ make
 

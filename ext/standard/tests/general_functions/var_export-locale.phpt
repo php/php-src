@@ -1,7 +1,7 @@
 --TEST--
 Test var_export() function with locale
 --INI--
-precision=14
+serialize_precision=17
 --SKIPIF--
 <?php
 if (!setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8")) {
@@ -31,8 +31,8 @@ $valid_ints = array(
                 '0Xfff',
                 '0XFA',
                 -0x80000000, // max negative integer as hexadecimal
-                '0x7fffffff',  // max postive integer as hexadecimal
-                0x7FFFFFFF,  // max postive integer as hexadecimal
+                '0x7fffffff',  // max positive integer as hexadecimal
+                0x7FFFFFFF,  // max positive integer as hexadecimal
                 '0123',        // integer as octal
                 01912,       // should be quivalent to octal 1
                 -020000000000, // max negative integer as octal
@@ -784,15 +784,15 @@ string(20) "array (
 Iteration 13
 array (
   0 => 10.5,
-  1 => 5.6,
+  1 => 5.5999999999999996,
 )
 array (
   0 => 10.5,
-  1 => 5.6,
+  1 => 5.5999999999999996,
 )
-string(34) "array (
+string(49) "array (
   0 => 10.5,
-  1 => 5.6,
+  1 => 5.5999999999999996,
 )"
 
 

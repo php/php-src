@@ -115,7 +115,7 @@ fclose( $file_handle );
 -- int 0 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-31 00:13:45"
+  string(26) "2009-01-31 00:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -125,7 +125,7 @@ object(DateTime)#%d (3) {
 -- int 1 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-31 01:13:45"
+  string(26) "2009-01-31 01:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -135,7 +135,7 @@ object(DateTime)#%d (3) {
 -- int 12345 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2010-06-29 09:13:45"
+  string(26) "2010-06-29 09:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -145,7 +145,7 @@ object(DateTime)#%d (3) {
 -- int -12345 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 15:13:45"
+  string(26) "2009-01-30 15:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -155,7 +155,7 @@ object(DateTime)#%d (3) {
 -- float 10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-30 10:13:45"
+  string(26) "2009-01-30 10:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -165,7 +165,7 @@ object(DateTime)#%d (3) {
 -- float -10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-29 14:13:45"
+  string(26) "2009-01-29 14:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -175,7 +175,7 @@ object(DateTime)#%d (3) {
 -- float .5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-29 00:13:45"
+  string(26) "2009-01-29 00:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -184,28 +184,28 @@ object(DateTime)#%d (3) {
 
 -- empty array --
 
-Warning: date_time_set() expects parameter 2 to be long, array given in %s
+Warning: date_time_set() expects parameter 2 to be integer, array given in %s
 bool(false)
 
 -- int indexed array --
 
-Warning: date_time_set() expects parameter 2 to be long, array given in %s
+Warning: date_time_set() expects parameter 2 to be integer, array given in %s
 bool(false)
 
 -- associative array --
 
-Warning: date_time_set() expects parameter 2 to be long, array given in %s
+Warning: date_time_set() expects parameter 2 to be integer, array given in %s
 bool(false)
 
 -- nested arrays --
 
-Warning: date_time_set() expects parameter 2 to be long, array given in %s
+Warning: date_time_set() expects parameter 2 to be integer, array given in %s
 bool(false)
 
 -- uppercase NULL --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-29 00:13:45"
+  string(26) "2009-01-29 00:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -215,7 +215,7 @@ object(DateTime)#%d (3) {
 -- lowercase null --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-29 00:13:45"
+  string(26) "2009-01-29 00:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -225,7 +225,7 @@ object(DateTime)#%d (3) {
 -- lowercase true --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-29 01:13:45"
+  string(26) "2009-01-29 01:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -235,7 +235,7 @@ object(DateTime)#%d (3) {
 -- lowercase false --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-29 00:13:45"
+  string(26) "2009-01-29 00:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -245,7 +245,7 @@ object(DateTime)#%d (3) {
 -- uppercase TRUE --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-29 01:13:45"
+  string(26) "2009-01-29 01:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -255,7 +255,7 @@ object(DateTime)#%d (3) {
 -- uppercase FALSE --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-29 00:13:45"
+  string(26) "2009-01-29 00:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -264,48 +264,48 @@ object(DateTime)#%d (3) {
 
 -- empty string DQ --
 
-Warning: date_time_set() expects parameter 2 to be long, string given in %s
+Warning: date_time_set() expects parameter 2 to be integer, string given in %s
 bool(false)
 
 -- empty string SQ --
 
-Warning: date_time_set() expects parameter 2 to be long, string given in %s
+Warning: date_time_set() expects parameter 2 to be integer, string given in %s
 bool(false)
 
 -- string DQ --
 
-Warning: date_time_set() expects parameter 2 to be long, string given in %s
+Warning: date_time_set() expects parameter 2 to be integer, string given in %s
 bool(false)
 
 -- string SQ --
 
-Warning: date_time_set() expects parameter 2 to be long, string given in %s
+Warning: date_time_set() expects parameter 2 to be integer, string given in %s
 bool(false)
 
 -- mixed case string --
 
-Warning: date_time_set() expects parameter 2 to be long, string given in %s
+Warning: date_time_set() expects parameter 2 to be integer, string given in %s
 bool(false)
 
 -- heredoc --
 
-Warning: date_time_set() expects parameter 2 to be long, string given in %s
+Warning: date_time_set() expects parameter 2 to be integer, string given in %s
 bool(false)
 
 -- instance of classWithToString --
 
-Warning: date_time_set() expects parameter 2 to be long, object given in %s
+Warning: date_time_set() expects parameter 2 to be integer, object given in %s
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: date_time_set() expects parameter 2 to be long, object given in %s
+Warning: date_time_set() expects parameter 2 to be integer, object given in %s
 bool(false)
 
 -- undefined var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-29 00:13:45"
+  string(26) "2009-01-29 00:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -315,7 +315,7 @@ object(DateTime)#%d (3) {
 -- unset var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2009-01-29 00:13:45"
+  string(26) "2009-01-29 00:13:45.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -324,6 +324,6 @@ object(DateTime)#%d (3) {
 
 -- resource --
 
-Warning: date_time_set() expects parameter 2 to be long, resource given in %s
+Warning: date_time_set() expects parameter 2 to be integer, resource given in %s
 bool(false)
 ===DONE===

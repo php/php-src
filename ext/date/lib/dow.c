@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,12 +23,21 @@
 static int m_table_common[13] = { -1, 0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 }; /* 1 = jan */
 static int m_table_leap[13] =   { -1, 6, 2, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 }; /* 1 = jan */
 
+static timelib_sll positive_mod(timelib_sll x, timelib_sll y)
+{
+	timelib_sll tmp;
+
+	tmp = x % y;
+	if (tmp < 0) {
+		tmp += y;
+	}
+
+	return tmp;
+}
+
 static timelib_sll century_value(timelib_sll j)
 {
-	timelib_sll i = j - 17;
-	timelib_sll c = (4 - i * 2 + (i + 1) / 4) % 7;
-
-	return c < 0 ? c + 7 : c;
+	return 6 - positive_mod(j, 4) * 2;
 }
 
 static timelib_sll timelib_day_of_week_ex(timelib_sll y, timelib_sll m, timelib_sll d, int iso)
@@ -36,15 +45,12 @@ static timelib_sll timelib_day_of_week_ex(timelib_sll y, timelib_sll m, timelib_
 	timelib_sll c1, y1, m1, dow;
 
 	/* Only valid for Gregorian calendar, commented out as we don't handle
-	 * julian calendar. We just return the 'wrong' day of week to be
-	 * consistent.
-	if (y < 1753) {
-		return -1;
-	} */
+	 * Julian calendar. We just return the 'wrong' day of week to be
+	 * consistent. */
 	c1 = century_value(y / 100);
-	y1 = (y % 100);
+	y1 = positive_mod(y, 100);
 	m1 = timelib_is_leap(y) ? m_table_leap[m] : m_table_common[m];
-	dow = (c1 + y1 + m1 + (y1 / 4) + d) % 7;
+	dow = positive_mod((c1 + y1 + m1 + (y1 / 4) + d), 7);
 	if (iso) {
 		if (dow == 0) {
 			dow = 7;

@@ -7,6 +7,8 @@
     
     NOTE: This is a non-UTF set of tests. When UTF support is needed, use
     test 5, and if Unicode Property Support is needed, use test 7. --/
+    
+< forbid 8W 
   
 /(a)b|/I
 
@@ -312,12 +314,6 @@
     foobbar
     *** Failers
     fooabar
-
-/This one is here because Perl 5.005_02 doesn't fail it/I
-
-/^(a)?(?(1)a|b)+$/I
-    *** Failers
-    a
 
 /This one is here because Perl behaves differently; see also the following/I
 
@@ -835,7 +831,13 @@
 
 /x++/DZ
 
-/x{1,3}+/DZ
+/x{1,3}+/BZO
+
+/x{1,3}+/BZOi
+
+/[^x]{1,3}+/BZO
+
+/[^x]{1,3}+/BZOi
 
 /(x)*+/DZ
 
@@ -904,6 +906,9 @@
 /\u/I
 
 /\U/I
+
+/a{1,3}b/U
+    ab
 
 /[/I
 
@@ -1501,6 +1506,8 @@
     a2b\CA
     ** Failers
     a1b\CZ\CA
+    
+/(?|(?<a>)(?<b>)(?<a>)|(?<a>)(?<b>)(?<a>))/IJ
 
 /^(?P<A>a)(?P<A>b)/IJ
     ab\CA
@@ -1941,10 +1948,7 @@ a random value. /Ix
 /(?<A> (?'B' abc (?(R) (?(R&A)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
     abcabc1Xabc2XabcXabcabc
 
-/(?<A> (?'B' abc (?(R) (?(R&1)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
-
-/(?<1> (?'B' abc (?(R) (?(R&1)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
-    abcabc1Xabc2XabcXabcabc
+/(?<A> (?'B' abc (?(R) (?(R&C)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
 
 /^(?(DEFINE) abc | xyz ) /x
 
@@ -2061,7 +2065,7 @@ a random value. /Ix
 
 /^(a)\g{3/
 
-/^(a)\g{4a}/
+/^(a)\g{aa}/
 
 /^a.b/<lf>
     a\rb
@@ -2516,7 +2520,10 @@ a random value. /Ix
     ** Failers
     ab  
 
-/a(?!)+b/
+/a(?!)b/BZ
+
+/(?!)?a/BZ
+    ab
 
 /a(*FAIL)+b/
 
@@ -2541,7 +2548,9 @@ a random value. /Ix
   abcxypqr\Y  
   
 /(*NO_START_OPT)xyz/C
-  abcxyz 
+  abcxyz
+  
+/(*NO_AUTO_POSSESS)a+b/BZ  
 
 /xyz/CY
   abcxyz 
@@ -2939,7 +2948,7 @@ a random value. /Ix
     xxxxabcde\P
     xxxxabcde\P\P
 
-/-- This is not in the Perl >= 5.10 test because Perl seems currently to be
+/-- This is not in the Perl-compatible test because Perl seems currently to be
     broken and not behaving as specified in that it *does* bumpalong after
     hitting (*COMMIT). --/
 
@@ -2985,27 +2994,11 @@ a random value. /Ix
 
 /^(?&t)*(?(DEFINE)(?<t>.))$/BZ
 
-/ -- The first four of these are not in the Perl >= 5.10 test because Perl 
-     documents that the use of \K in assertions is "not well defined". The
-     last is here because Perl gives the match as "b" rather than "ab". I
+/ -- This one is here because Perl gives the match as "b" rather than "ab". I
      believe this to be a Perl bug. --/  
       
-/(?=a\Kb)ab/
-    ab 
-
-/(?!a\Kb)ac/
-    ac 
-    
-/^abc(?<=b\Kc)d/
-    abcd
-
-/^abc(?<!b\Kq)d/
-    abcd
-
 /(?>a\Kb)z|(ab)/
     ab 
-
-/----------------------/
 
 /(?P<L1>(?P<L2>0|)|(?P>L2)(?P>L1))/
 
@@ -3021,7 +3014,7 @@ a random value. /Ix
 /A(*COMMIT)B/+K
     ACABX
 
-/--- These should be different, but in Perl 5.11 are not, which I think
+/--- These should be different, but in Perl they are not, which I think
      is a bug in Perl. ---/
 
 /A(*THEN)B|A(*THEN)C/K
@@ -3030,12 +3023,6 @@ a random value. /Ix
 /A(*PRUNE)B|A(*PRUNE)C/K
     AC
     
-/--- This should fail; the SKIP advances by one, but when we get to AC, the
-     PRUNE kills it. Perl behaves differently. ---/ 
-    
-/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xK
-    AAAC
-
 /--- Mark names can be duplicated. Perl doesn't give a mark for this one,
 though PCRE does. ---/
 
@@ -3061,7 +3048,7 @@ with \Y. ---/
 /^(ab (c+(*FAIL)cd) | xyz)/x
     abcccd  
     
-/--- Perl 5.11 gets some of these wrong ---/ 
+/--- Perl gets some of these wrong ---/ 
 
 /(?>.(*ACCEPT))*?5/
     abcde
@@ -3120,14 +3107,6 @@ with \Y. ---/
 
 /X\H++\R/BZ
     X\x0d\x0a
-
-/-- Perl treats this one differently, not failing the second string. I believe
-    that is a bug in Perl. --/
-
-/^((abc|abcx)(*THEN)y|abcd)/
-    abcd
-    *** Failers 
-    abcxy 
 
 /(?<=abc)def/
     abc\P\P
@@ -3427,7 +3406,7 @@ with \Y. ---/
 
 /\btype\b\W*?\btext\b\W*?\bjavascript\b|\burl\b\W*?\bshell:|<input\b.*?\btype\b\W*?\bimage\b|\bonkeyup\b\W*?\=/IS
 
-/a(*SKIP)c|b(*ACCEPT)|/+SI
+/a(*SKIP)c|b(*ACCEPT)|/+S!I
     a
 
 /a(*SKIP)c|b(*ACCEPT)cd(*ACCEPT)|x/SI
@@ -3452,52 +3431,6 @@ with \Y. ---/
 
 /a(?:.(*THEN:ABC))*?a/ims
     \Mabbbbbbbbbbbbbbbbbbbbba
-
-/-- These tests are in agreement with development Perl 5.015, which has fixed
-    some things, but they don't all work with 5.012, so they aren't in the
-    Perl-compatible tests. Those after the first come from Perl's own test
-    files. --/
-    
-/^((yes|no)(*THEN)(*F))?/
-  yes
-
-/(A (.*)   C? (*THEN)  | A D) (*FAIL)/x
-AbcdCBefgBhiBqz
-
-/(A (.*)   C? (*THEN)  | A D) z/x
-AbcdCBefgBhiBqz
-
-/(A (.*)   C? (*THEN)  | A D) \s* (*FAIL)/x
-AbcdCBefgBhiBqz
-
-/(A (.*)   C? (*THEN)  | A D) \s* z/x
-AbcdCBefgBhiBqz
-
-/(A (.*)   (?:C|) (*THEN)  | A D) (*FAIL)/x
-AbcdCBefgBhiBqz
-
-/(A (.*)   (?:C|) (*THEN)  | A D) z/x
-AbcdCBefgBhiBqz
-
-/(A (.*)   C{0,6} (*THEN)  | A D) (*FAIL)/x
-AbcdCBefgBhiBqz
-
-/(A (.*)   C{0,6} (*THEN)  | A D) z/x
-AbcdCBefgBhiBqz
-
-/(A (.*)   (CE){0,6} (*THEN)  | A D) (*FAIL)/x
-AbcdCEBefgBhiBqz
-
-/(A (.*)   (CE){0,6} (*THEN)  | A D) z/x
-AbcdCEBefgBhiBqz
-
-/(A (.*)   (CE*){0,6} (*THEN)  | A D) (*FAIL)/x
-AbcdCBefgBhiBqz
-
-/(A (.*)   (CE*){0,6} (*THEN)  | A D) z/x
-AbcdCBefgBhiBqz
-
-/-----------------------------------------------/  
 
 /^(?>a+)(?>(z+))\w/BZ
     aaaazzzzb
@@ -3563,6 +3496,8 @@ AbcdCBefgBhiBqz
     aNc
     
 /a[B-\Nc]/ 
+
+/a[B\Nc]/ 
 
 /(a)(?2){0,1999}?(b)/
 
@@ -3751,22 +3686,380 @@ replaced by single letters. --/
     \r\r\r\P
     \r\r\r\P\P     
 
-/-- These two are here because Perl does not match: it seems to allow the
-COMMIT to escape from the assertion. --/
-
-/(?=a(*COMMIT)b|ac)ac|ac/
-    ac
-
-/(?=a(*COMMIT)b|(ac)) ac | (a)c/x
-    ac
-
 "AB(C(D))(E(F))?(?(?=\2)(?=\4))"
     ABCDGHI\O03
     
-/-- This one is here because Perl does not confine the *COMMIT to the 
-assertion, and therefore fails the entire subroutine call. --/ 
+/-- These are all run as real matches in test 1; here we are just checking the
+settings of the anchored and startline bits. --/ 
+
+/(?>.*?a)(?<=ba)/I
+
+/(?:.*?a)(?<=ba)/I
+
+/.*?a(*PRUNE)b/I
+
+/.*?a(*PRUNE)b/sI
+
+/^a(*PRUNE)b/sI
+
+/.*?a(*SKIP)b/I
+
+/(?>.*?a)b/sI
+
+/(?>.*?a)b/I
+
+/(?>^a)b/sI
+
+/(?>.*?)(?<=(abcd)|(wxyz))/I
+
+/(?>.*)(?<=(abcd)|(wxyz))/I
+
+"(?>.*)foo"I
+
+"(?>.*?)foo"I
+
+/(?>^abc)/mI
+
+/(?>.*abc)/mI
+
+/(?:.*abc)/mI
+
+/-- Check PCRE_STUDY_EXTRA_NEEDED --/
+
+/.?/S-I
+
+/.?/S!I
+
+/(?:(a)+(?C1)bb|aa(?C2)b)/
+    aab\C+
+   
+/(?:(a)++(?C1)bb|aa(?C2)b)/
+    aab\C+ 
     
-/((?=a(*COMMIT)b)ab|ac){0}(?:(?1)|a(c))/
-    ac 
+/(?:(?>(a))(?C1)bb|aa(?C2)b)/
+    aab\C+ 
+
+/(?:(?1)(?C1)x|ab(?C2))((a)){0}/                                                
+    aab\C+ 
+
+/(?1)(?C1)((a)(?C2)){0}/   
+    aab\C+ 
+
+/(?:(a)+(?C1)bb|aa(?C2)b)++/
+    aab\C+
+    aab\C+\O2
+
+/(ab)x|ab/
+    ab\O3
+    ab\O2 
+  
+/(ab)/
+    ab\O3
+    ab\O2 
+    
+/(?<=123)(*MARK:xx)abc/K
+    xxxx123a\P\P
+    xxxx123a\P
+    
+/123\Kabc/
+    xxxx123a\P\P
+    xxxx123a\P
+
+/^(?(?=a)aa|bb)/C
+    bb
+
+/(?C1)^(?C2)(?(?C99)(?=(?C3)a(?C4))(?C5)a(?C6)a(?C7)|(?C8)b(?C9)b(?C10))(?C11)/
+    bb
+
+/-- Perl seems to have a bug with this one --/
+
+/aaaaa(*COMMIT)(*PRUNE)b|a+c/
+    aaaaaac
+    
+/-- Here are some that Perl treats differently because of the way it handles
+backtracking verbs. --/
+
+ /(?!a(*COMMIT)b)ac|ad/
+     ac
+     ad 
+
+/^(?!a(*THEN)b|ac)../
+     ac
+     ad 
+
+/^(?=a(*THEN)b|ac)/
+    ac
+    
+/\A.*?(?:a|b(*THEN)c)/
+    ba
+
+/\A.*?(?:a|b(*THEN)c)++/
+    ba
+
+/\A.*?(?:a|b(*THEN)c|d)/
+    ba
+
+/(?:(a(*MARK:X)a+(*SKIP:X)b)){0}(?:(?1)|aac)/
+    aac 
+
+/\A.*?(a|b(*THEN)c)/
+    ba
+
+/^(A(*THEN)B|A(*THEN)D)/
+    AD           
+    
+/(?!b(*THEN)a)bn|bnn/
+    bnn
+
+/(?(?=b(*SKIP)a)bn|bnn)/
+    bnn
+
+/(?=b(*THEN)a|)bn|bnn/
+    bnn
+
+/-------------------------/ 
+
+/(*LIMIT_MATCH=12bc)abc/
+
+/(*LIMIT_MATCH=4294967290)abc/
+
+/(*LIMIT_RECURSION=4294967280)abc/I
+
+/(a+)*zz/
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\q3000
+
+/(a+)*zz/S-
+    aaaaaaaaaaaaaz\Q10 
+
+/(*LIMIT_MATCH=3000)(a+)*zz/I
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\q60000
+
+/(*LIMIT_MATCH=60000)(*LIMIT_MATCH=3000)(a+)*zz/I
+    aaaaaaaaaaaaaz
+
+/(*LIMIT_MATCH=60000)(a+)*zz/I
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\q3000
+
+/(*LIMIT_RECURSION=10)(a+)*zz/IS-
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\Q1000
+
+/(*LIMIT_RECURSION=10)(*LIMIT_RECURSION=1000)(a+)*zz/IS-
+    aaaaaaaaaaaaaz
+
+/(*LIMIT_RECURSION=1000)(a+)*zz/IS-
+    aaaaaaaaaaaaaz
+    aaaaaaaaaaaaaz\Q10
+
+/-- This test causes a segfault with Perl 5.18.0 --/
+
+/^(?=(a)){0}b(?1)/
+    backgammon
+
+/(?|(?<n>f)|(?<n>b))/JI
+
+/(?<a>abc)(?<a>z)\k<a>()/JDZS
+
+/a*[bcd]/BZ
+
+/[bcd]*a/BZ
+
+/-- A complete set of tests for auto-possessification of character types --/
+
+/\D+\D \D+\d \D+\S \D+\s \D+\W \D+\w \D+. \D+\C \D+\R \D+\H \D+\h \D+\V \D+\v \D+\Z \D+\z \D+$/BZx
+
+/\d+\D \d+\d \d+\S \d+\s \d+\W \d+\w \d+. \d+\C \d+\R \d+\H \d+\h \d+\V \d+\v \d+\Z \d+\z \d+$/BZx
+
+/\S+\D \S+\d \S+\S \S+\s \S+\W \S+\w \S+. \S+\C \S+\R \S+\H \S+\h \S+\V \S+\v \S+\Z \S+\z \S+$/BZx
+
+/\s+\D \s+\d \s+\S \s+\s \s+\W \s+\w \s+. \s+\C \s+\R \s+\H \s+\h \s+\V \s+\v \s+\Z \s+\z \s+$/BZx
+
+/\W+\D \W+\d \W+\S \W+\s \W+\W \W+\w \W+. \W+\C \W+\R \W+\H \W+\h \W+\V \W+\v \W+\Z \W+\z \W+$/BZx
+
+/\w+\D \w+\d \w+\S \w+\s \w+\W \w+\w \w+. \w+\C \w+\R \w+\H \w+\h \w+\V \w+\v \w+\Z \w+\z \w+$/BZx
+
+/\C+\D \C+\d \C+\S \C+\s \C+\W \C+\w \C+. \C+\C \C+\R \C+\H \C+\h \C+\V \C+\v \C+\Z \C+\z \C+$/BZx
+
+/\R+\D \R+\d \R+\S \R+\s \R+\W \R+\w \R+. \R+\C \R+\R \R+\H \R+\h \R+\V \R+\v \R+\Z \R+\z \R+$/BZx
+
+/\H+\D \H+\d \H+\S \H+\s \H+\W \H+\w \H+. \H+\C \H+\R \H+\H \H+\h \H+\V \H+\v \H+\Z \H+\z \H+$/BZx
+
+/\h+\D \h+\d \h+\S \h+\s \h+\W \h+\w \h+. \h+\C \h+\R \h+\H \h+\h \h+\V \h+\v \h+\Z \h+\z \h+$/BZx
+
+/\V+\D \V+\d \V+\S \V+\s \V+\W \V+\w \V+. \V+\C \V+\R \V+\H \V+\h \V+\V \V+\v \V+\Z \V+\z \V+$/BZx
+
+/\v+\D \v+\d \v+\S \v+\s \v+\W \v+\w \v+. \v+\C \v+\R \v+\H \v+\h \v+\V \v+\v \v+\Z \v+\z \v+$/BZx
+
+/ a+\D  a+\d  a+\S  a+\s  a+\W  a+\w  a+.  a+\C  a+\R  a+\H  a+\h  a+\V  a+\v  a+\Z  a+\z  a+$/BZx
+
+/\n+\D \n+\d \n+\S \n+\s \n+\W \n+\w \n+. \n+\C \n+\R \n+\H \n+\h \n+\V \n+\v \n+\Z \n+\z \n+$/BZx
+
+/ .+\D  .+\d  .+\S  .+\s  .+\W  .+\w  .+.  .+\C  .+\R  .+\H  .+\h  .+\V  .+\v  .+\Z  .+\z  .+$/BZx
+
+/ .+\D  .+\d  .+\S  .+\s  .+\W  .+\w  .+.  .+\C  .+\R  .+\H  .+\h  .+\V  .+\v  .+\Z  .+\z  .+$/BZxs
+
+/\D+$  \d+$  \S+$  \s+$  \W+$  \w+$  \C+$  \R+$  \H+$  \h+$  \V+$  \v+$   a+$  \n+$   .+$  .+$/BZxm
+
+/(?=a+)a(a+)++a/BZ
+
+/a+(bb|cc)a+(?:bb|cc)a+(?>bb|cc)a+(?:bb|cc)+a+(aa)a+(?:bb|aa)/BZ
+
+/a+(bb|cc)?#a+(?:bb|cc)??#a+(?:bb|cc)?+#a+(?:bb|cc)*#a+(bb|cc)?a#a+(?:aa)?/BZ
+
+/a+(?:bb)?a#a+(?:|||)#a+(?:|b)a#a+(?:|||)?a/BZ
+
+/[ab]*/BZ
+    aaaa
+
+/[ab]*?/BZ
+    aaaa
+
+/[ab]?/BZ
+    aaaa
+
+/[ab]??/BZ
+    aaaa
+
+/[ab]+/BZ
+    aaaa
+
+/[ab]+?/BZ
+    aaaa
+
+/[ab]{2,3}/BZ
+    aaaa
+
+/[ab]{2,3}?/BZ
+    aaaa
+
+/[ab]{2,}/BZ
+    aaaa
+
+/[ab]{2,}?/BZ
+    aaaa
+
+/\d+\s{0,5}=\s*\S?=\w{0,4}\W*/BZ
+
+/[a-d]{5,12}[e-z0-9]*#[^a-z]+[b-y]*a[2-7]?[^0-9a-z]+/BZ
+
+/[a-z]*\s#[ \t]?\S#[a-c]*\S#[C-G]+?\d#[4-8]*\D#[4-9,]*\D#[!$]{0,5}\w#[M-Xf-l]+\W#[a-c,]?\W/BZ
+
+/a+(aa|bb)*c#a*(bb|cc)*a#a?(bb|cc)*d#[a-f]*(g|hh)*f/BZ
+
+/[a-f]*(g|hh|i)*i#[a-x]{4,}(y{0,6})*y#[a-k]+(ll|mm)+n/BZ
+
+/[a-f]*(?>gg|hh)+#[a-f]*(?>gg|hh)?#[a-f]*(?>gg|hh)*a#[a-f]*(?>gg|hh)*h/BZ
+
+/[a-c]*d/DZS
+
+/[a-c]+d/DZS
+
+/[a-c]?d/DZS
+
+/[a-c]{4,6}d/DZS
+
+/[a-c]{0,6}d/DZS
+
+/-- End of special auto-possessive tests --/
+
+/^A\o{1239}B/
+    A\123B
+
+/^A\oB/
+    
+/^A\x{zz}B/ 
+
+/^A\x{12Z/
+
+/^A\x{/
+
+/[ab]++/BZO
+
+/[^ab]*+/BZO
+
+/a{4}+/BZO
+
+/a{4}+/BZOi
+
+/[a-[:digit:]]+/
+
+/[A-[:digit:]]+/
+
+/[a-[.xxx.]]+/
+
+/[a-[=xxx=]]+/
+
+/[a-[!xxx!]]+/
+
+/[A-[!xxx!]]+/
+    A]]]
+
+/[a-\d]+/
+
+/(?<0abc>xx)/
+
+/(?&1abc)xx(?<1abc>y)/
+
+/(?<ab-cd>xx)/
+
+/(?'0abc'xx)/
+
+/(?P<0abc>xx)/
+
+/\k<5ghj>/
+
+/\k'5ghj'/
+
+/\k{2fgh}/
+
+/(?P=8yuki)/
+
+/\g{4df}/
+
+/(?&1abc)xx(?<1abc>y)/
+
+/(?P>1abc)xx(?<1abc>y)/
+
+/\g'3gh'/
+
+/\g<5fg>/
+
+/(?(<4gh>)abc)/
+
+/(?('4gh')abc)/
+
+/(?(4gh)abc)/
+
+/(?(R&6yh)abc)/
+
+/-- Test the ugly "start or end of word" compatibility syntax --/
+
+/[[:<:]]red[[:>:]]/BZ
+    little red riding hood
+    a /red/ thing 
+    red is a colour
+    put it all on red  
+    ** Failers
+    no reduction
+    Alfred Winifred
+    
+/[a[:<:]] should give error/ 
+
+/(?=ab\K)/+
+    abcd
+
+/abcd/f<lf>
+    xx\nxabcd
+    
+/ -- Test stack check external calls --/ 
+
+/(((((a)))))/Q0
+
+/(((((a)))))/Q1
+
+/(((((a)))))/Q
 
 /-- End of testinput2 --/

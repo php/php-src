@@ -48,7 +48,9 @@ if (mysql_unbuffered_query('DROP PROCEDURE IF EXISTS p', $link)) {
 			printf("[008] Result seems wrong, dumping\n");
 			var_dump($tmp);
 		}
-		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($tmp['p_version'])) {
+		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
+		    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+		    !is_unicode($tmp['p_version'])) {
 			printf("[009] Expecting unicode string, dumping\n");
 			var_dump($tmp);
 		}
@@ -65,7 +67,9 @@ if (mysql_unbuffered_query('DROP PROCEDURE IF EXISTS p', $link)) {
 			printf("[011] Result seems wrong, dumping\n");
 			var_dump($tmp);
 		}
-		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($tmp['f_version'])) {
+		if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
+		    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+		    !is_unicode($tmp['f_version'])) {
 			printf("[012] Expecting unicode string, dumping\n");
 			var_dump($tmp);
 		}
@@ -118,5 +122,5 @@ int(0)
 
 Notice: mysql_close(): Function called without first fetching all rows from a previous unbuffered query in %s on line %d
 
-Warning: mysql_unbuffered_query(): %d is not a valid MySQL-Link resource in %s on line %d
+Warning: mysql_unbuffered_query(): supplied resource is not a valid MySQL-Link resource in %s on line %d
 done!

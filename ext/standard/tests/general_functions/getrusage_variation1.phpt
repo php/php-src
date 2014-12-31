@@ -2,6 +2,7 @@
 Test getrusage() function : usage variation - diff data types as $who arg
 --SKIPIF--
 <?php
+if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 if( substr(PHP_OS, 0, 3) == "WIN" )
   die("skip.. Do not run on Windows");
 ?>

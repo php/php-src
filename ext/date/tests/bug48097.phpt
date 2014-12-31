@@ -16,7 +16,7 @@ echo $d->format( 'U' ), "\n\n";
 --EXPECT--
 object(DateTime)#1 (3) {
   ["date"]=>
-  string(19) "1955-05-23 00:00:00"
+  string(26) "1955-05-23 00:00:00.000000"
   ["timezone_type"]=>
   int(1)
   ["timezone"]=>
@@ -27,7 +27,7 @@ object(DateTime)#1 (3) {
 
 object(DateTime)#1 (3) {
   ["date"]=>
-  string(19) "1955-05-22 23:00:00"
+  string(26) "1955-05-22 23:00:00.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

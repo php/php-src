@@ -122,6 +122,10 @@ const char * gdJpegGetVersionString()
 			return "8";
 			break;
 
+		case 90:
+			return "9 compatible";
+			break;
+
 		default:
 			return "unknown";
 	}
@@ -269,21 +273,31 @@ void gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	gdFree (row);
 }
 
-gdImagePtr gdImageCreateFromJpeg (FILE * inFile, int ignore_warning)
+gdImagePtr gdImageCreateFromJpeg (FILE * inFile)
+{
+	return gdImageCreateFromJpegEx(inFile, 1);
+}
+
+gdImagePtr gdImageCreateFromJpegEx (FILE * inFile, int ignore_warning)
 {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewFileCtx(inFile);
-	im = gdImageCreateFromJpegCtx(in, ignore_warning);
+	im = gdImageCreateFromJpegCtxEx(in, ignore_warning);
 	in->gd_free (in);
 
 	return im;
 }
 
-gdImagePtr gdImageCreateFromJpegPtr (int size, void *data, int ignore_warning)
+gdImagePtr gdImageCreateFromJpegPtr (int size, void *data)
+{
+	return gdImageCreateFromJpegPtrEx(size, data, 1);
+}
+
+gdImagePtr gdImageCreateFromJpegPtrEx (int size, void *data, int ignore_warning)
 {
 	gdImagePtr im;
 	gdIOCtx *in = gdNewDynamicCtxEx(size, data, 0);
-	im = gdImageCreateFromJpegCtx(in, ignore_warning);
+	im = gdImageCreateFromJpegCtxEx(in, ignore_warning);
 	in->gd_free(in);
 
 	return im;
@@ -298,7 +312,12 @@ static int CMYKToRGB(int c, int m, int y, int k, int inverted);
  * Create a gd-format image from the JPEG-format INFILE.  Returns the
  * image, or NULL upon error.
  */
-gdImagePtr gdImageCreateFromJpegCtx (gdIOCtx * infile, int ignore_warning)
+gdImagePtr gdImageCreateFromJpegCtx (gdIOCtx * infile)
+{
+	return gdImageCreateFromJpegCtxEx(infile, 1);
+}
+
+gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 {
 	struct jpeg_decompress_struct cinfo;
 	struct jpeg_error_mgr jerr;

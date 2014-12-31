@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,16 +57,16 @@ PHP_FUNCTION(curl_share_close)
 	zval *z_sh;
 	php_curlsh *sh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_sh) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_sh) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(sh, php_curlsh *, &z_sh, -1, le_curl_share_handle_name, le_curl_share_handle);
-	zend_list_delete(Z_LVAL_P(z_sh));
+	ZEND_FETCH_RESOURCE(sh, php_curlsh *, z_sh, -1, le_curl_share_handle_name, le_curl_share_handle);
+	zend_list_close(Z_RES_P(z_sh));
 }
 /* }}} */
 
-static int _php_curl_share_setopt(php_curlsh *sh, long option, zval **zvalue, zval *return_value TSRMLS_DC) /* {{{ */
+static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
 {
 	CURLSHcode error = CURLSHE_OK;
 
@@ -74,11 +74,11 @@ static int _php_curl_share_setopt(php_curlsh *sh, long option, zval **zvalue, zv
 		case CURLSHOPT_SHARE:
 		case CURLSHOPT_UNSHARE:
 			convert_to_long_ex(zvalue);
-			error = curl_share_setopt(sh->share, option, Z_LVAL_PP(zvalue));
+			error = curl_share_setopt(sh->share, option, Z_LVAL_P(zvalue));
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid curl share configuration option");
+			php_error_docref(NULL, E_WARNING, "Invalid curl share configuration option");
 			error = CURLSHE_BAD_OPTION; 
 			break;
 	}
@@ -95,17 +95,17 @@ static int _php_curl_share_setopt(php_curlsh *sh, long option, zval **zvalue, zv
       Set an option for a cURL transfer */
 PHP_FUNCTION(curl_share_setopt)
 {
-	zval       *zid, **zvalue;
-	long        options;
+	zval       *zid, *zvalue;
+	zend_long        options;
 	php_curlsh *sh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlZ", &zid, &options, &zvalue) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlz", &zid, &options, &zvalue) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(sh, php_curlsh *, &zid, -1, le_curl_share_handle_name, le_curl_share_handle);
+	ZEND_FETCH_RESOURCE(sh, php_curlsh *, zid, -1, le_curl_share_handle_name, le_curl_share_handle);
 
-	if (!_php_curl_share_setopt(sh, options, zvalue, return_value TSRMLS_CC)) {
+	if (!_php_curl_share_setopt(sh, options, zvalue, return_value)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -113,9 +113,9 @@ PHP_FUNCTION(curl_share_setopt)
 }
 /* }}} */
 
-void _php_curl_share_close(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
+void _php_curl_share_close(zend_resource *rsrc) /* {{{ */
 {
-	php_curlsh *sh = (php_curlsh *) rsrc->ptr;
+	php_curlsh *sh = (php_curlsh *)rsrc->ptr;
 	if (sh) {
 		curl_share_cleanup(sh->share);
 		efree(sh);

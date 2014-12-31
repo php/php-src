@@ -163,7 +163,7 @@ class MultipleIterator implements Iterator
 		$retval = array();
 		foreach($this->iterators as $iter)
 		{
-			if ($it->valid())
+			if ($iter->valid())
 			{
 				if ($this->flags & self::MIT_KEYS_ASSOC)
 				{
@@ -205,7 +205,7 @@ class MultipleIterator implements Iterator
 		$retval = array();
 		foreach($this->iterators as $iter)
 		{
-			if ($it->valid())
+			if ($iter->valid())
 			{
 				$retval[] = $iter->key();
 			}

@@ -34,7 +34,7 @@ diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
  this:		$(ALL)
  
 -thttpd: $(OBJ)
-+thttpd: $(OBJ) libphp5.a
++thttpd: $(OBJ) libphp7.a
  	@rm -f $@
  	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ) $(LIBS) $(NETLIBS)
  
@@ -240,7 +240,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
 +
 +#define SMART_STR_USE_REALLOC
 +
-+#include "ext/standard/php_smart_str.h"
++#include "zend_smart_str.h"
  
  static void
 -send_mime( httpd_conn* hc, int status, char* title, char* encodings, char* extraheads, char* type, int length, time_t mod )
@@ -2059,7 +2059,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 @@ -1519,7 +1697,7 @@
      if ( c->bytes_sent >= c->bytes_to_send )
  	{
- 	/* This conection is finished! */
+ 	/* This connection is finished! */
 -	clear_connection( c, tvP );
 +	clear_connection( c, tvP, 1 );
  	return;

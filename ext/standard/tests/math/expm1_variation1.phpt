@@ -143,47 +143,47 @@ float(0)
 
 -- Iteration 16 --
 
-Warning: expm1() expects parameter 1 to be double, string given in %s on line %d
+Warning: expm1() expects parameter 1 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: expm1() expects parameter 1 to be double, string given in %s on line %d
+Warning: expm1() expects parameter 1 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: expm1() expects parameter 1 to be double, array given in %s on line %d
+Warning: expm1() expects parameter 1 to be float, array given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: expm1() expects parameter 1 to be double, string given in %s on line %d
+Warning: expm1() expects parameter 1 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: expm1() expects parameter 1 to be double, string given in %s on line %d
+Warning: expm1() expects parameter 1 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: expm1() expects parameter 1 to be double, string given in %s on line %d
+Warning: expm1() expects parameter 1 to be float, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: expm1() expects parameter 1 to be double, array given in %s on line %d
+Warning: expm1() expects parameter 1 to be float, array given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: expm1() expects parameter 1 to be double, array given in %s on line %d
+Warning: expm1() expects parameter 1 to be float, array given in %s on line %d
 NULL
 
 -- Iteration 24 --
 
-Warning: expm1() expects parameter 1 to be double, object given in %s on line %d
+Warning: expm1() expects parameter 1 to be float, object given in %s on line %d
 NULL
 
 -- Iteration 25 --
@@ -194,6 +194,6 @@ float(0)
 
 -- Iteration 27 --
 
-Warning: expm1() expects parameter 1 to be double, resource given in %s on line %d
+Warning: expm1() expects parameter 1 to be float, resource given in %s on line %d
 NULL
 ===Done===

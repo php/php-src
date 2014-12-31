@@ -22,11 +22,11 @@ $stmt = $pdo->prepare ("SELECT * FROM test");
 $stmt->execute();
 var_dump($stmt->fetchAll());
 
-$pdo = PDOTest::factory();
-
 if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) == 'oci') {
     $type = "clob";
-} else{
+} else if ($pdo->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+    $type = 'BLOB SUB_TYPE TEXT';
+} else {
     $type = "text";
 }
 

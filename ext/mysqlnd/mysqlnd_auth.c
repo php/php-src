@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2013 The PHP Group                                |
+  | Copyright (c) 2006-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  const char * const db,
 							  const size_t db_len,
 							  const MYSQLND_OPTIONS * const options,
-							  unsigned long mysql_flags,
+							  zend_ulong mysql_flags,
 							  unsigned int server_charset_no,
 							  zend_bool use_full_blown_auth_packet,
 							  const char * const auth_protocol,
@@ -47,7 +47,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 							  size_t * switch_to_auth_protocol_len,
 							  zend_uchar ** switch_to_auth_protocol_data,
 							  size_t * switch_to_auth_protocol_data_len
-							  TSRMLS_DC)
+							 )
 {
 	enum_func_status ret = FAIL;
 	const MYSQLND_CHARSET * charset = NULL;
@@ -57,7 +57,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 
 	DBG_ENTER("mysqlnd_auth_handshake");
 
-	auth_resp_packet = conn->protocol->m.get_auth_response_packet(conn->protocol, FALSE TSRMLS_CC);
+	auth_resp_packet = conn->protocol->m.get_auth_response_packet(conn->protocol, FALSE);
 
 	if (!auth_resp_packet) {
 		SET_OOM_ERROR(*conn->error_info);
@@ -65,7 +65,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 	}
 
 	if (use_full_blown_auth_packet != TRUE) {
-		change_auth_resp_packet = conn->protocol->m.get_change_auth_response_packet(conn->protocol, FALSE TSRMLS_CC);
+		change_auth_resp_packet = conn->protocol->m.get_change_auth_response_packet(conn->protocol, FALSE);
 		if (!change_auth_resp_packet) {
 			SET_OOM_ERROR(*conn->error_info);
 			goto end;
@@ -80,7 +80,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 			goto end;
 		}
 	} else {
-		auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE TSRMLS_CC);
+		auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE);
 
 		auth_packet->client_flags = mysql_flags;
 		auth_packet->max_packet_size = options->max_allowed_packet;
@@ -168,7 +168,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								size_t * switch_to_auth_protocol_len,
 								zend_uchar ** switch_to_auth_protocol_data,
 								size_t * switch_to_auth_protocol_data_len
-								TSRMLS_DC)
+								)
 {
 	enum_func_status ret = FAIL;
 	const MYSQLND_CHARSET * old_cs = conn->charset;
@@ -178,7 +178,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 
 	DBG_ENTER("mysqlnd_auth_change_user");
 
-	chg_user_resp = conn->protocol->m.get_change_user_response_packet(conn->protocol, FALSE TSRMLS_CC);
+	chg_user_resp = conn->protocol->m.get_change_user_response_packet(conn->protocol, FALSE);
 
 	if (!chg_user_resp) {
 		SET_OOM_ERROR(*conn->error_info);
@@ -186,7 +186,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 	}
 
 	if (use_full_blown_auth_packet != TRUE) {
-		change_auth_resp_packet = conn->protocol->m.get_change_auth_response_packet(conn->protocol, FALSE TSRMLS_CC);
+		change_auth_resp_packet = conn->protocol->m.get_change_auth_response_packet(conn->protocol, FALSE);
 		if (!change_auth_resp_packet) {
 			SET_OOM_ERROR(*conn->error_info);
 			goto end;
@@ -201,7 +201,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 			goto end;
 		}	
 	} else {
-		auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE TSRMLS_CC);
+		auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE);
 
 		if (!auth_packet) {
 			SET_OOM_ERROR(*conn->error_info);
@@ -219,7 +219,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		auth_packet->auth_plugin_name = auth_protocol;
 
 
-		if (conn->m->get_server_version(conn TSRMLS_CC) >= 50123) {
+		if (conn->m->get_server_version(conn) >= 50123) {
 			auth_packet->charset_no	= conn->charset->nr;
 		}
 	
@@ -259,12 +259,12 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		  bug#25371 mysql_change_user() triggers "packets out of sync"
 		  When it gets fixed, there should be one more check here
 		*/
-		if (conn->m->get_server_version(conn TSRMLS_CC) > 50113L &&conn->m->get_server_version(conn TSRMLS_CC) < 50118L) {
-			MYSQLND_PACKET_OK * redundant_error_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE TSRMLS_CC);
+		if (conn->m->get_server_version(conn) > 50113L &&conn->m->get_server_version(conn) < 50118L) {
+			MYSQLND_PACKET_OK * redundant_error_packet = conn->protocol->m.get_ok_packet(conn->protocol, FALSE);
 			if (redundant_error_packet) {
 				PACKET_READ(redundant_error_packet, conn);
 				PACKET_FREE(redundant_error_packet);
-				DBG_INF_FMT("Server is %u, buggy, sends two ERR messages", conn->m->get_server_version(conn TSRMLS_CC));
+				DBG_INF_FMT("Server is %u, buggy, sends two ERR messages", conn->m->get_server_version(conn));
 			} else {
 				SET_OOM_ERROR(*conn->error_info);
 			}
@@ -291,8 +291,8 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		}
 		memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
 		/* set charset for old servers */
-		if (conn->m->get_server_version(conn TSRMLS_CC) < 50123) {
-			ret = conn->m->set_charset(conn, old_cs->name TSRMLS_CC);
+		if (conn->m->get_server_version(conn) < 50123) {
+			ret = conn->m->set_charset(conn, old_cs->name);
 		}
 	} else if (ret == FAIL && chg_user_resp->server_asked_323_auth == TRUE) {
 		/* old authentication with new server  !*/
@@ -361,8 +361,8 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_OPTIONS * const options,
 								  const MYSQLND_NET_OPTIONS * const net_options,
-								  unsigned long mysql_flags
-								  TSRMLS_DC)
+								  zend_ulong mysql_flags
+								 )
 {
 	zend_uchar * ret = NULL;
 	DBG_ENTER("mysqlnd_native_auth_get_auth_data");
@@ -421,8 +421,8 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 							   const MYSQLND_OPTIONS * const options,
 							   const MYSQLND_NET_OPTIONS * const net_options,
-							   unsigned long mysql_flags
-							   TSRMLS_DC)
+							   zend_ulong mysql_flags
+							  )
 {
 	zend_uchar * ret = NULL;
 
@@ -482,10 +482,9 @@ static RSA *
 mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 						   const MYSQLND_OPTIONS * const options,
 						   const MYSQLND_NET_OPTIONS * const net_options
-						   TSRMLS_DC)
+						  )
 {
 	RSA * ret = NULL;
-	int len;
 	const char * fname = (net_options->sha256_server_public_key && net_options->sha256_server_public_key[0] != '\0')? 
 								net_options->sha256_server_public_key:
 								MYSQLND_G(sha256_server_public_key);
@@ -500,12 +499,12 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 
 		do {
 			DBG_INF("requesting the public key from the server");
-			pk_req_packet = conn->protocol->m.get_sha256_pk_request_packet(conn->protocol, FALSE TSRMLS_CC);
+			pk_req_packet = conn->protocol->m.get_sha256_pk_request_packet(conn->protocol, FALSE);
 			if (!pk_req_packet) {
 				SET_OOM_ERROR(*conn->error_info);
 				break;
 			}
-			pk_resp_packet = conn->protocol->m.get_sha256_pk_request_response_packet(conn->protocol, FALSE TSRMLS_CC);
+			pk_resp_packet = conn->protocol->m.get_sha256_pk_request_response_packet(conn->protocol, FALSE);
 			if (!pk_resp_packet) {
 				SET_OOM_ERROR(*conn->error_info);
 				PACKET_FREE(pk_req_packet);
@@ -543,20 +542,18 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 		DBG_ERR("server_public_key is not set");
 		DBG_RETURN(NULL);
 	} else {
-		char * key_str = NULL;
+		zend_string * key_str;
 		DBG_INF_FMT("Key in a file. [%s]", fname);
 		stream = php_stream_open_wrapper((char *) fname, "rb", REPORT_ERRORS, NULL);
 
 		if (stream) {
-			if ((len = php_stream_copy_to_mem(stream, &key_str, PHP_STREAM_COPY_ALL, 0)) >= 0 ) {
-				BIO * bio = BIO_new_mem_buf(key_str, len);
+			if ((key_str = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0)) != NULL) {
+				BIO * bio = BIO_new_mem_buf(key_str->val, key_str->len);
 				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 				BIO_free(bio);
 				DBG_INF("Successfully loaded");
-			}
-			if (key_str) {
-				DBG_INF_FMT("Public key:%*.s", len, key_str);
-				efree(key_str);
+				DBG_INF_FMT("Public key:%*.s", key_str->len, key_str->val);
+				zend_string_release(key_str);
 			}
 			php_stream_free(stream, PHP_STREAM_FREE_CLOSE);
 		}
@@ -574,8 +571,8 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 								  const MYSQLND_OPTIONS * const options,
 								  const MYSQLND_NET_OPTIONS * const net_options,
-								  unsigned long mysql_flags
-								  TSRMLS_DC)
+								  zend_ulong mysql_flags
+								 )
 {
 	RSA * server_public_key;
 	zend_uchar * ret = NULL;
@@ -591,7 +588,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 		memcpy(ret, passwd, passwd_len);
 	} else {
 		*auth_data_len = 0;
-		server_public_key = mysqlnd_sha256_get_rsa_key(conn, options, net_options TSRMLS_CC);
+		server_public_key = mysqlnd_sha256_get_rsa_key(conn, options, net_options);
 
 		if (server_public_key) {
 			int server_public_key_len;
@@ -649,12 +646,12 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_sha256_authentication_plu
 
 /* {{{ mysqlnd_register_builtin_authentication_plugins */
 void
-mysqlnd_register_builtin_authentication_plugins(TSRMLS_D)
+mysqlnd_register_builtin_authentication_plugins(void)
 {
-	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_native_auth_plugin TSRMLS_CC);
-	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_pam_authentication_plugin TSRMLS_CC);
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_native_auth_plugin);
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_pam_authentication_plugin);
 #ifdef MYSQLND_HAVE_SSL
-	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_sha256_authentication_plugin TSRMLS_CC);
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_sha256_authentication_plugin);
 #endif
 }
 /* }}} */

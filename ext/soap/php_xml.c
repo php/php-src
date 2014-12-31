@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -20,6 +20,7 @@
 /* $Id$ */
 
 #include "php_soap.h"
+#include "ext/libxml/php_libxml.h"
 #include "libxml/parser.h"
 #include "libxml/parserInternals.h"
 
@@ -76,7 +77,7 @@ static void soap_Comment(void *ctx, const xmlChar *value)
 {
 }
 
-xmlDocPtr soap_xmlParseFile(const char *filename TSRMLS_DC)
+xmlDocPtr soap_xmlParseFile(const char *filename)
 {
 	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
@@ -91,13 +92,17 @@ xmlDocPtr soap_xmlParseFile(const char *filename TSRMLS_DC)
 	ctxt = xmlCreateFileParserCtxt(filename);
 	PG(allow_url_fopen) = old_allow_url_fopen;
 	if (ctxt) {
+		zend_bool old;
+
 		ctxt->keepBlanks = 0;
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
 		ctxt->sax->comment = soap_Comment;
 		ctxt->sax->warning = NULL;
 		ctxt->sax->error = NULL;
 		/*ctxt->sax->fatalError = NULL;*/
+		old = php_libxml_disable_entity_loader(1);
 		xmlParseDocument(ctxt);
+		php_libxml_disable_entity_loader(old);
 		if (ctxt->wellFormed) {
 			ret = ctxt->myDoc;
 			if (ret->URL == NULL && ctxt->directory != NULL) {
@@ -128,11 +133,14 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
 
+
 /*
 	xmlInitParser();
 */
 	ctxt = xmlCreateMemoryParserCtxt(buf, buf_size);
 	if (ctxt) {
+		zend_bool old;
+
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
 		ctxt->sax->comment = soap_Comment;
 		ctxt->sax->warning = NULL;
@@ -141,7 +149,9 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 #if LIBXML_VERSION >= 20703
 		ctxt->options |= XML_PARSE_HUGE;
 #endif
+		old = php_libxml_disable_entity_loader(1);
 		xmlParseDocument(ctxt);
+		php_libxml_disable_entity_loader(old);
 		if (ctxt->wellFormed) {
 			ret = ctxt->myDoc;
 			if (ret->URL == NULL && ctxt->directory != NULL) {

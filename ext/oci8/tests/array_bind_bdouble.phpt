@@ -11,7 +11,7 @@ if (!defined('SQLT_BDOUBLE')) die('skip SQLT_BDOUBLE type not available on older
 
 require dirname(__FILE__).'/connect.inc';
 
-$statement = oci_parse($c, "BEGIN ARRAYBINDPKG1.iobind(:c1); END;");
+$statement = oci_parse($c, "BEGIN array_bind_bdouble_pkg.iobind(:c1); END;");
 $array = Array(1.243,2.5658,3.4234,4.2123,5.9999);
 oci_bind_array_by_name($statement, ":c1", $array, 5, 5, SQLT_BDOUBLE);
 

@@ -2,7 +2,7 @@
 #define TSRM_CONFIG_COMMON_H
 
 #ifndef __CYGWIN__
-# if WINNT|WIN32
+# ifdef _WIN32
 #  define TSRM_WIN32
 # endif
 #endif

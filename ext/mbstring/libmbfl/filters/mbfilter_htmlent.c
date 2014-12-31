@@ -238,7 +238,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					CK((*filter->output_function)(c, filter->data));
 				}
 				filter->status = 0;
-				/*php_error_docref("ref.mbstring" TSRMLS_CC, E_NOTICE, "mbstring decoded '%s'=%d", buffer, ent);*/
+				/*php_error_docref("ref.mbstring", E_NOTICE, "mbstring decoded '%s'=%d", buffer, ent);*/
 			} else {
 				/* named entity */
 				buffer[filter->status] = 0;
@@ -254,12 +254,12 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					/* decoded */
 					CK((*filter->output_function)(ent, filter->data));
 					filter->status = 0;
-					/*php_error_docref("ref.mbstring" TSRMLS_CC, E_NOTICE,"mbstring decoded '%s'=%d", buffer, ent);*/
+					/*php_error_docref("ref.mbstring", E_NOTICE,"mbstring decoded '%s'=%d", buffer, ent);*/
 				} else { 
 					/* failure */
 					buffer[filter->status++] = ';';
 					buffer[filter->status] = 0;
-					/* php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring cannot decode '%s'", buffer); */
+					/* php_error_docref("ref.mbstring", E_WARNING, "mbstring cannot decode '%s'", buffer); */
 					mbfl_filt_conv_html_dec_flush(filter);
 				}
 			}
@@ -273,7 +273,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 				if (c=='&')
 					filter->status--;
 				buffer[filter->status] = 0;
-				/* php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring cannot decode '%s'", buffer)l */
+				/* php_error_docref("ref.mbstring", E_WARNING, "mbstring cannot decode '%s'", buffer)l */
 				mbfl_filt_conv_html_dec_flush(filter);
 				if (c=='&')
 				{

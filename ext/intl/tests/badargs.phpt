@@ -1,5 +1,5 @@
 --TEST--
-Check that bad argumens return the same
+Check that bad arguments return the same
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--

@@ -70,5 +70,5 @@ Deprecated: mysql_connect(): The mysql extension is deprecated and will be remov
 %unicode|string%(%d) "%s"
 bool(false)
 
-Warning: mysql_select_db(): %d is not a valid MySQL-Link resource in %s on line %d
+Warning: mysql_select_db(): supplied resource is not a valid MySQL-Link resource in %s on line %d
 done!

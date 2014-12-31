@@ -3,7 +3,7 @@
  *
  *  This file is rewriten specificly for PHPFI.  Some functionality
  *  has been removed (MIME and file attachments).  This code was 
- *  modified from code based on code writen by Jarle Aase.
+ *  modified from code based on code written by Jarle Aase.
  *
  *  This class is based on the original code by Jarle Aase, see bellow:
  *  wSendmail.cpp  It has been striped of some functionality to match
@@ -87,9 +87,9 @@ char LocalHost[HOST_NAME_LEN];
 #endif
 char seps[] = " ,\t\n";
 #ifndef NETWARE
-char *php_mailer = "PHP 5 WIN32";
+char *php_mailer = "PHP 7 WIN32";
 #else
-char *php_mailer = "PHP 5 NetWare";
+char *php_mailer = "PHP 7 NetWare";
 #endif	/* NETWARE */
 
 /* Error messages */
@@ -119,8 +119,8 @@ static char *ErrorMessages[] =
 	{"Error while trimming mail header with PCRE, please file a bug report at http://bugs.php.net/"} /* 21 */
 };
 
-/* This pattern converts all single occurences of \n (Unix)
- * withour a leading \r to \r\n and all occurences of \r (Mac)
+/* This pattern converts all single occurrences of \n (Unix)
+ * withour a leading \r to \r\n and all occurrences of \r (Mac)
  * without a trailing \n to \r\n
  * Thx to Nibbler from ircnet/#linuxger
  */
@@ -130,7 +130,7 @@ static char *ErrorMessages[] =
 /* This pattern removes \r\n from the start of the string,
  * \r\n from the end of the string and also makes sure every line
  * is only wrapped with a single \r\n (thus reduces multiple
- * occurences of \r\n between lines to a single \r\n) */
+ * occurrences of \r\n between lines to a single \r\n) */
 #define PHP_WIN32_MAIL_RMVDBL_PATTERN	"/^\r\n|(\r\n)+$/m"
 #define PHP_WIN32_MAIL_RMVDBL_REPLACE	""
 
@@ -142,55 +142,56 @@ static char *ErrorMessages[] =
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
 /* This function is meant to unify the headers passed to to mail()
- * This means, use PCRE to transform single occurences of \n or \r in \r\n
- * As a second step we also eleminate all \r\n occurences which are:
+ * This means, use PCRE to transform single occurrences of \n or \r in \r\n
+ * As a second step we also eleminate all \r\n occurrences which are:
  * 1) At the start of the header
  * 2) At the end of the header
- * 3) Two or more occurences in the header are removed so only one is left
+ * 3) Two or more occurrences in the header are removed so only one is left
  *
  * Returns NULL on error, or the new char* buffer on success.
  * You have to take care and efree() the buffer on your own.
  */
-static char *php_win32_mail_trim_header(char *header TSRMLS_DC)
+static zend_string *php_win32_mail_trim_header(char *header)
 {
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	
-	char *result, *result2;
-	int result_len;
-	zval *replace;
+	zend_string *result, *result2;
+	zval replace;
+	zend_string *regex;
 
 	if (!header) {
 		return NULL;
 	}
 
-	MAKE_STD_ZVAL(replace);
-	ZVAL_STRING(replace, PHP_WIN32_MAIL_UNIFY_REPLACE, 0);
+	ZVAL_STRINGL(&replace, PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE));
+	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_REPLACE, sizeof(PHP_WIN32_MAIL_UNIFY_REPLACE)-1, 0);
 
-	result = php_pcre_replace(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1,
-							  header, strlen(header),
-							  replace,
+//zend_string *php_pcre_replace(zend_string *regex, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int limit, int *replace_count);
+
+	result = php_pcre_replace(regex,
+							  header, (int)strlen(header),
+							  &replace,
 							  0,
-							  &result_len,
 							  -1,
-							  NULL TSRMLS_CC);
+							  NULL);
+
 	if (NULL == result) {
-		FREE_ZVAL(replace);
+		zval_ptr_dtor(&replace);
+		zend_string_free(regex);
 		return NULL;
 	}
 
-	ZVAL_STRING(replace, PHP_WIN32_MAIL_RMVDBL_REPLACE, 0);
+	ZVAL_STRING(&replace, PHP_WIN32_MAIL_RMVDBL_PATTERN);
+	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
-	result2 = php_pcre_replace(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1,
-							   result, result_len,
-							   replace,
-							   0,
-							   &result_len,
-							   -1,
-							   NULL TSRMLS_CC);
-	efree(result);
-	FREE_ZVAL(replace);
-	return result2;
+	result2 = php_pcre_replace(regex,
+							   result->val, (int)result->len,
+							   &replace,
+							  0,
+							  -1,
+							  NULL);
+	return result;
 #else
 	/* In case we don't have PCRE support (for whatever reason...) simply do nothing and return the unmodified header */
 	return estrdup(header);
@@ -212,11 +213,11 @@ static char *php_win32_mail_trim_header(char *header TSRMLS_DC)
 //********************************************************************/
 PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			  char *headers, char *Subject, char *mailTo, char *data,
-			  char *mailCc, char *mailBcc, char *mailRPath TSRMLS_DC)
+			  char *mailCc, char *mailBcc, char *mailRPath)
 {
 	int ret;
 	char *RPath = NULL;
-	char *headers_lc = NULL; /* headers_lc is only created if we've a header at all */
+	zend_string *headers_lc = NULL; /* headers_lc is only created if we've a header at all */
 	char *pos1 = NULL, *pos2 = NULL;
 
 #ifndef NETWARE
@@ -236,22 +237,22 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 	if (headers) {
 		char *pos = NULL;
 		size_t i;
+		zend_string *headers_trim;
 
 		/* Use PCRE to trim the header into the right format */
-		if (NULL == (headers = php_win32_mail_trim_header(headers TSRMLS_CC))) {
+		if (NULL == (headers_trim = php_win32_mail_trim_header(headers))) {
 			*error = W32_SM_PCRE_ERROR;
 			return FAILURE;
 		}
 
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
-		if (NULL == (headers_lc = estrdup(headers))) {
-			efree(headers);
+		if (NULL == (headers_lc = zend_string_copy(headers_trim))) {
 			*error = OUT_OF_MEMORY;
 			return FAILURE;
 		}
-		for (i = 0; i < strlen(headers_lc); i++) {
-			headers_lc[i] = tolower(headers_lc[i]);
+		for (i = 0; i < headers_lc->len; i++) {
+			headers_lc->val[i] = tolower(headers_lc->val[i]);
 		}
 	}
  
@@ -261,22 +262,21 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 	} else if (INI_STR("sendmail_from")) {
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else if (	headers_lc &&
-				(pos1 = strstr(headers_lc, "from:")) &&
-				((pos1 == headers_lc) || (*(pos1-1) == '\n'))
+				(pos1 = strstr(headers_lc->val, "from:")) &&
+				((pos1 == headers_lc->val) || (*(pos1-1) == '\n'))
 	) {
 		/* Real offset is memaddress from the original headers + difference of
 		 * string found in the lowercase headrs + 5 characters to jump over   
 		 * the from: */
-		pos1 = headers + (pos1 - headers_lc) + 5;
+		pos1 = headers + (pos1 - headers_lc->val) + 5;
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
 			RPath = estrndup(pos1, strlen(pos1));
 		} else {
 			RPath = estrndup(pos1, pos2 - pos1);
 		}
 	} else {
-		if (headers) {
-			efree(headers);
-			efree(headers_lc);
+		if (headers_lc) {
+			zend_string_free(headers_lc);
 		}
 		*error = W32_SM_SENDMAIL_FROM_NOT_SET;
 		return FAILURE;
@@ -302,7 +302,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			MailHost, !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc, error_message TSRMLS_CC);
+		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc->val, error_message);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
@@ -360,6 +360,9 @@ PHPAPI char *GetSMErrorText(int index)
 	}
 }
 
+PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle,
+		size_t needle_len, char *str, size_t str_len);
+	
 
 /*********************************************************************
 // Name:  SendText
@@ -380,15 +383,14 @@ PHPAPI char *GetSMErrorText(int index)
 // History:
 //*******************************************************************/
 static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data, 
-			 char *headers, char *headers_lc, char **error_message TSRMLS_DC)
+			 char *headers, char *headers_lc, char **error_message)
 {
 	int res;
 	char *p;
 	char *tempMailTo, *token, *pos1, *pos2;
 	char *server_response = NULL;
 	char *stripped_header  = NULL;
-	char *data_cln;
-	int data_cln_len;
+	zend_string *data_cln;
 
 	/* check for NULL parameters */
 	if (data == NULL)
@@ -409,7 +411,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 
 	snprintf(Buffer, sizeof(Buffer), "HELO %s\r\n", LocalHost);
 
-	/* in the beggining of the dialog */
+	/* in the beginning of the dialog */
 	/* attempt reconnect if the first Post fail */
 	if ((res = Post(Buffer)) != SUCCESS) {
 		MailConnect();
@@ -570,7 +572,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 			   pos1    = pointer IN headers where the Bcc starts
 			   '4'     = Length of the characters 'bcc:'
 			   Because we've added +4 above for parsing the Emails
-			   we've to substract them here. */
+			   we've to subtract them here. */
 			memcpy(stripped_header, headers, pos1 - headers - 4);
 			if (pos1 != pos2) {
 				/* if pos1 != pos2 , pos2 points to the rest of the headers.
@@ -606,9 +608,9 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 
 	/* send message header */
 	if (Subject == NULL) {
-		res = PostHeader(RPath, "No Subject", mailTo, stripped_header TSRMLS_CC);
+		res = PostHeader(RPath, "No Subject", mailTo, stripped_header);
 	} else {
-		res = PostHeader(RPath, Subject, mailTo, stripped_header TSRMLS_CC);
+		res = PostHeader(RPath, Subject, mailTo, stripped_header);
 	}
 	if (stripped_header) {
 		efree(stripped_header);
@@ -621,35 +623,34 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	 * We use php_str_to_str() and not php_str_replace_in_subject(), since the latter
 	 * uses ZVAL as it's parameters */
 	data_cln = php_str_to_str(data, strlen(data), PHP_WIN32_MAIL_DOT_PATTERN, sizeof(PHP_WIN32_MAIL_DOT_PATTERN) - 1,
-					PHP_WIN32_MAIL_DOT_REPLACE, sizeof(PHP_WIN32_MAIL_DOT_REPLACE) - 1, &data_cln_len);
+					PHP_WIN32_MAIL_DOT_REPLACE, sizeof(PHP_WIN32_MAIL_DOT_REPLACE) - 1);
 	if (!data_cln) {
-		data_cln = estrdup("");
-		data_cln_len = 1;		
+		data_cln = STR_EMPTY_ALLOC();
 	}
 
 	/* send message contents in 1024 chunks */
 	{
-		char c, *e2, *e = data_cln + data_cln_len;
-		p = data_cln;
+		char c, *e2, *e = data_cln->val + data_cln->len;
+		p = data_cln->val;
 
 		while (e - p > 1024) {
 			e2 = p + 1024;
 			c = *e2;
 			*e2 = '\0';
 			if ((res = Post(p)) != SUCCESS) {
-				efree(data_cln);
+				zend_string_free(data_cln);
 				return(res);
 			}
 			*e2 = c;
 			p = e2;
 		}
 		if ((res = Post(p)) != SUCCESS) {
-			efree(data_cln);
+			zend_string_free(data_cln);
 			return(res);
 		}
 	}
 
-	efree(data_cln);
+	zend_string_free(data_cln);
 
 	/*send termination dot */
 	if ((res = Post("\r\n.\r\n")) != SUCCESS)
@@ -682,7 +683,7 @@ static int addToHeader(char **header_buffer, const char *specifier, char *string
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders TSRMLS_DC)
+static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 {
 	/* Print message header according to RFC 822 */
 	/* Return-path, Received, Date, From, Subject, Sender, To, cc */
@@ -705,10 +706,10 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders T
 
 	if (!xheaders || !strstr(headers_lc, "date:")) {
 		time_t tNow = time(NULL);
-		char *dt = php_format_date("r", 1, tNow, 1 TSRMLS_CC);
+		zend_string *dt = php_format_date("r", 1, tNow, 1);
 
-		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", dt);
-		efree(dt);
+		snprintf(header_buffer, MAIL_BUFFER_SIZE, "Date: %s\r\n", dt->val);
+		zend_string_free(dt);
 	}
 
 	if (!headers_lc || !strstr(headers_lc, "from:")) {
@@ -791,7 +792,7 @@ static int MailConnect()
 		return (FAILED_TO_GET_HOSTNAME);
 	}
 
-	namelen = strlen(ent->h_name);
+	namelen = (int)strlen(ent->h_name);
 
 #ifdef HAVE_IPV6
 	if (inet_pton(AF_INET, ent->h_name, &addr) == 1 || inet_pton(AF_INET6, ent->h_name, &addr6) == 1)
@@ -852,7 +853,7 @@ static int MailConnect()
 //********************************************************************/
 static int Post(LPCSTR msg)
 {
-	int len = strlen(msg);
+	int len = (int)strlen(msg);
 	int slen;
 	int index = 0;
 

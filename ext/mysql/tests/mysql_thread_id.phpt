@@ -37,5 +37,5 @@ print "done!";
 --EXPECTF--
 Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 
-Warning: mysql_thread_id(): %d is not a valid MySQL-Link resource in %s on line %d
+Warning: mysql_thread_id(): supplied resource is not a valid MySQL-Link resource in %s on line %d
 done!

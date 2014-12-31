@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -28,14 +28,13 @@ int make_http_soap_request(zval  *this_ptr,
                            char  *location, 
                            char  *soapaction, 
                            int    soap_version,
-                           char **response, 
-                           int   *response_len TSRMLS_DC);
+                           zval  *response);
 
-int proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC);
-int basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC);
+int proxy_authentication(zval* this_ptr, smart_str* soap_headers);
+int basic_authentication(zval* this_ptr, smart_str* soap_headers);
 void http_context_headers(php_stream_context* context,
                           zend_bool has_authorization,
                           zend_bool has_proxy_authorization,
                           zend_bool has_cookies,
-                          smart_str* soap_headers TSRMLS_DC);
+                          smart_str* soap_headers);
 #endif

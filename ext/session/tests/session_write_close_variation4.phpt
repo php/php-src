@@ -2,6 +2,8 @@
 Test session_write_close() function : variation
 --SKIPIF--
 <?php include('skipif.inc'); ?>
+--INI--
+session.use_strict_mode=0
 --FILE--
 <?php
 

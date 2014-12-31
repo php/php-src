@@ -20,7 +20,10 @@ test();
 
 ?>
 --EXPECTF--
+Notice: Only variable references should be returned by reference in %sclosure_019.php on line 4
 int(9)
+
+Notice: Only variable references should be returned by reference in %sclosure_019.php on line 4
 int(81)
 
 Fatal error: Cannot pass parameter 1 by reference in %s on line %d

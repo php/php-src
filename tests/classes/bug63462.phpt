@@ -2,8 +2,6 @@
 Test script to verify that magic methods should be called only once when accessing an unset property.
 --CREDITS--
 Marco Pivetta <ocramius@gmail.com>
---XFAIL--
-Bug 63462 is not yet fixed
 --FILE--
 <?php
 class Test {
@@ -20,7 +18,7 @@ class Test {
 	}
 
 	function __get($name) {
-		echo '__get ' . $name . "\n";
+		echo '__get ' . $name;
 		return $this->$name;
 	}
 
@@ -54,13 +52,13 @@ $test->privateProperty   = 'value';
 
 --EXPECTF--
 __get nonExisting
-Notice: Undefined index: nonExisting in %__set__get_006.php on line %d
+Notice: Undefined property: Test::$nonExisting in %sbug63462.php on line %d
 __get publicProperty
-Notice: Undefined index: publicProperty in %__set__get_006.php on line %d
+Notice: Undefined property: Test::$publicProperty in %sbug63462.php on line %d
 __get protectedProperty
-Notice: Undefined index: protectedProperty in %__set__get_006.php on line %d
+Notice: Undefined property: Test::$protectedProperty in %sbug63462.php on line %d
 __get privateProperty
-Notice: Undefined index: privateProperty in %__set__get_006.php on line %d
+Notice: Undefined property: Test::$privateProperty in %sbug63462.php on line %d
 __isset nonExisting
 __isset publicProperty
 __isset protectedProperty

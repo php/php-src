@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,7 +61,7 @@ PHP_FUNCTION(pcntl_setpriority);
 
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
-	long signo;
+	zend_long signo;
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)
@@ -69,6 +69,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	int processing_signal_queue;
 	struct php_pcntl_pending_signal *head, *tail, *spares;
 	int last_error;
+	volatile char pending_signals;
 ZEND_END_MODULE_GLOBALS(pcntl)
 
 #ifdef ZTS

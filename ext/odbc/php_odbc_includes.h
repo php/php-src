@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -115,6 +115,7 @@ PHP_FUNCTION(solid_fetch_prev);
 #endif
 
 #define ODBC_TYPE "unixODBC"
+#undef ODBCVER
 #include <sql.h>
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
@@ -160,8 +161,8 @@ PHP_FUNCTION(solid_fetch_prev);
 #define ODBC_TYPE "Birdstep"
 #define UNIX
 /*
- * Extended Fetch in the Birdstep ODBC API is incapable of returning long varchar (memo) fields.
- * So the following line has been commented-out to accomadate. - KNS
+ * Extended Fetch in the Birdstep ODBC API is incapable of returning zend_long varchar (memo) fields.
+ * So the following line has been commented-out to accommodate. - KNS
  *
  * #define HAVE_SQL_EXTENDED_FETCH 1
  */
@@ -227,12 +228,12 @@ typedef struct odbc_connection {
     ODBC_SQL_CONN_T hdbc;
     char laststate[6];
     char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
-	int id;
+	zend_resource *res;
 	int persistent;
 } odbc_connection;
 
 typedef struct odbc_result_value {
-	char name[32];
+	char name[256];
 	char *value;
 	SQLLEN vallen;
 	SQLLEN coltype;
@@ -246,7 +247,7 @@ typedef struct odbc_result {
 # if HAVE_SQL_EXTENDED_FETCH
 	int fetch_abs;
 # endif
-	long longreadlen;
+	zend_long longreadlen;
 	int binmode;
 	int fetched;
 	odbc_connection *conn_ptr;
@@ -256,16 +257,16 @@ ZEND_BEGIN_MODULE_GLOBALS(odbc)
 	char *defDB;
 	char *defUser;
 	char *defPW;
-	long allow_persistent;
-	long check_persistent;
-	long max_persistent;
-	long max_links;
-	long num_persistent;
-	long num_links;
+	zend_long allow_persistent;
+	zend_long check_persistent;
+	zend_long max_persistent;
+	zend_long max_links;
+	zend_long num_persistent;
+	zend_long num_links;
 	int defConn;
-    long defaultlrl;
-    long defaultbinmode;
-    long default_cursortype;
+    zend_long defaultlrl;
+    zend_long defaultbinmode;
+    zend_long default_cursortype;
     char laststate[6];
     char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
 	HashTable *resource_list;
@@ -278,13 +279,17 @@ void odbc_del_result(HashTable *list, int count);
 int odbc_add_conn(HashTable *list, HDBC conn);
 odbc_connection *odbc_get_conn(HashTable *list, int count);
 void odbc_del_conn(HashTable *list, int ind);
-int odbc_bindcols(odbc_result *result TSRMLS_DC);
+int odbc_bindcols(odbc_result *result);
 
 #define ODBC_SQL_ERROR_PARAMS odbc_connection *conn_resource, ODBC_SQL_STMT_T stmt, char *func
 
 void odbc_sql_error(ODBC_SQL_ERROR_PARAMS);
 
+#if defined(ODBCVER) && (ODBCVER >= 0x0300)
+#define IS_SQL_LONG(x) (x == SQL_LONGVARBINARY || x == SQL_LONGVARCHAR || x == SQL_WLONGVARCHAR)
+#else
 #define IS_SQL_LONG(x) (x == SQL_LONGVARBINARY || x == SQL_LONGVARCHAR)
+#endif
 #define IS_SQL_BINARY(x) (x == SQL_BINARY || x == SQL_VARBINARY || x == SQL_LONGVARBINARY)
 
 #ifdef ZTS

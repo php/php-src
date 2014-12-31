@@ -72,8 +72,10 @@ static struct {
 
 #define STACK_SIZE ((1<<(MAX_LWZ_BITS))*2)
 
+#define CSD_BUF_SIZE 280
+
 typedef struct {
-	unsigned char    buf[280];
+	unsigned char    buf[CSD_BUF_SIZE];
 	int              curbit, lastbit, done, last_byte;
 } CODE_STATIC_DATA;
 
@@ -398,9 +400,14 @@ GetCode_(gdIOCtx *fd, CODE_STATIC_DATA *scd, int code_size, int flag, int *ZeroD
 		scd->lastbit = (2+count)*8 ;
 	}
 
-	ret = 0;
-	for (i = scd->curbit, j = 0; j < code_size; ++i, ++j)
-		ret |= ((scd->buf[ i / 8 ] & (1 << (i % 8))) != 0) << j;
+	if ((scd->curbit + code_size - 1) >= (CSD_BUF_SIZE * 8)) {
+		ret = -1;
+	} else {
+		ret = 0;
+		for (i = scd->curbit, j = 0; j < code_size; ++i, ++j) {
+			ret |= ((scd->buf[i / 8] & (1 << (i % 8))) != 0) << j;
+		}
+	}
 
 	scd->curbit += code_size;
 	return ret;

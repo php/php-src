@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,9 +37,9 @@ void normalizer_register_constants( INIT_FUNC_ARGS )
 		return;
 	}
 
-	#define NORMALIZER_EXPOSE_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_CS)
-	#define NORMALIZER_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_long( Normalizer_ce_ptr, ZEND_STRS( #x ) - 1, NORMALIZER_##x TSRMLS_CC );
-	#define NORMALIZER_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_long( Normalizer_ce_ptr, ZEND_STRS( name ) - 1, value TSRMLS_CC );
+	#define NORMALIZER_EXPOSE_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_PERSISTENT | CONST_CS)
+	#define NORMALIZER_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_long( Normalizer_ce_ptr, ZEND_STRS( #x ) - 1, NORMALIZER_##x );
+	#define NORMALIZER_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_long( Normalizer_ce_ptr, ZEND_STRS( name ) - 1, value );
 
 	/* Normalization form constants */
 	NORMALIZER_EXPOSE_CLASS_CONST( NONE );

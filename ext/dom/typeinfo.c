@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,10 +46,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#TypeInfo-typeName
 Since: 
 */
-int dom_typeinfo_type_name_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_typeinfo_type_name_read(dom_object *obj, zval *retval)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 
@@ -60,10 +59,9 @@ readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#TypeInfo-typeNamespace
 Since: 
 */
-int dom_typeinfo_type_namespace_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_typeinfo_type_namespace_read(dom_object *obj, zval *retval)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_NULL(retval);
 	return SUCCESS;
 }
 

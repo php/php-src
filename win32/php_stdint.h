@@ -33,8 +33,16 @@
 #error "Use this header only with Microsoft Visual C++ compilers!"
 #endif // _MSC_VER ]
 
+// Starting with vc14, many of the C11 features are now included, so we only
+// need many of these typedefs and defines for older VS suites
+#if _MSC_VER < 1900
+
 #ifndef _MSC_STDINT_H_ // [
 #define _MSC_STDINT_H_
+
+#ifndef _STDINT
+# define _STDINT
+#endif
 
 #if _MSC_VER > 1000
 #pragma once
@@ -66,8 +74,12 @@
 // 7.18.1 Integer types
 
 // 7.18.1.1 Exact-width integer types
+#ifndef int8_t
 typedef __int8            int8_t;
+#endif
+#ifndef int16_t
 typedef __int16           int16_t;
+#endif
 #ifndef int32_t
 typedef __int32           int32_t;
 #endif
@@ -76,9 +88,6 @@ typedef __int64           int64_t;
 #endif
 #ifndef uint8_t
 typedef unsigned __int8   uint8_t;
-#endif
-#ifndef u_char
-typedef unsigned __int8   u_char;
 #endif
 typedef unsigned __int16  uint16_t;
 #ifndef uint32_t
@@ -108,13 +117,8 @@ typedef uint32_t  u_int32_t;
 typedef uint64_t  uint_fast64_t;
 
 // 7.18.1.4 Integer types capable of holding object pointers
-#ifdef _WIN64 // [
-   typedef __int64           intptr_t;
-   typedef unsigned __int64  uintptr_t;
-#else // _WIN64 ][
-   typedef _W64 int               intptr_t;
-   typedef _W64 unsigned int      uintptr_t;
-#endif // _WIN64 ]
+/* intptr_t and uintptr_t are available from stddef.h */
+#include <stddef.h>
 
 // 7.18.1.5 Greatest-width integer types
 typedef int64_t   intmax_t;
@@ -126,6 +130,7 @@ typedef uint64_t  uintmax_t;
 #if !defined(__cplusplus) || defined(__STDC_LIMIT_MACROS) // [   See footnote 220 at page 257 and footnote 221 at page 259
 
 // 7.18.2.1 Limits of exact-width integer types
+#if _MSC_VER >= 1700 && !defined(_INTSAFE_H_INCLUDED_)
 #define INT8_MIN     ((int8_t)_I8_MIN)
 #define INT8_MAX     _I8_MAX
 #define INT16_MIN    ((int16_t)_I16_MIN)
@@ -138,6 +143,7 @@ typedef uint64_t  uintmax_t;
 #define UINT16_MAX   _UI16_MAX
 #define UINT32_MAX   _UI32_MAX
 #define UINT64_MAX   _UI64_MAX
+#endif
 
 // 7.18.2.2 Limits of minimum-width integer types
 #define INT_LEAST8_MIN    INT8_MIN
@@ -249,3 +255,11 @@ static __inline int64_t llabs(int64_t i)
 
 
 #endif // _MSC_STDINT_H_ ]
+
+#else
+#include <stdint.h>
+#endif
+
+#ifndef u_char
+typedef unsigned __int8   u_char;
+#endif

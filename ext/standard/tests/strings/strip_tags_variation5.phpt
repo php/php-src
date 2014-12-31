@@ -33,7 +33,7 @@ $multiline_string = <<<EOT
 <b>This is a double quoted string</b>
 EOT;
 
-// here doc with diferent whitespaces
+// here doc with different whitespaces
 $diff_whitespaces = <<<EOT
 <html>hello\r world\t
 1111\t\t != 2222\v\v</html>

@@ -65,6 +65,7 @@
 	MAGIC_NO_CHECK_CDF	| \
 	MAGIC_NO_CHECK_TOKENS	| \
 	MAGIC_NO_CHECK_ENCODING	| \
+	0			  \
 )
 
 /* Defined for backwards compatibility (renamed) */
@@ -73,6 +74,8 @@
 /* Defined for backwards compatibility; do nothing */
 #define	MAGIC_NO_CHECK_FORTRAN	0x000000 /* Don't check ascii/fortran */
 #define	MAGIC_NO_CHECK_TROFF	0x000000 /* Don't check ascii/troff */
+
+#define MAGIC_VERSION		517	/* This implementation */
 
 
 #ifdef __cplusplus
@@ -92,6 +95,7 @@ const char *magic_buffer(magic_t, const void *, size_t);
 const char *magic_error(magic_t);
 int magic_setflags(magic_t, int);
 
+int magic_version(void);
 int magic_load(magic_t, const char *);
 int magic_compile(magic_t, const char *);
 int magic_list(magic_t, const char *);

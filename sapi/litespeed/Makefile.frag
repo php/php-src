@@ -4,6 +4,6 @@ $(SAPI_LITESPEED_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_LITESPEED_OB
 	$(BUILD_LITESPEED)
 
 install-litespeed: $(SAPI_LITESPEED_PATH)
-	@echo "Installing PHP LitSpeed binary:   $(INSTALL_ROOT)$(bindir)/"
+	@echo "Installing PHP LiteSpeed binary:   $(INSTALL_ROOT)$(bindir)/"
 	@$(INSTALL) -m 0755 $(SAPI_LITESPEED_PATH) $(INSTALL_ROOT)$(bindir)/lsphp
 

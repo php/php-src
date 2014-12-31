@@ -1,7 +1,7 @@
 --TEST--
 Bug #33491 (extended mysqli class crashes when result is not object)
 --INI--
-error_reporting=4095
+error_reporting=4096
 --SKIPIF--
 <?php 
 require_once('skipif.inc'); 
@@ -26,4 +26,4 @@ $DB->query_single('SELECT DATE()');
 
 ?>
 --EXPECTF--
-Fatal error: Call to a member function fetch_row() on a non-object in %sbug33491.php on line %d
+Catchable fatal error: Call to a member function fetch_row() on boolean in %sbug33491.php on line %d

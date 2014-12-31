@@ -59,11 +59,11 @@ var_dump($f->eof());
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
+unlink(dirname(__FILE__) . '/files/phar_oo_007.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--
-MyFile::__construct(phar://*/files/phar_oo_test.phar.php/a.php)
+MyFile::__construct(phar://*/files/phar_oo_007.phar.php/a.php)
 int(%d)
 int(%d)
 int(%d)
@@ -79,7 +79,7 @@ int(0)
 string(32) "<?php echo "This is a.php\n"; ?>"
 int(32)
 ===AGAIN===
-MyFile::__construct(phar://*/files/phar_oo_test.phar.php/a.php)
+MyFile::__construct(phar://*/files/phar_oo_007.phar.php/a.php)
 int(0)
 bool(false)
 string(32) "<?php echo "This is a.php\n"; ?>"

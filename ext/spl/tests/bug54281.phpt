@@ -12,4 +12,8 @@ foreach($it as $k=>$v) { }
 
 ?>
 --EXPECTF--
-Fatal error: RecursiveIteratorIterator::rewind(): The RecursiveArrayIteratorIterator instance wasn't initialized properly in %s on line %d
+Fatal error: Uncaught exception 'LogicException' with message 'The object is in an invalid state as the parent constructor was not called' in %s:%d
+Stack trace:
+#0 %s%ebug54281.php(8): RecursiveIteratorIterator->rewind()
+#1 {main}
+  thrown in %s%ebug54281.php on line 8

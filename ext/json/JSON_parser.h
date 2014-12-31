@@ -4,8 +4,8 @@
 #define JSON_PARSER_H
 
 #include "php.h"
-#include "ext/standard/php_smart_str.h"
 #include "php_json.h"
+#include "zend_smart_str.h"
 
 #define JSON_PARSER_DEFAULT_DEPTH 512
 
@@ -15,8 +15,8 @@ typedef struct JSON_parser_struct {
     int top;
 	int error_code;
     int* stack;
-    zval **the_zstack;
-    zval *the_static_zstack[JSON_PARSER_DEFAULT_DEPTH];
+    zval *the_zstack;
+    zval the_static_zstack[JSON_PARSER_DEFAULT_DEPTH];
 } * JSON_parser;
 
 enum error_codes {
@@ -32,12 +32,12 @@ enum error_codes {
 };
 
 extern JSON_parser new_JSON_parser(int depth);
-extern int parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int options TSRMLS_DC);
+extern int parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int options);
 extern int free_JSON_parser(JSON_parser jp);
 
-static inline int parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int assoc TSRMLS_DC)
+static inline int parse_JSON(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, int assoc)
 {
-	return parse_JSON_ex(jp, z, utf16_json, length, assoc ? PHP_JSON_OBJECT_AS_ARRAY : 0 TSRMLS_CC);
+	return parse_JSON_ex(jp, z, utf16_json, length, assoc ? PHP_JSON_OBJECT_AS_ARRAY : 0);
 }
 
 #endif

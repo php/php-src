@@ -5,8 +5,8 @@
 
 typedef struct json_utf8_decode
 {
-    int the_index;
     char *the_input;
+    int the_index;
     int the_length;
     int the_char;
     int the_byte;

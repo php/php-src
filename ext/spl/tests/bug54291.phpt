@@ -7,7 +7,7 @@ $dir->isFile();
 --EXPECTF--
 Fatal error: Uncaught exception 'UnexpectedValueException' with message 'Failed to open directory ""' in %s:%d
 Stack trace:
-#0 %s(%d): DirectoryIterator->__construct('?/abc')
+#0 %s(%d): DirectoryIterator->__construct('\x00/abc')
 #1 {main}
   thrown in %s on line %d
 

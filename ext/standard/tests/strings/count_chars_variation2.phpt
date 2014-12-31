@@ -1,5 +1,7 @@
 --TEST--
 Test count_chars() function : usage variations - test values for $mode argument
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 
@@ -115,11 +117,11 @@ Warning: count_chars(): Unknown mode in %s on line %d
 bool(false)
 -- Iteration 11 --
 
-Warning: count_chars() expects parameter 2 to be long, array given in %s on line %d
+Warning: count_chars() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 -- Iteration 12 --
 
-Warning: count_chars() expects parameter 2 to be long, array given in %s on line %d
+Warning: count_chars() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 -- Iteration 13 --
 bool(true)
@@ -135,11 +137,11 @@ bool(true)
 bool(true)
 -- Iteration 19 --
 
-Warning: count_chars() expects parameter 2 to be long, string given in %s on line %d
+Warning: count_chars() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 -- Iteration 20 --
 
-Warning: count_chars() expects parameter 2 to be long, string given in %s on line %d
+Warning: count_chars() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 -- Iteration 21 --
 
@@ -153,7 +155,7 @@ Warning: count_chars(): Unknown mode in %s on line %d
 bool(false)
 -- Iteration 23 --
 
-Warning: count_chars() expects parameter 2 to be long, object given in %s on line %d
+Warning: count_chars() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 -- Iteration 24 --
 bool(true)

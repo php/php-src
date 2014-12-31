@@ -85,7 +85,7 @@ bool(false)
 Warning: func_get_arg():  Argument 1 not passed to function in %s on line %d
 bool(false)
 
-Warning: Missing argument 2 for test3() in %s on line %d
+Warning: Missing argument 2 for test3()%s
 int(1)
 
 Warning: func_get_arg():  Argument 1 not passed to function in %s on line %d

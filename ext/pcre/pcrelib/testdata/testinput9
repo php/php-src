@@ -1,6 +1,8 @@
 /-- This set of tests checks UTF-8 support with the DFA matching functionality
-    of pcre_dfa_exec(). The -dfa flag must be used with pcretest when running 
-    it. --/
+    of pcre_dfa_exec(), excluding Unicode property support. The -dfa flag must
+    be used with pcretest when running it. --/
+    
+< forbid W 
 
 /\x{100}ab/8
   \x{100}ab
@@ -239,16 +241,16 @@
 /\x{100}{3,5}/8
     abcd\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}XX
 
-/\x{100}{3,}/8
+/\x{100}{3,}/8O
     abcd\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}XX
 
 /(?<=a\x{100}{2}b)X/8
     Xyyya\x{100}\x{100}bXzzz
 
-/\D*/8
+/\D*/8O
   aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
-/\D*/8
+/\D*/8O
   \x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}\x{100}
 
 /\D/8
@@ -584,16 +586,16 @@
     a\n\n\n\rb
     a\r
 
-/\h+\V?\v{3,4}/8 
+/\h+\V?\v{3,4}/8O
     \x09\x20\x{a0}X\x0a\x0b\x0c\x0d\x0a
 
-/\V?\v{3,4}/8 
+/\V?\v{3,4}/8O 
     \x20\x{a0}X\x0a\x0b\x0c\x0d\x0a
 
-/\h+\V?\v{3,4}/8
+/\h+\V?\v{3,4}/8O
     >\x09\x20\x{a0}X\x0a\x0a\x0a<
 
-/\V?\v{3,4}/8
+/\V?\v{3,4}/8O
     >\x09\x20\x{a0}X\x0a\x0a\x0a<
 
 /\H\h\V\v/8
@@ -602,7 +604,7 @@
     ** Failers
     \x{a0} X\x0a   
     
-/\H*\h+\V?\v{3,4}/8 
+/\H*\h+\V?\v{3,4}/8O 
     \x09\x20\x{a0}X\x0a\x0b\x0c\x0d\x0a
     \x09\x20\x{a0}\x0a\x0b\x0c\x0d\x0a
     \x09\x20\x{a0}\x0a\x0b\x0c
@@ -615,7 +617,7 @@
     ** Failers
     \x{2009} X\x0a   
     
-/\H*\h+\V?\v{3,4}/8 
+/\H*\h+\V?\v{3,4}/8O 
     \x{1680}\x{180e}\x{2007}X\x{2028}\x{2029}\x0c\x0d\x0a
     \x09\x{205f}\x{a0}\x0a\x{2029}\x0c\x{2028}\x0a
     \x09\x20\x{202f}\x0a\x0b\x0c

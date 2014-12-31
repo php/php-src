@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -108,7 +108,7 @@ typedef struct _fcgi_end_request_rec {
 
 /* FastCGI client API */
 
-typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC);
+typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg);
 
 typedef struct _fcgi_request fcgi_request;
 
@@ -127,7 +127,7 @@ char* fcgi_getenv(fcgi_request *req, const char* var, int var_len);
 char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val);
 char* fcgi_quick_getenv(fcgi_request *req, const char* var, int var_len, unsigned int hash_value);
 char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int hash_value, char* val);
-void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array TSRMLS_DC);
+void  fcgi_loadenv(fcgi_request *req, fcgi_apply_func load_func, zval *array);
 
 int fcgi_read(fcgi_request *req, char *str, int len);
 
@@ -139,7 +139,7 @@ void fcgi_impersonate(void);
 #endif
 
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len);
-void fcgi_free_mgmt_var_cb(void * ptr);
+void fcgi_free_mgmt_var_cb(zval *zv);
 
 /*
  * Local variables:

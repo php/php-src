@@ -130,13 +130,13 @@ FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer 
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer given
 
 -- float 10.5 --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, double given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, float given
 
 -- float -10.5 --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, double given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, float given
 
 -- float .5 --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, double given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, float given
 
 -- empty array --
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, array given
@@ -153,7 +153,7 @@ FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, array gi
 -- uppercase NULL --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2005-07-14 22:30:41"
+  string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -163,7 +163,7 @@ object(DateTime)#%d (3) {
 -- lowercase null --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2005-07-14 22:30:41"
+  string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -209,7 +209,7 @@ FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, object g
 -- undefined var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2005-07-14 22:30:41"
+  string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -219,7 +219,7 @@ object(DateTime)#%d (3) {
 -- unset var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "2005-07-14 22:30:41"
+  string(26) "2005-07-14 22:30:41.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

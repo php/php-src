@@ -65,7 +65,7 @@ $values =  array (
 
 
 // loop through each element of the array and check the working of get_html_translation_table()
-// when $table arugment is supplied with different values
+// when $table argument is supplied with different values
 echo "\n--- Testing get_html_translation_table() by supplying different values for 'table' argument ---\n";
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
@@ -106,38 +106,38 @@ echo "Done\n";
 --- Testing get_html_translation_table() by supplying different values for 'table' argument ---
 -- Iteration 1 --
 
-Warning: get_html_translation_table() expects parameter 1 to be long, array given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be long, array given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 -- Iteration 2 --
 
-Warning: get_html_translation_table() expects parameter 1 to be long, array given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be long, array given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 -- Iteration 3 --
 
-Warning: get_html_translation_table() expects parameter 1 to be long, array given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be long, array given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 -- Iteration 4 --
 
-Warning: get_html_translation_table() expects parameter 1 to be long, array given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be long, array given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 -- Iteration 5 --
 
-Warning: get_html_translation_table() expects parameter 1 to be long, array given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be long, array given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s on line %d
 NULL
 -- Iteration 6 --
 int(252)
@@ -189,38 +189,38 @@ array(4) {
 }
 -- Iteration 10 --
 
-Warning: get_html_translation_table() expects parameter 1 to be long, string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be long, string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: get_html_translation_table() expects parameter 1 to be long, string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be long, string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: get_html_translation_table() expects parameter 1 to be long, object given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, object given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be long, object given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, object given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: get_html_translation_table() expects parameter 1 to be long, string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be long, string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: get_html_translation_table() expects parameter 1 to be long, string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be long, string given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, string given in %s on line %d
 NULL
 -- Iteration 15 --
 array(4) {
@@ -266,10 +266,10 @@ array(4) {
 }
 -- Iteration 17 --
 
-Warning: get_html_translation_table() expects parameter 1 to be long, resource given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, resource given in %s on line %d
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be long, resource given in %s on line %d
+Warning: get_html_translation_table() expects parameter 1 to be integer, resource given in %s on line %d
 NULL
 -- Iteration 18 --
 array(4) {

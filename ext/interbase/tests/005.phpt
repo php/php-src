@@ -3,7 +3,7 @@ InterBase: transactions
 --SKIPIF--
 <?php include("skipif.inc"); ?>
 --FILE--
-<?php /* $Id$ */
+<?php
 
     require("interbase.inc");
     
@@ -18,7 +18,7 @@ InterBase: transactions
     
 /*
 Difference between default and other transactions:
-default commited when you call  ibase_close().
+default committed when you call  ibase_close().
 Other transaction doing rollback.
 
 If you not open default transaction with
@@ -63,7 +63,7 @@ simple default transaction test without ibase_trans()
 /*
 default transaction on default link
 First open transaction on link will be default.
-$tr_def_l1 may be ommited. All queryes without link and trans
+$tr_def_l1 may be omitted. All queryes without link and trans
 parameters run in this context
 */
     
@@ -158,7 +158,7 @@ three transaction on default link
 
     ibase_free_result($res);
 
- 	/* tr_4 IBASE_COMMITED + IBASE_REC_NO_VERSION + IBASE_NOWAIT */
+ 	/* tr_4 IBASE_COMMITTED + IBASE_REC_NO_VERSION + IBASE_NOWAIT */
  	$res = ibase_query($tr_4, "select * from test5");
    
  	 echo "three rows in fourth transaction with deadlock\n";

@@ -1,5 +1,5 @@
 --TEST--
-Try finally (function call in the finaly block after exception)
+Try finally (function call in the finally block after exception)
 --FILE--
 <?php
 function foo() {

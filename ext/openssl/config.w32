@@ -6,6 +6,7 @@ ARG_WITH("openssl", "OpenSSL support", "no");
 if (PHP_OPENSSL != "no") {
 	if (CHECK_LIB("ssleay32.lib", "openssl", PHP_OPENSSL) &&
 			CHECK_LIB("libeay32.lib", "openssl", PHP_OPENSSL) &&
+			CHECK_LIB("crypt32.lib", "openssl") &&
 			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", "CFLAGS_OPENSSL")) {
 		EXTENSION("openssl", "openssl.c xp_ssl.c");
 

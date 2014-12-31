@@ -3,15 +3,17 @@
 
 ARG_WITH("gd", "Bundled GD support", "yes,shared");
 ARG_WITH("t1lib", "t1lib support", "yes");
+ARG_WITH("libvpx", "vpx support", "yes");
 
 if (PHP_GD != "no") {
 	if (
-		CHECK_LIB("vpxmt.lib", "gd", PHP_GD) &&
 		CHECK_LIB("libjpeg_a.lib;libjpeg.lib", "gd", PHP_GD) &&
 		CHECK_LIB("freetype_a.lib;freetype.lib", "gd", PHP_GD) &&
+		CHECK_HEADER_ADD_INCLUDE("ft2build.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include" + ";" + PHP_PHP_BUILD + "\\include\\freetype") &&
 		CHECK_LIB("libpng_a.lib;libpng.lib", "gd", PHP_GD) &&
 		CHECK_HEADER_ADD_INCLUDE("gd.h", "CFLAGS_GD", PHP_GD + ";ext\\gd\\libgd") &&
-		CHECK_HEADER_ADD_INCLUDE("png.h", "CFLAGS_GD", PHP_GD +  ";" + PHP_PHP_BUILD + "\\include\\libpng12") &&
+		(CHECK_HEADER_ADD_INCLUDE("png.h", "CFLAGS_GD", PHP_GD +  ";" + PHP_PHP_BUILD + "\\include\\libpng15") ||
+		CHECK_HEADER_ADD_INCLUDE("png.h", "CFLAGS_GD", PHP_GD +  ";" + PHP_PHP_BUILD + "\\include\\libpng12")) &&
 		(CHECK_LIB("libiconv_a.lib;libiconv.lib", "gd", PHP_GD) || CHECK_LIB("iconv_a.lib;iconv.lib", "gd", PHP_GD)) &&
 		 CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_GD", PHP_GD) && 
 		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "gd", PHP_GD) )) || 
@@ -29,6 +31,14 @@ if (PHP_GD != "no") {
 			}
 		}
 
+		if (PHP_LIBVPX != "no") {
+			if (CHECK_LIB("vpxmt.lib", "gd", PHP_GD) &&
+				CHECK_HEADER_ADD_INCLUDE("vp8.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\vpx")) {
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBVPX /D HAVE_GD_WEBP");
+			} else {
+				WARNING("libvpx not enabled; libraries and headers not found");
+			}
+		}
 		CHECK_LIB("User32.lib", "gd", PHP_GD);
 		CHECK_LIB("Gdi32.lib", "gd", PHP_GD);
 
@@ -37,8 +47,9 @@ if (PHP_GD != "no") {
 			gdcache.c gdfontg.c gdfontl.c gdfontmb.c gdfonts.c gdfontt.c \
 			gdft.c gd_gd2.c gd_gd.c gd_gif_in.c gd_gif_out.c gdhelpers.c gd_io.c gd_io_dp.c \
 			gd_io_file.c gd_io_ss.c gd_jpeg.c gdkanji.c gd_png.c gd_ss.c \
-			gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c xbm.c gd_security.c \
-			gd_filter.c gd_pixelate.c gd_arc.c gd_rotate.c gd_color.c webpimg.c gd_webp.c ", "gd");
+			gdtables.c gd_topal.c gd_wbmp.c gdxpm.c wbmp.c xbm.c gd_security.c gd_transform.c \
+			gd_filter.c gd_pixelate.c gd_arc.c gd_rotate.c gd_color.c webpimg.c gd_webp.c \
+			gd_crop.c gd_interpolation.c gd_matrix.c", "gd");
 		AC_DEFINE('HAVE_LIBGD', 1, 'GD support');
 		ADD_FLAG("CFLAGS_GD", " \
 /D HAVE_GD_DYNAMIC_CTX_EX=1 \
@@ -59,14 +70,12 @@ if (PHP_GD != "no") {
 /D HAVE_GD_WBMP  \
 /D HAVE_GD_XBM  \
 /D HAVE_GD_XPM  \
-/D HAVE_GD_WEBP \
-/D HAVE_LIBFREETYPE=1  \
+/D HAVE_GD_FREETYPE=1  \
 /D HAVE_LIBGD13=1  \
 /D HAVE_LIBGD15=1  \
 /D HAVE_LIBGD20=1  \
 /D HAVE_LIBGD204=1 \
 /D HAVE_LIBJPEG  \
-/D HAVE_LIBVPX \
 /D HAVE_LIBPNG  \
 /D HAVE_XPM  \
 /D HAVE_COLORCLOSESTHWB  \
@@ -74,9 +83,12 @@ if (PHP_GD != "no") {
 /D USE_GD_IOCTX \
 /D MSWIN32 \
 		");
+		if (ICC_TOOLSET) {
+			ADD_FLAG("LDFLAGS_GD", "/nodefaultlib:libcmt");
+		}
 		
 		PHP_INSTALL_HEADERS("", "ext/gd ext/gd/libgd" );
-		} else {
+	} else {
 		WARNING("gd not enabled; libraries and headers not found");
 	}
 }

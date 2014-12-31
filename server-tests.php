@@ -1,7 +1,7 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -413,7 +413,7 @@ class testHarness {
 	public $xargs = array(
 		#arg         env var                value        default   description
 		'c' => array(''                    ,'file'       ,NULL    ,'configuration file, see server-tests-config.php for example'),
-		'd' => array('TEST_PATHS'          ,'paths'      ,NULL    ,'colon seperate path list'),
+		'd' => array('TEST_PATHS'          ,'paths'      ,NULL    ,'colon separate path list'),
 		'e' => array('TEST_PHP_ERROR_STYLE','EMACS|MSVC' ,'EMACS' ,'editor error style'),
 		'h' => array(''                    ,''           ,NULL    ,'this help'),
 		'i' => array('PHPRC'               ,'path|file'  ,NULL    ,'ini file to use for tests (sets PHPRC)'),
@@ -961,7 +961,7 @@ class testHarness {
 			if ($just_save_results || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
 				/*  
 				 * Collect information about the host system for our report
-				 * Fetch phpinfo() output so that we can see the PHP enviroment
+				 * Fetch phpinfo() output so that we can see the PHP environment
 				 * Make an archive of all the failed tests
 				 * Send an email
 				 */

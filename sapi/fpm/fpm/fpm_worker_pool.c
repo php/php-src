@@ -15,8 +15,25 @@
 #include "fpm_shm.h"
 #include "fpm_scoreboard.h"
 #include "fpm_conf.h"
+#include "fpm_unix.h"
 
 struct fpm_worker_pool_s *fpm_worker_all_pools;
+
+void fpm_worker_pool_free(struct fpm_worker_pool_s *wp) /* {{{ */
+{
+	if (wp->config) {
+		free(wp->config);
+	}
+	if (wp->user) {
+		free(wp->user);
+	}
+	if (wp->home) {
+		free(wp->home);
+	}
+	fpm_unix_free_socket_premissions(wp);
+	free(wp);
+}
+/* }}} */
 
 static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
 {
@@ -29,10 +46,7 @@ static void fpm_worker_pool_cleanup(int which, void *arg) /* {{{ */
 		if ((which & FPM_CLEANUP_CHILD) == 0 && fpm_globals.parent_pid == getpid()) {
 			fpm_scoreboard_free(wp->scoreboard);
 		}
-		free(wp->config);
-		free(wp->user);
-		free(wp->home);
-		free(wp);
+		fpm_worker_pool_free(wp);
 	}
 	fpm_worker_all_pools = NULL;
 }

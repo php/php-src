@@ -3,6 +3,7 @@ Description=The PHP FastCGI Process Manager
 After=syslog.target network.target
 
 [Service]
+Type=@php_fpm_systemd@
 PIDFile=@localstatedir@/run/php-fpm.pid
 ExecStart=@sbindir@/php-fpm --nodaemonize --fpm-config @sysconfdir@/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID

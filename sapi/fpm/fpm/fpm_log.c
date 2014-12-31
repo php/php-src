@@ -46,6 +46,8 @@ int fpm_log_open(int reopen) /* {{{ */
 		if (0 > fd) {
 			zlog(ZLOG_SYSERROR, "failed to open access log (%s)", wp->config->access_log);
 			return -1;
+		} else {
+			zlog(ZLOG_DEBUG, "open access log (%s)", wp->config->access_log);
 		}
 
 		if (reopen) {
@@ -57,7 +59,9 @@ int fpm_log_open(int reopen) /* {{{ */
 			wp->log_fd = fd;
 		}
 
-		fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
+		if (0 > fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC)) {
+			zlog(ZLOG_WARNING, "failed to change attribute of access_log");
+		}
 	}
 
 	return ret;
@@ -93,7 +97,7 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 }
 /* }}} */
 
-int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
+int fpm_log_write(char *log_format) /* {{{ */
 {
 	char *s, *b;
 	char buffer[FPM_LOG_BUFFER+1];
@@ -237,7 +241,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 				case 'f': /* script */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s",  proc.script_filename && *proc.script_filename ? proc.script_filename : "-");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s",  *proc.script_filename ? proc.script_filename : "-");
 					}
 					break;
 
@@ -249,7 +253,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 				case 'm': /* method */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.request_method && *proc.request_method ? proc.request_method : "-");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", *proc.request_method ? proc.request_method : "-");
 					}
 					break;
 
@@ -347,25 +351,25 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 				case 'q': /* query_string */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.query_string ? proc.query_string : "");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.query_string);
 					}
 					break;
 
 				case 'Q': /* '?' */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.query_string && *proc.query_string  ? "?" : "");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", *proc.query_string  ? "?" : "");
 					}
 					break;
 
 				case 'r': /* request URI */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.request_uri ? proc.request_uri : "-");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.request_uri);
 					}
 					break;
 
 				case 'R': /* remote IP address */
 					if (!test) {
-						char *tmp = fcgi_get_last_client_ip();
+						const char *tmp = fcgi_get_last_client_ip();
 						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", tmp ? tmp : "-");
 					}
 					break;
@@ -397,7 +401,7 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 
 				case 'u': /* remote user */
 					if (!test) {
-						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.auth_user ? proc.auth_user : "-");
+						len2 = snprintf(b, FPM_LOG_BUFFER - len, "%s", proc.auth_user);
 					}
 					break;
 

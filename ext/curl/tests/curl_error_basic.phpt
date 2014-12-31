@@ -38,4 +38,4 @@ curl_close($ch);
 ?>
 --EXPECTF--
 == Testing curl_error with a fake URL ==
-string(%d) "%sfakeURL%s"
+string(%d) "%sfakeURL%S"

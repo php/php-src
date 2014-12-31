@@ -8,6 +8,9 @@ if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
 	die("skip Test doesn't work on Windows");
 }
 
+if (!$IS_MYSQLND)
+    die("skip mysqlnd only, libmysql does not warning about server gone away");
+
 if (!($output = @exec("lsof -np " . getmypid())))
 	die("skip Test can't find command line tool lsof");
 ?>
@@ -69,18 +72,26 @@ mysql.allow_persistent=1
 ?>
 --EXPECTF--
 Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Warning: mysql_ping(): MySQL server has gone away in %s on line %d
 [003] reconnect 0
 
 Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [005] Setting openened files...
+
+Warning: mysql_ping(): MySQL server has gone away in %s on line %d
 [003] reconnect 1
 
 Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [007] Opened files as expected
+
+Warning: mysql_ping(): MySQL server has gone away in %s on line %d
 [003] reconnect 2
 
 Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [007] Opened files as expected
+
+Warning: mysql_ping(): MySQL server has gone away in %s on line %d
 [003] reconnect 3
 
 Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d

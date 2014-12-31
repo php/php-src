@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -27,12 +27,17 @@
 typedef libxml_doc_props *dom_doc_propsptr;
 
 typedef struct _dom_object {
-	zend_object  std;
 	void *ptr;
 	php_libxml_ref_obj *document;
 	HashTable *prop_handler;
-	zend_object_handle handle;
+	zend_object std;
 } dom_object;
+
+static inline dom_object *php_dom_obj_from_obj(zend_object *obj) {
+	return (dom_object*)((char*)(obj) - XtOffsetOf(dom_object, std));
+}
+
+#define Z_DOMOBJ_P(zv)  php_dom_obj_from_obj(Z_OBJ_P((zv)))
 
 #ifdef PHP_WIN32
 #	ifdef PHPAPI
@@ -54,39 +59,37 @@ typedef struct _dom_object {
 
 PHP_DOM_EXPORT extern zend_class_entry *dom_node_class_entry;
 PHP_DOM_EXPORT dom_object *php_dom_object_get_data(xmlNodePtr obj);
-PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval* return_value, dom_object *domobj TSRMLS_DC);
+PHP_DOM_EXPORT zend_bool php_dom_create_object(xmlNodePtr obj, zval* return_value, dom_object *domobj);
 PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 
 #define DOM_XMLNS_NAMESPACE \
     (const xmlChar *) "http://www.w3.org/2000/xmlns/"
 
 #define NODE_GET_OBJ(__ptr, __id, __prtype, __intern) { \
-	__intern = (php_libxml_node_object *)zend_object_store_get_object(__id TSRMLS_CC); \
+	__intern = Z_LIBXML_NODE_P(__id); \
 	if (__intern->node == NULL || !(__ptr = (__prtype)__intern->node->node)) { \
-  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
+  		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", \
+			__intern->std.ce->name->val);\
   		RETURN_NULL();\
   	} \
 }
 
 #define DOC_GET_OBJ(__ptr, __id, __prtype, __intern) { \
-	__intern = (php_libxml_node_object *)zend_object_store_get_object(__id TSRMLS_CC); \
+	__intern = Z_LIBXML_NODE_P(__id); \
 	if (__intern->document != NULL) { \
 		if (!(__ptr = (__prtype)__intern->document->ptr)) { \
-  			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
+  			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
   			RETURN_NULL();\
   		} \
 	} \
 }
 
 #define DOM_RET_OBJ(obj, ret, domobject) \
-	if (!php_dom_create_object(obj, ret, return_value, domobject TSRMLS_CC)) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object"); \
-		RETURN_FALSE; \
-	}
+	*ret = php_dom_create_object(obj, return_value, domobject)
 
 #define DOM_GET_THIS(zval) \
 	if (NULL == (zval = getThis())) { \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing"); \
+		php_error_docref(NULL, E_WARNING, "Underlying object missing"); \
 		RETURN_FALSE; \
 	}
 

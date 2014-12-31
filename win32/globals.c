@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,13 +28,13 @@ PHPAPI int php_win32_core_globals_id;
 php_win32_core_globals the_php_win32_core_globals;
 #endif
 
-void php_win32_core_globals_ctor(void *vg TSRMLS_DC)
+void php_win32_core_globals_ctor(void *vg)
 {
 	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
 	memset(wg, 0, sizeof(*wg));
 }
 
-void php_win32_core_globals_dtor(void *vg TSRMLS_DC)
+void php_win32_core_globals_dtor(void *vg)
 {
 	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
 
@@ -65,8 +65,6 @@ PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
 		;
 
 	closelog();
-	wg->starttime.tv_sec = 0;
-	wg->lasttime = 0;
 
 	return SUCCESS;
 }

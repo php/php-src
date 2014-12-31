@@ -8,7 +8,6 @@ zend.multibyte=1
 
 declare(encoding = 1);
 declare(encoding = 11111111111111);
-declare(encoding = NULL);
 declare(encoding = M_PI);
 
 print 'DONE';
@@ -19,6 +18,4 @@ Warning: Unsupported encoding [1] in %sdeclare_003.php on line %d
 
 Warning: Unsupported encoding [11111111111111] in %sdeclare_003.php on line %d
 
-Warning: Unsupported encoding [] in %sdeclare_003.php on line %d
-
-Fatal error: Cannot use constants as encoding in %sdeclare_003.php on line %d
+Fatal error: Encoding must be a literal in %s on line %d

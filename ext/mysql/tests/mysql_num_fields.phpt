@@ -54,5 +54,5 @@ require_once("clean_table.inc");
 --EXPECTF--
 Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 
-Warning: mysql_num_fields(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_num_fields(): supplied resource is not a valid MySQL result resource in %s on line %d
 done!

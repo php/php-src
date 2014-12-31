@@ -1,8 +1,8 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,7 @@
 
 
 #define SCAN_MAX_ARGS   0xFF    /* Maximum number of variable which can be      */
-                                /* passed to (f|s)scanf. This is an artifical   */
+                                /* passed to (f|s)scanf. This is an artificial   */
                                 /* upper limit to keep resources in check and   */
                                 /* minimize the possibility of exploits         */
 
@@ -42,8 +42,8 @@
  * e.g. fscanf
  */
 PHPAPI int ValidateFormat(char *format, int numVars, int *totalVars);
-PHPAPI int php_sscanf_internal(char *string,char *format,int argCount,zval ***args,
-				int varStart, zval **return_value TSRMLS_DC);
+PHPAPI int php_sscanf_internal(char *string,char *format,int argCount,zval *args,
+				int varStart, zval *return_value);
 
 
 #endif /* SCANF_H */

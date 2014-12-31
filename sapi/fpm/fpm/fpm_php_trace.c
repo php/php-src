@@ -40,8 +40,10 @@
 #endif
 
 
-static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC) /* {{{ */
+static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ */
 {
+// TODO: fpm_php_trace_dump() has to be reimplemented ???
+#if 0
 	int callers_limit = 20;
 	pid_t pid = child->pid;
 	struct timeval tv;
@@ -131,14 +133,14 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog TSRMLS_DC
 			break;
 		}
 	}
+#endif
 	return 0;
 }
 /* }}} */
 
 void fpm_php_trace(struct fpm_child_s *child) /* {{{ */
 {
-	TSRMLS_FETCH();
-	fpm_scoreboard_update(0, 0, 0, 0, 0, 0, 1, FPM_SCOREBOARD_ACTION_SET, child->wp->scoreboard);
+	fpm_scoreboard_update(0, 0, 0, 0, 0, 0, 1, FPM_SCOREBOARD_ACTION_INC, child->wp->scoreboard);
 	FILE *slowlog;
 
 	zlog(ZLOG_NOTICE, "about to trace %d", (int) child->pid);
@@ -154,7 +156,7 @@ void fpm_php_trace(struct fpm_child_s *child) /* {{{ */
 		goto done1;
 	}
 
-	if (0 > fpm_php_trace_dump(child, slowlog TSRMLS_CC)) {
+	if (0 > fpm_php_trace_dump(child, slowlog)) {
 		fprintf(slowlog, "+++ dump failed\n");
 	}
 

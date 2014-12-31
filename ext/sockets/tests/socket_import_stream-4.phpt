@@ -76,7 +76,7 @@ stream_set_blocking 1
 
 close stream
 stream_set_blocking 
-Warning: stream_set_blocking(): %d is not a valid stream resource in %s on line %d
+Warning: stream_set_blocking(): supplied resource is not a valid stream resource in %s on line %d
 
 socket_set_block 
 Warning: socket_set_block(): unable to set blocking mode [%d]: %s in %s on line %d
@@ -88,13 +88,13 @@ Warning: socket_get_option(): unable to retrieve socket option [%d]: %s in %s on
 
 close socket
 stream_set_blocking 
-Warning: stream_set_blocking(): %d is not a valid stream resource in %s on line %d
+Warning: stream_set_blocking(): supplied resource is not a valid stream resource in %s on line %d
 
 socket_set_block 
-Warning: socket_set_block(): %d is not a valid Socket resource in %s on line %d
+Warning: socket_set_block(): supplied resource is not a valid Socket resource in %s on line %d
 
 socket_get_option 
-Warning: socket_get_option(): %d is not a valid Socket resource in %s on line %d
+Warning: socket_get_option(): supplied resource is not a valid Socket resource in %s on line %d
 
 
 Done.

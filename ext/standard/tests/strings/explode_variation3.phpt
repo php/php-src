@@ -24,7 +24,7 @@ class sample  {
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
 
-// array with different values for $delimeter
+// array with different values for $delimiter
 $limits =  array (
 
 		  // integer values
@@ -70,11 +70,11 @@ $limits =  array (
 
 // loop through with each element of the $limits array to test explode() function
 $count = 1;
-$delimeter = " ";
+$delimiter = " ";
 $string = "piece1 piece2 piece3 piece4 piece5 piece6";
 foreach($limits as $limit) {
   echo "-- Iteration $count --\n";
-  var_dump( explode($delimeter, $string, $limit) );
+  var_dump( explode($delimiter, $string, $limit) );
   $count ++;
 }
 
@@ -177,15 +177,15 @@ array(6) {
 }
 -- Iteration 10 --
 
-Warning: explode() expects parameter 3 to be long, array given in %s on line %d
+Warning: explode() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: explode() expects parameter 3 to be long, array given in %s on line %d
+Warning: explode() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: explode() expects parameter 3 to be long, array given in %s on line %d
+Warning: explode() expects parameter 3 to be integer, array given in %s on line %d
 NULL
 -- Iteration 13 --
 array(1) {
@@ -219,11 +219,11 @@ array(1) {
 }
 -- Iteration 19 --
 
-Warning: explode() expects parameter 3 to be long, object given in %s on line %d
+Warning: explode() expects parameter 3 to be integer, object given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: explode() expects parameter 3 to be long, resource given in %s on line %d
+Warning: explode() expects parameter 3 to be integer, resource given in %s on line %d
 NULL
 -- Iteration 21 --
 array(1) {

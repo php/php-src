@@ -3,11 +3,9 @@ ResourceBundle constructor bundle accepts NULL for first two arguments
 --INI--
 date.timezone=Atlantic/Azores
 --SKIPIF--
-<?php
-if (!extension_loaded('intl'))
-	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '4.8') < 0)
-	die('skip ICU >= 4.8 only');
+<?php if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '4.8') < 0) die('skip ICU >= 4.8 only'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

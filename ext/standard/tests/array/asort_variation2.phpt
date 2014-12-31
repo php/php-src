@@ -70,7 +70,7 @@ $unexpected_values = array(
 );
 
 // loop though each element of the array and check the working of asort()
-// when $flag arugment is supplied with different values from $unexpected_values
+// when $flag argument is supplied with different values from $unexpected_values
 echo "\n-- Testing asort() by supplying different unexpected values for 'sort_flags' argument --\n";
 
 $counter = 1;
@@ -211,7 +211,7 @@ array(3) {
 }
 -- Iteration 13 --
 
-Warning: asort() expects parameter 2 to be long, string given in %s on line %d
+Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -223,7 +223,7 @@ array(3) {
 }
 -- Iteration 14 --
 
-Warning: asort() expects parameter 2 to be long, string given in %s on line %d
+Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -235,7 +235,7 @@ array(3) {
 }
 -- Iteration 15 --
 
-Warning: asort() expects parameter 2 to be long, string given in %s on line %d
+Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -247,7 +247,7 @@ array(3) {
 }
 -- Iteration 16 --
 
-Warning: asort() expects parameter 2 to be long, string given in %s on line %d
+Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -259,7 +259,7 @@ array(3) {
 }
 -- Iteration 17 --
 
-Warning: asort() expects parameter 2 to be long, object given in %s on line %d
+Warning: asort() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -271,7 +271,7 @@ array(3) {
 }
 -- Iteration 18 --
 
-Warning: asort() expects parameter 2 to be long, string given in %s on line %d
+Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -283,7 +283,7 @@ array(3) {
 }
 -- Iteration 19 --
 
-Warning: asort() expects parameter 2 to be long, string given in %s on line %d
+Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -295,7 +295,7 @@ array(3) {
 }
 -- Iteration 20 --
 
-Warning: asort() expects parameter 2 to be long, resource given in %s on line %d
+Warning: asort() expects parameter 2 to be integer, resource given in %s on line %d
 bool(false)
 array(3) {
   [1]=>

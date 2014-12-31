@@ -1,5 +1,5 @@
 --TEST--
-Bug #39971 (pg_insert/pg_update do not allow now() to be used for timestamp fields)
+Bug #39971 (8.0+) (pg_insert/pg_update do not allow now() to be used for timestamp fields)
 --SKIPIF--
 <?php 
 require_once('skipif.inc');

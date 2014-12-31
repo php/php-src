@@ -357,7 +357,24 @@ if ($pid) {
 					$transfer_type = $ascii? 'ASCII' : 'BINARY' ;
 					fputs($fs, "Bar\r\n");
 					fputs($s, "226 Closing data Connection.\r\n");
-					break;
+                                        break;
+                                case "fget_large":
+					fputs($s, "150 File status okay; about to open data connection.\r\n");
+                                        $transfer_type = $ascii? 'ASCII' : 'BINARY' ;
+                                        if ($GLOBALS['rest_pos'] == '5368709119') {
+					    fputs($fs, "X");
+                                        } else {
+					    fputs($fs, "Y");
+                                        }
+					fputs($s, "226 Closing data Connection.\r\n");
+                                        break;
+                case "mediumfile":
+					fputs($s, "150 File status okay; about to open data connection.\r\n");
+					for($i = 0; $i < 150; $i++){
+						fputs($fs, "This is line $i of the test data.\n");
+					}
+					fputs($s, "226 Closing data Connection.\r\n");
+
 				default:
 					fputs($s, "550 {$matches[1]}: No such file or directory \r\n");
 					break;
@@ -393,11 +410,12 @@ if ($pid) {
 		}elseif (preg_match('/^LIST no_exists\//', $buf, $matches)) {
 			fputs($s, "425 Error establishing connection\r\n");
 
-		}elseif (preg_match('/^REST \d+/', $buf, $matches)) {
+                }elseif (preg_match('/^REST (\d+)/', $buf, $matches)) {
+                        $GLOBALS['rest_pos'] = $matches[1];
 			fputs($s, "350 OK\r\n");
-		}
-
-		else {
+                }elseif (preg_match('/^SIZE largefile/', $buf)) {
+                        fputs($s, "213 5368709120\r\n");
+                }else {
 			fputs($s, "500 Syntax error, command unrecognized.\r\n");
 			dump_and_exit($buf);
 		}

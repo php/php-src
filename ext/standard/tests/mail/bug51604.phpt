@@ -11,7 +11,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 --FILE--
 <?php
 // Initialise all required variables
-$to = 'user@company.com';
+$to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = "KHeaders\n\n\n\n\n";
@@ -27,7 +27,7 @@ unlink($outFile);
 ===DONE===
 --EXPECT--
 bool(true)
-To: user@company.com
+To: user@example.com
 Subject: Test Subject
 KHeaders
 

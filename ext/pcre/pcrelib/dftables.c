@@ -106,11 +106,24 @@ fprintf(f,
   "library and dead code stripping is activated. This leads to link errors.\n"
   "Pulling in the header ensures that the array gets flagged as \"someone\n"
   "outside this compilation unit might reference this\" and so it will always\n"
-  "be supplied to the linker. */\n\n"
+  "be supplied to the linker. */\n\n");
+
+/* Force config.h in z/OS */
+
+#if defined NATIVE_ZOS
+fprintf(f,
+  "/* For z/OS, config.h is forced */\n"
+  "#ifndef HAVE_CONFIG_H\n"
+  "#define HAVE_CONFIG_H 1\n"
+  "#endif\n\n");
+#endif
+
+fprintf(f,
   "#ifdef HAVE_CONFIG_H\n"
   "#include \"config.h\"\n"
   "#endif\n\n"
   "#include \"pcre_internal.h\"\n\n");
+
 fprintf(f,
   "const pcre_uint8 PRIV(default_tables)[] = {\n\n"
   "/* This table is a lower casing table. */\n\n");

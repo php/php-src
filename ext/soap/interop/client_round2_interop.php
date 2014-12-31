@@ -93,7 +93,7 @@ class Interop_Client
     function _fetchEndpoints(&$soapclient, $test) {
         $this->_getEndpoints($test, 1);
 
-        // retreive endpoints from the endpoint server
+        // retrieve endpoints from the endpoint server
         $endpointArray = $soapclient->__soapCall("GetEndpointInfo",array("groupName"=>$test),array('soapaction'=>"http://soapinterop.org/",'uri'=>"http://soapinterop.org/"));
         if (is_soap_fault($endpointArray) || PEAR::isError($endpointArray)) {
             if ($this->html) print "<pre>";
@@ -133,7 +133,7 @@ class Interop_Client
 
     /**
     *  fetchEndpoints
-    * retreive endpoints interop server
+    * retrieve endpoints interop server
     *
     * @return boolean result
     * @access private
@@ -158,7 +158,7 @@ class Interop_Client
             }
             return NULL;
         }
-        // retreive all endpoints now
+        // retrieve all endpoints now
         $this->currentTest = $test;
         $x = $this->_getEndpoints($test);
         return $x;
@@ -166,7 +166,7 @@ class Interop_Client
 
     /**
     *  getEndpoints
-    * retreive endpoints from either database or interop server
+    * retrieve endpoints from either database or interop server
     *
     * @param string base (see local var $tests)
     * @param boolean all (if false, only get valid endpoints, status=1)
@@ -182,7 +182,7 @@ class Interop_Client
 
     /**
     *  _getEndpoints
-    * retreive endpoints from database
+    * retrieve endpoints from database
     *
     * @param string base (see local var $tests)
     * @param boolean all (if false, only get valid endpoints, status=1)
@@ -222,7 +222,7 @@ class Interop_Client
 
     /**
     *  getResults
-    * retreive results from the database, stuff them into the endpoint array
+    * retrieve results from the database, stuff them into the endpoint array
     *
     * @access private
     */
@@ -230,7 +230,7 @@ class Interop_Client
         // be sure we have the right endpoints for this test result
         $this->getEndpoints($test);
 
-        // retreive the results and put them into the endpoint info
+        // retrieve the results and put them into the endpoint info
         $sql = "select * from results where class='$test' and type='$type' and wsdl=$wsdl";
         $results = $this->dbc->getAll($sql,NULL, DB_FETCHMODE_ASSOC );
         foreach ($results as $result) {
@@ -300,7 +300,7 @@ class Interop_Client
 
     /**
     *  decodeSoapval
-    * decodes a soap value to php type, used for test result comparisions
+    * decodes a soap value to php type, used for test result comparisons
     *
     * @param SOAP_Value soapval
     * @return mixed result
@@ -373,7 +373,7 @@ class Interop_Client
                 }
                 $soap =& $endpoint_info['client'];
 
-                # XXX how do we determine a failure on retreiving/parsing wsdl?
+                # XXX how do we determine a failure on retrieving/parsing wsdl?
                 if ($soap->wsdl->fault) {
                     $fault = $soap->wsdl->fault;
                     $soap_test->setResult(0,'WSDL',
@@ -398,7 +398,7 @@ class Interop_Client
             $namespace = $soapaction = 'http://soapinterop.org/';
             // hack to make tests work with MS SoapToolkit
             // it's the only one that uses this soapaction, and breaks if
-            // it isn't right.  Can't wait for soapaction to be fully depricated
+            // it isn't right.  Can't wait for soapaction to be fully deprecated
             if ($this->currentTest == 'base' &&
                 strstr($endpoint_info['endpointName'],'MS SOAP ToolKit 2.0')) {
                 $soapaction = 'urn:soapinterop';
@@ -657,12 +657,12 @@ try {
 
     /**
     *  getResults
-    * retreive results from the database, stuff them into the endpoint array
+    * retrieve results from the database, stuff them into the endpoint array
     *
     * @access private
     */
     function getMethodList($test = 'base') {
-        // retreive the results and put them into the endpoint info
+        // retrieve the results and put them into the endpoint info
         $sql = "select distinct(function) from results where class='$test' order by function";
         $results = $this->dbc->getAll($sql);
         $ar = array();

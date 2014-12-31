@@ -28,7 +28,7 @@ struct itimerval {
 	struct timeval it_value;	/* current value */
 };
 
-#ifndef timespec
+#if !defined(timespec) && _MSC_VER < 1900
 struct timespec
 {
 	time_t   tv_sec;   /* seconds */
@@ -49,5 +49,7 @@ PHPAPI extern int setitimer(int which, const struct itimerval *value,
 					 struct itimerval *ovalue);
 
 PHPAPI int nanosleep( const struct timespec * rqtp, struct timespec * rmtp );
+
+PHPAPI int usleep(unsigned int useconds);
 
 #endif

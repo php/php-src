@@ -1,8 +1,8 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -211,7 +211,7 @@ INLINE static int lookup_integer_header(char *headername, int default_value)
  */
 
 static int
-php_roxen_low_ub_write(const char *str, uint str_length TSRMLS_DC) {
+php_roxen_low_ub_write(const char *str, uint str_length) {
   int sent_bytes = 0;
   struct pike_string *to_write = NULL;
 #ifdef ROXEN_USE_ZTS
@@ -242,7 +242,7 @@ php_roxen_low_ub_write(const char *str, uint str_length TSRMLS_DC) {
  */
 
 static int
-php_roxen_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
+php_roxen_sapi_ub_write(const char *str, uint str_length)
 {
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
@@ -274,7 +274,7 @@ php_roxen_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
       }
     }
   } else {
-    THREAD_SAFE_RUN(sent_bytes = php_roxen_low_ub_write(str, str_length TSRMLS_CC),
+    THREAD_SAFE_RUN(sent_bytes = php_roxen_low_ub_write(str, str_length),
 		    "write");
   }
   return sent_bytes;
@@ -324,7 +324,7 @@ static void php_roxen_set_header(char *header_name, char *value, char *p)
  */
 static int
 php_roxen_sapi_header_handler(sapi_header_struct *sapi_header,
-			      sapi_headers_struct *sapi_headers TSRMLS_DC)
+			      sapi_headers_struct *sapi_headers)
 {
   char *header_name, *header_content, *p;
   header_name = sapi_header->header;
@@ -346,7 +346,7 @@ php_roxen_sapi_header_handler(sapi_header_struct *sapi_header,
  */
 
 static int
-php_roxen_low_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+php_roxen_low_send_headers(sapi_headers_struct *sapi_headers)
 {
   struct pike_string *ind;
   struct svalue *s_headermap;
@@ -375,10 +375,10 @@ php_roxen_low_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 }
 
 static int
-php_roxen_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+php_roxen_sapi_send_headers(sapi_headers_struct *sapi_headers)
 {
   int res = 0;
-  THREAD_SAFE_RUN(res = php_roxen_low_send_headers(sapi_headers TSRMLS_CC), "send headers");
+  THREAD_SAFE_RUN(res = php_roxen_low_send_headers(sapi_headers), "send headers");
   return res;
 }
 
@@ -393,7 +393,6 @@ INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
-  TSRMLS_FETCH();
   
   if(!MY_FD_OBJ->prog)
   {
@@ -414,7 +413,7 @@ INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
 }
 
 static int
-php_roxen_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
+php_roxen_sapi_read_post(char *buf, uint count_bytes)
 {
   uint total_read = 0;
   THREAD_SAFE_RUN(total_read = php_roxen_low_read_post(buf, count_bytes), "read post");
@@ -427,7 +426,7 @@ php_roxen_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
  */
 	
 static char *
-php_roxen_sapi_read_cookies(TSRMLS_D)
+php_roxen_sapi_read_cookies(void)
 {
   char *cookies;
   cookies = lookup_string_header("HTTP_COOKIE", NULL);
@@ -521,7 +520,7 @@ static sapi_module_struct roxen_sapi_module = {
 			&zvalue, sizeof(zval *), NULL)
 
 static void
-php_roxen_hash_environment(TSRMLS_D)
+php_roxen_hash_environment(void)
 {
   int i;
   char buf[512];
@@ -571,7 +570,7 @@ php_roxen_hash_environment(TSRMLS_D)
  * "executes" the script
  */
 
-static int php_roxen_module_main(TSRMLS_D)
+static int php_roxen_module_main(void)
 {
   int res, len;
   char *dir;
@@ -586,14 +585,14 @@ static int php_roxen_module_main(TSRMLS_D)
   file_handle.opened_path = NULL;
 
   THREADS_ALLOW();
-  res = php_request_startup(TSRMLS_C);
+  res = php_request_startup();
   THREADS_DISALLOW();
   if(res == FAILURE) {
     return 0;
   }
-  php_roxen_hash_environment(TSRMLS_C);
+  php_roxen_hash_environment();
   THREADS_ALLOW();
-  php_execute_script(&file_handle TSRMLS_CC);
+  php_execute_script(&file_handle);
   php_request_shutdown(NULL);
   THREADS_DISALLOW();
   return 1;
@@ -614,15 +613,14 @@ void f_php_roxen_request_handler(INT32 args)
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
-  TSRMLS_FETCH();
-
+  
   if(current_thread == th_self())
-    php_error(E_WARNING, "PHP5.Interpreter->run: Tried to run a PHP-script from a PHP "
+    php_error(E_WARNING, "PHP7.Interpreter->run: Tried to run a PHP-script from a PHP "
 	  "callback!");
-  get_all_args("PHP5.Interpreter->run", args, "%S%m%O%*", &script,
+  get_all_args("PHP7.Interpreter->run", args, "%S%m%O%*", &script,
 	       &request_data, &my_fd_obj, &done_callback);
   if(done_callback->type != PIKE_T_FUNCTION) 
-    php_error(E_WARNING, "PHP5.Interpreter->run: Bad argument 4, expected function.\n");
+    php_error(E_WARNING, "PHP7.Interpreter->run: Bad argument 4, expected function.\n");
   PHP_LOCK(THIS); /* Need to lock here or reusing the same object might cause
 		       * problems in changing stuff in that object */
 #ifndef ROXEN_USE_ZTS
@@ -658,12 +656,12 @@ void f_php_roxen_request_handler(INT32 args)
   {
     int fd = fd_from_object(raw_fd->u.object);
     if(fd == -1)
-      php_error(E_WARNING, "PHP5.Interpreter->run: my_fd object not open or not an FD.\n");
+      php_error(E_WARNING, "PHP7.Interpreter->run: my_fd object not open or not an FD.\n");
     THIS->my_fd = fd;
   } else
     THIS->my_fd = 0;
   
-  status = php_roxen_module_main(TSRMLS_C);
+  status = php_roxen_module_main();
   current_thread = -1;
   
   apply_svalue(done_callback, 0);

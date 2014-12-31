@@ -35,6 +35,8 @@ On Linux/FreeBSD
 Before launching daemon make sure that there is no file /var/net-snmp/snmpd.conf
 Delete it if exists. Ingoring to to so will fail SNMPv3 tests.
 
+- Place bigtest.sh near snmpd.conf, tune path to it in snmpd.conf
+
 - Launch snmpd (service snmpd start or /etc/init.d/snmpd start).
   Alternatively you can start snmpd daemon using following command line:
     sudo snmpd -C -c ./snmpd.conf -f -Le

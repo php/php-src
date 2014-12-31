@@ -99,42 +99,42 @@ array(3) {
 }
 -- Iteration 3 --
 string(2) "c:"
-string(2) "c:"
+string(1) "c"
 string(0) ""
-string(2) "c:"
+string(1) "c"
 array(3) {
   ["dirname"]=>
   string(2) "c:"
   ["basename"]=>
-  string(2) "c:"
+  string(1) "c"
   ["filename"]=>
-  string(2) "c:"
+  string(1) "c"
 }
 -- Iteration 4 --
 string(3) "c:\"
-string(2) "c:"
+string(1) "c"
 string(0) ""
-string(2) "c:"
+string(1) "c"
 array(3) {
   ["dirname"]=>
   string(3) "c:\"
   ["basename"]=>
-  string(2) "c:"
+  string(1) "c"
   ["filename"]=>
-  string(2) "c:"
+  string(1) "c"
 }
 -- Iteration 5 --
 string(3) "c:\"
-string(2) "c:"
+string(1) "c"
 string(0) ""
-string(2) "c:"
+string(1) "c"
 array(3) {
   ["dirname"]=>
   string(3) "c:\"
   ["basename"]=>
-  string(2) "c:"
+  string(1) "c"
   ["filename"]=>
-  string(2) "c:"
+  string(1) "c"
 }
 -- Iteration 6 --
 string(1) "."

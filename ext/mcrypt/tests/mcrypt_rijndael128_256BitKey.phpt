@@ -1,5 +1,5 @@
 --TEST--
-Test mcrypt_encrypt() function : TripleDES functionality 
+Test mcrypt_encrypt() function : AES functionality 
 --SKIPIF--
 <?php 
 if (!extension_loaded("mcrypt")) {
@@ -62,16 +62,24 @@ foreach ($keys as $key) {
 --- testing different key lengths
 
 key length=20
-string(128) "6369830bfc89a39c9981c9a40e349e3bbc8599c28d7ffbd7a330a67690dac6dfb76a55814e95c83cced68eb1544cdd8406d272c249bd0a60fa5b605d4aefbaa0"
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
+
+Warning: mcrypt_encrypt(): Key of size 20 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
+
+Warning: mcrypt_decrypt(): Key of size 20 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
 
 key length=24
 string(128) "8ecdf1ed5742aff16ef34c819c8d22c707c54f4d9ffc18e5f6ab79fe68c25705351e2c001a0b9f29e5def67570ca9da644efb69a8bb97940cb4bec094dae8bb5"
 string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
 
 key length=30
-string(128) "f7731f0c0ab22270b2f516c7837256ed731ba6658ca8f78cda2ab1588e204f990843719ae88474f6572711674fcda9f40d99155e4cc4f5a31aa461ad36a7871d"
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
+
+Warning: mcrypt_encrypt(): Key of size 30 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
+
+Warning: mcrypt_decrypt(): Key of size 30 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
 
 key length=32
 string(128) "f23bc103bfd0859a8318acee6d96e5f43dff68f3cdeae817a1e77c33492e32bdb82c5f660fcd1a2bfda70d9de4d5d8028ce179a9e2f7f9ee7dd61c7b4b409e95"
@@ -79,9 +87,9 @@ string(128) "546869732069732074686520736563726574206d657373616765207768696368206
 
 key length=40
 
-Warning: mcrypt_encrypt(): Size of key is too large for this algorithm in %s on line %d
-string(128) "f23bc103bfd0859a8318acee6d96e5f43dff68f3cdeae817a1e77c33492e32bdb82c5f660fcd1a2bfda70d9de4d5d8028ce179a9e2f7f9ee7dd61c7b4b409e95"
+Warning: mcrypt_encrypt(): Key of size 40 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
 
-Warning: mcrypt_decrypt(): Size of key is too large for this algorithm in %s on line %d
-string(128) "546869732069732074686520736563726574206d657373616765207768696368206d75737420626520656e637279707465640000000000000000000000000000"
+Warning: mcrypt_decrypt(): Key of size 40 not supported by this algorithm. Only keys of sizes 16, 24 or 32 supported in %s on line %d
+string(0) ""
 ===DONE===

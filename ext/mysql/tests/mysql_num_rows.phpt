@@ -85,5 +85,5 @@ Warning: mysql_num_rows() expects parameter 1 to be resource, boolean given in %
 
 Warning: mysql_free_result() expects parameter 1 to be resource, boolean given in %s on line %d
 
-Warning: mysql_num_rows(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_num_rows(): supplied resource is not a valid MySQL result resource in %s on line %d
 done!

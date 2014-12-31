@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -31,32 +31,32 @@
 #include "php_pdo_odbc_int.h"
 #include "zend_exceptions.h"
 
-static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
+static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	pdo_odbc_errinfo *einfo = &H->einfo;
 	pdo_odbc_stmt *S = NULL;
-	char *message = NULL;
+	zend_string *message = NULL;
 
 	if (stmt) {
 		S = (pdo_odbc_stmt*)stmt->driver_data;
 		einfo = &S->einfo;
 	}
 
-	spprintf(&message, 0, "%s (%s[%ld] at %s:%d)",
+	message = strpprintf(0, "%s (%s[%ld] at %s:%d)",
 				einfo->last_err_msg,
 				einfo->what, einfo->last_error,
 				einfo->file, einfo->line);
 
 	add_next_index_long(info, einfo->last_error);
-	add_next_index_string(info, message, 0);
-	add_next_index_string(info, einfo->last_state, 1);
+	add_next_index_str(info, message);
+	add_next_index_string(info, einfo->last_state);
 
 	return 1;
 }
 
 
-void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, char *what, const char *file, int line TSRMLS_DC) /* {{{ */
+void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, char *what, const char *file, int line) /* {{{ */
 {
 	SQLRETURN rc;
 	SQLSMALLINT	errmsgsize = 0;
@@ -104,7 +104,7 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 	strcpy(*pdo_err, einfo->last_state);
 /* printf("@@ SQLSTATE[%s] %s\n", *pdo_err, einfo->last_err_msg); */
 	if (!dbh->methods) {
-		zend_throw_exception_ex(php_pdo_get_exception(), einfo->last_error TSRMLS_CC, "SQLSTATE[%s] %s: %d %s",
+		zend_throw_exception_ex(php_pdo_get_exception(), einfo->last_error, "SQLSTATE[%s] %s: %d %s",
 				*pdo_err, what, einfo->last_error, einfo->last_err_msg);
 	}
 
@@ -124,7 +124,7 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 }
 /* }}} */
 
-static int odbc_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
+static int odbc_handle_closer(pdo_dbh_t *dbh)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle*)dbh->driver_data;
 
@@ -142,7 +142,7 @@ static int odbc_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 	return 0;
 }
 
-static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, zval *driver_options TSRMLS_DC)
+static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options)
 {
 	RETCODE rc;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
@@ -158,7 +158,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 	/* before we prepare, we need to peek at the query; if it uses named parameters,
 	 * we want PDO to rewrite them for us */
 	stmt->supports_placeholders = PDO_PLACEHOLDER_POSITIONAL;
-	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len TSRMLS_CC);
+	ret = pdo_parse_params(stmt, (char*)sql, sql_len, &nsql, &nsql_len);
 	
 	if (ret == 1) {
 		/* query was re-written */
@@ -181,7 +181,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 		return 0;
 	}
 
-	cursor_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY TSRMLS_CC);
+	cursor_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY);
 	if (cursor_type != PDO_CURSOR_FWDONLY) {
 		rc = SQLSetStmtAttr(S->stmt, SQL_ATTR_CURSOR_SCROLLABLE, (void*)SQL_SCROLLABLE, 0);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
@@ -220,7 +220,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 	return 1;
 }
 
-static long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
+static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -261,14 +261,14 @@ out:
 	return row_count;
 }
 
-static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type param_type  TSRMLS_DC)
+static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type param_type )
 {
-	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
+	/* pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data; */
 	/* TODO: figure it out */
 	return 0;
 }
 
-static int odbc_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
+static int odbc_handle_begin(pdo_dbh_t *dbh)
 {
 	if (dbh->auto_commit) {
 		/* we need to disable auto-commit now, to be able to initiate a transaction */
@@ -284,7 +284,7 @@ static int odbc_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
 	return 1;
 }
 
-static int odbc_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
+static int odbc_handle_commit(pdo_dbh_t *dbh)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -310,7 +310,7 @@ static int odbc_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 	return 1;
 }
 
-static int odbc_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
+static int odbc_handle_rollback(pdo_dbh_t *dbh)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -336,7 +336,7 @@ static int odbc_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	return 1;
 }
 
-static int odbc_handle_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
+static int odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	switch (attr) {
@@ -351,12 +351,12 @@ static int odbc_handle_set_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
 	}
 }
 
-static int odbc_handle_get_attr(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
+static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	switch (attr) {
 		case PDO_ATTR_CLIENT_VERSION:
-			ZVAL_STRING(val, "ODBC-" PDO_ODBC_TYPE, 1);
+			ZVAL_STRING(val, "ODBC-" PDO_ODBC_TYPE);
 			return 1;
 
 		case PDO_ATTR_SERVER_VERSION:
@@ -388,7 +388,7 @@ static struct pdo_dbh_methods odbc_methods = {
 	NULL,	/* check_liveness */
 };
 
-static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
+static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
 {
 	pdo_odbc_db_handle *H;
 	RETCODE rc;
@@ -431,7 +431,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 	}
 
 	/* set up the cursor library, if needed, or if configured explicitly */
-	cursor_lib = pdo_attr_lval(driver_options, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY, SQL_CUR_USE_IF_NEEDED TSRMLS_CC);
+	cursor_lib = pdo_attr_lval(driver_options, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY, SQL_CUR_USE_IF_NEEDED);
 	rc = SQLSetConnectAttr(H->dbc, SQL_ODBC_CURSORS, (void*)cursor_lib, SQL_IS_INTEGER);
 	if (rc != SQL_SUCCESS && cursor_lib != SQL_CUR_USE_IF_NEEDED) {
 		pdo_odbc_drv_error("SQLSetConnectAttr SQL_ODBC_CURSORS");

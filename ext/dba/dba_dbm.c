@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,8 +60,8 @@ DBA_OPEN_FUNC(dbm)
 	int filemode = 0644;
 
 	if(info->argc > 0) {
-		convert_to_long_ex(info->argv[0]);
-		filemode = Z_LVAL_PP(info->argv[0]);
+		convert_to_long_ex(&info->argv[0]);
+		filemode = Z_LVAL(info->argv[0]);
 	}
 	
 	if(info->mode == DBA_TRUNC) {
@@ -195,7 +195,7 @@ DBA_INFO_FUNC(dbm)
 #if DBA_GDBM
 	if (!strcmp(DBM_VERSION, "GDBM"))
 	{
-		return dba_info_gdbm(hnd, info TSRMLS_CC);
+		return dba_info_gdbm(hnd, info);
 	}
 #endif
 	return estrdup(DBM_VERSION);

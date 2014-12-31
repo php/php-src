@@ -1,8 +1,8 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -82,8 +82,11 @@ PHP_METHOD(DateTimeImmutable, setTime);
 PHP_METHOD(DateTimeImmutable, setDate);
 PHP_METHOD(DateTimeImmutable, setISODate);
 PHP_METHOD(DateTimeImmutable, setTimestamp);
+PHP_METHOD(DateTimeImmutable, createFromMutable);
 
 PHP_METHOD(DateTimeZone, __construct);
+PHP_METHOD(DateTimeZone, __wakeup);
+PHP_METHOD(DateTimeZone, __set_state);
 PHP_FUNCTION(timezone_open);
 PHP_FUNCTION(timezone_name_get);
 PHP_FUNCTION(timezone_name_from_abbr);
@@ -101,6 +104,11 @@ PHP_FUNCTION(date_interval_format);
 PHP_FUNCTION(date_interval_create_from_date_string);
 
 PHP_METHOD(DatePeriod, __construct);
+PHP_METHOD(DatePeriod, __wakeup);
+PHP_METHOD(DatePeriod, __set_state);
+PHP_METHOD(DatePeriod, getStartDate);
+PHP_METHOD(DatePeriod, getEndDate);
+PHP_METHOD(DatePeriod, getDateInterval);
 
 /* Options and Configuration */
 PHP_FUNCTION(date_default_timezone_set);
@@ -123,36 +131,49 @@ typedef struct _php_interval_obj php_interval_obj;
 typedef struct _php_period_obj php_period_obj;
 
 struct _php_date_obj {
-	zend_object   std;
 	timelib_time *time;
 	HashTable    *props;
+	zend_object   std;
 };
 
+static inline php_date_obj *php_date_obj_from_obj(zend_object *obj) {
+	return (php_date_obj*)((char*)(obj) - XtOffsetOf(php_date_obj, std));
+}
+
+#define Z_PHPDATE_P(zv)  php_date_obj_from_obj(Z_OBJ_P((zv)))
+
 struct _php_timezone_obj {
-	zend_object     std;
 	int             initialized;
 	int             type;
 	union {
-		timelib_tzinfo *tz; /* TIMELIB_ZONETYPE_ID; */
-		timelib_sll     utc_offset; /* TIMELIB_ZONETYPE_OFFSET */
-		struct                      /* TIMELIB_ZONETYPE_ABBR */
-		{
-			timelib_sll  utc_offset;
-			char        *abbr;
-			int          dst;
-		} z;
+		timelib_tzinfo   *tz;         /* TIMELIB_ZONETYPE_ID */
+		timelib_sll       utc_offset; /* TIMELIB_ZONETYPE_OFFSET */
+		timelib_abbr_info z;          /* TIMELIB_ZONETYPE_ABBR */
 	} tzi;
+	HashTable *props;
+	zend_object std;
 };
 
+static inline php_timezone_obj *php_timezone_obj_from_obj(zend_object *obj) {
+	return (php_timezone_obj*)((char*)(obj) - XtOffsetOf(php_timezone_obj, std));
+}
+
+#define Z_PHPTIMEZONE_P(zv)  php_timezone_obj_from_obj(Z_OBJ_P((zv)))
+
 struct _php_interval_obj {
-	zend_object       std;
 	timelib_rel_time *diff;
 	HashTable        *props;
 	int               initialized;
+	zend_object       std;
 };
 
+static inline php_interval_obj *php_interval_obj_from_obj(zend_object *obj) {
+	return (php_interval_obj*)((char*)(obj) - XtOffsetOf(php_interval_obj, std));
+}
+
+#define Z_PHPINTERVAL_P(zv)  php_interval_obj_from_obj(Z_OBJ_P((zv)))
+
 struct _php_period_obj {
-	zend_object       std;
 	timelib_time     *start;
 	zend_class_entry *start_ce;
 	timelib_time     *current;
@@ -161,7 +182,14 @@ struct _php_period_obj {
 	int               recurrences;
 	int               initialized;
 	int               include_start_date;
+	zend_object       std;
 };
+
+static inline php_period_obj *php_period_obj_from_obj(zend_object *obj) {
+	return (php_period_obj*)((char*)(obj) - XtOffsetOf(php_period_obj, std));
+}
+
+#define Z_PHPPERIOD_P(zv)  php_period_obj_from_obj(Z_OBJ_P((zv)))
 
 ZEND_BEGIN_MODULE_GLOBALS(date)
 	char                    *default_timezone;
@@ -172,32 +200,32 @@ ZEND_BEGIN_MODULE_GLOBALS(date)
 ZEND_END_MODULE_GLOBALS(date)
 
 #ifdef ZTS
-#define DATEG(v) TSRMG(date_globals_id, zend_date_globals *, v)
+#define DATEG(v) ZEND_TSRMG(date_globals_id, zend_date_globals *, v)
 #else
 #define DATEG(v) (date_globals.v)
 #endif
 
-/* Backwards compability wrapper */
-PHPAPI signed long php_parse_date(char *string, signed long *now);
+/* Backwards compatibility wrapper */
+PHPAPI zend_long php_parse_date(char *string, zend_long *now);
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
-PHPAPI int php_idate(char format, time_t ts, int localtime TSRMLS_DC);
+PHPAPI int php_idate(char format, time_t ts, int localtime);
 #if HAVE_STRFTIME
 #define _php_strftime php_strftime
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 #endif
-PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localtime TSRMLS_DC);
+PHPAPI zend_string *php_format_date(char *format, size_t format_len, time_t ts, int localtime);
 
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);
-PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D);
+PHPAPI timelib_tzinfo *get_timezone_info(void);
 
 /* Grabbing CE's so that other exts can use the date objects too */
 PHPAPI zend_class_entry *php_date_get_date_ce(void);
 PHPAPI zend_class_entry *php_date_get_timezone_ce(void);
 
 /* Functions for creating DateTime objects, and initializing them from a string */
-PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object TSRMLS_DC);
-PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, int time_str_len, char *format, zval *timezone_object, int ctor TSRMLS_DC);
+PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object);
+PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, size_t time_str_len, char *format, zval *timezone_object, int ctor);
 
 
 #endif /* PHP_DATE_H */

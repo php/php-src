@@ -34,6 +34,7 @@ int fpm_stdio_init_main() /* {{{ */
 
 	if (0 > dup2(fd, STDIN_FILENO) || 0 > dup2(fd, STDOUT_FILENO)) {
 		zlog(ZLOG_SYSERROR, "failed to init stdio: dup2()");
+		close(fd);
 		return -1;
 	}
 	close(fd);
@@ -41,9 +42,28 @@ int fpm_stdio_init_main() /* {{{ */
 }
 /* }}} */
 
+static inline int fpm_use_error_log() {  /* {{{ */
+	/*
+	 * the error_log is NOT used when running in foreground
+	 * and from a tty (user looking at output).
+	 * So, error_log is used by
+	 * - SysV init launch php-fpm as a daemon
+	 * - Systemd launch php-fpm in foreground
+	 */
+#if HAVE_UNISTD_H
+	if (fpm_global_config.daemonize || (!isatty(STDERR_FILENO) && !fpm_globals.force_stderr)) {
+#else
+	if (fpm_global_config.daemonize) {
+#endif
+		return 1;
+	}
+	return 0;
+}
+
+/* }}} */
 int fpm_stdio_init_final() /* {{{ */
 {
-	if (fpm_global_config.daemonize) {
+	if (fpm_use_error_log()) {
 		/* prevent duping if logging to syslog */
 		if (fpm_globals.error_log_fd > 0 && fpm_globals.error_log_fd != STDERR_FILENO) {
 
@@ -66,6 +86,11 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 		closelog(); /* ensure to close syslog not to interrupt with PHP syslog code */
 	} else
 #endif
+
+	/* Notice: child cannot use master error_log
+	 * because not aware when being reopen
+	 * else, should use if (!fpm_use_error_log())
+	 */
 	if (fpm_globals.error_log_fd > 0) {
 		close(fpm_globals.error_log_fd);
 	}
@@ -267,7 +292,7 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	if (!strcasecmp(fpm_global_config.error_log, "syslog")) {
 		openlog(fpm_global_config.syslog_ident, LOG_PID | LOG_CONS, fpm_global_config.syslog_facility);
 		fpm_globals.error_log_fd = ZLOG_SYSLOG;
-		if (fpm_global_config.daemonize) {
+		if (fpm_use_error_log()) {
 			zlog_set_fd(fpm_globals.error_log_fd);
 		}
 		return 0;
@@ -281,7 +306,7 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 	}
 
 	if (reopen) {
-		if (fpm_global_config.daemonize) {
+		if (fpm_use_error_log()) {
 			dup2(fd, STDERR_FILENO);
 		}
 
@@ -290,11 +315,13 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 		fd = fpm_globals.error_log_fd; /* for FD_CLOSEXEC to work */
 	} else {
 		fpm_globals.error_log_fd = fd;
-		if (fpm_global_config.daemonize) {
+		if (fpm_use_error_log()) {
 			zlog_set_fd(fpm_globals.error_log_fd);
 		}
 	}
-	fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
+	if (0 > fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC)) {
+		zlog(ZLOG_WARNING, "failed to change attribute of error_log");
+	}
 	return 0;
 }
 /* }}} */

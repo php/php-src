@@ -21,7 +21,7 @@ echo "*** Testing mail() : basic functionality ***\n";
 
 
 // Initialise all required variables
-$to = 'user@company.com';
+$to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $outFile = "/tmp/php_test_mailVariation2.out";
@@ -36,7 +36,7 @@ unlink($outFile);
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 bool(true)
-%w1%wTo: user@company.com
+%w1%wTo: user@example.com
 %w2%wSubject: Test Subject
 %w3%w
 %w4%wA Message

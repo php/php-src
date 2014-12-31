@@ -3,9 +3,6 @@ Bind with SQLT_NUM
 --SKIPIF--
 <?php
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
-if (preg_match('/^1[012]\./', oci_client_version()) != 1) {
-    die("skip test expected to work only with Oracle 10g or greater version of client");
-}
 ?>
 --FILE--
 <?php

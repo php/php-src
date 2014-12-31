@@ -23,8 +23,8 @@ echo "-- Default flags, MultipleIterator::MIT_NEED_ALL | MultipleIterator::MIT_K
 
 var_dump($m->getFlags() === (MultipleIterator::MIT_NEED_ALL | MultipleIterator::MIT_KEYS_NUMERIC));
 
-foreach($m as $value) {
-	var_dump($m->key(), $value);
+foreach($m as $key => $value) {
+	var_dump($key, $value);
 }
 try {
 	$m->current();
@@ -42,8 +42,8 @@ echo "-- Flags = MultipleIterator::MIT_NEED_ANY | MultipleIterator::MIT_KEYS_NUM
 $m->setFlags(MultipleIterator::MIT_NEED_ANY | MultipleIterator::MIT_KEYS_NUMERIC);
 var_dump($m->getFlags() === (MultipleIterator::MIT_NEED_ANY | MultipleIterator::MIT_KEYS_NUMERIC));
 
-foreach($m as $value) {
-	var_dump($m->key(), $value);
+foreach($m as $key => $value) {
+	var_dump($key, $value);
 }
 
 echo "-- Default flags, added element --\n";
@@ -51,8 +51,8 @@ echo "-- Default flags, added element --\n";
 $m->setFlags(MultipleIterator::MIT_NEED_ALL | MultipleIterator::MIT_KEYS_NUMERIC);
 
 $iter2[] = 3;
-foreach($m as $value) {
-	var_dump($m->key(), $value);
+foreach($m as $key => $value) {
+	var_dump($key, $value);
 }
 
 echo "-- Flags |= MultipleIterator::MIT_KEYS_ASSOC, with iterator associated with NULL --\n";
@@ -71,8 +71,8 @@ $m->attachIterator($iter1, "iter1");
 $m->attachIterator($iter2, b"iter2");
 $m->attachIterator($iter3, 3);
 
-foreach($m as $value) {
-	var_dump($m->key(), $value);
+foreach($m as $key => $value) {
+	var_dump($key, $value);
 }
 
 echo "-- Associate with invalid value --\n";
@@ -98,8 +98,8 @@ var_dump($m->containsIterator($iter2));
 var_dump($m->detachIterator($iter2));
 var_dump($m->countIterators());
 var_dump($m->containsIterator($iter2));
-foreach($m as $value) {
-	var_dump($m->key(), $value);
+foreach($m as $key => $value) {
+	var_dump($key, $value);
 }
 
 ?>

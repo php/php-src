@@ -1,8 +1,8 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@
  */
 #define NO_PIKE_SHORTHAND
 
-/* Ok, we are now using Pike level threads to handle PHP5 since
+/* Ok, we are now using Pike level threads to handle PHP7 since
  * the nice th_farm threads aren't working on Linux with glibc 2.2
  * (why this is I don't know).
  */
@@ -79,7 +79,7 @@
 #endif
 
 #ifndef PIKE_THREADS
-#error The PHP5 module requires that your Pike has thread support.
+#error The PHP7 module requires that your Pike has thread support.
 #endif
 
 #undef HIDE_GLOBAL_VARIABLES
@@ -103,7 +103,7 @@ typedef struct
 
 void pike_module_init(void);
 void pike_module_exit(void);
-static void free_struct(TSRMLS_D);
+static void free_struct(void);
 void f_php_caudium_request_handler(INT32 args);
 
 /* Defines to get to the data supplied when the script is started. */
@@ -209,7 +209,7 @@ INLINE static int lookup_integer_header(char *headername, int default_value)
  */
 
 INLINE static int
-php_caudium_low_ub_write(const char *str, uint str_length TSRMLS_DC) {
+php_caudium_low_ub_write(const char *str, uint str_length) {
   int sent_bytes = 0;
   struct pike_string *to_write = NULL;
   GET_THIS();
@@ -239,7 +239,7 @@ php_caudium_low_ub_write(const char *str, uint str_length TSRMLS_DC) {
  */
 
 static int
-php_caudium_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
+php_caudium_sapi_ub_write(const char *str, uint str_length)
 {
   GET_THIS();
   int sent_bytes = 0, fd = MY_FD;
@@ -269,7 +269,7 @@ php_caudium_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
     }
     THIS->written += sent_bytes;
   } else {
-    THREAD_SAFE_RUN(sent_bytes = php_caudium_low_ub_write(str, str_length TSRMLS_CC),
+    THREAD_SAFE_RUN(sent_bytes = php_caudium_low_ub_write(str, str_length),
 		    "write");
   }
   return sent_bytes;
@@ -335,7 +335,7 @@ php_caudium_set_header(char *header_name, char *value, char *p)
  */
 static int
 php_caudium_sapi_header_handler(sapi_header_struct *sapi_header,
-			      sapi_headers_struct *sapi_headers TSRMLS_DC)
+			      sapi_headers_struct *sapi_headers)
 {
   char *header_name, *header_content, *p;
   header_name = sapi_header->header;
@@ -357,7 +357,7 @@ php_caudium_sapi_header_handler(sapi_header_struct *sapi_header,
  */
 
 INLINE static int
-php_caudium_low_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+php_caudium_low_send_headers(sapi_headers_struct *sapi_headers)
 {
   struct pike_string *ind;
   struct svalue *s_headermap;
@@ -383,10 +383,10 @@ php_caudium_low_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 }
 
 static int
-php_caudium_sapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+php_caudium_sapi_send_headers(sapi_headers_struct *sapi_headers)
 {
   int res = 0;
-  THREAD_SAFE_RUN(res = php_caudium_low_send_headers(sapi_headers TSRMLS_CC), "send headers");
+  THREAD_SAFE_RUN(res = php_caudium_low_send_headers(sapi_headers), "send headers");
   return res;
 }
 
@@ -399,7 +399,6 @@ INLINE static int php_caudium_low_read_post(char *buf, uint count_bytes)
 {
   uint total_read = 0;
   GET_THIS();
-  TSRMLS_FETCH();
   
   if(!MY_FD_OBJ->prog)
   {
@@ -420,7 +419,7 @@ INLINE static int php_caudium_low_read_post(char *buf, uint count_bytes)
 }
 
 static int
-php_caudium_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
+php_caudium_sapi_read_post(char *buf, uint count_bytes)
 {
   uint total_read = 0;
   THREAD_SAFE_RUN(total_read = php_caudium_low_read_post(buf, count_bytes), "read post");
@@ -433,7 +432,7 @@ php_caudium_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
  */
 	
 static char *
-php_caudium_sapi_read_cookies(TSRMLS_D)
+php_caudium_sapi_read_cookies(void)
 {
   char *cookies;
   cookies = lookup_string_header("HTTP_COOKIE", NULL);
@@ -478,7 +477,7 @@ static zend_module_entry php_caudium_module = {
 };
 
 
-INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC)   
+INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array)   
 {
   int i;
   struct keypair *k;
@@ -488,16 +487,16 @@ INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array TS
   struct svalue *val;
   GET_THIS();
   php_register_variable("PHP_SELF", SG(request_info).request_uri,
-			track_vars_array TSRMLS_CC);
+			track_vars_array);
   php_register_variable("GATEWAY_INTERFACE", "CGI/1.1",
-			track_vars_array TSRMLS_CC);
+			track_vars_array);
   php_register_variable("REQUEST_METHOD",
 			(char *) SG(request_info).request_method,
-			track_vars_array TSRMLS_CC);
+			track_vars_array);
   php_register_variable("REQUEST_URI", SG(request_info).request_uri,
-			track_vars_array TSRMLS_CC);
+			track_vars_array);
   php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated,
-			track_vars_array TSRMLS_CC);
+			track_vars_array);
 
   sind = make_shared_string("env");
   headers = low_mapping_string_lookup(REQUEST_DATA, sind);
@@ -509,15 +508,15 @@ INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array TS
       if(ind && ind->type == PIKE_T_STRING &&
 	 val && val->type == PIKE_T_STRING) {
 	php_register_variable(ind->u.string->str, val->u.string->str,
-			      track_vars_array TSRMLS_CC );
+			      track_vars_array );
       }
     }
   }
 }
 
-static void sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC)
+static void sapi_caudium_register_variables(zval *track_vars_array)
 {
-  THREAD_SAFE_RUN(low_sapi_caudium_register_variables(track_vars_array TSRMLS_CC), "register_variables");
+  THREAD_SAFE_RUN(low_sapi_caudium_register_variables(track_vars_array), "register_variables");
 }
 
 
@@ -569,8 +568,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   struct thread_state *state;
   extern struct program *thread_id_prog;
 #endif
-  TSRMLS_FETCH();
-  GET_THIS();
+    GET_THIS();
   THIS->filename = ureq->filename;
   THIS->done_cb = ureq->done_cb;
   THIS->my_fd_obj = ureq->my_fd_obj;
@@ -626,8 +624,8 @@ static void php_caudium_module_main(php_caudium_request *ureq)
     SG(request_info).headers_only = 0;
   }
 
-  /* Let PHP5 handle the deconding of the AUTH */
-  php_handle_auth_data(lookup_string_header("HTTP_AUTHORIZATION", NULL), TSRMLS_C);
+  /* Let PHP7 handle the deconding of the AUTH */
+  php_handle_auth_data(lookup_string_header("HTTP_AUTHORIZATION", NULL), );
    /* Swap out this thread and release the interpreter lock to allow
    * Pike threads to run. We wait since the above would otherwise require
    * a lot of unlock/lock.
@@ -645,22 +643,22 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   file_handle.free_filename = 0;
 
   THIS->written = 0;
-  res = php_request_startup(TSRMLS_C);
+  res = php_request_startup();
 
   if(res == FAILURE) {
     THREAD_SAFE_RUN({
       apply_svalue(&THIS->done_cb, 0);
       pop_stack();
-      free_struct(TSRMLS_C);
+      free_struct();
     }, "Negative run response");
   } else {
-    php_execute_script(&file_handle TSRMLS_CC);
+    php_execute_script(&file_handle);
     php_request_shutdown(NULL);
     THREAD_SAFE_RUN({
       push_int(THIS->written);
       apply_svalue(&THIS->done_cb, 1);
       pop_stack();
-      free_struct(TSRMLS_C);
+      free_struct();
     }, "positive run response");
   }
 
@@ -738,7 +736,7 @@ void f_php_caudium_request_handler(INT32 args)
   pop_n_elems(args);
 }
 
-static void free_struct(TSRMLS_D)
+static void free_struct(void)
 {
   GET_THIS();
   if(THIS->request_data) free_mapping(THIS->request_data);

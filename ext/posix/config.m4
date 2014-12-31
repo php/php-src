@@ -45,6 +45,6 @@ int main(int argc, char *argv[])
     ])
   ])
   if test "$ac_cv_have_utsname_domainname" = yes; then
-    AC_DEFINE(HAVE_UTSNAME_DOMAINNAME, 1, [Wether struct utsname has domainname])
+    AC_DEFINE(HAVE_UTSNAME_DOMAINNAME, 1, [Whether struct utsname has domainname])
   fi
 fi

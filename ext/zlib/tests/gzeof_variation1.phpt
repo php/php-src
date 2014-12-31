@@ -9,7 +9,7 @@ if (!extension_loaded("zlib")) {
 --FILE--
 <?php
 
-$filename = dirname(__FILE__)."/temp.txt.gz";
+$filename = dirname(__FILE__)."/gzeof_variation1.txt.gz";
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 $length = 10;
@@ -26,6 +26,6 @@ unlink($filename);
 bool(false)
 bool(false)
 
-Warning: gzeof(): %d is not a valid stream resource in %s on line %d
+Warning: gzeof(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 ===DONE===

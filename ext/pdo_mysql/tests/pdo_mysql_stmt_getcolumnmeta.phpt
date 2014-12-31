@@ -38,7 +38,7 @@ try {
 	if (false !== ($tmp = @$stmt->getColumnMeta(-1)))
 		printf("[004] Expecting false got %s\n", var_export($tmp, true));
 
-	// Warning: PDOStatement::getColumnMeta() expects parameter 1 to be long, array given in
+	// Warning: PDOStatement::getColumnMeta() expects parameter 1 to be integer, array given in
 	if (false !== ($tmp = @$stmt->getColumnMeta(array())))
 		printf("[005] Expecting false got %s\n", var_export($tmp, true));
 
@@ -148,9 +148,9 @@ try {
 
 	$db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 	$is_mysqlnd = MySQLPDOTest::isPDOMySQLnd();
-	test_meta($db, 20, 'BIT(8)', 1, NULL, ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
-	test_meta($db, 30, 'TINYINT', -127, NULL, ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
-	test_meta($db, 40, 'TINYINT UNSIGNED', 255, NULL, ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
+	test_meta($db, 20, 'BIT(8)', 1, 'BIT', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
+	test_meta($db, 30, 'TINYINT', -127, 'TINY', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
+	test_meta($db, 40, 'TINYINT UNSIGNED', 255, 'TINY', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
 	test_meta($db, 50, 'BOOLEAN', 1, NULL, ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
 
 	test_meta($db, 60, 'SMALLINT', -32768, 'SHORT', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
@@ -194,7 +194,7 @@ try {
 	test_meta($db, 340, 'TIME', '14:37:00', 'TIME', PDO::PARAM_STR);
 	test_meta($db, 350, 'TIMESTAMP', time(), 'TIMESTAMP', PDO::PARAM_STR);
 	test_meta($db, 360, 'DATETIME', '2008-03-23 14:38:00', 'DATETIME', PDO::PARAM_STR);
-	test_meta($db, 370, 'YEAR', '2008', NULL, ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
+	test_meta($db, 370, 'YEAR', '2008', 'YEAR', ($is_mysqlnd) ? PDO::PARAM_INT : PDO::PARAM_STR);
 
 	test_meta($db, 380, 'CHAR(1)', 'a', 'STRING', PDO::PARAM_STR);
 	test_meta($db, 390, 'CHAR(10)', '0123456789', 'STRING', PDO::PARAM_STR);

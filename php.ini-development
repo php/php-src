@@ -138,16 +138,6 @@
 ;   Development Value: "GP"
 ;   Production Value: "GP"
 
-; session.bug_compat_42
-;   Default Value: On
-;   Development Value: On
-;   Production Value: Off
-
-; session.bug_compat_warn
-;   Default Value: On
-;   Development Value: On
-;   Production Value: Off
-
 ; session.gc_divisor
 ;   Default Value: 100
 ;   Development Value: 1000
@@ -199,22 +189,17 @@
 engine = On
 
 ; This directive determines whether or not PHP will recognize code between
-; <? and ?> tags as PHP source which should be processed as such. For several
-; years we recommended that you not use the short tag shortcut and
-; instead to use the full <?php and ?> tag combination. With the widespread use
-; of XML and use of these tags by other languages, the server can become easily
-; confused and end up parsing the wrong code in the wrong context.
-; This shortcut is still supported for backwards compatibility, but we
-; recommend against its use.
+; <? and ?> tags as PHP source which should be processed as such. It is
+; generally recommended that <?php and ?> should be used and that this feature
+; should be disabled, as enabling it may result in issues when generating XML
+; documents, however this remains supported for backward compatibility reasons.
+; Note that this directive does not control the <?= shorthand tag, which can be
+; used regardless of this directive.
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
 ; http://php.net/short-open-tag
 short_open_tag = Off
-
-; Allow ASP-style <% %> tags.
-; http://php.net/asp-tags
-asp_tags = Off
 
 ; The number of significant digits displayed in floating point numbers.
 ; http://php.net/precision
@@ -304,20 +289,17 @@ serialize_precision = 17
 
 ; open_basedir, if set, limits all file operations to the defined directory
 ; and below.  This directive makes most sense if used in a per-directory
-; or per-virtualhost web server configuration file. This directive is
-; *NOT* affected by whether Safe Mode is turned On or Off.
+; or per-virtualhost web server configuration file.
 ; http://php.net/open-basedir
 ;open_basedir =
 
 ; This directive allows you to disable certain functions for security reasons.
-; It receives a comma-delimited list of function names. This directive is
-; *NOT* affected by whether Safe Mode is turned On or Off.
+; It receives a comma-delimited list of function names.
 ; http://php.net/disable-functions
 disable_functions =
 
 ; This directive allows you to disable certain classes for security reasons.
-; It receives a comma-delimited list of class names. This directive is
-; *NOT* affected by whether Safe Mode is turned On or Off.
+; It receives a comma-delimited list of class names.
 ; http://php.net/disable-classes
 disable_classes =
 
@@ -584,7 +566,7 @@ html_errors = On
 ; http://php.net/error-log
 ; Example:
 ;error_log = php_errors.log
-; Log errors to syslog (Event Log on NT, not valid in Windows 95).
+; Log errors to syslog (Event Log on Windows).
 ;error_log = syslog
 
 ;windows.show_crt_warning
@@ -622,13 +604,13 @@ html_errors = On
 ; http://php.net/variables-order
 variables_order = "GPCS"
 
-; This directive determines which super global data (G,P,C,E & S) should
-; be registered into the super global array REQUEST. If so, it also determines
-; the order in which that data is registered. The values for this directive are
-; specified in the same manner as the variables_order directive, EXCEPT one.
-; Leaving this value empty will cause PHP to use the value set in the
-; variables_order directive. It does not mean it will leave the super globals
-; array REQUEST empty.
+; This directive determines which super global data (G,P & C) should be
+; registered into the super global array REQUEST. If so, it also determines
+; the order in which that data is registered. The values for this directive
+; are specified in the same manner as the variables_order directive,
+; EXCEPT one. Leaving this value empty will cause PHP to use the value set
+; in the variables_order directive. It does not mean it will leave the super
+; globals array REQUEST empty.
 ; Default Value: None
 ; Development Value: "GP"
 ; Production Value: "GP"
@@ -689,15 +671,26 @@ auto_append_file =
 ; http://php.net/default-mimetype
 default_mimetype = "text/html"
 
-; PHP's default character set is set to empty.
+; PHP's default character set is set to UTF-8.
 ; http://php.net/default-charset
-;default_charset = "UTF-8"
+default_charset = "UTF-8"
 
-; Always populate the $HTTP_RAW_POST_DATA variable. PHP's default behavior is
-; to disable this feature. If post reading is disabled through
-; enable_post_data_reading, $HTTP_RAW_POST_DATA is *NOT* populated.
-; http://php.net/always-populate-raw-post-data
-;always_populate_raw_post_data = On
+; PHP internal character encoding is set to empty.
+; If empty, default_charset is used.
+; http://php.net/internal-encoding
+;internal_encoding =
+
+; PHP input character encoding is set to empty.
+; If empty, default_charset is used.
+; http://php.net/input-encoding
+;input_encoding =
+
+; PHP output character encoding is set to empty.
+; If empty, default_charset is used.
+; mbstring or iconv output handler is used.
+; See also output_buffer.
+; http://php.net/output-encoding
+;output_encoding =
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Paths and Directories ;
@@ -731,6 +724,10 @@ user_dir =
 ; On windows:
 ; extension_dir = "ext"
 
+; Directory where the temporary files should be placed.
+; Defaults to the system default (see sys_get_temp_dir)
+; sys_temp_dir = "/tmp"
+
 ; Whether or not to enable the dl() function.  The dl() function does NOT work
 ; properly in multithreaded servers, such as IIS or Zeus, and is automatically
 ; disabled on them.
@@ -753,7 +750,7 @@ enable_dl = Off
 ; will look for to know it is OK to continue execution.  Setting this variable MAY
 ; cause security issues, KNOW WHAT YOU ARE DOING FIRST.
 ; http://php.net/cgi.redirect-status-env
-;cgi.redirect_status_env = 
+;cgi.redirect_status_env =
 
 ; cgi.fix_pathinfo provides *real* PATH_INFO/PATH_TRANSLATED support for CGI.  PHP's
 ; previous behaviour was to set PATH_TRANSLATED to SCRIPT_FILENAME, and to not grok
@@ -863,8 +860,8 @@ default_socket_timeout = 60
 ;
 ; Windows Extensions
 ; Note that ODBC support is built in, so no dll is needed for it.
-; Note that many DLL files are located in the extensions/ (PHP 4) ext/ (PHP 5)
-; extension folders as well as the separate PECL DLL download (PHP 5).
+; Note that many DLL files are located in the extensions/ (PHP 4) ext/ (PHP 5+)
+; extension folders as well as the separate PECL DLL download (PHP 5+).
 ; Be sure to appropriately set the extension_dir directive.
 ;
 ;extension=php_bz2.dll
@@ -881,8 +878,7 @@ default_socket_timeout = 60
 ;extension=php_exif.dll      ; Must be after mbstring as it depends on it
 ;extension=php_mysql.dll
 ;extension=php_mysqli.dll
-;extension=php_oci8.dll      ; Use with Oracle 10gR2 Instant Client
-;extension=php_oci8_11g.dll  ; Use with Oracle 11gR2 Instant Client
+;extension=php_oci8_12c.dll  ; Use with Oracle Database 12c Instant Client
 ;extension=php_openssl.dll
 ;extension=php_pdo_firebird.dll
 ;extension=php_pdo_mysql.dll
@@ -905,7 +901,6 @@ default_socket_timeout = 60
 ;extension=php_tidy.dll
 ;extension=php_xmlrpc.dll
 ;extension=php_xsl.dll
-;extension=php_zip.dll
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
@@ -940,9 +935,22 @@ cli_server.color = On
 ;filter.default_flags =
 
 [iconv]
-;iconv.input_encoding = ISO-8859-1
-;iconv.internal_encoding = ISO-8859-1
-;iconv.output_encoding = ISO-8859-1
+; Use of this INI entry is deprecated, use global input_encoding instead.
+; If empty, default_charset or input_encoding or iconv.input_encoding is used.
+; The precedence is: default_charset < intput_encoding < iconv.input_encoding
+;iconv.input_encoding =
+
+; Use of this INI entry is deprecated, use global internal_encoding instead.
+; If empty, default_charset or internal_encoding or iconv.internal_encoding is used.
+; The precedence is: default_charset < internal_encoding < iconv.internal_encoding
+;iconv.internal_encoding =
+
+; Use of this INI entry is deprecated, use global output_encoding instead.
+; If empty, default_charset or output_encoding or iconv.output_encoding is used.
+; The precedence is: default_charset < output_encoding < iconv.output_encoding
+; To use an output encoding conversion, iconv's output handler must be set
+; otherwise output encoding conversion cannot be performed.
+;iconv.output_encoding =
 
 [intl]
 ;intl.default_locale =
@@ -1013,7 +1021,7 @@ smtp_port = 25
 
 ; Force the addition of the specified parameters to be passed as extra parameters
 ; to the sendmail binary. These parameters will always replace the value of
-; the 5th parameter to mail(), even in safe mode.
+; the 5th parameter to mail().
 ;mail.force_extra_parameters =
 
 ; Add X-PHP-Originating-Script: that will include uid of the script followed by the filename
@@ -1022,7 +1030,7 @@ mail.add_x_header = On
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
 ;mail.log =
-; Log mail to syslog (Event Log on NT, not valid in Windows 95).
+; Log mail to syslog (Event Log on Windows).
 ;mail.log = syslog
 
 [SQL]
@@ -1397,6 +1405,14 @@ session.save_handler = files
 ; http://php.net/session.save-path
 ;session.save_path = "/tmp"
 
+; Whether to use strict session mode.
+; Strict session mode does not accept uninitialized session ID and regenerate
+; session ID if browser sends uninitialized session ID. Strict mode protects
+; applications from session fixation via session adoption vulnerability. It is
+; disabled by default for maximum compatibility, but enabling it is encouraged.
+; https://wiki.php.net/rfc/strict_sessions
+session.use_strict_mode = 0
+
 ; Whether to use cookies.
 ; http://php.net/session.use-cookies
 session.use_cookies = 1
@@ -1476,32 +1492,7 @@ session.gc_maxlifetime = 1440
 ;       collection through a shell script, cron entry, or some other method.
 ;       For example, the following script would is the equivalent of
 ;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
-;          find /path/to/sessions -cmin +24 | xargs rm
-
-; PHP 4.2 and less have an undocumented feature/bug that allows you to
-; to initialize a session variable in the global scope.
-; PHP 4.3 and later will warn you if this feature is used.
-; You can disable the feature and the warning separately. At this time,
-; the warning is only displayed, if bug_compat_42 is enabled. This feature
-; introduces some serious security problems if not handled correctly. We
-; recommend you not use this feature on production servers. You
-; should enable this on development servers and enable the warning as well. If you
-; do not enable the feature on development servers, you won't be warned when it's
-; used, so debugging errors caused by this can be difficult to track down.
-; Default Value: On
-; Development Value: On
-; Production Value: Off
-; http://php.net/session.bug-compat-42
-session.bug_compat_42 = On
-
-; This setting controls whether or not you are warned by PHP when initializing a
-; session value into the global space. session.bug_compat_42 must be enabled before
-; these warnings can be issued by PHP. See the directive above for more information.
-; Default Value: On
-; Development Value: On
-; Production Value: Off
-; http://php.net/session.bug-compat-warn
-session.bug_compat_warn = On
+;          find /path/to/sessions -cmin +24 -type f | xargs rm
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
 ; HTTP_REFERER has to contain this substring for the session to be
@@ -1638,7 +1629,7 @@ mssql.min_error_severity = 10
 mssql.min_message_severity = 10
 
 ; Compatibility mode with old versions of PHP 3.0.
-mssql.compatability_mode = Off
+mssql.compatibility_mode = Off
 
 ; Connect timeout
 ;mssql.connect_timeout = 5
@@ -1722,23 +1713,34 @@ mssql.secure_connection = Off
 
 [mbstring]
 ; language for internal character representation.
+; This affects mb_send_mail() and mbstrig.detect_order.
 ; http://php.net/mbstring.language
 ;mbstring.language = Japanese
 
+; Use of this INI entry is deprecated, use global internal_encoding instead.
 ; internal/script encoding.
-; Some encoding cannot work as internal encoding.
-; (e.g. SJIS, BIG5, ISO-2022-*)
-; http://php.net/mbstring.internal-encoding
-;mbstring.internal_encoding = UTF-8
+; Some encoding cannot work as internal encoding. (e.g. SJIS, BIG5, ISO-2022-*)
+; If empty, default_charset or internal_encoding or iconv.internal_encoding is used.
+; The precedence is: default_charset < internal_encoding < iconv.internal_encoding
+;mbstring.internal_encoding =
 
+; Use of this INI entry is deprecated, use global input_encoding instead.
 ; http input encoding.
+; mbstring.encoding_traslation = On is needed to use this setting.
+; If empty, default_charset or input_encoding or mbstring.input is used.
+; The precedence is: default_charset < intput_encoding < mbsting.http_input
 ; http://php.net/mbstring.http-input
-;mbstring.http_input = UTF-8
+;mbstring.http_input =
 
-; http output encoding. mb_output_handler must be
-; registered as output buffer to function
+; Use of this INI entry is deprecated, use global output_encoding instead.
+; http output encoding.
+; mb_output_handler must be registered as output buffer to function.
+; If empty, default_charset or output_encoding or mbstring.http_output is used.
+; The precedence is: default_charset < output_encoding < mbstring.http_output
+; To use an output encoding conversion, mbstring's output handler must be set
+; otherwise output encoding conversion cannot be performed.
 ; http://php.net/mbstring.http-output
-;mbstring.http_output = pass
+;mbstring.http_output =
 
 ; enable automatic encoding translation according to
 ; mbstring.internal_encoding setting. Input chars are
@@ -1749,7 +1751,7 @@ mssql.secure_connection = Off
 ;mbstring.encoding_translation = Off
 
 ; automatic encoding detection order.
-; auto means
+; "auto" detect order is changed according to mbstring.language
 ; http://php.net/mbstring.detect-order
 ;mbstring.detect_order = auto
 
@@ -1770,6 +1772,7 @@ mssql.secure_connection = Off
 ;mbstring.func_overload = 0
 
 ; enable strict encoding detection.
+; Default: Off
 ;mbstring.strict_detection = On
 
 ; This directive specifies the regex pattern of content types for which mb_output_handler()
@@ -1857,6 +1860,125 @@ ldap.max_links = -1
 
 [dba]
 ;dba.default_handler=
+
+[opcache]
+; Determines if Zend OPCache is enabled
+;opcache.enable=0
+
+; Determines if Zend OPCache is enabled for the CLI version of PHP
+;opcache.enable_cli=0
+
+; The OPcache shared memory storage size.
+;opcache.memory_consumption=64
+
+; The amount of memory for interned strings in Mbytes.
+;opcache.interned_strings_buffer=4
+
+; The maximum number of keys (scripts) in the OPcache hash table.
+; Only numbers between 200 and 100000 are allowed.
+;opcache.max_accelerated_files=2000
+
+; The maximum percentage of "wasted" memory until a restart is scheduled.
+;opcache.max_wasted_percentage=5
+
+; When this directive is enabled, the OPcache appends the current working
+; directory to the script key, thus eliminating possible collisions between
+; files with the same name (basename). Disabling the directive improves
+; performance, but may break existing applications.
+;opcache.use_cwd=1
+
+; When disabled, you must reset the OPcache manually or restart the
+; webserver for changes to the filesystem to take effect.
+;opcache.validate_timestamps=1
+
+; How often (in seconds) to check file timestamps for changes to the shared
+; memory storage allocation. ("1" means validate once per second, but only
+; once per request. "0" means always validate)
+;opcache.revalidate_freq=2
+
+; Enables or disables file search in include_path optimization
+;opcache.revalidate_path=0
+
+; If disabled, all PHPDoc comments are dropped from the code to reduce the
+; size of the optimized code.
+;opcache.save_comments=1
+
+; If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"
+; may be always stored (save_comments=1), but not loaded by applications
+; that don't need them anyway.
+;opcache.load_comments=1
+
+; If enabled, a fast shutdown sequence is used for the accelerated code
+;opcache.fast_shutdown=0
+
+; Allow file existence override (file_exists, etc.) performance feature.
+;opcache.enable_file_override=0
+
+; A bitmask, where each bit enables or disables the appropriate OPcache
+; passes
+;opcache.optimization_level=0xffffffff
+
+;opcache.inherited_hack=1
+;opcache.dups_fix=0
+
+; The location of the OPcache blacklist file (wildcards allowed).
+; Each OPcache blacklist file is a text file that holds the names of files
+; that should not be accelerated. The file format is to add each filename
+; to a new line. The filename may be a full path or just a file prefix
+; (i.e., /var/www/x  blacklists all the files and directories in /var/www
+; that start with 'x'). Line starting with a ; are ignored (comments).
+;opcache.blacklist_filename=
+
+; Allows exclusion of large files from being cached. By default all files
+; are cached.
+;opcache.max_file_size=0
+
+; Check the cache checksum each N requests.
+; The default value of "0" means that the checks are disabled.
+;opcache.consistency_checks=0
+
+; How long to wait (in seconds) for a scheduled restart to begin if the cache
+; is not being accessed.
+;opcache.force_restart_timeout=180
+
+; OPcache error_log file name. Empty string assumes "stderr".
+;opcache.error_log=
+
+; All OPcache errors go to the Web server log.
+; By default, only fatal errors (level 0) or errors (level 1) are logged.
+; You can also enable warnings (level 2), info messages (level 3) or
+; debug messages (level 4).
+;opcache.log_verbosity_level=1
+
+; Preferred Shared Memory back-end. Leave empty and let the system decide.
+;opcache.preferred_memory_model=
+
+; Protect the shared memory from unexpected writing during script execution.
+; Useful for internal debugging only.
+;opcache.protect_memory=0
+
+[curl]
+; A default value for the CURLOPT_CAINFO option. This is required to be an
+; absolute path.
+;curl.cainfo =
+
+[openssl]
+; The location of a Certificate Authority (CA) file on the local filesystem
+; to use when verifying the identity of SSL/TLS peers. Most users should
+; not specify a value for this directive as PHP will attempt to use the
+; OS-managed cert stores in its absence. If specified, this value may still
+; be overridden on a per-stream basis via the "cafile" SSL stream context
+; option.
+;openssl.cafile=
+
+; If openssl.cafile is not specified or if the CA file is not found, the
+; directory pointed to by openssl.capath is searched for a suitable
+; certificate. This value must be a correctly hashed certificate directory.
+; Most users should not specify a value for this directive as PHP will
+; attempt to use the OS-managed cert stores in its absence. If specified,
+; this value may still be overridden on a per-stream basis via the "capath"
+; SSL stream context option.
+;openssl.capath=
 
 ; Local Variables:
 ; tab-width: 4

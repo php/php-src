@@ -3,7 +3,7 @@ Phar: test ini_set with readonly and require_hash disabled
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", "<")) die("skip Unicode support required");
+if (version_compare(PHP_VERSION, "6.0", "!=")) die("skip Unicode support required");
 ?>
 --INI--
 phar.require_hash=0

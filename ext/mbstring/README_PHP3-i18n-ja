@@ -371,7 +371,7 @@ o i18n.internal_encoding - internal encoding
     encodings, following conditions have to be satisfied in order
     to use them:
        - per byte encoding
-       - single byte charactor in range of 00h-7fh which is compatible 
+       - single byte character in range of 00h-7fh which is compatible 
          with ASCII
        - multibyte without 00h-7fh
     In case of Japanese, EUC-JP and UTF-8 are the only encoding that
@@ -408,7 +408,7 @@ o i18n.script_encoding - script encoding
     entering the script parser.
 
     Be aware that auto detection may fail under some conditions.
-    For best auto detection, add multibyte charactor at begining of
+    For best auto detection, add multibyte character at beginning of
     script.
 
 

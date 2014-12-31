@@ -34,6 +34,8 @@ STD
 EXT
 MD5
 BLO
+
+Notice: crypt(): No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash. in %s on line %d
 string(%d) "%s"
 
 Warning: crypt() expects at least 1 parameter, 0 given in %s on line %d

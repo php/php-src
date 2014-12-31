@@ -32,7 +32,7 @@ require_once('skipifconnectfailure.inc');
 		"MYSQLI_ASSOC"						=> true,
 		"MYSQLI_NUM"						=> true,
 		"MYSQLI_BOTH"						=> true,
-		"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH"	=> true,
+		"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH"=> true,
 		"MYSQLI_NOT_NULL_FLAG"				=> true,
 		"MYSQLI_PRI_KEY_FLAG"				=> true,
 		"MYSQLI_UNIQUE_KEY_FLAG"			=> true,
@@ -86,19 +86,30 @@ require_once('skipifconnectfailure.inc');
 		"MYSQLI_SET_CHARSET_NAME"			=> true,
 		"MYSQLI_SET_CHARSET_DIR"			=> true,
 		"MYSQLI_REFRESH_GRANT"				=> true,
-		"MYSQLI_REFRESH_LOG"					=> true,
+		"MYSQLI_REFRESH_LOG"				=> true,
 		"MYSQLI_REFRESH_TABLES"				=> true,
 		"MYSQLI_REFRESH_HOSTS"				=> true,
 		"MYSQLI_REFRESH_STATUS"				=> true,
 		"MYSQLI_REFRESH_THREADS"			=> true,
 		"MYSQLI_REFRESH_SLAVE"				=> true,
 		"MYSQLI_REFRESH_MASTER"				=> true,
-		"MYSQLI_DEBUG_TRACE_ENABLED"	=> true,
+		"MYSQLI_DEBUG_TRACE_ENABLED"		=> true,
+		"MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT" => true,
+		"MYSQLI_TRANS_START_READ_WRITE"		=> true,
+		"MYSQLI_TRANS_START_READ_ONLY"		=> true,
+		"MYSQLI_TRANS_COR_AND_CHAIN"		=> true,
+		"MYSQLI_TRANS_COR_AND_NO_CHAIN"		=> true,
+		"MYSQLI_TRANS_COR_RELEASE"			=> true,
+		"MYSQLI_TRANS_COR_NO_RELEASE"		=> true,
 	);
 
 	/* depends on the build - experimental */
 	if ($IS_MYSQLND && defined('MYSQLI_OPT_INT_AND_FLOAT_NATIVE')) {
 		$expected_constants['MYSQLI_OPT_INT_AND_FLOAT_NATIVE'] = true;
+	}
+
+	if ($IS_MYSQLND && defined('MYSQLI_STORE_RESULT_COPY_DATA')) {
+		$expected_constants['MYSQLI_STORE_RESULT_COPY_DATA'] = true;
 	}
 
 	if ($IS_MYSQLND || defined('MYSQLI_REFRESH_BACKUP_LOG')) {
@@ -185,6 +196,7 @@ require_once('skipifconnectfailure.inc');
 	if (($IS_MYSQLND && version_compare(PHP_VERSION, ' 5.4.12-dev', '>=')) || (!$IS_MYSQLND && ($version > 50610))) {
 		/* could be that MySQL/libmysql 5.6.9 had the flag already but it was no stable release */
 		$expected_constants["MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
+		$expected_constants["MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
 	}
 
 	$unexpected_constants = array();

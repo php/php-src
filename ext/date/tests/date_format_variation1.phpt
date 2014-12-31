@@ -2,10 +2,10 @@
 Test date_format() function : usage variation - Passing unexpected values to first argument $object.
 --FILE--
 <?php
-/* Prototype  : string date_format  ( DateTime $object  , string $format  )
+/* Prototype  : string date_format  ( DateTimeInterface $object  , string $format  )
  * Description: Returns date formatted according to given format
  * Source code: ext/date/php_date.c
- * Alias to functions: DateTime::format
+ * Alias to functions: DateTimeInterface::format
  */
  
 echo "*** Testing date_format() : usage variation -  unexpected values to first argument \$object***\n";
@@ -112,141 +112,141 @@ fclose( $file_handle );
 
 -- int 0 --
 
-Warning: date_format() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
 -- int 1 --
 
-Warning: date_format() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
 -- int 12345 --
 
-Warning: date_format() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
 -- int -12345 --
 
-Warning: date_format() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
 -- float 10.5 --
 
-Warning: date_format() expects parameter 1 to be DateTime, double given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, float given in %s on line %d
 bool(false)
 
 -- float -10.5 --
 
-Warning: date_format() expects parameter 1 to be DateTime, double given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, float given in %s on line %d
 bool(false)
 
 -- float .5 --
 
-Warning: date_format() expects parameter 1 to be DateTime, double given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, float given in %s on line %d
 bool(false)
 
 -- empty array --
 
-Warning: date_format() expects parameter 1 to be DateTime, array given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: date_format() expects parameter 1 to be DateTime, array given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: date_format() expects parameter 1 to be DateTime, array given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: date_format() expects parameter 1 to be DateTime, array given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
 
-Warning: date_format() expects parameter 1 to be DateTime, null given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 
 -- lowercase null --
 
-Warning: date_format() expects parameter 1 to be DateTime, null given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 
 -- lowercase true --
 
-Warning: date_format() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
 bool(false)
 
 -- lowercase false --
 
-Warning: date_format() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: date_format() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: date_format() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
 bool(false)
 
 -- empty string DQ --
 
-Warning: date_format() expects parameter 1 to be DateTime, string given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: date_format() expects parameter 1 to be DateTime, string given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: date_format() expects parameter 1 to be DateTime, string given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: date_format() expects parameter 1 to be DateTime, string given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: date_format() expects parameter 1 to be DateTime, string given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: date_format() expects parameter 1 to be DateTime, string given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
 
-Warning: date_format() expects parameter 1 to be DateTime, object given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, object given in %s on line %d
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: date_format() expects parameter 1 to be DateTime, object given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, object given in %s on line %d
 bool(false)
 
 -- undefined var --
 
-Warning: date_format() expects parameter 1 to be DateTime, null given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 
 -- unset var --
 
-Warning: date_format() expects parameter 1 to be DateTime, null given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 
 -- resource --
 
-Warning: date_format() expects parameter 1 to be DateTime, resource given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, resource given in %s on line %d
 bool(false)
 ===DONE===

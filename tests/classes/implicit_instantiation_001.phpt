@@ -20,7 +20,7 @@ foreach($c as $name => $value) {
 	echo "\n  --> Attempting implicit conversion to object using increment...\n";
 	$c->$name->prop++;
 	$c->$name = $value; // reset value in case implicit conversion was successful
-	
+
 	echo "\n  --> Attempting implicit conversion to object using assignment...\n";
 	$c->$name->prop = "Implicit instantiation!";
 	$c->$name = $value; // reset value in case implicit conversion was successful
@@ -41,6 +41,8 @@ var_dump($c);
 
 Warning: Creating default object from empty value in %s on line 18
 
+Notice: Undefined property: stdClass::$prop in %s on line 18
+
   --> Attempting implicit conversion to object using assignment...
 
 Warning: Creating default object from empty value in %s on line 22
@@ -48,6 +50,8 @@ Warning: Creating default object from empty value in %s on line 22
   --> Attempting implicit conversion to object using combined assignment...
 
 Warning: Creating default object from empty value in %s on line 26
+
+Notice: Undefined property: stdClass::$prop in %s on line 26
 
 
 ---( $c->emptyString )---
@@ -55,6 +59,8 @@ Warning: Creating default object from empty value in %s on line 26
 
 Warning: Creating default object from empty value in %s on line 18
 
+Notice: Undefined property: stdClass::$prop in %s on line 18
+
   --> Attempting implicit conversion to object using assignment...
 
 Warning: Creating default object from empty value in %s on line 22
@@ -62,6 +68,8 @@ Warning: Creating default object from empty value in %s on line 22
   --> Attempting implicit conversion to object using combined assignment...
 
 Warning: Creating default object from empty value in %s on line 26
+
+Notice: Undefined property: stdClass::$prop in %s on line 26
 
 
 ---( $c->null )---
@@ -69,6 +77,8 @@ Warning: Creating default object from empty value in %s on line 26
 
 Warning: Creating default object from empty value in %s on line 18
 
+Notice: Undefined property: stdClass::$prop in %s on line 18
+
   --> Attempting implicit conversion to object using assignment...
 
 Warning: Creating default object from empty value in %s on line 22
@@ -76,6 +86,8 @@ Warning: Creating default object from empty value in %s on line 22
   --> Attempting implicit conversion to object using combined assignment...
 
 Warning: Creating default object from empty value in %s on line 26
+
+Notice: Undefined property: stdClass::$prop in %s on line 26
 
 
 ---( $c->boolTrue )---

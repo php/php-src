@@ -9,7 +9,7 @@ Installing PHP
         Windows Installer
         Manual Installation Steps
         ActiveScript
-        Microsoft IIS / PWS
+        Microsoft IIS
         Apache 1.3.x on Microsoft Windows
         Apache 2.0.x on Microsoft Windows
         Sun, iPlanet and Netscape servers on Microsoft Windows
@@ -211,7 +211,7 @@ Windows Installer (PHP 5.1.0 and earlier)
 
    The Windows PHP installer is available from the downloads page at
    http://www.php.net/downloads.php. This installs the CGI version of PHP
-   and for IIS, PWS, and Xitami, it configures the web server as well. The
+   and for IIS and Xitami, it configures the web server as well. The
    installer does not include any extra external PHP extensions
    (php_*.dll) as you'll only find those in the Windows Zip Package and
    PECL downloads.
@@ -283,7 +283,7 @@ Manual Installation Steps
 
    Extract the distribution file into a directory of your choice. If you
    are installing PHP 4, extract to C:\, as the zip file expands to a
-   foldername like php-4.3.7-Win32. If you are installing PHP 5, extract
+   foldername like php-4.3.7-Win32. If you are installing PHP 7, extract
    to C:\php as the zip file doesn't expand as in PHP 4. You may choose a
    different location but do not have spaces in the path (like C:\Program
    Files\PHP) as some web servers will crash if you do.
@@ -291,12 +291,12 @@ Manual Installation Steps
    The directory structure extracted from the zip is different for PHP
    versions 4 and 5 and look like as follows:
 
-   Example 2-2. PHP 5 package structure
+   Example 2-2. PHP 7 package structure
 c:\php
    |
    +--dev
    |  |
-   |  |-php5ts.lib
+   |  |-php7ts.lib
    |
    +--ext                 -- extension DLLs for PHP
    |  |
@@ -355,7 +355,7 @@ c:\php
    packages have the server modules in the sapi folder, PHP 5
    distributions have no such directory and instead they're in the PHP
    folder root. The supporting DLLs for the PHP 5 extensions are also not
-   in a seperate directory.
+   in a separate directory.
 
      Note: In PHP 4, you should move all files located in the dll and
      sapi folders to the main folder (e.g. C:\php).
@@ -385,7 +385,7 @@ c:\php
    other server modules failing, such as ASP.
 
    The CGI and CLI binaries, and the web server modules all require the
-   php5ts.dll file to be available to them. You have to make
+   php7ts.dll file to be available to them. You have to make
    sure that this file can be found by your PHP installation. The search
    order for this DLL is as follows:
 
@@ -394,7 +394,7 @@ c:\php
        Files\Apache Group\Apache2\bin).
      * Any directory in your Windows PATH environment variable.
 
-   To make php5ts.dll available you have three options: copy
+   To make php7ts.dll available you have three options: copy
    the file to the Windows system directory, copy the file to the web
    server's directory, or add your PHP directory, C:\php to the PATH. For
    better maintenance, we advise you to follow the last option, add C:\php
@@ -433,7 +433,7 @@ c:\php
        follow the next step. Set the doc_root to point to your web servers
        document_root. For example:
 
-doc_root = c:\inetpub\wwwroot // for IIS/PWS
+doc_root = c:\inetpub\wwwroot // for IIS
 
 doc_root = c:\apache\htdocs // for Apache
 
@@ -442,11 +442,6 @@ doc_root = c:\apache\htdocs // for Apache
        what is already built in. Note that on a new installation it is
        advisable to first get PHP working and tested without any
        extensions before enabling them in php.ini.
-     * On PWS and IIS, you can set the browscap configuration setting to
-       point to: c:\windows\system\inetsrv\browscap.ini on Windows 9x/Me,
-       c:\winnt\system32\inetsrv\browscap.ini on NT/2000, and
-       c:\windows\system32\inetsrv\browscap.ini on XP. For an up-to-date
-       browscap.ini, read the following FAQ.
 
    PHP is now setup on your system. The next step is to choose a web
    server, and enable it to run PHP. Choose a web server from the table of
@@ -468,13 +463,13 @@ ActiveScript
      Note: You should read the manual installation steps first!
 
    After installing PHP, you should download the ActiveScript DLL
-   (php5activescript.dll) and place it in the main PHP folder (e.g.
+   (php7activescript.dll) and place it in the main PHP folder (e.g.
    C:\php).
 
    After having all the files needed, you must register the DLL on your
    system. To achieve this, open a Command Prompt window (located in the
    Start Menu). Then go to your PHP directory by typing something like cd
-   C:\php. To register the DLL just type regsvr32 php5activescript.dll.
+   C:\php. To register the DLL just type regsvr32 php7activescript.dll.
 
    To test if ActiveScript is working, create a new file, named test.wsf
    (the extension is very important) and type:
@@ -499,7 +494,7 @@ ActiveScript
      folder, if you wish to load extensions, etc.
      __________________________________________________________________
 
-Microsoft IIS / PWS
+Microsoft IIS
 
    This section contains notes and hints specific to IIS (Microsoft
    Internet Information Server).
@@ -511,7 +506,7 @@ Microsoft IIS / PWS
    yourself from those attacks.
      __________________________________________________________________
 
-General considerations for all installations of PHP with IIS or PWS
+General considerations for all installations of PHP with IIS
 
      * First, read the Manual Installation Instructions. Do not skip this
        step as it provides crucial information for installing PHP on
@@ -521,8 +516,8 @@ General considerations for all installations of PHP with IIS or PWS
        Also, CGI users may want to set the cgi.redirect_status_env
        directive. When using directives, be sure these directives aren't
        commented out inside php.ini.
-     * The PHP 4 CGI is named php.exe while in PHP 5 it's php-cgi.exe. In
-       PHP 5, php.exe is the CLI, and not the CGI.
+     * The PHP 4 CGI is named php.exe while in PHP 7 it's php-cgi.exe. In
+       PHP 7, php.exe is the CLI, and not the CGI.
      * Modify the Windows PATH environment variable to include the PHP
        directory. This way the PHP DLL files and PHP executables can all
        remain in the PHP directory without cluttering up the Windows
@@ -534,16 +529,16 @@ General considerations for all installations of PHP with IIS or PWS
      * Be sure the extension_dir and doc_root PHP directives are
        appropriately set in php.ini. These directives depend on the system
        that PHP is being installed on. In PHP 4, the extension_dir is
-       extensions while with PHP 5 it's ext. So, an example PHP 5
+       extensions while with PHP 7 it's ext. So, an example PHP 7
        extensions_dir value is "c:\php\ext" and an example IIS doc_root
        value is "c:\Inetpub\wwwroot".
      * PHP extension DLL files, such as php_mysql.dll and php_curl.dll,
        are found in the zip package of the PHP download (not the PHP
-       installer). In PHP 5, many extensions are part of PECL and can be
+       installer). In PHP 7, many extensions are part of PECL and can be
        downloaded in the "Collection of PECL modules" package. Files such
        as php_zip.dll and php_ssh2.dll. Download PHP files here.
      * When defining the executable, the 'check that file exists' box may
-       also be checked. For a small performance penalty, the IIS (or PWS)
+       also be checked. For a small performance penalty, the IIS
        will check that the script file exists and sort out authentication
        before firing up PHP. This means that the web server will provide
        sensible 404 style error messages instead of CGI errors complaining
@@ -566,7 +561,7 @@ Windows NT/200x/XP and IIS 4 or newer
      * Change the Execute Permissions to 'Scripts only'
      * Click on the 'Configuration' button, and choose the Application
        Mappings tab. Click Add and set the Executable path to the
-       appropriate CGI file. An example PHP 5 value is: C:\php\php-cgi.exe
+       appropriate CGI file. An example PHP 7 value is: C:\php\php-cgi.exe
        Supply .php as the extension. Leave 'Method exclusions' blank, and
        check the 'Script engine' checkbox. Now, click OK a few times.
      * Set up the appropriate security. (This is done in Internet Service
@@ -579,14 +574,14 @@ Windows NT/200x/XP and IIS 4 or newer
      * If you don't want to perform HTTP Authentication using PHP, you can
        (and should) skip this step. Under ISAPI Filters, add a new ISAPI
        filter. Use PHP as the filter name, and supply a path to the
-       php5isapi.dll.
+       php7isapi.dll.
      * Under 'Home Directory', 'Virtual Directory', or 'Directory', do the
        following:
      * Change the Execute Permissions to 'Scripts only'
      * Click on the 'Configuration' button, and choose the Application
        Mappings tab. Click Add and set the Executable path to the
-       appropriate ISAPI DLL. An example PHP 5 value is:
-       C:\php\php5isapi.dll Supply .php as the extension. Leave 'Method
+       appropriate ISAPI DLL. An example PHP 7 value is:
+       C:\php\php7isapi.dll Supply .php as the extension. Leave 'Method
        exclusions' blank, and check the 'Script engine' checkbox. Now,
        click OK a few times.
      * Stop IIS completely (NET STOP iisadmin)
@@ -595,7 +590,7 @@ Windows NT/200x/XP and IIS 4 or newer
    With IIS 6 (2003 Server), open up the IIS Manager, go to Web Service
    Extensions, choose "Add a new Web service extension", enter in a name
    such as PHP, choose the Add button and for the value browse to either
-   the ISAPI file (php5isapi.dll) or CGI (php.exe or
+   the ISAPI file (php7isapi.dll) or CGI (php.exe or
    php-cgi.exe) then check "Set extension status to Allowed" and click OK.
 
    In order to use index.php as a default content page, do the following:
@@ -658,12 +653,12 @@ Installing as an Apache module
    This assumes PHP is installed to c:\php. Adjust the path if this is not
    the case.
 
-   For PHP 5:
+   For PHP 7:
 # Add to the end of the LoadModule section
-LoadModule php5_module "C:/php/php5apache.dll"
+LoadModule php7_module "C:/php/php7apache.dll"
 
 # Add to the end of the AddModule section
-AddModule mod_php5.c
+AddModule mod_php7.c
 
    For both:
 # Add this line inside the <IfModule mod_mime.c> conditional brace
@@ -686,7 +681,7 @@ AddType application/x-httpd-php .php
 # For PHP 4
 Action application/x-httpd-php "/php/php.exe"
 
-# For PHP 5
+# For PHP 7
 Action application/x-httpd-php "/php/php-cgi.exe"
 
 # specify the directory where php.ini is
@@ -720,7 +715,7 @@ Apache 2.0.x on Microsoft Windows
 
      Apache 2.2.x Support: Users of Apache 2.2.x may use the
      documentation below except the appropriate DLL file is named
-     php5apache2_2.dll and it only exists as of PHP 5.2.0. See also
+     php7apache2_2.dll and it only exists as of PHP 7.2.0. See also
      http://snaps.php.net/
 
    Warning
@@ -739,8 +734,8 @@ Apache 2.0.x on Microsoft Windows
 
      * PHP 4.3.0 or later available at http://www.php.net/downloads.php.
      * the latest stable development version. Get the source code
-       http://snaps.php.net/php5-latest.tar.gz or download binaries for
-       Windows http://snaps.php.net/win32/php5-win32-latest.zip.
+       http://snaps.php.net/php7-latest.tar.gz or download binaries for
+       Windows http://snaps.php.net/win32/php7-win32-latest.zip.
      * a prerelease version downloadable from http://qa.php.net/.
      * you have always the option to obtain PHP through SVN.
 
@@ -787,7 +782,7 @@ AddType application/x-httpd-php .php
 # For PHP 4
 Action application/x-httpd-php "/php/php.exe"
 
-# For PHP 5
+# For PHP 7
 Action application/x-httpd-php "/php/php-cgi.exe"
 
    Warning
@@ -804,8 +799,8 @@ Installing as an Apache module
 
    Example 2-6. PHP and Apache 2.0 as Module
 
-# For PHP 5 do something like this:
-LoadModule php5_module "c:/php/php5apache2.dll"
+# For PHP 7 do something like this:
+LoadModule php7_module "c:/php/php7apache2.dll"
 AddType application/x-httpd-php .php
 
 # configure the path to php.ini
@@ -841,7 +836,7 @@ CGI setup on Sun, iPlanet and Netscape servers
 
    To install PHP as a CGI handler, do the following:
 
-     * Copy php5ts.dll to your systemroot (the directory where you
+     * Copy php7ts.dll to your systemroot (the directory where you
        installed Windows)
      * Make a file association from the command line. Type the following
        two lines:
@@ -866,7 +861,7 @@ NSAPI setup on Sun, iPlanet and Netscape servers
 
    To install PHP with NSAPI, do the following:
 
-     * Copy php5ts.dll to your systemroot (the directory where you
+     * Copy php7ts.dll to your systemroot (the directory where you
        installed Windows)
      * Make a file association from the command line. Type the following
        two lines:
@@ -881,9 +876,9 @@ ftype PHPScript=c:\php\php.exe %1 %*
        and add the following: You should place the lines after mime types
        init.
 
-Init fn="load-modules" funcs="php5_init,php5_execute,php5_auth_trans" shlib="c:/
-php/sapi/php5nsapi.dll"
-Init fn="php5_init" LateInit="yes" errorString="Failed to initialise PHP!" [php_
+Init fn="load-modules" funcs="php7_init,php7_execute,php7_auth_trans" shlib="c:/
+php/sapi/php7nsapi.dll"
+Init fn="php7_init" LateInit="yes" errorString="Failed to initialise PHP!" [php_
 ini="c:/path/to/php.ini"]
 
        The php_ini parameter is optional but with it you
@@ -893,12 +888,12 @@ ini="c:/path/to/php.ini"]
        <Object name="default"> section, place this line necessarily after
        all 'ObjectType' and before all 'AddLog' lines:
 
-Service fn="php5_execute" type="magnus-internal/x-httpd-php" [inikey=value inike
+Service fn="php7_execute" type="magnus-internal/x-httpd-php" [inikey=value inike
 y=value ...]
 
        As additional parameters you can add some special
        php.ini-values, for example you can set a
-       docroot="/path/to/docroot" specific to the context php5_execute is
+       docroot="/path/to/docroot" specific to the context php7_execute is
        called. For boolean ini-keys please use 0/1 as value, not
        "On","Off",... (this will not work correctly), e.g.
        zlib.output_compression=1 instead of zlib.output_compression="On"
@@ -907,7 +902,7 @@ y=value ...]
 
 <Object name="x-httpd-php">
 ObjectType fn="force-type" type="magnus-internal/x-httpd-php"
-Service fn=php5_execute [inikey=value inikey=value ...]
+Service fn=php7_execute [inikey=value inikey=value ...]
 </Object>
 
        After that you can configure a directory in the Administration
@@ -954,7 +949,7 @@ Special use for error pages or self-made directory listings (PHP >= 4.3.3)
    You can use PHP to generate the error pages for "404 Not Found" or
    similar. Add the following line to the object in obj.conf for every
    error page you want to overwrite:
-Error fn="php5_execute" code=XXX script="/path/to/script.php" [inikey=value inik
+Error fn="php7_execute" code=XXX script="/path/to/script.php" [inikey=value inik
 ey=value...]
 
    where XXX is the HTTP error code. Please delete any other Error
@@ -966,7 +961,7 @@ ey=value...]
    create a PHP script which displays a directory listing and replace the
    corresponding default Service line for type="magnus-internal/directory"
    in obj.conf with the following:
-Service fn="php5_execute" type="magnus-internal/directory" script="/path/to/scri
+Service fn="php7_execute" type="magnus-internal/directory" script="/path/to/scri
 pt.php" [inikey=value inikey=value...]
 
    For both error and directory listing pages the original URI and
@@ -991,8 +986,8 @@ Note about nsapi_virtual() and subrequests (PHP >= 4.3.3)
    server is used, the detection fails and nsapi_virtual() is disabled.
 
    If this is the case, try the following: Add the following parameter to
-   php5_init in magnus.conf/obj.conf:
-   Init fn=php5_init ... server_lib="ns-httpdXX.dll"
+   php7_init in magnus.conf/obj.conf:
+   Init fn=php7_init ... server_lib="ns-httpdXX.dll"
 
    where XX is the correct DLL version number. To get it, look in the
    server-root for the correct DLL name. The DLL with the biggest filesize
@@ -1028,7 +1023,7 @@ OmniHTTPd Server
        select Properties
     3. Click on Web Server Global Settings
     4. On the 'External' tab, enter: virtual = .php | actual =
-       c:\php\php.exe (use php-cgi.exe if installing PHP 5), and use the
+       c:\php\php.exe (use php-cgi.exe if installing PHP 7), and use the
        Add button.
     5. On the Mime tab, enter: virtual = wwwserver/stdcgi | actual = .php,
        and use the Add button.
@@ -1085,11 +1080,11 @@ Installation of extensions on Windows
    that require, or used to require, additional PHP DLL files. Here's a
    list of built in extensions:
 
-   In PHP 5 (updated PHP 5.0.4), the following changes exist. Built in:
+   In PHP 7 (updated PHP 5.0.4), the following changes exist. Built in:
    DOM, LibXML, Iconv, SimpleXML, SPL and SQLite. And the following are no
    longer built in: MySQL and Overload.
 
-   The default location PHP searches for extensions is C:\php5 in PHP 5. 
+   The default location PHP searches for extensions is C:\php7 in PHP 7.
    To change this setting to reflect your setup of PHP edit your php.ini
    file:
 
@@ -1451,7 +1446,7 @@ Running PHP as an Apache module
    (e.g. httpd.conf) and .htaccess files. You will need "AllowOverride
    Options" or "AllowOverride All" privileges to do so.
 
-   With PHP 4 and PHP 5, there are several Apache directives that allow
+   With PHP 4 and PHP 7, there are several Apache directives that allow
    you to change the PHP configuration from within the Apache
    configuration files. For a listing of which directives are PHP_INI_ALL,
    PHP_INI_PERDIR, or PHP_INI_SYSTEM, have a look at the List of php.ini
@@ -1486,7 +1481,7 @@ Running PHP as an Apache module
           directives.
 
    Example 5-2. Apache configuration example
-<IfModule mod_php5.c>
+<IfModule mod_php7.c>
   php_value include_path ".:/usr/local/lib/php"
   php_admin_flag engine on
 </IfModule>
@@ -1563,7 +1558,7 @@ Chapter 6. Installation FAQ
    9. Some operating systems: I have installed PHP without errors, but
           when I try to start apache I get undefined symbol errors:
 
-[mybox:user /src/php5] root# apachectl configtest
+[mybox:user /src/php7] root# apachectl configtest
  apachectl: /usr/local/apache/bin/httpd Undefined symbols:
   _compress
   _uncompress
@@ -1579,7 +1574,7 @@ cgi error:
    11. Windows: I've followed all the instructions, but still can't get
           PHP and IIS to work together!
 
-   12. When running PHP as CGI with IIS, PWS, OmniHTTPD or Xitami, I get
+   12. When running PHP as CGI with IIS, OmniHTTPD or Xitami, I get
           the following error: Security Alert! PHP CGI cannot be accessed
           directly..
 
@@ -1774,7 +1769,7 @@ rpm -ivh /usr/src/redhat/RPMS/i386/mod_php3-3.0.5-2.i386.rpm
 
    9. Some operating systems: I have installed PHP without errors, but
    when I try to start apache I get undefined symbol errors:
-[mybox:user /src/php5] root# apachectl configtest
+[mybox:user /src/php7] root# apachectl configtest
  apachectl: /usr/local/apache/bin/httpd Undefined symbols:
   _compress
   _uncompress
@@ -1802,7 +1797,7 @@ cgi error:
    the browser again. If it still fails then it could be one of the
    following:
 
-     * File permissions on your PHP script, php.exe, php5ts.dll, php.ini
+     * File permissions on your PHP script, php.exe, php7ts.dll, php.ini
        or any PHP extensions you are trying to load are such that the
        anonymous internet user ISUR_<machinename> cannot access them.
      * The script file does not exist (or possibly isn't where you think
@@ -1824,7 +1819,7 @@ cgi error:
    tell it that PHP is a script engine. Also, you will want to read this
    faq.
 
-   12. When running PHP as CGI with IIS, PWS, OmniHTTPD or Xitami, I get
+   12. When running PHP as CGI with IIS, OmniHTTPD or Xitami, I get
    the following error: Security Alert! PHP CGI cannot be accessed
    directly..
 
@@ -1922,8 +1917,8 @@ cgi error:
 AddHandler php-script php
 AddType text/html php
 
-# PHP 5
-AddHandler php5-script php
+# PHP 7
+AddHandler php7-script php
 AddType text/html php
 
    This solution doesn't work for Apache 1 as PHP module doesn't catch

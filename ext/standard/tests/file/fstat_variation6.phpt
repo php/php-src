@@ -1,5 +1,5 @@
 --TEST--
-Test function fstat() by substituting agument 1 with object values.
+Test function fstat() by substituting argument 1 with object values.
 --FILE--
 <?php
 

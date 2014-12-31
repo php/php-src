@@ -89,7 +89,7 @@
 /(\p{Yi}{0,3}+\277)*/
 
 /\p{Zl}{2,3}+/8BZ
-    \xe2\x80\xa8\xe2\x80\xa8
+      
     \x{2028}\x{2028}\x{2028}
     
 /\p{Zl}/8BZ
@@ -100,11 +100,30 @@
 
 /\p{Cc}{2}+/8BZ
 
+/^\p{Cf}/8
+    \x{180e}
+    \x{061c}
+    \x{2066}
+    \x{2067}
+    \x{2068}
+    \x{2069}
+
 /^\p{Cs}/8
     \?\x{dfff}
     ** Failers
     \x{09f} 
   
+/^\p{Mn}/8
+    \x{1a1b}
+
+/^\p{Pe}/8
+    \x{2309}
+    \x{230b}
+
+/^\p{Ps}/8
+    \x{2308}
+    \x{230a}
+
 /^\p{Sc}+/8
     $\x{a2}\x{a3}\x{a4}\x{a5}\x{a6}
     \x{9f2}
@@ -116,15 +135,15 @@
     \ \
     \x{a0}
     \x{1680}
-    \x{180e}
     \x{2000}
     \x{2001}     
     ** Failers
     \x{2028}
     \x{200d} 
   
-/-- These four are here rather than in test 6 because Perl has problems with
-    the negative versions of the properties. --/
+/-- These are here rather than in test 6 because Perl has problems with
+    the negative versions of the properties and behaves has changed how
+    it behaves for caseless matching. --/
       
 /\p{^Lu}/8i
     1234
@@ -148,6 +167,12 @@
     ** Failers 
     a
     \x{1d00}  
+
+/\p{Lu}/8i
+    A
+    aZ
+    ** Failers
+    abc   
 
 /[\x{c0}\x{391}]/8i
     \x{c0}
@@ -195,15 +220,6 @@ of case for anything other than the ASCII letters. --/
     \x{c0}
     \x{e0} 
 
-/-- This should be Perl-compatible but Perl 5.11 gets \x{300} wrong. --/8
-    
-/^\X/8
-    A
-    A\x{300}BC 
-    A\x{300}\x{301}\x{302}BC 
-    *** Failers
-    \x{300}  
-    
 /-- These are PCRE's extra properties to help with Unicodizing \d etc. --/
 
 /^\p{Xan}/8
@@ -621,5 +637,202 @@ of case for anything other than the ASCII letters. --/
 /^\X+?Z/8
     AA\P
     AA\P\P 
+
+/A\x{3a3}B/8iDZ
+
+/\x{3a3}B/8iDZ
+
+/[\x{3a3}]/8iBZ
+
+/[^\x{3a3}]/8iBZ
+
+/[\x{3a3}]+/8iBZ
+
+/[^\x{3a3}]+/8iBZ
+
+/a*\x{3a3}/8iBZ
+
+/\x{3a3}+a/8iBZ
+
+/\x{3a3}*\x{3c2}/8iBZ
+
+/\x{3a3}{3}/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}{2,4}/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}{2,4}?/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}+./8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}++./8i+
+    ** Failers
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}*\x{3c2}/8iBZ
+
+/[^\x{3a3}]*\x{3c2}/8iBZ
+
+/[^a]*\x{3c2}/8iBZ
+
+/ist/8iBZ
+    ikt
+
+/is+t/8i
+    iSs\x{17f}t
+    ikt
+
+/is+?t/8i
+    ikt
+
+/is?t/8i
+    ikt
+
+/is{2}t/8i
+    iskt
+    
+/-- This property is a PCRE special --/
+
+/^\p{Xuc}/8
+    $abc
+    @abc
+    `abc
+    \x{1234}abc
+    ** Failers
+    abc     
+
+/^\p{Xuc}+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}+?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}+?\*/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}++/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}{3,5}/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}{3,5}?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^[\p{Xuc}]/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^[\p{Xuc}]+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\P{Xuc}/8
+    abc
+    ** Failers
+    $abc
+    @abc
+    `abc
+    \x{1234}abc
+
+/^[\P{Xuc}]/8
+    abc
+    ** Failers
+    $abc
+    @abc
+    `abc
+    \x{1234}abc
+    
+/-- Some auto-possessification tests --/
+
+/\pN+\z/BZ
+
+/\PN+\z/BZ
+
+/\pN+/BZ
+
+/\PN+/BZ
+
+/\p{Any}+\p{Any} \p{Any}+\P{Any} \p{Any}+\p{L&} \p{Any}+\p{L} \p{Any}+\p{Lu} \p{Any}+\p{Han} \p{Any}+\p{Xan} \p{Any}+\p{Xsp} \p{Any}+\p{Xps} \p{Xwd}+\p{Any} \p{Any}+\p{Xuc}/BWZx  
+
+/\p{L&}+\p{Any} \p{L&}+\p{L&} \P{L&}+\p{L&} \p{L&}+\p{L} \p{L&}+\p{Lu} \p{L&}+\p{Han} \p{L&}+\p{Xan} \p{L&}+\P{Xan} \p{L&}+\p{Xsp} \p{L&}+\p{Xps} \p{Xwd}+\p{L&} \p{L&}+\p{Xuc}/BWZx  
+
+/\p{N}+\p{Any} \p{N}+\p{L&} \p{N}+\p{L} \p{N}+\P{L} \p{N}+\P{N} \p{N}+\p{Lu} \p{N}+\p{Han} \p{N}+\p{Xan} \p{N}+\p{Xsp} \p{N}+\p{Xps} \p{Xwd}+\p{N} \p{N}+\p{Xuc}/BWZx  
+
+/\p{Lu}+\p{Any} \p{Lu}+\p{L&} \p{Lu}+\p{L} \p{Lu}+\p{Lu} \P{Lu}+\p{Lu} \p{Lu}+\p{Nd} \p{Lu}+\P{Nd} \p{Lu}+\p{Han} \p{Lu}+\p{Xan} \p{Lu}+\p{Xsp} \p{Lu}+\p{Xps} \p{Xwd}+\p{Lu} \p{Lu}+\p{Xuc}/BWZx  
+
+/\p{Han}+\p{Lu} \p{Han}+\p{L&} \p{Han}+\p{L} \p{Han}+\p{Lu} \p{Han}+\p{Arabic} \p{Arabic}+\p{Arabic} \p{Han}+\p{Xan} \p{Han}+\p{Xsp} \p{Han}+\p{Xps} \p{Xwd}+\p{Han} \p{Han}+\p{Xuc}/BWZx  
+
+/\p{Xan}+\p{Any} \p{Xan}+\p{L&} \P{Xan}+\p{L&} \p{Xan}+\p{L} \p{Xan}+\p{Lu} \p{Xan}+\p{Han} \p{Xan}+\p{Xan} \p{Xan}+\P{Xan} \p{Xan}+\p{Xsp} \p{Xan}+\p{Xps} \p{Xwd}+\p{Xan} \p{Xan}+\p{Xuc}/BWZx  
+
+/\p{Xsp}+\p{Any} \p{Xsp}+\p{L&} \p{Xsp}+\p{L} \p{Xsp}+\p{Lu} \p{Xsp}+\p{Han} \p{Xsp}+\p{Xan} \p{Xsp}+\p{Xsp} \P{Xsp}+\p{Xsp} \p{Xsp}+\p{Xps} \p{Xwd}+\p{Xsp} \p{Xsp}+\p{Xuc}/BWZx  
+
+/\p{Xwd}+\p{Any} \p{Xwd}+\p{L&} \p{Xwd}+\p{L} \p{Xwd}+\p{Lu} \p{Xwd}+\p{Han} \p{Xwd}+\p{Xan} \p{Xwd}+\p{Xsp} \p{Xwd}+\p{Xps} \p{Xwd}+\p{Xwd} \p{Xwd}+\P{Xwd} \p{Xwd}+\p{Xuc}/BWZx  
+
+/\p{Xuc}+\p{Any} \p{Xuc}+\p{L&} \p{Xuc}+\p{L} \p{Xuc}+\p{Lu} \p{Xuc}+\p{Han} \p{Xuc}+\p{Xan} \p{Xuc}+\p{Xsp} \p{Xuc}+\p{Xps} \p{Xwd}+\p{Xuc} \p{Xuc}+\p{Xuc} \p{Xuc}+\P{Xuc}/BWZx  
+
+/\p{N}+\p{Ll} \p{N}+\p{Nd} \p{N}+\P{Nd}/BWZx
+
+/\p{Xan}+\p{L} \p{Xan}+\p{N} \p{Xan}+\p{C} \p{Xan}+\P{L} \P{Xan}+\p{N} \p{Xan}+\P{C}/BWZx
+
+/\p{L}+\p{Xan} \p{N}+\p{Xan} \p{C}+\p{Xan} \P{L}+\p{Xan} \p{N}+\p{Xan} \P{C}+\p{Xan} \p{L}+\P{Xan}/BWZx
+
+/\p{Xan}+\p{Lu} \p{Xan}+\p{Nd} \p{Xan}+\p{Cc} \p{Xan}+\P{Ll} \P{Xan}+\p{No} \p{Xan}+\P{Cf}/BWZx
+
+/\p{Lu}+\p{Xan} \p{Nd}+\p{Xan} \p{Cs}+\p{Xan} \P{Lt}+\p{Xan} \p{Nl}+\p{Xan} \P{Cc}+\p{Xan} \p{Lt}+\P{Xan}/BWZx
+
+/\w+\p{P} \w+\p{Po} \w+\s \p{Xan}+\s \s+\p{Xan} \s+\w/BWZx
+
+/\w+\P{P} \W+\p{Po} \w+\S \P{Xan}+\s \s+\P{Xan} \s+\W/BWZx
+
+/\w+\p{Po} \w+\p{Pc} \W+\p{Po} \W+\p{Pc} \w+\P{Po} \w+\P{Pc}/BWZx
+
+/\p{Nl}+\p{Xan} \P{Nl}+\p{Xan} \p{Nl}+\P{Xan} \P{Nl}+\P{Xan}/BWZx
+
+/\p{Xan}+\p{Nl} \P{Xan}+\p{Nl} \p{Xan}+\P{Nl} \P{Xan}+\P{Nl}/BWZx
+
+/\p{Xan}+\p{Nd} \P{Xan}+\p{Nd} \p{Xan}+\P{Nd} \P{Xan}+\P{Nd}/BWZx
+
+/-- End auto-possessification tests --/ 
+
+/\w+/8CWBZ
+    abcd
+
+/[\p{N}]?+/BZO
+
+/[\p{L}ab]{2,3}+/BZO
+
+/\D+\X \d+\X \S+\X \s+\X \W+\X \w+\X \C+\X \R+\X \H+\X \h+\X \V+\X \v+\X a+\X \n+\X .+\X/BZx
+
+/.+\X/BZxs
+
+/\X+$/BZxm
+
+/\X+\D \X+\d \X+\S \X+\s \X+\W \X+\w \X+. \X+\C \X+\R \X+\H \X+\h \X+\V \X+\v \X+\X \X+\Z \X+\z \X+$/BZx
+
+/\d+\s{0,5}=\s*\S?=\w{0,4}\W*/8WBZ
+
+/[RST]+/8iWBZ
+    
+/[R-T]+/8iWBZ 
+
+/[Q-U]+/8iWBZ 
 
 /-- End of testinput7 --/

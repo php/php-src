@@ -134,17 +134,17 @@ bool(false)
 
 -- float 10.5 --
 
-Warning: date_isodate_set() expects parameter 1 to be DateTime, double given in %s on line %d
+Warning: date_isodate_set() expects parameter 1 to be DateTime, float given in %s on line %d
 bool(false)
 
 -- float -10.5 --
 
-Warning: date_isodate_set() expects parameter 1 to be DateTime, double given in %s on line %d
+Warning: date_isodate_set() expects parameter 1 to be DateTime, float given in %s on line %d
 bool(false)
 
 -- float .5 --
 
-Warning: date_isodate_set() expects parameter 1 to be DateTime, double given in %s on line %d
+Warning: date_isodate_set() expects parameter 1 to be DateTime, float given in %s on line %d
 bool(false)
 
 -- empty array --

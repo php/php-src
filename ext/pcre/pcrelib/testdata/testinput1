@@ -1,6 +1,8 @@
 /-- This set of tests is for features that are compatible with all versions of
-    Perl >= 5.10, in non-UTF-8 mode. It should run clean for both the 8-bit and
-    16-bit PCRE libraries. --/
+    Perl >= 5.10, in non-UTF-8 mode. It should run clean for the 8-bit, 16-bit,
+    and 32-bit PCRE libraries. --/
+    
+< forbid 89?=ABCDEFfGILMNPTUWXZ<
 
 /the quick brown fox/
     the quick brown fox
@@ -1483,14 +1485,19 @@
     abc\100\x30
     abc\100\060
     abc\100\60
+    
+/^A\8B\9C$/
+    A8B9C
+    *** Failers
+    A\08B\09C  
+    
+/^(A)(B)(C)(D)(E)(F)(G)(H)(I)\8\9$/
+    ABCDEFGHIHI 
 
-/abc\81/
-    abc\081
-    abc\0\x38\x31
-
-/abc\91/
-    abc\091
-    abc\0\x39\x31
+/^[A\8B\9C]+$/
+    A8B9C
+    *** Failers 
+    A8B9C\x00
 
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)\12\123/
     abcdefghijkllS
@@ -3654,13 +3661,6 @@
 /a*/g
     abbab
 
-/^[a-\d]/
-    abcde
-    -things
-    0digit
-    *** Failers
-    bcdef    
-
 /^[\d-a]/
     abcde
     -things
@@ -3773,9 +3773,9 @@
     abc123abc
     abc123bc  
 
-/-- This tests for an IPv6 address in the form where it can have up to --/
-/-- eight components, one and only one of which is empty. This must be --/
-/-- an internal component. --/
+/-- This tests for an IPv6 address in the form where it can have up to
+    eight components, one and only one of which is empty. This must be
+    an internal component. --/
 
 /^(?!:)                       # colon disallowed at start
   (?:                         # start of item
@@ -4221,9 +4221,6 @@
     ab
     bc
 
-/^(?=(a)){0}b(?1)/
-    backgammon
-
 /^(?=(?1))?[az]([abc])d/
     abd 
     zcdxx 
@@ -4656,14 +4653,8 @@
 /(?<pn> \( ( [^()]++ | (?&pn) )* \) )/x
     (ab(cd)ef)
 
-/^(?!a(*SKIP)b)/
-    ac
-    
 /^(?=a(*SKIP)b|ac)/
     ** Failers
-    ac
-    
-/^(?=a(*THEN)b|ac)/
     ac
     
 /^(?=a(*PRUNE)b)/
@@ -4672,9 +4663,6 @@
     ac
 
 /^(?=a(*ACCEPT)b)/
-    ac
-
-/^(?(?!a(*SKIP)b))/
     ac
 
 /(?>a\Kb)/
@@ -4899,31 +4887,13 @@ however, we need the complication for Perl. ---/
 /(A (A|B(*ACCEPT)|C) D)(E)/x
     AB
 
-/\A.*?(?:a|b(*THEN)c)/
-    ba
-
-/\A.*?(?:a|bc)/
-    ba
-
-/\A.*?(a|b(*THEN)c)/
-    ba
-
 /\A.*?(a|bc)/
-    ba
-
-/\A.*?(?:a|b(*THEN)c)++/
     ba
 
 /\A.*?(?:a|bc)++/
     ba
 
-/\A.*?(a|b(*THEN)c)++/
-    ba
-
 /\A.*?(a|bc)++/
-    ba
-
-/\A.*?(?:a|b(*THEN)c|d)/
     ba
 
 /\A.*?(?:a|bc|d)/
@@ -5253,13 +5223,447 @@ name were given. ---/
 /(a(*COMMIT)b){0}a(?1)|aac/
     aac
 
-/(?!a(*COMMIT)b)ac|cd/
-    ac
-
 /((?:a?)*)*c/
   aac   
 
 /((?>a?)*)*c/
   aac   
+
+/(?>.*?a)(?<=ba)/
+    aba
+
+/(?:.*?a)(?<=ba)/
+    aba
+
+/.*?a(*PRUNE)b/
+    aab
+
+/.*?a(*PRUNE)b/s
+    aab
+
+/^a(*PRUNE)b/s
+    aab
+
+/.*?a(*SKIP)b/
+    aab
+
+/(?>.*?a)b/s
+    aab
+
+/(?>.*?a)b/
+    aab
+
+/(?>^a)b/s
+    aab
+
+/(?>.*?)(?<=(abcd)|(wxyz))/
+    alphabetabcd
+    endingwxyz 
+
+/(?>.*)(?<=(abcd)|(wxyz))/
+    alphabetabcd
+    endingwxyz 
+
+"(?>.*)foo"
+    abcdfooxyz
+    
+"(?>.*?)foo"
+    abcdfooxyz
+
+/(?:(a(*PRUNE)b)){0}(?:(?1)|ac)/
+    ac
+    
+/(?:(a(*SKIP)b)){0}(?:(?1)|ac)/
+    ac 
+
+/(?<=(*SKIP)ac)a/
+    aa
+
+/A(*MARK:A)A+(*SKIP:B)(B|Z) | AC/xK
+    AAAC
+
+/a(*SKIP:m)x|ac(*:n)(*SKIP:n)d|ac/K
+    acacd
+
+/A(*SKIP:m)x|A(*SKIP:n)x|AB/K
+    AB
+
+/((*SKIP:r)d){0}a(*SKIP:m)x|ac(*:n)|ac/K
+    acacd
+
+/-- Tests that try to figure out how Perl works. My hypothesis is that the
+    first verb that is backtracked onto is the one that acts. This seems to be
+    the case almost all the time, but there is one exception that is perhaps a 
+    bug. --/
+
+/-- This matches "aaaac"; each PRUNE advances one character until the subject
+    no longer starts with 5 'a's. --/
+
+/aaaaa(*PRUNE)b|a+c/
+    aaaaaac
+
+/-- Putting SKIP in front of PRUNE makes no difference, as it is never 
+backtracked onto, whether or not it has a label. --/
+
+/aaaaa(*SKIP)(*PRUNE)b|a+c/
+    aaaaaac
+
+/aaaaa(*SKIP:N)(*PRUNE)b|a+c/
+    aaaaaac
+
+/aaaa(*:N)a(*SKIP:N)(*PRUNE)b|a+c/
+    aaaaaac
+
+/-- Putting THEN in front makes no difference. */
+    
+/aaaaa(*THEN)(*PRUNE)b|a+c/
+    aaaaaac
+ 
+/-- However, putting COMMIT in front of the prune changes it to "no match". I 
+    think this is inconsistent and possibly a bug. For the moment, running this
+    test is moved out of the Perl-compatible file. --/
+
+/aaaaa(*COMMIT)(*PRUNE)b|a+c/
+    
+
+/---- OK, lets play the same game again using SKIP instead of PRUNE. ----/
+
+/-- This matches "ac" because SKIP forces the next match to start on the
+    sixth "a". --/
+
+/aaaaa(*SKIP)b|a+c/
+    aaaaaac
+ 
+/-- Putting PRUNE in front makes no difference. --/
+
+/aaaaa(*PRUNE)(*SKIP)b|a+c/
+    aaaaaac
+
+/-- Putting THEN in front makes no difference. --/
+
+/aaaaa(*THEN)(*SKIP)b|a+c/
+    aaaaaac
+
+/-- In this case, neither does COMMIT. This still matches "ac". --/
+
+/aaaaa(*COMMIT)(*SKIP)b|a+c/
+    aaaaaac
+    
+/-- This gives "no match", as expected. --/
+
+/aaaaa(*COMMIT)b|a+c/
+    aaaaaac
+    
+
+/------ Tests using THEN ------/
+
+/-- This matches "aaaaaac", as expected. --/
+
+/aaaaa(*THEN)b|a+c/
+    aaaaaac
+
+/-- Putting SKIP in front makes no difference. --/
+
+/aaaaa(*SKIP)(*THEN)b|a+c/
+    aaaaaac
+    
+/-- Putting PRUNE in front makes no difference. --/
+
+/aaaaa(*PRUNE)(*THEN)b|a+c/
+    aaaaaac
+    
+/-- Putting COMMIT in front makes no difference. --/
+
+/aaaaa(*COMMIT)(*THEN)b|a+c/
+    aaaaaac
+    
+/-- End of "priority" tests --/ 
+
+/aaaaa(*:m)(*PRUNE:m)(*SKIP:m)m|a+/
+    aaaaaa
+
+/aaaaa(*:m)(*MARK:m)(*PRUNE)(*SKIP:m)m|a+/
+    aaaaaa
+
+/aaaaa(*:n)(*PRUNE:m)(*SKIP:m)m|a+/
+    aaaaaa
+
+/aaaaa(*:n)(*MARK:m)(*PRUNE)(*SKIP:m)m|a+/
+    aaaaaa
+
+/a(*MARK:A)aa(*PRUNE:A)a(*SKIP:A)b|a+c/
+    aaaac
+
+/a(*MARK:A)aa(*MARK:A)a(*SKIP:A)b|a+c/
+    aaaac
+
+/aaa(*PRUNE:A)a(*SKIP:A)b|a+c/
+    aaaac
+
+/aaa(*MARK:A)a(*SKIP:A)b|a+c/
+    aaaac
+
+/a(*:m)a(*COMMIT)(*SKIP:m)b|a+c/K
+    aaaaaac
+
+/.?(a|b(*THEN)c)/
+    ba
+
+/(a(*COMMIT)b)c|abd/
+    abc
+    abd
+
+/(?=a(*COMMIT)b)abc|abd/
+    abc
+    abd
+
+/(?>a(*COMMIT)b)c|abd/
+    abc
+    abd
+
+/a(?=b(*COMMIT)c)[^d]|abd/
+    abd
+    abc 
+
+/a(?=bc).|abd/
+    abd
+    abc 
+    
+/a(?>b(*COMMIT)c)d|abd/
+    abceabd 
+
+/a(?>bc)d|abd/
+    abceabd 
+
+/(?>a(*COMMIT)b)c|abd/
+    abd
+
+/(?>a(*COMMIT)c)d|abd/
+    abd
+
+/((?=a(*COMMIT)b)ab|ac){0}(?:(?1)|a(c))/
+    ac 
+    
+/-- These tests were formerly in test 2, but changes in PCRE and Perl have
+    made them compatible. --/
+    
+/^(a)?(?(1)a|b)+$/
+    *** Failers
+    a
+
+/(?=a\Kb)ab/
+    ab 
+
+/(?!a\Kb)ac/
+    ac 
+    
+/^abc(?<=b\Kc)d/
+    abcd
+
+/^abc(?<!b\Kq)d/
+    abcd
+
+
+/A(*PRUNE:A)A+(*SKIP:A)(B|Z) | AC/xK
+    AAAC
+
+/^((abc|abcx)(*THEN)y|abcd)/
+    abcd
+    *** Failers 
+    abcxy 
+    
+/^((yes|no)(*THEN)(*F))?/
+  yes
+
+/(A (.*)   C? (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   C? (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   C? (*THEN)  | A D) \s* (*FAIL)/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   C? (*THEN)  | A D) \s* z/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   (?:C|) (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   (?:C|) (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   C{0,6} (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   C{0,6} (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   (CE){0,6} (*THEN)  | A D) (*FAIL)/x
+AbcdCEBefgBhiBqz
+
+/(A (.*)   (CE){0,6} (*THEN)  | A D) z/x
+AbcdCEBefgBhiBqz
+
+/(A (.*)   (CE*){0,6} (*THEN)  | A D) (*FAIL)/x
+AbcdCBefgBhiBqz
+
+/(A (.*)   (CE*){0,6} (*THEN)  | A D) z/x
+AbcdCBefgBhiBqz
+
+/(?=a(*COMMIT)b|ac)ac|ac/
+    ac
+
+/(?=a(*COMMIT)b|(ac)) ac | (a)c/x
+    ac
+
+/--------/
+
+/(?(?!b(*THEN)a)bn|bnn)/
+   bnn 
+
+/(?!b(*SKIP)a)bn|bnn/
+    bnn
+    
+/(?(?!b(*SKIP)a)bn|bnn)/
+   bnn 
+
+/(?!b(*PRUNE)a)bn|bnn/
+    bnn
+    
+/(?(?!b(*PRUNE)a)bn|bnn)/
+   bnn 
+   
+/(?!b(*COMMIT)a)bn|bnn/
+    bnn
+    
+/(?(?!b(*COMMIT)a)bn|bnn)/
+   bnn 
+
+/(?=b(*SKIP)a)bn|bnn/
+    bnn
+
+/(?=b(*THEN)a)bn|bnn/
+    bnn
+    
+ /^(?!a(*SKIP)b)/
+     ac
+
+ /^(?!a(*SKIP)b)../
+     acd
+
+/(?!a(*SKIP)b)../
+     acd
+
+/^(?(?!a(*SKIP)b))/
+     ac
+
+/^(?!a(*PRUNE)b)../
+     acd
+
+/(?!a(*PRUNE)b)../
+     acd
+
+ /(?!a(*COMMIT)b)ac|cd/
+     ac
+
+/\A.*?(?:a|bc)/
+    ba
+
+/^(A(*THEN)B|C(*THEN)D)/
+    CD           
+
+/(*:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+
+/(*PRUNE:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+
+/(*SKIP:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+
+/(*THEN:m(m)(?&y)(?(DEFINE)(?<y>b))/K
+    abc
+
+/^\d*\w{4}/
+    1234
+    123 
+
+/^[^b]*\w{4}/
+    aaaa
+    aaa     
+
+/^[^b]*\w{4}/i
+    aaaa
+    aaa     
+
+/^a*\w{4}/
+    aaaa
+    aaa     
+
+/^a*\w{4}/i
+    aaaa
+    aaa     
+
+/(?(?=ab)ab)/+
+    ca
+    cd 
+
+/(?:(?<n>foo)|(?<n>bar))\k<n>/J
+    foofoo
+    barbar
+
+/(?<n>A)(?:(?<n>foo)|(?<n>bar))\k<n>/J
+    AfooA
+    AbarA  
+    ** Failers 
+    Afoofoo
+    Abarbar
+
+/^(\d+)\s+IN\s+SOA\s+(\S+)\s+(\S+)\s*\(\s*$/
+    1 IN SOA non-sp1 non-sp2(
+
+/^ (?:(?<A>A)|(?'B'B)(?<A>A)) (?('A')x) (?(<B>)y)$/xJ
+    Ax
+    BAxy 
+    
+/^A\xZ/
+    A\0Z 
+
+/^A\o{123}B/
+    A\123B
+
+/ ^ a + + b $ /x
+    aaaab
+    
+/ ^ a + #comment
+  + b $ /x
+    aaaab
+    
+/ ^ a + #comment
+  #comment
+  + b $ /x
+    aaaab
+    
+/ ^ (?> a + ) b $ /x
+    aaaab 
+
+/ ^ ( a + ) + + \w $ /x
+    aaaab 
+
+/(?:a\Kb)*+/+
+    ababc
+
+/(?>a\Kb)*/+
+    ababc
+
+/(?:a\Kb)*/+
+    ababc
+
+/(a\Kb)*+/+
+    ababc
+
+/(a\Kb)*/+
+    ababc
 
 /-- End of testinput1 --/

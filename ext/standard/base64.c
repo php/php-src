@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -53,21 +53,14 @@ static const short base64_reverse_table[256] = {
 };
 /* }}} */
 
-PHPAPI unsigned char *php_base64_encode(const unsigned char *str, int length, int *ret_length) /* {{{ */
+PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) /* {{{ */
 {
 	const unsigned char *current = str;
 	unsigned char *p;
-	unsigned char *result;
+	zend_string *result;
 
-	if (length < 0) {
-		if (ret_length != NULL) {
-			*ret_length = 0;
-		}
-		return NULL;
-	}
-
-	result = (unsigned char *) safe_emalloc((length + 2) / 3, 4 * sizeof(char), 1);
-	p = result;
+	result = zend_string_alloc(((length + 2) / 3) * 4 * sizeof(char), 0);
+	p = (unsigned char *)result->val;
 
 	while (length > 2) { /* keep going until we have less than 24 bits */
 		*p++ = base64_table[current[0] >> 2];
@@ -92,10 +85,10 @@ PHPAPI unsigned char *php_base64_encode(const unsigned char *str, int length, in
 			*p++ = base64_pad;
 		}
 	}
-	if (ret_length != NULL) {
-		*ret_length = (int)(p - result);
-	}
 	*p = '\0';
+
+	result->len = (p - (unsigned char *)result->val);
+
 	return result;
 }
 /* }}} */
@@ -128,26 +121,26 @@ void php_base64_init(void)
 		ch += 16;
 	}
 	sprintf(sp, "};");
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Reverse_table:\n%s", s);
+	php_error_docref(NULL, E_NOTICE, "Reverse_table:\n%s", s);
 	efree(s);
 }
 */
 /* }}} */
 
-PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length) /* {{{ */
+PHPAPI zend_string *php_base64_decode(const unsigned char *str, size_t length) /* {{{ */
 {
-	return php_base64_decode_ex(str, length, ret_length, 0);
+	return php_base64_decode_ex(str, length, 0);
 }
 /* }}} */
 
-PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length, int *ret_length, zend_bool strict) /* {{{ */
+PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, zend_bool strict) /* {{{ */
 {
 	const unsigned char *current = str;
 	int ch, i = 0, j = 0, k;
 	/* this sucks for threaded environments */
-	unsigned char *result;
+	zend_string *result;
 
-	result = (unsigned char *)safe_emalloc(length, 1, 1);
+	result = zend_string_alloc(length, 0);
 
 	/* run through the whole string, converting as we go */
 	while ((ch = *current++) != '\0' && length-- > 0) {
@@ -161,7 +154,7 @@ PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length,
 						continue;
 					}
 				}
-				efree(result);
+				zend_string_free(result);
 				return NULL;
 			}
 			continue;
@@ -171,24 +164,24 @@ PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length,
 		if ((!strict && ch < 0) || ch == -1) { /* a space or some other separator character, we simply skip over */
 			continue;
 		} else if (ch == -2) {
-			efree(result);
+			zend_string_free(result);
 			return NULL;
 		}
 
 		switch(i % 4) {
 		case 0:
-			result[j] = ch << 2;
+			result->val[j] = ch << 2;
 			break;
 		case 1:
-			result[j++] |= ch >> 4;
-			result[j] = (ch & 0x0f) << 4;
+			result->val[j++] |= ch >> 4;
+			result->val[j] = (ch & 0x0f) << 4;
 			break;
 		case 2:
-			result[j++] |= ch >>2;
-			result[j] = (ch & 0x03) << 6;
+			result->val[j++] |= ch >>2;
+			result->val[j] = (ch & 0x03) << 6;
 			break;
 		case 3:
-			result[j++] |= ch;
+			result->val[j++] |= ch;
 			break;
 		}
 		i++;
@@ -199,18 +192,17 @@ PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length,
 	if (ch == base64_pad) {
 		switch(i % 4) {
 		case 1:
-			efree(result);
+			zend_string_free(result);
 			return NULL;
 		case 2:
 			k++;
 		case 3:
-			result[k] = 0;
+			result->val[k] = 0;
 		}
 	}
-	if(ret_length) {
-		*ret_length = j;
-	}
-	result[j] = '\0';
+	result->len = j;
+	result->val[result->len] = '\0';
+
 	return result;
 }
 /* }}} */
@@ -220,15 +212,15 @@ PHPAPI unsigned char *php_base64_decode_ex(const unsigned char *str, int length,
 PHP_FUNCTION(base64_encode)
 {
 	char *str;
-	unsigned char *result;
-	int str_len, ret_length;
+	size_t str_len;
+	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
 		return;
 	}
-	result = php_base64_encode((unsigned char*)str, str_len, &ret_length);
+	result = php_base64_encode((unsigned char*)str, str_len);
 	if (result != NULL) {
-		RETVAL_STRINGL((char*)result, ret_length, 0);
+		RETURN_STR(result);
 	} else {
 		RETURN_FALSE;
 	}
@@ -240,16 +232,16 @@ PHP_FUNCTION(base64_encode)
 PHP_FUNCTION(base64_decode)
 {
 	char *str;
-	unsigned char *result;
 	zend_bool strict = 0;
-	int str_len, ret_length;
+	size_t str_len;
+	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &str, &str_len, &strict) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &str, &str_len, &strict) == FAILURE) {
 		return;
 	}
-	result = php_base64_decode_ex((unsigned char*)str, str_len, &ret_length, strict);
+	result = php_base64_decode_ex((unsigned char*)str, str_len, strict);
 	if (result != NULL) {
-		RETVAL_STRINGL((char*)result, ret_length, 0);
+		RETURN_STR(result);
 	} else {
 		RETURN_FALSE;
 	}

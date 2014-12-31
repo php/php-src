@@ -45,7 +45,7 @@ string(25) "2008-08-08T08:08:08+00:00"
 string(%d) "%s"
 
 --DATE_COOKIE Constant--
-string(30) "Friday, 08-Aug-08 08:08:08 GMT"
+string(32) "Friday, 08-Aug-2008 08:08:08 GMT"
 string(%d) "%s"
 
 --DATE_RFC822 Constant--

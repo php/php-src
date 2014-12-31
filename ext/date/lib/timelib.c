@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,8 @@
 	}			\
 
 #define TIMELIB_LLABS(y) (y < 0 ? (y * -1) : y)
+
+#define HOUR(a) (int)(a * 60)
 
 timelib_time* timelib_time_ctor(void)
 {
@@ -69,10 +71,11 @@ timelib_rel_time* timelib_rel_time_clone(timelib_rel_time *rel)
 void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 {
 	unsigned int i;
+	size_t tz_abbr_len = strlen(tz_abbr);
 	
 	TIMELIB_TIME_FREE(tm->tz_abbr);
 	tm->tz_abbr = strdup(tz_abbr);
-	for (i = 0; i < strlen(tz_abbr); i++) {
+	for (i = 0; i < tz_abbr_len; i++) {
 		tm->tz_abbr[i] = toupper(tz_abbr[i]);
 	}
 }
@@ -174,13 +177,13 @@ void timelib_error_container_dtor(timelib_error_container *errors)
 	free(errors);
 }
 
-signed long timelib_date_to_int(timelib_time *d, int *error)
+timelib_long timelib_date_to_int(timelib_time *d, int *error)
 {
 	timelib_sll ts;
 
 	ts = d->sse;
 
-	if (ts < LONG_MIN || ts > LONG_MAX) {
+	if (ts < TIMELIB_LONG_MIN || ts > TIMELIB_LONG_MAX) {
 		if (error) {
 			*error = 1;
 		}
@@ -189,7 +192,7 @@ signed long timelib_date_to_int(timelib_time *d, int *error)
 	if (error) {
 		*error = 0;
 	}
-	return (signed long) d->sse;
+	return (timelib_long) d->sse;
 }
 
 void timelib_decimal_hour_to_hms(double h, int *hour, int *min, int *sec)
@@ -284,3 +287,35 @@ void timelib_dump_rel_time(timelib_rel_time *d)
 	printf("\n");
 }
 
+timelib_long timelib_parse_tz_cor(char **ptr)
+{
+        char *begin = *ptr, *end;
+        timelib_long  tmp;
+
+        while (isdigit(**ptr) || **ptr == ':') {
+                ++*ptr;
+        }
+        end = *ptr;
+        switch (end - begin) {
+                case 1:
+                case 2:
+                        return HOUR(strtol(begin, NULL, 10));
+                        break;
+                case 3:
+                case 4:
+                        if (begin[1] == ':') {
+                                tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 2, NULL, 10);
+                                return tmp;
+                        } else if (begin[2] == ':') {
+                                tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
+                                return tmp;
+                        } else {
+                                tmp = strtol(begin, NULL, 10);
+                                return HOUR(tmp / 100) + tmp % 100;
+                        }
+                case 5:
+                        tmp = HOUR(strtol(begin, NULL, 10)) + strtol(begin + 3, NULL, 10);
+                        return tmp;
+        }
+        return 0;
+}

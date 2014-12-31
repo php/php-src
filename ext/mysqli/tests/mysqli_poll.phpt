@@ -52,6 +52,13 @@ if (!$IS_MYSQLND)
 	if (0 !== ($tmp = (mysqli_poll($read, $error, $reject, 0, 1))))
 		printf("[009] Expecting int/0 got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
+	$read = $error = $reject = array($link);
+	if (false !== ($tmp = (mysqli_poll($read, $error, $reject, -1, 1))))
+		printf("[010] Expecting false got %s/%s\n", gettype($tmp), var_export($tmp, true));
+
+	$read = $error = $reject = array($link);
+	if (false !== ($tmp = (mysqli_poll($read, $error, $reject, 0, -1))))
+		printf("[011] Expecting false got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
 	function poll_async($offset, $link, $links, $errors, $reject, $exp_ready, $use_oo_syntax) {
 
@@ -90,14 +97,14 @@ if (!$IS_MYSQLND)
 	$links = array($link);
 	$errors = array($link);
 	$reject = array($link);
-	poll_async(10, $link, $links, $errors, $reject, 0, false);
+	poll_async(12, $link, $links, $errors, $reject, 0, false);
 	mysqli_close($link);
 
 	$link = get_connection();
 	$links = array($link);
 	$errors = array($link);
 	$reject = array($link);
-	poll_async(11, $link, $links, $errors, $reject, 0, true);
+	poll_async(13, $link, $links, $errors, $reject, 0, true);
 	mysqli_close($link);
 
 	// Connections on which no query has been send - 2
@@ -106,7 +113,7 @@ if (!$IS_MYSQLND)
 	$links = array($link, $link);
 	$errors = array($link, $link);
 	$reject = array();
-	poll_async(12, $link, $links, $errors, $reject, 0, false);
+	poll_async(14, $link, $links, $errors, $reject, 0, false);
 
 	// Connections on which no query has been send - 3
 	// Difference: pass two connections
@@ -114,7 +121,7 @@ if (!$IS_MYSQLND)
 	$links = array($link, get_connection());
 	$errors = array($link, $link);
 	$reject = array();
-	poll_async(13, $link, $links, $errors, $reject, 0, false);
+	poll_async(15, $link, $links, $errors, $reject, 0, false);
 
 	// Reference mess...
 	$link = get_connection();
@@ -122,16 +129,20 @@ if (!$IS_MYSQLND)
 	$errors = array($link);
 	$ref_errors =& $errors;
 	$reject = array();
-	poll_async(14, $link, $links, $ref_errors, $reject, 0, false);
+	poll_async(16, $link, $links, $ref_errors, $reject, 0, false);
 
 	print "done!";
 ?>
 --EXPECTF--
-[010 + 6] Rejecting thread %d: 0/
-[011 + 6] Rejecting thread %d: 0/
+
+Warning: mysqli_poll(): Negative values passed for sec and/or usec in %s on line %d
+
+Warning: mysqli_poll(): Negative values passed for sec and/or usec in %s on line %d
 [012 + 6] Rejecting thread %d: 0/
-[012 + 6] Rejecting thread %d: 0/
-[013 + 6] Rejecting thread %d: 0/
 [013 + 6] Rejecting thread %d: 0/
 [014 + 6] Rejecting thread %d: 0/
+[014 + 6] Rejecting thread %d: 0/
+[015 + 6] Rejecting thread %d: 0/
+[015 + 6] Rejecting thread %d: 0/
+[016 + 6] Rejecting thread %d: 0/
 done!

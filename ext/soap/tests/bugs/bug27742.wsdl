@@ -5,7 +5,7 @@
 		<xsd:schema targetNamespace="urn:TMSWebServices" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tms="urn:TMSWebServices" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<simpleType name="duration">
 		<annotation>
-			<documentation xml:lang="en">ISO 8601 pattern used to denote program durations.  Year, month and day are not relevent in our context and are omitted.</documentation>
+			<documentation xml:lang="en">ISO 8601 pattern used to denote program durations.  Year, month and day are not relevant in our context and are omitted.</documentation>
 		</annotation>
 		<restriction base="xsd:duration">
 			<pattern value="PT[0-9][0-9]H[0-5][0-9]M"/>
@@ -484,7 +484,7 @@
 									</attribute>
 									<attribute name="to" type="tms:date" use="optional">
 										<annotation>
-											<documentation xml:lang="en">Date untill which the mapping is valid, within the validity period of the whole XTVD document. @IMPORTANT : The change will occur at midnight.</documentation>
+											<documentation xml:lang="en">Date until which the mapping is valid, within the validity period of the whole XTVD document. @IMPORTANT : The change will occur at midnight.</documentation>
 										</annotation>
 									</attribute>
 								</complexType>
@@ -726,7 +726,7 @@
 	</element>
 	<element name="genres">
 		<annotation>
-			<documentation xml:lang="en">Containes genre information where available for the program records.  A program may have more than one genre with different relevence factors.</documentation>
+			<documentation xml:lang="en">Contains genre information where available for the program records.  A program may have more than one genre with different relevance factors.</documentation>
 		</annotation>
 		<complexType>
 			<sequence maxOccurs="unbounded">
@@ -749,7 +749,7 @@
 										</element>
 										<element name="relevance" type="xsd:int">
 											<annotation>
-												<documentation xml:lang="en">A relevence factor that applies to the genre classification for the program.  A relevence factor of 1 indicates that this is the top-level genre under which the program is classified.</documentation>
+												<documentation xml:lang="en">A relevance factor that applies to the genre classification for the program.  A relevance factor of 1 indicates that this is the top-level genre under which the program is classified.</documentation>
 											</annotation>
 										</element>
 									</sequence>

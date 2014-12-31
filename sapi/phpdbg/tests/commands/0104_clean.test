@@ -1,0 +1,14 @@
+#################################################
+# name: clean
+# purpose: test cleaning environment
+# expect: TEST::FORMAT
+# options: -rr
+#################################################
+#Cleaning Execution Environment
+#Classes    %d
+#Functions  %d
+#Constants  %d
+#Includes   %d
+#################################################
+clean
+quit

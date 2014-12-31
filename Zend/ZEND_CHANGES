@@ -435,7 +435,7 @@ Changes in the Zend Engine 2.0
       that of other object-oriented languages, such as Java: When the
       last reference to an object is destroyed the object's
       destructor, which is a class method name __destruct() that
-      recieves no parameters, is called before the object is freed
+      receives no parameters, is called before the object is freed
       from memory.
 
       Example:
@@ -1103,7 +1103,7 @@ Changes in the Zend Engine 1.0
       Use ob_start() to begin output buffering, ob_end_flush() to end
       buffering and send out the buffered contents, ob_end_clean() to
       end buffering without sending the buffered contents, and
-      ob_get_contents() to retreive the current contents of the output
+      ob_get_contents() to retrieve the current contents of the output
       buffer. Header information (header(), content type, cookies) are
       not buffered. By turning on output buffering, you can
       effectively send header information all throughout your file,
@@ -1136,7 +1136,7 @@ Changes in the Zend Engine 1.0
       (supports breakpoints, expression evaluation, step-in/over,
       function call backtrace, and more).
 
-  The Zend Engine claims 100% compatability with the engine of PHP
+  The Zend Engine claims 100% compatibility with the engine of PHP
   3.0, and is shamelessly lying about it. Here's why:
 
     * Static variable initializers only accept scalar values
@@ -1161,6 +1161,6 @@ Changes in the Zend Engine 1.0
       printed the letter { and the contents of the variable $somevar in
       PHP 3.0), it will result in a parse error with the Zend Engine.
       In this case, you would have to change the code to print
-      "\{$somevar"; This incompatability is due to the full variable
+      "\{$somevar"; This incompatibility is due to the full variable
       reference within quoted strings feature added in the Zend
       Engine.

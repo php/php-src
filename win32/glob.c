@@ -61,9 +61,16 @@
  *	Number of matches in the current invocation of glob.
  */
 #ifdef PHP_WIN32
-#define _POSIX_
-#include <limits.h>
-#undef _POSIX_
+#if _MSC_VER < 1800
+# define _POSIX_
+# include <limits.h>
+# undef _POSIX_
+#else
+/* Visual Studio 2013 removed all the _POSIX_ defines, but we depend on some */
+# ifndef ARG_MAX
+#  define ARG_MAX 14500
+# endif
+#endif
 #ifndef S_ISDIR
 #define S_ISDIR(m) (((m) & _S_IFDIR) == _S_IFDIR)
 #endif
@@ -139,10 +146,10 @@ typedef char Char;
 
 static int	 compare(const void *, const void *);
 static int	 g_Ctoc(const Char *, char *, u_int);
-static int	 g_lstat(Char *, struct stat *, glob_t *);
+static int	 g_lstat(Char *, zend_stat_t *, glob_t *);
 static DIR	*g_opendir(Char *, glob_t *);
 static Char	*g_strchr(Char *, int);
-static int	 g_stat(Char *, struct stat *, glob_t *);
+static int	 g_stat(Char *, zend_stat_t *, glob_t *);
 static int	 glob0(const Char *, glob_t *);
 static int	 glob1(Char *, Char *, glob_t *, size_t *);
 static int	 glob2(Char *, Char *, Char *, Char *, Char *, Char *,
@@ -552,7 +559,7 @@ glob2(pathbuf, pathbuf_last, pathend, pathend_last, pattern,
 	glob_t *pglob;
 	size_t *limitp;
 {
-	struct stat sb;
+	zend_stat_t sb;
 	Char *p, *q;
 	int anymeta;
 
@@ -689,7 +696,7 @@ glob3(pathbuf, pathbuf_last, pathend, pathend_last, pattern, pattern_last,
 
 
 /*
- * Extend the gl_pathv member of a glob_t structure to accomodate a new item,
+ * Extend the gl_pathv member of a glob_t structure to accommodate a new item,
  * add the new item, and update gl_pathc.
  *
  * This assumes the BSD realloc, which only copies the block when its size
@@ -735,7 +742,7 @@ globextend(path, pglob, limitp)
 
 	for (p = path; *p++;)
 		;
-	len = (size_t)(p - path);
+	len = (u_int)(p - path);
 	*limitp += len;
 	if ((copy = malloc(len)) != NULL) {
 		if (g_Ctoc(path, copy, len)) {
@@ -849,7 +856,7 @@ g_opendir(str, pglob)
 static int
 g_lstat(fn, sb, pglob)
 	register Char *fn;
-	struct stat *sb;
+	zend_stat_t *sb;
 	glob_t *pglob;
 {
 	char buf[MAXPATHLEN];
@@ -864,7 +871,7 @@ g_lstat(fn, sb, pglob)
 static int
 g_stat(fn, sb, pglob)
 	register Char *fn;
-	struct stat *sb;
+	zend_stat_t *sb;
 	glob_t *pglob;
 {
 	char buf[MAXPATHLEN];

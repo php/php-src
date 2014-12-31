@@ -1,4 +1,4 @@
-<?php /* $Id$ */
+<?php
 
 srand((double)microtime()*1000000);
 

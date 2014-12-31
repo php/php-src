@@ -1,6 +1,6 @@
 /*
   zip_set_file_comment.c -- set comment for file in archive
-  Copyright (C) 2006-2009 Dieter Baron and Thomas Klausner
+  Copyright (C) 2006-2012 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -35,38 +35,17 @@
 
 #include <stdlib.h>
 
+#define _ZIP_COMPILING_DEPRECATED
 #include "zipint.h"
 
 
 
-ZIP_EXTERN(int)
-zip_set_file_comment(struct zip *za, zip_uint64_t idx,
-		     const char *comment, int len)
+ZIP_EXTERN int
+zip_set_file_comment(struct zip *za, zip_uint64_t idx, const char *comment, int len)
 {
-    char *tmpcom;
-
-    if (idx >= za->nentry
-	|| len < 0 || len > MAXCOMLEN
-	|| (len > 0 && comment == NULL)) {
-	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
-	return -1;
+    if (len < 0 || len > ZIP_UINT16_MAX) {
+        _zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+        return -1;
     }
-
-    if (ZIP_IS_RDONLY(za)) {
-	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
-	return -1;
-    }
-
-    if (len > 0) {
-	if ((tmpcom=(char *)_zip_memdup(comment, len, &za->error)) == NULL)
-	    return -1;
-    }
-    else
-	tmpcom = NULL;
-
-    free(za->entry[idx].ch_comment);
-    za->entry[idx].ch_comment = tmpcom;
-    za->entry[idx].ch_comment_len = len;
-    
-    return 0;
+    return zip_file_set_comment(za, idx, comment, (zip_uint16_t)len, 0);
 }

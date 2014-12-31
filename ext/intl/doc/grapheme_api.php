@@ -98,7 +98,7 @@
 	 * @param string	$haystack	The input string.
 	 * @param string	$needle		The string to look for.
 	 * @param [boolean]	$before_needle	If TRUE (the default is FALSE), grapheme_strstr() returns the part of the
-						haystack before the first occurence of the needle.
+						haystack before the first occurrence of the needle.
 	 * @return string	Returns the portion of string, or FALSE if needle is not found.
 	*/
 	function grapheme_strstr($haystack, $needle, $before_needle = FALSE) {}
@@ -109,7 +109,7 @@
          * @param string        $haystack       The input string.
          * @param string        $needle         The string to look for.
          * @param [boolean]     $before_needle  If TRUE (the default is FALSE), grapheme_strstr() returns the part of the
-                                                haystack before the first occurence of the needle.
+                                                haystack before the first occurrence of the needle.
          * @return string       Returns the portion of string, or FALSE if needle is not found.
         */
         function grapheme_stristr($haystack, $needle, $before_needle = FALSE) {}

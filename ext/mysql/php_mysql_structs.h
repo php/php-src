@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -111,23 +111,26 @@ PHP_FUNCTION(mysql_set_charset);
 #endif
 
 ZEND_BEGIN_MODULE_GLOBALS(mysql)
-	long default_link;
-	long num_links,num_persistent;
-	long max_links,max_persistent;
-	long allow_persistent;
-	long default_port;
+	zend_resource *default_link;
+	zend_long num_links,num_persistent;
+	zend_long max_links,max_persistent;
+	zend_long allow_persistent;
+	zend_long default_port;
 	char *default_host, *default_user, *default_password;
 	char *default_socket;
 	char *connect_error;
-	long connect_errno;
-	long connect_timeout;
-	long result_allocated;
-	long trace_mode;
-	long allow_local_infile;
+	zend_long connect_errno;
+	zend_long connect_timeout;
+	zend_long result_allocated;
+	zend_long trace_mode;
+	zend_long allow_local_infile;
 ZEND_END_MODULE_GLOBALS(mysql)
 
 #ifdef ZTS
-# define MySG(v) TSRMG(mysql_globals_id, zend_mysql_globals *, v)
+# define MySG(v) ZEND_TSRMG(mysql_globals_id, zend_mysql_globals *, v)
+# ifdef COMPILE_DL_MYSQL
+ZEND_TSRMLS_CACHE_EXTERN;
+# endif
 #else
 # define MySG(v) (mysql_globals.v)
 #endif

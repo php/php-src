@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,26 +24,31 @@
 #include "dateformat_data.h"
 
 typedef struct {
-	zend_object		zo;
 	dateformat_data	datef_data;
 	int				date_type;
 	int				time_type;
 	int				calendar;
 	char			*requested_locale;
+	zend_object		zo;
 } IntlDateFormatter_object;
 
-void dateformat_register_IntlDateFormatter_class( TSRMLS_D );
+static inline IntlDateFormatter_object *php_intl_dateformatter_fetch_object(zend_object *obj) {
+	return (IntlDateFormatter_object *)((char*)(obj) - XtOffsetOf(IntlDateFormatter_object, zo));
+}
+#define Z_INTL_DATEFORMATTER_P(zv) php_intl_dateformatter_fetch_object(Z_OBJ_P(zv))
+
+void dateformat_register_IntlDateFormatter_class( void );
 extern zend_class_entry *IntlDateFormatter_ce_ptr;
 
 /* Auxiliary macros */
 
 #define DATE_FORMAT_METHOD_INIT_VARS	INTL_METHOD_INIT_VARS(IntlDateFormatter, dfo)
-#define DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(IntlDateFormatter, dfo)
+#define DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_DATEFORMATTER, dfo)
 #define DATE_FORMAT_METHOD_FETCH_OBJECT				\
 		DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;	\
 	if (dfo->datef_data.udatf == NULL)				\
 	{												\
-		intl_errors_set(&dfo->datef_data.error, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlDateFormatter", 0 TSRMLS_CC); \
+		intl_errors_set(&dfo->datef_data.error, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlDateFormatter", 0); \
 		RETURN_FALSE;								\
 	}
 

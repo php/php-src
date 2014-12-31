@@ -32,7 +32,9 @@ $row = mysql_fetch_assoc($res);
 if (1 != $row['id'])
 	printf("[005] Expecting record 1/a, got record %s/%s\n", $row['id'], $row['label']);
 
-if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($row['label'])) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
+    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+    !is_unicode($row['label'])) {
 	printf("[006] No unicode returned! [%d] %s\n", mysql_errno($link), mysql_error($link));
 	var_inspect($row);
 }
@@ -47,7 +49,9 @@ $row = mysql_fetch_assoc($res);
 if (1 != $row['id'])
 	printf("[008] Expecting record 1/a, got record %s/%s\n", $row['id'], $row['label']);
 
-if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($row['label'])) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
+    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+    !is_unicode($row['label'])) {
 	printf("[009] No unicode returned! [%d] %s\n", mysql_errno(), mysql_error());
 	var_inspect($row);
 }

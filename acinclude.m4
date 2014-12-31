@@ -66,10 +66,10 @@ AC_DEFUN([PHP_EXPAND_PATH],[
     $2=$1
   else
     changequote({,})
-    ep_dir="`echo $1|$SED 's%/*[^/][^/]*/*$%%'`"
+    ep_dir=`echo $1|$SED 's%/*[^/][^/]*/*$%%'`
     changequote([,])
-    ep_realdir="`(cd \"$ep_dir\" && pwd)`"
-    $2="$ep_realdir/`basename \"$1\"`"
+    ep_realdir=`(cd "$ep_dir" && pwd)`
+    $2="$ep_realdir"/`basename "$1"`
   fi
 ])
 
@@ -844,7 +844,7 @@ AC_DEFUN([PHP_SHARED_MODULE],[
       ;;
     *netware*[)]
       suffix=nlm
-      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) ifelse($1, php5lib, , -L$(top_builddir)/netware -lphp5lib) $(translit(ifelse($1, php5lib, $1, m4_substr($1, 3)),a-z_-,A-Z__)_SHARED_LIBADD)'
+      link_cmd='$(LIBTOOL) --mode=link ifelse($4,,[$(CC)],[$(CXX)]) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) -o [$]@ -shared -export-dynamic -avoid-version -prefer-pic -module -rpath $(phplibdir) $(EXTRA_LDFLAGS) $($2) ifelse($1, php7lib, , -L$(top_builddir)/netware -lphp7lib) $(translit(ifelse($1, php7lib, $1, m4_substr($1, 3)),a-z_-,A-Z__)_SHARED_LIBADD)'
       ;;
     *[)]
       suffix=la
@@ -1711,7 +1711,7 @@ int main(int argc, char *argv[])
 {
   FILE *fp;
   long position;
-  char *filename = "/tmp/phpglibccheck";
+  char *filename = tmpnam(NULL);
   
   fp = fopen(filename, "w");
   if (fp == NULL) {
@@ -1832,7 +1832,7 @@ AC_TRY_COMPILE([
 ])
 
 dnl -------------------------------------------------------------------------
-dnl Library/function existance and build sanity checks
+dnl Library/function existence and build sanity checks
 dnl -------------------------------------------------------------------------
 
 dnl
@@ -2342,8 +2342,10 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
       AC_MSG_ERROR([OpenSSL version 0.9.6 or greater required.])
     fi
 
-    if test -n "$OPENSSL_LIBS" && test -n "$OPENSSL_INCS"; then
+    if test -n "$OPENSSL_LIBS"; then
       PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)
+    fi
+    if test -n "$OPENSSL_INCS"; then
       PHP_EVAL_INCLINE($OPENSSL_INCS)
     fi
   fi
@@ -2684,14 +2686,14 @@ EOF
   fi
   for arg in $ac_configure_args; do
     if test `expr -- $arg : "'.*"` = 0; then
-      if test `expr -- $arg : "--.*"` = 0; then
-        break;
+      if test `expr -- $arg : "-.*"` = 0 && test `expr -- $arg : ".*=.*"` = 0; then
+        continue;
       fi
       echo "'[$]arg' \\" >> $1
       CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS '[$]arg'"
     else
-      if test `expr -- $arg : "'--.*"` = 0; then
-        break;
+      if test `expr -- $arg : "'-.*"` = 0 && test `expr -- $arg : "'.*=.*"` = 0; then
+        continue;
       fi
       echo "[$]arg \\" >> $1
       CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS [$]arg"
@@ -2734,7 +2736,7 @@ AC_DEFUN([PHP_CHECK_CONFIGURE_OPTIONS],[
       enable-libtool-lock | with-pic | with-tags | enable-shared | enable-static | enable-fast-install | with-gnu-ld[)];;
 
       # Allow certain TSRM options
-      with-tsrm-pth | with-tsrm-st | with-tsrm-pthreads[)];;
+      with-tsrm-pth | with-tsrm-st | with-tsrm-pthreads [)];;
 
       # Allow certain Zend options
       with-zend-vm | enable-maintainer-zts | enable-inline-optimization[)];;
@@ -2798,7 +2800,7 @@ AC_DEFUN([PHP_DETECT_ICC],
 
 dnl PHP_DETECT_SUNCC
 dnl Detect if the systems default compiler is suncc.
-dnl We also set some usefull CFLAGS if the user didn't set any
+dnl We also set some useful CFLAGS if the user didn't set any
 AC_DEFUN([PHP_DETECT_SUNCC],[
   SUNCC="no"
   AC_MSG_CHECKING([for suncc])
@@ -2923,17 +2925,17 @@ dnl providerdesc
 dnl header-file
   ac_hdrobj=$2
 
-dnl Add providerdesc.o into global objects when needed
+dnl Add providerdesc.o or .lo into global objects when needed
   case $host_alias in
   *freebsd*)
     PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
     PHP_LDFLAGS="$PHP_LDFLAGS -lelf"
     ;;
   *solaris*)
-    PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
+    PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.lo"
     ;;
   *linux*)
-    PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
+    PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.lo"
     ;;
   esac
 
@@ -2960,15 +2962,72 @@ dnl DTrace objects
   esac
 
 dnl Generate Makefile.objects entries
+dnl The empty $ac_provsrc command stops an implicit circular dependency
+dnl in GNU Make which causes the .d file to be overwritten (Bug 61268)
   cat>>Makefile.objects<<EOF
 
+$abs_srcdir/$ac_provsrc:;
+
 $ac_bdir[$]ac_hdrobj: $abs_srcdir/$ac_provsrc
-	CFLAGS="\$(CFLAGS_CLEAN)" dtrace -h -C -s $ac_srcdir[$]ac_provsrc -o \$[]@ && \$(SED) -ibak 's,PHP_,DTRACE_,g' \$[]@
+	CFLAGS="\$(CFLAGS_CLEAN)" dtrace -h -C -s $ac_srcdir[$]ac_provsrc -o \$[]@.bak && \$(SED) -e 's,PHP_,DTRACE_,g' \$[]@.bak > \$[]@
 
 \$(PHP_DTRACE_OBJS): $ac_bdir[$]ac_hdrobj
 
+EOF
+
+  case $host_alias in
+  *solaris*|*linux*)
+    dtrace_prov_name="`echo $ac_provsrc | $SED -e 's#\(.*\)\/##'`.o"
+    dtrace_lib_dir="`echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/[^/]*#\1#'`/.libs"
+    dtrace_d_obj="`echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/\([^/]*\)#\1/.libs/\2#'`.o"
+    dtrace_nolib_objs='$(PHP_DTRACE_OBJS:.lo=.o)'
+    for ac_lo in $PHP_DTRACE_OBJS; do
+      dtrace_lib_objs="[$]dtrace_lib_objs `echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
+    done;
+dnl Always attempt to create both PIC and non-PIC DTrace objects (Bug 63692)
+    cat>>Makefile.objects<<EOF
+$ac_bdir[$]ac_provsrc.lo: \$(PHP_DTRACE_OBJS)
+	echo "[#] Generated by Makefile for libtool" > \$[]@
+	@test -d "$dtrace_lib_dir" || mkdir $dtrace_lib_dir
+	if CFLAGS="\$(CFLAGS_CLEAN)" dtrace -G -o $dtrace_d_obj -s $abs_srcdir/$ac_provsrc $dtrace_lib_objs 2> /dev/null && test -f "$dtrace_d_obj"; then [\\]
+	  echo "pic_object=['].libs/$dtrace_prov_name[']" >> \$[]@ [;\\]
+	else [\\]
+	  echo "pic_object='none'" >> \$[]@ [;\\]
+	fi
+	if CFLAGS="\$(CFLAGS_CLEAN)" dtrace -G -o $ac_bdir[$]ac_provsrc.o -s $abs_srcdir/$ac_provsrc $dtrace_nolib_objs 2> /dev/null && test -f "$ac_bdir[$]ac_provsrc.o"; then [\\]
+	  echo "non_pic_object=[']$dtrace_prov_name[']" >> \$[]@ [;\\]
+	else [\\]
+	  echo "non_pic_object='none'" >> \$[]@ [;\\]
+	fi
+
+EOF
+
+    ;;
+  *)
+cat>>Makefile.objects<<EOF
 $ac_bdir[$]ac_provsrc.o: \$(PHP_DTRACE_OBJS)
 	CFLAGS="\$(CFLAGS_CLEAN)" dtrace -G -o \$[]@ -s $abs_srcdir/$ac_provsrc $dtrace_objs
 
 EOF
+    ;;
+  esac
+])
+
+dnl
+dnl PHP_CHECK_STDINT_TYPES
+dnl
+AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
+  AC_CHECK_SIZEOF([short], 2)
+  AC_CHECK_SIZEOF([int], 4)
+  AC_CHECK_SIZEOF([long], 4)
+  AC_CHECK_SIZEOF([long long], 8)
+  AC_CHECK_TYPES([int8, int16, int32, int64, int8_t, int16_t, int32_t, int64_t, uint8, uint16, uint32, uint64, uint8_t, uint16_t, uint32_t, uint64_t, u_int8_t, u_int16_t, u_int32_t, u_int64_t], [], [], [
+#if HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#if HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+  ])
+  AC_DEFINE([PHP_HAVE_STDINT_TYPES], [1], [Checked for stdint types])
 ])

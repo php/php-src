@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,10 +25,10 @@
 #include "zend_compile.h"
 #include "zend_build.h"
 
-/* The first number is the engine version and the rest is the date.
+/* The first number is the engine version and the rest is the date (YYYYMMDD).
  * This way engine 2/3 API no. is always greater than engine 1 API no..
  */
-#define ZEND_EXTENSION_API_NO	220121212
+#define ZEND_EXTENSION_API_NO	320140815
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
@@ -111,10 +111,10 @@ END_EXTERN_C()
 ZEND_API extern zend_llist zend_extensions;
 
 void zend_extension_dtor(zend_extension *extension);
-void zend_append_version_info(const zend_extension *extension);
+ZEND_API void zend_append_version_info(const zend_extension *extension);
 int zend_startup_extensions_mechanism(void);
 int zend_startup_extensions(void);
-void zend_shutdown_extensions(TSRMLS_D);
+void zend_shutdown_extensions(void);
 
 BEGIN_EXTERN_C()
 ZEND_API int zend_load_extension(const char *path);

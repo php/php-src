@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -122,26 +122,21 @@ xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index) /* {{{ */
 }
 /* }}} */
 
-static void php_dom_iterator_dtor(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static void php_dom_iterator_dtor(zend_object_iterator *iter) /* {{{ */
 {
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
-	zval_ptr_dtor((zval**)&iterator->intern.data);
-
-	if (iterator->curobj) {
-		zval_ptr_dtor((zval**)&iterator->curobj);
-	}
-
-	efree(iterator);
+	zval_ptr_dtor(&iterator->intern.data);
+	zval_ptr_dtor(&iterator->curobj);
 }
 /* }}} */
 
-static int php_dom_iterator_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static int php_dom_iterator_valid(zend_object_iterator *iter) /* {{{ */
 {
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
-	if (iterator->curobj) {
+	if (Z_TYPE(iterator->curobj) != IS_UNDEF) {
 		return SUCCESS;
 	} else {
 		return FAILURE;
@@ -149,76 +144,63 @@ static int php_dom_iterator_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
-static void php_dom_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC) /* {{{ */
+zval *php_dom_iterator_current_data(zend_object_iterator *iter) /* {{{ */
 {
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
-	*data = &iterator->curobj;
+	return &iterator->curobj;
 }
 /* }}} */
 
-static int php_dom_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) /* {{{ */
 {
-	zval *curobj;
-	xmlNodePtr curnode = NULL;
-	dom_object *intern;
-	zval *object;
-	int namelen;
-
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
+	zval *object = &iterator->intern.data;
 
-	object = (zval *)iterator->intern.data;
-
-	if (instanceof_function(Z_OBJCE_P(object), dom_nodelist_class_entry TSRMLS_CC)) {
-		*int_key = iter->index;
-		return HASH_KEY_IS_LONG;
+	if (instanceof_function(Z_OBJCE_P(object), dom_nodelist_class_entry)) {
+		ZVAL_LONG(key, iter->index);
 	} else {
-		curobj = iterator->curobj;
+		dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
 
-		intern = (dom_object *)zend_object_store_get_object(curobj TSRMLS_CC);
 		if (intern != NULL && intern->ptr != NULL) {
-			curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
+			xmlNodePtr curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
+			ZVAL_STRINGL(key, (char *) curnode->name, xmlStrlen(curnode->name));
 		} else {
-			return HASH_KEY_NON_EXISTANT;
+			ZVAL_NULL(key);
 		}
-
-		namelen = xmlStrlen(curnode->name);
-		*str_key = estrndup(curnode->name, namelen);
-		*str_key_len = namelen + 1;
-		return HASH_KEY_IS_STRING;
 	}
 }
 /* }}} */
 
-static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
+static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 {
-	zval *curobj, *curattr = NULL;
 	zval *object;
 	xmlNodePtr curnode = NULL, basenode;
 	dom_object *intern;
 	dom_object *nnmap;
 	dom_nnodemap_object *objmap;
-	int ret, previndex=0;
+	int previndex=0;
 	HashTable *nodeht;
-	zval **entry;
+	zval *entry;
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
-	object = (zval *)iterator->intern.data;
-	nnmap = (dom_object *)zend_object_store_get_object(object TSRMLS_CC);
+	object = &iterator->intern.data;
+	nnmap = Z_DOMOBJ_P(object);
 	objmap = (dom_nnodemap_object *)nnmap->ptr;
 
-	curobj = iterator->curobj;
-	intern = (dom_object *)zend_object_store_get_object(curobj TSRMLS_CC);
+	intern = Z_DOMOBJ_P(&iterator->curobj);
+	zval_ptr_dtor(&iterator->curobj);
+	ZVAL_UNDEF(&iterator->curobj);
+
 	if (intern != NULL && intern->ptr != NULL) {
 		if (objmap->nodetype != XML_ENTITY_NODE && 
 			objmap->nodetype != XML_NOTATION_NODE) {
 			if (objmap->nodetype == DOM_NODESET) {
-				nodeht = HASH_OF(objmap->baseobjptr);
+				nodeht = HASH_OF(&objmap->baseobj_zv);
 				zend_hash_move_forward(nodeht);
-				if (zend_hash_get_current_data(nodeht, (void **) &entry)==SUCCESS) {
-					curattr = *entry;
-					Z_ADDREF_P(curattr);
+				if ((entry = zend_hash_get_current_data(nodeht))) {
+					ZVAL_COPY(&iterator->curobj, entry);
 				}
 			} else {
 				curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
@@ -236,7 +218,8 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC) 
 					} else {
 						goto err;
 					}
-					curnode = dom_get_elements_by_tag_name_ns_raw(basenode, objmap->ns, objmap->local, &previndex, iter->index);
+					curnode = dom_get_elements_by_tag_name_ns_raw(
+						basenode, (char *) objmap->ns, (char *) objmap->local, &previndex, iter->index);
 				}
 			}
 		} else {
@@ -248,13 +231,9 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC) 
 		}
 	}
 err:
-	zval_ptr_dtor((zval**)&curobj);
 	if (curnode) {
-		MAKE_STD_ZVAL(curattr);
-		curattr = php_dom_create_object(curnode, &ret, curattr, objmap->baseobj TSRMLS_CC);
+		php_dom_create_object(curnode, &iterator->curobj, objmap->baseobj);
 	}
-
-	iterator->curobj = curattr;
 }
 /* }}} */
 
@@ -267,37 +246,37 @@ zend_object_iterator_funcs php_dom_iterator_funcs = {
 	NULL
 };
 
-zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
+zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	dom_object *intern;
 	dom_nnodemap_object *objmap;
 	xmlNodePtr nodep, curnode=NULL;
-	zval *curattr = NULL;
-	int ret, curindex = 0;
+	int curindex = 0;
 	HashTable *nodeht;
-	zval **entry;
+	zval *entry;
 	php_dom_iterator *iterator;
 
 	if (by_ref) {
 		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
 	}
 	iterator = emalloc(sizeof(php_dom_iterator));
+	zend_iterator_init(&iterator->intern);
 
-	Z_ADDREF_P(object);
-	iterator->intern.data = (void*)object;
+	ZVAL_COPY(&iterator->intern.data, object);
 	iterator->intern.funcs = &php_dom_iterator_funcs;
 
-	intern = (dom_object *)zend_object_store_get_object(object TSRMLS_CC);
+	ZVAL_UNDEF(&iterator->curobj);
+
+	intern = Z_DOMOBJ_P(object);
 	objmap = (dom_nnodemap_object *)intern->ptr;
 	if (objmap != NULL) {
 		if (objmap->nodetype != XML_ENTITY_NODE && 
 			objmap->nodetype != XML_NOTATION_NODE) {
 			if (objmap->nodetype == DOM_NODESET) {
-				nodeht = HASH_OF(objmap->baseobjptr);
+				nodeht = HASH_OF(&objmap->baseobj_zv);
 				zend_hash_internal_pointer_reset(nodeht);
-				if (zend_hash_get_current_data(nodeht, (void **) &entry)==SUCCESS) {
-					curattr = *entry;
-					Z_ADDREF_P(curattr);
+				if ((entry = zend_hash_get_current_data(nodeht))) {
+					ZVAL_COPY(&iterator->curobj, entry);
 				}
 			} else {
 				nodep = (xmlNode *)dom_object_get_node(objmap->baseobj);
@@ -316,7 +295,8 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 					} else {
 						nodep = nodep->children;
 					}
-					curnode = dom_get_elements_by_tag_name_ns_raw(nodep, objmap->ns, objmap->local, &curindex, 0);
+					curnode = dom_get_elements_by_tag_name_ns_raw(
+						nodep, (char *) objmap->ns, (char *) objmap->local, &curindex, 0);
 				}
 			}
 		} else {
@@ -329,13 +309,10 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 	}
 err:
 	if (curnode) {
-		MAKE_STD_ZVAL(curattr);
-		curattr = php_dom_create_object(curnode, &ret, curattr, objmap->baseobj TSRMLS_CC);
+		php_dom_create_object(curnode, &iterator->curobj, objmap->baseobj);
 	}
 
-	iterator->curobj = curattr;
-
-	return (zend_object_iterator*)iterator;
+	return &iterator->intern;
 }
 /* }}} */
 

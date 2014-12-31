@@ -37,11 +37,11 @@ $conf = array(
 'TEST_WEB_BASE_URL'    =>    NULL,
 
 /* if set, copy phpt files into this directory,
-   which should be accessable via an http server.  The
+   which should be accessible via an http server.  The
    TEST_WEB_BASE_URL setting should be the base url
    to access this path.  If this is not used,
    TEST_WEB_BASE_URL should be the base url pointing
-   to TEST_PHP_SRCDIR, which should then be accessable via
+   to TEST_PHP_SRCDIR, which should then be accessible via
    an http server.
    
    An example would be:
@@ -52,14 +52,14 @@ $conf = array(
 
 /* file extension of pages requested via http
    this allows for php to be configured to parse
-   extensions other than php, usefull for multiple
+   extensions other than php, useful for multiple
    configurations under a single webserver */
 'TEST_WEB_EXT'         =>    'php',
 
 /* if true doesn't run tests, just outputs executable info */
 'TEST_CONTEXT_INFO'    =>    false,
 
-/* : or ; seperated list of paths */
+/* : or ; separated list of paths */
 'TEST_PATHS'           =>    NULL
 /* additional configuration items that may be set
    to provide proxy support for testes:

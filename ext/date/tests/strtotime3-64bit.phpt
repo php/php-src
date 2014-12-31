@@ -53,7 +53,7 @@ bool(false)
 string(31) "Fri, 16 Jun 2006 23:49:12 +0100"
 bool(false)
 string(31) "Fri, 16 Jun 2006 02:22:00 +0100"
-string(31) "Mon, 16 Jun 0222 02:22:00 -0036"
+string(31) "Sun, 16 Jun 0222 02:22:00 -0036"
 string(31) "Fri, 16 Jun 2006 02:22:33 +0100"
 bool(false)
 string(31) "Tue, 02 Mar 2004 00:00:00 +0000"

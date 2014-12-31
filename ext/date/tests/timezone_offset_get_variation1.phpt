@@ -13,6 +13,14 @@ echo "*** Testing timezone_offset_get() : usage variation -  unexpected values t
 //Set the default time zone 
 date_default_timezone_set("Europe/London");
 
+set_error_handler('handler');
+
+function handler($errno, $errstr) {
+	if ($errno === E_RECOVERABLE_ERROR) {
+		echo $errstr . "\n";
+	}
+}
+
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
@@ -111,142 +119,114 @@ fclose( $file_handle );
 *** Testing timezone_offset_get() : usage variation -  unexpected values to first argument $object***
 
 -- int 0 --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, integer given
 bool(false)
 
 -- int 1 --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, integer given
 bool(false)
 
 -- int 12345 --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, integer given
 bool(false)
 
 -- int -12345 --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, integer given
 bool(false)
 
 -- float 10.5 --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, double given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, float given
 bool(false)
 
 -- float -10.5 --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, double given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, float given
 bool(false)
 
 -- float .5 --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, double given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, float given
 bool(false)
 
 -- empty array --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, array given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, array given
 bool(false)
 
 -- int indexed array --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, array given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, array given
 bool(false)
 
 -- associative array --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, array given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, array given
 bool(false)
 
 -- nested arrays --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, array given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, array given
 bool(false)
 
 -- uppercase NULL --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, null given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, null given
 bool(false)
 
 -- lowercase null --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, null given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, null given
 bool(false)
 
 -- lowercase true --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, boolean given
 bool(false)
 
 -- lowercase false --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, boolean given
 bool(false)
 
 -- uppercase TRUE --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, boolean given
 bool(false)
 
 -- uppercase FALSE --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, boolean given
 bool(false)
 
 -- empty string DQ --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, string given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, string given
 bool(false)
 
 -- empty string SQ --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, string given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, string given
 bool(false)
 
 -- string DQ --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, string given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, string given
 bool(false)
 
 -- string SQ --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, string given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, string given
 bool(false)
 
 -- mixed case string --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, string given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, string given
 bool(false)
 
 -- heredoc --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, string given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, string given
 bool(false)
 
 -- instance of classWithToString --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, object given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, instance of classWithToString given
 bool(false)
 
 -- instance of classWithoutToString --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, object given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, instance of classWithoutToString given
 bool(false)
 
 -- undefined var --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, null given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, null given
 bool(false)
 
 -- unset var --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, null given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, null given
 bool(false)
 
 -- resource --
-
-Warning: timezone_offset_get() expects parameter 1 to be DateTimeZone, resource given in %s on line %d
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, resource given
 bool(false)
 ===DONE===

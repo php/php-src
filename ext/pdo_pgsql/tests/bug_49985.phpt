@@ -30,6 +30,6 @@ for ($i = 0; $i < 3; $i++) {
 ?>
 --EXPECTF--
 bool(true)
-SQLSTATE[23505]: %s"test_pkey"
-SQLSTATE[23505]: %s"test_pkey"
+SQLSTATE[23505]: %stest_pkey%s
+SQLSTATE[23505]: %stest_pkey%s
 

@@ -43,7 +43,7 @@ bool(false)
 resource(%d) of type (stream)
 bool(true)
 
-Warning: socket_import_stream(): %d is not a valid stream resource in %s on line %d
+Warning: socket_import_stream(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 Done.
 

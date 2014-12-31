@@ -19,7 +19,7 @@ require_once('skipifconnectfailure.inc');
 
 	$idx = 0;
 	while ($row = mysqli_fetch_assoc($res)) {
-		/* mysqlnd: force seperation - create copies */
+		/* mysqlnd: force separation - create copies */
 		$references[$idx] = array(
 			'id' 		=> &$row['id'],
 			'label'	=> $row['label'] . '');
@@ -30,7 +30,7 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_data_seek($res, 0);
 	while ($row = mysqli_fetch_assoc($res)) {
-		/* mysqlnd: force seperation - create copies */
+		/* mysqlnd: force separation - create copies */
 		$references[$idx] = array(
 			'id' 		=> &$row['id'],
 			'label'	=> $row['label'] . '');
@@ -48,7 +48,7 @@ require_once('skipifconnectfailure.inc');
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	while ($row = mysqli_fetch_assoc($res)) {
-		/* mysqlnd: force seperation - create copies*/
+		/* mysqlnd: force separation - create copies*/
 		$references[$idx] = array(
 			'id' 		=> &$row['id'],
 			'label'	=> $row['label'] . '');
@@ -85,61 +85,61 @@ array(7) refcount(2){
   [0]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
-    long(1) refcount(1)
+    long(1)
     [%u|b%"label"]=>
     %unicode|string%(1) "a" refcount(1)
   }
   [1]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
-    long(2) refcount(1)
+    long(2)
     [%u|b%"label"]=>
     %unicode|string%(1) "b" refcount(1)
   }
   [2]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
-    long(1) refcount(1)
+    long(1)
     [%u|b%"label"]=>
     %unicode|string%(1) "a" refcount(1)
   }
   [3]=>
   array(2) refcount(1){
     [%u|b%"id"]=>
-    long(2) refcount(1)
+    long(2)
     [%u|b%"label"]=>
     %unicode|string%(1) "b" refcount(1)
   }
   [4]=>
   array(3) refcount(1){
     [%u|b%"id"]=>
-    &long(3) refcount(2)
+    &long(3)
     [%u|b%"label"]=>
     %unicode|string%(1) "a" refcount(1)
     [%u|b%"id2"]=>
-    &long(3) refcount(2)
+    &long(3)
   }
   [5]=>
   array(3) refcount(1){
     [%u|b%"id"]=>
-    &long(4) refcount(2)
+    &long(4)
     [%u|b%"label"]=>
     %unicode|string%(1) "b" refcount(1)
     [%u|b%"id2"]=>
-    &long(4) refcount(2)
+    &long(4)
   }
   [6]=>
-  &object(mysqli_result)#2 (5) refcount(2){
+  &object(mysqli_result)#%d (5) refcount(%d){
     [%u|b%"current_field"]=>
-    NULL refcount(1)
+    NULL
     [%u|b%"field_count"]=>
-    NULL refcount(1)
+    NULL
     [%u|b%"lengths"]=>
-    NULL refcount(1)
+    NULL
     [%u|b%"num_rows"]=>
-    NULL refcount(1)
+    NULL
     [%u|b%"type"]=>
-    NULL refcount(1)
+    NULL
   }
 }
 array(1) refcount(2){

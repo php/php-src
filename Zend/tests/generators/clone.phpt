@@ -1,32 +1,15 @@
 --TEST--
-Generators can be cloned
+Generators cannot be cloned
 --FILE--
 <?php
 
-function firstN($end) {
-    for ($i = 0; $i < $end; ++$i) {
-        yield $i;
-    }
+function gen() {
+    yield;
 }
 
-$g1 = firstN(5);
-var_dump($g1->current());
-$g1->next();
-
-$g2 = clone $g1;
-var_dump($g2->current());
-$g2->next();
-
-var_dump($g2->current());
-var_dump($g1->current());
-
-$g1->next();
-var_dump($g1->current());
+$gen = gen();
+clone $gen;
 
 ?>
---EXPECT--
-int(0)
-int(1)
-int(2)
-int(1)
-int(2)
+--EXPECTF--
+Fatal error: Trying to clone an uncloneable object of class Generator in %s on line %d

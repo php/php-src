@@ -78,7 +78,7 @@ No need char
 /[\p{Nd}+-]+/8DZ
 ------------------------------------------------------------------
         Bra
-        [+\-\p{Nd}]+
+        [+\-\p{Nd}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -124,7 +124,7 @@ No match
 /[z-\x{100}]/8iDZ 
 ------------------------------------------------------------------
         Bra
-        [Z\x{39c}\x{178}z-\x{101}]
+        [Zz-\xff\x{39c}\x{3bc}\x{212b}\x{1e9e}\x{212b}\x{178}\x{100}-\x{101}]
         Ket
         End
 ------------------------------------------------------------------
@@ -162,7 +162,7 @@ No match
 /[z-\x{100}]/8DZi
 ------------------------------------------------------------------
         Bra
-        [Z\x{39c}\x{178}z-\x{101}]
+        [Zz-\xff\x{39c}\x{3bc}\x{212b}\x{1e9e}\x{212b}\x{178}\x{100}-\x{101}]
         Ket
         End
 ------------------------------------------------------------------
@@ -233,7 +233,7 @@ No need char
         Ket
         End
 ------------------------------------------------------------------
-    \xe2\x80\xa8\xe2\x80\xa8
+      
  0: \x{2028}\x{2028}
     \x{2028}\x{2028}\x{2028}
  0: \x{2028}\x{2028}\x{2028}
@@ -270,6 +270,20 @@ No need char
         End
 ------------------------------------------------------------------
 
+/^\p{Cf}/8
+    \x{180e}
+ 0: \x{180e}
+    \x{061c}
+ 0: \x{61c}
+    \x{2066}
+ 0: \x{2066}
+    \x{2067}
+ 0: \x{2067}
+    \x{2068}
+ 0: \x{2068}
+    \x{2069}
+ 0: \x{2069}
+
 /^\p{Cs}/8
     \?\x{dfff}
  0: \x{dfff}
@@ -278,6 +292,22 @@ No match
     \x{09f} 
 No match
   
+/^\p{Mn}/8
+    \x{1a1b}
+ 0: \x{1a1b}
+
+/^\p{Pe}/8
+    \x{2309}
+ 0: \x{2309}
+    \x{230b}
+ 0: \x{230b}
+
+/^\p{Ps}/8
+    \x{2308}
+ 0: \x{2308}
+    \x{230a}
+ 0: \x{230a}
+
 /^\p{Sc}+/8
     $\x{a2}\x{a3}\x{a4}\x{a5}\x{a6}
  0: $\x{a2}\x{a3}\x{a4}\x{a5}
@@ -297,8 +327,6 @@ No match
  0: \x{a0}
     \x{1680}
  0: \x{1680}
-    \x{180e}
- 0: \x{180e}
     \x{2000}
  0: \x{2000}
     \x{2001}     
@@ -310,8 +338,9 @@ No match
     \x{200d} 
 No match
   
-/-- These four are here rather than in test 6 because Perl has problems with
-    the negative versions of the properties. --/
+/-- These are here rather than in test 6 because Perl has problems with
+    the negative versions of the properties and behaves has changed how
+    it behaves for caseless matching. --/
       
 /\p{^Lu}/8i
     1234
@@ -349,6 +378,16 @@ No match
     a
 No match
     \x{1d00}  
+No match
+
+/\p{Lu}/8i
+    A
+ 0: A
+    aZ
+ 0: Z
+    ** Failers
+ 0: F
+    abc   
 No match
 
 /[\x{c0}\x{391}]/8i
@@ -423,20 +462,6 @@ of case for anything other than the ASCII letters. --/
     \x{e0} 
  0: \x{e0}
 
-/-- This should be Perl-compatible but Perl 5.11 gets \x{300} wrong. --/8
-    
-/^\X/8
-    A
- 0: A
-    A\x{300}BC 
- 0: A\x{300}
-    A\x{300}\x{301}\x{302}BC 
- 0: A\x{300}\x{301}\x{302}
-    *** Failers
- 0: *
-    \x{300}  
-No match
-    
 /-- These are PCRE's extra properties to help with Unicodizing \d etc. --/
 
 /^\p{Xan}/8
@@ -515,7 +540,7 @@ No match
 
 /^>\p{Xsp}+/8
     > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
- 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
 
 /^>\p{Xsp}+?/8
     >\x{1680}\x{2028}\x{0b}
@@ -523,11 +548,11 @@ No match
 
 /^>\p{Xsp}*/8
     > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
- 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
     
 /^>\p{Xsp}{2,9}/8
     > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
- 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
     
 /^>\p{Xsp}{2,9}?/8
     > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
@@ -539,7 +564,7 @@ No match
  
 /^>[\p{Xsp}]+/8
     > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
- 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}
+ 0: > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
 
 /^>\p{Xps}/8
     >\x{1680}\x{2028}\x{0b}
@@ -834,7 +859,7 @@ No match
 /[[:graph:]]/WBZ
 ------------------------------------------------------------------
         Bra
-        [!-~]
+        [[:graph:]]
         Ket
         End
 ------------------------------------------------------------------
@@ -842,7 +867,7 @@ No match
 /[[:print:]]/WBZ
 ------------------------------------------------------------------
         Bra
-        [ -~]
+        [[:print:]]
         Ket
         End
 ------------------------------------------------------------------
@@ -850,7 +875,7 @@ No match
 /[[:punct:]]/WBZ
 ------------------------------------------------------------------
         Bra
-        [!-/:-@[-`{-~]
+        [[:punct:]]
         Ket
         End
 ------------------------------------------------------------------
@@ -924,7 +949,7 @@ No match
 /[[:^alpha:][:^cntrl:]]+/8WBZ
 ------------------------------------------------------------------
         Bra
-        [ -~\x80-\xff\P{L}]+
+        [ -~\x80-\xff\P{L}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -936,7 +961,7 @@ No match
 /[[:^cntrl:][:^alpha:]]+/8WBZ
 ------------------------------------------------------------------
         Bra
-        [ -~\x80-\xff\P{L}]+
+        [ -~\x80-\xff\P{L}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -948,7 +973,7 @@ No match
 /[[:alpha:]]+/8WBZ
 ------------------------------------------------------------------
         Bra
-        [\p{L}]+
+        [\p{L}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -958,7 +983,7 @@ No match
 /[[:^alpha:]\S]+/8WBZ
 ------------------------------------------------------------------
         Bra
-        [\P{L}\P{Xsp}]+
+        [\P{L}\P{Xsp}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -970,7 +995,7 @@ No match
 /[^\d]+/8WBZ
 ------------------------------------------------------------------
         Bra
-        [^\p{Nd}]+
+        [^\p{Nd}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -1084,8 +1109,8 @@ No match
         prop Nd
         B+
         prop N *+
-        B+
-        prop Nd *
+        B++
+        prop Nd *+
         Ket
         End
 ------------------------------------------------------------------
@@ -1194,11 +1219,13 @@ No match
 
 /^S(\X*)e(\X*)$/8
     Stéréo
-No match
+ 0: Ste\x{301}re\x{301}o
+ 1: te\x{301}r
+ 2: \x{301}o
     
 /^\X/8 
     ́réo
-No match
+ 0: \x{301}
 
 /^a\X41z/<JS>
     aX41z
@@ -1312,5 +1339,952 @@ Partial match: AA
 Partial match: AA
     AA\P\P 
 Partial match: AA
+
+/A\x{3a3}B/8iDZ
+------------------------------------------------------------------
+        Bra
+     /i A
+        clist 03a3 03c2 03c3
+     /i B
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: caseless utf
+First char = 'A' (caseless)
+Need char = 'B' (caseless)
+
+/\x{3a3}B/8iDZ
+------------------------------------------------------------------
+        Bra
+        clist 03a3 03c2 03c3
+     /i B
+        Ket
+        End
+------------------------------------------------------------------
+Capturing subpattern count = 0
+Options: caseless utf
+No first char
+Need char = 'B' (caseless)
+
+/[\x{3a3}]/8iBZ
+------------------------------------------------------------------
+        Bra
+        clist 03a3 03c2 03c3
+        Ket
+        End
+------------------------------------------------------------------
+
+/[^\x{3a3}]/8iBZ
+------------------------------------------------------------------
+        Bra
+        not clist 03a3 03c2 03c3
+        Ket
+        End
+------------------------------------------------------------------
+
+/[\x{3a3}]+/8iBZ
+------------------------------------------------------------------
+        Bra
+        clist 03a3 03c2 03c3 ++
+        Ket
+        End
+------------------------------------------------------------------
+
+/[^\x{3a3}]+/8iBZ
+------------------------------------------------------------------
+        Bra
+        not clist 03a3 03c2 03c3 ++
+        Ket
+        End
+------------------------------------------------------------------
+
+/a*\x{3a3}/8iBZ
+------------------------------------------------------------------
+        Bra
+     /i a*+
+        clist 03a3 03c2 03c3
+        Ket
+        End
+------------------------------------------------------------------
+
+/\x{3a3}+a/8iBZ
+------------------------------------------------------------------
+        Bra
+        clist 03a3 03c2 03c3 ++
+     /i a
+        Ket
+        End
+------------------------------------------------------------------
+
+/\x{3a3}*\x{3c2}/8iBZ
+------------------------------------------------------------------
+        Bra
+        clist 03a3 03c2 03c3 *
+        clist 03a3 03c2 03c3
+        Ket
+        End
+------------------------------------------------------------------
+
+/\x{3a3}{3}/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+ 0: \x{3a3}\x{3c3}\x{3c2}
+ 0+ \x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}{2,4}/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+ 0: \x{3a3}\x{3c3}\x{3c2}\x{3a3}
+ 0+ \x{3c3}\x{3c2}
+
+/\x{3a3}{2,4}?/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+ 0: \x{3a3}\x{3c3}
+ 0+ \x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}+./8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+ 0: \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+ 0+ 
+
+/\x{3a3}++./8i+
+    ** Failers
+No match
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+No match
+
+/\x{3a3}*\x{3c2}/8iBZ
+------------------------------------------------------------------
+        Bra
+        clist 03a3 03c2 03c3 *
+        clist 03a3 03c2 03c3
+        Ket
+        End
+------------------------------------------------------------------
+
+/[^\x{3a3}]*\x{3c2}/8iBZ
+------------------------------------------------------------------
+        Bra
+        not clist 03a3 03c2 03c3 *+
+        clist 03a3 03c2 03c3
+        Ket
+        End
+------------------------------------------------------------------
+
+/[^a]*\x{3c2}/8iBZ
+------------------------------------------------------------------
+        Bra
+     /i [^a]*
+        clist 03a3 03c2 03c3
+        Ket
+        End
+------------------------------------------------------------------
+
+/ist/8iBZ
+------------------------------------------------------------------
+        Bra
+     /i i
+        clist 0053 0073 017f
+     /i t
+        Ket
+        End
+------------------------------------------------------------------
+    ikt
+No match
+
+/is+t/8i
+    iSs\x{17f}t
+ 0: iSs\x{17f}t
+    ikt
+No match
+
+/is+?t/8i
+    ikt
+No match
+
+/is?t/8i
+    ikt
+No match
+
+/is{2}t/8i
+    iskt
+No match
+    
+/-- This property is a PCRE special --/
+
+/^\p{Xuc}/8
+    $abc
+ 0: $
+    @abc
+ 0: @
+    `abc
+ 0: `
+    \x{1234}abc
+ 0: \x{1234}
+    ** Failers
+No match
+    abc     
+No match
+
+/^\p{Xuc}+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}+?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}+?\*/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}*
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}++/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}{3,5}/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\p{Xuc}{3,5}?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^[\p{Xuc}]/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^[\p{Xuc}]+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+ 0: $@`\x{a0}\x{1234}\x{e000}
+    ** Failers
+No match
+    \x{9f}
+No match
+
+/^\P{Xuc}/8
+    abc
+ 0: a
+    ** Failers
+ 0: *
+    $abc
+No match
+    @abc
+No match
+    `abc
+No match
+    \x{1234}abc
+No match
+
+/^[\P{Xuc}]/8
+    abc
+ 0: a
+    ** Failers
+ 0: *
+    $abc
+No match
+    @abc
+No match
+    `abc
+No match
+    \x{1234}abc
+No match
+    
+/-- Some auto-possessification tests --/
+
+/\pN+\z/BZ
+------------------------------------------------------------------
+        Bra
+        prop N ++
+        \z
+        Ket
+        End
+------------------------------------------------------------------
+
+/\PN+\z/BZ
+------------------------------------------------------------------
+        Bra
+        notprop N ++
+        \z
+        Ket
+        End
+------------------------------------------------------------------
+
+/\pN+/BZ
+------------------------------------------------------------------
+        Bra
+        prop N ++
+        Ket
+        End
+------------------------------------------------------------------
+
+/\PN+/BZ
+------------------------------------------------------------------
+        Bra
+        notprop N ++
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Any}+\p{Any} \p{Any}+\P{Any} \p{Any}+\p{L&} \p{Any}+\p{L} \p{Any}+\p{Lu} \p{Any}+\p{Han} \p{Any}+\p{Xan} \p{Any}+\p{Xsp} \p{Any}+\p{Xps} \p{Xwd}+\p{Any} \p{Any}+\p{Xuc}/BWZx  
+------------------------------------------------------------------
+        Bra
+        prop Any +
+        prop Any
+        prop Any +
+        notprop Any
+        prop Any +
+        prop L&
+        prop Any +
+        prop L
+        prop Any +
+        prop Lu
+        prop Any +
+        prop Han
+        prop Any +
+        prop Xan
+        prop Any +
+        prop Xsp
+        prop Any +
+        prop Xps
+        prop Xwd +
+        prop Any
+        prop Any +
+        prop Xuc
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{L&}+\p{Any} \p{L&}+\p{L&} \P{L&}+\p{L&} \p{L&}+\p{L} \p{L&}+\p{Lu} \p{L&}+\p{Han} \p{L&}+\p{Xan} \p{L&}+\P{Xan} \p{L&}+\p{Xsp} \p{L&}+\p{Xps} \p{Xwd}+\p{L&} \p{L&}+\p{Xuc}/BWZx  
+------------------------------------------------------------------
+        Bra
+        prop L& +
+        prop Any
+        prop L& +
+        prop L&
+        notprop L& ++
+        prop L&
+        prop L& +
+        prop L
+        prop L& +
+        prop Lu
+        prop L& +
+        prop Han
+        prop L& +
+        prop Xan
+        prop L& ++
+        notprop Xan
+        prop L& ++
+        prop Xsp
+        prop L& ++
+        prop Xps
+        prop Xwd +
+        prop L&
+        prop L& +
+        prop Xuc
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{N}+\p{Any} \p{N}+\p{L&} \p{N}+\p{L} \p{N}+\P{L} \p{N}+\P{N} \p{N}+\p{Lu} \p{N}+\p{Han} \p{N}+\p{Xan} \p{N}+\p{Xsp} \p{N}+\p{Xps} \p{Xwd}+\p{N} \p{N}+\p{Xuc}/BWZx  
+------------------------------------------------------------------
+        Bra
+        prop N +
+        prop Any
+        prop N +
+        prop L&
+        prop N ++
+        prop L
+        prop N +
+        notprop L
+        prop N ++
+        notprop N
+        prop N ++
+        prop Lu
+        prop N +
+        prop Han
+        prop N +
+        prop Xan
+        prop N ++
+        prop Xsp
+        prop N ++
+        prop Xps
+        prop Xwd +
+        prop N
+        prop N +
+        prop Xuc
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Lu}+\p{Any} \p{Lu}+\p{L&} \p{Lu}+\p{L} \p{Lu}+\p{Lu} \P{Lu}+\p{Lu} \p{Lu}+\p{Nd} \p{Lu}+\P{Nd} \p{Lu}+\p{Han} \p{Lu}+\p{Xan} \p{Lu}+\p{Xsp} \p{Lu}+\p{Xps} \p{Xwd}+\p{Lu} \p{Lu}+\p{Xuc}/BWZx  
+------------------------------------------------------------------
+        Bra
+        prop Lu +
+        prop Any
+        prop Lu +
+        prop L&
+        prop Lu +
+        prop L
+        prop Lu +
+        prop Lu
+        notprop Lu ++
+        prop Lu
+        prop Lu ++
+        prop Nd
+        prop Lu +
+        notprop Nd
+        prop Lu +
+        prop Han
+        prop Lu +
+        prop Xan
+        prop Lu ++
+        prop Xsp
+        prop Lu ++
+        prop Xps
+        prop Xwd +
+        prop Lu
+        prop Lu +
+        prop Xuc
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Han}+\p{Lu} \p{Han}+\p{L&} \p{Han}+\p{L} \p{Han}+\p{Lu} \p{Han}+\p{Arabic} \p{Arabic}+\p{Arabic} \p{Han}+\p{Xan} \p{Han}+\p{Xsp} \p{Han}+\p{Xps} \p{Xwd}+\p{Han} \p{Han}+\p{Xuc}/BWZx  
+------------------------------------------------------------------
+        Bra
+        prop Han +
+        prop Lu
+        prop Han +
+        prop L&
+        prop Han +
+        prop L
+        prop Han +
+        prop Lu
+        prop Han ++
+        prop Arabic
+        prop Arabic +
+        prop Arabic
+        prop Han +
+        prop Xan
+        prop Han +
+        prop Xsp
+        prop Han +
+        prop Xps
+        prop Xwd +
+        prop Han
+        prop Han +
+        prop Xuc
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Xan}+\p{Any} \p{Xan}+\p{L&} \P{Xan}+\p{L&} \p{Xan}+\p{L} \p{Xan}+\p{Lu} \p{Xan}+\p{Han} \p{Xan}+\p{Xan} \p{Xan}+\P{Xan} \p{Xan}+\p{Xsp} \p{Xan}+\p{Xps} \p{Xwd}+\p{Xan} \p{Xan}+\p{Xuc}/BWZx  
+------------------------------------------------------------------
+        Bra
+        prop Xan +
+        prop Any
+        prop Xan +
+        prop L&
+        notprop Xan ++
+        prop L&
+        prop Xan +
+        prop L
+        prop Xan +
+        prop Lu
+        prop Xan +
+        prop Han
+        prop Xan +
+        prop Xan
+        prop Xan ++
+        notprop Xan
+        prop Xan ++
+        prop Xsp
+        prop Xan ++
+        prop Xps
+        prop Xwd +
+        prop Xan
+        prop Xan +
+        prop Xuc
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Xsp}+\p{Any} \p{Xsp}+\p{L&} \p{Xsp}+\p{L} \p{Xsp}+\p{Lu} \p{Xsp}+\p{Han} \p{Xsp}+\p{Xan} \p{Xsp}+\p{Xsp} \P{Xsp}+\p{Xsp} \p{Xsp}+\p{Xps} \p{Xwd}+\p{Xsp} \p{Xsp}+\p{Xuc}/BWZx  
+------------------------------------------------------------------
+        Bra
+        prop Xsp +
+        prop Any
+        prop Xsp ++
+        prop L&
+        prop Xsp ++
+        prop L
+        prop Xsp ++
+        prop Lu
+        prop Xsp +
+        prop Han
+        prop Xsp ++
+        prop Xan
+        prop Xsp +
+        prop Xsp
+        notprop Xsp ++
+        prop Xsp
+        prop Xsp +
+        prop Xps
+        prop Xwd ++
+        prop Xsp
+        prop Xsp +
+        prop Xuc
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Xwd}+\p{Any} \p{Xwd}+\p{L&} \p{Xwd}+\p{L} \p{Xwd}+\p{Lu} \p{Xwd}+\p{Han} \p{Xwd}+\p{Xan} \p{Xwd}+\p{Xsp} \p{Xwd}+\p{Xps} \p{Xwd}+\p{Xwd} \p{Xwd}+\P{Xwd} \p{Xwd}+\p{Xuc}/BWZx  
+------------------------------------------------------------------
+        Bra
+        prop Xwd +
+        prop Any
+        prop Xwd +
+        prop L&
+        prop Xwd +
+        prop L
+        prop Xwd +
+        prop Lu
+        prop Xwd +
+        prop Han
+        prop Xwd +
+        prop Xan
+        prop Xwd ++
+        prop Xsp
+        prop Xwd ++
+        prop Xps
+        prop Xwd +
+        prop Xwd
+        prop Xwd ++
+        notprop Xwd
+        prop Xwd +
+        prop Xuc
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Xuc}+\p{Any} \p{Xuc}+\p{L&} \p{Xuc}+\p{L} \p{Xuc}+\p{Lu} \p{Xuc}+\p{Han} \p{Xuc}+\p{Xan} \p{Xuc}+\p{Xsp} \p{Xuc}+\p{Xps} \p{Xwd}+\p{Xuc} \p{Xuc}+\p{Xuc} \p{Xuc}+\P{Xuc}/BWZx  
+------------------------------------------------------------------
+        Bra
+        prop Xuc +
+        prop Any
+        prop Xuc +
+        prop L&
+        prop Xuc +
+        prop L
+        prop Xuc +
+        prop Lu
+        prop Xuc +
+        prop Han
+        prop Xuc +
+        prop Xan
+        prop Xuc +
+        prop Xsp
+        prop Xuc +
+        prop Xps
+        prop Xwd +
+        prop Xuc
+        prop Xuc +
+        prop Xuc
+        prop Xuc ++
+        notprop Xuc
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{N}+\p{Ll} \p{N}+\p{Nd} \p{N}+\P{Nd}/BWZx
+------------------------------------------------------------------
+        Bra
+        prop N ++
+        prop Ll
+        prop N +
+        prop Nd
+        prop N +
+        notprop Nd
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Xan}+\p{L} \p{Xan}+\p{N} \p{Xan}+\p{C} \p{Xan}+\P{L} \P{Xan}+\p{N} \p{Xan}+\P{C}/BWZx
+------------------------------------------------------------------
+        Bra
+        prop Xan +
+        prop L
+        prop Xan +
+        prop N
+        prop Xan ++
+        prop C
+        prop Xan +
+        notprop L
+        notprop Xan ++
+        prop N
+        prop Xan +
+        notprop C
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{L}+\p{Xan} \p{N}+\p{Xan} \p{C}+\p{Xan} \P{L}+\p{Xan} \p{N}+\p{Xan} \P{C}+\p{Xan} \p{L}+\P{Xan}/BWZx
+------------------------------------------------------------------
+        Bra
+        prop L +
+        prop Xan
+        prop N +
+        prop Xan
+        prop C ++
+        prop Xan
+        notprop L +
+        prop Xan
+        prop N +
+        prop Xan
+        notprop C +
+        prop Xan
+        prop L ++
+        notprop Xan
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Xan}+\p{Lu} \p{Xan}+\p{Nd} \p{Xan}+\p{Cc} \p{Xan}+\P{Ll} \P{Xan}+\p{No} \p{Xan}+\P{Cf}/BWZx
+------------------------------------------------------------------
+        Bra
+        prop Xan +
+        prop Lu
+        prop Xan +
+        prop Nd
+        prop Xan ++
+        prop Cc
+        prop Xan +
+        notprop Ll
+        notprop Xan ++
+        prop No
+        prop Xan +
+        notprop Cf
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Lu}+\p{Xan} \p{Nd}+\p{Xan} \p{Cs}+\p{Xan} \P{Lt}+\p{Xan} \p{Nl}+\p{Xan} \P{Cc}+\p{Xan} \p{Lt}+\P{Xan}/BWZx
+------------------------------------------------------------------
+        Bra
+        prop Lu +
+        prop Xan
+        prop Nd +
+        prop Xan
+        prop Cs ++
+        prop Xan
+        notprop Lt +
+        prop Xan
+        prop Nl +
+        prop Xan
+        notprop Cc +
+        prop Xan
+        prop Lt ++
+        notprop Xan
+        Ket
+        End
+------------------------------------------------------------------
+
+/\w+\p{P} \w+\p{Po} \w+\s \p{Xan}+\s \s+\p{Xan} \s+\w/BWZx
+------------------------------------------------------------------
+        Bra
+        prop Xwd +
+        prop P
+        prop Xwd +
+        prop Po
+        prop Xwd ++
+        prop Xsp
+        prop Xan ++
+        prop Xsp
+        prop Xsp ++
+        prop Xan
+        prop Xsp ++
+        prop Xwd
+        Ket
+        End
+------------------------------------------------------------------
+
+/\w+\P{P} \W+\p{Po} \w+\S \P{Xan}+\s \s+\P{Xan} \s+\W/BWZx
+------------------------------------------------------------------
+        Bra
+        prop Xwd +
+        notprop P
+        notprop Xwd +
+        prop Po
+        prop Xwd +
+        notprop Xsp
+        notprop Xan +
+        prop Xsp
+        prop Xsp +
+        notprop Xan
+        prop Xsp +
+        notprop Xwd
+        Ket
+        End
+------------------------------------------------------------------
+
+/\w+\p{Po} \w+\p{Pc} \W+\p{Po} \W+\p{Pc} \w+\P{Po} \w+\P{Pc}/BWZx
+------------------------------------------------------------------
+        Bra
+        prop Xwd +
+        prop Po
+        prop Xwd ++
+        prop Pc
+        notprop Xwd +
+        prop Po
+        notprop Xwd +
+        prop Pc
+        prop Xwd +
+        notprop Po
+        prop Xwd +
+        notprop Pc
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Nl}+\p{Xan} \P{Nl}+\p{Xan} \p{Nl}+\P{Xan} \P{Nl}+\P{Xan}/BWZx
+------------------------------------------------------------------
+        Bra
+        prop Nl +
+        prop Xan
+        notprop Nl +
+        prop Xan
+        prop Nl ++
+        notprop Xan
+        notprop Nl +
+        notprop Xan
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Xan}+\p{Nl} \P{Xan}+\p{Nl} \p{Xan}+\P{Nl} \P{Xan}+\P{Nl}/BWZx
+------------------------------------------------------------------
+        Bra
+        prop Xan +
+        prop Nl
+        notprop Xan ++
+        prop Nl
+        prop Xan +
+        notprop Nl
+        notprop Xan +
+        notprop Nl
+        Ket
+        End
+------------------------------------------------------------------
+
+/\p{Xan}+\p{Nd} \P{Xan}+\p{Nd} \p{Xan}+\P{Nd} \P{Xan}+\P{Nd}/BWZx
+------------------------------------------------------------------
+        Bra
+        prop Xan +
+        prop Nd
+        notprop Xan ++
+        prop Nd
+        prop Xan +
+        notprop Nd
+        notprop Xan +
+        notprop Nd
+        Ket
+        End
+------------------------------------------------------------------
+
+/-- End auto-possessification tests --/ 
+
+/\w+/8CWBZ
+------------------------------------------------------------------
+        Bra
+        Callout 255 0 3
+        prop Xwd ++
+        Callout 255 3 0
+        Ket
+        End
+------------------------------------------------------------------
+    abcd
+--->abcd
+ +0 ^        \w+
+ +3 ^   ^    
+ 0: abcd
+
+/[\p{N}]?+/BZO
+------------------------------------------------------------------
+        Bra
+        [\p{N}]?+
+        Ket
+        End
+------------------------------------------------------------------
+
+/[\p{L}ab]{2,3}+/BZO
+------------------------------------------------------------------
+        Bra
+        [ab\p{L}]{2,3}+
+        Ket
+        End
+------------------------------------------------------------------
+
+/\D+\X \d+\X \S+\X \s+\X \W+\X \w+\X \C+\X \R+\X \H+\X \h+\X \V+\X \v+\X a+\X \n+\X .+\X/BZx
+------------------------------------------------------------------
+        Bra
+        \D+
+        extuni
+        \d+
+        extuni
+        \S+
+        extuni
+        \s+
+        extuni
+        \W+
+        extuni
+        \w+
+        extuni
+        AllAny+
+        extuni
+        \R+
+        extuni
+        \H+
+        extuni
+        \h+
+        extuni
+        \V+
+        extuni
+        \v+
+        extuni
+        a+
+        extuni
+        \x0a+
+        extuni
+        Any+
+        extuni
+        Ket
+        End
+------------------------------------------------------------------
+
+/.+\X/BZxs
+------------------------------------------------------------------
+        Bra
+        AllAny+
+        extuni
+        Ket
+        End
+------------------------------------------------------------------
+
+/\X+$/BZxm
+------------------------------------------------------------------
+        Bra
+        extuni+
+     /m $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\X+\D \X+\d \X+\S \X+\s \X+\W \X+\w \X+. \X+\C \X+\R \X+\H \X+\h \X+\V \X+\v \X+\X \X+\Z \X+\z \X+$/BZx
+------------------------------------------------------------------
+        Bra
+        extuni+
+        \D
+        extuni+
+        \d
+        extuni+
+        \S
+        extuni+
+        \s
+        extuni+
+        \W
+        extuni+
+        \w
+        extuni+
+        Any
+        extuni+
+        AllAny
+        extuni+
+        \R
+        extuni+
+        \H
+        extuni+
+        \h
+        extuni+
+        \V
+        extuni+
+        \v
+        extuni+
+        extuni
+        extuni+
+        \Z
+        extuni++
+        \z
+        extuni+
+        $
+        Ket
+        End
+------------------------------------------------------------------
+
+/\d+\s{0,5}=\s*\S?=\w{0,4}\W*/8WBZ
+------------------------------------------------------------------
+        Bra
+        prop Nd ++
+        prop Xsp {0,5}+
+        =
+        prop Xsp *+
+        notprop Xsp ?
+        =
+        prop Xwd {0,4}+
+        notprop Xwd *+
+        Ket
+        End
+------------------------------------------------------------------
+
+/[RST]+/8iWBZ
+------------------------------------------------------------------
+        Bra
+        [R-Tr-t\x{17f}]++
+        Ket
+        End
+------------------------------------------------------------------
+    
+/[R-T]+/8iWBZ 
+------------------------------------------------------------------
+        Bra
+        [R-Tr-t\x{17f}]++
+        Ket
+        End
+------------------------------------------------------------------
+
+/[Q-U]+/8iWBZ 
+------------------------------------------------------------------
+        Bra
+        [Q-Uq-u\x{17f}]++
+        Ket
+        End
+------------------------------------------------------------------
 
 /-- End of testinput7 --/

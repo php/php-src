@@ -150,19 +150,19 @@ bool(false)
 
 --empty array--
 Error: 2 - mb_stristr() expects parameter 2 to be string, array given, %s(%d)
-bool(false)
+NULL
 
 --int indexed array--
 Error: 2 - mb_stristr() expects parameter 2 to be string, array given, %s(%d)
-bool(false)
+NULL
 
 --associative array--
 Error: 2 - mb_stristr() expects parameter 2 to be string, array given, %s(%d)
-bool(false)
+NULL
 
 --nested arrays--
 Error: 2 - mb_stristr() expects parameter 2 to be string, array given, %s(%d)
-bool(false)
+NULL
 
 --uppercase NULL--
 Error: 2 - mb_stristr(): Empty delimiter, %s(%d)
@@ -199,7 +199,7 @@ bool(false)
 
 --instance of classWithoutToString--
 Error: 2 - mb_stristr() expects parameter 2 to be string, object given, %s(%d)
-bool(false)
+NULL
 
 --undefined var--
 Error: 2 - mb_stristr(): Empty delimiter, %s(%d)
@@ -211,6 +211,6 @@ bool(false)
 
 --resource--
 Error: 2 - mb_stristr() expects parameter 2 to be string, resource given, %s(%d)
-bool(false)
+NULL
 ===DONE===
 

@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -120,7 +120,7 @@ PHP_INI_END()
 
 
 
-static void php_apache_globals_ctor(php_apache_info_struct *apache_globals TSRMLS_DC)
+static void php_apache_globals_ctor(php_apache_info_struct *apache_globals)
 {
 	apache_globals->in_request = 0;
 }
@@ -131,7 +131,7 @@ static PHP_MINIT_FUNCTION(apache)
 #ifdef ZTS
 	ts_allocate_id(&php_apache_info_id, sizeof(php_apache_info_struct), (ts_allocate_ctor) php_apache_globals_ctor, NULL);
 #else
-	php_apache_globals_ctor(&php_apache_info TSRMLS_CC);
+	php_apache_globals_ctor(&php_apache_info);
 #endif
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -298,11 +298,11 @@ PHP_FUNCTION(apache_child_terminate)
 		ap_child_terminate( ((request_rec *)SG(server_context)) );
 		RETURN_TRUE;
 	} else { /* tell them to get lost! */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is disabled");
+		php_error_docref(NULL, E_WARNING, "This function is disabled");
 		RETURN_FALSE;
 	}
 #else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This function is not supported in this build");
+		php_error_docref(NULL, E_WARNING, "This function is not supported in this build");
 		RETURN_FALSE;
 #endif
 }
@@ -316,7 +316,7 @@ PHP_FUNCTION(apache_note)
 	int note_name_len, note_val_len;
 	char *old_val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
 		return;
 	}
 
@@ -327,7 +327,7 @@ PHP_FUNCTION(apache_note)
 	}
 
 	if (old_val) {
-		RETURN_STRING(old_val, 1);
+		RETURN_STRING(old_val);
 	}
 
 	RETURN_FALSE;
@@ -350,29 +350,29 @@ PHP_FUNCTION(virtual)
 	int filename_len;
 	request_rec *rr = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 	
 	if (!(rr = sub_req_lookup_uri (filename, ((request_rec *) SG(server_context))))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
+		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
 		if (rr)
 			destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
 	if (rr->status != 200) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - error finding URI", filename);
+		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - error finding URI", filename);
 		if (rr)
 			destroy_sub_req (rr);
 		RETURN_FALSE;
 	}
 
-	php_output_end_all(TSRMLS_C);
-	php_header(TSRMLS_C);
+	php_output_end_all();
+	php_header();
 
 	if (run_sub_req(rr)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - request execution failed", filename);
+		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - request execution failed", filename);
 		if (rr)
 			destroy_sub_req (rr);
 		RETURN_FALSE;
@@ -404,7 +404,7 @@ PHP_FUNCTION(apache_request_headers)
 		if (!tenv[i].key) {
 			continue;
 		}
-		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
+		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val)==FAILURE) {
 			RETURN_FALSE;
 		}
     }
@@ -424,7 +424,7 @@ PHP_FUNCTION(apache_response_headers)
 	tenv = (table_entry *)env_arr->elts;
 	for (i = 0; i < env_arr->nelts; ++i) {
 		if (!tenv[i].key) continue;
-		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
+		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val)==FAILURE) {
 			RETURN_FALSE;
 		}
 	}
@@ -440,7 +440,7 @@ PHP_FUNCTION(apache_setenv)
 	char *var = NULL, *val = NULL;
 	request_rec *r = (request_rec *) SG(server_context);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &var, &var_len, &val, &val_len, &top) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &var, &var_len, &val, &val_len, &top) == FAILURE) {
 		return;
 	}
 
@@ -462,12 +462,12 @@ PHP_FUNCTION(apache_lookup_uri)
 	int filename_len;
 	request_rec *rr=NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
 	if (!(rr = sub_req_lookup_uri(filename, ((request_rec *) SG(server_context))))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "URI lookup failed '%s'", filename);
+		php_error_docref(NULL, E_WARNING, "URI lookup failed '%s'", filename);
 		RETURN_FALSE;
 	}
 
@@ -475,34 +475,34 @@ PHP_FUNCTION(apache_lookup_uri)
 	add_property_long(return_value,"status", rr->status);
 
 	if (rr->the_request) {
-		add_property_string(return_value,"the_request", rr->the_request, 1);
+		add_property_string(return_value,"the_request", rr->the_request);
 	}
 	if (rr->status_line) {
-		add_property_string(return_value,"status_line", (char *)rr->status_line, 1);		
+		add_property_string(return_value,"status_line", (char *)rr->status_line);
 	}
 	if (rr->method) {
-		add_property_string(return_value,"method", (char *)rr->method, 1);		
+		add_property_string(return_value,"method", (char *)rr->method);
 	}
 	if (rr->content_type) {
-		add_property_string(return_value,"content_type", (char *)rr->content_type, 1);
+		add_property_string(return_value,"content_type", (char *)rr->content_type);
 	}
 	if (rr->handler) {
-		add_property_string(return_value,"handler", (char *)rr->handler, 1);		
+		add_property_string(return_value,"handler", (char *)rr->handler);
 	}
 	if (rr->uri) {
-		add_property_string(return_value,"uri", rr->uri, 1);
+		add_property_string(return_value,"uri", rr->uri);
 	}
 	if (rr->filename) {
-		add_property_string(return_value,"filename", rr->filename, 1);
+		add_property_string(return_value,"filename", rr->filename);
 	}
 	if (rr->path_info) {
-		add_property_string(return_value,"path_info", rr->path_info, 1);
+		add_property_string(return_value,"path_info", rr->path_info);
 	}
 	if (rr->args) {
-		add_property_string(return_value,"args", rr->args, 1);
+		add_property_string(return_value,"args", rr->args);
 	}
 	if (rr->boundary) {
-		add_property_string(return_value,"boundary", rr->boundary, 1);
+		add_property_string(return_value,"boundary", rr->boundary);
 	}
 
 	add_property_long(return_value,"no_cache", rr->no_cache);
@@ -515,7 +515,7 @@ PHP_FUNCTION(apache_lookup_uri)
 
 #if MODULE_MAGIC_NUMBER >= 19980324
 	if (rr->unparsed_uri) {
-		add_property_string(return_value,"unparsed_uri", rr->unparsed_uri, 1);
+		add_property_string(return_value,"unparsed_uri", rr->unparsed_uri);
 	}
 	if(rr->mtime) {
 		add_property_long(return_value,"mtime", rr->mtime);
@@ -540,12 +540,12 @@ PHP_FUNCTION(apache_exec_uri)
 	int filename_len;
 	request_rec *rr=NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
 	if(!(rr = ap_sub_req_lookup_uri(filename, ((request_rec *) SG(server_context))))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "URI lookup failed", filename);
+		php_error_docref(NULL, E_WARNING, "URI lookup failed", filename);
 		RETURN_FALSE;
 	}
 
@@ -561,7 +561,7 @@ PHP_FUNCTION(apache_get_version)
 	char *apv = (char *) ap_get_server_version();
 
 	if (apv && *apv) {
-		RETURN_STRING(apv, 1);
+		RETURN_STRING(apv);
 	}
 
 	RETURN_FALSE;
@@ -580,9 +580,9 @@ PHP_FUNCTION(apache_get_modules)
 	for (n = 0; ap_loaded_modules[n]; ++n) {
 		char *s = (char *) ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
-			add_next_index_stringl(return_value, s, (p - s), 1);
+			add_next_index_stringl(return_value, s, (p - s));
 		} else {
-			add_next_index_string(return_value, s, 1);
+			add_next_index_string(return_value, s);
 		}	
 	}
 }

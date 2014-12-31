@@ -2,10 +2,10 @@
 Test date_timezone_get() function : error conditions 
 --FILE--
 <?php
-/* Prototype  : DateTimeZone date_timezone_get  ( DateTime $object  )
- * Description: Return time zone relative to given DateTime
+/* Prototype  : DateTimeZone date_timezone_get  ( DateTimeInterface $object  )
+ * Description: Return time zone relative to given DateTimeInterface
  * Source code: ext/date/php_date.c
- * Alias to functions: DateTime::getTimezone
+ * Alias to functions: DateTimeInterface::getTimezone
  */
  
 // Set timezone 
@@ -45,12 +45,12 @@ bool(false)
 
 -- Testing date_timezone_get() function with an invalid values for $object argument --
 
-Warning: date_timezone_get() expects parameter 1 to be DateTime, object given in %s on line %d
+Warning: date_timezone_get() expects parameter 1 to be DateTimeInterface, object given in %s on line %d
 bool(false)
 
-Warning: date_timezone_get() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_timezone_get() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
-Warning: date_timezone_get() expects parameter 1 to be DateTime, null given in %s on line %d
+Warning: date_timezone_get() expects parameter 1 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 ===DONE===

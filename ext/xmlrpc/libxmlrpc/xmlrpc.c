@@ -201,9 +201,13 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
 			}
 			p++;
 		}
-			text = buf;
+		*p2 = 0;
+		text = buf;
 	}
 
+	if (strlen(text)<17) {
+		return -1;
+	}
 
    tm.tm_isdst = -1;
 
@@ -219,16 +223,19 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
    n = 10;
    tm.tm_mon = 0;
    for(i = 0; i < 2; i++) {
-      XMLRPC_IS_NUMBER(text[i])
+      XMLRPC_IS_NUMBER(text[i+4])
       tm.tm_mon += (text[i+4]-'0')*n;
       n /= 10;
    }
    tm.tm_mon --;
+   if(tm.tm_mon < 0 || tm.tm_mon > 11) {
+       return -1;
+   }
 
    n = 10;
    tm.tm_mday = 0;
    for(i = 0; i < 2; i++) {
-      XMLRPC_IS_NUMBER(text[i])
+      XMLRPC_IS_NUMBER(text[i+6])
       tm.tm_mday += (text[i+6]-'0')*n;
       n /= 10;
    }
@@ -236,7 +243,7 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
    n = 10;
    tm.tm_hour = 0;
    for(i = 0; i < 2; i++) {
-      XMLRPC_IS_NUMBER(text[i])
+      XMLRPC_IS_NUMBER(text[i+9])
       tm.tm_hour += (text[i+9]-'0')*n;
       n /= 10;
    }
@@ -244,7 +251,7 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
    n = 10;
    tm.tm_min = 0;
    for(i = 0; i < 2; i++) {
-      XMLRPC_IS_NUMBER(text[i])
+      XMLRPC_IS_NUMBER(text[i+12])
       tm.tm_min += (text[i+12]-'0')*n;
       n /= 10;
    }
@@ -252,7 +259,7 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
    n = 10;
    tm.tm_sec = 0;
    for(i = 0; i < 2; i++) {
-      XMLRPC_IS_NUMBER(text[i])
+      XMLRPC_IS_NUMBER(text[i+15])
       tm.tm_sec += (text[i+15]-'0')*n;
       n /= 10;
    }
@@ -897,7 +904,7 @@ const char *XMLRPC_SetValueID_Case(XMLRPC_VALUE value, const char* id, int len, 
          (len > 0) ? simplestring_addn(&value->id, id, len) :
                      simplestring_add(&value->id, id);
 
-         /* upper or lower case string in place if required. could be a seperate func. */
+         /* upper or lower case string in place if required. could be a separate func. */
          if(id_case == xmlrpc_case_lower || id_case == xmlrpc_case_upper) {
             int i;
             for(i = 0; i < value->id.len; i++) {
@@ -1609,7 +1616,7 @@ XMLRPC_VALUE XMLRPC_CopyValue(XMLRPC_VALUE value) {
  *   XMLRPC_CopyValue ()
  * NOTES
  *   Use this when function when you need to modify the contents of
- *   the copied value seperately from the original.
+ *   the copied value separately from the original.
  *   
  *   this function is recursive, thus the value and all of its children
  *   (if any) will be duplicated.
@@ -2394,7 +2401,7 @@ void XMLRPC_ServerDestroy(XMLRPC_SERVER server) {
          my_free(sm);
          sm = Q_Next(&server->methodlist);
       }
-      if(server->xIntrospection) {
+      if (server->xIntrospection) {
          XMLRPC_CleanupValue(server->xIntrospection);
       }
 

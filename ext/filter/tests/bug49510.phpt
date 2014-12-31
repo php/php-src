@@ -1,5 +1,7 @@
 --TEST--
-#49510	boolean validation fails with FILTER_NULL_ON_FAILURE
+Bug #49510	boolean validation fails with FILTER_NULL_ON_FAILURE
+--SKIPIF--
+<?php if (!extension_loaded("filter")) die("skip"); ?>
 --FILE--
 <?php
 var_dump(filter_var(false, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE));

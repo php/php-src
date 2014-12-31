@@ -16,7 +16,7 @@ http://www.webjames.alexwaugh.com/
 
 BUILDING
 
-$ cd php5
+$ cd php7
 $ ./configure \
 	--host=arm-riscos-aof \
 	--with-webjames=../webjames/src \

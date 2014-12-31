@@ -43,8 +43,8 @@ $scalars = array(
  
   /* floats */ 
   -0x80000000, // max negative integer as hexadecimal
-  0x7fffffff,  // max postive integer as hexadecimal
-  0x7FFFFFFF,  // max postive integer as hexadecimal
+  0x7fffffff,  // max positive integer as hexadecimal
+  0x7FFFFFFF,  // max positive integer as hexadecimal
   0123,        // integer as octal
   01912,       // should be quivalent to octal 1
   -020000000000, // max negative integer as octal
@@ -279,9 +279,9 @@ string(0) ""
 -- Iteration 1 --
 string(6) "Object"
 -- Iteration 2 --
-string(14) "Resource id #5"
+string(14) "Resource id #%d"
 -- Iteration 3 --
-string(14) "Resource id #6"
+string(14) "Resource id #%d"
 -- Iteration 4 --
 
 Notice: Array to string conversion in %sstrval.php on line %d

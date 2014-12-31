@@ -50,15 +50,15 @@ Warning: filter_has_var() expects parameter 2 to be string, array given in %s007
 bool(false)
 bool(false)
 
-Warning: filter_has_var() expects parameter 1 to be long, string given in %s007.php on line %d
+Warning: filter_has_var() expects parameter 1 to be integer, string given in %s007.php on line %d
 bool(false)
 
-Warning: filter_has_var() expects parameter 1 to be long, array given in %s007.php on line %d
+Warning: filter_has_var() expects parameter 1 to be integer, array given in %s007.php on line %d
 bool(false)
 
-Warning: filter_has_var() expects parameter 1 to be long, array given in %s007.php on line %d
+Warning: filter_has_var() expects parameter 1 to be integer, array given in %s007.php on line %d
 bool(false)
 
-Warning: filter_has_var() expects parameter 1 to be long, string given in %s007.php on line %d
+Warning: filter_has_var() expects parameter 1 to be integer, string given in %s007.php on line %d
 bool(false)
 Done

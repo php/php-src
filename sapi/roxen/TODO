@@ -10,18 +10,18 @@ BUGS:
     And another error (when trying to include a class)
     
     Recursive mutex locks!
-    /Usr/local/pike/7.0.54/lib/modules/PHP5.so.Interpreter:
-    run("/home/www/www.tx.pl/news/test.php",mapping[3],modules/scripting/php5.pike.PHPScript(),modules/scripting/php5.pike.PHPScript.done)
-    modules/scripting/php5.pike:169: run()
+    /Usr/local/pike/7.0.54/lib/modules/PHP7.so.Interpreter:
+    run("/home/www/www.tx.pl/news/test.php",mapping[3],modules/scripting/php7.pike.PHPScript(),modules/scripting/php7.pike.PHPScript.done)
+    modules/scripting/php7.pike:169: run()
     base_server/roxen.pike:569: handler_thread(3).
     
     And after this every access to any php script (on other virtual sites
     also) ends (of course there is no proper output) with this error:
     
     Php4.Interpreter->run: Tried to run a PHP-script from a PHP
-    callback!/usr/local/pike/7.0.54/lib/modules/PHP5.so.Interpreter:
-    run("/home/www/biall.com.pl/index.php3",mapping[2],modules/scripting/php5.pike.PHPScript(),modules/scripting/php5.pike.PHPScript.done)
-    modules/scripting/php5.pike:169: run()
+    callback!/usr/local/pike/7.0.54/lib/modules/PHP7.so.Interpreter:
+    run("/home/www/biall.com.pl/index.php3",mapping[2],modules/scripting/php7.pike.PHPScript(),modules/scripting/php7.pike.PHPScript.done)
+    modules/scripting/php7.pike:169: run()
     base_server/roxen.pike:569: handler_thread(3).
     
 

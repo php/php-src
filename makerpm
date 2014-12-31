@@ -37,8 +37,8 @@ sed -e "s/PVERSION/$VERSION/g" \
     -e "s/TARDIR/$TARDIR/g" \
     -e "s/PREQUIRES/$PREQUIRES/g" \
     > $SPEC <<'EOF'
-Summary: PHP 5 - A powerful scripting language
-Name: php5
+Summary: PHP 7 - A powerful scripting language
+Name: php7
 Version: PVERSION
 Release: PRELEASE
 Group: Networking/Daemons
@@ -48,7 +48,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Requires: PREQUIRES
 
 %description
-PHP 5 is a powerful apache module that adds scripting and database connection
+PHP 7 is a powerful apache module that adds scripting and database connection
 capabilities to the apache server. This version includes the "php_cgi" binary
 for suExec and stand alone php scripts too.
 
@@ -103,7 +103,7 @@ mv php.keepme sapi/cgi/php
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/apache
-install -m 0755 .libs/libphp5.so $RPM_BUILD_ROOT%{_libdir}/apache
+install -m 0755 .libs/libphp7.so $RPM_BUILD_ROOT%{_libdir}/apache
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
 install -m 0755 sapi/cli/php $RPM_BUILD_ROOT%{_bindir}
 install -m 0755 sapi/cgi/php $RPM_BUILD_ROOT%{_bindir}/php_cgi
@@ -168,7 +168,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%{_libdir}/apache/libphp5.so
+%{_libdir}/apache/libphp7.so
 %{_bindir}/php
 %{_bindir}/php_cgi
 %{_mandir}/man1/php.1*

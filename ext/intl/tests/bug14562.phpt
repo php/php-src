@@ -15,6 +15,7 @@ function ut_main()
 	setlocale(LC_ALL, $de_locale);
 	$fmt = new NumberFormatter("de", NumberFormatter::DECIMAL );
 	$numeric = $fmt->parse("1234,56");
+	setlocale(LC_ALL, "C"); // reset for printing
 	$res_str .= "$numeric\n";
     	return $res_str;
 }

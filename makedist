@@ -35,7 +35,10 @@ if test "${1}" = "1" -a "${2}" -lt "28"; then
 fi
 IFS="$old_IFS"
 
-PHPROOT=git@git.php.net:php-src.git
+if test "x$PHPROOT" == "x"; then
+    PHPROOT=git@git.php.net:php-src.git;
+fi
+
 LT_TARGETS='ltconfig ltmain.sh config.guess config.sub'
 
 if echo '\c' | grep -s c >/dev/null 2>&1

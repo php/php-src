@@ -2,7 +2,7 @@
 mysqli_real_escape_string() - gbk
 --SKIPIF--
 <?php
-if (version_compare(PHP_VERSION, '5.9.9', '>') == 1) {
+if (version_compare(PHP_VERSION, '6.0', '==') == 1) {
 	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
 }
 
@@ -36,7 +36,7 @@ $port, $socket, mysqli_connect_errno(), mysqli_connect_error());
 mysqli_error($link));
 	}
 
-	if (!mysqli_query($link, 'CREATE TABLE test(id INT, label CHAR(1), PRIMARY
+	if (!mysqli_query($link, 'CREATE TABLE test(id INT, label CHAR(3), PRIMARY
 KEY(id)) ENGINE=' . $engine . " DEFAULT CHARSET=gbk")) {
 		printf("Failed to create test table: [%d] %s\n", mysqli_errno($link),
 mysqli_error($link));

@@ -4,7 +4,7 @@ Phar and DirectoryIterator
 <?php
 if (!extension_loaded("phar")) die("skip");
 if (!extension_loaded("spl")) die("skip SPL not available");
-if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (version_compare(PHP_VERSION, "6.0", "==")) die("skip pre-unicode version of PHP required");
 ?>
 --INI--
 phar.require_hash=0
@@ -78,7 +78,7 @@ foreach($it as $name => $ent)
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
+unlink(dirname(__FILE__) . '/files/phar_oo_004.phar.php');
 __halt_compiler();
 ?>
 --EXPECT--

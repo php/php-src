@@ -6,7 +6,12 @@
 
 #define ST_INCLUDED
 
+#ifdef _WIN32
+# include <windows.h>
+typedef ULONG_PTR st_data_t;
+#else
 typedef unsigned long st_data_t;
+#endif
 #define ST_DATA_T_DEFINED
 
 typedef struct st_table st_table;

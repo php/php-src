@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +15,6 @@
    | Authors: Ard Biesheuvel <a.k.biesheuvel@its.tudelft.nl>              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -38,7 +36,7 @@ static void _php_ibase_event_free(char *event_buf, char *result_buf) /* {{{ */
 }
 /* }}} */
 
-void _php_ibase_free_event(ibase_event *event TSRMLS_DC) /* {{{ */
+void _php_ibase_free_event(ibase_event *event) /* {{{ */
 {
 	unsigned short i;
 
@@ -49,7 +47,7 @@ void _php_ibase_free_event(ibase_event *event TSRMLS_DC) /* {{{ */
 
 		if (event->link->handle != NULL &&
 				isc_cancel_events(IB_STATUS, &event->link->handle, &event->event_id)) {
-			_php_ibase_error(TSRMLS_C);
+			_php_ibase_error();
 		}
 
 		/* delete this event from the link struct */
@@ -57,10 +55,9 @@ void _php_ibase_free_event(ibase_event *event TSRMLS_DC) /* {{{ */
 		*node = event->event_next;
 	}
 
-	if (event->callback) {
-		zval_dtor(event->callback);
-		FREE_ZVAL(event->callback);
-		event->callback = NULL;
+	if (Z_TYPE(event->callback) != IS_UNDEF) {
+		zval_dtor(&event->callback);
+		ZVAL_UNDEF(&event->callback);
 
 		_php_ibase_event_free(event->event_buffer,event->result_buffer);
 
@@ -72,11 +69,11 @@ void _php_ibase_free_event(ibase_event *event TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void _php_ibase_free_event_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
+static void _php_ibase_free_event_rsrc(zend_resource *rsrc) /* {{{ */
 {
 	ibase_event *e = (ibase_event *) rsrc->ptr;
 
-	_php_ibase_free_event(e TSRMLS_CC);
+	_php_ibase_free_event(e);
 
 	efree(e);
 }
@@ -126,7 +123,7 @@ static void _php_ibase_event_block(ibase_db_link *ib_link, unsigned short count,
    Waits for any one of the passed Interbase events to be posted by the database, and returns its name */
 PHP_FUNCTION(ibase_wait_event)
 {
-	zval ***args;
+	zval *args;
 	ibase_db_link *ib_link;
 	int num_args;
 	char *event_buffer, *result_buffer, *events[15];
@@ -140,12 +137,12 @@ PHP_FUNCTION(ibase_wait_event)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &num_args) == FAILURE) {
 		return;
 	}
 
-	if (Z_TYPE_PP(args[0]) == IS_RESOURCE) {
-		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, args[0], -1, "InterBase link", le_link, le_plink)) {
+	if (Z_TYPE(args[0]) == IS_RESOURCE) {
+		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, &args[0], -1, "InterBase link", le_link, le_plink)) {
 			efree(args);
 			RETURN_FALSE;
 		}
@@ -162,8 +159,8 @@ PHP_FUNCTION(ibase_wait_event)
 	}
 
 	for (; i < ZEND_NUM_ARGS(); ++i) {
-		convert_to_string_ex(args[i]);
-		events[event_count++] = Z_STRVAL_PP(args[i]);
+		convert_to_string_ex(&args[i]);
+		events[event_count++] = Z_STRVAL(args[i]);
 	}
 
 	/* fills the required data structure with information about the events */
@@ -171,7 +168,7 @@ PHP_FUNCTION(ibase_wait_event)
 
 	/* now block until an event occurs */
 	if (isc_wait_for_event(IB_STATUS, &ib_link->handle, buffer_size, event_buffer, result_buffer)) {
-		_php_ibase_error(TSRMLS_C);
+		_php_ibase_error();
 		_php_ibase_event_free(event_buffer,result_buffer);
 		efree(args);
 		RETURN_FALSE;
@@ -181,10 +178,10 @@ PHP_FUNCTION(ibase_wait_event)
 	isc_event_counts(occurred_event, buffer_size, event_buffer, result_buffer);
 	for (i = 0; i < event_count; ++i) {
 		if (occurred_event[i]) {
-			char *result = estrdup(events[i]);
+			zend_string *result = zend_string_init(events[i], strlen(events[i]), 0);
 			_php_ibase_event_free(event_buffer,result_buffer);
 			efree(args);
-			RETURN_STRING(result,0);
+			RETURN_STR(result);
 		}
 	}
 
@@ -199,6 +196,8 @@ PHP_FUNCTION(ibase_wait_event)
 static isc_callback _php_ibase_callback(ibase_event *event, /* {{{ */
 	unsigned short buffer_size, char *result_buf)
 {
+	zval *res;
+
 	/* this function is called asynchronously by the Interbase client library. */
 	TSRMLS_FETCH_FROM_CTX(event->thread_ctx);
 
@@ -210,38 +209,35 @@ static isc_callback _php_ibase_callback(ibase_event *event, /* {{{ */
 	switch (event->state) {
 		unsigned short i;
 		unsigned long occurred_event[15];
-		zval event_name, link_id, return_value, *args[2];
+		zval return_value, args[2];
 
 		default: /* == DEAD */
 			break;
 		case ACTIVE:
-			args[0] = &event_name;
-			args[1] = &link_id;
-
 			/* copy the updated results into the result buffer */
 			memcpy(event->result_buffer, result_buf, buffer_size);
 
-			INIT_ZVAL(event_name);
-			INIT_ZVAL(link_id);
-			ZVAL_RESOURCE(&link_id, event->link_res_id);
+			res = zend_hash_index_find(&EG(regular_list), event->link_res_id);
+			ZVAL_RES(&args[1], Z_RES_P(res));
 
 			/* find out which event occurred */
 			isc_event_counts(occurred_event, buffer_size, event->event_buffer, event->result_buffer);
 			for (i = 0; i < event->event_count; ++i) {
 				if (occurred_event[i]) {
-					ZVAL_STRING(&event_name,event->events[i],0);
+					ZVAL_STRING(&args[0], event->events[i]);
+					efree(event->events[i]);
 					break;
 				}
 			}
 
 			/* call the callback provided by the user */
 			if (SUCCESS != call_user_function(EG(function_table), NULL,
-					event->callback, &return_value, 2, args TSRMLS_CC)) {
-				_php_ibase_module_error("Error calling callback %s" TSRMLS_CC, Z_STRVAL_P(event->callback));
+					&event->callback, &return_value, 2, args)) {
+				_php_ibase_module_error("Error calling callback %s", Z_STRVAL(event->callback));
 				break;
 			}
 
-			if (Z_TYPE(return_value) == IS_BOOL && !Z_BVAL(return_value)) {
+			if (Z_TYPE(return_value) == IS_FALSE) {
 				event->state = DEAD;
 				break;
 			}
@@ -250,7 +246,7 @@ static isc_callback _php_ibase_callback(ibase_event *event, /* {{{ */
 			if (isc_que_events(IB_STATUS, &event->link->handle, &event->event_id, buffer_size,
 				event->event_buffer,(isc_callback)_php_ibase_callback, (void *)event)) {
 
-				_php_ibase_error(TSRMLS_C);
+				_php_ibase_error();
 			}
 			event->state = ACTIVE;
 	}
@@ -267,8 +263,8 @@ PHP_FUNCTION(ibase_set_event_handler)
 	 * link resource id (int) as arguments. The value returned from the function is
 	 * used to determine if the event handler should remain set.
 	 */
-	char *cb_name;
-	zval ***args, **cb_arg;
+	zend_string *cb_name;
+	zval *args, *cb_arg;
 	ibase_db_link *ib_link;
 	ibase_event *event;
 	unsigned short i = 1, buffer_size;
@@ -281,57 +277,52 @@ PHP_FUNCTION(ibase_set_event_handler)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &num_args) == FAILURE) {
 		return;
 	}
 
 	/* get a working link */
-	if (Z_TYPE_PP(args[0]) != IS_STRING) {
+	if (Z_TYPE(args[0]) != IS_STRING) {
 		/* resource, callback, event_1 [, ... event_15]
 		 * No more than 15 events
 		 */
 		if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 17) {
-			efree(args);
 			WRONG_PARAM_COUNT;
 		}
 
-		cb_arg = args[1];
+		cb_arg = &args[1];
 		i = 2;
 
-		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, args[0], -1, "InterBase link", le_link, le_plink)) {
-			efree(args);
+		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, &args[0], -1, "InterBase link", le_link, le_plink)) {
 			RETURN_FALSE;
 		}
 
-		convert_to_long_ex(args[0]);
-		link_res_id = Z_LVAL_PP(args[0]);
+		convert_to_long_ex(&args[0]);
+		link_res_id = Z_LVAL(args[0]);
 
 	} else {
 		/* callback, event_1 [, ... event_15] 
 		 * No more than 15 events
 		 */
 		if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 16) {
-			efree(args);
 			WRONG_PARAM_COUNT;
 		}
 
-		cb_arg = args[0];
+		cb_arg = &args[0];
 
 		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink)) {
-			efree(args);
 			RETURN_FALSE;
 		}
 		link_res_id = IBG(default_link);
 	}
 
 	/* get the callback */
-	if (!zend_is_callable(*cb_arg, 0, &cb_name TSRMLS_CC)) {
-		_php_ibase_module_error("Callback argument %s is not a callable function" TSRMLS_CC, cb_name);
-		efree(cb_name);
-		efree(args);
+	if (!zend_is_callable(cb_arg, 0, &cb_name)) {
+		_php_ibase_module_error("Callback argument %s is not a callable function", cb_name->val);
+		zend_string_release(cb_name);
 		RETURN_FALSE;
 	}
-	efree(cb_name);
+	zend_string_release(cb_name);
 
 	/* allocate the event resource */
 	event = (ibase_event *) safe_emalloc(sizeof(ibase_event), 1, 0);
@@ -342,14 +333,11 @@ PHP_FUNCTION(ibase_set_event_handler)
 	event->state = NEW;
 	event->events = (char **) safe_emalloc(sizeof(char *),ZEND_NUM_ARGS()-i,0);
 
-	ALLOC_ZVAL(event->callback);
-	*event->callback = **cb_arg;
-	INIT_PZVAL(event->callback);
-	zval_copy_ctor(event->callback);
+	ZVAL_DUP(&event->callback, cb_arg);
 
 	for (; i < ZEND_NUM_ARGS(); ++i) {
-		convert_to_string_ex(args[i]);
-		event->events[event->event_count++] = estrdup(Z_STRVAL_PP(args[i]));
+		convert_to_string_ex(&args[i]);
+		event->events[event->event_count++] = estrdup(Z_STRVAL(args[i]));
 	}
 
 	/* fills the required data structure with information about the events */
@@ -360,9 +348,8 @@ PHP_FUNCTION(ibase_set_event_handler)
 	if (isc_que_events(IB_STATUS, &ib_link->handle, &event->event_id, buffer_size,
 		event->event_buffer,(isc_callback)_php_ibase_callback, (void *)event)) {
 
-		_php_ibase_error(TSRMLS_C);
+		_php_ibase_error();
 		efree(event);
-		efree(args);
 		RETURN_FALSE;
 	}
 
@@ -370,8 +357,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	ib_link->event_head = event;
 
 	ZEND_REGISTER_RESOURCE(return_value, event, le_event);
-	zend_list_addref(Z_LVAL_P(return_value));
-	efree(args);
+	Z_ADDREF_P(return_value);
 }
 /* }}} */
 
@@ -383,14 +369,14 @@ PHP_FUNCTION(ibase_free_event_handler)
 
 	RESET_ERRMSG;
 
-	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &event_arg)) {
+	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &event_arg)) {
 		ibase_event *event;
 
-		ZEND_FETCH_RESOURCE(event, ibase_event *, &event_arg, -1, "Interbase event", le_event);
+		ZEND_FETCH_RESOURCE(event, ibase_event *, event_arg, -1, "Interbase event", le_event);
 
 		event->state = DEAD;
 
-		zend_list_delete(Z_LVAL_P(event_arg));
+		zend_list_delete(Z_RES_P(event_arg));
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

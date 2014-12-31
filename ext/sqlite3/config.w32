@@ -4,8 +4,8 @@
 ARG_WITH("sqlite3", "SQLite 3 support", "no");
 
 if (PHP_SQLITE3 != "no") {
-	ADD_FLAG("CFLAGS_SQLITE3", "/D SQLITE_THREADSAFE=" + (PHP_ZTS == "yes" ? "1" : "0") + " /D SQLITE_ENABLE_FTS3=1 /D SQLITE_ENABLE_COLUMN_METADATA=1 /D SQLITE_CORE=1 ");
-	EXTENSION("sqlite3", "sqlite3.c", null, "/I" + configure_module_dirname + "/libsqlite /I" + configure_module_dirname);
+	ADD_FLAG("CFLAGS_SQLITE3", "/D SQLITE_THREADSAFE=" + (PHP_ZTS == "yes" ? "1" : "0") + " /D SQLITE_ENABLE_FTS3=1 /D SQLITE_ENABLE_COLUMN_METADATA=1 /D SQLITE_CORE=1 /D SQLITE_API=__declspec(dllexport) ");
+	EXTENSION("sqlite3", "sqlite3.c", null, "/I" + configure_module_dirname + "/libsqlite /I" + configure_module_dirname + " /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 	ADD_SOURCES(configure_module_dirname + "/libsqlite", "sqlite3.c", "sqlite3");
 

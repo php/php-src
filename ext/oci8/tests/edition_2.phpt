@@ -8,10 +8,18 @@ if (strcasecmp($user, "system") && strcasecmp($user, "sys"))
     die("skip needs to be run as a DBA user");
 if ($test_drcp)
     die("skip as Output might vary with DRCP");
-
-if (preg_match('/Release (1[1]\.2|12)\./', oci_server_version($c), $matches) !== 1) {
-	die("skip expected output only valid when using Oracle 11gR2 or greater databases");
-} else if (preg_match('/^(11\.2|12)\./', oci_client_version()) != 1) {
+preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
+if (!(isset($matches[0]) && 
+      (($matches[1] == 11 && $matches[2] >= 2) ||
+       ($matches[1] >= 12)
+       ))) {
+       	die("skip expected output only valid when using Oracle 11gR2 or greater database server");
+}
+preg_match('/^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)/', oci_client_version(), $matches);
+if (!(isset($matches[0]) &&
+    (($matches[1] == 11 && $matches[2] >= 2) ||
+     ($matches[1] >= 12)
+     ))) {
     die("skip test expected to work only with Oracle 11gR2 or greater version of client");
 }
 
@@ -24,10 +32,10 @@ if (preg_match('/Release (1[1]\.2|12)\./', oci_server_version($c), $matches) !==
  * already
  */
 
-require(dirname(__FILE__)."/conn_attr.inc");
+$testuser     = 'testuser_ed_2';  // Used in conn_attr.inc
+$testpassword = 'testuser'; 
 
-$user = 'testuser';
-$password = 'testuser';
+require(dirname(__FILE__)."/conn_attr.inc");
 
 echo"**Test 1.1 - Default value for  the attribute **************\n";
 get_edit_attr($c);
@@ -50,7 +58,7 @@ get_edit_attr($conn3);
 oci_close($conn1);
 
 // With a oci_pconnect with a different charset.
-$pc1 = oci_pconnect($user,$password,$dbase,"utf8");
+$pc1 = oci_pconnect($testuser,$testpassword,$dbase,"utf8");
 get_edit_attr($pc1);
 oci_close($pc1);
 
@@ -145,7 +153,7 @@ function set_scope() {
 }
 
 function get_scope() {
-    $sc1 = oci_connect($GLOBALS['user'],$GLOBALS['password'],$GLOBALS['dbase']);
+    $sc1 = oci_connect($GLOBALS['testuser'],$GLOBALS['testpassword'],$GLOBALS['dbase']);
     if ($sc1 === false) {
         $m = oci_error();
         die("Error:" . $m['message']);

@@ -77,12 +77,9 @@ stream_set_blocking 1
 
 close stream
 stream_set_blocking 
-Warning: stream_set_blocking(): %d is not a valid stream resource in %s on line %d
+Warning: stream_set_blocking(): supplied resource is not a valid stream resource in %s on line %d
 
 socket_set_block 
-Warning: socket_set_block(): An operation was attempted on something that is not a socket.
- in %ssocket_import_stream-4-win.php on line %d
-
 Warning: socket_set_block(): unable to set blocking mode [%d]: An operation was attempted on something that is not a socket.
  in %ssocket_import_stream-4-win.php on line %d
 
@@ -94,13 +91,13 @@ Warning: socket_get_option(): unable to retrieve socket option [%d]: An operatio
 
 close socket
 stream_set_blocking 
-Warning: stream_set_blocking(): %d is not a valid stream resource in %s on line %d
+Warning: stream_set_blocking(): supplied resource is not a valid stream resource in %s on line %d
 
 socket_set_block 
-Warning: socket_set_block(): %d is not a valid Socket resource in %s on line %d
+Warning: socket_set_block(): supplied resource is not a valid Socket resource in %s on line %d
 
 socket_get_option 
-Warning: socket_get_option(): %d is not a valid Socket resource in %s on line %d
+Warning: socket_get_option(): supplied resource is not a valid Socket resource in %s on line %d
 
 
 Done.

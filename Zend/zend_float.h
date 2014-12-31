@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,12 +21,16 @@
 #ifndef ZEND_FLOAT_H
 #define ZEND_FLOAT_H
 
+BEGIN_EXTERN_C()
+
 /*
   Define functions for FP initialization and de-initialization.
 */
-extern ZEND_API void zend_init_fpu(TSRMLS_D);
-extern ZEND_API void zend_shutdown_fpu(TSRMLS_D);
-extern ZEND_API void zend_ensure_fpu_mode(TSRMLS_D);
+extern ZEND_API void zend_init_fpu(void);
+extern ZEND_API void zend_shutdown_fpu(void);
+extern ZEND_API void zend_ensure_fpu_mode(void);
+
+END_EXTERN_C()
 
 /* Copy of the contents of xpfpa.h (which is under public domain)
    See http://wiki.php.net/rfc/rounding for details.
@@ -53,7 +57,7 @@ extern ZEND_API void zend_ensure_fpu_mode(TSRMLS_D);
  Implementation notes:
 
  x86_64:
-  - Since all x86_64 compilers use SSE by default, it is probably unecessary
+  - Since all x86_64 compilers use SSE by default, it is probably unnecessary
     to use these macros there. We define them anyway since we are too lazy
     to differentiate the architecture. Also, the compiler option -mfpmath=i387
     justifies this decision.
@@ -65,11 +69,13 @@ extern ZEND_API void zend_ensure_fpu_mode(TSRMLS_D);
 
  MS Visual C:
   - Since MSVC users tipically don't use autoconf or CMake, we will detect
-    MSVC via compile time define.
+    MSVC via compile time define. Floating point precision change isn't
+    supported on 64 bit platforms, so it's NOP. See
+    http://msdn.microsoft.com/en-us/library/c9676k6h(v=vs.110).aspx
 */
 
 /* MSVC detection (MSVC people usually don't use autoconf) */
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(_WIN64)
 # if _MSC_VER >= 1500
    /* Visual C++ 2008 or higher, supports _controlfp_s */
 #  define HAVE__CONTROLFP_S

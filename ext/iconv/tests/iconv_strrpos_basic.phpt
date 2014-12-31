@@ -5,6 +5,8 @@ Test iconv_strrpos() function : basic functionality
 extension_loaded('iconv') or die('skip');
 function_exists('iconv_strrpos') or die("skip iconv_strrpos() is not available in this build");
 ?>
+--INI--
+error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
 /* Prototype  : proto int iconv_strrpos(string haystack, string needle [, string charset])

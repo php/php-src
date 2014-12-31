@@ -13,7 +13,7 @@ error_reporting(E_ERROR);
 foreach ($strVals as $strVal) {
    foreach($strVals as $otherVal) {
 	   echo "--- testing: '$strVal' >> '$otherVal' ---\n";   
-      var_dump(bin2hex($strVal>>$otherVal));
+      var_dump($strVal>>$otherVal);
    }
 }
 
@@ -22,395 +22,395 @@ foreach ($strVals as $strVal) {
 ===DONE===
 --EXPECT--
 --- testing: '0' >> '0' ---
-string(2) "30"
+int(0)
 --- testing: '0' >> '65' ---
-string(2) "30"
+int(0)
 --- testing: '0' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: '0' >> '1.2' ---
-string(2) "30"
+int(0)
 --- testing: '0' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: '0' >> 'abc' ---
-string(2) "30"
+int(0)
 --- testing: '0' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: '0' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: '0' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: '0' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: '0' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: '0' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: '0' >> '3.4a' ---
-string(2) "30"
+int(0)
 --- testing: '0' >> 'a5.9' ---
-string(2) "30"
+int(0)
 --- testing: '65' >> '0' ---
-string(4) "3635"
+int(65)
 --- testing: '65' >> '65' ---
-string(4) "3332"
+int(0)
 --- testing: '65' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: '65' >> '1.2' ---
-string(4) "3332"
+int(32)
 --- testing: '65' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: '65' >> 'abc' ---
-string(4) "3635"
+int(65)
 --- testing: '65' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: '65' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: '65' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: '65' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: '65' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: '65' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: '65' >> '3.4a' ---
-string(2) "38"
+int(8)
 --- testing: '65' >> 'a5.9' ---
-string(4) "3635"
+int(65)
 --- testing: '-44' >> '0' ---
-string(6) "2d3434"
+int(-44)
 --- testing: '-44' >> '65' ---
-string(6) "2d3232"
+int(-1)
 --- testing: '-44' >> '-44' ---
-string(4) "2d31"
+bool(false)
 --- testing: '-44' >> '1.2' ---
-string(6) "2d3232"
+int(-22)
 --- testing: '-44' >> '-7.7' ---
-string(4) "2d31"
+bool(false)
 --- testing: '-44' >> 'abc' ---
-string(6) "2d3434"
+int(-44)
 --- testing: '-44' >> '123abc' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-44' >> '123e5' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-44' >> '123e5xyz' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-44' >> ' 123abc' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-44' >> '123 abc' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-44' >> '123abc ' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-44' >> '3.4a' ---
-string(4) "2d36"
+int(-6)
 --- testing: '-44' >> 'a5.9' ---
-string(6) "2d3434"
+int(-44)
 --- testing: '1.2' >> '0' ---
-string(2) "31"
+int(1)
 --- testing: '1.2' >> '65' ---
-string(2) "30"
+int(0)
 --- testing: '1.2' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: '1.2' >> '1.2' ---
-string(2) "30"
+int(0)
 --- testing: '1.2' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: '1.2' >> 'abc' ---
-string(2) "31"
+int(1)
 --- testing: '1.2' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: '1.2' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: '1.2' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: '1.2' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: '1.2' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: '1.2' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: '1.2' >> '3.4a' ---
-string(2) "30"
+int(0)
 --- testing: '1.2' >> 'a5.9' ---
-string(2) "31"
+int(1)
 --- testing: '-7.7' >> '0' ---
-string(4) "2d37"
+int(-7)
 --- testing: '-7.7' >> '65' ---
-string(4) "2d34"
+int(-1)
 --- testing: '-7.7' >> '-44' ---
-string(4) "2d31"
+bool(false)
 --- testing: '-7.7' >> '1.2' ---
-string(4) "2d34"
+int(-4)
 --- testing: '-7.7' >> '-7.7' ---
-string(4) "2d31"
+bool(false)
 --- testing: '-7.7' >> 'abc' ---
-string(4) "2d37"
+int(-7)
 --- testing: '-7.7' >> '123abc' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-7.7' >> '123e5' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-7.7' >> '123e5xyz' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-7.7' >> ' 123abc' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-7.7' >> '123 abc' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-7.7' >> '123abc ' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-7.7' >> '3.4a' ---
-string(4) "2d31"
+int(-1)
 --- testing: '-7.7' >> 'a5.9' ---
-string(4) "2d37"
+int(-7)
 --- testing: 'abc' >> '0' ---
-string(2) "30"
+int(0)
 --- testing: 'abc' >> '65' ---
-string(2) "30"
+int(0)
 --- testing: 'abc' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: 'abc' >> '1.2' ---
-string(2) "30"
+int(0)
 --- testing: 'abc' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: 'abc' >> 'abc' ---
-string(2) "30"
+int(0)
 --- testing: 'abc' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: 'abc' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: 'abc' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: 'abc' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: 'abc' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: 'abc' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: 'abc' >> '3.4a' ---
-string(2) "30"
+int(0)
 --- testing: 'abc' >> 'a5.9' ---
-string(2) "30"
+int(0)
 --- testing: '123abc' >> '0' ---
-string(6) "313233"
+int(123)
 --- testing: '123abc' >> '65' ---
-string(4) "3631"
+int(0)
 --- testing: '123abc' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: '123abc' >> '1.2' ---
-string(4) "3631"
+int(61)
 --- testing: '123abc' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: '123abc' >> 'abc' ---
-string(6) "313233"
+int(123)
 --- testing: '123abc' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: '123abc' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: '123abc' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: '123abc' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: '123abc' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: '123abc' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: '123abc' >> '3.4a' ---
-string(4) "3135"
+int(15)
 --- testing: '123abc' >> 'a5.9' ---
-string(6) "313233"
+int(123)
 --- testing: '123e5' >> '0' ---
-string(6) "313233"
+int(123)
 --- testing: '123e5' >> '65' ---
-string(4) "3631"
+int(0)
 --- testing: '123e5' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: '123e5' >> '1.2' ---
-string(4) "3631"
+int(61)
 --- testing: '123e5' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: '123e5' >> 'abc' ---
-string(6) "313233"
+int(123)
 --- testing: '123e5' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: '123e5' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: '123e5' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: '123e5' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: '123e5' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: '123e5' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: '123e5' >> '3.4a' ---
-string(4) "3135"
+int(15)
 --- testing: '123e5' >> 'a5.9' ---
-string(6) "313233"
+int(123)
 --- testing: '123e5xyz' >> '0' ---
-string(6) "313233"
+int(123)
 --- testing: '123e5xyz' >> '65' ---
-string(4) "3631"
+int(0)
 --- testing: '123e5xyz' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: '123e5xyz' >> '1.2' ---
-string(4) "3631"
+int(61)
 --- testing: '123e5xyz' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: '123e5xyz' >> 'abc' ---
-string(6) "313233"
+int(123)
 --- testing: '123e5xyz' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: '123e5xyz' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: '123e5xyz' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: '123e5xyz' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: '123e5xyz' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: '123e5xyz' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: '123e5xyz' >> '3.4a' ---
-string(4) "3135"
+int(15)
 --- testing: '123e5xyz' >> 'a5.9' ---
-string(6) "313233"
+int(123)
 --- testing: ' 123abc' >> '0' ---
-string(6) "313233"
+int(123)
 --- testing: ' 123abc' >> '65' ---
-string(4) "3631"
+int(0)
 --- testing: ' 123abc' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: ' 123abc' >> '1.2' ---
-string(4) "3631"
+int(61)
 --- testing: ' 123abc' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: ' 123abc' >> 'abc' ---
-string(6) "313233"
+int(123)
 --- testing: ' 123abc' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: ' 123abc' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: ' 123abc' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: ' 123abc' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: ' 123abc' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: ' 123abc' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: ' 123abc' >> '3.4a' ---
-string(4) "3135"
+int(15)
 --- testing: ' 123abc' >> 'a5.9' ---
-string(6) "313233"
+int(123)
 --- testing: '123 abc' >> '0' ---
-string(6) "313233"
+int(123)
 --- testing: '123 abc' >> '65' ---
-string(4) "3631"
+int(0)
 --- testing: '123 abc' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: '123 abc' >> '1.2' ---
-string(4) "3631"
+int(61)
 --- testing: '123 abc' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: '123 abc' >> 'abc' ---
-string(6) "313233"
+int(123)
 --- testing: '123 abc' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: '123 abc' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: '123 abc' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: '123 abc' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: '123 abc' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: '123 abc' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: '123 abc' >> '3.4a' ---
-string(4) "3135"
+int(15)
 --- testing: '123 abc' >> 'a5.9' ---
-string(6) "313233"
+int(123)
 --- testing: '123abc ' >> '0' ---
-string(6) "313233"
+int(123)
 --- testing: '123abc ' >> '65' ---
-string(4) "3631"
+int(0)
 --- testing: '123abc ' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: '123abc ' >> '1.2' ---
-string(4) "3631"
+int(61)
 --- testing: '123abc ' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: '123abc ' >> 'abc' ---
-string(6) "313233"
+int(123)
 --- testing: '123abc ' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: '123abc ' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: '123abc ' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: '123abc ' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: '123abc ' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: '123abc ' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: '123abc ' >> '3.4a' ---
-string(4) "3135"
+int(15)
 --- testing: '123abc ' >> 'a5.9' ---
-string(6) "313233"
+int(123)
 --- testing: '3.4a' >> '0' ---
-string(2) "33"
+int(3)
 --- testing: '3.4a' >> '65' ---
-string(2) "31"
+int(0)
 --- testing: '3.4a' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: '3.4a' >> '1.2' ---
-string(2) "31"
+int(1)
 --- testing: '3.4a' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: '3.4a' >> 'abc' ---
-string(2) "33"
+int(3)
 --- testing: '3.4a' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: '3.4a' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: '3.4a' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: '3.4a' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: '3.4a' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: '3.4a' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: '3.4a' >> '3.4a' ---
-string(2) "30"
+int(0)
 --- testing: '3.4a' >> 'a5.9' ---
-string(2) "33"
+int(3)
 --- testing: 'a5.9' >> '0' ---
-string(2) "30"
+int(0)
 --- testing: 'a5.9' >> '65' ---
-string(2) "30"
+int(0)
 --- testing: 'a5.9' >> '-44' ---
-string(2) "30"
+bool(false)
 --- testing: 'a5.9' >> '1.2' ---
-string(2) "30"
+int(0)
 --- testing: 'a5.9' >> '-7.7' ---
-string(2) "30"
+bool(false)
 --- testing: 'a5.9' >> 'abc' ---
-string(2) "30"
+int(0)
 --- testing: 'a5.9' >> '123abc' ---
-string(2) "30"
+int(0)
 --- testing: 'a5.9' >> '123e5' ---
-string(2) "30"
+int(0)
 --- testing: 'a5.9' >> '123e5xyz' ---
-string(2) "30"
+int(0)
 --- testing: 'a5.9' >> ' 123abc' ---
-string(2) "30"
+int(0)
 --- testing: 'a5.9' >> '123 abc' ---
-string(2) "30"
+int(0)
 --- testing: 'a5.9' >> '123abc ' ---
-string(2) "30"
+int(0)
 --- testing: 'a5.9' >> '3.4a' ---
-string(2) "30"
+int(0)
 --- testing: 'a5.9' >> 'a5.9' ---
-string(2) "30"
+int(0)
 ===DONE===

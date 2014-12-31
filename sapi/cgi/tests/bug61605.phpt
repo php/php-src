@@ -4,6 +4,8 @@ Bug #61605 (header_remove() does not remove all headers)
 <?php include "skipif.inc"; ?>
 --GET--
 foo=bar
+--INI--
+expose_php=On
 --FILE--
 <?php
 header("A: first");

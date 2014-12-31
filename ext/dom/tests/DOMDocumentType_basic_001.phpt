@@ -43,6 +43,6 @@ print 'notation: '.$notation->nodeName."\n";
 publicId: -//OASIS//DTD DocBook XML//EN
 systemId: docbookx.dtd
 name: chapter
-internalSubset: <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML//EN" "docbookx.dtd">
+internalSubset: 
 entity: logo
 notation: gif

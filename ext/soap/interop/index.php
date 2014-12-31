@@ -35,7 +35,7 @@ classes to define what the type of the value is.</p>
 
 <h3>Client Test Interface</h3>
 <p>The <a href="client_round2.php">client interface</a> allows you to run the PHP SOAP
-Client against a choosen interop server.  Each run updates the results database below.</p>
+Client against a chosen interop server.  Each run updates the results database below.</p>
 
 <h3>Interop Client Test Results</h3>
 <p>This is a database of the current test results using PHP SOAP Clients against interop servers.</p>

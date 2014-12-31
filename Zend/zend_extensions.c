@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -105,6 +105,14 @@ int zend_load_extension(const char *path)
 #endif
 		DL_UNLOAD(handle);
 		return FAILURE;
+	} else if (zend_get_extension(new_extension->name)) {
+		fprintf(stderr, "Cannot load %s - it was already loaded\n", new_extension->name);
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef PHP_WIN32
+		fflush(stderr);
+#endif
+		DL_UNLOAD(handle);
+		return FAILURE;
 	}
 
 	return zend_register_extension(new_extension, handle);
@@ -138,7 +146,7 @@ int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 }
 
 
-static void zend_extension_shutdown(zend_extension *extension TSRMLS_DC)
+static void zend_extension_shutdown(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	if (extension->shutdown) {
@@ -177,9 +185,9 @@ int zend_startup_extensions()
 }
 
 
-void zend_shutdown_extensions(TSRMLS_D)
+void zend_shutdown_extensions(void)
 {
-	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_shutdown TSRMLS_CC);
+	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_shutdown);
 	zend_llist_destroy(&zend_extensions);
 }
 
@@ -187,14 +195,14 @@ void zend_shutdown_extensions(TSRMLS_D)
 void zend_extension_dtor(zend_extension *extension)
 {
 #if ZEND_EXTENSIONS_SUPPORT && !ZEND_DEBUG
-	if (extension->handle) {
+	if (extension->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
 		DL_UNLOAD(extension->handle);
 	}
 #endif
 }
 
 
-static void zend_extension_message_dispatcher(const zend_extension *extension, int num_args, va_list args TSRMLS_DC)
+static void zend_extension_message_dispatcher(const zend_extension *extension, int num_args, va_list args)
 {
 	int message;
 	void *arg;
@@ -210,9 +218,7 @@ static void zend_extension_message_dispatcher(const zend_extension *extension, i
 
 ZEND_API void zend_extension_dispatch_message(int message, void *arg)
 {
-	TSRMLS_FETCH();
-
-	zend_llist_apply_with_arguments(&zend_extensions, (llist_apply_with_args_func_t) zend_extension_message_dispatcher TSRMLS_CC, 2, message, arg);
+	zend_llist_apply_with_arguments(&zend_extensions, (llist_apply_with_args_func_t) zend_extension_message_dispatcher, 2, message, arg);
 }
 
 

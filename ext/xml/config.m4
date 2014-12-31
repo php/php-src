@@ -7,11 +7,11 @@ PHP_ARG_ENABLE(xml,whether to enable XML support,
 
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR     XML: libxml2 install prefix], no, no)
+  [  --with-libxml-dir=DIR   XML: libxml2 install prefix], no, no)
 fi
 
 PHP_ARG_WITH(libexpat-dir, libexpat install dir,
-[  --with-libexpat-dir=DIR   XML: libexpat install prefix (deprecated)], no, no)
+[  --with-libexpat-dir=DIR XML: libexpat install prefix (deprecated)], no, no)
 
 if test "$PHP_XML" != "no"; then
 
@@ -52,7 +52,7 @@ if test "$PHP_XML" != "no"; then
     AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
   fi
 
-  PHP_NEW_EXTENSION(xml, xml.c $xml_extra_sources, $ext_shared)
+  PHP_NEW_EXTENSION(xml, xml.c $xml_extra_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(XML_SHARED_LIBADD)
   PHP_INSTALL_HEADERS([ext/xml/])
   AC_DEFINE(HAVE_XML, 1, [ ])

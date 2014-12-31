@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #include <unicode/utypes.h>
 #include <unicode/utrans.h>
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 void transliterator_register_constants( INIT_FUNC_ARGS );
 smart_str transliterator_parse_error_to_string( UParseError* pe );

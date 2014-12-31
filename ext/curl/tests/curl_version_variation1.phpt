@@ -1,14 +1,8 @@
 --TEST--
 Test curl_version() function : usage variations - test values for $ascii argument
 --SKIPIF--
-<?php 
-if (!extension_loaded("curl")) {
-	echo "skip - curl extension not available in this build";
-}
-if (!getenv('PHP_CURL_HTTP_REMOTE_SERVER')) {
-	echo "skip need PHP_CURL_HTTP_REMOTE_SERVER environment variable";
-}
-?>
+<?php if (!extension_loaded("curl")) exit("skip curl extension not loaded");
+if (PHP_INT_SIZE != 8) die('skip 64-bit only'); ?>
 --FILE--
 <?php
 
@@ -116,23 +110,23 @@ bool(true)
 bool(true)
 -- Iteration 10 --
 
-Warning: curl_version() expects parameter 1 to be long, array given in %s on line %d
+Warning: curl_version() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 -- Iteration 11 --
 
-Warning: curl_version() expects parameter 1 to be long, array given in %s on line %d
+Warning: curl_version() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 -- Iteration 12 --
 
-Warning: curl_version() expects parameter 1 to be long, array given in %s on line %d
+Warning: curl_version() expects parameter 1 to be integer, array given in %s on line %d
 bool(false)
 -- Iteration 13 --
 
-Warning: curl_version() expects parameter 1 to be long, string given in %s on line %d
+Warning: curl_version() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 -- Iteration 14 --
 
-Warning: curl_version() expects parameter 1 to be long, string given in %s on line %d
+Warning: curl_version() expects parameter 1 to be integer, string given in %s on line %d
 bool(false)
 -- Iteration 15 --
 
@@ -152,11 +146,11 @@ bool(true)
 bool(true)
 -- Iteration 22 --
 
-Warning: curl_version() expects parameter 1 to be long, object given in %s on line %d
+Warning: curl_version() expects parameter 1 to be integer, object given in %s on line %d
 bool(false)
 -- Iteration 23 --
 
-Warning: curl_version() expects parameter 1 to be long, resource given in %s on line %d
+Warning: curl_version() expects parameter 1 to be integer, resource given in %s on line %d
 bool(false)
 -- Iteration 24 --
 bool(true)

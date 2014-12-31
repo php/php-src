@@ -15,7 +15,7 @@ error_reporting(E_ALL & ~E_NOTICE);
 * Testing strspn() : with different unexpected values for mask argument
 */
 
-echo "*** Testing strspn() : with diferent unexpected values of mask argument ***\n";
+echo "*** Testing strspn() : with different unexpected values of mask argument ***\n";
 
 $str = 'string_val';
 $start = 1;
@@ -102,7 +102,7 @@ fclose($file_handle);
 echo "Done"
 ?>
 --EXPECTF--
-*** Testing strspn() : with diferent unexpected values of mask argument ***
+*** Testing strspn() : with different unexpected values of mask argument ***
 
 -- Iteration with mask value as "0" --
 int(0)

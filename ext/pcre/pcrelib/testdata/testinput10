@@ -139,6 +139,12 @@
   
 /^\p{Cf}/8
     \x{601}
+    \x{180e}
+    \x{061c}
+    \x{2066}
+    \x{2067}
+    \x{2068}
+    \x{2069}
     ** Failers
     \x{09f} 
   
@@ -199,11 +205,12 @@
   
 /^\p{Mn}/8
     \x{300}
+    \x{1a1b}
     ** Failers
     X
     \x{903}
   
-/^\p{Nd}+/8
+/^\p{Nd}+/8O
     0123456789\x{660}\x{661}\x{662}\x{663}\x{664}\x{665}\x{666}\x{667}\x{668}\x{669}\x{66a}
     \x{6f0}\x{6f1}\x{6f2}\x{6f3}\x{6f4}\x{6f5}\x{6f6}\x{6f7}\x{6f8}\x{6f9}\x{6fa}
     \x{966}\x{967}\x{968}\x{969}\x{96a}\x{96b}\x{96c}\x{96d}\x{96e}\x{96f}\x{970}
@@ -243,6 +250,8 @@
     ]
     }
     \x{f3b}
+    \x{2309}
+    \x{230b}
     ** Failers
     X
     \x{203f}
@@ -250,7 +259,7 @@
     [
     {
     \x{f3c}
-  
+
 /^\p{Pf}/8
     \x{bb}
     \x{2019}
@@ -277,6 +286,8 @@
     [
     {
     \x{f3c}
+    \x{2308}
+    \x{230a}
     ** Failers
     X
     )
@@ -326,7 +337,6 @@
     \ \
     \x{a0}
     \x{1680}
-    \x{180e}
     \x{2000}
     \x{2001}     
     ** Failers
@@ -423,23 +433,23 @@
     ** Failers
     1234
 
-/\D+/8
+/\D+/8O
     11111111111111111111111111111111111111111111111111111111111111111111111
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
      
-/\P{Nd}+/8
+/\P{Nd}+/8O
     11111111111111111111111111111111111111111111111111111111111111111111111
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
-/[\D]+/8
+/[\D]+/8O
     11111111111111111111111111111111111111111111111111111111111111111111111
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
-/[\P{Nd}]+/8
+/[\P{Nd}]+/8O
     11111111111111111111111111111111111111111111111111111111111111111111111
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
-/[\D\P{Nd}]+/8
+/[\D\P{Nd}]+/8O
     11111111111111111111111111111111111111111111111111111111111111111111111
     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
@@ -886,19 +896,19 @@
     ** Failers
     \x{0b} 
 
-/^>\p{Xsp}+/8
+/^>\p{Xsp}+/8O
     > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
 
-/^>\p{Xsp}*/8
+/^>\p{Xsp}*/8O
     > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
     
-/^>\p{Xsp}{2,9}/8
+/^>\p{Xsp}{2,9}/8O
     > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
     
-/^>[\p{Xsp}]/8
+/^>[\p{Xsp}]/8O
     >\x{2028}\x{0b}
  
-/^>[\p{Xsp}]+/8
+/^>[\p{Xsp}]+/8O
     > \x{09}\x{0a}\x{0c}\x{0d}\x{a0}\x{1680}\x{2028}\x{0b}
 
 /^>\p{Xps}/8
@@ -1025,5 +1035,385 @@
 /^\X+?Z/8
     AA\P
     AA\P\P 
+
+/-- These are tests for extended grapheme clusters --/ 
+
+/^\X/8+
+    G\x{34e}\x{34e}X
+    \x{34e}\x{34e}X
+    \x04X
+    \x{1100}X
+    \x{1100}\x{34e}X
+    \x{1b04}\x{1b04}X 
+    *These match up to the roman letters
+    \x{1111}\x{1111}L,L
+    \x{1111}\x{1111}\x{1169}L,L,V
+    \x{1111}\x{ae4c}L, LV
+    \x{1111}\x{ad89}L, LVT
+    \x{1111}\x{ae4c}\x{1169}L, LV, V
+    \x{1111}\x{ae4c}\x{1169}\x{1169}L, LV, V, V
+    \x{1111}\x{ae4c}\x{1169}\x{11fe}L, LV, V, T
+    \x{1111}\x{ad89}\x{11fe}L, LVT, T
+    \x{1111}\x{ad89}\x{11fe}\x{11fe}L, LVT, T, T
+    \x{ad89}\x{11fe}\x{11fe}LVT, T, T
+    *These match just the first codepoint (invalid sequence)
+    \x{1111}\x{11fe}L, T
+    \x{ae4c}\x{1111}LV, L
+    \x{ae4c}\x{ae4c}LV, LV
+    \x{ae4c}\x{ad89}LV, LVT
+    \x{1169}\x{1111}V, L
+    \x{1169}\x{ae4c}V, LV
+    \x{1169}\x{ad89}V, LVT
+    \x{ad89}\x{1111}LVT, L
+    \x{ad89}\x{1169}LVT, V
+    \x{ad89}\x{ae4c}LVT, LV
+    \x{ad89}\x{ad89}LVT, LVT
+    \x{11fe}\x{1111}T, L
+    \x{11fe}\x{1169}T, V
+    \x{11fe}\x{ae4c}T, LV
+    \x{11fe}\x{ad89}T, LVT
+    *Test extend and spacing mark
+    \x{1111}\x{ae4c}\x{0711}L, LV, extend
+    \x{1111}\x{ae4c}\x{1b04}L, LV, spacing mark
+    \x{1111}\x{ae4c}\x{1b04}\x{0711}\x{1b04}L, LV, spacing mark, extend, spacing mark
+    *Test CR, LF, and control
+    \x0d\x{0711}CR, extend
+    \x0d\x{1b04}CR, spacingmark
+    \x0a\x{0711}LF, extend
+    \x0a\x{1b04}LF, spacingmark
+    \x0b\x{0711}Control, extend
+    \x09\x{1b04}Control, spacingmark
+    *There are no Prepend characters, so we can't test Prepend, CR
+    
+/^(?>\X{2})X/8+
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+    
+/^\X{2,4}X/8+
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+
+/^\X{2,4}?X/8+
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+    \x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}\x{1111}\x{ae4c}X
+
+/-- --/
+
+/\x{1e9e}+/8i
+    \x{1e9e}\x{00df}
+
+/[z\x{1e9e}]+/8i
+    \x{1e9e}\x{00df}
+
+/\x{00df}+/8i
+    \x{1e9e}\x{00df}
+
+/[z\x{00df}]+/8i
+    \x{1e9e}\x{00df}
+
+/\x{1f88}+/8i
+    \x{1f88}\x{1f80} 
+
+/[z\x{1f88}]+/8i
+    \x{1f88}\x{1f80} 
+
+/-- Perl matches these --/
+
+/\x{00b5}+/8i
+    \x{00b5}\x{039c}\x{03bc}
+
+/\x{039c}+/8i
+    \x{00b5}\x{039c}\x{03bc}
+
+/\x{03bc}+/8i
+    \x{00b5}\x{039c}\x{03bc}
+
+
+/\x{00c5}+/8i
+    \x{00c5}\x{00e5}\x{212b}
+
+/\x{00e5}+/8i
+    \x{00c5}\x{00e5}\x{212b}
+
+/\x{212b}+/8i
+    \x{00c5}\x{00e5}\x{212b}
+
+
+/\x{01c4}+/8i
+    \x{01c4}\x{01c5}\x{01c6}
+
+/\x{01c5}+/8i
+    \x{01c4}\x{01c5}\x{01c6}
+
+/\x{01c6}+/8i
+    \x{01c4}\x{01c5}\x{01c6}
+
+
+/\x{01c7}+/8i
+    \x{01c7}\x{01c8}\x{01c9}
+
+/\x{01c8}+/8i
+    \x{01c7}\x{01c8}\x{01c9}
+
+/\x{01c9}+/8i
+    \x{01c7}\x{01c8}\x{01c9}
+
+
+/\x{01ca}+/8i
+    \x{01ca}\x{01cb}\x{01cc}
+
+/\x{01cb}+/8i
+    \x{01ca}\x{01cb}\x{01cc}
+
+/\x{01cc}+/8i
+    \x{01ca}\x{01cb}\x{01cc}
+
+
+/\x{01f1}+/8i
+    \x{01f1}\x{01f2}\x{01f3}
+
+/\x{01f2}+/8i
+    \x{01f1}\x{01f2}\x{01f3}
+
+/\x{01f3}+/8i
+    \x{01f1}\x{01f2}\x{01f3}
+
+
+/\x{0345}+/8i
+    \x{0345}\x{0399}\x{03b9}\x{1fbe}
+
+/\x{0399}+/8i
+    \x{0345}\x{0399}\x{03b9}\x{1fbe}
+
+/\x{03b9}+/8i
+    \x{0345}\x{0399}\x{03b9}\x{1fbe}
+
+/\x{1fbe}+/8i
+    \x{0345}\x{0399}\x{03b9}\x{1fbe}
+
+
+/\x{0392}+/8i
+    \x{0392}\x{03b2}\x{03d0}
+
+/\x{03b2}+/8i
+    \x{0392}\x{03b2}\x{03d0}
+
+/\x{03d0}+/8i
+    \x{0392}\x{03b2}\x{03d0}
+    
+
+/\x{0395}+/8i
+    \x{0395}\x{03b5}\x{03f5}
+
+/\x{03b5}+/8i
+    \x{0395}\x{03b5}\x{03f5}
+
+/\x{03f5}+/8i
+    \x{0395}\x{03b5}\x{03f5}
+
+
+/\x{0398}+/8i
+    \x{0398}\x{03b8}\x{03d1}\x{03f4}
+
+/\x{03b8}+/8i
+    \x{0398}\x{03b8}\x{03d1}\x{03f4}
+
+/\x{03d1}+/8i
+    \x{0398}\x{03b8}\x{03d1}\x{03f4}
+
+/\x{03f4}+/8i
+    \x{0398}\x{03b8}\x{03d1}\x{03f4}
+    
+
+/\x{039a}+/8i
+    \x{039a}\x{03ba}\x{03f0}
+
+/\x{03ba}+/8i
+    \x{039a}\x{03ba}\x{03f0}
+
+/\x{03f0}+/8i
+    \x{039a}\x{03ba}\x{03f0}
+    
+
+/\x{03a0}+/8i
+    \x{03a0}\x{03c0}\x{03d6} 
+
+/\x{03c0}+/8i
+    \x{03a0}\x{03c0}\x{03d6} 
+
+/\x{03d6}+/8i
+    \x{03a0}\x{03c0}\x{03d6} 
+
+
+/\x{03a1}+/8i
+    \x{03a1}\x{03c1}\x{03f1}
+
+/\x{03c1}+/8i
+    \x{03a1}\x{03c1}\x{03f1}
+
+/\x{03f1}+/8i
+    \x{03a1}\x{03c1}\x{03f1}
+
+
+/\x{03a3}+/8i
+    \x{03A3}\x{03C2}\x{03C3}
+
+/\x{03c2}+/8i
+    \x{03A3}\x{03C2}\x{03C3}
+
+/\x{03c3}+/8i
+    \x{03A3}\x{03C2}\x{03C3}
+    
+
+/\x{03a6}+/8i
+    \x{03a6}\x{03c6}\x{03d5} 
+
+/\x{03c6}+/8i
+    \x{03a6}\x{03c6}\x{03d5} 
+
+/\x{03d5}+/8i
+    \x{03a6}\x{03c6}\x{03d5} 
+
+
+/\x{03c9}+/8i
+    \x{03c9}\x{03a9}\x{2126}
+
+/\x{03a9}+/8i
+    \x{03c9}\x{03a9}\x{2126}
+
+/\x{2126}+/8i
+    \x{03c9}\x{03a9}\x{2126}
+    
+
+/\x{1e60}+/8i
+    \x{1e60}\x{1e61}\x{1e9b}
+
+/\x{1e61}+/8i
+    \x{1e60}\x{1e61}\x{1e9b}
+
+/\x{1e9b}+/8i
+    \x{1e60}\x{1e61}\x{1e9b}
+    
+
+/\x{1e9e}+/8i
+    \x{1e9e}\x{00df}
+
+/\x{00df}+/8i
+    \x{1e9e}\x{00df}
+    
+
+/\x{1f88}+/8i
+    \x{1f88}\x{1f80} 
+
+/\x{1f80}+/8i
+    \x{1f88}\x{1f80} 
+
+/\x{004b}+/8i
+    \x{004b}\x{006b}\x{212a}
+
+/\x{006b}+/8i
+    \x{004b}\x{006b}\x{212a}
+
+/\x{212a}+/8i
+    \x{004b}\x{006b}\x{212a}
+
+
+/\x{0053}+/8i
+    \x{0053}\x{0073}\x{017f}
+
+/\x{0073}+/8i
+    \x{0053}\x{0073}\x{017f}
+
+/\x{017f}+/8i
+    \x{0053}\x{0073}\x{017f}
+
+/ist/8i
+    ikt
+
+/is+t/8i
+    iSs\x{17f}t
+    ikt
+
+/is+?t/8i
+    ikt
+
+/is?t/8i
+    ikt
+
+/is{2}t/8i
+    iskt
+
+/^\p{Xuc}/8
+    $abc
+    @abc
+    `abc
+    \x{1234}abc
+    ** Failers
+    abc     
+
+/^\p{Xuc}+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}+?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}+?\*/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}++/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}{3,5}/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\p{Xuc}{3,5}?/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^[\p{Xuc}]/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^[\p{Xuc}]+/8
+    $@`\x{a0}\x{1234}\x{e000}**
+    ** Failers
+    \x{9f}
+
+/^\P{Xuc}/8
+    abc
+    ** Failers
+    $abc
+    @abc
+    `abc
+    \x{1234}abc
+
+/^[\P{Xuc}]/8
+    abc
+    ** Failers
+    $abc
+    @abc
+    `abc
+    \x{1234}abc
+
+/^A\s+Z/8W
+    A\x{2005}Z
+    A\x{85}\x{180e}\x{2005}Z
+
+/^A[\s]+Z/8W
+    A\x{2005}Z
+    A\x{85}\x{180e}\x{2005}Z
 
 /-- End of testinput10 --/ 

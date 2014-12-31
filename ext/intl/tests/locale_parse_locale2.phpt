@@ -63,7 +63,8 @@ function ut_main()
 //Some Invalid Tags:
         'de-419-DE',
         'a-DE',
-        'ar-a-aaa-b-bbb-a-ccc'
+        'ar-a-aaa-b-bbb-a-ccc',
+	'x-AAAAAA',
     );
 
 
@@ -201,3 +202,6 @@ No values found from Locale parsing.
 ---------------------
 ar-a-aaa-b-bbb-a-ccc:
 language : 'ar' ,
+---------------------
+x-AAAAAA:
+private0 : 'AAAAAA' ,

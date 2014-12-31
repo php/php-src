@@ -3,6 +3,9 @@ Bug #46408 (Locale number format settings can cause pg_query_params to break wit
 --SKIPIF--
 <?php
 require_once('skipif.inc');
+if (false === setlocale(LC_ALL, 'hr_HR.utf-8', 'hr_HR')) {
+    echo "skip Locale hr_HR.utf-8 not present";
+}
 ?>
 --FILE--
 <?php

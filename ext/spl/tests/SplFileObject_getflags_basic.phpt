@@ -7,16 +7,16 @@ Erwin Poeze <erwin.poeze@gmail.com>
 --FILE--
 <?php
 
-file_put_contents('testdata.csv', 'eerste;tweede;derde');
+file_put_contents('SplFileObject_getflags_basic.csv', 'eerste;tweede;derde');
 
-$fo = new SplFileObject('testdata.csv');
+$fo = new SplFileObject('SplFileObject_getflags_basic.csv');
 
 $fo->setFlags(SplFileObject::DROP_NEW_LINE);
 var_dump($fo->getFlags());
 ?>
 --CLEAN--
 <?php
-unlink('testdata.csv');
+unlink('SplFileObject_getflags_basic.csv');
 ?>
 --EXPECT--
 int(1)

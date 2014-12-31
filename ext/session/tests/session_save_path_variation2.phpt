@@ -32,7 +32,7 @@ ob_end_flush();
 *** Testing session_save_path() : variation ***
 string(5) "/blah"
 
-Warning: session_start(): open(%s, O_RDWR) failed: No such file or directory (2) in %s on line %d
+Warning: session_start(): open(%sblah%e%s, O_RDWR) failed: No such file or directory (2) in %s on line %d
 bool(true)
 string(5) "/blah"
 bool(true)

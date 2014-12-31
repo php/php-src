@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,18 +21,18 @@
 #include "php.h"
 #include "php_ticks.h"
 
-int php_startup_ticks(TSRMLS_D)
+int php_startup_ticks(void)
 {
 	zend_llist_init(&PG(tick_functions), sizeof(void(*)(int)), NULL, 1);
 	return SUCCESS;
 }
 
-void php_deactivate_ticks(TSRMLS_D)
+void php_deactivate_ticks(void)
 {
 	zend_llist_clean(&PG(tick_functions));
 }
 
-void php_shutdown_ticks(TSRMLS_D)
+void php_shutdown_ticks(void)
 {
 	zend_llist_destroy(&PG(tick_functions));
 }
@@ -48,20 +48,16 @@ static int php_compare_tick_functions(void *elem1, void *elem2)
 
 PHPAPI void php_add_tick_function(void (*func)(int))
 {
-	TSRMLS_FETCH();
-
 	zend_llist_add_element(&PG(tick_functions), (void *)&func);
 }
 
 PHPAPI void php_remove_tick_function(void (*func)(int))
 {
-	TSRMLS_FETCH();
-
 	zend_llist_del_element(&PG(tick_functions), (void *)func,
 						   (int(*)(void*, void*))php_compare_tick_functions);
 }
 
-static void php_tick_iterator(void *data, void *arg TSRMLS_DC)
+static void php_tick_iterator(void *data, void *arg)
 {
 	void (*func)(int);
 
@@ -71,9 +67,7 @@ static void php_tick_iterator(void *data, void *arg TSRMLS_DC)
 
 void php_run_ticks(int count)
 {
-	TSRMLS_FETCH();
-
-	zend_llist_apply_with_argument(&PG(tick_functions), (llist_apply_with_arg_func_t) php_tick_iterator, &count TSRMLS_CC);
+	zend_llist_apply_with_argument(&PG(tick_functions), (llist_apply_with_arg_func_t) php_tick_iterator, &count);
 }
 
 /*

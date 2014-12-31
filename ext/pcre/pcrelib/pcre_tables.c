@@ -56,6 +56,12 @@ the definition is next to the definition of the opcodes in pcre_internal.h. */
 
 const pcre_uint8 PRIV(OP_lengths)[] = { OP_LENGTHS };
 
+/* Tables of horizontal and vertical whitespace characters, suitable for
+adding to classes. */
+
+const pcre_uint32 PRIV(hspace_list)[] = { HSPACE_LIST };
+const pcre_uint32 PRIV(vspace_list)[] = { VSPACE_LIST };
+
 
 
 /*************************************************
@@ -66,9 +72,9 @@ const pcre_uint8 PRIV(OP_lengths)[] = { OP_LENGTHS };
 character. */
 
 #if (defined SUPPORT_UTF && defined COMPILE_PCRE8) \
-  || (defined PCRE_INCLUDED && defined SUPPORT_PCRE16)
+  || (defined PCRE_INCLUDED && (defined SUPPORT_PCRE16 || defined SUPPORT_PCRE32))
 
-/* These tables are also required by pcretest in 16 bit mode. */
+/* These tables are also required by pcretest in 16- or 32-bit mode. */
 
 const int PRIV(utf8_table1)[] =
   { 0x7f, 0x7ff, 0xffff, 0x1fffff, 0x3ffffff, 0x7fffffff};
@@ -90,13 +96,13 @@ const pcre_uint8 PRIV(utf8_table4)[] = {
   2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
   3,3,3,3,3,3,3,3,4,4,4,4,5,5,5,5 };
 
-#endif /* (SUPPORT_UTF && COMPILE_PCRE8) || (PCRE_INCLUDED && SUPPORT_PCRE16)*/
+#endif /* (SUPPORT_UTF && COMPILE_PCRE8) || (PCRE_INCLUDED && SUPPORT_PCRE[16|32])*/
 
 #ifdef SUPPORT_UTF
 
 /* Table to translate from particular type value to the general value. */
 
-const int PRIV(ucp_gentype)[] = {
+const pcre_uint32 PRIV(ucp_gentype)[] = {
   ucp_C, ucp_C, ucp_C, ucp_C, ucp_C,  /* Cc, Cf, Cn, Co, Cs */
   ucp_L, ucp_L, ucp_L, ucp_L, ucp_L,  /* Ll, Lu, Lm, Lo, Lt */
   ucp_M, ucp_M, ucp_M,                /* Mc, Me, Mn */
@@ -105,6 +111,66 @@ const int PRIV(ucp_gentype)[] = {
   ucp_P, ucp_P,                       /* Ps, Po */
   ucp_S, ucp_S, ucp_S, ucp_S,         /* Sc, Sk, Sm, So */
   ucp_Z, ucp_Z, ucp_Z                 /* Zl, Zp, Zs */
+};
+
+/* This table encodes the rules for finding the end of an extended grapheme
+cluster. Every code point has a grapheme break property which is one of the
+ucp_gbXX values defined in ucp.h. The 2-dimensional table is indexed by the
+properties of two adjacent code points. The left property selects a word from
+the table, and the right property selects a bit from that word like this:
+
+  ucp_gbtable[left-property] & (1 << right-property)
+
+The value is non-zero if a grapheme break is NOT permitted between the relevant
+two code points. The breaking rules are as follows:
+
+1. Break at the start and end of text (pretty obviously).
+
+2. Do not break between a CR and LF; otherwise, break before and   after
+   controls.
+
+3. Do not break Hangul syllable sequences, the rules for which are:
+
+    L may be followed by L, V, LV or LVT
+    LV or V may be followed by V or T
+    LVT or T may be followed by T
+
+4. Do not break before extending characters.
+
+The next two rules are only for extended grapheme clusters (but that's what we
+are implementing).
+
+5. Do not break before SpacingMarks.
+
+6. Do not break after Prepend characters.
+
+7. Otherwise, break everywhere.
+*/
+
+const pcre_uint32 PRIV(ucp_gbtable[]) = {
+   (1<<ucp_gbLF),                                           /*  0 CR */
+   0,                                                       /*  1 LF */
+   0,                                                       /*  2 Control */
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /*  3 Extend */
+   (1<<ucp_gbExtend)|(1<<ucp_gbPrepend)|                    /*  4 Prepend */
+     (1<<ucp_gbSpacingMark)|(1<<ucp_gbL)|
+     (1<<ucp_gbV)|(1<<ucp_gbT)|(1<<ucp_gbLV)|
+     (1<<ucp_gbLVT)|(1<<ucp_gbOther),
+
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark),                /*  5 SpacingMark */
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbL)|   /*  6 L */
+     (1<<ucp_gbL)|(1<<ucp_gbV)|(1<<ucp_gbLV)|(1<<ucp_gbLVT),
+
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbV)|   /*  7 V */
+     (1<<ucp_gbT),
+
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbT),   /*  8 T */
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbV)|   /*  9 LV */
+     (1<<ucp_gbT),
+
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)|(1<<ucp_gbT),   /* 10 LVT */
+   (1<<ucp_gbRegionalIndicator),                            /* 11 RegionalIndicator */
+   (1<<ucp_gbExtend)|(1<<ucp_gbSpacingMark)                 /* 12 Other */
 };
 
 #ifdef SUPPORT_JIT
@@ -278,6 +344,7 @@ strings to make sure that UTF-8 support works on EBCDIC platforms. */
 #define STRING_Xan0 STR_X STR_a STR_n "\0"
 #define STRING_Xps0 STR_X STR_p STR_s "\0"
 #define STRING_Xsp0 STR_X STR_s STR_p "\0"
+#define STRING_Xuc0 STR_X STR_u STR_c "\0"
 #define STRING_Xwd0 STR_X STR_w STR_d "\0"
 #define STRING_Yi0 STR_Y STR_i "\0"
 #define STRING_Z0 STR_Z "\0"
@@ -425,6 +492,7 @@ const char PRIV(utt_names)[] =
   STRING_Xan0
   STRING_Xps0
   STRING_Xsp0
+  STRING_Xuc0
   STRING_Xwd0
   STRING_Yi0
   STRING_Z0
@@ -572,12 +640,13 @@ const ucp_type_table PRIV(utt)[] = {
   { 1011, PT_ALNUM, 0 },
   { 1015, PT_PXSPACE, 0 },
   { 1019, PT_SPACE, 0 },
-  { 1023, PT_WORD, 0 },
-  { 1027, PT_SC, ucp_Yi },
-  { 1030, PT_GC, ucp_Z },
-  { 1032, PT_PC, ucp_Zl },
-  { 1035, PT_PC, ucp_Zp },
-  { 1038, PT_PC, ucp_Zs }
+  { 1023, PT_UCNC, 0 },
+  { 1027, PT_WORD, 0 },
+  { 1031, PT_SC, ucp_Yi },
+  { 1034, PT_GC, ucp_Z },
+  { 1036, PT_PC, ucp_Zl },
+  { 1039, PT_PC, ucp_Zp },
+  { 1042, PT_PC, ucp_Zs }
 };
 
 const int PRIV(utt_size) = sizeof(PRIV(utt)) / sizeof(ucp_type_table);

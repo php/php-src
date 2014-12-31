@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,11 +45,11 @@ static const DateFormat::EStyle valid_styles[] = {
 		DateFormat::kShortRelative,
 };
 
-static bool valid_format(zval **z) {
-	if (Z_TYPE_PP(z) == IS_LONG) {
-		long lval = Z_LVAL_PP(z);
+static bool valid_format(zval *z) {
+	if (Z_TYPE_P(z) == IS_LONG) {
+		zend_long lval = Z_LVAL_P(z);
 		for (int i = 0; i < sizeof(valid_styles) / sizeof(*valid_styles); i++) {
-			if ((long)valid_styles[i] == lval) {
+			if ((zend_long)valid_styles[i] == lval) {
 				return true;
 			}
 		}
@@ -61,9 +61,9 @@ static bool valid_format(zval **z) {
 U_CFUNC PHP_FUNCTION(datefmt_format_object)
 {
 	zval				*object,
-						**format = NULL;
+						*format = NULL;
 	const char			*locale_str	= NULL;
-	int					locale_len;
+	size_t				locale_len;
 	bool				pattern		= false;
 	UDate				date;
 	TimeZone			*timeZone	= NULL;
@@ -73,60 +73,60 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	DateFormat::EStyle	dateStyle = DateFormat::kDefault,
 						timeStyle = DateFormat::kDefault;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|Zs!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|zs!",
 			&object, &format, &locale_str, &locale_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	if (!locale_str) {
-		locale_str = intl_locale_get_default(TSRMLS_C);
+		locale_str = intl_locale_get_default();
 	}
 
-	if (format == NULL || Z_TYPE_PP(format) == IS_NULL) {
+	if (format == NULL || Z_TYPE_P(format) == IS_NULL) {
 		//nothing
-	} else if (Z_TYPE_PP(format) == IS_ARRAY) {
-		HashTable		*ht	= Z_ARRVAL_PP(format);
+	} else if (Z_TYPE_P(format) == IS_ARRAY) {
+		HashTable		*ht	= Z_ARRVAL_P(format);
 		HashPosition	pos	= {0};
-		zval			**z;
+		zval			*z;
 		if (zend_hash_num_elements(ht) != 2) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: bad format; if array, it must have "
-					"two elements", 0 TSRMLS_CC);
+					"two elements", 0);
 			RETURN_FALSE;
 		}
 
 		zend_hash_internal_pointer_reset_ex(ht, &pos);
-		zend_hash_get_current_data_ex(ht, (void**)&z, &pos);
+		z = zend_hash_get_current_data_ex(ht, &pos);
 		if (!valid_format(z)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: bad format; the date format (first "
-					"element of the array) is not valid", 0 TSRMLS_CC);
+					"element of the array) is not valid", 0);
 			RETURN_FALSE;
 		}
-		dateStyle = (DateFormat::EStyle)Z_LVAL_PP(z);
+		dateStyle = (DateFormat::EStyle)Z_LVAL_P(z);
 
 		zend_hash_move_forward_ex(ht, &pos);
-		zend_hash_get_current_data_ex(ht, (void**)&z, &pos);
+		z = zend_hash_get_current_data_ex(ht, &pos);
 		if (!valid_format(z)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: bad format; the time format ("
-					"second element of the array) is not valid", 0 TSRMLS_CC);
+					"second element of the array) is not valid", 0);
 			RETURN_FALSE;
 		}
-		timeStyle = (DateFormat::EStyle)Z_LVAL_PP(z);
-	} else if (Z_TYPE_PP(format) == IS_LONG) {
+		timeStyle = (DateFormat::EStyle)Z_LVAL_P(z);
+	} else if (Z_TYPE_P(format) == IS_LONG) {
 		if (!valid_format(format)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: the date/time format type is invalid",
-					0 TSRMLS_CC);
+					0);
 			RETURN_FALSE;
 		}
-		dateStyle = timeStyle = (DateFormat::EStyle)Z_LVAL_PP(format);
+		dateStyle = timeStyle = (DateFormat::EStyle)Z_LVAL_P(format);
 	} else {
 		convert_to_string_ex(format);
-		if (Z_STRLEN_PP(format) == 0) {
+		if (Z_STRLEN_P(format) == 0) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-					"datefmt_format_object: the format is empty", 0 TSRMLS_CC);
+					"datefmt_format_object: the format is empty", 0);
 			RETURN_FALSE;
 		}
 		pattern = true;
@@ -136,12 +136,12 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	timeStyle = (DateFormat::EStyle)(timeStyle & ~DateFormat::kRelative);
 
 	zend_class_entry *instance_ce = Z_OBJCE_P(object);
-	if (instanceof_function(instance_ce, Calendar_ce_ptr TSRMLS_CC)) {
-		Calendar *obj_cal = calendar_fetch_native_calendar(object TSRMLS_CC);
+	if (instanceof_function(instance_ce, Calendar_ce_ptr)) {
+		Calendar *obj_cal = calendar_fetch_native_calendar(object);
 		if (obj_cal == NULL) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: bad IntlCalendar instance: "
-					"not initialized properly", 0 TSRMLS_CC);
+					"not initialized properly", 0);
 			RETURN_FALSE;
 		}
 		timeZone = obj_cal->getTimeZone().clone();
@@ -149,34 +149,34 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status,
 					"datefmt_format_object: error obtaining instant from "
-					"IntlCalendar", 0 TSRMLS_CC);
+					"IntlCalendar", 0);
 			RETVAL_FALSE;
 			goto cleanup;
 		}
 		cal = obj_cal->clone();
-	} else if (instanceof_function(instance_ce, php_date_get_date_ce() TSRMLS_CC)) {
+	} else if (instanceof_function(instance_ce, php_date_get_date_ce())) {
 		if (intl_datetime_decompose(object, &date, &timeZone, NULL,
-				"datefmt_format_object" TSRMLS_CC) == FAILURE) {
+				"datefmt_format_object") == FAILURE) {
 			RETURN_FALSE;
 		}
 		cal = new GregorianCalendar(Locale::createFromName(locale_str), status);
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status,
 					"datefmt_format_object: could not create GregorianCalendar",
-					0 TSRMLS_CC);
+					0);
 			RETVAL_FALSE;
 			goto cleanup;
 		}
 	} else {
 		intl_error_set(NULL, status, "datefmt_format_object: the passed object "
 				"must be an instance of either IntlCalendar or DateTime",
-				0 TSRMLS_CC);
+				0);
 		RETURN_FALSE;
 	}
 
 	if (pattern) {
 		 df = new SimpleDateFormat(
-				UnicodeString(Z_STRVAL_PP(format), Z_STRLEN_PP(format),
+				UnicodeString(Z_STRVAL_P(format), Z_STRLEN_P(format),
 						UnicodeString::kInvariant),
 				Locale::createFromName(locale_str),
 				status);
@@ -184,7 +184,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status,
 					"datefmt_format_object: could not create SimpleDateFormat",
-					0 TSRMLS_CC);
+					0);
 			RETVAL_FALSE;
 			goto cleanup;
 		}
@@ -195,7 +195,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		if (df == NULL) { /* according to ICU sources, this should never happen */
 			intl_error_set(NULL, status,
 					"datefmt_format_object: could not create DateFormat",
-					0 TSRMLS_CC);
+					0);
 			RETVAL_FALSE;
 			goto cleanup;
 		}
@@ -208,18 +208,21 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	timeZone = NULL;
 
 	{
+		char *ret_str;
+		size_t ret_str_len;
 		UnicodeString result = UnicodeString();
 		df->format(date, result);
 
-		Z_TYPE_P(return_value) = IS_STRING;
-		if (intl_charFromString(result, &Z_STRVAL_P(return_value),
-				&Z_STRLEN_P(return_value), &status) == FAILURE) {
+		if (intl_charFromString(result, &ret_str, &ret_str_len, &status) == FAILURE) {
 			intl_error_set(NULL, status,
 					"datefmt_format_object: error converting result to UTF-8",
-					0 TSRMLS_CC);
+					0);
 			RETVAL_FALSE;
 			goto cleanup;
 		}
+		RETVAL_STRINGL(ret_str, ret_str_len);
+		//???
+		efree(ret_str);
 	}
 
 

@@ -1,8 +1,8 @@
 [IMPORTANT NOTICE]
 ------------------
- Failed tests usualy indicate a problem with your local system setup
+ Failed tests usually indicate a problem with your local system setup
 and not within PHP itself (at least for official PHP release versions).
-You may decide to automaticaly submit a test summary to our QA workflow
+You may decide to automatically submit a test summary to our QA workflow
 at the end of a test run.
  Please do *not* submit a failed test as a bug or ask for help on why
 it failed on your system without providing substantial backup information
@@ -118,12 +118,12 @@ Example script to be run by cron(1):
 ========== qa-test.sh =============
 #!/bin/sh
 
-CO_DIR=$HOME/cvs/php5
+CO_DIR=$HOME/cvs/php7
 MYMAIL=qa-test@domain.com
 TMPDIR=/var/tmp
 TODAY=`date +"%Y%m%d"`
 
-# Make sure compilation enviroment is correct
+# Make sure compilation environment is correct
 CONFIGURE_OPTS='--disable-all --enable-cli --with-pcre'
 export MAKE=gmake
 export CC=gcc

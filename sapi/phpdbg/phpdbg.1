@@ -1,0 +1,59 @@
+.TH PHPDBG 1
+.SH NAME
+phpdbg \- The interactive PHP debugger
+.SH SYNOPSIS
+.B phpdbg
+[OPTION]
+[\fB\-e\fIFILE\fR]
+.SH DESCRIPTION
+.B phpdbg
+a lightweight, powerful, easy to use debugging platform for PHP5.
+.SH OPTIONS
+The following switches are implemented (just like cli SAPI):
+.TP
+.BR \-n
+No \fBphp.ini\fR file will be used
+.TP
+.BR \-c \fIpath\fB|\fIfile\fR
+Look for \fBphp.ini\fR file in the directory \fIpath\fR or use the specified \fIfile\fR
+.TP
+.BR \-z \fIfile\fR
+Load Zend extension \fIfile\fR
+.TP
+.BR \-d \fIfoo\fB[=\fIbar\fB]\fR
+Define INI entry \fIfoo\fR with value \fIbar\fR
+.PP The following switches change the default behaviour of phpdbg:
+.TP
+.BR \-v
+Disables quietness
+.TP
+.BR \-s
+Enabled stepping
+.TP
+.BR -e \fIfile\fR
+Sets execution context
+.TP
+.BR \-b
+Disables use of colour on the console
+.TP
+.BR \-I
+Ignore .phpdbginit (default init file)
+.TP
+.BR \-i \fIpath\fB|\ffile\fR
+Override .phpgdbinit location (implies -I)
+.TP
+.BR \-O \fIfile\fR
+Set oplog output to \fIfile\fR
+.TP
+.BR \-q
+Do not print banner on startup
+.TP
+.BR \-r
+Jump straight to run
+.TP
+.BR \-E
+Enable step through eval()
+.SH NOTES
+Passing -rr will cause phpdbg to quit after execution, rather than returning to the console
+.SH AUTHOR
+Written by Felipe Pena, Joe Watkins and Bob Weinand, formatted by Ondřej Surý for Debian project.

@@ -9,15 +9,9 @@
 #include <limits.h>
 
 #ifdef PHP_WIN32
-# include "win32/php_stdint.h"
 # define __alignof__ __alignof
 # define alloca _alloca
 #else
-# if HAVE_INTTYPES_H
-#  include <inttypes.h>
-# elif HAVE_STDINT_H
-#  include <stdint.h>
-# endif
 # ifndef HAVE_ALIGNOF
 #  include <stddef.h>
 #  define __alignof__(type) offsetof (struct { char c; type member;}, member)
@@ -126,7 +120,7 @@ static void sha256_process_block (const void *buffer, size_t len, struct sha256_
 	/* First increment the byte count.  FIPS 180-2 specifies the possible
 	 length of the file up to 2^64 bits.  Here we only compute the
 	 number of bytes.  Do a double word increment.  */
-	ctx->total[0] += len;
+	ctx->total[0] += (uint32_t)len;
 	if (ctx->total[0] < len) {
 		++ctx->total[1];
 	}
@@ -267,7 +261,7 @@ static void sha256_process_bytes(const void *buffer, size_t len, struct sha256_c
 		size_t add = 128 - left_over > len ? len : 128 - left_over;
 
 		  memcpy(&ctx->buffer[left_over], buffer, add);
-		  ctx->buflen += add;
+		  ctx->buflen += (uint32_t)add;
 
 		if (ctx->buflen > 64) {
 			sha256_process_block(ctx->buffer, ctx->buflen & ~63, ctx);
@@ -312,7 +306,7 @@ compilers don't.  */
 			left_over -= 64;
 			memcpy(ctx->buffer, &ctx->buffer[64], left_over);
 		}
-		ctx->buflen = left_over;
+		ctx->buflen = (uint32_t)left_over;
 	}
 }
 
@@ -378,7 +372,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	if (strncmp(salt, sha256_rounds_prefix, sizeof(sha256_rounds_prefix) - 1) == 0) {
 		const char *num = salt + sizeof(sha256_rounds_prefix) - 1;
 		char *endp;
-		unsigned long int srounds = strtoul(num, &endp, 10);
+		zend_ulong srounds = ZEND_STRTOUL(num, &endp, 10);
 		if (*endp == '$') {
 			salt = endp + 1;
 			rounds = MAX(ROUNDS_MIN, MIN(srounds, ROUNDS_MAX));
@@ -526,7 +520,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 
 	if (rounds_custom) {
 #ifdef PHP_WIN32
-		int n = _snprintf(cp, MAX(0, buflen), "%s%u$", sha256_rounds_prefix, rounds);
+		int n = _snprintf(cp, MAX(0, buflen), "%s" ZEND_ULONG_FMT "$", sha256_rounds_prefix, rounds);
 #else
 		int n = snprintf(cp, MAX(0, buflen), "%s%zu$", sha256_rounds_prefix, rounds);
 #endif
@@ -535,7 +529,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	}
 
 	cp = __php_stpncpy(cp, salt, MIN ((size_t) MAX (0, buflen), salt_len));
-	buflen -= MIN((size_t) MAX (0, buflen), salt_len);
+	buflen -= MIN(MAX (0, buflen), (int)salt_len);
 
 	if (buflen > 0) {
 		*cp++ = '$';
@@ -577,18 +571,17 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
      inside the SHA256 implementation as well.  */
 	sha256_init_ctx(&ctx);
 	sha256_finish_ctx(&ctx, alt_result);
-	memset(temp_result, '\0', sizeof(temp_result));
-	memset(p_bytes, '\0', key_len);
-	memset(s_bytes, '\0', salt_len);
-	memset(&ctx, '\0', sizeof(ctx));
-	memset(&alt_ctx, '\0', sizeof(alt_ctx));
+	ZEND_SECURE_ZERO(temp_result, sizeof(temp_result));
+	ZEND_SECURE_ZERO(p_bytes, key_len);
+	ZEND_SECURE_ZERO(s_bytes, salt_len);
+	ZEND_SECURE_ZERO(&ctx, sizeof(ctx));
+	ZEND_SECURE_ZERO(&alt_ctx, sizeof(alt_ctx));
 
 	if (copied_key != NULL) {
-		memset(copied_key, '\0', key_len);
-
+		ZEND_SECURE_ZERO(copied_key, key_len);
 	}
 	if (copied_salt != NULL) {
-		memset(copied_salt, '\0', salt_len);
+		ZEND_SECURE_ZERO(copied_salt, salt_len);
 	}
 
 	return buffer;
@@ -607,7 +600,7 @@ char * php_sha256_crypt(const char *key, const char *salt)
 	static int buflen;
 	int needed = (sizeof(sha256_salt_prefix) - 1
 			+ sizeof(sha256_rounds_prefix) + 9 + 1
-			+ strlen(salt) + 1 + 43 + 1);
+			+ (int)strlen(salt) + 1 + 43 + 1);
 
 	if (buflen < needed) {
 		char *new_buffer = (char *) realloc(buffer, needed);

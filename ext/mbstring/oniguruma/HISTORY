@@ -1,5 +1,24 @@
 History
 
+2013/10/21: Version 5.9.5
+
+2013/10/21: [impl] escape warnings for -Wall. (regparse.c)
+2013/10/21: [bug] fixes an issue on Windows x64. (thanks Anatoliy Belsky)
+                  The issue was discovered in PHP, see https://bugs.php.net/64769.
+2013/10/21: [impl] remove unused variable. (regcomp.c)
+
+2013/04/04: Version 5.9.4
+
+2013/04/04: [dev]  remove Makefile.in from git repository.
+2013/04/04: [dist] add oniguruma.pc.in file. (for pkg-config)
+                   (thanks Giulio Paci)
+
+2012/10/26: Version 5.9.3
+
+2012/10/15: remove warnings "test: =: unary operator expected" in ./configure.
+            (thanks t_okazaki)
+2012/10/15: fix print_tree ENCLOSE_OPTION bug. (thanks Suraj N. Kurapati)
+
 2010/01/09: Version 5.9.2
 
 2010/01/05: [bug]  fix utf16be_code_to_mbc() and utf16le_code_to_mbc().
@@ -878,7 +897,7 @@ History
 2004/10/18: [impl] (thanks Imai Yasumasa)
                    enclose #include <sys/types.h> by #ifndef __BORLANDC__.
 2004/10/18: [bug]  (thanks Imai Yasumasa)
-                   memory acess violation in select_opt_exact_info().
+                   memory access violation in select_opt_exact_info().
 2004/09/25: [dist] fix doc/API and doc/API.ja.
 2004/09/25: [bug]  fix OP_SEMI_END_BUF process in match_at() for
                    the case USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE
@@ -1812,7 +1831,7 @@ History
 2003/01/31: [impl] rename TTRANS() to TOLOWER().
 2003/01/30: [bug]  .c.o --> .c.obj in win32\Makefile.
 2003/01/30: [impl] add -DNOT_RUBY to Makefile.in.
-                   NOT_RUBY is refered in regint.h for escape double
+                   NOT_RUBY is referred in regint.h for escape double
                    including config.h.
 2003/01/30: [impl] when string hasn't case ambiguity, don't compile
                    to ignore case opcode.

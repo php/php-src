@@ -14,7 +14,7 @@ var_dump($t);
 string(10) "1278455908"
 object(DateTime)#1 (3) {
   ["date"]=>
-  string(19) "2010-07-06 18:38:28"
+  string(26) "2010-07-06 18:38:28.000000"
   ["timezone_type"]=>
   int(2)
   ["timezone"]=>

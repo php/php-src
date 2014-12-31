@@ -1,8 +1,8 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2013 The PHP Group                                |
+  | Copyright (c) 1997-2014 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -29,39 +29,39 @@ PHPAPI HashTable *php_stream_xport_get_hash(void)
 	return &xport_hash;
 }
 
-PHPAPI int php_stream_xport_register(char *protocol, php_stream_transport_factory factory TSRMLS_DC)
+PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory)
 {
-	return zend_hash_update(&xport_hash, protocol, strlen(protocol) + 1, &factory, sizeof(factory), NULL);
+	return zend_hash_str_update_ptr(&xport_hash, protocol, strlen(protocol), factory) ? SUCCESS : FAILURE;
 }
 
-PHPAPI int php_stream_xport_unregister(char *protocol TSRMLS_DC)
+PHPAPI int php_stream_xport_unregister(const char *protocol)
 {
-	return zend_hash_del(&xport_hash, protocol, strlen(protocol) + 1);
+	return zend_hash_str_del(&xport_hash, protocol, strlen(protocol));
 }
 
 #define ERR_REPORT(out_err, fmt, arg) \
-	if (out_err) { spprintf(out_err, 0, fmt, arg); } \
-	else { php_error_docref(NULL TSRMLS_CC, E_WARNING, fmt, arg); }
+	if (out_err) { *out_err = strpprintf(0, fmt, arg); } \
+	else { php_error_docref(NULL, E_WARNING, fmt, arg); }
 
 #define ERR_RETURN(out_err, local_err, fmt) \
 	if (out_err) { *out_err = local_err; } \
-	else { php_error_docref(NULL TSRMLS_CC, E_WARNING, fmt, local_err ? local_err : "Unspecified error"); \
-		if (local_err) { efree(local_err); local_err = NULL; } \
+	else { php_error_docref(NULL, E_WARNING, fmt, local_err ? local_err->val : "Unspecified error"); \
+		if (local_err) { zend_string_release(local_err); local_err = NULL; } \
 	}
 	
-PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int options,
+PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, int options,
 		int flags, const char *persistent_id,
 		struct timeval *timeout,
 		php_stream_context *context,
-		char **error_string,
+		zend_string **error_string,
 		int *error_code
-		STREAMS_DC TSRMLS_DC)
+		STREAMS_DC)
 {
 	php_stream *stream = NULL;
-	php_stream_transport_factory *factory = NULL;
+	php_stream_transport_factory factory = NULL;
 	const char *p, *protocol = NULL;
 	int n = 0, failed = 0;
-	char *error_text = NULL;
+	zend_string *error_text = NULL;
 	struct timeval default_timeout = { 0, 0 };
 	
 	default_timeout.tv_sec = FG(default_socket_timeout);
@@ -72,7 +72,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 	
 	/* check for a cached persistent socket */
 	if (persistent_id) {
-		switch(php_stream_from_persistent_id(persistent_id, &stream TSRMLS_CC)) {
+		switch(php_stream_from_persistent_id(persistent_id, &stream)) {
 			case PHP_STREAM_PERSISTENT_SUCCESS:
 				/* use a 0 second timeout when checking if the socket
 				 * has already died */
@@ -107,7 +107,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 
 	if (protocol) {
 		char *tmp = estrndup(protocol, n);
-		if (FAILURE == zend_hash_find(&xport_hash, (char*)tmp, n + 1, (void**)&factory)) {
+		if (NULL == (factory = zend_hash_str_find_ptr(&xport_hash, tmp, n))) {
 			char wrapper_name[32];
 
 			if (n >= sizeof(wrapper_name))
@@ -125,13 +125,13 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 
 	if (factory == NULL) {
 		/* should never happen */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not find a factory !?");
+		php_error_docref(NULL, E_WARNING, "Could not find a factory !?");
 		return NULL;
 	}
 
-	stream = (*factory)(protocol, n,
+	stream = (factory)(protocol, n,
 			(char*)name, namelen, persistent_id, options, flags, timeout,
-			context STREAMS_REL_CC TSRMLS_CC);
+			context STREAMS_REL_CC);
 
 	if (stream) {
 		php_stream_context_set(stream, context);
@@ -142,7 +142,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 			if (flags & (STREAM_XPORT_CONNECT|STREAM_XPORT_CONNECT_ASYNC)) {
 				if (-1 == php_stream_xport_connect(stream, name, namelen,
 							flags & STREAM_XPORT_CONNECT_ASYNC ? 1 : 0,
-							timeout, &error_text, error_code TSRMLS_CC)) {
+							timeout, &error_text, error_code)) {
 
 					ERR_RETURN(error_string, error_text, "connect() failed: %s");
 
@@ -153,24 +153,24 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 		} else {
 			/* server */
 			if (flags & STREAM_XPORT_BIND) {
-				if (0 != php_stream_xport_bind(stream, name, namelen, &error_text TSRMLS_CC)) {
+				if (0 != php_stream_xport_bind(stream, name, namelen, &error_text)) {
 					ERR_RETURN(error_string, error_text, "bind() failed: %s");
 					failed = 1;
 				} else if (flags & STREAM_XPORT_LISTEN) {
-					zval **zbacklog = NULL;
+					zval *zbacklog = NULL;
 					int backlog = 32;
 					
-					if (stream->context && php_stream_context_get_option(stream->context, "socket", "backlog", &zbacklog) == SUCCESS) {
-						zval *ztmp = *zbacklog;
+					if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
+						zval *ztmp = zbacklog;
 						
-						convert_to_long_ex(&ztmp);
+						convert_to_long_ex(ztmp);
 						backlog = Z_LVAL_P(ztmp);
-						if (ztmp != *zbacklog) {
-							zval_ptr_dtor(&ztmp);
+						if (ztmp != zbacklog) {
+							zval_ptr_dtor(ztmp);
 						}
 					}
 					
-					if (0 != php_stream_xport_listen(stream, backlog, &error_text TSRMLS_CC)) {
+					if (0 != php_stream_xport_listen(stream, backlog, &error_text)) {
 						ERR_RETURN(error_string, error_text, "listen() failed: %s");
 						failed = 1;
 					}
@@ -194,9 +194,9 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 
 /* Bind the stream to a local address */
 PHPAPI int php_stream_xport_bind(php_stream *stream,
-		const char *name, long namelen,
-		char **error_text
-		TSRMLS_DC)
+		const char *name, size_t namelen,
+		zend_string **error_text
+		)
 {
 	php_stream_xport_param param;
 	int ret;
@@ -222,12 +222,12 @@ PHPAPI int php_stream_xport_bind(php_stream *stream,
 
 /* Connect to a remote address */
 PHPAPI int php_stream_xport_connect(php_stream *stream,
-		const char *name, long namelen,
+		const char *name, size_t namelen,
 		int asynchronous,
 		struct timeval *timeout,
-		char **error_text,
+		zend_string **error_text,
 		int *error_code
-		TSRMLS_DC)
+		)
 {
 	php_stream_xport_param param;
 	int ret;
@@ -257,7 +257,7 @@ PHPAPI int php_stream_xport_connect(php_stream *stream,
 }
 
 /* Prepare to listen */
-PHPAPI int php_stream_xport_listen(php_stream *stream, int backlog, char **error_text TSRMLS_DC)
+PHPAPI int php_stream_xport_listen(php_stream *stream, int backlog, zend_string **error_text)
 {
 	php_stream_xport_param param;
 	int ret;
@@ -282,11 +282,11 @@ PHPAPI int php_stream_xport_listen(php_stream *stream, int backlog, char **error
 
 /* Get the next client and their address (as a string) */
 PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
-		char **textaddr, int *textaddrlen,
+		zend_string **textaddr,
 		void **addr, socklen_t *addrlen,
 		struct timeval *timeout,
-		char **error_text
-		TSRMLS_DC)
+		zend_string **error_text
+		)
 {
 	php_stream_xport_param param;
 	int ret;
@@ -309,7 +309,6 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 		}
 		if (textaddr) {
 			*textaddr = param.outputs.textaddr;
-			*textaddrlen = param.outputs.textaddrlen;
 		}
 		if (error_text) {
 			*error_text = param.outputs.error_text;
@@ -321,9 +320,9 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 }
 
 PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
-		char **textaddr, int *textaddrlen,
+		zend_string **textaddr,
 		void **addr, socklen_t *addrlen
-		TSRMLS_DC)
+		)
 {
 	php_stream_xport_param param;
 	int ret;
@@ -343,7 +342,6 @@ PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
 		}
 		if (textaddr) {
 			*textaddr = param.outputs.textaddr;
-			*textaddrlen = param.outputs.textaddrlen;
 		}
 
 		return param.outputs.returncode;
@@ -351,7 +349,7 @@ PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
 	return ret;
 }
 
-PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_crypt_method_t crypto_method, php_stream *session_stream TSRMLS_DC)
+PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_crypt_method_t crypto_method, php_stream *session_stream)
 {
 	php_stream_xport_crypto_param param;
 	int ret;
@@ -367,12 +365,12 @@ PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_cr
 		return param.outputs.returncode;
 	}
 
-	php_error_docref("streams.crypto" TSRMLS_CC, E_WARNING, "this stream does not support SSL/crypto");
+	php_error_docref("streams.crypto", E_WARNING, "this stream does not support SSL/crypto");
 	
 	return ret;
 }
 
-PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRMLS_DC)
+PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate)
 {
 	php_stream_xport_crypto_param param;
 	int ret;
@@ -387,7 +385,7 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRML
 		return param.outputs.returncode;
 	}
 
-	php_error_docref("streams.crypto" TSRMLS_CC, E_WARNING, "this stream does not support SSL/crypto");
+	php_error_docref("streams.crypto", E_WARNING, "this stream does not support SSL/crypto");
 	
 	return ret;
 }
@@ -395,8 +393,8 @@ PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate TSRML
 /* Similar to recv() system call; read data from the stream, optionally
  * peeking, optionally retrieving OOB data */
 PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t buflen,
-		long flags, void **addr, socklen_t *addrlen, char **textaddr, int *textaddrlen
-		TSRMLS_DC)
+		int flags, void **addr, socklen_t *addrlen, zend_string **textaddr
+		)
 {
 	php_stream_xport_param param;
 	int ret = 0;
@@ -409,7 +407,7 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 	}
 
 	if (stream->readfilters.head) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot peek or fetch OOB data from a filtered stream");
+		php_error_docref(NULL, E_WARNING, "cannot peek or fetch OOB data from a filtered stream");
 		return -1;
 	}
 	
@@ -455,7 +453,6 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 		}
 		if (textaddr) {
 			*textaddr = param.outputs.textaddr;
-			*textaddrlen = param.outputs.textaddrlen;
 		}
 		return recvd_len + param.outputs.returncode;
 	}
@@ -465,7 +462,7 @@ PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t bufle
 /* Similar to send() system call; send data to the stream, optionally
  * sending it as OOB data */
 PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t buflen,
-		long flags, void *addr, socklen_t addrlen TSRMLS_DC)
+		int flags, void *addr, socklen_t addrlen)
 {
 	php_stream_xport_param param;
 	int ret = 0;
@@ -480,7 +477,7 @@ PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t b
 	oob = (flags & STREAM_OOB) == STREAM_OOB;
 
 	if ((oob || addr) && stream->writefilters.head) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot write OOB data, or data to a targeted address on a filtered stream");
+		php_error_docref(NULL, E_WARNING, "cannot write OOB data, or data to a targeted address on a filtered stream");
 		return -1;
 	}
 	
@@ -504,7 +501,7 @@ PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t b
 
 /* Similar to shutdown() system call; shut down part of a full-duplex
  * connection */
-PHPAPI int php_stream_xport_shutdown(php_stream *stream, stream_shutdown_t how TSRMLS_DC)
+PHPAPI int php_stream_xport_shutdown(php_stream *stream, stream_shutdown_t how)
 {
 	php_stream_xport_param param;
 	int ret = 0;

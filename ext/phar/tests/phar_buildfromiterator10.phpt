@@ -11,7 +11,7 @@ phar.readonly=0
 <?php
 try {
 	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar');
+	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator10.phar');
 	$dir = new RecursiveDirectoryIterator('.');
 	$iter = new RecursiveIteratorIterator($dir);
 	$a = $phar->buildFromIterator(new RegexIterator($iter, '/_\d{3}\.phpt$/'), dirname(__FILE__) . DIRECTORY_SEPARATOR);
@@ -25,7 +25,7 @@ try {
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/buildfromiterator.phar');
+unlink(dirname(__FILE__) . '/buildfromiterator10.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--

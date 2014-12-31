@@ -1,5 +1,5 @@
 --TEST--
-Test function gzfile() by substituting agument 2 with array values.
+Test function gzfile() by substituting argument 2 with array values.
 --SKIPIF--
 <?php
 if (!extension_loaded('zlib')) die ('skip zlib extension not available in this build');
@@ -29,15 +29,15 @@ foreach ( $variation as $var ) {
 ===DONE===
 --EXPECTF--
 
-Warning: gzfile() expects parameter 2 to be long, array given in %s on line %d
+Warning: gzfile() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
-Warning: gzfile() expects parameter 2 to be long, array given in %s on line %d
+Warning: gzfile() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
-Warning: gzfile() expects parameter 2 to be long, array given in %s on line %d
+Warning: gzfile() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 
-Warning: gzfile() expects parameter 2 to be long, array given in %s on line %d
+Warning: gzfile() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 ===DONE===

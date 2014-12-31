@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,13 +42,12 @@ static void php_dba_db4_errcall_fcn(
 #endif
 	const char *errpfx, const char *msg)
 {
-	TSRMLS_FETCH();
 
 #if (DB_VERSION_MAJOR == 5 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR == 8))
 /* Bug 51086, Berkeley DB 4.8.26 */
 /* This code suppresses a BDB 4.8+ error message, thus keeping PHP test compatibility */
 	{
-		const char *function = get_active_function_name(TSRMLS_C);
+		const char *function = get_active_function_name();
 		if (function && (!strcmp(function,"dba_popen") || !strcmp(function,"dba_open"))
 			&& (!strncmp(msg, "fop_read_meta", sizeof("fop_read_meta")-1)
 				|| !strncmp(msg, "BDB0004 fop_read_meta", sizeof("BDB0004 fop_read_meta")-1))) {
@@ -57,7 +56,7 @@ static void php_dba_db4_errcall_fcn(
 	}
 #endif
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
+	php_error_docref(NULL, E_NOTICE, "%s%s", errpfx?errpfx:"", msg);
 }
 
 #define DB4_DATA dba_db4_data *dba = info->dbf
@@ -118,8 +117,8 @@ DBA_OPEN_FUNC(db4)
 	}
 
 	if (info->argc > 0) {
-		convert_to_long_ex(info->argv[0]);
-		filemode = Z_LVAL_PP(info->argv[0]);
+		convert_to_long_ex(&info->argv[0]);
+		filemode = Z_LVAL(info->argv[0]);
 	}
 
 	if ((err=db_create(&dbp, NULL, 0)) == 0) {
@@ -239,7 +238,7 @@ DBA_FIRSTKEY_FUNC(db4)
 	}
 
 	/* we should introduce something like PARAM_PASSTHRU... */
-	return dba_nextkey_db4(info, newlen TSRMLS_CC);
+	return dba_nextkey_db4(info, newlen);
 }
 
 DBA_NEXTKEY_FUNC(db4)

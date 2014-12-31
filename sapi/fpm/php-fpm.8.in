@@ -84,6 +84,13 @@ Version number
 Specify alternative prefix path (the default is @php_fpm_prefix@)
 .TP
 .PD 0
+.B \-\-pid \fIfile\fP
+.TP
+.PD 1
+.B \-g
+Specify the PID file location.
+.TP
+.PD 0
 .B \-\-fpm\-config \fIfile\fP
 .TP
 .PD 1
@@ -96,7 +103,7 @@ Specify alternative path to FastCGI process manager configuration file (the defa
 .PD 1
 .B \-t
 Test FPM configuration file and exit
-If called twice (-tt), the configuration is dumped before exiting.
+If called twice (\-tt), the configuration is dumped before exiting.
 .TP
 .PD 0
 .B \-\-daemonize
@@ -113,12 +120,18 @@ Force to run in background and ignore daemonize option from configuration file.
 Force to stay in foreground and ignore daemonize option from configuration file.
 .TP
 .PD 0
-.B \-\-zend\-extension \fIfile\fP
+.B \-\-force-stderr
 .TP
 .PD 1
-.B \-z \fIfile\fP
-Load Zend extension 
-.IR file
+.B \-O
+Force output to stderr in nodaemonize even if stderr is not a TTY.
+.TP
+.PD 0
+.B \-\-allow\-to\-run\-as\-root
+.TP
+.PD 1
+.B \-R
+Allow pool to run as root (disabled by default)
 .SH FILES
 .TP 15
 .B php-fpm.conf

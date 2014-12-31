@@ -36,8 +36,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(WIN32)
 #  include "ext/mysqlnd/config-win.h"
-#else 
-#  include <ext/mysqlnd/php_mysqlnd_config.h>
 #endif /* _WIN32... */
 
 #if __STDC_VERSION__ < 199901L && !defined(atoll)
@@ -45,14 +43,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
   #define atoll atol
 #endif
 
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
+#include "php_stdint.h"
 
 #if SIZEOF_LONG_LONG > 4 && !defined(_LONG_LONG)
 #define _LONG_LONG 1        /* For AIX string library */
@@ -69,102 +60,6 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #if SIZEOF_LONG_LONG > 4
 #define HAVE_LONG_LONG 1
 #endif
-
-
-/* Typdefs for easyier portability */
-#ifndef HAVE_INT8_T
-#ifndef HAVE_INT8
-typedef signed char int8_t;			/* Signed integer >= 8    bits */
-#else
-typedef int8 int8_t;				/* Signed integer >= 8    bits */
-#endif
-#endif
-
-#ifndef HAVE_UINT8_T
-#ifndef HAVE_UINT8
-typedef unsigned char uint8_t;		/* Unsigned integer >= 8    bits */
-#else
-typedef uint8 uint8_t;				/* Signed integer >= 8    bits */
-#endif
-#endif
-
-#ifndef HAVE_INT16_T
-#ifndef HAVE_INT16
-typedef signed short int16_t;		/* Signed integer >= 16 bits */
-#else
-typedef int16 int16_t;				/* Signed integer >= 16 bits */
-#endif
-#endif
-
-#ifndef HAVE_UINT16_T
-#ifndef HAVE_UINT16
-typedef unsigned short uint16_t;		/* Signed integer >= 16 bits */
-#else
-typedef uint16 uint16_t;			/* Signed integer >= 16 bits */
-#endif
-#endif
-
-
-#ifndef HAVE_INT32_T
-#ifdef HAVE_INT32
-typedef int32 int32_t;
-#elif SIZEOF_INT == 4
-typedef signed int int32_t;
-#elif SIZEOF_LONG == 4
-typedef signed long int32_t;
-#else
-error "Neither int nor long is of 4 bytes width"
-#endif
-#endif /* HAVE_INT32_T */
-
-#ifndef HAVE_UINT32_T
-#ifdef HAVE_UINT32
-typedef uint32 uint32_t;
-#elif SIZEOF_INT == 4
-typedef unsigned int uint32_t;
-#elif SIZEOF_LONG == 4
-typedef unsigned long uint32_t;
-#else
-#error "Neither int nor long is of 4 bytes width"
-#endif
-#endif /* HAVE_UINT32_T */
-
-#ifndef HAVE_INT64_T
-#ifdef HAVE_INT64
-typedef int64 int64_t;
-#elif SIZEOF_INT == 8
-typedef signed int int64_t;
-#elif SIZEOF_LONG == 8
-typedef signed long int64_t;
-#elif SIZEOF_LONG_LONG == 8
-#ifdef PHP_WIN32
-typedef __int64 int64_t;
-#else
-typedef signed long long int64_t;
-#endif
-#else
-#error "Neither int nor long nor long long is of 8 bytes width"
-#endif
-#endif /* HAVE_INT64_T */
-
-#ifndef HAVE_UINT64_T
-#ifdef HAVE_UINT64
-typedef uint64 uint64_t;
-#elif SIZEOF_INT == 8
-typedef unsigned int uint64_t;
-#elif SIZEOF_LONG == 8
-typedef unsigned long uint64_t;
-#elif SIZEOF_LONG_LONG == 8
-#ifdef PHP_WIN32
-typedef unsigned __int64 uint64_t;
-#else
-typedef unsigned long long uint64_t;
-#endif
-#else
-#error "Neither int nor long nor long long is of 8 bytes width"
-#endif
-#endif /* HAVE_INT64_T */
-
 
 #ifdef PHP_WIN32
 #define MYSQLND_LLU_SPEC "%I64u"
@@ -299,13 +194,13 @@ typedef unsigned long long uint64_t;
                    (((uint32_t) (zend_uchar) (A)[2]) << 16) |\
                    (((uint32_t) (zend_uchar) (A)[1]) << 8) | \
                     ((uint32_t) (zend_uchar) (A)[0])))
-#define sint4korr(A)  (*((long *) (A)))
+#define sint4korr(A)  (*((zend_long *) (A)))
 
 #define uint2korr(A)  (*((uint16_t *) (A)))
 #define uint3korr(A)  (uint32_t) (((uint32_t) ((zend_uchar) (A)[0])) +\
                                (((uint32_t) ((zend_uchar) (A)[1])) << 8) +\
                                (((uint32_t) ((zend_uchar) (A)[2])) << 16))
-#define uint4korr(A)  (*((unsigned long *) (A)))
+#define uint4korr(A)  (*((zend_ulong *) (A)))
 
 
 
@@ -316,7 +211,7 @@ typedef unsigned long long uint64_t;
                   *(T)=  (zend_uchar) ((A));\
                   *(T+1)=(zend_uchar) (((uint32_t) (A) >> 8));\
                   *(T+2)=(zend_uchar) (((A) >> 16)); }
-#define int4store(T,A)    *((long *) (T))= (long) (A)
+#define int4store(T,A)    *((zend_long *) (T))= (zend_long) (A)
 #define int5store(T,A)    { \
               *((zend_uchar *)(T))= (zend_uchar)((A));\
               *(((zend_uchar *)(T))+1)=(zend_uchar) (((A) >> 8));\
@@ -337,12 +232,12 @@ typedef unsigned long long uint64_t;
 
 typedef union {
   double v;
-  long m[2];
+  zend_long m[2];
 } float8get_union;
-#define float8get(V,M)    { ((float8get_union *)&(V))->m[0] = *((long*) (M)); \
-                            ((float8get_union *)&(V))->m[1] = *(((long*) (M))+1); }
-#define float8store(T,V) { *((long *) (T))     = ((float8get_union *)&(V))->m[0]; \
-                           *(((long *) (T))+1) = ((float8get_union *)&(V))->m[1]; }
+#define float8get(V,M)    { ((float8get_union *)&(V))->m[0] = *((zend_long*) (M)); \
+                            ((float8get_union *)&(V))->m[1] = *(((zend_long*) (M))+1); }
+#define float8store(T,V) { *((zend_long *) (T))     = ((float8get_union *)&(V))->m[0]; \
+                           *(((zend_long *) (T))+1) = ((float8get_union *)&(V))->m[1]; }
 #define float4get(V,M)	{ *((float *) &(V)) = *((float*) (M)); }
 /* From Andrey Hristov based on float8get */
 #define floatget(V,M)    memcpy((char*) &(V),(char*) (M),sizeof(float))

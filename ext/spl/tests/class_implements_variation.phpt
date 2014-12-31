@@ -16,8 +16,8 @@ var_dump(class_implements(new fs));
 var_dump(class_implements('fs'));
 
 echo "\n--- testing autoload ---\n";
-var_dump(class_implements('non-existent'));
-var_dump(class_implements('non-existent2', false));
+var_dump(class_implements('non_existent'));
+var_dump(class_implements('non_existent2', false));
 
 
 function __autoload($classname) {
@@ -35,11 +35,11 @@ array(0) {
 }
 
 --- testing autoload ---
-attempting to autoload non-existent
+attempting to autoload non_existent
 
-Warning: class_implements(): Class non-existent does not exist and could not be loaded in %s on line %d
+Warning: class_implements(): Class non_existent does not exist and could not be loaded in %s on line %d
 bool(false)
 
-Warning: class_implements(): Class non-existent2 does not exist in %s on line %d
+Warning: class_implements(): Class non_existent2 does not exist in %s on line %d
 bool(false)
 ===DONE===

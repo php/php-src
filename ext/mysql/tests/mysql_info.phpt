@@ -46,7 +46,9 @@ if (!$res = mysql_query("UPDATE test SET label = 'b' WHERE id >= 100", $link))
 if (!is_string($tmp = mysql_info($link)) || ('' == $tmp))
 	printf("[012] Expecting string/any_non_empty, got %s/%s\n", gettype($tmp), $tmp);
 
-if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) && !is_unicode($tmp)) {
+if ((version_compare(PHP_VERSION, '5.9.9', '>') == 1) &&
+    (version_compare(PHP_VERSION, '6.9.9', '<=') == 1) &&
+    !is_unicode($tmp)) {
 	printf("[013] Expecting Unicode!\n");
 	var_inspect($info);
 }

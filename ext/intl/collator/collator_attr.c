@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,16 +33,16 @@
  */
 PHP_FUNCTION( collator_get_attribute )
 {
-	long attribute, value;
+	zend_long attribute, value;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &attribute ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"collator_get_attribute: unable to parse input params", 0 TSRMLS_CC );
+			"collator_get_attribute: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -64,16 +64,16 @@ PHP_FUNCTION( collator_get_attribute )
  */
 PHP_FUNCTION( collator_set_attribute )
 {
-	long attribute, value;
+	zend_long attribute, value;
 	COLLATOR_METHOD_INIT_VARS
 
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oll",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oll",
 		&object, Collator_ce_ptr, &attribute, &value ) == FAILURE)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "collator_set_attribute: unable to parse input params", 0 TSRMLS_CC );
+			 "collator_set_attribute: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -99,11 +99,11 @@ PHP_FUNCTION( collator_get_strength )
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "collator_get_strength: unable to parse input params", 0 TSRMLS_CC );
+			 "collator_get_strength: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -123,16 +123,16 @@ PHP_FUNCTION( collator_get_strength )
  */
 PHP_FUNCTION( collator_set_strength )
 {
-	long strength;
+	zend_long strength;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ol",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &strength ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			 "collator_set_strength: unable to parse input params", 0 TSRMLS_CC );
+			 "collator_set_strength: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}

@@ -60,7 +60,7 @@ if test "$PHP_APACHE_HOOKS" != "no"; then
   # Test that we're trying to configure with apache 1.x
   PHP_AP_EXTRACT_VERSION($APXS_HTTPD)
   if test "$APACHE_VERSION" -ge 2000000; then
-    AC_MSG_ERROR([You have enabled Apache 1.3 support while your server is Apache 2.  Please use the appropiate switch --with-apxs2]) 
+    AC_MSG_ERROR([You have enabled Apache 1.3 support while your server is Apache 2.  Please use the appropriate switch --with-apxs2]) 
   fi
 
   for flag in $APXS_CFLAGS; do
@@ -79,7 +79,7 @@ if test "$PHP_APACHE_HOOKS" != "no"; then
   *darwin*)
     MH_BUNDLE_FLAGS="-dynamic -twolevel_namespace -bundle -bundle_loader $APXS_HTTPD"
     PHP_SUBST(MH_BUNDLE_FLAGS)
-    SAPI_SHARED=libs/libphp5.so
+    SAPI_SHARED=libs/libphp7.so
     build_type=bundle
     ;;
   *)
@@ -87,26 +87,26 @@ if test "$PHP_APACHE_HOOKS" != "no"; then
     ;;
   esac
 
-  PHP_SELECT_SAPI(apache_hooks, $build_type, sapi_apache.c mod_php5.c php_apache.c, $APACHE_CPPFLAGS -I$APXS_INCLUDEDIR)
+  PHP_SELECT_SAPI(apache_hooks, $build_type, sapi_apache.c mod_php7.c php_apache.c, $APACHE_CPPFLAGS -I$APXS_INCLUDEDIR)
 
   # Test whether apxs support -S option
   $APXS -q -S CFLAGS="$APXS_CFLAGS" CFLAGS >/dev/null 2>&1
 
   if test "$?" != "0"; then
-    APACHE_HOOKS_INSTALL="$APXS -i -a -n php5 $SAPI_SHARED" # Old apxs does not have -S option
+    APACHE_HOOKS_INSTALL="$APXS -i -a -n php7 $SAPI_SHARED" # Old apxs does not have -S option
   else 
     APXS_LIBEXECDIR='$(INSTALL_ROOT)'`$APXS -q LIBEXECDIR`
     if test -z `$APXS -q SYSCONFDIR`; then
       APACHE_HOOKS_INSTALL="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                        $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
-                             -i -n php5 $SAPI_SHARED"
+                             -i -n php7 $SAPI_SHARED"
     else
       APXS_SYSCONFDIR='$(INSTALL_ROOT)'`$APXS -q SYSCONFDIR`
       APACHE_HOOKS_INSTALL="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                       \$(mkinstalldirs) '$APXS_SYSCONFDIR' && \
                        $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
                              -S SYSCONFDIR='$APXS_SYSCONFDIR' \
-                             -i -a -n php5 $SAPI_SHARED"
+                             -i -a -n php7 $SAPI_SHARED"
     fi
   fi
 
@@ -137,7 +137,7 @@ if test "$PHP_SAPI" != "apache" && test "$PHP_SAPI" != "apache_hooks" && test "$
     PHP_APACHE_HOOKS_STATIC=/usr/local/apache
   fi
 
-  APACHE_HOOKS_INSTALL_FILES="\$(srcdir)/sapi/apache_hooks/mod_php5.* sapi/apache_hooks/libphp5.module"
+  APACHE_HOOKS_INSTALL_FILES="\$(srcdir)/sapi/apache_hooks/mod_php7.* sapi/apache_hooks/libphp7.module"
 
   AC_DEFINE(HAVE_APACHE,1,[ ])
   APACHE_HOOKS_MODULE=yes
@@ -146,7 +146,7 @@ if test "$PHP_SAPI" != "apache" && test "$PHP_SAPI" != "apache_hooks" && test "$
   if test -f $PHP_APACHE_HOOKS_STATIC/src/httpd.h; then 
     APACHE_INCLUDE=-I$PHP_APACHE_HOOKS_STATIC/src
     APACHE_TARGET=$PHP_APACHE_HOOKS_STATIC/src
-    PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
+    PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php7.c php_apache.c, $APACHE_INCLUDE)
     APACHE_HOOKS_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_HOOKS_INSTALL_FILES $APACHE_TARGET"
     PHP_LIBS="-L. -lphp3"
     AC_MSG_RESULT([yes - Apache 1.2.x])
@@ -161,13 +161,13 @@ if test "$PHP_SAPI" != "apache" && test "$PHP_SAPI" != "apache_hooks" && test "$
   elif test -f $PHP_APACHE_HOOKS_STATIC/src/main/httpd.h; then
     APACHE_HAS_REGEX=1
     APACHE_INCLUDE="-I$PHP_APACHE_HOOKS_STATIC/src/main -I$PHP_APACHE_HOOKS_STATIC/src/os/unix -I$PHP_APACHE_HOOKS_STATIC/src/ap"
-    APACHE_TARGET=$PHP_APACHE_HOOKS_STATIC/src/modules/php5
+    APACHE_TARGET=$PHP_APACHE_HOOKS_STATIC/src/modules/php7
     if test ! -d $APACHE_TARGET; then
       mkdir $APACHE_TARGET
     fi
-    PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
-    APACHE_HOOKS_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp5.a; cp $APACHE_HOOKS_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache_hooks/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache_hooks/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-    PHP_LIBS="-Lmodules/php5 -L../modules/php5 -L../../modules/php5 -lmodphp5"
+    PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php7.c php_apache.c, $APACHE_INCLUDE)
+    APACHE_HOOKS_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp7.a; cp $APACHE_HOOKS_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache_hooks/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache_hooks/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
+    PHP_LIBS="-Lmodules/php7 -L../modules/php7 -L../../modules/php7 -lmodphp7"
     AC_MSG_RESULT([yes - Apache 1.3.x])
     STRONGHOLD=
     if test -f $PHP_APACHE_HOOKS_STATIC/src/include/ap_config.h; then
@@ -185,13 +185,13 @@ if test "$PHP_SAPI" != "apache" && test "$PHP_SAPI" != "apache_hooks" && test "$
   elif test -f $PHP_APACHE_HOOKS_STATIC/src/include/httpd.h; then
     APACHE_HAS_REGEX=1
     APACHE_INCLUDE="-I$PHP_APACHE_HOOKS_STATIC/src/include -I$PHP_APACHE_HOOKS_STATIC/src/os/unix"
-    APACHE_TARGET=$PHP_APACHE_HOOKS_STATIC/src/modules/php5
+    APACHE_TARGET=$PHP_APACHE_HOOKS_STATIC/src/modules/php7
     if test ! -d $APACHE_TARGET; then
       mkdir $APACHE_TARGET
     fi
-    PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
-    PHP_LIBS="-Lmodules/php5 -L../modules/php5 -L../../modules/php5 -lmodphp5"
-    APACHE_HOOKS_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp5.a; cp $APACHE_HOOKS_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache_hooks/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache_hooks/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
+    PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php7.c php_apache.c, $APACHE_INCLUDE)
+    PHP_LIBS="-Lmodules/php7 -L../modules/php7 -L../../modules/php7 -lmodphp7"
+    APACHE_HOOKS_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp7.a; cp $APACHE_HOOKS_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache_hooks/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache_hooks/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
     AC_MSG_RESULT([yes - Apache 1.3.x])
     STRONGHOLD=
     if test -f $PHP_APACHE_HOOKS_STATIC/src/include/ap_config.h; then
@@ -209,9 +209,9 @@ if test "$PHP_SAPI" != "apache" && test "$PHP_SAPI" != "apache_hooks" && test "$
   elif test -f $PHP_APACHE_HOOKS_STATIC/apache/httpd.h; then
     APACHE_INCLUDE="-I$PHP_APACHE_HOOKS_STATIC/apache -I$PHP_APACHE_HOOKS_STATIC/ssl/include"
     APACHE_TARGET=$PHP_APACHE_HOOKS_STATIC/apache
-    PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
-    PHP_LIBS="-Lmodules/php5 -L../modules/php5 -L../../modules/php5 -lmodphp5"
-    APACHE_HOOKS_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp5.a; cp $APACHE_HOOKS_INSTALL_FILES $APACHE_TARGET"
+    PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php7.c php_apache.c, $APACHE_INCLUDE)
+    PHP_LIBS="-Lmodules/php7 -L../modules/php7 -L../../modules/php7 -lmodphp7"
+    APACHE_HOOKS_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp7.a; cp $APACHE_HOOKS_INSTALL_FILES $APACHE_TARGET"
     STRONGHOLD=-DSTRONGHOLD=1
     AC_MSG_RESULT([yes - StrongHold])
     if test -f $PHP_APACHE_HOOKS_STATIC/apache/ap_config.h; then
@@ -239,7 +239,7 @@ if test -z "$enable_mod_charset" && test "$with_mod_charset"; then
 fi
 
 PHP_ARG_ENABLE(mod-charset, whether to enable Apache charset compatibility option,
-[  --enable-mod-charset      APACHE (hooks): Enable transfer tables for mod_charset (Rus Apache)], no, no)
+[  --enable-mod-charset    APACHE (hooks): Enable transfer tables for mod_charset (Rus Apache)], no, no)
 
 if test "$PHP_MOD_CHARSET" = "yes"; then
   AC_DEFINE(USE_TRANSFER_TABLES, 1, [ ])
@@ -249,13 +249,13 @@ dnl Build as static module
 if test "$APACHE_HOOKS_MODULE" = "yes"; then
   PHP_TARGET_RDYNAMIC
   $php_shtool mkdir -p sapi/apache_hooks
-  PHP_OUTPUT(sapi/apache_hooks/libphp5.module)
+  PHP_OUTPUT(sapi/apache_hooks/libphp7.module)
 fi
 
 dnl General
 if test -n "$APACHE_HOOKS_INSTALL"; then
   if test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
-    APXS_EXP=-bE:sapi/apache_hooks/mod_php5.exp
+    APXS_EXP=-bE:sapi/apache_hooks/mod_php7.exp
   fi
 
   PHP_APACHE_FD_CHECK

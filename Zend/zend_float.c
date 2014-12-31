@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -22,7 +22,7 @@
 #include "zend_compile.h"
 #include "zend_float.h"
 
-ZEND_API void zend_init_fpu(TSRMLS_D) /* {{{ */
+ZEND_API void zend_init_fpu(void) /* {{{ */
 {
 #if XPFPA_HAVE_CW
 	XPFPA_DECLARE
@@ -38,7 +38,7 @@ ZEND_API void zend_init_fpu(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_shutdown_fpu(TSRMLS_D) /* {{{ */
+ZEND_API void zend_shutdown_fpu(void) /* {{{ */
 {
 #if XPFPA_HAVE_CW
 	if (EG(saved_fpu_cw_ptr)) {
@@ -49,7 +49,7 @@ ZEND_API void zend_shutdown_fpu(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_ensure_fpu_mode(TSRMLS_D) /* {{{ */
+ZEND_API void zend_ensure_fpu_mode(void) /* {{{ */
 {
 	XPFPA_DECLARE
 	

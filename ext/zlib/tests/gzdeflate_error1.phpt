@@ -81,6 +81,6 @@ bool(false)
 Warning: gzdeflate() expects parameter 1 to be string, object given in %s on line %d
 NULL
 
-Warning: gzdeflate() expects parameter 2 to be long, object given in %s on line %d
+Warning: gzdeflate() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 ===Done===

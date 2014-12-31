@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -221,12 +221,12 @@ void timelib_dump_tzinfo(timelib_tzinfo *tz)
 	printf("Geo Location:      %f,%f\n", tz->location.latitude, tz->location.longitude);
 	printf("Comments:\n%s\n",          tz->location.comments);
 	printf("BC:                %s\n",  tz->bc ? "" : "yes");
-	printf("UTC/Local count:   %lu\n", (unsigned long) tz->ttisgmtcnt);
-	printf("Std/Wall count:    %lu\n", (unsigned long) tz->ttisstdcnt);
-	printf("Leap.sec. count:   %lu\n", (unsigned long) tz->leapcnt);
-	printf("Trans. count:      %lu\n", (unsigned long) tz->timecnt);
-	printf("Local types count: %lu\n", (unsigned long) tz->typecnt);
-	printf("Zone Abbr. count:  %lu\n", (unsigned long) tz->charcnt);
+	printf("UTC/Local count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->ttisgmtcnt);
+	printf("Std/Wall count:    " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->ttisstdcnt);
+	printf("Leap.sec. count:   " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->leapcnt);
+	printf("Trans. count:      " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->timecnt);
+	printf("Local types count: " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->typecnt);
+	printf("Zone Abbr. count:  " TIMELIB_ULONG_FMT "\n", (timelib_ulong) tz->charcnt);
 
 	printf ("%8s (%12s) = %3d [%5ld %1d %3d '%s' (%d,%d)]\n",
 		"", "", 0,
@@ -336,7 +336,7 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 {
 	uint32_t i;
 
-	/* If there is no transistion time, we pick the first one, if that doesn't
+	/* If there is no transition time, we pick the first one, if that doesn't
 	 * exist we return NULL */
 	if (!tz->timecnt || !tz->trans) {
 		*transition_time = 0;
@@ -346,8 +346,8 @@ static ttinfo* fetch_timezone_offset(timelib_tzinfo *tz, timelib_sll ts, timelib
 		return NULL;
 	}
 
-	/* If the TS is lower than the first transistion time, then we scan over
-	 * all the transistion times to find the first non-DST one, or the first
+	/* If the TS is lower than the first transition time, then we scan over
+	 * all the transition times to find the first non-DST one, or the first
 	 * one in case there are only DST entries. Not sure which smartass came up
 	 * with this idea in the first though :) */
 	if (ts < tz->trans[0]) {

@@ -63,18 +63,21 @@ Arguments:
 Returns:           0 if data returned, negative on error
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_config(int what, void *where)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre16_config(int what, void *where)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre32_config(int what, void *where)
 #endif
 {
 switch (what)
   {
   case PCRE_CONFIG_UTF8:
-#if defined COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
   *((int *)where) = 0;
   return PCRE_ERROR_BADOPTION;
 #else
@@ -87,7 +90,20 @@ switch (what)
 #endif
 
   case PCRE_CONFIG_UTF16:
-#if defined COMPILE_PCRE8
+#if defined COMPILE_PCRE8 || defined COMPILE_PCRE32
+  *((int *)where) = 0;
+  return PCRE_ERROR_BADOPTION;
+#else
+#if defined SUPPORT_UTF
+  *((int *)where) = 1;
+#else
+  *((int *)where) = 0;
+#endif
+  break;
+#endif
+
+  case PCRE_CONFIG_UTF32:
+#if defined COMPILE_PCRE8 || defined COMPILE_PCRE16
   *((int *)where) = 0;
   return PCRE_ERROR_BADOPTION;
 #else
@@ -141,6 +157,10 @@ switch (what)
 
   case PCRE_CONFIG_POSIX_MALLOC_THRESHOLD:
   *((int *)where) = POSIX_MALLOC_THRESHOLD;
+  break;
+
+  case PCRE_CONFIG_PARENS_LIMIT:
+  *((unsigned long int *)where) = PARENS_NEST_LIMIT;
   break;
 
   case PCRE_CONFIG_MATCH_LIMIT:

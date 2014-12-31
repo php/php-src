@@ -3,7 +3,7 @@ PostgreSQL pg_update()
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_server_version('8.5dev', '>=');
+skip_bytea_not_escape();
 ?>
 --FILE--
 <?php
@@ -17,9 +17,10 @@ $ids = array('num'=>'1234');
 
 pg_update($db, $table_name, $fields, $ids) or print "Error in test 1\n";
 echo pg_update($db, $table_name, $fields, $ids, PGSQL_DML_STRING)."\n";
+echo pg_update($db, $table_name, $fields, $ids, PGSQL_DML_STRING|PGSQL_DML_ESCAPE)."\n";
 
 echo "Ok\n";
 ?>
 --EXPECT--
-UPDATE php_pgsql_test SET num=1234,str='ABC',bin='XYZ' WHERE num=1234;
+UPDATE "php_pgsql_test" SET "num"=1234,"str"=E'ABC',"bin"=E'XYZ' WHERE "num"=1234;
 Ok

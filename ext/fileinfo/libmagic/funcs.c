@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: funcs.c,v 1.60 2011/12/08 12:38:24 rrt Exp $")
+FILE_RCSID("@(#)$File: funcs.c,v 1.68 2014/02/18 11:09:31 kim Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -41,20 +41,23 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.60 2011/12/08 12:38:24 rrt Exp $")
 #if defined(HAVE_WCTYPE_H)
 #include <wctype.h>
 #endif
+#if defined(HAVE_LOCALE_H)
+#include <locale.h>
+#endif
 
-#ifndef SIZE_MAX 
+#ifndef SIZE_MAX
 # define SIZE_MAX ((size_t) -1) 
 #endif
+
+#include "php.h"
+#include "main/php_network.h"
 
 #ifndef PREG_OFFSET_CAPTURE
 # define PREG_OFFSET_CAPTURE                 (1<<8)
 #endif
 
-extern public void convert_libmagic_pattern(zval *pattern, int options);
+extern public void convert_libmagic_pattern(zval *pattern, char *val, int len, int options);
 
-/*
- * Like printf, only we append to a buffer.
- */
 protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {
@@ -168,30 +171,25 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 	size_t ulen;
 	const char *code = NULL;
 	const char *code_mime = "binary";
-	const char *type = NULL;
-
-
+	const char *type = "application/octet-stream";
+	const char *def = "data";
+	const char *ftype = NULL;
 
 	if (nb == 0) {
-		if ((!mime || (mime & MAGIC_MIME_TYPE)) &&
-		    file_printf(ms, mime ? "application/x-empty" :
-		    "empty") == -1)
-			return -1;
-		return 1;
+		def = "empty";
+		type = "application/x-empty";
+		goto simple;
 	} else if (nb == 1) {
-		if ((!mime || (mime & MAGIC_MIME_TYPE)) &&
-		    file_printf(ms, mime ? "application/octet-stream" :
-		    "very short file (no magic)") == -1)
-			return -1;
-		return 1;
+		def = "very short file (no magic)";
+		goto simple;
 	}
 
 	if ((ms->flags & MAGIC_NO_CHECK_ENCODING) == 0) {
 		looks_text = file_encoding(ms, ubuf, nb, &u8buf, &ulen,
-		    &code, &code_mime, &type);
+		    &code, &code_mime, &ftype);
 	}
 
-#if defined(__EMX__)
+#ifdef __EMX__
 	if ((ms->flags & MAGIC_NO_CHECK_APPTYPE) == 0 && inname) {
 		switch (file_os2_apptype(ms, inname, buf, nb)) {
 		case -1:
@@ -209,7 +207,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 		if ((m = file_zmagic(ms, stream, inname, ubuf, nb)) != 0) {
 			if ((ms->flags & MAGIC_DEBUG) != 0)
 				(void)fprintf(stderr, "zmagic %d\n", m);
-			goto done;
+			goto done_encoding;
 		}
 #endif
 	/* Check if we have a tar file */
@@ -222,9 +220,8 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 
 	/* Check if we have a CDF file */
 	if ((ms->flags & MAGIC_NO_CHECK_CDF) == 0) {
-		int fd;
-		TSRMLS_FETCH();
-		if (stream && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0)) {
+		php_socket_t fd;
+			if (stream && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&fd, 0)) {
 			if ((m = file_trycdf(ms, fd, ubuf, nb)) != 0) {
 				if ((ms->flags & MAGIC_DEBUG) != 0)
 					(void)fprintf(stderr, "cdf %d\n", m);
@@ -235,7 +232,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 
 	/* try soft magic tests */
 	if ((ms->flags & MAGIC_NO_CHECK_SOFT) == 0)
-		if ((m = file_softmagic(ms, ubuf, nb, BINTEST,
+		if ((m = file_softmagic(ms, ubuf, nb, 0, BINTEST,
 		    looks_text)) != 0) {
 			if ((ms->flags & MAGIC_DEBUG) != 0)
 				(void)fprintf(stderr, "softmagic %d\n", m);
@@ -273,7 +270,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 		if ((ms->flags & MAGIC_NO_CHECK_ENCODING) == 0) {
 			if (looks_text == 0)
 				if ((m = file_ascmagic_with_encoding( ms, ubuf,
-				    nb, u8buf, ulen, code, type, looks_text))
+				    nb, u8buf, ulen, code, ftype, looks_text))
 				    != 0) {
 					if ((ms->flags & MAGIC_DEBUG) != 0)
 						(void)fprintf(stderr,
@@ -283,10 +280,11 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 		}
 	}
 
+simple:
 	/* give up */
 	m = 1;
 	if ((!mime || (mime & MAGIC_MIME_TYPE)) &&
-	    file_printf(ms, mime ? "application/octet-stream" : "data") == -1) {
+	    file_printf(ms, "%s", mime ? type : def) == -1) {
 	    rv = -1;
 	}
  done:
@@ -297,6 +295,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 		if (file_printf(ms, "%s", code_mime) == -1)
 			rv = -1;
 	}
+ done_encoding:
 	free(u8buf);
 	if (rv)
 		return rv;
@@ -307,7 +306,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 protected int
 file_reset(struct magic_set *ms)
 {
-	if (ms->mlist == NULL) {
+	if (ms->mlist[0] == NULL) {
 		file_error(ms, 0, "no magic files loaded");
 		return -1;
 	}
@@ -335,7 +334,7 @@ file_reset(struct magic_set *ms)
 protected const char *
 file_getbuffer(struct magic_set *ms)
 {
-	char *pbuf, *op, *np;
+	char *op, *np;
 	size_t psize, len;
 
 	if (ms->event_flags & EVENT_HAD_ERR)
@@ -353,8 +352,10 @@ file_getbuffer(struct magic_set *ms)
 		return NULL;
 	}
 	psize = len * 4 + 1;
-	pbuf = erealloc(ms->o.pbuf, psize);
-	ms->o.pbuf = pbuf;
+	if ((ms->o.pbuf = CAST(char *, erealloc(ms->o.pbuf, psize))) == NULL) {
+		file_oomem(ms, psize);
+		return NULL;
+	}
 
 #if defined(HAVE_WCHAR_H) && defined(HAVE_MBRTOWC) && defined(HAVE_WCWIDTH)
 	{
@@ -413,7 +414,13 @@ file_check_mem(struct magic_set *ms, unsigned int level)
 
 	if (level >= ms->c.len) {
 		len = (ms->c.len += 20) * sizeof(*ms->c.li);
-		ms->c.li = (ms->c.li == NULL) ? emalloc(len) : erealloc(ms->c.li, len);
+		ms->c.li = CAST(struct level_info *, (ms->c.li == NULL) ?
+		    emalloc(len) :
+		    erealloc(ms->c.li, len));
+		if (ms->c.li == NULL) {
+			file_oomem(ms, len);
+			return -1;
+		}
 	}
 	ms->c.li[level].got_match = 0;
 #ifdef ENABLE_CONDITIONALS
@@ -429,51 +436,41 @@ file_printedlen(const struct magic_set *ms)
 	return ms->o.buf == NULL ? 0 : strlen(ms->o.buf);
 }
 
-
-protected int 
 file_replace(struct magic_set *ms, const char *pat, const char *rep)
 {
-	zval *patt;
+	zval patt;
 	int opts = 0;
 	pcre_cache_entry *pce;
-	char *res;
-	zval *repl;
-	int res_len, rep_cnt = 0;
-	TSRMLS_FETCH();
+	zend_string *res;
+	zval repl;
+	int  rep_cnt = 0;
 
-	MAKE_STD_ZVAL(patt);
-	ZVAL_STRINGL(patt, pat, strlen(pat), 0);
+	(void)setlocale(LC_CTYPE, "C");
+
 	opts |= PCRE_MULTILINE;
-	convert_libmagic_pattern(patt, opts);
-#if (PHP_MAJOR_VERSION < 6)
-	if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(patt), Z_STRLEN_P(patt) TSRMLS_CC)) == NULL) {
-#else
-	if ((pce = pcre_get_compiled_regex_cache(IS_STRING, Z_STRVAL_P(patt), Z_STRLEN_P(patt) TSRMLS_CC)) == NULL) {
-#endif
-		zval_dtor(patt);
-		FREE_ZVAL(patt);
-		return -1;
+	convert_libmagic_pattern(&patt, pat, strlen(pat), opts);
+	if ((pce = pcre_get_compiled_regex_cache(Z_STR(patt))) == NULL) {
+		zval_ptr_dtor(&patt);
+		rep_cnt = -1;
+		goto out;
 	}
+	zval_ptr_dtor(&patt);
 
-	MAKE_STD_ZVAL(repl);
-	ZVAL_STRINGL(repl, rep, strlen(rep), 0);
+	ZVAL_STRING(&repl, rep);
+	res = php_pcre_replace_impl(pce, ms->o.buf, strlen(ms->o.buf), &repl, 0, -1, &rep_cnt);
 
-	res = php_pcre_replace_impl(pce, ms->o.buf, strlen(ms->o.buf), repl,
-			0, &res_len, -1, &rep_cnt TSRMLS_CC);
-
-	FREE_ZVAL(repl);
-	zval_dtor(patt);
-	FREE_ZVAL(patt);
-
+	zval_ptr_dtor(&repl);
 	if (NULL == res) {
-		return -1;
+		rep_cnt = -1;
+		goto out;
 	}
 
-	strncpy(ms->o.buf, res, res_len);
-	ms->o.buf[res_len] = '\0';
+	strncpy(ms->o.buf, res->val, res->len);
+	ms->o.buf[res->len] = '\0';
 
-	efree(res);
+	zend_string_release(res);
 
+out:
+	(void)setlocale(LC_CTYPE, "");
 	return rep_cnt;
 }
-

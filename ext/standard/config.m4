@@ -182,12 +182,12 @@ AC_TRY_RUN([
 
 main() {
 #if HAVE_CRYPT
-    char salt[30], answer[80];
-    
-    salt[0]='$'; salt[1]='6'; salt[2]='$'; salt[3]='$'; salt[4]='b'; salt[5]='a'; salt[6]='r'; salt[7]='\0';
+    char salt[21], answer[21+86];
+
+    strcpy(salt,"\$6\$rasmuslerdorf\$");
     strcpy(answer, salt);
-    strcpy(&answer[29],"$6$$QMXjqd7rHQZPQ1yHsXkQqC1FBzDiVfTHXL.LaeDAeVV.IzMaV9VU4MQ8kPuZa2SOP1A0RPm772EaFYjpEJtdu.");
-    exit (strcmp((char *)crypt("foo",salt),answer));
+    strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
+    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
 #else
 	exit(0);
 #endif
@@ -211,12 +211,13 @@ AC_TRY_RUN([
 
 main() {
 #if HAVE_CRYPT
-    char salt[30], answer[80];
-    salt[0]='$'; salt[1]='5'; salt[2]='$'; salt[3]='$'; salt[4]='s'; salt[5]='a'; salt[6]='l'; salt[7]='t';  salt[8]='s'; salt[9]='t'; salt[10]='r'; salt[11]='i'; salt[12]='n'; salt[13]='g'; salt[14]='\0';    
-    strcat(salt,"");
+    char salt[21], answer[21+43];
+
+    strcpy(salt,"\$5\$rasmuslerdorf\$");
     strcpy(answer, salt);
-    strcpy(&answer[29], "$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5");
-    exit (strcmp((char *)crypt("foo",salt),answer));
+    strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
+    exit (strcmp((char *)crypt("rasmuslerdorf",salt),answer));
+
 #else
 	exit(0);
 #endif
@@ -337,6 +338,8 @@ fi
 dnl
 dnl Check for available functions
 dnl
+dnl log2 could be used to improve the log function, however it requires C99. The check for log2 should be turned on,
+dnl as soon as we support C99.
 AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass isinf isnan mempcpy strpncpy)
 AC_FUNC_FNMATCH	
 
@@ -358,7 +361,29 @@ else
   AC_MSG_RESULT(no)
 fi
 
-if test "$PHP_SAPI" = "cgi" || test "$PHP_SAPI" = "cli" || test "$PHP_SAPI" = "embed"; then
+PHP_ENABLE_CHROOT_FUNC=no
+case "$PHP_SAPI" in
+  embed)
+    PHP_ENABLE_CHROOT_FUNC=yes
+  ;;
+
+  none)
+    for PROG in $PHP_BINARIES; do
+      case "$PROG" in
+        cgi|cli)
+          PHP_ENABLE_CHROOT_FUNC=yes
+        ;;
+
+        *)
+          PHP_ENABLE_CHROOT_FUNC=no
+          break
+        ;;
+      esac
+   done
+  ;;
+esac
+
+if test "$PHP_ENABLE_CHROOT_FUNC" = "yes"; then
   AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
 fi
 
@@ -580,7 +605,8 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             incomplete_class.c url_scanner_ex.c ftp_fopen_wrapper.c \
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
-                            filters.c proc_open.c streamsfuncs.c http.c password.c)
+                            filters.c proc_open.c streamsfuncs.c http.c password.c,,,
+			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_MAKEFILE_FRAGMENT
 PHP_INSTALL_HEADERS([ext/standard/])

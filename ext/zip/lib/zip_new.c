@@ -1,6 +1,6 @@
 /*
   zip_new.c -- create and init struct zip
-  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2012 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -56,16 +56,17 @@ _zip_new(struct zip_error *error)
 
     za->zn = NULL;
     za->zp = NULL;
+    za->open_flags = 0;
     _zip_error_init(&za->error);
-    za->cdir = NULL;
-    za->ch_comment = NULL;
-    za->ch_comment_len = -1;
+    za->flags = za->ch_flags = 0;
+    za->default_password = NULL;
+    za->comment_orig = za->comment_changes = NULL;
+    za->comment_changed = 0;
     za->nentry = za->nentry_alloc = 0;
     za->entry = NULL;
     za->nfile = za->nfile_alloc = 0;
     za->file = NULL;
-    za->flags = za->ch_flags = 0;
-    za->default_password = NULL;
+    za->tempdir = NULL;
     
     return za;
 }

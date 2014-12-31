@@ -1,5 +1,7 @@
 --TEST--
 Bug 60097: token_get_all fails to lex nested heredoc
+--SKIPIF--
+<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -12,12 +14,12 @@ DOC1;
 '));
 
 ?>
---EXPECT--
+--EXPECTF--
 array(14) {
   [0]=>
   array(3) {
     [0]=>
-    int(374)
+    int(%d)
     [1]=>
     string(6) "<?php
 "
@@ -27,7 +29,7 @@ array(14) {
   [1]=>
   array(3) {
     [0]=>
-    int(378)
+    int(%d)
     [1]=>
     string(8) "<<<DOC1
 "
@@ -37,7 +39,7 @@ array(14) {
   [2]=>
   array(3) {
     [0]=>
-    int(381)
+    int(%d)
     [1]=>
     string(1) "{"
     [2]=>
@@ -46,7 +48,7 @@ array(14) {
   [3]=>
   array(3) {
     [0]=>
-    int(310)
+    int(%d)
     [1]=>
     string(2) "$s"
     [2]=>
@@ -57,7 +59,7 @@ array(14) {
   [5]=>
   array(3) {
     [0]=>
-    int(378)
+    int(%d)
     [1]=>
     string(8) "<<<DOC2
 "
@@ -67,7 +69,7 @@ array(14) {
   [6]=>
   array(3) {
     [0]=>
-    int(379)
+    int(%d)
     [1]=>
     string(4) "DOC2"
     [2]=>
@@ -76,7 +78,7 @@ array(14) {
   [7]=>
   array(3) {
     [0]=>
-    int(377)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -90,7 +92,7 @@ array(14) {
   [10]=>
   array(3) {
     [0]=>
-    int(315)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -100,7 +102,7 @@ array(14) {
   [11]=>
   array(3) {
     [0]=>
-    int(379)
+    int(%d)
     [1]=>
     string(4) "DOC1"
     [2]=>
@@ -111,7 +113,7 @@ array(14) {
   [13]=>
   array(3) {
     [0]=>
-    int(377)
+    int(%d)
     [1]=>
     string(1) "
 "

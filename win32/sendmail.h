@@ -5,7 +5,7 @@
 #endif
 
 #define HOST_NAME_LEN	256
-#define MAX_APPNAME_LENGHT 100
+#define MAX_APPNAME_LENGTH 100
 #define MAIL_BUFFER_SIZE		(1024*4)	/* 4k buffer */
 /* Return values */
 #define MIN_ERROR_INDEX					0 /* Always 0 like SUCCESS */
@@ -36,14 +36,14 @@
 
 PHPAPI int TSendMail(char *smtpaddr, int *returnerror, char **error_message,
 			  char *RPath, char *Subject, char *mailTo, char *data,
-			  char *mailCc, char *mailBcc, char *mailRPath TSRMLS_DC);
+			  char *mailCc, char *mailBcc, char *mailRPath);
 PHPAPI void TSMClose(void);
 static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data, 
-			 char *headers, char *headers_lc, char **error_message TSRMLS_DC);
+			 char *headers, char *headers_lc, char **error_message);
 PHPAPI char *GetSMErrorText(int index);
 
 static int MailConnect();
-static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders TSRMLS_DC);
+static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders);
 static int Post(LPCSTR msg);
 static int Ack(char **server_response);
 static unsigned long GetAddr(LPSTR szHost);

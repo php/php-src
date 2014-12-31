@@ -42,7 +42,7 @@ Exceptions:
 
 4.  When writing functions that deal with strings, be sure to remember
     that PHP holds the length property of each string, and that it
-    shouldn't be calculated with strlen().  Write your functions in a such
+    shouldn't be calculated with strlen().  Write your functions in such
     a way so that they'll take advantage of the length property, both
     for efficiency and in order for them to be binary-safe.
     Functions that change strings and obtain their new lengths while
@@ -59,8 +59,8 @@ Exceptions:
     you're calling.
 
 7.  When commenting out code using a #if statement, do NOT use 0 only. Instead
-    use "<svn username here>_0". For example, #if FOO_0, where FOO is your
-    svn user foo.  This allows easier tracking of why code was commented out,
+    use "<git username here>_0". For example, #if FOO_0, where FOO is your
+    git user foo.  This allows easier tracking of why code was commented out,
     especially in bundled libraries.
 
 8.  Do not define functions that are not available.  For instance, if a
@@ -82,7 +82,7 @@ Exceptions:
     library may need to control or free the memory, or when the memory in
     question needs to survive between multiple requests.
 
-Naming Conventions
+User Functions/Methods Naming Conventions
 ------------------
 
 1.  Function names for user-level functions should be enclosed with in
@@ -151,7 +151,7 @@ Naming Conventions
 
 7.  Classes should be given descriptive names. Avoid using abbreviations where
     possible. Each word in the class name should start with a capital letter,
-    without underscore delimiters (CampelCaps starting with a capital letter).
+    without underscore delimiters (CamelCaps starting with a capital letter).
     The class name should be prefixed with the name of the 'parent set' (e.g.
     the name of the extension)::
 
@@ -162,6 +162,26 @@ Naming Conventions
     Bad:
     'foobar'
     'foo_bar'
+
+Internal Function Naming Convensions
+----------------------
+
+1.  Functions that are part of the external API should be named
+    'php_modulename_function()' to avoid symbol collision. They should be in
+    lowercase, with words underscore delimited. Exposed API must be defined
+    in 'php_modulename.h'.
+
+    PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS);
+
+    Unexposed module function should be static and should not be defined in
+    'php_modulename.h'.
+
+    static int php_session_destroy(TSRMLS_D)
+
+2.  Main module source file must be named 'modulename.c'.
+
+3.  Header file that is used by other sources must be named 'php_modulename.h'.
+
 
 Syntax and indentation
 ----------------------
@@ -181,9 +201,9 @@ Syntax and indentation
     of PHP or one of its standard modules, please maintain the K&R
     style.  This applies to just about everything, starting with
     indentation and comment styles and up to function declaration
-    syntax. Also see Indentstyle_.
+    syntax. Also see Indentstyle.
 
-.. _Indentstyle: http://www.catb.org/~esr/jargon/html/I/indent-style.html
+    Indentstyle: http://www.catb.org/~esr/jargon/html/I/indent-style.html
 
 3.  Be generous with whitespace and braces.  Keep one empty line between the
     variable declaration section and the statements in a block, as well as
@@ -259,7 +279,10 @@ The file labelled 'EXPERIMENTAL' should include the following
 information::
 
   Any authoring information (known bugs, future directions of the module).
-  Ongoing status notes which may not be appropriate for SVN comments.
+  Ongoing status notes which may not be appropriate for Git comments.
+
+In general new features should go to PECL or experimental branches until
+there are specific reasons for directly adding it to the core distribution.
 
 Aliases & Legacy Documentation
 -----------------------------------

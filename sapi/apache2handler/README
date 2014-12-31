@@ -58,7 +58,7 @@ HOW TO CONFIGURE
 
 DEBUGGING APACHE AND PHP
     
-    To debug Apache, we recommened:
+    To debug Apache, we recommend:
 
         1. Use the Prefork MPM (Apache 1.3-like process model) by
            configuring Apache with '--with-mpm=prefork'.

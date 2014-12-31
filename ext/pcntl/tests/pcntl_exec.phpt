@@ -8,7 +8,7 @@ if (!getenv("TEST_PHP_EXECUTABLE") || !is_executable(getenv("TEST_PHP_EXECUTABLE
 --FILE--
 <?php
 echo "ok\n";
-pcntl_exec(getenv("TEST_PHP_EXECUTABLE"));
+pcntl_exec(getenv("TEST_PHP_EXECUTABLE"), ['-n']);
 echo "nok\n";
 ?>
 --EXPECT--

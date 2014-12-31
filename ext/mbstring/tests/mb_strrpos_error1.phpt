@@ -41,10 +41,10 @@ echo "Done";
 -- Testing mb_strrpos() function with more than expected no. of arguments --
 
 Warning: mb_strrpos() expects at most 4 parameters, 5 given in %s on line %d
-bool(false)
+NULL
 
 -- Testing mb_strrpos() function with less than expected no. of arguments --
 
 Warning: mb_strrpos() expects at least 2 parameters, 1 given in %s on line %d
-bool(false)
+NULL
 Done

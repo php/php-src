@@ -4,12 +4,12 @@ dnl vim: se ts=2 sw=2 et:
 
 PHP_ARG_WITH(pdo-mysql, for MySQL support for PDO,
 [  --with-pdo-mysql[=DIR]    PDO: MySQL support. DIR is the MySQL base directory
-                                 If no value or mysqlnd is passed as DIR, the
-                                 MySQL native driver will be used])
+                          If no value or mysqlnd is passed as DIR, the
+                          MySQL native driver will be used])
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz,
-  [  --with-zlib-dir[=DIR]       PDO_MySQL: Set the path to libz install prefix], no, no)
+  [  --with-zlib-dir[=DIR]     PDO_MySQL: Set the path to libz install prefix], no, no)
 fi
 
 if test "$PHP_PDO_MYSQL" != "no"; then
@@ -144,7 +144,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   fi
 
   dnl fix after renaming to pdo_mysql
-  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_cv_inc_path -I)
+  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_cv_inc_path -I -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   ifdef([PHP_ADD_EXTENSION_DEP],
   [
     PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)

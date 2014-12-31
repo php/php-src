@@ -155,7 +155,7 @@ Table of Contents
    a  list  of all available options along with short explanations running
    ./configure   --help.   Our  manual  documents  the  different  options
    separately.  You  will find the core options in the appendix, while the
-   different  extension  specific  options  are  descibed on the reference
+   different  extension  specific  options  are  described on the reference
    pages.
 
    When  PHP  is  configured,  you  are  ready  to build the module and/or
@@ -223,12 +223,12 @@ Apache 1.3.x on Unix systems
     module on your system.  The make install from above may have already
     added this for you, but be sure to check.
 
-      LoadModule php5_module libexec/libphp5.so
+      LoadModule php7_module libexec/libphp7.so
 
 15. And in the AddModule section of httpd.conf, somewhere under the
     ClearModuleList, add this:
 
-      AddModule mod_php5.c
+      AddModule mod_php7.c
 
 16. Tell Apache to parse certain extensions as PHP.  For example,
     let's have Apache parse the .php extension as PHP.  You could
@@ -263,8 +263,8 @@ Apache 1.3.x on Unix systems
 
 10. cd ../apache_1.3.x
 
-11. ./configure --prefix=/www --activate-module=src/modules/php5/libphp5.a
-    (The above line is correct! Yes, we know libphp5.a does not exist at this
+11. ./configure --prefix=/www --activate-module=src/modules/php7/libphp7.a
+    (The above line is correct! Yes, we know libphp7.a does not exist at this
     stage. It isn't supposed to. It will be created.)
 
 12. make
@@ -309,24 +309,24 @@ stop and start:
    Different examples of compiling PHP for apache are as follows:
 ./configure --with-apxs --with-pgsql
 
-   This will create a libphp5.so shared library that is loaded into Apache
+   This will create a libphp7.so shared library that is loaded into Apache
    using  a  LoadModule  line  in Apache's httpd.conf file. The PostgreSQL
    support is embedded into this library.
 
 ./configure --with-apxs --with-pgsql=shared
 
-   This  will  create  a libphp5.so shared library for Apache, but it will
+   This  will  create  a libphp7.so shared library for Apache, but it will
    also create a pgsql.so shared library that is loaded into PHP either by
    using  the  extension  directive  in  php.ini  file  or  by  loading it
    explicitly in a script using the dl() function.
 
 ./configure --with-apache=/path/to/apache_source --with-pgsql
 
-   This  will  create  a  libmodphp5.a  library,  a  mod_php5.c  and  some
-   accompanying files and copy this into the src/modules/php5 directory in
+   This  will  create  a  libmodphp7.a  library,  a  mod_php7.c  and  some
+   accompanying files and copy this into the src/modules/php7 directory in
    the    Apache    source   tree.   Then   you   compile   Apache   using
-   --activate-module=src/modules/php5/libphp5.a   and   the  Apache  build
-   system  will  create  libphp5.a  and  link it statically into the httpd
+   --activate-module=src/modules/php7/libphp7.a   and   the  Apache  build
+   system  will  create  libphp7.a  and  link it statically into the httpd
    binary.  The  PostgreSQL  support  is included directly into this httpd
    binary, so the final result here is a single httpd binary that includes
    all of Apache and all of PHP.
@@ -450,7 +450,7 @@ cp php.ini-development /usr/local/lib/php.ini
        hand side of the LoadModule statement must point to the path of the
        PHP  module  on  your  system. The make install from above may have
        already added this for you, but be sure to check.
-LoadModule php5_module modules/libphp5.so
+LoadModule php7_module modules/libphp7.so
     8. Tell  Apache to parse certain extensions as PHP. For example, let's
        have  Apache  parse  .php  files  as PHP. Instead of only using the
        Apache  AddType  directive,  we want to avoid potentially dangerous
@@ -461,7 +461,7 @@ LoadModule php5_module modules/libphp5.so
 <FilesMatch \.php$>
     SetHandler application/x-httpd-php
 </FilesMatch>
-       Or,  if we wanted to allow .php, .php2, .php3, .php4, .php5, .php6,
+       Or,  if we wanted to allow .php, .php2, .php3, .php4, .php5, .php7,
        and  .phtml files to be executed as PHP, but nothing else, we'd use
        this:
 <FilesMatch "\.ph(p[2-6]?|tml)$">
@@ -1004,16 +1004,16 @@ Debian GNU/Linux installation notes
 Using APT
 
    First,   note   that   other  related  packages  may  be  desired  like
-   libapache2-mod-php5 to integrate with Apache 2, and php-pear for PEAR.
+   libapache2-mod-php7 to integrate with Apache 2, and php-pear for PEAR.
 
    Second,  before  installing  a package, it's wise to ensure the package
    list  is  up  to  date.  Typically, this is done by running the command
    apt-get update.
 
    Example #1 Debian Install Example with Apache 2
-# apt-get install php5-common libapache2-mod-php5 php5-cli
+# apt-get install php7-common libapache2-mod-php7 php7-cli
 
-   APT will automatically install the PHP 5 module for Apache 2 and all of
+   APT will automatically install the PHP 7 module for Apache 2 and all of
    its  dependencies,  and then activate it. Apache should be restarted in
    order for the changes take place. For example:
 
@@ -1027,23 +1027,23 @@ Better control of configuration
    very  likely  that  additional  modules will be desired, such as MySQL,
    cURL, GD, etc. These may also be installed via the apt-get command.
 
-   Example #3 Methods for listing additional PHP 5 packages
-# apt-cache search php5
-# aptitude search php5
-# aptitude search php5 |grep -i mysql
+   Example #3 Methods for listing additional PHP 7 packages
+# apt-cache search php7
+# aptitude search php7
+# aptitude search php7 |grep -i mysql
 
    The examples will show a lot of packages including several PHP specific
-   ones  like  php5-cgi, php5-cli and php5-dev. Determine which are needed
+   ones  like  php7-cgi, php7-cli and php7-dev. Determine which are needed
    and  install  them  like any other with either apt-get or aptitude. And
    because  Debian  performs  dependency checks, it'll prompt for those so
    for example to install MySQL and cURL:
 
    Example #4 Install PHP with MySQL, cURL
-# apt-get install php5-mysql php5-curl
+# apt-get install php7-mysql php7-curl
 
    APT  will  automatically  add  the  appropriate  lines to the different
-   php.ini      related      files     like     /etc/php5/apache2/php.ini,
-   /etc/php5/conf.d/pdo.ini,  etc. and depending on the extension will add
+   php.ini      related      files     like     /etc/php7/apache2/php.ini,
+   /etc/php7/conf.d/pdo.ini,  etc. and depending on the extension will add
    entries similar to extension=foo.so. However, restarting the web server
    (like Apache) is required before these changes take affect.
 
@@ -1137,9 +1137,9 @@ Using the bundled PHP
     2. With  a  text  editor, uncomment the lines (by removing the #) that
        look  similar  to  the  following  (these  two  lines are often not
        together, locate them both in the file):
-# LoadModule php5_module libexec/httpd/libphp5.so
+# LoadModule php7_module libexec/httpd/libphp7.so
 
-# AddModule mod_php5.c
+# AddModule mod_php7.c
 
        Notice  the  location/path.  When  building  PHP in the future, the
        above files should be replaced or commented out.
@@ -1148,7 +1148,7 @@ Using the bundled PHP
        Due  to  the following statement already existing in httpd.conf (as
        of   Mac  Panther),  once  PHP  is  enabled  the  .php  files  will
        automatically parse as PHP.
-<IfModule mod_php5.c>
+<IfModule mod_php7.c>
     # If php is turned on, we respect .php and .phps files.
     AddType application/x-httpd-php .php
     AddType application/x-httpd-php-source .phps
@@ -1740,7 +1740,7 @@ Running PHP as an Apache module
           php_admin_flag can not be overridden by .htaccess or ini_set().
 
    Example #1 Apache configuration example
-<IfModule mod_php5.c>
+<IfModule mod_php7.c>
   php_value include_path ".:/usr/local/lib/php"
   php_admin_flag engine on
 </IfModule>
@@ -1810,7 +1810,7 @@ Installation
        script file via my browser, I get a server 500 error.
     8. Some  operating  systems:  I have installed PHP without errors, but
        when  I  try  to  start  Apache  I  get  undefined  symbol  errors:
-       [mybox:user   /src/php5]   root#  apachectl  configtest  apachectl:
+       [mybox:user   /src/php7]   root#  apachectl  configtest  apachectl:
        /usr/local/apache/bin/httpd     Undefined     symbols:    _compress
        _uncompress
     9. Windows:  I  have  installed  PHP,  but  when I try to access a PHP
@@ -1819,7 +1819,7 @@ Installation
        set of HTTP headers. The headers it did return are:
    10. Windows:  I've  followed  all the instructions, but still can't get
        PHP and IIS to work together!
-   11. When  running  PHP as CGI with IIS, PWS, OmniHTTPD or Xitami, I get
+   11. When  running  PHP as CGI with IIS, OmniHTTPD or Xitami, I get
        the  following  error:  Security  Alert! PHP CGI cannot be accessed
        directly..
    12. How  do I know if my php.ini is being found and read? It seems like
@@ -1912,7 +1912,7 @@ AddModule mod_perl.c
 
 # Extra Modules
 LoadModule php_module         modules/mod_php.so
-LoadModule php5_module        modules/libphp5.so
+LoadModule php7_module        modules/libphp7.so
 LoadModule perl_module        modules/libperl.so
 
           And add:
@@ -1954,7 +1954,7 @@ AddType application/x-httpd-php .php
    Some operating systems: I have installed PHP without errors, but when I
           try to start Apache I get undefined symbol errors:
 
-[mybox:user /src/php5] root# apachectl configtest
+[mybox:user /src/php7] root# apachectl configtest
  apachectl: /usr/local/apache/bin/httpd Undefined symbols:
   _compress
   _uncompress
@@ -1984,7 +1984,7 @@ cgi error:
           script via the browser again. If it still fails then it could be
           one of the following:
 
-          + File  permissions  on  your  PHP  script, php.exe, php5ts.dll,
+          + File  permissions  on  your  PHP  script, php.exe, php7ts.dll,
             php.ini  or any PHP extensions you are trying to load are such
             that  the  anonymous  internet  user ISUR_<machinename> cannot
             access them.
@@ -2007,7 +2007,7 @@ cgi error:
           And  for  IIS4  you need to tell it that PHP is a script engine.
           Also, you will want to read this faq.
 
-   When running PHP as CGI with IIS, PWS, OmniHTTPD or Xitami, I get the
+   When running PHP as CGI with IIS, OmniHTTPD or Xitami, I get the
           following error: Security Alert! PHP CGI cannot be accessed
           directly..
           You  must set the cgi.force_redirect directive to 0. It defaults
@@ -2103,7 +2103,7 @@ cgi error:
           to  choose  PHP  files from URL with no extension. In this case,
           replace the line AddType application/x-httpd-php .php with:
 
-AddHandler php5-script php
+AddHandler php7-script php
 AddType text/html php
 
           This  solution  doesn't  work for Apache 1 as PHP module doesn't

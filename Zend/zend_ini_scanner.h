@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,14 +25,15 @@
 /* Scanner modes */
 #define ZEND_INI_SCANNER_NORMAL 0 /* Normal mode. [DEFAULT] */
 #define ZEND_INI_SCANNER_RAW    1 /* Raw mode. Option values are not parsed */
+#define ZEND_INI_SCANNER_TYPED  2 /* Typed mode. */
 
 BEGIN_EXTERN_C()
-int zend_ini_scanner_get_lineno(TSRMLS_D);
-char *zend_ini_scanner_get_filename(TSRMLS_D);
-int zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode TSRMLS_DC);
-int zend_ini_prepare_string_for_scanning(char *str, int scanner_mode TSRMLS_DC);
-int ini_lex(zval *ini_lval TSRMLS_DC);
-void shutdown_ini_scanner(TSRMLS_D);
+int zend_ini_scanner_get_lineno(void);
+char *zend_ini_scanner_get_filename(void);
+int zend_ini_open_file_for_scanning(zend_file_handle *fh, int scanner_mode);
+int zend_ini_prepare_string_for_scanning(char *str, int scanner_mode);
+int ini_lex(zval *ini_lval);
+void shutdown_ini_scanner(void);
 END_EXTERN_C()
 
 #endif /* _ZEND_INI_SCANNER_H */

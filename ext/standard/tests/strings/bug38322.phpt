@@ -1,5 +1,5 @@
 --TEST--
-Bug #38322 (reading past array in sscanf() leads to segfault/arbitary code execution)
+Bug #38322 (reading past array in sscanf() leads to segfault/arbitrary code execution)
 --FILE--
 <?php
 

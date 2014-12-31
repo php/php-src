@@ -12,7 +12,7 @@ is a very common test
 for all languages
 EOT;
 $dirname = 'gzfile_temp';
-$filename = $dirname.'/plainfile.txt.gz';
+$filename = $dirname.'/gzfile_basic.txt.gz';
 mkdir($dirname);
 $h = gzopen($filename, 'w');
 gzwrite($h, $plaintxt);

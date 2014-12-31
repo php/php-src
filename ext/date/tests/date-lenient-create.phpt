@@ -46,7 +46,7 @@ Array
 ==
 DateTime Object
 (
-    [date] => 2004-06-08 00:00:00
+    [date] => 2004-06-08 00:00:00.000000
     [timezone_type] => 3
     [timezone] => UTC
 )
@@ -67,7 +67,7 @@ Array
 ==
 DateTime Object
 (
-    [date] => 2004-06-08 00:00:00
+    [date] => 2004-06-08 00:00:00.000000
     [timezone_type] => 3
     [timezone] => UTC
 )
@@ -88,7 +88,7 @@ Array
 ==
 DateTime Object
 (
-    [date] => 2004-06-08 00:00:00
+    [date] => 2004-06-08 00:00:00.000000
     [timezone_type] => 3
     [timezone] => UTC
 )
@@ -109,7 +109,7 @@ Array
 ==
 DateTime Object
 (
-    [date] => 2004-06-08 00:00:00
+    [date] => 2004-06-08 00:00:00.000000
     [timezone_type] => 3
     [timezone] => UTC
 )
@@ -129,7 +129,7 @@ Array
 ==
 DateTime Object
 (
-    [date] => 2004-06-08 00:00:00
+    [date] => 2004-06-08 00:00:00.000000
     [timezone_type] => 3
     [timezone] => UTC
 )

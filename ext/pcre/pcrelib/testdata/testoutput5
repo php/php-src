@@ -1,25 +1,46 @@
 /-- This set of tests checks the API, internals, and non-Perl stuff for UTF
     support, excluding Unicode properties. However, tests that give different
     results in 8-bit and 16-bit modes are excluded (see tests 16 and 17). --/
+    
+< forbid W 
 
 /\x{110000}/8DZ
-Failed: character value in \x{...} sequence is too large at offset 9
+Failed: character value in \x{} or \o{} is too large at offset 9
+
+/\o{4200000}/8DZ
+Failed: character value in \x{} or \o{} is too large at offset 10
 
 /\x{ffffffff}/8
-Failed: character value in \x{...} sequence is too large at offset 11
+Failed: character value in \x{} or \o{} is too large at offset 11
+
+/\o{37777777777}/8
+Failed: character value in \x{} or \o{} is too large at offset 14
 
 /\x{100000000}/8
-Failed: character value in \x{...} sequence is too large at offset 12
+Failed: character value in \x{} or \o{} is too large at offset 12
+
+/\o{77777777777}/8
+Failed: character value in \x{} or \o{} is too large at offset 14
 
 /\x{d800}/8
 Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 
+/\o{154000}/8
+Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 9
+
 /\x{dfff}/8
 Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 
+/\o{157777}/8
+Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 9
+
 /\x{d7ff}/8
 
+/\o{153777}/8
+
 /\x{e000}/8
+
+/\o{170000}/8
 
 /^\x{100}a\x{1234}/8
     \x{100}a\x{1234}bcd
@@ -146,11 +167,12 @@ No match
 /\x{100}*/8DZ
 ------------------------------------------------------------------
         Bra
-        \x{100}*
+        \x{100}*+
         Ket
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 0
+May match empty string
 Options: utf
 No first char
 No need char
@@ -159,7 +181,7 @@ No need char
 ------------------------------------------------------------------
         Bra
         a
-        \x{100}*
+        \x{100}*+
         Ket
         End
 ------------------------------------------------------------------
@@ -172,7 +194,7 @@ No need char
 ------------------------------------------------------------------
         Bra
         ab
-        \x{100}*
+        \x{100}*+
         Ket
         End
 ------------------------------------------------------------------
@@ -248,7 +270,7 @@ No match
 /[z-\x{100}]/8DZ
 ------------------------------------------------------------------
         Bra
-        [z-\x{100}]
+        [z-\xff\x{100}]
         Ket
         End
 ------------------------------------------------------------------
@@ -276,7 +298,7 @@ No need char
 /[\xFF]/DZ
 ------------------------------------------------------------------
         Bra
-        \xff
+        \x{ff}
         Ket
         End
 ------------------------------------------------------------------
@@ -290,7 +312,7 @@ No need char
 /[^\xFF]/DZ
 ------------------------------------------------------------------
         Bra
-        [^\xff]
+        [^\x{ff}]
         Ket
         End
 ------------------------------------------------------------------
@@ -373,6 +395,7 @@ Need char = 'z'
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 Options: utf
 No first char
 No need char
@@ -404,6 +427,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 Options: utf
 No first char
 No need char
@@ -424,6 +448,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 Options: utf
 No first char
 No need char
@@ -455,6 +480,7 @@ No need char
         End
 ------------------------------------------------------------------
 Capturing subpattern count = 2
+May match empty string
 Options: utf
 No first char
 No need char
@@ -768,7 +794,7 @@ No match
 /[\h]{3,}/8BZ
 ------------------------------------------------------------------
         Bra
-        [\x09 \xa0\x{1680}\x{180e}\x{2000}-\x{200a}\x{202f}\x{205f}\x{3000}]{3,}
+        [\x09 \xa0\x{1680}\x{180e}\x{2000}-\x{200a}\x{202f}\x{205f}\x{3000}]{3,}+
         Ket
         End
 ------------------------------------------------------------------
@@ -1510,7 +1536,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /[^\x{1234}]+?/iS8I   
 Capturing subpattern count = 0
@@ -1518,7 +1544,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /[^\x{1234}]++/iS8I   
 Capturing subpattern count = 0
@@ -1526,7 +1552,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
 
 /[^\x{1234}]{2}/iS8I
 Capturing subpattern count = 0
@@ -1534,7 +1560,7 @@ Options: caseless utf
 No first char
 No need char
 Subject length lower bound = 2
-No set of starting bytes
+No starting char list
 
 //<bsr_anycrlf><bsr_unicode>
 Failed: inconsistent NEWLINE options at offset 0
@@ -1572,7 +1598,7 @@ Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 /[\h\x{e000}]+/8BZ
 ------------------------------------------------------------------
         Bra
-        [\x09 \xa0\x{1680}\x{180e}\x{2000}-\x{200a}\x{202f}\x{205f}\x{3000}\x{e000}]+
+        [\x09 \xa0\x{1680}\x{180e}\x{2000}-\x{200a}\x{202f}\x{205f}\x{3000}\x{e000}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -1594,7 +1620,7 @@ Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 /[\H\x{d7ff}]+/8BZ
 ------------------------------------------------------------------
         Bra
-        [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff\x{100}-\x{167f}\x{1681}-\x{180d}\x{180f}-\x{1fff}\x{200b}-\x{202e}\x{2030}-\x{205e}\x{2060}-\x{2fff}\x{3001}-\x{10ffff}\x{d7ff}]+
+        [\x00-\x08\x0a-\x1f!-\x9f\xa1-\xff\x{100}-\x{167f}\x{1681}-\x{180d}\x{180f}-\x{1fff}\x{200b}-\x{202e}\x{2030}-\x{205e}\x{2060}-\x{2fff}\x{3001}-\x{10ffff}\x{d7ff}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -1616,7 +1642,7 @@ Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 /[\v\x{e000}]+/8BZ
 ------------------------------------------------------------------
         Bra
-        [\x0a-\x0d\x85\x{2028}-\x{2029}\x{e000}]+
+        [\x0a-\x0d\x85\x{2028}-\x{2029}\x{e000}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -1634,7 +1660,7 @@ Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 7
 /[\V\x{d7ff}]+/8BZ
 ------------------------------------------------------------------
         Bra
-        [\x00-\x09\x0e-\x84\x86-\xff\x{100}-\x{2027}\x{202a}-\x{10ffff}\x{d7ff}]+
+        [\x00-\x09\x0e-\x84\x86-\xff\x{100}-\x{2027}\x{202a}-\x{10ffff}\x{d7ff}]++
         Ket
         End
 ------------------------------------------------------------------
@@ -1808,20 +1834,18 @@ Partial match: \x{0d}\x{0d}
      /i [^\x{8000}]*
      /i [^\x{7fff}]{2}
      /i [^\x{7fff}]{0,7}?
-        Once
      /i [^\x{fffff}]{5}
-     /i [^\x{fffff}]?
-        Ket
+     /i [^\x{fffff}]?+
         Ket
         End
 ------------------------------------------------------------------
 
 /(?<=\x{1234}\x{1234})\bxy/I8
 Capturing subpattern count = 0
+Max lookbehind = 2
 Options: utf
 First char = 'x'
 Need char = 'y'
-Max lookbehind = 2
 
 /(?<!^)ETA/8
     ETA
@@ -1845,5 +1869,32 @@ No match
 
 /\ud800/<JS>8
 Failed: disallowed Unicode code point (>= 0xd800 && <= 0xdfff) at offset 5
+
+/^a+[a\x{200}]/8BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        a+
+        [a\x{200}]
+        Ket
+        End
+------------------------------------------------------------------
+    aa
+ 0: aa
+
+/[b-d\x{200}-\x{250}]*[ae-h]?#[\x{200}-\x{250}]{0,8}[\x00-\xff]*#[\x{200}-\x{250}]+[a-z]/8BZ
+------------------------------------------------------------------
+        Bra
+        [b-d\x{200}-\x{250}]*+
+        [ae-h]?+
+        #
+        [\x{200}-\x{250}]{0,8}+
+        [\x00-\xff]*
+        #
+        [\x{200}-\x{250}]++
+        [a-z]
+        Ket
+        End
+------------------------------------------------------------------
 
 /-- End of testinput5 --/

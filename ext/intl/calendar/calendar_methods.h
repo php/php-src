@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -90,6 +90,8 @@ PHP_FUNCTION(intlcal_is_weekend);
 PHP_FUNCTION(intlcal_set_first_day_of_week);
 
 PHP_FUNCTION(intlcal_set_lenient);
+
+PHP_FUNCTION(intlcal_set_minimal_days_in_first_week);
 
 PHP_FUNCTION(intlcal_equals);
 

@@ -19,10 +19,10 @@ class StreamExploiter {
 	}
 }
 
-var_dump(mkdir('test_bug_61367'));
-var_dump(mkdir('test_bug_61367/base'));
-var_dump(file_put_contents('test_bug_61367/bad', 'blah'));
-var_dump(chdir('test_bug_61367/base'));
+var_dump(mkdir('test_bug_61367-write'));
+var_dump(mkdir('test_bug_61367-write/base'));
+var_dump(file_put_contents('test_bug_61367-write/bad', 'blah'));
+var_dump(chdir('test_bug_61367-write/base'));
 
 stream_wrapper_register( 'exploit', 'StreamExploiter' );
 $s = fopen( 'exploit://', 'r' );
@@ -30,9 +30,9 @@ $s = fopen( 'exploit://', 'r' );
 ?>
 --CLEAN--
 <?php
-@unlink('test_bug_61367/bad');
-rmdir('test_bug_61367/base');
-rmdir('test_bug_61367');
+@unlink('test_bug_61367-write/bad');
+rmdir('test_bug_61367-write/base');
+rmdir('test_bug_61367-write');
 ?>
 --EXPECTF--
 bool(true)

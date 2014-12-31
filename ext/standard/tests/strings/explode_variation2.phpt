@@ -70,11 +70,11 @@ $strings =  array (
 
 // loop through with each element of the $strings array to test explode() function
 $count = 1;
-$delimeter = " ";
+$delimiter = " ";
 $limit = 5;
 foreach($strings as $string) {
   echo "-- Iteration $count --\n";
-  var_dump( explode($delimeter, $string, $limit) );
+  var_dump( explode($delimiter, $string, $limit) );
   $count ++;
 }
 

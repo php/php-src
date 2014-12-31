@@ -1,4 +1,4 @@
-- Fix up config file for PHP 5 to use libxml extension configuration
+- Fix up config file for PHP 7 to use libxml extension configuration
 - Add tests for Namespace functions/methods
 - Sync with xmlwriter (new dtd func?)
 - Write documentations in docbook

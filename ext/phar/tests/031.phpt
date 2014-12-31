@@ -22,10 +22,10 @@ require $pname;
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
+unlink(dirname(__FILE__) . '/files/031.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--
 string(25) "<?php echo new new class;"
 
-Parse error: %s in phar://%sphar_oo_test.phar.php/a.php on line %d
+Parse error: %s in phar://%s031.phar.php/a.php on line %d

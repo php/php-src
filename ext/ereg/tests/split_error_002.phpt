@@ -77,7 +77,7 @@ bool(false)
 
 Deprecated: Function split() is deprecated in %s on line %d
 
-Warning: split() expects parameter 3 to be long, string given in %s on line %d
+Warning: split() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 
 Deprecated: Function split() is deprecated in %s on line %d
@@ -112,7 +112,7 @@ bool(false)
 
 Deprecated: Function split() is deprecated in %s on line %d
 
-Warning: split() expects parameter 3 to be long, string given in %s on line %d
+Warning: split() expects parameter 3 to be integer, string given in %s on line %d
 NULL
 string(8) "original"
 Done

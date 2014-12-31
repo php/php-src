@@ -1,5 +1,5 @@
 --TEST--
-Test trait_exists() function : usage variations - unexpected types for agument 1
+Test trait_exists() function : usage variations - unexpected types for argument 1
 --FILE--
 <?php
 /* Prototype  : proto bool trait_exists(string traitname [, bool autoload])
@@ -100,15 +100,12 @@ In __autoload(12345)
 bool(false)
 
 Arg value -2345 
-In __autoload(-2345)
 bool(false)
 
 Arg value 10.5 
-In __autoload(10.5)
 bool(false)
 
 Arg value -10.5 
-In __autoload(-10.5)
 bool(false)
 
 Arg value 101234567000 
@@ -116,11 +113,9 @@ In __autoload(101234567000)
 bool(false)
 
 Arg value 1.07654321E-9 
-In __autoload(1.07654321E-9)
 bool(false)
 
 Arg value 0.5 
-In __autoload(0.5)
 bool(false)
 Error: 8 - Array to string conversion, %strait_exists_variation_001.php(%d)
 

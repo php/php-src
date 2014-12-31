@@ -1,5 +1,109 @@
-PHP                                                                        NEWS
+﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 201?, PHP 5.6.0
+?? ??? 20??, PHP 7.0.0
+
+- CLI server:
+  . Refactor MIME type handling to use a hash table instead of linear search.
+    (Adam)
+  . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
+
+- Core:
+  . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
+    (Laruence)
+  . Fixed bug #68252 (segfault in Zend/zend_hash.c in function
+    _zend_hash_del_el). (Laruence)
+  . Added PHP_INT_MIN constant. (Andrea)
+  . Added Closure::call() method. (Andrea)
+  . Implemented FR #38409 (parse_ini_file() looses the type of booleans). (Tjerk)
+  . Fixed #67959 (Segfault when calling phpversion('spl')). (Florian)
+  . Implemented the RFC `Catchable "Call to a member function bar() on a
+    non-object"`. (Timm)
+  . Added options parameter for unserialize allowing to specify acceptable
+    classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
+  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
+  . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
+  . Fixed bug #65576 (Constructor from trait conflicts with inherited
+    constructor). (dunglas at gmail dot com)
+  . Removed ZEND_ACC_FINAL_CLASS, promoting ZEND_ACC_FINAL as final class 
+    modifier. (Guilherme Blanco)
+  . is_long() & is_integer() is now an alias of is_int(). (Kalle)
+  . Implemented FR #55467 (phpinfo: PHP Variables with $ and single quotes). (Kalle)
+  . Fixed bug #55415 (php_info produces invalid anchor names). (Kalle, Johannes)
+  . Added ?? operator. (Andrea)
+  . Added \u{xxxxx} Unicode Codepoint Escape Syntax. (Andrea)
+  . Fixed oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
+  . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint and conversion error messages. (Andrea)
+  . Implemented FR #55428 (E_RECOVERABLE_ERROR when output buffering in output buffering handler). (Kalle)
+
+- Date:
+  . Fixed day_of_week function as it could sometimes return negative values
+    internally. (Derick)
+
+- DBA:
+  . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
+
+- DOM:
+  . Made DOMNode::textContent writeable. (Tjerk)
+
+- GD:
+  . Made fontFetch's path parser thread-safe. (Sara)
+
+- Fileinfo:
+  . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
+
+- Filter:
+  . New FILTER_VALIDATE_DOMAIN and better RFC conformance for FILTER_VALIDATE_URL. (Kevin Dunglas)
+
+- FPM:
+  . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
+  . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
+
+- LiteSpeed:
+  . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
+
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
+
+- Opcache:
+  . Fixed bug #68644 (strlen incorrect : mbstring + func_overload=2 +UTF-8
+    + Opcache). (Laruence)
+
+- pcntl:
+  . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
+    when setting SIG_DFL). (Julien)
+
+- PDO_mysql:
+  . Fixed bug #68424 (Add new PDO mysql connection attr to control multi
+    statements option). (peter dot wolanin at acquia dot com)
+
+- Reflection
+  . Fixed inheritance chain of Reflector interface. (Tjerk)
+
+- Session:
+  . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
+
+- SOAP:
+  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
+    (Laruence)
+
+- SPL:
+  . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
+    nor curruption state). (Julien)
+  . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
+    breaks the RecursiveIterator). (Paul Garvin)
+  . Fixed bug #68479 (Added escape parameter to SplFileObject::fputcsv). (Salathe)
+
+- Standard:
+  . Removed call_user_method() and call_user_method_array() functions. (Kalle)
+  . Fix user session handlers (See rfc:session.user.return-value). (Sara)
+  . Added intdiv() function. (Andrea)
+  . Improved precision of log() function for base 2 and 10. (Marc Bennewitz)
+
+- Streams:
+  . Fixed bug #68532 (convert.base64-encode omits padding bytes).
+    (blaesius at krumedia dot de)
+
+- XSL:
+  . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

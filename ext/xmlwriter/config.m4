@@ -7,7 +7,7 @@ PHP_ARG_ENABLE(xmlwriter, whether to enable XMLWriter support,
 
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR     XMLWriter: libxml2 install prefix], no, no)
+  [  --with-libxml-dir=DIR   XMLWriter: libxml2 install prefix], no, no)
 fi
 
 if test "$PHP_XMLWRITER" != "no"; then

@@ -64,6 +64,8 @@ print "\nDone\n";
 --EXPECTF--
 Notice: String offset cast occurred in %s on line %d
 
+Notice: Uninitialized string offset: %s in %s on line 6
+
 Notice: Uninitialized string offset: 0 in %s on line %d
 
 Notice: Uninitialized string offset: 0 in %s on line %d

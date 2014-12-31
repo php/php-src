@@ -1,76 +1,163 @@
-$Id$
+﻿$Id$
 
 PHP X.Y UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
-2. Changes in SAPI modules
-3. Deprecated Functionality
-4. Changed Functions
-5. New Functions
-6. New Classes and Interfaces
-7. Removed Extensions
-8. Other Changes to Extensions
-9. New Global Constants
-10. Changes to INI File Handling
-11. Other Changes
+3. Changes in SAPI modules
+4. Deprecated Functionality
+5. Changed Functions
+6. New Functions
+7. New Classes and Interfaces
+8. Removed Extensions
+9. Other Changes to Extensions
+10. New Global Constants
+11. Changes to INI File Handling
+12. Windows Support
+13. Other Changes
 
 
 ========================================
 1. Backward Incompatible Changes
 ========================================
 
+- Core
+  . list() now always supports ArrayAccess and never supports strings.
+    Previously both were accepted in some situations and not in others.
+    (RFC: https://wiki.php.net/rfc/fix_list_behavior_inconsistency)
+  . Bitwise shifts by negative numbers of bits are disallowed (throws E_WARNING
+    and gives FALSE, like a division by zero).
+  . Left bitwise shifts by a number of bits beyond the bit width of an integer
+    will always result in 0, even on CPUs which wrap around.
+  . Right bitwise shifts by a number of bits beyond the bit width of an integer
+    will always result in 0 or -1 (depending on sign), even on CPUs which wrap
+    around.
+  . Removed ASP (<%) and script (<script language=php>) tags.
+    (RFC: https://wiki.php.net/rfc/remove_alternative_php_tags)
+  . call_user_method() and call_user_method_array() no longer exists.
+  . PHP 7 doesn't keep original values of arguments passed to user functions,
+    so func_get_arg() and func_get_args() will return current value of argument
+    instead of the actually passed. The following code is going to be affected:
+    function foo($x) { $x = 2; return func_get_arg(0);} var_dump(foo(1));
+    It will now produce 2, not 1.
+  . Function parameters with duplicate name are not allowed anymore. Definitions
+    like “function foo($x,$x) {}” will lead to compile time error.
+  . Indirect variable, property and method references are now interpreted with
+    left-to-right semantics. See details in:
+	https://wiki.php.net/rfc/uniform_variable_syntax#semantic_differences_in_existing_syntax 
+  . The global keyword now only accepts simple variables. See details in:
+    https://wiki.php.net/rfc/uniform_variable_syntax#global_keyword_takes_only_simple_variables
+  . The addition of Unicode Codepoint Escape Syntax for double-quoted strings
+    and heredocs means that \u{ followed by an invalid sequence will now error.
+    However, \u without a following { is unaffected, so "\u202e" won't error and
+    will work the same as before.
+  . zend_function.common.num_args don't include the variadic argument anymore.
+  . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
+    output buffer is created in an output buffer handler.
+
+- DBA
+  . dba_delete() now returns false if the key was not found for the inifile
+    handler, too.
+
+- GMP
+  . Requires libgmp version 4.2 or newer now.
+  . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making
+    them consistent with other GMP functions.
 
 ========================================
 2. New Features
 ========================================
 
+- Core
+  . Added null coalesce operator (??).
+    (RFC: https://wiki.php.net/rfc/isset_ternary)
+  . Support for strings with length >= 2^31 bytes in 64 bit builds.
+  . Closure::call() method added.
+  . Added \u{xxxxxx} Unicode Codepoint Escape Syntax for double-quoted strings
+    and heredocs.
+  . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did.
+
+- Standard
+  . intdiv() function for integer division added.
 
 ========================================
-2. Changes in SAPI modules
+3. Changes in SAPI modules
 ========================================
 
+- FPM
+  . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes).
+  . Listen = port now listen on all addresses (IPv6 and IPv4-mapped).
 
 ========================================
-3. Deprecated Functionality
-========================================
-
-
-========================================
-4. Changed Functions
-========================================
-
-
-========================================
-5. New Functions
-========================================
-
-
-========================================
-6. New Classes and Interfaces
-========================================
-
-
-========================================
-7. Removed Extensions
+4. Deprecated Functionality
 ========================================
 
 
 ========================================
-8. Other Changes to Extensions
+5. Changed Functions
+========================================
+
+- parse_ini_file():
+- parse_ini_string():
+  . Added scanner mode INI_SCANNER_TYPED to yield typed .ini values.
+- unserialize():
+  . Added second parameter for unserialize function 
+    (RFC: https://wiki.php.net/rfc/secure_unserialize) allowing to specify
+    acceptable classes: 
+    unserialize($foo, ["allowed_classes" => ["MyClass", "MyClass2"]);
+
+
+========================================
+6. New Functions
+========================================
+- GMP
+  . Added gmp_random_seed()
+
+========================================
+7. New Classes and Interfaces
 ========================================
 
 
 ========================================
-9. New Global Constants
-========================================
-
-========================================
-10. Changes to INI File Handling
+8. Removed Extensions
 ========================================
 
 
 ========================================
-11. Other Changes
+9. Other Changes to Extensions
 ========================================
 
+
+========================================
+10. New Global Constants
+========================================
+
+- Core
+  . PHP_INT_MIN added.
+
+========================================
+11. Changes to INI File Handling
+========================================
+
+- Core
+  . Removed asp_tags ini directive. Trying to enable it will result in a fatal
+    error.
+
+========================================
+12. Windows Support
+========================================
+
+- Core
+  . Support for native 64 bit integers in 64 bit builds.
+  . Support for large files in 64 bit builds.
+
+========================================
+13. Other Changes
+========================================
+
+- Core
+  . Instead of being undefined and platform-dependent, NaN and Infinity will
+    always be zero when casted to integer.
+  . Calling a method on a non-object no longer raises a fatal error; see
+    also: https://wiki.php.net/rfc/catchable-call-to-member-of-non-object.
+  . Error messages for zend_parse_parameters, type hints and conversions now always say "integer" and "float" instead of "long" and "double".

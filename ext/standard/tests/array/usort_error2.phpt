@@ -36,7 +36,7 @@ $extra_arg = 10;
 echo "\n-- Testing usort() function with non-existent compare function --\n";
 var_dump( usort($array_arg, 'non_existent') );
 
-// With non existent comparison function and extra arguemnt
+// With non existent comparison function and extra argument
 echo "\n-- Testing usort() function with non-existent compare function and extra argument --\n";
 var_dump( usort($array_arg, 'non_existent', $extra_arg) );
 ?>

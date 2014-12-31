@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(fpm,,
-[  --enable-fpm              Enable building of the fpm SAPI executable], no, no)
+[  --enable-fpm            Enable building of the fpm SAPI executable], no, no)
 
 dnl configure checks {{{
 AC_DEFUN([AC_FPM_STDLIBS],
@@ -536,6 +536,22 @@ AC_DEFUN([AC_FPM_SELECT],
 ])
 dnl }}}
 
+AC_DEFUN([AC_FPM_APPARMOR],
+[
+	AC_MSG_CHECKING([for apparmor])
+
+	SAVED_LIBS="$LIBS"
+	LIBS="$LIBS -lapparmor"
+
+	AC_TRY_LINK([ #include <sys/apparmor.h> ], [change_hat("test", 0);], [
+		AC_DEFINE([HAVE_APPARMOR], 1, [do we have apparmor support?])
+		AC_MSG_RESULT([yes])
+	], [
+		LIBS="$SAVED_LIBS"
+		AC_MSG_RESULT([no])
+	])
+])
+
 
 AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
@@ -547,21 +563,83 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
   AC_FPM_LQ
-	AC_FPM_SYSCONF
-	AC_FPM_TIMES
-	AC_FPM_KQUEUE
-	AC_FPM_PORT
-	AC_FPM_DEVPOLL
-	AC_FPM_EPOLL
-	AC_FPM_POLL
-	AC_FPM_SELECT
+  AC_FPM_SYSCONF
+  AC_FPM_TIMES
+  AC_FPM_KQUEUE
+  AC_FPM_PORT
+  AC_FPM_DEVPOLL
+  AC_FPM_EPOLL
+  AC_FPM_POLL
+  AC_FPM_SELECT
+  AC_FPM_APPARMOR
 
   PHP_ARG_WITH(fpm-user,,
-  [  --with-fpm-user[=USER]  Set the user for php-fpm to run as. (default: nobody)], nobody, no)
+  [  --with-fpm-user[=USER]    Set the user for php-fpm to run as. (default: nobody)], nobody, no)
 
   PHP_ARG_WITH(fpm-group,,
-  [  --with-fpm-group[=GRP]  Set the group for php-fpm to run as. For a system user, this 
-                  should usually be set to match the fpm username (default: nobody)], nobody, no)
+  [  --with-fpm-group[=GRP]    Set the group for php-fpm to run as. For a system user, this 
+                          should usually be set to match the fpm username (default: nobody)], nobody, no)
+
+  PHP_ARG_WITH(fpm-systemd,,
+  [  --with-fpm-systemd      Activate systemd integration], no, no)
+
+  PHP_ARG_WITH(fpm-acl,,
+  [  --with-fpm-acl          Use POSIX Access Control Lists], no, no)
+
+  if test "$PHP_FPM_SYSTEMD" != "no" ; then
+    if test -z "$PKG_CONFIG"; then
+      AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+    fi
+    unset SYSTEMD_LIBS
+    unset SYSTEMD_INCS
+
+    if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libsystemd; then
+      dnl systemd version >= 209 provides libsystemd
+      AC_MSG_CHECKING([for libsystemd])
+      SYSTEMD_LIBS=`$PKG_CONFIG --libs libsystemd`
+      SYSTEMD_INCS=`$PKG_CONFIG --cflags-only-I libsystemd`
+      SYSTEMD_VERS=`$PKG_CONFIG --modversion libsystemd`
+      AC_MSG_RESULT([version $SYSTEMD_VERS])
+
+    elif test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libsystemd-daemon; then
+      dnl systemd version < 209 provides libsystemd-daemon
+      AC_MSG_CHECKING([for libsystemd-daemon])
+      SYSTEMD_LIBS=`$PKG_CONFIG --libs libsystemd-daemon`
+      SYSTEMD_INCS=`$PKG_CONFIG --cflags-only-I libsystemd-daemon`
+      SYSTEMD_VERS=`$PKG_CONFIG --modversion libsystemd-daemon`
+      AC_MSG_RESULT([version $SYSTEMD_VERS])
+
+    else
+      dnl failback when no pkg-config
+      AC_CHECK_LIB(systemd-daemon, sd_notify, SYSTEMD_LIBS="-lsystemd-daemon")
+    fi
+
+    AC_CHECK_HEADERS(systemd/sd-daemon.h, [HAVE_SD_DAEMON_H="yes"], [HAVE_SD_DAEMON_H="no"])
+    if test $HAVE_SD_DAEMON_H = "no" || test -z "${SYSTEMD_LIBS}"; then
+      AC_MSG_ERROR([Your system does not support systemd.])
+    else
+      AC_DEFINE(HAVE_SYSTEMD, 1, [FPM use systemd integration])
+      PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
+      PHP_EVAL_LIBLINE($SYSTEMD_LIBS)
+      PHP_EVAL_INCLINE($SYSTEMD_INCS)
+      php_fpm_systemd=notify
+    fi
+  else
+    php_fpm_systemd=simple
+  fi
+
+  if test "$PHP_FPM_ACL" != "no" ; then
+    AC_CHECK_HEADERS([sys/acl.h])
+    AC_CHECK_LIB(acl, acl_free, [
+      PHP_ADD_LIBRARY(acl)
+      AC_DEFINE(HAVE_FPM_ACL, 1, [ POSIX Access Control List ])
+    ],[
+      AC_MSG_ERROR(libacl required not found)
+    ])
+  fi
+
+  PHP_SUBST_OLD(php_fpm_systemd)
+  AC_DEFINE_UNQUOTED(PHP_FPM_SYSTEMD, "$php_fpm_systemd", [fpm systemd service type])
 
   if test -z "$PHP_FPM_USER" -o "$PHP_FPM_USER" = "yes" -o "$PHP_FPM_USER" = "no"; then
     php_fpm_user="nobody"
@@ -589,7 +667,7 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_ADD_BUILD_DIR(sapi/fpm/fpm)
   PHP_ADD_BUILD_DIR(sapi/fpm/fpm/events)
-  PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html)
+  PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/www.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html)
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag])
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm
@@ -631,7 +709,7 @@ if test "$PHP_FPM" != "no"; then
 		fpm/events/port.c \
   "
 
-  PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')
+  PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')
 
   case $host_alias in
       *aix*)

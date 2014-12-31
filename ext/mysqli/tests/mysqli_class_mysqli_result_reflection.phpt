@@ -233,7 +233,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 256
+Modifiers: 268435712
 Number of Parameters: 2
 Number of Required Parameters: 0
 

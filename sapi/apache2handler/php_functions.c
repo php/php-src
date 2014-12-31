@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/head.h"
 #include "php_ini.h"
@@ -56,7 +56,7 @@ php_apache2_info_struct php_apache2_info;
 
 #define SECTION(name)  PUTS("<h2>" name "</h2>\n")
 
-static request_rec *php_apache_lookup_uri(char *filename TSRMLS_DC)
+static request_rec *php_apache_lookup_uri(char *filename)
 {
 	php_struct *ctx = SG(server_context);
 	
@@ -72,34 +72,34 @@ static request_rec *php_apache_lookup_uri(char *filename TSRMLS_DC)
 PHP_FUNCTION(virtual)
 {
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 	request_rec *rr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
-	if (!(rr = php_apache_lookup_uri(filename TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
+	if (!(rr = php_apache_lookup_uri(filename))) {
+		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
 		RETURN_FALSE;
 	}
 
 	if (rr->status != HTTP_OK) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - error finding URI", filename);
+		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - error finding URI", filename);
 		ap_destroy_sub_req(rr);
 		RETURN_FALSE;
 	}
 
 	/* Flush everything. */
-	php_output_end_all(TSRMLS_C);
-	php_header(TSRMLS_C);
+	php_output_end_all();
+	php_header();
 
 	/* Ensure that the ap_r* layer for the main request is flushed, to
 	 * work around http://issues.apache.org/bugzilla/show_bug.cgi?id=17629 */
 	ap_rflush(rr->main);
 
 	if (ap_run_sub_req(rr)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - request execution failed", filename);
+		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - request execution failed", filename);
 		ap_destroy_sub_req(rr);
 		RETURN_FALSE;
 	}
@@ -113,20 +113,20 @@ PHP_FUNCTION(virtual)
 #define ADD_TIME(name) \
 		add_property_long(return_value, #name, apr_time_sec(rr->name));
 #define ADD_STRING(name) \
-		if (rr->name) add_property_string(return_value, #name, (char *) rr->name, 1)
+		if (rr->name) add_property_string(return_value, #name, (char *) rr->name)
 
 PHP_FUNCTION(apache_lookup_uri)
 {
 	request_rec *rr;
 	char *filename;
-	int filename_len;
+	size_t filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
-	if (!(rr = php_apache_lookup_uri(filename TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
+	if (!(rr = php_apache_lookup_uri(filename))) {
+		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
 		RETURN_FALSE;
 	}
 	
@@ -163,7 +163,7 @@ PHP_FUNCTION(apache_lookup_uri)
 		return;
 	}
 	
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - error finding URI", filename);
+	php_error_docref(NULL, E_WARNING, "Unable to include '%s' - error finding URI", filename);
 	ap_destroy_sub_req(rr);
 	RETURN_FALSE;
 }
@@ -187,7 +187,7 @@ PHP_FUNCTION(apache_request_headers)
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) val = "";
-		add_assoc_string(return_value, key, val, 1);
+		add_assoc_string(return_value, key, val);
 	APR_ARRAY_FOREACH_CLOSE()
 }
 /* }}} */
@@ -211,7 +211,7 @@ PHP_FUNCTION(apache_response_headers)
 
 	APR_ARRAY_FOREACH_OPEN(arr, key, val)
 		if (!val) val = "";
-		add_assoc_string(return_value, key, val, 1);
+		add_assoc_string(return_value, key, val);
 	APR_ARRAY_FOREACH_CLOSE()
 }
 /* }}} */
@@ -222,10 +222,10 @@ PHP_FUNCTION(apache_note)
 {
 	php_struct *ctx;
 	char *note_name, *note_val = NULL;
-	int note_name_len, note_val_len;
+	size_t note_name_len, note_val_len;
 	char *old_note_val=NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
 		return;
 	}
 
@@ -238,7 +238,7 @@ PHP_FUNCTION(apache_note)
 	}
 
 	if (old_note_val) {
-		RETURN_STRING(old_note_val, 1);
+		RETURN_STRING(old_note_val);
 	}
 
 	RETURN_FALSE;
@@ -254,12 +254,12 @@ PHP_FUNCTION(apache_setenv)
 {
 	php_struct *ctx;
 	char *variable=NULL, *string_val=NULL;
-	int variable_len, string_val_len;
+	size_t variable_len, string_val_len;
 	zend_bool walk_to_top = 0;
 	int arg_count = ZEND_NUM_ARGS();
 	request_rec *r;
 
-	if (zend_parse_parameters(arg_count TSRMLS_CC, "ss|b", &variable, &variable_len, &string_val, &string_val_len, &walk_to_top) == FAILURE) {
+	if (zend_parse_parameters(arg_count, "ss|b", &variable, &variable_len, &string_val, &string_val_len, &walk_to_top) == FAILURE) {
 		return;
 	}
 
@@ -288,14 +288,14 @@ PHP_FUNCTION(apache_setenv)
 PHP_FUNCTION(apache_getenv)
 {
 	php_struct *ctx;
-	char *variable=NULL;
-	int variable_len;
+	char *variable;
+	size_t variable_len;
 	zend_bool walk_to_top = 0;
 	int arg_count = ZEND_NUM_ARGS();
 	char *env_val=NULL;
 	request_rec *r;
 
-	if (zend_parse_parameters(arg_count TSRMLS_CC, "s|b", &variable, &variable_len, &walk_to_top) == FAILURE) {
+	if (zend_parse_parameters(arg_count, "s|b", &variable, &variable_len, &walk_to_top) == FAILURE) {
 		return;
 	}
 
@@ -313,7 +313,7 @@ PHP_FUNCTION(apache_getenv)
 	env_val = (char*) apr_table_get(r->subprocess_env, variable);
 
 	if (env_val != NULL) {
-		RETURN_STRING(env_val, 1);
+		RETURN_STRING(env_val);
 	}
 
 	RETURN_FALSE;
@@ -336,7 +336,7 @@ PHP_FUNCTION(apache_get_version)
 	char *apv = php_apache_get_version();
 
 	if (apv && *apv) {
-		RETURN_STRING(apv, 1);
+		RETURN_STRING(apv);
 	} else {
 		RETURN_FALSE;
 	}
@@ -355,9 +355,9 @@ PHP_FUNCTION(apache_get_modules)
 	for (n = 0; ap_loaded_modules[n]; ++n) {
 		char *s = (char *) ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
-			add_next_index_stringl(return_value, s, (p - s), 1);
+			add_next_index_stringl(return_value, s, (p - s));
 		} else {
-			add_next_index_string(return_value, s, 1);
+			add_next_index_string(return_value, s);
 		}
 	}
 }
@@ -388,8 +388,12 @@ PHP_MINFO_FUNCTION(apache)
 		}
 		smart_str_appendc(&tmp1, ' ');
 	}
-	if ((tmp1.len - 1) >= 0) {
-		tmp1.c[tmp1.len - 1] = '\0';
+	if (tmp1.s) {
+		if (tmp1.s->len > 0) {
+			tmp1.s->val[tmp1.s->len - 1] = '\0';
+		} else {
+			tmp1.s->val[0] = '\0';
+		}
 	}
             
 	php_info_print_table_start();
@@ -426,7 +430,7 @@ PHP_MINFO_FUNCTION(apache)
 	
 	php_info_print_table_row(2, "Virtual Server", (serv->is_virtual ? "Yes" : "No"));
 	php_info_print_table_row(2, "Server Root", ap_server_root);
-	php_info_print_table_row(2, "Loaded Modules", tmp1.c);
+	php_info_print_table_row(2, "Loaded Modules", tmp1.s->val);
 
 	smart_str_free(&tmp1);
 	php_info_print_table_end();
@@ -528,9 +532,9 @@ static const zend_function_entry apache_functions[] = {
 };
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("xbithack",		"0",	PHP_INI_ALL,	OnUpdateLong,	xbithack,	php_apache2_info_struct, php_apache2_info)
-	STD_PHP_INI_ENTRY("engine",		"1",	PHP_INI_ALL,	OnUpdateLong,	engine, 	php_apache2_info_struct, php_apache2_info)
-	STD_PHP_INI_ENTRY("last_modified",	"0",	PHP_INI_ALL,	OnUpdateLong,	last_modified,	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_ENTRY("xbithack",		"0",	PHP_INI_ALL,	OnUpdateBool,	xbithack,	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_ENTRY("engine",		"1",	PHP_INI_ALL,	OnUpdateBool,	engine, 	php_apache2_info_struct, php_apache2_info)
+	STD_PHP_INI_ENTRY("last_modified",	"0",	PHP_INI_ALL,	OnUpdateBool,	last_modified,	php_apache2_info_struct, php_apache2_info)
 PHP_INI_END()
 
 static PHP_MINIT_FUNCTION(apache)

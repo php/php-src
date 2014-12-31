@@ -114,7 +114,7 @@ var_dump(array_key_exists("print_member", $key_check_obj)); // not found, its a 
 var_dump(array_key_exists("arr", $key_check_obj)); //found, public member
 var_dump(array_key_exists("var", $key_check_obj->arr)); //found,  key is in member array
 
-/* error condition, first arguemnt as object */
+/* error condition, first argument as object */
 var_dump( array_key_exists($key_check_obj, $key_check_obj) );
 echo "Done\n";
 ?>
@@ -270,7 +270,7 @@ NULL
 Warning: array_key_exists() expects parameter 2 to be array, boolean given in %s on line %d
 NULL
 
-Warning: array_key_exists() expects parameter 2 to be array, double given in %s on line %d
+Warning: array_key_exists() expects parameter 2 to be array, float given in %s on line %d
 NULL
 
 Warning: array_key_exists() expects exactly 2 parameters, 3 given in %s on line %d

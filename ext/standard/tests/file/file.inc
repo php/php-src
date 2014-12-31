@@ -451,7 +451,7 @@ function delete_file($filename) {
  Description: Deletes given number of files if exists.
    $file_path = location of the files
    $name_prefix = prefix for the filename, rest of the name is incremental(increment by 1 only)
-     numeric starting from suffix upto count
+     numeric starting from suffix up to count
    $count = number of files to be deleted
    $name_suffix = first numeric suffix in the name
  Returns: An array with following key/value pair
@@ -495,7 +495,7 @@ function delete_files($file_path,
    $file_path = location of link files 
    $link_file_count = Number of link files 
    $link_name_prefix = prefix for the linkname, rest of the name is incremental(increment by 1 only)
-     numeric starting from $link_name_suffix upto count
+     numeric starting from $link_name_suffix up to count
    $link_name_suffix = first numeric suffix in the name
 
  Returns: An array with following key/value pair
@@ -575,13 +575,13 @@ Description:
   Compares two stat values, stat value should be obtained by stat/lstat
   $stat1 = first stat array
   $stat2 = second stat array
-  $op = type of the comparision to be perform between elements of stat1 and stat2
+  $op = type of the comparison to be perform between elements of stat1 and stat2
     "!=" compare for not equal
     "==" compare for equality
     ">"  if each element of stat1 is > than stat2
     "<"  if each element of stat1 is < than stat2
   $fields = contains the key of the elements that needs to be compared. 
-            type of the comparision is based on $op argument value
+            type of the comparison is based on $op argument value
   $flag = specify true to dump the stat1 and stat2 
 */
 

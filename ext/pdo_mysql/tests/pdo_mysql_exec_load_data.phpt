@@ -48,6 +48,7 @@ if (($tmp[1] !== 'localhost') && ($tmp[1] !== '127.0.0.1'))
 	}
 
 	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+	putenv('PDOTEST_ATTR='.serialize([PDO::MYSQL_ATTR_LOCAL_INFILE=>true]));
 	$db = MySQLPDOTest::factory();
 	MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 

@@ -17,5 +17,5 @@ var_dump($result);
 
 ?>
 --EXPECTF--
-Warning: DOMDocument::schemaValidateSource() expects exactly 1 parameter, 0 given in %s.php on line %d
+Warning: DOMDocument::schemaValidateSource() expects at least 1 parameter, 0 given in %s.php on line %d
 NULL

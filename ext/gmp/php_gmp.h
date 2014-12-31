@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,6 +31,8 @@ ZEND_MODULE_DEACTIVATE_D(gmp);
 ZEND_MODULE_INFO_D(gmp);
 
 ZEND_FUNCTION(gmp_init);
+ZEND_FUNCTION(gmp_import);
+ZEND_FUNCTION(gmp_export);
 ZEND_FUNCTION(gmp_intval);
 ZEND_FUNCTION(gmp_strval);
 ZEND_FUNCTION(gmp_add);
@@ -45,9 +47,11 @@ ZEND_FUNCTION(gmp_neg);
 ZEND_FUNCTION(gmp_abs);
 ZEND_FUNCTION(gmp_fact);
 ZEND_FUNCTION(gmp_sqrt);
+ZEND_FUNCTION(gmp_sqrtrem);
+ZEND_FUNCTION(gmp_root);
+ZEND_FUNCTION(gmp_rootrem);
 ZEND_FUNCTION(gmp_pow);
 ZEND_FUNCTION(gmp_powm);
-ZEND_FUNCTION(gmp_sqrtrem);
 ZEND_FUNCTION(gmp_perfect_square);
 ZEND_FUNCTION(gmp_prob_prime);
 ZEND_FUNCTION(gmp_gcd);
@@ -62,6 +66,9 @@ ZEND_FUNCTION(gmp_or);
 ZEND_FUNCTION(gmp_com);
 ZEND_FUNCTION(gmp_xor);
 ZEND_FUNCTION(gmp_random);
+ZEND_FUNCTION(gmp_random_seed);
+ZEND_FUNCTION(gmp_random_bits);
+ZEND_FUNCTION(gmp_random_range);
 ZEND_FUNCTION(gmp_setbit);
 ZEND_FUNCTION(gmp_clrbit);
 ZEND_FUNCTION(gmp_scan0);
@@ -71,13 +78,25 @@ ZEND_FUNCTION(gmp_popcount);
 ZEND_FUNCTION(gmp_hamdist);
 ZEND_FUNCTION(gmp_nextprime);
 
+/* GMP and MPIR use different datatypes on different platforms */
+#ifdef PHP_WIN32
+typedef zend_long gmp_long;
+typedef zend_ulong gmp_ulong;
+#else
+typedef long gmp_long;
+typedef unsigned long gmp_ulong;
+#endif
+
 ZEND_BEGIN_MODULE_GLOBALS(gmp)
 	zend_bool rand_initialized;
 	gmp_randstate_t rand_state;
 ZEND_END_MODULE_GLOBALS(gmp)
 
 #ifdef ZTS
-#define GMPG(v) TSRMG(gmp_globals_id, zend_gmp_globals *, v)
+#define GMPG(v) ZEND_TSRMG(gmp_globals_id, zend_gmp_globals *, v)
+#ifdef COMPILE_DL_GMP
+ZEND_TSRMLS_CACHE_EXTERN;
+#endif
 #else
 #define GMPG(v) (gmp_globals.v)
 #endif

@@ -130,7 +130,7 @@ bool(false)
 -- float 10.5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -138,7 +138,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -152,7 +152,7 @@ bool(false)
 -- float .5 --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -160,7 +160,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -202,7 +202,7 @@ bool(false)
 -- uppercase NULL --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -210,7 +210,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -220,7 +220,7 @@ object(DateTime)#%d (3) {
 -- lowercase null --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -228,7 +228,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -242,7 +242,7 @@ bool(false)
 -- lowercase false --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -250,7 +250,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -264,7 +264,7 @@ bool(false)
 -- uppercase FALSE --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -272,7 +272,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -282,7 +282,7 @@ object(DateTime)#%d (3) {
 -- empty string DQ --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -290,7 +290,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -300,7 +300,7 @@ object(DateTime)#%d (3) {
 -- empty string SQ --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -308,7 +308,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -346,7 +346,7 @@ bool(false)
 -- undefined var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -354,7 +354,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -364,7 +364,7 @@ object(DateTime)#%d (3) {
 -- unset var --
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
@@ -372,7 +372,7 @@ object(DateTime)#%d (3) {
 }
 object(DateTime)#%d (3) {
   ["date"]=>
-  string(19) "%s"
+  string(26) "%s"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

@@ -31,7 +31,7 @@ AC_DEFUN([PHP_MBSTRING_ADD_INSTALL_HEADERS], [
 ])
 
 AC_DEFUN([PHP_MBSTRING_EXTENSION], [
-  PHP_NEW_EXTENSION(mbstring, $PHP_MBSTRING_SOURCES, $ext_shared,, $PHP_MBSTRING_CFLAGS)
+  PHP_NEW_EXTENSION(mbstring, $PHP_MBSTRING_SOURCES, $ext_shared,, $PHP_MBSTRING_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(MBSTRING_SHARED_LIBADD)
 
   for dir in $PHP_MBSTRING_EXTRA_BUILD_DIRS; do
@@ -344,19 +344,19 @@ PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
 [  --enable-mbstring       Enable multibyte string support])
 
 PHP_ARG_ENABLE([mbregex], [whether to enable multibyte regex support],
-[  --disable-mbregex         MBSTRING: Disable multibyte regex support], yes, no)
+[  --disable-mbregex       MBSTRING: Disable multibyte regex support], yes, no)
 
 PHP_ARG_ENABLE([mbregex_backtrack], [whether to check multibyte regex backtrack],
 [  --disable-mbregex-backtrack
-                            MBSTRING: Disable multibyte regex backtrack check], yes, no)
+                          MBSTRING: Disable multibyte regex backtrack check], yes, no)
 
 PHP_ARG_WITH(libmbfl, [for external libmbfl],
 [  --with-libmbfl[=DIR]      MBSTRING: Use external libmbfl.  DIR is the libmbfl base
-                            install directory [BUNDLED]], no, no)
+                          install directory [BUNDLED]], no, no)
 
 PHP_ARG_WITH(onig, [for external oniguruma],
 [  --with-onig[=DIR]         MBSTRING: Use external oniguruma. DIR is the oniguruma install prefix.
-                            If DIR is not set, the bundled oniguruma will be used], no, no)
+                          If DIR is not set, the bundled oniguruma will be used], no, no)
 
 if test "$PHP_MBSTRING" != "no"; then  
   AC_DEFINE([HAVE_MBSTRING],1,[whether to have multibyte string support])

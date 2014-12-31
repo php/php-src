@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #include "php_main.h"
 #include "php_variables.h"
 
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #include "tuxmodule.h"
 
@@ -49,7 +49,7 @@ static php_tux_globals tux_globals;
 
 #define TG(v) (tux_globals.v)
 
-static int sapi_tux_ub_write(const char *str, uint str_length TSRMLS_DC)
+static int sapi_tux_ub_write(const char *str, uint str_length)
 {
 	int n;
 	int m;
@@ -107,7 +107,6 @@ static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers)
 	size_t len;
 	char *status_line;
 	int locate_cl;
-	TSRMLS_FETCH();
 	
 	max_headers = 30;
 	n = 1;
@@ -162,7 +161,6 @@ static int sapi_tux_read_post(char *buffer, uint count_bytes)
 {
 #if 0
 	int amount = 0;
-	TSRMLS_FETCH();
 
 	TG(req)->objectlen = count_bytes;
 	TG(req)->object_addr = buffer;
@@ -179,16 +177,14 @@ static int sapi_tux_read_post(char *buffer, uint count_bytes)
 
 static char *sapi_tux_read_cookies(void)
 {
-	TSRMLS_FETCH();
-	
 	return TG(req)->cookies;
 }
 
 #define BUF_SIZE 512
 #define ADD_STRING(name)										\
-	php_register_variable(name, buf, track_vars_array TSRMLS_CC)
+	php_register_variable(name, buf, track_vars_array)
 
-static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
+static void sapi_tux_register_variables(zval *track_vars_array)
 {
 	char buf[BUF_SIZE + 1];
 	char *p;
@@ -196,16 +192,16 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 	
 	ctr.line = buf;
 	ctr.line_len = slprintf(buf, sizeof(buf), "Server: %s", TUXAPI_version);
-	sapi_header_op(SAPI_HEADER_REPLACE, &ctr TSRMLS_CC);
+	sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 	
-	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
-	php_register_variable("SERVER_SOFTWARE", TUXAPI_version, track_vars_array TSRMLS_CC);
-	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array TSRMLS_CC);
-	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array TSRMLS_CC);
-	php_register_variable("DOCUMENT_ROOT", TUXAPI_docroot, track_vars_array TSRMLS_CC);
-	php_register_variable("SERVER_NAME", TUXAPI_servername, track_vars_array TSRMLS_CC);
-	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array TSRMLS_CC);
-	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array TSRMLS_CC);
+	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array);
+	php_register_variable("SERVER_SOFTWARE", TUXAPI_version, track_vars_array);
+	php_register_variable("GATEWAY_INTERFACE", "CGI/1.1", track_vars_array);
+	php_register_variable("REQUEST_METHOD", (char *) SG(request_info).request_method, track_vars_array);
+	php_register_variable("DOCUMENT_ROOT", TUXAPI_docroot, track_vars_array);
+	php_register_variable("SERVER_NAME", TUXAPI_servername, track_vars_array);
+	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array);
+	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array);
 
 	p = inet_ntoa(TG(req)->client_host);
 	/* string representation of IPs are never larger than 512 bytes */
@@ -228,7 +224,7 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 
 #define CONDADD(name, field) 							\
 	if (TG(req)->field[0]) {								\
-		php_register_variable(#name, TG(req)->field, track_vars_array TSRMLS_CC); \
+		php_register_variable(#name, TG(req)->field, track_vars_array); \
 	}
 
 	CONDADD(HTTP_REFERER, referer);
@@ -248,7 +244,7 @@ static void sapi_tux_register_variables(zval *track_vars_array TSRMLS_DC)
 
 #if 0
 	if (TG(hc)->authorization[0])
-		php_register_variable("AUTH_TYPE", "Basic", track_vars_array TSRMLS_CC);
+		php_register_variable("AUTH_TYPE", "Basic", track_vars_array);
 #endif
 }
 
@@ -293,7 +289,7 @@ static sapi_module_struct tux_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-static void tux_module_main(TSRMLS_D)
+static void tux_module_main(void)
 {
 	zend_file_handle file_handle;
 
@@ -302,15 +298,15 @@ static void tux_module_main(TSRMLS_D)
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
-	if (php_request_startup(TSRMLS_C) == FAILURE) {
+	if (php_request_startup() == FAILURE) {
 		return;
 	}
 	
-	php_execute_script(&file_handle TSRMLS_CC);
+	php_execute_script(&file_handle);
 	php_request_shutdown(NULL);
 }
 
-static void tux_request_ctor(TSRMLS_D)
+static void tux_request_ctor(void)
 {
 	char buf[1024];
 	int offset;
@@ -344,11 +340,11 @@ static void tux_request_ctor(TSRMLS_D)
 	SG(request_info).content_length = 0; /* TG(req)->contentlength; */
 
 #if 0
-	php_handle_auth_data(TG(hc)->authorization TSRMLS_CC);
+	php_handle_auth_data(TG(hc)->authorization);
 #endif
 }
 
-static void tux_request_dtor(TSRMLS_D)
+static void tux_request_dtor(void)
 {
 	if (TG(header_vec)) {
 		/* free status_line */
@@ -385,7 +381,6 @@ static void *separate_thread(void *bla)
 
 int TUXAPI_handle_events(user_req_t *req)
 {
-	TSRMLS_FETCH();
 
 	if (req->event == PHP_TUX_BACKGROUND_CONN) {
 		tux_closed_conn(req->sock);
@@ -395,11 +390,11 @@ int TUXAPI_handle_events(user_req_t *req)
 	TG(req) = req;
 	TG(tux_action) = TUX_ACTION_FINISH_CLOSE_REQ;
 	
-	tux_request_ctor(TSRMLS_C);
+	tux_request_ctor();
 
-	tux_module_main(TSRMLS_C);
+	tux_module_main();
 
-	tux_request_dtor(TSRMLS_C);
+	tux_request_dtor();
 
 	return tux(TG(tux_action), req);
 }
@@ -411,21 +406,18 @@ void tux_register_on_close(void (*arg)(int))
 
 void tux_closed_conn(int fd)
 {
-	TSRMLS_FETCH();
 
 	if (TG(on_close)) TG(on_close)(fd);
 }
 
 int tux_get_fd(void)
 {
-	TSRMLS_FETCH();
 	
 	return TG(req)->sock;
 }
 
 void tux_set_dont_close(void)
 {
-	TSRMLS_FETCH();
 
 	TG(req)->event = PHP_TUX_BACKGROUND_CONN;
 	tux(TUX_ACTION_POSTPONE_REQ, TG(req));

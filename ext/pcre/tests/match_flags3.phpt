@@ -42,5 +42,5 @@ array(1) {
   }
 }
 
-Warning: preg_match(): Numeric named subpatterns are not allowed in %smatch_flags3.php on line 14
+Warning: preg_match(): Compilation failed: group name must start with a non-digit at offset %d in %smatch_flags3.php on line %d
 bool(false)

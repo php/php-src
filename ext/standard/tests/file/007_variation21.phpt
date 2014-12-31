@@ -40,7 +40,7 @@ var_dump( filesize($file) ); //Check that data hasn't over written; Expected: Si
 
 unlink($file);  //Deleting the file
 fclose( fopen($file, "ab") );  //Opening the non-existing file in "ab" mode, which will be created
-var_dump( file_exists($file) );  //Check for the existance of file
+var_dump( file_exists($file) );  //Check for the existence of file
 echo "*** Done ***\n"; 
 --CLEAN--
 <?php

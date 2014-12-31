@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(iconv, for iconv support,
-[  --without-iconv[=DIR]   Exclude iconv support], yes)
+[  --without-iconv[=DIR]     Exclude iconv support], yes)
 
 if test "$PHP_ICONV" != "no"; then
 
@@ -171,7 +171,7 @@ int main() {
       AC_MSG_RESULT([no])
     ])
 
-    PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-I\"$PHP_ICONV_PREFIX/include\"])
+    PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-I\"$PHP_ICONV_PREFIX/include\" -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
     PHP_SUBST(ICONV_SHARED_LIBADD)
     PHP_INSTALL_HEADERS([ext/iconv/])
   else

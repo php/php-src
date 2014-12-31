@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -72,8 +72,8 @@ DBA_OPEN_FUNC(db2)
 	}
 
 	if (info->argc > 0) {
-		convert_to_long_ex(info->argv[0]);
-		filemode = Z_LVAL_PP(info->argv[0]);
+		convert_to_long_ex(&info->argv[0]);
+		filemode = Z_LVAL(info->argv[0]);
 	}
 
 	if (db_open(info->path, type, gmode, filemode, NULL, NULL, &dbp)) {
@@ -164,7 +164,7 @@ DBA_FIRSTKEY_FUNC(db2)
 	}
 
 	/* we should introduce something like PARAM_PASSTHRU... */
-	return dba_nextkey_db2(info, newlen TSRMLS_CC);
+	return dba_nextkey_db2(info, newlen);
 }
 
 DBA_NEXTKEY_FUNC(db2)

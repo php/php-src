@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,8 +17,6 @@
    |          Ard Biesheuvel <a.k.biesheuvel@ewi.tudelft.nl>              |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifndef PHP_IBASE_INCLUDES_H
 #define PHP_IBASE_INCLUDES_H
@@ -37,7 +35,7 @@
 
 #define IB_STATUS (IBG(status))
 
-#ifdef ZEND_DEBUG_
+#ifdef IBASE_DEBUG
 #define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
 #endif
 
@@ -102,7 +100,7 @@ typedef struct event {
 	unsigned short event_count;
 	char **events;
 	char *event_buffer, *result_buffer;
-	zval *callback;
+	zval callback;
 	void **thread_ctx;
 	struct event *event_next;
 	enum event_state { NEW, ACTIVE, DEAD } state;
@@ -151,22 +149,22 @@ typedef void (__stdcall *info_func_t)(char*);
 typedef void (*info_func_t)(char*);
 #endif
 
-void _php_ibase_error(TSRMLS_D);
-void _php_ibase_module_error(char * TSRMLS_DC, ...)
+void _php_ibase_error(void);
+void _php_ibase_module_error(char *, ...)
 	PHP_ATTRIBUTE_FORMAT(printf,1,PHP_ATTR_FMT_OFFSET +2);
 
 /* determine if a resource is a link or transaction handle */
-#define PHP_IBASE_LINK_TRANS(pzval, lh, th)													\
-	do { if (!pzval) {																		\
+#define PHP_IBASE_LINK_TRANS(zv, lh, th)													\
+	do { if (!zv) {																		\
 			ZEND_FETCH_RESOURCE2(lh, ibase_db_link *, NULL, IBG(default_link),				\
 				"InterBase link", le_link, le_plink) }										\
 		else																				\
-			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, &pzval, &lh, &th);	\
-		if (SUCCESS != _php_ibase_def_trans(lh, &th TSRMLS_CC)) { RETURN_FALSE; }			\
+			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, zv, &lh, &th);		\
+		if (SUCCESS != _php_ibase_def_trans(lh, &th)) { RETURN_FALSE; }			\
 	} while (0)
 
-int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRMLS_DC);
-void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_id,
+int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans);
+void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval *link_id,
 	ibase_db_link **ib_link, ibase_trans **trans);
 
 /* provided by ibase_query.c */
@@ -176,12 +174,12 @@ void php_ibase_query_minit(INIT_FUNC_ARGS);
 void php_ibase_blobs_minit(INIT_FUNC_ARGS);
 int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd);
 char *_php_ibase_quad_to_string(ISC_QUAD const qd);
-int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len TSRMLS_DC);
-int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC);
+int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len);
+int _php_ibase_blob_add(zval *string_arg, ibase_blob *ib_blob);
 
 /* provided by ibase_events.c */
 void php_ibase_events_minit(INIT_FUNC_ARGS);
-void _php_ibase_free_event(ibase_event *event TSRMLS_DC);
+void _php_ibase_free_event(ibase_event *event);
 
 /* provided by ibase_service.c */
 void php_ibase_service_minit(INIT_FUNC_ARGS);

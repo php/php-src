@@ -37,7 +37,7 @@ NULL
 bool(true)
 bool(true)
 
-Warning: shm_remove(): %d is not a valid sysvshm resource in %s007.php on line %d
+Warning: shm_remove(): supplied resource is not a valid sysvshm resource in %s007.php on line %d
 bool(false)
 Done
 

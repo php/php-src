@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2012 University of Cambridge
+           Copyright (c) 1997-2013 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -90,6 +90,7 @@ PCRE_UTF8_ERR18  Overlong 5-byte sequence (won't ever occur)
 PCRE_UTF8_ERR19  Overlong 6-byte sequence (won't ever occur)
 PCRE_UTF8_ERR20  Isolated 0x80 byte (not within UTF-8 character)
 PCRE_UTF8_ERR21  Byte with the illegal value 0xfe or 0xff
+PCRE_UTF8_ERR22  Unused (was non-character)
 
 Arguments:
   string       points to the string
@@ -114,7 +115,7 @@ if (length < 0)
 
 for (p = string; length-- > 0; p++)
   {
-  register int ab, c, d;
+  register pcre_uchar ab, c, d;
 
   c = *p;
   if (c < 128) continue;                /* ASCII character */
@@ -286,9 +287,10 @@ for (p = string; length-- > 0; p++)
     }
   }
 
-#else  /* SUPPORT_UTF */
+#else  /* Not SUPPORT_UTF */
 (void)(string);  /* Keep picky compilers happy */
 (void)(length);
+(void)(erroroffset);
 #endif
 
 return PCRE_UTF8_ERR0;   /* This indicates success */

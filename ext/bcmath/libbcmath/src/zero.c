@@ -41,7 +41,7 @@
 /* In some places we need to check if the number NUM is zero. */
 
 char
-bc_is_zero (bc_num num TSRMLS_DC)
+bc_is_zero (bc_num num)
 {
   int  count;
   char *nptr;

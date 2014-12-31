@@ -72,9 +72,9 @@ fclose($fp);
 unlink($tn);
 ?>
 --EXPECT--
-bool(false) refcount(1)
+bool(false)
 0
-bool(false) refcount(1)
+bool(false)
 line1
 line2
 line3

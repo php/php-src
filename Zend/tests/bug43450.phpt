@@ -2,6 +2,8 @@
 Bug #43450 (Memory leak on some functions with implicit object __toString() call)
 --SKIPIF--
 <?php if (!function_exists('memory_get_usage')) die('memory_get_usage() not installed'); ?>
+--INI--
+opcache.enable_cli=0
 --FILE--
 <?php
 error_reporting(E_ALL|E_STRICT);
@@ -16,15 +18,15 @@ class Foo
 
 $num_repeats = 100000;
 
-$start = (memory_get_usage() / 1024) + 16;
+$start = memory_get_usage() / 1024;
 for ($i=1;$i<$num_repeats;$i++) 
 {
 	$foo = new Foo();
 	md5($foo);
 }
-$end = memory_get_peak_usage() / 1024;
+$end = memory_get_usage() / 1024;
 
-if ($start < $end) {
+if ($start + 16 < $end) {
 	echo 'FAIL';
 } else {
 	echo 'PASS';

@@ -106,7 +106,7 @@ array(2) {
 }
 -- Iteration 2 --
 
-Warning: array_fill(): Number of elements must be positive in %s on line %d
+Warning: array_fill(): Number of elements can't be negative in %s on line %d
 bool(false)
 -- Iteration 3 --
 array(5) {
@@ -122,85 +122,77 @@ array(5) {
   int(100)
 }
 -- Iteration 4 --
-
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+array(0) {
+}
 -- Iteration 5 --
-
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+array(0) {
+}
 -- Iteration 6 --
 
-Warning: array_fill() expects parameter 2 to be long, array given in %s on line %d
+Warning: array_fill() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 7 --
 
-Warning: array_fill() expects parameter 2 to be long, array given in %s on line %d
+Warning: array_fill() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 8 --
 
-Warning: array_fill() expects parameter 2 to be long, array given in %s on line %d
+Warning: array_fill() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 9 --
 
-Warning: array_fill() expects parameter 2 to be long, array given in %s on line %d
+Warning: array_fill() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: array_fill() expects parameter 2 to be long, array given in %s on line %d
+Warning: array_fill() expects parameter 2 to be integer, array given in %s on line %d
 NULL
 -- Iteration 11 --
-
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+array(0) {
+}
 -- Iteration 12 --
-
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+array(0) {
+}
 -- Iteration 13 --
 array(1) {
   [0]=>
   int(100)
 }
 -- Iteration 14 --
-
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+array(0) {
+}
 -- Iteration 15 --
 array(1) {
   [0]=>
   int(100)
 }
 -- Iteration 16 --
-
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+array(0) {
+}
 -- Iteration 17 --
 
-Warning: array_fill() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_fill() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 18 --
 
-Warning: array_fill() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_fill() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 19 --
 
-Warning: array_fill() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_fill() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: array_fill() expects parameter 2 to be long, string given in %s on line %d
+Warning: array_fill() expects parameter 2 to be integer, string given in %s on line %d
 NULL
 -- Iteration 21 --
 
-Warning: array_fill() expects parameter 2 to be long, object given in %s on line %d
+Warning: array_fill() expects parameter 2 to be integer, object given in %s on line %d
 NULL
 -- Iteration 22 --
-
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+array(0) {
+}
 -- Iteration 23 --
-
-Warning: array_fill(): Number of elements must be positive in %s on line %d
-bool(false)
+array(0) {
+}
 Done

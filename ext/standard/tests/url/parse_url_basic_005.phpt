@@ -66,7 +66,7 @@ echo "Done";
 --> www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : NULL
 --> http://secret@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(6) "secret"
 --> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(6) "secret"
---> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : NULL
+--> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(0) ""
 --> http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(6) "secret"
 --> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(14) "secret@hideout"
 --> http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(6) "secret"
@@ -95,6 +95,7 @@ echo "Done";
 --> x:/blah.com   : NULL
 --> x://::abc/?   : bool(false)
 --> http://::?   : NULL
+--> http://::#   : NULL
 --> x://::6.5   : NULL
 --> http://?:/   : NULL
 --> http://@?:/   : string(0) ""
@@ -108,6 +109,7 @@ echo "Done";
 --> http://[x:80]/   : NULL
 -->    : NULL
 --> /   : NULL
+--> /rest/Users?filter={"id":"123"}   : NULL
 --> http:///blah.com   : bool(false)
 --> http://:80   : bool(false)
 --> http://user@:80   : bool(false)
@@ -117,6 +119,7 @@ echo "Done";
 --> http://@:/   : bool(false)
 --> http://:/   : bool(false)
 --> http://?   : bool(false)
+--> http://#   : bool(false)
 --> http://?:   : bool(false)
 --> http://:?   : bool(false)
 --> http://blah.com:123456   : bool(false)

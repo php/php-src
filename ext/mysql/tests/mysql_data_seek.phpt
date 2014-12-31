@@ -75,5 +75,5 @@ Warning: mysql_data_seek(): Offset -1 is invalid for MySQL result index %d (or t
 
 Warning: mysql_data_seek(): Offset 3 is invalid for MySQL result index %d (or the query data is unbuffered) in %s on line %d
 
-Warning: mysql_data_seek(): %d is not a valid MySQL result resource in %s on line %d
+Warning: mysql_data_seek(): supplied resource is not a valid MySQL result resource in %s on line %d
 done!

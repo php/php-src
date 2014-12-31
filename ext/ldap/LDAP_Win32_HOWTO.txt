@@ -14,7 +14,7 @@ Note 1:  During the entire build process, you can ignore warnings about
     For 'Win32 Debug', change the runtime library to 'Debug Multithreaded DLL'
     For 'Win32 Release', change the runtime library to 'Multithreaded DLL'
   Select the Preprocessor tab, select 'All Configurations'.
-    Add '..\..\..\..\php5\regex' to the 'Additional include directories' list.
+    Add '..\..\..\..\php7\regex' to the 'Additional include directories' list.
     Add 'HAVE_MKTEMP' to the 'Preprocessor definitions' list.
 - Compile (you can compile both Debug and Release versions).
 

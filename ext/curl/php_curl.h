@@ -1,8 +1,8 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group                                |
+   | Copyright (c) 1997-2014 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,7 +23,7 @@
 #define _PHP_CURL_H
 
 #include "php.h"
-#include "ext/standard/php_smart_str.h"
+#include "zend_smart_str.h"
 
 #ifdef COMPILE_DL_CURL
 #undef HAVE_CURL
@@ -33,6 +33,14 @@
 #if HAVE_CURL
 
 #define PHP_CURL_DEBUG 0
+
+#ifdef PHP_WIN32
+# define PHP_CURL_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_CURL_API __attribute__ ((visibility("default")))
+#else
+# define PHP_CURL_API
+#endif
 
 #include <curl/curl.h>
 #include <curl/multi.h>
@@ -103,45 +111,47 @@ PHP_FUNCTION(curl_multi_setopt);
 #if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
 PHP_FUNCTION(curl_pause);
 #endif
+PHP_FUNCTION(curl_file_create);
 
-void _php_curl_multi_close(zend_rsrc_list_entry * TSRMLS_DC);
-void _php_curl_share_close(zend_rsrc_list_entry * TSRMLS_DC);
+
+void _php_curl_multi_close(zend_resource *);
+void _php_curl_share_close(zend_resource *);
 
 typedef struct {
-	zval            *func_name;
-	zend_fcall_info_cache fci_cache;
-	FILE            *fp;
-	smart_str       buf;
-	int             method;
-	zval		*stream;
+	zval       				func_name;
+	zend_fcall_info_cache 	fci_cache;
+	FILE            	   *fp;
+	smart_str       		buf;
+	int            		 	method;
+	zval					stream;
 } php_curl_write;
 
 typedef struct {
-	zval            *func_name;
-	zend_fcall_info_cache fci_cache;
-	FILE            *fp;
-	long            fd;
-	int             method;
-	zval		*stream;
+	zval            		func_name;
+	zend_fcall_info_cache 	fci_cache;
+	FILE				   *fp;
+	zend_resource		   *res;
+	int             		method;
+	zval					stream;
 } php_curl_read;
 
 typedef struct {
-	zval 		*func_name;
-	zend_fcall_info_cache fci_cache;
-	int    	        method;
+	zval 					func_name;
+	zend_fcall_info_cache 	fci_cache;
+	int    	        		method;
 } php_curl_progress, php_curl_fnmatch;
 
 typedef struct {
-	php_curl_write *write;
-	php_curl_write *write_header;
-	php_curl_read  *read;
+	php_curl_write 		   *write;
+	php_curl_write 		   *write_header;
+	php_curl_read  		   *read;
 #if CURLOPT_PASSWDFUNCTION != 0
-	zval           *passwd;
+	zval            		passwd;
 #endif
-	zval           *std_err;
-	php_curl_progress *progress;
+	zval            		std_err;
+	php_curl_progress 	   *progress;
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
-	php_curl_fnmatch  *fnmatch;
+	php_curl_fnmatch  	   *fnmatch;
 #endif
 } php_curl_handlers;
 
@@ -151,32 +161,33 @@ struct _php_curl_error  {
 };
 
 struct _php_curl_send_headers {
-	char *str;
-	size_t str_len;
+	zend_string *str;
 };
 
 struct _php_curl_free {
 	zend_llist str;
 	zend_llist post;
-	zend_llist slist;
+	HashTable *slist;
 };
 
 typedef struct {
 	struct _php_curl_error   err;
 	struct _php_curl_free    *to_free;
 	struct _php_curl_send_headers header;
-	void ***thread_ctx;
 	CURL                    *cp;
 	php_curl_handlers       *handlers;
-	long                     id;
+	zend_resource           *res;
 	zend_bool                in_callback;
-	zval                     *clone;
+	uint32_t				 clone;
+	zend_bool                safe_upload;
 } php_curl;
 
+#define CURLOPT_SAFE_UPLOAD -1
+
 typedef struct {
-	int    still_running;
-	CURLM *multi;
-	zend_llist easyh;
+	int    		still_running;
+	CURLM 	   *multi;
+	zend_llist	easyh;
 } php_curlm;
 
 typedef struct {
@@ -185,40 +196,10 @@ typedef struct {
 
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);
-int  _php_curl_verify_handlers(php_curl *ch, int reporterror TSRMLS_DC);
+void _php_curl_verify_handlers(php_curl *ch, int reporterror);
 
-/* streams support */
-
-extern php_stream_ops php_curl_stream_ops;
-#define PHP_STREAM_IS_CURL	&php_curl_stream_ops
-
-php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, char *mode,
-		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-
-extern php_stream_wrapper php_curl_wrapper;
-
-struct php_curl_buffer {
-	off_t readpos, writepos;
-	php_stream *buf;
-};
-
-typedef struct {
-	CURL	*curl;
-	CURLM	*multi;
-	char *url;
-	struct php_curl_buffer readbuffer; /* holds downloaded data */
-	struct php_curl_buffer writebuffer; /* holds data to upload */
-
-	fd_set readfds, writefds, excfds;
-	int maxfd;
-	
-	char errstr[CURL_ERROR_SIZE + 1];
-	CURLMcode mcode;
-	int pending;
-	zval *headers;
-	struct curl_slist *headers_slist; /* holds custom headers sent out in the request */
-} php_curl_stream;
-
+void curlfile_register_class(void);
+PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;
 
 #else
 #define curl_module_ptr NULL

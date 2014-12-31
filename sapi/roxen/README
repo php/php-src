@@ -8,9 +8,9 @@ script is executed at any one time). The second option is using ZTS
 (Zend Thread Safe mode). Unless --enable-roxen-zts is specified, this
 won't be used.
 
-This solution now works fine and is recommended. Multiple PHP5
+This solution now works fine and is recommended. Multiple PHP7
 requests will be run in parallell. The maximum number of parallell
-PHP5-execution is limited to the number of handle threads Roxen is
+PHP7-execution is limited to the number of handle threads Roxen is
 started with.
 
 Support for this module is lacking. Please contact Roxen Internet

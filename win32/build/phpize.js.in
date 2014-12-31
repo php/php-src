@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2008 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -24,7 +24,6 @@ var STDOUT = WScript.StdOut;
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
 var C = FSO.CreateTextFile("configure.js", true);
 var B = FSO.CreateTextFile("configure.bat", true);
-var DSP = false;
 re = /\\script/i;
 var PHP_DIR=FSO.GetParentFolderName(WScript.ScriptFullName).replace(re,"");
 
@@ -40,9 +39,13 @@ function ERROR(msg)
 
 function file_get_contents(filename)
 {
+	var t = "";
 	var F = FSO.OpenTextFile(filename, 1);
-	var t = F.ReadAll();
-	F.Close();
+
+	if (!F.AtEndOfStream) {
+		t = F.ReadAll();
+		F.Close();
+	}
 	return t;
 }
 
@@ -208,19 +211,20 @@ STDOUT.WriteLine(PHP_DIR);
 C.WriteLine("/* This file automatically generated from script/confutils.js */");
 C.WriteLine("var MODE_PHPIZE = true;");
 C.WriteLine("var PHP_DIR = " + '"' + PHP_DIR.replace(new RegExp('(["\\\\])', "g"), '\\$1') + '"');
+C.WriteLine("var PHP_PREFIX = " + '"' + PHP_PREFIX.replace(new RegExp('(["\\\\])', "g"), '\\$1') + '"');
+
+/* XXX this needs to be implemented for the phpize mode yet, a quick fix just to disable it for now */
+C.WriteLine("var PHP_ANALYZER = 'disabled';");
+C.WriteLine("var PHP_PGO = 'no';");
+C.WriteLine("var PHP_PGI = 'no';");
+
+C.Write(file_get_contents(PHP_DIR + "//script//ext_deps.js"));
+if (FSO.FileExists(PHP_DIR + "/script/ext_pickle.js")) {
+	C.Write(file_get_contents(PHP_DIR + "//script//ext_pickle.js"));
+}
 
 C.Write(file_get_contents(PHP_DIR + "/script/confutils.js"));
 C.Write(file_get_contents(PHP_DIR + "/script/config.phpize.js"));
-
-// If project files were requested, pull in the code to generate them
-if (DSP == true) {
-	C.WriteLine('PHP_DSP="yes"');
-	C.WriteBlankLines(1);
-	C.Write(file_get_contents(PHP_DIR + "win32/build/projectgen.js"));
-} else {
-	C.WriteLine('PHP_DSP="no"');
-	C.WriteBlankLines(1);
-}
 
 // Pull in code for the base detection
 modules = file_get_contents(PHP_DIR + "/script/config.w32.phpize.in");

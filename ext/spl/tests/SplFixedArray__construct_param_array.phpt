@@ -9,4 +9,4 @@ $array = new SplFixedArray( array("string", 1) );
 
 ?>
 --EXPECTF--
-Warning: SplFixedArray::__construct() expects parameter 1 to be long, array given in %s on line %d
+Warning: SplFixedArray::__construct() expects parameter 1 to be integer, array given in %s on line %d

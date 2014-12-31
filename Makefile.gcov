@@ -14,7 +14,7 @@ php_lcov.info: lcov-test
 	@rm -rf lcov_data/
 	@$(mkinstalldirs) lcov_data/
 	@echo
-	-@files=`find . -name \*.gcda -o -name \*.gcno -o -name \*.da -o -name \*.h | sed -e 's/^\.\///' | sed -e 's/\.gcda//g' -e 's/\.gcno//g' -e 's/\.da//g' | $(EGREP) $(LCOV_INCLUDE) | uniq` ;\
+	-@files=`find . -name \*.gcda -o -name \*.gcno -o -name \*.da -o -name \*.c -o -name \*.h | sed -e 's/^\.\///' | sed -e 's/\.gcda//g' -e 's/\.gcno//g' -e 's/\.da//g' | $(EGREP) $(LCOV_INCLUDE) | sed -e 's/.libs/zzzz/g' | sort | sed -e 's/zzzz/.libs/g' | uniq` ;\
 	for x in $$files; do \
 		echo -n . ;\
 		y=`echo $$x | sed -e 's!\.libs/!!'`; \

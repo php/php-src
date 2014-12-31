@@ -9,21 +9,23 @@ if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip output might vary with DRCP");
 
-if (preg_match('/Release (11\.2|12)\./', oci_server_version($c), $matches) !== 1) {
-    // Bug fixed in 11.2 prevents client_info being rest
+preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
+if (!(isset($matches[0]) && 
+      (($matches[1] == 11 && $matches[2] >= 2) ||
+       ($matches[1] >= 12)
+       ))) {
+    // Bug fixed in 11.2 prevents client_info being reset
 	die("skip expected output only valid when using Oracle 11gR2 or greater database server");
-} else if (preg_match('/^1[01]\./', oci_client_version()) != 1) {
-    die("skip test expected to work only with Oracle 10g or greater version of client");
 }
 ?>
 --FILE--
 <?php
 
+$testuser     = 'testuser_attr_4';  // Used in conn_attr.inc
+$testpassword = 'testuser'; 
 
 require(dirname(__FILE__)."/conn_attr.inc");
 
-$user='testuser';
-$password='testuser';
 $attr_array = array('MODULE','ACTION','CLIENT_INFO','CLIENT_IDENTIFIER');
 
 echo"**Test  Negative cases************\n";
@@ -40,7 +42,7 @@ var_dump(oci_set_client_info($str1,$str1));
 
 // Setting an Invalid value.
 echo "\nInvalid Value \n";
-$c1=oci_connect($user,$password,$dbase);
+$c1=oci_connect($testuser,$testpassword,$dbase);
 var_dump(oci_set_action($c1,$c1));
 
 // Setting values multiple times.
@@ -62,7 +64,7 @@ foreach($values_array as $val ) {
 	oci_set_client_info($c1,$val);
 	$r = oci_set_action($c1,$val);	
 	if ($r) {
-		echo "Values set succesfully to $val\n";
+		echo "Values set successfully to $val\n";
 		foreach($attr_array as $attr) {
             get_attr($c1,$attr);
         }
@@ -98,12 +100,12 @@ bool(true)
 The value of ACTION is ACTION1
 
 Setting to different values 
-Values set succesfully to 1000
+Values set successfully to 1000
 The value of MODULE is 1000
 The value of ACTION is 1000
 The value of CLIENT_INFO is 1000
 The value of CLIENT_IDENTIFIER is 1000
-Values set succesfully to 
+Values set successfully to 
 The value of MODULE is 
 The value of ACTION is 
 The value of CLIENT_INFO is 

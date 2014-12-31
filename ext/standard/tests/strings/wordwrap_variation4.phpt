@@ -66,7 +66,7 @@ $values =  array (
 );
 
 // loop though each element of the array and check the working of wordwrap()
-// when $cut arugment is supplied with different values
+// when $cut argument is supplied with different values
 echo "\n--- Testing wordwrap() by supplying different values for 'cut' argument ---\n";
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {

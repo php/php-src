@@ -4,7 +4,7 @@ Test trim() function : usage variations - test values for $charlist argument
 <?php
 
 /* Prototype  : string trim  ( string $str  [, string $charlist  ] )
- * Description: Strip whitespace (or other characters) from the begining and end of a string.
+ * Description: Strip whitespace (or other characters) from the beginning and end of a string.
  * Source code: ext/standard/string.c
 */
 
