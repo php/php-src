@@ -1453,7 +1453,7 @@ PHP_FUNCTION(extract)
 		var_exists = 0;
 
 		if (var_name) {
-			var_exists = zend_hash_exists_ind(&symbol_table->ht, var_name);
+			var_exists = zend_hash_exists_ind(symbol_table, var_name);
 		} else if (extract_type == EXTR_PREFIX_ALL || extract_type == EXTR_PREFIX_INVALID) {
 			zval num;
 
@@ -1523,14 +1523,14 @@ PHP_FUNCTION(extract)
 				ZVAL_MAKE_REF(entry);
 				Z_ADDREF_P(entry);
 
-				if ((orig_var = zend_hash_find(&symbol_table->ht, Z_STR(final_name))) != NULL) {
+				if ((orig_var = zend_hash_find(symbol_table, Z_STR(final_name))) != NULL) {
 					if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 						orig_var = Z_INDIRECT_P(orig_var);
 					}
 					zval_ptr_dtor(orig_var);
 					ZVAL_COPY_VALUE(orig_var, entry);
 				} else {
-					zend_hash_update(&symbol_table->ht, Z_STR(final_name), entry);
+					zend_hash_update(symbol_table, Z_STR(final_name), entry);
 				}
 			} else {
 				if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
@@ -1598,7 +1598,7 @@ PHP_FUNCTION(compact)
 	}
 
 	for (i=0; i<ZEND_NUM_ARGS(); i++) {
-		php_compact_var(&symbol_table->ht, return_value, &args[i]);
+		php_compact_var(symbol_table, return_value, &args[i]);
 	}
 }
 /* }}} */
@@ -1967,7 +1967,7 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 				zend_hash_index_del(in_hash, p->h);
 			} else {
 				zend_hash_add_new(removed, p->key, entry);
-				if (in_hash == &EG(symbol_table).ht) {
+				if (in_hash == &EG(symbol_table)) {
 					zend_delete_global_variable(p->key);
 				} else {
 					zend_hash_del(in_hash, p->key);
@@ -1982,7 +1982,7 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 			if (p->key == NULL) {
 				zend_hash_index_del(in_hash, p->h);
 			} else {
-				if (in_hash == &EG(symbol_table).ht) {
+				if (in_hash == &EG(symbol_table)) {
 					zend_delete_global_variable(p->key);
 				} else {
 					zend_hash_del(in_hash, p->key);
@@ -2015,6 +2015,8 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 
 	in_hash->pDestructor = NULL;
 	zend_hash_destroy(in_hash);
+	GC_REFCOUNT(&out_hash) = 1;
+	GC_TYPE_INFO(&out_hash) = IS_ARRAY;
 	*in_hash = out_hash;
 }
 /* }}} */
@@ -2098,7 +2100,7 @@ PHP_FUNCTION(array_pop)
 
 	/* Delete the last value */
 	if (p->key) {
-		if (Z_ARRVAL_P(stack) == &EG(symbol_table).ht) {
+		if (Z_ARRVAL_P(stack) == &EG(symbol_table)) {
 			zend_delete_global_variable(p->key);
 		} else {
 			zend_hash_del(Z_ARRVAL_P(stack), p->key);
@@ -2155,7 +2157,7 @@ PHP_FUNCTION(array_shift)
 
 	/* Delete the first value */
 	if (p->key) {
-		if (Z_ARRVAL_P(stack) == &EG(symbol_table).ht) {
+		if (Z_ARRVAL_P(stack) == &EG(symbol_table)) {
 			zend_delete_global_variable(p->key);
 		} else {
 			zend_hash_del(Z_ARRVAL_P(stack), p->key);
@@ -2241,6 +2243,8 @@ PHP_FUNCTION(array_unshift)
 
 	Z_ARRVAL_P(stack)->pDestructor = NULL;
 	zend_hash_destroy(Z_ARRVAL_P(stack));
+	GC_REFCOUNT(&new_hash) = 1;
+	GC_TYPE_INFO(&new_hash) = IS_ARRAY;
 	*Z_ARRVAL_P(stack) = new_hash;
 
 	/* Clean up and return the number of elements in the stack */
@@ -3169,7 +3173,7 @@ PHP_FUNCTION(array_unique)
 			if (p->key == NULL) {
 				zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
 			} else {
-				if (Z_ARRVAL_P(return_value) == &EG(symbol_table).ht) {
+				if (Z_ARRVAL_P(return_value) == &EG(symbol_table)) {
 					zend_delete_global_variable(p->key);
 				} else {
 					zend_hash_del(Z_ARRVAL_P(return_value), p->key);

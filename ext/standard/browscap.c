@@ -59,7 +59,7 @@ static void browscap_entry_dtor_request(zval *zvalue) /* {{{ */
 {
 	if (Z_TYPE_P(zvalue) == IS_ARRAY) {
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
-		efree(Z_ARR_P(zvalue));
+		efree(Z_ARRVAL_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
 		zend_string_release(Z_STR_P(zvalue));
 	}
@@ -69,7 +69,7 @@ static void browscap_entry_dtor_request(zval *zvalue) /* {{{ */
 static void browscap_entry_dtor_persistent(zval *zvalue) /* {{{ */ {
 	if (Z_TYPE_P(zvalue) == IS_ARRAY) {
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
-		free(Z_ARR_P(zvalue));
+		free(Z_ARRVAL_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
 		zend_string_release(Z_STR_P(zvalue));
 	}

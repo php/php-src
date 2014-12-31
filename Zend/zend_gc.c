@@ -243,7 +243,7 @@ tail_call:
 		}
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
 		if ((zend_array*)ref != &EG(symbol_table)) {
-			ht = &((zend_array*)ref)->ht;
+			ht = (zend_array*)ref;
 		}
 	} else if (GC_TYPE(ref) == IS_REFERENCE) {
 		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
@@ -328,7 +328,7 @@ tail_call:
 			if (((zend_array*)ref) == &EG(symbol_table)) {
 				GC_SET_BLACK(GC_INFO(ref));
 			} else {
-				ht = &((zend_array*)ref)->ht;
+				ht = (zend_array*)ref;
 			}
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
@@ -419,7 +419,7 @@ tail_call:
 				if ((zend_array*)ref == &EG(symbol_table)) {
 					GC_SET_BLACK(GC_INFO(ref));
 				} else {
-					ht = &((zend_array*)ref)->ht;
+					ht = (zend_array*)ref;
 				}
 			} else if (GC_TYPE(ref) == IS_REFERENCE) {
 				if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
@@ -543,7 +543,7 @@ tail_call:
 				ht = props;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
-			ht = &((zend_array*)ref)->ht;
+			ht = (zend_array*)ref;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				if (UNEXPECTED(!EG(objects_store).object_buckets) &&
@@ -680,7 +680,7 @@ tail_call:
 				ht = props;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
-			ht = &((zend_array*)ref)->ht;
+			ht = (zend_array*)ref;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				if (UNEXPECTED(!EG(objects_store).object_buckets) &&
@@ -805,7 +805,7 @@ ZEND_API int gc_collect_cycles(void)
 				zend_array *arr = (zend_array*)p;
 
 				GC_TYPE(arr) = IS_NULL;
-				zend_hash_destroy(&arr->ht);
+				zend_hash_destroy(arr);
 			}
 			current = GC_G(next_to_free);
 		}

@@ -202,18 +202,18 @@ static inline void zend_clone_zval(zval *src, int bind)
 			Z_STR_P(src) = zend_clone_str(Z_STR_P(src));
 			break;
 		case IS_ARRAY:
-			if (Z_ARR_P(src) != &EG(symbol_table)) {
-		    	if (bind && Z_REFCOUNT_P(src) > 1 && (ptr = accel_xlat_get(Z_ARR_P(src))) != NULL) {
-		    		Z_ARR_P(src) = ptr;
+			if (Z_ARRVAL_P(src) != &EG(symbol_table)) {
+		    	if (bind && Z_REFCOUNT_P(src) > 1 && (ptr = accel_xlat_get(Z_ARRVAL_P(src))) != NULL) {
+		    		Z_ARRVAL_P(src) = ptr;
 				} else {
-					zend_array *old = Z_ARR_P(src);
+					zend_array *old = Z_ARRVAL_P(src);
 
-					Z_ARR_P(src) = emalloc(sizeof(zend_array));
-					Z_ARR_P(src)->gc = old->gc;
+					Z_ARRVAL_P(src) = emalloc(sizeof(zend_array));
+					Z_ARRVAL_P(src)->gc = old->gc;
 			    	if (bind && Z_REFCOUNT_P(src) > 1) {
-						accel_xlat_set(old, Z_ARR_P(src));
+						accel_xlat_set(old, Z_ARRVAL_P(src));
 					}
-					zend_hash_clone_zval(Z_ARRVAL_P(src), &old->ht, 0);
+					zend_hash_clone_zval(Z_ARRVAL_P(src), old, 0);
 				}
 			}
 			break;

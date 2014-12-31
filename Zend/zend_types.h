@@ -156,7 +156,8 @@ typedef struct _Bucket {
 	zend_string      *key;              /* string key or NULL for numerics */
 } Bucket;
 
-typedef struct _HashTable {	
+struct _zend_array {
+	zend_refcounted   gc;
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_3(
@@ -175,12 +176,9 @@ typedef struct _HashTable {
 	Bucket           *arData;
 	uint32_t         *arHash;
 	dtor_func_t       pDestructor;
-} HashTable;
-
-struct _zend_array {
-	zend_refcounted   gc;
-	HashTable         ht;
 };
+
+#define HashTable zend_array
 
 struct _zend_object {
 	zend_refcounted   gc;
@@ -406,10 +404,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_STRHASH(zval)				Z_STR(zval)->h
 #define Z_STRHASH_P(zval_p)			Z_STRHASH(*(zval_p))
 
-#define Z_ARR(zval)					(zval).value.arr
-#define Z_ARR_P(zval_p)				Z_ARR(*(zval_p))
-
-#define Z_ARRVAL(zval)				(&Z_ARR(zval)->ht)
+#define Z_ARRVAL(zval)				(zval).value.arr
 #define Z_ARRVAL_P(zval_p)			Z_ARRVAL(*(zval_p))
 
 #define Z_OBJ(zval)					(zval).value.obj
@@ -541,7 +536,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define ZVAL_ARR(z, a) do {						\
 		zval *__z = (z);						\
-		Z_ARR_P(__z) = (a);						\
+		Z_ARRVAL_P(__z) = (a);					\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;		\
 	} while (0)
 
@@ -550,7 +545,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		zend_array *_arr = emalloc(sizeof(zend_array));			\
 		GC_REFCOUNT(_arr) = 1;									\
 		GC_TYPE_INFO(_arr) = IS_ARRAY;							\
-		Z_ARR_P(__z) = _arr;									\
+		Z_ARRVAL_P(__z) = _arr;									\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;						\
 	} while (0)
 
@@ -559,7 +554,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		zend_array *_arr = malloc(sizeof(zend_array));			\
 		GC_REFCOUNT(_arr) = 1;									\
 		GC_TYPE_INFO(_arr) = IS_ARRAY;							\
-		Z_ARR_P(__z) = _arr;									\
+		Z_ARRVAL_P(__z) = _arr;									\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;						\
 	} while (0)
 

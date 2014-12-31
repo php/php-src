@@ -43,7 +43,7 @@ PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len) {
 		phpdbg_is_auto_global(ZEND_STRL("_SERVER"));
 		phpdbg_is_auto_global(ZEND_STRL("_REQUEST"));
 		array_init(&zv[1]);
-		zend_hash_copy(Z_ARRVAL(zv[1]), &EG(symbol_table).ht, NULL);
+		zend_hash_copy(Z_ARRVAL(zv[1]), &EG(symbol_table), NULL);
 		Z_ARRVAL(zv[1])->pDestructor = NULL; /* we're operating on a copy! Don't double free zvals */
 		zend_hash_str_del(Z_ARRVAL(zv[1]), ZEND_STRL("GLOBALS")); /* do not use the reference to itself in json */
 		zend_hash_str_add(ht, ZEND_STRL("GLOBALS"), &zv[1]);

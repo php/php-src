@@ -553,7 +553,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 			return;
 		}
-		if (ht == &EG(symbol_table).ht) {
+		if (ht == &EG(symbol_table)) {
 			if (zend_delete_global_variable(Z_STR_P(offset))) {
 				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 			}
@@ -1480,11 +1480,13 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	HashTable *aht = spl_array_get_hash_table(intern, 0);
 	zval tmp, *arg = NULL;
 	zval retval;
+	uint32_t old_refcount;
 
 	/* A tricky way to pass "aht" by reference, copy HashTable */
 	//??? It may be not safe, if user comparison handler accesses "aht"
-	ZVAL_NEW_ARR(&tmp);
-	*Z_ARRVAL(tmp) = *aht;
+	old_refcount = GC_REFCOUNT(aht);
+	GC_REFCOUNT(aht) = 1;
+	ZVAL_ARR(&tmp, aht);
 
 	if (!use_arg) {
 		aht->u.v.nApplyCount++;
@@ -1510,12 +1512,11 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		aht->u.v.nApplyCount--;
 	}
 	/* A tricky way to pass "aht" by reference, copy back and cleanup */
-	if (Z_ISREF(tmp) && Z_TYPE_P(Z_REFVAL(tmp))) {
-		*aht = *Z_ARRVAL_P(Z_REFVAL(tmp));
-		GC_REMOVE_FROM_BUFFER(Z_ARR_P(Z_REFVAL(tmp)));
-		efree(Z_ARR_P(Z_REFVAL(tmp)));
+	if (Z_ISREF(tmp) && Z_TYPE_P(Z_REFVAL(tmp)) == IS_ARRAY) {
+		GC_REMOVE_FROM_BUFFER(Z_ARRVAL_P(Z_REFVAL(tmp)));
 		efree(Z_REF(tmp));
 	}
+	GC_REFCOUNT(aht) = old_refcount;
 	if (!Z_ISUNDEF(retval)) {
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}

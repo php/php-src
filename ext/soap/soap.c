@@ -1571,7 +1571,7 @@ PHP_METHOD(SoapServer, handle)
 			zend_string *server = zend_string_init("_SERVER", sizeof("_SERVER")-1, 0);
 
 			zend_is_auto_global(server);
-			if ((server_vars = zend_hash_find(&EG(symbol_table).ht, server)) != NULL &&
+			if ((server_vars = zend_hash_find(&EG(symbol_table), server)) != NULL &&
 			    Z_TYPE_P(server_vars) == IS_ARRAY &&
 			    (encoding = zend_hash_str_find(Z_ARRVAL_P(server_vars), "HTTP_CONTENT_ENCODING", sizeof("HTTP_CONTENT_ENCODING")-1)) != NULL &&
 			    Z_TYPE_P(encoding) == IS_STRING) {

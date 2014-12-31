@@ -551,7 +551,7 @@ static zend_bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
 
 	ZVAL_ARR(&globals, &EG(symbol_table));
 	ZVAL_NEW_REF(&globals, &globals);
-	zend_hash_update(&EG(symbol_table).ht, name, &globals);
+	zend_hash_update(&EG(symbol_table), name, &globals);
 	return 0;
 }
 /* }}} */
@@ -1123,7 +1123,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 				ZVAL_NULL(&params[4]);
 			} else {
 				ZVAL_NEW_ARR(&params[4]);
-				zend_array_dup(Z_ARRVAL(params[4]), &symbol_table->ht);
+				zend_array_dup(Z_ARRVAL(params[4]), symbol_table);
 			}
 
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));

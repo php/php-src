@@ -13518,7 +13518,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -16355,7 +16355,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -17791,7 +17791,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -19084,7 +19084,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -21170,7 +21170,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -22558,7 +22558,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -26102,7 +26102,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -26624,8 +26624,8 @@ static int ZEND_FASTCALL  ZEND_BIND_GLOBAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 
 	/* We store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 	idx = (uint32_t)(uintptr_t)CACHED_PTR(Z_CACHE_SLOT_P(varname)) - 1;
-	if (EXPECTED(idx < EG(symbol_table).ht.nNumUsed)) {
-		Bucket *p = EG(symbol_table).ht.arData + idx;
+	if (EXPECTED(idx < EG(symbol_table).nNumUsed)) {
+		Bucket *p = EG(symbol_table).arData + idx;
 
 		if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 	        (EXPECTED(p->key == Z_STR_P(varname)) ||
@@ -26634,19 +26634,19 @@ static int ZEND_FASTCALL  ZEND_BIND_GLOBAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	          EXPECTED(p->key->len == Z_STRLEN_P(varname)) &&
 	          EXPECTED(memcmp(p->key->val, Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)))) {
 
-			value = &EG(symbol_table).ht.arData[idx].val;
+			value = &EG(symbol_table).arData[idx].val;
 			goto check_indirect;
 		}
 	}
 
-	value = zend_hash_find(&EG(symbol_table).ht, Z_STR_P(varname));
+	value = zend_hash_find(&EG(symbol_table), Z_STR_P(varname));
 	if (UNEXPECTED(value == NULL)) {
-		value = zend_hash_add_new(&EG(symbol_table).ht, Z_STR_P(varname), &EG(uninitialized_zval));
-		idx = ((char*)value - (char*)EG(symbol_table).ht.arData) / sizeof(Bucket);
+		value = zend_hash_add_new(&EG(symbol_table), Z_STR_P(varname), &EG(uninitialized_zval));
+		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 		CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)(idx + 1));
 	} else {
-		idx = ((char*)value - (char*)EG(symbol_table).ht.arData) / sizeof(Bucket);
+		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 		CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)(idx + 1));
 check_indirect:
@@ -30106,7 +30106,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -32058,7 +32058,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));

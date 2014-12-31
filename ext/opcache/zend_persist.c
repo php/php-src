@@ -189,17 +189,17 @@ static void zend_persist_zval(zval *z)
 			Z_TYPE_FLAGS_P(z) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 			break;
 		case IS_ARRAY:
-			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
+			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARRVAL_P(z));
 			if (new_ptr) {
-				Z_ARR_P(z) = new_ptr;
+				Z_ARRVAL_P(z) = new_ptr;
 				Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
 			} else {
 				if (Z_IMMUTABLE_P(z)) {
-					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
+					Z_ARRVAL_P(z) = zend_accel_memdup(Z_ARRVAL_P(z), sizeof(zend_array));
 					zend_hash_persist_immutable(Z_ARRVAL_P(z));
 				} else {
-					GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
-					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
+					GC_REMOVE_FROM_BUFFER(Z_ARRVAL_P(z));
+					zend_accel_store(Z_ARRVAL_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval);
 					/* make immutable array */
 					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
@@ -243,17 +243,17 @@ static void zend_persist_zval_const(zval *z)
 			Z_TYPE_FLAGS_P(z) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 			break;
 		case IS_ARRAY:
-			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
+			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARRVAL_P(z));
 			if (new_ptr) {
-				Z_ARR_P(z) = new_ptr;
+				Z_ARRVAL_P(z) = new_ptr;
 				Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
 			} else {
 				if (Z_IMMUTABLE_P(z)) {
-					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
+					Z_ARRVAL_P(z) = zend_accel_memdup(Z_ARRVAL_P(z), sizeof(zend_array));
 					zend_hash_persist_immutable(Z_ARRVAL_P(z));
 				} else {
-					GC_REMOVE_FROM_BUFFER(Z_ARR_P(z));
-					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
+					GC_REMOVE_FROM_BUFFER(Z_ARRVAL_P(z));
+					zend_accel_store(Z_ARRVAL_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval);
 					/* make immutable array */
 					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;

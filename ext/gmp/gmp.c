@@ -561,7 +561,6 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	smart_str buf = {0};
 	zval zv;
 	php_serialize_data_t serialize_data = (php_serialize_data_t) data;
-	zend_array tmp_arr;
 
 	PHP_VAR_SERIALIZE_INIT(serialize_data);
     
@@ -569,8 +568,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	php_var_serialize(&buf, &zv, &serialize_data);
 	zval_dtor(&zv);
 
-	ZVAL_ARR(&zv, &tmp_arr);
-	tmp_arr.ht = *zend_std_get_properties(object);
+	ZVAL_ARR(&zv, zend_std_get_properties(object));
 	php_var_serialize(&buf, &zv, &serialize_data);
 
 	PHP_VAR_SERIALIZE_DESTROY(serialize_data);

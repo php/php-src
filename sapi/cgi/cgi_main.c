@@ -591,7 +591,7 @@ static char *sapi_fcgi_read_cookies(void)
 static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
 {
 	zval *array_ptr = (zval*)arg;	
-	int filter_arg = (Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV]))?PARSE_ENV:PARSE_SERVER;
+	int filter_arg = (Z_ARRVAL_P(array_ptr) == Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV]))?PARSE_ENV:PARSE_SERVER;
 	size_t new_val_len;
 
 	if (sapi_module.input_filter(filter_arg, var, &val, strlen(val), &new_val_len)) {
@@ -602,14 +602,14 @@ static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, uns
 static void cgi_php_import_environment_variables(zval *array_ptr)
 {
 	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
-		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
+		Z_ARRVAL_P(array_ptr) != Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV]) &&
 		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
 	) {
 		zval_dtor(array_ptr);
 		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
 		return;
 	} else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
-		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
+		Z_ARRVAL_P(array_ptr) != Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]) &&
 		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
 	) {
 		zval_dtor(array_ptr);

@@ -670,7 +670,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			php_error_docref(NULL, E_WARNING, "Invalid Regular Expression");
 			
 			zend_hash_destroy(Z_ARRVAL_P(return_value));
-			efree(Z_ARR_P(return_value));
+			efree(Z_ARRVAL_P(return_value));
 			RETURN_FALSE;
 		} else {
 			/* On a real match */
@@ -697,7 +697,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		php_ereg_eprint(err, &re);
 		regfree(&re);
 		zend_hash_destroy(Z_ARRVAL_P(return_value));
-		efree(Z_ARR_P(return_value));
+		efree(Z_ARRVAL_P(return_value));
 		RETURN_FALSE;
 	}
 

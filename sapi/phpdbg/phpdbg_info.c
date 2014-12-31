@@ -188,7 +188,7 @@ static int phpdbg_print_symbols(zend_bool show_globals) {
 	zend_hash_init(&vars, 8, NULL, NULL, 0);
 
 	phpdbg_try_access {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(&symtable->ht, var, data) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(symtable, var, data) {
 			if (zend_is_auto_global(var) ^ !show_globals) {
 				zend_hash_update(&vars, var, data);
 			}

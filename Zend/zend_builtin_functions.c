@@ -1853,7 +1853,7 @@ ZEND_FUNCTION(get_defined_vars)
 	zend_array *symbol_table = zend_rebuild_symbol_table();
 
 	ZVAL_NEW_ARR(return_value);
-	zend_array_dup(Z_ARRVAL_P(return_value), &symbol_table->ht);
+	zend_array_dup(Z_ARRVAL_P(return_value), symbol_table);
 }
 /* }}} */
 

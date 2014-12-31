@@ -120,7 +120,7 @@ static void zend_persist_zval_calc(zval *z)
 			Z_GC_FLAGS_P(z) |= flags;
 			break;
 		case IS_ARRAY:
-			size = zend_shared_memdup_size(Z_ARR_P(z), sizeof(zend_array));
+			size = zend_shared_memdup_size(Z_ARRVAL_P(z), sizeof(zend_array));
 			if (size) {
 				ADD_SIZE(size);
 				zend_hash_persist_calc(Z_ARRVAL_P(z), zend_persist_zval_calc);

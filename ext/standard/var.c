@@ -926,7 +926,7 @@ again:
 
 					/* we should still add element even if it's not OK,
 					 * since we already wrote the length of the array before */
-					if ((Z_TYPE_P(data) == IS_ARRAY && Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))
+					if ((Z_TYPE_P(data) == IS_ARRAY && Z_TYPE_P(struc) == IS_ARRAY && Z_ARRVAL_P(data) == Z_ARRVAL_P(struc))
 						|| (Z_TYPE_P(data) == IS_ARRAY && Z_ARRVAL_P(data)->u.v.nApplyCount > 1)
 					) {
 						smart_str_appendl(buf, "N;", 2);
