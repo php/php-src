@@ -1733,15 +1733,15 @@ static int php_openssl_enable_crypto(php_stream *stream,
 	return -1;
 }
 
-static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
-{
-	return php_openssl_sockop_io( 1, stream, buf, count );
-}
-/* }}} */
-
 static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	return php_openssl_sockop_io( 0, stream, buf, count );
+}
+/* }}} */
+
+static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
+{
+	return php_openssl_sockop_io( 1, stream, buf, count );
 }
 /* }}} */
 
