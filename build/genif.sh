@@ -19,7 +19,7 @@ fi
 
 header_list=
 olddir=`pwd`
-cd $srcdir
+cd "$srcdir"
 
 module_ptrs="$extra_module_ptrs`echo $@ | $awk -f ./build/order_by_dep.awk`"
 
@@ -29,7 +29,7 @@ done
 
 includes=`$awk -f ./build/print_include.awk $header_list`
 
-cd $olddir
+cd "$olddir"
 
 cat $infile | \
 	sed \
