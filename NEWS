@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20?? PHP 5.4.37
+- Core:
+  . Fix bug #68710 (Use after free vulnerability in unserialize(), incomplete
+    fix for #68594). (Stefan Esser)
+
 - CGI:
   . Fix bug #68618 (out of bounds read crashes php-cgi). (Stas)
 
