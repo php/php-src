@@ -718,7 +718,7 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status)
 					FAIL == mysqlnd_rollback(mysql->mysql, TRANS_COR_NO_OPT, NULL))
 #endif
 				{
-					mysqli_close(mysql->mysql, close_type);			
+					mysqli_close(mysql->mysql, close_type);
 				} else {
 					zend_ptr_stack_push(&plist->free_links, mysql->mysql);
 					MyG(num_inactive_persistent)++;
@@ -1504,7 +1504,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS)
 	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql;
 
-// TODO: We can't properly check if this was to mysql_init() in a class method 
+// TODO: We can't properly check if this was to mysql_init() in a class method
 //       or a call to mysqli->init().
 //       To solve the problem, we added instanceof check for the class of $this
 //       ???

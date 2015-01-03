@@ -401,10 +401,10 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 	filter_func.function(value, flags, options, charset);
 
 	if (options && (Z_TYPE_P(options) == IS_ARRAY || Z_TYPE_P(options) == IS_OBJECT) &&
-		((flags & FILTER_NULL_ON_FAILURE && Z_TYPE_P(value) == IS_NULL) || 
+		((flags & FILTER_NULL_ON_FAILURE && Z_TYPE_P(value) == IS_NULL) ||
 		(!(flags & FILTER_NULL_ON_FAILURE) && Z_TYPE_P(value) == IS_FALSE)) &&
 		zend_hash_str_exists(HASH_OF(options), "default", sizeof("default") - 1)) {
-		zval *tmp; 
+		zval *tmp;
 		if ((tmp = zend_hash_str_find(HASH_OF(options), "default", sizeof("default") - 1)) != NULL) {
 			ZVAL_COPY(value, tmp);
 		}
@@ -441,7 +441,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_l
 			break;
 	}
 
-	/* 
+	/*
 	 * According to rfc2965, more specific paths are listed above the less specific ones.
 	 * If we encounter a duplicate cookie name, we should skip it, since it is not possible
 	 * to have the same (plain text) cookie name for the same path and we should not overwrite
@@ -742,7 +742,7 @@ PHP_FUNCTION(filter_input)
 			} else if (Z_TYPE_P(filter_args) == IS_ARRAY && (option = zend_hash_str_find(HASH_OF(filter_args), "flags", sizeof("flags") - 1)) != NULL) {
 				filter_flags = zval_get_long(option);
 			}
-			if (Z_TYPE_P(filter_args) == IS_ARRAY && 
+			if (Z_TYPE_P(filter_args) == IS_ARRAY &&
 				(opt = zend_hash_str_find(HASH_OF(filter_args), "options", sizeof("options") - 1)) != NULL &&
 				Z_TYPE_P(opt) == IS_ARRAY &&
 				(def = zend_hash_str_find(HASH_OF(opt), "default", sizeof("default") - 1)) != NULL) {

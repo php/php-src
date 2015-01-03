@@ -238,7 +238,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					short_post = "</status>";
 				} else {
 					full_pre = "<processes>\n";
-					full_syntax = 
+					full_syntax =
 						"<process>"
 							"<pid>%d</pid>"
 							"<state>%s</state>"

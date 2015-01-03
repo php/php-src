@@ -40,7 +40,7 @@ typedef char * caddr_t;
 #define S_IFIFO		_IFIFO
 #define S_IFBLK		_IFBLK
 #define	S_IFLNK		_IFLNK
-#ifndef S_ISREG 
+#ifndef S_ISREG
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
 #define chdir(path) _chdir(path)

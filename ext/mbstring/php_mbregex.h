@@ -17,7 +17,7 @@
  */
 
 /* $Id$ */
- 
+
 #ifndef _PHP_MBREGEX_H
 #define _PHP_MBREGEX_H
 

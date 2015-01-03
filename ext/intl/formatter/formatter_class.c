@@ -76,7 +76,7 @@ zend_object *NumberFormatter_object_clone(zval *object)
 	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
 	new_obj = NumberFormatter_ce_ptr->create_object(Z_OBJCE_P(object));
 	new_nfo = php_intl_number_format_fetch_object(new_obj);
-	/* clone standard parts */	
+	/* clone standard parts */
 	zend_objects_clone_members(&new_nfo->zo, &nfo->zo);
 	/* clone formatter object. It may fail, the destruction code must handle this case */
 	if (FORMATTER_OBJECT(nfo) != NULL) {

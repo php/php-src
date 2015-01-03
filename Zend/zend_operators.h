@@ -567,7 +567,7 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 		__asm__(
 			"movl	(%1), %%eax\n\t"
 			"addl   (%2), %%eax\n\t"
-			"jo     0f\n\t"     
+			"jo     0f\n\t"
 			"movl   %%eax, (%0)\n\t"
 			"movl   %3, %c5(%0)\n\t"
 			"jmp    1f\n"
@@ -578,7 +578,7 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 			"movl   %4, %c5(%0)\n\t"
 			"fstpl	(%0)\n"
 			"1:"
-			: 
+			:
 			: "r"(&result->value),
 			  "r"(&op1->value),
 			  "r"(&op2->value),
@@ -590,7 +590,7 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 		__asm__(
 			"movq	(%1), %%rax\n\t"
 			"addq   (%2), %%rax\n\t"
-			"jo     0f\n\t"     
+			"jo     0f\n\t"
 			"movq   %%rax, (%0)\n\t"
 			"movl   %3, %c5(%0)\n\t"
 			"jmp    1f\n"
@@ -601,7 +601,7 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 			"movl   %4, %c5(%0)\n\t"
 			"fstpl	(%0)\n"
 			"1:"
-			: 
+			:
 			: "r"(&result->value),
 			  "r"(&op1->value),
 			  "r"(&op2->value),
@@ -678,7 +678,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 		__asm__(
 			"movl	(%1), %%eax\n\t"
 			"subl   (%2), %%eax\n\t"
-			"jo     0f\n\t"     
+			"jo     0f\n\t"
 			"movl   %%eax, (%0)\n\t"
 			"movl   %3, %c5(%0)\n\t"
 			"jmp    1f\n"
@@ -693,7 +693,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			"movl   %4, %c5(%0)\n\t"
 			"fstpl	(%0)\n"
 			"1:"
-			: 
+			:
 			: "r"(&result->value),
 			  "r"(&op1->value),
 			  "r"(&op2->value),
@@ -705,7 +705,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 		__asm__(
 			"movq	(%1), %%rax\n\t"
 			"subq   (%2), %%rax\n\t"
-			"jo     0f\n\t"     
+			"jo     0f\n\t"
 			"movq   %%rax, (%0)\n\t"
 			"movl   %3, %c5(%0)\n\t"
 			"jmp    1f\n"
@@ -720,7 +720,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			"movl   %4, %c5(%0)\n\t"
 			"fstpl	(%0)\n"
 			"1:"
-			: 
+			:
 			: "r"(&result->value),
 			  "r"(&op1->value),
 			  "r"(&op2->value),

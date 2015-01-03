@@ -44,7 +44,7 @@ typedef struct {
 
 	/* how many dimensions we are indirecting to get into this element */
 	LONG dimensions;
-	
+
 	/* this is an array whose size_is(dimensions) */
 	zval *indices;
 
@@ -92,9 +92,9 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 	SAFEARRAY *sa;
 	LONG ubound, lbound;
 	HRESULT res;
-	
+
 	ZVAL_NULL(rv);
-	
+
 	if (V_VT(&proxy->obj->v) == VT_DISPATCH) {
 		VARIANT v;
 		zval *args;
@@ -132,10 +132,10 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 	}
 
 	/* the SafeArray case */
-	
+
 	/* offset/index must be an integer */
 	convert_to_long(offset);
-	
+
 	sa = V_ARRAY(&proxy->obj->v);
 	dims = SafeArrayGetDim(sa);
 
@@ -153,14 +153,14 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 		php_com_throw_exception(DISP_E_BADINDEX, "index out of bounds");
 		return rv;
 	}
-	
+
 	if (dims - 1 == proxy->dimensions) {
 		LONG *indices;
 		VARTYPE vt;
 		VARIANT v;
-		
+
 		VariantInit(&v);
-		
+
 		/* we can return a real value */
 		indices = safe_emalloc(dims, sizeof(LONG), 0);
 
@@ -194,7 +194,7 @@ static zval *saproxy_read_dimension(zval *object, zval *offset, int type, zval *
 		}
 
 		VariantClear(&v);
-		
+
 	} else {
 		/* return another proxy */
 		php_com_saproxy_create(object, rv, offset);
@@ -209,7 +209,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value)
 	UINT dims, i;
 	HRESULT res;
 	VARIANT v;
-	
+
 	if (V_VT(&proxy->obj->v) == VT_DISPATCH) {
 		/* We do a prop-set using the first dimension as the property name,
 		 * all subsequent dimensions and offset as parameters, with value as
@@ -231,7 +231,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value)
 		}
 
 		efree(args);
-		
+
 	} else if (V_ISARRAY(&proxy->obj->v)) {
 		LONG *indices;
 		VARTYPE vt;
@@ -264,7 +264,7 @@ static void saproxy_write_dimension(zval *object, zval *offset, zval *value)
 		} else {
 			res = SafeArrayPutElement(V_ARRAY(&proxy->obj->v), indices, &v.lVal);
 		}
-	
+
 		efree(indices);
 		VariantClear(&v);
 
@@ -352,7 +352,7 @@ static int saproxy_count_elements(zval *object, zend_long *count)
 {
 	php_com_saproxy *proxy = SA_FETCH(object);
 	LONG ubound, lbound;
-	
+
 	if (!V_ISARRAY(&proxy->obj->v)) {
 		return FAILURE;
 	}
@@ -450,7 +450,7 @@ int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index)
 	zend_object_std_init(&proxy->std, php_com_saproxy_class_entry);
 	proxy->std.handlers = &php_com_saproxy_handlers;
 	ZVAL_OBJ(proxy_out, &proxy->std);
-	
+
 	return 1;
 }
 
@@ -481,9 +481,9 @@ static zval* saproxy_iter_get_data(zend_object_iterator *iter)
 	SAFEARRAY *sa;
 
 	I->indices[I->proxy->dimensions-1] = I->key;
-	
+
 	sa = V_ARRAY(&I->proxy->obj->v);
-	
+
 	if (FAILED(SafeArrayGetVartype(sa, &vt)) || vt == VT_EMPTY) {
 		vt = V_VT(&I->proxy->obj->v) & ~VT_ARRAY;
 	}
@@ -561,8 +561,8 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 	SafeArrayGetLBound(V_ARRAY(&proxy->obj->v), proxy->dimensions, &I->imin);
 	SafeArrayGetUBound(V_ARRAY(&proxy->obj->v), proxy->dimensions, &I->imax);
 
-	I->key = I->imin;	
-	
+	I->key = I->imin;
+
 	return &I->iter;
 }
 

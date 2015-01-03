@@ -137,7 +137,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 		/* For BC we have to check whether the key is numeric and use it like this */
 		if ((meta->zend_hash_keys[i].is_numeric = ZEND_HANDLE_NUMERIC(field_packet->metadata->sname, idx))) {
 			meta->zend_hash_keys[i].key = idx;
-		} 
+		}
 	}
 	PACKET_FREE(field_packet);
 

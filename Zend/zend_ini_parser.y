@@ -210,7 +210,7 @@ ZEND_API int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_erro
 	zend_file_handle_dtor(fh);
 
 	shutdown_ini_scanner();
-	
+
 	if (retval == 0) {
 		return SUCCESS;
 	} else {

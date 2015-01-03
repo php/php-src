@@ -27,7 +27,7 @@
  */
 int apache_php_module_main(request_rec *r, int display_source_mode)
 {
-	int retval = OK;	
+	int retval = OK;
 	zend_file_handle file_handle;
 
 	if (php_request_startup() == FAILURE) {
@@ -35,7 +35,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode)
 	}
 	/* sending a file handle to another dll is not working
 	   so let zend open it. */
-	
+
 	if (display_source_mode) {
 		zend_syntax_highlighter_ini syntax_highlighter_ini;
 
@@ -54,11 +54,11 @@ int apache_php_module_main(request_rec *r, int display_source_mode)
 	}
 
 	AP(in_request) = 0;
-	
+
 	zend_try {
 		php_request_shutdown(NULL);
 	} zend_end_try();
-	
+
 	return retval;
 }
 /* }}} */

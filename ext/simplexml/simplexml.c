@@ -975,7 +975,7 @@ static inline zend_string *sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr li
 {
 	xmlChar *tmp = xmlNodeListGetString(doc, list, inLine);
 	zend_string *res;
-	
+
 	if (tmp) {
 		res = zend_string_init((char*)tmp, strlen((char *)tmp), 0);
 		xmlFree(tmp);
@@ -1126,7 +1126,7 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug) /* {{{ */
 			} else {
 				if (node->type == XML_TEXT_NODE) {
 					const xmlChar *cur = node->content;
-					
+
 					if (*cur != 0) {
 						ZVAL_STR(&value, sxe_xmlNodeListGetString(node->doc, node, 1));
 						zend_hash_next_index_insert(rv, &value);
@@ -1176,7 +1176,7 @@ next_iter:
 static HashTable *sxe_get_gc(zval *object, zval **table, int *n) /* {{{ */ {
 	php_sxe_object *sxe;
 	sxe = Z_SXEOBJ_P(object);
-	
+
 	*table = NULL;
 	*n = 0;
 	return sxe->properties;
@@ -1280,7 +1280,7 @@ SXE_METHOD(xpath)
 	result = retval->nodesetval;
 
 	array_init(return_value);
-		
+
 	if (result != NULL) {
 		for (i = 0; i < result->nodeNr; ++i) {
 			nodeptr = result->nodeTab[i];
@@ -1519,11 +1519,11 @@ SXE_METHOD(getDocNamespaces)
 	}else{
 		GET_NODE(sxe, node);
 	}
-	
+
 	if (node == NULL) {
 		RETURN_FALSE;
 	}
-	
+
 	array_init(return_value);
 	sxe_add_registered_namespaces(sxe, node, recursive, return_value);
 }
@@ -1918,7 +1918,7 @@ SXE_METHOD(count)
 	}
 
 	php_sxe_count_elements_helper(sxe, &count);
-	
+
 	RETURN_LONG(count);
 }
 /* }}} */
@@ -2076,7 +2076,7 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce)
 		parent = parent->parent;
 		inherited = 1;
 	}
-	
+
 	if (inherited) {
 		intern->fptr_count = zend_hash_str_find_ptr(&ce->function_table, "count", sizeof("count") - 1);
 		if (intern->fptr_count->common.scope == parent) {

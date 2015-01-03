@@ -34,7 +34,7 @@ typedef size_t (*zend_stream_fsizer_t)(void* handle);
 typedef size_t (*zend_stream_reader_t)(void* handle, char *buf, size_t len);
 typedef void   (*zend_stream_closer_t)(void* handle);
 
-#define ZEND_MMAP_AHEAD 32 
+#define ZEND_MMAP_AHEAD 32
 
 typedef enum {
 	ZEND_HANDLE_FILENAME,

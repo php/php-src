@@ -38,9 +38,9 @@
 
 #ifdef PHP_WIN32
 #	ifdef SAPI_EXPORTS
-#		define SAPI_API __declspec(dllexport) 
+#		define SAPI_API __declspec(dllexport)
 #	else
-#		define SAPI_API __declspec(dllimport) 
+#		define SAPI_API __declspec(dllimport)
 #	endif
 #elif defined(__GNUC__) && __GNUC__ >= 4
 #	define SAPI_API __attribute__ ((visibility("default")))
@@ -157,7 +157,7 @@ SAPI_API void sapi_initialize_empty_request(void);
 END_EXTERN_C()
 
 /*
- * This is the preferred and maintained API for 
+ * This is the preferred and maintained API for
  * operating on HTTP headers.
  */
 
@@ -166,7 +166,7 @@ END_EXTERN_C()
  *
  *     sapi_header_line ctr = {0};
  */
- 
+
 typedef struct {
 	char *line; /* If you allocated this, you need to free it yourself */
 	uint line_len;
@@ -267,7 +267,7 @@ struct _sapi_module_struct {
 	int (*get_target_gid)(gid_t *);
 
 	unsigned int (*input_filter)(int arg, char *var, char **val, size_t val_len, size_t *new_val_len);
-	
+
 	void (*ini_defaults)(HashTable *configuration_hash);
 	int phpinfo_as_text;
 

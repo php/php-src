@@ -321,7 +321,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-			
+
 				convert_object_to_type(op, &dst, IS_LONG, convert_to_long);
 				zval_dtor(op);
 
@@ -378,7 +378,7 @@ ZEND_API void convert_to_double(zval *op) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-			
+
 				convert_object_to_type(op, &dst, IS_DOUBLE, convert_to_double);
 				zval_dtor(op);
 
@@ -401,7 +401,7 @@ ZEND_API void convert_to_null(zval *op) /* {{{ */
 	if (Z_TYPE_P(op) == IS_OBJECT) {
 		if (Z_OBJ_HT_P(op)->cast_object) {
 			zval org;
-		
+
 			ZVAL_COPY_VALUE(&org, op);
 			if (Z_OBJ_HT_P(op)->cast_object(&org, op, IS_NULL) == SUCCESS) {
 				zval_dtor(&org);
@@ -461,7 +461,7 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-			
+
 				convert_object_to_type(op, &dst, _IS_BOOL, convert_to_boolean);
 				zval_dtor(op);
 
@@ -510,7 +510,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 		case IS_DOUBLE: {
 			zend_string *str;
 			double dval = Z_DVAL_P(op);
-		
+
 			str = zend_strpprintf(0, "%.*G", (int) EG(precision), dval);
 			/* %G already handles removing trailing zeros from the fractional part, yay */
 			ZVAL_NEW_STR(op, str);
@@ -523,7 +523,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		case IS_OBJECT: {
 			zval dst;
-		
+
 			convert_object_to_type(op, &dst, IS_STRING, convert_to_string);
 
 			if (Z_TYPE(dst) == IS_STRING) {
@@ -1147,7 +1147,7 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
 	if (op1 == result) {
 		zval_dtor(result);
 	}
-	
+
 	if (op2_lval == 0) {
 		zend_error(E_WARNING, "Division by zero");
 		ZVAL_FALSE(result);
@@ -1280,7 +1280,7 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2) /* {{{ */
 		ZVAL_LONG(result, Z_LVAL_P(op1) | Z_LVAL_P(op2));
 		return SUCCESS;
 	}
-	
+
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
@@ -1338,7 +1338,7 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2) /* {{{ */
 		ZVAL_LONG(result, Z_LVAL_P(op1) & Z_LVAL_P(op2));
 		return SUCCESS;
 	}
-	
+
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
@@ -1396,7 +1396,7 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2) /* {{{ */
 		ZVAL_LONG(result, Z_LVAL_P(op1) ^ Z_LVAL_P(op2));
 		return SUCCESS;
 	}
-	
+
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
@@ -2173,7 +2173,7 @@ try_again:
 				/* proxy object */
 				zval rv;
 				zval *val;
-			
+
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
 				Z_ADDREF_P(val);
 				fast_increment_function(val);
@@ -2182,7 +2182,7 @@ try_again:
 			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
-			
+
 				ZVAL_LONG(&op2, 1);
 				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_ADD, op1, op1, &op2);
 				zval_ptr_dtor(&op2);
@@ -2246,7 +2246,7 @@ try_again:
 				/* proxy object */
 				zval rv;
 				zval *val;
-			
+
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
 				Z_ADDREF_P(val);
 				fast_decrement_function(val);
@@ -2255,7 +2255,7 @@ try_again:
 			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
-			
+
 				ZVAL_LONG(&op2, 1);
 				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_SUB, op1, op1, &op2);
 				zval_ptr_dtor(&op2);

@@ -56,8 +56,8 @@
 #	include "config.w32.h"
 #	undef  strcasecmp
 #	undef  strncasecmp
-#	define strcasecmp _stricmp 
-#	define strncasecmp _strnicmp 
+#	define strcasecmp _stricmp
+#	define strncasecmp _strnicmp
 #else
 #	include "php_config.h"
 #endif

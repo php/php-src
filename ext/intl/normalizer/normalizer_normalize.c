@@ -36,20 +36,20 @@ PHP_FUNCTION( normalizer_normalize )
 	/* form is optional, defaults to FORM_C */
 	zend_long	    form = NORMALIZER_DEFAULT;
 	size_t			input_len = 0;
-		
+
 	UChar*			uinput = NULL;
 	int32_t		    uinput_len = 0;
 	int			    expansion_factor = 1;
 	UErrorCode		status = U_ZERO_ERROR;
-		
+
 	UChar*			uret_buf = NULL;
 	int32_t			uret_len = 0;
-		
+
 	char*			ret_buf = NULL;
 	size_t			ret_len = 0;
 
 	int32_t			size_needed;
-		
+
 	intl_error_reset( NULL );
 
 	/* Parse parameters. */
@@ -109,11 +109,11 @@ PHP_FUNCTION( normalizer_normalize )
 
 	/* normalize */
 	size_needed = unorm_normalize( uinput, uinput_len, form, (int32_t) 0 /* options */, uret_buf, uret_len, &status);
-	
+
 	/* Bail out if an unexpected error occurred.
 	 * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
 	 * (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
-	 */	
+	 */
 	if( U_FAILURE(status) && status != U_BUFFER_OVERFLOW_ERROR && status != U_STRING_NOT_TERMINATED_WARNING ) {
 		efree( uret_buf );
 		efree( uinput );
@@ -180,9 +180,9 @@ PHP_FUNCTION( normalizer_is_normalized )
 	UChar*	 	uinput = NULL;
 	int		uinput_len = 0;
 	UErrorCode	status = U_ZERO_ERROR;
-		
+
 	UBool		uret = FALSE;
-		
+
 	intl_error_reset( NULL );
 
 	/* Parse parameters. */
@@ -233,7 +233,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 
 	/* test string */
 	uret = unorm_isNormalizedWithOptions( uinput, uinput_len, form, (int32_t) 0 /* options */, &status);
-	
+
 	efree( uinput );
 
 	/* Bail out if an unexpected error occurred. */
@@ -245,7 +245,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 
 	if ( uret )
 		RETURN_TRUE;
-				
+
 	RETURN_FALSE;
 }
 /* }}} */

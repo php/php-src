@@ -36,10 +36,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMProcessingInstruction extends DOMNode 
+* class DOMProcessingInstruction extends DOMNode
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1004215813
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_processinginstruction_class_functions[] = {
@@ -88,10 +88,10 @@ PHP_METHOD(domprocessinginstruction, __construct)
 }
 /* }}} end DOMProcessingInstruction::__construct */
 
-/* {{{ target	string	
-readonly=yes 
+/* {{{ target	string
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1478689192
-Since: 
+Since:
 */
 int dom_processinginstruction_target_read(dom_object *obj, zval *retval)
 {
@@ -109,10 +109,10 @@ int dom_processinginstruction_target_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ data	string	
-readonly=no 
+/* {{{ data	string
+readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-837822393
-Since: 
+Since:
 */
 int dom_processinginstruction_data_read(dom_object *obj, zval *retval)
 {

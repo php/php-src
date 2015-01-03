@@ -37,7 +37,7 @@
 	if (i > max) {				\
 		max = i;				\
 	}
-	
+
 void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	int T = op_array->T;

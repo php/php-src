@@ -72,7 +72,7 @@ PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, size_t *ple
 PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, size_t *plen STREAMS_DC) /* {{{ */
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
-	
+
 	if (pglob && pglob->pattern) {
 		if (plen) {
 			*plen = pglob->pattern_len;
@@ -225,7 +225,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, const cha
 	}
 
 	pglob = ecalloc(sizeof(*pglob), 1);
-	
+
 	if (0 != (ret = glob(path, pglob->flags & GLOB_FLAGMASK, NULL, &pglob->glob))) {
 #ifdef GLOB_NOMATCH
 		if (GLOB_NOMATCH != ret)

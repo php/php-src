@@ -32,12 +32,12 @@
 
 #include <curl/curl.h>
 
-/* {{{ proto void curl_share_init() 
+/* {{{ proto void curl_share_init()
    Initialize a share curl handle */
 PHP_FUNCTION(curl_share_init)
 {
 	php_curlsh *sh;
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -79,7 +79,7 @@ static int _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalue
 
 		default:
 			php_error_docref(NULL, E_WARNING, "Invalid curl share configuration option");
-			error = CURLSHE_BAD_OPTION; 
+			error = CURLSHE_BAD_OPTION;
 			break;
 	}
 

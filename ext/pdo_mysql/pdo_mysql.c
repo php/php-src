@@ -45,7 +45,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
  With libmysql `mysql_config --socket` will fill PDO_MYSQL_UNIX_ADDR
  and the user can use --with-mysql-sock=SOCKET which will fill
  PDO_MYSQL_UNIX_ADDR. If both aren't set we're using mysqlnd and use
- /tmp/mysql.sock as default on *nix and NULL for Windows (default 
+ /tmp/mysql.sock as default on *nix and NULL for Windows (default
  named pipe name is set in mysqlnd).
 */
 #ifndef PDO_MYSQL_UNIX_ADDR
@@ -101,8 +101,8 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
-/* true global environment */		
-		
+/* true global environment */
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 static PHP_MINIT_FUNCTION(pdo_mysql)
@@ -110,7 +110,7 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	REGISTER_INI_ENTRIES();
 
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_USE_BUFFERED_QUERY", (zend_long)PDO_MYSQL_ATTR_USE_BUFFERED_QUERY);
-	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_LOCAL_INFILE", (zend_long)PDO_MYSQL_ATTR_LOCAL_INFILE);	
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_LOCAL_INFILE", (zend_long)PDO_MYSQL_ATTR_LOCAL_INFILE);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_INIT_COMMAND", (zend_long)PDO_MYSQL_ATTR_INIT_COMMAND);
 #ifndef PDO_USE_MYSQLND
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MAX_BUFFER_SIZE", (zend_long)PDO_MYSQL_ATTR_MAX_BUFFER_SIZE);
@@ -174,7 +174,7 @@ static PHP_MINFO_FUNCTION(pdo_mysql)
 /* {{{ PHP_RINIT_FUNCTION
  */
 static PHP_RINIT_FUNCTION(pdo_mysql)
-{	
+{
 	if (PDO_MYSQL_G(debug)) {
 		MYSQLND_DEBUG *dbg = mysqlnd_debug_init(mysqlnd_debug_std_no_trace_funcs);
 		if (!dbg) {
@@ -183,7 +183,7 @@ static PHP_RINIT_FUNCTION(pdo_mysql)
 		dbg->m->set_mode(dbg, PDO_MYSQL_G(debug));
 		PDO_MYSQL_G(dbg) = dbg;
 	}
-	
+
 	return SUCCESS;
 }
 /* }}} */

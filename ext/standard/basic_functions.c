@@ -2090,7 +2090,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_stream_set_write_buffer, 0)
 	ZEND_ARG_INFO(0, fp)
 	ZEND_ARG_INFO(0, buffer)
 ZEND_END_ARG_INFO()
-		
+
 ZEND_BEGIN_ARG_INFO(arginfo_stream_set_chunk_size, 0)
 	ZEND_ARG_INFO(0, fp)
 	ZEND_ARG_INFO(0, chunk_size)
@@ -2285,7 +2285,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_lcfirst, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
-	
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ucwords, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, delimiters)
@@ -3434,7 +3434,7 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	BG(user_tick_functions) = NULL;
 	BG(user_filter_map) = NULL;
 	BG(serialize_lock) = 0;
-	
+
 	memset(&BG(serialize), 0, sizeof(BG(serialize)));
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
 
@@ -3503,7 +3503,7 @@ PHPAPI double php_get_inf(void) /* {{{ */
 
 #define BASIC_ADD_SUBMODULE(module) \
 	zend_hash_str_add_empty_element(&basic_submodules, #module, strlen(#module));
-	
+
 #define BASIC_RINIT_SUBMODULE(module) \
 	if (zend_hash_str_exists(&basic_submodules, #module, strlen(#module))) { \
 		PHP_RINIT(module)(INIT_FUNC_ARGS_PASSTHRU); \
@@ -4004,8 +4004,8 @@ PHP_FUNCTION(getenv)
 		int size;
 
 		SetLastError(0);
-		/*If the given bugger is not large enough to hold the data, the return value is 
-		the buffer size,  in characters, required to hold the string and its terminating 
+		/*If the given bugger is not large enough to hold the data, the return value is
+		the buffer size,  in characters, required to hold the string and its terminating
 		null character. We use this return value to alloc the final buffer. */
 		size = GetEnvironmentVariableA(str, &dummybuf, 0);
 		if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
@@ -4059,7 +4059,7 @@ PHP_FUNCTION(putenv)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &setting, &setting_len) == FAILURE) {
 		return;
 	}
-    
+
     if(setting_len == 0 || setting[0] == '=') {
     	php_error_docref(NULL, E_WARNING, "Invalid parameter syntax");
     	RETURN_FALSE;
@@ -4581,7 +4581,7 @@ PHP_FUNCTION(set_magic_quotes_runtime)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &new_setting) == FAILURE) {
 		return;
 	}
-	
+
 	if (new_setting) {
 		php_error_docref(NULL, E_CORE_ERROR, "magic_quotes_runtime is not supported anymore");
 	}
@@ -4798,7 +4798,7 @@ PHP_FUNCTION(forward_static_call)
 		instanceof_function(EX(called_scope), fci_cache.calling_scope)) {
 			fci_cache.called_scope = EX(called_scope);
 	}
-	
+
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
@@ -5507,7 +5507,7 @@ PHP_FUNCTION(getservbyname)
 	}
 
 
-/* empty string behaves like NULL on windows implementation of 
+/* empty string behaves like NULL on windows implementation of
    getservbyname. Let be portable instead. */
 #ifdef PHP_WIN32
 	if (proto_len == 0) {
@@ -5789,12 +5789,12 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 				if ((find_hash = zend_hash_index_find(Z_ARRVAL_P(arr), key)) == NULL) {
 					array_init(&hash);
 					find_hash = zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash);
-				} 
+				}
 			} else {
 				if ((find_hash = zend_hash_find(Z_ARRVAL_P(arr), Z_STR_P(arg1))) == NULL) {
 					array_init(&hash);
 					find_hash = zend_hash_update(Z_ARRVAL_P(arr), Z_STR_P(arg1), &hash);
-				} 
+				}
 			}
 
 			if (Z_TYPE_P(find_hash) != IS_ARRAY) {
@@ -5921,7 +5921,7 @@ PHP_FUNCTION(parse_ini_string)
 /* }}} */
 
 #if ZEND_DEBUG
-/* This function returns an array of ALL valid ini options with values and 
+/* This function returns an array of ALL valid ini options with values and
  *  is not the same as ini_get_all() which returns only registered ini options. Only useful for devs to debug php.ini scanner/parser! */
 PHP_FUNCTION(config_get_hash) /* {{{ */
 {

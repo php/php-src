@@ -98,9 +98,9 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 			*p++ = hexchars[(unsigned char) *s >> 4];
 			*p++ = hexchars[(unsigned char) *s & 15];
 		} else {
-			*p++ = *s;	
+			*p++ = *s;
 		}
-		s++;	
+		s++;
 	}
 	*p = '\0';
 	str->len = p - (unsigned char *)str->val;
@@ -113,7 +113,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 	unsigned char *str;
 	int   i, c;
 	zend_string *buf;
-	
+
 	/* Optimization for if no strip flags are set */
 	if (! ((flags & FILTER_FLAG_STRIP_LOW) || (flags & FILTER_FLAG_STRIP_HIGH)) ) {
 		return;
@@ -160,7 +160,7 @@ static void filter_map_apply(zval *value, filter_map *map)
 	unsigned char *str;
 	int   i, c;
 	zend_string *buf;
-	
+
 	str = (unsigned char *)Z_STRVAL_P(value);
 	buf = zend_string_alloc(Z_STRLEN_P(value) + 1, 0);
 	c = 0;
@@ -215,7 +215,7 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 		if (flags & FILTER_FLAG_EMPTY_STRING_NULL) {
 			ZVAL_NULL(value);
 		} else {
-			ZVAL_EMPTY_STRING(value);			
+			ZVAL_EMPTY_STRING(value);
 		}
 		return;
 	}
@@ -248,8 +248,8 @@ void php_filter_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 	if (flags & FILTER_FLAG_ENCODE_HIGH) {
 		memset(enc + 127, 1, sizeof(enc) - 127);
 	}
-	
-	php_filter_encode_html(value, enc);	
+
+	php_filter_encode_html(value, enc);
 }
 /* }}} */
 
@@ -258,7 +258,7 @@ void php_filter_full_special_chars(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zend_string *buf;
 	int quotes;
-	
+
 	if (!(flags & FILTER_FLAG_NO_ENCODE_QUOTES)) {
 		quotes = ENT_QUOTES;
 	} else {
@@ -289,7 +289,7 @@ void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 			memset(enc + 127, 1, sizeof(enc) - 127);
 		}
 
-		php_filter_encode_html(value, enc);	
+		php_filter_encode_html(value, enc);
 	} else if (flags & FILTER_FLAG_EMPTY_STRING_NULL && Z_STRLEN_P(value) == 0) {
 		zval_dtor(value);
 		ZVAL_NULL(value);
@@ -371,7 +371,7 @@ void php_filter_number_float(PHP_INPUT_FILTER_PARAM_DECL)
 void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL)
 {
 	zend_string *buf;
-	
+
 	/* just call php_addslashes quotes */
 	buf = php_addslashes(Z_STRVAL_P(value), Z_STRLEN_P(value), 0);
 

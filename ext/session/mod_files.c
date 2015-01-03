@@ -148,7 +148,7 @@ static void ps_files_open(ps_files *data, const char *key)
 #ifdef O_NOFOLLOW
 		data->fd = VCWD_OPEN_MODE(buf, O_CREAT | O_RDWR | O_BINARY | O_NOFOLLOW, data->filemode);
 #else
-		/* Check to make sure that the opened file is not outside of allowable dirs. 
+		/* Check to make sure that the opened file is not outside of allowable dirs.
 		   This is not 100% safe but it's hard to do something better without O_NOFOLLOW */
 		if(PG(open_basedir) && lstat(buf, &sbuf) == 0 && S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf)) {
 			return;

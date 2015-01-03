@@ -24,8 +24,8 @@
 #include "intl_error.h"
 
 /* Mock object to generalize error handling in sub-modules.
-   Sub-module data structures should always have error as first element 
-   for this to work! 
+   Sub-module data structures should always have error as first element
+   for this to work!
 */
 typedef struct _intl_data {
 	intl_error		error;
@@ -35,7 +35,7 @@ typedef struct _intl_data {
 #define INTL_METHOD_INIT_VARS(oclass, obj)		\
 	zval*             object  = NULL;			\
 	oclass##_object*  obj     = NULL;			\
-	intl_error_reset( NULL );			
+	intl_error_reset( NULL );
 
 #define INTL_DATA_ERROR(obj)				(((intl_object *)(obj))->error)
 #define INTL_DATA_ERROR_P(obj)				(&(INTL_DATA_ERROR((obj))))

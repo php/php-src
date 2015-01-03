@@ -75,7 +75,7 @@ PHP_MSHUTDOWN_FUNCTION(continuity);
 PHP_RINIT_FUNCTION(continuity);
 PHP_RSHUTDOWN_FUNCTION(continuity);
 PHP_MINFO_FUNCTION(continuity);
-        
+
 PHP_FUNCTION(continuity_virtual);
 PHP_FUNCTION(continuity_request_headers);
 PHP_FUNCTION(continuity_response_headers);
@@ -87,7 +87,7 @@ const zend_function_entry continuity_functions[] = {
 zend_module_entry continuity_module_entry = {
         STANDARD_MODULE_HEADER,
         "continuity",
-        continuity_functions,   
+        continuity_functions,
         PHP_MINIT(continuity),
         PHP_MSHUTDOWN(continuity),
         NULL,
@@ -118,7 +118,7 @@ PHP_MINFO_FUNCTION(continuity)
 	php_info_print_table_row(2,"CDP Extensions", "disabled");
 #endif
         php_info_print_table_end();
-        
+
 /*        DISPLAY_INI_ENTRIES(); */
 }
 
@@ -243,7 +243,7 @@ static void sapi_capi_register_server_variables(zval * track_vars_array)
       php_register_variable("PHP_SELF", value, track_vars_array);
       php_register_variable("REQUEST_URI", value, track_vars_array);
    }
- 
+
    /* COUNTRY CODE */
    value = lstFset_get(rc->t->vars, "ccode");
    if(value!=NULL)
@@ -475,7 +475,7 @@ int phpFservice(httpTtrans * t, lstTset * opts)
    int retval;
    capi_request_context *request_context;
 
-   
+
    request_context = (capi_request_context *) malloc(sizeof(capi_request_context));
    request_context->t = t;
    request_context->read_post_bytes = -1;

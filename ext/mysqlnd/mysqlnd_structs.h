@@ -554,7 +554,7 @@ struct st_mysqlnd_conn_data_methods
 	func_mysqlnd_conn_data__get_field_count get_field_count;
 
 	func_mysqlnd_conn_data__get_server_status get_server_status;
-	
+
 	func_mysqlnd_conn_data__set_server_option set_server_option;
 	func_mysqlnd_conn_data__set_client_option set_client_option;
 	func_mysqlnd_conn_data__free_contents free_contents;
@@ -1031,7 +1031,7 @@ struct st_mysqlnd_result_metadata
 	void				* unused2;					\
 	void				* unused3
 
-	
+
 struct st_mysqlnd_buffered_result_parent
 {
 	def_mysqlnd_buffered_result_parent;
@@ -1168,7 +1168,7 @@ typedef struct st_mysqlnd_string
 
 struct st_mysqlnd_plugin_header
 {
-	unsigned int	plugin_api_version; 
+	unsigned int	plugin_api_version;
 	const char *	plugin_name;
 	zend_ulong	plugin_version;
 	const char *	plugin_string_version;
@@ -1206,7 +1206,7 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 														size_t * auth_data_len,
 														MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 														const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-														const MYSQLND_OPTIONS * const options, 
+														const MYSQLND_OPTIONS * const options,
 														const MYSQLND_NET_OPTIONS * const net_options, zend_ulong mysql_flags
 														);
 

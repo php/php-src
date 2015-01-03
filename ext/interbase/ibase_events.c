@@ -81,7 +81,7 @@ static void _php_ibase_free_event_rsrc(zend_resource *rsrc) /* {{{ */
 
 void php_ibase_events_minit(INIT_FUNC_ARGS) /* {{{ */
 {
-	le_event = zend_register_list_destructors_ex(_php_ibase_free_event_rsrc, NULL, 
+	le_event = zend_register_list_destructors_ex(_php_ibase_free_event_rsrc, NULL,
 	    "interbase event", module_number);
 }
 /* }}} */
@@ -271,7 +271,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	int link_res_id, num_args;
 
 	RESET_ERRMSG;
-	
+
 	/* Minimum and maximum number of arguments allowed */
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 17) {
 		WRONG_PARAM_COUNT;
@@ -301,7 +301,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 		link_res_id = Z_LVAL(args[0]);
 
 	} else {
-		/* callback, event_1 [, ... event_15] 
+		/* callback, event_1 [, ... event_15]
 		 * No more than 15 events
 		 */
 		if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 16) {

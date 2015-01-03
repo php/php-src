@@ -286,8 +286,8 @@ MYSQLND_METHOD(mysqlnd_net, get_open_stream)(MYSQLND_NET * const net, const char
 
 	if (!ret) {
 		SET_CLIENT_ERROR(*error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "No handler for this scheme");
-	}	
-	
+	}
+
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -437,7 +437,7 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 		left -= to_be_sent;
 		packets_sent++;
 		/*
-		  if left is 0 then there is nothing more to send, but if the last packet was exactly 
+		  if left is 0 then there is nothing more to send, but if the last packet was exactly
 		  with the size MYSQLND_MAX_PACKET_SIZE we need to send additional packet, which has
 		  empty payload. Thus if left == 0 we check for to_be_sent being the max size. If it is
 		  indeed it then loop once more, then to_be_sent will become 0, left will stay 0. Empty
@@ -621,7 +621,7 @@ MYSQLND_METHOD(mysqlnd_net, encode)(zend_uchar * compress_buffer, size_t * compr
 		*compress_buffer_len = tmp_complen;
 		DBG_INF_FMT("compression successful. compressed size=%lu", tmp_complen);
 	}
-	
+
 	DBG_RETURN(error == Z_OK? PASS:FAIL);
 #else
 	DBG_ENTER("mysqlnd_net::encode");
@@ -633,7 +633,7 @@ MYSQLND_METHOD(mysqlnd_net, encode)(zend_uchar * compress_buffer, size_t * compr
 
 /* {{{ mysqlnd_net::receive_ex */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_net, receive_ex)(MYSQLND_NET * const net, zend_uchar * const buffer, const size_t count, 
+MYSQLND_METHOD(mysqlnd_net, receive_ex)(MYSQLND_NET * const net, zend_uchar * const buffer, const size_t count,
 										MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	size_t to_read = count;
@@ -811,7 +811,7 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 /* }}} */
 
 /* {{{ mysqlnd_net::consume_uneaten_data */
-size_t 
+size_t
 MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data)(MYSQLND_NET * const net, enum php_mysqlnd_server_command cmd)
 {
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND

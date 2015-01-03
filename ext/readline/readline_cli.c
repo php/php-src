@@ -199,7 +199,7 @@ static zend_string *cli_get_prompt(char *block, char prompt) /* {{{ */
 			smart_str_appendc(&retval, *prompt_spec);
 		}
 	} while (++prompt_spec && *prompt_spec);
-	smart_str_0(&retval);	
+	smart_str_0(&retval);
 	return retval.s;
 }
 /* }}} */
@@ -462,7 +462,7 @@ static char *cli_completion_generator_func(const char *text, int textlen, int *s
 		rl_completion_append_character = '(';
 		retval = strdup(func->common.function_name->val);
 	}
-	
+
 	return retval;
 } /* }}} */
 
@@ -474,7 +474,7 @@ static char *cli_completion_generator_class(const char *text, int textlen, int *
 		rl_completion_append_character = '\0';
 		retval = strdup(ce->name->val);
 	}
-	
+
 	return retval;
 } /* }}} */
 
@@ -486,7 +486,7 @@ static char *cli_completion_generator_define(const char *text, int textlen, int 
 		rl_completion_append_character = '\0';
 		retval = strdup(retval);
 	}
-	
+
 	return retval;
 } /* }}} */
 
@@ -518,7 +518,7 @@ TODO:
 		int class_name_len;
 		zend_string *class_name;
 		zend_class_entry *ce = NULL;
-		
+
 		class_name_end = strstr(text, "::");
 		if (class_name_end) {
 			class_name_len = class_name_end - text;
@@ -561,13 +561,13 @@ TODO:
 		if (ce && retval) {
 			int len = class_name_len + 2 + strlen(retval) + 1;
 			char *tmp = malloc(len);
-			
+
 			snprintf(tmp, len, "%s::%s", ce->name->val, retval);
 			free(retval);
 			retval = tmp;
 		}
 	}
-	
+
 	return retval;
 } /* }}} */
 
@@ -671,7 +671,7 @@ static int readline_shell_run(void) /* {{{ */
 		} zend_end_try();
 
 		pos = 0;
-					
+
 		if (!pager_pipe && php_last_char != '\0' && php_last_char != '\n') {
 			php_write("\n", 1);
 		}

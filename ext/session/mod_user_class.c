@@ -25,14 +25,14 @@
 	if (PS(default_mod) == NULL) {				\
 		php_error_docref(NULL, E_CORE_ERROR, "Cannot call default session handler"); \
 		RETURN_FALSE;						\
-	}							
+	}
 
 #define PS_SANITY_CHECK_IS_OPEN				\
 	PS_SANITY_CHECK; \
 	if (!PS(mod_user_is_open)) {			\
 		php_error_docref(NULL, E_WARNING, "Parent session handler is not open");	\
 		RETURN_FALSE;						\
-	}							
+	}
 
 /* {{{ proto bool SessionHandler::open(string save_path, string session_name)
    Wraps the old open handler */
@@ -61,7 +61,7 @@ PHP_METHOD(SessionHandler, close)
 	// don't return on failure, since not closing the default handler
 	// could result in memory leaks or other nasties
 	zend_parse_parameters_none();
-	
+
 	PS(mod_user_is_open) = 0;
 	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_close(&PS(mod_data)));
 }
@@ -116,7 +116,7 @@ PHP_METHOD(SessionHandler, destroy)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
 		return;
 	}
-	
+
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key));
 }
 /* }}} */
@@ -133,7 +133,7 @@ PHP_METHOD(SessionHandler, gc)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &maxlifetime) == FAILURE) {
 		return;
 	}
-	
+
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels));
 }
 /* }}} */

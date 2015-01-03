@@ -257,7 +257,7 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 #if HAVE_FPM_TRACE
 		if (child->slow_logged.tv_sec == 0 && slowlog_timeout &&
 				proc.request_stage == FPM_REQUEST_EXECUTING && tv.tv_sec >= slowlog_timeout) {
-			
+
 			str_purify_filename(purified_script_filename, proc.script_filename, sizeof(proc.script_filename));
 
 			child->slow_logged = proc.accepted;

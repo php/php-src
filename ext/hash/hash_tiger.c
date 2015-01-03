@@ -26,7 +26,7 @@
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
 # if defined(__LITTLE_ENDIAN__)
 #  undef WORDS_BIGENDIAN
-# else 
+# else
 #  if defined(__BIG_ENDIAN__)
 #   define WORDS_BIGENDIAN
 #  endif
@@ -139,13 +139,13 @@
 static inline void TigerFinalize(PHP_TIGER_CTX *context)
 {
 	context->passed += (php_hash_uint64) context->length << 3;
-	
+
 	context->buffer[context->length++] = 0x1;
 	if (context->length % 8) {
 		memset(&context->buffer[context->length], 0, 8-context->length%8);
 		context->length += 8-context->length%8;
 	}
-	
+
 	if (context->length > 56) {
 		memset(&context->buffer[context->length], 0, 64 - context->length);
 		tiger_compress(context->passes, ((php_hash_uint64 *) context->buffer), context->state);
@@ -154,7 +154,7 @@ static inline void TigerFinalize(PHP_TIGER_CTX *context)
 		memset(&context->buffer[context->length], 0, 56 - context->length);
 	}
 
-#ifndef WORDS_BIGENDIAN	
+#ifndef WORDS_BIGENDIAN
 	memcpy(&context->buffer[56], &context->passed, sizeof(php_hash_uint64));
 #else
 	context->buffer[56] = (unsigned char) (context->passed & 0xff);
@@ -202,7 +202,7 @@ PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, const unsigned char *i
 		context->length += len;
 	} else {
 		size_t i = 0, r = (context->length + len) % 64;
-		
+
 		if (context->length) {
 			i = 64 - context->length;
 			memcpy(&context->buffer[context->length], input, i);
@@ -210,7 +210,7 @@ PHP_HASH_API void PHP_TIGERUpdate(PHP_TIGER_CTX *context, const unsigned char *i
 			ZEND_SECURE_ZERO(context->buffer, 64);
 			context->passed += 512;
 		}
-		
+
 		for (; i + 64 <= len; i += 64) {
 			memcpy(context->buffer, &input[i], 64);
 			tiger_compress(context->passes, ((const php_hash_uint64 *) context->buffer), context->state);

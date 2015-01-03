@@ -4,9 +4,9 @@
 #ifdef PHP_WIN32
 #	include <windows.h>
 #	ifdef PHP7PI3WEB_EXPORTS
-#		define MODULE_API __declspec(dllexport) 
+#		define MODULE_API __declspec(dllexport)
 #	else
-#		define MODULE_API __declspec(dllimport) 
+#		define MODULE_API __declspec(dllimport)
 #	endif
 #else
 #	if defined(__GNUC__) && __GNUC__ >= 4

@@ -98,7 +98,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 		auth_packet->auth_data = auth_plugin_data;
 		auth_packet->auth_data_len = auth_plugin_data_len;
 		auth_packet->auth_plugin_name = auth_protocol;
-		
+
 		if (conn->server_capabilities & CLIENT_CONNECT_ATTRS) {
 			auth_packet->connect_attr = conn->options->connect_attr;
 		}
@@ -127,7 +127,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 				} else {
 					*switch_to_auth_protocol_data = NULL;
 					*switch_to_auth_protocol_data_len = 0;
-				}				
+				}
 			}
 		} else if (auth_resp_packet->response_code == 0xFF) {
 			if (auth_resp_packet->sqlstate[0]) {
@@ -199,7 +199,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
 			SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 			goto end;
-		}	
+		}
 	} else {
 		auth_packet = conn->protocol->m.get_auth_packet(conn->protocol, FALSE);
 
@@ -222,7 +222,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		if (conn->m->get_server_version(conn) >= 50123) {
 			auth_packet->charset_no	= conn->charset->nr;
 		}
-	
+
 		if (!PACKET_WRITE(auth_packet, conn)) {
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
 				SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
@@ -248,7 +248,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 			} else {
 				*switch_to_auth_protocol_data = NULL;
 				*switch_to_auth_protocol_data_len = 0;
-			}				
+			}
 		}
 	}
 
@@ -485,7 +485,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 						  )
 {
 	RSA * ret = NULL;
-	const char * fname = (net_options->sha256_server_public_key && net_options->sha256_server_public_key[0] != '\0')? 
+	const char * fname = (net_options->sha256_server_public_key && net_options->sha256_server_public_key[0] != '\0')?
 								net_options->sha256_server_public_key:
 								MYSQLND_G(sha256_server_public_key);
 	php_stream * stream;
@@ -536,7 +536,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 
 		DBG_INF_FMT("ret=%p", ret);
 		DBG_RETURN(ret);
-	
+
 		SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE,
 			"sha256_server_public_key is not set for the connection or as mysqlnd.sha256_server_public_key");
 		DBG_ERR("server_public_key is not set");

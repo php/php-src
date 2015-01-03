@@ -48,7 +48,7 @@ static void root_buffer_dtor(zend_gc_globals *gc_globals)
 	if (gc_globals->buf) {
 		free(gc_globals->buf);
 		gc_globals->buf = NULL;
-	}	
+	}
 }
 
 static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
@@ -379,7 +379,7 @@ static void gc_scan(zend_refcounted *ref)
     uint idx;
 	Bucket *p;
 
-tail_call:	
+tail_call:
 	if (GC_GET_COLOR(GC_INFO(ref)) == GC_GREY) {
 		ht = NULL;
 		if (GC_REFCOUNT(ref) > 0) {
@@ -396,7 +396,7 @@ tail_call:
 					zval *table;
 					zval tmp;
 					HashTable *props;
-					
+
 					ZVAL_OBJ(&tmp, obj);
 					props = get_gc(&tmp, &table, &n);
 					while (n > 0 && !Z_REFCOUNTED(table[n-1])) n--;
@@ -496,7 +496,7 @@ tail_call:
 				buf->prev = &GC_G(roots);
 				GC_G(roots).next->prev = buf;
 				GC_G(roots).next = buf;
-				GC_SET_ADDRESS(GC_INFO(ref), buf - GC_G(buf));				
+				GC_SET_ADDRESS(GC_INFO(ref), buf - GC_G(buf));
 			}
 		}
 #endif
@@ -511,14 +511,14 @@ tail_call:
 				zval *table;
 				zval tmp;
 				HashTable *props;
-				
+
 				ZVAL_OBJ(&tmp, obj);
 				props = get_gc(&tmp, &table, &n);
 				while (n > 0 && !Z_REFCOUNTED(table[n-1])) {
 					/* count non-refcounted for compatibility ??? */
 					if (Z_TYPE(table[n-1]) != IS_UNDEF) {
 						count++;
-					}					
+					}
 					n--;
 				}
 				for (i = 0; i < n; i++) {
@@ -535,7 +535,7 @@ tail_call:
 					/* count non-refcounted for compatibility ??? */
 					} else if (Z_TYPE(table[i]) != IS_UNDEF) {
 						count++;
-					}					
+					}
 				}
 				if (!props) {
 					return count;

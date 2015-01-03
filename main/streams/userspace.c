@@ -1136,7 +1136,7 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	int ret = 0;
 
 	/* create an instance of our class */
-	user_stream_create_object(uwrap, context, &object);	
+	user_stream_create_object(uwrap, context, &object);
 	if (Z_TYPE(object) == IS_UNDEF) {
 		return ret;
 	}
@@ -1182,7 +1182,7 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 	int ret = 0;
 
 	/* create an instance of our class */
-	user_stream_create_object(uwrap, context, &object);	
+	user_stream_create_object(uwrap, context, &object);
 	if (Z_TYPE(object) == IS_UNDEF) {
 		return ret;
 	}
@@ -1230,7 +1230,7 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
 	int ret = 0;
 
 	/* create an instance of our class */
-	user_stream_create_object(uwrap, context, &object);	
+	user_stream_create_object(uwrap, context, &object);
 	if (Z_TYPE(object) == IS_UNDEF) {
 		return ret;
 	}
@@ -1300,7 +1300,7 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 	}
 
 	/* create an instance of our class */
-	user_stream_create_object(uwrap, context, &object);	
+	user_stream_create_object(uwrap, context, &object);
 	if (Z_TYPE(object) == IS_UNDEF) {
 		zval_ptr_dtor(&args[2]);
 		return ret;

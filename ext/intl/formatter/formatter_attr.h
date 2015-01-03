@@ -19,7 +19,7 @@
 
 #include <php.h>
 
-PHP_FUNCTION( numfmt_set_attribute ); 
+PHP_FUNCTION( numfmt_set_attribute );
 PHP_FUNCTION( numfmt_get_attribute );
 PHP_FUNCTION( numfmt_set_text_attribute );
 PHP_FUNCTION( numfmt_get_text_attribute );

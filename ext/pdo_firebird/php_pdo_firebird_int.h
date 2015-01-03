@@ -74,34 +74,34 @@ typedef struct {
 
 	/* the last error that didn't come from the API */
 	char const *last_app_error;
-	
+
 	/* date and time format strings, can be set by the set_attribute method */
 	char *date_format;
 	char *time_format;
 	char *timestamp_format;
-	
+
 	/* prepend table names on column names in fetch */
 	unsigned fetch_table_names:1;
-	
+
 	unsigned _reserved:31;
-	
+
 } pdo_firebird_db_handle;
 
 
 typedef struct {
-	
+
 	/* the link that owns this statement */
 	pdo_firebird_db_handle *H;
-	
+
 	/* the statement handle */
 	isc_stmt_handle stmt;
-	
+
 	/* the name of the cursor (if it has one) */
 	char name[32];
-	
+
 	/* the type of statement that was issued */
 	char statement_type:8;
-	
+
 	/* whether EOF was reached for this statement */
 	unsigned exhausted:1;
 
@@ -112,16 +112,16 @@ typedef struct {
 
 	/* the named params that were converted to ?'s by the driver */
 	HashTable *named_params;
-	
+
 	/* allocated space to convert fields values to other types */
 	char **fetch_buf;
-	
+
 	/* the input SQLDA */
 	XSQLDA *in_sqlda;
-	
+
 	/* the output SQLDA */
 	XSQLDA out_sqlda; /* last member */
-	
+
 } pdo_firebird_stmt;
 
 extern pdo_driver_t pdo_firebird_driver;

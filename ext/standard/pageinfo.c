@@ -101,7 +101,7 @@ PHP_FUNCTION(getmyuid)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
+
 	uid = php_getuid();
 	if (uid < 0) {
 		RETURN_FALSE;
@@ -120,7 +120,7 @@ PHP_FUNCTION(getmygid)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
+
 	gid = php_getgid();
 	if (gid < 0) {
 		RETURN_FALSE;
@@ -139,7 +139,7 @@ PHP_FUNCTION(getmypid)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
+
 	pid = getpid();
 	if (pid < 0) {
 		RETURN_FALSE;

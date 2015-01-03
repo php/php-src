@@ -37,7 +37,7 @@ const php_hash_ops php_hash_fnv132_ops = {
 	const php_hash_ops php_hash_fnv1a32_ops = {
 	(php_hash_init_func_t) PHP_FNV132Init,
 	(php_hash_update_func_t) PHP_FNV1a32Update,
- 	(php_hash_final_func_t) PHP_FNV132Final, 
+ 	(php_hash_final_func_t) PHP_FNV132Final,
 	(php_hash_copy_func_t) php_hash_copy,
 	4,
 	4,
@@ -47,7 +47,7 @@ const php_hash_ops php_hash_fnv132_ops = {
 const php_hash_ops php_hash_fnv164_ops = {
 	(php_hash_init_func_t) PHP_FNV164Init,
 	(php_hash_update_func_t) PHP_FNV164Update,
-	(php_hash_final_func_t) PHP_FNV164Final, 
+	(php_hash_final_func_t) PHP_FNV164Final,
 	(php_hash_copy_func_t) php_hash_copy,
 	8,
 	4,
@@ -57,7 +57,7 @@ const php_hash_ops php_hash_fnv164_ops = {
 const php_hash_ops php_hash_fnv1a64_ops = {
 	(php_hash_init_func_t) PHP_FNV164Init,
 	(php_hash_update_func_t) PHP_FNV1a64Update,
- 	(php_hash_final_func_t) PHP_FNV164Final,  
+ 	(php_hash_final_func_t) PHP_FNV164Final,
 	(php_hash_copy_func_t) php_hash_copy,
 	8,
 	4,

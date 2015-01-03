@@ -95,7 +95,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0 &&
 						Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) != IS_UNDEF) {
 						zval zv;
-						
+
 						ZVAL_INDIRECT(&zv, OBJ_PROP(zobj, prop_info->offset));
 						zend_hash_add(zobj->properties, prop_info->name, &zv);
 					}
@@ -338,7 +338,7 @@ static zend_always_inline zend_property_info *zend_get_property_info_quick(zend_
 			}
 		}
 	}
-	
+
 	if (EG(scope) != ce
 		&& EG(scope)
 		&& is_derived_class(ce, EG(scope))
@@ -784,7 +784,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 			goto exit;
 		}
 	}
-	
+
 	/* magic unset */
 	if (zobj->ce->__unset) {
 		zend_long *guard = zend_get_property_guard(zobj, Z_STR_P(member));
@@ -1237,7 +1237,7 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 		}
 		return NULL;
 	}
-	
+
 	return &CE_STATIC_MEMBERS(ce)[property_info->offset];
 }
 /* }}} */

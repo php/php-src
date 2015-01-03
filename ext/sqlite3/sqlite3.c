@@ -49,7 +49,7 @@ static void php_sqlite3_error(php_sqlite3_db_object *db_obj, char *format, ...)
 	va_list arg;
 	char 	*message;
 
-	va_start(arg, format); 
+	va_start(arg, format);
 	vspprintf(&message, 0, format, arg);
 	va_end(arg);
 
@@ -58,7 +58,7 @@ static void php_sqlite3_error(php_sqlite3_db_object *db_obj, char *format, ...)
 	} else {
 		php_error_docref(NULL, E_WARNING, "%s", message);
 	}
-	
+
 	if (message) {
 		efree(message);
 	}
@@ -857,7 +857,7 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	zargs = safe_emalloc(2, sizeof(zval), 0);
 	ZVAL_STRINGL(&zargs[0], a, a_len);
 	ZVAL_STRINGL(&zargs[1], b, b_len);
- 
+
 	collation->fci.fci.params = zargs;
 
 	if ((ret = zend_call_function(&collation->fci.fci, &collation->fci.fcc)) == FAILURE) {
@@ -1047,7 +1047,7 @@ typedef struct {
 static size_t php_sqlite3_stream_write(php_stream *stream, const char *buf, size_t count)
 {
 /*	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract; */
-	
+
 	return 0;
 }
 
@@ -1071,13 +1071,13 @@ static size_t php_sqlite3_stream_read(php_stream *stream, char *buf, size_t coun
 static int php_sqlite3_stream_close(php_stream *stream, int close_handle)
 {
 	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
-	
+
 	if (sqlite3_blob_close(sqlite3_stream->blob) != SQLITE_OK) {
 		/* Error occurred, but it still closed */
 	}
 
 	efree(sqlite3_stream);
-	
+
 	return 0;
 }
 
@@ -1204,7 +1204,7 @@ PHP_METHOD(sqlite3, openBlob)
 	sqlite3_stream->blob = blob;
 	sqlite3_stream->position = 0;
 	sqlite3_stream->size = sqlite3_blob_bytes(blob);
-	
+
 	stream = php_stream_alloc(&php_stream_sqlite3_ops, sqlite3_stream, 0, "rb");
 
 	if (stream) {
@@ -1606,7 +1606,7 @@ PHP_METHOD(sqlite3stmt, __construct)
 
 	stmt_obj->db_obj = db_obj;
 	ZVAL_COPY(&stmt_obj->db_obj_zval, db_zval);
-	
+
 	errcode = sqlite3_prepare_v2(db_obj->db, sql->val, sql->len, &(stmt_obj->stmt), NULL);
 	if (errcode != SQLITE_OK) {
 		php_sqlite3_error(db_obj, "Unable to prepare statement: %d, %s", errcode, sqlite3_errmsg(db_obj->db));
@@ -1662,7 +1662,7 @@ PHP_METHOD(sqlite3result, columnName)
 	if (column_name == NULL) {
 		RETURN_FALSE;
 	}
-		
+
 	RETVAL_STRING(column_name);
 }
 /* }}} */
@@ -1953,7 +1953,7 @@ static zend_function_entry php_sqlite3_result_class_methods[] = {
 };
 /* }}} */
 
-/* {{{ Authorization Callback 
+/* {{{ Authorization Callback
 */
 static int php_sqlite3_authorizer(void *autharg, int access_type, const char *arg3, const char *arg4, const char *arg5, const char *arg6)
 {
@@ -1961,7 +1961,7 @@ static int php_sqlite3_authorizer(void *autharg, int access_type, const char *ar
 		case SQLITE_ATTACH:
 		{
 			if (memcmp(arg3, ":memory:", sizeof(":memory:")) && *arg3) {
-			
+
 #if PHP_API_VERSION < 20100412
 				if (PG(safe_mode) && (!php_checkuid(arg3, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 					return SQLITE_DENY;
@@ -1998,7 +1998,7 @@ static void php_sqlite3_free_list_dtor(void **item)
 
 static int php_sqlite3_compare_stmt_zval_free(php_sqlite3_free_list **free_list, zval *statement ) /* {{{ */
 {
-	return  ((*free_list)->stmt_obj->initialised && Z_PTR_P(statement) == Z_PTR((*free_list)->stmt_obj_zval));	
+	return  ((*free_list)->stmt_obj->initialised && Z_PTR_P(statement) == Z_PTR((*free_list)->stmt_obj_zval));
 }
 /* }}} */
 

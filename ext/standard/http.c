@@ -177,7 +177,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 						if (enc_type == PHP_QUERY_RFC3986) {
 							ekey = php_raw_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));
 						} else {
-							ekey = php_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));						
+							ekey = php_url_encode(Z_STRVAL_P(zdata), Z_STRLEN_P(zdata));
 						}
 						smart_str_append(formstr, ekey);
 						zend_string_free(ekey);
@@ -255,7 +255,7 @@ PHP_FUNCTION(http_build_query)
 	}
 
 	smart_str_0(&formstr);
-	
+
 	RETURN_STR(formstr.s);
 }
 /* }}} */

@@ -1522,7 +1522,7 @@ next_target:
 				char *same_t=NULL;
 				zend_code_block *target_block;
 				int var_num = op_array->last_var + op_array->T;
-		
+
 				if (var_num <= 0) {
    					return;
 				}

@@ -80,7 +80,7 @@ msgformat_data* msgformat_data_create( void )
 /* }}} */
 
 #ifdef MSG_FORMAT_QUOTE_APOS
-int msgformat_fix_quotes(UChar **spattern, uint32_t *spattern_len, UErrorCode *ec) 
+int msgformat_fix_quotes(UChar **spattern, uint32_t *spattern_len, UErrorCode *ec)
 {
 	if(*spattern && *spattern_len && u_strchr(*spattern, (UChar)'\'')) {
 		UChar *npattern = emalloc(sizeof(UChar)*(2*(*spattern_len)+1));

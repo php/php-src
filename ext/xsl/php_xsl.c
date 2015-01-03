@@ -80,10 +80,10 @@ void xsl_objects_free_storage(zend_object *object)
 
 	zend_hash_destroy(intern->parameter);
 	FREE_HASHTABLE(intern->parameter);
-	
+
 	zend_hash_destroy(intern->registered_phpfunctions);
 	FREE_HASHTABLE(intern->registered_phpfunctions);
-	
+
 	if (intern->node_list) {
 		zend_hash_destroy(intern->node_list);
 		FREE_HASHTABLE(intern->node_list);
@@ -97,7 +97,7 @@ void xsl_objects_free_storage(zend_object *object)
 	if (intern->ptr) {
 		/* free wrapper */
 		if (((xsltStylesheetPtr) intern->ptr)->_private != NULL) {
-			((xsltStylesheetPtr) intern->ptr)->_private = NULL;   
+			((xsltStylesheetPtr) intern->ptr)->_private = NULL;
 		}
 
 		xsltFreeStylesheet((xsltStylesheetPtr) intern->ptr);
@@ -130,8 +130,8 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 /* }}} */
 
 PHP_INI_BEGIN()
-/* Default is not allowing any write operations. 
-   XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_WRITE_FILE == 44 
+/* Default is not allowing any write operations.
+   XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_WRITE_FILE == 44
 */
 PHP_INI_ENTRY("xsl.security_prefs", "44", PHP_INI_ALL, NULL)
 PHP_INI_END()
@@ -140,9 +140,9 @@ PHP_INI_END()
  */
 PHP_MINIT_FUNCTION(xsl)
 {
-	
+
 	zend_class_entry ce;
-	
+
 	memcpy(&xsl_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	xsl_object_handlers.offset = XtOffsetOf(xsl_object, std);
 	xsl_object_handlers.clone_obj = NULL;
@@ -152,7 +152,7 @@ PHP_MINIT_FUNCTION(xsl)
 #if HAVE_XSL_EXSLT
 	exsltRegisterAll();
 #endif
- 
+
 	xsltRegisterExtModuleFunction ((const xmlChar *) "functionString",
 				   (const xmlChar *) "http://php.net/xsl",
 				   xsl_ext_function_string_php);
@@ -237,7 +237,7 @@ void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return
 		wrapper = wrapper_in;
 	}
 
-	
+
 	ce = xsl_xsltprocessor_class_entry;
 
 	if (!wrapper_in) {

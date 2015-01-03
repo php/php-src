@@ -29,7 +29,7 @@
  */
 
 /* {{{ resourcebundle_iterator_read */
-static void resourcebundle_iterator_read( ResourceBundle_iterator *iterator ) 
+static void resourcebundle_iterator_read( ResourceBundle_iterator *iterator )
 {
 	UErrorCode icuerror = U_ZERO_ERROR;
 	ResourceBundle_object *rb = iterator->subject;
@@ -51,7 +51,7 @@ static void resourcebundle_iterator_read( ResourceBundle_iterator *iterator )
 /* }}} */
 
 /* {{{ resourcebundle_iterator_invalidate */
-static void resourcebundle_iterator_invalidate( zend_object_iterator *iter ) 
+static void resourcebundle_iterator_invalidate( zend_object_iterator *iter )
 {
 	ResourceBundle_iterator *iterator = (ResourceBundle_iterator *) iter;
 

@@ -201,7 +201,7 @@ static void php_print_gpcse_array(char *name, uint name_length)
 	zend_string *string_key;
 	zend_ulong num_key;
 	zend_string *key;
-	
+
 	key = zend_string_init(name, name_length, 0);
 	zend_is_auto_global(key);
 
@@ -349,7 +349,7 @@ char* php_get_windows_name()
 				VER_SET_CONDITION(dwlConditionMask, VER_MINORVERSION, op);
 				VER_SET_CONDITION(dwlConditionMask, VER_SERVICEPACKMAJOR, op);
 
-				if (VerifyVersionInfo(&osvi81, 
+				if (VerifyVersionInfo(&osvi81,
 					VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR,
 					dwlConditionMask)) {
 					osvi.dwMinorVersion = 3; /* Windows 8.1/Windows Server 2012 R2 */
@@ -364,7 +364,7 @@ char* php_get_windows_name()
 					} else {
 						major = "Windows Server 2012";
 					}
-				} 
+				}
 			} else {
 				major = "Unknown Windows version";
 			}
@@ -593,14 +593,14 @@ PHPAPI zend_string *php_get_uname(char mode)
 
 		php_get_windows_cpu(wincpu, sizeof(wincpu));
 		dwBuild = (DWORD)(HIWORD(dwVersion));
-		
+
 		/* Windows "version" 6.2 could be Windows 8/Windows Server 2012, but also Windows 8.1/Windows Server 2012 R2 */
 		if (dwWindowsMajorVersion == 6 && dwWindowsMinorVersion == 2) {
 			if (strncmp(winver, "Windows 8.1", 11) == 0 || strncmp(winver, "Windows Server 2012 R2", 22) == 0) {
 				dwWindowsMinorVersion = 3;
 			}
 		}
-		
+
 		snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d (%s) %s",
 				 "Windows NT", ComputerName,
 				 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild, winver?winver:"unknown", wincpu);

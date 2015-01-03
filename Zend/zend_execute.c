@@ -170,7 +170,7 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
     stack->top = EG(vm_stack_top);
 	EG(vm_stack) = stack = zend_vm_stack_new_page(
 		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE) ?
-			ZEND_VM_STACK_PAGE_SIZE : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size), 
+			ZEND_VM_STACK_PAGE_SIZE : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size),
 		stack);
 	ptr = stack->top;
 	EG(vm_stack_top) = (void*)(((char*)ptr) + size);
@@ -399,7 +399,7 @@ static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, const 
 			ZEND_ASSERT(op_type == IS_VAR);
 			return _get_zval_ptr_var(node.var, execute_data, should_free);
 		}
-	} else {		
+	} else {
 		*should_free = NULL;
 		if (op_type == IS_CONST) {
 			return EX_CONSTANT(node);
@@ -419,7 +419,7 @@ static zend_always_inline zval *_get_zval_ptr_deref(int op_type, znode_op node, 
 			ZEND_ASSERT(op_type == IS_VAR);
 			return _get_zval_ptr_var_deref(node.var, execute_data, should_free);
 		}
-	} else {		
+	} else {
 		*should_free = NULL;
 		if (op_type == IS_CONST) {
 			return EX_CONSTANT(node);
@@ -831,7 +831,7 @@ fast_assign:
 
 			if (!zobj->ce->__set) {
 				if (EXPECTED(zobj->properties == NULL)) {
-					rebuild_object_properties(zobj);				
+					rebuild_object_properties(zobj);
 				}
 				/* separate our value if necessary */
 				if (value_type == IS_CONST) {
@@ -1034,7 +1034,7 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(zend_execute_d
 {
 	HashTable *ht;
 
-	if (EXPECTED(fetch_type == ZEND_FETCH_GLOBAL_LOCK) || 
+	if (EXPECTED(fetch_type == ZEND_FETCH_GLOBAL_LOCK) ||
 	    EXPECTED(fetch_type == ZEND_FETCH_GLOBAL)) {
 		ht = &EG(symbol_table).ht;
 	} else if (EXPECTED(fetch_type == ZEND_FETCH_STATIC)) {
@@ -1109,7 +1109,7 @@ str_index:
 					}
 				}
 			}
-		} else { 
+		} else {
 			switch (type) {
 				case BP_VAR_R:
 					zend_error(E_NOTICE, "Undefined index: %s", offset_key->val);
@@ -1239,7 +1239,7 @@ convert_to_array:
 		}
 
 		zend_check_string_offset(dim, type);
-		
+
 		ZVAL_INDIRECT(result, NULL); /* wrong string offset */
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
@@ -1711,7 +1711,7 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 		zend_attach_symbol_table(execute_data);
 	} else {
 		uint32_t first_extra_arg, num_args;
-		
+
 		/* Handle arguments */
 		first_extra_arg = op_array->num_args;
 		num_args = EX_NUM_ARGS();
@@ -1848,7 +1848,7 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 {
 	zend_execute_data *new_call;
 	int used_stack = (EG(vm_stack_top) - (zval*)call) + additional_args;
-		
+
 	/* copy call frame into new stack segment */
 	new_call = zend_vm_stack_extend(used_stack * sizeof(zval));
 	*new_call = *call;

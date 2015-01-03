@@ -19,7 +19,7 @@
 /* $Id$ */
 
 /*
-	Based on CPANs "Text-Metaphone-1.96" by Michael G Schwern <schwern@pobox.com> 
+	Based on CPANs "Text-Metaphone-1.96" by Michael G Schwern <schwern@pobox.com>
 */
 
 #include "php.h"
@@ -50,10 +50,10 @@ PHP_FUNCTION(metaphone)
 }
 /* }}} */
 
-/* 
+/*
    this is now the original code by Michael G Schwern:
-   i've changed it just a slightly bit (use emalloc, 
-   get rid of includes etc) 
+   i've changed it just a slightly bit (use emalloc,
+   get rid of includes etc)
 	- thies - 13.09.1999
 */
 
@@ -226,8 +226,8 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 			w_idx += 2;
 		}
 		break;
-		/* WH becomes W, 
-		   WR becomes R 
+		/* WH becomes W,
+		   WR becomes R
 		   W if followed by a vowel */
 	case 'W':
 		if (Next_Letter == 'R') {
@@ -267,7 +267,7 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 	for (; Curr_Letter != '\0' &&
 		 (max_phonemes == 0 || Phone_Len < max_phonemes);
 		 w_idx++) {
-		/* How many letters to skip because an eariler encoding handled     
+		/* How many letters to skip because an eariler encoding handled
 		 * multiple letters */
 		unsigned short int skip_letter = 0;
 
@@ -335,7 +335,7 @@ static int metaphone(unsigned char *word, size_t word_len, zend_long max_phoneme
 				Phonize('T');
 			break;
 			/* F if in -GH and not B--GH, D--GH, -H--GH, -H---GH
-			 * else dropped if -GNED, -GN, 
+			 * else dropped if -GNED, -GN,
 			 * else dropped if -DGE-, -DGI- or -DGY- (handled in D)
 			 * else J if in -GE-, -GI, -GY and not GG
 			 * else K

@@ -53,7 +53,7 @@ typedef uintptr_t tsrm_uintptr_t;
 #elif defined(TSRM_ST)
 # include <st.h>
 #elif defined(BETHREADS)
-#include <kernel/OS.h> 
+#include <kernel/OS.h>
 #include <TLS.h>
 #endif
 
@@ -84,7 +84,7 @@ typedef struct {
   sem_id sem;
   int32 ben;
 } beos_ben;
-# define MUTEX_T beos_ben * 
+# define MUTEX_T beos_ben *
 #endif
 
 #ifdef HAVE_SIGNAL_H
@@ -176,7 +176,7 @@ TSRM_API void *tsrm_get_ls_cache(void);
 /* BC only */
 #define TSRMLS_D void
 #define TSRMLS_DC
-#define TSRMLS_C	
+#define TSRMLS_C
 #define TSRMLS_CC
 #define TSRMLS_FETCH()
 

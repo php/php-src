@@ -39,7 +39,7 @@ ap_php_optiserr(int argc, char * const *argv, int oint, const char *optstr,
     }
     return('?');
 }
-    
+
 int ap_php_getopt(int argc, char* const *argv, const char *optstr)
 {
     static int optchr = 0;
@@ -96,7 +96,7 @@ int ap_php_getopt(int argc, char* const *argv, const char *optstr)
     }
     if (cp[1] == ':')
     {
-        /* Check for cases where the value of the argument 
+        /* Check for cases where the value of the argument
            is in the form -<arg> <val> or in the form -<arg><val> */
         dash = 0;
         if(!argv[ap_php_optind][2]) {

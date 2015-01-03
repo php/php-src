@@ -37,7 +37,7 @@ typedef enum {
 	/* Unmap the last range that was mapped for the stream */
 	PHP_STREAM_MMAP_UNMAP
 } php_stream_mmap_operation_t;
-	
+
 typedef enum {
 	PHP_STREAM_MAP_MODE_READONLY,
 	PHP_STREAM_MAP_MODE_READWRITE,
@@ -50,9 +50,9 @@ typedef struct {
 	 * If length is 0, the whole file is mapped */
 	size_t offset;
 	size_t length;
-	
+
 	php_stream_mmap_access_t mode;
-	
+
 	/* returned mapped address */
 	char *mapped;
 

@@ -417,7 +417,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt) /* {{{ */
 
 	if (!mysql_more_results(H->server)) {
 		/* No more results */
-		PDO_DBG_RETURN(0);	
+		PDO_DBG_RETURN(0);
 	}
 #if PDO_USE_MYSQLND
 	if (mysql_next_result(H->server) == FAIL) {
@@ -487,7 +487,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 					strcpy(stmt->error_code, "HY093");
 					PDO_DBG_RETURN(0);
 				}
- 
+
 				if (!Z_ISREF(param->parameter)) {
 					parameter = &param->parameter;
 				} else {

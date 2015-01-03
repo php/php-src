@@ -28,11 +28,11 @@
 #include "http_main.h"
 #include "http_protocol.h"
 #include "http_request.h"
-#include "http_log.h"   
+#include "http_log.h"
 #include "util_script.h"
 
 #include "php_variables.h"
-#include "php_main.h"     
+#include "php_main.h"
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
 

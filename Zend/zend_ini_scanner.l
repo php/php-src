@@ -427,7 +427,7 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 <INITIAL>{LABEL}"["{TABS_AND_SPACES}* { /* Start of option with offset */
 	/* Eat leading whitespace */
 	EAT_LEADING_WHITESPACE();
-	
+
 	/* Eat trailing whitespace and [ */
 	EAT_TRAILING_WHITESPACE_EX('[');
 
@@ -584,7 +584,7 @@ end_raw_value_chars:
 	if (YYCURSOR > YYLIMIT) {
 		return 0;
 	}
-	
+
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR++) {
 			case '"':
@@ -605,13 +605,13 @@ end_raw_value_chars:
 			default:
 				continue;
 		}
-		
+
 		YYCURSOR--;
 		break;
 	}
 
 	yyleng = YYCURSOR - SCNG(yy_text);
-	
+
 	zend_ini_escape_string(ini_lval, yytext, yyleng, '"');
 	return TC_QUOTED_STRING;
 }

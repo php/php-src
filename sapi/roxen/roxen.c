@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -25,7 +25,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "SAPI.h"
-#include "php_main.h" 
+#include "php_main.h"
 #include "ext/standard/info.h"
 
 #include "php_version.h"
@@ -36,7 +36,7 @@
 #endif
 
 
-/* Pike Include Files 
+/* Pike Include Files
  *
  * conflicts with pike avoided by only using long names. Requires a new
  * Pike 0.7 since it was implemented for this interface only.
@@ -95,7 +95,7 @@ static php_roxen_request *current_request = NULL;
 # define THIS current_request
 #endif
 
-/* File descriptor integer. Used to write directly to the FD without 
+/* File descriptor integer. Used to write directly to the FD without
  * passing Pike
  */
 #define MY_FD    (THIS->my_fd)
@@ -121,10 +121,10 @@ static PIKE_MUTEX_T roxen_php_execution_lock;
 # define PHP_UNLOCK(X)	mt_unlock(&roxen_php_execution_lock);
 # define PHP_DESTROY()	mt_destroy(&roxen_php_execution_lock)
 #else /* !_REENTRANT */
-# define PHP_INIT_LOCK()	
+# define PHP_INIT_LOCK()
 # define PHP_LOCK(X)
 # define PHP_UNLOCK(X)
-# define PHP_DESTROY()	
+# define PHP_DESTROY()
 #endif /* _REENTRANT */
 
 extern int fd_from_object(struct object *o);
@@ -153,7 +153,7 @@ struct program *php_program;
 
 /* To avoid executing a PHP script from a PHP callback, which would
  * create a deadlock, a global thread id is used. If the thread calling the
- * php-script is the same as the current thread, it fails. 
+ * php-script is the same as the current thread, it fails.
  */
 static int current_thread = -1;
 
@@ -161,7 +161,7 @@ static int current_thread = -1;
 /* Low level header lookup. Basically looks for the named header in the mapping
  * headers in the supplied options mapping.
  */
- 
+
 static INLINE struct svalue *lookup_header(char *headername)
 {
   struct svalue *headers, *value;
@@ -264,7 +264,7 @@ php_roxen_sapi_ub_write(const char *str, uint str_length)
 	  PG(connection_status) = PHP_CONNECTION_ABORTED;
 	  zend_bailout();
 	  return sent_bytes;
-	 case EINTR: 
+	 case EINTR:
 	 case EWOULDBLOCK:
 	  continue;
 	}
@@ -300,7 +300,7 @@ static void php_roxen_set_header(char *header_name, char *value, char *p)
   s_headermap = low_mapping_string_lookup(REQUEST_DATA, ind);
   if(!s_headermap)
   {
-    struct svalue mappie;                                           
+    struct svalue mappie;
     mappie.type = PIKE_T_MAPPING;
     headermap = allocate_mapping(1);
     mappie.u.mapping = headermap;
@@ -319,7 +319,7 @@ static void php_roxen_set_header(char *header_name, char *value, char *p)
 }
 
 /*
- * php_roxen_sapi_header_handler() sets a HTTP reply header to be 
+ * php_roxen_sapi_header_handler() sets a HTTP reply header to be
  * sent to the client.
  */
 static int
@@ -329,7 +329,7 @@ php_roxen_sapi_header_handler(sapi_header_struct *sapi_header,
   char *header_name, *header_content, *p;
   header_name = sapi_header->header;
   header_content = p = strchr(header_name, ':');
-  
+
   if(p) {
   do {
     header_content++;
@@ -359,10 +359,10 @@ php_roxen_low_send_headers(sapi_headers_struct *sapi_headers)
     zend_bailout();
     return SAPI_HEADER_SEND_FAILED;
   }
-  ind = make_shared_string(" _headers");  
+  ind = make_shared_string(" _headers");
   s_headermap = low_mapping_string_lookup(REQUEST_DATA, ind);
   free_string(ind);
-  
+
   push_int(SG(sapi_headers).http_response_code);
   if(s_headermap && s_headermap->type == PIKE_T_MAPPING)
     ref_push_mapping(s_headermap->u.mapping);
@@ -370,7 +370,7 @@ php_roxen_low_send_headers(sapi_headers_struct *sapi_headers)
     push_int(0);
   safe_apply(MY_FD_OBJ, "send_headers", 2);
   pop_stack();
-  
+
   return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
@@ -393,7 +393,7 @@ INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
-  
+
   if(!MY_FD_OBJ->prog)
   {
     PG(connection_status) = PHP_CONNECTION_ABORTED;
@@ -420,11 +420,11 @@ php_roxen_sapi_read_post(char *buf, uint count_bytes)
   return total_read;
 }
 
-/* 
+/*
  * php_roxen_sapi_read_cookies() returns the Cookie header from
  * the HTTP request header
  */
-	
+
 static char *
 php_roxen_sapi_read_cookies(void)
 {
@@ -447,7 +447,7 @@ static void php_info_roxen(ZEND_MODULE_INFO_FUNC_ARGS)
       php_info_print_table_row(2, "Server platform", Ns_InfoPlatform());
       snprintf(buf, 511, "%s/%s", Ns_InfoServerName(), Ns_InfoServerVersion());
       php_info_print_table_row(2, "Server version", buf);
-      snprintf(buf, 511, "%d day(s), %02d:%02d:%02d", 
+      snprintf(buf, 511, "%d day(s), %02d:%02d:%02d",
       uptime / 86400,
       (uptime / 3600) % 24,
       (uptime / 60) % 60,
@@ -550,13 +550,13 @@ php_roxen_hash_environment(void)
 	zvalue->type = IS_STRING;
 	zvalue->value.str.len = val->u.string->len;
 	zvalue->value.str.val = estrndup(val->u.string->str, zvalue->value.str.len);
-	
+
 	zend_hash_update(&EG(symbol_table), buf, buf_len + 1, &zvalue, sizeof(zval *), NULL);
       }
     }
     free_array(indices);
   }
-  
+
   /*
     MAKE_STD_ZVAL(zvalue);
     zvalue->type = IS_LONG;
@@ -613,13 +613,13 @@ void f_php_roxen_request_handler(INT32 args)
 #ifdef ROXEN_USE_ZTS
   GET_THIS();
 #endif
-  
+
   if(current_thread == th_self())
     php_error(E_WARNING, "PHP7.Interpreter->run: Tried to run a PHP-script from a PHP "
 	  "callback!");
   get_all_args("PHP7.Interpreter->run", args, "%S%m%O%*", &script,
 	       &request_data, &my_fd_obj, &done_callback);
-  if(done_callback->type != PIKE_T_FUNCTION) 
+  if(done_callback->type != PIKE_T_FUNCTION)
     php_error(E_WARNING, "PHP7.Interpreter->run: Bad argument 4, expected function.\n");
   PHP_LOCK(THIS); /* Need to lock here or reusing the same object might cause
 		       * problems in changing stuff in that object */
@@ -646,10 +646,10 @@ void f_php_roxen_request_handler(INT32 args)
   SG(request_info).content_type = lookup_string_header("HTTP_CONTENT_TYPE", NULL);
   SG(sapi_headers).http_response_code = 200;
 
-  /* FIXME: Check for auth stuff needs to be fixed... */ 
-  SG(request_info).auth_user = NULL; 
+  /* FIXME: Check for auth stuff needs to be fixed... */
+  SG(request_info).auth_user = NULL;
   SG(request_info).auth_password = NULL;
-  
+
   ind = make_shared_binary_string("my_fd", 5);
   raw_fd = low_mapping_string_lookup(THIS->request_data, ind);
   if(raw_fd && raw_fd->type == PIKE_T_OBJECT)
@@ -660,10 +660,10 @@ void f_php_roxen_request_handler(INT32 args)
     THIS->my_fd = fd;
   } else
     THIS->my_fd = 0;
-  
+
   status = php_roxen_module_main();
   current_thread = -1;
-  
+
   apply_svalue(done_callback, 0);
   pop_stack();
   pop_n_elems(args);
@@ -692,7 +692,7 @@ void pike_module_init( void )
     tsrm_startup(1, 1, 0, NULL);
 #ifdef ROXEN_USE_ZTS
     ts_allocate_id(&roxen_globals_id, sizeof(php_roxen_request), NULL, NULL);
-#endif	 
+#endif
 #endif
     sapi_startup(&roxen_sapi_module);
     /*php_roxen_startup(&roxen_sapi_module); removed - should be called from SAPI activation*/

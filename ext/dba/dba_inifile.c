@@ -84,9 +84,9 @@ DBA_UPDATE_FUNC(inifile)
 
 	INIFILE_DATA;
 	INIFILE_GKEY;
-	
+
 	ini_val.value = val;
-	
+
 	if (mode == 1) {
 		res = inifile_append(dba, &ini_key, &ini_val);
 	} else {
@@ -111,7 +111,7 @@ DBA_EXISTS_FUNC(inifile)
 
 	INIFILE_DATA;
 	INIFILE_GKEY;
-	
+
 	ini_val = inifile_fetch(dba, &ini_key, 0);
 	INIFILE_DONE;
 	if (ini_val.value) {
@@ -151,7 +151,7 @@ DBA_FIRSTKEY_FUNC(inifile)
 DBA_NEXTKEY_FUNC(inifile)
 {
 	INIFILE_DATA;
-	
+
 	if (!dba->curr.key.group && !dba->curr.key.name) {
 		return NULL;
 	}

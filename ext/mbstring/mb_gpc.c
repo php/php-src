@@ -92,7 +92,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 			break;
 	}
 
-	if (arg == PARSE_POST) { 
+	if (arg == PARSE_POST) {
 		sapi_handle_post(&v_array);
 		return;
 	}
@@ -132,7 +132,7 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 			separator = ";\0";
 			break;
 	}
-	
+
 	switch (arg) {
 		case PARSE_POST:
 			MBSTRG(http_input_identify_post) = NULL;
@@ -149,12 +149,12 @@ MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 	}
 
 	info.data_type              = arg;
-	info.separator              = separator; 
+	info.separator              = separator;
 	info.report_errors          = 0;
 	info.to_encoding            = MBSTRG(internal_encoding);
 	info.to_language            = MBSTRG(language);
 	info.from_encodings         = MBSTRG(http_input_list);
-	info.num_from_encodings     = MBSTRG(http_input_list_size); 
+	info.num_from_encodings     = MBSTRG(http_input_list_size);
 	info.from_language          = MBSTRG(language);
 
 	MBSTRG(illegalchars) = 0;
@@ -200,7 +200,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	size_t val_len, new_val_len;
 	mbfl_string string, resvar, resval;
 	const mbfl_encoding *from_encoding = NULL;
-	mbfl_encoding_detector *identd = NULL; 
+	mbfl_encoding_detector *identd = NULL;
 	mbfl_buffer_converter *convd = NULL;
 
 	mbfl_string_init_set(&string, info->to_language, info->to_encoding->no_encoding);
@@ -210,7 +210,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	if (!res || *res == '\0') {
 		goto out;
 	}
-	
+
 	/* count the variables(separators) contained in the "res".
 	 * separator may contain multiple separator chars.
 	 */
@@ -219,11 +219,11 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		for (s2=info->separator; *s2 != '\0'; s2++) {
 			if (*s1 == *s2) {
 				num++;
-			}	
+			}
 		}
 	}
 	num *= 2; /* need space for variable name and value */
-	
+
 	val_list = (char **)ecalloc(num, sizeof(char *));
 	len_list = (int *)ecalloc(num, sizeof(int));
 
@@ -237,7 +237,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 			len_list[n] = php_url_decode(var, val-var);
 			val_list[n] = var;
 			n++;
-			
+
 			*val++ = '\0';
 			val_list[n] = val;
 			len_list[n] = php_url_decode(val, strlen(val));
@@ -245,13 +245,13 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 			len_list[n] = php_url_decode(var, strlen(var));
 			val_list[n] = var;
 			n++;
-			
+
 			val_list[n] = "";
 			len_list[n] = 0;
 		}
 		n++;
 		var = php_strtok_r(NULL, info->separator, &strtok_buf);
-	} 
+	}
 
 	if (n > (PG(max_input_vars) * 2)) {
 		php_error_docref(NULL, E_WARNING, "Input variables exceeded %pd. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
@@ -259,7 +259,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	}
 
 	num = n; /* make sure to process initialized vars only */
-	
+
 	/* initialize converter */
 	if (info->num_from_encodings <= 0) {
 		from_encoding = &mbfl_encoding_pass;
@@ -334,7 +334,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 			php_register_variable_safe(var, val, new_val_len, array_ptr);
 		}
 		efree(val);
-		
+
 		if (convd != NULL){
 			mbfl_string_clear(&resvar);
 			mbfl_string_clear(&resval);
@@ -372,7 +372,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	info.to_encoding            = MBSTRG(internal_encoding);
 	info.to_language            = MBSTRG(language);
 	info.from_encodings         = MBSTRG(http_input_list);
-	info.num_from_encodings     = MBSTRG(http_input_list_size); 
+	info.num_from_encodings     = MBSTRG(http_input_list_size);
 	info.from_language          = MBSTRG(language);
 
 	php_stream_rewind(SG(request_info).request_body);

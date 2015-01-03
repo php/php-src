@@ -17,7 +17,7 @@
   |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 
-  $Id$ 
+  $Id$
 */
 
 #ifndef PHP_MYSQLND_H

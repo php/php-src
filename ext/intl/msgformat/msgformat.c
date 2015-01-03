@@ -26,7 +26,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS) 
+static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char* locale;
 	char*       pattern;
@@ -76,7 +76,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	(mfo)->mf_data.orig_format = estrndup(pattern, pattern_len);
 	(mfo)->mf_data.orig_format_len = pattern_len;
-	
+
 	/* Create an ICU message formatter. */
 	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, locale, NULL, &INTL_DATA_ERROR_CODE(mfo));
 

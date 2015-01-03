@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,11 +31,11 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include "zipint.h"
 
-
+
 
 ZIP_EXTERN int
 zip_file_replace(struct zip *za, zip_uint64_t idx, struct zip_source *source, zip_flags_t flags)
@@ -52,7 +52,7 @@ zip_file_replace(struct zip *za, zip_uint64_t idx, struct zip_source *source, zi
 }
 
 
-
+
 
 /* NOTE: Signed due to -1 on error.  See zip_add.c for more details. */
 
@@ -60,7 +60,7 @@ zip_int64_t
 _zip_file_replace(struct zip *za, zip_uint64_t idx, const char *name, struct zip_source *source, zip_flags_t flags)
 {
     zip_uint64_t za_nentry_prev;
-    
+
     if (ZIP_IS_RDONLY(za)) {
 	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
 	return -1;
@@ -69,7 +69,7 @@ _zip_file_replace(struct zip *za, zip_uint64_t idx, const char *name, struct zip
     za_nentry_prev = za->nentry;
     if (idx == ZIP_UINT64_MAX) {
 	zip_int64_t i = -1;
-	
+
 	if (flags & ZIP_FL_OVERWRITE)
 	    i = _zip_name_locate(za, name, flags, NULL);
 
@@ -80,7 +80,7 @@ _zip_file_replace(struct zip *za, zip_uint64_t idx, const char *name, struct zip
 	}
 	idx = (zip_uint64_t)i;
     }
-    
+
     if (name && _zip_set_name(za, idx, name, flags) != 0) {
 	if (za->nentry != za_nentry_prev) {
 	    _zip_entry_finalize(za->entry+idx);
@@ -104,7 +104,7 @@ _zip_file_replace(struct zip *za, zip_uint64_t idx, const char *name, struct zip
         za->entry[idx].changes->comp_method = ZIP_CM_REPLACED_DEFAULT;
         za->entry[idx].changes->changed |= ZIP_DIRENT_COMP_METHOD;
     }
-	
+
     za->entry[idx].source = source;
 
     return (zip_int64_t)idx;

@@ -56,7 +56,7 @@ main()
 		printf ("Token = '%s'\n", token);
 		token = tsrm_strtok_r(NULL, "/\\", &last);
 	}
-	
+
 	return 0;
 }
 

@@ -96,7 +96,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 		size_t size = (*buffer)->len;
 		while (req_size > size) {
 			if (size > ZEND_SIZE_MAX/2) {
-				zend_error_noreturn(E_ERROR, "Field width %zd is too long", req_size); 
+				zend_error_noreturn(E_ERROR, "Field width %zd is too long", req_size);
 			}
 			size <<= 1;
 		}
@@ -128,7 +128,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 /* php_spintf_appendint() {{{ */
 inline static void
 php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
-						size_t width, char padding, size_t alignment, 
+						size_t width, char padding, size_t alignment,
 						int always_sign)
 {
 	char numbuf[NUM_BUF_SIZE];
@@ -231,7 +231,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 		php_error_docref(NULL, E_NOTICE, "Requested precision of %d digits was truncated to PHP maximum of %d digits", precision, MAX_FLOAT_PRECISION);
 		precision = MAX_FLOAT_PRECISION;
 	}
-	
+
 	if (zend_isnan(number)) {
 		is_negative = (number<0);
 		php_sprintf_appendstring(buffer, pos, "NaN", 3, 0, padding,
@@ -246,7 +246,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 		return;
 	}
 
-	switch (fmt) {			
+	switch (fmt) {
 		case 'e':
 		case 'E':
 		case 'f':
@@ -400,11 +400,11 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 	}
 
 	/* verify the number of args */
-	if ((use_array && argc != (2 + format_offset)) 
+	if ((use_array && argc != (2 + format_offset))
 			|| (!use_array && argc < (1 + format_offset))) {
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);
 	}
-	
+
 	convert_to_string_ex(&args[format_offset]);
 	if (use_array) {
 		int i = 1;
@@ -417,11 +417,11 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 			SEPARATE_ZVAL(array);
 			convert_to_array(array);
 		}
-		
+
 		argc = 1 + zend_hash_num_elements(Z_ARRVAL_P(array));
 		newargs = (zval *)safe_emalloc(argc, sizeof(zval), 0);
 		ZVAL_COPY_VALUE(&newargs[0], z_format);
-		
+
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), zv) {
 			ZVAL_COPY_VALUE(&newargs[i], zv);
 			i++;
@@ -429,7 +429,7 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 		args = newargs;
 		format_offset = 0;
 	}
-	
+
 	format = Z_STRVAL(args[format_offset]);
 	format_len = Z_STRLEN(args[format_offset]);
 	result = zend_string_alloc(size, 0);
@@ -608,7 +608,7 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 											 format[inpos], always_sign
 											);
 					break;
-					
+
 				case 'c':
 					php_sprintf_appendchar(&result, &outpos,
 										(char) zval_get_long(tmp));
@@ -659,7 +659,7 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 
 	/* possibly, we have to make sure we have room for the terminating null? */
 	result->val[outpos]=0;
-	result->len = outpos;	
+	result->len = outpos;
 	return result;
 }
 /* }}} */
@@ -669,7 +669,7 @@ php_formatted_print(int param_count, int use_array, int format_offset)
 PHP_FUNCTION(user_sprintf)
 {
 	zend_string *result;
-	
+
 	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 0, 0))==NULL) {
 		RETURN_FALSE;
 	}
@@ -682,7 +682,7 @@ PHP_FUNCTION(user_sprintf)
 PHP_FUNCTION(vsprintf)
 {
 	zend_string *result;
-	
+
 	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 1, 0))==NULL) {
 		RETURN_FALSE;
 	}
@@ -696,7 +696,7 @@ PHP_FUNCTION(user_printf)
 {
 	zend_string *result;
 	size_t rlen;
-	
+
 	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 0, 0))==NULL) {
 		RETURN_FALSE;
 	}
@@ -712,7 +712,7 @@ PHP_FUNCTION(vprintf)
 {
 	zend_string *result;
 	size_t rlen;
-	
+
 	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 1, 0))==NULL) {
 		RETURN_FALSE;
 	}
@@ -729,15 +729,15 @@ PHP_FUNCTION(fprintf)
 	php_stream *stream;
 	zval *arg1;
 	zend_string *result;
-	
+
 	if (ZEND_NUM_ARGS() < 2) {
 		WRONG_PARAM_COUNT;
 	}
-	
+
 	if (zend_parse_parameters(1, "r", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
-	
+
 	php_stream_from_zval(stream, arg1);
 
 	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 0, 1))==NULL) {
@@ -758,15 +758,15 @@ PHP_FUNCTION(vfprintf)
 	php_stream *stream;
 	zval *arg1;
 	zend_string *result;
-	
+
 	if (ZEND_NUM_ARGS() != 3) {
 		WRONG_PARAM_COUNT;
 	}
-	
+
 	if (zend_parse_parameters(1, "r", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
-	
+
 	php_stream_from_zval(stream, arg1);
 
 	if ((result=php_formatted_print(ZEND_NUM_ARGS(), 1, 1))==NULL) {

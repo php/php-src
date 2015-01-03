@@ -40,7 +40,7 @@ typedef struct {
 
 typedef struct Vresult {
 	HSTMT   hstmt;
-	VConn   *conn; 
+	VConn   *conn;
 	zend_long    index;
 	VResVal *values;
 	zend_long    numcols;

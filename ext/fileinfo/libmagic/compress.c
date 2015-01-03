@@ -2,7 +2,7 @@
  * Copyright (c) Ian F. Darwin 1986-1995.
  * Software written by Ian F. Darwin and others;
  * maintained 1995-present by Christos Zoulas and others.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,7 +29,7 @@
  * compress routines:
  *	zmagic() - returns 0 if not recognized, uncompresses and prints
  *		   information if recognized
- *	uncompress(method, old, n, newch) - uncompress old into new, 
+ *	uncompress(method, old, n, newch) - uncompress old into new,
  *					    using method, return sizeof new
  */
 #include "config.h"
@@ -347,7 +347,7 @@ uncompressgzipped(struct magic_set *ms, const unsigned char *old,
 	if ((*newch = CAST(unsigned char *, emalloc(HOWMANY + 1))) == NULL) {
 		return 0;
 	}
-	
+
 	/* XXX: const castaway, via strchr */
 	z.next_in = (Bytef *)strchr((const char *)old + data_start,
 	    old[data_start]);
@@ -373,7 +373,7 @@ uncompressgzipped(struct magic_set *ms, const unsigned char *old,
 
 	n = (size_t)z.total_out;
 	(void)inflateEnd(&z);
-	
+
 	/* let's keep the nul-terminate tradition */
 	(*newch)[n] = '\0';
 
@@ -398,7 +398,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
 	(void)fflush(stderr);
 
 	if ((fd != -1 && pipe(fdin) == -1) || pipe(fdout) == -1) {
-		file_error(ms, errno, "cannot create pipe");	
+		file_error(ms, errno, "cannot create pipe");
 		return NODATA;
 	}
 	switch (pid = fork()) {
@@ -438,7 +438,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
 		(void) close(fdout[1]);
 		if (fd == -1) {
 			(void) close(fdin[0]);
-			/* 
+			/*
 			 * fork again, to avoid blocking because both
 			 * pipes filled
 			 */
@@ -498,7 +498,7 @@ err:
 		(void)wait(NULL);
 #endif
 		(void) close(fdin[0]);
-	    
+
 		return n;
 	}
 }

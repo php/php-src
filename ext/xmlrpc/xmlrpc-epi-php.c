@@ -1,33 +1,33 @@
 /*
-  This file is part of, or distributed with, libXMLRPC - a C library for 
+  This file is part of, or distributed with, libXMLRPC - a C library for
   xml-encoded function calls.
 
   Author: Dan Libby (dan@libby.com)
   Epinions.com may be contacted at feedback@epinions-inc.com
 */
 
-/*  
-  Copyright 2001 Epinions, Inc. 
+/*
+  Copyright 2001 Epinions, Inc.
 
-  Subject to the following 3 conditions, Epinions, Inc.  permits you, free 
-  of charge, to (a) use, copy, distribute, modify, perform and display this 
-  software and associated documentation files (the "Software"), and (b) 
-  permit others to whom the Software is furnished to do so as well.  
+  Subject to the following 3 conditions, Epinions, Inc.  permits you, free
+  of charge, to (a) use, copy, distribute, modify, perform and display this
+  software and associated documentation files (the "Software"), and (b)
+  permit others to whom the Software is furnished to do so as well.
 
-  1) The above copyright notice and this permission notice shall be included 
-  without modification in all copies or substantial portions of the 
-  Software.  
+  1) The above copyright notice and this permission notice shall be included
+  without modification in all copies or substantial portions of the
+  Software.
 
-  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF 
-  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY 
-  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-  PURPOSE OR NONINFRINGEMENT.  
+  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF
+  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY
+  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR
+  PURPOSE OR NONINFRINGEMENT.
 
-  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT, 
-  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT 
-  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING 
-  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH 
-  DAMAGES.    
+  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,
+  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT
+  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING
+  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH
+  DAMAGES.
 
 */
 
@@ -144,7 +144,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 const zend_function_entry xmlrpc_functions[] = {
-	PHP_FE(xmlrpc_encode,									arginfo_xmlrpc_encode) 
+	PHP_FE(xmlrpc_encode,									arginfo_xmlrpc_encode)
 	PHP_FE(xmlrpc_decode,									arginfo_xmlrpc_decode)
 	PHP_FE(xmlrpc_decode_request,							arginfo_xmlrpc_decode_request)
 	PHP_FE(xmlrpc_encode_request,							arginfo_xmlrpc_encode_request)
@@ -508,7 +508,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 
 		ZVAL_UNDEF(&val);
 		type = get_zval_xmlrpc_type(in_val, &val);
-	
+
 		if (!Z_ISUNDEF(val)) {
 			switch (type) {
 				case xmlrpc_base64:
@@ -556,7 +556,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 
 						ZVAL_COPY(&val_arr, &val);
 						convert_to_array(&val_arr);
-						
+
 						vtype = determine_vector_type(Z_ARRVAL(val_arr));
 						xReturn = XMLRPC_CreateVector(key, vtype);
 
@@ -582,7 +582,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 							if (ht) {
 								ht->u.v.nApplyCount--;
 							}
-						} ZEND_HASH_FOREACH_END();	
+						} ZEND_HASH_FOREACH_END();
 						zval_ptr_dtor(&val_arr);
 					}
 					break;
@@ -614,7 +614,7 @@ static void XMLRPC_to_PHP(XMLRPC_VALUE el, zval *elem)
 			case xmlrpc_string:
 				pStr = XMLRPC_GetValueString(el);
 				if (pStr) {
-					ZVAL_STRINGL(elem, pStr, XMLRPC_GetValueStringLen(el)); 
+					ZVAL_STRINGL(elem, pStr, XMLRPC_GetValueStringLen(el));
 				}
 				break;
 			case xmlrpc_int:
@@ -698,7 +698,7 @@ PHP_FUNCTION(xmlrpc_encode_request)
 			XMLRPC_RequestFree(xRequest, 1);
 		}
 	}
-	
+
 	if (strcmp(out.xmlrpc_out.xml_elem_opts.encoding, ENCODING_DEFAULT) != 0) {
 		efree((char *)out.xmlrpc_out.xml_elem_opts.encoding);
 	}
@@ -818,7 +818,7 @@ PHP_FUNCTION(xmlrpc_server_create)
 
 	if (USED_RET()) {
 		xmlrpc_server_data *server = emalloc(sizeof(xmlrpc_server_data));
-		
+
 		/* allocate server data.  free'd in destroy_server_data() */
 		array_init(&server->method_map);
 		array_init(&server->introspection_map);
@@ -855,7 +855,7 @@ PHP_FUNCTION(xmlrpc_server_destroy)
 	RETURN_BOOL(bSuccess == SUCCESS);
 }
 /* }}} */
-           
+
 /* called by xmlrpc C engine as method handler for all registered methods.
  * it then calls the corresponding PHP function to handle the method.
  */
@@ -872,9 +872,9 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
 	/* convert xmlrpc to native php types */
 	ZVAL_STRING(&pData->xmlrpc_method, XMLRPC_RequestGetMethodName(xRequest));
 	XMLRPC_to_PHP(XMLRPC_RequestGetData(xRequest), &xmlrpc_params);
-	
+
 	/* check if the called method has been previous registered */
-	if ((php_function = zend_hash_find(Z_ARRVAL(pData->server->method_map), Z_STR(pData->xmlrpc_method))) != NULL) { 
+	if ((php_function = zend_hash_find(Z_ARRVAL(pData->server->method_map), Z_STR(pData->xmlrpc_method))) != NULL) {
 		ZVAL_COPY_VALUE(&pData->php_function, php_function);
 	}
 
@@ -929,7 +929,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 				} else {
 					/* could not create description */
 					if (err.xml_elem_error.parser_code) {
-						php_error_docref(NULL, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %s()", 
+						php_error_docref(NULL, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %s()",
 								err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error, php_function_name->val);
 					} else {
 						php_error_docref(NULL, E_WARNING, "Unable to add introspection data returned from %s()", php_function_name->val);
@@ -945,7 +945,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 		}
 		zend_string_release(php_function_name);
 	} ZEND_HASH_FOREACH_END();
-	
+
 	/* so we don't call the same callbacks ever again */
 	zend_hash_clean(Z_ARRVAL(pData->server->introspection_map));
 }
@@ -966,7 +966,7 @@ PHP_FUNCTION(xmlrpc_server_register_method)
 
 	ZEND_FETCH_RESOURCE(server, xmlrpc_server_data*, handle, -1, "xmlrpc server", le_xmlrpc_server);
 
-	/* register with C engine. every method just calls our standard callback, 
+	/* register with C engine. every method just calls our standard callback,
 	 * and it then dispatches to php as necessary
 	 */
 	if (XMLRPC_ServerRegisterMethod(server->server_ptr, method_key, php_xmlrpc_callback)) {
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 	size_t rawxml_len;
 	php_output_options out;
 	int argc = ZEND_NUM_ARGS();
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|a", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
 		return;
 	}
@@ -1053,7 +1053,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 		data.php_executed = 0;
 		data.server = server;
 
-		/* We could just call the php method directly ourselves at this point, but we do this 
+		/* We could just call the php method directly ourselves at this point, but we do this
 		 * with a C callback in case the xmlrpc library ever implements some cool usage stats,
 		 * or somesuch.
 		 */
@@ -1072,7 +1072,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 				int buf_len = 0;
 
 				/* automagically determine output serialization type from request type */
-				if (out.b_auto_version) { 
+				if (out.b_auto_version) {
 					XMLRPC_REQUEST_OUTPUT_OPTIONS opts = XMLRPC_RequestGetOutputOptions(xRequest);
 					if (opts) {
 						out.xmlrpc_out.version = opts->version;
@@ -1155,7 +1155,7 @@ PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 		} else {
 			/* could not create description */
 			if (err.xml_elem_error.parser_code) {
-				php_error_docref(NULL, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to create introspection data", 
+				php_error_docref(NULL, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to create introspection data",
 						err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Invalid xml structure. Unable to create introspection data");
@@ -1248,7 +1248,7 @@ XMLRPC_VECTOR_TYPE xmlrpc_str_as_vector_type(const char* str) /* {{{ */
 }
 /* }}} */
 
-/* set a given value to a particular type. 
+/* set a given value to a particular type.
  * note: this only works on strings, and only for date and base64,
  *       which do not have native php types. black magic lies herein.
  */
@@ -1406,7 +1406,7 @@ PHP_FUNCTION(xmlrpc_get_type)
 	if (type == xmlrpc_vector) {
 		vtype = determine_vector_type((Z_TYPE_P(arg) == IS_OBJECT) ? Z_OBJPROP_P(arg) : Z_ARRVAL_P(arg));
 	}
-   
+
 	RETURN_STRING((char*) xmlrpc_type_as_str(type, vtype));
 }
 /* }}} */

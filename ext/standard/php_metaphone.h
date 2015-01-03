@@ -15,7 +15,7 @@
    | Author: Thies C. Arntzen <thies@thieso.net>                          |
    +----------------------------------------------------------------------+
  */
- 
+
 /* $Id$ */
 
 #ifndef PHP_METAPHONE_H

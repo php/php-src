@@ -324,13 +324,13 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 	 * appear inside complex formats because ::getFormats() returns NULL
 	 * for all uncached formats, which is the case for complex formats
 	 * unless they were set via one of the ::setFormat() methods */
-	
+
 	if (mfo->mf_data.tz_set) {
 		return; /* already done */
 	}
 
 	formats = mf->getFormats(count);
-	
+
 	if (formats == NULL) {
 		intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
 			"Out of memory retrieving subformats", 0);
@@ -342,7 +342,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 		if (df == NULL) {
 			continue;
 		}
-		
+
 		if (used_tz == NULL) {
 			zval nullzv, *zvptr = &nullzv;
 			ZVAL_NULL(zvptr);
@@ -351,7 +351,7 @@ static void umsg_set_timezone(MessageFormatter_object *mfo,
 				continue;
 			}
 		}
-		
+
 		df->setTimeZone(*used_tz);
 	}
 
@@ -377,7 +377,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 	}
 
 	types = umsg_get_types(mfo, err);
-	
+
 	umsg_set_timezone(mfo, err);
 
 	fargs.resize(arg_count);

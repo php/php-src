@@ -10986,7 +10986,7 @@ onigenc_unicode_mbc_case_fold(OnigEncoding enc,
 
   if (onig_st_lookup(FoldTable, (st_data_t )code, (void* )&to) != 0) {
     if (to->n == 1) {
-      return ONIGENC_CODE_TO_MBC(enc, to->code[0], fold);      
+      return ONIGENC_CODE_TO_MBC(enc, to->code[0], fold);
     }
 #if 0
     /* NO NEEDS TO CHECK */
@@ -11094,7 +11094,7 @@ onigenc_unicode_apply_all_case_fold(OnigCaseFoldType flag,
       for (j = 0; j < CaseUnfold_12[i].to.n; j++) {
 	r = (*f)(CaseUnfold_12[i].to.code[j],
 		 (OnigCodePoint* )CaseUnfold_12[i].from, 2, arg);
-	if (r != 0) return r;	
+	if (r != 0) return r;
 
 	for (k = 0; k < CaseUnfold_12[i].to.n; k++) {
 	  if (k == j) continue;
@@ -11115,7 +11115,7 @@ onigenc_unicode_apply_all_case_fold(OnigCaseFoldType flag,
 	for (j = 0; j < CaseUnfold_12_Locale[i].to.n; j++) {
 	  r = (*f)(CaseUnfold_12_Locale[i].to.code[j],
 		   (OnigCodePoint* )CaseUnfold_12_Locale[i].from, 2, arg);
-	  if (r != 0) return r;	
+	  if (r != 0) return r;
 
 	  for (k = 0; k < CaseUnfold_12_Locale[i].to.n; k++) {
 	    if (k == j) continue;
@@ -11136,7 +11136,7 @@ onigenc_unicode_apply_all_case_fold(OnigCaseFoldType flag,
       for (j = 0; j < CaseUnfold_13[i].to.n; j++) {
 	r = (*f)(CaseUnfold_13[i].to.code[j],
 		 (OnigCodePoint* )CaseUnfold_13[i].from, 3, arg);
-	if (r != 0) return r;	
+	if (r != 0) return r;
 
 	for (k = 0; k < CaseUnfold_13[i].to.n; k++) {
 	  if (k == j) continue;

@@ -63,7 +63,7 @@ DBA_OPEN_FUNC(dbm)
 		convert_to_long_ex(&info->argv[0]);
 		filemode = Z_LVAL(info->argv[0]);
 	}
-	
+
 	if(info->mode == DBA_TRUNC) {
 		char buf[MAXPATHLEN];
 
@@ -123,7 +123,7 @@ DBA_UPDATE_FUNC(dbm)
 
 	gval.dptr = (char *) val;
 	gval.dsize = vallen;
-	
+
 	return (store(gkey, gval) == -1 ? FAILURE : SUCCESS);
 }
 
@@ -131,7 +131,7 @@ DBA_EXISTS_FUNC(dbm)
 {
 	datum gval;
 	DBM_GKEY;
-	
+
 	gval = fetch(gkey);
 	if(gval.dptr) {
 		return SUCCESS;
@@ -166,9 +166,9 @@ DBA_NEXTKEY_FUNC(dbm)
 	DBM_DATA;
 	datum gkey;
 	char *nkey = NULL;
-	
+
 	if(!dba->nextkey.dptr) return NULL;
-	
+
 	gkey = nextkey(dba->nextkey);
 	if(gkey.dptr) {
 		if(newlen) *newlen = gkey.dsize;

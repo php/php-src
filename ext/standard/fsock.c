@@ -50,7 +50,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zend_string *errstr = NULL;
 
 	RETVAL_FALSE;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/z/d", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -65,7 +65,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		hostname_len = host_len;
 		hostname = host;
 	}
-	
+
 	/* prepare the timeout value for use */
 #ifndef PHP_WIN32
 	conv = (time_t) (timeout * 1000000.0);
@@ -98,7 +98,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (hashkey) {
 		efree(hashkey);
 	}
-	
+
 	if (stream == NULL)	{
 		if (zerrno) {
 			zval_dtor(zerrno);
@@ -110,7 +110,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			ZVAL_STR(zerrstr, errstr);
 		} else if (!zerrstr && errstr) {
 			zend_string_release(errstr);
-		} 
+		}
 
 		RETURN_FALSE;
 	}
@@ -118,7 +118,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (errstr) {
 		zend_string_release(errstr);
 	}
-		
+
 	php_stream_to_zval(stream, return_value);
 }
 

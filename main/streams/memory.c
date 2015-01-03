@@ -209,7 +209,7 @@ static int php_stream_memory_stat(php_stream *stream, php_stream_statbuf *ssb) /
 
 	memset(ssb, 0, sizeof(php_stream_statbuf));
 	/* read-only across the board */
-	
+
 	ssb->sb.st_mode = ms->mode & TEMP_STREAM_READONLY ? 0444 : 0666;
 
 	ssb->sb.st_size = ms->fsize;
@@ -248,7 +248,7 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 {
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	size_t newsize;
-	
+
 	switch(option) {
 		case PHP_STREAM_OPTION_TRUNCATE_API:
 			switch (value) {
@@ -277,7 +277,7 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 	}
 }
 /* }}} */
-	
+
 PHPAPI php_stream_ops	php_stream_memory_ops = {
 	php_stream_memory_write, php_stream_memory_read,
 	php_stream_memory_close, php_stream_memory_flush,
@@ -301,7 +301,7 @@ PHPAPI php_stream *_php_stream_memory_create(int mode STREAMS_DC)
 	self->fsize = 0;
 	self->smax = ~0u;
 	self->mode = mode;
-	
+
 	stream = php_stream_alloc_rel(&php_stream_memory_ops, self, 0, mode & TEMP_STREAM_READONLY ? "rb" : "w+b");
 	stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 	return stream;
@@ -317,7 +317,7 @@ PHPAPI php_stream *_php_stream_memory_open(int mode, char *buf, size_t length ST
 
 	if ((stream = php_stream_memory_create_rel(mode)) != NULL) {
 		ms = (php_stream_memory_data*)stream->abstract;
-		
+
 		if (mode == TEMP_STREAM_READONLY || mode == TEMP_STREAM_TAKE_BUFFER) {
 			/* use the buffer directly */
 			ms->data = buf;
@@ -397,11 +397,11 @@ static size_t php_stream_temp_read(php_stream *stream, char *buf, size_t count)
 	if (!ts->innerstream) {
 		return -1;
 	}
-	
+
 	got = php_stream_read(ts->innerstream, buf, count);
-	
+
 	stream->eof = ts->innerstream->eof;
-	
+
 	return got;
 }
 /* }}} */
@@ -420,7 +420,7 @@ static int php_stream_temp_close(php_stream *stream, int close_handle)
 	} else {
 		ret = 0;
 	}
-	
+
 	zval_ptr_dtor(&ts->meta);
 
 	if (ts->tmpdir) {
@@ -460,7 +460,7 @@ static int php_stream_temp_seek(php_stream *stream, zend_off_t offset, int whenc
 	ret = php_stream_seek(ts->innerstream, offset, whence);
 	*newoffs = php_stream_tell(ts->innerstream);
 	stream->eof = ts->innerstream->eof;
-	
+
 	return ret;
 }
 /* }}} */
@@ -502,7 +502,7 @@ static int php_stream_temp_cast(php_stream *stream, int castas, void **ret)
 	file = php_stream_fopen_tmpfile();
 	php_stream_write(file, membuf, memsize);
 	pos = php_stream_tell(ts->innerstream);
-	
+
 	php_stream_free_enclosed(ts->innerstream, PHP_STREAM_FREE_CLOSE);
 	ts->innerstream = file;
 	php_stream_encloses(stream, ts->innerstream);
@@ -526,7 +526,7 @@ static int php_stream_temp_stat(php_stream *stream, php_stream_statbuf *ssb) /* 
 static int php_stream_temp_set_option(php_stream *stream, int option, int value, void *ptrparam) /* {{{ */
 {
 	php_stream_temp_data *ts = (php_stream_temp_data*)stream->abstract;
-	
+
 	switch(option) {
 		case PHP_STREAM_OPTION_META_DATA_API:
 			if (Z_TYPE(ts->meta) != IS_UNDEF) {
@@ -651,7 +651,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 		dlen -= mlen;
 		semi = memchr(path, ';', mlen);
 		sep = memchr(path, '/', mlen);
-		
+
 		if (!semi && !sep) {
 			php_stream_wrapper_log_error(wrapper, options, "rfc2397: illegal media type");
 			return NULL;

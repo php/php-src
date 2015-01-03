@@ -541,7 +541,7 @@ ZEND_FUNCTION(strlen)
 ZEND_FUNCTION(strcmp)
 {
 	zend_string *s1, *s2;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &s1, &s2) == FAILURE) {
 		return;
 	}
@@ -575,7 +575,7 @@ ZEND_FUNCTION(strncmp)
 ZEND_FUNCTION(strcasecmp)
 {
 	zend_string *s1, *s2;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &s1, &s2) == FAILURE) {
 		return;
 	}
@@ -709,7 +709,7 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 				zend_error(E_WARNING, "Constants may only evaluate to scalar values or arrays");
 				ret = 0;
 				break;
-			}				
+			}
 		}
 	} ZEND_HASH_FOREACH_END();
 	ht->u.v.nApplyCount--;
@@ -738,7 +738,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 			new_val = zend_hash_add_new(Z_ARRVAL_P(dst), key, val);
 		} else {
 			new_val = zend_hash_index_add_new(Z_ARRVAL_P(dst), idx, val);
-		}		
+		}
 		if (Z_TYPE_P(val) == IS_ARRAY) {
 			if (!Z_IMMUTABLE_P(val)) {
 				copy_constant_array(new_val, val);
@@ -825,7 +825,7 @@ repeat:
 			zval_ptr_dtor(&val_free);
 			RETURN_FALSE;
 	}
-	
+
 	ZVAL_DUP(&c.value, val);
 	zval_ptr_dtor(&val_free);
 register_constant:
@@ -856,7 +856,7 @@ ZEND_FUNCTION(defined)
 		Z_PARAM_STR(name)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
-	
+
 	if (zend_get_constant_ex(name, NULL, ZEND_FETCH_CLASS_SILENT)) {
 		RETURN_TRUE;
 	} else {
@@ -911,7 +911,7 @@ ZEND_FUNCTION(get_parent_class)
 {
 	zval *arg;
 	zend_class_entry *ce = NULL;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
 		return;
 	}
@@ -961,7 +961,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass) /* 
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 	/*
-	 * allow_string - is_a default is no, is_subclass_of is yes. 
+	 * allow_string - is_a default is no, is_subclass_of is yes.
 	 *   if it's allowed, then the autoloader will be called if the class does not exist.
 	 *   default behaviour is different, as 'is_a' used to be used to test mixed return values
 	 *   and there is no easy way to deprecate this.
@@ -1147,7 +1147,7 @@ static int same_name(zend_string *key, zend_string *name) /* {{{ */
 	if (key->len != name->len) {
 		return 0;
 	}
-	lcname = zend_string_tolower(name);	
+	lcname = zend_string_tolower(name);
 	ret = memcmp(lcname->val, key->val, key->len) == 0;
 	zend_string_release(lcname);
 	return ret;
@@ -1182,7 +1182,7 @@ ZEND_FUNCTION(get_class_methods)
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, key, mptr) {
 
-		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC) 
+		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC)
 		 || (EG(scope) &&
 		     (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
 		       zend_check_protected(mptr->common.scope, EG(scope)))
@@ -1217,7 +1217,7 @@ ZEND_FUNCTION(get_class_methods)
    Checks if the class method exists */
 ZEND_FUNCTION(method_exists)
 {
-	zval *klass; 
+	zval *klass;
 	zend_string *method_name;
 	zend_string *lcname;
 	zend_class_entry * ce;
@@ -1249,17 +1249,17 @@ ZEND_FUNCTION(method_exists)
 	} else {
 		union _zend_function *func = NULL;
 
-		if (Z_TYPE_P(klass) == IS_OBJECT 
+		if (Z_TYPE_P(klass) == IS_OBJECT
 		&& Z_OBJ_HT_P(klass)->get_method != NULL
 		&& (func = Z_OBJ_HT_P(klass)->get_method(&Z_OBJ_P(klass), method_name, NULL)) != NULL
 		) {
-			if (func->type == ZEND_INTERNAL_FUNCTION 
+			if (func->type == ZEND_INTERNAL_FUNCTION
 			&& (func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0
 			) {
 				/* Returns true to the fake Closure's __invoke */
 				RETVAL_BOOL(func->common.scope == zend_ce_closure
 					&& zend_string_equals_literal(method_name, ZEND_INVOKE_FUNC_NAME));
-					
+
 				zend_string_release(lcname);
 				zend_string_release(func->common.function_name);
 				efree(func);
@@ -1296,7 +1296,7 @@ ZEND_FUNCTION(property_exists)
 		ce = zend_lookup_class(Z_STR_P(object));
 		if (!ce) {
 			RETURN_FALSE;
-		}			
+		}
 	} else if (Z_TYPE_P(object) == IS_OBJECT) {
 		ce = Z_OBJCE_P(object);
 	} else {
@@ -1312,7 +1312,7 @@ ZEND_FUNCTION(property_exists)
 	ZVAL_STR(&property_z, property);
 
 	if (Z_TYPE_P(object) ==  IS_OBJECT &&
-		Z_OBJ_HANDLER_P(object, has_property) && 
+		Z_OBJ_HANDLER_P(object, has_property) &&
 		Z_OBJ_HANDLER_P(object, has_property)(object, &property_z, 2, NULL)) {
 		RETURN_TRUE;
 	}
@@ -1412,7 +1412,7 @@ ZEND_FUNCTION(trait_exists)
 	zend_string *trait_name, *lc_name;
 	zend_class_entry *ce;
 	zend_bool autoload = 1;
-  
+
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &trait_name, &autoload) == FAILURE) {
 		return;
@@ -1424,7 +1424,7 @@ ZEND_FUNCTION(trait_exists)
 		Z_PARAM_BOOL(autoload)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
-  
+
 	if (!autoload) {
 		if (trait_name->val[0] == '\\') {
 			/* Ignore leading "\" */
@@ -1437,7 +1437,7 @@ ZEND_FUNCTION(trait_exists)
 		zend_string_release(lc_name);
 		RETURN_BOOL(ce && ((ce->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
 	}
-  
+
 	ce = zend_lookup_class(trait_name);
 	if (ce) {
  		RETURN_BOOL((ce->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
@@ -1447,14 +1447,14 @@ ZEND_FUNCTION(trait_exists)
 }
 /* }}} */
 
-/* {{{ proto bool function_exists(string function_name) 
+/* {{{ proto bool function_exists(string function_name)
    Checks if the function exists */
 ZEND_FUNCTION(function_exists)
 {
 	zend_string *name;
 	zend_function *func;
 	zend_string *lcname;
-	
+
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &name) == FAILURE) {
 		return;
@@ -1472,8 +1472,8 @@ ZEND_FUNCTION(function_exists)
 	} else {
 		lcname = zend_string_tolower(name);
 	}
-	
-	func = zend_hash_find_ptr(EG(function_table), lcname);	
+
+	func = zend_hash_find_ptr(EG(function_table), lcname);
 	zend_string_release(lcname);
 
 	/*
@@ -1500,9 +1500,9 @@ ZEND_FUNCTION(class_alias)
 	}
 
 	ce = zend_lookup_class_ex(class_name, NULL, autoload);
-	
+
 	if (ce) {
-		if (ce->type == ZEND_USER_CLASS) { 
+		if (ce->type == ZEND_USER_CLASS) {
 			if (zend_register_class_alias_ex(alias_name, alias_name_len, ce) == SUCCESS) {
 				RETURN_TRUE;
 			} else {
@@ -1662,7 +1662,7 @@ ZEND_FUNCTION(restore_error_handler)
 {
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
 		zval zeh;
-		
+
 		ZVAL_COPY_VALUE(&zeh, &EG(user_error_handler));
 		ZVAL_UNDEF(&EG(user_error_handler));
 		zval_ptr_dtor(&zeh);
@@ -1746,7 +1746,7 @@ static int copy_class_or_interface_name(zval *el, int num_args, va_list args, ze
 
 	if ((hash_key->key && hash_key->key->val[0] != 0)
 		&& (comply_mask == (ce->ce_flags & mask))) {
-		if (ce->refcount > 1 && 
+		if (ce->refcount > 1 &&
 		    !same_name(hash_key->key, ce->name)) {
 			add_next_index_str(array, zend_string_copy(hash_key->key));
 		} else {
@@ -2071,7 +2071,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 ZEND_FUNCTION(get_defined_constants)
 {
 	zend_bool categorize = 0;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &categorize) == FAILURE) {
 		return;
 	}
@@ -2141,7 +2141,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(arg_array)) {
 			if (call->func->type == ZEND_USER_FUNCTION) {
 				uint32_t first_extra_arg = call->func->op_array.num_args;
-			
+
 				if (ZEND_CALL_NUM_ARGS(call) > first_extra_arg) {
 					while (i < first_extra_arg) {
 						if (Z_OPT_REFCOUNTED_P(p)) Z_ADDREF_P(p);
@@ -2210,7 +2210,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 	while (ptr && (limit == 0 || frameno < limit)) {
 		frameno++;
 		class_name = NULL;
-		call_type = NULL;   
+		call_type = NULL;
 		ZVAL_UNDEF(&arg_array);
 
 		skip = ptr;
@@ -2255,7 +2255,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 			                 func->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
 					(object ? object->ce : func->common.scope), func)->val :
-				(func->common.function_name ? 
+				(func->common.function_name ?
 					func->common.function_name->val : NULL);
 		} else {
 			func = NULL;
@@ -2310,9 +2310,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 					function_name = "require_once";
 					break;
 				default:
-					/* this can actually happen if you use debug_backtrace() in your error_handler and 
+					/* this can actually happen if you use debug_backtrace() in your error_handler and
 					 * you're in the top-scope */
-					function_name = "unknown"; 
+					function_name = "unknown";
 					build_filename_arg = 0;
 					break;
 			}
@@ -2345,7 +2345,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 					!ZEND_USER_CODE(prev_call->func->common.type)) {
 					prev = NULL;
 					break;
-				}				    
+				}
 				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
 					zend_printf(") called at [%s:%d]\n", prev->func->op_array.filename->val, prev->opline->lineno);
 					break;
@@ -2434,7 +2434,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, lineno);
 
 			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
-			 * and debug_baktrace() might have been called by the error_handler. in this case we don't 
+			 * and debug_baktrace() might have been called by the error_handler. in this case we don't
 			 * want to pop anything of the argument-stack */
 		} else {
 			zend_execute_data *prev_call = skip;
@@ -2447,7 +2447,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					!(prev_call->func->common.type == ZEND_INTERNAL_FUNCTION &&
 						(prev_call->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER))) {
 					break;
-				}				    
+				}
 				if (prev->func && ZEND_USER_CODE(prev->func->common.type)) {
 					add_assoc_str_ex(&stack_frame, "file", sizeof("file")-1, zend_string_copy(prev->func->op_array.filename));
 					add_assoc_long_ex(&stack_frame, "line", sizeof("line")-1, prev->opline->lineno);
@@ -2474,7 +2474,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			                 func->common.scope->trait_aliases) ?
 				zend_resolve_method_name(
 					(object ? object->ce : func->common.scope), func)->val :
-				(func->common.function_name ? 
+				(func->common.function_name ?
 					func->common.function_name->val : NULL);
 		} else {
 			func = NULL;
@@ -2489,7 +2489,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(func->common.scope->name));
 				} else {
 					add_assoc_str_ex(&stack_frame, "class", sizeof("class")-1, zend_string_copy(object->ce->name));
-					
+
 				}
 				if ((options & DEBUG_BACKTRACE_PROVIDE_OBJECT) != 0) {
 					zval zv;
@@ -2504,7 +2504,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				add_assoc_string_ex(&stack_frame, "type", sizeof("type")-1, "::");
 			}
 
-			if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0 && 
+			if ((options & DEBUG_BACKTRACE_IGNORE_ARGS) == 0 &&
 				func->type != ZEND_EVAL_CODE) {
 				zval args;
 
@@ -2538,9 +2538,9 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 					function_name = "require_once";
 					break;
 				default:
-					/* this can actually happen if you use debug_backtrace() in your error_handler and 
+					/* this can actually happen if you use debug_backtrace() in your error_handler and
 					 * you're in the top-scope */
-					function_name = "unknown"; 
+					function_name = "unknown";
 					build_filename_arg = 0;
 					break;
 			}
@@ -2563,7 +2563,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &stack_frame);
 
-		include_filename = filename; 
+		include_filename = filename;
 
 		call = skip;
 		ptr = skip->prev_execute_data;
@@ -2577,7 +2577,7 @@ ZEND_FUNCTION(debug_backtrace)
 {
 	zend_long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
 	zend_long limit = 0;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &options, &limit) == FAILURE) {
 		return;
 	}
@@ -2616,7 +2616,7 @@ ZEND_FUNCTION(get_extension_funcs)
 	int array;
 	zend_module_entry *module;
 	zend_function *zif;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &extension_name) == FAILURE) {
 		return;
 	}
