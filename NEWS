@@ -28,6 +28,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #68671 (incorrect expression in libmagic).
     (Joshua Rogers, Anatol Belski)
+  . Removed readelf.c and related code from libmagic sources
+    (Remi, Anatol)
+  . Fixed bug #68735 (fileinfo out-of-bounds memory access).
+    (Anatol)
 
 - GD:
   . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (Jan Bee, Remi)
