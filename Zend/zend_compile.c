@@ -4608,6 +4608,15 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		import_name = zend_hash_find_ptr(CG(current_import), lcname);
 	}
 
+	while (info->name) {
+		if (lcname->len == info->name_len && strcmp(lcname->val, info->name) == 0) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
+				"because %s is a type name", name->val, info->name);
+		}
+		info++;
+	}
+
+
 	if (CG(current_namespace)) {
 		name = zend_prefix_with_ns(name);
 
@@ -4620,14 +4629,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	if (import_name && !zend_string_equals_str_ci(lcname, import_name)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
 			"because the name is already in use", name->val);
-	}
-
-	while (info->name) {
-		if (lcname->len == info->name_len && strcmp(lcname->val, info->name) == 0) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
-				"because %s is a type name", name->val, info->name);
-		}
-		info++;
 	}
 
 	name = zend_new_interned_string(name);
