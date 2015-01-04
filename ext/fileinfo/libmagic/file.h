@@ -420,8 +420,6 @@ protected int file_pipe2file(struct magic_set *, int, const void *, size_t);
 protected int file_replace(struct magic_set *, const char *, const char *);
 protected int file_printf(struct magic_set *, const char *, ...);
 protected int file_reset(struct magic_set *);
-protected int file_tryelf(struct magic_set *, int, const unsigned char *,
-    size_t);
 protected int file_trycdf(struct magic_set *, int, const unsigned char *,
     size_t);
 #ifdef PHP_FILEINFO_UNCOMPRESS 
