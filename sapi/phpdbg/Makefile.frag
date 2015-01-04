@@ -14,11 +14,11 @@ $(BUILD_BINARY): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
 $(builddir)/phpdbg_lexer.lo: $(srcdir)/phpdbg_parser.h
 
 $(srcdir)/phpdbg_lexer.c: $(srcdir)/phpdbg_lexer.l
-	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo $(srcdir)/phpdbg_lexer.c $(srcdir)/phpdbg_lexer.l)
+	@(cd $(top_srcdir); $(RE2C) $(RE2C_FLAGS) --no-generation-date -cbdFo "$(srcdir)/phpdbg_lexer.c" "$(srcdir)/phpdbg_lexer.l")
 
 $(srcdir)/phpdbg_parser.h: $(srcdir)/phpdbg_parser.c
 $(srcdir)/phpdbg_parser.c: $(srcdir)/phpdbg_parser.y
-	@$(YACC) -p phpdbg_ -v -d $(srcdir)/phpdbg_parser.y -o $@
+	@$(YACC) -p phpdbg_ -v -d "$(srcdir)/phpdbg_parser.y" -o $@
 
 install-phpdbg: $(BUILD_BINARY)
 	@echo "Installing phpdbg binary:         $(INSTALL_ROOT)$(bindir)/"
