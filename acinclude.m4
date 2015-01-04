@@ -954,7 +954,7 @@ AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_builddir=[]PHP_EXT_BUILDDIR($1)
   ext_srcdir=[]PHP_EXT_SRCDIR($1)
 
-  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"| $SED 's#@ext_srcdir@#"$ext_srcdir"#g'|$SED s#@ext_builddir@#$ext_builddir#g`])
+  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|$SED "s#@ext_srcdir@#\"$ext_srcdir\"#g"|$SED s#@ext_builddir@#$ext_builddir#g`])
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
