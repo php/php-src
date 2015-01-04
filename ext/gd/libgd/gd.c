@@ -3049,8 +3049,8 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 		}
 	}
 
-	/* free old palette buffer */
-	for (yy = y - 1; yy >= yy - 1; yy--) {
+	/* free old palette buffer (y is sy) */
+	for (yy = 0; yy < y; yy++) {
 		gdFree(src->pixels[yy]);
 	}
 	gdFree(src->pixels);
@@ -3067,13 +3067,11 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 	return 1;
 
 clean_on_error:
-	if (y > 0) {
-
-		for (yy = y; yy >= yy - 1; y--) {
-			gdFree(src->tpixels[y]);
-		}
-		gdFree(src->tpixels);
+	/* free new true color buffer (y is not allocated, have failed) */
+	for (yy = 0; yy < y; yy++) {
+		gdFree(src->tpixels[yy]);
 	}
+	gdFree(src->tpixels);
 	return 0;
 }
 
