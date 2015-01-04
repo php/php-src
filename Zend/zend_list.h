@@ -55,13 +55,9 @@ int zend_init_rsrc_list_dtors(void);
 void zend_destroy_rsrc_list_dtors(void);
 
 ZEND_API zval *zend_list_insert(void *ptr, int type);
-ZEND_API int _zend_list_free(zend_resource *res);
-ZEND_API int _zend_list_delete(zend_resource *res);
-ZEND_API int _zend_list_close(zend_resource *res);
-
-#define zend_list_free(res)			_zend_list_free(res)
-#define zend_list_delete(res)		_zend_list_delete(res)
-#define zend_list_close(res)		_zend_list_close(res)
+ZEND_API int zend_list_free(zend_resource *res);
+ZEND_API int zend_list_delete(zend_resource *res);
+ZEND_API int zend_list_close(zend_resource *res);
 
 ZEND_API zend_resource *zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type);
 ZEND_API void *zend_fetch_resource(zval *passed_id, int default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...);

@@ -492,6 +492,7 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zend_execute_data *call = EX(call);
 	zend_function *fbc = call->func;
 	zend_object *object = Z_OBJ(call->This);
+	zval *ret;
 
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
@@ -512,7 +513,36 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	LOAD_OPLINE();
 
-	if (UNEXPECTED(fbc->type == ZEND_INTERNAL_FUNCTION)) {
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
+		EG(scope) = fbc->common.scope;
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+			if (RETURN_VALUE_USED(opline)) {
+				zend_generator_create_zval(call, &fbc->op_array, EX_VAR(opline->result.var));
+			} else {
+				zend_vm_stack_free_args(call);
+			}
+
+			zend_vm_stack_free_call_frame(call);
+		} else {
+			ret = NULL;
+			call->symbol_table = NULL;
+			if (RETURN_VALUE_USED(opline)) {
+				ret = EX_VAR(opline->result.var);
+				ZVAL_NULL(ret);
+				Z_VAR_FLAGS_P(ret) = 0;
+			}
+
+			call->prev_execute_data = execute_data;
+			i_init_func_execute_data(call, &fbc->op_array, ret);
+
+			if (EXPECTED(zend_execute_ex == execute_ex)) {
+				ZEND_VM_ENTER();
+			} else {
+				ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+				zend_execute_ex(call);
+			}
+		}
+	} else if (EXPECTED(fbc->type < ZEND_USER_FUNCTION)) {
 		int should_change_scope = 0;
 		zval *ret;
 
@@ -572,44 +602,13 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_vm_stack_free_call_frame(call);
 
 		if (!RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(ret);
+			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
 
 		if (UNEXPECTED(should_change_scope)) {
 			goto fcall_end_change_scope;
 		} else {
 			goto fcall_end;
-		}
-	} else if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
-		EG(scope) = fbc->common.scope;
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			if (RETURN_VALUE_USED(opline)) {
-				zend_generator_create_zval(call, &fbc->op_array, EX_VAR(opline->result.var));
-			} else {
-				zend_vm_stack_free_args(call);
-			}
-
-			zend_vm_stack_free_call_frame(call);
-		} else {
-			zval *return_value = NULL;
-
-			call->symbol_table = NULL;
-			if (RETURN_VALUE_USED(opline)) {
-				return_value = EX_VAR(opline->result.var);
-
-				ZVAL_NULL(return_value);
-				Z_VAR_FLAGS_P(return_value) = 0;
-			}
-
-			call->prev_execute_data = execute_data;
-			i_init_func_execute_data(call, &fbc->op_array, return_value);
-
-			if (EXPECTED(zend_execute_ex == execute_ex)) {
-				ZEND_VM_ENTER();
-			} else {
-				ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
-				zend_execute_ex(call);
-			}
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
 		EG(scope) = fbc->common.scope;

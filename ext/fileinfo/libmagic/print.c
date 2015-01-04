@@ -59,15 +59,18 @@ protected void
 file_magwarn(struct magic_set *ms, const char *f, ...)
 {
 	va_list va;
-	char *expanded_format;
+	char *expanded_format = NULL;
+	int expanded_len;
 
 	va_start(va, f);
-	if (vasprintf(&expanded_format, f, va)); /* silence */
+	expanded_len = vasprintf(&expanded_format, f, va);
 	va_end(va);
 	
-	php_error_docref(NULL, E_NOTICE, "Warning: %s", expanded_format);
+	if (expanded_len >= 0 && expanded_format) {
+		php_error_docref(NULL, E_NOTICE, "Warning: %s", expanded_format);
 
-	free(expanded_format);
+		free(expanded_format);
+	}
 }
 
 protected const char *

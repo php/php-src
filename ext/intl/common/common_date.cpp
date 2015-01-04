@@ -43,7 +43,7 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 {
 	char		*id = NULL,
 				offset_id[] = "GMT+00:00";
-	int			id_len = 0;
+	int32_t		id_len = 0;
 	char		*message;
 	TimeZone	*timeZone;
 

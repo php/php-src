@@ -75,6 +75,10 @@ if (VS_TOOLSET && VCVERS >= 1500 && PHP_MP != 'disable') {
 		}
 }
 
+if (!PHP_MP_DISABLED) {
+	STDOUT.WriteLine('Enabling multi process build');
+}
+
 // General link flags
 toolset_setup_common_ldlags();
 

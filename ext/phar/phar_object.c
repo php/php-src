@@ -517,7 +517,7 @@ carry_on:
 		}
 
 		return;
-	} else if (PHAR_GLOBALS->phar_fname_map.arHash && NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len))) {
+	} else if (PHAR_GLOBALS->phar_fname_map.u.flags && NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len))) {
 		goto carry_on;
 	} else if (PHAR_G(manifest_cached) && NULL != (pphar = zend_hash_str_find_ptr(&cached_phars, fname, fname_len))) {
 		if (SUCCESS == phar_copy_on_write(&pphar)) {

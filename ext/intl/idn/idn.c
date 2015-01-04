@@ -134,7 +134,7 @@ static inline void php_intl_bad_args(const char *msg, int mode)
 
 #ifdef HAVE_46_API
 static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
-		const char *domain, int domain_len, uint32_t option, int mode, zval *idna_info)
+		const char *domain, int32_t domain_len, uint32_t option, int mode, zval *idna_info)
 {
 	UErrorCode	  status = U_ZERO_ERROR;
 	UIDNA		  *uts46;
@@ -152,10 +152,10 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	if (mode == INTL_IDN_TO_ASCII) {
-		len = uidna_nameToASCII_UTF8(uts46, domain, (int32_t)domain_len,
+		len = uidna_nameToASCII_UTF8(uts46, domain, domain_len,
 				buffer->val, buffer_capac, &info, &status);
 	} else {
-		len = uidna_nameToUnicodeUTF8(uts46, domain, (int32_t)domain_len,
+		len = uidna_nameToUnicodeUTF8(uts46, domain, domain_len,
 				buffer->val, buffer_capac, &info, &status);
 	}
 	if (php_intl_idn_check_status(status, "failed to convert name",
@@ -202,13 +202,13 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 #endif
 
 static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
-		const char *domain, int domain_len, uint32_t option, int mode)
+		const char *domain, int32_t domain_len, uint32_t option, int mode)
 {
 	UChar* ustring = NULL;
 	int ustring_len = 0;
 	UErrorCode status;
 	char     *converted_utf8;
-	int32_t   converted_utf8_len;
+	size_t    converted_utf8_len;
 	UChar     converted[MAXPATHLEN];
 	int32_t   converted_ret_len;
 
@@ -256,7 +256,7 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	/* return the allocated string, not a duplicate */
-	RETVAL_STRINGL(((char *)converted_utf8), converted_utf8_len);
+	RETVAL_STRINGL(converted_utf8, converted_utf8_len);
 	//????
 	efree(converted_utf8);
 }
@@ -315,11 +315,11 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	
 	if (variant == INTL_IDN_VARIANT_2003) {
 		php_intl_idn_to(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-				domain, domain_len, (uint32_t)option, mode);
+				domain, (int32_t)domain_len, (uint32_t)option, mode);
 	}
 #ifdef HAVE_46_API
 	else {
-		php_intl_idn_to_46(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, domain_len,
+		php_intl_idn_to_46(INTERNAL_FUNCTION_PARAM_PASSTHRU, domain, (int32_t)domain_len,
 				(uint32_t)option, mode, idna_info);
 	}
 #endif

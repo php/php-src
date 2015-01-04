@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Stig Sæther Bakken <ssb@php.net>                             |
+   | Author: Stig Sï¿½ther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
 
@@ -155,7 +155,7 @@ php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
 		numbuf[--i] = (unsigned char)(magn - (nmagn * 10)) + '0';
 		magn = nmagn;
 	}
-	while (magn > 0 && i > 0);
+	while (magn > 0 && i > 1);
 	if (neg) {
 		numbuf[--i] = '-';
 	} else if (always_sign) {

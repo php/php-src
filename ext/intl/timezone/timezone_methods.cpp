@@ -47,11 +47,10 @@ U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
 U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 {
 	char	*str_id;
-	size_t		str_id_len;
+	size_t	 str_id_len;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
-			&str_id, &str_id_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str_id, &str_id_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_create_time_zone: bad arguments", 0);
 		RETURN_NULL();
@@ -209,7 +208,7 @@ double_offset:
 U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 {
 	char	*str_id;
-	size_t		str_id_len;
+	size_t	 str_id_len;
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
@@ -234,24 +233,18 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 {
-	zend_long	zoneType,
-			offset_arg;
-	char	*region		= NULL;
-	size_t		region_len	= 0;
-	int32_t	offset,
-			*offsetp	= NULL;
-	int		arg3isnull	= 0;
+	zend_long zoneType,
+			  offset_arg;
+	char	 *region		= NULL;
+	size_t	  region_len	= 0;
+	int32_t	  offset,
+			 *offsetp	= NULL;
+	zend_bool arg3isnull = 1;
+
 	intl_error_reset(NULL);
 
-	/* must come before zpp because zpp would convert the arg in the stack to 0 */
-	if (ZEND_NUM_ARGS() == 3) {
-		zval *dummy, *zvoffset;
-		arg3isnull = zend_get_parameters_ex(3, &dummy, &dummy, &zvoffset)
-				!= FAILURE && Z_TYPE_P(zvoffset) == IS_NULL;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s!l",
-			&zoneType, &region, &region_len, &offset_arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s!l!",
+			&zoneType, &region, &region_len, &offset_arg, &arg3isnull) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_create_time_zone_id_enumeration: bad arguments", 0);
 		RETURN_FALSE;
@@ -264,18 +257,15 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() == 3) {
+	if (!arg3isnull) {
 		if (offset_arg < (zend_long)INT32_MIN || offset_arg > (zend_long)INT32_MAX) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intltz_create_time_zone_id_enumeration: offset out of bounds", 0);
 			RETURN_FALSE;
 		}
-		
-		if (!arg3isnull) {
-			offset = (int32_t)offset_arg;
-			offsetp = &offset;
-		} //else leave offsetp NULL
-	}
+		offset = (int32_t)offset_arg;
+		offsetp = &offset;
+	} //else leave offsetp NULL
 
 	StringEnumeration *se;
 	UErrorCode uec = UErrorCode();
@@ -291,7 +281,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 {
 	char	*str_id;
-	size_t		str_id_len;
+	size_t	 str_id_len;
 	zval	*is_systemid = NULL;
 	intl_error_reset(NULL);
 
@@ -316,7 +306,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	INTL_CHECK_STATUS(status, "intltz_get_canonical_id: error obtaining canonical ID");
 	
 	char *str;
-	int str_len;
+	size_t str_len;
 	intl_convert_utf16_to_utf8(&str, &str_len, result.getBuffer(), result.length(), &status);
 	INTL_CHECK_STATUS(status,
 		"intltz_get_canonical_id: could not convert time zone id to UTF-16");
@@ -335,8 +325,8 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 U_CFUNC PHP_FUNCTION(intltz_get_region)
 {
 	char	*str_id;
-	size_t		str_id_len;
-	char	outbuf[3];
+	size_t	 str_id_len;
+	char	 outbuf[3];
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
@@ -381,7 +371,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_tz_data_version)
 
 U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 {
-	char	*str_id;
+	char	   *str_id;
 	size_t		str_id_len;
 	zend_long	index;
 	intl_error_reset(NULL);
@@ -404,7 +394,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 
 	const UnicodeString result = TimeZone::getEquivalentID(id, (int32_t)index);
 	char *str;
-	int str_len;
+	size_t str_len;
 
 	intl_convert_utf16_to_utf8(&str, &str_len, result.getBuffer(), result.length(), &status);
 	INTL_CHECK_STATUS(status, "intltz_get_equivalent_id: "
@@ -430,8 +420,8 @@ U_CFUNC PHP_FUNCTION(intltz_get_id)
 	UnicodeString id_us;
 	to->utimezone->getID(id_us);
 
-	char *id = NULL;
-	int  id_len   = 0;
+	char   *id = NULL;
+	size_t  id_len   = 0;
 
 	intl_convert_utf16_to_utf8(&id, &id_len,
 		id_us.getBuffer(), id_us.length(), TIMEZONE_ERROR_CODE_P(to));
@@ -545,9 +535,9 @@ static const TimeZone::EDisplayType display_types[] = {
 U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 {
 	zend_bool	daylight		= 0;
-	zend_long		display_type	= TimeZone::LONG;
-	const char	*locale_str		= NULL;
-	size_t			dummy			= 0;
+	zend_long	display_type	= TimeZone::LONG;
+	const char *locale_str		= NULL;
+	size_t		dummy			= 0;
 	TIMEZONE_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
@@ -580,7 +570,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 		Locale::createFromName(locale_str), result);
 
 	char *str;
-	int str_len;
+	size_t str_len;
 	intl_convert_utf16_to_utf8(&str, &str_len, result.getBuffer(), result.length(), TIMEZONE_ERROR_CODE_P(to));
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_display_name: "
 		"could not convert resulting time zone id to UTF-16");

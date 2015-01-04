@@ -33,6 +33,7 @@
   . Added \u{xxxxx} Unicode Codepoint Escape Syntax. (Andrea)
   . Fixed oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
   . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint and conversion error messages. (Andrea)
+  . Implemented FR #55428 (E_RECOVERABLE_ERROR when output buffering in output buffering handler). (Kalle)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values

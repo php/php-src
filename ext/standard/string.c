@@ -5385,6 +5385,7 @@ PHP_FUNCTION(money_format)
 	double value;
 	zend_bool check = 0;
 	zend_string *str;
+	ssize_t res_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sd", &format, &format_len, &value) == FAILURE) {
 		return;
@@ -5405,10 +5406,11 @@ PHP_FUNCTION(money_format)
 	}
 
 	str = zend_string_alloc(format_len + 1024, 0);
-	if ((str->len = strfmon(str->val, str->len, format, value)) < 0) {
+	if ((res_len = strfmon(str->val, str->len, format, value)) < 0) {
 		zend_string_free(str);
 		RETURN_FALSE;
 	}
+	str->len = (size_t)res_len;
 	str->val[str->len] = '\0';
 
 	RETURN_NEW_STR(zend_string_realloc(str, str->len, 0));

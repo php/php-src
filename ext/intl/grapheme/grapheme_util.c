@@ -49,25 +49,27 @@ grapheme_close_global_iterator( void )
 /* }}} */
 
 /* {{{ grapheme_substr_ascii f='from' - starting point, l='length' */
-void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char **sub_str, int *sub_str_len)
+void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char **sub_str, int32_t *sub_str_len)
 {
+	int32_t str_len2 = (int32_t)str_len; /* in order to avoid signed/unsigned problems */
     *sub_str = NULL;
 
-    if (argc > 2) {
-        if ((l < 0 && -l > str_len)) {
-            return;
-        } else if (l > str_len) {
-            l = str_len;
-        }
-    } else {
-        l = str_len;
+    if(str_len > INT32_MAX) {
+    	/* We can not return long strings from ICU functions, so we won't here too */
+    	return;
     }
 
-    if (f > str_len || (f < 0 && -f > str_len)) {
+    if ((l < 0 && -l > str_len2)) {
+        return;
+    } else if (l > 0 && l > str_len2) {
+        l = str_len2;
+    }
+
+    if (f > str_len2 || (f < 0 && -f > str_len2)) {
         return;
     }
 
-    if (l < 0 && (l + str_len - f) < 0) {
+    if (l < 0 && str_len2 < f - l) {
         return;
     }
 
@@ -75,7 +77,7 @@ void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char 
      * of the string
      */
     if (f < 0) {
-        f = str_len + f;
+        f = str_len2 + f;
         if (f < 0) {
             f = 0;
         }
@@ -86,17 +88,17 @@ void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char 
      * needed to stop that many chars from the end of the string
      */
     if (l < 0) {
-        l = (str_len - f) + l;
+        l = (str_len2 - f) + l;
         if (l < 0) {
             l = 0;
         }
     }
 
-    if (f >= str_len) {
+    if (f >= str_len2) {
         return;
     }
 
-    if ((f + l) > str_len) {
+    if ((f + l) > str_len2) {
         l = str_len - f;
     }
 
@@ -128,7 +130,7 @@ void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char 
 
 
 /* {{{ grapheme_strpos_utf16 - strrpos using utf16*/
-int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last)
+int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last)
 {
 	UChar *uhaystack = NULL, *uneedle = NULL;
 	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0;
@@ -144,12 +146,12 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 	/* convert the strings to UTF-16. */
 
 	status = U_ZERO_ERROR;
-	intl_convert_utf8_to_utf16(&uhaystack, &uhaystack_len, (char *) haystack, haystack_len, &status );
+	intl_convert_utf8_to_utf16(&uhaystack, &uhaystack_len, haystack, haystack_len, &status );
 	STRPOS_CHECK_STATUS(status, "Error converting input string to UTF-16");
 
 	status = U_ZERO_ERROR;
-	intl_convert_utf8_to_utf16(&uneedle, &uneedle_len, (char *) needle, needle_len, &status );
-	STRPOS_CHECK_STATUS(status, "Error converting input string to UTF-16");
+	intl_convert_utf8_to_utf16(&uneedle, &uneedle_len, needle, needle_len, &status );
+	STRPOS_CHECK_STATUS(status, "Error converting needle string to UTF-16");
 
 	/* get a pointer to the haystack taking into account the offset */
 	status = U_ZERO_ERROR;
@@ -217,7 +219,7 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 /* }}} */
 
 /* {{{ grapheme_ascii_check: ASCII check */
-int grapheme_ascii_check(const unsigned char *day, int32_t len)
+zend_long grapheme_ascii_check(const unsigned char *day, size_t len)
 {
 	int ret_len = len;
 	while ( len-- ) {
@@ -231,7 +233,7 @@ int grapheme_ascii_check(const unsigned char *day, int32_t len)
 /* }}} */
 
 /* {{{ grapheme_split_string: find and optionally return grapheme boundaries */
-int grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len )
+int32_t grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len )
 {
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UErrorCode		status = U_ZERO_ERROR;
@@ -293,7 +295,7 @@ int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t stri
 
 
 /* {{{ 	grapheme_get_haystack_offset - bump the haystack pointer based on the grapheme count offset */
-int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
+int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 {
 	int32_t pos;
 	int32_t (*iter_op)(UBreakIterator* bi);
@@ -333,10 +335,10 @@ int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 /* }}} */
 
 /* {{{ grapheme_strrpos_ascii: borrowed from the php ext/standard/string.c */
- int32_t
-grapheme_strrpos_ascii(unsigned char *haystack, int32_t haystack_len, unsigned char *needle, int32_t needle_len, int32_t offset)
+ zend_long
+grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset)
 {
-	unsigned char *p, *e;
+	char *p, *e;
 
 	if (offset >= 0) {
 		p = haystack + offset;

@@ -1292,9 +1292,9 @@ int zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global
 	auto_global.auto_global_callback = auto_global_callback;
 	auto_global.jit = jit;
 
-	retval = zend_hash_add_mem(CG(auto_globals), name, &auto_global, sizeof(zend_auto_global)) != NULL ? SUCCESS : FAILURE;
+	retval = zend_hash_add_mem(CG(auto_globals), auto_global.name, &auto_global, sizeof(zend_auto_global)) != NULL ? SUCCESS : FAILURE;
 
-	zend_string_release(auto_global.name);
+	zend_string_release(name);
 	return retval;
 }
 /* }}} */
@@ -1950,6 +1950,9 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast) /* {{{ */
 		result->op_type = IS_CV;
 		result->u.op.var = lookup_cv(CG(active_op_array), name);
 
+		/* lookup_cv may be using another zend_string instance  */
+		name = CG(active_op_array)->vars[EX_VAR_TO_NUM(result->u.op.var)];
+
 		if (zend_string_equals_literal(name, "this")) {
 			CG(active_op_array)->this_var = result->u.op.var;
 		}
@@ -1975,6 +1978,9 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 	}
 
 	zend_compile_expr(&name_node, name_ast);
+	if (name_node.op_type == IS_CONST) {
+		convert_to_string(&name_node.u.constant);
+	}
 
 	opline = zend_emit_op(result, ZEND_FETCH_R, &name_node, NULL);
 
