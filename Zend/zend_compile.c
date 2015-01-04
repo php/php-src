@@ -1978,6 +1978,9 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 	}
 
 	zend_compile_expr(&name_node, name_ast);
+	if (name_node.op_type == IS_CONST) {
+		convert_to_string(&name_node.u.constant);
+	}
 
 	opline = zend_emit_op(result, ZEND_FETCH_R, &name_node, NULL);
 
