@@ -1950,6 +1950,9 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast) /* {{{ */
 		result->op_type = IS_CV;
 		result->u.op.var = lookup_cv(CG(active_op_array), name);
 
+		/* lookup_cv may be using another zend_string instance  */
+		name = CG(active_op_array)->vars[EX_VAR_TO_NUM(result->u.op.var)];
+
 		if (zend_string_equals_literal(name, "this")) {
 			CG(active_op_array)->this_var = result->u.op.var;
 		}
