@@ -33,6 +33,10 @@
   . Fixed bug #68665 (invalid free in libmagic). (Joshua Rogers, Anatol Belski)
   . Fixed bug #68671 (incorrect expression in libmagic).
     (Joshua Rogers, Anatol Belski)
+  . Removed readelf.c and related code from libmagic sources
+    (Remi, Anatol)
+  . Fixed bug #68735 (fileinfo out-of-bounds memory access).
+    (Anatol)
 
 - FPM:
   . Fixed request #68526 (Implement POSIX Access Control List for UDS). (Remi)
