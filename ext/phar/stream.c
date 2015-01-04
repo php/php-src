@@ -44,7 +44,9 @@ php_stream_wrapper_ops phar_stream_wops = {
 	phar_wrapper_unlink,   /* unlink */
 	phar_wrapper_rename,   /* rename */
 	phar_wrapper_mkdir,    /* create directory */
-	phar_wrapper_rmdir,    /* remove directory */
+	phar_wrapper_rmdir,     /* remove directory */
+	NULL,                   /* Metadata handling */
+	phar_wrapper_is_cacheable /* is_cacheable */
 };
 
 php_stream_wrapper php_stream_phar_wrapper = {
@@ -980,6 +982,16 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	php_url_free(resource_from);
 	php_url_free(resource_to);
 
+	return 1;
+}
+/* }}} */
+
+/**
+ * Called by opcode cache to know if they can cache an URL
+ */
+static int phar_wrapper_is_cacheable(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context) /* {{{ */
+{
+	/* Phar URLs are always cacheable */
 	return 1;
 }
 /* }}} */

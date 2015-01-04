@@ -2519,6 +2519,26 @@ PHP_FUNCTION(sys_get_temp_dir)
 }
 /* }}} */
 
+/* {{{ proto bool file_is_cacheable(string filename [, int options [, resource context]])
+   Determine if a path can be cached */
+PHP_FUNCTION(file_is_cacheable)
+{
+	char *filename;
+	size_t filename_len;
+	php_stream *stream;
+	zend_long options = 0;
+	zval *zcontext = NULL;
+
+	/* Parse arguments */
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lr!", &filename, &filename_len
+		, &options, &zcontext) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(php_stream_is_cacheable(filename, options, php_stream_context_from_zval(zcontext, 0)));
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

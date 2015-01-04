@@ -151,8 +151,7 @@ static inline int is_stream_path(const char *filename)
 
 static inline int is_cacheable_stream_path(const char *filename)
 {
-	return memcmp(filename, "file://", sizeof("file://") - 1) == 0 ||
-	       memcmp(filename, "phar://", sizeof("phar://") - 1) == 0;
+	return php_stream_is_cacheable(filename, 0, NULL);
 }
 
 /* O+ overrides PHP chdir() function and remembers the current working directory

@@ -28,6 +28,7 @@ PHP 7.1 UPGRADE NOTES
 - Core
   . Added void return type, which requires that a function not return a value.
     (RFC: https://wiki.php.net/rfc/void_return_type)
+  . Added is_cacheable() streams operation.
 
 ========================================
 3. Changes in SAPI modules
