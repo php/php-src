@@ -2,6 +2,14 @@
 str_ireplace() tests
 --FILE--
 <?php
+function check_ireplace($search,$replace,&$subject)
+{
+$c=0;
+var_dump($subject=str_ireplace($search,$replace,$subject,$c));
+echo "Count: $c\n";
+}
+
+//------
 
 var_dump(str_ireplace());
 var_dump(str_ireplace(""));
@@ -44,6 +52,17 @@ $Data = "Change tracking and management software designed to watch
 var_dump($Data = str_ireplace("\r\n", "<br>", $Data));
 var_dump($Data = str_ireplace("\n", "<br>", $Data));
 
+/* Check 'needle=string/replace=array' case */
+
+$search='a';
+$repl=array('B','C','A',10,'Aab', null);
+$subject='FgAnBraVAAaNBaFjAaaAaJzK?';
+check_ireplace($search,$repl,$subject);
+check_ireplace($search,$repl,$subject);
+
+$repl=array();
+$subject='FgAnBraVAAaNBaFjAaaAaJzK?';
+check_ireplace($search,$repl,$subject);
 
 echo "Done\n";
 ?>
@@ -98,4 +117,10 @@ string(143) "Change tracking and management software designed to watch
 Suggest features, report bugs, or ask
 	questions here."
 string(152) "Change tracking and management software designed to watch<br>	for abnormal system behavior.<br>Suggest features, report bugs, or ask<br>	questions here."
+string(30) "FgBnBrCVA10AabNBFjBCA10AabJzK?"
+Count: 11
+string(32) "FgBnBrCVB10CAbNBFjBC1010AabbJzK?"
+Count: 6
+string(14) "FgnBrVNBFjJzK?"
+Count: 11
 Done

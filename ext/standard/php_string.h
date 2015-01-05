@@ -134,6 +134,10 @@ PHPAPI zend_string *php_str_to_str_ex(char *haystack, size_t length, char *needl
 		size_t needle_len, char *str, size_t str_len, int case_sensitivity, size_t *replace_count);
 PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle,
 		size_t needle_len, char *str, size_t str_len);
+PHPAPI zend_string *php_str_to_array_ex(char *haystack, size_t length, char *needle,
+		size_t needle_len, HashTable *arr, int case_sensitivity, size_t *replace_count);
+PHPAPI zend_string *php_str_to_array(char *haystack, size_t length, char *needle,
+		size_t needle_len, HashTable *arr);
 PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int mode);
 PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *state, char *allow, size_t allow_len);
 PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, char *allow, size_t allow_len, zend_bool allow_tag_spaces);
