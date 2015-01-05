@@ -4966,7 +4966,7 @@ PHP_FUNCTION(array_combine)
 PHP_FUNCTION(array_get)
 {
 	zval *routeEx, *arr, **desc, *arr2, **data;
-	//zval zdelim, zroute;
+	zval zdelim;
 	zend_string* route;
 	zend_long route_len = ZEND_LONG_MAX;
 	HashTable *hash, *arr_hash;
@@ -4977,11 +4977,11 @@ PHP_FUNCTION(array_get)
     }
 	
 	//ZVAL_STRINGL(&zroute, route,route_len);
-	//ZVAL_STRINGL(&zdelim, ".", 1);
+	ZVAL_STRINGL(&zdelim, ".", 1);
 	
 	//ALLOC_INIT_ZVAL(routeEx);
 	array_init(routeEx);
-	php_explode( ".",route, routeEx, ZEND_LONG_MAX);
+	php_explode( &zdelim,route, routeEx, ZEND_LONG_MAX);
 	 
 	arr_hash= Z_ARRVAL_P(routeEx);
 	
