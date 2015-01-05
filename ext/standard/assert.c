@@ -325,11 +325,9 @@ PHP_FUNCTION(assert_options)
 		}
 		if (ac == 2) {
 			zval_ptr_dtor(&ASSERTG(callback));
-			ASSERTG(callback) = *value;
-			zval_add_ref(value);
+			ZVAL_COPY(&ASSERTG(callback), value);
 		}
 		return;
-		break;
 
 	default:
 		php_error_docref(NULL, E_WARNING, "Unknown value %pd", what);
