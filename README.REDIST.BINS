@@ -16,6 +16,7 @@
 16. main/strlcat
 17. main/strlcpy
 18. libgd see ext/gd/libgd/COPYING
+19. Zend/libtommath (Zend Engine bigint support LibTomMath backend) see Zend/libtommath/LICENSE
 
 5. ext/standard crypt
 
