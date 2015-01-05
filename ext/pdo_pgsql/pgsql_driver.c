@@ -391,6 +391,10 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			ZVAL_BOOL(return_value, H->disable_native_prepares);
 			break;
 
+		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
+			ZVAL_BOOL(return_value, H->disable_prepares);
+			break;
+
 		case PDO_ATTR_CLIENT_VERSION:
 			ZVAL_STRING(return_value, PG_VERSION);
 			break;
