@@ -6,6 +6,7 @@ foreach (glob($tempdir . "/test*") as $file ) { unlink($file); }
 rmdir($tempdir);
 --SKIPIF--
 <?php
+if(!extension_loaded('gd')){ die('skip gd extension not available'); }
 $support = gd_info();
 if (!isset($support['WEBP Support']) || $support['WEBP Support'] === false) {
 	print 'skip webp support not available';
