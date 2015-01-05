@@ -36,7 +36,7 @@ group = @php_fpm_group@
 listen = 127.0.0.1:9000
 
 ; Set listen(2) backlog.
-; Default Value: 511
+; Default Value: 511 (-1 on FreeBSD and OpenBSD)
 ;listen.backlog = 511
 
 ; Set permissions for unix socket, if one is used. In Linux, read/write
