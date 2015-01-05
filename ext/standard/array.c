@@ -4981,7 +4981,7 @@ PHP_FUNCTION(array_get)
 	
 	//ALLOC_INIT_ZVAL(routeEx);
 	array_init(routeEx);
-	php_explode( route_len,estrndup(route,route_len), routeEx, ZEND_LONG_MAX);
+	php_explode( ".",route, routeEx, ZEND_LONG_MAX);
 	 
 	arr_hash= Z_ARRVAL_P(routeEx);
 	
