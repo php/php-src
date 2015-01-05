@@ -678,7 +678,7 @@ END_EXTERN_C()
 #ifdef FAST_ZPP
 
 #define Z_EXPECTED_TYPES(_) \
-	_(Z_EXPECTED_LONG,		"integer") \
+	_(Z_EXPECTED_INTEGER,	"integer") \
 	_(Z_EXPECTED_BOOL,		"boolean") \
 	_(Z_EXPECTED_STRING,	"string") \
 	_(Z_EXPECTED_ARRAY,		"array") \
@@ -885,7 +885,7 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error);
 #define Z_PARAM_LONG_EX(dest, is_null, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
 		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null, 0))) { \
-			_expected_type = Z_EXPECTED_LONG; \
+			_expected_type = Z_EXPECTED_INTEGER; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -897,13 +897,37 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error);
 #define Z_PARAM_STRICT_LONG_EX(dest, is_null, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
 		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null, 1))) { \
-			_expected_type = Z_EXPECTED_LONG; \
+			_expected_type = Z_EXPECTED_INTEGER; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
 
 #define Z_PARAM_STRICT_LONG(dest) \
 	Z_PARAM_STRICT_LONG_EX(dest, _dummy, 0, 0)
+
+/* old "i" */
+#define Z_PARAM_BIGINT_OR_LONG_EX(dest, check_null, separate) \
+		Z_PARAM_PROLOGUE(separate); \
+		if (UNEXPECTED(!zend_parse_arg_bigint_or_long(_arg, &dest, check_null))) { \
+			_expected_type = Z_EXPECTED_INTEGER; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+#define Z_PARAM_BIGINT_OR_LONG(dest) \
+	Z_PARAM_BIGINT_OR_LONG_EX(dest, 0, 0)
+
+/* old "I" */
+#define Z_PARAM_BIGINT_EX(dest, check_null, separate) \
+		Z_PARAM_PROLOGUE(separate); \
+		if (UNEXPECTED(!zend_parse_arg_bigint(_arg, &dest, check_null))) { \
+			_expected_type = Z_EXPECTED_INTEGER; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+#define Z_PARAM_BIGINT(dest) \
+	Z_PARAM_BIGINT_EX(dest, 0, 0)
 
 /* old "o" */
 #define Z_PARAM_OBJECT_EX(dest, check_null, separate) \
@@ -1142,6 +1166,133 @@ static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, ze
 		return 0;
 	}
 	return 1;
+}
+
+static zend_always_inline int zend_parse_arg_bigint_or_long(zval *arg, zval **dest, int check_null)
+{
+	*dest = arg;
+	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG) || EXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		return 1;
+	
+	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
+		if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			*dest = NULL;
+			return 1;
+		}
+
+		if (Z_COPYABLE_P(arg) && Z_REFCOUNT_P(arg) > 1) {
+			Z_DELREF_P(arg);
+			zval_copy_ctor_func(arg);
+		}
+		
+		if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)) && !zend_finite(Z_DVAL_P(arg)))) {
+				return 0;
+			} else if (ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg))) {
+				ZVAL_LONG(arg, zend_dval_to_lval(Z_DVAL_P(arg)));
+			} else {
+				zend_bigint *big = zend_bigint_alloc();
+				zend_bigint_init_from_double(big, Z_DVAL_P(arg));
+				ZVAL_BIGINT(arg, big);
+			}
+			return 1;
+		} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
+			zend_long l;
+			double d;
+			zend_bigint *big;
+			int type;
+
+			if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), &l, &d, &big)) != IS_LONG)) {
+				if (EXPECTED(type != 0)) {
+					if (type == IS_DOUBLE) {
+						if (UNEXPECTED(zend_isnan(d) && !zend_finite(d))) {
+							return 0;
+						} else if (ZEND_DOUBLE_FITS_LONG(d)) {
+							ZVAL_LONG(arg, zend_dval_to_lval(d));
+						} else {
+							big = zend_bigint_alloc();
+							zend_bigint_init_from_double(big, d);
+							ZVAL_BIGINT(arg, big);
+						}
+					} else if (type == IS_BIGINT) {
+						ZVAL_BIGINT(arg, big);
+					} else {
+						ZVAL_LONG(arg, l);
+					}
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+		}
+		
+		convert_to_bigint_or_long(arg);
+		*dest = arg;
+		return 1;
+	}
+
+	return 0;
+}
+
+static zend_always_inline int zend_parse_arg_bigint(zval *arg, zend_bigint **dest, int check_null)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_BIGINT)) {
+		*dest = Z_BIG_P(arg);
+		return 1;
+	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
+		if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+			*dest = NULL;
+			return 1;
+		}
+
+		if (Z_COPYABLE_P(arg) && Z_REFCOUNT_P(arg) > 1) {
+			Z_DELREF_P(arg);
+			zval_copy_ctor_func(arg);
+		}
+		
+		if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
+			if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)) && !zend_finite(Z_DVAL_P(arg)))) {
+				return 0;
+			}
+		} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
+			zend_long l;
+			double d;
+			zend_bigint *big;
+			int type;
+
+			if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), &l, &d, &big)) != IS_LONG)) {
+				if (EXPECTED(type != 0)) {
+					if (type == IS_DOUBLE) {
+						if (UNEXPECTED(zend_isnan(d) && !zend_finite(d))) {
+							return 0;
+						} else {
+							big = zend_bigint_alloc();
+							zend_bigint_init_from_double(big, d);
+							ZVAL_BIGINT(arg, big);
+							*dest = big;
+						}
+					} else if (type == IS_BIGINT) {
+						ZVAL_BIGINT(arg, big);
+						*dest = big;
+					} else {
+						big = zend_bigint_alloc();
+						zend_bigint_init_from_long(big, l);
+						ZVAL_BIGINT(arg, big);
+						*dest = big;
+					}
+					return 1;
+				} else {
+					return 0;
+				}
+			}
+		}
+		
+		convert_to_bigint_or_long(arg);
+		*dest = Z_BIG_P(arg);
+		return 1;
+	}
+
+	return 0;
 }
 
 static zend_always_inline int zend_parse_arg_double(zval *arg, double *dest, zend_bool *is_null, int check_null)

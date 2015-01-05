@@ -1456,26 +1456,62 @@ PHP_FUNCTION(fmod)
 }
 /* }}} */
 
+#define TYPE_PAIR(t1,t2) (((t1) << 4) | (t2))
+
 /* {{{ proto int intdiv(int numerator, int divisor)
    Returns the integer division of the numerator by the divisor */
 PHP_FUNCTION(intdiv) 
 {
-	zend_long numerator, divisor;
+	zval *numerator, *divisor;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &numerator, &divisor) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ii", &numerator, &divisor) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_BIGINT_OR_LONG(numerator)
+		Z_PARAM_BIGINT_OR_LONG(divisor)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 	
-	if (divisor == 0) {
-		php_error_docref(NULL, E_WARNING, "Division by zero");
-		RETURN_BOOL(0);
-	} else if (divisor == -1 && numerator == ZEND_LONG_MIN) {
-		/* Prevent overflow error/crash 
-		   We don't return a float here as that violates function contract */
-		RETURN_LONG(0);
+	switch (TYPE_PAIR(Z_TYPE_P(numerator), Z_TYPE_P(divisor))) {
+		case TYPE_PAIR(IS_LONG, IS_LONG):
+			if (Z_LVAL_P(divisor) == 0) {
+				php_error_docref(NULL, E_WARNING, "Division by zero");
+				RETURN_BOOL(0);
+			} else if (Z_LVAL_P(divisor) == -1 && Z_LVAL_P(numerator) == ZEND_LONG_MIN) {
+				/* Prevent overflow error/crash */
+				zend_bigint *big = zend_bigint_alloc();
+				zend_bigint_init_from_long(big, ZEND_LONG_MIN);
+				zend_bigint_divide_long(big, big, -1);
+				RETURN_BIGINT(big);
+			}
+			
+			RETURN_LONG(Z_LVAL_P(numerator)/Z_LVAL_P(divisor));
+			break;
+		case TYPE_PAIR(IS_BIGINT, IS_BIGINT):
+			{
+				zend_bigint *big = zend_bigint_init_alloc();
+				zend_bigint_divide(big, Z_BIG_P(numerator), Z_BIG_P(divisor));
+				RETURN_BIGINT(big);
+			}
+			break;
+		case TYPE_PAIR(IS_BIGINT, IS_LONG):
+			{
+				zend_bigint *big = zend_bigint_init_alloc();
+				zend_bigint_divide_long(big, Z_BIG_P(numerator), Z_LVAL_P(divisor));
+				RETURN_BIGINT(big);
+			}
+			break;
+		case TYPE_PAIR(IS_LONG, IS_BIGINT):
+			{
+				zend_bigint *big = zend_bigint_init_alloc();
+				zend_bigint_long_divide(big, Z_LVAL_P(numerator), Z_BIG_P(divisor));
+				RETURN_BIGINT(big);
+			}
+			break;
 	}
-	
-	RETURN_LONG(numerator/divisor);
 }
 /* }}} */ 
 

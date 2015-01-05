@@ -403,6 +403,27 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			}
 			break;
 
+
+		case 'i':
+			{
+				zval **p = va_arg(*va, zval **);
+
+				if (!zend_parse_arg_bigint_or_long(arg, p, check_null)) {
+					return "integer";
+				}
+			}
+			break;
+
+		case 'I':
+			{
+				zend_bigint **p = va_arg(*va, zend_bigint **);
+
+				if (!zend_parse_arg_bigint(arg, p, check_null)) {
+					return "integer";
+				}
+			}
+			break;
+
 		case 'd':
 			{
 				double *p = va_arg(*va, double *);
@@ -676,7 +697,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
 		c = *spec_walk;
 		switch (c) {
-			case 'l': case 'd':
+			case 'l': case 'i':
+			case 'I': case 'd':
 			case 's': case 'b':
 			case 'r': case 'a':
 			case 'o': case 'O':
