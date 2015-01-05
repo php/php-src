@@ -207,7 +207,7 @@ ZEND_API void zval_add_ref(zval *p)
 		if (Z_ISREF_P(p) && Z_REFCOUNT_P(p) == 1) {
 			zend_reference *ref = Z_REF_P(p);
 			ZVAL_COPY(p, Z_REFVAL_P(p));
-			efree(ref);
+			efree_size(ref, sizeof(zend_reference));
 		} else {
 			Z_ADDREF_P(p);
 		}
