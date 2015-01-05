@@ -35,6 +35,9 @@ PHP                                                                        NEWS
   . Fixed bug #68735 (fileinfo out-of-bounds memory access).
     (Anatol)
 
+- FPM:
+  . Fixed bug #68751 (listen.allowed_clients is broken). (Remi)
+
 - GD:
   . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (Jan Bee, Remi)
 
