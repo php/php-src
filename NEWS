@@ -42,6 +42,7 @@
 
 - FPM:
   . Fixed request #68526 (Implement POSIX Access Control List for UDS). (Remi)
+  . Fixed bug #68751 (listen.allowed_clients is broken). (Remi)
 
 - GD:
   . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (Jan Bee, Remi)
