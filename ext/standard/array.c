@@ -4978,8 +4978,8 @@ PHP_FUNCTION(array_get)
         RETURN_NULL();
     }
 	
-	ZVAL_STRINGL(&zroute, route,route_len, 1);
-	ZVAL_STRINGL(&zdelim, ".", 1, 1);
+	ZVAL_STRINGL(&zroute, route,route_len);
+	ZVAL_STRINGL(&zdelim, ".", 1);
 	
 	ALLOC_INIT_ZVAL(routeEx);
 	array_init(routeEx);
