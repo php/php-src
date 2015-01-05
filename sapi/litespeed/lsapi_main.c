@@ -126,7 +126,7 @@ static void sapi_lsapi_ini_defaults(HashTable *configuration_hash)
 
 /* {{{ sapi_lsapi_ub_write
  */
-static int sapi_lsapi_ub_write(const char *str, uint str_length)
+static size_t sapi_lsapi_ub_write(const char *str, size_t str_length)
 {
     int ret;
     int remain;
@@ -207,7 +207,7 @@ static int add_variable( const char * pKey, int keyLen, const char * pValue, int
     int filter_arg = (arg == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
 #endif
     char * new_val = (char *) pValue; 
-    unsigned int new_val_len;
+    size_t new_val_len;
 
     if (sapi_module.input_filter(filter_arg, (char *)pKey, &new_val, valLen, &new_val_len)) {
         php_register_variable_safe((char *)pKey, new_val, new_val_len, (zval *)arg );
@@ -365,7 +365,7 @@ static void sapi_lsapi_register_variables(zval *track_vars_array)
 
 /* {{{ sapi_lsapi_read_post
  */
-static int sapi_lsapi_read_post(char *buffer, uint count_bytes)
+static size_t sapi_lsapi_read_post(char *buffer, size_t count_bytes)
 {
     if ( lsapi_mode ) {
         return LSAPI_ReadReqBody( buffer, (unsigned long long)count_bytes );
@@ -634,11 +634,11 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
         else
 		{
 #if PHP_MAJOR_VERSION >= 7
-			psKey = STR_INIT( pKey, keyLen, 1 );
-            zend_alter_ini_entry(psKey, 
+			psKey = zend_string_init(pKey, keyLen, 1);
+            zend_alter_ini_entry_chars(psKey, 
                              (char *)pValue, valLen,
                              type, PHP_INI_STAGE_ACTIVATE);
-            STR_RELEASE( psKey );
+			zend_string_release(psKey);
 #else
             zend_alter_ini_entry((char *)pKey, keyLen,
                              (char *)pValue, valLen,
@@ -807,11 +807,11 @@ static int cli_main( int argc, char * argv[] )
 #endif
         for( ini = ini_defaults; *ini; ini+=2 ) {
 #if PHP_MAJOR_VERSION >= 7
-			psKey = STR_INIT( *ini, strlen( *ini ), 1 );
-            zend_alter_ini_entry( psKey, 
+			psKey = zend_string_init(*ini, strlen( *ini ), 1);
+            zend_alter_ini_entry_chars(psKey, 
                                 (char *)*(ini+1), strlen( *(ini+1) ),
                                 PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
-            STR_RELEASE( psKey );
+			zend_string_release(psKey);
 #else
             zend_alter_ini_entry( (char *)*ini, strlen( *ini )+1,
                                 (char *)*(ini+1), strlen( *(ini+1) ),

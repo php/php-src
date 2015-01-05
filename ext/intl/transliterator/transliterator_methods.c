@@ -27,7 +27,7 @@
 
 #include <zend_exceptions.h>
 
-static int create_transliterator( char *str_id, int str_id_len, zend_long direction, zval *object )
+static int create_transliterator( char *str_id, size_t str_id_len, zend_long direction, zval *object )
 {
 	Transliterator_object *to;
 	UChar	              *ustr_id    = NULL;
@@ -103,9 +103,9 @@ static int create_transliterator( char *str_id, int str_id_len, zend_long direct
  */
 PHP_FUNCTION( transliterator_create )
 {
-	char  *str_id;
-	size_t   str_id_len;
-	zend_long  direction   = TRANSLITERATOR_FORWARD;
+	char     *str_id;
+	size_t    str_id_len;
+	zend_long direction   = TRANSLITERATOR_FORWARD;
 	int res;
 
 	TRANSLITERATOR_METHOD_INIT_VARS;
@@ -136,10 +136,10 @@ PHP_FUNCTION( transliterator_create )
 PHP_FUNCTION( transliterator_create_from_rules )
 {
 	char		    *str_rules;
-	size_t             str_rules_len;
+	size_t          str_rules_len;
 	UChar		    *ustr_rules    = NULL;
 	int32_t         ustr_rules_len = 0;
-	zend_long            direction      = TRANSLITERATOR_FORWARD;
+	zend_long       direction      = TRANSLITERATOR_FORWARD;
 	UParseError     parse_error    = {0, -1};
 	UTransliterator *utrans;
 	UChar           id[] = {0x52, 0x75, 0x6C, 0x65, 0x73, 0x54, 0x72,
@@ -266,7 +266,7 @@ PHP_FUNCTION( transliterator_list_ids )
 	while( (elem = uenum_unext( en, &elem_len, &status )) )
 	{
 		char *el_char = NULL;
-		int  el_len   = 0;
+		size_t el_len   = 0;
 
 		intl_convert_utf16_to_utf8( &el_char, &el_len, elem, elem_len, &status );
 
@@ -303,11 +303,11 @@ PHP_FUNCTION( transliterator_transliterate )
 	char	    *str;
 	UChar		*ustr		= NULL,
 				*uresult	= NULL;
-	size_t			str_len;
+	size_t	    str_len;
 	int32_t		ustr_len	= 0,
 				capacity,
 				uresult_len;
-	zend_long		start		= 0,
+	zend_long	start		= 0,
 				limit		= -1;
 	int			success     = 0;
 	zval 		tmp_object;

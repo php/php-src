@@ -45,10 +45,10 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 	UErrorCode* status )
 {
 	const char* old_val;
-	int         old_val_len;
+	size_t      old_val_len;
 	UChar*      new_val      = NULL;
-	int         new_val_len  = 0;
-	zval       znew_val;
+	int32_t     new_val_len  = 0;
+	zval        znew_val;
 
 	/* Process string values only. */
 	if( Z_TYPE_P( hashData ) != IS_STRING )
@@ -86,10 +86,10 @@ static void collator_convert_hash_item_from_utf16_to_utf8(
 	UErrorCode* status )
 {
 	const char* old_val;
-	int        old_val_len;
-	char*      new_val      = NULL;
-	int        new_val_len  = 0;
-	zval       znew_val;
+	size_t      old_val_len;
+	char*       new_val      = NULL;
+	size_t      new_val_len  = 0;
+	zval        znew_val;
 
 	/* Process string values only. */
 	if( Z_TYPE_P( hashData ) != IS_STRING )
@@ -105,7 +105,7 @@ static void collator_convert_hash_item_from_utf16_to_utf8(
 		return;
 
 	/* Update current hash item with the converted value. */
-	ZVAL_STRINGL( &znew_val, (char*)new_val, new_val_len);
+	ZVAL_STRINGL( &znew_val, new_val, new_val_len);
 	//???
 	efree(new_val);
 
@@ -171,7 +171,7 @@ zval* collator_convert_zstr_utf16_to_utf8( zval* utf16_zval, zval *rv )
 {
 	zval* utf8_zval   = NULL;
 	char* str         = NULL;
-	int   str_len     = 0;
+	size_t str_len    = 0;
 	UErrorCode status = U_ZERO_ERROR;
 
 	/* Convert to utf8 then. */
@@ -201,7 +201,7 @@ zval* collator_convert_zstr_utf8_to_utf16( zval* utf8_zval, zval *rv )
 {
 	zval* zstr        = NULL;
 	UChar* ustr       = NULL;
-	int    ustr_len   = 0;
+	int32_t ustr_len   = 0;
 	UErrorCode status = U_ZERO_ERROR;
 
 	/* Convert the string to UTF-16. */
@@ -230,7 +230,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	zval* zstr        = NULL;
 	UErrorCode status = U_ZERO_ERROR;
 	UChar* ustr       = NULL;
-	int    ustr_len   = 0;
+	int32_t ustr_len  = 0;
 
 	/* Bail out if it's not an object. */
 	if( Z_TYPE_P( obj ) != IS_OBJECT )

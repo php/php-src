@@ -34,19 +34,19 @@ PHP_FUNCTION( normalizer_normalize )
 {
 	char*			input = NULL;
 	/* form is optional, defaults to FORM_C */
-	zend_long			form = NORMALIZER_DEFAULT;
+	zend_long	    form = NORMALIZER_DEFAULT;
 	size_t			input_len = 0;
 		
 	UChar*			uinput = NULL;
-	int			uinput_len = 0;
-	int			expansion_factor = 1;
+	int32_t		    uinput_len = 0;
+	int			    expansion_factor = 1;
 	UErrorCode		status = U_ZERO_ERROR;
 		
 	UChar*			uret_buf = NULL;
-	int			uret_len = 0;
+	int32_t			uret_len = 0;
 		
 	char*			ret_buf = NULL;
-	int32_t			ret_len = 0;
+	size_t			ret_len = 0;
 
 	int32_t			size_needed;
 		

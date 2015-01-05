@@ -87,7 +87,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 		tzobj->tzi.utc_offset = -1 * timeZone->getRawOffset() / (60 * 1000);
 	} else {
 		char *str;
-		int str_len;
+		size_t str_len;
 		/* Call the constructor! */
 		if (intl_charFromString(id, &str, &str_len, &INTL_ERROR_CODE(*outside_error)) == FAILURE) {
 			spprintf(&message, 0, "%s: could not convert id to UTF-8", func);
@@ -292,7 +292,7 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 	const TimeZone	*tz;
 	UnicodeString	ustr;
 	char			*str;
-	int				str_len;
+	size_t			str_len;
 	HashTable 		*debug_info;
 	UErrorCode		uec = U_ZERO_ERROR;
 

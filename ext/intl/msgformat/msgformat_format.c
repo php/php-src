@@ -36,7 +36,7 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 {
 	int count;
 	UChar* formatted = NULL;
-	int formatted_len = 0;
+	int32_t formatted_len = 0;
 	HashTable *args_copy;
 
 	count = zend_hash_num_elements(Z_ARRVAL_P(args));
@@ -101,9 +101,9 @@ PHP_FUNCTION( msgfmt_format_message )
 	UChar      *spattern = NULL;
 	int         spattern_len = 0;
 	char       *pattern = NULL;
-	size_t         pattern_len = 0;
+	size_t      pattern_len = 0;
 	const char *slocale = NULL;
-	size_t         slocale_len = 0;
+	size_t      slocale_len = 0;
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 

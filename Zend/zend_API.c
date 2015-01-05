@@ -329,7 +329,7 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error) /* {
 }
 /* }}} */
 
-ZEND_API int _z_param_class(zval *arg, zend_class_entry **pce, int num, int check_null) /* {{{ */
+ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null) /* {{{ */
 {
 	zend_class_entry *ce_base = *pce;
 
@@ -391,92 +391,14 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'L':
 			{
 				zend_long *p = va_arg(*va, zend_long *);
+				zend_bool *is_null = NULL;
 
 				if (check_null) {
-					zend_bool *p = va_arg(*va, zend_bool *);
-					*p = (Z_TYPE_P(arg) == IS_NULL);
+					is_null = va_arg(*va, zend_bool *);
 				}
 
-				switch (Z_TYPE_P(arg)) {
-					case IS_STRING:
-						{
-							double d;
-							zend_bigint *big;
-							int type;
-
-							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), p, &d, &big, -1)) == 0) {
-								return "integer";
-							} else if (type == IS_DOUBLE) {
-								if (zend_isnan(d)) {
-									return "integer";
-								}
-								if (!ZEND_DOUBLE_FITS_LONG(d)) {
-									if (c == 'L') {
-										*p = (d > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
-									} else {
-										return "integer";
-									}
-									break;
-								}
-
-								*p = zend_dval_to_lval(d);
-							} else if (type == IS_BIGINT) {
-								if (!zend_bigint_can_fit_long(big)) {
-									if (c == 'L') {	
-										*p = (zend_bigint_sign(big) > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
-										zend_bigint_release(big);
-										break;
-									} else {
-										zend_bigint_release(big);
-										return "integer";
-									}
-								}
-
-								*p = zend_bigint_to_long(big);
-								zend_bigint_release(big);
-							}
-						}
-						break;
-
-					case IS_DOUBLE:
-						if (zend_isnan(Z_DVAL_P(arg))) {
-							return "integer";
-						}
-						if (!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg))) {
-							if (c == 'L') {
-								*p = (Z_DVAL_P(arg) > 0) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
-							} else {
-								return "integer";
-							}
-							break;
-						}
-					
-					case IS_NULL:
-					case IS_FALSE:
-					case IS_TRUE:
-					case IS_LONG:
-						convert_to_long_ex(arg);
-						*p = Z_LVAL_P(arg);
-						break;
-
-					case IS_BIGINT:
-						{
-							if (c == 'L') {
-								*p = zend_bigint_to_long_saturate(Z_BIG_P(arg));
-							} else {
-								if (!zend_bigint_can_fit_long(Z_BIG_P(arg))) {
-									return "integer";
-								}
-								*p = zend_bigint_to_long(Z_BIG_P(arg));
-							}
-						}
-						break;
-
-					case IS_ARRAY:
-					case IS_OBJECT:
-					case IS_RESOURCE:
-					default:
-						return "integer";
+				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L')) {
+					return "integer";
 				}
 			}
 			break;
@@ -484,130 +406,52 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'd':
 			{
 				double *p = va_arg(*va, double *);
+				zend_bool *is_null = NULL;
 
 				if (check_null) {
-					zend_bool *p = va_arg(*va, zend_bool *);
-					*p = (Z_TYPE_P(arg) == IS_NULL);
+					is_null = va_arg(*va, zend_bool *);
 				}
 
-				switch (Z_TYPE_P(arg)) {
-					case IS_STRING:
-						{
-							zend_long l;
-							zend_bigint *big;
-							int type;
-
-							if ((type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &l, p, &big, -1)) == 0) {
-								return "float";
-							} else if (type == IS_LONG) {
-								*p = (double) l;
-							} else if (type == IS_BIGINT) {
-								*p = zend_bigint_to_double(big);
-								zend_bigint_release(big);
-							}
-						}
-						break;
-
-					case IS_NULL:
-					case IS_FALSE:
-					case IS_TRUE:
-					case IS_LONG:
-					case IS_DOUBLE:
-					case IS_BIGINT:
-						convert_to_double_ex(arg);
-						*p = Z_DVAL_P(arg);
-						break;
-
-					case IS_ARRAY:
-					case IS_OBJECT:
-					case IS_RESOURCE:
-					default:
-						return "float";
+				if (!zend_parse_arg_double(arg, p, is_null, check_null)) {
+					return "float";
 				}
 			}
 			break;
 
-		case 'p':
 		case 's':
 			{
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
-				switch (Z_TYPE_P(arg)) {
-					case IS_NULL:
-						if (check_null) {
-							*p = NULL;
-							*pl = 0;
-							break;
-						}
-						/* break omitted intentionally */
-
-					case IS_LONG:
-					case IS_DOUBLE:
-					case IS_BIGINT:
-					case IS_FALSE:
-					case IS_TRUE:
-						convert_to_string_ex(arg);
-					case IS_STRING:
-						*p = Z_STRVAL_P(arg);
-						*pl = Z_STRLEN_P(arg);
-						if (c == 'p' && CHECK_ZVAL_NULL_PATH(arg)) {
-							return "a valid path";
-						}
-						break;
-
-					case IS_OBJECT:
-						if (parse_arg_object_to_string(arg, p, pl, IS_STRING) == SUCCESS) {
-							if (c == 'p' && CHECK_ZVAL_NULL_PATH(arg)) {
-								return "a valid path";
-							}
-							break;
-						}
-
-					case IS_ARRAY:
-					case IS_RESOURCE:
-					default:
-						return c == 's' ? "string" : "a valid path";
+				if (!zend_parse_arg_string(arg, p, pl, check_null)) {
+					return "string";
+				}
+			}
+			break;
+		
+		case 'p':
+			{
+				char **p = va_arg(*va, char **);
+				size_t *pl = va_arg(*va, size_t *);
+				if (!zend_parse_arg_path(arg, p, pl, check_null)) {
+					return "a valid path";
 				}
 			}
 			break;
 
 		case 'P':
+			{
+				zend_string **str = va_arg(*va, zend_string **);
+				if (!zend_parse_arg_path_str(arg, str, check_null)) {
+					return "a valid path";
+				}
+			}
+			break;
+
 		case 'S':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				switch (Z_TYPE_P(arg)) {
-					case IS_NULL:
-						if (check_null) {
-							*str = NULL;
-							break;
-						}
-						/* break omitted intentionally */
-
-					case IS_LONG:
-					case IS_DOUBLE:
-					case IS_BIGINT:
-					case IS_FALSE:
-					case IS_TRUE:
-						convert_to_string_ex(arg);
-					case IS_STRING:
-						*str = Z_STR_P(arg);
-						if (c == 'P' && CHECK_ZVAL_NULL_PATH(arg)) {
-							return "a valid path";
-						}
-						break;
-
-					case IS_OBJECT: {
-						if (parse_arg_object_to_str(arg, str, IS_STRING) == SUCCESS) {
-							if (c == 'P' && CHECK_ZVAL_NULL_PATH(arg)) {
-								return "a valid path";
-							}
-							break;
-						}
-					}
-					case IS_ARRAY:
-					case IS_RESOURCE:
-					default:
-						return c == 'S' ? "string" : "a valid path";
+				if (!zend_parse_arg_str(arg, str, check_null)) {
+					return "string";
 				}
 			}
 			break;
@@ -615,29 +459,14 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'b':
 			{
 				zend_bool *p = va_arg(*va, zend_bool *);
+				zend_bool *is_null = NULL;
 
 				if (check_null) {
-					zend_bool *p = va_arg(*va, zend_bool *);
-					*p = (Z_TYPE_P(arg) == IS_NULL);
+					is_null = va_arg(*va, zend_bool *);
 				}
 
-				switch (Z_TYPE_P(arg)) {
-					case IS_NULL:
-					case IS_STRING:
-					case IS_LONG:
-					case IS_DOUBLE:
-					case IS_BIGINT:
-					case IS_FALSE:
-					case IS_TRUE:
-						convert_to_boolean_ex(arg);
-						*p = Z_TYPE_P(arg) == IS_TRUE;
-						break;
-
-					case IS_ARRAY:
-					case IS_OBJECT:
-					case IS_RESOURCE:
-					default:
-						return "boolean";
+				if (!zend_parse_arg_bool(arg, p, is_null, check_null)) {
+					return "boolean";
 				}
 			}
 			break;
@@ -645,48 +474,30 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'r':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
-					*p = NULL;
-					break;
-				}
-				if (Z_TYPE_P(arg) == IS_RESOURCE) {
-					*p = arg;
-				} else {
+
+				if (!zend_parse_arg_resource(arg, p, check_null)) {
 					return "resource";
 				}
 			}
 			break;
+
 		case 'A':
 		case 'a':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
-					*p = NULL;
-					break;
-				}
-				if (Z_TYPE_P(arg) == IS_ARRAY || (c == 'A' && Z_TYPE_P(arg) == IS_OBJECT)) {
-					*p = arg;
-				} else {
+
+				if (!zend_parse_arg_array(arg, p, check_null, c == 'A')) {
 					return "array";
 				}
 			}
 			break;
+
 		case 'H':
 		case 'h':
 			{
 				HashTable **p = va_arg(*va, HashTable **);
-				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
-					*p = NULL;
-					break;
-				}
-				if (Z_TYPE_P(arg) == IS_ARRAY) {
-					*p = Z_ARRVAL_P(arg);
-				} else if(c == 'H' && Z_TYPE_P(arg) == IS_OBJECT) {
-					*p = HASH_OF(arg);
-					if(*p == NULL) {
-						return "array";
-					}
-				} else {
+
+				if (!zend_parse_arg_array_ht(arg, p, check_null, c == 'H')) {
 					return "array";
 				}
 			}
@@ -695,13 +506,8 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'o':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
-					*p = NULL;
-					break;
-				}
-				if (Z_TYPE_P(arg) == IS_OBJECT) {
-					*p = arg;
-				} else {
+
+				if (!zend_parse_arg_object(arg, p, NULL, check_null)) {
 					return "object";
 				}
 			}
@@ -712,14 +518,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				zval **p = va_arg(*va, zval **);
 				zend_class_entry *ce = va_arg(*va, zend_class_entry *);
 
-				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
-					*p = NULL;
-					break;
-				}
-				if (Z_TYPE_P(arg) == IS_OBJECT &&
-						(!ce || instanceof_function(Z_OBJCE_P(arg), ce))) {
-					*p = arg;
-				} else {
+				if (!zend_parse_arg_object(arg, p, ce, check_null)) {
 					if (ce) {
 						return ce->name->val;
 					} else {
@@ -798,11 +597,8 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'z':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
-					*p = NULL;
-				} else {
-					*p = real_arg;
-				}
+
+				zend_parse_arg_zval_deref(real_arg, p, check_null);
 			}
 			break;
 

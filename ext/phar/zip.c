@@ -293,11 +293,11 @@ foundit:
 	entry.is_persistent = mydata->is_persistent;
 #define PHAR_ZIP_FAIL_FREE(errmsg, save) \
 			zend_hash_destroy(&mydata->manifest); \
-			mydata->manifest.arHash = 0; \
+			mydata->manifest.u.flags = 0; \
 			zend_hash_destroy(&mydata->mounted_dirs); \
-			mydata->mounted_dirs.arHash = 0; \
+			mydata->mounted_dirs.u.flags = 0; \
 			zend_hash_destroy(&mydata->virtual_dirs); \
-			mydata->virtual_dirs.arHash = 0; \
+			mydata->virtual_dirs.u.flags = 0; \
 			php_stream_close(fp); \
 			zval_dtor(&mydata->metadata); \
 			if (mydata->signature) { \
@@ -315,11 +315,11 @@ foundit:
 			return FAILURE;
 #define PHAR_ZIP_FAIL(errmsg) \
 			zend_hash_destroy(&mydata->manifest); \
-			mydata->manifest.arHash = 0; \
+			mydata->manifest.u.flags = 0; \
 			zend_hash_destroy(&mydata->mounted_dirs); \
-			mydata->mounted_dirs.arHash = 0; \
+			mydata->mounted_dirs.u.flags = 0; \
 			zend_hash_destroy(&mydata->virtual_dirs); \
-			mydata->virtual_dirs.arHash = 0; \
+			mydata->virtual_dirs.u.flags = 0; \
 			php_stream_close(fp); \
 			zval_dtor(&mydata->metadata); \
 			if (mydata->signature) { \

@@ -2628,7 +2628,7 @@ PHP_FUNCTION(date_create_from_format)
 	size_t             time_str_len = 0, format_str_len = 0;
 	zval            datetime_object;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|O", &format_str, &format_str_len, &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|O!", &format_str, &format_str_len, &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -2651,7 +2651,7 @@ PHP_FUNCTION(date_create_immutable_from_format)
 	size_t          time_str_len = 0, format_str_len = 0;
 	zval            datetime_object;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|O", &format_str, &format_str_len, &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|O!", &format_str, &format_str_len, &time_str, &time_str_len, &timezone_object, date_ce_timezone) == FAILURE) {
 		RETURN_FALSE;
 	}
 

@@ -54,29 +54,27 @@ void grapheme_register_constants( INIT_FUNC_ARGS )
    Get number of graphemes in a string */
 PHP_FUNCTION(grapheme_strlen)
 {
-	unsigned char* string;
+	char* string;
 	size_t string_len;
 	UChar* ustring = NULL;
 	int ustring_len = 0;
-	int ret_len;
+	zend_long ret_len;
 	UErrorCode status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", (char **)&string, &string_len) == FAILURE) {
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &string, &string_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_strlen: unable to parse input param", 0 );
-
 		RETURN_FALSE;
 	}
 
-	ret_len = grapheme_ascii_check(string, string_len);
+	ret_len = grapheme_ascii_check((unsigned char *)string, string_len);
 
 	if ( ret_len >= 0 )
-		RETURN_LONG(ret_len);
+		RETURN_LONG(string_len);
 
 	/* convert the string to UTF-16. */
 	status = U_ZERO_ERROR;
-	intl_convert_utf8_to_utf16(&ustring, &ustring_len, (char*) string, string_len, &status );
+	intl_convert_utf8_to_utf16(&ustring, &ustring_len, string, string_len, &status );
 
 	if ( U_FAILURE( status ) ) {
 		/* Set global error code. */
@@ -108,25 +106,21 @@ PHP_FUNCTION(grapheme_strlen)
    Find position of first occurrence of a string within another */
 PHP_FUNCTION(grapheme_strpos)
 {
-	unsigned char *haystack, *needle;
+	char *haystack, *needle;
 	size_t haystack_len, needle_len;
-	unsigned char *found;
+	const char *found;
 	zend_long loffset = 0;
 	int32_t offset = 0;
-	int ret_pos;
+	zend_long ret_pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", (char **)&haystack, &haystack_len, (char **)&needle, &needle_len, &loffset) == FAILURE) {
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_strpos: unable to parse input param", 0 );
-
 		RETURN_FALSE;
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 );
-
 		RETURN_FALSE;
 	}
 
@@ -136,9 +130,7 @@ PHP_FUNCTION(grapheme_strpos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Empty delimiter", 1 );
-
 		RETURN_FALSE;
 	}
 
@@ -146,7 +138,7 @@ PHP_FUNCTION(grapheme_strpos)
 	/* quick check to see if the string might be there
 	 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
 	*/
-	found = (unsigned char *)php_memnstr((char *)haystack + offset, (char *)needle, needle_len, (char *)haystack + haystack_len);
+	found = php_memnstr(haystack + offset, needle, needle_len, haystack + haystack_len);
 
 	/* if it isn't there the we are done */
 	if (!found) {
@@ -154,8 +146,7 @@ PHP_FUNCTION(grapheme_strpos)
 	}
 
 	/* if it is there, and if the haystack is ascii, we are all done */
-	if ( grapheme_ascii_check(haystack, haystack_len) >= 0 ) {
-
+	if ( grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0 ) {
 		RETURN_LONG(found - haystack);
 	}
 
@@ -175,26 +166,22 @@ PHP_FUNCTION(grapheme_strpos)
    Find position of first occurrence of a string within another, ignoring case differences */
 PHP_FUNCTION(grapheme_stripos)
 {
-	unsigned char *haystack, *needle, *haystack_dup, *needle_dup;
+	char *haystack, *needle, *haystack_dup, *needle_dup;
 	size_t haystack_len, needle_len;
-	unsigned char *found;
+	const char *found;
 	zend_long loffset = 0;
 	int32_t offset = 0;
-	int ret_pos;
+	zend_long ret_pos;
 	int is_ascii;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", (char **)&haystack, &haystack_len, (char **)&needle, &needle_len, &loffset) == FAILURE) {
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_stripos: unable to parse input param", 0 );
-
 		RETURN_FALSE;
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_stripos: Offset not contained in string", 1 );
-
 		RETURN_FALSE;
 	}
 
@@ -204,22 +191,20 @@ PHP_FUNCTION(grapheme_stripos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_stripos: Empty delimiter", 1 );
-
 		RETURN_FALSE;
 	}
 
 
-	is_ascii = ( grapheme_ascii_check(haystack, haystack_len) >= 0 );
+	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
 
 	if ( is_ascii ) {
-		needle_dup = (unsigned char *)estrndup((char *)needle, needle_len);
-		php_strtolower((char *)needle_dup, needle_len);
-		haystack_dup = (unsigned char *)estrndup((char *)haystack, haystack_len);
-		php_strtolower((char *)haystack_dup, haystack_len);
+		needle_dup = estrndup(needle, needle_len);
+		php_strtolower(needle_dup, needle_len);
+		haystack_dup = estrndup(haystack, haystack_len);
+		php_strtolower(haystack_dup, haystack_len);
 
-		found = (unsigned char*) php_memnstr((char *)haystack_dup + offset, (char *)needle_dup, needle_len, (char *)haystack_dup + haystack_len);
+		found = php_memnstr(haystack_dup + offset, needle_dup, needle_len, haystack_dup + haystack_len);
 
 		efree(haystack_dup);
 		efree(needle_dup);
@@ -229,7 +214,7 @@ PHP_FUNCTION(grapheme_stripos)
 		}
 
 		/* if needle was ascii too, we are all done, otherwise we need to try using Unicode to see what we get */
-		if ( grapheme_ascii_check(needle, needle_len) >= 0 ) {
+		if ( grapheme_ascii_check((unsigned char *)needle, needle_len) >= 0 ) {
 			RETURN_FALSE;
 		}
 	}
@@ -250,25 +235,21 @@ PHP_FUNCTION(grapheme_stripos)
    Find position of last occurrence of a string within another */
 PHP_FUNCTION(grapheme_strrpos)
 {
-	unsigned char *haystack, *needle;
+	char *haystack, *needle;
 	size_t haystack_len, needle_len;
 	zend_long loffset = 0;
 	int32_t offset = 0;
-	int32_t ret_pos;
+	zend_long ret_pos;
 	int is_ascii;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", (char **)&haystack, &haystack_len, (char **)&needle, &needle_len, &loffset) == FAILURE) {
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_strrpos: unable to parse input param", 0 );
-
 		RETURN_FALSE;
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 );
-
 		RETURN_FALSE;
 	}
 
@@ -278,18 +259,15 @@ PHP_FUNCTION(grapheme_strrpos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Empty delimiter", 1 );
-
 		RETURN_FALSE;
 	}
 
-	is_ascii = grapheme_ascii_check(haystack, haystack_len) >= 0;
+	is_ascii = grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
 
 	if ( is_ascii ) {
 
 		ret_pos = grapheme_strrpos_ascii(haystack, haystack_len, needle, needle_len, offset);
-
 
 		if ( ret_pos >= 0 ) {
 			RETURN_LONG(ret_pos);
@@ -297,7 +275,7 @@ PHP_FUNCTION(grapheme_strrpos)
 
 		/* if the needle was ascii too, we are done */
 
-		if (  grapheme_ascii_check(needle, needle_len) >= 0 ) {
+		if (  grapheme_ascii_check((unsigned char *)needle, needle_len) >= 0 ) {
 			RETURN_FALSE;
 		}
 
@@ -320,25 +298,21 @@ PHP_FUNCTION(grapheme_strrpos)
    Find position of last occurrence of a string within another, ignoring case */
 PHP_FUNCTION(grapheme_strripos)
 {
-	unsigned char *haystack, *needle;
+	char *haystack, *needle;
 	size_t haystack_len, needle_len;
 	zend_long loffset = 0;
 	int32_t offset = 0;
-	int32_t ret_pos;
+	zend_long ret_pos;
 	int is_ascii;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", (char **)&haystack, &haystack_len, (char **)&needle, &needle_len, &loffset) == FAILURE) {
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_strrpos: unable to parse input param", 0 );
-
 		RETURN_FALSE;
 	}
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
-
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Offset not contained in string", 1 );
-
 		RETURN_FALSE;
 	}
 
@@ -348,21 +322,19 @@ PHP_FUNCTION(grapheme_strripos)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if (needle_len == 0) {
-
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_strpos: Empty delimiter", 1 );
-
 		RETURN_FALSE;
 	}
 
-	is_ascii = grapheme_ascii_check(haystack, haystack_len) >= 0;
+	is_ascii = grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0;
 
 	if ( is_ascii ) {
-		unsigned char *needle_dup, *haystack_dup;
+		char *needle_dup, *haystack_dup;
 
-		needle_dup = (unsigned char *)estrndup((char *)needle, needle_len);
-		php_strtolower((char *)needle_dup, needle_len);
-		haystack_dup = (unsigned char *)estrndup((char *)haystack, haystack_len);
-		php_strtolower((char *)haystack_dup, haystack_len);
+		needle_dup = estrndup(needle, needle_len);
+		php_strtolower(needle_dup, needle_len);
+		haystack_dup = estrndup(haystack, haystack_len);
+		php_strtolower(haystack_dup, haystack_len);
 
 		ret_pos = grapheme_strrpos_ascii(haystack_dup, haystack_len, needle_dup, needle_len, offset);
 
@@ -375,7 +347,7 @@ PHP_FUNCTION(grapheme_strripos)
 
 		/* if the needle was ascii too, we are done */
 
-		if (  grapheme_ascii_check(needle, needle_len) >= 0 ) {
+		if (  grapheme_ascii_check((unsigned char *)needle, needle_len) >= 0 ) {
 			RETURN_FALSE;
 		}
 
@@ -398,11 +370,11 @@ PHP_FUNCTION(grapheme_strripos)
    Returns part of a string */
 PHP_FUNCTION(grapheme_substr)
 {
-	unsigned char *str, *sub_str;
+	char *str, *sub_str;
 	UChar *ustr;
 	size_t str_len;
 	int32_t ustr_len;
-	int32_t sub_str_len;
+	size_t sub_str_len;
 	zend_long lstart = 0, length = 0;
 	int32_t start = 0;
 	int iter_val;
@@ -411,42 +383,50 @@ PHP_FUNCTION(grapheme_substr)
 	UBreakIterator* bi = NULL;
 	int sub_str_start_pos, sub_str_end_pos;
 	int32_t (*iter_func)(UBreakIterator *);
+	int no_length = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l", (char **)&str, &str_len, &lstart, &length) == FAILURE) {
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!", (char **)&str, &str_len, &lstart, &length, &no_length) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_substr: unable to parse input param", 0 );
-
 		RETURN_FALSE;
 	}
 
-	if ( OUTSIDE_STRING(lstart, str_len) ) {
-
+	if ( OUTSIDE_STRING(lstart, str_len)) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: start not contained in string", 1 );
-
 		RETURN_FALSE;
 	}
 
 	/* we checked that it will fit: */
 	start = (int32_t) lstart;
 
+	if(no_length) {
+		length = str_len;
+	}
+
+	if(length < INT32_MIN) {
+		length = INT32_MIN;
+	} else if(length > INT32_MAX) {
+		length = INT32_MAX;
+	}
+
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
-	if ( grapheme_ascii_check(str, str_len) >= 0 ) {
-		grapheme_substr_ascii((char *)str, str_len, start, length, ZEND_NUM_ARGS(), (char **) &sub_str, &sub_str_len);
+	if ( grapheme_ascii_check((unsigned char *)str, str_len) >= 0 ) {
+		int32_t asub_str_len;
+		grapheme_substr_ascii(str, str_len, start, (int32_t)length, &sub_str, &asub_str_len);
 
 		if ( NULL == sub_str ) {
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: invalid parameters", 1 );
 			RETURN_FALSE;
 		}
 
-		RETURN_STRINGL(((char *)sub_str), sub_str_len);
+		RETURN_STRINGL(sub_str, asub_str_len);
 	}
 
 	ustr = NULL;
 	ustr_len = 0;
 	status = U_ZERO_ERROR;
-	intl_convert_utf8_to_utf16(&ustr, &ustr_len, (char *)str, str_len, &status);
+	intl_convert_utf8_to_utf16(&ustr, &ustr_len, str, str_len, &status);
 
 	if ( U_FAILURE( status ) ) {
 		/* Set global error code. */
@@ -501,14 +481,15 @@ PHP_FUNCTION(grapheme_substr)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() <= 2) {
+	/* OK to convert here since if str_len were big, convert above would fail */
+	if (length >= (int32_t)str_len) {
 
-		/* no length supplied, return the rest of the string */
+		/* no length supplied or length is too big, return the rest of the string */
 
 		sub_str = NULL;
 		sub_str_len = 0;
 		status = U_ZERO_ERROR;
-		intl_convert_utf16_to_utf8((char **)&sub_str, &sub_str_len, ustr + sub_str_start_pos, ustr_len - sub_str_start_pos, &status);
+		intl_convert_utf16_to_utf8(&sub_str, &sub_str_len, ustr + sub_str_start_pos, ustr_len - sub_str_start_pos, &status);
 
 		if (ustr) {
 			efree( ustr );
@@ -530,7 +511,7 @@ PHP_FUNCTION(grapheme_substr)
 		}
 
 		/* return the allocated string, not a duplicate */
-		RETVAL_STRINGL(((char *)sub_str), sub_str_len);
+		RETVAL_STRINGL(sub_str, sub_str_len);
 		//???
 		efree(sub_str);
 		return;
@@ -591,7 +572,7 @@ PHP_FUNCTION(grapheme_substr)
 
 	sub_str = NULL;
 	status = U_ZERO_ERROR;
-	intl_convert_utf16_to_utf8((char **)&sub_str, &sub_str_len, ustr + sub_str_start_pos, ( sub_str_end_pos - sub_str_start_pos ), &status);
+	intl_convert_utf16_to_utf8(&sub_str, &sub_str_len, ustr + sub_str_start_pos, ( sub_str_end_pos - sub_str_start_pos ), &status);
 
 	efree( ustr );
 
@@ -609,7 +590,7 @@ PHP_FUNCTION(grapheme_substr)
 	}
 
 	 /* return the allocated string, not a duplicate */
-	RETVAL_STRINGL(((char *)sub_str), sub_str_len);
+	RETVAL_STRINGL(sub_str, sub_str_len);
 	//????
 	efree(sub_str);
 
@@ -619,12 +600,13 @@ PHP_FUNCTION(grapheme_substr)
 /* {{{	strstr_common_handler */
 static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_case)
 {
-	unsigned char *haystack, *needle, *found;
+	char *haystack, *needle;
+	const char *found;
 	size_t haystack_len, needle_len;
-	int ret_pos, uchar_pos;
+	int32_t ret_pos, uchar_pos;
 	zend_bool part = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", (char **)&haystack, &haystack_len, (char **)&needle, &needle_len, &part) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &haystack, &haystack_len, &needle, &needle_len, &part) == FAILURE) {
 
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_strstr: unable to parse input param", 0 );
@@ -645,7 +627,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 		/* ASCII optimization: quick check to see if the string might be there
 		 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
 		*/
-		found = (unsigned char *)php_memnstr((char *)haystack, (char *)needle, needle_len, (char *)haystack + haystack_len);
+		found = php_memnstr(haystack, needle, needle_len, haystack + haystack_len);
 
 		/* if it isn't there the we are done */
 		if ( !found ) {
@@ -653,13 +635,13 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 		}
 
 		/* if it is there, and if the haystack is ascii, we are all done */
-		if ( grapheme_ascii_check(haystack, haystack_len) >= 0 ) {
+		if ( grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0 ) {
 			size_t found_offset = found - haystack;
 
 			if (part) {
-				RETURN_STRINGL(((char *)haystack) , found_offset);
+				RETURN_STRINGL(haystack, found_offset);
 			} else {
-				RETURN_STRINGL(((char *)found), haystack_len - found_offset);
+				RETURN_STRINGL(found, haystack_len - found_offset);
 			}
 		}
 
@@ -678,10 +660,9 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	U8_FWD_N(haystack, ret_pos, haystack_len, uchar_pos);
 
 	if (part) {
-		RETURN_STRINGL(((char *)haystack), ret_pos);
-	}
-	else {
-		RETURN_STRINGL(((char *)haystack) + ret_pos, haystack_len - ret_pos);
+		RETURN_STRINGL(haystack, ret_pos);
+	} else {
+		RETURN_STRINGL(haystack + ret_pos, haystack_len - ret_pos);
 	}
 
 }
@@ -815,7 +796,7 @@ static grapheme_extract_iter grapheme_extract_iters[] = {
 	Function to extract a sequence of default grapheme clusters */
 PHP_FUNCTION(grapheme_extract)
 {
-	unsigned char *str, *pstr;
+	char *str, *pstr;
 	UChar *ustr;
 	size_t str_len;
 	int32_t ustr_len;
@@ -829,11 +810,9 @@ PHP_FUNCTION(grapheme_extract)
 	int ret_pos;
 	zval *next = NULL; /* return offset of next part of the string */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|llz", (char **)&str, &str_len, &size, &extract_type, &lstart, &next) == FAILURE) {
-
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|llz", &str, &str_len, &size, &extract_type, &lstart, &next) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_extract: unable to parse input param", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -841,10 +820,8 @@ PHP_FUNCTION(grapheme_extract)
 		if ( !Z_ISREF_P(next) ) {
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				 "grapheme_extract: 'next' was not passed by reference", 0 );
-
 			RETURN_FALSE;
-		}
-		else {
+		} else {
 			ZVAL_DEREF(next);
 			/* initialize next */
 			SEPARATE_ZVAL(next);
@@ -854,10 +831,8 @@ PHP_FUNCTION(grapheme_extract)
 	}
 
 	if ( extract_type < GRAPHEME_EXTRACT_TYPE_MIN || extract_type > GRAPHEME_EXTRACT_TYPE_MAX ) {
-
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_extract: unknown extract type param", 0 );
-
 		RETURN_FALSE;
 	}
 
@@ -881,7 +856,7 @@ PHP_FUNCTION(grapheme_extract)
 
 	/* just in case pstr points in the middle of a character, move forward to the start of the next char */
 	if ( !UTF8_IS_SINGLE(*pstr) && !U8_IS_LEAD(*pstr) ) {
-		unsigned char *str_end = str + str_len;
+		char *str_end = str + str_len;
 
 		while ( !UTF8_IS_SINGLE(*pstr) && !U8_IS_LEAD(*pstr) ) {
 			pstr++;
@@ -900,19 +875,19 @@ PHP_FUNCTION(grapheme_extract)
 		(size + 1 because the size-th character might be the beginning of a grapheme cluster)
 	 */
 
-	if ( -1 != grapheme_ascii_check(pstr, size + 1 < str_len ? size + 1 : str_len ) ) {
-        zend_long nsize = ( size < str_len ? size : str_len );
+	if ( -1 != grapheme_ascii_check((unsigned char *)pstr, MIN(size + 1, str_len)) ) {
+        size_t nsize = MIN(size, str_len);
 		if ( NULL != next ) {
 			ZVAL_LONG(next, start+nsize);
 		}
-		RETURN_STRINGL(((char *)pstr), nsize);
+		RETURN_STRINGL(pstr, nsize);
 	}
 
 	/* convert the strings to UTF-16. */
 	ustr = NULL;
 	ustr_len = 0;
 	status = U_ZERO_ERROR;
-	intl_convert_utf8_to_utf16(&ustr, &ustr_len, (char *)pstr, str_len, &status );
+	intl_convert_utf8_to_utf16(&ustr, &ustr_len, pstr, str_len, &status );
 
 	if ( U_FAILURE( status ) ) {
 		/* Set global error code. */
@@ -937,8 +912,8 @@ PHP_FUNCTION(grapheme_extract)
 		can't back up. So, we will not do anything. */
 
 	/* now we need to find the end of the chunk the user wants us to return */
-
-	ret_pos = (*grapheme_extract_iters[extract_type])(bi, size, pstr, str_len);
+	/* it's ok to convert str_len to in32_t since if it were too big intl_convert_utf8_to_utf16 above would fail */
+	ret_pos = (*grapheme_extract_iters[extract_type])(bi, size, (unsigned char *)pstr, (int32_t)str_len);
 
 	if (ustr) {
 		efree(ustr);

@@ -92,11 +92,11 @@ PHP_FUNCTION( msgfmt_parse_message )
 	UChar      *spattern = NULL;
 	int         spattern_len = 0;
 	char       *pattern = NULL;
-	size_t         pattern_len = 0;
+	size_t      pattern_len = 0;
 	const char *slocale = NULL;
-	size_t         slocale_len = 0;
+	size_t      slocale_len = 0;
 	char       *source = NULL;
-	size_t         src_len = 0;
+	size_t      src_len = 0;
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 

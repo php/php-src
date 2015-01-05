@@ -23,23 +23,20 @@
 /* get_break_interator: get a break iterator from the global structure */
 UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status );
 
-void grapheme_substr_ascii(char *str, int32_t str_len, int32_t f, int32_t l, int argc, char **sub_str, int *sub_str_len);
+zend_long grapheme_ascii_check(const unsigned char *day, size_t len);
+void grapheme_substr_ascii(char *str, size_t str_len, int32_t f, int32_t l, char **sub_str, int32_t *sub_str_len);
+zend_long grapheme_strrpos_ascii(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset);
 
-int grapheme_strrpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int f_ignore_case);
+int32_t grapheme_strrpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int f_ignore_case);
+int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle, size_t needle_len, int32_t offset, int *puchar_pos, int f_ignore_case, int last);
 
-int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int *puchar_pos, int f_ignore_case, int last);
-
-int grapheme_ascii_check(const unsigned char *day, int32_t len);
-
-int grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len );
+int32_t grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len );
 
 int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t string_len);
 
 inline void *grapheme_memrchr_grapheme(const void *s, int c, int32_t n);
 
-int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset);
-
-int32_t grapheme_strrpos_ascii(unsigned char *haystack, int32_t haystack_len, unsigned char *needle, int32_t needle_len, int32_t offset);
+int32_t grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset);
 
 UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status );
 

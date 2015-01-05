@@ -248,7 +248,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 {
 	smart_str  ret = {0};
 	char       *buf;
-	int        u8len;
+	size_t     u8len;
 	UErrorCode status;
 	int        any = 0;
 

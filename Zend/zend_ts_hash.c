@@ -140,7 +140,7 @@ ZEND_API void zend_ts_hash_graceful_destroy(TsHashTable *ht)
 
 #ifdef ZTS
 	tsrm_mutex_free(ht->mx_reader);
-	tsrm_mutex_free(ht->mx_reader);
+	tsrm_mutex_free(ht->mx_writer);
 #endif
 }
 

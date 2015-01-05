@@ -476,7 +476,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	size_t         loc_name_len    	= 0;
 
 	const char* disp_loc_name       = NULL;
-	size_t         disp_loc_name_len   = 0;
+	size_t      disp_loc_name_len   = 0;
 	int         free_loc_name       = 0;
 
 	UChar*      disp_name      	= NULL;
@@ -488,7 +488,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	UErrorCode  status          	= U_ZERO_ERROR;
 
 	char*       utf8value		= NULL;
-	int         utf8value_len   	= 0;
+	size_t      utf8value_len   	= 0;
 
   	char*       msg             	= NULL;
 	int         grOffset    	= 0;
