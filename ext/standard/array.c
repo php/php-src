@@ -4981,7 +4981,7 @@ PHP_FUNCTION(array_get)
 	
 	//ALLOC_INIT_ZVAL(routeEx);
 	array_init(routeEx);
-	php_explode( zend_long,estrndup(route,route_len), routeEx, ZEND_LONG_MAX);
+	php_explode( route_len,estrndup(route,route_len), routeEx, ZEND_LONG_MAX);
 	 
 	arr_hash= Z_ARRVAL_P(routeEx);
 	
@@ -4992,7 +4992,7 @@ PHP_FUNCTION(array_get)
 		zend_hash_get_current_data_ex(arr_hash, (void**) &data, &pointer) == SUCCESS; 
 		zend_hash_move_forward_ex(arr_hash, &pointer)) {
 			
-			ALLOC_INIT_ZVAL(arr2);
+			//ALLOC_INIT_ZVAL(arr2);
 			array_init(arr2);
 			if(zend_hash_find(hash,  Z_STRVAL_PP(data),Z_STRLEN_PP(data)+1, (void**)&desc) != FAILURE)
 			{
