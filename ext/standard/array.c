@@ -4966,24 +4966,22 @@ PHP_FUNCTION(array_combine)
 PHP_FUNCTION(array_get)
 {
 	zval *routeEx, *arr, **desc, *arr2, **data;
-	zval zdelim, zroute;
-	char* route;
-	int route_len;
-	HashTable *hash, *has_a;
-	HashTable *arr_hash;
+	//zval zdelim, zroute;
+	zend_string* route;
+	zend_long route_len = ZEND_LONG_MAX;
+	HashTable *hash, *arr_hash;
 	HashPosition pointer;
-	
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "as",&arr,&route,&route_len) == FAILURE) {
         RETURN_NULL();
     }
 	
-	ZVAL_STRINGL(&zroute, route,route_len);
-	ZVAL_STRINGL(&zdelim, ".", 1);
+	//ZVAL_STRINGL(&zroute, route,route_len);
+	//ZVAL_STRINGL(&zdelim, ".", 1);
 	
-	ALLOC_INIT_ZVAL(routeEx);
+	//ALLOC_INIT_ZVAL(routeEx);
 	array_init(routeEx);
-	php_explode( &zdelim,&zroute, routeEx, LONG_MAX);
+	php_explode( zend_long,estrndup(route,route_len), routeEx, ZEND_LONG_MAX);
 	 
 	arr_hash= Z_ARRVAL_P(routeEx);
 	
