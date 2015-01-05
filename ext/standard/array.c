@@ -4963,7 +4963,7 @@ PHP_FUNCTION(array_combine)
 }
 
 
-PHP_METHOD(array_get)
+PHP_FUNCTION(array_get)
 {
 	zval *routeEx, *arr, **desc, *arr2, **data;
 	zval zdelim, zroute;
