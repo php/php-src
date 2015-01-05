@@ -12,6 +12,8 @@
   . Fixed bug #68297 (Application Popup provides too few information). (Anatol)
   . Fixed bug #65769 (localeconv() broken in TS builds). (Anatol)
   . Fixed bug #65230 (setting locale randomly broken). (Anatol)
+  . Fixed bug #66764 (configure doesn't define EXPANDED_DATADIR / PHP_DATADIR
+    correctly). (Ferenc)
   . Fixed bug #68583 (Crash in timeout thread). (Anatol)
   . Fixed bug #65576 (Constructor from trait conflicts with inherited
     constructor). (dunglas at gmail dot com)
