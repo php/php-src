@@ -463,6 +463,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			ZVAL_LONG(return_value, H->buffered);
 			break;
 
+		case PDO_ATTR_EMULATE_PREPARES:
 		case PDO_MYSQL_ATTR_DIRECT_QUERY:
 			ZVAL_LONG(return_value, H->emulate_prepare);
 			break;
