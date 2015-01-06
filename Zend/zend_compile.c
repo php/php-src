@@ -32,22 +32,6 @@
 #include "zend_language_scanner.h"
 #include "zend_inheritance.h"
 
-struct _scalar_typehint_info {
-	const char* name;
-	const size_t name_len;
-	const zend_uchar type;
-};
-
-static const struct _scalar_typehint_info scalar_typehints[] = {
-	{"int", sizeof("int") - 1, IS_LONG},
-	{"integer", sizeof("integer") - 1, IS_LONG},
-	{"float", sizeof("float") - 1, IS_DOUBLE},
-	{"string", sizeof("string") - 1, IS_STRING},
-	{"bool", sizeof("bool") - 1, _IS_BOOL},
-	{"boolean", sizeof("boolean") - 1, _IS_BOOL},
-	{NULL, 0, IS_UNDEF}
-};
-
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
 		if ((src)->op_type == IS_CONST) { \
@@ -4590,7 +4574,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *ce = zend_arena_alloc(&CG(arena), sizeof(zend_class_entry));
 	zend_op *opline;
 	znode declare_node, extends_node;
-	const struct _scalar_typehint_info *info = &scalar_typehints[0];
 
 	if (CG(active_class_entry)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Class declarations may not be nested");
@@ -4608,14 +4591,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		import_name = zend_hash_find_ptr(CG(current_import), lcname);
 	}
 
-	while (info->name) {
-		if (lcname->len == info->name_len && strcmp(lcname->val, info->name) == 0) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
-				"because %s is a type name", name->val, info->name);
-		}
-		info++;
-	}
-
+	zend_assert_valid_class_name(name);
 
 	if (CG(current_namespace)) {
 		name = zend_prefix_with_ns(name);
@@ -4850,6 +4826,10 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 						"has no effect", new_name->val);
 				}
 			}
+		}
+
+		if (type == T_CLASS) {
+			zend_assert_valid_class_name(new_name);
 		}
 
 		if (case_sensitive) {
