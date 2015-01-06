@@ -37,8 +37,6 @@
 
 #include <windows.h>
 
-	typedef unsigned int in_addr_t;
-
 	struct sockaddr_un {
 		short   sun_family;
 		char    sun_path[MAXPATHLEN];
