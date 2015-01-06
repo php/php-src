@@ -61,34 +61,3 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes" || test "$
 #endif
   ])
 fi
-
-dnl
-dnl Check if the compiler supports Decimal32/64/128 types from the IEEE-754 2008 version
-dnl References: http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1657.pdf
-dnl http://speleotrove.com/decimal/
-dnl
-AC_CACHE_CHECK([whether whether compiler supports Decimal32/64/128 types], ac_cv_decimal_fp_supported,[
-AC_TRY_RUN( [
-#include <stdio.h>
-#include <string.h>
-
-int main(int argc, char **argv) {
-	typedef float dec32 __attribute__((mode(SD)));
-	dec32 k = 99.49f;
-	double d2 = (double)k;
-	const char *check_str = "99.49";
-	char print_str[32];
-
-	snprintf(print_str, 32, "%f", d2);
-	return memcmp(print_str, check_str, 5);
-}
-],[
-  ac_cv_decimal_fp_supported=yes
-],[
-  ac_cv_decimal_fp_supported=no
-],[
-  ac_cv_decimal_fp_supported=no
-])])
-if test "$ac_cv_decimal_fp_supported" = "yes"; then
-  AC_DEFINE(HAVE_DECIMAL_FP_SUPPORT, 1, [Define if the compiler supports Decimal32/64/128 types.])
-fi
