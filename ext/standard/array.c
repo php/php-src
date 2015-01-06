@@ -4537,7 +4537,6 @@ PHP_FUNCTION(array_reduce)
 		} else {
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
-			php_error_docref(NULL, E_WARNING, "An error occurred while invoking the reduction callback");
 			return;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -4621,7 +4620,6 @@ PHP_FUNCTION(array_filter)
 				if (use_type == ARRAY_FILTER_USE_BOTH) {
 					zval_ptr_dtor(&args[1]);						
 				}
-				php_error_docref(NULL, E_WARNING, "An error occurred while invoking the filter callback");
 				return;
 			}
 		} else if (!zend_is_true(operand)) {
@@ -4691,7 +4689,6 @@ PHP_FUNCTION(array_map)
 			ZVAL_COPY(&arg, zv);
 
 			if (zend_call_function(&fci, &fci_cache) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
-				php_error_docref(NULL, E_WARNING, "An error occurred while invoking the map callback");
 				zval_dtor(return_value);
 				zval_ptr_dtor(&arg);
 				RETURN_NULL();
@@ -4779,7 +4776,6 @@ PHP_FUNCTION(array_map)
 				fci.no_separation = 0;
 			
 				if (zend_call_function(&fci, &fci_cache) != SUCCESS || Z_TYPE(result) == IS_UNDEF) {
-					php_error_docref(NULL, E_WARNING, "An error occurred while invoking the map callback");
 					efree(array_pos);
 					zval_dtor(return_value);
 					for (i = 0; i < n_arrays; i++) {
