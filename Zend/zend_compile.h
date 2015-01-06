@@ -47,7 +47,7 @@ static const struct _scalar_typehint_info scalar_typehints[] = {
 	{NULL, 0, IS_UNDEF}
 };
 
-static void zend_assert_valid_class_name(const zend_string *const_name)
+static zend_always_inline void zend_assert_valid_class_name(const zend_string *const_name)
 {
 	const struct _scalar_typehint_info *info = &scalar_typehints[0];
 	const char *end_slash = strrchr(const_name->val, '\\');
