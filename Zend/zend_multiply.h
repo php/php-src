@@ -24,92 +24,39 @@
 
 #include "zend_bigint.h"
 
-
-/* assembly commented-out as it uses the old float overflow behaviour
-* however, now longs overflow to bigints, so we can't use it */
-
-#if 0
-#if defined(__i386__) && defined(__GNUC__)
-
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	zend_long __tmpvar; 													\
-	__asm__ ("imul %3,%0\n"											\
-		"adc $0,%1" 												\
-			: "=r"(__tmpvar),"=r"(usedval) 							\
-			: "0"(a), "r"(b), "1"(0));								\
-	if (usedval) (dval) = (double) (a) * (double) (b);				\
-	else (lval) = __tmpvar;											\
-} while (0)
-
-#elif defined(__x86_64__) && defined(__GNUC__)
-
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	zend_long __tmpvar; 													\
-	__asm__ ("imul %3,%0\n"											\
-		"adc $0,%1" 												\
-			: "=r"(__tmpvar),"=r"(usedval) 							\
-			: "0"(a), "r"(b), "1"(0));								\
-	if (usedval) (dval) = (double) (a) * (double) (b);				\
-	else (lval) = __tmpvar;											\
-} while (0)
-
-#elif defined(__arm__) && defined(__GNUC__)
-
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	zend_long __tmpvar; 													\
-	__asm__("smull %0, %1, %2, %3\n"								\
-		"sub %1, %1, %0, asr #31"									\
-			: "=r"(__tmpvar), "=r"(usedval)							\
-			: "r"(a), "r"(b));										\
-	if (usedval) (dval) = (double) (a) * (double) (b);				\
-	else (lval) = __tmpvar;											\
-} while (0)
-
-#elif defined(__aarch64__) && defined(__GNUC__)
-
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	zend_long __tmpvar; 													\
-	__asm__("mul %0, %2, %3\n"										\
-		"smulh %1, %2, %3\n"										\
-		"sub %1, %1, %0, asr #63\n"									\
-			: "=X"(__tmpvar), "=X"(usedval)							\
-			: "X"(a), "X"(b));										\
-	if (usedval) (dval) = (double) (a) * (double) (b);				\
-	else (lval) = __tmpvar;											\
-} while (0)
-#endif
+/* So __has_builtin won't cause an error if it's unavailable */
+#ifndef __has_builtin
+#	define __has_builtin(x) 0
 #endif
 
-#if 0
-#elif defined(ZEND_WIN32)
+#if __has_builtin(__builtin_smul_overflow) && SIZEOF_LONG == SIZEOF_ZEND_LONG
 
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
-	zend_long   __lres  = (a) * (b);										\
-	long double __dres  = (long double)(a) * (long double)(b);		\
-	long double __delta = (long double) __lres - __dres;			\
-	if ( ((usedval) = (( __dres + __delta ) != __dres))) {			\
-		(dval) = __dres;											\
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\
+	long   __lres  = (a) * (b);										\
+	if (__builtin_smull_overflow((a), (b), &__lres)) {				\
+		zend_bigint *__out = zend_bigint_init_alloc();				\
+		zend_bigint_long_multiply_long(__out, a, b);				\
+		(big) = __out;												\
+		(usedval) = 1;												\
 	} else {														\
 		(lval) = __lres;											\
+		(usedval) = 0;												\
 	}																\
 } while (0)
 
-#elif defined(__powerpc64__) && defined(__GNUC__)
+#elif __has_builtin(__builtin_saddll_overflow) && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
 
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {  \
-   long __tmpvar;                          \
-   __asm__("li 14, 0\n\t"                          \
-       "mtxer 14\n\t"                                          \
-       "mulldo. %0, %2,%3\n\t"                 \
-       "xor %1, %1, %1\n\t"                    \
-       "bns+ 0f\n\t"                       \
-        "li %1, 1\n\t"                     \
-        "0:\n"                         \
-           : "=r"(__tmpvar),"=r"(usedval)          \
-           : "r"(a), "r"(b)                \
-           : "r14", "cc");                 \
-   if (usedval) (dval) = (double) (a) * (double) (b);      \
-   else (lval) = __tmpvar;                     \
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\
+	long long  __llres  = (a) * (b);								\
+	if (__builtin_smulll_overflow((a), (b), &__llres)) {			\
+		zend_bigint *__out = zend_bigint_init_alloc();				\
+		zend_bigint_long_multiply_long(__out, a, b);				\
+		(big) = __out;												\
+		(usedval) = 1;												\
+	} else {														\
+		(lval) = __llres;											\
+		(usedval) = 0;												\
+	}																\
 } while (0)
 
 #elif SIZEOF_ZEND_LONG == 4
