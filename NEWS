@@ -37,6 +37,10 @@ PHP                                                                        NEWS
    . Fixed bug #69227 (Use after free in zval_scan caused by
      spl_object_storage_get_gc). (adam dot scarr at 99designs dot com)
 
+- SQLITE:
+   . Fixed bug #68760 (SQLITE segfaults if custom collator throws an exception).
+     (Dan Ackroyd)
+
 19 Mar 2015, PHP 5.5.23
 
 - Core:
