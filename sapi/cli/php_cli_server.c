@@ -708,6 +708,11 @@ static void sapi_cli_server_register_variable(zval *track_vars_array, const char
 {
 	char *new_val = (char *)val;
 	uint new_val_len;
+
+	if (NULL == val) {
+		return;
+	}
+
 	if (sapi_module.input_filter(PARSE_SERVER, (char*)key, &new_val, strlen(val), &new_val_len TSRMLS_CC)) {
 		php_register_variable_safe((char *)key, new_val, new_val_len, track_vars_array TSRMLS_CC);
 	}
