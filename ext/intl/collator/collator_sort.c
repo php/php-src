@@ -103,11 +103,11 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 			else
 			{
 				/* str1 is numeric strings => passthru to PHP-compare. */
-				zval_add_ref( num1_p );
+				Z_TRY_ADDREF_P(num1_p);
 				norm1_p = num1_p;
 
 				/* str2 is numeric strings => passthru to PHP-compare. */
-				zval_add_ref( num2_p );
+				Z_TRY_ADDREF_P(num2_p);
 				norm2_p = num2_p;
 			}
 		}

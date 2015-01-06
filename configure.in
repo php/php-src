@@ -1173,7 +1173,7 @@ case $libdir in
     libdir=$libdir/php
     ;;
 esac
-case $datadir in
+case `eval echo $datadir` in
   '${prefix}/share')
     datadir=$datadir/php
     ;;
@@ -1188,7 +1188,7 @@ old_libdir=$libdir
 old_datadir=$datadir
 exec_prefix=`eval echo $exec_prefix`
 libdir=`eval echo $libdir`
-datadir=`eval echo $datadir`
+datadir=`eval eval echo $datadir`
 
 dnl Build extension directory path
 

@@ -869,7 +869,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 			zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
 			storage = &intern->array;
-			zval_add_ref(storage);
+			Z_TRY_ADDREF_P(storage);
 
 			base = (Z_OBJ_HT_P(obj) == &spl_handler_ArrayIterator) ? spl_ce_ArrayIterator : spl_ce_ArrayObject;
 			zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1);
