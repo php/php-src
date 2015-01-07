@@ -18,12 +18,19 @@
 
 /* $Id$ */
 
+/* This file is one of the two implementations of zend_bigint.h
+ * See zend_bigint.c
+ */
+
+#include "zend.h"
+
+#ifdef ZEND_HAVE_LIBTOMMATH
+
 #include <ctype.h>
 #include <math.h>
 #include <limits.h>
 #include <stdlib.h>
 
-#include "zend.h"
 #include "zend_types.h"
 #include "zend_bigint.h"
 #include "zend_string.h"
@@ -895,3 +902,5 @@ ZEND_API void zend_bigint_abs(zend_bigint *out, const zend_bigint *big) /* {{{ *
 {
 	CHECK_ERROR(mp_abs((mp_int*)&big->mp, &out->mp));
 }
+
+#endif /* ZEND_HAVE_LIBTOMMATH */

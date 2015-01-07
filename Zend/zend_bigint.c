@@ -18,13 +18,13 @@
 
 /* $Id$ */
 
-#include "zend.h"
-#include "zend_bigint.h"
-
 /* There are two different bigint backends: GMP and libtommath
  * - libtommath is enabled and built by default, with its source in the repo
+ *   Its implementation of zend_bigint.h is in zend_bigint_libtommath.c
  * - GMP can be optionally enabled
- * This file will include the libtommath backend unless the GMP is available */
+ *   Its implementation of zend_bigint.h is in zend_bigint_gmp.c
+ * One or the other actually implement zend_bigint.h, this file isn't used.
+ */
 
 #if defined(ZEND_HAVE_LIBTOMMATH)
 #	include "zend_bigint_libtommath.c"

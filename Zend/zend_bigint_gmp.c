@@ -18,13 +18,20 @@
 
 /* $Id$ */
 
+/* This file is one of the two implementations of zend_bigint.h
+ * See zend_bigint.c
+ */
+
+#include "zend.h"
+
+#ifdef ZEND_HAVE_GMP
+
 #include <ctype.h>
 #include <math.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <gmp.h>
 
-#include "zend.h"
 #include "zend_types.h"
 #include "zend_bigint.h"
 #include "zend_string.h"
@@ -728,3 +735,5 @@ ZEND_API void zend_bigint_abs(zend_bigint *out, const zend_bigint *big) /* {{{ *
 	/* no need to assert; only sign can change */
 	mpz_abs(out->mpz, big->mpz);
 }
+
+#endif /* ZEND_HAVE_GMP */
