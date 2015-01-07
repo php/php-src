@@ -33,7 +33,7 @@
 #include "ext/standard/php_smart_str.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
-#include "ext/standard/float_to_double.h"
+#include "ext/mysqlnd/mysql_float_to_double.h"
 
 
 #if !defined(MYSQLI_USE_MYSQLND)
@@ -1062,7 +1062,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 #ifndef NOT_FIXED_DEC
 # define NOT_FIXED_DEC 31
 #endif
-							dval = float_to_double(*(float *)stmt->result.buf[i].val,
+							dval = mysql_float_to_double(*(float *)stmt->result.buf[i].val,
 										(stmt->stmt->fields[i].decimals >= NOT_FIXED_DEC) ? -1 :
 										stmt->stmt->fields[i].decimals);
 						} else {
