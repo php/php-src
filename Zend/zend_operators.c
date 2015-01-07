@@ -1143,6 +1143,10 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
 	zend_long op1_lval, op2_lval;
 
 	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, ZEND_MOD, mod_function);
+
+	if (op1 == result) {
+		zval_dtor(result);
+	}
 	
 	if (op2_lval == 0) {
 		zend_error(E_WARNING, "Division by zero");
@@ -1156,9 +1160,6 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
 		return SUCCESS;
 	}
 
-	if (op1 == result) {
-		zval_dtor(result);
-	}
 	ZVAL_LONG(result, op1_lval % op2_lval);
 	return SUCCESS;
 }
