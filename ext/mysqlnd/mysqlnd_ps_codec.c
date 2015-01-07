@@ -24,7 +24,7 @@
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
-#include "ext/standard/float_to_double.h"
+#include "ext/mysqlnd/mysql_float_to_double.h"
 
 #define MYSQLND_SILENT
 
@@ -186,7 +186,7 @@ ps_fetch_float(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_l
 # define NOT_FIXED_DEC 31
 #endif
 
-	dval = float_to_double(fval, (field->decimals >= NOT_FIXED_DEC) ? -1 : field->decimals);
+	dval = mysql_float_to_double(fval, (field->decimals >= NOT_FIXED_DEC) ? -1 : field->decimals);
 
 	ZVAL_DOUBLE(zv, dval);
 	DBG_VOID_RETURN;
