@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.22
 
+- Mysqli:
+  . Fixed bug #68114 for real (linker error on some OS X machines with fixed
+    width decimal support) (Keyur Govande)
+  . Fixed bug #68657 (Reading 4 byte floats with Mysqli and libmysqlclient
+    has rounding errors) (Keyur Govande)
 
 22 Jan 2014, PHP 5.5.21
 
