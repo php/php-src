@@ -16,11 +16,14 @@
   +----------------------------------------------------------------------+
 */
 
+#ifndef MYSQL_FLOAT_TO_DOUBLE_H
+#define MYSQL_FLOAT_TO_DOUBLE_H
+
+#include "main/php.h"
 #include <float.h>
-#include "float_to_double.h"
 #include "main/snprintf.h"
 
-#define MAX_BUF_LEN 255
+#define MAX_CHAR_BUF_LEN 255
 
 #ifndef FLT_DIG
 # define FLT_DIG 6
@@ -33,8 +36,8 @@
  * is less than zero, then a gcvt(3) like logic is used with the significant
  * digits set to FLT_DIG i.e. 6.
  */
-double float_to_double(float fp4, int decimals) {
-	char num_buf[MAX_BUF_LEN]; /* Over allocated */
+static inline double mysql_float_to_double(float fp4, int decimals) {
+	char num_buf[MAX_CHAR_BUF_LEN]; /* Over allocated */
 
 	if (decimals < 0) {
 		php_gcvt(fp4, FLT_DIG, '.', 'e', num_buf);
@@ -53,3 +56,5 @@ double float_to_double(float fp4, int decimals) {
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
+
+#endif /* MYSQL_FLOAT_TO_DOUBLE_H */
