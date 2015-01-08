@@ -367,12 +367,13 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array);
 	}
 	if (op_array->arg_info) {
-		uint32_t num_args = op_array->num_args;
+		int32_t num_args = op_array->num_args;
+		int32_t i = op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE ? -1 : 0;
 
 		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}
-		for (i = 0; i < num_args; i++) {
+		for ( ; i < num_args; i++) {
 			zend_string_release(op_array->arg_info[i].name);
 			if (op_array->arg_info[i].class_name) {
 				zend_string_release(op_array->arg_info[i].class_name);
@@ -761,6 +762,11 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_FE_RESET:
 			case ZEND_FE_FETCH:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
+				break;
+			case ZEND_VERIFY_RETURN_TYPE:
+				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+					MAKE_NOP(opline);
+				}
 				break;
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
