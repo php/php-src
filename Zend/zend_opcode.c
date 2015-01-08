@@ -763,6 +763,11 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_FE_FETCH:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
+			case ZEND_VERIFY_RETURN_TYPE:
+				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+					MAKE_NOP(opline);
+				}
+				break;
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
 				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {

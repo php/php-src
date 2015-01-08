@@ -146,7 +146,7 @@ const char *zend_vm_opcodes_map[170] = {
 	"ZEND_STRLEN",
 	"ZEND_DEFINED",
 	"ZEND_TYPE_CHECK",
-	NULL,
+	"ZEND_VERIFY_RETURN_TYPE",
 	NULL,
 	NULL,
 	NULL,
