@@ -146,7 +146,7 @@ php_stream_ops php_stream_input_ops = {
 
 static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain) /* {{{ */
 {
-	char *p, *token;
+	char *p, *token = NULL;
 	php_stream_filter *temp_filter;
 
 	p = php_strtok_r(filterlist, "|", &token);
