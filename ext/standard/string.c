@@ -4343,27 +4343,31 @@ PHP_FUNCTION(setlocale)
 		if (retval) {
 			if (loc) {
 				/* Remember if locale was changed */
-				size_t len;
+				size_t len = strlen(retval);
 
-				if (BG(locale_string)) {
-					zend_string_release(BG(locale_string));
+				BG(locale_changed) = 1;
+				if (cat == LC_CTYPE || cat == LC_ALL) {
+					if (BG(locale_string)) {
+						zend_string_release(BG(locale_string));
+					}
+					if (len == loc->len && !memcmp(loc->val, retval, len)) {
+						BG(locale_string) = zend_string_copy(loc);
+						RETURN_STR(BG(locale_string));
+					} else {
+						BG(locale_string) = zend_string_init(retval, len, 0);
+						zend_string_release(loc);
+						RETURN_STR(BG(locale_string));
+					}
+				} else if (len == loc->len && !memcmp(loc->val, retval, len)) {
+					RETURN_STR(loc);
 				}
-				len = strlen(retval);
-				if (len == loc->len && !memcmp(loc->val, retval, len)) {
-					BG(locale_string) = zend_string_copy(loc);
-				} else {
-					BG(locale_string) = zend_string_init(retval, len, 0);
-				}
-
 				zend_string_release(loc);
 			}
-			if (BG(locale_string)) {
-				RETURN_STR(zend_string_copy(BG(locale_string)));
-			} else {
-				RETURN_EMPTY_STRING();
-			}
+			RETURN_STRING(retval);
 		}
-		zend_string_release(loc);
+		if (loc) {
+			zend_string_release(loc);
+		}
 
 		if (Z_TYPE(args[0]) == IS_ARRAY) {
 			if (zend_hash_move_forward_ex(Z_ARRVAL(args[0]), &pos) == FAILURE) break;
