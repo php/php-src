@@ -56,7 +56,7 @@ msg("replace loop, grouped");
 $subject='Replace [?][?][?][?][?][?][?][?][?][?][?][?][?][?][?][?][?] a lot of grouped elements';
 check_replace($search,$repl,$subject);
 
-msg("eplace loop, separate");
+msg("replace loop, separate");
 
 $subject='[?]Rep[?]la[?]ce [?] ma[?]ny[?] [?] s[?]epa[?]rate [?] el[?]emen[?]ts[?]?';
 check_replace($search,$repl,$subject);
@@ -89,6 +89,32 @@ $search=$subject."\n";
 $repl=array(1,2,3);
 check_replace($search,$repl,$subject);
 
+msg("Level 2 cyclic - basic 1");
+
+$subject='[?](?)Rep[?]la[?(?)]ce [?]ma[?]n(?)y[?] (?)[?]s[?]epa[?]';
+$repl=array(
+	array('al[?]p(?)z[?]',"[?]b(?)v\n",null,37,"\n[?]"),
+	array('zk(?)j[?]', null, 'ab(?)c', 45)
+	);
+$search=array('[?]','(?)');
+check_replace($search,$repl,$subject);
+check_replace($search,$repl,$subject);
+check_replace($search,$repl,$subject);
+
+
+msg("Level 2 cyclic - empty array (level 2)");
+
+$subject='[?](?)Rep[?]la[?(?)]c<a>e [?]ma[?]n(?)y[?<a>] (?)[?]s[?]epa';
+$repl=array(
+	array('ap(?)z[?]',"b[?](?)v\n",null,37,"[?]\n[?]"),
+	array(),
+	array('k(?)j[?]', null, 'ab(?)c', 45)
+	);
+$search=array('[?]','(?)','<a>');
+check_replace($search,$repl,$subject);
+check_replace($search,$repl,$subject);
+check_replace($search,$repl,$subject);
+
 ?>
 ===DONE===
 --EXPECTF--	
@@ -112,7 +138,7 @@ Count: 4
 string(83) "Replace alphabeta10alphabeta10alphabeta10alphabeta10alpha a lot of grouped elements"
 Count: 17
 
---- eplace loop, separate ---
+--- replace loop, separate ---
 
 string(72) "alphaRepbetala10ce  maalphanybeta 10 sepaalpharate beta el10ementsalpha?"
 Count: 13
@@ -175,4 +201,54 @@ Count: 1
 
 string(27) "FOOOOOOOOOOOOOOOOOOOOOOOOOO"
 Count: 0
+
+--- Level 2 cyclic - basic 1 ---
+
+string(92) "al[?]pzk(?)j[?]z[?]Rep[?]bab(?)cv
+la[?45]ce ma37nzk(?)j[?]y
+[?] al[?]pab(?)cz[?]s[?]b45v
+epa"
+Count: 16
+string(127) "alal[?]pzk(?)j[?]z[?]pzkj[?]bab(?)cv
+zRep37bab45cv
+la[?45]ce ma37nzkzk(?)j[?]j
+[?]y
+al[?]pz[?] al[?]bab(?)cv
+pab45czs37b45v
+epa"
+Count: 17
+string(162) "alalal[?]pzk(?)j[?]z[?]pzkj[?]bab(?)cv
+zpzkj37bab45cv
+zRep37bab45cv
+la[?45]ce ma37nzkzkzk(?)j[?]j
+[?]j
+al[?]pz[?]y
+al[?]bab(?)cv
+pz al37bab45cv
+pab45czs37b45v
+epa"
+Count: 17
+
+--- Level 2 cyclic - empty array (level 2) ---
+
+string(58) "apz[?]Repb[?]v
+la[?]ck(?)j[?]e ma37ny[?] [?]
+[?]sapz[?]epa"
+Count: 15
+string(64) "apzapz[?]Repbb[?]v
+v
+lackj37e ma37ny[?]
+[?] apz[?]
+b[?]v
+sapzepa"
+Count: 13
+string(73) "apzapzapz[?]Repbbb[?]v
+v
+v
+lackj37e ma37ny
+37 apz[?]
+[?]
+bapz[?]v
+sapzepa"
+Count: 9
 ===DONE===
