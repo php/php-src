@@ -94,6 +94,10 @@
     breaks the RecursiveIterator). (Paul Garvin)
   . Fixed bug #68479 (Added escape parameter to SplFileObject::fputcsv). (Salathe)
 
+- Sqlite3:
+  . Fix bug #68260 (SQLite3Result::fetchArray declares wrong 
+    required_num_args). (Julien)
+
 - Standard:
   . Removed call_user_method() and call_user_method_array() functions. (Kalle)
   . Fix user session handlers (See rfc:session.user.return-value). (Sara)
