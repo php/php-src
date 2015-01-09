@@ -217,15 +217,15 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				return result;
 			}
 		} else {
-            /* DES Fallback */
+			/* DES Fallback */
 
-            /* Only check the salt if it's not EXT_DES */
-            if (salt[0] != '_') {
-                /* DES style hashes */
-                if (!IS_VALID_SALT_CHARACTER(salt[0]) || !IS_VALID_SALT_CHARACTER(salt[1])) {
-                    php_error_docref(NULL, E_DEPRECATED, DES_INVALID_SALT_ERROR);
-                }
-            }
+			/* Only check the salt if it's not EXT_DES */
+			if (salt[0] != '_') {
+				/* DES style hashes */
+				if (!IS_VALID_SALT_CHARACTER(salt[0]) || !IS_VALID_SALT_CHARACTER(salt[1])) {
+					php_error_docref(NULL, E_DEPRECATED, DES_INVALID_SALT_ERROR);
+				}
+			}
 
 			memset(&buffer, 0, sizeof(buffer));
 			_crypt_extended_init_r();
@@ -251,10 +251,10 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 #  else
 #    error Data struct used by crypt_r() is unknown. Please report.
 #  endif
-        if (salt[0] != '$' && salt[0] != '_' && (!IS_VALID_SALT_CHARACTER(salt[0]) || !IS_VALID_SALT_CHARACTER(salt[1]))) {
-            /* error consistently about invalid DES fallbacks */
-            php_error_docref(NULL, E_DEPRECATED, DES_INVALID_SALT_ERROR);
-        }
+		if (salt[0] != '$' && salt[0] != '_' && (!IS_VALID_SALT_CHARACTER(salt[0]) || !IS_VALID_SALT_CHARACTER(salt[1]))) {
+			/* error consistently about invalid DES fallbacks */
+			php_error_docref(NULL, E_DEPRECATED, DES_INVALID_SALT_ERROR);
+		}
 		crypt_res = crypt_r(password, salt, &buffer);
 		if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
 			return NULL;
