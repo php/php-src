@@ -37,6 +37,7 @@
   . Removed scoped calls of non-static methods from an incompatible $this
     context. (Nikita)
   . Removed support for #-style comments in ini files. (Nikita)
+  . Invalid octal literals in source code now produce compile errors, fixes PHPSadness #31. (Andrea)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values

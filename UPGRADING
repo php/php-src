@@ -62,6 +62,9 @@ PHP X.Y UPGRADE NOTES
   . Added zend_memnrstr, zend_memnrstr_ex.
   . Added hybrid sorting algo zend_sort for better performance.
   . Added stable sorting algo zend_insert_sort.
+  . Invalid octal literals in source code now produce compile errors, fixing
+    PHPSadness #31. Previously, the invalid digits (and any following valid 
+    digits) were simply ignored, such that 0781 became 7.
 
 - Date:
   . Removed $is_dst parameter from mktime() and gmmktime().

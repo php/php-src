@@ -1574,6 +1574,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>{BNUM} {
 	char *bin = yytext + 2; /* Skip "0b" */
 	int len = yyleng - 2;
+	char *end;
 
 	/* Skip any leading 0s */
 	while (*bin == '0') {
@@ -1585,29 +1586,54 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (len == 0) {
 			ZVAL_LONG(zendlval, 0);
 		} else {
-			ZVAL_LONG(zendlval, ZEND_STRTOL(bin, NULL, 2));
+			errno = 0;
+			ZVAL_LONG(zendlval, ZEND_STRTOL(bin, &end, 2));
+			ZEND_ASSERT(!errno && end == yytext + yyleng);
 		}
 		return T_LNUMBER;
 	} else {
-		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, NULL));
+		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, &end));
+		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
+		ZEND_ASSERT(end == yytext + yyleng);
 		return T_DNUMBER;
 	}
 }
 
 <ST_IN_SCRIPTING>{LNUM} {
+	char *end;
 	if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
-		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, NULL, 0));
+		errno = 0;
+		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, &end, 0));
+		/* This isn't an assert, we need to ensure 019 isn't valid octal
+		 * Because the lexing itself doesn't do that for us
+		 */
+		if (end != yytext + yyleng) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Invalid numeric literal");
+		}
+		ZEND_ASSERT(!errno);
 	} else {
 		errno = 0;
-		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, NULL, 0));
+		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, &end, 0));
 		if (errno == ERANGE) { /* Overflow */
+			errno = 0;
 			if (yytext[0] == '0') { /* octal overflow */
-				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, NULL));
+				errno = 0;
+				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, &end));
 			} else {
-				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, NULL));
+				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, &end));
 			}
+			/* Also not an assert for the same reason */
+			if (end != yytext + yyleng) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Invalid numeric literal");
+			}
+			ZEND_ASSERT(!errno);
 			return T_DNUMBER;
 		}
+		/* Also not an assert for the same reason */
+		if (end != yytext + yyleng) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Invalid numeric literal");
+		}
+		ZEND_ASSERT(!errno);
 	}
 	return T_LNUMBER;
 }
@@ -1615,6 +1641,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>{HNUM} {
 	char *hex = yytext + 2; /* Skip "0x" */
 	int len = yyleng - 2;
+	char *end;
 
 	/* Skip any leading 0s */
 	while (*hex == '0') {
@@ -1626,19 +1653,30 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (len == 0) {
 			ZVAL_LONG(zendlval, 0);
 		} else {
-			ZVAL_LONG(zendlval, ZEND_STRTOL(hex, NULL, 16));
+			errno = 0;
+			ZVAL_LONG(zendlval, ZEND_STRTOL(hex, &end, 16));
+			ZEND_ASSERT(!errno && end == hex + len);
 		}
 		return T_LNUMBER;
 	} else {
-		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, NULL));
+		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, &end));
+		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
+		ZEND_ASSERT(end == hex + len);
 		return T_DNUMBER;
 	}
 }
 
 <ST_VAR_OFFSET>[0]|([1-9][0-9]*) { /* Offset could be treated as a long */
 	if (yyleng < MAX_LENGTH_OF_LONG - 1 || (yyleng == MAX_LENGTH_OF_LONG - 1 && strcmp(yytext, long_min_digits) < 0)) {
-		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, NULL, 10));
+		char *end;
+		errno = 0;
+		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, &end, 10));
+		if (errno == ERANGE) {
+			goto string;
+		}
+		ZEND_ASSERT(end == yytext + yyleng);
 	} else {
+string:
 		ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
 	return T_NUM_STRING;
@@ -1650,7 +1688,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
-	ZVAL_DOUBLE(zendlval, zend_strtod(yytext, NULL));
+	char *end;
+
+	ZVAL_DOUBLE(zendlval, zend_strtod(yytext, &end));
+	/* errno isn't checked since we allow HUGE_VAL/INF overflow */
+	ZEND_ASSERT(end == yytext + yyleng);
 	return T_DNUMBER;
 }
 
