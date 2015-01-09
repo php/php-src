@@ -3708,6 +3708,7 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	ZVAL_UNDEF(&BG(strtok_zval));
 	BG(strtok_last) = NULL;
 	BG(locale_string) = NULL;
+	BG(locale_changed) = 0;
 	BG(array_walk_fci) = empty_fcall_info;
 	BG(array_walk_fci_cache) = empty_fcall_info_cache;
 	BG(user_compare_fci) = empty_fcall_info;
@@ -3756,12 +3757,14 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 
 	/* Check if locale was changed and change it back
 	 * to the value in startup environment */
-	if (BG(locale_string) != NULL) {
+	if (BG(locale_changed)) {
 		setlocale(LC_ALL, "C");
 		setlocale(LC_CTYPE, "");
 		zend_update_current_locale();
-		zend_string_release(BG(locale_string));
-		BG(locale_string) = NULL;
+		if (BG(locale_string)) {
+			zend_string_release(BG(locale_string));
+			BG(locale_string) = NULL;
+		}
 	}
 
 	/* FG(stream_wrappers) and FG(stream_filters) are destroyed

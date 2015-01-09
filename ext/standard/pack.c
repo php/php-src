@@ -736,7 +736,7 @@ PHP_FUNCTION(unpack)
 					case 'A': {
 						/* A will strip any trailing whitespace */
 						char padn = '\0'; char pads = ' '; char padt = '\t'; char padc = '\r'; char padl = '\n';
-						size_t len = inputlen - inputpos;	/* Remaining string */
+						zend_long len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {

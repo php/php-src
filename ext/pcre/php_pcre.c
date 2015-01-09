@@ -376,7 +376,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 
 #if HAVE_SETLOCALE
 	if (BG(locale_string) &&
-	    (!BG(locale_string)->len != 1 || !BG(locale_string)->val[0] != 'C')) {
+	    (BG(locale_string)->len != 1 || BG(locale_string)->val[0] != 'C')) {
 		tables = pcre_maketables();
 	}
 #endif
