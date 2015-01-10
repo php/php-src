@@ -133,7 +133,7 @@ $obj_subject = new subject;
 class search 
 {
   function __toString() {
-    return "Hello, world";
+    return "world";
   }
 }
 $obj_search = new search;
@@ -141,14 +141,19 @@ $obj_search = new search;
 class replace 
 {
   function __toString() {
-    return "Hello, world";
+    return "everybody";
   }
 }
 $obj_replace = new replace;
 
-var_dump(str_replace("$obj_search", "$obj_replace", "$obj_subject", $count));
+var_dump(str_replace($obj_search, $obj_replace, $obj_subject, $count));
 var_dump($count);
 
+// Check that object vars are still objects
+
+var_dump($obj_subject);
+var_dump($obj_search);
+var_dump($obj_replace);
 
 echo "\n-- Testing arrays --\n";
 var_dump(str_replace(array("a", "a", "b"), "multi", "aaa", $count));
@@ -230,7 +235,7 @@ var_dump( str_replace() );
 var_dump( str_replace("") );
 var_dump( str_replace(NULL) );
 var_dump( str_replace(1, 2) );
-var_dump( str_replace(1,2,3,$var,5) );
+var_dump( str_replace(1,2,3,$var,5,6) );
 
 fclose($resource1);
 closedir($resource2);
@@ -869,8 +874,14 @@ array(3) {
 int(6)
 
 -- Testing objects --
-string(12) "Hello, world"
+string(16) "Hello, everybody"
 int(1)
+object(subject)#1 (0) {
+}
+object(search)#2 (0) {
+}
+object(replace)#3 (0) {
+}
 
 -- Testing arrays --
 string(15) "multimultimulti"
@@ -950,6 +961,6 @@ NULL
 Warning: str_replace() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: str_replace() expects at most 4 parameters, 5 given in %s on line %d
+Warning: str_replace() expects at most 5 parameters, 6 given in %s on line %d
 NULL
 Done

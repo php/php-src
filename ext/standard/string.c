@@ -88,6 +88,11 @@ void register_string_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("PATHINFO_BASENAME", PHP_PATHINFO_BASENAME, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PATHINFO_EXTENSION", PHP_PATHINFO_EXTENSION, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PATHINFO_FILENAME", PHP_PATHINFO_FILENAME, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STR_REPLACE_STOP", PHP_STR_ARRAY_REPLACE_STOP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STR_REPLACE_FIRST", PHP_STR_ARRAY_REPLACE_FIRST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STR_REPLACE_LAST", PHP_STR_ARRAY_REPLACE_LAST, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STR_REPLACE_LOOP", PHP_STR_ARRAY_REPLACE_LOOP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STR_REPLACE_EMPTY", PHP_STR_ARRAY_REPLACE_EMPTY, CONST_CS | CONST_PERSISTENT);
 
 #ifdef HAVE_LOCALECONV
 	/* If last members of struct lconv equal CHAR_MAX, no grouping is done */
@@ -3500,7 +3505,7 @@ PHPAPI zend_string *php_addslashes(char *str, size_t length, int should_free)
 
 /* {{{ php_char_to_str_ex
  */
-PHPAPI size_t php_char_to_str_ex(char *str, size_t len, char from, char *to, size_t to_len, zval *result, int case_sensitivity, size_t *replace_count)
+PHPAPI size_t php_char_to_str_ex(char *str, size_t len, char from, char *to, size_t to_len, zval *result, int case_sensitivity, size_t *replace_count, zend_long options)
 {
 	size_t char_count = 0;
 	size_t replaced = 0;
@@ -3575,14 +3580,14 @@ PHPAPI size_t php_char_to_str_ex(char *str, size_t len, char from, char *to, siz
  */
 PHPAPI size_t php_char_to_str(char *str, size_t len, char from, char *to, size_t to_len, zval *result)
 {
-	return php_char_to_str_ex(str, len, from, to, to_len, result, 1, NULL);
+	return php_char_to_str_ex(str, len, from, to, to_len, result, 1, NULL, 0);
 }
 /* }}} */
 
 /* {{{ php_str_to_str_ex
  */
 PHPAPI zend_string *php_str_to_str_ex(char *haystack, size_t length,
-	char *needle, size_t needle_len, char *str, size_t str_len, int case_sensitivity, size_t *replace_count)
+	char *needle, size_t needle_len, char *str, size_t str_len, int case_sensitivity, size_t *replace_count, zend_long options)
 {
 	zend_string *new_str;
 
@@ -3747,23 +3752,37 @@ nothing_todo:
  */
 PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle, size_t needle_len, char *str, size_t str_len)
 {
-	return php_str_to_str_ex(haystack, length, needle, needle_len, str, str_len, 1, NULL);
+	return php_str_to_str_ex(haystack, length, needle, needle_len, str, str_len, 1, NULL, 0);
 }
 /* }}} */
 
 /* {{{ php_str_to_array_ex
+
+ if arr is empty or options value is invalid, raise an E_WARNING and return a
+ copy of haystack without doing any replacement.
  */
 PHPAPI zend_string *php_str_to_array_ex(char *haystack, size_t length,
-	char *needle, size_t needle_len, HashTable *arr, int case_sensitivity, size_t *replace_count)
+	char *needle, size_t needle_len, HashTable *arr, int case_sensitivity, size_t *replace_count, zend_long options)
 {
 	zval *entry;
 	zend_string *new_str;
 	HashPosition pos;
 	size_t new_length, offset, str_len;
-	char *checked_haystack, *checked_needle, *haystack_dup = NULL
-		, *needle_dup = NULL, *end, *p, *r, *n, *str;
+	char *checked_haystack, *checked_needle, *end, *p, *r, *n, *str;
 	size_t max_len=0, count=0;
+	int exhausted = 0;
 
+	if (UNEXPECTED(zend_hash_num_elements(arr) == 0)) { /* Empty array */
+		php_error_docref(NULL, E_WARNING, "Replace array must not be empty");
+		goto nothing_todo;
+	}
+
+	options &= PHP_STR_ARRAY_REPLACE_MASK; /* Ignore other possible flags */
+	if (UNEXPECTED(options > PHP_STR_ARRAY_REPLACE_MAX)) { /* Check validity */
+		php_error_docref(NULL, E_WARNING, "Invalid array replacement option (" ZEND_LONG_FMT ")", options);
+		goto nothing_todo;
+	}
+		
 	/* Convert replace elements to string before entering the replace loop */
 	/* and compute max length */
 
@@ -3773,19 +3792,17 @@ PHPAPI zend_string *php_str_to_array_ex(char *haystack, size_t length,
 		if (Z_STRLEN_P(entry) > max_len) max_len = Z_STRLEN_P(entry);
 	} ZEND_HASH_FOREACH_END();
 
-	if (EXPECTED(zend_hash_num_elements(arr) != 0)) { /* Non-empty replace array */
-		zend_hash_internal_pointer_reset_ex(arr, &pos);
-	}
-		
+	zend_hash_internal_pointer_reset_ex(arr, &pos);
+
 	if (EXPECTED(needle_len < length)) { /* Usual case: length(needle) < length(haystack) */
 		if (case_sensitivity) {
 			checked_haystack = haystack;
 			checked_needle = needle;
 		} else {	/* Case-insensitive: lowercase check */
-			checked_haystack = haystack_dup = estrndup(haystack, length);
-			checked_needle = needle_dup = estrndup(needle, needle_len);
-			php_strtolower(haystack_dup, length);
-			php_strtolower(needle_dup, needle_len);
+			checked_haystack = estrndup(haystack, length);
+			checked_needle = estrndup(needle, needle_len);
+			php_strtolower(checked_haystack, length);
+			php_strtolower(checked_needle, needle_len);
 		}
 
 		/* Pass 1 : compute max length of result string */
@@ -3801,42 +3818,63 @@ PHPAPI zend_string *php_str_to_array_ex(char *haystack, size_t length,
 		/* Pass 2 : Replace */
 		new_str = zend_string_alloc(new_length, 0);
 		offset = 0;
-		str = NULL;
 		for (p = checked_haystack, end = p+length; (r = (char*)php_memnstr(p, checked_needle, needle_len, end)); p = r + needle_len) {
-			if (EXPECTED(zend_hash_num_elements(arr) != 0)) {
-				if (zend_hash_has_more_elements_ex(arr, &pos) == FAILURE) {
+			if (!exhausted) { /* End of replace array not detected yet or loop */
+				if ((zend_hash_has_more_elements_ex(arr, &pos) == FAILURE) &&
+						(options == PHP_STR_ARRAY_REPLACE_LOOP)) {
 					zend_hash_internal_pointer_reset_ex(arr, &pos); /* Loop */
 				}
-				/* All checks done, this cannot return NULL */
-				entry = zend_hash_get_current_data_ex(arr, &pos);
-				str=Z_STRVAL_P(entry);
-				str_len=Z_STRLEN_P(entry);
-				zend_hash_move_forward_ex(arr, &pos);
+				if (zend_hash_has_more_elements_ex(arr, &pos) == SUCCESS) {
+					entry = zend_hash_get_current_data_ex(arr, &pos);
+					str=Z_STRVAL_P(entry);
+					str_len=Z_STRLEN_P(entry);
+					zend_hash_move_forward_ex(arr, &pos);
+				} else {
+					if (options == PHP_STR_ARRAY_REPLACE_STOP) {
+							break;
+					}
+					exhausted = 1; /* Ensure we get there only once */
+					if (options == PHP_STR_ARRAY_REPLACE_EMPTY) {
+						str = "";
+						str_len = 0;
+					} else {
+						if (options == PHP_STR_ARRAY_REPLACE_FIRST) {
+							/* Go to 1st elt */
+							zend_hash_internal_pointer_reset_ex(arr, &pos);
+							entry = zend_hash_get_current_data_ex(arr, &pos);
+							str=Z_STRVAL_P(entry);
+							str_len=Z_STRLEN_P(entry);
+						}
+					}
+					/* No need to check for REPLACE_LAST as this the only possible
+					   value here. And no need to fill str as it already contains
+					   the last element's value */
+				}
 			}
 
-			/* Before needle */
+			/* Copy chars before needle */
 			memcpy(new_str->val + offset, haystack + (p - checked_haystack), r - p);
 			offset += (r - p);
+
 			/* Replace needle */
-			if (str) { /* If replace is not an empty array */
-				memcpy(new_str->val + offset, str, str_len);
-				offset += str_len;
-				}
+			memcpy(new_str->val + offset, str, str_len);
+			offset += str_len;
+
 			if (replace_count) {
 				(*replace_count)++;
 			}
-		}
+		} /* End of replace loop: no more needles or replace array exhausted */
 
 		if (p < end) {
 			memcpy(new_str->val + offset, haystack + (p - checked_haystack), end - p);
 			offset += end - p;
 		}
 
-		if (haystack_dup) {
-			efree(haystack_dup);
+		if (checked_haystack != haystack) {
+			efree(checked_haystack);
 		}
-		if (needle_dup) {
-			efree(needle_dup);
+		if (checked_needle != needle) {
+			efree(checked_needle);
 		}
 
 		*(new_str->val + offset) = '\0';
@@ -3867,12 +3905,8 @@ nothing_todo:
 			efree(l_needle);
 		}
 
-		if (UNEXPECTED(zend_hash_num_elements(arr) == 0)) { /* Empty replace array */
-			new_str=zend_string_init("", 0, 0);
-		} else {
-			entry = zend_hash_get_current_data_ex(arr, &pos);
-			new_str = zend_string_dup(Z_STR_P(entry), 0);
-		}
+		entry = zend_hash_get_current_data_ex(arr, &pos);
+		new_str = zend_string_dup(Z_STR_P(entry), 0);
 
 		if (replace_count) {
 			(*replace_count)++;
@@ -3887,35 +3921,38 @@ nothing_todo:
  */
 PHPAPI zend_string *php_str_to_array(char *haystack, size_t length, char *needle, size_t needle_len, HashTable *arr)
 {
-	return php_str_to_array_ex(haystack, length, needle, needle_len, arr, 1, NULL);
+	return php_str_to_array_ex(haystack, length, needle, needle_len, arr, 1, NULL, 0);
 }
 /* }}} */
 
 /* {{{ php_str_replace_string_in_subject
 
 Assumed on entry:
-	- replace is a pointer to a string or array zval, or a null pointer. Null
-	  pointer means 'empty string'.
+	- replace is a pointer to a zval of any type or a null pointer. Null
+	  pointer means 'replace with an empty string'.
 
 Returns pointer to a newly-allocated zstring
 */
 static zend_string *php_str_replace_string_in_subject(char *search, size_t search_len,
 						zval *replace, char *subject, size_t subject_len,
-						int case_sensitivity, size_t *replace_count)
+						int case_sensitivity, size_t *replace_count, zend_long options)
 {
 	zval		zresult;
 	zend_string *result;
 	char *replace_value;
 	size_t replace_len;
 
-	if (replace == NULL) {
+	if (replace == NULL) { /* Search=array and replace array exhausted */
 		replace_value = "";
 		replace_len = 0;
-	} else if (Z_TYPE_P(replace) == IS_STRING) {
+	} else if (Z_TYPE_P(replace) == IS_ARRAY) {
+		replace_value = NULL;
+		replace_len = 0; /* Useless - Can avoid warnings on dumb compilers */
+	} else { /* Other types. Consider as string */
+		SEPARATE_ZVAL(replace);
+		convert_to_string_ex(replace);
 		replace_value = Z_STRVAL_P(replace);
 		replace_len = Z_STRLEN_P(replace);
-	} else { /* if replace is array */
-		replace_value = NULL;
 	}
 
 	if (replace_value) { /* Replace = NULL or string */
@@ -3927,17 +3964,18 @@ static zend_string *php_str_replace_string_in_subject(char *search, size_t searc
 							replace_len,
 							&zresult,
 							case_sensitivity,
-							replace_count);
+							replace_count,
+							options);
 			result=Z_STR(zresult);
-		} else if (search_len > 1) {
+		} else if (EXPECTED(search_len > 1)) {
 			result=php_str_to_str_ex(subject, subject_len, search, search_len,
-						replace_value, replace_len, case_sensitivity, replace_count);
-		} else { /* Search = empty string */
+						replace_value, replace_len, case_sensitivity, replace_count, options);
+		} else { /* Search = empty string, return subject */
 			result=zend_string_init(subject, subject_len, 0);
 		}
 	} else { /* Replace=array : cycle through replace elements */
 		result=php_str_to_array_ex(subject, subject_len, search, search_len,
-					Z_ARRVAL_P(replace), case_sensitivity, replace_count);
+					Z_ARRVAL_P(replace), case_sensitivity, replace_count, options);
 	}
 
 	return result;
@@ -3947,40 +3985,60 @@ static zend_string *php_str_replace_string_in_subject(char *search, size_t searc
 /* {{{ php_str_replace_in_subject
 
 Assumed on entry:
-	- search os string or array
-	- replace is string or array
- */
-static void php_str_replace_in_subject(zval *search, zval *replace, zval *subject, zval *result, int case_sensitivity, size_t *replace_count)
-{
-	zval		*search_entry,
-				*replace_entry = NULL,
-				 temp_result,
-				 tmp_subject;
-	HashPosition pos;
+	- search is any type
+	- replace is any type
+	- subject is any type. If array, recursive loop. Otherwise, consider as string
 
-	/* Ensure subject is a string */
+This function is recursive on subject and search arrays.
+ */
+static void php_str_replace_in_subject(zval *search, zval *replace, zval *subject, zval *result, int case_sensitivity, size_t *replace_count, zend_long options)
+{
+	zval *search_entry, *replace_entry, temp_result, tmp_subject, *subject_entry;
+	HashPosition replace_pos;
+	zend_string *string_key;
+	zend_ulong num_key;
+
 	if (Z_ISREF_P(subject)) {
 		subject = Z_REFVAL_P(subject);
 	}
+	
+	/* Recurse on subject array. For each subject entry, recurse and add the
+	   result to the result array, keeping the same key */
+	if (Z_TYPE_P(subject) == IS_ARRAY) {
+		array_init(result);
+
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(subject), num_key, string_key, subject_entry) {
+			php_str_replace_in_subject(search, replace, subject_entry, &temp_result, case_sensitivity, replace_count, options);
+
+			/* Append to return array, keeping the same key */
+			if (string_key) {
+				zend_hash_update(Z_ARRVAL_P(result), string_key, &temp_result);
+			} else {
+				add_index_zval(result, num_key, &temp_result);
+			}
+		} ZEND_HASH_FOREACH_END();
+	return;
+	}
+	
+	/* Here, subject is not array nor object. Consider as string */
 	ZVAL_UNDEF(&tmp_subject);
 	if (Z_TYPE_P(subject) != IS_STRING) {
 		ZVAL_DUP(&tmp_subject, subject);
 		convert_to_string_ex(&tmp_subject);
 		subject = &tmp_subject;
 	}
-	if (Z_STRLEN_P(subject) == 0) {
+	if (Z_STRLEN_P(subject) == 0) { /* Subject is empty -> do nothing */
 		zval_ptr_dtor(&tmp_subject);
 		ZVAL_EMPTY_STRING(result);
 		return;
 	}
 
-	/* If search is an array */
-	if (Z_TYPE_P(search) == IS_ARRAY) {
+	if (Z_TYPE_P(search) == IS_ARRAY) { /* If search is an array */
 		/* Duplicate subject string for repeated replacement */
 		ZVAL_DUP(result, subject);
 
 		if (Z_TYPE_P(replace) == IS_ARRAY) {
-			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(replace), &pos);
+			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(replace), &replace_pos);
 		} else {
 			/* Set replacement value to the passed one */
 			replace_entry = replace;
@@ -3988,47 +4046,35 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 
 		/* For each entry in the search array, get the entry */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(search), search_entry) {
-			/* Make sure we're dealing with strings. */
-			SEPARATE_ZVAL(search_entry);
-			convert_to_string(search_entry);
-			if (Z_STRLEN_P(search_entry) == 0) {
-				if (Z_TYPE_P(replace) == IS_ARRAY) {
-					zend_hash_move_forward_ex(Z_ARRVAL_P(replace), &pos);
-				}
-				continue;
+			if (Z_STRLEN_P(result) == 0) { /* When subject is empty, stop */
+				zval_ptr_dtor(&tmp_subject);
+				return;
 			}
 
-			/* If replace is an array. */
-			if (Z_TYPE_P(replace) == IS_ARRAY) {
+			if (Z_TYPE_P(replace) == IS_ARRAY) { /* If replace is an array. */
 				/* Get current entry */
-				/* When we run out of replacement strings, we send a null pointer */
-				if ((replace_entry = zend_hash_get_current_data_ex(Z_ARRVAL_P(replace), &pos)) != NULL) {
-					/* Make sure replace element is string or array. */
-					if ((Z_TYPE_P(replace_entry) != IS_STRING) && (Z_TYPE_P(replace_entry) != IS_ARRAY)) {
-						convert_to_string_ex(replace_entry);
-					}
-
-					zend_hash_move_forward_ex(Z_ARRVAL_P(replace), &pos);
+				/* When we run out of replacement strings, send null pointers */
+				replace_entry = zend_hash_get_current_data_ex(Z_ARRVAL_P(replace), &replace_pos);
+				if (replace_entry != NULL) {
+					zend_hash_move_forward_ex(Z_ARRVAL_P(replace), &replace_pos);
 				}
 			}
-
-			ZVAL_STR(&temp_result,php_str_replace_string_in_subject(Z_STRVAL_P(search_entry),
-					Z_STRLEN_P(search_entry), replace_entry, Z_STRVAL_P(result), Z_STRLEN_P(result),
-					case_sensitivity, replace_count));
+			/* Recurse */
+			php_str_replace_in_subject(search_entry, replace_entry, result,
+				&temp_result, case_sensitivity, replace_count, options);
 
 			zend_string_free(Z_STR_P(result));
 			Z_STR_P(result) = Z_STR(temp_result);
 			Z_TYPE_INFO_P(result) = Z_TYPE_INFO(temp_result);
-
-			if (Z_STRLEN_P(result) == 0) {
-				zval_ptr_dtor(&tmp_subject);
-				return;
-			}
 		} ZEND_HASH_FOREACH_END();
-	} else {
+	} else { /* Search is not an array */
+		if (Z_TYPE_P(search) != IS_STRING) {
+			SEPARATE_ZVAL(search);
+			convert_to_string_ex(search);
+		}
 		ZVAL_STR(result,php_str_replace_string_in_subject(Z_STRVAL_P(search), Z_STRLEN_P(search),
 				replace, Z_STRVAL_P(subject), Z_STRLEN_P(subject), case_sensitivity,
-				replace_count));
+				replace_count, options));
 	}
 	zval_ptr_dtor(&tmp_subject);
 }
@@ -4038,67 +4084,46 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
  */
 static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensitivity)
 {
-	zval *subject, *search, *replace, *subject_entry, *zcount = NULL;
-	zval result;
-	zend_string *string_key;
-	zend_ulong num_key;
-	size_t count = 0;
-	int argc = ZEND_NUM_ARGS();
+	zval *subject, *search, *replace, *zcount;
+	size_t count, *countp;
+	zend_long options;
+
+	zcount = NULL;
+	count = 0;
+	options = PHP_STR_ARRAY_REPLACE_STOP;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz|z/", &search, &replace, &subject, &zcount) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz|z/l", &search, &replace, &subject, &zcount, &options) == FAILURE) {
 		return;
 	}
 #else
-	ZEND_PARSE_PARAMETERS_START(3, 4)
+	ZEND_PARSE_PARAMETERS_START(3, 5)
 		Z_PARAM_ZVAL(search)
 		Z_PARAM_ZVAL(replace)
 		Z_PARAM_ZVAL(subject)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL_EX(zcount, 0, 1)
+		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-	/* Make sure we're dealing with strings or arrays only. */
-	if (Z_TYPE_P(search) != IS_ARRAY) {
-		SEPARATE_ZVAL(search);
-		convert_to_string_ex(search);
-	}
-	if (Z_TYPE_P(replace) != IS_ARRAY) {
-		SEPARATE_ZVAL(replace);
-		convert_to_string_ex(replace);
-	}
+	countp = ((ZEND_NUM_ARGS() > 3) ? (&count) : NULL);
 
-	/* if subject is an array */
-	if (Z_TYPE_P(subject) == IS_ARRAY) {
-		array_init(return_value);
-
-		/* For each subject entry, convert it to string, then perform replacement
-		   and add the result to the return_value array. */
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(subject), num_key, string_key, subject_entry) {
-			if (Z_TYPE_P(subject_entry) != IS_ARRAY && Z_TYPE_P(subject_entry) != IS_OBJECT) {
-				php_str_replace_in_subject(search, replace, subject_entry, &result, case_sensitivity, (argc > 3) ? &count : NULL);
-			} else {
-				ZVAL_COPY(&result, subject_entry);
-			}
-			/* Add to return array */
-			if (string_key) {
-				zend_hash_update(Z_ARRVAL_P(return_value), string_key, &result);
-			} else {
-				add_index_zval(return_value, num_key, &result);
-			}
-		} ZEND_HASH_FOREACH_END();
-	} else {	/* if subject is not an array */
-		php_str_replace_in_subject(search, replace, subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL);
+	/* Check options value. Nothing must be set outside of PHP_REPLACE_MASK */
+	if ((options & (~PHP_REPLACE_MASK)) != 0) {
+		php_error_docref(NULL, E_WARNING, "Invalid options value (" ZEND_LONG_FMT ")", options);
 	}
-	if (argc > 3) {
+	
+	php_str_replace_in_subject(search, replace, subject, return_value, case_sensitivity, countp, options);
+
+	if (countp) {
 		zval_dtor(zcount);
-		ZVAL_LONG(zcount, count);
+		ZVAL_LONG(zcount, *countp);
 	}
 }
 /* }}} */
 
-/* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject [, int &replace_count])
+/* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject [, int &replace_count [, int options]])
    Replaces all occurrences of search in haystack with replace */
 PHP_FUNCTION(str_replace)
 {
@@ -4106,7 +4131,7 @@ PHP_FUNCTION(str_replace)
 }
 /* }}} */
 
-/* {{{ proto mixed str_ireplace(mixed search, mixed replace, mixed subject [, int &replace_count])
+/* {{{ proto mixed str_ireplace(mixed search, mixed replace, mixed subject [, int &replace_count[, int options]])
    Replaces all occurrences of search in haystack with replace / case-insensitive */
 PHP_FUNCTION(str_ireplace)
 {

@@ -117,10 +117,12 @@ string(143) "Change tracking and management software designed to watch
 Suggest features, report bugs, or ask
 	questions here."
 string(152) "Change tracking and management software designed to watch<br>	for abnormal system behavior.<br>Suggest features, report bugs, or ask<br>	questions here."
-string(30) "FgBnBrCVA10AabNBFjBCA10AabJzK?"
-Count: 11
-string(32) "FgBnBrCVB10CAbNBFjBC1010AabbJzK?"
+string(27) "FgBnBrCVA10AabNBFjAaaAaJzK?"
 Count: 6
-string(14) "FgnBrVNBFjJzK?"
-Count: 11
+string(29) "FgBnBrCVB10CAbNBFj10AabAaJzK?"
+Count: 6
+
+Warning: str_ireplace(): Replace array must not be empty in %s on line %d
+string(25) "FgAnBraVAAaNBaFjAaaAaJzK?"
+Count: 0
 Done

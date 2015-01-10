@@ -18,11 +18,22 @@ precision=14
 	  replace arg was forced to a string.
 */
 
-function check_replace($search,$replace,&$subject)
+function check_replace2(&$result,$search,$replace,$subject,$opt_name)
 {
 $c=0;
-var_dump($subject=str_replace($search,$replace,$subject,$c));
-echo "Count: $c\n";
+$result[$opt_name]['value']=str_replace($search,$replace,$subject,$c,constant($opt_name));
+$result[$opt_name]['count']=$c;
+}
+
+function check_replace($search,$replace,$subject)
+{
+$result=array();
+check_replace2($result,$search,$replace,$subject,'STR_REPLACE_STOP');
+check_replace2($result,$search,$replace,$subject,'STR_REPLACE_LOOP');
+check_replace2($result,$search,$replace,$subject,'STR_REPLACE_FIRST');
+check_replace2($result,$search,$replace,$subject,'STR_REPLACE_LAST');
+check_replace2($result,$search,$replace,$subject,'STR_REPLACE_EMPTY');
+var_dump($result);
 }
 
 //----
@@ -51,28 +62,26 @@ msg("replace count, separate");
 $subject='Replace [?] repl/count [?] separate [?] elem[?]ents';
 check_replace($search,$repl,$subject);
 
-msg("replace loop, grouped");
+msg("multiple, grouped");
 
-$subject='Replace [?][?][?][?][?][?][?][?][?][?][?][?][?][?][?][?][?] a lot of grouped elements';
+$subject='Replace [?][?][?][?][?][?][?][?][?] grouped elements';
 check_replace($search,$repl,$subject);
 
-msg("replace loop, separate");
+msg("multiple, separate");
 
-$subject='[?]Rep[?]la[?]ce [?] ma[?]ny[?] [?] s[?]epa[?]rate [?] el[?]emen[?]ts[?]?';
+$subject='[?]Rep[?]la[?]ce [?] ma[?]ny[?] [?] s[?]epa[?]rate [?]';
 check_replace($search,$repl,$subject);
 
 msg("Empty replace array");
 
-$subject='[?]Rep[?]la[?]ce[?] wi[?]th[?][?][?][?] e[?]mp[?]ty [?]ar[?]ray[?][?]';
+$subject='[?]Rep[?]la[?]ce[?]';
 $repl=array();
 check_replace($search,$repl,$subject);
 
 msg("replace elements contain needle");
 
-$subject='[?]Rep[?]la[?]ce [?]ma[?]ny[?] [?]s[?]epa[?]rate[?] el[?]emen[?]ts[?]?';
+$subject='[?]Rep[?]la[?]ce[?] [?]ma[?]ny[?] ';
 $repl=array('al[?]pz[?]',"[?]b[?]v\n",null,37,"[?]\n[?]");
-check_replace($search,$repl,$subject);
-check_replace($search,$repl,$subject);
 check_replace($search,$repl,$subject);
 
 msg("subject == needle");
@@ -89,22 +98,19 @@ $search=$subject."\n";
 $repl=array(1,2,3);
 check_replace($search,$repl,$subject);
 
-msg("Level 2 cyclic - basic 1");
+msg("Multi-level array");
 
-$subject='[?](?)Rep[?]la[?(?)]ce [?]ma[?]n(?)y[?] (?)[?]s[?]epa[?]';
+$subject='[?](?)Rep[?]la[?(?)]ce [?]ma';
 $repl=array(
 	array('al[?]p(?)z[?]',"[?]b(?)v\n",null,37,"\n[?]"),
 	array('zk(?)j[?]', null, 'ab(?)c', 45)
 	);
 $search=array('[?]','(?)');
 check_replace($search,$repl,$subject);
-check_replace($search,$repl,$subject);
-check_replace($search,$repl,$subject);
 
+msg("Multi-level - empty array");
 
-msg("Level 2 cyclic - empty array (level 2)");
-
-$subject='[?](?)Rep[?]la[?(?)]c<a>e [?]ma[?]n(?)y[?<a>] (?)[?]s[?]epa';
+$subject='[?](?)Rep[?]la[?](?)c<a>e';
 $repl=array(
 	array('ap(?)z[?]',"b[?](?)v\n",null,37,"[?]\n[?]"),
 	array(),
@@ -112,143 +118,1063 @@ $repl=array(
 	);
 $search=array('[?]','(?)','<a>');
 check_replace($search,$repl,$subject);
+
+msg("Multi-level - deep 1");
+
+$search=array('[?]',array('(?)','d','e'),'a','R');
+$repl=array(
+	array('ap(?)z[?]',"b[?](?)v",null,37,"[?]n[?]"),
+	array('a',array('b',null)),
+	array('k(?)j[?]')
+	);
+$subject=array('[?](?)Re[?](?)c<a>e'
+	,'mykey' => array('[?]dabdee(?)ab[?][?]dd(?)ec(?)'
+		,array(null, 'key2' => $search, $repl, 10, 20)
+		),
+	$repl);
 check_replace($search,$repl,$subject);
-check_replace($search,$repl,$subject);
+
+msg('Invalid options value');
+
+$c=0;
+var_dump(str_replace('a','b','abc',$c,50));
+var_dump($c);
 
 ?>
 ===DONE===
 --EXPECTF--	
 --- 1 element ---
 
-string(23) "Replace 1 alpha element"
-Count: 1
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    string(23) "Replace 1 alpha element"
+    ["count"]=>
+    int(1)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    string(23) "Replace 1 alpha element"
+    ["count"]=>
+    int(1)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    string(23) "Replace 1 alpha element"
+    ["count"]=>
+    int(1)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    string(23) "Replace 1 alpha element"
+    ["count"]=>
+    int(1)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    string(23) "Replace 1 alpha element"
+    ["count"]=>
+    int(1)
+  }
+}
 
 --- replace count, grouped ---
 
-string(47) "Replace alphabeta10 repl/count grouped elements"
-Count: 4
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    string(47) "Replace alphabeta10 repl/count grouped elements"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    string(47) "Replace alphabeta10 repl/count grouped elements"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    string(47) "Replace alphabeta10 repl/count grouped elements"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    string(47) "Replace alphabeta10 repl/count grouped elements"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    string(47) "Replace alphabeta10 repl/count grouped elements"
+    ["count"]=>
+    int(4)
+  }
+}
 
 --- replace count, separate ---
 
-string(50) "Replace alpha repl/count beta separate 10 elements"
-Count: 4
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    string(50) "Replace alpha repl/count beta separate 10 elements"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    string(50) "Replace alpha repl/count beta separate 10 elements"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    string(50) "Replace alpha repl/count beta separate 10 elements"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    string(50) "Replace alpha repl/count beta separate 10 elements"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    string(50) "Replace alpha repl/count beta separate 10 elements"
+    ["count"]=>
+    int(4)
+  }
+}
 
---- replace loop, grouped ---
+--- multiple, grouped ---
 
-string(83) "Replace alphabeta10alphabeta10alphabeta10alphabeta10alpha a lot of grouped elements"
-Count: 17
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    string(51) "Replace alphabeta10[?][?][?][?][?] grouped elements"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    string(52) "Replace alphabeta10alphabeta10alpha grouped elements"
+    ["count"]=>
+    int(9)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    string(61) "Replace alphabeta10alphaalphaalphaalphaalpha grouped elements"
+    ["count"]=>
+    int(9)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    string(36) "Replace alphabeta10 grouped elements"
+    ["count"]=>
+    int(9)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    string(36) "Replace alphabeta10 grouped elements"
+    ["count"]=>
+    int(9)
+  }
+}
 
---- replace loop, separate ---
+--- multiple, separate ---
 
-string(72) "alphaRepbetala10ce  maalphanybeta 10 sepaalpharate beta el10ementsalpha?"
-Count: 13
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    string(53) "alphaRepbetala10ce  ma[?]ny[?] [?] s[?]epa[?]rate [?]"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    string(55) "alphaRepbetala10ce  maalphanybeta 10 sepaalpharate beta"
+    ["count"]=>
+    int(10)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    string(65) "alphaRepbetala10ce  maalphanyalpha alpha salphaepaalpharate alpha"
+    ["count"]=>
+    int(10)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    string(35) "alphaRepbetala10ce  many  separate "
+    ["count"]=>
+    int(10)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    string(35) "alphaRepbetala10ce  many  separate "
+    ["count"]=>
+    int(10)
+  }
+}
 
 --- Empty replace array ---
 
-string(24) "Replace with empty array"
-Count: 15
+
+Warning: str_replace(): Replace array must not be empty in %s on line %d
+
+Warning: str_replace(): Replace array must not be empty in %s on line %d
+
+Warning: str_replace(): Replace array must not be empty in %s on line %d
+
+Warning: str_replace(): Replace array must not be empty in %s on line %d
+
+Warning: str_replace(): Replace array must not be empty in %s on line %d
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    string(19) "[?]Rep[?]la[?]ce[?]"
+    ["count"]=>
+    int(0)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    string(19) "[?]Rep[?]la[?]ce[?]"
+    ["count"]=>
+    int(0)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    string(19) "[?]Rep[?]la[?]ce[?]"
+    ["count"]=>
+    int(0)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    string(19) "[?]Rep[?]la[?]ce[?]"
+    ["count"]=>
+    int(0)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    string(19) "[?]Rep[?]la[?]ce[?]"
+    ["count"]=>
+    int(0)
+  }
+}
 
 --- replace elements contain needle ---
 
-string(106) "al[?]pz[?]Rep[?]b[?]v
-lace 37ma[?]
-[?]nyal[?]pz[?] [?]b[?]v
-sepa37rate[?]
-[?] elal[?]pz[?]emen[?]b[?]v
-ts?"
-Count: 13
-string(152) "alal[?]pz[?]pz[?]b[?]v
-Repb37v
-lace 37ma[?]
-[?]
-al[?]pz[?]nyal[?]b[?]v
-pz 37b[?]
-[?]v
-sepa37rateal[?]pz[?]
-[?]b[?]v
- elalpz37emen[?]
-[?]bal[?]pz[?]v
-ts?"
-Count: 16
-string(204) "alalal[?]pz[?]pz[?]b[?]v
-pzb37v
-Repb37v
-lace 37ma[?]
-[?]
-al[?]pz[?]
-al[?]b[?]v
-pznyal37b[?]
-[?]v
-pz 37bal[?]pz[?]
-[?]b[?]v
-v
-sepa37ratealpz37
-[?]
-[?]bal[?]pz[?]v
- elalpz37emen[?]b[?]v
-
-bal37pz[?]
-[?]v
-ts?"
-Count: 20
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    string(47) "al[?]pz[?]Rep[?]b[?]v
+lace37 [?]
+[?]ma[?]ny[?] "
+    ["count"]=>
+    int(5)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    string(60) "al[?]pz[?]Rep[?]b[?]v
+lace37 [?]
+[?]maal[?]pz[?]ny[?]b[?]v
+ "
+    ["count"]=>
+    int(7)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    string(61) "al[?]pz[?]Rep[?]b[?]v
+lace37 [?]
+[?]maal[?]pz[?]nyal[?]pz[?] "
+    ["count"]=>
+    int(7)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    string(55) "al[?]pz[?]Rep[?]b[?]v
+lace37 [?]
+[?]ma[?]
+[?]ny[?]
+[?] "
+    ["count"]=>
+    int(7)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    string(41) "al[?]pz[?]Rep[?]b[?]v
+lace37 [?]
+[?]many "
+    ["count"]=>
+    int(7)
+  }
+}
 
 --- subject == needle ---
 
-string(1) "1"
-Count: 1
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    string(1) "1"
+    ["count"]=>
+    int(1)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    string(1) "1"
+    ["count"]=>
+    int(1)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    string(1) "1"
+    ["count"]=>
+    int(1)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    string(1) "1"
+    ["count"]=>
+    int(1)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    string(1) "1"
+    ["count"]=>
+    int(1)
+  }
+}
 
 --- length(subject) < length(needle) ---
 
-string(27) "FOOOOOOOOOOOOOOOOOOOOOOOOOO"
-Count: 0
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    string(27) "FOOOOOOOOOOOOOOOOOOOOOOOOOO"
+    ["count"]=>
+    int(0)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    string(27) "FOOOOOOOOOOOOOOOOOOOOOOOOOO"
+    ["count"]=>
+    int(0)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    string(27) "FOOOOOOOOOOOOOOOOOOOOOOOOOO"
+    ["count"]=>
+    int(0)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    string(27) "FOOOOOOOOOOOOOOOOOOOOOOOOOO"
+    ["count"]=>
+    int(0)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    string(27) "FOOOOOOOOOOOOOOOOOOOOOOOOOO"
+    ["count"]=>
+    int(0)
+  }
+}
 
---- Level 2 cyclic - basic 1 ---
+--- Multi-level array ---
 
-string(92) "al[?]pzk(?)j[?]z[?]Rep[?]bab(?)cv
-la[?45]ce ma37nzk(?)j[?]y
-[?] al[?]pab(?)cz[?]s[?]b45v
-epa"
-Count: 16
-string(127) "alal[?]pzk(?)j[?]z[?]pzkj[?]bab(?)cv
-zRep37bab45cv
-la[?45]ce ma37nzkzk(?)j[?]j
-[?]y
-al[?]pz[?] al[?]bab(?)cv
-pab45czs37b45v
-epa"
-Count: 17
-string(162) "alalal[?]pzk(?)j[?]z[?]pzkj[?]bab(?)cv
-zpzkj37bab45cv
-zRep37bab45cv
-la[?45]ce ma37nzkzkzk(?)j[?]j
-[?]j
-al[?]pz[?]y
-al[?]bab(?)cv
-pz al37bab45cv
-pab45czs37b45v
-epa"
-Count: 17
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    string(46) "al[?]pzk(?)j[?]z[?]Rep[?]bab(?)cv
+la[?45]ce ma"
+    ["count"]=>
+    int(7)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    string(46) "al[?]pzk(?)j[?]z[?]Rep[?]bab(?)cv
+la[?45]ce ma"
+    ["count"]=>
+    int(7)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    string(46) "al[?]pzk(?)j[?]z[?]Rep[?]bab(?)cv
+la[?45]ce ma"
+    ["count"]=>
+    int(7)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    string(46) "al[?]pzk(?)j[?]z[?]Rep[?]bab(?)cv
+la[?45]ce ma"
+    ["count"]=>
+    int(7)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    string(46) "al[?]pzk(?)j[?]z[?]Rep[?]bab(?)cv
+la[?45]ce ma"
+    ["count"]=>
+    int(7)
+  }
+}
 
---- Level 2 cyclic - empty array (level 2) ---
+--- Multi-level - empty array ---
 
-string(58) "apz[?]Repb[?]v
-la[?]ck(?)j[?]e ma37ny[?] [?]
-[?]sapz[?]epa"
-Count: 15
-string(64) "apzapz[?]Repbb[?]v
-v
-lackj37e ma37ny[?]
-[?] apz[?]
-b[?]v
-sapzepa"
-Count: 13
-string(73) "apzapzapz[?]Repbbb[?]v
-v
-v
-lackj37e ma37ny
-37 apz[?]
-[?]
-bapz[?]v
-sapzepa"
-Count: 9
+
+Warning: str_replace(): Replace array must not be empty in %s on line 19
+
+Warning: str_replace(): Replace array must not be empty in %s on line 19
+
+Warning: str_replace(): Replace array must not be empty in %s on line 19
+
+Warning: str_replace(): Replace array must not be empty in %s on line 19
+
+Warning: str_replace(): Replace array must not be empty in %s on line 19
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    string(39) "ap(?)z[?](?)Repb[?](?)v
+la(?)ck(?)j[?]e"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    string(39) "ap(?)z[?](?)Repb[?](?)v
+la(?)ck(?)j[?]e"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    string(39) "ap(?)z[?](?)Repb[?](?)v
+la(?)ck(?)j[?]e"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    string(39) "ap(?)z[?](?)Repb[?](?)v
+la(?)ck(?)j[?]e"
+    ["count"]=>
+    int(4)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    string(39) "ap(?)z[?](?)Repb[?](?)v
+la(?)ck(?)j[?]e"
+    ["count"]=>
+    int(4)
+  }
+}
+
+--- Multi-level - deep 1 ---
+
+array(5) {
+  ["STR_REPLACE_STOP"]=>
+  array(2) {
+    ["value"]=>
+    array(3) {
+      [0]=>
+      string(26) "k(?)j[?]paz[?]ab[?]avac<a>"
+      ["mykey"]=>
+      array(2) {
+        [0]=>
+        string(31) "k(?)j[?]paz[?]babaabb[?]avddaca"
+        [1]=>
+        array(5) {
+          [0]=>
+          string(0) ""
+          ["key2"]=>
+          array(4) {
+            [0]=>
+            string(14) "k(?)j[?]paz[?]"
+            [1]=>
+            array(3) {
+              [0]=>
+              string(8) "k(?)j[?]"
+              [1]=>
+              string(1) "b"
+              [2]=>
+              string(0) ""
+            }
+            [2]=>
+            string(8) "k(?)j[?]"
+            [3]=>
+            string(0) ""
+          }
+          [1]=>
+          array(3) {
+            [0]=>
+            array(5) {
+              [0]=>
+              string(18) "k(?)j[?]pazapaz[?]"
+              [1]=>
+              string(17) "bk(?)j[?]paz[?]av"
+              [2]=>
+              string(0) ""
+              [3]=>
+              string(2) "37"
+              [4]=>
+              string(21) "k(?)j[?]paz[?]nb[?]av"
+            }
+            [1]=>
+            array(2) {
+              [0]=>
+              string(8) "k(?)j[?]"
+              [1]=>
+              array(2) {
+                [0]=>
+                string(1) "b"
+                [1]=>
+                string(0) ""
+              }
+            }
+            [2]=>
+            array(1) {
+              [0]=>
+              string(17) "kk(?)j[?]japaz[?]"
+            }
+          }
+          [2]=>
+          string(2) "10"
+          [3]=>
+          string(2) "20"
+        }
+      }
+      [1]=>
+      array(3) {
+        [0]=>
+        array(5) {
+          [0]=>
+          string(18) "k(?)j[?]pazapaz[?]"
+          [1]=>
+          string(17) "bk(?)j[?]paz[?]av"
+          [2]=>
+          string(0) ""
+          [3]=>
+          string(2) "37"
+          [4]=>
+          string(21) "k(?)j[?]paz[?]nb[?]av"
+        }
+        [1]=>
+        array(2) {
+          [0]=>
+          string(8) "k(?)j[?]"
+          [1]=>
+          array(2) {
+            [0]=>
+            string(1) "b"
+            [1]=>
+            string(0) ""
+          }
+        }
+        [2]=>
+        array(1) {
+          [0]=>
+          string(17) "kk(?)j[?]japaz[?]"
+        }
+      }
+    }
+    ["count"]=>
+    int(69)
+  }
+  ["STR_REPLACE_LOOP"]=>
+  array(2) {
+    ["value"]=>
+    array(3) {
+      [0]=>
+      string(61) "k(?)j[?]pk(?)j[?]z[?]k(?)j[?]b[?]k(?)j[?]vk(?)j[?]c<k(?)j[?]>"
+      ["mykey"]=>
+      array(2) {
+        [0]=>
+        string(79) "k(?)j[?]pk(?)j[?]z[?]bk(?)j[?]bk(?)j[?]k(?)j[?]bb[?]k(?)j[?]vbk(?)j[?]ck(?)j[?]"
+        [1]=>
+        array(5) {
+          [0]=>
+          string(0) ""
+          ["key2"]=>
+          array(4) {
+            [0]=>
+            string(21) "k(?)j[?]pk(?)j[?]z[?]"
+            [1]=>
+            array(3) {
+              [0]=>
+              string(8) "k(?)j[?]"
+              [1]=>
+              string(1) "b"
+              [2]=>
+              string(0) ""
+            }
+            [2]=>
+            string(8) "k(?)j[?]"
+            [3]=>
+            string(0) ""
+          }
+          [1]=>
+          array(3) {
+            [0]=>
+            array(5) {
+              [0]=>
+              string(39) "k(?)j[?]pk(?)j[?]zk(?)j[?]pk(?)j[?]z[?]"
+              [1]=>
+              string(31) "bk(?)j[?]pk(?)j[?]z[?]k(?)j[?]v"
+              [2]=>
+              string(0) ""
+              [3]=>
+              string(2) "37"
+              [4]=>
+              string(35) "k(?)j[?]pk(?)j[?]z[?]nb[?]k(?)j[?]v"
+            }
+            [1]=>
+            array(2) {
+              [0]=>
+              string(8) "k(?)j[?]"
+              [1]=>
+              array(2) {
+                [0]=>
+                string(1) "b"
+                [1]=>
+                string(0) ""
+              }
+            }
+            [2]=>
+            array(1) {
+              [0]=>
+              string(31) "kk(?)j[?]jk(?)j[?]pk(?)j[?]z[?]"
+            }
+          }
+          [2]=>
+          string(2) "10"
+          [3]=>
+          string(2) "20"
+        }
+      }
+      [1]=>
+      array(3) {
+        [0]=>
+        array(5) {
+          [0]=>
+          string(39) "k(?)j[?]pk(?)j[?]zk(?)j[?]pk(?)j[?]z[?]"
+          [1]=>
+          string(31) "bk(?)j[?]pk(?)j[?]z[?]k(?)j[?]v"
+          [2]=>
+          string(0) ""
+          [3]=>
+          string(2) "37"
+          [4]=>
+          string(35) "k(?)j[?]pk(?)j[?]z[?]nb[?]k(?)j[?]v"
+        }
+        [1]=>
+        array(2) {
+          [0]=>
+          string(8) "k(?)j[?]"
+          [1]=>
+          array(2) {
+            [0]=>
+            string(1) "b"
+            [1]=>
+            string(0) ""
+          }
+        }
+        [2]=>
+        array(1) {
+          [0]=>
+          string(31) "kk(?)j[?]jk(?)j[?]pk(?)j[?]z[?]"
+        }
+      }
+    }
+    ["count"]=>
+    int(102)
+  }
+  ["STR_REPLACE_FIRST"]=>
+  array(2) {
+    ["value"]=>
+    array(3) {
+      [0]=>
+      string(61) "k(?)j[?]pk(?)j[?]z[?]k(?)j[?]b[?]k(?)j[?]vk(?)j[?]c<k(?)j[?]>"
+      ["mykey"]=>
+      array(2) {
+        [0]=>
+        string(80) "k(?)j[?]pk(?)j[?]z[?]bk(?)j[?]bk(?)j[?]k(?)j[?]bb[?]k(?)j[?]vbbk(?)j[?]ck(?)j[?]"
+        [1]=>
+        array(5) {
+          [0]=>
+          string(0) ""
+          ["key2"]=>
+          array(4) {
+            [0]=>
+            string(21) "k(?)j[?]pk(?)j[?]z[?]"
+            [1]=>
+            array(3) {
+              [0]=>
+              string(8) "k(?)j[?]"
+              [1]=>
+              string(1) "b"
+              [2]=>
+              string(0) ""
+            }
+            [2]=>
+            string(8) "k(?)j[?]"
+            [3]=>
+            string(0) ""
+          }
+          [1]=>
+          array(3) {
+            [0]=>
+            array(5) {
+              [0]=>
+              string(39) "k(?)j[?]pk(?)j[?]zk(?)j[?]pk(?)j[?]z[?]"
+              [1]=>
+              string(31) "bk(?)j[?]pk(?)j[?]z[?]k(?)j[?]v"
+              [2]=>
+              string(0) ""
+              [3]=>
+              string(2) "37"
+              [4]=>
+              string(35) "k(?)j[?]pk(?)j[?]z[?]nb[?]k(?)j[?]v"
+            }
+            [1]=>
+            array(2) {
+              [0]=>
+              string(8) "k(?)j[?]"
+              [1]=>
+              array(2) {
+                [0]=>
+                string(1) "b"
+                [1]=>
+                string(0) ""
+              }
+            }
+            [2]=>
+            array(1) {
+              [0]=>
+              string(31) "kk(?)j[?]jk(?)j[?]pk(?)j[?]z[?]"
+            }
+          }
+          [2]=>
+          string(2) "10"
+          [3]=>
+          string(2) "20"
+        }
+      }
+      [1]=>
+      array(3) {
+        [0]=>
+        array(5) {
+          [0]=>
+          string(39) "k(?)j[?]pk(?)j[?]zk(?)j[?]pk(?)j[?]z[?]"
+          [1]=>
+          string(31) "bk(?)j[?]pk(?)j[?]z[?]k(?)j[?]v"
+          [2]=>
+          string(0) ""
+          [3]=>
+          string(2) "37"
+          [4]=>
+          string(35) "k(?)j[?]pk(?)j[?]z[?]nb[?]k(?)j[?]v"
+        }
+        [1]=>
+        array(2) {
+          [0]=>
+          string(8) "k(?)j[?]"
+          [1]=>
+          array(2) {
+            [0]=>
+            string(1) "b"
+            [1]=>
+            string(0) ""
+          }
+        }
+        [2]=>
+        array(1) {
+          [0]=>
+          string(31) "kk(?)j[?]jk(?)j[?]pk(?)j[?]z[?]"
+        }
+      }
+    }
+    ["count"]=>
+    int(102)
+  }
+  ["STR_REPLACE_LAST"]=>
+  array(2) {
+    ["value"]=>
+    array(3) {
+      [0]=>
+      string(61) "k(?)j[?]pk(?)j[?]z[?]k(?)j[?]b[?]k(?)j[?]vk(?)j[?]c<k(?)j[?]>"
+      ["mykey"]=>
+      array(2) {
+        [0]=>
+        string(78) "k(?)j[?]pk(?)j[?]z[?]bk(?)j[?]bk(?)j[?]k(?)j[?]bb[?]k(?)j[?]vk(?)j[?]ck(?)j[?]"
+        [1]=>
+        array(5) {
+          [0]=>
+          string(0) ""
+          ["key2"]=>
+          array(4) {
+            [0]=>
+            string(21) "k(?)j[?]pk(?)j[?]z[?]"
+            [1]=>
+            array(3) {
+              [0]=>
+              string(8) "k(?)j[?]"
+              [1]=>
+              string(1) "b"
+              [2]=>
+              string(0) ""
+            }
+            [2]=>
+            string(8) "k(?)j[?]"
+            [3]=>
+            string(0) ""
+          }
+          [1]=>
+          array(3) {
+            [0]=>
+            array(5) {
+              [0]=>
+              string(39) "k(?)j[?]pk(?)j[?]zk(?)j[?]pk(?)j[?]z[?]"
+              [1]=>
+              string(31) "bk(?)j[?]pk(?)j[?]z[?]k(?)j[?]v"
+              [2]=>
+              string(0) ""
+              [3]=>
+              string(2) "37"
+              [4]=>
+              string(35) "k(?)j[?]pk(?)j[?]z[?]nb[?]k(?)j[?]v"
+            }
+            [1]=>
+            array(2) {
+              [0]=>
+              string(8) "k(?)j[?]"
+              [1]=>
+              array(2) {
+                [0]=>
+                string(1) "b"
+                [1]=>
+                string(0) ""
+              }
+            }
+            [2]=>
+            array(1) {
+              [0]=>
+              string(31) "kk(?)j[?]jk(?)j[?]pk(?)j[?]z[?]"
+            }
+          }
+          [2]=>
+          string(2) "10"
+          [3]=>
+          string(2) "20"
+        }
+      }
+      [1]=>
+      array(3) {
+        [0]=>
+        array(5) {
+          [0]=>
+          string(39) "k(?)j[?]pk(?)j[?]zk(?)j[?]pk(?)j[?]z[?]"
+          [1]=>
+          string(31) "bk(?)j[?]pk(?)j[?]z[?]k(?)j[?]v"
+          [2]=>
+          string(0) ""
+          [3]=>
+          string(2) "37"
+          [4]=>
+          string(35) "k(?)j[?]pk(?)j[?]z[?]nb[?]k(?)j[?]v"
+        }
+        [1]=>
+        array(2) {
+          [0]=>
+          string(8) "k(?)j[?]"
+          [1]=>
+          array(2) {
+            [0]=>
+            string(1) "b"
+            [1]=>
+            string(0) ""
+          }
+        }
+        [2]=>
+        array(1) {
+          [0]=>
+          string(31) "kk(?)j[?]jk(?)j[?]pk(?)j[?]z[?]"
+        }
+      }
+    }
+    ["count"]=>
+    int(102)
+  }
+  ["STR_REPLACE_EMPTY"]=>
+  array(2) {
+    ["value"]=>
+    array(3) {
+      [0]=>
+      string(21) "k(?)j[?]pz[?]b[?]vc<>"
+      ["mykey"]=>
+      array(2) {
+        [0]=>
+        string(22) "k(?)j[?]pz[?]bbbb[?]vc"
+        [1]=>
+        array(5) {
+          [0]=>
+          string(0) ""
+          ["key2"]=>
+          array(4) {
+            [0]=>
+            string(13) "k(?)j[?]pz[?]"
+            [1]=>
+            array(3) {
+              [0]=>
+              string(8) "k(?)j[?]"
+              [1]=>
+              string(1) "b"
+              [2]=>
+              string(0) ""
+            }
+            [2]=>
+            string(8) "k(?)j[?]"
+            [3]=>
+            string(0) ""
+          }
+          [1]=>
+          array(3) {
+            [0]=>
+            array(5) {
+              [0]=>
+              string(15) "k(?)j[?]pzpz[?]"
+              [1]=>
+              string(15) "bk(?)j[?]pz[?]v"
+              [2]=>
+              string(0) ""
+              [3]=>
+              string(2) "37"
+              [4]=>
+              string(19) "k(?)j[?]pz[?]nb[?]v"
+            }
+            [1]=>
+            array(2) {
+              [0]=>
+              string(8) "k(?)j[?]"
+              [1]=>
+              array(2) {
+                [0]=>
+                string(1) "b"
+                [1]=>
+                string(0) ""
+              }
+            }
+            [2]=>
+            array(1) {
+              [0]=>
+              string(15) "kk(?)j[?]jpz[?]"
+            }
+          }
+          [2]=>
+          string(2) "10"
+          [3]=>
+          string(2) "20"
+        }
+      }
+      [1]=>
+      array(3) {
+        [0]=>
+        array(5) {
+          [0]=>
+          string(15) "k(?)j[?]pzpz[?]"
+          [1]=>
+          string(15) "bk(?)j[?]pz[?]v"
+          [2]=>
+          string(0) ""
+          [3]=>
+          string(2) "37"
+          [4]=>
+          string(19) "k(?)j[?]pz[?]nb[?]v"
+        }
+        [1]=>
+        array(2) {
+          [0]=>
+          string(8) "k(?)j[?]"
+          [1]=>
+          array(2) {
+            [0]=>
+            string(1) "b"
+            [1]=>
+            string(0) ""
+          }
+        }
+        [2]=>
+        array(1) {
+          [0]=>
+          string(15) "kk(?)j[?]jpz[?]"
+        }
+      }
+    }
+    ["count"]=>
+    int(102)
+  }
+}
+
+--- Invalid options value ---
+
+
+Warning: str_replace(): Invalid options value (50) in %s on line %d
+string(3) "bbc"
+int(1)
 ===DONE===
