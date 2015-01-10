@@ -100,6 +100,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifsignaled, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifcontinued, 0, 0, 1)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifexitstatus, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
@@ -151,6 +155,7 @@ const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_wifexited,		arginfo_pcntl_wifexited)
 	PHP_FE(pcntl_wifstopped,	arginfo_pcntl_wifstopped)
 	PHP_FE(pcntl_wifsignaled,	arginfo_pcntl_wifsignaled)
+	PHP_FE(pcntl_wifcontinued,	arginfo_pcntl_wifcontinued)
 	PHP_FE(pcntl_wexitstatus,	arginfo_pcntl_wifexitstatus)
 	PHP_FE(pcntl_wtermsig,		arginfo_pcntl_wtermsig)
 	PHP_FE(pcntl_wstopsig,		arginfo_pcntl_wstopsig)
@@ -205,6 +210,9 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	/* Wait Constants */
 #ifdef WNOHANG
 	REGISTER_LONG_CONSTANT("WNOHANG",  (zend_long) WNOHANG, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef	WCONTINUED
+	REGISTER_LONG_CONSTANT("WCONTINUED",  (zend_long) WUNTRACED, CONST_CS | CONST_PERSISTENT);
 #endif
 #ifdef WUNTRACED
 	REGISTER_LONG_CONSTANT("WUNTRACED",  (zend_long) WUNTRACED, CONST_CS | CONST_PERSISTENT);
@@ -682,8 +690,27 @@ PHP_FUNCTION(pcntl_wifsignaled)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_wexitstatus(int status) 
-   Returns the status code of a child's exit */
+
+/* {{{ proto bool pcntl_wifcontinued(int status) 
+   Returns true if the child status code represents a resumed process (WUNTRACED must have been used with waitpid) */
+PHP_FUNCTION(pcntl_wifcontinued)
+{
+#ifdef WIFCONTINUED
+        zend_long status_word;
+
+        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &status_word) == FAILURE) {
+               return;
+        }
+
+        if (WIFCONTINUED(status_word))
+                RETURN_TRUE;
+#endif
+        RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto bool pcntl_wifexited(int status) 
+   Returns true if the child status code represents a successful exit */
 PHP_FUNCTION(pcntl_wexitstatus)
 {
 #ifdef WEXITSTATUS
@@ -873,7 +900,6 @@ PHP_FUNCTION(pcntl_signal)
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
 		}
-		zend_hash_index_del(&PCNTL_G(php_signal_table), signo);
 		RETURN_TRUE;
 	}
 	
