@@ -2280,7 +2280,7 @@ out:
 		if (_router) {
 			pefree(_router, 1);
 		}
-		if (server_sock >= -1) {
+		if (server_sock > -1) {
 			closesocket(server_sock);
 		}
 	}
