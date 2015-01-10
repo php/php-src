@@ -17,6 +17,7 @@
 # include <stdint.h>
 #endif
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <errno.h>
@@ -142,10 +143,12 @@ void fpm_php_trace(struct fpm_child_s *child) /* {{{ */
 {
 	fpm_scoreboard_update(0, 0, 0, 0, 0, 0, 1, FPM_SCOREBOARD_ACTION_INC, child->wp->scoreboard);
 	FILE *slowlog;
+	int fd;
 
 	zlog(ZLOG_NOTICE, "about to trace %d", (int) child->pid);
 
-	slowlog = fopen(child->wp->config->slowlog, "a+");
+	fd = open(child->wp->config->slowlog, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	slowlog = fdopen(fd, "a");
 
 	if (!slowlog) {
 		zlog(ZLOG_SYSERROR, "unable to open slowlog (%s)", child->wp->config->slowlog);

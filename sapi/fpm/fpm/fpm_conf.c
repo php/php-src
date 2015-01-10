@@ -951,7 +951,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			if (wp->config->slowlog && *wp->config->slowlog) {
 				int fd;
 
-				fd = open(wp->config->slowlog, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
+				fd = open(wp->config->slowlog, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
 				if (0 > fd) {
 					zlog(ZLOG_SYSERROR, "Unable to create or open slowlog(%s)", wp->config->slowlog);
