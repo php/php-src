@@ -1006,9 +1006,9 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type) /* {{{ *
 			zend_update_class_constants(class_type->parent);
 		}
 #if ZTS
-		CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval*) * class_type->default_static_members_count);
+		CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval) * class_type->default_static_members_count);
 #else
-		class_type->static_members_table = emalloc(sizeof(zval*) * class_type->default_static_members_count);
+		class_type->static_members_table = emalloc(sizeof(zval) * class_type->default_static_members_count);
 #endif
 		for (i = 0; i < class_type->default_static_members_count; i++) {
 			p = &class_type->default_static_members_table[i];
