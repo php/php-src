@@ -76,6 +76,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			prop_len = 0;
 		}
 
+		ZVAL_DEREF(zdata);
 		if (Z_TYPE_P(zdata) == IS_ARRAY || Z_TYPE_P(zdata) == IS_OBJECT) {
 			if (key) {
 				zend_string *ekey;
