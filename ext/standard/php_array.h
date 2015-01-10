@@ -45,6 +45,7 @@ PHP_FUNCTION(end);
 PHP_FUNCTION(prev);
 PHP_FUNCTION(next);
 PHP_FUNCTION(reset);
+PHP_FUNCTION(seek);
 PHP_FUNCTION(current);
 PHP_FUNCTION(key);
 PHP_FUNCTION(min);
@@ -123,6 +124,8 @@ PHPAPI zend_long php_count_recursive(zval *array, zend_long mode);
 
 #define ARRAY_FILTER_USE_BOTH	1
 #define ARRAY_FILTER_USE_KEY	2
+
+#define ARRAY_SEEK_KEY    3
 
 ZEND_BEGIN_MODULE_GLOBALS(array) 
 	int *multisort_flags[2];
