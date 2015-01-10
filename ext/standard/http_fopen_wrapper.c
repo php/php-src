@@ -197,7 +197,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			transport_len = Z_STRLEN_P(tmpzval);
 			transport_string = estrndup(Z_STRVAL_P(tmpzval), Z_STRLEN_P(tmpzval));
 		} else {
-			transport_len = spprintf(&transport_string, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", resource->host, resource->port);
+			transport_len = spprintf(&transport_string, 0, "%s://%s:%d", use_ssl ? "ssl" : "tcp", resource->ascii_domain, resource->port);
 		}
 	}
 
@@ -240,12 +240,12 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 		/* Set peer_name or name verification will try to use the proxy server name */
 		if (!context || (tmpzval = php_stream_context_get_option(context, "ssl", "peer_name")) == NULL) {
-			ZVAL_STRING(&ssl_proxy_peer_name, resource->host);
+			ZVAL_STRING(&ssl_proxy_peer_name, resource->ascii_domain);
 			php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_name", &ssl_proxy_peer_name);
 		}
 
 		smart_str_appendl(&header, "CONNECT ", sizeof("CONNECT ")-1);
-		smart_str_appends(&header, resource->host);
+		smart_str_appends(&header, resource->ascii_domain);
 		smart_str_appendc(&header, ':');
 		smart_str_append_unsigned(&header, resource->port);
 		smart_str_appendl(&header, " HTTP/1.0\r\n", sizeof(" HTTP/1.0\r\n")-1);
@@ -569,10 +569,10 @@ finish:
 	if ((have_header & HTTP_HEADER_HOST) == 0) {
 		if ((use_ssl && resource->port != 443 && resource->port != 0) || 
 			(!use_ssl && resource->port != 80 && resource->port != 0)) {
-			if (snprintf(scratch, scratch_len, "Host: %s:%i\r\n", resource->host, resource->port) > 0)
+			if (snprintf(scratch, scratch_len, "Host: %s:%i\r\n", resource->ascii_domain, resource->port) > 0)
 				php_stream_write(stream, scratch, strlen(scratch));
 		} else {
-			if (snprintf(scratch, scratch_len, "Host: %s\r\n", resource->host) > 0) {
+			if (snprintf(scratch, scratch_len, "Host: %s\r\n", resource->ascii_domain) > 0) {
 				php_stream_write(stream, scratch, strlen(scratch));
 			}
 		}
@@ -844,9 +844,9 @@ finish:
 					strlcpy(loc_path, location, sizeof(loc_path));
 				}
 				if ((use_ssl && resource->port != 443) || (!use_ssl && resource->port != 80)) {
-					snprintf(new_path, sizeof(new_path) - 1, "%s://%s:%d%s", resource->scheme, resource->host, resource->port, loc_path);
+					snprintf(new_path, sizeof(new_path) - 1, "%s://%s:%d%s", resource->scheme, resource->ascii_domain, resource->port, loc_path);
 				} else {
-					snprintf(new_path, sizeof(new_path) - 1, "%s://%s%s", resource->scheme, resource->host, loc_path);
+					snprintf(new_path, sizeof(new_path) - 1, "%s://%s%s", resource->scheme, resource->ascii_domain, loc_path);
 				}
 			} else {
 				strlcpy(new_path, location, sizeof(new_path));

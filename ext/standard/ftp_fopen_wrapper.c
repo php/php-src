@@ -155,7 +155,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 	if (resource->port == 0)
 		resource->port = 21;
 	
-	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", resource->host, resource->port);
+	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", resource->ascii_domain, resource->port);
 	stream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, NULL, NULL);
 	efree(transport);
 	if (stream == NULL) {
@@ -552,7 +552,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	
 	/* open the data channel */
 	if (hoststart == NULL) {
-		hoststart = resource->host;
+		hoststart = resource->ascii_domain;
 	}
 	transport_len = (int)spprintf(&transport, 0, "tcp://%s:%d", hoststart, portno);
 	datastream = php_stream_xport_create(transport, transport_len, REPORT_ERRORS, STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT, NULL, NULL, context, NULL, NULL);
@@ -718,7 +718,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 	
 	/* open the data channel */
 	if (hoststart == NULL) {
-		hoststart = resource->host;
+		hoststart = resource->ascii_domain;
 	}
 	datastream = php_stream_sock_open_host(hoststart, portno, SOCK_STREAM, 0, 0);
 	if (datastream == NULL) {

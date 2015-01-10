@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Jim Winstead <jimw@php.net>                                  |
+   | Authors: Jim Winstead <jimw@php.net>                                 |
+   |          Kévin Dunglas <dunglas@gmail.com>                           |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -21,6 +22,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
+#include <unicode/uidna.h>
 
 #include "php.h"
 
@@ -51,6 +53,8 @@ PHPAPI void php_url_free(php_url *theurl)
 		efree(theurl->host);
 	if (theurl->path)
 		efree(theurl->path);
+	if (theurl->ascii_domain)
+		efree(theurl->ascii_domain);
 	if (theurl->query)
 		efree(theurl->query);
 	if (theurl->fragment)
@@ -99,6 +103,11 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 	char port_buf[6];
 	php_url *ret = ecalloc(1, sizeof(php_url));
 	char const *s, *e, *p, *pp, *ue;
+	UErrorCode idn_error_code = U_ZERO_ERROR;
+	UIDNA *idn_uidna;
+	UIDNAInfo idn_uidna_info = UIDNA_INFO_INITIALIZER;
+	int32_t idn_domain_len;
+	int32_t idn_domain_capac = 255; /* no domain name may exceed this */
 		
 	s = str;
 	ue = s + length;
@@ -307,6 +316,21 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 
 	ret->host = estrndup(s, (p-s));
 	php_replace_controlchars_ex(ret->host, (p - s));
+
+	/* convert IDN domain to ASCII */
+	idn_uidna = uidna_openUTS46(UIDNA_DEFAULT, &idn_error_code);
+	if (U_FAILURE(idn_error_code)) {
+		php_url_free(ret);
+		return NULL;
+	}
+
+	ret->ascii_domain = emalloc(idn_domain_capac);
+	idn_domain_len = uidna_nameToASCII_UTF8(idn_uidna, ret->host, p - s, ret->ascii_domain, idn_domain_capac, &idn_uidna_info, &idn_error_code);
+	if (U_FAILURE(idn_error_code) || idn_domain_len >= idn_domain_capac || idn_uidna_info.errors != 0) {
+		php_url_free(ret);
+		return NULL;
+	}
+	ret->ascii_domain[idn_domain_len] = '\0';
 	
 	if (e == ue) {
 		return ret;

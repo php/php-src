@@ -12,7 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Jim Winstead <jimw@php.net>                                  |
+   | Authors: Jim Winstead <jimw@php.net>                                 |
+   |          Kévin Dunglas <dunglas@gmail.com>                           |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -25,6 +26,7 @@ typedef struct php_url {
 	char *user;
 	char *pass;
 	char *host;
+	char *ascii_domain;
 	unsigned short port;
 	char *path;
 	char *query;
