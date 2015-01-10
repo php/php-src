@@ -30,6 +30,14 @@
 #include "php_json.h"
 #include <zend_exceptions.h>
 
+/* double limits */
+#include <float.h>
+#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
+#define PHP_JSON_DOUBLE_MAX_LENGTH (1 + DBL_MANT_DIG - DBL_MIN_EXP)
+#else
+#define PHP_JSON_DOUBLE_MAX_LENGTH 1078
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(json)
 
 static const char digits[] = "0123456789abcdef";
@@ -85,6 +93,21 @@ static inline void php_json_pretty_print_indent(smart_str *buf, int options) /* 
 }
 /* }}} */
 
+/* }}} */
+
+static inline void php_json_encode_double(smart_str *buf, double d) /* {{{ */
+{
+	if (!zend_isinf(d) && !zend_isnan(d)) {
+		size_t len;
+		char num[PHP_JSON_DOUBLE_MAX_LENGTH];
+		php_gcvt(d, EG(precision), '.', 'e', &num[0]);
+		len = strlen(num);
+		smart_str_appendl(buf, num, len);
+	} else {
+		JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
+		smart_str_appendc(buf, '0');
+	}
+}
 /* }}} */
 
 static void php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{ */
@@ -267,15 +290,7 @@ static void php_json_escape_string(smart_str *buf, char *s, size_t len, int opti
 			if (type == IS_LONG) {
 				smart_str_append_long(buf, p);
 			} else if (type == IS_DOUBLE) {
-				if (!zend_isinf(d) && !zend_isnan(d)) {
-					char *tmp;
-					int l = spprintf(&tmp, 0, "%.*k", (int) EG(precision), d);
-					smart_str_appendl(buf, tmp, l);
-					efree(tmp);
-				} else {
-					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
-					smart_str_appendc(buf, '0');
-				}
+				php_json_encode_double(buf, d);
 			}
 			return;
 		}
@@ -487,20 +502,7 @@ again:
 			break;
 
 		case IS_DOUBLE:
-			{
-				char *d = NULL;
-				int len;
-				double dbl = Z_DVAL_P(val);
-
-				if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
-					len = spprintf(&d, 0, "%.*k", (int) EG(precision), dbl);
-					smart_str_appendl(buf, d, len);
-					efree(d);
-				} else {
-					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
-					smart_str_appendc(buf, '0');
-				}
-			}
+			php_json_encode_double(buf, Z_DVAL_P(val));
 			break;
 
 		case IS_STRING:
