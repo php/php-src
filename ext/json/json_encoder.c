@@ -34,9 +34,9 @@ ZEND_DECLARE_MODULE_GLOBALS(json)
 
 static const char digits[] = "0123456789abcdef";
 
-static void json_escape_string(smart_str *buf, char *s, size_t len, int options);
+static void php_json_escape_string(smart_str *buf, char *s, size_t len, int options);
 
-static int json_determine_array_type(zval *val) /* {{{ */
+static int php_json_determine_array_type(zval *val) /* {{{ */
 {
 	int i;
 	HashTable *myht = HASH_OF(val);
@@ -65,7 +65,7 @@ static int json_determine_array_type(zval *val) /* {{{ */
 
 /* {{{ Pretty printing support functions */
 
-static inline void json_pretty_print_char(smart_str *buf, int options, char c) /* {{{ */
+static inline void php_json_pretty_print_char(smart_str *buf, int options, char c) /* {{{ */
 {
 	if (options & PHP_JSON_PRETTY_PRINT) {
 		smart_str_appendc(buf, c);
@@ -73,7 +73,7 @@ static inline void json_pretty_print_char(smart_str *buf, int options, char c) /
 }
 /* }}} */
 
-static inline void json_pretty_print_indent(smart_str *buf, int options) /* {{{ */
+static inline void php_json_pretty_print_indent(smart_str *buf, int options) /* {{{ */
 {
 	int i;
 
@@ -87,14 +87,14 @@ static inline void json_pretty_print_indent(smart_str *buf, int options) /* {{{ 
 
 /* }}} */
 
-static void json_encode_array(smart_str *buf, zval *val, int options) /* {{{ */
+static void php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{ */
 {
 	int i, r, need_comma = 0;
 	HashTable *myht;
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		myht = HASH_OF(val);
-		r = (options & PHP_JSON_FORCE_OBJECT) ? PHP_JSON_OUTPUT_OBJECT : json_determine_array_type(val);
+		r = (options & PHP_JSON_FORCE_OBJECT) ? PHP_JSON_OUTPUT_OBJECT : php_json_determine_array_type(val);
 	} else {
 		myht = Z_OBJPROP_P(val);
 		r = PHP_JSON_OUTPUT_OBJECT;
@@ -136,8 +136,8 @@ static void json_encode_array(smart_str *buf, zval *val, int options) /* {{{ */
 					need_comma = 1;
 				}
 
-				json_pretty_print_char(buf, options, '\n');
-				json_pretty_print_indent(buf, options);
+				php_json_pretty_print_char(buf, options, '\n');
+				php_json_pretty_print_indent(buf, options);
 				php_json_encode(buf, data, options);
 			} else if (r == PHP_JSON_OUTPUT_OBJECT) {
 				if (key) {
@@ -155,13 +155,13 @@ static void json_encode_array(smart_str *buf, zval *val, int options) /* {{{ */
 						need_comma = 1;
 					}
 
-					json_pretty_print_char(buf, options, '\n');
-					json_pretty_print_indent(buf, options);
+					php_json_pretty_print_char(buf, options, '\n');
+					php_json_pretty_print_indent(buf, options);
 
-					json_escape_string(buf, key->val, key->len, options & ~PHP_JSON_NUMERIC_CHECK);
+					php_json_escape_string(buf, key->val, key->len, options & ~PHP_JSON_NUMERIC_CHECK);
 					smart_str_appendc(buf, ':');
 
-					json_pretty_print_char(buf, options, ' ');
+					php_json_pretty_print_char(buf, options, ' ');
 
 					php_json_encode(buf, data, options);
 				} else {
@@ -171,15 +171,15 @@ static void json_encode_array(smart_str *buf, zval *val, int options) /* {{{ */
 						need_comma = 1;
 					}
 
-					json_pretty_print_char(buf, options, '\n');
-					json_pretty_print_indent(buf, options);
+					php_json_pretty_print_char(buf, options, '\n');
+					php_json_pretty_print_indent(buf, options);
 
 					smart_str_appendc(buf, '"');
 					smart_str_append_long(buf, (zend_long) index);
 					smart_str_appendc(buf, '"');
 					smart_str_appendc(buf, ':');
 
-					json_pretty_print_char(buf, options, ' ');
+					php_json_pretty_print_char(buf, options, ' ');
 
 					php_json_encode(buf, data, options);
 				}
@@ -198,8 +198,8 @@ static void json_encode_array(smart_str *buf, zval *val, int options) /* {{{ */
 
 	/* Only keep closing bracket on same line for empty arrays/objects */
 	if (need_comma) {
-		json_pretty_print_char(buf, options, '\n');
-		json_pretty_print_indent(buf, options);
+		php_json_pretty_print_char(buf, options, '\n');
+		php_json_pretty_print_indent(buf, options);
 	}
 
 	if (r == PHP_JSON_OUTPUT_ARRAY) {
@@ -210,7 +210,7 @@ static void json_encode_array(smart_str *buf, zval *val, int options) /* {{{ */
 }
 /* }}} */
 
-static int json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{{ */
+static int php_json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{{ */
 {
 	size_t pos = 0, us;
 	int j, status;
@@ -247,7 +247,7 @@ static int json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{
 }
 /* }}} */
 
-static void json_escape_string(smart_str *buf, char *s, size_t len, int options) /* {{{ */
+static void php_json_escape_string(smart_str *buf, char *s, size_t len, int options) /* {{{ */
 {
 	int status;
 	unsigned int us, next_us = 0;
@@ -284,7 +284,7 @@ static void json_escape_string(smart_str *buf, char *s, size_t len, int options)
 
 	if (options & PHP_JSON_UNESCAPED_UNICODE) {
 		/* validate UTF-8 string first */
-		if (json_utf8_to_utf16(NULL, s, len) < 0) {
+		if (php_json_utf8_to_utf16(NULL, s, len) < 0) {
 			JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
 			smart_str_appendl(buf, "null", 4);
 			return;
@@ -417,7 +417,7 @@ static void json_escape_string(smart_str *buf, char *s, size_t len, int options)
 }
 /* }}} */
 
-static void json_encode_serializable_object(smart_str *buf, zval *val, int options) /* {{{ */
+static void php_json_encode_serializable_object(smart_str *buf, zval *val, int options) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(val);
 	zval retval, fname;
@@ -455,7 +455,7 @@ static void json_encode_serializable_object(smart_str *buf, zval *val, int optio
 	if ((Z_TYPE(retval) == IS_OBJECT) &&
 		(Z_OBJ_HANDLE(retval) == Z_OBJ_HANDLE_P(val))) {
 		/* Handle the case where jsonSerialize does: return $this; by going straight to encode array */
-		json_encode_array(buf, &retval, options);
+		php_json_encode_array(buf, &retval, options);
 	} else {
 		/* All other types, encode as normal */
 		php_json_encode(buf, &retval, options);
@@ -504,17 +504,17 @@ again:
 			break;
 
 		case IS_STRING:
-			json_escape_string(buf, Z_STRVAL_P(val), Z_STRLEN_P(val), options);
+			php_json_escape_string(buf, Z_STRVAL_P(val), Z_STRLEN_P(val), options);
 			break;
 
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(val), php_json_serializable_ce)) {
-				json_encode_serializable_object(buf, val, options);
+				php_json_encode_serializable_object(buf, val, options);
 				break;
 			}
 			/* fallthrough -- Non-serializable object */
 		case IS_ARRAY:
-			json_encode_array(buf, val, options);
+			php_json_encode_array(buf, val, options);
 			break;
 
 		case IS_REFERENCE:
