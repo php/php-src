@@ -78,8 +78,8 @@ extern php_stream* php_openssl_get_stream_from_ssl_handle(const SSL *ssl);
 extern zend_string* php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw);
 extern int php_openssl_get_ssl_stream_data_index();
 extern int php_openssl_get_x509_list_id(void);
-struct timeval subtractTimeval( struct timeval a, struct timeval b );
-int compareTimeval( struct timeval a, struct timeval b );
+static struct timeval subtractTimeval( struct timeval a, struct timeval b );
+static int compareTimeval( struct timeval a, struct timeval b );
 static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count TSRMLS_DC);
 
 php_stream_ops php_openssl_socket_ops;
@@ -1903,7 +1903,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 }
 /* }}} */
 
-struct timeval subtractTimeval( struct timeval a, struct timeval b )
+static struct timeval subtractTimeval( struct timeval a, struct timeval b )
 {
 	struct timeval difference;
 
@@ -1918,7 +1918,7 @@ struct timeval subtractTimeval( struct timeval a, struct timeval b )
 	return difference;
 }
 
-int compareTimeval( struct timeval a, struct timeval b )
+static int compareTimeval( struct timeval a, struct timeval b )
 {
 	if (a.tv_sec > b.tv_sec || (a.tv_sec == b.tv_sec && a.tv_usec > b.tv_usec) ) {
 		return 1;
