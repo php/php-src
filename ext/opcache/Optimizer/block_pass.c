@@ -1469,7 +1469,7 @@ next_target:
 					}
 
 					/* next block is only NOP's */
-					if (target == target_end) {
+					if (target == target_end && ! block->follow_to->protected) {
 						del_source(block, block->follow_to);
 						block->follow_to = block->follow_to->follow_to;
 						ADD_SOURCE(block, block->follow_to);

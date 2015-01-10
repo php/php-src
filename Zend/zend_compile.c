@@ -540,6 +540,22 @@ void zend_do_free(znode *op1) /* {{{ */
 }
 /* }}} */
 
+uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
+{
+	uint32_t new_flags = flags | new_flag;
+	if ((flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flag & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
+	}
+	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
+	}
+	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_FINAL)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class");
+	}
+	return new_flags;
+}
+/* }}} */
+
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
@@ -2175,10 +2191,7 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
-
-	if (list->children == 1 && !list->child[0]) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
-	}
+	zend_bool has_elems = 0;
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *var_ast = list->child[i];
@@ -2187,6 +2200,7 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 		if (var_ast == NULL) {
 			continue;
 		}
+		has_elems = 1;
 
 		dim_node.op_type = IS_CONST;
 		ZVAL_LONG(&dim_node.u.constant, i);
@@ -2198,6 +2212,11 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
 		zend_emit_assign_znode(var_ast, &fetch_result);
 	}
+
+	if (!has_elems) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
+	}
+
 	*result = *expr_node;
 }
 /* }}} */
@@ -4441,12 +4460,6 @@ void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 
 		zend_op *opline;
 
-		/* Traits can not implement interfaces */
-		if (ZEND_CE_IS_TRAIT(CG(active_class_entry))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' "
-				"since it is a Trait", name->val, CG(active_class_entry)->name->val);
-		}
-
 		if (!zend_is_const_default_class_ref(class_ast)) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use '%s' as interface name as it is reserved", name->val);
@@ -4520,12 +4533,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	if (extends_ast) {
-		if (ZEND_CE_IS_TRAIT(ce)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. "
-				"Traits can only be composed from other traits with the 'use' keyword. Error",
-				name->val);
-		}
-
 		if (!zend_is_const_default_class_ref(extends_ast)) {
 			zend_string *extends_name = zend_ast_get_str(extends_ast);
 			zend_error_noreturn(E_COMPILE_ERROR,

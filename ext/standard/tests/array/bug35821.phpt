@@ -23,8 +23,6 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 
-Warning: array_map(): An error occurred while invoking the map callback in %s on line %d
-
 Fatal error: Uncaught exception 'Exception' in %s:%d
 Stack trace:
 #0 %s(%d): Element->ThrowException()

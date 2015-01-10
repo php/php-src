@@ -53,8 +53,8 @@ static PHP_INI_MH(OnUpdateTags)
 {
 	url_adapt_state_ex_t *ctx;
 	char *key;
-	char *lasts;
 	char *tmp;
+	char *lasts = NULL;
 	
 	ctx = &BG(url_adapt_state_ex);
 	

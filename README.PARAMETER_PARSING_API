@@ -90,7 +90,7 @@ Note on 64bit compatibility
 ---------------------------
 Please note that since version 7 PHP uses zend_long as integer type and 
 zend_string with size_t as length, so make sure you pass zend_longs to "l" 
-and size_t to strings length (i.e. for "s" you need to pass char * and int), 
+and size_t to strings length (i.e. for "s" you need to pass char * and size_t), 
 not the other way round!
 
 Both mistakes might cause memory corruptions and segfaults:

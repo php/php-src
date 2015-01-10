@@ -201,6 +201,10 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 	}
 }
 
+/* This function should only be used as a copy constructor, i.e. it
+ * should only be called AFTER a zval has been copied to another
+ * location using ZVAL_COPY_VALUE. Do not call it before copying,
+ * otherwise a reference may be leaked. */
 ZEND_API void zval_add_ref(zval *p)
 {
 	if (Z_REFCOUNTED_P(p)) {

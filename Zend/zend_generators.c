@@ -303,8 +303,8 @@ ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 		zend_execute_data *original_execute_data = EG(current_execute_data);
 		zend_class_entry *original_scope = EG(scope);
 		zend_vm_stack original_stack = EG(vm_stack);
-
 		original_stack->top = EG(vm_stack_top);
+
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
 		EG(scope) = generator->execute_data->func->common.scope;
@@ -314,8 +314,7 @@ ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 
 		/* We want the backtrace to look as if the generator function was
 		 * called from whatever method we are current running (e.g. next()).
-		 * So we have to link generator call frame with caller call frames */
-
+		 * So we have to link generator call frame with caller call frame. */
 		generator->execute_data->prev_execute_data = original_execute_data;
 
 		/* Resume execution */
@@ -329,6 +328,7 @@ ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 		}
 
 		/* Restore executor globals */
+		generator->stack->top = EG(vm_stack_top);
 		EG(current_execute_data) = original_execute_data;
 		EG(scope) = original_scope;
 		EG(vm_stack_top) = original_stack->top;

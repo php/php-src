@@ -35,7 +35,7 @@
 #endif
 
 #define COLLATOR_CONVERT_RETURN_FAILED(retval) { \
-			zval_add_ref( retval );              \
+			Z_TRY_ADDREF_P(retval);              \
 			return retval;                       \
 	}
 
