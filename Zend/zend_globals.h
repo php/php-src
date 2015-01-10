@@ -64,6 +64,7 @@ END_EXTERN_C()
 
 typedef struct _zend_declarables {
 	zval ticks;
+	zend_bool strict_typehints;
 } zend_declarables;
 
 typedef struct _zend_vm_stack *zend_vm_stack;

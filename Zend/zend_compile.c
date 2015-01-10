@@ -142,6 +142,7 @@ static zend_bool zend_get_unqualified_name(const zend_string *name, const char *
 static void init_compiler_declarables(void) /* {{{ */
 {
 	ZVAL_LONG(&CG(declarables).ticks, 0);
+	CG(declarables).strict_typehints = 0;
 }
 /* }}} */
 
@@ -2548,7 +2549,8 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 		opline->op1.num = zend_vm_calc_used_stack(arg_count, fbc);
 	}
 
-	call_flags = (opline->opcode == ZEND_NEW ? ZEND_CALL_CTOR : 0);
+	call_flags = ((opline->opcode == ZEND_NEW) ? ZEND_CALL_CTOR : 0)
+		| (CG(declarables).strict_typehints ? ZEND_CALL_STRICT_TYPEHINTS : 0);
 	opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
 	opline->op1.num = call_flags;
 
@@ -3787,6 +3789,15 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}
+		} else if (zend_string_equals_literal_ci(name, "strict_typehints")) {
+			zval value_zv;
+			zend_const_expr_to_zval(&value_zv, value_ast);
+
+			if (Z_TYPE(value_zv) != IS_FALSE && Z_TYPE(value_zv) != IS_TRUE) {
+				zend_error_noreturn(E_COMPILE_ERROR, "strict_typehints declaration must have a boolean value");
+			}
+
+			CG(declarables).strict_typehints = (Z_TYPE(value_zv) == IS_TRUE) ? 1 : 0;
 		} else {
 			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", name->val);
 		}

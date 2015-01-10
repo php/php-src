@@ -658,7 +658,7 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg)
 	}
 }
 
-static void zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg)
+static void zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zend_bool strict)
 {
 	zend_internal_arg_info *cur_arg_info;
 	char *need_msg;
@@ -695,7 +695,7 @@ static void zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, z
 			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
 			}
-		} else if (UNEXPECTED(cur_arg_info->type_hint != Z_TYPE_P(arg))) {
+		} else if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(cur_arg_info->type_hint,  Z_TYPE_P(arg)))) {
 			if (Z_TYPE_P(arg) == IS_NULL) {
 				if (!cur_arg_info->allow_null) {
 failure:
@@ -703,14 +703,14 @@ failure:
 				}
 				return;
 			}
-			if (!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg)) {
+			if (strict || !zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg)) {
 				goto failure;
 			}
 		}
 	}
 }
 
-static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value)
+static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, zend_bool strict)
 {
 	zend_arg_info *cur_arg_info;
 	char *need_msg;
@@ -747,7 +747,7 @@ static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg,
 			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(arg) != IS_NULL || !(cur_arg_info->allow_null || (default_value && is_null_constant(default_value))))) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
 			}
-		} else if (UNEXPECTED(cur_arg_info->type_hint != Z_TYPE_P(arg))) {
+		} else if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(cur_arg_info->type_hint,  Z_TYPE_P(arg)))) {
 			if (Z_TYPE_P(arg) == IS_NULL) {
 				if (!cur_arg_info->allow_null) {
 failure:
@@ -755,7 +755,7 @@ failure:
 				}
 				return;
 			}
-			if (!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg)) {
+			if (strict || !zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg)) {
 				goto failure;
 			}
 		}
