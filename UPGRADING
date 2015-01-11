@@ -360,6 +360,8 @@ Standard library changes
   . Added hybrid sorting algo zend_sort for better performance.
   . Added stable sorting algo zend_insert_sort.
   . Removed dl() function on fpm-fcgi.
+  . Array to string conversion now raises E_RECOVERABLE_ERROR, instead of previous
+    E_NOTICE.
 
 Other
 =====

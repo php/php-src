@@ -515,7 +515,7 @@ ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{
 			break;
 		}
 		case IS_ARRAY:
-			zend_error(E_NOTICE, "Array to string conversion");
+			zend_error(E_RECOVERABLE_ERROR,"Array to string conversion");
 			zval_dtor(op);
 			ZVAL_NEW_STR(op, zend_string_init("Array", sizeof("Array")-1, 0));
 			break;
