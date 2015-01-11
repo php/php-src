@@ -111,7 +111,7 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_PRETTY_PRINT", PHP_JSON_PRETTY_PRINT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_UNICODE", PHP_JSON_UNESCAPED_UNICODE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_PARTIAL_OUTPUT_ON_ERROR", PHP_JSON_PARTIAL_OUTPUT_ON_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_PRESERVE_FRACTIONAL_PART", PHP_JSON_PRESERVE_FRACTIONAL_PART, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_PRESERVE_ZERO_FRACTION", PHP_JSON_PRESERVE_ZERO_FRACTION, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH, CONST_CS | CONST_PERSISTENT);
@@ -434,7 +434,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 
 					php_gcvt(d, EG(precision), '.', 'e', (char *)num);
 					l = strlen(num);
-					if (options & PHP_JSON_PRESERVE_FRACTIONAL_PART && strchr(num, '.') == NULL && l < NUM_BUF_SIZE - 2) {
+					if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && l < NUM_BUF_SIZE - 2) {
 						num[l++] = '.';
 						num[l++] = '0';
 						num[l] = '\0';
@@ -647,7 +647,7 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 				if (!zend_isinf(dbl) && !zend_isnan(dbl)) {
 					php_gcvt(dbl, EG(precision), '.', 'e', (char *)num);
 					len = strlen(num);
-					if (options & PHP_JSON_PRESERVE_FRACTIONAL_PART && strchr(num, '.') == NULL && len < NUM_BUF_SIZE - 2) {
+					if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < NUM_BUF_SIZE - 2) {
 						num[len++] = '.';
 						num[len++] = '0';
 						num[len] = '\0';
