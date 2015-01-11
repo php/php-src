@@ -489,7 +489,7 @@ static sapi_module_struct lsapi_sapi_module =
 };
 /* }}} */
 
-static int init_request_info( void )
+static void init_request_info( void )
 {
     char * pContentType = LSAPI_GetHeader( H_CONTENT_TYPE );
     char * pAuth;
