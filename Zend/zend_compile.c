@@ -1531,6 +1531,8 @@ void zend_do_end_compilation(void) /* {{{ */
 {
 	CG(has_bracketed_namespaces) = 0;
 	zend_end_namespace();
+	/* strict typehinting is per-file */
+	CG(declarables).strict_typehints = 0;
 }
 /* }}} */
 
