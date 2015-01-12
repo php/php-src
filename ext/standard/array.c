@@ -3055,6 +3055,7 @@ PHP_FUNCTION(array_flip)
 	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(array)));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+		ZVAL_DEREF(entry);
 		if (Z_TYPE_P(entry) == IS_LONG) {
 			if (str_idx) {
 				ZVAL_STR_COPY(&data, str_idx);
