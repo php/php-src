@@ -2620,11 +2620,12 @@ ZEND_API zend_string *zend_long_to_str(zend_long num) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) {
+ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */ {
     return is_numeric_string_ex(str->val, str->len, lval, dval, -1, NULL);
 }
+/* }}} */
 
-ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info)
+ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info) /* {{{ */
 {
 	const char *ptr;
 	int base = 10, digits = 0, dp_or_e = 0;
@@ -2760,6 +2761,56 @@ process_double:
 		return IS_DOUBLE;
 	}
 }
+/* }}} */
+
+static zend_always_inline void zend_memstr_ex_pre(unsigned int td[], const char *needle, size_t needle_len) /* {{{ */ {
+	int i;
+
+	for (i = 0; i < 256; i++) {
+		td[i] = needle_len + 1;
+	}
+
+	for (i = 0; i < needle_len; i++) {
+		td[(unsigned char)needle[i]] = (int)needle_len - i;
+	}
+}
+/* }}} */
+
+/* 
+ * String matching - Sunday algorithm
+ * http://www.iti.fh-flensburg.de/lang/algorithmen/pattern/sundayen.htm
+ */
+ZEND_API const char* zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end) /* {{{ */
+{
+	unsigned int td[256];
+	register size_t i;
+	const unsigned register char *p;
+
+	if (needle_len == 0 || (end - haystack) == 0) {
+		return NULL;
+	}
+
+	zend_memstr_ex_pre(td, needle, needle_len);
+
+	p = (const unsigned char *)haystack;
+	end -= needle_len;
+
+	while (p <= (unsigned char *)end) {
+		for (i = 0; i < needle_len; i++) {
+			if (needle[i] != p[i]) {
+				break;
+			}
+		}
+		if (i == needle_len) {
+			return (const char *)p;
+		}
+		p += td[p[needle_len]];
+	}
+
+	return NULL;
+}
+/* }}} */
+
 
 /*
  * Local variables:

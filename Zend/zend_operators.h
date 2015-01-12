@@ -87,6 +87,8 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
  */
 ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info);
 
+ZEND_API const char* zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end);
+
 END_EXTERN_C()
 
 #if SIZEOF_ZEND_LONG == 4
@@ -181,23 +183,27 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, char *
 		return NULL;
 	}
 
-	end -= needle_len;
+	if (EXPECTED(off_s < 1024 || needle_len < 3)) {
+		end -= needle_len;
 
-	while (p <= end) {
-		if ((p = (char *)memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
-			if (!memcmp(needle, p, needle_len-1)) {
-				return p;
+		while (p <= end) {
+			if ((p = (char *)memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
+				if (!memcmp(needle, p, needle_len-1)) {
+					return p;
+				}
 			}
+
+			if (p == NULL) {
+				return NULL;
+			}
+
+			p++;
 		}
 
-		if (p == NULL) {
-			return NULL;
-		}
-
-		p++;
+		return NULL;
+	} else {
+		return zend_memnstr_ex(haystack, needle, needle_len, end);
 	}
-
-	return NULL;
 }
 
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
