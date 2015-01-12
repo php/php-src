@@ -667,25 +667,52 @@ ZEND_FUNCTION(each)
    Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
 {
-	zend_string *err;
+	zval *err;
 	int old_error_reporting;
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &err) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &err) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(err)
+		Z_PARAM_ZVAL(err)
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
 	old_error_reporting = EG(error_reporting);
 	if(ZEND_NUM_ARGS() != 0) {
-		zend_string *key = zend_string_init("error_reporting", sizeof("error_reporting")-1, 0);
-		zend_alter_ini_entry(key, err, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
-		zend_string_release(key);
+		do {
+			if (!EG(error_reporting_ini_entry)) {
+				zend_ini_entry *p = zend_hash_str_find_ptr(EG(ini_directives), "error_reporting", sizeof("error_reporting")-1);
+				if (p) {
+					EG(error_reporting_ini_entry) = p;
+				} else {
+					break;
+				}
+			}
+			if (!EG(error_reporting_ini_entry)->modified) {
+				if (!EG(modified_ini_directives)) {
+					ALLOC_HASHTABLE(EG(modified_ini_directives));
+					zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
+				}
+				if (EXPECTED(zend_hash_str_add_ptr(EG(modified_ini_directives), "error_reporting", sizeof("error_reporting")-1, EG(error_reporting_ini_entry)) != NULL)) {
+					EG(error_reporting_ini_entry)->orig_value = EG(error_reporting_ini_entry)->value;
+					EG(error_reporting_ini_entry)->orig_modifiable = EG(error_reporting_ini_entry)->modifiable;
+					EG(error_reporting_ini_entry)->modified = 1;
+				}
+			} else {
+				zend_string_release(EG(error_reporting_ini_entry)->value);
+			}
+
+			EG(error_reporting_ini_entry)->value = zval_get_string(err);
+			if (Z_TYPE_P(err) == IS_LONG) {
+				EG(error_reporting) = Z_LVAL_P(err);
+			} else {
+				EG(error_reporting) = atoi(EG(error_reporting_ini_entry)->value);
+			}
+		} while (0);
 	}
 
 	RETVAL_LONG(old_error_reporting);
