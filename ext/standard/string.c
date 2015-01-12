@@ -2845,20 +2845,30 @@ PHP_FUNCTION(ucwords)
 PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size_t trlen)
 {
 	size_t i;
-	unsigned char xlat[256], j = 0;
 
-	if ((trlen < 1) || (len < 1)) {
+	if (UNEXPECTED(trlen < 1)) {
 		return str;
-	}
+	} else if (trlen == 1) {
+		char ch_from = *str_from;
+		char ch_to = *str_to;
 
-	do { xlat[j] = j; } while (++j != 0);
+		for (i = 0; i < len; i++) {
+			if (str[i] == ch_from) {
+				str[i] = ch_to;
+			}
+		}
+	} else {
+		unsigned char xlat[256], j = 0;
 
-	for (i = 0; i < trlen; i++) {
-		xlat[(size_t)(unsigned char) str_from[i]] = str_to[i];
-	}
+		do { xlat[j] = j; } while (++j != 0);
 
-	for (i = 0; i < len; i++) {
-		str[i] = xlat[(size_t)(unsigned char) str[i]];
+		for (i = 0; i < trlen; i++) {
+			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i];
+		}
+		
+		for (i = 0; i < len; i++) {
+			str[i] = xlat[(size_t)(unsigned char) str[i]];
+		}
 	}
 
 	return str;
@@ -3029,17 +3039,18 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 PHP_FUNCTION(strtr)
 {
 	zval *from;
-	char *str, *to = NULL;
-	size_t str_len, to_len = 0;
+	zend_string *str;
+	char *to = NULL;
+	size_t to_len = 0;
 	int ac = ZEND_NUM_ARGS();
 
 #ifndef FAST_ZPP
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|s", &str, &str_len, &from, &to, &to_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|s", &str, &from, &to, &to_len) == FAILURE) {
 		return;
 	}
 #else
 	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 		Z_PARAM_ZVAL(from)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(to, to_len)
@@ -3052,16 +3063,58 @@ PHP_FUNCTION(strtr)
 	}
 
 	/* shortcut for empty string */
-	if (str_len == 0) {
+	if (str->len == 0) {
 		RETURN_EMPTY_STRING();
 	}
 
 	if (ac == 2) {
-		php_strtr_array(return_value, str, str_len, HASH_OF(from));
+		HashTable *pats = HASH_OF(from);
+
+		if (zend_hash_num_elements(pats) < 1) {
+			RETURN_STR(zend_string_copy(str));
+//...			
+#if 1
+		} else if (zend_hash_num_elements(pats) == 1) {
+			zend_long num_key;
+			zend_string *str_key, *replace;
+			zval *entry, tmp;
+
+			ZEND_HASH_FOREACH_KEY_VAL(pats, num_key, str_key, entry) {
+				ZVAL_UNDEF(&tmp);
+				if (UNEXPECTED(!str_key)) {
+					ZVAL_LONG(&tmp, num_key);
+					convert_to_string(&tmp);
+					str_key = Z_STR(tmp);
+				}		
+				replace = zval_get_string(entry);
+				if (str_key->len < 1) {
+					RETVAL_STR(zend_string_copy(str));
+				} else if (str_key->len == 1) {
+					php_char_to_str_ex(str->val,
+								str->len,
+								str_key->val[0],
+								replace->val,
+								replace->len,
+								return_value,
+								0,
+								NULL);
+				} else {
+					RETVAL_STR(php_str_to_str_ex(str->val, str->len,
+								str_key->val, str_key->len,
+								replace->val, replace->len, 0, NULL));
+				}
+				zend_string_release(replace);
+				zval_dtor(&tmp);
+				return;
+			} ZEND_HASH_FOREACH_END();
+#endif
+		} else {
+			php_strtr_array(return_value, str->val, str->len, pats);
+		}
 	} else {
 		convert_to_string_ex(from);
 
-		ZVAL_STRINGL(return_value, str, str_len);
+		ZVAL_STRINGL(return_value, str->val, str->len);
 
 		php_strtr(Z_STRVAL_P(return_value),
 				  Z_STRLEN_P(return_value),
@@ -3850,7 +3903,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval *subjec
 						Z_STRVAL_P(search), Z_STRLEN_P(search),
 						Z_STRVAL_P(replace), Z_STRLEN_P(replace), case_sensitivity, replace_count));
 		} else {
-			ZVAL_DUP(result, subject);
+			ZVAL_COPY(result, subject);
 		}
 	}
 	zval_ptr_dtor(&tmp_subject);
@@ -5230,9 +5283,13 @@ PHP_FUNCTION(str_rot13)
 		return;
 	}
 
-	RETVAL_STRINGL(arg->val, arg->len);
+	if (arg->len == 0) {
+		RETURN_EMPTY_STRING();
+	} else {
+		RETVAL_STRINGL(arg->val, arg->len);
 
-	php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), rot13_from, rot13_to, 52);
+		php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), rot13_from, rot13_to, 52);
+	}
 }
 /* }}} */
 
