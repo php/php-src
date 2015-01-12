@@ -5,28 +5,28 @@
   Epinions.com may be contacted at feedback@epinions-inc.com
 */
 
-/*  
-  Copyright 2000 Epinions, Inc. 
+/*
+  Copyright 2000 Epinions, Inc.
 
-  Subject to the following 3 conditions, Epinions, Inc.  permits you, free 
-  of charge, to (a) use, copy, distribute, modify, perform and display this 
-  software and associated documentation files (the "Software"), and (b) 
-  permit others to whom the Software is furnished to do so as well.  
+  Subject to the following 3 conditions, Epinions, Inc.  permits you, free
+  of charge, to (a) use, copy, distribute, modify, perform and display this
+  software and associated documentation files (the "Software"), and (b)
+  permit others to whom the Software is furnished to do so as well.
 
-  1) The above copyright notice and this permission notice shall be included 
-  without modification in all copies or substantial portions of the 
-  Software.  
+  1) The above copyright notice and this permission notice shall be included
+  without modification in all copies or substantial portions of the
+  Software.
 
-  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF 
-  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY 
-  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-  PURPOSE OR NONINFRINGEMENT.  
+  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF
+  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY
+  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR
+  PURPOSE OR NONINFRINGEMENT.
 
-  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT, 
-  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT 
-  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING 
-  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH 
-  DAMAGES.    
+  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,
+  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT
+  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING
+  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH
+  DAMAGES.
 
 */
 
@@ -92,7 +92,7 @@ static const char rcsid[] = "#(@) $Id$";
  *   adding cvs log to history section
  *
  *   10/15/2000 -- danda -- adding robodoc documentation
- *   08/2000 -- danda -- PHP C extension that uses XMLRPC                     
+ *   08/2000 -- danda -- PHP C extension that uses XMLRPC
  *   08/2000 -- danda -- support for two vocabularies: danda-rpc and xml-rpc
  *   09/1999 -- danda -- Initial API, before I even knew of standard XMLRPC vocab. Response only.
  *   07/2000 -- danda -- wrote new implementation to be compatible with xmlrpc standard and
@@ -109,7 +109,7 @@ static const char rcsid[] = "#(@) $Id$";
  *
  *   This code aims to be a full-featured C implementation of XMLRPC.  It does not
  *   have any networking code.  Rather, it is intended to be plugged into apps
- *   or libraries with existing networking facilities, eg PHP, apache, perl, mozilla, 
+ *   or libraries with existing networking facilities, eg PHP, apache, perl, mozilla,
  *   home-brew application servers, etc.
  *
  *   Usage Paradigm:
@@ -130,13 +130,13 @@ static const char rcsid[] = "#(@) $Id$";
  *       it can be used as a standalone dom implementation.
  *     - Because of this, the same XMLRPC data can be serialized into multiple xml vocabularies.
  *       It is simply a matter of writing a transport.  So far, two transports have been defined.
- *       The default xmlrpc vocab (xml_to_xmlrpc.c), and simple-rpc (xml_to_dandarpc.c) which is 
+ *       The default xmlrpc vocab (xml_to_xmlrpc.c), and simple-rpc (xml_to_dandarpc.c) which is
  *       proprietary, but imho more readable, and nice for proprietary legacy reasons.
  *     - Various output options, including: xml escaping via CDATA or entity, case folding,
  *       vocab version, and character encoding.
  *     - One to One mapping between C structures and actual values, unlike ensor which forces
  *       one to understand the arcana of the xmlrpc vocab.
- *     - support for mixed indexed/keyed vector types, making it more compatible with 
+ *     - support for mixed indexed/keyed vector types, making it more compatible with
  *       languages such as PHP.
  *     - quite speedy compared to implementations written in interpreted languages. Also, uses
  *       intelligent string handling, so not many strlen() calls, etc.
@@ -187,7 +187,7 @@ static int date_from_ISO8601 (const char *text, time_t * value) {
    int n;
    int i;
    char buf[30];
-	
+
 
 	if (strchr (text, '-')) {
 		char *p = (char *) text, *p2 = buf;
@@ -522,7 +522,7 @@ XMLRPC_VALUE XMLRPC_RequestGetData(XMLRPC_REQUEST request) {
  *   XMLRPC_VALUE XMLRPC_RequestSetError(XMLRPC_REQUEST request, XMLRPC_VALUE error)
  * FUNCTION
  *   Associates a block of xmlrpc data, representing an error
- *   condition, with the request. 
+ *   condition, with the request.
  * INPUTS
  *   request -- previously allocated request struct
  *   error   -- previously allocated error code or struct
@@ -651,7 +651,7 @@ XMLRPC_REQUEST_OUTPUT_OPTIONS XMLRPC_RequestGetOutputOptions(XMLRPC_REQUEST requ
  *   val -- previously allocated XMLRPC_VALUE
  *   buf_len -- length of returned buffer, if not null
  * RESULT
- *   char* -- newly allocated buffer containing XML. 
+ *   char* -- newly allocated buffer containing XML.
  *   It is the caller's responsibility to free it.
  * SEE ALSO
  *   XMLRPC_REQUEST_ToXML ()
@@ -684,7 +684,7 @@ char* XMLRPC_VALUE_ToXML(XMLRPC_VALUE val, int* buf_len) {
  *   request -- previously allocated XMLRPC_REQUEST
  *   buf_len -- size of returned buf, if not null
  * RESULT
- *   char* -- newly allocated buffer containing XML. 
+ *   char* -- newly allocated buffer containing XML.
  *   It is the caller's responsibility to free it.
  * SEE ALSO
  *   XMLRPC_REQUEST_ToXML ()
@@ -761,8 +761,8 @@ static XMLRPC_VALUE map_expat_errors(XML_ELEM_ERROR error) {
    if(error) {
       XMLRPC_ERROR_CODE code;
       char buf[1024];
-      snprintf(buf, sizeof(buf), 
-               "error occurred at line %ld, column %ld, byte index %ld", 
+      snprintf(buf, sizeof(buf),
+               "error occurred at line %ld, column %ld, byte index %ld",
 					 error->line, error->column, error->byte_index);
 
       /* expat specific errors */
@@ -801,7 +801,7 @@ static XMLRPC_VALUE map_expat_errors(XML_ELEM_ERROR error) {
  *   XMLRPC_REQUEST
  * SOURCE
  */
-XMLRPC_REQUEST XMLRPC_REQUEST_FromXML (const char *in_buf, int len, 
+XMLRPC_REQUEST XMLRPC_REQUEST_FromXML (const char *in_buf, int len,
 													XMLRPC_REQUEST_INPUT_OPTIONS in_options) {
    XMLRPC_REQUEST request = XMLRPC_RequestNew();
    STRUCT_XML_ELEM_ERROR error = {0};
@@ -921,7 +921,7 @@ const char *XMLRPC_SetValueID_Case(XMLRPC_VALUE value, const char* id, int len, 
 
 #ifdef XMLRPC_DEBUG_REFCOUNT
          printf("set value id: %s\n", pRetval);
-#endif 
+#endif
       }
    }
 
@@ -1026,7 +1026,7 @@ void XMLRPC_SetValueBoolean(XMLRPC_VALUE value, int val) {
  * FUNCTION
  *   Set the XMLRPC_VALUE to be a vector (list) type.  The vector may be one of
  *   [xmlrpc_array | xmlrpc_struct | xmlrpc_mixed].  An array has only index values.
- *   A struct has key/val pairs.  Mixed allows both index and key/val combinations. 
+ *   A struct has key/val pairs.  Mixed allows both index and key/val combinations.
  * INPUTS
  *   value     The xml value who's vector type we will set
  *   type      New type of vector as enumerated by XMLRPC_VECTOR_TYPE
@@ -1121,7 +1121,7 @@ XMLRPC_VALUE XMLRPC_CreateVector(const char* id, XMLRPC_VECTOR_TYPE type) {
 /* Not yet implemented.
  *
  * This should use a hash to determine if a given target id has already
- * been appended.  
+ * been appended.
  *
  * Alternately, it could walk the entire vector, but that could be quite
  * slow for very large lists.
@@ -1154,7 +1154,7 @@ static int isDuplicateEntry(XMLRPC_VALUE target, XMLRPC_VALUE source) {
  */
 int XMLRPC_AddValueToVector(XMLRPC_VALUE target, XMLRPC_VALUE source) {
    if(target && source) {
-      if(target->type == xmlrpc_vector && target->v && 
+      if(target->type == xmlrpc_vector && target->v &&
          target->v->q && target->v->type != xmlrpc_vector_none) {
 
          /* guard against putting value of unknown type into vector */
@@ -1464,7 +1464,7 @@ void XMLRPC_CleanupValue(XMLRPC_VALUE value) {
                XMLRPC_VALUE cur = (XMLRPC_VALUE)Q_Head(value->v->q);
                while( cur ) {
                   XMLRPC_CleanupValue(cur);
-   
+
                   /* Make sure some idiot didn't include a vector as a child of itself
                    * and thus it would have already free'd these.
                    */
@@ -1503,7 +1503,7 @@ void XMLRPC_CleanupValue(XMLRPC_VALUE value) {
                else {
                   printf("free'd 0x%x\n", value);
                }
-#endif 
+#endif
                simplestring_free(&value->id);
                simplestring_free(&value->str);
 
@@ -1617,7 +1617,7 @@ XMLRPC_VALUE XMLRPC_CopyValue(XMLRPC_VALUE value) {
  * NOTES
  *   Use this when function when you need to modify the contents of
  *   the copied value separately from the original.
- *   
+ *
  *   this function is recursive, thus the value and all of its children
  *   (if any) will be duplicated.
  * SOURCE
@@ -1712,7 +1712,7 @@ XMLRPC_VALUE XMLRPC_CreateValueDateTime(const char* id, time_t time) {
  *   value     The target XMLRPC_VALUE
  *   s         The desired new time value
  * RESULT
- *   void                                
+ *   void
  * BUGS
  *   This function currently attempts to convert the time string to a valid unix time
  *   value before passing it. Behavior when the string is invalid or out of range
@@ -1750,7 +1750,7 @@ void XMLRPC_SetValueDateTime_ISO8601(XMLRPC_VALUE value, const char* s) {
  *   id        The id of the new value, or NULL
  *   s         The desired new time value
  * RESULT
- *   newly allocated XMLRPC_VALUE, or NULL if no value created.                                
+ *   newly allocated XMLRPC_VALUE, or NULL if no value created.
  * BUGS
  *   See XMLRPC_SetValueDateTime_ISO8601 ()
  * SEE ALSO
@@ -1786,7 +1786,7 @@ XMLRPC_VALUE XMLRPC_CreateValueDateTime_ISO8601(const char* id, const char *s) {
  *   s         The desired new binary value
  *   len       The length of s, or NULL. If buffer is not null terminated, len *must* be passed.
  * RESULT
- *   void                                
+ *   void
  * NOTES
  *   Data is set/stored/retrieved as passed in, but is base64 encoded for XML transfer, and
  *   decoded on the other side.  This is transparent to the caller.
@@ -1853,7 +1853,7 @@ XMLRPC_VALUE XMLRPC_CreateValueBase64(const char* id, const char* s, int len) {
  *   value     The target XMLRPC_VALUE
  *   val       The desired new double value
  * RESULT
- *   void                                
+ *   void
  * SEE ALSO
  *   XMLRPC_GetValueDouble ()
  *   XMLRPC_CreateValueDouble ()
@@ -1880,7 +1880,7 @@ void XMLRPC_SetValueDouble(XMLRPC_VALUE value, double val) {
  *   id        id of the newly created value, or NULL
  *   d         The desired new double value
  * RESULT
- *   void                                
+ *   void
  * SEE ALSO
  *   XMLRPC_GetValueDouble ()
  *   XMLRPC_CreateValueDouble ()
@@ -1910,7 +1910,7 @@ XMLRPC_VALUE XMLRPC_CreateValueDouble(const char* id, double d) {
  * INPUTS
  *   value     source XMLRPC_VALUE of type xmlrpc_string
  * RESULT
- *   void                                
+ *   void
  * SEE ALSO
  *   XMLRPC_SetValueString ()
  *   XMLRPC_GetValueType ()
@@ -1931,7 +1931,7 @@ const char* XMLRPC_GetValueString(XMLRPC_VALUE value) {
  * FUNCTION
  *   determine length of string value
  * INPUTS
- *   value     XMLRPC_VALUE of type xmlrpc_string 
+ *   value     XMLRPC_VALUE of type xmlrpc_string
  * RESULT
  *   length of string, or 0
  * NOTES
@@ -1954,7 +1954,7 @@ int XMLRPC_GetValueStringLen(XMLRPC_VALUE value) {
  * FUNCTION
  *   retrieve integer value.
  * INPUTS
- *   value     XMLRPC_VALUE of type xmlrpc_int 
+ *   value     XMLRPC_VALUE of type xmlrpc_int
  * RESULT
  *   integer value or 0 if value is not valid int
  * NOTES
@@ -2128,7 +2128,7 @@ const char* XMLRPC_GetValueID(XMLRPC_VALUE value) {
  * RESULT
  *   count of items in vector
  * NOTES
- *   This is a cheap operation even on large vectors.  Vector size is 
+ *   This is a cheap operation even on large vectors.  Vector size is
  *   maintained by queue during add/remove ops.
  * SEE ALSO
  *   XMLRPC_AddValueToVector ()
@@ -2266,7 +2266,7 @@ XMLRPC_VECTOR_TYPE XMLRPC_GetVectorType(XMLRPC_VALUE value) {
  *   data type of value as enumerated by XMLRPC_VALUE_TYPE_EASY
  *   xmlrpc_type_none if not a value.
  * NOTES
- *   all values are of type xmlrpc_type_empty until set. 
+ *   all values are of type xmlrpc_type_empty until set.
  * SEE ALSO
  *   XMLRPC_SetValue*
  *   XMLRPC_CreateValue*
@@ -2440,7 +2440,7 @@ int XMLRPC_ServerRegisterMethod(XMLRPC_SERVER server, const char *name, XMLRPC_C
    if(server && name && cb) {
 
       server_method* sm = malloc(sizeof(server_method));
-      
+
       if(sm) {
          sm->name = strdup(name);
          sm->method = cb;
@@ -2510,7 +2510,7 @@ const char* type_to_str(XMLRPC_VALUE_TYPE type, XMLRPC_VECTOR_TYPE vtype) {
  *   XMLRPC_Callback XMLRPC_ServerFindMethod(XMLRPC_SERVER server, const char* callName)
  * FUNCTION
  *   retrieve C callback associated with a given method name.
- * INPUTS       
+ * INPUTS
  *   server     The XMLRPC_SERVER the method is registered with
  *   callName   the method to find
  * RESULT
@@ -2556,7 +2556,7 @@ XMLRPC_Callback XMLRPC_ServerFindMethod(XMLRPC_SERVER server, const char* callNa
  * NOTES
  *   It is typically the caller's responsibility to free the returned value.
  *
- *   Often the caller will want to serialize the result as XML, via 
+ *   Often the caller will want to serialize the result as XML, via
  *   XMLRPC_VALUE_To_XML () or XMLRPC_REQUEST_To_XML ()
  * SEE ALSO
  *   XMLRPC_ServerFindMethod ()
@@ -2749,12 +2749,12 @@ XMLRPC_CASE_COMPARISON XMLRPC_SetDefaultIdCaseComparison(XMLRPC_CASE_COMPARISON 
  *   This function now supports some "standardized" fault codes, as specified at.
  *   http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php.
  *   If one of these fault codes is received, the description string will automatically
- *   be prefixed with a standard error string and 2 newlines.  
+ *   be prefixed with a standard error string and 2 newlines.
  *
  *   The actual transformation between this complex type and the xml "<fault>" element takes
  *   place in the xmlrpc to xml serialization layer.  This step is not performed when using the
  *   simplerpc serialization, meaning that there will be no "<fault>" element in that
- *   serialization. There will simply be a standard struct with 2 child elements.  
+ *   serialization. There will simply be a standard struct with 2 child elements.
  *   imho, the "<fault>" element is unnecessary and/or out of place as part of the standard API.
  *
  * SOURCE
@@ -2970,7 +2970,7 @@ const char* XMLRPC_GetResponseFaultString (XMLRPC_REQUEST response) {
  * SYNOPSIS
  *   void XMLRPC_Free(void* mem)
  * FUNCTION
- *   frees a block of memory allocated by xmlrpc. 
+ *   frees a block of memory allocated by xmlrpc.
  * INPUTS
  *   mem    memory to free
  * RESULT
@@ -2995,9 +2995,9 @@ void XMLRPC_Free(void* mem) {
  * FUNCTION
  *   returns library version string
  * INPUTS
- *   
+ *
  * RESULT
- *   const char* 
+ *   const char*
  * NOTES
  * SOURCE
  */

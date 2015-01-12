@@ -245,7 +245,7 @@ PHPDBG_COMMAND(help) /* {{{ */
 		    n = get_command( param->str, param->len, &cmd, phpdbg_help_commands);
 
 			if (n>0) {
-				if (cmd->alias == 'a') {   /* help aliases executes a canned routine */ 
+				if (cmd->alias == 'a') {   /* help aliases executes a canned routine */
 					return cmd->handler(param);
 				} else {
 					pretty_print(get_help(cmd->name));
@@ -320,7 +320,7 @@ PHPDBG_HELP(aliases) /* {{{ */
  * Also note the convention that help text not directly referenceable as a help param
  * has a key ending in !
  */
-#define CR "\n" 
+#define CR "\n"
 phpdbg_help_text_t phpdbg_help_text[] = {
 
 /******************************** General Help Topics ********************************/
@@ -332,7 +332,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **list**     list PHP source" CR
 "  **info**     displays information on the debug session" CR
 "  **print**    show opcodes" CR
-"  **frame**    select a stack frame and print a stack frame summary" CR 
+"  **frame**    select a stack frame and print a stack frame summary" CR
 "  **back**     shows the current backtrace" CR
 "  **help**     provide help on a topic" CR CR
 
@@ -412,10 +412,10 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Debugger scripts can also be executed using the **source** command." CR CR
 
 "A script file can contain a sequence of valid debugger commands, comments and embedded PHP "
-"code. " CR CR 
+"code. " CR CR
 
 "Comment lines are prefixed by the **#** character.  Note that comments are only allowed in script "
-"files and not in interactive sessions." CR CR 
+"files and not in interactive sessions." CR CR
 
 "PHP code is delimited by the start and end escape tags **<:** and **:>**. PHP code can be used "
 "to define application context for a debugging session and also to extend the debugger by defining "
@@ -608,7 +608,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"exec",
-"The **exec** command sets the execution context, that is the script to be executed.  The " 
+"The **exec** command sets the execution context, that is the script to be executed.  The "
 "execution context must be defined either by executing the **exec** command or by using the "
 "**-e** command line option." CR CR
 

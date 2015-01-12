@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-/* This code is heavily based on the PHP md5 implementation */ 
+/* This code is heavily based on the PHP md5 implementation */
 
 #include "sha1.h"
 #include "md5.h"
@@ -39,7 +39,7 @@ PHP_FUNCTION(sha1)
 	char sha1str[41];
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &arg, &raw_output) == FAILURE) {
 		return;
 	}
@@ -77,7 +77,7 @@ PHP_FUNCTION(sha1_file)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
-	
+
 	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS, NULL);
 	if (!stream) {
 		RETURN_FALSE;
@@ -128,7 +128,7 @@ static unsigned char PADDING[64] =
 /* W[i]
  */
 #define W(i) ( tmp=x[(i-3)&15]^x[(i-8)&15]^x[(i-14)&15]^x[i&15], \
-	(x[i&15]=ROTATE_LEFT(tmp, 1)) )  
+	(x[i&15]=ROTATE_LEFT(tmp, 1)) )
 
 /* FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
  */
@@ -152,7 +152,7 @@ static unsigned char PADDING[64] =
  (e) += ROTATE_LEFT ((a), 5); \
  (b) = ROTATE_LEFT((b), 30); \
   }
-			                    
+
 
 /* {{{ PHP_SHA1Init
  * SHA1 initialization. Begins an SHA1 operation, writing a new context.
@@ -230,7 +230,7 @@ PHPAPI void PHP_SHA1Final(unsigned char digest[20], PHP_SHA1_CTX * context)
 	bits[2] = (context->count[1] >> 8) & 0xFF;
 	bits[1] = (context->count[1] >> 16) & 0xFF;
 	bits[0] = (context->count[1] >> 24) & 0xFF;
-	
+
 	/* Pad out to 56 mod 64.
 	 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);

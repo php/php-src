@@ -52,7 +52,7 @@ TSRMLS_CACHE_UPDATE;
 	globals->comspec = _strdup((GetVersion()<0x80000000)?"cmd.exe":"command.com");
 
 	/* Set it to INVALID_HANDLE_VALUE
-	 * It will be initialized correctly in tsrm_win32_access or set to 
+	 * It will be initialized correctly in tsrm_win32_access or set to
 	 * NULL if no impersonation has been done.
 	 * the impersonated token can't be set here as the impersonation
 	 * will happen later, in fcgi_accept_request (or whatever is the

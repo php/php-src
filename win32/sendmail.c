@@ -1,8 +1,8 @@
-/* 
+/*
  *    PHP Sendmail for Windows.
  *
  *  This file is rewriten specificly for PHPFI.  Some functionality
- *  has been removed (MIME and file attachments).  This code was 
+ *  has been removed (MIME and file attachments).  This code was
  *  modified from code based on code written by Jarle Aase.
  *
  *  This class is based on the original code by Jarle Aase, see bellow:
@@ -155,7 +155,7 @@ static zend_string *php_win32_mail_trim_header(char *header)
 {
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
-	
+
 	zend_string *result, *result2;
 	zval replace;
 	zend_string *regex;
@@ -255,7 +255,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			headers_lc->val[i] = tolower(headers_lc->val[i]);
 		}
 	}
- 
+
 	/* Fall back to sendmail_from php.ini setting */
 	if (mailRPath && *mailRPath) {
 		RPath = estrdup(mailRPath);
@@ -266,7 +266,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 				((pos1 == headers_lc->val) || (*(pos1-1) == '\n'))
 	) {
 		/* Real offset is memaddress from the original headers + difference of
-		 * string found in the lowercase headrs + 5 characters to jump over   
+		 * string found in the lowercase headrs + 5 characters to jump over
 		 * the from: */
 		pos1 = headers + (pos1 - headers_lc->val) + 5;
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
@@ -331,12 +331,12 @@ PHPAPI void TSMClose()
 {
 	Post("QUIT\r\n");
 	Ack(NULL);
-	/* to guarantee that the cleanup is not made twice and 
+	/* to guarantee that the cleanup is not made twice and
 	   compomise the rest of the application if sockets are used
-	   elesewhere 
+	   elesewhere
 	*/
 
-	shutdown(sc, 0); 
+	shutdown(sc, 0);
 	closesocket(sc);
 }
 
@@ -362,7 +362,7 @@ PHPAPI char *GetSMErrorText(int index)
 
 PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle,
 		size_t needle_len, char *str, size_t str_len);
-	
+
 
 /*********************************************************************
 // Name:  SendText
@@ -382,7 +382,7 @@ PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle,
 // Author/Date:  jcar 20/9/96
 // History:
 //*******************************************************************/
-static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data, 
+static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data,
 			 char *headers, char *headers_lc, char **error_message)
 {
 	int res;
@@ -896,7 +896,7 @@ again:
 
 	/* Check for newline */
 	Index += rlen;
-	
+
 	/* SMPT RFC says \r\n is the only valid line ending, who are we to argue ;)
 	 * The response code must contain at least 5 characters ex. 220\r\n */
 	if (Received < 5 || buf[Received - 1] != '\n' || buf[Received - 2] != '\r') {
@@ -966,14 +966,14 @@ static unsigned long GetAddr(LPSTR szHost)
 
 /*********************************************************************
 // Name:  int FormatEmailAddress
-// Input: 
+// Input:
 // Output:
 // Description: Formats the email address to remove any content ouside
 //   of the angle brackets < > as per RFC 2821.
 //
-//   Returns the invalidly formatted mail address if the < > are 
+//   Returns the invalidly formatted mail address if the < > are
 //   unbalanced (the SMTP server should reject it if it's out of spec.)
-//  
+//
 // Author/Date:  garretts 08/18/2009
 // History:
 //********************************************************************/
@@ -986,6 +986,6 @@ static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString)
 		result = snprintf(Buf, MAIL_BUFFER_SIZE, FormatString , tmpAddress1+1);
 		*tmpAddress2 = '>'; // put it back the way it was.
 		return result;
-	} 
+	}
 	return snprintf(Buf, MAIL_BUFFER_SIZE , FormatString , EmailAddress );
 } /* end FormatEmailAddress() */

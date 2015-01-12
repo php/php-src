@@ -1469,7 +1469,7 @@ next_target:
 					}
 
 					/* next block is only NOP's */
-					if (target == target_end) {
+					if (target == target_end && ! block->follow_to->protected) {
 						del_source(block, block->follow_to);
 						block->follow_to = block->follow_to->follow_to;
 						ADD_SOURCE(block, block->follow_to);
@@ -1522,7 +1522,7 @@ next_target:
 				char *same_t=NULL;
 				zend_code_block *target_block;
 				int var_num = op_array->last_var + op_array->T;
-		
+
 				if (var_num <= 0) {
    					return;
 				}

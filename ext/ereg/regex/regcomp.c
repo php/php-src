@@ -1276,6 +1276,10 @@ int c;
 	register int ncols = (g->ncsets+(CHAR_BIT-1)) / CHAR_BIT;
 	register unsigned uc = (unsigned char)c;
 
+	if (!g->setbits) {
+		return(0);
+	}
+
 	for (i = 0, col = g->setbits; i < ncols; i++, col += g->csetsize)
 		if (col[uc] != 0)
 			return(1);

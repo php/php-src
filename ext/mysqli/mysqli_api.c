@@ -33,6 +33,7 @@
 #include "zend_smart_str.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
+#include "ext/mysqlnd/mysql_float_to_double.h"
 
 
 #if !defined(MYSQLI_USE_MYSQLND)
@@ -413,8 +414,17 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 		col_type = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].type : MYSQL_TYPE_STRING;
 
 		switch (col_type) {
-			case MYSQL_TYPE_DOUBLE:
 			case MYSQL_TYPE_FLOAT:
+				stmt->result.buf[ofs].type = IS_DOUBLE;
+				stmt->result.buf[ofs].buflen = sizeof(float);
+
+				stmt->result.buf[ofs].val = (char *)emalloc(sizeof(float));
+				bind[ofs].buffer_type = MYSQL_TYPE_FLOAT;
+				bind[ofs].buffer = stmt->result.buf[ofs].val;
+				bind[ofs].is_null = &stmt->result.is_null[ofs];
+				break;
+
+			case MYSQL_TYPE_DOUBLE:
 				stmt->result.buf[ofs].type = IS_DOUBLE;
 				stmt->result.buf[ofs].buflen = sizeof(double);
 
@@ -708,7 +718,7 @@ void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status)
 					FAIL == mysqlnd_rollback(mysql->mysql, TRANS_COR_NO_OPT, NULL))
 #endif
 				{
-					mysqli_close(mysql->mysql, close_type);			
+					mysqli_close(mysql->mysql, close_type);
 				} else {
 					zend_ptr_stack_push(&plist->free_links, mysql->mysql);
 					MyG(num_inactive_persistent)++;
@@ -1021,8 +1031,22 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 						}
 						break;
 					case IS_DOUBLE:
-						ZVAL_DOUBLE(result, *(double *)stmt->result.buf[i].val);
+					{
+						double dval;
+						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_FLOAT) {
+#ifndef NOT_FIXED_DEC
+# define NOT_FIXED_DEC 31
+#endif
+							dval = mysql_float_to_double(*(float *)stmt->result.buf[i].val,
+										(stmt->stmt->fields[i].decimals >= NOT_FIXED_DEC) ? -1 :
+										stmt->stmt->fields[i].decimals);
+						} else {
+							dval = *((double *)stmt->result.buf[i].val);
+						}
+
+						ZVAL_DOUBLE(result, dval);
 						break;
+					}
 					case IS_STRING:
 						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG
 #if MYSQL_VERSION_ID > 50002
@@ -1480,7 +1504,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS)
 	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql;
 
-// TODO: We can't properly check if this was to mysql_init() in a class method 
+// TODO: We can't properly check if this was to mysql_init() in a class method
 //       or a call to mysqli->init().
 //       To solve the problem, we added instanceof check for the class of $this
 //       ???

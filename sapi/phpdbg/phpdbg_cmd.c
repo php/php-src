@@ -462,7 +462,7 @@ PHPDBG_API int phpdbg_stack_verify(const phpdbg_command_t *command, phpdbg_param
 				return SUCCESS;
 			}
 
-			phpdbg_error("command", "type=\"toomanyargs\" command=\"%s\" expected=\"0\"", "The command \"%s\" expected no arguments", 
+			phpdbg_error("command", "type=\"toomanyargs\" command=\"%s\" expected=\"0\"", "The command \"%s\" expected no arguments",
 				phpdbg_command_name(command, buffer));
 			return FAILURE;
 		}

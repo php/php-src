@@ -601,7 +601,7 @@ int phar_open_parsed_phar(char *fname, int fname_len, char *alias, int alias_len
  *
  * Meta-data is in this format:
  * [len32][data...]
- * 
+ *
  * data is the serialized zval
  */
 int phar_parse_metadata(char **buffer, zval *metadata, int zip_metadata_len) /* {{{ */
@@ -655,7 +655,7 @@ int phar_parse_metadata(char **buffer, zval *metadata, int zip_metadata_len) /* 
  *
  * Parse a new one and add it to the cache, returning either SUCCESS or
  * FAILURE, and setting pphar to the pointer to the manifest entry
- * 
+ *
  * This is used by phar_open_from_filename to process the manifest, but can be called
  * directly.
  */
@@ -2170,7 +2170,7 @@ last_time:
 
 /**
  * Process a phar stream name, ensuring we can handle any of:
- * 
+ *
  * - whatever.phar
  * - whatever.phar.gz
  * - whatever.phar.bz2

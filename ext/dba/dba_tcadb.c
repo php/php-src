@@ -34,7 +34,7 @@
 #define TCADB_DATA dba_tcadb_data *dba = info->dbf
 
 typedef struct {
-	TCADB *tcadb;	
+	TCADB *tcadb;
 } dba_tcadb_data;
 
 DBA_OPEN_FUNC(tcadb)
@@ -115,7 +115,7 @@ DBA_UPDATE_FUNC(tcadb)
 			return FAILURE;
 		}
 	}
-	
+
 	result = tcadbput(dba->tcadb, key, keylen, val, vallen);
 
 	if (result) {

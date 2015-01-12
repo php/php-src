@@ -383,7 +383,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		/* search for directory */
 		zend_hash_internal_pointer_reset(&phar->manifest);
 		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
-			if (HASH_KEY_NON_EXISTENT != 
+			if (HASH_KEY_NON_EXISTENT !=
 					zend_hash_get_current_key(&phar->manifest, &str_key, &unused)) {
 				if (str_key->len > (uint)i_len && 0 == memcmp(str_key->val, internal_file, i_len)) {
 					/* directory found */
@@ -614,8 +614,8 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&phar->manifest, &str_key, &unused);
 			zend_hash_move_forward(&phar->manifest)
 		) {
-			if (str_key->len > path_len && 
-				memcmp(str_key->val, resource->path+1, path_len) == 0 && 
+			if (str_key->len > path_len &&
+				memcmp(str_key->val, resource->path+1, path_len) == 0 &&
 				IS_SLASH(str_key->val[path_len])) {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
@@ -630,9 +630,9 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 		for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
 			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&phar->virtual_dirs, &str_key, &unused);
 			zend_hash_move_forward(&phar->virtual_dirs)) {
-	
-			if (str_key->len > path_len && 
-				memcmp(str_key->val, resource->path+1, path_len) == 0 && 
+
+			if (str_key->len > path_len &&
+				memcmp(str_key->val, resource->path+1, path_len) == 0 &&
 				IS_SLASH(str_key->val[path_len])) {
 				php_stream_wrapper_log_error(wrapper, options, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {

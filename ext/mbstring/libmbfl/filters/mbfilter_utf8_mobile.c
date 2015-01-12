@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -24,7 +24,7 @@
 /*
  * The source code included in this files was separated from mbfilter.c
  * by rui hrokawa <hirokawa@php.net> on 8 aug 2011.
- * 
+ *
  */
 
 #ifdef HAVE_CONFIG_H
@@ -215,7 +215,7 @@ retry:
 	case 0x32: /* 4byte code 4th char: 0x80-0xbf */
 		filter->status = 0;
 		if (c >= 0x80 && c <= 0xbf) {
-			s = (filter->cache<<6) | (c & 0x3f);			
+			s = (filter->cache<<6) | (c & 0x3f);
 			filter->cache = 0;
 
 			if (filter->from->no_encoding == mbfl_no_encoding_utf8_docomo &&
@@ -231,20 +231,20 @@ retry:
 					   mbfilter_conv_r_map_tbl(s, &s1, mbfl_sb2uni_pua, 6) > 0) {
 				s = mbfilter_sjis_emoji_sb2unicode(s1, &snd);
 			}
-			
+
 			if (snd > 0) {
 				CK((*filter->output_function)(snd, filter->data));
 			}
 			CK((*filter->output_function)(s, filter->data));
 		} else {
 			mbfl_filt_put_invalid_char(filter->cache, filter);
-			goto retry;			
+			goto retry;
 		}
 		break;
 	case 0x20: /* 3byte code 2nd char: 0:0xa0-0xbf,D:0x80-9F,1-C,E-F:0x80-0x9f */
 		s = (filter->cache<<6) | (c & 0x3f);
 		c1 = filter->cache & 0xf;
-		
+
 		if ((c >= 0x80 && c <= 0xbf) &&
 			((c1 == 0x0 && c >= 0xa0) ||
 			 (c1 == 0xd && c < 0xa0) ||
@@ -253,13 +253,13 @@ retry:
 			filter->status++;
 		} else {
 			mbfl_filt_put_invalid_char(filter->cache, filter);
-			goto retry;						
+			goto retry;
 		}
 		break;
 	case 0x30: /* 4byte code 2nd char: 0:0x90-0xbf,1-3:0x80-0xbf,4:0x80-0x8f */
 		s = (filter->cache<<6) | (c & 0x3f);
 		c1 = filter->cache & 0x7;
-		
+
 		if ((c >= 0x80 && c <= 0xbf) &&
 			((c1 == 0x0 && c >= 0x90) ||
 			 (c1 == 0x4 && c < 0x90) ||
@@ -268,7 +268,7 @@ retry:
 			filter->status++;
 		} else {
 			mbfl_filt_put_invalid_char(filter->cache, filter);
-			goto retry;						
+			goto retry;
 		}
 		break;
 	case 0x31: /* 4byte code 3rd char: 0x80-0xbf */
@@ -277,7 +277,7 @@ retry:
 			filter->status++;
 		} else {
 			mbfl_filt_put_invalid_char(filter->cache, filter);
-			goto retry;						
+			goto retry;
 		}
 		break;
 	default:
@@ -298,7 +298,7 @@ int mbfl_filt_conv_wchar_utf8_mobile(int c, mbfl_convert_filter *filter)
 
 		if ((filter->to->no_encoding == mbfl_no_encoding_utf8_docomo &&
 			 mbfilter_unicode2sjis_emoji_docomo(c, &s1, filter) > 0 &&
-			 mbfilter_conv_map_tbl(s1, &c1, mbfl_docomo2uni_pua, 4) > 0) || 
+			 mbfilter_conv_map_tbl(s1, &c1, mbfl_docomo2uni_pua, 4) > 0) ||
 			(filter->to->no_encoding == mbfl_no_encoding_utf8_kddi_a &&
 			 mbfilter_unicode2sjis_emoji_kddi(c, &s1, filter) > 0 &&
 			 mbfilter_conv_map_tbl(s1, &c1, mbfl_kddi2uni_pua, 7) > 0) ||

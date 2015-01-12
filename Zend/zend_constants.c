@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -164,7 +164,7 @@ void clean_non_persistent_constants(void)
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number)
 {
 	zend_constant c;
-	
+
 	ZVAL_NULL(&c.value);
 	c.flags = flags;
 	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
@@ -175,7 +175,7 @@ ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int
 ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, zend_bool bval, int flags, int module_number)
 {
 	zend_constant c;
-	
+
 	ZVAL_BOOL(&c.value, bval);
 	c.flags = flags;
 	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
@@ -186,7 +186,7 @@ ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, zen
 ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zend_long lval, int flags, int module_number)
 {
 	zend_constant c;
-	
+
 	ZVAL_LONG(&c.value, lval);
 	c.flags = flags;
 	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
@@ -198,7 +198,7 @@ ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zen
 ZEND_API void zend_register_double_constant(const char *name, size_t name_len, double dval, int flags, int module_number)
 {
 	zend_constant c;
-	
+
 	ZVAL_DOUBLE(&c.value, dval);
 	c.flags = flags;
 	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
@@ -210,7 +210,7 @@ ZEND_API void zend_register_double_constant(const char *name, size_t name_len, d
 ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, char *strval, size_t strlen, int flags, int module_number)
 {
 	zend_constant c;
-	
+
 	ZVAL_NEW_STR(&c.value, zend_string_init(strval, strlen, flags & CONST_PERSISTENT));
 	c.flags = flags;
 	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
@@ -238,7 +238,7 @@ static zend_constant *zend_get_special_constant(const char *name, size_t name_le
 		if (EG(scope) && EG(scope)->name) {
 			size_t const_name_len;
 			zend_string *const_name;
-			
+
 			const_name_len = sizeof("\0__CLASS__") + EG(scope)->name->len;
 			const_name = zend_string_alloc(const_name_len, 0);
 			memcpy(const_name->val, "\0__CLASS__", sizeof("\0__CLASS__")-1);
@@ -521,7 +521,7 @@ ZEND_API int zend_register_constant(zend_constant *c)
 	if ((c->name->len == sizeof("__COMPILER_HALT_OFFSET__")-1
 		&& !memcmp(name->val, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1))
 		|| zend_hash_add_constant(EG(zend_constants), name, c) == NULL) {
-		
+
 		/* The internal __COMPILER_HALT_OFFSET__ is prefixed by NULL byte */
 		if (c->name->val[0] == '\0' && c->name->len > sizeof("\0__COMPILER_HALT_OFFSET__")-1
 			&& memcmp(name->val, "\0__COMPILER_HALT_OFFSET__", sizeof("\0__COMPILER_HALT_OFFSET__")) == 0) {

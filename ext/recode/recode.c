@@ -15,7 +15,7 @@
    | Author: Kristian Koehntopp <kris@koehntopp.de>					      |
    +----------------------------------------------------------------------+
  */
- 
+
 /* $Id$ */
 
 /* {{{ includes & prototypes */
@@ -62,7 +62,7 @@ ZEND_END_MODULE_GLOBALS(recode)
 #else
 # define ReSG(v) (recode_globals.v)
 #endif
-    
+
 ZEND_DECLARE_MODULE_GLOBALS(recode)
 static PHP_GINIT_FUNCTION(recode);
 
@@ -89,13 +89,13 @@ static const zend_function_entry php_recode_functions[] = {
 
 zend_module_entry recode_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"recode", 
- 	php_recode_functions, 
-	PHP_MINIT(recode), 
-	PHP_MSHUTDOWN(recode), 
+	"recode",
+ 	php_recode_functions,
+	PHP_MINIT(recode),
+	PHP_MSHUTDOWN(recode),
 	NULL,
-	NULL, 
-	PHP_MINFO(recode), 
+	NULL,
+	PHP_MINFO(recode),
 	NO_VERSION_YET,
 	PHP_MODULE_GLOBALS(recode),
 	PHP_GINIT(recode),
@@ -164,7 +164,7 @@ PHP_FUNCTION(recode_string)
 		php_error_docref(NULL, E_WARNING, "Illegal recode request '%s'", req);
 		goto error_exit;
 	}
-	
+
 	recode_buffer_to_buffer(request, str, str_len, &r, &r_len, &r_alen);
 	if (!r) {
 		php_error_docref(NULL, E_WARNING, "Recoding failed.");
@@ -202,7 +202,7 @@ PHP_FUNCTION(recode_file)
 	if (FAILURE == php_stream_cast(instream, PHP_STREAM_AS_STDIO, (void**)&in_fp, REPORT_ERRORS))	{
 		RETURN_FALSE;
 	}
-	
+
 	if (FAILURE == php_stream_cast(outstream, PHP_STREAM_AS_STDIO, (void**)&out_fp, REPORT_ERRORS))	{
 		RETURN_FALSE;
 	}
@@ -217,7 +217,7 @@ PHP_FUNCTION(recode_file)
 		php_error_docref(NULL, E_WARNING, "Illegal recode request '%s'", req);
 		goto error_exit;
 	}
-	
+
 	if (!recode_file_to_file(request, in_fp, out_fp)) {
 		php_error_docref(NULL, E_WARNING, "Recoding failed.");
 		goto error_exit;

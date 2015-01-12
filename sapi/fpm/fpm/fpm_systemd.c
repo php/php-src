@@ -29,7 +29,7 @@ static void fpm_systemd() /* {{{ */
 	}
 
 /*
-	zlog(ZLOG_DEBUG, "systemd %s (Processes active:%d, idle:%d, Requests:%lu, slow:%lu, Traffic:%.3greq/sec)", 
+	zlog(ZLOG_DEBUG, "systemd %s (Processes active:%d, idle:%d, Requests:%lu, slow:%lu, Traffic:%.3greq/sec)",
 			fpm_global_config.systemd_watchdog ? "watchdog" : "heartbeat",
 			active, idle, requests, slow_req, ((float)requests - last) * 1000.0 / fpm_global_config.systemd_interval);
 */

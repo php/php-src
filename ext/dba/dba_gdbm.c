@@ -46,11 +46,11 @@ DBA_OPEN_FUNC(gdbm)
 	int filemode = 0644;
 
 	gmode = info->mode == DBA_READER ? GDBM_READER :
-		info->mode == DBA_WRITER ? GDBM_WRITER : 
-		info->mode == DBA_CREAT  ? GDBM_WRCREAT : 
+		info->mode == DBA_WRITER ? GDBM_WRITER :
+		info->mode == DBA_CREAT  ? GDBM_WRCREAT :
 		info->mode == DBA_TRUNC ? GDBM_NEWDB : -1;
-		
-	if(gmode == -1) 
+
+	if(gmode == -1)
 		return FAILURE; /* not possible */
 
 	if(info->argc > 0) {
@@ -59,7 +59,7 @@ DBA_OPEN_FUNC(gdbm)
 	}
 
 	dbf = gdbm_open(info->path, 0, gmode, filemode, NULL);
-	
+
 	if(dbf) {
 		info->dbf = pemalloc(sizeof(dba_gdbm_data), info->flags&DBA_PERSISTENT);
 		memset(info->dbf, 0, sizeof(dba_gdbm_data));
@@ -73,7 +73,7 @@ DBA_OPEN_FUNC(gdbm)
 DBA_CLOSE_FUNC(gdbm)
 {
 	GDBM_DATA;
-	
+
 	if(dba->nextkey.dptr) free(dba->nextkey.dptr);
 	gdbm_close(dba->dbf);
 	pefree(dba, info->flags&DBA_PERSISTENT);
@@ -130,7 +130,7 @@ DBA_DELETE_FUNC(gdbm)
 {
 	GDBM_DATA;
 	GDBM_GKEY;
-	
+
 	return gdbm_delete(dba->dbf, gkey) == -1 ? FAILURE : SUCCESS;
 }
 
@@ -143,7 +143,7 @@ DBA_FIRSTKEY_FUNC(gdbm)
 	if(dba->nextkey.dptr) {
 		free(dba->nextkey.dptr);
 	}
-	
+
 	gkey = gdbm_firstkey(dba->dbf);
 	if(gkey.dptr) {
 		key = estrndup(gkey.dptr, gkey.dsize);
@@ -162,7 +162,7 @@ DBA_NEXTKEY_FUNC(gdbm)
 	datum gkey;
 
 	if(!dba->nextkey.dptr) return NULL;
-	
+
 	gkey = gdbm_nextkey(dba->dbf, dba->nextkey);
 	free(dba->nextkey.dptr);
 	if(gkey.dptr) {
@@ -182,7 +182,7 @@ DBA_OPTIMIZE_FUNC(gdbm)
 	return SUCCESS;
 }
 
-DBA_SYNC_FUNC(gdbm) 
+DBA_SYNC_FUNC(gdbm)
 {
 	GDBM_DATA;
 

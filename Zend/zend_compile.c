@@ -542,6 +542,22 @@ void zend_do_free(znode *op1) /* {{{ */
 }
 /* }}} */
 
+uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
+{
+	uint32_t new_flags = flags | new_flag;
+	if ((flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flag & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
+	}
+	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
+	}
+	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_FINAL)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class");
+	}
+	return new_flags;
+}
+/* }}} */
+
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
@@ -1427,7 +1443,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 }
 /* }}} */
 
-uint32_t zend_get_class_fetch_type(zend_string *name) /* {{{ */ 
+uint32_t zend_get_class_fetch_type(zend_string *name) /* {{{ */
 {
 	if (zend_string_equals_literal_ci(name, "self")) {
 		return ZEND_FETCH_CLASS_SELF;
@@ -1628,7 +1644,7 @@ static inline zend_bool zend_string_equals_str_ci(zend_string *str1, zend_string
 }
 /* }}} */
 
-static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */ 
+static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 {
 	switch (type & BP_VAR_MASK) {
 		case BP_VAR_R:
@@ -1655,7 +1671,7 @@ static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 }
 /* }}} */
 
-static inline void zend_make_var_result(znode *result, zend_op *opline) /* {{{ */ 
+static inline void zend_make_var_result(znode *result, zend_op *opline) /* {{{ */
 {
 	opline->result_type = IS_VAR;
 	opline->result.var = get_temporary_variable(CG(active_op_array));
@@ -1671,7 +1687,7 @@ static inline void zend_make_tmp_result(znode *result, zend_op *opline) /* {{{ *
 }
 /* }}} */
 
-static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode *op2) /* {{{ */ 
+static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode *op2) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array));
 	opline->opcode = opcode;
@@ -1773,7 +1789,7 @@ static inline void zend_update_jump_target(uint32_t opnum_jump, uint32_t opnum_t
 }
 /* }}} */
 
-static inline void zend_update_jump_target_to_next(uint32_t opnum_jump) /* {{{ */ 
+static inline void zend_update_jump_target_to_next(uint32_t opnum_jump) /* {{{ */
 {
 	zend_update_jump_target(opnum_jump, get_next_op_number(CG(active_op_array)));
 }
@@ -1938,7 +1954,7 @@ static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast) /* {{{
 }
 /* }}} */
 
-static int zend_try_compile_cv(znode *result, zend_ast *ast) /* {{{ */ 
+static int zend_try_compile_cv(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *name_ast = ast->child[0];
 	if (name_ast->kind == ZEND_AST_ZVAL) {
@@ -2177,10 +2193,7 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
-
-	if (list->children == 1 && !list->child[0]) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
-	}
+	zend_bool has_elems = 0;
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *var_ast = list->child[i];
@@ -2189,6 +2202,7 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 		if (var_ast == NULL) {
 			continue;
 		}
+		has_elems = 1;
 
 		dim_node.op_type = IS_CONST;
 		ZVAL_LONG(&dim_node.u.constant, i);
@@ -2200,6 +2214,11 @@ static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_n
 		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
 		zend_emit_assign_znode(var_ast, &fetch_result);
 	}
+
+	if (!has_elems) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
+	}
+
 	*result = *expr_node;
 }
 /* }}} */
@@ -2406,7 +2425,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 		if (arg->kind == ZEND_AST_UNPACK) {
 			uses_arg_unpack = 1;
 			fbc = NULL;
-			
+
 			zend_compile_expr(&arg_node, arg->child[0]);
 			opline = zend_emit_op(NULL, ZEND_SEND_UNPACK, &arg_node, NULL);
 			opline->op2.num = arg_count;
@@ -2601,7 +2620,7 @@ int zend_compile_func_typecheck(znode *result, zend_ast_list *args, uint32_t typ
 	if (args->children != 1 || args->child[0]->kind == ZEND_AST_UNPACK) {
 		return FAILURE;
 	}
-	
+
 	zend_compile_expr(&arg_node, args->child[0]);
 	opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &arg_node, NULL);
 	opline->extended_value = type;
@@ -2861,7 +2880,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 	zend_compile_expr(&method_node, method_ast);
 	opline = zend_emit_op(NULL, ZEND_INIT_METHOD_CALL, &obj_node, NULL);
-	
+
 	if (method_node.op_type == IS_CONST) {
 		if (Z_TYPE(method_node.u.constant) != IS_STRING) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Method name must be a string");
@@ -3434,7 +3453,7 @@ void zend_compile_if(zend_ast *ast) /* {{{ */
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 	uint32_t *jmp_opnums = NULL;
-	
+
 	if (list->children > 1) {
 		jmp_opnums = safe_emalloc(sizeof(uint32_t), list->children - 1, 0);
 	}
@@ -3769,7 +3788,7 @@ void zend_compile_params(zend_ast *ast) /* {{{ */
 	if (list->children == 0) {
 		return;
 	}
-	
+
 	arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children, 0);
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *param_ast = list->child[i];
@@ -3890,7 +3909,7 @@ void zend_compile_params(zend_ast *ast) /* {{{ */
 	/* Don't count the variadic argument */
 	if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
 		op_array->num_args--;
-	}		
+	}
 }
 /* }}} */
 
@@ -4149,7 +4168,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	zend_op_array *op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 
 	// TODO.AST interactive (not just here - also bpc etc!)
-	
+
 	init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE);
 
 	op_array->fn_flags |= decl->flags;
@@ -4338,7 +4357,7 @@ static void zend_compile_trait_precedence(zend_ast *ast) /* {{{ */
 {
 	zend_ast *method_ref_ast = ast->child[0];
 	zend_ast *insteadof_ast = ast->child[1];
-	
+
 	zend_trait_precedence *precedence = emalloc(sizeof(zend_trait_precedence));
 	precedence->trait_method = zend_compile_method_ref(method_ref_ast);
 	precedence->exclude_from_classes
@@ -4443,12 +4462,6 @@ void zend_compile_implements(znode *class_node, zend_ast *ast) /* {{{ */
 
 		zend_op *opline;
 
-		/* Traits can not implement interfaces */
-		if (ZEND_CE_IS_TRAIT(CG(active_class_entry))) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as interface on '%s' "
-				"since it is a Trait", name->val, CG(active_class_entry)->name->val);
-		}
-
 		if (!zend_is_const_default_class_ref(class_ast)) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use '%s' as interface name as it is reserved", name->val);
@@ -4522,12 +4535,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 	}
 
 	if (extends_ast) {
-		if (ZEND_CE_IS_TRAIT(ce)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. "
-				"Traits can only be composed from other traits with the 'use' keyword. Error",
-				name->val);
-		}
-
 		if (!zend_is_const_default_class_ref(extends_ast)) {
 			zend_string *extends_name = zend_ast_get_str(extends_ast);
 			zend_error_noreturn(E_COMPILE_ERROR,
@@ -5308,7 +5315,7 @@ void zend_compile_conditional(znode *result, zend_ast *ast) /* {{{ */
 		zend_compile_shorthand_conditional(result, ast);
 		return;
 	}
-	
+
 	zend_compile_expr(&cond_node, cond_ast);
 
 	opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
@@ -5871,7 +5878,7 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"\"static::\" is not allowed in compile-time constants");
 	}
-	
+
 	if (ZEND_FETCH_CLASS_DEFAULT == fetch_type) {
 		class_name = zend_resolve_class_name_ast(class_ast);
 	} else {

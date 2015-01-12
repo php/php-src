@@ -48,9 +48,9 @@
 #define PHP_ENABLE_SEH
 #endif
 
-/* 
-uncomment the following lines to turn off 
-exception trapping when running under a debugger 
+/*
+uncomment the following lines to turn off
+exception trapping when running under a debugger
 
 #ifdef _DEBUG
 #undef PHP_ENABLE_SEH
@@ -138,7 +138,7 @@ static char *isapi_secure_server_variable_names[] = {
 	"SSL_CLIENT_I_O",
 	"SSL_CLIENT_I_L",
 	"SSL_CLIENT_I_ST",
-	"SSL_CLIENT_I_C",	
+	"SSL_CLIENT_I_C",
 #endif
 	NULL
 };
@@ -206,7 +206,7 @@ static int sapi_isapi_ub_write(const char *str, uint str_length)
 {
 	DWORD num_bytes = str_length;
 	LPEXTENSION_CONTROL_BLOCK ecb;
-	
+
 	ecb = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
 	if (ecb->WriteClient(ecb->ConnID, (char *) str, &num_bytes, HSE_IO_SYNC) == FALSE) {
 		php_handle_aborted_connection();
@@ -280,7 +280,7 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers)
 		default: {
 			const char *sline = SG(sapi_headers).http_status_line;
 			int sline_len;
-			
+
 			/* httpd requires that r->status_line is set to the first digit of
 			 * the status-code: */
 			if (sline && ((sline_len = strlen(sline)) > 12) && strncmp(sline, "HTTP/1.", 7) == 0 && sline[8] == ' ') {
@@ -397,7 +397,7 @@ static void sapi_isapi_register_zeus_ssl_variables(LPEXTENSION_CONTROL_BLOCK lpE
 		strlcat( static_cons_buf, static_variable_buf, ISAPI_SERVER_VAR_BUF_SIZE );
 	}
 	php_register_variable( "SSL_CLIENT_DN", static_cons_buf, track_vars_array );
-	
+
 	strcpy( static_cons_buf, "/C=" );
 	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 	if( lpECB->GetServerVariable( lpECB->ConnID, "SSL_CLIENT_I_C", static_variable_buf, &variable_len ) && static_variable_buf[0] ) {
@@ -408,7 +408,7 @@ static void sapi_isapi_register_zeus_ssl_variables(LPEXTENSION_CONTROL_BLOCK lpE
 	if( lpECB->GetServerVariable( lpECB->ConnID, "SSL_CLIENT_I_ST", static_variable_buf, &variable_len ) && static_variable_buf[0] ) {
 		strlcat( static_cons_buf, static_variable_buf, ISAPI_SERVER_VAR_BUF_SIZE );
 	}
-	php_register_variable( "SSL_CLIENT_I_DN", static_cons_buf, track_vars_array );	
+	php_register_variable( "SSL_CLIENT_I_DN", static_cons_buf, track_vars_array );
 }
 
 static void sapi_isapi_register_zeus_variables(LPEXTENSION_CONTROL_BLOCK lpECB, zval *track_vars_array)
@@ -467,7 +467,7 @@ static void sapi_isapi_register_zeus_variables(LPEXTENSION_CONTROL_BLOCK lpECB, 
 	if ( lpECB->GetServerVariable(lpECB->ConnID, "AUTH_TYPE", static_variable_buf, &variable_len) && static_variable_buf[0] )  {
 		php_register_variable( "AUTH_TYPE", static_variable_buf, track_vars_array );
 	}
-	
+
 	/* And now, for the SSL variables (if applicable) */
 	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 	if ( lpECB->GetServerVariable(lpECB->ConnID, "CERT_COOKIE", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
@@ -541,7 +541,7 @@ static void sapi_isapi_register_iis_variables(LPEXTENSION_CONTROL_BLOCK lpECB, z
 		php_register_variable("DOCUMENT_ROOT", humi.lpszPath, track_vars_array);
 	}
 
-	if (!SG(request_info).auth_user || !SG(request_info).auth_password || 
+	if (!SG(request_info).auth_user || !SG(request_info).auth_password ||
 		!SG(request_info).auth_user[0] || !SG(request_info).auth_password[0]) {
 		variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 		if (lpECB->GetServerVariable(lpECB->ConnID, "HTTP_AUTHORIZATION", static_variable_buf, &variable_len)
@@ -664,7 +664,7 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array)
 static sapi_module_struct isapi_sapi_module = {
 	"isapi",						/* name */
 	"ISAPI",						/* pretty name */
-									
+
 	php_isapi_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
@@ -719,7 +719,7 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType, LP
 
 				if (auth_user && auth_user[0]) {
 					SG(request_info).auth_user = estrdup(auth_user);
-				}	
+				}
 				if (auth_password && auth_password[0]) {
 					SG(request_info).auth_password = estrdup(auth_password);
 				}
@@ -755,7 +755,7 @@ static void init_request_info(LPEXTENSION_CONTROL_BLOCK lpECB)
 	 */
 	if(lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_FILENAME", static_variable_buf, &variable_len)) {
 		SG(request_info).path_translated = estrdup(static_variable_buf);
-	} else 
+	} else
 #else
 	/* happily, IIS gives us SCRIPT_NAME which is correct (without PATH_INFO stuff)
 	   so we can just map that to the physical path and we have our filename */
@@ -763,7 +763,7 @@ static void init_request_info(LPEXTENSION_CONTROL_BLOCK lpECB)
 	lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_NAME", static_variable_buf, &variable_len);
 	if (lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_MAP_URL_TO_PATH_EX, static_variable_buf, &variable_len, (LPDWORD) &humi)) {
 		SG(request_info).path_translated = estrdup(humi.lpszPath);
-	} else 
+	} else
 #endif
 		/* if mapping fails, default to what the server tells us */
 		SG(request_info).path_translated = estrdup(lpECB->lpszPathTranslated);

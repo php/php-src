@@ -15,7 +15,7 @@
    | Author: Andrei Zmievski <andrei@php.net>                             |
    +----------------------------------------------------------------------+
  */
- 
+
 /* $Id$ */
 
 #ifndef PHP_PCRE_H
@@ -59,7 +59,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex);
 PHPAPI void  php_pcre_match_impl(  pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
 	zval *subpats, int global, int use_flags, zend_long flags, zend_long start_offset);
 
-PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value, 
+PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,
 	int is_callable_replace, int limit, int *replace_count);
 
 PHPAPI void  php_pcre_split_impl(  pcre_cache_entry *pce, char *subject, int subject_len, zval *return_value,

@@ -87,9 +87,9 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 				sqlite3_reset(S->stmt);
 				S->done = 1;
 			}
-			
+
 			if (param->is_param) {
-				
+
 				if (param->paramno == -1) {
 					param->paramno = sqlite3_bind_parameter_index(S->stmt, param->name->val) - 1;
 				}
@@ -104,7 +104,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						}
 						pdo_sqlite_error_stmt(stmt);
 						return 0;
-					
+
 					case PDO_PARAM_INT:
 					case PDO_PARAM_BOOL:
 						if (Z_ISREF(param->parameter)) {
@@ -130,7 +130,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						}
 						pdo_sqlite_error_stmt(stmt);
 						return 0;
-					
+
 					case PDO_PARAM_LOB:
 						if (Z_ISREF(param->parameter)) {
 							parameter = Z_REFVAL(param->parameter);
@@ -156,15 +156,15 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						} else {
 							convert_to_string(parameter);
 						}
-						
+
 						if (SQLITE_OK == sqlite3_bind_blob(S->stmt, param->paramno + 1,
 								Z_STRVAL_P(parameter),
 								Z_STRLEN_P(parameter),
 								SQLITE_STATIC)) {
-							return 1;	
+							return 1;
 						}
 						return 0;
-							
+
 					case PDO_PARAM_STR:
 					default:
 						if (Z_ISREF(param->parameter)) {
@@ -182,7 +182,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 									Z_STRVAL_P(parameter),
 									Z_STRLEN_P(parameter),
 									SQLITE_STATIC)) {
-								return 1;	
+								return 1;
 							}
 						}
 						pdo_sqlite_error_stmt(stmt);
@@ -203,7 +203,7 @@ static int pdo_sqlite_stmt_fetch(pdo_stmt_t *stmt,
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
 	int i;
 	if (!S->stmt) {
-		return 0;	
+		return 0;
 	}
 	if (S->pre_fetched) {
 		S->pre_fetched = 0;
@@ -244,7 +244,7 @@ static int pdo_sqlite_stmt_describe(pdo_stmt_t *stmt, int colno)
 	stmt->columns[colno].namelen = strlen(stmt->columns[colno].name);
 	stmt->columns[colno].maxlen = 0xffffffff;
 	stmt->columns[colno].precision = 0;
-	
+
 	switch (sqlite3_column_type(S->stmt, colno)) {
 		case SQLITE_INTEGER:
 		case SQLITE_FLOAT:
@@ -293,7 +293,7 @@ static int pdo_sqlite_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *ret
 	pdo_sqlite_stmt *S = (pdo_sqlite_stmt*)stmt->driver_data;
 	const char *str;
 	zval flags;
-	
+
 	if (!S->stmt) {
 		return FAILURE;
 	}

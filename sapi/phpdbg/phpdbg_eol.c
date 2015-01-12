@@ -124,7 +124,7 @@ void phpdbg_eol_convert(char **str, int *len)
 				out[cursor] = cur;
 				last = cur;
 			}
-			
+
 			i++;
 			cursor++;
 			cur = in[i];

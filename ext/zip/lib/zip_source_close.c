@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,11 +31,11 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include "zipint.h"
 
-
+
 
 void
 zip_source_close(struct zip_source *src)
@@ -49,6 +49,6 @@ zip_source_close(struct zip_source *src)
 	(void)src->cb.l(src->src, src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
 	zip_source_close(src->src);
     }
-    
+
     src->is_open = 0;
 }

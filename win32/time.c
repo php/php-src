@@ -5,7 +5,7 @@
  * Freely redistributable and modifiable.  Use at your own risk.             *
  *                                                                           *
  * Copyright 1994 The Downhill Project                                       *
- * 
+ *
  * Modified by Shane Caraveo for use with PHP
  *
  *****************************************************************************/
@@ -59,7 +59,7 @@ static zend_always_inline int getfilesystemtime(struct timeval *tv)
 	timefunc(&ft);
 
         /*
-	 * Do not cast a pointer to a FILETIME structure to either a 
+	 * Do not cast a pointer to a FILETIME structure to either a
 	 * ULARGE_INTEGER* or __int64* value because it can cause alignment faults on 64-bit Windows.
 	 * via  http://technet.microsoft.com/en-us/library/ms724284(v=vs.85).aspx
 	 */

@@ -289,7 +289,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time)
 
 	co->ucal->setTime((UDate)time_arg, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "Call to underlying method failed");
-	
+
 	RETURN_TRUE;
 }
 
@@ -305,7 +305,7 @@ U_CFUNC PHP_FUNCTION(intlcal_add)
 			"intlcal_add: bad arguments", 0);
 		RETURN_FALSE;
 	}
-	
+
 	if (field < 0 || field >= UCAL_FIELD_COUNT) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_add: invalid field", 0);
@@ -343,7 +343,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 	if (zv_timezone == NULL) {
 		RETURN_TRUE; /* the method does nothing if passed null */
 	}
-	
+
 	timeZone = timezone_process_timezone_argument(zv_timezone,
 			CALENDAR_ERROR_P(co), "intlcal_set_time_zone");
 	if (timeZone == NULL) {
@@ -373,7 +373,7 @@ static void _php_intlcal_before_after(
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
-	
+
 	when_co = Z_INTL_CALENDAR_P(when_object);
 	if (when_co->ucal == NULL) {
 		intl_errors_set(&co->err, U_ILLEGAL_ARGUMENT_ERROR,
@@ -429,7 +429,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 			"intlcal_set: bad arguments", 0);
 		RETURN_FALSE;
 	}
-	
+
 	for (i = 0; i < variant; i++) {
 		if (Z_LVAL(args[i]) < INT32_MIN || Z_LVAL(args[i]) > INT32_MAX) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -456,7 +456,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	} else if (variant == 6) {
 		co->ucal->set((int32_t)arg1, (int32_t)arg2, (int32_t)arg3, (int32_t)arg4, (int32_t)arg5, (int32_t)arg6);
 	}
-	
+
 	RETURN_TRUE;
 }
 
@@ -1256,7 +1256,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 			"range for a 64-bit integer", 0);
 		RETURN_FALSE;
 	}
-	
+
 	ZVAL_UNDEF(&retval);
 	ts = (int64_t)date;
 

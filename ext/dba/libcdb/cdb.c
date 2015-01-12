@@ -50,11 +50,11 @@ static int cdb_match(struct cdb *c, char *key, unsigned int len, uint32 pos)
 
 	while (len > 0) {
 		n = sizeof(buf);
-		if (n > len) 
+		if (n > len)
 			n = len;
-		if (cdb_read(c, buf, n, pos) == -1) 
+		if (cdb_read(c, buf, n, pos) == -1)
 			return -1;
-		if (memcmp(buf, key, n)) 
+		if (memcmp(buf, key, n))
 			return 0;
 		pos += n;
 		key += n;
@@ -112,7 +112,7 @@ int cdb_read(struct cdb *c, char *buf, unsigned int len, uint32 pos)
 		do {
 			r = php_stream_read(c->fp, buf, len);
 		} while ((r == -1) && (errno == EINTR));
-		if (r == -1) 
+		if (r == -1)
 			return -1;
 		if (r == 0) {
 			errno = EPROTO;
@@ -134,10 +134,10 @@ int cdb_findnext(struct cdb *c, char *key, unsigned int len)
 
 	if (!c->loop) {
 		u = cdb_hash(key, len);
-		if (cdb_read(c, buf, 8, (u << 3) & 2047) == -1) 
+		if (cdb_read(c, buf, 8, (u << 3) & 2047) == -1)
 			return -1;
 		uint32_unpack(buf + 4,&c->hslots);
-		if (!c->hslots) 
+		if (!c->hslots)
 			return 0;
 		uint32_unpack(buf, &c->hpos);
 		c->khash = u;
@@ -148,18 +148,18 @@ int cdb_findnext(struct cdb *c, char *key, unsigned int len)
 	}
 
 	while (c->loop < c->hslots) {
-		if (cdb_read(c, buf, 8, c->kpos) == -1) 
+		if (cdb_read(c, buf, 8, c->kpos) == -1)
 			return -1;
 		uint32_unpack(buf + 4, &pos);
-		if (!pos) 
+		if (!pos)
 			return 0;
 		c->loop += 1;
 		c->kpos += 8;
-		if (c->kpos == c->hpos + (c->hslots << 3)) 
+		if (c->kpos == c->hpos + (c->hslots << 3))
 			c->kpos = c->hpos;
 		uint32_unpack(buf, &u);
 		if (u == c->khash) {
-			if (cdb_read(c, buf, 8, pos) == -1) 
+			if (cdb_read(c, buf, 8, pos) == -1)
 				return -1;
 			uint32_unpack(buf, &u);
 			if (u == len)
@@ -187,7 +187,7 @@ int cdb_find(struct cdb *c, char *key, unsigned int len)
 /* }}} */
 
 /* {{{ cdb_version */
-char *cdb_version() 
+char *cdb_version()
 {
 	return "0.75, $Id$";
 }

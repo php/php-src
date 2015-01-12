@@ -443,7 +443,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 			goto fail;
 		}
 		/* Allocate the result now as it is needed for the reading of metadata */
-		stmt_to_prepare->result = result; 
+		stmt_to_prepare->result = result;
 
 		result->conn = stmt_to_prepare->conn->m->get_reference(stmt_to_prepare->conn);
 
@@ -629,7 +629,7 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s)
 		*/
 #ifdef WE_DONT_COPY_IN_BUFFERED_AND_UNBUFFERED_BECAUSEOF_IS_REF
 		if (stmt->result_bind &&
-			stmt->result_zvals_separated_once == TRUE && 
+			stmt->result_zvals_separated_once == TRUE &&
 			stmt->state >= MYSQLND_STMT_USER_FETCHING)
 		{
 			/*
@@ -1070,7 +1070,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 									  result->conn->options->int_and_float_native,
 									  result->conn->stats))
 			{
-				DBG_RETURN(FAIL);						  
+				DBG_RETURN(FAIL);
 			}
 
 			/* If no result bind, do nothing. We consumed the data */
@@ -1130,7 +1130,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 			stmt->conn->upsert_status->warning_count =
 				row_packet->warning_count;
 
-		stmt->upsert_status->server_status = 
+		stmt->upsert_status->server_status =
 			stmt->conn->upsert_status->server_status =
 				row_packet->server_status;
 
@@ -1139,7 +1139,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, unsigned int f
 	stmt->upsert_status->warning_count =
 		stmt->conn->upsert_status->warning_count =
 			row_packet->warning_count;
-	stmt->upsert_status->server_status = 
+	stmt->upsert_status->server_status =
 		stmt->conn->upsert_status->server_status =
 			row_packet->server_status;
 

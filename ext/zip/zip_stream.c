@@ -229,7 +229,7 @@ php_stream *php_stream_zip_open(const char *filename, const char *path, const ch
 			self = emalloc(sizeof(*self));
 
 			self->za = stream_za;
-			self->zf = zf; 
+			self->zf = zf;
 			self->stream = NULL;
 			self->cursor = 0;
 			stream = php_stream_alloc(&php_stream_zipio_ops, self, NULL, mode);
@@ -307,7 +307,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 			self = emalloc(sizeof(*self));
 
 			self->za = za;
-			self->zf = zf; 
+			self->zf = zf;
 			self->stream = NULL;
 			self->cursor = 0;
 			stream = php_stream_alloc(&php_stream_zipio_ops, self, NULL, mode);

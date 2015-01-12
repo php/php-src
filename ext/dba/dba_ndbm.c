@@ -64,7 +64,7 @@ DBA_OPEN_FUNC(ndbm)
 	}
 
 	dbf = dbm_open(info->path, gmode, filemode);
-	
+
 	pinfo->dbf = dbf;
 	return SUCCESS;
 }

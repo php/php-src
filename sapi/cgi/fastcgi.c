@@ -243,7 +243,7 @@ static inline char* fcgi_hash_strndup(fcgi_hash *h, char *str, unsigned int str_
 		p->next = h->data;
 		h->data = p;
 	}
-	ret = h->data->pos; 
+	ret = h->data->pos;
 	memcpy(ret, str, str_len);
 	ret[str_len] = 0;
 	h->data->pos += str_len + 1;

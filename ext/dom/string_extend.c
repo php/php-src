@@ -38,10 +38,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class domstringextend 
+* class domstringextend
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#i18n-methods-StringExtend
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_string_extend_class_functions[] = {
@@ -54,7 +54,7 @@ const zend_function_entry php_dom_string_extend_class_functions[] = {
 
 /* {{{ proto int dom_string_extend_find_offset16(int offset32);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#i18n-methods-StringExtend-findOffset16
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_string_extend_find_offset16)
 {
@@ -64,7 +64,7 @@ PHP_FUNCTION(dom_string_extend_find_offset16)
 
 /* {{{ proto int dom_string_extend_find_offset32(int offset16);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#i18n-methods-StringExtend-findOffset32
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_string_extend_find_offset32)
 {

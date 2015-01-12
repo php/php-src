@@ -265,7 +265,7 @@ int php_cli_server_get_system_time(char *buf) {
 #endif
 
 static void char_ptr_dtor_p(zval *zv) /* {{{ */
-{	
+{
 	pefree(Z_PTR_P(zv), 1);
 } /* }}} */
 
@@ -2280,7 +2280,7 @@ out:
 		if (_router) {
 			pefree(_router, 1);
 		}
-		if (server_sock >= -1) {
+		if (server_sock > -1) {
 			closesocket(server_sock);
 		}
 	}

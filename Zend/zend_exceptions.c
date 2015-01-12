@@ -131,7 +131,7 @@ ZEND_API void zend_throw_exception_internal(zval *exception) /* {{{ */
 ZEND_API void zend_clear_exception(void) /* {{{ */
 {
 	if (EG(prev_exception)) {
-				
+
 		OBJ_RELEASE(EG(prev_exception));
 		EG(prev_exception) = NULL;
 	}
@@ -507,7 +507,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
 			size_t last_len = str->s->len;
 			zval *arg;
-			
+
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmp), arg) {
 				_build_trace_args(arg, str);
 			} ZEND_HASH_FOREACH_END();
@@ -533,7 +533,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	uint32_t num = 0;
 
 	DEFAULT_0_PARAMS;
-	
+
 	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1);
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
 		if (Z_TYPE_P(frame) != IS_ARRAY) {
@@ -549,7 +549,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	smart_str_appends(&str, " {main}");
 	smart_str_0(&str);
 
-	RETURN_NEW_STR(str.s); 
+	RETURN_NEW_STR(str.s);
 }
 /* }}} */
 
@@ -594,9 +594,9 @@ ZEND_METHOD(exception, __toString)
 	zend_string *str;
 	zend_fcall_info fci;
 	zval fname;
-	
+
 	DEFAULT_0_PARAMS;
-	
+
 	str = STR_EMPTY_ALLOC();
 
 	exception = getThis();
@@ -806,7 +806,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 {
 	zval exception;
 	zend_class_entry *ce_exception;
-	
+
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = Z_OBJCE(exception);
 	if (instanceof_function(ce_exception, default_exception_ce)) {

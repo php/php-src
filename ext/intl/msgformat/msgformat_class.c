@@ -76,7 +76,7 @@ zend_object *MessageFormatter_object_clone(zval *object)
 	MSG_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 	new_obj = MessageFormatter_ce_ptr->create_object(Z_OBJCE_P(object));
 	new_mfo = php_intl_messageformatter_fetch_object(new_obj);
-	/* clone standard parts */	
+	/* clone standard parts */
 	zend_objects_clone_members(&new_mfo->zo, &mfo->zo);
 
 	/* clone formatter object */

@@ -26,32 +26,32 @@
 #include "mysqlnd_debug.h"
 
 
-/* {{{ mysqlnd_stats_values_names 
+/* {{{ mysqlnd_stats_values_names
  */
 
 const MYSQLND_STRING mysqlnd_stats_values_names[STAT_LAST] =
 {
 	{ MYSQLND_STR_W_LEN("bytes_sent") },
-	{ MYSQLND_STR_W_LEN("bytes_received") }, 
+	{ MYSQLND_STR_W_LEN("bytes_received") },
 	{ MYSQLND_STR_W_LEN("packets_sent") },
 	{ MYSQLND_STR_W_LEN("packets_received") },
 	{ MYSQLND_STR_W_LEN("protocol_overhead_in") },
 	{ MYSQLND_STR_W_LEN("protocol_overhead_out") },
-	{ MYSQLND_STR_W_LEN("bytes_received_ok_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_eof_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_rset_header_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_rset_field_meta_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_rset_row_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_prepare_response_packet") }, 
-	{ MYSQLND_STR_W_LEN("bytes_received_change_user_packet") }, 
-	{ MYSQLND_STR_W_LEN("packets_sent_command") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_ok") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_eof") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_rset_header") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_rset_field_meta") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_rset_row") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_prepare_response") }, 
-	{ MYSQLND_STR_W_LEN("packets_received_change_user") }, 
+	{ MYSQLND_STR_W_LEN("bytes_received_ok_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_eof_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_rset_header_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_rset_field_meta_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_rset_row_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_prepare_response_packet") },
+	{ MYSQLND_STR_W_LEN("bytes_received_change_user_packet") },
+	{ MYSQLND_STR_W_LEN("packets_sent_command") },
+	{ MYSQLND_STR_W_LEN("packets_received_ok") },
+	{ MYSQLND_STR_W_LEN("packets_received_eof") },
+	{ MYSQLND_STR_W_LEN("packets_received_rset_header") },
+	{ MYSQLND_STR_W_LEN("packets_received_rset_field_meta") },
+	{ MYSQLND_STR_W_LEN("packets_received_rset_row") },
+	{ MYSQLND_STR_W_LEN("packets_received_prepare_response") },
+	{ MYSQLND_STR_W_LEN("packets_received_change_user") },
 	{ MYSQLND_STR_W_LEN("result_set_queries") },
 	{ MYSQLND_STR_W_LEN("non_result_set_queries") },
 	{ MYSQLND_STR_W_LEN("no_index_used") },

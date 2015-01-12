@@ -452,7 +452,7 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		case PDO_ATTR_SERVER_INFO: {
 			int spid = PQbackendPID(H->server);
 
-			
+
 			zend_string *str_info =
 				strpprintf(0,
 					"PID: %d; Client Encoding: %s; Is Superuser: %s; Session Authorization: %s; Date Style: %s",

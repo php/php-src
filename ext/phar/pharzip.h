@@ -179,7 +179,7 @@ typedef struct _phar_zip_dir_signature {
 
 /* unused in this release */
 typedef struct _phar_zip64_dir_end {
-	char signature[4];        /* zip64 end of central dir 
+	char signature[4];        /* zip64 end of central dir
                                  signature                       4 bytes  (0x06064b50) */
 	char size1[4];         /* size of zip64 end of central
                                  directory record                8 bytes */
@@ -187,7 +187,7 @@ typedef struct _phar_zip64_dir_end {
 	char madeby[2];           /* version made by                 2 bytes */
 	char extractneeded[2]; /* version needed to extract       2 bytes */
 	char disknum[4];       /* number of this disk             4 bytes */
-	char cdir_num[4];      /* number of the disk with the 
+	char cdir_num[4];      /* number of the disk with the
                                  start of the central directory  4 bytes */
 	char entries1[4];      /* total number of entries in the
                                  central directory on this disk  8 bytes */
@@ -206,10 +206,10 @@ typedef struct _phar_zip64_dir_end {
 
 /* unused in this release */
 typedef struct _phar_zip64_dir_locator {
-	char signature[4];     /* zip64 end of central dir locator 
+	char signature[4];     /* zip64 end of central dir locator
                               signature                       4 bytes  (0x07064b50) */
 	char disknum[4];    /* number of the disk with the
-                              start of the zip64 end of 
+                              start of the zip64 end of
                               central directory               4 bytes */
 	char diroffset1[4]; /* relative offset of the zip64
                               end of central directory record 8 bytes */

@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,7 +31,7 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include <sys/stat.h>
 #include <errno.h>
@@ -56,7 +56,7 @@ struct read_file {
 static zip_int64_t read_file(void *state, void *data, zip_uint64_t len,
 		     enum zip_source_cmd cmd);
 
-
+
 
 ZIP_EXTERN struct zip_source *
 zip_source_filep(struct zip *za, FILE *file, zip_uint64_t start,
@@ -73,7 +73,7 @@ zip_source_filep(struct zip *za, FILE *file, zip_uint64_t start,
     return _zip_source_file_or_p(za, NULL, file, start, len, 1, NULL);
 }
 
-
+
 
 struct zip_source *
 _zip_source_file_or_p(struct zip *za, const char *fname, FILE *file,
@@ -118,7 +118,7 @@ _zip_source_file_or_p(struct zip *za, const char *fname, FILE *file,
     return zs;
 }
 
-
+
 
 static zip_int64_t
 read_file(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
@@ -150,13 +150,13 @@ read_file(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
 	}
 	z->remain = z->len;
 	return 0;
-	
+
     case ZIP_SOURCE_READ:
 	if (z->remain != -1)
 	    n = len > (zip_uint64_t)z->remain ? (zip_uint64_t)z->remain : len;
 	else
 	    n = len;
-            
+
         if (n > SIZE_MAX)
             n = SIZE_MAX;
 
@@ -181,7 +181,7 @@ read_file(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
 	    z->remain -= i;
 
 	return (zip_int64_t)i;
-	
+
     case ZIP_SOURCE_CLOSE:
 	if (z->fname) {
 	    fclose(z->f);
@@ -200,7 +200,7 @@ read_file(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
 		struct zip_stat *st;
 		struct stat fst;
 		int err;
-	    
+
 		if (z->f)
 		    err = fstat(fileno(z->f), &fst);
 		else
@@ -213,7 +213,7 @@ read_file(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
 		}
 
 		st = (struct zip_stat *)data;
-		
+
 		zip_stat_init(st);
 		st->mtime = fst.st_mtime;
 		st->valid |= ZIP_STAT_MTIME;

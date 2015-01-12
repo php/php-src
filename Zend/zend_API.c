@@ -448,7 +448,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 			}
 			break;
-		
+
 		case 'p':
 			{
 				char **p = va_arg(*va, char **);
@@ -1032,9 +1032,9 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type) /* {{{ *
 			zend_update_class_constants(class_type->parent);
 		}
 #if ZTS
-		CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval*) * class_type->default_static_members_count);
+		CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval) * class_type->default_static_members_count);
 #else
-		class_type->static_members_table = emalloc(sizeof(zval*) * class_type->default_static_members_count);
+		class_type->static_members_table = emalloc(sizeof(zval) * class_type->default_static_members_count);
 #endif
 		for (i = 0; i < class_type->default_static_members_count; i++) {
 			p = &class_type->default_static_members_table[i];
@@ -1147,7 +1147,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 			prop = zend_hash_update(object->properties, key, prop);
 			zval_add_ref(prop);
 		}
-	} ZEND_HASH_FOREACH_END();		
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -1202,7 +1202,7 @@ ZEND_API int add_assoc_function(zval *arg, const char *key, void (*function_ptr)
 ZEND_API int add_assoc_long_ex(zval *arg, const char *key, size_t key_len, zend_long n) /* {{{ */
 {
 	zval *ret, tmp;
-	
+
 	ZVAL_LONG(&tmp, n);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret ? SUCCESS : FAILURE;
@@ -1212,7 +1212,7 @@ ZEND_API int add_assoc_long_ex(zval *arg, const char *key, size_t key_len, zend_
 ZEND_API int add_assoc_null_ex(zval *arg, const char *key, size_t key_len) /* {{{ */
 {
 	zval *ret, tmp;
-	
+
 	ZVAL_NULL(&tmp);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret ? SUCCESS : FAILURE;
@@ -1222,7 +1222,7 @@ ZEND_API int add_assoc_null_ex(zval *arg, const char *key, size_t key_len) /* {{
 ZEND_API int add_assoc_bool_ex(zval *arg, const char *key, size_t key_len, int b) /* {{{ */
 {
 	zval *ret, tmp;
-	
+
 	ZVAL_BOOL(&tmp, b);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret ? SUCCESS : FAILURE;
@@ -1232,7 +1232,7 @@ ZEND_API int add_assoc_bool_ex(zval *arg, const char *key, size_t key_len, int b
 ZEND_API int add_assoc_resource_ex(zval *arg, const char *key, size_t key_len, zend_resource *r) /* {{{ */
 {
 	zval *ret, tmp;
-	
+
 	ZVAL_RES(&tmp, r);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret ? SUCCESS : FAILURE;
@@ -1242,7 +1242,7 @@ ZEND_API int add_assoc_resource_ex(zval *arg, const char *key, size_t key_len, z
 ZEND_API int add_assoc_double_ex(zval *arg, const char *key, size_t key_len, double d) /* {{{ */
 {
 	zval *ret, tmp;
-	
+
 	ZVAL_DOUBLE(&tmp, d);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret ? SUCCESS : FAILURE;
@@ -1262,7 +1262,7 @@ ZEND_API int add_assoc_str_ex(zval *arg, const char *key, size_t key_len, zend_s
 ZEND_API int add_assoc_string_ex(zval *arg, const char *key, size_t key_len, char *str) /* {{{ */
 {
 	zval *ret, tmp;
-	
+
 	ZVAL_STRING(&tmp, str);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret ? SUCCESS : FAILURE;
@@ -1272,7 +1272,7 @@ ZEND_API int add_assoc_string_ex(zval *arg, const char *key, size_t key_len, cha
 ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, size_t key_len, char *str, size_t length) /* {{{ */
 {
 	zval *ret, tmp;
-	
+
 	ZVAL_STRINGL(&tmp, str, length);
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, &tmp);
 	return ret ? SUCCESS : FAILURE;
@@ -1282,7 +1282,7 @@ ZEND_API int add_assoc_stringl_ex(zval *arg, const char *key, size_t key_len, ch
 ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval *value) /* {{{ */
 {
 	zval *ret;
-	
+
 	ret = zend_symtable_str_update(Z_ARRVAL_P(arg), key, key_len, value);
 	return ret ? SUCCESS : FAILURE;
 }
@@ -1815,7 +1815,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	module_post_deactivate_handlers = module_request_shutdown_handlers + shutdown_count + 1;
 	module_post_deactivate_handlers[post_deactivate_count] = NULL;
 	startup_count = 0;
-	
+
 	ZEND_HASH_FOREACH_PTR(&module_registry, module) {
 		if (module->request_startup_func) {
 			module_request_startup_handlers[startup_count++] = module;
@@ -2058,7 +2058,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 		if (ptr->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)ptr->arg_info;
-			
+
 			internal_function->arg_info = (zend_internal_arg_info*)ptr->arg_info+1;
 			internal_function->num_args = ptr->num_args;
 			/* Currently you cannot denote that the function can accept less arguments than num_args */
@@ -2684,7 +2684,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_fcall_info_cache
 	zend_string *lcname;
 	ALLOCA_FLAG(use_heap);
 
-	STR_ALLOCA_ALLOC(lcname, name_len, use_heap);	
+	STR_ALLOCA_ALLOC(lcname, name_len, use_heap);
 	zend_str_tolower_copy(lcname->val, name->val, name_len);
 
 	*strict_class = 0;
@@ -3048,7 +3048,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 	if (error) {
 		*error = NULL;
 	}
-	
+
 	fcc->initialized = 0;
 	fcc->calling_scope = NULL;
 	fcc->called_scope = NULL;
@@ -3126,7 +3126,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 						if (callable_name) {
 							char *ptr;
 
-							
+
 							*callable_name = zend_string_alloc(Z_STRLEN_P(obj) + Z_STRLEN_P(method) + sizeof("::") - 1, 0);
 							ptr = (*callable_name)->val;
 							memcpy(ptr, Z_STRVAL_P(obj), Z_STRLEN_P(obj));
@@ -3215,7 +3215,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 					*callable_name = zend_string_alloc(ce->name->len + sizeof("::__invoke") - 1, 0);
 					memcpy((*callable_name)->val, ce->name->val, ce->name->len);
 					memcpy((*callable_name)->val + ce->name->len, "::__invoke", sizeof("::__invoke"));
-				}									
+				}
 				return 1;
 			}
 			/* break missing intentionally */
@@ -3782,7 +3782,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 ZEND_API int zend_update_static_property_null(zend_class_entry *scope, const char *name, size_t name_length) /* {{{ */
 {
 	zval tmp;
-	
+
 	ZVAL_NULL(&tmp);
 	return zend_update_static_property(scope, name, name_length, &tmp);
 }
@@ -3992,7 +3992,7 @@ ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data) /* {{{ */
 		if (Z_TYPE_P(EX(return_value)) == IS_OBJECT) {
 			zend_object *object = Z_OBJ_P(EX(return_value));
 			zend_execute_data *ex = EX(prev_execute_data);
-			
+
 			while (ex && Z_OBJ(ex->This) == object) {
 				if (ex->func) {
 					if (ZEND_USER_CODE(ex->func->type)) {

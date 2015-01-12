@@ -151,15 +151,15 @@ static const zend_function_entry php_readline_functions[] = {
 	PHP_FE_END
 };
 
-zend_module_entry readline_module_entry = { 
+zend_module_entry readline_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"readline", 
-	php_readline_functions, 
-	PHP_MINIT(readline), 
+	"readline",
+	php_readline_functions,
+	PHP_MINIT(readline),
 	PHP_MSHUTDOWN(readline),
 	NULL,
 	PHP_RSHUTDOWN(readline),
-	PHP_MINFO(readline), 
+	PHP_MINFO(readline),
 	PHP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
@@ -208,7 +208,7 @@ PHP_MINFO_FUNCTION(readline)
 
 /* }}} */
 
-/* {{{ proto string readline([string prompt]) 
+/* {{{ proto string readline([string prompt])
    Reads a line */
 PHP_FUNCTION(readline)
 {
@@ -234,7 +234,7 @@ PHP_FUNCTION(readline)
 
 #define SAFE_STRING(s) ((s)?(char*)(s):"")
 
-/* {{{ proto mixed readline_info([string varname [, string newvalue]]) 
+/* {{{ proto mixed readline_info([string varname [, string newvalue]])
    Gets/sets various internal readline variables. */
 PHP_FUNCTION(readline_info)
 {
@@ -331,7 +331,7 @@ PHP_FUNCTION(readline_info)
 }
 
 /* }}} */
-/* {{{ proto bool readline_add_history(string prompt) 
+/* {{{ proto bool readline_add_history(string prompt)
    Adds a line to the history */
 PHP_FUNCTION(readline_add_history)
 {
@@ -348,7 +348,7 @@ PHP_FUNCTION(readline_add_history)
 }
 
 /* }}} */
-/* {{{ proto bool readline_clear_history(void) 
+/* {{{ proto bool readline_clear_history(void)
    Clears the history */
 PHP_FUNCTION(readline_clear_history)
 {
@@ -367,7 +367,7 @@ PHP_FUNCTION(readline_clear_history)
 }
 
 /* }}} */
-/* {{{ proto array readline_list_history(void) 
+/* {{{ proto array readline_list_history(void)
    Lists the history */
 #ifndef HAVE_LIBEDIT
 PHP_FUNCTION(readline_list_history)
@@ -377,9 +377,9 @@ PHP_FUNCTION(readline_list_history)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
+
 	history = history_list();
-	
+
 	array_init(return_value);
 
 	if (history) {
@@ -391,7 +391,7 @@ PHP_FUNCTION(readline_list_history)
 }
 #endif
 /* }}} */
-/* {{{ proto bool readline_read_history([string filename]) 
+/* {{{ proto bool readline_read_history([string filename])
    Reads the history */
 PHP_FUNCTION(readline_read_history)
 {
@@ -415,7 +415,7 @@ PHP_FUNCTION(readline_read_history)
 }
 
 /* }}} */
-/* {{{ proto bool readline_write_history([string filename]) 
+/* {{{ proto bool readline_write_history([string filename])
    Writes the history */
 PHP_FUNCTION(readline_write_history)
 {
@@ -438,18 +438,18 @@ PHP_FUNCTION(readline_write_history)
 }
 
 /* }}} */
-/* {{{ proto bool readline_completion_function(string funcname) 
+/* {{{ proto bool readline_completion_function(string funcname)
    Readline completion function? */
 
 static char *_readline_command_generator(const char *text, int state)
 {
 	HashTable  *myht = Z_ARRVAL(_readline_array);
 	zval *entry;
-	
+
 	if (!state) {
 		zend_hash_internal_pointer_reset(myht);
 	}
-	
+
 	while ((entry = zend_hash_get_current_data(myht)) != NULL) {
 		zend_hash_move_forward(myht);
 
@@ -477,7 +477,7 @@ static void _readline_long_zval(zval *ret, long l)
 }
 
 static char **_readline_completion_cb(const char *text, int start, int end)
-{ 
+{
 	zval params[3];
 	int i;
 	char **matches = NULL;
@@ -500,13 +500,13 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 			}
 		}
 	}
-	
+
 	for (i = 0; i < 3; i++) {
 		zval_ptr_dtor(&params[i]);
 	}
 	zval_dtor(&_readline_array);
-	
-	return matches; 
+
+	return matches;
 }
 
 PHP_FUNCTION(readline_completion_function)

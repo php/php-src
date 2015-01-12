@@ -266,7 +266,7 @@ typedef struct _zend_property_info {
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
 /* arg_info for internal functions */
-typedef struct _zend_internal_arg_info { 
+typedef struct _zend_internal_arg_info {
 	const char *name;
 	const char *class_name;
 	zend_uchar type_hint;
@@ -425,7 +425,7 @@ struct _zend_execute_data {
 #define ZEND_SET_CALL_INFO(call, info) do { \
 		Z_TYPE_INFO((call)->This) = IS_OBJECT_EX | ((info) << 24); \
 	} while (0)
-	
+
 #define ZEND_ADD_CALL_FLAG(call, info) do { \
 		Z_TYPE_INFO((call)->This) |= ((info) << 24); \
 	} while (0)
@@ -495,7 +495,7 @@ struct _zend_execute_data {
 /* convert jump target back from run-time to compile-time */
 # define ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, node) do { \
 		(node).opline_num = ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, (node).jmp_offset); \
-	} while (0)		
+	} while (0)
 
 #endif
 
@@ -632,6 +632,7 @@ ZEND_API binary_op_type get_binary_op(int opcode);
 void zend_stop_lexing(void);
 void zend_emit_final_return(zval *zv);
 zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
+uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
 zend_ast *zend_ast_append_doc_comment(zend_ast *list);
 void zend_handle_encoding_declaration(zend_ast *ast);

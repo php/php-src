@@ -88,7 +88,7 @@ int intl_charFromString(const UnicodeString &from, char **res, size_t *res_len, 
 	}
 	(*res)[actual_len] = '\0';
 	*res_len = actual_len;
-	
+
 	return SUCCESS;
 }
 /* }}} */

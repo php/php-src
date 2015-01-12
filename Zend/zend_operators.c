@@ -369,7 +369,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-			
+
 				convert_object_to_type(op, &dst, IS_LONG, convert_to_long);
 				zval_dtor(op);
 
@@ -581,7 +581,7 @@ ZEND_API void convert_to_double(zval *op) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-			
+
 				convert_object_to_type(op, &dst, IS_DOUBLE, convert_to_double);
 				zval_dtor(op);
 
@@ -604,7 +604,7 @@ ZEND_API void convert_to_null(zval *op) /* {{{ */
 	if (Z_TYPE_P(op) == IS_OBJECT) {
 		if (Z_OBJ_HT_P(op)->cast_object) {
 			zval org;
-		
+
 			ZVAL_COPY_VALUE(&org, op);
 			if (Z_OBJ_HT_P(op)->cast_object(&org, op, IS_NULL) == SUCCESS) {
 				zval_dtor(&org);
@@ -671,7 +671,7 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-			
+
 				convert_object_to_type(op, &dst, _IS_BOOL, convert_to_boolean);
 				zval_dtor(op);
 
@@ -720,7 +720,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 		case IS_DOUBLE: {
 			zend_string *str;
 			double dval = Z_DVAL_P(op);
-		
+
 			str = zend_strpprintf(0, "%.*G", (int) EG(precision), dval);
 			/* %G already handles removing trailing zeros from the fractional part, yay */
 			ZVAL_NEW_STR(op, str);
@@ -739,7 +739,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		case IS_OBJECT: {
 			zval dst;
-		
+
 			convert_object_to_type(op, &dst, IS_STRING, convert_to_string);
 
 			if (Z_TYPE(dst) == IS_STRING) {
@@ -1959,7 +1959,7 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2) /* {{{ */
 		ZVAL_LONG(result, Z_LVAL_P(op1) | Z_LVAL_P(op2));
 		return SUCCESS;
 	}
-	
+
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
@@ -2060,7 +2060,7 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2) /* {{{ */
 		ZVAL_LONG(result, Z_LVAL_P(op1) & Z_LVAL_P(op2));
 		return SUCCESS;
 	}
-	
+
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
@@ -2161,7 +2161,7 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2) /* {{{ */
 		ZVAL_LONG(result, Z_LVAL_P(op1) ^ Z_LVAL_P(op2));
 		return SUCCESS;
 	}
-	
+
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
@@ -3102,7 +3102,7 @@ try_again:
 				/* proxy object */
 				zval rv;
 				zval *val;
-			
+
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
 				Z_ADDREF_P(val);
 				increment_function(val);
@@ -3111,7 +3111,7 @@ try_again:
 			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
-			
+
 				ZVAL_LONG(&op2, 1);
 				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_ADD, op1, op1, &op2);
 				zval_ptr_dtor(&op2);
@@ -3193,7 +3193,7 @@ try_again:
 				/* proxy object */
 				zval rv;
 				zval *val;
-			
+
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
 				Z_ADDREF_P(val);
 				decrement_function(val);
@@ -3202,7 +3202,7 @@ try_again:
 			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
-			
+
 				ZVAL_LONG(&op2, 1);
 				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_SUB, op1, op1, &op2);
 				zval_ptr_dtor(&op2);
@@ -3612,6 +3612,7 @@ ZEND_API zend_string *zend_long_to_str(zend_long num) /* {{{ */
 ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval, zend_bigint **big) {
     return is_numeric_string_ex(str->val, str->len, lval, dval, big, -1, NULL);
 }
+/* }}} */
 
 /**
  * Checks whether the string "str" with length "length" is numeric. The value
@@ -3781,6 +3782,98 @@ process_double:
 		return IS_BIGINT;
 	}
 }
+/* }}} */
+
+/* 
+ * String matching - Sunday algorithm
+ * http://www.iti.fh-flensburg.de/lang/algorithmen/pattern/sundayen.htm
+ */
+static zend_always_inline void zend_memnstr_ex_pre(unsigned int td[], const char *needle, size_t needle_len, int reverse) /* {{{ */ {
+	int i;
+
+	for (i = 0; i < 256; i++) {
+		td[i] = needle_len + 1;
+	}
+
+	if (reverse) {
+		for (i = needle_len - 1; i >= 0; i--) {
+			td[(unsigned char)needle[i]] = i + 1;
+		}
+	} else {
+		for (i = 0; i < needle_len; i++) {
+			td[(unsigned char)needle[i]] = (int)needle_len - i;
+		}
+	}
+}
+/* }}} */
+
+ZEND_API const char* zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end) /* {{{ */
+{
+	unsigned int td[256];
+	register size_t i;
+	register const char *p;
+
+	if (needle_len == 0 || (end - haystack) == 0) {
+		return NULL;
+	}
+
+	zend_memnstr_ex_pre(td, needle, needle_len, 0);
+
+	p = haystack;
+	end -= needle_len;
+
+	while (p <= end) {
+		for (i = 0; i < needle_len; i++) {
+			if (needle[i] != p[i]) {
+				break;
+			}
+		}
+		if (i == needle_len) {
+			return p;
+		}
+		p += td[(unsigned char)(p[needle_len])];
+	}
+
+	return NULL;
+}
+/* }}} */
+
+ZEND_API const char* zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end) /* {{{ */
+{
+	unsigned int td[256];
+	register size_t i;
+	register const char *p;
+
+	if (needle_len == 0 || (end - haystack) == 0) {
+		return NULL;
+	}
+
+	zend_memnstr_ex_pre(td, needle, needle_len, 1);
+
+	p = end;
+	p -= needle_len;
+
+	while (p >= haystack) {
+		for (i = 0; i < needle_len; i++) {
+			if (needle[i] != p[i]) {
+				break;
+			}
+		}
+
+		if (i == needle_len) {
+			return (const char *)p;
+		}
+		
+		if (p == haystack) {
+			return NULL;
+		}
+
+		p -= td[(unsigned char)(p[-1])];
+	}
+
+	return NULL;
+}
+/* }}} */
 
 /*
  * Local variables:

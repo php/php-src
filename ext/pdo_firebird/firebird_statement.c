@@ -29,30 +29,30 @@
 #include "php_pdo_firebird_int.h"
 
 #include <time.h>
-	
+
 #define RECORD_ERROR(stmt) _firebird_error(NULL, stmt,  __FILE__, __LINE__)
 
 /* free the allocated space for passing field values to the db and back */
 static void free_sqlda(XSQLDA const *sqlda) /* {{{ */
 {
 	int i;
-	
+
 	for (i = 0; i < sqlda->sqld; ++i) {
 		XSQLVAR const *var = &sqlda->sqlvar[i];
-		
+
 		if (var->sqlind) {
 			efree(var->sqlind);
 		}
 	}
 }
 /* }}} */
-	
+
 /* called by PDO to clean up a statement handle */
 static int firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	int result = 1, i;
-	
+
 	/* release the statement */
 	if (isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
 		RECORD_ERROR(stmt);
@@ -66,10 +66,10 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 		}
 	}
 	efree(S->fetch_buf);
-	
+
 	zend_hash_destroy(S->named_params);
 	FREE_HASHTABLE(S->named_params);
-	
+
 	/* clean up the input descriptor */
 	if (S->in_sqlda) {
 		free_sqlda(S->in_sqlda);
@@ -78,7 +78,7 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 
 	free_sqlda(&S->out_sqlda);
 	efree(S);
-	
+
 	return result;
 }
 /* }}} */
@@ -99,16 +99,16 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 		}
 		S->cursor_open = 0;
 		/* assume all params have been bound */
-	
+
 		if (isc_dsql_execute(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION, S->in_sqlda)) {
 			break;
 		}
-		
+
 		/* Determine how many rows have changed. In this case we are
 		 * only interested in rows changed, not rows retrieved. That
 		 * should be handled by the client when fetching. */
 		stmt->row_count = affected_rows;
-		
+
 		switch (S->statement_type) {
 			case isc_info_sql_stmt_insert:
 			case isc_info_sql_stmt_update:
@@ -137,15 +137,15 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 		if (stmt->dbh->auto_commit && isc_commit_retaining(H->isc_status, &H->tr)) {
 			break;
 		}
-	
+
 		*S->name = 0;
 		S->cursor_open = (S->out_sqlda.sqln > 0);	/* A cursor is opened, when more than zero columns returned */
 		S->exhausted = !S->cursor_open;
-		
+
 		return 1;
 	} while (0);
 
-	RECORD_ERROR(stmt);	
+	RECORD_ERROR(stmt);
 
 	return 0;
 }
@@ -187,7 +187,7 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 	XSQLVAR *var = &S->out_sqlda.sqlvar[colno];
 	int colname_len;
 	char *cp;
-	
+
 	/* allocate storage for the column */
 	var->sqlind = (void*)ecalloc(1, var->sqllen + 2*sizeof(short));
 	var->sqldata = &((char*)var->sqlind)[sizeof(short)];
@@ -249,7 +249,7 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ *
 				|| i >= sizeof(bl_info)) {
 			H->last_app_error = "Couldn't determine BLOB size";
 			goto fetch_blob_end;
-		}								
+		}
 
 		item_len = (unsigned short) isc_vax_integer(&bl_info[i], 2);
 
@@ -261,24 +261,24 @@ static int firebird_fetch_blob(pdo_stmt_t *stmt, int colno, char **ptr, /* {{{ *
 	}
 
 	/* we've found the blob's length, now fetch! */
-	
+
 	if (*len) {
 		zend_ulong cur_len;
 		unsigned short seg_len;
 		ISC_STATUS stat;
 
 		*ptr = S->fetch_buf[colno] = erealloc(*ptr, *len+1);
-	
+
 		for (cur_len = stat = 0; (!stat || stat == isc_segment) && cur_len < *len; cur_len += seg_len) {
-	
+
 			unsigned short chunk_size = (*len-cur_len) > USHRT_MAX ? USHRT_MAX
 				: (unsigned short)(*len-cur_len);
-	
+
 			stat = isc_get_segment(H->isc_status, &blobh, &seg_len, chunk_size, &(*ptr)[cur_len]);
 		}
-	
+
 		(*ptr)[*len++] = '\0';
-	
+
 		if (H->isc_status[0] == 1 && (stat != 0 && stat != isc_segstr_eof && stat != isc_segment)) {
 			H->last_app_error = "Error reading from BLOB";
 			goto fetch_blob_end;
@@ -307,21 +307,21 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 		*len = 0;
 	} else {
 		if (var->sqlscale < 0) {
-			static ISC_INT64 const scales[] = { 1, 10, 100, 1000, 
-				10000, 
-				100000, 
-				1000000, 
+			static ISC_INT64 const scales[] = { 1, 10, 100, 1000,
+				10000,
+				100000,
+				1000000,
 				10000000,
-				100000000, 
-				1000000000, 
-				LL_LIT(10000000000), 
+				100000000,
+				1000000000,
+				LL_LIT(10000000000),
 				LL_LIT(100000000000),
-				LL_LIT(1000000000000), 
-				LL_LIT(10000000000000), 
+				LL_LIT(1000000000000),
+				LL_LIT(10000000000000),
 				LL_LIT(100000000000000),
 				LL_LIT(1000000000000000),
-				LL_LIT(10000000000000000), 
-				LL_LIT(100000000000000000), 
+				LL_LIT(10000000000000000),
+				LL_LIT(100000000000000000),
 				LL_LIT(1000000000000000000)
 			};
 			ISC_INT64 n, f = scales[-var->sqlscale];
@@ -336,22 +336,22 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 				case SQL_INT64:
 					n = *(ISC_INT64*)var->sqldata;
 			}
-				
+
 			*ptr = FETCH_BUF(S->fetch_buf[colno], char, CHAR_BUF_LEN, NULL);
-			
+
 			if (n >= 0) {
-				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d", 
+				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d",
 					n / f, -var->sqlscale, n % f);
 			} else if (n <= -f) {
 				*len = slprintf(*ptr, CHAR_BUF_LEN, "%" LL_MASK "d.%0*" LL_MASK "d",
-					n / f, -var->sqlscale, -n % f);				
+					n / f, -var->sqlscale, -n % f);
 			 } else {
 				*len = slprintf(*ptr, CHAR_BUF_LEN, "-0.%0*" LL_MASK "d", -var->sqlscale, -n % f);
 			}
 		} else {
 			switch (var->sqltype & ~1) {
 				struct tm t;
-				char *fmt;				
+				char *fmt;
 
 				case SQL_VARYING:
 					*ptr = &var->sqldata[2];
@@ -416,7 +416,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 	zend_ulong put_cnt = 0, rem_cnt;
 	unsigned short chunk_size;
 	int result = 1;
-	
+
 	if (isc_create_blob(H->isc_status, &H->db, &H->tr, &h, blob_id)) {
 		RECORD_ERROR(stmt);
 		return 0;
@@ -424,7 +424,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 
 	SEPARATE_ZVAL(param);
 	convert_to_string_ex(param);
-	
+
 	for (rem_cnt = Z_STRLEN_P(param); rem_cnt > 0; rem_cnt -= chunk_size)  {
 
 		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : (unsigned short)rem_cnt;
@@ -436,7 +436,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 		}
 		put_cnt += chunk_size;
 	}
-	
+
 	zval_dtor(param);
 
 	if (isc_close_blob(H->isc_status, &h)) {
@@ -444,7 +444,7 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 		return 0;
 	}
 	return result;
-}	
+}
 
 static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, /* {{{ */
 	enum pdo_param_event event_type)
@@ -475,8 +475,8 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			for (i = 0; i < sqlda->sqld; ++i) {
 				XSQLVAR *var = &sqlda->sqlvar[i];
 
-				if ((var->aliasname_length && !strncasecmp(param->name->val, var->aliasname, 
-						min(param->name->len, var->aliasname_length))) 
+				if ((var->aliasname_length && !strncasecmp(param->name->val, var->aliasname,
+						min(param->name->len, var->aliasname_length)))
 						|| (var->sqlname_length && !strncasecmp(param->name->val, var->sqlname,
 						min(param->name->len, var->sqlname_length)))) {
 					param->paramno = i;
@@ -492,13 +492,13 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 	}
 
 	var = &sqlda->sqlvar[param->paramno];
-	
+
 	switch (event_type) {
 		char *value;
 		zend_ulong value_len;
 		int caller_frees;
 		zval *parameter;
-			
+
 		case PDO_PARAM_EVT_ALLOC:
 			if (param->is_param) {
 				/* allocate the parameter */
@@ -509,7 +509,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				var->sqldata = &((char*)var->sqlind)[sizeof(short)];
 			}
 			break;
-			
+
 		case PDO_PARAM_EVT_EXEC_PRE:
 			if (!param->is_param) {
 				break;
@@ -521,7 +521,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			} else {
 				parameter = &param->parameter;
 			}
-			
+
 			if (Z_TYPE_P(parameter) == IS_RESOURCE) {
 				php_stream *stm;
 
@@ -540,15 +540,15 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 					strcpy(stmt->error_code, "HY000");
 					S->H->last_app_error = "Cannot bind to array field";
 					return 0;
-	
+
 				case SQL_BLOB:
 					return firebird_bind_blob(stmt, (ISC_QUAD*)var->sqldata, parameter);
 			}
-							
+
 			/* check if a NULL should be inserted */
 			switch (Z_TYPE_P(parameter)) {
 				int force_null;
-				
+
 				case IS_LONG:
 					/* keep the allow-NULL flag */
 					var->sqltype = (sizeof(zend_long) == 8 ? SQL_INT64 : SQL_LONG) | (var->sqltype & 1);
@@ -563,7 +563,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 					break;
 				case IS_STRING:
 					force_null = 0;
-	
+
 					/* for these types, an empty string can be handled like a NULL value */
 					switch (var->sqltype & ~1) {
 						case SQL_SHORT:
@@ -616,7 +616,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			}
 			zval_ptr_dtor(parameter);
 			ZVAL_NULL(parameter);
-			
+
 			if (firebird_stmt_get_col(stmt, param->paramno, &value, &value_len, &caller_frees)) {
 				switch (PDO_PARAM_TYPE(param->param_type)) {
 					case PDO_PARAM_STR:
@@ -649,7 +649,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 			return 0;
 		default:
 			;
-	}		
+	}
 	return 1;
 }
 /* }}} */
@@ -657,13 +657,13 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
-	
+
 	switch (attr) {
 		default:
 			return 0;
 		case PDO_ATTR_CURSOR_NAME:
 			convert_to_string(val);
-			
+
 			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, Z_STRVAL_P(val),0)) {
 				RECORD_ERROR(stmt);
 				return 0;
@@ -678,7 +678,7 @@ static int firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zval *v
 static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval *val) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
-	
+
 	switch (attr) {
 		default:
 			return 0;
@@ -697,7 +697,7 @@ static int firebird_stmt_get_attribute(pdo_stmt_t *stmt, zend_long attr, zval *v
 static int firebird_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
-	
+
 	/* close the statement handle */
 	if ((*S->name || S->cursor_open) && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_close)) {
 		RECORD_ERROR(stmt);

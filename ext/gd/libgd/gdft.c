@@ -338,7 +338,7 @@ static int fontTest (void *element, void *key)
 {
 	font_t *a = (font_t *) element;
 	fontkey_t *b = (fontkey_t *) key;
-	
+
 	if (strcmp (a->fontlist, b->fontlist) == 0) {
 		switch (b->preferred_map) {
 			case gdFTEX_Unicode:

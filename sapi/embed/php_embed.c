@@ -115,32 +115,32 @@ static int php_embed_startup(sapi_module_struct *sapi_module)
 EMBED_SAPI_API sapi_module_struct php_embed_module = {
 	"embed",                       /* name */
 	"PHP Embedded Library",        /* pretty name */
-	
+
 	php_embed_startup,              /* startup */
 	php_module_shutdown_wrapper,   /* shutdown */
-  
+
 	NULL,                          /* activate */
 	php_embed_deactivate,           /* deactivate */
-  
+
 	php_embed_ub_write,             /* unbuffered write */
 	php_embed_flush,                /* flush */
 	NULL,                          /* get uid */
 	NULL,                          /* getenv */
-  
+
 	php_error,                     /* error handler */
-  
+
 	NULL,                          /* header handler */
 	NULL,                          /* send headers handler */
 	php_embed_send_header,          /* send header handler */
-	
+
 	NULL,                          /* read POST data */
 	php_embed_read_cookies,         /* read Cookies */
-  
+
 	php_embed_register_variables,   /* register server variables */
 	php_embed_log_message,          /* Log message */
 	NULL,							/* Get request time */
 	NULL,							/* Child terminate */
-  
+
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
@@ -198,8 +198,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
   if (php_embed_module.startup(&php_embed_module)==FAILURE) {
 	  return FAILURE;
   }
- 
-  zend_llist_init(&global_vars, sizeof(char *), NULL, 0);  
+
+  zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
   /* Set some Embedded PHP defaults */
   SG(options) |= SAPI_OPTION_NO_CHDIR;
@@ -210,7 +210,7 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 	  php_module_shutdown();
 	  return FAILURE;
   }
-  
+
   SG(headers_sent) = 1;
   SG(request_info).no_headers = 1;
   php_register_variable("PHP_SELF", "-", NULL);

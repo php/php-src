@@ -433,7 +433,7 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 	if (!value_len) {
 		RETURN_FALSE;
 	}
-	
+
 	PHP_ENCHANT_GET_BROKER;
 
 	switch (dict_type) {
@@ -468,7 +468,7 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &broker, &dict_type) == FAILURE) {
 		RETURN_FALSE;
 	}
-	
+
 	PHP_ENCHANT_GET_BROKER;
 
 	switch (dict_type) {
@@ -543,7 +543,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	}
 
 	PHP_ENCHANT_GET_BROKER;
-	
+
 	if (taglen == 0) {
 		php_error_docref(NULL, E_WARNING, "Tag cannot be empty");
 		RETURN_FALSE;

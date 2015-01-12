@@ -120,10 +120,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMElement extends DOMNode 
+* class DOMElement extends DOMNode
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-745549614
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
@@ -229,10 +229,10 @@ PHP_METHOD(domelement, __construct)
 }
 /* }}} end DOMElement::__construct */
 
-/* {{{ tagName	string	
-readonly=yes 
+/* {{{ tagName	string
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-104682815
-Since: 
+Since:
 */
 int dom_element_tag_name_read(dom_object *obj, zval *retval)
 {
@@ -263,8 +263,8 @@ int dom_element_tag_name_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ schemaTypeInfo	typeinfo	
-readonly=yes 
+/* {{{ schemaTypeInfo	typeinfo
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Element-schemaTypeInfo
 Since: DOM Level 3
 */
@@ -352,7 +352,7 @@ PHP_FUNCTION(dom_element_get_attribute)
 				value = xmlStrdup(((xmlAttributePtr)attr)->defaultValue);
 		}
 	}
-	
+
 	if (value == NULL) {
 		RETURN_EMPTY_STRING();
 	} else {
@@ -364,7 +364,7 @@ PHP_FUNCTION(dom_element_get_attribute)
 
 /* {{{ proto void dom_element_set_attribute(string name, string value);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68F082
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_element_set_attribute)
 {
@@ -479,7 +479,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 
 /* {{{ proto DOMAttr dom_element_get_attribute_node(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-217A91B8
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_element_get_attribute_node)
 {
@@ -526,7 +526,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 
 /* {{{ proto DOMAttr dom_element_set_attribute_node(DOMAttr newAttr);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-887236154
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_element_set_attribute_node)
 {
@@ -561,7 +561,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 
 	existattrp = xmlHasProp(nodep, attrp->name);
 	if (existattrp != NULL && existattrp->type != XML_ATTRIBUTE_DECL) {
-		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL && 
+		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL &&
 			((php_libxml_node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
 		{
 			RETURN_NULL();
@@ -592,7 +592,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 
 /* {{{ proto DOMAttr dom_element_remove_attribute_node(DOMAttr oldAttr);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D589198
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_element_remove_attribute_node)
 {
@@ -629,7 +629,7 @@ PHP_FUNCTION(dom_element_remove_attribute_node)
 
 /* {{{ proto DOMNodeList dom_element_get_elements_by_tag_name(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1938918D
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 {
@@ -720,7 +720,7 @@ static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) /*
 		if (ns->prefix == NULL)
 			snprintf((char *) prefix, sizeof(prefix), "default%d", counter++);
 		else
-			snprintf((char *) prefix, sizeof(prefix), "%.20s%d", 
+			snprintf((char *) prefix, sizeof(prefix), "%.20s%d",
 			(char *)ns->prefix, counter++);
 		def = xmlSearchNs(doc, tree, prefix);
 	}
@@ -776,8 +776,8 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 				node_list_unlink(nodep->children);
 			}
 
-			if ((xmlStrEqual((xmlChar *) prefix, (xmlChar *)"xmlns") || 
-				(prefix == NULL && xmlStrEqual((xmlChar *) localname, (xmlChar *)"xmlns"))) && 
+			if ((xmlStrEqual((xmlChar *) prefix, (xmlChar *)"xmlns") ||
+				(prefix == NULL && xmlStrEqual((xmlChar *) localname, (xmlChar *)"xmlns"))) &&
 				xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
 				is_xmlns = 1;
 				if (prefix == NULL) {
@@ -792,7 +792,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 
 					tmpnsptr = nsptr->next;
 					while (tmpnsptr) {
-						if ((tmpnsptr->prefix != NULL) && (tmpnsptr->href != NULL) && 
+						if ((tmpnsptr->prefix != NULL) && (tmpnsptr->href != NULL) &&
 							(xmlStrEqual(tmpnsptr->href, (xmlChar *) uri))) {
 							nsptr = tmpnsptr;
 							break;
@@ -993,7 +993,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
     }
 
 	if (existattrp != NULL && existattrp->type != XML_ATTRIBUTE_DECL) {
-		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL && 
+		if ((oldobj = php_dom_object_get_data((xmlNodePtr) existattrp)) != NULL &&
 			((php_libxml_node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp)
 		{
 			RETURN_NULL();

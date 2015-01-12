@@ -477,7 +477,7 @@ int fpm_unix_init_main() /* {{{ */
 		 * The parent process has then to wait for the master
 		 * process to initialize to return a consistent exit
 		 * value. For this pupose, the master process will
-		 * send \"1\" into the pipe if everything went well 
+		 * send \"1\" into the pipe if everything went well
 		 * and \"0\" otherwise.
 		 */
 

@@ -78,18 +78,18 @@ PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, s
 	if (bucket == NULL) {
 		return NULL;
 	}
-	
+
 	bucket->next = bucket->prev = NULL;
 
 	if (is_persistent && !buf_persistent) {
 		/* all data in a persistent bucket must also be persistent */
 		bucket->buf = pemalloc(buflen, 1);
-		
+
 		if (bucket->buf == NULL) {
 			pefree(bucket, 1);
 			return NULL;
 		}
-		
+
 		memcpy(bucket->buf, buf, buflen);
 		bucket->buflen = buflen;
 		bucket->own_buf = 1;
@@ -117,7 +117,7 @@ PHPAPI php_stream_bucket *php_stream_bucket_make_writeable(php_stream_bucket *bu
 	php_stream_bucket *retval;
 
 	php_stream_bucket_unlink(bucket);
-	
+
 	if (bucket->refcount == 1 && bucket->own_buf) {
 		return bucket;
 	}
@@ -132,7 +132,7 @@ PHPAPI php_stream_bucket *php_stream_bucket_make_writeable(php_stream_bucket *bu
 	retval->own_buf = 1;
 
 	php_stream_bucket_delref(bucket);
-	
+
 	return retval;
 }
 
@@ -151,16 +151,16 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	(*left)->refcount = 1;
 	(*left)->own_buf = 1;
 	(*left)->is_persistent = in->is_persistent;
-	
+
 	(*right)->buflen = in->buflen - length;
 	(*right)->buf = pemalloc((*right)->buflen, in->is_persistent);
 	memcpy((*right)->buf, in->buf + length, (*right)->buflen);
 	(*right)->refcount = 1;
 	(*right)->own_buf = 1;
 	(*right)->is_persistent = in->is_persistent;
-	
+
 	return SUCCESS;
-	
+
 exit_fail:
 	if (*right) {
 		if ((*right)->buf) {
@@ -234,7 +234,7 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket)
 	bucket->brigade = NULL;
 	bucket->next = bucket->prev = NULL;
 }
-	
+
 
 
 
@@ -256,7 +256,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	char *period;
 
 	n = (int)strlen(filtername);
-	
+
 	if (NULL != (factory = zend_hash_str_find_ptr(filter_hash, filtername, n))) {
 		filter = factory->create_filter(filtername, filterparams, persistent);
 	} else if ((period = strrchr(filtername, '.'))) {
@@ -286,7 +286,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		else
 			php_error_docref(NULL, E_WARNING, "unable to create or locate filter \"%s\"", filtername);
 	}
-	
+
 	return filter;
 }
 
@@ -300,7 +300,7 @@ PHPAPI php_stream_filter *_php_stream_filter_alloc(php_stream_filter_ops *fops, 
 	filter->fops = fops;
 	Z_PTR(filter->abstract) = abstract;
 	filter->is_persistent = persistent;
-	
+
 	return filter;
 }
 
@@ -379,7 +379,7 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 				return FAILURE;
 			case PSFS_FEED_ME:
 				/* We don't actually need data yet,
-				   leave this filter in a feed me state until data is needed. 
+				   leave this filter in a feed me state until data is needed.
 				   Reset stream's internal read buffer since the filter is "holding" it. */
 				stream->readpos = 0;
 				stream->writepos = 0;

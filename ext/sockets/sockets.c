@@ -835,7 +835,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto int socket_select(array &read_fds, array &write_fds, array &except_fds, int tv_sec[, int tv_usec]) 
+/* {{{ proto int socket_select(array &read_fds, array &write_fds, array &except_fds, int tv_sec[, int tv_usec])
    Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
 PHP_FUNCTION(socket_select)
 {
@@ -909,7 +909,7 @@ PHP_FUNCTION(socket_select)
 }
 /* }}} */
 
-/* {{{ proto resource socket_create_listen(int port[, int backlog]) 
+/* {{{ proto resource socket_create_listen(int port[, int backlog])
    Opens a socket on port to accept connections */
 PHP_FUNCTION(socket_create_listen)
 {
@@ -1114,7 +1114,7 @@ PHP_FUNCTION(socket_write)
 }
 /* }}} */
 
-/* {{{ proto string socket_read(resource socket, int length [, int type]) 
+/* {{{ proto string socket_read(resource socket, int length [, int type])
    Reads a maximum of length bytes from socket */
 PHP_FUNCTION(socket_read)
 {
@@ -1332,7 +1332,7 @@ PHP_FUNCTION(socket_getpeername)
 }
 /* }}} */
 
-/* {{{ proto resource socket_create(int domain, int type, int protocol) 
+/* {{{ proto resource socket_create(int domain, int type, int protocol)
    Creates an endpoint for communication in the domain specified by domain, of type specified by type */
 PHP_FUNCTION(socket_create)
 {
@@ -1836,7 +1836,7 @@ PHP_FUNCTION(socket_sendto)
 }
 /* }}} */
 
-/* {{{ proto mixed socket_get_option(resource socket, int level, int optname) 
+/* {{{ proto mixed socket_get_option(resource socket, int level, int optname)
    Gets socket options for the socket */
 PHP_FUNCTION(socket_get_option)
 {
@@ -2088,7 +2088,7 @@ default_case:
 /* }}} */
 
 #ifdef HAVE_SOCKETPAIR
-/* {{{ proto bool socket_create_pair(int domain, int type, int protocol, array &fd) 
+/* {{{ proto bool socket_create_pair(int domain, int type, int protocol, array &fd)
    Creates a pair of indistinguishable sockets and stores them in fds. */
 PHP_FUNCTION(socket_create_pair)
 {
@@ -2150,7 +2150,7 @@ PHP_FUNCTION(socket_create_pair)
 #endif
 
 #ifdef HAVE_SHUTDOWN
-/* {{{ proto bool socket_shutdown(resource socket[, int how]) 
+/* {{{ proto bool socket_shutdown(resource socket[, int how])
    Shuts down a socket for receiving, sending, or both. */
 PHP_FUNCTION(socket_shutdown)
 {
@@ -2174,7 +2174,7 @@ PHP_FUNCTION(socket_shutdown)
 /* }}} */
 #endif
 
-/* {{{ proto int socket_last_error([resource socket]) 
+/* {{{ proto int socket_last_error([resource socket])
    Returns the last socket error (either the last used or the provided socket resource) */
 PHP_FUNCTION(socket_last_error)
 {
@@ -2194,7 +2194,7 @@ PHP_FUNCTION(socket_last_error)
 }
 /* }}} */
 
-/* {{{ proto void socket_clear_error([resource socket]) 
+/* {{{ proto void socket_clear_error([resource socket])
    Clears the error on the socket or the last error code. */
 PHP_FUNCTION(socket_clear_error)
 {

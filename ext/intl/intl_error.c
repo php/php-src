@@ -268,7 +268,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 			smart_str_appends( &ret, "at " );
 
 		smart_str_appends( &ret, "offset " );
-		smart_str_append_long( &ret, (zend_long ) pe->offset ); 
+		smart_str_append_long( &ret, (zend_long ) pe->offset );
 		any = 1;
 	}
 
@@ -315,7 +315,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 		smart_str_free( &ret );
 		smart_str_appends( &ret, "no parse error" );
 	}
-	
+
 	smart_str_0( &ret );
 	return ret;
 }

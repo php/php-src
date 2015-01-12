@@ -137,7 +137,7 @@ static void sapi_webjames_register_variables(zval *track_vars_array)
 	ADD_FIELD("PHP_SELF", uri);
 	ADD_FIELD("QUERY_STRING", args);
 
-	
+
 	snprintf(buf, BUF_SIZE, "%d.%d.%d.%d", WG(conn)->ipaddr[0], WG(conn)->ipaddr[1], WG(conn)->ipaddr[2], WG(conn)->ipaddr[3]);
 	ADD_STRING("REMOTE_ADDR", buf);
 	if (WG(conn)->dnsstatus == DNS_OK) ADD_FIELD("REMOTE_HOST", host);
@@ -211,7 +211,7 @@ static void webjames_module_main(void)
 	if (php_request_startup() == FAILURE) {
 		return;
 	}
-	
+
 	php_execute_script(&file_handle);
 	php_request_shutdown(NULL);
 }
@@ -258,7 +258,7 @@ static zend_module_entry php_webjames_module = {
   NULL,
   php_info_webjames,
 #if ZEND_MODULE_API_NO >= 20010901
-  WEBJAMES_SAPI_VERSION,          
+  WEBJAMES_SAPI_VERSION,
 #endif
   STANDARD_MODULE_PROPERTIES
 };

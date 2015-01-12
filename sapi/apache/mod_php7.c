@@ -95,7 +95,7 @@ static void php_save_umask(void)
 static int sapi_apache_ub_write(const char *str, uint str_length)
 {
 	int ret=0;
-		
+
 	if (SG(server_context)) {
 		ret = rwrite(str, str_length, (request_rec *) SG(server_context));
 	}
@@ -137,7 +137,7 @@ static int sapi_apache_read_post(char *buffer, uint count_bytes)
 	if (!SG(read_post_bytes) && !ap_should_client_block(r)) {
 		return total_read_bytes;
 	}
- 
+
 	handler = signal(SIGPIPE, SIG_IGN);
 	while (total_read_bytes<count_bytes) {
 		hard_timeout("Read POST information", r); /* start timeout timer */
@@ -148,7 +148,7 @@ static int sapi_apache_read_post(char *buffer, uint count_bytes)
 		}
 		total_read_bytes += read_bytes;
 	}
-	signal(SIGPIPE, handler);	
+	signal(SIGPIPE, handler);
 	return total_read_bytes;
 }
 /* }}} */
@@ -331,10 +331,10 @@ static void php_apache_request_shutdown(void *dummy)
 		AP(in_request) = 0;
 		php_request_shutdown(dummy);
 	}
-	SG(server_context) = NULL; 
-	/* 
-	* The server context (request) is NOT invalid by the time 
-	* run_cleanups() is called 
+	SG(server_context) = NULL;
+	/*
+	* The server context (request) is NOT invalid by the time
+	* run_cleanups() is called
 	*/
 }
 /* }}} */
@@ -343,7 +343,7 @@ static void php_apache_request_shutdown(void *dummy)
  */
 static int php_apache_sapi_activate(void)
 {
-	request_rec *r = (request_rec *) SG(server_context); 
+	request_rec *r = (request_rec *) SG(server_context);
 
 	/*
 	 * For the Apache module version, this bit of code registers a cleanup
@@ -351,7 +351,7 @@ static int php_apache_sapi_activate(void)
 	 * We need this because at any point in our code we can be interrupted
 	 * and that may happen before we have had time to free our memory.
 	 * The php_request_shutdown function needs to free all outstanding allocated
-	 * memory.  
+	 * memory.
 	 */
 	block_alarms();
 	register_cleanup(r->pool, NULL, php_apache_request_shutdown, php_request_shutdown_for_exec);
@@ -395,7 +395,7 @@ static int sapi_apache_get_fd(int *nfd)
 	int fd;
 
 	fd = r->connection->client->fd;
-	
+
 	if (fd >= 0) {
 		if (nfd) *nfd = fd;
 		return SUCCESS;
@@ -410,9 +410,9 @@ static int sapi_apache_get_fd(int *nfd)
 static int sapi_apache_force_http_10(void)
 {
 	request_rec *r = SG(server_context);
-	
+
 	r->proto_num = HTTP_VERSION(1,0);
-	
+
 	return SUCCESS;
 }
 /* }}} */
@@ -458,7 +458,7 @@ static void sapi_apache_child_terminate(void)
 static sapi_module_struct apache_sapi_module = {
 	"apache",						/* name */
 	"Apache",						/* pretty name */
-									
+
 	php_apache_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
@@ -576,7 +576,7 @@ static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry)
  */
 static char *php_apache_get_default_mimetype(request_rec *r)
 {
-	
+
 	char *mimetype;
 	if (SG(default_mimetype) || SG(default_charset)) {
 		/* Assume output will be of the default MIME type.  Individual
@@ -624,7 +624,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 		if (per_dir_conf) {
 			zend_hash_apply((HashTable *) per_dir_conf, (apply_func_t) php_apache_alter_ini_entries);
 		}
-		
+
 		/* If PHP parser engine has been turned off with an "engine off"
 		 * directive, then decline to handle this request
 		 */
@@ -691,7 +691,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 static int send_parsed_php(request_rec * r)
 {
 	int result = send_php(r, 0, NULL);
- 
+
 	ap_table_setn(r->notes, "mod_php_memory_usage",
 		ap_psprintf(r->pool, "%lu", zend_memory_peak_usage(1)));
 
@@ -863,7 +863,7 @@ static CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *
 		bool_val[0] = '0';
 	}
 	bool_val[1] = 0;
-	
+
 	return php_apache_value_handler_ex(cmd, conf, arg1, bool_val, mode);
 }
 /* }}} */
@@ -928,7 +928,7 @@ static void apache_php_module_shutdown_wrapper(void)
 
 #if MODULE_MAGIC_NUMBER >= 19970728
 	/* This function is only called on server exit if the apache API
-	 * child_exit handler exists, so shutdown globally 
+	 * child_exit handler exists, so shutdown globally
 	 */
 	sapi_shutdown();
 #endif

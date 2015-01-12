@@ -164,7 +164,7 @@ static void php_phpdbg_destroy_bp_condition(zval *data) /* {{{ */
 
 	if (brake) {
 		if (brake->ops) {
-		
+
 			destroy_op_array(brake->ops);
 			efree(brake->ops);
 		}
@@ -304,7 +304,7 @@ static PHP_FUNCTION(phpdbg_break_next)
 	if (zend_parse_parameters_none() == FAILURE && EG(current_execute_data)) {
 		return;
 	}
-    
+
 	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) EG(current_execute_data)->opline + 1);
 } /* }}} */
 
@@ -314,7 +314,7 @@ static PHP_FUNCTION(phpdbg_break_file)
 	char    *file = NULL;
 	size_t   flen = 0;
 	long     line;
-    
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &file, &flen, &line) == FAILURE) {
 		return;
 	}
@@ -327,7 +327,7 @@ static PHP_FUNCTION(phpdbg_break_method)
 {
 	char *class = NULL, *method = NULL;
 	size_t clen = 0, mlen = 0;
-    
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &class, &clen, &method, &mlen) == FAILURE) {
 		return;
 	}
@@ -340,7 +340,7 @@ static PHP_FUNCTION(phpdbg_break_function)
 {
 	char    *function = NULL;
 	size_t   function_len;
-    
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &function, &function_len) == FAILURE) {
 		return;
 	}
@@ -516,7 +516,7 @@ static void php_sapi_phpdbg_log_message(char *message) /* {{{ */
 			case E_PARSE:
 			case E_RECOVERABLE_ERROR: {
 				const char *file_char = zend_get_executed_filename();
-				zend_string *file = zend_string_init(file_char, strlen(file_char), 0); 
+				zend_string *file = zend_string_init(file_char, strlen(file_char), 0);
 				phpdbg_list_file(file, 3, zend_get_executed_lineno() - 1, zend_get_executed_lineno());
 				efree(file);
 
@@ -1204,7 +1204,7 @@ phpdbg_main:
 			} break;
 		}
 	}
-	
+
 	/* set exec if present on command line */
 	if (!exec && (argc > php_optind) && (strcmp(argv[php_optind-1], "--") != SUCCESS)) {
 		if (strlen(argv[php_optind])) {
@@ -1391,7 +1391,7 @@ phpdbg_main:
 		PHPDBG_G(io)[PHPDBG_STDOUT].fd = fileno(stdout);
 #else
 		/* XXX this is a complete mess here with FILE/fd/SOCKET,
-			we should let only one to survive probably. Need 
+			we should let only one to survive probably. Need
 			a clean separation whether it's a remote or local
 			prompt. And what is supposed to go as user interaction,
 			error log, etc. */
@@ -1462,7 +1462,7 @@ phpdbg_main:
 			}
 		} zend_end_try();
 		PHPDBG_G(flags) &= ~PHPDBG_IS_INITIALIZING;
-		
+
 		/* quit if init says so */
 		if (PHPDBG_G(flags) & PHPDBG_IS_QUITTING) {
 			goto phpdbg_out;
@@ -1521,16 +1521,16 @@ phpdbg_interact:
 				if (!cleaning) {
 					/* remote client disconnected */
 					if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
-					
+
 						if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 							/* renegociate connections */
 							phpdbg_remote_init(address, listen, server, &socket, &stream);
-				
+
 							/* set streams */
 							if (stream) {
 								PHPDBG_G(flags) &= ~PHPDBG_IS_QUITTING;
 							}
-				
+
 							/* this must be forced */
 							CG(unclean_shutdown) = 0;
 						} else {
@@ -1550,10 +1550,10 @@ phpdbg_interact:
 
 		/* this must be forced */
 		CG(unclean_shutdown) = 0;
-		
+
 		/* this is just helpful */
 		PG(report_memleaks) = 0;
-		
+
 #ifndef _WIN32
 phpdbg_out:
 		if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {

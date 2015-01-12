@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -65,7 +65,7 @@ ZEND_API int zend_list_free(zend_resource *res)
 static void zend_resource_dtor(zend_resource *res)
 {
 	zend_rsrc_list_dtors_entry *ld;
-	
+
 	ld = zend_hash_index_find_ptr(&list_destructors, res->type);
 	if (ld) {
 		if (ld->list_dtor_ex) {
@@ -94,7 +94,7 @@ ZEND_API zend_resource* zend_register_resource(zval *rsrc_result, void *rsrc_poi
 	zval *zv;
 
 	zv = zend_list_insert(rsrc_pointer, rsrc_type);
-	
+
 	if (rsrc_result) {
 		ZVAL_COPY_VALUE(rsrc_result, zv);
 		return Z_RES_P(rsrc_result);
@@ -165,7 +165,7 @@ void list_entry_destructor(zval *zv)
 	zend_resource *res = Z_RES_P(zv);
 
 	if (res->type >= 0) {
-		
+
 		zend_resource_dtor(res);
 	}
 	efree_size(res, sizeof(zend_resource));
@@ -177,7 +177,7 @@ void plist_entry_destructor(zval *zv)
 
 	if (res->type >= 0) {
 		zend_rsrc_list_dtors_entry *ld;
-		
+
 		ld = zend_hash_index_find_ptr(&list_destructors, res->type);
 		if (ld) {
 			if (ld->plist_dtor_ex) {
@@ -239,7 +239,7 @@ static int clean_module_resource(zval *zv, void *arg)
 
 static int zend_clean_module_rsrc_dtors_cb(zval *zv, void *arg)
 {
-	zend_rsrc_list_dtors_entry *ld = (zend_rsrc_list_dtors_entry *)Z_PTR_P(zv);	
+	zend_rsrc_list_dtors_entry *ld = (zend_rsrc_list_dtors_entry *)Z_PTR_P(zv);
 	int module_number = *(int *)arg;
 	if (ld->module_number == module_number) {
 		zend_hash_apply_with_argument(&EG(persistent_list), clean_module_resource, (void *) &(ld->resource_id));
@@ -260,15 +260,15 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 {
 	zend_rsrc_list_dtors_entry *lde;
 	zval zv;
-	
-	lde = malloc(sizeof(zend_rsrc_list_dtors_entry));	
+
+	lde = malloc(sizeof(zend_rsrc_list_dtors_entry));
 	lde->list_dtor_ex = ld;
 	lde->plist_dtor_ex = pld;
 	lde->module_number = module_number;
 	lde->resource_id = list_destructors.nNextFreeElement;
 	lde->type_name = type_name;
 	ZVAL_PTR(&zv, lde);
-	
+
 	if (zend_hash_next_index_insert(&list_destructors, &zv) == NULL) {
 		return FAILURE;
 	}

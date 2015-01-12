@@ -143,7 +143,7 @@ int		ftp_chmod(ftpbuf_t *ftp, const int mode, const char *filename, const int fi
 
 /* Allocate space on remote server with ALLO command
  * Many servers will respond with 202 Allocation not necessary,
- * however some servers will not accept STOR or APPE until ALLO is confirmed. 
+ * however some servers will not accept STOR or APPE until ALLO is confirmed.
  * If response is passed, it is estrdup()ed from ftp->inbuf and must be freed
  * or assigned to a zval returned to the user */
 int		ftp_alloc(ftpbuf_t *ftp, const zend_long size, zend_string **response);

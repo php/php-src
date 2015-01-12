@@ -143,7 +143,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	zend_string	  *buffer = zend_string_alloc(buffer_capac, 0);
 	UIDNAInfo	  info = UIDNA_INFO_INITIALIZER;
 	int			  buffer_used = 0;
-	
+
 	uts46 = uidna_openUTS46(option, &status);
 	if (php_intl_idn_check_status(status, "failed to open UIDNA instance",
 			mode) == FAILURE) {
@@ -312,7 +312,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			array_init(idna_info);
 		}
 	}
-	
+
 	if (variant == INTL_IDN_VARIANT_2003) {
 		php_intl_idn_to(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 				domain, (int32_t)domain_len, (uint32_t)option, mode);

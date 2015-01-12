@@ -23,7 +23,7 @@
 #include "zend_globals.h"
 #include "zend_variables.h"
 #include "zend_API.h"
-#include "zend_objects_API.h"	
+#include "zend_objects_API.h"
 
 ZEND_API void zend_objects_store_init(zend_objects_store *objects, uint32_t init_size)
 {
@@ -167,7 +167,7 @@ ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 					GC_REFCOUNT(object)--;
 				}
 			}
-			
+
 			if (GC_REFCOUNT(object) == 0) {
 				uint32_t handle = object->handle;
 				void *ptr;
@@ -190,7 +190,7 @@ ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 				efree(ptr);
 				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
 			}
-			
+
 			if (failure) {
 				zend_bailout();
 			}

@@ -95,7 +95,7 @@ int zend_optimizer_lookup_cv(zend_op_array *op_array, zend_string* name)
 			opline++;
 		}
 	}
-	
+
 	return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
 }
 
@@ -185,7 +185,7 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 				zend_optimizer_add_literal(op_array, val);
 				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
-				/* break missing intentionally */						
+				/* break missing intentionally */
 			/*case ZEND_FETCH_CONSTANT:*/
 			case ZEND_ASSIGN_OBJ:
 			case ZEND_FETCH_OBJ_R:
@@ -324,11 +324,11 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					return 1;
 				default:
 					break;
-			} 
+			}
 			zend_optimizer_update_op1_const(op_array, opline, val);
 			break;
 		}
-		
+
 		if (ZEND_OP2_TYPE(opline) == type &&
 			ZEND_OP2(opline).var == var) {
 			switch (opline->opcode) {
@@ -411,7 +411,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	}
 
 	/* pass 11:
-	 * - Compact literals table 
+	 * - Compact literals table
 	 */
 	if (ZEND_OPTIMIZER_PASS_11 & OPTIMIZATION_LEVEL) {
 		zend_optimizer_compact_literals(op_array, ctx);
@@ -459,8 +459,8 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 	}
 
 	/* Do actual optimizations */
-	zend_optimize(op_array, ctx);	
-	
+	zend_optimize(op_array, ctx);
+
 	/* Redo pass_two() */
 	opline = op_array->opcodes;
 	end = opline + op_array->last;

@@ -32,7 +32,7 @@ extern zend_module_entry xsl_module_entry;
 #include <libxslt/xsltInternals.h>
 #include <libxslt/xsltutils.h>
 #include <libxslt/transform.h>
-#include <libxslt/security.h> 
+#include <libxslt/security.h>
 #if HAVE_XSL_EXSLT
 #include <libexslt/exslt.h>
 #include <libexslt/exsltconfig.h>
@@ -102,9 +102,9 @@ PHP_RSHUTDOWN_FUNCTION(xsl);
 PHP_MINFO_FUNCTION(xsl);
 
 
-/* 
+/*
   	Declare any global variables you may need between the BEGIN
-	and END macros here:     
+	and END macros here:
 
 ZEND_BEGIN_MODULE_GLOBALS(xsl)
 	long  global_value;
@@ -112,12 +112,12 @@ ZEND_BEGIN_MODULE_GLOBALS(xsl)
 ZEND_END_MODULE_GLOBALS(xsl)
 */
 
-/* In every utility function you add that needs to use variables 
-   in php_xsl_globals, call TSRM_FETCH(); after declaring other 
+/* In every utility function you add that needs to use variables
+   in php_xsl_globals, call TSRM_FETCH(); after declaring other
    variables used by that function, or better yet, pass in
    after the last function argument and declare your utility function
    with after the last declared argument.  Always refer to
-   the globals in your function as XSL_G(variable).  You are 
+   the globals in your function as XSL_G(variable).  You are
    encouraged to rename these macros something shorter, see
    examples in any other php module directory.
 */

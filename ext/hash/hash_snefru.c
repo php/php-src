@@ -85,10 +85,10 @@ static inline void Snefru(php_hash_uint32 input[16])
 			round(B12, B13, B14, t0);
 			round(B13, B14, B15, t1);
 			round(B14, B15, B00, t1);
-			
-			rshift = shifts[b]; 
+
+			rshift = shifts[b];
 			lshift = 32-rshift;
-			
+
 			B00 = (B00 >> rshift) | (B00 << lshift);
 			B01 = (B01 >> rshift) | (B01 << lshift);
 			B02 = (B02 >> rshift) | (B02 << lshift);
@@ -148,23 +148,23 @@ PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char 
 	} else {
 		context->count[1] += len * 8;
 	}
-	
+
 	if (context->length + len < 32) {
 		memcpy(&context->buffer[context->length], input, len);
 		context->length += len;
 	} else {
 		size_t i = 0, r = (context->length + len) % 32;
-		
+
 		if (context->length) {
 			i = 32 - context->length;
 			memcpy(&context->buffer[context->length], input, i);
 			SnefruTransform(context, context->buffer);
 		}
-		
+
 		for (; i + 32 <= len; i += 32) {
 			SnefruTransform(context, input + i);
 		}
-		
+
 		memcpy(context->buffer, input + i, r);
 		ZEND_SECURE_ZERO(&context->buffer[r], 32 - r);
 		context->length = r;
@@ -174,22 +174,22 @@ PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char 
 PHP_HASH_API void PHP_SNEFRUFinal(unsigned char digest[32], PHP_SNEFRU_CTX *context)
 {
 	php_hash_uint32 i, j;
-	
+
 	if (context->length) {
 		SnefruTransform(context, context->buffer);
 	}
-	
+
 	context->state[14] = context->count[0];
 	context->state[15] = context->count[1];
 	Snefru(context->state);
-	
+
 	for (i = 0, j = 0; j < 32; i++, j += 4) {
 		digest[j] = (unsigned char) ((context->state[i] >> 24) & 0xff);
 		digest[j + 1] = (unsigned char) ((context->state[i] >> 16) & 0xff);
 		digest[j + 2] = (unsigned char) ((context->state[i] >> 8) & 0xff);
 		digest[j + 3] = (unsigned char) (context->state[i] & 0xff);
 	}
-	
+
 	ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 

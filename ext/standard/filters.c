@@ -47,17 +47,17 @@ static php_stream_filter_status_t strfilter_rot13_filter(
 
 	while (buckets_in->head) {
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
-		
+
 		php_strtr(bucket->buf, bucket->buflen, rot13_from, rot13_to, 52);
 		consumed += bucket->buflen;
-		
+
 		php_stream_bucket_append(buckets_out, bucket);
 	}
 
 	if (bytes_consumed) {
 		*bytes_consumed = consumed;
 	}
-	
+
 	return PSFS_PASS_ON;
 }
 
@@ -95,10 +95,10 @@ static php_stream_filter_status_t strfilter_toupper_filter(
 
 	while (buckets_in->head) {
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
-		
+
 		php_strtr(bucket->buf, bucket->buflen, lowercase, uppercase, 26);
 		consumed += bucket->buflen;
-		
+
 		php_stream_bucket_append(buckets_out, bucket);
 	}
 
@@ -123,10 +123,10 @@ static php_stream_filter_status_t strfilter_tolower_filter(
 
 	while (buckets_in->head) {
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
-		
+
 		php_strtr(bucket->buf, bucket->buflen, uppercase, lowercase, 26);
 		consumed += bucket->buflen;
-		
+
 		php_stream_bucket_append(buckets_out, bucket);
 	}
 
@@ -183,7 +183,7 @@ static int php_strip_tags_filter_ctor(php_strip_tags_filter *inst, const char *a
 			return FAILURE;
 		}
 		memcpy((char *)inst->allowed_tags, allowed_tags, allowed_tags_len);
-		inst->allowed_tags_len = (int)allowed_tags_len; 
+		inst->allowed_tags_len = (int)allowed_tags_len;
 	} else {
 		inst->allowed_tags = NULL;
 	}
@@ -191,7 +191,7 @@ static int php_strip_tags_filter_ctor(php_strip_tags_filter *inst, const char *a
 	inst->persistent = persistent;
 
 	return SUCCESS;
-}	
+}
 
 static void php_strip_tags_filter_dtor(php_strip_tags_filter *inst)
 {
@@ -216,16 +216,16 @@ static php_stream_filter_status_t strfilter_strip_tags_filter(
 	while (buckets_in->head) {
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 		consumed = bucket->buflen;
-		
+
 		bucket->buflen = php_strip_tags(bucket->buf, bucket->buflen, &(inst->state), (char *)inst->allowed_tags, inst->allowed_tags_len);
-	
+
 		php_stream_bucket_append(buckets_out, bucket);
 	}
 
 	if (bytes_consumed) {
 		*bytes_consumed = consumed;
 	}
-	
+
 	return PSFS_PASS_ON;
 }
 
@@ -248,14 +248,14 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 {
 	php_strip_tags_filter *inst;
 	smart_str tags_ss = {0};
-	
+
 	inst = pemalloc(sizeof(php_strip_tags_filter), persistent);
 
 	if (inst == NULL) { /* it's possible pemalloc returns NULL
 						   instead of causing it to bail out */
 		return NULL;
 	}
-	
+
 	if (filterparams != NULL) {
 		if (Z_TYPE_P(filterparams) == IS_ARRAY) {
 			zval *tmp;
@@ -419,7 +419,7 @@ static php_conv_err_t php_conv_base64_encode_flush(php_conv_base64_encode *inst,
 			line_ccnt -= 4;
 			break;
 
-		case 2: 
+		case 2:
 			if (line_ccnt < 4 && inst->lbchars != NULL) {
 				if (ocnt < inst->lbchars_len) {
 					return PHP_CONV_ERR_TOO_BIG;
@@ -461,7 +461,7 @@ static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *ins
 	register unsigned char *ps, *pd;
 	register unsigned int line_ccnt;
 
-	if (in_pp == NULL || in_left_p == NULL) { 
+	if (in_pp == NULL || in_left_p == NULL) {
 		return php_conv_base64_encode_flush(inst, in_pp, in_left_p, out_pp, out_left_p);
 	}
 
@@ -500,7 +500,7 @@ static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *ins
 			}
 			break;
 
-		case 2: 
+		case 2:
 			if (icnt >= 1) {
 				if (inst->line_ccnt < 4 && inst->lbchars != NULL) {
 					if (ocnt < inst->lbchars_len) {
@@ -632,7 +632,7 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 	static const unsigned int nbitsof_pack = 8;
 
 	if (in_pp == NULL || in_left_p == NULL) {
-		if (inst->eos || inst->urem_nbits == 0) { 
+		if (inst->eos || inst->urem_nbits == 0) {
 			return PHP_CONV_ERR_SUCCESS;
 		}
 		return PHP_CONV_ERR_UNEXPECTED_EOS;
@@ -995,7 +995,7 @@ typedef struct _php_conv_qprint_decode {
 	int lbchars_dup;
 	int persistent;
 	unsigned int lb_ptr;
-	unsigned int lb_cnt;	
+	unsigned int lb_cnt;
 } php_conv_qprint_decode;
 
 static void php_conv_qprint_decode_dtor(php_conv_qprint_decode *inst)
@@ -1080,7 +1080,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 				}
 			} /* break is missing intentionally */
 
-			case 2: {	
+			case 2: {
 				if (icnt <= 0) {
 					goto out;
 				}
@@ -1206,7 +1206,7 @@ typedef struct _php_convert_filter {
 
 #define PHP_CONV_BASE64_ENCODE 1
 #define PHP_CONV_BASE64_DECODE 2
-#define PHP_CONV_QPRINT_ENCODE 3 
+#define PHP_CONV_QPRINT_ENCODE 3
 #define PHP_CONV_QPRINT_DECODE 4
 
 static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pretval, size_t *pretval_len, char *field_name, size_t field_name_len, int persistent)
@@ -1215,7 +1215,7 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 
 	*pretval = NULL;
 	*pretval_len = 0;
- 
+
 	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
 		zend_string *str = zval_get_string(tmpval);
 
@@ -1251,7 +1251,7 @@ static php_conv_err_t php_conv_get_long_prop_ex(const HashTable *ht, zend_long *
 		*pretval = Z_LVAL_P(ztval);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
-	} 
+	}
 	return PHP_CONV_ERR_SUCCESS;
 }
 #endif
@@ -1277,7 +1277,7 @@ static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, zend_ulong
 		}
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
-	} 
+	}
 	return PHP_CONV_ERR_SUCCESS;
 }
 
@@ -1299,7 +1299,7 @@ static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretva
 		*pretval = (Z_TYPE_P(tmpval) == IS_TRUE);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
-	} 
+	}
 	return PHP_CONV_ERR_SUCCESS;
 }
 
@@ -1334,7 +1334,7 @@ static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval,
 }
 
 #define GET_STR_PROP(ht, var, var_len, fldname, persistent) \
-	php_conv_get_string_prop_ex(ht, &var, &var_len, fldname, sizeof(fldname), persistent) 
+	php_conv_get_string_prop_ex(ht, &var, &var_len, fldname, sizeof(fldname), persistent)
 
 #define GET_INT_PROP(ht, var, fldname) \
 	php_conv_get_int_prop_ex(ht, &var, fldname, sizeof(fldname))
@@ -1348,7 +1348,7 @@ static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval,
 static php_conv *php_conv_open(int conv_mode, const HashTable *options, int persistent)
 {
 	/* FIXME: I'll have to replace this ugly code by something neat
-	   (factories?) in the near future. */ 
+	   (factories?) in the near future. */
 	php_conv *retval = NULL;
 
 	switch (conv_mode) {
@@ -1407,8 +1407,8 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 
 				GET_STR_PROP(options, lbchars, lbchars_len, "line-break-chars", 0);
 				GET_UINT_PROP(options, line_len, "line-length");
-				GET_BOOL_PROP(options, opt_binary, "binary"); 
-				GET_BOOL_PROP(options, opt_force_encode_first, "force-encode-first"); 
+				GET_BOOL_PROP(options, opt_binary, "binary");
+				GET_BOOL_PROP(options, opt_force_encode_first, "force-encode-first");
 
 				if (line_len < 4) {
 					if (lbchars != NULL) {
@@ -1437,7 +1437,7 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 				}
 			}
 		} break;
-	
+
 		case PHP_CONV_QPRINT_DECODE: {
 			char *lbchars = NULL;
 			size_t lbchars_len;
@@ -1471,7 +1471,7 @@ out_failure:
 	if (retval != NULL) {
 		pefree(retval, persistent);
 	}
-	return NULL;	
+	return NULL;
 }
 
 #undef GET_STR_PROP
@@ -1532,7 +1532,7 @@ static int strfilter_convert_append_bucket(
 	const char *pt;
 	size_t ocnt, icnt, tcnt;
 	size_t initial_out_buf_size;
-	
+
 	if (ps == NULL) {
 		initial_out_buf_size = 64;
 		icnt = 1;
@@ -1541,7 +1541,7 @@ static int strfilter_convert_append_bucket(
 		icnt = buf_len;
 	}
 
-	out_buf_size = ocnt = initial_out_buf_size; 
+	out_buf_size = ocnt = initial_out_buf_size;
 	if (NULL == (out_buf = pemalloc(out_buf_size, persistent))) {
 		return FAILURE;
 	}
@@ -1810,12 +1810,12 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 	} else if (strcasecmp(dot, "quoted-printable-decode") == 0) {
 		conv_mode = PHP_CONV_QPRINT_DECODE;
 	}
-	
+
 	if (php_convert_filter_ctor(inst, conv_mode,
 		(filterparams != NULL ? Z_ARRVAL_P(filterparams) : NULL),
 		filtername, persistent) != SUCCESS) {
 		goto out;
-	}	
+	}
 
 	retval = php_stream_filter_alloc(&strfilter_convert_ops, inst, persistent);
 out:
@@ -1866,7 +1866,7 @@ static php_stream_filter_status_t consumed_filter_filter(
 		php_stream_seek(stream, data->offset + data->consumed, SEEK_SET);
 	}
 	data->consumed += consumed;
-	
+
 	return PSFS_PASS_ON;
 }
 
@@ -2045,7 +2045,7 @@ static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
 					memmove(out, p, end - p);
 				}
 				out_len += end - p;
-				return out_len;	
+				return out_len;
 		}
 	}
 	return out_len;
@@ -2067,14 +2067,14 @@ static php_stream_filter_status_t php_chunked_filter(
 	while (buckets_in->head) {
 		bucket = php_stream_bucket_make_writeable(buckets_in->head);
 		consumed += bucket->buflen;
-		bucket->buflen = php_dechunk(bucket->buf, bucket->buflen, data);	
+		bucket->buflen = php_dechunk(bucket->buf, bucket->buflen, data);
 		php_stream_bucket_append(buckets_out, bucket);
 	}
 
 	if (bytes_consumed) {
 		*bytes_consumed = consumed;
 	}
-	
+
 	return PSFS_PASS_ON;
 }
 

@@ -46,10 +46,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMText extends DOMCharacterData 
+* class DOMText extends DOMCharacterData
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1312295772
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_text_class_functions[] = {
@@ -97,8 +97,8 @@ PHP_METHOD(domtext, __construct)
 }
 /* }}} end DOMText::__construct */
 
-/* {{{ wholeText	string	
-readonly=yes 
+/* {{{ wholeText	string
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-wholeText
 Since: DOM Level 3
 */
@@ -139,7 +139,7 @@ int dom_text_whole_text_read(dom_object *obj, zval *retval)
 
 /* {{{ proto DOMText dom_text_split_text(int offset);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_text_split_text)
 {
@@ -175,12 +175,12 @@ PHP_FUNCTION(dom_text_split_text)
 
 	first = xmlUTF8Strndup(cur, offset);
 	second = xmlUTF8Strsub(cur, offset, length - offset);
-	
+
 	xmlFree(cur);
 
 	xmlNodeSetContent(node, first);
 	nnode = xmlNewDocText(node->doc, second);
-	
+
 	xmlFree(first);
 	xmlFree(second);
 
@@ -193,7 +193,7 @@ PHP_FUNCTION(dom_text_split_text)
 		xmlAddNextSibling(node, nnode);
 		nnode->type = XML_TEXT_NODE;
 	}
-	
+
 	php_dom_create_object(nnode, return_value, intern);
 }
 /* }}} end dom_text_split_text */

@@ -41,7 +41,7 @@ ap_optiserr(int argc, char * const *argv, int oint, const char *optstr,
     ap_optopt = argv[oint][optchr];
     return('?');
 }
-    
+
 int ap_getopt(int argc, char* const *argv, const char *optstr)
 {
     static int optchr = 0;
@@ -98,7 +98,7 @@ int ap_getopt(int argc, char* const *argv, const char *optstr)
     }
     if (cp[1] == ':')
     {
-        /* Check for cases where the value of the argument 
+        /* Check for cases where the value of the argument
            is in the form -<arg> <val> or in the form -<arg><val> */
         dash = 0;
         if(!argv[ap_optind][2]) {

@@ -305,7 +305,7 @@ struct st_mysqlnd_dbg_function_profile {
 	uint64_t in_calls_underporm_calls;
 	uint64_t min_total;
 	uint64_t max_total;
-	uint64_t avg_total;	
+	uint64_t avg_total;
 	uint64_t total_underporm_calls;
 };
 #define PROFILE_UNDERPERFORM_THRESHOLD 10
@@ -432,7 +432,7 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 			struct st_mysqlnd_dbg_function_profile * f_profile;
 			zend_string	*string_key = NULL;
 
-			self->m->log_va(self, __LINE__, __FILE__, 0, "info : ",	
+			self->m->log_va(self, __LINE__, __FILE__, 0, "info : ",
 					"number of functions: %d", zend_hash_num_elements(&self->function_profiles));
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&self->function_profiles, string_key, f_profile) {
 				self->m->log_va(self, __LINE__, __FILE__, -1, "info : ",
@@ -458,7 +458,7 @@ MYSQLND_METHOD(mysqlnd_debug, close)(MYSQLND_DEBUG * self)
 						);
 			} ZEND_HASH_FOREACH_END();
 		}
-#endif	
+#endif
 
 		php_stream_free(self->stream, PHP_STREAM_FREE_CLOSE);
 		self->stream = NULL;
@@ -572,7 +572,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 								char func_name[1024];
 								unsigned int func_name_len = MIN(sizeof(func_name) - 1, j - i - 1);
 								memcpy(func_name, mode + i + 1, func_name_len);
-								func_name[func_name_len] = '\0'; 
+								func_name[func_name_len] = '\0';
 
 								zend_hash_str_add_empty_element(&self->not_filtered_functions,
 															func_name, func_name_len);
@@ -663,7 +663,7 @@ MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const
 			case 'x': /* mysqlnd extension - profile calls */
 				self->flags |= MYSQLND_DEBUG_PROFILE_CALLS;
 				state = PARSER_WAIT_COLON;
-				break;				
+				break;
 			default:
 				if (state == PARSER_WAIT_MODIFIER) {
 #if 0

@@ -235,20 +235,20 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 		if (op_array->static_variables) {
 			ALLOC_HASHTABLE(op_array_copy->static_variables);
 			zend_hash_init(
-				op_array_copy->static_variables, 
+				op_array_copy->static_variables,
 				zend_hash_num_elements(op_array->static_variables),
 				NULL, ZVAL_PTR_DTOR, 0
 			);
 			zend_hash_apply_with_arguments(
 				op_array->static_variables,
-				copy_closure_static_var, 1, 
+				copy_closure_static_var, 1,
 				op_array_copy->static_variables
 			);
 		}
 
 		op_array = op_array_copy;
 	}
-	
+
 	/* Create new execution context. We have to back up and restore
 	 * EG(current_execute_data) here. */
 	current_execute_data = EG(current_execute_data);
@@ -303,8 +303,8 @@ ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 		zend_execute_data *original_execute_data = EG(current_execute_data);
 		zend_class_entry *original_scope = EG(scope);
 		zend_vm_stack original_stack = EG(vm_stack);
-
 		original_stack->top = EG(vm_stack_top);
+
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
 		EG(scope) = generator->execute_data->func->common.scope;
@@ -314,8 +314,7 @@ ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 
 		/* We want the backtrace to look as if the generator function was
 		 * called from whatever method we are current running (e.g. next()).
-		 * So we have to link generator call frame with caller call frames */
-
+		 * So we have to link generator call frame with caller call frame. */
 		generator->execute_data->prev_execute_data = original_execute_data;
 
 		/* Resume execution */
@@ -329,6 +328,7 @@ ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 		}
 
 		/* Restore executor globals */
+		generator->stack->top = EG(vm_stack_top);
 		EG(current_execute_data) = original_execute_data;
 		EG(scope) = original_scope;
 		EG(vm_stack_top) = original_stack->top;
@@ -468,7 +468,7 @@ ZEND_METHOD(Generator, send)
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
-	zend_generator_ensure_initialized(generator); 
+	zend_generator_ensure_initialized(generator);
 
 	/* The generator is already closed, thus can't send anything */
 	if (!generator->execute_data) {
@@ -504,7 +504,7 @@ ZEND_METHOD(Generator, throw)
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
-	zend_generator_ensure_initialized(generator); 
+	zend_generator_ensure_initialized(generator);
 
 	if (generator->execute_data) {
 		/* Throw the exception in the context of the generator */
@@ -632,7 +632,7 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 	}
 
 	iterator = generator->iterator = emalloc(sizeof(zend_object_iterator));
-	
+
 	zend_iterator_init(iterator);
 
 	iterator->funcs = &zend_generator_iterator_functions;

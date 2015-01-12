@@ -35,20 +35,20 @@
 
 
 /* {{{ pdo_dblib_get_field_name
- * 
+ *
  * Return the data type name for a given TDS number
- * 
+ *
  */
 static char *pdo_dblib_get_field_name(int type)
 {
-	/* 
-	 * I don't return dbprtype(type) because it does not fully describe the type 
+	/*
+	 * I don't return dbprtype(type) because it does not fully describe the type
 	 * (example: varchar is reported as char by dbprtype)
-	 * 
+	 *
 	 * FIX ME: Cache datatypes from server systypes table in pdo_dblib_handle_factory()
 	 * 		   to make this future proof.
 	 */
-	 
+
 	switch (type) {
 		case 31: return "nvarchar";
 		case 34: return "image";
@@ -102,16 +102,16 @@ static int pdo_dblib_stmt_cursor_closer(pdo_stmt_t *stmt)
 
 	/* Cancel any pending results */
 	dbcancel(H->link);
-	
+
 	return 1;
 }
 
 static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
-	
+
 	efree(S);
-	
+
 	return 1;
 }
 
@@ -120,21 +120,21 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt)
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
 	RETCODE ret;
-	
+
 	ret = dbresults(H->link);
 
 	if (FAIL == ret) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbresults() returned FAIL");		
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbresults() returned FAIL");
 		return 0;
 	}
-	
+
 	if(NO_MORE_RESULTS == ret) {
 		return 0;
 	}
-		
+
 	stmt->row_count = DBCOUNT(H->link);
 	stmt->column_count = dbnumcols(H->link);
-	
+
 	return 1;
 }
 
@@ -143,89 +143,89 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
 	RETCODE ret;
-	
+
 	dbsetuserdata(H->link, (BYTE*) &S->err);
-	
+
 	pdo_dblib_stmt_cursor_closer(stmt);
-	
+
 	if (FAIL == dbcmd(H->link, stmt->active_query_string)) {
 		return 0;
 	}
-	
+
 	if (FAIL == dbsqlexec(H->link)) {
 		return 0;
 	}
-	
+
 	ret = pdo_dblib_stmt_next_rowset(stmt);
-	
+
 	stmt->row_count = DBCOUNT(H->link);
 	stmt->column_count = dbnumcols(H->link);
-	
+
 	return 1;
 }
 
 static int pdo_dblib_stmt_fetch(pdo_stmt_t *stmt,
 	enum pdo_fetch_orientation ori, zend_long offset)
 {
-	
+
 	RETCODE ret;
-	
+
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
-	
+
 	ret = dbnextrow(H->link);
-	
+
 	if (FAIL == ret) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbnextrow() returned FAIL");
 		return 0;
 	}
-		
+
 	if(NO_MORE_ROWS == ret) {
 		return 0;
 	}
-	
-	return 1;	
+
+	return 1;
 }
 
 static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
-	
+
 	if(colno >= stmt->column_count || colno < 0)  {
 		return FAILURE;
 	}
-	
+
 	struct pdo_column_data *col = &stmt->columns[colno];
-	
+
 	col->name =  estrdup(dbcolname(H->link, colno+1));
 	col->maxlen = dbcollen(H->link, colno+1);
 	col->namelen = strlen(col->name);
 	col->param_type = PDO_PARAM_STR;
-		
+
 	return 1;
 }
 
 static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	 zend_ulong *len, int *caller_frees)
 {
-	
+
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
-	
+
 	int coltype;
 	unsigned int tmp_len;
 	char *tmp_ptr = NULL;
-	
+
 	coltype = dbcoltype(H->link, colno+1);
-	
+
 	*len = dbdatlen(H->link, colno+1);
 	*ptr = dbdata(H->link, colno+1);
-	
+
 	if (*len == 0 && *ptr == NULL) {
 		return 1;
 	}
-	
+
 	switch (coltype) {
 		case SQLVARBINARY:
 		case SQLBINARY:
@@ -293,9 +293,9 @@ static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 	array_init(return_value);
 
 	dbtypeinfo = dbcoltypeinfo(H->link, colno+1);
-	
+
 	if(!dbtypeinfo) return FAILURE;
-		
+
 	add_assoc_long(return_value, "max_length", dbcollen(H->link, colno+1) );
 	add_assoc_long(return_value, "precision", (int) dbtypeinfo->precision );
 	add_assoc_long(return_value, "scale", (int) dbtypeinfo->scale );

@@ -39,7 +39,7 @@ typedef struct _php_bz2_filter_data {
 	char *outbuf;
 	size_t inbuf_len;
 	size_t outbuf_len;
-	
+
 	enum strm_status status;              /* Decompress option */
 	unsigned int small_footprint : 1;     /* Decompress option */
 	unsigned int expect_concatenated : 1; /* Decompress option */
@@ -378,7 +378,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "blocks", sizeof("blocks")-1))) {
 					/* How much memory to allocate (1 - 9) x 100kb */
 					zval tmp;
-	
+
 					ZVAL_DUP(&tmp, tmpzval);
 					convert_to_long(&tmp);
 					if (Z_LVAL(tmp) < 1 || Z_LVAL(tmp) > 9) {
@@ -391,7 +391,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 				if ((tmpzval = zend_hash_str_find(HASH_OF(filterparams), "work", sizeof("work")-1))) {
 					/* Work Factor (0 - 250) */
 					zval tmp;
-	
+
 					ZVAL_DUP(&tmp, tmpzval);
 					convert_to_long(&tmp);
 

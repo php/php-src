@@ -105,7 +105,7 @@ zend_class_entry *oci_coll_class_entry_ptr;
 #define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE2
 #else
 #define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE
-#endif 
+#endif
 
 #if ZEND_MODULE_API_NO > 20020429
 #define ONUPDATELONGFUNC OnUpdateLong
@@ -1099,7 +1099,7 @@ static void php_oci_init_global_handles(void)
 			&& *tmp_buf) {
 			php_error_docref(NULL, E_WARNING, "%s", tmp_buf);
 		}
-		
+
 		OCI_G(env) = NULL;
 		OCI_G(err) = NULL;
 		return;
@@ -1128,18 +1128,18 @@ static void php_oci_init_global_handles(void)
 
 		if (ora_error_code) {
 			int tmp_buf_len = strlen((char *)tmp_buf);
-			
+
 			if (tmp_buf_len > 0 && tmp_buf[tmp_buf_len - 1] == '\n') {
 				tmp_buf[tmp_buf_len - 1] = '\0';
 			}
-			
+
 			if (errstatus == OCI_SUCCESS_WITH_INFO) {
 				php_error_docref(NULL, E_WARNING, "Initialization error: OCI_SUCCESS_WITH_INFO: %s", tmp_buf);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Initialization error: OCI_ERROR: %s", tmp_buf);
-				
+
 				OCIHandleFree((dvoid *) OCI_G(env), OCI_HTYPE_ENV);
-				
+
 				OCI_G(env) = NULL;
 				OCI_G(err) = NULL;
 			}
@@ -2507,7 +2507,7 @@ void php_oci_client_get_version(char **version)
 	char  version_buff[256];
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))	/* OCIClientVersion only available 10.2 onwards */
 	sword major_version = 0;
-	sword minor_version = 0; 
+	sword minor_version = 0;
 	sword update_num = 0;
 	sword patch_num = 0;
 	sword port_update_num = 0;
@@ -2585,7 +2585,7 @@ int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode)
 			/* PHP_OCI_RETURN_LOBS means that we want the content of the LOB back instead of the locator */
 
 			if (column->chunk_size)
-				descriptor->chunk_size = column->chunk_size;			
+				descriptor->chunk_size = column->chunk_size;
 			lob_fetch_status = php_oci_lob_read(descriptor, -1, 0, &lob_buffer, &lob_length);
 			if (descriptor->chunk_size)  /* Cache the chunk_size to avoid recalling OCILobGetChunkSize */
 				column->chunk_size = descriptor->chunk_size;
@@ -2698,16 +2698,16 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 
 	if (invokedstatement->impres_flag == PHP_OCI_IMPRES_NO_CHILDREN) {
 		/* Already know there are no Implicit Result Sets */
-	    statement = invokedstatement; 
+	    statement = invokedstatement;
 	} else if (invokedstatement->impres_flag == PHP_OCI_IMPRES_HAS_CHILDREN) {
 		/* Previously saw an Implicit Result Set in an earlier invocation of php_oci_fetch_row */
 		statement = (php_oci_statement *)invokedstatement->impres_child_stmt;
 	} else {
 		sword errstatus;
-		
+
 		/* Check for an Implicit Result Set on this statement handle */
-		PHP_OCI_CALL_RETURN(errstatus, OCIAttrGet, ((dvoid *)invokedstatement->stmt, OCI_HTYPE_STMT, 
-						    (dvoid *) &invokedstatement->impres_count, 
+		PHP_OCI_CALL_RETURN(errstatus, OCIAttrGet, ((dvoid *)invokedstatement->stmt, OCI_HTYPE_STMT,
+						    (dvoid *) &invokedstatement->impres_count,
 						    (ub4 *)NULL, OCI_ATTR_IMPLICIT_RESULT_COUNT, invokedstatement->err));
 		if (errstatus) {
 			RETURN_FALSE;
@@ -3065,7 +3065,7 @@ static OCIEnv *php_oci_create_env(ub2 charsetid)
 			&& *ora_msg_buf) {
 			php_error_docref(NULL, E_WARNING, "%s", ora_msg_buf);
 		}
-		
+
 		return NULL;
 	}
 	return retenv;
@@ -3374,7 +3374,7 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 		/* {{{ Populate the session and server fields of the connection */
 		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrGet, ((dvoid *)connection->svc, OCI_HTYPE_SVCCTX, (dvoid *)&(connection->server), (ub4 *)0, OCI_ATTR_SERVER, OCI_G(err)));
 
-		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrGet, ((dvoid *)connection->svc, OCI_HTYPE_SVCCTX, (dvoid *)&(connection->session), (ub4 *)0, OCI_ATTR_SESSION, OCI_G(err))); 
+		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrGet, ((dvoid *)connection->svc, OCI_HTYPE_SVCCTX, (dvoid *)&(connection->session), (ub4 *)0, OCI_ATTR_SESSION, OCI_G(err)));
 		/* }}} */
 
 		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIContextGetValue, (connection->session, OCI_G(err), (ub1 *)"NEXT_PING", (ub1)sizeof("NEXT_PING"), (void **)&(connection->next_pingp)));

@@ -122,7 +122,7 @@
 	char *__t = zend_print##func##_to_buf(__b + sizeof(__b) - 1, (num));	\
 	smart_string_appendl_ex((dest), __t, __b + sizeof(__b) - 1 - __t, (type));	\
 } while (0)
-	
+
 #define smart_string_append_unsigned_ex(dest, num, type) \
 	smart_string_append_generic_ex((dest), (num), (type), zend_ulong, _ulong)
 

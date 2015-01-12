@@ -1,7 +1,10 @@
 --TEST--
 FPM: Test IPv4/IPv6 support
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php include "skipif.inc";
+      @stream_socket_client('tcp://[::1]:0', $errno);
+      if ($errno != 111) die('skip IPv6 not supported.');
+?>
 --FILE--
 <?php
 

@@ -212,9 +212,9 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 				zval entries;
 
 				add_assoc_string(subarray, "type", "TXT");
-				
+
 				array_init(&entries);
-				
+
 				for (i = 0; i < count; i++) {
 					txt_len += strlen(data_txt->pStringArray[i]) + 1;
 				}

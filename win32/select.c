@@ -47,7 +47,7 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 	int retcode;
 
 #define SAFE_FD_ISSET(fd, set)	(set != NULL && FD_ISSET(fd, set))
-	
+
 	/* calculate how long we need to wait in milliseconds */
 	if (tv == NULL) {
 		ms_total = INFINITE;
@@ -59,7 +59,7 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 	FD_ZERO(&sock_read);
 	FD_ZERO(&sock_write);
 	FD_ZERO(&sock_except);
-	
+
 	/* build an array of handles for non-sockets */
 	for (i = 0; i < max_fd; i++) {
 		if (SAFE_FD_ISSET(i, rfds) || SAFE_FD_ISSET(i, wfds) || SAFE_FD_ISSET(i, efds)) {
@@ -89,18 +89,18 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 		/* plain sockets only - let winsock handle the whole thing */
 		return select(max_fd, rfds, wfds, efds, tv);
 	}
-	
+
 	/* mixture of handles and sockets; lets multiplex between
 	 * winsock and waiting on the handles */
 
 	FD_ZERO(&aread);
 	FD_ZERO(&awrite);
 	FD_ZERO(&aexcept);
-	
+
 	limit = GetTickCount64() + ms_total;
 	do {
 		retcode = 0;
-	
+
 		if (sock_max_fd >= 0) {
 			/* overwrite the zero'd sets here; the select call
 			 * will clear those that are not active */
@@ -159,8 +159,8 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 	}
 	if (efds) {
 		*efds = aexcept;
-	}	
-	
+	}
+
 	return retcode;
 }
 

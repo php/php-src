@@ -75,7 +75,7 @@ typedef struct {
 	char vary_string[1];
 } IBVARY;
 
-/* sql variables union 
+/* sql variables union
  * used for convert and binding input variables
  */
 typedef struct {
@@ -124,7 +124,7 @@ static void _php_ibase_free_stmt_handle(ibase_db_link *link, isc_stmt_handle stm
 		char res_buf[8];
 		IBDEBUG("Dropping statement handle (free_stmt_handle)...");
 		/* Only free statement if db-connection is still open */
-		if (SUCCESS == isc_database_info(IB_STATUS, &link->handle, 
+		if (SUCCESS == isc_database_info(IB_STATUS, &link->handle,
 							sizeof(info), info, sizeof(res_buf), res_buf)) {
 			if (isc_dsql_free_statement(IB_STATUS, &stmt, DSQL_drop)) {
 				_php_ibase_error();
@@ -194,9 +194,9 @@ static void php_ibase_free_query_rsrc(zend_resource *rsrc) /* {{{ */
 
 void php_ibase_query_minit(INIT_FUNC_ARGS) /* {{{ */
 {
-	le_result = zend_register_list_destructors_ex(_php_ibase_free_result, NULL, 
+	le_result = zend_register_list_destructors_ex(_php_ibase_free_result, NULL,
 	    "interbase result", module_number);
-	le_query = zend_register_list_destructors_ex(php_ibase_free_query_rsrc, NULL, 
+	le_query = zend_register_list_destructors_ex(php_ibase_free_query_rsrc, NULL,
 	    "interbase query", module_number);
 }
 /* }}} */
@@ -275,7 +275,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, /* {{{
 				case blr_varying2:
 					/**
 					 * IB has a strange way of handling VARCHAR arrays. It doesn't store
-					 * the length in the first short, as with VARCHAR fields. It does, 
+					 * the length in the first short, as with VARCHAR fields. It does,
 					 * however, expect the extra short to be allocated for each element.
 					 */
 					a->el_type = SQL_TEXT;
@@ -286,7 +286,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, /* {{{
 				case blr_cstring:
 				case blr_cstring2:
 					/**
-					 * These types are mentioned as array types in the manual, but I 
+					 * These types are mentioned as array types in the manual, but I
 					 * wouldn't know how to create an array field with any of these
 					 * types. I assume these types are not applicable to arrays, and
 					 * were mentioned erroneously.
@@ -353,12 +353,12 @@ static int _php_ibase_alloc_query(ibase_query *ib_query, ibase_db_link *link, /*
 	}
 
 	/* find out what kind of statement was prepared */
-	if (isc_dsql_sql_info(IB_STATUS, &ib_query->stmt, sizeof(info_type), 
+	if (isc_dsql_sql_info(IB_STATUS, &ib_query->stmt, sizeof(info_type),
 			info_type, sizeof(result), result)) {
 		_php_ibase_error();
 		goto _php_ibase_alloc_query_error;
 	}
-	ib_query->statement_type = result[3];	
+	ib_query->statement_type = result[3];
 
 	/* not enough output variables ? */
 	if (ib_query->out_sqlda->sqld > ib_query->out_sqlda->sqln) {
@@ -449,7 +449,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 			zend_hash_internal_pointer_reset(Z_ARRVAL_P(val));
 		}
 
-		for (i = 0; i < dim_len; ++i) { 
+		for (i = 0; i < dim_len; ++i) {
 
 			if (Z_TYPE_P(val) == IS_ARRAY &&
 				(subval = zend_hash_get_current_data(Z_ARRVAL_P(val))) == NULL)
@@ -517,15 +517,15 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 						}
 
 						if (l > 0) {
-							*(ISC_INT64 *) buf = (ISC_INT64) (l * pow(10, 
+							*(ISC_INT64 *) buf = (ISC_INT64) (l * pow(10,
 								-array->ar_desc.array_desc_scale) + .5);
 						} else {
-							*(ISC_INT64 *) buf = (ISC_INT64) (l * pow(10, 
+							*(ISC_INT64 *) buf = (ISC_INT64) (l * pow(10,
 								-array->ar_desc.array_desc_scale) - .5);
 						}
 					}
 					break;
-			}			
+			}
 		} else {
 			struct tm t = { 0, 0, 0, 0, 0, 0 };
 
@@ -579,7 +579,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 #ifdef HAVE_STRPTIME
 					strptime(Z_STRVAL_P(val), INI_STR("ibase.timestampformat"), &t);
 #else
-					n = sscanf(Z_STRVAL_P(val), "%d%*[/]%d%*[/]%d %d%*[:]%d%*[:]%d", 
+					n = sscanf(Z_STRVAL_P(val), "%d%*[/]%d%*[/]%d %d%*[:]%d%*[:]%d",
 						&t.tm_mon, &t.tm_mday, &t.tm_year, &t.tm_hour, &t.tm_min, &t.tm_sec);
 
 					if (n != 3 && n != 6) {
@@ -631,7 +631,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 		}
 	}
 	return SUCCESS;
-}		
+}
 /* }}} */
 
 static int _php_ibase_bind(XSQLDA *sqlda, zval *b_vars, BIND_BUF *buf, /* {{{ */
@@ -774,7 +774,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval *b_vars, BIND_BUF *buf, /* {{{ */
 					void *array_data = emalloc(ar->ar_size);
 					ISC_QUAD array_id = { 0, 0 };
 
-					if (FAILURE == _php_ibase_bind_array(b_var, array_data, ar->ar_size, 
+					if (FAILURE == _php_ibase_bind_array(b_var, array_data, ar->ar_size,
 							ar, 0)) {
 						_php_ibase_module_error("Parameter %d: failed to bind array argument"
 							TSRMLS_CC,i+1);
@@ -783,7 +783,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval *b_vars, BIND_BUF *buf, /* {{{ */
 						continue;
 					}
 
-					if (isc_array_put_slice(IB_STATUS, &ib_query->link->handle, &ib_query->trans->handle, 
+					if (isc_array_put_slice(IB_STATUS, &ib_query->link->handle, &ib_query->trans->handle,
 							&array_id, &ar->ar_desc, array_data, &ar->ar_size)) {
 						_php_ibase_error();
 						efree(array_data);
@@ -791,7 +791,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval *b_vars, BIND_BUF *buf, /* {{{ */
 					}
 					buf[i].val.qval = array_id;
 					efree(array_data);
-				}				
+				}
 				++array_cnt;
 				continue;
 			} /* switch */
@@ -869,7 +869,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 	char result[64];
 	ISC_STATUS isc_result;
 	int argc = ib_query->in_sqlda ? ib_query->in_sqlda->sqld : 0;
-	
+
 	RESET_ERRMSG;
 
 	for (i = 0; i < argc; ++i) {
@@ -886,7 +886,7 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 			/* a SET TRANSACTION statement should be executed with a NULL trans handle */
 			tr = NULL;
 
-			if (isc_dsql_execute_immediate(IB_STATUS, &ib_query->link->handle, &tr, 0, 
+			if (isc_dsql_execute_immediate(IB_STATUS, &ib_query->link->handle, &tr, 0,
 					ib_query->query, ib_query->dialect, NULL)) {
 				_php_ibase_error();
 				goto _php_ibase_exec_error;
@@ -918,14 +918,14 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 		case isc_info_sql_stmt_commit:
 		case isc_info_sql_stmt_rollback:
 
-			if (isc_dsql_execute_immediate(IB_STATUS, &ib_query->link->handle, 
+			if (isc_dsql_execute_immediate(IB_STATUS, &ib_query->link->handle,
 					&ib_query->trans->handle, 0, ib_query->query, ib_query->dialect, NULL)) {
 				_php_ibase_error();
 				goto _php_ibase_exec_error;
 			}
 
 			if (ib_query->trans->handle == NULL && ib_query->trans_res_id != 0) {
-				/* transaction was released by the query and was a registered resource, 
+				/* transaction was released by the query and was a registered resource,
 				   so we have to release it */
 				zval *res = zend_hash_index_find(&EG(regular_list), ib_query->trans_res_id);
 				zend_list_delete(Z_RES_P(res));
@@ -1070,7 +1070,7 @@ PHP_FUNCTION(ibase_query)
 	ibase_result *result = NULL;
 
 	RESET_ERRMSG;
-	
+
 	RETVAL_FALSE;
 
 	switch (ZEND_NUM_ARGS()) {
@@ -1082,7 +1082,7 @@ PHP_FUNCTION(ibase_query)
 
 				ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link*, zlink, -1, LE_LINK, le_link, le_plink);
 				ZEND_FETCH_RESOURCE(trans, ibase_trans*, ztrans, -1, LE_TRANS,	le_trans);
-				
+
 				trans_res_id = Z_RES_P(ztrans)->handle;
 				bind_i = 3;
 				break;
@@ -1091,7 +1091,7 @@ PHP_FUNCTION(ibase_query)
 			if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 2, "rs",
 					&zlink, &query, &query_len)) {
 				_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, zlink, &ib_link, &trans);
-	
+
 				if (trans != NULL) {
 					trans_res_id = Z_RES_P(zlink)->handle;
 				}
@@ -1113,7 +1113,7 @@ PHP_FUNCTION(ibase_query)
 					_php_ibase_module_error("CREATE DATABASE is not allowed: maximum link count "
 						"(%ld) reached", l);
 
-				} else if (isc_dsql_execute_immediate(IB_STATUS, &db, &trans, (short)query_len, 
+				} else if (isc_dsql_execute_immediate(IB_STATUS, &db, &trans, (short)query_len,
 						query, SQL_DIALECT_CURRENT, NULL)) {
 					_php_ibase_error();
 
@@ -1123,7 +1123,7 @@ PHP_FUNCTION(ibase_query)
 
 				} else {
 
-					/* register the link as a resource; unfortunately, we cannot register 
+					/* register the link as a resource; unfortunately, we cannot register
 					   it in the hash table, because we don't know the connection params */
 					ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 					ib_link->handle = db;
@@ -1137,10 +1137,10 @@ PHP_FUNCTION(ibase_query)
 					++IBG(num_links);
 				}
 				return;
-			}					
+			}
 		case 1:
 		case 0:
-			if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() ? 1 : 0, "s", &query, 
+			if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() ? 1 : 0, "s", &query,
 					&query_len)) {
 				ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK,
 			    	le_link, le_plink);
@@ -1152,7 +1152,7 @@ PHP_FUNCTION(ibase_query)
 	}
 
 	/* open default transaction */
-	if (ib_link == NULL || FAILURE == _php_ibase_def_trans(ib_link, &trans) 
+	if (ib_link == NULL || FAILURE == _php_ibase_def_trans(ib_link, &trans)
 			|| FAILURE == _php_ibase_alloc_query(&ib_query, ib_link, trans, query, ib_link->dialect,
 				trans_res_id)) {
 		return;
@@ -1161,26 +1161,26 @@ PHP_FUNCTION(ibase_query)
 	do {
 		int bind_n = ZEND_NUM_ARGS() - bind_i,
 		    expected_n = ib_query.in_sqlda ? ib_query.in_sqlda->sqld : 0;
-		
+
 		if (bind_n != expected_n) {
 			php_error_docref(NULL, (bind_n < expected_n) ? E_WARNING : E_NOTICE,
 				"Statement expects %d arguments, %d given", expected_n, bind_n);
 			if (bind_n < expected_n) {
 				break;
 			}
-		} else if (bind_n > 0) {		
+		} else if (bind_n > 0) {
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &bind_args, &bind_num) == FAILURE) {
 				return;
 			}
 		}
-	
-		if (FAILURE == _php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &result, &ib_query, 
+
+		if (FAILURE == _php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &result, &ib_query,
 				&bind_args[bind_i])) {
 			break;
 		}
 
 		if (result != NULL) { /* statement returns a result */
-			result->type = QUERY_RESULT;	
+			result->type = QUERY_RESULT;
 
 			/* EXECUTE PROCEDURE returns only one row => statement can be released immediately */
 			if (ib_query.statement_type != isc_info_sql_stmt_exec_procedure) {
@@ -1203,9 +1203,9 @@ PHP_FUNCTION(ibase_affected_rows)
 	ibase_trans *trans = NULL;
 	ibase_db_link *ib_link;
 	zval *arg = NULL;
-		
+
 	RESET_ERRMSG;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &arg) == FAILURE) {
 		return;
 	}
@@ -1232,28 +1232,28 @@ PHP_FUNCTION(ibase_affected_rows)
 }
 /* }}} */
 
-/* {{{ proto int ibase_num_rows( resource result_identifier ) 
+/* {{{ proto int ibase_num_rows( resource result_identifier )
    Return the number of rows that are available in a result */
 #if abies_0
-PHP_FUNCTION(ibase_num_rows) 
+PHP_FUNCTION(ibase_num_rows)
 {
 	/**
 	 * As this function relies on the InterBase API function isc_dsql_sql_info()
-	 * which has a couple of limitations (which I hope will be fixed in future 
+	 * which has a couple of limitations (which I hope will be fixed in future
 	 * releases of Firebird), this function is fairly useless. I'm leaving it
-	 * in place for people who can live with the limitations, which I only 
+	 * in place for people who can live with the limitations, which I only
 	 * found out about after I had implemented it anyway.
 	 *
 	 * Currently, there's no way to determine how many rows can be fetched from
 	 * a cursor. The only number that _can_ be determined is the number of rows
-	 * that have already been pre-fetched by the client library. 
+	 * that have already been pre-fetched by the client library.
 	 * This implies the following:
 	 * - num_rows() always returns zero before the first fetch;
 	 * - num_rows() for SELECT ... FOR UPDATE is broken -> never returns a
 	 *   higher number than the number of records fetched so far (no pre-fetch);
-	 * - the result of num_rows() for other statements is merely a lower bound 
+	 * - the result of num_rows() for other statements is merely a lower bound
 	 *   on the number of records => calling ibase_num_rows() again after a couple
-	 *   of fetches will most likely return a new (higher) figure for large result 
+	 *   of fetches will most likely return a new (higher) figure for large result
 	 *   sets.
 	 */
 
@@ -1285,7 +1285,7 @@ PHP_FUNCTION(ibase_num_rows)
 			}
 			i += len+3;
 		}
-	}					
+	}
 }
 #endif
 /* }}} */
@@ -1293,21 +1293,21 @@ PHP_FUNCTION(ibase_num_rows)
 static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ */
 	int scale, int flag)
 {
-	static ISC_INT64 const scales[] = { 1, 10, 100, 1000, 
-		10000, 
-		100000, 
-		1000000, 
+	static ISC_INT64 const scales[] = { 1, 10, 100, 1000,
+		10000,
+		100000,
+		1000000,
 		10000000,
-		100000000, 
-		1000000000, 
-		LL_LIT(10000000000), 
+		100000000,
+		1000000000,
+		LL_LIT(10000000000),
 		LL_LIT(100000000000),
-		LL_LIT(1000000000000), 
-		LL_LIT(10000000000000), 
+		LL_LIT(1000000000000),
+		LL_LIT(10000000000000),
 		LL_LIT(100000000000000),
 		LL_LIT(1000000000000000),
-		LL_LIT(10000000000000000), 
-		LL_LIT(100000000000000000), 
+		LL_LIT(10000000000000000),
+		LL_LIT(100000000000000000),
 		LL_LIT(1000000000000000000)
 	};
 
@@ -1342,7 +1342,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 				if (n >= 0) {
 					l = slprintf(string_data, sizeof(string_data), "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, n % f);
 				} else if (n <= -f) {
-					l = slprintf(string_data, sizeof(string_data), "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, -n % f);				
+					l = slprintf(string_data, sizeof(string_data), "%" LL_MASK "d.%0*" LL_MASK "d", n / f, -scale, -n % f);
 				 } else {
 					l = slprintf(string_data, sizeof(string_data), "-0.%0*" LL_MASK "d", -scale, -n % f);
 				}
@@ -1351,7 +1351,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 			break;
 #endif
 		case SQL_LONG:
-			n = *(ISC_LONG *) data; 
+			n = *(ISC_LONG *) data;
 		_sql_long:
 			if (scale == 0) {
 				ZVAL_LONG(val,n);
@@ -1403,7 +1403,7 @@ format_date_time:
 #else
 				switch (type & ~1) {
 					default:
-						l = slprintf(string_data, sizeof(string_data), "%02d/%02d/%4d %02d:%02d:%02d", t.tm_mon+1, t.tm_mday, 
+						l = slprintf(string_data, sizeof(string_data), "%02d/%02d/%4d %02d:%02d:%02d", t.tm_mon+1, t.tm_mday,
 							t.tm_year + 1900, t.tm_hour, t.tm_min, t.tm_sec);
 						break;
 					case SQL_TYPE_DATE:
@@ -1428,7 +1428,7 @@ static int _php_ibase_arr_zval(zval *ar_zval, char *data, unsigned long data_siz
 	/**
 	 * Create multidimension array - recursion function
 	 */
-	int 
+	int
 		u_bound = ib_array->ar_desc.array_desc_bounds[dim].array_bound_upper,
 		l_bound = ib_array->ar_desc.array_desc_bounds[dim].array_bound_lower,
 		dim_len = 1 + u_bound - l_bound;
@@ -1498,32 +1498,32 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 		}
 	} else {
 		ib_result->has_more_rows = 0;
-	}	
+	}
 
 	array_init(return_value);
 
 	for (i = 0; i < ib_result->out_sqlda->sqld; ++i) {
 		XSQLVAR *var = &ib_result->out_sqlda->sqlvar[i];
 		char buf[METADATALENGTH+4], *alias = var->aliasname;
-		
+
 		if (! (fetch_type & FETCH_ROW)) {
 			int i = 0;
 			char const *base = "FIELD"; /* use 'FIELD' if name is empty */
-			
+
 			/**
-			* Ensure no two columns have identical names: 
+			* Ensure no two columns have identical names:
 			* keep generating new names until we find one that is unique.
 			*/
 			switch (*alias) {
 				void *p;
-				
+
 				default:
 					i = 1;
 					base = alias;
-					
+
 					while ((p = zend_symtable_str_find_ptr(
 							Z_ARRVAL_P(return_value), alias, strlen(alias))) != NULL) {
-				
+
 				case '\0':
 						snprintf(alias = buf, sizeof(buf), "%s_%02d", base, i++);
 					}
@@ -1568,13 +1568,13 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 							unsigned short item_len;
 							char item = bl_info[i++];
 
-							if (item == isc_info_end || item == isc_info_truncated || 
+							if (item == isc_info_end || item == isc_info_truncated ||
 								item == isc_info_error || i >= sizeof(bl_info)) {
 
 								_php_ibase_module_error("Could not determine BLOB size (internal error)"
 									);
 								goto _php_ibase_fetch_error;
-							}								
+							}
 
 							item_len = (unsigned short) isc_vax_integer(&bl_info[i], 2);
 
@@ -1587,7 +1587,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 
 						if (max_len == 0) {
 							ZVAL_STRING(&result, "");
-						} else if (SUCCESS != _php_ibase_blob_get(&result, &blob_handle, 
+						} else if (SUCCESS != _php_ibase_blob_get(&result, &blob_handle,
 								max_len)) {
 							goto _php_ibase_fetch_error;
 						}
@@ -1611,7 +1611,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 						ibase_array *ib_array = &ib_result->out_array[array_cnt++];
 						void *ar_data = emalloc(ib_array->ar_size);
 
-						if (isc_array_get_slice(IB_STATUS, &ib_result->link->handle, 
+						if (isc_array_get_slice(IB_STATUS, &ib_result->link->handle,
 								&ib_result->trans->handle, &ar_qd, &ib_array->ar_desc,
 								ar_data, &ib_array->ar_size)) {
 							_php_ibase_error();
@@ -1740,7 +1740,7 @@ PHP_FUNCTION(ibase_prepare)
 	char *query;
 
 	RESET_ERRMSG;
-	
+
 	if (ZEND_NUM_ARGS() == 1) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &query, &query_len) == FAILURE) {
 			return;
@@ -1789,7 +1789,7 @@ PHP_FUNCTION(ibase_execute)
 	int bind_n = 0;
 
 	RESET_ERRMSG;
-	
+
 	RETVAL_FALSE;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|r*", &query, &args, &bind_n)) {
@@ -1811,7 +1811,7 @@ PHP_FUNCTION(ibase_execute)
 		}
 
 		/* Have we used this cursor before and it's still open (exec proc has no cursor) ? */
-		if (ib_query->result_res_id != 0 
+		if (ib_query->result_res_id != 0
 				&& ib_query->statement_type != isc_info_sql_stmt_exec_procedure) {
 			zval *res;
 
@@ -1828,7 +1828,7 @@ PHP_FUNCTION(ibase_execute)
 			}
 		}
 
-		if (FAILURE == _php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &result, ib_query, 
+		if (FAILURE == _php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &result, ib_query,
 				args)) {
 		    break;
 		}
@@ -1837,7 +1837,7 @@ PHP_FUNCTION(ibase_execute)
 		if (ib_query->trans->handle == NULL) {
 			zend_list_delete(Z_RES_P(query));
 		}
-	
+
 		if (result != NULL) {
 			zval *ret;
 
@@ -1952,36 +1952,36 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var) /* {{{ */
 	} else {
 		switch (var->sqltype & ~1) {
 			case SQL_TEXT:
-				s = "CHAR"; 
+				s = "CHAR";
 				break;
 			case SQL_VARYING:
-				s = "VARCHAR"; 
+				s = "VARCHAR";
 				break;
 			case SQL_SHORT:
-				s = "SMALLINT"; 
+				s = "SMALLINT";
 				break;
 			case SQL_LONG:
-				s = "INTEGER"; 
+				s = "INTEGER";
 				break;
 			case SQL_FLOAT:
 				s = "FLOAT"; break;
 			case SQL_DOUBLE:
 			case SQL_D_FLOAT:
 				s = "DOUBLE PRECISION"; break;
-			case SQL_INT64: 
-				s = "BIGINT"; 
+			case SQL_INT64:
+				s = "BIGINT";
 				break;
-			case SQL_TIMESTAMP:	
-				s = "TIMESTAMP"; 
+			case SQL_TIMESTAMP:
+				s = "TIMESTAMP";
 				break;
 			case SQL_TYPE_DATE:
 				s = "DATE";
 				break;
 			case SQL_TYPE_TIME:
-				s = "TIME"; 
+				s = "TIME";
 				break;
 			case SQL_BLOB:
-				s = "BLOB"; 
+				s = "BLOB";
 				break;
 			case SQL_ARRAY:
 				s = "ARRAY";
@@ -2025,7 +2025,7 @@ PHP_FUNCTION(ibase_field_info)
 
 		ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result_arg, -1, LE_RESULT, le_result);
 		sqlda = ib_result->out_sqlda;
-	}					
+	}
 
 	if (sqlda == NULL) {
 		_php_ibase_module_error("Trying to get field info from a non-select query");

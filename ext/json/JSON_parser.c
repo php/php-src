@@ -188,9 +188,9 @@ static const int state_transition_table[NR_STATES][NR_CLASSES] = {
     These modes can be pushed on the stack.
 */
 enum modes {
-    MODE_ARRAY, 
-    MODE_DONE,  
-    MODE_KEY,   
+    MODE_ARRAY,
+    MODE_DONE,
+    MODE_KEY,
     MODE_OBJECT,
 };
 
@@ -634,7 +634,7 @@ parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, 
 					zval *arr = &jp->the_zstack[jp->top];
 
                     array_init(arr);
-					
+
 					if (jp->top == 1) {
 						ZVAL_COPY_VALUE(z, arr);
 					}

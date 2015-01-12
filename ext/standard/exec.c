@@ -91,7 +91,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 
 	if (type != 3) {
 		b = buf;
-		
+
 		while (php_stream_get_line(stream, b, EXEC_INPUT_BUF, &bufl)) {
 			/* no new line found, let's read some more */
 			if (b[bufl - 1] != '\n' && !php_stream_eof(stream)) {
@@ -278,7 +278,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 				cmd->val[y++] = str[x];
 				break;
 #else
-			/* % is Windows specific for environmental variables, ^%PATH% will 
+			/* % is Windows specific for environmental variables, ^%PATH% will
 				output PATH whil ^%PATH^% not. escapeshellcmd->val will escape all %.
 			*/
 			case '%':

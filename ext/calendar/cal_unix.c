@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Shane Caraveo             <shane@caraveo.com>               | 
+   | Authors: Shane Caraveo             <shane@caraveo.com>               |
    |          Colin Viebrock            <colin@easydns.com>               |
    |          Hartmut Holzgraefe        <hholzgra@php.net>                |
    +----------------------------------------------------------------------+
@@ -33,7 +33,7 @@ PHP_FUNCTION(unixtojd)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &ts) == FAILURE) {
 		return;
-	}	
+	}
 
 	if (!ts) {
 		ts = time(NULL);
@@ -57,10 +57,10 @@ PHP_FUNCTION(jdtounix)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &uday) == FAILURE) {
 		return;
-	}	
+	}
 	uday -= 2440588 /* J.D. of 1.1.1970 */;
 
-	if (uday < 0 || uday > 24755) { /* before beginning of unix epoch or behind end of unix epoch */ 
+	if (uday < 0 || uday > 24755) { /* before beginning of unix epoch or behind end of unix epoch */
 		RETURN_FALSE;
 	}
 

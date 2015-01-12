@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,11 +31,11 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include "zipint.h"
 
-
+
 
 zip_int64_t
 zip_source_read(struct zip_source *src, void *data, zip_uint64_t len)
@@ -59,6 +59,6 @@ zip_source_read(struct zip_source *src, void *data, zip_uint64_t len)
 	    src->error_source = ZIP_LES_UPPER;
 	return -1;
     }
-    
+
     return ret;
 }

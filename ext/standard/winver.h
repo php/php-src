@@ -86,7 +86,7 @@ typedef struct _php_win_OSVERSIONINFOEXA {
     DWORD dwMinorVersion;
     DWORD dwBuildNumber;
     DWORD dwPlatformId;
-    CHAR  szCSDVersion[128];     
+    CHAR  szCSDVersion[128];
     WORD  wServicePackMajor;
     WORD  wServicePackMinor;
     WORD  wSuiteMask;

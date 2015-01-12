@@ -1,4 +1,4 @@
-/* 
+/*
 	+----------------------------------------------------------------------+
 	| PHP Version 7                                                        |
 	+----------------------------------------------------------------------+
@@ -188,7 +188,7 @@ static zend_module_entry *php_builtin_extensions[] = {
 /* }}} */
 
 #define EXTCOUNT (sizeof(php_builtin_extensions)/sizeof(zend_module_entry *))
-	
+
 PHPAPI int php_register_internal_extensions(void)
 {
 	return php_register_extensions(php_builtin_extensions, EXTCOUNT);

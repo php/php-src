@@ -107,12 +107,12 @@ int main(int argc, char **argv)
 	mbfl_string_init_set(&result, no_language, from_encoding);
 	ret = mbfl_buffer_converter_feed_result(convd2, &string, &result);
 	hexdump(&result);
-	mbfl_buffer_converter_delete(convd2);	
+	mbfl_buffer_converter_delete(convd2);
 #endif
 	mbfl_string_clear(&result);
 	mbfl_string_clear(&string);
 
-	mbfl_buffer_converter_delete(convd);	
+	mbfl_buffer_converter_delete(convd);
 
 
 	return EXIT_SUCCESS;

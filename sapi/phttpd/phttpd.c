@@ -24,7 +24,7 @@
 #ifdef HAVE_PHTTPD
 
 #include "ext/standard/info.h"
- 
+
 #ifndef ZTS
 #error PHTTPD module is only useable in thread-safe mode
 #endif
@@ -34,7 +34,7 @@
 typedef struct {
     struct connectioninfo *cip;
 	struct stat sb;
-} phttpd_globals_struct; 
+} phttpd_globals_struct;
 
 static int ph_globals_id;
 
@@ -71,12 +71,12 @@ php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 {
     char *header_name, *header_content;
     char *p;
- 
+
 	http_sendheaders(PHG(cip)->fd, PHG(cip), SG(sapi_headers).http_response_code, NULL);
 
     header_name = sapi_header->header;
     header_content = p = strchr(header_name, ':');
- 
+
     if (p) {
         *p = '\0';
         do {
@@ -84,7 +84,7 @@ php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
         } while (*header_content == ' ');
 
 		fd_printf(PHG(cip)->fd,"%s: %s\n", header_name, header_content);
- 
+
         *p = ':';
     }
 
@@ -99,9 +99,9 @@ php_phttpd_sapi_send_headers(sapi_headers_struct *sapi_headers)
     if (SG(sapi_headers).send_default_content_type) {
 		fd_printf(PHG(cip)->fd,"Content-Type: text/html\n");
     }
- 
+
 	fd_putc('\n', PHG(cip)->fd);
- 
+
     return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
@@ -112,16 +112,16 @@ php_phttpd_sapi_read_cookies(void)
 /*
     int i;
     char *http_cookie = NULL;
- 
+
     i = Ns_SetIFind(NSG(conn->headers), "cookie");
     if(i != -1) {
         http_cookie = Ns_SetValue(NSG(conn->headers), i);
     }
- 
+
     return http_cookie;
 */
 	fprintf(stderr,"***php_phttpd_sapi_read_cookies\n");
- 
+
 	return 0;
 }
 
@@ -131,17 +131,17 @@ php_phttpd_sapi_read_post(char *buf, uint count_bytes)
 /*
     uint max_read;
     uint total_read = 0;
- 
+
     max_read = MIN(NSG(data_avail), count_bytes);
- 
+
     total_read = Ns_ConnRead(NSG(conn), buf, max_read);
- 
+
     if(total_read == NS_ERROR) {
         total_read = -1;
     } else {
         NSG(data_avail) -= total_read;
     }
- 
+
     return total_read;
 */
 	fprintf(stderr,"***php_phttpd_sapi_read_post\n");
@@ -151,10 +151,10 @@ php_phttpd_sapi_read_post(char *buf, uint count_bytes)
 static sapi_module_struct phttpd_sapi_module = {
     "phttpd",
     "PHTTPD",
- 
+
     php_phttpd_startup,                     /* startup */
     php_module_shutdown_wrapper,            /* shutdown */
- 
+
 	NULL,									/* activate */
 	NULL,									/* deactivate */
 
@@ -164,14 +164,14 @@ static sapi_module_struct phttpd_sapi_module = {
  	NULL,									/* getenv */
 
     php_error,                              /* error handler */
- 
+
     php_phttpd_sapi_header_handler,         /* header handler */
     php_phttpd_sapi_send_headers,           /* send headers handler */
     NULL,                                   /* send header handler */
- 
+
     php_phttpd_sapi_read_post,              /* read POST data */
     php_phttpd_sapi_read_cookies,           /* read Cookies */
- 
+
 	NULL,									/* register server variables */
 	NULL,									/* Log message */
 	NULL,									/* Get request time */
@@ -199,12 +199,12 @@ php_phttpd_request_ctor(void)
     char *root;
     int index;
     char *tmp;
- 
+
     server = Ns_ConnServer(NSG(conn));
- 
+
     Ns_DStringInit(&ds);
     Ns_UrlToFile(&ds, server, NSG(conn->request->url));
- 
+
     /* path_translated is the absolute path to the file */
     SG(request_info).path_translated = strdup(Ns_DStringValue(&ds));
     Ns_DStringFree(&ds);
@@ -214,19 +214,19 @@ php_phttpd_request_ctor(void)
     index = Ns_SetIFind(NSG(conn)->headers, "content-type");
     SG(request_info).content_type = index == -1 ? NULL :
         Ns_SetValue(NSG(conn)->headers, index);
- 
+
     tmp = Ns_ConnAuthUser(NSG(conn));
     if(tmp) {
         tmp = estrdup(tmp);
     }
     SG(request_info).auth_user = tmp;
- 
+
     tmp = Ns_ConnAuthPasswd(NSG(conn));
     if(tmp) {
         tmp = estrdup(tmp);
     }
     SG(request_info).auth_password = tmp;
- 
+
     NSG(data_avail) = SG(request_info).content_length;
 #endif
 }
@@ -282,16 +282,16 @@ int pm_request(struct connectioninfo *cip)
 	struct httpinfo *hip = cip->hip;
 	int status;
 
-	if (strcasecmp(hip->method, "GET") == 0 || 
+	if (strcasecmp(hip->method, "GET") == 0 ||
 	    strcasecmp(hip->method, "HEAD") == 0 ||
 	    strcasecmp(hip->method, "POST") == 0) {
 		PHG(cip) = cip;
-		
+
 		php_phttpd_request_ctor();
 		status = php_doit();
 		php_phttpd_request_dtor();
 
-		return status;	
+		return status;
 	} else {
 		return -2;
 	}

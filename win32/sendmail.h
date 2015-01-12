@@ -38,7 +38,7 @@ PHPAPI int TSendMail(char *smtpaddr, int *returnerror, char **error_message,
 			  char *RPath, char *Subject, char *mailTo, char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath);
 PHPAPI void TSMClose(void);
-static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data, 
+static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data,
 			 char *headers, char *headers_lc, char **error_message);
 PHPAPI char *GetSMErrorText(int index);
 

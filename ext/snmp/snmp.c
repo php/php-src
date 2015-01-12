@@ -477,7 +477,7 @@ static void php_snmp_session_destructor(zend_resource *rsrc) /* {{{ */
 static void php_snmp_object_free_storage(zend_object *object) /* {{{ */
 {
 	php_snmp_object *intern = php_snmp_fetch_object(object);
-	
+
 	if (!intern) {
 		return;
 	}
@@ -501,7 +501,7 @@ static zend_object *php_snmp_object_new(zend_class_entry *class_type) /* {{{ */
 	intern->zo.handlers = &php_snmp_object_handlers;
 
 	return &intern->zo;
-	
+
 }
 /* }}} */
 
@@ -555,7 +555,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval, int val
 	char *dbuf = (char *)NULL;
 	int buflen = sizeof(sbuf) - 1;
 	int val_len = vars->val_len;
-	
+
 	/* use emalloc() for large values, use static array otherwize */
 
 	/* There is no way to know the size of buffer snprint_value() needs in order to print a value there.
@@ -698,7 +698,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval, int val
 * SNMP object fetcher/setter for all SNMP versions
 *
 */
-static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st, 
+static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 							struct snmp_session *session,
 							struct objid_query *objid_query)
 {
@@ -717,7 +717,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 
 	/* we start with retval=FALSE. If any actual data is acquired, retval will be set to appropriate type */
 	RETVAL_FALSE;
-	
+
 	/* reset errno and errstr */
 	php_snmp_error(getThis(), NULL, PHP_SNMP_ERRNO_NOERROR, "");
 
@@ -801,8 +801,8 @@ retry:
 				}
 				for (vars = response->variables; vars; vars = vars->next_variable) {
 					/* do not output errors as values */
-					if ( 	vars->type == SNMP_ENDOFMIBVIEW || 
-						vars->type == SNMP_NOSUCHOBJECT || 
+					if ( 	vars->type == SNMP_ENDOFMIBVIEW ||
+						vars->type == SNMP_NOSUCHOBJECT ||
 						vars->type == SNMP_NOSUCHINSTANCE ) {
 						if ((st & SNMP_CMD_WALK) && Z_TYPE_P(return_value) == IS_ARRAY) {
 							break;
@@ -812,8 +812,8 @@ retry:
 						php_snmp_error(getThis(), NULL, PHP_SNMP_ERRNO_ERROR_IN_REPLY, "Error in packet at '%s': %s", buf, buf2);
 						continue;
 					}
-					
-					if ((st & SNMP_CMD_WALK) && 
+
+					if ((st & SNMP_CMD_WALK) &&
 						(vars->name_length < rootlen || memcmp(root, vars->name, rootlen * sizeof(oid)))) { /* not part of this subtree */
 						if (Z_TYPE_P(return_value) == IS_ARRAY) { /* some records are fetched already, shut down further lookup */
 							keepwalking = 0;
@@ -1101,7 +1101,7 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 				efree(objid_query->vars);
 				return FALSE;
 			}
-		} else { 
+		} else {
 			memmove((char *)objid_query->vars[0].name, (char *)objid_mib, sizeof(objid_mib));
 			objid_query->vars[0].name_length = sizeof(objid_mib) / sizeof(oid);
 		}
@@ -1437,7 +1437,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	int session_less_mode = (getThis() == NULL);
 	php_snmp_object *snmp_object;
 	php_snmp_object glob_snmp_object;
-	
+
 	objid_query.max_repetitions = -1;
 	objid_query.non_repeaters = 0;
 	objid_query.valueretrieval = SNMP_G(valueretrieval);
@@ -1550,7 +1550,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 	}
 
 	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, session, &objid_query);
-	
+
 	efree(objid_query.vars);
 
 	if (session_less_mode) {
@@ -1563,7 +1563,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version)
 }
 /* }}} */
 
-/* {{{ proto mixed snmpget(string host, string community, mixed object_id [, int timeout [, int retries]]) 
+/* {{{ proto mixed snmpget(string host, string community, mixed object_id [, int timeout [, int retries]])
    Fetch a SNMP object */
 PHP_FUNCTION(snmpget)
 {
@@ -1571,7 +1571,7 @@ PHP_FUNCTION(snmpget)
 }
 /* }}} */
 
-/* {{{ proto mixed snmpgetnext(string host, string community, mixed object_id [, int timeout [, int retries]]) 
+/* {{{ proto mixed snmpgetnext(string host, string community, mixed object_id [, int timeout [, int retries]])
    Fetch a SNMP object */
 PHP_FUNCTION(snmpgetnext)
 {
@@ -1579,7 +1579,7 @@ PHP_FUNCTION(snmpgetnext)
 }
 /* }}} */
 
-/* {{{ proto mixed snmpwalk(string host, string community, mixed object_id [, int timeout [, int retries]]) 
+/* {{{ proto mixed snmpwalk(string host, string community, mixed object_id [, int timeout [, int retries]])
    Return all objects under the specified object id */
 PHP_FUNCTION(snmpwalk)
 {
@@ -1595,7 +1595,7 @@ PHP_FUNCTION(snmprealwalk)
 }
 /* }}} */
 
-/* {{{ proto bool snmpset(string host, string community, mixed object_id, mixed type, mixed value [, int timeout [, int retries]]) 
+/* {{{ proto bool snmpset(string host, string community, mixed object_id, mixed type, mixed value [, int timeout [, int retries]])
    Set the value of a SNMP object */
 PHP_FUNCTION(snmpset)
 {
@@ -1642,7 +1642,7 @@ PHP_FUNCTION(snmp_set_enum_print)
 
 	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_PRINT_NUMERIC_ENUM, (int) a1);
 	RETURN_TRUE;
-} 
+}
 /* }}} */
 
 /* {{{ proto bool snmp_set_oid_output_format(int oid_format)
@@ -1670,10 +1670,10 @@ PHP_FUNCTION(snmp_set_oid_output_format)
 			RETURN_FALSE;
 			break;
 	}
-} 
+}
 /* }}} */
 
-/* {{{ proto mixed snmp2_get(string host, string community, mixed object_id [, int timeout [, int retries]]) 
+/* {{{ proto mixed snmp2_get(string host, string community, mixed object_id [, int timeout [, int retries]])
    Fetch a SNMP object */
 PHP_FUNCTION(snmp2_get)
 {
@@ -1681,7 +1681,7 @@ PHP_FUNCTION(snmp2_get)
 }
 /* }}} */
 
-/* {{{ proto mixed snmp2_getnext(string host, string community, mixed object_id [, int timeout [, int retries]]) 
+/* {{{ proto mixed snmp2_getnext(string host, string community, mixed object_id [, int timeout [, int retries]])
    Fetch a SNMP object */
 PHP_FUNCTION(snmp2_getnext)
 {
@@ -1689,7 +1689,7 @@ PHP_FUNCTION(snmp2_getnext)
 }
 /* }}} */
 
-/* {{{ proto mixed snmp2_walk(string host, string community, mixed object_id [, int timeout [, int retries]]) 
+/* {{{ proto mixed snmp2_walk(string host, string community, mixed object_id [, int timeout [, int retries]])
    Return all objects under the specified object id */
 PHP_FUNCTION(snmp2_walk)
 {
@@ -1705,7 +1705,7 @@ PHP_FUNCTION(snmp2_real_walk)
 }
 /* }}} */
 
-/* {{{ proto bool snmp2_set(string host, string community, mixed object_id, mixed type, mixed value [, int timeout [, int retries]]) 
+/* {{{ proto bool snmp2_set(string host, string community, mixed object_id, mixed type, mixed value [, int timeout [, int retries]])
    Set the value of a SNMP object */
 PHP_FUNCTION(snmp2_set)
 {
@@ -1821,7 +1821,7 @@ PHP_METHOD(snmp, __construct)
 
 	snmp_object = Z_SNMP_P(object);
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	
+
 	if (zend_parse_parameters(argc, "lss|ll", &version, &a1, &a1_len, &a2, &a2_len, &timeout, &retries) == FAILURE) {
 		zend_restore_error_handling(&error_handling);
 		return;
@@ -1843,7 +1843,7 @@ PHP_METHOD(snmp, __construct)
 	if (snmp_object->session) {
 		netsnmp_session_free(&(snmp_object->session));
 	}
-	
+
 	if (netsnmp_session_init(&(snmp_object->session), version, a1, a2, timeout, retries)) {
 		return;
 	}
@@ -1857,7 +1857,7 @@ PHP_METHOD(snmp, __construct)
 }
 /* }}} */
 
-/* {{{ proto bool SNMP::close() 
+/* {{{ proto bool SNMP::close()
 	Close SNMP session */
 PHP_METHOD(snmp, close)
 {
@@ -1900,7 +1900,7 @@ PHP_METHOD(snmp, walk)
 }
 /* }}} */
 
-/* {{{ proto bool SNMP::set(mixed object_id, mixed type, mixed value) 
+/* {{{ proto bool SNMP::set(mixed object_id, mixed type, mixed value)
    Set the value of a SNMP object */
 PHP_METHOD(snmp, set)
 {
@@ -1919,7 +1919,7 @@ PHP_METHOD(snmp, setSecurity)
 	int argc = ZEND_NUM_ARGS();
 
 	snmp_object = Z_SNMP_P(object);
-	
+
 	if (zend_parse_parameters(argc, "s|ssssss", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
 		&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len) == FAILURE) {
 		RETURN_FALSE;
@@ -1933,7 +1933,7 @@ PHP_METHOD(snmp, setSecurity)
 }
 /* }}} */
 
-/* {{{ proto long SNMP::getErrno() 
+/* {{{ proto long SNMP::getErrno()
 	Get last error code number */
 PHP_METHOD(snmp, getErrno)
 {
@@ -1947,7 +1947,7 @@ PHP_METHOD(snmp, getErrno)
 }
 /* }}} */
 
-/* {{{ proto long SNMP::getError() 
+/* {{{ proto long SNMP::getError()
 	Get last error message */
 PHP_METHOD(snmp, getError)
 {
@@ -1983,7 +1983,7 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, void **cache_
 	php_snmp_prop_handler *hnd;
 	int ret;
 
-	obj = Z_SNMP_P(object); 
+	obj = Z_SNMP_P(object);
 
 	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_COPY(&tmp_member, member);
@@ -2123,19 +2123,19 @@ static int php_snmp_read_info(php_snmp_object *snmp_object, zval *retval)
 	if (snmp_object->session == NULL) {
 		return SUCCESS;
 	}
-		
+
 	ZVAL_STRINGL(&val, snmp_object->session->peername, strlen(snmp_object->session->peername));
 	add_assoc_zval(retval, "hostname", &val);
-	
+
 	ZVAL_LONG(&val, snmp_object->session->remote_port);
 	add_assoc_zval(retval, "port", &val);
-	
+
 	ZVAL_LONG(&val, snmp_object->session->timeout);
 	add_assoc_zval(retval, "timeout", &val);
-	
+
 	ZVAL_LONG(&val, snmp_object->session->retries);
 	add_assoc_zval(retval, "retries", &val);
-	
+
 	return SUCCESS;
 }
 /* }}} */
@@ -2205,7 +2205,7 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 	} else {
 		php_error_docref(NULL, E_WARNING, "max_oids should be positive integer or NULL, got %pd", Z_LVAL_P(newval));
 	}
-	
+
 	if (newval == &ztmp) {
 		zval_dtor(newval);
 	}
@@ -2233,7 +2233,7 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 		php_error_docref(NULL, E_WARNING, "Unknown SNMP value retrieval method '%pd'", Z_LVAL_P(newval));
 		ret = FAILURE;
 	}
-	
+
 	if (newval == &ztmp) {
 		zval_dtor(newval);
 	}
@@ -2269,7 +2269,7 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 		convert_to_long(&ztmp);
 		newval = &ztmp;
 	}
-	
+
 	switch(Z_LVAL_P(newval)) {
 		case NETSNMP_OID_OUTPUT_SUFFIX:
 		case NETSNMP_OID_OUTPUT_MODULE:
@@ -2303,7 +2303,7 @@ static int php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval 
 		newval = &ztmp;
 	}
 
-	snmp_object->exceptions_enabled = Z_LVAL_P(newval);	
+	snmp_object->exceptions_enabled = Z_LVAL_P(newval);
 
 	if (newval == &ztmp) {
 		zval_ptr_dtor(newval);
@@ -2446,7 +2446,7 @@ PHP_MINIT_FUNCTION(snmp)
 PHP_MSHUTDOWN_FUNCTION(snmp)
 {
 	snmp_shutdown("snmpapp");
-	
+
 	zend_hash_destroy(&php_snmp_properties);
 
 	return SUCCESS;

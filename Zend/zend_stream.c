@@ -136,7 +136,7 @@ ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle) /*
 	handle->filename = filename;
 	handle->free_filename = 0;
 	memset(&handle->handle.stream.mmap, 0, sizeof(zend_mmap));
-	
+
 	return (handle->handle.fp) ? SUCCESS : FAILURE;
 } /* }}} */
 
@@ -169,7 +169,7 @@ static size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t 
 			buf[n] = (char)c;
 		}
 		if (c == '\n') {
-			buf[n++] = (char)c; 
+			buf[n++] = (char)c;
 		}
 
 		return n;
@@ -188,11 +188,11 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 		}
 	}
 
-	switch (file_handle->type) {		
+	switch (file_handle->type) {
 		case ZEND_HANDLE_FD:
 			file_handle->type = ZEND_HANDLE_FP;
 			file_handle->handle.fp = fdopen(file_handle->handle.fd, "rb");
-			/* no break; */			
+			/* no break; */
 		case ZEND_HANDLE_FP:
 			if (!file_handle->handle.fp) {
 				return FAILURE;
@@ -203,17 +203,17 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 			file_handle->handle.stream.closer     = (zend_stream_closer_t)zend_stream_stdio_closer;
 			file_handle->handle.stream.fsizer     = (zend_stream_fsizer_t)zend_stream_stdio_fsizer;
 			memset(&file_handle->handle.stream.mmap, 0, sizeof(file_handle->handle.stream.mmap));
-			/* no break; */			
+			/* no break; */
 		case ZEND_HANDLE_STREAM:
 			/* nothing to do */
 			break;
-		
+
 		case ZEND_HANDLE_MAPPED:
 			file_handle->handle.stream.mmap.pos = 0;
 			*buf = file_handle->handle.stream.mmap.buf;
 			*len = file_handle->handle.stream.mmap.len;
 			return SUCCESS;
-			
+
 		default:
 			return FAILURE;
 	}

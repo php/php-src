@@ -367,7 +367,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	php_com_saproxy_class_entry->ce_flags |= ZEND_ACC_FINAL;
 /*	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
-	
+
 	INIT_CLASS_ENTRY(ce, "variant", NULL);
 	ce.create_object = php_com_object_new;
 	php_com_variant_class_entry = zend_register_internal_class(&ce);
@@ -396,7 +396,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	ULongToIntPtr(x, &__tmp); \
 	REGISTER_LONG_CONSTANT(#x, __tmp, CONST_CS|CONST_PERSISTENT); \
 }
-	
+
 	COM_CONST(CLSCTX_INPROC_SERVER);
 	COM_CONST(CLSCTX_INPROC_HANDLER);
 	COM_CONST(CLSCTX_LOCAL_SERVER);

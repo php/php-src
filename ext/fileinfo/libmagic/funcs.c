@@ -46,7 +46,7 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.68 2014/02/18 11:09:31 kim Exp $")
 #endif
 
 #ifndef SIZE_MAX
-# define SIZE_MAX ((size_t) -1) 
+# define SIZE_MAX ((size_t) -1)
 #endif
 
 #include "php.h"
@@ -91,7 +91,7 @@ file_error_core(struct magic_set *ms, int error, const char *f, va_list va,
     size_t lineno)
 {
 	char *buf = NULL;
-	
+
 	/* Only the first error is ok */
 	if (ms->event_flags & EVENT_HAD_ERR)
 		return;
@@ -103,13 +103,13 @@ file_error_core(struct magic_set *ms, int error, const char *f, va_list va,
 
 	vspprintf(&buf, 0, f, va);
 	va_end(va);
-	
+
 	if (error > 0) {
 		file_printf(ms, "%s (%s)", (*buf ? buf : ""), strerror(error));
 	} else if (*buf) {
 		file_printf(ms, "%s", buf);
 	}
-	
+
 	if (buf) {
 		efree(buf);
 	}

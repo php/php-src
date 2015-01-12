@@ -435,7 +435,7 @@ void *tsrm_new_interpreter_context(void)
 	current = tsrm_tls_get();
 
 	allocate_new_resource(&new_ctx, thread_id);
-	
+
 	/* switch back to the context that was in use prior to our creation
 	 * of the new one */
 	return tsrm_set_interpreter_context(current);
@@ -613,7 +613,7 @@ TSRM_API MUTEX_T tsrm_mutex_alloc(void)
 #elif defined(BETHREADS)
 	mutexp = (beos_ben*)malloc(sizeof(beos_ben));
 	mutexp->ben = 0;
-	mutexp->sem = create_sem(1, "PHP sempahore"); 
+	mutexp->sem = create_sem(1, "PHP sempahore");
 #endif
 #ifdef THR_DEBUG
 	printf("Mutex created thread: %d\n",mythreadid());
@@ -642,7 +642,7 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 		st_mutex_destroy(mutexp);
 #elif defined(BETHREADS)
 		delete_sem(mutexp->sem);
-		free(mutexp);  
+		free(mutexp);
 #endif
 	}
 #ifdef THR_DEBUG
@@ -676,8 +676,8 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 #elif defined(TSRM_ST)
 	return st_mutex_lock(mutexp);
 #elif defined(BETHREADS)
-	if (atomic_add(&mutexp->ben, 1) != 0)  
-		return acquire_sem(mutexp->sem);   
+	if (atomic_add(&mutexp->ben, 1) != 0)
+		return acquire_sem(mutexp->sem);
 	return 0;
 #endif
 }
@@ -708,9 +708,9 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 #elif defined(TSRM_ST)
 	return st_mutex_unlock(mutexp);
 #elif defined(BETHREADS)
-	if (atomic_add(&mutexp->ben, -1) != 1) 
+	if (atomic_add(&mutexp->ben, -1) != 1)
 		return release_sem(mutexp->sem);
-	return 0;   
+	return 0;
 #endif
 }
 

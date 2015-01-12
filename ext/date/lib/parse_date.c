@@ -679,7 +679,7 @@ const static timelib_tz_lookup_table* abbr_search(const char *word, timelib_long
 	if (strcasecmp("utc", word) == 0 || strcasecmp("gmt", word) == 0) {
 		return timelib_timezone_utc;
 	}
-	
+
 	for (tp = timelib_timezone_lookup; tp->name; tp++) {
 		if (strcasecmp(word, tp->name) == 0) {
 			if (!first_found) {
@@ -810,7 +810,7 @@ static int scan(Scanner *s, timelib_tz_get_wrapper tz_get_wrapper)
 {
 	uchar *cursor = s->cur;
 	char *str, *ptr = NULL;
-		
+
 std:
 	s->tok = cursor;
 	s->len = 0;
@@ -823,38 +823,38 @@ std:
 	YYCTYPE yych;
 	unsigned int yyaccept = 0;
 	static const unsigned char yybm[] = {
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0, 100,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		100,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0, 128,  64, 160,  96,   0, 
-		  2,   2,   2,   2,   2,   2,   2,   2, 
-		  2,   2,   0,   0,   0,   0,   0,   0, 
-		  0,   8,   8,   8,   8,   8,   8,   8, 
-		  8,   8,   8,   8,   8,   8,   8,   8, 
-		  8,   8,   8,   8,   8,   8,   8,   8, 
-		  8,   8,   8,   0,   0,   0,   0,   0, 
-		  0,  24,  24,  24,  88,  24,  24,  24, 
-		 88,  24,  24,  24,  24,  24,  88,  24, 
-		 24,  24,  88,  88,  88,  24,  24,  24, 
-		 24,  24,  24,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
-		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0, 100,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		100,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0, 128,  64, 160,  96,   0,
+		  2,   2,   2,   2,   2,   2,   2,   2,
+		  2,   2,   0,   0,   0,   0,   0,   0,
+		  0,   8,   8,   8,   8,   8,   8,   8,
+		  8,   8,   8,   8,   8,   8,   8,   8,
+		  8,   8,   8,   8,   8,   8,   8,   8,
+		  8,   8,   8,   0,   0,   0,   0,   0,
+		  0,  24,  24,  24,  88,  24,  24,  24,
+		 88,  24,  24,  24,  24,  24,  88,  24,
+		 24,  24,  88,  88,  88,  24,  24,  24,
+		 24,  24,  24,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0,
 	};
 
 	YYDEBUG(0, *YYCURSOR);
@@ -3539,7 +3539,7 @@ yy166:
 		if (s->time->relative.weekday_behavior != 2) {
 			s->time->relative.weekday_behavior = 1;
 		}
-		
+
 		TIMELIB_DEINIT;
 		return TIMELIB_WEEKDAY;
 	}
@@ -13187,7 +13187,7 @@ yy814:
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		TIMELIB_HAVE_RELATIVE();
-		
+
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		w = timelib_get_nr((char **) &ptr, 2);
 		d = 1;
@@ -13215,7 +13215,7 @@ yy816:
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		TIMELIB_HAVE_RELATIVE();
-		
+
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		w = timelib_get_nr((char **) &ptr, 2);
 		d = timelib_get_nr((char **) &ptr, 1);
@@ -24868,7 +24868,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 						add_pbf_error(s, "A textual day could not be found", string, begin);
 						break;
 					} else {
-						in.time->have_relative = 1; 
+						in.time->have_relative = 1;
 						in.time->relative.have_weekday_relative = 1;
 						in.time->relative.weekday = tmprel->multiplier;
 						in.time->relative.weekday_behavior = 1;
@@ -25139,13 +25139,13 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 
 	/* do funky checking whether the parsed time was valid time */
 	if (s->time->h != TIMELIB_UNSET && s->time->i != TIMELIB_UNSET &&
-		s->time->s != TIMELIB_UNSET && 
+		s->time->s != TIMELIB_UNSET &&
 		!timelib_valid_time( s->time->h, s->time->i, s->time->s)) {
 		add_pbf_warning(s, "The parsed time was invalid", string, ptr);
 	}
 	/* do funky checking whether the parsed date was valid date */
 	if (s->time->y != TIMELIB_UNSET && s->time->m != TIMELIB_UNSET &&
-		s->time->d != TIMELIB_UNSET && 
+		s->time->d != TIMELIB_UNSET &&
 		!timelib_valid_date( s->time->y, s->time->m, s->time->d)) {
 		add_pbf_warning(s, "The parsed date was invalid", string, ptr);
 	}
@@ -25218,7 +25218,7 @@ int main(void)
 	printf ("%04d-%02d-%02d %02d:%02d:%02d.%-5d %+04d %1d",
 		time.y, time.m, time.d, time.h, time.i, time.s, time.f, time.z, time.dst);
 	if (time.have_relative) {
-		printf ("%3dY %3dM %3dD / %3dH %3dM %3dS", 
+		printf ("%3dY %3dM %3dD / %3dH %3dM %3dS",
 			time.relative.y, time.relative.m, time.relative.d, time.relative.h, time.relative.i, time.relative.s);
 	}
 	if (time.have_weekday_relative) {
@@ -25227,7 +25227,7 @@ int main(void)
 	if (time.have_weeknr_day) {
 		printf(" / %dW%d", time.relative.weeknr_day.weeknr, time.relative.weeknr_day.dayofweek);
 	}
-	return 0;				
+	return 0;
 }
 #endif
 
