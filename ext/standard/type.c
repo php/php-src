@@ -194,9 +194,16 @@ PHP_FUNCTION(boolval)
 PHP_FUNCTION(strval)
 {
 	zval *num;
+
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	RETVAL_STR(zval_get_string(num));
 }
@@ -322,9 +329,15 @@ PHP_FUNCTION(is_numeric)
 {
 	zval *arg;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	switch (Z_TYPE_P(arg)) {
 		case IS_LONG:

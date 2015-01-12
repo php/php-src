@@ -670,9 +670,16 @@ ZEND_FUNCTION(error_reporting)
 	zend_string *err;
 	int old_error_reporting;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &err) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(err)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	old_error_reporting = EG(error_reporting);
 	if(ZEND_NUM_ARGS() != 0) {
