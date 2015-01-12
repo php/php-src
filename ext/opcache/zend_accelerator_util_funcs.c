@@ -46,7 +46,6 @@ typedef void (*unique_copy_ctor_func_t)(void *pElement);
 
 static const uint32_t uninitialized_bucket = {INVALID_IDX};
 
-static int zend_prepare_function_for_execution(zend_op_array *op_array);
 static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind);
 static zend_ast *zend_ast_clone(zend_ast *ast);
 
@@ -170,11 +169,11 @@ static void zend_destroy_property_info(zval *zv)
 	}
 }
 
-static inline zend_string *zend_clone_str(zend_string *str)
+static zend_always_inline zend_string *zend_clone_str(zend_string *str)
 {
 	zend_string *ret;
 
-	if (IS_INTERNED(str)) {
+	if (EXPECTED(IS_INTERNED(str))) {
 		ret = str;
 	} else if (GC_REFCOUNT(str) <= 1 || (ret = accel_xlat_get(str)) == NULL) {
 		ret = zend_string_dup(str, 0);
@@ -367,6 +366,22 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	}
 }
 
+/* protects reference count, creates copy of statics */
+static zend_always_inline void zend_prepare_function_for_execution(zend_op_array *op_array)
+{
+	/* protect reference count */
+	op_array->refcount = &zend_accel_refcount;
+	(*op_array->refcount) = ZEND_PROTECTED_REFCOUNT;
+
+	/* copy statics */
+	if (UNEXPECTED(op_array->static_variables)) {
+		HashTable *shared_statics = op_array->static_variables;
+
+		ALLOC_HASHTABLE(op_array->static_variables);
+		zend_hash_clone_zval(op_array->static_variables, shared_statics, 0);
+	}
+}
+
 static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class_entry *old_ce, zend_class_entry *ce)
 {
 	uint idx;
@@ -508,24 +523,6 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME" class loading error, class %s, property %s", ce->name->val, prop_info->name->val);
 		}
 	}
-}
-
-/* protects reference count, creates copy of statics */
-static int zend_prepare_function_for_execution(zend_op_array *op_array)
-{
-	HashTable *shared_statics = op_array->static_variables;
-
-	/* protect reference count */
-	op_array->refcount = &zend_accel_refcount;
-	(*op_array->refcount) = ZEND_PROTECTED_REFCOUNT;
-
-	/* copy statics */
-	if (shared_statics) {
-		ALLOC_HASHTABLE(op_array->static_variables);
-		zend_hash_clone_zval(op_array->static_variables, shared_statics, 0);
-	}
-
-	return 0;
 }
 
 #define zend_update_inherited_handler(handler) \
@@ -709,7 +706,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	}
 }
 
-static void zend_accel_function_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor)
+static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 {
 	zend_function *function1, *function2;
 	uint idx;
@@ -737,10 +734,57 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source, 
 				goto failure;
 			}
 		}
-		if (pCopyConstructor) {
-			Z_PTR_P(t) = ARENA_REALLOC(Z_PTR(p->val));
-			pCopyConstructor(Z_PTR_P(t));
+	}
+	target->nInternalPointer = target->nNumOfElements ? 0 : INVALID_IDX;
+	return;
+
+failure:
+	function1 = Z_PTR(p->val);
+	function2 = Z_PTR_P(t);
+	CG(in_compilation) = 1;
+	zend_set_compiled_filename(function1->op_array.filename);
+	CG(zend_lineno) = function1->op_array.opcodes[0].lineno;
+	if (function2->type == ZEND_USER_FUNCTION
+		&& function2->op_array.last > 0) {
+		zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
+				   function1->common.function_name->val,
+				   function2->op_array.filename->val,
+				   (int)function2->op_array.opcodes[0].lineno);
+	} else {
+		zend_error(E_ERROR, "Cannot redeclare %s()", function1->common.function_name->val);
+	}
+}
+
+static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable *source)
+{
+	zend_function *function1, *function2;
+	uint idx;
+	Bucket *p;
+	zval *t;
+
+	for (idx = 0; idx < source->nNumUsed; idx++) {
+		p = source->arData + idx;
+		if (Z_TYPE(p->val) == IS_UNDEF) continue;
+		if (p->key) {
+			t = zend_hash_add(target, p->key, &p->val);
+			if (UNEXPECTED(t == NULL)) {
+				if (p->key->len > 0 && p->key->val[0] == 0) {
+					/* Mangled key */
+					t = zend_hash_update(target, p->key, &p->val);
+				} else {
+					t = zend_hash_find(target, p->key);
+					goto failure;
+				}
+			}
+		} else {
+		    t = zend_hash_index_add(target, p->h, &p->val);
+			if (UNEXPECTED(t == NULL)) {
+				t = zend_hash_index_find(target, p->h);
+				goto failure;
+			}
 		}
+		Z_PTR_P(t) = ARENA_REALLOC(Z_PTR(p->val));
+		zend_prepare_function_for_execution((zend_op_array*)Z_PTR_P(t));
 	}
 	target->nInternalPointer = target->nNumOfElements ? 0 : INVALID_IDX;
 	return;
@@ -831,7 +875,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		/* we must first to copy all classes and then prepare functions, since functions may try to bind
 		   classes - which depend on pre-bind class entries existent in the class table */
 		if (zend_hash_num_elements(&persistent_script->function_table) > 0) {
-			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table, (unique_copy_ctor_func_t)zend_prepare_function_for_execution);
+			zend_accel_function_hash_copy_from_shm(CG(function_table), &persistent_script->function_table);
 		}
 
 		zend_prepare_function_for_execution(op_array);
@@ -853,7 +897,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		ZCG(current_persistent_script) = NULL;
 	} else /* if (!from_shared_memory) */ {
 		if (zend_hash_num_elements(&persistent_script->function_table) > 0) {
-			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table, NULL);
+			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table);
 		}
 		if (zend_hash_num_elements(&persistent_script->class_table) > 0) {
 			zend_accel_class_hash_copy(CG(class_table), &persistent_script->class_table, NULL);
