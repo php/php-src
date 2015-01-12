@@ -172,11 +172,9 @@ array(2) {
   string(3) "ccc"
 }
 int(6)
-
-Notice: Array to string conversion in %s on line %d
 array(1) {
   [0]=>
-  string(15) "ArrayArrayArray"
+  string(3) "qqc"
 }
 int(3)
 array(2) {

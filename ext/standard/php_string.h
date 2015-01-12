@@ -24,6 +24,26 @@
 #ifndef PHP_STRING_H
 #define PHP_STRING_H
 
+/* php_xxx_to_xxx_ex() options */
+
+/* (string search, array replace) - behavior when replace array is exhausted */
+/* Bits 0-2 are reserved for these exclusive values */
+/* Other bits are free for future options */
+
+#define PHP_STR_ARRAY_REPLACE_STOP		0 /* Stop replace */
+#define PHP_STR_ARRAY_REPLACE_FIRST		1 /* Replace remaining matches with first elt */
+#define PHP_STR_ARRAY_REPLACE_LAST		2 /* Replace remaining matches with last elt */
+#define PHP_STR_ARRAY_REPLACE_LOOP		3 /* Loop */
+#define PHP_STR_ARRAY_REPLACE_EMPTY		4 /* Replace remaining matches with an empty string */
+
+#define PHP_STR_ARRAY_REPLACE_MASK		7 /* Bits 0-2 */
+#define PHP_STR_ARRAY_REPLACE_MAX		4 /* Max value */
+
+/* Nothing must be set outside of this mask */
+/* Will evolve when new flags will be defined */
+
+#define PHP_REPLACE_MASK				PHP_STR_ARRAY_REPLACE_MASK
+
 PHP_FUNCTION(strspn);
 PHP_FUNCTION(strcspn);
 PHP_FUNCTION(str_replace);
@@ -131,13 +151,17 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 PHPAPI size_t php_dirname(char *str, size_t len);
 PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len);
 PHPAPI zend_string *php_str_to_str_ex(char *haystack, size_t length, char *needle,
-		size_t needle_len, char *str, size_t str_len, int case_sensitivity, size_t *replace_count);
+		size_t needle_len, char *str, size_t str_len, int case_sensitivity, size_t *replace_count, zend_long options);
 PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle,
 		size_t needle_len, char *str, size_t str_len);
+PHPAPI zend_string *php_str_to_array_ex(char *haystack, size_t length, char *needle,
+		size_t needle_len, HashTable *arr, int case_sensitivity, size_t *replace_count, zend_long options);
+PHPAPI zend_string *php_str_to_array(char *haystack, size_t length, char *needle,
+		size_t needle_len, HashTable *arr);
 PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int mode);
 PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *state, char *allow, size_t allow_len);
 PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, char *allow, size_t allow_len, zend_bool allow_tag_spaces);
-PHPAPI size_t php_char_to_str_ex(char *str, size_t len, char from, char *to, size_t to_len, zval *result, int case_sensitivity, size_t *replace_count);
+PHPAPI size_t php_char_to_str_ex(char *str, size_t len, char from, char *to, size_t to_len, zval *result, int case_sensitivity, size_t *replace_count, zend_long options);
 PHPAPI size_t php_char_to_str(char *str, size_t len, char from, char *to, size_t to_len, zval *result);
 PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value);
 PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit);
