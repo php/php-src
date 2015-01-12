@@ -54,7 +54,8 @@ PHP X.Y UPGRADE NOTES
   . zend_function.common.num_args don't include the variadic argument anymore.
   . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
     output buffer is created in an output buffer handler.
-  . Add zend_memnstr_ex, which is based on string matching sunday algo.
+  . Added zend_memnstr_ex, which is based on string matching sunday algo.
+  . Added zend_memnrstr, zend_memnrstr_ex.
 
 - DBA
   . dba_delete() now returns false if the key was not found for the inifile

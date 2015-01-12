@@ -88,6 +88,7 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
 ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info);
 
 ZEND_API const char* zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end);
+ZEND_API const char* zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end);
 
 END_EXTERN_C()
 
@@ -174,11 +175,12 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, char *
 	size_t off_s;
 
 	if (needle_len == 1) {
-		return (char *)memchr(p, *needle, (end-p));
+		return (const char *)memchr(p, *needle, (end-p));
 	}
 
 	off_p = end - haystack;
 	off_s = (off_p > 0) ? (size_t)off_p : 0;
+
 	if (needle_len > off_s) {
 		return NULL;
 	}
@@ -187,7 +189,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, char *
 		end -= needle_len;
 
 		while (p <= end) {
-			if ((p = (char *)memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
+			if ((p = (const char *)memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
 				if (!memcmp(needle, p, needle_len-1)) {
 					return p;
 				}
@@ -209,7 +211,6 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, char *
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
 	register const unsigned char *e;
-
 	if (n <= 0) {
 		return NULL;
 	}
@@ -219,8 +220,44 @@ static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t 
 			return (const void *)e;
 		}
 	}
-
 	return NULL;
+}
+
+
+static zend_always_inline const char *
+zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, char *end)
+{
+    const char *p = end;
+    const char ne = needle[needle_len-1];
+    ptrdiff_t off_p;
+    size_t off_s;
+
+    if (needle_len == 1) {
+        return (const char *)zend_memrchr(haystack, *needle, (p - haystack));
+    }
+
+    off_p = end - haystack;
+    off_s = (off_p > 0) ? (size_t)off_p : 0;
+
+    if (needle_len > off_s) {
+        return NULL;
+    }
+
+	if (EXPECTED(off_s < 1024 || needle_len < 3)) {
+		p -= needle_len;
+
+		do {
+			if ((p = (const char *)zend_memrchr(haystack, *needle, (p - haystack) + 1)) && ne == p[needle_len-1]) {
+				if (!memcmp(needle, p, needle_len - 1)) {
+					return p;
+				}
+			}
+		} while (p-- >= haystack);
+
+		return NULL;
+	} else {
+		return zend_memnrstr_ex(haystack, needle, needle_len, end);
+	}
 }
 
 BEGIN_EXTERN_C()

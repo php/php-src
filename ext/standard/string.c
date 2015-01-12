@@ -1929,9 +1929,9 @@ PHP_FUNCTION(stripos)
 	char *found = NULL;
 	zend_string *haystack;
 	zend_long offset = 0;
-	char *needle_dup = NULL, *haystack_dup;
 	char needle_char[2];
 	zval *needle;
+	zend_string *needle_dup = NULL, *haystack_dup;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &haystack, &needle, &offset) == FAILURE) {
 		return;
@@ -1946,40 +1946,38 @@ PHP_FUNCTION(stripos)
 		RETURN_FALSE;
 	}
 
-	haystack_dup = estrndup(haystack->val, haystack->len);
-	php_strtolower(haystack_dup, haystack->len);
-
 	if (Z_TYPE_P(needle) == IS_STRING) {
 		if (Z_STRLEN_P(needle) == 0 || Z_STRLEN_P(needle) > haystack->len) {
-			efree(haystack_dup);
 			RETURN_FALSE;
 		}
 
-		needle_dup = estrndup(Z_STRVAL_P(needle), Z_STRLEN_P(needle));
-		php_strtolower(needle_dup, Z_STRLEN_P(needle));
-		found = (char*)php_memnstr(haystack_dup + offset, needle_dup, Z_STRLEN_P(needle), haystack_dup + haystack->len);
+		haystack_dup = php_string_tolower(haystack);
+		needle_dup = php_string_tolower(Z_STR_P(needle));
+		found = (char*)php_memnstr(haystack_dup->val + offset,
+				needle_dup->val, needle_dup->len, haystack_dup->val + haystack->len);
 	} else {
 		if (php_needle_char(needle, needle_char) != SUCCESS) {
-			efree(haystack_dup);
 			RETURN_FALSE;
 		}
+		haystack_dup = php_string_tolower(haystack);
 		needle_char[0] = tolower(needle_char[0]);
 		needle_char[1] = '\0';
-		found = (char*)php_memnstr(haystack_dup + offset,
+		found = (char*)php_memnstr(haystack_dup->val + offset,
 							needle_char,
 							sizeof(needle_char) - 1,
-							haystack_dup + haystack->len);
+							haystack_dup->val + haystack->len);
 	}
 
-	efree(haystack_dup);
-	if (needle_dup) {
-		efree(needle_dup);
-	}
 
 	if (found) {
-		RETURN_LONG(found - haystack_dup);
+		RETVAL_LONG(found - haystack_dup->val);
 	} else {
-		RETURN_FALSE;
+		RETVAL_FALSE;
+	}
+
+	zend_string_release(haystack_dup);
+	if (needle_dup) {
+		zend_string_release(needle_dup);
 	}
 }
 /* }}} */
@@ -1994,6 +1992,7 @@ PHP_FUNCTION(strrpos)
 	size_t needle_len;
 	zend_long offset = 0;
 	char *p, *e, ord_needle[2];
+	char *found;
 
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &haystack, &zneedle, &offset) == FAILURE) {
@@ -2030,37 +2029,22 @@ PHP_FUNCTION(strrpos)
 			RETURN_FALSE;
 		}
 		p = haystack->val + (size_t)offset;
-		e = haystack->val + haystack->len - needle_len;
+		e = haystack->val + haystack->len;
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > haystack->len) {
 			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
-
 		p = haystack->val;
-		if (needle_len > (size_t)(-offset)) {
-			e = haystack->val + haystack->len - needle_len;
+		if (haystack->len + (size_t)offset >= needle_len) {
+			e = haystack->val + haystack->len + (size_t)offset + needle_len;
 		} else {
-			e = haystack->val + haystack->len + offset;
+			e = haystack->val + haystack->len;
 		}
 	}
 
-	if (needle_len == 1) {
-		/* Single character search can shortcut memcmps */
-		while (e >= p) {
-			if (*e == *needle) {
-				RETURN_LONG(e - p + (offset > 0 ? offset : 0));
-			}
-			e--;
-		}
-		RETURN_FALSE;
-	}
-
-	while (e >= p) {
-		if (memcmp(e, needle, needle_len) == 0) {
-			RETURN_LONG(e - p + (offset > 0 ? offset : 0));
-		}
-		e--;
+	if ((found = (char *)zend_memnrstr(p, needle, needle_len, e))) {
+		RETURN_LONG(found - haystack->val);
 	}
 
 	RETURN_FALSE;
@@ -2072,103 +2056,105 @@ PHP_FUNCTION(strrpos)
 PHP_FUNCTION(strripos)
 {
 	zval *zneedle;
-	char *needle;
+	zend_string *needle;
 	zend_string *haystack;
 	size_t needle_len;
 	zend_long offset = 0;
-	char *p, *e, ord_needle[2];
-	char *needle_dup, *haystack_dup;
+	char *p, *e;
+	char *found;
+	zend_string *needle_dup, *haystack_dup, *ord_needle = NULL;
+	ALLOCA_FLAG(use_heap);
+
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &haystack, &zneedle, &offset) == FAILURE) {
 		RETURN_FALSE;
 	}
 
+	STR_ALLOCA_ALLOC(ord_needle, 1, use_heap);
 	if (Z_TYPE_P(zneedle) == IS_STRING) {
-		needle = Z_STRVAL_P(zneedle);
-		needle_len = Z_STRLEN_P(zneedle);
+		needle = Z_STR_P(zneedle);
 	} else {
-		if (php_needle_char(zneedle, ord_needle) != SUCCESS) {
+		if (php_needle_char(zneedle, ord_needle->val) != SUCCESS) {
 			RETURN_FALSE;
 		}
-		ord_needle[1] = '\0';
+		ord_needle->val[1] = '\0';
 		needle = ord_needle;
-		needle_len = 1;
 	}
 
-	if ((haystack->len == 0) || (needle_len == 0)) {
+	if ((haystack->len == 0) || (needle->len == 0)) {
 		RETURN_FALSE;
 	}
 
-	if (needle_len == 1) {
+	if (needle->len == 1) {
 		/* Single character search can shortcut memcmps
 		   Can also avoid tolower emallocs */
 		if (offset >= 0) {
 			if ((size_t)offset > haystack->len) {
+				STR_ALLOCA_FREE(ord_needle, use_heap);
 				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
-			p = haystack->val + offset;
+			p = haystack->val + (size_t)offset;
 			e = haystack->val + haystack->len - 1;
 		} else {
 			p = haystack->val;
 			if (offset < -INT_MAX || (size_t)(-offset) > haystack->len) {
+				STR_ALLOCA_FREE(ord_needle, use_heap);
 				php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 				RETURN_FALSE;
 			}
-			e = haystack->val + haystack->len + offset;
+			e = haystack->val + haystack->len + (size_t)offset;
 		}
 		/* Borrow that ord_needle buffer to avoid repeatedly tolower()ing needle */
-		*ord_needle = tolower(*needle);
+		*ord_needle->val = tolower(*needle->val);
 		while (e >= p) {
-			if (tolower(*e) == *ord_needle) {
+			if (tolower(*e) == *ord_needle->val) {
+				STR_ALLOCA_FREE(ord_needle, use_heap);
 				RETURN_LONG(e - p + (offset > 0 ? offset : 0));
 			}
 			e--;
 		}
+		STR_ALLOCA_FREE(ord_needle, use_heap);
 		RETURN_FALSE;
 	}
 
-	needle_dup = estrndup(needle, needle_len);
-	php_strtolower(needle_dup, needle_len);
-	haystack_dup = estrndup(haystack->val, haystack->len);
-	php_strtolower(haystack_dup, haystack->len);
-
+	haystack_dup = php_string_tolower(haystack);
 	if (offset >= 0) {
 		if ((size_t)offset > haystack->len) {
-			efree(needle_dup);
-			efree(haystack_dup);
+			zend_string_release(haystack_dup);
+			STR_ALLOCA_FREE(ord_needle, use_heap);
 			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
-		p = haystack_dup + offset;
-		e = haystack_dup + haystack->len - needle_len;
+		p = haystack_dup->val + offset;
+		e = haystack_dup->val + haystack->len;
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > haystack->len) {
-			efree(needle_dup);
-			efree(haystack_dup);
+			zend_string_release(haystack_dup);
+			STR_ALLOCA_FREE(ord_needle, use_heap);
 			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
 		}
-		p = haystack_dup;
-		if (needle_len > (size_t)(-offset)) {
-			e = haystack_dup + haystack->len - needle_len;
+		p = haystack_dup->val;
+		if (haystack->len + (size_t)offset >= needle->len) {
+			e = haystack_dup->val + haystack->len + (size_t)offset + needle->len;
 		} else {
-			e = haystack_dup + haystack->len + offset;
+			e = haystack_dup->val + haystack->len;
 		}
 	}
 
-	while (e >= p) {
-		if (memcmp(e, needle_dup, needle_len) == 0) {
-			efree(haystack_dup);
-			efree(needle_dup);
-			RETURN_LONG(e - p + (offset > 0 ? offset : 0));
-		}
-		e--;
+	needle_dup = php_string_tolower(needle);
+	if ((found = (char *)zend_memnrstr(p, needle_dup->val, needle_dup->len, e))) {
+		RETVAL_LONG(found - haystack_dup->val);
+		zend_string_release(needle_dup);
+		zend_string_release(haystack_dup);
+		STR_ALLOCA_FREE(ord_needle, use_heap);
+	} else {
+		zend_string_release(needle_dup);
+		zend_string_release(haystack_dup);
+		STR_ALLOCA_FREE(ord_needle, use_heap);
+		RETURN_FALSE;
 	}
-
-	efree(haystack_dup);
-	efree(needle_dup);
-	RETURN_FALSE;
 }
 /* }}} */
 

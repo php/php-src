@@ -2763,54 +2763,96 @@ process_double:
 }
 /* }}} */
 
-static zend_always_inline void zend_memstr_ex_pre(unsigned int td[], const char *needle, size_t needle_len) /* {{{ */ {
+/* 
+ * String matching - Sunday algorithm
+ * http://www.iti.fh-flensburg.de/lang/algorithmen/pattern/sundayen.htm
+ */
+static zend_always_inline void zend_memnstr_ex_pre(unsigned int td[], const char *needle, size_t needle_len, int reverse) /* {{{ */ {
 	int i;
 
 	for (i = 0; i < 256; i++) {
 		td[i] = needle_len + 1;
 	}
 
-	for (i = 0; i < needle_len; i++) {
-		td[(unsigned char)needle[i]] = (int)needle_len - i;
+	if (reverse) {
+		for (i = needle_len - 1; i >= 0; i--) {
+			td[(unsigned char)needle[i]] = i + 1;
+		}
+	} else {
+		for (i = 0; i < needle_len; i++) {
+			td[(unsigned char)needle[i]] = (int)needle_len - i;
+		}
 	}
 }
 /* }}} */
 
-/* 
- * String matching - Sunday algorithm
- * http://www.iti.fh-flensburg.de/lang/algorithmen/pattern/sundayen.htm
- */
 ZEND_API const char* zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end) /* {{{ */
 {
 	unsigned int td[256];
 	register size_t i;
-	const unsigned register char *p;
+	register const char *p;
 
 	if (needle_len == 0 || (end - haystack) == 0) {
 		return NULL;
 	}
 
-	zend_memstr_ex_pre(td, needle, needle_len);
+	zend_memnstr_ex_pre(td, needle, needle_len, 0);
 
-	p = (const unsigned char *)haystack;
+	p = haystack;
 	end -= needle_len;
 
-	while (p <= (unsigned char *)end) {
+	while (p <= end) {
 		for (i = 0; i < needle_len; i++) {
 			if (needle[i] != p[i]) {
 				break;
 			}
 		}
 		if (i == needle_len) {
-			return (const char *)p;
+			return p;
 		}
-		p += td[p[needle_len]];
+		p += td[(unsigned char)(p[needle_len])];
 	}
 
 	return NULL;
 }
 /* }}} */
 
+ZEND_API const char* zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end) /* {{{ */
+{
+	unsigned int td[256];
+	register size_t i;
+	register const char *p;
+
+	if (needle_len == 0 || (end - haystack) == 0) {
+		return NULL;
+	}
+
+	zend_memnstr_ex_pre(td, needle, needle_len, 1);
+
+	p = end;
+	p -= needle_len;
+
+	while (p >= haystack) {
+		for (i = 0; i < needle_len; i++) {
+			if (needle[i] != p[i]) {
+				break;
+			}
+		}
+
+		if (i == needle_len) {
+			return (const char *)p;
+		}
+		
+		if (p == haystack) {
+			return NULL;
+		}
+
+		p -= td[(unsigned char)(p[-1])];
+	}
+
+	return NULL;
+}
+/* }}} */
 
 /*
  * Local variables:
