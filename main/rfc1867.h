@@ -54,7 +54,7 @@ typedef struct _multipart_event_file_data {
 	zend_off_t	offset;
 	char	*data;
 	size_t	length;
-	size_t	*newlength;	
+	size_t	*newlength;
 } multipart_event_file_data;
 
 typedef struct _multipart_event_file_end {
@@ -86,6 +86,6 @@ SAPI_API void php_rfc1867_set_multibyte_callbacks(
 					php_rfc1867_set_input_encoding_t set_input_encoding,
 					php_rfc1867_getword_t getword,
 					php_rfc1867_getword_conf_t getword_conf,
-					php_rfc1867_basename_t basename);	
+					php_rfc1867_basename_t basename);
 
 #endif /* RFC1867_H */

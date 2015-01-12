@@ -22,8 +22,8 @@
  * Functions to parse & compse IPTC data.
  * PhotoShop >= 3.0 can read and write textual data to JPEG files.
  * ... more to come .....
- * 
- * i know, parts of this is now duplicated in image.c 
+ *
+ * i know, parts of this is now duplicated in image.c
  * but in this case i think it's okay!
  */
 
@@ -31,7 +31,7 @@
  * TODO:
  *  - add IPTC translation table
  */
- 
+
 #include "php.h"
 #include "php_iptc.h"
 #include "ext/standard/head.h"
@@ -76,7 +76,7 @@
 /* {{{ php_iptc_put1
  */
 static int php_iptc_put1(FILE *fp, int spool, unsigned char c, unsigned char **spoolbuf)
-{ 
+{
 	if (spool > 0)
 		PUTC(c);
 
@@ -89,7 +89,7 @@ static int php_iptc_put1(FILE *fp, int spool, unsigned char c, unsigned char **s
 /* {{{ php_iptc_get1
  */
 static int php_iptc_get1(FILE *fp, int spool, unsigned char **spoolbuf)
-{ 	
+{
 	int c;
 	char cc;
 
@@ -121,7 +121,7 @@ static int php_iptc_read_remaining(FILE *fp, int spool, unsigned char **spoolbuf
 /* {{{ php_iptc_skip_variable
  */
 static int php_iptc_skip_variable(FILE *fp, int spool, unsigned char **spoolbuf)
-{ 
+{
 	unsigned int  length;
 	int c1, c2;
 
@@ -205,7 +205,7 @@ PHP_FUNCTION(iptcembed)
 
 		poi = spoolbuf = safe_emalloc(1, iptcdata_len + sizeof(psheader) + sb.st_size + 1024, 1);
 		memset(poi, 0, iptcdata_len + sizeof(psheader) + sb.st_size + 1024 + 1);
-	} 
+	}
 
 	if (php_iptc_get1(fp, spool, poi?&poi:0) != 0xFF) {
 		fclose(fp);
@@ -228,14 +228,14 @@ PHP_FUNCTION(iptcembed)
 
 		if (marker == M_EOI) { /* EOF */
 			break;
-		} else if (marker != M_APP13) { 
+		} else if (marker != M_APP13) {
 			php_iptc_put1(fp, spool, (unsigned char)marker, poi?&poi:0);
 		}
 
 		switch (marker) {
 			case M_APP13:
 				/* we are going to write a new APP13 marker, so don't output the old one */
-				php_iptc_skip_variable(fp, 0, 0);    
+				php_iptc_skip_variable(fp, 0, 0);
 				php_iptc_read_remaining(fp, spool, poi?&poi:0);
 				done = 1;
 				break;
@@ -270,7 +270,7 @@ PHP_FUNCTION(iptcembed)
 				}
 				break;
 
-			case M_SOS:								
+			case M_SOS:
 				/* we hit data, no more marker-inserting can be done! */
 				php_iptc_read_remaining(fp, spool, poi?&poi:0);
 				done = 1;
@@ -312,7 +312,7 @@ PHP_FUNCTION(iptcparse)
 	buffer = (unsigned char *)str;
 
 	while (inx < str_len) { /* find 1st tag */
-		if ((buffer[inx] == 0x1c) && ((buffer[inx+1] == 0x01) || (buffer[inx+1] == 0x02))){ 
+		if ((buffer[inx] == 0x1c) && ((buffer[inx+1] == 0x01) || (buffer[inx+1] == 0x02))){
 			break;
 		} else {
 			inx++;
@@ -322,8 +322,8 @@ PHP_FUNCTION(iptcparse)
 	while (inx < str_len) {
 		if (buffer[ inx++ ] != 0x1c) {
 			break;   /* we ran against some data which does not conform to IPTC - stop parsing! */
-		} 
-		
+		}
+
 		if ((inx + 4) >= str_len)
 			break;
 
@@ -334,14 +334,14 @@ PHP_FUNCTION(iptcparse)
 			if((inx+6) >= str_len) {
 				break;
 			}
-			len = (((zend_long) buffer[ inx + 2 ]) << 24) + (((zend_long) buffer[ inx + 3 ]) << 16) + 
+			len = (((zend_long) buffer[ inx + 2 ]) << 24) + (((zend_long) buffer[ inx + 3 ]) << 16) +
 				  (((zend_long) buffer[ inx + 4 ]) <<  8) + (((zend_long) buffer[ inx + 5 ]));
 			inx += 6;
 		} else { /* short tag */
 			len = (((unsigned short) buffer[ inx ])<<8) | (unsigned short)buffer[ inx+1 ];
 			inx += 2;
 		}
-		
+
 		if ((len < 0) || (len > str_len) || (inx + len) > str_len) {
 			break;
 		}
@@ -354,10 +354,10 @@ PHP_FUNCTION(iptcparse)
 
 		if ((element = zend_hash_str_find(Z_ARRVAL_P(return_value), key, strlen(key))) == NULL) {
 			array_init(&values);
-			
+
 			element = zend_hash_str_update(Z_ARRVAL_P(return_value), key, strlen(key), &values);
-		} 
-			
+		}
+
 		add_next_index_stringl(element, buffer+inx, len);
 		inx += len;
 		tagsfound++;

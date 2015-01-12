@@ -424,7 +424,7 @@ PHP_FUNCTION(mysqli_error_list)
 		zend_llist_position pos;
 		for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(mysql->mysql->data->error_info->error_list, &pos);
 			 message;
-			 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(mysql->mysql->data->error_info->error_list, &pos)) 
+			 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(mysql->mysql->data->error_info->error_list, &pos))
 		{
 			zval single_error;
 			array_init(&single_error);
@@ -465,7 +465,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 		zend_llist_position pos;
 		for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(stmt->stmt->data->error_info->error_list, &pos);
 			 message;
-			 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(stmt->stmt->data->error_info->error_list, &pos)) 
+			 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(stmt->stmt->data->error_info->error_list, &pos))
 		{
 			zval single_error;
 			array_init(&single_error);
@@ -680,7 +680,7 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(out_array), elem) {
 		i++;
-		if (Z_TYPE_P(elem) != IS_OBJECT || 
+		if (Z_TYPE_P(elem) != IS_OBJECT ||
 				!instanceof_function(Z_OBJCE_P(elem), mysqli_link_class_entry)) {
 			continue;
 		}
@@ -1094,9 +1094,9 @@ PHP_FUNCTION(mysqli_begin_transaction)
 		err = TRUE;
 	}
 	if (TRUE == err) {
-		RETURN_FALSE;			
+		RETURN_FALSE;
 	}
-	
+
 #if !defined(MYSQLI_USE_MYSQLND)
 	if (mysqli_begin_transaction_libmysql(mysql->mysql, flags, name)) {
 		RETURN_FALSE;
@@ -1139,7 +1139,7 @@ PHP_FUNCTION(mysqli_savepoint)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	if (!name || !name_len) {
 		php_error_docref(NULL, E_WARNING, "Savepoint name cannot be empty");
-		RETURN_FALSE;	
+		RETURN_FALSE;
 	}
 
 #if !defined(MYSQLI_USE_MYSQLND)
@@ -1167,7 +1167,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	if (!name || !name_len) {
-		php_error_docref(NULL, E_WARNING, "Savepoint name cannot be empty");	
+		php_error_docref(NULL, E_WARNING, "Savepoint name cannot be empty");
 		RETURN_FALSE;
 	}
 #if !defined(MYSQLI_USE_MYSQLND)
@@ -1187,7 +1187,7 @@ PHP_FUNCTION(mysqli_get_links_stats)
 {
 	if (ZEND_NUM_ARGS()) {
 		php_error_docref(NULL, E_WARNING, "no parameters expected");
-		return;	
+		return;
 	}
 	array_init(return_value);
 	add_assoc_long_ex(return_value, "total", sizeof("total") - 1, MyG(num_links));

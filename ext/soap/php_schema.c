@@ -458,7 +458,7 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 
 		{
 			smart_str anonymous = {0};
-			
+
 			smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
 			smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
 			smart_str_0(&anonymous);
@@ -556,7 +556,7 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 
 			{
 				smart_str anonymous = {0};
-			
+
 				smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
 				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
 				smart_str_0(&anonymous);
@@ -1282,8 +1282,8 @@ static int schema_sequence(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr seqType, sdlTy
 }
 
 /*
-<any 
-  id = ID 
+<any
+  id = ID
   maxOccurs = (nonNegativeInteger | unbounded)  : 1
   minOccurs = nonNegativeInteger : 1
   namespace = ((##any | ##other) | List of (anyURI | (##targetNamespace | ##local)) )  : ##any
@@ -1529,7 +1529,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 				if (ns) {
 					smart_str_appends(&nscat, (char*)ns->children->content);
 				}
-			} 
+			}
 			smart_str_appendc(&nscat, ':');
 			smart_str_appends(&nscat, type);
 			newType->name = estrdup(type);
@@ -1654,7 +1654,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
   	}
 		if (parent == NULL) {
 			cur_type->form = XSD_FORM_UNQUALIFIED;
-		}	
+		}
 	}
 
 	/* type = QName */
@@ -1908,7 +1908,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
   	}
 		if (parent == NULL) {
 			newAttr->form = XSD_FORM_UNQUALIFIED;
-		}	
+		}
 	}
 	trav = attrType->children;
 	if (trav != NULL && node_is_equal(trav, "annotation")) {
@@ -1929,7 +1929,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			memset(dummy_type, 0, sizeof(sdlType));
 			{
 				smart_str anonymous = {0};
-			
+
 				smart_str_appendl(&anonymous, "anonymous", sizeof("anonymous")-1);
 				smart_str_append_long(&anonymous, zend_hash_num_elements(sdl->types));
 				smart_str_0(&anonymous);
@@ -2367,7 +2367,7 @@ static void delete_model_persistent_int(sdlContentModelPtr tmp)
 
 void delete_model_persistent(zval *zv)
 {
-	delete_model_persistent_int(Z_PTR_P(zv));	
+	delete_model_persistent_int(Z_PTR_P(zv));
 }
 
 void delete_type(zval *zv)
@@ -2586,5 +2586,5 @@ void delete_restriction_var_char_persistent_int(sdlRestrictionCharPtr ptr)
 
 void delete_restriction_var_char_persistent(zval *zv)
 {
-	delete_restriction_var_char_persistent_int(Z_PTR_P(zv));	
+	delete_restriction_var_char_persistent_int(Z_PTR_P(zv));
 }

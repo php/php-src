@@ -468,7 +468,7 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 				*tpix = gdTrueColor (currow[0], currow[1], currow[2]);
 			}
 		}
-	} 
+	}
 
 	if (jpeg_finish_decompress (&cinfo) != TRUE) {
 		php_gd_error("gd-jpeg: warning: jpeg_finish_decompress reports suspended data source");
@@ -478,7 +478,7 @@ gdImagePtr gdImageCreateFromJpegCtxEx (gdIOCtx * infile, int ignore_warning)
 			goto error;
 		}
 	}
-	
+
 	jpeg_destroy_decompress (&cinfo);
 	gdFree (row);
 

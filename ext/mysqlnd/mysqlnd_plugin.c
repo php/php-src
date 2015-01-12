@@ -66,7 +66,7 @@ static struct st_mysqlnd_typeii_plugin_example mysqlnd_example_plugin =
 
 
 /* {{{ mysqlnd_example_plugin_end */
-static 
+static
 enum_func_status mysqlnd_example_plugin_end(void * p)
 {
 	struct st_mysqlnd_typeii_plugin_example * plugin = (struct st_mysqlnd_typeii_plugin_example *) p;
@@ -91,7 +91,7 @@ mysqlnd_example_plugin_register(void)
 /*--------------------------------------------------------------------*/
 
 static HashTable mysqlnd_registered_plugins;
-		
+
 static unsigned int mysqlnd_plugins_counter = 0;
 
 

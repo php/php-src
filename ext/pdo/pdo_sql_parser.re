@@ -40,7 +40,7 @@ typedef struct Scanner {
 	char 	*ptr, *cur, *tok, *end;
 } Scanner;
 
-static int scan(Scanner *s) 
+static int scan(Scanner *s)
 {
 	char *cursor = s->cur;
 
@@ -63,7 +63,7 @@ static int scan(Scanner *s)
 		SPECIALS								{ SKIP_ONE(PDO_PARSER_TEXT); }
 		COMMENTS								{ RET(PDO_PARSER_TEXT); }
 		(ANYNOEOF\SPECIALS)+ 					{ RET(PDO_PARSER_TEXT); }
-	*/	
+	*/
 }
 
 struct placeholder {
@@ -80,7 +80,7 @@ static void free_param_name(zval *el) {
 	efree(Z_PTR_P(el));
 }
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 	char **outquery, int *outquery_len)
 {
 	Scanner s;
@@ -154,9 +154,9 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 		 * but it works. */
 		query_type = PDO_PLACEHOLDER_POSITIONAL;
 	}
-	
+
 	params = stmt->bound_params;
-	
+
 	/* Do we have placeholders but no bound params */
 	if (bindno && !params && stmt->supports_placeholders == PDO_PLACEHOLDER_NONE) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY093", "no parameters were bound");
@@ -189,7 +189,7 @@ safe:
 
 		newbuffer_len = inquery_len;
 
-		/* let's quote all the values */	
+		/* let's quote all the values */
 		for (plc = placeholders; plc; plc = plc->next) {
 			if (query_type == PDO_PLACEHOLDER_POSITIONAL) {
 				param = zend_hash_index_find_ptr(params, plc->bindno);
@@ -215,7 +215,7 @@ safe:
 					php_stream_from_zval_no_verify(stm, parameter);
 					if (stm) {
 						zend_string *buf;
-					
+
 						buf = php_stream_copy_to_mem(stm, PHP_STREAM_COPY_ALL, 0);
 						if (!stmt->dbh->methods->quoter(stmt->dbh, buf->val, buf->len, &plc->quoted, &plc->qlen,
 								param->param_type)) {
@@ -323,7 +323,7 @@ rewrite:
 		char *name, *idxbuf;
 		const char *tmpl = stmt->named_rewrite_template ? stmt->named_rewrite_template : ":pdo%d";
 		int bind_no = 1;
-		
+
 		newbuffer_len = inquery_len;
 
 		if (stmt->bound_param_map == NULL) {
@@ -356,22 +356,22 @@ rewrite:
 
 			/* map number to name */
 			zend_hash_index_update_mem(stmt->bound_param_map, plc->bindno, idxbuf, plc->qlen + 1);
-			
+
 			efree(name);
 		}
-				
+
 		goto rewrite;
 
 	} else {
 		/* rewrite :name to ? */
-		
+
 		newbuffer_len = inquery_len;
-	
+
 		if (stmt->bound_param_map == NULL) {
 			ALLOC_HASHTABLE(stmt->bound_param_map);
 			zend_hash_init(stmt->bound_param_map, 13, NULL, free_param_name, 0);
 		}
-		
+
 		for (plc = placeholders; plc; plc = plc->next) {
 			char *name;
 			name = estrndup(plc->pos, plc->len);
@@ -401,7 +401,7 @@ clean_up:
 }
 
 #if 0
-int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **outquery, 
+int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **outquery,
 		int *outquery_len)
 {
 	Scanner s;
@@ -448,7 +448,7 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 			*outquery_len += (s.cur - s.tok);
 		}
 		else if(t == PDO_PARSER_BIND) {
-			if(!params) { 
+			if(!params) {
 				/* error */
 				efree(*outquery);
 				*outquery = NULL;
@@ -456,17 +456,17 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 			}
 			/* lookup bind first via hash and then index */
 			/* stupid keys need to be null-terminated, even though we know their length */
-			if((NULL != (param = zend_hash_str_find_ptr(params, s.tok, s.cur-s.tok))  
+			if((NULL != (param = zend_hash_str_find_ptr(params, s.tok, s.cur-s.tok))
 			    ||
-			   NULL != (params = zend_hash_index_find_ptr(params, bindno))) 
+			   NULL != (params = zend_hash_index_find_ptr(params, bindno)))
 			{
 				char *quotedstr;
 				int quotedstrlen;
 				/* restore the in-string key, doesn't need null-termination here */
 				/* currently everything is a string here */
-				
+
 				/* quote the bind value if necessary */
-				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter), 
+				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
 					Z_STRLEN_P(param->parameter), &quotedstr, &quotedstrlen))
 				{
 					memcpy(ptr, quotedstr, quotedstrlen);
@@ -488,21 +488,21 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 			bindno++;
 		}
 		else if(t == PDO_PARSER_BIND_POS) {
-			if(!params) { 
+			if(!params) {
 				/* error */
 				efree(*outquery);
 				*outquery = NULL;
 				return (int) (s.cur - inquery);
 			}
 			/* lookup bind by index */
-			if(NULL != (params = zend_hash_index_find_ptr(params, bindno))) 
+			if(NULL != (params = zend_hash_index_find_ptr(params, bindno)))
 			{
 				char *quotedstr;
 				int quotedstrlen;
 				/* currently everything is a string here */
-				
+
 				/* quote the bind value if necessary */
-				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter), 
+				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter),
 					Z_STRLEN_P(param->parameter), &quotedstr, &quotedstrlen))
 				{
 					memcpy(ptr, quotedstr, quotedstrlen);
@@ -523,7 +523,7 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 			}
 			bindno++;
 		}
-	}	
+	}
 	*ptr = '\0';
 	return 0;
 }

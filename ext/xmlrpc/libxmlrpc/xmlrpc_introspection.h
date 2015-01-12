@@ -5,28 +5,28 @@
   Epinions.com may be contacted at feedback@epinions-inc.com
 */
 
-/*  
-  Copyright 2000 Epinions, Inc. 
+/*
+  Copyright 2000 Epinions, Inc.
 
-  Subject to the following 3 conditions, Epinions, Inc.  permits you, free 
-  of charge, to (a) use, copy, distribute, modify, perform and display this 
-  software and associated documentation files (the "Software"), and (b) 
-  permit others to whom the Software is furnished to do so as well.  
+  Subject to the following 3 conditions, Epinions, Inc.  permits you, free
+  of charge, to (a) use, copy, distribute, modify, perform and display this
+  software and associated documentation files (the "Software"), and (b)
+  permit others to whom the Software is furnished to do so as well.
 
-  1) The above copyright notice and this permission notice shall be included 
-  without modification in all copies or substantial portions of the 
-  Software.  
+  1) The above copyright notice and this permission notice shall be included
+  without modification in all copies or substantial portions of the
+  Software.
 
-  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF 
-  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY 
-  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-  PURPOSE OR NONINFRINGEMENT.  
+  2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF
+  ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY
+  IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR
+  PURPOSE OR NONINFRINGEMENT.
 
-  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT, 
-  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT 
-  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING 
-  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH 
-  DAMAGES.    
+  3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,
+  SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT
+  OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING
+  NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH
+  DAMAGES.
 
 */
 
@@ -58,8 +58,8 @@
  #define xi_token_returns "returns"
  #define xi_token_related "related"
  #define xi_token_sub "sub"
- 
- 
+
+
 /*----------------------------------------------------------------------------
  * Includes
  */
@@ -67,7 +67,7 @@
 /*----------------------------------------------------------------------------
  * Structures
  */
- 
+
  /****d* VALUE/XMLRPC_IntrospectionCallback
  * NAME
  *   XMLRPC_IntrospectionCallback
@@ -77,8 +77,8 @@
  */
 typedef void (*XMLRPC_IntrospectionCallback)(XMLRPC_SERVER server, void* userData);
 /******/
- 
- 
+
+
 /*----------------------------------------------------------------------------
  * Globals
  */
@@ -89,7 +89,7 @@ typedef void (*XMLRPC_IntrospectionCallback)(XMLRPC_SERVER server, void* userDat
 XMLRPC_VALUE XMLRPC_IntrospectionCreateDescription(const char* xml, XMLRPC_ERROR error);
 int XMLRPC_ServerAddIntrospectionData(XMLRPC_SERVER server, XMLRPC_VALUE desc);
 int XMLRPC_ServerRegisterIntrospectionCallback(XMLRPC_SERVER server, XMLRPC_IntrospectionCallback cb);
- 
+
 /*----------------------------------------------------------------------------
  * Macros
  */

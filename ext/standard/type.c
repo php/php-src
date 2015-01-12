@@ -48,11 +48,11 @@ PHP_FUNCTION(gettype)
 		case IS_DOUBLE:
 			RETVAL_STRING("double");
 			break;
-	
+
 		case IS_STRING:
 			RETVAL_STRING("string");
 			break;
-	
+
 		case IS_ARRAY:
 			RETVAL_STRING("array");
 			break;
@@ -220,7 +220,7 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce = Z_OBJCE_P(arg);
-			if (ce->name->len == sizeof(INCOMPLETE_CLASS) - 1 
+			if (ce->name->len == sizeof(INCOMPLETE_CLASS) - 1
 					&& !strncmp(ce->name->val, INCOMPLETE_CLASS, ce->name->len)) {
 				RETURN_FALSE;
 			}
@@ -379,7 +379,7 @@ PHP_FUNCTION(is_scalar)
 }
 /* }}} */
 
-/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]]) 
+/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]])
    Returns true if var is callable. */
 PHP_FUNCTION(is_callable)
 {
@@ -394,7 +394,7 @@ PHP_FUNCTION(is_callable)
 							  &syntax_only, &callable_name) == FAILURE) {
 		return;
 	}
-	
+
 	if (syntax_only) {
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}

@@ -34,7 +34,7 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class domimplementationlist 
+* class domimplementationlist
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementationList
 * Since: DOM Level 3
@@ -47,10 +47,10 @@ const zend_function_entry php_dom_domimplementationlist_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-/* {{{ length	unsigned long	
-readonly=yes 
+/* {{{ length	unsigned long
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementationList-length
-Since: 
+Since:
 */
 int dom_domimplementationlist_length_read(dom_object *obj, zval *retval)
 {
@@ -62,7 +62,7 @@ int dom_domimplementationlist_length_read(dom_object *obj, zval *retval)
 
 /* {{{ proto domdomimplementation dom_domimplementationlist_item(int index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementationList-item
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_domimplementationlist_item)
 {

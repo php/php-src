@@ -193,7 +193,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 
 			tmp = get_node(fault->children, "faultstring");
 			if (tmp != NULL && tmp->children != NULL) {
-				zval zv; 
+				zval zv;
 				master_to_zval(&zv, get_conversion(IS_STRING), tmp);
 				faultstring = Z_STR(zv);
 			}
@@ -307,7 +307,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 									val = get_node(cur->children, "result");
 								}
 								if (val == NULL && cur->children && cur->children->next == NULL) {
-									val = cur->children;								  
+									val = cur->children;
 								}
 							}
 						}

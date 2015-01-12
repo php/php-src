@@ -213,7 +213,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 			return NULL;
 		}
 	}
-	
+
 	zval_dtor(&local_zv_tz);
 
 	return timeZone;
@@ -279,7 +279,7 @@ static int TimeZone_compare_objects(zval *object1, zval *object2)
 			return 0;
 		}
 	}
-	
+
 	return 1;
 }
 /* }}} */
@@ -297,7 +297,7 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 	UErrorCode		uec = U_ZERO_ERROR;
 
 	*is_temp = 1;
-	
+
 	ALLOC_HASHTABLE(debug_info);
 	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
 
@@ -330,11 +330,11 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 	if (U_FAILURE(uec)) {
 		return debug_info;
 	}
-	
+
 	ZVAL_LONG(&zv, (zend_long)rawOffset);
-	zend_hash_str_update(debug_info,"rawOffset", sizeof("rawOffset") - 1, &zv); 
+	zend_hash_str_update(debug_info,"rawOffset", sizeof("rawOffset") - 1, &zv);
 	ZVAL_LONG(&zv, (zend_long)(rawOffset + dstOffset));
-	zend_hash_str_update(debug_info,"currentOffset", sizeof("currentOffset") - 1, &zv); 
+	zend_hash_str_update(debug_info,"currentOffset", sizeof("currentOffset") - 1, &zv);
 
 	return debug_info;
 }
@@ -379,7 +379,7 @@ static zend_object *TimeZone_object_create(zend_class_entry *ce)
 	TimeZone_object*	intern;
 
 	intern = (TimeZone_object*)ecalloc(1, sizeof(TimeZone_object) + sizeof(zval) * (ce->default_properties_count - 1));
-	
+
 	zend_object_std_init(&intern->zo, ce);
     object_properties_init(&intern->zo, ce);
 	TimeZone_object_init(intern);

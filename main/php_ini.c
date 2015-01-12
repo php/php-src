@@ -420,8 +420,8 @@ int php_init_config(void)
 
 			SetLastError(0);
 
-			/*If the given bugger is not large enough to hold the data, the return value is 
-			the buffer size,  in characters, required to hold the string and its terminating 
+			/*If the given bugger is not large enough to hold the data, the return value is
+			the buffer size,  in characters, required to hold the string and its terminating
 			null character. We use this return value to alloc the final buffer. */
 			size = GetEnvironmentVariableA("PHPRC", &dummybuf, 0);
 			if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {

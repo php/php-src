@@ -71,7 +71,7 @@
 # define SQLVARBINARY	SYBVARBINARY
 # ifdef SYBUNIQUE
 #  define SQLUNIQUE		SYBUNIQUE
-#else 
+#else
 #  define SQLUNIQUE		36 /* FreeTDS Hack */
 # endif
 

@@ -68,7 +68,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 
 /* {{{ proto mixed Closure::call(object $to [, mixed $parameter] [, mixed $...] )
    Call closure, binding to a given object with its class as the scope */
-ZEND_METHOD(Closure, call) 
+ZEND_METHOD(Closure, call)
 {
 	zval *zclosure, *newthis, closure_result;
 	zend_closure *closure;
@@ -81,10 +81,10 @@ ZEND_METHOD(Closure, call)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o*", &newthis, &my_params, &my_param_count) == FAILURE) {
 		return;
 	}
-	
+
 	zclosure = getThis();
 	closure = (zend_closure *)Z_OBJ_P(zclosure);
-	
+
 	if (closure->func.common.fn_flags & ZEND_ACC_STATIC) {
 		zend_error(E_WARNING, "Cannot bind an instance to a static closure");
 		return;
@@ -109,7 +109,7 @@ ZEND_METHOD(Closure, call)
 	fci.param_count = my_param_count;
 	fci.object = fci_cache.object = Z_OBJ_P(newthis);
 	fci_cache.initialized = 1;
-	
+
 	my_function = *fci_cache.function_handler;
 	/* use scope of passed object */
 	my_function.common.scope = Z_OBJCE_P(newthis);

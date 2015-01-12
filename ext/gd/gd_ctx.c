@@ -93,10 +93,10 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		}
 	} else {
 		/* PHP_GDIMG_TYPE_GIF
-		 * PHP_GDIMG_TYPE_PNG 
-		 * PHP_GDIMG_TYPE_JPG 
-		 * PHP_GDIMG_TYPE_WBM 
-		 * PHP_GDIMG_TYPE_WEBP 
+		 * PHP_GDIMG_TYPE_PNG
+		 * PHP_GDIMG_TYPE_JPG
+		 * PHP_GDIMG_TYPE_WBM
+		 * PHP_GDIMG_TYPE_WEBP
 		 * */
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z/!ll", &imgind, &to_zval, &quality, &basefilter) == FAILURE) {
 			return;

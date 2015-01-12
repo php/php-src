@@ -76,9 +76,9 @@ const timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
 timelib_long timelib_parse_tz_cor(char**);
 
 /* From parse_iso_intervals.re */
-void timelib_strtointerval(char *s, size_t len, 
-                           timelib_time **begin, timelib_time **end, 
-						   timelib_rel_time **period, int *recurrences, 
+void timelib_strtointerval(char *s, size_t len,
+                           timelib_time **begin, timelib_time **end,
+						   timelib_rel_time **period, int *recurrences,
 						   struct timelib_error_container **errors);
 
 

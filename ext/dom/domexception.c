@@ -28,10 +28,10 @@
 #include "php_dom.h"
 
 /*
-* class DOMException 
+* class DOMException
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-17189187
-* Since: 
+* Since:
 */
 
 extern zend_class_entry *dom_domexception_class_entry;

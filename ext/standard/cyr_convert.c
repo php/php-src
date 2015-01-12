@@ -32,7 +32,7 @@
 #include <stdio.h>
 
 /*****************************************************************************
-* This is codetables for different Cyrillic charsets (relative to koi8-r). 
+* This is codetables for different Cyrillic charsets (relative to koi8-r).
 * Each table contains data for 128-255 symbols from ASCII table.
 * First 256 symbols are for conversion from koi8-r to corresponding charset,
 * second 256 symbols are for reverse conversion, from charset to koi8-r.
@@ -83,7 +83,7 @@ static const _cyr_charset_table _cyr_win1251 = {
 222,192,193,214,196,197,212,195,213,200,201,202,203,204,205,206,
 207,223,208,209,210,211,198,194,220,219,199,216,221,217,215,218,
 },
-_cyr_cp866 = { 
+_cyr_cp866 = {
 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
 16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
 32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,
@@ -188,8 +188,8 @@ _cyr_mac = {
 /* }}} */
 
 /* {{{ static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to)
-* This is the function that performs real in-place conversion of the string 
-* between charsets. 
+* This is the function that performs real in-place conversion of the string
+* between charsets.
 * Parameters:
 *    str - string to be converted
 *    from,to - one-symbol label of source and destination charset
@@ -209,7 +209,7 @@ static char * php_convert_cyr_string(unsigned char *str, size_t length, char fro
 
 	from_table = NULL;
 	to_table   = NULL;
-	
+
 	switch (toupper((int)(unsigned char)from))
 	{
 		case 'W':
@@ -257,7 +257,7 @@ static char * php_convert_cyr_string(unsigned char *str, size_t length, char fro
 
 	if (!str)
 		return (char *)str;
-	
+
 	for (i = 0; i < length; i++) {
 		tmp = (from_table == NULL)? str[i] : from_table[ str[i] ];
 		str[i] = (to_table == NULL) ? tmp : to_table[tmp + 256];

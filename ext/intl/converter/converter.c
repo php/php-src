@@ -842,7 +842,7 @@ static PHP_METHOD(UConverter, transcode) {
 	} else {
 		RETVAL_FALSE;
 	}
-	
+
 	if (src_cnv) {
 		ucnv_close(src_cnv);
 	}
@@ -864,7 +864,7 @@ static PHP_METHOD(UConverter, getErrorCode) {
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(intl_error_get_code(&(objval->error)));	
+	RETURN_LONG(intl_error_get_code(&(objval->error)));
 }
 /* }}} */
 

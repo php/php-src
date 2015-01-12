@@ -55,15 +55,15 @@ static void _php_ibase_free_service(zend_resource *rsrc) /* {{{ */
 }
 /* }}} */
 
-/* the svc api seems to get confused after an error has occurred, 
+/* the svc api seems to get confused after an error has occurred,
    so invalidate the handle on errors */
 #define IBASE_SVC_ERROR(svm) \
 	do { zend_list_delete(svm->res); _php_ibase_error(); } while (0)
-	
+
 
 void php_ibase_service_minit(INIT_FUNC_ARGS) /* {{{ */
 {
-	le_service = zend_register_list_destructors_ex(_php_ibase_free_service, NULL, 
+	le_service = zend_register_list_destructors_ex(_php_ibase_free_service, NULL,
 	    "interbase service manager handle", module_number);
 
 	/* backup options */
@@ -134,7 +134,7 @@ void php_ibase_service_minit(INIT_FUNC_ARGS) /* {{{ */
 static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, char operation) /* {{{ */
 {
 	/* user = 0, password = 1, first_name = 2, middle_name = 3, last_name = 4 */
-	static char const user_flags[] = { isc_spb_sec_username, isc_spb_sec_password, 
+	static char const user_flags[] = { isc_spb_sec_username, isc_spb_sec_password,
 	    isc_spb_sec_firstname, isc_spb_sec_middlename, isc_spb_sec_lastname };
 	char buf[128], *args[] = { NULL, NULL, NULL, NULL, NULL };
 	int i, args_len[] = { 0, 0, 0, 0, 0 };
@@ -150,17 +150,17 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, char operation) /* {{{
 			&args[3], &args_len[3], &args[4], &args_len[4])) {
 		RETURN_FALSE;
 	}
-			
+
 	ZEND_FETCH_RESOURCE(svm, ibase_service *, res, -1, "Interbase service manager handle",
 		le_service);
 
 	buf[0] = operation;
-	
+
 	for (i = 0; i < sizeof(user_flags); ++i) {
 		if (args[i] != NULL) {
 			int chunk = slprintf(&buf[spb_len], sizeof(buf) - spb_len, "%c%c%c%s",
 				user_flags[i], (char)args_len[i], (char)(args_len[i] >> 8), args[i]);
-			
+
 			if ((spb_len + chunk) > sizeof(buf) || chunk <= 0) {
 				_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%d)"
 					TSRMLS_CC, spb_len);

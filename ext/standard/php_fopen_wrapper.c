@@ -322,7 +322,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 				"The file descriptors must be non-negative numbers smaller than %d", dtablesize);
 			return NULL;
 		}
-		
+
 		fd = dup((int)fildes_ori);
 		if (fd == -1) {
 			php_stream_wrapper_log_error(wrapper, options,

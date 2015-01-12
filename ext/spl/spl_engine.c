@@ -62,7 +62,7 @@ PHPAPI zend_long spl_offset_convert_to_long(zval *offset) /* {{{ */
 		return Z_RES_HANDLE_P(offset);
 	}
 	return -1;
-} 
+}
 /* }}} */
 
 /*

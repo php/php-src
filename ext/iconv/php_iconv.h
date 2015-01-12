@@ -27,7 +27,7 @@
 #  define PHP_ICONV_API __declspec(dllexport)
 # else
 #  define PHP_ICONV_API __declspec(dllimport)
-# endif 
+# endif
 #elif defined(__GNUC__) && __GNUC__ >= 4
 # define PHP_ICONV_API __attribute__ ((visibility("default")))
 #else

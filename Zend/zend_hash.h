@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -655,7 +655,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_FOREACH_END() \
 		} \
 	} while (0)
-	
+
 #define ZEND_HASH_FOREACH_BUCKET(ht, _bucket) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_bucket = _p;
@@ -679,7 +679,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_FOREACH_STR_KEY(ht, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_key = _p->key;
-		
+
 #define ZEND_HASH_FOREACH_KEY(ht, _h, _key) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_h = _p->h; \
@@ -689,7 +689,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	ZEND_HASH_FOREACH(ht, 0); \
 	_h = _p->h; \
 	_val = _z;
-		
+
 #define ZEND_HASH_FOREACH_STR_KEY_VAL(ht, _key, _val) \
 	ZEND_HASH_FOREACH(ht, 0); \
 	_key = _p->key; \
@@ -761,7 +761,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_DEC_APPLY_COUNT(ht) ((ht)->u.flags -= (1 << ZEND_HASH_APPLY_SHIFT))
 
 
-/* The following macros are useful to insert a sequence of new elements 
+/* The following macros are useful to insert a sequence of new elements
  * of packed array. They may be use insted of series of
  * zend_hash_next_index_insert_new()
  * (HashTable must have enough free buckets).
@@ -779,7 +779,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		__fill_bkt++; \
 		__fill_idx++; \
 	} while (0)
-	
+
 #define ZEND_HASH_FILL_END() \
 		__fill_ht->nNumUsed = __fill_idx; \
 		__fill_ht->nNumOfElements = __fill_idx; \

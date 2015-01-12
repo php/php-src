@@ -106,7 +106,7 @@ PHP_FUNCTION(pdo_drivers)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
+
 	array_init(return_value);
 
 	ZEND_HASH_FOREACH_PTR(&pdo_driver_hash, pdriver) {
@@ -246,7 +246,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source, zend_ulong data_s
 					semi = i++;
 					break;
 				} else {
-					n_semicolumns++; 
+					n_semicolumns++;
 					i += 2;
 					continue;
 				}
@@ -273,7 +273,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source, zend_ulong data_s
 					int vlen = semi - valstart;
 					const char *orig_val = data_source + valstart;
 					char *new_val  = (char *) emalloc(vlen - n_semicolumns + 1);
-				
+
 					parsed[j].optval = new_val;
 
 					while (vlen && *orig_val) {
@@ -281,7 +281,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source, zend_ulong data_s
 						new_val++;
 
 						if (*orig_val == ';') {
-							orig_val+=2; 
+							orig_val+=2;
 							vlen-=2;
 						} else {
 							orig_val++;
@@ -393,7 +393,7 @@ PHP_MINFO_FUNCTION(pdo)
 {
 	char *drivers = NULL, *ldrivers = estrdup("");
 	pdo_driver_t *pdriver;
-	
+
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PDO support", "enabled");
 
@@ -402,7 +402,7 @@ PHP_MINFO_FUNCTION(pdo)
 		efree(ldrivers);
 		ldrivers = drivers;
 	} ZEND_HASH_FOREACH_END();
-	
+
 	php_info_print_table_row(2, "PDO drivers", drivers ? drivers + 2 : "");
 
 	if (drivers) {

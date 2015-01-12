@@ -46,7 +46,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 																						\
 				MYSQLND_STATS_LOCK((s_array)); \
 				(s_array)->in_trigger = FALSE; \
-			} 
+			}
 #else
 #define MYSQLND_STAT_CALL_TRIGGER(s_array, statistic, val)
 #endif /* MYSQLND_CORE_STATISTICS_TRIGGERS_DISABLED */
@@ -147,7 +147,7 @@ extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 
 #else
 
-#define MYSQLND_INC_GLOBAL_STATISTIC(statistic) 
+#define MYSQLND_INC_GLOBAL_STATISTIC(statistic)
 #define MYSQLND_DEC_CONN_STATISTIC(conn_stats, statistic)
 #define MYSQLND_INC_GLOBAL_STATISTIC_W_VALUE2(statistic1, value1, statistic2, value2)
 #define MYSQLND_INC_CONN_STATISTIC(conn_stats, statistic)

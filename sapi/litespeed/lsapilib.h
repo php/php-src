@@ -22,18 +22,18 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
-met: 
+met:
 
     * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer. 
+      notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
-      with the distribution. 
+      with the distribution.
     * Neither the name of the Lite Speed Technologies Inc nor the
       names of its contributors may be used to endorse or promote
       products derived from this software without specific prior
-      written permission.  
+      written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -45,7 +45,7 @@ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
@@ -83,7 +83,7 @@ typedef struct lsapi_request
 
     char            * m_pReqBuf;
     int               m_reqBufSize;
-    
+
     char            * m_pRespBuf;
     char            * m_pRespBufEnd;
     char            * m_pRespBufPos;
@@ -96,7 +96,7 @@ typedef struct lsapi_request
     struct iovec    * m_pIovec;
     struct iovec    * m_pIovecEnd;
     struct iovec    * m_pIovecCur;
-    struct iovec    * m_pIovecToWrite;    
+    struct iovec    * m_pIovecToWrite;
 
     struct lsapi_packet_header      * m_respPktHeaderEnd;
 
@@ -108,7 +108,7 @@ typedef struct lsapi_request
 
     struct lsapi_http_header_index  * m_pHeaderIndex;
     struct lsapi_header_offset      * m_pUnknownHeader;
-    
+
     char            * m_pScriptFile;
     char            * m_pScriptName;
     char            * m_pQueryString;
@@ -120,9 +120,9 @@ typedef struct lsapi_request
     off_t             m_reqBodyRead;
     int               m_bufProcessed;
     int               m_bufRead;
-    
+
     struct lsapi_packet_header        m_respPktHeader[5];
-    
+
     struct lsapi_resp_header          m_respHeader;
     short                             m_respHeaderLen[LSAPI_MAX_RESP_HEADERS];
     void            * m_pAppData;
@@ -168,7 +168,7 @@ int LSAPI_ForeachSpecialEnv_r( LSAPI_Request * pReq,
             LSAPI_CB_EnvHandler fn, void * arg );
 
 char * LSAPI_GetEnv_r( LSAPI_Request * pReq, const char * name );
-            
+
 
 ssize_t LSAPI_ReadReqBody_r( LSAPI_Request * pReq, char * pBuf, size_t len );
 
@@ -189,7 +189,7 @@ int LSAPI_Flush_r( LSAPI_Request * pReq );
 
 int LSAPI_AppendRespHeader_r( LSAPI_Request * pReq, const char * pBuf, int len );
 
-int LSAPI_AppendRespHeader2_r( LSAPI_Request * pReq, const char * pHeaderName, 
+int LSAPI_AppendRespHeader2_r( LSAPI_Request * pReq, const char * pHeaderName,
                               const char * pHeaderValue );
 
 int LSAPI_ErrResponse_r( LSAPI_Request * pReq, int code, const char ** pRespHeaders,
@@ -331,7 +331,7 @@ static inline ssize_t LSAPI_Write( const char * pBuf, ssize_t len )
 
 static inline ssize_t LSAPI_sendfile( int fdIn, off_t* off, size_t size )
 {
-    return LSAPI_sendfile_r(&g_req, fdIn, off, size );          
+    return LSAPI_sendfile_r(&g_req, fdIn, off, size );
 }
 
 static inline ssize_t LSAPI_Write_Stderr( const char * pBuf, ssize_t len )

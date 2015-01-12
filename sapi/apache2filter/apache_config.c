@@ -60,11 +60,11 @@ static const char *real_value_hnd(cmd_parms *cmd, void *dummy, const char *name,
 	php_dir_entry e;
 
 	phpapdebug((stderr, "Getting %s=%s for %p (%d)\n", name, value, dummy, zend_hash_num_elements(&d->config)));
-	
+
 	if (!strncasecmp(value, "none", sizeof("none"))) {
 		value = "";
 	}
-	
+
 	e.value = apr_pstrdup(cmd->pool, value);
 	e.value_len = strlen(value);
 	e.status = status;
@@ -132,7 +132,7 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 
 	phpapdebug((stderr, "Merge dir (%p)+(%p)=(%p)\n", base_conf, new_conf, n));
 	for (zend_hash_internal_pointer_reset(&d->config);
-			zend_hash_get_current_key(&d->config, &str, &str_len, 
+			zend_hash_get_current_key(&d->config, &str, &str_len,
 				&num_index) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&d->config)) {
 		pe = NULL;
@@ -151,7 +151,7 @@ char *get_php_config(void *conf, char *name, size_t name_len)
 {
 	php_conf_rec *d = conf;
 	php_dir_entry *pe;
-	
+
 	if ((pe = zend_hash_find(&d->config, name, name_len)) != NULL) {
 		return pe->value;
 	}
@@ -165,7 +165,7 @@ void apply_config(void *dummy)
 	char *str;
 	uint str_len;
 	php_dir_entry *data;
-	
+
 	for (zend_hash_internal_pointer_reset(&d->config);
 			zend_hash_get_current_key(&d->config, &str, &str_len, NULL) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&d->config)) {
@@ -173,7 +173,7 @@ void apply_config(void *dummy)
 		phpapdebug((stderr, "APPLYING (%s)(%s)\n", str, data->value));
 		if (zend_alter_ini_entry(str, str_len, data->value, data->value_len, data->status, data->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE) == FAILURE) {
 			phpapdebug((stderr, "..FAILED\n"));
-		}	
+		}
 	}
 }
 
@@ -191,7 +191,7 @@ static apr_status_t destroy_php_config(void *data)
 {
 	php_conf_rec *d = data;
 
-	phpapdebug((stderr, "Destroying config %p\n", data));	
+	phpapdebug((stderr, "Destroying config %p\n", data));
 	zend_hash_destroy(&d->config);
 
 	return APR_SUCCESS;

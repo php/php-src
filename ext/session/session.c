@@ -203,7 +203,7 @@ static zend_string *php_session_encode(void) /* {{{ */
 		if (!PS(serializer)) {
 			php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to encode session object");
 			return NULL;
-		} 
+		}
 		return PS(serializer)->encode();
 	} else {
 		php_error_docref(NULL, E_WARNING, "Cannot encode non-existent session");
@@ -415,7 +415,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 
 		php_error_docref(NULL, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
 	}
-	
+
 	outid = zend_string_alloc((digest_len + 2) * ((8.0f / PS(hash_bits_per_character) + 0.5)), 0);
 	outid->len = (int)(bin_to_readable((char *)digest, digest_len, outid->val, (char)PS(hash_bits_per_character)) - (char *)&outid->val);
 	efree(digest);
@@ -836,7 +836,7 @@ PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 	}
 	if (Z_TYPE(session_vars) == IS_NULL) {
 		array_init(&session_vars);
-	} 
+	}
 	ZVAL_NEW_REF(&PS(http_session_vars), &session_vars);
 	Z_ADDREF_P(&PS(http_session_vars));
 	zend_hash_update_ind(&EG(symbol_table).ht, var_name, &PS(http_session_vars));
@@ -1849,7 +1849,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		}
 		zend_string_release(name);
 	}
-	
+
 	if (PS(mod) && PS(mod) != &ps_mod_user) {
 		ini_name = zend_string_init("session.save_handler", sizeof("session.save_handler") - 1, 0);
 		ini_val = zend_string_init("user", sizeof("user") - 1, 0);
@@ -2670,12 +2670,12 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 		case MULTIPART_EVENT_FILE_START: {
 			multipart_event_file_start *data = (multipart_event_file_start *) event_data;
 
-			/* Do nothing when $_POST["PHP_SESSION_UPLOAD_PROGRESS"] is not set 
+			/* Do nothing when $_POST["PHP_SESSION_UPLOAD_PROGRESS"] is not set
 			 * or when we have no session id */
 			if (!Z_TYPE(progress->sid) || !progress->key.s) {
 				break;
 			}
-			
+
 			/* First FILE_START event, initializing data */
 			if (Z_ISUNDEF(progress->data)) {
 
@@ -2717,7 +2717,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			add_assoc_long_ex(&progress->current_file, "bytes_processed", sizeof("bytes_processed") - 1, 0);
 
 			add_next_index_zval(&progress->files, &progress->current_file);
-			
+
 			progress->current_file_bytes_processed = zend_hash_str_find(Z_ARRVAL(progress->current_file), "bytes_processed", sizeof("bytes_processed") - 1);
 
 			Z_LVAL_P(progress->current_file_bytes_processed) =  data->post_bytes_processed;
@@ -2730,7 +2730,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			if (!Z_TYPE(progress->sid) || !progress->key.s) {
 				break;
 			}
-			
+
 			Z_LVAL_P(progress->current_file_bytes_processed) = data->offset + data->length;
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
@@ -2743,7 +2743,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			if (!Z_TYPE(progress->sid) || !progress->key.s) {
 				break;
 			}
-			
+
 			if (data->temp_filename) {
 				add_assoc_string_ex(&progress->current_file, "tmp_name",  sizeof("tmp_name") - 1, data->temp_filename);
 			}

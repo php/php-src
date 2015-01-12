@@ -48,7 +48,7 @@ static uint zend_obj_num_elements(HashTable *ht)
 		if (Z_TYPE(p->val) == IS_INDIRECT) {
 			if (Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF) {
 				num--;
-			}			
+			}
 		}
 	}
 	return num;
@@ -430,7 +430,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 		const char *class_name, *prop_name;
 		size_t prop_name_len;
 		zend_string *pname_esc;
-		
+
 		zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len);
 		pname_esc = php_addcslashes(prop_name, prop_name_len, 0, "'\\", 2);
 
@@ -511,7 +511,7 @@ again:
 				buffer_append_spaces(buf, level - 1);
 			}
 			smart_str_appendc(buf, ')');
-		
+
 			break;
 
 		case IS_OBJECT:
@@ -864,7 +864,7 @@ again:
 					res = call_user_function_ex(CG(function_table), struc, &fname, &retval, 0, 0, 1, NULL);
 					BG(serialize_lock)--;
 					zval_dtor(&fname);
-                    
+
 					if (EG(exception)) {
 						zval_ptr_dtor(&retval);
 						return;

@@ -310,7 +310,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 							precision = 0;
 					} else
 						precision = 0;
-					
+
 					if (precision > FORMAT_CONV_MAX_PRECISION) {
 						precision = FORMAT_CONV_MAX_PRECISION;
 					}
@@ -378,7 +378,7 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 					break;
 				case 'p': {
 						char __next = *(fmt+1);
-						if ('d' == __next || 'u' == __next || 'x' == __next || 'o' == __next) { 
+						if ('d' == __next || 'u' == __next || 'x' == __next || 'o' == __next) {
 							fmt++;
 							modifier = LM_PHP_INT_T;
 						} else {

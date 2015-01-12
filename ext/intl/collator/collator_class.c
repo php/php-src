@@ -134,10 +134,10 @@ void collator_register_Collator_class( void )
 
 	memcpy(&Collator_handlers, zend_get_std_object_handlers(),
 		sizeof Collator_handlers);
-	/* Collator has no usable clone semantics - ucol_cloneBinary/ucol_openBinary require binary buffer 
-	   for which we don't have the place to keep */	
+	/* Collator has no usable clone semantics - ucol_cloneBinary/ucol_openBinary require binary buffer
+	   for which we don't have the place to keep */
 	Collator_handlers.offset = XtOffsetOf(Collator_object, zo);
-	Collator_handlers.clone_obj = NULL; 
+	Collator_handlers.clone_obj = NULL;
 	Collator_handlers.dtor_obj = Collator_objects_dtor;
 	Collator_handlers.free_obj = Collator_objects_free;
 

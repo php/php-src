@@ -45,7 +45,7 @@ static struct fpm_event_module_s devpoll_module = {
 	.clean = fpm_event_devpoll_clean,
 	.wait = fpm_event_devpoll_wait,
 	.add = fpm_event_devpoll_add,
-	.remove = fpm_event_devpoll_remove, 
+	.remove = fpm_event_devpoll_remove,
 };
 
 int dpfd = -1;
@@ -76,7 +76,7 @@ static int fpm_event_devpoll_init(int max) /* {{{ */
 
 	/* open /dev/poll for future usages */
 	dpfd = open("/dev/poll", O_RDWR);
-	if (dpfd < 0) {  
+	if (dpfd < 0) {
 		zlog(ZLOG_ERROR, "Unable to open /dev/poll");
 		return -1;
 	}
@@ -120,7 +120,7 @@ static int fpm_event_devpoll_init(int max) /* {{{ */
 static int fpm_event_devpoll_clean() /* {{{ */
 {
 	/* close /dev/poll if open */
-	if (dpfd > -1) {  
+	if (dpfd > -1) {
 		close(dpfd);
 		dpfd = -1;
 	}
@@ -176,7 +176,7 @@ static int fpm_event_devpoll_wait(struct fpm_event_queue_s *queue, unsigned long
 		while (q) {
 
 			/* found */
-			if (q->ev && q->ev->fd == active_pollfds[i].fd) {  
+			if (q->ev && q->ev->fd == active_pollfds[i].fd) {
 
 					/* fire the event */
 					fpm_event_fire(q->ev);

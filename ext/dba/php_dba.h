@@ -23,7 +23,7 @@
 
 #if HAVE_DBA
 
-typedef enum { 
+typedef enum {
 	/* do not allow 0 here */
 	DBA_READER = 1,
 	DBA_WRITER,
@@ -49,7 +49,7 @@ typedef struct dba_info {
 	zval *argv;
 	/* private */
 	int flags; /* whether and how dba did locking and other flags*/
-	struct dba_handler *hnd;	
+	struct dba_handler *hnd;
 	dba_lock lock;
 } dba_info;
 
@@ -127,7 +127,7 @@ typedef struct dba_handler {
 	DBA_INFO_FUNC(x)
 
 #define VALLEN(p) Z_STRVAL_PP(p), Z_STRLEN_PP(p)
-	
+
 PHP_FUNCTION(dba_open);
 PHP_FUNCTION(dba_popen);
 PHP_FUNCTION(dba_close);

@@ -37,10 +37,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMDocumentFragment extends DOMNode 
+* class DOMDocumentFragment extends DOMNode
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-B63ED1A3
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_documentfragment_class_functions[] = {
@@ -142,7 +142,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 		if (err != 0) {
 			RETURN_FALSE;
 		}
-		/* Following needed due to bug in libxml2 <= 2.6.14 
+		/* Following needed due to bug in libxml2 <= 2.6.14
 		ifdef after next libxml release as bug is fixed in their cvs */
 		php_dom_xmlSetTreeDoc(lst, nodep->doc);
 		/* End stupid hack */

@@ -34,9 +34,9 @@
 # include "config.w32.h"
 # include "win95nt.h"
 # ifdef PHP_EXPORTS
-#  define PHPAPI __declspec(dllexport) 
+#  define PHPAPI __declspec(dllexport)
 # else
-#  define PHPAPI __declspec(dllimport) 
+#  define PHPAPI __declspec(dllimport)
 # endif
 #else
 # include <php_config.h>
@@ -118,9 +118,9 @@ const zend_function_entry birdstep_functions[] = {
 	PHP_FE(birdstep_fieldnum,       arginfo_birdstep_fieldnum)
 	PHP_FE(birdstep_fieldname,      arginfo_birdstep_fieldname)
 /*
- * Temporary Function aliases until the next major upgrade to PHP.  
- * These should allow users to continue to use their current scripts, 
- * but should in reality warn the user that this functionality is 
+ * Temporary Function aliases until the next major upgrade to PHP.
+ * These should allow users to continue to use their current scripts,
+ * but should in reality warn the user that this functionality is
  * deprecated.
  */
 	PHP_FALIAS(velocis_connect,        birdstep_connect,        arginfo_birdstep_connect)
@@ -159,9 +159,9 @@ ZEND_GET_MODULE(birdstep)
 THREAD_LS birdstep_module php_birdstep_module;
 THREAD_LS static HENV henv;
 
-#define PHP_GET_BIRDSTEP_RES_IDX(id) if (!(res = birdstep_find_result(list, id))) { php_error_docref(NULL, E_WARNING, "Birdstep: Not result index (%ld)", id); RETURN_FALSE; } 
+#define PHP_GET_BIRDSTEP_RES_IDX(id) if (!(res = birdstep_find_result(list, id))) { php_error_docref(NULL, E_WARNING, "Birdstep: Not result index (%ld)", id); RETURN_FALSE; }
 #define PHP_BIRDSTEP_CHK_LNK(id) if (!(conn = birdstep_find_conn(list, id))) { php_error_docref(NULL, E_WARNING, "Birdstep: Not connection index (%ld)", id); RETURN_FALSE; }
-                                                        
+
 
 static void _close_birdstep_link(zend_rsrc_list_entry *rsrc)
 {
@@ -296,7 +296,7 @@ PHP_FUNCTION(birdstep_connect)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss", &serv, &serv_len, &user, &user_len, &pass, &pass_len) == FAILURE) {
 		return;
 	}
-	
+
 	if ( php_birdstep_module.max_links != -1 && php_birdstep_module.num_links == php_birdstep_module.max_links ) {
 		php_error_docref(NULL, E_WARNING, "Birdstep: Too many open connections (%d)",php_birdstep_module.num_links);
 		RETURN_FALSE;

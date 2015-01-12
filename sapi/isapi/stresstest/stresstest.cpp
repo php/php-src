@@ -84,9 +84,9 @@ char * GetEnv(char *);
 
 
 DWORD CALLBACK IsapiThread(void *);
-int stress_main(const char *filename, 
-				const char *arg, 
-				const char *postfile, 
+int stress_main(const char *filename,
+				const char *arg,
+				const char *postfile,
 				const char *matchdata);
 
 
@@ -354,7 +354,7 @@ BOOL ParseTestFile(const char *path, const char *fn)
 				fputs(line, fe);
 				break;
 			}
-		}		
+		}
 
 		fclose(fp);
 		fclose(ft);
@@ -520,14 +520,14 @@ int main(int argc, char* argv[])
 	hDll = LoadLibrary(module); // Load our DLL
 
 	if (!hDll) {
-		FormatMessage( 
+		FormatMessage(
 		   FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
 		    NULL,
 		    GetLastError(),
 		    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
 		    (LPTSTR) &lpMsgBuf,
 		    0,
-		    NULL 
+		    NULL
 		);
 		fprintf(stderr,"Error: Dll 'php7isapi.dll' not found -%d\n%s\n", GetLastError(), lpMsgBuf);
 		free (module);
@@ -553,7 +553,7 @@ int main(int argc, char* argv[])
 		free(filelist);
 		return -1;
 	}
-	TerminateExtensionProc = (TerminateProc) GetProcAddress(hDll, 
+	TerminateExtensionProc = (TerminateProc) GetProcAddress(hDll,
                                           "TerminateExtension");
 
 	// This should really check if the version information matches what we
@@ -568,7 +568,7 @@ int main(int argc, char* argv[])
 
 	if (bUseTestFiles) {
 		char TestPath[MAX_PATH];
-		if (filelist != NULL) 
+		if (filelist != NULL)
 			_snprintf(TestPath, sizeof(TestPath)-1, "%s\\tests", filelist);
 		else strcpy(TestPath, "tests");
 		DoTestFiles(TestPath, environment);
@@ -598,8 +598,8 @@ DWORD CALLBACK IsapiThread(void *p)
 			// execute each file
 			CString testname = TestNames.GetAt(i);
 			BOOL ok = FALSE;
-			if (stress_main(IsapiFileList.GetAt(i), 
-						IsapiGetData.GetAt(i), 
+			if (stress_main(IsapiFileList.GetAt(i),
+						IsapiGetData.GetAt(i),
 						IsapiPostData.GetAt(i),
 						IsapiMatchData.GetAt(i))) {
 				InterlockedIncrement(&Results[i].ok);
@@ -629,10 +629,10 @@ DWORD CALLBACK IsapiThread(void *p)
  * the DLL to load. There is no recompilation required.                    *
  * ======================================================================= *
 */
-BOOL stress_main(const char *filename, 
-				const char *arg, 
+BOOL stress_main(const char *filename,
+				const char *arg,
 				const char *postdata,
-				const char *matchdata) 
+				const char *matchdata)
 {
 
 	EXTENSION_CONTROL_BLOCK ECB;
@@ -660,8 +660,8 @@ BOOL stress_main(const char *filename,
 		fprintf(stderr,"Fill Ext Block Failed\n");
 		return -1;
 	}
-	
-	// check for command line argument, 
+
+	// check for command line argument,
 	// first arg = filename
 	// this is added for testing php from command line
 
@@ -718,7 +718,7 @@ BOOL stress_main(const char *filename,
 	DeleteFile(fname);
 
 	return ok;
-		
+
 }
 //
 // GetServerVariable() is how the DLL calls the main program to figure out
@@ -764,7 +764,7 @@ BOOL WINAPI ReadClient(HCONN hConn, LPVOID lpBuffer, LPDWORD lpdwSize) {
 	TIsapiContext *c = (TIsapiContext *)hConn;
 	if (!c) return FALSE;
 
-	if (c->in != INVALID_HANDLE_VALUE) 
+	if (c->in != INVALID_HANDLE_VALUE)
 		return ReadFile(c->in, lpBuffer, (*lpdwSize), lpdwSize, NULL);
 
 	return FALSE;
@@ -782,7 +782,7 @@ BOOL WINAPI WriteClient(HCONN hConn, LPVOID lpBuffer, LPDWORD lpdwSize,
 	return FALSE;
 }
 //
-// This is a special callback function used by the DLL for certain extra 
+// This is a special callback function used by the DLL for certain extra
 // functionality. Look at the API help for details.
 //
 BOOL WINAPI ServerSupportFunction(HCONN hConn, DWORD dwHSERequest,
@@ -801,16 +801,16 @@ BOOL WINAPI ServerSupportFunction(HCONN hConn, DWORD dwHSERequest,
 				return FALSE;
 			wsprintf(lpszRespBuf,"%s",
 				//HTTP_VER,
-				
+
 				/* Default response is 200 Ok */
 
 				//lpvBuffer?lpvBuffer:"200 Ok",
-				
+
 				/* Create a string for the time. */
 				//temp=MakeDateStr(),
 
 				//SERVER_VERSION,
-				
+
 				/* If this exists, it is a pointer to a data buffer to
 				   be sent. */
 				lpdwDataType?(char *)lpdwDataType:NULL);
@@ -828,7 +828,7 @@ BOOL WINAPI ServerSupportFunction(HCONN hConn, DWORD dwHSERequest,
 			SetEvent(c->waitEvent);
 			//ExitThread(0);
 			break;
-		
+
 		//
 		// This sends a redirect (temporary) to the client.
 		// The header construction is similar to RESPONSE_HEADER above.
@@ -851,7 +851,7 @@ BOOL WINAPI ServerSupportFunction(HCONN hConn, DWORD dwHSERequest,
 		break;
 	}
 	return bRet;
-	
+
 }
 //
 // Makes a string of the date and time from GetSystemTime().
@@ -877,7 +877,7 @@ char * MakeDateStr(void){
 	return szDate;
 }
 //
-// Fill the ECB up 
+// Fill the ECB up
 //
 BOOL WINAPI FillExtensionControlBlock(EXTENSION_CONTROL_BLOCK *ECB, TIsapiContext *context) {
 
@@ -915,18 +915,18 @@ BOOL WINAPI FillExtensionControlBlock(EXTENSION_CONTROL_BLOCK *ECB, TIsapiContex
 //
 char *GetEnv(LPSTR lpszEnvVar)
 {
-	
+
 	char *var, dummy;
 	DWORD dwLen;
 
 	if (!lpszEnvVar)
 		return "";
-	
+
 	dwLen =GetEnvironmentVariable(lpszEnvVar, &dummy, 1);
 
 	if (dwLen == 0)
 		return "";
-	
+
 	var = (char *)xmalloc(dwLen);
 	if (!var)
 		return "";

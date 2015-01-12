@@ -196,7 +196,7 @@ PHP_FUNCTION(token_get_all)
 	LANG_SCNG(yy_state) = yycINITIAL;
 
 	tokenize(return_value);
-	
+
 	zend_restore_lexical_state(&original_lex_state);
 	zval_dtor(&source_zval);
 }

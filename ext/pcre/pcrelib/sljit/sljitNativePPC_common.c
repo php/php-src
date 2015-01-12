@@ -731,7 +731,7 @@ static SLJIT_CONST sljit_ins data_transfer_insts[64 + 8] = {
 
 /* Byte. */
 
-/* u b n i s */ HI(38) /* stb */, 
+/* u b n i s */ HI(38) /* stb */,
 /* u b n i l */ HI(34) /* lbz */,
 /* u b n x s */ HI(31) | LO(215) /* stbx */,
 /* u b n x l */ HI(31) | LO(87) /* lbzx */,

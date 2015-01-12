@@ -32,7 +32,7 @@ static void ptr_dtor(zval *zv) /* {{{ */
 static zend_property_info *zend_duplicate_property_info(zend_property_info *property_info) /* {{{ */
 {
 	zend_property_info* new_property_info;
-	
+
 	new_property_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
 	memcpy(new_property_info, property_info, sizeof(zend_property_info));
 	zend_string_addref(new_property_info->name);
@@ -288,7 +288,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			zend_string *fe_class_name, *proto_class_name;
 			const char *class_name;
 
-			if (fe->type == ZEND_INTERNAL_FUNCTION) {				
+			if (fe->type == ZEND_INTERNAL_FUNCTION) {
 				fe_class_name = NULL;
 				class_name = ((zend_internal_arg_info*)fe_arg_info)->class_name;
 			} else {
@@ -305,7 +305,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 				fe_class_name = zend_string_init(class_name, strlen(class_name), 0);
 			}
 
-			if (proto->type == ZEND_INTERNAL_FUNCTION) {				
+			if (proto->type == ZEND_INTERNAL_FUNCTION) {
 				proto_class_name = NULL;
 				class_name = ((zend_internal_arg_info*)proto_arg_info)->class_name;
 			} else {
@@ -1320,7 +1320,7 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 			j = 0;
 			while (precedences[i]->exclude_from_classes[j].ce) {
 				if (precedences[i]->exclude_from_classes[j].ce == trait) {
-					zend_string *lcname =										
+					zend_string *lcname =
 						zend_string_tolower(precedences[i]->trait_method->method_name);
 					if (zend_hash_add_empty_element(exclude_table, lcname) == NULL) {
 						zend_string_release(lcname);

@@ -108,7 +108,7 @@ PHP_MINIT_FUNCTION(user_filters)
 	le_bucket_brigade = zend_register_list_destructors_ex(NULL, NULL, PHP_STREAM_BRIGADE_RES_NAME, module_number);
 	/* Brigades will dispose of their buckets */
 	le_bucket = zend_register_list_destructors_ex(php_bucket_dtor, NULL, PHP_STREAM_BUCKET_RES_NAME, module_number);
-	
+
 	if (le_bucket_brigade == FAILURE) {
 		return FAILURE;
 	}
@@ -120,7 +120,7 @@ PHP_MINIT_FUNCTION(user_filters)
 	REGISTER_LONG_CONSTANT("PSFS_FLAG_NORMAL",		PSFS_FLAG_NORMAL,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PSFS_FLAG_FLUSH_INC",	PSFS_FLAG_FLUSH_INC,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PSFS_FLAG_FLUSH_CLOSE",	PSFS_FLAG_FLUSH_CLOSE,	CONST_CS | CONST_PERSISTENT);
-	
+
 	return SUCCESS;
 }
 
@@ -279,7 +279,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	zval func_name;
 	zval retval;
 	int len;
-	
+
 	/* some sanity checks */
 	if (persistent) {
 		php_error_docref(NULL, E_WARNING,
@@ -295,7 +295,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 		/* Userspace Filters using ambiguous wildcards could cause problems.
            i.e.: myfilter.foo.bar will always call into myfilter.foo.*
-                 never seeing myfilter.* 
+                 never seeing myfilter.*
            TODO: Allow failed userfilter creations to continue
                  scanning through the list */
 		if ((period = strrchr(filtername, '.'))) {
@@ -343,7 +343,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 	/* filtername */
 	add_property_string(&obj, "filtername", (char*)filtername);
-	
+
 	/* and the parameters, if any */
 	if (filterparams) {
 		add_property_zval(&obj, "params", filterparams);
@@ -375,7 +375,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 
 			/* Report failure to filter_alloc */
 			return NULL;
-		}			
+		}
 		zval_ptr_dtor(&retval);
 	}
 	zval_ptr_dtor(&func_name);
@@ -413,7 +413,7 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(brigade, php_stream_bucket_brigade *, zbrigade, -1, PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade); 
+	ZEND_FETCH_RESOURCE(brigade, php_stream_bucket_brigade *, zbrigade, -1, PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade);
 
 	ZVAL_NULL(return_value);
 
@@ -514,7 +514,7 @@ PHP_FUNCTION(stream_bucket_new)
 	memcpy(pbuffer, buffer, buffer_len);
 
 	bucket = php_stream_bucket_new(stream, pbuffer, buffer_len, 1, php_stream_is_persistent(stream));
-	
+
 	if (bucket == NULL) {
 		RETURN_FALSE;
 	}
@@ -553,7 +553,7 @@ PHP_FUNCTION(stream_get_filters)
 	}
 	/* It's okay to return an empty array if no filters are registered */
 }
-/* }}} */	
+/* }}} */
 
 /* {{{ proto bool stream_filter_register(string filtername, string classname)
    Registers a custom filter handler class */
@@ -561,7 +561,7 @@ PHP_FUNCTION(stream_filter_register)
 {
 	zend_string *filtername, *classname;
 	struct php_user_filter_data *fdat;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &filtername, &classname) == FAILURE) {
 		RETURN_FALSE;
 	}

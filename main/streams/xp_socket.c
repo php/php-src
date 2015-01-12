@@ -126,7 +126,7 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 	if (!sock || sock->socket == -1) {
 		return;
 	}
-	
+
 	sock->timeout_event = 0;
 
 	if (sock->timeout.tv_sec == -1)
@@ -218,7 +218,7 @@ static int php_sockop_close(php_stream *stream, int close_handle)
 	}
 
 	pefree(sock, php_stream_is_persistent(stream));
-	
+
 	return 0;
 }
 
@@ -287,7 +287,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 	int oldmode, flags;
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	php_stream_xport_param *xparam;
-	
+
 	if (!sock) {
 		return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	}
@@ -320,7 +320,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 				}
 				return alive ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
 			}
-			
+
 		case PHP_STREAM_OPTION_BLOCKING:
 			oldmode = sock->is_blocked;
 			if (SUCCESS == php_set_sock_blocking(sock->socket, value)) {
@@ -339,7 +339,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 			add_assoc_bool((zval *)ptrparam, "blocked", sock->is_blocked);
 			add_assoc_bool((zval *)ptrparam, "eof", stream->eof);
 			return PHP_STREAM_OPTION_RETURN_OK;
-		
+
 		case PHP_STREAM_OPTION_XPORT_API:
 			xparam = (php_stream_xport_param *)ptrparam;
 
@@ -417,7 +417,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 					return PHP_STREAM_OPTION_RETURN_OK;
 				}
 #endif
-				
+
 				default:
 					return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 			}
@@ -648,7 +648,7 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 			&err
 			);
-	
+
 	if (host) {
 		efree(host);
 	}
@@ -723,7 +723,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	/* Note: the test here for php_stream_udp_socket_ops is important, because we
 	 * want the default to be TCP sockets so that the openssl extension can
 	 * re-use this code. */
-	
+
 	sock->socket = php_network_connect_socket_to_host(host, portno,
 			stream->ops == &php_stream_udp_socket_ops ? SOCK_DGRAM : SOCK_STREAM,
 			xparam->op == STREAM_XPORT_OP_CONNECT_ASYNC,
@@ -734,7 +734,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 			bindport,
 			sockopts
 			);
-	
+
 	ret = sock->socket == -1 ? -1 : 0;
 	xparam->outputs.error_code = err;
 
@@ -753,7 +753,7 @@ out:
 		/* indicates pending connection */
 		return 1;
 	}
-	
+
 	return ret;
 }
 
@@ -794,7 +794,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 			}
 		}
 	}
-	
+
 	return xparam->outputs.client == NULL ? -1 : 0;
 }
 
@@ -857,7 +857,7 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 		/* should never happen */
 		return NULL;
 	}
-	
+
 	sock = pemalloc(sizeof(php_netstream_data_t), persistent_id ? 1 : 0);
 	memset(sock, 0, sizeof(php_netstream_data_t));
 
@@ -868,7 +868,7 @@ PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t p
 	/* we don't know the socket until we have determined if we are binding or
 	 * connecting */
 	sock->socket = -1;
-	
+
 	stream = php_stream_alloc_rel(ops, sock, persistent_id, "r+");
 
 	if (stream == NULL)	{

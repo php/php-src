@@ -24,7 +24,7 @@
 #include "resourcebundle/resourcebundle_class.h"
 
 /* {{{ ResourceBundle_extract_value */
-void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *source ) 
+void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *source )
 {
 	UResType               restype;
 	const UChar*           ufield;

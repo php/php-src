@@ -135,7 +135,7 @@ SPL_API int spl_hash_verify_pos_ex(spl_array_object * intern, HashTable * ht) /*
 		}
 	} else {
 		idx = ht->arHash[intern->pos_h & ht->nTableMask];
-		while (idx != INVALID_IDX) {		
+		while (idx != INVALID_IDX) {
 			if (idx == intern->pos) {
 				return SUCCESS;
 			}
@@ -430,9 +430,9 @@ static zval *spl_array_read_dimension_ex(int check_inherited, zval *object, zval
 
 	/* When in a write context,
 	 * ZE has to be fooled into thinking this is in a reference set
-	 * by separating (if necessary) and returning as an is_ref=1 zval (even if refcount == 1) 
+	 * by separating (if necessary) and returning as an is_ref=1 zval (even if refcount == 1)
 	 */
-	
+
 	if ((type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) &&
 	    !Z_ISREF_P(ret) &&
 	    EXPECTED(ret != &EG(uninitialized_zval))) {
@@ -561,7 +561,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 //??? see below
 #if 0
 			if (zend_symtable_del_ind(ht, Z_STR_P(offset)) == FAILURE) {
-#else 
+#else
 			zval *data = zend_symtable_find(ht, Z_STR_P(offset));
 
 			if (data) {
@@ -653,7 +653,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		HashTable *ht = spl_array_get_hash_table(intern, 0);
 
 		switch(Z_TYPE_P(offset)) {
-			case IS_STRING: 
+			case IS_STRING:
 				if ((tmp = zend_symtable_find(ht, Z_STR_P(offset))) != NULL) {
 					if (check_empty == 2) {
 						return 1;
@@ -669,10 +669,10 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 			case IS_RESOURCE:
 				index = Z_RES_HANDLE_P(offset);
 				goto num_index;
-			case IS_FALSE: 
+			case IS_FALSE:
 				index = 0;
 				goto num_index;
-			case IS_TRUE: 
+			case IS_TRUE:
 				index = 1;
 				goto num_index;
 			case IS_LONG:

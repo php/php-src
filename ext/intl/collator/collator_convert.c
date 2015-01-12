@@ -215,7 +215,7 @@ zval* collator_convert_zstr_utf8_to_utf16( zval* utf8_zval, zval *rv )
 	/* Set string. */
 	zstr = rv;
 	ZVAL_STRINGL( zstr, (char*)ustr, UBYTES(ustr_len));
-	//??? 
+	//???
 	efree((char *)ustr);
 
 	return zstr;
@@ -400,7 +400,7 @@ zval* collator_make_printable_zval( zval* arg, zval *rv)
 
 	if( Z_TYPE_P(arg) != IS_STRING )
 	{
-	    	    
+
 		use_copy = zend_make_printable_zval(arg, &arg_copy);
 
 		if( use_copy )

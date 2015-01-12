@@ -35,10 +35,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMNodeList 
+* class DOMNodeList
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-536297177
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_nodelist_class_functions[] = {
@@ -46,10 +46,10 @@ const zend_function_entry php_dom_nodelist_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ length	int	
-readonly=yes 
+/* {{{ length	int
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-203510337
-Since: 
+Since:
 */
 int dom_nodelist_length_read(dom_object *obj, zval *retval)
 {
@@ -100,7 +100,7 @@ int dom_nodelist_length_read(dom_object *obj, zval *retval)
 
 /* {{{ proto DOMNode dom_nodelist_item(int index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_nodelist_item)
 {

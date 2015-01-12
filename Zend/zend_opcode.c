@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -169,7 +169,7 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 {
 	if (CE_STATIC_MEMBERS(ce)) {
 		int i;
-		
+
 		for (i = 0; i < ce->default_static_members_count; i++) {
 			zval_ptr_dtor(&CE_STATIC_MEMBERS(ce)[i]);
 		}
@@ -187,7 +187,7 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 	if (ce->num_traits > 0 && ce->traits) {
 		efree(ce->traits);
 	}
-	
+
 	if (ce->trait_aliases) {
 		size_t i = 0;
 		while (ce->trait_aliases[i]) {
@@ -200,21 +200,21 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 				}
 				efree(ce->trait_aliases[i]->trait_method);
 			}
-			
+
 			if (ce->trait_aliases[i]->alias) {
 				zend_string_release(ce->trait_aliases[i]->alias);
 			}
-			
+
 			efree(ce->trait_aliases[i]);
 			i++;
 		}
-		
+
 		efree(ce->trait_aliases);
 	}
 
 	if (ce->trait_precedences) {
 		size_t i = 0;
-		
+
 		while (ce->trait_precedences[i]) {
 			zend_string_release(ce->trait_precedences[i]->trait_method->method_name);
 			zend_string_release(ce->trait_precedences[i]->trait_method->class_name);
@@ -234,7 +234,7 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 ZEND_API void destroy_zend_class(zval *zv)
 {
 	zend_class_entry *ce = Z_PTR_P(zv);
-	
+
 	if (--ce->refcount > 0) {
 		return;
 	}
@@ -270,9 +270,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 			if (ce->info.user.doc_comment) {
 				zend_string_release(ce->info.user.doc_comment);
 			}
-			
+
 			_destroy_zend_class_traits_info(ce);
-			
+
 			break;
 		case ZEND_INTERNAL_CLASS:
 			if (ce->default_properties_table) {
@@ -399,9 +399,9 @@ zend_op *get_next_op(zend_op_array *op_array)
 		CG(context).opcodes_size *= 4;
 		op_array_alloc_ops(op_array, CG(context).opcodes_size);
 	}
-	
+
 	next_op = &(op_array->opcodes[next_op_num]);
-	
+
 	init_op(next_op);
 
 	return next_op;
@@ -462,16 +462,16 @@ static void zend_check_finally_breakout(zend_op_array *op_array, uint32_t op_num
 			CG(active_op_array) = op_array;
 			CG(zend_lineno) = op_array->opcodes[op_num].lineno;
 			zend_error_noreturn(E_COMPILE_ERROR, "jump into a finally block is disallowed");
-		} else if ((op_num >= op_array->try_catch_array[i].finally_op 
+		} else if ((op_num >= op_array->try_catch_array[i].finally_op
 					&& op_num <= op_array->try_catch_array[i].finally_end)
-				&& (dst_num > op_array->try_catch_array[i].finally_end 
+				&& (dst_num > op_array->try_catch_array[i].finally_end
 					|| dst_num < op_array->try_catch_array[i].finally_op)) {
 			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
 			CG(zend_lineno) = op_array->opcodes[op_num].lineno;
 			zend_error_noreturn(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
 		}
-	} 
+	}
 }
 
 static void zend_adjust_fast_call(zend_op_array *op_array, uint32_t fast_call, uint32_t start, uint32_t end)
@@ -480,7 +480,7 @@ static void zend_adjust_fast_call(zend_op_array *op_array, uint32_t fast_call, u
 	uint32_t op_num = 0;
 
 	for (i = 0; i < op_array->last_try_catch; i++) {
-		if (op_array->try_catch_array[i].finally_op > start 
+		if (op_array->try_catch_array[i].finally_op > start
 				&& op_array->try_catch_array[i].finally_end < end) {
 			op_num = op_array->try_catch_array[i].finally_op;
 			start = op_array->try_catch_array[i].finally_end;
@@ -514,7 +514,7 @@ static void zend_resolve_fast_call(zend_op_array *op_array, uint32_t fast_call, 
 			op_array->opcodes[fast_call].extended_value = ZEND_FAST_CALL_FROM_FINALLY;
 			op_array->opcodes[fast_call].op2.opline_num = finally_op_num - 2;
 		}
-	} 
+	}
 }
 
 static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, uint32_t dst_num)
@@ -537,7 +537,7 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 		     dst_num > op_array->try_catch_array[i].finally_end)) {
 			/* we have a jump out of try block that needs executing finally */
 			uint32_t fast_call_var;
-			
+
 			/* Must be ZEND_FAST_RET */
 			ZEND_ASSERT(op_array->opcodes[op_array->try_catch_array[i].finally_end].opcode == ZEND_FAST_RET);
 			fast_call_var = op_array->opcodes[op_array->try_catch_array[i].finally_end].op1.var;
@@ -603,7 +603,7 @@ static void zend_resolve_finally_call(zend_op_array *op_array, uint32_t op_num, 
 
 			break;
 		}
-	}	
+	}
 }
 
 static void zend_resolve_finally_ret(zend_op_array *op_array, uint32_t op_num)
@@ -671,7 +671,7 @@ static void zend_resolve_finally_calls(zend_op_array *op_array)
 
 					ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
 					zend_resolve_goto_label(op_array, opline, 1);
-					opline->op2.constant = num;					
+					opline->op2.constant = num;
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:

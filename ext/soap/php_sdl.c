@@ -289,7 +289,7 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 					char *rest = strstr(s, "\r\n");
 					if (rest) {
 						zval new_header;
-				    	
+
 						rest += 2;
 						ZVAL_NEW_STR(&new_header, zend_string_alloc(Z_STRLEN_P(header) - (rest - s), 0));
 						memcpy(Z_STRVAL(new_header), Z_STRVAL_P(header), s - Z_STRVAL_P(header));
@@ -324,11 +324,11 @@ static void load_wsdl_ex(zval *this_ptr, char *struri, sdlCtx *ctx, int include)
 	if (zend_hash_str_exists(&ctx->docs, struri, strlen(struri))) {
 		return;
 	}
-	
+
 	sdl_set_uri_credentials(ctx, struri);
 	wsdl = soap_xmlParseFile(struri);
 	sdl_restore_uri_credentials(ctx);
-	
+
 	if (!wsdl) {
 		xmlErrorPtr xmlErrorPtr = xmlGetLastError();
 
@@ -1437,7 +1437,7 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 				enc->to_xml = real_enc->to_xml;
 			}
 		}
-	}	
+	}
 }
 
 static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encodePtr *encoders, sdlTypePtr *types, char **in)
@@ -2632,7 +2632,7 @@ static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashT
 				if (tmp->val) {
 					pextra->val = strdup(tmp->val);
 				}
-			
+
 				/* We have to duplicate key emalloc->malloc */
 				zend_hash_str_add_ptr(pattr->extraAttributes, key->val, key->len, pextra);
 			}
@@ -2851,7 +2851,7 @@ static sdlBindingPtr make_persistent_sdl_binding(sdlBindingPtr bind, HashTable *
 
 	if (pbind->bindingType == BINDING_SOAP && pbind->bindingAttributes) {
 		sdlSoapBindingPtr soap_binding;
-	   
+
 		soap_binding = malloc(sizeof(sdlSoapBinding));
 		memset(soap_binding, 0, sizeof(sdlSoapBinding));
 		*soap_binding = *(sdlSoapBindingPtr)pbind->bindingAttributes;
@@ -2887,7 +2887,7 @@ static sdlFunctionPtr make_persistent_sdl_function(sdlFunctionPtr func, HashTabl
 			assert(0);
 		}
 		pfunc->binding = tmp;
-		
+
 		if (pfunc->binding->bindingType == BINDING_SOAP && pfunc->bindingAttributes) {
 			sdlSoapBindingFunctionPtr soap_binding;
 
@@ -3229,7 +3229,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	}
 
 	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent")-1)) != NULL &&
-	    Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {	
+	    Z_TYPE_P(tmp) == IS_STRING && Z_STRLEN_P(tmp) > 0) {
 		smart_str_appends(&headers, "User-Agent: ");
 		smart_str_appends(&headers, Z_STRVAL_P(tmp));
 		smart_str_appends(&headers, "\r\n");
@@ -3250,7 +3250,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		smart_str_0(&proxy);
 		zval_dtor(&str_port);
 		ZVAL_NEW_STR(&str_proxy, proxy.s);
-		
+
 		if (!context) {
 			context = php_stream_context_alloc();
 		}

@@ -400,7 +400,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_server_option)(MYSQLND_CONN_DATA * const c
 
 		int2store(buffer, (unsigned int) option);
 		ret = conn->m->simple_command(conn, COM_SET_OPTION, buffer, sizeof(buffer), PROT_EOF_PACKET, FALSE, TRUE);
-	
+
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -610,7 +610,7 @@ mysqlnd_run_authentication(
 				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
 												   plugin_data, plugin_data_len, options, &conn->net->data->options, mysql_flags);
 			if (conn->error_info->error_no) {
-				goto end;	
+				goto end;
 			}
 			if (FALSE == is_change_user) {
 				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, options, mysql_flags,
@@ -628,7 +628,7 @@ mysqlnd_run_authentication(
 											   scrambled_data, scrambled_data_len,
 											   &switch_to_auth_protocol, &switch_to_auth_protocol_len,
 											   &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
-											  );				
+											  );
 			}
 			first_call = FALSE;
 			free(scrambled_data);
@@ -647,7 +647,7 @@ mysqlnd_run_authentication(
 		}
 		DBG_INF_FMT("conn->error_info->error_no = %d", conn->error_info->error_no);
 	} while (ret == FAIL && conn->error_info->error_no == 0 && switch_to_auth_protocol != NULL);
-		
+
 	if (ret == PASS) {
 		DBG_INF_FMT("saving requested_protocol=%s", requested_protocol);
 		conn->m->set_client_option(conn, MYSQLND_OPT_AUTH_PROTOCOL, requested_protocol);
@@ -932,7 +932,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		db = "";
 		db_len = 0;
 	} else {
-		mysql_flags |= CLIENT_CONNECT_WITH_DB;	
+		mysql_flags |= CLIENT_CONNECT_WITH_DB;
 	}
 
 	host_len = strlen(host);
@@ -1748,7 +1748,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 
 			if (PASS == (ret = PACKET_READ(stats_header, conn))) {
 				/* will be freed by Zend, thus don't use the mnd_ allocator */
-				*message = zend_string_init(stats_header->message, stats_header->message_len, 0); 
+				*message = zend_string_init(stats_header->message, stats_header->message_len, 0);
 				DBG_INF((*message)->val);
 			}
 			PACKET_FREE(stats_header);
@@ -1873,7 +1873,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, shutdown)(MYSQLND_CONN_DATA * const conn, uint
 
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
-	DBG_RETURN(ret);	
+	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -2287,7 +2287,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	  Here we should close all statements. Unbuffered queries should not be a
 	  problem as we won't allow sending COM_CHANGE_USER.
 	*/
-	conn->m->local_tx_end(conn, this_func, ret);	
+	conn->m->local_tx_end(conn, this_func, ret);
 end:
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
@@ -2375,7 +2375,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 				ret = FAIL;
 				break;
 			}
-				
+
 			new_charset_name = mnd_pestrdup(value, conn->persistent);
 			if (!new_charset_name) {
 				goto oom;
@@ -2454,11 +2454,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		default:
 			ret = FAIL;
 	}
-	conn->m->local_tx_end(conn, this_func, ret);	
+	conn->m->local_tx_end(conn, this_func, ret);
 	DBG_RETURN(ret);
 oom:
 	SET_OOM_ERROR(*conn->error_info);
-	conn->m->local_tx_end(conn, this_func, FAIL);	
+	conn->m->local_tx_end(conn, this_func, FAIL);
 end:
 	DBG_RETURN(FAIL);
 }
@@ -2501,11 +2501,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 		default:
 			ret = FAIL;
 	}
-	conn->m->local_tx_end(conn, this_func, ret);	
+	conn->m->local_tx_end(conn, this_func, ret);
 	DBG_RETURN(ret);
 oom:
 	SET_OOM_ERROR(*conn->error_info);
-	conn->m->local_tx_end(conn, this_func, FAIL);	
+	conn->m->local_tx_end(conn, this_func, FAIL);
 end:
 	DBG_RETURN(FAIL);
 }
@@ -2546,7 +2546,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, use_result)(MYSQLND_CONN_DATA * const conn, co
 			conn->current_result = NULL;
 		} while (0);
 
-		conn->m->local_tx_end(conn, this_func, result == NULL? FAIL:PASS);	
+		conn->m->local_tx_end(conn, this_func, result == NULL? FAIL:PASS);
 	}
 
 	DBG_RETURN(result);
@@ -2595,7 +2595,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, 
 			if (!(f & (MYSQLND_STORE_NO_COPY | MYSQLND_STORE_COPY))) {
 				SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Unknown fetch mode");
 				DBG_ERR("Unknown fetch mode");
-				break;				
+				break;
 			}
 			result = conn->current_result->m.store_result(conn->current_result, conn, f);
 			if (!result) {
@@ -2604,7 +2604,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn, 
 			conn->current_result = NULL;
 		} while (0);
 
-		conn->m->local_tx_end(conn, this_func, result == NULL? FAIL:PASS);	
+		conn->m->local_tx_end(conn, this_func, result == NULL? FAIL:PASS);
 	}
 	DBG_RETURN(result);
 }
@@ -2633,7 +2633,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_autocommit)(MYSQLND_CONN_DATA * conn, unsi
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		ret = conn->m->query(conn, (mode) ? "SET AUTOCOMMIT=1":"SET AUTOCOMMIT=0", sizeof("SET AUTOCOMMIT=1") - 1);
-		conn->m->local_tx_end(conn, this_func, ret);	
+		conn->m->local_tx_end(conn, this_func, ret);
 	}
 
 	DBG_RETURN(ret);
@@ -2753,7 +2753,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 				char * query;
 				size_t query_len;
 				char * name_esc = mysqlnd_escape_string_for_tx_name_in_comment(name);
-				
+
 				query_len = mnd_sprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
 										name_esc? name_esc:"", tmp_str.s? tmp_str.s->val:"");
 				smart_str_free(&tmp_str);
@@ -2770,7 +2770,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 				mnd_sprintf_free(query);
 			}
 		} while (0);
-		conn->m->local_tx_end(conn, this_func, ret);	
+		conn->m->local_tx_end(conn, this_func, ret);
 	}
 
 	DBG_RETURN(ret);
@@ -2832,7 +2832,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 				mnd_sprintf_free(query);
 			}
 		} while (0);
-		conn->m->local_tx_end(conn, this_func, ret);	
+		conn->m->local_tx_end(conn, this_func, ret);
 	}
 
 	DBG_RETURN(ret);
@@ -2864,7 +2864,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint)(MYSQLND_CONN_DATA * conn, const 
 			ret = conn->m->query(conn, query, query_len);
 			mnd_sprintf_free(query);
 		} while (0);
-		conn->m->local_tx_end(conn, this_func, ret);	
+		conn->m->local_tx_end(conn, this_func, ret);
 	}
 
 	DBG_RETURN(ret);
@@ -2896,7 +2896,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint_release)(MYSQLND_CONN_DATA * conn
 			ret = conn->m->query(conn, query, query_len);
 			mnd_sprintf_free(query);
 		} while (0);
-		conn->m->local_tx_end(conn, this_func, ret);	
+		conn->m->local_tx_end(conn, this_func, ret);
 	}
 
 	DBG_RETURN(ret);

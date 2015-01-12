@@ -321,7 +321,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-			
+
 				convert_object_to_type(op, &dst, IS_LONG, convert_to_long);
 				zval_dtor(op);
 
@@ -378,7 +378,7 @@ ZEND_API void convert_to_double(zval *op) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-			
+
 				convert_object_to_type(op, &dst, IS_DOUBLE, convert_to_double);
 				zval_dtor(op);
 
@@ -401,7 +401,7 @@ ZEND_API void convert_to_null(zval *op) /* {{{ */
 	if (Z_TYPE_P(op) == IS_OBJECT) {
 		if (Z_OBJ_HT_P(op)->cast_object) {
 			zval org;
-		
+
 			ZVAL_COPY_VALUE(&org, op);
 			if (Z_OBJ_HT_P(op)->cast_object(&org, op, IS_NULL) == SUCCESS) {
 				zval_dtor(&org);
@@ -461,7 +461,7 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 		case IS_OBJECT:
 			{
 				zval dst;
-			
+
 				convert_object_to_type(op, &dst, _IS_BOOL, convert_to_boolean);
 				zval_dtor(op);
 
@@ -510,7 +510,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 		case IS_DOUBLE: {
 			zend_string *str;
 			double dval = Z_DVAL_P(op);
-		
+
 			str = zend_strpprintf(0, "%.*G", (int) EG(precision), dval);
 			/* %G already handles removing trailing zeros from the fractional part, yay */
 			ZVAL_NEW_STR(op, str);
@@ -523,7 +523,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		case IS_OBJECT: {
 			zval dst;
-		
+
 			convert_object_to_type(op, &dst, IS_STRING, convert_to_string);
 
 			if (Z_TYPE(dst) == IS_STRING) {
@@ -1147,7 +1147,7 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
 	if (op1 == result) {
 		zval_dtor(result);
 	}
-	
+
 	if (op2_lval == 0) {
 		zend_error(E_WARNING, "Division by zero");
 		ZVAL_FALSE(result);
@@ -1280,7 +1280,7 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2) /* {{{ */
 		ZVAL_LONG(result, Z_LVAL_P(op1) | Z_LVAL_P(op2));
 		return SUCCESS;
 	}
-	
+
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
@@ -1338,7 +1338,7 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2) /* {{{ */
 		ZVAL_LONG(result, Z_LVAL_P(op1) & Z_LVAL_P(op2));
 		return SUCCESS;
 	}
-	
+
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
@@ -1396,7 +1396,7 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2) /* {{{ */
 		ZVAL_LONG(result, Z_LVAL_P(op1) ^ Z_LVAL_P(op2));
 		return SUCCESS;
 	}
-	
+
 	ZVAL_DEREF(op1);
 	ZVAL_DEREF(op2);
 
@@ -2173,7 +2173,7 @@ try_again:
 				/* proxy object */
 				zval rv;
 				zval *val;
-			
+
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
 				Z_ADDREF_P(val);
 				fast_increment_function(val);
@@ -2182,7 +2182,7 @@ try_again:
 			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
-			
+
 				ZVAL_LONG(&op2, 1);
 				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_ADD, op1, op1, &op2);
 				zval_ptr_dtor(&op2);
@@ -2246,7 +2246,7 @@ try_again:
 				/* proxy object */
 				zval rv;
 				zval *val;
-			
+
 				val = Z_OBJ_HANDLER_P(op1, get)(op1, &rv);
 				Z_ADDREF_P(val);
 				fast_decrement_function(val);
@@ -2255,7 +2255,7 @@ try_again:
 			} else if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;
 				int res;
-			
+
 				ZVAL_LONG(&op2, 1);
 				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_SUB, op1, op1, &op2);
 				zval_ptr_dtor(&op2);
@@ -2620,11 +2620,12 @@ ZEND_API zend_string *zend_long_to_str(zend_long num) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) {
+ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *lval, double *dval) /* {{{ */ {
     return is_numeric_string_ex(str->val, str->len, lval, dval, -1, NULL);
 }
+/* }}} */
 
-ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info)
+ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info) /* {{{ */
 {
 	const char *ptr;
 	int base = 10, digits = 0, dp_or_e = 0;
@@ -2760,6 +2761,56 @@ process_double:
 		return IS_DOUBLE;
 	}
 }
+/* }}} */
+
+static zend_always_inline void zend_memstr_ex_pre(unsigned int td[], const char *needle, size_t needle_len) /* {{{ */ {
+	int i;
+
+	for (i = 0; i < 256; i++) {
+		td[i] = needle_len + 1;
+	}
+
+	for (i = 0; i < needle_len; i++) {
+		td[(unsigned char)needle[i]] = (int)needle_len - i;
+	}
+}
+/* }}} */
+
+/* 
+ * String matching - Sunday algorithm
+ * http://www.iti.fh-flensburg.de/lang/algorithmen/pattern/sundayen.htm
+ */
+ZEND_API const char* zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end) /* {{{ */
+{
+	unsigned int td[256];
+	register size_t i;
+	const unsigned register char *p;
+
+	if (needle_len == 0 || (end - haystack) == 0) {
+		return NULL;
+	}
+
+	zend_memstr_ex_pre(td, needle, needle_len);
+
+	p = (const unsigned char *)haystack;
+	end -= needle_len;
+
+	while (p <= (unsigned char *)end) {
+		for (i = 0; i < needle_len; i++) {
+			if (needle[i] != p[i]) {
+				break;
+			}
+		}
+		if (i == needle_len) {
+			return (const char *)p;
+		}
+		p += td[p[needle_len]];
+	}
+
+	return NULL;
+}
+/* }}} */
+
 
 /*
  * Local variables:

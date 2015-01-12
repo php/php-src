@@ -100,7 +100,7 @@ INPUT       [^\n\000]+
 
 <NORMAL>({T_YES}|{T_ON}|{T_ENABLED}|{T_TRUE}){WS} {
 	phpdbg_init_param(yylval, NUMERIC_PARAM);
-	yylval->num = 1;		
+	yylval->num = 1;
 	return T_TRUTHY;
 }
 
@@ -133,7 +133,7 @@ INPUT       [^\n\000]+
 	phpdbg_init_param(yylval, STR_PARAM);
 	yylval->str = zend_strndup(yytext, yyleng);
 	yylval->len = yyleng;
-	return T_ID; 
+	return T_ID;
 }
 
 <RAW>{INPUT} {

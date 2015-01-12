@@ -113,7 +113,7 @@ END_EXTERN_C()
 
 #define ZEND_INI_ENTRY1(name, default_value, modifiable, on_modify, arg1) \
 	ZEND_INI_ENTRY1_EX(name, default_value, modifiable, on_modify, arg1, NULL)
-	
+
 #define ZEND_INI_ENTRY_EX(name, default_value, modifiable, on_modify, displayer) \
 	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, NULL, NULL, NULL, displayer)
 

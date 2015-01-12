@@ -16,7 +16,7 @@
    |          Gavin Sherry <gavin@linuxworld.com.au>                      |
    +----------------------------------------------------------------------+
  */
- 
+
 /* $Id$ */
 
 /* Latest update build anc tested on Linux 2.2.14
@@ -396,10 +396,10 @@ PHP_FUNCTION(sem_remove)
 		php_error_docref(NULL, E_WARNING, "failed for SysV sempphore %ld: %s", Z_LVAL_P(arg_id), strerror(errno));
 		RETURN_FALSE;
 	}
-	
+
 	/* let release_sysvsem_sem know we have removed
 	 * the semaphore to avoid issues with releasing.
-	 */ 
+	 */
 
 	sem_ptr->count = -1;
 	RETURN_TRUE;

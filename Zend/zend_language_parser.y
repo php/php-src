@@ -71,7 +71,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left '?' ':'
 %right T_COALESCE
 %left T_BOOLEAN_OR
-%left T_BOOLEAN_AND 
+%left T_BOOLEAN_AND
 %left '|'
 %left '^'
 %left '&'
@@ -87,8 +87,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %right '['
 %nonassoc T_NEW T_CLONE
 %left T_ELSEIF
-%left T_ELSE 
-%left T_ENDIF 
+%left T_ELSE
+%left T_ENDIF
 %right T_STATIC T_ABSTRACT T_FINAL T_PRIVATE T_PROTECTED T_PUBLIC
 
 %token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
@@ -788,9 +788,9 @@ expr_without_variable:
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_MOD, $1, $3); }
 	|	variable T_AND_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_BW_AND, $1, $3); }
-	|	variable T_OR_EQUAL expr 
+	|	variable T_OR_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_BW_OR, $1, $3); }
-	|	variable T_XOR_EQUAL expr 
+	|	variable T_XOR_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_BW_XOR, $1, $3); }
 	|	variable T_SL_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_SL, $1, $3); }
@@ -1195,7 +1195,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			char buffer[120];
 			const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
 			unsigned int len = 0, toklen = 0, yystr_len;
-			
+
 			CG(parse_error) = 1;
 
 			if (LANG_SCNG(yy_text)[0] == 0 &&
@@ -1204,11 +1204,11 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 				yystpcpy(yyres, "end of file");
 				return sizeof("end of file")-1;
 			}
-			
+
 			str = LANG_SCNG(yy_text);
 			end = memchr(str, '\n', LANG_SCNG(yy_leng));
 			yystr_len = (unsigned int)yystrlen(yystr);
-			
+
 			if ((tok1 = memchr(yystr, '(', yystr_len)) != NULL
 				&& (tok2 = zend_memrchr(yystr, ')', yystr_len)) != NULL) {
 				toklen = (tok2 - tok1) + 1;
@@ -1216,7 +1216,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 				tok1 = tok2 = NULL;
 				toklen = 0;
 			}
-			
+
 			if (end == NULL) {
 				len = LANG_SCNG(yy_leng) > 30 ? 30 : LANG_SCNG(yy_leng);
 			} else {
@@ -1229,8 +1229,8 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			}
 			yystpcpy(yyres, buffer);
 			return len + (toklen ? toklen + 1 : 0) + 2;
-		}		
-	}	
+		}
+	}
 	if (*yystr == '"') {
 		YYSIZE_T yyn = 0;
 		const char *yyp = yystr;

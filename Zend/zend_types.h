@@ -156,7 +156,7 @@ typedef struct _Bucket {
 	zend_string      *key;              /* string key or NULL for numerics */
 } Bucket;
 
-typedef struct _HashTable {	
+typedef struct _HashTable {
 	union {
 		struct {
 			ZEND_ENDIAN_LOHI_3(
@@ -170,7 +170,7 @@ typedef struct _HashTable {
 	uint32_t          nTableMask;
 	uint32_t          nNumUsed;
 	uint32_t          nNumOfElements;
-	uint32_t          nInternalPointer; 
+	uint32_t          nInternalPointer;
 	zend_long         nNextFreeElement;
 	Bucket           *arData;
 	uint32_t         *arHash;
@@ -333,7 +333,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 			(Z_GC_FLAGS(zval) & ~IS_OBJ_APPLY_COUNT) | \
 			((Z_GC_FLAGS(zval) & IS_OBJ_APPLY_COUNT) + 1); \
 	} while (0)
-	
+
 #define Z_OBJ_DEC_APPLY_COUNT(zval) do { \
 		Z_GC_FLAGS(zval) = \
 			(Z_GC_FLAGS(zval) & ~IS_OBJ_APPLY_COUNT) | \

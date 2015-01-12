@@ -23,7 +23,7 @@
 
 /*
  * TODO: simplify Update and Final, those look ridiculously complex
- * Mike, 2005-11-23 
+ * Mike, 2005-11-23
  */
 
 #include "php_hash_whirlpool.h"
@@ -429,7 +429,7 @@ PHP_HASH_API void PHP_WHIRLPOOLFinal(unsigned char digest[64], PHP_WHIRLPOOL_CTX
         digest[7] = (unsigned char)(context->state[i]      );
         digest += 8;
     }
-    
+
     ZEND_SECURE_ZERO(context, sizeof(*context));
 }
 

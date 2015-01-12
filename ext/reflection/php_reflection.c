@@ -660,7 +660,7 @@ static zend_op* _get_recv_op(zend_op_array *op_array, uint32_t offset)
 
 	++offset;
 	while (op < end) {
-		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT 
+		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT
 		    || op->opcode == ZEND_RECV_VARIADIC) && op->op1.num == (zend_long)offset)
 		{
 			return op;
@@ -2207,7 +2207,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 					&& (lcname_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 					&& memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 					&& (fptr = zend_get_closure_invoke_method(Z_OBJ_P(classref))) != NULL)
-				{					
+				{
 					/* nothing to do. don't set is_closure since is the invoke handler,
 					   not the closure itself */
 					is_invoke = 1;
@@ -3049,8 +3049,8 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
 	fcc.object = (object) ? Z_OBJ_P(object) : NULL;
-	
-	/* 
+
+	/*
 	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
 	 */
 	if (mptr->type == ZEND_INTERNAL_FUNCTION &&
@@ -3977,7 +3977,7 @@ static int _adddynproperty(zval *ptr, int num_args, va_list args, zend_hash_key 
 
 	if (zend_get_property_info(ce, hash_key->key, 1) == NULL) {
 		zend_property_info property_info;
-		
+
 		property_info.flags = ZEND_ACC_IMPLICIT_PUBLIC;
 		property_info.name = hash_key->key;
 		property_info.ce = ce;
@@ -5062,7 +5062,7 @@ ZEND_METHOD(reflection_property, setValue)
 		if (variable_ptr != value) {
 			if (Z_ISREF_P(variable_ptr)) {
 				zval garbage;
-				
+
 				ZVAL_COPY_VALUE(&garbage, variable_ptr); /* old value should be destroyed */
 
 				/* To check: can't *variable_ptr be some system variable like error_zval here? */
@@ -5073,7 +5073,7 @@ ZEND_METHOD(reflection_property, setValue)
 				zval_dtor(&garbage);
 			} else {
 				zval garbage;
-				
+
 				ZVAL_COPY_VALUE(&garbage, variable_ptr);
 				/* if we assign referenced variable, we should separate it */
 				if (Z_REFCOUNTED_P(value)) {

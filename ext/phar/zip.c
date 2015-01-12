@@ -159,7 +159,7 @@ static void phar_zip_u2d_time(time_t time, char *dtime, char *ddate) /* {{{ */
  *
  * Parse a new one and add it to the cache, returning either SUCCESS or
  * FAILURE, and setting pphar to the pointer to the manifest entry
- * 
+ *
  * This is used by phar_open_from_fp to process a zip-based phar, but can be called
  * directly.
  */
@@ -1184,7 +1184,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	static const char newstub[] = "<?php // zip-based phar archive stub file\n__HALT_COMPILER();";
 	char halt_stub[] = "__HALT_COMPILER();";
 	char *tmp;
-	
+
 	php_stream *stubfile, *oldfile;
 	php_serialize_data_t metadata_hash;
 	int free_user_stub, closeoldfile = 0;

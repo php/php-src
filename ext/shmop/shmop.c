@@ -78,7 +78,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_shmop_delete, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* {{{ shmop_functions[] 
+/* {{{ shmop_functions[]
  */
 const zend_function_entry shmop_functions[] = {
 	PHP_FE(shmop_open, 		arginfo_shmop_open)
@@ -127,7 +127,7 @@ static void rsclean(zend_resource *rsrc)
 PHP_MINIT_FUNCTION(shmop)
 {
 	shm_type = zend_register_list_destructors_ex(rsclean, NULL, "shmop", module_number);
-	
+
 	return SUCCESS;
 }
 /* }}} */
@@ -147,7 +147,7 @@ PHP_MINFO_FUNCTION(shmop)
 PHP_FUNCTION(shmop_open)
 {
 	zend_long key, mode, size;
-	struct php_shmop *shmop;	
+	struct php_shmop *shmop;
 	struct shmid_ds shm;
 	char *flags;
 	size_t flags_len;
@@ -167,7 +167,7 @@ PHP_FUNCTION(shmop_open)
 	shmop->key = key;
 	shmop->shmflg |= mode;
 
-	switch (flags[0]) 
+	switch (flags[0])
 	{
 		case 'a':
 			shmop->shmatflg |= SHM_RDONLY;
@@ -179,9 +179,9 @@ PHP_FUNCTION(shmop_open)
 		case 'n':
 			shmop->shmflg |= (IPC_CREAT | IPC_EXCL);
 			shmop->size = size;
-			break;	
+			break;
 		case 'w':
-			/* noop 
+			/* noop
 				shm segment is being opened for read & write
 				will fail if segment does not exist
 			*/
@@ -205,7 +205,7 @@ PHP_FUNCTION(shmop_open)
 	if (shmctl(shmop->shmid, IPC_STAT, &shm)) {
 		php_error_docref(NULL, E_WARNING, "unable to get shared memory segment information '%s'", strerror(errno));
 		goto err;
-	}	
+	}
 
 	shmop->addr = shmat(shmop->shmid, 0, shmop->shmatflg);
 	if (shmop->addr == (char*) -1) {

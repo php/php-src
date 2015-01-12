@@ -71,7 +71,7 @@ static void _php_gettimeofday(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		timelib_time_offset *offset;
 
 		offset = timelib_get_time_zone_info(tp.tv_sec, get_timezone_info());
-				
+
 		array_init(return_value);
 		add_assoc_long(return_value, "sec", tp.tv_sec);
 		add_assoc_long(return_value, "usec", tp.tv_usec);
@@ -117,7 +117,7 @@ PHP_FUNCTION(getrusage)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &pwho) == FAILURE) {
 		return;
 	}
-	
+
 	if (pwho == 1) {
 		who = RUSAGE_CHILDREN;
 	}

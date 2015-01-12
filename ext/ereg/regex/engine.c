@@ -956,7 +956,7 @@ FILE *d;
 	fprintf(d, "\n");
 }
 
-/* 
+/*
  - at - print current situation
  == #ifdef REDEBUG
  == static void at(struct match *m, unsigned char *title, unsigned char *start, unsigned char *stop, \

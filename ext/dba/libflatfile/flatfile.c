@@ -137,7 +137,7 @@ int flatfile_delete(flatfile *dba, datum key_datum) {
 			php_stream_seek(dba->fp, 0L, SEEK_END);
 			efree(buf);
 			return SUCCESS;
-		}	
+		}
 
 		/* read in the length of the value */
 		if (!php_stream_gets(dba->fp, buf, 15)) {
@@ -156,7 +156,7 @@ int flatfile_delete(flatfile *dba, datum key_datum) {
 	}
 	efree(buf);
 	return FAILURE;
-}	
+}
 /* }}} */
 
 /* {{{ flatfile_findkey
@@ -188,7 +188,7 @@ int flatfile_findkey(flatfile *dba, datum key_datum) {
 				ret = 1;
 				break;
 			}
-		}	
+		}
 		if (!php_stream_gets(dba->fp, buf, 15)) {
 			break;
 		}
@@ -300,15 +300,15 @@ datum flatfile_nextkey(flatfile *dba) {
 	res.dptr = NULL;
 	res.dsize = 0;
 	return res;
-}	
+}
 /* }}} */
 
 /* {{{ flatfile_version */
-char *flatfile_version() 
+char *flatfile_version()
 {
 	return "1.0, $Id$";
 }
-/* }}} */ 
+/* }}} */
 
 /*
  * Local variables:

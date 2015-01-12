@@ -43,14 +43,14 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
 	int call = 0;
-	void *checkpoint; 
+	void *checkpoint;
 	optimizer_call_info *call_stack;
 
 	if (op_array->last < 2) {
 		return;
 	}
 
-	checkpoint = zend_arena_checkpoint(ctx->arena); 
+	checkpoint = zend_arena_checkpoint(ctx->arena);
 	call_stack = zend_arena_calloc(&ctx->arena, op_array->last / 2, sizeof(optimizer_call_info));
 	while (opline < end) {
 		switch (opline->opcode) {

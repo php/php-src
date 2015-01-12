@@ -53,17 +53,17 @@ typedef struct _Imscorlib_System_AppDomain IAppDomain;
 struct _Imscorlib_System_AppDomainVtbl {
 	BEGIN_INTERFACE
 
-	HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
+	HRESULT ( STDMETHODCALLTYPE *QueryInterface )(
 		IAppDomain * This,
 		/* [in] */ REFIID riid,
 		/* [iid_is][out] */ void **ppvObject);
-        
-	ULONG ( STDMETHODCALLTYPE *AddRef )( 
+
+	ULONG ( STDMETHODCALLTYPE *AddRef )(
 		IAppDomain * This);
-        
-	ULONG ( STDMETHODCALLTYPE *Release )( 
+
+	ULONG ( STDMETHODCALLTYPE *Release )(
 		IAppDomain * This);
-        
+
 	/* this is padding to get CreateInstance into the correct position */
 #define DUMMY_METHOD(x)		HRESULT ( STDMETHODCALLTYPE *dummy_##x )(IAppDomain *This)
 
@@ -146,7 +146,7 @@ static HRESULT dotnet_init(char **p_where)
 	hr = ICorRuntimeHost_Start(stuff->dotnet_host);
 	if (FAILED(hr))
 		goto out;
-	
+
 	where = "ICorRuntimeHost_GetDefaultDomain";
 	hr = ICorRuntimeHost_GetDefaultDomain(stuff->dotnet_host, &unk);
 	if (FAILED(hr))
@@ -156,7 +156,7 @@ static HRESULT dotnet_init(char **p_where)
 	hr = IUnknown_QueryInterface(unk, &IID_mscorlib_System_AppDomain, (LPVOID*)&stuff->dotnet_domain);
 	if (FAILED(hr))
 		goto out;
-		
+
 	COMG(dotnet_runtime_stuff) = stuff;
 
 out:
@@ -323,7 +323,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 void php_com_dotnet_mshutdown(void)
 {
 	struct dotnet_runtime_stuff *stuff = COMG(dotnet_runtime_stuff);
-	
+
 	if (stuff->dotnet_domain) {
 		IDispatch_Release(stuff->dotnet_domain);
 	}
@@ -339,7 +339,7 @@ void php_com_dotnet_mshutdown(void)
 void php_com_dotnet_rshutdown(void)
 {
 	struct dotnet_runtime_stuff *stuff = COMG(dotnet_runtime_stuff);
-	
+
 	if (stuff->dotnet_domain) {
 		IDispatch_Release(stuff->dotnet_domain);
 		stuff->dotnet_domain = NULL;

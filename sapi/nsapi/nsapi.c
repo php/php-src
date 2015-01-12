@@ -62,7 +62,7 @@
 #ifdef __hpux
 #define HPUX
 #endif
- 
+
 /*
  * NSAPI includes
  */
@@ -233,7 +233,7 @@ nsapi_servact_prototype nsapi_servact_service = NULL;
  * the server only by wrapping the function table nothing else. So choose
  * the newest one found in process space for dynamic linking */
 static char *nsapi_dlls[] = { "ns-httpd40.dll", "ns-httpd36.dll", "ns-httpd35.dll", "ns-httpd30.dll", NULL };
-/* if user specifies an other dll name by server_lib parameter 
+/* if user specifies an other dll name by server_lib parameter
  * it is placed in the following variable and only this DLL is
  * checked for the servact_* functions */
 char *nsapi_dll = NULL;
@@ -408,7 +408,7 @@ PHP_FUNCTION(nsapi_request_headers)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
+
 	array_init(return_value);
 
 	for (i=0; i < rc->rq->headers->hsize; i++) {
@@ -432,7 +432,7 @@ PHP_FUNCTION(nsapi_response_headers)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
+
 	array_init(return_value);
 
 	for (i=0; i < rc->rq->srvhdrs->hsize; i++) {
@@ -454,7 +454,7 @@ static int sapi_nsapi_ub_write(const char *str, unsigned int str_length)
 {
 	int retval;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
-	
+
 	if (!SG(headers_sent)) {
 		sapi_send_headers();
 	}
@@ -470,7 +470,7 @@ static int sapi_nsapi_ub_write(const char *str, unsigned int str_length)
 static void sapi_nsapi_flush(void *server_context)
 {
 	nsapi_request_context *rc = (nsapi_request_context *)server_context;
-	
+
 	if (!rc) {
 		/* we have no context, so no flushing needed. This fixes a SIGSEGV on shutdown */
 		return;
@@ -493,7 +493,7 @@ static int php_nsapi_remove_header(sapi_header_struct *sapi_header)
 {
 	char *header_name, *p;
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
-	
+
 	/* copy the header, because NSAPI needs reformatting and we do not want to change the parameter */
 	header_name = pool_strdup(rc->sn->pool, sapi_header->header);
 
@@ -501,16 +501,16 @@ static int php_nsapi_remove_header(sapi_header_struct *sapi_header)
 	if (p = strchr(header_name, ':')) {
 		*p = 0;
 	}
-	
+
 	/* header_name to lower case because NSAPI reformats the headers and wants lowercase */
 	for (p=header_name; *p; p++) {
 		*p=tolower(*p);
 	}
-	
+
 	/* remove the header */
 	param_free(pblock_remove(header_name, rc->rq->srvhdrs));
 	pool_free(rc->sn->pool, header_name);
-	
+
 	return ZEND_HASH_APPLY_KEEP;
 }
 
@@ -542,7 +542,7 @@ static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_heade
 				do {
 					header_content++;
 				} while (*header_content==' ');
-				
+
 				/* header_name to lower case because NSAPI reformats the headers and wants lowercase */
 				for (p=header_name; *p; p++) {
 					*p=tolower(*p);
@@ -555,10 +555,10 @@ static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_heade
 				/* ADD header to nsapi table */
 				pblock_nvinsert(header_name, header_content, rc->rq->srvhdrs);
 			}
-			
+
 			pool_free(rc->sn->pool, header_name);
 			return SAPI_HEADER_ADD;
-			
+
 		default:
 			return 0;
 	}
@@ -746,7 +746,7 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array)
 	/* Create full Request-URI & Script-Name */
 	if (SG(request_info).request_uri) {
 		pos = strlen(SG(request_info).request_uri);
-		
+
 		if (SG(request_info).query_string) {
 			spprintf(&value, 0, "%s?%s", SG(request_info).request_uri, SG(request_info).query_string);
 			if (value) {
@@ -877,13 +877,13 @@ void NSAPI_PUBLIC php7_close(void *vparam)
 	if (nsapi_sapi_module.php_ini_path_override) {
 		free(nsapi_sapi_module.php_ini_path_override);
 	}
-	
+
 #ifdef PHP_WIN32
 	if (nsapi_dll) {
 		free(nsapi_dll);
 		nsapi_dll = NULL;
 	}
-#endif	
+#endif
 
 	sapi_shutdown();
 	tsrm_shutdown();
@@ -921,14 +921,14 @@ int NSAPI_PUBLIC php7_init(pblock *pb, Session *sn, Request *rq)
 	if (strval = pblock_findval("php_ini", pb)) {
 		nsapi_sapi_module.php_ini_path_override = strdup(strval);
 	}
-	
+
 #ifdef PHP_WIN32
 	/* look if server_lib parameter is given to php7_init
 	 * (this disables the automatic search for the newest ns-httpdXX.dll) */
 	if (strval = pblock_findval("server_lib", pb)) {
 		nsapi_dll = strdup(strval);
 	}
-#endif	
+#endif
 
 	/* start SAPI */
 	sapi_startup(&nsapi_sapi_module);
@@ -1025,7 +1025,7 @@ int NSAPI_PUBLIC php7_execute(pblock *pb, Session *sn, Request *rq)
 	SG(request_info).content_type = content_type;
 	SG(request_info).content_length = (content_length == NULL) ? 0 : strtoul(content_length, 0, 0);
 	SG(sapi_headers).http_response_code = (error_directive) ? rq->status_num : 200;
-	
+
 	nsapi_php_ini_entries(NSLS_C);
 
 	php_handle_auth_data(pblock_findval("authorization", rq->headers));

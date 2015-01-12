@@ -125,19 +125,19 @@ PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
 
 #if !defined(HAVE_POSIX_READDIR_R)
 
-PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry, 
+PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
 		struct dirent **result)
 {
 #if defined(HAVE_OLD_READDIR_R)
 	int ret = 0;
-	
+
 	/* We cannot rely on the return value of readdir_r
 	   as it differs between various platforms
 	   (HPUX returns 0 on success whereas Solaris returns non-zero)
 	 */
 	entry->d_name[0] = '\0';
 	readdir_r(dirp, entry);
-	
+
 	if (entry->d_name[0] == '\0') {
 		*result = NULL;
 		ret = errno;
@@ -150,11 +150,11 @@ PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
 	int ret = 0;
 
 	local_lock(READDIR_R);
-	
+
 	errno = 0;
-	
+
 	ptr = readdir(dirp);
-	
+
 	if (!ptr && errno != 0)
 		ret = errno;
 
@@ -176,7 +176,7 @@ PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
 PHPAPI struct tm *php_localtime_r(const time_t *const timep, struct tm *p_tm)
 {
 	struct tm *tmp;
-	
+
 	local_lock(LOCALTIME_R);
 
 	tmp = localtime(timep);
@@ -184,7 +184,7 @@ PHPAPI struct tm *php_localtime_r(const time_t *const timep, struct tm *p_tm)
 		memcpy(p_tm, tmp, sizeof(struct tm));
 		tmp = p_tm;
 	}
-	
+
 	local_unlock(LOCALTIME_R);
 
 	return tmp;
@@ -197,14 +197,14 @@ PHPAPI struct tm *php_localtime_r(const time_t *const timep, struct tm *p_tm)
 PHPAPI char *php_ctime_r(const time_t *clock, char *buf)
 {
 	char *tmp;
-	
+
 	local_lock(CTIME_R);
 
 	tmp = ctime(clock);
 	strcpy(buf, tmp);
 
 	local_unlock(CTIME_R);
-	
+
 	return buf;
 }
 
@@ -215,7 +215,7 @@ PHPAPI char *php_ctime_r(const time_t *clock, char *buf)
 PHPAPI char *php_asctime_r(const struct tm *tm, char *buf)
 {
 	char *tmp;
-	
+
 	local_lock(ASCTIME_R);
 
 	tmp = asctime(tm);
@@ -233,7 +233,7 @@ PHPAPI char *php_asctime_r(const struct tm *tm, char *buf)
 PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
 {
 	struct tm *tmp;
-	
+
 	local_lock(GMTIME_R);
 
 	tmp = gmtime(timep);
@@ -241,7 +241,7 @@ PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
 		memcpy(p_tm, tmp, sizeof(struct tm));
 		tmp = p_tm;
 	}
-	
+
 	local_unlock(GMTIME_R);
 
 	return tmp;
@@ -346,11 +346,11 @@ php_rand_r(unsigned int *ctx)
  *
  * 1. Redistributions of source code must retain the above copyright
  *    notices, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notices, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
  *

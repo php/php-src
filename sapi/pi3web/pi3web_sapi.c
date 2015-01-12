@@ -52,7 +52,7 @@ static void php_info_pi3web(ZEND_MODULE_INFO_FUNC_ARGS)
 	DWORD variable_len;
 	LPCONTROL_BLOCK lpCB = (LPCONTROL_BLOCK) SG(server_context);
 	PIDB *pDB = (PIDB *)lpCB->GetVariableNames(lpCB->ConnID);
-	PIDBIterator *pIter = PIDB_getIterator( pDB, PIDBTYPE_STRING, 0, 0 );	
+	PIDBIterator *pIter = PIDB_getIterator( pDB, PIDBTYPE_STRING, 0, 0 );
 
 	PUTS("<table border=0 cellpadding=3 cellspacing=1 width=600 align=center>\n");
 	PUTS("<tr><th colspan=2 bgcolor=\"" PHP_HEADER_COLOR "\">Pi3Web Server Information</th></tr>\n");
@@ -71,7 +71,7 @@ static void php_info_pi3web(ZEND_MODULE_INFO_FUNC_ARGS)
 	php_info_print_table_row(2, "Server PID", variable_buf);
 	php_info_print_table_row(2, "Server Platform", PIPlatform_getDescription());
 
-	PUTS("</table><br />");	
+	PUTS("</table><br />");
 
 	PUTS("<table border=0 cellpadding=3 cellspacing=1 width=600 align=center>\n");
 	PUTS("<tr><th colspan=2 bgcolor=\"" PHP_HEADER_COLOR "\">HTTP Request Information</th></tr>\n");
@@ -81,10 +81,10 @@ static void php_info_pi3web(ZEND_MODULE_INFO_FUNC_ARGS)
 
 	/* --- loop over all registered server variables --- */
 	for(; pIter && PIDBIterator_atValidElement( pIter ); PIDBIterator_next( pIter ) )
-	{	
+	{
 		PCHAR pKey;
 		PIDBIterator_current( pIter, &pKey );
-		if ( !pKey ) { /* sanity */ continue; };										
+		if ( !pKey ) { /* sanity */ continue; };
 
 		variable_len = PI3WEB_SERVER_VAR_BUF_SIZE;
 		if (lpCB->GetServerVariable(lpCB->ConnID, pKey, variable_buf, &variable_len)
@@ -124,7 +124,7 @@ static int zend_pi3web_ub_write(const char *str, uint str_length)
 {
 	DWORD num_bytes = str_length;
 	LPCONTROL_BLOCK cb;
-	
+
 	cb = (LPCONTROL_BLOCK) SG(server_context);
 
 	if ( !IWasLoaded ) return 0;
@@ -165,7 +165,7 @@ static int sapi_pi3web_send_headers(sapi_headers_struct *sapi_headers)
 	char *combined_headers, *combined_headers_ptr;
 	LPCONTROL_BLOCK lpCB = (LPCONTROL_BLOCK) SG(server_context);
 	sapi_header_struct default_content_type;
-	
+
 	if ( !IWasLoaded ) return SAPI_HEADER_SENT_SUCCESSFULLY;
 
 
@@ -235,7 +235,7 @@ static int sapi_pi3web_read_post(char *buffer, uint count_bytes)
 		}
 		total_read += cbRead;
 	}
-	
+
 	/* removed after re-testing POST with Pi3Web 2.0.2 */
 	/* SG(read_post_bytes) += total_read; */
 	return total_read;
@@ -284,14 +284,14 @@ static void sapi_pi3web_register_variables(zval *track_vars_array)
 	DWORD variable_len = PI3WEB_SERVER_VAR_BUF_SIZE;
 	LPCONTROL_BLOCK lpCB = (LPCONTROL_BLOCK) SG(server_context);
 	PIDB *pDB = (PIDB *)lpCB->GetVariableNames(lpCB->ConnID);
-	PIDBIterator *pIter = PIDB_getIterator( pDB, PIDBTYPE_STRING, 0, 0 );	
+	PIDBIterator *pIter = PIDB_getIterator( pDB, PIDBTYPE_STRING, 0, 0 );
 
-	/* --- loop over all registered server variables --- */				
+	/* --- loop over all registered server variables --- */
 	for(; pIter && PIDBIterator_atValidElement( pIter ); PIDBIterator_next( pIter ) )
-	{	
+	{
 		PCHAR pKey;
 		PIDBIterator_current( pIter, &pKey );
-		if ( !pKey ) { /* sanity */ continue; };										
+		if ( !pKey ) { /* sanity */ continue; };
 
 		variable_len = PI3WEB_SERVER_VAR_BUF_SIZE;
 		if (lpCB->GetServerVariable(lpCB->ConnID, pKey, static_variable_buf, &variable_len)
@@ -379,7 +379,7 @@ MODULE_API DWORD PHP7_wrapper(LPCONTROL_BLOCK lpCB)
 
 				ctr.line = "Content-Type: text/plain";
 				ctr.line_len = strlen(ctr.line);
-				
+
 				sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 			  }
 				if ( open_file_for_scanning( &file_handle ) == SUCCESS )

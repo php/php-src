@@ -1518,7 +1518,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 					}
 #if defined(PHP_WIN32) || defined(NETWARE)
 				/* Catch relative paths in c:file.txt style. They're not to confuse
-				   with the NTFS streams. This part ensures also, that no drive 
+				   with the NTFS streams. This part ensures also, that no drive
 				   letter traversing happens. */
 				} else if ((*c == ':' && (c - comp == 1))) {
 					if (state == 0) {
@@ -2995,7 +2995,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 					found = 1;
 					zend_string_release(str);
 					break;
-				} 
+				}
 			} ZEND_HASH_FOREACH_END();
 			if (!found) {
 				smart_str_appendc(&result, str[pos++]);
@@ -3020,7 +3020,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 					found = 1;
 					zend_string_release(str);
 					break;
-				} 
+				}
 			}
 			if (!found) {
 				smart_str_appendc(&result, str[pos++]);

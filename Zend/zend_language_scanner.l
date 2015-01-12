@@ -731,7 +731,7 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 	ZVAL_DUP(&tmp, source_string);
 	convert_to_string(&tmp);
 	source_string = &tmp;
-	
+
 	CG(in_compilation) = 1;
 	zend_save_lexical_state(&original_lex_state);
 	if (zend_prepare_string_for_scanning(source_string, filename) == SUCCESS) {

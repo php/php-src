@@ -45,7 +45,7 @@ typedef long int          count_int;
 #define maxmaxcode ((code_int)1 << GIFBITS)
 
 #define HSIZE  5003            /* 80% occupancy */
-#define hsize HSIZE            /* Apparently invariant, left over from 
+#define hsize HSIZE            /* Apparently invariant, left over from
 					compress */
 
 typedef struct {
@@ -127,7 +127,7 @@ void gdImageGifCtx(gdImagePtr im, gdIOCtxPtr out)
 		if (!pim) {
 			return;
 		}
-		tim = pim; 
+		tim = pim;
 	}
 	BitsPerPixel = colorstobpp(tim->colorsTotal);
 	/* All set, let's do it. */
@@ -676,7 +676,7 @@ cl_block (GifCtx *ctx)             /* table clear for block compress */
 
 static void
 cl_hash(register count_int chsize, GifCtx *ctx)          /* reset code table */
-                         
+
 {
 
         register count_int *htab_p = ctx->htab+chsize;

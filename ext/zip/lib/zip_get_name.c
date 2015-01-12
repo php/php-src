@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,13 +31,13 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include <string.h>
 
 #include "zipint.h"
 
-
+
 
 ZIP_EXTERN const char *
 zip_get_name(struct zip *za, zip_uint64_t idx, zip_flags_t flags)
@@ -45,7 +45,7 @@ zip_get_name(struct zip *za, zip_uint64_t idx, zip_flags_t flags)
     return _zip_get_name(za, idx, flags, &za->error);
 }
 
-
+
 
 const char *
 _zip_get_name(struct zip *za, zip_uint64_t idx, zip_flags_t flags, struct zip_error *error)

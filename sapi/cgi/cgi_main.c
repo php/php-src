@@ -431,7 +431,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 	while (h) {
 		/* prevent CRLFCRLF */
 		if (h->header_len) {
-			if (h->header_len > sizeof("Status:")-1 && 
+			if (h->header_len > sizeof("Status:")-1 &&
 				strncasecmp(h->header, "Status:", sizeof("Status:")-1) == 0
 			) {
 				if (!ignore_status) {
@@ -590,7 +590,7 @@ static char *sapi_fcgi_read_cookies(void)
 
 static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
 {
-	zval *array_ptr = (zval*)arg;	
+	zval *array_ptr = (zval*)arg;
 	int filter_arg = (Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV]))?PARSE_ENV:PARSE_SERVER;
 	size_t new_val_len;
 
@@ -763,12 +763,12 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 		}
 
 		/* we have to test if path is part of DOCUMENT_ROOT.
-		  if it is inside the docroot, we scan the tree up to the docroot 
+		  if it is inside the docroot, we scan the tree up to the docroot
 			to find more user.ini, if not we only scan the current path.
 		  */
 #ifdef PHP_WIN32
 		if (strnicmp(s1, s2, s_len) == 0) {
-#else 
+#else
 		if (strncmp(s1, s2, s_len) == 0) {
 #endif
 			ptr = s2 + start;  /* start is the point where doc_root ends! */
@@ -864,7 +864,7 @@ static int sapi_cgi_activate(void)
 				zend_str_tolower(doc_root, doc_root_len);
 #endif
 				php_cgi_ini_activate_user_config(path, path_len, doc_root, doc_root_len, (doc_root_len > 0 && (doc_root_len - 1)));
-				
+
 #ifdef PHP_WIN32
 				efree(doc_root);
 #endif
@@ -1014,7 +1014,7 @@ static int is_valid_path(const char *path)
 					p++;
 					if (UNEXPECTED(!*p) || UNEXPECTED(IS_SLASH(*p))) {
 						return 0;
-					}											
+					}
 				}
 			}
 		}
@@ -1436,7 +1436,7 @@ PHP_INI_END()
  */
 static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 {
-#ifdef ZTS 
+#ifdef ZTS
 	ZEND_TSRMLS_CACHE_UPDATE;
 #endif
 	php_cgi_globals->rfc2616_headers = 0;
@@ -2507,7 +2507,7 @@ fastcgi_request_done:
 #ifdef HAVE_GETTIMEOFDAY
 							gettimeofday(&start, NULL);
 #else
-							time(&start);						
+							time(&start);
 #endif
 						}
 						continue;

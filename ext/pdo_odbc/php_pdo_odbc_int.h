@@ -163,7 +163,7 @@ typedef struct {
 	unsigned is_unicode:1;
 	unsigned _spare:31;
 } pdo_odbc_param;
-	
+
 extern pdo_driver_t pdo_odbc_driver;
 extern struct pdo_stmt_methods odbc_stmt_methods;
 

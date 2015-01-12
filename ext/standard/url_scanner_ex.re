@@ -53,11 +53,11 @@ static PHP_INI_MH(OnUpdateTags)
 	char *key;
 	char *tmp;
 	char *lasts = NULL;
-	
+
 	ctx = &BG(url_adapt_state_ex);
-	
+
 	tmp = estrndup(new_value->val, new_value->len);
-	
+
 	if (ctx->tags)
 		zend_hash_destroy(ctx->tags);
 	else {
@@ -68,7 +68,7 @@ static PHP_INI_MH(OnUpdateTags)
 	}
 
 	zend_hash_init(ctx->tags, 0, NULL, tag_dtor, 1);
-	
+
 	for (key = php_strtok_r(tmp, ",", &lasts);
 			key;
 			key = php_strtok_r(NULL, ",", &lasts)) {
@@ -78,7 +78,7 @@ static PHP_INI_MH(OnUpdateTags)
 		if (val) {
 			char *q;
 			size_t keylen;
-			
+
 			*val++ = '\0';
 			for (q = key; *q; q++)
 				*q = tolower(*q);
@@ -111,13 +111,13 @@ alphadash = ([a-zA-Z] | "-");
 #define YYCURSOR p
 #define YYLIMIT q
 #define YYMARKER r
-	
+
 static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const char *separator)
 {
 	register const char *p, *q;
 	const char *bash = NULL;
 	const char *sep = "?";
-	
+
 	q = (p = url->s->val) + url->s->len;
 
 scan:
@@ -128,7 +128,7 @@ scan:
   (any\[:?#])+		{ goto scan; }
 */
 done:
-	
+
 	/* Don't modify URLs of the format "#mark" */
 	if (bash && bash - url->s->val == 0) {
 		smart_str_append_smart_str(dest, url);
@@ -197,7 +197,7 @@ enum {
 #define scdebug(x)
 #endif
 
-static inline void passthru(STD_PARA) 
+static inline void passthru(STD_PARA)
 {
 	scdebug(("appending %d chars, starting with %c\n", YYCURSOR-start, *start));
 	smart_str_appendl(&ctx->result, start, YYCURSOR - start);
@@ -208,7 +208,7 @@ static inline void passthru(STD_PARA)
  * <fieldset>.  The latter is important for XHTML.
  */
 
-static void handle_form(STD_PARA) 
+static void handle_form(STD_PARA)
 {
 	int doit = 0;
 
@@ -216,7 +216,7 @@ static void handle_form(STD_PARA)
 		switch (ctx->tag.s->len) {
 			case sizeof("form") - 1:
 				if (!strncasecmp(ctx->tag.s->val, "form", sizeof("form") - 1)) {
-					doit = 1;		
+					doit = 1;
 				}
 				if (doit && ctx->val.s && ctx->lookup_data && *ctx->lookup_data) {
 					char *e, *p = (char *)zend_memnstr(ctx->val.s->val, "://", sizeof("://") - 1, ctx->val.s->val + ctx->val.s->len);
@@ -234,7 +234,7 @@ static void handle_form(STD_PARA)
 
 			case sizeof("fieldset") - 1:
 				if (!strncasecmp(ctx->tag.s->val, "fieldset", sizeof("fieldset") - 1)) {
-					doit = 1;		
+					doit = 1;
 				}
 				break;
 		}
@@ -245,13 +245,13 @@ static void handle_form(STD_PARA)
 }
 
 /*
- *  HANDLE_TAG copies the HTML Tag and checks whether we 
+ *  HANDLE_TAG copies the HTML Tag and checks whether we
  *  have that tag in our table. If we might modify it,
  *  we continue to scan the tag, otherwise we simply copy the complete
  *  HTML stuff to the result buffer.
  */
 
-static inline void handle_tag(STD_PARA) 
+static inline void handle_tag(STD_PARA)
 {
 	int ok = 0;
 	unsigned int i;
@@ -268,7 +268,7 @@ static inline void handle_tag(STD_PARA)
 	STATE = ok ? STATE_NEXT_ARG : STATE_PLAIN;
 }
 
-static inline void handle_arg(STD_PARA) 
+static inline void handle_arg(STD_PARA)
 {
 	if (ctx->arg.s) {
 		ctx->arg.s->len = 0;
@@ -276,7 +276,7 @@ static inline void handle_arg(STD_PARA)
 	smart_str_appendl(&ctx->arg, start, YYCURSOR - start);
 }
 
-static inline void handle_val(STD_PARA, char quotes, char type) 
+static inline void handle_val(STD_PARA, char quotes, char type)
 {
 	smart_str_setl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2);
 	tag_arg(ctx, quotes, type);
@@ -290,7 +290,7 @@ static inline void xx_mainloop(url_adapt_state_ex_t *ctx, const char *newdata, s
 	size_t rest;
 
 	smart_str_appendl(&ctx->buf, newdata, newlen);
-	
+
 	YYCURSOR = ctx->buf.s->val;
 	YYLIMIT = ctx->buf.s->val + ctx->buf.s->len;
 
@@ -302,11 +302,11 @@ static inline void xx_mainloop(url_adapt_state_ex_t *ctx, const char *newdata, s
 		case STATE_BEFORE_VAL: goto state_before_val;
 		case STATE_VAL: goto state_val;
 	}
-	
+
 
 state_plain_begin:
 	STATE = STATE_PLAIN;
-	
+
 state_plain:
 	start = YYCURSOR;
 /*!re2c
@@ -314,7 +314,7 @@ state_plain:
   N+ 				{ passthru(STD_ARGS); goto state_plain; }
 */
 
-state_tag:	
+state_tag:
 	start = YYCURSOR;
 /*!re2c
   alphanamespace+	{ handle_tag(STD_ARGS); /* Sets STATE */; passthru(STD_ARGS); if (STATE == STATE_PLAIN) goto state_plain; else goto state_next_arg; }
@@ -323,7 +323,7 @@ state_tag:
 
 state_next_arg_begin:
 	STATE = STATE_NEXT_ARG;
-	
+
 state_next_arg:
 	start = YYCURSOR;
 /*!re2c
@@ -359,13 +359,13 @@ state_val:
 
 stop:
 	if (YYLIMIT < start) {
-		/* XXX: Crash avoidance. Need to work with reporter to figure out what goes wrong */	
+		/* XXX: Crash avoidance. Need to work with reporter to figure out what goes wrong */
 		rest = 0;
 	} else {
 		rest = YYLIMIT - start;
 		scdebug(("stopped in state %d at pos %d (%d:%c) %d\n", STATE, YYCURSOR - ctx->buf.c, *YYCURSOR, *YYCURSOR, rest));
 	}
-	
+
 	if (rest) memmove(ctx->buf.s->val, start, rest);
 	ctx->buf.s->len = rest;
 }
@@ -426,7 +426,7 @@ static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, zend_
 static int php_url_scanner_ex_activate(void)
 {
 	url_adapt_state_ex_t *ctx;
-	
+
 	ctx = &BG(url_adapt_state_ex);
 
 	memset(ctx, 0, ((size_t) &((url_adapt_state_ex_t *)0)->tags));
@@ -437,7 +437,7 @@ static int php_url_scanner_ex_activate(void)
 static int php_url_scanner_ex_deactivate(void)
 {
 	url_adapt_state_ex_t *ctx;
-	
+
 	ctx = &BG(url_adapt_state_ex);
 
 	smart_str_free(&ctx->result);
@@ -482,7 +482,7 @@ PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, siz
 {
 	smart_str val = {0};
 	zend_string *encoded;
-	
+
 	if (!BG(url_adapt_state_ex).active) {
 		php_url_scanner_ex_activate();
 		php_output_start_internal(ZEND_STRL("URL-Rewriter"), php_url_scanner_output_handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
@@ -500,12 +500,12 @@ PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, siz
 	} else {
 		smart_str_setl(&val, value, value_len);
 	}
-	
+
 	smart_str_appendl(&BG(url_adapt_state_ex).url_app, name, name_len);
 	smart_str_appendc(&BG(url_adapt_state_ex).url_app, '=');
 	smart_str_append_smart_str(&BG(url_adapt_state_ex).url_app, &val);
 
-	smart_str_appends(&BG(url_adapt_state_ex).form_app, "<input type=\"hidden\" name=\""); 
+	smart_str_appends(&BG(url_adapt_state_ex).form_app, "<input type=\"hidden\" name=\"");
 	smart_str_appendl(&BG(url_adapt_state_ex).form_app, name, name_len);
 	smart_str_appends(&BG(url_adapt_state_ex).form_app, "\" value=\"");
 	smart_str_append_smart_str(&BG(url_adapt_state_ex).form_app, &val);
@@ -551,7 +551,7 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner)
 PHP_RINIT_FUNCTION(url_scanner)
 {
 	BG(url_adapt_state_ex).active = 0;
-	
+
 	return SUCCESS;
 }
 
