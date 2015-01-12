@@ -3078,8 +3078,6 @@ PHP_FUNCTION(strtr)
 
 		if (zend_hash_num_elements(pats) < 1) {
 			RETURN_STR(zend_string_copy(str));
-//...			
-#if 1
 		} else if (zend_hash_num_elements(pats) == 1) {
 			zend_long num_key;
 			zend_string *str_key, *replace;
@@ -3102,18 +3100,17 @@ PHP_FUNCTION(strtr)
 								replace->val,
 								replace->len,
 								return_value,
-								0,
+								1,
 								NULL);
 				} else {
 					RETVAL_STR(php_str_to_str_ex(str->val, str->len,
 								str_key->val, str_key->len,
-								replace->val, replace->len, 0, NULL));
+								replace->val, replace->len, 1, NULL));
 				}
 				zend_string_release(replace);
 				zval_dtor(&tmp);
 				return;
 			} ZEND_HASH_FOREACH_END();
-#endif
 		} else {
 			php_strtr_array(return_value, str->val, str->len, pats);
 		}
