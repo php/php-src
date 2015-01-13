@@ -150,35 +150,31 @@ ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce)
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (ce->static_members_table) {
+		zval *static_members = ce->static_members_table;
 		int i;
 
-		for (i = 0; i < ce->default_static_members_count; i++) {
-			if (Z_TYPE(ce->static_members_table[i]) != IS_UNDEF) {
-				zval tmp;
-
-				ZVAL_COPY_VALUE(&tmp, &ce->static_members_table[i]);
-				ZVAL_UNDEF(&ce->static_members_table[i]);
-				zval_ptr_dtor(&tmp);
-			}
-		}
 		ce->static_members_table = NULL;
+		for (i = 0; i < ce->default_static_members_count; i++) {
+			zval_ptr_dtor(&static_members[i]);
+		}
 	}
 }
 
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 {
 	if (CE_STATIC_MEMBERS(ce)) {
+		zval *static_members = CE_STATIC_MEMBERS(ce);
 		int i;
 
-		for (i = 0; i < ce->default_static_members_count; i++) {
-			zval_ptr_dtor(&CE_STATIC_MEMBERS(ce)[i]);
-		}
-		efree(CE_STATIC_MEMBERS(ce));
 #ifdef ZTS
 		CG(static_members_table)[(zend_intptr_t)(ce->static_members_table)] = NULL;
 #else
 		ce->static_members_table = NULL;
 #endif
+		for (i = 0; i < ce->default_static_members_count; i++) {
+			zval_ptr_dtor(&static_members[i]);
+		}
+		efree(static_members);
 	}
 }
 

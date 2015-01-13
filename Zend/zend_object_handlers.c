@@ -1198,15 +1198,13 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent, void **cache_slot) /* {{{ */
 {
 	zend_property_info *property_info;
+	zval *ret;
 
-	if (UNEXPECTED(cache_slot == NULL) ||
-	    (property_info = CACHED_POLYMORPHIC_PTR_EX(cache_slot, ce)) == NULL) {
+	if (cache_slot == NULL ||
+	    (ret = CACHED_POLYMORPHIC_PTR_EX(cache_slot, ce)) == NULL) {
 
 		if (UNEXPECTED((property_info = zend_hash_find_ptr(&ce->properties_info, property_name)) == NULL)) {
-			if (!silent) {
-				zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, property_name->val);
-			}
-			return NULL;
+			goto undeclared_property;
 		}
 
 		if (UNEXPECTED(!zend_verify_property_access(property_info, ce))) {
@@ -1217,28 +1215,32 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 		}
 
 		if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0)) {
-			if (!silent) {
-				zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, property_name->val);
-			}
-			return NULL;
+			goto undeclared_property;
 		}
 
 		zend_update_class_constants(ce);
+		ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
+
+		/* check if static properties were destoyed */
+		if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+			goto undeclared_property;
+		}
 
 		if (EXPECTED(cache_slot != NULL)) {
-			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, property_info);
+			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, ret);
+		}
+	} else {
+		/* check if static properties were destoyed */
+		if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+undeclared_property:
+			if (!silent) {
+				zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, property_name->val);
+			}
+			ret = NULL;
 		}
 	}
 
-	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL) ||
-	    UNEXPECTED(Z_TYPE(CE_STATIC_MEMBERS(ce)[property_info->offset]) == IS_UNDEF)) {
-		if (!silent) {
-			zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, property_name->val);
-		}
-		return NULL;
-	}
-
-	return &CE_STATIC_MEMBERS(ce)[property_info->offset];
+	return ret;
 }
 /* }}} */
 
