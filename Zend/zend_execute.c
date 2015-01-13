@@ -804,12 +804,12 @@ static zend_always_inline void zend_assign_to_object(zval *retval, zval *object,
 
 	if (property_op_type == IS_CONST &&
 		EXPECTED(Z_OBJCE_P(object) == CACHED_PTR_EX(cache_slot))) {
-		zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 1);
+		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR_EX(cache_slot + 1);
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
 
-		if (EXPECTED(prop_info)) {
-			property = OBJ_PROP(zobj, prop_info->offset);
+		if (EXPECTED(prop_offset != ZEND_DYNAMIC_PROPERTY_OFFSET)) {
+			property = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property) != IS_UNDEF) {
 fast_assign:
 				value = zend_assign_to_variable(property, value, value_type);
@@ -1442,12 +1442,12 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 	}
 	if (prop_op_type == IS_CONST &&
 	    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR_EX(cache_slot))) {
-		zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 1);
+		uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR_EX(cache_slot + 1);
 		zend_object *zobj = Z_OBJ_P(container);
 		zval *retval;
 
-		if (EXPECTED(prop_info)) {
-			retval = OBJ_PROP(zobj, prop_info->offset);
+		if (EXPECTED(prop_offset != ZEND_DYNAMIC_PROPERTY_OFFSET)) {
+			retval = OBJ_PROP(zobj, prop_offset);
 			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
 				ZVAL_INDIRECT(result, retval);
 				return;
