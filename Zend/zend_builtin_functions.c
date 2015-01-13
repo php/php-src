@@ -684,33 +684,35 @@ ZEND_FUNCTION(error_reporting)
 	old_error_reporting = EG(error_reporting);
 	if(ZEND_NUM_ARGS() != 0) {
 		do {
-			if (!EG(error_reporting_ini_entry)) {
-				zend_ini_entry *p = zend_hash_str_find_ptr(EG(ini_directives), "error_reporting", sizeof("error_reporting")-1);
+			zend_ini_entry *p = EG(error_reporting_ini_entry);
+
+			if (!p) {
+				p = zend_hash_str_find_ptr(EG(ini_directives), "error_reporting", sizeof("error_reporting")-1);
 				if (p) {
 					EG(error_reporting_ini_entry) = p;
 				} else {
 					break;
 				}
 			}
-			if (!EG(error_reporting_ini_entry)->modified) {
+			if (!p->modified) {
 				if (!EG(modified_ini_directives)) {
 					ALLOC_HASHTABLE(EG(modified_ini_directives));
 					zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
 				}
-				if (EXPECTED(zend_hash_str_add_ptr(EG(modified_ini_directives), "error_reporting", sizeof("error_reporting")-1, EG(error_reporting_ini_entry)) != NULL)) {
-					EG(error_reporting_ini_entry)->orig_value = EG(error_reporting_ini_entry)->value;
-					EG(error_reporting_ini_entry)->orig_modifiable = EG(error_reporting_ini_entry)->modifiable;
-					EG(error_reporting_ini_entry)->modified = 1;
+				if (EXPECTED(zend_hash_str_add_ptr(EG(modified_ini_directives), "error_reporting", sizeof("error_reporting")-1, p) != NULL)) {
+					p->orig_value = p->value;
+					p->orig_modifiable = p->modifiable;
+					p->modified = 1;
 				}
-			} else {
-				zend_string_release(EG(error_reporting_ini_entry)->value);
+			} else if (p->value) {
+				zend_string_release(p->value);
 			}
 
-			EG(error_reporting_ini_entry)->value = zval_get_string(err);
+			p->value = zval_get_string(err);
 			if (Z_TYPE_P(err) == IS_LONG) {
 				EG(error_reporting) = Z_LVAL_P(err);
 			} else {
-				EG(error_reporting) = atoi(EG(error_reporting_ini_entry)->value);
+				EG(error_reporting) = atoi(p->value->val);
 			}
 		} while (0);
 	}
