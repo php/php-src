@@ -3769,15 +3769,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
 				}
 
-				if (type == BP_VAR_R || type == BP_VAR_IS) {
-					if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
-						ZVAL_UNREF(retval);
-					}
-					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-				} else {
-					ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-				}
-				ZEND_VM_NEXT_OPCODE();
+				goto fetch_var_return;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 			} else {
@@ -3794,8 +3786,21 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 			}
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
+			if (IS_CONST == IS_CONST &&
+			    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+				/* check if static properties were destoyed */
+				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+				}
+
+				goto fetch_var_return;
+			}
 		}
-		retval = zend_std_get_static_property(ce, name, 0, ((IS_CONST == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		retval = zend_std_get_static_property(ce, name, 0);
+		if (IS_CONST == IS_CONST && retval) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
+		}
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
@@ -3852,6 +3857,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 		zend_string_release(name);
 	}
 
+fetch_var_return:
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
@@ -4633,7 +4639,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CONST == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		zend_std_unset_static_property(ce, Z_STR_P(varname));
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
@@ -4681,7 +4687,18 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 			zend_class_entry *ce;
 
 			if (IS_CONST == IS_CONST) {
-				if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+				if (IS_CONST == IS_CONST && CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+
+					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
+					value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)) + 1);
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 				} else {
 					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op2)), EX_CONSTANT(opline->op2) + 1, 0);
@@ -4693,8 +4710,23 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op2.var));
+				if (IS_CONST == IS_CONST &&
+				    (value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				}
 			}
-			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1, ((IS_CONST == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+
+			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1);
+
+			if (IS_CONST == IS_CONST && value) {
+				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, value);
+			}
 		} else {
 			HashTable *target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 			value = zend_hash_find_ind(target_symbol_table, Z_STR_P(varname));
@@ -4704,6 +4736,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_CONST_HANDLER(ZEND_O
 			zend_string_release(Z_STR(tmp));
 		}
 
+is_var_return:
 		if (opline->extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(EX_VAR(opline->result.var),
 				value && Z_TYPE_P(value) > IS_NULL &&
@@ -5281,15 +5314,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
 				}
 
-				if (type == BP_VAR_R || type == BP_VAR_IS) {
-					if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
-						ZVAL_UNREF(retval);
-					}
-					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-				} else {
-					ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-				}
-				ZEND_VM_NEXT_OPCODE();
+				goto fetch_var_return;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 			} else {
@@ -5306,8 +5331,21 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 			}
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
+			if (IS_CONST == IS_CONST &&
+			    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+				/* check if static properties were destoyed */
+				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+				}
+
+				goto fetch_var_return;
+			}
 		}
-		retval = zend_std_get_static_property(ce, name, 0, ((IS_CONST == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		retval = zend_std_get_static_property(ce, name, 0);
+		if (IS_CONST == IS_CONST && retval) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
+		}
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
@@ -5364,6 +5402,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 		zend_string_release(name);
 	}
 
+fetch_var_return:
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
@@ -5474,7 +5513,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HAND
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CONST == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		zend_std_unset_static_property(ce, Z_STR_P(varname));
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
@@ -5522,7 +5561,18 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 			zend_class_entry *ce;
 
 			if (IS_VAR == IS_CONST) {
-				if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+				if (IS_CONST == IS_CONST && CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+
+					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
+					value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)) + 1);
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 				} else {
 					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op2)), EX_CONSTANT(opline->op2) + 1, 0);
@@ -5534,8 +5584,23 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op2.var));
+				if (IS_CONST == IS_CONST &&
+				    (value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				}
 			}
-			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1, ((IS_CONST == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+
+			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1);
+
+			if (IS_CONST == IS_CONST && value) {
+				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, value);
+			}
 		} else {
 			HashTable *target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 			value = zend_hash_find_ind(target_symbol_table, Z_STR_P(varname));
@@ -5545,6 +5610,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 			zend_string_release(Z_STR(tmp));
 		}
 
+is_var_return:
 		if (opline->extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(EX_VAR(opline->result.var),
 				value && Z_TYPE_P(value) > IS_NULL &&
@@ -5725,15 +5791,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
 				}
 
-				if (type == BP_VAR_R || type == BP_VAR_IS) {
-					if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
-						ZVAL_UNREF(retval);
-					}
-					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-				} else {
-					ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-				}
-				ZEND_VM_NEXT_OPCODE();
+				goto fetch_var_return;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 			} else {
@@ -5750,8 +5808,21 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 			}
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
+			if (IS_CONST == IS_CONST &&
+			    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+				/* check if static properties were destoyed */
+				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+				}
+
+				goto fetch_var_return;
+			}
 		}
-		retval = zend_std_get_static_property(ce, name, 0, ((IS_CONST == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		retval = zend_std_get_static_property(ce, name, 0);
+		if (IS_CONST == IS_CONST && retval) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
+		}
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
@@ -5808,6 +5879,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 		zend_string_release(name);
 	}
 
+fetch_var_return:
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
@@ -6196,7 +6268,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_H
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CONST == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		zend_std_unset_static_property(ce, Z_STR_P(varname));
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
@@ -6244,7 +6316,18 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 			zend_class_entry *ce;
 
 			if (IS_UNUSED == IS_CONST) {
-				if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+				if (IS_CONST == IS_CONST && CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+
+					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
+					value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)) + 1);
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 				} else {
 					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op2)), EX_CONSTANT(opline->op2) + 1, 0);
@@ -6256,8 +6339,23 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op2.var));
+				if (IS_CONST == IS_CONST &&
+				    (value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				}
 			}
-			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1, ((IS_CONST == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+
+			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1);
+
+			if (IS_CONST == IS_CONST && value) {
+				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, value);
+			}
 		} else {
 			HashTable *target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 			value = zend_hash_find_ind(target_symbol_table, Z_STR_P(varname));
@@ -6267,6 +6365,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_
 			zend_string_release(Z_STR(tmp));
 		}
 
+is_var_return:
 		if (opline->extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(EX_VAR(opline->result.var),
 				value && Z_TYPE_P(value) > IS_NULL &&
@@ -25159,15 +25258,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
 				}
 
-				if (type == BP_VAR_R || type == BP_VAR_IS) {
-					if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
-						ZVAL_UNREF(retval);
-					}
-					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-				} else {
-					ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-				}
-				ZEND_VM_NEXT_OPCODE();
+				goto fetch_var_return;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 			} else {
@@ -25184,8 +25275,21 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 			}
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
+			if (IS_CV == IS_CONST &&
+			    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+				/* check if static properties were destoyed */
+				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+				}
+
+				goto fetch_var_return;
+			}
 		}
-		retval = zend_std_get_static_property(ce, name, 0, ((IS_CV == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		retval = zend_std_get_static_property(ce, name, 0);
+		if (IS_CV == IS_CONST && retval) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
+		}
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
@@ -25242,6 +25346,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 		zend_string_release(name);
 	}
 
+fetch_var_return:
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
@@ -26126,7 +26231,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CV == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		zend_std_unset_static_property(ce, Z_STR_P(varname));
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
@@ -26299,7 +26404,18 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 			zend_class_entry *ce;
 
 			if (IS_CONST == IS_CONST) {
-				if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+				if (IS_CV == IS_CONST && CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+
+					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
+					value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)) + 1);
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 				} else {
 					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op2)), EX_CONSTANT(opline->op2) + 1, 0);
@@ -26311,8 +26427,23 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op2.var));
+				if (IS_CV == IS_CONST &&
+				    (value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				}
 			}
-			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1, ((IS_CV == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+
+			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1);
+
+			if (IS_CV == IS_CONST && value) {
+				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, value);
+			}
 		} else {
 			HashTable *target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 			value = zend_hash_find_ind(target_symbol_table, Z_STR_P(varname));
@@ -26322,6 +26453,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 			zend_string_release(Z_STR(tmp));
 		}
 
+is_var_return:
 		if (opline->extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(EX_VAR(opline->result.var),
 				value && Z_TYPE_P(value) > IS_NULL &&
@@ -27002,15 +27134,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
 				}
 
-				if (type == BP_VAR_R || type == BP_VAR_IS) {
-					if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
-						ZVAL_UNREF(retval);
-					}
-					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-				} else {
-					ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-				}
-				ZEND_VM_NEXT_OPCODE();
+				goto fetch_var_return;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 			} else {
@@ -27027,8 +27151,21 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 			}
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
+			if (IS_CV == IS_CONST &&
+			    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+				/* check if static properties were destoyed */
+				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+				}
+
+				goto fetch_var_return;
+			}
 		}
-		retval = zend_std_get_static_property(ce, name, 0, ((IS_CV == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		retval = zend_std_get_static_property(ce, name, 0);
+		if (IS_CV == IS_CONST && retval) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
+		}
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
@@ -27085,6 +27222,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 		zend_string_release(name);
 	}
 
+fetch_var_return:
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
@@ -27292,7 +27430,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CV == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		zend_std_unset_static_property(ce, Z_STR_P(varname));
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
@@ -27340,7 +27478,18 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 			zend_class_entry *ce;
 
 			if (IS_VAR == IS_CONST) {
-				if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+				if (IS_CV == IS_CONST && CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+
+					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
+					value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)) + 1);
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 				} else {
 					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op2)), EX_CONSTANT(opline->op2) + 1, 0);
@@ -27352,8 +27501,23 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op2.var));
+				if (IS_CV == IS_CONST &&
+				    (value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				}
 			}
-			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1, ((IS_CV == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+
+			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1);
+
+			if (IS_CV == IS_CONST && value) {
+				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, value);
+			}
 		} else {
 			HashTable *target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 			value = zend_hash_find_ind(target_symbol_table, Z_STR_P(varname));
@@ -27363,6 +27527,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 			zend_string_release(Z_STR(tmp));
 		}
 
+is_var_return:
 		if (opline->extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(EX_VAR(opline->result.var),
 				value && Z_TYPE_P(value) > IS_NULL &&
@@ -27867,15 +28032,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
 				}
 
-				if (type == BP_VAR_R || type == BP_VAR_IS) {
-					if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
-						ZVAL_UNREF(retval);
-					}
-					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-				} else {
-					ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-				}
-				ZEND_VM_NEXT_OPCODE();
+				goto fetch_var_return;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 			} else {
@@ -27892,8 +28049,21 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 			}
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
+			if (IS_CV == IS_CONST &&
+			    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+				/* check if static properties were destoyed */
+				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+				}
+
+				goto fetch_var_return;
+			}
 		}
-		retval = zend_std_get_static_property(ce, name, 0, ((IS_CV == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		retval = zend_std_get_static_property(ce, name, 0);
+		if (IS_CV == IS_CONST && retval) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
+		}
 
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
@@ -27950,6 +28120,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 		zend_string_release(name);
 	}
 
+fetch_var_return:
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
@@ -28328,7 +28499,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		zend_std_unset_static_property(ce, Z_STR_P(varname), ((IS_CV == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		zend_std_unset_static_property(ce, Z_STR_P(varname));
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
@@ -28376,7 +28547,18 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 			zend_class_entry *ce;
 
 			if (IS_UNUSED == IS_CONST) {
-				if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+				if (IS_CV == IS_CONST && CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+
+					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
+					value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)) + 1);
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 				} else {
 					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op2)), EX_CONSTANT(opline->op2) + 1, 0);
@@ -28388,8 +28570,23 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op2.var));
+				if (IS_CV == IS_CONST &&
+				    (value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				}
 			}
-			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1, ((IS_CV == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+
+			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1);
+
+			if (IS_CV == IS_CONST && value) {
+				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, value);
+			}
 		} else {
 			HashTable *target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 			value = zend_hash_find_ind(target_symbol_table, Z_STR_P(varname));
@@ -28399,6 +28596,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 			zend_string_release(Z_STR(tmp));
 		}
 
+is_var_return:
 		if (opline->extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(EX_VAR(opline->result.var),
 				value && Z_TYPE_P(value) > IS_NULL &&
@@ -33249,15 +33447,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMPVAR_CONST(int typ
 					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
 				}
 
-				if (type == BP_VAR_R || type == BP_VAR_IS) {
-					if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
-						ZVAL_UNREF(retval);
-					}
-					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-				} else {
-					ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-				}
-				ZEND_VM_NEXT_OPCODE();
+				goto fetch_var_return;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 			} else {
@@ -33274,8 +33464,22 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMPVAR_CONST(int typ
 			}
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
+			if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
+			    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+				/* check if static properties were destoyed */
+				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+				}
+
+				goto fetch_var_return;
+			}
 		}
-		retval = zend_std_get_static_property(ce, name, 0, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		retval = zend_std_get_static_property(ce, name, 0);
+		if ((IS_TMP_VAR|IS_VAR) == IS_CONST && retval) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
+		}
+
 		zval_ptr_dtor_nogc(free_op1);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
@@ -33332,6 +33536,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMPVAR_CONST(int typ
 		zend_string_release(name);
 	}
 
+fetch_var_return:
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
@@ -33704,7 +33909,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_H
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		zend_std_unset_static_property(ce, Z_STR_P(varname), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		zend_std_unset_static_property(ce, Z_STR_P(varname));
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
@@ -33752,7 +33957,18 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_CONST_HANDLER(ZEND_
 			zend_class_entry *ce;
 
 			if (IS_CONST == IS_CONST) {
-				if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST && CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+
+					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
+					value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)) + 1);
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 				} else {
 					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op2)), EX_CONSTANT(opline->op2) + 1, 0);
@@ -33764,8 +33980,23 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_CONST_HANDLER(ZEND_
 				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op2.var));
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
+				    (value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				}
 			}
-			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+
+			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1);
+
+			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && value) {
+				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, value);
+			}
 		} else {
 			HashTable *target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 			value = zend_hash_find_ind(target_symbol_table, Z_STR_P(varname));
@@ -33776,6 +34007,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_CONST_HANDLER(ZEND_
 		}
 		zval_ptr_dtor_nogc(free_op1);
 
+is_var_return:
 		if (opline->extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(EX_VAR(opline->result.var),
 				value && Z_TYPE_P(value) > IS_NULL &&
@@ -34039,15 +34271,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMPVAR_VAR(int type,
 					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
 				}
 
-				if (type == BP_VAR_R || type == BP_VAR_IS) {
-					if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
-						ZVAL_UNREF(retval);
-					}
-					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-				} else {
-					ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-				}
-				ZEND_VM_NEXT_OPCODE();
+				goto fetch_var_return;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 			} else {
@@ -34064,8 +34288,22 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMPVAR_VAR(int type,
 			}
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
+			if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
+			    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+				/* check if static properties were destoyed */
+				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+				}
+
+				goto fetch_var_return;
+			}
 		}
-		retval = zend_std_get_static_property(ce, name, 0, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		retval = zend_std_get_static_property(ce, name, 0);
+		if ((IS_TMP_VAR|IS_VAR) == IS_CONST && retval) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
+		}
+
 		zval_ptr_dtor_nogc(free_op1);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
@@ -34122,6 +34360,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMPVAR_VAR(int type,
 		zend_string_release(name);
 	}
 
+fetch_var_return:
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
@@ -34232,7 +34471,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMPVAR_VAR_HANDLER(ZEND_OPCODE_HAN
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		zend_std_unset_static_property(ce, Z_STR_P(varname), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		zend_std_unset_static_property(ce, Z_STR_P(varname));
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
@@ -34280,7 +34519,18 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_VAR_HANDLER(ZEND_OP
 			zend_class_entry *ce;
 
 			if (IS_VAR == IS_CONST) {
-				if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST && CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+
+					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
+					value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)) + 1);
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 				} else {
 					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op2)), EX_CONSTANT(opline->op2) + 1, 0);
@@ -34292,8 +34542,23 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_VAR_HANDLER(ZEND_OP
 				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op2.var));
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
+				    (value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				}
 			}
-			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+
+			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1);
+
+			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && value) {
+				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, value);
+			}
 		} else {
 			HashTable *target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 			value = zend_hash_find_ind(target_symbol_table, Z_STR_P(varname));
@@ -34304,6 +34569,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_VAR_HANDLER(ZEND_OP
 		}
 		zval_ptr_dtor_nogc(free_op1);
 
+is_var_return:
 		if (opline->extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(EX_VAR(opline->result.var),
 				value && Z_TYPE_P(value) > IS_NULL &&
@@ -34396,15 +34662,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMPVAR_UNUSED(int ty
 					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
 				}
 
-				if (type == BP_VAR_R || type == BP_VAR_IS) {
-					if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
-						ZVAL_UNREF(retval);
-					}
-					ZVAL_COPY(EX_VAR(opline->result.var), retval);
-				} else {
-					ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
-				}
-				ZEND_VM_NEXT_OPCODE();
+				goto fetch_var_return;
 			} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 			} else {
@@ -34421,8 +34679,22 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMPVAR_UNUSED(int ty
 			}
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
+			if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
+			    (retval = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+				/* check if static properties were destoyed */
+				if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+					zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, name->val);
+				}
+
+				goto fetch_var_return;
+			}
 		}
-		retval = zend_std_get_static_property(ce, name, 0, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		retval = zend_std_get_static_property(ce, name, 0);
+		if ((IS_TMP_VAR|IS_VAR) == IS_CONST && retval) {
+			CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, retval);
+		}
+
 		zval_ptr_dtor_nogc(free_op1);
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
@@ -34479,6 +34751,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMPVAR_UNUSED(int ty
 		zend_string_release(name);
 	}
 
+fetch_var_return:
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
 		if (/*type == BP_VAR_R &&*/ Z_ISREF_P(retval) && Z_REFCOUNT_P(retval) == 1) {
@@ -34589,7 +34862,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMPVAR_UNUSED_HANDLER(ZEND_OPCODE_
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		zend_std_unset_static_property(ce, Z_STR_P(varname), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+		zend_std_unset_static_property(ce, Z_STR_P(varname));
 	} else {
 		target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 		zend_hash_del_ind(target_symbol_table, Z_STR_P(varname));
@@ -34637,7 +34910,18 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_UNUSED_HANDLER(ZEND
 			zend_class_entry *ce;
 
 			if (IS_UNUSED == IS_CONST) {
-				if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST && CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+
+					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)));
+					value = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)) + 1);
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				} else if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
 					ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
 				} else {
 					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(opline->op2)), EX_CONSTANT(opline->op2) + 1, 0);
@@ -34649,8 +34933,23 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_UNUSED_HANDLER(ZEND
 				}
 			} else {
 				ce = Z_CE_P(EX_VAR(opline->op2.var));
+				if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
+				    (value = CACHED_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce)) != NULL) {
+
+					/* check if static properties were destoyed */
+					if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+						zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, Z_STR_P(varname));
+					}
+
+					goto is_var_return;
+				}
 			}
-			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1, (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (EX_RUN_TIME_CACHE() + Z_CACHE_SLOT_P(varname)) : NULL));
+
+			value = zend_std_get_static_property(ce, Z_STR_P(varname), 1);
+
+			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && value) {
+				CACHE_POLYMORPHIC_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)), ce, value);
+			}
 		} else {
 			HashTable *target_symbol_table = zend_get_target_symbol_table(execute_data, opline->extended_value & ZEND_FETCH_TYPE_MASK);
 			value = zend_hash_find_ind(target_symbol_table, Z_STR_P(varname));
@@ -34661,6 +34960,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_UNUSED_HANDLER(ZEND
 		}
 		zval_ptr_dtor_nogc(free_op1);
 
+is_var_return:
 		if (opline->extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(EX_VAR(opline->result.var),
 				value && Z_TYPE_P(value) > IS_NULL &&

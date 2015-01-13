@@ -1195,56 +1195,43 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 }
 /* }}} */
 
-ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent, void **cache_slot) /* {{{ */
+ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent) /* {{{ */
 {
-	zend_property_info *property_info;
+	zend_property_info *property_info = zend_hash_find_ptr(&ce->properties_info, property_name);
 	zval *ret;
 
-	if (cache_slot == NULL ||
-	    (ret = CACHED_POLYMORPHIC_PTR_EX(cache_slot, ce)) == NULL) {
+	if (UNEXPECTED(property_info == NULL)) {
+		goto undeclared_property;
+	}
 
-		if (UNEXPECTED((property_info = zend_hash_find_ptr(&ce->properties_info, property_name)) == NULL)) {
-			goto undeclared_property;
+	if (UNEXPECTED(!zend_verify_property_access(property_info, ce))) {
+		if (!silent) {
+			zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name->val, property_name->val);
 		}
+		return NULL;
+	}
 
-		if (UNEXPECTED(!zend_verify_property_access(property_info, ce))) {
-			if (!silent) {
-				zend_error_noreturn(E_ERROR, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ce->name->val, property_name->val);
-			}
-			return NULL;
-		}
+	if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0)) {
+		goto undeclared_property;
+	}
 
-		if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0)) {
-			goto undeclared_property;
-		}
+	zend_update_class_constants(ce);
+	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
 
-		zend_update_class_constants(ce);
-		ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
-
-		/* check if static properties were destoyed */
-		if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-			goto undeclared_property;
-		}
-
-		if (EXPECTED(cache_slot != NULL)) {
-			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, ret);
-		}
-	} else {
-		/* check if static properties were destoyed */
-		if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+	/* check if static properties were destoyed */
+	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
 undeclared_property:
-			if (!silent) {
-				zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, property_name->val);
-			}
-			ret = NULL;
+		if (!silent) {
+			zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name->val, property_name->val);
 		}
+		ret = NULL;
 	}
 
 	return ret;
 }
 /* }}} */
 
-ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name, void **cache_slot) /* {{{ */
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name) /* {{{ */
 {
 	zend_error_noreturn(E_ERROR, "Attempt to unset static property %s::$%s", ce->name->val, property_name->val);
 	return 0;
