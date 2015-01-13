@@ -704,7 +704,7 @@ ZEND_FUNCTION(error_reporting)
 					p->orig_modifiable = p->modifiable;
 					p->modified = 1;
 				}
-			} else if (p->value) {
+			} else if (p->orig_value != p->value) {
 				zend_string_release(p->value);
 			}
 
