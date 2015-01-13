@@ -164,6 +164,7 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 	switch(type) {
 		case IS_FALSE:
 		case IS_TRUE:
+		case _IS_BOOL:
 			return "boolean";
 		case IS_LONG:
 			return "integer";
@@ -2547,6 +2548,9 @@ ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zen
 		lcname = zend_string_alloc(name_len, 1);
 		zend_str_tolower_copy(lcname->val, name, name_len);
 	}
+
+	zend_assert_valid_class_name(lcname);
+
 	ce = zend_hash_add_ptr(CG(class_table), lcname, ce);
 	zend_string_release(lcname);
 	if (ce) {

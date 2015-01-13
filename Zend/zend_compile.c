@@ -3882,7 +3882,17 @@ void zend_compile_params(zend_ast *ast) /* {{{ */
 				}
 			} else {
 				zend_string *class_name = zend_ast_get_str(type_ast);
+				const struct _scalar_typehint_info *info = &scalar_typehints[0];
 
+				while (info->name) {
+					if (class_name->len == info->name_len
+						&& zend_binary_strcasecmp(class_name->val, info->name_len, info->name, info->name_len) == 0) {
+						arg_info->type_hint = info->type;
+						goto done;
+					}
+					info++;
+				}
+				
 				if (zend_is_const_default_class_ref(type_ast)) {
 					class_name = zend_resolve_class_name_ast(type_ast);
 				} else {
@@ -3892,9 +3902,15 @@ void zend_compile_params(zend_ast *ast) /* {{{ */
 				arg_info->type_hint = IS_OBJECT;
 				arg_info->class_name = class_name;
 
+done:
 				if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant)) {
+					if (arg_info->class_name) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with a class type hint can only be NULL");
+					} else if (Z_TYPE(default_node.u.constant) != arg_info->type_hint) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+							"with a %s type hint can only be %s or NULL", class_name->val, class_name->val);
+					}
 				}
 			}
 		}
@@ -4503,6 +4519,8 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		import_name = zend_hash_find_ptr(CG(current_import), lcname);
 	}
 
+	zend_assert_valid_class_name(name);
+
 	if (CG(current_namespace)) {
 		name = zend_prefix_with_ns(name);
 
@@ -4723,6 +4741,10 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 						"has no effect", new_name->val);
 				}
 			}
+		}
+
+		if (type == T_CLASS) {
+			zend_assert_valid_class_name(new_name);
 		}
 
 		if (case_sensitive) {
