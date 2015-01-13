@@ -405,7 +405,7 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 	} else { /* string key */
 		zend_string *tmp_str;
 		zend_string *ckey = php_addcslashes(key->val, key->len, 0, "'\\", 2);
-		tmp_str = php_str_to_str_ex(ckey->val, ckey->len, "\0", 1, "' . \"\\0\" . '", 12, 0, NULL);
+		tmp_str = php_str_to_str(ckey->val, ckey->len, "\0", 1, "' . \"\\0\" . '", 12);
 
 		buffer_append_spaces(buf, level + 1);
 
@@ -479,7 +479,7 @@ again:
 			break;
 		case IS_STRING:
 			ztmp = php_addcslashes(Z_STRVAL_P(struc), Z_STRLEN_P(struc), 0, "'\\", 2);
-			ztmp2 = php_str_to_str_ex(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12, 0, NULL);
+			ztmp2 = php_str_to_str(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12);
 
 			smart_str_appendc(buf, '\'');
 			smart_str_append(buf, ztmp2);
