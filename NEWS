@@ -62,7 +62,8 @@
     (Ashesh Vashi)
 
 - Opcache:
-  . Fixed bug (try block removed while combined with xdebug). (Laruence)
+  . Fixed bug with try blocks being removed when extended_info opcode
+    generation is turned on. (Laruence)
   . Fixed bug #68644 (strlen incorrect : mbstring + func_overload=2 +UTF-8
     + Opcache). (Laruence)
   . Fixed bug #67111 (Memory leak when using "continue 2" inside two foreach
