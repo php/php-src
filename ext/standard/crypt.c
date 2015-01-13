@@ -216,6 +216,8 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
 				return result;
 			}
+        } else if (salt[0] == '*' && (salt[1] == '0' || salt[1] == '1')) {
+            return NULL;
 		} else {
 			/* DES Fallback */
 
