@@ -610,13 +610,13 @@ static int is_null_constant(zval *default_value)
 	return 0;
 }
 
-static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg)
+static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, zend_bool strict)
 {
 	switch (type_hint) {
 		case _IS_BOOL: {
 			zend_bool dest;
 
-			if (!zend_parse_arg_bool(arg, &dest, NULL, 0)) {
+			if (!zend_parse_arg_bool(arg, &dest, NULL, 0, strict)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -626,7 +626,7 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg)
 		case IS_LONG: {
 			zend_long dest;
 
-			if (!zend_parse_arg_long(arg, &dest, NULL, 0, 0)) {
+			if (!zend_parse_arg_long(arg, &dest, NULL, 0, 0, strict)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -636,7 +636,7 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg)
 		case IS_DOUBLE: {
 			double dest;
 
-			if (!zend_parse_arg_double(arg, &dest, NULL, 0)) {
+			if (!zend_parse_arg_double(arg, &dest, NULL, 0, strict)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -646,7 +646,7 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg)
 		case IS_STRING: {
 			zend_string *dest;
 
-			if (!zend_parse_arg_str(arg, &dest, 0)) {
+			if (!zend_parse_arg_str(arg, &dest, 0, strict)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -695,7 +695,7 @@ static void zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, z
 			if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
 			}
-		} else if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(cur_arg_info->type_hint,  Z_TYPE_P(arg)))) {
+		} else if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(cur_arg_info->type_hint, Z_TYPE_P(arg)))) {
 			if (Z_TYPE_P(arg) == IS_NULL) {
 				if (!cur_arg_info->allow_null) {
 failure:
@@ -703,7 +703,7 @@ failure:
 				}
 				return;
 			}
-			if (strict || !zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg)) {
+			if (!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg, strict)) {
 				goto failure;
 			}
 		}
@@ -755,7 +755,7 @@ failure:
 				}
 				return;
 			}
-			if (strict || !zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg)) {
+			if (!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg, strict)) {
 				goto failure;
 			}
 		}
