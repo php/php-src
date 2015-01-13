@@ -2843,7 +2843,7 @@ ZEND_API const char* zend_memnrstr_ex(const char *haystack, const char *needle, 
 			return (const char *)p;
 		}
 		
-		if (p == haystack) {
+		if (UNEXPECTED(p == haystack)) {
 			return NULL;
 		}
 
