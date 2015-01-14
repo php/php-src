@@ -101,25 +101,24 @@ static const uint32_t uninitialized_bucket = {INVALID_IDX};
 
 ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
+#if defined(ZEND_WIN32)
+	unsigned long index;
+#endif
 	/* Use big enough power of 2 */
-#if defined(PHP_WIN32) && !defined(__clang__)
-	if (nSize <= 8) {
-		ht->nTableSize = 8;
-	} else if (nSize >= 0x80000000) {
-		/* prevent overflow */
-		ht->nTableSize = 0x80000000;
-	} else {
-		ht->nTableSize = 1U << __lzcnt(nSize);
-		if (ht->nTableSize < nSize) {
-			ht->nTableSize <<= 1;
-		}
-	}
-#else
 	/* size should be between 8 and 0x80000000 */
 	nSize = (nSize <= 8 ? 8 : (nSize >= 0x80000000 ? 0x80000000 : nSize));
-# if defined(__GNUC__)
+
+#if defined(ZEND_WIN32)
+	if (BitScanReverse(&index, nSize - 1)) {
+		ht->nTableSize = 0x2 << ((31 - index) ^ 0x1f);
+	} else {
+		/* nSize is ensured to be in the valid range, fall back to it
+		   rather than using an undefined bis scan result. */
+		ht->nTableSize = nSize;
+	}
+#elif defined(__GNUC__)
 	ht->nTableSize =  0x2 << (__builtin_clz(nSize - 1) ^ 0x1f);
-# else
+#else
 	nSize -= 1;
 	nSize |= (nSize >> 1);
 	nSize |= (nSize >> 2);
@@ -127,7 +126,6 @@ ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestru
 	nSize |= (nSize >> 8);
 	nSize |= (nSize >> 16);
 	ht->nTableSize = nSize + 1;
-# endif
 #endif
 
 	ht->nTableMask = 0;
