@@ -117,7 +117,7 @@ static zend_object *spoofchecker_clone_obj(zval *object) /* {{{ */
 
 	new_obj_val = Spoofchecker_ce_ptr->create_object(Z_OBJCE_P(object));
 	new_sfo = php_intl_spoofchecker_fetch_object(new_obj_val);
-	/* clone standard parts */	
+	/* clone standard parts */
 	zend_objects_clone_members(&new_sfo->zo, &sfo->zo);
 	/* clone internal object */
 	new_sfo->uspoof = uspoof_clone(sfo->uspoof, SPOOFCHECKER_ERROR_CODE_P(new_sfo));
@@ -146,7 +146,7 @@ void spoofchecker_register_Spoofchecker_class(void)
 	memcpy(&Spoofchecker_handlers, zend_get_std_object_handlers(),
 		sizeof Spoofchecker_handlers);
 	Spoofchecker_handlers.offset = XtOffsetOf(Spoofchecker_object, zo);
-	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj; 
+	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj;
 	Spoofchecker_handlers.dtor_obj = Spoofchecker_objects_dtor;
 	Spoofchecker_handlers.free_obj = Spoofchecker_objects_free;
 

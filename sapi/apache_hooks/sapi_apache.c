@@ -34,7 +34,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode)
 	}
 	/* sending a file handle to another dll is not working
 	   so let zend open it. */
-	
+
 	if (display_source_mode) {
 		zend_syntax_highlighter_ini syntax_highlighter_ini;
 
@@ -53,7 +53,7 @@ int apache_php_module_main(request_rec *r, int display_source_mode)
 		(void) php_execute_script(&file_handle);
 	}
 	AP(in_request) = 0;
-	
+
 	return (OK);
 }
 /* }}} */

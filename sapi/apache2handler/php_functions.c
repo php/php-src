@@ -59,7 +59,7 @@ php_apache2_info_struct php_apache2_info;
 static request_rec *php_apache_lookup_uri(char *filename)
 {
 	php_struct *ctx = SG(server_context);
-	
+
 	if (!filename || !ctx || !ctx->r) {
 		return NULL;
 	}
@@ -129,7 +129,7 @@ PHP_FUNCTION(apache_lookup_uri)
 		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
 		RETURN_FALSE;
 	}
-	
+
 	if (rr->status == HTTP_OK) {
 		object_init(return_value);
 
@@ -162,7 +162,7 @@ PHP_FUNCTION(apache_lookup_uri)
 		ap_destroy_sub_req(rr);
 		return;
 	}
-	
+
 	php_error_docref(NULL, E_WARNING, "Unable to include '%s' - error finding URI", filename);
 	ap_destroy_sub_req(rr);
 	RETURN_FALSE;
@@ -181,7 +181,7 @@ PHP_FUNCTION(apache_request_headers)
 	}
 
 	array_init(return_value);
-	
+
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->r->headers_in);
 
@@ -205,7 +205,7 @@ PHP_FUNCTION(apache_response_headers)
 	}
 
 	array_init(return_value);
-	
+
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->r->headers_out);
 
@@ -349,9 +349,9 @@ PHP_FUNCTION(apache_get_modules)
 {
 	int n;
 	char *p;
-	
+
 	array_init(return_value);
-	
+
 	for (n = 0; ap_loaded_modules[n]; ++n) {
 		char *s = (char *) ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
@@ -378,7 +378,7 @@ PHP_MINFO_FUNCTION(apache)
 	AP_DECLARE_DATA extern unixd_config_rec unixd_config;
 #endif
 #endif
-	
+
 	for (n = 0; ap_loaded_modules[n]; ++n) {
 		char *s = (char *) ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
@@ -395,21 +395,21 @@ PHP_MINFO_FUNCTION(apache)
 			tmp1.s->val[0] = '\0';
 		}
 	}
-            
+
 	php_info_print_table_start();
 	if (apv && *apv) {
 		php_info_print_table_row(2, "Apache Version", apv);
 	}
 	snprintf(tmp, sizeof(tmp), "%d", MODULE_MAGIC_NUMBER);
 	php_info_print_table_row(2, "Apache API Version", tmp);
-	
+
 	if (serv->server_admin && *(serv->server_admin)) {
 		php_info_print_table_row(2, "Server Administrator", serv->server_admin);
 	}
-	
+
 	snprintf(tmp, sizeof(tmp), "%s:%u", serv->server_hostname, serv->port);
 	php_info_print_table_row(2, "Hostname:Port", tmp);
-	
+
 #if !defined(WIN32) && !defined(WINNT) && !defined(NETWARE)
 #if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
 	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", ap_unixd_config.user_name, ap_unixd_config.user_id, ap_unixd_config.group_id);
@@ -424,25 +424,25 @@ PHP_MINFO_FUNCTION(apache)
 	php_info_print_table_row(2, "Max Requests", tmp);
 
 	apr_snprintf(tmp, sizeof tmp,
-				 "Connection: %" APR_TIME_T_FMT " - Keep-Alive: %" APR_TIME_T_FMT, 
+				 "Connection: %" APR_TIME_T_FMT " - Keep-Alive: %" APR_TIME_T_FMT,
 				 apr_time_sec(serv->timeout), apr_time_sec(serv->keep_alive_timeout));
 	php_info_print_table_row(2, "Timeouts", tmp);
-	
+
 	php_info_print_table_row(2, "Virtual Server", (serv->is_virtual ? "Yes" : "No"));
 	php_info_print_table_row(2, "Server Root", ap_server_root);
 	php_info_print_table_row(2, "Loaded Modules", tmp1.s->val);
 
 	smart_str_free(&tmp1);
 	php_info_print_table_end();
-	
+
 	DISPLAY_INI_ENTRIES();
 
 	{
 		const apr_array_header_t *arr = apr_table_elts(((php_struct *) SG(server_context))->r->subprocess_env);
 		char *key, *val;
-		
+
 		SECTION("Apache Environment");
-		php_info_print_table_start();	
+		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
 		APR_ARRAY_FOREACH_OPEN(arr, key, val)
 			if (!val) {
@@ -450,14 +450,14 @@ PHP_MINFO_FUNCTION(apache)
 			}
 			php_info_print_table_row(2, key, val);
 		APR_ARRAY_FOREACH_CLOSE()
-		                                                
-		php_info_print_table_end();	
-		
+
+		php_info_print_table_end();
+
 		SECTION("HTTP Headers Information");
 		php_info_print_table_start();
 		php_info_print_table_colspan_header(2, "HTTP Request Headers");
 		php_info_print_table_row(2, "HTTP Request", ((php_struct *) SG(server_context))->r->the_request);
-		
+
 		arr = apr_table_elts(((php_struct *) SG(server_context))->r->headers_in);
 		APR_ARRAY_FOREACH_OPEN(arr, key, val)
 			if (!val) {
@@ -474,7 +474,7 @@ PHP_MINFO_FUNCTION(apache)
 			}
 		        php_info_print_table_row(2, key, val);
 		APR_ARRAY_FOREACH_CLOSE()
-		
+
 		php_info_print_table_end();
 	}
 }
@@ -519,7 +519,7 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry apache_functions[] = {
 	PHP_FE(apache_lookup_uri, 		arginfo_apache2handler_lookup_uri)
-	PHP_FE(virtual, 				arginfo_apache2handler_virtual) 
+	PHP_FE(virtual, 				arginfo_apache2handler_virtual)
 	PHP_FE(apache_request_headers, 	arginfo_apache2handler_getallheaders)
 	PHP_FE(apache_response_headers, arginfo_apache2handler_response_headers)
 	PHP_FE(apache_setenv, 		arginfo_apache2handler_setenv)
@@ -559,7 +559,7 @@ zend_module_entry php_apache_module = {
 	PHP_MINIT(apache),
 	PHP_MSHUTDOWN(apache),
 	NULL,
-	NULL, 
+	NULL,
 	PHP_MINFO(apache),
 	NULL,
 	STANDARD_MODULE_PROPERTIES

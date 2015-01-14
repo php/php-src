@@ -500,11 +500,11 @@ static int spl_heap_object_count_elements(zval *object, zend_long *count) /* {{{
 		*count = 0;
 		return FAILURE;
 	}
-	
+
 	*count = spl_ptr_heap_count(intern->heap);
 
 	return SUCCESS;
-} 
+}
 /* }}} */
 
 static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zval *obj, int *is_temp) { /* {{{ */
@@ -620,7 +620,7 @@ SPL_METHOD(SplHeap, insert)
 	spl_ptr_heap_insert(intern->heap, value, getThis());
 
 	RETURN_TRUE;
-} 
+}
 /* }}} */
 
 /* {{{ proto mixed SplHeap::extract()
@@ -649,7 +649,7 @@ SPL_METHOD(SplHeap, extract)
 	}
 
 	RETURN_ZVAL(&value, 1, 1);
-} 
+}
 /* }}} */
 
 /* {{{ proto bool SplPriorityQueue::insert(mixed $value, mixed $priority)
@@ -680,7 +680,7 @@ SPL_METHOD(SplPriorityQueue, insert)
 	spl_ptr_heap_insert(intern->heap, &elem, getThis());
 
 	RETURN_TRUE;
-} 
+}
 /* }}} */
 
 /* {{{ proto mixed SplPriorityQueue::extract()
@@ -722,7 +722,7 @@ SPL_METHOD(SplPriorityQueue, extract)
 
 	RETVAL_ZVAL(value_out, 1, 0);
 	zval_ptr_dtor(&value);
-} 
+}
 /* }}} */
 
 /* {{{ proto mixed SplPriorityQueue::top()
@@ -842,7 +842,7 @@ SPL_METHOD(SplPriorityQueue, compare)
 	}
 
 	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL));
-} 
+}
 /* }}} */
 
 /* {{{ proto mixed SplHeap::top()
@@ -885,7 +885,7 @@ SPL_METHOD(SplMinHeap, compare)
 	}
 
 	RETURN_LONG(spl_ptr_heap_zval_min_cmp(a, b, NULL));
-} 
+}
 /* }}} */
 
 /* {{{ proto bool SplMaxHeap::compare(mixed $a, mixed $b)
@@ -899,7 +899,7 @@ SPL_METHOD(SplMaxHeap, compare)
 	}
 
 	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL));
-} 
+}
 /* }}} */
 
 static void spl_heap_it_dtor(zend_object_iterator *iter) /* {{{ */
@@ -994,11 +994,11 @@ static void spl_heap_it_move_forward(zend_object_iterator *iter) /* {{{ */
 SPL_METHOD(SplHeap, key)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
-	}		
-	
+	}
+
 	RETURN_LONG(intern->heap->count - 1);
 }
 /* }}} */
@@ -1010,7 +1010,7 @@ SPL_METHOD(SplHeap, next)
 	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
 	zval elem;
 	spl_ptr_heap_delete_top(intern->heap, &elem, getThis());
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1024,7 +1024,7 @@ SPL_METHOD(SplHeap, next)
 SPL_METHOD(SplHeap, valid)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1050,7 +1050,7 @@ SPL_METHOD(SplHeap, current)
 {
 	spl_heap_object *intern  = Z_SPLHEAP_P(getThis());
 	zval *element = &intern->heap->elements[0];
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1069,7 +1069,7 @@ SPL_METHOD(SplPriorityQueue, current)
 {
 	spl_heap_object  *intern  = Z_SPLHEAP_P(getThis());
 	zval *element = &intern->heap->elements[0];
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1119,7 +1119,7 @@ zend_object_iterator *spl_heap_get_iterator(zend_class_entry *ce, zval *object, 
 	}
 
 	iterator = emalloc(sizeof(spl_heap_it));
-	
+
 	zend_iterator_init(&iterator->intern.it);
 
 	ZVAL_COPY(&iterator->intern.it.data, object);

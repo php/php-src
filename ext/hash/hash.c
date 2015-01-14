@@ -243,7 +243,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 	void *context;
 	php_stream *stream = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|b", &algo, &algo_len, &data, &data_len, 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|b", &algo, &algo_len, &data, &data_len,
 																  &key, &key_len, &raw_output) == FAILURE) {
 		return;
 	}
@@ -266,7 +266,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 	K = emalloc(ops->block_size);
 	digest = zend_string_alloc(ops->digest_size, 0);
 
-	php_hash_hmac_prep_key(K, ops, context, (unsigned char *) key, key_len);		
+	php_hash_hmac_prep_key(K, ops, context, (unsigned char *) key, key_len);
 
 	if (isfilename) {
 		char buf[1024];
@@ -377,7 +377,7 @@ PHP_FUNCTION(hash_init)
 		} else {
 			memcpy(K, key, key_len);
 		}
-			
+
 		/* XOR ipad */
 		for(i=0; i < ops->block_size; i++) {
 			K[i] ^= 0x36;
@@ -442,7 +442,7 @@ PHP_FUNCTION(hash_update_stream)
 		hash->ops->hash_update(hash->context, (unsigned char *) buf, n);
 		length -= n;
 		didread += n;
-	} 
+	}
 
 	RETURN_LONG(didread);
 }
@@ -682,7 +682,7 @@ PHP_FUNCTION(hash_pbkdf2)
 		/* temp = digest */
 		memcpy(temp, digest, ops->digest_size);
 
-		/* 
+		/*
 		 * Note that the loop starting at 1 is intentional, since we've already done
 		 * the first round of the algorithm.
 		 */

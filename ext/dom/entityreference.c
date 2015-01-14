@@ -34,10 +34,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMEntityReference extends DOMNode 
+* class DOMEntityReference extends DOMNode
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-11C98490
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_entityreference_class_functions[] = {

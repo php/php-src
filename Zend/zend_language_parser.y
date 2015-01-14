@@ -71,7 +71,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left '?' ':'
 %right T_COALESCE
 %left T_BOOLEAN_OR
-%left T_BOOLEAN_AND 
+%left T_BOOLEAN_AND
 %left '|'
 %left '^'
 %left '&'
@@ -87,8 +87,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %right '['
 %nonassoc T_NEW T_CLONE
 %left T_ELSEIF
-%left T_ELSE 
-%left T_ENDIF 
+%left T_ELSE
+%left T_ENDIF
 %right T_STATIC T_ABSTRACT T_FINAL T_PRIVATE T_PROTECTED T_PUBLIC
 
 %token <ast> T_LNUMBER   "integer number (T_LNUMBER)"
@@ -228,7 +228,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_POW_EQUAL       "**= (T_POW_EQUAL)"
 
 %type <ast> top_statement namespace_name name statement function_declaration_statement
-%type <ast> class_declaration_statement use_declaration const_decl inner_statement
+%type <ast> class_declaration_statement trait_declaration_statement
+%type <ast> interface_declaration_statement interface_extends_list
+%type <ast> use_declaration const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
 %type <ast> extends_from parameter optional_type argument expr_without_variable global_var
@@ -243,15 +245,16 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
 %type <ast> echo_expr_list unset_variables catch_list parameter_list class_statement_list
-%type <ast> implements_list interface_extends_list case_list if_stmt_without_else
+%type <ast> implements_list case_list if_stmt_without_else
 %type <ast> non_empty_parameter_list argument_list non_empty_argument_list property_list
 %type <ast> class_const_list name_list trait_adaptations method_body non_empty_for_exprs
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list array_pair_list non_empty_array_pair_list
 %type <ast> assignment_list
 
-%type <num> returns_ref function is_reference is_variadic class_type variable_modifiers
+%type <num> returns_ref function is_reference is_variadic variable_modifiers
 %type <num> method_modifiers trait_modifiers non_empty_member_modifiers member_modifier
+%type <num> class_modifiers class_modifier
 
 %type <str> backup_doc_comment
 
@@ -278,9 +281,11 @@ name:
 ;
 
 top_statement:
-		statement						{ $$ = $1; }
-	|	function_declaration_statement	{ $$ = $1; }
-	|	class_declaration_statement		{ $$ = $1; }
+		statement							{ $$ = $1; }
+	|	function_declaration_statement		{ $$ = $1; }
+	|	class_declaration_statement			{ $$ = $1; }
+	|	trait_declaration_statement			{ $$ = $1; }
+	|	interface_declaration_statement		{ $$ = $1; }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = zend_ast_create(ZEND_AST_HALT_COMPILER,
 			      zend_ast_create_zval_from_long(zend_get_scanned_file_offset()));
@@ -333,8 +338,10 @@ inner_statement_list:
 
 inner_statement:
 		statement { $$ = $1; }
-	|	function_declaration_statement { $$ = $1; }
-	|	class_declaration_statement { $$ = $1; }
+	|	function_declaration_statement 		{ $$ = $1; }
+	|	class_declaration_statement 		{ $$ = $1; }
+	|	trait_declaration_statement			{ $$ = $1; }
+	|	interface_declaration_statement		{ $$ = $1; }
 	|	T_HALT_COMPILER '(' ')' ';'
 			{ $$ = NULL; zend_error_noreturn(E_COMPILE_ERROR,
 			      "__HALT_COMPILER() can only be used from the outermost scope"); }
@@ -418,21 +425,34 @@ is_variadic:
 ;
 
 class_declaration_statement:
-		class_type { $<num>$ = CG(zend_lineno); }
+		class_modifiers T_CLASS { $<num>$ = CG(zend_lineno); }
 		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>2, $6,
-				  zend_ast_get_str($3), $4, $5, $8); }
-	|	T_INTERFACE { $<num>$ = CG(zend_lineno); }
-		T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $5,
-				  zend_ast_get_str($3), NULL, $4, $7); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9); }
+	|	T_CLASS { $<num>$ = CG(zend_lineno); }
+		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8); }
 ;
 
-class_type:
-		T_CLASS				{ $$ = 0; }
-	|	T_ABSTRACT T_CLASS	{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
-	|	T_FINAL T_CLASS		{ $$ = ZEND_ACC_FINAL; }
-	|	T_TRAIT				{ $$ = ZEND_ACC_TRAIT; }
+class_modifiers:
+		class_modifier 					{ $$ = $1; }
+	|	class_modifiers class_modifier 	{ $$ = zend_add_class_modifier($1, $2); }
+;
+
+class_modifier:
+		T_ABSTRACT 		{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
+	|	T_FINAL 		{ $$ = ZEND_ACC_FINAL; }
+;
+
+trait_declaration_statement:
+		T_TRAIT { $<num>$ = CG(zend_lineno); }
+		T_STRING backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_TRAIT, $<num>2, $4, zend_ast_get_str($3), NULL, NULL, $6); }
+;
+
+interface_declaration_statement:
+		T_INTERFACE { $<num>$ = CG(zend_lineno); }
+		T_STRING interface_extends_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_INTERFACE, $<num>2, $5, zend_ast_get_str($3), NULL, $4, $7); }
 ;
 
 extends_from:
@@ -768,9 +788,9 @@ expr_without_variable:
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_MOD, $1, $3); }
 	|	variable T_AND_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_BW_AND, $1, $3); }
-	|	variable T_OR_EQUAL expr 
+	|	variable T_OR_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_BW_OR, $1, $3); }
-	|	variable T_XOR_EQUAL expr 
+	|	variable T_XOR_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_BW_XOR, $1, $3); }
 	|	variable T_SL_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_SL, $1, $3); }
@@ -1175,7 +1195,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			char buffer[120];
 			const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
 			unsigned int len = 0, toklen = 0, yystr_len;
-			
+
 			CG(parse_error) = 1;
 
 			if (LANG_SCNG(yy_text)[0] == 0 &&
@@ -1184,11 +1204,11 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 				yystpcpy(yyres, "end of file");
 				return sizeof("end of file")-1;
 			}
-			
+
 			str = LANG_SCNG(yy_text);
 			end = memchr(str, '\n', LANG_SCNG(yy_leng));
 			yystr_len = (unsigned int)yystrlen(yystr);
-			
+
 			if ((tok1 = memchr(yystr, '(', yystr_len)) != NULL
 				&& (tok2 = zend_memrchr(yystr, ')', yystr_len)) != NULL) {
 				toklen = (tok2 - tok1) + 1;
@@ -1196,7 +1216,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 				tok1 = tok2 = NULL;
 				toklen = 0;
 			}
-			
+
 			if (end == NULL) {
 				len = LANG_SCNG(yy_leng) > 30 ? 30 : LANG_SCNG(yy_leng);
 			} else {
@@ -1209,8 +1229,8 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			}
 			yystpcpy(yyres, buffer);
 			return len + (toklen ? toklen + 1 : 0) + 2;
-		}		
-	}	
+		}
+	}
 	if (*yystr == '"') {
 		YYSIZE_T yyn = 0;
 		const char *yyp = yystr;

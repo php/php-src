@@ -38,7 +38,7 @@
 
 static void php_dba_db4_errcall_fcn(
 #if (DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 3))
-	const DB_ENV *dbenv, 
+	const DB_ENV *dbenv,
 #endif
 	const char *errpfx, const char *msg)
 {
@@ -87,11 +87,11 @@ DBA_OPEN_FUNC(db4)
 	type = info->mode == DBA_READER ? DB_UNKNOWN :
 		info->mode == DBA_TRUNC ? DB_BTREE :
 		s ? DB_BTREE : DB_UNKNOWN;
-	  
+
 	gmode = info->mode == DBA_READER ? DB_RDONLY :
-		(info->mode == DBA_CREAT && s) ? DB_CREATE : 
+		(info->mode == DBA_CREAT && s) ? DB_CREATE :
 		(info->mode == DBA_CREAT && !s) ? 0 :
-		info->mode == DBA_WRITER ? 0         : 
+		info->mode == DBA_WRITER ? 0         :
 		info->mode == DBA_TRUNC ? DB_CREATE | DB_TRUNCATE : -1;
 #else
 	if (!s && !check_stat.st_size) {
@@ -101,10 +101,10 @@ DBA_OPEN_FUNC(db4)
 	type = info->mode == DBA_READER ? DB_UNKNOWN :
 		(info->mode == DBA_TRUNC || info->mode == DBA_CREAT) ? DB_BTREE :
 		s ? DB_BTREE : DB_UNKNOWN;
-	  
+
 	gmode = info->mode == DBA_READER ? DB_RDONLY :
-		info->mode == DBA_CREAT ? DB_CREATE : 
-		info->mode == DBA_WRITER ? 0         : 
+		info->mode == DBA_CREAT ? DB_CREATE :
+		info->mode == DBA_WRITER ? 0         :
 		info->mode == DBA_TRUNC ? DB_CREATE | DB_TRUNCATE : -1;
 #endif
 
@@ -135,7 +135,7 @@ DBA_OPEN_FUNC(db4)
 			data->dbp = dbp;
 			data->cursor = NULL;
 			info->dbf = data;
-		
+
 			return SUCCESS;
 		} else {
 			dbp->close(dbp, 0);
@@ -151,7 +151,7 @@ DBA_OPEN_FUNC(db4)
 DBA_CLOSE_FUNC(db4)
 {
 	DB4_DATA;
-	
+
 	if (dba->cursor) dba->cursor->c_close(dba->cursor);
 	dba->dbp->close(dba->dbp, 0);
 	pefree(dba, info->flags&DBA_PERSISTENT);
@@ -163,7 +163,7 @@ DBA_FETCH_FUNC(db4)
 	char *new = NULL;
 	DB4_DATA;
 	DB4_GKEY;
-	
+
 	memset(&gval, 0, sizeof(gval));
 	if (info->flags & DBA_PERSISTENT) {
 		gval.flags |= DB_DBT_MALLOC;
@@ -183,12 +183,12 @@ DBA_UPDATE_FUNC(db4)
 	DBT gval;
 	DB4_DATA;
 	DB4_GKEY;
-	
+
 	memset(&gval, 0, sizeof(gval));
 	gval.data = (char *) val;
 	gval.size = vallen;
 
-	if (!dba->dbp->put(dba->dbp, NULL, &gkey, &gval, 
+	if (!dba->dbp->put(dba->dbp, NULL, &gkey, &gval,
 				mode == 1 ? DB_NOOVERWRITE : 0)) {
 		return SUCCESS;
 	}
@@ -200,9 +200,9 @@ DBA_EXISTS_FUNC(db4)
 	DBT gval;
 	DB4_DATA;
 	DB4_GKEY;
-	
+
 	memset(&gval, 0, sizeof(gval));
-	
+
 	if (info->flags & DBA_PERSISTENT) {
 		gval.flags |= DB_DBT_MALLOC;
 	}
@@ -246,7 +246,7 @@ DBA_NEXTKEY_FUNC(db4)
 	DB4_DATA;
 	DBT gkey, gval;
 	char *nkey = NULL;
-	
+
 	memset(&gkey, 0, sizeof(gkey));
 	memset(&gval, 0, sizeof(gval));
 

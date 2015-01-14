@@ -57,7 +57,7 @@ static char* php_password_get_algo_name(const php_password_algo algo)
 	}
 }
 
-static php_password_algo php_password_determine_algo(const char *hash, const size_t len) 
+static php_password_algo php_password_determine_algo(const char *hash, const size_t len)
 {
 	if (len > 3 && hash[0] == '$' && hash[1] == '2' && hash[2] == 'y' && len == 60) {
 		return PHP_PASSWORD_BCRYPT;
@@ -156,7 +156,7 @@ static int php_password_make_salt(size_t length, char *ret) /* {{{ */
 		}
 	}
 
-	result = safe_emalloc(length, 1, 1); 
+	result = safe_emalloc(length, 1, 1);
 	if (php_password_salt_to64(buffer, raw_length, length, result) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Generated salt too short");
 		efree(buffer);
@@ -186,7 +186,7 @@ PHP_FUNCTION(password_get_info)
 
 	algo = php_password_determine_algo(hash, (size_t) hash_len);
 	algo_name = php_password_get_algo_name(algo);
-	
+
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 			{
@@ -201,10 +201,10 @@ PHP_FUNCTION(password_get_info)
 	}
 
 	array_init(return_value);
-	
+
 	add_assoc_long(return_value, "algo", algo);
 	add_assoc_string(return_value, "algoName", algo_name);
-	add_assoc_zval(return_value, "options", &options);	
+	add_assoc_zval(return_value, "options", &options);
 }
 
 PHP_FUNCTION(password_needs_rehash)
@@ -215,13 +215,13 @@ PHP_FUNCTION(password_needs_rehash)
 	char *hash;
 	HashTable *options = 0;
 	zval *option_buffer;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
 		return;
 	}
 
 	algo = php_password_determine_algo(hash, (size_t) hash_len);
-	
+
 	if (algo != new_algo) {
 		RETURN_TRUE;
 	}
@@ -230,7 +230,7 @@ PHP_FUNCTION(password_needs_rehash)
 		case PHP_PASSWORD_BCRYPT:
 			{
 				zend_long new_cost = PHP_PASSWORD_BCRYPT_COST, cost = 0;
-				
+
 				if (options && (option_buffer = zend_symtable_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 					if (Z_TYPE_P(option_buffer) != IS_LONG) {
 						zval cast_option_buffer;
@@ -264,7 +264,7 @@ PHP_FUNCTION(password_verify)
 	size_t password_len, hash_len;
 	char *password, *hash;
 	zend_string *ret;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &password, &password_len, &hash, &hash_len) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -276,7 +276,7 @@ PHP_FUNCTION(password_verify)
 		zend_string_free(ret);
 		RETURN_FALSE;
 	}
-	
+
 	/* We're using this method instead of == in order to provide
 	 * resistance towards timing attacks. This is a constant time
 	 * equality check that will always check every byte of both
@@ -288,7 +288,7 @@ PHP_FUNCTION(password_verify)
 	zend_string_free(ret);
 
 	RETURN_BOOL(status == 0);
-	
+
 }
 /* }}} */
 
@@ -313,7 +313,7 @@ PHP_FUNCTION(password_hash)
 		case PHP_PASSWORD_BCRYPT:
 		{
 			zend_long cost = PHP_PASSWORD_BCRYPT_COST;
-	
+
 			if (options && (option_buffer = zend_symtable_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 				if (Z_TYPE_P(option_buffer) != IS_LONG) {
 					zval cast_option_buffer;
@@ -325,12 +325,12 @@ PHP_FUNCTION(password_hash)
 					cost = Z_LVAL_P(option_buffer);
 				}
 			}
-	
+
 			if (cost < 4 || cost > 31) {
 				php_error_docref(NULL, E_WARNING, "Invalid bcrypt cost parameter specified: " ZEND_LONG_FMT, cost);
 				RETURN_NULL();
 			}
-			
+
 			required_salt_len = 22;
 			hash_format = emalloc(8);
 			sprintf(hash_format, "$2y$%02ld$", (long) cost);
@@ -415,7 +415,7 @@ PHP_FUNCTION(password_hash)
 		}
 		salt_len = required_salt_len;
 	}
-	
+
 	salt[salt_len] = 0;
 
 	hash = safe_emalloc(salt_len + hash_format_len, 1, 1);

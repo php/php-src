@@ -136,7 +136,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 					}
 					zend_hash_move_forward_ex(&EG(regular_list), &pos);
 				}
-				
+
 				*stream = (php_stream*)le->ptr;
 				if (!regentry) { /* not found in regular list */
 					GC_REFCOUNT(le)++;
@@ -271,7 +271,7 @@ PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int option
 		if (!list) {
 			zend_llist new_list;
 			zend_llist_init(&new_list, sizeof(buffer), wrapper_error_dtor, 0);
-			list = zend_hash_str_update_mem(FG(wrapper_errors), (const char*)&wrapper, 
+			list = zend_hash_str_update_mem(FG(wrapper_errors), (const char*)&wrapper,
 					sizeof(wrapper), &new_list, sizeof(new_list));
 		}
 
@@ -400,7 +400,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options) /* {{{ */
 		fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%s\n",
 			stream->ops->label, stream, stream->orig_path, stream->in_free, _php_stream_pretty_free_options(close_options, out));
 	}
-	
+
 #endif
 
 	if (stream->in_free) {
@@ -1649,7 +1649,7 @@ void php_shutdown_stream_hashes(void)
 		efree(FG(stream_filters));
 		FG(stream_filters) = NULL;
 	}
-    
+
     if (FG(wrapper_errors)) {
 		zend_hash_destroy(FG(wrapper_errors));
 		efree(FG(wrapper_errors));

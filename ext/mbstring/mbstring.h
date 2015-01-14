@@ -143,10 +143,10 @@ MBSTRING_API int php_mb_check_encoding_list(const char *encoding_list);
 MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc);
 MBSTRING_API size_t php_mb_mbchar_bytes(const char *s);
 
-MBSTRING_API int php_mb_encoding_detector_ex(const char *arg_string, int arg_length, 
+MBSTRING_API int php_mb_encoding_detector_ex(const char *arg_string, int arg_length,
 											 char *arg_list);
 
-MBSTRING_API int php_mb_encoding_converter_ex(char **str, int *len, const char *encoding_to, 
+MBSTRING_API int php_mb_encoding_converter_ex(char **str, int *len, const char *encoding_to,
 											  const char *encoding_from);
 MBSTRING_API int php_mb_stripos(int mode, const char *old_haystack, unsigned int old_haystack_len, const char *old_needle, unsigned int old_needle_len, long offset, const char *from_encoding);
 

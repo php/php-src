@@ -68,12 +68,12 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length)
 {
 	int n;
 	uint sent = 0;
-	
+
 	if (TG(sbuf).c != 0) {
 		smart_str_appendl_ex(&TG(sbuf), str, str_length, 1);
 		return str_length;
 	}
-	
+
 	while (str_length > 0) {
 		PHP_SYS_CALL(n = send(TG(hc)->conn_fd, str, str_length, 0););
 
@@ -148,7 +148,7 @@ static int do_writev(struct iovec *vec, int nvec, int len)
 			smart_str_appendl_ex(&TG(sbuf), vec->iov_base, vec->iov_len, 1);
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -178,15 +178,15 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers)
 	zend_llist_position pos;
 	sapi_header_struct *h;
 	size_t len = 0;
-	
+
 	if (!SG(sapi_headers).http_status_line) {
 		ADD_VEC_S("HTTP/1.1 ");
-		p = zend_print_long_to_buf(buf+sizeof(buf)-1, 
+		p = zend_print_long_to_buf(buf+sizeof(buf)-1,
 				SG(sapi_headers).http_response_code);
 		ADD_VEC(p, strlen(p));
 		ADD_VEC_S(" HTTP\r\n");
 	} else {
-		ADD_VEC(SG(sapi_headers).http_status_line, 
+		ADD_VEC(SG(sapi_headers).http_status_line,
 				strlen(SG(sapi_headers).http_status_line));
 		ADD_VEC("\r\n", 2);
 	}
@@ -198,7 +198,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers)
 
 	h = zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 	while (h) {
-		
+
 		switch (h->header[0]) {
 			case 'c': case 'C':
 				if (!TG(seen_cl) && strncasecmp(h->header, CL_TOKEN, sizeof(CL_TOKEN)-1) == 0) {
@@ -216,7 +216,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers)
 		}
 #endif
 		ADD_VEC("\r\n", 2);
-		
+
 		h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
 	}
 
@@ -226,12 +226,12 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers)
 		TG(hc)->do_keep_alive = 0;
 		ADD_VEC(KA_NO, sizeof(KA_NO)-1);
 	}
-		
+
 	ADD_VEC("\r\n", 2);
 
 #ifdef SERIALIZE_HEADERS
 	sapi_thttpd_ub_write(vec_str.c, vec_str.len);
-#else			
+#else
 	do_writev(vec, n, len);
 #endif
 
@@ -255,7 +255,7 @@ static int sapi_thttpd_read_post(char *buffer, uint count_bytes)
 		TG(unconsumed_length) -= read_bytes;
 		CONSUME_BYTES(read_bytes);
 	}
-	
+
 	return read_bytes;
 }
 
@@ -287,8 +287,8 @@ static void sapi_thttpd_register_variables(zval *track_vars_array)
 		php_register_variable("SERVER_PROTOCOL", "HTTP/1.0", track_vars_array);
 	}
 
-	p = httpd_ntoa(&TG(hc)->client_addr);	
-	
+	p = httpd_ntoa(&TG(hc)->client_addr);
+
 	ADD_STRING_EX("REMOTE_ADDR", p);
 	ADD_STRING_EX("REMOTE_HOST", p);
 
@@ -323,7 +323,7 @@ static void sapi_thttpd_register_variables(zval *track_vars_array)
 
 	if (TG(hc)->contentlength != -1) {
 		ADD_STRING_EX("CONTENT_LENGTH",
-				zend_print_long_to_buf(buf + sizeof(buf) - 1, 
+				zend_print_long_to_buf(buf + sizeof(buf) - 1,
 					TG(hc)->contentlength));
 	}
 
@@ -372,10 +372,10 @@ static int sapi_thttpd_get_fd(int *nfd)
 static sapi_module_struct thttpd_sapi_module = {
 	"thttpd",
 	"thttpd",
-	
+
 	php_thttpd_startup,
 	php_module_shutdown_wrapper,
-	
+
 	NULL,									/* activate */
 	NULL,									/* deactivate */
 
@@ -385,7 +385,7 @@ static sapi_module_struct thttpd_sapi_module = {
 	NULL,									/* getenv */
 
 	php_error,
-	
+
 	NULL,
 	sapi_thttpd_send_headers,
 	NULL,
@@ -415,7 +415,7 @@ static void thttpd_module_main(int show_source)
 	if (php_request_startup() == FAILURE) {
 		return;
 	}
-	
+
 	if (show_source) {
 		zend_syntax_highlighter_ini syntax_highlighter_ini;
 
@@ -429,7 +429,7 @@ static void thttpd_module_main(int show_source)
 
 		php_execute_script(&file_handle);
 	}
-	
+
 	php_request_shutdown(NULL);
 }
 
@@ -446,7 +446,7 @@ static void thttpd_request_ctor(void)
 	smart_str_appends_ex(&s, TG(hc)->expnfilename, 1);
 	smart_str_0(&s);
 	SG(request_info).path_translated = s.c;
-	
+
 	s.c = NULL;
 	smart_str_appendc_ex(&s, '/', 1);
 	smart_str_appends_ex(&s, TG(hc)->origfilename, 1);
@@ -462,7 +462,7 @@ static void thttpd_request_ctor(void)
 		: TG(hc)->contentlength;
 
 	TG(unconsumed_length) = SG(request_info).content_length;
-	
+
 	php_handle_auth_data(TG(hc)->authorization);
 }
 
@@ -528,7 +528,7 @@ static httpd_conn *duplicate_conn(httpd_conn *hc, httpd_conn *nhc)
 #define HANDLE_STR(m) nhc->m = nhc->m ? strdup(nhc->m) : NULL
 	HANDLE_STRINGS();
 #undef HANDLE_STR
-	
+
 	return nhc;
 }
 
@@ -543,7 +543,7 @@ static httpd_conn *dequeue_request(void)
 {
 	httpd_conn *ret = NULL;
 	qreq_t *m;
-	
+
 	tsrm_mutex_lock(qr_lock);
 	if (queued_requests) {
 		m = queued_requests;
@@ -553,7 +553,7 @@ static httpd_conn *dequeue_request(void)
 		free(m);
 	}
 	tsrm_mutex_unlock(qr_lock);
-	
+
 	return ret;
 }
 
@@ -563,7 +563,7 @@ static void queue_request(httpd_conn *hc)
 {
 	qreq_t *m;
 	httpd_conn *nhc;
-	
+
 	/* Mark as long-running request */
 	hc->file_address = (char *) 1;
 
@@ -573,17 +573,17 @@ static void queue_request(httpd_conn *hc)
 	 */
 	nhc = malloc(sizeof *nhc);
 	duplicate_conn(hc, nhc);
-	
+
 	/* Allocate request queue container */
 	m = malloc(sizeof *m);
 	m->hc = nhc;
 	m->next = NULL;
-	
+
 	tsrm_mutex_lock(qr_lock);
 	/* Create new threads when reaching a certain threshold */
 	if (nr_threads < max_threads && nr_free_threads < 2) {
 		nr_threads++; /* protected by qr_lock */
-		
+
 		thread_atomic_inc(nr_free_threads);
 		thread_create_simple_detached(worker_thread);
 	}
@@ -663,13 +663,13 @@ static off_t thttpd_real_php_request(httpd_conn *hc, int show_source)
 		hc->should_linger = 1;
 		hc->do_keep_alive = 0;
 	}
-	
+
 	if (hc->contentlength != -1
 			&& SIZEOF_UNCONSUMED_BYTES() < hc->contentlength) {
 		hc->read_body_into_mem = 1;
 		return 0;
 	}
-	
+
 	thttpd_request_ctor();
 
 	thttpd_module_main(show_source);
@@ -678,11 +678,11 @@ static off_t thttpd_real_php_request(httpd_conn *hc, int show_source)
 	if (TG(seen_cl) == 0 || TG(seen_cn) == 1) {
 		TG(hc)->do_keep_alive = 0;
 	}
-	
+
 	if (TG(sbuf).c != 0) {
 		if (TG(hc)->response)
 			free(TG(hc)->response);
-		
+
 		TG(hc)->response = TG(sbuf).c;
 		TG(hc)->responselen = TG(sbuf).len;
 		TG(hc)->maxresponse = TG(sbuf).a;
@@ -706,7 +706,7 @@ off_t thttpd_php_request(httpd_conn *hc, int show_source)
 #endif
 }
 
-void thttpd_register_on_close(void (*arg)(int)) 
+void thttpd_register_on_close(void (*arg)(int))
 {
 	TG(on_close) = arg;
 }
@@ -746,9 +746,9 @@ void thttpd_php_init(void)
 
 	sapi_startup(&thttpd_sapi_module);
 	thttpd_sapi_module.startup(&thttpd_sapi_module);
-	
+
 	{
-	
+
 		SG(server_context) = (void *) 1;
 	}
 }

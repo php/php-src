@@ -470,7 +470,7 @@ static sapi_module_struct cli_sapi_module = {
 	sapi_cli_log_message,			/* Log message */
 	NULL,							/* Get request time */
 	NULL,							/* Child terminate */
-	
+
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
@@ -500,7 +500,7 @@ static void php_cli_usage(char *argv0)
 	} else {
 		prog = "php";
 	}
-	
+
 	printf( "Usage: %s [options] [-f] <file> [--] [args...]\n"
 				"   %s [options] -r <code> [--] [args...]\n"
 				"   %s [options] [-B <begin_code>] -R <code> [-E <end_code>] [--] [args...]\n"
@@ -559,7 +559,7 @@ static void cli_register_file_handles(void) /* {{{ */
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
 	zend_constant ic, oc, ec;
-	
+
 	s_in  = php_stream_open_wrapper_ex("php://stdin",  "rb", 0, NULL, sc_in);
 	s_out = php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, sc_out);
 	s_err = php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, sc_err);
@@ -570,7 +570,7 @@ static void cli_register_file_handles(void) /* {{{ */
 		if (s_err) php_stream_close(s_err);
 		return;
 	}
-	
+
 #if PHP_DEBUG
 	/* do not close stdout and stderr */
 	s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
@@ -582,7 +582,7 @@ static void cli_register_file_handles(void) /* {{{ */
 	php_stream_to_zval(s_in,  &zin);
 	php_stream_to_zval(s_out, &zout);
 	php_stream_to_zval(s_err, &zerr);
-	
+
 	ZVAL_COPY_VALUE(&ic.value, &zin);
 	ic.flags = CONST_CS;
 	ic.name = zend_string_init("STDIN", sizeof("STDIN")-1, 1);
@@ -664,7 +664,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	zend_string *key;
 
 	zend_try {
-	
+
 		CG(in_compilation) = 0; /* not initialized but needed for several options */
 
 		while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
@@ -798,7 +798,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				behavior=PHP_MODE_CLI_DIRECT;
 				exec_direct=php_optarg;
 				break;
-			
+
 			case 'R':
 				if (behavior == PHP_MODE_PROCESS_STDIN) {
 					if (exec_run || script_file) {
@@ -907,11 +907,11 @@ static int do_cli(int argc, char **argv) /* {{{ */
 		}
 
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
-		if (argc > php_optind 
-		  && !script_file 
-		  && behavior!=PHP_MODE_CLI_DIRECT 
-		  && behavior!=PHP_MODE_PROCESS_STDIN 
-		  && strcmp(argv[php_optind-1],"--")) 
+		if (argc > php_optind
+		  && !script_file
+		  && behavior!=PHP_MODE_CLI_DIRECT
+		  && behavior!=PHP_MODE_PROCESS_STDIN
+		  && strcmp(argv[php_optind-1],"--"))
 		{
 			script_file=argv[php_optind];
 			php_optind++;
@@ -1023,7 +1023,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				exit_status=254;
 			}
 			break;
-			
+
 		case PHP_MODE_PROCESS_STDIN:
 			{
 				char *input;
@@ -1098,7 +1098,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 							pce = reflection_zend_extension_ptr;
 							break;
 					}
-					
+
 					ZVAL_STRING(&arg, reflection_what);
 					object_init_ex(&ref, pce);
 
@@ -1138,7 +1138,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					} else {
 						php_info_print_module(module);
 					}
-					
+
 					efree(lcname);
 					break;
 				}
@@ -1348,7 +1348,7 @@ exit_loop:
 		goto out;
 	}
 	module_started = 1;
-	
+
 	/* -e option */
 	if (use_extended_info) {
 		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;

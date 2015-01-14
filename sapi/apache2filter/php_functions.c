@@ -46,11 +46,11 @@
 static request_rec *php_apache_lookup_uri(char *filename)
 {
 	php_struct *ctx;
-	
+
 	if (!filename) {
 		return NULL;
 	}
-	
+
 	ctx = SG(server_context);
 	return ap_sub_req_lookup_uri(filename, ctx->f->r, ctx->f->next);
 }
@@ -71,7 +71,7 @@ PHP_FUNCTION(virtual)
 		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
 		RETURN_FALSE;
 	}
-	
+
 	if (rr->status == HTTP_OK) {
 		if (ap_run_sub_req(rr)) {
 			php_error_docref(NULL, E_WARNING, "Unable to include '%s' - request execution failed", filename);
@@ -81,7 +81,7 @@ PHP_FUNCTION(virtual)
 		ap_destroy_sub_req(rr);
 		RETURN_TRUE;
 	}
-	
+
 	php_error_docref(NULL, E_WARNING, "Unable to include '%s' - error finding URI", filename);
 	ap_destroy_sub_req(rr);
 	RETURN_FALSE;
@@ -109,7 +109,7 @@ PHP_FUNCTION(apache_lookup_uri)
 		php_error_docref(NULL, E_WARNING, "Unable to include '%s' - URI lookup failed", filename);
 		RETURN_FALSE;
 	}
-	
+
 	if (rr->status == HTTP_OK) {
 		object_init(return_value);
 
@@ -142,7 +142,7 @@ PHP_FUNCTION(apache_lookup_uri)
 		ap_destroy_sub_req(rr);
 		return;
 	}
-	
+
 	php_error_docref(NULL, E_WARNING, "Unable to include '%s' - error finding URI", filename);
 	ap_destroy_sub_req(rr);
 	RETURN_FALSE;
@@ -157,7 +157,7 @@ PHP_FUNCTION(apache_request_headers)
 	char *key, *val;
 
 	array_init(return_value);
-	
+
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->f->r->headers_in);
 
@@ -177,7 +177,7 @@ PHP_FUNCTION(apache_response_headers)
 	char *key, *val;
 
 	array_init(return_value);
-	
+
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->f->r->headers_out);
 
@@ -307,9 +307,9 @@ PHP_FUNCTION(apache_get_modules)
 {
 	int n;
 	char *p;
-	
+
 	array_init(return_value);
-	
+
 	for (n = 0; ap_loaded_modules[n]; ++n) {
 		char *s = (char *) ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
@@ -327,7 +327,7 @@ PHP_MINFO_FUNCTION(apache)
 	smart_str tmp1 = {0};
 	int n;
 	char *p;
-	
+
 	for (n = 0; ap_loaded_modules[n]; ++n) {
 		char *s = (char *) ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
@@ -340,7 +340,7 @@ PHP_MINFO_FUNCTION(apache)
 	if ((tmp1.len - 1) >= 0) {
 		tmp1.c[tmp1.len - 1] = '\0';
 	}
-            
+
 	php_info_print_table_start();
 	if (apv && *apv) {
 		php_info_print_table_row(2, "Apache Version", apv);

@@ -22,11 +22,11 @@
 #ifndef PHP_HTTP_H
 #define PHP_HTTP_H
 
-int make_http_soap_request(zval  *this_ptr, 
-                           char  *request, 
-                           int    request_size, 
-                           char  *location, 
-                           char  *soapaction, 
+int make_http_soap_request(zval  *this_ptr,
+                           char  *request,
+                           int    request_size,
+                           char  *location,
+                           char  *soapaction,
                            int    soap_version,
                            zval  *response);
 

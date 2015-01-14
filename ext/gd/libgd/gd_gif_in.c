@@ -232,11 +232,11 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 		}
 		im->interlace = BitSet(buf[8], INTERLACE);
 		if (!useGlobalColormap) {
-			if (ReadColorMap(fd, bitPixel, localColorMap)) { 
+			if (ReadColorMap(fd, bitPixel, localColorMap)) {
 				gdImageDestroy(im);
 				return 0;
 			}
-			ReadImage(im, fd, width, height, localColorMap, 
+			ReadImage(im, fd, width, height, localColorMap,
 					BitSet(buf[8], INTERLACE), &ZeroDataBlock);
 		} else {
 			if (!haveGlobalColormap) {
@@ -244,7 +244,7 @@ gdImagePtr gdImageCreateFromGifCtx(gdIOCtxPtr fd) /* {{{ */
 				return 0;
 			}
 			ReadImage(im, fd, width, height,
-						ColorMap, 
+						ColorMap,
 						BitSet(buf[8], INTERLACE), &ZeroDataBlock);
 		}
 		if (Transparent != (-1)) {
@@ -567,7 +567,7 @@ ReadImage(gdImagePtr im, gdIOCtx *fd, int len, int height, unsigned char (*cmap)
 	}
 
 	if (c > MAX_LWZ_BITS) {
-		return;	
+		return;
 	}
 
 	/* Stash the color map into the image */

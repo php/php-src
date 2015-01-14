@@ -262,13 +262,13 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		int *error_code
 		);
 
-PHPAPI int php_network_get_sock_name(php_socket_t sock, 
+PHPAPI int php_network_get_sock_name(php_socket_t sock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen
 		);
-	
-PHPAPI int php_network_get_peer_name(php_socket_t sock, 
+
+PHPAPI int php_network_get_peer_name(php_socket_t sock,
 		zend_string **textaddr,
 		struct sockaddr **addr,
 		socklen_t *addrlen

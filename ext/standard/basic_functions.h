@@ -168,7 +168,8 @@ typedef struct _php_basic_globals {
 	HashTable putenv_ht;
 	zval  strtok_zval;
 	char *strtok_string;
-	zend_string *locale_string;
+	zend_string *locale_string; /* current LC_CTYPE locale (or NULL for 'C') */
+	zend_bool locale_changed;   /* locale was changed and has to be restored */
 	char *strtok_last;
 	char strtok_table[256];
 	zend_ulong strtok_len;
@@ -180,7 +181,7 @@ typedef struct _php_basic_globals {
 	zend_llist *user_tick_functions;
 
 	zval active_ini_file_section;
-	
+
 	/* pageinfo.c */
 	zend_long page_uid;
 	zend_long page_gid;
@@ -200,7 +201,7 @@ typedef struct _php_basic_globals {
 
 	zend_bool rand_is_seeded; /* Whether rand() has been seeded */
 	zend_bool mt_rand_is_seeded; /* Whether mt_rand() has been seeded */
-    
+
 	/* syslog.c */
 	char *syslog_device;
 

@@ -206,7 +206,7 @@ static int add_variable( const char * pKey, int keyLen, const char * pValue, int
 #else
     int filter_arg = (arg == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
 #endif
-    char * new_val = (char *) pValue; 
+    char * new_val = (char *) pValue;
     size_t new_val_len;
 
     if (sapi_module.input_filter(filter_arg, (char *)pKey, &new_val, valLen, &new_val_len)) {
@@ -304,7 +304,7 @@ static void litespeed_php_import_environment_variables(zval *array_ptr)
 
 
 #if ((PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || PHP_MAJOR_VERSION < 5)
-static int add_variable_magic_quote( const char * pKey, int keyLen, const char * pValue, int valLen, 
+static int add_variable_magic_quote( const char * pKey, int keyLen, const char * pValue, int valLen,
                          void * arg )
 {
     zval * gpc_element, **gpc_element_p;
@@ -489,11 +489,11 @@ static sapi_module_struct lsapi_sapi_module =
 };
 /* }}} */
 
-static int init_request_info( void )
+static void init_request_info( void )
 {
     char * pContentType = LSAPI_GetHeader( H_CONTENT_TYPE );
     char * pAuth;
-    
+
     SG(request_info).content_type = pContentType ? pContentType : "";
     SG(request_info).request_method = LSAPI_GetRequestMethod();
     SG(request_info).query_string = LSAPI_GetQueryString();
@@ -503,7 +503,7 @@ static int init_request_info( void )
 
     /* It is not reset by zend engine, set it to 200. */
     SG(sapi_headers).http_response_code = 200;
-    
+
     pAuth = LSAPI_GetHeader( H_AUTHORIZATION );
     php_handle_auth_data(pAuth);
 }
@@ -532,7 +532,7 @@ static int lsapi_chdir_primary_script( zend_file_handle * file_handle )
         if ( !CWDG(cwd).cwd ||
              ( strcmp( file_handle->filename, CWDG(cwd).cwd ) != 0 ) ) {
             CWDG(cwd).cwd_length = p - file_handle->filename;
-            CWDG(cwd).cwd = (char *) realloc(CWDG(cwd).cwd, CWDG(cwd).cwd_length+1);            
+            CWDG(cwd).cwd = (char *) realloc(CWDG(cwd).cwd, CWDG(cwd).cwd_length+1);
             memmove( CWDG(cwd).cwd, file_handle->filename, CWDG(cwd).cwd_length+1 );
         }
         *p = ch;
@@ -616,7 +616,7 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
                 void * arg )
 {
 #if PHP_MAJOR_VERSION >= 7
-	zend_string * psKey; 
+	zend_string * psKey;
 #endif
     int type = ZEND_INI_PERDIR;
     if ( '\001' == *pKey ) {
@@ -635,14 +635,14 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
 		{
 #if PHP_MAJOR_VERSION >= 7
 			psKey = zend_string_init(pKey, keyLen, 1);
-            zend_alter_ini_entry_chars(psKey, 
+            zend_alter_ini_entry_chars(psKey,
                              (char *)pValue, valLen,
                              type, PHP_INI_STAGE_ACTIVATE);
 			zend_string_release(psKey);
 #else
             zend_alter_ini_entry((char *)pKey, keyLen,
                              (char *)pValue, valLen,
-                             type, PHP_INI_STAGE_ACTIVATE);            
+                             type, PHP_INI_STAGE_ACTIVATE);
 #endif
 		}
     }
@@ -731,7 +731,7 @@ static int parse_opt( int argc, char * argv[], int *climode,
             }
             *php_bind = strdup(*p++);
             break;
-            
+
         case 'c':
             if ( p >= argend ) {
                 fprintf( stderr, "<path> or <file> must be specified following '-c' option.\n");
@@ -786,7 +786,7 @@ static int cli_main( int argc, char * argv[] )
     int ret = -1;
     int c;
 #if PHP_MAJOR_VERSION >= 7
-	zend_string * psKey; 
+	zend_string * psKey;
 #endif
     lsapi_mode = 0;        /* enter CLI mode */
 
@@ -808,7 +808,7 @@ static int cli_main( int argc, char * argv[] )
         for( ini = ini_defaults; *ini; ini+=2 ) {
 #if PHP_MAJOR_VERSION >= 7
 			psKey = zend_string_init(*ini, strlen( *ini ), 1);
-            zend_alter_ini_entry_chars(psKey, 
+            zend_alter_ini_entry_chars(psKey,
                                 (char *)*(ini+1), strlen( *(ini+1) ),
                                 PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 			zend_string_release(psKey);
@@ -891,7 +891,7 @@ static int cli_main( int argc, char * argv[] )
                     } else {
                         if (source_highlight == 1) {
                             zend_syntax_highlighter_ini syntax_highlighter_ini;
-                    
+
                             php_get_highlight_struct(&syntax_highlighter_ini);
                             highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini);
                         } else if (source_highlight == 2) {
@@ -904,7 +904,7 @@ static int cli_main( int argc, char * argv[] )
                             } else {
                                 zend_printf("Errors parsing %s\n", file_handle.filename);
                             }
-                            
+
                         } else {
                             file_handle.filename = *p;
                             file_handle.free_filename = 0;
@@ -982,7 +982,7 @@ void start_children( int children )
                 running++;
                 break;
             }
-        } 
+        }
         if ( s_stop ) {
             break;
         }
@@ -1027,7 +1027,7 @@ int main( int argc, char * argv[] )
     struct timeval tv_req_end;
     int slow_script_msec = 0;
     char time_buf[40];
-    
+
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
     signal(SIGPIPE, SIG_IGN);
@@ -1039,7 +1039,7 @@ int main( int argc, char * argv[] )
 #endif
 
     if (argc > 1 ) {
-        if ( parse_opt( argc, argv, &climode, 
+        if ( parse_opt( argc, argv, &climode,
                 &php_ini_path, &php_bind ) == -1 ) {
             return 1;
         }
@@ -1063,7 +1063,7 @@ int main( int argc, char * argv[] )
 #endif
 
     lsapi_sapi_module.executable_location = argv[0];
-    
+
     if ( ignore_php_ini )
         lsapi_sapi_module.php_ini_ignore = 1;
 
@@ -1099,9 +1099,9 @@ int main( int argc, char * argv[] )
     }
 
     LSAPI_Init();
-   
+
     LSAPI_Init_Env_Parameters( NULL );
-    lsapi_mode = 1; 
+    lsapi_mode = 1;
 
     slow_script_msec = LSAPI_Get_Slow_Req_Msecs();
 
@@ -1118,13 +1118,13 @@ int main( int argc, char * argv[] )
         ret = processReq();
         if ( slow_script_msec ) {
             gettimeofday( &tv_req_end, NULL );
-            n = ((long) tv_req_end.tv_sec - tv_req_begin.tv_sec ) * 1000 
+            n = ((long) tv_req_end.tv_sec - tv_req_begin.tv_sec ) * 1000
                 + (tv_req_end.tv_usec - tv_req_begin.tv_usec) / 1000;
             if ( n > slow_script_msec )
             {
                 strftime( time_buf, 30, "%d/%b/%Y:%H:%M:%S", localtime( &tv_req_end.tv_sec ) );
                 fprintf( stderr, "[%s] Slow PHP script: %d ms\n  URL: %s %s\n  Query String: %s\n  Script: %s\n",
-                         time_buf, n,  LSAPI_GetRequestMethod(), 
+                         time_buf, n,  LSAPI_GetRequestMethod(),
                          LSAPI_GetScriptName(), LSAPI_GetQueryString(),
                          LSAPI_GetScriptFileName() );
 
@@ -1199,7 +1199,7 @@ static int add_associate_array( const char * pKey, int keyLen, const char * pVal
     add_assoc_string_ex( (zval *)arg, (char *)pKey, keyLen+1, (char *)pValue
 #if PHP_MAJOR_VERSION < 7
             , 1
-#endif        
+#endif
     );
     return 1;
 }
@@ -1257,13 +1257,13 @@ PHP_FUNCTION(litespeed_response_headers)
                     add_assoc_string_ex(return_value, headerBuf, len+1, p
 #if PHP_MAJOR_VERSION < 7
                                         , 1
-#endif        
+#endif
                     );
                 }
             }
         }
         h = zend_llist_get_next_ex(&SG(sapi_headers).headers, &pos);
-    }  
+    }
 }
 
 /* }}} */
@@ -1273,7 +1273,7 @@ PHP_FUNCTION(litespeed_response_headers)
    Fetch all loaded module names  */
 PHP_FUNCTION(apache_get_modules)
 {
-    static const char * mod_names[] = 
+    static const char * mod_names[] =
     {
         "mod_rewrite", "mod_mime", "mod_headers", "mod_expires", NULL
     };
@@ -1285,10 +1285,10 @@ PHP_FUNCTION(apache_get_modules)
     array_init(return_value);
     while( *name )
     {
-        add_next_index_string(return_value, *name 
+        add_next_index_string(return_value, *name
 #if PHP_MAJOR_VERSION < 7
                                         , 1
-#endif        
+#endif
         );
         ++name;
     }

@@ -165,7 +165,7 @@ if (php_check_open_basedir(filename)) { \
 	}
 /* }}} */
 
-/* {{{ ext/tidy structs 
+/* {{{ ext/tidy structs
 */
 typedef struct _PHPTidyDoc PHPTidyDoc;
 typedef struct _PHPTidyObj PHPTidyObj;
@@ -380,7 +380,7 @@ static const zend_function_entry tidy_functions[] = {
 	PHP_FE(tidy_parse_string,       arginfo_tidy_parse_string)
 	PHP_FE(tidy_parse_file,         arginfo_tidy_parse_file)
 	PHP_FE(tidy_get_output,         arginfo_tidy_get_output)
-	PHP_FE(tidy_get_error_buffer,   arginfo_tidy_get_error_buffer) 
+	PHP_FE(tidy_get_error_buffer,   arginfo_tidy_get_error_buffer)
 	PHP_FE(tidy_clean_repair,       arginfo_tidy_clean_repair)
 	PHP_FE(tidy_repair_string,	arginfo_tidy_repair_string)
 	PHP_FE(tidy_repair_file,	arginfo_tidy_repair_file)
@@ -394,7 +394,7 @@ static const zend_function_entry tidy_functions[] = {
 	PHP_FE(tidy_error_count,	arginfo_tidy_error_count)
 	PHP_FE(tidy_warning_count,	arginfo_tidy_warning_count)
 	PHP_FE(tidy_access_count,	arginfo_tidy_access_count)
-	PHP_FE(tidy_config_count,	arginfo_tidy_config_count) 
+	PHP_FE(tidy_config_count,	arginfo_tidy_config_count)
 #if HAVE_TIDYOPTGETDOC
 	PHP_FE(tidy_get_opt_doc,	arginfo_tidy_get_opt_doc)
 #endif
@@ -504,7 +504,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
 		php_error_docref(NULL, E_NOTICE, "Unknown Tidy Configuration Option '%s'", optname);
 		return FAILURE;
 	}
-	
+
 	if (tidyOptIsReadOnly(opt)) {
 		php_error_docref(NULL, E_NOTICE, "Attempting to set read-only option '%s'", optname);
 		return FAILURE;
@@ -550,7 +550,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
 		default:
 			php_error_docref(NULL, E_WARNING, "Unable to determine type of configuration option");
 			break;
-	}	
+	}
 
 	return FAILURE;
 }
@@ -582,19 +582,19 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	doc = tidyCreate();
 	errbuf = emalloc(sizeof(TidyBuffer));
 	tidyBufInit(errbuf);
-	
+
 	if (tidySetErrorBuffer(doc, errbuf) != 0) {
 		tidyBufFree(errbuf);
 		efree(errbuf);
 		tidyRelease(doc);
 		php_error_docref(NULL, E_ERROR, "Could not set Tidy error buffer");
 	}
-	
+
 	tidyOptSetBool(doc, TidyForceOutput, yes);
 	tidyOptSetBool(doc, TidyMark, no);
-	
+
 	TIDY_SET_DEFAULT_CONFIG(doc);
-	
+
 	if (config) {
 		TIDY_APPLY_CONFIG_ZVAL(doc, config);
 	}
@@ -605,7 +605,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 			RETVAL_FALSE;
 		}
 	}
-	
+
 	if (data) {
 		TidyBuffer buf;
 
@@ -810,7 +810,7 @@ static void tidy_doc_update_properties(PHPTidyObj *obj)
 
 	tidyBufInit(&output);
 	tidySaveBuffer (obj->ptdoc->doc, &output);
-	
+
 	if (output.size) {
 		if (!obj->std.properties) {
 			rebuild_object_properties(&obj->std);
@@ -818,7 +818,7 @@ static void tidy_doc_update_properties(PHPTidyObj *obj)
 		ZVAL_STRINGL(&temp, (char*)output.bp, output.size-1);
 		zend_hash_str_update(obj->std.properties, "value", sizeof("value") - 1, &temp);
 	}
-	
+
 	tidyBufFree(&output);
 
 	if (obj->ptdoc->errbuf->size) {
@@ -862,7 +862,7 @@ static void tidy_add_default_properties(PHPTidyObj *obj, tidy_obj_type type)
 				case TidyNode_Text:
 				case TidyNode_Comment:
 					break;
-	
+
 				default:
 					ADD_PROPERTY_LONG(obj->std.properties, id, tidyNodeGetId(obj->node));
 			}
@@ -1002,7 +1002,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
 		}
 		_php_tidy_set_tidy_opt(doc, opt_name->val, opt_val);
 	} ZEND_HASH_FOREACH_END();
-	
+
 	return SUCCESS;
 }
 
@@ -1201,9 +1201,9 @@ static PHP_FUNCTION(tidy_parse_string)
 
 	tidy_instanciate(tidy_ce_doc, return_value);
 	obj = Z_TIDY_P(return_value);
-		
+
 	TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
-	
+
 	if (php_tidy_parse_string(obj, input->val, input->len, enc) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
@@ -1249,7 +1249,7 @@ static PHP_FUNCTION(tidy_parse_file)
 	zend_bool use_include_path = 0;
 	zend_string *inputfile, *contents;
 	zval *options = NULL;
-	
+
 	PHPTidyObj *obj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|zsb", &inputfile,
@@ -1500,14 +1500,14 @@ static PHP_FUNCTION(tidy_config_count)
 /* {{{ proto mixed tidy_getopt(string option)
    Returns the value of the specified configuration option for the tidy document. */
 static PHP_FUNCTION(tidy_getopt)
-{  
+{
 	PHPTidyObj *obj;
 	char *optname;
 	void *optval;
 	size_t optname_len;
 	TidyOption opt;
 	TidyOptionType optt;
-	
+
 	TIDY_SET_CONTEXT;
 
 	if (object) {
@@ -1564,17 +1564,17 @@ static TIDY_DOC_METHOD(__construct)
 	zend_bool use_include_path = 0;
 	zval *options = NULL;
 	zend_string *contents, *inputfile = NULL;
-	
+
 	PHPTidyObj *obj;
-	TIDY_SET_CONTEXT;	
-	
+	TIDY_SET_CONTEXT;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|Pzsb", &inputfile,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
-	
+
 	obj = Z_TIDY_P(object);
-	
+
 	if (inputfile) {
 		if (!(contents = php_tidy_file_to_mem(inputfile->val, use_include_path))) {
 			php_error_docref(NULL, E_WARNING, "Cannot Load '%s' into memory%s", inputfile->val, (use_include_path) ? " (Using include path)" : "");
@@ -1606,7 +1606,7 @@ static TIDY_DOC_METHOD(parseFile)
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
-	
+
 	if (!(contents = php_tidy_file_to_mem(inputfile->val, use_include_path))) {
 		php_error_docref(NULL, E_WARNING, "Cannot Load '%s' into memory%s", inputfile->val, (use_include_path) ? " (Using include path)" : "");
 		RETURN_FALSE;
@@ -1644,7 +1644,7 @@ static TIDY_DOC_METHOD(parseString)
 	if(php_tidy_parse_string(obj, input->val, input->len, enc) == SUCCESS) {
 		RETURN_TRUE;
 	}
-	
+
 	RETURN_FALSE;
 }
 
@@ -1822,7 +1822,7 @@ static TIDY_NODE_METHOD(getParent)
 static TIDY_NODE_METHOD(__construct)
 {
 	php_error_docref(NULL, E_ERROR, "You should not create a tidyNode manually");
-}   
+}
 /* }}} */
 
 static void _php_tidy_register_nodetypes(INIT_FUNC_ARGS)

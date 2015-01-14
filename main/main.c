@@ -1195,7 +1195,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		{ /* new block to allow variable definition */
 			/* eval() errors do not affect exit_status or response code */
 			zend_bool during_eval = 0;
-			
+
 			if (type == E_PARSE) {
 				zend_execute_data *execute_data = EG(current_execute_data);
 
@@ -2473,7 +2473,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file = {0}, append_file = {0};
-#if HAVE_BROKEN_GETCWD 
+#if HAVE_BROKEN_GETCWD
 	volatile int old_cwd_fd = -1;
 #else
 	char *old_cwd;
@@ -2639,7 +2639,7 @@ PHPAPI int php_handle_auth_data(const char *auth)
 				SG(request_info).auth_user = estrndup(user->val, user->len);
 				SG(request_info).auth_password = estrdup(pass);
 				ret = 0;
-			} 
+			}
 			zend_string_free(user);
 		}
 	}

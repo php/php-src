@@ -40,11 +40,11 @@
  */
 
 /* {{{ inifile_version */
-char *inifile_version() 
+char *inifile_version()
 {
 	return "1.0, $Id$";
 }
-/* }}} */ 
+/* }}} */
 
 /* {{{ inifile_free_key */
 void inifile_key_free(key_type *key)
@@ -89,7 +89,7 @@ inifile * inifile_alloc(php_stream *fp, int readonly, int persistent)
 			return NULL;
 		}
 	}
- 
+
 	dba = pemalloc(sizeof(inifile), persistent);
 	memset(dba, 0, sizeof(inifile));
 	dba->fp = fp;
@@ -114,7 +114,7 @@ key_type inifile_key_split(const char *group_name)
 {
 	key_type key;
 	char *name;
-	
+
 	if (group_name[0] == '[' && (name = strchr(group_name, ']')) != NULL) {
 		key.group = estrndup(group_name+1, name - (group_name + 1));
 		key.name = estrdup(name+1);
@@ -146,7 +146,7 @@ static char *etrim(const char *str)
 {
 	char *val;
 	size_t l;
-	
+
 	if (!str) {
 		return NULL;
 	}
@@ -227,7 +227,7 @@ static int inifile_read(inifile *dba, line_type *ln) {
 static int inifile_key_cmp(const key_type *k1, const key_type *k2)
 {
 	assert(k1->group && k1->name && k2->group && k2->name);
-	
+
 	if (!strcasecmp(k1->group, k2->group)) {
 		if (!strcasecmp(k1->name, k2->name)) {
 			return 0;
@@ -304,7 +304,7 @@ int inifile_nextkey(inifile *dba) {
 	inifile_line_free(&dba->curr);
 	dba->curr = ln;
 	return ln.key.group || ln.key.name;
-}	
+}
 /* }}} */
 
 /* {{{ inifile_truncate
@@ -325,7 +325,7 @@ static int inifile_truncate(inifile *dba, size_t size)
 /* {{{ inifile_find_group
  * if found pos_grp_start points to "[group_name]"
  */
-static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp_start) 
+static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp_start)
 {
 	int ret = FAILURE;
 
@@ -362,7 +362,7 @@ static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp
  * only valid after a call to inifile_find_group
  * if any next group is found pos_grp_start points to "[group_name]" or whitespace before that
  */
-static int inifile_next_group(inifile *dba, const key_type *key, size_t *pos_grp_start) 
+static int inifile_next_group(inifile *dba, const key_type *key, size_t *pos_grp_start)
 {
 	int ret = FAILURE;
 	line_type ln = {{NULL,NULL},{NULL}};
@@ -386,7 +386,7 @@ static int inifile_next_group(inifile *dba, const key_type *key, size_t *pos_grp
 static int inifile_copy_to(inifile *dba, size_t pos_start, size_t pos_end, inifile **ini_copy)
 {
 	php_stream *fp;
-	
+
 	if (pos_start == pos_end) {
 		*ini_copy = NULL;
 		return SUCCESS;
@@ -405,7 +405,7 @@ static int inifile_copy_to(inifile *dba, size_t pos_start, size_t pos_end, inifi
 	if (SUCCESS != php_stream_copy_to_stream_ex(dba->fp, fp, pos_end - pos_start, NULL)) {
 		php_error_docref(NULL, E_WARNING, "Could not copy group [%zu - %zu] to temporary stream", pos_start, pos_end);
 		return FAILURE;
-	} 
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -473,7 +473,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 	 * 3) If not append: Copy group to ini_tmp
 	 * 4) Open temp_stream and copy remainder
 	 * 5) Truncate stream
-	 * 6) If not append AND key.name given: Filtered copy back from ini_tmp 
+	 * 6) If not append AND key.name given: Filtered copy back from ini_tmp
 	 *    to stream. Otherwise the user wanted to delete the group.
 	 * 7) Append value if given
 	 * 8) Append temporary stream
@@ -507,7 +507,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 			}
 		}
 	}
-	
+
 	/* 5 */
 	if (ret == SUCCESS) {
 		if (!value || (key->name && strlen(key->name))) {
@@ -533,8 +533,8 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 				php_stream_printf(dba->fp, "%s=%s\n", key->name, value->value ? value->value : "");
 			}
 		}
-		
-		/* 8 */ 
+
+		/* 8 */
 		/* important: do not query ret==SUCCESS again: inifile_filter might fail but
 		 * however next operation must be done.
 		 */
@@ -564,7 +564,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 
 /* {{{ inifile_delete
  */
-int inifile_delete(inifile *dba, const key_type *key) 
+int inifile_delete(inifile *dba, const key_type *key)
 {
 	return inifile_delete_replace_append(dba, key, NULL, 0, NULL);
 }
@@ -575,12 +575,12 @@ int inifile_delete(inifile *dba, const key_type *key)
 int inifile_delete_ex(inifile *dba, const key_type *key, zend_bool *found)
 {
 	return inifile_delete_replace_append(dba, key, NULL, 0, found);
-}	
+}
 /* }}} */
 
 /* {{{ inifile_relace
  */
-int inifile_replace(inifile *dba, const key_type *key, const val_type *value) 
+int inifile_replace(inifile *dba, const key_type *key, const val_type *value)
 {
 	return inifile_delete_replace_append(dba, key, value, 0, NULL);
 }
@@ -596,7 +596,7 @@ int inifile_replace_ex(inifile *dba, const key_type *key, const val_type *value,
 
 /* {{{ inifile_append
  */
-int inifile_append(inifile *dba, const key_type *key, const val_type *value) 
+int inifile_append(inifile *dba, const key_type *key, const val_type *value)
 {
 	return inifile_delete_replace_append(dba, key, value, 1, NULL);
 }

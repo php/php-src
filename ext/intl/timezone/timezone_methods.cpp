@@ -304,7 +304,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	UBool isSystemID;
 	TimeZone::getCanonicalID(id, result, isSystemID, status);
 	INTL_CHECK_STATUS(status, "intltz_get_canonical_id: error obtaining canonical ID");
-	
+
 	char *str;
 	size_t str_len;
 	intl_convert_utf16_to_utf8(&str, &str_len, result.getBuffer(), result.length(), &status);
@@ -313,7 +313,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	RETVAL_STRINGL(str, str_len);
 	//????
 	efree(str);
-	
+
 	if (is_systemid) { /* by-ref argument passed */
 		ZVAL_DEREF(is_systemid);
 		zval_dtor(is_systemid);

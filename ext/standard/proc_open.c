@@ -878,7 +878,7 @@ PHP_FUNCTION(proc_open)
 
 	if (pipes != NULL) {
 		zval_dtor(pipes);
-	} 
+	}
 
 	array_init(pipes);
 

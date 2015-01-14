@@ -315,7 +315,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 		pefree(data, persistent);
 		return NULL;
 	}
-		
+
 	data->strm.data_type = Z_ASCII;
 
 	if (strcasecmp(filtername, "zlib.inflate") == 0) {

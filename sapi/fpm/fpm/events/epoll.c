@@ -41,7 +41,7 @@ static struct fpm_event_module_s epoll_module = {
 	.clean = fpm_event_epoll_clean,
 	.wait = fpm_event_epoll_wait,
 	.add = fpm_event_epoll_add,
-	.remove = fpm_event_epoll_remove, 
+	.remove = fpm_event_epoll_remove,
 };
 
 static struct epoll_event *epollfds = NULL;

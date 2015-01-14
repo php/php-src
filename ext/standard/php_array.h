@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -124,10 +124,10 @@ PHPAPI zend_long php_count_recursive(zval *array, zend_long mode);
 #define ARRAY_FILTER_USE_BOTH	1
 #define ARRAY_FILTER_USE_KEY	2
 
-ZEND_BEGIN_MODULE_GLOBALS(array) 
+ZEND_BEGIN_MODULE_GLOBALS(array)
 	int *multisort_flags[2];
 	int (*compare_func)(zval *result, zval *op1, zval *op2);
-ZEND_END_MODULE_GLOBALS(array) 
+ZEND_END_MODULE_GLOBALS(array)
 
 #ifdef ZTS
 #define ARRAYG(v) ZEND_TSRMG(array_globals_id, zend_array_globals *, v)

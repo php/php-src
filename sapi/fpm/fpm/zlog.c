@@ -184,7 +184,7 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 		buf[len] = '\0';
 		php_syslog(syslog_priorities[zlog_level], "%s", buf);
 		buf[len++] = '\n';
-	} else 
+	} else
 #endif
 	{
 		buf[len++] = '\n';

@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -49,7 +49,7 @@ void zend_interned_strings_init(void)
 	zend_string *str;
 
 	zend_hash_init(&CG(interned_strings), 1024, NULL, _str_dtor, 1);
-	
+
 	CG(interned_strings).nTableMask = CG(interned_strings).nTableSize - 1;
 	CG(interned_strings).arData = (Bucket*) pecalloc(CG(interned_strings).nTableSize, sizeof(Bucket), 1);
 	CG(interned_strings).arHash = (uint32_t*) pecalloc(CG(interned_strings).nTableSize, sizeof(uint32_t), 1);
@@ -101,7 +101,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 		}
 		idx = Z_NEXT(p->val);
 	}
-	
+
 	GC_REFCOUNT(str) = 1;
 	GC_FLAGS(str) |= IS_STR_INTERNED;
 
@@ -123,7 +123,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 	}
 
 	HANDLE_BLOCK_INTERRUPTIONS();
-	
+
 	idx = CG(interned_strings).nNumUsed++;
 	CG(interned_strings).nNumOfElements++;
 	p = CG(interned_strings).arData + idx;
@@ -134,7 +134,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 	nIndex = h & CG(interned_strings).nTableMask;
 	Z_NEXT(p->val) = CG(interned_strings).arHash[nIndex];
 	CG(interned_strings).arHash[nIndex] = idx;
-		
+
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
 	return str;

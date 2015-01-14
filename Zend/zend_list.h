@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -55,13 +55,9 @@ int zend_init_rsrc_list_dtors(void);
 void zend_destroy_rsrc_list_dtors(void);
 
 ZEND_API zval *zend_list_insert(void *ptr, int type);
-ZEND_API int _zend_list_free(zend_resource *res);
-ZEND_API int _zend_list_delete(zend_resource *res);
-ZEND_API int _zend_list_close(zend_resource *res);
-
-#define zend_list_free(res)			_zend_list_free(res)
-#define zend_list_delete(res)		_zend_list_delete(res)
-#define zend_list_close(res)		_zend_list_close(res)
+ZEND_API int zend_list_free(zend_resource *res);
+ZEND_API int zend_list_delete(zend_resource *res);
+ZEND_API int zend_list_close(zend_resource *res);
 
 ZEND_API zend_resource *zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type);
 ZEND_API void *zend_fetch_resource(zval *passed_id, int default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
@@ -79,14 +75,14 @@ extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 #define ZEND_FETCH_RESOURCE(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type)	\
 	rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 1, resource_type);	\
 	ZEND_VERIFY_RESOURCE(rsrc);
-	
+
 #define ZEND_FETCH_RESOURCE_NO_RETURN(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type)	\
 	(rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 1, resource_type))
 
 #define ZEND_FETCH_RESOURCE2(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type1, resource_type2)	\
 	rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 2, resource_type1, resource_type2);	\
 	ZEND_VERIFY_RESOURCE(rsrc);
-	
+
 #define ZEND_FETCH_RESOURCE2_NO_RETURN(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type1, resource_type2)	\
 	(rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 2, resource_type1, resource_type2))
 

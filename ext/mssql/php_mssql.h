@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -148,7 +148,7 @@ typedef struct mssql_statement {
 } mssql_statement;
 
 typedef struct {
-	
+
 	zval *zval;
 	/* TODO: more data for special types (BLOBS, NUMERIC...) */
 } mssql_bind;
@@ -179,7 +179,7 @@ ZEND_END_MODULE_GLOBALS(mssql)
 
 typedef struct mssql_field {
 	char *name,*column_source;
-	long max_length; 
+	long max_length;
 	int numeric;
 	int type;
 } mssql_field;

@@ -88,7 +88,7 @@ static char *ini_filename = NULL;
 static int ini_lineno = 0;
 static char *ini_include = NULL;
 
-/* 
+/*
  * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
  */
 static struct ini_value_parser_s ini_fpm_global_options[] = {
@@ -114,7 +114,7 @@ static struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ 0, 0, 0 }
 };
 
-/* 
+/*
  * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
  */
 static struct ini_value_parser_s ini_fpm_pool_options[] = {
@@ -510,7 +510,7 @@ static char *fpm_conf_set_rlimit_core(zval *value, void **config, intptr_t offse
 
 		error = fpm_conf_set_integer(value, &subconf, 0);
 
-		if (error) { 
+		if (error) {
 			return error;
 		}
 
@@ -602,7 +602,7 @@ static void *fpm_worker_pool_config_alloc() /* {{{ */
 
 	wp->config = malloc(sizeof(struct fpm_worker_pool_config_s));
 
-	if (!wp->config) { 
+	if (!wp->config) {
 		fpm_worker_pool_free(wp);
 		return 0;
 	}
@@ -1256,7 +1256,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 
 	if (!inc || !arg) return;
 	if (*error) return; /* We got already an error. Switch to the end. */
-	spprintf(&filename, 0, "%s", ini_filename); 
+	spprintf(&filename, 0, "%s", ini_filename);
 
 #ifdef HAVE_GLOB
 	{
@@ -1267,7 +1267,7 @@ static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 				zlog(ZLOG_WARNING, "Nothing matches the include pattern '%s' from %s at line %d.", inc, filename, ini_lineno);
 				efree(filename);
 				return;
-			} 
+			}
 #endif /* GLOB_NOMATCH */
 			zlog(ZLOG_ERROR, "Unable to globalize '%s' (ret=%d) from %s at line %d.", inc, i, filename, ini_lineno);
 			*error = 1;

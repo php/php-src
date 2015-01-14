@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -236,7 +236,7 @@ static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_str
  * numbers are not useable at all. The remaining 128 odd numbers
  * (except for the number 1) work more or less all equally well. They
  * all distribute in an acceptable way and this way fill a hash table
- * with an average percent of approx. 86%. 
+ * with an average percent of approx. 86%.
  *
  * If one compares the Chi^2 values of the variants, the number 33 not
  * even has the best value. But the number 33 and a few other equally

@@ -56,10 +56,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMCharacterData extends DOMNode 
+* class DOMCharacterData extends DOMNode
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-FF21A306
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_characterdata_class_functions[] = {
@@ -71,10 +71,10 @@ const zend_function_entry php_dom_characterdata_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ data	string	
-readonly=no 
+/* {{{ data	string
+readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-72AB8359
-Since: 
+Since:
 */
 int dom_characterdata_data_read(dom_object *obj, zval *retval)
 {
@@ -116,10 +116,10 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval)
 
 /* }}} */
 
-/* {{{ length	long	
-readonly=yes 
+/* {{{ length	long
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7D61178C
-Since: 
+Since:
 */
 int dom_characterdata_length_read(dom_object *obj, zval *retval)
 {
@@ -148,7 +148,7 @@ int dom_characterdata_length_read(dom_object *obj, zval *retval)
 
 /* {{{ proto string dom_characterdata_substring_data(int offset, int count);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_characterdata_substring_data)
 {
@@ -197,7 +197,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 
 /* {{{ proto void dom_characterdata_append_data(string arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_characterdata_append_data)
 {
@@ -231,7 +231,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 
 /* {{{ proto void dom_characterdata_insert_data(int offset, string arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_characterdata_insert_data)
 {
@@ -270,7 +270,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 	xmlNodeSetContent(node, first);
 	xmlNodeAddContent(node, (xmlChar *) arg);
 	xmlNodeAddContent(node, second);
-	
+
 	xmlFree(first);
 	xmlFree(second);
 
@@ -280,7 +280,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 
 /* {{{ proto void dom_characterdata_delete_data(int offset, int count);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_characterdata_delete_data)
 {
@@ -335,7 +335,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 
 /* {{{ proto void dom_characterdata_replace_data(int offset, int count, string arg);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_characterdata_replace_data)
 {

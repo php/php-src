@@ -44,7 +44,7 @@ static struct fpm_event_module_s kqueue_module = {
 	.clean = fpm_event_kqueue_clean,
 	.wait = fpm_event_kqueue_wait,
 	.add = fpm_event_kqueue_add,
-	.remove = fpm_event_kqueue_remove, 
+	.remove = fpm_event_kqueue_remove,
 };
 
 static struct kevent *kevents = NULL;

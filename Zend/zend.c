@@ -1258,7 +1258,7 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 		if (!file_handle) {
 			continue;
 		}
-       
+
 		op_array = zend_compile_file(file_handle, type);
 		if (file_handle->opened_path) {
 			zend_hash_str_add_empty_element(&EG(included_files), file_handle->opened_path, strlen(file_handle->opened_path));

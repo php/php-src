@@ -48,11 +48,11 @@ PHP_FUNCTION(gettype)
 		case IS_DOUBLE:
 			RETVAL_STRING("double");
 			break;
-	
+
 		case IS_STRING:
 			RETVAL_STRING("string");
 			break;
-	
+
 		case IS_ARRAY:
 			RETVAL_STRING("array");
 			break;
@@ -194,9 +194,16 @@ PHP_FUNCTION(boolval)
 PHP_FUNCTION(strval)
 {
 	zval *num;
+
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &num) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(num)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	RETVAL_STR(zval_get_string(num));
 }
@@ -220,7 +227,7 @@ static inline void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 	if (Z_TYPE_P(arg) == type) {
 		if (type == IS_OBJECT) {
 			zend_class_entry *ce = Z_OBJCE_P(arg);
-			if (ce->name->len == sizeof(INCOMPLETE_CLASS) - 1 
+			if (ce->name->len == sizeof(INCOMPLETE_CLASS) - 1
 					&& !strncmp(ce->name->val, INCOMPLETE_CLASS, ce->name->len)) {
 				RETURN_FALSE;
 			}
@@ -322,9 +329,15 @@ PHP_FUNCTION(is_numeric)
 {
 	zval *arg;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	switch (Z_TYPE_P(arg)) {
 		case IS_LONG:
@@ -379,7 +392,7 @@ PHP_FUNCTION(is_scalar)
 }
 /* }}} */
 
-/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]]) 
+/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]])
    Returns true if var is callable. */
 PHP_FUNCTION(is_callable)
 {
@@ -394,7 +407,7 @@ PHP_FUNCTION(is_callable)
 							  &syntax_only, &callable_name) == FAILURE) {
 		return;
 	}
-	
+
 	if (syntax_only) {
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}

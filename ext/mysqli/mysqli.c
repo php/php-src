@@ -1160,7 +1160,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 	unsigned int	i;
 	MYSQL_FIELD		*fields;
 	zend_ulong	*field_len;
-	
+
 	if (!(row = mysql_fetch_row(result))) {
 		RETURN_NULL();
 	}

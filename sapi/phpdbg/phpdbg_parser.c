@@ -2,20 +2,20 @@
 /* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton implementation for Bison's Yacc-like parsers in C
-   
+
       Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
    Free Software Foundation, Inc.
-   
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -28,7 +28,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -78,14 +78,14 @@
 /* Line 189 of yacc.c  */
 #line 1 "sapi/phpdbg/phpdbg_parser.y"
 
- 
+
 /*
  * phpdbg_parser.y
  * (from php-src root)
  * flex sapi/phpdbg/dev/phpdbg_lexer.l
  * bison sapi/phpdbg/dev/phpdbg_parser.y
  */
- 
+
 #include "phpdbg.h"
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
@@ -867,7 +867,7 @@ int yydebug;
 # define YYMAXDEPTH 10000
 #endif
 
-
+
 
 #if YYERROR_VERBOSE
 
@@ -1078,7 +1078,7 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
     }
 }
 #endif /* YYERROR_VERBOSE */
-
+
 
 /*-----------------------------------------------.
 | Release the memory associated to this symbol.  |
@@ -1436,7 +1436,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 77 "sapi/phpdbg/phpdbg_parser.y"
-    { 	
+    {
 		(yyval).type = FILE_PARAM;
 		(yyval).file.name = (yyvsp[(2) - (3)]).str;
 		(yyval).file.line = (yyvsp[(3) - (3)]).num;
@@ -1490,7 +1490,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 107 "sapi/phpdbg/phpdbg_parser.y"
-    { 
+    {
 		(yyval).type = METHOD_PARAM;
 		(yyval).method.class = (yyvsp[(1) - (3)]).str;
 		(yyval).method.name = (yyvsp[(3) - (3)]).str;
@@ -1501,11 +1501,11 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 112 "sapi/phpdbg/phpdbg_parser.y"
-    { 
+    {
 		(yyval).type = NUMERIC_METHOD_PARAM;
 		(yyval).method.class = (yyvsp[(1) - (5)]).str;
 		(yyval).method.name = (yyvsp[(3) - (5)]).str;
-		(yyval).num = (yyvsp[(5) - (5)]).num; 
+		(yyval).num = (yyvsp[(5) - (5)]).num;
 	;}
     break;
 
@@ -1517,7 +1517,7 @@ yyreduce:
 		(yyval).type = NUMERIC_FUNCTION_PARAM;
 		(yyval).str = (yyvsp[(1) - (3)]).str;
 		(yyval).len = (yyvsp[(1) - (3)]).len;
-		(yyval).num = (yyvsp[(3) - (3)]).num; 
+		(yyval).num = (yyvsp[(3) - (3)]).num;
 	;}
     break;
 
@@ -1526,7 +1526,7 @@ yyreduce:
 /* Line 1455 of yacc.c  */
 #line 124 "sapi/phpdbg/phpdbg_parser.y"
     {
-		(yyval).type = COND_PARAM; 
+		(yyval).type = COND_PARAM;
 		(yyval).str = (yyvsp[(2) - (2)]).str;
 		(yyval).len = (yyvsp[(2) - (2)]).len;
 	;}
@@ -1592,8 +1592,8 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 144 "sapi/phpdbg/phpdbg_parser.y"
-    { 
-		(yyval).type = EVAL_PARAM; 
+    {
+		(yyval).type = EVAL_PARAM;
 		(yyval).str = (yyvsp[(3) - (3)]).str;
 		(yyval).len = (yyvsp[(3) - (3)]).len;
 	;}
@@ -1603,8 +1603,8 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 149 "sapi/phpdbg/phpdbg_parser.y"
-    { 	
-		(yyval).type = SHELL_PARAM; 
+    {
+		(yyval).type = SHELL_PARAM;
 		(yyval).str = (yyvsp[(3) - (3)]).str;
 		(yyval).len = (yyvsp[(3) - (3)]).len;
 	;}
@@ -1624,8 +1624,8 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 158 "sapi/phpdbg/phpdbg_parser.y"
-    { 	
-		(yyval).type = RUN_PARAM; 
+    {
+		(yyval).type = RUN_PARAM;
 		(yyval).str = (yyvsp[(3) - (3)]).str;
 		(yyval).len = (yyvsp[(3) - (3)]).len;
 	;}
@@ -1854,7 +1854,7 @@ static int yyerror(const char *msg) {
 
 	{
 		const phpdbg_param_t *top = PHPDBG_G(parser_stack);
-    	
+
 		while (top) {
 			phpdbg_param_debug(top, "--> ");
 			top = top->next;

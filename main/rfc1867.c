@@ -891,7 +891,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					if (count == PG(max_input_vars) + 1) {
 						php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
 					}
-				
+
 					if (php_rfc1867_callback != NULL) {
 						multipart_event_formdata event_formdata;
 

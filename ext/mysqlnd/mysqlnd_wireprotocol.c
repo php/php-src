@@ -212,7 +212,7 @@ php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length)
 
 
 /* {{{ php_mysqlnd_net_store_length_size */
-size_t 
+size_t
 php_mysqlnd_net_store_length_size(uint64_t length)
 {
 	if (length < (uint64_t) L64(251)) {
@@ -339,7 +339,7 @@ php_mysqlnd_greet_read(void * _packet, MYSQLND_CONN_DATA * conn)
 		  Null-terminate the string, so strdup can work even if the packets have a string at the end,
 		  which is not ASCIIZ
 		*/
-		buf[packet->header.size] = '\0'; 
+		buf[packet->header.size] = '\0';
 	}
 
 	packet->protocol_version = uint1korr(p);
@@ -519,8 +519,8 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn)
 			SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, msg);
 			php_error_docref(NULL, E_WARNING, "%s", msg);
 			DBG_RETURN(0);
-		}		
-		
+		}
+
 		int1store(p, packet->auth_data_len);
 		++p;
 /*!!!!! is the buffer big enough ??? */
@@ -540,7 +540,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn)
 			p+= real_db_len;
 			*p++= '\0';
 		} else if (packet->is_change_user_packet) {
-			*p++= '\0';		
+			*p++= '\0';
 		}
 		/* no \0 for no DB */
 
@@ -550,7 +550,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn)
 				p+= 2;
 			}
 		}
-		
+
 		if (packet->auth_plugin_name) {
 			size_t len = MIN(strlen(packet->auth_plugin_name), sizeof(buffer) - (p - buffer) - 1);
 			memcpy(p, packet->auth_plugin_name, len);
@@ -569,7 +569,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn)
 				unsigned int s_len;
 				zend_ulong num_key;
 				size_t value_len = strlen(*entry_value);
-				
+
 				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, &pos_value)) {
 					ca_payload_len += php_mysqlnd_net_store_length_size(s_len);
 					ca_payload_len += s_len;
@@ -700,7 +700,7 @@ php_mysqlnd_auth_response_read(void * _packet, MYSQLND_CONN_DATA * conn)
 	  because buf_len is -1 the size of the buffer pointed
 	*/
 	buf[packet->header.size] = '\0';
-	
+
 	/* Should be always 0x0 or ERROR_MARKER for error */
 	packet->response_code = uint1korr(p);
 	p++;
@@ -1134,7 +1134,7 @@ php_mysqlnd_rset_header_read(void * _packet, MYSQLND_CONN_DATA * conn)
 				packet->info_or_local_file_len = len;
 			} else {
 				SET_OOM_ERROR(*conn->error_info);
-				ret = FAIL;	
+				ret = FAIL;
 			}
 			break;
 		case 0x00:
@@ -1339,18 +1339,18 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn)
 		meta->def = mnd_pemalloc(len + 1, packet->persistent_alloc);
 		if (!meta->def) {
 			SET_OOM_ERROR(*conn->error_info);
-			DBG_RETURN(FAIL);		
+			DBG_RETURN(FAIL);
 		}
 		memcpy(meta->def, p, len);
 		meta->def[len] = '\0';
 		meta->def_length = len;
-		p += len;	
-	} 
+		p += len;
+	}
 
 	root_ptr = meta->root = mnd_pemalloc(total_len, packet->persistent_alloc);
 	if (!root_ptr) {
 		SET_OOM_ERROR(*conn->error_info);
-		DBG_RETURN(FAIL);	
+		DBG_RETURN(FAIL);
 	}
 
 	meta->root_len = total_len;

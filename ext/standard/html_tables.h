@@ -48,7 +48,7 @@ static const struct {
 	{ "utf-8",			cs_utf_8 },
 	{ "cp1252", 		cs_cp1252 },
 	{ "Windows-1252",	cs_cp1252 },
-	{ "1252",			cs_cp1252 }, 
+	{ "1252",			cs_cp1252 },
 	{ "BIG5",			cs_big5 },
 	{ "950",			cs_big5 },
 	{ "GB2312",			cs_gb2312 },
@@ -71,7 +71,7 @@ static const struct {
 	{ "iso8859-5",		cs_8859_5 },
 	{ "iso-8859-5",		cs_8859_5 },
 	{ "cp866",			cs_cp866 },
-	{ "866",			cs_cp866 },    
+	{ "866",			cs_cp866 },
 	{ "ibm866",			cs_cp866 },
 	{ "MacRoman",		cs_macroman },
 	{ NULL }
@@ -1129,7 +1129,7 @@ typedef const entity_stage3_row *const *entity_stage1_row; /* 64 elements */
 
 /* For stage 1, Calculate k & 0xFFF000 >> 3*4.
  * If larger than 1D, we have no mapping. Otherwise lookup that index */
- 
+
 typedef struct {
 	const entity_stage1_row *ms_table;
 	/* for tables with only basic entities, this member is to be accessed

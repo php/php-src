@@ -76,7 +76,7 @@ PHP_HASH_API void PHP_RIPEMD128Init(PHP_RIPEMD128_CTX * context)
 	context->state[0] = 0x67452301;
 	context->state[1] = 0xEFCDAB89;
 	context->state[2] = 0x98BADCFE;
-	context->state[3] = 0x10325476; 
+	context->state[3] = 0x10325476;
 }
 /* }}} */
 
@@ -91,7 +91,7 @@ PHP_HASH_API void PHP_RIPEMD256Init(PHP_RIPEMD256_CTX * context)
 	context->state[0] = 0x67452301;
 	context->state[1] = 0xEFCDAB89;
 	context->state[2] = 0x98BADCFE;
-	context->state[3] = 0x10325476; 
+	context->state[3] = 0x10325476;
 	context->state[4] = 0x76543210;
 	context->state[5] = 0xFEDCBA98;
 	context->state[6] = 0x89ABCDEF;
@@ -110,7 +110,7 @@ PHP_HASH_API void PHP_RIPEMD160Init(PHP_RIPEMD160_CTX * context)
 	context->state[0] = 0x67452301;
 	context->state[1] = 0xEFCDAB89;
 	context->state[2] = 0x98BADCFE;
-	context->state[3] = 0x10325476; 
+	context->state[3] = 0x10325476;
 	context->state[4] = 0xC3D2E1F0;
 }
 /* }}} */
@@ -126,7 +126,7 @@ PHP_HASH_API void PHP_RIPEMD320Init(PHP_RIPEMD320_CTX * context)
 	context->state[0] = 0x67452301;
 	context->state[1] = 0xEFCDAB89;
 	context->state[2] = 0x98BADCFE;
-	context->state[3] = 0x10325476; 
+	context->state[3] = 0x10325476;
 	context->state[4] = 0xC3D2E1F0;
 	context->state[5] = 0x76543210;
 	context->state[6] = 0xFEDCBA98;
@@ -635,7 +635,7 @@ PHP_HASH_API void PHP_RIPEMD128Final(unsigned char digest[16], PHP_RIPEMD128_CTX
 	bits[5] = (unsigned char) ((context->count[1] >> 8) & 0xFF);
 	bits[6] = (unsigned char) ((context->count[1] >> 16) & 0xFF);
 	bits[7] = (unsigned char) ((context->count[1] >> 24) & 0xFF);
-	
+
 	/* Pad out to 56 mod 64.
 	 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
@@ -672,7 +672,7 @@ PHP_HASH_API void PHP_RIPEMD256Final(unsigned char digest[32], PHP_RIPEMD256_CTX
 	bits[5] = (unsigned char) ((context->count[1] >> 8) & 0xFF);
 	bits[6] = (unsigned char) ((context->count[1] >> 16) & 0xFF);
 	bits[7] = (unsigned char) ((context->count[1] >> 24) & 0xFF);
-	
+
 	/* Pad out to 56 mod 64.
 	 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
@@ -709,7 +709,7 @@ PHP_HASH_API void PHP_RIPEMD160Final(unsigned char digest[20], PHP_RIPEMD160_CTX
 	bits[5] = (unsigned char) ((context->count[1] >> 8) & 0xFF);
 	bits[6] = (unsigned char) ((context->count[1] >> 16) & 0xFF);
 	bits[7] = (unsigned char) ((context->count[1] >> 24) & 0xFF);
-	
+
 	/* Pad out to 56 mod 64.
 	 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);
@@ -746,7 +746,7 @@ PHP_HASH_API void PHP_RIPEMD320Final(unsigned char digest[40], PHP_RIPEMD320_CTX
 	bits[5] = (unsigned char) ((context->count[1] >> 8) & 0xFF);
 	bits[6] = (unsigned char) ((context->count[1] >> 16) & 0xFF);
 	bits[7] = (unsigned char) ((context->count[1] >> 24) & 0xFF);
-	
+
 	/* Pad out to 56 mod 64.
 	 */
 	index = (unsigned int) ((context->count[0] >> 3) & 0x3f);

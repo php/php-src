@@ -646,7 +646,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 				} else {
 					dest_elem = zend_hash_update(Z_ARRVAL(new_array), key, elem);
 				}
-				
+
 				if (dest_elem) {
 					zval_add_ref(dest_elem);
 				}
@@ -1389,7 +1389,7 @@ PHP_FUNCTION(stream_set_chunk_size)
 		php_error_docref(NULL, E_WARNING, "The chunk size must be a positive integer, given " ZEND_LONG_FMT, csize);
 		RETURN_FALSE;
 	}
-	/* stream.chunk_size is actually a size_t, but php_stream_set_option 
+	/* stream.chunk_size is actually a size_t, but php_stream_set_option
 	 * can only use an int to accept the new value and return the old one.
 	 * In any case, values larger than INT_MAX for a chunk size make no sense.
 	 */
@@ -1397,11 +1397,11 @@ PHP_FUNCTION(stream_set_chunk_size)
 		php_error_docref(NULL, E_WARNING, "The chunk size cannot be larger than %d", INT_MAX);
 		RETURN_FALSE;
 	}
-	
+
 	php_stream_from_zval(stream, zstream);
 
 	ret = php_stream_set_option(stream, PHP_STREAM_OPTION_SET_CHUNK_SIZE, (int)csize, NULL);
-	
+
 	RETURN_LONG(ret > 0 ? (zend_long)ret : (zend_long)EOF);
 }
 /* }}} */

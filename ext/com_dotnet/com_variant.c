@@ -42,7 +42,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 	zend_ulong intindex = 0;
 	VARIANT *va;
 	zval *item;
-		
+
 	/* find the largest array index, and assert that all keys are integers */
 	zend_hash_internal_pointer_reset_ex(HASH_OF(z), &pos);
 	for (;; zend_hash_move_forward_ex(HASH_OF(z), &pos)) {
@@ -59,7 +59,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 		}
 	}
 
-	/* allocate the structure */	
+	/* allocate the structure */
 	bound.lLbound = 0;
 	bound.cElements = zend_hash_num_elements(HASH_OF(z));
 	sa = SafeArrayCreate(VT_VARIANT, 1, &bound);
@@ -67,7 +67,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 	/* get a lock on the array itself */
 	SafeArrayAccessData(sa, &va);
 	va = (VARIANT*)sa->pvData;
-	
+
 	/* now fill it in */
 	zend_hash_internal_pointer_reset_ex(HASH_OF(z), &pos);
 	for (;; zend_hash_move_forward_ex(HASH_OF(z), &pos)) {
@@ -75,7 +75,7 @@ static void safe_array_from_zval(VARIANT *v, zval *z, int codepage)
 			break;
 		}
 		zend_hash_get_current_key_ex(HASH_OF(z), &strindex, &intindex, &pos);
-		php_com_variant_from_zval(&va[intindex], item, codepage);		
+		php_com_variant_from_zval(&va[intindex], item, codepage);
 	}
 
 	/* Unlock it and stuff it into our variant */
@@ -101,7 +101,7 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 	OLECHAR *olestring;
 	php_com_dotnet_object *obj;
 	zend_uchar ztype = (z == NULL ? IS_NULL : Z_TYPE_P(z));
-	
+
 	switch (ztype) {
 		case IS_NULL:
 			V_VT(v) = VT_NULL;
@@ -138,7 +138,7 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 				V_DISPATCH(v) = php_com_wrapper_export(z);
 			}
 			break;
-			
+
 		case IS_ARRAY:
 			/* map as safe array */
 			safe_array_from_zval(v, z, codepage);
@@ -265,7 +265,7 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 		case VT_VARIANT:
 			/* points to another variant */
 			return php_com_zval_from_variant(z, V_VARIANTREF(v), codepage);
-			
+
 		default:
 			php_com_wrap_variant(z, v, codepage);
 	}
@@ -285,7 +285,7 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 {
 	int ret = SUCCESS;
-	
+
 	switch (V_VT(dstvar) & ~VT_BYREF) {
 	case VT_EMPTY:
 	case VT_NULL:
@@ -313,7 +313,7 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 		if (V_VT(dstvar) & VT_BYREF) {
 			*V_UI2REF(dstvar) = V_UI2(srcvar);
 		} else {
-			V_UI2(dstvar) = V_UI2(srcvar); 
+			V_UI2(dstvar) = V_UI2(srcvar);
 		}
 		break;
 
@@ -325,7 +325,7 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 		}
 		break;
 
-	case VT_UI4: 
+	case VT_UI4:
 		if (V_VT(dstvar) & VT_BYREF) {
 			*V_UI4REF(dstvar) = V_UI4(srcvar);
 		} else {
@@ -340,8 +340,8 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 			V_I4(dstvar) = V_I4(srcvar);
 		}
 		break;
-#if SIZEOF_ZEND_LONG == 8 
-	case VT_UI8: 
+#if SIZEOF_ZEND_LONG == 8
+	case VT_UI8:
 		if (V_VT(dstvar) & VT_BYREF) {
 			*V_UI8REF(dstvar) = V_UI8(srcvar);
 		} else {
@@ -369,7 +369,7 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 		if (V_VT(dstvar) & VT_BYREF) {
 			*V_UINTREF(dstvar) = V_UINT(srcvar);
 		} else {
-			V_UINT(dstvar) = V_UINT(srcvar);       
+			V_UINT(dstvar) = V_UINT(srcvar);
 		}
 		break;
 
@@ -423,7 +423,7 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 
 	case VT_VARIANT:
 		return php_com_copy_variant(V_VARIANTREF(dstvar), srcvar);
-		
+
 	default:
 		php_error_docref(NULL, E_WARNING, "variant->variant: failed to copy from 0x%x to 0x%x", V_VT(dstvar), V_VT(srcvar));
 		ret = FAILURE;
@@ -445,9 +445,9 @@ PHP_FUNCTION(com_variant_create_instance)
 		/* just leave things as-is - an empty variant */
 		return;
 	}
-	
+
 	obj = CDNO_FETCH(object);
-	
+
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"z!|ll", &zvalue, &vt, &codepage)) {
 			php_com_throw_exception(E_INVALIDARG, "Invalid arguments");
@@ -468,7 +468,7 @@ PHP_FUNCTION(com_variant_create_instance)
 
 		/* If already an array and VT_ARRAY is passed then:
 			- if only VT_ARRAY passed then do not perform a conversion
-			- if VT_ARRAY plus other type passed then perform conversion 
+			- if VT_ARRAY plus other type passed then perform conversion
 			  but will probably fail (original behavior)
 		*/
 		if ((vt & VT_ARRAY) && (V_VT(&obj->v) & VT_ARRAY)) {
@@ -1037,7 +1037,7 @@ PHP_FUNCTION(variant_get_type)
 		return;
 	}
 	obj = CDNO_FETCH(zobj);
-		
+
 	RETURN_LONG(V_VT(&obj->v));
 }
 /* }}} */

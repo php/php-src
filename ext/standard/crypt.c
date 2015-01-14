@@ -149,7 +149,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 {
 	char *crypt_res;
 	zend_string *result;
-/* Windows (win32/crypt) has a stripped down version of libxcrypt and 
+/* Windows (win32/crypt) has a stripped down version of libxcrypt and
 	a CryptoApi md5_crypt implementation */
 #if PHP_USE_PHP_CRYPT_R
 	{

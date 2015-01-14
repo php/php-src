@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,13 +31,13 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include <stdlib.h>
 
 #include "zipint.h"
 
-
+
 
 ZIP_EXTERN int
 zip_set_archive_comment(struct zip *za, const char *comment, zip_uint16_t len)
@@ -79,6 +79,6 @@ zip_set_archive_comment(struct zip *za, const char *comment, zip_uint16_t len)
 	za->comment_changes = cstr;
 	za->comment_changed = 1;
     }
-    
+
     return 0;
 }

@@ -22,18 +22,18 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
-met: 
+met:
 
     * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer. 
+      notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
-      with the distribution. 
+      with the distribution.
     * Neither the name of the Lite Speed Technologies Inc nor the
       names of its contributors may be used to endorse or promote
       products derived from this software without specific prior
-      written permission.  
+      written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -45,7 +45,7 @@ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
@@ -94,7 +94,7 @@ enum
 
 /* Values for m_flag in lsapi_packet_header */
 #define LSAPI_ENDIAN_LITTLE         0
-#define LSAPI_ENDIAN_BIG            1 
+#define LSAPI_ENDIAN_BIG            1
 #define LSAPI_ENDIAN_BIT            1
 
 #if defined(__i386__)||defined( __x86_64 )||defined( __x86_64__ )
@@ -137,7 +137,7 @@ struct lsapi_packet_header
 
 /*
     LSAPI request header packet
-    
+
     1. struct lsapi_req_header
     2. struct lsapi_http_header_index
     3. lsapi_header_offset * unknownHeaders
@@ -148,7 +148,7 @@ struct lsapi_packet_header
 struct lsapi_req_header
 {
     struct lsapi_packet_header m_pktHeader;
-        
+
     int32_t m_httpHeaderLen;
     int32_t m_reqBodyLen;
     int32_t m_scriptFileOff;   /* path to the script file. */
@@ -162,11 +162,11 @@ struct lsapi_req_header
 
 
 struct lsapi_http_header_index
-{        
+{
     int16_t m_headerLen[H_TRANSFER_ENCODING+1];
     int32_t m_headerOff[H_TRANSFER_ENCODING+1];
-} ;  
- 
+} ;
+
 struct lsapi_header_offset
 {
     int32_t nameOff;

@@ -28,6 +28,9 @@ struct _zend_property_info;
 #define ZEND_WRONG_PROPERTY_INFO \
 	((struct _zend_property_info*)((zend_intptr_t)-1))
 
+#define ZEND_DYNAMIC_PROPERTY_OFFSET (-1)
+#define ZEND_WRONG_PROPERTY_OFFSET   (-2)
+
 /* The following rule applies to read_property() and read_dimension() implementations:
    If you return a zval which is not otherwise referenced by the extension or the engine's
    symbol table, its reference count should be 0.
@@ -160,8 +163,8 @@ extern ZEND_API zend_object_handlers std_object_handlers;
 
 BEGIN_EXTERN_C()
 ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_string *function_name_strval, const zval *key);
-ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent, void **cache_slot);
-ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name, void **cache_slot);
+ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent);
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, zend_string *property_name);
 ZEND_API union _zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zval *object);

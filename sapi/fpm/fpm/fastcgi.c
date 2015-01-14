@@ -37,8 +37,6 @@
 
 #include <windows.h>
 
-	typedef unsigned int in_addr_t;
-
 	struct sockaddr_un {
 		short   sun_family;
 		char    sun_path[MAXPATHLEN];
@@ -258,7 +256,7 @@ void fcgi_set_allowed_clients(char *ip)
 			cur++;
 		}
 		if (allowed_clients) free(allowed_clients);
-		allowed_clients = malloc(sizeof(in_addr_t) * (n+2));
+		allowed_clients = malloc(sizeof(sa_t) * (n+2));
 		n = 0;
 		cur = ip;
 		while (cur) {
@@ -474,7 +472,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			break;
 		}
 		if (eff_name_len >= buf_size-1) {
-			if (eff_name_len > ((uint)-1)-64) { 
+			if (eff_name_len > ((uint)-1)-64) {
 				ret = 0;
 				break;
 			}
@@ -1032,8 +1030,8 @@ ssize_t fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, i
 				return -1;
 			}
 			pos += 0xfff8;
-		}		
-		
+		}
+
 		pad = (((len - pos) + 7) & ~7) - (len - pos);
 		rest = pad ? 8 - pad : 0;
 

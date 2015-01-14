@@ -151,7 +151,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 	Calendar_object	*co;
 	const Calendar	*cal;
 	HashTable		*debug_info;
-	
+
 	*is_temp = 1;
 
 	ALLOC_HASHTABLE(debug_info);
@@ -206,7 +206,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 			 i < sizeof(debug_info_fields) / sizeof(*debug_info_fields);
 			 i++) {
 		UErrorCode	uec		= U_ZERO_ERROR;
-		const char	*name	= debug_info_fields[i].name; 
+		const char	*name	= debug_info_fields[i].name;
 		int32_t		res		= cal->get(debug_info_fields[i].field, uec);
 		if (U_SUCCESS(uec)) {
 			add_assoc_long(&zfields, name, (zend_long)res);
@@ -259,7 +259,7 @@ static zend_object *Calendar_object_create(zend_class_entry *ce)
 	Calendar_object*	intern;
 
 	intern = (Calendar_object*)ecalloc(1, sizeof(Calendar_object) + sizeof(zval) * (ce->default_properties_count - 1));
-	
+
 	zend_object_std_init(&intern->zo, ce);
     object_properties_init((zend_object*) intern, ce);
 	calendar_object_init(intern);

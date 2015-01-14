@@ -175,7 +175,7 @@ static inline unsigned int get_next_char(
 					else
 						MB_FAILURE(pos, 4);
 				}
-				
+
 				this_char = ((c & 0x07) << 18) | ((str[pos + 1] & 0x3f) << 12) | ((str[pos + 2] & 0x3f) << 6) | (str[pos + 3] & 0x3f);
 				if (this_char < 0x10000 || this_char > 0x10FFFF) { /* non-shortest form or outside range */
 					MB_FAILURE(pos, 4);
@@ -449,7 +449,7 @@ det_charset:
 
 	if (charset_hint) {
 		int found = 0;
-		
+
 		/* now walk the charset map and look for the codeset */
 		for (i = 0; charset_map[i].codeset; i++) {
 			if (len == strlen(charset_map[i].codeset) && strncasecmp(charset_hint, charset_map[i].codeset, len) == 0) {
@@ -557,7 +557,7 @@ static inline unsigned char unimap_bsearch(const uni_to_enc *table, unsigned cod
 		return 0;
 
 	code_key = (unsigned short) code_key_a;
-	
+
 	while (l <= h) {
 		m = l + (h - l) / 2;
 		if (code_key < m->un_code_point)
@@ -583,7 +583,7 @@ static inline int map_from_unicode(unsigned code, enum entity_charset charset, u
 		/* identity mapping of code points to unicode */
 		if (code > 0xFF) {
 			return FAILURE;
-		} 
+		}
 		*res = code;
 		break;
 
@@ -602,7 +602,7 @@ static inline int map_from_unicode(unsigned code, enum entity_charset charset, u
 			return FAILURE;
 		}
 		break;
-		
+
 	case cs_8859_15:
 		if (code < 0xA4 || (code > 0xBE && code <= 0xFF)) {
 			*res = code;
@@ -646,7 +646,7 @@ static inline int map_from_unicode(unsigned code, enum entity_charset charset, u
 	case cs_cp866:
 		table = unimap_cp866;
 		table_size = sizeof(unimap_cp866) / sizeof(*unimap_cp866);
-		
+
 table_over_7F:
 		if (code <= 0x7F) {
 			*res = code;
@@ -722,7 +722,7 @@ static inline int unicode_cp_is_allowed(unsigned uni_cp, int document_type)
 	 * Not sure this is the relevant part for HTML 5, though. I opted to
 	 * disallow the characters that would result in a parse error when
 	 * preprocessing of the input stream. See also section 8.1.3.
-	 * 
+	 *
 	 * It's unclear if XHTML 1.0 allows C1 characters. I'll opt to apply to
 	 * XHTML 1.0 the same rules as for XML 1.0.
 	 * See <http://cmsmcq.com/2007/C1.xml>.
@@ -786,7 +786,7 @@ static inline int numeric_entity_is_allowed(unsigned uni_cp, int document_type)
 /* {{{ process_numeric_entity
  * Auxiliary function to traverse_for_entities.
  * On input, *buf should point to the first character after # and on output, it's the last
- * byte read, no matter if there was success or insuccess. 
+ * byte read, no matter if there was success or insuccess.
  */
 static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 {
@@ -796,7 +796,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 
 	if (hexadecimal && (**buf != '\0'))
 		(*buf)++;
-			
+
 	/* strtol allows whitespace and other stuff in the beginning
 		* we're not interested */
 	if ((hexadecimal && !isxdigit(**buf)) ||
@@ -980,7 +980,7 @@ static void traverse_for_entities(
 				goto invalid_code;
 
 			/* are we allowed to decode this entity in this document type?
-			 * HTML 5 is the only that has a character that cannot be used in 
+			 * HTML 5 is the only that has a character that cannot be used in
 			 * a numeric entity but is allowed literally (U+000D). The
 			 * unoptimized version would be ... || !numeric_entity_is_allowed(code) */
 			if (!unicode_cp_is_allowed(code, doctype) ||
@@ -1007,9 +1007,9 @@ static void traverse_for_entities(
 				}
 			}
 		}
-		
+
 		assert(*next == ';');
-		
+
 		if (((code == '\'' && !(flags & ENT_HTML_QUOTE_SINGLE)) ||
 				(code == '"' && !(flags & ENT_HTML_QUOTE_DOUBLE)))
 				/* && code2 == '\0' always true for current maps */)
@@ -1037,7 +1037,7 @@ invalid_code:
 			*(q++) = *p;
 		}
 	}
-	
+
 	*q = '\0';
 	ret->len = (size_t)(q - ret->val);
 }
@@ -1077,7 +1077,7 @@ static entity_table_opt determine_entity_table(int all, int doctype)
 	entity_table_opt retval = {NULL};
 
 	assert(!(doctype == ENT_HTML_DOC_XML1 && all));
-	
+
 	if (all) {
 		retval.ms_table = (doctype == ENT_HTML_DOC_HTML5) ?
 			entity_ms_table_html5 : entity_ms_table_html4;
@@ -1123,13 +1123,13 @@ PHPAPI zend_string *php_unescape_html_entities(unsigned char *old, size_t oldlen
 	if (retlen == 0) {
 		goto empty_source;
 	}
-	
+
 	inverse_map = unescape_inverse_map(all, flags);
-	
+
 	/* replace numeric entities */
 	traverse_for_entities((char*)old, oldlen, ret, all, flags, inverse_map, charset);
 
-empty_source:	
+empty_source:
 	return ret;
 }
 /* }}} */
@@ -1152,7 +1152,7 @@ static inline void find_entity_for_char(
 {
 	unsigned stage1_idx = ENT_STAGE1_INDEX(k);
 	const entity_stage3_row *c;
-	
+
 	if (stage1_idx > 0x1D) {
 		*entity     = NULL;
 		*entity_len = 0;
@@ -1173,7 +1173,7 @@ static inline void find_entity_for_char(
 		if (!(*cursor < oldlen))
 			goto no_suitable_2nd;
 
-		next_char = get_next_char(charset, old, oldlen, cursor, &status); 
+		next_char = get_next_char(charset, old, oldlen, cursor, &status);
 
 		if (status == FAILURE)
 			goto no_suitable_2nd;
@@ -1198,7 +1198,7 @@ no_suitable_2nd:
 		*entity = (const unsigned char *)
 			c->data.multicodepoint_table[0].leading_entry.default_entity;
 		*entity_len = c->data.multicodepoint_table[0].leading_entry.default_entity_len;
-	}	
+	}
 }
 /* }}} */
 
@@ -1266,7 +1266,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 
 	/* initial estimate */
 	if (oldlen < 64) {
-		maxlen = 128;	
+		maxlen = 128;
 	} else {
 		maxlen = 2 * oldlen;
 		if (maxlen < oldlen) {
@@ -1610,7 +1610,7 @@ static inline void write_s3row_data(
 			} else {
 				spe_cp = uni_cp;
 			}
-			
+
 			written_k2 = write_octet_sequence((unsigned char*)&key[written_k1], charset, spe_cp);
 			memcpy(&entity[1], mcpr[i].normal_entry.entity, l);
 			entity[l + 1] = ';';
@@ -1648,7 +1648,7 @@ PHP_FUNCTION(get_html_translation_table)
 	LIMIT_ALL(all, doctype, charset);
 
 	array_init(return_value);
-	
+
 	entity_table = determine_entity_table((int)all, doctype);
 	if (all && !CHARSET_UNICODE_COMPAT(charset)) {
 		to_uni_table = enc_to_uni_index[charset];

@@ -125,7 +125,7 @@ static size_t ps_buffer_cur_len; /* actual string length in ps_buffer */
 static int save_argc;
 static char** save_argv;
 
-/* 
+/*
  * This holds the 'locally' allocated environ from the save_ps_args method.
  * This is subsequently free'd at exit.
  */

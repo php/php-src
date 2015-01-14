@@ -75,12 +75,12 @@ PHP_FUNCTION( numfmt_format )
 	switch(type) {
 		case FORMAT_TYPE_INT32:
 			convert_to_long_ex(number);
-			formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number), 
+			formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
 				formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
-				intl_error_reset(INTL_DATA_ERROR_P(nfo)); 
+				intl_error_reset(INTL_DATA_ERROR_P(nfo));
 				formatted = eumalloc(formatted_len);
-				formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number), 
+				formatted_len = unum_format(FORMATTER_OBJECT(nfo), (int32_t)Z_LVAL_P(number),
 					formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
 					efree(formatted);
@@ -94,7 +94,7 @@ PHP_FUNCTION( numfmt_format )
 			int64_t value = (Z_TYPE_P(number) == IS_DOUBLE)?(int64_t)Z_DVAL_P(number):Z_LVAL_P(number);
 			formatted_len = unum_formatInt64(FORMATTER_OBJECT(nfo), value, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
-				intl_error_reset(INTL_DATA_ERROR_P(nfo)); 
+				intl_error_reset(INTL_DATA_ERROR_P(nfo));
 				formatted = eumalloc(formatted_len);
 				formatted_len = unum_formatInt64(FORMATTER_OBJECT(nfo), value, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
@@ -109,7 +109,7 @@ PHP_FUNCTION( numfmt_format )
 			convert_to_double_ex(number);
 			formatted_len = unum_formatDouble(FORMATTER_OBJECT(nfo), Z_DVAL_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 			if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
-				intl_error_reset(INTL_DATA_ERROR_P(nfo)); 
+				intl_error_reset(INTL_DATA_ERROR_P(nfo));
 				formatted = eumalloc(formatted_len);
 				unum_formatDouble(FORMATTER_OBJECT(nfo), Z_DVAL_P(number), formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 				if (U_FAILURE( INTL_DATA_ERROR_CODE(nfo) ) ) {
@@ -171,7 +171,7 @@ PHP_FUNCTION( numfmt_format_currency )
 	 * and use it to format the number.
 	 */
 	if (INTL_DATA_ERROR_CODE(nfo) == U_BUFFER_OVERFLOW_ERROR) {
-		intl_error_reset(INTL_DATA_ERROR_P(nfo)); 
+		intl_error_reset(INTL_DATA_ERROR_P(nfo));
 		formatted = eumalloc(formatted_len);
 		unum_formatDoubleCurrency(FORMATTER_OBJECT(nfo), number, scurrency, formatted, formatted_len, NULL, &INTL_DATA_ERROR_CODE(nfo));
 	}

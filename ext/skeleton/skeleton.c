@@ -49,9 +49,9 @@ PHP_FUNCTION(confirm_extname_compiled)
 	efree(strg);
 }
 /* }}} */
-/* The previous line is meant for vim and emacs, so it can correctly fold and 
-   unfold functions in source code. See the corresponding marks just before 
-   function definition, where the functions purpose is also documented. Please 
+/* The previous line is meant for vim and emacs, so it can correctly fold and
+   unfold functions in source code. See the corresponding marks just before
+   function definition, where the functions purpose is also documented. Please
    follow this convention for the convenience of others editing your code.
 */
 
@@ -72,7 +72,7 @@ static void php_extname_init_globals(zend_extname_globals *extname_globals)
  */
 PHP_MINIT_FUNCTION(extname)
 {
-	/* If you have INI entries, uncomment these lines 
+	/* If you have INI entries, uncomment these lines
 	REGISTER_INI_ENTRIES();
 	*/
 	return SUCCESS;

@@ -97,7 +97,7 @@ gdCacheGet( gdCache_head_t *head, void *keydata )
 	elem = head->mru;
 	if (elem == NULL) {
 		return NULL;
-		
+
 	}
 
 	while(elem) {

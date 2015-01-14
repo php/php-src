@@ -26,7 +26,7 @@ namespace PHP {
 	class CodePointBreakIterator : public BreakIterator {
 
 	public:
-		static UClassID getStaticClassID(); 
+		static UClassID getStaticClassID();
 
 		CodePointBreakIterator();
 

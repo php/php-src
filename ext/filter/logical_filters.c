@@ -152,7 +152,7 @@ static int php_filter_parse_octal(const char *str, size_t str_len, zend_long *re
 			return -1;
 		}
 	}
-	
+
 	*ret = (zend_long)ctx_value;
 	return 1;
 }
@@ -419,7 +419,7 @@ error:
 			efree(num);
 			RETURN_VALIDATION_FAILED
 	}
-	efree(num);	
+	efree(num);
 }
 /* }}} */
 
@@ -480,7 +480,7 @@ static int _php_filter_validate_domain(char * domain, int len, zend_long flags) 
 	}
 
 	/* First char must be alphanumeric */
-	if(*s == '.' || (hostname && !isalnum((int)*(unsigned char *)s))) { 
+	if(*s == '.' || (hostname && !isalnum((int)*(unsigned char *)s))) {
 		return 0;
 	}
 
@@ -503,13 +503,13 @@ static int _php_filter_validate_domain(char * domain, int len, zend_long flags) 
 
 		s++;
 	}
-	
+
 	return 1;
 }
 /* }}} */
 
 void php_filter_validate_domain(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
-{		
+{
 	if (!_php_filter_validate_domain(Z_STRVAL_P(value), Z_STRLEN_P(value), flags)) {
 		RETURN_VALIDATION_FAILED
 	}
@@ -520,7 +520,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	php_url *url;
 	int old_len = (int)Z_STRLEN_P(value);
-	
+
 	php_filter_url(value, flags, option_array, charset);
 
 	if (Z_TYPE_P(value) != IS_STRING || old_len != Z_STRLEN_P(value)) {
@@ -561,7 +561,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	if (
-		url->scheme == NULL || 
+		url->scheme == NULL ||
 		/* some schemas allow the host to be empty */
 		(url->host == NULL && (strcmp(url->scheme, "mailto") && strcmp(url->scheme, "news") && strcmp(url->scheme, "file"))) ||
 		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
@@ -662,7 +662,7 @@ static int _php_filter_validate_ipv4(char *str, size_t str_len, int *ip) /* {{{ 
 			return 0;
 		}
 	}
-	return 0;		
+	return 0;
 }
 /* }}} */
 
@@ -725,7 +725,7 @@ static int _php_filter_validate_ipv6(char *str, size_t str_len) /* {{{ */
 			} else if ((str - 1) == s) {
 				/* dont allow leading : without another : following */
 				return 0;
-			}				
+			}
 		}
 		n = 0;
 		while ((str < end) &&

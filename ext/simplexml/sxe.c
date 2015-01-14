@@ -41,7 +41,7 @@ zend_class_entry *ce_SimpleXMLElement;
 PHP_METHOD(ce_SimpleXMLIterator, rewind)
 {
 	php_sxe_iterator iter;
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -56,7 +56,7 @@ PHP_METHOD(ce_SimpleXMLIterator, rewind)
 PHP_METHOD(ce_SimpleXMLIterator, valid)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -70,7 +70,7 @@ PHP_METHOD(ce_SimpleXMLIterator, valid)
 PHP_METHOD(ce_SimpleXMLIterator, current)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -90,7 +90,7 @@ PHP_METHOD(ce_SimpleXMLIterator, key)
 	xmlNodePtr curnode;
 	php_sxe_object *intern;
 	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -104,7 +104,7 @@ PHP_METHOD(ce_SimpleXMLIterator, key)
 		curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
 		RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name));
 	}
-    
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -114,7 +114,7 @@ PHP_METHOD(ce_SimpleXMLIterator, key)
 PHP_METHOD(ce_SimpleXMLIterator, next)
 {
 	php_sxe_iterator iter;
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -125,13 +125,13 @@ PHP_METHOD(ce_SimpleXMLIterator, next)
 /* }}} */
 
 /* {{{ proto bool SimpleXMLIterator::hasChildren()
- Check whether element has children (elements) */ 
+ Check whether element has children (elements) */
 PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
 	php_sxe_object *child;
 	xmlNodePtr      node;
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -153,11 +153,11 @@ PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
 /* }}} */
 
 /* {{{ proto SimpleXMLIterator SimpleXMLIterator::getChildren()
- Get child element iterator */ 
+ Get child element iterator */
 PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 {
 	php_sxe_object *sxe = Z_SXEOBJ_P(getThis());
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}

@@ -29,7 +29,7 @@
 
 
 /*
-* class domuserdatahandler 
+* class domuserdatahandler
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#UserDataHandler
 * Since: DOM Level 3
@@ -44,7 +44,7 @@ const zend_function_entry php_dom_userdatahandler_class_functions[] = {
 
 /* {{{ proto dom_void dom_userdatahandler_handle(short operation, string key, domobject data, node src, node dst);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-handleUserDataEvent
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_userdatahandler_handle)
 {

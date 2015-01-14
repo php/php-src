@@ -311,7 +311,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 					} else {
 						parameter = &param->parameter;
 					}
-					
+
 					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB &&
 							Z_TYPE_P(parameter) == IS_RESOURCE) {
 						php_stream *stm;

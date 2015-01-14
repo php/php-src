@@ -194,7 +194,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 	ZVAL_UNDEF(&iterator->curobj);
 
 	if (intern != NULL && intern->ptr != NULL) {
-		if (objmap->nodetype != XML_ENTITY_NODE && 
+		if (objmap->nodetype != XML_ENTITY_NODE &&
 			objmap->nodetype != XML_NOTATION_NODE) {
 			if (objmap->nodetype == DOM_NODESET) {
 				nodeht = HASH_OF(&objmap->baseobj_zv);
@@ -204,13 +204,13 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 				}
 			} else {
 				curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
-				if (objmap->nodetype == XML_ATTRIBUTE_NODE || 
+				if (objmap->nodetype == XML_ATTRIBUTE_NODE ||
 					objmap->nodetype == XML_ELEMENT_NODE) {
 					curnode = curnode->next;
 				} else {
 					/* Nav the tree evey time as this is LIVE */
 					basenode = dom_object_get_node(objmap->baseobj);
-					if (basenode && (basenode->type == XML_DOCUMENT_NODE || 
+					if (basenode && (basenode->type == XML_DOCUMENT_NODE ||
 						basenode->type == XML_HTML_DOCUMENT_NODE)) {
 						basenode = xmlDocGetRootElement((xmlDoc *) basenode);
 					} else if (basenode) {
@@ -270,7 +270,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 	intern = Z_DOMOBJ_P(object);
 	objmap = (dom_nnodemap_object *)intern->ptr;
 	if (objmap != NULL) {
-		if (objmap->nodetype != XML_ENTITY_NODE && 
+		if (objmap->nodetype != XML_ENTITY_NODE &&
 			objmap->nodetype != XML_NOTATION_NODE) {
 			if (objmap->nodetype == DOM_NODESET) {
 				nodeht = HASH_OF(&objmap->baseobj_zv);

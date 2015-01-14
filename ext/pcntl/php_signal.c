@@ -54,7 +54,7 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 	{
 		return SIG_ERR;
 	}
- 
+
 	return oact.sa_handler;
 }
 

@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -24,7 +24,7 @@
 /*
  * The source code included in this files was separated from mbfilter_iso2022_jp_ms.c
  * by Rui Hirokawa <hirokawa@php.net> on 25 July 2011.
- * 
+ *
  */
 
 #ifdef HAVE_CONFIG_H
@@ -194,7 +194,7 @@ retry:
 					w = 0xffe2;			/* FULLWIDTH NOT SIGN */
 				}
 			}
-			
+
 			if (w == 0) {
 				if (s >= cp932ext1_ucs_table_min && s < cp932ext1_ucs_table_max) {		/* vendor ext1 (13ku) */
 					w = cp932ext1_ucs_table[s - cp932ext1_ucs_table_min];
@@ -204,7 +204,7 @@ retry:
 					w = 0;
 				}
 			}
-			
+
 			if (s >= (84*94) && s < 91*94) {
 				s += 22*94;
 				if (filter->from->no_encoding == mbfl_no_encoding_2022jp_kddi) {
@@ -212,9 +212,9 @@ retry:
 				}
 				if (w > 0  && snd > 0) {
 					CK((*filter->output_function)(snd, filter->data));
-				}					
+				}
 			}
-			
+
 			if (w <= 0) {
 				w = (c1 << 8) | c;
 				w &= MBFL_WCSPLANE_MASK;
@@ -422,7 +422,7 @@ mbfl_filt_conv_wchar_2022jp_mobile(int c, mbfl_convert_filter *filter)
 			filter->status = 0x200;
 			CK((*filter->output_function)((s1 >> 8) & 0xff, filter->data));
 			CK((*filter->output_function)(s1 & 0x7f, filter->data));
-		} 
+		}
 	} else {
 		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
 			CK(mbfl_filt_conv_illegal_output(c, filter));

@@ -702,7 +702,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 							precision = 0;
 					} else
 						precision = 0;
-					
+
 					if (precision > FORMAT_CONV_MAX_PRECISION) {
 						precision = FORMAT_CONV_MAX_PRECISION;
 					}
@@ -805,7 +805,7 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 					s = Z_STRVAL_P(zvp);
 					if (adjust_precision && precision < s_len) {
 						s_len = precision;
-					}	
+					}
 					break;
 				}
 				case 'u':

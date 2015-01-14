@@ -41,14 +41,14 @@
 #ifndef PHP_WIN32
     #define EMBED_SAPI_API SAPI_API
 #else
-    #define EMBED_SAPI_API 
-#endif 
+    #define EMBED_SAPI_API
+#endif
 
 #ifdef ZTS
 ZEND_TSRMLS_CACHE_EXTERN;
 #endif
 
-BEGIN_EXTERN_C() 
+BEGIN_EXTERN_C()
 EMBED_SAPI_API int php_embed_init(int argc, char **argv);
 EMBED_SAPI_API void php_embed_shutdown(void);
 extern EMBED_SAPI_API sapi_module_struct php_embed_module;

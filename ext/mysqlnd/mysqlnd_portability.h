@@ -1,9 +1,9 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
 This file is public domain and comes with NO WARRANTY of any kind */
 
 /*
   Parts of the original, which are not applicable to mysqlnd have been removed.
-  
+
   With small modifications, mostly casting but adding few more macros by
   Andrey Hristov <andrey@mysql.com> . The additions are in the public domain and
   were added to improve the header file, to get it more consistent.
@@ -241,7 +241,7 @@ typedef union {
 #define float4get(V,M)	{ *((float *) &(V)) = *((float*) (M)); }
 /* From Andrey Hristov based on float8get */
 #define floatget(V,M)    memcpy((char*) &(V),(char*) (M),sizeof(float))
-#endif /* __i386__ */ 
+#endif /* __i386__ */
 
 
 /* If we haven't defined sint2korr, which is because the platform is not x86 or it's WIN64 */

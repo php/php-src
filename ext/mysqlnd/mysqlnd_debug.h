@@ -50,7 +50,7 @@ struct st_mysqlnd_debug
 	int pid;
 	char * file_name;
 	zend_stack call_stack;
-	zend_stack call_time_stack;	
+	zend_stack call_time_stack;
 	HashTable not_filtered_functions;
 	HashTable function_profiles;
 	struct st_mysqlnd_debug_methods *m;
@@ -106,7 +106,7 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 #define DBG_BLOCK_LEAVE_EX2(dbg_obj1, dbg_obj2) \
 			DBG_LEAVE_EX2((dbg_obj1), (dbg_obj2), ;) \
 		} \
-	
+
 
 #define DBG_ENTER_EX(dbg_obj, func_name)	DBG_ENTER_EX2((dbg_obj), (MYSQLND_DEBUG *) NULL, (func_name))
 #define DBG_LEAVE_EX(dbg_obj, leave)		DBG_LEAVE_EX2((dbg_obj), (MYSQLND_DEBUG *) NULL, leave)
@@ -129,7 +129,7 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 						{ \
 							DBG_PROFILE_START_TIME(); \
 						} \
-					} while (0); 
+					} while (0);
 
 #define DBG_LEAVE_EX2(dbg_obj1, dbg_obj2, leave)	\
 			do {\

@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -25,12 +25,12 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "SAPI.h"
-#include "php_main.h" 
+#include "php_main.h"
 #include "ext/standard/info.h"
 
 #include "php_version.h"
 
-/* Pike Include Files 
+/* Pike Include Files
  *
  * conflicts with pike avoided by only using long names. Requires a new
  * Pike 0.7 since it was implemented for this interface only.
@@ -114,7 +114,7 @@ static int caudium_globals_id;
 #define GET_THIS() php_caudium_request *_request = ts_resource(caudium_globals_id)
 #define THIS _request
 #define PTHIS ((php_caudium_request *)(Pike_fp->current_storage))
-/* File descriptor integer. Used to write directly to the FD without 
+/* File descriptor integer. Used to write directly to the FD without
  * passing Pike
  */
 #define MY_FD    (THIS->my_fd)
@@ -161,7 +161,7 @@ static unsigned char caudium_php_initialized;
 /* Low level header lookup. Basically looks for the named header in the mapping
  * headers in the supplied options mapping.
  */
- 
+
 INLINE static struct svalue *lookup_header(char *headername)
 {
   struct svalue *headers, *value;
@@ -204,7 +204,7 @@ INLINE static int lookup_integer_header(char *headername, int default_value)
 
 /*
  * php_caudium_low_ub_write() writes data to the client connection. Might be
- * rewritten to do more direct IO to save CPU and the need to lock the 
+ * rewritten to do more direct IO to save CPU and the need to lock the
  * interpreter for better threading.
  */
 
@@ -235,7 +235,7 @@ php_caudium_low_ub_write(const char *str, uint str_length) {
 /*
  * php_caudium_sapi_ub_write() calls php_caudium_low_ub_write in a Pike thread
  * safe manner or writes directly to the output FD if RXML post-parsing is
- * disabled. 
+ * disabled.
  */
 
 static int
@@ -259,7 +259,7 @@ php_caudium_sapi_ub_write(const char *str, uint str_length)
 	  zend_bailout();
 	  THIS->written += sent_bytes;
 	  return sent_bytes;
-	 case EINTR: 
+	 case EINTR:
 	 case EWOULDBLOCK:
 	  continue;
 	}
@@ -295,7 +295,7 @@ php_caudium_set_header(char *header_name, char *value, char *p)
   s_headermap = low_mapping_string_lookup(REQUEST_DATA, ind);
   if(!s_headermap || s_headermap->type != PIKE_T_MAPPING)
   {
-    struct svalue mappie;                                           
+    struct svalue mappie;
     mappie.type = PIKE_T_MAPPING;
     headermap = allocate_mapping(1);
     mappie.u.mapping = headermap;
@@ -306,7 +306,7 @@ php_caudium_set_header(char *header_name, char *value, char *p)
     headermap = s_headermap->u.mapping;
     soldval = low_mapping_string_lookup(headermap, hind);
     vallen = strlen(value);
-    if(soldval != NULL && 
+    if(soldval != NULL &&
        soldval->type == PIKE_T_STRING &&
        soldval->u.string->size_shift == 0) {
       /* Existing, valid header. Prepend.*/
@@ -315,7 +315,7 @@ php_caudium_set_header(char *header_name, char *value, char *p)
       STR0(hval)[soldval->u.string->len] = '\0';
       MEMCPY(hval->str+soldval->u.string->len+1, value, vallen);
       hval = end_shared_string(hval);
-    } else { 
+    } else {
       hval = make_shared_string(value);
     }
   }
@@ -330,7 +330,7 @@ php_caudium_set_header(char *header_name, char *value, char *p)
 }
 
 /*
- * php_caudium_sapi_header_handler() sets a HTTP reply header to be 
+ * php_caudium_sapi_header_handler() sets a HTTP reply header to be
  * sent to the client.
  */
 static int
@@ -340,7 +340,7 @@ php_caudium_sapi_header_handler(sapi_header_struct *sapi_header,
   char *header_name, *header_content, *p;
   header_name = sapi_header->header;
   header_content = p = strchr(header_name, ':');
-  
+
   if(p) {
   do {
     header_content++;
@@ -367,10 +367,10 @@ php_caudium_low_send_headers(sapi_headers_struct *sapi_headers)
     zend_bailout();
     return SAPI_HEADER_SEND_FAILED;
   }
-  ind = make_shared_string(" _headers");  
+  ind = make_shared_string(" _headers");
   s_headermap = low_mapping_string_lookup(REQUEST_DATA, ind);
   free_string(ind);
-  
+
   push_int(SG(sapi_headers).http_response_code);
   if(s_headermap && s_headermap->type == PIKE_T_MAPPING)
     ref_push_mapping(s_headermap->u.mapping);
@@ -378,7 +378,7 @@ php_caudium_low_send_headers(sapi_headers_struct *sapi_headers)
     push_int(0);
   safe_apply(MY_FD_OBJ, "send_headers", 2);
   pop_stack();
-  
+
   return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
@@ -399,7 +399,7 @@ INLINE static int php_caudium_low_read_post(char *buf, uint count_bytes)
 {
   uint total_read = 0;
   GET_THIS();
-  
+
   if(!MY_FD_OBJ->prog)
   {
     PG(connection_status) = PHP_CONNECTION_ABORTED;
@@ -426,11 +426,11 @@ php_caudium_sapi_read_post(char *buf, uint count_bytes)
   return total_read;
 }
 
-/* 
+/*
  * php_caudium_sapi_read_cookies() returns the Cookie header from
  * the HTTP request header
  */
-	
+
 static char *
 php_caudium_sapi_read_cookies(void)
 {
@@ -453,7 +453,7 @@ static void php_info_caudium(ZEND_MODULE_INFO_FUNC_ARGS)
       php_info_print_table_row(2, "Server platform", Ns_InfoPlatform());
       snprintf(buf, 511, "%s/%s", Ns_InfoServerName(), Ns_InfoServerVersion());
       php_info_print_table_row(2, "Server version", buf);
-      snprintf(buf, 511, "%d day(s), %02d:%02d:%02d", 
+      snprintf(buf, 511, "%d day(s), %02d:%02d:%02d",
       uptime / 86400,
       (uptime / 3600) % 24,
       (uptime / 60) % 60,
@@ -477,7 +477,7 @@ static zend_module_entry php_caudium_module = {
 };
 
 
-INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array)   
+INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array)
 {
   int i;
   struct keypair *k;
@@ -602,7 +602,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   state->status=THREAD_RUNNING;
 #endif
   state->swapped = 0;
-#endif 
+#endif
   SG(request_info).query_string = lookup_string_header("QUERY_STRING", 0);
   SG(server_context) = (void *)1; /* avoid server_context == NULL */
 
@@ -706,7 +706,7 @@ void f_php_caudium_request_handler(INT32 args)
 
   get_all_args("PHP5.Interpreter->run", args, "%S%m%O%*", &script,
 	       &request_data, &my_fd_obj, &done_callback);
-  if(done_callback->type != PIKE_T_FUNCTION) 
+  if(done_callback->type != PIKE_T_FUNCTION)
     Pike_error("PHP5.Interpreter->run: Bad argument 4, expected function.\n");
   add_ref(request_data);
   add_ref(my_fd_obj);

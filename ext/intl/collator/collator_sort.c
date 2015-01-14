@@ -93,7 +93,7 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 			if( num1_p == str1_p )
 			{
 				/* str1 is string but not numeric string
-				 * just convert it to utf8. 
+				 * just convert it to utf8.
 				 */
 				norm1_p = collator_convert_zstr_utf16_to_utf8( str1_p, &norm1 );
 
@@ -103,11 +103,11 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 			else
 			{
 				/* str1 is numeric strings => passthru to PHP-compare. */
-				zval_add_ref( num1_p );
+				Z_TRY_ADDREF_P(num1_p);
 				norm1_p = num1_p;
 
 				/* str2 is numeric strings => passthru to PHP-compare. */
-				zval_add_ref( num2_p );
+				Z_TRY_ADDREF_P(num2_p);
 				norm2_p = num2_p;
 			}
 		}
@@ -585,7 +585,7 @@ PHP_FUNCTION( collator_get_sort_key )
 		RETURN_FALSE;
 	}
 
-	/* ucol_getSortKey is exception in that the key length includes the 
+	/* ucol_getSortKey is exception in that the key length includes the
 	 * NUL terminator*/
 	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, 0);
 	if(!key_len) {

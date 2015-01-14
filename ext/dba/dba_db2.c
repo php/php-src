@@ -60,11 +60,11 @@ DBA_OPEN_FUNC(db2)
 	type = info->mode == DBA_READER ? DB_UNKNOWN :
 		info->mode == DBA_TRUNC ? DB_BTREE :
 		s ? DB_BTREE : DB_UNKNOWN;
-	  
+
 	gmode = info->mode == DBA_READER ? DB_RDONLY :
-		(info->mode == DBA_CREAT && s) ? DB_CREATE : 
+		(info->mode == DBA_CREAT && s) ? DB_CREATE :
 		(info->mode == DBA_CREAT && !s) ? 0 :
-		info->mode == DBA_WRITER ? 0         : 
+		info->mode == DBA_WRITER ? 0         :
 		info->mode == DBA_TRUNC ? DB_CREATE | DB_TRUNCATE : -1;
 
 	if (gmode == -1) {
@@ -89,8 +89,8 @@ DBA_OPEN_FUNC(db2)
 DBA_CLOSE_FUNC(db2)
 {
 	DB2_DATA;
-	
-	if (dba->cursor) 
+
+	if (dba->cursor)
 		dba->cursor->c_close(dba->cursor);
 	dba->dbp->close(dba->dbp, 0);
 	pefree(dba, info->flags&DBA_PERSISTENT);
@@ -101,7 +101,7 @@ DBA_FETCH_FUNC(db2)
 	DBT gval = {0};
 	DB2_DATA;
 	DB2_GKEY;
-	
+
 	if (dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
 		return NULL;
 	}
@@ -115,11 +115,11 @@ DBA_UPDATE_FUNC(db2)
 	DBT gval = {0};
 	DB2_DATA;
 	DB2_GKEY;
-	
+
 	gval.data = (char *) val;
 	gval.size = vallen;
 
-	if (dba->dbp->put(dba->dbp, NULL, &gkey, &gval, 
+	if (dba->dbp->put(dba->dbp, NULL, &gkey, &gval,
 				mode == 1 ? DB_NOOVERWRITE : 0)) {
 		return FAILURE;
 	}
@@ -131,7 +131,7 @@ DBA_EXISTS_FUNC(db2)
 	DBT gval = {0};
 	DB2_DATA;
 	DB2_GKEY;
-	
+
 	if (dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
 		return FAILURE;
 	}

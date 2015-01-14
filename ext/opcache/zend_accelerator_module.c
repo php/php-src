@@ -94,7 +94,7 @@ static int validate_api_restriction(void)
 			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " API is restricted by \"restrict_api\" configuration directive");
 			return 0;
 		}
-	}       
+	}
 	return 1;
 }
 
@@ -518,7 +518,7 @@ static ZEND_FUNCTION(opcache_get_status)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &fetch_scripts) == FAILURE) {
 		return;
 	}
-	
+
 	if (!validate_api_restriction()) {
 		RETURN_FALSE;
 	}
@@ -553,7 +553,7 @@ static ZEND_FUNCTION(opcache_get_status)
 		add_assoc_long(&interned_strings_usage, "number_of_strings", ZCSG(interned_strings).nNumOfElements);
 		add_assoc_zval(return_value, "interned_strings_usage", &interned_strings_usage);
 	}
-	
+
 	/* Accelerator statistics */
 	array_init(&statistics);
 	add_assoc_long(&statistics, "num_cached_scripts", ZCSG(hash).num_direct_entries);

@@ -140,7 +140,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 {
 	browser_data *bdata = arg;
 	int persistent = bdata->htab->u.flags & HASH_FLAG_PERSISTENT;
-	
+
 	if (!arg1) {
 		return;
 	}
@@ -152,7 +152,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				zend_string *new_key;
 
 				/* parent entry can not be same as current section -> causes infinite loop! */
-				if (!strcasecmp(Z_STRVAL_P(arg1), "parent") && 
+				if (!strcasecmp(Z_STRVAL_P(arg1), "parent") &&
 					bdata->current_section_name != NULL &&
 					!strcasecmp(bdata->current_section_name, Z_STRVAL_P(arg2))
 				) {
@@ -222,11 +222,11 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 static int browscap_read_file(char *filename, browser_data *browdata, int persistent) /* {{{ */
 {
 	zend_file_handle fh = {{0}};
-	
+
 	if (filename == NULL || filename[0] == '\0') {
 		return FAILURE;
 	}
-	
+
 	browdata->htab = pemalloc(sizeof *browdata->htab, persistent);
 	if (browdata->htab == NULL) {
 		return FAILURE;
@@ -256,7 +256,7 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 		pefree(browdata->current_section_name, persistent);
 		browdata->current_section_name = NULL;
 	}
-	
+
 	return SUCCESS;
 }
 /* }}} */
@@ -301,7 +301,7 @@ PHP_INI_MH(OnChangeBrowscap)
 		}
 		return SUCCESS;
 	}
-	
+
 	return FAILURE;
 }
 /* }}} */
@@ -332,7 +332,7 @@ PHP_RSHUTDOWN_FUNCTION(browscap) /* {{{ */
 	if (bdata->filename[0] != '\0') {
 		browscap_bdata_dtor(bdata, 0);
 	}
-	
+
 	return SUCCESS;
 }
 /* }}} */
@@ -340,7 +340,7 @@ PHP_RSHUTDOWN_FUNCTION(browscap) /* {{{ */
 PHP_MSHUTDOWN_FUNCTION(browscap) /* {{{ */
 {
 	browscap_bdata_dtor(&global_bdata, 1);
-	
+
 	return SUCCESS;
 }
 /* }}} */

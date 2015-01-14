@@ -97,12 +97,12 @@ int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 		if (!einfo) einfo = &DBLIB_G(err);
 	} else {
 		einfo = &DBLIB_G(err);
-	}	
+	}
 
 	einfo->severity = severity;
 	einfo->oserr = oserr;
 	einfo->dberr = dberr;
-	
+
 	if (einfo->oserrstr) {
 		efree(einfo->oserrstr);
 	}
@@ -180,11 +180,11 @@ PHP_MINIT_FUNCTION(pdo_dblib)
 	if (FAIL == dbinit()) {
 		return FAILURE;
 	}
-	
+
 	if (FAILURE == php_pdo_register_driver(&pdo_dblib_driver)) {
 		return FAILURE;
 	}
-	
+
 #if !PHP_DBLIB_IS_MSSQL
 	dberrhandle((EHANDLEFUNC) pdo_dblib_error_handler);
 	dbmsghandle((MHANDLEFUNC) pdo_dblib_msg_handler);

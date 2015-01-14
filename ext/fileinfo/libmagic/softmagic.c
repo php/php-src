@@ -360,7 +360,7 @@ check_fmt(struct magic_set *ms, struct magic *m)
 	int re_options, rv = -1;
 	pcre_extra *re_extra;
 	zend_string *pattern;
-	
+
 	if (strchr(m->desc, '%') == NULL)
 		return 0;
 
@@ -920,14 +920,17 @@ mconvert(struct magic_set *ms, struct magic *m, int flip)
 		size_t sz = file_pstring_length_size(m);
 		char *ptr1 = p->s, *ptr2 = ptr1 + sz;
 		size_t len = file_pstring_get_length(m, ptr1);
-		if (len >= sizeof(p->s)) {
+		sz = sizeof(p->s) - sz; /* maximum length of string */
+		if (len >= sz) {
 			/*
 			 * The size of the pascal string length (sz)
 			 * is 1, 2, or 4. We need at least 1 byte for NUL
 			 * termination, but we've already truncated the
 			 * string by p->s, so we need to deduct sz.
-			 */ 
-			len = sizeof(p->s) - sz;
+			 * Because we can use one of the bytes of the length
+			 * after we shifted as NUL termination.
+			 */
+			len = sz;
 		}
 		while (len--)
 			*ptr1++ = *ptr2++;
@@ -1903,7 +1906,7 @@ convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
 	}
 	t->val[j++] = '~';
 
-	if (options & PCRE_CASELESS) 
+	if (options & PCRE_CASELESS)
 		t->val[j++] = 'i';
 
 	if (options & PCRE_MULTILINE)
@@ -2078,15 +2081,15 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		zval pattern;
 		int options = 0;
 		pcre_cache_entry *pce;
-			
+
 		options |= PCRE_MULTILINE;
-		
+
 		if (m->str_flags & STRING_IGNORE_CASE) {
 			options |= PCRE_CASELESS;
 		}
-		
+
 		convert_libmagic_pattern(&pattern, (char *)m->value.s, m->vallen, options);
-		
+
 		l = v = 0;
 		if ((pce = pcre_get_compiled_regex_cache(Z_STR(pattern))) == NULL) {
 			zval_ptr_dtor(&pattern);
@@ -2096,7 +2099,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			zval retval;
 			zval subpats;
 			char *haystack;
-			
+
 			ZVAL_NULL(&retval);
 			ZVAL_NULL(&subpats);
 
@@ -2107,7 +2110,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			php_pcre_match_impl(pce, haystack, ms->search.s_len, &retval, &subpats, 1, 1, PREG_OFFSET_CAPTURE, 0);
 			/* Free haystack */
 			efree(haystack);
-			
+
 			if (Z_LVAL(retval) < 0) {
 				zval_ptr_dtor(&subpats);
 				zval_ptr_dtor(&pattern);
@@ -2143,7 +2146,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 							continue;
 						}
 						ZVAL_DUP(&matchcopy, match);
-						convert_to_string(&matchcopy); 
+						convert_to_string(&matchcopy);
 						pattern_match = &matchcopy;
 					} ZEND_HASH_FOREACH_END();
 
@@ -2154,11 +2157,11 @@ magiccheck(struct magic_set *ms, struct magic *m)
 							continue;
 						}
 						ZVAL_DUP(&offsetcopy, offset);
-						convert_to_long(&offsetcopy); 
+						convert_to_long(&offsetcopy);
 						pattern_offset = &offsetcopy;
 					} ZEND_HASH_FOREACH_END();
 
-					zval_dtor(&tmpcopy); 	
+					zval_dtor(&tmpcopy);
 
 					if ((pattern_match != NULL) && (pattern_offset != NULL)) {
 						ms->search.s += Z_LVAL_P(pattern_offset); /* this is where the match starts */

@@ -563,7 +563,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	php_serialize_data_t serialize_data = (php_serialize_data_t) data;
 
 	PHP_VAR_SERIALIZE_INIT(serialize_data);
-    
+
 	gmp_strval(&zv, gmpnum, 10);
 	php_var_serialize(&buf, &zv, &serialize_data);
 	zval_dtor(&zv);
@@ -760,8 +760,8 @@ static void gmp_strval(zval *result, mpz_t gmpnum, zend_long base) /* {{{ */
 
 	str = zend_string_alloc(num_len, 0);
 	mpz_get_str(str->val, base, gmpnum);
-	
-	/* 
+
+	/*
 	 * From GMP documentation for mpz_sizeinbase():
 	 * The returned value will be exact or 1 too big.  If base is a power of
 	 * 2, the returned value will always be exact.
@@ -1497,7 +1497,7 @@ ZEND_FUNCTION(gmp_sqrtrem)
 		FREE_GMP_TEMP(temp_a);
 		RETURN_FALSE;
 	}
-	
+
 	gmp_create(&result1, &gmpnum_result1);
 	gmp_create(&result2, &gmpnum_result2);
 

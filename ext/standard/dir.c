@@ -93,8 +93,8 @@ static zend_class_entry *dir_class_entry_ptr;
 		dirp = (php_stream *) zend_fetch_resource(id, -1, "Directory", NULL, 1, php_file_le_stream()); \
 		if (!dirp) \
 			RETURN_FALSE; \
-	} 
-	
+	}
+
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dir, 0, 0, 0)
 	ZEND_ARG_INFO(0, dir_handle)
@@ -118,7 +118,7 @@ static void php_set_default_dir(zend_resource *res)
 	if (res) {
 		GC_REFCOUNT(res)++;
 	}
-	
+
 	DIRG(default_dir) = res;
 }
 
@@ -168,25 +168,25 @@ PHP_MINIT_FUNCTION(dir)
 
 #ifdef GLOB_NOSORT
 	REGISTER_LONG_CONSTANT("GLOB_NOSORT", GLOB_NOSORT, CONST_CS | CONST_PERSISTENT);
-#else 
+#else
 # define GLOB_NOSORT 0
 #endif
 
 #ifdef GLOB_NOCHECK
 	REGISTER_LONG_CONSTANT("GLOB_NOCHECK", GLOB_NOCHECK, CONST_CS | CONST_PERSISTENT);
-#else 
+#else
 # define GLOB_NOCHECK 0
 #endif
 
 #ifdef GLOB_NOESCAPE
 	REGISTER_LONG_CONSTANT("GLOB_NOESCAPE", GLOB_NOESCAPE, CONST_CS | CONST_PERSISTENT);
-#else 
+#else
 # define GLOB_NOESCAPE 0
 #endif
 
 #ifdef GLOB_ERR
 	REGISTER_LONG_CONSTANT("GLOB_ERR", GLOB_ERR, CONST_CS | CONST_PERSISTENT);
-#else 
+#else
 # define GLOB_ERR 0
 #endif
 
@@ -224,7 +224,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
-	
+
 	dirp = php_stream_opendir(dirname, REPORT_ERRORS, context);
 
 	if (dirp == NULL) {
@@ -232,7 +232,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	}
 
 	dirp->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
-		
+
 	php_set_default_dir(dirp->res);
 
 	if (createobject) {
@@ -294,11 +294,11 @@ PHP_FUNCTION(chroot)
 	char *str;
 	int ret;
 	size_t str_len;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	
+
 	ret = chroot(str);
 	if (ret != 0) {
 		php_error_docref(NULL, E_WARNING, "%s (errno %d)", strerror(errno), errno);
@@ -306,9 +306,9 @@ PHP_FUNCTION(chroot)
 	}
 
 	php_clear_stat_cache(1, NULL, 0);
-	
+
 	ret = chdir("/");
-	
+
 	if (ret != 0) {
 		php_error_docref(NULL, E_WARNING, "%s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
@@ -326,7 +326,7 @@ PHP_FUNCTION(chdir)
 	char *str;
 	int ret;
 	size_t str_len;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -335,7 +335,7 @@ PHP_FUNCTION(chdir)
 		RETURN_FALSE;
 	}
 	ret = VCWD_CHDIR(str);
-	
+
 	if (ret != 0) {
 		php_error_docref(NULL, E_WARNING, "%s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
@@ -360,7 +360,7 @@ PHP_FUNCTION(getcwd)
 {
 	char path[MAXPATHLEN];
 	char *ret=NULL;
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -385,7 +385,7 @@ PHP_FUNCTION(rewinddir)
 {
 	zval *id = NULL, *tmp, *myself;
 	php_stream *dirp;
-	
+
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
@@ -452,9 +452,9 @@ PHP_FUNCTION(glob)
 		RETURN_FALSE;
 	}
 
-#ifdef ZTS 
+#ifdef ZTS
 	if (!IS_ABSOLUTE_PATH(pattern, pattern_len)) {
-		result = VCWD_GETCWD(cwd, MAXPATHLEN);	
+		result = VCWD_GETCWD(cwd, MAXPATHLEN);
 		if (!result) {
 			cwd[0] = '\0';
 		}
@@ -467,10 +467,10 @@ PHP_FUNCTION(glob)
 
 		snprintf(work_pattern, MAXPATHLEN, "%s%c%s", cwd, DEFAULT_SLASH, pattern);
 		pattern = work_pattern;
-	} 
+	}
 #endif
 
-	
+
 	memset(&globbuf, 0, sizeof(glob_t));
 	globbuf.gl_offs = 0;
 	if (0 != (ret = glob(pattern, flags & GLOB_FLAGMASK, NULL, &globbuf))) {
@@ -479,7 +479,7 @@ PHP_FUNCTION(glob)
 			/* Some glob implementation simply return no data if no matches
 			   were found, others return the GLOB_NOMATCH error code.
 			   We don't want to treat GLOB_NOMATCH as an error condition
-			   so that PHP glob() behaves the same on both types of 
+			   so that PHP glob() behaves the same on both types of
 			   implementations and so that 'foreach (glob() as ...'
 			   can be used for simple glob() calls without further error
 			   checking.
@@ -519,11 +519,11 @@ no_results:
 		}
 		/* we need to do this every time since GLOB_ONLYDIR does not guarantee that
 		 * all directories will be filtered. GNU libc documentation states the
-		 * following: 
-		 * If the information about the type of the file is easily available 
-		 * non-directories will be rejected but no extra work will be done to 
-		 * determine the information for each file. I.e., the caller must still be 
-		 * able to filter directories out. 
+		 * following:
+		 * If the information about the type of the file is easily available
+		 * non-directories will be rejected but no extra work will be done to
+		 * determine the information for each file. I.e., the caller must still be
+		 * able to filter directories out.
 		 */
 		if (flags & GLOB_ONLYDIR) {
 			zend_stat_t s;
@@ -547,7 +547,7 @@ no_results:
 	}
 }
 /* }}} */
-#endif 
+#endif
 
 /* {{{ proto array scandir(string dir [, int sorting_order [, resource context]])
    List files & directories inside the specified path */
@@ -585,7 +585,7 @@ PHP_FUNCTION(scandir)
 		php_error_docref(NULL, E_WARNING, "(errno %d): %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
-	
+
 	array_init(return_value);
 
 	for (i = 0; i < n; i++) {

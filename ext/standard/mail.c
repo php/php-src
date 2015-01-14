@@ -387,7 +387,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		php_error_docref(NULL, E_WARNING, "Could not execute mail delivery program '%s'", sendmail_path);
 #if PHP_SIGCHILD
 		if (sig_handler) {
-			signal(SIGCHLD, sig_handler);						
+			signal(SIGCHLD, sig_handler);
 		}
 #endif
 		MAIL_RET(0);

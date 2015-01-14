@@ -40,10 +40,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMAttr extends DOMNode 
+* class DOMAttr extends DOMNode
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-637646024
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_attr_class_functions[] = {
@@ -94,10 +94,10 @@ PHP_METHOD(domattr, __construct)
 
 /* }}} end DOMAttr::__construct */
 
-/* {{{ name	string	
-readonly=yes 
+/* {{{ name	string
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1112119403
-Since: 
+Since:
 */
 int dom_attr_name_read(dom_object *obj, zval *retval)
 {
@@ -117,10 +117,10 @@ int dom_attr_name_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ specified	boolean	
-readonly=yes 
+/* {{{ specified	boolean
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-862529273
-Since: 
+Since:
 */
 int dom_attr_specified_read(dom_object *obj, zval *retval)
 {
@@ -131,10 +131,10 @@ int dom_attr_specified_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ value	string	
-readonly=no 
+/* {{{ value	string
+readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-221662474
-Since: 
+Since:
 */
 int dom_attr_value_read(dom_object *obj, zval *retval)
 {
@@ -181,8 +181,8 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 
 /* }}} */
 
-/* {{{ ownerElement	DOMElement	
-readonly=yes 
+/* {{{ ownerElement	DOMElement
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-ownerElement
 Since: DOM Level 2
 */
@@ -210,8 +210,8 @@ int dom_attr_owner_element_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ schemaTypeInfo	DOMTypeInfo	
-readonly=yes 
+/* {{{ schemaTypeInfo	DOMTypeInfo
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-schemaTypeInfo
 Since: DOM Level 3
 */

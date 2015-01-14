@@ -104,7 +104,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 		if (!current_row) {
 			DBG_RETURN(FAIL);
 		}
-		
+
 		for (i = 0; i < result->row_count; i++) {
 			/* (i / 8) & the_bit_for_i*/
 			if (initialized[i >> 3] & (1 << (i & 7))) {
@@ -216,7 +216,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, free_result)(MYSQLND_RES_BUFFERED_Z
 	if (data) {
 		unsigned int field_count = set->field_count;
 		int64_t row;
-	
+
 		for (row = set->row_count - 1; row >= 0; row--) {
 			zval *current_row = data + row * field_count;
 			int64_t col;
@@ -264,7 +264,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 
 	for (row = set->row_count - 1; row >= 0; row--) {
 		MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row];
-		current_buffer->free_chunk(current_buffer);	
+		current_buffer->free_chunk(current_buffer);
 	}
 
 	if (set->lengths) {
@@ -360,7 +360,7 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 
 	/*
 	  Make it safe to call it repeatedly for PS -
-	  better free and allocate a new because the number of field might change 
+	  better free and allocate a new because the number of field might change
 	  (select *) with altered table. Also for statements which skip the PS
 	  infrastructure!
 	*/
@@ -1029,7 +1029,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 				set->data_cursor += field_count;
 				MYSQLND_INC_GLOBAL_STATISTIC(STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_BUF);
 			} else {
-				SET_OOM_ERROR(*result->conn->error_info);			
+				SET_OOM_ERROR(*result->conn->error_info);
 			}
 /* END difference between normal normal fetch and _c */
 
@@ -1164,7 +1164,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 		current_row = mnd_emalloc(field_count * sizeof(zval));
 		if (!current_row) {
 			SET_OOM_ERROR(*result->conn->error_info);
-			DBG_RETURN(FAIL);			
+			DBG_RETURN(FAIL);
 		}
 
 		rc = result->stored_data->m.row_decoder(result->stored_data->row_buffers[set->current_row],
@@ -1200,7 +1200,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 			zval * data = &current_row[i];
 
 			set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
-			
+
 			if (flags & MYSQLND_FETCH_NUM) {
 				Z_TRY_ADDREF_P(data);
 				zend_hash_next_index_insert(Z_ARRVAL_P(row), data);
@@ -1226,7 +1226,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 				It also simplifies the handling of Z_ADDREF_P because we don't need to check if only
 				either NUM or ASSOC is set but not both.
 			*/
-			zval_ptr_dtor(data); 
+			zval_ptr_dtor(data);
 		}
 		mnd_efree(current_row);
 		set->current_row++;
@@ -1353,7 +1353,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 									   set->row_count);
 
 	/* Finally clean */
-	if (row_packet->eof) { 
+	if (row_packet->eof) {
 		memset(conn->upsert_status, 0, sizeof(*conn->upsert_status));
 		conn->upsert_status->warning_count = row_packet->warning_count;
 		conn->upsert_status->server_status = row_packet->server_status;
@@ -1934,7 +1934,7 @@ mysqlnd_result_unbuffered_init(unsigned int field_count, zend_bool ps, zend_bool
 	if (!(ret->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size)))) {
 		mnd_efree(ret->lengths);
 		mnd_pefree(ret, persistent);
-		DBG_RETURN(NULL);	
+		DBG_RETURN(NULL);
 	}
 
 	ret->persistent	= persistent;
@@ -1974,7 +1974,7 @@ mysqlnd_result_buffered_zval_init(unsigned int field_count, zend_bool ps, zend_b
 	if (!(ret->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size)))) {
 		mnd_efree(ret->lengths);
 		mnd_pefree(ret, persistent);
-		DBG_RETURN(NULL);	
+		DBG_RETURN(NULL);
 	}
 
 	ret->persistent	= persistent;
@@ -2017,7 +2017,7 @@ mysqlnd_result_buffered_c_init(unsigned int field_count, zend_bool ps, zend_bool
 	if (!(ret->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size)))) {
 		mnd_efree(ret->lengths);
 		mnd_pefree(ret, persistent);
-		DBG_RETURN(NULL);	
+		DBG_RETURN(NULL);
 	}
 
 	ret->persistent	= persistent;

@@ -270,8 +270,8 @@ static void print_extensions(void)
 	zend_llist_destroy(&sorted_exts);
 }
 
-#ifndef STDOUT_FILENO	 
-#define STDOUT_FILENO 1	 
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO 1
 #endif
 
 static inline size_t sapi_cgibin_single_write(const char *str, uint str_length)
@@ -289,8 +289,8 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length)
 	}
 
 	/* sapi has not started, output to stdout instead of fcgi */
-#ifdef PHP_WRITE_STDOUT	 
-	ret = write(STDOUT_FILENO, str, str_length);	 
+#ifdef PHP_WRITE_STDOUT
+	ret = write(STDOUT_FILENO, str, str_length);
 	if (ret <= 0) {
 		return 0;
 	}
@@ -420,7 +420,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 	while (h) {
 		/* prevent CRLFCRLF */
 		if (h->header_len) {
-			if (h->header_len > sizeof("Status:") - 1 && 
+			if (h->header_len > sizeof("Status:") - 1 &&
 				strncasecmp(h->header, "Status:", sizeof("Status:") - 1) == 0
 			) {
 				if (!ignore_status) {
@@ -679,12 +679,12 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 		}
 
 		/* we have to test if path is part of DOCUMENT_ROOT.
-		  if it is inside the docroot, we scan the tree up to the docroot 
+		  if it is inside the docroot, we scan the tree up to the docroot
 			to find more user.ini, if not we only scan the current path.
 		  */
 #ifdef PHP_WIN32
 		if (strnicmp(s1, s2, s_len) == 0) {
-#else 
+#else
 		if (strncmp(s1, s2, s_len) == 0) {
 #endif
 			ptr = s2 + start;  /* start is the point where doc_root ends! */
@@ -1554,7 +1554,7 @@ int main(int argc, char *argv[])
 	sapi_startup(&cgi_sapi_module);
 	cgi_sapi_module.php_ini_path_override = NULL;
 	cgi_sapi_module.php_ini_ignore_cwd = 1;
-	
+
 	fcgi_init();
 
 #ifdef PHP_WIN32
@@ -1625,7 +1625,7 @@ int main(int argc, char *argv[])
 				use_extended_info = 1;
 				break;
 
-			case 't': 
+			case 't':
 				test_conf++;
 				break;
 
@@ -1746,7 +1746,7 @@ int main(int argc, char *argv[])
 #endif
 		return FPM_EXIT_SOFTWARE;
 	}
-	
+
 	if (use_extended_info) {
 		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
 	}
@@ -1868,7 +1868,7 @@ consult the installation file that came with this distribution, or visit \n\
 				goto fastcgi_request_done;
 			}
 
-			/* 
+			/*
 			 * have to duplicate SG(request_info).path_translated to be able to log errrors
 			 * php_fopen_primary_script seems to delete SG(request_info).path_translated on failure
 			 */

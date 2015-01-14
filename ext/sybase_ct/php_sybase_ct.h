@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -101,7 +101,7 @@ typedef struct {
 	sybase_link *sybase_ptr;
 	int cur_row,cur_field;
 	int num_rows,num_fields;
-	
+
 	/* For unbuffered reads */
 	CS_INT *lengths;
 	CS_SMALLINT *indicators;
