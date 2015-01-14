@@ -3119,7 +3119,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 #endif /* HAVE_DTRACE */
 
 	if (ce != catch_ce) {
-		if (!instanceof_function(ce, catch_ce)) {
+		if (!catch_ce || !instanceof_function(ce, catch_ce)) {
 			if (opline->result.num) {
 				zend_throw_exception_internal(NULL);
 				HANDLE_EXCEPTION();
@@ -5597,7 +5597,7 @@ ZEND_VM_C_LABEL(try_instanceof):
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
 	} else if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		ZEND_VM_C_GOTO(try_instanceof);

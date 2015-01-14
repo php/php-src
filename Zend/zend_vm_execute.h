@@ -7248,7 +7248,7 @@ static int ZEND_FASTCALL  ZEND_CATCH_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 #endif /* HAVE_DTRACE */
 
 	if (ce != catch_ce) {
-		if (!instanceof_function(ce, catch_ce)) {
+		if (!catch_ce || !instanceof_function(ce, catch_ce)) {
 			if (opline->result.num) {
 				zend_throw_exception_internal(NULL);
 				HANDLE_EXCEPTION();
@@ -26681,7 +26681,7 @@ try_instanceof:
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
 	} else if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		goto try_instanceof;
@@ -27599,7 +27599,7 @@ try_instanceof:
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
 	} else if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		goto try_instanceof;
@@ -34243,7 +34243,7 @@ try_instanceof:
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
 	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		goto try_instanceof;
@@ -34649,7 +34649,7 @@ try_instanceof:
 		} else {
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
-		result = instanceof_function(Z_OBJCE_P(expr), ce);
+		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
 	} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
 		expr = Z_REFVAL_P(expr);
 		goto try_instanceof;
