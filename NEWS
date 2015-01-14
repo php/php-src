@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #68735 (fileinfo out-of-bounds memory access).
     (Anatol)
 
+- OpenSSL:
+  . Fixed bug #55618 (use case-insensitive cert name matching).
+    (Daniel Lowrey)
 
 18 Dec 2014 PHP 5.4.36
 
