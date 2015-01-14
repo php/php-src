@@ -56,6 +56,8 @@ PHP X.Y UPGRADE NOTES
     output buffer is created in an output buffer handler.
   . Added zend_memnstr_ex, which is based on string matching sunday algo.
   . Added zend_memnrstr, zend_memnrstr_ex.
+  . Added hybrid sorting algo zend_sort for better performance.
+  . Added stable sorting algo zend_insert_sort.
 
 - DBA
   . dba_delete() now returns false if the key was not found for the inifile

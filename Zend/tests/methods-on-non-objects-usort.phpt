@@ -23,21 +23,16 @@ int(4096)
 string(43) "Call to a member function compare() on null"
 int(4096)
 string(43) "Call to a member function compare() on null"
-int(4096)
-string(43) "Call to a member function compare() on null"
-int(4096)
-string(43) "Call to a member function compare() on null"
 array(5) {
   [0]=>
-  int(-1)
+  int(1)
   [1]=>
-  int(3)
+  int(4)
   [2]=>
   int(2)
   [3]=>
-  int(4)
+  int(3)
   [4]=>
-  int(1)
+  int(-1)
 }
 Alive
-

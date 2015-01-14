@@ -76,8 +76,8 @@ static void phpdbg_array_intersect_init(phpdbg_intersect_ptr *info, HashTable *h
 	info->ht[0] = ht1;
 	info->ht[1] = ht2;
 
-	zend_hash_sort(info->ht[0], zend_qsort, (compare_func_t) phpdbg_array_data_compare, 0);
-	zend_hash_sort(info->ht[1], zend_qsort, (compare_func_t) phpdbg_array_data_compare, 0);
+	zend_hash_sort(info->ht[0], (compare_func_t) phpdbg_array_data_compare, 0);
+	zend_hash_sort(info->ht[1], (compare_func_t) phpdbg_array_data_compare, 0);
 
 	zend_hash_internal_pointer_reset_ex(info->ht[0], &info->pos[0]);
 	zend_hash_internal_pointer_reset_ex(info->ht[1], &info->pos[1]);

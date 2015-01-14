@@ -321,7 +321,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	ZVAL_COPY_VALUE(&INTL_G( current_collator ), object);
 
 	/* Sort specified array. */
-	zend_hash_sort( hash, zend_qsort, collator_compare_func, renumber );
+	zend_hash_sort(hash, collator_compare_func, renumber);
 
 	/* Restore saved collator. */
 	ZVAL_COPY_VALUE(&INTL_G( current_collator ), &saved_collator);
@@ -342,6 +342,15 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 PHP_FUNCTION( collator_sort )
 {
 	collator_sort_internal( TRUE, INTERNAL_FUNCTION_PARAM_PASSTHRU );
+}
+/* }}} */
+
+static collator_sortkey_swap(collator_sort_key_index_t *p, collator_sort_key_index_t *q) /* {{{ */
+{
+	collator_sort_key_index_t t;
+	t = *p;
+	*p = *q;
+	*q = t;
 }
 /* }}} */
 
@@ -496,7 +505,8 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 		sortKeyIndxBuf[j].key = sortKeyBuf + (ptrdiff_t)sortKeyIndxBuf[j].key;
 
 	/* sort it */
-	zend_qsort( sortKeyIndxBuf, sortKeyCount, sortKeyIndxSize, collator_cmp_sort_keys );
+	zend_sort( sortKeyIndxBuf, sortKeyCount,
+			sortKeyIndxSize, collator_cmp_sort_keys, (swap_func_t)collator_sortkey_swap);
 
 	zval_ptr_dtor( array );
 	/* for resulting hash we'll assign new hash keys rather then reordering */
@@ -532,7 +542,7 @@ PHP_FUNCTION( collator_asort )
 /* {{{ proto bool Collator::getSortKey( Collator $coll, string $str )
  * Get a sort key for a string from a Collator. }}} */
 /* {{{ proto bool collator_get_sort_key( Collator $coll, string $str )
- * Get a sort key for a string from a Collator. }}} */
+ * Get a sort key for a string from a Collator. */
 PHP_FUNCTION( collator_get_sort_key )
 {
 	char*            str      = NULL;

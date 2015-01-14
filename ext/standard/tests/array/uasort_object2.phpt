@@ -123,32 +123,32 @@ echo "Done"
 -- Testing uasort() with StaticClass objects --
 bool(true)
 array(4) {
-  [3]=>
-  object(StaticClass)#%d (0) {
-  }
-  [2]=>
+  [0]=>
   object(StaticClass)#%d (0) {
   }
   [1]=>
   object(StaticClass)#%d (0) {
   }
-  [0]=>
+  [2]=>
+  object(StaticClass)#%d (0) {
+  }
+  [3]=>
   object(StaticClass)#%d (0) {
   }
 }
 -- Testing uasort() with EmptyClass objects --
 bool(true)
 array(4) {
-  [3]=>
-  object(EmptyClass)#%d (0) {
-  }
-  [2]=>
+  [0]=>
   object(EmptyClass)#%d (0) {
   }
   [1]=>
   object(EmptyClass)#%d (0) {
   }
-  [0]=>
+  [2]=>
+  object(EmptyClass)#%d (0) {
+  }
+  [3]=>
   object(EmptyClass)#%d (0) {
   }
 }

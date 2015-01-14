@@ -1663,8 +1663,47 @@ ZEND_API zval *zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos)
 	}
 }
 
-ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
-							compare_func_t compar, zend_bool renumber)
+ZEND_API void zend_hash_bucket_swap(Bucket *p, Bucket *q) {
+	zval val;
+	zend_ulong h;
+	zend_string *key;
+
+	ZVAL_COPY_VALUE(&val, &p->val);
+	h = p->h;
+	key = p->key;
+
+	ZVAL_COPY_VALUE(&p->val, &q->val);
+	p->h = q->h;
+	p->key = q->key;
+
+	ZVAL_COPY_VALUE(&q->val, &val);
+	q->h = h;
+	q->key = key;
+}
+
+ZEND_API void zend_hash_bucket_renum_swap(Bucket *p, Bucket *q) {
+	zval val;
+
+	ZVAL_COPY_VALUE(&val, &p->val);
+	ZVAL_COPY_VALUE(&p->val, &q->val);
+	ZVAL_COPY_VALUE(&q->val, &val);
+}
+
+ZEND_API void zend_hash_bucket_packed_swap(Bucket *p, Bucket *q) {
+	zval val;
+	zend_ulong h;
+
+	ZVAL_COPY_VALUE(&val, &p->val);
+	h = p->h;
+
+	ZVAL_COPY_VALUE(&p->val, &q->val);
+	p->h = q->h;
+
+	ZVAL_COPY_VALUE(&q->val, &val);
+	q->h = h;
+}
+
+ZEND_API int zend_hash_sort_ex(HashTable *ht, sort_func_t sort, compare_func_t compar, zend_bool renumber)
 {
 	Bucket *p;
 	uint32_t i, j;
@@ -1688,7 +1727,9 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 		}
 	}
 
-	(*sort_func)((void *) ht->arData, i, sizeof(Bucket), compar);
+	sort((void *)ht->arData, i, sizeof(Bucket), compar,
+			(swap_func_t)(renumber? zend_hash_bucket_renum_swap :
+				((ht->u.flags & HASH_FLAG_PACKED) ? zend_hash_bucket_packed_swap : zend_hash_bucket_swap)));
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->nNumUsed = i;
