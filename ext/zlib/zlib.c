@@ -572,7 +572,7 @@ static PHP_FUNCTION(gzfile)
 
 	/* Now loop through the file and do the magic quotes thing if needed */
 	memset(buf, 0, sizeof(buf));
-	    
+
 	while (php_stream_gets(stream, buf, sizeof(buf) - 1) != NULL) {
 		add_index_string(return_value, i++, buf);
 	}
@@ -938,7 +938,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_handler)
 	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 /* }}} */
- 
+
 /* {{{ INI */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zlib.output_compression",      "0", PHP_INI_ALL, OnUpdate_zlib_output_compression,       output_compression_default,       zend_zlib_globals, zlib_globals)

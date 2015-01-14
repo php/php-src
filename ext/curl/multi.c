@@ -54,7 +54,7 @@
 PHP_FUNCTION(curl_multi_init)
 {
 	php_curlm *mh;
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -92,7 +92,7 @@ PHP_FUNCTION(curl_multi_add_handle)
 
 	zend_llist_add_element(&mh->easyh, &tmp_val);
 
-	RETURN_LONG((zend_long)curl_multi_add_handle(mh->multi, ch->cp));	
+	RETURN_LONG((zend_long)curl_multi_add_handle(mh->multi, ch->cp));
 }
 /* }}} */
 
@@ -104,7 +104,7 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 	if (!z_ch) {
 		return;
 	}
-	
+
 	ch = zend_fetch_resource(z_ch, -1, le_curl_name, NULL, 1, le_curl);
 	if (!ch) {
 		return;
@@ -117,7 +117,7 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 /* Used internally as comparison routine passed to zend_list_del_element */
 static int curl_compare_resources( zval *z1, zval *z2 ) /* {{{ */
 {
-	return (Z_TYPE_P(z1) == Z_TYPE_P(z2) && 
+	return (Z_TYPE_P(z1) == Z_TYPE_P(z2) &&
 			Z_TYPE_P(z1) == IS_RESOURCE &&
 			Z_RES_P(z1) == Z_RES_P(z2));
 }
@@ -175,7 +175,7 @@ PHP_FUNCTION(curl_multi_select)
 	ZEND_FETCH_RESOURCE(mh, php_curlm *, z_mh, -1, le_curl_multi_handle_name, le_curl_multi_handle);
 
 	_make_timeval_struct(&to, timeout);
-	
+
 	FD_ZERO(&readfds);
 	FD_ZERO(&writefds);
 	FD_ZERO(&exceptfds);
@@ -188,7 +188,7 @@ PHP_FUNCTION(curl_multi_select)
 }
 /* }}} */
 
-/* {{{ proto int curl_multi_exec(resource mh, int &still_running) 
+/* {{{ proto int curl_multi_exec(resource mh, int &still_running)
    Run the sub-connections of the current cURL handle */
 PHP_FUNCTION(curl_multi_exec)
 {
@@ -294,15 +294,15 @@ PHP_FUNCTION(curl_multi_info_read)
 			if (ch->cp == tmp_msg->easy_handle) {
 
 				/* we are adding a reference to the underlying php_curl
-				   resource, so we need to add one to the resource's refcount 
-				   in order to ensure it doesn't get destroyed when the 
+				   resource, so we need to add one to the resource's refcount
+				   in order to ensure it doesn't get destroyed when the
 				   underlying curl easy handle goes out of scope.
 				   Normally you would call zval_copy_ctor( pz_ch ), or
 				   SEPARATE_ZVAL, but those create new zvals, which is already
 				   being done in add_assoc_resource */
 				Z_ADDREF_P(pz_ch);
 
-				/* add_assoc_resource automatically creates a new zval to 
+				/* add_assoc_resource automatically creates a new zval to
 				   wrap the "resource" represented by the current pz_ch */
 
 				add_assoc_zval(return_value, "handle", pz_ch);
@@ -378,7 +378,7 @@ PHP_FUNCTION(curl_multi_strerror)
 
 #if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
-{ 
+{
 	CURLMcode error = CURLM_OK;
 
 	switch (option) {

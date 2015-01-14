@@ -1507,7 +1507,7 @@ PHP_FUNCTION(ob_get_status)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_status) == FAILURE) {
 		return;
 	}
-	
+
 	if (!OG(active)) {
 		array_init(return_value);
 		return;

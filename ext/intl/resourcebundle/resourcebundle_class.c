@@ -74,7 +74,7 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 /* }}} */
 
 /* {{{ ResourceBundle_ctor */
-static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS) 
+static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	const char *bundlename;
 	size_t		bundlename_len = 0;
@@ -87,7 +87,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	intl_error_reset( NULL );
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s!s!|b", 
+	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s!s!|b",
 		&locale, &locale_len, &bundlename, &bundlename_len, &fallback ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -97,7 +97,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
-	
+
 	if (locale == NULL) {
 		locale = intl_locale_get_default();
 	}
@@ -155,7 +155,7 @@ PHP_METHOD( ResourceBundle, __construct )
 /* {{{ proto ResourceBundle ResourceBundle::create( string $locale [, string $bundlename [, bool $fallback = true ]] )
 proto ResourceBundle resourcebundle_create( string $locale [, string $bundlename [, bool $fallback = true ]] )
 */
-PHP_FUNCTION( resourcebundle_create ) 
+PHP_FUNCTION( resourcebundle_create )
 {
 	object_init_ex( return_value, ResourceBundle_ce_ptr );
 	resourcebundle_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -166,7 +166,7 @@ PHP_FUNCTION( resourcebundle_create )
 /* }}} */
 
 /* {{{ resourcebundle_array_fetch */
-static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_value, int fallback) 
+static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_value, int fallback)
 {
 	int32_t     meindex = 0;
 	char *      mekey = NULL;
@@ -174,7 +174,7 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 	char         *pbuf;
 	ResourceBundle_object *rb;
 
-	intl_error_reset( NULL );	
+	intl_error_reset( NULL );
 	RESOURCEBUNDLE_METHOD_FETCH_OBJECT;
 
 	if(Z_TYPE_P(offset) == IS_LONG) {
@@ -185,12 +185,12 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 		mekey = Z_STRVAL_P(offset);
 		rb->child = ures_getByKey(rb->me, mekey, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else {
-		intl_errors_set(INTL_DATA_ERROR_P(rb), U_ILLEGAL_ARGUMENT_ERROR,	
+		intl_errors_set(INTL_DATA_ERROR_P(rb), U_ILLEGAL_ARGUMENT_ERROR,
 			"resourcebundle_get: index should be integer or string", 0);
 		RETURN_NULL();
 	}
 
-	intl_error_set_code( NULL, INTL_DATA_ERROR_CODE(rb) );	
+	intl_error_set_code( NULL, INTL_DATA_ERROR_CODE(rb) );
 	if (U_FAILURE(INTL_DATA_ERROR_CODE(rb))) {
 		if (is_numeric) {
 			spprintf( &pbuf, 0, "Cannot load resource element %d", meindex );
@@ -220,7 +220,7 @@ static void resourcebundle_array_fetch(zval *object, zval *offset, zval *return_
 /* }}} */
 
 /* {{{ resourcebundle_array_get */
-zval *resourcebundle_array_get(zval *object, zval *offset, int type, zval *rv) 
+zval *resourcebundle_array_get(zval *object, zval *offset, int type, zval *rv)
 {
 	if(offset == NULL) {
 		php_error( E_ERROR, "Cannot apply [] to ResourceBundle object" );
@@ -249,7 +249,7 @@ PHP_FUNCTION( resourcebundle_get )
 	zval *      object;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oz|b",	&object, ResourceBundle_ce_ptr, &offset, &fallback ) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"resourcebundle_get: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
@@ -259,7 +259,7 @@ PHP_FUNCTION( resourcebundle_get )
 /* }}} */
 
 /* {{{ resourcebundle_array_count */
-int resourcebundle_array_count(zval *object, zend_long *count) 
+int resourcebundle_array_count(zval *object, zend_long *count)
 {
 	ResourceBundle_object *rb;
 	RESOURCEBUNDLE_METHOD_FETCH_OBJECT_NO_CHECK;
@@ -291,7 +291,7 @@ PHP_FUNCTION( resourcebundle_count )
 	RESOURCEBUNDLE_METHOD_INIT_VARS;
 
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, ResourceBundle_ce_ptr ) == FAILURE ) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"resourcebundle_count: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
@@ -325,7 +325,7 @@ PHP_FUNCTION( resourcebundle_locales )
 
 	if( zend_parse_parameters(ZEND_NUM_ARGS(), "s", &bundlename, &bundlename_len ) == FAILURE )
 	{
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"resourcebundle_locales: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
@@ -336,10 +336,10 @@ PHP_FUNCTION( resourcebundle_locales )
 	}
 
 	icuenum = ures_openAvailableLocales( bundlename, &icuerror );
-	INTL_CHECK_STATUS(icuerror, "Cannot fetch locales list");		
+	INTL_CHECK_STATUS(icuerror, "Cannot fetch locales list");
 
 	uenum_reset( icuenum, &icuerror );
-	INTL_CHECK_STATUS(icuerror, "Cannot iterate locales list");		
+	INTL_CHECK_STATUS(icuerror, "Cannot iterate locales list");
 
 	array_init( return_value );
 	while ((entry = uenum_next( icuenum, &entry_len, &icuerror ))) {

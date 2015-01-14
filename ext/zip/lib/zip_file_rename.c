@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,20 +31,20 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include <string.h>
 
 #include "zipint.h"
 
-
+
 
 ZIP_EXTERN int
 zip_file_rename(struct zip *za, zip_uint64_t idx, const char *name, zip_flags_t flags)
 {
     const char *old_name;
     int old_is_dir, new_is_dir;
-    
+
     if (idx >= za->nentry || (name != NULL && strlen(name) > ZIP_UINT16_MAX)) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
@@ -57,7 +57,7 @@ zip_file_rename(struct zip *za, zip_uint64_t idx, const char *name, zip_flags_t 
 
     if ((old_name=zip_get_name(za, idx, 0)) == NULL)
 	return -1;
-								    
+
     new_is_dir = (name != NULL && name[strlen(name)-1] == '/');
     old_is_dir = (old_name[strlen(old_name)-1] == '/');
 

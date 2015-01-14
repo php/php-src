@@ -198,7 +198,7 @@ ZEND_GET_MODULE(pcntl)
 
 static void pcntl_signal_handler(int);
 static void pcntl_signal_dispatch();
-  
+
 void php_register_signal_constants(INIT_FUNC_ARGS)
 {
 
@@ -234,7 +234,7 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("SIGTERM",  (zend_long) SIGTERM, CONST_CS | CONST_PERSISTENT);
 #ifdef SIGSTKFLT
 	REGISTER_LONG_CONSTANT("SIGSTKFLT",(zend_long) SIGSTKFLT, CONST_CS | CONST_PERSISTENT);
-#endif 
+#endif
 #ifdef SIGCLD
 	REGISTER_LONG_CONSTANT("SIGCLD",   (zend_long) SIGCLD, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -484,7 +484,7 @@ static void php_pcntl_register_errno_constants(INIT_FUNC_ARGS)
 }
 
 static PHP_GINIT_FUNCTION(pcntl)
-{ 
+{
 	memset(pcntl_globals, 0, sizeof(*pcntl_globals));
 }
 
@@ -547,7 +547,7 @@ PHP_FUNCTION(pcntl_fork)
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error %d", errno);
 	}
-	
+
 	RETURN_LONG((zend_long) id);
 }
 /* }}} */
@@ -560,7 +560,7 @@ PHP_FUNCTION(pcntl_alarm)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &seconds) == FAILURE)
 		return;
-	
+
 	RETURN_LONG ((zend_long) alarm(seconds));
 }
 /* }}} */
@@ -576,7 +576,7 @@ PHP_FUNCTION(pcntl_waitpid)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz/|l", &pid, &z_status, &options) == FAILURE)
 		return;
-	
+
 	convert_to_long_ex(z_status);
 
 	status = Z_LVAL_P(z_status);
@@ -604,7 +604,7 @@ PHP_FUNCTION(pcntl_wait)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/|l", &z_status, &options) == FAILURE)
 		return;
-	
+
 	convert_to_long_ex(z_status);
 
 	status = Z_LVAL_P(z_status);
@@ -628,7 +628,7 @@ PHP_FUNCTION(pcntl_wait)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifexited(int status) 
+/* {{{ proto bool pcntl_wifexited(int status)
    Returns true if the child status code represents a successful exit */
 PHP_FUNCTION(pcntl_wifexited)
 {
@@ -646,7 +646,7 @@ PHP_FUNCTION(pcntl_wifexited)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifstopped(int status) 
+/* {{{ proto bool pcntl_wifstopped(int status)
    Returns true if the child status code represents a stopped process (WUNTRACED must have been used with waitpid) */
 PHP_FUNCTION(pcntl_wifstopped)
 {
@@ -664,7 +664,7 @@ PHP_FUNCTION(pcntl_wifstopped)
 }
 /* }}} */
 
-/* {{{ proto bool pcntl_wifsignaled(int status) 
+/* {{{ proto bool pcntl_wifsignaled(int status)
    Returns true if the child status code represents a process that was terminated due to a signal */
 PHP_FUNCTION(pcntl_wifsignaled)
 {
@@ -682,7 +682,7 @@ PHP_FUNCTION(pcntl_wifsignaled)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_wexitstatus(int status) 
+/* {{{ proto int pcntl_wexitstatus(int status)
    Returns the status code of a child's exit */
 PHP_FUNCTION(pcntl_wexitstatus)
 {
@@ -700,7 +700,7 @@ PHP_FUNCTION(pcntl_wexitstatus)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_wtermsig(int status) 
+/* {{{ proto int pcntl_wtermsig(int status)
    Returns the number of the signal that terminated the process who's status code is passed  */
 PHP_FUNCTION(pcntl_wtermsig)
 {
@@ -718,7 +718,7 @@ PHP_FUNCTION(pcntl_wtermsig)
 }
 /* }}} */
 
-/* {{{ proto int pcntl_wstopsig(int status) 
+/* {{{ proto int pcntl_wstopsig(int status)
    Returns the number of the signal that caused the process to stop who's status code is passed */
 PHP_FUNCTION(pcntl_wstopsig)
 {
@@ -752,16 +752,16 @@ PHP_FUNCTION(pcntl_exec)
 	char *path;
 	size_t path_len;
 	zend_ulong key_num;
-		
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|aa", &path, &path_len, &args, &envs) == FAILURE) {
 		return;
 	}
-	
+
 	if (ZEND_NUM_ARGS() > 1) {
 		/* Build argument list */
 		args_hash = HASH_OF(args);
 		argc = zend_hash_num_elements(args_hash);
-		
+
 		argv = safe_emalloc((argc + 2), sizeof(char *), 0);
 		*argv = path;
 		current_arg = argv+1;
@@ -783,8 +783,8 @@ PHP_FUNCTION(pcntl_exec)
 		/* Build environment pair list */
 		envs_hash = HASH_OF(envs);
 		envc = zend_hash_num_elements(envs_hash);
-		
-		pair = envp = safe_emalloc((envc + 1), sizeof(char *), 0);		
+
+		pair = envp = safe_emalloc((envc + 1), sizeof(char *), 0);
 		ZEND_HASH_FOREACH_KEY_VAL(envs_hash, key_num, key, element) {
 			if (envi >= envc) break;
 			if (!key) {
@@ -795,13 +795,13 @@ PHP_FUNCTION(pcntl_exec)
 
 			convert_to_string_ex(element);
 
-			/* Length of element + equal sign + length of key + null */ 
+			/* Length of element + equal sign + length of key + null */
 			pair_length = Z_STRLEN_P(element) + key->len + 2;
 			*pair = emalloc(pair_length);
-			strlcpy(*pair, key->val, key->len + 1); 
+			strlcpy(*pair, key->val, key->len + 1);
 			strlcat(*pair, "=", pair_length);
 			strlcat(*pair, Z_STRVAL_P(element), pair_length);
-			
+
 			/* Cleanup */
 			zend_string_release(key);
 			envi++;
@@ -813,7 +813,7 @@ PHP_FUNCTION(pcntl_exec)
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error has occurred: (errno %d) %s", errno, strerror(errno));
 		}
-	
+
 		/* Cleanup */
 		for (pair = envp; *pair != NULL; pair++) efree(*pair);
 		efree(envp);
@@ -826,7 +826,7 @@ PHP_FUNCTION(pcntl_exec)
 	}
 
 	efree(argv);
-	
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -876,7 +876,7 @@ PHP_FUNCTION(pcntl_signal)
 		zend_hash_index_del(&PCNTL_G(php_signal_table), signo);
 		RETURN_TRUE;
 	}
-	
+
 	if (!zend_is_callable(handle, 0, &func_name)) {
 		PCNTL_G(last_error) = EINVAL;
 		php_error_docref(NULL, E_WARNING, "%s is not a callable function name error", func_name->val);
@@ -884,12 +884,12 @@ PHP_FUNCTION(pcntl_signal)
 		RETURN_FALSE;
 	}
 	zend_string_release(func_name);
-	
+
 	/* Add the function name to our signal table */
 	if (zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle)) {
 		if (Z_REFCOUNTED_P(handle)) Z_ADDREF_P(handle);
 	}
-	
+
 	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == SIG_ERR) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
@@ -1018,7 +1018,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 	}
 
 	/*
-	 * sigtimedwait and sigwaitinfo can return 0 on success on some 
+	 * sigtimedwait and sigwaitinfo can return 0 on success on some
 	 * platforms, e.g. NetBSD
 	 */
 	if (!signo && siginfo.si_signo) {
@@ -1065,7 +1065,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 #endif
 		}
 	}
-	
+
 	RETURN_LONG(signo);
 }
 /* }}} */
@@ -1095,12 +1095,12 @@ PHP_FUNCTION(pcntl_getpriority)
 	zend_long who = PRIO_PROCESS;
 	zend_long pid = getpid();
 	int pri;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &pid, &who) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	/* needs to be cleared, since any returned value is valid */ 
+	/* needs to be cleared, since any returned value is valid */
 	errno = 0;
 
 	pri = getpriority(who, pid);
@@ -1160,7 +1160,7 @@ PHP_FUNCTION(pcntl_setpriority)
 		}
 		RETURN_FALSE;
 	}
-	
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1192,7 +1192,7 @@ PHP_FUNCTION(pcntl_strerror)
 static void pcntl_signal_handler(int signo)
 {
 	struct php_pcntl_pending_signal *psig;
-	
+
 	psig = PCNTL_G(spares);
 	if (!psig) {
 		/* oops, too many signals for us to track, so we'll forget about this one */
@@ -1224,7 +1224,7 @@ void pcntl_signal_dispatch()
 	if(!PCNTL_G(pending_signals)) {
 		return;
 	}
-		
+
 	/* Mask all signals */
 	sigfillset(&mask);
 	sigprocmask(SIG_BLOCK, &mask, &old_mask);
@@ -1240,7 +1240,7 @@ void pcntl_signal_dispatch()
 
 	queue = PCNTL_G(head);
 	PCNTL_G(head) = NULL; /* simple stores are atomic */
-	
+
 	/* Allocate */
 
 	while (queue) {
@@ -1265,7 +1265,7 @@ void pcntl_signal_dispatch()
 
 	/* Re-enable queue */
 	PCNTL_G(processing_signal_queue) = 0;
-	
+
 	/* return signal mask to previous state */
 	sigprocmask(SIG_SETMASK, &old_mask, NULL);
 }

@@ -141,7 +141,7 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 				case 12154:	/* ORA-12154: TNS:could not resolve service name */
 					strcpy(*pdo_err, "42S02");
 					break;
-				
+
 				case	22:	/* ORA-00022: invalid session id */
 				case   378:
 				case   602:
@@ -388,19 +388,19 @@ static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedl
 	*quotedlen = unquotedlen + qcount + 2;
 	*quoted = c = emalloc(*quotedlen+1);
 	*c++ = '\'';
-	
+
 	/* foreach (chunk that ends in a quote) */
 	for (l = unquoted; (r = strchr(l,'\'')); l = r+1) {
 		strncpy(c, l, r-l+1);
-		c += (r-l+1);		
+		c += (r-l+1);
 		*c++ = '\'';			/* add second quote */
 	}
 
-    /* Copy remainder and add enclosing quote */	
+    /* Copy remainder and add enclosing quote */
 	strncpy(c, l, *quotedlen-(c-*quoted)-1);
-	(*quoted)[*quotedlen-1] = '\''; 
+	(*quoted)[*quotedlen-1] = '\'';
 	(*quoted)[*quotedlen]   = '\0';
-	
+
 	return 1;
 }
 /* }}} */
@@ -463,7 +463,7 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val) /* {{{
 	} else {
 		return 0;
 	}
-	
+
 }
 /* }}} */
 
@@ -478,7 +478,7 @@ static int oci_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_valu
 			text infostr[512];
 			char verstr[15];
 			ub4  vernum;
-			
+
 			if (OCIServerRelease(H->svc, H->err, infostr, (ub4)sizeof(infostr), (ub1)OCI_HTYPE_SVCCTX, &vernum))
 			{
 				ZVAL_STRING(return_value, "<<Unknown>>", 1);
@@ -486,13 +486,13 @@ static int oci_handle_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_valu
 				if (attr == PDO_ATTR_SERVER_INFO) {
 					ZVAL_STRING(return_value, (char *)infostr, 1);
 				} else {
-					slprintf(verstr, sizeof(verstr), "%d.%d.%d.%d.%d", 
+					slprintf(verstr, sizeof(verstr), "%d.%d.%d.%d.%d",
 							 (int)((vernum>>24) & 0xFF),  /* version number */
 							 (int)((vernum>>20) & 0x0F),  /* release number*/
 							 (int)((vernum>>12) & 0xFF),  /* update number */
 							 (int)((vernum>>8)  & 0x0F),  /* port release number */
 							 (int)((vernum>>0)  & 0xFF)); /* port update number */
-					
+
 					ZVAL_STRING(return_value, verstr, 1);
 				}
 			}
@@ -552,7 +552,7 @@ static int pdo_oci_check_liveness(pdo_dbh_t *dbh) /* {{{ */
 	 * such as from Pre-10.1 servers, the error is still from the server and we would have
 	 * successfully performed a roundtrip and validated the connection. Use OCIServerVersion for
 	 * Pre-10.2 clients
-	 */	
+	 */
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))	/* OCIPing available 10.2 onwards */
 	H->last_err = OCIPing (H->svc, H->err, OCI_DEFAULT);
 #else
@@ -564,7 +564,7 @@ static int pdo_oci_check_liveness(pdo_dbh_t *dbh) /* {{{ */
 	}
 
 	OCIErrorGet (H->err, (ub4)1, NULL, &error_code, NULL, 0, OCI_HTYPE_ERROR);
-	
+
 	if (error_code == 1010) {
 		return SUCCESS;
 	}

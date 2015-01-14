@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,7 +31,7 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include <errno.h>
 #include <stdio.h>
@@ -40,7 +40,7 @@
 
 #include "zipint.h"
 
-
+
 
 ZIP_EXTERN int
 zip_error_to_str(char *buf, zip_uint64_t len, int ze, int se)
@@ -51,16 +51,16 @@ zip_error_to_str(char *buf, zip_uint64_t len, int ze, int se)
 	return snprintf(buf, len, "Unknown error %d", ze);
 
     zs = _zip_err_str[ze];
-	
+
     switch (_zip_err_type[ze]) {
     case ZIP_ET_SYS:
 	ss = strerror(se);
 	break;
-	
+
     case ZIP_ET_ZLIB:
 	ss = zError(se);
 	break;
-	
+
     default:
 	ss = NULL;
     }

@@ -86,7 +86,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JB2",     IMAGE_FILETYPE_JB2,     CONST_CS | CONST_PERSISTENT);
 #if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_SWC",     IMAGE_FILETYPE_SWC,     CONST_CS | CONST_PERSISTENT);
-#endif	
+#endif
 	REGISTER_LONG_CONSTANT("IMAGETYPE_IFF",     IMAGE_FILETYPE_IFF,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_WBMP",    IMAGE_FILETYPE_WBMP,    CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG2000",IMAGE_FILETYPE_JPC,     CONST_CS | CONST_PERSISTENT); /* keep alias */
@@ -221,7 +221,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 			return NULL;
 
 		bufz = php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0);
-		
+
 		/*
 		 * zlib::uncompress() wants to know the output data length
 		 * if none was given as a parameter
@@ -229,26 +229,26 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 		 * doubling it whenever it wasn't big enough
 		 * that should be eneugh for all real life cases
 		*/
-		
+
 		do {
 			szlength = bufz->len * (1<<factor++);
 			buf = (char *) erealloc(buf, szlength);
 			status = uncompress(buf, &szlength, bufz->val, bufz->len);
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
-		
+
 		if (bufz) {
 			zend_string_release(bufz);
-		}	
-		
+		}
+
 		if (status == Z_OK) {
 			 memcpy(b, buf, len);
 		}
-		
-		if (buf) { 
+
+		if (buf) {
 			efree(buf);
-		}	
+		}
 	}
-	
+
 	if (!status) {
 		result = (struct gfxinfo *) ecalloc (1, sizeof (struct gfxinfo));
 		bits = php_swf_get_bits (b, 0, 5);
@@ -258,8 +258,8 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 			php_swf_get_bits (b, 5 + (2 * bits), bits)) / 20;
 	} else {
 		result = NULL;
-	}	
-		
+	}
+
 	efree (b);
 	return result;
 }
@@ -472,7 +472,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 
 /* {{{ php_handle_jpeg
    main loop to parse JPEG structure */
-static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info) 
+static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info)
 {
 	struct gfxinfo *result = NULL;
 	unsigned int marker = M_PSEUDO;
@@ -546,7 +546,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, zval *info)
 			case M_SOS:
 			case M_EOI:
 				return result;	/* we're about to hit image data, or are at EOF. stop processing. */
-			
+
 			default:
 				if (!php_skip_variable(stream)) { /* anything else isn't interesting */
 					return result;
@@ -582,7 +582,7 @@ static unsigned int php_read4(php_stream * stream)
 #define JPEG2000_MARKER_SOD 0x93 /* Start of Data */
 #define JPEG2000_MARKER_EOC 0xD9 /* End of Codestream */
 #define JPEG2000_MARKER_SIZ 0x51 /* Image and tile size */
-#define JPEG2000_MARKER_COD 0x52 /* Coding style default */ 
+#define JPEG2000_MARKER_COD 0x52 /* Coding style default */
 #define JPEG2000_MARKER_COC 0x53 /* Coding style component */
 #define JPEG2000_MARKER_RGN 0x5E /* Region of interest */
 #define JPEG2000_MARKER_QCD 0x5C /* Quantization default */
@@ -971,7 +971,7 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 		}
 		width = (width << 7) | (i & 0x7f);
 	} while (i & 0x80);
-	
+
 	/* get height */
 	do {
 		i = php_stream_getc(stream);
@@ -985,7 +985,7 @@ static int php_get_wbmp(php_stream *stream, struct gfxinfo **result, int check)
 	if (!height || !width || height > 2048 || width > 2048) {
 		return 0;
 	}
-	
+
 	if (!check) {
 		(*result)->width = width;
 		(*result)->height = height;
@@ -1034,7 +1034,7 @@ static int php_get_xbm(php_stream *stream, struct gfxinfo **result)
 			} else {
 				type++;
 			}
-	
+
 			if (!strcmp("width", type)) {
 				width = (unsigned int) value;
 				if (height) {

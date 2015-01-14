@@ -70,7 +70,7 @@ zend_string *spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, in
 
 #define SPL_ME(class_name, function_name, arg_info, flags) \
 	PHP_ME( spl_ ## class_name, function_name, arg_info, flags)
-	
+
 #define SPL_ABSTRACT_ME(class_name, function_name, arg_info) \
 	ZEND_ABSTRACT_ME( spl_ ## class_name, function_name, arg_info)
 

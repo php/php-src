@@ -426,7 +426,7 @@ static void json_escape_string(smart_str *buf, char *s, size_t len, int options)
 		if (json_utf8_to_utf16(NULL, s, len) < 0) {
 			JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
 			smart_str_appendl(buf, "null", 4);
-			return;			
+			return;
 		}
 	}
 
@@ -551,7 +551,7 @@ static void json_escape_string(smart_str *buf, char *s, size_t len, int options)
 				break;
 		}
 	} while (pos < len || next_us);
-	
+
 	smart_str_appendc(buf, '"');
 }
 /* }}} */

@@ -382,6 +382,19 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	switch (attr) {
+		case PDO_ATTR_EMULATE_PREPARES:
+			ZVAL_BOOL(return_value, H->emulate_prepares);
+			break;
+
+		case PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT:
+			php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "PDO::PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT is deprecated, use PDO::ATTR_EMULATE_PREPARES instead");
+			ZVAL_BOOL(return_value, H->disable_native_prepares);
+			break;
+
+		case PDO_PGSQL_ATTR_DISABLE_PREPARES:
+			ZVAL_BOOL(return_value, H->disable_prepares);
+			break;
+
 		case PDO_ATTR_CLIENT_VERSION:
 			ZVAL_STRING(return_value, PG_VERSION);
 			break;
@@ -439,7 +452,7 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 		case PDO_ATTR_SERVER_INFO: {
 			int spid = PQbackendPID(H->server);
 
-			
+
 			zend_string *str_info =
 				strpprintf(0,
 					"PID: %d; Client Encoding: %s; Is Superuser: %s; Session Authorization: %s; Date Style: %s",

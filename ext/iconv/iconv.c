@@ -2478,7 +2478,7 @@ PHP_FUNCTION(iconv_set_encoding)
 	} else {
 		RETURN_FALSE;
 	}
-		
+
 	retval = zend_alter_ini_entry(name, charset, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	zend_string_release(name);
 

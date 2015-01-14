@@ -59,7 +59,7 @@ PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
 
 	do {
 		int i;
-		if (bytes <= 0) { 
+		if (bytes <= 0) {
 			continue;
 		}
 
@@ -293,7 +293,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 			write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 			return sock;
-		} 
+		}
 
 		if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char*) &reuse, sizeof(reuse)) == -1) {
 			phpdbg_close_socket(sock);

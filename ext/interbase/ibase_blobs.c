@@ -48,7 +48,7 @@ static void _php_ibase_free_blob(zend_resource *rsrc) /* {{{ */
 
 void php_ibase_blobs_minit(INIT_FUNC_ARGS) /* {{{ */
 {
-	le_blob = zend_register_list_destructors_ex(_php_ibase_free_blob, NULL, 
+	le_blob = zend_register_list_destructors_ex(_php_ibase_free_blob, NULL,
 	    "interbase blob", module_number);
 }
 /* }}} */

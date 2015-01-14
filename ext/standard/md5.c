@@ -51,11 +51,11 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &arg, &raw_output) == FAILURE) {
 		return;
 	}
-	
+
 	md5str[0] = '\0';
 	PHP_MD5Init(&context);
 	PHP_MD5Update(&context, arg->val, arg->len);
@@ -87,7 +87,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
-	
+
 	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS, NULL);
 	if (!stream) {
 		RETURN_FALSE;

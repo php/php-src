@@ -28,7 +28,7 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, size_t src_len, zval *return_value) 
+static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, size_t src_len, zval *return_value)
 {
 	zval *fargs;
 	int count = 0;

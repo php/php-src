@@ -37,7 +37,7 @@ echo "Testing directory:\n";
 $path = __DIR__ . '/adir';
 $i = 1;
 foreach ($iteration as $perms => $exp) {
-	create_file($path, $perms);
+	create_dir($path, $perms);
 	clearstatcache(true, $path);
 	echo 'Iteration #' . $i++ . ': ';
 	if (is_readable($path) == $exp) {
@@ -46,7 +46,7 @@ foreach ($iteration as $perms => $exp) {
 		var_dump(is_readable($path), $exp);
 		echo "failed.\n";
 	}
-	delete_file($path);
+	delete_dir($path);
 }
 
 ?>

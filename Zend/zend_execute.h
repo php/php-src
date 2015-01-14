@@ -54,7 +54,7 @@ ZEND_API void zend_verify_arg_error(int error_type, const zend_function *zf, uin
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
 {
 	do {
-		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {	
+		if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
 			zend_refcounted *garbage;
 
 			if (Z_ISREF_P(variable_ptr)) {
@@ -159,7 +159,7 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame_ex(ui
 static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, zend_function *func)
 {
 	uint32_t used_stack = ZEND_CALL_FRAME_SLOT + num_args;
-	
+
 	if (ZEND_USER_CODE(func->type)) {
 		used_stack += func->op_array.last_var + func->op_array.T - MIN(func->op_array.num_args, num_args);
 	}
@@ -169,7 +169,7 @@ static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, ze
 static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, zend_class_entry *called_scope, zend_object *object, zend_execute_data *prev)
 {
 	uint32_t used_stack = zend_vm_calc_used_stack(num_args, func);
-	
+
 	return zend_vm_stack_push_call_frame_ex(used_stack, call_info,
 		func, num_args, called_scope, object, prev);
 }

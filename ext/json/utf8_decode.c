@@ -55,7 +55,7 @@ SOFTWARE.
 /*
     Get the next byte. It returns UTF8_END if there are no more bytes.
 */
-static int 
+static int
 get(json_utf8_decode *utf8)
 {
     int c;
@@ -72,7 +72,7 @@ get(json_utf8_decode *utf8)
     Get the 6-bit payload of the next continuation byte.
     Return UTF8_ERROR if it is not a contination byte.
 */
-static int 
+static int
 cont(json_utf8_decode *utf8)
 {
     int c = get(utf8);
@@ -83,7 +83,7 @@ cont(json_utf8_decode *utf8)
 /*
     Initialize the UTF-8 decoder. The decoder is not reentrant,
 */
-void 
+void
 utf8_decode_init(json_utf8_decode *utf8, char p[], int length)
 {
     utf8->the_index = 0;
@@ -97,7 +97,7 @@ utf8_decode_init(json_utf8_decode *utf8, char p[], int length)
 /*
     Get the current byte offset. This is generally used in error reporting.
 */
-int 
+int
 utf8_decode_at_byte(json_utf8_decode *utf8)
 {
     return utf8->the_byte;
@@ -108,7 +108,7 @@ utf8_decode_at_byte(json_utf8_decode *utf8)
     Get the current character offset. This is generally used in error reporting.
     The character offset matches the byte offset if the text is strictly ASCII.
 */
-int 
+int
 utf8_decode_at_character(json_utf8_decode *utf8)
 {
     return utf8->the_char > 0 ? utf8->the_char - 1 : 0;
@@ -121,7 +121,7 @@ utf8_decode_at_character(json_utf8_decode *utf8)
          or  UTF8_END   (the end)
          or  UTF8_ERROR (error)
 */
-int 
+int
 utf8_decode_next(json_utf8_decode *utf8)
 {
     int c;  /* the first byte of the character */
@@ -151,7 +151,7 @@ utf8_decode_next(json_utf8_decode *utf8)
         return r >= 128 ? r : UTF8_ERROR;
     }
 /*
-    Two continuation (2048 to 55295 and 57344 to 65535) 
+    Two continuation (2048 to 55295 and 57344 to 65535)
 */
     if ((c & 0xF0) == 0xE0) {
         int c1 = cont(utf8);

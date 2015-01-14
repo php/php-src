@@ -15,7 +15,7 @@
   | Author: Sara Golemon <pollita@php.net>                               |
   +----------------------------------------------------------------------+
 
-  $Id$ 
+  $Id$
 */
 
 #ifndef PHP_MCRYPT_FILTER_H

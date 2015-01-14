@@ -137,7 +137,7 @@ PHP_FUNCTION(symlink)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
 	}
-	
+
 	if (!expand_filepath(frompath, source_p)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");
 		RETURN_FALSE;
@@ -152,7 +152,7 @@ PHP_FUNCTION(symlink)
 	}
 
 	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) ||
-		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) ) 
+		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) )
 	{
 		php_error_docref(NULL, E_WARNING, "Unable to symlink to a URL");
 		RETURN_FALSE;
@@ -207,7 +207,7 @@ PHP_FUNCTION(link)
 	}
 
 	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) ||
-		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) ) 
+		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY) )
 	{
 		php_error_docref(NULL, E_WARNING, "Unable to link to a URL");
 		RETURN_FALSE;
@@ -223,9 +223,9 @@ PHP_FUNCTION(link)
 
 #ifndef ZTS
 	ret = CreateHardLinkA(topath, frompath, NULL);
-#else 
-	ret = CreateHardLinkA(dest_p, source_p, NULL);	
-#endif	
+#else
+	ret = CreateHardLinkA(dest_p, source_p, NULL);
+#endif
 
 	if (ret == 0) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));

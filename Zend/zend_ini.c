@@ -254,7 +254,7 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int 
 		}
 		if (((default_value = zend_get_configuration_directive(p->name)) != NULL) &&
             (!p->on_modify || p->on_modify(p, Z_STR_P(default_value), p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP) == SUCCESS)) {
-			
+
 			p->value = zend_string_copy(Z_STR_P(default_value));
 		} else {
 			p->value = ini_entry->value ?
@@ -404,7 +404,7 @@ ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*di
 {
 	zend_ini_entry *ini_entry;
 
-	ini_entry = zend_hash_str_find_ptr(registered_zend_ini_directives, name, name_length);	
+	ini_entry = zend_hash_str_find_ptr(registered_zend_ini_directives, name, name_length);
 	if (ini_entry == NULL) {
 		return FAILURE;
 	}

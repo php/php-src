@@ -211,7 +211,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 			if (path_len > 1 && path_tmp[path_len - 2] == ':') {
 				if (path_len != 3) {
 					return -1;
-				} 
+				}
 				/* this is c:\ */
 				path_tmp[path_len] = '\0';
 			} else {
@@ -402,7 +402,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 				spprintf(&filename, 0, "%s%c%s%c%s", pw->pw_dir, PHP_DIR_SEPARATOR, PG(user_dir), PHP_DIR_SEPARATOR, s + 1); /* Safe */
 			} else {
 				filename = SG(request_info).path_translated;
-			} 
+			}
 #if defined(ZTS) && defined(HAVE_GETPWNAM_R) && defined(_SC_GETPW_R_SIZE_MAX)
 			efree(pwbuf);
 #endif
@@ -505,8 +505,8 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 		return NULL;
 	}
 
-	if ((*filename == '.' && 
-	     (IS_SLASH(filename[1]) || 
+	if ((*filename == '.' &&
+	     (IS_SLASH(filename[1]) ||
 	      ((filename[1] == '.') && IS_SLASH(filename[2])))) ||
 	    IS_ABSOLUTE_PATH(filename, filename_length) ||
 	    !path ||

@@ -47,7 +47,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	UErrorCode	status		= U_ZERO_ERROR;
 	int			variant;
 	intl_error_reset(NULL);
-	
+
 	// parameter number validation / variant determination
 	if (ZEND_NUM_ARGS() > 6 ||
 			zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
@@ -85,7 +85,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		Z_OBJ_P(return_value) = NULL;
 		return;
 	}
-	
+
 	// instantion of ICU object
 	GregorianCalendar *gcal = NULL;
 
@@ -100,7 +100,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		if (!locale) {
 			locale = const_cast<char*>(intl_locale_get_default());
 		}
-		
+
 		gcal = new GregorianCalendar(tz, Locale::createFromName(locale),
 			status);
 		if (U_FAILURE(status)) {
@@ -166,7 +166,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		TimeZone *tz = TimeZone::createTimeZone(tzstr);
 		gcal->adoptTimeZone(tz);
 	}
-    
+
     Calendar_object *co = Z_INTL_CALENDAR_P(return_value);
     co->ucal = gcal;
 }
@@ -216,7 +216,7 @@ U_CFUNC PHP_FUNCTION(intlgregcal_set_gregorian_change)
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
-	
+
 	fetch_greg(co)->setGregorianChange(date, CALENDAR_ERROR_CODE(co));
 	INTL_METHOD_CHECK_STATUS(co, "intlgregcal_set_gregorian_change: error "
 		"calling ICU method");
@@ -236,7 +236,7 @@ U_CFUNC PHP_FUNCTION(intlgregcal_get_gregorian_change)
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
-	
+
 	RETURN_DOUBLE((double)fetch_greg(co)->getGregorianChange());
 }
 
@@ -259,6 +259,6 @@ U_CFUNC PHP_FUNCTION(intlgregcal_is_leap_year)
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
-	
+
 	RETURN_BOOL((int)fetch_greg(co)->isLeapYear((int32_t)year));
 }

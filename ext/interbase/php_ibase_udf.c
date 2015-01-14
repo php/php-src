@@ -20,27 +20,27 @@
 * This UDF library adds the ability to call PHP functions from SQL
 * statements. Because of SQL's strong typing, you will have to declare
 * an external function for every combination { output type, #args } that
-* your application requires. 
-* 
+* your application requires.
+*
 * Declare the functions like this:
-* 
+*
 *     DECLARE EXTERNAL FUNCTION CALL_PHP1
 *         CSTRING(xx),
 *         <return type> BY DESCRIPTOR,
 *         INTEGER BY DESCRIPTOR
 *         RETURNS PARAMETER 2
 *         ENTRY_POINT 'udf_call_php1' MODULE_NAME 'php_ibase_udf'
-* 
+*
 *     DECLARE EXTERNAL FUNCTION CALL_PHP2
 *         CSTRING(xx),
-*         <return type> BY DESCRIPTOR, 
+*         <return type> BY DESCRIPTOR,
 *         INTEGER BY DESCRIPTOR,
 *         INTEGER BY DESCRIPTOR
 *         RETURNS PARAMETER 2
 *         ENTRY_POINT 'udf_call_php2' MODULE_NAME 'php_ibase_udf'
-* 
+*
 *     ... and so on. [for up to 8 input arguments]
-* 
+*
 * The first input parameter contains the name of the PHP function you want
 * to call. The second argument is the result. (omit this argument when calling
 * the function) The return type of the function is the declared type of the
@@ -49,13 +49,13 @@
 * The arguments should have their types declared as well, but you're free
 * to pass arguments of other types instead. They will be converted to the
 * best matching PHP type before being passed to the PHP function.
-* 
+*
 * The declared functions can be called from SQL like:
-* 
+*
 *     SELECT * FROM <table> WHERE CALL_PHP1('soundex',<field>) NOT LIKE ?
 * or
 *     UPDATE <table> SET <field> = CALL_PHP1('ucwords',<field>)
-* 
+*
 * Additionally, there's a function 'exec_php' which allows the contents
 * of text BLOB fields to be parsed and executed by PHP. This is most useful
 * for declaring functions that can then be called with CALL_PHPx.
@@ -80,7 +80,7 @@
 *         `php-config --libs` -o php_ibase_udf.so php_ibase_udf.c
 *
 * If you connect to the classic server by TCP/IP, you should build the
-* PHP embedded static library and link against that. 
+* PHP embedded static library and link against that.
 *
 *     gcc -shared `php-config --includes` `php-config --ldflags` \
 *         `php-config --libs` -o php_ibase_udf.so php_ibase_udf.c \
@@ -147,7 +147,7 @@ void exec_php(BLOBCALLBACK b, PARAMDSC *res, ISC_SHORT *init)
 	ISC_USHORT read;
 
 	for (code[remaining] = '\0'; remaining > 0; remaining -= read)
-		b->blob_get_segment(b->blob_handle, &code[i++<<16],min(0x10000,remaining), &read); 
+		b->blob_get_segment(b->blob_handle, &code[i++<<16],min(0x10000,remaining), &read);
 
 	LOCK();
 
@@ -166,7 +166,7 @@ void exec_php(BLOBCALLBACK b, PARAMDSC *res, ISC_SHORT *init)
 				result = zend_eval_stringl(code, b->blob_total_length, NULL, "Firebird Embedded PHP engine");
 			} zend_end_try();
 	}
-	
+
 	UNLOCK();
 
 	free(code);
@@ -190,14 +190,14 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 		ZVAL_STRING(&callback, name);
 
 		LOCK();
-		
+
 		/* check if the requested function exists */
 		if (!zend_is_callable(&callback, 0, NULL)) {
 			break;
 		}
-		
+
 		UNLOCK();
-	
+
 		/* create the argument array */
 		for (i = 0; i < argc; ++i) {
 
@@ -267,17 +267,17 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 
 				case dtype_sql_date:
 					isc_decode_sql_date((ISC_DATE*)argv[i]->dsc_address, &t);
-					ZVAL_STRINGL(&args[i], d, strftime(d, sizeof(d), INI_STR("ibase.dateformat"), &t),1); 
+					ZVAL_STRINGL(&args[i], d, strftime(d, sizeof(d), INI_STR("ibase.dateformat"), &t),1);
 					break;
 
 				case dtype_sql_time:
 					isc_decode_sql_time((ISC_TIME*)argv[i]->dsc_address, &t);
-					ZVAL_STRINGL(&args[i], d, strftime(d, sizeof(d), INI_STR("ibase.timeformat"), &t),1); 
+					ZVAL_STRINGL(&args[i], d, strftime(d, sizeof(d), INI_STR("ibase.timeformat"), &t),1);
 					break;
 
 				case dtype_timestamp:
 					isc_decode_timestamp((ISC_TIMESTAMP*)argv[i]->dsc_address, &t);
-					ZVAL_STRINGL(&args[i], d, strftime(d, sizeof(d), INI_STR("ibase.timestampformat"), &t)); 
+					ZVAL_STRINGL(&args[i], d, strftime(d, sizeof(d), INI_STR("ibase.timestampformat"), &t));
 					break;
 			}
 		}
@@ -290,7 +290,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 			UNLOCK();
 			break;
 		}
-		
+
 		UNLOCK();
 
 		for (i = 0; i < argc; ++i) {
@@ -298,7 +298,7 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 				case dtype_sql_date:
 				case dtype_sql_time:
 				case dtype_timestamp:
-					zval_dtor(&args[i]);					
+					zval_dtor(&args[i]);
 			}
 		}
 
@@ -333,13 +333,13 @@ static void call_php(char *name, PARAMDSC *r, int argc, PARAMDSC **argv)
 				r->dsc_length = res->vary_length+2;
 				break;
 		}
-				
+
 		zval_dtor(&return_value);
 
 		return;
 
 	} while (0);
-	
+
 	/**
 	* If we end up here, we should report an error back to the DB engine, but
 	* that's not possible. We can however report it back to PHP.
@@ -370,35 +370,35 @@ void udf_call_php3(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARA
 	call_php(name, r, 3, args);
 }
 
-void udf_call_php4(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3, 
+void udf_call_php4(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3,
 	PARAMDSC *arg4)
 {
 	PARAMDSC *args[4] = { arg1, arg2, arg3, arg4 };
 	call_php(name, r, 4, args);
 }
 
-void udf_call_php5(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3, 
+void udf_call_php5(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3,
 	PARAMDSC *arg4, PARAMDSC *arg5)
 {
 	PARAMDSC *args[5] = { arg1, arg2, arg3, arg4, arg5 };
 	call_php(name, r, 5, args);
 }
 
-void udf_call_php6(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3, 
+void udf_call_php6(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3,
 	PARAMDSC *arg4, PARAMDSC *arg5, PARAMDSC *arg6)
 {
 	PARAMDSC *args[6] = { arg1, arg2, arg3, arg4, arg5, arg6 };
 	call_php(name, r, 6, args);
 }
 
-void udf_call_php7(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3, 
+void udf_call_php7(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3,
 	PARAMDSC *arg4, PARAMDSC *arg5, PARAMDSC *arg6, PARAMDSC *arg7)
 {
 	PARAMDSC *args[7] = { arg1, arg2, arg3, arg4, arg5, arg6, arg7 };
 	call_php(name, r, 7, args);
 }
 
-void udf_call_php8(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3, 
+void udf_call_php8(char *name, PARAMDSC *r, PARAMDSC *arg1, PARAMDSC *arg2, PARAMDSC *arg3,
 	PARAMDSC *arg4, PARAMDSC *arg5, PARAMDSC *arg6, PARAMDSC *arg7, PARAMDSC *arg8)
 {
 	PARAMDSC *args[8] = { arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 };

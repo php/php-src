@@ -24,6 +24,7 @@
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
+#include "ext/mysqlnd/mysql_float_to_double.h"
 
 #define MYSQLND_SILENT
 
@@ -80,7 +81,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigne
 		if (uval > INT_MAX) {
 			DBG_INF("stringify");
 			tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, uval);
-		} else 
+		} else
 #endif /* #if SIZEOF_LONG==4 */
 		{
 			if (byte_count < 8 || uval <= L64(9223372036854775807)) {
@@ -181,55 +182,11 @@ ps_fetch_float(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_l
 	(*row)+= 4;
 	DBG_INF_FMT("value=%f", fval);
 
-	/*
-	 * The following is needed to correctly support 4-byte floats.
-	 * Otherwise, a value of 9.99 in a FLOAT column comes out of mysqli
-	 * as 9.9998998641968.
-	 *
-	 * For GCC, we use the built-in decimal support to "up-convert" a
-	 * 4-byte float to a 8-byte double.
-	 * When that is not available, we fall back to converting the float
-	 * to a string and then converting the string to a double. This mimics
-	 * what MySQL does.
-	 */
-#ifdef HAVE_DECIMAL_FP_SUPPORT
-	{
-		typedef float dec32 __attribute__((mode(SD)));
-		/* volatile so the compiler will not optimize away the conversion */
-		volatile dec32 d32val = fval;
-
-		/* The following cast is guaranteed to do the right thing */
-		dval = (double) d32val;
-	}
-#elif defined(PHP_WIN32)
-	{
-		/* float datatype on Winows is already 4 byte but has a precision of 7 digits */
-		char num_buf[2048];
-		(void)_gcvt_s(num_buf, 2048, fval, field->decimals >= 31 ? 7 : field->decimals);
-		dval = zend_strtod(num_buf, NULL);
-	}
-#else
-	{
-		char num_buf[2048]; /* Over allocated */
-		char *s;
-
-#ifndef FLT_DIG
-# define FLT_DIG 6
+#ifndef NOT_FIXED_DEC
+# define NOT_FIXED_DEC 31
 #endif
-		/* Convert to string. Ignoring localization, etc.
-		 * Following MySQL's rules. If precision is undefined (NOT_FIXED_DEC i.e. 31)
-		 * or larger than 31, the value is limited to 6 (FLT_DIG).
-		 */
-		s = php_gcvt(fval,
-			     field->decimals >= 31 ? FLT_DIG : field->decimals,
-			     '.',
-			     'e',
-			     num_buf);
 
-		/* And now convert back to double */
-		dval = zend_strtod(s, NULL);
-	}
-#endif
+	dval = mysql_float_to_double(fval, (field->decimals >= NOT_FIXED_DEC) ? -1 : field->decimals);
 
 	ZVAL_DOUBLE(zv, dval);
 	DBG_VOID_RETURN;
@@ -635,7 +592,7 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 				zval *tmp_data = (*copies_param && !Z_ISUNDEF((*copies_param)[i]))? &(*copies_param)[i]: parameter;
 				/*
 				  Because converting to double and back to long can lead
-				  to losing precision we need second variable. Conversion to double is to see if 
+				  to losing precision we need second variable. Conversion to double is to see if
 				  value is too big for a long. As said, precision could be lost.
 				*/
 				zval tmp_data_copy;
@@ -674,7 +631,7 @@ mysqlnd_stmt_execute_store_types(MYSQLND_STMT_DATA * stmt, zval * copies, zend_u
 		short current_type = stmt->param_bind[i].type;
 		zval *parameter = &stmt->param_bind[i].zv;
 		/* our types are not unsigned */
-#if SIZEOF_ZEND_LONG==8  
+#if SIZEOF_ZEND_LONG==8
 		if (current_type == MYSQL_TYPE_LONG) {
 			current_type = MYSQL_TYPE_LONGLONG;
 		}
@@ -961,7 +918,7 @@ mysqlnd_stmt_execute_generate_request(MYSQLND_STMT * const s, zend_uchar ** requ
 	p++;
 
 	/* Make it all zero */
-	int4store(p, 0); 
+	int4store(p, 0);
 
 	int1store(p, 1); /* and send 1 for iteration count */
 	p+= 4;

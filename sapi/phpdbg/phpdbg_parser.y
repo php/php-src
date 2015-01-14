@@ -1,12 +1,12 @@
 %{
- 
+
 /*
  * phpdbg_parser.y
  * (from php-src root)
  * flex sapi/phpdbg/dev/phpdbg_lexer.l
  * bison sapi/phpdbg/dev/phpdbg_parser.y
  */
- 
+
 #include "phpdbg.h"
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
@@ -27,7 +27,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 %pure-parser
 %error-verbose
- 
+
 %code requires {
 #include "phpdbg.h"
 #ifndef YY_TYPEDEF_YY_SCANNER_T
@@ -74,7 +74,7 @@ parameters
 	;
 
 parameter
-	: T_ID T_COLON T_DIGITS { 	
+	: T_ID T_COLON T_DIGITS {
 		$$.type = FILE_PARAM;
 		$$.file.name = $2.str;
 		$$.file.line = $3.num;
@@ -104,25 +104,25 @@ parameter
 		}
 		$$.file.line = $5.num;
 	}
-	| T_ID T_DCOLON T_ID { 
+	| T_ID T_DCOLON T_ID {
 		$$.type = METHOD_PARAM;
 		$$.method.class = $1.str;
 		$$.method.name = $3.str;
 	}
-	| T_ID T_DCOLON T_ID T_POUND T_DIGITS { 
+	| T_ID T_DCOLON T_ID T_POUND T_DIGITS {
 		$$.type = NUMERIC_METHOD_PARAM;
 		$$.method.class = $1.str;
 		$$.method.name = $3.str;
-		$$.num = $5.num; 
+		$$.num = $5.num;
 	}
 	| T_ID T_POUND T_DIGITS {
 		$$.type = NUMERIC_FUNCTION_PARAM;
 		$$.str = $1.str;
 		$$.len = $1.len;
-		$$.num = $3.num; 
+		$$.num = $3.num;
 	}
 	| T_IF T_INPUT {
-		$$.type = COND_PARAM; 
+		$$.type = COND_PARAM;
 		$$.str = $2.str;
 		$$.len = $2.len;
 	}
@@ -141,13 +141,13 @@ req_id
 ;
 
 full_expression
-	: T_EVAL req_id T_INPUT { 
-		$$.type = EVAL_PARAM; 
+	: T_EVAL req_id T_INPUT {
+		$$.type = EVAL_PARAM;
 		$$.str = $3.str;
 		$$.len = $3.len;
 	}
-	| T_SHELL req_id T_INPUT { 	
-		$$.type = SHELL_PARAM; 
+	| T_SHELL req_id T_INPUT {
+		$$.type = SHELL_PARAM;
 		$$.str = $3.str;
 		$$.len = $3.len;
 	}
@@ -155,8 +155,8 @@ full_expression
 		$$.type = RUN_PARAM;
 		$$.len = 0;
 	}
-	| T_RUN req_id T_INPUT { 	
-		$$.type = RUN_PARAM; 
+	| T_RUN req_id T_INPUT {
+		$$.type = RUN_PARAM;
 		$$.str = $3.str;
 		$$.len = $3.len;
 	}
@@ -169,7 +169,7 @@ static int yyerror(const char *msg) {
 
 	{
 		const phpdbg_param_t *top = PHPDBG_G(parser_stack);
-    	
+
 		while (top) {
 			phpdbg_param_debug(top, "--> ");
 			top = top->next;

@@ -28,20 +28,20 @@
 #include "php_dom.h"
 
 /*
-* class DOMDocumentType extends DOMNode 
+* class DOMDocumentType extends DOMNode
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-412266927
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_documenttype_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ name	string	
-readonly=yes 
+/* {{{ name	string
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1844763134
-Since: 
+Since:
 */
 int dom_documenttype_name_read(dom_object *obj, zval *retval)
 {
@@ -59,10 +59,10 @@ int dom_documenttype_name_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ entities	DOMNamedNodeMap	
-readonly=yes 
+/* {{{ entities	DOMNamedNodeMap
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1788794630
-Since: 
+Since:
 */
 int dom_documenttype_entities_read(dom_object *obj, zval *retval)
 {
@@ -87,10 +87,10 @@ int dom_documenttype_entities_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ notations	DOMNamedNodeMap	
-readonly=yes 
+/* {{{ notations	DOMNamedNodeMap
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D46829EF
-Since: 
+Since:
 */
 int dom_documenttype_notations_read(dom_object *obj, zval *retval)
 {
@@ -115,8 +115,8 @@ int dom_documenttype_notations_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ publicId	string	
-readonly=yes 
+/* {{{ publicId	string
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-publicId
 Since: DOM Level 2
 */
@@ -140,8 +140,8 @@ int dom_documenttype_public_id_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ systemId	string	
-readonly=yes 
+/* {{{ systemId	string
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-systemId
 Since: DOM Level 2
 */
@@ -164,8 +164,8 @@ int dom_documenttype_system_id_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ internalSubset	string	
-readonly=yes 
+/* {{{ internalSubset	string
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-Core-DocType-internalSubset
 Since: DOM Level 2
 */

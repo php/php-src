@@ -226,7 +226,7 @@ typedef struct {
 #define PDO_DRIVER_HEADER(name)	\
 	#name, sizeof(#name)-1, \
 	PDO_DRIVER_API
-	
+
 	/* create driver specific portion of the database handle and stash it into
 	 * the dbh.  dbh contains the data source string and flags for this
 	 * instance.  You MUST respect dbh->is_persistent and pass that flag to
@@ -283,7 +283,7 @@ typedef int (*pdo_dbh_check_liveness_func)(pdo_dbh_t *dbh);
  * scope */
 typedef void (*pdo_dbh_request_shutdown)(pdo_dbh_t *dbh);
 
-/* for adding methods to the dbh or stmt objects 
+/* for adding methods to the dbh or stmt objects
 pointer to a list of driver specific functions. The convention is
 to prefix the function names using the PDO driver name; this will
 reduce the chance of collisions with future functionality in the
@@ -328,7 +328,7 @@ typedef int (*pdo_stmt_execute_func)(pdo_stmt_t *stmt);
 /* causes the next row in the set to be fetched; indicates if there are no
  * more rows.  The ori and offset params modify which row should be returned,
  * if the stmt represents a scrollable cursor */
-typedef int (*pdo_stmt_fetch_func)(pdo_stmt_t *stmt, 
+typedef int (*pdo_stmt_fetch_func)(pdo_stmt_t *stmt,
 	enum pdo_fetch_orientation ori, zend_long offset);
 
 /* queries information about the type of a column, by index (0 based).
@@ -434,7 +434,7 @@ struct _pdo_dbh_t {
 
 	/* credentials */
 	char *username, *password;
-	
+
 	/* if true, then data stored and pointed at by this handle must all be
 	 * persistently allocated */
 	unsigned is_persistent:1;
@@ -487,7 +487,7 @@ struct _pdo_dbh_t {
 	HashTable *cls_methods[PDO_DBH_DRIVER_METHOD_KIND__MAX];
 
 	pdo_driver_t *driver;
-	
+
 	zend_class_entry *def_stmt_ce;
 
 	zval def_stmt_ctor_args;
@@ -579,7 +579,7 @@ struct _pdo_stmt_t {
 	 * */
 	int column_count;
 	struct pdo_column_data *columns;
-	
+
 	/* we want to keep the dbh alive while we live, so we own a reference */
 	zval database_object_handle;
 	pdo_dbh_t *dbh;
@@ -620,8 +620,8 @@ struct _pdo_stmt_t {
 			zval ctor_args;            /* freed */
 			zend_fcall_info fci;
 			zend_fcall_info_cache fcc;
-			zval retval; 
-			zend_class_entry *ce;	
+			zval retval;
+			zend_class_entry *ce;
 		} cls;
 		struct {
 			zval fetch_args;           /* freed */
@@ -678,7 +678,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 PDO_API zend_class_entry *php_pdo_get_dbh_ce(void);
 PDO_API zend_class_entry *php_pdo_get_exception(void);
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, 
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 	char **outquery, int *outquery_len);
 
 PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,

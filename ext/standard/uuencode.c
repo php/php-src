@@ -158,7 +158,7 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 		while (s < ee) {
 			if(s+4 > e) {
 				goto err;
-			} 
+			}
 			*p++ = PHP_UU_DEC(*s) << 2 | PHP_UU_DEC(*(s + 1)) >> 4;
 			*p++ = PHP_UU_DEC(*(s + 1)) << 4 | PHP_UU_DEC(*(s + 2)) >> 2;
 			*p++ = PHP_UU_DEC(*(s + 2)) << 6 | PHP_UU_DEC(*(s + 3));
@@ -196,7 +196,7 @@ err:
 }
 /* }}} */
 
-/* {{{ proto string convert_uuencode(string data) 
+/* {{{ proto string convert_uuencode(string data)
    uuencode a string */
 PHP_FUNCTION(convert_uuencode)
 {

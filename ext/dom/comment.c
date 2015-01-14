@@ -35,10 +35,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMComment extends DOMCharacterData 
+* class DOMComment extends DOMCharacterData
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1728279322
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_comment_class_functions[] = {

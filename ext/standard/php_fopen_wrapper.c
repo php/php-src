@@ -146,7 +146,7 @@ php_stream_ops php_stream_input_ops = {
 
 static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, int read_chain, int write_chain) /* {{{ */
 {
-	char *p, *token;
+	char *p, *token = NULL;
 	php_stream_filter *temp_filter;
 
 	p = php_strtok_r(filterlist, "|", &token);
@@ -322,7 +322,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 				"The file descriptors must be non-negative numbers smaller than %d", dtablesize);
 			return NULL;
 		}
-		
+
 		fd = dup((int)fildes_ori);
 		if (fd == -1) {
 			php_stream_wrapper_log_error(wrapper, options,

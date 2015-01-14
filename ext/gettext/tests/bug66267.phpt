@@ -28,6 +28,7 @@ $loc = ["de_DE", "fr_FR", "en_US"];
 
 foreach ($loc as $l) {
 	putenv("LC_ALL=$l");
+	setlocale(LC_ALL, $l);
 
 	$path = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . "66265");
 	bindtextdomain($domain, $path);

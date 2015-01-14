@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -94,11 +94,11 @@ PS_OPEN_FUNC(user)
 {
 	zval args[2];
 	STDVARS;
-	
+
 	if (Z_ISUNDEF(PSF(open))) {
 		php_error_docref(NULL, E_WARNING,
 			"user session functions not defined");
-			
+
 		return FAILURE;
 	}
 

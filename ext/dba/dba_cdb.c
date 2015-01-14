@@ -72,7 +72,7 @@ DBA_OPEN_FUNC(cdb)
 	dba_info *pinfo = (dba_info *) info;
 
 	switch (info->mode) {
-		case DBA_READER: 
+		case DBA_READER:
 #if DBA_CDB_BUILTIN
 			make = 0;
 			file = info->fp;
@@ -94,7 +94,7 @@ DBA_OPEN_FUNC(cdb)
 			*error = "Update operations are not supported";
 			return FAILURE; /* not supported */
 #endif
-		default: 
+		default:
 			*error = "Currently not supported";
 			return FAILURE;
 	}
@@ -113,7 +113,7 @@ DBA_OPEN_FUNC(cdb)
 	cdb_init(&cdb->c, file);
 #endif
 	cdb->file = file;
-	
+
 	pinfo->dbf = cdb;
 	return SUCCESS;
 }
@@ -151,7 +151,7 @@ DBA_FETCH_FUNC(cdb)
 	CDB_INFO;
 	unsigned int len;
 	char *new_entry = NULL;
-	
+
 #if DBA_CDB_BUILTIN
 	if (cdb->make)
 		return NULL; /* database was opened writeonly */
@@ -164,16 +164,16 @@ DBA_FETCH_FUNC(cdb)
 		}
 		len = cdb_datalen(&cdb->c);
 		new_entry = safe_emalloc(len, 1, 1);
-		
+
 		if (php_cdb_read(&cdb->c, new_entry, len, cdb_datapos(&cdb->c)) == -1) {
 			efree(new_entry);
 			return NULL;
 		}
 		new_entry[len] = 0;
-		if (newlen) 
+		if (newlen)
 			*newlen = len;
 	}
-	
+
 	return new_entry;
 }
 
@@ -222,7 +222,7 @@ DBA_DELETE_FUNC(cdb)
 	if (cdb_file_read(cdb->file, buf, n) < n) return NULL; \
 } while (0)
 
-/* {{{ cdb_file_lseek 
+/* {{{ cdb_file_lseek
  php_stream_seek does not return actual position */
 #if DBA_CDB_BUILTIN
 int cdb_file_lseek(php_stream *fp, off_t offset, int whence) {
@@ -257,13 +257,13 @@ DBA_FIRSTKEY_FUNC(cdb)
 	cdb->eod = -1;
 	CSEEK(0);
 	CREAD(4);
-	
+
 	/* Total length of file in bytes */
 	uint32_unpack(buf, &cdb->eod);
-	
+
 	CSEEK(2048);
 	CREAD(8);
-	
+
 	/* The first four bytes contain the length of the key */
 	uint32_unpack(buf, &klen);
 	uint32_unpack(buf + 4, &dlen);
@@ -279,7 +279,7 @@ DBA_FIRSTKEY_FUNC(cdb)
 
 	/*       header + klenlen + dlenlen + klen + dlen */
 	cdb->pos = 2048 + 4       + 4       + klen + dlen;
-		
+
 	return key;
 }
 
@@ -299,7 +299,7 @@ DBA_NEXTKEY_FUNC(cdb)
 	CREAD(8);
 	uint32_unpack(buf, &klen);
 	uint32_unpack(buf + 4, &dlen);
-	
+
 	key = safe_emalloc(klen, 1, 1);
 	if (cdb_file_read(cdb->file, key, klen) < klen) {
 		efree(key);
@@ -308,9 +308,9 @@ DBA_NEXTKEY_FUNC(cdb)
 		key[klen] = '\0';
 		if (newlen) *newlen = klen;
 	}
-	
+
 	cdb->pos += 8 + klen + dlen;
-	
+
 	return key;
 }
 

@@ -130,10 +130,10 @@ typedef struct _php_output_handler {
 	int level;
 	size_t size;
 	php_output_buffer buffer;
-	
+
 	void *opaq;
 	void (*dtor)(void *opaq);
-	
+
 	union {
 		php_output_handler_user_func_t *user;
 		php_output_handler_context_func_t internal;

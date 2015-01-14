@@ -5,7 +5,7 @@
  * LICENSE NOTICES
  *
  * This file is part of "streamable kanji code filter and converter",
- * which is distributed under the terms of GNU Lesser General Public 
+ * which is distributed under the terms of GNU Lesser General Public
  * License (version 2) as published by the Free Software Foundation.
  *
  * This software is distributed in the hope that it will be useful,
@@ -24,7 +24,7 @@
 /*
  * The source code included in this files was separated from mbfilter.c
  * by moriyoshi koizumi <moriyoshi@php.net> on 4 dec 2002.
- * 
+ *
  */
 
 #ifdef HAVE_CONFIG_H
@@ -111,7 +111,7 @@ int mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter)
 		for (i = 0; (e = &mbfl_html_entity_list[i])->name != NULL; i++) {
 			if (c == e->code) {
 				char *p;
-				
+
 				for (p = e->name; *p != '\0'; p++) {
 					CK((*filter->output_function)((int)*p, filter->data));
 				}
@@ -165,7 +165,7 @@ void mbfl_filt_conv_html_dec_ctor(mbfl_convert_filter *filter)
 	filter->status = 0;
 	filter->opaque = mbfl_malloc(html_enc_buffer_size+1);
 }
-	
+
 void mbfl_filt_conv_html_dec_dtor(mbfl_convert_filter *filter)
 {
 	filter->status = 0;
@@ -255,7 +255,7 @@ int mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter)
 					CK((*filter->output_function)(ent, filter->data));
 					filter->status = 0;
 					/*php_error_docref("ref.mbstring", E_NOTICE,"mbstring decoded '%s'=%d", buffer, ent);*/
-				} else { 
+				} else {
 					/* failure */
 					buffer[filter->status++] = ';';
 					buffer[filter->status] = 0;

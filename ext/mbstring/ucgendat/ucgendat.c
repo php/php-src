@@ -461,7 +461,7 @@ add_decomp(ac_uint4 code, short compat)
 	pdecomps_used = &decomps_used;
 	pdecomps_size = &decomps_size;
     }
-    
+
     /*
      * Add the code to the composite property.
      */
@@ -965,7 +965,7 @@ read_cdata(FILE *in)
               i++;
         }
         for (e = s; *e && *e != ';'; e++) ;
-    
+
         ordered_range_insert(code, s, e - s);
 
         /*
@@ -1139,7 +1139,7 @@ find_decomp(ac_uint4 code, short compat)
 {
     long l, r, m;
     _decomp_t *decs;
-    
+
     l = 0;
     r = (compat ? kdecomps_used : decomps_used) - 1;
     decs = compat ? kdecomps : decomps;
@@ -1520,12 +1520,12 @@ write_cdata(char *opath)
      * Generate the composition data.
      *
      *****************************************************************/
-    
+
     /*
      * Create compositions from decomposition data
      */
     create_comps();
-    
+
 #if HARDCODE_DATA
     fprintf(out, PREF "ac_uint4 _uccomp_size = %ld;\n\n",
         comps_used * 4L);
@@ -1553,28 +1553,28 @@ write_cdata(char *opath)
     snprintf(path, sizeof path, "%s" LDAP_DIRSEP "comp.dat", opath);
     if ((out = fopen(path, "wb")) == 0)
 	return;
-    
+
     /*
      * Write the header.
      */
     hdr[1] = (ac_uint2) comps_used * 4;
     fwrite((char *) hdr, sizeof(ac_uint2), 2, out);
-    
+
     /*
      * Write out the byte count to maintain header size.
      */
     bytes = comps_used * sizeof(_comp_t);
     fwrite((char *) &bytes, sizeof(ac_uint4), 1, out);
-    
+
     /*
      * Now, if comps exist, write them out.
      */
     if (comps_used > 0)
         fwrite((char *) comps, sizeof(_comp_t), comps_used, out);
-    
+
     fclose(out);
 #endif
-    
+
     /*****************************************************************
      *
      * Generate the decomposition data.

@@ -30,7 +30,7 @@
 #endif
 #endif
 
-/* 
+/*
  * The SCO OpenServer 5 Development System (not the UDK)
  * defines syslog to std_syslog.
  */

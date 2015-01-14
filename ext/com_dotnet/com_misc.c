@@ -101,11 +101,11 @@ PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest,
 	LONG lbound, ubound;
 	LONG indices[1];
 	VARTYPE vt;
-	
+
 	if (!V_ISARRAY(array)) {
 		return 0;
 	}
-	
+
 	dims = SafeArrayGetDim(V_ARRAY(array));
 
 	if (dims != 1) {
@@ -113,7 +113,7 @@ PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest,
 			   "Can only handle single dimension variant arrays (this array has %d)", dims);
 		return 0;
 	}
-	
+
 	if (FAILED(SafeArrayGetVartype(V_ARRAY(array), &vt)) || vt == VT_EMPTY) {
 		vt = V_VT(array) & ~VT_ARRAY;
 	}
@@ -121,16 +121,16 @@ PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest,
 	/* determine the bounds */
 	SafeArrayGetLBound(V_ARRAY(array), 1, &lbound);
 	SafeArrayGetUBound(V_ARRAY(array), 1, &ubound);
-	
+
 	/* check bounds */
 	if (dim1 < lbound || dim1 > ubound) {
 		php_com_throw_exception(DISP_E_BADINDEX, "index out of bounds");
 		return 0;
 	}
-	
+
 	/* now fetch that element */
 	VariantInit(dest);
-		
+
 	indices[0] = dim1;
 
 	if (vt == VT_VARIANT) {
@@ -143,5 +143,5 @@ PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest,
 		SafeArrayGetElement(V_ARRAY(array), indices, &dest->lVal);
 	}
 
-	return 1;	
+	return 1;
 }

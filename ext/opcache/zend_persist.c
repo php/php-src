@@ -288,7 +288,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	int already_stored = 0;
 	zend_op *persist_ptr;
 	zval *orig_literals = NULL;
-	
+
 	if (op_array->type != ZEND_USER_FUNCTION) {
 		return;
 	}
@@ -722,7 +722,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	script->mem = ZCG(mem);
 
 	zend_shared_alloc_clear_xlat_table();
-	
+
 	zend_accel_store(script, sizeof(zend_persistent_script));
 	*key = zend_accel_memdup(*key, key_length + 1);
 	zend_accel_store_string(script->full_path);

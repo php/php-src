@@ -48,7 +48,7 @@ static uint zend_obj_num_elements(HashTable *ht)
 		if (Z_TYPE(p->val) == IS_INDIRECT) {
 			if (Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF) {
 				num--;
-			}			
+			}
 		}
 	}
 	return num;
@@ -405,7 +405,7 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 	} else { /* string key */
 		zend_string *tmp_str;
 		zend_string *ckey = php_addcslashes(key->val, key->len, 0, "'\\", 2);
-		tmp_str = php_str_to_str_ex(ckey->val, ckey->len, "\0", 1, "' . \"\\0\" . '", 12, 0, NULL);
+		tmp_str = php_str_to_str(ckey->val, ckey->len, "\0", 1, "' . \"\\0\" . '", 12);
 
 		buffer_append_spaces(buf, level + 1);
 
@@ -430,7 +430,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 		const char *class_name, *prop_name;
 		size_t prop_name_len;
 		zend_string *pname_esc;
-		
+
 		zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_name_len);
 		pname_esc = php_addcslashes(prop_name, prop_name_len, 0, "'\\", 2);
 
@@ -479,7 +479,7 @@ again:
 			break;
 		case IS_STRING:
 			ztmp = php_addcslashes(Z_STRVAL_P(struc), Z_STRLEN_P(struc), 0, "'\\", 2);
-			ztmp2 = php_str_to_str_ex(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12, 0, NULL);
+			ztmp2 = php_str_to_str(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12);
 
 			smart_str_appendc(buf, '\'');
 			smart_str_append(buf, ztmp2);
@@ -511,7 +511,7 @@ again:
 				buffer_append_spaces(buf, level - 1);
 			}
 			smart_str_appendc(buf, ')');
-		
+
 			break;
 
 		case IS_OBJECT:
@@ -864,7 +864,7 @@ again:
 					res = call_user_function_ex(CG(function_table), struc, &fname, &retval, 0, 0, 1, NULL);
 					BG(serialize_lock)--;
 					zval_dtor(&fname);
-                    
+
 					if (EG(exception)) {
 						zval_ptr_dtor(&retval);
 						return;

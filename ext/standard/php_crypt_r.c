@@ -62,7 +62,7 @@ MUTEX_T php_crypt_extended_init_lock;
 #if 0
 CONDITION_VARIABLE initialized;
 #endif
-	
+
 void php_init_crypt_r()
 {
 #ifdef ZTS
@@ -294,7 +294,7 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 _destroyCtx1:
 	if (ctx1) {
 		if (!CryptDestroyHash(ctx1)) {
-			
+
 		}
 	}
 
@@ -325,9 +325,9 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out)
 	PHP_MD5_CTX	ctx, ctx1;
 	php_uint32 l;
 	int pl;
-	
+
 	pwl = strlen(pw);
-	
+
 	/* Refine the salt first */
 	sp = salt;
 

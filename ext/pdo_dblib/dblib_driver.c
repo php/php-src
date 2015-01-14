@@ -96,7 +96,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	pdo_dblib_stmt *S = ecalloc(1, sizeof(*S));
-	
+
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &dblib_stmt_methods;
@@ -120,7 +120,7 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sq
 	if (FAIL == dbsqlexec(H->link)) {
 		return -1;
 	}
-	
+
 	resret = dbresults(H->link);
 
 	if (resret == FAIL) {
@@ -150,9 +150,9 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	int i;
 	char * q;
 	*quotedlen = 0;
-	
-	/* 
-	 * Detect quoted length and if we should use binary encoding 
+
+	/*
+	 * Detect quoted length and if we should use binary encoding
 	 */
 	for(i=0;i<unquotedlen;i++) {
 		if( 32 > unquoted[i] || 127 < unquoted[i] ) {
@@ -162,13 +162,13 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 		if(unquoted[i] == '\'') ++*quotedlen;
 		++*quotedlen;
 	}
-	
+
 	if(useBinaryEncoding) {
-		/* 
-		 * Binary safe quoting 
+		/*
+		 * Binary safe quoting
 		 * Will implicitly convert for all data types except Text, DateTime & SmallDateTime
-		 * 
-		 */	
+		 *
+		 */
 		*quotedlen = (unquotedlen * 2) + 2; /* 2 chars per byte +2 for "0x" prefix */
 		q = *quoted = emalloc(*quotedlen);
 
@@ -196,22 +196,22 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	}
 
 	*q = 0;
-	
+
 	return 1;
 }
 
 static int pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
-	
+
 	if (FAIL == dbcmd(H->link, cmd)) {
 		return 0;
 	}
-	
+
 	if (FAIL == dbsqlexec(H->link)) {
 		return 0;
 	}
-	
+
 	return 1;
 }
 
@@ -230,25 +230,25 @@ static int dblib_handle_rollback(pdo_dbh_t *dbh)
 	return pdo_dblib_transaction_cmd("ROLLBACK TRANSACTION", dbh);
 }
 
-char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len) 
+char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 
 	RETCODE ret;
 	char *id = NULL;
 
-	/* 
+	/*
 	 * Would use scope_identity() but it's not implemented on Sybase
 	 */
-	
+
 	if (FAIL == dbcmd(H->link, "SELECT @@IDENTITY")) {
 		return NULL;
 	}
-	
+
 	if (FAIL == dbsqlexec(H->link)) {
 		return NULL;
 	}
-	
+
 	ret = dbresults(H->link);
 	if (ret == FAIL || ret == NO_MORE_RESULTS) {
 		dbcancel(H->link);
@@ -256,7 +256,7 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len)
 	}
 
 	ret = dbnextrow(H->link);
-	
+
 	if (ret == FAIL || ret == NO_MORE_ROWS) {
 		dbcancel(H->link);
 		return NULL;
@@ -269,7 +269,7 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len)
 
 	id = emalloc(32);
 	*len = dbconvert(NULL, (dbcoltype(H->link, 1)) , (dbdata(H->link, 1)) , (dbdatlen(H->link, 1)), SQLCHAR, (BYTE *)id, (DBINT)-1);
-		
+
 	dbcancel(H->link);
 	return id;
 }
@@ -313,7 +313,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 {
 	pdo_dblib_db_handle *H;
 	int i, nvars, nvers, ret = 0;
-	
+
 	const pdo_dblib_keyval tdsver[] = {
 		 {"4.2",DBVERSION_42}
 		,{"4.6",DBVERSION_46}
@@ -329,11 +329,11 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 #endif
 		,{"10.0",DBVERSION_100}
 		,{"auto",0} /* Only works with FreeTDS. Other drivers will bork */
-		
+
 	};
-	
+
 	nvers = sizeof(tdsver)/sizeof(tdsver[0]);
-	
+
 	struct pdo_data_src_parser vars[] = {
 		{ "charset",	NULL,	0 }
 		,{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 }
@@ -342,9 +342,9 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		,{ "secure",	NULL,	0 } /* DBSETLSECURE */
 		,{ "version",	NULL,	0 } /* DBSETLVERSION */
 	};
-	
+
 	nvars = sizeof(vars)/sizeof(vars[0]);
-	
+
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
 
 	if (driver_options) {
@@ -363,21 +363,21 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 
 	DBERRHANDLE(H->login, (EHANDLEFUNC) pdo_dblib_error_handler);
 	DBMSGHANDLE(H->login, (MHANDLEFUNC) pdo_dblib_msg_handler);
-	
+
 	if(vars[5].optval) {
 		for(i=0;i<nvers;i++) {
 			if(strcmp(vars[5].optval,tdsver[i].key) == 0) {
 				if(FAIL==dbsetlversion(H->login, tdsver[i].value)) {
-					pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Failed to set version specified in connection string.");		
+					pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Failed to set version specified in connection string.");
 					goto cleanup;
 				}
 				break;
 			}
 		}
-		
+
 		if (i==nvers) {
 			printf("Invalid version '%s'\n", vars[5].optval);
-			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Invalid version specified in connection string.");		
+			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Invalid version specified in connection string.");
 			goto cleanup; /* unknown version specified */
 		}
 	}
@@ -393,7 +393,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 			goto cleanup;
 		}
 	}
-	
+
 #if !PHP_DBLIB_IS_MSSQL
 	if (vars[0].optval) {
 		DBSETLCHARSET(H->login, vars[0].optval);

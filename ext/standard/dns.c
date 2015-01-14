@@ -294,7 +294,7 @@ static zend_string *php_gethostbyname(char *name)
 
 /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
 #if !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
-  
+
 #ifndef HFIXEDSZ
 #define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
 #endif /* HFIXEDSZ */
@@ -323,12 +323,12 @@ typedef union {
 
 #if defined(__GLIBC__) && !defined(HAVE_DEPRECATED_DNS_FUNCS)
 #define php_dns_free_res(__res__) _php_dns_free_res(__res__)
-static void _php_dns_free_res(struct __res_state res) { /* {{{ */
+static void _php_dns_free_res(struct __res_state *res) { /* {{{ */
 	int ns;
 	for (ns = 0; ns < MAXNS; ns++) {
-		if (res._u._ext.nsaddrs[ns] != NULL) {
-			free (res._u._ext.nsaddrs[ns]);
-			res._u._ext.nsaddrs[ns] = NULL;
+		if (res->_u._ext.nsaddrs[ns] != NULL) {
+			free (res->_u._ext.nsaddrs[ns]);
+			res->_u._ext.nsaddrs[ns] = NULL;
 		}
 	}
 } /* }}} */
@@ -524,9 +524,9 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 
 				add_assoc_string(subarray, "type", "TXT");
 				tp = zend_string_alloc(dlen, 0);
-				
+
 				array_init(&entries);
-				
+
 				while (l1 < dlen) {
 					n = cp[l1];
 					if ((l1 + n) >= dlen) {

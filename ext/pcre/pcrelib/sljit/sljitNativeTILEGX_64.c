@@ -120,7 +120,7 @@ SLJIT_API_FUNC_ATTRIBUTE SLJIT_CONST char *sljit_get_platform_name(void)
 typedef sljit_uw sljit_ins;
 
 struct jit_instr {
-	const struct tilegx_opcode* opcode; 
+	const struct tilegx_opcode* opcode;
 	tilegx_pipeline pipe;
 	unsigned long input_registers;
 	unsigned long output_registers;
@@ -896,7 +896,7 @@ static sljit_si push_jr_buffer(struct sljit_compiler *compiler, tilegx_mnemonic 
 	inst_buf[inst_buf_index].output_registers = 0;
 	inst_buf[inst_buf_index].line = line;
 	inst_buf_index++;
- 
+
 	return flush_buffer(compiler);
 }
 
@@ -1817,7 +1817,7 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 				else {
 					/* Rare ocasion. */
 					FAIL_IF(ADD(TMP_EREG2, reg_map[src1], ZERO));
-	
+
 					overflow_ra = TMP_EREG2;
 				}
 			}

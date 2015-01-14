@@ -26,7 +26,7 @@
  * it is intentially a light-weight implementation.
  *
  * Each stream can have a chain of filters for reading and another for writing.
- * 
+ *
  * When data is written to the stream, it is placed into a bucket and placed at
  * the start of the input brigade.
  *
@@ -50,7 +50,7 @@ struct _php_stream_bucket {
 	/* if non-zero, buf should be pefreed when the bucket is destroyed */
 	int own_buf;
 	int is_persistent;
-	
+
 	/* destroy this struct when refcount falls to zero */
 	int refcount;
 };
@@ -91,11 +91,11 @@ typedef struct _php_stream_filter_ops {
 			size_t *bytes_consumed,
 			int flags
 			);
-	
+
 	void (*dtor)(php_stream_filter *thisfilter);
-	
+
 	const char *label;
-	
+
 } php_stream_filter_ops;
 
 typedef struct _php_stream_filter_chain {

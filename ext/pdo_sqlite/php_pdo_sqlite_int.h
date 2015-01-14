@@ -41,7 +41,7 @@ struct pdo_sqlite_func {
 	zval func, step, fini;
 	int argc;
 	const char *funcname;
-	
+
 	/* accelerated callback references */
 	struct pdo_sqlite_fci afunc, astep, afini;
 };

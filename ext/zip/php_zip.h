@@ -42,8 +42,8 @@ extern zend_module_entry zip_module_entry;
 
 #ifndef  Z_SET_REFCOUNT_P
 # if PHP_MAJOR_VERSION < 6 && (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 3)
-#  define Z_SET_REFCOUNT_P(pz, rc)  pz->refcount = rc 
-#  define Z_UNSET_ISREF_P(pz) pz->is_ref = 0 
+#  define Z_SET_REFCOUNT_P(pz, rc)  pz->refcount = rc
+#  define Z_UNSET_ISREF_P(pz) pz->is_ref = 0
 # endif
 #endif
 

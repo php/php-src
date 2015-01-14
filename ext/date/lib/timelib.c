@@ -72,7 +72,7 @@ void timelib_time_tz_abbr_update(timelib_time* tm, char* tz_abbr)
 {
 	unsigned int i;
 	size_t tz_abbr_len = strlen(tz_abbr);
-	
+
 	TIMELIB_TIME_FREE(tm->tz_abbr);
 	tm->tz_abbr = strdup(tz_abbr);
 	for (i = 0; i < tz_abbr_len; i++) {
@@ -123,7 +123,7 @@ timelib_tzinfo *timelib_tzinfo_clone(timelib_tzinfo *tz)
 	tmp->timecnt = tz->timecnt;
 	tmp->typecnt = tz->typecnt;
 	tmp->charcnt = tz->charcnt;
-	
+
 	tmp->trans = (int32_t *) malloc(tz->timecnt * sizeof(int32_t));
 	tmp->trans_idx = (unsigned char*) malloc(tz->timecnt * sizeof(unsigned char));
 	memcpy(tmp->trans, tz->trans, tz->timecnt * sizeof(int32_t));
@@ -237,7 +237,7 @@ void timelib_dump_date(timelib_time *d, int options)
 
 	if ((options & 1) == 1) {
 		if (d->have_relative) {
-			printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS", 
+			printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS",
 				d->relative.y, d->relative.m, d->relative.d, d->relative.h, d->relative.i, d->relative.s);
 			if (d->relative.first_last_day_of != 0) {
 				switch (d->relative.first_last_day_of) {
@@ -272,7 +272,7 @@ void timelib_dump_date(timelib_time *d, int options)
 
 void timelib_dump_rel_time(timelib_rel_time *d)
 {
-	printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS (days: %lld)%s", 
+	printf("%3lldY %3lldM %3lldD / %3lldH %3lldM %3lldS (days: %lld)%s",
 		d->y, d->m, d->d, d->h, d->i, d->s, d->days, d->invert ? " inverted" : "");
 	if (d->first_last_day_of != 0) {
 		switch (d->first_last_day_of) {

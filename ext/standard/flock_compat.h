@@ -59,7 +59,7 @@ PHPAPI int flock(int fd, int operation);
 #endif
 
 #ifndef PHP_WIN32
-extern int inet_aton(const char *, struct in_addr *); 
+extern int inet_aton(const char *, struct in_addr *);
 #endif
 #endif
 

@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -79,7 +79,7 @@ ZEND_TSRMLS_CACHE_EXTERN;
 #ifdef HAVE_NORETURN
 # if defined(ZEND_WIN32)
 ZEND_API ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...);
-# else 
+# else
 void zend_error_noreturn(int type, const char *format, ...) ZEND_NORETURN;
 # endif
 #else
@@ -98,13 +98,13 @@ typedef struct _zend_serialize_data zend_serialize_data;
 typedef struct _zend_unserialize_data zend_unserialize_data;
 
 typedef struct _zend_trait_method_reference {
-	zend_string *method_name;	
+	zend_string *method_name;
 	zend_class_entry *ce;
 	zend_string *class_name;
 } zend_trait_method_reference;
 
 typedef struct _zend_trait_precedence {
-	zend_trait_method_reference *trait_method;	
+	zend_trait_method_reference *trait_method;
 	union {
 		zend_class_entry  *ce;
 		zend_string       *class_name;
@@ -113,12 +113,12 @@ typedef struct _zend_trait_precedence {
 
 typedef struct _zend_trait_alias {
 	zend_trait_method_reference *trait_method;
-	
+
 	/**
 	* name for method to be added
 	*/
 	zend_string *alias;
-	
+
 	/**
 	* modifiers to be set on trait method
 	*/
@@ -170,7 +170,7 @@ struct _zend_class_entry {
 	uint32_t num_interfaces;
 	uint32_t num_traits;
 	zend_class_entry **interfaces;
-	
+
 	zend_class_entry **traits;
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;

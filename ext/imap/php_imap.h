@@ -40,7 +40,7 @@
 # include "imap4r1.h"	/* location of c-client quota functions */
 #else
 # include "mail.h"
-# include "rfc822.h" 
+# include "rfc822.h"
 #endif
 
 extern zend_module_entry imap_module_entry;
@@ -94,7 +94,7 @@ typedef struct _php_imap_message_struct {
 	unsigned long msgid;
 	struct _php_imap_message_struct *next;
 } MESSAGELIST;
- 
+
 
 /* Functions */
 

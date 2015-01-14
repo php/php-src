@@ -93,7 +93,7 @@ END_EXTERN_C()
 #define php_stream_notify_info(context, code, xmsg, xcode)	do { if ((context) && (context)->notifier) { \
 	php_stream_notification_notify((context), (code), PHP_STREAM_NOTIFY_SEVERITY_INFO, \
 				(xmsg), (xcode), 0, 0, NULL); } } while (0)
-			
+
 #define php_stream_notify_progress(context, bsofar, bmax) do { if ((context) && (context)->notifier) { \
 	php_stream_notification_notify((context), PHP_STREAM_NOTIFY_PROGRESS, PHP_STREAM_NOTIFY_SEVERITY_INFO, \
 			NULL, 0, (bsofar), (bmax), NULL); } } while(0)
@@ -112,11 +112,11 @@ END_EXTERN_C()
 #define php_stream_notify_file_size(context, file_size, xmsg, xcode) do { if ((context) && (context)->notifier) { \
 	php_stream_notification_notify((context), PHP_STREAM_NOTIFY_FILE_SIZE_IS, PHP_STREAM_NOTIFY_SEVERITY_INFO, \
 			(xmsg), (xcode), 0, (file_size), NULL); } } while(0)
-	
+
 #define php_stream_notify_error(context, code, xmsg, xcode) do { if ((context) && (context)->notifier) {\
 	php_stream_notification_notify((context), (code), PHP_STREAM_NOTIFY_SEVERITY_ERR, \
 			(xmsg), (xcode), 0, 0, NULL); } } while(0)
-	
+
 
 /*
  * Local variables:

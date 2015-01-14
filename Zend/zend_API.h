@@ -462,7 +462,7 @@ ZEND_API extern const zend_fcall_info_cache empty_fcall_info_cache;
 
 /** Build zend_call_info/cache from a zval*
  *
- * Caller is responsible to provide a return value, otherwise the we will crash. 
+ * Caller is responsible to provide a return value, otherwise the we will crash.
  * fci->retval_ptr_ptr = NULL;
  * In order to pass parameters the following members need to be set:
  * fci->param_count = 0;

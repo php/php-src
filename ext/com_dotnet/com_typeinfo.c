@@ -146,7 +146,7 @@ PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codep
 			}
 		}
 	}
-	
+
 	efree(p);
 
 	return TL;
@@ -267,7 +267,7 @@ ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj
 	ITypeLib *typelib = NULL;
 	int gotguid = 0;
 	GUID iid;
-	
+
 	if (obj) {
 		if (dispname == NULL && sink) {
 			IProvideClassInfo2 *pci2;
@@ -313,18 +313,18 @@ ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj
 	} else if (typelibname) {
 		/* Fetch the typelibrary and use that to look things up */
 		typelib = php_com_load_typelib(typelibname, CP_THREAD_ACP);
-	} 
+	}
 
 	if (!gotguid && dispname && typelib) {
 		unsigned short cfound;
 		MEMBERID memid;
 		OLECHAR *olename = php_com_string_to_olestring(dispname, strlen(dispname), CP_ACP);
-			
+
 		cfound = 1;
 		if (FAILED(ITypeLib_FindName(typelib, olename, 0, &typeinfo, &memid, &cfound)) || cfound == 0) {
 			CLSID coclass;
 			ITypeInfo *coinfo;
-	
+
 			/* assume that it might be a progid instead */
 			if (SUCCEEDED(CLSIDFromProgID(olename, &coclass)) &&
 					SUCCEEDED(ITypeLib_GetTypeInfoOfGuid(typelib, &coclass, &coinfo))) {
@@ -351,16 +351,16 @@ ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj
 						if (SUCCEEDED(ITypeInfo_GetRefTypeOfImplType(coinfo, i, &rt)))
 							if (SUCCEEDED(ITypeInfo_GetRefTypeInfo(coinfo, rt, &typeinfo)))
 								break;
-						
+
 					}
 				}
-				
+
 				ITypeInfo_ReleaseTypeAttr(coinfo, attr);
 				ITypeInfo_Release(coinfo);
 			}
 		}
 
-		
+
 		efree(olename);
 	} else if (gotguid) {
 		ITypeLib_GetTypeInfoOfGuid(typelib, &iid, &typeinfo);
@@ -450,7 +450,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 		if (guid) {
 			memcpy(guid, &attr->guid, sizeof(GUID));
 		}
-		
+
 		if (printdef) {
 			char *guidstring;
 
@@ -483,7 +483,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 			if (!isprop || lastid != func->memid) {
 
 				lastid = func->memid;
-				
+
 				ITypeInfo_GetDocumentation(typeinfo, func->memid, &olename, NULL, NULL, NULL);
 				ansiname = php_com_olestring_to_string(olename, &ansinamelen, codepage);
 				SysFreeString(olename);

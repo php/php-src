@@ -918,7 +918,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			/* hash it up */
 			ZVAL_NEW_PERSISTENT_RES(&new_le, -1, mysql, le_plink);
-			
+
 			/* avoid bogus memleak report */
 			phashed = zend_string_init(hashed_details->val, hashed_details->len, 1);
 			if (zend_hash_update(&EG(persistent_list), phashed, &new_le) == NULL) {
@@ -1054,7 +1054,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ZEND_REGISTER_RESOURCE(return_value, mysql, le_link);
 
 		/* add it to the hash */
-		ZVAL_NEW_RES(&new_index_ptr, -1, Z_RES_P(return_value), le_index_ptr);		
+		ZVAL_NEW_RES(&new_index_ptr, -1, Z_RES_P(return_value), le_index_ptr);
 		if (zend_hash_update(&EG(regular_list), hashed_details, &new_index_ptr) == NULL) {
 			zval_ptr_dtor(return_value);
 			zend_string_release(hashed_details);
@@ -1263,7 +1263,7 @@ PHP_FUNCTION(mysql_info)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &mysql_link) == FAILURE) {
 		return;
 	}
-	
+
 	if (!mysql_link) {
 		zend_resource *res = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(res);

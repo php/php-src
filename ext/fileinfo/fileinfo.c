@@ -24,7 +24,7 @@
 #include "php.h"
 
 #include <magic.h>
-/* 
+/*
  * HOWMANY specifies the maximum offset libmagic will look at
  * this is currently hardcoded in the libmagic source but not exported
  */
@@ -253,7 +253,7 @@ zend_module_entry fileinfo_module_entry = {
 	fileinfo_functions,
 	PHP_MINIT(finfo),
 	NULL,
-	NULL,	
+	NULL,
 	NULL,
 	PHP_MINFO(fileinfo),
 	PHP_FILEINFO_VERSION,
@@ -463,7 +463,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 		}
 		ZEND_FETCH_RESOURCE(finfo, php_fileinfo *, zfinfo, -1, "file_info", le_fileinfo);
 		magic = finfo->magic;
-	}	
+	}
 
 	/* Set options for the current file/buffer. */
 	if (options) {

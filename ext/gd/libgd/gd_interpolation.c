@@ -41,8 +41,8 @@
 	downscaling using the fixed point implementations are usually much faster
 	than the existing gdImageCopyResampled while having a similar or better
 	quality.
-	
-	For image rotations, the optimized versions have a lazy antialiasing for 
+
+	For image rotations, the optimized versions have a lazy antialiasing for
 	the edges of the images. For a much better antialiased result, the affine
 	function is recommended.
 */
@@ -635,7 +635,7 @@ static inline int _color_blend (const int dst, const int src)
 	}
 }
 
-static inline int _setEdgePixel(const gdImagePtr src, unsigned int x, unsigned int y, gdFixed coverage, const int bgColor) 
+static inline int _setEdgePixel(const gdImagePtr src, unsigned int x, unsigned int y, gdFixed coverage, const int bgColor)
 {
 	const gdFixed f_127 = gd_itofx(127);
 	register int c = src->tpixels[y][x];
@@ -2276,7 +2276,7 @@ int gdTransformAffineGetImage(gdImagePtr *dst,
 	if (!src->trueColor) {
 		gdImagePaletteToTrueColor(src);
 	}
-	
+
 	/* Translate to dst origin (0,0) */
 	gdAffineTranslate(m, -bbox.x, -bbox.y);
 	gdAffineConcat(m, affine, m);
@@ -2335,7 +2335,7 @@ int gdTransformAffineCopy(gdImagePtr dst,
 	if (src->interpolation_id == GD_BILINEAR_FIXED || src->interpolation_id == GD_BICUBIC_FIXED || src->interpolation_id == GD_NEAREST_NEIGHBOUR) {
 		interpolation_id_bak = src->interpolation_id;
 		interpolation_bak = src->interpolation;
-		
+
 		gdImageSetInterpolationMethod(src, GD_BICUBIC);
 	}
 

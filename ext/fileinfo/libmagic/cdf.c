@@ -911,8 +911,8 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
 			}
 			DPRINTF(("nelements = %" SIZE_T_FORMAT "u\n",
 			    nelements));
-			for (j = 0; j < nelements && i < sh.sh_properties; 
-			    j++, i++) 
+			for (j = 0; j < nelements && i < sh.sh_properties;
+			    j++, i++)
 			{
 				uint32_t l = CDF_GETUINT32(q, o);
 				inp[i].pi_str.s_len = l;
@@ -978,7 +978,7 @@ cdf_unpack_summary_info(const cdf_stream_t *sst, const cdf_header_t *h,
 	maxcount = 0;
 	*info = NULL;
 	if (cdf_read_property_info(sst, h, CDF_TOLE4(sd->sd_offset), info,
-		count, &maxcount) == -1) 
+		count, &maxcount) == -1)
 			return -1;
 	return 0;
 }

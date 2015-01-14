@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -124,7 +124,7 @@ struct _zend_compiler_globals {
 	zend_stack context_stack;
 
 	zend_arena *arena;
-	
+
 	zend_string *empty_string;
 	zend_string *one_char_string[256];
 
@@ -213,7 +213,7 @@ struct _zend_executor_globals {
 
 	HashTable *ini_directives;
 	HashTable *modified_ini_directives;
-	zend_ini_entry *error_reporting_ini_entry;	                
+	zend_ini_entry *error_reporting_ini_entry;
 
 	zend_objects_store objects_store;
 	zend_object *exception, *prev_exception;
@@ -266,7 +266,7 @@ struct _zend_php_scanner_globals {
 	int yy_state;
 	zend_stack state_stack;
 	zend_ptr_stack heredoc_label_stack;
-	
+
 	/* original (unfiltered) script */
 	unsigned char *script_org;
 	size_t script_org_size;

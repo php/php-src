@@ -523,7 +523,7 @@ PHP_FUNCTION(grapheme_substr)
 			efree(ustr);
 		}
 		ubrk_close(bi);
-		RETURN_EMPTY_STRING();		
+		RETURN_EMPTY_STRING();
 	}
 
 	/* find the end point of the string to return */
@@ -562,7 +562,7 @@ PHP_FUNCTION(grapheme_substr)
 			sub_str_end_pos = ustr_len;
 		}
 	}
-	
+
 	if(sub_str_start_pos > sub_str_end_pos) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: length is beyond start", 1 );
 

@@ -37,7 +37,7 @@ DIR *opendir(const char *dir)
 	}
 	strcpy(filespec, resolved_path_buff);
 	index = (int)strlen(filespec) - 1;
-	if (index >= 0 && (filespec[index] == '/' || 
+	if (index >= 0 && (filespec[index] == '/' ||
 	   (filespec[index] == '\\' && (index == 0 || !IsDBCSLeadByte(filespec[index-1])))))
 		filespec[index] = '\0';
 	strcat(filespec, "\\*");
@@ -152,7 +152,7 @@ int rewinddir(DIR *dp)
 
 	strcpy(filespec, dp->dir);
 	index = (int)strlen(filespec) - 1;
-	if (index >= 0 && (filespec[index] == '/' || 
+	if (index >= 0 && (filespec[index] == '/' ||
 	   (filespec[index] == '\\' && (index == 0 || !IsDBCSLeadByte(filespec[index-1])))))
 		filespec[index] = '\0';
 	strcat(filespec, "/*");
@@ -160,7 +160,7 @@ int rewinddir(DIR *dp)
 	if ((handle = FindFirstFile(filespec, &(dp->fileinfo))) == INVALID_HANDLE_VALUE) {
 		dp->finished = 1;
 	}
-	
+
 	dp->handle = handle;
 	free(filespec);
 

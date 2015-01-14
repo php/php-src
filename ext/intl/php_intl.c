@@ -750,7 +750,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( resourcebundle_locales, arginfo_resourcebundle_locales_proc )
 	PHP_FE( resourcebundle_get_error_code, arginfo_resourcebundle_get_error_code_proc )
 	PHP_FE( resourcebundle_get_error_message, arginfo_resourcebundle_get_error_message_proc )
-	
+
 	/* Transliterator functions */
 	PHP_FE( transliterator_create, arginfo_transliterator_create )
 	PHP_FE( transliterator_create_from_rules, arginfo_transliterator_create_from_rules )
@@ -920,7 +920,7 @@ PHP_MINIT_FUNCTION( intl )
 	REGISTER_STRING_CONSTANT("INTL_ICU_VERSION", U_ICU_VERSION, CONST_PERSISTENT | CONST_CS);
 #ifdef U_ICU_DATA_VERSION
 	REGISTER_STRING_CONSTANT("INTL_ICU_DATA_VERSION", U_ICU_DATA_VERSION, CONST_PERSISTENT | CONST_CS);
-#endif	
+#endif
 
 	/* Register 'Collator' PHP class */
 	collator_register_Collator_class(  );

@@ -20,9 +20,9 @@ extern zend_module_entry extname_module_entry;
 #include "TSRM.h"
 #endif
 
-/* 
+/*
   	Declare any global variables you may need between the BEGIN
-	and END macros here:     
+	and END macros here:
 
 ZEND_BEGIN_MODULE_GLOBALS(extname)
 	zend_long  global_value;

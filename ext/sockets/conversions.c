@@ -1243,7 +1243,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 		}
 	} else {
 		zend_string *str;
-			
+
 		str = zval_get_string((zval *) zv);
 
 #if HAVE_IF_NAMETOINDEX

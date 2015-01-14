@@ -36,7 +36,7 @@ typedef struct php_struct {
 	int state;
 	request_rec *r;
 	ap_filter_t *f; /* downstream output filters after the PHP filter. */
-	/* stat structure of the current file */	
+	/* stat structure of the current file */
 	struct stat finfo;
 	/* Set-aside request body bucket brigade */
 	apr_bucket_brigade *post_data;

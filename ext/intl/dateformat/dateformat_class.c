@@ -87,7 +87,7 @@ zend_object *IntlDateFormatter_object_clone(zval *object)
 
 	new_obj = IntlDateFormatter_ce_ptr->create_object(Z_OBJCE_P(object));
 	new_dfo = php_intl_dateformatter_fetch_object(new_obj);
-	/* clone standard parts */	
+	/* clone standard parts */
 	zend_objects_clone_members(&new_dfo->zo, &dfo->zo);
 	/* clone formatter object */
 	if (dfo->datef_data.udatf != NULL) {
@@ -105,7 +105,7 @@ zend_object *IntlDateFormatter_object_clone(zval *object)
 }
 /* }}} */
 
-/* 
+/*
  * 'IntlDateFormatter' class registration structures & functions
  */
 
