@@ -2903,10 +2903,12 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 	zval *entry, tmp, dummy;
 	char *key;
 	smart_str result = {0};
+	zend_ulong bitset[256/sizeof(zend_ulong)];
 
 	/* we will collect all possible key lengths */
 	ZVAL_NULL(&dummy);
 	zend_hash_init(&num_hash, 8, NULL, NULL, 0);
+	memset(bitset, 0, sizeof(bitset));
 
 	/* check if original array has numeric keys */
 	ZEND_HASH_FOREACH_KEY(pats, num_key, str_key) {
@@ -2928,6 +2930,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 			}
 			/* remember possible key length */
 			zend_hash_index_add(&num_hash, len, &dummy);
+			bitset[((unsigned char)str_key->val[0]) / sizeof(zend_ulong)] |= Z_UL(1) << (((unsigned char)str_key->val[0]) % sizeof(zend_ulong));
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -2953,6 +2956,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 				}
 				/* remember possible key length */
 				zend_hash_index_add(&num_hash, len, &dummy);
+				bitset[((unsigned char)str_key->val[0]) / sizeof(zend_ulong)] |= Z_UL(1) << (((unsigned char)str_key->val[0]) % sizeof(zend_ulong));
 			} else {
 				len = str_key->len;
 				if (UNEXPECTED(len > slen)) {
@@ -2989,6 +2993,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 			key = str + pos;
 			ZEND_HASH_FOREACH_NUM_KEY(&num_hash, len) {
 				if (len > slen - pos) continue;
+				if ((bitset[((unsigned char)key[0]) / sizeof(zend_ulong)] & Z_UL(1) << (((unsigned char)key[0]) % sizeof(zend_ulong))) == 0) continue;
 				entry = zend_hash_str_find(pats, key, len);
 				if (entry != NULL) {
 					zend_string *str = zval_get_string(entry);
@@ -3014,6 +3019,7 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 			found = 0;
 			key = str + pos;
 			for (len = maxlen; len >= minlen; len--) {
+				if ((bitset[((unsigned char)key[0]) / sizeof(zend_ulong)] & Z_UL(1) << (((unsigned char)key[0]) % sizeof(zend_ulong))) == 0) continue;
 				entry = zend_hash_str_find(pats, key, len);
 				if (entry != NULL) {
 					zend_string *str = zval_get_string(entry);
