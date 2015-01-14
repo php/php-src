@@ -2881,6 +2881,62 @@ PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size
 }
 /* }}} */
 
+/* {{{ php_strtr_ex
+ */
+static zend_string *php_strtr_ex(zend_string *str, char *str_from, char *str_to, size_t trlen)
+{
+	zend_string *new_str = NULL;
+	size_t i;
+
+	if (UNEXPECTED(trlen < 1)) {
+		return zend_string_copy(str);
+	} else if (trlen == 1) {
+		char ch_from = *str_from;
+		char ch_to = *str_to;
+
+		for (i = 0; i < str->len; i++) {
+			if (str->val[i] == ch_from) {
+				new_str = zend_string_alloc(str->len, 0);
+				memcpy(new_str->val, str->val, i);
+				new_str->val[i] = ch_to;
+				break;
+			}
+		}
+		for (; i < str->len; i++) {
+			new_str->val[i] = (str->val[i] != ch_from) ? str->val[i] : ch_to;
+		}
+	} else {
+		unsigned char xlat[256], j = 0;
+
+		do { xlat[j] = j; } while (++j != 0);
+
+		for (i = 0; i < trlen; i++) {
+			xlat[(size_t)(unsigned char) str_from[i]] = str_to[i];
+		}
+
+		for (i = 0; i < str->len; i++) {
+			if (str->val[i] != xlat[(size_t)(unsigned char) str->val[i]]) {
+				new_str = zend_string_alloc(str->len, 0);
+				memcpy(new_str->val, str->val, i);
+				new_str->val[i] = xlat[(size_t)(unsigned char) str->val[i]];
+				break;
+			}
+		}
+
+		for (;i < str->len; i++) {
+			new_str->val[i] = xlat[(size_t)(unsigned char) str->val[i]];
+		}
+	}
+
+	if (!new_str) {
+		return zend_string_copy(str);
+	}
+
+	new_str->val[new_str->len] = 0;
+	return new_str;
+}
+/* }}} */
+
 static int php_strtr_key_compare(const void *a, const void *b) /* {{{ */
 {
 	Bucket *f = (Bucket *) a;
@@ -2891,11 +2947,13 @@ static int php_strtr_key_compare(const void *a, const void *b) /* {{{ */
 /* }}} */
 
 /* {{{ php_strtr_array */
-static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTable *pats)
+static void php_strtr_array(zval *return_value, zend_string *input, HashTable *pats)
 {
+	char *str = input->val;
+	size_t slen = input->len;
 	zend_ulong num_key;
 	zend_string *str_key;
-	size_t len, pos, found;
+	size_t len, pos, old_pos;
 	int num_keys = 0;
 	size_t minlen = 128*1024;
 	size_t maxlen = 0;
@@ -2987,62 +3045,62 @@ static void php_strtr_array(zval *return_value, char *str, size_t slen, HashTabl
 		/* smart algorithm, sort key lengths first */
 		zend_hash_sort(&num_hash, zend_qsort, php_strtr_key_compare, 0) == SUCCESS) {
 
-		pos = 0;
+		old_pos = pos = 0;
 		while (pos <= slen - minlen) {
-			found = 0;
 			key = str + pos;
 			ZEND_HASH_FOREACH_NUM_KEY(&num_hash, len) {
 				if (len > slen - pos) continue;
 				if ((bitset[((unsigned char)key[0]) / sizeof(zend_ulong)] & Z_UL(1) << (((unsigned char)key[0]) % sizeof(zend_ulong))) == 0) continue;
 				entry = zend_hash_str_find(pats, key, len);
 				if (entry != NULL) {
-					zend_string *str = zval_get_string(entry);
-					smart_str_append(&result, str);
-					pos += len;
-					found = 1;
-					zend_string_release(str);
+					zend_string *s = zval_get_string(entry);
+					smart_str_appendl(&result, str + old_pos, pos - old_pos);
+					smart_str_append(&result, s);
+					old_pos = pos + len;
+					pos = old_pos - 1;
+					zend_string_release(s);
 					break;
 				}
 			} ZEND_HASH_FOREACH_END();
-			if (!found) {
-				smart_str_appendc(&result, str[pos++]);
-			}
+			pos++;
 		}
-		smart_str_appendl(&result, str + pos, slen - pos);
 	} else {
 		/* use simple algorithm */
-		pos = 0;
+		old_pos = pos = 0;
 		while (pos <= slen - minlen) {
 			if (maxlen > slen - pos) {
 				maxlen = slen - pos;
 			}
-			found = 0;
 			key = str + pos;
 			for (len = maxlen; len >= minlen; len--) {
 				if ((bitset[((unsigned char)key[0]) / sizeof(zend_ulong)] & Z_UL(1) << (((unsigned char)key[0]) % sizeof(zend_ulong))) == 0) continue;
 				entry = zend_hash_str_find(pats, key, len);
 				if (entry != NULL) {
-					zend_string *str = zval_get_string(entry);
-					smart_str_append(&result, str);
-					pos += len;
-					found = 1;
-					zend_string_release(str);
+					zend_string *s = zval_get_string(entry);
+					smart_str_appendl(&result, str + old_pos, pos - old_pos);
+					smart_str_append(&result, s);
+					old_pos = pos + len;
+					pos = old_pos - 1;
+					zend_string_release(s);
 					break;
 				}
 			}
-			if (!found) {
-				smart_str_appendc(&result, str[pos++]);
-			}
+			pos++;
 		}
-		smart_str_appendl(&result, str + pos, slen - pos);
+	}
+	if (result.s && result.s->len) {
+		smart_str_appendl(&result, str + old_pos, slen - old_pos);
+		smart_str_0(&result);
+		RETVAL_STR(result.s);
+	} else {
+		smart_str_free(&result);
+		RETVAL_STR(zend_string_copy(input));
 	}
 
 	if (pats == &str_hash) {
 		zend_hash_destroy(&str_hash);
 	}
 	zend_hash_destroy(&num_hash);
-	smart_str_0(&result);
-	RETURN_STR(result.s);
 }
 /* }}} */
 
@@ -3418,19 +3476,15 @@ PHP_FUNCTION(strtr)
 				return;
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			php_strtr_array(return_value, str->val, str->len, pats);
+			php_strtr_array(return_value, str, pats);
 		}
 	} else {
 		convert_to_string_ex(from);
 
-		ZVAL_STRINGL(return_value, str->val, str->len);
-
-		php_strtr(Z_STRVAL_P(return_value),
-				  Z_STRLEN_P(return_value),
+		RETURN_STR(php_strtr_ex(str,
 				  Z_STRVAL_P(from),
 				  to,
-				  MIN(Z_STRLEN_P(from),
-				  to_len));
+				  MIN(Z_STRLEN_P(from), to_len)));
 	}
 }
 /* }}} */
@@ -5362,9 +5416,7 @@ PHP_FUNCTION(str_rot13)
 	if (arg->len == 0) {
 		RETURN_EMPTY_STRING();
 	} else {
-		RETVAL_STRINGL(arg->val, arg->len);
-
-		php_strtr(Z_STRVAL_P(return_value), Z_STRLEN_P(return_value), rot13_from, rot13_to, 52);
+		RETURN_STR(php_strtr_ex(arg, rot13_from, rot13_to, 52));
 	}
 }
 /* }}} */
