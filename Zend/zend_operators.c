@@ -2004,12 +2004,12 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2) /*
 }
 /* }}} */
 
-static zend_bool instanceof_inerface_only(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
+static zend_bool instanceof_interface_only(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
 {
 	uint32_t i;
 
 	for (i = 0; i < instance_ce->num_interfaces; i++) {
-		if (instanceof_inerface_only(instance_ce->interfaces[i], ce)) {
+		if (instanceof_interface_only(instance_ce->interfaces[i], ce)) {
 			return 1;
 		}
 	}
@@ -2046,7 +2046,7 @@ ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, c
 {
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		if (!interfaces_only) {
-			if (instanceof_inerface_only(instance_ce, ce)) {
+			if (instanceof_interface_only(instance_ce, ce)) {
 				return 1;
 			}
 		} else {
