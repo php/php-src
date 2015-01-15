@@ -665,6 +665,17 @@ static inline void php_var_serialize_long(smart_str *buf, zend_long val) /* {{{ 
 }
 /* }}} */
 
+static inline void php_var_serialize_bigint(smart_str *buf, zend_bigint *big) /* {{{ */
+{
+	char *str = zend_bigint_to_string(big);
+
+	smart_str_appendl(buf, "i:", 2);
+	smart_str_appends(buf, str);
+	efree(str);
+	smart_str_appendc(buf, ';');
+}
+/* }}} */
+
 static inline void php_var_serialize_string(smart_str *buf, char *str, size_t len) /* {{{ */
 {
 	smart_str_appendl(buf, "s:", 2);
@@ -826,6 +837,10 @@ again:
 
 		case IS_LONG:
 			php_var_serialize_long(buf, Z_LVAL_P(struc));
+			return;
+
+		case IS_BIGINT:
+			php_var_serialize_bigint(buf, Z_BIG_P(struc));
 			return;
 
 		case IS_DOUBLE: {
