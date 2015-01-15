@@ -1904,10 +1904,10 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 
 	if (hash->nNumUsed != hash->nNumOfElements) {
 		for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
-			p = hash->arData + idx;
+			p = HT_DATA(hash) + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			if (j != idx) {
-				hash->arData[j] = *p;
+				HT_DATA(hash)[j] = *p;
 			}
 			j++;
 		}
@@ -1916,9 +1916,9 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 		rnd_idx = php_rand();
 		RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
 		if (rnd_idx != n_left) {
-			temp = hash->arData[n_left];
-			hash->arData[n_left] = hash->arData[rnd_idx];
-			hash->arData[rnd_idx] = temp;
+			temp = HT_DATA(hash)[n_left];
+			HT_DATA(hash)[n_left] = HT_DATA(hash)[rnd_idx];
+			HT_DATA(hash)[rnd_idx] = temp;
 		}
 	}
 
@@ -1927,7 +1927,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 	hash->nInternalPointer = 0;
 
 	for (j = 0; j < n_elems; j++) {
-		p = hash->arData + j;
+		p = HT_DATA(hash) + j;
 		if (p->key) {
 			zend_string_release(p->key);
 		}
@@ -1989,7 +1989,7 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 
 	/* Start at the beginning of the input hash and copy entries to output hash until offset is reached */
 	for (pos = 0, idx = 0; pos < offset && idx < in_hash->nNumUsed; idx++) {
-		p = in_hash->arData + idx;
+		p = HT_DATA(in_hash) + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		pos++;
 		/* Get entry and increase reference count */
@@ -2006,7 +2006,7 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 	/* If hash for removed entries exists, go until offset+length and copy the entries to it */
 	if (removed != NULL) {
 		for ( ; pos < offset + length && idx < in_hash->nNumUsed; idx++) {
-			p = in_hash->arData + idx;
+			p = HT_DATA(in_hash) + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			pos++;
 			entry = &p->val;
@@ -2027,7 +2027,7 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 		}
 	} else { /* otherwise just skip those entries */
 		for ( ; pos < offset + length && idx < in_hash->nNumUsed; idx++) {
-			p = in_hash->arData + idx;
+			p = HT_DATA(in_hash) + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			pos++;
 			if (p->key == NULL) {
@@ -2052,7 +2052,7 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 
 	/* Copy the remaining input hash entries to the output hash */
 	for ( ; idx < in_hash->nNumUsed ; idx++) {
-		p = in_hash->arData + idx;
+		p = HT_DATA(in_hash) + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		entry = &p->val;
 		if (p->key == NULL) {
@@ -2133,7 +2133,7 @@ PHP_FUNCTION(array_pop)
 			return;
 		}
 		idx--;
-		p = Z_ARRVAL_P(stack)->arData + idx;
+		p = HT_DATA(Z_ARRVAL_P(stack)) + idx;
 		val = &p->val;
 		if (Z_TYPE_P(val) == IS_INDIRECT) {
 			val = Z_INDIRECT_P(val);
@@ -2193,7 +2193,7 @@ PHP_FUNCTION(array_shift)
 		if (idx == Z_ARRVAL_P(stack)->nNumUsed) {
 			return;
 		}
-		p = Z_ARRVAL_P(stack)->arData + idx;
+		p = HT_DATA(Z_ARRVAL_P(stack)) + idx;
 		val = &p->val;
 		if (Z_TYPE_P(val) == IS_INDIRECT) {
 			val = Z_INDIRECT_P(val);
@@ -2222,10 +2222,10 @@ PHP_FUNCTION(array_shift)
 		uint32_t k = 0;
 
 		for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
-			p = Z_ARRVAL_P(stack)->arData + idx;
+			p = HT_DATA(Z_ARRVAL_P(stack)) + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			if (idx != k) {
-				Bucket *q = Z_ARRVAL_P(stack)->arData + k;
+				Bucket *q = HT_DATA(Z_ARRVAL_P(stack)) + k;
 				q->h = k;
 				q->key = NULL;
 				ZVAL_COPY_VALUE(&q->val, &p->val);
@@ -2240,7 +2240,7 @@ PHP_FUNCTION(array_shift)
 		int should_rehash = 0;
 
 		for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
-			p = Z_ARRVAL_P(stack)->arData + idx;
+			p = HT_DATA(Z_ARRVAL_P(stack)) + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			if (p->key == NULL) {
 				if (p->h != k) {
@@ -3220,7 +3220,7 @@ PHP_FUNCTION(array_unique)
 		RETURN_FALSE;
 	}
 	for (i = 0, idx = 0; idx < Z_ARRVAL_P(array)->nNumUsed; idx++) {
-		p = Z_ARRVAL_P(array)->arData + idx;
+		p = HT_DATA(Z_ARRVAL_P(array)) + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (Z_TYPE(p->val) == IS_INDIRECT && Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF) continue;
 		arTmp[i].b = *p;
@@ -3373,7 +3373,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 	array_init(return_value);
 
 	for (idx = 0; idx < Z_ARRVAL(args[0])->nNumUsed; idx++) {
-		p = Z_ARRVAL(args[0])->arData + idx;
+		p = HT_DATA(Z_ARRVAL(args[0])) + idx;
 		val = &p->val;
 		if (Z_TYPE_P(val) == IS_UNDEF) continue;
 		if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
@@ -3554,7 +3554,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		lists[i] = list;
 		ptrs[i] = list;
 		for (idx = 0; idx < hash->nNumUsed; idx++) {
-			p = hash->arData + idx;
+			p = HT_DATA(hash) + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			*list++ = *p;
 		}
@@ -3794,7 +3794,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 	array_init(return_value);
 
 	for (idx = 0; idx < Z_ARRVAL(args[0])->nNumUsed; idx++) {
-		p = Z_ARRVAL(args[0])->arData + idx;
+		p = HT_DATA(Z_ARRVAL(args[0])) + idx;
 		val = &p->val;
 		if (Z_TYPE_P(val) == IS_UNDEF) continue;
 		if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
@@ -3974,7 +3974,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		lists[i] = list;
 		ptrs[i] = list;
 		for (idx = 0; idx < hash->nNumUsed; idx++) {
-			p = hash->arData + idx;
+			p = HT_DATA(hash) + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			*list++ = *p;
 		}
@@ -4409,7 +4409,7 @@ PHP_FUNCTION(array_multisort)
 	for (i = 0; i < num_arrays; i++) {
 		k = 0;
 		for (idx = 0; idx < Z_ARRVAL_P(arrays[i])->nNumUsed; idx++) {
-			p = Z_ARRVAL_P(arrays[i])->arData + idx;
+			p = HT_DATA(Z_ARRVAL_P(arrays[i])) + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			indirect[k][i] = *p;
 			k++;
@@ -4433,9 +4433,9 @@ PHP_FUNCTION(array_multisort)
 		repack = !(hash->u.flags & HASH_FLAG_PACKED);
 
 		for (n = 0, k = 0; k < array_size; k++) {
-			hash->arData[k] = indirect[k][i];
-			if (hash->arData[k].key == NULL) {
-				hash->arData[k].h = n++;
+			HT_DATA(hash)[k] = indirect[k][i];
+			if (HT_DATA(hash)[k].key == NULL) {
+				HT_DATA(hash)[k].h = n++;
 			} else {
 				repack = 0;
 			}
@@ -4832,8 +4832,8 @@ PHP_FUNCTION(array_map)
 						if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
 							ZVAL_NULL(&zv);
 							break;
-						} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
-							ZVAL_COPY(&zv, &Z_ARRVAL(arrays[i])->arData[pos].val);
+						} else if (Z_TYPE(HT_DATA(Z_ARRVAL(arrays[i]))[pos].val) != IS_UNDEF) {
+							ZVAL_COPY(&zv, &HT_DATA(Z_ARRVAL(arrays[i]))[pos].val);
 							array_pos[i] = pos + 1;
 							break;
 						}
@@ -4858,8 +4858,8 @@ PHP_FUNCTION(array_map)
 						if (pos >= Z_ARRVAL(arrays[i])->nNumUsed) {
 							ZVAL_NULL(&params[i]);
 							break;
-						} else if (Z_TYPE(Z_ARRVAL(arrays[i])->arData[pos].val) != IS_UNDEF) {
-							ZVAL_COPY(&params[i], &Z_ARRVAL(arrays[i])->arData[pos].val);
+						} else if (Z_TYPE(HT_DATA(Z_ARRVAL(arrays[i]))[pos].val) != IS_UNDEF) {
+							ZVAL_COPY(&params[i], &HT_DATA(Z_ARRVAL(arrays[i]))[pos].val);
 							array_pos[i] = pos + 1;
 							break;
 						}
@@ -5034,8 +5034,8 @@ PHP_FUNCTION(array_combine)
 		while (1) {
 			if (pos_values >= Z_ARRVAL_P(values)->nNumUsed) {
 				break;
-			} else if (Z_TYPE(Z_ARRVAL_P(values)->arData[pos_values].val) != IS_UNDEF) {
-				entry_values = &Z_ARRVAL_P(values)->arData[pos_values].val;
+			} else if (Z_TYPE(HT_DATA(Z_ARRVAL_P(values))[pos_values].val) != IS_UNDEF) {
+				entry_values = &HT_DATA(Z_ARRVAL_P(values))[pos_values].val;
 				if (Z_TYPE_P(entry_keys) == IS_LONG) {
 					entry_values = zend_hash_index_update(Z_ARRVAL_P(return_value),
 						Z_LVAL_P(entry_keys), entry_values);

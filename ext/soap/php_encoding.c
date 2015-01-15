@@ -2192,10 +2192,10 @@ static void add_xml_array_elements(xmlNodePtr xmlParam,
 static inline int array_num_elements(HashTable* ht)
 {
 	if (ht->nNumUsed &&
-	    Z_TYPE(ht->arData[ht->nNumUsed-1].val) != IS_UNUSED &&
-	    ht->arData[ht->nNumUsed-1].key == NULL) {
+	    Z_TYPE(HT_DATA(ht)[ht->nNumUsed-1].val) != IS_UNUSED &&
+	    HT_DATA(ht)[ht->nNumUsed-1].key == NULL) {
 
-	    return ht->arData[ht->nNumUsed-1].h - 1;
+	    return HT_DATA(ht)[ht->nNumUsed-1].h - 1;
 	}
 	return 0;
 }

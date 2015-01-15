@@ -168,18 +168,53 @@ struct _zend_array {
 		} v;
 		uint32_t flags;
 	} u;
-	uint32_t          nTableSize;
-	uint32_t          nTableMask;
+	uint32_t          nTableSize; /* number of buckets */
+	uint32_t          nTableMask; /* number of hash slots - 1 */
 	uint32_t          nNumUsed;
 	uint32_t          nNumOfElements;
 	uint32_t          nInternalPointer;
 	zend_long         nNextFreeElement;
-	Bucket           *arData;
-	uint32_t         *arHash;
+	void             *pData;
 	dtor_func_t       pDestructor;
 };
 
+/*
+ * HashTable Data Layout
+ * =====================
+ *
+ *                  +=====================================+
+ *                  | HT_HASH(ht, MAX(ht->nTableMask, 3)) |
+ *                  | ...                                 |
+ *                  | HT_HASH(ht, 0)                      |
+ *                  +-------------------------------------+
+ *  ht->pData  ---> | HT_DATA(ht)[0]                      |
+ *                  | ...                                 |
+ *                  | HT_DATA(ht)[ht->nTableSize-1]       |
+ *                  +=====================================+
+ */
+
 #define HashTable zend_array
+
+#define HT_INVALID_IDX ((uint32_t) -1)
+
+#define HT_HASH(ht, idx) \
+	((uint32_t*)((ht)->pData))[~(idx)]
+#define HT_DATA(ht) \
+	((Bucket*)((ht)->pData))	
+#define HT_HASH_SIZE(ht) \
+	((MAX((ht)->nTableMask, 3) + 1) * sizeof(uint32_t))
+#define HT_SIZE(ht) \
+	(HT_HASH_SIZE(ht) + ((ht)->nTableSize * sizeof(Bucket)))
+#define HT_USED_SIZE(ht) \
+	(HT_HASH_SIZE(ht) + ((ht)->nNumUsed * sizeof(Bucket)))
+#define HT_HASH_RESET(ht) \
+	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, ((ht)->nTableMask + 1) * sizeof(uint32_t))
+
+#define HT_SET_DATA(ht, ptr) do { \
+		(ht)->pData = (((char*)(ptr)) + HT_HASH_SIZE(ht)); \
+	} while (0)
+#define HT_GET_DATA(ht) \
+	((char*)(ht)->pData - HT_HASH_SIZE(ht))	
 
 struct _zend_object {
 	zend_refcounted   gc;

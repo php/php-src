@@ -43,7 +43,7 @@ static uint zend_obj_num_elements(HashTable *ht)
 
 	num = ht->nNumOfElements;
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = ht->arData + idx;
+		p = HT_DATA(ht) + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		if (Z_TYPE(p->val) == IS_INDIRECT) {
 			if (Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF) {

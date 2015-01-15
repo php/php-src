@@ -2206,10 +2206,10 @@ static int spl_filesystem_file_is_empty_line(spl_filesystem_object *intern) /* {
 					uint idx = 0;
 					zval *first;
 
-					while (Z_ISUNDEF(Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val)) {
+					while (Z_ISUNDEF(HT_DATA(Z_ARRVAL(intern->u.file.current_zval))[idx].val)) {
 						idx++;
 					}
-					first = &Z_ARRVAL(intern->u.file.current_zval)->arData[idx].val;
+					first = &HT_DATA(Z_ARRVAL(intern->u.file.current_zval))[idx].val;
 					return Z_TYPE_P(first) == IS_STRING && Z_STRLEN_P(first) == 0;
 				}
 				return zend_hash_num_elements(Z_ARRVAL(intern->u.file.current_zval)) == 0;
