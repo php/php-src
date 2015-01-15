@@ -12,22 +12,23 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Sterling Hughes <sterling@php.net>                          |
+   | Authors: Xinchen Hui <laruence@php.net>                              |
+   |          Sterling Hughes <sterling@php.net>                          |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#ifndef ZEND_QSORT_H
-#define ZEND_QSORT_H
+#ifndef ZEND_SORT_H
+#define ZEND_SORT_H
 
 BEGIN_EXTERN_C()
-typedef int  (*compare_r_func_t)(const void *, const void *, void *);
-ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t compare);
-ZEND_API void zend_qsort_r(void *base, size_t nmemb, size_t siz, compare_r_func_t compare, void *arg);
+ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp);
+ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp);
+ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp);
 END_EXTERN_C()
 
-#endif       /* ZEND_QSORT_H */
+#endif       /* ZEND_SORT_H */
 
 /*
  * Local variables:

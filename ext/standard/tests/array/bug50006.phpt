@@ -24,6 +24,6 @@ function magic_sort_cmp($a, $b) {
 Array
 (
     [foo] => 0
-    [bar-bazbazbaz-] => 0
     [bar-bazbazbaz.] => 0
+    [bar-bazbazbaz-] => 0
 )

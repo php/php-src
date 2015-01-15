@@ -582,7 +582,7 @@ parse_JSON_ex(JSON_parser jp, zval *z, unsigned short utf16_json[], int length, 
 
                     json_create_zval(&mval, &buf, type, options);
                     add_next_index_zval(&jp->the_zstack[jp->top], &mval);
-                    buf.s->len = 0;
+                    if (buf.s) { buf.s->len = 0; }
                     JSON_RESET_TYPE();
                 }
 

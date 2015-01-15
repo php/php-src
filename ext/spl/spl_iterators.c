@@ -476,13 +476,14 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	zend_long mode, flags;
 	int inc_refcount = 1;
 	zend_error_handling error_handling;
+	zval caching_it;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 
 	switch (rit_type) {
 		case RIT_RecursiveTreeIterator: {
 
-			zval caching_it, caching_it_flags, *user_caching_it_flags = NULL;
+			zval caching_it_flags, *user_caching_it_flags = NULL;
 			mode = RIT_SELF_FIRST;
 			flags = RTIT_BYPASS_KEY;
 
