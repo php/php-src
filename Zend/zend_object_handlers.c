@@ -1044,7 +1044,9 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 	}
 
 	if (UNEXPECTED((func = zend_hash_find(&zobj->ce->function_table, lc_method_name)) == NULL)) {
-		STR_ALLOCA_FREE(lc_method_name, use_heap);
+		if (UNEXPECTED(!key)) {
+			STR_ALLOCA_FREE(lc_method_name, use_heap);
+		}
 		if (zobj->ce->__call) {
 			return zend_get_user_call_function(zobj->ce, method_name);
 		} else {
@@ -1099,7 +1101,9 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 		}
 	}
 
-	STR_ALLOCA_FREE(lc_method_name, use_heap);
+	if (UNEXPECTED(!key)) {
+		STR_ALLOCA_FREE(lc_method_name, use_heap);
+	}
 	return fbc;
 }
 /* }}} */
