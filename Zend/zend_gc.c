@@ -263,7 +263,7 @@ tail_call:
 	}
 	if (!ht) return;
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = ht->arData + idx;
+		p = HT_DATA(ht) + idx;
 		if (!Z_REFCOUNTED(p->val)) continue;
 		ref = Z_COUNTED(p->val);
 		if (GC_TYPE(ref) != IS_ARRAY || (zend_array*)ref != &EG(symbol_table)) {
@@ -346,7 +346,7 @@ tail_call:
 		}
 		if (!ht) return;
 		for (idx = 0; idx < ht->nNumUsed; idx++) {
-			p = ht->arData + idx;
+			p = HT_DATA(ht) + idx;
 			if (!Z_REFCOUNTED(p->val)) continue;
 			ref = Z_COUNTED(p->val);
 			if (GC_TYPE(ref) != IS_ARRAY || ((zend_array*)ref) != &EG(symbol_table)) {
@@ -435,7 +435,7 @@ tail_call:
 		}
 		if (!ht) return;
 		for (idx = 0; idx < ht->nNumUsed; idx++) {
-			p = ht->arData + idx;
+			p = HT_DATA(ht) + idx;
 			if (!Z_REFCOUNTED(p->val)) continue;
 			ref = Z_COUNTED(p->val);
 			if (idx == ht->nNumUsed-1) {
@@ -561,7 +561,7 @@ tail_call:
 
 		if (!ht) return count;
 		for (idx = 0; idx < ht->nNumUsed; idx++) {
-			p = ht->arData + idx;
+			p = HT_DATA(ht) + idx;
 			if (!Z_REFCOUNTED(p->val)) {
 				/* count non-refcounted for compatibility ??? */
 				if (Z_TYPE(p->val) != IS_UNDEF && Z_TYPE(p->val) != IS_INDIRECT) {
@@ -694,7 +694,7 @@ tail_call:
 		}
 		if (!ht) return;
 		for (idx = 0; idx < ht->nNumUsed; idx++) {
-			p = ht->arData + idx;
+			p = HT_DATA(ht) + idx;
 			if (!Z_REFCOUNTED(p->val)) continue;
 			ref = Z_COUNTED(p->val);
 			if (idx == ht->nNumUsed-1) {

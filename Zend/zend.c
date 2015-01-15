@@ -1122,8 +1122,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 			if (!symbol_table) {
 				ZVAL_NULL(&params[4]);
 			} else {
-				ZVAL_NEW_ARR(&params[4]);
-				zend_array_dup(Z_ARRVAL(params[4]), symbol_table);
+				ZVAL_ARR(&params[4], zend_array_dup(symbol_table));
 			}
 
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));

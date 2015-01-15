@@ -235,16 +235,11 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 			Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
 			break;
-		case IS_ARRAY: {
-				HashTable *ht;
-			
-				if (Z_ARRVAL_P(zvalue) == &EG(symbol_table)) {
-					return; /* do nothing */
-				}
-				ht = Z_ARRVAL_P(zvalue);
-				ZVAL_NEW_ARR(zvalue);
-				zend_array_dup(Z_ARRVAL_P(zvalue), ht);
+		case IS_ARRAY:
+			if (Z_ARRVAL_P(zvalue) == &EG(symbol_table)) {
+				return; /* do nothing */
 			}
+			ZVAL_ARR(zvalue, zend_array_dup(Z_ARRVAL_P(zvalue)));
 			break;
 		case IS_CONSTANT_AST: {
 				zend_ast_ref *ast = emalloc(sizeof(zend_ast_ref));

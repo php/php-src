@@ -34,8 +34,6 @@
 #define HASH_ADD_NEW			(1<<3)
 #define HASH_ADD_NEXT			(1<<4)
 
-#define INVALID_IDX ((uint32_t) -1)
-
 #define HASH_FLAG_PERSISTENT       (1<<0)
 #define HASH_FLAG_APPLY_PROTECTION (1<<1)
 #define HASH_FLAG_PACKED           (1<<2)
@@ -222,7 +220,7 @@ ZEND_API zval *zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint
 
 ZEND_API int zend_hash_rehash(HashTable *ht);
 
-ZEND_API void zend_array_dup(HashTable *target, HashTable *source);
+ZEND_API HashTable* zend_array_dup(HashTable *source);
 ZEND_API void zend_array_destroy(HashTable *ht);
 ZEND_API void zend_symtable_clean(HashTable *ht);
 
@@ -641,7 +639,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_FOREACH(_ht, indirect) do { \
 		uint _idx; \
 		for (_idx = 0; _idx < (_ht)->nNumUsed; _idx++) { \
-			Bucket *_p = (_ht)->arData + _idx; \
+			Bucket *_p = HT_DATA(_ht) + _idx; \
 			zval *_z = &_p->val; \
 			if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
 				_z = Z_INDIRECT_P(_z); \
@@ -651,7 +649,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_REVERSE_FOREACH(_ht, indirect) do { \
 		uint _idx; \
 		for (_idx = (_ht)->nNumUsed; _idx > 0; _idx--) { \
-			Bucket *_p = (_ht)->arData + _idx - 1; \
+			Bucket *_p = HT_DATA(_ht) + _idx - 1; \
 			zval *_z = &_p->val; \
 			if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
 				_z = Z_INDIRECT_P(_z); \
@@ -774,7 +772,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
  */
 #define ZEND_HASH_FILL_PACKED(ht) do { \
 		HashTable *__fill_ht = (ht); \
-		Bucket *__fill_bkt = __fill_ht->arData + __fill_ht->nNumUsed; \
+		Bucket *__fill_bkt = HT_DATA(__fill_ht) + __fill_ht->nNumUsed; \
 		uint32_t __fill_idx = __fill_ht->nNumUsed; \
 		ZEND_ASSERT(__fill_ht->u.flags & HASH_FLAG_PACKED);
 

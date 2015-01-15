@@ -111,8 +111,8 @@ static void spl_array_rewind(spl_array_object *intern);
 static void spl_array_update_pos(HashTable *ht, spl_array_object* intern) /* {{{ */
 {
 	uint pos = intern->pos;
-	if (pos != INVALID_IDX) {
-		intern->pos_h = ht->arData[pos].h;
+	if (pos != HT_INVALID_IDX) {
+		intern->pos_h = HT_DATA(ht)[pos].h;
 	}
 } /* }}} */
 
@@ -130,16 +130,16 @@ SPL_API int spl_hash_verify_pos_ex(spl_array_object * intern, HashTable * ht) /*
 
 /*	HASH_PROTECT_RECURSION(ht);*/
 	if (ht->u.flags & HASH_FLAG_PACKED) {
-		if (intern->pos_h == intern->pos && Z_TYPE(ht->arData[intern->pos_h].val) != IS_UNDEF) {
+		if (intern->pos_h == intern->pos && Z_TYPE(HT_DATA(ht)[intern->pos_h].val) != IS_UNDEF) {
 			return SUCCESS;
 		}
 	} else {
-		idx = ht->arHash[intern->pos_h & ht->nTableMask];
-		while (idx != INVALID_IDX) {
+		idx = HT_HASH(ht, intern->pos_h & ht->nTableMask);
+		while (idx != HT_INVALID_IDX) {
 			if (idx == intern->pos) {
 				return SUCCESS;
 			}
-			idx = Z_NEXT(ht->arData[idx].val);
+			idx = Z_NEXT(HT_DATA(ht)[idx].val);
 		}
 	}
 /*	HASH_UNPROTECT_RECURSION(ht); */
@@ -198,8 +198,7 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 		if (clone_orig) {
 			intern->array = other->array;
 			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayObject) {
-				ZVAL_NEW_ARR(&intern->array);
-				zend_array_dup(Z_ARRVAL(intern->array), HASH_OF(&other->array));
+				ZVAL_ARR(&intern->array, zend_array_dup(HASH_OF(&other->array)));
 			}
 			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayIterator) {
 				Z_ADDREF_P(&other->array);
@@ -715,7 +714,7 @@ static inline int spl_array_object_verify_pos_ex(spl_array_object *object, HashT
 		return FAILURE;
 	}
 
-	if (object->pos != INVALID_IDX && (object->ar_flags & SPL_ARRAY_IS_REF) && spl_hash_verify_pos_ex(object, ht) == FAILURE) {
+	if (object->pos != HT_INVALID_IDX && (object->ar_flags & SPL_ARRAY_IS_REF) && spl_hash_verify_pos_ex(object, ht) == FAILURE) {
 		php_error_docref(NULL, E_NOTICE, "%sArray was modified outside object and internal position is no longer valid", msg_prefix);
 		return FAILURE;
 	}
@@ -784,8 +783,8 @@ void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 	}
 
 	spl_array_write_dimension(object, NULL, append_value);
-	if (intern->pos == INVALID_IDX) {
-		if (aht->nNumUsed && !Z_ISUNDEF(aht->arData[aht->nNumUsed-1].val)) {
+	if (intern->pos == HT_INVALID_IDX) {
+		if (aht->nNumUsed && !Z_ISUNDEF(HT_DATA(aht)[aht->nNumUsed-1].val)) {
 			spl_array_set_pos(intern, aht, aht->nNumUsed - 1);
 		}
 	}
@@ -824,8 +823,7 @@ SPL_METHOD(Array, getArrayCopy)
 	zval *object = getThis();
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	ZVAL_NEW_ARR(return_value);
-	zend_array_dup(Z_ARRVAL_P(return_value), spl_array_get_hash_table(intern, 0));
+	ZVAL_ARR(return_value, zend_array_dup(spl_array_get_hash_table(intern, 0)));
 } /* }}} */
 
 static HashTable *spl_array_get_properties(zval *object) /* {{{ */
@@ -1327,8 +1325,7 @@ SPL_METHOD(Array, exchangeArray)
 	zval *object = getThis(), *array;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	ZVAL_NEW_ARR(return_value);
-	zend_array_dup(Z_ARRVAL_P(return_value), spl_array_get_hash_table(intern, 0));
+	ZVAL_ARR(return_value, zend_array_dup(spl_array_get_hash_table(intern, 0)));
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &array) == FAILURE) {
 		return;
 	}
@@ -1426,7 +1423,7 @@ int static spl_array_object_count_elements_helper(spl_array_object *intern, zend
 		pos = intern->pos;
 		*count = 0;
 		spl_array_rewind(intern);
-		while(intern->pos != INVALID_IDX && spl_array_next(intern) == SUCCESS) {
+		while(intern->pos != HT_INVALID_IDX && spl_array_next(intern) == SUCCESS) {
 			(*count)++;
 		}
 		spl_array_set_pos(intern, aht, pos);
@@ -1750,8 +1747,7 @@ SPL_METHOD(Array, serialize)
 		rebuild_object_properties(&intern->std);
 	}
 
-	ZVAL_NEW_ARR(&members);
-	zend_array_dup(Z_ARRVAL(members), intern->std.properties);
+	ZVAL_ARR(&members, zend_array_dup(intern->std.properties));
 
 	php_var_serialize(&buf, &members, &var_hash); /* finishes the string */
 

@@ -434,8 +434,7 @@ static HashTable *gmp_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 	zval zv;
 
 	*is_temp = 1;
-	ALLOC_HASHTABLE(ht);
-	zend_array_dup(ht, props);
+	ht = zend_array_dup(props);
 
 	gmp_strval(&zv, gmpnum, 10);
 	zend_hash_str_update(ht, "num", sizeof("num")-1, &zv);

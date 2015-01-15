@@ -1147,8 +1147,7 @@ ZEND_FUNCTION(get_object_vars)
 
 	if (!zobj->ce->default_properties_count && properties == zobj->properties) {
 		/* fast copy */
-		ZVAL_NEW_ARR(return_value);
-		zend_array_dup(Z_ARRVAL_P(return_value), properties);
+		ZVAL_ARR(return_value, zend_array_dup(properties));
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(properties));
 
@@ -1888,8 +1887,7 @@ ZEND_FUNCTION(get_defined_vars)
 {
 	zend_array *symbol_table = zend_rebuild_symbol_table();
 
-	ZVAL_NEW_ARR(return_value);
-	zend_array_dup(Z_ARRVAL_P(return_value), symbol_table);
+	ZVAL_ARR(return_value, zend_array_dup(symbol_table));
 }
 /* }}} */
 
