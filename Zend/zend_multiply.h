@@ -77,7 +77,7 @@
 #else
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\
-	long   __lres  = (a) * (b);										\
+	zend_long   __lres  = (a) * (b);										\
 	long double __dres  = (long double)(a) * (long double)(b);		\
 	long double __delta = (long double) __lres - __dres;			\
 	if ( ((usedval) = (( __dres + __delta ) != __dres))) {			\
