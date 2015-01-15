@@ -2408,12 +2408,13 @@ PHP_FUNCTION(array_slice)
 		length = num_in - offset;
 	}
 
-	/* Initialize returned array */
-	array_init_size(return_value, length > 0 ? (uint32_t)length : 0);
-
 	if (length <= 0) {
+		array_init(return_value);
 		return;
 	}
+
+	/* Initialize returned array */
+	array_init_size(return_value, (uint32_t)length);
 
 	/* Start at the beginning and go until we hit offset */
 	pos = 0;
