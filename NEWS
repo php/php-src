@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fix bug #68260 (SQLite3Result::fetchArray declares wrong 
     required_num_args). (Julien)
 
+- PDO_mysql:
+  . Fixed bug #68750 (PDOMysql with mysqlnd does not allow the usage of
+    named pipes). (steffenb198@aol.com)
+
 22 Jan 2014, PHP 5.5.21
 
 - Core:
