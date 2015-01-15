@@ -163,10 +163,16 @@ ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_fun
 			zend_sort_3(base, (char *)base + siz, (char *)base + siz + siz, cmp, swp);
 			break;
 		case 4:
-			zend_sort_4(base, (char *)base + siz, (char *)base + siz + siz, (char *)base + siz + siz + siz, cmp, swp);
+			{
+				size_t siz2 = siz + siz;
+				zend_sort_4(base, (char *)base + siz, (char *)base + siz2, (char *)base + siz + siz2, cmp, swp);
+			}
 			break;
 		case 5:
-			zend_sort_5(base, (char *)base + siz, (char *)base + siz + siz, (char *)base + siz + siz + siz, (char *)base + (siz * 4), cmp, swp);
+			{
+				size_t siz2 = siz + siz;
+				zend_sort_5(base, (char *)base + siz, (char *)base + siz2, (char *)base + siz + siz2, (char *)base + siz2 + siz2, cmp, swp);
+			}
 			break;
 		default:
 			{
