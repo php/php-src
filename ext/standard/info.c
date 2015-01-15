@@ -862,7 +862,7 @@ PHPAPI void php_print_info(int flag)
 
 		zend_hash_init(&sorted_registry, zend_hash_num_elements(&module_registry), NULL, NULL, 1);
 		zend_hash_copy(&sorted_registry, &module_registry, NULL);
-		zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0);
+		zend_hash_sort(&sorted_registry, module_name_cmp, 0);
 
 		zend_hash_apply(&sorted_registry, _display_module_info_func);
 

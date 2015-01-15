@@ -1715,7 +1715,7 @@ static int zend_startup_module_zval(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func_t compare) /* {{{ */
+static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func_t compare, swap_func_t swp) /* {{{ */
 {
 	Bucket *b1 = base;
 	Bucket *b2;
@@ -1821,7 +1821,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 
 ZEND_API int zend_startup_modules(void) /* {{{ */
 {
-	zend_hash_sort(&module_registry, zend_sort_modules, NULL, 0);
+	zend_hash_sort_ex(&module_registry, zend_sort_modules, NULL, 0);
 	zend_hash_apply(&module_registry, zend_startup_module_zval);
 	return SUCCESS;
 }

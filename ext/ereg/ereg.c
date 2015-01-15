@@ -144,7 +144,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 
 	if (zend_hash_num_elements(&EREG(ht_rc)) >= EREG_CACHE_SIZE) {
 		/* easier than dealing with overflow as it happens */
-		if (EREG(lru_counter) >= (1 << 31) || zend_hash_sort(&EREG(ht_rc), zend_qsort, ereg_lru_cmp, 0) == FAILURE) {
+		if (EREG(lru_counter) >= (1 << 31) || zend_hash_sort(&EREG(ht_rc), (compare_func_t)ereg_lru_cmp, 0) == FAILURE) {
 			zend_hash_clean(&EREG(ht_rc));
 			EREG(lru_counter) = 0;
 		} else {

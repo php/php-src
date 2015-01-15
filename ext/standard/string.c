@@ -3043,7 +3043,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	len = zend_hash_num_elements(&num_hash);
 	if ((maxlen - (minlen - 1) - len > 0) &&
 		/* smart algorithm, sort key lengths first */
-		zend_hash_sort(&num_hash, zend_qsort, php_strtr_key_compare, 0) == SUCCESS) {
+		zend_hash_sort(&num_hash, php_strtr_key_compare, 0) == SUCCESS) {
 
 		old_pos = pos = 0;
 		while (pos <= slen - minlen) {

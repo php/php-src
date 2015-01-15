@@ -201,12 +201,18 @@ typedef struct _HashPointer {
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor);
 ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, zend_bool overwrite ZEND_FILE_LINE_DC);
 ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, merge_checker_func_t pMergeSource, void *pParam);
-ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, zend_bool renumber);
+ZEND_API void zend_hash_bucket_swap(Bucket *p, Bucket *q);
+ZEND_API void zend_hash_bucket_renum_swap(Bucket *p, Bucket *q);
+ZEND_API void zend_hash_bucket_packed_swap(Bucket *p, Bucket *q);
+ZEND_API int zend_hash_sort_ex(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, zend_bool renumber);
 ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered);
 ZEND_API zval *zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint32_t flag);
 
 #define zend_hash_merge(target, source, pCopyConstructor, overwrite)					\
 	_zend_hash_merge(target, source, pCopyConstructor, overwrite ZEND_FILE_LINE_CC)
+
+#define zend_hash_sort(ht, compare_func, renumber) \
+	zend_hash_sort_ex(ht, zend_sort, compare_func, renumber)
 
 #define zend_hash_num_elements(ht) \
 	(ht)->nNumOfElements

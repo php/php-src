@@ -33,7 +33,7 @@
 #include "zend_hash.h"
 #include "zend_interfaces.h"
 #include "zend_operators.h"
-#include "zend_qsort.h"
+#include "zend_sort.h"
 #include "zend_vm.h"
 #include "zend_smart_str.h"
 #include "main/php_streams.h"
