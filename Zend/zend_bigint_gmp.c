@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | Zend Big Integer Support - GMP backend                               |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2014 The PHP Group                                     |
+  | Copyright (c) 2015 The PHP Group                                     |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |

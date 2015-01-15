@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
 /* $Id$ */
 
 #include "zend.h"
-#include "zend_qsort.h"
+#include "zend_sort.h"
 #include "zend_API.h"
 #include "zend_ini.h"
 #include "zend_alloc.h"
@@ -202,7 +202,7 @@ static int ini_key_compare(const void *a, const void *b) /* {{{ */
 
 ZEND_API void zend_ini_sort_entries(void) /* {{{ */
 {
-	zend_hash_sort(EG(ini_directives), zend_qsort, ini_key_compare, 0);
+	zend_hash_sort(EG(ini_directives), ini_key_compare, 0);
 }
 /* }}} */
 

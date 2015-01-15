@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2917,31 +2917,69 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2) /*
 }
 /* }}} */
 
-ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only) /* {{{ */
+static zend_bool instanceof_interface_only(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
 {
 	uint32_t i;
 
-	for (i=0; i<instance_ce->num_interfaces; i++) {
-		if (instanceof_function(instance_ce->interfaces[i], ce)) {
+	for (i = 0; i < instance_ce->num_interfaces; i++) {
+		if (instanceof_interface_only(instance_ce->interfaces[i], ce)) {
 			return 1;
 		}
 	}
-	if (!interfaces_only) {
-		while (instance_ce) {
-			if (instance_ce == ce) {
-				return 1;
-			}
-			instance_ce = instance_ce->parent;
+	return 0;
+}
+/* }}} */
+
+static zend_always_inline zend_bool instanceof_class(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
+{
+	while (instance_ce) {
+		if (instance_ce == ce) {
+			return 1;
+		}
+		instance_ce = instance_ce->parent;
+	}
+	return 0;
+}
+/* }}} */
+
+static zend_bool instanceof_interface(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
+{
+	uint32_t i;
+
+	for (i = 0; i < instance_ce->num_interfaces; i++) {
+		if (instanceof_interface(instance_ce->interfaces[i], ce)) {
+			return 1;
 		}
 	}
+	return instanceof_class(instance_ce, ce);
+}
+/* }}} */
 
+ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only) /* {{{ */
+{
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		if (!interfaces_only) {
+			if (instanceof_interface_only(instance_ce, ce)) {
+				return 1;
+			}
+		} else {
+			return instanceof_interface(instance_ce, ce);
+		}
+	}
+	if (!interfaces_only) {
+		return instanceof_class(instance_ce, ce);
+	}
 	return 0;
 }
 /* }}} */
 
 ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
 {
-	return instanceof_function_ex(instance_ce, ce, 0);
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		return instanceof_interface(instance_ce, ce);
+	} else {
+		return instanceof_class(instance_ce, ce);
+	}
 }
 /* }}} */
 
@@ -3864,7 +3902,7 @@ ZEND_API const char* zend_memnrstr_ex(const char *haystack, const char *needle, 
 			return (const char *)p;
 		}
 		
-		if (p == haystack) {
+		if (UNEXPECTED(p == haystack)) {
 			return NULL;
 		}
 

@@ -166,13 +166,13 @@ array(3) {
 - With default sort_flag -
 bool(true)
 array(6) {
-  [4]=>
-  int(1)
   [0]=>
+  int(1)
+  [1]=>
   int(1)
   [8]=>
   int(1)
-  [1]=>
+  [4]=>
   int(1)
   [3]=>
   int(13)
@@ -182,13 +182,13 @@ array(6) {
 - Sort_flag = SORT_REGULAR -
 bool(true)
 array(6) {
-  [4]=>
-  int(1)
   [0]=>
+  int(1)
+  [1]=>
   int(1)
   [8]=>
   int(1)
-  [1]=>
+  [4]=>
   int(1)
   [3]=>
   int(13)

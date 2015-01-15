@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -322,13 +322,14 @@ ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 		zend_execute_ex(generator->execute_data);
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
-		/* Unlink generator call_frame from the caller */
+		/* Unlink generator call_frame from the caller and backup vm_stack_top */
 		if (generator->execute_data) {
+			generator->stack = EG(vm_stack);
+			generator->stack->top = EG(vm_stack_top);
 			generator->execute_data->prev_execute_data = NULL;
 		}
 
 		/* Restore executor globals */
-		generator->stack->top = EG(vm_stack_top);
 		EG(current_execute_data) = original_execute_data;
 		EG(scope) = original_scope;
 		EG(vm_stack_top) = original_stack->top;

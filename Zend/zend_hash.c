@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -101,25 +101,24 @@ static const uint32_t uninitialized_bucket = {INVALID_IDX};
 
 ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
+#if defined(ZEND_WIN32)
+	unsigned long index;
+#endif
 	/* Use big enough power of 2 */
-#if defined(PHP_WIN32) && !defined(__clang__)
-	if (nSize <= 8) {
-		ht->nTableSize = 8;
-	} else if (nSize >= 0x80000000) {
-		/* prevent overflow */
-		ht->nTableSize = 0x80000000;
-	} else {
-		ht->nTableSize = 1U << __lzcnt(nSize);
-		if (ht->nTableSize < nSize) {
-			ht->nTableSize <<= 1;
-		}
-	}
-#else
 	/* size should be between 8 and 0x80000000 */
 	nSize = (nSize <= 8 ? 8 : (nSize >= 0x80000000 ? 0x80000000 : nSize));
-# if defined(__GNUC__)
+
+#if defined(ZEND_WIN32)
+	if (BitScanReverse(&index, nSize - 1)) {
+		ht->nTableSize = 0x2 << ((31 - index) ^ 0x1f);
+	} else {
+		/* nSize is ensured to be in the valid range, fall back to it
+		   rather than using an undefined bis scan result. */
+		ht->nTableSize = nSize;
+	}
+#elif defined(__GNUC__)
 	ht->nTableSize =  0x2 << (__builtin_clz(nSize - 1) ^ 0x1f);
-# else
+#else
 	nSize -= 1;
 	nSize |= (nSize >> 1);
 	nSize |= (nSize >> 2);
@@ -127,7 +126,6 @@ ZEND_API void _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestru
 	nSize |= (nSize >> 8);
 	nSize |= (nSize >> 16);
 	ht->nTableSize = nSize + 1;
-# endif
 #endif
 
 	ht->nTableMask = 0;
@@ -160,6 +158,7 @@ ZEND_API void zend_hash_packed_to_hash(HashTable *ht)
 {
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->u.flags &= ~HASH_FLAG_PACKED;
+	ht->nTableMask = ht->nTableSize - 1;
 	ht->arData = (Bucket *) safe_perealloc(ht->arData, ht->nTableSize, sizeof(Bucket) + sizeof(uint32_t), 0, ht->u.flags & HASH_FLAG_PERSISTENT);
 	ht->arHash = (uint32_t*)(ht->arData + ht->nTableSize);
 	zend_hash_rehash(ht);
@@ -171,7 +170,7 @@ ZEND_API void zend_hash_to_packed(HashTable *ht)
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->u.flags |= HASH_FLAG_PACKED;
 	ht->nTableMask = 0;
-	ht->arData = erealloc(ht->arData, ht->nTableSize * sizeof(Bucket));
+	ht->arData = (Bucket *) perealloc(ht->arData, ht->nTableSize * sizeof(Bucket), ht->u.flags & HASH_FLAG_PERSISTENT);
 	ht->arHash = (uint32_t*)&uninitialized_bucket;
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
@@ -1663,8 +1662,47 @@ ZEND_API zval *zend_hash_get_current_data_ex(HashTable *ht, HashPosition *pos)
 	}
 }
 
-ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
-							compare_func_t compar, zend_bool renumber)
+ZEND_API void zend_hash_bucket_swap(Bucket *p, Bucket *q) {
+	zval val;
+	zend_ulong h;
+	zend_string *key;
+
+	ZVAL_COPY_VALUE(&val, &p->val);
+	h = p->h;
+	key = p->key;
+
+	ZVAL_COPY_VALUE(&p->val, &q->val);
+	p->h = q->h;
+	p->key = q->key;
+
+	ZVAL_COPY_VALUE(&q->val, &val);
+	q->h = h;
+	q->key = key;
+}
+
+ZEND_API void zend_hash_bucket_renum_swap(Bucket *p, Bucket *q) {
+	zval val;
+
+	ZVAL_COPY_VALUE(&val, &p->val);
+	ZVAL_COPY_VALUE(&p->val, &q->val);
+	ZVAL_COPY_VALUE(&q->val, &val);
+}
+
+ZEND_API void zend_hash_bucket_packed_swap(Bucket *p, Bucket *q) {
+	zval val;
+	zend_ulong h;
+
+	ZVAL_COPY_VALUE(&val, &p->val);
+	h = p->h;
+
+	ZVAL_COPY_VALUE(&p->val, &q->val);
+	p->h = q->h;
+
+	ZVAL_COPY_VALUE(&q->val, &val);
+	q->h = h;
+}
+
+ZEND_API int zend_hash_sort_ex(HashTable *ht, sort_func_t sort, compare_func_t compar, zend_bool renumber)
 {
 	Bucket *p;
 	uint32_t i, j;
@@ -1688,7 +1726,9 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 		}
 	}
 
-	(*sort_func)((void *) ht->arData, i, sizeof(Bucket), compar);
+	sort((void *)ht->arData, i, sizeof(Bucket), compar,
+			(swap_func_t)(renumber? zend_hash_bucket_renum_swap :
+				((ht->u.flags & HASH_FLAG_PACKED) ? zend_hash_bucket_packed_swap : zend_hash_bucket_swap)));
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	ht->nNumUsed = i;
@@ -1714,7 +1754,7 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 		if (renumber) {
 			ht->u.flags |= HASH_FLAG_PACKED;
 			ht->nTableMask = 0;
-			ht->arData = erealloc(ht->arData, ht->nTableSize * sizeof(Bucket));
+			ht->arData = perealloc(ht->arData, ht->nTableSize * sizeof(Bucket), ht->u.flags & HASH_FLAG_PERSISTENT);
 			ht->arHash = (uint32_t*)&uninitialized_bucket;
 		} else {
 			zend_hash_rehash(ht);
