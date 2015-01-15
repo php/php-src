@@ -125,6 +125,15 @@ STDOUT.WriteBlankLines(1);
 STDOUT.WriteLine("Build dir: " + get_define('BUILD_DIR'));
 STDOUT.WriteLine("PHP Core:  " + get_define('PHPDLL') + " and " + get_define('PHPLIB'));
 
+/* XXX should check for the other compatible lib as well, for now just mpir as we have it already */
+if (CHECK_LIB("mpir_a.lib") &&
+	CHECK_HEADER_ADD_INCLUDE("gmp.h", "CFLAGS", PHP_PHP_BUILD + "\\include\\mpir")) {
+	AC_DEFINE('HAVE_GMP', 1, 'GMP support');
+	AC_DEFINE('HAVE_MPIR', 1, 'MPIR support');
+} else {
+	ERROR("MPIR not found");
+}
+
 ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_ini_parser.c zend_ini_scanner.c zend_alloc.c zend_compile.c \
 	zend_constants.c zend_exceptions.c \
