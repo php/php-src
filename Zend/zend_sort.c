@@ -312,7 +312,8 @@ ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp
 {
 	while (1) {
 		if (nmemb <= 16) {
-			return zend_insert_sort(base, nmemb, siz, cmp, swp);
+			zend_insert_sort(base, nmemb, siz, cmp, swp);
+			return;
 		} else {
 			char *i, *j;
 			char *start = (char *)base;
