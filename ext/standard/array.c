@@ -2412,12 +2412,13 @@ PHP_FUNCTION(array_slice)
 		length = num_in - offset;
 	}
 
-	/* Initialize returned array */
-	array_init_size(return_value, length > 0 ? (uint32_t)length : 0);
-
 	if (length <= 0) {
+		array_init(return_value);
 		return;
 	}
+
+	/* Initialize returned array */
+	array_init_size(return_value, (uint32_t)length);
 
 	/* Start at the beginning and go until we hit offset */
 	pos = 0;
@@ -3233,6 +3234,9 @@ PHP_FUNCTION(array_unique)
 	for (idx = 0; idx < i; idx++) {
 		cmpdata = &arTmp[idx];
 		if (Z_TYPE(cmpdata->b.val) != IS_UNDEF) {
+#if 1
+			continue;
+#else
 			if (lastkept == NULL) {
 				lastkept = cmpdata;
 				continue;
@@ -3248,13 +3252,14 @@ PHP_FUNCTION(array_unique)
 					p = &cmpdata->b;
 				}
 			}
+#endif
 		} else {
 			p = &cmpdata->b;
 		}
 		if (p->key == NULL) {
 			zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
 		} else {
-				zend_hash_del(Z_ARRVAL_P(return_value), p->key);
+			zend_hash_del(Z_ARRVAL_P(return_value), p->key);
 		}
 	}
 	pefree(arTmp, Z_ARRVAL_P(array)->u.flags & HASH_FLAG_PERSISTENT);
