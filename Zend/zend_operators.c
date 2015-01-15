@@ -3579,13 +3579,13 @@ ZEND_API zend_long zendi_smart_strcmp(zval *s1, zval *s2) /* {{{ */
 			return lval1 > lval2 ? 1 : (lval1 < lval2 ? -1 : 0);
 		}
 	} else {
+		int strcmp_ret;
 		if (big1) {
 			zend_bigint_release(big1);
 		}
 		if (big2) {
 			zend_bigint_release(big2);
 		}
-		int strcmp_ret;
 string_cmp:
 		strcmp_ret = zend_binary_strcmp(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2));
 		return ZEND_NORMALIZE_BOOL(strcmp_ret);
