@@ -34,9 +34,9 @@
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\
 	long   __lres  = (a) * (b);										\
 	if (__builtin_smull_overflow((a), (b), &__lres)) {				\
-		zend_bigint *__out = zend_bigint_init_alloc();				\
-		zend_bigint_long_multiply_long(__out, a, b);				\
-		(big) = __out;												\
+		zend_bigint *__bires = zend_bigint_init_alloc();				\
+		zend_bigint_long_multiply_long(__bires, a, b);				\
+		(big) = __bires;												\
 		(usedval) = 1;												\
 	} else {														\
 		(lval) = __lres;											\
@@ -49,9 +49,9 @@
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\
 	long long  __llres  = (a) * (b);								\
 	if (__builtin_smulll_overflow((a), (b), &__llres)) {			\
-		zend_bigint *__out = zend_bigint_init_alloc();				\
-		zend_bigint_long_multiply_long(__out, a, b);				\
-		(big) = __out;												\
+		zend_bigint *__bires = zend_bigint_init_alloc();				\
+		zend_bigint_long_multiply_long(__bires, a, b);				\
+		(big) = __bires;												\
 		(usedval) = 1;												\
 	} else {														\
 		(lval) = __llres;											\
@@ -64,9 +64,9 @@
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, big, usedval) do {	\
 	int64_t __result = (int64_t) (a) * (int64_t) (b);				\
 	if (__result > ZEND_LONG_MAX || __result < ZEND_LONG_MIN) {		\
-		zend_bigint *__out = zend_bigint_init_alloc();				\
-		zend_bigint_long_multiply_long(__out, a, b);				\
-		(big) = __out;												\
+		zend_bigint *__bires = zend_bigint_init_alloc();				\
+		zend_bigint_long_multiply_long(__bires, a, b);				\
+		(big) = __bires;												\
 		(usedval) = 1;												\
 	} else {														\
 		(lval) = (long) __result;									\
@@ -81,9 +81,9 @@
 	long double __dres  = (long double)(a) * (long double)(b);		\
 	long double __delta = (long double) __lres - __dres;			\
 	if ( ((usedval) = (( __dres + __delta ) != __dres))) {			\
-		zend_bigint *__out = zend_bigint_init_alloc();				\
-		zend_bigint_long_multiply_long(__out, a, b);				\
-		(big) = __out;												\
+		zend_bigint *__bires = zend_bigint_init_alloc();				\
+		zend_bigint_long_multiply_long(__bires, a, b);				\
+		(big) = __bires;												\
 		(usedval) = 1;												\
 	} else {														\
 		(lval) = __lres;											\
