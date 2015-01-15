@@ -1035,7 +1035,9 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 
 	if (EXPECTED(key != NULL)) {
 		lc_method_name = Z_STR_P(key);
+#ifdef ZEND_ALLOCA_MAX_SIZE
 		use_heap = 0;
+#endif
 	} else {
 		STR_ALLOCA_ALLOC(lc_method_name, method_name->len, use_heap);
 		zend_str_tolower_copy(lc_method_name->val, method_name->val, method_name->len);
