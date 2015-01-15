@@ -156,6 +156,7 @@ ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce)
 		ce->static_members_table = NULL;
 		for (i = 0; i < ce->default_static_members_count; i++) {
 			zval_ptr_dtor(&static_members[i]);
+			ZVAL_UNDEF(&static_members[i]);
 		}
 	}
 }
