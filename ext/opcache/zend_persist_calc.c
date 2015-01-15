@@ -57,10 +57,14 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		return;
 	}
-	ADD_SIZE(HT_USED_SIZE(ht));
+	if (ht->u.flags & HASH_FLAG_PACKED) {
+		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed);
+	} else {
+		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed + sizeof(uint32_t) * ht->nTableSize);
+	}
 
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = HT_DATA(ht) + idx;
+		p = ht->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 
 		/* persist bucket and key */

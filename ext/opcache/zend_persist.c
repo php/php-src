@@ -67,7 +67,7 @@ typedef void (*zend_persist_func_t)(zval*);
 static void zend_persist_zval(zval *z);
 static void zend_persist_zval_const(zval *z);
 
-static const uint32_t uninitialized_bucket[] = {HT_INVALID_IDX, HT_INVALID_IDX, HT_INVALID_IDX, HT_INVALID_IDX};
+static const uint32_t uninitialized_bucket = {INVALID_IDX};
 
 static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement)
 {
@@ -75,23 +75,25 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	Bucket *p;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
-		HT_SET_DATA(ht, &uninitialized_bucket);
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
 	if (ht->u.flags & HASH_FLAG_PACKED) {
-		void *data = HT_GET_DATA(ht);
-		zend_accel_store(data, HT_USED_SIZE(ht));
-		HT_SET_DATA(ht, data);
+		zend_accel_store(ht->arData, sizeof(Bucket) * ht->nNumUsed);
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 	} else {
-		void *data = ZCG(mem);
+		Bucket *d = (Bucket*)ZCG(mem);
+		uint32_t *h = (uint32_t*)(d + ht->nNumUsed);
 
-		ZCG(mem) = (void*)((char*)data + HT_USED_SIZE(ht));
-		memcpy(data, HT_GET_DATA(ht), HT_USED_SIZE(ht));
-		efree(HT_GET_DATA(ht));
-		HT_SET_DATA(ht, data);
+		ZCG(mem) = (void*)(h + ht->nTableSize);
+		memcpy(d, ht->arData, sizeof(Bucket) * ht->nNumUsed);
+		memcpy(h, ht->arHash, sizeof(uint32_t) * ht->nTableSize);
+		efree(ht->arData);
+		ht->arData = d;
+		ht->arHash = h;
 	}
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = HT_DATA(ht) + idx;
+		p = ht->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 
 		/* persist bucket and key */
@@ -110,20 +112,24 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	Bucket *p;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
-		HT_SET_DATA(ht, &uninitialized_bucket);
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 		return;
 	}
-	if (ht->u.flags & HASH_FLAG_PACKED) {		
-		HT_SET_DATA(ht, zend_accel_memdup(HT_GET_DATA(ht), HT_USED_SIZE(ht)));
+	if (ht->u.flags & HASH_FLAG_PACKED) {
+		ht->arData = zend_accel_memdup(ht->arData, sizeof(Bucket) * ht->nNumUsed);
+		ht->arHash = (uint32_t*)&uninitialized_bucket;
 	} else {
-		void *data = ZCG(mem);
+		Bucket *d = (Bucket*)ZCG(mem);
+		uint32_t *h = (uint32_t*)(d + ht->nNumUsed);
 
-		ZCG(mem) = (void*)((char*)data + HT_USED_SIZE(ht));
-		memcpy(data, HT_GET_DATA(ht), HT_USED_SIZE(ht));
-		HT_SET_DATA(ht, data);
+		ZCG(mem) = (void*)(h + ht->nTableSize);
+		memcpy(d, ht->arData, sizeof(Bucket) * ht->nNumUsed);
+		memcpy(h, ht->arHash, sizeof(uint32_t) * ht->nTableSize);
+		ht->arData = d;
+		ht->arHash = h;
 	}
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = HT_DATA(ht) + idx;
+		p = ht->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 
 		/* persist bucket and key */

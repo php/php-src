@@ -111,8 +111,8 @@ static void spl_array_rewind(spl_array_object *intern);
 static void spl_array_update_pos(HashTable *ht, spl_array_object* intern) /* {{{ */
 {
 	uint pos = intern->pos;
-	if (pos != HT_INVALID_IDX) {
-		intern->pos_h = HT_DATA(ht)[pos].h;
+	if (pos != INVALID_IDX) {
+		intern->pos_h = ht->arData[pos].h;
 	}
 } /* }}} */
 
@@ -130,16 +130,16 @@ SPL_API int spl_hash_verify_pos_ex(spl_array_object * intern, HashTable * ht) /*
 
 /*	HASH_PROTECT_RECURSION(ht);*/
 	if (ht->u.flags & HASH_FLAG_PACKED) {
-		if (intern->pos_h == intern->pos && Z_TYPE(HT_DATA(ht)[intern->pos_h].val) != IS_UNDEF) {
+		if (intern->pos_h == intern->pos && Z_TYPE(ht->arData[intern->pos_h].val) != IS_UNDEF) {
 			return SUCCESS;
 		}
 	} else {
-		idx = HT_HASH(ht, intern->pos_h & ht->nTableMask);
-		while (idx != HT_INVALID_IDX) {
+		idx = ht->arHash[intern->pos_h & ht->nTableMask];
+		while (idx != INVALID_IDX) {
 			if (idx == intern->pos) {
 				return SUCCESS;
 			}
-			idx = Z_NEXT(HT_DATA(ht)[idx].val);
+			idx = Z_NEXT(ht->arData[idx].val);
 		}
 	}
 /*	HASH_UNPROTECT_RECURSION(ht); */
@@ -715,7 +715,7 @@ static inline int spl_array_object_verify_pos_ex(spl_array_object *object, HashT
 		return FAILURE;
 	}
 
-	if (object->pos != HT_INVALID_IDX && (object->ar_flags & SPL_ARRAY_IS_REF) && spl_hash_verify_pos_ex(object, ht) == FAILURE) {
+	if (object->pos != INVALID_IDX && (object->ar_flags & SPL_ARRAY_IS_REF) && spl_hash_verify_pos_ex(object, ht) == FAILURE) {
 		php_error_docref(NULL, E_NOTICE, "%sArray was modified outside object and internal position is no longer valid", msg_prefix);
 		return FAILURE;
 	}
@@ -784,8 +784,8 @@ void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 	}
 
 	spl_array_write_dimension(object, NULL, append_value);
-	if (intern->pos == HT_INVALID_IDX) {
-		if (aht->nNumUsed && !Z_ISUNDEF(HT_DATA(aht)[aht->nNumUsed-1].val)) {
+	if (intern->pos == INVALID_IDX) {
+		if (aht->nNumUsed && !Z_ISUNDEF(aht->arData[aht->nNumUsed-1].val)) {
 			spl_array_set_pos(intern, aht, aht->nNumUsed - 1);
 		}
 	}
@@ -1426,7 +1426,7 @@ int static spl_array_object_count_elements_helper(spl_array_object *intern, zend
 		pos = intern->pos;
 		*count = 0;
 		spl_array_rewind(intern);
-		while(intern->pos != HT_INVALID_IDX && spl_array_next(intern) == SUCCESS) {
+		while(intern->pos != INVALID_IDX && spl_array_next(intern) == SUCCESS) {
 			(*count)++;
 		}
 		spl_array_set_pos(intern, aht, pos);

@@ -3191,7 +3191,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				}
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			p = HT_DATA(fe_ht) + pos;
+			p = fe_ht->arData + pos;
 			if (Z_TYPE(p->val) == IS_UNDEF ||
 			    (Z_TYPE(p->val) == IS_INDIRECT &&
 			     Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
@@ -3208,8 +3208,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		fe_ht->nInternalPointer = pos;
 		ptr->pos = pos;
 		ptr->ht = fe_ht;
-		ptr->h = HT_DATA(fe_ht)[pos].h;
-		ptr->key = HT_DATA(fe_ht)[pos].key;
+		ptr->h = fe_ht->arData[pos].h;
+		ptr->key = fe_ht->arData[pos].key;
 		is_empty = 0;
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
@@ -9091,7 +9091,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				}
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			p = HT_DATA(fe_ht) + pos;
+			p = fe_ht->arData + pos;
 			if (Z_TYPE(p->val) == IS_UNDEF ||
 			    (Z_TYPE(p->val) == IS_INDIRECT &&
 			     Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
@@ -9108,8 +9108,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		fe_ht->nInternalPointer = pos;
 		ptr->pos = pos;
 		ptr->ht = fe_ht;
-		ptr->h = HT_DATA(fe_ht)[pos].h;
-		ptr->key = HT_DATA(fe_ht)[pos].key;
+		ptr->h = fe_ht->arData[pos].h;
+		ptr->key = fe_ht->arData[pos].key;
 		is_empty = 0;
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
@@ -11891,7 +11891,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				}
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			p = HT_DATA(fe_ht) + pos;
+			p = fe_ht->arData + pos;
 			if (Z_TYPE(p->val) == IS_UNDEF ||
 			    (Z_TYPE(p->val) == IS_INDIRECT &&
 			     Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
@@ -11908,8 +11908,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		fe_ht->nInternalPointer = pos;
 		ptr->pos = pos;
 		ptr->ht = fe_ht;
-		ptr->h = HT_DATA(fe_ht)[pos].h;
-		ptr->key = HT_DATA(fe_ht)[pos].key;
+		ptr->h = fe_ht->arData[pos].h;
+		ptr->key = fe_ht->arData[pos].key;
 		is_empty = 0;
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
@@ -11953,7 +11953,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		fe_ht = Z_ARRVAL_P(array);
 		ptr = (HashPointer*)EX_VAR((opline+1)->op1.var);
 		pos = ptr->pos;
-		if (UNEXPECTED(pos == HT_INVALID_IDX)) {
+		if (UNEXPECTED(pos == INVALID_IDX)) {
 			/* reached end of iteration */
 			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 		} else if (UNEXPECTED(ptr->ht != fe_ht)) {
@@ -11963,15 +11963,15 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			if (fe_ht->u.flags & HASH_FLAG_PACKED) {
 				pos = ptr->h;
 			} else {
-				pos = HT_HASH(fe_ht, ptr->h & fe_ht->nTableMask);
+				pos = fe_ht->arHash[ptr->h & fe_ht->nTableMask];
 				while (1) {
-					if (pos == HT_INVALID_IDX) {
+					if (pos == INVALID_IDX) {
 						pos = fe_ht->nInternalPointer;
 						break;
-					} else if (HT_DATA(fe_ht)[pos].h == ptr->h && HT_DATA(fe_ht)[pos].key == ptr->key) {
+					} else if (fe_ht->arData[pos].h == ptr->h && fe_ht->arData[pos].key == ptr->key) {
 						break;
 					}
-					pos = Z_NEXT(HT_DATA(fe_ht)[pos].val);
+					pos = Z_NEXT(fe_ht->arData[pos].val);
 				}
 			}
 		}
@@ -11980,7 +11980,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				/* reached end of iteration */
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			p = HT_DATA(fe_ht) + pos;
+			p = fe_ht->arData + pos;
 			value = &p->val;
 			if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
 				pos++;
@@ -12011,17 +12011,17 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		do {
 			pos++;
 			if (pos >= fe_ht->nNumUsed) {
-				fe_ht->nInternalPointer = ptr->pos = HT_INVALID_IDX;
+				fe_ht->nInternalPointer = ptr->pos = INVALID_IDX;
 				ZEND_VM_INC_OPCODE();
 				ZEND_VM_NEXT_OPCODE();
 			}
-			p = HT_DATA(fe_ht) + pos;
+			p = fe_ht->arData + pos;
 		} while (Z_TYPE(p->val) == IS_UNDEF ||
 			     (Z_TYPE(p->val) == IS_INDIRECT &&
 			      Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF));
 		fe_ht->nInternalPointer = ptr->pos = pos;
-		ptr->h = HT_DATA(fe_ht)[pos].h;
-		ptr->key = HT_DATA(fe_ht)[pos].key;
+		ptr->h = fe_ht->arData[pos].h;
+		ptr->key = fe_ht->arData[pos].key;
 		ZEND_VM_INC_OPCODE();
 		ZEND_VM_NEXT_OPCODE();
 	} else if (EXPECTED(Z_TYPE_P(array) == IS_OBJECT)) {
@@ -12034,7 +12034,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
  			fe_ht = Z_OBJPROP_P(array);
 			ptr = (HashPointer*)EX_VAR((opline+1)->op1.var);
 			pos = ptr->pos;
-			if (pos == HT_INVALID_IDX) {
+			if (pos == INVALID_IDX) {
 				/* reached end of iteration */
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			} else if (UNEXPECTED(ptr->ht != fe_ht)) {
@@ -12044,15 +12044,15 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				if (fe_ht->u.flags & HASH_FLAG_PACKED) {
 					pos = ptr->h;
 				} else {
-					pos = HT_HASH(fe_ht, ptr->h & fe_ht->nTableMask);
+					pos = fe_ht->arHash[ptr->h & fe_ht->nTableMask];
 					while (1) {
-						if (pos == HT_INVALID_IDX) {
+						if (pos == INVALID_IDX) {
 							pos = fe_ht->nInternalPointer;
 							break;
-						} else if (HT_DATA(fe_ht)[pos].h == ptr->h && HT_DATA(fe_ht)[pos].key == ptr->key) {
+						} else if (fe_ht->arData[pos].h == ptr->h && fe_ht->arData[pos].key == ptr->key) {
 							break;
 						}
-						pos = Z_NEXT(HT_DATA(fe_ht)[pos].val);
+						pos = Z_NEXT(fe_ht->arData[pos].val);
 					}
 				}
 			}
@@ -12062,7 +12062,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
 
-				p = HT_DATA(fe_ht) + pos;
+				p = fe_ht->arData + pos;
 				value = &p->val;
 				if (UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
 					pos++;
@@ -12106,19 +12106,19 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			do {
 				pos++;
 				if (pos >= fe_ht->nNumUsed) {
-					fe_ht->nInternalPointer = ptr->pos = HT_INVALID_IDX;
+					fe_ht->nInternalPointer = ptr->pos = INVALID_IDX;
 					ZEND_VM_INC_OPCODE();
 					ZEND_VM_NEXT_OPCODE();
 				}
-				p = HT_DATA(fe_ht) + pos;
+				p = fe_ht->arData + pos;
 			} while (Z_TYPE(p->val) == IS_UNDEF ||
 				     (Z_TYPE(p->val) == IS_INDIRECT &&
 				      Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF) ||
 				     (EXPECTED(p->key != NULL) &&
 				      zend_check_property_access(zobj, p->key) == FAILURE));
 			fe_ht->nInternalPointer = ptr->pos = pos;
-			ptr->h = HT_DATA(fe_ht)[pos].h;
-			ptr->key = HT_DATA(fe_ht)[pos].key;
+			ptr->h = fe_ht->arData[pos].h;
+			ptr->key = fe_ht->arData[pos].key;
 			ZEND_VM_INC_OPCODE();
 			ZEND_VM_NEXT_OPCODE();
 		} else {
@@ -24159,7 +24159,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				}
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			p = HT_DATA(fe_ht) + pos;
+			p = fe_ht->arData + pos;
 			if (Z_TYPE(p->val) == IS_UNDEF ||
 			    (Z_TYPE(p->val) == IS_INDIRECT &&
 			     Z_TYPE_P(Z_INDIRECT(p->val)) == IS_UNDEF)) {
@@ -24176,8 +24176,8 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		fe_ht->nInternalPointer = pos;
 		ptr->pos = pos;
 		ptr->ht = fe_ht;
-		ptr->h = HT_DATA(fe_ht)[pos].h;
-		ptr->key = HT_DATA(fe_ht)[pos].key;
+		ptr->h = fe_ht->arData[pos].h;
+		ptr->key = fe_ht->arData[pos].key;
 		is_empty = 0;
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
@@ -26860,7 +26860,7 @@ static int ZEND_FASTCALL  ZEND_BIND_GLOBAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	/* We store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 	idx = (uint32_t)(uintptr_t)CACHED_PTR(Z_CACHE_SLOT_P(varname)) - 1;
 	if (EXPECTED(idx < EG(symbol_table).nNumUsed)) {
-		Bucket *p = HT_DATA(&EG(symbol_table)) + idx;
+		Bucket *p = EG(symbol_table).arData + idx;
 
 		if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 	        (EXPECTED(p->key == Z_STR_P(varname)) ||
@@ -26869,7 +26869,7 @@ static int ZEND_FASTCALL  ZEND_BIND_GLOBAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	          EXPECTED(p->key->len == Z_STRLEN_P(varname)) &&
 	          EXPECTED(memcmp(p->key->val, Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)))) {
 
-			value = &HT_DATA(&EG(symbol_table))[idx].val;
+			value = &EG(symbol_table).arData[idx].val;
 			goto check_indirect;
 		}
 	}
@@ -26877,11 +26877,11 @@ static int ZEND_FASTCALL  ZEND_BIND_GLOBAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	value = zend_hash_find(&EG(symbol_table), Z_STR_P(varname));
 	if (UNEXPECTED(value == NULL)) {
 		value = zend_hash_add_new(&EG(symbol_table), Z_STR_P(varname), &EG(uninitialized_zval));
-		idx = ((char*)value - (char*)HT_DATA(&EG(symbol_table))) / sizeof(Bucket);
+		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 		CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)(idx + 1));
 	} else {
-		idx = ((char*)value - (char*)HT_DATA(&EG(symbol_table))) / sizeof(Bucket);
+		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 		CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)(idx + 1));
 check_indirect:
