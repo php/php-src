@@ -175,15 +175,18 @@ ZEND_API void zend_bigint_long_modulus(zend_bigint *out, zend_long num, const ze
  */
 ZEND_API void zend_bigint_ones_complement(zend_bigint *out, const zend_bigint *op);
 
-/* Finds the bitwise OR of two integers */
+/* Finds the bitwise OR of two integers
+ * Uses two's-complement arithmetic for negative numbers */
 ZEND_API void zend_bigint_or(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_or_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 
-/* Finds the bitwise AND of two integers */
+/* Finds the bitwise AND of two integers
+ * Uses two's-complement arithmetic for negative numbers */
 ZEND_API void zend_bigint_and(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_and_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 
-/* Finds the bitwise XOR of two integers */
+/* Finds the bitwise XOR of two integers
+ * Uses two's-complement arithmetic for negative numbers */
 ZEND_API void zend_bigint_xor(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_xor_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 

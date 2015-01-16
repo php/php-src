@@ -773,44 +773,118 @@ ZEND_API void zend_bigint_ones_complement(zend_bigint *out, const zend_bigint *o
 }
 /* }}} */
 
+static void zend_always_inline _zend_bigint_twos_complement(mp_int *out, mp_int *in, int size) /* {{{ */
+{
+	mp_int tmp;
+
+	/* two's complement of a number is 2^width - n
+	 * so first we need 2^width
+	 */
+	CHECK_ERROR(mp_init(&tmp));
+	CHECK_ERROR(mp_set_int(&tmp, 1));
+	CHECK_ERROR(mp_mul_2d(&tmp, size + 1, &tmp));
+
+	/* then, we subtract (or add if our number is already negative) */
+	if (SIGN(in) == MP_NEG) {
+		CHECK_ERROR(mp_add(&tmp, in, out));
+	} else {
+		CHECK_ERROR(mp_sub(&tmp, in, out));
+	}
+
+	mp_clear(&tmp);
+}
+/* }}} */
+
+static void zend_always_inline _zend_bigint_bitwise_op(mp_int *out, mp_int *real_op1, mp_int *real_op2, char op) /* {{{ */
+{
+	zend_bool op1_sign, op2_sign, sign;
+	mp_int op1_copy, op2_copy;
+	int largest_bit_width;
+
+	op1_sign = (SIGN(real_op1) == MP_NEG);
+	op2_sign = (SIGN(real_op2) == MP_NEG);
+
+	/* to emulate two's-complement OR, get twos' complement of negatives */
+	largest_bit_width = MAX(mp_count_bits(real_op1), mp_count_bits(real_op2));
+	if (op1_sign) {
+		CHECK_ERROR(mp_init(&op1_copy));
+		_zend_bigint_twos_complement(&op1_copy, real_op1, largest_bit_width);
+		real_op1 = &op1_copy;
+	}
+	if (op2_sign) {
+		CHECK_ERROR(mp_init(&op2_copy));
+		_zend_bigint_twos_complement(&op2_copy, real_op2, largest_bit_width); 
+		real_op2 = &op2_copy;
+	}
+
+	switch (op) {
+		case '|':
+			CHECK_ERROR(mp_or(real_op1, real_op2, out));
+			sign = op1_sign | op2_sign;
+			break;
+		case '^':
+			CHECK_ERROR(mp_xor(real_op1, real_op2, out));
+			sign = op1_sign ^ op2_sign;
+			break;
+		case '&':
+			CHECK_ERROR(mp_and(real_op1, real_op2, out));
+			sign = op1_sign & op2_sign;
+			break;
+	}
+
+	/* since the sign is negative, we need to undo twos' complement */
+	if (sign) {
+		_zend_bigint_twos_complement(out, out, largest_bit_width);
+		mp_neg(out, out);
+	}
+
+	if (op1_sign) {
+		mp_clear(&op1_copy);
+	}
+	if (op2_sign) {
+		mp_clear(&op2_copy);
+	}
+}
+/* }}} */
+
 ZEND_API void zend_bigint_or(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
-	CHECK_ERROR(mp_or((mp_int*)&op1->mp, (mp_int*)&op2->mp, &out->mp));
+	_zend_bigint_bitwise_op(&out->mp, (mp_int*)&op1->mp, (mp_int*)&op2->mp, '|');
 }
 /* }}} */
 
 ZEND_API void zend_bigint_or_long(zend_bigint *out, const zend_bigint *op1, zend_long op2) /* {{{ */
 {
 	WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
-		CHECK_ERROR(mp_or((mp_int*)&op1->mp, &op2_mp, &out->mp));
+		_zend_bigint_bitwise_op(&out->mp, (mp_int*)&op1->mp, &op2_mp, '|');
 	})
 }
 /* }}} */
 
 ZEND_API void zend_bigint_and(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
-	CHECK_ERROR(mp_and((mp_int*)&op1->mp, (mp_int*)&op2->mp, &out->mp));
+	_zend_bigint_bitwise_op(&out->mp, (mp_int*)&op1->mp, (mp_int*)&op2->mp, '&');
 }
 /* }}} */
 
 ZEND_API void zend_bigint_and_long(zend_bigint *out, const zend_bigint *op1, zend_long op2) /* {{{ */
 {
 	WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
-		CHECK_ERROR(mp_and((mp_int*)&op1->mp, &op2_mp, &out->mp));
+		_zend_bigint_bitwise_op(&out->mp, (mp_int*)&op1->mp, &op2_mp, '&');
 	})
 }
 /* }}} */
 
 ZEND_API void zend_bigint_xor(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */
 {
-	CHECK_ERROR(mp_xor((mp_int*)&op1->mp, (mp_int*)&op2->mp, &out->mp));
+	_zend_bigint_bitwise_op(&out->mp, (mp_int*)&op1->mp, (mp_int*)&op2->mp, '^');
 }
 /* }}} */
 
 ZEND_API void zend_bigint_xor_long(zend_bigint *out, const zend_bigint *op1, zend_long op2) /* {{{ */
 {
 	WITH_TEMP_MP_FROM_ZEND_LONG(op2, op2_mp, {
-		CHECK_ERROR(mp_xor((mp_int*)&op1->mp, &op2_mp, &out->mp));
+		_zend_bigint_bitwise_op(&out->mp, (mp_int*)&op1->mp, &op2_mp, '^');
 	})
 }
 /* }}} */
