@@ -167,7 +167,10 @@ ZEND_API void zend_bigint_modulus(zend_bigint *out, const zend_bigint *num, cons
 ZEND_API void zend_bigint_modulus_long(zend_bigint *out, const zend_bigint *num, zend_long divisor);
 ZEND_API void zend_bigint_long_modulus(zend_bigint *out, zend_long num, const zend_bigint *divisor);
 
-/* Finds the one's complement of an integer */
+/* Finds the one's complement of an integer
+ * If you're used to two's-complement arithmetic, this is equivalent to a
+ * bitwise NOT on a two's-complement signed integer
+ */
 ZEND_API void zend_bigint_ones_complement(zend_bigint *out, const zend_bigint *op);
 
 /* Finds the bitwise OR of two integers */
@@ -182,11 +185,17 @@ ZEND_API void zend_bigint_and_long(zend_bigint *out, const zend_bigint *op1, zen
 ZEND_API void zend_bigint_xor(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2);
 ZEND_API void zend_bigint_xor_long(zend_bigint *out, const zend_bigint *op1, zend_long op2);
 
-/* Shifts an integer left by an integer number of bits */
+/* Shifts an integer left by an integer number of bits
+ * This is a logical left shift, like C
+ */
 ZEND_API void zend_bigint_shift_left_ulong(zend_bigint *out, const zend_bigint *num, zend_ulong shift);
 ZEND_API void zend_bigint_long_shift_left_ulong(zend_bigint *out, zend_long num, zend_ulong shift);
 
-/* Shifts an integer right by an integer number of bits */
+/* Shifts an integer right by an integer number of bits
+ * This is an arithmetic (sign-extending) right shift, like C in most compilers
+ * While bigints are not usually represented as two's complement, it acts the
+ * same as a two's-complement arithmetic right shift
+ */
 ZEND_API void zend_bigint_shift_right_ulong(zend_bigint *out, const zend_bigint *num, zend_ulong shift);
 
 /* Compares two numbers
