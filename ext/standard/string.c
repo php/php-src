@@ -2064,7 +2064,6 @@ PHP_FUNCTION(strripos)
 	zval *zneedle;
 	zend_string *needle;
 	zend_string *haystack;
-	size_t needle_len;
 	zend_long offset = 0;
 	char *p, *e;
 	char *found;
