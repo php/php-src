@@ -848,11 +848,16 @@ PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list
 
 	smart_string_0(&buf);
 
+	//Test 'pbuf'(also known as 'error') against NULL, since it is called multiple places without checking against, causing null pointer dereferences.
 	if (buf.c) {
-		*pbuf = buf.c;
+		if(pbuf) {
+			*pbuf = buf.c;
+		}
 		result = buf.len;
 	} else {
-		*pbuf = NULL;
+		if(pbuf) {
+			*pbuf = NULL;
+		}
 		result = 0;
 	}
 
