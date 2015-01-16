@@ -177,6 +177,7 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 	zend_long	lv;
 	int		type;
 	char	*message;
+	zend_bigint *big;
 
 	if (err && U_FAILURE(err->code)) {
 		return NAN;
@@ -184,11 +185,14 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 
 	switch (Z_TYPE_P(z)) {
 	case IS_STRING:
-		type = is_numeric_string(Z_STRVAL_P(z), Z_STRLEN_P(z), &lv, &rv, 0);
+		type = is_numeric_string(Z_STRVAL_P(z), Z_STRLEN_P(z), &lv, &rv, &big, 0);
 		if (type == IS_DOUBLE) {
 			rv *= U_MILLIS_PER_SECOND;
 		} else if (type == IS_LONG) {
 			rv = U_MILLIS_PER_SECOND * (double)lv;
+		} else if (type == IS_BIGINT) {
+			rv = U_MILLIS_PER_SECOND * zend_bigint_to_double(big);
+			zend_bigint_release(big);
 		} else {
 			spprintf(&message, 0, "%s: string '%s' is not numeric, "
 					"which would be required for it to be a valid date", func,
@@ -233,6 +237,9 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 				message, 1);
 			efree(message);
 		}
+		break;
+	case IS_BIGINT:
+		rv = U_MILLIS_PER_SECOND * zend_bigint_to_double(big);
 		break;
 	default:
 		spprintf(&message, 0, "%s: invalid PHP type for date", func);
