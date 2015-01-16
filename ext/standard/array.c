@@ -396,57 +396,6 @@ static int php_array_data_compare(const void *a, const void *b) /* {{{ */
 }
 /* }}} */
 
-static int php_array_data_compare_unique(const void *a, const void *b) /* {{{ */
-{
-	Bucket *f;
-	Bucket *s;
-	zval result;
-	zval *first;
-	zval *second;
-	int ret;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	first = &f->val;
-	second = &s->val;
-
-	if (Z_TYPE_P(first) == IS_INDIRECT) {
-		first = Z_INDIRECT_P(first);
-	} else if (Z_TYPE_P(first) == IS_UNDEF) {
-		if (Z_TYPE_P(second) != IS_UNDEF) {
-			return -1;
-		}
-		return 0;
-	}
-
-	if (Z_TYPE_P(second) == IS_INDIRECT) {
-		second = Z_INDIRECT_P(second);
-	} else if (Z_TYPE_P(second) == IS_UNDEF) {
-		return 1;
-	}
-
-	if (ARRAYG(compare_func)(&result, first, second) == FAILURE) {
-		return 0;
-	}
-
-	if (EXPECTED(Z_TYPE(result) == IS_LONG)) {
-		ret = ZEND_NORMALIZE_BOOL(Z_LVAL(result));
-	} else if (Z_TYPE(result) == IS_DOUBLE) {
-		ret = ZEND_NORMALIZE_BOOL(Z_DVAL(result));
-	} else {
-		ret = ZEND_NORMALIZE_BOOL(zval_get_long(&result));
-	}
-
-	if (ret == 0) {
-		ZVAL_UNDEF(&s->val);
-		ret = 1;
-	}
-
-	return ret;
-}
-/* }}} */
-
 static int php_array_reverse_data_compare(const void *a, const void *b) /* {{{ */
 {
 	return php_array_data_compare(a, b) * -1;
@@ -3210,7 +3159,7 @@ PHP_FUNCTION(array_unique)
 	}
 
 	/* create and sort array with pointers to the target_hash buckets */
-	arTmp = (struct bucketindex *) pemalloc((Z_ARRVAL_P(array)->nNumOfElements) * sizeof(struct bucketindex), Z_ARRVAL_P(array)->u.flags & HASH_FLAG_PERSISTENT);
+	arTmp = (struct bucketindex *) pemalloc((Z_ARRVAL_P(array)->nNumOfElements + 1) * sizeof(struct bucketindex), Z_ARRVAL_P(array)->u.flags & HASH_FLAG_PERSISTENT);
 	if (!arTmp) {
 		zval_dtor(return_value);
 		RETURN_FALSE;
@@ -3223,35 +3172,30 @@ PHP_FUNCTION(array_unique)
 		arTmp[i].i = i;
 		i++;
 	}
+	ZVAL_UNDEF(&arTmp[i].b.val);
 	zend_sort((void *) arTmp, i, sizeof(struct bucketindex),
-			php_array_data_compare_unique, (swap_func_t)array_bucketindex_swap);
+			php_array_data_compare, (swap_func_t)array_bucketindex_swap);
 	/* go through the sorted array and delete duplicates from the copy */
-	lastkept = NULL;
-	for (idx = 0; idx < i; idx++) {
-		cmpdata = &arTmp[idx];
-		if (Z_TYPE(cmpdata->b.val) != IS_UNDEF) {
-			if (lastkept == NULL) {
+	lastkept = arTmp;
+	for (cmpdata = arTmp + 1; Z_TYPE(cmpdata->b.val) != IS_UNDEF; cmpdata++) {
+		if (php_array_data_compare(lastkept, cmpdata)) {
+			lastkept = cmpdata;
+		} else {
+			if (lastkept->i > cmpdata->i) {
+				p = &lastkept->b;
 				lastkept = cmpdata;
-				continue;
-			}
-			if (php_array_data_compare(lastkept, cmpdata)) {
-				lastkept = cmpdata;
-				continue;
 			} else {
-				if (lastkept->i > cmpdata->i) {
-					p = &lastkept->b;
-					lastkept = cmpdata;
+				p = &cmpdata->b;
+			}
+			if (p->key == NULL) {
+				zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
+			} else {
+				if (Z_ARRVAL_P(return_value) == &EG(symbol_table).ht) {
+					zend_delete_global_variable(p->key);
 				} else {
-					p = &cmpdata->b;
+					zend_hash_del(Z_ARRVAL_P(return_value), p->key);
 				}
 			}
-		} else {
-			p = &cmpdata->b;
-		}
-		if (p->key == NULL) {
-			zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
-		} else {
-				zend_hash_del(Z_ARRVAL_P(return_value), p->key);
 		}
 	}
 	pefree(arTmp, Z_ARRVAL_P(array)->u.flags & HASH_FLAG_PERSISTENT);
