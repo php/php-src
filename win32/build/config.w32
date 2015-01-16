@@ -130,6 +130,7 @@ if (CHECK_LIB("mpir_a.lib") &&
 	CHECK_HEADER_ADD_INCLUDE("gmp.h", "CFLAGS", PHP_PHP_BUILD + "\\include\\mpir")) {
 	AC_DEFINE('HAVE_GMP', 1, 'GMP support');
 	AC_DEFINE('HAVE_MPIR', 1, 'MPIR support');
+	ADD_FLAG("CFLAGS", "/D ZEND_HAVE_GMP=1");
 } else {
 	ERROR("MPIR not found");
 }
