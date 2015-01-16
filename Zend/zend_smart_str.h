@@ -48,6 +48,8 @@
 	smart_str_append_long_ex((dest), (val), 0)
 #define smart_str_append_unsigned(dest, val) \
 	smart_str_append_unsigned_ex((dest), (val), 0)
+#define smart_str_append_bigint(dest, val) \
+	smart_str_append_bigint_ex((dest), (val), 0)
 
 static zend_always_inline size_t smart_str_alloc(smart_str *str, size_t len, zend_bool persistent) {
 	size_t newlen;
@@ -114,6 +116,12 @@ static zend_always_inline void smart_str_append_unsigned_ex(smart_str *dest, zen
 	char buf[32];
 	char *result = zend_print_ulong_to_buf(buf + sizeof(buf) - 1, num);
 	smart_str_appendl_ex(dest, result, buf + sizeof(buf) - 1 - result, persistent);
+}
+
+static zend_always_inline void smart_str_append_bigint_ex(smart_str *dest, zend_bigint *num, zend_bool persistent) {
+	char *buf = zend_bigint_to_string(num);
+	smart_str_appendl_ex(dest, buf, strlen(buf), persistent);
+	efree(buf);
 }
 
 static zend_always_inline void smart_str_setl(smart_str *dest, const char *src, size_t len) {
