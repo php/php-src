@@ -661,7 +661,7 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 static PHP_INI_MH(OnUpdateName) /* {{{ */
 {
 	/* Numeric session.name won't work at all */
-	if ((!new_value->len || is_numeric_string(new_value->val, new_value->len, NULL, NULL, 0))) {
+	if ((!new_value->len || is_numeric_string(new_value->val, new_value->len, NULL, NULL, NULL, 0))) {
 		int err_type;
 
 		if (stage == ZEND_INI_STAGE_RUNTIME || stage == ZEND_INI_STAGE_ACTIVATE || stage == ZEND_INI_STAGE_STARTUP) {
