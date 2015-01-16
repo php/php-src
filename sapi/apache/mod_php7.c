@@ -565,9 +565,9 @@ static void init_request_info(void)
  */
 static int php_apache_alter_ini_entries(php_per_dir_entry *per_dir_entry)
 {
-	zend_string *key = STR_INIT(per_dir_entry->key, per_dir_entry->key_length, 0);
+	zend_string *key = zend_string_init(per_dir_entry->key, per_dir_entry->key_length, 0);
 	zend_alter_ini_entry_chars(key, per_dir_entry->value, per_dir_entry->value_length, per_dir_entry->type, per_dir_entry->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE);
-	STR_RELEASE(key);
+	zend_string_release(key);
 	return 0;
 }
 /* }}} */
