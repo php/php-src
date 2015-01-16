@@ -153,7 +153,7 @@ ZEND_API void zend_bigint_long_pow_ulong(zend_bigint *out, zend_long base, zend_
 
 /* Divides an integer by an integer
  * _as_double functions may provide better precision than converting to double
- * and doing a floating-point division
+ * and doing a floating-point division would
  */
 ZEND_API void zend_bigint_divide(zend_bigint *out, const zend_bigint *big, const zend_bigint *divisor);
 ZEND_API double zend_bigint_divide_as_double(const zend_bigint *num, const zend_bigint *divisor);
@@ -162,7 +162,9 @@ ZEND_API double zend_bigint_divide_long_as_double(const zend_bigint *num, zend_l
 ZEND_API void zend_bigint_long_divide(zend_bigint *out, zend_long big, const zend_bigint *divisor);
 ZEND_API double zend_bigint_long_divide_as_double(zend_long num, const zend_bigint *divisor);
 
-/* Finds the remainder of the division of two integers */
+/* Finds the remainder of the division of two integers
+ * The result always has the sign of the divisor, like in C and PHP
+ */
 ZEND_API void zend_bigint_modulus(zend_bigint *out, const zend_bigint *num, const zend_bigint *divisor);
 ZEND_API void zend_bigint_modulus_long(zend_bigint *out, const zend_bigint *num, zend_long divisor);
 ZEND_API void zend_bigint_long_modulus(zend_bigint *out, zend_long num, const zend_bigint *divisor);
