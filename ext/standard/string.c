@@ -3112,7 +3112,7 @@ static zend_string* php_char_to_str_ex(zend_string *str, char from, char *to, si
 	size_t char_count = 0;
 	size_t replaced = 0;
 	char lc_from = 0;
-	char *source, *target, *tmp, *source_end= str->val + str->len, *tmp_end = NULL;
+	char *source, *target, *source_end= str->val + str->len;
 
 	if (case_sensitivity) {
 		char *p = str->val, *e = p + str->len;
