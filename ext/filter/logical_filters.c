@@ -334,6 +334,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	zend_long lval;
 	double dval;
+	zend_bigint *big;
 
 	int first, n;
 
@@ -402,7 +403,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 	*p = 0;
 
-	switch (is_numeric_string(num, p - num, &lval, &dval, 0)) {
+	switch (is_numeric_string(num, p - num, &lval, &dval, &big, 0)) {
 		case IS_LONG:
 			zval_ptr_dtor(value);
 			ZVAL_DOUBLE(value, (double)lval);
@@ -413,6 +414,10 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			}
 			zval_ptr_dtor(value);
 			ZVAL_DOUBLE(value, dval);
+			break;
+		case IS_BIGINT:
+			ZVAL_DOUBLE(value, zend_bigint_to_double(big));
+			zend_bigint_release(big);
 			break;
 		default:
 error:
