@@ -1445,6 +1445,12 @@ PHP_FUNCTION(extract)
 	}
 
 	symbol_table = zend_rebuild_symbol_table();
+#if 0
+	if (!symbol_table) {
+		php_error_docref(NULL, E_WARNING, "failed to build symbol table");
+		return;
+	}
+#endif
 
 	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(var_array), num_key, var_name, entry) {
 		zval final_name;
@@ -1534,7 +1540,7 @@ PHP_FUNCTION(extract)
 				}
 			} else {
 				if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
-				zend_set_local_var(Z_STR(final_name), entry, 1);
+				zend_hash_update_ind(&symbol_table->ht, Z_STR(final_name), entry);
 			}
 			count++;
 		}
