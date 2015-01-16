@@ -11960,7 +11960,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			ptr->ht = fe_ht;
 			pos = 0;
 		} else if (UNEXPECTED(fe_ht->nInternalPointer != ptr->pos)) {
-			if (fe_ht->u.flags & HASH_FLAG_PACKED) {
+			if (HT_FLAGS(fe_ht) & HASH_FLAG_PACKED) {
 				pos = ptr->h;
 			} else {
 				pos = HT_HASH(fe_ht, ptr->h & fe_ht->nTableMask);
@@ -12041,7 +12041,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				ptr->ht = fe_ht;
 				pos = 0;
 			} else if (UNEXPECTED(fe_ht->nInternalPointer != ptr->pos)) {
-				if (fe_ht->u.flags & HASH_FLAG_PACKED) {
+				if (HT_FLAGS(fe_ht) & HASH_FLAG_PACKED) {
 					pos = ptr->h;
 				} else {
 					pos = HT_HASH(fe_ht, ptr->h & fe_ht->nTableMask);

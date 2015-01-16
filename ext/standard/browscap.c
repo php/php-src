@@ -139,7 +139,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg) /* {{{ */
 {
 	browser_data *bdata = arg;
-	int persistent = bdata->htab->u.flags & HASH_FLAG_PERSISTENT;
+	int persistent = HT_FLAGS(bdata->htab) & HASH_FLAG_PERSISTENT;
 
 	if (!arg1) {
 		return;

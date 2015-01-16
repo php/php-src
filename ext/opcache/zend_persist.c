@@ -68,18 +68,18 @@ static void zend_persist_zval(zval *z);
 static void zend_persist_zval_const(zval *z);
 
 static const uint32_t uninitialized_bucket[HT_MIN_MASK+1] =
-	{HT_INVALID_IDX, HT_INVALID_IDX, HT_INVALID_IDX, HT_INVALID_IDX};
+	{HT_INVALID_IDX, HT_INVALID_IDX};
 
 static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement)
 {
 	uint idx;
 	Bucket *p;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		HT_SET_DATA(ht, &uninitialized_bucket);
 		return;
 	}
-	if (ht->u.flags & HASH_FLAG_PACKED) {
+	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
 		void *data = HT_GET_DATA(ht);
 		zend_accel_store(data, HT_USED_SIZE(ht));
 		HT_SET_DATA(ht, data);
@@ -110,11 +110,11 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	uint idx;
 	Bucket *p;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		HT_SET_DATA(ht, &uninitialized_bucket);
 		return;
 	}
-	if (ht->u.flags & HASH_FLAG_PACKED) {		
+	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {		
 		HT_SET_DATA(ht, zend_accel_memdup(HT_GET_DATA(ht), HT_USED_SIZE(ht)));
 	} else {
 		void *data = ZCG(mem);
@@ -199,7 +199,7 @@ static void zend_persist_zval(zval *z)
 					/* make immutable array */
 					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
 					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
-					Z_ARRVAL_P(z)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
+					HT_FLAGS(Z_ARRVAL_P(z)) &= ~HASH_FLAG_APPLY_PROTECTION;
 				}
 			}
 			break;
@@ -253,7 +253,7 @@ static void zend_persist_zval_const(zval *z)
 					/* make immutable array */
 					Z_TYPE_FLAGS_P(z) = IS_TYPE_IMMUTABLE;
 					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
-					Z_ARRVAL_P(z)->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
+					HT_FLAGS(Z_ARRVAL_P(z)) &= ~HASH_FLAG_APPLY_PROTECTION;
 				}
 			}
 			break;

@@ -45,7 +45,7 @@ typedef int (*id_function_t)(void *, void *);
 typedef void (*unique_copy_ctor_func_t)(void *pElement);
 
 static const uint32_t uninitialized_bucket[HT_MIN_MASK+1] =
-	{HT_INVALID_IDX, HT_INVALID_IDX, HT_INVALID_IDX, HT_INVALID_IDX};
+	{HT_INVALID_IDX, HT_INVALID_IDX};
 
 static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind);
 static zend_ast *zend_ast_clone(zend_ast *ast);
@@ -295,22 +295,25 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	Bucket *p, *q, *r;
 	zend_ulong nIndex;
 
-	ht->nTableSize = source->nTableSize;
+	GC_REFCOUNT(ht) = 1;
+	GC_TYPE_INFO(ht) = IS_ARRAY |
+		(((HT_FLAGS(source) & HASH_FLAG_INITIALIZED) | HASH_FLAG_APPLY_PROTECTION) << GC_FLAGS_SHIFT);
 	ht->nTableMask = source->nTableMask;
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = source->nNumOfElements;
+	ht->nTableSize = source->nTableSize;
 	ht->nNextFreeElement = source->nNextFreeElement;
-	ht->pDestructor = ZVAL_PTR_DTOR;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED) | HASH_FLAG_APPLY_PROTECTION;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	ht->nApplyCount = 0;
+	ht->pDestructor = ZVAL_PTR_DTOR;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		HT_SET_DATA(ht, &uninitialized_bucket);
 		return;
 	}
 
-	if (source->u.flags & HASH_FLAG_PACKED) {
-		ht->u.flags |= HASH_FLAG_PACKED;
+	if (HT_FLAGS(source) & HASH_FLAG_PACKED) {
+		HT_FLAGS(ht) |= HASH_FLAG_PACKED;
 		HT_SET_DATA(ht, (Bucket *) emalloc(HT_SIZE(ht)));
 		HT_HASH(ht, 0) = HT_INVALID_IDX;
 
@@ -389,21 +392,24 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	zend_function *new_prototype;
 	zend_op_array *new_entry;
 
-	ht->nTableSize = source->nTableSize;
+	GC_REFCOUNT(ht) = 1;
+	GC_TYPE_INFO(ht) = IS_ARRAY |
+		((HT_FLAGS(source) & HASH_FLAG_INITIALIZED) << GC_FLAGS_SHIFT);
 	ht->nTableMask = source->nTableMask;
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = source->nNumOfElements;
+	ht->nTableSize = source->nTableSize;
 	ht->nNextFreeElement = source->nNextFreeElement;
-	ht->pDestructor = ZEND_FUNCTION_DTOR;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	ht->nApplyCount = 0;
+	ht->pDestructor = ZEND_FUNCTION_DTOR;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		HT_SET_DATA(ht, &uninitialized_bucket);
 		return;
 	}
 
-	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
+	ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_PACKED));
 	HT_SET_DATA(ht, emalloc(HT_SIZE(ht)));
 	HT_HASH_RESET(ht);
 
@@ -464,21 +470,24 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	zend_class_entry *new_ce;
 	zend_property_info *prop_info;
 
-	ht->nTableSize = source->nTableSize;
+	GC_REFCOUNT(ht) = 1;
+	GC_TYPE_INFO(ht) = IS_ARRAY |
+		((HT_FLAGS(source) & HASH_FLAG_INITIALIZED) << GC_FLAGS_SHIFT);
 	ht->nTableMask = source->nTableMask;
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = source->nNumOfElements;
+	ht->nTableSize = source->nTableSize;
 	ht->nNextFreeElement = source->nNextFreeElement;
-	ht->pDestructor = zend_destroy_property_info;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	ht->nApplyCount = 0;
+	ht->pDestructor = zend_destroy_property_info;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		HT_SET_DATA(ht, &uninitialized_bucket);
 		return;
 	}
 
-	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
+	ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_PACKED));
 	HT_SET_DATA(ht, emalloc(HT_SIZE(ht)));
 	HT_HASH_RESET(ht);
 
@@ -577,7 +586,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 
 	/* constants table */
 	zend_hash_clone_zval(&ce->constants_table, &old_ce->constants_table, 1);
-	ce->constants_table.u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
+	HT_FLAGS(&ce->constants_table) &= ~HASH_FLAG_APPLY_PROTECTION;
 
 	ce->name = zend_clone_str(ce->name);
 

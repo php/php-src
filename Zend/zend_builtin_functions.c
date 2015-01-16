@@ -726,13 +726,13 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 	int ret = 1;
 	zval *val;
 
-	ht->u.v.nApplyCount++;
+	ht->nApplyCount++;
 	ZEND_HASH_FOREACH_VAL_IND(ht, val) {
 		ZVAL_DEREF(val);
 		if (Z_REFCOUNTED_P(val)) {
 			if (Z_TYPE_P(val) == IS_ARRAY) {
 				if (!Z_IMMUTABLE_P(val)) {
-					if (Z_ARRVAL_P(val)->u.v.nApplyCount > 0) {
+					if (Z_ARRVAL_P(val)->nApplyCount > 0) {
 						zend_error(E_WARNING, "Constants cannot be recursive arrays");
 						ret = 0;
 						break;
@@ -748,7 +748,7 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
-	ht->u.v.nApplyCount--;
+	ht->nApplyCount--;
 	return ret;
 }
 /* }}} */

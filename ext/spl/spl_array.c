@@ -129,7 +129,7 @@ SPL_API int spl_hash_verify_pos_ex(spl_array_object * intern, HashTable * ht) /*
 /*	IS_CONSISTENT(ht);*/
 
 /*	HASH_PROTECT_RECURSION(ht);*/
-	if (ht->u.flags & HASH_FLAG_PACKED) {
+	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
 		if (intern->pos_h == intern->pos && Z_TYPE(HT_DATA(ht)[intern->pos_h].val) != IS_UNDEF) {
 			return SUCCESS;
 		}
@@ -308,7 +308,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, zval *object, zval
 		return &EG(uninitialized_zval);
 	}
 
-	if ((type == BP_VAR_W || type == BP_VAR_RW) && (ht->u.v.nApplyCount > 0)) {
+	if ((type == BP_VAR_W || type == BP_VAR_RW) && (ht->nApplyCount > 0)) {
 		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 		return &EG(error_zval);;
 	}
@@ -468,7 +468,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 
 	if (!offset) {
 		ht = spl_array_get_hash_table(intern, 0);
-		if (ht->u.v.nApplyCount > 0) {
+		if (ht->nApplyCount > 0) {
 			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 			return;
 		}
@@ -485,7 +485,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 	switch (Z_TYPE_P(offset)) {
 		case IS_STRING:
 			ht = spl_array_get_hash_table(intern, 0);
-			if (ht->u.v.nApplyCount > 0) {
+			if (ht->nApplyCount > 0) {
 				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 				return;
 			}
@@ -507,7 +507,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 			index = Z_LVAL_P(offset);
 num_index:
 			ht = spl_array_get_hash_table(intern, 0);
-			if (ht->u.v.nApplyCount > 0) {
+			if (ht->nApplyCount > 0) {
 				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 				return;
 			}
@@ -515,7 +515,7 @@ num_index:
 			return;
 		case IS_NULL:
 			ht = spl_array_get_hash_table(intern, 0);
-			if (ht->u.v.nApplyCount > 0) {
+			if (ht->nApplyCount > 0) {
 				zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 				return;
 			}
@@ -548,7 +548,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
 		ht = spl_array_get_hash_table(intern, 0);
-		if (ht->u.v.nApplyCount > 0) {
+		if (ht->nApplyCount > 0) {
 			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 			return;
 		}
@@ -599,7 +599,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 		index = Z_LVAL_P(offset);
 num_index:
 		ht = spl_array_get_hash_table(intern, 0);
-		if (ht->u.v.nApplyCount > 0) {
+		if (ht->nApplyCount > 0) {
 			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 			return;
 		}
@@ -862,7 +862,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 			ZEND_INIT_SYMTABLE_EX(intern->debug_info, zend_hash_num_elements(intern->std.properties) + 1, 0);
 		}
 
-		if (intern->debug_info->u.v.nApplyCount == 0) {
+		if (intern->debug_info->nApplyCount == 0) {
 			zend_hash_clean(intern->debug_info);
 			zend_hash_copy(intern->debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
@@ -1486,27 +1486,27 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	ZVAL_ARR(&tmp, aht);
 
 	if (!use_arg) {
-		aht->u.v.nApplyCount++;
+		aht->nApplyCount++;
 		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval, 1, &tmp, NULL);
-		aht->u.v.nApplyCount--;
+		aht->nApplyCount--;
 	} else if (use_arg == SPL_ARRAY_METHOD_MAY_USER_ARG) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
 			zval_ptr_dtor(&tmp);
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects one argument at most", 0);
 			return;
 		}
-		aht->u.v.nApplyCount++;
+		aht->nApplyCount++;
 		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval, arg? 2 : 1, &tmp, arg);
-		aht->u.v.nApplyCount--;
+		aht->nApplyCount--;
 	} else {
 		if (ZEND_NUM_ARGS() != 1 || zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 			zval_ptr_dtor(&tmp);
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects exactly one argument", 0);
 			return;
 		}
-		aht->u.v.nApplyCount++;
+		aht->nApplyCount++;
 		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval, 2, &tmp, arg);
-		aht->u.v.nApplyCount--;
+		aht->nApplyCount--;
 	}
 	/* A tricky way to pass "aht" by reference, copy back and cleanup */
 	if (Z_ISREF(tmp) && Z_TYPE_P(Z_REFVAL(tmp)) == IS_ARRAY) {
@@ -1787,7 +1787,7 @@ SPL_METHOD(Array, unserialize)
 	}
 
 	aht = spl_array_get_hash_table(intern, 0);
-	if (aht->u.v.nApplyCount > 0) {
+	if (aht->nApplyCount > 0) {
 		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}

@@ -618,9 +618,9 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 				break;
 			case IS_ARRAY:
 				myht = Z_ARRVAL_P(zv);
-				if (ZEND_HASH_APPLY_PROTECTION(myht) && ++myht->u.v.nApplyCount > 1) {
+				if (ZEND_HASH_APPLY_PROTECTION(myht) && ++myht->nApplyCount > 1) {
 					phpdbg_xml("<recursion />");
-					--myht->u.v.nApplyCount;
+					--myht->nApplyCount;
 					break;
 				}
 				phpdbg_xml("<array refstatus=\"%s\" num=\"%d\">", COMMON, zend_hash_num_elements(myht));
@@ -629,9 +629,9 @@ PHPDBG_API void phpdbg_xml_var_dump(zval *zv) {
 				goto head_done;
 			case IS_OBJECT:
 				myht = Z_OBJDEBUG_P(zv, is_temp);
-				if (myht && ++myht->u.v.nApplyCount > 1) {
+				if (myht && ++myht->nApplyCount > 1) {
 					phpdbg_xml("<recursion />");
-					--myht->u.v.nApplyCount;
+					--myht->nApplyCount;
 					break;
 				}
 
@@ -646,7 +646,7 @@ head_done:
 						element_dump_func(val, key, num);
 					} ZEND_HASH_FOREACH_END();
 					zend_hash_apply_with_arguments(myht, (apply_func_args_t) element_dump_func, 0);
-					--myht->u.v.nApplyCount;
+					--myht->nApplyCount;
 					if (is_temp) {
 						zend_hash_destroy(myht);
 						efree(myht);

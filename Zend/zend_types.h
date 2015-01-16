@@ -159,22 +159,14 @@ typedef struct _Bucket {
 
 struct _zend_array {
 	zend_refcounted   gc;
-	union {
-		struct {
-			ZEND_ENDIAN_LOHI_3(
-				zend_uchar    flags,
-				zend_uchar    nApplyCount,
-				uint16_t      reserve)
-		} v;
-		uint32_t flags;
-	} u;
-	uint32_t          nTableSize; /* number of buckets */
-	uint32_t          nTableMask; /* number of hash slots - 1 */
+	uint32_t          nTableMask;        /* number of hash slots - 1 */
 	uint32_t          nNumUsed;
-	uint32_t          nNumOfElements;
-	uint32_t          nInternalPointer;
-	zend_long         nNextFreeElement;
 	void             *pData;
+	uint32_t          nNumOfElements;
+	uint32_t          nTableSize;        /* number of buckets */
+	zend_long         nNextFreeElement;
+	uint32_t          nInternalPointer;
+	uint32_t          nApplyCount;
 	dtor_func_t       pDestructor;
 };
 
@@ -196,7 +188,7 @@ struct _zend_array {
 #define HashTable zend_array
 
 #define HT_INVALID_IDX ((uint32_t) -1)
-#define HT_MIN_MASK    3
+#define HT_MIN_MASK    1
 
 #define HT_MIN_SIZE		8
 #if SIZEOF_SIZE_T == 4
@@ -307,6 +299,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_COUNTED(zval)				(zval).value.counted
 #define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))
 
+#define GC_FLAGS_SHIFT				8
 #define Z_TYPE_FLAGS_SHIFT			8
 #define Z_CONST_FLAGS_SHIFT			16
 
@@ -363,6 +356,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define IS_STR_CONSTANT             (1<<3) /* constant index */
 #define IS_STR_CONSTANT_UNQUALIFIED (1<<4) /* the same as IS_CONSTANT_UNQUALIFIED */
+
+/* array flags */
+#define HT_FLAGS(ht) GC_FLAGS(ht)
 
 /* object flags (zval.value->gc.u.flags) */
 #define IS_OBJ_APPLY_COUNT			0x07

@@ -496,7 +496,7 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		zval *element;
 
-		if (Z_ARRVAL_P(value)->u.v.nApplyCount > 1) {
+		if (Z_ARRVAL_P(value)->nApplyCount > 1) {
 			return;
 		}
 
@@ -504,9 +504,9 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 			ZVAL_DEREF(element);
 			SEPARATE_ZVAL_NOREF(element);
 			if (Z_TYPE_P(element) == IS_ARRAY) {
-				Z_ARRVAL_P(element)->u.v.nApplyCount++;
+				Z_ARRVAL_P(element)->nApplyCount++;
 				php_zval_filter_recursive(element, filter, flags, options, charset, copy);
-				Z_ARRVAL_P(element)->u.v.nApplyCount--;
+				Z_ARRVAL_P(element)->nApplyCount--;
 			} else {
 				php_zval_filter(element, filter, flags, options, charset, copy);
 			}

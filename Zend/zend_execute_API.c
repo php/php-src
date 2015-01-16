@@ -153,8 +153,6 @@ void init_executor(void) /* {{{ */
 	zend_vm_stack_init();
 
 	zend_hash_init(&EG(symbol_table), 64, NULL, ZVAL_PTR_DTOR, 0);
-	GC_REFCOUNT(&EG(symbol_table)) = 1;
-	GC_TYPE_INFO(&EG(symbol_table)) = IS_ARRAY;
 	EG(valid_symbol_table) = 1;
 
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator);
@@ -1434,8 +1432,7 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 		symbol_table = ex->symbol_table = *(EG(symtable_cache_ptr)--);
 	} else {
 		symbol_table = ex->symbol_table = emalloc(sizeof(zend_array));
-		GC_REFCOUNT(symbol_table) = 0;
-		GC_TYPE_INFO(symbol_table) = IS_ARRAY;
+//???		GC_REFCOUNT(symbol_table) = 0;
 		zend_hash_init(symbol_table, ex->func->op_array.last_var, NULL, ZVAL_PTR_DTOR, 0);
 		/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 	}
