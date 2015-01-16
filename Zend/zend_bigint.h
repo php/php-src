@@ -40,26 +40,19 @@ void zend_startup_bigint(void);
  * the data it points is not.
  */
 
-/* Allocates a bigint and returns pointer, does NOT initialise */
-ZEND_API zend_bigint* zend_bigint_alloc(void);
+/* Allocates and initialises ("creates") a bigint, returns pointer */
+ZEND_API zend_bigint* zend_bigint_init(void);
 
-/* Initialises a bigint */
-ZEND_API void zend_bigint_init(zend_bigint *big);
-
-/* Convenience function: Allocates and initialises a bigint, returns pointer */
-ZEND_API zend_bigint* zend_bigint_init_alloc(void);
-
-/* Initialises a bigint from a string with the specified base (in range 2-36)
- * Returns FAILURE on failure (if the string is not entirely numeric), else SUCCESS
+/* Creates a bigint from a string with the specified base (in range 2-36)
+ * Returns NULL on failure (if the string is not entirely numeric)
  */
-ZEND_API int zend_bigint_init_from_string(zend_bigint *big, const char *str, int base);
+ZEND_API zend_bigint* zend_bigint_init_from_string(const char *str, int base);
 
-/* Initialises a bigint from a string with the specified base (in range 2-36)
- * Takes a length - due to an extra memory allocation, this function is slower
- * Returns FAILURE on failure, else SUCCESS */
-ZEND_API int zend_bigint_init_from_string_length(zend_bigint *big, const char *str, size_t length, int base);
+/* Creates a bigint from a string with the specified base (in range 2-36)
+ * Returns NULL on failure */
+ZEND_API zend_bigint* zend_bigint_init_from_string_length(const char *str, size_t length, int base);
 
-/* Intialises a bigint from a C-string with the specified base (10 or 16)
+/* Creates a bigint from a C-string with the specified base (10 or 16)
  * If endptr is not NULL, it it set to point to first character after number
  * If base is zero, it shall be detected from the prefix: 0x/0X for 16, else 10
  * Leading whitespace is ignored, will take as many valid characters as possible
@@ -67,22 +60,22 @@ ZEND_API int zend_bigint_init_from_string_length(zend_bigint *big, const char *s
  * If there are no valid characters, the bigint is initialised to zero
  * This behaviour is supposed to match that of strtol but is not exactly the same
  */
-ZEND_API void zend_bigint_init_strtol(zend_bigint *big, const char *str, char** endptr, int base);
+ZEND_API zend_bigint* zend_bigint_init_strtol(const char *str, char** endptr, int base);
 
-/* Initialises a bigint from a long */
-ZEND_API void zend_bigint_init_from_long(zend_bigint *big, zend_long value);
+/* Creates a bigint from a long */
+ZEND_API zend_bigint* zend_bigint_init_from_long(zend_long value);
 
-/* Initialises a bigint from a double */
-ZEND_API void zend_bigint_init_from_double(zend_bigint *big, double value);
+/* Creates a bigint from a double */
+ZEND_API zend_bigint* zend_bigint_init_from_double(double value);
 
-/* Initialises a bigint and duplicates a bigint to it (copies value) */
-ZEND_API void zend_bigint_init_dup(zend_bigint *big, const zend_bigint *source);
-
-/* Destroys a bigint (does NOT deallocate) */
-ZEND_API void zend_bigint_dtor(zend_bigint *big);
+/* Creates a bigint and from another bigint, duplicating its value */
+ZEND_API zend_bigint* zend_bigint_dup(const zend_bigint *source);
 
 /* Decreases the refcount of a bigint and, if <= 0, destroys and frees it */
 ZEND_API void zend_bigint_release(zend_bigint *big);
+
+/* Destroys and frees a bigint */
+ZEND_API void zend_bigint_free(zend_bigint *big);
 
 /*** INFORMATION ***/
 

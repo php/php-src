@@ -39,29 +39,29 @@
  * emalloc/realloc/free are macros, not functions, so we need wrappers to pass
  * them as our custom allocators
  */
-static void* zend_bigint_malloc(size_t size)
+static void* zend_bigint_custom_malloc(size_t size)
 {
 	return emalloc(size);
 }
-#define XMALLOC zend_bigint_malloc
+#define XMALLOC zend_bigint_custom_malloc
 
-static void* zend_bigint_realloc(void *ptr, size_t size)
+static void* zend_bigint_custom_realloc(void *ptr, size_t size)
 {
 	return erealloc(ptr, size);
 }
-#define XREALLOC zend_bigint_realloc
+#define XREALLOC zend_bigint_custom_realloc
 
-static void* zend_bigint_calloc(size_t num, size_t size)
+static void* zend_bigint_custom_calloc(size_t num, size_t size)
 {
 	return ecalloc(num, size);
 }
-#define XCALLOC zend_bigint_calloc
+#define XCALLOC zend_bigint_custom_calloc
 
-static void zend_bigint_free(void *ptr)
+static void zend_bigint_custom_free(void *ptr)
 {
 	efree(ptr);
 }
-#define XFREE zend_bigint_free
+#define XFREE zend_bigint_custom_free
 
 #include "tommath.h"
 
@@ -204,56 +204,46 @@ void zend_startup_bigint(void)
 
 /*** INITIALISERS ***/
 
-ZEND_API zend_bigint* zend_bigint_alloc(void) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init(void) /* {{{ */
 {
-	return emalloc(sizeof(zend_bigint));
-}
-/* }}} */
-
-ZEND_API void zend_bigint_init(zend_bigint *big) /* {{{ */
-{
-	GC_REFCOUNT(big) = 1;
-	GC_TYPE_INFO(big) = IS_BIGINT;
-	CHECK_ERROR(mp_init(&big->mp));
-}
-/* }}} */
-
-ZEND_API zend_bigint* zend_bigint_init_alloc(void) /* {{{ */
-{
-	zend_bigint *return_value;
-	return_value = zend_bigint_alloc();
-	zend_bigint_init(return_value);
+	zend_bigint *return_value = emalloc(sizeof(zend_bigint));
+	GC_REFCOUNT(return_value) = 1;
+	GC_TYPE_INFO(return_value) = IS_BIGINT;
+	CHECK_ERROR(mp_init(&return_value->mp));
 	return return_value;
 }
 /* }}} */
 
-ZEND_API int zend_bigint_init_from_string(zend_bigint *big, const char *str, int base) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init_from_string(const char *str, int base) /* {{{ */
 {
-	zend_bigint_init(big);
+	zend_bigint *big = zend_bigint_init();
+
 	if (mp_read_radix(&big->mp, str, base) < 0) {
-		mp_clear(&big->mp);
-		return FAILURE;
+		zend_bigint_release(big);
+		return NULL;
 	}
-	return SUCCESS;
+	return big;
 }
 /* }}} */
 
-ZEND_API int zend_bigint_init_from_string_length(zend_bigint *big, const char *str, size_t length, int base) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init_from_string_length(const char *str, size_t length, int base) /* {{{ */
 {
+	zend_bigint *big = zend_bigint_init();
 	char *temp_str = estrndup(str, length);
-	zend_bigint_init(big);
+
 	if (mp_read_radix(&big->mp, temp_str, base) < 0) {
-		mp_clear(&big->mp);
+		zend_bigint_release(big);
 		efree(temp_str);
-		return FAILURE;
+		return NULL;
 	}
 	efree(temp_str);
-	return SUCCESS;
+	return big;
 }
 /* }}} */
 
-ZEND_API void zend_bigint_init_strtol(zend_bigint *big, const char *str, char** endptr, int base) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init_strtol(const char *str, char** endptr, int base) /* {{{ */
 {
+	zend_bigint *big = zend_bigint_init();
 	size_t len = 0;
 
 	/* Skip leading whitespace */
@@ -286,7 +276,6 @@ ZEND_API void zend_bigint_init_strtol(zend_bigint *big, const char *str, char** 
 		}
 	}
 
-	zend_bigint_init(big);
 	if (len) {
 		char *temp_str = estrndup(str, len);
 		/* we ignore the return value since if it fails it'll just be zero anyway */
@@ -297,46 +286,51 @@ ZEND_API void zend_bigint_init_strtol(zend_bigint *big, const char *str, char** 
 	if (endptr) {
 		*endptr = (char*)(str + len);
 	}
+
+	return big;
 }
 /* }}} */
 
-ZEND_API void zend_bigint_init_from_long(zend_bigint *big, zend_long value) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init_from_long(zend_long value) /* {{{ */
 {
-	zend_bigint_init(big);
+	zend_bigint *big = zend_bigint_init();
 	zend_bigint_long_to_mp_int(value, &big->mp);
+	return big;
 }
 /* }}} */
 
-ZEND_API void zend_bigint_init_from_double(zend_bigint *big, double value) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init_from_double(double value) /* {{{ */
 {
-	zend_bigint_init(big);
+	zend_bigint *big = zend_bigint_init();
 	/* prevents crash and ensures zed_dval_to_lval conformity */
 	if (zend_finite(value) && !zend_isnan(value)) {
 		/* FIXME: Handle larger doubles */
 		zend_bigint_long_to_mp_int(zend_dval_to_lval(value), &big->mp);
 	}
+	return big;
 }
 /* }}} */
 
-ZEND_API void zend_bigint_init_dup(zend_bigint *big, const zend_bigint *source) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_dup(const zend_bigint *source) /* {{{ */
 {
-	zend_bigint_init(big);
+	zend_bigint *big = zend_bigint_init();
 	CHECK_ERROR(mp_copy((mp_int *)&source->mp, &big->mp));
-}
-/* }}} */
-
-ZEND_API void zend_bigint_dtor(zend_bigint *big) /* {{{ */
-{
-	mp_clear(&big->mp);
+	return big;
 }
 /* }}} */
 
 ZEND_API void zend_bigint_release(zend_bigint *big) /* {{{ */
 {
 	if (--GC_REFCOUNT(big) <= 0) {
-		zend_bigint_dtor(big);
+		mp_clear(&big->mp);
 		efree(big);
 	}
+}
+
+ZEND_API void zend_bigint_free(zend_bigint *big) /* {{{ */
+{
+	mp_clear(&big->mp);
+	efree(big);
 }
 /* }}} */
 

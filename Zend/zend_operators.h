@@ -162,8 +162,7 @@ static zend_always_inline zend_uchar zend_dval_to_big_or_lval(double d, zend_lon
 	/* >= as (double)LONG_MAX is outside signed range */
 	if (d >= ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
 #endif
-		*big = zend_bigint_alloc();
-		zend_bigint_init_from_double(*big, d);
+		*big = zend_bigint_init_from_double(d);
 		return IS_BIGINT;
 	} else {
 		*lval = zend_dval_to_lval(d);
@@ -534,7 +533,7 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 				 * ensure that 'result' is not updated until after we
 				 * have read the values of op1 and op2.
 				 */
-				zend_bigint *out = zend_bigint_init_alloc();
+				zend_bigint *out = zend_bigint_init();
 				zend_bigint_long_add_long(out, Z_LVAL_P(op1), Z_LVAL_P(op2));
 				ZVAL_BIGINT(result, out);
 			}
@@ -573,7 +572,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 				ZVAL_LONG(result, Z_LVAL_P(op1) - Z_LVAL_P(op2));
 #endif
 			} else {
-				zend_bigint *out = zend_bigint_init_alloc();
+				zend_bigint *out = zend_bigint_init();
 				zend_bigint_long_subtract_long(out, Z_LVAL_P(op1), Z_LVAL_P(op2));
 				ZVAL_BIGINT(result, out);
 			}

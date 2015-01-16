@@ -312,14 +312,14 @@ PHP_FUNCTION(abs)
 		RETURN_DOUBLE(fabs(Z_DVAL_P(value)));
 	} else if (Z_TYPE_P(value) == IS_LONG) {
 		if (Z_LVAL_P(value) == ZEND_LONG_MIN) {
-			zend_bigint *out = zend_bigint_init_alloc();
+			zend_bigint *out = zend_bigint_init();
 			zend_bigint_long_subtract_long(out, 0, ZEND_LONG_MIN);
 			RETURN_BIGINT(out);
 		} else {
 			RETURN_LONG(Z_LVAL_P(value) < 0 ? -Z_LVAL_P(value) : Z_LVAL_P(value));
 		}
 	} else if (Z_TYPE_P(value) == IS_BIGINT) {
-		zend_bigint *out = zend_bigint_init_alloc();
+		zend_bigint *out = zend_bigint_init();
 		zend_bigint_abs(out, Z_BIG_P(value));
 		RETURN_BIGINT(out);
 	}
@@ -1482,8 +1482,7 @@ PHP_FUNCTION(intdiv)
 				RETURN_BOOL(0);
 			} else if (Z_LVAL_P(divisor) == -1 && Z_LVAL_P(numerator) == ZEND_LONG_MIN) {
 				/* Prevent overflow error/crash */
-				zend_bigint *big = zend_bigint_alloc();
-				zend_bigint_init_from_long(big, ZEND_LONG_MIN);
+				zend_bigint *big = zend_bigint_init_from_long(ZEND_LONG_MIN);
 				zend_bigint_divide_long(big, big, -1);
 				RETURN_BIGINT(big);
 			}
@@ -1492,21 +1491,21 @@ PHP_FUNCTION(intdiv)
 			break;
 		case TYPE_PAIR(IS_BIGINT, IS_BIGINT):
 			{
-				zend_bigint *big = zend_bigint_init_alloc();
+				zend_bigint *big = zend_bigint_init();
 				zend_bigint_divide(big, Z_BIG_P(numerator), Z_BIG_P(divisor));
 				RETURN_BIGINT(big);
 			}
 			break;
 		case TYPE_PAIR(IS_BIGINT, IS_LONG):
 			{
-				zend_bigint *big = zend_bigint_init_alloc();
+				zend_bigint *big = zend_bigint_init();
 				zend_bigint_divide_long(big, Z_BIG_P(numerator), Z_LVAL_P(divisor));
 				RETURN_BIGINT(big);
 			}
 			break;
 		case TYPE_PAIR(IS_LONG, IS_BIGINT):
 			{
-				zend_bigint *big = zend_bigint_init_alloc();
+				zend_bigint *big = zend_bigint_init();
 				zend_bigint_long_divide(big, Z_LVAL_P(numerator), Z_BIG_P(divisor));
 				RETURN_BIGINT(big);
 			}

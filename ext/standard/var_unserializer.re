@@ -603,8 +603,7 @@ PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
             zend_bigint *big;
 
 use_bigint:            
-            big = zend_bigint_alloc();
-            zend_bigint_init_from_string_length(big, start + 2, digits, 10);
+            big = zend_bigint_init_from_string_length(start + 2, digits, 10);
             *p = YYCURSOR;
             ZVAL_BIGINT(rval, big);
             return 1;

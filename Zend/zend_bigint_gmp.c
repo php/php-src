@@ -147,56 +147,44 @@ void zend_startup_bigint(void)
 
 /*** INITIALISERS ***/
 
-ZEND_API zend_bigint* zend_bigint_alloc(void) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init(void) /* {{{ */
 {
-	return emalloc(sizeof(zend_bigint));
-}
-/* }}} */
-
-ZEND_API void zend_bigint_init(zend_bigint *big) /* {{{ */
-{
+	zend_bigint *big = emalloc(sizeof(zend_bigint));
 	GC_REFCOUNT(big) = 1;
 	GC_TYPE_INFO(big) = IS_BIGINT;
 	mpz_init(big->mpz);
+	return big;
 }
 /* }}} */
 
-ZEND_API zend_bigint* zend_bigint_init_alloc(void) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init_from_string(const char *str, int base) /* {{{ */
 {
-	zend_bigint *return_value;
-	return_value = zend_bigint_alloc();
-	zend_bigint_init(return_value);
-	return return_value;
-}
-/* }}} */
-
-ZEND_API int zend_bigint_init_from_string(zend_bigint *big, const char *str, int base) /* {{{ */
-{
-	zend_bigint_init(big);
+	zend_bigint *big = zend_bigint_init();
 	if (mpz_set_str(big->mpz, str, base) < 0) {
-		mpz_clear(big->mpz);
-		return FAILURE;
+		zend_bigint_release(big);
+		return NULL;
 	}
-	return SUCCESS;
+	return big;
 }
 /* }}} */
 
-ZEND_API int zend_bigint_init_from_string_length(zend_bigint *big, const char *str, size_t length, int base) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init_from_string_length(const char *str, size_t length, int base) /* {{{ */
 {
+	zend_bigint *big = zend_bigint_init();
 	char *temp_str = estrndup(str, length);
-	zend_bigint_init(big);
 	if (mpz_set_str(big->mpz, temp_str, base) < 0) {
-		mpz_clear(big->mpz);
+		zend_bigint_release(big);
 		efree(temp_str);
-		return FAILURE;
+		return NULL;
 	}
 	efree(temp_str);
-	return SUCCESS;
+	return big;
 }
 /* }}} */
 
-ZEND_API void zend_bigint_init_strtol(zend_bigint *big, const char *str, char** endptr, int base) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init_strtol(const char *str, char** endptr, int base) /* {{{ */
 {
+	zend_bigint *big = zend_bigint_init();
 	size_t len = 0;
 
 	/* Skip leading whitespace */
@@ -229,7 +217,6 @@ ZEND_API void zend_bigint_init_strtol(zend_bigint *big, const char *str, char** 
 		}
 	}
 
-	zend_bigint_init(big);
 	if (len) {
 		char *temp_str = estrndup(str, len);
 		/* we ignore the return value since if it fails it'll just be zero anyway */
@@ -240,45 +227,52 @@ ZEND_API void zend_bigint_init_strtol(zend_bigint *big, const char *str, char** 
 	if (endptr) {
 		*endptr = (char*)(str + len);
 	}
+
+	return big;
 }
 /* }}} */
 
-ZEND_API void zend_bigint_init_from_long(zend_bigint *big, zend_long value) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init_from_long(zend_long value) /* {{{ */
 {
-	zend_bigint_init(big);
+	zend_bigint *big = zend_bigint_init();
 	mpz_set_si(big->mpz, value);
+	return big;
 }
 /* }}} */
 
-ZEND_API void zend_bigint_init_from_double(zend_bigint *big, double value) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_init_from_double(double value) /* {{{ */
 {
-	zend_bigint_init(big);
+	zend_bigint *big = zend_bigint_init();
 	/* prevents crash */
 	if (zend_finite(value) && !zend_isnan(value)) {
 		mpz_set_d(big->mpz, value);
 	}
+	return big;
 }
 /* }}} */
 
-ZEND_API void zend_bigint_init_dup(zend_bigint *big, const zend_bigint *source) /* {{{ */
+ZEND_API zend_bigint* zend_bigint_dup(const zend_bigint *source) /* {{{ */
 {
-	zend_bigint_init(big);
+	zend_bigint *big = zend_bigint_init();
 	mpz_set(big->mpz, source->mpz);
+	return big;
 }
 /* }}} */
 
-ZEND_API void zend_bigint_dtor(zend_bigint *big) /* {{{ */
-{
-	mpz_clear(big->mpz);
-}
-/* }}} */
 
 ZEND_API void zend_bigint_release(zend_bigint *big) /* {{{ */
 {
 	if (--GC_REFCOUNT(big) <= 0) {
-		zend_bigint_dtor(big);
+		mpz_clear(big->mpz);
 		efree(big);
 	}
+}
+/* }}} */
+
+ZEND_API void zend_bigint_free(zend_bigint *big) /* {{{ */
+{
+	mpz_clear(big->mpz);
+	efree(big);
 }
 /* }}} */
 

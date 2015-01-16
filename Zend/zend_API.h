@@ -1191,8 +1191,7 @@ static zend_always_inline int zend_parse_arg_bigint_or_long(zval *arg, zval **de
 			} else if (ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg))) {
 				ZVAL_LONG(arg, zend_dval_to_lval(Z_DVAL_P(arg)));
 			} else {
-				zend_bigint *big = zend_bigint_alloc();
-				zend_bigint_init_from_double(big, Z_DVAL_P(arg));
+				zend_bigint *big = zend_bigint_init_from_double(Z_DVAL_P(arg));
 				ZVAL_BIGINT(arg, big);
 			}
 			return 1;
@@ -1210,8 +1209,7 @@ static zend_always_inline int zend_parse_arg_bigint_or_long(zval *arg, zval **de
 						} else if (ZEND_DOUBLE_FITS_LONG(d)) {
 							ZVAL_LONG(arg, zend_dval_to_lval(d));
 						} else {
-							big = zend_bigint_alloc();
-							zend_bigint_init_from_double(big, d);
+							big = zend_bigint_init_from_double(d);
 							ZVAL_BIGINT(arg, big);
 						}
 					} else if (type == IS_BIGINT) {
@@ -1266,8 +1264,7 @@ static zend_always_inline int zend_parse_arg_bigint(zval *arg, zend_bigint **des
 						if (UNEXPECTED(zend_isnan(d) && !zend_finite(d))) {
 							return 0;
 						} else {
-							big = zend_bigint_alloc();
-							zend_bigint_init_from_double(big, d);
+							big = zend_bigint_init_from_double(d);
 							ZVAL_BIGINT(arg, big);
 							*dest = big;
 						}
@@ -1275,8 +1272,7 @@ static zend_always_inline int zend_parse_arg_bigint(zval *arg, zend_bigint **des
 						ZVAL_BIGINT(arg, big);
 						*dest = big;
 					} else {
-						big = zend_bigint_alloc();
-						zend_bigint_init_from_long(big, l);
+						big = zend_bigint_init_from_long(l);
 						ZVAL_BIGINT(arg, big);
 						*dest = big;
 					}

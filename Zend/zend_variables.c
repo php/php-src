@@ -52,11 +52,8 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 			}
 		case IS_BIGINT: {
 				zend_bigint *big = (zend_bigint*)p;
-				
-				if (--GC_REFCOUNT(big) <= 0) {
-					zend_bigint_dtor(big);
-					efree(big);
-				}
+			
+				zend_bigint_release(big);
 				break;
 			}
 		case IS_CONSTANT_AST: {
@@ -120,8 +117,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 		case IS_BIGINT: {
 				zend_bigint *big = (zend_bigint*)p;
 			
-				zend_bigint_dtor(big);
-				efree(big);
+				zend_bigint_free(big);
 				break;
 			}
 		case IS_CONSTANT_AST: {
@@ -274,11 +270,8 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 				Z_AST_P(zvalue) = ast;
 			}
 			break;
-		case IS_BIGINT: {
-				zend_bigint *bigint = zend_bigint_alloc();
-				zend_bigint_init_dup(bigint, Z_BIG_P(zvalue));
-				Z_BIG_P(zvalue) = bigint;
-			}
+		case IS_BIGINT:
+			Z_BIG_P(zvalue) = zend_bigint_dup(Z_BIG_P(zvalue));
 			break;
 		case IS_OBJECT:
 		case IS_RESOURCE:

@@ -520,15 +520,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		Z_TYPE_INFO_P(__z) = IS_BIGINT_EX;	\
 	}
 
-#define ZVAL_NEW_BIGINT(z) do {									\
-		zval *__z = (z);										\
-		zend_bigint *_big = zend_bigint_alloc();				\
-		GC_REFCOUNT(_big) = 1;									\
-		GC_TYPE_INFO(_big) = IS_BIGINT;							\
-		Z_BIG_P(__z) = _big;									\
-		Z_TYPE_INFO_P(__z) = IS_BIGINT_EX;						\
-	} while (0)
-
 #define ZVAL_STR(z, s) do {						\
 		zval *__z = (z);						\
 		zend_string *__s = (s);					\
