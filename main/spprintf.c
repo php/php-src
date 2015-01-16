@@ -842,27 +842,27 @@ PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list
 
 	xbuf_format_converter(&buf, 1, format, ap);
 
+	/*
+	 * Test 'pbuf'(also known as 'error') against NULL,
+	 * since it is called multiple places without
+	 * checking against NULL, causing null pointer
+	 * dereferences.
+	 */
+	if(!pbuf) {
+		return 0;
+	}
+
 	if (max_len && buf.len > max_len) {
 		buf.len = max_len;
 	}
 
 	smart_string_0(&buf);
 
-	/*
-	 * Test 'pbuf'(also known as 'error') against NULL,
-	 * since it is called multiple places without
-	 * checking against NULL, causing null pointer
-	 *dereferences.
-	 */
 	if (buf.c) {
-		if(pbuf) {
-			*pbuf = buf.c;
-		}
+		*pbuf = buf.c;
 		result = buf.len;
 	} else {
-		if(pbuf) {
-			*pbuf = NULL;
-		}
+		*pbuf = NULL;
 		result = 0;
 	}
 
