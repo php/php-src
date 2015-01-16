@@ -3230,9 +3230,6 @@ PHP_FUNCTION(array_unique)
 	for (idx = 0; idx < i; idx++) {
 		cmpdata = &arTmp[idx];
 		if (Z_TYPE(cmpdata->b.val) != IS_UNDEF) {
-#if 1
-			continue;
-#else
 			if (lastkept == NULL) {
 				lastkept = cmpdata;
 				continue;
@@ -3248,14 +3245,13 @@ PHP_FUNCTION(array_unique)
 					p = &cmpdata->b;
 				}
 			}
-#endif
 		} else {
 			p = &cmpdata->b;
 		}
 		if (p->key == NULL) {
 			zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
 		} else {
-			zend_hash_del(Z_ARRVAL_P(return_value), p->key);
+				zend_hash_del(Z_ARRVAL_P(return_value), p->key);
 		}
 	}
 	pefree(arTmp, Z_ARRVAL_P(array)->u.flags & HASH_FLAG_PERSISTENT);
