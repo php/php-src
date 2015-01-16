@@ -737,39 +737,22 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_l
 			RETVAL_BOOL(0);
 		}
 
-		if ((type = is_numeric_string_ex(trim, trim_len, &p, &d, &big, 0, &overflow_info)) != 0) {
+		if ((type = is_numeric_string_ex(trim, trim_len, &p, &d,
+				(options & PHP_JSON_BIGINT_AS_STRING) ? NULL : &big,
+				0, &overflow_info)) != 0) {
 			if (type == IS_LONG) {
 				RETVAL_LONG(p);
 			} else if (type == IS_DOUBLE) {
-				if (options & PHP_JSON_BIGINT_AS_STRING && overflow_info) {
-					/* Within an object or array, a numeric literal is assumed
-					 * to be an integer if and only if it's entirely made up of
-					 * digits (exponent notation will result in the number
-					 * being treated as a double). We'll match that behaviour
-					 * here. */
-					int i;
-					zend_bool is_float = 0;
-
-					for (i = (trim[0] == '-' ? 1 : 0); i < trim_len; i++) {
-						/* Not using isdigit() because it's locale specific,
-						 * but we expect JSON input to always be UTF-8. */
-						if (trim[i] < '0' || trim[i] > '9') {
-							is_float = 1;
-							break;
-						}
-					}
-
-					if (is_float) {
-						RETVAL_DOUBLE(d);
-					} else {
-						RETVAL_STRINGL(trim, trim_len);
-					}
-				} else {
-					RETVAL_DOUBLE(d);
-				}
+				RETVAL_DOUBLE(d);
 			} else if (type == IS_BIGINT) {
-				/* TODO: double/bigint decode needs to be fixed */
-				RETVAL_BIGINT(big);
+				if (options & PHP_JSON_BIGINT_AS_STRING && overflow_info) {
+					/* no need to release bigint, we won't have got one
+					 * since we passed is_numeric_string_ex NULL
+					 */
+					RETVAL_STRINGL(trim, trim_len);
+				} else {
+					RETVAL_BIGINT(big);
+				}
 			}
 		}
 
