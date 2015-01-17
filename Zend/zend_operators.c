@@ -323,8 +323,6 @@ ZEND_API void convert_to_bigint_or_long(zval *op) /* {{{ */
 
 ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 {
-	zend_long tmp;
-
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 		case IS_FALSE:
@@ -348,7 +346,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 			break;
 		case IS_BIGINT:
 			{
-				long l = zend_bigint_to_long(Z_BIG_P(op));
+				zend_long l = zend_bigint_to_long(Z_BIG_P(op));
 				zval_dtor(op);
 				ZVAL_LONG(op, l);
 			}
@@ -362,9 +360,11 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 			}
 			break;
 		case IS_ARRAY:
-			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_dtor(op);
-			ZVAL_LONG(op, tmp);
+			{
+				zend_long tmp = (zend_hash_num_elements(Z_ARRVAL_P(op)) ? Z_L(1) : Z_L(0));
+				zval_dtor(op);
+				ZVAL_LONG(op, tmp);
+			}
 			break;
 		case IS_OBJECT:
 			{
@@ -389,8 +389,6 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 
 ZEND_API void convert_to_bigint_base(zval *op, int base) /* {{{ */
 {
-	long tmp;
-
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 		case IS_FALSE:
@@ -401,14 +399,14 @@ ZEND_API void convert_to_bigint_base(zval *op, int base) /* {{{ */
 			break;
 		case IS_RESOURCE:
 			{
-				long l = Z_RES_HANDLE_P(op);
+				zend_long l = Z_RES_HANDLE_P(op);
 				zval_ptr_dtor(op);
 				ZVAL_BIGINT(op, zend_bigint_init_from_long(l));
 			}
 			break;
 		case IS_LONG:
 			{
-				long l = Z_LVAL_P(op);
+				zend_long l = Z_LVAL_P(op);
 				ZVAL_BIGINT(op, zend_bigint_init_from_long(l));
 			}
 			break;
@@ -428,9 +426,11 @@ ZEND_API void convert_to_bigint_base(zval *op, int base) /* {{{ */
 			}
 			break;
 		case IS_ARRAY:
-			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_dtor(op);
-			ZVAL_BIGINT(op, zend_bigint_init_from_long(tmp));
+			{ 
+				zend_long tmp = (zend_hash_num_elements(Z_ARRVAL_P(op)) ? Z_L(1) : Z_L(0));
+				zval_dtor(op);
+				ZVAL_BIGINT(op, zend_bigint_init_from_long(tmp));
+			}
 			break;
 		case IS_OBJECT:
 			{
@@ -456,8 +456,6 @@ ZEND_API void convert_to_bigint_base(zval *op, int base) /* {{{ */
 
 ZEND_API void convert_to_bigint_or_long_base(zval *op, int base) /* {{{ */
 {
-	long tmp;
-
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 		case IS_FALSE:
@@ -467,7 +465,7 @@ ZEND_API void convert_to_bigint_or_long_base(zval *op, int base) /* {{{ */
 			ZVAL_LONG(op, 1);
 			break;
 		case IS_RESOURCE: {
-				long l = Z_RES_HANDLE_P(op);
+				zend_long l = Z_RES_HANDLE_P(op);
 				zval_ptr_dtor(op);
 				ZVAL_LONG(op, l);
 			}
@@ -499,9 +497,11 @@ ZEND_API void convert_to_bigint_or_long_base(zval *op, int base) /* {{{ */
 			}
 			break;
 		case IS_ARRAY:
-			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_dtor(op);
-			ZVAL_LONG(op, tmp);
+			{
+				zend_long tmp = (zend_hash_num_elements(Z_ARRVAL_P(op)) ? Z_L(1) : Z_L(0));
+				zval_dtor(op);
+				ZVAL_LONG(op, tmp);
+			}
 			break;
 		case IS_OBJECT:
 			{
@@ -527,8 +527,6 @@ ZEND_API void convert_to_bigint_or_long_base(zval *op, int base) /* {{{ */
 
 ZEND_API void convert_to_double(zval *op) /* {{{ */
 {
-	double tmp;
-
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 		case IS_FALSE:
@@ -564,9 +562,11 @@ ZEND_API void convert_to_double(zval *op) /* {{{ */
 			}
 			break;
 		case IS_ARRAY:
-			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_dtor(op);
-			ZVAL_DOUBLE(op, tmp);
+			{
+				double tmp = (zend_hash_num_elements(Z_ARRVAL_P(op)) ? 1.0 : 0.0);
+				zval_dtor(op);
+				ZVAL_DOUBLE(op, tmp);
+			}
 			break;
 		case IS_OBJECT:
 			{
@@ -611,8 +611,6 @@ ZEND_API void convert_to_null(zval *op) /* {{{ */
 
 ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 {
-	int tmp;
-
 	switch (Z_TYPE_P(op)) {
 		case IS_FALSE:
 		case IS_TRUE:
@@ -654,9 +652,11 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 			}
 			break;
 		case IS_ARRAY:
-			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_dtor(op);
-			ZVAL_BOOL(op, tmp);
+			{
+				zend_uchar tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
+				zval_dtor(op);
+				ZVAL_BOOL(op, tmp);
+			}
 			break;
 		case IS_OBJECT:
 			{
