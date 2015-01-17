@@ -1287,9 +1287,17 @@ PHP_FUNCTION(strtok)
 	char *pe;
 	size_t skipped = 0;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S", &str, &tok) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(tok)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	if (ZEND_NUM_ARGS() == 1) {
 		tok = str;
@@ -4322,9 +4330,17 @@ PHP_FUNCTION(nl2br)
 	zend_bool	is_xhtml = 1;
 	zend_string *result;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &str, &is_xhtml) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(is_xhtml)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	tmp = str->val;
 	end = str->val + str->len;
