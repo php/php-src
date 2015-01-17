@@ -345,7 +345,7 @@ PHP_FUNCTION( collator_sort )
 }
 /* }}} */
 
-static collator_sortkey_swap(collator_sort_key_index_t *p, collator_sort_key_index_t *q) /* {{{ */
+static void collator_sortkey_swap(collator_sort_key_index_t *p, collator_sort_key_index_t *q) /* {{{ */
 {
 	collator_sort_key_index_t t;
 	t = *p;
