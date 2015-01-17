@@ -983,11 +983,16 @@ static zval *to_zval_double(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
 			zend_long lval;
 			double dval;
+			zend_bigint *big;
 
 			whiteSpace_collapse(data->children->content);
-			switch (is_numeric_string((char*)data->children->content, strlen((char*)data->children->content), &lval, &dval, 0)) {
+			switch (is_numeric_string((char*)data->children->content, strlen((char*)data->children->content), &lval, &dval, &big, 0)) {
 				case IS_LONG:
 					ZVAL_DOUBLE(ret, lval);
+					break;
+				case IS_BIGINT:
+					ZVAL_DOUBLE(ret, zend_bigint_to_double(big));
+					zend_bigint_release(big);
 					break;
 				case IS_DOUBLE:
 					ZVAL_DOUBLE(ret, dval);
@@ -1021,13 +1026,17 @@ static zval *to_zval_long(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
 			zend_long lval;
 			double dval;
+			zend_bigint *big;
 
 			whiteSpace_collapse(data->children->content);
 			errno = 0;
 
-			switch (is_numeric_string((char*)data->children->content, strlen((char*)data->children->content), &lval, &dval, 0)) {
+			switch (is_numeric_string((char*)data->children->content, strlen((char*)data->children->content), &lval, &dval, &big, 0)) {
 				case IS_LONG:
 					ZVAL_LONG(ret, lval);
+					break;
+				case IS_BIGINT:
+					ZVAL_BIGINT(ret, big);
 					break;
 				case IS_DOUBLE:
 					ZVAL_DOUBLE(ret, dval);
