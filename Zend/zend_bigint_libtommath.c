@@ -256,11 +256,14 @@ ZEND_API zend_bigint* zend_bigint_init_strtol(const char *str, char** endptr, in
 		len += 1;
 	}
 
-	/* detect hex prefix */
+	/* detect prefix */
 	if (base == 0) {
 		if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X')) {
 			base = 16;
 			str += 2;
+		} else if (str[0] == '0') {
+			base = 8;
+			str++;
 		} else {
 			base = 10;
 		}
@@ -272,6 +275,10 @@ ZEND_API zend_bigint* zend_bigint_init_strtol(const char *str, char** endptr, in
 		}
 	} else if (base == 16) {
 		while (isxdigit(str[len])) {
+			len++;
+		}
+	} else if (base == 8) {
+		while (isdigit(str[len]) && str[len] != '8' && str[len] != '9') {
 			len++;
 		}
 	}

@@ -50,11 +50,13 @@ ZEND_API zend_bigint* zend_bigint_init_from_string_length(const char *str, size_
 
 /* Creates a bigint from a C-string with the specified base (10 or 16)
  * If endptr is not NULL, it it set to point to first character after number
- * If base is zero, it shall be detected from the prefix: 0x/0X for 16, else 10
+ * If base is zero, it shall be detected from the prefix:
+ * 0x/0X for 16, 0 for 8, else 10
  * Leading whitespace is ignored, will take as many valid characters as possible
  * Stops at first non-valid character, else null byte
  * If there are no valid characters, the bigint is initialised to zero
- * This behaviour is supposed to match that of strtol but is not exactly the same
+ * This behaviour is supposed to match that of strtol but may have differences
+ * in practice
  */
 ZEND_API zend_bigint* zend_bigint_init_strtol(const char *str, char** endptr, int base);
 
