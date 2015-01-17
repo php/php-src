@@ -167,14 +167,12 @@ static zend_string *php_win32_mail_trim_header(char *header)
 	ZVAL_STRINGL(&replace, PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE));
 	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1, 0);
 
-//zend_string *php_pcre_replace(zend_string *regex, char *subject, int subject_len, zval *replace_val, int is_callable_replace, int limit, int *replace_count);
-
 	result = php_pcre_replace(regex,
-							  header, (int)strlen(header),
-							  &replace,
-							  0,
-							  -1,
-							  NULL);
+				  header, (int)strlen(header),
+				  &replace,
+				  0,
+				  -1,
+				  NULL);
 
 	if (NULL == result) {
 		zval_ptr_dtor(&replace);
@@ -186,11 +184,11 @@ static zend_string *php_win32_mail_trim_header(char *header)
 	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
 	result2 = php_pcre_replace(regex,
-							   result->val, (int)result->len,
-							   &replace,
-							  0,
-							  -1,
-							  NULL);
+				   result->val, (int)result->len,
+				   &replace,
+				  0,
+				  -1,
+				  NULL);
 	return result;
 #else
 	/* In case we don't have PCRE support (for whatever reason...) simply do nothing and return the unmodified header */
