@@ -1175,8 +1175,6 @@ static zend_never_inline zend_long zend_check_string_offset(zval *dim, int type)
 
 try_again:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
-		zend_uchar type;
-
 		switch(Z_TYPE_P(dim)) {
 			case IS_STRING:
 				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, NULL, -1)) {
