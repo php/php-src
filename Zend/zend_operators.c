@@ -1816,6 +1816,8 @@ ZEND_API int mod_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			}
 			return SUCCESS;
 	}
+
+	return FAILURE;
 }
 /* }}} */
 
@@ -2036,6 +2038,8 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			}
 			return SUCCESS;
 	}
+
+	return FAILURE;
 }
 /* }}} */
 
@@ -2137,6 +2141,8 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			}
 			return SUCCESS;
 	}
+
+	return FAILURE;
 }
 /* }}} */
 
@@ -2239,6 +2245,8 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			
 			return SUCCESS;
 	}
+
+	return FAILURE;
 }
 /* }}} */
 
@@ -2295,6 +2303,8 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			}
 			return SUCCESS;
 	}
+
+	return FAILURE;
 }
 /* }}} */
 
@@ -2337,6 +2347,8 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2) /* {{{ */
 			}
 			return SUCCESS;
 	}
+
+	return FAILURE;
 }
 /* }}} */
 
