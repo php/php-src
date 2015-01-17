@@ -2486,7 +2486,6 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 	int colno = -1;
 	zval zobj;
 	zend_long lval;
-	zend_bigint *big;
 
 	ZVAL_NULL(rv);
 	if (stmt) {
@@ -2495,17 +2494,14 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 				fetch_value(stmt, rv, Z_LVAL_P(member), NULL);
 			}
 		} else if (Z_TYPE_P(member) == IS_BIGINT) {
-			lval =  zend_bigint_to_long(Z_BIG_P(member));
-			if (lval >= 0 && lval < stmt->column_count) {
-				fetch_value(stmt, rv, lval, NULL);
+			if (zend_bigint_can_fit_long(Z_BIG_P(member))) {
+				lval =  zend_bigint_to_long(Z_BIG_P(member));
+				if (lval >= 0 && lval < stmt->column_count) {
+					fetch_value(stmt, rv, lval, NULL);
+				}
 			}
 		} else if (Z_TYPE_P(member) == IS_STRING
-				/* XXX reusing formal param 'type' here */
-			   && (type = is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, &big, 0, NULL)) >= IS_LONG)	{
-			if (IS_BIGINT == type) {
-				lval =  zend_bigint_to_long(big);
-				zend_bigint_release(big);
-			}
+			   && is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, NULL, 0, NULL) == IS_LONG)	{
 			if (lval >= 0 && lval < stmt->column_count) {
 				fetch_value(stmt, rv, lval, NULL);
 			}
