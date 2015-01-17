@@ -667,7 +667,7 @@ END_EXTERN_C()
 
 /* Fast parameter parsing API */
 
-/* TODO: This API is experemental. It may be changed or removed ???
+/* TODO: This API is experimental. It may be changed or removed ???
  * It should be used only for really often used functions.
  * (Keep the original parsing code and wrap usage with #ifndef FAST_ZPP)
  */
