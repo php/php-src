@@ -1186,9 +1186,8 @@ PHP_FUNCTION(octdec)
 /* }}} */
 
 #define RETURN_DEC_TO_BASE(_base) \
-	convert_to_bigint(arg); \
-	if (zend_bigint_cmp_long(Z_BIG_P(arg), ZEND_LONG_MAX) >= 0 \
-		&& zend_bigint_cmp_long(Z_BIG_P(arg), ZEND_LONG_MIN) == -1) { \
+	convert_to_bigint_or_long(arg); \
+	if (IS_LONG == Z_TYPE_P(arg) || IS_BIGINT == Z_TYPE_P(arg) && zend_bigint_can_fit_long(Z_BIG_P(arg))) { \
 		zend_string *result; \
 		convert_to_long_ex(arg); \
 		result = _php_math_longtobase(arg, _base); \
