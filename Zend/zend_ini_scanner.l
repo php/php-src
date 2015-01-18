@@ -29,6 +29,10 @@
 #include <zend_ini_parser.h>
 #include "zend_ini_scanner.h"
 
+#ifdef YYDEBUG
+#undef YYDEBUG
+#endif
+
 #if 0
 # define YYDEBUG(s, c) printf("state: %d char: %c\n", s, c)
 #else
