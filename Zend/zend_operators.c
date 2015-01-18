@@ -313,6 +313,7 @@ ZEND_API void convert_to_bigint(zval *op) /* {{{ */
 }
 /* }}} */
 
+/* Note: This will demote bigints to longs if they fit */
 ZEND_API void convert_to_bigint_or_long(zval *op) /* {{{ */
 {
 	if (Z_TYPE_P(op) != IS_BIGINT && Z_TYPE_P(op) != IS_LONG) {
@@ -454,6 +455,7 @@ ZEND_API void convert_to_bigint_base(zval *op, int base) /* {{{ */
 }
 /* }}} */
 
+/* Note: This will demote bigints to longs if they fit */
 ZEND_API void convert_to_bigint_or_long_base(zval *op, int base) /* {{{ */
 {
 	switch (Z_TYPE_P(op)) {
@@ -484,6 +486,11 @@ ZEND_API void convert_to_bigint_or_long_base(zval *op, int base) /* {{{ */
 			}
 			break;
 		case IS_BIGINT:
+			if (zend_bigint_can_fit_long(Z_BIG_P(op))) {
+				zend_long lval = zend_bigint_to_long(Z_BIG_P(op));
+				zval_dtor(op);
+				ZVAL_LONG(op, lval);
+			}
 			break;
 		case IS_STRING:
 			{

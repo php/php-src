@@ -16,5 +16,4 @@ $b->bar();
 
 ?>
 --EXPECTF--
-Deprecated: Non-static method A::foo() should not be called statically, assuming $this from incompatible context in %s on line %d
-string(1) "B"
+Fatal error: Non-static method A::foo() cannot be called statically, assuming $this from incompatible context in %s on line %d
