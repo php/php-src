@@ -2082,7 +2082,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 
 	if (zend_get_parameters_array_ex(pass_num_args, params + (arg2 ? 2 : 1)) != SUCCESS) {
 		efree(params);
-		WRONG_PARAM_COUNT;
+		WRONG_PARAM_COUNT_WITH_RETVAL(FAILURE);
 	}
 
 	ZVAL_UNDEF(&retval);
