@@ -1185,19 +1185,28 @@ PHP_FUNCTION(octdec)
 }
 /* }}} */
 
+#define RETURN_DEC_TO_BASE(_base) \
+	convert_to_bigint_or_long(arg); \
+	if (IS_LONG == Z_TYPE_P(arg) || IS_BIGINT == Z_TYPE_P(arg) && zend_bigint_can_fit_long(Z_BIG_P(arg))) { \
+		zend_string *result; \
+		convert_to_long_ex(arg); \
+		result = _php_math_longtobase(arg, _base); \
+		RETURN_STR(result); \
+	} else { \
+		RETURN_STRING(zend_bigint_to_string_base(Z_BIG_P(arg), _base)); \
+	}
+
 /* {{{ proto string decbin(int decimal_number)
    Returns a string containing a binary representation of the number */
 PHP_FUNCTION(decbin)
 {
 	zval *arg;
-	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_long_ex(arg);
-	result = _php_math_longtobase(arg, 2);
-	RETURN_STR(result);
+
+	RETURN_DEC_TO_BASE(2);
 }
 /* }}} */
 
@@ -1206,14 +1215,12 @@ PHP_FUNCTION(decbin)
 PHP_FUNCTION(decoct)
 {
 	zval *arg;
-	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_long_ex(arg);
-	result = _php_math_longtobase(arg, 8);
-	RETURN_STR(result);
+
+	RETURN_DEC_TO_BASE(8);
 }
 /* }}} */
 
@@ -1222,14 +1229,12 @@ PHP_FUNCTION(decoct)
 PHP_FUNCTION(dechex)
 {
 	zval *arg;
-	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
 		return;
 	}
-	convert_to_long_ex(arg);
-	result = _php_math_longtobase(arg, 16);
-	RETURN_STR(result);
+
+	RETURN_DEC_TO_BASE(16);
 }
 /* }}} */
 

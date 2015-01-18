@@ -2493,8 +2493,15 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 			if (Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count) {
 				fetch_value(stmt, rv, Z_LVAL_P(member), NULL);
 			}
+		} else if (Z_TYPE_P(member) == IS_BIGINT) {
+			if (zend_bigint_can_fit_long(Z_BIG_P(member))) {
+				lval =  zend_bigint_to_long(Z_BIG_P(member));
+				if (lval >= 0 && lval < stmt->column_count) {
+					fetch_value(stmt, rv, lval, NULL);
+				}
+			}
 		} else if (Z_TYPE_P(member) == IS_STRING
-			   && is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0, NULL) == IS_LONG)	{
+			   && is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, NULL, 0, NULL) == IS_LONG)	{
 			if (lval >= 0 && lval < stmt->column_count) {
 				fetch_value(stmt, rv, lval, NULL);
 			}
@@ -2546,14 +2553,22 @@ static int row_prop_exists(zval *object, zval *member, int check_empty, void **c
 	pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(object);
 	pdo_stmt_t *stmt = row->stmt;
 	int colno = -1;
-	zend_long lval;
 
 	if (stmt) {
 		if (Z_TYPE_P(member) == IS_LONG) {
 			return Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count;
 		} else if (Z_TYPE_P(member) == IS_STRING) {
-			if (is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, 0, NULL) == IS_LONG)	{
-				return lval >=0 && lval < stmt->column_count;
+			zend_long lval;
+			zend_bigint *big;
+			int type = is_numeric_string_ex(Z_STRVAL_P(member), Z_STRLEN_P(member), &lval, NULL, &big, 0, NULL);
+
+			switch (type) {
+				case IS_BIGINT:
+					lval = zend_bigint_to_long(big);
+					zend_bigint_release(big);
+					/* fallthrough */
+				case IS_LONG:
+					return lval >=0 && lval < stmt->column_count;
 			}
 		} else {
 			convert_to_string(member);
