@@ -568,6 +568,17 @@ ZEND_API char* zend_bigint_to_string_base(const zend_bigint *big, int base) /* {
 }
 /* }}} */
 
+ZEND_API zend_string* zend_bigint_to_zend_string_base(const zend_bigint *big, int base, int persistent) /* {{{ */
+{
+	int size;
+	zend_string *str;
+	CHECK_ERROR(mp_radix_size((mp_int*)&big->mp, base, &size));
+	str = zend_string_alloc(size - 1, persistent);
+	CHECK_ERROR(mp_toradix((mp_int*)&big->mp, str->val, base));
+	return str;
+}
+/* }}} */
+
 /*** OPERATIONS **/
 
 ZEND_API void zend_bigint_add(zend_bigint *out, const zend_bigint *op1, const zend_bigint *op2) /* {{{ */

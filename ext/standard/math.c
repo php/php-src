@@ -1193,7 +1193,7 @@ PHP_FUNCTION(octdec)
 		result = _php_math_longtobase(arg, _base); \
 		RETURN_STR(result); \
 	} else { \
-		RETURN_STRING(zend_bigint_to_string_base(Z_BIG_P(arg), _base)); \
+		RETURN_STR(zend_bigint_to_zend_string_base(Z_BIG_P(arg), _base, 0)); \
 	}
 
 /* {{{ proto string decbin(int decimal_number)

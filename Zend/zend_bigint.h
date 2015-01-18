@@ -121,6 +121,9 @@ ZEND_API zend_string* zend_bigint_to_zend_string(const zend_bigint *big, int per
 /* Converts to C string of arbitrary base */
 ZEND_API char* zend_bigint_to_string_base(const zend_bigint *big, int base);
 
+/* Convenience function: Converts to zend string of arbitrary base */
+ZEND_API zend_string* zend_bigint_to_zend_string_base(const zend_bigint *big, int base, int persistent);
+
 /*** OPERATIONS **/
 
 /* By the way, in case you're wondering, you can indeed use something as both
