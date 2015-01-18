@@ -4957,7 +4957,7 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 			const char *unqualified_name;
 			size_t unqualified_name_len;
 			if (zend_get_unqualified_name(old_name, &unqualified_name, &unqualified_name_len)) {
-				/* The form "use A\B" is eqivalent to "use A\B as B" */
+				/* The form "use A\B" is equivalent to "use A\B as B" */
 				new_name = zend_string_init(unqualified_name, unqualified_name_len, 0);
 			} else {
 				new_name = zend_string_copy(old_name);
