@@ -1592,7 +1592,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 		return T_LNUMBER;
 	} else {
-		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, &end));
+		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 		ZEND_ASSERT(end == yytext + yyleng);
 		return T_DNUMBER;
@@ -1618,9 +1618,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			errno = 0;
 			if (yytext[0] == '0') { /* octal overflow */
 				errno = 0;
-				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, &end));
+				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, (const char **)&end));
 			} else {
-				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, &end));
+				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, (const char **)&end));
 			}
 			/* Also not an assert for the same reason */
 			if (end != yytext + yyleng) {
@@ -1659,7 +1659,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		}
 		return T_LNUMBER;
 	} else {
-		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, &end));
+		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 		ZEND_ASSERT(end == hex + len);
 		return T_DNUMBER;
@@ -1688,7 +1688,7 @@ string:
 }
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
-	char *end;
+	const char *end;
 
 	ZVAL_DOUBLE(zendlval, zend_strtod(yytext, &end));
 	/* errno isn't checked since we allow HUGE_VAL/INF overflow */
