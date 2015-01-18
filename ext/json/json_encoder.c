@@ -95,13 +95,18 @@ static inline void php_json_pretty_print_indent(smart_str *buf, int options) /* 
 
 /* }}} */
 
-static inline void php_json_encode_double(smart_str *buf, double d) /* {{{ */
+static inline void php_json_encode_double(smart_str *buf, double d, int options) /* {{{ */
 {
 	if (!zend_isinf(d) && !zend_isnan(d)) {
 		size_t len;
 		char num[PHP_JSON_DOUBLE_MAX_LENGTH];
 		php_gcvt(d, EG(precision), '.', 'e', &num[0]);
 		len = strlen(num);
+		if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && len < PHP_JSON_DOUBLE_MAX_LENGTH - 2) {
+			num[len++] = '.';
+			num[len++] = '0';
+			num[len] = '\0';
+		}
 		smart_str_appendl(buf, num, len);
 	} else {
 		JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
@@ -290,7 +295,7 @@ static void php_json_escape_string(smart_str *buf, char *s, size_t len, int opti
 			if (type == IS_LONG) {
 				smart_str_append_long(buf, p);
 			} else if (type == IS_DOUBLE) {
-				php_json_encode_double(buf, d);
+				php_json_encode_double(buf, d, options);
 			}
 			return;
 		}
@@ -502,7 +507,7 @@ again:
 			break;
 
 		case IS_DOUBLE:
-			php_json_encode_double(buf, Z_DVAL_P(val));
+			php_json_encode_double(buf, Z_DVAL_P(val), options);
 			break;
 
 		case IS_STRING:
