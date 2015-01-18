@@ -15,6 +15,10 @@ strrpos() function
 	var_dump(@strrpos("a", ""));
 	var_dump(@strrpos("", "a"));
 	var_dump(@strrpos("\\\\a", "\\a"));
+	var_dump(strrpos("/documents/show/5474", '/', -20));
+	var_dump(@strrpos("/documents/show/5474", '/d', -21));
+	var_dump(strrpos("/documents/show/5474", 'd', -19));
+	var_dump(strrpos("/documents/show/5474", '/d', -15));
 ?>
 --EXPECT--
 int(5)
@@ -30,3 +34,7 @@ bool(false)
 bool(false)
 bool(false)
 int(1)
+int(0)
+bool(false)
+int(1)
+int(0)

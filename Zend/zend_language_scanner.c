@@ -2957,7 +2957,7 @@ yy154:
 		yyleng = YYCURSOR - SCNG(yy_text);
 #line 1682 "Zend/zend_language_scanner.l"
 		{
-	char *end;
+	const char *end;
 
 	ZVAL_DOUBLE(zendlval, zend_strtod(yytext, &end));
 	/* errno isn't checked since we allow HUGE_VAL/INF overflow */

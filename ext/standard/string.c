@@ -2050,8 +2050,8 @@ PHP_FUNCTION(strrpos)
 			RETURN_FALSE;
 		}
 		p = haystack->val;
-		if (haystack->len + (size_t)offset >= needle_len) {
-			e = haystack->val + haystack->len + (size_t)offset + needle_len;
+		if (haystack->len + offset + 1 >= needle_len) {
+			e = haystack->val + haystack->len + offset + needle_len;
 		} else {
 			e = haystack->val + haystack->len;
 		}
@@ -2149,8 +2149,8 @@ PHP_FUNCTION(strripos)
 			RETURN_FALSE;
 		}
 		p = haystack_dup->val;
-		if (haystack->len + (size_t)offset >= needle->len) {
-			e = haystack_dup->val + haystack->len + (size_t)offset + needle->len;
+		if (haystack->len + offset + 1 >= needle->len) {
+			e = haystack_dup->val + haystack->len + offset + needle->len;
 		} else {
 			e = haystack_dup->val + haystack->len;
 		}
