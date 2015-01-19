@@ -4090,6 +4090,7 @@ PHP_FUNCTION(array_diff)
 	zval *value;
 	zend_string *str, *key;
 	zend_long idx;
+	zval dummy;
 
 	if (ZEND_NUM_ARGS() < 2) {
 		php_error_docref(NULL, E_WARNING, "at least 2 parameters are required, %d given", ZEND_NUM_ARGS());
@@ -4120,12 +4121,13 @@ PHP_FUNCTION(array_diff)
 		return;
 	}
 
+	ZVAL_NULL(&dummy);
 	/* create exclude map */
 	zend_hash_init(&exclude, num, NULL, NULL, 0);
 	for (i = 1; i < argc; i++) {
 		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(args[i]), value) {
 			str = zval_get_string(value);
-			zend_hash_add_empty_element(&exclude, str);
+			zend_hash_add(&exclude, str, &dummy);
 			zend_string_release(str);
 		} ZEND_HASH_FOREACH_END();
 	}
