@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2014, PHP 5.5.22
 
+- Date:
+  . Fixed bug #45081 (strtotime incorrectly interprets SGT time zone). (Derick)
+
 - Sqlite3:
   . Fix bug #68260 (SQLite3Result::fetchArray declares wrong 
     required_num_args). (Julien)
