@@ -334,9 +334,9 @@ static timelib_sll do_years(timelib_sll year)
 static timelib_sll do_months(timelib_ull month, timelib_ull year)
 {
 	if (timelib_is_leap(year)) {
-		return ((month_tab_leap[month - 1] + 1) * SECS_PER_DAY);
+		return (((timelib_ull)month_tab_leap[month - 1] + 1) * SECS_PER_DAY);
 	} else {
-		return ((month_tab[month - 1]) * SECS_PER_DAY);
+		return (((timelib_ull)month_tab[month - 1]) * SECS_PER_DAY);
 	}
 }
 
@@ -361,7 +361,7 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 		case TIMELIB_ZONETYPE_OFFSET:
 
 			tz->is_localtime = 1;
-			return tz->z * 60;
+			return (timelib_sll)tz->z * 60;
 			break;
 
 		case TIMELIB_ZONETYPE_ABBR: {
