@@ -186,6 +186,9 @@ typedef struct _zend_ast_decl {
 	zend_ast *child[3];
 } zend_ast_decl;
 
+typedef void (*zend_ast_process_t)(zend_ast *ast);
+extern zend_ast_process_t zend_ast_process;
+
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr);
 
 ZEND_API zend_ast *zend_ast_create_ex(zend_ast_kind kind, zend_ast_attr attr, ...);
