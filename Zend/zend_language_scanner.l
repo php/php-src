@@ -586,6 +586,9 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 		if (compiler_result != 0) { /* parser error */
 			zend_bailout();
 		}
+		if (zend_ast_process) {
+			zend_ast_process(CG(ast));
+		}
 		zend_compile_top_stmt(CG(ast));
 		zend_ast_destroy(CG(ast));
 		zend_arena_destroy(CG(ast_arena));
@@ -747,6 +750,9 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 
 			zend_stack_push(&CG(context_stack), (void *) &CG(context));
 			zend_init_compiler_context();
+			if (zend_ast_process) {
+				zend_ast_process(CG(ast));
+			}
 			zend_compile_top_stmt(CG(ast));
 			zend_do_end_compilation();
 			zend_emit_final_return(NULL);
