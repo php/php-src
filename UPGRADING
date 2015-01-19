@@ -135,6 +135,9 @@ PHP X.Y UPGRADE NOTES
 - GMP
   . Added gmp_random_seed()
 
+- Standard
+  . Added cmp()
+
 ========================================
 7. New Classes and Interfaces
 ========================================

@@ -433,6 +433,19 @@ PHP_FUNCTION(is_callable)
 }
 /* }}} */
 
+/* {{{ proto int cmp(mixed var1, mixed var2)
+   Returns < 0 if var1 is less than var2; > 0 if var1 is greater than var2, and 0 if they are equal. */
+PHP_FUNCTION(cmp)
+{
+	zval *var1, *var2;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &var1, &var2) == FAILURE) {
+		return;
+	}
+
+	compare_function(return_value, var1, var2);
+}
+/* }}} */
 /*
  * Local variables:
  * tab-width: 4
