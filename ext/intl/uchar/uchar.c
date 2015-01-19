@@ -6,7 +6,7 @@
 
 #define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
 
-inline int convert_cp(UChar32* pcp, zval *zcp) {
+static inline int convert_cp(UChar32* pcp, zval *zcp) {
 	zend_long cp = -1;
 	if (Z_TYPE_P(zcp) == IS_LONG) {
 		cp = Z_LVAL_P(zcp);
@@ -534,7 +534,8 @@ IC_METHOD(getFC_NFKC_Closure) {
 	zval *zcp;
 	UChar *closure;
 	char *ret;
-	int32_t closure_len, ret_len;
+	int32_t closure_len;
+	size_t ret_len;
 	UErrorCode error = U_ZERO_ERROR;
 
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
