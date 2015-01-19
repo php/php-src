@@ -1621,7 +1621,7 @@ int php_request_startup(void)
 		if (PG(max_input_time) == -1) {
 			zend_set_timeout(EG(timeout_seconds), 1);
 		} else {
-			zend_set_timeout(PG(max_input_time), 1);
+		        zend_set_input_timeout(PG(max_input_time));
 		}
 
 		/* Disable realpath cache if an open_basedir is set */
