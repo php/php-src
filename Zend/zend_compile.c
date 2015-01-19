@@ -3251,23 +3251,23 @@ void zend_compile_while(zend_ast *ast) /* {{{ */
 {
 	zend_ast *cond_ast = ast->child[0];
 	zend_ast *stmt_ast = ast->child[1];
-
 	znode cond_node;
-	uint32_t opnum_start, opnum_jmpz;
+	uint32_t opnum_start, opnum_jmp, opnum_cond;
 
-	opnum_start = get_next_op_number(CG(active_op_array));
-	zend_compile_expr(&cond_node, cond_ast);
+	opnum_jmp = zend_emit_jump(0);
 
-	opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
 	zend_begin_loop();
 
+	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_compile_stmt(stmt_ast);
 
-	zend_emit_jump(opnum_start);
+	opnum_cond = get_next_op_number(CG(active_op_array));
+	zend_update_jump_target(opnum_jmp, opnum_cond);
+	zend_compile_expr(&cond_node, cond_ast);
 
-	zend_update_jump_target_to_next(opnum_jmpz);
+	zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, opnum_start);
 
-	zend_end_loop(opnum_start, 0);
+	zend_end_loop(opnum_cond, 0);
 }
 /* }}} */
 
@@ -3323,27 +3323,27 @@ void zend_compile_for(zend_ast *ast) /* {{{ */
 	zend_ast *stmt_ast = ast->child[3];
 
 	znode result;
-	uint32_t opnum_cond, opnum_jmpz, opnum_loop;
+	uint32_t opnum_start, opnum_cond, opnum_jmp, opnum_loop;
 
 	zend_compile_expr_list(&result, init_ast);
 	zend_do_free(&result);
 
-	opnum_cond = get_next_op_number(CG(active_op_array));
-	zend_compile_expr_list(&result, cond_ast);
-	zend_do_extended_info();
+	opnum_jmp = zend_emit_jump(0);
 
-	opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &result, 0);
 	zend_begin_loop();
 
+	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_compile_stmt(stmt_ast);
 
 	opnum_loop = get_next_op_number(CG(active_op_array));
 	zend_compile_expr_list(&result, loop_ast);
 	zend_do_free(&result);
 
-	zend_emit_jump(opnum_cond);
+	zend_update_jump_target_to_next(opnum_jmp);
+	zend_compile_expr_list(&result, cond_ast);
+	zend_do_extended_info();
 
-	zend_update_jump_target_to_next(opnum_jmpz);
+	zend_emit_cond_jump(ZEND_JMPNZ, &result, opnum_start);
 
 	zend_end_loop(opnum_loop, 0);
 }
