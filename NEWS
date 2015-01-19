@@ -43,6 +43,7 @@
   . Invalid octal literals in source code now produce compile errors, fixes PHPSadness #31. (Andrea)
   . Removed dl() function on fpm-fcgi. (Nikita)
   . Removed support for hexadecimal numeric strings. (Nikita)
+  . Added <=> operator. (Andrea)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values

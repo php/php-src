@@ -121,6 +121,7 @@ PHP X.Y UPGRADE NOTES
   . Added \u{xxxxxx} Unicode Codepoint Escape Syntax for double-quoted strings
     and heredocs.
   . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did.
+  . Added the comparison operator (<=>), aka the spaceship operator.
 
 ========================================
 3. Changes in SAPI modules
