@@ -797,29 +797,55 @@ PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int 
 	char mask[256];
 
 	if (what) {
-		php_charmask((unsigned char*)what, what_len, mask);
-
-		if (mode & 1) {
-			for (i = 0; i < len; i++) {
-				if (mask[(unsigned char)c[i]]) {
-					trimmed++;
-				} else {
-					break;
-				}
-			}
-			len -= trimmed;
-			c += trimmed;
-		}
-		if (mode & 2) {
-			if (len > 0) {
-				i = len - 1;
-				do {
-					if (mask[(unsigned char)c[i]]) {
-						len--;
+		if (what_len == 1) {
+			if (mode & 1) {
+				for (i = 0; i < len; i++) {
+					if (c[i] == *what) {
+						trimmed++;
 					} else {
 						break;
 					}
-				} while (i-- != 0);
+				}
+				len -= trimmed;
+				c += trimmed;
+			}
+			if (mode & 2) {
+				if (len > 0) {
+					i = len - 1;
+					do {
+						if (c[i] == *what) {
+							len--;
+						} else {
+							break;
+						}
+					} while (i-- != 0);
+				}
+			}
+		} else {
+			php_charmask((unsigned char*)what, what_len, mask);
+
+			if (mode & 1) {
+				for (i = 0; i < len; i++) {
+					if (mask[(unsigned char)c[i]]) {
+						trimmed++;
+					} else {
+						break;
+					}
+				}
+				len -= trimmed;
+				c += trimmed;
+			}
+			if (mode & 2) {
+				if (len > 0) {
+					i = len - 1;
+					do {
+						if (mask[(unsigned char)c[i]]) {
+							len--;
+						} else {
+							break;
+						}
+					} while (i-- != 0);
+				}
 			}
 		}
 	} else {
