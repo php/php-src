@@ -91,10 +91,9 @@ ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t co
 /* }}} */
 
 static inline void zend_sort_2(void *a, void *b, compare_func_t cmp, swap_func_t swp) /* {{{ */ {
-	if (cmp(a, b) <= 0) {
-		return;
+	if (cmp(a, b) > 0) {
+		swp(a, b);
 	}
-	swp(a, b);
 }
 /* }}} */
 
@@ -109,7 +108,7 @@ static inline void zend_sort_3(void *a, void *b, void *c, compare_func_t cmp, sw
 		}
 		return;
 	}
-	if (cmp(b, c) >= 0) {
+	if (cmp(c, b) <= 0) {
 		swp(a, c);
 		return;
 	}
@@ -215,7 +214,7 @@ ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_fun
 						}
 						if (j == start + siz) {
 							j -= siz;
-							if (cmp(j, i) < 0) {
+							if (cmp(i, j) > 0) {
 								j += siz;
 							}
 							break;
@@ -338,7 +337,7 @@ ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp
 			i = pivot + siz;
 			j = end - siz;
 			while (1) {
-				while (cmp(i, pivot) < 0) {
+				while (cmp(pivot, i) > 0) {
 					i += siz;
 					if (UNEXPECTED(i == j)) {
 						goto done;
@@ -348,7 +347,7 @@ ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp
 				if (UNEXPECTED(j == i)) {
 					goto done;
 				}
-				while (cmp(pivot, j) < 0) {
+				while (cmp(j, pivot) > 0) {
 					j -= siz;
 					if (UNEXPECTED(j == i)) {
 						goto done;
