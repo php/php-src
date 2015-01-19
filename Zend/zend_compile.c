@@ -3527,13 +3527,21 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 		zend_compile_expr(&cond_node, cond_ast);
 
-		opline = zend_emit_op(NULL, ZEND_CASE, &expr_node, &cond_node);
-		SET_NODE(opline->result, &case_node);
-		if (opline->op1_type == IS_CONST) {
-			zval_copy_ctor(CT_CONSTANT(opline->op1));
-		}
+		if (expr_node.op_type == IS_CONST
+			&& Z_TYPE(expr_node.u.constant) == IS_FALSE) {
+			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
+		} else if (expr_node.op_type == IS_CONST
+			&& Z_TYPE(expr_node.u.constant) == IS_TRUE) {
+			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, 0);
+		} else {		    
+			opline = zend_emit_op(NULL, ZEND_CASE, &expr_node, &cond_node);
+			SET_NODE(opline->result, &case_node);
+			if (opline->op1_type == IS_CONST) {
+				zval_copy_ctor(CT_CONSTANT(opline->op1));
+			}
 
-		jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &case_node, 0);
+			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &case_node, 0);
+		}
 	}
 
 	opnum_default_jmp = zend_emit_jump(0);
@@ -5124,7 +5132,32 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	zend_emit_op_tmp(result, opcode, &left_node, &right_node);
+	do {
+		if (opcode == ZEND_IS_EQUAL || opcode == ZEND_IS_NOT_EQUAL) {
+			if (left_node.op_type == IS_CONST) {
+				if (Z_TYPE(left_node.u.constant) == IS_FALSE) {
+					opcode = (opcode == ZEND_IS_NOT_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
+					zend_emit_op_tmp(result, opcode, &right_node, NULL);
+					break;
+				} else if (Z_TYPE(left_node.u.constant) == IS_TRUE) {
+					opcode = (opcode == ZEND_IS_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
+					zend_emit_op_tmp(result, opcode, &right_node, NULL);
+					break;
+				}
+			} else if (right_node.op_type == IS_CONST) {
+				if (Z_TYPE(right_node.u.constant) == IS_FALSE) {
+					opcode = (opcode == ZEND_IS_NOT_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
+					zend_emit_op_tmp(result, opcode, &left_node, NULL);
+					break;
+				} else if (Z_TYPE(right_node.u.constant) == IS_TRUE) {
+					opcode = (opcode == ZEND_IS_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
+					zend_emit_op_tmp(result, opcode, &left_node, NULL);
+					break;
+				}
+			}
+		}
+		zend_emit_op_tmp(result, opcode, &left_node, &right_node);
+	} while (0);
 }
 /* }}} */
 
