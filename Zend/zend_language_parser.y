@@ -229,6 +229,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> top_statement namespace_name name statement function_declaration_statement
 %type <ast> class_declaration_statement trait_declaration_statement
 %type <ast> interface_declaration_statement interface_extends_list
+%type <ast> batch_use_declarations inline_use_declarations inline_use_declaration
 %type <ast> use_declaration const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
@@ -297,10 +298,32 @@ top_statement:
 	|	T_NAMESPACE { RESET_DOC_COMMENT(); }
 		'{' top_statement_list '}'
 			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, NULL, $4); }
+	|	T_USE batch_use_declarations ';'		{ $$ = $2; }
 	|	T_USE use_declarations ';'				{ $$ = $2; $$->attr = T_CLASS; }
 	|	T_USE T_FUNCTION use_declarations ';'	{ $$ = $3; $$->attr = T_FUNCTION; }
 	|	T_USE T_CONST use_declarations ';'		{ $$ = $3; $$->attr = T_CONST; }
 	|	T_CONST const_list ';'					{ $$ = $2; }
+;
+
+batch_use_declarations:
+	namespace_name '{' inline_use_declarations '}'
+		{$$ = zend_ast_create(ZEND_AST_BATCH_USE, $1, $3);}
+;
+
+inline_use_declarations:
+		inline_use_declarations ',' inline_use_declaration
+			{ $$ = zend_ast_list_add($1, $3); }
+	|	inline_use_declaration
+			{ $$ = zend_ast_create_list(1, ZEND_AST_USE, $1); }
+;
+
+inline_use_declaration:
+		use_declaration
+			{ $$ = $1; $$->attr = T_CLASS; }
+	|	T_FUNCTION use_declaration
+			{ $$ = $2; $$->attr = T_FUNCTION; }
+	|	T_CONST use_declaration
+			{ $$ = $2; $$->attr = T_CONST; }
 ;
 
 use_declarations:

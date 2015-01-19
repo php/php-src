@@ -4935,6 +4935,26 @@ static void zend_check_already_in_use(uint32_t type, zend_string *old_name, zend
 }
 /* }}} */
 
+void zend_compile_batch_use(zend_ast *ast) /* {{{ */
+{
+	zend_string *ns = zend_ast_get_str(ast->child[0]);
+	zend_ast_list *list = zend_ast_get_list(ast->child[1]);
+	uint32_t i;
+
+	for (i = 0; i < list->children; i++) {
+		zend_ast *use = list->child[i];
+		zval *name_zval = zend_ast_get_zval(use->child[0]);
+		zend_string *name = Z_STR_P(name_zval);
+		zend_string *compound_ns = zend_concat_names(ns->val, ns->len, name->val, name->len);
+		zend_string_release(name);
+		ZVAL_STR(name_zval, compound_ns);
+		zend_ast_list *inline_use = zend_ast_create_list(1, ZEND_AST_USE, use);
+		inline_use->attr = use->attr;
+		zend_compile_use(inline_use);
+	}
+}
+/* }}} */
+
 void zend_compile_use(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -6438,6 +6458,9 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			break;
 		case ZEND_AST_CLASS:
 			zend_compile_class_decl(ast);
+			break;
+		case ZEND_AST_BATCH_USE:
+			zend_compile_batch_use(ast);
 			break;
 		case ZEND_AST_USE:
 			zend_compile_use(ast);
