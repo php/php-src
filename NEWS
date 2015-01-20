@@ -6,7 +6,7 @@
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
 - Sqlite3:
-  . Fix bug #68260 (SQLite3Result::fetchArray declares wrong 
+  . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong 
     required_num_args). (Julien)
 
 - PDO_mysql:
@@ -35,12 +35,13 @@
   . Fixed bug #65576 (Constructor from trait conflicts with inherited
     constructor). (dunglas at gmail dot com)
   . Fixed bug #68676 (Explicit Double Free). (Kalle)
+  . Fixed bug #68710 (Use After Free Vulnerability in PHP's unserialize()).
+    (CVE-2015-0231) (Stefan Esser)
 
 - CGI:
-  . Fix bug #68618 (out of bounds read crashes php-cgi). (Stas)
-
-- CLI server:
-  . Fix bug #68745 (Invalid HTTP requests make web server segfault). (Adam)
+  . Fixed bug #68618 (out of bounds read crashes php-cgi). (CVE-2014-9427)
+    (Stas)
+  . Fixed bug #68745 (Invalid HTTP requests make web server segfault). (Adam)
 
 - cURL:
   . Fixed bug #67643 (curl_multi_getcontent returns '' when
@@ -49,6 +50,10 @@
 - Date:
   . Implemented FR #68268 (DatePeriod: Getter for start date, end date and 
     interval). (Marc Bennewitz)
+
+- EXIF:
+  . Fixed bug #68799: Free called on unitialized pointer. (CVE-2015-0232)
+    (Stas)
 
 - Fileinfo:
   . Fixed bug #68398 (msooxml matches too many archives). (Anatol)
