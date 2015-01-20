@@ -475,21 +475,13 @@ ZEND_FUNCTION(func_get_args)
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			i = 0;
 			p = ZEND_CALL_ARG(ex, 1);
-			if (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg) {
+			if (arg_count > first_extra_arg) {
 				while (i < first_extra_arg) {
 					q = p;
 					ZVAL_DEREF(q);
 					if (Z_OPT_REFCOUNTED_P(q)) Z_ADDREF_P(q);
 					ZEND_HASH_FILL_ADD(q);
-//					q->h = i;
-//					q->key = NULL;
-//					if (!Z_ISREF_P(p)) {
-//						ZVAL_COPY(&q->val, p);
-//					} else {
-//						ZVAL_COPY(&q->val, Z_REFVAL_P(p));
-//				    }
 					p++;
-//					q++;
 					i++;
 				}
 				p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
@@ -499,15 +491,7 @@ ZEND_FUNCTION(func_get_args)
 				ZVAL_DEREF(q);
 				if (Z_OPT_REFCOUNTED_P(q)) Z_ADDREF_P(q);
 				ZEND_HASH_FILL_ADD(q);
-//				q->h = i;
-//				q->key = NULL;
-//				if (!Z_ISREF_P(p)) {
-//					ZVAL_COPY(&q->val, p);
-//				} else {
-//					ZVAL_COPY(&q->val, Z_REFVAL_P(p));
-//			    }
 				p++;
-//				q++;
 				i++;
 			}
 		} ZEND_HASH_FILL_END();
