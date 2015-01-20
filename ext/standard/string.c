@@ -4550,11 +4550,12 @@ PHP_FUNCTION(setlocale)
 					}
 					if (len == loc->len && !memcmp(loc->val, retval, len)) {
 						BG(locale_string) = zend_string_copy(loc);
+						RETURN_STR(BG(locale_string));
 					} else {
 						BG(locale_string) = zend_string_init(retval, len, 0);
 						zend_string_release(loc);
+						RETURN_STR(zend_string_copy(BG(locale_string)));
 					}
-					RETURN_STR(zend_string_copy(BG(locale_string)));
 				} else if (len == loc->len && !memcmp(loc->val, retval, len)) {
 					RETURN_STR(loc);
 				}
