@@ -813,6 +813,11 @@ PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap
 {
 	smart_str xbuf = {0};
 
+	/* since there are places where (v)spprintf called without checking for null,
+	   a bit of defensive coding here */
+	if(!pbuf) {
+		return 0;
+	}
 	xbuf_format_converter(&xbuf, format, ap);
 
 	if (max_len && xbuf.len > max_len) {
