@@ -1442,16 +1442,16 @@ int LSAPI_ReqBodyGetLine_r( LSAPI_Request * pReq, char * pBuf, size_t bufLen, in
     char * pBufCur = pBuf;
     char * pCur;
     char * p;
-    if (!pReq || (pReq->m_fd ==-1) ||( !pBuf )||(bufLen < 0 )|| !getLF )
+    if (!pReq || (pReq->m_fd ==-1) ||( !pBuf )|| !getLF )
         return -1;
     *getLF = 0;
     while( (left = pBufEnd - pBufCur ) > 0 )
     {
 
         len = pReq->m_bufRead - pReq->m_bufProcessed;
-        if ( len <= 0 )
+        if ( len == 0 )
         {
-            if ( (len = readBodyToReqBuf( pReq )) <= 0 )
+            if ( (len = readBodyToReqBuf( pReq )) == 0 )
             {
                 *getLF = 1;
                 break;
@@ -1486,7 +1486,7 @@ ssize_t LSAPI_ReadReqBody_r( LSAPI_Request * pReq, char * pBuf, size_t bufLen )
     ssize_t len;
     off_t total;
     /* char *pOldBuf = pBuf; */
-    if (!pReq || (pReq->m_fd ==-1) || ( !pBuf )||(bufLen < 0 ))
+    if (!pReq || (pReq->m_fd ==-1) || ( !pBuf ))
         return -1;
 
     total = pReq->m_reqBodyLen - pReq->m_reqBodyRead;
@@ -1517,7 +1517,7 @@ ssize_t LSAPI_ReadReqBody_r( LSAPI_Request * pReq, char * pBuf, size_t bufLen )
             pBuf += len;
             bufLen -= len;
         }
-        else if ( len <= 0 )
+        else if ( len == 0 )
         {
             if ( !total)
                 return -1;
