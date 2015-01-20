@@ -46,6 +46,7 @@
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
+  . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
 - DOM:
   . Made DOMNode::textContent writeable. (Tjerk)
