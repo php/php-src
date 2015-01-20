@@ -2,7 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20?? PHP 5.4.37
 - CGI:
-  . Fix bug #68618 (out of bounds read crashes php-cgi). (Stas)
+  . Fixed bug #68618 (out of bounds read crashes php-cgi). (Stas)
+
+- EXIF:
+  . Fix bug #68799: Free called on unitialized pointer. (CVE-2015-0232) (Stas)
 
 - Fileinfo:
   . Removed readelf.c and related code from libmagic sources
