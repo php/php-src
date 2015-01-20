@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20?? PHP 5.4.37
+?? ??? 20?? PHP 5.4.38
+
+22 Jan 2015 PHP 5.4.37
 - Core:
   . Fixed bug #68710 (Use After Free Vulnerability in PHP's unserialize()).
     (CVE-2015-0231) (Stefan Esser)
