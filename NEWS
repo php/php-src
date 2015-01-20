@@ -9,7 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
 - Sqlite3:
-  . Fix bug #68260 (SQLite3Result::fetchArray declares wrong 
+  . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong 
     required_num_args). (Julien)
 
 - PDO_mysql:
@@ -35,16 +35,22 @@ PHP                                                                        NEWS
   . Fixed bug #68594 (Use after free vulnerability in unserialize()).
     (CVE-2014-8142) (Stefan Esser)
   . Fixed bug #68676 (Explicit Double Free). (Kalle)
+  . Fixed bug #68710 (Use After Free Vulnerability in PHP's unserialize()).
+    (CVE-2015-0231) (Stefan Esser)
 
 - CGI:
-  . Fix bug #68618 (out of bounds read crashes php-cgi). (Stas)
+  . Fixed bug #68618 (out of bounds read crashes php-cgi). (CVE-2014-9427)
+    (Stas)
 
 - CLI server:
-  . Fix bug #68745 (Invalid HTTP requests make web server segfault). (Adam)
+  . Fixed bug #68745 (Invalid HTTP requests make web server segfault). (Adam)
 
 - cURL:
   . Fixed bug #67643 (curl_multi_getcontent returns '' when
     CURLOPT_RETURNTRANSFER isn't set). (Jille Timmermans)
+
+- EXIF:
+  . Fixed bug #68799: Free called on unitialized pointer. (CVE-2015-0232) (Stas)
 
 - Fileinfo:
   . Fixed bug #68671 (incorrect expression in libmagic).
