@@ -12,7 +12,8 @@ PHP                                                                        NEWS
     (Stas)
 
 - EXIF:
-  . Fix bug #68799: Free called on unitialized pointer. (CVE-2015-0232) (Stas)
+  . Fixed bug #68799: Free called on unitialized pointer. (CVE-2015-0232) 
+    (Stas)
 
 - Fileinfo:
   . Removed readelf.c and related code from libmagic sources
