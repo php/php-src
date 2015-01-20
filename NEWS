@@ -8,7 +8,8 @@ PHP                                                                        NEWS
     (CVE-2015-0231) (Stefan Esser)
 
 - CGI:
-  . Fixed bug #68618 (out of bounds read crashes php-cgi). (Stas)
+  . Fixed bug #68618 (out of bounds read crashes php-cgi). (CVE-2014-9427)
+    (Stas)
 
 - EXIF:
   . Fix bug #68799: Free called on unitialized pointer. (CVE-2015-0232) (Stas)
