@@ -2376,7 +2376,7 @@ PHP_FUNCTION(array_slice)
 	if (!preserve_keys && (Z_ARRVAL_P(input)->u.flags & HASH_FLAG_PACKED)) {
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(input), num_key, entry) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
 				pos++;
 				if (pos <= offset) {
 					continue;
