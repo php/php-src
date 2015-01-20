@@ -3891,7 +3891,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 	int state = 0;
 	int crlf_state = -1;
 	char *token = NULL;
-	size_t token_pos;
+	size_t token_pos = 0;
 	zend_string *fld_name, *fld_val;
 
 	ps = str;
@@ -3917,7 +3917,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 				}
 
 				if (state == 0 || state == 1) {
-					if(token) {
+					if(token && token_pos > 0) {
 						fld_name = zend_string_init(token, token_pos, 0);
 					}
 					state = 2;
@@ -3983,7 +3983,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 
 					case 3:
 						if (crlf_state == -1) {
-							if(token) {
+							if(token && token_pos > 0) {
 								fld_val = zend_string_init(token, token_pos, 0);
 							}
 
@@ -4032,7 +4032,7 @@ out:
 		state = 3;
 	}
 	if (state == 3) {
-		if(token) {
+		if(token && token_pos > 0) {
 			fld_val = zend_string_init(token, token_pos, 0);
 		}
 		if (fld_name != NULL && fld_val != NULL) {
