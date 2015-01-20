@@ -1482,13 +1482,13 @@ PHP_FUNCTION(strtotime)
 /* {{{ php_mktime - (gm)mktime helper */
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
-	zend_long hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0, dst = -1;
+	zend_long hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0;
 	timelib_time *now;
 	timelib_tzinfo *tzi = NULL;
 	zend_long ts, adjust_seconds = 0;
 	int error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lllllll", &hou, &min, &sec, &mon, &day, &yea, &dst) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|llllll", &hou, &min, &sec, &mon, &day, &yea) == FAILURE) {
 		RETURN_FALSE;
 	}
 	/* Initialize structure with current time */
@@ -1537,27 +1537,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	} else {
 		timelib_update_ts(now, tzi);
 	}
-	/* Support for the deprecated is_dst parameter */
-	if (dst != -1) {
-		php_error_docref(NULL, E_DEPRECATED, "The is_dst parameter is deprecated");
-		if (gmt) {
-			/* GMT never uses DST */
-			if (dst == 1) {
-				adjust_seconds = -3600;
-			}
-		} else {
-			/* Figure out is_dst for current TS */
-			timelib_time_offset *tmp_offset;
-			tmp_offset = timelib_get_time_zone_info(now->sse, tzi);
-			if (dst == 1 && tmp_offset->is_dst == 0) {
-				adjust_seconds = -3600;
-			}
-			if (dst == 0 && tmp_offset->is_dst == 1) {
-				adjust_seconds = +3600;
-			}
-			timelib_time_offset_dtor(tmp_offset);
-		}
-	}
+
 	/* Clean up and return */
 	ts = timelib_date_to_int(now, &error);
 	ts += adjust_seconds;

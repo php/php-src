@@ -87,8 +87,7 @@ PHP_FUNCTION(stream_socket_pair)
    Open a client connection to a remote address */
 PHP_FUNCTION(stream_socket_client)
 {
-	char *host;
-	size_t host_len;
+	zend_string *host;
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	double timeout = (double)FG(default_socket_timeout);
 	php_timeout_ull conv;
@@ -102,14 +101,14 @@ PHP_FUNCTION(stream_socket_client)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/z/dlr", &host, &host_len, &zerrno, &zerrstr, &timeout, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|z/z/dlr", &host, &zerrno, &zerrstr, &timeout, &flags, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	if (flags & PHP_STREAM_CLIENT_PERSISTENT) {
-		spprintf(&hashkey, 0, "stream_socket_client__%s", host);
+		spprintf(&hashkey, 0, "stream_socket_client__%s", host->val);
 	}
 
 	/* prepare the timeout value for use */
@@ -130,7 +129,7 @@ PHP_FUNCTION(stream_socket_client)
 		ZVAL_EMPTY_STRING(zerrstr);
 	}
 
-	stream = php_stream_xport_create(host, host_len, REPORT_ERRORS,
+	stream = php_stream_xport_create(host->val, host->len, REPORT_ERRORS,
 			STREAM_XPORT_CLIENT | (flags & PHP_STREAM_CLIENT_CONNECT ? STREAM_XPORT_CONNECT : 0) |
 			(flags & PHP_STREAM_CLIENT_ASYNC_CONNECT ? STREAM_XPORT_CONNECT_ASYNC : 0),
 			hashkey, &tv, context, &errstr, &err);
@@ -138,7 +137,7 @@ PHP_FUNCTION(stream_socket_client)
 
 	if (stream == NULL) {
 		/* host might contain binary characters */
-		zend_string *quoted_host = php_addslashes(host, host_len, 0);
+		zend_string *quoted_host = php_addslashes(host, 0);
 
 		php_error_docref(NULL, E_WARNING, "unable to connect to %s (%s)", quoted_host->val, errstr == NULL ? "Unknown error" : errstr->val);
 		zend_string_release(quoted_host);

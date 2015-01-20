@@ -2066,8 +2066,11 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 	}
 
 	oldpath = estrndup(phar->fname, phar->fname_len);
-	oldname = zend_memrchr(phar->fname, '/', phar->fname_len);
-	++oldname;
+	if ((oldname = zend_memrchr(phar->fname, '/', phar->fname_len))) {
+		++oldname;
+	} else {
+		oldname = phar->fname;
+	}
 	oldname_len = strlen(oldname);
 
 	basename = estrndup(oldname, oldname_len);

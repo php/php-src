@@ -160,6 +160,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 	if (za) {
 		memset(ssb, 0, sizeof(php_stream_statbuf));
 		if (zip_stat(za, fragment, ZIP_FL_NOCASE, &sb) != 0) {
+			zip_close(za);
 			zend_string_release(file_basename);
 			return -1;
 		}

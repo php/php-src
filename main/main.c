@@ -379,7 +379,7 @@ static PHP_INI_DISP(display_errors_mode)
 
 	if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 		tmp_value = (ini_entry->orig_value ? ini_entry->orig_value->val : NULL );
-		tmp_value_length = (int)ini_entry->orig_value->len;
+		tmp_value_length = (int)(ini_entry->orig_value? ini_entry->orig_value->len : 0);
 	} else if (ini_entry->value) {
 		tmp_value = ini_entry->value->val;
 		tmp_value_length = (int)ini_entry->value->len;

@@ -34,10 +34,15 @@
   . Fixed oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
   . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint and conversion error messages. (Andrea)
   . Implemented FR #55428 (E_RECOVERABLE_ERROR when output buffering in output buffering handler). (Kalle)
+  . Removed scoped calls of non-static methods from an incompatible $this
+    context. (Nikita)
+  . Removed support for #-style comments in ini files. (Nikita)
+  . Invalid octal literals in source code now produce compile errors, fixes PHPSadness #31. (Andrea)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
     internally. (Derick)
+  . Removed $is_dst parameter from mktime() and gmmktime(). (Nikita)
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
@@ -104,10 +109,15 @@
   . Fix user session handlers (See rfc:session.user.return-value). (Sara)
   . Added intdiv() function. (Andrea)
   . Improved precision of log() function for base 2 and 10. (Marc Bennewitz)
+  . Remove string category support in setlocale(). (Nikita)
+  . Remove set_magic_quotes_runtime() and its alias magic_quotes_runtime().
+    (Nikita)
 
 - Streams:
   . Fixed bug #68532 (convert.base64-encode omits padding bytes).
     (blaesius at krumedia dot de)
+  . Removed set_socket_blocking() in favor of its alias stream_set_blocking().
+    (Nikita)
 
 - XSL:
   . Fixed bug #64776 (The XSLT extension is not thread safe). (Mike)
