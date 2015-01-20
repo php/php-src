@@ -124,7 +124,6 @@ PHPAPI zend_string *php_string_toupper(zend_string *s);
 PHPAPI zend_string *php_string_tolower(zend_string *s);
 PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size_t trlen);
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free);
-PHPAPI zend_string *php_addslashes_str(const char *str, size_t length, int should_free);
 PHPAPI zend_string *php_addcslashes(const char *str, size_t length, int freeit, char *what, size_t wlength);
 PHPAPI void php_stripslashes(char *str, size_t *len);
 PHPAPI void php_stripcslashes(char *str, size_t *len);

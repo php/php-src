@@ -3910,7 +3910,11 @@ PHPAPI zend_string *php_addslashes(zend_string *str, int should_free)
 		}
 	}
 
-	return zend_string_copy(str);
+	if (!should_free) {
+		return zend_string_copy(str);
+	}
+
+	return str;
 
 do_escape:
 	offset = source - (char *)str->val;
@@ -3949,14 +3953,6 @@ do_escape:
 	}
 
 	return new_str;
-}
-/* }}} */
-
-/* {{{ php_addslashes_str
- */
-PHPAPI zend_string *php_addslashes_str(const char *str, size_t length, int should_free)
-{
-	return php_addslashes(zend_string_init(str, length, 0), 1);
 }
 /* }}} */
 

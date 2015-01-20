@@ -1026,7 +1026,7 @@ static zend_string *preg_do_eval(char *eval_str, int eval_str_len, char *subject
 					match = subject + offsets[backref<<1];
 					match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
 					if (match_len) {
-						esc_match = php_addslashes_str(match, match_len, 0);
+						esc_match = php_addslashes(zend_string_init(match, match_len, 0), 1);
 					} else {
 						esc_match = zend_string_init(match, match_len, 0);
 					}
