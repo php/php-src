@@ -2,6 +2,9 @@
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2015, PHP 5.6.6
 
+- Dba:
+  . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
+
 - Sqlite3:
   . Fix bug #68260 (SQLite3Result::fetchArray declares wrong 
     required_num_args). (Julien)
