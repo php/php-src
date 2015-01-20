@@ -200,7 +200,7 @@ struct _zend_array {
 #endif
 
 #define HT_HASH(ht, idx) \
-	((uint32_t*)((ht)->pData))[~(idx)]
+	((uint32_t*)((ht)->pData))[~(int)(idx)]
 #define HT_DATA(ht) \
 	((Bucket*)((ht)->pData))	
 #define HT_HASH_SIZE(ht) \
