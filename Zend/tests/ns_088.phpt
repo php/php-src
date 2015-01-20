@@ -2,15 +2,6 @@
 Nested batch use statements syntax error
 --FILE--
 <?php
-namespace Foo\Bar\Baz {
-    class A {}
-    class B {}
-    namespace B {
-        class C {}
-        class D {}
-        class E {}
-    }
-}
 namespace Fiz\Biz\Buz {
     use Foo\Bar\Baz {
         A,
@@ -23,4 +14,4 @@ namespace Fiz\Biz\Buz {
 }
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected '{', expecting ',' or '}' in %sns_088.php on line 14
+Parse error: syntax error, unexpected '{', expecting ',' or '}' in %sns_088.php on line 5
