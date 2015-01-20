@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #45081 (strtotime incorrectly interprets SGT time zone). (Derick)
 
+- Dba:
+  . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
+
 - Sqlite3:
   . Fix bug #68260 (SQLite3Result::fetchArray declares wrong 
     required_num_args). (Julien)
