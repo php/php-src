@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #45081 (strtotime incorrectly interprets SGT time zone). (Derick)
+  . Fixed bug #55407 (Impossible to prototype DateTime::createFromFormat).
+    (Derick, Felipe)
 
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
