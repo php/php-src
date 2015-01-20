@@ -194,47 +194,6 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 }
 /* }}} */
 
-static int parse_arg_object_to_string(zval *arg, char **p, size_t *pl, int type) /* {{{ */
-{
-	if (Z_OBJ_HANDLER_P(arg, cast_object)) {
-		zval obj;
-		if (Z_OBJ_HANDLER_P(arg, cast_object)(arg, &obj, type) == SUCCESS) {
-			zval_ptr_dtor(arg);
-			ZVAL_COPY_VALUE(arg, &obj);
-			*pl = Z_STRLEN_P(arg);
-			*p = Z_STRVAL_P(arg);
-			return SUCCESS;
-		}
-	}
-	/* Standard PHP objects */
-	if (Z_OBJ_HT_P(arg) == &std_object_handlers || !Z_OBJ_HANDLER_P(arg, cast_object)) {
-		SEPARATE_ZVAL_NOREF(arg);
-		if (zend_std_cast_object_tostring(arg, arg, type) == SUCCESS) {
-			*pl = Z_STRLEN_P(arg);
-			*p = Z_STRVAL_P(arg);
-			return SUCCESS;
-		}
-	}
-	if (!Z_OBJ_HANDLER_P(arg, cast_object) && Z_OBJ_HANDLER_P(arg, get)) {
-		zval rv;
-		zval *z = Z_OBJ_HANDLER_P(arg, get)(arg, &rv);
-		Z_ADDREF_P(z);
-		if(Z_TYPE_P(z) != IS_OBJECT) {
-			zval_dtor(arg);
-			ZVAL_NULL(arg);
-			if (!zend_make_printable_zval(z, arg)) {
-				ZVAL_ZVAL(arg, z, 1, 1);
-			}
-			*pl = Z_STRLEN_P(arg);
-			*p = Z_STRVAL_P(arg);
-			return SUCCESS;
-		}
-		zval_ptr_dtor(z);
-	}
-	return FAILURE;
-}
-/* }}} */
-
 ZEND_API int parse_arg_object_to_str(zval *arg, zend_string **str, int type) /* {{{ */
 {
 	if (Z_OBJ_HANDLER_P(arg, cast_object)) {
