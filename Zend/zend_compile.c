@@ -3323,7 +3323,7 @@ void zend_compile_for(zend_ast *ast) /* {{{ */
 	zend_ast *stmt_ast = ast->child[3];
 
 	znode result;
-	uint32_t opnum_start, opnum_cond, opnum_jmp, opnum_loop;
+	uint32_t opnum_start, opnum_jmp, opnum_loop;
 
 	zend_compile_expr_list(&result, init_ast);
 	zend_do_free(&result);
