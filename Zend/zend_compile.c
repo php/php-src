@@ -907,7 +907,6 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
 		zend_function *old_function;
 
-		efree_size(new_function, sizeof(zend_op_array));
 		if ((old_function = zend_hash_find_ptr(function_table, Z_STR_P(op2))) != NULL
 			&& old_function->type == ZEND_USER_FUNCTION
 			&& old_function->op_array.last > 0) {
