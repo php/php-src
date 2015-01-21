@@ -1715,7 +1715,7 @@ PHP_FUNCTION(imap_mail_copy)
 	zval *streamind;
 	zend_long options = 0;
 	zend_string *seq, *folder;
-	int seq_len, folder_len, argc = ZEND_NUM_ARGS();
+	int argc = ZEND_NUM_ARGS();
 	pils *imap_le_struct;
 
 	if (zend_parse_parameters(argc, "rSS|l", &streamind, &seq, &folder, &options) == FAILURE) {
@@ -2388,7 +2388,7 @@ PHP_FUNCTION(imap_savebody)
 	pils *imap_ptr = NULL;
 	php_stream *writer = NULL;
 	zend_string *section = NULL;
-	int section_len = 0, close_stream = 1;
+	int close_stream = 1;
 	zend_long msgno, flags = 0;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rzl|Sl", &stream, &out, &msgno, &section, &flags)) {
@@ -2508,7 +2508,6 @@ PHP_FUNCTION(imap_binary)
 {
 	zend_string *text;
 	char *decode;
-	int text_len;
 	unsigned long newlength;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &text) == FAILURE) {
