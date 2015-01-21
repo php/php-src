@@ -2272,9 +2272,15 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2) /* {{{ */
 					ZVAL_BOOL(result, 0);
 					return FAILURE;
 				}
-				/* find how many bits are used in op1 - not fast, but portable */
-				/* TODO: optimise to use bsr (x86)/clz (ARM) in assembly where available */
+
+				/* find how many bits are used in op1 */
+#if __has_builtin(__builtin_clzl) && SIZEOF_LONG == SIZEOF_ZEND_LONG
+				bits_occupied = (SIZEOF_ZEND_LONG * CHAR_BIT) - __builtin_clzl(Z_LVAL_P(op1));
+#elif __has_builtin(__builtin_clzll) && SIZEOF_LONG_LONG == SIZEOF_LONG_LONG
+				bits_occupied = (SIZEOF_ZEND_LONG * CHAR_BIT) - __builtin_clzll(Z_LVAL_P(op1));
+#else 
 				frexp((double) Z_LVAL_P(op1), &bits_occupied);
+#endif
 				/* checks for overflow */
 				if (bits_occupied + (unsigned long)Z_LVAL_P(op2) >= SIZEOF_LONG * 8) {
 					if (CAN_OVERWRITE()) {
