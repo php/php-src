@@ -2275,9 +2275,11 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2) /* {{{ */
 
 				/* find how many bits are used in op1 */
 #if __has_builtin(__builtin_clzl) && SIZEOF_LONG == SIZEOF_ZEND_LONG
-				bits_occupied = (SIZEOF_ZEND_LONG * CHAR_BIT) - __builtin_clzl(Z_LVAL_P(op1));
+				/* must check for zero because __builtin_clz(0) is undefined */
+				bits_occupied = (Z_LVAL_P(op1) == 0) ? 0 : (SIZEOF_ZEND_LONG * CHAR_BIT - __builtin_clzl(Z_LVAL_P(op1)));
 #elif __has_builtin(__builtin_clzll) && SIZEOF_LONG_LONG == SIZEOF_LONG_LONG
-				bits_occupied = (SIZEOF_ZEND_LONG * CHAR_BIT) - __builtin_clzll(Z_LVAL_P(op1));
+				/* must check for zero because __builtin_clz(0) is undefined */
+				bits_occupied = (Z_LVAL_P(op1) == 0) ? 0 : (SIZEOF_ZEND_LONG * CHAR_BIT - __builtin_clzll(Z_LVAL_P(op1)));
 #else 
 				frexp((double) Z_LVAL_P(op1), &bits_occupied);
 #endif
