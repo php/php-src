@@ -10,13 +10,17 @@ PHP                                                                        NEWS
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
-- Sqlite3:
-  . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong 
-    required_num_args). (Julien)
+- OpenSSL:
+  . Fixed bug #55618 (use case-insensitive cert name matching).
+    (Daniel Lowrey)
 
 - PDO_mysql:
   . Fixed bug #68750 (PDOMysql with mysqlnd does not allow the usage of
     named pipes). (steffenb198@aol.com)
+
+- Sqlite3:
+  . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong 
+    required_num_args). (Julien)
 
 22 Jan 2015, PHP 5.5.21
 
