@@ -23,6 +23,8 @@
 
 #include "timelib_config.h"
 
+#ifndef TIMELIB_OMIT_STDINT
+
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -102,6 +104,8 @@ typedef unsigned __int64  uint64_t;
 #define UINT64_MAX   _UI64_MAX
 # endif
 #endif
+
+#endif /* TIMELIB_OMIT_STDINT */
 
 #include <stdio.h>
 
