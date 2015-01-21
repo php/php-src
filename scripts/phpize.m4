@@ -19,6 +19,8 @@ dnl
 
 test -z "$CFLAGS" && auto_cflags=1
 
+CFLAGS="$CFLAGS -D HAVE_TIMELIB_CONFIG_H=1"
+
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
 
