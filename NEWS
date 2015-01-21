@@ -5,17 +5,21 @@
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
-- Sqlite3:
-  . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong 
-    required_num_args). (Julien)
+- JSON:
+  . Fixed bug #50224 (json_encode() does not always encode a float as a float)
+    by adding JSON_PRESERVE_ZERO_FRACTION. (Juan Basso)
+
+- Opcache:
+  . Fixed bug with try blocks being removed when extended_info opcode
+    generation is turned on. (Laruence)
 
 - PDO_mysql:
   . Fixed bug #68750 (PDOMysql with mysqlnd does not allow the usage of
     named pipes). (steffenb198@aol.com)
 
-- JSON:
-  . Fixed bug #50224 (json_encode() does not always encode a float as a float)
-    by adding JSON_PRESERVE_ZERO_FRACTION. (Juan Basso)
+- Sqlite3:
+  . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong 
+    required_num_args). (Julien)
 
 22 Jan 2015, PHP 5.6.5
 
@@ -41,6 +45,8 @@
 - CGI:
   . Fixed bug #68618 (out of bounds read crashes php-cgi). (CVE-2014-9427)
     (Stas)
+
+- CLI server:
   . Fixed bug #68745 (Invalid HTTP requests make web server segfault). (Adam)
 
 - cURL:
@@ -78,8 +84,6 @@
     (Ashesh Vashi)
 
 - Opcache:
-  . Fixed bug with try blocks being removed when extended_info opcode
-    generation is turned on. (Laruence)
   . Fixed bug #68644 (strlen incorrect : mbstring + func_overload=2 +UTF-8
     + Opcache). (Laruence)
   . Fixed bug #67111 (Memory leak when using "continue 2" inside two foreach
