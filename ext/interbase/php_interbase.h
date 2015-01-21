@@ -12,8 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Jouni Ahto <jouni.ahto@exdec.fi>                            |
-   |          Andrew Avdeev <andy@simgts.mv.ru>                           |
+   | Authors: Andrew Avdeev <andy@simgts.mv.ru>                           |
    |          Ard Biesheuvel <a.k.biesheuvel@its.tudelft.nl>              |
    +----------------------------------------------------------------------+
  */
