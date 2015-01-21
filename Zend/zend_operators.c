@@ -2284,7 +2284,7 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2) /* {{{ */
 				frexp((double) Z_LVAL_P(op1), &bits_occupied);
 #endif
 				/* checks for overflow */
-				if (bits_occupied + (unsigned long)Z_LVAL_P(op2) >= SIZEOF_LONG * 8) {
+				if (bits_occupied + (unsigned long)Z_LVAL_P(op2) >= SIZEOF_LONG * CHAR_BIT) {
 					if (CAN_OVERWRITE()) {
 						zend_bigint_long_shift_left_ulong(Z_BIG_P(result), Z_LVAL_P(op1), Z_LVAL_P(op2));
 						FREE_OP1_OP2_COPY_ONLY();
