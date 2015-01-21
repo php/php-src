@@ -23,4 +23,5 @@ cat > $ext_builddir/lib/timelib_config.h <<EOF
 # include <php_config.h>
 #endif
 #include <php_stdint.h>
+#define TIMELIB_OMIT_STDINT 1
 EOF
