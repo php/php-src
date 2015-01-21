@@ -2008,15 +2008,7 @@ Q: String or long first?
 		RETURN_FALSE;
 	}
 	if (sql_row[field_offset]) {
-#if PHP_API_VERSION < 20100412
-		if (PG(magic_quotes_runtime)) {
-			RETVAL_STR(php_addslashes(sql_row[field_offset], sql_row_lengths[field_offset], 0));
-		} else {
-#endif
-			RETVAL_STRINGL(sql_row[field_offset], sql_row_lengths[field_offset]);
-#if PHP_API_VERSION < 20100412
-		}
-#endif
+		RETVAL_STRINGL(sql_row[field_offset], sql_row_lengths[field_offset]);
 	} else {
 		RETURN_NULL();
 	}
@@ -2142,15 +2134,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		if (mysql_row[i]) {
 			zval data;
 
-#if PHP_API_VERSION < 20100412
-			if (PG(magic_quotes_runtime)) {
-				ZVAL_STR(&data, php_addslashes(mysql_row[i], mysql_row_lengths[i], 0));
-			} else {
-#endif
-				ZVAL_STRINGL(&data, mysql_row[i], mysql_row_lengths[i]);
-#if PHP_API_VERSION < 20100412
-			}
-#endif
+			ZVAL_STRINGL(&data, mysql_row[i], mysql_row_lengths[i]);
 
 			if (result_type & MYSQL_NUM) {
 				add_index_zval(return_value, i, &data);

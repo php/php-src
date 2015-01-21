@@ -99,9 +99,6 @@ PHP X.Y UPGRADE NOTES
     and heredocs.
   . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did.
 
-- Standard
-  . intdiv() function for integer division added.
-
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -133,7 +130,10 @@ PHP X.Y UPGRADE NOTES
 6. New Functions
 ========================================
 - GMP
-  . Added gmp_random_seed()
+  . Added gmp_random_seed().
+
+- Standard
+  . Added intdiv() function for integer division.
 
 ========================================
 7. New Classes and Interfaces

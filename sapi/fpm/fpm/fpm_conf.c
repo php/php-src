@@ -574,6 +574,8 @@ static char *fpm_conf_set_array(zval *key, zval *value, void **config, int conve
 	} else {
 		kv->value = strdup(Z_STRVAL_P(value));
 		if (fpm_conf_expand_pool_name(&kv->value) == -1) {
+			free(kv->key);
+			free(kv);
 			return "Can't use '$pool' when the pool is not defined";
 		}
 	}

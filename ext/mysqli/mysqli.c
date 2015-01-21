@@ -1200,16 +1200,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 #endif
 			{
 
-#if PHP_API_VERSION < 20100412
-				/* check if we need magic quotes */
-				if (PG(magic_quotes_runtime)) {
-					ZVAL_STR(&res, php_addslashes(row[i], field_len[i], 0));
-				} else {
-#endif
-					ZVAL_STRINGL(&res, row[i], field_len[i]);
-#if PHP_API_VERSION < 20100412
-				}
-#endif
+				ZVAL_STRINGL(&res, row[i], field_len[i]);
 			}
 
 			if (fetchtype & MYSQLI_NUM) {

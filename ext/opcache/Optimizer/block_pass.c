@@ -901,22 +901,31 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			}
 			ZVAL_NULL(&ZEND_OP1_LITERAL(last_op));
 			MAKE_NOP(last_op);
-		} else if (opline->opcode == ZEND_CONCAT &&
+		} else if ((opline->opcode == ZEND_CONCAT ||
+		            opline->opcode == ZEND_ADD_STRING ||
+		            opline->opcode == ZEND_ADD_CHAR) &&
 				  ZEND_OP2_TYPE(opline) == IS_CONST &&
 				  ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
 				  VAR_SOURCE(opline->op1) &&
 				  (VAR_SOURCE(opline->op1)->opcode == ZEND_CONCAT ||
-				   VAR_SOURCE(opline->op1)->opcode == ZEND_ADD_STRING) &&
+				   VAR_SOURCE(opline->op1)->opcode == ZEND_ADD_STRING ||
+				   VAR_SOURCE(opline->op1)->opcode == ZEND_ADD_CHAR) &&
 				  ZEND_OP2_TYPE(VAR_SOURCE(opline->op1)) == IS_CONST &&
 				  ZEND_RESULT(VAR_SOURCE(opline->op1)).var == ZEND_OP1(opline).var) {
-			/* compress consecutive CONCATs */
+			/* compress consecutive CONCAT/ADD_STRING/ADD_CHARs */
 			zend_op *src = VAR_SOURCE(opline->op1);
 			int l, old_len;
 
-			if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
+			if (opline->opcode == ZEND_ADD_CHAR) {
+				char c = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
+				ZVAL_STRINGL(&ZEND_OP2_LITERAL(opline), &c, 1);
+			} else if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
 				convert_to_string_safe(&ZEND_OP2_LITERAL(opline));
 			}
-			if (Z_TYPE(ZEND_OP2_LITERAL(src)) != IS_STRING) {
+			if (src->opcode == ZEND_ADD_CHAR) {
+				char c = (char)Z_LVAL(ZEND_OP2_LITERAL(src));
+				ZVAL_STRINGL(&ZEND_OP2_LITERAL(src), &c, 1);
+			} else if (Z_TYPE(ZEND_OP2_LITERAL(src)) != IS_STRING) {
 				convert_to_string_safe(&ZEND_OP2_LITERAL(src));
 			}
 
@@ -924,6 +933,8 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			if (ZEND_OP1_TYPE(src) == IS_UNUSED) {
 				/* 5.3 may use IS_UNUSED as first argument to ZEND_ADD_... */
 				opline->opcode = ZEND_ADD_STRING;
+			} else {
+				opline->opcode = ZEND_CONCAT;
 			}
 			COPY_NODE(opline->op1, src->op1);
 			old_len = Z_STRLEN(ZEND_OP2_LITERAL(src));
@@ -945,16 +956,6 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			}
 			ZVAL_NULL(&ZEND_OP2_LITERAL(src));
 			MAKE_NOP(src);
-		} else if ((opline->opcode == ZEND_ADD_STRING || opline->opcode == ZEND_ADD_VAR) && ZEND_OP1_TYPE(opline) == IS_CONST) {
-			/* convert ADD_STRING(C1, C2) to CONCAT(C1, C2) */
-			opline->opcode = ZEND_CONCAT;
-			continue;
-		} else if (opline->opcode == ZEND_ADD_CHAR && ZEND_OP1_TYPE(opline) == IS_CONST && ZEND_OP2_TYPE(opline) == IS_CONST) {
-            /* convert ADD_CHAR(C1, C2) to CONCAT(C1, C2) */
-			char c = (char)Z_LVAL(ZEND_OP2_LITERAL(opline));
-			ZVAL_STRINGL(&ZEND_OP2_LITERAL(opline), &c, 1);
-			opline->opcode = ZEND_CONCAT;
-			continue;
 		} else if ((opline->opcode == ZEND_ADD ||
 					opline->opcode == ZEND_SUB ||
 					opline->opcode == ZEND_MUL ||

@@ -126,9 +126,6 @@ int flatfile_delete(flatfile *dba, datum key_datum) {
 
 		/* read in the key name */
 		num = php_stream_read(dba->fp, buf, num);
-		if (num < 0)  {
-			break;
-		}
 
 		if (size == num && !memcmp(buf, key, size)) {
 			php_stream_seek(dba->fp, pos, SEEK_SET);
@@ -150,9 +147,6 @@ int flatfile_delete(flatfile *dba, datum key_datum) {
 		}
 		/* read in the value */
 		num = php_stream_read(dba->fp, buf, num);
-		if (num < 0) {
-			break;
-		}
 	}
 	efree(buf);
 	return FAILURE;
@@ -180,9 +174,7 @@ int flatfile_findkey(flatfile *dba, datum key_datum) {
 			buf = erealloc(buf, buf_size);
 		}
 		num = php_stream_read(dba->fp, buf, num);
-		if (num < 0) {
-			break;
-		}
+
 		if (size == num) {
 			if (!memcmp(buf, key, size)) {
 				ret = 1;
@@ -198,9 +190,6 @@ int flatfile_findkey(flatfile *dba, datum key_datum) {
 			buf = erealloc(buf, buf_size);
 		}
 		num = php_stream_read(dba->fp, buf, num);
-		if (num < 0) {
-			break;
-		}
 	}
 	efree(buf);
 	return ret;
@@ -226,9 +215,7 @@ datum flatfile_firstkey(flatfile *dba) {
 			buf = erealloc(buf, buf_size);
 		}
 		num = php_stream_read(dba->fp, buf, num);
-		if (num < 0) {
-			break;
-		}
+
 		if (*(buf) != 0) {
 			dba->CurrentFlatFilePos = php_stream_tell(dba->fp);
 			res.dptr = buf;
@@ -244,9 +231,6 @@ datum flatfile_firstkey(flatfile *dba) {
 			buf = erealloc(buf, buf_size);
 		}
 		num = php_stream_read(dba->fp, buf, num);
-		if (num < 0) {
-			break;
-		}
 	}
 	efree(buf);
 	res.dptr = NULL;
@@ -274,9 +258,7 @@ datum flatfile_nextkey(flatfile *dba) {
 			buf = erealloc(buf, buf_size);
 		}
 		num = php_stream_read(dba->fp, buf, num);
-		if (num < 0)  {
-			break;
-		}
+
 		if (!php_stream_gets(dba->fp, buf, 15)) {
 			break;
 		}
@@ -286,9 +268,7 @@ datum flatfile_nextkey(flatfile *dba) {
 			buf = erealloc(buf, buf_size);
 		}
 		num = php_stream_read(dba->fp, buf, num);
-		if (num < 0) {
-			break;
-		}
+
 		if (*(buf)!=0) {
 			dba->CurrentFlatFilePos = php_stream_tell(dba->fp);
 			res.dptr = buf;

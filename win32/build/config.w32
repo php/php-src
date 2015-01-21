@@ -14,9 +14,6 @@ toolset_setup_compiler();
 
 // do we use x64 or 80x86 version of compiler?
 X64 = toolset_is_64();
-if (!X64) {
-	ERROR("64-bit compiler required");
-}
 toolset_setup_arch();
 
 toolset_setup_linker();

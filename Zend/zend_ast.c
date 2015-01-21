@@ -24,6 +24,8 @@
 #include "zend_operators.h"
 #include "zend_bigint.h"
 
+ZEND_API zend_ast_process_t zend_ast_process = NULL;
+
 static inline void *zend_ast_alloc(size_t size) {
 	return zend_arena_alloc(&CG(ast_arena), size);
 }

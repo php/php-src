@@ -3348,7 +3348,8 @@ PHP_FUNCTION(curl_escape)
 PHP_FUNCTION(curl_unescape)
 {
 	char       *str = NULL, *out = NULL;
-	int        str_len = 0, out_len;
+	size_t     str_len = 0;
+	int        out_len;
 	zval       *zid;
 	php_curl   *ch;
 
