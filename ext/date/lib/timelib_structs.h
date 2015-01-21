@@ -21,7 +21,9 @@
 #ifndef __TIMELIB_STRUCTS_H__
 #define __TIMELIB_STRUCTS_H__
 
-#include "timelib_config.h"
+#ifdef HAVE_TIMELIB_CONFIG_H
+# include "timelib_config.h"
+#endif
 
 #ifndef TIMELIB_OMIT_STDINT
 
