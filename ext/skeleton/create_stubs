@@ -19,14 +19,14 @@ function convert(i, j, t)
 	for (i = 0; i < t; i++) { tabs = tabs "\t" }
 
 	if (type == "int" || type == "long") {
-		longs = longs "\tlong " name ";\n"
+		longs = longs "\tzend_long " name ";\n"
 	} else if (type == "bool" || type == "boolean") {
 		bools = bools "\tzend_bool " name ";\n"
 	} else if (type == "double" || type == "float") {
 		doubles = doubles "\tdouble " name ";\n"
 	} else if (type == "string") {
 		strings = strings "\tchar *" name " = NULL;\n"
-		ints = ints "\tint " name "_len;\n"
+		ints = ints "\tsize_t " name "_len;\n"
 	} else if (type == "array" || type == "object" || type == "mixed") {
 		zvals = zvals "\tzval *" name " = NULL;\n"
 	} else if (type == "resource" || type == "handle") {
