@@ -1873,7 +1873,7 @@ static char * GetHeaderVar( LSAPI_Request * pReq, const char * name )
 char * LSAPI_GetEnv_r( LSAPI_Request * pReq, const char * name )
 {
     if ( !pReq || !name )
-	return NULL;
+        return NULL;
 
     struct LSAPI_key_value_pair * pBegin = pReq->m_pEnvList;
     struct LSAPI_key_value_pair * pEnd = pBegin + pReq->m_pHeader->m_cntEnv;
@@ -3114,10 +3114,10 @@ static int lsapi_initSuEXEC()
     if ( !s_defaultUid || !s_defaultGid )
     {
         pw = getpwnam( "nobody" );
-	if(!pw) {
-		perror( "Can't get uid for user 'nobody'" );
-		return -1;
-	}
+        if(!pw) {
+            perror( "Can't get uid for user 'nobody'" );
+            return -1;
+        }
         if ( !s_defaultUid )
             s_defaultUid = pw->pw_uid;
         if ( !s_defaultGid )

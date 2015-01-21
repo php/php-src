@@ -716,6 +716,7 @@ static int parse_opt( int argc, char * argv[], int *climode,
         case '?':
             if ( *((*(p-1))+2) == 's' )
                 exit( 99 );
+            break;
         case 'h':
         case 'i':
         case 'l':
