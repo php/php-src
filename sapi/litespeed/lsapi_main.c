@@ -487,7 +487,7 @@ static int lsapi_chdir_primary_script( zend_file_handle * file_handle )
     getcwd( s_cur_chdir, sizeof( s_cur_chdir ) );
 
     p = strrchr( file_handle->filename, '/' );
-    if ( *p )
+    if ( p )
     {
         *p = 0;
         if ( strcmp( file_handle->filename, s_cur_chdir ) != 0 ) {
