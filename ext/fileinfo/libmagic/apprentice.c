@@ -2616,7 +2616,7 @@ apprentice_map(struct magic_set *ms, const char *fn)
 	return to give apprentice_load() a chance. */
 	if (php_stream_stat_path_ex((char *)fn, 0, &st, NULL) == SUCCESS) {
                if (st.sb.st_mode & S_IFDIR) {
-                       goto error;
+                       return NULL;
                }
        }
 #endif
