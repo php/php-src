@@ -683,7 +683,7 @@ int fcgi_listen(const char *path, int backlog)
 		if(listen_socket > -1) {
 			close(listen_socket);
 		}
-			fprintf(stderr, "Cannot bind/listen socket - [%d] %s.\n",errno, strerror(errno));
+		fprintf(stderr, "Cannot bind/listen socket - [%d] %s.\n",errno, strerror(errno));
 		return -1;
 	}
 
