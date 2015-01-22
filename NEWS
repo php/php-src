@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug #68571 (core dump when webserver close the socket).
     (redfoxli069 at gmail dot com, Laruence)
 
+- Libxml:
+  . Fixed bug #64938 (libxml_disable_entity_loader setting is shared
+    between threads). (Martin Jansen)
+
 - OpenSSL:
   . Fixed bug #55618 (use case-insensitive cert name matching).
     (Daniel Lowrey)
