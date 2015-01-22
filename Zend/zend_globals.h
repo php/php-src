@@ -211,7 +211,7 @@ struct _zend_executor_globals {
 
 	/* timeout support */
 	zend_long timeout_seconds;
-	int timeout_type;
+	unsigned char timeout_type;
 
 	int lambda_count;
 
