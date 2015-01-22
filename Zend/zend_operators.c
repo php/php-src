@@ -1458,14 +1458,8 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2) /* {{{ */
 
 	/* prevent wrapping quirkiness on some processors where << 64 + x == << x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
-		if (EXPECTED(op2_lval > 0)) {
-			ZVAL_LONG(result, 0);
-			return SUCCESS;
-		} else {
-			zend_error(E_WARNING, "Bit shift by negative number");
-			ZVAL_FALSE(result);
-			return FAILURE;
-		}
+		ZVAL_LONG(result, 0);
+		return SUCCESS;
 	}
 
 	ZVAL_LONG(result, op1_lval << op2_lval);
@@ -1485,14 +1479,8 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2) /* {{{ */
 
 	/* prevent wrapping quirkiness on some processors where >> 64 + x == >> x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
-		if (EXPECTED(op2_lval > 0)) {
-			ZVAL_LONG(result, (op1_lval < 0) ? -1 : 0);
-			return SUCCESS;
-		} else {
-			zend_error(E_WARNING, "Bit shift by negative number");
-			ZVAL_FALSE(result);
-			return FAILURE;
-		}
+		ZVAL_LONG(result, (op1_lval < 0) ? -1 : 0);
+		return SUCCESS;
 	}
 
 	ZVAL_LONG(result, op1_lval >> op2_lval);

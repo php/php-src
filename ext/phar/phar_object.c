@@ -390,9 +390,6 @@ static void phar_postprocess_ru_web(char *fname, int fname_len, char **entry, in
 		} else {
 			u = strrchr(e, '/');
 			if (!u) {
-				if (saveu) {
-					saveu[0] = '/';
-				}
 				return;
 			}
 		}
