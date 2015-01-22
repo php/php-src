@@ -6,7 +6,7 @@ pcntl_wait() and rusage
 --FILE--
 <?php
 $pid = pcntl_fork();
-if ($pid == 1) {
+if ($pid == -1) {
 	die("failed");
 } else if ($pid) {
 	$status = 0;
