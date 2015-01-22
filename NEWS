@@ -41,8 +41,6 @@ PHP                                                                        NEWS
   . Fixed bug #66764 (configure doesn't define EXPANDED_DATADIR / PHP_DATADIR
     correctly). (Ferenc)
   . Fixed bug #68583 (Crash in timeout thread). (Anatol)
-  . Fixed bug #68594 (Use after free vulnerability in unserialize()).
-    (CVE-2014-8142) (Stefan Esser)
   . Fixed bug #68676 (Explicit Double Free). (Kalle)
   . Fixed bug #68710 (Use After Free Vulnerability in PHP's unserialize()).
     (CVE-2015-0231) (Stefan Esser)
@@ -127,6 +125,8 @@ PHP                                                                        NEWS
     triggered). (Julien)
   . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
   . Fixed bug #68545 (NULL pointer dereference in unserialize.c). (Anatol)
+  . Fixed bug #68594 (Use after free vulnerability in unserialize()).
+    (CVE-2014-8142) (Stefan Esser)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
