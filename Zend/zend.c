@@ -1151,7 +1151,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 				int result = call_user_function_ex(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params, 1, NULL);
 				zval *errmsg = &params[1];
 
-				if (Z_TYPE_P(errmsg) == IS_REFERENCE) {
+				if (Z_ISREF_P(errmsg)) {
 					errmsg = Z_REFVAL_P(errmsg);
 					convert_to_string(errmsg);
 				}
