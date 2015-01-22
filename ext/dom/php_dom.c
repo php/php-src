@@ -1562,11 +1562,12 @@ zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type, zval *rv
 int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty)
 {
 	zend_long offset = zval_get_long(member);
+	zval rv;
 
 	if (offset < 0) {
 		return 0;
 	} else {
-		zval *length = zend_read_property(Z_OBJCE_P(object), object, "length", sizeof("length") - 1, 0);
+		zval *length = zend_read_property(Z_OBJCE_P(object), object, "length", sizeof("length") - 1, 0, &rv);
 
 		return length && offset < Z_LVAL_P(length);
 	}

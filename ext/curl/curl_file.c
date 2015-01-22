@@ -72,11 +72,12 @@ PHP_FUNCTION(curl_file_create)
 
 static void curlfile_get_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval *res;
+	zval *res, rv;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	res = zend_read_property(curl_CURLFile_class, getThis(), name, strlen(name), 1);
+	res = zend_read_property(curl_CURLFile_class, getThis(), name, strlen(name), 1, &rv);
 	RETURN_ZVAL(res, 1, 0);
 }
 
