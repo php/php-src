@@ -93,7 +93,7 @@ const struct mbfl_convert_vtbl vtbl_wchar_utf8 = {
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)
 
-void mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter)
+int mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter)
 {
 	int w;
 	w = c & MBFL_WCSGROUP_MASK;
@@ -101,6 +101,8 @@ void mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter)
 	filter->status = 0;
 	filter->cache = 0;
 	CK((*filter->output_function)(w, filter->data));
+
+	return w;
 }
 
 
