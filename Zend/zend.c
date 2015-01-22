@@ -1145,16 +1145,28 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 			}
 
 			ZVAL_UNDEF(&retval);
-			if (call_user_function_ex(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params, 1, NULL) == SUCCESS) {
-				if (Z_TYPE(retval) != IS_UNDEF) {
-					if (Z_TYPE(retval) == IS_FALSE) {
-						zend_error_cb(type, error_filename, error_lineno, format, args);
-					}
-					zval_ptr_dtor(&retval);
+
+			{
+				va_list empty_va_list;
+				int result = call_user_function_ex(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params, 1, NULL);
+				zval *errmsg = &params[1];
+
+				if (Z_TYPE_P(errmsg) == IS_REFERENCE) {
+					errmsg = Z_REFVAL_P(errmsg);
+					convert_to_string(errmsg);
 				}
-			} else if (!EG(exception)) {
-				/* The user error handler failed, use built-in error handler */
-				zend_error_cb(type, error_filename, error_lineno, format, args);
+
+				if (result == SUCCESS) {
+					if (Z_TYPE(retval) != IS_UNDEF) {
+						if (Z_TYPE(retval) == IS_FALSE) {
+							zend_error_cb(type, error_filename, error_lineno, Z_STR_P(errmsg)->val, empty_va_list);
+						}
+						zval_ptr_dtor(&retval);
+					}
+				} else if (!EG(exception)) {
+					/* The user error handler failed, use built-in error handler */
+					zend_error_cb(type, error_filename, error_lineno, Z_STR_P(errmsg)->val, empty_va_list);
+				}
 			}
 
 			if (in_compilation) {
