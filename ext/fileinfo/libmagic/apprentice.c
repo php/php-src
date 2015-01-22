@@ -2611,8 +2611,7 @@ apprentice_map(struct magic_set *ms, const char *fn)
 
 	if ((map = CAST(struct magic_map *, ecalloc(1, sizeof(*map)))) == NULL) {
 		file_oomem(ms, sizeof(*map));
-		efree(map);
-		goto error;
+		return NULL;
 	}
 
 	if (fn == NULL) {
