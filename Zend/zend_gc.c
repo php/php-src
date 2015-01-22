@@ -137,6 +137,11 @@ ZEND_API void gc_init(void)
 
 ZEND_API void gc_possible_root(zend_refcounted *ref)
 {
+	if (GC_TYPE(ref) == IS_NULL) {
+		return;
+	}
+
+	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
 	GC_BENCH_INC(zval_possible_root);
 
 	if (EXPECTED(GC_GET_COLOR(GC_INFO(ref)) == GC_BLACK)) {
