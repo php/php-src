@@ -9,6 +9,9 @@
   . Fixed bug #50224 (json_encode() does not always encode a float as a float)
     by adding JSON_PRESERVE_ZERO_FRACTION. (Juan Basso)
 
+- Fileinfo:
+  . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
+
 - Opcache:
   . Fixed bug with try blocks being removed when extended_info opcode
     generation is turned on. (Laruence)
