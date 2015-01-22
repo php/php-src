@@ -3912,30 +3912,6 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data) /* {{{ */
 {
 	if (EX(return_value)) {
-/*
-		if (Z_TYPE_P(EX(return_value)) == IS_OBJECT) {
-			zend_object *object = Z_OBJ_P(EX(return_value));
-			zend_execute_data *ex = EX(prev_execute_data);
-
-			while (ex && Z_OBJ(ex->This) == object) {
-				if (ex->func) {
-					if (ZEND_USER_CODE(ex->func->type)) {
-						if (ex->func->op_array.this_var != -1) {
-							zval *this_var = ZEND_CALL_VAR(ex, ex->func->op_array.this_var);
-							if (this_var != EX(return_value)) {
-								zval_ptr_dtor(this_var);
-								ZVAL_NULL(this_var);
-							}
-						}
-					}
-				}
-				Z_OBJ(ex->This) = NULL;
-				ZVAL_NULL(&ex->This);
-				ex = ex->prev_execute_data;
-			}
-		}
-*/
-		zval_ptr_dtor(EX(return_value));
 		Z_OBJ_P(EX(return_value)) = NULL;
 		ZVAL_NULL(EX(return_value));
 	}
