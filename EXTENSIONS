@@ -136,7 +136,7 @@ STATUS:              Working
 COMMENT:             DBM abstraction for db2, db3, db4, dbm, ndbm, gdbm, ini
 -------------------------------------------------------------------------------
 EXTENSION:           interbase
-PRIMARY MAINTAINER:  Ard Biesheuvel <ard@ard.nu>, Jouni Ahto <jouni.ahto@exdec.fi>
+PRIMARY MAINTAINER:  Ard Biesheuvel <ard@ard.nu>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
