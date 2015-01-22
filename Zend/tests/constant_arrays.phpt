@@ -85,7 +85,7 @@ array(4) {
 int(3)
 array(1) {
   [0]=>
-  int(3)
+  &int(3)
 }
 array(1) {
   [0]=>

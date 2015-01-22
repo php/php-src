@@ -746,14 +746,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 	array_init_size(dst, zend_hash_num_elements(Z_ARRVAL_P(src)));
 	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(src), idx, key, val) {
 		/* constant arrays can't contain references */
-		if (Z_ISREF_P(val)) {
-			if (Z_REFCOUNT_P(val) == 1) {
-				ZVAL_UNREF(val);
-			} else {
-				Z_DELREF_P(val);
-				val = Z_REFVAL_P(val);
-			}
-		}
+		ZVAL_DEREF(val);
 		if (key) {
 			new_val = zend_hash_add_new(Z_ARRVAL_P(dst), key, val);
 		} else {
