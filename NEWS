@@ -11,6 +11,8 @@
 
 - Fileinfo:
   . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
+  . Fixed bug #67647 (Bundled libmagic 5.17 does not detect quicktime files
+    correctly). (Anatol)
 
 - Opcache:
   . Fixed bug with try blocks being removed when extended_info opcode
