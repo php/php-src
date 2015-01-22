@@ -3761,11 +3761,10 @@ ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const 
 }
 /* }}} */
 
-ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent) /* {{{ */
+ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent, zval *rv) /* {{{ */
 {
 	zval property, *value;
 	zend_class_entry *old_scope = EG(scope);
-	zval rv;
 
 	EG(scope) = scope;
 
@@ -3774,7 +3773,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 	}
 
 	ZVAL_STRINGL(&property, name, name_length);
-	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, NULL, &rv);
+	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, NULL, rv);
 	zval_ptr_dtor(&property);
 
 	EG(scope) = old_scope;
