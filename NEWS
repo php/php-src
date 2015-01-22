@@ -10,6 +10,9 @@ PHP                                                                        NEWS
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
+- Fileinfo:
+  . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
+
 - OpenSSL:
   . Fixed bug #55618 (use case-insensitive cert name matching).
     (Daniel Lowrey)
