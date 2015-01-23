@@ -640,7 +640,7 @@ PHPAPI zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Cha
 			c = '?';
 		}
 
-		str->val[str->len++] = decoder ? decoder(c) : c;
+		str->val[str->len++] = decoder(c);
 	}
 	str->val[str->len] = '\0';
 	if (str->len < len) {
