@@ -80,7 +80,7 @@ extern int php_openssl_get_ssl_stream_data_index();
 extern int php_openssl_get_x509_list_id(void);
 static struct timeval subtract_timeval( struct timeval a, struct timeval b );
 static int compare_timeval( struct timeval a, struct timeval b );
-static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count TSRMLS_DC);
+static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count);
 
 php_stream_ops php_openssl_socket_ops;
 
@@ -1733,13 +1733,13 @@ static int php_openssl_enable_crypto(php_stream *stream,
 	return -1;
 }
 
-static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
+static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
 {
 	return php_openssl_sockop_io( 0, stream, (char*)buf, count );
 }
 /* }}} */
 
-static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
+static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	return php_openssl_sockop_io( 1, stream, buf, count );
 }
@@ -1752,7 +1752,7 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
  * report that back to PHP
  *
  */
-static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
+static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 	int nr_bytes = 0;
@@ -1766,7 +1766,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 		       has_timeout = 0;
 
 		/* Begin by making the socket non-blocking. This allows us to check the timeout. */
-		if (SUCCESS == php_set_sock_blocking(sslsock->s.socket, 0 TSRMLS_CC)) {
+		if (SUCCESS == php_set_sock_blocking(sslsock->s.socket, 0)) {
 			sslsock->s.is_blocked = 0;
 		}
 
@@ -1794,7 +1794,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				if (compare_timeval( elapsed_time, *timeout) > 0 ) {
 					/* If the socket was originally blocking, set it back. */
 					if (blocked) {
-						php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC);
+						php_set_sock_blocking(sslsock->s.socket, 1);
 						sslsock->s.is_blocked = 1;
 					}
 					return -1;
@@ -1826,7 +1826,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 
 				/* Get the error code from SSL, and check to see if it's an error or not. */
 				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes );
-				retry = handle_ssl_error(stream, nr_bytes, 0 TSRMLS_CC);
+				retry = handle_ssl_error(stream, nr_bytes, 0);
 
 				/* If we get this (the above doesn't check) then we'll retry as well. */
 				if (errno == EAGAIN && ( err == SSL_ERROR_WANT_READ || SSL_ERROR_WANT_WRITE ) ) {
@@ -1878,7 +1878,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 
 		/* And if we were originally supposed to be blocking, let's reset the socket to that. */
 		if (blocked) {
-			php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC);
+			php_set_sock_blocking(sslsock->s.socket, 1);
 			 sslsock->s.is_blocked = 1;
 		}
 	} else {
@@ -1886,9 +1886,9 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 	     	 * This block is if we had no timeout... We will just sit and wait forever on the IO operation.
 		 */
 		if (read) {
-			nr_bytes = php_stream_socket_ops.read(stream, buf, count TSRMLS_CC);
+			nr_bytes = php_stream_socket_ops.read(stream, buf, count);
 		} else {
-			nr_bytes = php_stream_socket_ops.write(stream, buf, count TSRMLS_CC);
+			nr_bytes = php_stream_socket_ops.write(stream, buf, count);
 		}
 	}
 
