@@ -137,7 +137,7 @@ ZEND_API void gc_init(void)
 
 ZEND_API void gc_possible_root(zend_refcounted *ref)
 {
-	if (GC_TYPE(ref) == IS_NULL) {
+	if (UNEXPECTED(GC_TYPE(ref) == IS_NULL) || UNEXPECTED(CG(unclean_shutdown))) {
 		return;
 	}
 
