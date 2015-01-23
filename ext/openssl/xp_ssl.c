@@ -1781,8 +1781,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 
 		/* Main IO loop. */
 		do {
-			struct timeval  cur_time,
-				elapsed_time;
+			struct timeval cur_time, elapsed_time, left_time;
 
 			/* If we have a timeout to check, figure out how much time has elapsed since we started. */
 			if (has_timeout) {
@@ -1818,7 +1817,6 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 			}
 
 			/* Now, how much time until we time out? */
-			struct timeval left_time;
 			if (has_timeout) {
 				left_time = subtract_timeval( *timeout, elapsed_time );
 			}
