@@ -2121,6 +2121,7 @@ PHP_FUNCTION(strripos)
 	}
 
 	if ((haystack->len == 0) || (needle->len == 0)) {
+		STR_ALLOCA_FREE(ord_needle, use_heap);
 		RETURN_FALSE;
 	}
 
