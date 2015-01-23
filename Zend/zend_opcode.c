@@ -151,13 +151,15 @@ ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce)
 	}
 	if (ce->static_members_table) {
 		zval *static_members = ce->static_members_table;
+		int count = ce->default_static_members_count;
 		int i;
 
-		ce->static_members_table = NULL;
-		for (i = 0; i < ce->default_static_members_count; i++) {
+		ce->default_static_members_count = 0;
+		ce->default_static_members_table = ce->static_members_table = NULL;
+		for (i = 0; i < count; i++) {
 			zval_ptr_dtor(&static_members[i]);
-			ZVAL_UNDEF(&static_members[i]);
 		}
+		efree(static_members);
 	}
 }
 
