@@ -2114,6 +2114,7 @@ PHP_FUNCTION(strripos)
 		needle = Z_STR_P(zneedle);
 	} else {
 		if (php_needle_char(zneedle, ord_needle->val) != SUCCESS) {
+			STR_ALLOCA_FREE(ord_needle, use_heap);
 			RETURN_FALSE;
 		}
 		ord_needle->val[1] = '\0';
