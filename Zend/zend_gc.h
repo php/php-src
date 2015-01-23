@@ -141,7 +141,7 @@ END_EXTERN_C()
 static zend_always_inline void gc_check_possible_root(zval *z)
 {
 	ZVAL_DEREF(z);
-	if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z))) {
+	if (Z_COLLECTABLE_P(z) && UNEXPECTED(!Z_GC_INFO_P(z)) && EXPECTED(GC_TYPE(Z_COUNTED_P(z)) != IS_NULL)) {
 		gc_possible_root(Z_COUNTED_P(z));
 	}
 }
