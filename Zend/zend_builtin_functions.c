@@ -1058,6 +1058,8 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		if (UNEXPECTED(Z_COPYABLE_P(prop))) {
 			ZVAL_DUP(&prop_copy, prop);
 			prop = &prop_copy;
+		} else {
+			Z_TRY_ADDREF_P(prop);
 		}
 
 		/* this is necessary to make it able to work with default array
