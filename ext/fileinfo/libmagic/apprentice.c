@@ -2691,7 +2691,6 @@ internal_loaded:
 	}
 
 	if (NULL != fn) {
-		nentries = (uint32_t)(st.sb.st_size / sizeof(struct magic));
 		entries = (uint32_t)(st.sb.st_size / sizeof(struct magic));
 		if ((zend_off_t)(entries * sizeof(struct magic)) != st.sb.st_size) {
 			file_error(ms, 0, "Size of `%s' %llu is not a multiple of %zu",
