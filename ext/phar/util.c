@@ -1542,7 +1542,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 
 			sig_len = tempsig;
 #else
-			in = BIO_new_mem_buf(pubkey ? pubkey->val : NULL, pubkey ? pubkey->len : 0);
+			in = BIO_new_mem_buf(pubkey->val, pubkey->len);
 
 			if (NULL == in) {
 				zend_string_release(pubkey);

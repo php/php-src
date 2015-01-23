@@ -92,9 +92,8 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 		zend_throw_exception_object(&ex);
 	}
 
-	if (message) {
-		efree(message);
-	}
+	efree(message);
+
 }
 /* }}} */
 

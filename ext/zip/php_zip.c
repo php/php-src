@@ -171,16 +171,16 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 
 	/* it is a directory only, see #40228 */
 	if (path_cleaned_len > 1 && IS_SLASH(path_cleaned[path_cleaned_len - 1])) {
-		len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file);
+		spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file);
 		is_dir_only = 1;
 	} else {
 		memcpy(file_dirname, path_cleaned, path_cleaned_len);
 		dir_len = php_dirname(file_dirname, path_cleaned_len);
 
 		if (dir_len <= 0 || (dir_len == 1 && file_dirname[0] == '.')) {
-			len = spprintf(&file_dirname_fullpath, 0, "%s", dest);
+			spprintf(&file_dirname_fullpath, 0, "%s", dest);
 		} else {
-			len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file_dirname);
+			spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file_dirname);
 		}
 
 		file_basename =	php_basename(path_cleaned, path_cleaned_len, NULL, 0);

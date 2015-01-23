@@ -101,6 +101,8 @@ int mbfl_filt_put_invalid_char(int c, mbfl_convert_filter *filter)
 	filter->status = 0;
 	filter->cache = 0;
 	CK((*filter->output_function)(w, filter->data));
+
+	return w;
 }
 
 
