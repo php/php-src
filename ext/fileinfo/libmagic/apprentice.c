@@ -1542,7 +1542,7 @@ parse(struct magic_set *ms, struct magic_entry *me, const char *line,
 				file_oomem(ms, sizeof(*nm) * cnt);
 				return -1;
 			}
-			me->mp = m = nm;
+			me->mp = nm;
 			me->max_count = CAST(uint32_t, cnt);
 		}
 		m = &me->mp[me->cont_count++];
