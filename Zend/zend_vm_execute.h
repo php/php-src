@@ -2422,6 +2422,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_AR
 	USE_OPLINE
 
 	zval *val;
+	int ret;
 
 	SAVE_OPLINE();
 	val = EX_CONSTANT(opline->op1);
@@ -2440,12 +2441,12 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_AR
 		}
 	}
 
-	if (i_zend_is_true(val)) {
+	ret = i_zend_is_true(val);
 
+	if (ret) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline++;
 	} else {
-
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	}
@@ -2460,6 +2461,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	USE_OPLINE
 
 	zval *val;
+	int ret;
 
 	SAVE_OPLINE();
 	val = EX_CONSTANT(opline->op1);
@@ -2477,14 +2479,15 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 			ZEND_VM_CONTINUE();
 		}
 	}
-	if (i_zend_is_true(val)) {
+	ret = i_zend_is_true(val);
+
+	if (ret) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	} else {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline++;
 	}
-
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		HANDLE_EXCEPTION();
 	}
@@ -23303,6 +23306,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	USE_OPLINE
 
 	zval *val;
+	int ret;
 
 	SAVE_OPLINE();
 	val = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
@@ -23321,12 +23325,12 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
-	if (i_zend_is_true(val)) {
+	ret = i_zend_is_true(val);
 
+	if (ret) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline++;
 	} else {
-
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	}
@@ -23341,6 +23345,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	USE_OPLINE
 
 	zval *val;
+	int ret;
 
 	SAVE_OPLINE();
 	val = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
@@ -23358,14 +23363,15 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			ZEND_VM_CONTINUE();
 		}
 	}
-	if (i_zend_is_true(val)) {
+	ret = i_zend_is_true(val);
+
+	if (ret) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	} else {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline++;
 	}
-
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		HANDLE_EXCEPTION();
 	}
@@ -32835,6 +32841,7 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_A
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *val;
+	int ret;
 
 	SAVE_OPLINE();
 	val = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -32853,12 +32860,12 @@ static int ZEND_FASTCALL  ZEND_JMPZ_EX_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_A
 		}
 	}
 
-	if (i_zend_is_true(val)) {
-		zval_ptr_dtor_nogc(free_op1);
+	ret = i_zend_is_true(val);
+	zval_ptr_dtor_nogc(free_op1);
+	if (ret) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline++;
 	} else {
-		zval_ptr_dtor_nogc(free_op1);
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	}
@@ -32873,6 +32880,7 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *val;
+	int ret;
 
 	SAVE_OPLINE();
 	val = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -32890,14 +32898,15 @@ static int ZEND_FASTCALL  ZEND_JMPNZ_EX_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_
 			ZEND_VM_CONTINUE();
 		}
 	}
-	if (i_zend_is_true(val)) {
+	ret = i_zend_is_true(val);
+	zval_ptr_dtor_nogc(free_op1);
+	if (ret) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	} else {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline++;
 	}
-	zval_ptr_dtor_nogc(free_op1);
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		HANDLE_EXCEPTION();
 	}
