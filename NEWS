@@ -76,6 +76,10 @@
   . Fixed bug #68644 (strlen incorrect : mbstring + func_overload=2 +UTF-8
     + Opcache). (Laruence)
 
+- OpenSSL:
+  . Fix bug #61285, #68329, #68046, #41631: encrypted streams don't observe
+    socket timeouts (Brad Broerman)
+
 - pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
     when setting SIG_DFL). (Julien)
