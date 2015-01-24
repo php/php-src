@@ -5720,16 +5720,31 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *const_ast = ast->child[1];
 
 	znode class_node, const_node;
-	zend_op *opline;
+	zend_op *opline, *class_op = NULL;
 
 	if (zend_is_const_default_class_ref(class_ast)) {
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else {
-		zend_compile_class_ref(&class_node, class_ast);
+		class_op = zend_compile_class_ref(&class_node, class_ast);
 	}
 
 	zend_compile_expr(&const_node, const_ast);
+
+	if (class_op && const_node.op_type == IS_CONST && class_op->extended_value == ZEND_FETCH_CLASS_SELF && Z_TYPE(const_node.u.constant) == IS_STRING)
+		zval *const_zv = zend_hash_find(&CG(active_class_entry)->constants_table, Z_STR(const_node.u.constant))
+		if (const_zv && Z_TYPE_P(const_zv) < IS_CONSTANT) {
+			CG(active_op_array)->last--;
+			CG(active_op_array)->T--;
+
+			result->op_type = IS_CONST;
+			Z_TRY_ADDREF_P(const_zv);
+			result->u.constant = *const_zv;
+
+			zend_string_release(Z_STR(const_node.u.constant));
+			return;
+		}
+	}
 
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, &const_node);
 
