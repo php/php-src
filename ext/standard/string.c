@@ -3145,7 +3145,6 @@ static zend_string* php_char_to_str_ex(zend_string *str, char from, char *to, si
 {
 	zend_string *result;
 	size_t char_count = 0;
-	size_t replaced = 0;
 	char lc_from = 0;
 	char *source, *target, *source_end= str->val + str->len;
 
@@ -3195,7 +3194,6 @@ static zend_string* php_char_to_str_ex(zend_string *str, char from, char *to, si
 	} else {
 		for (source = str->val; source < source_end; source++) {
 			if (tolower(*source) == lc_from) {
-				replaced = 1;
 				if (replace_count) {
 					*replace_count += 1;
 				}
