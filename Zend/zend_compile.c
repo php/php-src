@@ -5731,15 +5731,14 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&const_node, const_ast);
 
-	if (class_op && const_node.op_type == IS_CONST && class_op->extended_value == ZEND_FETCH_CLASS_SELF && Z_TYPE(const_node.u.constant) == IS_STRING) {
+	if (class_op && const_node.op_type == IS_CONST && class_op->extended_value == ZEND_FETCH_CLASS_SELF && Z_TYPE(const_node.u.constant) == IS_STRING && CG(active_class_entry)) {
 		zval *const_zv = zend_hash_find(&CG(active_class_entry)->constants_table, Z_STR(const_node.u.constant));
 		if (const_zv && Z_TYPE_P(const_zv) < IS_CONSTANT) {
 			CG(active_op_array)->last--;
 			CG(active_op_array)->T--;
 
 			result->op_type = IS_CONST;
-			Z_TRY_ADDREF_P(const_zv);
-			result->u.constant = *const_zv;
+			ZVAL_COPY(&result->u.constant, const_zv);
 
 			zend_string_release(Z_STR(const_node.u.constant));
 			return;
