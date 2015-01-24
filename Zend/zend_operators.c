@@ -292,13 +292,10 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_TRUE:
 			ZVAL_LONG(op, 1);
 			break;
-		case IS_RESOURCE: {
-				zend_long l = Z_RES_HANDLE_P(op);
-				zval_ptr_dtor(op);
-				ZVAL_LONG(op, l);
-			}
-			/* break missing intentionally */
-			Z_TYPE_INFO_P(op) = IS_LONG;
+		case IS_RESOURCE:
+			tmp = Z_RES_HANDLE_P(op);
+			zval_ptr_dtor(op);
+			ZVAL_LONG(op, tmp);
 			break;
 		case IS_LONG:
 			break;
@@ -489,7 +486,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 		case IS_UNDEF:
 		case IS_NULL:
 		case IS_FALSE: {
-					ZVAL_EMPTY_STRING(op);
+			ZVAL_EMPTY_STRING(op);
 			break;
 		}
 		case IS_TRUE:
@@ -500,6 +497,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 		case IS_RESOURCE: {
 			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
 			int len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
+			zval_ptr_dtor(op);
 			ZVAL_NEW_STR(op, zend_string_init(buf, len, 0));
 			break;
 		}
