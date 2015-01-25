@@ -472,7 +472,6 @@ class testHarness {
 			'error_append_string'=>'',
 			'auto_prepend_file'=>'',
 			'auto_append_file'=>'',
-			'magic_quotes_runtime'=>'0',
 		);	
 	public $env = array();
 	public $info_params = array();

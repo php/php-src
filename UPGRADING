@@ -54,10 +54,20 @@ PHP X.Y UPGRADE NOTES
   . zend_function.common.num_args don't include the variadic argument anymore.
   . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
     output buffer is created in an output buffer handler.
+  . Removed support for scoped calls to non-static methods from an incompatible
+    $this context. See details in https://wiki.php.net/rfc/incompat_ctx.
+  . Removed support for #-style comments in ini files. Use ;-style comments
+    instead.
   . Added zend_memnstr_ex, which is based on string matching sunday algo.
   . Added zend_memnrstr, zend_memnrstr_ex.
   . Added hybrid sorting algo zend_sort for better performance.
   . Added stable sorting algo zend_insert_sort.
+  . Invalid octal literals in source code now produce compile errors, fixing
+    PHPSadness #31. Previously, the invalid digits (and any following valid 
+    digits) were simply ignored, such that 0781 became 7.
+
+- Date:
+  . Removed $is_dst parameter from mktime() and gmmktime().
 
 - DBA
   . dba_delete() now returns false if the key was not found for the inifile
@@ -67,6 +77,14 @@ PHP X.Y UPGRADE NOTES
   . Requires libgmp version 4.2 or newer now.
   . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making
     them consistent with other GMP functions.
+
+- Standard:
+  . Removed string category support in setlocale(). Use the LC_* constants
+    instead.
+  . Removed set_magic_quotes_runtime() and its alias magic_quotes_runtime().
+
+- Stream:
+  . Removed set_socket_blocking() in favor of its alias stream_set_blocking().
 
 ========================================
 2. New Features
@@ -80,9 +98,6 @@ PHP X.Y UPGRADE NOTES
   . Added \u{xxxxxx} Unicode Codepoint Escape Syntax for double-quoted strings
     and heredocs.
   . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did.
-
-- Standard
-  . intdiv() function for integer division added.
 
 ========================================
 3. Changes in SAPI modules
@@ -115,7 +130,10 @@ PHP X.Y UPGRADE NOTES
 6. New Functions
 ========================================
 - GMP
-  . Added gmp_random_seed()
+  . Added gmp_random_seed().
+
+- Standard
+  . Added intdiv() function for integer division.
 
 ========================================
 7. New Classes and Interfaces

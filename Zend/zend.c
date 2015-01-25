@@ -616,6 +616,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	zend_compile_string = compile_string;
 	zend_throw_exception_hook = NULL;
 
+	/* Set up the default garbage collection implementation. */
+	gc_collect_cycles = zend_gc_collect_cycles;
+
 	zend_init_opcodes_handlers();
 
 	/* set up version */

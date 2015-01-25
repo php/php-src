@@ -2493,10 +2493,10 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 					if (Z_TYPE_P(current) == IS_OBJECT &&
 							instanceof_function(Z_OBJCE_P(current), curl_CURLFile_class)) {
 						/* new-style file upload */
-						zval *prop;
+						zval *prop, rv;
 						char *type = NULL, *filename = NULL;
 
-						prop = zend_read_property(curl_CURLFile_class, current, "name", sizeof("name")-1, 0);
+						prop = zend_read_property(curl_CURLFile_class, current, "name", sizeof("name")-1, 0, &rv);
 						if (Z_TYPE_P(prop) != IS_STRING) {
 							php_error_docref(NULL, E_WARNING, "Invalid filename for key %s", string_key->val);
 						} else {
@@ -2506,11 +2506,11 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 								return 1;
 							}
 
-							prop = zend_read_property(curl_CURLFile_class, current, "mime", sizeof("mime")-1, 0);
+							prop = zend_read_property(curl_CURLFile_class, current, "mime", sizeof("mime")-1, 0, &rv);
 							if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
 								type = Z_STRVAL_P(prop);
 							}
-							prop = zend_read_property(curl_CURLFile_class, current, "postname", sizeof("postname")-1, 0);
+							prop = zend_read_property(curl_CURLFile_class, current, "postname", sizeof("postname")-1, 0, &rv);
 							if (Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
 								filename = Z_STRVAL_P(prop);
 							}
@@ -3348,7 +3348,8 @@ PHP_FUNCTION(curl_escape)
 PHP_FUNCTION(curl_unescape)
 {
 	char       *str = NULL, *out = NULL;
-	int        str_len = 0, out_len;
+	size_t     str_len = 0;
+	int        out_len;
 	zval       *zid;
 	php_curl   *ch;
 

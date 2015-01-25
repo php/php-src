@@ -36,7 +36,7 @@ BEGIN_EXTERN_C()
 # define CG(v) (compiler_globals.v)
 extern ZEND_API struct _zend_compiler_globals compiler_globals;
 #endif
-int zendparse(void);
+ZEND_API int zendparse(void);
 
 
 /* Executor */

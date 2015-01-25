@@ -2588,7 +2588,8 @@ PHP_FUNCTION(ldap_escape)
 static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 {
 	char *value;
-	int result, ldap_len;
+	size_t value_len;
+	int result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &value, &value_len) != SUCCESS) {
 		return;

@@ -541,7 +541,7 @@ PHP_MINFO_FUNCTION(mssql)
 static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	char *host = NULL, *user = NULL, *passwd = NULL;
-	int host_len = 0, user_len = 0, passwd_len = 0;
+	size_t host_len = 0, user_len = 0, passwd_len = 0;
 	zend_bool new_link = 0;
 	char *hashed_details;
 	int hashed_details_length;
@@ -901,7 +901,7 @@ PHP_FUNCTION(mssql_select_db)
 {
 	char *db;
 	zval *mssql_link_index = NULL;
-	int db_len;
+	size_t db_len;
 	int id = -1;
 	mssql_link  *mssql_ptr;
 
@@ -1322,8 +1322,9 @@ PHP_FUNCTION(mssql_query)
 {
 	char *query;
 	zval *mssql_link_index = NULL;
-	int query_len, retvalue, batchsize, num_fields;
-	long zbatchsize = 0;
+	size_t query_len;
+	int retvalue, batchsize, num_fields;
+	zend_long zbatchsize = 0;
 	mssql_link *mssql_ptr;
 	mssql_result *result;
 	int id = -1;
@@ -1493,7 +1494,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	zval *mssql_result_index;
 	mssql_result *result;
 	int i;
-	long resulttype = 0;
+	zend_long resulttype = 0;
 
 	switch (result_type) {
 		case MSSQL_NUM:
@@ -1609,7 +1610,7 @@ PHP_FUNCTION(mssql_fetch_assoc)
 PHP_FUNCTION(mssql_data_seek)
 {
 	zval *mssql_result_index;
-	long offset;
+	zend_long offset;
 	mssql_result *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &mssql_result_index, &offset) == FAILURE) {
@@ -1692,7 +1693,7 @@ static char *php_mssql_get_field_name(int type)
 PHP_FUNCTION(mssql_fetch_field)
 {
 	zval *mssql_result_index;
-	long field_offset = -1;
+	zend_long field_offset = -1;
 	mssql_result *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &mssql_result_index, &field_offset) == FAILURE) {
@@ -1728,7 +1729,7 @@ PHP_FUNCTION(mssql_fetch_field)
 PHP_FUNCTION(mssql_field_length)
 {
 	zval *mssql_result_index;
-	long field_offset = -1;
+	zend_long field_offset = -1;
 	mssql_result *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &mssql_result_index, &field_offset) == FAILURE) {
@@ -1758,7 +1759,7 @@ PHP_FUNCTION(mssql_field_length)
 PHP_FUNCTION(mssql_field_name)
 {
 	zval *mssql_result_index;
-	long field_offset = -1;
+	zend_long field_offset = -1;
 	mssql_result *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &mssql_result_index, &field_offset) == FAILURE) {
@@ -1788,7 +1789,7 @@ PHP_FUNCTION(mssql_field_name)
 PHP_FUNCTION(mssql_field_type)
 {
 	zval *mssql_result_index;
-	long field_offset = -1;
+	zend_long field_offset = -1;
 	mssql_result *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &mssql_result_index, &field_offset) == FAILURE) {
@@ -1818,7 +1819,7 @@ PHP_FUNCTION(mssql_field_type)
 PHP_FUNCTION(mssql_field_seek)
 {
 	zval *mssql_result_index;
-	long field_offset;
+	zend_long field_offset;
 	mssql_result *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &mssql_result_index, &field_offset) == FAILURE) {
@@ -1842,7 +1843,7 @@ PHP_FUNCTION(mssql_field_seek)
 PHP_FUNCTION(mssql_result)
 {
 	zval **field, *mssql_result_index;
-	long row;
+	zend_long row;
 	int field_offset=0;
 	mssql_result *result;
 
@@ -1940,7 +1941,7 @@ PHP_FUNCTION(mssql_next_result)
    Sets the lower error severity */
 PHP_FUNCTION(mssql_min_error_severity)
 {
-	long severity;
+	zend_long severity;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &severity) == FAILURE) {
 		return;
@@ -1955,7 +1956,7 @@ PHP_FUNCTION(mssql_min_error_severity)
    Sets the lower message severity */
 PHP_FUNCTION(mssql_min_message_severity)
 {
-	long severity;
+	zend_long severity;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &severity) == FAILURE) {
 		return;
@@ -1970,7 +1971,7 @@ PHP_FUNCTION(mssql_min_message_severity)
 PHP_FUNCTION(mssql_init)
 {
 	char *sp_name;
-	int sp_name_len;
+	size_t sp_name_len;
 	zval *mssql_link_index = NULL;
 	mssql_link *mssql_ptr;
 	mssql_statement *statement;
@@ -2008,9 +2009,10 @@ PHP_FUNCTION(mssql_init)
 PHP_FUNCTION(mssql_bind)
 {
 	char *param_name;
-	int param_name_len, datalen;
+	size_t param_name_len;
+	int datalen;
 	int status = 0;
-	long type = 0, maxlen = -1;
+	zend_long type = 0, maxlen = -1;
 	zval *stmt, **var;
 	zend_bool is_output = 0, is_null = 0;
 	mssql_link *mssql_ptr;
@@ -2230,7 +2232,7 @@ PHP_FUNCTION(mssql_free_statement)
 PHP_FUNCTION(mssql_guid_string)
 {
 	char *binary;
-	int binary_len;
+	size_t binary_len;
 	zend_bool sf = 0;
 	char buffer[32+1];
 	char buffer2[36+1];

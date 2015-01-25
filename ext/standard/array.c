@@ -1663,15 +1663,12 @@ PHP_FUNCTION(array_fill_keys)
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(keys), entry) {
 		ZVAL_DEREF(entry);
+		Z_TRY_ADDREF_P(val);
 		if (Z_TYPE_P(entry) == IS_LONG) {
-			Z_TRY_ADDREF_P(val);
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), val);
 		} else {
 			zend_string *key = zval_get_string(entry);
-
-			Z_TRY_ADDREF_P(val);
 			zend_symtable_update(Z_ARRVAL_P(return_value), key, val);
-
 			zend_string_release(key);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1705,9 +1702,6 @@ PHP_FUNCTION(range)
 		}
 	}
 
-	/* Initialize the return_value as an array. */
-	array_init(return_value);
-
 	/* If the range is given as strings, generate an array of characters. */
 	if (Z_TYPE_P(zlow) == IS_STRING && Z_TYPE_P(zhigh) == IS_STRING && Z_STRLEN_P(zlow) >= 1 && Z_STRLEN_P(zhigh) >= 1) {
 		int type1, type2;
@@ -1731,34 +1725,44 @@ PHP_FUNCTION(range)
 				err = 1;
 				goto err;
 			}
-			for (; low >= high; low -= (unsigned int)lstep) {
-				if (CG(one_char_string)[low]) {
-					ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
-				} else {
-					ZVAL_STRINGL(&tmp, (char*)&low, 1);
+			/* Initialize the return_value as an array. */
+			array_init_size(return_value, ((low - high) / lstep) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (; low >= high; low -= (unsigned int)lstep) {
+					if (CG(one_char_string)[low]) {
+						ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
+					} else {
+						ZVAL_STRINGL(&tmp, (char*)&low, 1);
+					}
+					ZEND_HASH_FILL_ADD(&tmp);
+					if (((signed int)low - lstep) < 0) {
+						break;
+					}
 				}
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-				if (((signed int)low - lstep) < 0) {
-					break;
-				}
-			}
+			} ZEND_HASH_FILL_END();
 		} else if (high > low) {	/* Positive Steps */
 			if (lstep <= 0) {
 				err = 1;
 				goto err;
 			}
-			for (; low <= high; low += (unsigned int)lstep) {
-				if (CG(one_char_string)[low]) {
-					ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
-				} else {
-					ZVAL_STRINGL(&tmp, (char*)&low, 1);
+			array_init_size(return_value, ((high - low) / lstep) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (; low <= high; low += (unsigned int)lstep) {
+					if (CG(one_char_string)[low]) {
+						ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
+					} else {
+						ZVAL_STRINGL(&tmp, (char*)&low, 1);
+					}
+					ZEND_HASH_FILL_ADD(&tmp);
+					if (((signed int)low + lstep) > 255) {
+						break;
+					}
 				}
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-				if (((signed int)low + lstep) > 255) {
-					break;
-				}
-			}
+			} ZEND_HASH_FILL_END();
 		} else {
+			array_init(return_value);
 			if (CG(one_char_string)[low]) {
 				ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
 			} else {
@@ -1766,7 +1770,6 @@ PHP_FUNCTION(range)
 			}
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
-
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
 		double low, high, value;
 		zend_long i;
@@ -1782,21 +1785,30 @@ double_str:
 				goto err;
 			}
 
+			array_init_size(return_value, ((low - high) / step) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			for (value = low; value >= (high - DOUBLE_DRIFT_FIX); value = low - (++i * step)) {
 				Z_DVAL(tmp) = value;
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+				ZEND_HASH_FILL_ADD(&tmp);
 			}
+			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
 			if (high - low < step || step <= 0) {
 				err = 1;
 				goto err;
 			}
 
-			for (value = low; value <= (high + DOUBLE_DRIFT_FIX); value = low + (++i * step)) {
-				Z_DVAL(tmp) = value;
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-			}
+			array_init_size(return_value, ((high - low) / step) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (value = low; value <= (high + DOUBLE_DRIFT_FIX); value = low + (++i * step)) {
+					Z_DVAL(tmp) = value;
+					ZEND_HASH_FILL_ADD(&tmp);
+				}
+			} ZEND_HASH_FILL_END();
 		} else {
+			array_init(return_value);
 			Z_DVAL(tmp) = low;
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
@@ -1814,20 +1826,29 @@ long_str:
 				err = 1;
 				goto err;
 			}
-			for (; low >= high; low -= lstep) {
-				Z_LVAL(tmp) = (zend_long)low;
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-			}
+			array_init_size(return_value, ((low - high) / lstep) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (; low >= high; low -= lstep) {
+					Z_LVAL(tmp) = (zend_long)low;
+					ZEND_HASH_FILL_ADD(&tmp);
+				}
+			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
 			if (high - low < lstep || lstep <= 0) {
 				err = 1;
 				goto err;
 			}
-			for (; low <= high; low += lstep) {
-				Z_LVAL(tmp) = (zend_long)low;
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-			}
+			array_init_size(return_value, ((high - low) / lstep) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (; low <= high; low += lstep) {
+					Z_LVAL(tmp) = (zend_long)low;
+					ZEND_HASH_FILL_ADD(&tmp);
+				}
+			} ZEND_HASH_FILL_END();
 		} else {
+			array_init(return_value);
 			Z_LVAL(tmp) = (zend_long)low;
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
@@ -1835,7 +1856,6 @@ long_str:
 err:
 	if (err) {
 		php_error_docref(NULL, E_WARNING, "step exceeds the specified range");
-		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
 }
@@ -2376,7 +2396,7 @@ PHP_FUNCTION(array_slice)
 	if (!preserve_keys && (Z_ARRVAL_P(input)->u.flags & HASH_FLAG_PACKED)) {
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-			ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(input), num_key, entry) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
 				pos++;
 				if (pos <= offset) {
 					continue;
@@ -4090,6 +4110,7 @@ PHP_FUNCTION(array_diff)
 	zval *value;
 	zend_string *str, *key;
 	zend_long idx;
+	zval dummy;
 
 	if (ZEND_NUM_ARGS() < 2) {
 		php_error_docref(NULL, E_WARNING, "at least 2 parameters are required, %d given", ZEND_NUM_ARGS());
@@ -4120,12 +4141,13 @@ PHP_FUNCTION(array_diff)
 		return;
 	}
 
+	ZVAL_NULL(&dummy);
 	/* create exclude map */
 	zend_hash_init(&exclude, num, NULL, NULL, 0);
 	for (i = 1; i < argc; i++) {
 		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(args[i]), value) {
 			str = zval_get_string(value);
-			zend_hash_add_empty_element(&exclude, str);
+			zend_hash_add(&exclude, str, &dummy);
 			zend_string_release(str);
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -4298,7 +4320,7 @@ PHP_FUNCTION(array_multisort)
 					/* flag allowed here */
 					if (parse_state[MULTISORT_ORDER] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */
-						sort_order = Z_LVAL(args[i]) == PHP_SORT_DESC ? -1 : 1;
+						sort_order = Z_LVAL_P(arg) == PHP_SORT_DESC ? -1 : 1;
 						parse_state[MULTISORT_ORDER] = 0;
 					} else {
 						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
@@ -4316,7 +4338,7 @@ PHP_FUNCTION(array_multisort)
 					/* flag allowed here */
 					if (parse_state[MULTISORT_TYPE] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */
-						sort_type = (int)Z_LVAL(args[i]);
+						sort_type = (int)Z_LVAL_P(arg);
 						parse_state[MULTISORT_TYPE] = 0;
 					} else {
 						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
