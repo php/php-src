@@ -3,7 +3,7 @@ Strict scalar type hint basics
 --FILE--
 <?php
 
-declare(strict_typehints = TRUE);
+declare(strict_types=1);
 
 $errnames = [
     E_NOTICE => 'E_NOTICE',

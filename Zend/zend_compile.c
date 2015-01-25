@@ -142,7 +142,7 @@ static zend_bool zend_get_unqualified_name(const zend_string *name, const char *
 static void init_compiler_declarables(void) /* {{{ */
 {
 	ZVAL_LONG(&CG(declarables).ticks, 0);
-	CG(declarables).strict_typehints = 0;
+	CG(declarables).strict_types = 0;
 }
 /* }}} */
 
@@ -1532,7 +1532,7 @@ void zend_do_end_compilation(void) /* {{{ */
 	CG(has_bracketed_namespaces) = 0;
 	zend_end_namespace();
 	/* strict typehinting is per-file */
-	CG(declarables).strict_typehints = 0;
+	CG(declarables).strict_types = 0;
 }
 /* }}} */
 
@@ -2552,7 +2552,7 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	}
 
 	call_flags = ((opline->opcode == ZEND_NEW) ? ZEND_CALL_CTOR : 0)
-		| (CG(declarables).strict_typehints ? ZEND_CALL_STRICT_TYPEHINTS : 0);
+		| (CG(declarables).strict_types ? ZEND_CALL_STRICT_TYPEHINTS : 0);
 	opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
 	opline->op1.num = call_flags;
 
@@ -3791,15 +3791,15 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}
-		} else if (zend_string_equals_literal_ci(name, "strict_typehints")) {
+		} else if (zend_string_equals_literal_ci(name, "strict_types")) {
 			zval value_zv;
 			zend_const_expr_to_zval(&value_zv, value_ast);
 
-			if (Z_TYPE(value_zv) != IS_FALSE && Z_TYPE(value_zv) != IS_TRUE) {
-				zend_error_noreturn(E_COMPILE_ERROR, "strict_typehints declaration must have a boolean value");
+			if (Z_TYPE(value_zv) != IS_LONG || (Z_LVAL(value_zv) != 0 && Z_LVAL(value_zv) != 1)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must have 0 or 1 as its value");
 			}
 
-			CG(declarables).strict_typehints = (Z_TYPE(value_zv) == IS_TRUE) ? 1 : 0;
+			CG(declarables).strict_types = Z_LVAL(value_zv);
 		} else {
 			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", name->val);
 		}
