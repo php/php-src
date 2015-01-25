@@ -71,7 +71,7 @@ static ZEND_FUNCTION(pass)
 
 static const zend_internal_function zend_pass_function = {
 	ZEND_INTERNAL_FUNCTION, /* type              */
-	0,                      /* fn_flags          */
+	ZEND_ACC_STATIC,        /* fn_flags          */
 	NULL,                   /* name              */
 	NULL,                   /* scope             */
 	NULL,                   /* prototype         */
