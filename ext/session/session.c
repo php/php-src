@@ -223,16 +223,18 @@ static zend_string *php_session_encode(void) /* {{{ */
 }
 /* }}} */
 
-static void php_session_decode(zend_string *data) /* {{{ */
+static int php_session_decode(zend_string *data) /* {{{ */
 {
 	if (!PS(serializer)) {
 		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
-		return;
+		return FAILURE;
 	}
 	if (PS(serializer)->decode(data->val, data->len) == FAILURE) {
 		php_session_destroy();
 		php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
+		return FAILURE;
 	}
+	return SUCCESS;
 }
 /* }}} */
 
@@ -297,7 +299,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	void *hash_context = NULL;
 #endif
 	unsigned char *digest;
-	int digest_len;
+	size_t digest_len;
 	char *buf;
 	struct timeval tv;
 	zval *array;
@@ -428,7 +430,7 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	}
 
 	outid = zend_string_alloc((digest_len + 2) * ((8.0f / PS(hash_bits_per_character) + 0.5)), 0);
-	outid->len = (int)(bin_to_readable((char *)digest, digest_len, outid->val, (char)PS(hash_bits_per_character)) - (char *)&outid->val);
+	outid->len = (size_t)(bin_to_readable((char *)digest, digest_len, outid->val, (char)PS(hash_bits_per_character)) - (char *)&outid->val);
 	efree(digest);
 
 	return outid;
@@ -2156,6 +2158,7 @@ static PHP_FUNCTION(session_decode)
 	zend_string *str = NULL;
 
 	if (PS(session_status) != php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Session is not active. You cannot decode session data");
 		RETURN_FALSE;
 	}
 
@@ -2163,8 +2166,10 @@ static PHP_FUNCTION(session_decode)
 		return;
 	}
 
-	php_session_decode(str);
-
+	if (php_session_decode(str) == FAILURE) {
+		/* FIXME: session_decode() should return FALSE */
+		/* RETURN_FALSE; */
+	}
 	RETURN_TRUE;
 }
 /* }}} */
