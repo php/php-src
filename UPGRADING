@@ -83,6 +83,10 @@ PHP X.Y UPGRADE NOTES
     instead.
   . Removed set_magic_quotes_runtime() and its alias magic_quotes_runtime().
 
+- Json:
+  . Rejected RFC 7159 incompatible number formats in json_decode string -
+        top level (07, 0xff, .1, -.1) and all levels ([1.], [1.e1])
+
 - Stream:
   . Removed set_socket_blocking() in favor of its alias stream_set_blocking().
 
