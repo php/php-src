@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -128,7 +128,7 @@ ZEND_API zend_utility_values zend_uv;
 /* version information */
 static char *zend_version_info;
 static uint zend_version_info_length;
-#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2014 Zend Technologies\n"
+#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2015 Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
 
 static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, zend_bool is_object) /* {{{ */
@@ -615,6 +615,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #endif /* HAVE_SYS_SDT_H */
 	zend_compile_string = compile_string;
 	zend_throw_exception_hook = NULL;
+
+	/* Set up the default garbage collection implementation. */
+	gc_collect_cycles = zend_gc_collect_cycles;
 
 	zend_init_opcodes_handlers();
 

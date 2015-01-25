@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -119,7 +119,7 @@ PHP_FUNCTION(sha1)
 PHP_FUNCTION(sha1_file)
 {
 	char          *arg;
-	int           arg_len;
+	size_t        arg_len;
 	zend_bool raw_output = 0;
 	char          sha1str[41];
 	unsigned char buf[1024];

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -281,7 +281,7 @@ ZEND_API int zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_f
 	int retval;
 
 	begin_write(ht);
-	retval = zend_hash_sort(TS_HASH(ht), sort_func, compare_func, renumber);
+	retval = zend_hash_sort_ex(TS_HASH(ht), sort_func, compare_func, renumber);
 	end_write(ht);
 
 	return retval;

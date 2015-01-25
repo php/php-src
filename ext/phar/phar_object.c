@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2014 The PHP Group                                |
+  | Copyright (c) 2005-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -2066,8 +2066,11 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 	}
 
 	oldpath = estrndup(phar->fname, phar->fname_len);
-	oldname = zend_memrchr(phar->fname, '/', phar->fname_len);
-	++oldname;
+	if ((oldname = zend_memrchr(phar->fname, '/', phar->fname_len))) {
+		++oldname;
+	} else {
+		oldname = phar->fname;
+	}
 	oldname_len = strlen(oldname);
 
 	basename = estrndup(oldname, oldname_len);

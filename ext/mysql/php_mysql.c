@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1947,7 +1947,7 @@ Q: String or long first?
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 
 	if (row < 0 || row >= (int)mysql_num_rows(mysql_result)) {
-		php_error_docref(NULL, E_WARNING, "Unable to jump to row %pd on MySQL result index %pd", row, Z_RES_P(result)->handle);
+		php_error_docref(NULL, E_WARNING, "Unable to jump to row %pd on MySQL result index %d", row, Z_RES_P(result)->handle);
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, row);
@@ -1977,7 +1977,7 @@ Q: String or long first?
 						i++;
 					}
 					if (!tmp_field) { /* no match found */
-						php_error_docref(NULL, E_WARNING, "%s%s%s not found in MySQL result index %pd",
+						php_error_docref(NULL, E_WARNING, "%s%s%s not found in MySQL result index %d",
 									(table_name?table_name:""), (table_name?".":""), field_name, Z_RES_P(result)->handle);
 						efree(field_name);
 						if (table_name) {
@@ -2008,15 +2008,7 @@ Q: String or long first?
 		RETURN_FALSE;
 	}
 	if (sql_row[field_offset]) {
-#if PHP_API_VERSION < 20100412
-		if (PG(magic_quotes_runtime)) {
-			RETVAL_STR(php_addslashes(sql_row[field_offset], sql_row_lengths[field_offset], 0));
-		} else {
-#endif
-			RETVAL_STRINGL(sql_row[field_offset], sql_row_lengths[field_offset]);
-#if PHP_API_VERSION < 20100412
-		}
-#endif
+		RETVAL_STRINGL(sql_row[field_offset], sql_row_lengths[field_offset]);
 	} else {
 		RETURN_NULL();
 	}
@@ -2142,15 +2134,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		if (mysql_row[i]) {
 			zval data;
 
-#if PHP_API_VERSION < 20100412
-			if (PG(magic_quotes_runtime)) {
-				ZVAL_STR(&data, php_addslashes(mysql_row[i], mysql_row_lengths[i], 0));
-			} else {
-#endif
-				ZVAL_STRINGL(&data, mysql_row[i], mysql_row_lengths[i]);
-#if PHP_API_VERSION < 20100412
-			}
-#endif
+			ZVAL_STRINGL(&data, mysql_row[i], mysql_row_lengths[i]);
 
 			if (result_type & MYSQL_NUM) {
 				add_index_zval(return_value, i, &data);
@@ -2293,7 +2277,7 @@ PHP_FUNCTION(mysql_data_seek)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 
 	if (offset < 0 || offset >= (int)mysql_num_rows(mysql_result)) {
-		php_error_docref(NULL, E_WARNING, "Offset %pd is invalid for MySQL result index %pd (or the query data is unbuffered)", offset, Z_RES_P(result)->handle);
+		php_error_docref(NULL, E_WARNING, "Offset %pd is invalid for MySQL result index %d (or the query data is unbuffered)", offset, Z_RES_P(result)->handle);
 		RETURN_FALSE;
 	}
 	mysql_data_seek(mysql_result, offset);
@@ -2466,7 +2450,7 @@ PHP_FUNCTION(mysql_field_seek)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 
 	if (offset < 0 || offset >= (int)mysql_num_fields(mysql_result)) {
-		php_error_docref(NULL, E_WARNING, "Field %pd is invalid for MySQL result index %pd", offset, Z_RES_P(result)->handle);
+		php_error_docref(NULL, E_WARNING, "Field %pd is invalid for MySQL result index %d", offset, Z_RES_P(result)->handle);
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, offset);
@@ -2498,7 +2482,7 @@ static void php_mysql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	ZEND_FETCH_RESOURCE(mysql_result, MYSQL_RES *, result, -1, "MySQL result", le_result);
 
 	if (field < 0 || field >= (int)mysql_num_fields(mysql_result)) {
-		php_error_docref(NULL, E_WARNING, "Field %pd is invalid for MySQL result index %pd", field, Z_RES_P(result)->handle);
+		php_error_docref(NULL, E_WARNING, "Field %pd is invalid for MySQL result index %d", field, Z_RES_P(result)->handle);
 		RETURN_FALSE;
 	}
 	mysql_field_seek(mysql_result, field);

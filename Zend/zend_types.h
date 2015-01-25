@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,7 +84,8 @@ typedef struct _zend_ast_ref    zend_ast_ref;
 typedef struct _zend_ast        zend_ast;
 
 typedef int  (*compare_func_t)(const void *, const void *);
-typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t);
+typedef void (*swap_func_t)(void *, void *);
+typedef void (*sort_func_t)(void *, size_t, size_t, compare_func_t, swap_func_t);
 typedef void (*dtor_func_t)(zval *pDest);
 typedef void (*copy_ctor_func_t)(zval *pElement);
 

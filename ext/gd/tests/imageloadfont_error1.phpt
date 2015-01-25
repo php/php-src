@@ -11,5 +11,5 @@ Neveo Harrison <neveoo [at] gmail [dot] com> #testfest #tek11
 var_dump( imageloadfont(array()) );
 ?>
 --EXPECTF--
-Warning: imageloadfont() expects parameter 1 to be string, array given in %s on line %d
+Warning: imageloadfont() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL

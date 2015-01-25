@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -150,35 +150,34 @@ ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce)
 		} ZEND_HASH_FOREACH_END();
 	}
 	if (ce->static_members_table) {
+		zval *static_members = ce->static_members_table;
+		int count = ce->default_static_members_count;
 		int i;
 
-		for (i = 0; i < ce->default_static_members_count; i++) {
-			if (Z_TYPE(ce->static_members_table[i]) != IS_UNDEF) {
-				zval tmp;
-
-				ZVAL_COPY_VALUE(&tmp, &ce->static_members_table[i]);
-				ZVAL_UNDEF(&ce->static_members_table[i]);
-				zval_ptr_dtor(&tmp);
-			}
+		ce->default_static_members_count = 0;
+		ce->default_static_members_table = ce->static_members_table = NULL;
+		for (i = 0; i < count; i++) {
+			zval_ptr_dtor(&static_members[i]);
 		}
-		ce->static_members_table = NULL;
+		efree(static_members);
 	}
 }
 
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 {
 	if (CE_STATIC_MEMBERS(ce)) {
+		zval *static_members = CE_STATIC_MEMBERS(ce);
 		int i;
 
-		for (i = 0; i < ce->default_static_members_count; i++) {
-			zval_ptr_dtor(&CE_STATIC_MEMBERS(ce)[i]);
-		}
-		efree(CE_STATIC_MEMBERS(ce));
 #ifdef ZTS
 		CG(static_members_table)[(zend_intptr_t)(ce->static_members_table)] = NULL;
 #else
 		ce->static_members_table = NULL;
 #endif
+		for (i = 0; i < ce->default_static_members_count; i++) {
+			zval_ptr_dtor(&static_members[i]);
+		}
+		efree(static_members);
 	}
 }
 

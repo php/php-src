@@ -1,5 +1,7 @@
 --TEST--
 Bug #64896 (Segfault with gc_collect_cycles using unserialize on certain objects)
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 $bar = NULL;

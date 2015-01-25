@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -3474,7 +3474,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce);
-	prop = zend_std_get_static_property(ce, name, 1, NULL);
+	prop = zend_std_get_static_property(ce, name, 1);
 	if (!prop) {
 		if (def_value) {
 			RETURN_ZVAL(def_value, 1, 0);
@@ -3505,7 +3505,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	GET_REFLECTION_OBJECT_PTR(ce);
 
 	zend_update_class_constants(ce);
-	variable_ptr = zend_std_get_static_property(ce, name, 1, NULL);
+	variable_ptr = zend_std_get_static_property(ce, name, 1);
 	if (!variable_ptr) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Class %s does not have a property named %s", ce->name->val, name->val);
@@ -5013,13 +5013,14 @@ ZEND_METHOD(reflection_property, getValue)
 	} else {
 		const char *class_name, *prop_name;
 		size_t prop_name_len;
+		zval rv;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &object) == FAILURE) {
 			return;
 		}
 
 		zend_unmangle_property_name_ex(ref->prop.name, &class_name, &prop_name, &prop_name_len);
-		member_p = zend_read_property(ref->ce, object, prop_name, prop_name_len, 1);
+		member_p = zend_read_property(ref->ce, object, prop_name, prop_name_len, 1, &rv);
 		ZVAL_DUP(return_value, member_p);
 	}
 }

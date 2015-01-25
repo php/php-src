@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2014 The PHP Group                                |
+  | Copyright (c) 2006-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
 #include "zend_hash.h"
 #include "zend_interfaces.h"
 #include "zend_operators.h"
-#include "zend_qsort.h"
+#include "zend_sort.h"
 #include "zend_vm.h"
 #include "zend_smart_str.h"
 #include "main/php_streams.h"

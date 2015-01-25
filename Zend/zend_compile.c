@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -907,7 +907,6 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
 		zend_function *old_function;
 
-		efree_size(new_function, sizeof(zend_op_array));
 		if ((old_function = zend_hash_find_ptr(function_table, Z_STR_P(op2))) != NULL
 			&& old_function->type == ZEND_USER_FUNCTION
 			&& old_function->op_array.last > 0) {
@@ -3251,23 +3250,23 @@ void zend_compile_while(zend_ast *ast) /* {{{ */
 {
 	zend_ast *cond_ast = ast->child[0];
 	zend_ast *stmt_ast = ast->child[1];
-
 	znode cond_node;
-	uint32_t opnum_start, opnum_jmpz;
+	uint32_t opnum_start, opnum_jmp, opnum_cond;
 
-	opnum_start = get_next_op_number(CG(active_op_array));
-	zend_compile_expr(&cond_node, cond_ast);
+	opnum_jmp = zend_emit_jump(0);
 
-	opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
 	zend_begin_loop();
 
+	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_compile_stmt(stmt_ast);
 
-	zend_emit_jump(opnum_start);
+	opnum_cond = get_next_op_number(CG(active_op_array));
+	zend_update_jump_target(opnum_jmp, opnum_cond);
+	zend_compile_expr(&cond_node, cond_ast);
 
-	zend_update_jump_target_to_next(opnum_jmpz);
+	zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, opnum_start);
 
-	zend_end_loop(opnum_start, 0);
+	zend_end_loop(opnum_cond, 0);
 }
 /* }}} */
 
@@ -3323,27 +3322,27 @@ void zend_compile_for(zend_ast *ast) /* {{{ */
 	zend_ast *stmt_ast = ast->child[3];
 
 	znode result;
-	uint32_t opnum_cond, opnum_jmpz, opnum_loop;
+	uint32_t opnum_start, opnum_jmp, opnum_loop;
 
 	zend_compile_expr_list(&result, init_ast);
 	zend_do_free(&result);
 
-	opnum_cond = get_next_op_number(CG(active_op_array));
-	zend_compile_expr_list(&result, cond_ast);
-	zend_do_extended_info();
+	opnum_jmp = zend_emit_jump(0);
 
-	opnum_jmpz = zend_emit_cond_jump(ZEND_JMPZ, &result, 0);
 	zend_begin_loop();
 
+	opnum_start = get_next_op_number(CG(active_op_array));
 	zend_compile_stmt(stmt_ast);
 
 	opnum_loop = get_next_op_number(CG(active_op_array));
 	zend_compile_expr_list(&result, loop_ast);
 	zend_do_free(&result);
 
-	zend_emit_jump(opnum_cond);
+	zend_update_jump_target_to_next(opnum_jmp);
+	zend_compile_expr_list(&result, cond_ast);
+	zend_do_extended_info();
 
-	zend_update_jump_target_to_next(opnum_jmpz);
+	zend_emit_cond_jump(ZEND_JMPNZ, &result, opnum_start);
 
 	zend_end_loop(opnum_loop, 0);
 }
@@ -3527,13 +3526,21 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 		zend_compile_expr(&cond_node, cond_ast);
 
-		opline = zend_emit_op(NULL, ZEND_CASE, &expr_node, &cond_node);
-		SET_NODE(opline->result, &case_node);
-		if (opline->op1_type == IS_CONST) {
-			zval_copy_ctor(CT_CONSTANT(opline->op1));
-		}
+		if (expr_node.op_type == IS_CONST
+			&& Z_TYPE(expr_node.u.constant) == IS_FALSE) {
+			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
+		} else if (expr_node.op_type == IS_CONST
+			&& Z_TYPE(expr_node.u.constant) == IS_TRUE) {
+			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, 0);
+		} else {		    
+			opline = zend_emit_op(NULL, ZEND_CASE, &expr_node, &cond_node);
+			SET_NODE(opline->result, &case_node);
+			if (opline->op1_type == IS_CONST) {
+				zval_copy_ctor(CT_CONSTANT(opline->op1));
+			}
 
-		jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &case_node, 0);
+			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &case_node, 0);
+		}
 	}
 
 	opnum_default_jmp = zend_emit_jump(0);
@@ -5124,7 +5131,32 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 		return;
 	}
 
-	zend_emit_op_tmp(result, opcode, &left_node, &right_node);
+	do {
+		if (opcode == ZEND_IS_EQUAL || opcode == ZEND_IS_NOT_EQUAL) {
+			if (left_node.op_type == IS_CONST) {
+				if (Z_TYPE(left_node.u.constant) == IS_FALSE) {
+					opcode = (opcode == ZEND_IS_NOT_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
+					zend_emit_op_tmp(result, opcode, &right_node, NULL);
+					break;
+				} else if (Z_TYPE(left_node.u.constant) == IS_TRUE) {
+					opcode = (opcode == ZEND_IS_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
+					zend_emit_op_tmp(result, opcode, &right_node, NULL);
+					break;
+				}
+			} else if (right_node.op_type == IS_CONST) {
+				if (Z_TYPE(right_node.u.constant) == IS_FALSE) {
+					opcode = (opcode == ZEND_IS_NOT_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
+					zend_emit_op_tmp(result, opcode, &left_node, NULL);
+					break;
+				} else if (Z_TYPE(right_node.u.constant) == IS_TRUE) {
+					opcode = (opcode == ZEND_IS_EQUAL) ? ZEND_BOOL : ZEND_BOOL_NOT;
+					zend_emit_op_tmp(result, opcode, &left_node, NULL);
+					break;
+				}
+			}
+		}
+		zend_emit_op_tmp(result, opcode, &left_node, &right_node);
+	} while (0);
 }
 /* }}} */
 
@@ -5688,16 +5720,30 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *const_ast = ast->child[1];
 
 	znode class_node, const_node;
-	zend_op *opline;
+	zend_op *opline, *class_op = NULL;
 
 	if (zend_is_const_default_class_ref(class_ast)) {
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else {
-		zend_compile_class_ref(&class_node, class_ast);
+		class_op = zend_compile_class_ref(&class_node, class_ast);
 	}
 
 	zend_compile_expr(&const_node, const_ast);
+
+	if (class_op && const_node.op_type == IS_CONST && class_op->extended_value == ZEND_FETCH_CLASS_SELF && Z_TYPE(const_node.u.constant) == IS_STRING && CG(active_class_entry)) {
+		zval *const_zv = zend_hash_find(&CG(active_class_entry)->constants_table, Z_STR(const_node.u.constant));
+		if (const_zv && Z_TYPE_P(const_zv) < IS_CONSTANT) {
+			CG(active_op_array)->last--;
+			CG(active_op_array)->T--;
+
+			result->op_type = IS_CONST;
+			ZVAL_COPY(&result->u.constant, const_zv);
+
+			zend_string_release(Z_STR(const_node.u.constant));
+			return;
+		}
+	}
 
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, &const_node);
 

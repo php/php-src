@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,6 +41,8 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 				zend_array *arr = (zend_array*)p;
 
 				if (arr != &EG(symbol_table)) {
+					ZEND_ASSERT(GC_REFCOUNT(arr) <= 1);
+
 					/* break possible cycles */
 					GC_TYPE(arr) = IS_NULL;
 					GC_REMOVE_FROM_BUFFER(arr);

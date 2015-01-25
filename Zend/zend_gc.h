@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -119,13 +119,17 @@ extern ZEND_API zend_gc_globals gc_globals;
 #endif
 
 BEGIN_EXTERN_C()
-ZEND_API int  gc_collect_cycles(void);
+ZEND_API extern int (*gc_collect_cycles)(void);
+
 ZEND_API void gc_possible_root(zend_refcounted *ref);
 ZEND_API void gc_remove_from_buffer(zend_refcounted *ref);
 ZEND_API void gc_globals_ctor(void);
 ZEND_API void gc_globals_dtor(void);
 ZEND_API void gc_init(void);
 ZEND_API void gc_reset(void);
+
+/* The default implementation of the gc_collect_cycles callback. */
+ZEND_API int  zend_gc_collect_cycles(void);
 END_EXTERN_C()
 
 #define GC_ZVAL_CHECK_POSSIBLE_ROOT(z) \

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -123,22 +123,18 @@ PHPAPI char *php_strtolower(char *s, size_t len);
 PHPAPI zend_string *php_string_toupper(zend_string *s);
 PHPAPI zend_string *php_string_tolower(zend_string *s);
 PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size_t trlen);
-PHPAPI zend_string *php_addslashes(char *str, size_t length, int should_free);
-PHPAPI zend_string *php_addcslashes(const char *str, size_t length, int freeit, char *what, size_t wlength);
-PHPAPI void php_stripslashes(char *str, size_t *len);
-PHPAPI void php_stripcslashes(char *str, size_t *len);
+PHPAPI zend_string *php_addslashes(zend_string *str, int should_free);
+PHPAPI zend_string *php_addcslashes(zend_string *str, int freeit, char *what, size_t what_len);
+PHPAPI void php_stripslashes(zend_string *str);
+PHPAPI void php_stripcslashes(zend_string *str);
 PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t sufflen);
 PHPAPI size_t php_dirname(char *str, size_t len);
 PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len);
-PHPAPI zend_string *php_str_to_str_ex(char *haystack, size_t length, char *needle,
-		size_t needle_len, char *str, size_t str_len, int case_sensitivity, size_t *replace_count);
 PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle,
 		size_t needle_len, char *str, size_t str_len);
 PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int mode);
 PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *state, char *allow, size_t allow_len);
 PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, char *allow, size_t allow_len, zend_bool allow_tag_spaces);
-PHPAPI size_t php_char_to_str_ex(char *str, size_t len, char from, char *to, size_t to_len, zval *result, int case_sensitivity, size_t *replace_count);
-PHPAPI size_t php_char_to_str(char *str, size_t len, char from, char *to, size_t to_len, zval *result);
 PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value);
 PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit);
 

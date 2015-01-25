@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +28,10 @@
 #include "zend_globals.h"
 #include <zend_ini_parser.h>
 #include "zend_ini_scanner.h"
+
+#ifdef YYDEBUG
+#undef YYDEBUG
+#endif
 
 #if 0
 # define YYDEBUG(s, c) printf("state: %d char: %c\n", s, c)
@@ -631,13 +635,6 @@ end_raw_value_chars:
 }
 
 <INITIAL,ST_VALUE,ST_RAW>{TABS_AND_SPACES}*[;][^\r\n]*{NEWLINE} { /* Comment */
-	BEGIN(INITIAL);
-	SCNG(lineno)++;
-	return END_OF_LINE;
-}
-
-<INITIAL>{TABS_AND_SPACES}*[#][^\r\n]*{NEWLINE} { /* #Comment */
-	zend_error(E_DEPRECATED, "Comments starting with '#' are deprecated in %s on line %d", zend_ini_scanner_get_filename(), SCNG(lineno));
 	BEGIN(INITIAL);
 	SCNG(lineno)++;
 	return END_OF_LINE;

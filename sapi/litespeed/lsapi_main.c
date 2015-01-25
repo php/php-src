@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -302,29 +302,6 @@ static void litespeed_php_import_environment_variables(zval *array_ptr)
 	}
 }
 
-
-#if ((PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || PHP_MAJOR_VERSION < 5)
-static int add_variable_magic_quote( const char * pKey, int keyLen, const char * pValue, int valLen,
-                         void * arg )
-{
-    zval * gpc_element, **gpc_element_p;
-    HashTable * symtable1 = Z_ARRVAL_P((zval * )arg);
-    register char * pKey1 = (char *)pKey;
-
-    MAKE_STD_ZVAL(gpc_element);
-    Z_STRLEN_P( gpc_element ) = valLen;
-    Z_STRVAL_P( gpc_element ) = php_addslashes((char *)pValue, valLen, &Z_STRLEN_P( gpc_element ), 0 );
-    Z_TYPE_P( gpc_element ) = IS_STRING;
-#if PHP_MAJOR_VERSION > 4
-    zend_symtable_update( symtable1, pKey1, keyLen + 1, &gpc_element, sizeof( zval *), (void **) &gpc_element_p );
-#else
-    zend_hash_update( symtable1, pKey1, keyLen + 1, &gpc_element, sizeof( zval *), (void **) &gpc_element_p );
-#endif
-    return 1;
-}
-
-#endif
-
 /* {{{ sapi_lsapi_register_variables
  */
 static void sapi_lsapi_register_variables(zval *track_vars_array)
@@ -336,19 +313,9 @@ static void sapi_lsapi_register_variables(zval *track_vars_array)
 
         litespeed_php_import_environment_variables(track_vars_array);
 
-#if ((PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || PHP_MAJOR_VERSION < 5)
-        if (!PG(magic_quotes_gpc)) {
-#endif
-            LSAPI_ForeachHeader( add_variable, track_vars_array );
-            LSAPI_ForeachEnv( add_variable, track_vars_array );
-            add_variable("PHP_SELF", 8, php_self, strlen( php_self ), track_vars_array );
-#if ((PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4) || PHP_MAJOR_VERSION < 5)
-        } else {
-            LSAPI_ForeachHeader( add_variable_magic_quote, track_vars_array );
-            LSAPI_ForeachEnv( add_variable_magic_quote, track_vars_array );
-            add_variable_magic_quote("PHP_SELF", 8, php_self, strlen( php_self ), track_vars_array );
-        }
-#endif
+		LSAPI_ForeachHeader( add_variable, track_vars_array );
+		LSAPI_ForeachEnv( add_variable, track_vars_array );
+		add_variable("PHP_SELF", 8, php_self, strlen( php_self ), track_vars_array );
     } else {
         php_import_environment_variables(track_vars_array);
 
@@ -840,9 +807,9 @@ static int cli_main( int argc, char * argv[] )
             case 'v':
                 if (php_request_startup() != FAILURE) {
 #if ZEND_DEBUG
-                    php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+                    php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2015 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #else
-                    php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2014 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+                    php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2015 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
 #ifdef PHP_OUTPUT_NEWAPI
                     php_output_end_all();

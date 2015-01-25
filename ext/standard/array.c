@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -187,7 +187,7 @@ static int php_array_key_compare(const void *a, const void *b) /* {{{ */
 		ZVAL_STR(&first, f->key);
 	}
 
-	if (s->key == 0) {
+	if (s->key == NULL) {
 		ZVAL_LONG(&second, s->h);
 	} else {
 		ZVAL_STR(&second, s->key);
@@ -226,7 +226,7 @@ PHP_FUNCTION(krsort)
 
 	php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_reverse_key_compare, 0) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_reverse_key_compare, 0) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -254,7 +254,7 @@ PHP_FUNCTION(ksort)
 
 	php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_key_compare, 0) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_key_compare, 0) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -438,11 +438,11 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 	}
 
 	if (fold_case) {
-		if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_natural_case_compare, 0) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_case_compare, 0) == FAILURE) {
 			return;
 		}
 	} else {
-		if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_natural_compare, 0) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_compare, 0) == FAILURE) {
 			return;
 		}
 	}
@@ -480,7 +480,7 @@ PHP_FUNCTION(asort)
 
 	php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_data_compare, 0) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_data_compare, 0) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -500,7 +500,7 @@ PHP_FUNCTION(arsort)
 
 	php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_reverse_data_compare, 0) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_reverse_data_compare, 0) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -520,7 +520,7 @@ PHP_FUNCTION(sort)
 
 	php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_data_compare, 1) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_data_compare, 1) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -540,7 +540,7 @@ PHP_FUNCTION(rsort)
 
 	php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_reverse_data_compare, 1) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_reverse_data_compare, 1) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -633,7 +633,7 @@ PHP_FUNCTION(usort)
 	refcount = Z_REFCOUNT_P(array);
 	arr = Z_COUNTED_P(array);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_user_compare, 1) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 1) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
 		if (refcount > Z_REFCOUNT_P(array)) {
@@ -678,7 +678,7 @@ PHP_FUNCTION(uasort)
 	refcount = Z_REFCOUNT_P(array);
 	arr = Z_COUNTED_P(array);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_user_compare, 0) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 0) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
 		if (refcount > Z_REFCOUNT_P(array)) {
@@ -766,7 +766,7 @@ PHP_FUNCTION(uksort)
 	refcount = Z_REFCOUNT_P(array);
 	arr = Z_COUNTED_P(array);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), zend_qsort, php_array_user_key_compare, 0) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_key_compare, 0) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
 		if (refcount > Z_REFCOUNT_P(array)) {
@@ -1445,6 +1445,12 @@ PHP_FUNCTION(extract)
 	}
 
 	symbol_table = zend_rebuild_symbol_table();
+#if 0
+	if (!symbol_table) {
+		php_error_docref(NULL, E_WARNING, "failed to build symbol table");
+		return;
+	}
+#endif
 
 	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(var_array), num_key, var_name, entry) {
 		zval final_name;
@@ -1534,7 +1540,7 @@ PHP_FUNCTION(extract)
 				}
 			} else {
 				if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
-				zend_set_local_var(Z_STR(final_name), entry, 1);
+				zend_hash_update_ind(&symbol_table->ht, Z_STR(final_name), entry);
 			}
 			count++;
 		}
@@ -1657,15 +1663,12 @@ PHP_FUNCTION(array_fill_keys)
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(keys), entry) {
 		ZVAL_DEREF(entry);
+		Z_TRY_ADDREF_P(val);
 		if (Z_TYPE_P(entry) == IS_LONG) {
-			Z_TRY_ADDREF_P(val);
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), val);
 		} else {
 			zend_string *key = zval_get_string(entry);
-
-			Z_TRY_ADDREF_P(val);
 			zend_symtable_update(Z_ARRVAL_P(return_value), key, val);
-
 			zend_string_release(key);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1699,9 +1702,6 @@ PHP_FUNCTION(range)
 		}
 	}
 
-	/* Initialize the return_value as an array. */
-	array_init(return_value);
-
 	/* If the range is given as strings, generate an array of characters. */
 	if (Z_TYPE_P(zlow) == IS_STRING && Z_TYPE_P(zhigh) == IS_STRING && Z_STRLEN_P(zlow) >= 1 && Z_STRLEN_P(zhigh) >= 1) {
 		int type1, type2;
@@ -1725,34 +1725,44 @@ PHP_FUNCTION(range)
 				err = 1;
 				goto err;
 			}
-			for (; low >= high; low -= (unsigned int)lstep) {
-				if (CG(one_char_string)[low]) {
-					ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
-				} else {
-					ZVAL_STRINGL(&tmp, (char*)&low, 1);
+			/* Initialize the return_value as an array. */
+			array_init_size(return_value, ((low - high) / lstep) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (; low >= high; low -= (unsigned int)lstep) {
+					if (CG(one_char_string)[low]) {
+						ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
+					} else {
+						ZVAL_STRINGL(&tmp, (char*)&low, 1);
+					}
+					ZEND_HASH_FILL_ADD(&tmp);
+					if (((signed int)low - lstep) < 0) {
+						break;
+					}
 				}
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-				if (((signed int)low - lstep) < 0) {
-					break;
-				}
-			}
+			} ZEND_HASH_FILL_END();
 		} else if (high > low) {	/* Positive Steps */
 			if (lstep <= 0) {
 				err = 1;
 				goto err;
 			}
-			for (; low <= high; low += (unsigned int)lstep) {
-				if (CG(one_char_string)[low]) {
-					ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
-				} else {
-					ZVAL_STRINGL(&tmp, (char*)&low, 1);
+			array_init_size(return_value, ((high - low) / lstep) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (; low <= high; low += (unsigned int)lstep) {
+					if (CG(one_char_string)[low]) {
+						ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
+					} else {
+						ZVAL_STRINGL(&tmp, (char*)&low, 1);
+					}
+					ZEND_HASH_FILL_ADD(&tmp);
+					if (((signed int)low + lstep) > 255) {
+						break;
+					}
 				}
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-				if (((signed int)low + lstep) > 255) {
-					break;
-				}
-			}
+			} ZEND_HASH_FILL_END();
 		} else {
+			array_init(return_value);
 			if (CG(one_char_string)[low]) {
 				ZVAL_INTERNED_STR(&tmp, CG(one_char_string)[low]);
 			} else {
@@ -1760,7 +1770,6 @@ PHP_FUNCTION(range)
 			}
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
-
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
 		double low, high, value;
 		zend_long i;
@@ -1776,21 +1785,30 @@ double_str:
 				goto err;
 			}
 
+			array_init_size(return_value, ((low - high) / step) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			for (value = low; value >= (high - DOUBLE_DRIFT_FIX); value = low - (++i * step)) {
 				Z_DVAL(tmp) = value;
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+				ZEND_HASH_FILL_ADD(&tmp);
 			}
+			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
 			if (high - low < step || step <= 0) {
 				err = 1;
 				goto err;
 			}
 
-			for (value = low; value <= (high + DOUBLE_DRIFT_FIX); value = low + (++i * step)) {
-				Z_DVAL(tmp) = value;
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-			}
+			array_init_size(return_value, ((high - low) / step) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (value = low; value <= (high + DOUBLE_DRIFT_FIX); value = low + (++i * step)) {
+					Z_DVAL(tmp) = value;
+					ZEND_HASH_FILL_ADD(&tmp);
+				}
+			} ZEND_HASH_FILL_END();
 		} else {
+			array_init(return_value);
 			Z_DVAL(tmp) = low;
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
@@ -1808,20 +1826,29 @@ long_str:
 				err = 1;
 				goto err;
 			}
-			for (; low >= high; low -= lstep) {
-				Z_LVAL(tmp) = (zend_long)low;
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-			}
+			array_init_size(return_value, ((low - high) / lstep) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (; low >= high; low -= lstep) {
+					Z_LVAL(tmp) = (zend_long)low;
+					ZEND_HASH_FILL_ADD(&tmp);
+				}
+			} ZEND_HASH_FILL_END();
 		} else if (high > low) { 	/* Positive steps */
 			if (high - low < lstep || lstep <= 0) {
 				err = 1;
 				goto err;
 			}
-			for (; low <= high; low += lstep) {
-				Z_LVAL(tmp) = (zend_long)low;
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
-			}
+			array_init_size(return_value, ((high - low) / lstep) + 1);
+			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (; low <= high; low += lstep) {
+					Z_LVAL(tmp) = (zend_long)low;
+					ZEND_HASH_FILL_ADD(&tmp);
+				}
+			} ZEND_HASH_FILL_END();
 		} else {
+			array_init(return_value);
 			Z_LVAL(tmp) = (zend_long)low;
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
@@ -1829,7 +1856,6 @@ long_str:
 err:
 	if (err) {
 		php_error_docref(NULL, E_WARNING, "step exceeds the specified range");
-		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
 }
@@ -2357,35 +2383,53 @@ PHP_FUNCTION(array_slice)
 		length = num_in - offset;
 	}
 
-	/* Initialize returned array */
-	array_init_size(return_value, length > 0 ? (uint32_t)length : 0);
-
 	if (length <= 0) {
+		array_init(return_value);
 		return;
 	}
 
+	/* Initialize returned array */
+	array_init_size(return_value, (uint32_t)length);
+
 	/* Start at the beginning and go until we hit offset */
 	pos = 0;
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
-		pos++;
-		if (pos <= offset) {
-			continue;
-		}
-		if (pos > offset + length) {
-			break;
-		}
-
-		if (string_key) {
-			entry = zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, entry);
-		} else {
-			if (preserve_keys) {
-				entry = zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, entry);
-			} else {
-				entry = zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), entry);
+	if (!preserve_keys && (Z_ARRVAL_P(input)->u.flags & HASH_FLAG_PACKED)) {
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
+				pos++;
+				if (pos <= offset) {
+					continue;
+				}
+				if (pos > offset + length) {
+					break;
+				}
+				ZEND_HASH_FILL_ADD(entry);
+				zval_add_ref(entry);
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FILL_END();
+	} else {
+		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
+			pos++;
+			if (pos <= offset) {
+				continue;
 			}
-		}
-		zval_add_ref(entry);
-	} ZEND_HASH_FOREACH_END();
+			if (pos > offset + length) {
+				break;
+			}
+
+			if (string_key) {
+				entry = zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, entry);
+			} else {
+				if (preserve_keys) {
+					entry = zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, entry);
+				} else {
+					entry = zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), entry);
+				}
+			}
+			zval_add_ref(entry);
+		} ZEND_HASH_FOREACH_END();
+	}
 }
 /* }}} */
 
@@ -2788,9 +2832,15 @@ PHP_FUNCTION(array_values)
 	zval	 *input,		/* Input array */
 			 *entry;		/* An entry in the input array */
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &input) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY(input)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	/* Initialize return array */
 	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
@@ -3055,6 +3105,7 @@ PHP_FUNCTION(array_flip)
 	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(array)));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+		ZVAL_DEREF(entry);
 		if (Z_TYPE_P(entry) == IS_LONG) {
 			if (str_idx) {
 				ZVAL_STR_COPY(&data, str_idx);
@@ -3110,6 +3161,22 @@ PHP_FUNCTION(array_change_key_case)
 }
 /* }}} */
 
+struct bucketindex {
+	Bucket b;
+	unsigned int i;
+};
+
+static void array_bucketindex_swap(void *p, void *q) /* {{{ */
+{
+	struct bucketindex *f = (struct bucketindex *)p;
+	struct bucketindex *g = (struct bucketindex *)q;
+	struct bucketindex t;
+	t = *f;
+	*f = *g;
+	*g = t;
+}
+/* }}} */
+
 /* {{{ proto array array_unique(array input [, int sort_flags])
    Removes duplicate values from array */
 PHP_FUNCTION(array_unique)
@@ -3117,10 +3184,6 @@ PHP_FUNCTION(array_unique)
 	zval *array;
 	uint idx;
 	Bucket *p;
-	struct bucketindex {
-		Bucket b;
-		unsigned int i;
-	};
 	struct bucketindex *arTmp, *cmpdata, *lastkept;
 	unsigned int i;
 	zend_long sort_type = PHP_SORT_STRING;
@@ -3153,8 +3216,8 @@ PHP_FUNCTION(array_unique)
 		i++;
 	}
 	ZVAL_UNDEF(&arTmp[i].b.val);
-	zend_qsort((void *) arTmp, i, sizeof(struct bucketindex), php_array_data_compare);
-
+	zend_sort((void *) arTmp, i, sizeof(struct bucketindex),
+			php_array_data_compare, (swap_func_t)array_bucketindex_swap);
 	/* go through the sorted array and delete duplicates from the copy */
 	lastkept = arTmp;
 	for (cmpdata = arTmp + 1; Z_TYPE(cmpdata->b.val) != IS_UNDEF; cmpdata++) {
@@ -3477,9 +3540,11 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		ZVAL_UNDEF(&list->val);
 		if (hash->nNumOfElements > 1) {
 			if (behavior == INTERSECT_NORMAL) {
-				zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), intersect_data_compare_func);
+				zend_sort((void *) lists[i], hash->nNumOfElements, 
+						sizeof(Bucket), intersect_data_compare_func, (swap_func_t)zend_hash_bucket_swap);
 			} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
-				zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), intersect_key_compare_func);
+				zend_sort((void *) lists[i], hash->nNumOfElements,
+						sizeof(Bucket), intersect_key_compare_func, (swap_func_t)zend_hash_bucket_swap);
 			}
 		}
 	}
@@ -3491,9 +3556,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	/* go through the lists and look for common values */
 	while (Z_TYPE(ptrs[0]->val) != IS_UNDEF) {
 		if ((behavior & INTERSECT_ASSOC) /* triggered also when INTERSECT_KEY */
-			&&
-			key_compare_type == INTERSECT_COMP_KEY_USER) {
-
+			&& key_compare_type == INTERSECT_COMP_KEY_USER) {
 			BG(user_compare_fci) = *fci_key;
 			BG(user_compare_fci_cache) = *fci_key_cache;
 		}
@@ -3897,9 +3960,11 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		ZVAL_UNDEF(&list->val);
 		if (hash->nNumOfElements > 1) {
 			if (behavior == DIFF_NORMAL) {
-				zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), diff_data_compare_func);
+				zend_sort((void *) lists[i], hash->nNumOfElements,
+						sizeof(Bucket), diff_data_compare_func, (swap_func_t)zend_hash_bucket_swap);
 			} else if (behavior & DIFF_ASSOC) { /* triggered also when DIFF_KEY */
-				zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket), diff_key_compare_func);
+				zend_sort((void *) lists[i], hash->nNumOfElements,
+						sizeof(Bucket), diff_key_compare_func, (swap_func_t)zend_hash_bucket_swap);
 			}
 		}
 	}
@@ -4045,6 +4110,7 @@ PHP_FUNCTION(array_diff)
 	zval *value;
 	zend_string *str, *key;
 	zend_long idx;
+	zval dummy;
 
 	if (ZEND_NUM_ARGS() < 2) {
 		php_error_docref(NULL, E_WARNING, "at least 2 parameters are required, %d given", ZEND_NUM_ARGS());
@@ -4075,12 +4141,13 @@ PHP_FUNCTION(array_diff)
 		return;
 	}
 
+	ZVAL_NULL(&dummy);
 	/* create exclude map */
 	zend_hash_init(&exclude, num, NULL, NULL, 0);
 	for (i = 1; i < argc; i++) {
 		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(args[i]), value) {
 			str = zval_get_string(value);
-			zend_hash_add_empty_element(&exclude, str);
+			zend_hash_add(&exclude, str, &dummy);
 			zend_string_release(str);
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -4179,6 +4246,17 @@ PHPAPI int php_multisort_compare(const void *a, const void *b) /* {{{ */
 	efree(arrays);							\
 	RETURN_FALSE;
 
+static void array_bucket_p_sawp(void *p, void *q) /* {{{ */ {
+	Bucket *t;
+	Bucket **f = (Bucket **)p;
+	Bucket **g = (Bucket **)q;
+
+	t = *f;
+	*f = *g;
+	*g = t;
+}
+/* }}} */
+
 /* {{{ proto bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]], ...])
    Sort multiple arrays at once similar to how ORDER BY clause works in SQL */
 PHP_FUNCTION(array_multisort)
@@ -4242,7 +4320,7 @@ PHP_FUNCTION(array_multisort)
 					/* flag allowed here */
 					if (parse_state[MULTISORT_ORDER] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */
-						sort_order = Z_LVAL(args[i]) == PHP_SORT_DESC ? -1 : 1;
+						sort_order = Z_LVAL_P(arg) == PHP_SORT_DESC ? -1 : 1;
 						parse_state[MULTISORT_ORDER] = 0;
 					} else {
 						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
@@ -4260,7 +4338,7 @@ PHP_FUNCTION(array_multisort)
 					/* flag allowed here */
 					if (parse_state[MULTISORT_TYPE] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */
-						sort_type = (int)Z_LVAL(args[i]);
+						sort_type = (int)Z_LVAL_P(arg);
 						parse_state[MULTISORT_TYPE] = 0;
 					} else {
 						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
@@ -4323,7 +4401,7 @@ PHP_FUNCTION(array_multisort)
 	}
 
 	/* Do the actual sort magic - bada-bim, bada-boom. */
-	zend_qsort(indirect, array_size, sizeof(Bucket *), php_multisort_compare);
+	zend_qsort(indirect, array_size, sizeof(Bucket *), php_multisort_compare, (swap_func_t)array_bucket_p_sawp);
 
 	/* Restructure the arrays based on sorted indirect - this is mostly taken from zend_hash_sort() function. */
 	HANDLE_BLOCK_INTERRUPTIONS();

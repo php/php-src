@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -475,21 +475,13 @@ ZEND_FUNCTION(func_get_args)
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			i = 0;
 			p = ZEND_CALL_ARG(ex, 1);
-			if (ZEND_CALL_NUM_ARGS(ex) > first_extra_arg) {
+			if (arg_count > first_extra_arg) {
 				while (i < first_extra_arg) {
 					q = p;
 					ZVAL_DEREF(q);
 					if (Z_OPT_REFCOUNTED_P(q)) Z_ADDREF_P(q);
 					ZEND_HASH_FILL_ADD(q);
-//					q->h = i;
-//					q->key = NULL;
-//					if (!Z_ISREF_P(p)) {
-//						ZVAL_COPY(&q->val, p);
-//					} else {
-//						ZVAL_COPY(&q->val, Z_REFVAL_P(p));
-//				    }
 					p++;
-//					q++;
 					i++;
 				}
 				p = ZEND_CALL_VAR_NUM(ex, ex->func->op_array.last_var + ex->func->op_array.T);
@@ -499,15 +491,7 @@ ZEND_FUNCTION(func_get_args)
 				ZVAL_DEREF(q);
 				if (Z_OPT_REFCOUNTED_P(q)) Z_ADDREF_P(q);
 				ZEND_HASH_FILL_ADD(q);
-//				q->h = i;
-//				q->key = NULL;
-//				if (!Z_ISREF_P(p)) {
-//					ZVAL_COPY(&q->val, p);
-//				} else {
-//					ZVAL_COPY(&q->val, Z_REFVAL_P(p));
-//			    }
 				p++;
-//				q++;
 				i++;
 			}
 		} ZEND_HASH_FILL_END();
@@ -667,18 +651,54 @@ ZEND_FUNCTION(each)
    Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
 {
-	zend_string *err;
+	zval *err;
 	int old_error_reporting;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &err) == FAILURE) {
+#ifndef FAST_ZPP
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &err) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(err)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	old_error_reporting = EG(error_reporting);
 	if(ZEND_NUM_ARGS() != 0) {
-		zend_string *key = zend_string_init("error_reporting", sizeof("error_reporting")-1, 0);
-		zend_alter_ini_entry(key, err, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
-		zend_string_release(key);
+		do {
+			zend_ini_entry *p = EG(error_reporting_ini_entry);
+
+			if (!p) {
+				p = zend_hash_str_find_ptr(EG(ini_directives), "error_reporting", sizeof("error_reporting")-1);
+				if (p) {
+					EG(error_reporting_ini_entry) = p;
+				} else {
+					break;
+				}
+			}
+			if (!p->modified) {
+				if (!EG(modified_ini_directives)) {
+					ALLOC_HASHTABLE(EG(modified_ini_directives));
+					zend_hash_init(EG(modified_ini_directives), 8, NULL, NULL, 0);
+				}
+				if (EXPECTED(zend_hash_str_add_ptr(EG(modified_ini_directives), "error_reporting", sizeof("error_reporting")-1, p) != NULL)) {
+					p->orig_value = p->value;
+					p->orig_modifiable = p->modifiable;
+					p->modified = 1;
+				}
+			} else if (p->orig_value != p->value) {
+				zend_string_release(p->value);
+			}
+
+			p->value = zval_get_string(err);
+			if (Z_TYPE_P(err) == IS_LONG) {
+				EG(error_reporting) = Z_LVAL_P(err);
+			} else {
+				EG(error_reporting) = atoi(p->value->val);
+			}
+		} while (0);
 	}
 
 	RETVAL_LONG(old_error_reporting);
@@ -726,14 +746,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 	array_init_size(dst, zend_hash_num_elements(Z_ARRVAL_P(src)));
 	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(src), idx, key, val) {
 		/* constant arrays can't contain references */
-		if (Z_ISREF_P(val)) {
-			if (Z_REFCOUNT_P(val) == 1) {
-				ZVAL_UNREF(val);
-			} else {
-				Z_DELREF_P(val);
-				val = Z_REFVAL_P(val);
-			}
-		}
+		ZVAL_DEREF(val);
 		if (key) {
 			new_val = zend_hash_add_new(Z_ARRVAL_P(dst), key, val);
 		} else {
@@ -978,14 +991,18 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass) /* 
 		RETURN_FALSE;
 	}
 
-	ce = zend_lookup_class_ex(class_name, NULL, 0);
-	if (!ce) {
-		retval = 0;
+	if (!only_subclass && EXPECTED(zend_string_equals(instance_ce->name, class_name))) {
+		retval = 1;
 	} else {
-		if (only_subclass && instance_ce == ce) {
+		ce = zend_lookup_class_ex(class_name, NULL, 0);
+		if (!ce) {
 			retval = 0;
- 		} else {
-			retval = instanceof_function(instance_ce, ce);
+		} else {
+			if (only_subclass && instance_ce == ce) {
+				retval = 0;
+			} else {
+				retval = instanceof_function(instance_ce, ce);
+			}
 		}
 	}
 
@@ -1041,6 +1058,8 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		if (UNEXPECTED(Z_COPYABLE_P(prop))) {
 			ZVAL_DUP(&prop_copy, prop);
 			prop = &prop_copy;
+		} else {
+			Z_TRY_ADDREF_P(prop);
 		}
 
 		/* this is necessary to make it able to work with default array

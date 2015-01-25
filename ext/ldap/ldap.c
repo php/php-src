@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2588,7 +2588,8 @@ PHP_FUNCTION(ldap_escape)
 static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 {
 	char *value;
-	int result, ldap_len;
+	size_t value_len;
+	int result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &value, &value_len) != SUCCESS) {
 		return;

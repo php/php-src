@@ -239,11 +239,11 @@ array(5) {
 }
 -- with table = HTML_SPECIALCHARS, ENT_NOQUOTES --
 array(3) {
-  [">"]=>
-  string(4) "&gt;"
-  ["<"]=>
-  string(4) "&lt;"
   ["&"]=>
   string(5) "&amp;"
+  ["<"]=>
+  string(4) "&lt;"
+  [">"]=>
+  string(4) "&gt;"
 }
 Done

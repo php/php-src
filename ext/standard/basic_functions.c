@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -605,10 +605,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_get_magic_quotes_gpc, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_get_magic_quotes_runtime, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_set_magic_quotes_runtime, 0, 0, 1)
-	ZEND_ARG_INFO(0, new_setting)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_constant, 0)
@@ -2937,8 +2933,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(header_register_callback,										arginfo_header_register_callback)
 	PHP_FE(get_cfg_var,														arginfo_get_cfg_var)
 
-	PHP_DEP_FALIAS(magic_quotes_runtime,	set_magic_quotes_runtime,		arginfo_set_magic_quotes_runtime)
-	PHP_DEP_FE(set_magic_quotes_runtime,									arginfo_set_magic_quotes_runtime)
 	PHP_FE(get_magic_quotes_gpc,										arginfo_get_magic_quotes_gpc)
 	PHP_FE(get_magic_quotes_runtime,									arginfo_get_magic_quotes_runtime)
 
@@ -3106,7 +3100,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FALIAS(set_file_buffer, stream_set_write_buffer,					arginfo_stream_set_write_buffer)
 	PHP_FE(stream_set_chunk_size,											arginfo_stream_set_chunk_size)
 
-	PHP_DEP_FALIAS(set_socket_blocking, stream_set_blocking,				arginfo_stream_set_blocking)
 	PHP_FE(stream_set_blocking,												arginfo_stream_set_blocking)
 	PHP_FALIAS(socket_set_blocking, stream_set_blocking,					arginfo_stream_set_blocking)
 
@@ -4456,8 +4449,8 @@ PHP_FUNCTION(time_nanosleep)
 		RETURN_TRUE;
 	} else if (errno == EINTR) {
 		array_init(return_value);
-		add_assoc_long_ex(return_value, "seconds", sizeof("seconds"), php_rem.tv_sec);
-		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds"), php_rem.tv_nsec);
+		add_assoc_long_ex(return_value, "seconds", sizeof("seconds")-1, php_rem.tv_sec);
+		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, php_rem.tv_nsec);
 		return;
 	} else if (errno == EINVAL) {
 		php_error_docref(NULL, E_WARNING, "nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
@@ -4569,23 +4562,6 @@ PHP_FUNCTION(get_cfg_var)
 	} else {
 		RETURN_FALSE;
 	}
-}
-/* }}} */
-
-/* {{{ proto bool set_magic_quotes_runtime(int new_setting)
-   magic_quotes_runtime is not supported anymore */
-PHP_FUNCTION(set_magic_quotes_runtime)
-{
-	zend_bool new_setting;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &new_setting) == FAILURE) {
-		return;
-	}
-
-	if (new_setting) {
-		php_error_docref(NULL, E_CORE_ERROR, "magic_quotes_runtime is not supported anymore");
-	}
-	RETURN_FALSE;
 }
 /* }}} */
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1555,8 +1555,8 @@ PHP_FUNCTION(odbc_data_source)
 
 	array_init(return_value);
 
-	add_assoc_string_ex(return_value, "server", sizeof("server"), server_name);
-	add_assoc_string_ex(return_value, "description", sizeof("description"), desc);
+	add_assoc_string_ex(return_value, "server", sizeof("server")-1, server_name);
+	add_assoc_string_ex(return_value, "description", sizeof("description")-1, desc);
 
 }
 /* }}} */
@@ -1569,8 +1569,9 @@ PHP_FUNCTION(odbc_exec)
 {
 	zval *pv_conn;
 	zend_long pv_flags;
+	int numArgs;
 	char *query;
-	int numArgs, query_len;
+	size_t query_len;
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	RETCODE rc;
@@ -3131,7 +3132,7 @@ PHP_FUNCTION(odbc_columns)
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *table = NULL, *column = NULL;
-	int cat_len = 0, schema_len = 0, table_len = 0, column_len = 0;
+	size_t cat_len = 0, schema_len = 0, table_len = 0, column_len = 0;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!sss", &pv_conn, &cat, &cat_len, &schema, &schema_len,
@@ -3201,7 +3202,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema, *table, *column;
-	int cat_len = 0, schema_len, table_len, column_len;
+	size_t cat_len = 0, schema_len, table_len, column_len;
 	RETCODE rc;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs!sss", &pv_conn, &cat, &cat_len, &schema, &schema_len,
@@ -3401,7 +3402,7 @@ PHP_FUNCTION(odbc_primarykeys)
 	odbc_result   *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *table = NULL;
-	int cat_len = 0, schema_len, table_len;
+	size_t cat_len = 0, schema_len, table_len;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs!ss", &pv_conn, &cat, &cat_len, &schema, &schema_len, &table, &table_len) == FAILURE) {
@@ -3530,7 +3531,7 @@ PHP_FUNCTION(odbc_procedures)
 	odbc_result   *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *proc = NULL;
-	int cat_len = 0, schema_len = 0, proc_len = 0;
+	size_t cat_len = 0, schema_len = 0, proc_len = 0;
 	RETCODE rc;
 
 	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 4) {
@@ -3666,7 +3667,7 @@ PHP_FUNCTION(odbc_statistics)
 	odbc_result *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema, *name;
-	int cat_len = 0, schema_len, name_len;
+	size_t cat_len = 0, schema_len, name_len;
 	SQLUSMALLINT unique, reserved;
 	RETCODE rc;
 
@@ -3734,7 +3735,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	odbc_result   *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *table = NULL;
-	int cat_len = 0, schema_len, table_len;
+	size_t cat_len = 0, schema_len, table_len;
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs!ss", &pv_conn, &cat, &cat_len, &schema, &schema_len, &table, &table_len) == FAILURE) {

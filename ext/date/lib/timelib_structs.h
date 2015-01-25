@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,9 +21,93 @@
 #ifndef __TIMELIB_STRUCTS_H__
 #define __TIMELIB_STRUCTS_H__
 
-#include "timelib_config.h"
+#ifdef HAVE_TIMELIB_CONFIG_H
+# include "timelib_config.h"
+#endif
 
-#include "php_stdint.h"
+#ifndef TIMELIB_OMIT_STDINT
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#if defined(HAVE_INTTYPES_H)
+#include <inttypes.h>
+#elif defined(HAVE_STDINT_H)
+#include <stdint.h>
+#endif
+
+# ifndef HAVE_INT32_T
+#  if SIZEOF_INT == 4
+typedef int int32_t;
+#  elif SIZEOF_LONG == 4
+typedef long int int32_t;
+#  endif
+# endif
+
+# ifndef HAVE_UINT32_T
+#  if SIZEOF_INT == 4
+typedef unsigned int uint32_t;
+#  elif SIZEOF_LONG == 4
+typedef unsigned long int uint32_t;
+#  endif
+# endif
+
+#ifdef _WIN32
+# if _MSC_VER >= 1600
+# include <stdint.h>
+# endif
+# ifndef SIZEOF_INT
+#  define SIZEOF_INT 4
+# endif
+# ifndef SIZEOF_LONG
+#  define SIZEOF_LONG 4
+# endif
+# ifndef int32_t
+typedef __int32           int32_t;
+# endif
+# ifndef uint32_t
+typedef unsigned __int32  uint32_t;
+# endif
+# ifndef int64_t
+typedef __int64           int64_t;
+# endif
+# ifndef uint64_t
+typedef unsigned __int64  uint64_t;
+# endif
+# ifndef PRId32
+#  define PRId32       "I32d"
+# endif
+# ifndef PRIu32
+#  define PRIu32       "I32u"
+# endif
+# ifndef PRId64
+#  define PRId64       "I64d"
+# endif
+# ifndef PRIu64
+#  define PRIu64       "I64u"
+# endif
+# ifndef INT32_MAX
+#define INT32_MAX    _I32_MAX
+# endif
+# ifndef INT32_MIN
+#define INT32_MIN    ((int32_t)_I32_MIN)
+# endif
+# ifndef UINT32_MAX
+#define UINT32_MAX   _UI32_MAX
+# endif
+# ifndef INT64_MIN
+#define INT64_MIN    ((int64_t)_I64_MIN)
+# endif
+# ifndef INT64_MAX
+#define INT64_MAX    _I64_MAX
+# endif
+# ifndef UINT64_MAX
+#define UINT64_MAX   _UI64_MAX
+# endif
+#endif
+
+#endif /* TIMELIB_OMIT_STDINT */
 
 #include <stdio.h>
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,7 @@ ZEND_API void (*zend_throw_exception_hook)(zval *ex);
 
 void zend_exception_set_previous(zend_object *exception, zend_object *add_previous)
 {
-    zval tmp, *previous, zv, *pzv;
+    zval tmp, *previous, zv, *pzv, rv;
 
 	if (exception == add_previous || !add_previous || !exception) {
 		return;
@@ -50,7 +50,7 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 	ZVAL_OBJ(&zv, exception);
 	pzv = &zv;
 	do {
-		previous = zend_read_property(default_exception_ce, pzv, "previous", sizeof("previous")-1, 1);
+		previous = zend_read_property(default_exception_ce, pzv, "previous", sizeof("previous")-1, 1, &rv);
 		if (Z_TYPE_P(previous) == IS_NULL) {
 			zend_update_property(default_exception_ce, pzv, "previous", sizeof("previous")-1, &tmp);
 			GC_REFCOUNT(add_previous)--;
@@ -264,14 +264,16 @@ ZEND_METHOD(error_exception, __construct)
 	}
 
 #define GET_PROPERTY(object, name) \
-	zend_read_property(default_exception_ce, (object), name, sizeof(name) - 1, 0)
+	zend_read_property(default_exception_ce, (object), name, sizeof(name) - 1, 0, &rv)
 #define GET_PROPERTY_SILENT(object, name) \
-	zend_read_property(default_exception_ce, (object), name, sizeof(name) - 1, 1)
+	zend_read_property(default_exception_ce, (object), name, sizeof(name) - 1, 1, &rv)
 
 /* {{{ proto string Exception::getFile()
    Get the file in which the exception occurred */
 ZEND_METHOD(exception, getFile)
 {
+	zval rv;
+
 	DEFAULT_0_PARAMS;
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "file"));
@@ -282,6 +284,8 @@ ZEND_METHOD(exception, getFile)
    Get the line in which the exception occurred */
 ZEND_METHOD(exception, getLine)
 {
+	zval rv;
+
 	DEFAULT_0_PARAMS;
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "line"));
@@ -292,6 +296,8 @@ ZEND_METHOD(exception, getLine)
    Get the exception message */
 ZEND_METHOD(exception, getMessage)
 {
+	zval rv;
+
 	DEFAULT_0_PARAMS;
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "message"));
@@ -302,6 +308,8 @@ ZEND_METHOD(exception, getMessage)
    Get the exception code */
 ZEND_METHOD(exception, getCode)
 {
+	zval rv;
+
 	DEFAULT_0_PARAMS;
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "code"));
@@ -312,6 +320,8 @@ ZEND_METHOD(exception, getCode)
    Get the stack trace for the location in which the exception occurred */
 ZEND_METHOD(exception, getTrace)
 {
+	zval rv;
+
 	DEFAULT_0_PARAMS;
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "trace"));
@@ -322,6 +332,8 @@ ZEND_METHOD(exception, getTrace)
    Get the exception severity */
 ZEND_METHOD(error_exception, getSeverity)
 {
+	zval rv;
+
 	DEFAULT_0_PARAMS;
 
 	ZVAL_COPY(return_value, GET_PROPERTY(getThis(), "severity"));
@@ -519,14 +531,14 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
    Obtain the backtrace for the exception as a string (instead of an array) */
 ZEND_METHOD(exception, getTraceAsString)
 {
-	zval *trace, *frame;
+	zval *trace, *frame, rv;
 	zend_ulong index;
 	smart_str str = {0};
 	uint32_t num = 0;
 
 	DEFAULT_0_PARAMS;
 
-	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1);
+	trace = zend_read_property(default_exception_ce, getThis(), "trace", sizeof("trace")-1, 1, &rv);
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
 		if (Z_TYPE_P(frame) != IS_ARRAY) {
 			zend_error(E_WARNING, "Expected array for frame %pu", index);
@@ -549,6 +561,8 @@ ZEND_METHOD(exception, getTraceAsString)
    Return previous Exception or NULL. */
 ZEND_METHOD(exception, getPrevious)
 {
+	zval rv;
+
 	DEFAULT_0_PARAMS;
 
 	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(getThis(), "previous"));
@@ -585,7 +599,7 @@ ZEND_METHOD(exception, __toString)
 	zval trace, *exception;
 	zend_string *str;
 	zend_fcall_info fci;
-	zval fname;
+	zval fname, rv;
 
 	DEFAULT_0_PARAMS;
 
@@ -802,7 +816,7 @@ ZEND_API void zend_exception_error(zend_object *ex, int severity) /* {{{ */
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = Z_OBJCE(exception);
 	if (instanceof_function(ce_exception, default_exception_ce)) {
-		zval tmp;
+		zval tmp, rv;
 		zend_string *str, *file = NULL;
 		zend_long line = 0;
 

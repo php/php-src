@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -31,6 +31,14 @@
 #include "php_json_encoder.h"
 #include "php_json_parser.h"
 #include <zend_exceptions.h>
+
+#include <float.h>
+#if defined(DBL_MANT_DIG) && defined(DBL_MIN_EXP)
+#define NUM_BUF_SIZE (3 + DBL_MANT_DIG - DBL_MIN_EXP)
+#else
+#define NUM_BUF_SIZE 1080
+#endif
+
 
 static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);

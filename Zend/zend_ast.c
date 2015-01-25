@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +22,8 @@
 #include "zend_ast.h"
 #include "zend_API.h"
 #include "zend_operators.h"
+
+ZEND_API zend_ast_process_t zend_ast_process = NULL;
 
 static inline void *zend_ast_alloc(size_t size) {
 	return zend_arena_alloc(&CG(ast_arena), size);

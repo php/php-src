@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -201,7 +201,7 @@ static void print_modules(void) /* {{{ */
 
 	zend_hash_init(&sorted_registry, 50, NULL, NULL, 0);
 	zend_hash_copy(&sorted_registry, &module_registry, NULL);
-	zend_hash_sort(&sorted_registry, zend_qsort, module_name_cmp, 0);
+	zend_hash_sort(&sorted_registry, module_name_cmp, 0);
 	zend_hash_apply(&sorted_registry, print_module_info);
 	zend_hash_destroy(&sorted_registry);
 }
@@ -681,7 +681,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2014 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2015 The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
 #if ZEND_DEBUG && defined(HAVE_GCOV)
 					"(DEBUG GCOV)",
@@ -1107,10 +1107,10 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					zend_call_method_with_1_params(&ref, pce, &pce->constructor, "__construct", NULL, &arg);
 
 					if (EG(exception)) {
-						zval tmp, *msg;
+						zval tmp, *msg, rv;
 
 						ZVAL_OBJ(&tmp, EG(exception));
-						msg = zend_read_property(zend_exception_get_default(), &tmp, "message", sizeof("message")-1, 0);
+						msg = zend_read_property(zend_exception_get_default(), &tmp, "message", sizeof("message")-1, 0, &rv);
 						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
 						zval_ptr_dtor(&tmp);
 						EG(exception) = NULL;

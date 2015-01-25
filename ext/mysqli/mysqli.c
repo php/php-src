@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1200,16 +1200,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 #endif
 			{
 
-#if PHP_API_VERSION < 20100412
-				/* check if we need magic quotes */
-				if (PG(magic_quotes_runtime)) {
-					ZVAL_STR(&res, php_addslashes(row[i], field_len[i], 0));
-				} else {
-#endif
-					ZVAL_STRINGL(&res, row[i], field_len[i]);
-#if PHP_API_VERSION < 20100412
-				}
-#endif
+				ZVAL_STRINGL(&res, row[i], field_len[i]);
 			}
 
 			if (fetchtype & MYSQLI_NUM) {

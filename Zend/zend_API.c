@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -191,47 +191,6 @@ ZEND_API char *zend_zval_type_name(const zval *arg) /* {{{ */
 {
 	ZVAL_DEREF(arg);
 	return zend_get_type_by_const(Z_TYPE_P(arg));
-}
-/* }}} */
-
-static int parse_arg_object_to_string(zval *arg, char **p, size_t *pl, int type) /* {{{ */
-{
-	if (Z_OBJ_HANDLER_P(arg, cast_object)) {
-		zval obj;
-		if (Z_OBJ_HANDLER_P(arg, cast_object)(arg, &obj, type) == SUCCESS) {
-			zval_ptr_dtor(arg);
-			ZVAL_COPY_VALUE(arg, &obj);
-			*pl = Z_STRLEN_P(arg);
-			*p = Z_STRVAL_P(arg);
-			return SUCCESS;
-		}
-	}
-	/* Standard PHP objects */
-	if (Z_OBJ_HT_P(arg) == &std_object_handlers || !Z_OBJ_HANDLER_P(arg, cast_object)) {
-		SEPARATE_ZVAL_NOREF(arg);
-		if (zend_std_cast_object_tostring(arg, arg, type) == SUCCESS) {
-			*pl = Z_STRLEN_P(arg);
-			*p = Z_STRVAL_P(arg);
-			return SUCCESS;
-		}
-	}
-	if (!Z_OBJ_HANDLER_P(arg, cast_object) && Z_OBJ_HANDLER_P(arg, get)) {
-		zval rv;
-		zval *z = Z_OBJ_HANDLER_P(arg, get)(arg, &rv);
-		Z_ADDREF_P(z);
-		if(Z_TYPE_P(z) != IS_OBJECT) {
-			zval_dtor(arg);
-			ZVAL_NULL(arg);
-			if (!zend_make_printable_zval(z, arg)) {
-				ZVAL_ZVAL(arg, z, 1, 1);
-			}
-			*pl = Z_STRLEN_P(arg);
-			*p = Z_STRVAL_P(arg);
-			return SUCCESS;
-		}
-		zval_ptr_dtor(z);
-	}
-	return FAILURE;
 }
 /* }}} */
 
@@ -1715,7 +1674,7 @@ static int zend_startup_module_zval(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func_t compare) /* {{{ */
+static void zend_sort_modules(void *base, size_t count, size_t siz, compare_func_t compare, swap_func_t swp) /* {{{ */
 {
 	Bucket *b1 = base;
 	Bucket *b2;
@@ -1821,7 +1780,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 
 ZEND_API int zend_startup_modules(void) /* {{{ */
 {
-	zend_hash_sort(&module_registry, zend_sort_modules, NULL, 0);
+	zend_hash_sort_ex(&module_registry, zend_sort_modules, NULL, 0);
 	zend_hash_apply(&module_registry, zend_startup_module_zval);
 	return SUCCESS;
 }
@@ -3714,7 +3673,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 	zend_string *key = zend_string_init(name, name_length, 0);
 
 	EG(scope) = scope;
-	property = zend_std_get_static_property(scope, key, 0, NULL);
+	property = zend_std_get_static_property(scope, key, 0);
 	EG(scope) = old_scope;
 	zend_string_free(key);
 	if (!property) {
@@ -3802,11 +3761,10 @@ ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const 
 }
 /* }}} */
 
-ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent) /* {{{ */
+ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent, zval *rv) /* {{{ */
 {
 	zval property, *value;
 	zend_class_entry *old_scope = EG(scope);
-	zval rv;
 
 	EG(scope) = scope;
 
@@ -3815,7 +3773,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 	}
 
 	ZVAL_STRINGL(&property, name, name_length);
-	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, NULL, &rv);
+	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, NULL, rv);
 	zval_ptr_dtor(&property);
 
 	EG(scope) = old_scope;
@@ -3830,7 +3788,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 	zend_string *key = zend_string_init(name, name_length, 0);
 
 	EG(scope) = scope;
-	property = zend_std_get_static_property(scope, key, silent, NULL);
+	property = zend_std_get_static_property(scope, key, silent);
 	EG(scope) = old_scope;
 	zend_string_free(key);
 
@@ -3954,30 +3912,6 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data) /* {{{ */
 {
 	if (EX(return_value)) {
-/*
-		if (Z_TYPE_P(EX(return_value)) == IS_OBJECT) {
-			zend_object *object = Z_OBJ_P(EX(return_value));
-			zend_execute_data *ex = EX(prev_execute_data);
-
-			while (ex && Z_OBJ(ex->This) == object) {
-				if (ex->func) {
-					if (ZEND_USER_CODE(ex->func->type)) {
-						if (ex->func->op_array.this_var != -1) {
-							zval *this_var = ZEND_CALL_VAR(ex, ex->func->op_array.this_var);
-							if (this_var != EX(return_value)) {
-								zval_ptr_dtor(this_var);
-								ZVAL_NULL(this_var);
-							}
-						}
-					}
-				}
-				Z_OBJ(ex->This) = NULL;
-				ZVAL_NULL(&ex->This);
-				ex = ex->prev_execute_data;
-			}
-		}
-*/
-		zval_ptr_dtor(EX(return_value));
 		Z_OBJ_P(EX(return_value)) = NULL;
 		ZVAL_NULL(EX(return_value));
 	}

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -83,7 +83,7 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 		if (!(*var_hashx)->first_dtor) {
 			(*var_hashx)->first_dtor = var_hash;
 		} else {
-			((var_entries *) (*var_hashx)->last_dtor)->next = var_hash;
+			((var_dtor_entries *) (*var_hashx)->last_dtor)->next = var_hash;
 		}
 
 		(*var_hashx)->last_dtor = var_hash;

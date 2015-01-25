@@ -1,5 +1,7 @@
 --TEST--
 Constant arrays
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 
@@ -85,7 +87,7 @@ array(4) {
 int(3)
 array(1) {
   [0]=>
-  int(3)
+  &int(3)
 }
 array(1) {
   [0]=>

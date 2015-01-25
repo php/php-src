@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1426,18 +1426,17 @@ PHP_GD_API int phpi_get_le_gd(void)
 PHP_FUNCTION(imageloadfont)
 {
 	zval *ind;
-	char *file;
-	size_t file_name;
+	zend_string *file;
 	int hdr_size = sizeof(gdFont) - sizeof(char *);
 	int body_size, n = 0, b, i, body_size_check;
 	gdFontPtr font;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &file, &file_name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &file) == FAILURE) {
 		return;
 	}
 
-	stream = php_stream_open_wrapper(file, "rb", IGNORE_PATH | IGNORE_URL_WIN | REPORT_ERRORS, NULL);
+	stream = php_stream_open_wrapper(file->val, "rb", IGNORE_PATH | IGNORE_URL_WIN | REPORT_ERRORS, NULL);
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
@@ -3898,24 +3897,24 @@ static void php_free_ps_enc(zend_resource *rsrc)
    Load a new font from specified file */
 PHP_FUNCTION(imagepsloadfont)
 {
-	char *file;
-	int file_len, f_ind, *font;
+	zend_string *file;
+	int f_ind, *font;
 #ifdef PHP_WIN32
 	zend_stat_t st;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &file) == FAILURE) {
 		return;
 	}
 
 #ifdef PHP_WIN32
-	if (VCWD_STAT(file, &st) < 0) {
+	if (VCWD_STAT(file->val, &st) < 0) {
 		php_error_docref(NULL, E_WARNING, "Font file not found (%s)", file);
 		RETURN_FALSE;
 	}
 #endif
 
-	f_ind = T1_AddFont(file);
+	f_ind = T1_AddFont(file->val);
 
 	if (f_ind < 0) {
 		php_error_docref(NULL, E_WARNING, "T1Lib Error (%i): %s", f_ind, T1_StrError(f_ind));
@@ -3940,7 +3939,7 @@ PHP_FUNCTION(imagepscopyfont)
 {
 	int l_ind, type;
 	gd_ps_font *nf_ind, *of_ind;
-	long fnt;
+	zend_long fnt;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &fnt) == FAILURE) {
 		return;
@@ -4009,7 +4008,8 @@ PHP_FUNCTION(imagepsencodefont)
 {
 	zval *fnt;
 	char *enc, **enc_vector;
-	size_t enc_len, *f_ind;
+	size_t enc_len;
+	int *f_ind;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &fnt, &enc, &enc_len) == FAILURE) {
 		return;
@@ -4105,10 +4105,9 @@ PHP_FUNCTION(imagepstext)
 	GLYPH *str_img;
 	T1_OUTLINE *char_path, *str_path;
 	T1_TMATRIX *transform = NULL;
-	char *str;
-	int str_len;
+	zend_string *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsrlllll|lldl", &img, &str, &str_len, &fnt, &size, &_fg, &_bg, &x, &y, &space, &width, &angle, &aa_steps) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSrlllll|lldl", &img, &str, &fnt, &size, &_fg, &_bg, &x, &y, &space, &width, &angle, &aa_steps) == FAILURE) {
 		return;
 	}
 
@@ -4171,7 +4170,7 @@ PHP_FUNCTION(imagepstext)
 
 	if (width) {
 		extend = T1_GetExtend(*f_ind);
-		str_path = T1_GetCharOutline(*f_ind, str[0], size, transform);
+		str_path = T1_GetCharOutline(*f_ind, str->val[0], size, transform);
 
 		if (!str_path) {
 			if (T1_errno) {
@@ -4180,20 +4179,20 @@ PHP_FUNCTION(imagepstext)
 			RETURN_FALSE;
 		}
 
-		for (i = 1; i < str_len; i++) {
-			amount_kern = (int) T1_GetKerning(*f_ind, str[i - 1], str[i]);
-			amount_kern += str[i - 1] == ' ' ? space : 0;
+		for (i = 1; i < str->len; i++) {
+			amount_kern = (int) T1_GetKerning(*f_ind, str->val[i - 1], str->val[i]);
+			amount_kern += str->val[i - 1] == ' ' ? space : 0;
 			add_width = (int) (amount_kern + width) / extend;
 
 			char_path = T1_GetMoveOutline(*f_ind, add_width, 0, 0, size, transform);
 			str_path = T1_ConcatOutlines(str_path, char_path);
 
-			char_path = T1_GetCharOutline(*f_ind, str[i], size, transform);
+			char_path = T1_GetCharOutline(*f_ind, str->val[i], size, transform);
 			str_path = T1_ConcatOutlines(str_path, char_path);
 		}
 		str_img = T1_AAFillOutline(str_path, 0);
 	} else {
-		str_img = T1_AASetString(*f_ind, str,  str_len, space, T1_KERNING, size, transform);
+		str_img = T1_AASetString(*f_ind, str->val,  str->len, space, T1_KERNING, size, transform);
 	}
 	if (T1_errno) {
 		php_error_docref(NULL, E_WARNING, "T1Lib Error: %s", T1_StrError(T1_errno));
@@ -4231,12 +4230,12 @@ PHP_FUNCTION(imagepsbbox)
 {
 	zval *fnt;
 	zend_long sz = 0, sp = 0, wd = 0;
-	char *str;
+	zend_string *str;
 	int i, space = 0, add_width = 0, char_width, amount_kern;
 	int cur_x, cur_y, dx, dy;
 	int x1, y1, x2, y2, x3, y3, x4, y4;
 	int *f_ind;
-	int str_len, per_char = 0;
+	int per_char = 0;
 	int argc = ZEND_NUM_ARGS();
 	double angle = 0, sin_a = 0, cos_a = 0;
 	BBox char_bbox, str_bbox = {0, 0, 0, 0};
@@ -4245,7 +4244,7 @@ PHP_FUNCTION(imagepsbbox)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "srl|lld", &str, &str_len, &fnt, &sz, &sp, &wd, &angle) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Srl|lld", &str, &fnt, &sz, &sp, &wd, &angle) == FAILURE) {
 		return;
 	}
 
@@ -4269,15 +4268,15 @@ PHP_FUNCTION(imagepsbbox)
 		space += T1_GetCharWidth(*f_ind, ' ');
 		cur_x = cur_y = 0;
 
-		for (i = 0; i < str_len; i++) {
-			if (str[i] == ' ') {
+		for (i = 0; i < str->len; i++) {
+			if (str->val[i] == ' ') {
 				char_bbox.llx = char_bbox.lly = char_bbox.ury = 0;
 				char_bbox.urx = char_width = space;
 			} else {
-				char_bbox = T1_GetCharBBox(*f_ind, str[i]);
-				char_width = T1_GetCharWidth(*f_ind, str[i]);
+				char_bbox = T1_GetCharBBox(*f_ind, str->val[i]);
+				char_width = T1_GetCharWidth(*f_ind, str->val[i]);
 			}
-			amount_kern = i ? T1_GetKerning(*f_ind, str[i - 1], str[i]) : 0;
+			amount_kern = i ? T1_GetKerning(*f_ind, str->val[i - 1], str->val[i]) : 0;
 
 			/* Transfer character bounding box to right place */
 			x1 = new_x(char_bbox.llx, char_bbox.lly) + cur_x;
@@ -4306,7 +4305,7 @@ PHP_FUNCTION(imagepsbbox)
 		}
 
 	} else {
-		str_bbox = T1_GetStringBBox(*f_ind, str, str_len, space, T1_KERNING);
+		str_bbox = T1_GetStringBBox(*f_ind, str->val, str->len, space, T1_KERNING);
 	}
 
 	if (T1_errno) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,6 +49,9 @@ typedef struct _zend_lex_state {
 	zend_encoding_filter input_filter;
 	zend_encoding_filter output_filter;
 	const zend_encoding *script_encoding;
+
+	zend_ast *ast;
+	zend_arena *ast_arena;
 } zend_lex_state;
 
 typedef struct _zend_heredoc_label {

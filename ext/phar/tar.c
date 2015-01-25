@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | TAR archive support for Phar                                         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2014 The PHP Group                                |
+  | Copyright (c) 2005-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -481,7 +481,14 @@ bail:
 			entry.link = estrdup(hdr->linkname);
 		}
 		phar_set_inode(&entry);
-		newentry = zend_hash_str_add_mem(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
+		if ((newentry = zend_hash_str_add_mem(&myphar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) == NULL) {
+			if (error) {
+				spprintf(error, 4096, "phar error: tar-based phar \"%s\" cannot be registered", entry.filename);
+			}
+			php_stream_close(fp);
+			phar_destroy_phar_data(myphar);
+			return FAILURE;
+		}
 
 		if (entry.is_persistent) {
 			++entry.manifest_pos;

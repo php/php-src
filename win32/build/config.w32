@@ -14,9 +14,6 @@ toolset_setup_compiler();
 
 // do we use x64 or 80x86 version of compiler?
 X64 = toolset_is_64();
-if (!X64) {
-	ERROR("64-bit compiler required");
-}
 toolset_setup_arch();
 
 toolset_setup_linker();
@@ -132,7 +129,7 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_llist.c zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c \
 	zend_stack.c zend_variables.c zend.c zend_API.c zend_extensions.c \
 	zend_hash.c zend_list.c zend_indent.c zend_builtin_functions.c \
-	zend_sprintf.c zend_ini.c zend_qsort.c zend_multibyte.c zend_ts_hash.c \
+	zend_sprintf.c zend_ini.c zend_sort.c zend_multibyte.c zend_ts_hash.c \
 	zend_stream.c zend_iterators.c zend_interfaces.c zend_objects.c \
 	zend_object_handlers.c zend_objects_API.c \
 	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c \
