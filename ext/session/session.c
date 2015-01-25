@@ -511,7 +511,7 @@ static void php_session_initialize(void) /* {{{ */
 			PS(send_cookie) = 1;
 		}
 	}
-	
+
 	/* Set session ID for compatibility for older/3rd party save handlers */
 	if (!PS(use_strict_mode)) {
 		php_session_reset_id();
@@ -558,7 +558,7 @@ static void php_session_save_current_state(void) /* {{{ */
 	int ret = FAILURE;
 
 	IF_SESSION_VARS() {
- 		if (PS(mod_data) || PS(mod_user_implemented)) {
+		if (PS(mod_data) || PS(mod_user_implemented)) {
 			zend_string *val;
 
 			val = php_session_encode();
