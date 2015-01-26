@@ -425,16 +425,6 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 				break;
 
 			case MYSQL_TYPE_DOUBLE:
-				stmt->result.buf[ofs].type = IS_DOUBLE;
-				stmt->result.buf[ofs].buflen = sizeof(float);
-
-				stmt->result.buf[ofs].val = (char *)emalloc(sizeof(float));
-				bind[ofs].buffer_type = MYSQL_TYPE_FLOAT;
-				bind[ofs].buffer = stmt->result.buf[ofs].val;
-				bind[ofs].is_null = &stmt->result.is_null[ofs];
-				break;
-
-			case MYSQL_TYPE_DOUBLE:
 				convert_to_double_ex(args[i]);
 				stmt->result.buf[ofs].type = IS_DOUBLE;
 				stmt->result.buf[ofs].buflen = sizeof(double);
