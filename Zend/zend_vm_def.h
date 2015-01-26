@@ -3631,6 +3631,7 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, VAR|CV, ANY)
 				if (Z_OBJ(EX(call)->This)) {
 					OBJ_RELEASE(Z_OBJ(EX(call)->This));
 				}
+				ZVAL_UNDEF(param);
 				EX(call)->func = (zend_function*)&zend_pass_function;
 				EX(call)->called_scope = NULL;
 				Z_OBJ(EX(call)->This) = NULL;
