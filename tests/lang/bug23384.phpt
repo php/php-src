@@ -1,7 +1,7 @@
 --TEST--
 Bug #23384 (use of class constants in statics)
 --INI--
-error_reporting=4095
+error_reporting=E_ALL
 --FILE--
 <?php
 define('TEN', 10);
@@ -21,7 +21,7 @@ Foo::test();
 echo Foo::HUN."\n";
 ?>
 --EXPECTF--
-Strict Standards: Non-static method Foo::test() should not be called statically in %sbug23384.php on line %d
+Deprecated: Non-static method Foo::test() should not be called statically in %sbug23384.php on line %d
 Array
 (
     [100] => ten

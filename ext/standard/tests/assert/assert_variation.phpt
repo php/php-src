@@ -107,7 +107,7 @@ array(2) {
 ini.get("assert.callback") => [f2]
 
 
-Strict Standards: Non-static method c1::assert() should not be called statically in %s on line 53
+Deprecated: Non-static method c1::assert() should not be called statically in %s on line 53
 Class assertion failed 53, "0 != 0"
 NULL
 

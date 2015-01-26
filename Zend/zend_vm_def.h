@@ -2460,27 +2460,18 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMPVAR|UNUSE
 
 	object = NULL;
 	if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-		if (Z_OBJ(EX(This))) {
+		if (Z_OBJ(EX(This)) && instanceof_function(Z_OBJCE(EX(This)), ce)) {
 			object = Z_OBJ(EX(This));
 			GC_REFCOUNT(object)++;
-		}
-		if (!object ||
-		    !instanceof_function(object->ce, ce)) {
-		    /* We are calling method of the other (incompatible) class,
-		       but passing $this. This is done for compatibility with php-4. */
+		} else {
 			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(
-					object ? E_DEPRECATED : E_STRICT,
-					"Non-static method %s::%s() should not be called statically%s",
-					fbc->common.scope->name->val, fbc->common.function_name->val,
-					object ? ", assuming $this from incompatible context" : "");
+				zend_error(E_DEPRECATED,
+					"Non-static method %s::%s() should not be called statically",
+					fbc->common.scope->name->val, fbc->common.function_name->val);
 			} else {
-				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-				zend_error_noreturn(
-					E_ERROR,
-					"Non-static method %s::%s() cannot be called statically%s",
-					fbc->common.scope->name->val, fbc->common.function_name->val,
-					object ? ", assuming $this from incompatible context" : "");
+				zend_error_noreturn(E_ERROR,
+					"Non-static method %s::%s() cannot be called statically",
+					fbc->common.scope->name->val, fbc->common.function_name->val);
 			}
 		}
 	}
@@ -2605,12 +2596,11 @@ ZEND_VM_C_LABEL(try_function_name):
 				}
 				if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 					if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-						zend_error(E_STRICT,
+						zend_error(E_DEPRECATED,
 						"Non-static method %s::%s() should not be called statically",
 						fbc->common.scope->name->val, fbc->common.function_name->val);
 					} else {
-						zend_error_noreturn(
-							E_ERROR,
+						zend_error_noreturn(E_ERROR,
 							"Non-static method %s::%s() cannot be called statically",
 							fbc->common.scope->name->val, fbc->common.function_name->val);
 					}
@@ -2677,12 +2667,11 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV)
 		} else if (func->common.scope &&
 		           !(func->common.fn_flags & ZEND_ACC_STATIC)) {
 			if (func->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT,
+				zend_error(E_DEPRECATED,
 				"Non-static method %s::%s() should not be called statically",
 				func->common.scope->name->val, func->common.function_name->val);
 			} else {
-				zend_error_noreturn(
-					E_ERROR,
+				zend_error_noreturn(E_ERROR,
 					"Non-static method %s::%s() cannot be called statically",
 					func->common.scope->name->val, func->common.function_name->val);
 			}

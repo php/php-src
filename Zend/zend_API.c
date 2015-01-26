@@ -2885,7 +2885,7 @@ get_function_via_handler:
 				int severity;
 				char *verb;
 				if (fcc->function_handler->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					severity = E_STRICT;
+					severity = E_DEPRECATED;
 					verb = "should not";
 				} else {
 					/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
