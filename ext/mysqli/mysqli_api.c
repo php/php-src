@@ -425,7 +425,6 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc, un
 				break;
 
 			case MYSQL_TYPE_DOUBLE:
-				convert_to_double_ex(args[i]);
 				stmt->result.buf[ofs].type = IS_DOUBLE;
 				stmt->result.buf[ofs].buflen = sizeof(double);
 
