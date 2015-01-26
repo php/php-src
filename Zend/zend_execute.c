@@ -925,7 +925,7 @@ static zend_always_inline void zend_assign_to_object_dim(zval *retval, zval *obj
 static void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value, zval *retval, int (*binary_op)(zval *result, zval *op1, zval *op2))
 {
 	zval *z;
-	zval rv;
+	zval rv, res;
 
 	if (Z_OBJ_HT_P(object)->read_dimension &&
 		(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
@@ -939,14 +939,15 @@ static void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *va
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		ZVAL_DEREF(z);
-		SEPARATE_ZVAL_NOREF(z);
-		binary_op(z, z, value);
-		Z_OBJ_HT_P(object)->write_dimension(object, property, z);
-		if (retval) {
-			ZVAL_COPY(retval, z);
+		binary_op(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+		Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+		if (z == &rv) {
+			zval_ptr_dtor(&rv);
 		}
-		zval_ptr_dtor(z);
+		if (retval) {
+			ZVAL_COPY(retval, &res);
+		}
+		zval_ptr_dtor(&res);
 	} else {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
 		if (retval) {
