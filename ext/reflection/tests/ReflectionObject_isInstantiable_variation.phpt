@@ -30,36 +30,12 @@ class privateCtorNew {
 	}	
 }
 
-class publicCtorOld {
-	public function publicCtorOld() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}	
-}
-
-class protectedCtorOld {
-	protected function protectedCtorOld() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}	
-}
-
-class privateCtorOld {
-	private function privateCtorOld() {}
-	public static function reflectionObjectFactory() {
-		return new ReflectionObject(new self);
-	}	
-}
-
 
 $reflectionObjects = array(
 		noCtor::reflectionObjectFactory(),
 		publicCtorNew::reflectionObjectFactory(),
 		protectedCtorNew::reflectionObjectFactory(),
 		privateCtorNew::reflectionObjectFactory(),
-		publicCtorOld::reflectionObjectFactory(), 
-		protectedCtorOld::reflectionObjectFactory(),
-		privateCtorOld::reflectionObjectFactory()
 	);
 
 foreach($reflectionObjects  as $reflectionObject ) {
@@ -73,6 +49,3 @@ Is noCtor instantiable? bool(true)
 Is publicCtorNew instantiable? bool(true)
 Is protectedCtorNew instantiable? bool(false)
 Is privateCtorNew instantiable? bool(false)
-Is publicCtorOld instantiable? bool(true)
-Is protectedCtorOld instantiable? bool(false)
-Is privateCtorOld instantiable? bool(false)

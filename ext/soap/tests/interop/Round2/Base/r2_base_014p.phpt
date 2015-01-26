@@ -7,7 +7,7 @@ precision=14
 --FILE--
 <?php
 class SOAPStruct {
-    function SOAPStruct($s, $i, $f) {
+    function __construct($s, $i, $f) {
         $this->varString = $s;
         $this->varInt = $i;
         $this->varFloat = $f;

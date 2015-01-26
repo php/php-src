@@ -6,7 +6,7 @@ class a
 {
 	public $a = array();
 
-	function a()
+	function __construct()
 	{
 		$output = preg_replace(
 				'!\{\s*([a-z0-9_]+)\s*\}!sie',
