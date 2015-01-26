@@ -142,7 +142,7 @@ static int odbc_handle_closer(pdo_dbh_t *dbh)
 	return 0;
 }
 
-static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options)
+static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
 {
 	RETCODE rc;
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
@@ -150,7 +150,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_l
 	enum pdo_cursor_type cursor_type = PDO_CURSOR_FWDONLY;
 	int ret;
 	char *nsql = NULL;
-	int nsql_len = 0;
+	size_t nsql_len = 0;
 
 	S->H = H;
 	S->assume_utf8 = H->assume_utf8;
@@ -220,7 +220,7 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_l
 	return 1;
 }
 
-static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len)
+static zend_long odbc_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
 {
 	pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data;
 	RETCODE rc;
@@ -261,7 +261,7 @@ out:
 	return row_count;
 }
 
-static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type param_type )
+static int odbc_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type param_type )
 {
 	/* pdo_odbc_db_handle *H = (pdo_odbc_db_handle *)dbh->driver_data; */
 	/* TODO: figure it out */
@@ -440,7 +440,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 
 	if (strchr(dbh->data_source, ';')) {
 		char dsnbuf[1024];
-		short dsnbuflen;
+		SQLSMALLINT dsnbuflen;
 
 		use_direct = 1;
 

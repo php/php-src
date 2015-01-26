@@ -175,7 +175,7 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
-static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options)
+static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	pdo_sqlite_stmt *S = ecalloc(1, sizeof(pdo_sqlite_stmt));
@@ -203,7 +203,7 @@ static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql
 	return 0;
 }
 
-static zend_long sqlite_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len)
+static zend_long sqlite_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	char *errmsg = NULL;
@@ -219,7 +219,7 @@ static zend_long sqlite_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long s
 	}
 }
 
-static char *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len)
+static char *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *len)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
 	char *id;
@@ -230,7 +230,7 @@ static char *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigne
 }
 
 /* NB: doesn't handle binary strings... use prepared stmts for that */
-static int sqlite_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype )
+static int sqlite_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype )
 {
 	*quoted = safe_emalloc(2, unquotedlen, 3);
 	sqlite3_snprintf(2*unquotedlen + 3, *quoted, "'%q'", unquoted);
