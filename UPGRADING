@@ -135,6 +135,9 @@ PHP X.Y UPGRADE NOTES
 - Standard
   . Added intdiv() function for integer division.
 
+- Standard
+  . Added cmp()
+
 ========================================
 7. New Classes and Interfaces
 ========================================
