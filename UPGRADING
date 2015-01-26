@@ -82,7 +82,7 @@ PHP X.Y UPGRADE NOTES
   . session_start() accepts all INI settings as array. e.g. ['cache_limiter'=>'private']
     sets session.cache_limiter=private. It also supports 'read_and_close' which closes
     session data immediately after read data.
-  . Save handlers accpets validate_sid(), update_timestamp() which validates session
+  . Save handler accepts validate_sid(), update_timestamp() which validates session
     ID existence, updates timestamp of session data. Compatibility of old user defined
     save handler is retained.
   . SessionUpdateTimestampHandlerInterface is added. validateSid(), updateTimestamp()
