@@ -256,7 +256,7 @@ main/config.w32.h
 main/stamp-h1
 main/streams/build-defs.h
 main/streams/stamp-h1
-pear/install-pear-nozlib.phar
+#pear/install-pear-nozlib.phar
 pear/phpize
 pear/run-tests
 pear/php-config
