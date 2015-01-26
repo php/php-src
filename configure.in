@@ -1086,7 +1086,7 @@ fi
 
 PHP_ARG_WITH(pear, [whether to install PEAR],
 [  --with-pear=DIR         Install PEAR in DIR @<:@PREFIX/lib/php@:>@
-  --without-pear          Do not install PEAR], no, yes)
+  --without-pear          Do not install PEAR], DEFAULT, yes)
 
 if test "$PHP_PEAR" != "no"; then
 
