@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.5.22
 
+
 - Date:
   . Fixed bug #45081 (strtotime incorrectly interprets SGT time zone). (Derick)
   . Fixed bug #55407 (Impossible to prototype DateTime::createFromFormat).
@@ -12,6 +13,10 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
+
+- FPM:
+  . Fixed bug #68571 (core dump when webserver close the socket).
+    (redfoxli069 at gmail dot com, Laruence)
 
 - OpenSSL:
   . Fixed bug #55618 (use case-insensitive cert name matching).

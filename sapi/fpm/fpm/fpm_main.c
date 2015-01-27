@@ -669,15 +669,15 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 	 * - the message is not empty
 	 */
 	if (CGIG(fcgi_logging) && request && message && len > 0) {
+		int ret;
 		char *buf = malloc(len + 2);
-		ssize_t ret = 0;
 		memcpy(buf, message, len);
 		memcpy(buf + len, "\n", sizeof("\n"));
-		ret = fcgi_write(request, FCGI_STDERR, buf, len+1);
+		ret = fcgi_write(request, FCGI_STDERR, buf, len + 1);
 		free(buf);
-	        if (ret <= 0) {
-                    php_handle_aborted_connection();
-	        }
+		if (ret < 0) {
+			php_handle_aborted_connection();
+		}
 	}
 }
 /* }}} */
