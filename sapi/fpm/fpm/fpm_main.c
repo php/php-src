@@ -614,7 +614,7 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 	 * - the message is not empty
 	 */
 	if (CGIG(fcgi_logging) && request && message && len > 0) {
-		int ret;
+		ssize_t ret;
 		char *buf = malloc(len + 2);
 		memcpy(buf, message, len);
 		memcpy(buf + len, "\n", sizeof("\n"));
