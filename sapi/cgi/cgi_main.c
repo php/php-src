@@ -699,13 +699,16 @@ static void sapi_cgi_log_message(char *message)
 
 		request = (fcgi_request*) SG(server_context);
 		if (request) {
-			int len = (int)strlen(message);
+			int ret, len = (int)strlen(message);
 			char *buf = malloc(len+2);
 
 			memcpy(buf, message, len);
 			memcpy(buf + len, "\n", sizeof("\n"));
-			fcgi_write(request, FCGI_STDERR, buf, (int)(len+1));
+			ret = fcgi_write(request, FCGI_STDERR, buf, (int)(len + 1));
 			free(buf);
+			if (ret < 0) {
+				php_handle_aborted_connection();
+			}
 		} else {
 			fprintf(stderr, "%s\n", message);
 		}
