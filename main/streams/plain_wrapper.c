@@ -143,7 +143,7 @@ typedef struct {
 } php_stdio_stream_data;
 #define PHP_STDIOP_GET_FD(anfd, data)	anfd = (data)->file ? fileno((data)->file) : (data)->fd
 
-static int do_fstat(php_stdio_stream_data *d, int force)
+static zend_bool do_fstat(php_stdio_stream_data *d, int force)
 {
 	if (!d->cached_fstat || force) {
 		int fd;
@@ -238,7 +238,7 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 #ifdef S_ISFIFO
 		/* detect if this is a pipe */
 		if (self->fd >= 0) {
-			self->is_pipe = (do_fstat(self, 0) == 0 && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
+			self->is_pipe = (!do_fstat(self, 0) && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
 		}
 #elif defined(PHP_WIN32)
 		{
@@ -277,7 +277,7 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 #ifdef S_ISFIFO
 		/* detect if this is a pipe */
 		if (self->fd >= 0) {
-			self->is_pipe = (do_fstat(self, 0) == 0 && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
+			self->is_pipe = (!do_fstat(self, 0) && S_ISFIFO(self->sb.st_mode)) ? 1 : 0;
 		}
 #elif defined(PHP_WIN32)
 		{
@@ -578,7 +578,10 @@ static int php_stdiop_stat(php_stream *stream, php_stream_statbuf *ssb)
 
 	assert(data != NULL);
 
-	ret = do_fstat(data, 1);
+	if(!(ret = do_fstat(data, 1))) {
+		return ret;
+	}
+
 	memcpy(&ssb->sb, &data->sb, sizeof(ssb->sb));
 	return ret;
 }
@@ -669,7 +672,9 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 						return fd == -1 ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
 
 					case PHP_STREAM_MMAP_MAP_RANGE:
-						do_fstat(data, 1);
+						if(!do_fstat(data, 1)) {
+							return PHP_STREAM_OPTION_RETURN_ERR;
+						}
 						if (range->length == 0 && range->offset > 0 && range->offset < data->sb.st_size) {
 							range->length = data->sb.st_size - range->offset;
 						}
