@@ -2203,24 +2203,26 @@ static PHP_FUNCTION(session_start)
 	/* set options */
 	if (options) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), num_idx, str_idx, value) {
-			switch(Z_TYPE_P(value)) {
-				case IS_STRING:
-				case IS_TRUE:
-				case IS_FALSE:
-				case IS_LONG:
-					if (!zend_string_equals_literal(str_idx, "read_and_close")) {
-						convert_to_boolean(value);
-						read_and_close = (Z_TYPE_P(value) == IS_TRUE) ? 1 : 0;
-					} else {
-						convert_to_string(value);
-						if (php_session_start_set_ini(str_idx, Z_STR_P(value)) == FAILURE) {
-							php_error_docref(NULL, E_WARNING, "Setting option '%s' failed", str_idx->val);
+			if (str_idx) {
+				switch(Z_TYPE_P(value)) {
+					case IS_STRING:
+					case IS_TRUE:
+					case IS_FALSE:
+					case IS_LONG:
+						if (zend_string_equals_literal(str_idx, "read_and_close")) {
+							convert_to_boolean(value);
+							read_and_close = (Z_TYPE_P(value) == IS_TRUE) ? 1 : 0;
+						} else {
+							convert_to_string(value);
+							if (php_session_start_set_ini(str_idx, Z_STR_P(value)) == FAILURE) {
+								php_error_docref(NULL, E_WARNING, "Setting option '%s' failed", str_idx->val);
+							}
 						}
-					}
-					break;
-				default:
-					php_error_docref(NULL, E_WARNING, "Option(%s) value must be string, boolean or long", str_idx->val);
-					break;
+						break;
+					default:
+						php_error_docref(NULL, E_WARNING, "Option(%s) value must be string, boolean or long", str_idx->val);
+						break;
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
