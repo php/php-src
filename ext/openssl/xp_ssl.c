@@ -1829,7 +1829,6 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				retry = handle_ssl_error(stream, nr_bytes, 0);
 			
 				/* If we get this (the above doesn't check) then we'll retry as well. */
-				retry = 0;
 				if (errno == EAGAIN && err == SSL_ERROR_WANT_READ && read) {          
 					retry = 1;
 				}
