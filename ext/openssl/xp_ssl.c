@@ -1829,10 +1829,13 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				retry = handle_ssl_error(stream, nr_bytes, 0);
 
 				/* If we get this (the above doesn't check) then we'll retry as well. */
-				if (errno == EAGAIN && ( err == SSL_ERROR_WANT_READ || SSL_ERROR_WANT_WRITE ) ) {
+				if (errno == EAGAIN && err == SSL_ERROR_WANT_READ && read) {
 					retry = 1;
 				}
-
+				if (errno == EAGAIN && SSL_ERROR_WANT_WRITE && read == 0) {          
+					retry = 1;
+				}
+				
 				/* Also, on reads, we may get this condition on an EOF. We should check properly. */
 				if (read) {
 					stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
@@ -1868,9 +1871,10 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 							(POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);
 					}
 			}
-		/* Finally, we keep going until we got data, and an SSL_ERROR_NONE, unless we had an error. */
-		} while (retry);
 
+			/* Finally, we keep going until we got data, and an SSL_ERROR_NONE, unless we had an error. */			
+		} while (retry);
+		
 		/* Tell PHP if we read / wrote bytes. */
 		if (nr_bytes > 0) {
 			php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
