@@ -282,7 +282,7 @@ static int filename_is_in_cache(char *filename, int filename_len)
 {
 	char *key;
 	int key_length;
-	zend_file_handle handle = {0};
+	zend_file_handle handle = {{0}, NULL, NULL, 0, 0};
 	zend_persistent_script *persistent_script;
 
 	handle.filename = filename;
