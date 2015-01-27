@@ -963,7 +963,6 @@ SPL_METHOD(DirectoryIterator, getExtension)
 
 	p = zend_memrchr(fname->val, '.', fname->len);
 	if (p) {
-		assert(p > fname->val);
 		idx = (int)(p - fname->val);
 		RETVAL_STRINGL(fname->val + idx + 1, fname->len - idx - 1);
 		zend_string_release(fname);
