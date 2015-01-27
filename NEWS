@@ -16,6 +16,10 @@
   . Fixed bug #68731 (finfo_buffer doesn't extract the correct mime with some
     gifs). (Anatol)
 
+- FPM:
+  . Fixed bug #68571 (core dump when webserver close the socket).
+    (redfoxli069 at gmail dot com, Laruence)
+
 - Opcache:
   . Fixed bug with try blocks being removed when extended_info opcode
     generation is turned on. (Laruence)
