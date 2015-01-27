@@ -19,6 +19,7 @@ namespace Fiz\Biz\Buz {
         B,
         C as AC,
         D,
+        // comment between declarations
         function foo,
         function bar as buz,
         const FOO,
