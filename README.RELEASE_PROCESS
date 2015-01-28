@@ -196,11 +196,11 @@ last commit id to web/php.git, then, mirrors will now sync
 Getting the stable release announced
 ------------------------------------
 
-1. Run the bumpRelease script for phpweb on your local checkout
+1. Update phpweb/include/releases.inc with the old release info
+  (updates the download archives)
 
- a. ``php bin/bumpRelease 5`` to create the release file (releases/x_y_z.php)
-    The release announcement file should list in detail security fixes and
-    changes in behavior (whether due to a bug fix or not).
+ a. You can run ``php bin/bumpRelease 5`` if you are making a release for the
+    highest branch, otherwise you have to do this manually, see point 1.b
 
  b. In case multiple PHP minor versions are in active development you have
     to manually copy the old information to include/releases.inc
@@ -220,8 +220,9 @@ Getting the stable release announced
 
  f. if the windows builds aren't ready yet prefix the "windows" key with a dot (".windows")
 
-3. Update phpweb/include/releases.php with the old release info
-  (updates the download archives)
+3. Create the release file (releases/x_y_z.php)
+   Usually we use the same content as for point 6, but included in php template
+   instead of the release xml.
 
 4. Update php-qa/include/release-qa.php and add the next version as an QARELEASE
    (prepare for next RC)

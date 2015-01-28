@@ -83,7 +83,7 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval *rval)
 		if (!(*var_hashx)->first_dtor) {
 			(*var_hashx)->first_dtor = var_hash;
 		} else {
-			((var_entries *) (*var_hashx)->last_dtor)->next = var_hash;
+			((var_dtor_entries *) (*var_hashx)->last_dtor)->next = var_hash;
 		}
 
 		(*var_hashx)->last_dtor = var_hash;

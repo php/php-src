@@ -256,7 +256,7 @@ U_CFUNC zend_function *IntlPartsIterator_get_method(zend_object **object_ptr, ze
 	}
 
 	if (method->len == sizeof("getrulestatus") - 1
-			&& memcmp("getrulestatus", Z_STRVAL_P(key),	method->len) == 0) {
+			&& memcmp("getrulestatus", lc_method_name->val, lc_method_name->len) == 0) {
 		IntlIterator_object *obj = php_intl_iterator_fetch_object(*object_ptr);
 		if (obj->iterator && !Z_ISUNDEF(obj->iterator->data)) {
 			zval *break_iter_zv = &obj->iterator->data;

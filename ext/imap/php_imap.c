@@ -3999,7 +3999,7 @@ PHP_FUNCTION(imap_mail)
 	zend_string *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *cc=NULL, *bcc=NULL, *rpath=NULL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "SSS|SSSS", &to, &subject, &message, 
+	if (zend_parse_parameters(argc, "SSS|SSSS", &to, &subject, &message,
 		&headers, &cc, &bcc, &rpath) == FAILURE) {
 		return;
 	}
@@ -4023,7 +4023,8 @@ PHP_FUNCTION(imap_mail)
 		message = NULL;
 	}
 
-	if (_php_imap_mail(to->val, subject->val, message->val, headers->val, cc->val, bcc->val, rpath->val)) {
+	if (_php_imap_mail(to->val, subject->val, message->val, headers?headers->val:NULL, cc?cc->val:NULL,
+			bcc?bcc->val:NULL, rpath?rpath->val:NULL)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -4044,7 +4045,7 @@ PHP_FUNCTION(imap_search)
 	int argc = ZEND_NUM_ARGS();
 	SEARCHPGM *pgm = NIL;
 
-	if (zend_parse_parameters(argc, "rs|ls", &streamind, &criteria, &flags, &charset) == FAILURE) {
+	if (zend_parse_parameters(argc, "rs|lS", &streamind, &criteria, &flags, &charset) == FAILURE) {
 		return;
 	}
 

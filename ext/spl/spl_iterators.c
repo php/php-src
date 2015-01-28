@@ -2031,7 +2031,7 @@ SPL_METHOD(RegexIterator, accept)
 	char *subject;
 	zend_string *result;
 	int subject_len, use_copy, count = 0;
-	zval *subject_ptr, subject_copy, zcount, *replacement, tmp_replacement;
+	zval *subject_ptr, subject_copy, zcount, *replacement, tmp_replacement, rv;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2096,7 +2096,7 @@ SPL_METHOD(RegexIterator, accept)
 			break;
 
 		case REGIT_MODE_REPLACE:
-			replacement = zend_read_property(intern->std.ce, getThis(), "replacement", sizeof("replacement")-1, 1);
+			replacement = zend_read_property(intern->std.ce, getThis(), "replacement", sizeof("replacement")-1, 1, &rv);
 			if (Z_TYPE_P(replacement) != IS_STRING) {
 				tmp_replacement = *replacement;
 				zval_copy_ctor(&tmp_replacement);

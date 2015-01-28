@@ -769,8 +769,6 @@ expr_without_variable:
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' '&' variable
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
-	|	variable '=' '&' new_expr
-			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
 	|	T_CLONE expr { $$ = zend_ast_create(ZEND_AST_CLONE, $2); }
 	|	variable T_PLUS_EQUAL expr
 			{ $$ = zend_ast_create_assign_op(ZEND_ASSIGN_ADD, $1, $3); }

@@ -4320,7 +4320,7 @@ PHP_FUNCTION(array_multisort)
 					/* flag allowed here */
 					if (parse_state[MULTISORT_ORDER] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */
-						sort_order = Z_LVAL(args[i]) == PHP_SORT_DESC ? -1 : 1;
+						sort_order = Z_LVAL_P(arg) == PHP_SORT_DESC ? -1 : 1;
 						parse_state[MULTISORT_ORDER] = 0;
 					} else {
 						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);
@@ -4338,7 +4338,7 @@ PHP_FUNCTION(array_multisort)
 					/* flag allowed here */
 					if (parse_state[MULTISORT_TYPE] == 1) {
 						/* Save the flag and make sure then next arg is not the current flag. */
-						sort_type = (int)Z_LVAL(args[i]);
+						sort_type = (int)Z_LVAL_P(arg);
 						parse_state[MULTISORT_TYPE] = 0;
 					} else {
 						php_error_docref(NULL, E_WARNING, "Argument #%d is expected to be an array or sorting flag that has not already been specified", i + 1);

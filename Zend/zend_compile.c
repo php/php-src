@@ -909,7 +909,6 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
 		zend_function *old_function;
 
-		efree_size(new_function, sizeof(zend_op_array));
 		if ((old_function = zend_hash_find_ptr(function_table, Z_STR_P(op2))) != NULL
 			&& old_function->type == ZEND_USER_FUNCTION
 			&& old_function->op_array.last > 0) {
@@ -2344,9 +2343,6 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 
 	if (zend_is_call(source_ast)) {
 		opline->extended_value = ZEND_RETURNS_FUNCTION;
-	} else if (source_ast->kind == ZEND_AST_NEW) {
-		zend_error(E_DEPRECATED, "Assigning the return value of new by reference is deprecated");
-		opline->extended_value = ZEND_RETURNS_NEW;
 	}
 }
 /* }}} */
@@ -5723,16 +5719,30 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *const_ast = ast->child[1];
 
 	znode class_node, const_node;
-	zend_op *opline;
+	zend_op *opline, *class_op = NULL;
 
 	if (zend_is_const_default_class_ref(class_ast)) {
 		class_node.op_type = IS_CONST;
 		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
 	} else {
-		zend_compile_class_ref(&class_node, class_ast);
+		class_op = zend_compile_class_ref(&class_node, class_ast);
 	}
 
 	zend_compile_expr(&const_node, const_ast);
+
+	if (class_op && const_node.op_type == IS_CONST && class_op->extended_value == ZEND_FETCH_CLASS_SELF && Z_TYPE(const_node.u.constant) == IS_STRING && CG(active_class_entry)) {
+		zval *const_zv = zend_hash_find(&CG(active_class_entry)->constants_table, Z_STR(const_node.u.constant));
+		if (const_zv && Z_TYPE_P(const_zv) < IS_CONSTANT) {
+			CG(active_op_array)->last--;
+			CG(active_op_array)->T--;
+
+			result->op_type = IS_CONST;
+			ZVAL_COPY(&result->u.constant, const_zv);
+
+			zend_string_release(Z_STR(const_node.u.constant));
+			return;
+		}
+	}
 
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, &const_node);
 
@@ -6350,11 +6360,8 @@ void zend_compile_var(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 			if (type == BP_VAR_W || type == BP_VAR_REF
 				|| type == BP_VAR_RW || type == BP_VAR_UNSET
 			) {
-				/* For BC reasons =& new Foo is allowed */
-				if (type != BP_VAR_REF || ast->kind != ZEND_AST_NEW) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot use temporary expression in write context");
-				}
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use temporary expression in write context");
 			}
 
 			zend_compile_expr(result, ast);

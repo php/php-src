@@ -937,7 +937,7 @@ PHP_METHOD(SoapFault, SoapFault)
    SoapFault constructor */
 PHP_METHOD(SoapFault, __toString)
 {
-	zval *faultcode, *faultstring, *file, *line, trace;
+	zval *faultcode, *faultstring, *file, *line, trace, rv1, rv2, rv3, rv4;
 	zend_string *str;
 	zend_fcall_info fci;
 	zval *this_ptr;
@@ -947,10 +947,10 @@ PHP_METHOD(SoapFault, __toString)
 	}
 
 	this_ptr = getThis();
-	faultcode   = zend_read_property(soap_fault_class_entry, this_ptr, "faultcode", sizeof("faultcode")-1, 1);
-	faultstring = zend_read_property(soap_fault_class_entry, this_ptr, "faultstring", sizeof("faultstring")-1, 1);
-	file = zend_read_property(soap_fault_class_entry, this_ptr, "file", sizeof("file")-1, 1);
-	line = zend_read_property(soap_fault_class_entry, this_ptr, "line", sizeof("line")-1, 1);
+	faultcode   = zend_read_property(soap_fault_class_entry, this_ptr, "faultcode", sizeof("faultcode")-1, 1, &rv1);
+	faultstring = zend_read_property(soap_fault_class_entry, this_ptr, "faultstring", sizeof("faultstring")-1, 1, &rv2);
+	file = zend_read_property(soap_fault_class_entry, this_ptr, "file", sizeof("file")-1, 1, &rv3);
+	line = zend_read_property(soap_fault_class_entry, this_ptr, "line", sizeof("line")-1, 1, &rv4);
 
 	fci.size = sizeof(fci);
 	fci.function_table = &Z_OBJCE_P(getThis())->function_table;

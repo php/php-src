@@ -4825,8 +4825,8 @@ PHP_FUNCTION(openssl_seal)
 	eksl = safe_emalloc(nkeys, sizeof(*eksl), 0);
 	eks = safe_emalloc(nkeys, sizeof(*eks), 0);
 	memset(eks, 0, sizeof(*eks) * nkeys);
-	key_resources = safe_emalloc(nkeys, sizeof(zend_resource), 0);
-	memset(key_resources, 0, sizeof(zend_resource) * nkeys);
+	key_resources = safe_emalloc(nkeys, sizeof(zend_resource*), 0);
+	memset(key_resources, 0, sizeof(zend_resource*) * nkeys);
 
 	/* get the public keys we are using to seal this data */
 	i = 0;
