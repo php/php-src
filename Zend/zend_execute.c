@@ -1137,6 +1137,7 @@ static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht
 	zval *retval;
 	zend_string *offset_key;
 	zend_ulong hval;
+	zend_bool key_needs_release = 0;
 
 try_again:
 	if (EXPECTED(Z_TYPE_P(dim) == IS_LONG)) {
@@ -1208,6 +1209,10 @@ str_index:
 					break;
 			}
 		}
+		if (key_needs_release)
+		{
+			zend_string_release(offset_key);
+		}
 	} else {
 		switch (Z_TYPE_P(dim)) {
 			case IS_NULL:
@@ -1216,6 +1221,10 @@ str_index:
 			case IS_DOUBLE:
 				hval = zend_dval_to_lval(Z_DVAL_P(dim));
 				goto num_index;
+			case IS_BIGINT:
+				offset_key = zend_bigint_to_zend_string(Z_BIG_P(dim), 0);
+				key_needs_release = 1;
+				goto str_index;
 			case IS_RESOURCE:
 				zend_error(E_STRICT, "Resource ID#%pd used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
 				hval = Z_RES_HANDLE_P(dim);
@@ -1250,12 +1259,15 @@ try_again:
 	if (UNEXPECTED(Z_TYPE_P(dim) != IS_LONG)) {
 		switch(Z_TYPE_P(dim)) {
 			case IS_STRING:
-				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+				if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, NULL, -1)) {
 					break;
 				}
 				if (type != BP_VAR_UNSET) {
 					zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
 				}
+				break;
+			/* Bigints are ints so far as the user cares, so don't error */
+			case IS_BIGINT:
 				break;
 			case IS_DOUBLE:
 			case IS_NULL:
@@ -1413,12 +1425,15 @@ try_string_offset:
 			switch(Z_TYPE_P(dim)) {
 				/* case IS_LONG: */
 				case IS_STRING:
-					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+					if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, NULL, -1)) {
 						break;
 					}
 					if (type != BP_VAR_IS) {
 						zend_error(E_WARNING, "Illegal string offset '%s'", Z_STRVAL_P(dim));
 					}
+					break;
+				/* Bigints are ints so far as the user cares, so don't error */
+				case IS_BIGINT:
 					break;
 				case IS_DOUBLE:
 				case IS_NULL:

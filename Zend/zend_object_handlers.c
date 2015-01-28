@@ -1526,6 +1526,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 			ZVAL_BOOL(writeobj, 1);
 			return SUCCESS;
 		case IS_LONG:
+		case IS_BIGINT_OR_LONG:
 			ce = Z_OBJCE_P(readobj);
 			zend_error(E_NOTICE, "Object of class %s could not be converted to int", ce->name->val);
 			if (readobj == writeobj) {

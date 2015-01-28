@@ -1,10 +1,5 @@
 --TEST--
 zend_dval_to_lval preserves low bits  (32 bit long)
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4)
-	 die("skip for machines with 32-bit longs");
-?>
 --FILE--
 <?php
 	/* test doubles around -4e21 */
@@ -24,9 +19,9 @@ if (PHP_INT_SIZE != 4)
 
 ?>
 --EXPECT--
-int(-2056257536)
-int(-2055733248)
-int(-2055208960)
-int(-2054684672)
-int(-2054160384)
-int(2147483647)
+int(-4000000000000001048576)
+int(-4000000000000000524288)
+int(-4000000000000000000000)
+int(-3999999999999999475712)
+int(-3999999999999998951424)
+int(-2147483649)

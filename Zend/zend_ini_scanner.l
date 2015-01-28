@@ -156,7 +156,7 @@ static inline int convert_to_number(zval *retval, const char *str, const int str
 	zend_long lval;
 	double dval;
 
-	if ((type = is_numeric_string_ex(str, str_len, &lval, &dval, 0, &overflow)) != 0) {
+	if ((type = is_numeric_string_ex(str, str_len, &lval, &dval, NULL, 0, &overflow)) != 0) {
 		if (type == IS_LONG) {
 			ZVAL_LONG(retval, lval);
 			return SUCCESS;

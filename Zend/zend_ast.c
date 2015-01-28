@@ -22,6 +22,7 @@
 #include "zend_ast.h"
 #include "zend_API.h"
 #include "zend_operators.h"
+#include "zend_bigint.h"
 
 ZEND_API zend_ast_process_t zend_ast_process = NULL;
 
@@ -183,6 +184,18 @@ static void zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 		case IS_STRING:
 			zend_symtable_update(Z_ARRVAL_P(result), Z_STR_P(offset), expr);
 			zval_dtor(offset);
+			break;
+		case IS_BIGINT:
+			{
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					zend_hash_index_update(Z_ARRVAL_P(result), zend_bigint_to_long(Z_BIG_P(offset)), expr);
+				} else {
+					char *temp = zend_bigint_to_string(Z_BIG_P(offset));
+					zend_symtable_str_update(Z_ARRVAL_P(result), temp, strlen(temp), expr);
+					efree(temp);
+				}
+				zval_dtor(offset);
+			}
 			break;
 		case IS_NULL:
 			zend_symtable_update(Z_ARRVAL_P(result), STR_EMPTY_ALLOC(), expr);

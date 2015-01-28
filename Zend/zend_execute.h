@@ -26,6 +26,7 @@
 #include "zend_hash.h"
 #include "zend_operators.h"
 #include "zend_variables.h"
+#include "zend_bigint.h"
 
 BEGIN_EXTERN_C()
 struct _zend_fcall_info;

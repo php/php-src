@@ -26,6 +26,7 @@
 #include "zend_globals.h"
 #include "zend_constants.h"
 #include "zend_list.h"
+#include "zend_bigint.h"
 
 ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
@@ -49,6 +50,12 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 					zend_array_destroy(&arr->ht);
 					efree_size(arr, sizeof(zend_array));
 				}
+				break;
+			}
+		case IS_BIGINT: {
+				zend_bigint *big = (zend_bigint*)p;
+			
+				zend_bigint_release(big);
 				break;
 			}
 		case IS_CONSTANT_AST: {
@@ -109,6 +116,12 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 				}
 				break;
 			}
+		case IS_BIGINT: {
+				zend_bigint *big = (zend_bigint*)p;
+			
+				zend_bigint_free(big);
+				break;
+			}
 		case IS_CONSTANT_AST: {
 				zend_ast_ref *ast = (zend_ast_ref*)p;
 
@@ -150,10 +163,11 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 			zend_string_release(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
+		case IS_BIGINT:
 		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
-			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, bigints, constant ASTs, objects or resources");
 			break;
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);
@@ -181,10 +195,11 @@ ZEND_API void _zval_internal_dtor_for_ptr(zval *zvalue ZEND_FILE_LINE_DC)
 			zend_string_free(Z_STR_P(zvalue));
 			break;
 		case IS_ARRAY:
+		case IS_BIGINT:
 		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
-			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, bigints, constant ASTs, objects or resources");
 			break;
 		case IS_REFERENCE: {
 				zend_reference *ref = (zend_reference*)Z_REF_P(zvalue);
@@ -256,6 +271,9 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 				ast->ast = zend_ast_copy(Z_ASTVAL_P(zvalue));
 				Z_AST_P(zvalue) = ast;
 			}
+			break;
+		case IS_BIGINT:
+			Z_BIG_P(zvalue) = zend_bigint_dup(Z_BIG_P(zvalue));
 			break;
 		case IS_OBJECT:
 		case IS_RESOURCE:

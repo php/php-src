@@ -1,11 +1,7 @@
 --TEST--
-Test tan function : 64bit long tests
+Test tan function : 64bit long and bigint tests
 --INI--
 precision=5
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
 --FILE--
 <?php
  
@@ -53,11 +49,11 @@ float(-0.57225)
 float(0.71667)
 --- testing: 9223372036854775806 ---
 float(84.739)
---- testing: 9.2234E+18 ---
+--- testing: 9223372036854775808 ---
 float(84.739)
 --- testing: -9223372036854775807 ---
 float(-84.739)
---- testing: -9.2234E+18 ---
+--- testing: -9223372036854775809 ---
 float(-84.739)
 ===DONE===
 

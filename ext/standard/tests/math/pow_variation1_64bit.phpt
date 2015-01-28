@@ -2,10 +2,6 @@
 Test pow() function : usage variations - different data types as $base argument
 --INI--
 precision = 14
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
 --FILE--
 <?php
 /* Prototype  : number pow  ( number $base  , number $exp  )
@@ -107,7 +103,7 @@ int(1881365963625)
 int(-12895213625)
 
 -- Iteration 5 --
-float(7.8463771692334E+56)
+int(784637716923335095224261902710254454442933591094742482943)
 
 -- Iteration 6 --
 float(1157.625)

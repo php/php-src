@@ -42,6 +42,7 @@ PHP_FUNCTION(gettype)
 			break;
 
 		case IS_LONG:
+		case IS_BIGINT:
 			RETVAL_STRING("integer");
 			break;
 
@@ -103,9 +104,9 @@ PHP_FUNCTION(settype)
 	ZVAL_DEREF(var);
 	SEPARATE_ZVAL_NOREF(var);
 	if (!strcasecmp(type, "integer")) {
-		convert_to_long(var);
+		convert_to_bigint_or_long(var);
 	} else if (!strcasecmp(type, "int")) {
-		convert_to_long(var);
+		convert_to_bigint_or_long(var);
 	} else if (!strcasecmp(type, "float")) {
 		convert_to_double(var);
 	} else if (!strcasecmp(type, "double")) { /* deprecated */
@@ -283,7 +284,14 @@ PHP_FUNCTION(is_bool)
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_int)
 {
-	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
+	zval *arg;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	ZVAL_DEREF(arg);
+	RETURN_BOOL(Z_TYPE_P(arg) == IS_LONG || Z_TYPE_P(arg) == IS_BIGINT);
 }
 /* }}} */
 
@@ -342,11 +350,12 @@ PHP_FUNCTION(is_numeric)
 	switch (Z_TYPE_P(arg)) {
 		case IS_LONG:
 		case IS_DOUBLE:
+		case IS_BIGINT:
 			RETURN_TRUE;
 			break;
 
 		case IS_STRING:
-			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 0)) {
+			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, NULL, 0)) {
 				RETURN_TRUE;
 			} else {
 				RETURN_FALSE;
@@ -381,6 +390,7 @@ PHP_FUNCTION(is_scalar)
 		case IS_TRUE:
 		case IS_DOUBLE:
 		case IS_LONG:
+		case IS_BIGINT:
 		case IS_STRING:
 			RETURN_TRUE;
 			break;

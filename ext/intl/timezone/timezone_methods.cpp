@@ -175,8 +175,9 @@ double_offset:
 	} else if (Z_TYPE_P(arg) == IS_OBJECT || Z_TYPE_P(arg) == IS_STRING) {
 		zend_long lval;
 		double dval;
+		zend_bigint *big;
 		convert_to_string_ex(arg);
-		switch (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, 0)) {
+		switch (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, &big, 0)) {
 		case IS_DOUBLE:
 			SEPARATE_ZVAL(arg);
 			zval_dtor(arg);
@@ -186,6 +187,12 @@ double_offset:
 			SEPARATE_ZVAL(arg);
 			zval_dtor(arg);
 			ZVAL_LONG(arg, lval);
+			goto int_offset;
+		case IS_BIGINT:
+			SEPARATE_ZVAL(arg);
+			zval_dtor(arg);
+			ZVAL_LONG(arg, zend_bigint_to_long(big));
+			zend_bigint_release(big);
 			goto int_offset;
 		}
 		/* else call string version */

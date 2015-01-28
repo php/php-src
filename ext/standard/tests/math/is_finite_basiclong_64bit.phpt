@@ -1,9 +1,5 @@
 --TEST--
-Test is_finite function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test is_finite function : 64bit bigint and long tests
 --FILE--
 <?php
  
@@ -51,10 +47,10 @@ bool(true)
 bool(true)
 --- testing: 9223372036854775806 ---
 bool(true)
---- testing: 9.2233720368548E+18 ---
+--- testing: 9223372036854775808 ---
 bool(true)
 --- testing: -9223372036854775807 ---
 bool(true)
---- testing: -9.2233720368548E+18 ---
+--- testing: -9223372036854775809 ---
 bool(true)
 ===DONE===

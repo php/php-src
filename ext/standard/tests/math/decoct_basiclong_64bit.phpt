@@ -1,9 +1,5 @@
 --TEST--
-Test decoct function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test decoct function : 64bit long and bigint tests
 --FILE--
 <?php
  
@@ -51,10 +47,10 @@ string(11) "37777777777"
 string(11) "37777777775"
 --- testing: 9223372036854775806 ---
 string(21) "777777777777777777776"
---- testing: 9.2233720368548E+18 ---
-string(22) "1000000000000000000000"
+--- testing: 9223372036854775808 ---
+string(21) "777777777777777777777"
 --- testing: -9223372036854775807 ---
 string(22) "1000000000000000000001"
---- testing: -9.2233720368548E+18 ---
+--- testing: -9223372036854775809 ---
 string(22) "1000000000000000000000"
 ===DONE===

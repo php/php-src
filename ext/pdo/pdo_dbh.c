@@ -277,7 +277,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 		if ((v = zend_hash_index_find(Z_ARRVAL_P(options), PDO_ATTR_PERSISTENT)) != NULL) {
 			if (Z_TYPE_P(v) == IS_STRING &&
-				!is_numeric_string(Z_STRVAL_P(v), Z_STRLEN_P(v), NULL, NULL, 0) && Z_STRLEN_P(v) > 0) {
+				!is_numeric_string(Z_STRVAL_P(v), Z_STRLEN_P(v), NULL, NULL, NULL, 0) && Z_STRLEN_P(v) > 0) {
 				/* user specified key */
 				plen = spprintf(&hashkey, 0, "PDO:DBH:DSN=%s:%s:%s:%s", data_source,
 						username ? username : "",

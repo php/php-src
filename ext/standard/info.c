@@ -807,6 +807,14 @@ PHPAPI void php_print_info(int flag)
 			efree(descr);
 		}
 
+#		if defined(ZEND_HAVE_LIBTOMMATH)
+			php_info_print_table_row(2, "Zend Big Integer Support", "LibTomMath");
+#		elif defined(ZEND_HAVE_GMP)
+			php_info_print_table_row(2, "Zend Big Integer Support", "GNU Multiple Precision");
+#		else
+			php_info_print_table_row(2, "Zend Big Integer Support", "UNKNOWN");
+#		endif
+
 #if HAVE_IPV6
 		php_info_print_table_row(2, "IPv6 Support", "enabled" );
 #else

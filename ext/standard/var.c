@@ -103,6 +103,7 @@ PHPAPI void php_var_dump(zval *struc, int level) /* {{{ */
 	zend_ulong num;
 	zend_string *key;
 	zval *val;
+	char *temp_str;
 
 	if (level > 1) {
 		php_printf("%*c", level - 1, ' ');
@@ -121,6 +122,11 @@ again:
 			break;
 		case IS_LONG:
 			php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
+			break;
+		case IS_BIGINT:
+			temp_str = zend_bigint_to_string(Z_BIG_P(struc));
+			php_printf("%sint(%s)\n", COMMON, temp_str);
+			efree(temp_str);
 			break;
 		case IS_DOUBLE:
 			php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
@@ -270,6 +276,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 	int is_ref = 0;
 	zend_ulong index;
 	zend_string *key;
+	char *str;
 	zval *val;
 
 	if (level > 1) {
@@ -292,6 +299,11 @@ again:
 		break;
 	case IS_DOUBLE:
 		php_printf("%sdouble(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_P(struc));
+		break;
+	case IS_BIGINT:
+		str = zend_bigint_to_string(Z_BIG_P(struc));
+		php_printf("%sbigint(%s) refcount(%u)\n", COMMON, str, Z_REFCOUNT_P(struc));
+		efree(str);
 		break;
 	case IS_STRING:
 		php_printf("%sstring(%d) \"", COMMON, Z_STRLEN_P(struc));
@@ -477,6 +489,11 @@ again:
 			smart_str_appendl(buf, tmp_str, tmp_len);
 			efree(tmp_str);
 			break;
+		case IS_BIGINT:
+			ztmp = zend_bigint_to_zend_string(Z_BIG_P(struc), 0);
+			smart_str_appendl(buf, ztmp->val, ztmp->len);
+			zend_string_release(ztmp);
+			break;
 		case IS_STRING:
 			ztmp = php_addcslashes(Z_STR_P(struc), 0, "'\\", 2);
 			ztmp2 = php_str_to_str(ztmp->val, ztmp->len, "\0", 1, "' . \"\\0\" . '", 12);
@@ -648,6 +665,17 @@ static inline void php_var_serialize_long(smart_str *buf, zend_long val) /* {{{ 
 }
 /* }}} */
 
+static inline void php_var_serialize_bigint(smart_str *buf, zend_bigint *big) /* {{{ */
+{
+	char *str = zend_bigint_to_string(big);
+
+	smart_str_appendl(buf, "i:", 2);
+	smart_str_appends(buf, str);
+	efree(str);
+	smart_str_appendc(buf, ';');
+}
+/* }}} */
+
 static inline void php_var_serialize_string(smart_str *buf, char *str, size_t len) /* {{{ */
 {
 	smart_str_appendl(buf, "s:", 2);
@@ -809,6 +837,10 @@ again:
 
 		case IS_LONG:
 			php_var_serialize_long(buf, Z_LVAL_P(struc));
+			return;
+
+		case IS_BIGINT:
+			php_var_serialize_bigint(buf, Z_BIG_P(struc));
 			return;
 
 		case IS_DOUBLE: {

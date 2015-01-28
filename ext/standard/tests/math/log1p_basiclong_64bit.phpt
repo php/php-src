@@ -1,9 +1,5 @@
 --TEST--
-Test log1p function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test log1p function : 64bit long and bigint tests
 --FILE--
 <?php
  
@@ -51,10 +47,10 @@ float(22.180709777918)
 float(22.180709777453)
 --- testing: 9223372036854775806 ---
 float(43.668272375277)
---- testing: 9.2233720368548E+18 ---
+--- testing: 9223372036854775808 ---
 float(43.668272375277)
 --- testing: -9223372036854775807 ---
 float(NAN)
---- testing: -9.2233720368548E+18 ---
+--- testing: -9223372036854775809 ---
 float(NAN)
 ===DONE===

@@ -1,9 +1,5 @@
 --TEST--
-Test N++ operator : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test N++ operator : 64bit long and bigint tests
 --FILE--
 <?php
  
@@ -29,7 +25,7 @@ foreach ($longVals as $longVal) {
 ===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 ---
-float(9.2233720368548E+18)
+int(9223372036854775808)
 --- testing: -9223372036854775808 ---
 int(-9223372036854775807)
 --- testing: 2147483647 ---
@@ -52,10 +48,10 @@ int(4294967296)
 int(4294967294)
 --- testing: 9223372036854775806 ---
 int(9223372036854775807)
---- testing: 9.2233720368548E+18 ---
-float(9.2233720368548E+18)
+--- testing: 9223372036854775808 ---
+int(9223372036854775809)
 --- testing: -9223372036854775807 ---
 int(-9223372036854775806)
---- testing: -9.2233720368548E+18 ---
-float(-9.2233720368548E+18)
+--- testing: -9223372036854775809 ---
+int(-9223372036854775808)
 ===DONE===

@@ -433,3 +433,22 @@ else
     AC_MSG_RESULT(no) 
   fi 
 fi 
+
+AC_ARG_ENABLE(bigint-gmp,
+[  --enable-bigint-gmp     Use GMP instead of LibTomMath for bigints],[
+  for i in $PHP_GMP /usr/local /usr; do
+    test -f $i/include/gmp.h && GMP_DIR=$i && break
+  done
+
+  if test -z "$GMP_DIR"; then
+    AC_MSG_ERROR(Unable to locate gmp.h)
+  fi
+  PHP_ADD_LIBRARY_WITH_PATH(gmp, $GMP_DIR/$PHP_LIBDIR, GMP_SHARED_LIBADD)
+  PHP_ADD_INCLUDE($GMP_DIR/include)
+  AC_DEFINE([ZEND_HAVE_GMP], 1, [Define whether GMP is available and to be used by bigints])
+], [
+  AC_DEFINE([ZEND_HAVE_LIBTOMMATH], 1, [Define whether LibTomMath is available and to be used by bigints])
+  PHP_ADD_INCLUDE(Zend/libtommath)
+])
+
+

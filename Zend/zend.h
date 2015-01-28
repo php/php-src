@@ -86,6 +86,8 @@ void zend_error_noreturn(int type, const char *format, ...) ZEND_NORETURN;
 # define zend_error_noreturn zend_error
 #endif
 
+#include "zend_bigint.h"
+
 /* overloaded elements data types */
 #define OE_IS_ARRAY					(1<<0)
 #define OE_IS_OBJECT				(1<<1)

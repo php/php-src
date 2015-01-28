@@ -2841,8 +2841,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case _IS_BOOL:
 			ZVAL_BOOL(result, zend_is_true(expr));
 			break;
-		case IS_LONG:
-			ZVAL_LONG(result, zval_get_long(expr));
+		case IS_BIGINT_OR_LONG:
+			{
+				zend_uchar type;
+				if ((type = zval_get_bigint_or_long(expr, &Z_LVAL_P(result), &Z_BIG_P(result))) == IS_LONG) {
+					ZVAL_LONG(result, Z_LVAL_P(result));
+				} else if (type == IS_BIGINT) {
+					ZVAL_BIGINT(result, Z_BIG_P(result));
+				}
+			}
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -2855,7 +2862,8 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				ZVAL_DEREF(expr);
 			}
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == opline->extended_value
+				|| (opline->extended_value == IS_BIGINT_OR_LONG && (Z_TYPE_P(expr) == IS_BIGINT || Z_TYPE_P(expr) == IS_LONG))) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_CONST == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(result))) {
@@ -3243,6 +3251,8 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		do {
 			if (Z_TYPE_P(ptr) == IS_LONG) {
 				EG(exit_status) = Z_LVAL_P(ptr);
+			} else if (Z_TYPE_P(ptr) == IS_BIGINT) {
+				EG(exit_status) = zend_bigint_to_long(Z_BIG_P(ptr));
 			} else {
 				if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
 					ptr = Z_REFVAL_P(ptr);
@@ -3407,7 +3417,6 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER
 	value = EX_CONSTANT(opline->op1);
 	switch (opline->extended_value) {
 		case IS_NULL:
-		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
@@ -3415,6 +3424,9 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER
 			break;
 		case _IS_BOOL:
 			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_BIGINT_OR_LONG:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT);
 			break;
 		case IS_OBJECT:
 			if (Z_TYPE_P(value) == opline->extended_value) {
@@ -4526,6 +4538,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -4795,6 +4819,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -4844,9 +4880,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -6173,6 +6212,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -7367,6 +7418,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -7463,6 +7526,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -7512,9 +7587,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -8456,6 +8534,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -8552,6 +8642,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -8601,9 +8703,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -8884,8 +8989,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case _IS_BOOL:
 			ZVAL_BOOL(result, zend_is_true(expr));
 			break;
-		case IS_LONG:
-			ZVAL_LONG(result, zval_get_long(expr));
+		case IS_BIGINT_OR_LONG:
+			{
+				zend_uchar type;
+				if ((type = zval_get_bigint_or_long(expr, &Z_LVAL_P(result), &Z_BIG_P(result))) == IS_LONG) {
+					ZVAL_LONG(result, Z_LVAL_P(result));
+				} else if (type == IS_BIGINT) {
+					ZVAL_BIGINT(result, Z_BIG_P(result));
+				}
+			}
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -8898,7 +9010,8 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				ZVAL_DEREF(expr);
 			}
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == opline->extended_value
+				|| (opline->extended_value == IS_BIGINT_OR_LONG && (Z_TYPE_P(expr) == IS_BIGINT || Z_TYPE_P(expr) == IS_LONG))) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_TMP_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(result))) {
@@ -9263,7 +9376,6 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 	value = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
 	switch (opline->extended_value) {
 		case IS_NULL:
-		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
@@ -9271,6 +9383,9 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 			break;
 		case _IS_BOOL:
 			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_BIGINT_OR_LONG:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT);
 			break;
 		case IS_OBJECT:
 			if (Z_TYPE_P(value) == opline->extended_value) {
@@ -9562,6 +9677,18 @@ num_index:
 				}
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
 				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
@@ -10190,6 +10317,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -10644,6 +10783,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -11069,6 +11220,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -11140,8 +11303,8 @@ static int ZEND_FASTCALL  ZEND_PRE_INC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_increment_function(var_ptr);
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MAX)) {
+		Z_LVAL_P(var_ptr)++;
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -11183,8 +11346,8 @@ static int ZEND_FASTCALL  ZEND_PRE_DEC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_decrement_function(var_ptr);
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MIN)) {
+		Z_LVAL_P(var_ptr)--;
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -11226,9 +11389,9 @@ static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MAX)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_increment_function(var_ptr);
+		Z_LVAL_P(var_ptr)++;
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -11262,9 +11425,9 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MIN)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_decrement_function(var_ptr);
+		Z_LVAL_P(var_ptr)--;
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -11702,8 +11865,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case _IS_BOOL:
 			ZVAL_BOOL(result, zend_is_true(expr));
 			break;
-		case IS_LONG:
-			ZVAL_LONG(result, zval_get_long(expr));
+		case IS_BIGINT_OR_LONG:
+			{
+				zend_uchar type;
+				if ((type = zval_get_bigint_or_long(expr, &Z_LVAL_P(result), &Z_BIG_P(result))) == IS_LONG) {
+					ZVAL_LONG(result, Z_LVAL_P(result));
+				} else if (type == IS_BIGINT) {
+					ZVAL_BIGINT(result, Z_BIG_P(result));
+				}
+			}
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -11716,7 +11886,8 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				ZVAL_DEREF(expr);
 			}
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == opline->extended_value
+				|| (opline->extended_value == IS_BIGINT_OR_LONG && (Z_TYPE_P(expr) == IS_BIGINT || Z_TYPE_P(expr) == IS_LONG))) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_VAR == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(result))) {
@@ -12321,7 +12492,6 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 	value = _get_zval_ptr_var_deref(opline->op1.var, execute_data, &free_op1);
 	switch (opline->extended_value) {
 		case IS_NULL:
-		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
@@ -12329,6 +12499,9 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 			break;
 		case _IS_BOOL:
 			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_BIGINT_OR_LONG:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT);
 			break;
 		case IS_OBJECT:
 			if (Z_TYPE_P(value) == opline->extended_value) {
@@ -13631,6 +13804,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -13720,6 +13905,20 @@ offset_again:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+				break;
+			case IS_BIGINT:
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					hval = zend_bigint_to_long(Z_BIG_P(offset));
+					goto num_index_dim;
+				} else {
+					zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+					if (ht == &EG(symbol_table).ht) {
+						zend_delete_global_variable(temp_str TSRMLS_CC);
+					} else {
+						zend_hash_del(ht, temp_str);
+					}
+					zend_string_release(temp_str);
+				}
 				break;
 			case IS_STRING:
 				if (IS_CONST != IS_CONST) {
@@ -15029,6 +15228,18 @@ num_index:
 				}
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
 				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
@@ -16467,6 +16678,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -16556,6 +16779,20 @@ offset_again:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+				break;
+			case IS_BIGINT:
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					hval = zend_bigint_to_long(Z_BIG_P(offset));
+					goto num_index_dim;
+				} else {
+					zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+					if (ht == &EG(symbol_table).ht) {
+						zend_delete_global_variable(temp_str TSRMLS_CC);
+					} else {
+						zend_hash_del(ht, temp_str);
+					}
+					zend_string_release(temp_str);
+				}
 				break;
 			case IS_STRING:
 				if (IS_CV != IS_CONST) {
@@ -17904,6 +18141,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -17993,6 +18242,20 @@ offset_again:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+				break;
+			case IS_BIGINT:
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					hval = zend_bigint_to_long(Z_BIG_P(offset));
+					goto num_index_dim;
+				} else {
+					zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+					if (ht == &EG(symbol_table).ht) {
+						zend_delete_global_variable(temp_str TSRMLS_CC);
+					} else {
+						zend_hash_del(ht, temp_str);
+					}
+					zend_string_release(temp_str);
+				}
 				break;
 			case IS_STRING:
 				if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -18172,6 +18435,8 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		do {
 			if (Z_TYPE_P(ptr) == IS_LONG) {
 				EG(exit_status) = Z_LVAL_P(ptr);
+			} else if (Z_TYPE_P(ptr) == IS_BIGINT) {
+				EG(exit_status) = zend_bigint_to_long(Z_BIG_P(ptr));
 			} else {
 				if ((IS_UNUSED & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
 					ptr = Z_REFVAL_P(ptr);
@@ -19290,6 +19555,20 @@ offset_again:
 num_index_dim:
 				zend_hash_index_del(ht, hval);
 				break;
+			case IS_BIGINT:
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					hval = zend_bigint_to_long(Z_BIG_P(offset));
+					goto num_index_dim;
+				} else {
+					zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+					if (ht == &EG(symbol_table).ht) {
+						zend_delete_global_variable(temp_str TSRMLS_CC);
+					} else {
+						zend_hash_del(ht, temp_str);
+					}
+					zend_string_release(temp_str);
+				}
+				break;
 			case IS_STRING:
 				if (IS_CONST != IS_CONST) {
 					if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), hval)) {
@@ -19421,6 +19700,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -19470,9 +19761,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -21397,6 +21691,20 @@ offset_again:
 num_index_dim:
 				zend_hash_index_del(ht, hval);
 				break;
+			case IS_BIGINT:
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					hval = zend_bigint_to_long(Z_BIG_P(offset));
+					goto num_index_dim;
+				} else {
+					zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+					if (ht == &EG(symbol_table).ht) {
+						zend_delete_global_variable(temp_str TSRMLS_CC);
+					} else {
+						zend_hash_del(ht, temp_str);
+					}
+					zend_string_release(temp_str);
+				}
+				break;
 			case IS_STRING:
 				if (IS_CV != IS_CONST) {
 					if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), hval)) {
@@ -21528,6 +21836,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -21577,9 +21897,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -22788,6 +23111,20 @@ offset_again:
 num_index_dim:
 				zend_hash_index_del(ht, hval);
 				break;
+			case IS_BIGINT:
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					hval = zend_bigint_to_long(Z_BIG_P(offset));
+					goto num_index_dim;
+				} else {
+					zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+					if (ht == &EG(symbol_table).ht) {
+						zend_delete_global_variable(temp_str TSRMLS_CC);
+					} else {
+						zend_hash_del(ht, temp_str);
+					}
+					zend_string_release(temp_str);
+				}
+				break;
 			case IS_STRING:
 				if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 					if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), hval)) {
@@ -22920,6 +23257,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -22969,9 +23318,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -23086,8 +23438,8 @@ static int ZEND_FASTCALL  ZEND_PRE_INC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_increment_function(var_ptr);
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MAX)) {
+		Z_LVAL_P(var_ptr)++;
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -23128,8 +23480,8 @@ static int ZEND_FASTCALL  ZEND_PRE_DEC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_decrement_function(var_ptr);
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MIN)) {
+		Z_LVAL_P(var_ptr)--;
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -23170,9 +23522,9 @@ static int ZEND_FASTCALL  ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MAX)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_increment_function(var_ptr);
+		Z_LVAL_P(var_ptr)++;
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -23205,9 +23557,9 @@ static int ZEND_FASTCALL  ZEND_POST_DEC_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MIN)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_decrement_function(var_ptr);
+		Z_LVAL_P(var_ptr)--;
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -23866,8 +24218,15 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		case _IS_BOOL:
 			ZVAL_BOOL(result, zend_is_true(expr));
 			break;
-		case IS_LONG:
-			ZVAL_LONG(result, zval_get_long(expr));
+		case IS_BIGINT_OR_LONG:
+			{
+				zend_uchar type;
+				if ((type = zval_get_bigint_or_long(expr, &Z_LVAL_P(result), &Z_BIG_P(result))) == IS_LONG) {
+					ZVAL_LONG(result, Z_LVAL_P(result));
+				} else if (type == IS_BIGINT) {
+					ZVAL_BIGINT(result, Z_BIG_P(result));
+				}
+			}
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -23880,7 +24239,8 @@ static int ZEND_FASTCALL  ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				ZVAL_DEREF(expr);
 			}
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == opline->extended_value
+				|| (opline->extended_value == IS_BIGINT_OR_LONG && (Z_TYPE_P(expr) == IS_BIGINT || Z_TYPE_P(expr) == IS_LONG))) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (IS_CV == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(result))) {
@@ -24268,6 +24628,8 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		do {
 			if (Z_TYPE_P(ptr) == IS_LONG) {
 				EG(exit_status) = Z_LVAL_P(ptr);
+			} else if (Z_TYPE_P(ptr) == IS_BIGINT) {
+				EG(exit_status) = zend_bigint_to_long(Z_BIG_P(ptr));
 			} else {
 				if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
 					ptr = Z_REFVAL_P(ptr);
@@ -24432,7 +24794,6 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 	value = _get_zval_ptr_cv_deref_BP_VAR_R(execute_data, opline->op1.var);
 	switch (opline->extended_value) {
 		case IS_NULL:
-		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
@@ -24440,6 +24801,9 @@ static int ZEND_FASTCALL  ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 			break;
 		case _IS_BOOL:
 			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_BIGINT_OR_LONG:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT);
 			break;
 		case IS_OBJECT:
 			if (Z_TYPE_P(value) == opline->extended_value) {
@@ -26199,6 +26563,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -26363,6 +26739,20 @@ offset_again:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+				break;
+			case IS_BIGINT:
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					hval = zend_bigint_to_long(Z_BIG_P(offset));
+					goto num_index_dim;
+				} else {
+					zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+					if (ht == &EG(symbol_table).ht) {
+						zend_delete_global_variable(temp_str TSRMLS_CC);
+					} else {
+						zend_hash_del(ht, temp_str);
+					}
+					zend_string_release(temp_str);
+				}
 				break;
 			case IS_STRING:
 				if (IS_CONST != IS_CONST) {
@@ -26593,6 +26983,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -26642,9 +27044,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -28474,6 +28879,18 @@ num_index:
 				}
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
+				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
 				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
@@ -30410,6 +30827,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -30499,6 +30928,20 @@ offset_again:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+				break;
+			case IS_BIGINT:
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					hval = zend_bigint_to_long(Z_BIG_P(offset));
+					goto num_index_dim;
+				} else {
+					zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+					if (ht == &EG(symbol_table).ht) {
+						zend_delete_global_variable(temp_str TSRMLS_CC);
+					} else {
+						zend_hash_del(ht, temp_str);
+					}
+					zend_string_release(temp_str);
+				}
 				break;
 			case IS_STRING:
 				if (IS_CV != IS_CONST) {
@@ -30631,6 +31074,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -30680,9 +31135,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -32365,6 +32823,18 @@ num_index:
 str_index:
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						goto num_index;
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				goto str_index;
@@ -32454,6 +32924,20 @@ offset_again:
 				hval = Z_LVAL_P(offset);
 num_index_dim:
 				zend_hash_index_del(ht, hval);
+				break;
+			case IS_BIGINT:
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					hval = zend_bigint_to_long(Z_BIG_P(offset));
+					goto num_index_dim;
+				} else {
+					zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+					if (ht == &EG(symbol_table).ht) {
+						zend_delete_global_variable(temp_str TSRMLS_CC);
+					} else {
+						zend_hash_del(ht, temp_str);
+					}
+					zend_string_release(temp_str);
+				}
 				break;
 			case IS_STRING:
 				if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -32587,6 +33071,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -32636,9 +33132,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -33200,6 +33699,8 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		do {
 			if (Z_TYPE_P(ptr) == IS_LONG) {
 				EG(exit_status) = Z_LVAL_P(ptr);
+			} else if (Z_TYPE_P(ptr) == IS_BIGINT) {
+				EG(exit_status) = zend_bigint_to_long(Z_BIG_P(ptr));
 			} else {
 				if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
 					ptr = Z_REFVAL_P(ptr);
@@ -34156,6 +34657,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -34205,9 +34718,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -35580,6 +36096,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -35629,9 +36157,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -36225,6 +36756,18 @@ num_index_prop:
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					goto num_index_prop;
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							goto num_index_prop;
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					goto str_index_prop;
@@ -36274,9 +36817,12 @@ num_index_prop:
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}

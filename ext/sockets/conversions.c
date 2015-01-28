@@ -326,18 +326,29 @@ double_case:
 		convert_to_long(&lzval);
 		goto long_case;
 
+	case IS_BIGINT:
+bigint_case:
+		ret = zend_bigint_to_long(Z_BIG(lzval));
+		break;
+
 	case IS_OBJECT:
 	case IS_STRING: {
 		zend_long lval;
 		double dval;
+		zend_bigint *big;
 
 		convert_to_string(&lzval);
 
-		switch (is_numeric_string(Z_STRVAL(lzval), Z_STRLEN(lzval), &lval, &dval, 0)) {
+		switch (is_numeric_string(Z_STRVAL(lzval), Z_STRLEN(lzval), &lval, &dval, &big, 0)) {
 		case IS_DOUBLE:
 			zval_dtor(&lzval);
 			ZVAL_DOUBLE(&lzval, dval);
 			goto double_case;
+
+		case IS_BIGINT:
+			zval_dtor(&lzval);
+			ZVAL_BIGINT(&lzval, big);
+			goto bigint_case;
 
 		case IS_LONG:
 			zval_dtor(&lzval);

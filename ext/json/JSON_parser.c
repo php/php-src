@@ -322,7 +322,7 @@ static void json_create_zval(zval *z, smart_str *buf, int type, int options)
 				}
 				goto use_string;
 			} else {
-				goto use_double;
+				goto use_bigint;
 			}
 		}
 
@@ -333,6 +333,11 @@ static void json_create_zval(zval *z, smart_str *buf, int type, int options)
 use_double:
         ZVAL_DOUBLE(z, zend_strtod(buf->s->val, NULL));
     }
+	else if (type == IS_BIGINT)
+	{
+use_bigint:
+		ZVAL_BIGINT(z, zend_bigint_init_strtol(buf->s->val, NULL, 10));
+	}
     else if (type == IS_STRING)
     {
 use_string:

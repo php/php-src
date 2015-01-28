@@ -859,7 +859,7 @@ expr_without_variable:
 	|	expr T_COALESCE expr
 			{ $$ = zend_ast_create(ZEND_AST_COALESCE, $1, $3); }
 	|	internal_functions_in_yacc { $$ = $1; }
-	|	T_INT_CAST expr		{ $$ = zend_ast_create_cast(IS_LONG, $2); }
+	|	T_INT_CAST expr		{ $$ = zend_ast_create_cast(IS_BIGINT_OR_LONG, $2); }
 	|	T_DOUBLE_CAST expr	{ $$ = zend_ast_create_cast(IS_DOUBLE, $2); }
 	|	T_STRING_CAST expr	{ $$ = zend_ast_create_cast(IS_STRING, $2); }
 	|	T_ARRAY_CAST expr	{ $$ = zend_ast_create_cast(IS_ARRAY, $2); }

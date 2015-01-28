@@ -1,9 +1,5 @@
 --TEST--
-Test sinh function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test sinh function : 64bit long and bigint tests
 --FILE--
 <?php
  
@@ -51,10 +47,10 @@ float(INF)
 float(INF)
 --- testing: 9223372036854775806 ---
 float(INF)
---- testing: 9.2233720368548E+18 ---
+--- testing: 9223372036854775808 ---
 float(INF)
 --- testing: -9223372036854775807 ---
 float(-INF)
---- testing: -9.2233720368548E+18 ---
+--- testing: -9223372036854775809 ---
 float(-INF)
 ===DONE===

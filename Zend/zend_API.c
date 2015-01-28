@@ -27,6 +27,7 @@
 #include "zend_constants.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_bigint.h"
 #include "zend_inheritance.h"
 
 #ifdef HAVE_STDARG_H
@@ -166,6 +167,9 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 		case IS_TRUE:
 			return "boolean";
 		case IS_LONG:
+		case IS_BIGINT:
+		/* this is a fake type, but it's used in some places */
+		case IS_BIGINT_OR_LONG:
 			return "integer";
 		case IS_DOUBLE:
 			return "float";
@@ -353,6 +357,27 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 
 				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L')) {
+					return "integer";
+				}
+			}
+			break;
+
+
+		case 'i':
+			{
+				zval **p = va_arg(*va, zval **);
+
+				if (!zend_parse_arg_bigint_or_long(arg, p, check_null)) {
+					return "integer";
+				}
+			}
+			break;
+
+		case 'I':
+			{
+				zend_bigint **p = va_arg(*va, zend_bigint **);
+
+				if (!zend_parse_arg_bigint(arg, p, check_null)) {
 					return "integer";
 				}
 			}
@@ -631,7 +656,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
 		c = *spec_walk;
 		switch (c) {
-			case 'l': case 'd':
+			case 'l': case 'i':
+			case 'I': case 'd':
 			case 's': case 'b':
 			case 'r': case 'a':
 			case 'o': case 'O':
@@ -1452,6 +1478,13 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 			break;
 		case IS_NULL:
 			result = zend_symtable_update(ht, STR_EMPTY_ALLOC(), value);
+			break;
+		case IS_BIGINT:
+			{
+				char *temp = zend_bigint_to_string(Z_BIG_P(key));
+				result = zend_symtable_str_update(ht, temp, strlen(temp), value);
+				efree(temp);
+			}
 			break;
 		case IS_RESOURCE:
 			zend_error(E_STRICT, "Resource ID#" ZEND_LONG_FMT " used as offset, casting to integer (%pd)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
@@ -3836,6 +3869,7 @@ static int same_zval(zval *zv1, zval *zv2)  /* {{{ */
 			return Z_LVAL_P(zv1) == Z_LVAL_P(zv2);
 		case IS_DOUBLE:
 			return Z_LVAL_P(zv1) == Z_LVAL_P(zv2);
+		case IS_BIGINT:
 		case IS_STRING:
 		case IS_ARRAY:
 		case IS_OBJECT:

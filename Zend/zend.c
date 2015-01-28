@@ -31,6 +31,7 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 #include "zend_virtual_cwd.h"
+#include "zend_bigint.h"
 
 #ifdef ZTS
 # define GLOBAL_FUNCTION_TABLE		global_function_table
@@ -579,6 +580,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #endif
 
 	zend_startup_strtod();
+	zend_startup_bigint();
 	zend_startup_extensions_mechanism();
 
 	/* Set up utility functions and values */

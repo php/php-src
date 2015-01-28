@@ -426,7 +426,7 @@ int make_http_soap_request(zval  *this_ptr,
 
 	if (context &&
 		(tmp = php_stream_context_get_option(context, "http", "max_redirects")) != NULL) {
-		if (Z_TYPE_P(tmp) != IS_STRING || !is_numeric_string(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &redirect_max, NULL, 1)) {
+		if (Z_TYPE_P(tmp) != IS_STRING || !is_numeric_string(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), &redirect_max, NULL, NULL, 1)) {
 			if (Z_TYPE_P(tmp) == IS_LONG)
 				redirect_max = Z_LVAL_P(tmp);
 		}

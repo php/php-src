@@ -30,6 +30,8 @@
 #include "zend_virtual_cwd.h"
 #include "zend_multibyte.h"
 #include "zend_language_scanner.h"
+#include "zend_string.h"
+#include "zend_bigint.h"
 #include "zend_inheritance.h"
 
 #define SET_NODE(target, src) do { \
@@ -2780,7 +2782,7 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		|| zend_string_equals_literal(lcname, "is_int")
 		|| zend_string_equals_literal(lcname, "is_integer")
 	) {
-		return zend_compile_func_typecheck(result, args, IS_LONG);
+		return zend_compile_func_typecheck(result, args, IS_BIGINT_OR_LONG);
 	} else if (zend_string_equals_literal(lcname, "is_float")
 		|| zend_string_equals_literal(lcname, "is_double")
 		|| zend_string_equals_literal(lcname, "is_real")

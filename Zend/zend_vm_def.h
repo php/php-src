@@ -913,8 +913,8 @@ ZEND_VM_HANDLER(34, ZEND_PRE_INC, VAR|CV, ANY)
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_increment_function(var_ptr);
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MAX)) {
+		Z_LVAL_P(var_ptr)++;
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -956,8 +956,8 @@ ZEND_VM_HANDLER(35, ZEND_PRE_DEC, VAR|CV, ANY)
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
-		fast_decrement_function(var_ptr);
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MIN)) {
+		Z_LVAL_P(var_ptr)--;
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
 		}
@@ -999,9 +999,9 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MAX)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_increment_function(var_ptr);
+		Z_LVAL_P(var_ptr)++;
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -1035,9 +1035,9 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 		zend_error_noreturn(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 	}
 
-	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG)) {
+	if (EXPECTED(Z_TYPE_P(var_ptr) == IS_LONG) && EXPECTED(Z_LVAL_P(var_ptr) != ZEND_LONG_MIN)) {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-		fast_decrement_function(var_ptr);
+		Z_LVAL_P(var_ptr)--;
 		ZEND_VM_NEXT_OPCODE();
 	}
 
@@ -4130,6 +4130,18 @@ ZEND_VM_C_LABEL(num_index):
 ZEND_VM_C_LABEL(str_index):
 				zend_hash_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), str, expr_ptr);
 				break;
+			case IS_BIGINT:
+				{
+					if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+						hval = zend_bigint_to_long(Z_BIG_P(offset));
+						ZEND_VM_C_GOTO(num_index);
+					} else {
+						char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+						zend_hash_str_update(Z_ARRVAL_P(EX_VAR(opline->result.var)), temp_str, strlen(temp_str), expr_ptr);
+						efree(temp_str);
+					}
+				}
+				break;
 			case IS_NULL:
 				str = STR_EMPTY_ALLOC();
 				ZEND_VM_C_GOTO(str_index);
@@ -4219,8 +4231,15 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 		case _IS_BOOL:
 			ZVAL_BOOL(result, zend_is_true(expr));
 			break;
-		case IS_LONG:
-			ZVAL_LONG(result, zval_get_long(expr));
+		case IS_BIGINT_OR_LONG:
+			{
+				zend_uchar type;
+				if ((type = zval_get_bigint_or_long(expr, &Z_LVAL_P(result), &Z_BIG_P(result))) == IS_LONG) {
+					ZVAL_LONG(result, Z_LVAL_P(result));
+				} else if (type == IS_BIGINT) {
+					ZVAL_BIGINT(result, Z_BIG_P(result));
+				}
+			}
 			break;
 		case IS_DOUBLE:
 			ZVAL_DOUBLE(result, zval_get_double(expr));
@@ -4233,7 +4252,8 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 				ZVAL_DEREF(expr);
 			}
 			/* If value is already of correct type, return it directly */
-			if (Z_TYPE_P(expr) == opline->extended_value) {
+			if (Z_TYPE_P(expr) == opline->extended_value
+				|| (opline->extended_value == IS_BIGINT_OR_LONG && (Z_TYPE_P(expr) == IS_BIGINT || Z_TYPE_P(expr) == IS_LONG))) {
 				ZVAL_COPY_VALUE(result, expr);
 				if (OP1_TYPE == IS_CONST) {
 					if (UNEXPECTED(Z_OPT_COPYABLE_P(result))) {
@@ -4525,6 +4545,20 @@ ZEND_VM_C_LABEL(offset_again):
 				hval = Z_LVAL_P(offset);
 ZEND_VM_C_LABEL(num_index_dim):
 				zend_hash_index_del(ht, hval);
+				break;
+			case IS_BIGINT:	
+				if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+					hval = zend_bigint_to_long(Z_BIG_P(offset));
+					ZEND_VM_C_GOTO(num_index_dim);
+				} else {
+					zend_string *temp_str = zend_bigint_to_zend_string(Z_BIG_P(offset), 0);
+					if (ht == &EG(symbol_table).ht) {
+						zend_delete_global_variable(temp_str TSRMLS_CC);
+					} else {
+						zend_hash_del(ht, temp_str);
+					}
+					zend_string_release(temp_str);
+				}
 				break;
 			case IS_STRING:
 				if (OP2_TYPE != IS_CONST) {
@@ -5198,6 +5232,18 @@ ZEND_VM_C_LABEL(num_index_prop):
 				case IS_DOUBLE:
 					hval = zend_dval_to_lval(Z_DVAL_P(offset));
 					ZEND_VM_C_GOTO(num_index_prop);
+				case IS_BIGINT:
+					{
+						if (zend_bigint_can_fit_long(Z_BIG_P(offset))) {
+							hval = zend_bigint_to_long(Z_BIG_P(offset));
+							ZEND_VM_C_GOTO(num_index_prop);
+						} else {
+							char *temp_str = zend_bigint_to_string(Z_BIG_P(offset));
+							value = zend_hash_str_find_ind(ht, temp_str, strlen(temp_str));
+							efree(temp_str);
+						}
+					}
+					break;
 				case IS_NULL:
 					str = STR_EMPTY_ALLOC();
 					ZEND_VM_C_GOTO(str_index_prop);
@@ -5247,9 +5293,12 @@ ZEND_VM_C_LABEL(num_index_prop):
 			}
 			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
 					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
-						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, NULL, 0))) {
 				ZVAL_DUP(&tmp, offset);
 				convert_to_long(&tmp);
+				offset = &tmp;
+			} else if (Z_TYPE_P(offset) == IS_BIGINT) {
+				ZVAL_LONG(&tmp, zend_bigint_to_long(Z_BIG_P(offset)));
 				offset = &tmp;
 			}
 		}
@@ -5331,6 +5380,8 @@ ZEND_VM_HANDLER(79, ZEND_EXIT, CONST|TMPVAR|UNUSED|CV, ANY)
 		do {
 			if (Z_TYPE_P(ptr) == IS_LONG) {
 				EG(exit_status) = Z_LVAL_P(ptr);
+			} else if (Z_TYPE_P(ptr) == IS_BIGINT) {
+				EG(exit_status) = zend_bigint_to_long(Z_BIG_P(ptr));
 			} else {
 				if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
 					ptr = Z_REFVAL_P(ptr);
@@ -6328,7 +6379,6 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 	value = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	switch (opline->extended_value) {
 		case IS_NULL:
-		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
@@ -6336,6 +6386,9 @@ ZEND_VM_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMP|VAR|CV, ANY)
 			break;
 		case _IS_BOOL:
 			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_TRUE || Z_TYPE_P(value) == IS_FALSE);
+			break;
+		case IS_BIGINT_OR_LONG:
+			ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_BIGINT);
 			break;
 		case IS_OBJECT:
 			if (Z_TYPE_P(value) == opline->extended_value) {

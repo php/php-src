@@ -1,9 +1,5 @@
 --TEST--
-Test rad2deg function : 64bit long tests
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
-?>
+Test rad2deg function : 64bit long and bigint tests
 --FILE--
 <?php
  
@@ -51,10 +47,10 @@ float(246083499150.22)
 float(246083499035.63)
 --- testing: 9223372036854775806 ---
 float(5.2846029059076E+20)
---- testing: 9.2233720368548E+18 ---
+--- testing: 9223372036854775808 ---
 float(5.2846029059076E+20)
 --- testing: -9223372036854775807 ---
 float(-5.2846029059076E+20)
---- testing: -9.2233720368548E+18 ---
+--- testing: -9223372036854775809 ---
 float(-5.2846029059076E+20)
 ===DONE===

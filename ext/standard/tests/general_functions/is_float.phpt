@@ -1,9 +1,5 @@
 --TEST--
 Test is_float() & it's FALIASes: is_double() & is_real() functions
---SKIPIF--
-<?php
-if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
-?>
 --FILE--
 <?php
 /* Prototype: bool is_float ( mixed $var );
@@ -13,12 +9,6 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 echo "*** Testing is_float(), is_double() and is_real() with float values***\n";
 // different valid  float vlaues 
 $floats = array(
-  -2147483649, // float value
-  2147483648,  // float value
-  -0x80000001, // float value, beyond max negative int
-  0x800000001, // float value, beyond max positive int
-  020000000001, // float value, beyond max positive int
-  -020000000001, // float value, beyond max negative int
   0.0,
   -0.1,
   10.0000000000000000005,
@@ -112,6 +102,7 @@ $not_floats = array (
   -0x673,
   0123,
   -0123,
+  0x100000000, // bigint (outside range of 32-bit integer)
    
   @$unset_var,  // unset variable
   @$undefined_var
@@ -240,30 +231,6 @@ bool(true)
 bool(true)
 bool(true)
 -- Iteration 24 --
-bool(true)
-bool(true)
-bool(true)
--- Iteration 25 --
-bool(true)
-bool(true)
-bool(true)
--- Iteration 26 --
-bool(true)
-bool(true)
-bool(true)
--- Iteration 27 --
-bool(true)
-bool(true)
-bool(true)
--- Iteration 28 --
-bool(true)
-bool(true)
-bool(true)
--- Iteration 29 --
-bool(true)
-bool(true)
-bool(true)
--- Iteration 30 --
 bool(true)
 bool(true)
 bool(true)
@@ -414,6 +381,10 @@ bool(false)
 bool(false)
 bool(false)
 --Iteration 37--
+bool(false)
+bool(false)
+bool(false)
+--Iteration 38--
 bool(false)
 bool(false)
 bool(false)

@@ -64,13 +64,22 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 		zend_long lval = 0;
 		double dval = 0;
 		unsigned scope_id = 0;
+		int type;
+		zend_bigint *big;
 
-		if (IS_LONG == is_numeric_string(scope, strlen(scope), &lval, &dval, 0)) {
-			if (lval > 0 && lval <= UINT_MAX) {
-				scope_id = lval;
-			}
-		} else {
-			php_string_to_if_index(scope, &scope_id);
+		type = is_numeric_string(scope, strlen(scope), &lval, &dval, &big, 0);
+		switch (type) {
+			case IS_BIGINT:
+				lval = zend_bigint_to_long(big);
+				zend_bigint_free(big);
+				/* fallthroug */
+			case IS_LONG:
+				if (lval > 0 && lval <= UINT_MAX) {
+					scope_id = lval;
+				}
+				break;
+			default:
+				php_string_to_if_index(scope, &scope_id);
 		}
 
 		sin6->sin6_scope_id = scope_id;

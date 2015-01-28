@@ -28,6 +28,7 @@
 #include "zend_exceptions.h"
 #include "zend_vm.h"
 #include "zend_dtrace.h"
+#include "zend_bigint.h"
 #include "zend_smart_str.h"
 
 static zend_class_entry *default_exception_ce;
@@ -454,6 +455,13 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			smart_str_appendl(str, s_tmp, l_tmp);
 			smart_str_appends(str, ", ");
 			efree(s_tmp);
+			break;
+		}
+		case IS_BIGINT: {
+			char *s_tmp = zend_bigint_to_string(Z_BIG_P(arg));
+			smart_str_appendl(str, s_tmp, strlen(s_tmp));
+			efree(s_tmp);
+			smart_str_appends(str, ", ");
 			break;
 		}
 		case IS_ARRAY:

@@ -48,6 +48,7 @@
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_virtual_cwd.h"
+#include "zend_bigint.h"
 #include "tsrm_config_common.h"
 
 #define YYCTYPE   unsigned char
@@ -1602,13 +1603,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			ZVAL_LONG(zendlval, ZEND_STRTOL(bin, &end, 2));
 			ZEND_ASSERT(!errno && end == yytext + yyleng);
 		}
-		return T_LNUMBER;
 	} else {
-		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, (const char **)&end));
-		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
-		ZEND_ASSERT(end == yytext + yyleng);
-		return T_DNUMBER;
+		zend_bigint *big;
+		ZVAL_BIGINT(zendlval, big = zend_bigint_init_from_string_length(bin, len, 2));
+		ZEND_ASSERT(big != NULL);
 	}
+	return T_LNUMBER;
 }
 
 <ST_IN_SCRIPTING>{LNUM} {
@@ -1627,25 +1627,20 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		errno = 0;
 		ZVAL_LONG(zendlval, ZEND_STRTOL(yytext, &end, 0));
 		if (errno == ERANGE) { /* Overflow */
-			errno = 0;
+			zend_bigint *big;
 			if (yytext[0] == '0') { /* octal overflow */
-				errno = 0;
-				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, (const char **)&end));
+				ZVAL_BIGINT(zendlval, big = zend_bigint_init_strtol(yytext, &end, 8));
 			} else {
-				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, (const char **)&end));
+				ZVAL_BIGINT(zendlval, big = zend_bigint_init_strtol(yytext, &end, 10));
 			}
 			/* Also not an assert for the same reason */
 			if (end != yytext + yyleng) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Invalid numeric literal");
 			}
-			ZEND_ASSERT(!errno);
-			return T_DNUMBER;
-		}
 		/* Also not an assert for the same reason */
-		if (end != yytext + yyleng) {
+		} else if (end != yytext + yyleng) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Invalid numeric literal");
 		}
-		ZEND_ASSERT(!errno);
 	}
 	return T_LNUMBER;
 }
@@ -1669,13 +1664,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			ZVAL_LONG(zendlval, ZEND_STRTOL(hex, &end, 16));
 			ZEND_ASSERT(!errno && end == hex + len);
 		}
-		return T_LNUMBER;
 	} else {
-		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, (const char **)&end));
-		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
-		ZEND_ASSERT(end == hex + len);
-		return T_DNUMBER;
+		ZVAL_BIGINT(zendlval, zend_bigint_init_from_string_length(hex, len, 16));
 	}
+	return T_LNUMBER;
 }
 
 <ST_VAR_OFFSET>[0]|([1-9][0-9]*) { /* Offset could be treated as a long */

@@ -3,35 +3,50 @@ Simple math tests
 --FILE--
 <?php // $Id$
 
-define('LONG_MAX', is_int(5000000000)? 9223372036854775807 : 0x7FFFFFFF);
-define('LONG_MIN', -LONG_MAX - 1);
-printf("%d,%d,%d,%d\n",is_int(LONG_MIN  ),is_int(LONG_MAX  ),
-					   is_int(LONG_MIN-1),is_int(LONG_MAX+1));
+define('LONG_MAX64', 9223372036854775807);
+define('LONG_MIN64', -LONG_MAX64 - 1);
+define('LONG_MAX32', 0x7FFFFFFF);
+define('LONG_MIN32', -LONG_MAX32 - 1);
 
 $tests = <<<TESTS
 -1 ~== ceil(-1.5)
  2 ~== ceil( 1.5)
 -2 ~== floor(-1.5)
  1 ~== floor(1.5)
- LONG_MIN   ~== ceil(LONG_MIN - 0.5)
- LONG_MIN+1 ~== ceil(LONG_MIN + 0.5)
- LONG_MIN-1 ~== round(LONG_MIN - 0.6)
- LONG_MIN   ~== round(LONG_MIN - 0.4)
- LONG_MIN   ~== round(LONG_MIN + 0.4)
- LONG_MIN+1 ~== round(LONG_MIN + 0.6)
- LONG_MIN-1 ~== floor(LONG_MIN - 0.5)
- LONG_MIN   ~== floor(LONG_MIN + 0.5)
- LONG_MAX   ~== ceil(LONG_MAX - 0.5)
- LONG_MAX+1 ~== ceil(LONG_MAX + 0.5)
- LONG_MAX-1 ~== round(LONG_MAX - 0.6)
- LONG_MAX   ~== round(LONG_MAX - 0.4)
- LONG_MAX   ~== round(LONG_MAX + 0.4)
- LONG_MAX+1 ~== round(LONG_MAX + 0.6)
- LONG_MAX-1 ~== floor(LONG_MAX - 0.5)
- LONG_MAX   ~== floor(LONG_MAX + 0.5)
+(float) LONG_MIN64   ~== ceil(LONG_MIN64 - 0.5)
+(float) LONG_MIN64+1 ~== ceil(LONG_MIN64 + 0.5)
+(float) LONG_MIN64-1 ~== round(LONG_MIN64 - 0.6)
+(float) LONG_MIN64   ~== round(LONG_MIN64 - 0.4)
+(float) LONG_MIN64   ~== round(LONG_MIN64 + 0.4)
+(float) LONG_MIN64+1 ~== round(LONG_MIN64 + 0.6)
+(float) LONG_MIN64-1 ~== floor(LONG_MIN64 - 0.5)
+(float) LONG_MIN64   ~== floor(LONG_MIN64 + 0.5)
+(float) LONG_MAX64   ~== ceil(LONG_MAX64 - 0.5)
+(float) LONG_MAX64+1 ~== ceil(LONG_MAX64 + 0.5)
+(float) LONG_MAX64-1 ~== round(LONG_MAX64 - 0.6)
+(float) LONG_MAX64   ~== round(LONG_MAX64 - 0.4)
+(float) LONG_MAX64   ~== round(LONG_MAX64 + 0.4)
+(float) LONG_MAX64+1 ~== round(LONG_MAX64 + 0.6)
+(float) LONG_MAX64-1 ~== floor(LONG_MAX64 - 0.5)
+(float) LONG_MAX64   ~== floor(LONG_MAX64 + 0.5)
+(float) LONG_MIN32   ~== ceil(LONG_MIN32 - 0.5)
+(float) LONG_MIN32+1 ~== ceil(LONG_MIN32 + 0.5)
+(float) LONG_MIN32-1 ~== round(LONG_MIN32 - 0.6)
+(float) LONG_MIN32   ~== round(LONG_MIN32 - 0.4)
+(float) LONG_MIN32   ~== round(LONG_MIN32 + 0.4)
+(float) LONG_MIN32+1 ~== round(LONG_MIN32 + 0.6)
+(float) LONG_MIN32-1 ~== floor(LONG_MIN32 - 0.5)
+(float) LONG_MIN32   ~== floor(LONG_MIN32 + 0.5)
+(float) LONG_MAX32   ~== ceil(LONG_MAX32 - 0.5)
+(float) LONG_MAX32+1 ~== ceil(LONG_MAX32 + 0.5)
+(float) LONG_MAX32-1 ~== round(LONG_MAX32 - 0.6)
+(float) LONG_MAX32   ~== round(LONG_MAX32 - 0.4)
+(float) LONG_MAX32   ~== round(LONG_MAX32 + 0.4)
+(float) LONG_MAX32+1 ~== round(LONG_MAX32 + 0.6)
+(float) LONG_MAX32-1 ~== floor(LONG_MAX32 - 0.5)
+(float) LONG_MAX32   ~== floor(LONG_MAX32 + 0.5)
 TESTS;
 
 include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
 --EXPECT--
-1,1,0,0
 OK
