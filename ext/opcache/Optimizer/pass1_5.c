@@ -602,8 +602,10 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_JMPNZ:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
-		case ZEND_FE_RESET:
-		case ZEND_FE_FETCH:
+		case ZEND_FE_RESET_R:
+		case ZEND_FE_RESET_RW:
+		case ZEND_FE_FETCH_R:
+		case ZEND_FE_FETCH_RW:
 		case ZEND_NEW:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:

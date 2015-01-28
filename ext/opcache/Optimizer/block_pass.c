@@ -166,14 +166,16 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
-			case ZEND_FE_RESET:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
 			case ZEND_NEW:
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 				START_BLOCK_OP(ZEND_OP2(opline).opline_num);
 				START_BLOCK_OP(opno + 1);
 				break;
-			case ZEND_FE_FETCH:
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
 				START_BLOCK_OP(ZEND_OP2(opline).opline_num);
 				START_BLOCK_OP(opno + 2);
 				break;
@@ -293,11 +295,13 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				case ZEND_JMPNZ:
 				case ZEND_JMPZ_EX:
 				case ZEND_JMPNZ_EX:
-				case ZEND_FE_RESET:
+				case ZEND_FE_RESET_R:
+				case ZEND_FE_RESET_RW:
 				case ZEND_NEW:
 				case ZEND_JMP_SET:
 				case ZEND_COALESCE:
-				case ZEND_FE_FETCH:
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
 					cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
 					/* break missing intentionally */
 				default:
@@ -619,7 +623,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			ZEND_OP1_TYPE(VAR_SOURCE(opline->op1)) == IS_CONST &&
 			opline->opcode != ZEND_CASE &&         /* CASE _always_ expects variable */
 			opline->opcode != ZEND_FETCH_LIST &&
-			opline->opcode != ZEND_FE_RESET &&
+			(opline->opcode != ZEND_FE_RESET_R || opline->opcode != ZEND_FE_RESET_RW) &&
 			opline->opcode != ZEND_FREE
 			) {
 			zend_op *src = VAR_SOURCE(opline->op1);

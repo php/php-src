@@ -128,6 +128,7 @@ struct _zval_struct {
 		uint32_t     cache_slot;           /* literal cache slot */
 		uint32_t     lineno;               /* line number (for ast nodes) */
 		uint32_t     num_args;             /* arguments number for EX(This) */
+		uint32_t     fe_pos;               /* foreach position */
 	} u2;
 };
 
@@ -260,6 +261,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_CACHE_SLOT(zval)			(zval).u2.cache_slot
 #define Z_CACHE_SLOT_P(zval_p)		Z_CACHE_SLOT(*(zval_p))
+
+#define Z_FE_POS(zval)				(zval).u2.fe_pos
+#define Z_FE_POS_P(zval_p)			Z_FE_POS(*(zval_p))
 
 #define Z_COUNTED(zval)				(zval).value.counted
 #define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))

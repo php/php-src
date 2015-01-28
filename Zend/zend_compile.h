@@ -828,9 +828,6 @@ int zend_add_literal(zend_op_array *op_array, zval *zv);
 
 #define ZEND_FETCH_ARG_MASK         0x000fffff
 
-#define ZEND_FE_FETCH_BYREF	1
-#define ZEND_FE_FETCH_WITH_KEY	2
-
 #define EXT_TYPE_FREE_ON_RETURN		(1<<2)
 
 #define ZEND_MEMBER_FUNC_CALL	1<<0
