@@ -553,38 +553,40 @@ static void php_session_initialize(void) /* {{{ */
 }
 /* }}} */
 
-static void php_session_save_current_state(void) /* {{{ */
+static void php_session_save_current_state(int write) /* {{{ */
 {
 	int ret = FAILURE;
 
-	IF_SESSION_VARS() {
-		if (PS(mod_data) || PS(mod_user_implemented)) {
-			zend_string *val;
+	if (write) {
+		IF_SESSION_VARS() {
+			if (PS(mod_data) || PS(mod_user_implemented)) {
+				zend_string *val;
 
-			val = php_session_encode();
-			if (val) {
-				if (PS(lazy_write) && PS(session_vars)
-					&& PS(mod)->s_update_timestamp
-					&& PS(mod)->s_update_timestamp != php_session_update_timestamp
-					&& val->len == PS(session_vars)->len
-					&& !memcmp(val->val, PS(session_vars)->val, val->len)
-				) {
-					ret = PS(mod)->s_update_timestamp(&PS(mod_data), PS(id), val);
+				val = php_session_encode();
+				if (val) {
+					if (PS(lazy_write) && PS(session_vars)
+						&& PS(mod)->s_update_timestamp
+						&& PS(mod)->s_update_timestamp != php_session_update_timestamp
+						&& val->len == PS(session_vars)->len
+						&& !memcmp(val->val, PS(session_vars)->val, val->len)
+					) {
+						ret = PS(mod)->s_update_timestamp(&PS(mod_data), PS(id), val);
+					} else {
+						ret = PS(mod)->s_write(&PS(mod_data), PS(id), val);
+					}
+					zend_string_release(val);
 				} else {
-					ret = PS(mod)->s_write(&PS(mod_data), PS(id), val);
+					ret = PS(mod)->s_write(&PS(mod_data), PS(id), STR_EMPTY_ALLOC());
 				}
-				zend_string_release(val);
-			} else {
-				ret = PS(mod)->s_write(&PS(mod_data), PS(id), STR_EMPTY_ALLOC());
 			}
-		}
 
-		if ((ret == FAILURE) && !EG(exception)) {
-			php_error_docref(NULL, E_WARNING, "Failed to write session data (%s). Please "
-					"verify that the current setting of session.save_path "
-					"is correct (%s)",
-					PS(mod)->s_name,
-					PS(save_path));
+			if ((ret == FAILURE) && !EG(exception)) {
+				php_error_docref(NULL, E_WARNING, "Failed to write session data (%s). Please "
+								 "verify that the current setting of session.save_path "
+								 "is correct (%s)",
+								 PS(mod)->s_name,
+								 PS(save_path));
+			}
 		}
 	}
 
@@ -1634,11 +1636,11 @@ PHPAPI void php_session_start(void) /* {{{ */
 }
 /* }}} */
 
-static void php_session_flush(void) /* {{{ */
+static void php_session_flush(int write) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
 		PS(session_status) = php_session_none;
-		php_session_save_current_state();
+		php_session_save_current_state(write);
 	}
 }
 /* }}} */
@@ -2234,7 +2236,7 @@ static PHP_FUNCTION(session_start)
 	}
 
 	if (read_and_close) {
-		php_session_flush();
+		php_session_flush(0);
 	}
 
 	RETURN_TRUE;
@@ -2274,7 +2276,7 @@ static PHP_FUNCTION(session_unset)
    Write session data and end session */
 static PHP_FUNCTION(session_write_close)
 {
-	php_session_flush();
+	php_session_flush(1);
 }
 /* }}} */
 
@@ -2334,7 +2336,7 @@ static PHP_FUNCTION(session_register_shutdown)
 		 * If the user does have a later shutdown function which needs the
 		 * session then tough luck.
 		 */
-		php_session_flush();
+		php_session_flush(1);
 		php_error_docref(NULL, E_WARNING, "Unable to register session flush function");
 	}
 }
@@ -2556,7 +2558,7 @@ static PHP_RSHUTDOWN_FUNCTION(session) /* {{{ */
 	int i;
 
 	zend_try {
-		php_session_flush();
+		php_session_flush(1);
 	} zend_end_try();
 	php_rshutdown_session_globals();
 
@@ -2802,7 +2804,7 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 		if (Z_REFCOUNTED(progress->data)) Z_ADDREF(progress->data);
 		zend_hash_update(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s, &progress->data);
 	}
-	php_session_flush();
+	php_session_flush(1);
 } /* }}} */
 
 static void php_session_rfc1867_cleanup(php_session_rfc1867_progress *progress) /* {{{ */
@@ -2812,7 +2814,7 @@ static void php_session_rfc1867_cleanup(php_session_rfc1867_progress *progress) 
 	IF_SESSION_VARS() {
 		zend_hash_del(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), progress->key.s);
 	}
-	php_session_flush();
+	php_session_flush(1);
 } /* }}} */
 
 static int php_session_rfc1867_callback(unsigned int event, void *event_data, void **extra) /* {{{ */

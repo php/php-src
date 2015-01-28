@@ -80,9 +80,9 @@ ValidateID [%s,PHPT-%d]
 Read [%s,PHPT-%d]
 GC [0]
 1 deleted
+bool(true)
 Write [%s,PHPT-%d,]
 Close [%s,PHPSESSID]
-bool(true)
 NULL
 string(15) "PHPT-%d"
 *** Cleanup ***
