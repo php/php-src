@@ -4637,7 +4637,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, ANY)
 		zend_bool is_empty;
 
 		if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-			FREE_OP1_IF_VAR();
+			FREE_OP1();
 			if (!EG(exception)) {
 				zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ce->name->val);
 			}
@@ -4649,8 +4649,8 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, ANY)
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				FREE_OP1_IF_VAR();
 				OBJ_RELEASE(&iter->std);
+				FREE_OP1();
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -4658,15 +4658,15 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, ANY)
 		is_empty = iter->funcs->valid(iter) != SUCCESS;
 				
 		if (UNEXPECTED(EG(exception) != NULL)) {
-			FREE_OP1_IF_VAR();
 			OBJ_RELEASE(&iter->std);
+			FREE_OP1();
 			HANDLE_EXCEPTION();
 		}
 		iter->index = -1; /* will be set to 0 before using next handler */
 
 		ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
 
-		FREE_OP1_IF_VAR();
+		FREE_OP1();
 		if (is_empty) {
 			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 		} else {
@@ -4674,13 +4674,13 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, ANY)
 			ZEND_VM_NEXT_OPCODE();
 		}
 	} else if ((fe_ht = HASH_OF(array_ptr)) != NULL) {
-		if (OP1_TYPE != IS_TMP_VAR) {
-			if (Z_REFCOUNTED_P(array_ptr)) {
-				Z_ADDREF_P(array_ptr);
-			}
+		zval *result = EX_VAR(opline->result.var);
+
+		ZVAL_COPY_VALUE(result, array_ptr);
+		if (OP1_TYPE != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(result)) {
+			Z_ADDREF_P(array_ptr);
 		}
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ptr);
-		Z_FE_POS_P(EX_VAR(opline->result.var)) = 0;
+		Z_FE_POS_P(result) = 0;
 
 		FREE_OP1_IF_VAR();
 		CHECK_EXCEPTION();
@@ -4720,7 +4720,11 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 		zend_bool is_empty;
 
 		if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-			FREE_OP1_VAR_PTR();
+			if (OP1_TYPE == IS_VAR) {
+				FREE_OP1_VAR_PTR();
+			} else {
+				FREE_OP1();
+			}
 			if (!EG(exception)) {
 				zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ce->name->val);
 			}
@@ -4732,8 +4736,12 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 		if (iter->funcs->rewind) {
 			iter->funcs->rewind(iter);
 			if (UNEXPECTED(EG(exception) != NULL)) {
-				FREE_OP1_VAR_PTR();
 				OBJ_RELEASE(&iter->std);
+				if (OP1_TYPE == IS_VAR) {
+					FREE_OP1_VAR_PTR();
+				} else {
+					FREE_OP1();
+				}
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -4741,8 +4749,12 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 		is_empty = iter->funcs->valid(iter) != SUCCESS;
 				
 		if (UNEXPECTED(EG(exception) != NULL)) {
-			FREE_OP1_VAR_PTR();
 			OBJ_RELEASE(&iter->std);
+			if (OP1_TYPE == IS_VAR) {
+				FREE_OP1_VAR_PTR();
+			} else {
+				FREE_OP1();
+			}
 			HANDLE_EXCEPTION();
 		}
 		iter->index = -1; /* will be set to 0 before using next handler */
@@ -4751,7 +4763,11 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 		Z_FE_POS_P(EX_VAR(opline->result.var)) = INVALID_IDX;
 		ZVAL_PTR(EX_VAR((opline+2)->op1.var), NULL);
 
-		FREE_OP1_VAR_PTR();
+		if (OP1_TYPE == IS_VAR) {
+			FREE_OP1_VAR_PTR();
+		} else {
+			FREE_OP1();
+		}
 		if (is_empty) {
 			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 		} else {
@@ -4793,7 +4809,11 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
-		FREE_OP1_VAR_PTR();
+		if (OP1_TYPE == IS_VAR) {
+			FREE_OP1_VAR_PTR();
+		} else {
+			FREE_OP1();
+		}
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 	}
 }
@@ -5130,9 +5150,6 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
 				/* failure in get_current_data */
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			ZVAL_MAKE_REF(value);
-			Z_ADDREF_P(value);
-			ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(value));
 			if (opline->extended_value) {
 				if (iter->funcs->get_current_key) {
 					iter->funcs->get_current_key(iter, EX_VAR((opline+1)->result.var));
@@ -5144,6 +5161,9 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
 					ZVAL_LONG(EX_VAR((opline+1)->result.var), iter->index);
 				}
 			}
+			ZVAL_MAKE_REF(value);
+			Z_ADDREF_P(value);
+			ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(value));
 			ZEND_VM_INC_OPCODE();
 			ZEND_VM_NEXT_OPCODE();
 		}
