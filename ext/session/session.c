@@ -1401,6 +1401,7 @@ static void ppid2sid(zval *ppid) {
 PHPAPI void php_session_reset_id(void) /* {{{ */
 {
 	int module_number = PS(module_number);
+	zval *sid;
 
 	if (!PS(id)) {
 		php_error_docref(NULL, E_WARNING, "Cannot set session ID - session ID is not initialized");
@@ -1413,7 +1414,9 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 	}
 
 	/* if the SID constant exists, destroy it. */
-	zend_hash_str_del(EG(zend_constants), "sid", sizeof("sid") - 1);
+	/* We must not delete any items in EG(zend_contants) */
+	/* zend_hash_str_del(EG(zend_constants), "sid", sizeof("sid") - 1); */
+	sid = zend_get_constant_str("SID", sizeof("SID") - 1);
 
 	if (PS(define_sid)) {
 		smart_str var = {0};
@@ -1422,10 +1425,20 @@ PHPAPI void php_session_reset_id(void) /* {{{ */
 		smart_str_appendc(&var, '=');
 		smart_str_appends(&var, PS(id)->val);
 		smart_str_0(&var);
-		REGISTER_STRINGL_CONSTANT("SID", var.s->val, var.s->len, 0);
-		smart_str_free(&var);
+		if (sid) {
+			zend_string_release(Z_STR_P(sid));
+			ZVAL_STR(sid, var.s);
+		} else {
+			REGISTER_STRINGL_CONSTANT("SID", var.s->val, var.s->len, 0);
+			smart_str_free(&var);
+		}
 	} else {
-		REGISTER_STRINGL_CONSTANT("SID", "", 0, 0);
+		if (sid) {
+			zend_string_release(Z_STR_P(sid));
+			ZVAL_EMPTY_STRING(sid);
+		} else {
+			REGISTER_STRINGL_CONSTANT("SID", "", 0, 0);
+		}
 	}
 
 	if (PS(apply_trans_sid)) {
