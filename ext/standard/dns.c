@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -897,7 +897,24 @@ PHP_FUNCTION(dns_get_record)
 
 			if (n < 0) {
 				php_dns_free_handle(handle);
-				continue;
+				switch (h_errno) {
+					case NO_DATA:
+					case HOST_NOT_FOUND:
+						continue;
+
+					case NO_RECOVERY:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "An unexpected server failure occurred.");
+						break;
+
+					case TRY_AGAIN:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "A temporary server error occurred.");
+						break;
+
+					default:
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "DNS Query failed");
+				}
+				zval_dtor(return_value);
+				RETURN_FALSE;
 			}
 
 			cp = answer.qb2 + HFIXEDSZ;

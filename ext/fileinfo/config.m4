@@ -11,7 +11,7 @@ if test "$PHP_FILEINFO" != "no"; then
     libmagic/cdf.c libmagic/cdf_time.c libmagic/compress.c \
     libmagic/encoding.c libmagic/fsmagic.c libmagic/funcs.c \
     libmagic/is_tar.c libmagic/magic.c libmagic/print.c \
-    libmagic/readcdf.c libmagic/readelf.c libmagic/softmagic.c"
+    libmagic/readcdf.c libmagic/softmagic.c"
 
   PHP_NEW_EXTENSION(fileinfo, fileinfo.c $libmagic_sources, $ext_shared,,-I@ext_srcdir@/libmagic)
   PHP_ADD_BUILD_DIR($ext_builddir/libmagic)

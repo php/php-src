@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -124,9 +124,9 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CAPATH", (long)PDO_MYSQL_ATTR_SSL_CAPATH);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CIPHER", (long)PDO_MYSQL_ATTR_SSL_CIPHER);
 #if MYSQL_VERSION_ID > 50605 || defined(PDO_USE_MYSQLND)
-	 REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SERVER_PUBLIC_KEY", (long)PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SERVER_PUBLIC_KEY", (long)PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY);
 #endif
-
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MULTI_STATEMENTS", (long)PDO_MYSQL_ATTR_MULTI_STATEMENTS);
 
 #ifdef PDO_USE_MYSQLND
 	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api TSRMLS_CC);

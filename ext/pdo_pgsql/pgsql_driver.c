@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -379,6 +379,14 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, long attr, zval *return_value
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	switch (attr) {
+		case PDO_ATTR_EMULATE_PREPARES:
+			ZVAL_BOOL(return_value, H->emulate_prepares);
+			break;
+
+		case PDO_PGSQL_ATTR_DISABLE_NATIVE_PREPARED_STATEMENT:
+			ZVAL_BOOL(return_value, H->disable_native_prepares);
+			break;
+
 		case PDO_ATTR_CLIENT_VERSION:
 			ZVAL_STRING(return_value, PG_VERSION, 1);
 			break;
@@ -465,6 +473,15 @@ static int pdo_pgsql_check_liveness(pdo_dbh_t *dbh TSRMLS_DC)
 }
 /* }}} */
 
+static int pgsql_handle_in_transaction(pdo_dbh_t *dbh TSRMLS_DC)
+{
+	pdo_pgsql_db_handle *H;
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	return PQtransactionStatus(H->server) > PQTRANS_IDLE;
+}
+
 static int pdo_pgsql_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -489,21 +506,20 @@ static int pgsql_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
 
 static int pgsql_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 {
-	return pdo_pgsql_transaction_cmd("COMMIT", dbh TSRMLS_CC);
+	int ret = pdo_pgsql_transaction_cmd("COMMIT", dbh TSRMLS_CC);
+
+	/* When deferred constraints are used the commit could
+	   fail, and a ROLLBACK implicitly ran. See bug #67462 */
+	if (!ret) {
+		dbh->in_txn = pgsql_handle_in_transaction(dbh TSRMLS_CC);
+	}
+
+	return ret;
 }
 
 static int pgsql_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	return pdo_pgsql_transaction_cmd("ROLLBACK", dbh TSRMLS_CC);
-}
-
-static int pgsql_handle_in_transaction(pdo_dbh_t *dbh TSRMLS_DC)
-{
-	pdo_pgsql_db_handle *H;
-
-	H = (pdo_pgsql_db_handle *)dbh->driver_data;
-
-	return PQtransactionStatus(H->server);
 }
 
 /* {{{ proto string PDO::pgsqlCopyFromArray(string $table_name , array $rows [, string $delimiter [, string $null_as ] [, string $fields])

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -208,7 +208,7 @@ static struct cal_entry_t cal_conversion_table[CAL_NUM_CALS] = {
 #define JEWISH_HEB_MONTH_NAME(year) ((monthsPerYear[((year)-1) % 19] == 13)?JewishMonthHebNameLeap:JewishMonthHebName)
 
 /* For jddayofweek */
-enum { CAL_DOW_DAYNO, CAL_DOW_SHORT, CAL_DOW_LONG };
+enum { CAL_DOW_DAYNO, CAL_DOW_LONG, CAL_DOW_SHORT };
 
 /* For jdmonthname */
 enum { CAL_MONTH_GREGORIAN_SHORT, CAL_MONTH_GREGORIAN_LONG,
@@ -696,10 +696,10 @@ PHP_FUNCTION(jddayofweek)
 	daynames = DayNameShort[day];
 
 	switch (mode) {
-	case CAL_DOW_SHORT:
+	case CAL_DOW_LONG:
 		RETURN_STRING(daynamel, 1);
 		break;
-	case CAL_DOW_LONG:
+	case CAL_DOW_SHORT:
 		RETURN_STRING(daynames, 1);
 		break;
 	case CAL_DOW_DAYNO:

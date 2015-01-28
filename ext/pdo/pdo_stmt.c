@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1141,7 +1141,6 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 						}
 						PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 #endif
-#if PHP_MAJOR_VERSION > 5 || PHP_MINOR_VERSION >= 1
 						if (!ce->unserialize) {
 							zval_ptr_dtor(&val);
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class" TSRMLS_CC);
@@ -1155,7 +1154,6 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 						} else {
 							zval_ptr_dtor(&val);
 						}
-#endif
 					}
 					break;
 				
@@ -1255,13 +1253,6 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, long mode, int fetch_all TSRML
 		flags = stmt->default_fetch_type & PDO_FETCH_FLAGS;
 		mode = stmt->default_fetch_type & ~PDO_FETCH_FLAGS;
 	}
-
-#if PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 1
-	if ((flags & PDO_FETCH_SERIALIZE) == PDO_FETCH_SERIALIZE) {
-		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "PDO::FETCH_SERIALIZE is not supported in this PHP version" TSRMLS_CC);
-		return 0;
-	}
-#endif
 
 	switch(mode) {
 	case PDO_FETCH_FUNC:

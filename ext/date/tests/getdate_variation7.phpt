@@ -61,7 +61,7 @@ array\(11\) {
   \["mday"\]=>
   int\((9|14|23)\)
   \["wday"\]=>
-  int\((6|-4)\)
+  int\(0\)
   \["mon"\]=>
   int\((10|12)\)
   \["year"\]=>
@@ -69,7 +69,7 @@ array\(11\) {
   \["yday"\]=>
   int\((282|347|295)\)
   \["weekday"\]=>
-  string\((8|7)\) "(Saturday|Unknown)"
+  string\(6\) "Sunday"
   \["month"\]=>
   string\((7|8)\) "(October|December)"
   \[0\]=>

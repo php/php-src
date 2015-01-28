@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -4619,14 +4619,14 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 			return FAILURE;
 		}
 
-		match = strcmp(cnmatch, buf) == 0;
+		match = strcasecmp(cnmatch, buf) == 0;
 		if (!match && strlen(buf) > 3 && buf[0] == '*' && buf[1] == '.') {
 			/* Try wildcard */
 
 			if (strchr(buf+2, '.')) {
 				char *tmp = strstr(cnmatch, buf+1);
 
-				match = tmp && strcmp(tmp, buf+2) && tmp == strchr(cnmatch, '.');
+				match = tmp && strcasecmp(tmp, buf+2) && tmp == strchr(cnmatch, '.');
 			}
 		}
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,6 +41,7 @@
 #include "php_streams_int.h"
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
+# include "win32/time.h"
 #endif
 
 #define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC TSRMLS_CC)
@@ -1031,12 +1032,8 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, ch
 
 static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
 {
-	char *p;
-
-	if ((p = strstr(url, "://")) != NULL) {
-		if (p < strchr(url, '/')) {
-			url = p + 3;
-		}
+	if (strncasecmp(url, "file://", sizeof("file://") - 1) == 0) {
+		url += sizeof("file://") - 1;
 	}
 
 	if (php_check_open_basedir_ex(url, (flags & PHP_STREAM_URL_STAT_QUIET) ? 0 : 1 TSRMLS_CC)) {
@@ -1061,13 +1058,10 @@ static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, in
 
 static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
 {
-	char *p;
 	int ret;
 
-	if ((p = strstr(url, "://")) != NULL) {
-		if (p < strchr(url, '/')) {
-			url = p + 3;
-		}
+	if (strncasecmp(url, "file://", sizeof("file://") - 1) == 0) {
+		url += sizeof("file://") - 1;
 	}
 
 	if (php_check_open_basedir(url TSRMLS_CC)) {
@@ -1090,7 +1084,6 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 
 static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC)
 {
-	char *p;
 	int ret;
 
 	if (!url_from || !url_to) {
@@ -1108,16 +1101,12 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 	}
 #endif
 
-	if ((p = strstr(url_from, "://")) != NULL) {
-		if (p < strchr(url_from, '/')) {
-			url_from = p + 3;
-		}
+	if (strncasecmp(url_from, "file://", sizeof("file://") - 1) == 0) {
+		url_from += sizeof("file://") - 1;
 	}
 
-	if ((p = strstr(url_to, "://")) != NULL) {
-		if (p < strchr(url_to, '/')) {
-			url_to = p + 3;
-		}
+	if (strncasecmp(url_to, "file://", sizeof("file://") - 1) == 0) {
+		url_to += sizeof("file://") - 1;
 	}
 
 	if (php_check_open_basedir(url_from TSRMLS_CC) || php_check_open_basedir(url_to TSRMLS_CC)) {
@@ -1182,10 +1171,8 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 	int ret, recursive = options & PHP_STREAM_MKDIR_RECURSIVE;
 	char *p;
 
-	if ((p = strstr(dir, "://")) != NULL) {
-		if (p < strchr(dir, '/')) {
-			dir = p + 3;
-		}
+	if (strncasecmp(dir, "file://", sizeof("file://") - 1) == 0) {
+		dir += sizeof("file://") - 1;
 	}
 
 	if (!recursive) {
@@ -1267,15 +1254,16 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 
 static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
 {
-#if PHP_WIN32
-	int url_len = strlen(url);
-#endif
+	if (strncasecmp(url, "file://", sizeof("file://") - 1) == 0) {
+		url += sizeof("file://") - 1;
+	}
+
 	if (php_check_open_basedir(url TSRMLS_CC)) {
 		return 0;
 	}
 
 #if PHP_WIN32
-	if (!php_win32_check_trailing_space(url, url_len)) {
+	if (!php_win32_check_trailing_space(url, (int)strlen(url))) {
 		php_error_docref1(NULL TSRMLS_CC, url, E_WARNING, "%s", strerror(ENOENT));
 		return 0;
 	}
@@ -1295,7 +1283,6 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int opt
 static int php_plain_files_metadata(php_stream_wrapper *wrapper, char *url, int option, void *value, php_stream_context *context TSRMLS_DC)
 {
 	struct utimbuf *newtime;
-	char *p;
 #if !defined(WINDOWS) && !defined(NETWARE)
 	uid_t uid;
 	gid_t gid;
@@ -1313,10 +1300,8 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, char *url, int 
 	}
 #endif
 
-	if ((p = strstr(url, "://")) != NULL) {
-		if (p < strchr(url, '/')) {
-			url = p + 3;
-		}
+	if (strncasecmp(url, "file://", sizeof("file://") - 1) == 0) {
+		url += sizeof("file://") - 1;
 	}
 
 	if (php_check_open_basedir(url TSRMLS_CC)) {

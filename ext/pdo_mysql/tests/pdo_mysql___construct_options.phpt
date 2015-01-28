@@ -50,6 +50,7 @@ MySQLPDOTest::skip();
 			PDO::MYSQL_ATTR_DIRECT_QUERY					=> 'PDO::MYSQL_ATTR_DIRECT_QUERY',
 
 			PDO::MYSQL_ATTR_INIT_COMMAND					=> 'PDO::MYSQL_ATTR_INIT_COMMAND',
+			PDO::ATTR_EMULATE_PREPARES						=> 'PDO::ATTR_EMULATE_PREPARES',
 		);
 
 		$defaults = array(
@@ -163,19 +164,10 @@ MySQLPDOTest::skip();
 ?>
 --EXPECTF--
 [003] [TODO][CHANGEREQUEST] Please, lets not ignore invalid options and bail out!
-[003a] Expecting default value for 'PDO::ATTR_EMULATE_PREPARES' of '1'/integer, getAttribute() reports setting ''/boolean
 [003a] Expecting default value for 'PDO::MYSQL_ATTR_INIT_COMMAND' of ''/string, getAttribute() reports setting ''/boolean
-
-Warning: PDO::getAttribute(): SQLSTATE[IM001]: Driver does not support this function: driver does not support that attribute in %s on line %d
-[010] [TODO][CHANGEREQUEST] ATTR_EMULATE_PREPARES should be on
-
-Warning: PDO::getAttribute(): SQLSTATE[IM001]: Driver does not support this function: driver does not support that attribute in %s on line %d
-
-Warning: PDO::getAttribute(): SQLSTATE[IM001]: Driver does not support this function: driver does not support that attribute in %s on line %d
 [015] PDO::ATTR_EMULATE_PREPARES should be on
 [016] PDO::MYSQL_ATTR_DIRECT_QUERY should be on
-
-Warning: PDO::getAttribute(): SQLSTATE[IM001]: Driver does not support this function: driver does not support that attribute in %s on line %d
+[017] PDO::ATTR_EMULATE_PREPARES should be off
 [018] PDO::MYSQL_ATTR_DIRECT_QUERY should be off
 [021] Execting '1'/boolean got ''/boolean' for options 'PDO::MYSQL_ATTR_LOCAL_INFILE'
 [023] Execting 'SET @a=1'/string got ''/boolean' for options 'PDO::MYSQL_ATTR_INIT_COMMAND'

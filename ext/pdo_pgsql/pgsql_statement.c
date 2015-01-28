@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -294,7 +294,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 							sizeof(Oid));
 				}
 				if (param->paramno >= 0) {
-					if (param->paramno > zend_hash_num_elements(stmt->bound_param_map)) {
+					if (param->paramno >= zend_hash_num_elements(stmt->bound_param_map)) {
 						pdo_pgsql_error_stmt(stmt, PGRES_FATAL_ERROR, "HY105");
 						return 0;
 					}
@@ -370,6 +370,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
             ((param->param_type & PDO_PARAM_INPUT_OUTPUT) != PDO_PARAM_INPUT_OUTPUT)) {
             SEPARATE_ZVAL(&param->parameter);
             param->param_type = PDO_PARAM_STR;
+			convert_to_boolean(param->parameter);
             ZVAL_STRINGL(param->parameter, Z_BVAL_P(param->parameter) ? "t" : "f", 1, 1);
         }
     }

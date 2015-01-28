@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -3631,10 +3631,10 @@ PHP_FUNCTION(pg_lo_export)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
-	if (lo_export(pgsql, oid, file_out)) {
-		RETURN_TRUE;
+	if (lo_export(pgsql, oid, file_out) == -1) {
+		RETURN_FALSE;
 	}
-	RETURN_FALSE;
+	RETURN_TRUE;
 }
 /* }}} */
 

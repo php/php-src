@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -203,8 +203,18 @@ PHPAPI struct lconv *localeconv_r(struct lconv *out)
 	tsrm_mutex_lock( locale_mutex );
 # endif
 
+#if defined(PHP_WIN32) && defined(ZTS)
+	{
+		/* Even with the enabled per thread locale, localeconv
+			won't check any locale change in the master thread. */
+		_locale_t cur = _get_current_locale();
+
+		res = cur->locinfo->lconv;
+	}
+#else
 	/* localeconv doesn't return an error condition */
 	res = localeconv();
+#endif
 
 	*out = *res;
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2015 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2140,6 +2140,12 @@ void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static 
 			if (!CG(active_class_entry)) {
 				zend_error(E_COMPILE_ERROR, "Cannot access self::class when no class scope is active");
 			}
+			if (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) {
+				constant_name.op_type = IS_CONST;
+				ZVAL_STRINGL(&constant_name.u.constant, "class", sizeof("class")-1, 1);
+				zend_do_fetch_constant(result, class_name, &constant_name, ZEND_RT, 1 TSRMLS_CC);
+				break;
+			}
 			zval_dtor(&class_name->u.constant);
 			class_name->op_type = IS_CONST;
 			ZVAL_STRINGL(&class_name->u.constant, CG(active_class_entry)->name, CG(active_class_entry)->name_length, 1);
@@ -3836,7 +3842,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint
 	if (!strncmp(mname, ZEND_CLONE_FUNC_NAME, mname_len)) {
 		ce->clone = fe; fe->common.fn_flags |= ZEND_ACC_CLONE;
 	} else if (!strncmp(mname, ZEND_CONSTRUCTOR_FUNC_NAME, mname_len)) {
-		if (ce->constructor) {
+		if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 			zend_error(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
 		}
 		ce->constructor = fe; fe->common.fn_flags |= ZEND_ACC_CTOR;
@@ -3861,7 +3867,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, uint
 		zend_str_tolower_copy(lowercase_name, ce->name, ce->name_length);
 		lowercase_name = (char*)zend_new_interned_string(lowercase_name, ce->name_length + 1, 1 TSRMLS_CC);
 		if (!memcmp(mname, lowercase_name, mname_len)) {
-			if (ce->constructor) {
+			if (ce->constructor && (!ce->parent || ce->constructor != ce->parent->constructor)) {
 				zend_error(E_COMPILE_ERROR, "%s has colliding constructor definitions coming from traits", ce->name);
 			}
 			ce->constructor = fe;
@@ -4116,7 +4122,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 
 					/* make sure that the trait method is not from a class mentioned in
 					 exclude_from_classes, for consistency */
-					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[i]) {
+					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[j]) {
 						zend_error(E_COMPILE_ERROR,
 								   "Inconsistent insteadof definition. "
 								   "The method %s is to be used from %s, but %s is also on the exclude list",

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2014 The PHP Group                                |
+  | Copyright (c) 2005-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -2139,8 +2139,8 @@ static zval *phar_rename_archive(phar_archive_data *phar, char *ext, zend_bool c
 	}
 its_ok:
 	if (SUCCESS == php_stream_stat_path(newpath, &ssb)) {
-		efree(oldpath);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0 TSRMLS_CC, "phar \"%s\" exists and must be unlinked prior to conversion", newpath);
+		efree(oldpath);
 		return NULL;
 	}
 	if (!phar->is_data) {

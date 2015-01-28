@@ -1,17 +1,211 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2014, PHP 5.5.19
+?? ??? 2015, PHP 5.5.22
+
+
+- Date:
+  . Fixed bug #45081 (strtotime incorrectly interprets SGT time zone). (Derick)
+  . Fixed bug #55407 (Impossible to prototype DateTime::createFromFormat).
+    (Derick, Felipe)
+
+- Dba:
+  . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
+
+- Fileinfo:
+  . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
+
+- FPM:
+  . Fixed bug #68571 (core dump when webserver close the socket).
+    (redfoxli069 at gmail dot com, Laruence)
+
+- OpenSSL:
+  . Fixed bug #55618 (use case-insensitive cert name matching).
+    (Daniel Lowrey)
+
+- PDO_mysql:
+  . Fixed bug #68750 (PDOMysql with mysqlnd does not allow the usage of
+    named pipes). (steffenb198@aol.com)
+
+- Phar:
+  . Fixed bug #68901 (use after free). (bugreports at internot dot info)
+
+- Sqlite3:
+  . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong 
+    required_num_args). (Julien)
+
+- Mysqli:
+  . Fixed bug #68114 (linker error on some OS X machines with fixed
+    width decimal support) (Keyur Govande)
+  . Fixed bug #68657 (Reading 4 byte floats with Mysqli and libmysqlclient
+    has rounding errors) (Keyur Govande)
+
+- Streams:
+  . Fixed bug which caused call after final close on streams filter. (Bob)
+
+22 Jan 2015, PHP 5.5.21
 
 - Core:
+  . Upgraded crypt_blowfish to version 1.3. (Leigh)
+  . Fixed bug #60704 (unlink() bug with some files path). 
+  . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
+  . Fixed bug #65576 (Constructor from trait conflicts with inherited
+    constructor). (dunglas at gmail dot com)
+  . Fixed bug #55541 (errors spawn MessageBox, which blocks test automation).
+    (Anatol)
+  . Fixed bug #68297 (Application Popup provides too few information). (Anatol)
+  . Fixed bug #65769 (localeconv() broken in TS builds). (Anatol)
+  . Fixed bug #65230 (setting locale randomly broken). (Anatol)
+  . Fixed bug #66764 (configure doesn't define EXPANDED_DATADIR / PHP_DATADIR
+    correctly). (Ferenc)
+  . Fixed bug #68583 (Crash in timeout thread). (Anatol)
+  . Fixed bug #68676 (Explicit Double Free). (Kalle)
+  . Fixed bug #68710 (Use After Free Vulnerability in PHP's unserialize()).
+    (CVE-2015-0231) (Stefan Esser)
+
+- CGI:
+  . Fixed bug #68618 (out of bounds read crashes php-cgi). (CVE-2014-9427)
+    (Stas)
+
+- CLI server:
+  . Fixed bug #68745 (Invalid HTTP requests make web server segfault). (Adam)
+
+- cURL:
+  . Fixed bug #67643 (curl_multi_getcontent returns '' when
+    CURLOPT_RETURNTRANSFER isn't set). (Jille Timmermans)
+
+- EXIF:
+  . Fixed bug #68799: Free called on unitialized pointer. (CVE-2015-0232) (Stas)
+
+- Fileinfo:
+  . Fixed bug #68671 (incorrect expression in libmagic).
+    (Joshua Rogers, Anatol Belski)
+  . Removed readelf.c and related code from libmagic sources
+    (Remi, Anatol)
+  . Fixed bug #68735 (fileinfo out-of-bounds memory access).
+    (Anatol)
+
+- FPM:
+  . Fixed bug #68751 (listen.allowed_clients is broken). (Remi)
+
+- GD:
+  . Fixed bug #68601 (buffer read overflow in gd_gif_in.c). (Jan Bee, Remi)
+
+- Mbstring:
+  . Fixed bug #68504 (--with-libmbfl configure option not present on Windows).
+    (Ashesh Vashi)
+
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
+
+- Opcache:
+  . Fixed bug #67111 (Memory leak when using "continue 2" inside two foreach
+    loops). (Nikita)
+
+- Pcntl:
+  . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
+    when setting SIG_DFL). (Julien)
+
+- PCRE:
+  . Fixed bug #66679 (Alignment Bug in PCRE 8.34 upstream).
+    (Rainer Jung, Anatol Belski)
+
+- pgsql:
+  . Fixed bug #68697 (lo_export return -1 on failure). (Ondřej Surý)
+
+- PDO:
+  . Fixed bug #68371 (PDO#getAttribute() cannot be called with platform-specific
+    attribute names). (Matteo)
+
+- PDO_mysql:
+  . Fixed bug #68424 (Add new PDO mysql connection attr to control multi
+    statements option). (peter dot wolanin at acquia dot com)
+
+- SPL:
+  . Fixed bug #66405 (RecursiveDirectoryIterator::CURRENT_AS_PATHNAME
+    breaks the RecursiveIterator). (Paul Garvin)
+  . Fixed bug #65213 (cannot cast SplFileInfo to boolean) (Tjerk)
+  . Fixed bug #68479 (Added escape parameter to SplFileObject::fputcsv). (Salathe)
+
+- SQLite:
+  . Fixed bug #68120 (Update bundled libsqlite to 3.8.7.2). (Anatol)
+
+- Streams:
+  . Fixed bug #68532 (convert.base64-encode omits padding bytes).
+    (blaesius at krumedia dot de)
+
+18 Dec 2014, PHP 5.5.20
+
+- Core:
+  . Fixed bug #68091 (Some Zend headers lack appropriate extern "C" blocks).
+    (Adam)
+  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly 
+    triggered). (Julien)
+  . Fixed bug #68370 ("unset($this)" can make the program crash). (Laruence)
+  . Fixed bug #68545 (NULL pointer dereference in unserialize.c). (Anatol)
+  . Fixed bug #68594 (Use after free vulnerability in unserialize()).
+    (CVE-2014-8142) (Stefan Esser)
+
+- Date:
+  . Fixed day_of_week function as it could sometimes return negative values
+    internally. (Derick)
+
+- FPM:
+  . Fixed bug #68381 (fpm_unix_init_main ignores log_level).
+    (David Zuelke, Remi)
+  . Fixed bug #68420 (listen=9000 listens to ipv6 localhost instead of all
+    addresses). (Remi)
+  . Fixed bug #68421 (access.format='%R' doesn't log ipv6 address). (Remi)
+  . Fixed bug #68423 (PHP-FPM will no longer load all pools). (Remi)
+  . Fixed bug #68428 (listen.allowed_clients is IPv4 only). (Remi)
+  . Fixed bug #68452 (php-fpm man page is oudated). (Remi)
+  . Fixed request #68458 (Change pm.start_servers default warning to
+    notice). (David Zuelke, Remi)
+  . Fixed bug #68463 (listen.allowed_clients can silently result
+    in no allowed access). (Remi)
+  . Fixed request #68391 (php-fpm conf files loading order).
+    (Florian Margaine, Remi)
+  . Fixed bug #68478 (access.log don't use prefix). (Remi)
+
+- Mcrypt:
+  . Fixed possible read after end of buffer and use after free. (Dmitry)
+
+- PDO_pgsql:
+  . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
+  . Fixed bug #67462 (PDO_PGSQL::beginTransaction() wrongly throws exception
+  when not in transaction) (Matteo)
+  . Fixed bug #68351 (PDO::PARAM_BOOL and ATTR_EMULATE_PREPARES misbehaving)
+  (Matteo)
+
+- zlib:
+  . Fixed bug #53829 (Compiling PHP with large file support will replace
+    function gzopen by gzopen64) (Sascha Kettler, Matteo)
+
+13 Nov 2014, PHP 5.5.19
+
+- Core:
+  . Fixed bug #68095 (AddressSanitizer reports a heap buffer overflow in 
+    php_getopt()). (Stas)
   . Fixed bug #68118 ($a->foo .= 'test'; can leave $a->foo undefined). (Nikita)
   . Fixed bug #68129 (parse_url() - incomplete support for empty usernames
     and passwords) (Tjerk)
+  . Fixed bug #68365 (zend_mm_heap corrupted after memory overflow in
+    zend_hash_copy). (Dmitry)
+
+- CURL:
+  . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
+    CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
 
 - Fileinfo:
   . Fixed bug #66242 (libmagic: don't assume char is signed). (ArdB)
+  . Fixed bug #68283 (fileinfo: out-of-bounds read in elf note headers).
+    (CVE-2014-3710) (Remi)
 
 - GD:
   . Fixed bug #65171 (imagescale() fails without height param). (Remi)
+
+- GMP:
+  . Fixed bug #63595 (GMP memory management conflicts with other libraries
+    using GMP). (Remi)
 
 - Mysqli:
   . Fixed bug #68114 (linker error on some OS X machines with fixed width
@@ -21,12 +215,12 @@ PHP                                                                        NEWS
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
 
+- SOAP:
+  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
+    (Laruence)
+
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
-
-- CURL:
-  . Add CURL_SSLVERSION_TLSv1_0, CURL_SSLVERSION_TLSv1_1, and 
-    CURL_SSLVERSION_TLSv1_2 constants if supported by libcurl (Rasmus)
 
 16 Oct 2014, PHP 5.5.18
 
@@ -227,6 +421,9 @@ PHP                                                                        NEWS
     (Francisco Alonso, Jan Kaluza, Remi)
   . Fixed bug #67413 (fileinfo: cdf_read_property_info insufficient boundary
     check). (Francisco Alonso, Jan Kaluza, Remi)
+
+- LiteSpeed:
+  . Updated LiteSpeed SAPI code from V5.5 to V6.6 (George Wang)
 
 - Network:
   . Fixed bug #67432 (Fix potential segfault in dns_get_record()).

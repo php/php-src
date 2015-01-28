@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -244,12 +244,15 @@ PHP_FUNCTION(curl_multi_getcontent)
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &z_ch, -1, le_curl_name, le_curl);
 
-	if (ch->handlers->write->method == PHP_CURL_RETURN && ch->handlers->write->buf.len > 0) {
+	if (ch->handlers->write->method == PHP_CURL_RETURN) {
+		if (ch->handlers->write->buf.len == 0) {
+			RETURN_EMPTY_STRING();
+		}
 		smart_str_0(&ch->handlers->write->buf);
 		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 1);
 	}
 
-        RETURN_EMPTY_STRING();
+	RETURN_NULL();
 }
 /* }}} */
 

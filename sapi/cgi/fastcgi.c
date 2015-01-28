@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1321,6 +1321,7 @@ int fcgi_flush(fcgi_request *req, int close)
 
 	if (safe_write(req, req->out_buf, len) != len) {
 		req->keep = 0;
+		req->out_pos = req->out_buf;
 		return 0;
 	}
 

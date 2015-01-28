@@ -2,6 +2,11 @@
 Bug #67052 - NumberFormatter::parse() resets LC_NUMERIC setting
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+  die("skip Valid only on non Windows");
+}
+?>
 --FILE--
 <?php
 

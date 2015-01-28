@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2014 The PHP Group                                |
+  | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -172,8 +172,9 @@ enum {
 	PDO_MYSQL_ATTR_SSL_CAPATH,
 	PDO_MYSQL_ATTR_SSL_CIPHER,
 #if MYSQL_VERSION_ID > 50605 || defined(PDO_USE_MYSQLND)
-	PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY
+	PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY,
 #endif
+	PDO_MYSQL_ATTR_MULTI_STATEMENTS,
 };
 
 #endif

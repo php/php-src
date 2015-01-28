@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -619,8 +619,11 @@ PHP_FUNCTION(mcrypt_generic_init)
 
 	if (iv_len != iv_size) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Iv size incorrect; supplied length: %d, needed: %d", iv_len, iv_size);
+		if (iv_len > iv_size) {
+			iv_len = iv_size;
+		}
 	}
-	memcpy(iv_s, iv, iv_size);
+	memcpy(iv_s, iv, iv_len);
 
 	mcrypt_generic_deinit(pm->td);
 	result = mcrypt_generic_init(pm->td, key_s, key_size, iv_s);
@@ -641,8 +644,9 @@ PHP_FUNCTION(mcrypt_generic_init)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown error");
 				break;
 		}
+	} else {
+		pm->init = 1;
 	}
-	pm->init = 1;
 	RETVAL_LONG(result);
 
 	efree(iv_s);

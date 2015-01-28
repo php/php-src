@@ -381,7 +381,7 @@ static inline void del_source(zend_code_block *from, zend_code_block *to)
 		return;
 	}
 
-	if (to->sources->next == NULL) {
+	if (!to->protected && to->sources->next == NULL) {
 		/* source to only one block */
 		zend_code_block *from_block = to->sources->from;
 

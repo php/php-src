@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2014 The PHP Group                                |
+   | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,18 @@
 #include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
 #include "php_zlib.h"
+
+/*
+ * zlib include files can define the following preprocessor defines which rename
+ * the corresponding PHP functions to gzopen64, gzseek64 and gztell64 and thereby
+ * breaking some software, most notably PEAR's Archive_Tar, which halts execution
+ * without error message on gzip compressed archivesa.
+ *
+ * This only seems to happen on 32bit systems with large file support.
+ */
+#undef gzopen
+#undef gzseek
+#undef gztell
 
 ZEND_DECLARE_MODULE_GLOBALS(zlib);
 
