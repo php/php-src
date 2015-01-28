@@ -69,9 +69,8 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
 		/* special puprose variable to keep HashTable* on VM stack */
 		if (opline->opcode == ZEND_OP_DATA &&
 		    (opline-1)->opcode == ZEND_FE_FETCH_RW &&
-		    (opline-2)->opcode == ZEND_FE_RESET_RW &&
 		    opline->op1_type == IS_TMP_VAR) {
-			start_of_T[VAR_NUM(ZEND_OP1(opline).var) - offset] = opline - 2;
+			start_of_T[VAR_NUM(ZEND_OP1(opline).var) - offset] = opline;
 		}
 		opline--;
 	}
@@ -85,13 +84,21 @@ void optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_ctx *c
     while (opline >= end) {
 		if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_TMP_VAR))) {
 
-			currT = VAR_NUM(ZEND_OP1(opline).var) - offset;
-			if (!valid_T[currT]) {
-				GET_AVAILABLE_T();
-				map_T[currT] = i;
-				valid_T[currT] = 1;
+			/* special puprose variable to keep HashPointer on VM stack */
+			if (opline->opcode == ZEND_OP_DATA &&
+			    (opline-1)->opcode == ZEND_FE_FETCH_RW &&
+				opline->op1_type == IS_TMP_VAR) {
+				max++;
+				ZEND_OP1(opline).var = NUM_VAR(max + offset);
+			} else {
+				currT = VAR_NUM(ZEND_OP1(opline).var) - offset;
+				if (!valid_T[currT]) {
+					GET_AVAILABLE_T();
+					map_T[currT] = i;
+					valid_T[currT] = 1;
+				}
+				ZEND_OP1(opline).var = NUM_VAR(map_T[currT] + offset);
 			}
-			ZEND_OP1(opline).var = NUM_VAR(map_T[currT] + offset);
 		}
 
 		/* Skip OP_DATA */
