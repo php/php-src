@@ -2943,6 +2943,24 @@ ZEND_VM_C_LABEL(fcall_end):
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	if (OP1_TYPE == IS_UNUSED) {
+		zend_verify_missing_return_type(EX(func));
+	} else {
+		zval *retval_ptr;
+		zend_free_op free_op1;
+
+		retval_ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+		zend_verify_return_type(EX(func), retval_ptr);
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE

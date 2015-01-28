@@ -194,21 +194,27 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 	}
 
 	if (op_array->arg_info) {
-		uint32_t i, num_args;
+		zend_arg_info *arg_info = op_array->arg_info;
+		uint32_t num_args = op_array->num_args;
+		uint32_t i;
 
 		num_args = op_array->num_args;
 		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}
+		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			arg_info--;
+			num_args++;
+		}
 		ADD_DUP_SIZE(op_array->arg_info, sizeof(zend_arg_info) * num_args);
+		ADD_DUP_SIZE(arg_info, sizeof(zend_arg_info) * num_args);
 		for (i = 0; i < num_args; i++) {
-			if (op_array->arg_info[i].name) {
-				ADD_INTERNED_STRING(op_array->arg_info[i].name, 1);
+			if (arg_info[i].name) {
+				ADD_INTERNED_STRING(arg_info[i].name, 1);
 			}
-			if (op_array->arg_info[i].class_name) {
-				ADD_INTERNED_STRING(op_array->arg_info[i].class_name, 1);
+			if (arg_info[i].class_name) {
+				ADD_INTERNED_STRING(arg_info[i].class_name, 1);
 			}
-
 		}
 	}
 
