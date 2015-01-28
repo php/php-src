@@ -512,11 +512,8 @@ static void php_session_initialize(void) /* {{{ */
 		}
 	}
 
-	/* Set session ID for compatibility for older/3rd party save handlers */
-	if (!PS(use_strict_mode)) {
-		php_session_reset_id();
-		PS(session_status) = php_session_active;
-	}
+	php_session_reset_id();
+	PS(session_status) = php_session_active;
 
 	/* Read data */
 	php_session_track_init();
@@ -526,11 +523,6 @@ static void php_session_initialize(void) /* {{{ */
 		/*
 		php_error_docref(NULL, E_NOTICE, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
 		*/
-	}
-	/* Set session ID if session read didn't activated session */
-	if (PS(use_strict_mode) && PS(session_status) != php_session_active) {
-		php_session_reset_id();
-		PS(session_status) = php_session_active;
 	}
 	if (PS(session_vars)) {
 		zend_string_release(PS(session_vars));
