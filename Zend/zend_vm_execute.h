@@ -3120,11 +3120,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 	SAVE_OPLINE();
 
 	if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
-		array_ref = NULL;
-		ZVAL_MAKE_REF(array_ref);
-		array_ptr = Z_REFVAL_P(array_ref);
-		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
-			SEPARATE_ARRAY(array_ptr);
+		array_ref = array_ptr = NULL;
+		if (Z_ISREF_P(array_ref)) {
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 	} else {
 		array_ref = array_ptr = EX_CONSTANT(opline->op1);
@@ -3195,12 +3193,25 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 		HashPosition pos = 0;
 		Bucket *p;
 
-		if (IS_CONST != IS_TMP_VAR) {
-			if (Z_REFCOUNTED_P(array_ref)) {
-				Z_ADDREF_P(array_ref);
+		if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
+			if (array_ptr == array_ref) {
+				ZVAL_NEW_REF(array_ref, array_ref);
+				array_ptr = Z_REFVAL_P(array_ref);
 			}
+			Z_ADDREF_P(array_ref);
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
+		} else {
+			array_ptr = EX_VAR(opline->result.var);
+			ZVAL_COPY_VALUE(array_ptr, array_ref);
 		}
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
+		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
+			if (IS_CONST == IS_CONST) {
+				zval_copy_ctor_func(array_ptr);
+			} else {
+				SEPARATE_ARRAY(array_ptr);
+			}
+			fe_ht = Z_ARRVAL_P(array_ptr);
+		}
 		while (1) {
 			if (pos >= fe_ht->nNumUsed) {
 
@@ -9043,11 +9054,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	SAVE_OPLINE();
 
 	if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
-		array_ref = NULL;
-		ZVAL_MAKE_REF(array_ref);
-		array_ptr = Z_REFVAL_P(array_ref);
-		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
-			SEPARATE_ARRAY(array_ptr);
+		array_ref = array_ptr = NULL;
+		if (Z_ISREF_P(array_ref)) {
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 	} else {
 		array_ref = array_ptr = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
@@ -9118,12 +9127,25 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 		HashPosition pos = 0;
 		Bucket *p;
 
-		if (IS_TMP_VAR != IS_TMP_VAR) {
-			if (Z_REFCOUNTED_P(array_ref)) {
-				Z_ADDREF_P(array_ref);
+		if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
+			if (array_ptr == array_ref) {
+				ZVAL_NEW_REF(array_ref, array_ref);
+				array_ptr = Z_REFVAL_P(array_ref);
 			}
+			Z_ADDREF_P(array_ref);
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
+		} else {
+			array_ptr = EX_VAR(opline->result.var);
+			ZVAL_COPY_VALUE(array_ptr, array_ref);
 		}
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
+		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
+			if (IS_TMP_VAR == IS_CONST) {
+				zval_copy_ctor_func(array_ptr);
+			} else {
+				SEPARATE_ARRAY(array_ptr);
+			}
+			fe_ht = Z_ARRVAL_P(array_ptr);
+		}
 		while (1) {
 			if (pos >= fe_ht->nNumUsed) {
 
@@ -11868,11 +11890,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 	SAVE_OPLINE();
 
 	if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
-		array_ref = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
-		ZVAL_MAKE_REF(array_ref);
-		array_ptr = Z_REFVAL_P(array_ref);
-		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
-			SEPARATE_ARRAY(array_ptr);
+		array_ref = array_ptr = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1);
+		if (Z_ISREF_P(array_ref)) {
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 	} else {
 		array_ref = array_ptr = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -11943,12 +11963,25 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 		HashPosition pos = 0;
 		Bucket *p;
 
-		if (IS_VAR != IS_TMP_VAR) {
-			if (Z_REFCOUNTED_P(array_ref)) {
-				Z_ADDREF_P(array_ref);
+		if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
+			if (array_ptr == array_ref) {
+				ZVAL_NEW_REF(array_ref, array_ref);
+				array_ptr = Z_REFVAL_P(array_ref);
 			}
+			Z_ADDREF_P(array_ref);
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
+		} else {
+			array_ptr = EX_VAR(opline->result.var);
+			ZVAL_COPY_VALUE(array_ptr, array_ref);
 		}
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
+		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
+			if (IS_VAR == IS_CONST) {
+				zval_copy_ctor_func(array_ptr);
+			} else {
+				SEPARATE_ARRAY(array_ptr);
+			}
+			fe_ht = Z_ARRVAL_P(array_ptr);
+		}
 		while (1) {
 			if (pos >= fe_ht->nNumUsed) {
 				if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
@@ -24266,11 +24299,9 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	SAVE_OPLINE();
 
 	if (IS_CV == IS_VAR || IS_CV == IS_CV) {
-		array_ref = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
-		ZVAL_MAKE_REF(array_ref);
-		array_ptr = Z_REFVAL_P(array_ref);
-		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
-			SEPARATE_ARRAY(array_ptr);
+		array_ref = array_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+		if (Z_ISREF_P(array_ref)) {
+			array_ptr = Z_REFVAL_P(array_ref);
 		}
 	} else {
 		array_ref = array_ptr = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
@@ -24341,12 +24372,25 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 		HashPosition pos = 0;
 		Bucket *p;
 
-		if (IS_CV != IS_TMP_VAR) {
-			if (Z_REFCOUNTED_P(array_ref)) {
-				Z_ADDREF_P(array_ref);
+		if (IS_CV == IS_VAR || IS_CV == IS_CV) {
+			if (array_ptr == array_ref) {
+				ZVAL_NEW_REF(array_ref, array_ref);
+				array_ptr = Z_REFVAL_P(array_ref);
 			}
+			Z_ADDREF_P(array_ref);
+			ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
+		} else {
+			array_ptr = EX_VAR(opline->result.var);
+			ZVAL_COPY_VALUE(array_ptr, array_ref);
 		}
-		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
+		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
+			if (IS_CV == IS_CONST) {
+				zval_copy_ctor_func(array_ptr);
+			} else {
+				SEPARATE_ARRAY(array_ptr);
+			}
+			fe_ht = Z_ARRVAL_P(array_ptr);
+		}
 		while (1) {
 			if (pos >= fe_ht->nNumUsed) {
 
