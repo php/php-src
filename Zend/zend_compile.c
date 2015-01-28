@@ -436,14 +436,6 @@ static int zend_add_const_name_literal(zend_op_array *op_array, zend_string *nam
 		op.constant = zend_add_literal(CG(active_op_array), &_c); \
 	} while (0)
 
-#define MAKE_NOP(opline) do { \
-	opline->opcode = ZEND_NOP; \
-	memset(&opline->result, 0, sizeof(opline->result)); \
-	memset(&opline->op1, 0, sizeof(opline->op1)); \
-	memset(&opline->op2, 0, sizeof(opline->op2)); \
-	opline->result_type = opline->op1_type = opline->op2_type = IS_UNUSED; \
-} while (0)
-
 void zend_stop_lexing(void) {
 	LANG_SCNG(yy_cursor) = LANG_SCNG(yy_limit);
 }
@@ -1040,7 +1032,7 @@ void zend_do_early_binding(void) /* {{{ */
 				if (((ce = zend_lookup_class(Z_STR_P(parent_name))) == NULL) ||
 				    ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) &&
 				     (ce->type == ZEND_INTERNAL_CLASS))) {
-				    if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
+					if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
 						uint32_t *opline_num = &CG(active_op_array)->early_binding;
 
 						while (*opline_num != (uint32_t)-1) {
@@ -1829,10 +1821,24 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 }
 /* }}} */
 
+
+static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info) /* {{{ */
+{
+	if (return_info->type_hint != IS_UNDEF) {
+		zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
+	}
+}
+/* }}} */
+
+
 void zend_emit_final_return(zval *zv) /* {{{ */
 {
 	znode zn;
 	zend_bool returns_reference = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		zend_emit_return_type_check(NULL, CG(active_op_array)->arg_info - 1);
+	}
 
 	zn.op_type = IS_CONST;
 	if (zv) {
@@ -3119,6 +3125,7 @@ static void zend_free_foreach_and_switch_variables(void) /* {{{ */
 }
 /* }}} */
 
+
 void zend_compile_return(zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
@@ -3144,6 +3151,12 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 		opline->op1.var = CG(context).fast_call_var;
 	}
 
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		zend_emit_return_type_check(&expr_node, CG(active_op_array)->arg_info - 1);
+		if (expr_node.op_type == IS_CONST) {
+			zval_copy_ctor(&expr_node.u.constant);
+		}
+	}
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
 		&expr_node, NULL);
 
@@ -3780,18 +3793,51 @@ void zend_compile_stmt_list(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_params(zend_ast *ast) /* {{{ */
+void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_method) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	uint32_t i;
 	zend_op_array *op_array = CG(active_op_array);
 	zend_arg_info *arg_infos;
+	
+	if (return_type_ast) {
+		/* Use op_array->arg_info[-1] for return type hinting */
+		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children + 1, 0);
+		arg_infos->name = NULL;
+		arg_infos->pass_by_reference = (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+		arg_infos->is_variadic = 0;
+		arg_infos->type_hint = 0;
+		arg_infos->allow_null = 0;
+		arg_infos->class_name = NULL;
 
-	if (list->children == 0) {
-		return;
+		if (return_type_ast->kind == ZEND_AST_TYPE) {
+			arg_infos->type_hint = return_type_ast->attr;
+		} else {
+			zend_string *class_name = zend_ast_get_str(return_type_ast);
+
+			if (zend_is_const_default_class_ref(return_type_ast)) {
+				class_name = zend_resolve_class_name_ast(return_type_ast);
+			} else {
+				zend_string_addref(class_name);
+				if (!is_method) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare a return type of %s outside of a class scope", class_name->val);
+					return;
+				}
+			}
+
+			arg_infos->type_hint = IS_OBJECT;
+			arg_infos->class_name = class_name;
+		}
+
+		arg_infos++;
+		op_array->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
+	} else {
+		if (list->children == 0) {
+			return;
+		}
+		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children, 0);
 	}
 
-	arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children, 0);
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *param_ast = list->child[i];
 		zend_ast *type_ast = param_ast->child[0];
@@ -4164,6 +4210,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *params_ast = decl->child[0];
 	zend_ast *uses_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
+	zend_ast *return_type_ast = decl->child[3];
 	zend_bool is_method = decl->kind == ZEND_AST_METHOD;
 
 	zend_op_array *orig_op_array = CG(active_op_array);
@@ -4207,7 +4254,7 @@ void zend_compile_func_decl(znode *result, zend_ast *ast) /* {{{ */
 		zend_stack_push(&CG(loop_var_stack), (void *) &dummy_var);
 	}
 
-	zend_compile_params(params_ast);
+	zend_compile_params(params_ast, return_type_ast, is_method);
 	if (uses_ast) {
 		zend_compile_closure_uses(uses_ast);
 	}
@@ -4585,11 +4632,20 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			zend_error_noreturn(E_COMPILE_ERROR, "Constructor %s::%s() cannot be static",
 				ce->name->val, ce->constructor->common.function_name->val);
 		}
+		if (ce->constructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Constructor %s::%s() cannot declare a return type",
+				ce->name->val, ce->constructor->common.function_name->val);
+		}
 	}
 	if (ce->destructor) {
 		ce->destructor->common.fn_flags |= ZEND_ACC_DTOR;
 		if (ce->destructor->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Destructor %s::%s() cannot be static",
+				ce->name->val, ce->destructor->common.function_name->val);
+		} else if (ce->destructor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Destructor %s::%s() cannot declare a return type",
 				ce->name->val, ce->destructor->common.function_name->val);
 		}
 	}
@@ -4597,6 +4653,10 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		ce->clone->common.fn_flags |= ZEND_ACC_CLONE;
 		if (ce->clone->common.fn_flags & ZEND_ACC_STATIC) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Clone method %s::%s() cannot be static",
+				ce->name->val, ce->clone->common.function_name->val);
+		} else if (ce->clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"%s::%s() cannot declare a return type",
 				ce->name->val, ce->clone->common.function_name->val);
 		}
 	}
@@ -5434,6 +5494,21 @@ void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 	if (!CG(active_op_array)->function_name) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"The \"yield\" expression can only be used inside a function");
+	}
+	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		const char *msg = "Generators may only declare a return type of Generator, Iterator or Traversable, %s is not permitted";
+		if (!CG(active_op_array)->arg_info[-1].class_name) {
+			zend_error_noreturn(E_COMPILE_ERROR, msg,
+				zend_get_type_by_const(CG(active_op_array)->arg_info[-1].type_hint));
+		}
+		if (!(CG(active_op_array)->arg_info[-1].class_name->len == sizeof("Traversable")-1
+				&& zend_binary_strcasecmp(CG(active_op_array)->arg_info[-1].class_name->val, sizeof("Traversable")-1, "Traversable", sizeof("Traversable")-1) == 0) &&
+			!(CG(active_op_array)->arg_info[-1].class_name->len == sizeof("Iterator")-1
+				&& zend_binary_strcasecmp(CG(active_op_array)->arg_info[-1].class_name->val, sizeof("Iterator")-1, "Iterator", sizeof("Iterator")-1) == 0) &&
+			!(CG(active_op_array)->arg_info[-1].class_name->len == sizeof("Generator")-1
+				&& zend_binary_strcasecmp(CG(active_op_array)->arg_info[-1].class_name->val, sizeof("Generator")-1, "Generator", sizeof("Generator")-1) == 0)) {
+			zend_error_noreturn(E_COMPILE_ERROR, msg, CG(active_op_array)->arg_info[-1].class_name->val);
+		}
 	}
 
 	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;

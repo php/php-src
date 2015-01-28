@@ -35,6 +35,14 @@
 
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
+#define MAKE_NOP(opline) do { \
+	opline->opcode = ZEND_NOP; \
+	memset(&opline->result, 0, sizeof(opline->result)); \
+	memset(&opline->op1, 0, sizeof(opline->op1)); \
+	memset(&opline->op2, 0, sizeof(opline->op2)); \
+	opline->result_type = opline->op1_type = opline->op2_type = IS_UNUSED; \
+} while (0)
+
 #define RESET_DOC_COMMENT() do { \
 	if (CG(doc_comment)) { \
 		zend_string_release(CG(doc_comment)); \
@@ -243,6 +251,9 @@ typedef struct _zend_try_catch_element {
 /* internal function is allocated at arena */
 #define ZEND_ACC_ARENA_ALLOCATED		0x20000000
 
+/* Function has a return type hint (or class has such non-private function) */
+#define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
+
 #define ZEND_CE_IS_TRAIT(ce) (((ce)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)
 
 char *zend_visibility_string(uint32_t fn_flags);
@@ -288,13 +299,14 @@ typedef struct _zend_arg_info {
 /* the following structure repeats the layout of zend_internal_arg_info,
  * but its fields have different meaning. It's used as the first element of
  * arg_info array to define properties of internal functions.
+ * It's also used for return type hinting.
  */
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
-	const char *_class_name;
-	zend_uchar _type_hint;
+	const char *class_name;
+	zend_uchar type_hint;
 	zend_bool return_reference;
-	zend_bool _allow_null;
+	zend_bool allow_null;
 	zend_bool _is_variadic;
 } zend_internal_function_info;
 
