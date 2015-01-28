@@ -46,7 +46,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20080721
+#define PDO_DRIVER_API	20150127
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
