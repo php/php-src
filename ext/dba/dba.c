@@ -554,13 +554,12 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	size_t val_len;
 	zval *id;
 	dba_info *info = NULL;
-	int ac = ZEND_NUM_ARGS();
 	zval *key;
 	char *val;
 	char *key_str, *key_free;
 	size_t key_len;
 
-	if (zend_parse_parameters(ac, "zsr", &key, &val, &val_len, &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zsr", &key, &val, &val_len, &id) == FAILURE) {
 		return;
 	}
 

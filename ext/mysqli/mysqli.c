@@ -1050,36 +1050,19 @@ PHP_FUNCTION(mysqli_stmt_construct)
 	zval				*mysql_link;
 	MY_STMT				*stmt;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	char				*statement;
-	size_t					statement_len;
+	char				*statement = NULL;
+	size_t				 statement_len;
 
-	switch (ZEND_NUM_ARGS())
-	{
-		case 1:  /* mysql_stmt_init */
-			if (zend_parse_parameters(1, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
-				return;
-			}
-			MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|s", &mysql_link, mysqli_link_class_entry, &statement, &statement_len)==FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
+	stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
+	stmt->stmt = mysql_stmt_init(mysql->mysql);
 
-			stmt->stmt = mysql_stmt_init(mysql->mysql);
-		break;
-		case 2:
-			if (zend_parse_parameters(2, "Os", &mysql_link, mysqli_link_class_entry, &statement, &statement_len)==FAILURE) {
-				return;
-			}
-			MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
-
-			stmt = (MY_STMT *)ecalloc(1,sizeof(MY_STMT));
-
-			if ((stmt->stmt = mysql_stmt_init(mysql->mysql))) {
-				mysql_stmt_prepare(stmt->stmt, (char *)statement, statement_len);
-			}
-		break;
-		default:
-			WRONG_PARAM_COUNT;
-		break;
+	if(statement != NULL && stmt->stmt) {
+		mysql_stmt_prepare(stmt->stmt, (char *)statement, statement_len);
 	}
 
 	if (!stmt->stmt) {
@@ -1092,7 +1075,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
-	mysqli_resource->status = (ZEND_NUM_ARGS() == 1) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
+	mysqli_resource->status = (statement == NULL) ? MYSQLI_STATUS_INITIALIZED : MYSQLI_STATUS_VALID;
 
 	MYSQLI_REGISTER_RESOURCE_EX(mysqli_resource, getThis());
 }
@@ -1111,19 +1094,8 @@ PHP_FUNCTION(mysqli_result_construct)
 	MYSQLI_RESOURCE		*mysqli_resource;
 	zend_long				resmode = MYSQLI_STORE_RESULT;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_parse_parameters(1, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
-				return;
-			}
-			break;
-		case 2:
-			if (zend_parse_parameters(2, "Ol", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
-				return;
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
+		return;
 	}
 
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);

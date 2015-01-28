@@ -629,7 +629,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
 	zval *link, *base_dn, *filter, *attrs = NULL, *attr;
-	zend_long attrsonly, sizelimit, timelimit, deref;
+	zend_long attrsonly = 0, sizelimit = -1, timelimit = -1, deref = -1;
 	char *ldap_base_dn = NULL, *ldap_filter = NULL, **ldap_attrs = NULL;
 	ldap_linkdata *ld = NULL;
 	LDAPMessage *ldap_res;
@@ -653,6 +653,8 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 		case 5:
 			ldap_attrsonly = attrsonly;
 		case 4:
+			if(attrs == NULL) break;
+
 			num_attribs = zend_hash_num_elements(Z_ARRVAL_P(attrs));
 			ldap_attrs = safe_emalloc((num_attribs+1), sizeof(char *), 0);
 
@@ -2201,7 +2203,7 @@ PHP_FUNCTION(ldap_set_option)
    Extract information from result */
 PHP_FUNCTION(ldap_parse_result)
 {
-	zval *link, *result, *errcode, *matcheddn, *errmsg, *referrals;
+	zval *link, *result, *errcode, *matcheddn = NULL, *errmsg = NULL, *referrals = NULL;
 	ldap_linkdata *ld;
 	LDAPMessage *ldap_result;
 	char **lreferrals, **refp;

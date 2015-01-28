@@ -757,7 +757,7 @@ PHP_FUNCTION(pcntl_exec)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (args != NULL) {
 		/* Build argument list */
 		args_hash = HASH_OF(args);
 		argc = zend_hash_num_elements(args_hash);
@@ -779,7 +779,7 @@ PHP_FUNCTION(pcntl_exec)
 		*(argv+1) = NULL;
 	}
 
-	if ( ZEND_NUM_ARGS() == 3 ) {
+	if ( envs != NULL ) {
 		/* Build environment pair list */
 		envs_hash = HASH_OF(envs);
 		envc = zend_hash_num_elements(envs_hash);

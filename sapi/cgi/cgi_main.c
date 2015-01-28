@@ -1492,9 +1492,9 @@ static PHP_MINFO_FUNCTION(cgi)
 
 PHP_FUNCTION(apache_child_terminate) /* {{{ */
 {
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
-	}
+    if (zend_parse_parameters_none() == FAILURE) {
+            RETURN_FALSE;
+    }
 	if (fcgi_is_fastcgi()) {
 		fcgi_terminate();
 	}
@@ -1551,9 +1551,9 @@ static void add_request_header(char *var, unsigned int var_len, char *val, unsig
 
 PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
-	if (ZEND_NUM_ARGS() > 0) {
-		WRONG_PARAM_COUNT;
-	}
+    if (zend_parse_parameters_none() == FAILURE) {
+            RETURN_FALSE;
+    }
 	array_init(return_value);
 	if (fcgi_is_fastcgi()) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);

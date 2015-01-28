@@ -259,17 +259,16 @@ PHP_FUNCTION(assert_options)
 	zval *value = NULL;
 	zend_long what;
 	zend_bool oldint;
-	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
-	if (zend_parse_parameters(ac, "l|z", &what, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|z", &what, &value) == FAILURE) {
 		return;
 	}
 
 	switch (what) {
 	case ASSERT_ACTIVE:
 		oldint = ASSERTG(active);
-		if (ac == 2) {
+		if (value != NULL) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.active", sizeof("assert.active")-1, 0);
 			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
@@ -281,7 +280,7 @@ PHP_FUNCTION(assert_options)
 
 	case ASSERT_BAIL:
 		oldint = ASSERTG(bail);
-		if (ac == 2) {
+		if (value != NULL) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.bail", sizeof("assert.bail")-1, 0);
 			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
@@ -293,7 +292,7 @@ PHP_FUNCTION(assert_options)
 
 	case ASSERT_QUIET_EVAL:
 		oldint = ASSERTG(quiet_eval);
-		if (ac == 2) {
+		if (value != NULL) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.quiet_eval", sizeof("assert.quiet_eval")-1, 0);
 			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
@@ -305,7 +304,7 @@ PHP_FUNCTION(assert_options)
 
 	case ASSERT_WARNING:
 		oldint = ASSERTG(warning);
-		if (ac == 2) {
+		if (value != NULL) {
 			zend_string *value_str = zval_get_string(value);
 			key = zend_string_init("assert.warning", sizeof("assert.warning")-1, 0);
 			zend_alter_ini_entry_ex(key, value_str, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
@@ -323,7 +322,7 @@ PHP_FUNCTION(assert_options)
 		} else {
 			RETVAL_NULL();
 		}
-		if (ac == 2) {
+		if (value != NULL) {
 			zval_ptr_dtor(&ASSERTG(callback));
 			ZVAL_COPY(&ASSERTG(callback), value);
 		}

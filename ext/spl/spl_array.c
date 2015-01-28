@@ -1238,7 +1238,7 @@ SPL_METHOD(Array, __construct)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() > 2) {
+	if (ce_get_iterator != NULL && ce_get_iterator != spl_ce_Iterator) {
 		intern->ce_get_iterator = ce_get_iterator;
 	}
 

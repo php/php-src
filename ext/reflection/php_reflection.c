@@ -3801,17 +3801,13 @@ ZEND_METHOD(reflection_class, getMethods)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	zend_long filter = 0;
+	/* If no parameters given, default to "return all" */
+	zend_long filter = ZEND_ACC_PPP_MASK | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL | ZEND_ACC_STATIC;
 	int argc = ZEND_NUM_ARGS();
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (argc) {
-		if (zend_parse_parameters(argc, "|l", &filter) == FAILURE) {
-			return;
-		}
-	} else {
-		/* No parameters given, default to "return all" */
-		filter = ZEND_ACC_PPP_MASK | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL | ZEND_ACC_STATIC;
+	if (zend_parse_parameters(argc TSRMLS_CC, "|l", &filter) == FAILURE) {
+		return;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -3995,17 +3991,13 @@ ZEND_METHOD(reflection_class, getProperties)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	zend_long filter = 0;
+	/* If no parameters given, default to "return all" */
+	zend_long filter = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC;
 	int argc = ZEND_NUM_ARGS();
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (argc) {
-		if (zend_parse_parameters(argc, "|l", &filter) == FAILURE) {
-			return;
-		}
-	} else {
-		/* No parameters given, default to "return all" */
-		filter = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC;
+	if (zend_parse_parameters(argc, "|l", &filter) == FAILURE) {
+		return;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -4318,7 +4310,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 	reflection_object *intern;
 	zend_class_entry *ce, *old_scope;
 	int ret, i, argc = 0;
-	HashTable *args;
+	HashTable *args = NULL;
 	zend_function *constructor;
 
 
@@ -4328,8 +4320,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|h", &args) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_NUM_ARGS() > 0) {
+	if (args != NULL) {
 		argc = args->nNumOfElements;
 	}
 

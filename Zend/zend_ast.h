@@ -62,6 +62,7 @@ enum _zend_ast_kind {
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_TYPE,
+	ZEND_AST_DEFAULT,
 
 	/* 1 child node */
 	ZEND_AST_VAR = 1 << ZEND_AST_NUM_CHILDREN_SHIFT,

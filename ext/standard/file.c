@@ -1007,11 +1007,12 @@ PHPAPI PHP_FUNCTION(feof)
 PHPAPI PHP_FUNCTION(fgets)
 {
 	zval *res;
-	zend_long len = 1024;
+	zend_long len = ZEND_LONG_MIN;
 	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
 	php_stream *stream;
+	int alloc_buf = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &res, &len) == FAILURE) {
 		RETURN_FALSE;
@@ -1019,20 +1020,25 @@ PHPAPI PHP_FUNCTION(fgets)
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
-	if (argc == 1) {
+	if(len == LONG_MIN) {
+		len = 1024;
+		alloc_buf = 0;
+	}
+
+	if (len <= 0) {
+		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
+		RETURN_FALSE;
+	}
+
+	if(alloc_buf) {
+		buf = ecalloc(len + 1, sizeof(char));
+		if (php_stream_get_line(stream, buf, len, &line_len) == NULL) {
+			goto exit_failed;
+		}
+	} else {
 		/* ask streams to give us a buffer of an appropriate size */
 		buf = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (buf == NULL) {
-			goto exit_failed;
-		}
-	} else if (argc > 1) {
-		if (len <= 0) {
-			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
-			RETURN_FALSE;
-		}
-
-		buf = ecalloc(len + 1, sizeof(char));
-		if (php_stream_get_line(stream, buf, len, &line_len) == NULL) {
 			goto exit_failed;
 		}
 	}
@@ -1091,7 +1097,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 PHPAPI PHP_FUNCTION(fgetss)
 {
 	zval *fd;
-	zend_long bytes = 0;
+	zend_long bytes = ZEND_LONG_MIN;
 	size_t len = 0;
 	size_t actual_len, retval_len;
 	char *buf = NULL, *retval;
@@ -1106,7 +1112,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	PHP_STREAM_TO_ZVAL(stream, fd);
 
-	if (ZEND_NUM_ARGS() >= 2) {
+	if (bytes != LONG_MIN) {
 		if (bytes <= 0) {
 			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
@@ -1198,14 +1204,14 @@ PHPAPI PHP_FUNCTION(fwrite)
 	size_t inputlen;
 	size_t ret;
 	size_t num_bytes;
-	zend_long maxlen = 0;
+	zend_long maxlen = ZEND_LONG_MIN;
 	php_stream *stream;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &res, &input, &inputlen, &maxlen) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() == 2) {
+	if (maxlen == ZEND_LONG_MIN) {
 		num_bytes = inputlen;
 	} else if (maxlen <= 0) {
 		num_bytes = 0;
@@ -1413,6 +1419,7 @@ PHP_FUNCTION(umask)
 	if (BG(umask) == -1) {
 		BG(umask) = oldumask;
 	}
+	mask = oldumask;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &mask) == FAILURE) {
 		RETURN_FALSE;

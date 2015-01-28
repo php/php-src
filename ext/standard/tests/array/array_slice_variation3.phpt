@@ -5,7 +5,7 @@ Test array_slice() function : usage variations - Pass different data types as $l
 --FILE--
 <?php
 /* Prototype  : array array_slice(array $input, int $offset [, int $length [, bool $preserve_keys]])
- * Description: Returns elements specified by offset and length 
+ * Description: Returns elements specified by offset and length
  * Source code: ext/standard/array.c
  */
 
@@ -53,7 +53,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -172,28 +172,34 @@ array(0) {
 }
 
 -- Iteration 16 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be integer, string given in %s/array_slice_variation3.php on line %d
+NULL
 
 -- Iteration 17 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be integer, string given in %s/array_slice_variation3.php on line %d
+NULL
 
 -- Iteration 18 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be integer, array given in %s/array_slice_variation3.php on line %d
+NULL
 
 -- Iteration 19 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be integer, string given in %s/array_slice_variation3.php on line %d
+NULL
 
 -- Iteration 20 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be integer, string given in %s/array_slice_variation3.php on line %d
+NULL
 
 -- Iteration 21 --
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be integer, string given in %s/array_slice_variation3.php on line %d
+NULL
 
 -- Iteration 22 --
 array(2) {

@@ -752,6 +752,13 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	for (i=0; i<fci->param_count; i++) {
 		zval *param;
 
+		if(Z_ISUNDEF(fci->params[i])) {
+			if(i < func->common.required_num_args
+				|| (i >= func->common.num_args && !(func->common.fn_flags & ZEND_ACC_ALLOWS_DEFAULT))) {
+				zend_error_noreturn(E_ERROR, "Defaults can be used only for declared optional parameters");
+			}
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_HAS_DEFAULT);
+		}
 		if (ARG_SHOULD_BE_SENT_BY_REF(func, i + 1)) {
 			// TODO: Scalar values don't have reference counters anymore.
 			// They are assumed to be 1, and they may be easily passed by

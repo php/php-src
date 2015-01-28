@@ -6,7 +6,7 @@ function gobble(s, x)
 	match(line, "^" "(" s ")")
 	x = substr(line, 1, RLENGTH)
 	line = substr(line, RLENGTH+1)
-	return x 
+	return x
 }
 
 function convert(i, j, t)
@@ -64,7 +64,7 @@ BEGIN {
 	} else {
 		xmldoc = extname "/" extname ".xml"
 	}
-			
+
 
 	xmlhead = "<?xml version='1.0' encoding='iso-8859-1'?>\n" \
     "<!-- $Id$ -->\n" \
@@ -195,7 +195,7 @@ END {
 		if (maxargs[i]>0) {
 			fetchargs = "\tif (zend_parse_parameters("
 			ints = ints "\tint argc = ZEND_NUM_ARGS();\n"
-			fetchargs = fetchargs "argc TSRMLS_CC, " specs[i]
+			fetchargs = fetchargs "ZEND_NUM_ARGS() TSRMLS_CC, " specs[i]
 		} else {
 			fetchargs = fetchargs "\tif (zend_parse_parameters_none() == FAILURE) {\n\t\treturn;\n\t}"
 	 		xmlparams = xmlparams "      <void/>\n"

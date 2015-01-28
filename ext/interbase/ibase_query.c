@@ -1172,6 +1172,13 @@ PHP_FUNCTION(ibase_query)
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &bind_args, &bind_num) == FAILURE) {
 				return;
 			}
+			if(bind_num != expected_n) {
+				php_error_docref(NULL TSRMLS_CC, (bind_num < expected_n) ? E_WARNING : E_NOTICE,
+					"Statement expects %d arguments, %d given", expected_n, bind_num);
+				if (bind_num < expected_n) {
+					break;
+				}
+			}
 		}
 
 		if (FAILURE == _php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &result, &ib_query,

@@ -1622,7 +1622,11 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 
 		if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
-			EX(opline) += first_extra_arg;
+			if(UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_HAS_DEFAULT) != 0)) {
+				EX(opline) += op_array->required_num_args;
+			} else {
+				EX(opline) += first_extra_arg;
+			}
 		}
 
 		/* move extra args into separate array after all CV and TMP vars */
@@ -1646,7 +1650,11 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
 	} else if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 		/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
-		EX(opline) += num_args;
+		if(UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_HAS_DEFAULT) != 0)) {
+			EX(opline) += MIN(op_array->required_num_args, num_args);
+		} else {
+			EX(opline) += num_args;
+		}
 	}
 
 	/* Initialize CV variables (skip arguments) */
@@ -1722,7 +1730,11 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 
 			if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 				/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
-				EX(opline) += first_extra_arg;
+				if(UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_HAS_DEFAULT) != 0)) {
+					EX(opline) += op_array->required_num_args;
+				} else {
+					EX(opline) += first_extra_arg;
+				}
 			}
 
 			/* move extra args into separate array after all CV and TMP vars */
@@ -1746,7 +1758,11 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 			ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
 		} else if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 			/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
-			EX(opline) += num_args;
+			if(UNEXPECTED((EX_CALL_INFO() & ZEND_CALL_HAS_DEFAULT) != 0)) {
+				EX(opline) += MIN(op_array->required_num_args, num_args);
+			} else {
+				EX(opline) += num_args;
+			}
 		}
 
 		/* Initialize CV variables (skip arguments) */

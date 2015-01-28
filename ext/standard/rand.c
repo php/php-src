@@ -231,7 +231,7 @@ PHP_FUNCTION(srand)
 {
 	zend_long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &seed) == FAILURE)
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, ZEND_NUM_ARGS(), "|l", &seed) == FAILURE)
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
@@ -247,7 +247,7 @@ PHP_FUNCTION(mt_srand)
 {
 	zend_long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &seed) == FAILURE)
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, ZEND_NUM_ARGS(), "|l", &seed) == FAILURE)
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)

@@ -2052,7 +2052,7 @@ PHP_FUNCTION(iconv_substr)
 	char *charset = get_internal_encoding();
 	size_t charset_len = 0;
 	zend_string *str;
-	zend_long offset, length = 0;
+	zend_long offset, length = ZEND_LONG_MAX;
 
 	php_iconv_err_t err;
 
@@ -2069,7 +2069,7 @@ PHP_FUNCTION(iconv_substr)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() < 3) {
+	if (length == ZEND_LONG_MAX) {
 		length = str->len;
 	}
 

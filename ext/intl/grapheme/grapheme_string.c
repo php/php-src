@@ -390,6 +390,13 @@ PHP_FUNCTION(grapheme_substr)
 			 "grapheme_substr: unable to parse input param", 0 );
 		RETURN_FALSE;
 	}
+	if(no_length) {
+		length = str_len;
+	} else if(length < INT32_MIN) {
+		length = INT32_MIN;
+	} else if(length > INT32_MAX) {
+		length = INT32_MAX;
+	}
 
 	if ( OUTSIDE_STRING(lstart, str_len)) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: start not contained in string", 1 );

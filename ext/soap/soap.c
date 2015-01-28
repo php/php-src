@@ -1564,7 +1564,7 @@ PHP_METHOD(SoapServer, handle)
 		php_error_docref(NULL, E_ERROR,"ob_start failed");
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (!arg) {
 		if (SG(request_info).request_body && 0 == php_stream_rewind(SG(request_info).request_body)) {
 			zval *server_vars, *encoding;
 			php_stream_filter *zf = NULL;

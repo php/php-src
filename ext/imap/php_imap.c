@@ -1713,18 +1713,17 @@ PHP_FUNCTION(imap_body)
 PHP_FUNCTION(imap_mail_copy)
 {
 	zval *streamind;
-	zend_long options = 0;
+	zend_long options = NIL;
 	zend_string *seq, *folder;
-	int argc = ZEND_NUM_ARGS();
 	pils *imap_le_struct;
 
-	if (zend_parse_parameters(argc, "rSS|l", &streamind, &seq, &folder, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(, "rSS|l", &streamind, &seq, &folder, &options) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
-	if (mail_copy_full(imap_le_struct->imap_stream, seq->val, folder->val, (argc == 4 ? options : NIL)) == T) {
+	if (mail_copy_full(imap_le_struct->imap_stream, seq->val, folder->val, options) == T) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -1978,10 +1977,9 @@ PHP_FUNCTION(imap_delete)
 {
 	zval *streamind, *sequence;
 	pils *imap_le_struct;
-	zend_long flags = 0;
-	int argc = ZEND_NUM_ARGS();
+	zend_long flags = NIL;
 
-	if (zend_parse_parameters(argc, "rz|l", &streamind, &sequence, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|l", &streamind, &sequence, &flags) == FAILURE) {
 		return;
 	}
 
@@ -1989,7 +1987,7 @@ PHP_FUNCTION(imap_delete)
 
 	convert_to_string_ex(sequence);
 
-	mail_setflag_full(imap_le_struct->imap_stream, Z_STRVAL_P(sequence), "\\DELETED", (argc == 3 ? flags : NIL));
+	mail_setflag_full(imap_le_struct->imap_stream, Z_STRVAL_P(sequence), "\\DELETED", flags);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -1999,11 +1997,10 @@ PHP_FUNCTION(imap_delete)
 PHP_FUNCTION(imap_undelete)
 {
 	zval *streamind, *sequence;
-	zend_long flags = 0;
+	zend_long flags = NIL;
 	pils *imap_le_struct;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rz|l", &streamind, &sequence, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|l", &streamind, &sequence, &flags) == FAILURE) {
 		return;
 	}
 
@@ -2011,7 +2008,7 @@ PHP_FUNCTION(imap_undelete)
 
 	convert_to_string_ex(sequence);
 
-	mail_clearflag_full(imap_le_struct->imap_stream, Z_STRVAL_P(sequence), "\\DELETED", (argc == 3 ? flags : NIL));
+	mail_clearflag_full(imap_le_struct->imap_stream, Z_STRVAL_P(sequence), "\\DELETED", flags);
 	RETVAL_TRUE;
 }
 /* }}} */
@@ -2023,7 +2020,7 @@ PHP_FUNCTION(imap_headerinfo)
 	zval *streamind;
 	zend_string *defaulthost = NULL;
 	int argc = ZEND_NUM_ARGS();
-	zend_long msgno, fromlength, subjectlength;
+	zend_long msgno, fromlength = 0, subjectlength = 0;
 	pils *imap_le_struct;
 	MESSAGECACHE *cache;
 	ENVELOPE *en;
@@ -2040,16 +2037,12 @@ PHP_FUNCTION(imap_headerinfo)
 			php_error_docref(NULL, E_WARNING, "From length has to be between 0 and %d", MAILTMPLEN);
 			RETURN_FALSE;
 		}
-	} else {
-		fromlength = 0x00;
 	}
 	if (argc >= 4) {
 		if (subjectlength < 0 || subjectlength > MAILTMPLEN) {
 			php_error_docref(NULL, E_WARNING, "Subject length has to be between 0 and %d", MAILTMPLEN);
 			RETURN_FALSE;
 		}
-	} else {
-		subjectlength = 0x00;
 	}
 
 	PHP_IMAP_CHECK_MSGNO(msgno);
@@ -2105,13 +2098,12 @@ PHP_FUNCTION(imap_rfc822_parse_headers)
 {
 	zend_string *headers, *defaulthost = NULL;
 	ENVELOPE *en;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "S|S", &headers, &defaulthost) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S", &headers, &defaulthost) == FAILURE) {
 		return;
 	}
 
-	if (argc == 2) {
+	if (defaulthost != NULL) {
 		rfc822_parse_msg(&en, NULL, headers->val, headers->len, NULL, defaulthost->val, NIL);
 	} else {
 		rfc822_parse_msg(&en, NULL, headers->val, headers->len, NULL, "UNKNOWN", NIL);
@@ -3036,17 +3028,16 @@ PHP_FUNCTION(imap_clearflag_full)
 {
 	zval *streamind;
 	zend_string *sequence, *flag;
-	zend_long flags = 0;
+	zend_long flags = NIL;
 	pils *imap_le_struct;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rSS|l", &streamind, &sequence, &flag, &flags) ==FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSS|l", &streamind, &sequence, &flag, &flags) ==FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
-	mail_clearflag_full(imap_le_struct->imap_stream, sequence->val, flag->val, (argc == 4 ? flags : NIL));
+	mail_clearflag_full(imap_le_struct->imap_stream, sequence->val, flag->val, flags);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -3349,7 +3340,6 @@ PHP_FUNCTION(imap_fetch_overview)
 	zval myoverview;
 	zend_string *address;
 	zend_long status, flags = 0L;
-	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc, "rS|l", &streamind, &sequence, &flags) == FAILURE) {
 		return;
@@ -3997,9 +3987,8 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 PHP_FUNCTION(imap_mail)
 {
 	zend_string *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *cc=NULL, *bcc=NULL, *rpath=NULL;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "SSS|SSSS", &to, &subject, &message,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSS|SSSS", &to, &subject, &message, 
 		&headers, &cc, &bcc, &rpath) == FAILURE) {
 		return;
 	}
@@ -4042,10 +4031,9 @@ PHP_FUNCTION(imap_search)
 	pils *imap_le_struct;
 	char *search_criteria;
 	MESSAGELIST *cur;
-	int argc = ZEND_NUM_ARGS();
 	SEARCHPGM *pgm = NIL;
 
-	if (zend_parse_parameters(argc, "rs|lS", &streamind, &criteria, &flags, &charset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|lS", &streamind, &criteria, &flags, &charset) == FAILURE) {
 		return;
 	}
 
@@ -4056,7 +4044,7 @@ PHP_FUNCTION(imap_search)
 	IMAPG(imap_messages) = IMAPG(imap_messages_tail) = NIL;
 	pgm = mail_criteria(search_criteria);
 
-	mail_search_full(imap_le_struct->imap_stream, (argc == 4 ? charset->val : NIL), pgm, flags);
+	mail_search_full(imap_le_struct->imap_stream, (charset != NULL ? charset->val : NIL), pgm, flags);
 
 	if (pgm && !(flags & SE_FREE)) {
 		mail_free_searchpgm(&pgm);
@@ -4643,10 +4631,9 @@ PHP_FUNCTION(imap_thread)
 	zend_long flags = SE_FREE;
 	char criteria[] = "ALL";
 	THREADNODE *top;
-	int argc = ZEND_NUM_ARGS();
 	SEARCHPGM *pgm = NIL;
 
-	if (zend_parse_parameters(argc, "r|l", &streamind, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &streamind, &flags) == FAILURE) {
 		return;
 	}
 

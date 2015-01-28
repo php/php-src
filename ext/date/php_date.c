@@ -1221,11 +1221,9 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 	size_t     format_len;
 	zend_long    ts;
 
+	ts = (zend_long)time(NULL);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &format, &format_len, &ts) == FAILURE) {
 		RETURN_FALSE;
-	}
-	if (ZEND_NUM_ARGS() == 1) {
-		ts = time(NULL);
 	}
 
 	RETURN_STR(php_format_date(format, format_len, ts, localtime));
@@ -1378,6 +1376,7 @@ PHP_FUNCTION(idate)
 	zend_long    ts = 0;
 	int ret;
 
+	ts = (zend_long)time(NULL);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &format, &format_len, &ts) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1385,10 +1384,6 @@ PHP_FUNCTION(idate)
 	if (format_len != 1) {
 		php_error_docref(NULL, E_WARNING, "idate format is one char");
 		RETURN_FALSE;
-	}
-
-	if (ZEND_NUM_ARGS() == 1) {
-		ts = time(NULL);
 	}
 
 	ret = php_idate(format[0], ts, 0);
@@ -1449,6 +1444,7 @@ PHP_FUNCTION(strtotime)
 	timelib_time *t, *now;
 	timelib_tzinfo *tzi;
 
+	preset_ts = (zend_long)time(NULL);
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "s|l", &times, &time_len, &preset_ts) == FAILURE || !time_len) {
 		RETURN_FALSE;
 	}
@@ -1458,8 +1454,7 @@ PHP_FUNCTION(strtotime)
 	now = timelib_time_ctor();
 	now->tz_info = tzi;
 	now->zone_type = TIMELIB_ZONETYPE_ID;
-	timelib_unixtime2local(now,
-		(ZEND_NUM_ARGS() == 2) ? (timelib_sll) preset_ts : (timelib_sll) time(NULL));
+	timelib_unixtime2local(now, (timelib_sll) preset_ts);
 
 	t = timelib_strtotime(times, time_len, &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	error1 = error->error_count;
@@ -1488,7 +1483,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	zend_long ts, adjust_seconds = 0;
 	int error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|llllll", &hou, &min, &sec, &mon, &day, &yea) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, ZEND_NUM_ARGS(), "|llllll", &hou, &min, &sec, &mon, &day, &yea) == FAILURE) {
 		RETURN_FALSE;
 	}
 	/* Initialize structure with current time */
@@ -4595,40 +4590,25 @@ PHP_FUNCTION(date_default_timezone_get)
  */
 static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_sunset)
 {
-	double latitude = 0.0, longitude = 0.0, zenith = 0.0, gmt_offset = 0, altitude;
+	double latitude = INI_FLT("date.default_latitude"), longitude = INI_FLT("date.default_latitude"), zenith = 0.0, gmt_offset = 0, altitude;
 	double h_rise, h_set, N;
 	timelib_sll rise, set, transit;
-	zend_long time, retformat = 0;
+	zend_long time, retformat = SUNFUNCS_RET_STRING;
 	int             rs;
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
 	zend_string    *retstr;
 
+	if (calc_sunset) {
+		zenith = INI_FLT("date.sunset_zenith");
+	} else {
+		zenith = INI_FLT("date.sunrise_zenith");
+	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|ldddd", &time, &retformat, &latitude, &longitude, &zenith, &gmt_offset) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			retformat = SUNFUNCS_RET_STRING;
-		case 2:
-			latitude = INI_FLT("date.default_latitude");
-		case 3:
-			longitude = INI_FLT("date.default_longitude");
-		case 4:
-			if (calc_sunset) {
-				zenith = INI_FLT("date.sunset_zenith");
-			} else {
-				zenith = INI_FLT("date.sunrise_zenith");
-			}
-		case 5:
-		case 6:
-			break;
-		default:
-			php_error_docref(NULL, E_WARNING, "invalid format");
-			RETURN_FALSE;
-			break;
-	}
 	if (retformat != SUNFUNCS_RET_TIMESTAMP &&
 		retformat != SUNFUNCS_RET_STRING &&
 		retformat != SUNFUNCS_RET_DOUBLE)
