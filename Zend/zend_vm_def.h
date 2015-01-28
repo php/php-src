@@ -4629,8 +4629,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, ANY)
 
 	SAVE_OPLINE();
 
-	array_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	ZVAL_DEREF(array_ptr);
+	array_ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	if (OP1_TYPE != IS_CONST &&
 	    Z_TYPE_P(array_ptr) == IS_OBJECT && Z_OBJCE_P(array_ptr)->get_iterator) {
 		zend_class_entry *ce = Z_OBJCE_P(array_ptr);
