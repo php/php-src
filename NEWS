@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - Sqlite3:
   . Fixed bug #66550 (SQLite prepared statement use-after-free). (Sean Heelan)
 
+- Phar:
+  . Fixed bug #68901 (use after free). (bugreports at internot dot info)
+
 - Postgres:
   . Fixed bug #68741 (Null pointer deference) (CVE-2015-1352). (Xinchen Hui)
 
