@@ -1298,8 +1298,8 @@ static void php_session_remove_cookie(void) {
 	zend_llist_element *current;
 	char *session_cookie;
 	zend_string *e_session_name;
-	int session_cookie_len;
-	uint len = sizeof("Set-Cookie")-1;
+	size_t session_cookie_len;
+	size_t len = sizeof("Set-Cookie")-1;
 
 	e_session_name = php_url_encode(PS(session_name), strlen(PS(session_name)));
 	spprintf(&session_cookie, 0, "Set-Cookie: %s=", e_session_name->val);
@@ -1504,7 +1504,7 @@ PHPAPI void php_session_start(void) /* {{{ */
 	zval *data;
 	char *p, *value;
 	int nrand;
-	int lensess;
+	size_t lensess;
 
 	if (PS(use_only_cookies)) {
 		PS(apply_trans_sid) = 0;
