@@ -1439,12 +1439,12 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name) /* {{{ */
 /* }}} */
 
 static void ppid2sid(zval *ppid) {
-	if (Z_TYPE_P(ppid) != IS_STRING) {
-		PS(id) = NULL;
-		PS(send_cookie) = 1;
-	} else {
+	if (Z_TYPE_P(ppid) == IS_STRING) {
 		PS(id) = zend_string_init(Z_STRVAL_P(ppid), Z_STRLEN_P(ppid), 0);
 		PS(send_cookie) = 0;
+	} else {
+		PS(id) = NULL;
+		PS(send_cookie) = 1;
 	}
 }
 
