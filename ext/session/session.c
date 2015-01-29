@@ -1443,7 +1443,6 @@ static void ppid2sid(zval *ppid) {
 		PS(id) = NULL;
 		PS(send_cookie) = 1;
 	} else {
-		convert_to_string(ppid);
 		PS(id) = zend_string_init(Z_STRVAL_P(ppid), Z_STRLEN_P(ppid), 0);
 		PS(send_cookie) = 0;
 	}
