@@ -64,4 +64,4 @@ Foo\Bar\fiz
 Foo\Bar\biz
 Foo\Bar\buz
 
-Fatal error: Call to undefined function Foo\Bar\A() in /home/marcio/P/php-src/Zend/tests/ns_092.php on line 45
+Fatal error: Call to undefined function Foo\Bar\A() in %sns_092.php on line 45
