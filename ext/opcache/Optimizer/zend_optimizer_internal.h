@@ -32,10 +32,19 @@
 #define INV_COND_EX(op)    ((op) == ZEND_JMPZ    ? ZEND_JMPNZ_EX : ZEND_JMPZ_EX)
 #define INV_EX_COND_EX(op) ((op) == ZEND_JMPZ_EX ? ZEND_JMPNZ_EX : ZEND_JMPZ_EX)
 
-#define MAKE_NOP(opline)	{ (opline)->opcode = ZEND_NOP; memset(&(opline)->result, 0, sizeof((opline)->result)); memset(&(opline)->op1, 0, sizeof((opline)->op1)); memset(&(opline)->op2, 0, sizeof((opline)->op2));(opline)->result_type=(opline)->op1_type=(opline)->op2_type=IS_UNUSED; (opline)->handler = zend_opcode_handlers[ZEND_NOP]; }
-#define RESULT_USED(op)	(((op->result_type & IS_VAR) && !(op->result_type & EXT_TYPE_UNUSED)) || op->result_type == IS_TMP_VAR)
+#undef MAKE_NOP
+
+#define MAKE_NOP(opline)   do { \
+	(opline)->opcode = ZEND_NOP; \
+	memset(&(opline)->result, 0, sizeof((opline)->result)); \
+	memset(&(opline)->op1, 0, sizeof((opline)->op1)); \
+	memset(&(opline)->op2, 0, sizeof((opline)->op2)); \
+	(opline)->result_type = (opline)->op1_type = (opline)->op2_type=IS_UNUSED; \
+	(opline)->handler = zend_opcode_handlers[ZEND_NOP]; \
+} while (0);
+#define RESULT_USED(op)	    (((op->result_type & IS_VAR) && !(op->result_type & EXT_TYPE_UNUSED)) || op->result_type == IS_TMP_VAR)
 #define RESULT_UNUSED(op)	((op->result_type & EXT_TYPE_UNUSED) != 0)
-#define SAME_VAR(op1, op2) ((((op1 ## _type & IS_VAR) && (op2 ## _type & IS_VAR)) || (op1 ## _type == IS_TMP_VAR && op2 ## _type == IS_TMP_VAR)) && op1.var == op2.var)
+#define SAME_VAR(op1, op2)  ((((op1 ## _type & IS_VAR) && (op2 ## _type & IS_VAR)) || (op1 ## _type == IS_TMP_VAR && op2 ## _type == IS_TMP_VAR)) && op1.var == op2.var)
 
 typedef struct _zend_optimizer_ctx {
 	zend_arena             *arena;
