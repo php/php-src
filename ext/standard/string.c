@@ -221,7 +221,7 @@ PHP_FUNCTION(bin2hex_ts)
     result = php_bin2hex_ts((unsigned char *)data->val, data->len);
     
     if (!result) {
-        RETURN_NULL;
+        return;
     }
     
     RETURN_STR(result);
