@@ -29,14 +29,14 @@ function noisy_gc($maxlifetime) {
 echo "*** Testing session_set_save_handler() : variation ***\n";
 
 require_once "save_handler.inc";
-$session_id = 'testid';
 $path = dirname(__FILE__);
 var_dump(session_save_path($path));
 
 echo "*** Without lazy_write ***\n";
-var_dump(session_id($session_id));
 var_dump(session_set_save_handler("open", "close", "read", "write", "destroy", "noisy_gc", "create_sid", "validate_sid", "update"));
 var_dump(session_start(['lazy_write'=>FALSE]));
+$session_id = session_id();
+var_dump(session_id());
 var_dump(session_write_close());
 var_dump(session_id());
 
@@ -59,21 +59,20 @@ ob_end_flush();
 
 string(0) ""
 *** Without lazy_write ***
-string(0) ""
 bool(true)
 Open [%s,PHPSESSID]
-ValidateID [%s,testid]
 CreateID [PHPT-%d]
 Read [%s,PHPT-%d]
 GC [0]
 1 deleted
 bool(true)
+string(%d) "PHPT-%d"
 Write [%s,PHPT-%d,]
 Close [%s,PHPSESSID]
 NULL
-string(15) "PHPT-%d"
+string(%d) "PHPT-%d"
 *** With lazy_write ***
-string(15) "PHPT-%d"
+string(%d) "PHPT-%d"
 bool(true)
 Open [%s,PHPSESSID]
 ValidateID [%s,PHPT-%d]
@@ -84,9 +83,9 @@ bool(true)
 Write [%s,PHPT-%d,]
 Close [%s,PHPSESSID]
 NULL
-string(15) "PHPT-%d"
+string(%d) "PHPT-%d"
 *** Cleanup ***
-string(15) "PHPT-%d"
+string(%d) "PHPT-%d"
 Open [%s,PHPSESSID]
 ValidateID [%s,PHPT-%d]
 Read [%s,PHPT-%d]

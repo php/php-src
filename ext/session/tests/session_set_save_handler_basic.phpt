@@ -29,6 +29,7 @@ session_save_path($path);
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
 
 session_start();
+$session_id = session_id();
 $_SESSION["Blah"] = "Hello World!";
 $_SESSION["Foo"] = FALSE;
 $_SESSION["Guff"] = 1234567890;

@@ -51,6 +51,10 @@ var_dump($_SESSION);
 // $_SESSION should be the same and should skip write()
 session_write_close();
 
+echo "Cleanup\n";
+session_start();
+session_destroy();
+
 ob_end_flush();
 ?>
 --EXPECTF--
@@ -104,4 +108,9 @@ array(4) {
   string(3) "Foo"
 }
 Update [%s,PHPT-%d]
+Close [%s,PHPSESSID]
+Cleanup
+Open [%s,PHPSESSID]
+Read [%s,PHPT-%d]
+Destroy [%s,PHPT-%d]
 Close [%s,PHPSESSID]
