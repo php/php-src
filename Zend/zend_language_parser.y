@@ -230,7 +230,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> class_declaration_statement trait_declaration_statement
 %type <ast> interface_declaration_statement interface_extends_list
 %type <ast> batch_use_declarations inline_use_declarations inline_use_declaration
-%type <ast> use_declaration const_decl inner_statement
+%type <ast> mixed_batch_use_declarations use_declaration const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
 %type <ast> extends_from parameter optional_type argument expr_without_variable global_var
@@ -298,14 +298,21 @@ top_statement:
 	|	T_NAMESPACE { RESET_DOC_COMMENT(); }
 		'{' top_statement_list '}'
 			{ $$ = zend_ast_create(ZEND_AST_NAMESPACE, NULL, $4); }
-	|	T_USE batch_use_declarations ';'		{ $$ = $2; }
-	|	T_USE use_declarations ';'				{ $$ = $2; $$->attr = T_CLASS; }
-	|	T_USE T_FUNCTION use_declarations ';'	{ $$ = $3; $$->attr = T_FUNCTION; }
-	|	T_USE T_CONST use_declarations ';'		{ $$ = $3; $$->attr = T_CONST; }
-	|	T_CONST const_list ';'					{ $$ = $2; }
+	|	T_USE mixed_batch_use_declarations ';'		{ $$ = $2; }
+	|	T_USE T_FUNCTION batch_use_declarations ';'	{ $$ = $3; $3->attr = T_FUNCTION; }
+	|	T_USE T_CONST batch_use_declarations ';'	{ $$ = $3; $3->attr = T_CONST; }
+	|	T_USE use_declarations ';'					{ $$ = $2; $$->attr = T_CLASS; }
+	|	T_USE T_FUNCTION use_declarations ';'		{ $$ = $3; $$->attr = T_FUNCTION; }
+	|	T_USE T_CONST use_declarations ';'			{ $$ = $3; $$->attr = T_CONST; }
+	|	T_CONST const_list ';'						{ $$ = $2; }
 ;
 
 batch_use_declarations:
+	namespace_name '{' use_declarations '}'
+		{$$ = zend_ast_create(ZEND_AST_BATCH_USE, $1, $3); }
+;
+
+mixed_batch_use_declarations:
 	namespace_name '{' inline_use_declarations '}'
 		{$$ = zend_ast_create(ZEND_AST_BATCH_USE, $1, $3);}
 ;

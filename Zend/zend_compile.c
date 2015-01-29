@@ -4949,7 +4949,7 @@ void zend_compile_batch_use(zend_ast *ast) /* {{{ */
 		zend_string_release(name);
 		ZVAL_STR(name_zval, compound_ns);
 		zend_ast_list *inline_use = zend_ast_create_list(1, ZEND_AST_USE, use);
-		inline_use->attr = use->attr;
+		inline_use->attr = ast->attr ? ast->attr : use->attr;
 		zend_compile_use(inline_use);
 	}
 }
