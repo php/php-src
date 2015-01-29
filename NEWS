@@ -39,6 +39,9 @@ PHP                                                                        NEWS
   . Fixed bug #68657 (Reading 4 byte floats with Mysqli and libmysqlclient
     has rounding errors) (Keyur Govande)
 
+- Session:
+  . Fixed bug #68941 (mod_files.sh is a bash-script) (bugzilla at ii.nl, Yasuo)
+
 - Streams:
   . Fixed bug which caused call after final close on streams filter. (Bob)
 
