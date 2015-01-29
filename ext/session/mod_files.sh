@@ -61,5 +61,5 @@ echo "Creating session path in $directory with a depth of $depth for session.has
 for i in $hash_chars; do
        newpath="$directory/$i"
        mkdir $newpath || exit 1
-       sh $0 $newpath `expr $depth - 1` $hashbits recurse
+       /bin/bash $0 $newpath `expr $depth - 1` $hashbits recurse
 done
