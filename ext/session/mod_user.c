@@ -23,7 +23,7 @@
 #include "mod_user.h"
 
 ps_module ps_mod_user = {
-	PS_MOD_SID(user)
+	PS_MOD_UPDATE_TIMESTAMP(user)
 };
 
 #define SESS_ZVAL_LONG(val, a)						\
@@ -225,6 +225,42 @@ PS_CREATE_SID_FUNC(user)
 
 	/* function as defined by PS_MOD */
 	return php_session_create_id(mod_data);
+}
+
+PS_VALIDATE_SID_FUNC(user)
+{
+	/* maintain backwards compatibility */
+	if (!Z_ISUNDEF(PSF(validate_sid))) {
+		zval args[1];
+		STDVARS;
+
+		SESS_ZVAL_STR(key, &args[0]);
+
+		ps_call_handler(&PSF(validate_sid), 1, args, &retval);
+
+		FINISH;
+	}
+
+	/* dummy function defined by PS_MOD */
+	return php_session_validate_sid(mod_data, key TSRMLS_CC);
+}
+
+PS_UPDATE_TIMESTAMP_FUNC(user)
+{
+	zval args[2];
+	STDVARS;
+
+	SESS_ZVAL_STR(key, &args[0]);
+	SESS_ZVAL_STR(val, &args[1]);
+
+	/* maintain backwards compatibility */
+	if (!Z_ISUNDEF(PSF(update_timestamp))) {
+		ps_call_handler(&PSF(update_timestamp), 2, args, &retval);
+	} else {
+		ps_call_handler(&PSF(write), 2, args, &retval);
+	}
+
+	FINISH;
 }
 
 /*

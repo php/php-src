@@ -1,11 +1,11 @@
 --TEST--
-Test session_set_save_handler() function : test write short circuit
+Test session_set_save_handler() function : test lazy_write
 --INI--
+session.lazy_write=1
 session.save_path=
 session.name=PHPSESSID
 --SKIPIF--
 <?php include('skipif.inc'); ?>
-skip - Waiting RFC patch merge
 --FILE--
 <?php
 
@@ -22,7 +22,7 @@ echo "*** Testing session_set_save_handler() : test write short circuit ***\n";
 require_once "save_handler.inc";
 $path = dirname(__FILE__);
 session_save_path($path);
-session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
+session_set_save_handler("open", "close", "read", "write", "destroy", "gc", "create_sid", "validate_sid", "update");
 
 session_start();
 $session_id = session_id();
@@ -37,7 +37,7 @@ var_dump($_SESSION);
 
 echo "Starting session again..!\n";
 session_id($session_id);
-session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
+session_set_save_handler("open", "close", "read", "write", "destroy", "gc", "create_sid", "validate_sid", "update");
 session_start();
 var_dump($_SESSION);
 $_SESSION['Bar'] = 'Foo';
@@ -45,11 +45,15 @@ session_write_close();
 
 echo "Starting session again..!\n";
 session_id($session_id);
-session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
+session_set_save_handler("open", "close", "read", "write", "destroy", "gc", "create_sid", "validate_sid", "update");
 session_start();
 var_dump($_SESSION);
 // $_SESSION should be the same and should skip write()
 session_write_close();
+
+echo "Cleanup\n";
+session_start();
+session_destroy();
 
 ob_end_flush();
 ?>
@@ -57,6 +61,7 @@ ob_end_flush();
 *** Testing session_set_save_handler() : test write short circuit ***
 
 Open [%s,PHPSESSID]
+CreateID [PHPT-%s]
 Read [%s,%s]
 array(3) {
   ["Blah"]=>
@@ -102,4 +107,10 @@ array(4) {
   ["Bar"]=>
   string(3) "Foo"
 }
+Update [%s,PHPT-%d]
+Close [%s,PHPSESSID]
+Cleanup
+Open [%s,PHPSESSID]
+Read [%s,PHPT-%d]
+Destroy [%s,PHPT-%d]
 Close [%s,PHPSESSID]

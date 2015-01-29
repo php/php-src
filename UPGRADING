@@ -85,6 +85,18 @@ PHP X.Y UPGRADE NOTES
   . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making
     them consistent with other GMP functions.
 
+- Session
+  . session_start() accepts all INI settings as array. e.g. ['cache_limiter'=>'private']
+    sets session.cache_limiter=private. It also supports 'read_and_close' which closes
+    session data immediately after read data.
+  . Save handler accepts validate_sid(), update_timestamp() which validates session
+    ID existence, updates timestamp of session data. Compatibility of old user defined
+    save handler is retained.
+  . SessionUpdateTimestampHandlerInterface is added. validateSid(), updateTimestamp()
+    is defined in the interface.
+  . session.lazy_write(default=On) INI setting enables only write session data when
+    session data is updated.
+
 - PCRE:
   . Removed support for /e (PREG_REPLACE_EVAL) modifier. Use
     preg_reaplace_callback() instead.

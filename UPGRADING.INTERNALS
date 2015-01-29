@@ -204,3 +204,22 @@ PHP 7.0 INTERNALS UPGRADE NOTES
      - configure.js now produces response files which are passed to the linker
        and library manager. This solves the issues with the long command lines
        which can exceed the OS limit.
+
+
+========================
+3. Module changes
+========================
+
+  Session:
+
+    - PS_MOD_UPDATE_TIMESTAMP() session save handler definition is added. New
+      save handler should use PS_MOD_UPDATE_TIMESTAMP() definition. Save handler
+      must not refer/change PS() variables directly from save handler.
+    - PS_MOD_UPDATE_TIMESTAMP() defines validate_sid() handler. This handler
+      must validate if requested session ID is in session data storage or not.
+      Internal save handler needed to asscess PS(id) directly to validate it.
+      Do not access PS(id), but use this handler.
+    - PS_MOD_UPDATE_TIMESTAMP() defines update_timestamp() handlers. This handler
+      must update session data timestamp for GC if it is needed. e.g. Memcache
+      updates timestap on read, so it does not need to update timestamp. Return
+      SUCCESS simply for this case.
