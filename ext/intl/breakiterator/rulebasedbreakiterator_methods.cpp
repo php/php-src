@@ -104,7 +104,6 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		zend_object_store_ctor_failed(Z_OBJ(orig_this));
-		zval_dtor(&orig_this);
 		ZEND_CTOR_MAKE_NULL();
 	}
 }

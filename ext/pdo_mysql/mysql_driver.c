@@ -161,18 +161,18 @@ static int mysql_handle_closer(pdo_dbh_t *dbh)
 /* }}} */
 
 /* {{{ mysql_handle_preparer */
-static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options)
+static int mysql_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	pdo_mysql_stmt *S = ecalloc(1, sizeof(pdo_mysql_stmt));
 	char *nsql = NULL;
-	int nsql_len = 0;
+	size_t nsql_len = 0;
 	int ret;
 	int server_version;
 
 	PDO_DBG_ENTER("mysql_handle_preparer");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("sql=%.*s", sql_len, sql);
+	PDO_DBG_INF_FMT("sql=%.*s", (int)sql_len, sql);
 
 	S->H = H;
 	stmt->driver_data = S;
@@ -253,12 +253,12 @@ end:
 /* }}} */
 
 /* {{{ mysql_handle_doer */
-static zend_long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len)
+static zend_long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	PDO_DBG_ENTER("mysql_handle_doer");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("sql=%.*s", sql_len, sql);
+	PDO_DBG_INF_FMT("sql=%.*s", (int)sql_len, sql);
 
 	if (mysql_real_query(H->server, sql, sql_len)) {
 		pdo_mysql_error(dbh);
@@ -288,7 +288,7 @@ static zend_long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sq
 /* }}} */
 
 /* {{{ pdo_mysql_last_insert_id */
-static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len)
+static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *len)
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	char *id = php_pdo_int64_to_str(mysql_insert_id(H->server));
@@ -299,17 +299,17 @@ static char *pdo_mysql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned
 /* }}} */
 
 /* {{{ mysql_handle_quoter */
-static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype )
+static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype )
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	PDO_DBG_ENTER("mysql_handle_quoter");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
-	PDO_DBG_INF_FMT("unquoted=%.*s", unquotedlen, unquoted);
+	PDO_DBG_INF_FMT("unquoted=%.*s", (int)unquotedlen, unquoted);
 	*quoted = safe_emalloc(2, unquotedlen, 3);
 	*quotedlen = mysql_real_escape_string(H->server, *quoted + 1, unquoted, unquotedlen);
 	(*quoted)[0] =(*quoted)[++*quotedlen] = '\'';
 	(*quoted)[++*quotedlen] = '\0';
-	PDO_DBG_INF_FMT("quoted=%.*s", *quotedlen, *quoted);
+	PDO_DBG_INF_FMT("quoted=%.*s", (int)*quotedlen, *quoted);
 	PDO_DBG_RETURN(1);
 }
 /* }}} */
@@ -559,8 +559,8 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 #endif
 		;
 #if defined(PDO_USE_MYSQLND)
-	int dbname_len = 0;
-	int password_len = 0;
+	size_t dbname_len = 0;
+	size_t password_len = 0;
 #endif
 
 #ifdef CLIENT_MULTI_STATEMENTS

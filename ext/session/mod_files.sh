@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash
 
 if [[ "$2" = "" ]] || [[ "$3" = "" ]]; then
        echo "Usage: $0 BASE_DIRECTORY DEPTH HASH_BITS"

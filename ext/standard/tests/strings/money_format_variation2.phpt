@@ -156,6 +156,8 @@ NULL
 Warning: money_format() expects parameter 2 to be float, string given in %s on line %d
 NULL
 -- Iteration 21 --
+
+Notice: A non well formed numeric value encountered in %s on line %d
 string
 -- Iteration 22 --
 

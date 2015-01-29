@@ -614,11 +614,15 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 	 * - the message is not empty
 	 */
 	if (CGIG(fcgi_logging) && request && message && len > 0) {
+		ssize_t ret;
 		char *buf = malloc(len + 2);
 		memcpy(buf, message, len);
 		memcpy(buf + len, "\n", sizeof("\n"));
-		fcgi_write(request, FCGI_STDERR, buf, len+1);
+		ret = fcgi_write(request, FCGI_STDERR, buf, len + 1);
 		free(buf);
+		if (ret < 0) {
+			php_handle_aborted_connection();
+		}
 	}
 }
 /* }}} */
@@ -837,17 +841,6 @@ static sapi_module_struct cgi_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
-
-/* {{{ arginfo ext/standard/dl.c */
-ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
-	ZEND_ARG_INFO(0, extension_filename)
-ZEND_END_ARG_INFO()
-/* }}} */
-
-static const zend_function_entry additional_functions[] = {
-	ZEND_FE(dl, arginfo_dl)
-	{NULL, NULL, NULL}
-};
 
 /* {{{ php_cgi_usage
  */
@@ -1736,7 +1729,7 @@ int main(int argc, char *argv[])
 	SG(request_info).path_translated = NULL;
 #endif
 
-	cgi_sapi_module.additional_functions = additional_functions;
+	cgi_sapi_module.additional_functions = NULL;
 	cgi_sapi_module.executable_location = argv[0];
 
 	/* startup after we get the above ini override se we get things right */

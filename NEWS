@@ -8,6 +8,8 @@
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
 - Core:
+  . Fixed #68868 (Segfault in clean_non_persistent_constants() in SugarCRM 
+    6.5.20). (Laruence)
   . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
     (Laruence)
   . Fixed bug #68252 (segfault in Zend/zend_hash.c in function
@@ -37,7 +39,10 @@
   . Removed scoped calls of non-static methods from an incompatible $this
     context. (Nikita)
   . Removed support for #-style comments in ini files. (Nikita)
+  . Removed support for assigning the result of new by reference. (Nikita)
   . Invalid octal literals in source code now produce compile errors, fixes PHPSadness #31. (Andrea)
+  . Removed dl() function on fpm-fcgi. (Nikita)
+  . Removed support for hexadecimal numeric strings. (Nikita)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
@@ -84,6 +89,9 @@
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
     when setting SIG_DFL). (Julien)
 
+- PCRE:
+  . Removed support for the /e (PREG_REPLACE_EVAL) modifier. (Nikita)
+
 - PDO_mysql:
   . Fixed bug #68424 (Add new PDO mysql connection attr to control multi
     statements option). (peter dot wolanin at acquia dot com)
@@ -93,6 +101,7 @@
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
+  . Fixed bug #68941 (mod_files.sh is a bash-script) (bugzilla at ii.nl, Yasuo)
 
 - SOAP:
   . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).

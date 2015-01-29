@@ -53,8 +53,13 @@ $TS \
 --enable-calendar \
 --enable-ftp \
 --with-pspell=/usr \
---with-recode=/usr \
 --with-enchant=/usr \
 --enable-wddx \
+--with-imap \
+--with-imap-ssl \
+--with-freetype-dir=/usr \
+--with-t1lib=/usr \
+--with-xpm-dir=/usr \
+--with-kerberos \
 --enable-sysvmsg 
 make --quiet

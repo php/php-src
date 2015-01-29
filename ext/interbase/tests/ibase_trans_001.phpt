@@ -18,4 +18,6 @@ var_dump(ibase_close($x));
 resource(%d) of type (Firebird/InterBase transaction)
 resource(%d) of type (Firebird/InterBase transaction)
 bool(true)
-bool(true)
+
+Warning: ibase_close(): supplied resource is not a valid Firebird/InterBase link resource in %s on line %d
+bool(false)

@@ -68,9 +68,9 @@ static int scan(Scanner *s)
 
 struct placeholder {
 	char *pos;
-	int len;
+	size_t len;
 	int bindno;
-	int qlen;		/* quoted length of value */
+	size_t qlen;		/* quoted length of value */
 	char *quoted;	/* quoted value */
 	int freeq;
 	struct placeholder *next;
@@ -80,15 +80,15 @@ static void free_param_name(zval *el) {
 	efree(Z_PTR_P(el));
 }
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
-	char **outquery, int *outquery_len)
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len,
+	char **outquery, size_t *outquery_len)
 {
 	Scanner s;
 	char *ptr, *newbuffer;
 	int t;
 	int bindno = 0;
 	int ret = 0;
-	int newbuffer_len;
+	size_t newbuffer_len;
 	HashTable *params;
 	struct pdo_bound_param_data *param;
 	int query_type = PDO_PLACEHOLDER_NONE;

@@ -1235,7 +1235,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	imap_stream = mail_open(NIL, mailbox->val, flags);
 
 	if (imap_stream == NIL) {
-		php_error_docref(NULL, E_WARNING, "Couldn't open stream %s", mailbox);
+		php_error_docref(NULL, E_WARNING, "Couldn't open stream %s", mailbox->val);
 		efree(IMAPG(imap_user)); IMAPG(imap_user) = 0;
 		efree(IMAPG(imap_password)); IMAPG(imap_password) = 0;
 		RETURN_FALSE;
@@ -1340,6 +1340,7 @@ PHP_FUNCTION(imap_append)
 		}
 	}
 
+	zend_string_free(regex);
 	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
 
 	INIT (&st, mail_string, (void *) message->val, message->len);
@@ -3999,7 +4000,7 @@ PHP_FUNCTION(imap_mail)
 	zend_string *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *cc=NULL, *bcc=NULL, *rpath=NULL;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "SSS|SSSS", &to, &subject, &message, 
+	if (zend_parse_parameters(argc, "SSS|SSSS", &to, &subject, &message,
 		&headers, &cc, &bcc, &rpath) == FAILURE) {
 		return;
 	}
@@ -4023,7 +4024,8 @@ PHP_FUNCTION(imap_mail)
 		message = NULL;
 	}
 
-	if (_php_imap_mail(to->val, subject->val, message->val, headers->val, cc->val, bcc->val, rpath->val)) {
+	if (_php_imap_mail(to->val, subject->val, message->val, headers?headers->val:NULL, cc?cc->val:NULL,
+			bcc?bcc->val:NULL, rpath?rpath->val:NULL)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
@@ -4044,7 +4046,7 @@ PHP_FUNCTION(imap_search)
 	int argc = ZEND_NUM_ARGS();
 	SEARCHPGM *pgm = NIL;
 
-	if (zend_parse_parameters(argc, "rs|ls", &streamind, &criteria, &flags, &charset) == FAILURE) {
+	if (zend_parse_parameters(argc, "rS|lS", &streamind, &criteria, &flags, &charset) == FAILURE) {
 		return;
 	}
 

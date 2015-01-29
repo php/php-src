@@ -16,6 +16,7 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   o. Updated final class modifier
   p. TSRM changes
   q. gc_collect_cycles() is now hookable
+  r. PDO uses size_t for lengths
 
 2. Build system changes
   a. Unix build system changes
@@ -175,6 +176,9 @@ PHP 7.0 INTERNALS UPGRADE NOTES
      time spent in the garbage collector in a profiler). The default
      implementation has been renamed to zend_gc_collect_cycles(), and is
      exported with ZEND_API.
+
+  r. In accordance with general use of size_t as string length, all PDO API
+     functions now use size_t for string length.
 
 
 ========================

@@ -4825,8 +4825,8 @@ PHP_FUNCTION(openssl_seal)
 	eksl = safe_emalloc(nkeys, sizeof(*eksl), 0);
 	eks = safe_emalloc(nkeys, sizeof(*eks), 0);
 	memset(eks, 0, sizeof(*eks) * nkeys);
-	key_resources = safe_emalloc(nkeys, sizeof(zend_resource), 0);
-	memset(key_resources, 0, sizeof(zend_resource) * nkeys);
+	key_resources = safe_emalloc(nkeys, sizeof(zend_resource*), 0);
+	memset(key_resources, 0, sizeof(zend_resource*) * nkeys);
 
 	/* get the public keys we are using to seal this data */
 	i = 0;
@@ -5067,7 +5067,7 @@ PHP_FUNCTION(openssl_digest)
 }
 /* }}} */
 
-static zend_bool php_openssl_validate_iv(char **piv, int *piv_len, int iv_required_len)
+static zend_bool php_openssl_validate_iv(char **piv, size_t *piv_len, size_t iv_required_len)
 {
 	char *iv_new;
 
@@ -5078,7 +5078,7 @@ static zend_bool php_openssl_validate_iv(char **piv, int *piv_len, int iv_requir
 
 	iv_new = ecalloc(1, iv_required_len + 1);
 
-	if (*piv_len <= 0) {
+	if (*piv_len == 0) {
 		/* BC behavior */
 		*piv_len = iv_required_len;
 		*piv     = iv_new;
@@ -5134,10 +5134,10 @@ PHP_FUNCTION(openssl_encrypt)
 	}
 
 	max_iv_len = EVP_CIPHER_iv_length(cipher_type);
-	if (iv_len <= 0 && max_iv_len > 0) {
+	if (iv_len == 0 && max_iv_len > 0) {
 		php_error_docref(NULL, E_WARNING, "Using an empty Initialization Vector (iv) is potentially insecure and not recommended");
 	}
-	free_iv = php_openssl_validate_iv(&iv, (int *)&iv_len, max_iv_len);
+	free_iv = php_openssl_validate_iv(&iv, &iv_len, max_iv_len);
 
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = zend_string_alloc(outlen, 0);
@@ -5230,7 +5230,7 @@ PHP_FUNCTION(openssl_decrypt)
 		key = (unsigned char*)password;
 	}
 
-	free_iv = php_openssl_validate_iv(&iv, (int *)&iv_len, EVP_CIPHER_iv_length(cipher_type));
+	free_iv = php_openssl_validate_iv(&iv, &iv_len, EVP_CIPHER_iv_length(cipher_type));
 
 	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = zend_string_alloc(outlen, 0);

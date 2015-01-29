@@ -907,6 +907,24 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	}
 	_function_parameter_string(str, fptr, param_indent.buf->val);
 	string_free(&param_indent);
+	if (fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		string_printf(str, "  %s- Return [ ", indent);
+		if (fptr->common.arg_info[-1].class_name) {
+			string_printf(str, "%s ",
+				(fptr->type == ZEND_INTERNAL_FUNCTION) ?
+					((zend_internal_arg_info*)(fptr->common.arg_info - 1))->class_name :
+					fptr->common.arg_info[-1].class_name->val);
+			if (fptr->common.arg_info[-1].allow_null) {
+				string_printf(str, "or NULL ");
+			}
+		} else if (fptr->common.arg_info[-1].type_hint) {
+			string_printf(str, "%s ", zend_get_type_by_const(fptr->common.arg_info[-1].type_hint));
+			if (fptr->common.arg_info[-1].allow_null) {
+				string_printf(str, "or NULL ");
+			}
+		}
+		string_printf(str, "]\n");
+	}
 	string_printf(str, "%s}\n", indent);
 }
 /* }}} */

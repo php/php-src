@@ -2001,6 +2001,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				/* Don't count the variadic argument */
 				internal_function->num_args--;
 			}
+			if (info->type_hint) {
+				internal_function->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
+			}
 		} else {
 			internal_function->arg_info = NULL;
 			internal_function->num_args = 0;

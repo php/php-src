@@ -3958,7 +3958,8 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 {
 	zval		*search_entry,
 				*replace_entry = NULL;
-	zend_string	*tmp_result;
+	zend_string	*tmp_result,
+				*replace_entry_str = NULL;
 	char		*replace_value = NULL;
 	size_t		 replace_len = 0;
 	zend_long	 replace_count = 0;
@@ -3990,7 +3991,8 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 		/* For each entry in the search array, get the entry */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(search), search_entry) {
 			/* Make sure we're dealing with strings. */
-			SEPARATE_ZVAL(search_entry);
+			ZVAL_DEREF(search_entry);
+			SEPARATE_ZVAL_NOREF(search_entry);
 			convert_to_string(search_entry);
 			if (Z_STRLEN_P(search_entry) == 0) {
 				if (Z_TYPE_P(replace) == IS_ARRAY) {
@@ -4004,11 +4006,11 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				/* Get current entry */
 				if ((replace_entry = zend_hash_get_current_data_ex(Z_ARRVAL_P(replace), &pos)) != NULL) {
 					/* Make sure we're dealing with strings. */
-					convert_to_string_ex(replace_entry);
+					replace_entry_str = zval_get_string(replace_entry);
 
 					/* Set replacement value to the one we got from array */
-					replace_value = Z_STRVAL_P(replace_entry);
-					replace_len = Z_STRLEN_P(replace_entry);
+					replace_value = replace_entry_str->val;
+					replace_len = replace_entry_str->len;
 
 					zend_hash_move_forward_ex(Z_ARRVAL_P(replace), &pos);
 				} else {
@@ -4051,6 +4053,9 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				}				
 			}
 
+			if (replace_entry_str) {
+				zend_string_release(replace_entry_str);
+			}
 			zend_string_release(Z_STR_P(result));
 			ZVAL_STR(result, tmp_result);
 
