@@ -127,7 +127,7 @@ rm -rf $RPM_BUILD_ROOT
 - Support building of shared extensions.
 - Build CLI only once.
 
-* Thu Oct 31 2003 Marcus Boerger <helly@php.net>
+* Fri Oct 31 2003 Marcus Boerger <helly@php.net>
 - Update version to 5.
 - Remove unsure external requirements.
 - Remove non existing directories
