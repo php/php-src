@@ -101,6 +101,7 @@
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
+  . Fixed bug #68941 (mod_files.sh is a bash-script) (bugzilla at ii.nl, Yasuo)
 
 - SOAP:
   . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
