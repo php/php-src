@@ -2203,6 +2203,9 @@ PHP_FUNCTION(array_shift)
 				q->key = NULL;
 				ZVAL_COPY_VALUE(&q->val, &p->val);
 				ZVAL_UNDEF(&p->val);
+				if (idx == Z_ARRVAL_P(stack)->nInternalPointer) {
+					zend_hash_iterators_update(Z_ARRVAL_P(stack), k);
+				}
 			}
 			k++;
 		}
@@ -2265,9 +2268,14 @@ PHP_FUNCTION(array_unshift)
 		}
 	} ZEND_HASH_FOREACH_END();
 
+	new_hash.nInternalPointer = Z_ARRVAL_P(stack)->nInternalPointer;
+	new_hash.u.v.nIteratorsCount = Z_ARRVAL_P(stack)->u.v.nIteratorsCount;
+	Z_ARRVAL_P(stack)->u.v.nIteratorsCount = 0;
 	Z_ARRVAL_P(stack)->pDestructor = NULL;
 	zend_hash_destroy(Z_ARRVAL_P(stack));
 	*Z_ARRVAL_P(stack) = new_hash;
+	zend_hash_iterators_update(Z_ARRVAL_P(stack), 0);
+	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
 
 	/* Clean up and return the number of elements in the stack */
 	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));

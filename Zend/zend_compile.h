@@ -95,7 +95,8 @@ typedef union _znode_op {
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */
-	int op_type;
+	zend_uchar op_type;
+	zend_uchar flag;
 	union {
 		znode_op op;
 		zval constant; /* replaced by literal/zv */

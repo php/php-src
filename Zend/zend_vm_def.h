@@ -2138,6 +2138,21 @@ ZEND_VM_HANDLER(70, ZEND_FREE, TMPVAR, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(127, ZEND_FE_FREE, TMPVAR, ANY)
+{
+	zval *var;
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	var = EX_VAR(opline->op1.var);
+	if (Z_FE_ITER_P(var) != (uint32_t)-1) {
+		zend_hash_iterator_del(Z_FE_ITER_P(var));
+	}
+	zval_ptr_dtor_nogc(var);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HANDLER(54, ZEND_ADD_CHAR, TMP|UNUSED, CONST)
 {
 	USE_OPLINE
@@ -3821,6 +3836,14 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 		if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
 			zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
 		}
+	} else if (brk_opline->opcode == ZEND_FE_FREE) {
+		if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+			zval *var = EX_VAR(brk_opline->op1.var);
+			if (Z_FE_ITER_P(var) != (uint32_t)-1) {
+				zend_hash_iterator_del(Z_FE_ITER_P(var));
+			}
+			zval_ptr_dtor_nogc(var);
+		}
 	}
 	ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op1));
 }
@@ -4758,8 +4781,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 		iter->index = -1; /* will be set to 0 before using next handler */
 
 		ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-		Z_FE_POS_P(EX_VAR(opline->result.var)) = INVALID_IDX;
-		ZVAL_PTR(EX_VAR((opline+2)->op1.var), NULL);
+		Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 
 		if (OP1_TYPE == IS_VAR) {
 			FREE_OP1_VAR_PTR();
@@ -4798,6 +4820,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 		while (1) {
 			if (pos >= fe_ht->nNumUsed) {
 				FREE_OP1_VAR_PTR();
+				Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
 			p = fe_ht->arData + pos;
@@ -4811,8 +4834,8 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 			}
 			pos++;
 		}
-		Z_FE_POS_P(EX_VAR(opline->result.var)) = fe_ht->nInternalPointer = pos;
-		ZVAL_PTR(EX_VAR((opline+2)->op1.var), fe_ht);
+		fe_ht->nInternalPointer = pos;
+		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
 
 		FREE_OP1_VAR_PTR();
 		CHECK_EXCEPTION();
@@ -4820,6 +4843,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 		if (OP1_TYPE == IS_VAR) {
 			FREE_OP1_VAR_PTR();
 		} else {
@@ -4990,21 +5014,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
 	ZVAL_DEREF(array);
 	if (EXPECTED(Z_TYPE_P(array) == IS_ARRAY)) {
 		fe_ht = Z_ARRVAL_P(array);
-		pos = Z_FE_POS_P(EX_VAR(opline->op1.var));
-		if (UNEXPECTED(pos == INVALID_IDX)) {
-			/* reached end of iteration */
-			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
-		} else {
-			if (Z_PTR_P(EX_VAR((opline+1)->op1.var)) != fe_ht) {
-				pos = fe_ht->nInternalPointer;
-			}
-			SEPARATE_ARRAY(array);
-			fe_ht = Z_ARRVAL_P(array);
-			Z_PTR_P(EX_VAR((opline+1)->op1.var)) = fe_ht;
-		}
-//???		if (pos != fe_ht->nInternalPointer) {
-//???			//...
-//???		}
+		pos = zend_hash_iterator_pos(Z_FE_ITER_P(EX_VAR(opline->op1.var)), fe_ht);
 		while (1) {
 			if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 				/* reached end of iteration */
@@ -5048,7 +5058,8 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
 				break;
 			}
 		}
-		Z_FE_POS_P(EX_VAR(opline->op1.var)) = fe_ht->nInternalPointer = pos;
+		EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos =
+			fe_ht->nInternalPointer = pos;
 		ZEND_VM_INC_OPCODE();
 		ZEND_VM_NEXT_OPCODE();
 	} else if (EXPECTED(Z_TYPE_P(array) == IS_OBJECT)) {
@@ -5059,19 +5070,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
  			zend_object *zobj = Z_OBJ_P(array);
 
  			fe_ht = Z_OBJPROP_P(array);
-			pos = Z_FE_POS_P(EX_VAR(opline->op1.var));
-			if (UNEXPECTED(pos == INVALID_IDX)) {
-				/* reached end of iteration */
-				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
-			} else {
-				if (Z_PTR_P(EX_VAR((opline+1)->op1.var)) != fe_ht) {
-					pos = fe_ht->nInternalPointer;
-				}
-				Z_PTR_P(EX_VAR((opline+1)->op1.var)) = fe_ht;
-			}
-//???			if (pos != fe_ht->nInternalPointer) {
-//???
-//???			}
+			pos = zend_hash_iterator_pos(Z_FE_ITER_P(EX_VAR(opline->op1.var)), fe_ht);
 			while (1) {
 				if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 					/* reached end of iteration */
@@ -5129,7 +5128,8 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
 					break;
 				}
 			}
-			Z_FE_POS_P(EX_VAR(opline->op1.var)) = fe_ht->nInternalPointer = pos;
+			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos =
+				fe_ht->nInternalPointer = pos;
 			ZEND_VM_INC_OPCODE();
 			ZEND_VM_NEXT_OPCODE();
 		} else {
@@ -5962,6 +5962,14 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 				if (brk_opline->opcode == ZEND_FREE) {
 					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
 						zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
+					}
+				} else if (brk_opline->opcode == ZEND_FE_FREE) {
+					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+						zval *var = EX_VAR(brk_opline->op1.var);
+						if (Z_FE_ITER_P(var) != (uint32_t)-1) {
+							zend_hash_iterator_del(Z_FE_ITER_P(var));
+						}
+						zval_ptr_dtor_nogc(var);
 					}
 				} else if (brk_opline->opcode == ZEND_END_SILENCE) {
 					/* restore previous error_reporting value */

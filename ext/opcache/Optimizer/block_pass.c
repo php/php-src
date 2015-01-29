@@ -207,12 +207,15 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 		for (i = 0; i< op_array->last_brk_cont; i++) {
 			if (op_array->brk_cont_array[i].start >= 0 &&
 			    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
+			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FE_FREE ||
 			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
 				int parent = op_array->brk_cont_array[i].parent;
 
 				while (parent >= 0 &&
 				       op_array->brk_cont_array[parent].start < 0 &&
-				       op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FREE) {
+				       (op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FREE ||
+				        op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FE_FREE ||
+				        op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_END_SILENCE)) {
 					parent = op_array->brk_cont_array[parent].parent;
 				}
 				op_array->brk_cont_array[i].parent = parent;
@@ -227,6 +230,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			for (i = 0; i< op_array->last_brk_cont; i++) {
 				if (op_array->brk_cont_array[i].start >= 0 &&
 				    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
+				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FE_FREE ||
 				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_END_SILENCE)) {
 					if (i != j) {
 						op_array->brk_cont_array[j] = op_array->brk_cont_array[i];

@@ -149,7 +149,7 @@ const char *zend_vm_opcodes_map[170] = {
 	"ZEND_VERIFY_RETURN_TYPE",
 	"ZEND_FE_RESET_RW",
 	"ZEND_FE_FETCH_RW",
-	NULL,
+	"ZEND_FE_FREE",
 	NULL,
 	NULL,
 	NULL,
