@@ -31,6 +31,9 @@
 - Phar:
   . Fixed bug #68901 (use after free). (bugreports at internot dot info)
 
+- Session:
+  . Fixed bug #68941 (mod_files.sh is a bash-script) (bugzilla at ii.nl, Yasuo)
+
 - Sqlite3:
   . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong 
     required_num_args). (Julien)
