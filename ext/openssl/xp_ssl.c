@@ -242,15 +242,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 
 			/* Now, do the IO operation. Don't block if we can't complete... */
 			if (read) {
-			nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);
-
-			if (sslsock->reneg && sslsock->reneg->should_close) {
-				/* renegotiation rate limiting triggered */
-          php_stream_xport_shutdown(stream, (stream_shutdown_t)SHUT_RDWR);
-				nr_bytes = 0;
-				stream->eof = 1;
-				break;
-        }
+				nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);
 			} else {
 				nr_bytes = SSL_write(sslsock->ssl_handle, buf, count);
 			}
