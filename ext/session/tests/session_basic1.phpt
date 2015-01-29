@@ -30,7 +30,9 @@ var_dump(session_save_path($path));
 
 echo "*** Without lazy_write ***\n";
 var_dump(session_id($session_id));
-var_dump(session_start(['lazy_write'=>FALSE]));
+$config = ['lazy_write'=>FALSE];
+var_dump(session_start($config));
+var_dump($config);
 var_dump(session_write_close());
 var_dump(session_id());
 
@@ -53,6 +55,10 @@ string(0) ""
 *** Without lazy_write ***
 string(6) "testid"
 bool(true)
+array(1) {
+  ["lazy_write"]=>
+  bool(false)
+}
 NULL
 string(6) "testid"
 *** With lazy_write ***
@@ -64,4 +70,3 @@ string(6) "testid"
 string(6) "testid"
 bool(true)
 bool(true)
-

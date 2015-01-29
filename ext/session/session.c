@@ -2217,13 +2217,13 @@ static PHP_FUNCTION(session_start)
 					case IS_FALSE:
 					case IS_LONG:
 						if (zend_string_equals_literal(str_idx, "read_and_close")) {
-							convert_to_boolean(value);
-							read_and_close = (Z_TYPE_P(value) == IS_TRUE) ? 1 : 0;
+							read_and_close = zval_get_long(value);
 						} else {
-							convert_to_string(value);
-							if (php_session_start_set_ini(str_idx, Z_STR_P(value)) == FAILURE) {
+							zend_string *val = zval_get_string(value);
+							if (php_session_start_set_ini(str_idx, val) == FAILURE) {
 								php_error_docref(NULL, E_WARNING, "Setting option '%s' failed", str_idx->val);
 							}
+							zend_string_release(val);
 						}
 						break;
 					default:
