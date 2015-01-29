@@ -78,6 +78,7 @@ PHP_FUNCTION(chunk_split);
 PHP_FUNCTION(parse_str);
 PHP_FUNCTION(str_getcsv);
 PHP_FUNCTION(bin2hex);
+PHP_FUNCTION(bin2hex_ts);
 PHP_FUNCTION(hex2bin);
 PHP_FUNCTION(similar_text);
 PHP_FUNCTION(strip_tags);
