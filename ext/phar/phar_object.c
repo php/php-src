@@ -2115,8 +2115,8 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 	}
 its_ok:
 	if (SUCCESS == php_stream_stat_path(newpath, &ssb)) {
-		efree(oldpath);
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "phar \"%s\" exists and must be unlinked prior to conversion", newpath);
+		efree(oldpath);
 		return NULL;
 	}
 	if (!phar->is_data) {

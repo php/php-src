@@ -132,7 +132,9 @@ NULL
 -- Iteration 12 --
 string(20) "****Test string*****"
 -- Iteration 13 --
-string(20) "****Test string*****"
+
+Notice: A non well formed numeric value encountered in %s on line %d
+string(20) "*********Test string"
 -- Iteration 14 --
 string(20) "****Test string*****"
 -- Iteration 15 --

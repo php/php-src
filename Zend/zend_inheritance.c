@@ -212,7 +212,7 @@ static zend_function *do_inherit_method(zend_function *old_function, zend_class_
 }
 /* }}} */
 
-static int zend_do_perform_type_hint_check(zend_function *fe, zend_arg_info *fe_arg_info, zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
+static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	if (ZEND_LOG_XOR(fe_arg_info->class_name, proto_arg_info->class_name)) {
 		/* Only one has a type hint and the other one doesn't */

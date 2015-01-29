@@ -42,6 +42,7 @@
   . Removed support for assigning the result of new by reference. (Nikita)
   . Invalid octal literals in source code now produce compile errors, fixes PHPSadness #31. (Andrea)
   . Removed dl() function on fpm-fcgi. (Nikita)
+  . Removed support for hexadecimal numeric strings. (Nikita)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
@@ -100,6 +101,7 @@
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
+  . Fixed bug #68941 (mod_files.sh is a bash-script) (bugzilla at ii.nl, Yasuo)
 
 - SOAP:
   . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
