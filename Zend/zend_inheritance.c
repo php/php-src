@@ -404,7 +404,7 @@ static void zend_append_type_hint(smart_str *str, zend_function *fptr, zend_arg_
 		if (!strcasecmp(class_name, "self") && fptr->common.scope) {
 			class_name = fptr->common.scope->name->val;
 			class_name_len = fptr->common.scope->name->len;
-		} else if (!strcasecmp(class_name, "parent") && fptr->common.scope->parent) {
+		} else if (!strcasecmp(class_name, "parent") && fptr->common.scope && fptr->common.scope->parent) {
 			class_name = fptr->common.scope->parent->name->val;
 			class_name_len = fptr->common.scope->parent->name->len;
 		}

@@ -26,26 +26,6 @@ ps_module ps_mod_user = {
 	PS_MOD_UPDATE_TIMESTAMP(user)
 };
 
-#define SESS_ZVAL_LONG(val, a)						\
-{													\
-	ZVAL_LONG(a, val);								\
-}
-
-#define SESS_ZVAL_STRING(vl, a)						\
-{													\
-	char *__vl = vl;								\
-	SESS_ZVAL_STRINGN(__vl, strlen(__vl), a);		\
-}
-
-#define SESS_ZVAL_STRINGN(vl, ln, a)				\
-{													\
-	ZVAL_STRINGL(a, vl, ln);						\
-}
-
-#define SESS_ZVAL_STR(vl, a)						\
-{													\
-	ZVAL_STR_COPY(a, vl);							\
-}
 
 static void ps_call_handler(zval *func, int argc, zval *argv, zval *retval)
 {
@@ -102,8 +82,8 @@ PS_OPEN_FUNC(user)
 		return FAILURE;
 	}
 
-	SESS_ZVAL_STRING((char*)save_path, &args[0]);
-	SESS_ZVAL_STRING((char*)session_name, &args[1]);
+	ZVAL_STRING(&args[0], (char*)save_path);
+	ZVAL_STRING(&args[1], (char*)session_name);
 
 	ps_call_handler(&PSF(open), 2, args, &retval);
 	PS(mod_user_implemented) = 1;
@@ -144,7 +124,7 @@ PS_READ_FUNC(user)
 	zval args[1];
 	STDVARS;
 
-	SESS_ZVAL_STR(key, &args[0]);
+	ZVAL_STR_COPY(&args[0], key);
 
 	ps_call_handler(&PSF(read), 1, args, &retval);
 
@@ -164,8 +144,8 @@ PS_WRITE_FUNC(user)
 	zval args[2];
 	STDVARS;
 
-	SESS_ZVAL_STR(key, &args[0]);
-	SESS_ZVAL_STR(val, &args[1]);
+	ZVAL_STR_COPY(&args[0], key);
+	ZVAL_STR_COPY(&args[1], val);
 
 	ps_call_handler(&PSF(write), 2, args, &retval);
 
@@ -177,7 +157,7 @@ PS_DESTROY_FUNC(user)
 	zval args[1];
 	STDVARS;
 
-	SESS_ZVAL_STR(key, &args[0]);
+	ZVAL_STR_COPY(&args[0], key);
 
 	ps_call_handler(&PSF(destroy), 1, args, &retval);
 
@@ -189,7 +169,7 @@ PS_GC_FUNC(user)
 	zval args[1];
 	STDVARS;
 
-	SESS_ZVAL_LONG(maxlifetime, &args[0]);
+	ZVAL_LONG(&args[0], maxlifetime);
 
 	ps_call_handler(&PSF(gc), 1, args, &retval);
 
@@ -234,7 +214,7 @@ PS_VALIDATE_SID_FUNC(user)
 		zval args[1];
 		STDVARS;
 
-		SESS_ZVAL_STR(key, &args[0]);
+		ZVAL_STR_COPY(&args[0], key);
 
 		ps_call_handler(&PSF(validate_sid), 1, args, &retval);
 
@@ -250,8 +230,8 @@ PS_UPDATE_TIMESTAMP_FUNC(user)
 	zval args[2];
 	STDVARS;
 
-	SESS_ZVAL_STR(key, &args[0]);
-	SESS_ZVAL_STR(val, &args[1]);
+	ZVAL_STR_COPY(&args[0], key);
+	ZVAL_STR_COPY(&args[1], val);
 
 	/* maintain backwards compatibility */
 	if (!Z_ISUNDEF(PSF(update_timestamp))) {
