@@ -2145,7 +2145,7 @@ ZEND_VM_HANDLER(127, ZEND_FE_FREE, TMPVAR, ANY)
 
 	SAVE_OPLINE();
 	var = EX_VAR(opline->op1.var);
-	if (Z_FE_ITER_P(var) != (uint32_t)-1) {
+	if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 		zend_hash_iterator_del(Z_FE_ITER_P(var));
 	}
 	zval_ptr_dtor_nogc(var);
@@ -3839,7 +3839,7 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 	} else if (brk_opline->opcode == ZEND_FE_FREE) {
 		if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
 			zval *var = EX_VAR(brk_opline->op1.var);
-			if (Z_FE_ITER_P(var) != (uint32_t)-1) {
+			if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 				zend_hash_iterator_del(Z_FE_ITER_P(var));
 			}
 			zval_ptr_dtor_nogc(var);
@@ -4647,58 +4647,14 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *array_ptr;
+	zval *array_ptr, *result;
 	HashTable *fe_ht;
 
 	SAVE_OPLINE();
 
 	array_ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
-	if (OP1_TYPE != IS_CONST &&
-	    Z_TYPE_P(array_ptr) == IS_OBJECT && Z_OBJCE_P(array_ptr)->get_iterator) {
-		zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-		zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 0);
-		zend_bool is_empty;
-
-		if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-			FREE_OP1();
-			if (!EG(exception)) {
-				zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ce->name->val);
-			}
-			zend_throw_exception_internal(NULL);
-			HANDLE_EXCEPTION();
-		}
-
-		iter->index = 0;
-		if (iter->funcs->rewind) {
-			iter->funcs->rewind(iter);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				OBJ_RELEASE(&iter->std);
-				FREE_OP1();
-				HANDLE_EXCEPTION();
-			}
-		}
-		
-		is_empty = iter->funcs->valid(iter) != SUCCESS;
-				
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			OBJ_RELEASE(&iter->std);
-			FREE_OP1();
-			HANDLE_EXCEPTION();
-		}
-		iter->index = -1; /* will be set to 0 before using next handler */
-
-		ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-
-		FREE_OP1();
-		if (is_empty) {
-			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
-		} else {
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
-		}
-	} else if ((fe_ht = HASH_OF(array_ptr)) != NULL) {
-		zval *result = EX_VAR(opline->result.var);
-
+	if (EXPECTED(Z_TYPE_P(array_ptr) == IS_ARRAY)) {
+		result = EX_VAR(opline->result.var);
 		ZVAL_COPY_VALUE(result, array_ptr);
 		if (OP1_TYPE != IS_TMP_VAR && Z_OPT_REFCOUNTED_P(result)) {
 			Z_ADDREF_P(array_ptr);
@@ -4708,9 +4664,88 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, ANY)
 		FREE_OP1_IF_VAR();
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
+	} else if (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
+		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
+			HashPosition pos = 0;
+			Bucket *p;
+
+			result = EX_VAR(opline->result.var);
+			ZVAL_COPY_VALUE(result, array_ptr);
+			if (OP1_TYPE != IS_TMP_VAR) {
+				Z_ADDREF_P(array_ptr);
+			}
+			fe_ht = Z_OBJPROP_P(array_ptr);
+			pos = 0;
+			while (1) {
+				if (pos >= fe_ht->nNumUsed) {
+					FREE_OP1_IF_VAR();
+					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+				}
+				p = fe_ht->arData + pos;
+				if ((Z_TYPE(p->val) != IS_UNDEF &&
+				     (Z_TYPE(p->val) != IS_INDIRECT ||
+				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
+				    (!p->key ||
+				     zend_check_property_access(Z_OBJ_P(array_ptr), p->key) == SUCCESS)) {
+					break;
+				}
+				pos++;
+			}
+			fe_ht->nInternalPointer = pos;
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+
+			FREE_OP1_IF_VAR();
+			CHECK_EXCEPTION();
+			ZEND_VM_NEXT_OPCODE();
+		} else {
+			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
+			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 0);
+			zend_bool is_empty;
+
+			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
+				FREE_OP1();
+				if (!EG(exception)) {
+					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ce->name->val);
+				}
+				zend_throw_exception_internal(NULL);
+				HANDLE_EXCEPTION();
+			}
+
+			iter->index = 0;
+			if (iter->funcs->rewind) {
+				iter->funcs->rewind(iter);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					OBJ_RELEASE(&iter->std);
+					FREE_OP1();
+					HANDLE_EXCEPTION();
+				}
+			}
+
+			is_empty = iter->funcs->valid(iter) != SUCCESS;
+
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				OBJ_RELEASE(&iter->std);
+				FREE_OP1();
+				HANDLE_EXCEPTION();
+			}
+			iter->index = -1; /* will be set to 0 before using next handler */
+
+			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+
+			FREE_OP1();
+			if (is_empty) {
+				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+			} else {
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 		FREE_OP1();
 		ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 	}
@@ -4722,6 +4757,8 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 	zend_free_op free_op1;
 	zval *array_ptr, *array_ref;
 	HashTable *fe_ht;
+	HashPosition pos = 0;
+	Bucket *p;
 
 	SAVE_OPLINE();
 
@@ -4734,70 +4771,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 		array_ref = array_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	}
 
-	if (OP1_TYPE != IS_CONST &&
-	    Z_TYPE_P(array_ptr) == IS_OBJECT && Z_OBJCE_P(array_ptr)->get_iterator) {
-		zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-		zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
-		zend_bool is_empty;
-
-		if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-			if (OP1_TYPE == IS_VAR) {
-				FREE_OP1_VAR_PTR();
-			} else {
-				FREE_OP1();
-			}
-			if (!EG(exception)) {
-				zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ce->name->val);
-			}
-			zend_throw_exception_internal(NULL);
-			HANDLE_EXCEPTION();
-		}
-
-		iter->index = 0;
-		if (iter->funcs->rewind) {
-			iter->funcs->rewind(iter);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				OBJ_RELEASE(&iter->std);
-				if (OP1_TYPE == IS_VAR) {
-					FREE_OP1_VAR_PTR();
-				} else {
-					FREE_OP1();
-				}
-				HANDLE_EXCEPTION();
-			}
-		}
-		
-		is_empty = iter->funcs->valid(iter) != SUCCESS;
-				
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			OBJ_RELEASE(&iter->std);
-			if (OP1_TYPE == IS_VAR) {
-				FREE_OP1_VAR_PTR();
-			} else {
-				FREE_OP1();
-			}
-			HANDLE_EXCEPTION();
-		}
-		iter->index = -1; /* will be set to 0 before using next handler */
-
-		ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-		Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
-
-		if (OP1_TYPE == IS_VAR) {
-			FREE_OP1_VAR_PTR();
-		} else {
-			FREE_OP1();
-		}
-		if (is_empty) {
-			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
-		} else {
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE();
-		}
-	} else if ((fe_ht = HASH_OF(array_ptr)) != NULL) {
-		HashPosition pos = 0;
-		Bucket *p;
-
+	if (EXPECTED(Z_TYPE_P(array_ptr) == IS_ARRAY)) {
 		if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 			if (array_ptr == array_ref) {
 				ZVAL_NEW_REF(array_ref, array_ref);
@@ -4809,14 +4783,12 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 			array_ptr = EX_VAR(opline->result.var);
 			ZVAL_COPY_VALUE(array_ptr, array_ref);
 		}
-		if (Z_TYPE_P(array_ptr) == IS_ARRAY) {
-			if (OP1_TYPE == IS_CONST) {
-				zval_copy_ctor_func(array_ptr);
-			} else {
-				SEPARATE_ARRAY(array_ptr);
-			}
-			fe_ht = Z_ARRVAL_P(array_ptr);
+		if (OP1_TYPE == IS_CONST) {
+			zval_copy_ctor_func(array_ptr);
+		} else {
+			SEPARATE_ARRAY(array_ptr);
 		}
+		fe_ht = Z_ARRVAL_P(array_ptr);
 		while (1) {
 			if (pos >= fe_ht->nNumUsed) {
 				FREE_OP1_VAR_PTR();
@@ -4824,12 +4796,9 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
 			p = fe_ht->arData + pos;
-			if ((Z_TYPE(p->val) != IS_UNDEF &&
-			     (Z_TYPE(p->val) != IS_INDIRECT ||
-			      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
-			    (Z_TYPE_P(array_ptr) != IS_OBJECT ||
-			     !p->key ||
-			     zend_check_property_access(Z_OBJ_P(array_ptr), p->key) == SUCCESS)) {
+			if (Z_TYPE(p->val) != IS_UNDEF &&
+			    (Z_TYPE(p->val) != IS_INDIRECT ||
+			     Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) {
 				break;
 			}
 			pos++;
@@ -4840,6 +4809,102 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, ANY)
 		FREE_OP1_VAR_PTR();
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
+	} else if (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
+		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
+			if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
+				if (array_ptr == array_ref) {
+					ZVAL_NEW_REF(array_ref, array_ref);
+					array_ptr = Z_REFVAL_P(array_ref);
+				}
+				Z_ADDREF_P(array_ref);
+				ZVAL_COPY_VALUE(EX_VAR(opline->result.var), array_ref);
+			} else {
+				array_ptr = EX_VAR(opline->result.var);
+				ZVAL_COPY_VALUE(array_ptr, array_ref);
+			}
+			fe_ht = Z_OBJPROP_P(array_ptr);
+			while (1) {
+				if (pos >= fe_ht->nNumUsed) {
+					FREE_OP1_VAR_PTR();
+					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+				}
+				p = fe_ht->arData + pos;
+				if ((Z_TYPE(p->val) != IS_UNDEF &&
+				     (Z_TYPE(p->val) != IS_INDIRECT ||
+				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
+				    (!p->key ||
+				     zend_check_property_access(Z_OBJ_P(array_ptr), p->key) == SUCCESS)) {
+					break;
+				}
+				pos++;
+			}
+			fe_ht->nInternalPointer = pos;
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+
+			FREE_OP1_VAR_PTR();
+			CHECK_EXCEPTION();
+			ZEND_VM_NEXT_OPCODE();
+		} else {
+			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
+			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
+			zend_bool is_empty;
+
+			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
+				if (OP1_TYPE == IS_VAR) {
+					FREE_OP1_VAR_PTR();
+				} else {
+					FREE_OP1();
+				}
+				if (!EG(exception)) {
+					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ce->name->val);
+				}
+				zend_throw_exception_internal(NULL);
+				HANDLE_EXCEPTION();
+			}
+
+			iter->index = 0;
+			if (iter->funcs->rewind) {
+				iter->funcs->rewind(iter);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					OBJ_RELEASE(&iter->std);
+					if (OP1_TYPE == IS_VAR) {
+						FREE_OP1_VAR_PTR();
+					} else {
+						FREE_OP1();
+					}
+					HANDLE_EXCEPTION();
+				}
+			}
+
+			is_empty = iter->funcs->valid(iter) != SUCCESS;
+
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				OBJ_RELEASE(&iter->std);
+				if (OP1_TYPE == IS_VAR) {
+					FREE_OP1_VAR_PTR();
+				} else {
+					FREE_OP1();
+				}
+				HANDLE_EXCEPTION();
+			}
+			iter->index = -1; /* will be set to 0 before using next handler */
+
+			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+
+			if (OP1_TYPE == IS_VAR) {
+				FREE_OP1_VAR_PTR();
+			} else {
+				FREE_OP1();
+			}
+			if (is_empty) {
+				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+			} else {
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -4906,7 +4971,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY)
  			zend_object *zobj = Z_OBJ_P(array);
 
  			fe_ht = Z_OBJPROP_P(array);
-			pos = Z_FE_POS_P(EX_VAR(opline->op1.var));
+			pos = zend_hash_iterator_pos(Z_FE_ITER_P(EX_VAR(opline->op1.var)), fe_ht);
 			while (1) {
 				if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 					/* reached end of iteration */
@@ -4945,7 +5010,24 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY)
 				}
 			}
 			ZVAL_COPY(EX_VAR(opline->result.var), value);
-			Z_FE_POS_P(EX_VAR(opline->op1.var)) = pos + 1;
+			while (1) {
+				pos++;
+				if (pos >= fe_ht->nNumUsed) {
+					pos = INVALID_IDX;
+					break;
+				}
+				p = fe_ht->arData + pos;
+				if ((Z_TYPE(p->val) != IS_UNDEF &&
+				     (Z_TYPE(p->val) != IS_INDIRECT ||
+				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
+				    (Z_TYPE_P(array) != IS_OBJECT ||
+				     !p->key ||
+				     zend_check_property_access(Z_OBJ_P(array), p->key) == SUCCESS)) {
+					break;
+				}
+			}
+			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos =
+				fe_ht->nInternalPointer = pos;
 			ZEND_VM_INC_OPCODE();
 			ZEND_VM_NEXT_OPCODE();
 		} else {
@@ -5966,7 +6048,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 				} else if (brk_opline->opcode == ZEND_FE_FREE) {
 					if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
 						zval *var = EX_VAR(brk_opline->op1.var);
-						if (Z_FE_ITER_P(var) != (uint32_t)-1) {
+						if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 							zend_hash_iterator_del(Z_FE_ITER_P(var));
 						}
 						zval_ptr_dtor_nogc(var);

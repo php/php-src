@@ -1587,7 +1587,7 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 			} else if (brk_opline->opcode == ZEND_FE_FREE) {
 				if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
 					zval *var = EX_VAR(brk_opline->op1.var);
-					if (Z_FE_ITER_P(var) != (uint32_t)-1) {
+					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
 						zend_hash_iterator_del(Z_FE_ITER_P(var));
 					}
 					zval_ptr_dtor_nogc(var);
