@@ -1543,7 +1543,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 
 static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param) /* {{{ */
 {
-	struct pdo_bound_param_data param = {0};
+	struct pdo_bound_param_data param = {{{0}}};
 	zend_long param_type = PDO_PARAM_STR;
 	zval *parameter;
 
@@ -1582,7 +1582,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
    bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
 static PHP_METHOD(PDOStatement, bindValue)
 {
-	struct pdo_bound_param_data param = {0};
+	struct pdo_bound_param_data param = {{{0}}};
 	zend_long param_type = PDO_PARAM_STR;
 	zval *parameter;
 	PHP_STMT_GET_OBJ;
