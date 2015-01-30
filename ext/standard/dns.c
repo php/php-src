@@ -457,6 +457,7 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 	add_assoc_string(subarray, "host", name);
 	add_assoc_string(subarray, "class", "IN");
 	add_assoc_long(subarray, "ttl", ttl);
+	(void) class;
 
 	if (raw) {
 		add_assoc_long(subarray, "type", type);

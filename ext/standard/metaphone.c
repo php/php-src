@@ -117,7 +117,7 @@ char _codes[26] =
 /* Look two letters down.  It makes sure you don't walk off the string. */
 #define After_Next_Letter	(Next_Letter != '\0' ? toupper(word[w_idx+2]) \
 											     : '\0')
-#define Look_Ahead_Letter(n) (toupper(Lookahead(word+w_idx, n)))
+#define Look_Ahead_Letter(n) (toupper(Lookahead((char *) word+w_idx, n)))
 
 
 /* Allows us to safely look ahead an arbitrary # of letters */

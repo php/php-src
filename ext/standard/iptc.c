@@ -286,7 +286,7 @@ PHP_FUNCTION(iptcembed)
 
 	if (spool < 2) {
 		// TODO: avoid reallocation ???
-		RETVAL_STRINGL(spoolbuf, poi - spoolbuf);
+		RETVAL_STRINGL((char *) spoolbuf, poi - spoolbuf);
 		efree(spoolbuf);
 	} else {
 		RETURN_TRUE;
@@ -358,7 +358,7 @@ PHP_FUNCTION(iptcparse)
 			element = zend_hash_str_update(Z_ARRVAL_P(return_value), key, strlen(key), &values);
 		}
 
-		add_next_index_stringl(element, buffer+inx, len);
+		add_next_index_stringl(element, (char *) buffer+inx, len);
 		inx += len;
 		tagsfound++;
 	}
