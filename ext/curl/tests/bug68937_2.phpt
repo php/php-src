@@ -14,7 +14,7 @@ curl_setopt_array($ch, array(
 	CURLOPT_RETURNTRANSFER => true,
 	CURLOPT_POST => true,
 	CURLOPT_INFILESIZE => filesize(__FILE__),
-    CURLOPT_INFILE => fopen(__FILE__, 'r'),
+	CURLOPT_INFILE => fopen(__FILE__, 'r'),
 	CURLOPT_HTTPHEADER => array(
 		'Content-Length: 1',
 	),
