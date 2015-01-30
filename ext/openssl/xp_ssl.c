@@ -149,7 +149,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init)
 	int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
 	char esbuf[512];
 	smart_str ebuf = {0};
-	zend_ulong ecode;
+	unsigned long ecode;
 	int retry = 1;
 
 	switch(err) {
@@ -314,7 +314,8 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val)
 static zend_bool matches_wildcard_name(const char *subjectname, const char *certname) /* {{{ */
 {
 	char *wildcard = NULL;
-	int prefix_len, suffix_len, subject_len;
+	ptrdiff_t prefix_len;
+	size_t suffix_len, subject_len;
 
 	if (strcasecmp(subjectname, certname) == 0) {
 		return 1;
@@ -517,7 +518,7 @@ static int passwd_callback(char *buf, int num, int verify, void *data) /* {{{ */
 	if (passphrase) {
 		if (Z_STRLEN_P(val) < num - 1) {
 			memcpy(buf, Z_STRVAL_P(val), Z_STRLEN_P(val)+1);
-			return Z_STRLEN_P(val);
+			return (int)Z_STRLEN_P(val);
 		}
 	}
 	return 0;
@@ -2302,7 +2303,7 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 
 	sslsock->s.is_blocked = 1;
 	/* this timeout is used by standard stream funcs, therefor it should use the default value */
-	sslsock->s.timeout.tv_sec = FG(default_socket_timeout);
+	sslsock->s.timeout.tv_sec = (long)FG(default_socket_timeout);
 	sslsock->s.timeout.tv_usec = 0;
 
 	/* use separate timeout for our private funcs */
