@@ -1127,7 +1127,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 	if ($stat['signaled']) {
 		$data .= "\nTermsig=" . $stat['stopsig'] . "\n";
 	}
-	if ($stat["exitcode"] > 128) {
+	if ($stat["exitcode"] > 128 && $stat["exitcode"] < 160) {
 		$data .= "\nTermsig=" . ($stat["exitcode"] - 128) . "\n";
 	}
 
