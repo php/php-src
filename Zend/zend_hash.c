@@ -354,21 +354,6 @@ ZEND_API void zend_hash_iterators_update(HashTable *ht, HashPosition from, HashP
 	}
 }
 
-ZEND_API void zend_hash_iterators_reset(HashTable *ht)
-{
-	if (UNEXPECTED(ht->u.v.nIteratorsCount)) {
-		HashTableIterator *iter = EG(ht_iterators);
-		HashTableIterator *end  = iter + EG(ht_iterators_used);
-
-		while (iter != end) {
-			if (iter->ht == ht) {
-				iter->pos = ht->nInternalPointer;
-			}
-			iter++;
-		}
-	}
-}
-
 static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key)
 {
 	zend_ulong h;

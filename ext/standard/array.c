@@ -1989,7 +1989,6 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 	for (pos = 0, idx = 0; pos < offset && idx < in_hash->nNumUsed; idx++) {
 		p = in_hash->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		pos++;
 		/* Get entry and increase reference count */
 		entry = &p->val;
 
@@ -1999,6 +1998,10 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 		} else {
 			zend_hash_add_new(&out_hash, p->key, entry);
 		}
+		if (idx != pos) {
+			zend_hash_iterators_update(in_hash, idx, pos);
+		}
+		pos++;
 	}
 
 	/* If hash for removed entries exists, go until offset+length and copy the entries to it */
@@ -2024,10 +2027,12 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 			}
 		}
 	} else { /* otherwise just skip those entries */
-		for ( ; pos < offset + length && idx < in_hash->nNumUsed; idx++) {
+		int pos2 = pos;
+
+		for ( ; pos2 < offset + length && idx < in_hash->nNumUsed; idx++) {
 			p = in_hash->arData + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
-			pos++;
+			pos2++;
 			if (p->key == NULL) {
 				zend_hash_index_del(in_hash, p->h);
 			} else {
@@ -2045,6 +2050,7 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 		ZEND_HASH_FOREACH_VAL_IND(replace, entry) {
 			if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 			zend_hash_next_index_insert_new(&out_hash, entry);
+			pos++;
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -2058,13 +2064,28 @@ static void php_splice(HashTable *in_hash, int offset, int length, HashTable *re
 		} else {
 			zend_hash_add_new(&out_hash, p->key, entry);
 		}
+		if (idx != pos) {
+			zend_hash_iterators_update(in_hash, idx, pos);
+		}
+		pos++;
 	}
 
-	zend_hash_internal_pointer_reset(&out_hash);
-
+	/* replace HashTable data */
+	in_hash->u.v.nIteratorsCount = 0;
 	in_hash->pDestructor = NULL;
 	zend_hash_destroy(in_hash);
-	*in_hash = out_hash;
+
+	in_hash->u.v.flags         = out_hash.u.v.flags;
+	in_hash->nTableSize        = out_hash.nTableSize;
+	in_hash->nTableMask        = out_hash.nTableMask;
+	in_hash->nNumUsed          = out_hash.nNumUsed;
+	in_hash->nNumOfElements    = out_hash.nNumOfElements;
+	in_hash->nNextFreeElement  = out_hash.nNextFreeElement;
+	in_hash->arData            = out_hash.arData;
+	in_hash->arHash            = out_hash.arHash;
+	in_hash->pDestructor       = out_hash.pDestructor;
+
+	zend_hash_internal_pointer_reset(in_hash);
 }
 /* }}} */
 
