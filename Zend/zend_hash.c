@@ -296,35 +296,73 @@ static zend_always_inline void iterators_del(HashTable *ht)
 	}
 }
 
-static zend_never_inline void _iterators_update(HashTable *ht, HashPosition pos)
+static zend_never_inline void _iterators_update(HashTable *ht, HashPosition from, HashPosition to)
 {
 	HashTableIterator *iter = EG(ht_iterators);
 	HashTableIterator *end  = iter + EG(ht_iterators_used);
 
 	while (iter != end) {
-		if (iter->ht == ht && iter->pos == ht->nInternalPointer) {
-			iter->pos = pos;
+		if (iter->ht == ht && iter->pos == from) {
+			iter->pos = to;
 		}
 		iter++;
 	}
 }
 
-static zend_always_inline void iterators_update(HashTable *ht, HashPosition pos)
+static zend_always_inline void iterators_update(HashTable *ht, HashPosition from, HashPosition to)
 {
 	if (UNEXPECTED(ht->u.v.nIteratorsCount)) {
-		_iterators_update(ht, pos);
+		_iterators_update(ht, from, to);
 	}
 }
 
-ZEND_API void zend_hash_iterators_update(HashTable *ht, HashPosition pos)
+static zend_never_inline void _iterators_update_to_next(HashTable *ht, HashPosition from)
+{
+	uint32_t to = from;
+
+	while (1) {
+		to++;
+		if (to >= ht->nNumUsed) {
+			to = INVALID_IDX;
+			break;
+		} else if (Z_TYPE(ht->arData[to].val) != IS_UNDEF) {
+			break;
+		}
+	}
+	_iterators_update(ht, from, to);
+}
+
+static zend_always_inline void iterators_update_to_next(HashTable *ht, HashPosition from)
+{
+	if (UNEXPECTED(ht->u.v.nIteratorsCount)) {
+		_iterators_update_to_next(ht, from);
+	}
+}
+
+ZEND_API void zend_hash_iterators_update(HashTable *ht, HashPosition from, HashPosition to)
 {
 	if (UNEXPECTED(ht->u.v.nIteratorsCount)) {
 		HashTableIterator *iter = EG(ht_iterators);
 		HashTableIterator *end  = iter + EG(ht_iterators_used);
 
 		while (iter != end) {
-			if (iter->ht == ht && iter->pos == ht->nInternalPointer) {
-				iter->pos = pos;
+			if (iter->ht == ht && iter->pos == from) {
+				iter->pos = to;
+			}
+			iter++;
+		}
+	}
+}
+
+ZEND_API void zend_hash_iterators_reset(HashTable *ht)
+{
+	if (UNEXPECTED(ht->u.v.nIteratorsCount)) {
+		HashTableIterator *iter = EG(ht_iterators);
+		HashTableIterator *end  = iter + EG(ht_iterators_used);
+
+		while (iter != end) {
+			if (iter->ht == ht) {
+				iter->pos = ht->nInternalPointer;
 			}
 			iter++;
 		}
@@ -441,9 +479,9 @@ add_to_hash:
 	idx = ht->nNumUsed++;
 	ht->nNumOfElements++;
 	if (ht->nInternalPointer == INVALID_IDX) {
-		iterators_update(ht, idx);
 		ht->nInternalPointer = idx;
 	}
+	iterators_update(ht, INVALID_IDX, idx);
 	p = ht->arData + idx;
 	p->h = h = zend_string_hash_val(key);
 	p->key = key;
@@ -609,9 +647,9 @@ add_to_packed:
 		}
 		ht->nNumOfElements++;
 		if (ht->nInternalPointer == INVALID_IDX) {
-			iterators_update(ht, h);
 			ht->nInternalPointer = h;
 		}
+		iterators_update(ht, INVALID_IDX, h);
 		if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
 			ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
 		}
@@ -652,9 +690,9 @@ add_to_hash:
 	idx = ht->nNumUsed++;
 	ht->nNumOfElements++;
 	if (ht->nInternalPointer == INVALID_IDX) {
-		iterators_update(ht, idx);
 		ht->nInternalPointer = idx;
 	}
+	iterators_update(ht, INVALID_IDX, idx);
 	if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
 		ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
 	}
@@ -741,9 +779,9 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 		if (i != j) {
 			ht->arData[j] = ht->arData[i];
 			if (ht->nInternalPointer == i) {
-				iterators_update(ht, j);
 				ht->nInternalPointer = j;
 			}
+			iterators_update(ht, i, j);
 		}
 		nIndex = ht->arData[j].h & ht->nTableMask;
 		Z_NEXT(ht->arData[j].val) = ht->arHash[nIndex];
@@ -770,15 +808,14 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 		} while (ht->nNumUsed > 0 && (Z_TYPE(ht->arData[ht->nNumUsed-1].val) == IS_UNDEF));
 	}
 	ht->nNumOfElements--;
+	iterators_update_to_next(ht, idx);
 	if (ht->nInternalPointer == idx) {
 		while (1) {
 			idx++;
 			if (idx >= ht->nNumUsed) {
-				iterators_update(ht, INVALID_IDX);
 				ht->nInternalPointer = INVALID_IDX;
 				break;
 			} else if (Z_TYPE(ht->arData[idx].val) != IS_UNDEF) {
-				iterators_update(ht, idx);
 				ht->nInternalPointer = idx;
 				break;
 			}
