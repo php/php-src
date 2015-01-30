@@ -4055,6 +4055,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 
 			if (replace_entry_str) {
 				zend_string_release(replace_entry_str);
+				replace_entry_str = NULL;
 			}
 			zend_string_release(Z_STR_P(result));
 			ZVAL_STR(result, tmp_result);
