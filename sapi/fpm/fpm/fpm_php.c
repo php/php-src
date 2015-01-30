@@ -28,7 +28,7 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 	zend_ini_entry *ini_entry;
 	zend_string *duplicate;
 
-	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length))) {
+	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), name, name_length)) == NULL) {
 		return FAILURE;
 	}
 
