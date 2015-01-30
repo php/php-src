@@ -220,7 +220,6 @@ static void ps_files_open(ps_files *data, const char *key)
 static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 {
 	zend_long n;
-	zend_stat_t sbuf;
 
 	/* PS(id) may be changed by calling session_regenerate_id().
 	   Re-initialization should be tried here. ps_files_open() checks

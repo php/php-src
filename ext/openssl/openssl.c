@@ -845,13 +845,30 @@ static int add_oid_section(struct php_x509_request * req) /* {{{ */
 
 #define SET_OPTIONAL_LONG_ARG(key, varname, defval)	\
 	if (optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), key, sizeof(key)-1)) != NULL && Z_TYPE_P(item) == IS_LONG) \
-		varname = Z_LVAL_P(item); \
+		varname = (int)Z_LVAL_P(item); \
 	else \
 		varname = defval
 
 static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(zend_long algo);
 
-int openssl_spki_cleanup(const char *src, char *dest);
+/* {{{ strip line endings from spkac */
+static int openssl_spki_cleanup(const char *src, char *dest)
+{
+    int removed=0;
+
+    while (*src) {
+        if (*src!='\n'&&*src!='\r') {
+            *dest++=*src;
+        } else {
+            ++removed;
+        }
+        ++src;
+    }
+    *dest=0;
+    return removed;
+}
+/* }}} */
+
 
 static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args) /* {{{ */
 {
@@ -1377,7 +1394,7 @@ static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_reso
 	} else {
 		BIO *in;
 
-		in = BIO_new_mem_buf(Z_STRVAL_P(val), Z_STRLEN_P(val));
+		in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 		if (in == NULL) {
 			return NULL;
 		}
@@ -1493,7 +1510,10 @@ PHP_FUNCTION(openssl_spki_new)
 	}
 
 	if (challenge) {
-		ASN1_STRING_set(spki->spkac->challenge, challenge, challenge_len);
+		if (!ASN1_STRING_set(spki->spkac->challenge, challenge, (int)challenge_len)) {
+			php_error_docref(NULL, E_WARNING, "Unable to set challenge data");
+			goto cleanup;
+		}
 	}
 
 	if (!NETSCAPE_SPKI_set_pubkey(spki, pkey)) {
@@ -1546,7 +1566,7 @@ cleanup:
 PHP_FUNCTION(openssl_spki_verify)
 {
 	size_t spkstr_len;
-	int i = 0;
+	int i = 0, spkstr_cleaned_len = 0;
 	char *spkstr = NULL, * spkstr_cleaned = NULL;
 
 	EVP_PKEY *pkey = NULL;
@@ -1563,14 +1583,14 @@ PHP_FUNCTION(openssl_spki_verify)
 	}
 
 	spkstr_cleaned = emalloc(spkstr_len + 1);
-	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+	spkstr_cleaned_len = (int)(spkstr_len - openssl_spki_cleanup(spkstr, spkstr_cleaned));
 
-	if (strlen(spkstr_cleaned)<=0) {
+	if (spkstr_cleaned_len == 0) {
 		php_error_docref(NULL, E_WARNING, "Invalid SPKAC");
 		goto cleanup;
 	}
 
-	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, spkstr_cleaned_len);
 	if (spki == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to decode supplied SPKAC");
 		goto cleanup;
@@ -1608,6 +1628,7 @@ PHP_FUNCTION(openssl_spki_export)
 {
 	size_t spkstr_len;
 	char *spkstr = NULL, * spkstr_cleaned = NULL, * s = NULL;
+	int spkstr_cleaned_len;
 
 	EVP_PKEY *pkey = NULL;
 	NETSCAPE_SPKI *spki = NULL;
@@ -1624,9 +1645,14 @@ PHP_FUNCTION(openssl_spki_export)
 	}
 
 	spkstr_cleaned = emalloc(spkstr_len + 1);
-	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+	spkstr_cleaned_len = (int)(spkstr_len - openssl_spki_cleanup(spkstr, spkstr_cleaned));
 
-	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spkstr_cleaned_len == 0) {
+		php_error_docref(NULL, E_WARNING, "Invalid SPKAC");
+		goto cleanup;
+	}
+
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, spkstr_cleaned_len);
 	if (spki == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to decode supplied SPKAC");
 		goto cleanup;
@@ -1668,6 +1694,7 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 {
 	size_t spkstr_len;
 	char *spkstr = NULL, * spkstr_cleaned = NULL;
+	int spkstr_cleaned_len;
 
 	NETSCAPE_SPKI *spki = NULL;
 
@@ -1682,9 +1709,14 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 	}
 
 	spkstr_cleaned = emalloc(spkstr_len + 1);
-	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+	spkstr_cleaned_len = (int)(spkstr_len - openssl_spki_cleanup(spkstr, spkstr_cleaned));
 
-	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spkstr_cleaned_len == 0) {
+		php_error_docref(NULL, E_WARNING, "Invalid SPKAC");
+		goto cleanup;
+	}
+
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, spkstr_cleaned_len);
 	if (spki == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to decode SPKAC");
 		goto cleanup;
@@ -1697,24 +1729,6 @@ cleanup:
 	if (spkstr_cleaned != NULL) {
 		efree(spkstr_cleaned);
 	}
-}
-/* }}} */
-
-/* {{{ strip line endings from spkac */
-int openssl_spki_cleanup(const char *src, char *dest)
-{
-    int removed=0;
-
-    while (*src) {
-        if (*src!='\n'&&*src!='\r') {
-            *dest++=*src;
-        } else {
-            ++removed;
-        }
-        ++src;
-    }
-    *dest=0;
-    return removed;
 }
 /* }}} */
 
@@ -2162,7 +2176,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 		goto clean_exit;
 	}
 
-	ret = check_cert(cainfo, cert, untrustedchain, purpose);
+	ret = check_cert(cainfo, cert, untrustedchain, (int)purpose);
 	if (ret != 0 && ret != 1) {
 		RETVAL_LONG(ret);
 	} else {
@@ -2519,7 +2533,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 	bio_in = BIO_new(BIO_s_mem());
 
-	if(!BIO_write(bio_in, zp12, zp12_len))
+	if(0 >= BIO_write(bio_in, zp12, (int)zp12_len))
 		goto cleanup;
 
 	if(d2i_PKCS12_bio(bio_in, &p12)) {
@@ -2660,7 +2674,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			v = sk_CONF_VALUE_value(dn_sk, i);
 			type = v->name;
 
-			len = strlen(type);
+			len = (int)strlen(type);
 			if (len < sizeof("_default")) {
 				continue;
 			}
@@ -2776,7 +2790,7 @@ static X509_REQ * php_openssl_csr_from_zval(zval * val, int makeresource, zend_r
 		}
 		in = BIO_new_file(filename, "r");
 	} else {
-		in = BIO_new_mem_buf(Z_STRVAL_P(val), Z_STRLEN_P(val));
+		in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 	}
 	csr = PEM_read_bio_X509_REQ(in, NULL,NULL,NULL);
 	BIO_free(in);
@@ -2950,7 +2964,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 
 
-	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
+	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), (long)serial);
 
 	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
 
@@ -2961,7 +2975,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 	X509_gmtime_adj(X509_get_notBefore(new_cert), 0);
-	X509_gmtime_adj(X509_get_notAfter(new_cert), (long)60*60*24*num_days);
+	X509_gmtime_adj(X509_get_notAfter(new_cert), 60*60*24*(long)num_days);
 	i = X509_set_pubkey(new_cert, key);
 	if (!i) {
 		goto cleanup;
@@ -3274,7 +3288,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval * val, int public_key, char * p
 				if (filename) {
 					in = BIO_new_file(filename, "r");
 				} else {
-					in = BIO_new_mem_buf(Z_STRVAL_P(val), Z_STRLEN_P(val));
+					in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 				}
 				if (in == NULL) {
 					TMP_CLEAN;
@@ -3292,7 +3306,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval * val, int public_key, char * p
 				}
 				in = BIO_new_file(filename, "r");
 			} else {
-				in = BIO_new_mem_buf(Z_STRVAL_P(val), Z_STRLEN_P(val));
+				in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 			}
 
 			if (in == NULL) {
@@ -3468,7 +3482,7 @@ static int php_openssl_is_private_key(EVP_PKEY* pkey)
 				Z_TYPE_P(bn) == IS_STRING) {							\
 			_type->_name = BN_bin2bn(									\
 				(unsigned char*)Z_STRVAL_P(bn),							\
-	 			Z_STRLEN_P(bn), NULL);									\
+	 			(int)Z_STRLEN_P(bn), NULL);									\
 	    }                                                               \
 	} while (0);
 
@@ -3631,11 +3645,11 @@ PHP_FUNCTION(openssl_pkey_export_to_file)
 		switch (EVP_PKEY_type(key->type)) {
 #ifdef HAVE_EVP_PKEY_EC
 			case EVP_PKEY_EC:
-				pem_write = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get1_EC_KEY(key), cipher, (unsigned char *)passphrase, passphrase_len, NULL, NULL);
+				pem_write = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get1_EC_KEY(key), cipher, (unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
 				break;
 #endif
 			default:
-				pem_write = PEM_write_bio_PrivateKey(bio_out, key, cipher, (unsigned char *)passphrase, passphrase_len, NULL, NULL);
+				pem_write = PEM_write_bio_PrivateKey(bio_out, key, cipher, (unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
 				break;
 		}
 
@@ -3699,11 +3713,11 @@ PHP_FUNCTION(openssl_pkey_export)
 		switch (EVP_PKEY_type(key->type)) {
 #ifdef HAVE_EVP_PKEY_EC
 			case EVP_PKEY_EC:
-				pem_write = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get1_EC_KEY(key), cipher, (unsigned char *)passphrase, passphrase_len, NULL, NULL);
+				pem_write = PEM_write_bio_ECPrivateKey(bio_out, EVP_PKEY_get1_EC_KEY(key), cipher, (unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
 				break;
 #endif
 			default:
-				pem_write = PEM_write_bio_PrivateKey(bio_out, key, cipher, (unsigned char *)passphrase, passphrase_len, NULL, NULL);
+				pem_write = PEM_write_bio_PrivateKey(bio_out, key, cipher, (unsigned char *)passphrase, (int)passphrase_len, NULL, NULL);
 				break;
 		}
 
@@ -3965,7 +3979,7 @@ PHP_FUNCTION(openssl_pbkdf2)
 
 	out_buffer = zend_string_alloc(key_length, 0);
 
-	if (PKCS5_PBKDF2_HMAC(password, password_len, (unsigned char *)salt, salt_len, iterations, digest, key_length, (unsigned char*)out_buffer->val) == 1) {
+	if (PKCS5_PBKDF2_HMAC(password, (int)password_len, (unsigned char *)salt, (int)salt_len, (int)iterations, digest, (int)key_length, (unsigned char*)out_buffer->val) == 1) {
 		out_buffer->val[key_length] = 0;
 		RETURN_STR(out_buffer);
 	} else {
@@ -4052,7 +4066,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	zend_printf("Calling PKCS7 verify\n");
 #endif
 
-	if (PKCS7_verify(p7, others, store, datain, dataout, flags)) {
+	if (PKCS7_verify(p7, others, store, datain, dataout, (int)flags)) {
 
 		RETVAL_TRUE;
 
@@ -4066,7 +4080,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 			certout = BIO_new_file(signersfilename, "w");
 			if (certout) {
 				int i;
-				signers = PKCS7_get0_signers(p7, NULL, flags);
+				signers = PKCS7_get0_signers(p7, NULL, (int)flags);
 
 				for(i = 0; i < sk_X509_num(signers); i++) {
 					PEM_write_bio_X509(certout, sk_X509_value(signers, i));
@@ -4182,7 +4196,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 		goto clean_exit;
 	}
 
-	p7 = PKCS7_encrypt(recipcerts, infile, (EVP_CIPHER*)cipher, flags);
+	p7 = PKCS7_encrypt(recipcerts, infile, (EVP_CIPHER*)cipher, (int)flags);
 
 	if (p7 == NULL) {
 		goto clean_exit;
@@ -4204,7 +4218,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	(void)BIO_reset(infile);
 
 	/* write the encrypted data */
-	SMIME_write_PKCS7(outfile, p7, infile, flags);
+	SMIME_write_PKCS7(outfile, p7, infile, (int)flags);
 
 	RETVAL_TRUE;
 
@@ -4284,7 +4298,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		goto clean_exit;
 	}
 
-	p7 = PKCS7_sign(cert, privkey, others, infile, flags);
+	p7 = PKCS7_sign(cert, privkey, others, infile, (int)flags);
 	if (p7 == NULL) {
 		php_error_docref(NULL, E_WARNING, "error creating PKCS7 structure!");
 		goto clean_exit;
@@ -4305,7 +4319,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		} ZEND_HASH_FOREACH_END();
 	}
 	/* write the signed data */
-	SMIME_write_PKCS7(outfile, p7, infile, flags);
+	SMIME_write_PKCS7(outfile, p7, infile, (int)flags);
 
 	RETVAL_TRUE;
 
@@ -4421,6 +4435,9 @@ PHP_FUNCTION(openssl_private_encrypt)
 	if (pkey == NULL) {
 		php_error_docref(NULL, E_WARNING, "key param is not a valid private key");
 		RETURN_FALSE;
+	} else if (INT_MAX < data_len) {
+		php_error_docref(NULL, E_WARNING, "data is too long");
+		RETURN_FALSE;
 	}
 
 	cryptedlen = EVP_PKEY_size(pkey);
@@ -4429,11 +4446,11 @@ PHP_FUNCTION(openssl_private_encrypt)
 	switch (pkey->type) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
-			successful =  (RSA_private_encrypt(data_len,
+			successful =  (RSA_private_encrypt((int)data_len,
 						(unsigned char *)data,
 						(unsigned char *)cryptedbuf->val,
 						pkey->pkey.rsa,
-						padding) == cryptedlen);
+						(int)padding) == cryptedlen);
 			break;
 		default:
 			php_error_docref(NULL, E_WARNING, "key type not supported in this PHP build!");
@@ -4479,6 +4496,9 @@ PHP_FUNCTION(openssl_private_decrypt)
 	if (pkey == NULL) {
 		php_error_docref(NULL, E_WARNING, "key parameter is not a valid private key");
 		RETURN_FALSE;
+	} else if (INT_MAX < data_len) {
+		php_error_docref(NULL, E_WARNING, "data is too long");
+		RETURN_FALSE;
 	}
 
 	cryptedlen = EVP_PKEY_size(pkey);
@@ -4487,11 +4507,11 @@ PHP_FUNCTION(openssl_private_decrypt)
 	switch (pkey->type) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
-			cryptedlen = RSA_private_decrypt(data_len,
+			cryptedlen = RSA_private_decrypt((int)data_len,
 					(unsigned char *)data,
 					crypttemp,
 					pkey->pkey.rsa,
-					padding);
+					(int)padding);
 			if (cryptedlen != -1) {
 				cryptedbuf = zend_string_alloc(cryptedlen, 0);
 				memcpy(cryptedbuf->val, crypttemp, cryptedlen);
@@ -4543,6 +4563,9 @@ PHP_FUNCTION(openssl_public_encrypt)
 	if (pkey == NULL) {
 		php_error_docref(NULL, E_WARNING, "key parameter is not a valid public key");
 		RETURN_FALSE;
+	} else if (INT_MAX < data_len) {
+		php_error_docref(NULL, E_WARNING, "data is too long");
+		RETURN_FALSE;
 	}
 
 	cryptedlen = EVP_PKEY_size(pkey);
@@ -4551,11 +4574,11 @@ PHP_FUNCTION(openssl_public_encrypt)
 	switch (pkey->type) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
-			successful = (RSA_public_encrypt(data_len,
+			successful = (RSA_public_encrypt((int)data_len,
 						(unsigned char *)data,
 						(unsigned char *)cryptedbuf->val,
 						pkey->pkey.rsa,
-						padding) == cryptedlen);
+						(int)padding) == cryptedlen);
 			break;
 		default:
 			php_error_docref(NULL, E_WARNING, "key type not supported in this PHP build!");
@@ -4602,6 +4625,9 @@ PHP_FUNCTION(openssl_public_decrypt)
 	if (pkey == NULL) {
 		php_error_docref(NULL, E_WARNING, "key parameter is not a valid public key");
 		RETURN_FALSE;
+	} else if (INT_MAX < data_len) {
+		php_error_docref(NULL, E_WARNING, "data is too long");
+		RETURN_FALSE;
 	}
 
 	cryptedlen = EVP_PKEY_size(pkey);
@@ -4610,11 +4636,11 @@ PHP_FUNCTION(openssl_public_decrypt)
 	switch (pkey->type) {
 		case EVP_PKEY_RSA:
 		case EVP_PKEY_RSA2:
-			cryptedlen = RSA_public_decrypt(data_len,
+			cryptedlen = RSA_public_decrypt((int)data_len,
 					(unsigned char *)data,
 					crypttemp,
 					pkey->pkey.rsa,
-					padding);
+					(int)padding);
 			if (cryptedlen != -1) {
 				cryptedbuf = zend_string_alloc(cryptedlen, 0);
 				memcpy(cryptedbuf->val, crypttemp, cryptedlen);
@@ -4774,7 +4800,7 @@ PHP_FUNCTION(openssl_verify)
 
 	EVP_VerifyInit   (&md_ctx, mdtype);
 	EVP_VerifyUpdate (&md_ctx, data, data_len);
-	err = EVP_VerifyFinal (&md_ctx, (unsigned char *)signature, signature_len, pkey);
+	err = EVP_VerifyFinal (&md_ctx, (unsigned char *)signature, (int)signature_len, pkey);
 	EVP_MD_CTX_cleanup(&md_ctx);
 
 	if (keyresource == NULL) {
@@ -4808,6 +4834,9 @@ PHP_FUNCTION(openssl_seal)
 	nkeys = pubkeysht ? zend_hash_num_elements(pubkeysht) : 0;
 	if (!nkeys) {
 		php_error_docref(NULL, E_WARNING, "Fourth argument to openssl_seal() must be a non-empty array");
+		RETURN_FALSE;
+	} else if (INT_MAX < data_len) {
+		php_error_docref(NULL, E_WARNING, "data is too long");
 		RETURN_FALSE;
 	}
 
@@ -4856,7 +4885,7 @@ PHP_FUNCTION(openssl_seal)
 	buf = emalloc(data_len + EVP_CIPHER_CTX_block_size(&ctx));
 	EVP_CIPHER_CTX_cleanup(&ctx);
 
-	if (!EVP_SealInit(&ctx, cipher, eks, eksl, NULL, pkeys, nkeys) || !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, data_len)) {
+	if (!EVP_SealInit(&ctx, cipher, eks, eksl, NULL, pkeys, nkeys) || !EVP_SealUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len)) {
 		RETVAL_FALSE;
 		efree(buf);
 		EVP_CIPHER_CTX_cleanup(&ctx);
@@ -4938,6 +4967,12 @@ PHP_FUNCTION(openssl_open)
 	if (pkey == NULL) {
 		php_error_docref(NULL, E_WARNING, "unable to coerce parameter 4 into a private key");
 		RETURN_FALSE;
+	} else if (INT_MAX < ekey_len) {
+		php_error_docref(NULL, E_WARNING, "ekey is too long");
+		RETURN_FALSE;
+	} else if (INT_MAX < data_len) {
+		php_error_docref(NULL, E_WARNING, "data is too long");
+		RETURN_FALSE;
 	}
 
 	if (method) {
@@ -4952,7 +4987,7 @@ PHP_FUNCTION(openssl_open)
 
 	buf = emalloc(data_len + 1);
 
-	if (EVP_OpenInit(&ctx, cipher, (unsigned char *)ekey, ekey_len, NULL, pkey) && EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)data, data_len)) {
+	if (EVP_OpenInit(&ctx, cipher, (unsigned char *)ekey, (int)ekey_len, NULL, pkey) && EVP_OpenUpdate(&ctx, buf, &len1, (unsigned char *)data, (int)data_len)) {
 		if (!EVP_OpenFinal(&ctx, buf + len1, &len2) || (len1 + len2 == 0)) {
 			efree(buf);
 			RETVAL_FALSE;
@@ -5122,6 +5157,9 @@ PHP_FUNCTION(openssl_encrypt)
 	if (!cipher_type) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
+	} else if (INT_MAX < data_len) {
+		php_error_docref(NULL, E_WARNING, "data is too long");
+		RETURN_FALSE;
 	}
 
 	keylen = EVP_CIPHER_key_length(cipher_type);
@@ -5139,19 +5177,19 @@ PHP_FUNCTION(openssl_encrypt)
 	}
 	free_iv = php_openssl_validate_iv(&iv, &iv_len, max_iv_len);
 
-	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
+	outlen = (int)data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = zend_string_alloc(outlen, 0);
 
 	EVP_EncryptInit(&cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
-		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password_len);
+		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
 	}
 	EVP_EncryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	if (options & OPENSSL_ZERO_PADDING) {
 		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
 	}
 	if (data_len > 0) {
-		EVP_EncryptUpdate(&cipher_ctx, (unsigned char*)outbuf->val, &i, (unsigned char *)data, data_len);
+		EVP_EncryptUpdate(&cipher_ctx, (unsigned char*)outbuf->val, &i, (unsigned char *)data, (int)data_len);
 	}
 	outlen = i;
 	if (EVP_EncryptFinal(&cipher_ctx, (unsigned char *)outbuf->val + i, &i)) {
@@ -5203,6 +5241,9 @@ PHP_FUNCTION(openssl_decrypt)
 	if (!method_len) {
 		php_error_docref(NULL, E_WARNING, "Unknown cipher algorithm");
 		RETURN_FALSE;
+	} else if (INT_MAX < data_len) {
+		php_error_docref(NULL, E_WARNING, "data is too long");
+		RETURN_FALSE;
 	}
 
 	cipher_type = EVP_get_cipherbyname(method);
@@ -5212,7 +5253,7 @@ PHP_FUNCTION(openssl_decrypt)
 	}
 
 	if (!(options & OPENSSL_RAW_DATA)) {
-		base64_str = php_base64_decode((unsigned char*)data, data_len);
+		base64_str = php_base64_decode((unsigned char*)data, (int)data_len);
 		if (!base64_str) {
 			php_error_docref(NULL, E_WARNING, "Failed to base64 decode the input");
 			RETURN_FALSE;
@@ -5232,18 +5273,18 @@ PHP_FUNCTION(openssl_decrypt)
 
 	free_iv = php_openssl_validate_iv(&iv, &iv_len, EVP_CIPHER_iv_length(cipher_type));
 
-	outlen = data_len + EVP_CIPHER_block_size(cipher_type);
+	outlen = (int)data_len + EVP_CIPHER_block_size(cipher_type);
 	outbuf = zend_string_alloc(outlen, 0);
 
 	EVP_DecryptInit(&cipher_ctx, cipher_type, NULL, NULL);
 	if (password_len > keylen) {
-		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, password_len);
+		EVP_CIPHER_CTX_set_key_length(&cipher_ctx, (int)password_len);
 	}
 	EVP_DecryptInit_ex(&cipher_ctx, NULL, NULL, key, (unsigned char *)iv);
 	if (options & OPENSSL_ZERO_PADDING) {
 		EVP_CIPHER_CTX_set_padding(&cipher_ctx, 0);
 	}
-	EVP_DecryptUpdate(&cipher_ctx, (unsigned char*)outbuf->val, &i, (unsigned char *)data, data_len);
+	EVP_DecryptUpdate(&cipher_ctx, (unsigned char*)outbuf->val, &i, (unsigned char *)data, (int)data_len);
 	outlen = i;
 	if (EVP_DecryptFinal(&cipher_ctx, (unsigned char *)outbuf->val + i, &i)) {
 		outlen += i;
@@ -5314,7 +5355,7 @@ PHP_FUNCTION(openssl_dh_compute_key)
 		RETURN_FALSE;
 	}
 
-	pub = BN_bin2bn((unsigned char*)pub_str, pub_len, NULL);
+	pub = BN_bin2bn((unsigned char*)pub_str, (int)pub_len, NULL);
 
 	data = zend_string_alloc(DH_size(pkey->pkey.dh), 0);
 	len = DH_compute_key((unsigned char*)data->val, pub, pkey->pkey.dh);
