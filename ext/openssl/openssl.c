@@ -845,7 +845,7 @@ static int add_oid_section(struct php_x509_request * req) /* {{{ */
 
 #define SET_OPTIONAL_LONG_ARG(key, varname, defval)	\
 	if (optional_args && (item = zend_hash_str_find(Z_ARRVAL_P(optional_args), key, sizeof(key)-1)) != NULL && Z_TYPE_P(item) == IS_LONG) \
-		varname = Z_LVAL_P(item); \
+		varname = (int)Z_LVAL_P(item); \
 	else \
 		varname = defval
 
@@ -1377,7 +1377,7 @@ static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_reso
 	} else {
 		BIO *in;
 
-		in = BIO_new_mem_buf(Z_STRVAL_P(val), Z_STRLEN_P(val));
+		in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 		if (in == NULL) {
 			return NULL;
 		}
@@ -1493,7 +1493,10 @@ PHP_FUNCTION(openssl_spki_new)
 	}
 
 	if (challenge) {
-		ASN1_STRING_set(spki->spkac->challenge, challenge, challenge_len);
+		if (!ASN1_STRING_set(spki->spkac->challenge, challenge, (int)challenge_len)) {
+			php_error_docref(NULL, E_WARNING, "Unable to set challenge data");
+			goto cleanup;
+		}
 	}
 
 	if (!NETSCAPE_SPKI_set_pubkey(spki, pkey)) {
@@ -1546,7 +1549,7 @@ cleanup:
 PHP_FUNCTION(openssl_spki_verify)
 {
 	size_t spkstr_len;
-	int i = 0;
+	int i = 0, spkstr_cleaned_len = 0;
 	char *spkstr = NULL, * spkstr_cleaned = NULL;
 
 	EVP_PKEY *pkey = NULL;
@@ -1563,14 +1566,14 @@ PHP_FUNCTION(openssl_spki_verify)
 	}
 
 	spkstr_cleaned = emalloc(spkstr_len + 1);
-	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+	spkstr_cleaned_len = (int)(spkstr_len - openssl_spki_cleanup(spkstr, spkstr_cleaned));
 
-	if (strlen(spkstr_cleaned)<=0) {
+	if (spkstr_cleaned_len == 0) {
 		php_error_docref(NULL, E_WARNING, "Invalid SPKAC");
 		goto cleanup;
 	}
 
-	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, spkstr_cleaned_len);
 	if (spki == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to decode supplied SPKAC");
 		goto cleanup;
