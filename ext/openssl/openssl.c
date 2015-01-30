@@ -1611,6 +1611,7 @@ PHP_FUNCTION(openssl_spki_export)
 {
 	size_t spkstr_len;
 	char *spkstr = NULL, * spkstr_cleaned = NULL, * s = NULL;
+	int spkstr_cleaned_len;
 
 	EVP_PKEY *pkey = NULL;
 	NETSCAPE_SPKI *spki = NULL;
@@ -1627,9 +1628,14 @@ PHP_FUNCTION(openssl_spki_export)
 	}
 
 	spkstr_cleaned = emalloc(spkstr_len + 1);
-	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+	spkstr_cleaned_len = (int)(spkstr_len - openssl_spki_cleanup(spkstr, spkstr_cleaned));
 
-	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spkstr_cleaned_len == 0) {
+		php_error_docref(NULL, E_WARNING, "Invalid SPKAC");
+		goto cleanup;
+	}
+
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, spkstr_cleaned_len);
 	if (spki == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to decode supplied SPKAC");
 		goto cleanup;
@@ -1671,6 +1677,7 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 {
 	size_t spkstr_len;
 	char *spkstr = NULL, * spkstr_cleaned = NULL;
+	int spkstr_cleaned_len;
 
 	NETSCAPE_SPKI *spki = NULL;
 
@@ -1685,9 +1692,14 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 	}
 
 	spkstr_cleaned = emalloc(spkstr_len + 1);
-	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+	spkstr_cleaned_len = (int)(spkstr_len - openssl_spki_cleanup(spkstr, spkstr_cleaned));
 
-	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spkstr_cleaned_len == 0) {
+		php_error_docref(NULL, E_WARNING, "Invalid SPKAC");
+		goto cleanup;
+	}
+
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, spkstr_cleaned_len);
 	if (spki == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to decode SPKAC");
 		goto cleanup;
