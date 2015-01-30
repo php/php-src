@@ -10,7 +10,7 @@ namespace Foo\Bar\Baz {
 }
 namespace Fiz\Biz\Buz {
 
-    use Foo\Bar { A, Baz\B };
+    use Foo\Bar\{ A, Baz\B };
     new A;
     new B;
 }

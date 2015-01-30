@@ -13,20 +13,20 @@ namespace Foo\Bar {
 }
 namespace Fiz\Biz\Buz {
 
-    use function Foo\Bar {
+    use function Foo\Bar\{
         fiz,
         biz,
         buz as boz,
         A // <- this one must fail
     };
 
-    use const Foo\Bar {
+    use const Foo\Bar\{
         FOO as FOZ,
         BAR,
         B // <- this one must fail
     };
 
-    use Foo\Bar { A, B, const BAR as BOZ };
+    use Foo\Bar\{ A, B, const BAR as BOZ };
 
     function buz(){ echo __FUNCTION__,"\n"; }
     const FOO = 100;

@@ -308,13 +308,13 @@ top_statement:
 ;
 
 batch_use_declarations:
-	namespace_name '{' use_declarations '}'
-		{$$ = zend_ast_create(ZEND_AST_BATCH_USE, $1, $3); }
+	namespace_name T_NS_SEPARATOR '{' use_declarations '}'
+		{$$ = zend_ast_create(ZEND_AST_BATCH_USE, $1, $4); }
 ;
 
 mixed_batch_use_declarations:
-	namespace_name '{' inline_use_declarations '}'
-		{$$ = zend_ast_create(ZEND_AST_BATCH_USE, $1, $3);}
+	namespace_name T_NS_SEPARATOR '{' inline_use_declarations '}'
+		{$$ = zend_ast_create(ZEND_AST_BATCH_USE, $1, $4);}
 ;
 
 inline_use_declarations:

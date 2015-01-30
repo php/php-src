@@ -14,7 +14,7 @@ namespace Foo\Bar\Baz {
 }
 namespace Fiz\Biz\Buz {
 
-    use Foo\Bar\Baz {
+    use Foo\Bar\Baz\{
         A,
         B,
         C as AC,
