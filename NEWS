@@ -44,6 +44,9 @@
   . Removed dl() function on fpm-fcgi. (Nikita)
   . Removed support for hexadecimal numeric strings. (Nikita)
 
+- Curl:
+  . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
+
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
     internally. (Derick)
@@ -66,6 +69,7 @@
   . New FILTER_VALIDATE_DOMAIN and better RFC conformance for FILTER_VALIDATE_URL. (Kevin Dunglas)
 
 - FPM:
+  . Fixed bug #68945 (Unknown admin values segfault pools) (Laruence)
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
   . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
