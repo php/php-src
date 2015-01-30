@@ -1297,7 +1297,9 @@ static int enable_server_sni(php_stream *stream, php_openssl_netstream_data_t *s
 		sizeof(php_openssl_sni_cert_t), 0, php_stream_is_persistent(stream)
 	);
 
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(val), key_index,key, current) {
+	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(val), key_index, key, current) {
+		(void) key_index;
+
 		if (!key) {
 			php_error_docref(NULL, E_WARNING,
 				"SNI_server_certs array requires string host name keys"
@@ -1864,11 +1866,12 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes );
 
 				/* If we didn't get any error, then let's return it to PHP. */
-				if (err == SSL_ERROR_NONE)
+				if (err == SSL_ERROR_NONE) {
 					break;
+				}
 
 				/* Otherwise, we need to wait again (up to time_left or we get an error) */
-				if (blocked)
+				if (blocked) {
 					if (read) {
 						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
 							(POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
@@ -1876,6 +1879,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
 							(POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);
 					}
+				}
 			}
 
 			/* Finally, we keep going until we got data, and an SSL_ERROR_NONE, unless we had an error. */			
