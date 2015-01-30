@@ -2176,7 +2176,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 		goto clean_exit;
 	}
 
-	ret = check_cert(cainfo, cert, untrustedchain, purpose);
+	ret = check_cert(cainfo, cert, untrustedchain, (int)purpose);
 	if (ret != 0 && ret != 1) {
 		RETVAL_LONG(ret);
 	} else {
@@ -2533,7 +2533,7 @@ PHP_FUNCTION(openssl_pkcs12_read)
 
 	bio_in = BIO_new(BIO_s_mem());
 
-	if(!BIO_write(bio_in, zp12, zp12_len))
+	if(0 >= BIO_write(bio_in, zp12, (int)zp12_len))
 		goto cleanup;
 
 	if(d2i_PKCS12_bio(bio_in, &p12)) {
@@ -2674,7 +2674,7 @@ static int php_openssl_make_REQ(struct php_x509_request * req, X509_REQ * csr, z
 			v = sk_CONF_VALUE_value(dn_sk, i);
 			type = v->name;
 
-			len = strlen(type);
+			len = (int)strlen(type);
 			if (len < sizeof("_default")) {
 				continue;
 			}
@@ -2790,7 +2790,7 @@ static X509_REQ * php_openssl_csr_from_zval(zval * val, int makeresource, zend_r
 		}
 		in = BIO_new_file(filename, "r");
 	} else {
-		in = BIO_new_mem_buf(Z_STRVAL_P(val), Z_STRLEN_P(val));
+		in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 	}
 	csr = PEM_read_bio_X509_REQ(in, NULL,NULL,NULL);
 	BIO_free(in);
@@ -2964,7 +2964,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 
 
-	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), serial);
+	ASN1_INTEGER_set(X509_get_serialNumber(new_cert), (long)serial);
 
 	X509_set_subject_name(new_cert, X509_REQ_get_subject_name(csr));
 
@@ -2975,7 +2975,7 @@ PHP_FUNCTION(openssl_csr_sign)
 		goto cleanup;
 	}
 	X509_gmtime_adj(X509_get_notBefore(new_cert), 0);
-	X509_gmtime_adj(X509_get_notAfter(new_cert), (long)60*60*24*num_days);
+	X509_gmtime_adj(X509_get_notAfter(new_cert), 60*60*24*(long)num_days);
 	i = X509_set_pubkey(new_cert, key);
 	if (!i) {
 		goto cleanup;
@@ -3306,7 +3306,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval * val, int public_key, char * p
 				}
 				in = BIO_new_file(filename, "r");
 			} else {
-				in = BIO_new_mem_buf(Z_STRVAL_P(val), Z_STRLEN_P(val));
+				in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
 			}
 
 			if (in == NULL) {
