@@ -1411,6 +1411,9 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 	}
 
 	filename_length = (int)strlen(filename);
+#ifndef PHP_WIN32
+	(void) filename_length;
+#endif
 
 	/* Relative path open */
 	if (*filename == '.' && (IS_SLASH(filename[1]) || filename[1] == '.')) {
