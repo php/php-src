@@ -851,7 +851,24 @@ static int add_oid_section(struct php_x509_request * req) /* {{{ */
 
 static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(zend_long algo);
 
-int openssl_spki_cleanup(const char *src, char *dest);
+/* {{{ strip line endings from spkac */
+static int openssl_spki_cleanup(const char *src, char *dest)
+{
+    int removed=0;
+
+    while (*src) {
+        if (*src!='\n'&&*src!='\r') {
+            *dest++=*src;
+        } else {
+            ++removed;
+        }
+        ++src;
+    }
+    *dest=0;
+    return removed;
+}
+/* }}} */
+
 
 static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args) /* {{{ */
 {
@@ -1712,24 +1729,6 @@ cleanup:
 	if (spkstr_cleaned != NULL) {
 		efree(spkstr_cleaned);
 	}
-}
-/* }}} */
-
-/* {{{ strip line endings from spkac */
-int openssl_spki_cleanup(const char *src, char *dest)
-{
-    int removed=0;
-
-    while (*src) {
-        if (*src!='\n'&&*src!='\r') {
-            *dest++=*src;
-        } else {
-            ++removed;
-        }
-        ++src;
-    }
-    *dest=0;
-    return removed;
 }
 /* }}} */
 
