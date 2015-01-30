@@ -2414,7 +2414,7 @@ consult the installation file that came with this distribution, or visit \n\
 						break;
 					case ZEND_HANDLE_MAPPED:
 						if (file_handle.handle.stream.mmap.buf[0] == '#') {
-						    int i = 1;
+						    size_t i = 1;
 
 						    c = file_handle.handle.stream.mmap.buf[i++];
 							while (c != '\n' && c != '\r' && i < file_handle.handle.stream.mmap.len) {

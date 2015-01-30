@@ -774,12 +774,21 @@ static inline ssize_t safe_write(fcgi_request *req, const void *buf, size_t coun
 	size_t n = 0;
 
 	do {
+#ifdef _WIN32
+		size_t tmp;
+#endif
 		errno = 0;
 #ifdef _WIN32
+		tmp = count - n;
+
 		if (!req->tcp) {
-			ret = write(req->fd, ((char*)buf)+n, count-n);
+			unsigned int out_len = tmp > UINT_MAX ? UINT_MAX : (unsigned int)tmp;
+
+			ret = write(req->fd, ((char*)buf)+n, out_len);
 		} else {
-			ret = send(req->fd, ((char*)buf)+n, count-n, 0);
+			int out_len = tmp > INT_MAX ? INT_MAX : (int)tmp;
+
+			ret = send(req->fd, ((char*)buf)+n, out_len, 0);
 			if (ret <= 0) {
 				errno = WSAGetLastError();
 			}
@@ -802,12 +811,21 @@ static inline ssize_t safe_read(fcgi_request *req, const void *buf, size_t count
 	size_t n = 0;
 
 	do {
+#ifdef _WIN32
+		size_t tmp;
+#endif
 		errno = 0;
 #ifdef _WIN32
+		tmp = count - n;
+
 		if (!req->tcp) {
-			ret = read(req->fd, ((char*)buf)+n, count-n);
+			unsigned int in_len = tmp > UINT_MAX ? UINT_MAX : (unsigned int)tmp;
+	
+			ret = read(req->fd, ((char*)buf)+n, in_len);
 		} else {
-			ret = recv(req->fd, ((char*)buf)+n, count-n, 0);
+			int in_len = tmp > INT_MAX ? INT_MAX : (int)tmp;
+
+			ret = recv(req->fd, ((char*)buf)+n, in_len, 0);
 			if (ret <= 0) {
 				errno = WSAGetLastError();
 			}
@@ -997,7 +1015,7 @@ static int fcgi_read_request(fcgi_request *req)
 			if ((value = zend_hash_str_find(&fcgi_mgmt_vars, q->var, q->var_len)) == NULL) {
 				continue;
 			}
-			zlen = Z_STRLEN_P(value);
+			zlen = (unsigned int)Z_STRLEN_P(value);
 			if ((p + 4 + 4 + q->var_len + zlen) >= (buf + sizeof(buf))) {
 				break;
 			}
@@ -1022,7 +1040,7 @@ static int fcgi_read_request(fcgi_request *req)
 			memcpy(p, Z_STRVAL_P(value), zlen);
 			p += zlen;
 		}
-		len = p - buf - sizeof(fcgi_header);
+		len = (int)(p - buf - sizeof(fcgi_header));
 		len += fcgi_make_header((fcgi_header*)buf, FCGI_GET_VALUES_RESULT, 0, len);
 		if (safe_write(req, buf, sizeof(fcgi_header)+len) != (int)sizeof(fcgi_header)+len) {
 			req->keep = 0;
@@ -1060,9 +1078,9 @@ int fcgi_read(fcgi_request *req, char *str, int len)
 		}
 
 		if (req->in_len >= rest) {
-			ret = safe_read(req, str, rest);
+			ret = (int)safe_read(req, str, rest);
 		} else {
-			ret = safe_read(req, str, req->in_len);
+			ret = (int)safe_read(req, str, req->in_len);
 		}
 		if (ret < 0) {
 			req->keep = 0;
@@ -1297,7 +1315,7 @@ static inline fcgi_header* open_packet(fcgi_request *req, fcgi_request_type type
 static inline void close_packet(fcgi_request *req)
 {
 	if (req->out_hdr) {
-		int len = req->out_pos - ((unsigned char*)req->out_hdr + sizeof(fcgi_header));
+		int len = (int)(req->out_pos - ((unsigned char*)req->out_hdr + sizeof(fcgi_header)));
 
 		req->out_pos += fcgi_make_header(req->out_hdr, (fcgi_request_type)req->out_hdr->type, req->id, len);
 		req->out_hdr = NULL;
@@ -1310,7 +1328,7 @@ int fcgi_flush(fcgi_request *req, int close)
 
 	close_packet(req);
 
-	len = req->out_pos - req->out_buf;
+	len = (int)(req->out_pos - req->out_buf);
 
 	if (close) {
 		fcgi_end_request_rec *rec = (fcgi_end_request_rec*)(req->out_pos);
@@ -1376,7 +1394,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 	}
 #else
 	/* Optimized version */
-	limit = sizeof(req->out_buf) - (req->out_pos - req->out_buf);
+	limit = (int)(sizeof(req->out_buf) - (req->out_pos - req->out_buf));
 	if (!req->out_hdr) {
 		limit -= sizeof(fcgi_header);
 		if (limit < 0) limit = 0;
@@ -1483,7 +1501,7 @@ char* fcgi_putenv(fcgi_request *req, char* var, int var_len, char* val)
 		fcgi_hash_del(&req->env, FCGI_HASH_FUNC(var, var_len), var, var_len);
 		return NULL;
 	} else {
-		return fcgi_hash_set(&req->env, FCGI_HASH_FUNC(var, var_len), var, var_len, val, strlen(val));
+		return fcgi_hash_set(&req->env, FCGI_HASH_FUNC(var, var_len), var, var_len, val, (unsigned int)strlen(val));
 	}
 }
 
@@ -1493,7 +1511,7 @@ char* fcgi_quick_putenv(fcgi_request *req, char* var, int var_len, unsigned int 
 		fcgi_hash_del(&req->env, hash_value, var, var_len);
 		return NULL;
 	} else {
-		return fcgi_hash_set(&req->env, hash_value, var, var_len, val, strlen(val));
+		return fcgi_hash_set(&req->env, hash_value, var, var_len, val, (unsigned int)strlen(val));
 	}
 }
 
