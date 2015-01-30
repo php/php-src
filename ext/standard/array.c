@@ -1877,26 +1877,49 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 	hash = Z_ARRVAL_P(array);
 	n_left = n_elems;
 
-	if (hash->nNumUsed != hash->nNumOfElements) {
-		for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
-			p = hash->arData + idx;
-			if (Z_TYPE(p->val) == IS_UNDEF) continue;
-			if (j != idx) {
-				hash->arData[j] = *p;
+	if (EXPECTED(hash->u.v.nIteratorsCount == 0)) {
+		if (hash->nNumUsed != hash->nNumOfElements) {
+			for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
+				p = hash->arData + idx;
+				if (Z_TYPE(p->val) == IS_UNDEF) continue;
+				if (j != idx) {
+					hash->arData[j] = *p;
+				}
+				j++;
 			}
-			j++;
+		}
+		while (--n_left) {
+			rnd_idx = php_rand();
+			RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
+			if (rnd_idx != n_left) {
+				temp = hash->arData[n_left];
+				hash->arData[n_left] = hash->arData[rnd_idx];
+				hash->arData[rnd_idx] = temp;
+			}
+		}
+	} else {
+		if (hash->nNumUsed != hash->nNumOfElements) {
+			for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
+				p = hash->arData + idx;
+				if (Z_TYPE(p->val) == IS_UNDEF) continue;
+				if (j != idx) {
+					hash->arData[j] = *p;
+					zend_hash_iterators_update(hash, idx, j);
+				}
+				j++;
+			}
+		}
+		while (--n_left) {
+			rnd_idx = php_rand();
+			RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
+			if (rnd_idx != n_left) {
+				temp = hash->arData[n_left];
+				hash->arData[n_left] = hash->arData[rnd_idx];
+				hash->arData[rnd_idx] = temp;
+				zend_hash_iterators_update(hash, rnd_idx, n_left);
+			}
 		}
 	}
-	while (--n_left) {
-		rnd_idx = php_rand();
-		RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
-		if (rnd_idx != n_left) {
-			temp = hash->arData[n_left];
-			hash->arData[n_left] = hash->arData[rnd_idx];
-			hash->arData[rnd_idx] = temp;
-		}
-	}
-
 	HANDLE_BLOCK_INTERRUPTIONS();
 	hash->nNumUsed = n_elems;
 	hash->nInternalPointer = 0;
@@ -2194,18 +2217,33 @@ PHP_FUNCTION(array_shift)
 	if (Z_ARRVAL_P(stack)->u.flags & HASH_FLAG_PACKED) {
 		uint32_t k = 0;
 
-		for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
-			p = Z_ARRVAL_P(stack)->arData + idx;
-			if (Z_TYPE(p->val) == IS_UNDEF) continue;
-			if (idx != k) {
-				Bucket *q = Z_ARRVAL_P(stack)->arData + k;
-				q->h = k;
-				q->key = NULL;
-				ZVAL_COPY_VALUE(&q->val, &p->val);
-				ZVAL_UNDEF(&p->val);
-				zend_hash_iterators_update(Z_ARRVAL_P(stack), idx, k);
+		if (EXPECTED(Z_ARRVAL_P(stack)->u.v.nIteratorsCount == 0)) {
+			for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
+				p = Z_ARRVAL_P(stack)->arData + idx;
+				if (Z_TYPE(p->val) == IS_UNDEF) continue;
+				if (idx != k) {
+					Bucket *q = Z_ARRVAL_P(stack)->arData + k;
+					q->h = k;
+					q->key = NULL;
+					ZVAL_COPY_VALUE(&q->val, &p->val);
+					ZVAL_UNDEF(&p->val);
+				}
+				k++;
 			}
-			k++;
+		} else {
+			for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
+				p = Z_ARRVAL_P(stack)->arData + idx;
+				if (Z_TYPE(p->val) == IS_UNDEF) continue;
+				if (idx != k) {
+					Bucket *q = Z_ARRVAL_P(stack)->arData + k;
+					q->h = k;
+					q->key = NULL;
+					ZVAL_COPY_VALUE(&q->val, &p->val);
+					ZVAL_UNDEF(&p->val);
+					zend_hash_iterators_update(Z_ARRVAL_P(stack), idx, k);
+				}
+				k++;
+			}
 		}
 		Z_ARRVAL_P(stack)->nNumUsed = k;
 		Z_ARRVAL_P(stack)->nNextFreeElement = k;
@@ -2258,21 +2296,46 @@ PHP_FUNCTION(array_unshift)
 		}
 		zend_hash_next_index_insert_new(&new_hash, &args[i]);
 	}
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
-		if (key) {
-			zend_hash_add_new(&new_hash, key, value);
-		} else {
-			zend_hash_next_index_insert_new(&new_hash, value);
-		}
-	} ZEND_HASH_FOREACH_END();
+	if (EXPECTED(Z_ARRVAL_P(stack)->u.v.nIteratorsCount == 0)) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
+			if (key) {
+				zend_hash_add_new(&new_hash, key, value);
+			} else {
+				zend_hash_next_index_insert_new(&new_hash, value);
+			}
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		uint32_t old_idx;
+		uint32_t new_idx = i;
 
-	new_hash.u.v.nIteratorsCount = Z_ARRVAL_P(stack)->u.v.nIteratorsCount;
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
+			if (key) {
+				zend_hash_add_new(&new_hash, key, value);
+			} else {
+				zend_hash_next_index_insert_new(&new_hash, value);
+			}
+			old_idx = (Bucket*)value - Z_ARRVAL_P(stack)->arData;
+			zend_hash_iterators_update(Z_ARRVAL_P(stack), old_idx, new_idx);
+			new_idx++;
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	/* replace HashTable data */
 	Z_ARRVAL_P(stack)->u.v.nIteratorsCount = 0;
 	Z_ARRVAL_P(stack)->pDestructor = NULL;
 	zend_hash_destroy(Z_ARRVAL_P(stack));
-	*Z_ARRVAL_P(stack) = new_hash;
+
+	Z_ARRVAL_P(stack)->u.v.flags         = new_hash.u.v.flags;
+	Z_ARRVAL_P(stack)->nTableSize        = new_hash.nTableSize;
+	Z_ARRVAL_P(stack)->nTableMask        = new_hash.nTableMask;
+	Z_ARRVAL_P(stack)->nNumUsed          = new_hash.nNumUsed;
+	Z_ARRVAL_P(stack)->nNumOfElements    = new_hash.nNumOfElements;
+	Z_ARRVAL_P(stack)->nNextFreeElement  = new_hash.nNextFreeElement;
+	Z_ARRVAL_P(stack)->arData            = new_hash.arData;
+	Z_ARRVAL_P(stack)->arHash            = new_hash.arHash;
+	Z_ARRVAL_P(stack)->pDestructor       = new_hash.pDestructor;
+	
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
-	zend_hash_iterators_reset(Z_ARRVAL_P(stack));
 
 	/* Clean up and return the number of elements in the stack */
 	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));

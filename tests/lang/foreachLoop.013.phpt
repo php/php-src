@@ -445,28 +445,12 @@ array(1) {
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
-     iteration 1:  $k=0; $v=new.0
-     iteration 2:  $k=0; $v=new.1
-     iteration 3:  $k=0; $v=new.2
-     iteration 4:  $k=0; $v=new.3
-     iteration 5:  $k=0; $v=new.4
-  ** Stuck in a loop! **
 --> State of array after loop:
-array(7) {
+array(2) {
   [0]=>
-  string(5) "new.5"
-  [1]=>
-  &string(5) "new.4"
-  [2]=>
-  string(5) "new.3"
-  [3]=>
-  string(5) "new.2"
-  [4]=>
-  string(5) "new.1"
-  [5]=>
   string(5) "new.0"
-  [6]=>
-  string(3) "v.0"
+  [1]=>
+  &string(3) "v.0"
 }
 
 ---( Array with 2 element(s): )---
@@ -479,30 +463,17 @@ array(2) {
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
-     iteration 1:  $k=0; $v=new.0
-     iteration 2:  $k=0; $v=new.1
-     iteration 3:  $k=0; $v=new.2
-     iteration 4:  $k=0; $v=new.3
-     iteration 5:  $k=0; $v=new.4
-  ** Stuck in a loop! **
+     iteration 1:  $k=2; $v=v.1
 --> State of array after loop:
-array(8) {
+array(4) {
   [0]=>
-  string(5) "new.5"
-  [1]=>
-  &string(5) "new.4"
-  [2]=>
-  string(5) "new.3"
-  [3]=>
-  string(5) "new.2"
-  [4]=>
   string(5) "new.1"
-  [5]=>
+  [1]=>
   string(5) "new.0"
-  [6]=>
+  [2]=>
   string(3) "v.0"
-  [7]=>
-  string(3) "v.1"
+  [3]=>
+  &string(3) "v.1"
 }
 
 ---( Array with 3 element(s): )---
@@ -517,32 +488,19 @@ array(3) {
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
-     iteration 1:  $k=0; $v=new.0
-     iteration 2:  $k=0; $v=new.1
-     iteration 3:  $k=0; $v=new.2
-     iteration 4:  $k=0; $v=new.3
-     iteration 5:  $k=0; $v=new.4
-  ** Stuck in a loop! **
+     iteration 1:  $k=3; $v=v.2
 --> State of array after loop:
-array(9) {
+array(5) {
   [0]=>
-  string(5) "new.5"
-  [1]=>
-  &string(5) "new.4"
-  [2]=>
-  string(5) "new.3"
-  [3]=>
-  string(5) "new.2"
-  [4]=>
   string(5) "new.1"
-  [5]=>
+  [1]=>
   string(5) "new.0"
-  [6]=>
+  [2]=>
   string(3) "v.0"
-  [7]=>
+  [3]=>
   string(3) "v.1"
-  [8]=>
-  string(3) "v.2"
+  [4]=>
+  &string(3) "v.2"
 }
 
 ---( Array with 4 element(s): )---
@@ -559,32 +517,19 @@ array(4) {
 }
 --> Do loop:
      iteration 0:  $k=0; $v=v.0
-     iteration 1:  $k=0; $v=new.0
-     iteration 2:  $k=0; $v=new.1
-     iteration 3:  $k=0; $v=new.2
-     iteration 4:  $k=0; $v=new.3
-     iteration 5:  $k=0; $v=new.4
-  ** Stuck in a loop! **
+     iteration 1:  $k=4; $v=v.3
 --> State of array after loop:
-array(10) {
+array(6) {
   [0]=>
-  string(5) "new.5"
-  [1]=>
-  &string(5) "new.4"
-  [2]=>
-  string(5) "new.3"
-  [3]=>
-  string(5) "new.2"
-  [4]=>
   string(5) "new.1"
-  [5]=>
+  [1]=>
   string(5) "new.0"
-  [6]=>
+  [2]=>
   string(3) "v.0"
-  [7]=>
+  [3]=>
   string(3) "v.1"
-  [8]=>
+  [4]=>
   string(3) "v.2"
-  [9]=>
-  string(3) "v.3"
+  [5]=>
+  &string(3) "v.3"
 }
