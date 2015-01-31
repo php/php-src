@@ -8,6 +8,8 @@
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
 - Core:
+  . Fixed #68933 (Invalid read of size 8 in zend_std_read_property). 
+    (Laruence, arjen at react dot com)
   . Fixed #68868 (Segfault in clean_non_persistent_constants() in SugarCRM 
     6.5.20). (Laruence)
   . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
