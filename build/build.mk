@@ -22,15 +22,16 @@ SUBDIRS = Zend TSRM
 
 STAMP = buildmk.stamp
 
-all: $(STAMP) generated_lists
+ALWAYS = generated_lists
+
+
+all: $(STAMP) $(ALWAYS)
 	@$(MAKE) -s -f build/build2.mk
 
-generated_lists: ALWAYS
+generated_lists:
 	@echo makefile_am_files = Zend/Makefile.am TSRM/Makefile.am > $@
 	@echo config_m4_files = Zend/Zend.m4 TSRM/tsrm.m4 TSRM/threads.m4 \
 		Zend/acinclude.m4 ext/*/config*.m4 sapi/*/config.m4 >> $@
-
-ALWAYS:
 
 $(STAMP): build/buildcheck.sh
 	@build/buildcheck.sh $(STAMP)
