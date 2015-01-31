@@ -2945,8 +2945,9 @@ ZEND_VM_C_LABEL(fcall_end):
 
 ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 {
+#if OP1_TYPE != IS_UNUSED
 	USE_OPLINE
-
+#endif
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_UNUSED) {
 		zend_verify_missing_return_type(EX(func));
