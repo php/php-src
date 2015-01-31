@@ -291,7 +291,7 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 				/* NUL terminate it and */
 				buf[dirname_len + entry_len + 1] = '\0';
 
-				/* check whether its last access was more than maxlifet ago */
+				/* check whether its last access was more than maxlifetime ago */
 				if (VCWD_STAT(buf, &sbuf) == 0 &&
 						(now - sbuf.st_mtime) > maxlifetime) {
 					VCWD_UNLINK(buf);
