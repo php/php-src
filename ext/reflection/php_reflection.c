@@ -2510,10 +2510,7 @@ ZEND_METHOD(reflection_parameter, getClassName)
 
 			RETURN_STRINGL(class_name, class_name_len);
 		} else {
-			class_name = param->arg_info->class_name->val;
-			class_name_len = param->arg_info->class_name->len;
-
-			RETURN_STR(param->arg_info->class_name);
+			ZVAL_STR_COPY(return_value, param->arg_info->class_name);
 		}
 	}
 }
