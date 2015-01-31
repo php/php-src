@@ -193,7 +193,7 @@ ZEND_API void zend_hash_set_apply_protection(HashTable *ht, zend_bool bApplyProt
 	}
 }
 
-ZEND_API uint32_t zend_hash_iterator_add(HashTable *ht)
+ZEND_API uint32_t zend_hash_iterator_add(HashTable *ht, HashPosition pos)
 {
 	HashTableIterator *iter = EG(ht_iterators);
 	HashTableIterator *end  = iter + EG(ht_iterators_count);
@@ -205,7 +205,7 @@ ZEND_API uint32_t zend_hash_iterator_add(HashTable *ht)
 	while (iter != end) {
 		if (iter->ht == NULL) {
 			iter->ht = ht;
-			iter->pos = ht->nInternalPointer;
+			iter->pos = pos;
 			idx = iter - EG(ht_iterators);
 			if (idx + 1 > EG(ht_iterators_used)) {
 				EG(ht_iterators_used) = idx + 1;
@@ -223,7 +223,7 @@ ZEND_API uint32_t zend_hash_iterator_add(HashTable *ht)
 	iter = EG(ht_iterators) + EG(ht_iterators_count);
 	EG(ht_iterators_count) += 8;
 	iter->ht = ht;
-	iter->pos = ht->nInternalPointer;
+	iter->pos = pos;
 	memset(iter + 1, 0, sizeof(HashTableIterator) * 7);
 	idx = iter - EG(ht_iterators);
 	EG(ht_iterators_used) = idx + 1;

@@ -3104,7 +3104,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER
 				pos++;
 			}
 			fe_ht->nInternalPointer = pos;
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
@@ -3213,7 +3213,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 			pos++;
 		}
 		fe_ht->nInternalPointer = pos;
-		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -3248,7 +3248,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 				pos++;
 			}
 			fe_ht->nInternalPointer = pos;
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
@@ -9101,7 +9101,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 				pos++;
 			}
 			fe_ht->nInternalPointer = pos;
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
@@ -9211,7 +9211,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 			pos++;
 		}
 		fe_ht->nInternalPointer = pos;
-		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -9246,7 +9246,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 				pos++;
 			}
 			fe_ht->nInternalPointer = pos;
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
@@ -12001,7 +12001,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 				pos++;
 			}
 			fe_ht->nInternalPointer = pos;
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			zval_ptr_dtor_nogc(free_op1);
 			CHECK_EXCEPTION();
@@ -12112,7 +12112,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 			pos++;
 		}
 		fe_ht->nInternalPointer = pos;
-		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 		CHECK_EXCEPTION();
@@ -12148,7 +12148,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 				pos++;
 			}
 			fe_ht->nInternalPointer = pos;
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 			CHECK_EXCEPTION();
@@ -24470,7 +24470,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 				pos++;
 			}
 			fe_ht->nInternalPointer = pos;
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
@@ -24579,7 +24579,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 			pos++;
 		}
 		fe_ht->nInternalPointer = pos;
-		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 		CHECK_EXCEPTION();
 		ZEND_VM_NEXT_OPCODE();
@@ -24614,7 +24614,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 				pos++;
 			}
 			fe_ht->nInternalPointer = pos;
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht);
+			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();

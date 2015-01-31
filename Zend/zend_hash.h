@@ -226,7 +226,7 @@ void zend_hash_display(const HashTable *ht);
 ZEND_API int _zend_handle_numeric_str_ex(const char *key, size_t length, zend_ulong *idx);
 
 
-ZEND_API uint32_t     zend_hash_iterator_add(HashTable *ht);
+ZEND_API uint32_t     zend_hash_iterator_add(HashTable *ht, HashPosition pos);
 ZEND_API HashPosition zend_hash_iterator_pos(uint32_t idx, HashTable *ht);
 ZEND_API void         zend_hash_iterator_del(uint32_t idx);
 ZEND_API HashPosition zend_hash_iterators_lower_pos(HashTable *ht, HashPosition start);
