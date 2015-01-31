@@ -225,6 +225,11 @@ struct _zend_executor_globals {
 	zend_bool active;
 	zend_bool valid_symbol_table;
 
+	uint32_t           ht_iterators_count;     /* number of allocatd slots */
+	uint32_t           ht_iterators_used;      /* number of used slots */
+	HashTableIterator *ht_iterators;
+	HashTableIterator  ht_iterators_slots[16];
+
 	void *saved_fpu_cw_ptr;
 #if XPFPA_HAVE_CW
 	XPFPA_CW_DATATYPE saved_fpu_cw;
