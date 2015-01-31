@@ -1061,7 +1061,9 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 #ifdef HAVE_DTRACE
 	if(DTRACE_ERROR_ENABLED()) {
 		char *dtrace_error_buffer;
-		va_start(args, format);
+#if !defined(ZEND_WIN32) && !defined(DARWIN)
+    	va_start(args, format);
+#endif
 		zend_vspprintf(&dtrace_error_buffer, 0, format, args);
 		DTRACE_ERROR(dtrace_error_buffer, (char *)error_filename, error_lineno);
 		efree(dtrace_error_buffer);
