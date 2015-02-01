@@ -4,7 +4,7 @@ The PHP Interpreter
 This is the github mirror of the official PHP repository located at
 http://git.php.net.
 
-[![Build Status](https://secure.travis-ci.org/php/php-src.png?branch=master)](http://travis-ci.org/php/php-src)
+[![Build Status](https://secure.travis-ci.org/php/php-src.svg?branch=master)](http://travis-ci.org/php/php-src)
 
 Pull Requests
 =============
