@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.5.22
 
+- Core:
+  . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
+    buffer overflow). (Stas)
 
 - Date:
   . Fixed bug #45081 (strtotime incorrectly interprets SGT time zone). (Derick)
