@@ -874,7 +874,7 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 }
 #endif
 
-static void zend_verify_return_type(zend_function *zf, zval *ret)
+static void zend_verify_return_type(zend_function *zf, zval *ret, zend_bool strict)
 {
 	zend_arg_info *ret_info = zf->common.arg_info - 1;
 	char *need_msg;
@@ -909,7 +909,7 @@ failure:
 				}
 				return;
 			}
-			if (!zend_verify_scalar_type_hint(ret_info->type_hint, ret, 1)) {
+			if (!zend_verify_scalar_type_hint(ret_info->type_hint, ret, strict)) {
 				goto failure;
 			}
 		}

@@ -1902,7 +1902,8 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info) /* {{{ */
 {
 	if (return_info->type_hint != IS_UNDEF) {
-		zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
+		zend_op *opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
+		opline->extended_value = (CG(declarables).strict_types ? 1 : 0);
 	}
 }
 /* }}} */
@@ -3238,7 +3239,18 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	}
 
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		zend_emit_return_type_check(&expr_node, CG(active_op_array)->arg_info - 1);
+		zend_arg_info *arg_info = CG(active_op_array)->arg_info - 1;
+
+		/* for scalar, weak return types, the value may be casted
+		 * thus, for constants, we need to store them in a tmp var
+		 */
+		if (expr_node.op_type == IS_CONST && !CG(declarables).strict_types) {
+			znode expr_node_copy = expr_node;
+
+			zend_emit_op_tmp(&expr_node, ZEND_QM_ASSIGN, &expr_node_copy, NULL);
+		}
+
+		zend_emit_return_type_check(&expr_node, arg_info);
 		if (expr_node.op_type == IS_CONST) {
 			zval_copy_ctor(&expr_node.u.constant);
 		}
