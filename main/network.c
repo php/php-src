@@ -105,10 +105,6 @@ const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 # define PHP_TIMEOUT_ERROR_VALUE		ETIMEDOUT
 #endif
 
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 255
-#endif
-
 #if HAVE_GETADDRINFO
 #ifdef HAVE_GAI_STRERROR
 #  define PHP_GAI_STRERROR(x) (gai_strerror(x))
@@ -250,7 +246,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 #else
 	if (!inet_aton(host, &in)) {
 		/* XXX NOT THREAD SAFE (is safe under win32) */
-		if(strlen(host) > MAXHOSTNAMELEN) {
+		if(strlen(host) > MAXFQDNLEN) {
 			host_info = NULL;
 			errno = E2BIG;
 		} else {

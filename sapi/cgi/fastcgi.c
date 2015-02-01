@@ -28,6 +28,10 @@
 #include <stdarg.h>
 #include <errno.h>
 
+#ifndef MAXFQDNLEN
+#define MAXFQDNLEN 255
+#endif
+
 #ifdef _WIN32
 
 #include <windows.h>
@@ -616,7 +620,7 @@ int fcgi_listen(const char *path, int backlog)
 			if (sa.sa_inet.sin_addr.s_addr == INADDR_NONE) {
 				struct hostent *hep;
 
-				if(strlen(host) > MAXHOSTNAMELEN) {
+				if(strlen(host) > MAXFQDNLEN) {
 					hep = NULL;
 				} else {
 					hep = gethostbyname(host);
