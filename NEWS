@@ -3,10 +3,10 @@
 ?? Feb 2015, PHP 5.6.6
 
 - Core:
-  . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
-    buffer overflow). (Stas)
   . Fixed bug #67068 (getClosure returns somethings that's not a closure).
     (Danack at basereality dot com)
+  . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
+    buffer overflow). (Stas)
 
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
@@ -23,6 +23,7 @@
     gifs). (Anatol)
 
 - FPM:
+  . Fixed bug #66479 (Wrong response to FCGI_GET_VALUES). (Frank Stolle)
   . Fixed bug #68571 (core dump when webserver close the socket).
     (redfoxli069 at gmail dot com, Laruence)
 
