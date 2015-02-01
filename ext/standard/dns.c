@@ -222,9 +222,9 @@ PHP_FUNCTION(gethostbyname)
 		return;
 	}
 
-	if(hostname_len > MAXHOSTNAMELEN) {
+	if(hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
-		php_error_docref(NULL, E_WARNING, "Host name is too long, the limit is %d characters", MAXHOSTNAMELEN);
+		php_error_docref(NULL, E_WARNING, "Host name is too long, the limit is %d characters", MAXFQDNLEN);
 		RETURN_STRINGL(hostname, hostname_len, 1);
 	}
 	addr = php_gethostbyname(hostname);
@@ -247,9 +247,9 @@ PHP_FUNCTION(gethostbynamel)
 		return;
 	}
 
-	if(hostname_len > MAXHOSTNAMELEN) {
+	if(hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
-		php_error_docref(NULL, E_WARNING, "Host name is too long, the limit is %d characters", MAXHOSTNAMELEN);
+		php_error_docref(NULL, E_WARNING, "Host name is too long, the limit is %d characters", MAXFQDNLEN);
 		RETURN_FALSE;
 	}
 
