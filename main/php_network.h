@@ -313,6 +313,10 @@ END_EXTERN_C()
 
 /* }}} */
 
+#ifndef MAXFQDNLEN
+#define MAXFQDNLEN 255
+#endif
+
 #endif /* _PHP_NETWORK_H */
 
 /*
