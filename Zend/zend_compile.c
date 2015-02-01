@@ -3909,19 +3909,24 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 			arg_infos->type_hint = return_type_ast->attr;
 		} else {
 			zend_string *class_name = zend_ast_get_str(return_type_ast);
+			zend_uchar type = zend_lookup_scalar_typehint_by_name(class_name);
 
-			if (zend_is_const_default_class_ref(return_type_ast)) {
-				class_name = zend_resolve_class_name_ast(return_type_ast);
+			if (type != 0) {
+				arg_infos->type_hint = type;
 			} else {
-				zend_string_addref(class_name);
-				if (!is_method) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare a return type of %s outside of a class scope", class_name->val);
-					return;
+				if (zend_is_const_default_class_ref(return_type_ast)) {
+					class_name = zend_resolve_class_name_ast(return_type_ast);
+				} else {
+					zend_string_addref(class_name);
+					if (!is_method) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare a return type of %s outside of a class scope", class_name->val);
+						return;
+					}
 				}
-			}
 
-			arg_infos->type_hint = IS_OBJECT;
-			arg_infos->class_name = class_name;
+				arg_infos->type_hint = IS_OBJECT;
+				arg_infos->class_name = class_name;
+			}
 		}
 
 		arg_infos++;

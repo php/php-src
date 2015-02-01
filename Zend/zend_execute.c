@@ -901,10 +901,17 @@ static void zend_verify_return_type(zend_function *zf, zval *ret)
 			if (!zend_is_callable(ret, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
 				zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be callable", "", zend_zval_type_name(ret), "");
 			}
-#if ZEND_DEBUG
-		} else {
-			zend_error(E_ERROR, "Unknown typehint");
-#endif
+		} else if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(ret)))) {
+			if (Z_TYPE_P(ret) == IS_NULL) {
+				if (!ret_info->allow_null) {
+failure:
+					zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
+				}
+				return;
+			}
+			if (!zend_verify_scalar_type_hint(ret_info->type_hint, ret, 1)) {
+				goto failure;
+			}
 		}
 	}
 }
@@ -926,10 +933,8 @@ static inline int zend_verify_missing_return_type(zend_function *zf)
 			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type array", "", "none", "");
 		} else if (ret_info->type_hint == IS_CALLABLE) {
 			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be callable", "", "none", "");
-#if ZEND_DEBUG
 		} else {
-			zend_error(E_ERROR, "Unknown typehint");
-#endif
+			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), "none", "");
 		}
 		return 0;
 	}
