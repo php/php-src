@@ -1021,6 +1021,7 @@ static int fcgi_read_request(fcgi_request *req)
 		q = req->env.list;
 		while (q != NULL) {
 			if ((value = zend_hash_str_find(&fcgi_mgmt_vars, q->var, q->var_len)) == NULL) {
+				q = q->list_next;
 				continue;
 			}
 			zlen = (unsigned int)Z_STRLEN_P(value);
@@ -1047,6 +1048,7 @@ static int fcgi_read_request(fcgi_request *req)
 			p += q->var_len;
 			memcpy(p, Z_STRVAL_P(value), zlen);
 			p += zlen;
+			q = q->list_next;
 		}
 		len = (int)(p - buf - sizeof(fcgi_header));
 		len += fcgi_make_header((fcgi_header*)buf, FCGI_GET_VALUES_RESULT, 0, len);
