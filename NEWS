@@ -26,6 +26,10 @@
   . Fixed bug #68571 (core dump when webserver close the socket).
     (redfoxli069 at gmail dot com, Laruence)
 
+- LIBXML:
+  . Fixed bug #64938 (libxml_disable_entity_loader setting is shared
+    between threads). (Martin Jansen)
+
 - Opcache:
   . Fixed bug with try blocks being removed when extended_info opcode
     generation is turned on. (Laruence)
