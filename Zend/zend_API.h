@@ -353,12 +353,15 @@ ZEND_API char *zend_get_type_by_const(int type);
 #define getThis()							(Z_OBJ(EX(This)) ? &EX(This) : NULL)
 #define ZEND_IS_METHOD_CALL()				(EX(func)->common.scope != NULL)
 
-#define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT((ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0)
-#define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	ZEND_WRONG_PARAM_COUNT_WITH_RETVAL((ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0, ret)
+#define WRONG_PARAM_COUNT					_ZEND_WRONG_PARAM_COUNT((ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0)
+#define WRONG_PARAM_COUNT_WITH_RETVAL(ret)	_ZEND_WRONG_PARAM_COUNT_WITH_RETVAL((ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0, ret)
 #define ARG_COUNT(dummy)					EX_NUM_ARGS()
 #define ZEND_NUM_ARGS()						EX_NUM_ARGS()
-#define ZEND_WRONG_PARAM_COUNT(strict)						{ _zend_wrong_param_count(strict); return; }
-#define ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(strict, ret)		{ _zend_wrong_param_count(strict); return ret; }
+/* These are prefixed with underscores for a reason: don't use them directly
+ * Use WRONG_PARAM_COUNT;
+ */
+#define _ZEND_WRONG_PARAM_COUNT(strict)						{ _zend_wrong_param_count(strict); return; }
+#define _ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(strict, ret)		{ _zend_wrong_param_count(strict); return ret; }
 
 #ifndef ZEND_WIN32
 #define DLEXPORT
