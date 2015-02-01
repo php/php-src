@@ -2,6 +2,10 @@
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2015, PHP 5.6.6
 
+- Core:
+  . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
+    buffer overflow). (Stas)
+
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
