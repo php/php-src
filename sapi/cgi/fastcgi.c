@@ -611,7 +611,11 @@ int fcgi_listen(const char *path, int backlog)
 			if (sa.sa_inet.sin_addr.s_addr == INADDR_NONE) {
 				struct hostent *hep;
 
-				hep = gethostbyname(host);
+				if(strlen(host) > MAXHOSTNAMELEN) {
+					hep = NULL;
+				} else {
+					hep = gethostbyname(host);
+				}
 				if (!hep || hep->h_addrtype != AF_INET || !hep->h_addr_list[0]) {
 					fprintf(stderr, "Cannot resolve host name '%s'!\n", host);
 					return -1;
