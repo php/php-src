@@ -31,45 +31,6 @@
 
 #include "zend_llist.h"
 
-struct _scalar_typehint_info {
-	const char* name;
-	const size_t name_len;
-	const zend_uchar type;
-};
-
-static const struct _scalar_typehint_info scalar_typehints[] = {
-	{"int", sizeof("int") - 1, IS_LONG},
-	{"integer", sizeof("integer") - 1, IS_LONG},
-	{"float", sizeof("float") - 1, IS_DOUBLE},
-	{"string", sizeof("string") - 1, IS_STRING},
-	{"bool", sizeof("bool") - 1, _IS_BOOL},
-	{"boolean", sizeof("boolean") - 1, _IS_BOOL},
-	{NULL, 0, IS_UNDEF}
-};
-
-static zend_always_inline void zend_assert_valid_class_name(const zend_string *const_name)
-{
-	const struct _scalar_typehint_info *info = &scalar_typehints[0];
-	const char *end_slash = strrchr(const_name->val, '\\');
-	zend_string *name = (zend_string*)const_name;
-	
-	if (end_slash) {
-		end_slash++;
-		name = zend_string_init(end_slash, strlen(end_slash), 0);
-	}
-
-	while (info->name) {
-		if (name->len == info->name_len && zend_binary_strcasecmp(name->val, name->len, info->name, info->name_len) == 0) {
-			zend_error_noreturn(E_COMPILE_ERROR, "\"%s\" cannot be used as a class name", name->val);
-		}
-		info++;
-	}
-
-	if (end_slash) {
-		zend_string_release(name);
-	}
-}
-
 #define DEBUG_ZEND 0
 
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
@@ -776,6 +737,8 @@ ZEND_API size_t zend_dirname(char *path, size_t len);
 int zendlex(zend_parser_stack_elem *elem);
 
 int zend_add_literal(zend_op_array *op_array, zval *zv);
+
+ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 /* BEGIN: OPCODES */
 

@@ -139,6 +139,71 @@ static zend_bool zend_get_unqualified_name(const zend_string *name, const char *
 }
 /* }}} */
 
+struct _scalar_typehint_info {
+	const char* name;
+	const size_t name_len;
+	const zend_uchar type;
+};
+
+static const struct _scalar_typehint_info scalar_typehints[] = {
+	{"int", sizeof("int") - 1, IS_LONG},
+	{"integer", sizeof("integer") - 1, IS_LONG},
+	{"float", sizeof("float") - 1, IS_DOUBLE},
+	{"string", sizeof("string") - 1, IS_STRING},
+	{"bool", sizeof("bool") - 1, _IS_BOOL},
+	{"boolean", sizeof("boolean") - 1, _IS_BOOL},
+	{NULL, 0, IS_UNDEF}
+};
+
+static zend_always_inline const struct _scalar_typehint_info* zend_find_scalar_typehint(const zend_string *const_name) /* {{{ */
+{
+	const struct _scalar_typehint_info *info = &scalar_typehints[0];
+	const char *uqname;
+	size_t uqname_len;
+
+	if (!zend_get_unqualified_name(const_name, &uqname, &uqname_len)) {
+		uqname = const_name->val;
+		uqname_len = const_name->len;
+	}
+	
+	while (info->name) {
+		if (uqname_len == info->name_len && zend_binary_strcasecmp(uqname, uqname_len, info->name, info->name_len) == 0) {
+			break;
+		}
+		info++;
+	}
+
+	if (info->name) {
+		return info;
+	} else {
+		return NULL;
+	}
+}
+/* }}} */
+
+ZEND_API void zend_assert_valid_class_name(const zend_string *const_name) /* {{{ */
+{	
+	const struct _scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
+	
+	if (info) {
+		zend_error_noreturn(E_COMPILE_ERROR, "\"%s\" cannot be used as a class name", info->name);
+	}
+}
+/* }}} */
+
+static zend_always_inline zend_uchar zend_lookup_scalar_typehint_by_name(const zend_string *const_name) /* {{{ */
+{	
+	const struct _scalar_typehint_info *info = zend_find_scalar_typehint(const_name);
+	
+	if (info) {
+		return info->type;
+	} else {
+		return 0;
+	}
+}
+/* }}} */
+
+
 static void init_compiler_declarables(void) /* {{{ */
 {
 	ZVAL_LONG(&CG(declarables).ticks, 0);
@@ -3962,15 +4027,12 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 				}
 			} else {
 				zend_string *class_name = zend_ast_get_str(type_ast);
-				const struct _scalar_typehint_info *info = &scalar_typehints[0];
+				zend_uchar type;
 
-				while (info->name) {
-					if (class_name->len == info->name_len
-						&& zend_binary_strcasecmp(class_name->val, info->name_len, info->name, info->name_len) == 0) {
-						arg_info->type_hint = info->type;
-						goto done;
-					}
-					info++;
+				type = zend_lookup_scalar_typehint_by_name(class_name);
+				if (type != 0) {
+					arg_info->type_hint = type;
+					goto done;
 				}
 				
 				if (zend_is_const_default_class_ref(type_ast)) {
