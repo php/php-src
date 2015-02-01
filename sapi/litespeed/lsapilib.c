@@ -1449,9 +1449,9 @@ int LSAPI_ReqBodyGetLine_r( LSAPI_Request * pReq, char * pBuf, size_t bufLen, in
     {
 
         len = pReq->m_bufRead - pReq->m_bufProcessed;
-        if ( len == 0 )
+        if ( len <= 0 )
         {
-            if ( (len = readBodyToReqBuf( pReq )) == 0 )
+            if ( (len = readBodyToReqBuf( pReq )) <= 0 )
             {
                 *getLF = 1;
                 break;
@@ -1517,7 +1517,7 @@ ssize_t LSAPI_ReadReqBody_r( LSAPI_Request * pReq, char * pBuf, size_t bufLen )
             pBuf += len;
             bufLen -= len;
         }
-        else if ( len == 0 )
+        else if ( len <= 0 )
         {
             if ( !total)
                 return -1;
