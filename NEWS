@@ -56,6 +56,10 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #68941 (mod_files.sh is a bash-script) (bugzilla at ii.nl, Yasuo)
 
+- Standard:
+  . Fixed bug #65272 (flock() out parameter not set correctly in windows).
+    (Daniel Lowrey)
+
 - Streams:
   . Fixed bug which caused call after final close on streams filter. (Bob)
 
