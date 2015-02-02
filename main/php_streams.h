@@ -259,6 +259,12 @@ END_EXTERN_C()
 		RETURN_FALSE; \
 	} \
 } while (0)
+#define php_stream_from_res(xstr, res)	do { \
+	if (((xstr) = (php_stream*)zend_fetch_resource2((res), \
+			   	"stream", NULL, php_file_le_stream(), php_file_le_pstream())) == NULL) { \
+		RETURN_FALSE; \
+	} \
+} while (0)
 #define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), "stream", NULL, php_file_le_stream(), php_file_le_pstream())
 
 BEGIN_EXTERN_C()
