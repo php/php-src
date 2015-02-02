@@ -53,6 +53,10 @@
   . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong 
     required_num_args). (Julien)
 
+- Standard:
+  . Fixed bug #65272 (flock() out parameter not set correctly in windows).
+    (Daniel Lowrey)
+
 - Mysqli:
   . Fixed bug #68114 (linker error on some OS X machines with fixed
     width decimal support) (Keyur Govande)
