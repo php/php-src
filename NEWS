@@ -8,6 +8,8 @@
   . Update the MIME type list from the one shipped by Apache HTTPD. (Adam)
 
 - Core:
+  . Fixed #68933 (Invalid read of size 8 in zend_std_read_property). 
+    (Laruence, arjen at react dot com)
   . Fixed #68868 (Segfault in clean_non_persistent_constants() in SugarCRM 
     6.5.20). (Laruence)
   . Fixed bug #68104 (Segfault while pre-evaluating a disabled function).
@@ -44,6 +46,9 @@
   . Removed dl() function on fpm-fcgi. (Nikita)
   . Removed support for hexadecimal numeric strings. (Nikita)
 
+- Curl:
+  . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
+
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
     internally. (Derick)
@@ -66,6 +71,7 @@
   . New FILTER_VALIDATE_DOMAIN and better RFC conformance for FILTER_VALIDATE_URL. (Kevin Dunglas)
 
 - FPM:
+  . Fixed bug #68945 (Unknown admin values segfault pools) (Laruence)
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
   . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 

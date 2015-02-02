@@ -425,7 +425,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header)
 		char *value = NULL;
 
 		if (php_rfc1867_encoding_translation()) {
-			self->input_encoding = zend_multibyte_encoding_detector(line, strlen(line), self->detect_order, self->detect_order_size);
+			self->input_encoding = zend_multibyte_encoding_detector((const unsigned char *) line, strlen(line), self->detect_order, self->detect_order_size);
 		}
 
 		/* space in the beginning means same header */

@@ -102,7 +102,7 @@ typedef struct _zend_smm_shared_globals {
     /* Amount of free shared memory */
     size_t                     shared_free;
     /* Amount of shared memory allocated by garbage */
-    int                        wasted_shared_memory;
+    size_t                     wasted_shared_memory;
     /* No more shared memory flag */
     zend_bool                  memory_exhausted;
     /* Saved Shared Allocator State */

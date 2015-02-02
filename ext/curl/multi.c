@@ -105,6 +105,10 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 		return;
 	}
 
+	if (Z_RES_P(z_ch)->ptr == NULL) {
+		return;
+	}
+
 	ch = zend_fetch_resource(z_ch, -1, le_curl_name, NULL, 1, le_curl);
 	if (!ch) {
 		return;
@@ -341,9 +345,11 @@ void _php_curl_multi_close(zend_resource *rsrc) /* {{{ */
 
 		for (pz_ch = (zval *)zend_llist_get_first_ex(&mh->easyh, &pos); pz_ch;
 			pz_ch = (zval *)zend_llist_get_next_ex(&mh->easyh, &pos)) {
-
-			ch = (php_curl *) zend_fetch_resource(pz_ch, -1, le_curl_name, NULL, 1, le_curl);
-			_php_curl_verify_handlers(ch, 0);
+			/* ptr is NULL means it already be freed */
+			if (Z_RES_P(pz_ch)->ptr) {
+				ch = (php_curl *) zend_fetch_resource(pz_ch, -1, le_curl_name, NULL, 1, le_curl);
+				_php_curl_verify_handlers(ch, 0);
+			}
 		}
 
 		curl_multi_cleanup(mh->multi);

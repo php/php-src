@@ -876,7 +876,7 @@ PHPDBG_COMMAND(sh) /* {{{ */
 	FILE *fd = NULL;
 	if ((fd=VCWD_POPEN((char*)param->str, "w"))) {
 		/* TODO: do something perhaps ?? do we want input ?? */
-		fclose(fd);
+		pclose(fd);
 	} else {
 		phpdbg_error("sh", "type=\"failure\" smd=\"%s\"", "Failed to execute %s", param->str);
 	}

@@ -1125,7 +1125,10 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 	$stat = proc_get_status($proc);
 
 	if ($stat['signaled']) {
-		$data .= "\nTermsig=" . $stat['stopsig'];
+		$data .= "\nTermsig=" . $stat['stopsig'] . "\n";
+	}
+	if ($stat["exitcode"] > 128 && $stat["exitcode"] < 160) {
+		$data .= "\nTermsig=" . ($stat["exitcode"] - 128) . "\n";
 	}
 
 	$code = proc_close($proc);

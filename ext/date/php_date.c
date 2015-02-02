@@ -1441,7 +1441,7 @@ PHPAPI zend_long php_parse_date(char *string, zend_long *now)
    Convert string representation of date and time to a timestamp */
 PHP_FUNCTION(strtotime)
 {
-	char *times, *initial_ts;
+	char *times;
 	size_t   time_len;
 	int error1, error2;
 	struct timelib_error_container *error;
