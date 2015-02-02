@@ -67,7 +67,7 @@ ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
 
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
-	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2
+	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
 ) {
 	zend_ast_decl *ast;
 
@@ -83,6 +83,7 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	ast->child[0] = child0;
 	ast->child[1] = child1;
 	ast->child[2] = child2;
+	ast->child[3] = child3;
 
 	return (zend_ast *) ast;
 }
@@ -396,6 +397,7 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 			zend_ast_destroy_ex(decl->child[0], free);
 			zend_ast_destroy_ex(decl->child[1], free);
 			zend_ast_destroy_ex(decl->child[2], free);
+			zend_ast_destroy_ex(decl->child[3], free);
 			break;
 		}
 		default:

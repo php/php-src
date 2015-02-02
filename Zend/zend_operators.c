@@ -2664,7 +2664,7 @@ ZEND_API zend_uchar is_numeric_str_function(const zend_string *str, zend_long *l
 ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_long *lval, double *dval, int allow_errors, int *oflow_info) /* {{{ */
 {
 	const char *ptr;
-	int base = 10, digits = 0, dp_or_e = 0;
+	int digits = 0, dp_or_e = 0;
 	double local_dval = 0.0;
 	zend_uchar type;
 
@@ -2689,13 +2689,6 @@ ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_l
 	}
 
 	if (ZEND_IS_DIGIT(*ptr)) {
-		/* Handle hex numbers
-		 * str is used instead of ptr to disallow signs and keep old behavior */
-		if (length > 2 && *str == '0' && (str[1] == 'x' || str[1] == 'X')) {
-			base = 16;
-			ptr += 2;
-		}
-
 		/* Skip any leading 0s */
 		while (*ptr == '0') {
 			ptr++;
@@ -2706,42 +2699,30 @@ ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_l
 		 * a full match, stop when there are too many digits for a long */
 		for (type = IS_LONG; !(digits >= MAX_LENGTH_OF_LONG && (dval || allow_errors == 1)); digits++, ptr++) {
 check_digits:
-			if (ZEND_IS_DIGIT(*ptr) || (base == 16 && ZEND_IS_XDIGIT(*ptr))) {
+			if (ZEND_IS_DIGIT(*ptr)) {
 				continue;
-			} else if (base == 10) {
-				if (*ptr == '.' && dp_or_e < 1) {
-					goto process_double;
-				} else if ((*ptr == 'e' || *ptr == 'E') && dp_or_e < 2) {
-					const char *e = ptr + 1;
+			} else if (*ptr == '.' && dp_or_e < 1) {
+				goto process_double;
+			} else if ((*ptr == 'e' || *ptr == 'E') && dp_or_e < 2) {
+				const char *e = ptr + 1;
 
-					if (*e == '-' || *e == '+') {
-						ptr = e++;
-					}
-					if (ZEND_IS_DIGIT(*e)) {
-						goto process_double;
-					}
+				if (*e == '-' || *e == '+') {
+					ptr = e++;
+				}
+				if (ZEND_IS_DIGIT(*e)) {
+					goto process_double;
 				}
 			}
 
 			break;
 		}
 
-		if (base == 10) {
-			if (digits >= MAX_LENGTH_OF_LONG) {
-				if (oflow_info != NULL) {
-					*oflow_info = *str == '-' ? -1 : 1;
-				}
-				dp_or_e = -1;
-				goto process_double;
-			}
-		} else if (!(digits < SIZEOF_ZEND_LONG * 2 || (digits == SIZEOF_ZEND_LONG * 2 && ptr[-digits] <= '7'))) {
-			if (dval) {
-				local_dval = zend_hex_strtod(str, &ptr);
-			}
+		if (digits >= MAX_LENGTH_OF_LONG) {
 			if (oflow_info != NULL) {
-				*oflow_info = 1;
+				*oflow_info = *str == '-' ? -1 : 1;
 			}
-			type = IS_DOUBLE;
+			dp_or_e = -1;
+			goto process_double;
 		}
 	} else if (*ptr == '.' && ZEND_IS_DIGIT(ptr[1])) {
 process_double:
@@ -2785,7 +2766,7 @@ process_double:
 		}
 
 		if (lval) {
-			*lval = ZEND_STRTOL(str, NULL, base);
+			*lval = ZEND_STRTOL(str, NULL, 10);
 		}
 
 		return IS_LONG;

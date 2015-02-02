@@ -86,7 +86,7 @@ PHP_FUNCTION(linkinfo)
 {
 	char *link;
 	char *dirname;
-	size_t link_len, dir_len;
+	size_t link_len;
 	zend_stat_t sb;
 	int ret;
 
@@ -95,7 +95,7 @@ PHP_FUNCTION(linkinfo)
 	}
 
 	dirname = estrndup(link, link_len);
-	dir_len = php_dirname(dirname, link_len);
+	php_dirname(dirname, link_len);
 
 	if (php_check_open_basedir(dirname)) {
 		efree(dirname);

@@ -427,8 +427,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	zval *option_val;
 	zend_string *regexp;
-	zend_long option_flags;
-	int regexp_set, option_flags_set;
+	int regexp_set;
 	pcre *re = NULL;
 	pcre_extra *pcre_extra = NULL;
 	int preg_options = 0;
@@ -437,7 +436,6 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	/* Parse options */
 	FETCH_STR_OPTION(regexp, "regexp");
-	FETCH_LONG_OPTION(option_flags, "flags");
 
 	if (!regexp_set) {
 		php_error_docref(NULL, E_WARNING, "'regexp' option missing");

@@ -1338,7 +1338,9 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 				ini_in_p = in_p;
 
 				for (out_size = (char_cnt - 2) / 3; out_size > 0;) {
+#if !ICONV_SUPPORTS_ERRNO
 					size_t prev_out_left;
+#endif
 
 					nbytes_required = 0;
 
@@ -1374,8 +1376,9 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 						}
 #endif
 					}
-
+#if !ICONV_SUPPORTS_ERRNO
 					prev_out_left = out_left;
+#endif
 					if (iconv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)-1) {
 #if ICONV_SUPPORTS_ERRNO
 						if (errno != E2BIG) {

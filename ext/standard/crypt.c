@@ -100,6 +100,12 @@
 
 #define PHP_CRYPT_RAND php_rand()
 
+/* Used to check DES salts to ensure that they contain only valid characters */
+#define IS_VALID_SALT_CHARACTER(c) (((c) >= '.' && (c) <= '9') || ((c) >= 'A' && (c) <= 'Z') || ((c) >= 'a' && (c) <= 'z'))
+
+#define DES_INVALID_SALT_ERROR "Supplied salt is not valid for DES. Possible bug in provided salt format."
+
+
 PHP_MINIT_FUNCTION(crypt) /* {{{ */
 {
 	REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", PHP_MAX_SALT_LEN, CONST_CS | CONST_PERSISTENT);
@@ -196,10 +202,7 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 		} else if (
 				salt[0] == '$' &&
 				salt[1] == '2' &&
-				salt[3] == '$' &&
-				salt[4] >= '0' && salt[4] <= '3' &&
-				salt[5] >= '0' && salt[5] <= '9' &&
-				salt[6] == '$') {
+				salt[3] == '$') {
 			char output[PHP_MAX_SALT_LEN + 1];
 
 			memset(output, 0, PHP_MAX_SALT_LEN + 1);
@@ -213,7 +216,19 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 				ZEND_SECURE_ZERO(output, PHP_MAX_SALT_LEN + 1);
 				return result;
 			}
+        } else if (salt[0] == '*' && (salt[1] == '0' || salt[1] == '1')) {
+            return NULL;
 		} else {
+			/* DES Fallback */
+
+			/* Only check the salt if it's not EXT_DES */
+			if (salt[0] != '_') {
+				/* DES style hashes */
+				if (!IS_VALID_SALT_CHARACTER(salt[0]) || !IS_VALID_SALT_CHARACTER(salt[1])) {
+					php_error_docref(NULL, E_DEPRECATED, DES_INVALID_SALT_ERROR);
+				}
+			}
+
 			memset(&buffer, 0, sizeof(buffer));
 			_crypt_extended_init_r();
 
@@ -238,6 +253,10 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 #  else
 #    error Data struct used by crypt_r() is unknown. Please report.
 #  endif
+		if (salt[0] != '$' && salt[0] != '_' && (!IS_VALID_SALT_CHARACTER(salt[0]) || !IS_VALID_SALT_CHARACTER(salt[1]))) {
+			/* error consistently about invalid DES fallbacks */
+			php_error_docref(NULL, E_DEPRECATED, DES_INVALID_SALT_ERROR);
+		}
 		crypt_res = crypt_r(password, salt, &buffer);
 		if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
 			return NULL;

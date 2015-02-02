@@ -148,6 +148,7 @@ END_EXTERN_C()
 #define ZEND_STRLEN                          121
 #define ZEND_DEFINED                         122
 #define ZEND_TYPE_CHECK                      123
+#define ZEND_VERIFY_RETURN_TYPE              124
 #define ZEND_PRE_INC_OBJ                     132
 #define ZEND_PRE_DEC_OBJ                     133
 #define ZEND_POST_INC_OBJ                    134

@@ -699,13 +699,16 @@ static void sapi_cgi_log_message(char *message)
 
 		request = (fcgi_request*) SG(server_context);
 		if (request) {
-			int len = (int)strlen(message);
+			int ret, len = (int)strlen(message);
 			char *buf = malloc(len+2);
 
 			memcpy(buf, message, len);
 			memcpy(buf + len, "\n", sizeof("\n"));
-			fcgi_write(request, FCGI_STDERR, buf, (int)(len+1));
+			ret = fcgi_write(request, FCGI_STDERR, buf, (int)(len + 1));
 			free(buf);
+			if (ret < 0) {
+				php_handle_aborted_connection();
+			}
 		} else {
 			fprintf(stderr, "%s\n", message);
 		}
@@ -2411,7 +2414,7 @@ consult the installation file that came with this distribution, or visit \n\
 						break;
 					case ZEND_HANDLE_MAPPED:
 						if (file_handle.handle.stream.mmap.buf[0] == '#') {
-						    int i = 1;
+						    size_t i = 1;
 
 						    c = file_handle.handle.stream.mmap.buf[i++];
 							while (c != '\n' && c != '\r' && i < file_handle.handle.stream.mmap.len) {

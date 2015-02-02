@@ -556,7 +556,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 						conn->current_result = NULL;
 					} else {
 						stmt->result = NULL;
-						memset(stmt, 0, sizeof(MYSQLND_STMT));
+						memset(stmt, 0, sizeof(*stmt));
 						stmt->state = MYSQLND_STMT_INITTED;
 					}
 				} else {

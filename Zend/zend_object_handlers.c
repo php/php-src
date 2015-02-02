@@ -475,20 +475,24 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 }
 /* }}} */
 
+static void zend_property_guard_dtor(zval *el) /* {{{ */ {
+	efree(Z_PTR_P(el));
+}
+/* }}} */
+
 static zend_long *zend_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */
 {
-	zval stub, *guard;
+	zend_long stub, *guard;
 
 	if (!zobj->guards) {
 		ALLOC_HASHTABLE(zobj->guards);
-		zend_hash_init(zobj->guards, 8, NULL, NULL, 0);
-	} else if ((guard = zend_hash_find(zobj->guards, member)) != NULL) {
-		return &Z_LVAL_P(guard);
+		zend_hash_init(zobj->guards, 8, NULL, zend_property_guard_dtor, 0);
+	} else if ((guard = (zend_long *)zend_hash_find_ptr(zobj->guards, member)) != NULL) {
+		return guard;
 	}
 
-	ZVAL_LONG(&stub, 0);
-	guard = zend_hash_add_new(zobj->guards, member, &stub);
-	return &Z_LVAL_P(guard);
+	stub = 0;
+	return (zend_long *)zend_hash_add_mem(zobj->guards, member, &stub, sizeof(zend_ulong));
 }
 /* }}} */
 

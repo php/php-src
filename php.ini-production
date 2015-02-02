@@ -1957,6 +1957,16 @@ ldap.max_links = -1
 ; Useful for internal debugging only.
 ;opcache.protect_memory=0
 
+; Allows calling OPcache API functions only from PHP scripts which path is
+; started from specified string. The default "" means no restriction
+;opcache.restrict_api=
+
+; Mapping base of shared memory segments (for Windows only). All the PHP
+; processes have to map shared memory into the same address space. This
+; directive allows to manually fix the "Unable to reattach to base address"
+; errors.
+;opcache.mmap_base=
+
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an
 ; absolute path.

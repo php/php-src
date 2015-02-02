@@ -359,7 +359,9 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 			zend_hash_str_update(closure->debug_info, "this", sizeof("this")-1, &closure->this_ptr);
 		}
 
-		if (arg_info) {
+		if (arg_info &&
+		    (closure->func.common.num_args ||
+		     (closure->func.common.fn_flags & ZEND_ACC_VARIADIC))) {
 			uint32_t i, num_args, required = closure->func.common.required_num_args;
 
 			array_init(&val);
@@ -481,6 +483,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 
 	closure->func = *func;
 	closure->func.common.prototype = NULL;
+	closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 
 	if ((scope == NULL) && this_ptr && (Z_TYPE_P(this_ptr) != IS_UNDEF)) {
 		/* use dummy scope if we're binding an object without specifying a scope */

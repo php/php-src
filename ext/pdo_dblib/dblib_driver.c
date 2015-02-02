@@ -92,7 +92,7 @@ static int dblib_handle_closer(pdo_dbh_t *dbh)
 	return 0;
 }
 
-static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options)
+static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	pdo_dblib_stmt *S = ecalloc(1, sizeof(*S));
@@ -106,7 +106,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_
 	return 1;
 }
 
-static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len)
+static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	RETCODE ret, resret;
@@ -142,7 +142,7 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sq
 	return DBCOUNT(H->link);
 }
 
-static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype)
+static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
 {
 
 	int useBinaryEncoding = 0;
@@ -230,7 +230,7 @@ static int dblib_handle_rollback(pdo_dbh_t *dbh)
 	return pdo_dblib_transaction_cmd("ROLLBACK TRANSACTION", dbh);
 }
 
-char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, unsigned int *len)
+char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, size_t *len)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 

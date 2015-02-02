@@ -37,13 +37,8 @@ typedef int64_t zend_off_t;
 # define ZEND_LONG_MAX INT64_MAX
 # define ZEND_LONG_MIN INT64_MIN
 # define ZEND_ULONG_MAX UINT64_MAX
-# ifdef _WIN64
-#   define Z_L(i) i##i64
-#   define Z_UL(i) i##Ui64
-# else
-#   define Z_L(i) i##LL
-#   define Z_UL(i) i##ULL
-# endif
+# define Z_L(i) INT64_C(i)
+# define Z_UL(i) UINT64_C(i)
 # define SIZEOF_ZEND_LONG 8
 #else
 typedef int32_t zend_long;

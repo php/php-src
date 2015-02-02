@@ -1486,8 +1486,12 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 
 			ZVAL_RES(&argv[0], ch->res);
 			Z_ADDREF(argv[0]);
-			ZVAL_RES(&argv[1], t->res);
-			Z_ADDREF(argv[1]);
+			if (t->res) {
+				ZVAL_RES(&argv[1], t->res);
+				Z_ADDREF(argv[1]);
+			} else {
+				ZVAL_NULL(&argv[1]);
+			}
 			ZVAL_LONG(&argv[2], (int)size * nmemb);
 
 			fci.size = sizeof(fci);

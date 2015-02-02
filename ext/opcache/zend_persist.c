@@ -414,27 +414,36 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	}
 
 	if (op_array->arg_info) {
-		if (already_stored) {
-			zend_arg_info *new_ptr = zend_shared_alloc_get_xlat_entry(op_array->arg_info);
-			ZEND_ASSERT(new_ptr != NULL);
-			op_array->arg_info = new_ptr;
-		} else {
-			uint32_t i, num_args;
+		zend_arg_info *arg_info = op_array->arg_info;
+		uint32_t num_args = op_array->num_args;
 
-			num_args = op_array->num_args;
+		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			arg_info--;
+			num_args++;
+		}
+		if (already_stored) {
+			arg_info = zend_shared_alloc_get_xlat_entry(arg_info);
+			ZEND_ASSERT(arg_info != NULL);
+		} else {
+			uint32_t i;
+
 			if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
 				num_args++;
 			}
-			zend_accel_store(op_array->arg_info, sizeof(zend_arg_info) * num_args);
+			zend_accel_store(arg_info, sizeof(zend_arg_info) * num_args);
 			for (i = 0; i < num_args; i++) {
-				if (op_array->arg_info[i].name) {
-					zend_accel_store_interned_string(op_array->arg_info[i].name);
+				if (arg_info[i].name) {
+					zend_accel_store_interned_string(arg_info[i].name);
 				}
-				if (op_array->arg_info[i].class_name) {
-					zend_accel_store_interned_string(op_array->arg_info[i].class_name);
+				if (arg_info[i].class_name) {
+					zend_accel_store_interned_string(arg_info[i].class_name);
 				}
 			}
 		}
+		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			arg_info++;
+		}
+		op_array->arg_info = arg_info;
 	}
 
 	if (op_array->brk_cont_array) {
