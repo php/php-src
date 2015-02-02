@@ -1825,7 +1825,11 @@ static zend_op *zend_delayed_compile_end(uint32_t offset) /* {{{ */
 static void zend_emit_return_type_check(znode *expr, zend_arg_info *return_info) /* {{{ */
 {
 	if (return_info->type_hint != IS_UNDEF) {
-		zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
+		zend_op *opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
+		if (expr && expr->op_type == IS_CONST) {
+			opline->result_type = expr->op_type = IS_TMP_VAR;
+			opline->result.var = expr->u.op.var = get_temporary_variable(CG(active_op_array));
+		}
 	}
 }
 /* }}} */
@@ -3152,10 +3156,7 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	}
 
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		zend_emit_return_type_check(&expr_node, CG(active_op_array)->arg_info - 1);
-		if (expr_node.op_type == IS_CONST) {
-			zval_copy_ctor(&expr_node.u.constant);
-		}
+		zend_emit_return_type_check(expr_ast ? &expr_node : NULL, CG(active_op_array)->arg_info - 1);
 	}
 	opline = zend_emit_op(NULL, by_ref ? ZEND_RETURN_BY_REF : ZEND_RETURN,
 		&expr_node, NULL);
@@ -3793,6 +3794,30 @@ void zend_compile_stmt_list(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static int zend_scalar_type_hint(zend_string *type_name, zend_arg_info *arg_info) /* {{{ */
+{
+	if (type_name->len == sizeof("bool")-1 &&
+	    memcmp(type_name->val, "bool", sizeof("bool")-1) == 0) {
+		arg_info->type_hint = _IS_BOOL;
+	} else if (type_name->len == sizeof("int")-1 &&
+	    memcmp(type_name->val, "int", sizeof("int")-1) == 0) {
+		arg_info->type_hint = IS_LONG;
+	} else if (type_name->len == sizeof("float")-1 &&
+	    memcmp(type_name->val, "float", sizeof("float")-1) == 0) {
+		arg_info->type_hint = IS_DOUBLE;
+	} else if (type_name->len == sizeof("string")-1 &&
+	    memcmp(type_name->val, "string", sizeof("string")-1) == 0) {
+		arg_info->type_hint = IS_STRING;
+	} else if (type_name->len == sizeof("resource")-1 &&
+	    memcmp(type_name->val, "resource", sizeof("resource")-1) == 0) {
+		arg_info->type_hint = IS_RESOURCE;
+	} else {
+		return 0;
+	}
+	return 1;
+}
+/* }}} */
+
 void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_method) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -3815,18 +3840,20 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 		} else {
 			zend_string *class_name = zend_ast_get_str(return_type_ast);
 
-			if (zend_is_const_default_class_ref(return_type_ast)) {
-				class_name = zend_resolve_class_name_ast(return_type_ast);
-			} else {
-				zend_string_addref(class_name);
-				if (!is_method) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare a return type of %s outside of a class scope", class_name->val);
-					return;
+			if (!zend_scalar_type_hint(class_name, arg_infos)) {
+				if (zend_is_const_default_class_ref(return_type_ast)) {
+					class_name = zend_resolve_class_name_ast(return_type_ast);
+				} else {
+					zend_string_addref(class_name);
+					if (!is_method) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare a return type of %s outside of a class scope", class_name->val);
+						return;
+					}
 				}
-			}
 
-			arg_infos->type_hint = IS_OBJECT;
-			arg_infos->class_name = class_name;
+				arg_infos->type_hint = IS_OBJECT;
+				arg_infos->class_name = class_name;
+			}
 		}
 
 		arg_infos++;
@@ -3914,6 +3941,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->allow_null = has_null_default;
 
+
 			if (type_ast->kind == ZEND_AST_TYPE) {
 				arg_info->type_hint = type_ast->attr;
 				if (arg_info->type_hint == IS_ARRAY) {
@@ -3933,18 +3961,26 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 			} else {
 				zend_string *class_name = zend_ast_get_str(type_ast);
 
-				if (zend_is_const_default_class_ref(type_ast)) {
-					class_name = zend_resolve_class_name_ast(type_ast);
+				if (zend_scalar_type_hint(class_name, arg_info)) {
+					if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant) &&
+					    Z_TYPE(default_node.u.constant) != arg_info->type_hint) {
+						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+							"with a %s type hint can only be %s or NULL", class_name->val, class_name->val);
+					}
 				} else {
-					zend_string_addref(class_name);
-				}
+					if (zend_is_const_default_class_ref(type_ast)) {
+						class_name = zend_resolve_class_name_ast(type_ast);
+					} else {
+						zend_string_addref(class_name);
+					}
 
-				arg_info->type_hint = IS_OBJECT;
-				arg_info->class_name = class_name;
+					arg_info->type_hint = IS_OBJECT;
+					arg_info->class_name = class_name;
 
-				if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant)) {
+					if (default_ast && !has_null_default && !Z_CONSTANT(default_node.u.constant)) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with a class type hint can only be NULL");
+					}
 				}
 			}
 		}

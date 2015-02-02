@@ -2945,9 +2945,8 @@ ZEND_VM_C_LABEL(fcall_end):
 
 ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 {
-#if OP1_TYPE != IS_UNUSED
 	USE_OPLINE
-#endif
+
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_UNUSED) {
 		zend_verify_missing_return_type(EX(func));
@@ -2957,6 +2956,9 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 
 		retval_ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 		zend_verify_return_type(EX(func), retval_ptr);
+		if (OP1_TYPE == IS_CONST) {
+			ZVAL_COPY(EX_VAR(opline->result.var), retval_ptr);
+		}
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
