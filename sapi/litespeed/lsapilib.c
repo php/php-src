@@ -1872,10 +1872,12 @@ static char * GetHeaderVar( LSAPI_Request * pReq, const char * name )
 
 char * LSAPI_GetEnv_r( LSAPI_Request * pReq, const char * name )
 {
-    struct LSAPI_key_value_pair * pBegin = pReq->m_pEnvList;
-    struct LSAPI_key_value_pair * pEnd = pBegin + pReq->m_pHeader->m_cntEnv;
     if ( !pReq || !name )
         return NULL;
+
+    struct LSAPI_key_value_pair * pBegin = pReq->m_pEnvList;
+    struct LSAPI_key_value_pair * pEnd = pBegin + pReq->m_pHeader->m_cntEnv;
+
     if ( strncmp( name, "HTTP_", 5 ) == 0 )
     {
         return GetHeaderVar( pReq, name );
@@ -2282,7 +2284,7 @@ int LSAPI_ParseSockAddr( const char * pBind, struct sockaddr * pAddr )
     while( isspace( *pBind ) )
         ++pBind;
 
-    strncpy( achAddr, pBind, 256 );
+    strncpy( achAddr, pBind, sizeof(pBind) );
 
     switch( *p )
     {
@@ -3112,6 +3114,10 @@ static int lsapi_initSuEXEC()
     if ( !s_defaultUid || !s_defaultGid )
     {
         pw = getpwnam( "nobody" );
+        if(!pw) {
+            perror( "Can't get uid for user 'nobody'" );
+            return -1;
+        }
         if ( !s_defaultUid )
             s_defaultUid = pw->pw_uid;
         if ( !s_defaultGid )
