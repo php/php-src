@@ -920,7 +920,7 @@ static php_stream_context *decode_context_param(zval *contextresource)
 	if (context == NULL) {
 		php_stream *stream;
 
-		stream = zend_fetch_resource2_ex(contextresource, NULL, NULL, php_file_le_stream(), php_file_le_pstream());
+		stream = zend_fetch_resource2_ex(contextresource, NULL, php_file_le_stream(), php_file_le_pstream());
 
 		if (stream) {
 			context = PHP_STREAM_CONTEXT(stream);

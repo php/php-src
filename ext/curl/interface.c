@@ -230,7 +230,7 @@ void _php_curl_verify_handlers(php_curl *ch, int reporterror) /* {{{ */
 	}
 
 	if (!Z_ISUNDEF(ch->handlers->std_err)) {
-		stream = (php_stream *)zend_fetch_resource2_ex(&ch->handlers->std_err, NULL, NULL, php_file_le_stream(), php_file_le_pstream());
+		stream = (php_stream *)zend_fetch_resource2_ex(&ch->handlers->std_err, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream == NULL) {
 			if (reporterror) {
 				php_error_docref(NULL, E_WARNING, "CURLOPT_STDERR resource has gone away, resetting to stderr");
@@ -242,7 +242,7 @@ void _php_curl_verify_handlers(php_curl *ch, int reporterror) /* {{{ */
 		}
 	}
 	if (ch->handlers->read && !Z_ISUNDEF(ch->handlers->read->stream)) {
-		stream = (php_stream *)zend_fetch_resource2_ex(&ch->handlers->read->stream, NULL, NULL, php_file_le_stream(), php_file_le_pstream());
+		stream = (php_stream *)zend_fetch_resource2_ex(&ch->handlers->read->stream, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream == NULL) {
 			if (reporterror) {
 				php_error_docref(NULL, E_WARNING, "CURLOPT_INFILE resource has gone away, resetting to default");
@@ -256,7 +256,7 @@ void _php_curl_verify_handlers(php_curl *ch, int reporterror) /* {{{ */
 		}
 	}
 	if (ch->handlers->write_header && !Z_ISUNDEF(ch->handlers->write_header->stream)) {
-		stream = (php_stream *)zend_fetch_resource2_ex(&ch->handlers->write_header->stream, NULL, NULL, php_file_le_stream(), php_file_le_pstream());
+		stream = (php_stream *)zend_fetch_resource2_ex(&ch->handlers->write_header->stream, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream == NULL) {
 			if (reporterror) {
 				php_error_docref(NULL, E_WARNING, "CURLOPT_WRITEHEADER resource has gone away, resetting to default");
@@ -270,7 +270,7 @@ void _php_curl_verify_handlers(php_curl *ch, int reporterror) /* {{{ */
 		}
 	}
 	if (ch->handlers->write && !Z_ISUNDEF(ch->handlers->write->stream)) {
-		stream = (php_stream *)zend_fetch_resource2_ex(&ch->handlers->write->stream, NULL, NULL, php_file_le_stream(), php_file_le_pstream());
+		stream = (php_stream *)zend_fetch_resource2_ex(&ch->handlers->write->stream, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream == NULL) {
 			if (reporterror) {
 				php_error_docref(NULL, E_WARNING, "CURLOPT_FILE resource has gone away, resetting to default");
@@ -2281,11 +2281,10 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 		case CURLOPT_STDERR:
 		case CURLOPT_WRITEHEADER: {
 			FILE *fp = NULL;
-			int type;
 			php_stream *what = NULL;
 
 			if (Z_TYPE_P(zvalue) != IS_NULL) {
-				what = (php_stream *)zend_fetch_resource2_ex(zvalue, "File-Handle", &type, php_file_le_stream(), php_file_le_pstream());
+				what = (php_stream *)zend_fetch_resource2_ex(zvalue, "File-Handle", php_file_le_stream(), php_file_le_pstream());
 				if (!what) {
 					return FAILURE;
 				}
@@ -2860,7 +2859,7 @@ PHP_FUNCTION(curl_exec)
 
 	if (!Z_ISUNDEF(ch->handlers->std_err)) {
 		php_stream  *stream;
-		stream = (php_stream*)zend_fetch_resource2_ex(&ch->handlers->std_err, NULL, NULL, php_file_le_stream(), php_file_le_pstream());
+		stream = (php_stream*)zend_fetch_resource2_ex(&ch->handlers->std_err, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream) {
 			php_stream_flush(stream);
 		}

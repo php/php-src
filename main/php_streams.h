@@ -255,18 +255,18 @@ END_EXTERN_C()
 
 #define php_stream_from_zval(xstr, pzval)	do { \
 	if (((xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), \
-				"stream", NULL, php_file_le_stream(), php_file_le_pstream())) == NULL) { \
+				"stream", php_file_le_stream(), php_file_le_pstream())) == NULL) { \
 		RETURN_FALSE; \
 	} \
 } while (0)
 #define php_stream_from_res(xstr, res)	do { \
 	if (((xstr) = (php_stream*)zend_fetch_resource2((res), \
-			   	"stream", NULL, php_file_le_stream(), php_file_le_pstream())) == NULL) { \
+			   	"stream", php_file_le_stream(), php_file_le_pstream())) == NULL) { \
 		RETURN_FALSE; \
 	} \
 } while (0)
-#define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource((res), "stream", NULL, php_file_le_stream(), php_file_le_pstream())
-#define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), "stream", NULL, php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_res_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource((res), "stream", php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_zval_no_verify(xstr, pzval)	(xstr) = (php_stream*)zend_fetch_resource2_ex((pzval), "stream", php_file_le_stream(), php_file_le_pstream())
 
 BEGIN_EXTERN_C()
 PHPAPI php_stream *php_stream_encloses(php_stream *enclosing, php_stream *enclosed);

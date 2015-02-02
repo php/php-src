@@ -61,9 +61,9 @@ ZEND_API int zend_list_close(zend_resource *res);
 
 ZEND_API zend_resource *zend_register_resource(void *rsrc_pointer, int rsrc_type);
 ZEND_API void *zend_fetch_resource(zend_resource *res, const char *resource_type_name, int resource_type);
-ZEND_API void *zend_fetch_resource2(zend_resource *res, const char *resource_type_name, int *found_type, int resource_type, int resource_type2);
+ZEND_API void *zend_fetch_resource2(zend_resource *res, const char *resource_type_name, int resource_type, int resource_type2);
 ZEND_API void *zend_fetch_resource_ex(zval *res, const char *resource_type_name, int resource_type);
-ZEND_API void *zend_fetch_resource2_ex(zval *res, const char *resource_type_name, int *found_type, int resource_type, int resource_type2);
+ZEND_API void *zend_fetch_resource2_ex(zval *res, const char *resource_type_name, int resource_type, int resource_type2);
 
 ZEND_API const char *zend_rsrc_list_get_rsrc_type(zend_resource *res);
 ZEND_API int zend_fetch_list_dtor_id(const char *type_name);

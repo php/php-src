@@ -543,7 +543,7 @@ static MYSQLND *mysql_convert_zv_to_mysqlnd(zval *zv)
 		return NULL;
 	}
 
-	if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(zv), "MySQL-Link", NULL, le_link, le_plink))) {
+	if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(zv), "MySQL-Link", le_link, le_plink))) {
 		return NULL;
 	}
 
@@ -1109,11 +1109,11 @@ PHP_FUNCTION(mysql_close)
 	}
 
 	if (mysql_link) {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(MySG(default_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(MySG(default_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1160,7 +1160,7 @@ PHP_FUNCTION(mysql_select_db)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1203,7 +1203,7 @@ PHP_FUNCTION(mysql_get_host_info)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1228,7 +1228,7 @@ PHP_FUNCTION(mysql_get_proto_info)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1253,7 +1253,7 @@ PHP_FUNCTION(mysql_get_server_info)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1279,7 +1279,7 @@ PHP_FUNCTION(mysql_info)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1308,7 +1308,7 @@ PHP_FUNCTION(mysql_thread_id)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1339,7 +1339,7 @@ PHP_FUNCTION(mysql_stat)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1374,7 +1374,7 @@ PHP_FUNCTION(mysql_client_encoding)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1403,7 +1403,7 @@ PHP_FUNCTION(mysql_set_charset)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1437,7 +1437,7 @@ PHP_FUNCTION(mysql_create_db)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1470,7 +1470,7 @@ PHP_FUNCTION(mysql_drop_db)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1593,7 +1593,7 @@ static void php_mysql_do_query(INTERNAL_FUNCTION_PARAMETERS, int use_store)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1636,7 +1636,7 @@ PHP_FUNCTION(mysql_db_query)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1664,7 +1664,7 @@ PHP_FUNCTION(mysql_list_dbs)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1702,7 +1702,7 @@ PHP_FUNCTION(mysql_list_tables)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1741,7 +1741,7 @@ PHP_FUNCTION(mysql_list_fields)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1778,7 +1778,7 @@ PHP_FUNCTION(mysql_list_processes)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1817,7 +1817,7 @@ PHP_FUNCTION(mysql_error)
 		}
 		mysql = (php_mysql_conn*)MySG(default_link)->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1848,7 +1848,7 @@ PHP_FUNCTION(mysql_errno)
 		}
 		mysql = (php_mysql_conn*)MySG(default_link)->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1874,7 +1874,7 @@ PHP_FUNCTION(mysql_affected_rows)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1927,7 +1927,7 @@ PHP_FUNCTION(mysql_real_escape_string)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -1959,7 +1959,7 @@ PHP_FUNCTION(mysql_insert_id)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}
@@ -2727,7 +2727,7 @@ PHP_FUNCTION(mysql_ping)
 		CHECK_LINK(res);
 		mysql = (php_mysql_conn*)res->ptr;
 	} else {
-		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", NULL, le_link, le_plink))) {
+		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(Z_RES_P(mysql_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
 	}

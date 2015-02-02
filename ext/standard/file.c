@@ -1151,7 +1151,7 @@ PHPAPI PHP_FUNCTION(fgetss)
    Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
 {
-	int result, type, argc = 0;
+	int result, argc = 0;
 	size_t format_len;
 	zval *args = NULL;
 	zval *file_handle;
@@ -1163,7 +1163,7 @@ PHP_FUNCTION(fscanf)
 		return;
 	}
 
-	what = zend_fetch_resource2(Z_RES_P(file_handle), "File-Handle", &type, php_file_le_stream(), php_file_le_pstream());
+	what = zend_fetch_resource2(Z_RES_P(file_handle), "File-Handle", php_file_le_stream(), php_file_le_pstream());
 
 	/* we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
 	 * with a leak if we have an invalid filehandle. This needs changing

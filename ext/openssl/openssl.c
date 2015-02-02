@@ -3219,9 +3219,8 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval * val, int public_key, char * p
 
 	if (Z_TYPE_P(val) == IS_RESOURCE) {
 		void * what;
-		int type;
 
-		what = zend_fetch_resource2_ex(val, "OpenSSL X.509/key", &type, le_x509, le_key);
+		what = zend_fetch_resource2_ex(val, "OpenSSL X.509/key", le_x509, le_key);
 		if (!what) {
 			TMP_CLEAN;
 		}
@@ -3229,11 +3228,11 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval * val, int public_key, char * p
 			*resourceval = Z_RES_P(val);
 			Z_ADDREF_P(val);
 		}
-		if (type == le_x509) {
+		if (Z_RES_P(val)->type == le_x509) {
 			/* extract key from cert, depending on public_key param */
 			cert = (X509*)what;
 			free_cert = 0;
-		} else if (type == le_key) {
+		} else if (Z_RES_P(val)->type == le_key) {
 			int is_priv;
 
 			is_priv = php_openssl_is_private_key((EVP_PKEY*)what);

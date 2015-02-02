@@ -974,7 +974,7 @@ PHP_FUNCTION(socket_set_nonblock)
 	if (!Z_ISUNDEF(php_sock->zstream)) {
 		php_stream *stream;
 		/* omit notice if resource doesn't exist anymore */
-		stream = zend_fetch_resource2_ex(&php_sock->zstream, NULL, NULL, php_file_le_stream(), php_file_le_pstream());
+		stream = zend_fetch_resource2_ex(&php_sock->zstream, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream != NULL) {
 			if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, 0,
 					NULL) != -1) {
@@ -1014,7 +1014,7 @@ PHP_FUNCTION(socket_set_block)
 	 * state */
 	if (!Z_ISUNDEF(php_sock->zstream)) {
 		php_stream *stream;
-		stream = zend_fetch_resource2_ex(&php_sock->zstream, NULL, NULL, php_file_le_stream(), php_file_le_pstream());
+		stream = zend_fetch_resource2_ex(&php_sock->zstream, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream != NULL) {
 			if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, 1,
 					NULL) != -1) {

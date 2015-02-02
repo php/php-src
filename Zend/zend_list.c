@@ -98,19 +98,13 @@ ZEND_API zend_resource* zend_register_resource(void *rsrc_pointer, int rsrc_type
 	return Z_RES_P(zv);
 }
 
-ZEND_API void *zend_fetch_resource2(zend_resource *res, const char *resource_type_name, int *found_type, int resource_type1, int resource_type2)
+ZEND_API void *zend_fetch_resource2(zend_resource *res, const char *resource_type_name, int resource_type1, int resource_type2)
 {
 	if (resource_type1 == res->type) {
-		if (found_type) {
-			*found_type = resource_type1;
-		}
 		return res->ptr;
 	}
 
 	if (resource_type2 == res->type) {
-		if (found_type) {
-			*found_type = resource_type2;
-		}
 		return res->ptr;
 	}
 
@@ -159,7 +153,7 @@ ZEND_API void *zend_fetch_resource_ex(zval *res, const char *resource_type_name,
 	return zend_fetch_resource(Z_RES_P(res), resource_type_name, resource_type);
 }
 
-ZEND_API void *zend_fetch_resource2_ex(zval *res, const char *resource_type_name, int *found_type, int resource_type1, int resource_type2)
+ZEND_API void *zend_fetch_resource2_ex(zval *res, const char *resource_type_name, int resource_type1, int resource_type2)
 {
 	const char *space, *class_name;
 	if (res == NULL) {
@@ -177,7 +171,7 @@ ZEND_API void *zend_fetch_resource2_ex(zval *res, const char *resource_type_name
 		return NULL;
 	}
 
-	return zend_fetch_resource2(Z_RES_P(res), resource_type_name, found_type, resource_type1, resource_type2);
+	return zend_fetch_resource2(Z_RES_P(res), resource_type_name, resource_type1, resource_type2);
 }
 
 void list_entry_destructor(zval *zv)

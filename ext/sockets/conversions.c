@@ -1357,7 +1357,7 @@ static void from_zval_write_fd_array_aux(zval *elem, unsigned i, void **args, se
 			return;
 		}
 
-		stream = (php_stream *)zend_fetch_resource2_ex(elem, NULL, NULL, php_file_le_stream(), php_file_le_pstream());
+		stream = (php_stream *)zend_fetch_resource2_ex(elem, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream == NULL) {
 			do_from_zval_err(ctx, "resource is not a stream or a socket");
 			return;
