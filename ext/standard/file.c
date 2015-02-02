@@ -128,10 +128,8 @@ php_file_globals file_globals;
 /* }}} */
 
 #define PHP_STREAM_TO_ZVAL(stream, arg) \
-	php_stream_from_zval_no_verify(stream, arg); \
-	if (stream == NULL) {	\
-		RETURN_FALSE;	\
-	}
+	ZEND_ASSERT(Z_TYPE_P(arg) == IS_RESOURCE); \
+	php_stream_from_res(stream, Z_RES_P(arg));
 
 /* {{{ ZTS-stuff / Globals / Prototypes */
 
