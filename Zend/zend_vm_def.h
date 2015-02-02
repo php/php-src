@@ -2958,12 +2958,15 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 	if (OP1_TYPE == IS_UNUSED) {
 		zend_verify_missing_return_type(EX(func));
 	} else {
+/* prevents "undefined variable opline" errors */
+#if OP1_TYPE != IS_UNUSED
 		zval *retval_ptr;
 		zend_free_op free_op1;
 
 		retval_ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 		/* extended_value stores strictness flag */
 		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value);
+#endif
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
