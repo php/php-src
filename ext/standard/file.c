@@ -1165,7 +1165,7 @@ PHP_FUNCTION(fscanf)
 		return;
 	}
 
-	what = zend_fetch_resource(file_handle, -1, "File-Handle", &type, 2, php_file_le_stream(), php_file_le_pstream());
+	what = zend_fetch_resource2(Z_RES_P(file_handle), "File-Handle", &type, php_file_le_stream(), php_file_le_pstream());
 
 	/* we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
 	 * with a leak if we have an invalid filehandle. This needs changing

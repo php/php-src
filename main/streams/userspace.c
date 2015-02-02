@@ -503,7 +503,7 @@ PHP_FUNCTION(stream_wrapper_register)
 	uwrap->wrapper.abstract = uwrap;
 	uwrap->wrapper.is_url = ((flags & PHP_STREAM_IS_URL) != 0);
 
-	rsrc = ZEND_REGISTER_RESOURCE(NULL, uwrap, le_protocols);
+	rsrc = zend_register_resource(uwrap, le_protocols);
 
 	if ((uwrap->ce = zend_lookup_class(classname)) != NULL) {
 		if (php_register_url_stream_wrapper_volatile(protocol->val, &uwrap->wrapper) == SUCCESS) {

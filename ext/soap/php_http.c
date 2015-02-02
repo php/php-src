@@ -471,7 +471,7 @@ try_again:
 	if (stream != NULL) {
 	  php_url *orig;
 		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "httpurl", sizeof("httpurl")-1)) != NULL &&
-		    (orig = (php_url *) zend_fetch_resource(tmp, -1, "httpurl", NULL, 1, le_url)) != NULL &&
+		    (orig = (php_url *) zend_fetch_resource_ex(tmp, "httpurl", le_url)) != NULL &&
 		    ((use_proxy && !use_ssl) ||
 		     (((use_ssl && orig->scheme != NULL && strcmp(orig->scheme, "https") == 0) ||
 		      (!use_ssl && orig->scheme == NULL) ||
@@ -517,7 +517,7 @@ try_again:
 
 	if (stream) {
 		zval *cookies, *login, *password;
-		zend_resource *ret = zend_register_resource(NULL, phpurl, le_url);
+		zend_resource *ret = zend_register_resource(phpurl, le_url);
 
 		add_property_resource(this_ptr, "httpurl", ret);
 		/*zend_list_addref(ret);*/
