@@ -237,7 +237,7 @@ PHP_FUNCTION(shmop_read)
 		return;
 	}
 
-	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type))) {
+	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -264,17 +264,19 @@ PHP_FUNCTION(shmop_read)
    closes a shared memory segment */
 PHP_FUNCTION(shmop_close)
 {
-	zend_long shmid;
-	zval *res;
+	zval *shmid;
+	struct php_shmop *shmop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &shmid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shmid) == FAILURE) {
 		return;
 	}
 
-	res = zend_hash_index_find(&EG(regular_list), shmid);
-	if (res) {
-		zend_list_close(Z_RES_P(res));
+
+	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
+		RETURN_FALSE;
 	}
+
+	zend_list_close(Z_RES_P(shmid));
 }
 /* }}} */
 
@@ -289,7 +291,7 @@ PHP_FUNCTION(shmop_size)
 		return;
 	}
 
-	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type))) {
+	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -311,7 +313,7 @@ PHP_FUNCTION(shmop_write)
 		return;
 	}
 
-	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type))) {
+	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -343,7 +345,7 @@ PHP_FUNCTION(shmop_delete)
 		return;
 	}
 
-	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type))) {
+	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
 		RETURN_FALSE;
 	}
 
