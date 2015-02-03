@@ -43,6 +43,9 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #68901 (use after free). (bugreports at internot dot info)
 
+- Pgsql:
+  . Fixed Bug #65199 'pg_copy_from() modifies input array variable). (Yasuo)
+
 - Sqlite3:
   . Fixed bug #68260 (SQLite3Result::fetchArray declares wrong 
     required_num_args). (Julien)
@@ -55,6 +58,8 @@ PHP                                                                        NEWS
 
 - Session:
   . Fixed bug #68941 (mod_files.sh is a bash-script) (bugzilla at ii.nl, Yasuo)
+  . Fixed Bug #66623 (no EINTR check on flock) (Yasuo)
+  . Fixed bug #68063 (Empty session IDs do still start sessions) (Yasuo)
 
 - Standard:
   . Fixed bug #65272 (flock() out parameter not set correctly in windows).
