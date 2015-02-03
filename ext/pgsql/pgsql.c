@@ -4330,7 +4330,9 @@ PHP_FUNCTION(pg_escape_string)
 				return;
 			}
 			link = FETCH_DEFAULT_LINK();
-			CHECK_DEFAULT_LINK(link);
+			if (!link) {
+				RETURN_FALSE;
+			}
 			break;
 
 		default:
@@ -4378,9 +4380,10 @@ PHP_FUNCTION(pg_escape_bytea)
 				return;
 			}
 			link = FETCH_DEFAULT_LINK();
-			CHECK_DEFAULT_LINK(link);
+			if (!link) {
+				RETURN_FALSE;
+			}
 			break;
-
 		default:
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pgsql_link, &from, &from_len) == FAILURE) {
 				return;
@@ -4395,7 +4398,7 @@ PHP_FUNCTION(pg_escape_bytea)
 			RETURN_FALSE;
 		}
 		to = (char *)PQescapeByteaConn(pgsql, (unsigned char *)from, (size_t)from_len, &to_len);
-	} else
+	} else 
 #endif
 		to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
 
