@@ -1113,6 +1113,10 @@ PHP_FUNCTION(mysql_close)
 			RETURN_FALSE;
 		}
 	} else {
+		if (!MySG(default_link)) {
+			zend_fetch_resource2_ex(NULL, "MySQL-Link", le_link, le_plink); /* trigger a warning to be consistent */
+			RETURN_FALSE;
+		}	
 		if (!(mysql = (php_mysql_conn *)zend_fetch_resource2(MySG(default_link), "MySQL-Link", le_link, le_plink))) {
 			RETURN_FALSE;
 		}
