@@ -1029,7 +1029,7 @@ void zend_do_early_binding(void) /* {{{ */
 				zend_class_entry *ce;
 
 				parent_name = CT_CONSTANT(fetch_class_opline->op2);
-				if (((ce = zend_lookup_class(Z_STR_P(parent_name))) == NULL) ||
+				if (((ce = zend_lookup_class_ex(Z_STR_P(parent_name), parent_name + 1, 0)) == NULL) ||
 				    ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) &&
 				     (ce->type == ZEND_INTERNAL_CLASS))) {
 					if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
@@ -1083,7 +1083,8 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array) /* {{
 
 		CG(in_compilation) = 1;
 		while (opline_num != (uint32_t)-1) {
-			if ((ce = zend_lookup_class(Z_STR_P(RT_CONSTANT(op_array, op_array->opcodes[opline_num-1].op2)))) != NULL) {
+			zval *parent_name = RT_CONSTANT(op_array, op_array->opcodes[opline_num-1].op2);
+			if ((ce = zend_lookup_class_ex(Z_STR_P(parent_name), parent_name + 1, 0)) != NULL) {
 				do_bind_inherited_class(op_array, &op_array->opcodes[opline_num], EG(class_table), ce, 0);
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
@@ -1789,8 +1790,16 @@ static inline zend_op *zend_delayed_emit_op(znode *result, zend_uchar opcode, zn
 	zend_op tmp_opline;
 	init_op(&tmp_opline);
 	tmp_opline.opcode = opcode;
-	SET_NODE(tmp_opline.op1, op1);
-	SET_NODE(tmp_opline.op2, op2);
+	if (op1 == NULL) {
+		SET_UNUSED(tmp_opline.op1);
+	} else {
+		SET_NODE(tmp_opline.op1, op1);
+	}
+	if (op2 == NULL) {
+		SET_UNUSED(tmp_opline.op2);
+	} else {
+		SET_NODE(tmp_opline.op2, op2);
+	}
 	if (result) {
 		zend_make_var_result(result, &tmp_opline);
 	}
@@ -1984,7 +1993,7 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
+static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint32_t type, int delayed) /* {{{ */
 {
 	zend_ast *name_ast = ast->child[0];
 	znode name_node;
@@ -2003,7 +2012,11 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 		convert_to_string(&name_node.u.constant);
 	}
 
-	opline = zend_emit_op(result, ZEND_FETCH_R, &name_node, NULL);
+	if (delayed) {
+		opline = zend_delayed_emit_op(result, ZEND_FETCH_R, &name_node, NULL);
+	} else {
+		opline = zend_emit_op(result, ZEND_FETCH_R, &name_node, NULL);
+	}
 
 	opline->extended_value = ZEND_FETCH_LOCAL;
 	if (name_node.op_type == IS_CONST) {
@@ -2016,10 +2029,10 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 }
 /* }}} */
 
-static void zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
+static void zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t type, int delayed) /* {{{ */
 {
 	if (zend_try_compile_cv(result, ast) == FAILURE) {
-		zend_op *opline = zend_compile_simple_var_no_cv(result, ast, type);
+		zend_op *opline = zend_compile_simple_var_no_cv(result, ast, type, delayed);
 		zend_adjust_for_fetch_type(opline, type);
 	}
 }
@@ -2151,7 +2164,7 @@ void zend_compile_prop(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 }
 /* }}} */
 
-zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
+zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, uint32_t type, int delayed) /* {{{ */
 {
 	zend_ast *class_ast = ast->child[0];
 	zend_ast *prop_ast = ast->child[1];
@@ -2168,7 +2181,11 @@ zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, uint32_t 
 
 	zend_compile_expr(&prop_node, prop_ast);
 
-	opline = zend_emit_op(result, ZEND_FETCH_R, &prop_node, NULL);
+	if (delayed) {
+		opline = zend_delayed_emit_op(result, ZEND_FETCH_R, &prop_node, NULL);
+	} else {
+		opline = zend_emit_op(result, ZEND_FETCH_R, &prop_node, NULL);
+	}
 	if (opline->op1_type == IS_CONST) {
 		zend_alloc_polymorphic_cache_slot(opline->op1.constant);
 	}
@@ -2185,9 +2202,9 @@ zend_op *zend_compile_static_prop_common(znode *result, zend_ast *ast, uint32_t 
 }
 /* }}} */
 
-void zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
+void zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, int delayed) /* {{{ */
 {
-	zend_op *opline = zend_compile_static_prop_common(result, ast, type);
+	zend_op *opline = zend_compile_static_prop_common(result, ast, type, delayed);
 	zend_adjust_for_fetch_type(opline, type);
 }
 /* }}} */
@@ -2291,7 +2308,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 
 			if (zend_is_assign_to_self(var_ast, expr_ast)) {
 				/* $a[0] = $a should evaluate the right $a first */
-				zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R);
+				zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
 			} else {
 				zend_compile_expr(&expr_node, expr_ast);
 			}
@@ -3088,7 +3105,7 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 				opline = zend_emit_op(NULL, ZEND_UNSET_VAR, &var_node, NULL);
 				opline->extended_value = ZEND_FETCH_LOCAL | ZEND_QUICK_SET;
 			} else {
-				opline = zend_compile_simple_var_no_cv(NULL, var_ast, BP_VAR_UNSET);
+				opline = zend_compile_simple_var_no_cv(NULL, var_ast, BP_VAR_UNSET, 0);
 				opline->opcode = ZEND_UNSET_VAR;
 			}
 			return;
@@ -3101,7 +3118,7 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 			opline->opcode = ZEND_UNSET_OBJ;
 			return;
 		case ZEND_AST_STATIC_PROP:
-			opline = zend_compile_static_prop_common(NULL, var_ast, BP_VAR_UNSET);
+			opline = zend_compile_static_prop_common(NULL, var_ast, BP_VAR_UNSET, 0);
 			opline->opcode = ZEND_UNSET_VAR;
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE()
@@ -5613,7 +5630,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 				opline = zend_emit_op(result, ZEND_ISSET_ISEMPTY_VAR, &var_node, NULL);
 				opline->extended_value = ZEND_FETCH_LOCAL | ZEND_QUICK_SET;
 			} else {
-				opline = zend_compile_simple_var_no_cv(result, var_ast, BP_VAR_IS);
+				opline = zend_compile_simple_var_no_cv(result, var_ast, BP_VAR_IS, 0);
 				opline->opcode = ZEND_ISSET_ISEMPTY_VAR;
 			}
 			break;
@@ -5626,7 +5643,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 			opline->opcode = ZEND_ISSET_ISEMPTY_PROP_OBJ;
 			break;
 		case ZEND_AST_STATIC_PROP:
-			opline = zend_compile_static_prop_common(result, var_ast, BP_VAR_IS);
+			opline = zend_compile_static_prop_common(result, var_ast, BP_VAR_IS, 0);
 			opline->opcode = ZEND_ISSET_ISEMPTY_VAR;
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
@@ -5650,7 +5667,7 @@ void zend_compile_silence(znode *result, zend_ast *ast) /* {{{ */
 	if (expr_ast->kind == ZEND_AST_VAR) {
 		/* For @$var we need to force a FETCH instruction, otherwise the CV access will
 		 * happen outside the silenced section. */
-		zend_compile_simple_var_no_cv(result, expr_ast, BP_VAR_R);
+		zend_compile_simple_var_no_cv(result, expr_ast, BP_VAR_R, 0 );
 	} else {
 		zend_compile_expr(result, expr_ast);
 	}
@@ -6406,7 +6423,7 @@ void zend_compile_var(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
 	switch (ast->kind) {
 		case ZEND_AST_VAR:
-			zend_compile_simple_var(result, ast, type);
+			zend_compile_simple_var(result, ast, type, 0);
 			return;
 		case ZEND_AST_DIM:
 			zend_compile_dim(result, ast, type);
@@ -6415,7 +6432,7 @@ void zend_compile_var(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 			zend_compile_prop(result, ast, type);
 			return;
 		case ZEND_AST_STATIC_PROP:
-			zend_compile_static_prop(result, ast, type);
+			zend_compile_static_prop(result, ast, type, 0);
 			return;
 		case ZEND_AST_CALL:
 			zend_compile_call(result, ast, type);
@@ -6447,6 +6464,9 @@ void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type) /* {{
 {
 	zend_op *opline;
 	switch (ast->kind) {
+		case ZEND_AST_VAR:
+			zend_compile_simple_var(result, ast, type, 1);
+			return;
 		case ZEND_AST_DIM:
 			opline = zend_delayed_compile_dim(result, ast, type);
 			zend_adjust_for_fetch_type(opline, type);
@@ -6454,6 +6474,9 @@ void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type) /* {{
 		case ZEND_AST_PROP:
 			opline = zend_delayed_compile_prop(result, ast, type);
 			zend_adjust_for_fetch_type(opline, type);
+			return;
+		case ZEND_AST_STATIC_PROP:
+			zend_compile_static_prop(result, ast, type, 1);
 			return;
 		default:
 			zend_compile_var(result, ast, type);
