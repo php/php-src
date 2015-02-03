@@ -159,6 +159,7 @@ static void ps_files_open(ps_files *data, const char *key)
 #if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
     struct stat sbuf;
 #endif
+	int ret;
 
 	if (data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
 		if (data->lastkey) {
@@ -201,7 +202,9 @@ static void ps_files_open(ps_files *data, const char *key)
 				return;
 			}
 #endif
-			flock(data->fd, LOCK_EX);
+			do {
+				ret = flock(data->fd, LOCK_EX);
+			} while (ret == -1 && errno == EINTR);
 
 #ifdef F_SETFD
 # ifndef FD_CLOEXEC

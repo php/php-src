@@ -423,8 +423,6 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-	} else {
-		PG(internal_encoding) = SG(default_charset);
 	}
 	return SUCCESS;
 }
@@ -436,8 +434,6 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-	} else {
-		PG(input_encoding) = SG(default_charset);
 	}
 	return SUCCESS;
 }
@@ -449,8 +445,6 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-	} else {
-		PG(output_encoding) = SG(default_charset);
 	}
 	return SUCCESS;
 }
