@@ -2,8 +2,6 @@
 Bug #61470 (session_regenerate_id() does not create session file)
 --SKIPIF--
 <?php include('skipif.inc'); ?>
---XFAIL--
-Semantecs of create id seems changed. Will be fixed soon.
 --INI--
 --FILE--
 <?php
@@ -24,6 +22,6 @@ var_dump(is_file($file2));
 unlink($file1);
 unlink($file2);
 --EXPECT--
-bool(true);
-bool(true);
+bool(true)
+bool(true)
 

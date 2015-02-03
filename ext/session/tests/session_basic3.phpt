@@ -180,15 +180,15 @@ ob_end_flush();
 *** Testing basic session functionality : variation3 use_trans_sid ***
 *** Test trans sid ***
 
-<a href="/?PHPSESSID=testid&PHPSESSID=testid">test</a>
-<a href="/?PHPSESSID=testid&PHPSESSID=testid#bar">test</a>
-<a href="/?foo&PHPSESSID=testid&PHPSESSID=testid">test</a>
-<a href="/?foo&PHPSESSID=testid&PHPSESSID=testid#bar">test</a>
-<a href="/?foo=var&PHPSESSID=testid&PHPSESSID=testid">test</a>
-<a href="/?foo=var&PHPSESSID=testid&PHPSESSID=testid#bar">test</a>
-<a href="file.php?PHPSESSID=testid&PHPSESSID=testid">test</a>
-<a href="file.php?foo&PHPSESSID=testid&PHPSESSID=testid">test</a>
-<a href="file.php?foo=var&PHPSESSID=testid&PHPSESSID=testid">test</a>
+<a href="/?PHPSESSID=testid">test</a>
+<a href="/?PHPSESSID=testid#bar">test</a>
+<a href="/?foo&PHPSESSID=testid">test</a>
+<a href="/?foo&PHPSESSID=testid#bar">test</a>
+<a href="/?foo=var&PHPSESSID=testid">test</a>
+<a href="/?foo=var&PHPSESSID=testid#bar">test</a>
+<a href="file.php?PHPSESSID=testid">test</a>
+<a href="file.php?foo&PHPSESSID=testid">test</a>
+<a href="file.php?foo=var&PHPSESSID=testid">test</a>
 <a href="http://php.net">test</a>
 <a href="http://php.net/">test</a>
 <a href="http://php.net/#bar">test</a>

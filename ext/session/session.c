@@ -2010,6 +2010,7 @@ static PHP_FUNCTION(session_id)
 static PHP_FUNCTION(session_regenerate_id)
 {
 	zend_bool del_ses = 0;
+	zend_string *data = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &del_ses) == FAILURE) {
 		return;
@@ -2020,26 +2021,31 @@ static PHP_FUNCTION(session_regenerate_id)
 		RETURN_FALSE;
 	}
 
-	if (PS(session_status) == php_session_active) {
-		if (PS(id)) {
-			if (del_ses && PS(mod)->s_destroy(&PS(mod_data), PS(id)) == FAILURE) {
-				php_error_docref(NULL, E_WARNING, "Session object destruction failed");
-				RETURN_FALSE;
-			}
-			zend_string_release(PS(id));
-			PS(id) = NULL;
-		}
-
-		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
-		if (PS(id)) {
-			PS(send_cookie) = 1;
-			php_session_reset_id();
-			RETURN_TRUE;
-		} else {
-			PS(id) = STR_EMPTY_ALLOC();
-		}
+	if (PS(session_status) != php_session_active) {
+		php_error_docref(NULL, E_WARNING, "Cannot regenerate session id - session is not active");
+		RETURN_FALSE;
 	}
-	RETURN_FALSE;
+
+	/* Keep current session data */
+	data = php_session_encode();
+
+	if (del_ses && PS(mod)->s_destroy(&PS(mod_data), PS(id)) == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "Session object destruction failed");
+	}
+	php_rshutdown_session_globals();
+	php_rinit_session_globals();
+
+	php_session_initialize();
+	/* Restore session data */
+	if (data) {
+		if (PS(session_vars)) {
+			zend_string_release(PS(session_vars));
+			PS(session_vars) = NULL;
+		}
+		php_session_decode(data);
+		zend_string_release(data);
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
