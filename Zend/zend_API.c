@@ -1911,9 +1911,9 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		!memcmp(lcname, ZEND_CALLSTATIC_FUNC_NAME, sizeof(ZEND_CALLSTATIC_FUNC_NAME)-1)
 	) {
 		if (fptr->common.num_args != 2) {
-			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ce->name->val, ZEND_CALLSTATIC_FUNC_NAME);
+			zend_error(error_type, "Method %s::__callStatic() must take exactly 2 arguments", ce->name->val);
 		} else if (ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
-			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ce->name->val, ZEND_CALLSTATIC_FUNC_NAME);
+			zend_error(error_type, "Method %s::__callStatic() cannot take arguments by reference", ce->name->val);
 		}
  	} else if (name_len == sizeof(ZEND_TOSTRING_FUNC_NAME) - 1 &&
  		!memcmp(lcname, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && fptr->common.num_args != 0
