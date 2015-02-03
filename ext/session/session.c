@@ -2201,6 +2201,11 @@ static PHP_FUNCTION(session_start)
 		RETURN_FALSE;
 	}
 
+	if (PS(id) && !(PS(id)->len)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot start session with empty session ID");
+		RETURN_FALSE;
+	}
+
 	/* set options */
 	if (options) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(options), num_idx, str_idx, value) {
