@@ -4340,11 +4340,7 @@ PHP_FUNCTION(pg_escape_string)
 				return;
 			}
 			link = FETCH_DEFAULT_LINK();
-			if (!link) {
-				RETURN_FALSE;
-			}
 			break;
-
 		default:
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS", &pgsql_link, &from) == FAILURE) {
 				return;
@@ -4390,9 +4386,6 @@ PHP_FUNCTION(pg_escape_bytea)
 				return;
 			}
 			link = FETCH_DEFAULT_LINK();
-			if (!link) {
-				RETURN_FALSE;
-			}
 			break;
 		default:
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pgsql_link, &from, &from_len) == FAILURE) {
