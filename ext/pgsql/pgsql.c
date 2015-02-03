@@ -4211,18 +4211,26 @@ PHP_FUNCTION(pg_copy_from)
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(pg_rows), &pos);
 #if HAVE_PQPUTCOPYDATA
 				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(pg_rows), (void **) &tmp, &pos) == SUCCESS) {
-					convert_to_string_ex(tmp);
-					query = (char *)emalloc(Z_STRLEN_PP(tmp) + 2);
-					strlcpy(query, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp) + 2);
-					if(Z_STRLEN_PP(tmp) > 0 && *(query + Z_STRLEN_PP(tmp) - 1) != '\n') {
-						strlcat(query, "\n", Z_STRLEN_PP(tmp) + 2);
+					zval *value;
+					ALLOC_ZVAL(value);
+					INIT_PZVAL_COPY(value, *tmp);
+					zval_copy_ctor(value);
+					convert_to_string_ex(&value);
+					query = (char *)emalloc(Z_STRLEN_P(value) + 2);
+					strlcpy(query, Z_STRVAL_P(value), Z_STRLEN_P(value) + 2);
+					if(Z_STRLEN_P(value) > 0 && *(query + Z_STRLEN_P(value) - 1) != '\n') {
+						strlcat(query, "\n", Z_STRLEN_P(value) + 2);
 					}
 					if (PQputCopyData(pgsql, query, strlen(query)) != 1) {
 						efree(query);
+						zval_dtor(value);
+						efree(value);
 						PHP_PQ_ERROR("copy failed: %s", pgsql);
 						RETURN_FALSE;
 					}
 					efree(query);
+					zval_dtor(value);
+					efree(value);
 					zend_hash_move_forward_ex(Z_ARRVAL_P(pg_rows), &pos);
 				}
 				if (PQputCopyEnd(pgsql, NULL) != 1) {
@@ -4231,18 +4239,26 @@ PHP_FUNCTION(pg_copy_from)
 				}
 #else
 				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(pg_rows), (void **) &tmp, &pos) == SUCCESS) {
-					convert_to_string_ex(tmp);
-					query = (char *)emalloc(Z_STRLEN_PP(tmp) + 2);
-					strlcpy(query, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp) + 2);
-					if(Z_STRLEN_PP(tmp) > 0 && *(query + Z_STRLEN_PP(tmp) - 1) != '\n') {
-						strlcat(query, "\n", Z_STRLEN_PP(tmp) + 2);
+					zval *value;
+					ALLOC_ZVAL(value);
+					INIT_PZVAL_COPY(value, *tmp);
+					zval_copy_ctor(value);
+					convert_to_string_ex(&value);
+					query = (char *)emalloc(Z_STRLEN_P(value) + 2);
+					strlcpy(query, Z_STRVAL_P(value), Z_STRLEN_P(value) + 2);
+					if(Z_STRLEN_P(value) > 0 && *(query + Z_STRLEN_P(value) - 1) != '\n') {
+						strlcat(query, "\n", Z_STRLEN_P(value) + 2);
 					}
 					if (PQputline(pgsql, query)==EOF) {
 						efree(query);
+						zval_dtor(value);
+						efree(value);
 						PHP_PQ_ERROR("copy failed: %s", pgsql);
 						RETURN_FALSE;
 					}
 					efree(query);
+					zval_dtor(value);
+					efree(value);
 					zend_hash_move_forward_ex(Z_ARRVAL_P(pg_rows), &pos);
 				}
 				if (PQputline(pgsql, "\\.\n") == EOF) {
