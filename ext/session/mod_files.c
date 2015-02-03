@@ -121,7 +121,8 @@ static void ps_files_close(ps_files *data)
 static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 {
 	char buf[MAXPATHLEN];
-    struct stat sbuf;
+	struct stat sbuf;
+	int ret;
 
 	if (data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
 		if (data->lastkey) {
@@ -164,7 +165,9 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 				return;
 			}
 #endif
-			flock(data->fd, LOCK_EX);
+			do {
+				ret = flock(data->fd, LOCK_EX);
+			} while (ret == -1 && errno == EINTR);
 
 #ifdef F_SETFD
 # ifndef FD_CLOEXEC
