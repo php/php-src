@@ -1358,7 +1358,7 @@ PHP_FUNCTION(odbc_execute)
 
 				rc = SQLBindParameter(result->stmt, (SQLUSMALLINT)i, SQL_PARAM_INPUT,
 									  ctype, sqltype, precision, scale,
-									  (void *)params[i-1].fp, 0,
+									  (void *)(intptr_t)params[i-1].fp, 0,
 									  &params[i-1].vallen);
 			} else {
 #ifdef HAVE_DBMAKER
