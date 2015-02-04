@@ -1,8 +1,9 @@
 --TEST--
 Bug #60227 (header() cannot detect the multi-line header with CR), \0 before \n
+--INI--
+expose_php=0
 --FILE--
 <?php
-header("X-foo: e\n foo");
 header("X-Foo6: e\0Set-Cookie: ID=\n123\n d");
 echo 'foo';
 ?>
@@ -10,5 +11,4 @@ echo 'foo';
 Warning: Header may not contain NUL bytes in %s on line %d
 foo
 --EXPECTHEADERS--
-X-foo: e
-foo
+Content-type: text/html; charset=UTF-8
