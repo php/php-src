@@ -281,7 +281,7 @@ PHP_FUNCTION(headers_list)
 		return;
 	}
 
-	if (!&SG(sapi_headers).headers.count) {
+	if (!SG(sapi_headers).headers.count) {
 		RETURN_FALSE;
 	}
 	array_init(return_value);
