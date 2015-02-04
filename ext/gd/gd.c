@@ -1977,7 +1977,7 @@ PHP_FUNCTION(imagegrabwindow)
 	zend_long lwindow_handle;
 	typedef BOOL (WINAPI *tPrintWindow)(HWND, HDC,UINT);
 	tPrintWindow pPrintWindow = 0;
-	gdImagePtr im;
+	gdImagePtr im = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &lwindow_handle, &client_area) == FAILURE) {
 		RETURN_FALSE;
