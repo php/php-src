@@ -993,7 +993,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
 {
 	zval *opt_val;
-	ulong opt_indx;
+	zend_ulong opt_indx;
 	zend_string *opt_name;
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht_options, opt_indx, opt_name, opt_val) {
