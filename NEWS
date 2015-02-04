@@ -1,9 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2015, PHP 5.5.23
-
-
-?? ??? 2015, PHP 5.5.22
+5 Feb 2015, PHP 5.5.22RC1
 
 - Core:
   . Fixed bug #67068 (getClosure returns somethings that's not a closure). 
