@@ -262,7 +262,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #define PACKAGE_NAME "PCRE"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE 8.35"
+#define PACKAGE_STRING "PCRE 8.36"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre"
@@ -271,7 +271,7 @@ sure both macros are undefined; an emulation function will then be used. */
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "8.35"
+#define PACKAGE_VERSION "8.36"
 
 /* The value of PARENS_NEST_LIMIT specifies the maximum depth of nested
    parentheses (of any kind) in a pattern. This limits the amount of system
@@ -322,7 +322,7 @@ sure both macros are undefined; an emulation function will then be used. */
 /* #undef STDC_HEADERS */
 
 /* Define to any value to enable support for Just-In-Time compiling. */
-#define SUPPORT_JIT
+/* #undef SUPPORT_JIT */
 
 /* Define to any value to allow pcregrep to be linked with libbz2, so that it
    is able to handle .bz2 files. */
@@ -348,7 +348,7 @@ sure both macros are undefined; an emulation function will then be used. */
 /* #undef SUPPORT_PCRE8 */
 
 /* Define to any value to enable JIT support in pcregrep. */
-#define SUPPORT_PCREGREP_JIT
+/* #undef SUPPORT_PCREGREP_JIT */
 
 /* Define to any value to enable support for Unicode properties. */
 /* #undef SUPPORT_UCP */
@@ -363,7 +363,7 @@ sure both macros are undefined; an emulation function will then be used. */
 /* #undef SUPPORT_VALGRIND */
 
 /* Version number of package */
-#define VERSION "8.35"
+#define VERSION "8.36"
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
