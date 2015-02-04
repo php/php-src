@@ -780,12 +780,12 @@ static void zend_verify_return_type(zend_function *zf, zval *ret)
 		char *class_name;
 
 		if (Z_TYPE_P(ret) == IS_OBJECT) {
-			need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
+			need_msg = zf->type == ZEND_INTERNAL_FUNCTION ? zend_verify_internal_arg_class_kind((zend_internal_arg_info *)ret_info, &class_name, &ce) : zend_verify_arg_class_kind(ret_info, &class_name, &ce);
 			if (!ce || !instanceof_function(Z_OBJCE_P(ret), ce)) {
 				zend_verify_return_error(E_RECOVERABLE_ERROR, zf, need_msg, class_name, "instance of ", Z_OBJCE_P(ret)->name->val);
 			}
 		} else if (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null) {
-			need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
+			need_msg = zf->type == ZEND_INTERNAL_FUNCTION ? zend_verify_internal_arg_class_kind((zend_internal_arg_info *)ret_info, &class_name, &ce) : zend_verify_arg_class_kind(ret_info, &class_name, &ce);
 			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, need_msg, class_name, zend_zval_type_name(ret), "");
 		}
 	} else if (ret_info->type_hint) {

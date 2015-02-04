@@ -2002,6 +2002,10 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				internal_function->num_args--;
 			}
 			if (info->type_hint) {
+				if (info->type_hint == IS_OBJECT) {
+					ZEND_ASSERT(info->class_name);
+				}
+
 				internal_function->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 			}
 		} else {

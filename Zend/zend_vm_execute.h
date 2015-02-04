@@ -601,6 +601,10 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
 
+		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+			zend_verify_return_type(fbc, EX_VAR(opline->result.var));
+		}
+
 		if (!RETURN_VALUE_USED(opline)) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
