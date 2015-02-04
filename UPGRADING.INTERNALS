@@ -180,6 +180,9 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   r. In accordance with general use of size_t as string length, all PDO API
      functions now use size_t for string length.
 
+  s. Removed ZEND_REGISTER/FETCH_RESOURCE, use zend_fetch_resource and
+     and zend_register_resource instead.
+
 
 ========================
 2. Build system changes
