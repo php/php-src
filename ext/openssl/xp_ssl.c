@@ -176,12 +176,12 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init 
 
 static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
-	return php_openssl_sockop_io( 0, stream, buf, count );
+	return php_openssl_sockop_io( 0, stream, buf, count TSRMLS_CC);
 }
 
 static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
-	return php_openssl_sockop_io( 1, stream, buf, count );
+	return php_openssl_sockop_io( 1, stream, buf, count TSRMLS_CC);
 }
 
 /**
