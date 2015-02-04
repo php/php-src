@@ -240,6 +240,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	FG(pclose_ret) = -1;
 #endif
 	_php_free_envp(proc->env, proc->is_persistent);
+	pefree(proc->pipes, proc->is_persistent);
 	pefree(proc->command, proc->is_persistent);
 	pefree(proc, proc->is_persistent);
 
@@ -428,7 +429,8 @@ PHP_FUNCTION(proc_open)
 	zval *descitem = NULL;
 	zend_string *str_index;
 	zend_ulong nindex;
-	struct php_proc_open_descriptor_item descriptors[PHP_PROC_OPEN_MAX_DESCRIPTORS];
+	struct php_proc_open_descriptor_item *descriptors = NULL;
+	int ndescriptors_array;
 #ifdef PHP_WIN32
 	PROCESS_INFORMATION pi;
 	HANDLE childHandle;
@@ -493,7 +495,11 @@ PHP_FUNCTION(proc_open)
 		memset(&env, 0, sizeof(env));
 	}
 
-	memset(descriptors, 0, sizeof(descriptors));
+	ndescriptors_array = zend_hash_num_elements(Z_ARRVAL_P(descriptorspec));
+
+	descriptors = safe_emalloc(sizeof(struct php_proc_open_descriptor_item), ndescriptors_array, 0);
+
+	memset(descriptors, 0, sizeof(struct php_proc_open_descriptor_item) * ndescriptors_array);
 
 #ifdef PHP_WIN32
 	/* we use this to allow the child to inherit handles */
@@ -663,9 +669,7 @@ PHP_FUNCTION(proc_open)
 				goto exit_fail;
 			}
 		}
-
-		if (++ndesc == PHP_PROC_OPEN_MAX_DESCRIPTORS)
-			break;
+		ndesc++;
 	} ZEND_HASH_FOREACH_END();
 
 #ifdef PHP_WIN32
@@ -869,6 +873,7 @@ PHP_FUNCTION(proc_open)
 	proc = (struct php_process_handle*)pemalloc(sizeof(struct php_process_handle), is_persistent);
 	proc->is_persistent = is_persistent;
 	proc->command = command;
+	proc->pipes = pemalloc(sizeof(zend_resource *) * ndesc, is_persistent);
 	proc->npipes = ndesc;
 	proc->child = child;
 #ifdef PHP_WIN32
@@ -946,10 +951,12 @@ PHP_FUNCTION(proc_open)
 		}
 	}
 
+	efree(descriptors);
 	ZEND_REGISTER_RESOURCE(return_value, proc, le_proc_open);
 	return;
 
 exit_fail:
+	efree(descriptors);
 	_php_free_envp(env, is_persistent);
 	pefree(command, is_persistent);
 #if PHP_CAN_DO_PTS
