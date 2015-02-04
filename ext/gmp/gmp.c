@@ -378,8 +378,7 @@ static void gmp_free_object_storage(zend_object *obj) /* {{{ */
 
 static inline zend_object *gmp_create_object_ex(zend_class_entry *ce, mpz_ptr *gmpnum_target) /* {{{ */
 {
-	gmp_object *intern = emalloc(sizeof(gmp_object)
-			+ sizeof(zval) * (ce->default_properties_count - 1));
+	gmp_object *intern = emalloc(sizeof(gmp_object) + zend_object_properties_size(ce));
 
 	zend_object_std_init(&intern->std, ce);
 	object_properties_init(&intern->std, ce);

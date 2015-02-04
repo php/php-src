@@ -2069,7 +2069,7 @@ static inline zend_object *date_object_new_date_ex(zend_class_entry *class_type,
 {
 	php_date_obj *intern;
 
-	intern = ecalloc(1, sizeof(php_date_obj) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(php_date_obj) + zend_object_properties_size(class_type));
 
 	zend_object_std_init(&intern->std, class_type);
 	if (init_props) {
@@ -2200,7 +2200,7 @@ static inline zend_object *date_object_new_timezone_ex(zend_class_entry *class_t
 {
 	php_timezone_obj *intern;
 
-	intern = ecalloc(1, sizeof(php_timezone_obj) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(php_timezone_obj) + zend_object_properties_size(class_type));
 
 	zend_object_std_init(&intern->std, class_type);
 	if (init_props) {
@@ -2291,7 +2291,7 @@ static inline zend_object *date_object_new_interval_ex(zend_class_entry *class_t
 {
 	php_interval_obj *intern;
 
-	intern = ecalloc(1, sizeof(php_interval_obj) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(php_interval_obj) + zend_object_properties_size(class_type));
 
 	zend_object_std_init(&intern->std, class_type);
 	if (init_props) {
@@ -2372,7 +2372,7 @@ static inline zend_object *date_object_new_period_ex(zend_class_entry *class_typ
 {
 	php_period_obj *intern;
 
-	intern = ecalloc(1, sizeof(php_period_obj) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(php_period_obj) + zend_object_properties_size(class_type));
 
 	zend_object_std_init(&intern->std, class_type);
 	if (init_props) {
