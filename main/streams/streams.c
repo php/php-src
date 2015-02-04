@@ -140,7 +140,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 				*stream = (php_stream*)le->ptr;
 				if (!regentry) { /* not found in regular list */
 					GC_REFCOUNT(le)++;
-					(*stream)->res = ZEND_REGISTER_RESOURCE(NULL, *stream, le_pstream);
+					(*stream)->res = zend_register_resource(*stream, le_pstream);
 				} else {
 					GC_REFCOUNT(regentry)++;
 					(*stream)->res = regentry;
@@ -325,7 +325,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 		}
 	}
 
-	ret->res = ZEND_REGISTER_RESOURCE(NULL, ret, persistent_id ? le_pstream : le_stream);
+	ret->res = zend_register_resource(ret, persistent_id ? le_pstream : le_stream);
 	strlcpy(ret->mode, mode, sizeof(ret->mode));
 
 	ret->wrapper          = NULL;
@@ -2211,7 +2211,7 @@ PHPAPI php_stream_context *php_stream_context_alloc(void)
 	context->notifier = NULL;
 	array_init(&context->options);
 
-	context->res = ZEND_REGISTER_RESOURCE(NULL, context, php_le_stream_context());
+	context->res = zend_register_resource(context, php_le_stream_context());
 	return context;
 }
 

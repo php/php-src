@@ -59,40 +59,17 @@ ZEND_API int zend_list_free(zend_resource *res);
 ZEND_API int zend_list_delete(zend_resource *res);
 ZEND_API int zend_list_close(zend_resource *res);
 
-ZEND_API zend_resource *zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type);
-ZEND_API void *zend_fetch_resource(zval *passed_id, int default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
+ZEND_API zend_resource *zend_register_resource(void *rsrc_pointer, int rsrc_type);
+ZEND_API void *zend_fetch_resource(zend_resource *res, const char *resource_type_name, int resource_type);
+ZEND_API void *zend_fetch_resource2(zend_resource *res, const char *resource_type_name, int resource_type, int resource_type2);
+ZEND_API void *zend_fetch_resource_ex(zval *res, const char *resource_type_name, int resource_type);
+ZEND_API void *zend_fetch_resource2_ex(zval *res, const char *resource_type_name, int resource_type, int resource_type2);
 
 ZEND_API const char *zend_rsrc_list_get_rsrc_type(zend_resource *res);
 ZEND_API int zend_fetch_list_dtor_id(const char *type_name);
 
 extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 
-#define ZEND_VERIFY_RESOURCE(rsrc)		\
-	if (!rsrc) {						\
-		RETURN_FALSE;					\
-	}
-
-#define ZEND_FETCH_RESOURCE(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type)	\
-	rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 1, resource_type);	\
-	ZEND_VERIFY_RESOURCE(rsrc);
-
-#define ZEND_FETCH_RESOURCE_NO_RETURN(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type)	\
-	(rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 1, resource_type))
-
-#define ZEND_FETCH_RESOURCE2(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type1, resource_type2)	\
-	rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 2, resource_type1, resource_type2);	\
-	ZEND_VERIFY_RESOURCE(rsrc);
-
-#define ZEND_FETCH_RESOURCE2_NO_RETURN(rsrc, rsrc_type, passed_id, default_id, resource_type_name, resource_type1, resource_type2)	\
-	(rsrc = (rsrc_type) zend_fetch_resource(passed_id, default_id, resource_type_name, NULL, 2, resource_type1, resource_type2))
-
-#define ZEND_REGISTER_RESOURCE(rsrc_result, rsrc_pointer, rsrc_type)  \
-    zend_register_resource(rsrc_result, rsrc_pointer, rsrc_type);
-
-#define ZEND_GET_RESOURCE_TYPE_ID(le_id, le_type_name) \
-    if (le_id == 0) {                                  \
-        le_id = zend_fetch_list_dtor_id(le_type_name); \
-	}
 END_EXTERN_C()
 
 #endif

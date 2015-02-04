@@ -1177,7 +1177,7 @@ PHP_FUNCTION(wddx_packet_start)
 	php_wddx_packet_start(packet, comment, comment_len);
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 
-	ZEND_REGISTER_RESOURCE(return_value, packet, le_wddx);
+	RETURN_RES(zend_register_resource(packet, le_wddx));
 }
 /* }}} */
 
@@ -1192,7 +1192,9 @@ PHP_FUNCTION(wddx_packet_end)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(packet, wddx_packet *, packet_id, -1, "WDDX packet ID", le_wddx);
+	if ((packet = (wddx_packet *)zend_fetch_resource(Z_RES_P(packet_id), "WDDX packet ID", le_wddx)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 
@@ -1218,11 +1220,7 @@ PHP_FUNCTION(wddx_add_vars)
 		return;
 	}
 
-	if (!ZEND_FETCH_RESOURCE_NO_RETURN(packet, wddx_packet *, packet_id, -1, "WDDX packet ID", le_wddx)) {
-		RETURN_FALSE;
-	}
-
-	if (!packet) {
+	if ((packet = (wddx_packet *)zend_fetch_resource(Z_RES_P(packet_id), "WDDX packet ID", le_wddx)) == NULL) {
 		RETURN_FALSE;
 	}
 

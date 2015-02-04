@@ -215,8 +215,7 @@ PHP_FUNCTION(shmop_open)
 
 	shmop->size = shm.shm_segsz;
 
-	ZEND_REGISTER_RESOURCE(return_value, shmop, shm_type);
-	RETURN_LONG(Z_RES_HANDLE_P(return_value));
+	RETURN_RES(zend_register_resource(shmop, shm_type));
 err:
 	efree(shmop);
 	RETURN_FALSE;
@@ -227,17 +226,20 @@ err:
    reads from a shm segment */
 PHP_FUNCTION(shmop_read)
 {
-	zend_long shmid, start, count;
+	zval *shmid;
+	zend_long start, count;
 	struct php_shmop *shmop;
 	char *startaddr;
 	int bytes;
 	zend_string *return_string;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &shmid, &start, &count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rll", &shmid, &start, &count) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(shmop, struct php_shmop *, NULL, shmid, "shmop", shm_type);
+	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (start < 0 || start > shmop->size) {
 		php_error_docref(NULL, E_WARNING, "start is out of range");
@@ -262,17 +264,19 @@ PHP_FUNCTION(shmop_read)
    closes a shared memory segment */
 PHP_FUNCTION(shmop_close)
 {
-	zend_long shmid;
-	zval *res;
+	zval *shmid;
+	struct php_shmop *shmop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &shmid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shmid) == FAILURE) {
 		return;
 	}
 
-	res = zend_hash_index_find(&EG(regular_list), shmid);
-	if (res) {
-		zend_list_close(Z_RES_P(res));
+
+	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
+		RETURN_FALSE;
 	}
+
+	zend_list_close(Z_RES_P(shmid));
 }
 /* }}} */
 
@@ -280,14 +284,16 @@ PHP_FUNCTION(shmop_close)
    returns the shm size */
 PHP_FUNCTION(shmop_size)
 {
-	zend_long shmid;
+	zval *shmid;
 	struct php_shmop *shmop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &shmid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shmid) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(shmop, struct php_shmop *, NULL, shmid, "shmop", shm_type);
+	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	RETURN_LONG(shmop->size);
 }
@@ -299,14 +305,17 @@ PHP_FUNCTION(shmop_write)
 {
 	struct php_shmop *shmop;
 	int writesize;
-	zend_long shmid, offset;
+	zend_long offset;
 	zend_string *data;
+	zval *shmid;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lSl", &shmid, &data, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSl", &shmid, &data, &offset) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(shmop, struct php_shmop *, NULL, shmid, "shmop", shm_type);
+	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if ((shmop->shmatflg & SHM_RDONLY) == SHM_RDONLY) {
 		php_error_docref(NULL, E_WARNING, "trying to write to a read only segment");
@@ -329,14 +338,16 @@ PHP_FUNCTION(shmop_write)
    mark segment for deletion */
 PHP_FUNCTION(shmop_delete)
 {
-	zend_long shmid;
+	zval *shmid;
 	struct php_shmop *shmop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &shmid) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shmid) == FAILURE) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(shmop, struct php_shmop *, NULL, shmid, "shmop", shm_type);
+	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (shmctl(shmop->shmid, IPC_RMID, NULL)) {
 		php_error_docref(NULL, E_WARNING, "can't mark segment for deletion (are you the owner?)");
