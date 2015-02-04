@@ -72,6 +72,7 @@ PHP X.Y UPGRADE NOTES
     hexadecimal numbers. Furthermore is_numeric() will not consider hexadecimal
     strings to be numeric (use FILTER_VALIDATE_INT instead).
     (RFC: https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings)
+  . $HTTP_RAW_POST_DATA is no longer available. Use the php://input stream instead.
 
 - Date:
   . Removed $is_dst parameter from mktime() and gmmktime().
@@ -187,6 +188,7 @@ PHP X.Y UPGRADE NOTES
 - Core
   . Removed asp_tags ini directive. Trying to enable it will result in a fatal
     error.
+  . Removed always_populate_raw_post_data ini directive.
 
 ========================================
 12. Windows Support
