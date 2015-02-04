@@ -181,7 +181,9 @@ PHP 7.0 INTERNALS UPGRADE NOTES
      functions now use size_t for string length.
 
   s. Removed ZEND_REGISTER/FETCH_RESOURCE, use zend_fetch_resource and
-     and zend_register_resource instead.
+     and zend_register_resource instead, zend_fetch_resource accepts a zend_resource *
+     as first argument, if you still need to fetch a resource from zval, use 
+     zend_fetch_resource_ex. More details can be found in Zend/zend_list.c.
 
 
 ========================
