@@ -1,5 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2015, PHP 5.5.23
+
+
 ?? ??? 2015, PHP 5.5.22
 
 - Core:
@@ -23,10 +26,6 @@ PHP                                                                        NEWS
   . Fixed bug #66479 (Wrong response to FCGI_GET_VALUES). (Frank Stolle)
   . Fixed bug #68571 (core dump when webserver close the socket).
     (redfoxli069 at gmail dot com, Laruence)
-
-- JSON:
-  . Fixed bug #68938 (json_decode() decodes empty string without error).
-    (jeremy at bat-country dot us)
 
 - Libxml:
   . Fixed bug #64938 (libxml_disable_entity_loader setting is shared
