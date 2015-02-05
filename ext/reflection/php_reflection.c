@@ -2485,10 +2485,6 @@ ZEND_METHOD(reflection_return_type, allowsNull)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	if (!param->arg_info) {
-		return;
-	}
-
 	RETVAL_BOOL(param->arg_info->allow_null);
 }
 /* }}} */

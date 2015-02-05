@@ -31,6 +31,14 @@ function user_return_class() : TestClass {
 	return new TestClass();
 }
 
+function &user_return_class2() : TestClass {
+	return new TestClass();
+}
+
+echo "Basic:----------\n";
+echo ReflectionReturnType::export("user_return_class", true) . "\n";
+echo ReflectionReturnType::export("user_return_class2", true) . "\n";
+
 echo "No return types:-----------\n";
 $rf = new ReflectionFunction('user_no_return_type');
 var_dump($rf->getReturnType());
@@ -59,11 +67,20 @@ dump_rt_obj($rt);
 $rt = new ReflectionReturnType("user_return_class");
 dump_rt_obj($rt);
 
+$rt = new ReflectionReturnType("user_return_class2");
+dump_rt_obj($rt);
+echo $rt . "\n";
+
 $rt = new ReflectionReturnType(function() : array { return []; });
 dump_rt_obj($rt);
 
+echo $rt . "\n";
+
 ?>
 --EXPECTF--
+Basic:----------
+ReturnType [ TestClass  ]
+ReturnType [ TestClass & ]
 No return types:-----------
 bool(false)
 bool(false)
@@ -91,9 +108,20 @@ object(ReflectionClass)#3 (1) {
   string(9) "TestClass"
 }
 =========
+bool(false)
+bool(false)
+bool(false)
+bool(true)
+object(ReflectionClass)#1 (1) {
+  ["name"]=>
+  string(9) "TestClass"
+}
+=========
+ReturnType [ TestClass & ]
 bool(true)
 bool(false)
 bool(false)
 bool(false)
 NULL
 =========
+ReturnType [ array  ]
