@@ -7,6 +7,8 @@
 ?? Feb 2015, PHP 5.6.6
 
 - Core:
+  . Fixed bug #68986 (pointer returned by php_stream_fopen_temporary_file
+    not validated in memory.c). (nayana at ddproperty dot com)
   . Fixed bug #67068 (getClosure returns somethings that's not a closure).
     (Danack at basereality dot com)
   . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname

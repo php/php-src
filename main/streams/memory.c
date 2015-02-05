@@ -375,6 +375,10 @@ static size_t php_stream_temp_write(php_stream *stream, const char *buf, size_t 
 
 		if (memsize + count >= ts->smax) {
 			php_stream *file = php_stream_fopen_temporary_file(ts->tmpdir, "php", NULL);
+			if (file == NULL) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create temporary file, Check permissions in temporary files directory.");
+				return 0;
+			}
 			php_stream_write(file, membuf, memsize);
 			php_stream_free_enclosed(ts->innerstream, PHP_STREAM_FREE_CLOSE);
 			ts->innerstream = file;
