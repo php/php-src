@@ -2254,7 +2254,7 @@ static zend_object *dbstmt_clone_obj(zval *zobject)
 	pdo_stmt_t *stmt;
 	pdo_stmt_t *old_stmt;
 
-	stmt = ecalloc(1, sizeof(pdo_stmt_t) + sizeof(zval) * (Z_OBJCE_P(zobject)->default_properties_count - 1));
+	stmt = ecalloc(1, sizeof(pdo_stmt_t) + zend_object_properties_size(Z_OBJCE_P(zobject)));
 	zend_object_std_init(&stmt->std, Z_OBJCE_P(zobject));
 	object_properties_init(&stmt->std, Z_OBJCE_P(zobject));
 
@@ -2357,7 +2357,7 @@ zend_object *pdo_dbstmt_new(zend_class_entry *ce)
 {
 	pdo_stmt_t *stmt;
 
-	stmt = ecalloc(1, sizeof(pdo_stmt_t) + sizeof(zval) * (ce->default_properties_count - 1));
+	stmt = ecalloc(1, sizeof(pdo_stmt_t) + zend_object_properties_size(ce));
 	zend_object_std_init(&stmt->std, ce);
 	object_properties_init(&stmt->std, ce);
 

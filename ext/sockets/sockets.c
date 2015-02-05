@@ -781,7 +781,7 @@ static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, PHP_SOCKET *m
 	if (Z_TYPE_P(sock_array) != IS_ARRAY) return 0;
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(sock_array), element) {
-		php_sock = (php_socket*) zend_fetch_resource(element, -1, le_socket_name, NULL, 1, le_socket);
+		php_sock = (php_socket*) zend_fetch_resource_ex(element, le_socket_name, le_socket);
 		if (!php_sock) continue; /* If element is not a resource, skip it */
 
 		PHP_SAFE_FD_SET(php_sock->bsd_socket, fds);
@@ -809,7 +809,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
 
 	array_init(&new_hash);
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(sock_array), num_key, key, element) {
-		php_sock = (php_socket*) zend_fetch_resource(element, -1, le_socket_name, NULL, 1, le_socket);
+		php_sock = (php_socket*) zend_fetch_resource_ex(element, le_socket_name, le_socket);
 		if (!php_sock) continue; /* If element is not a resource, skip it */
 
 		if (PHP_SAFE_FD_ISSET(php_sock->bsd_socket, fds)) {
@@ -927,7 +927,7 @@ PHP_FUNCTION(socket_create_listen)
 	php_sock->error = 0;
 	php_sock->blocking = 1;
 
-	ZEND_REGISTER_RESOURCE(return_value, php_sock, le_socket);
+	RETURN_RES(zend_register_resource(php_sock, le_socket));
 }
 /* }}} */
 
@@ -944,13 +944,15 @@ PHP_FUNCTION(socket_accept)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (!php_accept_connect(php_sock, &new_sock, (struct sockaddr*)&sa, &php_sa_len)) {
 		RETURN_FALSE;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value, new_sock, le_socket);
+	RETURN_RES(zend_register_resource(new_sock, le_socket));
 }
 /* }}} */
 
@@ -965,13 +967,14 @@ PHP_FUNCTION(socket_set_nonblock)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (!Z_ISUNDEF(php_sock->zstream)) {
 		php_stream *stream;
 		/* omit notice if resource doesn't exist anymore */
-		stream = zend_fetch_resource(&php_sock->zstream, -1,
-			NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
+		stream = zend_fetch_resource2_ex(&php_sock->zstream, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream != NULL) {
 			if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, 0,
 					NULL) != -1) {
@@ -1002,15 +1005,16 @@ PHP_FUNCTION(socket_set_block)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* if socket was created from a stream, give the stream a chance to take
 	 * care of the operation itself, thereby allowing it to update its internal
 	 * state */
 	if (!Z_ISUNDEF(php_sock->zstream)) {
 		php_stream *stream;
-		stream = zend_fetch_resource(&php_sock->zstream, -1,
-			NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream());
+		stream = zend_fetch_resource2_ex(&php_sock->zstream, NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream != NULL) {
 			if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, 1,
 					NULL) != -1) {
@@ -1042,7 +1046,9 @@ PHP_FUNCTION(socket_listen)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (listen(php_sock->bsd_socket, backlog) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "unable to listen on socket", errno);
@@ -1063,7 +1069,10 @@ PHP_FUNCTION(socket_close)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
+
 	if (!Z_ISUNDEF(php_sock->zstream)) {
 		php_stream *stream = NULL;
 		php_stream_from_zval_no_verify(stream, &php_sock->zstream);
@@ -1093,7 +1102,9 @@ PHP_FUNCTION(socket_write)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (ZEND_NUM_ARGS() < 3) {
 		length = str_len;
@@ -1135,7 +1146,9 @@ PHP_FUNCTION(socket_read)
 
 	tmpbuf = zend_string_alloc(length, 0);
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (type == PHP_NORMAL_READ) {
 		retval = php_read(php_sock, tmpbuf->val, length, 0);
@@ -1193,7 +1206,9 @@ PHP_FUNCTION(socket_getsockname)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	sa = (struct sockaddr *) &sa_storage;
 
@@ -1274,7 +1289,9 @@ PHP_FUNCTION(socket_getpeername)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	sa = (struct sockaddr *) &sa_storage;
 
@@ -1371,7 +1388,7 @@ PHP_FUNCTION(socket_create)
 	php_sock->error = 0;
 	php_sock->blocking = 1;
 
-	ZEND_REGISTER_RESOURCE(return_value, php_sock, le_socket);
+	RETURN_RES(zend_register_resource(php_sock, le_socket));
 }
 /* }}} */
 
@@ -1391,7 +1408,9 @@ PHP_FUNCTION(socket_connect)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	switch(php_sock->type) {
 #if HAVE_IPV6
@@ -1495,7 +1514,9 @@ PHP_FUNCTION(socket_bind)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	switch(php_sock->type) {
 		case AF_UNIX:
@@ -1575,7 +1596,9 @@ PHP_FUNCTION(socket_recv)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, php_sock_res, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(php_sock_res), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* overflow check */
 	if ((len + 1) < 2) {
@@ -1621,7 +1644,9 @@ PHP_FUNCTION(socket_send)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	retval = send(php_sock->bsd_socket, buf, (buf_len < len ? buf_len : len), flags);
 
@@ -1656,7 +1681,9 @@ PHP_FUNCTION(socket_recvfrom)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* overflow check */
 	if ((arg3 + 2) < 3) {
@@ -1779,7 +1806,9 @@ PHP_FUNCTION(socket_sendto)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	switch (php_sock->type) {
 		case AF_UNIX:
@@ -1855,7 +1884,9 @@ PHP_FUNCTION(socket_get_option)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (level == IPPROTO_IP) {
 		switch (optname) {
@@ -1968,7 +1999,9 @@ PHP_FUNCTION(socket_set_option)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	set_errno(0);
 
@@ -2138,8 +2171,8 @@ PHP_FUNCTION(socket_create_pair)
 	php_sock[0]->blocking	= 1;
 	php_sock[1]->blocking	= 1;
 
-	ZEND_REGISTER_RESOURCE(&retval[0], php_sock[0], le_socket);
-	ZEND_REGISTER_RESOURCE(&retval[1], php_sock[1], le_socket);
+	ZVAL_RES(&retval[0], zend_register_resource(php_sock[0], le_socket));
+	ZVAL_RES(&retval[1], zend_register_resource(php_sock[1], le_socket));
 
 	add_index_zval(fds_array_zval, 0, &retval[0]);
 	add_index_zval(fds_array_zval, 1, &retval[1]);
@@ -2162,7 +2195,9 @@ PHP_FUNCTION(socket_shutdown)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(php_sock, php_socket*, arg1, -1, le_socket_name, le_socket);
+	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (shutdown(php_sock->bsd_socket, how_shutdown) != 0) {
 		PHP_SOCKET_ERROR(php_sock, "unable to shutdown socket", errno);
@@ -2186,7 +2221,9 @@ PHP_FUNCTION(socket_last_error)
 	}
 
 	if (arg1) {
-		ZEND_FETCH_RESOURCE(php_sock, php_socket*, arg1, -1, le_socket_name, le_socket);
+		if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+			RETURN_FALSE;
+		}
 		RETVAL_LONG(php_sock->error);
 	} else {
 		RETVAL_LONG(SOCKETS_G(last_error));
@@ -2206,7 +2243,9 @@ PHP_FUNCTION(socket_clear_error)
 	}
 
 	if (arg1) {
-		ZEND_FETCH_RESOURCE(php_sock, php_socket*, arg1, -1, le_socket_name, le_socket);
+		if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
+			RETURN_FALSE;
+		}
 		php_sock->error = 0;
 	} else {
 		SOCKETS_G(last_error) = 0;
@@ -2306,7 +2345,7 @@ PHP_FUNCTION(socket_import_stream)
 	php_stream_set_option(stream, PHP_STREAM_OPTION_READ_BUFFER,
 		PHP_STREAM_BUFFER_NONE, NULL);
 
-	ZEND_REGISTER_RESOURCE(return_value, retsock, le_socket);
+	RETURN_RES(zend_register_resource(retsock, le_socket));
 }
 /* }}} */
 

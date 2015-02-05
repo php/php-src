@@ -1245,7 +1245,7 @@ static void php_imap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	imap_le_struct->imap_stream = imap_stream;
 	imap_le_struct->flags = cl_flags;
 
-	ZEND_REGISTER_RESOURCE(return_value, imap_le_struct, le_imap);
+	RETURN_RES(zend_register_resource(imap_le_struct, le_imap));
 }
 /* }}} */
 
@@ -1272,7 +1272,9 @@ PHP_FUNCTION(imap_reopen)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (options) {
 		flags = options;
@@ -1341,7 +1343,9 @@ PHP_FUNCTION(imap_append)
 	}
 
 	zend_string_free(regex);
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	INIT (&st, mail_string, (void *) message->val, message->len);
 
@@ -1364,7 +1368,9 @@ PHP_FUNCTION(imap_num_msg)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	RETURN_LONG(imap_le_struct->imap_stream->nmsgs);
 }
@@ -1381,7 +1387,9 @@ PHP_FUNCTION(imap_ping)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	RETURN_BOOL(mail_ping(imap_le_struct->imap_stream));
 }
@@ -1398,7 +1406,9 @@ PHP_FUNCTION(imap_num_recent)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	RETURN_LONG(imap_le_struct->imap_stream->recent);
 }
@@ -1417,7 +1427,9 @@ PHP_FUNCTION(imap_get_quota)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	array_init(return_value);
 	IMAPG(quota_return) = &return_value;
@@ -1444,7 +1456,9 @@ PHP_FUNCTION(imap_get_quotaroot)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	array_init(return_value);
 	IMAPG(quota_return) = &return_value;
@@ -1473,7 +1487,9 @@ PHP_FUNCTION(imap_set_quota)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	limits.text.data = (unsigned char*)"STORAGE";
 	limits.text.size = mailbox_size;
@@ -1495,7 +1511,9 @@ PHP_FUNCTION(imap_setacl)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	RETURN_BOOL(imap_setacl(imap_le_struct->imap_stream, mailbox->val, id->val, rights->val));
 }
@@ -1513,7 +1531,9 @@ PHP_FUNCTION(imap_getacl)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* initializing the special array for the return values */
 	array_init(return_value);
@@ -1544,7 +1564,9 @@ PHP_FUNCTION(imap_expunge)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	mail_expunge (imap_le_struct->imap_stream);
 
@@ -1569,7 +1591,9 @@ PHP_FUNCTION(imap_gc)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	mail_gc(imap_le_struct->imap_stream, flags);
 
@@ -1590,7 +1614,9 @@ PHP_FUNCTION(imap_close)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (argc == 2) {
 		flags = options;
@@ -1630,7 +1656,9 @@ PHP_FUNCTION(imap_headers)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* Initialize return array */
 	array_init(return_value);
@@ -1685,7 +1713,9 @@ PHP_FUNCTION(imap_body)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if ((argc == 3) && (flags & FT_UID)) {
 		/* This should be cached; if it causes an extra RTT to the
@@ -1723,7 +1753,9 @@ PHP_FUNCTION(imap_mail_copy)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (mail_copy_full(imap_le_struct->imap_stream, seq->val, folder->val, (argc == 4 ? options : NIL)) == T) {
 		RETURN_TRUE;
@@ -1747,7 +1779,9 @@ PHP_FUNCTION(imap_mail_move)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (mail_copy_full(imap_le_struct->imap_stream, seq->val, folder->val, (argc == 4 ? (options | CP_MOVE) : CP_MOVE)) == T) {
 		RETURN_TRUE;
@@ -1769,7 +1803,9 @@ PHP_FUNCTION(imap_createmailbox)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (mail_create(imap_le_struct->imap_stream, folder->val) == T) {
 		RETURN_TRUE;
@@ -1791,7 +1827,9 @@ PHP_FUNCTION(imap_renamemailbox)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (mail_rename(imap_le_struct->imap_stream, old_mailbox->val, new_mailbox->val) == T) {
 		RETURN_TRUE;
@@ -1813,7 +1851,9 @@ PHP_FUNCTION(imap_deletemailbox)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (mail_delete(imap_le_struct->imap_stream, folder->val) == T) {
 		RETURN_TRUE;
@@ -1836,7 +1876,9 @@ PHP_FUNCTION(imap_list)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* set flag for normal, old mailbox list */
 	IMAPG(folderlist_style) = FLIST_ARRAY;
@@ -1874,7 +1916,9 @@ PHP_FUNCTION(imap_list_full)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* set flag for new, improved array of objects mailbox list */
 	IMAPG(folderlist_style) = FLIST_OBJECT;
@@ -1921,7 +1965,9 @@ PHP_FUNCTION(imap_listscan)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	IMAPG(imap_folders) = NIL;
 	mail_scan(imap_le_struct->imap_stream, ref->val, pat->val, content->val);
@@ -1953,7 +1999,9 @@ PHP_FUNCTION(imap_check)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (mail_ping (imap_le_struct->imap_stream) == NIL) {
 		RETURN_FALSE;
@@ -1986,7 +2034,9 @@ PHP_FUNCTION(imap_delete)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	convert_to_string_ex(sequence);
 
@@ -2008,7 +2058,9 @@ PHP_FUNCTION(imap_undelete)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	convert_to_string_ex(sequence);
 
@@ -2034,7 +2086,9 @@ PHP_FUNCTION(imap_headerinfo)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (argc >= 3) {
 		if (fromlength < 0 || fromlength > MAILTMPLEN) {
@@ -2139,7 +2193,9 @@ PHP_FUNCTION(imap_lsub)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* set flag for normal, old mailbox list */
 	IMAPG(folderlist_style) = FLIST_ARRAY;
@@ -2176,7 +2232,9 @@ PHP_FUNCTION(imap_lsub_full)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* set flag for new, improved array of objects list */
 	IMAPG(folderlist_style) = FLIST_OBJECT;
@@ -2222,7 +2280,9 @@ PHP_FUNCTION(imap_subscribe)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (mail_subscribe(imap_le_struct->imap_stream, folder->val) == T) {
 		RETURN_TRUE;
@@ -2244,7 +2304,9 @@ PHP_FUNCTION(imap_unsubscribe)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (mail_unsubscribe(imap_le_struct->imap_stream, folder->val) == T) {
 		RETURN_TRUE;
@@ -2273,7 +2335,9 @@ PHP_FUNCTION(imap_fetchstructure)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (msgno < 1) {
 		RETURN_FALSE;
@@ -2323,7 +2387,9 @@ PHP_FUNCTION(imap_fetchbody)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (argc < 4 || !(flags & FT_UID)) {
 		/* only perform the check if the msgno is a message number and not a UID */
@@ -2363,7 +2429,9 @@ PHP_FUNCTION(imap_fetchmime)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (argc < 4 || !(flags & FT_UID)) {
 		/* only perform the check if the msgno is a message number and not a UID */
@@ -2396,7 +2464,9 @@ PHP_FUNCTION(imap_savebody)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_ptr, pils *, stream, -1, "imap", le_imap);
+	if ((imap_ptr = (pils *)zend_fetch_resource(Z_RES_P(stream), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (!imap_ptr) {
 		RETURN_FALSE;
@@ -2539,7 +2609,9 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* Initialize return object */
 	object_init(return_value);
@@ -3024,7 +3096,9 @@ PHP_FUNCTION(imap_setflag_full)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	mail_setflag_full(imap_le_struct->imap_stream, sequence->val, flag->val, (flags ? flags : NIL));
 	RETURN_TRUE;
@@ -3045,7 +3119,9 @@ PHP_FUNCTION(imap_clearflag_full)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	mail_clearflag_full(imap_le_struct->imap_stream, sequence->val, flag->val, (argc == 4 ? flags : NIL));
 	RETURN_TRUE;
@@ -3070,7 +3146,9 @@ PHP_FUNCTION(imap_sort)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (pgm > SORTSIZE) {
 		php_error_docref(NULL, E_WARNING, "Unrecognized sort criteria");
@@ -3129,7 +3207,9 @@ PHP_FUNCTION(imap_fetchheader)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if ((argc == 3) && (flags & FT_UID)) {
 		/* This should be cached; if it causes an extra RTT to the
@@ -3159,7 +3239,9 @@ PHP_FUNCTION(imap_uid)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	msgindex = msgno;
 	if ((msgindex < 1) || ((unsigned) msgindex > imap_le_struct->imap_stream->nmsgs)) {
@@ -3183,7 +3265,9 @@ PHP_FUNCTION(imap_msgno)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	RETURN_LONG(mail_msgno(imap_le_struct->imap_stream, msgno));
 }
@@ -3202,7 +3286,9 @@ PHP_FUNCTION(imap_status)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	object_init(return_value);
 
@@ -3245,7 +3331,9 @@ PHP_FUNCTION(imap_bodystruct)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (!msg || msg < 1 || (unsigned) msg > imap_le_struct->imap_stream->nmsgs) {
 		php_error_docref(NULL, E_WARNING, "Bad message number");
@@ -3361,7 +3449,9 @@ PHP_FUNCTION(imap_fetch_overview)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	array_init(return_value);
 
@@ -4050,7 +4140,9 @@ PHP_FUNCTION(imap_search)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	search_criteria = estrndup(criteria->val, criteria->len);
 
@@ -4651,7 +4743,9 @@ PHP_FUNCTION(imap_thread)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(imap_le_struct, pils *, streamind, -1, "imap", le_imap);
+	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	pgm = mail_criteria(criteria);
 	top = mail_thread(imap_le_struct->imap_stream, "REFERENCES", NIL, pgm, flags);

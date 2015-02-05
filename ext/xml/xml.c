@@ -1141,7 +1141,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 
 	XML_SetUserData(parser->parser, parser);
 
-	ZEND_REGISTER_RESOURCE(return_value, parser, le_xml_parser);
+	RETVAL_RES(zend_register_resource(parser, le_xml_parser));
 	ZVAL_COPY(&parser->index, return_value);
 }
 /* }}} */
@@ -1173,7 +1173,9 @@ PHP_FUNCTION(xml_set_object)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* please leave this commented - or ask thies@thieso.net before doing it (again) */
 	if (!Z_ISUNDEF(parser->object)) {
@@ -1202,7 +1204,9 @@ PHP_FUNCTION(xml_set_element_handler)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	xml_set_handler(&parser->startElementHandler, shdl);
 	xml_set_handler(&parser->endElementHandler, ehdl);
@@ -1222,7 +1226,9 @@ PHP_FUNCTION(xml_set_character_data_handler)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	xml_set_handler(&parser->characterDataHandler, hdl);
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);
@@ -1241,7 +1247,9 @@ PHP_FUNCTION(xml_set_processing_instruction_handler)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	xml_set_handler(&parser->processingInstructionHandler, hdl);
 	XML_SetProcessingInstructionHandler(parser->parser, _xml_processingInstructionHandler);
@@ -1260,7 +1268,9 @@ PHP_FUNCTION(xml_set_default_handler)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	xml_set_handler(&parser->defaultHandler, hdl);
 	XML_SetDefaultHandler(parser->parser, _xml_defaultHandler);
@@ -1279,7 +1289,9 @@ PHP_FUNCTION(xml_set_unparsed_entity_decl_handler)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	xml_set_handler(&parser->unparsedEntityDeclHandler, hdl);
 	XML_SetUnparsedEntityDeclHandler(parser->parser, _xml_unparsedEntityDeclHandler);
@@ -1297,7 +1309,10 @@ PHP_FUNCTION(xml_set_notation_decl_handler)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &pind, &hdl) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	xml_set_handler(&parser->notationDeclHandler, hdl);
 	XML_SetNotationDeclHandler(parser->parser, _xml_notationDeclHandler);
@@ -1315,7 +1330,10 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &pind, &hdl) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	xml_set_handler(&parser->externalEntityRefHandler, hdl);
 	XML_SetExternalEntityRefHandler(parser->parser, (void *) _xml_externalEntityRefHandler);
@@ -1334,7 +1352,9 @@ PHP_FUNCTION(xml_set_start_namespace_decl_handler)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	xml_set_handler(&parser->startNamespaceDeclHandler, hdl);
 	XML_SetStartNamespaceDeclHandler(parser->parser, _xml_startNamespaceDeclHandler);
@@ -1353,7 +1373,9 @@ PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	xml_set_handler(&parser->endNamespaceDeclHandler, hdl);
 	XML_SetEndNamespaceDeclHandler(parser->parser, _xml_endNamespaceDeclHandler);
@@ -1375,7 +1397,10 @@ PHP_FUNCTION(xml_parse)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &pind, &data, &data_len, &isFinal) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	parser->isparsing = 1;
 	ret = XML_Parse(parser->parser, (XML_Char*)data, data_len, isFinal);
@@ -1405,7 +1430,9 @@ PHP_FUNCTION(xml_parse_into_struct)
 		array_init(info);
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	zval_ptr_dtor(xdata);
 	array_init(xdata);
@@ -1442,7 +1469,9 @@ PHP_FUNCTION(xml_get_error_code)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	RETURN_LONG((zend_long)XML_GetErrorCode(parser->parser));
 }
@@ -1477,7 +1506,9 @@ PHP_FUNCTION(xml_get_current_line_number)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	RETVAL_LONG(XML_GetCurrentLineNumber(parser->parser));
 }
@@ -1494,7 +1525,9 @@ PHP_FUNCTION(xml_get_current_column_number)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	RETVAL_LONG(XML_GetCurrentColumnNumber(parser->parser));
 }
@@ -1511,7 +1544,9 @@ PHP_FUNCTION(xml_get_current_byte_index)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	RETVAL_LONG(XML_GetCurrentByteIndex(parser->parser));
 }
@@ -1529,7 +1564,9 @@ PHP_FUNCTION(xml_parser_free)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (parser->isparsing == 1) {
 		php_error_docref(NULL, E_WARNING, "Parser cannot be freed while it is parsing.");
@@ -1555,7 +1592,9 @@ PHP_FUNCTION(xml_parser_set_option)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	switch (opt) {
 		case PHP_XML_OPTION_CASE_FOLDING:
@@ -1601,7 +1640,10 @@ PHP_FUNCTION(xml_parser_get_option)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &pind, &opt) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(parser, xml_parser *, pind, -1, "XML Parser", le_xml_parser);
+
+	if ((parser = (xml_parser *)zend_fetch_resource(Z_RES_P(pind), "XML Parser", le_xml_parser)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	switch (opt) {
 		case PHP_XML_OPTION_CASE_FOLDING:

@@ -132,6 +132,8 @@
   . Remove string category support in setlocale(). (Nikita)
   . Remove set_magic_quotes_runtime() and its alias magic_quotes_runtime().
     (Nikita)
+  . Fixed bug #65272 (flock() out parameter not set correctly in windows).
+    (Daniel Lowrey)
 
 - Streams:
   . Fixed bug #68532 (convert.base64-encode omits padding bytes).

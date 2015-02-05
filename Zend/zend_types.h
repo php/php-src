@@ -189,7 +189,6 @@ struct _zend_object {
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
-	HashTable        *guards; /* protects from __get/__set ... recursion */
 	zval              properties_table[1];
 };
 
@@ -325,6 +324,8 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_OBJ_APPLY_COUNT			0x07
 #define IS_OBJ_DESTRUCTOR_CALLED	(1<<3)
 #define IS_OBJ_FREE_CALLED			(1<<4)
+#define IS_OBJ_USE_GUARDS           (1<<5)
+#define IS_OBJ_HAS_GUARDS           (1<<6)
 
 #define Z_OBJ_APPLY_COUNT(zval) \
 	(Z_GC_FLAGS(zval) & IS_OBJ_APPLY_COUNT)

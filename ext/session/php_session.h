@@ -186,8 +186,7 @@ typedef struct _php_ps_globals {
 	zend_bool auto_start;
 	zend_bool use_cookies;
 	zend_bool use_only_cookies;
-	zend_bool use_trans_sid;	/* contains the INI value of whether to use trans-sid */
-	zend_bool apply_trans_sid;	/* whether or not to enable trans-sid for the current request */
+	zend_bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
 
 	zend_long hash_func;
 #if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)

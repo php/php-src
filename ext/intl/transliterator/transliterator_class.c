@@ -121,7 +121,7 @@ static zend_object *Transliterator_object_create(
 {
 	Transliterator_object* intern;
 
-	intern = ecalloc( 1, sizeof( Transliterator_object ) + sizeof(zval) * (ce->default_properties_count - 1));
+	intern = ecalloc( 1, sizeof( Transliterator_object ) + zend_object_properties_size(ce));
 
 	zend_object_std_init( &intern->zo, ce );
     object_properties_init( &intern->zo, ce );

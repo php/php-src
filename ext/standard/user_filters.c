@@ -40,15 +40,6 @@ static int le_userfilters;
 static int le_bucket_brigade;
 static int le_bucket;
 
-#define GET_FILTER_FROM_OBJ()	{ \
-	zval **tmp; \
-	if (FAILURE == zend_hash_index_find(Z_OBJPROP_P(this_ptr), 0, (void**)&tmp)) { \
-		php_error_docref(NULL, E_WARNING, "filter property vanished"); \
-		RETURN_FALSE; \
-	} \
-	ZEND_FETCH_RESOURCE(filter, php_stream_filter*, tmp, -1, "filter", le_userfilters); \
-}
-
 /* define the base filter class */
 
 PHP_FUNCTION(user_filter_nop)
@@ -198,9 +189,8 @@ php_stream_filter_status_t userfilter_filter(
 	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1);
 
 	/* Setup calling arguments */
-	ZEND_REGISTER_RESOURCE(&args[0], buckets_in, le_bucket_brigade);
-
-	ZEND_REGISTER_RESOURCE(&args[1], buckets_out, le_bucket_brigade);
+	ZVAL_RES(&args[0], zend_register_resource(buckets_in, le_bucket_brigade));
+	ZVAL_RES(&args[1], zend_register_resource(buckets_out, le_bucket_brigade));
 
 	if (bytes_consumed) {
 		ZVAL_LONG(&args[2], *bytes_consumed);
@@ -381,7 +371,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	zval_ptr_dtor(&func_name);
 
 	/* set the filter property, this will be used during cleanup */
-	ZEND_REGISTER_RESOURCE(&zfilter, filter, le_userfilters);
+	ZVAL_RES(&zfilter, zend_register_resource(filter, le_userfilters));
 	ZVAL_COPY_VALUE(&filter->abstract, &obj);
 	add_property_zval(&obj, "filter", &zfilter);
 	/* add_property_zval increments the refcount which is unwanted here */
@@ -409,16 +399,19 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 	php_stream_bucket_brigade *brigade;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zbrigade) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zbrigade) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(brigade, php_stream_bucket_brigade *, zbrigade, -1, PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade);
+	if ((brigade = (php_stream_bucket_brigade*)zend_fetch_resource(
+					Z_RES_P(zbrigade), PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	ZVAL_NULL(return_value);
 
 	if (brigade->head && (bucket = php_stream_bucket_make_writeable(brigade->head))) {
-		ZEND_REGISTER_RESOURCE(&zbucket, bucket, le_bucket);
+		ZVAL_RES(&zbucket, zend_register_resource(bucket, le_bucket));
 		object_init(return_value);
 		add_property_zval(return_value, "bucket", &zbucket);
 		/* add_property_zval increments the refcount which is unwanted here */
@@ -437,7 +430,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	php_stream_bucket_brigade *brigade;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zo", &zbrigade, &zobject) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ro", &zbrigade, &zobject) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -446,8 +439,14 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(brigade, php_stream_bucket_brigade *, zbrigade, -1, PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade);
-	ZEND_FETCH_RESOURCE(bucket, php_stream_bucket *, pzbucket, -1, PHP_STREAM_BUCKET_RES_NAME, le_bucket);
+	if ((brigade = (php_stream_bucket_brigade*)zend_fetch_resource(
+					Z_RES_P(zbrigade), PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	if ((bucket = (php_stream_bucket *)zend_fetch_resource_ex(pzbucket, PHP_STREAM_BUCKET_RES_NAME, le_bucket)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (NULL != (pzdata = zend_hash_str_find(Z_OBJPROP_P(zobject), "data", sizeof("data")-1)) && Z_TYPE_P(pzdata) == IS_STRING) {
 		if (!bucket->own_buf) {
@@ -519,7 +518,7 @@ PHP_FUNCTION(stream_bucket_new)
 		RETURN_FALSE;
 	}
 
-	ZEND_REGISTER_RESOURCE(&zbucket, bucket, le_bucket);
+	ZVAL_RES(&zbucket, zend_register_resource(bucket, le_bucket));
 	object_init(return_value);
 	add_property_zval(return_value, "bucket", &zbucket);
 	/* add_property_zval increments the refcount which is unwanted here */

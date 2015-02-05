@@ -53,7 +53,7 @@ zend_object *Spoofchecker_object_create(
 {
 	Spoofchecker_object*     intern;
 
-	intern = ecalloc(1, sizeof(Spoofchecker_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(Spoofchecker_object) + zend_object_properties_size(ce));
 	intl_error_init(SPOOFCHECKER_ERROR_P(intern));
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);

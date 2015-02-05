@@ -356,13 +356,13 @@ PS_READ_FUNC(mm)
 
 	/* If there is an ID and strict mode, verify existence */
 	if (PS(use_strict_mode)
-		&& ps_mm_key_exists(data, key) == FAILURE) {
+		&& ps_mm_key_exists(data, key->val) == FAILURE) {
 		/* key points to PS(id), but cannot change here. */
 		if (key) {
 			efree(PS(id));
 			PS(id) = NULL;
 		}
-		PS(id) = PS(mod)->s_create_sid((void **)&data, NULL);
+		PS(id) = PS(mod)->s_create_sid((void **)&data);
 		if (!PS(id)) {
 			return FAILURE;
 		}
@@ -373,12 +373,9 @@ PS_READ_FUNC(mm)
 		PS(session_status) = php_session_active;
 	}
 
-	sd = ps_sd_lookup(data, PS(id), 0);
+	sd = ps_sd_lookup(data, PS(id)->val, 0);
 	if (sd) {
-		*vallen = sd->datalen;
-		*val = emalloc(sd->datalen + 1);
-		memcpy(*val, sd->data, sd->datalen);
-		(*val)[sd->datalen] = '\0';
+		*val = zend_string_init(sd->data, sd->datalen, 0);
 		ret = SUCCESS;
 	}
 
@@ -394,18 +391,18 @@ PS_WRITE_FUNC(mm)
 
 	mm_lock(data->mm, MM_LOCK_RW);
 
-	sd = ps_sd_lookup(data, key, 1);
+	sd = ps_sd_lookup(data, key->val, 1);
 	if (!sd) {
-		sd = ps_sd_new(data, key);
-		ps_mm_debug(("new entry for %s\n", key));
+		sd = ps_sd_new(data, key->val);
+		ps_mm_debug(("new entry for %s\n", key->val));
 	}
 
 	if (sd) {
-		if (vallen >= sd->alloclen) {
+		if (val->len >= sd->alloclen) {
 			if (data->mm) {
 				mm_free(data->mm, sd->data);
 			}
-			sd->alloclen = vallen + 1;
+			sd->alloclen = val->len + 1;
 			sd->data = mm_malloc(data->mm, sd->alloclen);
 
 			if (!sd->data) {
@@ -415,8 +412,8 @@ PS_WRITE_FUNC(mm)
 			}
 		}
 		if (sd) {
-			sd->datalen = vallen;
-			memcpy(sd->data, val, vallen);
+			sd->datalen = val->len;
+			memcpy(sd->data, val->val, val->len);
 			time(&sd->ctime);
 		}
 	}
@@ -433,7 +430,7 @@ PS_DESTROY_FUNC(mm)
 
 	mm_lock(data->mm, MM_LOCK_RW);
 
-	sd = ps_sd_lookup(data, key, 0);
+	sd = ps_sd_lookup(data, key->val, 0);
 	if (sd) {
 		ps_sd_destroy(data, sd);
 	}
@@ -478,16 +475,16 @@ PS_GC_FUNC(mm)
 
 PS_CREATE_SID_FUNC(mm)
 {
-	char *sid;
+	zend_string *sid;
 	int maxfail = 3;
 	PS_MM_DATA;
 
 	do {
-		sid = php_session_create_id((void **)&data, newlen);
+		sid = php_session_create_id((void **)&data);
 		/* Check collision */
-		if (ps_mm_key_exists(data, sid) == SUCCESS) {
+		if (ps_mm_key_exists(data, sid->val) == SUCCESS) {
 			if (sid) {
-				efree(sid);
+				zend_string_release(sid);
 				sid = NULL;
 			}
 			if (!(maxfail--)) {
