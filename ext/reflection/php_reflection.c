@@ -2317,7 +2317,7 @@ static void _get_fptr_from_zval(zval *reference, zend_function **func_ptr, zend_
 }
 
 /* {{{ proto public ReflectionReturnType ReflectionFunction::getReturnType()
-   Returns a return type object for this function */
+   Returns a return type object for this function, or FALSE if no return type */
 ZEND_METHOD(reflection_function, getReturnType)
 {
 	reflection_object *intern;
@@ -2422,7 +2422,7 @@ ZEND_METHOD(reflection_return_type, __toString)
 /* }}} */
 
 /* {{{ proto public ReflectionClass|NULL ReflectionReturnType::getClass()
-   Returns this parameters's class hint or NULL if there is none */
+   Returns this return type's class hint or NULL if there is none */
 ZEND_METHOD(reflection_return_type, getClass)
 {
 	reflection_object *intern;
@@ -2442,7 +2442,7 @@ ZEND_METHOD(reflection_return_type, getClass)
 /* }}} */
 
 /* {{{ proto public bool ReflectionReturnType::isArray()
-   Returns whether parameter MUST be an array */
+   Returns whether return type is an array */
 ZEND_METHOD(reflection_return_type, isArray)
 {
 	reflection_object *intern;
@@ -2458,7 +2458,7 @@ ZEND_METHOD(reflection_return_type, isArray)
 /* }}} */
 
 /* {{{ proto public bool ReflectionReturnType::isCallable()
-   Returns whether parameter MUST be callable */
+   Returns whether return type is callable */
 ZEND_METHOD(reflection_return_type, isCallable)
 {
 	reflection_object *intern;
@@ -2494,7 +2494,7 @@ ZEND_METHOD(reflection_return_type, allowsNull)
 /* }}} */
 
 /* {{{ proto public bool ReflectionReturnType::isReturnByReference()
-   Returns whether this return is returned by reference */
+   Returns whether the return value is returned by reference */
 ZEND_METHOD(reflection_return_type, isReturnByReference)
 {
 	reflection_object *intern;
