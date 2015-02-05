@@ -2433,7 +2433,7 @@ ZEND_METHOD(reflection_return_type, getClass)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	if (param->arg_info) {
+	if (!param->arg_info) {
 		return;
 	}
 
