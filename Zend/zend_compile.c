@@ -1029,7 +1029,7 @@ void zend_do_early_binding(void) /* {{{ */
 				zend_class_entry *ce;
 
 				parent_name = CT_CONSTANT(fetch_class_opline->op2);
-				if (((ce = zend_lookup_class(Z_STR_P(parent_name))) == NULL) ||
+				if (((ce = zend_lookup_class_ex(Z_STR_P(parent_name), parent_name + 1, 0)) == NULL) ||
 				    ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) &&
 				     (ce->type == ZEND_INTERNAL_CLASS))) {
 					if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
@@ -1083,7 +1083,8 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array) /* {{
 
 		CG(in_compilation) = 1;
 		while (opline_num != (uint32_t)-1) {
-			if ((ce = zend_lookup_class(Z_STR_P(RT_CONSTANT(op_array, op_array->opcodes[opline_num-1].op2)))) != NULL) {
+			zval *parent_name = RT_CONSTANT(op_array, op_array->opcodes[opline_num-1].op2);
+			if ((ce = zend_lookup_class_ex(Z_STR_P(parent_name), parent_name + 1, 0)) != NULL) {
 				do_bind_inherited_class(op_array, &op_array->opcodes[opline_num], EG(class_table), ce, 0);
 			}
 			opline_num = op_array->opcodes[opline_num].result.opline_num;
@@ -4129,24 +4130,28 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 					"public visibility and cannot be static");
 			}
 			ce->__get = (zend_function *) op_array;
+			ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 		} else if (zend_string_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __set() must have "
 					"public visibility and cannot be static");
 			}
 			ce->__set = (zend_function *) op_array;
+			ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 		} else if (zend_string_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __unset() must have "
 					"public visibility and cannot be static");
 			}
 			ce->__unset = (zend_function *) op_array;
+			ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 		} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __isset() must have "
 					"public visibility and cannot be static");
 			}
 			ce->__isset = (zend_function *) op_array;
+			ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 		} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
 			if (!is_public || is_static) {
 				zend_error(E_WARNING, "The magic method __toString() must have "

@@ -916,11 +916,11 @@ static php_stream_context *decode_context_param(zval *contextresource)
 {
 	php_stream_context *context = NULL;
 
-	context = zend_fetch_resource(contextresource, -1, NULL, NULL, 1, php_le_stream_context());
+	context = zend_fetch_resource_ex(contextresource, NULL, php_le_stream_context());
 	if (context == NULL) {
 		php_stream *stream;
 
-		stream = zend_fetch_resource(contextresource, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream);
+		stream = zend_fetch_resource2_ex(contextresource, NULL, php_file_le_stream(), php_file_le_pstream());
 
 		if (stream) {
 			context = PHP_STREAM_CONTEXT(stream);
@@ -1182,7 +1182,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if (filter) {
-		filter->res = ZEND_REGISTER_RESOURCE(NULL, filter, php_file_le_stream_filter());
+		filter->res = zend_register_resource(filter, php_file_le_stream_filter());
 		GC_REFCOUNT(filter->res)++;
 		RETURN_RES(filter->res);
 	} else {
@@ -1218,7 +1218,7 @@ PHP_FUNCTION(stream_filter_remove)
 		RETURN_FALSE;
 	}
 
-	filter = zend_fetch_resource(zfilter, -1, NULL, NULL, 1, php_file_le_stream_filter());
+	filter = zend_fetch_resource(Z_RES_P(zfilter), NULL, php_file_le_stream_filter());
 	if (!filter) {
 		php_error_docref(NULL, E_WARNING, "Invalid resource given, not a stream filter");
 		RETURN_FALSE;

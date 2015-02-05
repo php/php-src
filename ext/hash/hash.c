@@ -386,7 +386,7 @@ PHP_FUNCTION(hash_init)
 		hash->key = (unsigned char *) K;
 	}
 
-	ZEND_REGISTER_RESOURCE(return_value, hash, php_hash_le_hash);
+	RETURN_RES(zend_register_resource(hash, php_hash_le_hash));
 }
 /* }}} */
 
@@ -403,7 +403,9 @@ PHP_FUNCTION(hash_update)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(hash, php_hash_data*, zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
+	if ((hash = (php_hash_data *)zend_fetch_resource(Z_RES_P(zhash), PHP_HASH_RESNAME, php_hash_le_hash)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	hash->ops->hash_update(hash->context, (unsigned char *) data, data_len);
 
@@ -424,7 +426,10 @@ PHP_FUNCTION(hash_update_stream)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(hash, php_hash_data*, zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
+	if ((hash = (php_hash_data *)zend_fetch_resource(Z_RES_P(zhash), PHP_HASH_RESNAME, php_hash_le_hash)) == NULL) {
+		RETURN_FALSE;
+	}
+
 	php_stream_from_zval(stream, zstream);
 
 	while (length) {
@@ -463,7 +468,9 @@ PHP_FUNCTION(hash_update_file)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(hash, php_hash_data*, zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
+	if ((hash = (php_hash_data *)zend_fetch_resource(Z_RES_P(zhash), PHP_HASH_RESNAME, php_hash_le_hash)) == NULL) {
+		RETURN_FALSE;
+	}
 	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, NULL, context);
@@ -495,7 +502,9 @@ PHP_FUNCTION(hash_final)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(hash, php_hash_data*, zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
+	if ((hash = (php_hash_data *)zend_fetch_resource(Z_RES_P(zhash), PHP_HASH_RESNAME, php_hash_le_hash)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	digest_len = hash->ops->digest_size;
 	digest = zend_string_alloc(digest_len, 0);
@@ -558,7 +567,9 @@ PHP_FUNCTION(hash_copy)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(hash, php_hash_data*, zhash, -1, PHP_HASH_RESNAME, php_hash_le_hash);
+	if ((hash = (php_hash_data *)zend_fetch_resource(Z_RES_P(zhash), PHP_HASH_RESNAME, php_hash_le_hash)) == NULL) {
+		RETURN_FALSE;
+	}
 
 
 	context = emalloc(hash->ops->context_size);
@@ -578,7 +589,7 @@ PHP_FUNCTION(hash_copy)
 	if (hash->key) {
 		memcpy(copy_hash->key, hash->key, hash->ops->block_size);
 	}
-	ZEND_REGISTER_RESOURCE(return_value, copy_hash, php_hash_le_hash);
+	RETURN_RES(zend_register_resource(copy_hash, php_hash_le_hash));
 }
 /* }}} */
 

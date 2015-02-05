@@ -2057,7 +2057,7 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce)
 	zend_class_entry *parent = ce;
 	int inherited = 0;
 
-	intern = ecalloc(1, sizeof(php_sxe_object) + sizeof(zval) * (parent->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(php_sxe_object) + zend_object_properties_size(parent));
 
 	intern->iter.type = SXE_ITER_NONE;
 	intern->iter.nsprefix = NULL;

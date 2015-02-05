@@ -112,7 +112,11 @@ ZEND_GET_MODULE(sysvshm)
 
 #undef shm_ptr					/* undefine AIX-specific macro */
 
-#define SHM_FETCH_RESOURCE(shm_ptr, z_ptr) ZEND_FETCH_RESOURCE(shm_ptr, sysvshm_shm *, z_ptr, -1, PHP_SHM_RSRC_NAME, php_sysvshm.le_shm)
+#define SHM_FETCH_RESOURCE(shm_ptr, z_ptr) do { \
+	if ((shm_ptr = (sysvshm_shm *)zend_fetch_resource(Z_RES_P(z_ptr), PHP_SHM_RSRC_NAME, php_sysvshm.le_shm)) == NULL) { \
+		RETURN_FALSE; \
+	} \
+} while (0)
 
 THREAD_LS sysvshm_module php_sysvshm;
 
@@ -197,7 +201,7 @@ PHP_FUNCTION(shm_attach)
 	shm_list_ptr->id = shm_id;
 	shm_list_ptr->ptr = chunk_ptr;
 
-	ZEND_REGISTER_RESOURCE(return_value, shm_list_ptr, php_sysvshm.le_shm);
+	RETURN_RES(zend_register_resource(shm_list_ptr, php_sysvshm.le_shm));
 }
 /* }}} */
 
@@ -257,7 +261,7 @@ PHP_FUNCTION(shm_put_var)
 	php_var_serialize(&shm_var, arg_var, &var_hash);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	shm_list_ptr = zend_fetch_resource(shm_id, -1, PHP_SHM_RSRC_NAME, NULL, 1, php_sysvshm.le_shm);
+	shm_list_ptr = zend_fetch_resource(Z_RES_P(shm_id), PHP_SHM_RSRC_NAME, php_sysvshm.le_shm);
 	if (!shm_list_ptr) {
 		smart_str_free(&shm_var);
 		RETURN_FALSE;

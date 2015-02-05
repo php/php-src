@@ -328,7 +328,7 @@ if (IS_GMP(zval)) {                                               \
 #define INIT_GMP_RETVAL(gmpnumber) \
 	gmp_create(return_value, &gmpnumber)
 
-static void gmp_strval(zval *result, mpz_t gmpnum, zend_long base);
+static void gmp_strval(zval *result, mpz_t gmpnum, int base);
 static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base);
 static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg);
 
@@ -378,8 +378,7 @@ static void gmp_free_object_storage(zend_object *obj) /* {{{ */
 
 static inline zend_object *gmp_create_object_ex(zend_class_entry *ce, mpz_ptr *gmpnum_target) /* {{{ */
 {
-	gmp_object *intern = emalloc(sizeof(gmp_object)
-			+ sizeof(zval) * (ce->default_properties_count - 1));
+	gmp_object *intern = emalloc(sizeof(gmp_object) + zend_object_properties_size(ce));
 
 	zend_object_std_init(&intern->std, ce);
 	object_properties_init(&intern->std, ce);
@@ -750,7 +749,7 @@ static int convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base)
 }
 /* }}} */
 
-static void gmp_strval(zval *result, mpz_t gmpnum, zend_long base) /* {{{ */
+static void gmp_strval(zval *result, mpz_t gmpnum, int base) /* {{{ */
 {
 	size_t num_len;
 	zend_string *str;
@@ -1200,7 +1199,7 @@ ZEND_FUNCTION(gmp_strval)
 
 	FETCH_GMP_ZVAL(gmpnum, gmpnumber_arg, temp_a);
 
-	gmp_strval(return_value, gmpnum, base);
+	gmp_strval(return_value, gmpnum, (int)base);
 
 	FREE_GMP_TEMP(temp_a);
 }

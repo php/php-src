@@ -242,6 +242,9 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
+/* class has magic methods __get/__set/__unset/__isset that use guards */
+#define ZEND_ACC_USE_GUARDS				0x1000000
+
 /* function has arguments with type hinting */
 #define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
 

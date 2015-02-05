@@ -58,7 +58,7 @@ zend_object *Collator_object_create(zend_class_entry *ce )
 {
 	Collator_object*     intern;
 
-	intern = ecalloc(1, sizeof(Collator_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(Collator_object) + zend_object_properties_size(ce));
 	intl_error_init(COLLATOR_ERROR_P(intern));
 	zend_object_std_init(&intern->zo, ce );
 	object_properties_init(&intern->zo, ce);

@@ -31,7 +31,7 @@ ZEND_API int gc_globals_id;
 ZEND_API zend_gc_globals gc_globals;
 #endif
 
-ZEND_API int (*gc_collect_cycles)(TSRMLS_D);
+ZEND_API int (*gc_collect_cycles)(void);
 
 #define GC_REMOVE_FROM_ROOTS(current) \
 	gc_remove_from_roots((current))

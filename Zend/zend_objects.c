@@ -32,7 +32,6 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
 	GC_TYPE_INFO(object) = IS_OBJECT;
 	object->ce = ce;
 	object->properties = NULL;
-	object->guards = NULL;
 	zend_objects_store_put(object);
 	if (EXPECTED(ce->default_properties_count != 0)) {
 		zval *p = object->properties_table;
@@ -43,16 +42,17 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
 			p++;
 		} while (p != end);
 	}
+	if (ce->ce_flags & ZEND_ACC_USE_GUARDS) {
+		GC_FLAGS(object) |= IS_OBJ_USE_GUARDS;
+		ZVAL_UNDEF(&object->properties_table[ce->default_properties_count]);
+		Z_PTR(object->properties_table[ce->default_properties_count]) = NULL;
+	}
 }
 
 ZEND_API void zend_object_std_dtor(zend_object *object)
 {
 	int i, count;
 
-	if (object->guards) {
-		zend_hash_destroy(object->guards);
-		FREE_HASHTABLE(object->guards);
-	}
 	if (object->properties) {
 		zend_array_destroy(object->properties);
 		FREE_HASHTABLE(object->properties);
@@ -60,6 +60,13 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 	count = object->ce->default_properties_count;
 	for (i = 0; i < count; i++) {
 		i_zval_ptr_dtor(&object->properties_table[i] ZEND_FILE_LINE_CC);
+	}
+	if (GC_FLAGS(object) & IS_OBJ_HAS_GUARDS) {
+		HashTable *guards = Z_PTR(object->properties_table[count]);
+
+		ZEND_ASSERT(guards != NULL);
+		zend_hash_destroy(guards);
+		FREE_HASHTABLE(guards);
 	}
 }
 
@@ -131,7 +138,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 
 ZEND_API zend_object *zend_objects_new(zend_class_entry *ce)
 {
-	zend_object *object = emalloc(sizeof(zend_object) + sizeof(zval) * (ce->default_properties_count - 1));
+	zend_object *object = emalloc(sizeof(zend_object) + zend_object_properties_size(ce));
 
 	zend_object_std_init(object, ce);
 	object->handlers = &std_object_handlers;
