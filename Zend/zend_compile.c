@@ -3813,20 +3813,15 @@ void zend_compile_stmt_list(zend_ast *ast) /* {{{ */
 
 static int zend_scalar_type_hint(zend_string *type_name, zend_arg_info *arg_info) /* {{{ */
 {
-	if (type_name->len == sizeof("bool")-1 &&
-	    memcmp(type_name->val, "bool", sizeof("bool")-1) == 0) {
+	if (zend_string_equals_literal_ci(type_name, "bool")) {
 		arg_info->type_hint = _IS_BOOL;
-	} else if (type_name->len == sizeof("int")-1 &&
-	    memcmp(type_name->val, "int", sizeof("int")-1) == 0) {
+	} else if (zend_string_equals_literal_ci(type_name, "int")) {
 		arg_info->type_hint = IS_LONG;
-	} else if (type_name->len == sizeof("float")-1 &&
-	    memcmp(type_name->val, "float", sizeof("float")-1) == 0) {
+	} else if (zend_string_equals_literal_ci(type_name, "float")) {
 		arg_info->type_hint = IS_DOUBLE;
-	} else if (type_name->len == sizeof("string")-1 &&
-	    memcmp(type_name->val, "string", sizeof("string")-1) == 0) {
+	} else if (zend_string_equals_literal_ci(type_name, "string")) {
 		arg_info->type_hint = IS_STRING;
-	} else if (type_name->len == sizeof("resource")-1 &&
-	    memcmp(type_name->val, "resource", sizeof("resource")-1) == 0) {
+	} else if (zend_string_equals_literal_ci(type_name, "resource")) {
 		arg_info->type_hint = IS_RESOURCE;
 	} else {
 		return 0;
