@@ -27,7 +27,6 @@ PHP 7.0 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
-  a. zend_set_memory_limit() now takes the TSRMLS_CC macro as its last argument
   e. New data types
 
      String
