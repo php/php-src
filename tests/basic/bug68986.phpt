@@ -24,7 +24,6 @@ var_dump(fwrite($fp, $data));
 fclose($fp);
 rmdir($tempDir . '/php68986');
 
-?>
 --EXPECT--
 int(2097152)
 int(2088960)
