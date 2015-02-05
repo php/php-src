@@ -87,7 +87,6 @@ static ZEND_FUNCTION(debug_backtrace);
 static ZEND_FUNCTION(debug_print_backtrace);
 #if ZEND_DEBUG
 static ZEND_FUNCTION(zend_test_func);
-static ZEND_FUNCTION(zend_test_func2);
 #ifdef ZTS
 static ZEND_FUNCTION(zend_thread_id);
 #endif
@@ -244,14 +243,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
 	ZEND_ARG_INFO(0, extension_name)
 ZEND_END_ARG_INFO()
-
-#ifdef ZEND_DEBUG
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func, IS_ARRAY, NULL, 0)
-ZEND_END_ARG_INFO()
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func2, IS_ARRAY, NULL, 1)
-ZEND_END_ARG_INFO()
-#endif
-
 /* }}} */
 
 static const zend_function_entry builtin_functions[] = { /* {{{ */
@@ -313,8 +304,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(debug_backtrace, 		arginfo_debug_backtrace)
 	ZEND_FE(debug_print_backtrace, 		arginfo_debug_print_backtrace)
 #if ZEND_DEBUG
-	ZEND_FE(zend_test_func,		arginfo_zend_test_func)
-	ZEND_FE(zend_test_func2,	arginfo_zend_test_func2)
+	ZEND_FE(zend_test_func,		NULL)
 #ifdef ZTS
 	ZEND_FE(zend_thread_id,		NULL)
 #endif
@@ -1958,13 +1948,6 @@ ZEND_FUNCTION(create_function)
 
 #if ZEND_DEBUG
 ZEND_FUNCTION(zend_test_func)
-{
-	zval *arg1, *arg2;
-
-	zend_get_parameters(ZEND_NUM_ARGS(), 2, &arg1, &arg2);
-}
-
-ZEND_FUNCTION(zend_test_func2)
 {
 	zval *arg1, *arg2;
 
