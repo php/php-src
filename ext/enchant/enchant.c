@@ -338,14 +338,14 @@ PHP_MINFO_FUNCTION(enchant)
 /* }}} */
 
 #define PHP_ENCHANT_GET_BROKER	\
-	ZEND_FETCH_RESOURCE(pbroker, enchant_broker *, broker, -1, "enchant_broker", le_enchant_broker);	\
+	pbroker = (enchant_broker *)zend_fetch_resource(Z_RES_P(broker), "enchant_broker", le_enchant_broker); \
 	if (!pbroker || !pbroker->pbroker) {	\
 		php_error_docref(NULL, E_WARNING, "%s", "Resource broker invalid");	\
 		RETURN_FALSE;	\
 	}
 
 #define PHP_ENCHANT_GET_DICT	\
-	ZEND_FETCH_RESOURCE(pdict, enchant_dict *, dict, -1, "enchant_dict", le_enchant_dict);	\
+	pdict = (enchant_dict *)zend_fetch_resource(Z_RES_P(dict), "enchant_dict", le_enchant_dict); \
 	if (!pdict || !pdict->pdict) {	\
 		php_error_docref(NULL, E_WARNING, "%s", "Invalid dictionary resource.");	\
 		RETURN_FALSE;	\
@@ -369,7 +369,8 @@ PHP_FUNCTION(enchant_broker_init)
 		broker->pbroker = pbroker;
 		broker->dict = NULL;
 		broker->dictcnt = 0;
-		broker->rsrc = ZEND_REGISTER_RESOURCE(return_value, broker, le_enchant_broker);
+		broker->rsrc = zend_register_resource(broker, le_enchant_broker);
+		RETURN_RES(broker->rsrc);
 	} else {
 		RETURN_FALSE;
 	}
@@ -566,8 +567,9 @@ PHP_FUNCTION(enchant_broker_request_dict)
 		dict->pdict = d;
 		pbroker->dict[pos] = dict;
 
-		dict->rsrc = ZEND_REGISTER_RESOURCE(return_value, dict, le_enchant_dict);
+		dict->rsrc = zend_register_resource(dict, le_enchant_dict);
 		pbroker->rsrc->gc.refcount++;
+		RETURN_RES(dict->rsrc);
 	} else {
 		RETURN_FALSE;
 	}
@@ -616,8 +618,9 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		dict->pdict = d;
 		pbroker->dict[pos] = dict;
 
-		dict->rsrc = ZEND_REGISTER_RESOURCE(return_value, dict, le_enchant_dict);
+		dict->rsrc = zend_register_resource(dict, le_enchant_dict);
 		pbroker->rsrc->gc.refcount++;
+		RETURN_RES(dict->rsrc);
 	} else {
 		RETURN_FALSE;
 	}

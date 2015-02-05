@@ -608,7 +608,7 @@ static void json_encode_serializable_object(smart_str *buf, zval *val, int optio
 	}
 
 	if ((Z_TYPE(retval) == IS_OBJECT) &&
-		(Z_OBJ_HANDLE(retval) == Z_OBJ_HANDLE_P(val))) {
+		(Z_OBJ(retval) == Z_OBJ_P(val))) {
 		/* Handle the case where jsonSerialize does: return $this; by going straight to encode array */
 		json_encode_array(buf, &retval, options);
 	} else {
@@ -838,6 +838,7 @@ static PHP_FUNCTION(json_decode)
 	JSON_G(error_code) = 0;
 
 	if (!str_len) {
+		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
 		RETURN_NULL();
 	}
 

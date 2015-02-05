@@ -357,24 +357,32 @@ typedef struct {
 
 #define PHP_OCI_REGISTER_RESOURCE(resource, le_resource) \
 	do { \
-		resource->id = ZEND_REGISTER_RESOURCE(NULL, resource, le_resource); \
+		resource->id = zend_register_resource(resource, le_resource); \
 	} while (0)
 
 #define PHP_OCI_ZVAL_TO_CONNECTION(zval, connection) \
-	ZEND_FETCH_RESOURCE2(connection, php_oci_connection *, zval, -1, "oci8 connection", le_connection, le_pconnection)
+	if ((connection = (php_oci_connection *)zend_fetch_resource2(Z_RES_P(zval), "oci8 connection", le_connection, le_pconnection)) == NULL) { \
+		RETURN_FALSE; \
+	}
 
 #define PHP_OCI_ZVAL_TO_STATEMENT(zval, statement) \
-	ZEND_FETCH_RESOURCE(statement, php_oci_statement *, zval, -1, "oci8 statement", le_statement)
+	if ((statement = (php_oci_statement *)zend_fetch_resource(Z_RES_P(zval), "oci8 statement", le_statement)) == NULL) { \
+		RETURN_FALSE; \
+	}
 
 #define PHP_OCI_ZVAL_TO_DESCRIPTOR(zval, descriptor) \
-	ZEND_FETCH_RESOURCE(descriptor, php_oci_descriptor *, zval, -1, "oci8 descriptor", le_descriptor)
+	if ((descriptor = (php_oci_descriptor *)zend_fetch_resource(Z_RES_P(zval), "oci8 descriptor", le_descriptor)) == NULL) { \
+		RETURN_FALSE; \
+	}
 
 #define PHP_OCI_ZVAL_TO_COLLECTION(zval, collection) \
-	ZEND_FETCH_RESOURCE(collection, php_oci_collection *, zval, -1, "oci8 collection", le_collection)
+	if ((collection = (php_oci_collection *)zend_fetch_resource(Z_RES_P(zval), "oci8 collection", le_collection)) == NULL) { \
+		RETURN_FALSE; \
+	}
 
 #define PHP_OCI_FETCH_RESOURCE_EX(zval, var, type, name, resource_type)						 \
 	do { \
-		var = (type) zend_fetch_resource(zval, -1, name, NULL, 1, resource_type); \
+		var = (type) zend_fetch_resource(Z_RES_P(zval), name, resource_type);                \
 		if (!var) {																			 \
 			return 1;																		 \
 		} \

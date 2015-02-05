@@ -677,7 +677,7 @@ static zend_object *tidy_object_new(zend_class_entry *class_type, zend_object_ha
 {
 	PHPTidyObj *intern;
 
-	intern = ecalloc(1, sizeof(PHPTidyObj) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(PHPTidyObj) + zend_object_properties_size(class_type));
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 
@@ -993,7 +993,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
 {
 	zval *opt_val;
-	ulong opt_indx;
+	zend_ulong opt_indx;
 	zend_string *opt_name;
 
 	ZEND_HASH_FOREACH_KEY_VAL(ht_options, opt_indx, opt_name, opt_val) {

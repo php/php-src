@@ -463,7 +463,6 @@ PHP_FUNCTION(dns_get_record)
 			}
 
 			for (pRec = pResult; pRec; pRec = pRec->pNext) {
-				DNS_SRV_DATA *srv = &pRec->Data.Srv;
 				zval retval;
 
 				if (pRec->Flags.S.Section == DnsSectionAnswer) {

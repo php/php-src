@@ -112,7 +112,7 @@ PHPAPI int php_scandir(const char *dirname, struct dirent **namelist[], int (*se
 	*namelist = vector;
 
 	if (compare) {
-		qsort (*namelist, nfiles, sizeof(struct dirent *), compare);
+		qsort (*namelist, nfiles, sizeof(struct dirent *), (int (*) (const void *, const void *)) compare);
 	}
 
 	return nfiles;
