@@ -24,7 +24,6 @@
 #define PHP_ODBC_H
 
 #if HAVE_UODBC
-#define ODBCVER 0x0250
 
 #ifdef ZTS
 #include "TSRM.h"

@@ -490,6 +490,19 @@ PHP_ARG_WITH(dbmaker,,
   fi
 fi
 
+PHP_ARG_WITH(odbcver,,
+[  --with-odbcver[=HEX]      Force support for the passed ODBC version. A hex number is expected, default 0x0300.
+                             Use the special value of 0 to prevent an explicit ODBCVER to be defined. ], 0x0300)
+
+if test "no" != "$PHP_ODBCVER"; then
+  if test "$PHP_ODBCVER" != "0"; then
+    AC_DEFINE_UNQUOTED(ODBCVER, $PHP_ODBCVER, [ The highest supported ODBC version ])
+  fi
+else
+  AC_DEFINE(ODBCVER, 0x300, [ The highest supported ODBC version ])
+fi
+
+
 dnl
 dnl Extension setup
 dnl

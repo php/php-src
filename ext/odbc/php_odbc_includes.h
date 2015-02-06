@@ -25,12 +25,6 @@
 
 #if HAVE_UODBC
 
-#define ODBCVER 0x0250
-/*#ifndef MSVC5
-#define FAR
-#endif
-*/
-
 /* checking in the same order as in configure.in */
 
 #if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35) /* Solid Server */
