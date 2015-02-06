@@ -110,8 +110,8 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 		if (!(flags & SET_FLAGS))
 			return SLJIT_SUCCESS;
 		FAIL_IF(push_inst(compiler, SRA | D(TMP_REG1) | S1(dst) | IMM(31), DR(TMP_REG1)));
-		FAIL_IF(push_inst(compiler, RDY | D(TMP_REG4), DR(TMP_REG4)));
-		return push_inst(compiler, SUB | SET_FLAGS | D(0) | S1(TMP_REG1) | S2(TMP_REG4), MOVABLE_INS | SET_FLAGS);
+		FAIL_IF(push_inst(compiler, RDY | D(TMP_LINK), DR(TMP_LINK)));
+		return push_inst(compiler, SUB | SET_FLAGS | D(0) | S1(TMP_REG1) | S2(TMP_LINK), MOVABLE_INS | SET_FLAGS);
 
 	case SLJIT_AND:
 		return push_inst(compiler, AND | (flags & SET_FLAGS) | D(dst) | S1(src1) | ARG2(flags, src2), DR(dst) | (flags & SET_FLAGS));

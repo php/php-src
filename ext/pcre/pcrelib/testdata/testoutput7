@@ -2287,4 +2287,12 @@ No match
         End
 ------------------------------------------------------------------
 
+/^s?c/mi8I
+Capturing subpattern count = 0
+Options: caseless multiline utf
+First char at start or follows newline
+Need char = 'c' (caseless)
+    scat
+ 0: sc
+
 /-- End of testinput7 --/

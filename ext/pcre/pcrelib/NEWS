@@ -1,6 +1,13 @@
 News about PCRE releases
 ------------------------
 
+Release 8.36 26-September-2014
+------------------------------
+
+This is primarily a bug-fix release. However, in addition, the Unicode data
+tables have been updated to Unicode 7.0.0.
+
+
 Release 8.35 04-April-2014
 --------------------------
 

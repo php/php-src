@@ -1,6 +1,104 @@
 ChangeLog for PCRE
 ------------------
 
+Version 8.36 26-September-2014
+------------------------------
+
+1.  Got rid of some compiler warnings in the C++ modules that were shown up by
+    -Wmissing-field-initializers and -Wunused-parameter.
+
+2.  The tests for quantifiers being too big (greater than 65535) were being
+    applied after reading the number, and stupidly assuming that integer
+    overflow would give a negative number. The tests are now applied as the
+    numbers are read.
+
+3.  Tidy code in pcre_exec.c where two branches that used to be different are
+    now the same.
+
+4.  The JIT compiler did not generate match limit checks for certain
+    bracketed expressions with quantifiers. This may lead to exponential
+    backtracking, instead of returning with PCRE_ERROR_MATCHLIMIT. This
+    issue should be resolved now.
+
+5.  Fixed an issue, which occures when nested alternatives are optimized
+    with table jumps.
+
+6.  Inserted two casts and changed some ints to size_t in the light of some
+    reported 64-bit compiler warnings (Bugzilla 1477).
+
+7.  Fixed a bug concerned with zero-minimum possessive groups that could match
+    an empty string, which sometimes were behaving incorrectly in the
+    interpreter (though correctly in the JIT matcher). This pcretest input is
+    an example:
+
+      '\A(?:[^"]++|"(?:[^"]*+|"")*+")++'
+      NON QUOTED "QUOT""ED" AFTER "NOT MATCHED
+
+    the interpreter was reporting a match of 'NON QUOTED ' only, whereas the
+    JIT matcher and Perl both matched 'NON QUOTED "QUOT""ED" AFTER '. The test
+    for an empty string was breaking the inner loop and carrying on at a lower
+    level, when possessive repeated groups should always return to a higher
+    level as they have no backtrack points in them. The empty string test now
+    occurs at the outer level.
+
+8.  Fixed a bug that was incorrectly auto-possessifying \w+ in the pattern
+    ^\w+(?>\s*)(?<=\w) which caused it not to match "test test".
+
+9.  Give a compile-time error for \o{} (as Perl does) and for \x{} (which Perl
+    doesn't).
+
+10. Change 8.34/15 introduced a bug that caused the amount of memory needed
+    to hold a pattern to be incorrectly computed (too small) when there were
+    named back references to duplicated names. This could cause "internal
+    error: code overflow" or "double free or corruption" or other memory
+    handling errors.
+
+11. When named subpatterns had the same prefixes, back references could be
+    confused. For example, in this pattern:
+
+      /(?P<Name>a)?(?P<Name2>b)?(?(<Name>)c|d)*l/
+
+    the reference to 'Name' was incorrectly treated as a reference to a
+    duplicate name.
+
+12. A pattern such as /^s?c/mi8 where the optional character has more than
+    one "other case" was incorrectly compiled such that it would only try to
+    match starting at "c".
+
+13. When a pattern starting with \s was studied, VT was not included in the
+    list of possible starting characters; this should have been part of the
+    8.34/18 patch.
+
+14. If a character class started [\Qx]... where x is any character, the class
+    was incorrectly terminated at the ].
+
+15. If a pattern that started with a caseless match for a character with more
+    than one "other case" was studied, PCRE did not set up the starting code
+    unit bit map for the list of possible characters. Now it does. This is an
+    optimization improvement, not a bug fix.
+
+16. The Unicode data tables have been updated to Unicode 7.0.0.
+
+17. Fixed a number of memory leaks in pcregrep.
+
+18. Avoid a compiler warning (from some compilers) for a function call with
+    a cast that removes "const" from an lvalue by using an intermediate
+    variable (to which the compiler does not object).
+
+19. Incorrect code was compiled if a group that contained an internal recursive
+    back reference was optional (had quantifier with a minimum of zero). This
+    example compiled incorrect code: /(((a\2)|(a*)\g<-1>))*/ and other examples
+    caused segmentation faults because of stack overflows at compile time.
+
+20. A pattern such as /((?(R)a|(?1)))+/, which contains a recursion within a
+    group that is quantified with an indefinite repeat, caused a compile-time
+    loop which used up all the system stack and provoked a segmentation fault.
+    This was not the same bug as 19 above.
+
+21. Add PCRECPP_EXP_DECL declaration to operator<< in pcre_stringpiece.h.
+    Patch by Mike Frysinger.
+
+
 Version 8.35 04-April-2014
 --------------------------
 
@@ -27,9 +125,9 @@ Version 8.35 04-April-2014
 
 6.  Improve character range checks in JIT. Characters are read by an inprecise
     function now, which returns with an unknown value if the character code is
-    above a certain treshold (e.g: 256). The only limitation is that the value
-    must be bigger than the treshold as well. This function is useful, when
-    the characters above the treshold are handled in the same way.
+    above a certain threshold (e.g: 256). The only limitation is that the value
+    must be bigger than the threshold as well. This function is useful when
+    the characters above the threshold are handled in the same way.
 
 7.  The macros whose names start with RAWUCHAR are placeholders for a future
     mode in which only the bottom 21 bits of 32-bit data items are used. To
@@ -1544,7 +1642,7 @@ Version 8.10 25-Jun-2010
 
 7.  Minor change to pcretest.c to avoid a compiler warning.
 
-8.  Added four artificial Unicode properties to help with an option to make
+8.  Added four artifical Unicode properties to help with an option to make
     \s etc use properties (see next item). The new properties are: Xan
     (alphanumeric), Xsp (Perl space), Xps (POSIX space), and Xwd (word).
 
@@ -4169,7 +4267,7 @@ Version 4.3 21-May-03
    (i)   The utf8_table... variables are now declared "const".
 
    (ii)  The code for \cx, which used the "case flipping" table to upper case
-         lower case letters, now just subtracts 32. This is ASCII-specific,
+         lower case letters, now just substracts 32. This is ASCII-specific,
          but the whole concept of \cx is ASCII-specific, so it seems
          reasonable.
 
@@ -5431,7 +5529,7 @@ by an auxiliary program - but can then be edited by hand if required. There are
 now no calls to isalnum(), isspace(), isdigit(), isxdigit(), tolower() or
 toupper() in the code.
 
-7. Turn the malloc/free functions variables into pcre_malloc and pcre_free and
+7. Turn the malloc/free funtions variables into pcre_malloc and pcre_free and
 make them global. Abolish the function for setting them, as the caller can now
 set them directly.
 
