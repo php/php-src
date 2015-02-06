@@ -4005,7 +4005,6 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 {
 	zend_class_entry *ce = CG(active_class_entry);
 	zend_bool in_interface = (ce->ce_flags & ZEND_ACC_INTERFACE) != 0;
-	zend_bool in_trait = ZEND_CE_IS_TRAIT(ce);
 	zend_bool is_public = (op_array->fn_flags & ZEND_ACC_PUBLIC) != 0;
 	zend_bool is_static = (op_array->fn_flags & ZEND_ACC_STATIC) != 0;
 
@@ -4098,15 +4097,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 			}
 		}
 	} else {
-		if (!in_trait && zend_string_equals_str_ci(lcname, ce->name)) {
-			if (!ce->constructor) {
-				ce->constructor = (zend_function *) op_array;
-			}
-		} else if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
-			if (CG(active_class_entry)->constructor) {
-				zend_error(E_STRICT, "Redefining already defined constructor for class %s",
-					ce->name->val);
-			}
+		if (zend_string_equals_literal(lcname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
 			ce->constructor = (zend_function *) op_array;
 		} else if (zend_string_equals_literal(lcname, ZEND_DESTRUCTOR_FUNC_NAME)) {
 			ce->destructor = (zend_function *) op_array;
