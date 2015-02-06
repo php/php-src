@@ -4004,7 +4004,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				} else {	
 					xmlNodeSetContentLen(node, BAD_CAST(str), (int)new_len);
 				}
-				efree(str);
+				str_efree(str);
 			}
 			if (zend_hash_find(prop, "faultstring", sizeof("faultstring"), (void**)&tmp) == SUCCESS) {
 				xmlNodePtr node = master_to_xml(get_conversion(IS_STRING), *tmp, SOAP_LITERAL, param TSRMLS_CC);
@@ -4029,7 +4029,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				} else {	
 					xmlNodeSetContentLen(node, BAD_CAST(str), (int)new_len);
 				}
-				efree(str);
+				str_efree(str);
 			}
 			if (zend_hash_find(prop, "faultstring", sizeof("faultstring"), (void**)&tmp) == SUCCESS) {
 				xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Reason"), NULL);
