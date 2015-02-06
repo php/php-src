@@ -13,10 +13,6 @@
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
-- JSON:
-  . Fixed bug #50224 (json_encode() does not always encode a float as a float)
-    by adding JSON_PRESERVE_ZERO_FRACTION. (Juan Basso)
-
 - Fileinfo:
   . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
   . Fixed bug #67647 (Bundled libmagic 5.17 does not detect quicktime files
@@ -32,6 +28,8 @@
 - JSON:
   . Fixed bug #68938 (json_decode() decodes empty string without error).
     (jeremy at bat-country dot us)
+  . Fixed bug #50224 (json_encode() does not always encode a float as a float)
+    by adding JSON_PRESERVE_ZERO_FRACTION. (Juan Basso)
 
 - LIBXML:
   . Fixed bug #64938 (libxml_disable_entity_loader setting is shared
