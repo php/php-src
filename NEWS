@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.5.23
 
+- ODBC:
+  . Bug #68964 (Allowed memory size exhausted with odbc_exec). (Anatol)
 
 ?? ??? 2015, PHP 5.5.22
 
