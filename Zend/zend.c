@@ -957,7 +957,7 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 		} \
 	} while (0)
 
-#if !defined(ZEND_WIN32) && !defined(DARWIN)
+#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
 ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 #else
 static void zend_error_va_list(int type, const char *format, va_list args)
@@ -965,7 +965,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 {
 	char *str;
 	int len;
-#if !defined(ZEND_WIN32) && !defined(DARWIN)
+#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
 	va_list args;
 #endif
 	va_list usr_copy;
@@ -1069,7 +1069,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	}
 #endif /* HAVE_DTRACE */
 
-#if !defined(ZEND_WIN32) && !defined(DARWIN)
+#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
 	va_start(args, format);
 #endif
 
@@ -1182,7 +1182,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 			break;
 	}
 
-#if !defined(ZEND_WIN32) && !defined(DARWIN)
+#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
 	va_end(args);
 #endif
 
