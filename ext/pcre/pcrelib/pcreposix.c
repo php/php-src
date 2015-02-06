@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2015 University of Cambridge
+           Copyright (c) 1997-2014 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -170,7 +170,8 @@ static const int eint[] = {
   REG_BADPAT,  /* invalid range in character class */
   REG_BADPAT,  /* group name must start with a non-digit */
   /* 85 */
-  REG_BADPAT   /* parentheses too deeply nested (stack check) */
+  REG_BADPAT,  /* parentheses too deeply nested (stack check) */
+  REG_BADPAT   /* missing digits in \x{} or \o{} */
 };
 
 /* Table of texts corresponding to POSIX error codes */

@@ -835,4 +835,7 @@ of case for anything other than the ASCII letters. --/
 
 /[Q-U]+/8iWBZ 
 
+/^s?c/mi8I
+    scat
+
 /-- End of testinput7 --/
