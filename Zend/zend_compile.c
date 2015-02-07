@@ -1155,6 +1155,13 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 }
 /* }}} */
 
+static inline zend_bool zend_string_equals_str_ci(zend_string *str1, zend_string *str2) /* {{{ */
+{
+	return str1->len == str2->len
+		&& !zend_binary_strcasecmp(str1->val, str1->len, str2->val, str2->len);
+}
+/* }}} */
+
 static zend_constant *zend_lookup_reserved_const(const char *name, size_t len) /* {{{ */
 {
 	zend_constant *c = zend_hash_find_ptr_lc(EG(zend_constants), name, len);
@@ -1169,13 +1176,14 @@ static zend_bool zend_try_ct_eval_const(zval *zv, zend_string *name, zend_bool i
 {
 	zend_constant *c;
 
-	if (!(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
-		/* Substitute case-sensitive (or lowercase) persistent constants */
-		c = zend_hash_find_ptr(EG(zend_constants), name);
-		if (c && (c->flags & CONST_PERSISTENT)) {
-			ZVAL_DUP(zv, &c->value);
-			return 1;
-		}
+	/* Substitute case-sensitive (or lowercase) constants */
+	c = zend_hash_find_ptr(EG(zend_constants), name);
+	if (c && (
+	      (c->flags & CONST_PERSISTENT)
+	   || (Z_TYPE(c->value) < IS_CONSTANT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)))
+	) {
+		ZVAL_DUP(zv, &c->value);
+		return 1;
 	}
 
 	{
@@ -1197,6 +1205,33 @@ static zend_bool zend_try_ct_eval_const(zval *zv, zend_string *name, zend_bool i
 	return 0;
 }
 /* }}} */
+
+static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name, zend_string *name) /* {{{ */
+{
+	uint32_t fetch_type = zend_get_class_fetch_type(class_name);
+	zval *c;
+
+	if (CG(active_class_entry) && (fetch_type == ZEND_FETCH_CLASS_SELF || (fetch_type == ZEND_FETCH_CLASS_DEFAULT && zend_string_equals_str_ci(class_name, CG(active_class_entry)->name)))) {
+		c = zend_hash_find(&CG(active_class_entry)->constants_table, name);
+	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
+		zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), class_name);
+		if (ce) {
+			c = zend_hash_find(&ce->constants_table, name);
+		} else {
+			return 0;
+		}
+	} else {
+		return 0;
+	}
+
+	/* Substitute case-sensitive (or lowercase) persistent class constants */
+	if (c && Z_TYPE_P(c) < IS_CONSTANT) {
+		ZVAL_DUP(zv, c);
+		return 1;
+	}
+
+	return 0;
+}
 
 void zend_init_list(void *result, void *item) /* {{{ */
 {
@@ -1624,13 +1659,6 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	*(end+1) = '\0';
 
 	return (size_t)(end + 1 - path) + len_adjust;
-}
-/* }}} */
-
-static inline zend_bool zend_string_equals_str_ci(zend_string *str1, zend_string *str2) /* {{{ */
-{
-	return str1->len == str2->len
-		&& !zend_binary_strcasecmp(str1->val, str1->len, str2->val, str2->len);
 }
 /* }}} */
 
@@ -5814,29 +5842,31 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 
 	znode class_node, const_node;
 	zend_op *opline, *class_op = NULL;
+	zend_string *resolved_name;
+
+	zend_eval_const_expr(&class_ast);
+	zend_eval_const_expr(&const_ast);
+
+	if (class_ast->kind == ZEND_AST_ZVAL) {
+		resolved_name = zend_resolve_class_name_ast(class_ast);
+		if (const_ast->kind == ZEND_AST_ZVAL && zend_try_ct_eval_class_const(&result->u.constant, resolved_name, zend_ast_get_str(const_ast))) {
+			result->op_type = IS_CONST;
+			zend_string_release(resolved_name);
+			return;
+		}
+	}
 
 	if (zend_is_const_default_class_ref(class_ast)) {
 		class_node.op_type = IS_CONST;
-		ZVAL_STR(&class_node.u.constant, zend_resolve_class_name_ast(class_ast));
+		ZVAL_STR(&class_node.u.constant, resolved_name);
 	} else {
+		if (class_ast->kind == ZEND_AST_ZVAL) {
+			zend_string_release(resolved_name);
+		}
 		class_op = zend_compile_class_ref(&class_node, class_ast);
 	}
 
 	zend_compile_expr(&const_node, const_ast);
-
-	if (class_op && const_node.op_type == IS_CONST && class_op->extended_value == ZEND_FETCH_CLASS_SELF && Z_TYPE(const_node.u.constant) == IS_STRING && CG(active_class_entry)) {
-		zval *const_zv = zend_hash_find(&CG(active_class_entry)->constants_table, Z_STR(const_node.u.constant));
-		if (const_zv && Z_TYPE_P(const_zv) < IS_CONSTANT) {
-			CG(active_op_array)->last--;
-			CG(active_op_array)->T--;
-
-			result->op_type = IS_CONST;
-			ZVAL_COPY(&result->u.constant, const_zv);
-
-			zend_string_release(Z_STR(const_node.u.constant));
-			return;
-		}
-	}
 
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CONSTANT, NULL, &const_node);
 
@@ -5877,8 +5907,8 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast) /* {{{ */
 				ZVAL_STR_COPY(&result->u.constant, CG(active_class_entry)->name);
 			}
 			break;
-        case ZEND_FETCH_CLASS_STATIC:
-        case ZEND_FETCH_CLASS_PARENT:
+		case ZEND_FETCH_CLASS_STATIC:
+		case ZEND_FETCH_CLASS_PARENT:
 			if (!CG(active_class_entry)) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Cannot access %s::class when no class scope is active",
@@ -6555,6 +6585,30 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			zend_string_release(resolved_name);
 			break;
 		}
+		case ZEND_AST_CLASS_CONST:
+		{
+			zend_ast *class_ast = ast->child[0];
+			zend_ast *name_ast = ast->child[1];
+			zend_string *resolved_name;
+
+			zend_eval_const_expr(&class_ast);
+			zend_eval_const_expr(&name_ast);
+
+			if (class_ast->kind != ZEND_AST_ZVAL || name_ast->kind != ZEND_AST_ZVAL) {
+				return;
+			}
+
+			resolved_name = zend_resolve_class_name_ast(class_ast);
+
+			if (!zend_try_ct_eval_class_const(&result, resolved_name, zend_ast_get_str(name_ast))) {
+				zend_string_release(resolved_name);
+				return;
+			}
+
+			zend_string_release(resolved_name);
+			break;
+		}
+
 		default:
 			return;
 	}
