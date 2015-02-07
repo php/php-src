@@ -466,7 +466,7 @@ static sapi_module_struct lsapi_sapi_module =
 };
 /* }}} */
 
-static int init_request_info( TSRMLS_D )
+static void init_request_info( TSRMLS_D )
 {
     char * pContentType = LSAPI_GetHeader( H_CONTENT_TYPE );
     char * pAuth;
