@@ -1059,13 +1059,17 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	}
 
 #ifdef HAVE_DTRACE
-	if(DTRACE_ERROR_ENABLED()) {
+	if (DTRACE_ERROR_ENABLED()) {
 		char *dtrace_error_buffer;
+#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
 		va_start(args, format);
+#endif
 		zend_vspprintf(&dtrace_error_buffer, 0, format, args);
 		DTRACE_ERROR(dtrace_error_buffer, (char *)error_filename, error_lineno);
 		efree(dtrace_error_buffer);
+#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
 		va_end(args);
+#endif
 	}
 #endif /* HAVE_DTRACE */
 
