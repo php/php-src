@@ -935,7 +935,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 			zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) &tmp, sizeof(zval *), NULL);
 		}
 	}
-	efree(buffer);
+	str_efree(buffer);
 
 	php_error(type, "%s", message);
 	efree(message);
