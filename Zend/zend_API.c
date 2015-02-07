@@ -2003,16 +2003,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 			if (info->type_hint) {
 				if (info->class_name) {
-					uint32_t fetch_type;
-					zend_string *class_name;
-					ALLOCA_FLAG(use_heap);
-
-					ZEND_ASSERT(info->type_hint == IS_OBJECT);
-					STR_ALLOCA_INIT(class_name, info->class_name, strlen(info->class_name), use_heap);
-					fetch_type = zend_get_class_fetch_type(class_name);
-					STR_ALLOCA_FREE(class_name, use_heap);
-
-					if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && !scope) {
+					if (!scope && (!strcasecmp(info->class_name, "self") || !strcasecmp(info->class_name, "parent"))) {
 						zend_error(E_CORE_ERROR, "Cannot declare a return type of %s outside of a class scope", info->class_name);
 					}
 				}
