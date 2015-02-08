@@ -10,14 +10,8 @@ html_errors=1
 --FILE--
 <?php
 fopen("\xfc\x63", "r");
-finfo_open(FILEINFO_MIME_TYPE, "\xfc\x63");
 ?>
 --EXPECTF--
 <br />
-<b>Warning</b>:  : failed to open stream: No such file or directory in <b>%sbug68996.php</b> on line <b>2</b><br />
-<br />
-<b>Warning</b>:  : failed to open stream: No such file or directory in <b>%sbug68996.php</b> on line <b>3</b><br />
-<br />
-<b>Warning</b>:  : failed to open stream: No such file or directory in <b>%sbug68996.php</b> on line <b>3</b><br />
-<br />
-<b>Warning</b>:  finfo_open():  in <b>/%sbug68996.php</b> on line <b>3</b><br />
+<b>Warning</b>:  : failed to open stream: No such file or directory in <b>%sbug68996.php</b> on line <b>%d</b><br />
+
