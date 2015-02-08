@@ -577,7 +577,7 @@ AC_TRY_COMPILE([
 # include <wchar.h>
 #endif
 ],[
-int __tmp__() { mbstate_t a; }
+mbstate_t a;
 ],[
   ac_cv_type_mbstate_t=yes
 ],[
