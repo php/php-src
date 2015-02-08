@@ -103,7 +103,9 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		}
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", phpi_get_le_gd());
+	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(imgind), "Image", phpi_get_le_gd())) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (argc >= 3) {
 		q = quality; /* or colorindex for foreground of BW images (defaults to black) */

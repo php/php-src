@@ -27,7 +27,6 @@ PHP 7.0 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
-  a. zend_set_memory_limit() now takes the TSRMLS_CC macro as its last argument
   e. New data types
 
      String
@@ -180,6 +179,11 @@ PHP 7.0 INTERNALS UPGRADE NOTES
   r. In accordance with general use of size_t as string length, all PDO API
      functions now use size_t for string length.
 
+  s. Removed ZEND_REGISTER/FETCH_RESOURCE, use zend_fetch_resource and
+     and zend_register_resource instead, zend_fetch_resource accepts a zend_resource *
+     as first argument, if you still need to fetch a resource from zval, use 
+     zend_fetch_resource_ex. More details can be found in Zend/zend_list.c.
+
 
 ========================
 2. Build system changes
@@ -214,12 +218,20 @@ PHP 7.0 INTERNALS UPGRADE NOTES
 
     - PS_MOD_UPDATE_TIMESTAMP() session save handler definition is added. New
       save handler should use PS_MOD_UPDATE_TIMESTAMP() definition. Save handler
-      must not refer/change PS() variables directly from save handler.
-    - PS_MOD_UPDATE_TIMESTAMP() defines validate_sid() handler. This handler
-      must validate if requested session ID is in session data storage or not.
-      Internal save handler needed to asscess PS(id) directly to validate it.
-      Do not access PS(id), but use this handler.
-    - PS_MOD_UPDATE_TIMESTAMP() defines update_timestamp() handlers. This handler
+      must not refer/change PS() variables directly from save handler. Use
+      parameters.
+    - PS_MOD()/PS_MOD_SID() macro exist only for transition. Beware these
+      save handlers are less secure and slower than PS_MOD_UPDATE_TIMESTAMP().
+    - PS(invalid_session_id) was removed. It was never worked as it supposed.
+      To report invalid session ID, use PS_VALIDATE_SID() handler.
+    - PS_VALIDATE_SID() defines session ID validation handler. This handler
+      must validate if requested session ID exists in session data storage or not.
+      Do not access PS(id) directly, but use this handler and it's parameter.
+    - PS_UPDATE_TIMESTAMP() defines timestamp updating handler. This handler
       must update session data timestamp for GC if it is needed. e.g. Memcache
       updates timestap on read, so it does not need to update timestamp. Return
       SUCCESS simply for this case.
+    - PS_CREATE_SID() should check session ID collision. Return NULL for failure.
+    - More documentation can be found in ext/session/mod_files.c as comments.
+      mod_files.c may be used as reference implementation.
+ 

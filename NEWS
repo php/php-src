@@ -102,6 +102,10 @@
 - PCRE:
   . Removed support for the /e (PREG_REPLACE_EVAL) modifier. (Nikita)
 
+- PDO:
+  . Fixed bug #59450 (./configure fails with "Cannot find php_pdo_driver.h").
+    (maxime dot besson at smile dot fr)
+
 - PDO_mysql:
   . Fixed bug #68424 (Add new PDO mysql connection attr to control multi
     statements option). (peter dot wolanin at acquia dot com)

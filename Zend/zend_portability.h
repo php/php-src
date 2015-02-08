@@ -224,6 +224,10 @@ char *alloca();
 # define ZEND_NORETURN
 #endif
 
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
+# define HAVE_NORETURN_ALIAS
+#endif
+
 #if ZEND_DEBUG
 # define zend_always_inline inline
 # define zend_never_inline

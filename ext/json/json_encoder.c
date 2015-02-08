@@ -474,7 +474,7 @@ static void php_json_encode_serializable_object(smart_str *buf, zval *val, int o
 	}
 
 	if ((Z_TYPE(retval) == IS_OBJECT) &&
-		(Z_OBJ_HANDLE(retval) == Z_OBJ_HANDLE_P(val))) {
+		(Z_OBJ(retval) == Z_OBJ_P(val))) {
 		/* Handle the case where jsonSerialize does: return $this; by going straight to encode array */
 		php_json_encode_array(buf, &retval, options);
 	} else {

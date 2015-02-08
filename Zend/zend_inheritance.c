@@ -904,7 +904,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		/* The verification will be done in runtime by ZEND_VERIFY_ABSTRACT_CLASS */
 		zend_verify_abstract_class(ce);
 	}
-	ce->ce_flags |= parent_ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS;
+	ce->ce_flags |= parent_ce->ce_flags & (ZEND_HAS_STATIC_IN_METHODS | ZEND_ACC_USE_GUARDS);
 }
 /* }}} */
 
@@ -1044,14 +1044,18 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 		ce->destructor = fe; fe->common.fn_flags |= ZEND_ACC_DTOR;
 	} else if (!strncmp(mname->val, ZEND_GET_FUNC_NAME, mname->len)) {
 		ce->__get = fe;
+		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (!strncmp(mname->val, ZEND_SET_FUNC_NAME, mname->len)) {
 		ce->__set = fe;
+		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (!strncmp(mname->val, ZEND_CALL_FUNC_NAME, mname->len)) {
 		ce->__call = fe;
 	} else if (!strncmp(mname->val, ZEND_UNSET_FUNC_NAME, mname->len)) {
 		ce->__unset = fe;
+		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (!strncmp(mname->val, ZEND_ISSET_FUNC_NAME, mname->len)) {
 		ce->__isset = fe;
+		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (!strncmp(mname->val, ZEND_CALLSTATIC_FUNC_NAME, mname->len)) {
 		ce->__callstatic = fe;
 	} else if (!strncmp(mname->val, ZEND_TOSTRING_FUNC_NAME, mname->len)) {

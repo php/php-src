@@ -89,75 +89,89 @@ ZEND_API int zend_list_close(zend_resource *res)
 	return SUCCESS;
 }
 
-ZEND_API zend_resource* zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type)
+ZEND_API zend_resource* zend_register_resource(void *rsrc_pointer, int rsrc_type)
 {
 	zval *zv;
 
 	zv = zend_list_insert(rsrc_pointer, rsrc_type);
 
-	if (rsrc_result) {
-		ZVAL_COPY_VALUE(rsrc_result, zv);
-		return Z_RES_P(rsrc_result);
-	} else {
-		return Z_RES_P(zv);
-	}
+	return Z_RES_P(zv);
 }
 
-ZEND_API void *zend_fetch_resource(zval *passed_id, int default_id, const char *resource_type_name, int *found_resource_type, int num_resource_types, ...)
+ZEND_API void *zend_fetch_resource2(zend_resource *res, const char *resource_type_name, int resource_type1, int resource_type2)
 {
-	int actual_resource_type;
-//	void *resource;
-	va_list resource_types;
-	int i;
-	zend_resource *res;
-	const char *space;
-	const char *class_name;
-
-	if (default_id==-1) { /* use id */
-		if (!passed_id) {
-			if (resource_type_name) {
-				class_name = get_active_class_name(&space);
-				zend_error(E_WARNING, "%s%s%s(): no %s resource supplied", class_name, space, get_active_function_name(), resource_type_name);
-			}
-			return NULL;
-		} else if (Z_TYPE_P(passed_id) != IS_RESOURCE) {
-			if (resource_type_name) {
-				class_name = get_active_class_name(&space);
-				zend_error(E_WARNING, "%s%s%s(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
-			}
-			return NULL;
-		}
-	} else {
-		passed_id = zend_hash_index_find(&EG(regular_list), default_id);
-		if (!passed_id) {
-			if (resource_type_name) {
-				class_name = get_active_class_name(&space);
-				zend_error(E_WARNING, "%s%s%s(): %d is not a valid %s resource", class_name, space, get_active_function_name(), default_id, resource_type_name);
-			}
-			return NULL;
-		}
+	if (resource_type1 == res->type) {
+		return res->ptr;
 	}
-	res = Z_RES_P(passed_id);
-	actual_resource_type = res->type;
 
-	va_start(resource_types, num_resource_types);
-	for (i=0; i<num_resource_types; i++) {
-		if (actual_resource_type == va_arg(resource_types, int)) {
-			va_end(resource_types);
-			if (found_resource_type) {
-				*found_resource_type = actual_resource_type;
-			}
-			return res->ptr;
-		}
+	if (resource_type2 == res->type) {
+		return res->ptr;
 	}
-	va_end(resource_types);
 
 	if (resource_type_name) {
-		class_name = get_active_class_name(&space);
+		const char *space;
+		const char *class_name = get_active_class_name(&space);
 		zend_error(E_WARNING, "%s%s%s(): supplied resource is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
 	}
 
 	return NULL;
+}
+
+ZEND_API void *zend_fetch_resource(zend_resource *res, const char *resource_type_name, int resource_type)
+{
+	if (resource_type == res->type) {
+		return res->ptr;
+	}
+
+	if (resource_type_name) {
+		const char *space;
+		const char *class_name = get_active_class_name(&space);
+		zend_error(E_WARNING, "%s%s%s(): supplied resource is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
+	}
+
+	return NULL;
+}
+
+ZEND_API void *zend_fetch_resource_ex(zval *res, const char *resource_type_name, int resource_type)
+{
+	const char *space, *class_name;
+	if (res == NULL) {
+		if (resource_type_name) {
+			class_name = get_active_class_name(&space);
+			zend_error(E_WARNING, "%s%s%s(): no %s resource supplied", class_name, space, get_active_function_name(), resource_type_name);
+		}
+		return NULL;
+	}
+	if (Z_TYPE_P(res) != IS_RESOURCE) {
+		if (resource_type_name) {
+			class_name = get_active_class_name(&space);
+			zend_error(E_WARNING, "%s%s%s(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
+		}
+		return NULL;
+	}
+
+	return zend_fetch_resource(Z_RES_P(res), resource_type_name, resource_type);
+}
+
+ZEND_API void *zend_fetch_resource2_ex(zval *res, const char *resource_type_name, int resource_type1, int resource_type2)
+{
+	const char *space, *class_name;
+	if (res == NULL) {
+		if (resource_type_name) {
+			class_name = get_active_class_name(&space);
+			zend_error(E_WARNING, "%s%s%s(): no %s resource supplied", class_name, space, get_active_function_name(), resource_type_name);
+		}
+		return NULL;
+	}
+	if (Z_TYPE_P(res) != IS_RESOURCE) {
+		if (resource_type_name) {
+			class_name = get_active_class_name(&space);
+			zend_error(E_WARNING, "%s%s%s(): supplied argument is not a valid %s resource", class_name, space, get_active_function_name(), resource_type_name);
+		}
+		return NULL;
+	}
+
+	return zend_fetch_resource2(Z_RES_P(res), resource_type_name, resource_type1, resource_type2);
 }
 
 void list_entry_destructor(zval *zv)

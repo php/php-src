@@ -45,14 +45,16 @@ the 16-bit library, which processes strings of 16-bit values, and one for the
 32-bit library, which processes strings of 32-bit values. The distribution also
 includes a set of C++ wrapper functions (see the pcrecpp man page for details),
 courtesy of Google Inc., which can be used to call the 8-bit PCRE library from
-C++.
+C++. Other C++ wrappers have been created from time to time. See, for example:
+https://github.com/YasserAsmi/regexp, which aims to be simple and similar in
+style to the C API.
 
-In addition, there is a set of C wrapper functions (again, just for the 8-bit
-library) that are based on the POSIX regular expression API (see the pcreposix
-man page). These end up in the library called libpcreposix. Note that this just
-provides a POSIX calling interface to PCRE; the regular expressions themselves
-still follow Perl syntax and semantics. The POSIX API is restricted, and does
-not give full access to all of PCRE's facilities.
+The distribution also contains a set of C wrapper functions (again, just for
+the 8-bit library) that are based on the POSIX regular expression API (see the
+pcreposix man page). These end up in the library called libpcreposix. Note that
+this just provides a POSIX calling interface to PCRE; the regular expressions
+themselves still follow Perl syntax and semantics. The POSIX API is restricted,
+and does not give full access to all of PCRE's facilities.
 
 The header file for the POSIX-style functions is called pcreposix.h. The
 official POSIX name is regex.h, but I did not want to risk possible problems
@@ -392,7 +394,7 @@ library. They are also documented in the pcrebuild man page.
   avoided by linking with libedit (which has a BSD licence) instead.
 
   Enabling libreadline causes the -lreadline option to be added to the pcretest
-  build. In many operating environments with a system-installed readline
+  build. In many operating environments with a sytem-installed readline
   library this is sufficient. However, in some environments (e.g. if an
   unmodified distribution version of readline is in use), it may be necessary
   to specify something like LIBS="-lncurses" as well. This is because, to quote
@@ -988,4 +990,4 @@ pcre_xxx, one with the name pcre16_xx, and a third with the name pcre32_xxx.
 Philip Hazel
 Email local part: ph10
 Email domain: cam.ac.uk
-Last updated: 17 January 2014
+Last updated: 24 October 2014

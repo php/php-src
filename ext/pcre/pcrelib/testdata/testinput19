@@ -19,4 +19,10 @@
 
 /[[:blank:]]/WBZ
 
+/\x{212a}+/i8SI
+    KKkk\x{212a}
+
+/s+/i8SI
+    SSss\x{17f}
+
 /-- End of testinput19 --/ 

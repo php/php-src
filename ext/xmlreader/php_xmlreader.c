@@ -385,7 +385,7 @@ zend_object *xmlreader_objects_new(zend_class_entry *class_type)
 {
 	xmlreader_object *intern;
 
-	intern = ecalloc(1, sizeof(xmlreader_object) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(xmlreader_object) + zend_object_properties_size(class_type));
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 	intern->prop_handler = &xmlreader_prop_handlers;

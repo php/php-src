@@ -56,7 +56,7 @@ zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 {
 	NumberFormatter_object*     intern;
 
-	intern = ecalloc( 1, sizeof(NumberFormatter_object) + sizeof(zval) * (ce->default_properties_count - 1) );
+	intern = ecalloc( 1, sizeof(NumberFormatter_object) + zend_object_properties_size(ce));
 	formatter_data_init( &intern->nf_data );
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);

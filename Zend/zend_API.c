@@ -2002,6 +2002,13 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				internal_function->num_args--;
 			}
 			if (info->type_hint) {
+				if (info->class_name) {
+					ZEND_ASSERT(info->type_hint == IS_OBJECT);
+					if (!strcasecmp(info->class_name, "self") && !scope) {
+						zend_error(E_CORE_ERROR, "Cannot declare a return type of self outside of a class scope");
+					}
+				}
+
 				internal_function->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 			}
 		} else {
@@ -2086,12 +2093,16 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				__tostring = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_GET_FUNC_NAME)) {
 				__get = reg_function;
+				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_SET_FUNC_NAME)) {
 				__set = reg_function;
+				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_UNSET_FUNC_NAME)) {
 				__unset = reg_function;
+				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_ISSET_FUNC_NAME)) {
 				__isset = reg_function;
+				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_DEBUGINFO_FUNC_NAME)) {
 				__debugInfo = reg_function;
 			} else {
@@ -2201,6 +2212,18 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			if (__debugInfo->common.fn_flags & ZEND_ACC_STATIC) {
 				zend_error(error_type, "Method %s::%s() cannot be static", scope->name->val, __debugInfo->common.function_name->val);
 			}
+		}
+
+		if (ctor && ctor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && ctor->common.fn_flags & ZEND_ACC_CTOR) {
+			zend_error(E_CORE_ERROR, "Constructor %s::%s() cannot declare a return type", scope->name->val, ctor->common.function_name->val);
+		}
+
+		if (dtor && dtor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && dtor->common.fn_flags & ZEND_ACC_DTOR) {
+			zend_error(E_CORE_ERROR, "Destructor %s::%s() cannot declare a return type", scope->name->val, dtor->common.function_name->val);
+		}
+
+		if (clone && clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && dtor->common.fn_flags & ZEND_ACC_DTOR) {
+			zend_error(E_CORE_ERROR, "%s::%s() cannot declare a return type", scope->name->val, clone->common.function_name->val);
 		}
 		efree((char*)lc_class_name);
 	}

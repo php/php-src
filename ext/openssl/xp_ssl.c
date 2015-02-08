@@ -1563,7 +1563,7 @@ static int capture_peer_certs(php_stream *stream, php_openssl_netstream_data_t *
 			"ssl", "capture_peer_cert")) &&
 		zend_is_true(val)
 	) {
-		zend_register_resource(&zcert, peer_cert, php_openssl_get_x509_list_id());
+		ZVAL_RES(&zcert, zend_register_resource(peer_cert, php_openssl_get_x509_list_id()));
 		php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "peer_certificate", &zcert);
 		cert_captured = 1;
 	}
@@ -1583,7 +1583,7 @@ static int capture_peer_certs(php_stream *stream, php_openssl_netstream_data_t *
 
 			for (i = 0; i < sk_X509_num(chain); i++) {
 				X509 *mycert = X509_dup(sk_X509_value(chain, i));
-				zend_register_resource(&zcert, mycert, php_openssl_get_x509_list_id());
+				ZVAL_RES(&zcert, zend_register_resource(mycert, php_openssl_get_x509_list_id()));
 				add_next_index_zval(&arr, &zcert);
 			}
 
