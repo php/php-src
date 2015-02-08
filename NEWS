@@ -75,9 +75,11 @@
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
   . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
-- Json
+- JSON
   . Replace non-free JSON parser with a parser from Jsond extension, fixes #63520
     (JSON extension includes a problematic license statement). (Jakub Zelenka)
+  . Fixed bug #68938 (json_decode() decodes empty string without error).
+    (jeremy at bat-country dot us)
 
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
