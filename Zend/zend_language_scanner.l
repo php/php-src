@@ -1453,6 +1453,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_IS_NOT_EQUAL;
 }
 
+<ST_IN_SCRIPTING>"<=>" {
+	return T_SPACESHIP;
+}
+
 <ST_IN_SCRIPTING>"<=" {
 	return T_IS_SMALLER_OR_EQUAL;
 }
