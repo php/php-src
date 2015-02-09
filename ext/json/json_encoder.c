@@ -239,7 +239,7 @@ static void php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{
 }
 /* }}} */
 
-static int php_json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{{ */
+static int php_json_utf8_to_utf16(unsigned short *utf16, char utf8[], size_t len) /* {{{ */
 {
 	size_t pos = 0, us;
 	int j, status;
