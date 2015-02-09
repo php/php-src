@@ -27,6 +27,11 @@
 int json_yydebug = 1;
 #endif
 
+#ifdef _MSC_VER
+#define YYMALLOC malloc
+#define YYFREE free
+#endif
+
 #define PHP_JSON_USE(uv) ((void) (uv))
 #define PHP_JSON_USE_1(uvr, uv1) PHP_JSON_USE(uvr); PHP_JSON_USE(uv1)
 #define PHP_JSON_USE_2(uvr, uv1, uv2) PHP_JSON_USE(uvr); PHP_JSON_USE(uv1); PHP_JSON_USE(uv2)
