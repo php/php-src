@@ -58,7 +58,7 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 {
 	ResourceBundle_object *rb;
 
-	rb = ecalloc( 1, sizeof(ResourceBundle_object) + sizeof(zval) * (ce->default_properties_count - 1) );
+	rb = ecalloc( 1, sizeof(ResourceBundle_object) + zend_object_properties_size(ce));
 
 	zend_object_std_init( &rb->zend, ce );
 	object_properties_init( &rb->zend, ce);
@@ -146,7 +146,6 @@ PHP_METHOD( ResourceBundle, __construct )
 
 	if (Z_TYPE_P(return_value) == IS_OBJECT && Z_OBJ_P(return_value) == NULL) {
 		zend_object_store_ctor_failed(Z_OBJ(orig_this));
-		zval_dtor(&orig_this);
 		ZEND_CTOR_MAKE_NULL();
 	}
 }

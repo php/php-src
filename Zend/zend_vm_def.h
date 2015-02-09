@@ -1818,10 +1818,6 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 			HANDLE_EXCEPTION();
 		}
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ASSIGN);
-	} else if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		if (!OP2_FREE) {
-			PZVAL_LOCK(value_ptr);
-		}
 	}
 
 	variable_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
@@ -1838,12 +1834,6 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 		variable_ptr = &EG(uninitialized_zval);
 	} else {
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
-	}
-
-	if (OP2_TYPE == IS_VAR && opline->extended_value == ZEND_RETURNS_NEW) {
-		if (!OP2_FREE) {
-			Z_DELREF_P(variable_ptr);
-		}
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -2066,6 +2056,7 @@ ZEND_VM_HANDLER(46, ZEND_JMPZ_EX, CONST|TMPVAR|CV, ANY)
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *val;
+	int ret;
 
 	SAVE_OPLINE();
 	val = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -2084,12 +2075,12 @@ ZEND_VM_HANDLER(46, ZEND_JMPZ_EX, CONST|TMPVAR|CV, ANY)
 		}
 	}
 
-	if (i_zend_is_true(val)) {
-		FREE_OP1();
+	ret = i_zend_is_true(val);
+	FREE_OP1();
+	if (ret) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline++;
 	} else {
-		FREE_OP1();
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	}
@@ -2104,6 +2095,7 @@ ZEND_VM_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMPVAR|CV, ANY)
 	USE_OPLINE
 	zend_free_op free_op1;
 	zval *val;
+	int ret;
 
 	SAVE_OPLINE();
 	val = GET_OP1_ZVAL_PTR(BP_VAR_R);
@@ -2121,14 +2113,15 @@ ZEND_VM_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMPVAR|CV, ANY)
 			ZEND_VM_CONTINUE();
 		}
 	}
-	if (i_zend_is_true(val)) {
+	ret = i_zend_is_true(val);
+	FREE_OP1();
+	if (ret) {
 		ZVAL_TRUE(EX_VAR(opline->result.var));
 		opline = OP_JMP_ADDR(opline, opline->op2);
 	} else {
 		ZVAL_FALSE(EX_VAR(opline->result.var));
 		opline++;
 	}
-	FREE_OP1();
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		HANDLE_EXCEPTION();
 	}
@@ -2882,6 +2875,10 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
 
+		ZEND_ASSERT(
+			!(fbc->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+			zend_verify_internal_return_type(fbc, EX_VAR(opline->result.var)));
+
 		if (!RETURN_VALUE_USED(opline)) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
 		}
@@ -2947,6 +2944,25 @@ ZEND_VM_C_LABEL(fcall_end):
 		HANDLE_EXCEPTION();
 	}
 
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
+{
+#if OP1_TYPE != IS_UNUSED
+	USE_OPLINE
+#endif
+	SAVE_OPLINE();
+	if (OP1_TYPE == IS_UNUSED) {
+		zend_verify_missing_return_type(EX(func));
+	} else {
+		zval *retval_ptr;
+		zend_free_op free_op1;
+
+		retval_ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+		zend_verify_return_type(EX(func), retval_ptr);
+	}
+	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -3628,6 +3644,7 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, VAR|CV, ANY)
 				if (Z_OBJ(EX(call)->This)) {
 					OBJ_RELEASE(Z_OBJ(EX(call)->This));
 				}
+				ZVAL_UNDEF(param);
 				EX(call)->func = (zend_function*)&zend_pass_function;
 				EX(call)->called_scope = NULL;
 				Z_OBJ(EX(call)->This) = NULL;

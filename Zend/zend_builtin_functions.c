@@ -87,6 +87,7 @@ static ZEND_FUNCTION(debug_backtrace);
 static ZEND_FUNCTION(debug_print_backtrace);
 #if ZEND_DEBUG
 static ZEND_FUNCTION(zend_test_func);
+static ZEND_FUNCTION(zend_test_func2);
 #ifdef ZTS
 static ZEND_FUNCTION(zend_thread_id);
 #endif
@@ -243,6 +244,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
 	ZEND_ARG_INFO(0, extension_name)
 ZEND_END_ARG_INFO()
+
+#ifdef ZEND_DEBUG
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func, IS_ARRAY, NULL, 0)
+ZEND_END_ARG_INFO()
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_func2, IS_ARRAY, NULL, 1)
+ZEND_END_ARG_INFO()
+#endif
+
 /* }}} */
 
 static const zend_function_entry builtin_functions[] = { /* {{{ */
@@ -304,7 +313,8 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(debug_backtrace, 		arginfo_debug_backtrace)
 	ZEND_FE(debug_print_backtrace, 		arginfo_debug_print_backtrace)
 #if ZEND_DEBUG
-	ZEND_FE(zend_test_func,		NULL)
+	ZEND_FE(zend_test_func,		arginfo_zend_test_func)
+	ZEND_FE(zend_test_func2,	arginfo_zend_test_func2)
 #ifdef ZTS
 	ZEND_FE(zend_thread_id,		NULL)
 #endif
@@ -746,14 +756,7 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 	array_init_size(dst, zend_hash_num_elements(Z_ARRVAL_P(src)));
 	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(src), idx, key, val) {
 		/* constant arrays can't contain references */
-		if (Z_ISREF_P(val)) {
-			if (Z_REFCOUNT_P(val) == 1) {
-				ZVAL_UNREF(val);
-			} else {
-				Z_DELREF_P(val);
-				val = Z_REFVAL_P(val);
-			}
-		}
+		ZVAL_DEREF(val);
 		if (key) {
 			new_val = zend_hash_add_new(Z_ARRVAL_P(dst), key, val);
 		} else {
@@ -1065,6 +1068,8 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		if (UNEXPECTED(Z_COPYABLE_P(prop))) {
 			ZVAL_DUP(&prop_copy, prop);
 			prop = &prop_copy;
+		} else {
+			Z_TRY_ADDREF_P(prop);
 		}
 
 		/* this is necessary to make it able to work with default array
@@ -1951,6 +1956,13 @@ ZEND_FUNCTION(create_function)
 
 #if ZEND_DEBUG
 ZEND_FUNCTION(zend_test_func)
+{
+	zval *arg1, *arg2;
+
+	zend_get_parameters(ZEND_NUM_ARGS(), 2, &arg1, &arg2);
+}
+
+ZEND_FUNCTION(zend_test_func2)
 {
 	zval *arg1, *arg2;
 

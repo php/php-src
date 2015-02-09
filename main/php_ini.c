@@ -357,6 +357,10 @@ static void php_load_zend_extension_cb(void *arg)
 	char *filename = *((char **) arg);
 	const int length = (int)strlen(filename);
 
+#ifndef PHP_WIN32
+	(void) length;
+#endif
+
 	if (IS_ABSOLUTE_PATH(filename, length)) {
 		zend_load_extension(filename);
 	} else {

@@ -329,7 +329,7 @@ static zend_object *reflection_objects_new(zend_class_entry *class_type) /* {{{ 
 {
 	reflection_object *intern;
 
-	intern = ecalloc(1, sizeof(reflection_object) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(reflection_object) + zend_object_properties_size(class_type));
 	intern->zo.ce = class_type;
 
 	zend_object_std_init(&intern->zo, class_type);
@@ -907,6 +907,24 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	}
 	_function_parameter_string(str, fptr, param_indent.buf->val);
 	string_free(&param_indent);
+	if (fptr->op_array.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+		string_printf(str, "  %s- Return [ ", indent);
+		if (fptr->common.arg_info[-1].class_name) {
+			string_printf(str, "%s ",
+				(fptr->type == ZEND_INTERNAL_FUNCTION) ?
+					((zend_internal_arg_info*)(fptr->common.arg_info - 1))->class_name :
+					fptr->common.arg_info[-1].class_name->val);
+			if (fptr->common.arg_info[-1].allow_null) {
+				string_printf(str, "or NULL ");
+			}
+		} else if (fptr->common.arg_info[-1].type_hint) {
+			string_printf(str, "%s ", zend_get_type_by_const(fptr->common.arg_info[-1].type_hint));
+			if (fptr->common.arg_info[-1].allow_null) {
+				string_printf(str, "or NULL ");
+			}
+		}
+		string_printf(str, "]\n");
+	}
 	string_printf(str, "%s}\n", indent);
 }
 /* }}} */
@@ -3978,6 +3996,7 @@ static int _adddynproperty(zval *ptr, int num_args, va_list args, zend_hash_key 
 	if (zend_get_property_info(ce, hash_key->key, 1) == NULL) {
 		zend_property_info property_info;
 
+		property_info.doc_comment = NULL;
 		property_info.flags = ZEND_ACC_IMPLICIT_PUBLIC;
 		property_info.name = hash_key->key;
 		property_info.ce = ce;
@@ -4198,7 +4217,7 @@ ZEND_METHOD(reflection_class, getModifiers)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	RETURN_LONG(ce->ce_flags & ~ZEND_ACC_CONSTANTS_UPDATED);
+	RETURN_LONG(ce->ce_flags & ~(ZEND_ACC_CONSTANTS_UPDATED|ZEND_ACC_USE_GUARDS));
 }
 /* }}} */
 
@@ -5013,13 +5032,14 @@ ZEND_METHOD(reflection_property, getValue)
 	} else {
 		const char *class_name, *prop_name;
 		size_t prop_name_len;
+		zval rv;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &object) == FAILURE) {
 			return;
 		}
 
 		zend_unmangle_property_name_ex(ref->prop.name, &class_name, &prop_name, &prop_name_len);
-		member_p = zend_read_property(ref->ce, object, prop_name, prop_name_len, 1);
+		member_p = zend_read_property(ref->ce, object, prop_name, prop_name_len, 1, &rv);
 		ZVAL_DUP(return_value, member_p);
 	}
 }

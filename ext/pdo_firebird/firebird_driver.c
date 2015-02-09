@@ -31,7 +31,7 @@
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
-static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, zend_long, XSQLDA*, isc_stmt_handle*,
+static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, size_t, XSQLDA*, isc_stmt_handle*,
 	HashTable*);
 
 /* map driver specific error message to PDO error */
@@ -130,7 +130,7 @@ static int firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 /* }}} */
 
 /* called by PDO to prepare an SQL query */
-static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, /* {{{ */
+static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len, /* {{{ */
 	pdo_stmt_t *stmt, zval *driver_options)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
@@ -216,7 +216,7 @@ static int firebird_handle_preparer(pdo_dbh_t *dbh, const char *sql, zend_long s
 /* }}} */
 
 /* called by PDO to execute a statement that doesn't produce a result set */
-static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long sql_len) /* {{{ */
+static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_len) /* {{{ */
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	isc_stmt_handle stmt = NULL;
@@ -270,8 +270,8 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, zend_long
 /* }}} */
 
 /* called by the PDO SQL parser to add quotes to values that are copied into SQL */
-static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, /* {{{ */
-	char **quoted, int *quotedlen, enum pdo_param_type paramtype)
+static int firebird_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, /* {{{ */
+	char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
 {
 	int qcount = 0;
 	char const *co, *l, *r;
@@ -389,7 +389,7 @@ static int firebird_handle_rollback(pdo_dbh_t *dbh) /* {{{ */
 /* }}} */
 
 /* used by prepare and exec to allocate a statement handle and prepare the SQL */
-static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, /* {{{ */
+static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t sql_len, /* {{{ */
 	XSQLDA *out_sqlda, isc_stmt_handle *s, HashTable *named_params)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;

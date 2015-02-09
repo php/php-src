@@ -577,9 +577,10 @@ static int php_stdiop_stat(php_stream *stream, php_stream_statbuf *ssb)
 	php_stdio_stream_data *data = (php_stdio_stream_data*) stream->abstract;
 
 	assert(data != NULL);
+	if((ret = do_fstat(data, 1)) == 0) {
+		memcpy(&ssb->sb, &data->sb, sizeof(ssb->sb));
+	}
 
-	ret = do_fstat(data, 1);
-	memcpy(&ssb->sb, &data->sb, sizeof(ssb->sb));
 	return ret;
 }
 
@@ -669,7 +670,9 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 						return fd == -1 ? PHP_STREAM_OPTION_RETURN_ERR : PHP_STREAM_OPTION_RETURN_OK;
 
 					case PHP_STREAM_MMAP_MAP_RANGE:
-						do_fstat(data, 1);
+						if(do_fstat(data, 1) != 0) {
+							return PHP_STREAM_OPTION_RETURN_ERR;
+						}
 						if (range->length == 0 && range->offset > 0 && range->offset < data->sb.st_size) {
 							range->length = data->sb.st_size - range->offset;
 						}
@@ -1341,7 +1344,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 			break;
 		case PHP_STREAM_META_GROUP:
 		case PHP_STREAM_META_GROUP_NAME:
-			if(option == PHP_STREAM_META_OWNER_NAME) {
+			if(option == PHP_STREAM_META_GROUP_NAME) {
 				if(php_get_gid_by_name((char *)value, &gid) != SUCCESS) {
 					php_error_docref1(NULL, url, E_WARNING, "Unable to find gid for %s", (char *)value);
 					return 0;
@@ -1411,6 +1414,9 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 	}
 
 	filename_length = (int)strlen(filename);
+#ifndef PHP_WIN32
+	(void) filename_length;
+#endif
 
 	/* Relative path open */
 	if (*filename == '.' && (IS_SLASH(filename[1]) || filename[1] == '.')) {

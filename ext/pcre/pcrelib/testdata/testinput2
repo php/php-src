@@ -4035,6 +4035,8 @@ backtracking verbs. --/
 
 /(?(R&6yh)abc)/
 
+/(((a\2)|(a*)\g<-1>))*a?/BZ
+
 /-- Test the ugly "start or end of word" compatibility syntax --/
 
 /[[:<:]]red[[:>:]]/BZ
@@ -4061,5 +4063,19 @@ backtracking verbs. --/
 /(((((a)))))/Q1
 
 /(((((a)))))/Q
+
+/^\w+(?>\s*)(?<=\w)/BZ
+
+/\othing/
+
+/\o{}/
+
+/\o{whatever}/
+
+/\xthing/
+
+/\x{}/
+
+/\x{whatever}/
 
 /-- End of testinput2 --/

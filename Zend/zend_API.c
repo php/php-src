@@ -2001,6 +2001,16 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				/* Don't count the variadic argument */
 				internal_function->num_args--;
 			}
+			if (info->type_hint) {
+				if (info->class_name) {
+					ZEND_ASSERT(info->type_hint == IS_OBJECT);
+					if (!strcasecmp(info->class_name, "self") && !scope) {
+						zend_error(E_CORE_ERROR, "Cannot declare a return type of self outside of a class scope");
+					}
+				}
+
+				internal_function->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
+			}
 		} else {
 			internal_function->arg_info = NULL;
 			internal_function->num_args = 0;
@@ -2083,12 +2093,16 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				__tostring = reg_function;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_GET_FUNC_NAME)) {
 				__get = reg_function;
+				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_SET_FUNC_NAME)) {
 				__set = reg_function;
+				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_UNSET_FUNC_NAME)) {
 				__unset = reg_function;
+				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_ISSET_FUNC_NAME)) {
 				__isset = reg_function;
+				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_DEBUGINFO_FUNC_NAME)) {
 				__debugInfo = reg_function;
 			} else {
@@ -2198,6 +2212,18 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			if (__debugInfo->common.fn_flags & ZEND_ACC_STATIC) {
 				zend_error(error_type, "Method %s::%s() cannot be static", scope->name->val, __debugInfo->common.function_name->val);
 			}
+		}
+
+		if (ctor && ctor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && ctor->common.fn_flags & ZEND_ACC_CTOR) {
+			zend_error(E_CORE_ERROR, "Constructor %s::%s() cannot declare a return type", scope->name->val, ctor->common.function_name->val);
+		}
+
+		if (dtor && dtor->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && dtor->common.fn_flags & ZEND_ACC_DTOR) {
+			zend_error(E_CORE_ERROR, "Destructor %s::%s() cannot declare a return type", scope->name->val, dtor->common.function_name->val);
+		}
+
+		if (clone && clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && dtor->common.fn_flags & ZEND_ACC_DTOR) {
+			zend_error(E_CORE_ERROR, "%s::%s() cannot declare a return type", scope->name->val, clone->common.function_name->val);
 		}
 		efree((char*)lc_class_name);
 	}
@@ -3761,11 +3787,10 @@ ZEND_API int zend_update_static_property_stringl(zend_class_entry *scope, const 
 }
 /* }}} */
 
-ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent) /* {{{ */
+ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const char *name, size_t name_length, zend_bool silent, zval *rv) /* {{{ */
 {
 	zval property, *value;
 	zend_class_entry *old_scope = EG(scope);
-	zval rv;
 
 	EG(scope) = scope;
 
@@ -3774,7 +3799,7 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 	}
 
 	ZVAL_STRINGL(&property, name, name_length);
-	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, NULL, &rv);
+	value = Z_OBJ_HT_P(object)->read_property(object, &property, silent?BP_VAR_IS:BP_VAR_R, NULL, rv);
 	zval_ptr_dtor(&property);
 
 	EG(scope) = old_scope;
@@ -3913,30 +3938,6 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 ZEND_API void zend_ctor_make_null(zend_execute_data *execute_data) /* {{{ */
 {
 	if (EX(return_value)) {
-/*
-		if (Z_TYPE_P(EX(return_value)) == IS_OBJECT) {
-			zend_object *object = Z_OBJ_P(EX(return_value));
-			zend_execute_data *ex = EX(prev_execute_data);
-
-			while (ex && Z_OBJ(ex->This) == object) {
-				if (ex->func) {
-					if (ZEND_USER_CODE(ex->func->type)) {
-						if (ex->func->op_array.this_var != -1) {
-							zval *this_var = ZEND_CALL_VAR(ex, ex->func->op_array.this_var);
-							if (this_var != EX(return_value)) {
-								zval_ptr_dtor(this_var);
-								ZVAL_NULL(this_var);
-							}
-						}
-					}
-				}
-				Z_OBJ(ex->This) = NULL;
-				ZVAL_NULL(&ex->This);
-				ex = ex->prev_execute_data;
-			}
-		}
-*/
-		zval_ptr_dtor(EX(return_value));
 		Z_OBJ_P(EX(return_value)) = NULL;
 		ZVAL_NULL(EX(return_value));
 	}

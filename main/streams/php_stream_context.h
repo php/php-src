@@ -33,7 +33,7 @@ typedef void (*php_stream_notification_func)(php_stream_context *context,
    If no context was passed, use the default context
    The default context has not yet been created, do it now. */
 #define php_stream_context_from_zval(zcontext, nocontext) ( \
-		(zcontext) ? zend_fetch_resource(zcontext, -1, "Stream-Context", NULL, 1, php_le_stream_context()) : \
+		(zcontext) ? zend_fetch_resource_ex(zcontext, "Stream-Context", php_le_stream_context()) : \
 		(nocontext) ? NULL : \
 		FG(default_context) ? FG(default_context) : \
 		(FG(default_context) = php_stream_context_alloc()) )

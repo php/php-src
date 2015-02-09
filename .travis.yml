@@ -26,7 +26,7 @@ env:
 
 before_install:
     - sudo apt-get update -qq
-    - sudo apt-get install -y libenchant-dev libaspell-dev libpspell-dev librecode-dev
+    - sudo apt-get install -y libenchant-dev libaspell-dev libpspell-dev librecode-dev libsasl2-dev libxpm-dev libt1-dev libc-client2007e-dev
     - sudo cp ./travis/de /var/lib/locales/supported.d/de
     - sudo dpkg-reconfigure locales
     - ./travis/install.sh
@@ -40,8 +40,9 @@ before_script:
     - . ./travis/ext/pdo_mysql/setup.sh
     - . ./travis/ext/pgsql/setup.sh
     - . ./travis/ext/pdo_pgsql/setup.sh
+    - . ./travis/ext/imap/setup.sh
 
 # Run PHPs run-tests.php 
 script:
-    - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --show-diff --set-timeout 120
+    - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --set-timeout 120
     - ./sapi/cli/php sapi/phpdbg/tests/run-tests.php -diff2stdout --phpdbg sapi/phpdbg/phpdbg

@@ -68,7 +68,7 @@ appropriately for an application, not for building PCRE. */
 #include "pcre.h"
 #include "pcre_internal.h"
 
-/* These are the functions that are contained within. It doesn't seem worth
+/* These are the funtions that are contained within. It doesn't seem worth
 having a separate .h file just for this. */
 
 #endif /* PCRE_INCLUDED */

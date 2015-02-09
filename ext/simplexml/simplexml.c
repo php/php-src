@@ -789,7 +789,7 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 				}
 			}
 			if (exists && check_empty == 1 &&
-				(!attr->children || !attr->children->content || !attr->children->content[0] || !xmlStrcmp(attr->children->content, "0")) ) {
+				(!attr->children || !attr->children->content || !attr->children->content[0] || !xmlStrcmp(attr->children->content, (const xmlChar *) "0")) ) {
 				/* Attribute with no content in it's text node */
 				exists = 0;
 			}
@@ -817,7 +817,7 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 				exists = 1;
 				if (check_empty == 1 &&
 					(!node->children || (node->children->type == XML_TEXT_NODE && !node->children->next &&
-					 (!node->children->content || !node->children->content[0] || !xmlStrcmp(node->children->content, "0")))) ) {
+					 (!node->children->content || !node->children->content[0] || !xmlStrcmp(node->children->content, (const xmlChar *) "0")))) ) {
 					exists = 0;
 				}
 			}
@@ -1388,7 +1388,7 @@ SXE_METHOD(asXML)
 
 	if (node) {
 		if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
-			xmlDocDumpMemoryEnc((xmlDocPtr) sxe->document->ptr, &strval, &strval_len, ((xmlDocPtr) sxe->document->ptr)->encoding);
+			xmlDocDumpMemoryEnc((xmlDocPtr) sxe->document->ptr, &strval, &strval_len, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
 			RETVAL_STRINGL((char *)strval, strval_len);
 			xmlFree(strval);
 		} else {
@@ -1399,7 +1399,7 @@ SXE_METHOD(asXML)
 				RETURN_FALSE;
 			}
 
-			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, ((xmlDocPtr) sxe->document->ptr)->encoding);
+			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
 			xmlOutputBufferFlush(outbuf);
 #ifdef LIBXML2_NEW_BUFFER
 			RETVAL_STRINGL((char *)xmlOutputBufferGetContent(outbuf), xmlOutputBufferGetSize(outbuf));
@@ -2057,7 +2057,7 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce)
 	zend_class_entry *parent = ce;
 	int inherited = 0;
 
-	intern = ecalloc(1, sizeof(php_sxe_object) + sizeof(zval) * (parent->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(php_sxe_object) + zend_object_properties_size(parent));
 
 	intern->iter.type = SXE_ITER_NONE;
 	intern->iter.nsprefix = NULL;

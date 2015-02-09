@@ -187,7 +187,7 @@ PHP_FUNCTION(recode_file)
 {
 	RECODE_REQUEST request = NULL;
 	char *req;
-	int req_len;
+	size_t req_len;
 	zval *input, *output;
 	php_stream *instream, *outstream;
 	FILE  *in_fp,  *out_fp;

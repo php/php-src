@@ -135,7 +135,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 PHP_NAMED_FUNCTION(php_if_md5_file)
 {
 	char          *arg;
-	int           arg_len;
+	size_t        arg_len;
 	zend_bool raw_output = 0;
 	char          md5str[33];
 	unsigned char buf[1024];

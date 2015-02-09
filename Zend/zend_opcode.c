@@ -151,13 +151,15 @@ ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce)
 	}
 	if (ce->static_members_table) {
 		zval *static_members = ce->static_members_table;
+		int count = ce->default_static_members_count;
 		int i;
 
-		ce->static_members_table = NULL;
-		for (i = 0; i < ce->default_static_members_count; i++) {
+		ce->default_static_members_count = 0;
+		ce->default_static_members_table = ce->static_members_table = NULL;
+		for (i = 0; i < count; i++) {
 			zval_ptr_dtor(&static_members[i]);
-			ZVAL_UNDEF(&static_members[i]);
 		}
+		efree(static_members);
 	}
 }
 
@@ -365,18 +367,26 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_dtor_handler, op_array);
 	}
 	if (op_array->arg_info) {
-		uint32_t num_args = op_array->num_args;
+		int32_t num_args = op_array->num_args;
+		zend_arg_info *arg_info = op_array->arg_info;
+		int32_t i;
 
+		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			arg_info--;
+			num_args++;
+		}
 		if (op_array->fn_flags & ZEND_ACC_VARIADIC) {
 			num_args++;
 		}
-		for (i = 0; i < num_args; i++) {
-			zend_string_release(op_array->arg_info[i].name);
-			if (op_array->arg_info[i].class_name) {
-				zend_string_release(op_array->arg_info[i].class_name);
+		for (i = 0 ; i < num_args; i++) {
+			if (arg_info[i].name) {
+				zend_string_release(arg_info[i].name);
+			}
+			if (arg_info[i].class_name) {
+				zend_string_release(arg_info[i].class_name);
 			}
 		}
-		efree(op_array->arg_info);
+		efree(arg_info);
 	}
 }
 
@@ -759,6 +769,11 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_FE_RESET:
 			case ZEND_FE_FETCH:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
+				break;
+			case ZEND_VERIFY_RETURN_TYPE:
+				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+					MAKE_NOP(opline);
+				}
 				break;
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:

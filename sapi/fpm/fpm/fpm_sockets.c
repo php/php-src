@@ -287,6 +287,7 @@ static int fpm_socket_af_inet_listening_socket(struct fpm_worker_pool_s *wp) /* 
 
 	if ((status = getaddrinfo(addr, port_str, &hints, &servinfo)) != 0) {
 		zlog(ZLOG_ERROR, "getaddrinfo: %s\n", gai_strerror(status));
+		free(dup_address);
 		return -1;
 	}
 

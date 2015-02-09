@@ -5821,13 +5821,13 @@ No match
 No match
 
 /a{11111111111111111111}/I
-Failed: number too big in {} quantifier at offset 22
+Failed: number too big in {} quantifier at offset 8
 
 /(){64294967295}/I
-Failed: number too big in {} quantifier at offset 14
+Failed: number too big in {} quantifier at offset 9
 
 /(){2,4294967295}/I
-Failed: number too big in {} quantifier at offset 15
+Failed: number too big in {} quantifier at offset 11
 
 "(?i:a)(?i:b)(?i:c)(?i:d)(?i:e)(?i:f)(?i:g)(?i:h)(?i:i)(?i:j)(k)(?i:l)A\1B"I
 Capturing subpattern count = 1
@@ -14093,6 +14093,30 @@ Failed: malformed number or name after (?( at offset 4
 /(?(R&6yh)abc)/
 Failed: group name must start with a non-digit at offset 5
 
+/(((a\2)|(a*)\g<-1>))*a?/BZ
+------------------------------------------------------------------
+        Bra
+        Brazero
+        SCBra 1
+        Once
+        CBra 2
+        CBra 3
+        a
+        \2
+        Ket
+        Alt
+        CBra 4
+        a*
+        Ket
+        Recurse
+        Ket
+        Ket
+        KetRmax
+        a?+
+        Ket
+        End
+------------------------------------------------------------------
+
 /-- Test the ugly "start or end of word" compatibility syntax --/
 
 /[[:<:]]red[[:>:]]/BZ
@@ -14148,5 +14172,38 @@ Failed: parentheses are too deeply nested (stack check) at offset 0
 
 /(((((a)))))/Q
 ** Missing 0 or 1 after /Q
+
+/^\w+(?>\s*)(?<=\w)/BZ
+------------------------------------------------------------------
+        Bra
+        ^
+        \w+
+        Once_NC
+        \s*+
+        Ket
+        AssertB
+        Reverse
+        \w
+        Ket
+        Ket
+        End
+------------------------------------------------------------------
+
+/\othing/
+Failed: missing opening brace after \o at offset 1
+
+/\o{}/
+Failed: digits missing in \x{} or \o{} at offset 1
+
+/\o{whatever}/
+Failed: non-octal character in \o{} (closing brace missing?) at offset 3
+
+/\xthing/
+
+/\x{}/
+Failed: digits missing in \x{} or \o{} at offset 3
+
+/\x{whatever}/
+Failed: non-hex character in \x{} (closing brace missing?) at offset 3
 
 /-- End of testinput2 --/

@@ -719,9 +719,9 @@ No match
  0: \x{6e9}
     \x{060b}
  0: \x{60b}
-    \x{061c}
- 0: \x{61c}
     ** Failers
+No match
+    \x{061c}
 No match
     X\x{06e9}   
 No match
@@ -2456,5 +2456,9 @@ No match
 /[q-u]+/8iW 
     Ss\x{17f}
  0: Ss\x{17f}
+
+/^s?c/mi8
+    scat
+ 0: sc
 
 /-- End of testinput6 --/

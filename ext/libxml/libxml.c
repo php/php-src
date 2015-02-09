@@ -860,6 +860,12 @@ static PHP_RINIT_FUNCTION(libxml)
 		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
 		xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
 		xmlOutputBufferCreateFilenameDefault(php_libxml_output_buffer_create_filename);
+
+		/* Enable the entity loader by default. This ensures that
+		 * other threads/requests that might have disabled the loader
+		 * do not affect the current request.
+		 */
+		LIBXML(entity_loader_disabled) = 0;
 	}
 	return SUCCESS;
 }

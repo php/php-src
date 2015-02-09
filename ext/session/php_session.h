@@ -27,21 +27,19 @@
 # include "ext/hash/php_hash.h"
 #endif
 
-#define PHP_SESSION_API 20020330
+#define PHP_SESSION_API 20150121
 
-/* To check php_session_valid_key()/php_session_reset_id() */
-#define PHP_SESSION_STRICT 1
-
-#define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name
-#define PS_CLOSE_ARGS void **mod_data
-#define PS_READ_ARGS void **mod_data, zend_string *key, zend_string **val
-#define PS_WRITE_ARGS void **mod_data, zend_string *key, zend_string *val
-#define PS_DESTROY_ARGS void **mod_data, zend_string *key
-#define PS_GC_ARGS void **mod_data, int maxlifetime, int *nrdels
+/* save handler macros */
+#define PS_NUM_APIS      9
+#define PS_OPEN_ARGS     void **mod_data, const char *save_path, const char *session_name
+#define PS_CLOSE_ARGS    void **mod_data
+#define PS_READ_ARGS     void **mod_data, zend_string *key, zend_string **val
+#define PS_WRITE_ARGS    void **mod_data, zend_string *key, zend_string *val
+#define PS_DESTROY_ARGS  void **mod_data, zend_string *key
+#define PS_GC_ARGS       void **mod_data, int maxlifetime, int *nrdels
 #define PS_CREATE_SID_ARGS void **mod_data
-
-/* default create id function */
-PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS);
+#define PS_VALIDATE_SID_ARGS void **mod_data, zend_string *key
+#define PS_UPDATE_TIMESTAMP_ARGS void **mod_data, zend_string *key, zend_string *val
 
 typedef struct ps_module_struct {
 	const char *s_name;
@@ -52,6 +50,8 @@ typedef struct ps_module_struct {
 	int (*s_destroy)(PS_DESTROY_ARGS);
 	int (*s_gc)(PS_GC_ARGS);
 	zend_string *(*s_create_sid)(PS_CREATE_SID_ARGS);
+	int (*s_validate_sid)(PS_VALIDATE_SID_ARGS);
+	int (*s_update_timestamp)(PS_UPDATE_TIMESTAMP_ARGS);
 } ps_module;
 
 #define PS_GET_MOD_DATA() *mod_data
@@ -64,7 +64,10 @@ typedef struct ps_module_struct {
 #define PS_DESTROY_FUNC(x) 	int ps_delete_##x(PS_DESTROY_ARGS)
 #define PS_GC_FUNC(x) 		int ps_gc_##x(PS_GC_ARGS)
 #define PS_CREATE_SID_FUNC(x)	zend_string *ps_create_sid_##x(PS_CREATE_SID_ARGS)
+#define PS_VALIDATE_SID_FUNC(x)	int ps_validate_sid_##x(PS_VALIDATE_SID_ARGS)
+#define PS_UPDATE_TIMESTAMP_FUNC(x) 	int ps_update_timestamp_##x(PS_UPDATE_TIMESTAMP_ARGS)
 
+/* Legacy save handler module definitions */
 #define PS_FUNCS(x) \
 	PS_OPEN_FUNC(x); \
 	PS_CLOSE_FUNC(x); \
@@ -76,9 +79,10 @@ typedef struct ps_module_struct {
 
 #define PS_MOD(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
-	 ps_delete_##x, ps_gc_##x, php_session_create_id
+	 ps_delete_##x, ps_gc_##x, php_session_create_id, \
+	 php_session_validate_sid, php_session_update_timestamp
 
-/* SID creation enabled module handler definitions */
+/* Legacy SID creation enabled save handler module definitions */
 #define PS_FUNCS_SID(x) \
 	PS_OPEN_FUNC(x); \
 	PS_CLOSE_FUNC(x); \
@@ -86,11 +90,33 @@ typedef struct ps_module_struct {
 	PS_WRITE_FUNC(x); \
 	PS_DESTROY_FUNC(x); \
 	PS_GC_FUNC(x); \
-	PS_CREATE_SID_FUNC(x)
+	PS_CREATE_SID_FUNC(x); \
+	PS_VALIDATE_SID_FUNC(x); \
+	PS_UPDATE_TIMESTAMP_FUNC(x);
 
 #define PS_MOD_SID(x) \
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
-	 ps_delete_##x, ps_gc_##x, ps_create_sid_##x
+	 ps_delete_##x, ps_gc_##x, ps_create_sid_##x, \
+	 php_session_validate_sid, php_session_update_timestamp
+
+/* Update timestamp enabled save handler module definitions
+   New save handlers should use this API */
+#define PS_FUNCS_UPDATE_TIMESTAMP(x) \
+	PS_OPEN_FUNC(x); \
+	PS_CLOSE_FUNC(x); \
+	PS_READ_FUNC(x); \
+	PS_WRITE_FUNC(x); \
+	PS_DESTROY_FUNC(x); \
+	PS_GC_FUNC(x); \
+	PS_CREATE_SID_FUNC(x); \
+	PS_VALIDATE_SID_FUNC(x); \
+	PS_UPDATE_TIMESTAMP_FUNC(x);
+
+#define PS_MOD_UPDATE_TIMESTAMP(x) \
+	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
+	 ps_delete_##x, ps_gc_##x, ps_create_sid_##x, \
+	 ps_validate_sid_##x, ps_update_timestamp_##x
+
 
 typedef enum {
 	php_session_disabled,
@@ -99,7 +125,6 @@ typedef enum {
 } php_session_status;
 
 typedef struct _php_session_rfc1867_progress {
-
 	size_t    sname_len;
 	zval      sid;
 	smart_str key;
@@ -141,7 +166,7 @@ typedef struct _php_ps_globals {
 	int module_number;
 	zend_long cache_expire;
 	union {
-		zval names[7];
+		zval names[PS_NUM_APIS];
 		struct {
 			zval ps_open;
 			zval ps_close;
@@ -150,6 +175,8 @@ typedef struct _php_ps_globals {
 			zval ps_destroy;
 			zval ps_gc;
 			zval ps_create_sid;
+			zval ps_validate_sid;
+			zval ps_update_timestamp;
 		} name;
 	} mod_user_names;
 	int mod_user_implemented;
@@ -159,8 +186,7 @@ typedef struct _php_ps_globals {
 	zend_bool auto_start;
 	zend_bool use_cookies;
 	zend_bool use_only_cookies;
-	zend_bool use_trans_sid;	/* contains the INI value of whether to use trans-sid */
-	zend_bool apply_trans_sid;	/* whether or not to enable trans-sid for the current request */
+	zend_bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
 
 	zend_long hash_func;
 #if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
@@ -169,7 +195,6 @@ typedef struct _php_ps_globals {
 	zend_long hash_bits_per_character;
 	int send_cookie;
 	int define_sid;
-	zend_bool invalid_session_id;	/* allows the driver to report about an invalid session id and request id regeneration */
 
 	php_session_rfc1867_progress *rfc1867_progress;
 	zend_bool rfc1867_enabled; /* session.upload_progress.enabled */
@@ -180,7 +205,8 @@ typedef struct _php_ps_globals {
 	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
 
 	zend_bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
-	unsigned char session_data_hash[16]; /* binary MD5 hash length */
+	zend_bool lazy_write; /* omit session write when it is possible */
+	zend_string *session_vars; /* serialized original session data */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
@@ -220,6 +246,12 @@ typedef struct ps_serializer_struct {
 
 #define PS_SERIALIZER_ENTRY(x) \
 	{ #x, PS_SERIALIZER_ENCODE_NAME(x), PS_SERIALIZER_DECODE_NAME(x) }
+
+/* default create id function */
+PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS);
+/* Dummy PS module functions */
+PHPAPI int php_session_validate_sid(PS_VALIDATE_SID_ARGS);
+PHPAPI int php_session_update_timestamp(PS_UPDATE_TIMESTAMP_ARGS);
 
 PHPAPI void session_adapt_url(const char *, size_t, char **, size_t *);
 
@@ -288,6 +320,9 @@ extern zend_class_entry *php_session_iface_entry;
 #define PS_SID_IFACE_NAME "SessionIdInterface"
 extern zend_class_entry *php_session_id_iface_entry;
 
+#define PS_UPDATE_TIMESTAMP_IFACE_NAME "SessionUpdateTimestampHandlerInterface"
+extern zend_class_entry *php_session_update_timestamp_iface_entry;
+
 extern PHP_METHOD(SessionHandler, open);
 extern PHP_METHOD(SessionHandler, close);
 extern PHP_METHOD(SessionHandler, read);
@@ -295,5 +330,7 @@ extern PHP_METHOD(SessionHandler, write);
 extern PHP_METHOD(SessionHandler, destroy);
 extern PHP_METHOD(SessionHandler, gc);
 extern PHP_METHOD(SessionHandler, create_sid);
+extern PHP_METHOD(SessionHandler, validateId);
+extern PHP_METHOD(SessionHandler, updateTimestamp);
 
 #endif

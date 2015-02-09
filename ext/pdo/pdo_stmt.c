@@ -1543,7 +1543,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 
 static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param) /* {{{ */
 {
-	struct pdo_bound_param_data param = {0};
+	struct pdo_bound_param_data param = {{{0}}};
 	zend_long param_type = PDO_PARAM_STR;
 	zval *parameter;
 
@@ -1582,7 +1582,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
    bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
 static PHP_METHOD(PDOStatement, bindValue)
 {
-	struct pdo_bound_param_data param = {0};
+	struct pdo_bound_param_data param = {{{0}}};
 	zend_long param_type = PDO_PARAM_STR;
 	zval *parameter;
 	PHP_STMT_GET_OBJ;
@@ -2254,7 +2254,7 @@ static zend_object *dbstmt_clone_obj(zval *zobject)
 	pdo_stmt_t *stmt;
 	pdo_stmt_t *old_stmt;
 
-	stmt = ecalloc(1, sizeof(pdo_stmt_t) + sizeof(zval) * (Z_OBJCE_P(zobject)->default_properties_count - 1));
+	stmt = ecalloc(1, sizeof(pdo_stmt_t) + zend_object_properties_size(Z_OBJCE_P(zobject)));
 	zend_object_std_init(&stmt->std, Z_OBJCE_P(zobject));
 	object_properties_init(&stmt->std, Z_OBJCE_P(zobject));
 
@@ -2357,7 +2357,7 @@ zend_object *pdo_dbstmt_new(zend_class_entry *ce)
 {
 	pdo_stmt_t *stmt;
 
-	stmt = ecalloc(1, sizeof(pdo_stmt_t) + sizeof(zval) * (ce->default_properties_count - 1));
+	stmt = ecalloc(1, sizeof(pdo_stmt_t) + zend_object_properties_size(ce));
 	zend_object_std_init(&stmt->std, ce);
 	object_properties_init(&stmt->std, ce);
 

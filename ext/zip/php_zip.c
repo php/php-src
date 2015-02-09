@@ -1014,7 +1014,7 @@ static zend_object *php_zip_object_new(zend_class_entry *class_type) /* {{{ */
 {
 	ze_zip_object *intern;
 
-	intern = ecalloc(1, sizeof(ze_zip_object) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(ze_zip_object) + zend_object_properties_size(class_type));
 	intern->prop_handler = &zip_prop_handlers;
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
@@ -1130,7 +1130,7 @@ static PHP_NAMED_FUNCTION(zif_zip_open)
 	rsrc_int->index_current = 0;
 	rsrc_int->num_files = zip_get_num_files(rsrc_int->za);
 
-	ZEND_REGISTER_RESOURCE(return_value, rsrc_int, le_zip_dir);
+	RETURN_RES(zend_register_resource(rsrc_int, le_zip_dir));
 }
 /* }}} */
 
@@ -1144,7 +1144,10 @@ static PHP_NAMED_FUNCTION(zif_zip_close)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zip) == FAILURE) {
 		return;
 	}
-	ZEND_FETCH_RESOURCE(z_rsrc, zip_rsrc *, zip, -1, le_zip_dir_name, le_zip_dir);
+
+	if ((z_rsrc = (zip_rsrc *)zend_fetch_resource(Z_RES_P(zip), le_zip_dir_name, le_zip_dir)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	/* really close the zip will break BC :-D */
 	zend_list_close(Z_RES_P(zip));
@@ -1164,7 +1167,9 @@ static PHP_NAMED_FUNCTION(zif_zip_read)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(rsrc_int, zip_rsrc *, zip_dp, -1, le_zip_dir_name, le_zip_dir);
+	if ((rsrc_int = (zip_rsrc *)zend_fetch_resource(Z_RES_P(zip_dp), le_zip_dir_name, le_zip_dir)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (rsrc_int && rsrc_int->za) {
 		if (rsrc_int->index_current >= rsrc_int->num_files) {
@@ -1183,7 +1188,7 @@ static PHP_NAMED_FUNCTION(zif_zip_read)
 		zr_rsrc->zf = zip_fopen_index(rsrc_int->za, rsrc_int->index_current, 0);
 		if (zr_rsrc->zf) {
 			rsrc_int->index_current++;
-			ZEND_REGISTER_RESOURCE(return_value, zr_rsrc, le_zip_entry);
+			RETURN_RES(zend_register_resource(zr_rsrc, le_zip_entry));
 		} else {
 			efree(zr_rsrc);
 			RETURN_FALSE;
@@ -1211,8 +1216,13 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_open)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(zr_rsrc, zip_read_rsrc *, zip_entry, -1, le_zip_entry_name, le_zip_entry);
-	ZEND_FETCH_RESOURCE(z_rsrc, zip_rsrc *, zip, -1, le_zip_dir_name, le_zip_dir);
+	if ((zr_rsrc = (zip_read_rsrc *)zend_fetch_resource(Z_RES_P(zip_entry), le_zip_entry_name, le_zip_entry)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	if ((z_rsrc = (zip_rsrc *)zend_fetch_resource(Z_RES_P(zip), le_zip_dir_name, le_zip_dir)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (zr_rsrc->zf != NULL) {
 		RETURN_TRUE;
@@ -1233,7 +1243,9 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_close)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(zr_rsrc, zip_read_rsrc *, zip_entry, -1, le_zip_entry_name, le_zip_entry);
+	if ((zr_rsrc = (zip_read_rsrc *)zend_fetch_resource(Z_RES_P(zip_entry), le_zip_entry_name, le_zip_entry)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	RETURN_BOOL(SUCCESS == zend_list_close(Z_RES_P(zip_entry)));
 }
@@ -1253,7 +1265,9 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_read)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(zr_rsrc, zip_read_rsrc *, zip_entry, -1, le_zip_entry_name, le_zip_entry);
+	if ((zr_rsrc = (zip_read_rsrc *)zend_fetch_resource(Z_RES_P(zip_entry), le_zip_entry_name, le_zip_entry)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (len <= 0) {
 		len = 1024;
@@ -1285,7 +1299,9 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(zr_rsrc, zip_read_rsrc *, zip_entry, -1, le_zip_entry_name, le_zip_entry);
+	if ((zr_rsrc = (zip_read_rsrc *)zend_fetch_resource(Z_RES_P(zip_entry), le_zip_entry_name, le_zip_entry)) == NULL) {
+		RETURN_FALSE;
+	}
 
 	if (!zr_rsrc->zf) {
 		RETURN_FALSE;

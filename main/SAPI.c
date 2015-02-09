@@ -744,13 +744,8 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 		/* new line/NUL character safety check */
 		uint i;
 		for (i = 0; i < header_line_len; i++) {
-			/* RFC 2616 allows new lines if followed by SP or HT */
-			int illegal_break =
-					(header_line[i+1] != ' ' && header_line[i+1] != '\t')
-					&& (
-						header_line[i] == '\n'
-						|| (header_line[i] == '\r' && header_line[i+1] != '\n'));
-			if (illegal_break) {
+			/* RFC 7230 ch. 3.2.4 deprecates folding support */
+			if (header_line[i] == '\n' || header_line[i] == '\r') {
 				efree(header_line);
 				sapi_module.sapi_error(E_WARNING, "Header may not contain "
 						"more than a single header, new line detected");

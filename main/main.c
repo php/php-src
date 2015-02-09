@@ -423,8 +423,6 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-	} else {
-		PG(internal_encoding) = SG(default_charset);
 	}
 	return SUCCESS;
 }
@@ -436,8 +434,6 @@ static PHP_INI_MH(OnUpdateInputEncoding)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-	} else {
-		PG(input_encoding) = SG(default_charset);
 	}
 	return SUCCESS;
 }
@@ -449,8 +445,6 @@ static PHP_INI_MH(OnUpdateOutputEncoding)
 {
 	if (new_value) {
 		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-	} else {
-		PG(output_encoding) = SG(default_charset);
 	}
 	return SUCCESS;
 }
@@ -761,7 +755,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	buffer_len = (int)vspprintf(&buffer, 0, format, args);
 
 	if (PG(html_errors)) {
-		replace_buffer = php_escape_html_entities(buffer, buffer_len, 0, ENT_COMPAT, NULL);
+		replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, NULL);
 		efree(buffer);
 		buffer = replace_buffer->val;
 		buffer_len = (int)replace_buffer->len;
@@ -820,7 +814,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	}
 
 	if (PG(html_errors)) {
-		replace_origin = php_escape_html_entities(origin, origin_len, 0, ENT_COMPAT, NULL);
+		replace_origin = php_escape_html_entities((unsigned char*)origin, origin_len, 0, ENT_COMPAT, NULL);
 		efree(origin);
 		origin = replace_origin->val;
 	}
@@ -1136,7 +1130,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 				if (PG(html_errors)) {
 					if (type == E_ERROR || type == E_PARSE) {
-						zend_string *buf = php_escape_html_entities(buffer, buffer_len, 0, ENT_COMPAT, NULL);
+						zend_string *buf = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, NULL);
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf->val, error_filename, error_lineno, STR_PRINT(append_string));
 						zend_string_free(buf);
 					} else {
@@ -2255,6 +2249,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	zuv.html_errors = 1;
 	zuv.import_use_extension = ".php";
+	zuv.import_use_extension_length = (uint)strlen(zuv.import_use_extension);
 	php_startup_auto_globals();
 	zend_set_utility_values(&zuv);
 	php_startup_sapi_content_types();
@@ -2472,7 +2467,7 @@ void php_module_shutdown(void)
 PHPAPI int php_execute_script(zend_file_handle *primary_file)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
-	zend_file_handle prepend_file = {0}, append_file = {0};
+	zend_file_handle prepend_file = {{0}, NULL, NULL, 0, 0}, append_file = {{0}, NULL, NULL, 0, 0};
 #if HAVE_BROKEN_GETCWD
 	volatile int old_cwd_fd = -1;
 #else
@@ -2631,7 +2626,7 @@ PHPAPI int php_handle_auth_data(const char *auth)
 		char *pass;
 		zend_string *user;
 
-		user = php_base64_decode(auth + 6, strlen(auth) - 6);
+		user = php_base64_decode((const unsigned char*)auth + 6, strlen(auth) - 6);
 		if (user) {
 			pass = strchr(user->val, ':');
 			if (pass) {

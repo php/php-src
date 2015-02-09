@@ -437,12 +437,13 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(uint32_t var, const zend_e
 	if (EXPECTED(Z_TYPE_P(ret) == IS_INDIRECT)) {
 		*should_free = NULL;
 		ret = Z_INDIRECT_P(ret);
-	} else {
+	} else if (!Z_REFCOUNTED_P(ret)) {
+		*should_free = ret; /* immutable array may be converted to regular */
+	} else if (Z_REFCOUNT_P(ret) == 1) {
 		*should_free = ret;
-		if (Z_REFCOUNTED_P(ret) && Z_REFCOUNT_P(ret) > 1) {
-			*should_free = NULL;
-			Z_DELREF_P(ret);
-		}
+	} else {
+		*should_free = NULL;
+		Z_DELREF_P(ret);
 	}
 	return ret;
 }
@@ -751,6 +752,130 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t ar
 	}
 }
 
+ZEND_API void zend_verify_return_error(int error_type, const zend_function *zf, const char *need_msg, const char *need_kind, const char *returned_msg, const char *returned_kind)
+{
+	const char *fname = zf->common.function_name->val;
+	const char *fsep;
+	const char *fclass;
+
+	if (zf->common.scope) {
+		fsep =  "::";
+		fclass = zf->common.scope->name->val;
+	} else {
+		fsep =  "";
+		fclass = "";
+	}
+
+	zend_error(error_type,
+		"Return value of %s%s%s() must %s%s, %s%s returned",
+		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
+}
+
+#if ZEND_DEBUG
+static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
+{
+	zend_arg_info *ret_info = zf->common.arg_info - 1;
+	char *need_msg;
+	zend_class_entry *ce;
+
+	if (ret_info->class_name) {
+		char *class_name;
+
+		if (Z_TYPE_P(ret) == IS_OBJECT) {
+			need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info *)ret_info, &class_name, &ce);
+			if (!ce || !instanceof_function(Z_OBJCE_P(ret), ce)) {
+				zend_verify_return_error(E_CORE_ERROR, zf, need_msg, class_name, "instance of ", Z_OBJCE_P(ret)->name->val);
+				return 0;
+			}
+		} else if (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null) {
+			need_msg = zend_verify_internal_arg_class_kind((zend_internal_arg_info *)ret_info, &class_name, &ce);
+			zend_verify_return_error(E_CORE_ERROR, zf, need_msg, class_name, zend_zval_type_name(ret), "");
+			return 0;
+		}
+	} else if (ret_info->type_hint) {
+		if (ret_info->type_hint == IS_ARRAY) {
+			if (Z_TYPE_P(ret) != IS_ARRAY && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
+				zend_verify_return_error(E_CORE_ERROR, zf, "be of the type array", "", zend_zval_type_name(ret), "");
+				return 0;
+			}
+		} else if (ret_info->type_hint == IS_CALLABLE) {
+			if (!zend_is_callable(ret, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
+				zend_verify_return_error(E_CORE_ERROR, zf, "be callable", "", zend_zval_type_name(ret), "");
+				return 0;
+			}
+#if ZEND_DEBUG
+		} else {
+			zend_error(E_CORE_ERROR, "Unknown typehint");
+			return 0;
+#endif
+		}
+	}
+	return 1;
+}
+#endif
+
+static void zend_verify_return_type(zend_function *zf, zval *ret)
+{
+	zend_arg_info *ret_info = zf->common.arg_info - 1;
+	char *need_msg;
+	zend_class_entry *ce;
+
+	if (ret_info->class_name) {
+		char *class_name;
+
+		if (Z_TYPE_P(ret) == IS_OBJECT) {
+			need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
+			if (!ce || !instanceof_function(Z_OBJCE_P(ret), ce)) {
+				zend_verify_return_error(E_RECOVERABLE_ERROR, zf, need_msg, class_name, "instance of ", Z_OBJCE_P(ret)->name->val);
+			}
+		} else if (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null) {
+			need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
+			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, need_msg, class_name, zend_zval_type_name(ret), "");
+		}
+	} else if (ret_info->type_hint) {
+		if (ret_info->type_hint == IS_ARRAY) {
+			if (Z_TYPE_P(ret) != IS_ARRAY && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
+				zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type array", "", zend_zval_type_name(ret), "");
+			}
+		} else if (ret_info->type_hint == IS_CALLABLE) {
+			if (!zend_is_callable(ret, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
+				zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be callable", "", zend_zval_type_name(ret), "");
+			}
+#if ZEND_DEBUG
+		} else {
+			zend_error(E_ERROR, "Unknown typehint");
+#endif
+		}
+	}
+}
+
+static inline int zend_verify_missing_return_type(zend_function *zf)
+{
+	zend_arg_info *ret_info = zf->common.arg_info - 1;
+	char *need_msg;
+	zend_class_entry *ce;
+
+	if (ret_info->class_name) {
+		char *class_name;
+
+		need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
+		zend_verify_return_error(E_RECOVERABLE_ERROR, zf, need_msg, class_name, "none", "");
+		return 0;
+	} else if (ret_info->type_hint) {
+		if (ret_info->type_hint == IS_ARRAY) {
+			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type array", "", "none", "");
+		} else if (ret_info->type_hint == IS_CALLABLE) {
+			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be callable", "", "none", "");
+#if ZEND_DEBUG
+		} else {
+			zend_error(E_ERROR, "Unknown typehint");
+#endif
+		}
+		return 0;
+	}
+	return 1;
+}
+
 static zend_always_inline void zend_assign_to_object(zval *retval, zval *object, uint32_t object_op_type, zval *property_name, uint32_t property_op_type, int value_type, znode_op value_op, const zend_execute_data *execute_data, void **cache_slot)
 {
 	zend_free_op free_value;
@@ -925,7 +1050,7 @@ static zend_always_inline void zend_assign_to_object_dim(zval *retval, zval *obj
 static void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value, zval *retval, int (*binary_op)(zval *result, zval *op1, zval *op2))
 {
 	zval *z;
-	zval rv;
+	zval rv, res;
 
 	if (Z_OBJ_HT_P(object)->read_dimension &&
 		(z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_R, &rv)) != NULL) {
@@ -939,14 +1064,15 @@ static void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *va
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		ZVAL_DEREF(z);
-		SEPARATE_ZVAL_NOREF(z);
-		binary_op(z, z, value);
-		Z_OBJ_HT_P(object)->write_dimension(object, property, z);
-		if (retval) {
-			ZVAL_COPY(retval, z);
+		binary_op(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value);
+		Z_OBJ_HT_P(object)->write_dimension(object, property, &res);
+		if (z == &rv) {
+			zval_ptr_dtor(&rv);
 		}
-		zval_ptr_dtor(z);
+		if (retval) {
+			ZVAL_COPY(retval, &res);
+		}
+		zval_ptr_dtor(&res);
 	} else {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
 		if (retval) {

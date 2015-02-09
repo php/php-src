@@ -50,5 +50,6 @@ aclocal.m4: configure.in acinclude.m4
 
 configure: aclocal.m4 configure.in $(config_m4_files)
 	@echo rebuilding $@
-	$(PHP_AUTOCONF) $(SUPPRESS_WARNINGS)
+	@rm -f $@
+	$(PHP_AUTOCONF) -f $(SUPPRESS_WARNINGS)
 

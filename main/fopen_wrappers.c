@@ -638,6 +638,9 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 	}
 
 	filename_length = (int)strlen(filename);
+#ifndef PHP_WIN32
+	(void) filename_length;
+#endif
 
 	/* Relative path open */
 	if ((*filename == '.')

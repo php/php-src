@@ -222,6 +222,9 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
 	lex_state->input_filter = SCNG(input_filter);
 	lex_state->output_filter = SCNG(output_filter);
 	lex_state->script_encoding = SCNG(script_encoding);
+
+	lex_state->ast = CG(ast);
+	lex_state->ast_arena = CG(ast_arena);
 }
 
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
@@ -256,6 +259,9 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 	SCNG(input_filter) = lex_state->input_filter;
 	SCNG(output_filter) = lex_state->output_filter;
 	SCNG(script_encoding) = lex_state->script_encoding;
+
+	CG(ast) = lex_state->ast;
+	CG(ast_arena) = lex_state->ast_arena;
 
 	RESET_DOC_COMMENT();
 }

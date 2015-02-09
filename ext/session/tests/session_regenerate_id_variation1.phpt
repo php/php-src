@@ -31,12 +31,16 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_regenerate_id() : variation ***
 string(0) ""
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 string(0) ""
 bool(true)
 bool(true)
 string(%d) "%s"
 bool(true)
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 string(0) ""
 Done

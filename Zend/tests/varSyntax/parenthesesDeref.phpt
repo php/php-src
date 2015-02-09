@@ -1,5 +1,7 @@
 --TEST--
 Dereferencing expression parentheses
+--INI--
+zend.enable_gc=1
 --FILE--
 <?php
 

@@ -139,16 +139,16 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	}
 
 #define FIND_SDL_PROPERTY(ss,tmp) (tmp = zend_hash_str_find(Z_OBJPROP_P(ss), "sdl", sizeof("sdl")-1))
-#define FETCH_SDL_RES(ss,tmp) ss = (sdlPtr) zend_fetch_resource(tmp, -1, "sdl", NULL, 1, le_sdl)
+#define FETCH_SDL_RES(ss,tmp) ss = (sdlPtr) zend_fetch_resource_ex(tmp, "sdl", le_sdl)
 
 #define FIND_TYPEMAP_PROPERTY(ss,tmp) (tmp = zend_hash_str_find(Z_OBJPROP_P(ss), "typemap", sizeof("typemap")-1))
-#define FETCH_TYPEMAP_RES(ss,tmp) ss = (HashTable*) zend_fetch_resource(tmp, -1, "typemap", NULL, 1, le_typemap)
+#define FETCH_TYPEMAP_RES(ss,tmp) ss = (HashTable*) zend_fetch_resource_ex(tmp, "typemap", le_typemap)
 
 #define FETCH_THIS_SERVICE(ss) \
 	{ \
 		zval *tmp; \
 		if ((tmp = zend_hash_str_find(Z_OBJPROP_P(getThis()),"service", sizeof("service")-1)) != NULL) { \
-			ss = (soapServicePtr)zend_fetch_resource(tmp, -1, "service", NULL, 1, le_service); \
+			ss = (soapServicePtr)zend_fetch_resource_ex(tmp, "service", le_service); \
 		} else { \
 	                php_error_docref(NULL, E_WARNING, "Can not fetch service object"); \
 			SOAP_SERVER_END_CODE(); \
@@ -937,7 +937,7 @@ PHP_METHOD(SoapFault, SoapFault)
    SoapFault constructor */
 PHP_METHOD(SoapFault, __toString)
 {
-	zval *faultcode, *faultstring, *file, *line, trace;
+	zval *faultcode, *faultstring, *file, *line, trace, rv1, rv2, rv3, rv4;
 	zend_string *str;
 	zend_fcall_info fci;
 	zval *this_ptr;
@@ -947,10 +947,10 @@ PHP_METHOD(SoapFault, __toString)
 	}
 
 	this_ptr = getThis();
-	faultcode   = zend_read_property(soap_fault_class_entry, this_ptr, "faultcode", sizeof("faultcode")-1, 1);
-	faultstring = zend_read_property(soap_fault_class_entry, this_ptr, "faultstring", sizeof("faultstring")-1, 1);
-	file = zend_read_property(soap_fault_class_entry, this_ptr, "file", sizeof("file")-1, 1);
-	line = zend_read_property(soap_fault_class_entry, this_ptr, "line", sizeof("line")-1, 1);
+	faultcode   = zend_read_property(soap_fault_class_entry, this_ptr, "faultcode", sizeof("faultcode")-1, 1, &rv1);
+	faultstring = zend_read_property(soap_fault_class_entry, this_ptr, "faultstring", sizeof("faultstring")-1, 1, &rv2);
+	file = zend_read_property(soap_fault_class_entry, this_ptr, "file", sizeof("file")-1, 1, &rv3);
+	line = zend_read_property(soap_fault_class_entry, this_ptr, "line", sizeof("line")-1, 1, &rv4);
 
 	fci.size = sizeof(fci);
 	fci.function_table = &Z_OBJCE_P(getThis())->function_table;
@@ -1244,7 +1244,7 @@ PHP_METHOD(SoapServer, SoapServer)
 		service->typemap = soap_create_typemap(service->sdl, typemap_ht);
 	}
 
-	res = zend_register_resource(NULL, service, le_service);
+	res = zend_register_resource(service, le_service);
 	add_property_resource(getThis(), "service", res);
 
 	SOAP_SERVER_END_CODE();
@@ -2251,7 +2251,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			if (Z_OBJ(SOAP_GLOBAL(error_object)) &&
 			    instanceof_function(Z_OBJCE(SOAP_GLOBAL(error_object)), soap_server_class_entry) &&
 		        (tmp = zend_hash_str_find(Z_OBJPROP(SOAP_GLOBAL(error_object)), "service", sizeof("service")-1)) != NULL &&
-				(service = (soapServicePtr)zend_fetch_resource(tmp, -1, "service", NULL, 1, le_service)) &&
+				(service = (soapServicePtr)zend_fetch_resource_ex(tmp, "service", le_service)) &&
 				!service->send_errors) {
 				strcpy(buffer, "Internal Error");
 			} else {
@@ -2546,7 +2546,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		SOAP_GLOBAL(soap_version) = soap_version;
 
 		sdl = get_sdl(this_ptr, Z_STRVAL_P(wsdl), cache_wsdl);
-		res = zend_register_resource(NULL, sdl, le_sdl);
+		res = zend_register_resource(sdl, le_sdl);
 
 		add_property_resource(this_ptr, "sdl", res);
 
@@ -2558,7 +2558,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		if (typemap) {
 			zend_resource *res;
 
-			res = zend_register_resource(NULL, typemap, le_typemap);
+			res = zend_register_resource(typemap, le_typemap);
 			add_property_resource(this_ptr, "typemap", res);
 		}
 	}

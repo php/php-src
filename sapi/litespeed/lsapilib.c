@@ -1442,7 +1442,7 @@ int LSAPI_ReqBodyGetLine_r( LSAPI_Request * pReq, char * pBuf, size_t bufLen, in
     char * pBufCur = pBuf;
     char * pCur;
     char * p;
-    if (!pReq || (pReq->m_fd ==-1) ||( !pBuf )||(bufLen < 0 )|| !getLF )
+    if (!pReq || (pReq->m_fd ==-1) ||( !pBuf )|| !getLF )
         return -1;
     *getLF = 0;
     while( (left = pBufEnd - pBufCur ) > 0 )
@@ -1486,7 +1486,7 @@ ssize_t LSAPI_ReadReqBody_r( LSAPI_Request * pReq, char * pBuf, size_t bufLen )
     ssize_t len;
     off_t total;
     /* char *pOldBuf = pBuf; */
-    if (!pReq || (pReq->m_fd ==-1) || ( !pBuf )||(bufLen < 0 ))
+    if (!pReq || (pReq->m_fd ==-1) || ( !pBuf ))
         return -1;
 
     total = pReq->m_reqBodyLen - pReq->m_reqBodyRead;
@@ -3376,7 +3376,7 @@ void lsapi_MD5Final(unsigned char digest[16], struct lsapi_MD5Context *ctx)
     lsapi_MD5Transform(ctx->buf, (uint32 *) ctx->in);
     byteReverse((unsigned char *) ctx->buf, 4);
     memmove(digest, ctx->buf, 16);
-    memset(ctx, 0, sizeof(ctx));        /* In case it's sensitive */
+    memset(ctx, 0, sizeof(*ctx));        /* In case it's sensitive */
 }
 
 /* The four core functions - F1 is optimized somewhat */

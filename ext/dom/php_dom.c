@@ -1079,7 +1079,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 
 static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool hash_copy) /* {{{ */
 {
-	dom_object *intern = ecalloc(1, sizeof(dom_object) + sizeof(zval) * (class_type->default_properties_count - 1));
+	dom_object *intern = ecalloc(1, sizeof(dom_object) + zend_object_properties_size(class_type));
 
 	zend_class_entry *base_class = class_type;
 	while (base_class->type != ZEND_INTERNAL_CLASS && base_class->parent != NULL) {
@@ -1110,7 +1110,7 @@ zend_object *dom_objects_new(zend_class_entry *class_type)
 /* {{{ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type) */
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 {
-	dom_xpath_object *intern = ecalloc(1, sizeof(dom_xpath_object) + sizeof(zval) * (class_type->default_properties_count - 1));
+	dom_xpath_object *intern = ecalloc(1, sizeof(dom_xpath_object) + zend_object_properties_size(class_type));
 
 	ALLOC_HASHTABLE(intern->registered_phpfunctions);
 	zend_hash_init(intern->registered_phpfunctions, 0, NULL, ZVAL_PTR_DTOR, 0);
@@ -1560,11 +1560,12 @@ zval *dom_nodelist_read_dimension(zval *object, zval *offset, int type, zval *rv
 int dom_nodelist_has_dimension(zval *object, zval *member, int check_empty)
 {
 	zend_long offset = zval_get_long(member);
+	zval rv;
 
 	if (offset < 0) {
 		return 0;
 	} else {
-		zval *length = zend_read_property(Z_OBJCE_P(object), object, "length", sizeof("length") - 1, 0);
+		zval *length = zend_read_property(Z_OBJCE_P(object), object, "length", sizeof("length") - 1, 0, &rv);
 
 		return length && offset < Z_LVAL_P(length);
 	}

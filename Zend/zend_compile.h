@@ -35,6 +35,14 @@
 
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
+#define MAKE_NOP(opline) do { \
+	opline->opcode = ZEND_NOP; \
+	memset(&opline->result, 0, sizeof(opline->result)); \
+	memset(&opline->op1, 0, sizeof(opline->op1)); \
+	memset(&opline->op2, 0, sizeof(opline->op2)); \
+	opline->result_type = opline->op1_type = opline->op2_type = IS_UNUSED; \
+} while (0)
+
 #define RESET_DOC_COMMENT() do { \
 	if (CG(doc_comment)) { \
 		zend_string_release(CG(doc_comment)); \
@@ -234,6 +242,9 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
+/* class has magic methods __get/__set/__unset/__isset that use guards */
+#define ZEND_ACC_USE_GUARDS				0x1000000
+
 /* function has arguments with type hinting */
 #define ZEND_ACC_HAS_TYPE_HINTS			0x10000000
 
@@ -242,6 +253,9 @@ typedef struct _zend_try_catch_element {
 
 /* internal function is allocated at arena */
 #define ZEND_ACC_ARENA_ALLOCATED		0x20000000
+
+/* Function has a return type hint (or class has such non-private function) */
+#define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
 
 #define ZEND_CE_IS_TRAIT(ce) (((ce)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)
 
@@ -288,13 +302,14 @@ typedef struct _zend_arg_info {
 /* the following structure repeats the layout of zend_internal_arg_info,
  * but its fields have different meaning. It's used as the first element of
  * arg_info array to define properties of internal functions.
+ * It's also used for return type hinting.
  */
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
-	const char *_class_name;
-	zend_uchar _type_hint;
+	const char *class_name;
+	zend_uchar type_hint;
 	zend_bool return_reference;
-	zend_bool _allow_null;
+	zend_bool allow_null;
 	zend_bool _is_variadic;
 } zend_internal_function_info;
 
@@ -858,8 +873,7 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 
 
 #define ZEND_RETURNS_FUNCTION 1<<0
-#define ZEND_RETURNS_NEW      1<<1
-#define ZEND_RETURNS_VALUE    1<<2
+#define ZEND_RETURNS_VALUE    1<<1
 
 #define ZEND_FAST_RET_TO_CATCH		1
 #define ZEND_FAST_RET_TO_FINALLY	2

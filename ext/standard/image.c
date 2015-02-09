@@ -367,7 +367,7 @@ static unsigned short php_read2(php_stream * stream)
 	unsigned char a[2];
 
 	/* return 0 if we couldn't read enough data */
-	if((php_stream_read(stream, a, sizeof(a))) < sizeof(a)) return 0;
+	if((php_stream_read(stream, (char *) a, sizeof(a))) < sizeof(a)) return 0;
 
 	return (((unsigned short)a[0]) << 8) + ((unsigned short)a[1]);
 }
@@ -604,7 +604,6 @@ static unsigned int php_read4(php_stream * stream)
 static struct gfxinfo *php_handle_jpc(php_stream * stream)
 {
 	struct gfxinfo *result = NULL;
-	unsigned short dummy_short;
 	int highest_bit_depth, bit_depth;
 	unsigned char first_marker_id;
 	unsigned int i;
@@ -627,8 +626,8 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream)
 
 	result = (struct gfxinfo *)ecalloc(1, sizeof(struct gfxinfo));
 
-	dummy_short = php_read2(stream); /* Lsiz */
-	dummy_short = php_read2(stream); /* Rsiz */
+	php_read2(stream); /* Lsiz */
+	php_read2(stream); /* Rsiz */
 	result->width = php_read4(stream); /* Xsiz */
 	result->height = php_read4(stream); /* Ysiz */
 
@@ -647,7 +646,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream)
 #endif
 
 	result->channels = php_read2(stream); /* Csiz */
-	if (result->channels == 0 && php_stream_eof(stream) || result->channels > 256) {
+	if ((result->channels == 0 && php_stream_eof(stream)) || result->channels > 256) {
 		efree(result);
 		return NULL;
 	}
@@ -831,7 +830,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, zval *info, int mot
 	/* now we have the directory we can look how long it should be */
 	ifd_size = dir_size;
 	for(i=0;i<num_entries;i++) {
-		dir_entry 	 = ifd_data+2+i*12;
+		dir_entry 	 = (unsigned char *) ifd_data+2+i*12;
 		entry_tag    = php_ifd_get16u(dir_entry+0, motorola_intel);
 		entry_type   = php_ifd_get16u(dir_entry+2, motorola_intel);
 		switch(entry_type) {
@@ -889,10 +888,10 @@ static struct gfxinfo *php_handle_iff(php_stream * stream)
 	int size;
 	short width, height, bits;
 
-	if (php_stream_read(stream, a, 8) != 8) {
+	if (php_stream_read(stream, (char *) a, 8) != 8) {
 		return NULL;
 	}
-	if (strncmp(a+4, "ILBM", 4) && strncmp(a+4, "PBM ", 4)) {
+	if (strncmp((char *) a+4, "ILBM", 4) && strncmp((char *) a+4, "PBM ", 4)) {
 		return NULL;
 	}
 
@@ -1088,7 +1087,7 @@ static struct gfxinfo *php_handle_ico(php_stream * stream)
 	unsigned char dim[16];
 	int num_icons = 0;
 
-	if (php_stream_read(stream, dim, 2) != 2)
+	if (php_stream_read(stream, (char *) dim, 2) != 2)
 		return NULL;
 
 	num_icons = (((unsigned int)dim[1]) << 8) + ((unsigned int) dim[0]);
@@ -1100,7 +1099,7 @@ static struct gfxinfo *php_handle_ico(php_stream * stream)
 
 	while (num_icons > 0)
 	{
-		if (php_stream_read(stream, dim, sizeof(dim)) != sizeof(dim))
+		if (php_stream_read(stream, (char *) dim, sizeof(dim)) != sizeof(dim))
 			break;
 
 		if ((((unsigned int)dim[7]) <<  8) +  ((unsigned int)dim[6]) >= result->bits)

@@ -370,18 +370,32 @@ stop:
 	ctx->buf.s->len = rest;
 }
 
-char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen)
+
+PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen, int urlencode)
 {
 	char *result;
 	smart_str surl = {0};
 	smart_str buf = {0};
 	smart_str url_app = {0};
+	zend_string *encoded;
 
-	smart_str_setl(&surl, url, urllen);
+	smart_str_appendl(&surl, url, urllen);
 
-	smart_str_appends(&url_app, name);
+	if (urlencode) {
+		encoded = php_raw_url_encode(name, strlen(name));
+		smart_str_appendl(&url_app, encoded->val, encoded->len);
+		zend_string_free(encoded);
+	} else {
+		smart_str_appends(&url_app, name);
+	}
 	smart_str_appendc(&url_app, '=');
-	smart_str_appends(&url_app, value);
+	if (urlencode) {
+		encoded = php_raw_url_encode(value, strlen(value));
+		smart_str_appendl(&url_app, encoded->val, encoded->len);
+		zend_string_free(encoded);
+	} else {
+		smart_str_appends(&url_app, value);
+	}
 
 	append_modified_url(&surl, &buf, &url_app, PG(arg_separator).output);
 
@@ -480,7 +494,8 @@ static void php_url_scanner_output_handler(char *output, size_t output_len, char
 
 PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, size_t value_len, int urlencode)
 {
-	smart_str val = {0};
+	smart_str sname = {0};
+	smart_str svalue = {0};
 	zend_string *encoded;
 
 	if (!BG(url_adapt_state_ex).active) {
@@ -489,32 +504,34 @@ PHPAPI int php_url_scanner_add_var(char *name, size_t name_len, char *value, siz
 		BG(url_adapt_state_ex).active = 1;
 	}
 
-
 	if (BG(url_adapt_state_ex).url_app.s && BG(url_adapt_state_ex).url_app.s->len != 0) {
 		smart_str_appends(&BG(url_adapt_state_ex).url_app, PG(arg_separator).output);
 	}
 
 	if (urlencode) {
-		encoded = php_url_encode(value, value_len);
-		smart_str_setl(&val, encoded->val, encoded->len);
+		encoded = php_raw_url_encode(name, name_len);
+		smart_str_appendl(&sname, encoded->val, encoded->len);
+		zend_string_free(encoded);
+		encoded = php_raw_url_encode(value, value_len);
+		smart_str_appendl(&svalue, encoded->val, encoded->len);
+		zend_string_free(encoded);
 	} else {
-		smart_str_setl(&val, value, value_len);
+		smart_str_appendl(&sname, name, name_len);
+		smart_str_appendl(&svalue, value, value_len);
 	}
 
-	smart_str_appendl(&BG(url_adapt_state_ex).url_app, name, name_len);
+	smart_str_append_smart_str(&BG(url_adapt_state_ex).url_app, &sname);
 	smart_str_appendc(&BG(url_adapt_state_ex).url_app, '=');
-	smart_str_append_smart_str(&BG(url_adapt_state_ex).url_app, &val);
+	smart_str_append_smart_str(&BG(url_adapt_state_ex).url_app, &svalue);
 
 	smart_str_appends(&BG(url_adapt_state_ex).form_app, "<input type=\"hidden\" name=\"");
-	smart_str_appendl(&BG(url_adapt_state_ex).form_app, name, name_len);
+	smart_str_append_smart_str(&BG(url_adapt_state_ex).form_app, &sname);
 	smart_str_appends(&BG(url_adapt_state_ex).form_app, "\" value=\"");
-	smart_str_append_smart_str(&BG(url_adapt_state_ex).form_app, &val);
+	smart_str_append_smart_str(&BG(url_adapt_state_ex).form_app, &svalue);
 	smart_str_appends(&BG(url_adapt_state_ex).form_app, "\" />");
 
-	if (urlencode) {
-		zend_string_free(encoded);
-	}
-	smart_str_free(&val);
+	smart_str_free(&sname);
+	smart_str_free(&svalue);
 
 	return SUCCESS;
 }

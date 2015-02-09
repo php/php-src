@@ -120,7 +120,7 @@ SLJIT_API_FUNC_ATTRIBUTE SLJIT_CONST char *sljit_get_platform_name(void)
 typedef sljit_uw sljit_ins;
 
 struct jit_instr {
-	const struct tilegx_opcode* opcode;
+	const struct tilegx_opcode* opcode; 
 	tilegx_pipeline pipe;
 	unsigned long input_registers;
 	unsigned long output_registers;
@@ -896,7 +896,7 @@ static sljit_si push_jr_buffer(struct sljit_compiler *compiler, tilegx_mnemonic 
 	inst_buf[inst_buf_index].output_registers = 0;
 	inst_buf[inst_buf_index].line = line;
 	inst_buf_index++;
-
+ 
 	return flush_buffer(compiler);
 }
 
@@ -1173,16 +1173,21 @@ static sljit_si emit_const_64(struct sljit_compiler *compiler, sljit_si dst_ar, 
 	return SHL16INSLI(reg_map[dst_ar], reg_map[dst_ar], imm);
 }
 
-SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compiler, sljit_si args, sljit_si scratches, sljit_si saveds, sljit_si local_size)
+SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compiler,
+	sljit_si options, sljit_si args, sljit_si scratches, sljit_si saveds,
+	sljit_si fscratches, sljit_si fsaveds, sljit_si local_size)
 {
 	sljit_ins base;
 	sljit_ins bundle = 0;
 
 	CHECK_ERROR();
-	check_sljit_emit_enter(compiler, args, scratches, saveds, local_size);
+	check_sljit_emit_enter(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size);
 
+	compiler->options = options;
 	compiler->scratches = scratches;
 	compiler->saveds = saveds;
+	compiler->fscratches = fscratches;
+	compiler->fsaveds = fsaveds;
 #if (defined SLJIT_DEBUG && SLJIT_DEBUG)
 	compiler->logical_local_size = local_size;
 #endif
@@ -1233,13 +1238,18 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_enter(struct sljit_compiler *compil
 	return SLJIT_SUCCESS;
 }
 
-SLJIT_API_FUNC_ATTRIBUTE void sljit_set_context(struct sljit_compiler *compiler, sljit_si args, sljit_si scratches, sljit_si saveds, sljit_si local_size)
+SLJIT_API_FUNC_ATTRIBUTE void sljit_set_context(struct sljit_compiler *compiler,
+	sljit_si options, sljit_si args, sljit_si scratches, sljit_si saveds,
+	sljit_si fscratches, sljit_si fsaveds, sljit_si local_size)
 {
 	CHECK_ERROR_VOID();
-	check_sljit_set_context(compiler, args, scratches, saveds, local_size);
+	check_sljit_set_context(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size);
 
+	compiler->options = options;
 	compiler->scratches = scratches;
 	compiler->saveds = saveds;
+	compiler->fscratches = fscratches;
+	compiler->fsaveds = fsaveds;
 #if (defined SLJIT_DEBUG && SLJIT_DEBUG)
 	compiler->logical_local_size = local_size;
 #endif
@@ -1817,7 +1827,7 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 				else {
 					/* Rare ocasion. */
 					FAIL_IF(ADD(TMP_EREG2, reg_map[src1], ZERO));
-
+	
 					overflow_ra = TMP_EREG2;
 				}
 			}
@@ -1843,7 +1853,7 @@ static SLJIT_INLINE sljit_si emit_single_op(struct sljit_compiler *compiler, slj
 				if (src1 != dst)
 					overflow_ra = reg_map[src1];
 				else {
-					/* Rare occasion. */
+					/* Rare ocasion. */
 					FAIL_IF(ADD(TMP_EREG2, reg_map[src1], ZERO));
 					overflow_ra = TMP_EREG2;
 				}
@@ -2370,7 +2380,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_ijump(struct sljit_compiler *compil
 				FAIL_IF(emit_op(compiler, SLJIT_MOV, WORD_DATA, TMP_REG2, 0, TMP_REG1, 0, src, srcw));
 			}
 
-			FAIL_IF(ADD_SOLO(0, reg_map[SLJIT_SCRATCH_REG1], ZERO));
+			FAIL_IF(ADD_SOLO(0, reg_map[SLJIT_R0], ZERO));
 
 			FAIL_IF(ADDI_SOLO(54, 54, -16));
 
@@ -2381,7 +2391,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_si sljit_emit_ijump(struct sljit_compiler *compil
 
 		/* Register input. */
 		if (type >= SLJIT_CALL1)
-			FAIL_IF(ADD_SOLO(0, reg_map[SLJIT_SCRATCH_REG1], ZERO));
+			FAIL_IF(ADD_SOLO(0, reg_map[SLJIT_R0], ZERO));
 
 		FAIL_IF(ADD_SOLO(reg_map[PIC_ADDR_REG], reg_map[src_r], ZERO));
 
@@ -2511,7 +2521,7 @@ SLJIT_API_FUNC_ATTRIBUTE struct sljit_jump * sljit_emit_jump(struct sljit_compil
 		SLJIT_ASSERT(reg_map[PIC_ADDR_REG] == 16 && PIC_ADDR_REG == TMP_REG2);
 		/* Cannot be optimized out if type is >= CALL0. */
 		jump->flags |= IS_JAL | (type >= SLJIT_CALL0 ? SLJIT_REWRITABLE_JUMP : 0);
-		PTR_FAIL_IF(ADD_SOLO(0, reg_map[SLJIT_SCRATCH_REG1], ZERO));
+		PTR_FAIL_IF(ADD_SOLO(0, reg_map[SLJIT_R0], ZERO));
 		jump->addr = compiler->size;
 		PTR_FAIL_IF(JALR_SOLO(TMP_REG2_mapped));
 	}

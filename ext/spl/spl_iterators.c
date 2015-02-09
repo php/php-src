@@ -948,7 +948,7 @@ static zend_object *spl_RecursiveIteratorIterator_new_ex(zend_class_entry *class
 {
 	spl_recursive_it_object *intern;
 
-	intern = ecalloc(1, sizeof(spl_recursive_it_object) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(spl_recursive_it_object) + zend_object_properties_size(class_type));
 
 	if (init_prefix) {
 		smart_str_appendl(&intern->prefix[0], "",    0);
@@ -2031,7 +2031,7 @@ SPL_METHOD(RegexIterator, accept)
 	char *subject;
 	zend_string *result;
 	int subject_len, use_copy, count = 0;
-	zval *subject_ptr, subject_copy, zcount, *replacement, tmp_replacement;
+	zval *subject_ptr, subject_copy, zcount, *replacement, tmp_replacement, rv;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2096,7 +2096,7 @@ SPL_METHOD(RegexIterator, accept)
 			break;
 
 		case REGIT_MODE_REPLACE:
-			replacement = zend_read_property(intern->std.ce, getThis(), "replacement", sizeof("replacement")-1, 1);
+			replacement = zend_read_property(intern->std.ce, getThis(), "replacement", sizeof("replacement")-1, 1, &rv);
 			if (Z_TYPE_P(replacement) != IS_STRING) {
 				tmp_replacement = *replacement;
 				zval_copy_ctor(&tmp_replacement);
@@ -2377,7 +2377,7 @@ static zend_object *spl_dual_it_new(zend_class_entry *class_type)
 {
 	spl_dual_it_object *intern;
 
-	intern = ecalloc(1, sizeof(spl_dual_it_object) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(spl_dual_it_object) + zend_object_properties_size(class_type));
 	intern->dit_type = DIT_Unknown;
 
 	zend_object_std_init(&intern->std, class_type);

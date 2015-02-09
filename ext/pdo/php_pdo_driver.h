@@ -46,7 +46,7 @@ PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64);
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20080721
+#define PDO_DRIVER_API	20150127
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -219,8 +219,8 @@ static inline char *pdo_attr_strval(zval *options, enum pdo_attribute_type optio
 /* This structure is registered with PDO when a PDO driver extension is
  * initialized */
 typedef struct {
-	const char		*driver_name;
-	zend_ulong	driver_name_len;
+	const char	*driver_name;
+	size_t		driver_name_len;
 	zend_ulong	api_version; /* needs to be compatible with PDO */
 
 #define PDO_DRIVER_HEADER(name)	\
@@ -244,13 +244,13 @@ typedef struct {
 typedef int (*pdo_dbh_close_func)(pdo_dbh_t *dbh);
 
 /* prepare a statement and stash driver specific portion into stmt */
-typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, zend_long sql_len, pdo_stmt_t *stmt, zval *driver_options);
+typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, size_t sql_len, pdo_stmt_t *stmt, zval *driver_options);
 
 /* execute a statement (that does not return a result set) */
-typedef zend_long (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, zend_long sql_len);
+typedef zend_long (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, size_t sql_len);
 
 /* quote a string */
-typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype);
+typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype);
 
 /* transaction related */
 typedef int (*pdo_dbh_txn_func)(pdo_dbh_t *dbh);
@@ -260,7 +260,7 @@ typedef int (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, zend_long attr, zval *val);
 
 /* return last insert id.  NULL indicates error condition, otherwise, the return value
  * MUST be an emalloc'd NULL terminated string. */
-typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, unsigned int *len);
+typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, size_t *len);
 
 /* fetch error information.  if stmt is not null, fetch information pertaining
  * to the statement, otherwise fetch global error information.  The driver
@@ -341,7 +341,7 @@ typedef int (*pdo_stmt_describe_col_func)(pdo_stmt_t *stmt, int colno);
  * If the driver sets caller_frees, ptr should point to emalloc'd memory
  * and PDO will free it as soon as it is done using it.
  */
-typedef int (*pdo_stmt_get_col_data_func)(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees);
+typedef int (*pdo_stmt_get_col_data_func)(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees);
 
 /* hook for bound params */
 enum pdo_param_event {
@@ -469,7 +469,7 @@ struct _pdo_dbh_t {
 
 	/* data source string used to open this handle */
 	const char *data_source;
-	zend_ulong data_source_len;
+	size_t data_source_len;
 
 	/* the global error code. */
 	pdo_error_type error_code;
@@ -480,7 +480,7 @@ struct _pdo_dbh_t {
 
 	/* persistent hash key associated with this handle */
 	const char *persistent_id;
-	int persistent_id_len;
+	size_t persistent_id_len;
 	unsigned int refcount;
 
 	/* driver specific "class" methods for the dbh and stmt */
@@ -528,10 +528,10 @@ static inline pdo_dbh_object_t *php_pdo_dbh_fetch_object(zend_object *obj) {
 /* describes a column */
 struct pdo_column_data {
 	char *name;
-	zend_ulong maxlen;
+	size_t maxlen;
 	zend_ulong precision;
 	enum pdo_param_type param_type;
-	int namelen;
+	size_t namelen;
 
 	/* don't touch this unless your name is dbdo */
 	void *dbdo_data;
@@ -598,11 +598,11 @@ struct _pdo_stmt_t {
 
 	/* used to hold the statement's current query */
 	char *query_string;
-	int query_stringlen;
+	size_t query_stringlen;
 
 	/* the copy of the query with expanded binds ONLY for emulated-prepare drivers */
 	char *active_query_string;
-	int active_query_stringlen;
+	size_t active_query_stringlen;
 
 	/* the cursor specific error code. */
 	pdo_error_type error_code;
@@ -678,8 +678,8 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 PDO_API zend_class_entry *php_pdo_get_dbh_ce(void);
 PDO_API zend_class_entry *php_pdo_get_exception(void);
 
-PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
-	char **outquery, int *outquery_len);
+PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len,
+	char **outquery, size_t *outquery_len);
 
 PDO_API void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt,
 	const char *sqlstate, const char *supp);

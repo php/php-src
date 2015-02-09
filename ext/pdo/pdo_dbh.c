@@ -962,9 +962,9 @@ static PHP_METHOD(PDO, lastInsertId)
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support lastInsertId()");
 		RETURN_FALSE;
 	} else {
-		int id_len;
+		size_t id_len;
 		char *id;
-		id = dbh->methods->last_id(dbh, name, (unsigned int *)&id_len);
+		id = dbh->methods->last_id(dbh, name, &id_len);
 		if (!id) {
 			PDO_HANDLE_DBH_ERR();
 			RETURN_FALSE;
@@ -1136,7 +1136,7 @@ static PHP_METHOD(PDO, quote)
 	size_t str_len;
 	zend_long paramtype = PDO_PARAM_STR;
 	char *qstr;
-	int qlen;
+	size_t qlen;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &paramtype)) {
 		RETURN_FALSE;
@@ -1544,7 +1544,7 @@ zend_object *pdo_dbh_new(zend_class_entry *ce)
 {
 	pdo_dbh_object_t *dbh;
 
-	dbh = ecalloc(1, sizeof(pdo_dbh_object_t) + sizeof(zval) * (ce->default_properties_count - 1));
+	dbh = ecalloc(1, sizeof(pdo_dbh_object_t) + zend_object_properties_size(ce));
 	zend_object_std_init(&dbh->std, ce);
 	object_properties_init(&dbh->std, ce);
 	rebuild_object_properties(&dbh->std);

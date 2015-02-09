@@ -128,10 +128,8 @@ php_file_globals file_globals;
 /* }}} */
 
 #define PHP_STREAM_TO_ZVAL(stream, arg) \
-	php_stream_from_zval_no_verify(stream, arg); \
-	if (stream == NULL) {	\
-		RETURN_FALSE;	\
-	}
+	ZEND_ASSERT(Z_TYPE_P(arg) == IS_RESOURCE); \
+	php_stream_from_res(stream, Z_RES_P(arg));
 
 /* {{{ ZTS-stuff / Globals / Prototypes */
 
@@ -364,7 +362,11 @@ PHP_FUNCTION(flock)
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
+#ifdef PHP_WIN32
+		if (operation && errno == ERROR_INVALID_BLOCK && wouldblock) {
+#else
 		if (operation && errno == EWOULDBLOCK && wouldblock) {
+#endif
 			ZVAL_LONG(wouldblock, 1);
 		}
 		RETURN_FALSE;
@@ -1153,7 +1155,7 @@ PHPAPI PHP_FUNCTION(fgetss)
    Implements a mostly ANSI compatible fscanf() */
 PHP_FUNCTION(fscanf)
 {
-	int result, type, argc = 0;
+	int result, argc = 0;
 	size_t format_len;
 	zval *args = NULL;
 	zval *file_handle;
@@ -1165,7 +1167,7 @@ PHP_FUNCTION(fscanf)
 		return;
 	}
 
-	what = zend_fetch_resource(file_handle, -1, "File-Handle", &type, 2, php_file_le_stream(), php_file_le_pstream());
+	what = zend_fetch_resource2(Z_RES_P(file_handle), "File-Handle", php_file_le_stream(), php_file_le_pstream());
 
 	/* we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
 	 * with a leak if we have an invalid filehandle. This needs changing

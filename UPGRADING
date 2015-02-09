@@ -54,6 +54,7 @@ PHP X.Y UPGRADE NOTES
   . zend_function.common.num_args don't include the variadic argument anymore.
   . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
     output buffer is created in an output buffer handler.
+  . Removed support for assigning the result of new by reference.
   . Removed support for scoped calls to non-static methods from an incompatible
     $this context. See details in https://wiki.php.net/rfc/incompat_ctx.
   . Removed support for #-style comments in ini files. Use ;-style comments
@@ -65,6 +66,13 @@ PHP X.Y UPGRADE NOTES
   . Invalid octal literals in source code now produce compile errors, fixing
     PHPSadness #31. Previously, the invalid digits (and any following valid 
     digits) were simply ignored, such that 0781 became 7.
+  . Removed dl() function on fpm-fcgi.
+  . Removed support for hexadecimal numeric strings. This means that some
+    operations like == will no longer specially interpret strings containing
+    hexadecimal numbers. Furthermore is_numeric() will not consider hexadecimal
+    strings to be numeric (use FILTER_VALIDATE_INT instead).
+    (RFC: https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings)
+  . $HTTP_RAW_POST_DATA is no longer available. Use the php://input stream instead.
 
 - Date:
   . Removed $is_dst parameter from mktime() and gmmktime().
@@ -78,10 +86,31 @@ PHP X.Y UPGRADE NOTES
   . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making
     them consistent with other GMP functions.
 
+- Session
+  . session_start() accepts all INI settings as array. e.g. ['cache_limiter'=>'private']
+    sets session.cache_limiter=private. It also supports 'read_and_close' which closes
+    session data immediately after read data.
+  . Save handler accepts validate_sid(), update_timestamp() which validates session
+    ID existence, updates timestamp of session data. Compatibility of old user defined
+    save handler is retained.
+  . SessionUpdateTimestampHandlerInterface is added. validateSid(), updateTimestamp()
+    is defined in the interface.
+  . session.lazy_write(default=On) INI setting enables only write session data when
+    session data is updated.
+
+- PCRE:
+  . Removed support for /e (PREG_REPLACE_EVAL) modifier. Use
+    preg_reaplace_callback() instead.
+
 - Standard:
   . Removed string category support in setlocale(). Use the LC_* constants
     instead.
   . Removed set_magic_quotes_runtime() and its alias magic_quotes_runtime().
+
+- JSON:
+  . Rejected RFC 7159 incompatible number formats in json_decode string -
+        top level (07, 0xff, .1, -.1) and all levels ([1.], [1.e1])
+  . Empty PHP string passed to json_encode emits a JSON syntax error.
 
 - Stream:
   . Removed set_socket_blocking() in favor of its alias stream_set_blocking().
@@ -164,6 +193,7 @@ PHP X.Y UPGRADE NOTES
 - Core
   . Removed asp_tags ini directive. Trying to enable it will result in a fatal
     error.
+  . Removed always_populate_raw_post_data ini directive.
 
 ========================================
 12. Windows Support

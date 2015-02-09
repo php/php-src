@@ -523,11 +523,7 @@ void _php_ibase_module_error(char *msg, ...) /* {{{ */
 {
 	va_list ap;
 
-#ifdef ZTS
-	va_start(ap, );
-#else
 	va_start(ap, msg);
-#endif
 
 	/* vsnprintf NUL terminates the buf and writes at most n-1 chars+NUL */
 	vsnprintf(IBG(errmsg), MAX_ERRMSG, msg, ap);

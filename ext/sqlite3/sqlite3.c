@@ -2113,7 +2113,7 @@ static zend_object *php_sqlite3_object_new(zend_class_entry *class_type) /* {{{ 
 	php_sqlite3_db_object *intern;
 
 	/* Allocate memory for it */
-	intern = ecalloc(1, sizeof(php_sqlite3_db_object) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(php_sqlite3_db_object) + zend_object_properties_size(class_type));
 
 	/* Need to keep track of things to free */
 	zend_llist_init(&(intern->free_list),  sizeof(php_sqlite3_free_list *), (llist_dtor_func_t)php_sqlite3_free_list_dtor, 0);
@@ -2132,7 +2132,7 @@ static zend_object *php_sqlite3_stmt_object_new(zend_class_entry *class_type) /*
 	php_sqlite3_stmt *intern;
 
 	/* Allocate memory for it */
-	intern = ecalloc(1, sizeof(php_sqlite3_stmt) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(php_sqlite3_stmt) + zend_object_properties_size(class_type));
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
@@ -2148,7 +2148,7 @@ static zend_object *php_sqlite3_result_object_new(zend_class_entry *class_type) 
 	php_sqlite3_result *intern;
 
 	/* Allocate memory for it */
-	intern = ecalloc(1, sizeof(php_sqlite3_result) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(php_sqlite3_result) + zend_object_properties_size(class_type));
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);

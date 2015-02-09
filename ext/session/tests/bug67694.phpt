@@ -1,5 +1,5 @@
 --TEST--
-Bug #67694	Regression in session_regenerate_id()
+Bug #67694 Regression in session_regenerate_id()
 --INI--
 session.save_handler = files
 session.name=PHPSESSID

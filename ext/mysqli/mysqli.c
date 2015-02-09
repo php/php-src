@@ -453,7 +453,7 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type
 	zend_class_entry *mysqli_base_class;
 	zend_object_handlers *handlers;
 
-	intern = ecalloc(1, sizeof(mysqli_object) + sizeof(zval) * (class_type->default_properties_count - 1));
+	intern = ecalloc(1, sizeof(mysqli_object) + zend_object_properties_size(class_type));
 
 	mysqli_base_class = class_type;
 	while (mysqli_base_class->type != ZEND_INTERNAL_CLASS &&

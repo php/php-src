@@ -2114,6 +2114,7 @@ PHP_FUNCTION(strripos)
 		needle = Z_STR_P(zneedle);
 	} else {
 		if (php_needle_char(zneedle, ord_needle->val) != SUCCESS) {
+			STR_ALLOCA_FREE(ord_needle, use_heap);
 			RETURN_FALSE;
 		}
 		ord_needle->val[1] = '\0';
@@ -2121,6 +2122,7 @@ PHP_FUNCTION(strripos)
 	}
 
 	if ((haystack->len == 0) || (needle->len == 0)) {
+		STR_ALLOCA_FREE(ord_needle, use_heap);
 		RETURN_FALSE;
 	}
 
@@ -3143,7 +3145,6 @@ static zend_string* php_char_to_str_ex(zend_string *str, char from, char *to, si
 {
 	zend_string *result;
 	size_t char_count = 0;
-	size_t replaced = 0;
 	char lc_from = 0;
 	char *source, *target, *source_end= str->val + str->len;
 
@@ -3193,7 +3194,6 @@ static zend_string* php_char_to_str_ex(zend_string *str, char from, char *to, si
 	} else {
 		for (source = str->val; source < source_end; source++) {
 			if (tolower(*source) == lc_from) {
-				replaced = 1;
 				if (replace_count) {
 					*replace_count += 1;
 				}
@@ -3958,7 +3958,8 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 {
 	zval		*search_entry,
 				*replace_entry = NULL;
-	zend_string	*tmp_result;
+	zend_string	*tmp_result,
+				*replace_entry_str = NULL;
 	char		*replace_value = NULL;
 	size_t		 replace_len = 0;
 	zend_long	 replace_count = 0;
@@ -3990,7 +3991,8 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 		/* For each entry in the search array, get the entry */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(search), search_entry) {
 			/* Make sure we're dealing with strings. */
-			SEPARATE_ZVAL(search_entry);
+			ZVAL_DEREF(search_entry);
+			SEPARATE_ZVAL_NOREF(search_entry);
 			convert_to_string(search_entry);
 			if (Z_STRLEN_P(search_entry) == 0) {
 				if (Z_TYPE_P(replace) == IS_ARRAY) {
@@ -4004,11 +4006,11 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				/* Get current entry */
 				if ((replace_entry = zend_hash_get_current_data_ex(Z_ARRVAL_P(replace), &pos)) != NULL) {
 					/* Make sure we're dealing with strings. */
-					convert_to_string_ex(replace_entry);
+					replace_entry_str = zval_get_string(replace_entry);
 
 					/* Set replacement value to the one we got from array */
-					replace_value = Z_STRVAL_P(replace_entry);
-					replace_len = Z_STRLEN_P(replace_entry);
+					replace_value = replace_entry_str->val;
+					replace_len = replace_entry_str->len;
 
 					zend_hash_move_forward_ex(Z_ARRVAL_P(replace), &pos);
 				} else {
@@ -4051,6 +4053,10 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				}				
 			}
 
+			if (replace_entry_str) {
+				zend_string_release(replace_entry_str);
+				replace_entry_str = NULL;
+			}
 			zend_string_release(Z_STR_P(result));
 			ZVAL_STR(result, tmp_result);
 
@@ -4554,7 +4560,7 @@ PHP_FUNCTION(setlocale)
 					} else {
 						BG(locale_string) = zend_string_init(retval, len, 0);
 						zend_string_release(loc);
-						RETURN_STR(BG(locale_string));
+						RETURN_STR(zend_string_copy(BG(locale_string)));
 					}
 				} else if (len == loc->len && !memcmp(loc->val, retval, len)) {
 					RETURN_STR(loc);
