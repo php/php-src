@@ -15,7 +15,7 @@ json_decode("invalid json");
 var_dump(json_last_error());
 
 
-json_decode("\001 invalid json");
+json_decode("\"\001 invalid json\"");
 var_dump(json_last_error());
 
 

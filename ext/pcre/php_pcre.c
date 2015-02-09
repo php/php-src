@@ -132,9 +132,18 @@ PHP_INI_END()
 /* {{{ PHP_MINFO_FUNCTION(pcre) */
 static PHP_MINFO_FUNCTION(pcre)
 {
+	int jit_yes = 0;
+
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PCRE (Perl Compatible Regular Expressions) Support", "enabled" );
 	php_info_print_table_row(2, "PCRE Library Version", pcre_version() );
+
+	if (!pcre_config(PCRE_CONFIG_JIT, &jit_yes)) {
+		php_info_print_table_row(2, "PCRE JIT Support", jit_yes ? "enabled" : "disabled");
+	} else {
+		php_info_print_table_row(2, "PCRE JIT Support", "unknown" );
+	}
+
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();

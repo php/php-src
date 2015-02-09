@@ -104,7 +104,8 @@ The php file will be generated always.
 NOTE: You can set environment variable TEST_PHP_DETAILED to enable
 detailed test information.
 
-[Automated testing]
+[Automated Testing]
+--------------
  If you like to keep up to speed, with latest developments and quality
 assurance, setting the environment variable NO_INTERACTION to 1, will not
 prompt the tester for any user input.
@@ -142,7 +143,7 @@ then
 fi
 ========== end of qa-test.sh =============
 
-NOTE: the exit status of run-tests.php will be 1 when
+NOTE: The exit status of run-tests.php will be 1 when
 REPORT_EXIT_STATUS is set. The result of "make test" may be higher
 than that. At present, gmake 3.79.1 returns 2, so it is
 advised to test for non-zero, rather then a specific value.

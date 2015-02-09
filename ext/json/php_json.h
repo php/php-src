@@ -13,6 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Author: Omar Kilani <omar@php.net>                                   |
+  |         Jakub Zelenka <bukka@php.net>                                |
   +----------------------------------------------------------------------+
 */
 
@@ -37,25 +38,21 @@ extern zend_module_entry json_module_entry;
 #include "TSRM.h"
 #endif
 
-ZEND_BEGIN_MODULE_GLOBALS(json)
-	int encoder_depth;
-	int error_code;
-	int encode_max_depth;
-ZEND_END_MODULE_GLOBALS(json)
-
-#ifdef ZTS
-# define JSON_G(v) ZEND_TSRMG(json_globals_id, zend_json_globals *, v)
-# ifdef COMPILE_DL_JSON
-ZEND_TSRMLS_CACHE_EXTERN;
-# endif
-#else
-# define JSON_G(v) (json_globals.v)
-#endif
-
-PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options);
-PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth);
 extern PHP_JSON_API zend_class_entry *php_json_serializable_ce;
 
+/* error codes */
+typedef enum {
+	PHP_JSON_ERROR_NONE = 0,
+	PHP_JSON_ERROR_DEPTH,
+	PHP_JSON_ERROR_STATE_MISMATCH,
+	PHP_JSON_ERROR_CTRL_CHAR,
+	PHP_JSON_ERROR_SYNTAX,
+	PHP_JSON_ERROR_UTF8,
+	PHP_JSON_ERROR_RECURSION,
+	PHP_JSON_ERROR_INF_OR_NAN,
+	PHP_JSON_ERROR_UNSUPPORTED_TYPE,
+	PHP_JSON_ERROR_UTF16
+} php_json_error_code;
 
 /* json_encode() options */
 #define PHP_JSON_HEX_TAG	(1<<0)
@@ -74,9 +71,31 @@ extern PHP_JSON_API zend_class_entry *php_json_serializable_ce;
 #define PHP_JSON_OUTPUT_ARRAY	0
 #define PHP_JSON_OUTPUT_OBJECT	1
 
+/* default depth */
+#define PHP_JSON_PARSER_DEFAULT_DEPTH 512
+
+ZEND_BEGIN_MODULE_GLOBALS(json)
+	int encoder_depth;
+	int encode_max_depth;
+	php_json_error_code error_code;
+ZEND_END_MODULE_GLOBALS(json)
+
+
+#ifdef ZTS
+# define JSON_G(v) ZEND_TSRMG(json_globals_id, zend_json_globals *, v)
+# ifdef COMPILE_DL_JSON
+ZEND_TSRMLS_CACHE_EXTERN;
+# endif
+#else
+# define JSON_G(v) (json_globals.v)
+#endif
+
 /* json_decode() options */
 #define PHP_JSON_OBJECT_AS_ARRAY	(1<<0)
 #define PHP_JSON_BIGINT_AS_STRING	(1<<1)
+
+PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options);
+PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_len, zend_long options, zend_long depth);
 
 static inline void php_json_decode(zval *return_value, char *str, int str_len, zend_bool assoc, zend_long depth)
 {

@@ -75,6 +75,12 @@
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
   . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
+- JSON
+  . Replace non-free JSON parser with a parser from Jsond extension, fixes #63520
+    (JSON extension includes a problematic license statement). (Jakub Zelenka)
+  . Fixed bug #68938 (json_decode() decodes empty string without error).
+    (jeremy at bat-country dot us)
+
 - LiteSpeed:
   . Updated LiteSpeed SAPI code from V5.5 to V6.6. (George Wang)
 
@@ -97,6 +103,10 @@
 
 - PCRE:
   . Removed support for the /e (PREG_REPLACE_EVAL) modifier. (Nikita)
+
+- PDO:
+  . Fixed bug #59450 (./configure fails with "Cannot find php_pdo_driver.h").
+    (maxime dot besson at smile dot fr)
 
 - PDO_mysql:
   . Fixed bug #68424 (Add new PDO mysql connection attr to control multi

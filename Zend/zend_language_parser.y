@@ -150,8 +150,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_ELSEIF    "elseif (T_ELSEIF)"
 %token T_ELSE      "else (T_ELSE)"
 %token T_ENDIF     "endif (T_ENDIF)"
-%token T_CHARACTER
-%token T_BAD_CHARACTER
 %token T_ECHO       "echo (T_ECHO)"
 %token T_DO         "do (T_DO)"
 %token T_WHILE      "while (T_WHILE)"
