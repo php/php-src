@@ -174,14 +174,14 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init 
 	return retry;
 }
 
-static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
-{
-	return php_openssl_sockop_io( 0, stream, buf, count TSRMLS_CC);
-}
-
 static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
-	return php_openssl_sockop_io( 1, stream, buf, count TSRMLS_CC);
+	return php_openssl_sockop_io(1, stream, buf, count TSRMLS_CC);
+}
+
+static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+{
+	return php_openssl_sockop_io(0, stream, (char*)buf, count TSRMLS_CC);
 }
 
 /**
@@ -194,15 +194,15 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-    int nr_bytes = 0;
+	int nr_bytes = 0;
 	
-    /* Only do this if SSL is active. */
+	/* Only do this if SSL is active. */
 	if (sslsock->ssl_active) {
 		int retry = 1;
-        struct timeval  start_time,
-                        *timeout;
-        int             blocked   = sslsock->s.is_blocked,
-                        has_timeout = 0;
+		struct timeval start_time;
+		struct timeval *timeout;
+		int blocked = sslsock->s.is_blocked;
+		int has_timeout = 0;
 
 		/* Begin by making the socket non-blocking. This allows us to check the timeout. */
 		if (SUCCESS == php_set_sock_blocking(sslsock->s.socket, 0 TSRMLS_CC)) {
@@ -216,7 +216,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 		/* gettimeofday is not monotonic; using it here is not strictly correct */
 		if (has_timeout) {
 			gettimeofday(&start_time, NULL);
-	}
+		}
 
 		/* Main IO loop. */
 		do {
@@ -263,7 +263,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				if (errno == EAGAIN && err == SSL_ERROR_WANT_READ && read) {
 					retry = 1;
 				}
-				if (errno == EAGAIN && SSL_ERROR_WANT_WRITE && read == 0) {          
+				if (errno == EAGAIN && SSL_ERROR_WANT_WRITE && read == 0) {
 					retry = 1;
 				}
 
@@ -289,11 +289,12 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes );
 
 				/* If we didn't get any error, then let's return it to PHP. */
-				if (err == SSL_ERROR_NONE)
-				break;
+				if (err == SSL_ERROR_NONE) {
+					break;
+				}
 
 				/* Otherwise, we need to wait again (up to time_left or we get an error) */
-				if (blocked)
+				if (blocked) {
 					if (read) {
 						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
 							(POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
@@ -301,6 +302,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
 							(POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);
 					}
+				}
 			}
 		/* Finally, we keep going until we got data, and an SSL_ERROR_NONE, unless we had an error. */
 		} while (retry);
@@ -312,21 +314,19 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 
 		/* And if we were originally supposed to be blocking, let's reset the socket to that. */
 		if (blocked) {
-		  php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC);
-		  sslsock->s.is_blocked = 1;
+			php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC);
+			sslsock->s.is_blocked = 1;
+		}
+	} else {
+		/* This block is if we had no timeout... We will just sit and wait forever on the IO operation. */
+		if (read) {
+			nr_bytes = php_stream_socket_ops.read(stream, buf, count TSRMLS_CC);
+		} else {
+			nr_bytes = php_stream_socket_ops.write(stream, buf, count TSRMLS_CC);
+		}
 	}
-    } else {
-	    /*
-	     * This block is if we had no timeout... We will just sit and wait forever on the IO operation.
-	     */
-        if (read) {
-		nr_bytes = php_stream_socket_ops.read(stream, buf, count TSRMLS_CC);
-        } else {
-            nr_bytes = php_stream_socket_ops.write(stream, buf, count TSRMLS_CC);
-	}
-    }
 
-    /* PHP doesn't expect a negative return. */
+	/* PHP doesn't expect a negative return. */
 	if (nr_bytes < 0) {
 		nr_bytes = 0;
 	}
