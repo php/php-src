@@ -183,6 +183,15 @@ typedef struct _zend_try_catch_element {
 	uint32_t finally_end;
 } zend_try_catch_element;
 
+typedef struct {
+	uint32_t truth;
+	uint32_t real_true;
+	uint32_t nully;
+	uint32_t zero;
+	uint32_t long_zero;
+	znode_op cur;
+} zend_switch_table;
+
 #if SIZEOF_ZEND_LONG == 8
 # ifdef _WIN32
 #  define THIS_HASHVAL 6385726429Ui64

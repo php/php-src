@@ -4866,6 +4866,105 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 	ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op1));
 }
 
+ZEND_VM_HANDLER(49, ZEND_SWITCH, CONST|TMPVAR|CV, CONST)
+{
+	USE_OPLINE
+	zval *expr;
+	zend_switch_table *info;
+	zval off_zv, *off;
+	zend_op *jmp;
+	HashTable *jmptable;
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+
+	expr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	jmptable = Z_ARRVAL_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
+	info = Z_PTR_P(zend_hash_find(jmptable, CG(empty_string)));
+
+	switch (Z_TYPE_P(expr)) {
+		case IS_STRING:
+			if (Z_STRLEN_P(expr)) {
+				zval *new_off;
+				zend_long lval = 0;
+				double dval;
+				zend_uchar str_type = is_numeric_string(Z_STRVAL_P(expr), Z_STRLEN_P(expr), &lval, &dval, 1);
+				if (str_type == IS_LONG) {
+					off = zend_hash_index_find(jmptable, lval);
+				} else if (str_type == IS_DOUBLE) {
+					if (dval == (double) (zend_long) dval) {
+						lval = (zend_long) dval;
+						off = zend_hash_index_find(jmptable, lval);
+					} else {
+						off = NULL;
+					}
+				} else {
+					Z_LVAL(off_zv) = info->long_zero;
+					off = &off_zv;
+				}
+				new_off = zend_hash_find(jmptable, Z_STR_P(expr));
+				if (off == NULL) {
+					if (new_off) {
+						off = new_off;
+					}
+				} else if (new_off && Z_LVAL_P(new_off) < Z_LVAL_P(off)) {
+					off = new_off;
+				}
+				/* "" and "0" are falsy strings (matching null and false), everything else is true */
+				if (Z_STRLEN_P(expr) == 1 && *Z_STRVAL_P(expr) == '0') {
+					if (off == NULL || info->zero < Z_LVAL_P(off)) {
+						Z_LVAL(off_zv) = info->zero;
+						off = &off_zv;
+					}
+				} else if (off == NULL || info->real_true < Z_LVAL_P(off)) {
+					Z_LVAL(off_zv) = info->real_true;
+					off = &off_zv;
+				}
+
+				break;
+			}
+			/* else fallthrough */
+
+		case IS_NULL:
+			Z_LVAL(off_zv) = info->nully;
+			off = &off_zv;
+			break;
+
+		case IS_FALSE:
+			Z_LVAL(off_zv) = info->zero > info->nully ? info->nully : info->zero;
+			off = &off_zv;
+			break;
+
+		case IS_LONG:
+			off = zend_hash_index_find(jmptable, Z_LVAL_P(expr));
+			if (off == NULL) {
+				Z_LVAL(off_zv) = Z_LVAL_P(expr) ? info->truth : info->zero;
+				off = &off_zv;
+			} else if (Z_LVAL_P(expr) == 0) {
+				uint32_t min_falsy = info->zero > info->nully ? info->nully : info->zero;
+				if (min_falsy < Z_LVAL_P(off)) {
+					Z_LVAL(off_zv) = min_falsy;
+					off = &off_zv;
+				}
+			}
+			break;
+
+		case IS_TRUE:
+			Z_LVAL(off_zv) = info->truth;
+			off = &off_zv;
+			break;
+
+		default:
+			/* jump forward to first ZEND_CASE */
+			CHECK_EXCEPTION();
+			ZEND_VM_NEXT_OPCODE();
+	}
+
+	CHECK_EXCEPTION();
+	jmp = execute_data->func->op_array.opcodes + Z_LVAL_P(off);
+	ZEND_VM_JMP(OP_JMP_ADDR(jmp, jmp->op2));
+}
+
 ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
