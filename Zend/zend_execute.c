@@ -569,11 +569,10 @@ static int zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg)
 		case IS_STRING: {
 			zend_string *dest;
 
+			/* on success "arg" is converted to IS_STRING */
 			if (!zend_parse_arg_str(arg, &dest, 0)) {
 				return 0;
 			}
-			zval_ptr_dtor(arg);
-			ZVAL_STR(arg, dest);
 			return 1;
 		}
 		case IS_RESOURCE:
