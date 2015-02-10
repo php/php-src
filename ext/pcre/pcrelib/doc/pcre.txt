@@ -1242,7 +1242,7 @@ PCRETEST OPTION FOR LIBREADLINE SUPPORT
        pcretest linked in this way, there may be licensing issues.
 
        Setting  this  option  causes  the -lreadline option to be added to the
-       pcretest build. In many operating environments with  a system-installed
+       pcretest build. In many operating environments with  a  sytem-installed
        libreadline this is sufficient. However, in some environments (e.g.  if
        an unmodified distribution version of readline is in use),  some  extra
        configuration  may  be necessary. The INSTALL file for libreadline says
@@ -5326,21 +5326,25 @@ BACKSLASH
        Those  that are not part of an identified script are lumped together as
        "Common". The current list of scripts is:
 
-       Arabic, Armenian, Avestan, Balinese, Bamum, Batak,  Bengali,  Bopomofo,
-       Brahmi,  Braille, Buginese, Buhid, Canadian_Aboriginal, Carian, Chakma,
-       Cham, Cherokee, Common, Coptic, Cuneiform, Cypriot, Cyrillic,  Deseret,
-       Devanagari,   Egyptian_Hieroglyphs,   Ethiopic,  Georgian,  Glagolitic,
-       Gothic, Greek, Gujarati, Gurmukhi, Han, Hangul, Hanunoo, Hebrew,  Hira-
-       gana,   Imperial_Aramaic,  Inherited,  Inscriptional_Pahlavi,  Inscrip-
-       tional_Parthian,  Javanese,  Kaithi,   Kannada,   Katakana,   Kayah_Li,
-       Kharoshthi,  Khmer,  Lao, Latin, Lepcha, Limbu, Linear_B, Lisu, Lycian,
-       Lydian,    Malayalam,    Mandaic,    Meetei_Mayek,    Meroitic_Cursive,
-       Meroitic_Hieroglyphs,   Miao,  Mongolian,  Myanmar,  New_Tai_Lue,  Nko,
-       Ogham,   Old_Italic,   Old_Persian,   Old_South_Arabian,    Old_Turkic,
-       Ol_Chiki,  Oriya, Osmanya, Phags_Pa, Phoenician, Rejang, Runic, Samari-
-       tan, Saurashtra, Sharada, Shavian,  Sinhala,  Sora_Sompeng,  Sundanese,
-       Syloti_Nagri,  Syriac,  Tagalog,  Tagbanwa, Tai_Le, Tai_Tham, Tai_Viet,
-       Takri, Tamil, Telugu, Thaana, Thai, Tibetan, Tifinagh,  Ugaritic,  Vai,
+       Arabic, Armenian, Avestan, Balinese, Bamum, Bassa_Vah, Batak,  Bengali,
+       Bopomofo,  Brahmi,  Braille, Buginese, Buhid, Canadian_Aboriginal, Car-
+       ian, Caucasian_Albanian, Chakma, Cham, Cherokee, Common, Coptic, Cunei-
+       form, Cypriot, Cyrillic, Deseret, Devanagari, Duployan, Egyptian_Hiero-
+       glyphs,  Elbasan,  Ethiopic,  Georgian,  Glagolitic,  Gothic,  Grantha,
+       Greek,  Gujarati,  Gurmukhi,  Han,  Hangul,  Hanunoo, Hebrew, Hiragana,
+       Imperial_Aramaic,    Inherited,     Inscriptional_Pahlavi,     Inscrip-
+       tional_Parthian,   Javanese,   Kaithi,   Kannada,  Katakana,  Kayah_Li,
+       Kharoshthi, Khmer, Khojki, Khudawadi, Lao, Latin, Lepcha,  Limbu,  Lin-
+       ear_A,  Linear_B,  Lisu,  Lycian, Lydian, Mahajani, Malayalam, Mandaic,
+       Manichaean,     Meetei_Mayek,     Mende_Kikakui,      Meroitic_Cursive,
+       Meroitic_Hieroglyphs,  Miao,  Modi, Mongolian, Mro, Myanmar, Nabataean,
+       New_Tai_Lue,  Nko,  Ogham,  Ol_Chiki,  Old_Italic,   Old_North_Arabian,
+       Old_Permic, Old_Persian, Old_South_Arabian, Old_Turkic, Oriya, Osmanya,
+       Pahawh_Hmong,    Palmyrene,    Pau_Cin_Hau,    Phags_Pa,    Phoenician,
+       Psalter_Pahlavi,  Rejang,  Runic,  Samaritan, Saurashtra, Sharada, Sha-
+       vian, Siddham, Sinhala, Sora_Sompeng, Sundanese, Syloti_Nagri,  Syriac,
+       Tagalog,  Tagbanwa,  Tai_Le,  Tai_Tham, Tai_Viet, Takri, Tamil, Telugu,
+       Thaana, Thai, Tibetan, Tifinagh, Tirhuta, Ugaritic,  Vai,  Warang_Citi,
        Yi.
 
        Each character has exactly one Unicode general category property, spec-
@@ -7777,21 +7781,25 @@ PCRE SPECIAL CATEGORY PROPERTIES FOR \p and \P
 
 SCRIPT NAMES FOR \p AND \P
 
-       Arabic, Armenian, Avestan, Balinese, Bamum, Batak,  Bengali,  Bopomofo,
-       Brahmi,  Braille, Buginese, Buhid, Canadian_Aboriginal, Carian, Chakma,
-       Cham, Cherokee, Common, Coptic, Cuneiform, Cypriot, Cyrillic,  Deseret,
-       Devanagari,   Egyptian_Hieroglyphs,   Ethiopic,  Georgian,  Glagolitic,
-       Gothic, Greek, Gujarati, Gurmukhi, Han, Hangul, Hanunoo, Hebrew,  Hira-
-       gana,   Imperial_Aramaic,  Inherited,  Inscriptional_Pahlavi,  Inscrip-
-       tional_Parthian,  Javanese,  Kaithi,   Kannada,   Katakana,   Kayah_Li,
-       Kharoshthi,  Khmer,  Lao, Latin, Lepcha, Limbu, Linear_B, Lisu, Lycian,
-       Lydian,    Malayalam,    Mandaic,    Meetei_Mayek,    Meroitic_Cursive,
-       Meroitic_Hieroglyphs,   Miao,  Mongolian,  Myanmar,  New_Tai_Lue,  Nko,
-       Ogham,   Old_Italic,   Old_Persian,   Old_South_Arabian,    Old_Turkic,
-       Ol_Chiki,  Oriya, Osmanya, Phags_Pa, Phoenician, Rejang, Runic, Samari-
-       tan, Saurashtra, Sharada, Shavian,  Sinhala,  Sora_Sompeng,  Sundanese,
-       Syloti_Nagri,  Syriac,  Tagalog,  Tagbanwa, Tai_Le, Tai_Tham, Tai_Viet,
-       Takri, Tamil, Telugu, Thaana, Thai, Tibetan, Tifinagh,  Ugaritic,  Vai,
+       Arabic, Armenian, Avestan, Balinese, Bamum, Bassa_Vah, Batak,  Bengali,
+       Bopomofo,  Brahmi,  Braille, Buginese, Buhid, Canadian_Aboriginal, Car-
+       ian, Caucasian_Albanian, Chakma, Cham, Cherokee, Common, Coptic, Cunei-
+       form, Cypriot, Cyrillic, Deseret, Devanagari, Duployan, Egyptian_Hiero-
+       glyphs,  Elbasan,  Ethiopic,  Georgian,  Glagolitic,  Gothic,  Grantha,
+       Greek,  Gujarati,  Gurmukhi,  Han,  Hangul,  Hanunoo, Hebrew, Hiragana,
+       Imperial_Aramaic,    Inherited,     Inscriptional_Pahlavi,     Inscrip-
+       tional_Parthian,   Javanese,   Kaithi,   Kannada,  Katakana,  Kayah_Li,
+       Kharoshthi, Khmer, Khojki, Khudawadi, Lao, Latin, Lepcha,  Limbu,  Lin-
+       ear_A,  Linear_B,  Lisu,  Lycian, Lydian, Mahajani, Malayalam, Mandaic,
+       Manichaean,     Meetei_Mayek,     Mende_Kikakui,      Meroitic_Cursive,
+       Meroitic_Hieroglyphs,  Miao,  Modi, Mongolian, Mro, Myanmar, Nabataean,
+       New_Tai_Lue,  Nko,  Ogham,  Ol_Chiki,  Old_Italic,   Old_North_Arabian,
+       Old_Permic, Old_Persian, Old_South_Arabian, Old_Turkic, Oriya, Osmanya,
+       Pahawh_Hmong,    Palmyrene,    Pau_Cin_Hau,    Phags_Pa,    Phoenician,
+       Psalter_Pahlavi,  Rejang,  Runic,  Samaritan, Saurashtra, Sharada, Sha-
+       vian, Siddham, Sinhala, Sora_Sompeng, Sundanese, Syloti_Nagri,  Syriac,
+       Tagalog,  Tagbanwa,  Tai_Le,  Tai_Tham, Tai_Viet, Takri, Tamil, Telugu,
+       Thaana, Thai, Tibetan, Tifinagh, Tirhuta, Ugaritic,  Vai,  Warang_Citi,
        Yi.
 
 

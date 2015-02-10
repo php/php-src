@@ -111,7 +111,7 @@
     bababbc
     babababc
 
-/^\ca\cA\c[\c{\c:/
+/^\ca\cA\c[;\c:/
     \x01\x01\e;z
 
 /^[ab\]cde]/
@@ -4937,6 +4937,12 @@ however, we need the complication for Perl. ---/
 
 /((?(R1)a+|(?1)b))/
     aaaabcde
+    
+/((?(R)a|(?1)))*/
+    aaa
+
+/((?(R)a|(?1)))+/
+    aaa
 
 /a(*:any 
 name)/K
@@ -5665,5 +5671,53 @@ AbcdCBefgBhiBqz
 
 /(a\Kb)*/+
     ababc
+
+/(?:x|(?:(xx|yy)+|x|x|x|x|x)|a|a|a)bc/
+    acb
+
+'\A(?:[^\"]++|\"(?:[^\"]*+|\"\")*+\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+
+'\A(?:[^\"]++|\"(?:[^\"]++|\"\")*+\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+
+'\A(?:[^\"]++|\"(?:[^\"]++|\"\")++\")++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+
+'\A([^\"1]++|[\"2]([^\"3]*+|[\"4][\"5])*+[\"6])++'
+    NON QUOTED \"QUOT\"\"ED\" AFTER \"NOT MATCHED
+
+/^\w+(?>\s*)(?<=\w)/
+  test test
+
+/(?P<same>a)(?P<same>b)/gJ
+    abbaba
+
+/(?P<same>a)(?P<same>b)(?P=same)/gJ
+    abbaba
+
+/(?P=same)?(?P<same>a)(?P<same>b)/gJ
+    abbaba
+
+/(?:(?P=same)?(?:(?P<same>a)|(?P<same>b))(?P=same))+/gJ
+    bbbaaabaabb
+
+/(?:(?P=same)?(?:(?P=same)(?P<same>a)(?P=same)|(?P=same)?(?P<same>b)(?P=same)){2}(?P=same)(?P<same>c)(?P=same)){2}(?P<same>z)?/gJ
+    bbbaaaccccaaabbbcc
+
+/(?P<Name>a)?(?P<Name2>b)?(?(<Name>)c|d)*l/
+    acl
+    bdl
+    adl
+    bcl    
+
+/\sabc/
+    \x{0b}abc
+
+/[\Qa]\E]+/
+    aa]]
+
+/[\Q]a\E]+/
+    aa]]
 
 /-- End of testinput1 --/
