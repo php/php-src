@@ -2409,8 +2409,7 @@ PHP_FUNCTION(substr_replace)
 	zend_long f;
 	int argc = ZEND_NUM_ARGS();
 	zend_string *result;
-
-	HashPosition pos_from, pos_repl, pos_len;
+	HashPosition from_idx, repl_idx, len_idx;
 	zval *tmp_str = NULL, *tmp_from = NULL, *tmp_repl = NULL, *tmp_len= NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz|z/", &str, &repl, &from, &len) == FAILURE) {
@@ -2490,8 +2489,15 @@ PHP_FUNCTION(substr_replace)
 				l = Z_STRLEN_P(str) - f;
 			}
 			if (Z_TYPE_P(repl) == IS_ARRAY) {
-				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(repl), &pos_repl);
-				if (NULL != (tmp_repl = zend_hash_get_current_data_ex(Z_ARRVAL_P(repl), &pos_repl))) {
+				repl_idx = 0;
+				while (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
+					tmp_repl = &Z_ARRVAL_P(repl)->arData[repl_idx].val;
+					if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
+						break;
+					}
+					repl_idx++;
+				}
+				if (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
 					convert_to_string_ex(tmp_repl);
 					repl_len = Z_STRLEN_P(tmp_repl);
 				}
@@ -2519,17 +2525,7 @@ PHP_FUNCTION(substr_replace)
 
 		array_init(return_value);
 
-		if (Z_TYPE_P(from) == IS_ARRAY) {
-			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(from), &pos_from);
-		}
-
-		if (argc > 3 && Z_TYPE_P(len) == IS_ARRAY) {
-			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(len), &pos_len);
-		}
-
-		if (Z_TYPE_P(repl) == IS_ARRAY) {
-			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(repl), &pos_repl);
-		}
+		from_idx = len_idx = repl_idx = 0;
 
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(str), num_index, str_index, tmp_str) {
 			zval *orig_str;
@@ -2553,7 +2549,14 @@ PHP_FUNCTION(substr_replace)
 			*/
 
 			if (Z_TYPE_P(from) == IS_ARRAY) {
-				if (NULL != (tmp_from = zend_hash_get_current_data_ex(Z_ARRVAL_P(from), &pos_from))) {
+				while (from_idx < Z_ARRVAL_P(from)->nNumUsed) {
+					tmp_from = &Z_ARRVAL_P(from)->arData[from_idx].val;
+					if (Z_TYPE_P(tmp_from) != IS_UNDEF) {
+						break;
+					}
+					from_idx++;
+				}
+				if (from_idx < Z_ARRVAL_P(from)->nNumUsed) {
 					f = zval_get_long(tmp_from);
 
 					if (f < 0) {
@@ -2564,7 +2567,7 @@ PHP_FUNCTION(substr_replace)
 					} else if (f > Z_STRLEN_P(orig_str)) {
 						f = Z_STRLEN_P(orig_str);
 					}
-					zend_hash_move_forward_ex(Z_ARRVAL_P(from), &pos_from);
+					from_idx++;
 				} else {
 					f = 0;
 				}
@@ -2581,9 +2584,16 @@ PHP_FUNCTION(substr_replace)
 			}
 
 			if (argc > 3 && Z_TYPE_P(len) == IS_ARRAY) {
-				if (NULL != (tmp_len = zend_hash_get_current_data_ex(Z_ARRVAL_P(len), &pos_len))) {
+				while (len_idx < Z_ARRVAL_P(len)->nNumUsed) {
+					tmp_len = &Z_ARRVAL_P(len)->arData[len_idx].val;
+					if (Z_TYPE_P(tmp_len) != IS_UNDEF) {
+						break;
+					}
+					len_idx++;
+				}
+				if (len_idx < Z_ARRVAL_P(len)->nNumUsed) {
 					l = zval_get_long(tmp_len);
-					zend_hash_move_forward_ex(Z_ARRVAL_P(len), &pos_len);
+					len_idx++;
 				} else {
 					l = Z_STRLEN_P(orig_str);
 				}
@@ -2607,7 +2617,14 @@ PHP_FUNCTION(substr_replace)
 			result_len = Z_STRLEN_P(orig_str) - l;
 
 			if (Z_TYPE_P(repl) == IS_ARRAY) {
-				if (NULL != (tmp_repl = zend_hash_get_current_data_ex(Z_ARRVAL_P(repl), &pos_repl))) {
+				while (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
+					tmp_repl = &Z_ARRVAL_P(repl)->arData[repl_idx].val;
+					if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
+						break;
+					}
+					repl_idx++;
+				}
+				if (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
 					zval *repl_str;
 					zval zrepl;
 
@@ -2630,7 +2647,7 @@ PHP_FUNCTION(substr_replace)
 					*/
 
 					result_len += Z_STRLEN_P(repl_str);
-					zend_hash_move_forward_ex(Z_ARRVAL_P(repl), &pos_repl);
+					repl_idx++;
 					result = zend_string_alloc(result_len, 0);
 
 					memcpy(result->val, Z_STRVAL_P(orig_str), f);
@@ -3965,7 +3982,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 	zend_long	 replace_count = 0;
 	zend_string	*subject_str;
 	zend_string *lc_subject_str = NULL;
-	HashPosition pos;
+	uint32_t     replace_idx;
 
 	/* Make sure we're dealing with strings. */
 	subject_str = zval_get_string(subject);
@@ -3981,7 +3998,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 		ZVAL_STR_COPY(result, subject_str);
 
 		if (Z_TYPE_P(replace) == IS_ARRAY) {
-			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(replace), &pos);
+			replace_idx = 0;
 		} else {
 			/* Set replacement value to the passed one */
 			replace_value = Z_STRVAL_P(replace);
@@ -3996,7 +4013,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 			convert_to_string(search_entry);
 			if (Z_STRLEN_P(search_entry) == 0) {
 				if (Z_TYPE_P(replace) == IS_ARRAY) {
-					zend_hash_move_forward_ex(Z_ARRVAL_P(replace), &pos);
+					replace_idx++;
 				}
 				continue;
 			}
@@ -4004,7 +4021,14 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 			/* If replace is an array. */
 			if (Z_TYPE_P(replace) == IS_ARRAY) {
 				/* Get current entry */
-				if ((replace_entry = zend_hash_get_current_data_ex(Z_ARRVAL_P(replace), &pos)) != NULL) {
+				while (replace_idx < Z_ARRVAL_P(replace)->nNumUsed) {
+					replace_entry = &Z_ARRVAL_P(replace)->arData[replace_idx].val;
+					if (Z_TYPE_P(replace_entry) != IS_UNDEF) {
+						break;
+					}
+					replace_idx++;
+				}
+				if (replace_idx < Z_ARRVAL_P(replace)->nNumUsed) {
 					/* Make sure we're dealing with strings. */
 					replace_entry_str = zval_get_string(replace_entry);
 
@@ -4012,7 +4036,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 					replace_value = replace_entry_str->val;
 					replace_len = replace_entry_str->len;
 
-					zend_hash_move_forward_ex(Z_ARRVAL_P(replace), &pos);
+					replace_idx++;
 				} else {
 					/* We've run out of replacement strings, so use an empty one. */
 					replace_value = "";
@@ -4506,23 +4530,24 @@ PHP_FUNCTION(setlocale)
 	char *retval;
 	zend_long cat;
 	int num_args, i = 0;
-	HashPosition pos;
+	uint32_t idx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l+", &cat, &args, &num_args) == FAILURE) {
 		return;
 	}
 
 #ifdef HAVE_SETLOCALE
-	if (Z_TYPE(args[0]) == IS_ARRAY) {
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL(args[0]), &pos);
-	}
-
+	idx = 0;
 	while (1) {
 		if (Z_TYPE(args[0]) == IS_ARRAY) {
-			if (!zend_hash_num_elements(Z_ARRVAL(args[0]))) {
-				break;
+			while (idx < Z_ARRVAL(args[0])->nNumUsed) {
+				plocale = &Z_ARRVAL(args[0])->arData[idx].val;
+				if (Z_TYPE(plocale) != IS_UNDEF) {
+					break;
+				}
+				idx++;
 			}
-			if ((plocale = zend_hash_get_current_data_ex(Z_ARRVAL(args[0]), &pos)) == NULL) {
+			if (idx >= Z_ARRVAL(args[0])->nNumUsed) {
 				break;
 			}
 		} else {
@@ -4574,7 +4599,7 @@ PHP_FUNCTION(setlocale)
 		}
 
 		if (Z_TYPE(args[0]) == IS_ARRAY) {
-			if (zend_hash_move_forward_ex(Z_ARRVAL(args[0]), &pos) == FAILURE) break;
+			idx++;
 		} else {
 			if (++i >= num_args) break;
 		}
