@@ -58,4 +58,4 @@ $TS \
 --enable-wddx \
 --enable-sysvmsg 
 make -j2 --quiet
-make install
+sudo make install
