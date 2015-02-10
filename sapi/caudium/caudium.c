@@ -616,7 +616,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
     SG(request_info).request_uri = lookup_string_header("SCRIPT_NAME", NULL);
   SG(request_info).request_method = lookup_string_header("REQUEST_METHOD", "GET");
   SG(request_info).content_length = lookup_integer_header("HTTP_CONTENT_LENGTH", 0);
-  SG(request_info).content_type = lookup_string_header("HTTP_CONTENT_TYPE", NULL);
+  SG(request_info).content_type = lookup_string_header("CONTENT_TYPE", NULL);
   SG(sapi_headers).http_response_code = 200;
   if (!strcmp(SG(request_info).request_method, "HEAD")) {
     SG(request_info).headers_only = 1;
