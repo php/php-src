@@ -3840,18 +3840,29 @@ void zend_compile_if(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_switch_info_dtor(zval *zv) {
+	if (Z_TYPE_P(zv) == IS_PTR) {
+		efree(Z_PTR_P(zv));
+	} else {
+		ZVAL_PTR_DTOR(zv);
+	}
+}
+
 void zend_compile_switch(zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 	zend_ast_list *cases = zend_ast_get_list(ast->child[1]);
 
 	uint32_t i;
-	zend_bool has_default_case = 0;
+	int default_case = -1;
 
 	znode expr_node, case_node;
 	zend_op *opline;
 	uint32_t *jmpnz_opnums = safe_emalloc(sizeof(uint32_t), cases->children, 0);
 	uint32_t opnum_default_jmp;
+	int const_nodes = 0;
+	HashTable *jmp_array;
+	zval compile_compare = {{0}};
 
 	zend_compile_expr(&expr_node, expr_ast);
 
@@ -3859,6 +3870,79 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 	zend_stack_push(&CG(loop_var_stack), &expr_node);
 
 	zend_begin_loop();
+
+	for (i = 0; i < cases->children; ++i) {
+		zend_ast *case_ast = cases->child[i], *cond_ast;
+		zend_eval_const_expr(&case_ast->child[0]);
+		cond_ast = case_ast->child[0];
+
+		if (!cond_ast) {
+			if (default_case >= 0) {
+				CG(zend_lineno) = case_ast->lineno;
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Switch statements may only contain one default clause");
+			}
+			default_case = i;
+			continue;
+		}
+
+		if (const_nodes >= 0) {
+			if (cond_ast->kind == ZEND_AST_ZVAL) {
+				zval *zv = zend_ast_get_zval(cond_ast);
+				if (expr_node.op_type == IS_CONST && compare_function(&compile_compare, &expr_node.u.constant, zv) == SUCCESS && !Z_LVAL(compile_compare)) {
+					/* we need to still compile everything because of goto */
+					int j = 0, target_jump = zend_emit_jump(0);
+					do {
+						if (j == i) {
+							zend_update_jump_target_to_next(target_jump);
+						}
+						zend_compile_stmt(cases->child[j]->child[1]);
+					} while (++j < cases->children);
+					zend_end_loop(get_next_op_number(CG(active_op_array)), 1);
+					zval_dtor(&expr_node.u.constant);
+					efree(jmpnz_opnums);
+					return;
+				} else {
+					int type = Z_TYPE_P(zv);
+					if ((type == IS_STRING && Z_STRLEN_P(zv)) || type == IS_LONG || type == IS_NULL || type == IS_FALSE || type == IS_TRUE) {
+						const_nodes++;
+					} else {
+						const_nodes = -1;
+					}
+				}
+			} else {
+				const_nodes = -1;
+			}
+		}
+	}
+
+	if (const_nodes >= 0) {
+		if (expr_node.op_type == IS_CONST) {
+			/* we need to still compile everything because of goto */
+			int j = 0, target_jump = zend_emit_jump(0);
+			for (; j < cases->children; j++) {
+				if (j == default_case) {
+					zend_update_jump_target_to_next(target_jump);
+				}
+				zend_compile_stmt(cases->child[j]->child[1]);
+			}
+			if (default_case < 0) {
+				zend_update_jump_target_to_next(target_jump);
+			}
+			zend_end_loop(get_next_op_number(CG(active_op_array)), 1);
+			zval_dtor(&expr_node.u.constant);
+			efree(jmpnz_opnums);
+			return;
+		}
+
+		if (const_nodes > 2) {
+			znode info_znode;
+			info_znode.op_type = IS_CONST;
+			ZVAL_NEW_ARR(&info_znode.u.constant);
+			jmp_array = Z_ARRVAL(info_znode.u.constant);
+			zend_emit_op(NULL, ZEND_SWITCH, &expr_node, &info_znode);
+		}
+	}
 
 	case_node.op_type = IS_TMP_VAR;
 	case_node.u.op.var = get_temporary_variable(CG(active_op_array));
@@ -3869,24 +3953,18 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		znode cond_node;
 
 		if (!cond_ast) {
-			if (has_default_case) {
-				CG(zend_lineno) = case_ast->lineno;
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Switch statements may only contain one default clause");
-			}
-			has_default_case = 1;
-			continue;
+			continue;	
 		}
 
 		zend_compile_expr(&cond_node, cond_ast);
 
 		if (expr_node.op_type == IS_CONST
-			&& Z_TYPE(expr_node.u.constant) == IS_FALSE) {
+		    && Z_TYPE(expr_node.u.constant) == IS_FALSE) {
 			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
 		} else if (expr_node.op_type == IS_CONST
-			&& Z_TYPE(expr_node.u.constant) == IS_TRUE) {
+		           && Z_TYPE(expr_node.u.constant) == IS_TRUE) {
 			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, 0);
-		} else {		    
+		} else {
 			opline = zend_emit_op(NULL, ZEND_CASE, &expr_node, &cond_node);
 			SET_NODE(opline->result, &case_node);
 			if (opline->op1_type == IS_CONST) {
@@ -3913,8 +3991,79 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		zend_compile_stmt(stmt_ast);
 	}
 
-	if (!has_default_case) {
+	if (default_case < 0) {
 		zend_update_jump_target_to_next(opnum_default_jmp);
+	}
+
+	if (const_nodes > 2) { // else it's not worth it...
+		zval off, zv;
+		zend_switch_table *info = emalloc(sizeof(zend_switch_table));
+
+		zend_hash_init(jmp_array, cases->children * 2, sigh, zend_switch_info_dtor, 0);
+		ZVAL_PTR(&zv, info);
+		zend_hash_add(jmp_array, CG(empty_string), &zv);		
+
+		ZVAL_LONG(&off, opnum_default_jmp);
+		info->truth = opnum_default_jmp;
+		info->real_true = opnum_default_jmp;
+		info->nully = opnum_default_jmp;
+		info->zero = opnum_default_jmp;
+		info->long_zero = opnum_default_jmp;
+
+		i = cases->children;
+		while (i--) {
+			zend_ast *cond_ast = cases->child[i]->child[0];
+			zend_op *case_op = CG(active_op_array)->opcodes + jmpnz_opnums[i] - 1;
+
+			if (cond_ast && case_op->opcode == ZEND_CASE) {
+				zval *zv = CT_CONSTANT(case_op->op2);
+				Z_LVAL(off) = jmpnz_opnums[i];
+				switch (Z_TYPE_P(zv)) {
+					case IS_STRING:
+						if (Z_STRLEN_P(zv)) {
+							zend_long lval = 0;
+							double dval;
+							zend_hash_add(jmp_array, Z_STR_P(zv), &off);
+							if (is_numeric_string(Z_STRVAL_P(zv), Z_STRLEN_P(zv), &lval, &dval, 1) != IS_DOUBLE) {
+								zend_hash_index_update(jmp_array, lval, &off);
+							} else if (dval == (double) (zend_long) dval) {
+								lval = (zend_long) dval;
+								zend_hash_index_update(jmp_array, lval, &off);
+							}
+							if (Z_STRLEN_P(zv) == 1 && *Z_STRVAL_P(zv) == '0') {
+								info->zero = jmpnz_opnums[i];
+							} else {
+								info->truth = jmpnz_opnums[i];
+							}
+							break;
+						}
+						/* fallthrough */
+
+					case IS_FALSE:
+						info->zero = jmpnz_opnums[i];
+						/* fallthrough */
+					case IS_NULL:
+						info->nully = jmpnz_opnums[i];
+						break;
+
+					case IS_LONG:
+						zend_hash_index_update(jmp_array, Z_LVAL_P(zv), &off);
+						if (Z_LVAL_P(zv)) {
+							info->truth = jmpnz_opnums[i];
+						} else {
+							info->long_zero = jmpnz_opnums[i];
+							info->zero = jmpnz_opnums[i];
+							info->nully = jmpnz_opnums[i];
+						}
+						break;
+
+					case IS_TRUE:
+						info->truth = jmpnz_opnums[i];
+						info->real_true = jmpnz_opnums[i];
+						break;
+				}
+			}
+		}
 	}
 
 	zend_end_loop(get_next_op_number(CG(active_op_array)), 1);
