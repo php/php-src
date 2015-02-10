@@ -57,4 +57,5 @@ $TS \
 --with-enchant=/usr \
 --enable-wddx \
 --enable-sysvmsg 
-make --quiet
+make -j2 --quiet
+make install
