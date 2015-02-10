@@ -259,18 +259,10 @@ string(109) ".The hebrev function converts logical Hebrew text to visual text
 .The function tries to avoid breaking words
 "
 -- Iteration 23 --
-string(109) "textual vis
-to
-textrew Heb
-icallog
-ertsconvion unctf
-brevhe
-.Therds
-wo
-kingbreaoid av
-to
-riest
-tionfuncThe .
+
+Notice: A non well formed numeric value encountered in %s on line %d
+string(109) ".The hebrev function converts logical Hebrew text to visual text
+.The function tries to avoid breaking words
 "
 -- Iteration 24 --
 
