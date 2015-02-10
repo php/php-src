@@ -123,28 +123,21 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 	if ((le = zend_hash_str_find_ptr(&EG(persistent_list), persistent_id, strlen(persistent_id))) != NULL) {
 		if (le->type == le_pstream) {
 			if (stream) {
-				HashPosition pos;
-				zend_resource *regentry;
+				zend_resource *regentry = NULL;
 
 				/* see if this persistent resource already has been loaded to the
 				 * regular list; allowing the same resource in several entries in the
 				 * regular list causes trouble (see bug #54623) */
-				zend_hash_internal_pointer_reset_ex(&EG(regular_list), &pos);
-				while ((regentry = zend_hash_get_current_data_ptr_ex(&EG(regular_list), &pos)) != NULL) {
-					if (regentry->ptr == le->ptr) {
-						break;
-					}
-					zend_hash_move_forward_ex(&EG(regular_list), &pos);
-				}
-
 				*stream = (php_stream*)le->ptr;
-				if (!regentry) { /* not found in regular list */
-					GC_REFCOUNT(le)++;
-					(*stream)->res = zend_register_resource(*stream, le_pstream);
-				} else {
-					GC_REFCOUNT(regentry)++;
-					(*stream)->res = regentry;
-				}
+				ZEND_HASH_FOREACH_PTR(&EG(regular_list), regentry) {
+					if (regentry->ptr == le->ptr) {
+						GC_REFCOUNT(regentry)++;
+						(*stream)->res = regentry;
+						return PHP_STREAM_PERSISTENT_SUCCESS;
+					}
+				} ZEND_HASH_FOREACH_END();
+				GC_REFCOUNT(le)++;
+				(*stream)->res = zend_register_resource(*stream, le_pstream);
 			}
 			return PHP_STREAM_PERSISTENT_SUCCESS;
 		}

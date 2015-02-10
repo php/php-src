@@ -545,7 +545,6 @@ PHPAPI void php_output_handler_set_context(php_output_handler *handler, void *op
  * Starts the set up output handler and pushes it on top of the stack. Checks for any conflicts regarding the output handler to start */
 PHPAPI int php_output_handler_start(php_output_handler *handler)
 {
-	HashPosition pos;
 	HashTable *rconflicts;
 	php_output_handler_conflict_check_t conflict;
 
@@ -558,14 +557,11 @@ PHPAPI int php_output_handler_start(php_output_handler *handler)
 		}
 	}
 	if (NULL != (rconflicts = zend_hash_find_ptr(&php_output_handler_reverse_conflicts, handler->name))) {
-		for (zend_hash_internal_pointer_reset_ex(rconflicts, &pos);
-			(conflict = zend_hash_get_current_data_ptr_ex(rconflicts, &pos)) != NULL;
-			zend_hash_move_forward_ex(rconflicts, &pos)
-		) {
+		ZEND_HASH_FOREACH_PTR(rconflicts, conflict) {
 			if (SUCCESS != conflict(handler->name->val, handler->name->len)) {
 				return FAILURE;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 	/* zend_stack_push returns stack level */
 	handler->level = zend_stack_push(&OG(handlers), &handler);
