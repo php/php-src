@@ -1165,12 +1165,10 @@ static zend_always_inline int zend_parse_arg_str(zval *arg, zend_string **dest, 
 		if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 			*dest = NULL;
 		} else {
-			if (Z_COPYABLE_P(arg) && Z_REFCOUNT_P(arg) > 1) {
-				Z_DELREF_P(arg);
-				zval_copy_ctor_func(arg);
-			}
-			convert_to_string(arg);
-			*dest = Z_STR_P(arg);
+			zval converted;
+			ZVAL_COPY_VALUE(&converted, arg);
+			convert_to_string(&converted);
+			*dest = Z_STR(converted);
 		}
 	} else if (UNEXPECTED(Z_TYPE_P(arg) != IS_OBJECT) ||
 	           UNEXPECTED(parse_arg_object_to_str(arg, dest, IS_STRING) != SUCCESS)) {
