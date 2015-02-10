@@ -1179,9 +1179,9 @@ static zend_bool zend_try_ct_eval_const(zval *zv, zend_string *name, zend_bool i
 	/* Substitute case-sensitive (or lowercase) constants */
 	c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c && (
-	      (c->flags & CONST_PERSISTENT)
-	   || (Z_TYPE(c->value) < IS_OBJECT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)))
-	) {
+	      ((c->flags & CONST_PERSISTENT) && !(CG(compiler_options) & ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION))
+	   || (Z_TYPE(c->value) < IS_OBJECT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION))
+	)) {
 		ZVAL_DUP(zv, &c->value);
 		return 1;
 	}
@@ -1221,6 +1221,10 @@ static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name,
 			return 0;
 		}
 	} else {
+		return 0;
+	}
+
+	if (CG(compiler_options) & ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION) {
 		return 0;
 	}
 
@@ -3929,9 +3933,13 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 					"Variadic parameter cannot have a default value");
 			}
 		} else if (default_ast) {
+			/* we cannot substitute constants here or it will break ReflectionParameter::getDefaultValueConstantName() and ReflectionParameter::isDefaultValueConstant() */
+			uint32_t cops = CG(compiler_options);
+			CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION | ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION;
 			opcode = ZEND_RECV_INIT;
 			default_node.op_type = IS_CONST;
 			zend_const_expr_to_zval(&default_node.u.constant, default_ast);
+			CG(compiler_options) = cops;
 		} else {
 			opcode = ZEND_RECV;
 			default_node.op_type = IS_UNUSED;

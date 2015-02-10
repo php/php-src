@@ -927,6 +927,9 @@ END_EXTERN_C()
 /* disable usage of builtin instruction for strlen() */
 #define ZEND_COMPILE_NO_BUILTIN_STRLEN			(1<<6)
 
+/* disable substitution of persistent constants at compile-time */
+#define ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION	(1<<7)
+
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 
