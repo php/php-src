@@ -2004,12 +2004,13 @@ PHP_FUNCTION(curl_copy_handle)
 static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{ */
 {
 	CURLcode error = CURLE_OK;
+	zend_long lval;
 
 	switch (option) {
 		/* Long options */
 		case CURLOPT_SSL_VERIFYHOST:
-			convert_to_long(zvalue);
-			if (Z_LVAL_P(zvalue) == 1) {
+			lval = zval_get_long(zvalue);
+			if (lval == 1) {
 #if LIBCURL_VERSION_NUM <= 0x071c00 /* 7.28.0 */
 				php_error_docref(NULL, E_NOTICE, "CURLOPT_SSL_VERIFYHOST with value 1 is deprecated and will be removed as of libcurl 7.28.1. It is recommended to use value 2 instead");
 #else
@@ -2163,19 +2164,19 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 #if CURLOPT_MUTE != 0
 		case CURLOPT_MUTE:
 #endif
-			convert_to_long_ex(zvalue);
+			lval = zval_get_long(zvalue);
 #if LIBCURL_VERSION_NUM >= 0x71304
 			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
-				(PG(open_basedir) && *PG(open_basedir)) && (Z_LVAL_P(zvalue) & CURLPROTO_FILE)) {
+				(PG(open_basedir) && *PG(open_basedir)) && (lval & CURLPROTO_FILE)) {
 					php_error_docref(NULL, E_WARNING, "CURLPROTO_FILE cannot be activated when an open_basedir is set");
 					return 1;
 			}
 #endif
-			error = curl_easy_setopt(ch->cp, option, Z_LVAL_P(zvalue));
+			error = curl_easy_setopt(ch->cp, option, lval);
 			break;
 		case CURLOPT_SAFE_UPLOAD:
-			convert_to_long_ex(zvalue);
-			ch->safe_upload = (Z_LVAL_P(zvalue) != 0);
+			lval = zval_get_long(zvalue);
+			ch->safe_upload = (lval != 0);
 			break;
 
 		/* String options */
@@ -2236,8 +2237,10 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 		case CURLOPT_MAIL_AUTH:
 #endif
 		{
-			convert_to_string_ex(zvalue);
-			return php_curl_option_str(ch, option, Z_STRVAL_P(zvalue), Z_STRLEN_P(zvalue), 0);
+			zend_string *str = zval_get_string(zvalue);
+			int ret = php_curl_option_str(ch, option, str->val, str->len, 0);
+			zend_string_release(str);
+			return ret;
 		}
 
 		/* Curl nullable string options */
@@ -2259,21 +2262,31 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			if (Z_ISNULL_P(zvalue)) {
 				error = curl_easy_setopt(ch->cp, option, NULL);
 			} else {
-				convert_to_string_ex(zvalue);
-				return php_curl_option_str(ch, option, Z_STRVAL_P(zvalue), Z_STRLEN_P(zvalue), 0);
+				zend_string *str = zval_get_string(zvalue);
+				int ret = php_curl_option_str(ch, option, str->val, str->len, 0);
+				zend_string_release(str);
+				return ret;
 			}
 			break;
 		}
 
 		/* Curl private option */
 		case CURLOPT_PRIVATE:
-			convert_to_string_ex(zvalue);
-			return php_curl_option_str(ch, option, Z_STRVAL_P(zvalue), Z_STRLEN_P(zvalue), 1);
+		{
+			zend_string *str = zval_get_string(zvalue);
+			int ret = php_curl_option_str(ch, option, str->val, str->len, 1);
+			zend_string_release(str);
+			return ret;
+		}
 
 		/* Curl url option */
 		case CURLOPT_URL:
-			convert_to_string_ex(zvalue);
-			return php_curl_option_url(ch, Z_STRVAL_P(zvalue), Z_STRLEN_P(zvalue));
+		{
+			zend_string *str = zval_get_string(zvalue);
+			int ret = php_curl_option_url(ch, str->val, str->len);
+			zend_string_release(str);
+			return ret;
+		}
 
 		/* Curl file handle options */
 		case CURLOPT_FILE:
@@ -2450,16 +2463,16 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			break;
 
 		case CURLOPT_FOLLOWLOCATION:
-			convert_to_long_ex(zvalue);
+			lval = zval_get_long(zvalue);
 #if LIBCURL_VERSION_NUM < 0x071304
 			if (PG(open_basedir) && *PG(open_basedir)) {
-				if (Z_LVAL_P(zvalue) != 0) {
+				if (lval != 0) {
 					php_error_docref(NULL, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set");
 					return FAILURE;
 				}
 			}
 #endif
-			error = curl_easy_setopt(ch->cp, option, Z_LVAL_P(zvalue));
+			error = curl_easy_setopt(ch->cp, option, lval);
 			break;
 
 		case CURLOPT_HEADERFUNCTION:
@@ -2593,19 +2606,21 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				error = curl_easy_setopt(ch->cp, CURLOPT_HTTPPOST, first);
 			} else {
 #if LIBCURL_VERSION_NUM >= 0x071101
-				convert_to_string_ex(zvalue);
+				zend_string *str = zval_get_string(zvalue);
 				/* with curl 7.17.0 and later, we can use COPYPOSTFIELDS, but we have to provide size before */
-				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, Z_STRLEN_P(zvalue));
-				error = curl_easy_setopt(ch->cp, CURLOPT_COPYPOSTFIELDS, Z_STRVAL_P(zvalue));
+				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, str->len);
+				error = curl_easy_setopt(ch->cp, CURLOPT_COPYPOSTFIELDS, str->val);
+				zend_string_release(str);
 #else
 				char *post = NULL;
+				zend_string *str = zval_get_string(zvalue);
 
-				convert_to_string_ex(zvalue);
-				post = estrndup(Z_STRVAL_P(zvalue), Z_STRLEN_P(zvalue));
+				post = estrndup(str->val, str->len);
 				zend_llist_add_element(&ch->to_free->str, &post);
 
 				curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDS, post);
-				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, Z_STRLEN_P(zvalue));
+				error = curl_easy_setopt(ch->cp, CURLOPT_POSTFIELDSIZE, str->len);
+				zend_string_release(str);
 #endif
 			}
 			break;
@@ -2633,8 +2648,8 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			break;
 
 		case CURLOPT_RETURNTRANSFER:
-			convert_to_long_ex(zvalue);
-			if (Z_LVAL_P(zvalue)) {
+			lval = zval_get_long(zvalue);
+			if (lval) {
 				ch->handlers->write->method = PHP_CURL_RETURN;
 			} else {
 				ch->handlers->write->method = PHP_CURL_STDOUT;
@@ -2653,15 +2668,15 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 #if LIBCURL_VERSION_NUM >= 0x070f05 /* Available since 7.15.5 */
 		case CURLOPT_MAX_RECV_SPEED_LARGE:
 		case CURLOPT_MAX_SEND_SPEED_LARGE:
-			convert_to_long_ex(zvalue);
-			error = curl_easy_setopt(ch->cp, option, (curl_off_t)Z_LVAL_P(zvalue));
+			lval = zval_get_long(zvalue);
+			error = curl_easy_setopt(ch->cp, option, (curl_off_t)lval);
 			break;
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
 		case CURLOPT_POSTREDIR:
-			convert_to_long_ex(zvalue);
-			error = curl_easy_setopt(ch->cp, CURLOPT_POSTREDIR, Z_LVAL_P(zvalue) & CURL_REDIR_POST_ALL);
+			lval = zval_get_long(zvalue);
+			error = curl_easy_setopt(ch->cp, CURLOPT_POSTREDIR, lval & CURL_REDIR_POST_ALL);
 			break;
 #endif
 
@@ -2696,18 +2711,21 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 		case CURLOPT_SSH_KNOWNHOSTS:
 #endif
 		{
-			convert_to_string_ex(zvalue);
+			zend_string *str = zval_get_string(zvalue);
+			int ret;
 
-			if (Z_STRLEN_P(zvalue) && php_check_open_basedir(Z_STRVAL_P(zvalue))) {
+			if (str->len && php_check_open_basedir(str->val)) {
 				return FAILURE;
 			}
 
-			return php_curl_option_str(ch, option, Z_STRVAL_P(zvalue), Z_STRLEN_P(zvalue), 0);
+			ret = php_curl_option_str(ch, option, str->val, str->len, 0);
+			zend_string_release(str);
+			return ret;
 		}
 
 		case CURLINFO_HEADER_OUT:
-			convert_to_long_ex(zvalue);
-			if (Z_LVAL_P(zvalue) == 1) {
+			lval = zval_get_long(zvalue);
+			if (lval == 1) {
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGFUNCTION, curl_debug);
 				curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA, (void *)ch);
 				curl_easy_setopt(ch->cp, CURLOPT_VERBOSE, 1);
