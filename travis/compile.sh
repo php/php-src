@@ -50,4 +50,4 @@ $TS \
 --with-gmp \
 --enable-bcmath
 make -j2 --quiet
-make install
+sudo make install
