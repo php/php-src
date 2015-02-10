@@ -2619,54 +2619,6 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionParameter::isDefaultValueConstant()
-   Returns whether the default value of this parameter is constant */
-ZEND_METHOD(reflection_parameter, isDefaultValueConstant)
-{
-	zend_op *precv;
-	parameter_reference *param;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	if (!param) {
-		RETURN_FALSE;
-	}
-
-	precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
-	if (precv && Z_TYPE_P(RT_CONSTANT(&param->fptr->op_array, precv->op2)) == IS_CONSTANT) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
-}
-/* }}} */
-
-/* {{{ proto public mixed ReflectionParameter::getDefaultValueConstantName()
-   Returns the default value's constant name if default value is constant or null */
-ZEND_METHOD(reflection_parameter, getDefaultValueConstantName)
-{
-	zend_op *precv;
-	parameter_reference *param;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	if (!param) {
-		return;
-	}
-
-	precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
-	if (precv && Z_TYPE_P(RT_CONSTANT(&param->fptr->op_array, precv->op2)) == IS_CONSTANT) {
-		RETURN_STR(zend_string_copy(Z_STR_P(RT_CONSTANT(&param->fptr->op_array, precv->op2))));
-	}
-}
-/* }}} */
-
 /* {{{ proto public bool ReflectionParameter::isVariadic()
    Returns whether this parameter is a variadic parameter */
 ZEND_METHOD(reflection_parameter, isVariadic)
@@ -6038,8 +5990,6 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, isOptional, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isDefaultValueAvailable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDefaultValue, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_parameter, isDefaultValueConstant, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_parameter, getDefaultValueConstantName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isVariadic, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
