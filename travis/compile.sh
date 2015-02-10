@@ -49,4 +49,5 @@ $TS \
 --with-openssl \
 --with-gmp \
 --enable-bcmath
-make --quiet
+make -j2 --quiet
+make install
