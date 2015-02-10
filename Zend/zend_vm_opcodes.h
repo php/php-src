@@ -82,6 +82,7 @@ END_EXTERN_C()
 #define ZEND_JMPZ_EX                          46
 #define ZEND_JMPNZ_EX                         47
 #define ZEND_CASE                             48
+#define ZEND_SWITCH                           49
 #define ZEND_BRK                              50
 #define ZEND_CONT                             51
 #define ZEND_BOOL                             52
