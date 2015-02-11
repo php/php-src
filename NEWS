@@ -103,7 +103,8 @@ PHP                                                                        NEWS
     CURLOPT_RETURNTRANSFER isn't set). (Jille Timmermans)
 
 - EXIF:
-  . Fixed bug #68799: Free called on unitialized pointer. (CVE-2015-0232) (Stas)
+  . Fixed bug #68799 (Free called on unitialized pointer). (CVE-2015-0232)
+    (Stas)
 
 - Fileinfo:
   . Fixed bug #68671 (incorrect expression in libmagic).
