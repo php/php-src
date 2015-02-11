@@ -287,6 +287,10 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #67972 (SessionHandler Invalid memory read create_sid()). (Adam)
 
+- XMLRPC:
+  . Fixed bug #68027 (Global buffer overflow in mkgmtime() function).
+    (CVE-2014-3668) (Stas)
+
 18 Sep 2014, PHP 5.5.17
 
 - Core:
