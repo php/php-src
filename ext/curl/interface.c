@@ -2715,6 +2715,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 			int ret;
 
 			if (str->len && php_check_open_basedir(str->val)) {
+				zend_string_release(str);
 				return FAILURE;
 			}
 
