@@ -4542,7 +4542,7 @@ PHP_FUNCTION(setlocale)
 		if (Z_TYPE(args[0]) == IS_ARRAY) {
 			while (idx < Z_ARRVAL(args[0])->nNumUsed) {
 				plocale = &Z_ARRVAL(args[0])->arData[idx].val;
-				if (Z_TYPE(plocale) != IS_UNDEF) {
+				if (Z_TYPE_P(plocale) != IS_UNDEF) {
 					break;
 				}
 				idx++;
