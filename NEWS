@@ -52,7 +52,7 @@
 
 - PDO_mysql:
   . Fixed bug #68750 (PDOMysql with mysqlnd does not allow the usage of
-    named pipes). (steffenb198@aol.com)
+    named pipes). (steffenb198 at aol dot com)
 
 - Phar:
   . Fixed bug #68901 (use after free). (bugreports at internot dot info)
@@ -978,7 +978,7 @@
 
 - FPM:
   . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
-    (pacho@gentoo.org, Remi)
+    (pacho at gentoo dot org, Remi)
 
 - GD:
   . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
