@@ -546,7 +546,7 @@ static int php_handler(request_rec *r)
 	request_rec * volatile parent_req = NULL;
 #ifdef ZTS
 	/* initial resource fetch */
-	void ***tsrm_ls = ts_resource(0);
+	(void)ts_resource(0);
 	ZEND_TSRMLS_CACHE_UPDATE;
 #endif
 
