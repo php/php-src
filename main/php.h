@@ -320,6 +320,7 @@ PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const 
 END_EXTERN_C()
 
 #define php_error_docref php_error_docref0
+#define php_error_docref_ex(...) php_error_docref0(NULL, __VA_ARGS__)
 
 #define zenderror phperror
 #define zendlex phplex
