@@ -310,6 +310,9 @@
     (Matteo, Alain Laporte)
   . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
 
+- OpenSSL:
+  . Revert regression introduced by fix of bug #41631
+
 - Reflection:
   . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
 
