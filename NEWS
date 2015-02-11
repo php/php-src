@@ -91,7 +91,7 @@ PHP                                                                        NEWS
   . Fixed bug #66764 (configure doesn't define EXPANDED_DATADIR / PHP_DATADIR
     correctly). (Ferenc)
   . Fixed bug #68583 (Crash in timeout thread). (Anatol)
-  . Fixed bug #68676 (Explicit Double Free). (Kalle)
+  . Fixed bug #68676 (Explicit Double Free). (CVE-2014-9425) (Kalle)
   . Fixed bug #68710 (Use After Free Vulnerability in PHP's unserialize()).
     (CVE-2015-0231) (Stefan Esser)
 
