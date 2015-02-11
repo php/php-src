@@ -1155,13 +1155,6 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 }
 /* }}} */
 
-static inline zend_bool zend_string_equals_str_ci(zend_string *str1, zend_string *str2) /* {{{ */
-{
-	return str1->len == str2->len
-		&& !zend_binary_strcasecmp(str1->val, str1->len, str2->val, str2->len);
-}
-/* }}} */
-
 static zend_constant *zend_lookup_reserved_const(const char *name, size_t len) /* {{{ */
 {
 	zend_constant *c = zend_hash_find_ptr_lc(EG(zend_constants), name, len);
@@ -1211,7 +1204,7 @@ static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name,
 	uint32_t fetch_type = zend_get_class_fetch_type(class_name);
 	zval *c;
 
-	if (CG(active_class_entry) && (fetch_type == ZEND_FETCH_CLASS_SELF || (fetch_type == ZEND_FETCH_CLASS_DEFAULT && zend_string_equals_str_ci(class_name, CG(active_class_entry)->name)))) {
+	if (CG(active_class_entry) && (fetch_type == ZEND_FETCH_CLASS_SELF || (fetch_type == ZEND_FETCH_CLASS_DEFAULT && zend_string_equals_ci(class_name, CG(active_class_entry)->name)))) {
 		c = zend_hash_find(&CG(active_class_entry)->constants_table, name);
 	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
 		zend_class_entry *ce = zend_hash_find_ptr_lc(CG(class_table), class_name->val, class_name->len);
@@ -4134,7 +4127,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 			}
 		}
 	} else {
-		if (!in_trait && zend_string_equals_str_ci(lcname, ce->name)) {
+		if (!in_trait && zend_string_equals_ci(lcname, ce->name)) {
 			if (!ce->constructor) {
 				ce->constructor = (zend_function *) op_array;
 			}
@@ -4226,7 +4219,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 
 	if (CG(current_import_function)) {
 		zend_string *import_name = zend_hash_find_ptr(CG(current_import_function), lcname);
-		if (import_name && !zend_string_equals_str_ci(lcname, import_name)) {
+		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 			zend_error(E_COMPILE_ERROR, "Cannot declare function %s "
 				"because the name is already in use", name->val);
 		}
@@ -4620,7 +4613,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		zend_string_addref(name);
 	}
 
-	if (import_name && !zend_string_equals_str_ci(lcname, import_name)) {
+	if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
 			"because the name is already in use", name->val);
 	}
@@ -4798,7 +4791,7 @@ static char *zend_get_use_type_str(uint32_t type) /* {{{ */
 
 static void zend_check_already_in_use(uint32_t type, zend_string *old_name, zend_string *new_name, zend_string *check_name) /* {{{ */
 {
-	if (zend_string_equals_str_ci(old_name, check_name)) {
+	if (zend_string_equals_ci(old_name, check_name)) {
 		return;
 	}
 
