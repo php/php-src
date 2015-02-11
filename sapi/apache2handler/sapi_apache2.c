@@ -220,8 +220,13 @@ php_apache_sapi_get_stat(void)
 {
 	php_struct *ctx = SG(server_context);
 
+#ifdef PHP_WIN32
+	ctx->finfo.st_uid = 0;
+	ctx->finfo.st_gid = 0;
+#else
 	ctx->finfo.st_uid = ctx->r->finfo.user;
 	ctx->finfo.st_gid = ctx->r->finfo.group;
+#endif
 	ctx->finfo.st_dev = ctx->r->finfo.device;
 	ctx->finfo.st_ino = ctx->r->finfo.inode;
 #if defined(NETWARE) && defined(CLIB_STAT_PATCH)
