@@ -119,6 +119,8 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	int is_last_message = 0;
 	int in_buf = 0;
 	int res;
+	char fmt_buf[max_buf_size];
+	int fmt_len = 0;
 
 	if (!arg) {
 		return;
@@ -130,10 +132,15 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	} else {
 		event = &child->ev_stderr;
 	}
+	
+	/* calculate how long the "child 123 said into ..." prefix is so we can subtract its length from max_buf_size */
+	fmt_len = snprintf(fmt_buf, max_buf_size, "[pool %s] child %d said into %s: \"%%s\"%%s", child->wp->config->name, (int) child->pid, is_stdout ? "stdout" : "stderr");
+	/* subtract two characters each for the two "%s", then add character counts for "WARNING: " added by zlog and "[11-Feb-2015 15:58:20] " added by zlog; we're ignoring the potential extra length in log_level=DEBUG */
+	fmt_len = fmt_len - 2 - 2 + 9 + 23; 
 
 	while (fifo_in || fifo_out) {
 		if (fifo_in) {
-			res = read(fd, buf + in_buf, max_buf_size - 1 - in_buf);
+			res = read(fd, buf + in_buf, max_buf_size - fmt_len - 1 - in_buf);
 			if (res <= 0) { /* no data */
 				fifo_in = 0;
 				if (res < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
@@ -171,7 +178,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 				/* FIXME: there might be binary data */
 
 				/* we should print if no more space in the buffer */
-				if (in_buf == max_buf_size - 1) {
+				if (in_buf == max_buf_size - fmt_len - 1) {
 					should_print = 1;
 				}
 
@@ -187,8 +194,7 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 						*nl = '\0';
 					}
 
-					zlog(ZLOG_WARNING, "[pool %s] child %d said into %s: \"%s\"%s", child->wp->config->name,
-					  (int) child->pid, is_stdout ? "stdout" : "stderr", buf, is_last_message ? ", pipe is closed" : "");
+					zlog(ZLOG_WARNING, fmt_buf, buf, is_last_message ? ", pipe is closed" : "");
 
 					if (nl) {
 						int out_buf = 1 + nl - buf;
