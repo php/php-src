@@ -208,6 +208,10 @@ PHP                                                                        NEWS
   . Fixed bug #68351 (PDO::PARAM_BOOL and ATTR_EMULATE_PREPARES misbehaving)
   (Matteo)
 
+- SOAP:
+  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
+    (Laruence)
+
 - zlib:
   . Fixed bug #53829 (Compiling PHP with large file support will replace
     function gzopen by gzopen64) (Sascha Kettler, Matteo)
@@ -246,10 +250,6 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #68087 (ODBC not correctly reading DATE column when preceded by
     a VARCHAR column) (Keyur Govande)
-
-- SOAP:
-  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
-    (Laruence)
 
 - SPL:
   . Fixed bug #68128 (Regression in RecursiveRegexIterator) (Tjerk)
