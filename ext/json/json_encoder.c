@@ -39,8 +39,6 @@
 #define PHP_JSON_DOUBLE_MAX_LENGTH 1080
 #endif
 
-ZEND_DECLARE_MODULE_GLOBALS(json)
-
 static const char digits[] = "0123456789abcdef";
 
 static void php_json_escape_string(smart_str *buf, char *s, size_t len, int options);
@@ -239,7 +237,7 @@ static void php_json_encode_array(smart_str *buf, zval *val, int options) /* {{{
 }
 /* }}} */
 
-static int php_json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{{ */
+static int php_json_utf8_to_utf16(unsigned short *utf16, char utf8[], size_t len) /* {{{ */
 {
 	size_t pos = 0, us;
 	int j, status;

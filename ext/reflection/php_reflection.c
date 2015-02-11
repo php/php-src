@@ -447,36 +447,27 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		/* counting static properties */
 		count = zend_hash_num_elements(&ce->properties_info);
 		if (count > 0) {
-			HashPosition pos;
 			zend_property_info *prop;
 
-			zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
-
-			while ((prop = zend_hash_get_current_data_ptr_ex(&ce->properties_info, &pos)) != NULL) {
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
 				if(prop->flags & ZEND_ACC_SHADOW) {
 					count_shadow_props++;
 				} else if (prop->flags & ZEND_ACC_STATIC) {
 					count_static_props++;
 				}
-				zend_hash_move_forward_ex(&ce->properties_info, &pos);
-			}
+			} ZEND_HASH_FOREACH_END();
 		}
 
 		/* static properties */
 		string_printf(str, "\n%s  - Static properties [%d] {\n", indent, count_static_props);
 		if (count_static_props > 0) {
-			HashPosition pos;
 			zend_property_info *prop;
 
-			zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
-
-			while ((prop = zend_hash_get_current_data_ptr_ex(&ce->properties_info, &pos)) != NULL) {
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
 				if ((prop->flags & ZEND_ACC_STATIC) && !(prop->flags & ZEND_ACC_SHADOW)) {
 					_property_string(str, prop, NULL, sub_indent.buf->val);
 				}
-
-				zend_hash_move_forward_ex(&ce->properties_info, &pos);
-			}
+			} ZEND_HASH_FOREACH_END();
 		}
 		string_printf(str, "%s  }\n", indent);
 	}
@@ -486,38 +477,30 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		/* counting static methods */
 		count = zend_hash_num_elements(&ce->function_table);
 		if (count > 0) {
-			HashPosition pos;
 			zend_function *mptr;
 
-			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
-
-			while ((mptr = zend_hash_get_current_data_ptr_ex(&ce->function_table, &pos)) != NULL) {
+			ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
 				if (mptr->common.fn_flags & ZEND_ACC_STATIC
 					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 				{
 					count_static_funcs++;
 				}
-				zend_hash_move_forward_ex(&ce->function_table, &pos);
-			}
+			} ZEND_HASH_FOREACH_END();
 		}
 
 		/* static methods */
 		string_printf(str, "\n%s  - Static methods [%d] {", indent, count_static_funcs);
 		if (count_static_funcs > 0) {
-			HashPosition pos;
 			zend_function *mptr;
 
-			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
-
-			while ((mptr = zend_hash_get_current_data_ptr_ex(&ce->function_table, &pos)) != NULL) {
+			ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
 				if (mptr->common.fn_flags & ZEND_ACC_STATIC
 					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 				{
 					string_printf(str, "\n");
 					_function_string(str, mptr, ce, sub_indent.buf->val);
 				}
-				zend_hash_move_forward_ex(&ce->function_table, &pos);
-			}
+			} ZEND_HASH_FOREACH_END();
 		} else {
 			string_printf(str, "\n");
 		}
@@ -529,17 +512,13 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		count = zend_hash_num_elements(&ce->properties_info) - count_static_props - count_shadow_props;
 		string_printf(str, "\n%s  - Properties [%d] {\n", indent, count);
 		if (count > 0) {
-			HashPosition pos;
 			zend_property_info *prop;
 
-			zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
-
-			while ((prop = zend_hash_get_current_data_ptr_ex(&ce->properties_info, &pos)) != NULL) {
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
 				if (!(prop->flags & (ZEND_ACC_STATIC|ZEND_ACC_SHADOW))) {
 					_property_string(str, prop, NULL, sub_indent.buf->val);
 				}
-				zend_hash_move_forward_ex(&ce->properties_info, &pos);
-			}
+			} ZEND_HASH_FOREACH_END();
 		}
 		string_printf(str, "%s  }\n", indent);
 	}
@@ -547,29 +526,20 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	if (obj && Z_TYPE_P(obj) == IS_OBJECT && Z_OBJ_HT_P(obj)->get_properties) {
 		string       dyn;
 		HashTable    *properties = Z_OBJ_HT_P(obj)->get_properties(obj);
-		HashPosition pos;
-		zval         **prop;
+		zend_string  *prop_name;
 
 		string_init(&dyn);
 		count = 0;
 
 		if (properties && zend_hash_num_elements(properties)) {
-			zend_hash_internal_pointer_reset_ex(properties, &pos);
-
-			while ((prop = zend_hash_get_current_data_ptr_ex(properties, &pos)) != NULL) {
-				zend_string *prop_name;
-				zend_ulong index;
-
-				if (zend_hash_get_current_key_ex(properties, &prop_name, &index, &pos) == HASH_KEY_IS_STRING) {
-					if (prop_name->len && prop_name->val[0]) { /* skip all private and protected properties */
-						if (!zend_hash_exists(&ce->properties_info, prop_name)) {
-							count++;
-							_property_string(&dyn, NULL, prop_name->val, sub_indent.buf->val);
-						}
+			ZEND_HASH_FOREACH_STR_KEY(properties, prop_name) {
+				if (prop_name && prop_name->len && prop_name->val[0]) { /* skip all private and protected properties */
+					if (!zend_hash_exists(&ce->properties_info, prop_name)) {
+						count++;
+						_property_string(&dyn, NULL, prop_name->val, sub_indent.buf->val);
 					}
 				}
-				zend_hash_move_forward_ex(properties, &pos);
-			}
+			} ZEND_HASH_FOREACH_END();
 		}
 
 		string_printf(str, "\n%s  - Dynamic properties [%d] {\n", indent, count);
@@ -582,26 +552,23 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	if (&ce->function_table) {
 		count = zend_hash_num_elements(&ce->function_table) - count_static_funcs;
 		if (count > 0) {
-			HashPosition pos;
 			zend_function *mptr;
+			zend_string *key;
 			string dyn;
 
 			count = 0;
 			string_init(&dyn);
-			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
-			while ((mptr = zend_hash_get_current_data_ptr_ex(&ce->function_table, &pos)) != NULL) {
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, key, mptr) {
 				if ((mptr->common.fn_flags & ZEND_ACC_STATIC) == 0
 					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 				{
-					zend_string *key;
-					zend_ulong num_index;
 					size_t len = mptr->common.function_name->len;
 
 					/* Do not display old-style inherited constructors */
 					if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0
 						|| mptr->common.scope == ce
-						|| zend_hash_get_current_key_ex(&ce->function_table, &key, &num_index, &pos) != HASH_KEY_IS_STRING
+						|| !key
 						|| zend_binary_strcasecmp(key->val, key->len, mptr->common.function_name->val, len) == 0)
 					{
 						zend_function *closure;
@@ -620,8 +587,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 						_free_function(closure);
 					}
 				}
-				zend_hash_move_forward_ex(&ce->function_table, &pos);
-			}
+			} ZEND_HASH_FOREACH_END();
 			string_printf(str, "\n%s  - Methods [%d] {", indent, count);
 			if (!count) {
 				string_printf(str, "\n");
@@ -777,10 +743,8 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 static void _function_closure_string(string *str, zend_function *fptr, char* indent)
 {
 	uint32_t i, count;
-	zend_ulong num_index;
 	zend_string *key;
 	HashTable *static_variables;
-	HashPosition pos;
 
 	if (fptr->type != ZEND_USER_FUNCTION || !fptr->op_array.static_variables) {
 		return;
@@ -795,13 +759,10 @@ static void _function_closure_string(string *str, zend_function *fptr, char* ind
 
 	string_printf(str, "\n");
 	string_printf(str, "%s- Bound Variables [%d] {\n", indent, zend_hash_num_elements(static_variables));
-	zend_hash_internal_pointer_reset_ex(static_variables, &pos);
 	i = 0;
-	while (i < count) {
-		zend_hash_get_current_key_ex(static_variables, &key, &num_index, &pos);
+	ZEND_HASH_FOREACH_STR_KEY(static_variables, key) {
 		string_printf(str, "%s    Variable #%d [ $%s ]\n", indent, i++, key->val);
-		zend_hash_move_forward_ex(static_variables, &pos);
-	}
+	} ZEND_HASH_FOREACH_END();
 	string_printf(str, "%s}\n", indent);
 }
 /* }}} */
@@ -1118,12 +1079,10 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 	}
 
 	{
-		HashPosition iterator;
 		zend_function *fptr;
 		int first = 1;
 
-		zend_hash_internal_pointer_reset_ex(CG(function_table), &iterator);
-		while ((fptr = zend_hash_get_current_data_ptr_ex(CG(function_table), &iterator)) != NULL) {
+		ZEND_HASH_FOREACH_PTR(CG(function_table), fptr) {
 			if (fptr->common.type==ZEND_INTERNAL_FUNCTION
 				&& fptr->internal_function.module == module) {
 				if (first) {
@@ -1132,8 +1091,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 				}
 				_function_string(str, fptr, NULL, "    ");
 			}
-			zend_hash_move_forward_ex(CG(function_table), &iterator);
-		}
+		} ZEND_HASH_FOREACH_END();
 		if (!first) {
 			string_printf(str, "%s  }\n", indent);
 		}
@@ -5300,7 +5258,6 @@ ZEND_METHOD(reflection_extension, getFunctions)
 {
 	reflection_object *intern;
 	zend_module_entry *module;
-	HashPosition iterator;
 	zval function;
 	zend_function *fptr;
 
@@ -5310,15 +5267,13 @@ ZEND_METHOD(reflection_extension, getFunctions)
 	GET_REFLECTION_OBJECT_PTR(module);
 
 	array_init(return_value);
-	zend_hash_internal_pointer_reset_ex(CG(function_table), &iterator);
-	while ((fptr = zend_hash_get_current_data_ptr_ex(CG(function_table), &iterator)) != NULL) {
+	ZEND_HASH_FOREACH_PTR(CG(function_table), fptr) {
 		if (fptr->common.type==ZEND_INTERNAL_FUNCTION
 			&& fptr->internal_function.module == module) {
 			reflection_function_factory(fptr, NULL, &function);
 			zend_hash_update(Z_ARRVAL_P(return_value), fptr->common.function_name, &function);
 		}
-		zend_hash_move_forward_ex(CG(function_table), &iterator);
-	}
+	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 

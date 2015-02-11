@@ -161,6 +161,7 @@ typedef struct _zend_persistent_script {
 	int            ping_auto_globals_mask; /* which autoglobals are used by the script */
 	accel_time_t   timestamp;              /* the script modification time */
 	zend_bool      corrupted;
+	zend_bool      is_phar;
 
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */

@@ -73,7 +73,7 @@ define dump_bt
 
 			set $callFrameSize = (sizeof(zend_execute_data) + sizeof(zval) - 1) / sizeof(zval)
 
-			set $count = $ex->num_args
+			set $count = $ex->This.u2.num_args
 			set $arg = 0
 			while $arg < $count
 				if $arg > 0
@@ -181,7 +181,7 @@ define ____printzv_contents
 		printf "array: "
 		if ! $arg1
 			set $ind = $ind + 1
-			____print_ht $zvalue->value.ht 1
+			____print_ht &$zvalue->value.arr->ht 1
 			set $ind = $ind - 1
 			set $i = $ind
 			while $i > 0
