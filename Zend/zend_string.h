@@ -215,7 +215,7 @@ static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_str
 	return s1 == s2 || (s1->len == s2->len && !memcmp(s1->val, s2->val, s1->len));
 }
 
-#define zend_string_equals_str_ci(s1, s2) \
+#define zend_string_equals_ci(s1, s2) \
 	((s1)->len == (s2)->len && !zend_binary_strcasecmp((s1)->val, (s1)->len, (s2)->val, (s2)->len))
 
 #define zend_string_equals_literal_ci(str, c) \
