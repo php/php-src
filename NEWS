@@ -281,6 +281,9 @@ PHP                                                                        NEWS
   . Implemented FR #55508 (listen and listen.allowed_clients should take IPv6
     addresses). (Robin Gloster)
 
+- OpenSSL:
+  . Revert regression introduced by fix of bug #41631
+
 - Reflection:
   . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
 
