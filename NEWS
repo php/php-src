@@ -39,10 +39,6 @@ PHP                                                                        NEWS
   . Fixed bug #64938 (libxml_disable_entity_loader setting is shared
     between threads). (Martin Jansen)
 
-- OpenSSL:
-  . Fixed bug #55618 (use case-insensitive cert name matching).
-    (Daniel Lowrey)
-
 - PDO_mysql:
   . Fixed bug #68750 (PDOMysql with mysqlnd does not allow the usage of
     named pipes). (steffenb198 at aol dot com)
@@ -133,6 +129,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #67111 (Memory leak when using "continue 2" inside two foreach
     loops). (Nikita)
+
+- OpenSSL:
+  . Fixed bug #55618 (use case-insensitive cert name matching). (Daniel Lowrey)
 
 - Pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
