@@ -2871,13 +2871,15 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 		} else {
 			zend_execute_internal(call, ret);
 		}
+		
+		ZEND_ASSERT(
+			!call->func ||
+			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+			zend_verify_internal_return_type(call->func, EX_VAR(opline->result.var)));
+
 		EG(current_execute_data) = call->prev_execute_data;
 		zend_vm_stack_free_args(call);
 		zend_vm_stack_free_call_frame(call);
-
-		ZEND_ASSERT(
-			!(fbc->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(fbc, EX_VAR(opline->result.var)));
 
 		if (!RETURN_VALUE_USED(opline)) {
 			zval_ptr_dtor(EX_VAR(opline->result.var));
