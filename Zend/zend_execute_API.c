@@ -1395,7 +1395,7 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 	zend_function *func;
 	zend_abstract_info ai;
 
-	if ((ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) && !(ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+	if ((ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) && !(ce->ce_flags & (ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 		memset(&ai, 0, sizeof(ai));
 
 		ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
