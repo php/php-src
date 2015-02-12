@@ -1070,6 +1070,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 	}
 
 	fbc = Z_FUNC_P(func);
+	CHECK_METHOD_CASE_ZSTR(method_name,fbc);
 	/* Check access level */
 	if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 		zend_function *updated_fbc;
@@ -1080,6 +1081,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 		updated_fbc = zend_check_private_int(fbc, zobj->ce, lc_method_name);
 		if (EXPECTED(updated_fbc != NULL)) {
 			fbc = updated_fbc;
+			CHECK_METHOD_CASE_ZSTR(method_name,fbc);
 		} else {
 			if (zobj->ce->__call) {
 				fbc = zend_get_user_call_function(zobj->ce, method_name);
@@ -1099,6 +1101,7 @@ static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_str
 				if (priv_fbc->common.fn_flags & ZEND_ACC_PRIVATE
 					&& priv_fbc->common.scope == EG(scope)) {
 					fbc = priv_fbc;
+					CHECK_METHOD_CASE_ZSTR(method_name,fbc);
 				}
 			}
 		}
@@ -1212,6 +1215,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		zval *func = zend_hash_find(&ce->function_table, lc_function_name);
 		if (EXPECTED(func != NULL)) {
 			fbc = Z_FUNC_P(func);
+			CHECK_METHOD_CASE_ZSTR(function_name,fbc);
 		} else {
 			if (UNEXPECTED(!key)) {
 				zend_string_release(lc_function_name);

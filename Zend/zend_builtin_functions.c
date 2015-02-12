@@ -1380,6 +1380,7 @@ ZEND_FUNCTION(class_exists)
 		}
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		zend_string_release(lc_name);
+		CHECK_CLASS_CASE_ZSTR(class_name,ce);
 		RETURN_BOOL(ce && !((ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT)) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
 	}
 
@@ -1422,6 +1423,7 @@ ZEND_FUNCTION(interface_exists)
 		}
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		zend_string_release(lc_name);
+		CHECK_CLASS_CASE_ZSTR(iface_name,ce);
 		RETURN_BOOL(ce && ce->ce_flags & ZEND_ACC_INTERFACE);
 	}
 
@@ -1464,6 +1466,7 @@ ZEND_FUNCTION(trait_exists)
 		}
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		zend_string_release(lc_name);
+		CHECK_CLASS_CASE_ZSTR(trait_name,ce);
 		RETURN_BOOL(ce && ((ce->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
 	}
 
@@ -1504,6 +1507,7 @@ ZEND_FUNCTION(function_exists)
 
 	func = zend_hash_find_ptr(EG(function_table), lcname);
 	zend_string_release(lcname);
+	CHECK_FUNCTION_CASE(name,name_len,func);
 
 	/*
 	 * A bit of a hack, but not a bad one: we see if the handler of the function

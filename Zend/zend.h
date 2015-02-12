@@ -189,6 +189,42 @@ struct _zend_class_entry {
 	} info;
 };
 
+#define CHECK_NAME_CASE(_type,_name,_len,_ref_name,_ref_len) { \
+	char *_tmp_name=_name; \
+	size_t _tmp_len=_len; \
+	if ((*(_tmp_name))=='\\') { \
+		_tmp_name++; \
+		_tmp_len--; \
+	} \
+	if (((_tmp_len)!=(_ref_len)) \
+		|| memcmp((_tmp_name),(_ref_name),(_tmp_len))) { \
+		zend_error(E_STRICT,"Case mismatch in %s name (%s should be %s)" \
+			,_type,(_tmp_name),(_ref_name)); \
+	} }
+
+#define CHECK_CLASS_CASE(_name,_len,_ce) { \
+	if (_ce) CHECK_NAME_CASE("class",(_name),(_len) \
+		,(_ce)->name->val,(_ce)->name->len); }
+
+#define CHECK_FUNCTION_CASE(_name,_len,_fe) { \
+		if (_fe) CHECK_NAME_CASE("function",(_name),(_len) \
+			,(_fe)->common.function_name->val \
+			,(_fe)->common.function_name->len); }
+
+#define CHECK_METHOD_CASE(_name,_len,_fe) { \
+		if (_fe) CHECK_NAME_CASE("method",(_name),(_len) \
+			,(_fe)->common.function_name->val \
+			,(_fe)->common.function_name->len); }
+
+#define CHECK_CLASS_CASE_ZSTR(_zstr,_ce) \
+	CHECK_CLASS_CASE((_zstr)->val,(_zstr)->len,(_ce))
+
+#define CHECK_FUNCTION_CASE_ZSTR(_zstr,_fe) \
+	CHECK_FUNCTION_CASE((_zstr)->val,(_zstr)->len,(_fe))
+
+#define CHECK_METHOD_CASE_ZSTR(_zstr,_fe) \
+	CHECK_METHOD_CASE((_zstr)->val,(_zstr)->len,(_fe))
+
 typedef struct _zend_utility_functions {
 	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 	size_t (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
