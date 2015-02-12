@@ -1726,7 +1726,7 @@ PHP_FUNCTION(range)
 				goto err;
 			}
 			/* Initialize the return_value as an array. */
-			array_init_size(return_value, ((low - high) / lstep) + 1);
+			array_init_size(return_value, (uint32_t)(((low - high) / lstep) + 1));
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low >= high; low -= (unsigned int)lstep) {
@@ -1746,7 +1746,7 @@ PHP_FUNCTION(range)
 				err = 1;
 				goto err;
 			}
-			array_init_size(return_value, ((high - low) / lstep) + 1);
+			array_init_size(return_value, (uint32_t)(((high - low) / lstep) + 1));
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low <= high; low += (unsigned int)lstep) {
@@ -1785,7 +1785,7 @@ double_str:
 				goto err;
 			}
 
-			array_init_size(return_value, ((low - high) / step) + 1);
+			array_init_size(return_value, (uint32_t)(((low - high) / step) + 1));
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			for (value = low; value >= (high - DOUBLE_DRIFT_FIX); value = low - (++i * step)) {
@@ -1799,7 +1799,7 @@ double_str:
 				goto err;
 			}
 
-			array_init_size(return_value, ((high - low) / step) + 1);
+			array_init_size(return_value, (uint32_t)(((high - low) / step) + 1));
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (value = low; value <= (high + DOUBLE_DRIFT_FIX); value = low + (++i * step)) {
@@ -1826,7 +1826,7 @@ long_str:
 				err = 1;
 				goto err;
 			}
-			array_init_size(return_value, ((low - high) / lstep) + 1);
+			array_init_size(return_value, (uint32_t)(((low - high) / lstep) + 1));
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low >= high; low -= lstep) {
@@ -1839,7 +1839,7 @@ long_str:
 				err = 1;
 				goto err;
 			}
-			array_init_size(return_value, ((high - low) / lstep) + 1);
+			array_init_size(return_value, (uint32_t)(((high - low) / lstep) + 1));
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 				for (; low <= high; low += lstep) {
