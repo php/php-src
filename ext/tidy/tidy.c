@@ -936,7 +936,7 @@ static void *php_tidy_get_opt_val(PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionT
 			break;
 
 		case TidyInteger:
-			return (void *) tidyOptGetInt(ptdoc->doc, tidyOptGetId(opt));
+			return (void *) (uintptr_t) tidyOptGetInt(ptdoc->doc, tidyOptGetId(opt));
 			break;
 
 		case TidyBoolean:
