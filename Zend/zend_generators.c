@@ -60,6 +60,12 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 				if (brk_opline->opcode == ZEND_FREE) {
 					zval *var = EX_VAR(brk_opline->op1.var);
 					zval_ptr_dtor_nogc(var);
+				} else if (brk_opline->opcode == ZEND_FE_FREE) {
+					zval *var = EX_VAR(brk_opline->op1.var);
+					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
+						zend_hash_iterator_del(Z_FE_ITER_P(var));
+					}
+					zval_ptr_dtor_nogc(var);
 				}
 			}
 		}

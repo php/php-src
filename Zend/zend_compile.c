@@ -829,7 +829,7 @@ static int generate_free_loop_var(znode *var) /* {{{ */
 		{
 			zend_op *opline = get_next_op(CG(active_op_array));
 
-			opline->opcode = ZEND_FREE;
+			opline->opcode = var->flag ? ZEND_FE_FREE : ZEND_FREE;
 			SET_NODE(opline->op1, var);
 			SET_UNUSED(opline->op2);
 		}
@@ -3438,31 +3438,18 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	}
 
 	opnum_reset = get_next_op_number(CG(active_op_array));
-	opline = zend_emit_op(&reset_node, ZEND_FE_RESET, &expr_node, NULL);
-	if (by_ref && is_variable) {
-		opline->extended_value = ZEND_FE_FETCH_BYREF;
-	}
+	opline = zend_emit_op(&reset_node, by_ref ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
 
+	reset_node.flag = 1; /* generate FE_FREE */
 	zend_stack_push(&CG(loop_var_stack), &reset_node);
 
 	opnum_fetch = get_next_op_number(CG(active_op_array));
-	opline = zend_emit_op(&value_node, ZEND_FE_FETCH, &reset_node, NULL);
-	if (by_ref) {
-		opline->extended_value |= ZEND_FE_FETCH_BYREF;
-	}
+	opline = zend_emit_op(&value_node, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
 	if (key_ast) {
-		opline->extended_value |= ZEND_FE_FETCH_WITH_KEY;
+		opline->extended_value = 1;
 	}
 
 	opline = zend_emit_op(NULL, ZEND_OP_DATA, NULL, NULL);
-
-	/* Allocate enough space to keep HashPointer on VM stack */
-	opline->op1_type = IS_TMP_VAR;
-	opline->op1.var = get_temporary_variable(CG(active_op_array));
-	if (sizeof(HashPointer) > sizeof(zval)) {
-		/* Make sure 1 zval is enough for HashPointer (2 must be enough) */
-		get_temporary_variable(CG(active_op_array));
-	}
 
 	if (key_ast) {
 		zend_make_tmp_result(&key_node, opline);
@@ -3554,6 +3541,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&expr_node, expr_ast);
 
+	expr_node.flag = 0;
 	zend_stack_push(&CG(loop_var_stack), &expr_node);
 
 	zend_begin_loop();
