@@ -25,6 +25,7 @@
 #include "php_globals.h"
 #include "php_ini.h"
 #include "php_standard.h"
+#include "php_rand.h"
 #include "php_math.h"
 #include "php_http.h"
 #include "php_incomplete_class.h"
@@ -1872,31 +1873,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_quoted_printable_encode, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
 /* }}} */
-/* {{{ rand.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_srand, 0, 0, 0)
-	ZEND_ARG_INFO(0, seed)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mt_srand, 0, 0, 0)
-	ZEND_ARG_INFO(0, seed)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_rand, 0, 0, 0)
-	ZEND_ARG_INFO(0, min)
-	ZEND_ARG_INFO(0, max)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mt_rand, 0, 0, 0)
-	ZEND_ARG_INFO(0, min)
-	ZEND_ARG_INFO(0, max)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_getrandmax, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_mt_getrandmax, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ sha1.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sha1, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
@@ -2819,6 +2795,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(mt_rand,														arginfo_mt_rand)
 	PHP_FE(mt_srand,														arginfo_mt_srand)
 	PHP_FE(mt_getrandmax,													arginfo_mt_getrandmax)
+	PHP_FE(rand_bytes,													arginfo_rand_bytes)
 
 #if HAVE_GETSERVBYNAME
 	PHP_FE(getservbyname,													arginfo_getservbyname)
@@ -3592,6 +3569,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
+	register_rand_constants(INIT_FUNC_ARGS_PASSTHRU);
 
 	BASIC_ADD_SUBMODULE(dl)
 	BASIC_ADD_SUBMODULE(mail)

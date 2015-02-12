@@ -29,6 +29,14 @@
 #include "basic_functions.h"
 #include "php_lcg.h"
 
+typedef enum {
+	RANDOM = 0,
+	URANDOM,
+	RAND,
+	MT_RAND,
+	ARANDOM
+} rand_bytes_source;
+
 /* System Rand functions */
 #ifndef RAND_MAX
 #define RAND_MAX (1<<15)
@@ -57,5 +65,43 @@ PHPAPI void php_srand(zend_long seed);
 PHPAPI zend_long php_rand(void);
 PHPAPI void php_mt_srand(php_uint32 seed);
 PHPAPI php_uint32 php_mt_rand(void);
+void register_rand_constants(INIT_FUNC_ARGS);
+
+PHP_FUNCTION(srand);
+PHP_FUNCTION(rand);
+PHP_FUNCTION(getrandmax);
+PHP_FUNCTION(mt_srand);
+PHP_FUNCTION(mt_rand);
+PHP_FUNCTION(mt_getrandmax);
+PHP_FUNCTION(rand_bytes);
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_srand, 0, 0, 0)
+	ZEND_ARG_INFO(0, seed)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mt_srand, 0, 0, 0)
+	ZEND_ARG_INFO(0, seed)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_rand, 0, 0, 0)
+	ZEND_ARG_INFO(0, min)
+	ZEND_ARG_INFO(0, max)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mt_rand, 0, 0, 0)
+	ZEND_ARG_INFO(0, min)
+	ZEND_ARG_INFO(0, max)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_getrandmax, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_mt_getrandmax, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_rand_bytes, 0, 0, 1)
+	ZEND_ARG_INFO(0, length)
+	ZEND_ARG_INFO(0, source)
+ZEND_END_ARG_INFO()
 
 #endif	/* PHP_RAND_H */

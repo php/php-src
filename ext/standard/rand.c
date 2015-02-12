@@ -33,6 +33,23 @@
 
 #include "basic_functions.h"
 
+#if PHP_WIN32
+# include "win32/winutil.h"
+#endif
+
+#include "fcntl.h"
+
+/* {{{ register_rand_constants
+ */
+void register_rand_constants(INIT_FUNC_ARGS)
+{
+	REGISTER_LONG_CONSTANT("RNG_DEV_RANDOM",  RANDOM,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("RNG_DEV_URANDOM", URANDOM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("RNG_DEV_ARANDOM", ARANDOM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("RNG_RAND",        RAND,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("RNG_MT_RAND",     MT_RAND, CONST_CS | CONST_PERSISTENT);
+}
+/* }}} */
 
 /* SYSTEM RAND FUNCTIONS */
 
@@ -369,6 +386,95 @@ PHP_FUNCTION(mt_getrandmax)
 	 * compatibility with the previous php_rand
 	 */
   	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
+}
+/* }}} */
+
+/* {{{ proto string rand_bytes(int length, int source)
+   Create a string of random bytes */
+PHP_FUNCTION(rand_bytes)
+{
+	char *bytes;
+	zend_long source = URANDOM;
+	zend_long length;
+	int n = 0;
+	int fd = -1;
+	size_t read_bytes = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &length, &source) == FAILURE) {
+		return;
+	}
+
+	if (length <= 0 || length >= INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Cannot create a random string with a length of less than 1 or greater than %d", INT_MAX);
+		RETURN_FALSE;
+	}
+
+	bytes = ecalloc(length + 1, 1);
+
+	switch(source) {
+#if PHP_WIN32
+		case ARANDOM:
+		case RANDOM:
+		case URANDOM:
+			BYTE *bytes_b = (BYTE *) iv;
+			if (php_win32_get_rand_bytes(bytes_b, (size_t)length) == FAILURE){
+				efree(bytes);
+				php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
+				RETURN_FALSE;
+			}
+			n = (int)length;
+			break;
+#else
+		case ARANDOM:
+			fd = open("/dev/arandom", O_RDONLY);
+		case RANDOM:
+			// Didn't get /dev/arandom, fall through to random for best quality
+			if (fd < 0) {
+				fd = open("/dev/random", O_RDONLY);
+			}
+		case URANDOM:
+			// Didn't get /dev/random, fall through to urandom
+			if (fd < 0) {
+				fd = open("/dev/urandom", O_RDONLY);
+				if (fd < 0) {
+					efree(bytes);
+					php_error_docref(NULL, E_WARNING, "Cannot open source device");
+					RETURN_FALSE;
+				}
+			}
+			while (read_bytes < length) {
+				n = read(fd, bytes + read_bytes, length - read_bytes);
+				if (n < 0) {
+					break;
+				}
+				read_bytes += n;
+			}
+			n = read_bytes;
+			close(fd);
+			if (n < length) {
+				efree(bytes);
+				php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
+				RETURN_FALSE;
+			}
+			break;
+#endif
+		case MT_RAND:
+			if (!BG(mt_rand_is_seeded)) {
+				php_mt_srand(GENERATE_SEED());
+			}
+			n = (int)length;
+			while (length) {
+				bytes[--length] = (char)php_mt_rand();
+			}
+			break;
+		default:
+			n = (int)length;
+			while (length) {
+				bytes[--length] = (char)(255.0 * php_rand() / RAND_MAX);
+			}
+	}
+	RETVAL_STRINGL(bytes, n);
+	efree(bytes);
 }
 /* }}} */
 
