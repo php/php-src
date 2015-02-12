@@ -3840,20 +3840,12 @@ void zend_compile_if(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_switch_info_dtor(zval *zv) {
-	if (Z_TYPE_P(zv) == IS_PTR) {
-		efree(Z_PTR_P(zv));
-	} else {
-		ZVAL_PTR_DTOR(zv);
-	}
-}
-
 void zend_compile_switch(zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 	zend_ast_list *cases = zend_ast_get_list(ast->child[1]);
 
-	uint32_t i;
+	uint32_t i, switch_op_off;
 	int default_case = -1;
 
 	znode expr_node, case_node;
@@ -3861,7 +3853,6 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 	uint32_t *jmpnz_opnums = safe_emalloc(sizeof(uint32_t), cases->children, 0);
 	uint32_t opnum_default_jmp;
 	int const_nodes = 0;
-	HashTable *jmp_array;
 	zval compile_compare = {{0}};
 
 	zend_compile_expr(&expr_node, expr_ast);
@@ -3936,11 +3927,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		}
 
 		if (const_nodes > 2) {
-			znode info_znode;
-			info_znode.op_type = IS_CONST;
-			ZVAL_NEW_ARR(&info_znode.u.constant);
-			jmp_array = Z_ARRVAL(info_znode.u.constant);
-			zend_emit_op(NULL, ZEND_SWITCH, &expr_node, &info_znode);
+			switch_op_off = zend_emit_op(NULL, ZEND_SWITCH, &expr_node, NULL) - CG(active_op_array)->opcodes;
 		}
 	}
 
@@ -3996,19 +3983,20 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 	}
 
 	if (const_nodes > 2) { // else it's not worth it...
-		zval off, zv;
-		zend_switch_table *info = emalloc(sizeof(zend_switch_table));
+		zval off;
+		uint32_t truth, real_true, nully, zero, long_zero;
+		HashTable *jmp_array;
+		znode ht_znode;
 
-		zend_hash_init(jmp_array, cases->children * 2, sigh, zend_switch_info_dtor, 0);
-		ZVAL_PTR(&zv, info);
-		zend_hash_add(jmp_array, CG(empty_string), &zv);		
+		ht_znode.op_type = IS_CONST;
+		ZVAL_NEW_ARR(&ht_znode.u.constant);
+		jmp_array = Z_ARRVAL(ht_znode.u.constant);
+		SET_NODE(CG(active_op_array)->opcodes[switch_op_off].op2, &ht_znode);
+
+		zend_hash_init(jmp_array, cases->children * 2, sigh, ZVAL_PTR_DTOR, 0);
 
 		ZVAL_LONG(&off, opnum_default_jmp);
-		info->truth = opnum_default_jmp;
-		info->real_true = opnum_default_jmp;
-		info->nully = opnum_default_jmp;
-		info->zero = opnum_default_jmp;
-		info->long_zero = opnum_default_jmp;
+		truth = real_true = nully = zero = long_zero = opnum_default_jmp;
 
 		i = cases->children;
 		while (i--) {
@@ -4031,39 +4019,50 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 								zend_hash_index_update(jmp_array, lval, &off);
 							}
 							if (Z_STRLEN_P(zv) == 1 && *Z_STRVAL_P(zv) == '0') {
-								info->zero = jmpnz_opnums[i];
+								zero = jmpnz_opnums[i];
 							} else {
-								info->truth = jmpnz_opnums[i];
+								truth = jmpnz_opnums[i];
 							}
 							break;
 						}
 						/* fallthrough */
 
 					case IS_FALSE:
-						info->zero = jmpnz_opnums[i];
+						zero = jmpnz_opnums[i];
 						/* fallthrough */
 					case IS_NULL:
-						info->nully = jmpnz_opnums[i];
+						nully = jmpnz_opnums[i];
 						break;
 
 					case IS_LONG:
 						zend_hash_index_update(jmp_array, Z_LVAL_P(zv), &off);
 						if (Z_LVAL_P(zv)) {
-							info->truth = jmpnz_opnums[i];
+							truth = jmpnz_opnums[i];
 						} else {
-							info->long_zero = jmpnz_opnums[i];
-							info->zero = jmpnz_opnums[i];
-							info->nully = jmpnz_opnums[i];
+							long_zero = jmpnz_opnums[i];
+							zero = jmpnz_opnums[i];
+							nully = jmpnz_opnums[i];
 						}
 						break;
 
 					case IS_TRUE:
-						info->truth = jmpnz_opnums[i];
-						info->real_true = jmpnz_opnums[i];
+						truth = jmpnz_opnums[i];
+						real_true = jmpnz_opnums[i];
 						break;
 				}
 			}
 		}
+
+		Z_LVAL(off) = truth;
+		zend_add_literal(CG(active_op_array), &off);
+		Z_LVAL(off) = real_true;
+		zend_add_literal(CG(active_op_array), &off);
+		Z_LVAL(off) = nully;
+		zend_add_literal(CG(active_op_array), &off);
+		Z_LVAL(off) = zero;
+		zend_add_literal(CG(active_op_array), &off);
+		Z_LVAL(off) = long_zero;
+		zend_add_literal(CG(active_op_array), &off);
 	}
 
 	zend_end_loop(get_next_op_number(CG(active_op_array)), 1);

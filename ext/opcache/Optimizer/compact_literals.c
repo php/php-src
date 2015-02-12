@@ -169,6 +169,12 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 							op_array);
 					}
 					break;
+				case ZEND_SWITCH:
+					if (opline->op1_type == IS_CONST) {
+						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1, 0, 1);
+					}
+					LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 0, 0, ZEND_SWITCH_OFF_MODES + 1);
+					break;
 				case ZEND_CATCH:
 					LITERAL_INFO(opline->op1.constant, LITERAL_CLASS, 1, 1, 2);
 					break;
@@ -364,17 +370,30 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					map[i] = l_true;
 					break;
 				case IS_LONG:
-					if ((pos = zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i]))) != NULL) {
+					if ((info[i].flags & LITERAL_MAY_MERGE) && (pos = zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i]))) != NULL) {
 						map[i] = Z_LVAL_P(pos);
 					} else {
 						map[i] = j;
-						ZVAL_LONG(&zv, j);
-						zend_hash_index_add_new(&hash, Z_LVAL(op_array->literals[i]), &zv);
+						if (info[i].flags & LITERAL_MAY_MERGE) {
+							ZVAL_LONG(&zv, j);
+							zend_hash_index_add_new(&hash, Z_LVAL(op_array->literals[i]), &zv);
+						}
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];
 						}
+						if (LITERAL_NUM_SLOTS(info[i].flags)) {
+							Z_CACHE_SLOT(op_array->literals[j]) = cache_slots;
+							cache_slots += LITERAL_NUM_SLOTS(info[i].flags);
+						}
 						j++;
+						n = LITERAL_NUM_RELATED(info[i].flags);
+						while (n > 1) {
+							i++;
+							if (i != j) op_array->literals[j] = op_array->literals[i];
+							j++;
+							n--;
+						}
 					}
 					break;
 				case IS_DOUBLE:
@@ -468,7 +487,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		op_array->last_literal = j;
 		op_array->cache_size = cache_size;
 
-	    /* Update opcodes to use new literals table */
+		/* Update opcodes to use new literals table */
 		opline = op_array->opcodes;
 		end = opline + op_array->last;
 		while (opline < end) {
