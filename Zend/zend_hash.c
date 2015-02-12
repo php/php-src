@@ -1415,6 +1415,9 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 
 		if (key_type == HASH_KEY_IS_LONG) {
 			p->h = num_index;
+			if ((long)num_index >= (long)ht->nNextFreeElement) {
+				ht->nNextFreeElement = num_index < LONG_MAX ? num_index + 1 : LONG_MAX;
+			}
 		} else {
 			p->h = h;
 			p->nKeyLength = str_length;

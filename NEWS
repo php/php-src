@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2015, PHP 5.5.23
 
+- Core:
+  . Fixed bug #69017 (Fail to push to the empty array with the constant value
+    defined in class scope). (Laruence)
+
 - ODBC:
   . Bug #68964 (Allowed memory size exhausted with odbc_exec). (Anatol)
 
