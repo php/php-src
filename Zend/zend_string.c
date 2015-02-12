@@ -106,7 +106,7 @@ static zend_string *zend_new_interned_string_int(zend_string *str)
 	GC_FLAGS(str) |= IS_STR_INTERNED;
 
 	if (CG(interned_strings).nNumUsed >= CG(interned_strings).nTableSize) {
-		if ((CG(interned_strings).nTableSize << 1) > 0) {	/* Let's double the table size */
+		if (CG(interned_strings).nTableSize < HT_MAX_SIZE) {	/* Let's double the table size */
 			Bucket *d = (Bucket *) perealloc_recoverable(CG(interned_strings).arData, (CG(interned_strings).nTableSize << 1) * sizeof(Bucket), 1);
 			uint32_t *h = (uint32_t *) perealloc_recoverable(CG(interned_strings).arHash, (CG(interned_strings).nTableSize << 1) * sizeof(uint32_t), 1);
 

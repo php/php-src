@@ -181,6 +181,16 @@ typedef struct _HashTable {
 	dtor_func_t       pDestructor;
 } HashTable;
 
+#define HT_MIN_SIZE 8
+
+#if SIZEOF_SIZE_T == 4
+# define HT_MAX_SIZE 0x04000000 /* small enough to avoid overflow checks */
+#elif SIZEOF_SIZE_T == 8
+# define HT_MAX_SIZE 0x80000000
+#else
+# error "Unknown SIZEOF_SIZE_T"
+#endif
+
 typedef uint32_t HashPosition;
 
 typedef struct _HashTableIterator {
