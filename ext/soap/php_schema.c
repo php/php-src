@@ -1062,7 +1062,7 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 {
 	xmlNodePtr trav;
 	xmlAttrPtr ns, name, ref = NULL;
-	sdlContentModelPtr newModel;
+	sdlContentModelPtr newModel = NULL;
 
 	ns = get_attribute(groupType->properties, "targetNamespace");
 	if (ns == NULL) {

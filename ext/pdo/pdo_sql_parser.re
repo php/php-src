@@ -422,9 +422,7 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 		padding = 3;
 	}
 	if(params) {
-		HashPosition *param_pos;
-		zend_hash_internal_pointer_reset(params);
-		while ((param == zend_hash_get_current_data_ptr_ex(params, &param_pos)) != NULL) {
+		ZEND_HASH_FOREACH_PTR(params, param) {
 			if(param->parameter) {
 				convert_to_string(param->parameter);
 				/* accommodate a string that needs to be fully quoted
@@ -433,8 +431,7 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
                 */
 				newbuffer_len += padding * Z_STRLEN_P(param->parameter);
 			}
-			zend_hash_move_forward(params);
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 	*outquery = (char *) emalloc(newbuffer_len + 1);
 	*outquery_len = 0;

@@ -95,7 +95,8 @@ typedef union _znode_op {
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */
-	int op_type;
+	zend_uchar op_type;
+	zend_uchar flag;
 	union {
 		znode_op op;
 		zval constant; /* replaced by literal/zv */
@@ -831,9 +832,6 @@ int zend_add_literal(zend_op_array *op_array, zval *zv);
 
 #define ZEND_FETCH_ARG_MASK         0x000fffff
 
-#define ZEND_FE_FETCH_BYREF	1
-#define ZEND_FE_FETCH_WITH_KEY	2
-
 #define EXT_TYPE_FREE_ON_RETURN		(1<<2)
 
 #define ZEND_MEMBER_FUNC_CALL	1<<0
@@ -926,6 +924,9 @@ END_EXTERN_C()
 
 /* disable usage of builtin instruction for strlen() */
 #define ZEND_COMPILE_NO_BUILTIN_STRLEN			(1<<6)
+
+/* disable substitution of persistent constants at compile-time */
+#define ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION	(1<<7)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

@@ -102,7 +102,7 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ *
 
 	if (ht) {
 		if (zend_hash_num_elements(ht)) {
-			HashPosition pos;
+			int first = 1;
 
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_printf("<tr><td class=\"e\">Registered %s</td><td class=\"v\">", name);
@@ -110,21 +110,20 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ *
 				php_info_printf("\nRegistered %s => ", name);
 			}
 
-			zend_hash_internal_pointer_reset_ex(ht, &pos);
-			while (zend_hash_get_current_key_ex(ht, &key, NULL, &pos) == HASH_KEY_IS_STRING)
-			{
-				if (!sapi_module.phpinfo_as_text) {
-					php_info_print_html_esc(key->val, key->len);
-				} else {
-					php_info_print(key->val);
+			ZEND_HASH_FOREACH_STR_KEY(ht, key) {
+				if (key) {
+					if (first) {
+						first = 0;
+					} else {
+						php_info_print(", ");
+					}
+					if (!sapi_module.phpinfo_as_text) {
+						php_info_print_html_esc(key->val, key->len);
+					} else {
+						php_info_print(key->val);
+					}
 				}
-				zend_hash_move_forward_ex(ht, &pos);
-				if (zend_hash_get_current_key_ex(ht, &key, NULL, &pos) == HASH_KEY_IS_STRING) {
-					php_info_print(", ");
-				} else {
-					break;
-				}
-			}
+			} ZEND_HASH_FOREACH_END();
 
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("</td></tr>\n");

@@ -519,7 +519,7 @@ static void php_session_initialize(void) /* {{{ */
 
 	/* Read data */
 	php_session_track_init();
-	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val) == FAILURE) {
+	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, PS(gc_maxlifetime)) == FAILURE) {
 		/* Some broken save handler implementation returns FAILURE for non-existent session ID */
 		/* It's better to raise error for this, but disabled error for better compatibility */
 		/*
@@ -557,13 +557,13 @@ static void php_session_save_current_state(int write) /* {{{ */
 						&& val->len == PS(session_vars)->len
 						&& !memcmp(val->val, PS(session_vars)->val, val->len)
 					) {
-						ret = PS(mod)->s_update_timestamp(&PS(mod_data), PS(id), val);
+						ret = PS(mod)->s_update_timestamp(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
 					} else {
-						ret = PS(mod)->s_write(&PS(mod_data), PS(id), val);
+						ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, PS(gc_maxlifetime));
 					}
 					zend_string_release(val);
 				} else {
-					ret = PS(mod)->s_write(&PS(mod_data), PS(id), STR_EMPTY_ALLOC());
+					ret = PS(mod)->s_write(&PS(mod_data), PS(id), STR_EMPTY_ALLOC(), PS(gc_maxlifetime));
 				}
 			}
 

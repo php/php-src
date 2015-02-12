@@ -1736,15 +1736,15 @@ static int php_openssl_enable_crypto(php_stream *stream,
 	return -1;
 }
 
-static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
-{
-	return php_openssl_sockop_io( 0, stream, (char*)buf, count );
-}
-/* }}} */
-
 static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	return php_openssl_sockop_io( 1, stream, buf, count );
+}
+/* }}} */
+
+static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count) /* {{{ */
+{
+	return php_openssl_sockop_io( 0, stream, (char*)buf, count );
 }
 /* }}} */
 
@@ -1762,10 +1762,10 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 	/* Only do this if SSL is active. */
 	if (sslsock->ssl_active) {
 		int retry = 1;
-		struct timeval start_time,
-		               *timeout;
-		int    blocked     = sslsock->s.is_blocked,
-		       has_timeout = 0;
+		struct timeval start_time;
+		struct timeval *timeout;
+		int blocked = sslsock->s.is_blocked;
+		int has_timeout = 0;
 		int nr_bytes = 0;
 
 		/* prevent overflow in openssl */
@@ -1812,7 +1812,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 			/* Now, do the IO operation. Don't block if we can't complete... */
 			if (read) {
 				nr_bytes = SSL_read(sslsock->ssl_handle, buf, (int)count);
-        
+
 				if (sslsock->reneg && sslsock->reneg->should_close) {
 					/* renegotiation rate limiting triggered */
 					php_stream_xport_shutdown(stream, (stream_shutdown_t)SHUT_RDWR);
@@ -1840,7 +1840,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				if (errno == EAGAIN && err == SSL_ERROR_WANT_READ && read) {
 					retry = 1;
 				}
-				if (errno == EAGAIN && SSL_ERROR_WANT_WRITE && read == 0) {          
+				if (errno == EAGAIN && SSL_ERROR_WANT_WRITE && read == 0) {
 					retry = 1;
 				}
 				
@@ -1863,7 +1863,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				}
 			} else {
 				/* Else, if we got bytes back, check for possible errors. */
-				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes );
+				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes);
 
 				/* If we didn't get any error, then let's return it to PHP. */
 				if (err == SSL_ERROR_NONE) {
@@ -1884,7 +1884,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 
 			/* Finally, we keep going until we got data, and an SSL_ERROR_NONE, unless we had an error. */			
 		} while (retry);
-		
+
 		/* Tell PHP if we read / wrote bytes. */
 		if (nr_bytes > 0) {
 			php_stream_notify_progress_increment(PHP_STREAM_CONTEXT(stream), nr_bytes, 0);
@@ -1893,7 +1893,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 		/* And if we were originally supposed to be blocking, let's reset the socket to that. */
 		if (blocked) {
 			php_set_sock_blocking(sslsock->s.socket, 1);
-			 sslsock->s.is_blocked = 1;
+			sslsock->s.is_blocked = 1;
 		}
 
 		return 0 > nr_bytes ? 0 : nr_bytes;
@@ -1901,7 +1901,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 		size_t nr_bytes = 0;
 
 		/*
-	     	 * This block is if we had no timeout... We will just sit and wait forever on the IO operation.
+		 	 * This block is if we had no timeout... We will just sit and wait forever on the IO operation.
 		 */
 		if (read) {
 			nr_bytes = php_stream_socket_ops.read(stream, buf, count);
@@ -2260,7 +2260,7 @@ static zend_long get_crypto_method(php_stream_context *ctx, zend_long crypto_met
 	if (ctx && (val = php_stream_context_get_option(ctx, "ssl", "crypto_method")) != NULL) {
 		convert_to_long_ex(val);
 		crypto_method = (zend_long)Z_LVAL_P(val);
-	        crypto_method |= STREAM_CRYPTO_IS_CLIENT;
+		crypto_method |= STREAM_CRYPTO_IS_CLIENT;
 	}
 
 	return crypto_method;

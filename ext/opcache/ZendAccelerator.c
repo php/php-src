@@ -1173,6 +1173,11 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	/* Copy into shared memory */
 	new_persistent_script = zend_accel_script_persist(new_persistent_script, &key, key_length);
 
+	new_persistent_script->is_phar =
+		new_persistent_script->full_path &&
+		strstr(new_persistent_script->full_path->val, ".phar") &&
+		!strstr(new_persistent_script->full_path->val, "://");
+
 	/* Consistency check */
 	if ((char*)new_persistent_script->mem + new_persistent_script->size != (char*)ZCG(mem)) {
 		zend_accel_error(
@@ -1634,7 +1639,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 			     EG(current_execute_data)->opline->extended_value != ZEND_REQUIRE_ONCE)) {
 				if (zend_hash_add_empty_element(&EG(included_files), persistent_script->full_path) != NULL) {
 					/* ext/phar has to load phar's metadata into memory */
-					if (strstr(persistent_script->full_path->val, ".phar") && !strstr(persistent_script->full_path->val, "://")) {
+					if (persistent_script->is_phar) {
 						php_stream_statbuf ssb;
 						char *fname = emalloc(sizeof("phar://") + persistent_script->full_path->len);
 

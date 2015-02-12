@@ -21,6 +21,7 @@
 #if !defined(ZEND_SIGNALS) || defined(_WIN32)
 # include <signal.h>
 #endif
+
 #include "phpdbg.h"
 #include "phpdbg_prompt.h"
 #include "phpdbg_bp.h"
@@ -31,6 +32,8 @@
 #include "phpdbg_io.h"
 #include "zend_alloc.h"
 #include "phpdbg_eol.h"
+
+#include "ext/standard/basic_functions.h"
 
 /* {{{ remote console headers */
 #ifndef _WIN32

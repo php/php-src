@@ -217,17 +217,14 @@ static unsigned from_array_iterate(const zval *arr,
 								   void **args,
 								   ser_context *ctx)
 {
-	HashPosition	pos;
 	unsigned		i;
 	zval			*elem;
 	char			buf[sizeof("element #4294967295")];
 	char			*bufp = buf;
 
 	/* Note i starts at 1, not 0! */
-    for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos), i = 1;
-			!ctx->err.has_error
-			&& (elem = zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), &pos)) != NULL;
-			zend_hash_move_forward_ex(Z_ARRVAL_P(arr), &pos), i++) {
+	i = 1;
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), elem) {
 		if (snprintf(buf, sizeof(buf), "element #%u", i) >= sizeof(buf)) {
 			memcpy(buf, "element", sizeof("element"));
 		}
@@ -236,7 +233,11 @@ static unsigned from_array_iterate(const zval *arr,
 		func(elem, i, args, ctx);
 
 		zend_llist_remove_tail(&ctx->keys);
-    }
+		if (ctx->err.has_error) {
+			break;
+		}
+		i++;
+    } ZEND_HASH_FOREACH_END();
 
     return i -1;
 }

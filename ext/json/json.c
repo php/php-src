@@ -191,7 +191,7 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, size_t str_l
 {
 	php_json_parser parser;
 
-	php_json_parser_init(&parser, return_value, str, str_len, options, depth);
+	php_json_parser_init(&parser, return_value, str, str_len, (int)options, (int)depth);
 
 	if (php_json_yyparse(&parser)) {
 		JSON_G(error_code) = php_json_parser_error_code(&parser);
@@ -215,9 +215,9 @@ static PHP_FUNCTION(json_encode)
 
 	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
 
-	JSON_G(encode_max_depth) = depth;
+	JSON_G(encode_max_depth) = (int)depth;
 
-	php_json_encode(&buf, parameter, options);
+	php_json_encode(&buf, parameter, (int)options);
 
 	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 		smart_str_free(&buf);
