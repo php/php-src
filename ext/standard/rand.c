@@ -393,7 +393,7 @@ PHP_FUNCTION(mt_getrandmax)
    Create a string of random bytes */
 PHP_FUNCTION(rand_bytes)
 {
-	char *bytes;
+	zend_string *bytes;
 	zend_long source = URANDOM;
 	zend_long length;
 	int n = 0;
@@ -409,16 +409,15 @@ PHP_FUNCTION(rand_bytes)
 		RETURN_FALSE;
 	}
 
-	bytes = ecalloc(length + 1, 1);
+	bytes = zend_string_alloc(length, 0);
 
 	switch(source) {
 #if PHP_WIN32
 		case ARANDOM:
 		case RANDOM:
 		case URANDOM:
-			BYTE *bytes_b = (BYTE *) iv;
-			if (php_win32_get_rand_bytes(bytes_b, (size_t)length) == FAILURE){
-				efree(bytes);
+			if (php_win32_get_random_bytes((unsigned char*)bytes->val, (size_t)length) == FAILURE){
+				zend_string_release(bytes);
 				php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 				RETURN_FALSE;
 			}
@@ -427,23 +426,23 @@ PHP_FUNCTION(rand_bytes)
 #else
 		case ARANDOM:
 			fd = open("/dev/arandom", O_RDONLY);
-		case RANDOM:
-			// Didn't get /dev/arandom, fall through to random for best quality
-			if (fd < 0) {
-				fd = open("/dev/random", O_RDONLY);
-			}
 		case URANDOM:
-			// Didn't get /dev/random, fall through to urandom
+			// Didn't get /dev/arandom, fall through and don't block
 			if (fd < 0) {
 				fd = open("/dev/urandom", O_RDONLY);
+			}
+		case RANDOM:
+			// Not getting /dev/urandom is unlikely, but maybe in a chroot env
+			if (fd < 0) {
+				fd = open("/dev/random", O_RDONLY);
 				if (fd < 0) {
-					efree(bytes);
+					zend_string_release(bytes);
 					php_error_docref(NULL, E_WARNING, "Cannot open source device");
 					RETURN_FALSE;
 				}
 			}
 			while (read_bytes < length) {
-				n = read(fd, bytes + read_bytes, length - read_bytes);
+				n = read(fd, bytes->val + read_bytes, length - read_bytes);
 				if (n < 0) {
 					break;
 				}
@@ -452,7 +451,7 @@ PHP_FUNCTION(rand_bytes)
 			n = read_bytes;
 			close(fd);
 			if (n < length) {
-				efree(bytes);
+				zend_string_release(bytes);
 				php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 				RETURN_FALSE;
 			}
@@ -464,17 +463,18 @@ PHP_FUNCTION(rand_bytes)
 			}
 			n = (int)length;
 			while (length) {
-				bytes[--length] = (char)php_mt_rand();
+				bytes->val[--length] = (char)php_mt_rand();
 			}
 			break;
 		default:
 			n = (int)length;
 			while (length) {
-				bytes[--length] = (char)(255.0 * php_rand() / RAND_MAX);
+				bytes->val[--length] = (char)(255.0 * php_rand() / RAND_MAX);
 			}
 	}
-	RETVAL_STRINGL(bytes, n);
-	efree(bytes);
+
+	bytes->val[n] = '\0';
+	RETVAL_STR(bytes);
 }
 /* }}} */
 
