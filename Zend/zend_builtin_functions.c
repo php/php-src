@@ -1381,10 +1381,9 @@ ZEND_FUNCTION(class_exists)
 
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		zend_string_release(lc_name);
-		RETURN_BOOL(ce && !((ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT)) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
+	} else {
+		ce = zend_lookup_class(class_name);
 	}
-
-	ce = zend_lookup_class(class_name);
 
  	if (ce) {
  		RETURN_BOOL((ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT)) == 0);
@@ -1467,12 +1466,12 @@ ZEND_FUNCTION(trait_exists)
 
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		zend_string_release(lc_name);
-		RETURN_BOOL(ce && ((ce->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
+	} else {
+		ce = zend_lookup_class(trait_name);
 	}
 
-	ce = zend_lookup_class(trait_name);
 	if (ce) {
- 		RETURN_BOOL((ce->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
+ 		RETURN_BOOL((ce->ce_flags & ZEND_ACC_TRAIT) != 0);
 	} else {
 		RETURN_FALSE;
 	}
