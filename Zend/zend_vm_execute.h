@@ -5881,7 +5881,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SWITCH_SPEC_CONST_CONST_HANDLE
 {
 	USE_OPLINE
 	zval *expr, *off;
-	zend_op *jmp;
 	HashTable *jmptable;
 
 
@@ -5972,8 +5971,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SWITCH_SPEC_CONST_CONST_HANDLE
 	}
 
 	CHECK_EXCEPTION();
-	jmp = execute_data->func->op_array.opcodes + Z_LVAL_P(off);
-	ZEND_VM_JMP(OP_JMP_ADDR(jmp, jmp->op2));
+	ZEND_VM_JMP(execute_data->func->op_array.opcodes + Z_LVAL_P(off));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -32331,7 +32329,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SWITCH_SPEC_CV_CONST_HANDLER(Z
 {
 	USE_OPLINE
 	zval *expr, *off;
-	zend_op *jmp;
 	HashTable *jmptable;
 
 
@@ -32422,8 +32419,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SWITCH_SPEC_CV_CONST_HANDLER(Z
 	}
 
 	CHECK_EXCEPTION();
-	jmp = execute_data->func->op_array.opcodes + Z_LVAL_P(off);
-	ZEND_VM_JMP(OP_JMP_ADDR(jmp, jmp->op2));
+	ZEND_VM_JMP(execute_data->func->op_array.opcodes + Z_LVAL_P(off));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -42244,7 +42240,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SWITCH_SPEC_TMPVAR_CONST_HANDL
 {
 	USE_OPLINE
 	zval *expr, *off;
-	zend_op *jmp;
 	HashTable *jmptable;
 	zend_free_op free_op1;
 
@@ -42335,8 +42330,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SWITCH_SPEC_TMPVAR_CONST_HANDL
 	}
 
 	CHECK_EXCEPTION();
-	jmp = execute_data->func->op_array.opcodes + Z_LVAL_P(off);
-	ZEND_VM_JMP(OP_JMP_ADDR(jmp, jmp->op2));
+	ZEND_VM_JMP(execute_data->func->op_array.opcodes + Z_LVAL_P(off));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
