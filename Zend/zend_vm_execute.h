@@ -3109,7 +3109,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER
 				}
 				pos++;
 			}
-			fe_ht->nInternalPointer = pos;
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();
@@ -3218,7 +3217,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 			}
 			pos++;
 		}
-		fe_ht->nInternalPointer = pos;
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 		CHECK_EXCEPTION();
@@ -3253,7 +3251,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 				}
 				pos++;
 			}
-			fe_ht->nInternalPointer = pos;
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();
@@ -9107,7 +9104,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 				}
 				pos++;
 			}
-			fe_ht->nInternalPointer = pos;
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();
@@ -9217,7 +9213,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 			}
 			pos++;
 		}
-		fe_ht->nInternalPointer = pos;
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 		CHECK_EXCEPTION();
@@ -9252,7 +9247,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 				}
 				pos++;
 			}
-			fe_ht->nInternalPointer = pos;
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();
@@ -12008,7 +12002,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 				}
 				pos++;
 			}
-			fe_ht->nInternalPointer = pos;
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			zval_ptr_dtor_nogc(free_op1);
@@ -12119,7 +12112,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 			}
 			pos++;
 		}
-		fe_ht->nInternalPointer = pos;
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 		if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
@@ -12155,7 +12147,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 				}
 				pos++;
 			}
-			fe_ht->nInternalPointer = pos;
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
@@ -12342,8 +12333,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 					break;
 				}
 			}
-			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos =
-				fe_ht->nInternalPointer = pos;
+			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos;
 			ZEND_VM_INC_OPCODE();
 			ZEND_VM_NEXT_OPCODE();
 		} else {
@@ -12416,7 +12406,6 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 		while (1) {
 			if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 				/* reached end of iteration */
-				fe_ht->nInternalPointer = INVALID_IDX;
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
 			p = fe_ht->arData + pos;
@@ -12456,8 +12445,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 				break;
 			}
 		}
-		EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos =
-			fe_ht->nInternalPointer = pos;
+		EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos;
 		ZEND_VM_INC_OPCODE();
 		ZEND_VM_NEXT_OPCODE();
 	} else if (EXPECTED(Z_TYPE_P(array) == IS_OBJECT)) {
@@ -12472,7 +12460,6 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 			while (1) {
 				if (UNEXPECTED(pos >= fe_ht->nNumUsed)) {
 					/* reached end of iteration */
-					fe_ht->nInternalPointer = INVALID_IDX;
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
 
@@ -12526,8 +12513,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 					break;
 				}
 			}
-			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos =
-				fe_ht->nInternalPointer = pos;
+			EG(ht_iterators)[Z_FE_ITER_P(EX_VAR(opline->op1.var))].pos = pos;
 			ZEND_VM_INC_OPCODE();
 			ZEND_VM_NEXT_OPCODE();
 		} else {
@@ -24479,7 +24465,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 				}
 				pos++;
 			}
-			fe_ht->nInternalPointer = pos;
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();
@@ -24588,7 +24573,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 			}
 			pos++;
 		}
-		fe_ht->nInternalPointer = pos;
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 		CHECK_EXCEPTION();
@@ -24623,7 +24607,6 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 				}
 				pos++;
 			}
-			fe_ht->nInternalPointer = pos;
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(fe_ht, pos);
 
 			CHECK_EXCEPTION();

@@ -61,4 +61,4 @@ int(2)
 string(1) "f"
 
 string(1) "a"
-bool(false)
+string(1) "a"
