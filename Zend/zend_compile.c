@@ -2237,10 +2237,11 @@ void zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, int d
 static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
-	uint32_t i;
+	int32_t i;
 	zend_bool has_elems = 0;
 
-	for (i = 0; i < list->children; ++i) {
+	/* list was evaluated from right to left */
+	for (i = list->children - 1; i >= 0; --i) {
 		zend_ast *var_ast = list->child[i];
 		znode fetch_result, dim_node;
 
