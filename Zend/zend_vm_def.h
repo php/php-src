@@ -4870,7 +4870,6 @@ ZEND_VM_HANDLER(49, ZEND_SWITCH, CONST|TMPVAR|CV, CONST)
 {
 	USE_OPLINE
 	zval *expr, *off;
-	zend_op *jmp;
 	HashTable *jmptable;
 	zend_free_op free_op1;
 
@@ -4961,8 +4960,7 @@ ZEND_VM_HANDLER(49, ZEND_SWITCH, CONST|TMPVAR|CV, CONST)
 	}
 
 	CHECK_EXCEPTION();
-	jmp = execute_data->func->op_array.opcodes + Z_LVAL_P(off);
-	ZEND_VM_JMP(OP_JMP_ADDR(jmp, jmp->op2));
+	ZEND_VM_JMP(execute_data->func->op_array.opcodes + Z_LVAL_P(off));
 }
 
 ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMPVAR|CV, CONST|TMPVAR|CV)

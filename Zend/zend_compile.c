@@ -3995,8 +3995,10 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 		zend_hash_init(jmp_array, cases->children * 2, sigh, ZVAL_PTR_DTOR, 0);
 
-		ZVAL_LONG(&off, opnum_default_jmp);
-		truth = real_true = nully = zero = long_zero = opnum_default_jmp;
+#define SWITCH_TARGET_OFFSET(off) ((CG(active_op_array)->opcodes[off].opcode == ZEND_JMP ? CG(active_op_array)->opcodes[off].op1 : CG(active_op_array)->opcodes[off].op2).opline_num)
+
+		ZVAL_LONG(&off, SWITCH_TARGET_OFFSET(opnum_default_jmp));
+		truth = real_true = nully = zero = long_zero = SWITCH_TARGET_OFFSET(opnum_default_jmp);
 
 		i = cases->children;
 		while (i--) {
@@ -4005,7 +4007,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 			if (cond_ast && case_op->opcode == ZEND_CASE) {
 				zval *zv = CT_CONSTANT(case_op->op2);
-				Z_LVAL(off) = jmpnz_opnums[i];
+				Z_LVAL(off) = SWITCH_TARGET_OFFSET(jmpnz_opnums[i]);
 				switch (Z_TYPE_P(zv)) {
 					case IS_STRING:
 						if (Z_STRLEN_P(zv)) {
@@ -4019,35 +4021,35 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 								zend_hash_index_update(jmp_array, lval, &off);
 							}
 							if (Z_STRLEN_P(zv) == 1 && *Z_STRVAL_P(zv) == '0') {
-								zero = jmpnz_opnums[i];
+								zero = Z_LVAL(off);
 							} else {
-								truth = jmpnz_opnums[i];
+								truth = Z_LVAL(off);
 							}
 							break;
 						}
 						/* fallthrough */
 
 					case IS_FALSE:
-						zero = jmpnz_opnums[i];
+						zero = Z_LVAL(off);
 						/* fallthrough */
 					case IS_NULL:
-						nully = jmpnz_opnums[i];
+						nully = Z_LVAL(off);
 						break;
 
 					case IS_LONG:
 						zend_hash_index_update(jmp_array, Z_LVAL_P(zv), &off);
 						if (Z_LVAL_P(zv)) {
-							truth = jmpnz_opnums[i];
+							truth = Z_LVAL(off);
 						} else {
-							long_zero = jmpnz_opnums[i];
-							zero = jmpnz_opnums[i];
-							nully = jmpnz_opnums[i];
+							long_zero = Z_LVAL(off);
+							zero = Z_LVAL(off);
+							nully = Z_LVAL(off);
 						}
 						break;
 
 					case IS_TRUE:
-						truth = jmpnz_opnums[i];
-						real_true = jmpnz_opnums[i];
+						truth = Z_LVAL(off);
+						real_true = Z_LVAL(off);
 						break;
 				}
 			}
