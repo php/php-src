@@ -657,10 +657,10 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 
 	/* destroy old array and add new one */
 	zend_hash_destroy(Z_ARRVAL_P(stream_array));
-	GC_REMOVE_FROM_BUFFER(Z_ARR_P(stream_array));
-	efree(Z_ARR_P(stream_array));
+	GC_REMOVE_FROM_BUFFER(Z_ARRVAL_P(stream_array));
+	efree(Z_ARRVAL_P(stream_array));
 
-	Z_ARR_P(stream_array) = Z_ARR(new_array);
+	Z_ARRVAL_P(stream_array) = Z_ARRVAL(new_array);
 
 	return ret;
 }
@@ -701,11 +701,11 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 	if (ret > 0) {
 		/* destroy old array and add new one */
 		zend_hash_destroy(Z_ARRVAL_P(stream_array));
-		efree(Z_ARR_P(stream_array));
-		Z_ARR_P(stream_array) = Z_ARR(new_array);
+		efree(Z_ARRVAL_P(stream_array));
+		Z_ARRVAL_P(stream_array) = Z_ARRVAL(new_array);
 	} else {
 		zend_hash_destroy(Z_ARRVAL(new_array));
-		efree(Z_ARR(new_array));
+		efree(Z_ARRVAL(new_array));
 	}
 
 	return ret;

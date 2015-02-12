@@ -566,8 +566,7 @@ ZEND_API void convert_to_array(zval *op) /* {{{ */
 					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op);
 					if (obj_ht) {
 						zval arr;
-						ZVAL_NEW_ARR(&arr);
-						zend_array_dup(Z_ARRVAL(arr), obj_ht);
+						ZVAL_ARR(&arr, zend_array_dup(obj_ht));
 						zval_dtor(op);
 						ZVAL_COPY_VALUE(op, &arr);
 						return;
@@ -605,7 +604,7 @@ ZEND_API void convert_to_object(zval *op) /* {{{ */
 		case IS_ARRAY:
 			{
 				HashTable *properties = emalloc(sizeof(HashTable));
-				zend_array *arr = Z_ARR_P(op);
+				zend_array *arr = Z_ARRVAL_P(op);
 
 				memcpy(properties, Z_ARRVAL_P(op), sizeof(HashTable));
 				object_and_properties_init(op, zend_standard_class_def, properties);

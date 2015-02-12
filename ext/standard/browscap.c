@@ -59,7 +59,7 @@ static void browscap_entry_dtor_request(zval *zvalue) /* {{{ */
 {
 	if (Z_TYPE_P(zvalue) == IS_ARRAY) {
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
-		efree(Z_ARR_P(zvalue));
+		efree(Z_ARRVAL_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
 		zend_string_release(Z_STR_P(zvalue));
 	}
@@ -69,7 +69,7 @@ static void browscap_entry_dtor_request(zval *zvalue) /* {{{ */
 static void browscap_entry_dtor_persistent(zval *zvalue) /* {{{ */ {
 	if (Z_TYPE_P(zvalue) == IS_ARRAY) {
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
-		free(Z_ARR_P(zvalue));
+		free(Z_ARRVAL_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
 		zend_string_release(Z_STR_P(zvalue));
 	}
@@ -139,7 +139,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg) /* {{{ */
 {
 	browser_data *bdata = arg;
-	int persistent = bdata->htab->u.flags & HASH_FLAG_PERSISTENT;
+	int persistent = HT_FLAGS(bdata->htab) & HASH_FLAG_PERSISTENT;
 
 	if (!arg1) {
 		return;
@@ -492,8 +492,7 @@ PHP_FUNCTION(get_browser)
 	}
 
 	if (return_array) {
-		ZVAL_NEW_ARR(return_value);
-		zend_array_dup(Z_ARRVAL_P(return_value), Z_ARRVAL_P(agent));
+		ZVAL_ARR(return_value, zend_array_dup(Z_ARRVAL_P(agent)));
 	}
 	else {
 		object_init(return_value);

@@ -46,7 +46,7 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 					/* break possible cycles */
 					GC_TYPE(arr) = IS_NULL;
 					GC_REMOVE_FROM_BUFFER(arr);
-					zend_array_destroy(&arr->ht);
+					zend_array_destroy(arr);
 					efree_size(arr, sizeof(zend_array));
 				}
 				break;
@@ -104,7 +104,7 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 					/* break possible cycles */
 					GC_TYPE(arr) = IS_NULL;
 					GC_REMOVE_FROM_BUFFER(arr);
-					zend_array_destroy(&arr->ht);
+					zend_array_destroy(arr);
 					efree_size(arr, sizeof(zend_array));
 				}
 				break;
@@ -237,16 +237,11 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 			Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
 			break;
-		case IS_ARRAY: {
-				HashTable *ht;
-
-				if (Z_ARR_P(zvalue) == &EG(symbol_table)) {
-					return; /* do nothing */
-				}
-				ht = Z_ARRVAL_P(zvalue);
-				ZVAL_NEW_ARR(zvalue);
-				zend_array_dup(Z_ARRVAL_P(zvalue), ht);
+		case IS_ARRAY:
+			if (Z_ARRVAL_P(zvalue) == &EG(symbol_table)) {
+				return; /* do nothing */
 			}
+			ZVAL_ARR(zvalue, zend_array_dup(Z_ARRVAL_P(zvalue)));
 			break;
 		case IS_CONSTANT_AST: {
 				zend_ast_ref *ast = emalloc(sizeof(zend_ast_ref));
@@ -315,13 +310,13 @@ ZEND_API int zval_copy_static_var(zval *p, int num_args, va_list args, zend_hash
 		is_ref = Z_CONST_FLAGS_P(p) & IS_LEXICAL_REF;
 
 		symbol_table = zend_rebuild_symbol_table();
-		p = zend_hash_find(&symbol_table->ht, key->key);
+		p = zend_hash_find(symbol_table, key->key);
 		if (!p) {
 			p = &tmp;
 			ZVAL_NULL(&tmp);
 			if (is_ref) {
 				ZVAL_NEW_REF(&tmp, &tmp);
-				zend_hash_add_new(&symbol_table->ht, key->key, &tmp);
+				zend_hash_add_new(symbol_table, key->key, &tmp);
 				Z_ADDREF_P(p);
 			} else {
 				zend_error(E_NOTICE,"Undefined variable: %s", key->key->val);

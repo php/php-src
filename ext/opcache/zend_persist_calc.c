@@ -54,17 +54,13 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 	uint idx;
 	Bucket *p;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		return;
 	}
-	if (ht->u.flags & HASH_FLAG_PACKED) {
-		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed);
-	} else {
-		ADD_SIZE(sizeof(Bucket) * ht->nNumUsed + sizeof(uint32_t) * ht->nTableSize);
-	}
+	ADD_SIZE(HT_USED_SIZE(ht));
 
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = ht->arData + idx;
+		p = HT_DATA(ht) + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 
 		/* persist bucket and key */
@@ -120,7 +116,7 @@ static void zend_persist_zval_calc(zval *z)
 			Z_GC_FLAGS_P(z) |= flags;
 			break;
 		case IS_ARRAY:
-			size = zend_shared_memdup_size(Z_ARR_P(z), sizeof(zend_array));
+			size = zend_shared_memdup_size(Z_ARRVAL_P(z), sizeof(zend_array));
 			if (size) {
 				ADD_SIZE(size);
 				zend_hash_persist_calc(Z_ARRVAL_P(z), zend_persist_zval_calc);

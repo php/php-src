@@ -627,28 +627,28 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name)
 
 		case IS_ARRAY:
 			ht = Z_ARRVAL_P(var);
-			if (ht->u.v.nApplyCount > 1) {
+			if (ht->nApplyCount > 1) {
 				php_error_docref(NULL, E_RECOVERABLE_ERROR, "WDDX doesn't support circular references");
 				return;
 			}
 			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
-				ht->u.v.nApplyCount++;
+				ht->nApplyCount++;
 			}
 			php_wddx_serialize_array(packet, var);
 			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
-				ht->u.v.nApplyCount--;
+				ht->nApplyCount--;
 			}
 			break;
 
 		case IS_OBJECT:
 			ht = Z_OBJPROP_P(var);
-			if (ht->u.v.nApplyCount > 1) {
+			if (ht->nApplyCount > 1) {
 				php_error_docref(NULL, E_RECOVERABLE_ERROR, "WDDX doesn't support circular references");
 				return;
 			}
-			ht->u.v.nApplyCount++;
+			ht->nApplyCount++;
  			php_wddx_serialize_object(packet, var);
-			ht->u.v.nApplyCount--;
+			ht->nApplyCount--;
 			break;
 	}
 
@@ -667,7 +667,7 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 
 	if (Z_TYPE_P(name_var) == IS_STRING) {
 		zend_array *symbol_table = zend_rebuild_symbol_table();
-		if ((val = zend_hash_find(&symbol_table->ht, Z_STR_P(name_var))) != NULL) {
+		if ((val = zend_hash_find(symbol_table, Z_STR_P(name_var))) != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
 				val = Z_INDIRECT_P(val);
 			}
@@ -678,7 +678,7 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 
 		target_hash = HASH_OF(name_var);
 
-		if (is_array && target_hash->u.v.nApplyCount > 1) {
+		if (is_array && target_hash->nApplyCount > 1) {
 			php_error_docref(NULL, E_WARNING, "recursion detected");
 			return;
 		}
@@ -690,14 +690,14 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 		} else {
 			ZEND_HASH_FOREACH_VAL(target_hash, val) {
 				if (is_array) {
-					target_hash->u.v.nApplyCount++;
+					target_hash->nApplyCount++;
 				}
 
 				ZVAL_DEREF(val);
 				php_wddx_add_var(packet, val);
 
 				if (is_array) {
-					target_hash->u.v.nApplyCount--;
+					target_hash->nApplyCount--;
 				}
 			} ZEND_HASH_FOREACH_END();
 		}

@@ -250,7 +250,7 @@ tail_call:
 		}
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
 		if ((zend_array*)ref != &EG(symbol_table)) {
-			ht = &((zend_array*)ref)->ht;
+			ht = (zend_array*)ref;
 		}
 	} else if (GC_TYPE(ref) == IS_REFERENCE) {
 		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
@@ -266,7 +266,7 @@ tail_call:
 	}
 	if (!ht) return;
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
-		p = ht->arData + idx;
+		p = HT_DATA(ht) + idx;
 		if (!Z_REFCOUNTED(p->val)) continue;
 		ref = Z_COUNTED(p->val);
 		if (GC_TYPE(ref) != IS_ARRAY || (zend_array*)ref != &EG(symbol_table)) {
@@ -331,7 +331,7 @@ tail_call:
 			if (((zend_array*)ref) == &EG(symbol_table)) {
 				GC_SET_BLACK(GC_INFO(ref));
 			} else {
-				ht = &((zend_array*)ref)->ht;
+				ht = (zend_array*)ref;
 			}
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
@@ -350,7 +350,7 @@ tail_call:
 		}
 		if (!ht) return;
 		for (idx = 0; idx < ht->nNumUsed; idx++) {
-			p = ht->arData + idx;
+			p = HT_DATA(ht) + idx;
 			if (!Z_REFCOUNTED(p->val)) continue;
 			if (UNEXPECTED(!EG(objects_store).object_buckets) &&
 				Z_TYPE(p->val) == IS_OBJECT) {
@@ -428,7 +428,7 @@ tail_call:
 				if ((zend_array*)ref == &EG(symbol_table)) {
 					GC_SET_BLACK(GC_INFO(ref));
 				} else {
-					ht = &((zend_array*)ref)->ht;
+					ht = (zend_array*)ref;
 				}
 			} else if (GC_TYPE(ref) == IS_REFERENCE) {
 				if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
@@ -440,7 +440,7 @@ tail_call:
 		}
 		if (!ht) return;
 		for (idx = 0; idx < ht->nNumUsed; idx++) {
-			p = ht->arData + idx;
+			p = HT_DATA(ht) + idx;
 			if (!Z_REFCOUNTED(p->val)) continue;
 			ref = Z_COUNTED(p->val);
 			if (idx == ht->nNumUsed-1) {
@@ -548,7 +548,7 @@ tail_call:
 				ht = props;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
-			ht = &((zend_array*)ref)->ht;
+			ht = (zend_array*)ref;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
@@ -562,7 +562,7 @@ tail_call:
 
 		if (!ht) return count;
 		for (idx = 0; idx < ht->nNumUsed; idx++) {
-			p = ht->arData + idx;
+			p = HT_DATA(ht) + idx;
 			if (!Z_REFCOUNTED(p->val)) {
 				/* count non-refcounted for compatibility ??? */
 				if (Z_TYPE(p->val) != IS_UNDEF && Z_TYPE(p->val) != IS_INDIRECT) {
@@ -681,7 +681,7 @@ tail_call:
 				ht = props;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
-			ht = &((zend_array*)ref)->ht;
+			ht = (zend_array*)ref;
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
@@ -691,7 +691,7 @@ tail_call:
 		}
 		if (!ht) return;
 		for (idx = 0; idx < ht->nNumUsed; idx++) {
-			p = ht->arData + idx;
+			p = HT_DATA(ht) + idx;
 			if (!Z_REFCOUNTED(p->val)) continue;
 			ref = Z_COUNTED(p->val);
 			if (idx == ht->nNumUsed-1) {
@@ -803,7 +803,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 				zend_array *arr = (zend_array*)p;
 
 				GC_TYPE(arr) = IS_NULL;
-				zend_hash_destroy(&arr->ht);
+				zend_hash_destroy(arr);
 			}
 			current = GC_G(next_to_free);
 		}

@@ -201,7 +201,7 @@ static int add_variable( const char * pKey, int keyLen, const char * pValue, int
                          void * arg )
 {
 #if PHP_MAJOR_VERSION >= 7
-	int filter_arg = (Z_ARR_P((zval *)arg) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV]))
+	int filter_arg = (Z_ARRVAL_P((zval *)arg) == Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV]))
         ? PARSE_ENV : PARSE_SERVER;
 #else
     int filter_arg = (arg == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
@@ -245,14 +245,14 @@ static void litespeed_php_import_environment_variables(zval *array_ptr)
 
 #if PHP_MAJOR_VERSION >= 7
     if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
-        Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
+        Z_ARRVAL_P(array_ptr) != Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV]) &&
         zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
 	) {
         zval_dtor(array_ptr);
         ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
 		return;
     } else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
-        Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
+        Z_ARRVAL_P(array_ptr) != Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]) &&
         zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
 	) {
         zval_dtor(array_ptr);

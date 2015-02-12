@@ -537,18 +537,18 @@ int zend_accel_script_optimize(zend_persistent_script *script)
 	zend_accel_optimize(&script->main_op_array, &ctx);
 
 	for (idx = 0; idx < script->function_table.nNumUsed; idx++) {
-		p = script->function_table.arData + idx;
+		p = HT_DATA(&script->function_table) + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		op_array = (zend_op_array*)Z_PTR(p->val);
 		zend_accel_optimize(op_array, &ctx);
 	}
 
 	for (idx = 0; idx < script->class_table.nNumUsed; idx++) {
-		p = script->class_table.arData + idx;
+		p = HT_DATA(&script->class_table) + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
 		ce = (zend_class_entry*)Z_PTR(p->val);
 		for (j = 0; j < ce->function_table.nNumUsed; j++) {
-			q = ce->function_table.arData + j;
+			q = HT_DATA(&ce->function_table) + j;
 			if (Z_TYPE(q->val) == IS_UNDEF) continue;
 			op_array = (zend_op_array*)Z_PTR(q->val);
 			if (op_array->scope == ce) {
@@ -568,18 +568,18 @@ int zend_accel_script_optimize(zend_persistent_script *script)
 		zend_accel_adjust_fcall_stack_size(&script->main_op_array, &ctx);
 
 		for (idx = 0; idx < script->function_table.nNumUsed; idx++) {
-			p = script->function_table.arData + idx;
+			p = HT_DATA(&script->function_table) + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			op_array = (zend_op_array*)Z_PTR(p->val);
 			zend_accel_adjust_fcall_stack_size(op_array, &ctx);
 		}
 
 		for (idx = 0; idx < script->class_table.nNumUsed; idx++) {
-			p = script->class_table.arData + idx;
+			p = HT_DATA(&script->class_table) + idx;
 			if (Z_TYPE(p->val) == IS_UNDEF) continue;
 			ce = (zend_class_entry*)Z_PTR(p->val);
 			for (j = 0; j < ce->function_table.nNumUsed; j++) {
-				q = ce->function_table.arData + j;
+				q = HT_DATA(&ce->function_table) + j;
 				if (Z_TYPE(q->val) == IS_UNDEF) continue;
 				op_array = (zend_op_array*)Z_PTR(q->val);
 				if (op_array->scope == ce) {

@@ -1550,7 +1550,7 @@ static zend_array *capture_session_meta(SSL *ssl_handle) /* {{{ */
 	add_assoc_long(&meta_arr, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
 	add_assoc_string(&meta_arr, "cipher_version", SSL_CIPHER_get_version(cipher));
 
-	return Z_ARR(meta_arr);
+	return Z_ARRVAL(meta_arr);
 }
 /* }}} */
 

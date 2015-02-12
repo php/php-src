@@ -527,14 +527,14 @@ void cgi_php_import_environment_variables(zval *array_ptr)
 	int filter_arg;
 
 	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
-		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
+		Z_ARRVAL_P(array_ptr) != Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV]) &&
 		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
 	) {
 		zval_dtor(array_ptr);
 		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
 		return;
 	} else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
-		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
+		Z_ARRVAL_P(array_ptr) != Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]) &&
 		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
 	) {
 		zval_dtor(array_ptr);
@@ -546,7 +546,7 @@ void cgi_php_import_environment_variables(zval *array_ptr)
 	php_php_import_environment_variables(array_ptr);
 
 	request = (fcgi_request*) SG(server_context);
-	filter_arg = Z_ARR_P(array_ptr) == Z_ARR(PG(http_globals)[TRACK_VARS_ENV])
+	filter_arg = Z_ARRVAL_P(array_ptr) == Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])
 		? PARSE_ENV : PARSE_SERVER;
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(request->env, var, val) {

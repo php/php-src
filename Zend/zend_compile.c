@@ -865,10 +865,7 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 
 		(*op_array->refcount)++;
 		if (op_array->static_variables) {
-			HashTable *static_variables = op_array->static_variables;
-
-			ALLOC_HASHTABLE(op_array->static_variables);
-			zend_array_dup(op_array->static_variables, static_variables);
+			op_array->static_variables = zend_array_dup(op_array->static_variables);
 		}
 		op_array->run_time_cache = NULL;
 	} else if (function->type == ZEND_INTERNAL_FUNCTION) {

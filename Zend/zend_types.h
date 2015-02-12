@@ -159,27 +159,21 @@ typedef struct _Bucket {
 	zend_string      *key;              /* string key or NULL for numerics */
 } Bucket;
 
-typedef struct _HashTable {
-	union {
-		struct {
-			ZEND_ENDIAN_LOHI_4(
-				zend_uchar    flags,
-				zend_uchar    nApplyCount,
-				zend_uchar    nIteratorsCount,
-				zend_uchar    reserve)
-		} v;
-		uint32_t flags;
-	} u;
-	uint32_t          nTableSize;
-	uint32_t          nTableMask;
+struct _zend_array {
+	zend_refcounted   gc;
+	uint32_t          nTableMask;        /* number of hash slots - 1 */
 	uint32_t          nNumUsed;
+	void             *pData;
 	uint32_t          nNumOfElements;
-	uint32_t          nInternalPointer;
+	uint32_t          nTableSize;        /* number of buckets */
 	zend_long         nNextFreeElement;
-	Bucket           *arData;
-	uint32_t         *arHash;
+	uint32_t          nInternalPointer;
+	zend_uchar        nApplyCount;
+	zend_uchar        nIteratorsCount;
 	dtor_func_t       pDestructor;
-} HashTable;
+};
+
+#define HashTable zend_array
 
 typedef uint32_t HashPosition;
 
@@ -188,10 +182,51 @@ typedef struct _HashTableIterator {
 	HashPosition  pos;
 } HashTableIterator;
 
-struct _zend_array {
-	zend_refcounted   gc;
-	HashTable         ht;
-};
+/*
+ * HashTable Data Layout
+ * =====================
+ *
+ *                  +===============================================+
+ *                  | HT_HASH(ht, MAX(ht->nTableMask, HT_MIN_MASK)) |
+ *                  | ...                                           |
+ *                  | HT_HASH(ht, 0)                                |
+ *                  +-----------------------------------------------+
+ *  ht->pData  ---> | HT_DATA(ht)[0]                                |
+ *                  | ...                                           |
+ *                  | HT_DATA(ht)[ht->nTableSize-1]                 |
+ *                  +===============================================+
+ */
+
+#define HT_INVALID_IDX ((uint32_t) -1)
+#define HT_MIN_MASK    1
+
+#define HT_MIN_SIZE		8
+#if SIZEOF_SIZE_T == 4
+# define HT_MAX_SIZE	0x01000000
+#elif SIZEOF_SIZE_T == 8
+# define HT_MAX_SIZE	0x80000000
+#else
+# error "Unknown SIZEOF_SIZE_T"
+#endif
+
+#define HT_HASH(ht, idx) \
+	((uint32_t*)((ht)->pData))[~(int)(idx)]
+#define HT_DATA(ht) \
+	((Bucket*)((ht)->pData))	
+#define HT_HASH_SIZE(ht) \
+	((MAX((ht)->nTableMask, HT_MIN_MASK) + 1) * sizeof(uint32_t))
+#define HT_SIZE(ht) \
+	(HT_HASH_SIZE(ht) + ((ht)->nTableSize * sizeof(Bucket)))
+#define HT_USED_SIZE(ht) \
+	(HT_HASH_SIZE(ht) + ((ht)->nNumUsed * sizeof(Bucket)))
+#define HT_HASH_RESET(ht) \
+	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, ((ht)->nTableMask + 1) * sizeof(uint32_t))
+
+#define HT_SET_DATA(ht, ptr) do { \
+		(ht)->pData = (((char*)(ptr)) + HT_HASH_SIZE(ht)); \
+	} while (0)
+#define HT_GET_DATA(ht) \
+	((char*)(ht)->pData - HT_HASH_SIZE(ht))	
 
 struct _zend_object {
 	zend_refcounted   gc;
@@ -279,6 +314,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_COUNTED(zval)				(zval).value.counted
 #define Z_COUNTED_P(zval_p)			Z_COUNTED(*(zval_p))
 
+#define GC_FLAGS_SHIFT				8
 #define Z_TYPE_FLAGS_SHIFT			8
 #define Z_CONST_FLAGS_SHIFT			16
 
@@ -335,6 +371,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define IS_STR_CONSTANT             (1<<3) /* constant index */
 #define IS_STR_CONSTANT_UNQUALIFIED (1<<4) /* the same as IS_CONSTANT_UNQUALIFIED */
+
+/* array flags */
+#define HT_FLAGS(ht) GC_FLAGS(ht)
 
 /* object flags (zval.value->gc.u.flags) */
 #define IS_OBJ_APPLY_COUNT			0x07
@@ -424,10 +463,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_STRHASH(zval)				Z_STR(zval)->h
 #define Z_STRHASH_P(zval_p)			Z_STRHASH(*(zval_p))
 
-#define Z_ARR(zval)					(zval).value.arr
-#define Z_ARR_P(zval_p)				Z_ARR(*(zval_p))
-
-#define Z_ARRVAL(zval)				(&Z_ARR(zval)->ht)
+#define Z_ARRVAL(zval)				(zval).value.arr
 #define Z_ARRVAL_P(zval_p)			Z_ARRVAL(*(zval_p))
 
 #define Z_OBJ(zval)					(zval).value.obj
@@ -559,25 +595,21 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define ZVAL_ARR(z, a) do {						\
 		zval *__z = (z);						\
-		Z_ARR_P(__z) = (a);						\
+		Z_ARRVAL_P(__z) = (a);					\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;		\
 	} while (0)
 
 #define ZVAL_NEW_ARR(z) do {									\
 		zval *__z = (z);										\
 		zend_array *_arr = emalloc(sizeof(zend_array));			\
-		GC_REFCOUNT(_arr) = 1;									\
-		GC_TYPE_INFO(_arr) = IS_ARRAY;							\
-		Z_ARR_P(__z) = _arr;									\
+		Z_ARRVAL_P(__z) = _arr;									\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;						\
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_ARR(z) do {							\
 		zval *__z = (z);										\
 		zend_array *_arr = malloc(sizeof(zend_array));			\
-		GC_REFCOUNT(_arr) = 1;									\
-		GC_TYPE_INFO(_arr) = IS_ARRAY;							\
-		Z_ARR_P(__z) = _arr;									\
+		Z_ARRVAL_P(__z) = _arr;									\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;						\
 	} while (0)
 

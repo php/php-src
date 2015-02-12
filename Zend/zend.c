@@ -250,15 +250,15 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 		case IS_ARRAY:
 			ZEND_PUTS("Array (");
 			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr)) &&
-			    ++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
+			    ++Z_ARRVAL_P(expr)->nApplyCount>1) {
 				ZEND_PUTS(" *RECURSION*");
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+				Z_ARRVAL_P(expr)->nApplyCount--;
 				return;
 			}
 			print_flat_hash(Z_ARRVAL_P(expr));
 			ZEND_PUTS(")");
 			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr))) {
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+				Z_ARRVAL_P(expr)->nApplyCount--;
 			}
 			break;
 		case IS_OBJECT:
@@ -272,13 +272,13 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 				properties = Z_OBJPROP_P(expr);
 			}
 			if (properties) {
-				if (++properties->u.v.nApplyCount>1) {
+				if (++properties->nApplyCount>1) {
 					ZEND_PUTS(" *RECURSION*");
-					properties->u.v.nApplyCount--;
+					properties->nApplyCount--;
 					return;
 				}
 				print_flat_hash(properties);
-				properties->u.v.nApplyCount--;
+				properties->nApplyCount--;
 			}
 			ZEND_PUTS(")");
 			break;
@@ -303,14 +303,14 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 		case IS_ARRAY:
 			ZEND_PUTS_EX("Array\n");
 			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr)) &&
-			    ++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
+			    ++Z_ARRVAL_P(expr)->nApplyCount>1) {
 				ZEND_PUTS_EX(" *RECURSION*");
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+				Z_ARRVAL_P(expr)->nApplyCount--;
 				return;
 			}
 			print_hash(write_func, Z_ARRVAL_P(expr), indent, 0);
 			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr))) {
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+				Z_ARRVAL_P(expr)->nApplyCount--;
 			}
 			break;
 		case IS_OBJECT:
@@ -326,13 +326,13 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 				if ((properties = Z_OBJDEBUG_P(expr, is_temp)) == NULL) {
 					break;
 				}
-				if (++properties->u.v.nApplyCount>1) {
+				if (++properties->nApplyCount>1) {
 					ZEND_PUTS_EX(" *RECURSION*");
-					properties->u.v.nApplyCount--;
+					properties->nApplyCount--;
 					return;
 				}
 				print_hash(write_func, properties, indent, 1);
-				properties->u.v.nApplyCount--;
+				properties->nApplyCount--;
 				if (is_temp) {
 					zend_hash_destroy(properties);
 					FREE_HASHTABLE(properties);
@@ -551,7 +551,7 @@ static zend_bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
 
 	ZVAL_ARR(&globals, &EG(symbol_table));
 	ZVAL_NEW_REF(&globals, &globals);
-	zend_hash_update(&EG(symbol_table).ht, name, &globals);
+	zend_hash_update(&EG(symbol_table), name, &globals);
 	return 0;
 }
 /* }}} */
@@ -1129,8 +1129,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 			if (!symbol_table) {
 				ZVAL_NULL(&params[4]);
 			} else {
-				ZVAL_NEW_ARR(&params[4]);
-				zend_array_dup(Z_ARRVAL(params[4]), &symbol_table->ht);
+				ZVAL_ARR(&params[4], zend_array_dup(symbol_table));
 			}
 
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));

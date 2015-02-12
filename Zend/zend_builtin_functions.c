@@ -720,13 +720,13 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 	int ret = 1;
 	zval *val;
 
-	ht->u.v.nApplyCount++;
+	ht->nApplyCount++;
 	ZEND_HASH_FOREACH_VAL_IND(ht, val) {
 		ZVAL_DEREF(val);
 		if (Z_REFCOUNTED_P(val)) {
 			if (Z_TYPE_P(val) == IS_ARRAY) {
 				if (!Z_IMMUTABLE_P(val)) {
-					if (Z_ARRVAL_P(val)->u.v.nApplyCount > 0) {
+					if (Z_ARRVAL_P(val)->nApplyCount > 0) {
 						zend_error(E_WARNING, "Constants cannot be recursive arrays");
 						ret = 0;
 						break;
@@ -742,7 +742,7 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
-	ht->u.v.nApplyCount--;
+	ht->nApplyCount--;
 	return ret;
 }
 /* }}} */
@@ -1140,8 +1140,7 @@ ZEND_FUNCTION(get_object_vars)
 
 	if (!zobj->ce->default_properties_count && properties == zobj->properties) {
 		/* fast copy */
-		ZVAL_NEW_ARR(return_value);
-		zend_array_dup(Z_ARRVAL_P(return_value), properties);
+		ZVAL_ARR(return_value, zend_array_dup(properties));
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(properties));
 
@@ -1881,8 +1880,7 @@ ZEND_FUNCTION(get_defined_vars)
 {
 	zend_array *symbol_table = zend_rebuild_symbol_table();
 
-	ZVAL_NEW_ARR(return_value);
-	zend_array_dup(Z_ARRVAL_P(return_value), &symbol_table->ht);
+	ZVAL_ARR(return_value, zend_array_dup(symbol_table));
 }
 /* }}} */
 

@@ -2491,7 +2491,7 @@ PHP_FUNCTION(substr_replace)
 			if (Z_TYPE_P(repl) == IS_ARRAY) {
 				repl_idx = 0;
 				while (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
-					tmp_repl = &Z_ARRVAL_P(repl)->arData[repl_idx].val;
+					tmp_repl = &HT_DATA(Z_ARRVAL_P(repl))[repl_idx].val;
 					if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
 						break;
 					}
@@ -2550,7 +2550,7 @@ PHP_FUNCTION(substr_replace)
 
 			if (Z_TYPE_P(from) == IS_ARRAY) {
 				while (from_idx < Z_ARRVAL_P(from)->nNumUsed) {
-					tmp_from = &Z_ARRVAL_P(from)->arData[from_idx].val;
+					tmp_from = &HT_DATA(Z_ARRVAL_P(from))[from_idx].val;
 					if (Z_TYPE_P(tmp_from) != IS_UNDEF) {
 						break;
 					}
@@ -2585,7 +2585,7 @@ PHP_FUNCTION(substr_replace)
 
 			if (argc > 3 && Z_TYPE_P(len) == IS_ARRAY) {
 				while (len_idx < Z_ARRVAL_P(len)->nNumUsed) {
-					tmp_len = &Z_ARRVAL_P(len)->arData[len_idx].val;
+					tmp_len = &HT_DATA(Z_ARRVAL_P(len))[len_idx].val;
 					if (Z_TYPE_P(tmp_len) != IS_UNDEF) {
 						break;
 					}
@@ -2618,7 +2618,7 @@ PHP_FUNCTION(substr_replace)
 
 			if (Z_TYPE_P(repl) == IS_ARRAY) {
 				while (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
-					tmp_repl = &Z_ARRVAL_P(repl)->arData[repl_idx].val;
+					tmp_repl = &HT_DATA(Z_ARRVAL_P(repl))[repl_idx].val;
 					if (Z_TYPE_P(tmp_repl) != IS_UNDEF) {
 						break;
 					}
@@ -4022,7 +4022,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 			if (Z_TYPE_P(replace) == IS_ARRAY) {
 				/* Get current entry */
 				while (replace_idx < Z_ARRVAL_P(replace)->nNumUsed) {
-					replace_entry = &Z_ARRVAL_P(replace)->arData[replace_idx].val;
+					replace_entry = &HT_DATA(Z_ARRVAL_P(replace))[replace_idx].val;
 					if (Z_TYPE_P(replace_entry) != IS_UNDEF) {
 						break;
 					}
@@ -4541,7 +4541,7 @@ PHP_FUNCTION(setlocale)
 	while (1) {
 		if (Z_TYPE(args[0]) == IS_ARRAY) {
 			while (idx < Z_ARRVAL(args[0])->nNumUsed) {
-				plocale = &Z_ARRVAL(args[0])->arData[idx].val;
+				plocale = &HT_DATA(Z_ARRVAL(args[0]))[idx].val;
 				if (Z_TYPE_P(plocale) != IS_UNDEF) {
 					break;
 				}

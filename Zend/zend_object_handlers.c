@@ -150,15 +150,10 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 	if (Z_TYPE(retval) == IS_ARRAY) {
 		if (Z_IMMUTABLE(retval)) {
 			*is_temp = 1;
-			ALLOC_HASHTABLE(ht);
-			zend_array_dup(ht, Z_ARRVAL(retval));
-			return ht;
+			return zend_array_dup(Z_ARRVAL(retval));
 		} else if (Z_REFCOUNT(retval) <= 1) {
 			*is_temp = 1;
-			ALLOC_HASHTABLE(ht);
-			*ht = *Z_ARRVAL(retval);
-			efree_size(Z_ARR(retval), sizeof(zend_array));
-			return ht;
+			return Z_ARRVAL(retval);
 		} else {
 			*is_temp = 0;
 			zval_ptr_dtor(&retval);

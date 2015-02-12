@@ -3099,7 +3099,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER
 					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				if ((Z_TYPE(p->val) != IS_UNDEF &&
 				     (Z_TYPE(p->val) != IS_INDIRECT ||
 				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
@@ -3209,7 +3209,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 				Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			p = fe_ht->arData + pos;
+			p = HT_DATA(fe_ht) + pos;
 			if (Z_TYPE(p->val) != IS_UNDEF &&
 			    (Z_TYPE(p->val) != IS_INDIRECT ||
 			     Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) {
@@ -3241,7 +3241,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLE
 					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				if ((Z_TYPE(p->val) != IS_UNDEF &&
 				     (Z_TYPE(p->val) != IS_INDIRECT ||
 				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
@@ -9094,7 +9094,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				if ((Z_TYPE(p->val) != IS_UNDEF &&
 				     (Z_TYPE(p->val) != IS_INDIRECT ||
 				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
@@ -9205,7 +9205,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 				Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			p = fe_ht->arData + pos;
+			p = HT_DATA(fe_ht) + pos;
 			if (Z_TYPE(p->val) != IS_UNDEF &&
 			    (Z_TYPE(p->val) != IS_INDIRECT ||
 			     Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) {
@@ -9237,7 +9237,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				if ((Z_TYPE(p->val) != IS_UNDEF &&
 				     (Z_TYPE(p->val) != IS_INDIRECT ||
 				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
@@ -11992,7 +11992,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				if ((Z_TYPE(p->val) != IS_UNDEF &&
 				     (Z_TYPE(p->val) != IS_INDIRECT ||
 				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
@@ -12104,7 +12104,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 				Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			p = fe_ht->arData + pos;
+			p = HT_DATA(fe_ht) + pos;
 			if (Z_TYPE(p->val) != IS_UNDEF &&
 			    (Z_TYPE(p->val) != IS_INDIRECT ||
 			     Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) {
@@ -12137,7 +12137,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				if ((Z_TYPE(p->val) != IS_UNDEF &&
 				     (Z_TYPE(p->val) != IS_INDIRECT ||
 				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
@@ -12245,7 +12245,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 				/* reached end of iteration */
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			p = fe_ht->arData + pos;
+			p = HT_DATA(fe_ht) + pos;
 			value = &p->val;
 			if (Z_TYPE_P(value) == IS_UNDEF) {
 				pos++;
@@ -12285,7 +12285,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
 
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				value = &p->val;
 				if (Z_TYPE_P(value) == IS_UNDEF) {
 					pos++;
@@ -12320,10 +12320,10 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 			while (1) {
 				pos++;
 				if (pos >= fe_ht->nNumUsed) {
-					pos = INVALID_IDX;
+					pos = HT_INVALID_IDX;
 					break;
 				}
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				if ((Z_TYPE(p->val) != IS_UNDEF &&
 				     (Z_TYPE(p->val) != IS_INDIRECT ||
 				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
@@ -12408,7 +12408,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 				/* reached end of iteration */
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			p = fe_ht->arData + pos;
+			p = HT_DATA(fe_ht) + pos;
 			value = &p->val;
 			if (Z_TYPE_P(value) == IS_UNDEF) {
 				pos++;
@@ -12435,10 +12435,10 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 		while (1) {
 			pos++;
 			if (pos >= fe_ht->nNumUsed) {
-				pos = INVALID_IDX;
+				pos = HT_INVALID_IDX;
 				break;
 			}
-			p = fe_ht->arData + pos;
+			p = HT_DATA(fe_ht) + pos;
 			if (Z_TYPE(p->val) != IS_UNDEF &&
 			    (Z_TYPE(p->val) != IS_INDIRECT ||
 			     Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) {
@@ -12463,7 +12463,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
 
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				value = &p->val;
 				if (Z_TYPE_P(value) == IS_UNDEF) {
 					pos++;
@@ -12500,10 +12500,10 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 			while (1) {
 				pos++;
 				if (pos >= fe_ht->nNumUsed) {
-					pos = INVALID_IDX;
+					pos = HT_INVALID_IDX;
 					break;
 				}
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				if ((Z_TYPE(p->val) != IS_UNDEF &&
 				     (Z_TYPE(p->val) != IS_INDIRECT ||
 			    	  Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
@@ -14078,7 +14078,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -16915,7 +16915,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -18352,7 +18352,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -19648,7 +19648,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -21756,7 +21756,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -23147,7 +23147,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -24455,7 +24455,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				if ((Z_TYPE(p->val) != IS_UNDEF &&
 				     (Z_TYPE(p->val) != IS_INDIRECT ||
 				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
@@ -24565,7 +24565,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 				Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 				ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 			}
-			p = fe_ht->arData + pos;
+			p = HT_DATA(fe_ht) + pos;
 			if (Z_TYPE(p->val) != IS_UNDEF &&
 			    (Z_TYPE(p->val) != IS_INDIRECT ||
 			     Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) {
@@ -24597,7 +24597,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 					Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 					ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 				}
-				p = fe_ht->arData + pos;
+				p = HT_DATA(fe_ht) + pos;
 				if ((Z_TYPE(p->val) != IS_UNDEF &&
 				     (Z_TYPE(p->val) != IS_INDIRECT ||
 				      Z_TYPE_P(Z_INDIRECT(p->val)) != IS_UNDEF)) &&
@@ -26799,7 +26799,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -27348,8 +27348,8 @@ static int ZEND_FASTCALL  ZEND_BIND_GLOBAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 
 	/* We store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 	idx = (uint32_t)(uintptr_t)CACHED_PTR(Z_CACHE_SLOT_P(varname)) - 1;
-	if (EXPECTED(idx < EG(symbol_table).ht.nNumUsed)) {
-		Bucket *p = EG(symbol_table).ht.arData + idx;
+	if (EXPECTED(idx < EG(symbol_table).nNumUsed)) {
+		Bucket *p = HT_DATA(&EG(symbol_table)) + idx;
 
 		if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 	        (EXPECTED(p->key == Z_STR_P(varname)) ||
@@ -27358,19 +27358,19 @@ static int ZEND_FASTCALL  ZEND_BIND_GLOBAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	          EXPECTED(p->key->len == Z_STRLEN_P(varname)) &&
 	          EXPECTED(memcmp(p->key->val, Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)))) {
 
-			value = &EG(symbol_table).ht.arData[idx].val;
+			value = &HT_DATA(&EG(symbol_table))[idx].val;
 			goto check_indirect;
 		}
 	}
 
-	value = zend_hash_find(&EG(symbol_table).ht, Z_STR_P(varname));
+	value = zend_hash_find(&EG(symbol_table), Z_STR_P(varname));
 	if (UNEXPECTED(value == NULL)) {
-		value = zend_hash_add_new(&EG(symbol_table).ht, Z_STR_P(varname), &EG(uninitialized_zval));
-		idx = ((char*)value - (char*)EG(symbol_table).ht.arData) / sizeof(Bucket);
+		value = zend_hash_add_new(&EG(symbol_table), Z_STR_P(varname), &EG(uninitialized_zval));
+		idx = ((char*)value - (char*)HT_DATA(&EG(symbol_table))) / sizeof(Bucket);
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 		CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)(idx + 1));
 	} else {
-		idx = ((char*)value - (char*)EG(symbol_table).ht.arData) / sizeof(Bucket);
+		idx = ((char*)value - (char*)HT_DATA(&EG(symbol_table))) / sizeof(Bucket);
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 		CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)(idx + 1));
 check_indirect:
@@ -30936,7 +30936,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));
@@ -32891,7 +32891,7 @@ num_index_dim:
 						goto num_index_dim;
 					}
 				}
-				if (ht == &EG(symbol_table).ht) {
+				if (ht == &EG(symbol_table)) {
 					zend_delete_global_variable(Z_STR_P(offset));
 				} else {
 					zend_hash_del(ht, Z_STR_P(offset));

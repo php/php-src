@@ -1292,8 +1292,8 @@ static zend_string *php_replace_in_subject(zval *regex, zval *replace, zval *sub
 				/* Get current entry */
 				replace_entry = NULL;
 				while (replace_idx < Z_ARRVAL_P(replace)->nNumUsed) {
-					if (Z_TYPE(Z_ARRVAL_P(replace)->arData[replace_idx].val) != IS_UNUSED) {
-						replace_entry = &Z_ARRVAL_P(replace)->arData[replace_idx].val;
+					if (Z_TYPE(HT_DATA(Z_ARRVAL_P(replace))[replace_idx].val) != IS_UNUSED) {
+						replace_entry = &HT_DATA(Z_ARRVAL_P(replace))[replace_idx].val;
 						break;
 					}
 					replace_idx++;

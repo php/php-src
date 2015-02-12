@@ -198,7 +198,7 @@ PHPAPI void config_zval_dtor(zval *zvalue)
 {
 	if (Z_TYPE_P(zvalue) == IS_ARRAY) {
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
-		free(Z_ARR_P(zvalue));
+		free(Z_ARRVAL_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
 		zend_string_release(Z_STR_P(zvalue));
 	}
