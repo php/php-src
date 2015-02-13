@@ -53,8 +53,6 @@ typedef int (*incdec_t)(zval *);
 
 #define get_zval_ptr(op_type, node, ex, should_free, type) _get_zval_ptr(op_type, node, ex, should_free, type)
 #define get_zval_ptr_deref(op_type, node, ex, should_free, type) _get_zval_ptr_deref(op_type, node, ex, should_free, type)
-#define get_zval_ptr_ptr(op_type, node, ex, should_free, type) _get_zval_ptr_ptr(op_type, node, ex, should_free, type)
-#define get_zval_ptr_ptr_undef(op_type, node, ex, should_free, type) _get_zval_ptr_ptr(op_type, node, ex, should_free, type)
 #define get_obj_zval_ptr(op_type, node, ex, should_free, type) _get_obj_zval_ptr(op_type, node, ex, should_free, type)
 #define get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type) _get_obj_zval_ptr_ptr(op_type, node, ex, should_free, type)
 
@@ -317,29 +315,10 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_UNSET(const zend_execute
 	return ret;
 }
 
-static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_UNSET(const zend_execute_data *execute_data, uint32_t var)
-{
-	zval *ret = EX_VAR(var);
-
-	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_UNSET(ret, var, execute_data);
-	}
-	ZVAL_DEREF(ret);
-	return ret;
-}
-
 static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_IS(const zend_execute_data *execute_data, uint32_t var)
 {
 	zval *ret = EX_VAR(var);
 
-	return ret;
-}
-
-static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_IS(const zend_execute_data *execute_data, uint32_t var)
-{
-	zval *ret = EX_VAR(var);
-
-	ZVAL_DEREF(ret);
 	return ret;
 }
 
@@ -350,17 +329,6 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_RW(const zend_execute_da
 	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
 		return _get_zval_cv_lookup_BP_VAR_RW(ret, var, execute_data);
 	}
-	return ret;
-}
-
-static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_RW(const zend_execute_data *execute_data, uint32_t var)
-{
-	zval *ret = EX_VAR(var);
-
-	if (UNEXPECTED(Z_TYPE_P(ret) == IS_UNDEF)) {
-		return _get_zval_cv_lookup_BP_VAR_RW(ret, var, execute_data);
-	}
-	ZVAL_DEREF(ret);
 	return ret;
 }
 
@@ -377,17 +345,6 @@ static zend_always_inline zval *_get_zval_ptr_cv_BP_VAR_W(const zend_execute_dat
 static zend_always_inline zval *_get_zval_ptr_cv_undef_BP_VAR_W(const zend_execute_data *execute_data, uint32_t var)
 {
 	return EX_VAR(var);
-}
-
-static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(const zend_execute_data *execute_data, uint32_t var)
-{
-	zval *ret = EX_VAR(var);
-
-	if (Z_TYPE_P(ret) == IS_UNDEF) {
-		return _get_zval_cv_lookup_BP_VAR_W(ret, var, execute_data);
-	}
-	ZVAL_DEREF(ret);
-	return ret;
 }
 
 static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, const zend_execute_data *execute_data, zend_free_op *should_free, int type)
@@ -448,17 +405,6 @@ static zend_always_inline zval *_get_zval_ptr_ptr_var(uint32_t var, const zend_e
 	return ret;
 }
 
-static inline zval *_get_zval_ptr_ptr(int op_type, znode_op node, const zend_execute_data *execute_data, zend_free_op *should_free, int type)
-{
-	if (op_type == IS_CV) {
-		*should_free = NULL;
-		return _get_zval_ptr_cv(execute_data, node.var, type);
-	} else /* if (op_type == IS_VAR) */ {
-		ZEND_ASSERT(op_type == IS_VAR);
-		return _get_zval_ptr_ptr_var(node.var, execute_data, should_free);
-	}
-}
-
 static zend_always_inline zval *_get_obj_zval_ptr_unused(zend_execute_data *execute_data)
 {
 	if (EXPECTED(Z_OBJ(EX(This)) != NULL)) {
@@ -467,32 +413,6 @@ static zend_always_inline zval *_get_obj_zval_ptr_unused(zend_execute_data *exec
 		zend_error_noreturn(E_ERROR, "Using $this when not in object context");
 		return NULL;
 	}
-}
-
-static inline zval *_get_obj_zval_ptr(int op_type, znode_op op, zend_execute_data *execute_data, zend_free_op *should_free, int type)
-{
-	if (op_type == IS_UNUSED) {
-		if (EXPECTED(Z_OBJ(EX(This)) != NULL)) {
-			*should_free = NULL;
-			return &EX(This);
-		} else {
-			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
-		}
-	}
-	return get_zval_ptr(op_type, op, execute_data, should_free, type);
-}
-
-static inline zval *_get_obj_zval_ptr_ptr(int op_type, znode_op node, zend_execute_data *execute_data, zend_free_op *should_free, int type)
-{
-	if (op_type == IS_UNUSED) {
-		if (EXPECTED(Z_OBJ(EX(This)) != NULL)) {
-			*should_free = NULL;
-			return &EX(This);
-		} else {
-			zend_error_noreturn(E_ERROR, "Using $this when not in object context");
-		}
-	}
-	return get_zval_ptr_ptr(op_type, node, execute_data, should_free, type);
 }
 
 static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr)
