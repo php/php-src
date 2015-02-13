@@ -65,6 +65,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 static zend_bool phpdbg_booted = 0;
+static zend_bool phpdbg_fully_started = 0;
 
 #if PHP_VERSION_ID >= 50500
 void (*zend_execute_old)(zend_execute_data *execute_data);
@@ -522,6 +523,10 @@ static void php_sapi_phpdbg_log_message(char *message) /* {{{ */
 				zend_string *file = zend_string_init(file_char, strlen(file_char), 0);
 				phpdbg_list_file(file, 3, zend_get_executed_lineno() - 1, zend_get_executed_lineno());
 				efree(file);
+
+				if (!phpdbg_fully_started) {
+					return;
+				}
 
 				do {
 					switch (phpdbg_interactive(1)) {
@@ -1476,7 +1481,11 @@ phpdbg_main:
 			if (settings) {
 				PHPDBG_G(flags) |= PHPDBG_DISCARD_OUTPUT;
 			}
-			phpdbg_compile();
+
+			zend_try {
+				phpdbg_compile();
+			} zend_end_try();
+
 			PHPDBG_G(flags) &= ~PHPDBG_DISCARD_OUTPUT;
 		}
 
@@ -1484,6 +1493,8 @@ phpdbg_main:
 		if (step) {
 			PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 		}
+
+		phpdbg_fully_started = 1;
 
 /* #ifndef for making compiler shutting up */
 #ifndef _WIN32
