@@ -859,13 +859,13 @@ static inline int zend_verify_missing_return_type(zend_function *zf)
 		char *class_name;
 
 		need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
-		zend_verify_return_error(E_RECOVERABLE_ERROR, zf, need_msg, class_name, "none", "");
+		zend_verify_return_error(E_RECOVERABLE_ERROR, zf, need_msg, class_name, "no value", "");
 		return 0;
 	} else if (ret_info->type_hint) {
 		if (ret_info->type_hint == IS_ARRAY) {
-			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type array", "", "none", "");
+			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type array", "", "no value", "");
 		} else if (ret_info->type_hint == IS_CALLABLE) {
-			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be callable", "", "none", "");
+			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be callable", "", "no value", "");
 #if ZEND_DEBUG
 		} else {
 			zend_error(E_ERROR, "Unknown typehint");

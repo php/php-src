@@ -9,4 +9,4 @@ function returns_none(): array {
 
 returns_none();
 --EXPECTF--
-Catchable fatal error: Return value of returns_none() must be of the type array, none returned in %snull_and_none2.php on line 4
+Catchable fatal error: Return value of returns_none() must be of the type array, no value returned in %snull_and_none2.php on line 4
