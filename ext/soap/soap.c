@@ -2081,7 +2081,6 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 	xmlDocPtr doc_return;
 	zval *agent_name;
 	int use_http_error_status = 1;
-	zend_string *server;
 
 	soap_version = SOAP_GLOBAL(soap_version);
 
@@ -2096,7 +2095,6 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 			use_http_error_status = 0;
 		}
 	}
-	zend_string_release(server);
 	/*
 	   Want to return HTTP 500 but apache wants to over write
 	   our fault code with their own handling... Figure this out later
