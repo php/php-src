@@ -661,7 +661,6 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	int lineno = 0;
 	const char *param_error=NULL;
 	int hide_argv = 0;
-	zend_string *key;
 
 	zend_try {
 
@@ -965,9 +964,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			}
 		}
 
-		key = zend_string_init("_SERVER", sizeof("_SERVER")-1, 0);
-		zend_is_auto_global(key);
-		zend_string_release(key);
+		zend_is_auto_global_str(ZEND_STRL("_SERVER"));
 
 		PG(during_request_startup) = 0;
 		switch (behavior) {

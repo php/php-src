@@ -534,17 +534,13 @@ static zval *php_filter_get_storage(zend_long arg)/* {{{ */
 			break;
 		case PARSE_SERVER:
 			if (PG(auto_globals_jit)) {
-				zend_string *name = zend_string_init("_SERVER", sizeof("_SERVER") - 1, 0);
-				zend_is_auto_global(name);
-				zend_string_release(name);
+				zend_is_auto_global_str(ZEND_STRL("_SERVER"));
 			}
 			array_ptr = &IF_G(server_array);
 			break;
 		case PARSE_ENV:
 			if (PG(auto_globals_jit)) {
-				zend_string *name = zend_string_init("_ENV", sizeof("_ENV") - 1, 0);
-				zend_is_auto_global(name);
-				zend_string_release(name);
+				zend_is_auto_global_str(ZEND_STRL("_ENV"));
 			}
 			array_ptr = &IF_G(env_array) ? &IF_G(env_array) : &PG(http_globals)[TRACK_VARS_ENV];
 			break;
