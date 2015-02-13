@@ -46,6 +46,7 @@
   . Removed dl() function on fpm-fcgi. (Nikita)
   . Removed support for hexadecimal numeric strings. (Nikita)
   . Removed obsolete extensions and SAPIs. See the full list in UPGRADING. (Anatol)
+  . Added NULL byte protection to exec, system and passthru. (Yasuo)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)

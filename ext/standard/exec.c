@@ -190,7 +190,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_FALSE;
 	}
 	if (strlen(cmd) != cmd_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "NULL byte detected. Possible attack");
+		php_error_docref(NULL, E_WARNING, "NULL byte detected. Possible attack");
 		RETURN_FALSE;
 	}
 
