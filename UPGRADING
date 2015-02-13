@@ -191,8 +191,17 @@ Changes to parameter handling
 
 Relevant RFC: https://wiki.php.net/phpng
 
-Changes to integer operations
------------------------------
+Changes to integer handling
+---------------------------
+
+* Invalid octal literals (containing digits larger than 7) now produce compile
+  errors. For example, the following is no longer valid:
+  
+      $i = 0781; // 8 is not a valid octal digit!
+
+  Previously the invalid digits (and any following valid digits) were simply
+  ignored. As such $i previously held the value 7, because the last two digits
+  were silently discarded.
 
 * Bitwise shifts by negative numbers will now throw a warning and return false:
 
@@ -211,10 +220,33 @@ Changes to integer operations
 * Similarly right bitwise shifts by a number of bits beyond the bit width of an
   integer will always result in 0 or -1 (depending on sign):
 
-      var_dump(1 >> 64);   // int(0)
-      var_dump(-1) >> 64); // int(-1)
+      var_dump(1 >> 64);  // int(0)
+      var_dump(-1 >> 64); // int(-1)
 
-Relevant RFC: https://wiki.php.net/rfc/integer_semantics
+* Strings that contain hexadecimal numbers are no longer considered to be
+  numeric and don't receive special treatment anymore. Some examples of the
+  new behavior:
+
+      var_dump("0x123" == "291");     // bool(false)     (previously true)
+      var_dump(is_numeric("0x123"));  // bool(false)     (previously true)
+      var_dump("0xe" + "0x1");        // int(0)          (previously 16)
+
+      var_dump(substr("foo", "0x1")); // string(3) "foo" (previously "oo")
+      // Notice: A non well formed numeric value encountered
+
+  filter_var() can be used to check if a string contains a hexadecimal number
+  or convert such a string into an integer:
+
+    $str = "0xffff";
+    $int = filter_var($str, FILTER_VALIDATE_INT, FILTER_FLAG_ALLOW_HEX);
+    if (false === $int) {
+        throw new Exception("Invalid integer!");
+    }
+    var_dump($num); // int(65535)
+
+Relevant RFCs:
+ * https://wiki.php.net/rfc/integer_semantics
+ * https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings
 
 Other core changes
 ------------------
@@ -238,15 +270,7 @@ Other core changes
   . Added zend_memnrstr, zend_memnrstr_ex.
   . Added hybrid sorting algo zend_sort for better performance.
   . Added stable sorting algo zend_insert_sort.
-  . Invalid octal literals in source code now produce compile errors, fixing
-    PHPSadness #31. Previously, the invalid digits (and any following valid 
-    digits) were simply ignored, such that 0781 became 7.
   . Removed dl() function on fpm-fcgi.
-  . Removed support for hexadecimal numeric strings. This means that some
-    operations like == will no longer specially interpret strings containing
-    hexadecimal numbers. Furthermore is_numeric() will not consider hexadecimal
-    strings to be numeric (use FILTER_VALIDATE_INT instead).
-    (RFC: https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings)
   . $HTTP_RAW_POST_DATA is no longer available. Use the php://input stream instead.
 
 Other
