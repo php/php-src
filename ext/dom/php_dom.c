@@ -424,10 +424,8 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 
 	*is_temp = 1;
 
-	ALLOC_HASHTABLE(debug_info);
-
 	std_props = zend_std_get_properties(object);
-	zend_array_dup(debug_info, std_props);
+	debug_info = zend_array_dup(std_props);
 
 	if (!prop_handlers) {
 		return debug_info;

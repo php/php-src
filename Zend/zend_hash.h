@@ -213,7 +213,7 @@ ZEND_API zval *zend_hash_minmax(const HashTable *ht, compare_func_t compar, uint
 
 ZEND_API int zend_hash_rehash(HashTable *ht);
 
-ZEND_API void zend_array_dup(HashTable *target, HashTable *source);
+ZEND_API HashTable *zend_array_dup(HashTable *source);
 ZEND_API void zend_array_destroy(HashTable *ht);
 ZEND_API void zend_symtable_clean(HashTable *ht);
 

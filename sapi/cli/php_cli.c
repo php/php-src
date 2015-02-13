@@ -1033,14 +1033,14 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					exit_status=254;
 				}
 				ZVAL_LONG(&argi, index);
-				zend_hash_str_update(&EG(symbol_table).ht, "argi", sizeof("argi")-1, &argi);
+				zend_hash_str_update(&EG(symbol_table), "argi", sizeof("argi")-1, &argi);
 				while (exit_status == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
 					len = strlen(input);
 					while (len > 0 && len-- && (input[len]=='\n' || input[len]=='\r')) {
 						input[len] = '\0';
 					}
 					ZVAL_STRINGL(&argn, input, len);
-					zend_hash_str_update(&EG(symbol_table).ht, "argn", sizeof("argn")-1, &argn);
+					zend_hash_str_update(&EG(symbol_table), "argn", sizeof("argn")-1, &argn);
 					Z_LVAL(argi) = ++index;
 					if (exec_run) {
 						if (zend_eval_string_ex(exec_run, NULL, "Command line run code", 1) == FAILURE) {

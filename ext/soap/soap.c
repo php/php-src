@@ -1189,8 +1189,7 @@ PHP_METHOD(SoapServer, SoapServer)
 
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
-			ALLOC_HASHTABLE(service->class_map);
-			zend_array_dup(service->class_map, Z_ARRVAL_P(tmp));
+			service->class_map = zend_array_dup(Z_ARRVAL_P(tmp));
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "typemap", sizeof("typemap")-1)) != NULL &&
@@ -1571,7 +1570,7 @@ PHP_METHOD(SoapServer, handle)
 			zend_string *server = zend_string_init("_SERVER", sizeof("_SERVER") - 1, 0);
 
 			zend_is_auto_global(server);
-			if ((server_vars = zend_hash_find(&EG(symbol_table).ht, server)) != NULL &&
+			if ((server_vars = zend_hash_find(&EG(symbol_table), server)) != NULL &&
 			    Z_TYPE_P(server_vars) == IS_ARRAY &&
 			    (encoding = zend_hash_str_find(Z_ARRVAL_P(server_vars), "HTTP_CONTENT_ENCODING", sizeof("HTTP_CONTENT_ENCODING")-1)) != NULL &&
 			    Z_TYPE_P(encoding) == IS_STRING) {
@@ -2914,9 +2913,7 @@ PHP_METHOD(SoapClient, __call)
 		HashTable *default_headers = Z_ARRVAL_P(tmp);
 		if (soap_headers) {
 			if (!free_soap_headers) {
-				HashTable *t =  emalloc(sizeof(HashTable));
-				zend_array_dup(t, soap_headers);
-				soap_headers = t;
+				soap_headers = zend_array_dup(soap_headers);
 				free_soap_headers = 1;
 			}
 			ZEND_HASH_FOREACH_VAL(default_headers, tmp) {
@@ -3164,8 +3161,7 @@ PHP_METHOD(SoapClient, __getCookies)
 
 
 	if ((cookies = zend_hash_str_find(Z_OBJPROP_P(getThis()), "_cookies", sizeof("_cookies")-1)) != NULL) {
-		ZVAL_NEW_ARR(return_value);
-		zend_array_dup(Z_ARRVAL_P(return_value), Z_ARRVAL_P(cookies));
+		ZVAL_ARR(return_value, zend_array_dup(Z_ARRVAL_P(cookies)));
 	} else {
 		array_init(return_value);
 	}

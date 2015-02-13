@@ -1162,7 +1162,7 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(zend_execute_d
 
 	if (EXPECTED(fetch_type == ZEND_FETCH_GLOBAL_LOCK) ||
 	    EXPECTED(fetch_type == ZEND_FETCH_GLOBAL)) {
-		ht = &EG(symbol_table).ht;
+		ht = &EG(symbol_table);
 	} else if (EXPECTED(fetch_type == ZEND_FETCH_STATIC)) {
 		ZEND_ASSERT(EX(func)->op_array.static_variables != NULL);
 		ht = EX(func)->op_array.static_variables;
@@ -1171,7 +1171,7 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(zend_execute_d
 		if (!EX(symbol_table)) {
 			zend_rebuild_symbol_table();
 		}
-		ht = &EX(symbol_table)->ht;
+		ht = EX(symbol_table);
 	}
 	return ht;
 }
@@ -1687,12 +1687,12 @@ ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_val
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table) /* {{{ */
 {
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
-		zend_array_destroy(&symbol_table->ht);
+		zend_array_destroy(symbol_table);
 		efree_size(symbol_table, sizeof(zend_array));
 	} else {
 		/* clean before putting into the cache, since clean
 		   could call dtors, which could use cached hash */
-		zend_symtable_clean(&symbol_table->ht);
+		zend_symtable_clean(symbol_table);
 		*(++EG(symtable_cache_ptr)) = symbol_table;
 	}
 }
