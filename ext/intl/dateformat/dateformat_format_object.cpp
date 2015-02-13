@@ -86,8 +86,9 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		//nothing
 	} else if (Z_TYPE_P(format) == IS_ARRAY) {
 		HashTable		*ht	= Z_ARRVAL_P(format);
-		HashPosition	pos	= {0};
+		uint32_t         idx;
 		zval			*z;
+
 		if (zend_hash_num_elements(ht) != 2) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: bad format; if array, it must have "
@@ -95,9 +96,15 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 			RETURN_FALSE;
 		}
 
-		zend_hash_internal_pointer_reset_ex(ht, &pos);
-		z = zend_hash_get_current_data_ex(ht, &pos);
-		if (!valid_format(z)) {
+		idx = 0;
+		while (idx < ht->nNumUsed) {
+			z = &ht->arData[idx].val;
+			if (Z_TYPE_P(z) != IS_UNDEF) {
+				break;
+			}
+			idx++;
+		}
+		if (idx >= ht->nNumUsed || !valid_format(z)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: bad format; the date format (first "
 					"element of the array) is not valid", 0);
@@ -105,9 +112,15 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		}
 		dateStyle = (DateFormat::EStyle)Z_LVAL_P(z);
 
-		zend_hash_move_forward_ex(ht, &pos);
-		z = zend_hash_get_current_data_ex(ht, &pos);
-		if (!valid_format(z)) {
+		idx++;
+		while (idx < ht->nNumUsed) {
+			z = &ht->arData[idx].val;
+			if (Z_TYPE_P(z) != IS_UNDEF) {
+				break;
+			}
+			idx++;
+		}
+		if (idx >= ht->nNumUsed || !valid_format(z)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: bad format; the time format ("
 					"second element of the array) is not valid", 0);
