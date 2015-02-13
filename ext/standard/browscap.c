@@ -462,11 +462,8 @@ PHP_FUNCTION(get_browser)
 	}
 
 	if (agent_name == NULL) {
-		zend_string *key = zend_string_init("_SERVER", sizeof("_SERVER") - 1, 0);
-		zend_is_auto_global(key);
-		zend_string_release(key);
-		if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) != IS_UNDEF ||
-			(http_user_agent = zend_hash_str_find(HASH_OF(&PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT")-1)) == NULL
+		if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global_str(ZEND_STRL("_SERVER"))) ||
+			(http_user_agent = zend_hash_str_find(Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT")-1)) == NULL
 		) {
 			php_error_docref(NULL, E_WARNING, "HTTP_USER_AGENT variable is not set, cannot determine user agent name");
 			RETURN_FALSE;

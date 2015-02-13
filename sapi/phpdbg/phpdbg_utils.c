@@ -516,11 +516,7 @@ PHPDBG_API int phpdbg_parse_variable_with_arg(char *input, size_t len, HashTable
 }
 
 int phpdbg_is_auto_global(char *name, int len) {
-	int ret;
-	zend_string *str = zend_string_init(name, len, 0);
-	ret = zend_is_auto_global(str);
-	efree(str);
-	return ret;
+	return zend_is_auto_global_str(name, len);
 }
 
 static int phpdbg_xml_array_element_dump(zval *zv, zend_string *key, zend_ulong num) {
