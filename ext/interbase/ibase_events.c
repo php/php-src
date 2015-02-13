@@ -142,7 +142,7 @@ PHP_FUNCTION(ibase_wait_event)
 	}
 
 	if (Z_TYPE(args[0]) == IS_RESOURCE) {
-		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, &args[0], -1, "InterBase link", le_link, le_plink)) {
+		if ((ib_link = (ibase_db_link *)zend_fetch_resource2_ex(&args[0], "InterBase link", le_link, le_plink)) == NULL) {
 			efree(args);
 			RETURN_FALSE;
 		}
@@ -152,7 +152,7 @@ PHP_FUNCTION(ibase_wait_event)
 			efree(args);
 			WRONG_PARAM_COUNT;
 		}
-		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink)) {
+		if ((ib_link = (ibase_db_link *)zend_fetch_resource2_ex(IBG(default_link), "InterBase link", le_link, le_plink)) == NULL) {
 			efree(args);
 			RETURN_FALSE;
 		}
@@ -293,7 +293,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 		cb_arg = &args[1];
 		i = 2;
 
-		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, &args[0], -1, "InterBase link", le_link, le_plink)) {
+		if ((ib_link = (ibase_db_link *)zend_fetch_resource2_ex(&args[0], "InterBase link", le_link, le_plink)) == NULL) {
 			RETURN_FALSE;
 		}
 
@@ -310,7 +310,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 
 		cb_arg = &args[0];
 
-		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink)) {
+		if ((ib_link = (ibase_db_link *)zend_fetch_resource2_ex(IBG(default_link), "InterBase link", le_link, le_plink)) == NULL) {
 			RETURN_FALSE;
 		}
 		link_res_id = IBG(default_link);
@@ -356,8 +356,8 @@ PHP_FUNCTION(ibase_set_event_handler)
 	event->event_next = ib_link->event_head;
 	ib_link->event_head = event;
 
-	ZEND_REGISTER_RESOURCE(return_value, event, le_event);
-	Z_ADDREF_P(return_value);
+	RETVAL_RES(zend_register_resource(event, le_event));
+	Z_TRY_ADDREF_P(return_value);
 }
 /* }}} */
 
@@ -372,7 +372,7 @@ PHP_FUNCTION(ibase_free_event_handler)
 	if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &event_arg)) {
 		ibase_event *event;
 
-		ZEND_FETCH_RESOURCE(event, ibase_event *, event_arg, -1, "Interbase event", le_event);
+		event = (ibase_event *)zend_fetch_resource_ex(event_arg, "Interbase event", le_event);
 
 		event->state = DEAD;
 

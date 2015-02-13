@@ -151,7 +151,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, char operation) /* {{{
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(svm, ibase_service *, res, -1, "Interbase service manager handle",
+	svm = (ibase_service *)zend_fetch_resource_ex(res, "Interbase service manager handle",
 		le_service);
 
 	buf[0] = operation;
@@ -245,8 +245,8 @@ PHP_FUNCTION(ibase_service_attach)
 	svm->hostname = estrdup(host);
 	svm->username = estrdup(user);
 
-	ZEND_REGISTER_RESOURCE(return_value, svm, le_service);
-	Z_ADDREF_P(return_value);
+	RETVAL_RES(zend_register_resource(svm, le_service));
+	Z_TRY_ADDREF_P(return_value);
 	svm->res = Z_RES_P(return_value);
 }
 /* }}} */
@@ -437,7 +437,7 @@ static void _php_ibase_backup_restore(INTERNAL_FUNCTION_PARAMETERS, char operati
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(svm, ibase_service *, res, -1,
+	svm = (ibase_service *)zend_fetch_resource_ex(res,
 		"Interbase service manager handle", le_service);
 
 	/* fill the param buffer */
@@ -500,7 +500,7 @@ static void _php_ibase_service_action(INTERNAL_FUNCTION_PARAMETERS, char svc_act
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(svm, ibase_service *, res, -1,
+	svm = (ibase_service *)zend_fetch_resource_ex(res,
 		"Interbase service manager handle", le_service);
 
 	if (svc_action == isc_action_svc_db_stats) {
@@ -606,7 +606,7 @@ PHP_FUNCTION(ibase_server_info)
 		RETURN_FALSE;
 	}
 
-	ZEND_FETCH_RESOURCE(svm, ibase_service *, res, -1,
+	svm = (ibase_service *)zend_fetch_resource_ex(res,
 		"Interbase service manager handle", le_service);
 
 	_php_ibase_service_query(INTERNAL_FUNCTION_PARAM_PASSTHRU, svm, (char)action);
