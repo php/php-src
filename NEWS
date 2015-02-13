@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #69017 (Fail to push to the empty array with the constant value
     defined in class scope). (Laruence)
+  . Added NULL byte protection to exec, system and passthru. (Yasuo)
 
 - ODBC:
   . Bug #68964 (Allowed memory size exhausted with odbc_exec). (Anatol)
