@@ -4972,7 +4972,6 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY)
 
 		if ((iter = zend_iterator_unwrap(array)) == NULL) {
 			/* plain object */
- 			zend_object *zobj = Z_OBJ_P(array);
 
  			fe_ht = Z_OBJPROP_P(array);
 			pos = zend_hash_iterator_pos(Z_FE_ITER_P(EX_VAR(opline->op1.var)), fe_ht);
@@ -5150,7 +5149,6 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY)
 
 		if ((iter = zend_iterator_unwrap(array)) == NULL) {
 			/* plain object */
- 			zend_object *zobj = Z_OBJ_P(array);
 
  			fe_ht = Z_OBJPROP_P(array);
 			pos = zend_hash_iterator_pos(Z_FE_ITER_P(EX_VAR(opline->op1.var)), fe_ht);

@@ -313,7 +313,6 @@ ZEND_API HashPosition zend_hash_iterators_lower_pos(HashTable *ht, HashPosition 
 	HashTableIterator *iter = EG(ht_iterators);
 	HashTableIterator *end  = iter + EG(ht_iterators_used);
 	HashPosition res = INVALID_IDX;
-	uint32_t idx;
 
 	while (iter != end) {
 		if (iter->ht == ht) {
