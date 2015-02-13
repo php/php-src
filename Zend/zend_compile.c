@@ -5838,7 +5838,7 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *const_ast = ast->child[1];
 
 	znode class_node, const_node;
-	zend_op *opline, *class_op = NULL;
+	zend_op *opline;
 	zend_string *resolved_name;
 
 	zend_eval_const_expr(&class_ast);
@@ -5860,7 +5860,7 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 		if (class_ast->kind == ZEND_AST_ZVAL) {
 			zend_string_release(resolved_name);
 		}
-		class_op = zend_compile_class_ref(&class_node, class_ast);
+		zend_compile_class_ref(&class_node, class_ast);
 	}
 
 	zend_compile_expr(&const_node, const_ast);
