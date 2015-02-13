@@ -2791,11 +2791,13 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(rand,															arginfo_rand)
 	PHP_FE(srand,															arginfo_srand)
-	PHP_FE(getrandmax,													arginfo_getrandmax)
-	PHP_FE(mt_rand,														arginfo_mt_rand)
+	PHP_FE(getrandmax,														arginfo_getrandmax)
+	PHP_FE(mt_rand,															arginfo_mt_rand)
 	PHP_FE(mt_srand,														arginfo_mt_srand)
 	PHP_FE(mt_getrandmax,													arginfo_mt_getrandmax)
-	PHP_FE(rand_bytes,													arginfo_rand_bytes)
+	PHP_FE(random_bytes,													arginfo_random_bytes)
+	PHP_FE(random_int,														arginfo_random_int)
+	PHP_FE(random_int_uniform,												arginfo_random_int_uniform)
 
 #if HAVE_GETSERVBYNAME
 	PHP_FE(getservbyname,													arginfo_getservbyname)
@@ -3569,7 +3571,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	register_string_constants(INIT_FUNC_ARGS_PASSTHRU);
-	register_rand_constants(INIT_FUNC_ARGS_PASSTHRU);
 
 	BASIC_ADD_SUBMODULE(dl)
 	BASIC_ADD_SUBMODULE(mail)

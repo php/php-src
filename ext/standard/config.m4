@@ -593,6 +593,13 @@ dnl
 AC_CHECK_HEADERS([atomic.h])
 
 dnl
+dnl Check for arc4random functions and linux getrandom syscall
+dnl
+AC_CHECK_FUNCS(
+	[arc4random, arc4random_buf, arc4random_uniform, getrandom]
+)
+
+dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
