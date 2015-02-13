@@ -2071,8 +2071,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 
 	xmlDocDumpMemory(doc_return, &buf, &size);
 
-	zend_is_auto_global("_SERVER", sizeof("_SERVER") - 1 TSRMLS_CC);
-	if (PG(http_globals)[TRACK_VARS_SERVER] &&
+	if ((PG(http_globals)[TRACK_VARS_SERVER] || zend_is_auto_global("_SERVER", sizeof("_SERVER") - 1 TSRMLS_CC)) &&
 		zend_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name) == SUCCESS &&
 		Z_TYPE_PP(agent_name) == IS_STRING) {
 		if (strncmp(Z_STRVAL_PP(agent_name), "Shockwave Flash", sizeof("Shockwave Flash")-1) == 0) {
