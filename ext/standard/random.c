@@ -19,79 +19,98 @@
 /* $Id$ */
 
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "php.h"
+
+#if PHP_WIN32
+# include "win32/winutil.h"
+#endif
 
 // Copy/pasted from string.c
 static char hexconvtab[] = "0123456789abcdef";
 
 // Copy/pasted from string.c
-static zend_string *php_bin_to_hex(const unsigned char *old, const size_t oldlen)
+static void php_bin_to_hex(char *old, const zend_long old_len, char *hex)
 {
-	zend_string *result;
-	size_t i, j;
+	zend_long i, j;
 
-	result = zend_string_safe_alloc(oldlen, 2 * sizeof(char), 0, 0);
-
-	for (i = j = 0; i < oldlen; i++) {
-		result->val[j++] = hexconvtab[old[i] >> 4];
-		result->val[j++] = hexconvtab[old[i] & 15];
+	// @todo I don't think this is doing it right
+	for (i = j = 0; i < old_len; i++) {
+		hex[j++] = hexconvtab[old[i] >> 4];
+		hex[j++] = hexconvtab[old[i] & 15];
 	}
-	result->val[j] = '\0';
 
-	return result;
+	hex[j] = '\0';
 }
 
-static int *php_random_bytes(zend_string *bytes, size_t length)
+// Copy/pasted from mcrypt.c
+static int php_random_bytes(char *bytes, zend_long size)
 {
-	FILE *fp;
+	int n = 0;
 
-#ifdef PHP_WIN32
-	// @todo Need to add Windows support
-	fp = NULL;
+#if PHP_WIN32
+	/* random/urandom equivalent on Windows */
+	BYTE *win_bytes = (BYTE *) bytes;
+	if (php_win32_get_random_bytes(win_bytes, (size_t) size) == FAILURE){
+		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
+		return FAILURE;
+	}
+	n = (int)size;
 #else
-	fp = fopen("/dev/urandom" , "rb");
+	int    fd;
+	size_t read_bytes = 0;
+
+	fd = open("/dev/urandom", O_RDONLY);
+	if (fd < 0) {
+		php_error_docref(NULL, E_WARNING, "Cannot open source device");
+		return FAILURE;
+	}
+	while (read_bytes < size) {
+		n = read(fd, bytes + read_bytes, size - read_bytes);
+		if (n < 0) {
+			break;
+		}
+		read_bytes += n;
+	}
+	n = read_bytes;
+	close(fd);
+	if (n < size) {
+		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
+		return FAILURE;
+	}
 #endif
 
-	if (fp == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to open /dev/urandom");
-		return FAILURE;
-	}
-
-	// @todo I think this has to be char & int!
-	if (fgets(bytes, 10, fp) == NULL) {
-		fclose(fp);
-		php_error_docref(NULL, E_WARNING, "Unable to read from /dev/urandom");
-		return FAILURE;
-	}
-	fclose(fp);
-
-	return bytes;
+	return SUCCESS;
 }
 
 /* {{{ proto string random_bytes(int bytes)
 Return an arbitrary length of pseudo-random bytes as binary string */
 PHP_FUNCTION(random_bytes)
 {
-	size_t length;
-	zend_string *bytes;
+	zend_long size;
+	char *bytes;
 
-	int argc = ZEND_NUM_ARGS();
-
-	if (argc != 0) {
-		if (zend_parse_parameters(argc, "l", &length) == FAILURE) {
-			return;
-		} else if (length <= 0) {
-			php_error_docref(NULL, E_WARNING, "length(" ZEND_LONG_FMT ") must be greater than 0", length);
-			RETURN_FALSE;
-		}
-	}
-
-	if (php_random_bytes(bytes, length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
 		return;
 	}
 
-	RETURN_STR(bytes);
+	if (size <= 0 || size >= INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Cannot genrate a random string with a size of less than 1 or greater than %d", INT_MAX);
+		RETURN_FALSE;
+	}
+
+	bytes = ecalloc(size + 1, 1);
+
+	if (php_random_bytes(bytes, size) == FAILURE) {
+		efree(bytes);
+		return;
+	}
+
+	RETVAL_STRINGL(bytes, size);
+
+	efree(bytes);
 }
 /* }}} */
 
@@ -99,28 +118,35 @@ PHP_FUNCTION(random_bytes)
 Return an arbitrary length of pseudo-random bytes as hexadecimal string */
 PHP_FUNCTION(random_hex)
 {
-	size_t length;
-	zend_string *bytes;
-	zend_string *hex;
+	zend_long size;
+	char *bytes;
+	char *hex;
 
-	int argc = ZEND_NUM_ARGS();
-
-	if (argc != 0) {
-		if (zend_parse_parameters(argc, "l", &length) == FAILURE) {
-			return;
-		} else if (length <= 0) {
-			php_error_docref(NULL, E_WARNING, "length(" ZEND_LONG_FMT ") must be greater than 0", length);
-			RETURN_FALSE;
-		}
-	}
-
-	if (php_random_bytes(bytes, length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
 		return;
 	}
 
-	hex = php_bin_to_hex(bytes, length);
+	if (size <= 0 || size >= INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Cannot genrate a random string with a size of less than 1 or greater than %d", INT_MAX);
+		RETURN_FALSE;
+	}
 
-	RETURN_STR(hex);
+	// @todo should we half the size for hex? How for odd num of chars?
+	bytes = ecalloc(size + 1, 1);
+
+	if (php_random_bytes(bytes, size) == FAILURE) {
+		efree(bytes);
+		return;
+	}
+
+	int hex_size = size * 2;
+	hex = ecalloc(hex_size + 1, 1);
+	php_bin_to_hex(bytes, hex_size, hex);
+
+	RETVAL_STRINGL(hex, hex_size);
+
+	efree(bytes);
+	efree(hex);
 }
 /* }}} */
 
@@ -131,18 +157,23 @@ PHP_FUNCTION(random_int)
 	zend_long min;
 	zend_long max;
 	zend_long number;
-	int argc = ZEND_NUM_ARGS();
 
-	if (argc != 0) {
-		if (zend_parse_parameters(argc, "ll", &min, &max) == FAILURE) {
-			return;
-		} else if (max < min) {
-			php_error_docref(NULL, E_WARNING, "max(" ZEND_LONG_FMT ") is smaller than min(" ZEND_LONG_FMT ")", max, min);
-			RETURN_FALSE;
-		}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
+		return;
 	}
 
-	number = min + max;
+	if (min >= INT_MAX || max >= INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Cannot use range greater than %d", INT_MAX);
+		RETURN_FALSE;
+	}
+
+	if (max < min) {
+		php_error_docref(NULL, E_WARNING, "Max value (%d) is less than min value (%d)", max, min);
+		RETURN_FALSE;
+	}
+
+	// @todo Insert bin-to-int stuff here
+	number = min + max * 100;
 
 	RETURN_LONG(number);
 }
