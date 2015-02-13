@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     (Stas)
   . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
     buffer overflow). (Stas)
+  . Added NULL byte protection to exec, system and passthru. (Yasuo)
 
 22 Jan 2015 PHP 5.4.37
 - Core:
