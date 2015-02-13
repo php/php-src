@@ -466,13 +466,22 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{{ */
 {
 	ZEND_TSRMLS_CACHE_UPDATE;
-	memset(executor_globals, 0, sizeof(*executor_globals));
-
 	zend_startup_constants();
 	zend_copy_constants(EG(zend_constants), GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
-	EG(error_reporting) = E_ALL & ~E_NOTICE;
+	EG(lambda_count) = 0;
+	ZVAL_UNDEF(&EG(user_error_handler));
+	ZVAL_UNDEF(&EG(user_exception_handler));
+	EG(in_autoload) = NULL;
+	EG(current_execute_data) = NULL;
+	EG(current_module) = NULL;
+	EG(exit_status) = 0;
+#if XPFPA_HAVE_CW
+	EG(saved_fpu_cw) = 0;
+#endif
+	EG(saved_fpu_cw_ptr) = NULL;
+	EG(active) = 0;
 }
 /* }}} */
 
@@ -652,7 +661,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	ini_scanner_globals_ctor(&ini_scanner_globals);
 	php_scanner_globals_ctor(&language_scanner_globals);
 	zend_set_default_compile_time_values();
-	EG(error_reporting) = E_ALL & ~E_NOTICE;
+	ZVAL_UNDEF(&EG(user_error_handler));
+	ZVAL_UNDEF(&EG(user_exception_handler));
 #endif
 
 	zend_interned_strings_init();

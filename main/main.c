@@ -1919,6 +1919,8 @@ static size_t php_output_wrapper(const char *str, size_t str_length)
 static void core_globals_ctor(php_core_globals *core_globals)
 {
 	memset(core_globals, 0, sizeof(*core_globals));
+
+	php_startup_ticks();
 }
 /* }}} */
 #endif
@@ -2033,7 +2035,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	char *php_os;
 	zend_module_entry *module;
 #ifdef ZTS
+	zend_executor_globals *executor_globals;
 	void ***tsrm_ls;
+	php_core_globals *core_globals;
 #endif
 
 #if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
@@ -2053,7 +2057,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	_CrtSetReportMode(_CRT_ASSERT, 0);
 #endif
 #else
-	php_os = PHP_OS;
+	php_os=PHP_OS;
 #endif
 
 #ifdef ZTS
@@ -2077,9 +2081,27 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	php_output_startup();
 
+	zuf.error_function = php_error_cb;
+	zuf.printf_function = php_printf;
+	zuf.write_function = php_output_wrapper;
+	zuf.fopen_function = php_fopen_wrapper_for_zend;
+	zuf.message_handler = php_message_handler_for_zend;
+	zuf.block_interruptions = sapi_module.block_interruptions;
+	zuf.unblock_interruptions = sapi_module.unblock_interruptions;
+	zuf.get_configuration_directive = php_get_configuration_directive_for_zend;
+	zuf.ticks_function = php_run_ticks;
+	zuf.on_timeout = php_on_timeout;
+	zuf.stream_open_function = php_stream_open_for_zend;
+	zuf.vspprintf_function = vspprintf;
+	zuf.vstrpprintf_function = vstrpprintf;
+	zuf.getenv_function = sapi_getenv;
+	zuf.resolve_path_function = php_resolve_path_for_zend;
+	zend_startup(&zuf, NULL);
+
 #ifdef ZTS
+	executor_globals = ts_resource(executor_globals_id);
 	ts_allocate_id(&core_globals_id, sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, (ts_allocate_dtor) core_globals_dtor);
-	php_startup_ticks();
+	core_globals = ts_resource(core_globals_id);
 #ifdef PHP_WIN32
 	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor) php_win32_core_globals_ctor, (ts_allocate_dtor) php_win32_core_globals_dtor);
 #endif
@@ -2100,23 +2122,24 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		}
 	}
 #endif
-
-	zuf.error_function = php_error_cb;
-	zuf.printf_function = php_printf;
-	zuf.write_function = php_output_wrapper;
-	zuf.fopen_function = php_fopen_wrapper_for_zend;
-	zuf.message_handler = php_message_handler_for_zend;
-	zuf.block_interruptions = sapi_module.block_interruptions;
-	zuf.unblock_interruptions = sapi_module.unblock_interruptions;
-	zuf.get_configuration_directive = php_get_configuration_directive_for_zend;
-	zuf.ticks_function = php_run_ticks;
-	zuf.on_timeout = php_on_timeout;
-	zuf.stream_open_function = php_stream_open_for_zend;
-	zuf.vspprintf_function = vspprintf;
-	zuf.vstrpprintf_function = vstrpprintf;
-	zuf.getenv_function = sapi_getenv;
-	zuf.resolve_path_function = php_resolve_path_for_zend;
-	zend_startup(&zuf, NULL);
+	EG(bailout) = NULL;
+	EG(error_reporting) = E_ALL & ~E_NOTICE;
+	PG(header_is_being_sent) = 0;
+	SG(request_info).headers_only = 0;
+	SG(request_info).argv0 = NULL;
+	SG(request_info).argc=0;
+	SG(request_info).argv=(char **)NULL;
+	PG(connection_status) = PHP_CONNECTION_NORMAL;
+	PG(during_request_startup) = 0;
+	PG(last_error_message) = NULL;
+	PG(last_error_file) = NULL;
+	PG(last_error_lineno) = 0;
+	EG(error_handling)  = EH_NORMAL;
+	EG(exception_class) = NULL;
+	PG(disable_functions) = NULL;
+	PG(disable_classes) = NULL;
+	EG(exception) = NULL;
+	EG(objects_store).object_buckets = NULL;
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
