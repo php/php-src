@@ -21,32 +21,207 @@ PHP X.Y UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- Core
-  . list() now always supports ArrayAccess and never supports strings.
-    Previously both were accepted in some situations and not in others.
-    (RFC: https://wiki.php.net/rfc/fix_list_behavior_inconsistency)
-  . Bitwise shifts by negative numbers of bits are disallowed (throws E_WARNING
-    and gives FALSE, like a division by zero).
-  . Left bitwise shifts by a number of bits beyond the bit width of an integer
-    will always result in 0, even on CPUs which wrap around.
-  . Right bitwise shifts by a number of bits beyond the bit width of an integer
-    will always result in 0 or -1 (depending on sign), even on CPUs which wrap
-    around.
+Core
+====
+
+Changes to variable handling
+----------------------------
+
+* Indirect variable, property and method references are now interpreted with
+  left-to-right semantics. Some examples:
+
+      $$foo['bar']['baz'] // interpreted as ($$foo)['bar']['baz']
+      $foo->$bar['baz']   // interpreted as ($foo->$bar)['baz']
+      $foo->$bar['baz']() // interpreted as ($foo->$bar)['baz']()
+      Foo::$bar['baz']()  // interpreted as (Foo::$bar)['baz']()
+
+  To restore the previous behavior add explicit curly braces:
+
+      ${$foo['bar']['baz']}
+      $foo->{$bar['baz']}
+      $foo->{$bar['baz']}()
+      Foo::{$bar['baz']}()
+      
+* The global keyword now only accepts simple variables. Instead of
+
+      global $$foo->bar;
+
+  it is now required to write the following:
+
+      global ${$foo->bar};
+
+* Parentheses around variables or function calls no longer have any influence
+  on behavior. For example the following code, where the result of a function
+  call is passed to a by-reference function
+
+      function getArray() { return [1, 2, 3]; }
+
+      $last = array_pop(getArray());
+      // Strict Standards: Only variables should be passed by reference
+      $last = array_pop((getArray()));
+      // Strict Standards: Only variables should be passed by reference
+
+  will now throw a strict standards error irregardless of whether parentheses
+  are used. Previously no notice was generated in the second case.
+
+* Array elements or object properties that are automatically created during
+  by-reference assignments will now result in a different order. For example
+
+      $array = [];
+      $array["a"] =& $array["b"];
+      $array["b"] = 1;
+      var_dump($array);
+
+  now results in the array ["a" => 1, "b" => 1], while previously the result
+  was ["b" => 1, "a" => 1];
+
+Relevant RFCs:
+ * https://wiki.php.net/rfc/uniform_variable_syntax
+ * https://wiki.php.net/rfc/abstract_syntax_tree
+
+Changes to list()
+-----------------
+
+* list() will no longer assign variables in reverse order. For example
+
+      list($array[], $array[], $array[]) = [1, 2, 3];
+      var_dump($array);
+
+  will now result in $array == [1, 2, 3] rather than [3, 2, 1]. Note that only
+  the **order** of the assignments changed, but the assigned values stay the
+  same. E.g. a normal usage like
+
+      list($a, $b, $c) = [1, 2, 3];
+      // $a = 1; $b = 2; $c = 3;
+  
+  will retain its current behavior.
+
+* Empty list() assignments are no longer allowed. As such all of the following
+  are invalid:
+
+      list() = $a;
+      list(,,) = $a;
+      list($x, list(), $y) = $a;
+
+* list() no longer supports unpacking strings (while previously this was only
+  supported in some cases). The code
+
+      $string = "xy";
+      list($x, $y) = $string;
+
+  will now result in $x == null and $y == null (without notices) instead of
+  $x == "x" and $y == "y". Furthermore list() is now always guaranteed to
+  work with objects implementing ArrayAccess, e.g.
+
+      list($a, $b) = (object) new ArrayObject([0, 1]);
+
+  will now result in $a == 0 and $b == 1. Previously both $a and $b were null.
+
+Relevant RFCs:
+* https://wiki.php.net/rfc/abstract_syntax_tree#changes_to_list
+* https://wiki.php.net/rfc/fix_list_behavior_inconsistency
+
+Changes to parameter handling
+-----------------------------
+
+* It is no longer possible to define two function parameters with the same name.
+  For example, the following method will trigger a compile-time error:
+
+      public function foo($a, $b, $unused, $unused) {
+          // ...
+      }
+
+  Code like this should be changed to use distinct parameter names, for example:
+
+      public function foo($a, $b, $unused1, $unused2) {
+          // ...
+      }
+
+* The func_get_arg() and func_get_args() functions will no longer return the
+  original value that was passed to a parameter and will instead provide the
+  current value (which might have been modified). For example
+
+      function foo($x) {
+          $x++;
+          var_dump(func_get_arg(0));
+      }
+      foo(1);
+
+  will now print "2" instead of "1". This code should be changed to either
+  perform modifications only after calling func_get_arg(s)
+
+      function foo($x) {
+          var_dump(func_get_arg(0));
+          $x++;
+      }
+
+  or avoid modifying the parameters altogether:
+
+      function foo($x) {
+          $newX = $x + 1;
+          var_dump(func_get_arg(0));
+      }
+
+* Similarly exception backtraces will no longer display the original value that
+  was passed to a function and show the modified value instead. For example
+
+      function foo($x) {
+          $x = 42;
+          throw new Exception;
+      }
+      foo("string");
+
+  will now result in the stack trace
+
+      Stack trace:
+      #0 file.php(4): foo(42)
+      #1 {main}
+
+  while previously it was:
+
+      Stack trace:
+      #0 file.php(4): foo('string')
+      #1 {main}
+
+  While this should not impact runtime behavior of your code, it is worthwhile
+  to be aware of this difference for debugging purposes.
+
+  The same limitation also applies to debug_backtrace() and other functions
+  inspecting function arguments.
+
+Relevant RFC: https://wiki.php.net/phpng
+
+Changes to integer operations
+-----------------------------
+
+* Bitwise shifts by negative numbers will now throw a warning and return false:
+
+      var_dump(1 >> -1); // bool(false)
+      // Warning: Bit shift by negative number
+
+* Left bitwise shifts by a number of bits beyond the bit width of an integer
+  will always result in 0:
+
+      var_dump(1 << 64); // int(0)
+
+  Previously the behavior of this code was dependent on the used CPU
+  architecture. For example on x86 (including x86-64) the result was int(1),
+  because the shift operand was wrapped.
+
+* Similarly right bitwise shifts by a number of bits beyond the bit width of an
+  integer will always result in 0 or -1 (depending on sign):
+
+      var_dump(1 >> 64);   // int(0)
+      var_dump(-1) >> 64); // int(-1)
+
+Relevant RFC: https://wiki.php.net/rfc/integer_semantics
+
+Other core changes
+------------------
+
   . Removed ASP (<%) and script (<script language=php>) tags.
     (RFC: https://wiki.php.net/rfc/remove_alternative_php_tags)
   . call_user_method() and call_user_method_array() no longer exists.
-  . PHP 7 doesn't keep original values of arguments passed to user functions,
-    so func_get_arg() and func_get_args() will return current value of argument
-    instead of the actually passed. The following code is going to be affected:
-    function foo($x) { $x = 2; return func_get_arg(0);} var_dump(foo(1));
-    It will now produce 2, not 1.
-  . Function parameters with duplicate name are not allowed anymore. Definitions
-    like “function foo($x,$x) {}” will lead to compile time error.
-  . Indirect variable, property and method references are now interpreted with
-    left-to-right semantics. See details in:
-	https://wiki.php.net/rfc/uniform_variable_syntax#semantic_differences_in_existing_syntax 
-  . The global keyword now only accepts simple variables. See details in:
-    https://wiki.php.net/rfc/uniform_variable_syntax#global_keyword_takes_only_simple_variables
   . The addition of Unicode Codepoint Escape Syntax for double-quoted strings
     and heredocs means that \u{ followed by an invalid sequence will now error.
     However, \u without a following { is unaffected, so "\u202e" won't error and
@@ -73,6 +248,9 @@ PHP X.Y UPGRADE NOTES
     strings to be numeric (use FILTER_VALIDATE_INT instead).
     (RFC: https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings)
   . $HTTP_RAW_POST_DATA is no longer available. Use the php://input stream instead.
+
+Other
+=====
 
 - Date:
   . Removed $is_dst parameter from mktime() and gmmktime().
