@@ -629,7 +629,7 @@ void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 
 /* {{{ sapi_cgi_log_message
  */
-static void sapi_cgi_log_message(char *message TSRMLS_DC)
+static void sapi_cgi_log_message(char *message)
 {
 	zlog(ZLOG_NOTICE, "PHP message: %s", message);
 }
