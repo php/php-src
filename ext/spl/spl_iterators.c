@@ -2028,10 +2028,9 @@ SPL_METHOD(CallbackFilterIterator, accept)
 SPL_METHOD(RegexIterator, accept)
 {
 	spl_dual_it_object *intern;
-	char *subject;
-	zend_string *result;
-	int subject_len, use_copy, count = 0;
-	zval *subject_ptr, subject_copy, zcount, *replacement, tmp_replacement, rv;
+	zend_string *result, *subject;
+	int count = 0;
+	zval zcount, *replacement, tmp_replacement, rv;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2046,51 +2045,40 @@ SPL_METHOD(RegexIterator, accept)
 	}
 
 	if (intern->u.regex.flags & REGIT_USE_KEY) {
-		subject_ptr = &intern->current.key;
+		subject = zval_get_string(&intern->current.key);
 	} else {
-		subject_ptr = &intern->current.data;
+		subject = zval_get_string(&intern->current.data);
 	}
 
-	ZVAL_UNDEF(&subject_copy);
-	use_copy = zend_make_printable_zval(subject_ptr, &subject_copy);
-	if (use_copy) {
-		subject = Z_STRVAL(subject_copy);
-		subject_len = (int)Z_STRLEN(subject_copy);
-	} else {
-		subject = Z_STRVAL_P(subject_ptr);
-		subject_len = (int)Z_STRLEN_P(subject_ptr);
-	}
-
-	use_copy = 0;
 	switch (intern->u.regex.mode)
 	{
 		case REGIT_MODE_MAX: /* won't happen but makes compiler happy */
 		case REGIT_MODE_MATCH:
-			count = pcre_exec(intern->u.regex.pce->re, intern->u.regex.pce->extra, subject, subject_len, 0, 0, NULL, 0);
+			count = pcre_exec(intern->u.regex.pce->re, intern->u.regex.pce->extra, subject->val, subject->len, 0, 0, NULL, 0);
 			RETVAL_BOOL(count >= 0);
 			break;
 
 		case REGIT_MODE_ALL_MATCHES:
 		case REGIT_MODE_GET_MATCH:
-			if (!use_copy) {
-				subject = estrndup(subject, subject_len);
-				use_copy = 1;
-			}
+//???			if (!use_copy) {
+//???				subject = estrndup(subject, subject_len);
+//???				use_copy = 1;
+//???			}
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
-			php_pcre_match_impl(intern->u.regex.pce, subject, subject_len, &zcount,
+			php_pcre_match_impl(intern->u.regex.pce, subject->val, subject->len, &zcount,
 				&intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.use_flags, intern->u.regex.preg_flags, 0);
 			RETVAL_BOOL(Z_LVAL(zcount) > 0);
 			break;
 
 		case REGIT_MODE_SPLIT:
-			if (!use_copy) {
-				subject = estrndup(subject, subject_len);
-				use_copy = 1;
-			}
+//???			if (!use_copy) {
+//???				subject = estrndup(subject, subject_len);
+//???				use_copy = 1;
+//???			}
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
-			php_pcre_split_impl(intern->u.regex.pce, subject, subject_len, &intern->current.data, -1, intern->u.regex.preg_flags);
+			php_pcre_split_impl(intern->u.regex.pce, subject->val, subject->len, &intern->current.data, -1, intern->u.regex.preg_flags);
 			count = zend_hash_num_elements(Z_ARRVAL(intern->current.data));
 			RETVAL_BOOL(count > 1);
 			break;
@@ -2103,7 +2091,7 @@ SPL_METHOD(RegexIterator, accept)
 				convert_to_string(&tmp_replacement);
 				replacement = &tmp_replacement;
 			}
-			result = php_pcre_replace_impl(intern->u.regex.pce, subject, subject_len, replacement, 0, -1, &count);
+			result = php_pcre_replace_impl(intern->u.regex.pce, subject, subject->val, subject->len, replacement, 0, -1, &count);
 
 			if (intern->u.regex.flags & REGIT_USE_KEY) {
 				zval_ptr_dtor(&intern->current.key);
@@ -2122,13 +2110,7 @@ SPL_METHOD(RegexIterator, accept)
 	if (intern->u.regex.flags & REGIT_INVERTED) {
 		RETVAL_BOOL(Z_TYPE_P(return_value) != IS_TRUE);
 	}
-
-	if (use_copy) {
-		efree(subject);
-	}
-	if (!Z_ISUNDEF(subject_copy)) {
-		zval_ptr_dtor(&subject_copy);
-	}
+	zend_string_release(subject);
 } /* }}} */
 
 /* {{{ proto string RegexIterator::getRegex()

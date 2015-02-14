@@ -418,7 +418,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 	HashTable			*debug_info,
 						*prop_handlers = obj->prop_handler,
 						*std_props;
-	HashPosition		pos;
+	zend_string			*string_key;
 	dom_prop_handler	*entry;
 	zval object_value;
 
@@ -435,19 +435,10 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 
 	ZVAL_STRING(&object_value, "(object value omitted)");
 
-	for (zend_hash_internal_pointer_reset_ex(prop_handlers, &pos);
-			(entry = zend_hash_get_current_data_ptr_ex(prop_handlers, &pos)) != NULL;
-			zend_hash_move_forward_ex(prop_handlers, &pos)) {
+	ZEND_HASH_FOREACH_STR_KEY_PTR(prop_handlers, string_key, entry) {
 		zval value;
-		zend_string *string_key;
-		zend_ulong num_key;
 
-		if (entry->read_func(obj, &value) == FAILURE) {
-			continue;
-		}
-
-		if (zend_hash_get_current_key_ex(prop_handlers, &string_key,
-			&num_key, &pos) != HASH_KEY_IS_STRING) {
+		if (entry->read_func(obj, &value) == FAILURE || !string_key) {
 			continue;
 		}
 
@@ -457,7 +448,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 		}
 
 		zend_hash_add(debug_info, string_key, &value);
-	}
+	} ZEND_HASH_FOREACH_END();
 
 	zval_dtor(&object_value);
 

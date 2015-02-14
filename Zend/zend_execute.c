@@ -925,15 +925,15 @@ static inline int zend_verify_missing_return_type(zend_function *zf)
 		char *class_name;
 
 		need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
-		zend_verify_return_error(E_RECOVERABLE_ERROR, zf, need_msg, class_name, "none", "");
+		zend_verify_return_error(E_RECOVERABLE_ERROR, zf, need_msg, class_name, "no value", "");
 		return 0;
 	} else if (ret_info->type_hint) {
 		if (ret_info->type_hint == IS_ARRAY) {
-			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type array", "", "none", "");
+			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type array", "", "no value", "");
 		} else if (ret_info->type_hint == IS_CALLABLE) {
-			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be callable", "", "none", "");
+			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be callable", "", "no value", "");
 		} else {
-			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), "none", "");
+			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), "no value", "");
 		}
 		return 0;
 	}
@@ -1691,6 +1691,14 @@ static inline zend_brk_cont_element* zend_brk_cont(int nest_levels, int array_of
 			if (brk_opline->opcode == ZEND_FREE) {
 				if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
 					zval_ptr_dtor_nogc(EX_VAR(brk_opline->op1.var));
+				}
+			} else if (brk_opline->opcode == ZEND_FE_FREE) {
+				if (!(brk_opline->extended_value & EXT_TYPE_FREE_ON_RETURN)) {
+					zval *var = EX_VAR(brk_opline->op1.var);
+					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
+						zend_hash_iterator_del(Z_FE_ITER_P(var));
+					}
+					zval_ptr_dtor_nogc(var);
 				}
 			}
 		}

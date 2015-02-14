@@ -9,7 +9,7 @@ PHP X.Y UPGRADE NOTES
 5. Changed Functions
 6. New Functions
 7. New Classes and Interfaces
-8. Removed Extensions
+8. Removed Extensions and SAPIs
 9. Other Changes to Extensions
 10. New Global Constants
 11. Changes to INI File Handling
@@ -170,9 +170,26 @@ PHP X.Y UPGRADE NOTES
 
 
 ========================================
-8. Removed Extensions
+8. Removed Extensions and SAPIs
 ========================================
 
+- sapi/aolserver
+- sapi/apache
+- sapi/apache_hooks
+- sapi/apache2filter
+- sapi/caudium
+- sapi/continuity
+- sapi/isapi
+- sapi/milter
+- sapi/phttpd
+- sapi/pi3web
+- sapi/roxen
+- sapi/thttpd
+- sapi/tux
+- sapi/webjames
+- ext/mssql
+- ext/sybase_ct
+For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 
 ========================================
 9. Other Changes to Extensions

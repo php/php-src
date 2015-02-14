@@ -183,6 +183,11 @@ void init_executor(void) /* {{{ */
 
 	EG(scope) = NULL;
 
+	EG(ht_iterators_count) = sizeof(EG(ht_iterators_slots)) / sizeof(HashTableIterator);
+	EG(ht_iterators_used) = 0;
+	EG(ht_iterators) = EG(ht_iterators_slots);
+	memset(EG(ht_iterators), 0, sizeof(EG(ht_iterators_slots)));
+
 	EG(active) = 1;
 }
 /* }}} */
@@ -372,6 +377,11 @@ void shutdown_executor(void) /* {{{ */
 	} zend_end_try();
 
 	zend_shutdown_fpu();
+
+	EG(ht_iterators_used) = 0;
+	if (EG(ht_iterators) != EG(ht_iterators_slots)) {
+		efree(EG(ht_iterators));
+	}
 
 	EG(active) = 0;
 }

@@ -81,7 +81,7 @@ static int php_json_ucs2_to_int(php_json_scanner *s, int size)
 	return php_json_ucs2_to_int_ex(s, size, 1);
 }
 
-void php_json_scanner_init(php_json_scanner *s, char *str, int str_len, long options)
+void php_json_scanner_init(php_json_scanner *s, char *str, size_t str_len, int options)
 {
 	s->cursor = (php_json_ctype *) str;
 	s->limit = (php_json_ctype *) str + str_len;
@@ -171,7 +171,7 @@ std:
 			}
 		}
 		if (!bigint) {
-			ZVAL_LONG(&s->value, strtol((char *) s->token, NULL, 10));
+			ZVAL_LONG(&s->value, ZEND_STRTOL((char *) s->token, NULL, 10));
 			return PHP_JSON_T_INT;
 		} else if (s->options & PHP_JSON_BIGINT_AS_STRING) {
 			ZVAL_STRINGL(&s->value, (char *) s->token, s->cursor - s->token);
