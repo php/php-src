@@ -152,6 +152,7 @@ static const struct _scalar_typehint_info scalar_typehints[] = {
 	{"string", sizeof("string") - 1, IS_STRING},
 	{"bool", sizeof("bool") - 1, _IS_BOOL},
 	{"boolean", sizeof("boolean") - 1, _IS_BOOL},
+	{"void", sizeof("void") - 1, IS_VOID},
 	{NULL, 0, IS_UNDEF}
 };
 
@@ -4070,6 +4071,9 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 
 				type = zend_lookup_scalar_typehint_by_name(class_name);
 				if (type != 0) {
+					if (type == IS_VOID) {
+						zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
+					}
 					arg_info->type_hint = type;
 					goto done;
 				}

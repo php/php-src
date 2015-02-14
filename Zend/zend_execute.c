@@ -830,6 +830,25 @@ ZEND_API void zend_verify_return_error(int error_type, const zend_function *zf, 
 		fclass, fsep, fname, need_msg, need_kind, returned_msg, returned_kind);
 }
 
+ZEND_API void zend_verify_void_return_error(int error_type, const zend_function *zf, const char *returned_kind)
+{
+	const char *fname = zf->common.function_name->val;
+	const char *fsep;
+	const char *fclass;
+
+	if (zf->common.scope) {
+		fsep =  "::";
+		fclass = zf->common.scope->name->val;
+	} else {
+		fsep =  "";
+		fclass = "";
+	}
+
+	zend_error(error_type,
+		"%s%s%s() must not return a value, %s returned",
+		fclass, fsep, fname, returned_kind);
+}
+
 #if ZEND_DEBUG
 static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 {
@@ -900,6 +919,8 @@ static void zend_verify_return_type(zend_function *zf, zval *ret, zend_bool stri
 			if (!zend_is_callable(ret, IS_CALLABLE_CHECK_SILENT, NULL) && (Z_TYPE_P(ret) != IS_NULL || !ret_info->allow_null)) {
 				zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be callable", "", zend_zval_type_name(ret), "");
 			}
+		} else if (ret_info->type_hint == IS_VOID) {
+			zend_verify_void_return_error(E_RECOVERABLE_ERROR, zf, zend_zval_type_name(ret));
 		} else if (UNEXPECTED(!ZEND_SAME_FAKE_TYPE(ret_info->type_hint, Z_TYPE_P(ret)))) {
 			if (Z_TYPE_P(ret) == IS_NULL) {
 				if (!ret_info->allow_null) {
@@ -927,7 +948,7 @@ static inline int zend_verify_missing_return_type(zend_function *zf)
 		need_msg = zend_verify_arg_class_kind(ret_info, &class_name, &ce);
 		zend_verify_return_error(E_RECOVERABLE_ERROR, zf, need_msg, class_name, "no value", "");
 		return 0;
-	} else if (ret_info->type_hint) {
+	} else if (ret_info->type_hint && ret_info->type_hint != IS_VOID) {
 		if (ret_info->type_hint == IS_ARRAY) {
 			zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type array", "", "no value", "");
 		} else if (ret_info->type_hint == IS_CALLABLE) {
