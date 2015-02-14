@@ -33,6 +33,11 @@
 
 #include "basic_functions.h"
 
+#if PHP_WIN32
+# include "win32/winutil.h"
+#endif
+
+#include "fcntl.h"
 
 /* SYSTEM RAND FUNCTIONS */
 
@@ -369,6 +374,153 @@ PHP_FUNCTION(mt_getrandmax)
 	 * compatibility with the previous php_rand
 	 */
   	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
+}
+/* }}} */
+
+PHPAPI int php_random_bytes(void *buf, size_t nbytes)
+{
+	size_t read_bytes = 0;
+	size_t n = 0;
+	int fd = -1;
+#if PHP_WIN32
+	if (php_win32_get_random_bytes((unsigned char*)buf, nbytes) == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
+		return 0;
+	}
+	return 1;
+#else // !PHP_WIN32
+#ifdef HAVE_ARC4RANDOM_BUF
+	arc4random_buf(buf, nbytes);
+	return 1;
+#endif
+#ifdef HAVE_DEV_ARANDOM
+	fd = open("/dev/arandom", O_RDONLY);
+	if (fd > 0) {
+		goto readfd;
+	}
+#endif
+#ifdef HAVE_GETRANDOM
+	return 0;
+#else
+	#ifdef HAVE_GETRANDOM_SYSCALL
+		return 0;
+	#endif
+#endif // HAVE_GETRANDOM
+#ifdef HAVE_DEV_URANDOM
+	fd = open("/dev/urandom", O_RDONLY);
+	if (fd > 0) {
+		goto readfd;
+	}
+#endif
+	php_error_docref(NULL, E_WARNING, "Cannot open source device");
+	return 0;
+readfd:
+	while (read_bytes < nbytes) {
+		n = read(fd, buf + read_bytes, nbytes - read_bytes);
+		if (n < 0) {
+			break;
+		}
+		read_bytes += n;
+	}
+
+	n = read_bytes;
+	close(fd);
+	if (n < nbytes) {
+		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
+		return 0;
+	}
+
+	return 1;
+#endif // PHP_WIN32
+}
+
+/* {{{ proto string random_bytes(int length)
+   Create a string of random bytes */
+PHP_FUNCTION(random_bytes)
+{
+	zend_string *bytes;
+	zend_long length;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &length) == FAILURE) {
+		return;
+	}
+
+	if (length <= 0 || length >= INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Cannot create a random string with a length of less than 1 or greater than %d", INT_MAX);
+		RETURN_FALSE;
+	}
+
+	bytes = zend_string_alloc(length, 0);
+	if (!php_random_bytes(bytes->val, length)) {
+		zend_string_release(bytes);
+		RETURN_FALSE;
+	}
+
+	bytes->val[length] = '\0';
+	RETVAL_STR(bytes);
+}
+/* }}} */
+
+/* {{{ proto string random_int(void)
+   Generate a random integer */
+PHP_FUNCTION(random_int)
+{
+	zend_long result = 0;
+#ifdef HAVE_ARC4RANDOM
+	// This function is always successful
+	// TODO: 64bit
+	RETURN_LONG((zend_long)arc4random());
+#endif
+	if (!php_random_bytes(&result, sizeof(result))) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(result);
+}
+/* }}} */
+
+/* {{{ proto string random_int_uniform(int max)
+   Create a random integer less than max, with a uniform distribution */
+PHP_FUNCTION(random_int_uniform)
+{
+	zend_long max;
+	uint32_t r, min;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &max) == FAILURE) {
+		return;
+	}
+
+#ifdef HAVE_ARC4RANDOM_UNIFORM
+	// This function is always successful
+	// TODO: 64bit
+	RETURN_LONG((zend_long)arc4random_uniform((uint32_t)max));
+#endif
+
+	if (max < 2) {
+		RETURN_LONG(0);
+	}
+
+#if (ULONG_MAX > 0xffffffffUL)
+	min = 0x100000000UL % max;
+#else
+	if (max > 0x80000000) {
+		min = 1 + ~max;
+	else {
+		/* (2**32 - (x * 2)) % x == 2**32 % x when x <= 2**31 */
+		min = ((0xffffffff - (max * 2)) + 1) % max;
+	}
+#endif
+
+	for (;;) {
+		if (!php_random_bytes(&r, sizeof(r))) {
+			RETURN_FALSE;
+		}
+		if (r >= min) {
+			break;
+		}
+	}
+
+	RETURN_LONG(r % max);
 }
 /* }}} */
 

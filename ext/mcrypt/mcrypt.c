@@ -39,6 +39,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "ext/standard/info.h"
+#include "ext/standard/basic_functions.h"
 #include "ext/standard/php_rand.h"
 #include "zend_smart_str.h"
 #include "php_mcrypt_filter.h"
@@ -231,11 +232,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_ofb, 0, 0, 5)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mcrypt_create_iv, 0, 0, 1)
-	ZEND_ARG_INFO(0, size)
-	ZEND_ARG_INFO(0, source)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 const zend_function_entry mcrypt_functions[] = { /* {{{ */
@@ -246,7 +242,7 @@ const zend_function_entry mcrypt_functions[] = { /* {{{ */
 	PHP_FE(mcrypt_get_key_size, 	arginfo_mcrypt_get_key_size)
 	PHP_FE(mcrypt_get_block_size, 	arginfo_mcrypt_get_block_size)
 	PHP_FE(mcrypt_get_cipher_name, 	arginfo_mcrypt_get_cipher_name)
-	PHP_FE(mcrypt_create_iv, 		arginfo_mcrypt_create_iv)
+	PHP_DEP_FALIAS(mcrypt_create_iv, rand_bytes, arginfo_rand_bytes)
 
 	PHP_FE(mcrypt_list_algorithms, 	arginfo_mcrypt_list_algorithms)
 	PHP_FE(mcrypt_list_modes, 		arginfo_mcrypt_list_modes)
@@ -312,12 +308,6 @@ ZEND_GET_MODULE(mcrypt)
 
 #define MCRYPT_ENCRYPT 0
 #define MCRYPT_DECRYPT 1
-
-typedef enum {
-	RANDOM = 0,
-	URANDOM,
-	RAND
-} iv_source;
 
 #define MCRYPT_GET_INI											\
 	cipher_dir_string = MCG(algorithms_dir); 					\
@@ -1404,72 +1394,6 @@ PHP_FUNCTION(mcrypt_ofb)
 	convert_to_long_ex(mode);
 
 	php_mcrypt_do_crypt(cipher, key, key_len, data, data_len, "ofb", iv, iv_len, Z_LVAL_P(mode), return_value);
-}
-/* }}} */
-
-/* {{{ proto string mcrypt_create_iv(int size, int source)
-   Create an initialization vector (IV) */
-PHP_FUNCTION(mcrypt_create_iv)
-{
-	char *iv;
-	zend_long source = URANDOM;
-	zend_long size;
-	int n = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &size, &source) == FAILURE) {
-		return;
-	}
-
-	if (size <= 0 || size >= INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Cannot create an IV with a size of less than 1 or greater than %d", INT_MAX);
-		RETURN_FALSE;
-	}
-
-	iv = ecalloc(size + 1, 1);
-
-	if (source == RANDOM || source == URANDOM) {
-#if PHP_WIN32
-		/* random/urandom equivalent on Windows */
-		BYTE *iv_b = (BYTE *) iv;
-		if (php_win32_get_random_bytes(iv_b, (size_t) size) == FAILURE){
-			efree(iv);
-			php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
-			RETURN_FALSE;
-		}
-		n = (int)size;
-#else
-		int    fd;
-		size_t read_bytes = 0;
-
-		fd = open(source == RANDOM ? "/dev/random" : "/dev/urandom", O_RDONLY);
-		if (fd < 0) {
-			efree(iv);
-			php_error_docref(NULL, E_WARNING, "Cannot open source device");
-			RETURN_FALSE;
-		}
-		while (read_bytes < size) {
-			n = read(fd, iv + read_bytes, size - read_bytes);
-			if (n < 0) {
-				break;
-			}
-			read_bytes += n;
-		}
-		n = read_bytes;
-		close(fd);
-		if (n < size) {
-			efree(iv);
-			php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
-			RETURN_FALSE;
-		}
-#endif
-	} else {
-		n = (int)size;
-		while (size) {
-			iv[--size] = (char) (255.0 * php_rand() / RAND_MAX);
-		}
-	}
-	RETVAL_STRINGL(iv, n);
-	efree(iv);
 }
 /* }}} */
 
