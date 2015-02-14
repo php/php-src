@@ -1164,8 +1164,8 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		//??? TODO: try to avoid array duplication
 		ZVAL_DUP(&intern->array, array);
 	} else {
-		ZVAL_COPY(&intern->array, array);
 		zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
+		ZVAL_COPY(&intern->array, array);
 		if ((handler != std_object_handlers.get_properties && handler != spl_array_get_properties)
 		|| !spl_array_get_hash_table(intern, 0)) {
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
