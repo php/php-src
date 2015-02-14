@@ -12,6 +12,10 @@
   . Fix bug #61285, #68329, #68046, #41631: encrypted streams don't observe
     socket timeouts (Brad Broerman)
 
+- pgsql:
+  . Fixed bug #68638 (pg_update() fails to store infinite values).
+    (william dot welter at 4linux dot com dot br, Laruence)
+
 ?? Feb 2015, PHP 5.6.6
 
 - Core:
