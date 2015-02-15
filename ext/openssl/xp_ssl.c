@@ -1840,7 +1840,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				if (errno == EAGAIN && err == SSL_ERROR_WANT_READ && read) {
 					retry = 1;
 				}
-				if (errno == EAGAIN && SSL_ERROR_WANT_WRITE && read == 0) {
+				if (errno == EAGAIN && err == SSL_ERROR_WANT_WRITE && read == 0) {
 					retry = 1;
 				}
 				

@@ -667,7 +667,7 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 
 	if (Z_TYPE_P(name_var) == IS_STRING) {
 		zend_array *symbol_table = zend_rebuild_symbol_table();
-		if ((val = zend_hash_find(&symbol_table->ht, Z_STR_P(name_var))) != NULL) {
+		if ((val = zend_hash_find(symbol_table, Z_STR_P(name_var))) != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
 				val = Z_INDIRECT_P(val);
 			}

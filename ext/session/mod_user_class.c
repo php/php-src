@@ -80,7 +80,7 @@ PHP_METHOD(SessionHandler, read)
 		return;
 	}
 
-	if (PS(default_mod)->s_read(&PS(mod_data), key, &val) == FAILURE) {
+	if (PS(default_mod)->s_read(&PS(mod_data), key, &val, PS(gc_maxlifetime)) == FAILURE) {
 		RETVAL_FALSE;
 		return;
 	}
@@ -101,7 +101,7 @@ PHP_METHOD(SessionHandler, write)
 		return;
 	}
 
-	RETURN_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val));
+	RETURN_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime)));
 }
 /* }}} */
 
@@ -186,6 +186,6 @@ PHP_METHOD(SessionHandler, updateTimestamp)
 	}
 
 	/* Legacy save handler may not support update_timestamp API. Just write. */
-	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val));
+	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime)));
 }
 /* }}} */

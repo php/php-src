@@ -550,8 +550,9 @@ static zend_bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
 	zval globals;
 
 	ZVAL_ARR(&globals, &EG(symbol_table));
+	Z_TYPE_INFO_P(&globals) = IS_ARRAY | (IS_TYPE_SYMBOLTABLE << Z_TYPE_FLAGS_SHIFT);
 	ZVAL_NEW_REF(&globals, &globals);
-	zend_hash_update(&EG(symbol_table).ht, name, &globals);
+	zend_hash_update(&EG(symbol_table), name, &globals);
 	return 0;
 }
 /* }}} */
@@ -1129,8 +1130,7 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 			if (!symbol_table) {
 				ZVAL_NULL(&params[4]);
 			} else {
-				ZVAL_NEW_ARR(&params[4]);
-				zend_array_dup(Z_ARRVAL(params[4]), &symbol_table->ht);
+				ZVAL_ARR(&params[4], zend_array_dup(symbol_table));
 			}
 
 			ZVAL_COPY_VALUE(&orig_user_error_handler, &EG(user_error_handler));

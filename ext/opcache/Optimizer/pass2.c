@@ -203,7 +203,9 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 						jmp_to = &op_array->brk_cont_array[array_offset];
 						array_offset = jmp_to->parent;
 						if (--nest_levels > 0) {
-							if (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE) {
+							if (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE ||
+							    op_array->opcodes[jmp_to->brk].opcode == ZEND_FE_FREE ||
+							    op_array->opcodes[jmp_to->brk].opcode == ZEND_END_SILENCE) {
 								dont_optimize = 1;
 								break;
 							}

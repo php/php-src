@@ -95,7 +95,8 @@ typedef union _znode_op {
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */
-	int op_type;
+	zend_uchar op_type;
+	zend_uchar flag;
 	union {
 		znode_op op;
 		zval constant; /* replaced by literal/zv */
@@ -190,8 +191,8 @@ typedef struct _zend_try_catch_element {
 /* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
 #define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
 #define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
-#define ZEND_ACC_INTERFACE		            0x80
-#define ZEND_ACC_TRAIT						0x120
+#define ZEND_ACC_INTERFACE		            0x40
+#define ZEND_ACC_TRAIT						0x80
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */
@@ -256,8 +257,6 @@ typedef struct _zend_try_catch_element {
 
 /* Function has a return type hint (or class has such non-private function) */
 #define ZEND_ACC_HAS_RETURN_TYPE		0x40000000
-
-#define ZEND_CE_IS_TRAIT(ce) (((ce)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)
 
 char *zend_visibility_string(uint32_t fn_flags);
 
@@ -731,6 +730,7 @@ typedef struct _zend_auto_global {
 ZEND_API int zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global_callback auto_global_callback);
 ZEND_API void zend_activate_auto_globals(void);
 ZEND_API zend_bool zend_is_auto_global(zend_string *name);
+ZEND_API zend_bool zend_is_auto_global_str(char *name, size_t len);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 
 int zendlex(zend_parser_stack_elem *elem);
@@ -830,9 +830,6 @@ int zend_add_literal(zend_op_array *op_array, zval *zv);
 #define ZEND_QUICK_SET			    0x00800000
 
 #define ZEND_FETCH_ARG_MASK         0x000fffff
-
-#define ZEND_FE_FETCH_BYREF	1
-#define ZEND_FE_FETCH_WITH_KEY	2
 
 #define EXT_TYPE_FREE_ON_RETURN		(1<<2)
 

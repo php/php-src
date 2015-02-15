@@ -769,8 +769,7 @@ SPL_METHOD(SplObjectStorage, serialize)
 
 	/* members */
 	smart_str_appendl(&buf, "m:", 2);
-	ZVAL_NEW_ARR(&members);
-	zend_array_dup(Z_ARRVAL(members), zend_std_get_properties(getThis()));
+	ZVAL_ARR(&members, zend_array_dup(zend_std_get_properties(getThis())));
 	php_var_serialize(&buf, &members, &var_hash); /* finishes the string */
 	zval_ptr_dtor(&members);
 

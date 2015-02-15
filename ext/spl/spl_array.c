@@ -198,8 +198,7 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zval *
 		if (clone_orig) {
 			intern->array = other->array;
 			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayObject) {
-				ZVAL_NEW_ARR(&intern->array);
-				zend_array_dup(Z_ARRVAL(intern->array), HASH_OF(&other->array));
+				ZVAL_ARR(&intern->array, zend_array_dup(HASH_OF(&other->array)));
 			}
 			if (Z_OBJ_HT_P(orig) == &spl_handler_ArrayIterator) {
 				Z_ADDREF_P(&other->array);
@@ -553,7 +552,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 			zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
 			return;
 		}
-		if (ht == &EG(symbol_table).ht) {
+		if (ht == &EG(symbol_table)) {
 			if (zend_delete_global_variable(Z_STR_P(offset))) {
 				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 			}
@@ -824,8 +823,7 @@ SPL_METHOD(Array, getArrayCopy)
 	zval *object = getThis();
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	ZVAL_NEW_ARR(return_value);
-	zend_array_dup(Z_ARRVAL_P(return_value), spl_array_get_hash_table(intern, 0));
+	ZVAL_ARR(return_value, zend_array_dup(spl_array_get_hash_table(intern, 0)));
 } /* }}} */
 
 static HashTable *spl_array_get_properties(zval *object) /* {{{ */
@@ -1141,10 +1139,6 @@ static void spl_array_it_rewind(zend_object_iterator *iter) /* {{{ */
 /* {{{ spl_array_set_array */
 static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, zend_long ar_flags, int just_array) {
 
-	if (Z_TYPE_P(array) == IS_ARRAY) {
-		SEPARATE_ARRAY(array);
-	}
-
 	if (Z_TYPE_P(array) == IS_OBJECT && (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator)) {
 		zval_ptr_dtor(&intern->array);
 		if (just_array)	{
@@ -1152,14 +1146,12 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			ar_flags = other->ar_flags & ~SPL_ARRAY_INT_MASK;
 		}
 		ar_flags |= SPL_ARRAY_USE_OTHER;
-		ZVAL_COPY_VALUE(&intern->array, array);
 	} else {
 		if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
 			zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object, using empty array instead", 0);
 			return;
 		}
 		zval_ptr_dtor(&intern->array);
-		ZVAL_COPY_VALUE(&intern->array, array);
 	}
 	if (Z_TYPE_P(array) == IS_OBJECT && Z_OBJ_P(object) == Z_OBJ_P(array)) {
 		intern->ar_flags |= SPL_ARRAY_IS_SELF;
@@ -1168,9 +1160,12 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		intern->ar_flags &= ~SPL_ARRAY_IS_SELF;
 	}
 	intern->ar_flags |= ar_flags;
-	Z_ADDREF_P(&intern->array);
-	if (Z_TYPE_P(array) == IS_OBJECT) {
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+		//??? TODO: try to avoid array duplication
+		ZVAL_DUP(&intern->array, array);
+	} else {
 		zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
+		ZVAL_COPY(&intern->array, array);
 		if ((handler != std_object_handlers.get_properties && handler != spl_array_get_properties)
 		|| !spl_array_get_hash_table(intern, 0)) {
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Overloaded object of type %s is not compatible with %s", Z_OBJCE_P(array)->name, intern->std.ce->name);
@@ -1327,8 +1322,7 @@ SPL_METHOD(Array, exchangeArray)
 	zval *object = getThis(), *array;
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
-	ZVAL_NEW_ARR(return_value);
-	zend_array_dup(Z_ARRVAL_P(return_value), spl_array_get_hash_table(intern, 0));
+	ZVAL_ARR(return_value, zend_array_dup(spl_array_get_hash_table(intern, 0)));
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &array) == FAILURE) {
 		return;
 	}
@@ -1480,11 +1474,13 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	HashTable *aht = spl_array_get_hash_table(intern, 0);
 	zval tmp, *arg = NULL;
 	zval retval;
+	uint32_t old_refcount;
 
-	/* A tricky way to pass "aht" by reference, copy HashTable */
+	/* A tricky way to pass "aht" by reference, reset refcount */
 	//??? It may be not safe, if user comparison handler accesses "aht"
-	ZVAL_NEW_ARR(&tmp);
-	*Z_ARRVAL(tmp) = *aht;
+	old_refcount = GC_REFCOUNT(aht);
+	GC_REFCOUNT(aht) = 1;
+	ZVAL_ARR(&tmp, aht);
 
 	if (!use_arg) {
 		aht->u.v.nApplyCount++;
@@ -1492,7 +1488,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		aht->u.v.nApplyCount--;
 	} else if (use_arg == SPL_ARRAY_METHOD_MAY_USER_ARG) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
-			zval_ptr_dtor(&tmp);
+			GC_REFCOUNT(aht) = old_refcount;
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects one argument at most", 0);
 			return;
 		}
@@ -1501,7 +1497,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		aht->u.v.nApplyCount--;
 	} else {
 		if (ZEND_NUM_ARGS() != 1 || zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
-			zval_ptr_dtor(&tmp);
+			GC_REFCOUNT(aht) = old_refcount;
 			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects exactly one argument", 0);
 			return;
 		}
@@ -1513,9 +1509,9 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 	if (Z_ISREF(tmp) && Z_TYPE_P(Z_REFVAL(tmp))) {
 		*aht = *Z_ARRVAL_P(Z_REFVAL(tmp));
 		GC_REMOVE_FROM_BUFFER(Z_ARR_P(Z_REFVAL(tmp)));
-		efree(Z_ARR_P(Z_REFVAL(tmp)));
 		efree(Z_REF(tmp));
 	}
+	GC_REFCOUNT(aht) = old_refcount;
 	if (!Z_ISUNDEF(retval)) {
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
@@ -1749,8 +1745,7 @@ SPL_METHOD(Array, serialize)
 		rebuild_object_properties(&intern->std);
 	}
 
-	ZVAL_NEW_ARR(&members);
-	zend_array_dup(Z_ARRVAL(members), intern->std.properties);
+	ZVAL_ARR(&members, zend_array_dup(intern->std.properties));
 
 	php_var_serialize(&buf, &members, &var_hash); /* finishes the string */
 

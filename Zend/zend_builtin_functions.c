@@ -1140,8 +1140,7 @@ ZEND_FUNCTION(get_object_vars)
 
 	if (!zobj->ce->default_properties_count && properties == zobj->properties) {
 		/* fast copy */
-		ZVAL_NEW_ARR(return_value);
-		zend_array_dup(Z_ARRVAL_P(return_value), properties);
+		ZVAL_ARR(return_value, zend_array_dup(properties));
 	} else {
 		array_init_size(return_value, zend_hash_num_elements(properties));
 
@@ -1378,14 +1377,15 @@ ZEND_FUNCTION(class_exists)
 		} else {
 			lc_name = zend_string_tolower(class_name);
 		}
+
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		zend_string_release(lc_name);
-		RETURN_BOOL(ce && !((ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT)) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
+	} else {
+		ce = zend_lookup_class(class_name);
 	}
 
-	ce = zend_lookup_class(class_name);
  	if (ce) {
- 		RETURN_BOOL((ce->ce_flags & (ZEND_ACC_INTERFACE | (ZEND_ACC_TRAIT - ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) == 0);
+ 		RETURN_BOOL((ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT)) == 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1462,14 +1462,15 @@ ZEND_FUNCTION(trait_exists)
 		} else {
 			lc_name = zend_string_tolower(trait_name);
 		}
+
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		zend_string_release(lc_name);
-		RETURN_BOOL(ce && ((ce->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS));
+	} else {
+		ce = zend_lookup_class(trait_name);
 	}
 
-	ce = zend_lookup_class(trait_name);
 	if (ce) {
- 		RETURN_BOOL((ce->ce_flags & ZEND_ACC_TRAIT) > ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
+ 		RETURN_BOOL((ce->ce_flags & ZEND_ACC_TRAIT) != 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1806,7 +1807,7 @@ ZEND_FUNCTION(get_declared_traits)
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
-	uint32_t mask = ZEND_ACC_INTERFACE | (ZEND_ACC_TRAIT & ~ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
+	uint32_t mask = ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT;
 	uint32_t comply = 0;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1881,8 +1882,7 @@ ZEND_FUNCTION(get_defined_vars)
 {
 	zend_array *symbol_table = zend_rebuild_symbol_table();
 
-	ZVAL_NEW_ARR(return_value);
-	zend_array_dup(Z_ARRVAL_P(return_value), &symbol_table->ht);
+	ZVAL_ARR(return_value, zend_array_dup(symbol_table));
 }
 /* }}} */
 

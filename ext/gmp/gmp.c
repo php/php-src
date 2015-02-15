@@ -433,8 +433,7 @@ static HashTable *gmp_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 	zval zv;
 
 	*is_temp = 1;
-	ALLOC_HASHTABLE(ht);
-	zend_array_dup(ht, props);
+	ht = zend_array_dup(props);
 
 	gmp_strval(&zv, gmpnum, 10);
 	zend_hash_str_update(ht, "num", sizeof("num")-1, &zv);
@@ -560,7 +559,6 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	smart_str buf = {0};
 	zval zv;
 	php_serialize_data_t serialize_data = (php_serialize_data_t) data;
-	zend_array tmp_arr;
 
 	PHP_VAR_SERIALIZE_INIT(serialize_data);
 
@@ -568,8 +566,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	php_var_serialize(&buf, &zv, &serialize_data);
 	zval_dtor(&zv);
 
-	ZVAL_ARR(&zv, &tmp_arr);
-	tmp_arr.ht = *zend_std_get_properties(object);
+	ZVAL_ARR(&zv, zend_std_get_properties(object));
 	php_var_serialize(&buf, &zv, &serialize_data);
 
 	PHP_VAR_SERIALIZE_DESTROY(serialize_data);

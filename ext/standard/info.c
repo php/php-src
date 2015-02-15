@@ -204,7 +204,7 @@ static void php_print_gpcse_array(char *name, uint name_length)
 	key = zend_string_init(name, name_length, 0);
 	zend_is_auto_global(key);
 
-	if ((data = zend_hash_find(&EG(symbol_table).ht, key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
+	if ((data = zend_hash_find(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_key, string_key, tmp) {
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("<tr>");
@@ -899,16 +899,16 @@ PHPAPI void php_print_info(int flag)
 
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_SELF", sizeof("PHP_SELF")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_SELF", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_AUTH_TYPE", sizeof("PHP_AUTH_TYPE")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_TYPE", sizeof("PHP_AUTH_TYPE")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_TYPE", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_AUTH_USER", sizeof("PHP_AUTH_USER")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_USER", sizeof("PHP_AUTH_USER")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_USER", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_AUTH_PW", sizeof("PHP_AUTH_PW")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_PW", Z_STRVAL_P(data));
 		}
 		php_print_gpcse_array(ZEND_STRL("_REQUEST"));
