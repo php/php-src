@@ -59,6 +59,7 @@ PHPAPI zend_class_entry *reflection_function_abstract_ptr;
 PHPAPI zend_class_entry *reflection_function_ptr;
 PHPAPI zend_class_entry *reflection_generator_ptr;
 PHPAPI zend_class_entry *reflection_parameter_ptr;
+PHPAPI zend_class_entry *reflection_typeannotation_ptr;
 PHPAPI zend_class_entry *reflection_class_ptr;
 PHPAPI zend_class_entry *reflection_object_ptr;
 PHPAPI zend_class_entry *reflection_method_ptr;
@@ -201,11 +202,17 @@ typedef struct _parameter_reference {
 	zend_function *fptr;
 } parameter_reference;
 
+/* Struct for type annotations */
+typedef struct _typeannotation_reference {
+	struct _zend_arg_info *arg_info;
+} typeannotation_reference;
+
 typedef enum {
 	REF_TYPE_OTHER,      /* Must be 0 */
 	REF_TYPE_FUNCTION,
 	REF_TYPE_GENERATOR,
 	REF_TYPE_PARAMETER,
+	REF_TYPE_ANNOTATION,
 	REF_TYPE_PROPERTY,
 	REF_TYPE_DYNAMIC_PROPERTY
 } reflection_type_t;
@@ -305,6 +312,8 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 		case REF_TYPE_PARAMETER:
 			reference = (parameter_reference*)intern->ptr;
 			_free_function(reference->fptr);
+			/* fallthrough */
+		case REF_TYPE_ANNOTATION:
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_FUNCTION:
@@ -1233,6 +1242,26 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 		ZVAL_COPY_VALUE(&intern->obj, closure_object);
 	}
 	reflection_update_property(object, "name", &name);
+}
+/* }}} */
+
+/* {{{ reflection_typeannotation_factory */
+static void reflection_typeannotation_factory(zend_function *fptr, zval *closure_object, struct _zend_arg_info *arg_info, zval *object)
+{
+	reflection_object *intern;
+	typeannotation_reference *reference;
+
+	reflection_instantiate(reflection_typeannotation_ptr, object);
+	intern = Z_REFLECTION_P(object);
+	reference = (typeannotation_reference*) emalloc(sizeof(typeannotation_reference));
+	reference->arg_info = arg_info;
+	intern->ptr = reference;
+	intern->ref_type = REF_TYPE_ANNOTATION;
+	intern->ce = fptr->common.scope;
+	if (closure_object) {
+		Z_ADDREF_P(closure_object);
+		ZVAL_COPY_VALUE(&intern->obj, closure_object);
+	}
 }
 /* }}} */
 
@@ -2630,6 +2659,41 @@ ZEND_METHOD(reflection_parameter, getClass)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionParameter::hasTypeAnnotation()
+   Rethern whether parameter has a type hint */
+ZEND_METHOD(reflection_parameter, hasTypeAnnotation)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint != 0);
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionParameter::getTypeAnnotation()
+   Returns the typehint associated with the parameter */
+ZEND_METHOD(reflection_parameter, getTypeAnnotation)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	if (!param->arg_info->type_hint) {
+		RETURN_NULL();
+	}
+	reflection_typeannotation_factory(param->fptr, Z_ISUNDEF(intern->obj)? NULL : &intern->obj, param->arg_info, return_value);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionParameter::isArray()
    Returns whether parameter MUST be an array */
 ZEND_METHOD(reflection_parameter, isArray)
@@ -2864,6 +2928,77 @@ ZEND_METHOD(reflection_parameter, isVariadic)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	RETVAL_BOOL(param->arg_info->is_variadic);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionTypeAnnotation::isArray()
+   Returns whether parameter MUST be an array */
+ZEND_METHOD(reflection_typeannotation, isArray)
+{
+	reflection_object *intern;
+	typeannotation_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_ARRAY);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionTypeAnnotation::isCallable()
+   Returns whether parameter MUST be callable */
+ZEND_METHOD(reflection_typeannotation, isCallable)
+{
+	reflection_object *intern;
+	typeannotation_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->type_hint == IS_CALLABLE);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionTypeAnnotation::isNullable()
+  Returns whether parameter MAY be null */
+ZEND_METHOD(reflection_typeannotation, isNullable)
+{
+	reflection_object *intern;
+	typeannotation_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->allow_null);
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionTypeAnnotation::__toString()
+   Return the text of the type annotation */
+ZEND_METHOD(reflection_typeannotation, __toString)
+{
+	reflection_object *intern;
+	typeannotation_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	switch (param->arg_info->type_hint) {
+		case IS_ARRAY:    RETURN_STRINGL("array", sizeof("array") - 1);
+		case IS_CALLABLE: RETURN_STRINGL("callable", sizeof("callable") - 1);
+		case IS_OBJECT:   RETURN_STR(zend_string_copy(param->arg_info->class_name));
+		default:
+			php_error_docref(NULL, E_ERROR, "Unknown type annotation: %d", (int)param->arg_info->type_hint);
+			RETURN_EMPTY_STRING();
+	}
 }
 /* }}} */
 
@@ -6281,6 +6416,8 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, getDeclaringFunction, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getClass, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, hasTypeAnnotation, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, getTypeAnnotation, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isArray, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isCallable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, allowsNull, arginfo_reflection__void, 0)
@@ -6291,6 +6428,15 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, isDefaultValueConstant, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDefaultValueConstantName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isVariadic, arginfo_reflection__void, 0)
+	PHP_FE_END
+};
+
+static const zend_function_entry reflection_typeannotation_functions[] = {
+	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(reflection_typeannotation, isArray, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_typeannotation, isCallable, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_typeannotation, isNullable, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_typeannotation, __toString, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 
@@ -6406,6 +6552,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_parameter_ptr = zend_register_internal_class(&_reflection_entry);
 	zend_class_implements(reflection_parameter_ptr, 1, reflector_ptr);
 	zend_declare_property_string(reflection_parameter_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC);
+
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionTypeAnnotation", reflection_typeannotation_functions);
+	_reflection_entry.create_object = reflection_objects_new;
+	reflection_typeannotation_ptr = zend_register_internal_class(&_reflection_entry);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionMethod", reflection_method_functions);
 	_reflection_entry.create_object = reflection_objects_new;
