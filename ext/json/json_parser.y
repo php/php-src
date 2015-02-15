@@ -67,7 +67,6 @@ int json_yydebug = 1;
 %type <pair> pair
 
 %destructor { zval_dtor(&$$); } <value>
-%destructor { zend_hash_destroy($$); FREE_HASHTABLE($$); } <ht>
 %destructor { zval_dtor(&$$.key); zval_dtor(&$$.val); } <pair>
 
 %code {
