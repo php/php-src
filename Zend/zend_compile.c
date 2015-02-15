@@ -3199,7 +3199,12 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	}
 
 	if (CG(active_op_array)->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-		zend_emit_return_type_check(&expr_node, CG(active_op_array)->arg_info - 1);
+		/* maintains empty return/NULL return distinction */
+		if (!expr_ast) {
+			zend_emit_return_type_check(NULL, CG(active_op_array)->arg_info - 1);
+		} else {
+			zend_emit_return_type_check(&expr_node, CG(active_op_array)->arg_info - 1);
+		}
 		if (expr_node.op_type == IS_CONST) {
 			zval_copy_ctor(&expr_node.u.constant);
 		}
