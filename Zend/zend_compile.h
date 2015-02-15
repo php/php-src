@@ -429,6 +429,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
 #define ZEND_CALL_CTOR               (1 << 3)
 #define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 4)
+#define ZEND_CALL_STRICT_TYPEHINTS   (1 << 5)
 
 #define ZEND_CALL_INFO(call) \
 	(Z_TYPE_INFO((call)->This) >> 24)
@@ -736,6 +737,8 @@ ZEND_API size_t zend_dirname(char *path, size_t len);
 int zendlex(zend_parser_stack_elem *elem);
 
 int zend_add_literal(zend_op_array *op_array, zval *zv);
+
+ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 
 /* BEGIN: OPCODES */
 

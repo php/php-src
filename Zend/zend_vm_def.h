@@ -2783,6 +2783,8 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 	zend_object *object = Z_OBJ(call->This);
 	zval *ret;
 
+	ZEND_ADD_CALL_FLAG(call, opline->op1.num & ZEND_CALL_STRICT_TYPEHINTS);
+
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
@@ -2858,7 +2860,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, ANY, ANY)
 			zval *p = ZEND_CALL_ARG(call, 1);
 
 			for (i = 0; i < num_args; ++i) {
-				zend_verify_internal_arg_type(fbc, i + 1, p);
+				zend_verify_internal_arg_type(fbc, i + 1, p, (EX_CALL_INFO() & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0);
 				p++;
 			}
 			if (UNEXPECTED(EG(exception) != NULL)) {
@@ -2973,11 +2975,15 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 	if (OP1_TYPE == IS_UNUSED) {
 		zend_verify_missing_return_type(EX(func));
 	} else {
+/* prevents "undefined variable opline" errors */
+#if OP1_TYPE != IS_UNUSED
 		zval *retval_ptr;
 		zend_free_op free_op1;
 
 		retval_ptr = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
-		zend_verify_return_type(EX(func), retval_ptr);
+		/* extended_value stores strictness flag */
+		zend_verify_return_type(EX(func), retval_ptr, opline->extended_value);
+#endif
 	}
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -3709,7 +3715,7 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 	} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
 		zval *param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var);
 
-		zend_verify_arg_type(EX(func), arg_num, param, NULL);
+		zend_verify_arg_type(EX(func), arg_num, param, NULL, (EX_CALL_INFO() & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0);
 		CHECK_EXCEPTION();
 	}
 
@@ -3737,7 +3743,7 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 	}
 
 	if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
-		zend_verify_arg_type(EX(func), arg_num, param, EX_CONSTANT(opline->op2));
+		zend_verify_arg_type(EX(func), arg_num, param, EX_CONSTANT(opline->op2), (EX_CALL_INFO() & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0);
 	}
 
 	CHECK_EXCEPTION();
@@ -3763,8 +3769,8 @@ ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(params)) {
 			param = EX_VAR_NUM(EX(func)->op_array.last_var + EX(func)->op_array.T);
 			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
-				do {
-					zend_verify_arg_type(EX(func), arg_num, param, NULL);
+				do {			
+					zend_verify_arg_type(EX(func), arg_num, param, NULL, (EX_CALL_INFO() & ZEND_CALL_STRICT_TYPEHINTS) ? 1 : 0);
 					if (Z_OPT_REFCOUNTED_P(param)) Z_ADDREF_P(param);
 					ZEND_HASH_FILL_ADD(param);
 					param++;
