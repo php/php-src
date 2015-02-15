@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #68638 (pg_update() fails to store infinite values).
     (william dot welter at 4linux dot com dot br, Laruence)
 
+- Readline:
+  . Fixed bug #69054 (Null dereference in readline_(read|write)_history() without
+    parameters). (Laruence)
+
 - CGI:
   . Fixed bug #69015 (php-cgi's getopt does not see $argv). (Laruence)
 
