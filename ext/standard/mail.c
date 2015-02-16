@@ -286,34 +286,30 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	return val;	\
 
 	if (mail_log && *mail_log) {
-		char *tmp;
+		char *msg;
 		time_t curtime;
-		size_t l;
+		size_t len;
 		zend_string *date_str;
 
 		time(&curtime);
 		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
-
-		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", ZSTR_VAL(date_str), zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
+		spprintf(&msg, 0, "mail() on [%s:%d]: To: %s -- Headers: %s", zend_get_executed_filename(), zend_get_executed_lineno(), to, hdr ? hdr : "");
 
 		zend_string_free(date_str);
 
 		if (hdr) {
-			php_mail_log_crlf_to_spaces(tmp);
+			php_mail_log_crlf_to_spaces(msg);
 		}
 
 		if (!strcmp(mail_log, "syslog")) {
-			/* Drop the final space when logging to syslog. */
-			tmp[l - 1] = 0;
-			php_mail_log_to_syslog(tmp);
+			php_mail_log_to_syslog(msg);
 		}
 		else {
-			/* Convert the final space to a newline when logging to file. */
-			tmp[l - 1] = '\n';
-			php_mail_log_to_file(mail_log, tmp, l);
+			len = spprintf(&msg, 0, "[%s] %s%s", date_str->val, msg, PHP_EOL);
+			php_mail_log_to_file(mail_log, msg, len);
 		}
 
-		efree(tmp);
+		efree(msg);
 	}
 
 	if (PG(mail_x_header)) {
