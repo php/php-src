@@ -9,7 +9,8 @@
   . Bug #68964 (Allowed memory size exhausted with odbc_exec). (Anatol)
 
 - OpenSSL:
-  . Fix bug #61285, #68329, #68046, #41631: encrypted streams don't observe
+  . Fixed bug #68912 (Segmentation fault at openssl_spki_new). (Laruence)
+  . Fixed bug #61285, #68329, #68046, #41631: encrypted streams don't observe
     socket timeouts (Brad Broerman)
 
 - pgsql:

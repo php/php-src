@@ -1532,7 +1532,7 @@ cleanup:
 		efree(spkstr);
 	}
 
-	if (strlen(s) <= 0) {
+	if (s && strlen(s) <= 0) {
 		RETVAL_FALSE;
 	}
 
