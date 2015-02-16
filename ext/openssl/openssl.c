@@ -1545,7 +1545,7 @@ cleanup:
 		efree(spkstr);
 	}
 
-	if (s->len <= 0) {
+	if (s && s->len <= 0) {
 		RETVAL_FALSE;
 	}
 
