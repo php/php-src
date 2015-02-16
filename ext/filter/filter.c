@@ -154,7 +154,7 @@ zend_module_entry filter_module_entry = {
 
 #ifdef COMPILE_DL_FILTER
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(filter)
 #endif
@@ -196,7 +196,7 @@ PHP_INI_END()
 static void php_filter_init_globals(zend_filter_globals *filter_globals) /* {{{ */
 {
 #if defined(COMPILE_DL_FILTER) && defined(ZTS)
-ZEND_TSRMLS_CACHE_UPDATE;
+ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	ZVAL_UNDEF(&filter_globals->post_array);
 	ZVAL_UNDEF(&filter_globals->get_array);

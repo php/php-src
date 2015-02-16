@@ -144,7 +144,7 @@ PHPAPI zend_string *xml_utf8_encode(const char *, size_t, const XML_Char *);
 #ifdef ZTS
 #define XML(v) ZEND_TSRMG(xml_globals_id, zend_xml_globals *, v)
 #ifdef COMPILE_DL_XML
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define XML(v) (xml_globals.v)

@@ -346,7 +346,7 @@ ZEND_END_MODULE_GLOBALS(mysqli)
 #ifdef ZTS
 #define MyG(v) ZEND_TSRMG(mysqli_globals_id, zend_mysqli_globals *, v)
 #ifdef COMPILE_DL_MYSQLI
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define MyG(v) (mysqli_globals.v)
