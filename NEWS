@@ -10,7 +10,13 @@ PHP                                                                        NEWS
     buffer overflow). (Stas)
   . Fixed bug #67827 (broken detection of system crypt sha256/sha512 support).
     (ncopa at alpinelinux dot org)  
+  . Fixed bug #68942 (Use after free vulnerability in unserialize() with
+    DateTimeZone). (Stas)
   
+- Enchant: 
+  . Fixed bug #6855 (heap buffer overflow in enchant_broker_request_dict()).
+    (Antony)
+
 - SOAP:
   . Fixed bug #67427 (SoapServer cannot handle large messages)
     (brandt at docoloc dot de)
