@@ -609,6 +609,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_NEW:
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
+		case ZEND_ASSERT_CHECK:
 			collect_constants = 0;
 			break;
 		case ZEND_FETCH_R:

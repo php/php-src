@@ -2815,7 +2815,37 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 }
 /* }}} */
 
-int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args) /* {{{ */
+
+
+static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *lcname, zend_function *fbc) /* {{{ */
+{
+	if (EG(assertions) >= 0) {
+	    znode name_node;
+		zend_op *opline;
+		uint32_t check_op_number = get_next_op_number(CG(active_op_array));
+
+		zend_emit_op(NULL, ZEND_ASSERT_CHECK, NULL, NULL);
+
+		name_node.op_type = IS_CONST;
+		ZVAL_STR_COPY(&name_node.u.constant, lcname);
+
+		opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
+		zend_alloc_cache_slot(opline->op2.constant);
+
+		if (args->children == 1) {
+			/* TODO: add "assert(condition) as assertion message ??? */
+		}
+
+		zend_compile_call_common(result, args, fbc);
+
+		CG(active_op_array)->opcodes[check_op_number].op2.opline_num = get_next_op_number(CG(active_op_array));
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc) /* {{{ */
 {
 	if (zend_string_equals_literal(lcname, "strlen")) {
 		return zend_compile_func_strlen(result, args);
@@ -2847,6 +2877,8 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_cufa(result, args, lcname);
 	} else if (zend_string_equals_literal(lcname, "call_user_func")) {
 		return zend_compile_func_cuf(result, args, lcname);
+	} else if (zend_string_equals_literal(lcname, "assert")) {
+		return zend_compile_assert(result, args, lcname, fbc);
 	} else {
 		return FAILURE;
 	}
@@ -2892,7 +2924,7 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 		}
 
 		if (zend_try_compile_special_func(result, lcname,
-				zend_ast_get_list(args_ast)) == SUCCESS
+				zend_ast_get_list(args_ast), fbc) == SUCCESS
 		) {
 			zend_string_release(lcname);
 			zval_ptr_dtor(&name_node.u.constant);
