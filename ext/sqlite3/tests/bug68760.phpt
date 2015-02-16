@@ -1,9 +1,9 @@
 --TEST--
-Bug #68760 (Callback throws exception behaviour. Segfault in 5.6)
+Bug #68760 (Callback throws exception behaviour.)
 --FILE--
 <?php
 function oopsFunction($a, $b) {
-	echo "callback";
+	echo "callback".PHP_EOL;
 	throw new \Exception("oops");
 }
 
@@ -27,6 +27,5 @@ catch(\Exception $e) {
 ?>
 --EXPECTF--
 callback
-Warning: SQLite3::query(): An error occurred while invoking the compare callback in %a/bug68760.php on line %i
 Exception: oops
 
