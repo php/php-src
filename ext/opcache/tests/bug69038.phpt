@@ -39,7 +39,18 @@ function b($b = "bad") {
 	return $b;
 }
 var_dump(b());
+
+function c($b = "bad") {
+	switch (extension_loaded("standard")) {
+	case 0 : return "LALALAL";
+	case 1 : return "okey";
+	default : return "bad";
+	}
+}
+var_dump(c());
+
 ?>
 --EXPECT--
+string(4) "okey"
 string(4) "okey"
 string(4) "okey"
