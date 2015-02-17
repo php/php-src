@@ -48,6 +48,10 @@ PHP                                                                        NEWS
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
+- Enchant:
+  . Fixed bug #6855 (heap buffer overflow in enchant_broker_request_dict()).
+    (Antony)
+
 - Fileinfo:
   . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
 
