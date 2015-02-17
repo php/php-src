@@ -291,17 +291,41 @@ static void replace_tmp_by_const(zend_op_array *op_array,
 			 * usually terminated by ZEND_FREE that finally kills the value.
 			 */
 			if (opline->opcode == ZEND_CASE) {
-				zval old_val;
-				old_val = *val;
-				zval_copy_ctor(val);
-				update_op1_const(op_array, opline, val TSRMLS_CC);
-				*val = old_val;
+				zend_op *m, *n;
+				int brk = op_array->last_brk_cont;
+				while (brk--) {
+					if (op_array->brk_cont_array[brk].start <= (opline - op_array->opcodes) &&
+							op_array->brk_cont_array[brk].brk > (opline - op_array->opcodes)) {
+						break;
+					}
+				}
+				m = opline;
+				n = op_array->opcodes + op_array->brk_cont_array[brk].brk + 1;
+				while (m < n) {
+					if (ZEND_OP1_TYPE(m) == IS_TMP_VAR &&
+							ZEND_OP1(m).var == var) {
+						if (m->opcode == ZEND_CASE) {
+							zval old_val;
+							old_val = *val;
+							zval_copy_ctor(val);
+							update_op1_const(op_array, m, val TSRMLS_CC);
+							*val = old_val;
+						} else if (m->opcode == ZEND_FREE) {
+							MAKE_NOP(m);
+						} else {
+							ZEND_ASSERT(0);
+						}
+					}
+					m++;
+				}
+				zval_dtor(val);
+				break;
 			} else if (opline->opcode == ZEND_FREE) {
 				MAKE_NOP(opline);
+				zval_dtor(val);
 				break;
 			} else {				
 				update_op1_const(op_array, opline, val TSRMLS_CC);
-				val = NULL;
 				break;
 			}
 		}
@@ -311,13 +335,9 @@ static void replace_tmp_by_const(zend_op_array *op_array,
 
 			update_op2_const(op_array, opline, val TSRMLS_CC);
 			/* TMP_VAR may be used only once */
-			val = NULL;
 			break;
 		}
 		opline++;
-	}
-	if (val) {
-		zval_dtor(val);
 	}
 }
 
