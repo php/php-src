@@ -1935,6 +1935,7 @@ function generate_config_h()
 	outfile.Close();
 }
 
+/* Generate phpize */
 function generate_phpize()
 {
 	STDOUT.WriteLine("Generating phpize");
@@ -2268,6 +2269,7 @@ function _inner_glob(base, p, parts)
 	return items;
 }
 
+/* Install Headers */
 function PHP_INSTALL_HEADERS(dir, headers_list)
 {
 	headers_list = headers_list.split(new RegExp("\\s+"));
@@ -2457,6 +2459,7 @@ function toolset_get_compiler()
 	ERROR("Unsupported toolset");
 }
 
+/* Get compiler version if the toolset is supported */
 function toolset_get_compiler_version()
 {
 	var version;
@@ -2492,6 +2495,7 @@ function toolset_get_compiler_version()
 	ERROR("Failed to parse compiler version or unsupported toolset");
 }
 
+/* Get compiler name if the toolset is supported */
 function toolset_get_compiler_name()
 {
 	var version;
@@ -2818,4 +2822,3 @@ function trim(s)
 {
 	return s.replace(/^\s+/, "").replace(/\s+$/, "");
 }
-
