@@ -3767,7 +3767,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 	php_date_instantiate(date_ce_timezone, return_value TSRMLS_CC);
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
 	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht TSRMLS_CC) != SUCCESS) {
-		php_error_docref(NULL, E_ERROR, "Timezone initialization failed");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Timezone initialization failed");
 	}
 }
 /* }}} */
@@ -3785,7 +3785,7 @@ PHP_METHOD(DateTimeZone, __wakeup)
 	myht = Z_OBJPROP_P(object);
 	
 	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht TSRMLS_CC) != SUCCESS) {
-		php_error_docref(NULL, E_ERROR, "Timezone initialization failed");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Timezone initialization failed");
 	}
 }
 /* }}} */
