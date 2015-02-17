@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20?? PHP 5.4.38
+?? ??? 2015 PHP 5.4.39
+
+19 Feb 2015 PHP 5.4.38
 
 - Core:
   . Removed support for multi-line headers, as the are deprecated by RFC 7230.
