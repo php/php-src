@@ -42,7 +42,7 @@ ZEND_END_MODULE_GLOBALS(tidy)
 #ifdef ZTS
 #define TG(v) ZEND_TSRMG(tidy_globals_id, zend_tidy_globals *, v)
 #ifdef COMPILE_DL_TIDY
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define TG(v) (tidy_globals.v)

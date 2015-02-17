@@ -195,7 +195,7 @@ ZEND_EXTERN_MODULE_GLOBALS(soap)
 #ifdef ZTS
 # define SOAP_GLOBAL(v) ZEND_TSRMG(soap_globals_id, zend_soap_globals *, v)
 # ifdef COMPILE_DL_SOAP
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 # endif
 #else
 # define SOAP_GLOBAL(v) (soap_globals.v)

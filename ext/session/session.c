@@ -2584,7 +2584,7 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	int i;
 
 #if defined(COMPILE_DL_SESSION) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
 	ps_globals->save_path = NULL;
@@ -3023,7 +3023,7 @@ zend_module_entry session_module_entry = {
 
 #ifdef COMPILE_DL_SESSION
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(session)
 #endif

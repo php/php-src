@@ -773,7 +773,7 @@ zend_module_entry pgsql_module_entry = {
 
 #ifdef COMPILE_DL_PGSQL
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(pgsql)
 #endif
@@ -1093,7 +1093,7 @@ PHP_INI_END()
 static PHP_GINIT_FUNCTION(pgsql)
 {
 #if defined(COMPILE_DL_PGSQL) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
 	/* Initilize notice message hash at MINIT only */

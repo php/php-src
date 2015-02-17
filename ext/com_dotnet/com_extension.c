@@ -255,7 +255,7 @@ zend_module_entry com_dotnet_module_entry = {
 
 #ifdef COMPILE_DL_COM_DOTNET
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(com_dotnet)
 #endif
@@ -341,7 +341,7 @@ PHP_INI_END()
 static PHP_GINIT_FUNCTION(com_dotnet)
 {
 #if defined(COMPILE_DL_COM_DOTNET) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(com_dotnet_globals, 0, sizeof(*com_dotnet_globals));
 	com_dotnet_globals->code_page = CP_ACP;

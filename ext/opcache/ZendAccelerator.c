@@ -91,7 +91,7 @@ zend_accel_globals accel_globals;
 #else
 int accel_globals_id;
 #if defined(COMPILE_DL_OPCACHE)
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 #endif
 
@@ -2236,7 +2236,7 @@ static int zend_accel_init_shm(void)
 static void accel_globals_ctor(zend_accel_globals *accel_globals)
 {
 #if defined(COMPILE_DL_OPCACHE) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
 	zend_hash_init(&accel_globals->function_table, zend_hash_num_elements(CG(function_table)), NULL, ZEND_FUNCTION_DTOR, 1);

@@ -2388,7 +2388,7 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		return;
 	}
 #endif
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 	alloc_globals->mm_heap = zend_mm_init();
 }
 

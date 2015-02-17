@@ -21,8 +21,8 @@ PHP X.Y UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-Core
-====
+Language changes
+================
 
 Changes to variable handling
 ----------------------------
@@ -76,8 +76,8 @@ Changes to variable handling
   was ["b" => 1, "a" => 1];
 
 Relevant RFCs:
- * https://wiki.php.net/rfc/uniform_variable_syntax
- * https://wiki.php.net/rfc/abstract_syntax_tree
+* https://wiki.php.net/rfc/uniform_variable_syntax
+* https://wiki.php.net/rfc/abstract_syntax_tree
 
 Changes to list()
 -----------------
@@ -120,6 +120,58 @@ Changes to list()
 Relevant RFCs:
 * https://wiki.php.net/rfc/abstract_syntax_tree#changes_to_list
 * https://wiki.php.net/rfc/fix_list_behavior_inconsistency
+
+Changes to foreach
+------------------
+
+* Iteration with foreach() no longer has any effect on the internal array
+  pointer, which can be accessed through the current()/next()/etc family of
+  functions. For example
+
+      $array = [0, 1, 2];
+      foreach ($array as &$val) {
+          var_dump(current($array));
+      }
+
+  will now print the value int(0) three times. Previously the output was int(1),
+  int(2) and bool(false).
+
+* When iterating arrays by-value, foreach will now always operate on a copy of
+  the array, as such changes to the array during iteration will not influence
+  iteration behavior. For example
+
+      $array = [0, 1, 2];
+      $ref =& $array; // Necessary to trigger the old behavior
+      foreach ($array as $val) {
+          var_dump($val);
+          unset($array[1]);
+      }
+
+  will now print all three elements (0 1 2), while previously the second element
+  1 was skipped (0 2).
+
+* When iterating arrays by-reference, modifications to the array will continue
+  to influence the iteration. However PHP will now do a better job of
+  maintaining a correct position in a number of cases. E.g. appending to an
+  array during by-reference iteration
+
+      $array = [0];
+      foreach ($array as &$val) {
+          var_dump($val);
+          $array[1] = 1;
+      }
+
+  will now iterate over the appended element as well. As such the output of this
+  example will now be "int(0) int(1)", while previously it was only "int(0)".
+
+* Iteration of plain (non-Traversable) objects by-value or by-reference will
+  behave like by-reference iteration of arrays. This matches the previous
+  behavior apart from the more accurate position management mentioned in the
+  previous point.
+
+* Iteration of Traversable objects remains unchanged.
+
+Relevant RFC: https://wiki.php.net/rfc/php7_foreach
 
 Changes to parameter handling
 -----------------------------
@@ -223,6 +275,11 @@ Changes to integer handling
       var_dump(1 >> 64);  // int(0)
       var_dump(-1 >> 64); // int(-1)
 
+Relevant RFC: https://wiki.php.net/rfc/integer_semantics
+
+Changes to string handling
+--------------------------
+
 * Strings that contain hexadecimal numbers are no longer considered to be
   numeric and don't receive special treatment anymore. Some examples of the
   new behavior:
@@ -244,34 +301,46 @@ Changes to integer handling
     }
     var_dump($num); // int(65535)
 
-Relevant RFCs:
- * https://wiki.php.net/rfc/integer_semantics
- * https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings
+* Due to the addition of the Unicode Codepoint Escape Syntax for double-quoted
+  strings and heredocs, "\u{" followed by an invalid sequence will now result in
+  an error:
 
-Other core changes
-------------------
+      $str = "\u{xyz}"; // Fatal error: Invalid UTF-8 codepoint escape sequence
+
+  To avoid this the leading backslash should be escaped:
+
+      $str = "\\u{xyz}"; // Works fine
+
+  However, "\u" without a following { is unaffected. As such the following code
+  won't error and will work the same as before:
+
+      $str = "\u202e"; // Works fine
+
+Relevant RFCs:
+* https://wiki.php.net/rfc/remove_hex_support_in_numeric_strings
+* https://wiki.php.net/rfc/unicode_escape
+
+Other language changes
+----------------------
 
   . Removed ASP (<%) and script (<script language=php>) tags.
     (RFC: https://wiki.php.net/rfc/remove_alternative_php_tags)
-  . call_user_method() and call_user_method_array() no longer exists.
-  . The addition of Unicode Codepoint Escape Syntax for double-quoted strings
-    and heredocs means that \u{ followed by an invalid sequence will now error.
-    However, \u without a following { is unaffected, so "\u202e" won't error and
-    will work the same as before.
-  . zend_function.common.num_args don't include the variadic argument anymore.
-  . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
-    output buffer is created in an output buffer handler.
   . Removed support for assigning the result of new by reference.
   . Removed support for scoped calls to non-static methods from an incompatible
     $this context. See details in https://wiki.php.net/rfc/incompat_ctx.
   . Removed support for #-style comments in ini files. Use ;-style comments
     instead.
-  . Added zend_memnstr_ex, which is based on string matching sunday algo.
-  . Added zend_memnrstr, zend_memnrstr_ex.
+  . $HTTP_RAW_POST_DATA is no longer available. Use the php://input stream instead.
+
+Standard library changes
+========================
+
+  . call_user_method() and call_user_method_array() no longer exists.
+  . ob_start() no longer issues an E_ERROR, but instead an E_RECOVERABLE_ERROR in case an 
+    output buffer is created in an output buffer handler.
   . Added hybrid sorting algo zend_sort for better performance.
   . Added stable sorting algo zend_insert_sort.
   . Removed dl() function on fpm-fcgi.
-  . $HTTP_RAW_POST_DATA is no longer available. Use the php://input stream instead.
 
 Other
 =====

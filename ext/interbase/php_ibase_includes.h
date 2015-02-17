@@ -134,7 +134,7 @@ enum php_interbase_option {
 #ifdef ZTS
 # define IBG(v) ZEND_TSRMG(ibase_globals_id, zend_ibase_globals *, v)
 # ifdef COMPILE_DL_INTERBASE
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 # endif
 #else
 #define IBG(v) (ibase_globals.v)
