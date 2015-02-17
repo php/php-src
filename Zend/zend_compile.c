@@ -2817,19 +2817,26 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 
 
 
-static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *lcname, zend_function *fbc) /* {{{ */
+static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *name, zend_function *fbc) /* {{{ */
 {
 	if (EG(assertions) >= 0) {
-	    znode name_node;
+		znode name_node;
 		zend_op *opline;
 		uint32_t check_op_number = get_next_op_number(CG(active_op_array));
 
 		zend_emit_op(NULL, ZEND_ASSERT_CHECK, NULL, NULL);
 
-		name_node.op_type = IS_CONST;
-		ZVAL_STR_COPY(&name_node.u.constant, lcname);
+		if (fbc) {
+			name_node.op_type = IS_CONST;
+			ZVAL_STR_COPY(&name_node.u.constant, name);
 
-		opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
+			opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
+		} else {
+			opline = zend_emit_op(NULL, ZEND_INIT_NS_FCALL_BY_NAME, NULL, NULL);
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = zend_add_ns_func_name_literal(
+				CG(active_op_array), name);
+		}
 		zend_alloc_cache_slot(opline->op2.constant);
 
 		if (args->children == 1 &&
@@ -2844,6 +2851,12 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 		zend_compile_call_common(result, (zend_ast*)args, fbc);
 
 		CG(active_op_array)->opcodes[check_op_number].op2.opline_num = get_next_op_number(CG(active_op_array));
+	} else {
+		if (!fbc) {
+			zend_string_release(name);
+		}
+		result->op_type = IS_CONST;
+		ZVAL_TRUE(&result->u.constant);
 	}
 
 	return SUCCESS;
@@ -2906,7 +2919,11 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 	{
 		zend_bool runtime_resolution = zend_compile_function_name(&name_node, name_ast);
 		if (runtime_resolution) {
-			zend_compile_ns_call(result, &name_node, args_ast);
+			if (zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "assert")) {
+				zend_compile_assert(result, args_ast, Z_STR(name_node.u.constant), NULL);
+			} else {
+				zend_compile_ns_call(result, &name_node, args_ast);
+			}
 			return;
 		}
 	}

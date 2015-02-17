@@ -116,6 +116,7 @@ static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 
 	if (stage != ZEND_INI_STAGE_STARTUP &&
 	    stage != ZEND_INI_STAGE_SHUTDOWN &&
+	    *p != val &&
 	    (*p < 0 || val < 0)) {
 		zend_error(E_WARNING, "zend.assertions may be completely enabled or disabled only in php.ini");
 		return FAILURE;
