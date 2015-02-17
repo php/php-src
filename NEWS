@@ -32,11 +32,17 @@
     (Danack at basereality dot com)
   . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
     buffer overflow). (Stas)
+  . Fixed bug #68942 (Use after free vulnerability in unserialize() with
+    DateTimeZone). (Stas)
   . Fixed Bug #67988 (htmlspecialchars() does not respect default_charset
     specified by ini_set) (Yasuo)
 
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
+
+- Enchant:
+  . Fixed bug #6855 (heap buffer overflow in enchant_broker_request_dict()).
+    (Antony)
 
 - JSON:
   . Fixed bug #50224 (json_encode() does not always encode a float as a float)
