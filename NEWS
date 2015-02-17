@@ -5,9 +5,15 @@ PHP                                                                        NEWS
 - Core:
   . Removed support for multi-line headers, as the are deprecated by RFC 7230.
     (Stas)
+  . Added NULL byte protection to exec, system and passthru. (Yasuo)
   . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
     buffer overflow). (Stas)
-  . Added NULL byte protection to exec, system and passthru. (Yasuo)
+  . Fixed bug #67827 (broken detection of system crypt sha256/sha512 support).
+    (ncopa at alpinelinux dot org)  
+  
+- SOAP:
+  . Fixed bug #67427 (SoapServer cannot handle large messages)
+    (brandt at docoloc dot de)
 
 22 Jan 2015 PHP 5.4.37
 - Core:
