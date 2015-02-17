@@ -39,6 +39,8 @@ PHP                                                                        NEWS
     (Danack at basereality dot com)
   . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
     buffer overflow). (Stas)
+  . Fixed bug #68942 (Use after free vulnerability in unserialize() with
+    DateTimeZone). (Stas)
 
 - Date:
   . Fixed bug #45081 (strtotime incorrectly interprets SGT time zone). (Derick)
