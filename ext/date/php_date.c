@@ -2720,15 +2720,11 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 	php_timezone_obj *tzobj;
 
 	z_date = zend_hash_str_find(myht, "date", sizeof("data")-1);
-	if (z_date) {
-		convert_to_string(z_date);
+	if (z_date && Z_TYPE_P(z_date) == IS_STRING) {
 		z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1);
-		if (z_timezone_type) {
-			convert_to_long(z_timezone_type);
+		if (z_timezone_type && Z_TYPE_P(z_timezone_type) == IS_LONG) {
 			z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1);
-			if (z_timezone) {
-				convert_to_string(z_timezone);
-
+			if (z_timezone && Z_TYPE_P(z_timezone) == IS_STRING) {
 				switch (Z_LVAL_P(z_timezone_type)) {
 					case TIMELIB_ZONETYPE_OFFSET:
 					case TIMELIB_ZONETYPE_ABBR: {
@@ -2742,7 +2738,6 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 
 					case TIMELIB_ZONETYPE_ID: {
 						int ret;
-						convert_to_string(z_timezone);
 
 						tzi = php_date_parse_tzfile(Z_STRVAL_P(z_timezone), DATE_TIMEZONEDB);
 
@@ -3657,7 +3652,9 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 
 	if ((z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1)) != NULL) {
 		if ((z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1)) != NULL) {
-			convert_to_long(z_timezone_type);
+			if(Z_TYPE_P(z_timezone_type) != IS_LONG) {
+				return FAILURE;
+			}
 			if (SUCCESS == timezone_initialize(*tzobj, Z_STRVAL_P(z_timezone))) {
 				return SUCCESS;
 			}
@@ -3682,7 +3679,9 @@ PHP_METHOD(DateTimeZone, __set_state)
 
 	php_date_instantiate(date_ce_timezone, return_value);
 	tzobj = Z_PHPTIMEZONE_P(return_value);
-	php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht);
+	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) != SUCCESS) {
+		php_error_docref(NULL, E_ERROR, "Timezone initialization failed");
+	}
 }
 /* }}} */
 
@@ -3698,7 +3697,9 @@ PHP_METHOD(DateTimeZone, __wakeup)
 
 	myht = Z_OBJPROP_P(object);
 
-	php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht);
+	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) != SUCCESS) {
+		php_error_docref(NULL, E_ERROR, "Timezone initialization failed");
+	}
 }
 /* }}} */
 
