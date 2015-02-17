@@ -2832,11 +2832,16 @@ static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *
 		opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
 		zend_alloc_cache_slot(opline->op2.constant);
 
-		if (args->children == 1) {
-			/* TODO: add "assert(condition) as assertion message ??? */
+		if (args->children == 1 &&
+		    (args->child[0]->kind != ZEND_AST_ZVAL ||
+		     Z_TYPE_P(zend_ast_get_zval(args->child[0])) != IS_STRING)) {
+			/* add "assert(condition) as assertion message */
+			zend_ast_list_add((zend_ast*)args,
+				zend_ast_create_zval_from_str(
+					zend_ast_export("assert(", args->child[0], ")")));
 		}
 
-		zend_compile_call_common(result, args, fbc);
+		zend_compile_call_common(result, (zend_ast*)args, fbc);
 
 		CG(active_op_array)->opcodes[check_op_number].op2.opline_num = get_next_op_number(CG(active_op_array));
 	}
