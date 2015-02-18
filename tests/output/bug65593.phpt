@@ -7,7 +7,7 @@ echo "Test\n";
 ob_start(function(){ob_start();});
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 Test
 
 Fatal error: Cannot destroy active lambda function in %sbug65593.php on line %d
