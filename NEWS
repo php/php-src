@@ -16,7 +16,7 @@ PHP                                                                        NEWS
     DateTimeZone). (CVE-2015-0273) (Stas)
   
 - Enchant: 
-  . Fixed bug #6855 (heap buffer overflow in enchant_broker_request_dict()).
+  . Fixed bug #68552 (heap buffer overflow in enchant_broker_request_dict()).
     (Antony)
 
 - SOAP:
