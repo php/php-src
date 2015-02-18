@@ -1,21 +1,26 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-5 Feb 2015, PHP 5.6.6RC1
+19 Feb 2015, PHP 5.6.6
 
 - Core:
+  . Removed support for multi-line headers, as the are deprecated by RFC 7230.
+    (Stas)
   . Fixed bug #67068 (getClosure returns somethings that's not a closure).
     (Danack at basereality dot com)
+  . Fixed bug #68942 (Use after free vulnerability in unserialize() with
+    DateTimeZone). (CVE-2015-0273) (Stas)
   . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
     buffer overflow). (Stas)
   . Fixed Bug #67988 (htmlspecialchars() does not respect default_charset
     specified by ini_set) (Yasuo)
+  . Added NULL byte protection to exec, system and passthru. (Yasuo)
 
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
-- JSON:
-  . Fixed bug #50224 (json_encode() does not always encode a float as a float)
-    by adding JSON_PRESERVE_ZERO_FRACTION. (Juan Basso)
+- Enchant:
+  . Fixed bug #68552 (heap buffer overflow in enchant_broker_request_dict()).
+    (Antony)
 
 - Fileinfo:
   . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
@@ -29,9 +34,19 @@
   . Fixed bug #68571 (core dump when webserver close the socket).
     (redfoxli069 at gmail dot com, Laruence)
 
+- JSON:
+  . Fixed bug #50224 (json_encode() does not always encode a float as a float)
+    by adding JSON_PRESERVE_ZERO_FRACTION. (Juan Basso)
+
 - LIBXML:
   . Fixed bug #64938 (libxml_disable_entity_loader setting is shared
     between threads). (Martin Jansen)
+
+- Mysqli:
+  . Fixed bug #68114 (linker error on some OS X machines with fixed
+    width decimal support) (Keyur Govande)
+  . Fixed bug #68657 (Reading 4 byte floats with Mysqli and libmysqlclient
+    has rounding errors) (Keyur Govande)
 
 - Opcache:
   . Fixed bug with try blocks being removed when extended_info opcode
@@ -39,7 +54,7 @@
 
 - PDO_mysql:
   . Fixed bug #68750 (PDOMysql with mysqlnd does not allow the usage of
-    named pipes). (steffenb198@aol.com)
+    named pipes). (steffenb198 at aol dot com)
 
 - Phar:
   . Fixed bug #68901 (use after free). (bugreports at internot dot info)
@@ -59,12 +74,8 @@
 - Standard:
   . Fixed bug #65272 (flock() out parameter not set correctly in windows).
     (Daniel Lowrey)
-
-- Mysqli:
-  . Fixed bug #68114 (linker error on some OS X machines with fixed
-    width decimal support) (Keyur Govande)
-  . Fixed bug #68657 (Reading 4 byte floats with Mysqli and libmysqlclient
-    has rounding errors) (Keyur Govande)
+  . Fixed bug #69033 (Request may get env. variables from previous requests
+    if PHP works as FastCGI). (Anatol)
 
 - Streams:
   . Fixed bug which caused call after final close on streams filter. (Bob)
@@ -86,7 +97,7 @@
   . Fixed bug #68583 (Crash in timeout thread). (Anatol)
   . Fixed bug #65576 (Constructor from trait conflicts with inherited
     constructor). (dunglas at gmail dot com)
-  . Fixed bug #68676 (Explicit Double Free). (Kalle)
+  . Fixed bug #68676 (Explicit Double Free). (CVE-2014-9425) (Kalle)
   . Fixed bug #68710 (Use After Free Vulnerability in PHP's unserialize()).
     (CVE-2015-0231) (Stefan Esser)
 
@@ -296,6 +307,9 @@
   . Fixed bug #68199 (PDO::pgsqlGetNotify doesn't support NOTIFY payloads)
     (Matteo, Alain Laporte)
   . Fixed bug #66584 (Segmentation fault on statement deallocation) (Matteo)
+
+- OpenSSL:
+  . Revert regression introduced by fix of bug #41631
 
 - Reflection:
   . Fixed bug #68103 (Duplicate entry in Reflection for class alias). (Remi)
@@ -563,7 +577,7 @@
   . Fixed bug #67606 (revised fix 67541, broke mod_fastcgi BC). (David Zuelke)
   . Fixed bug #67530 (error_log=syslog ignored). (Remi)
   . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
-    (pacho@gentoo.org, Remi)
+    (pacho at gentoo dot org, Remi)
   . Fixed bug #67531 (syslog cannot be set in pool configuration). (Remi)
   . Fixed bug #67541 (Fix Apache 2.4.10+ SetHandler proxy:fcgi://
     incompatibilities). (David Zuelke)
@@ -965,7 +979,7 @@
 
 - FPM:
   . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
-    (pacho@gentoo.org, Remi)
+    (pacho at gentoo dot org, Remi)
 
 - GD:
   . Fixed bug #66901 (php-gd 'c_color' NULL pointer dereference).
