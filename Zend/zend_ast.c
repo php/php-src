@@ -747,6 +747,43 @@ static void zend_ast_export_stmt(smart_str *str, zend_ast *ast, int indent)
 	}
 }
 
+static void zend_ast_export_if_stmt(smart_str *str, zend_ast_list *list, int indent)
+{
+	uint32_t i;
+	zend_ast *ast;
+
+tail_call:
+	i = 0;
+	while (i < list->children) {
+		ast = list->child[i];
+		ZEND_ASSERT(ast->kind == ZEND_AST_IF_ELEM);
+		if (ast->child[0]) {
+			if (i == 0) {
+				smart_str_appends(str, "if (");
+			} else {
+				zend_ast_export_indent(str, indent);
+				smart_str_appends(str, "} elseif (");
+			}
+			zend_ast_export_ex(str, ast->child[0], 0, indent);
+			smart_str_appends(str, ") {\n");
+			zend_ast_export_stmt(str, ast->child[1], indent + 1);
+		} else {
+			zend_ast_export_indent(str, indent);
+			smart_str_appends(str, "} else ");
+			if (ast->child[1]->kind == ZEND_AST_IF) {
+				list = (zend_ast_list*)ast->child[1];
+				goto tail_call;
+			} else {
+				smart_str_appends(str, "{\n");
+				zend_ast_export_stmt(str, ast->child[1], indent + 1);
+			}
+		}
+		i++;
+	}
+	zend_ast_export_indent(str, indent);
+	smart_str_appendc(str, '}');
+}
+
 static void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int indent)
 {
 	zend_long idx;
@@ -974,6 +1011,8 @@ simple_list:
 			zend_ast_export_stmt(str, ast, indent);
 			break;
 		case ZEND_AST_IF:
+			zend_ast_export_if_stmt(str, (zend_ast_list*)ast, indent);
+			break;
 		case ZEND_AST_SWITCH_LIST:
 		case ZEND_AST_CATCH_LIST:
 			zend_ast_export_list(str, (zend_ast_list*)ast, 0, 0, indent);
@@ -1268,23 +1307,19 @@ simple_list:
 			zend_ast_export_ex(str, ast->child[1], 0, indent);
 			smart_str_appendc(str, ')');
 			break;
+
 		case ZEND_AST_IF_ELEM:
 			if (ast->child[0]) {
 				smart_str_appends(str, "if (");
 				zend_ast_export_ex(str, ast->child[0], 0, indent);
-				smart_str_appends(str, ") ");
-			} else {
-				smart_str_appends(str, " else ");
-			}
-			if (ast->child[1]->kind == ZEND_AST_IF) {
-				zend_ast_export_list(str, (zend_ast_list*)ast->child[1], 0, 0, indent);
-			} else {
-				smart_str_appends(str, "{\n");
+				smart_str_appends(str, ") {\n");
 				zend_ast_export_stmt(str, ast->child[1], indent + 1);
-				zend_ast_export_indent(str, indent);
-				smart_str_appendc(str, '}');
-				break;
+			} else {
+				smart_str_appends(str, "else {\n");
+				zend_ast_export_stmt(str, ast->child[1], indent + 1);
 			}
+			zend_ast_export_indent(str, indent);
+			smart_str_appendc(str, '}');
 			break;
 		case ZEND_AST_SWITCH:
 			smart_str_appends(str, "switch (");

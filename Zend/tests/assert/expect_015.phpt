@@ -134,6 +134,9 @@ assert(0 && ($a = function () {
 	$x = new foo();
 	$x = new \foo();
 	$x = new namespace\foo();
+    if ($a) {
+    } elseif ($b) {
+    }
 }));
 
 ?>
@@ -286,4 +289,7 @@ Warning: assert(): assert(0 && ($a = function () {
     $x = new foo();
     $x = new \foo();
     $x = new namespace\foo();
+    if ($a) {
+    } elseif ($b) {
+    }
 })) failed in %sexpect_015.php on line %d
