@@ -7,7 +7,8 @@ PHP                                                                        NEWS
     callback). (Mike)
   . Fixed bug #69017 (Fail to push to the empty array with the constant value
     defined in class scope). (Laruence)
-  . Added NULL byte protection to exec, system and passthru. (Yasuo)
+  . Fixed bug #68986 (pointer returned by php_stream_fopen_temporary_file
+    not validated in memory.c). (nayana at ddproperty dot com)
 
 - ODBC:
   . Fixed bug #68964 (Allowed memory size exhausted with odbc_exec). (Anatol)
@@ -38,8 +39,6 @@ PHP                                                                        NEWS
 - Core:
   . Removed support for multi-line headers, as the are deprecated by RFC 7230.
     (Stas)
-  . Fixed bug #68986 (pointer returned by php_stream_fopen_temporary_file
-    not validated in memory.c). (nayana at ddproperty dot com)
   . Fixed bug #67068 (getClosure returns somethings that's not a closure). 
     (Danack at basereality dot com)
   . Fixed bug #68942 (Use after free vulnerability in unserialize() with
