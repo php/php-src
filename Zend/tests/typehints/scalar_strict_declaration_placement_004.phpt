@@ -1,8 +1,9 @@
 --TEST--
-Scalar type with namespaces proper ordering
+Test strict declaration being first operation only 004
 --FILE--
 <?php
 declare(strict_types=1);
+
 namespace Foo {
     function add1(int $arg): int {
         return $arg + 1;

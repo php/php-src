@@ -3890,16 +3890,10 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 		} else if (zend_string_equals_literal_ci(name, "strict_types")) {
 			zval value_zv;
 
-            /* Strict Hint declaration was already handled during parsing. Here we
-             * only check that it is the first statement in the file. */
-            uint32_t num = CG(active_op_array)->last;
-            while (num > 0 &&
-                   (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
-                    CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
-                --num;
-            }
+            /* Check that it is the node in the AST from the file. */
+            zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
 
-            if (num > 0) {
+            if (file_ast->child[0] != ast) {
                 zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must be "
                     "the very first statement in the script");
             }
