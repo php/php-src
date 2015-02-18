@@ -35,6 +35,8 @@
     not validated in memory.c). (nayana at ddproperty dot com)
   . Fixed bug #67068 (getClosure returns somethings that's not a closure).
     (Danack at basereality dot com)
+  . Fixed bug #68942 (Use after free vulnerability in unserialize() with
+    DateTimeZone). (CVE-2015-0273) (Stas)
   . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
     buffer overflow). (Stas)
   . Fixed Bug #67988 (htmlspecialchars() does not respect default_charset
