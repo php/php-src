@@ -98,6 +98,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #65272 (flock() out parameter not set correctly in windows).
     (Daniel Lowrey)
+  . Fixed bug #69033 (Request may get env. variables from previous requests
+    if PHP works as FastCGI). (Anatol)
 
 - Streams:
   . Fixed bug which caused call after final close on streams filter. (Bob)

@@ -3433,6 +3433,9 @@ static void php_putenv_destructor(putenv_entry *pe) /* {{{ */
 		unsetenv(pe->key);
 # elif defined(PHP_WIN32)
 		SetEnvironmentVariable(pe->key, NULL);
+# ifndef ZTS
+		_putenv_s(pe->key, "");
+# endif
 # else
 		char **env;
 
