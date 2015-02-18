@@ -27,7 +27,7 @@ assert(0 && ($a = function &(array &$a, X $b = null) use ($c,&$d) : X {
 		public $a = 1, $b;
 		protected $c;
 		static private $d = null;
-		
+
 		abstract function foo();
 
 		static private function f1() {

@@ -450,13 +450,13 @@ ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
  * ====================
  * proirity  associativity  operatiers
  * -----------------------------------
- *   10     left            inclue, include_once, eval, require, require_once
+ *   10     left            include, include_once, eval, require, require_once
  *   20     left            ,
  *   30     left            or
  *   40     left            xor
  *   50     left            and
  *   60     right           print
- *	 70     right           yield
+ *   70     right           yield
  *   80     right           =>
  *   90     right           = += -= *= /= .= %= &= |= ^= <<= >>= **=
  *  100     left            ? :
@@ -506,30 +506,30 @@ static void zend_ast_export_dstr(smart_str *str, zend_string *s)
 			switch (c) {
 				case '\n':
 					smart_str_appends(str, "\\n");
-					break;					
+					break;
 				case '\r':
 					smart_str_appends(str, "\\r");
-					break;					
+					break;
 				case '\t':
 					smart_str_appends(str, "\\t");
-					break;					
+					break;
 				case '\f':
 					smart_str_appends(str, "\\f");
-					break;					
+					break;
 				case '\v':
 					smart_str_appends(str, "\\v");
-					break;					
+					break;
 #ifdef PHP_WIN32
 				case VK_ESCAPE:
 #else
 				case '\e':
 #endif
 					smart_str_appends(str, "\\e");
-					break;					
+					break;
 				default:
 					smart_str_appends(str, "\\0");
 					smart_str_appendc(str, '0' + (c / 8));
-					smart_str_appendc(str, '0' + (c % 8));					
+					smart_str_appendc(str, '0' + (c % 8));
 					break;
 			}
 		} else {
@@ -553,7 +553,7 @@ static void zend_ast_export_name(smart_str *str, zend_ast *ast, int priority, in
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
-		
+
 		if (Z_TYPE_P(zv) == IS_STRING) {
 			smart_str_appendl(str, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
 			return;
@@ -601,7 +601,7 @@ static void zend_ast_export_encaps_list(smart_str *str, zend_ast_list *list, int
 		ast = list->child[i];
 		if (ast->kind == ZEND_AST_ZVAL) {
 			zval *zv = zend_ast_get_zval(ast);
-		
+
 			if (Z_TYPE_P(zv) == IS_STRING) {
 				zend_ast_export_dstr(str, Z_STR_P(zv));
 			} else {
@@ -642,7 +642,7 @@ static void zend_ast_export_var_list(smart_str *str, zend_ast_list *list, int in
 		if (list->child[i]->attr) {
 			smart_str_appendc(str, '&');
 		}
-		smart_str_appendc(str, '$');			
+		smart_str_appendc(str, '$');
 		zend_ast_export_name(str, list->child[i], 20, indent);
 		i++;
 	}
@@ -687,7 +687,7 @@ static void zend_ast_export_stmt(smart_str *str, zend_ast *ast, int indent)
 
 static void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int indent)
 {
-    zend_long idx;
+	zend_long idx;
     zend_string *key;
     zval *val;
     int first;
@@ -745,7 +745,7 @@ static void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int ind
 			break;
 		default:
 			ZEND_ASSERT(0);
-	}			
+	}
 }
 
 #define BINARY_OP(_op, _p, _pl, _pr) do { \
@@ -1071,7 +1071,7 @@ simple_list:
 			APPEND_NODE_1("continue");
 
 		/* 2 child nodes */
-		case ZEND_AST_DIM:			
+		case ZEND_AST_DIM:
 			zend_ast_export_ex(str, ast->child[0], 260, indent);
 			smart_str_appendc(str, '[');
 			if (ast->child[1]) {
@@ -1231,7 +1231,7 @@ simple_list:
 				smart_str_appends(str, "default:\n");
 			}
 			zend_ast_export_stmt(str, ast->child[1], indent + 1);
-			break;			
+			break;
 		case ZEND_AST_DECLARE:
 			smart_str_appends(str, "declare(");
 			if (ast->child[0]->kind == ZEND_AST_CONST_DECL) {
@@ -1251,7 +1251,7 @@ simple_list:
 			zend_ast_export_name(str, ast->child[0], 0, indent);
 			APPEND_DEFAULT_VALUE(1);
 		case ZEND_AST_USE_TRAIT:
-			smart_str_appends(str, "use ");			
+			smart_str_appends(str, "use ");
 			zend_ast_export_ex(str, ast->child[0], 0, indent);
 			if (ast->child[1]) {
 				smart_str_appends(str, " {\n");
@@ -1385,7 +1385,7 @@ simple_list:
 			zend_ast_export_stmt(str, ast->child[3], indent + 1);
 			zend_ast_export_indent(str, indent);
 			smart_str_appendc(str, '}');
-			break;		
+			break;
 		default:
 			ZEND_ASSERT(0);
 	}
