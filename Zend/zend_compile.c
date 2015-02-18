@@ -3898,6 +3898,11 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
                     "the very first statement in the script");
             }
 
+            if (ast->child[1] != NULL) {
+                zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must not "
+                    "use block mode");   
+            }
+
             zend_const_expr_to_zval(&value_zv, value_ast);
 
 			if (Z_TYPE(value_zv) != IS_LONG || (Z_LVAL(value_zv) != 0 && Z_LVAL(value_zv) != 1)) {
