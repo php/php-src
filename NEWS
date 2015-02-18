@@ -7,6 +7,10 @@ PHP                                                                        NEWS
    (Julian)
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
 
+- Mbstring:
+   . Fixed bug #68846 (False detection of CJK Unified Ideographs Extension E).
+    (Masaki Kagaya)
+
 - Mysqli:
   . Fixed bug#63486 (mysqli_free_result leave the resource variable in a messy
     state). (Julian) 
