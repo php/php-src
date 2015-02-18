@@ -4103,7 +4103,7 @@ done:
 					if (arg_info->class_name) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with a class type hint can only be NULL");
-					} else if (Z_TYPE(default_node.u.constant) != arg_info->type_hint) {
+					} else if (!ZEND_SAME_FAKE_TYPE(arg_info->type_hint, Z_TYPE(default_node.u.constant))) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 							"with a %s type hint can only be %s or NULL", class_name->val, class_name->val);
 					}
