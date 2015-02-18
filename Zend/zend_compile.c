@@ -147,11 +147,9 @@ struct _scalar_typehint_info {
 
 static const struct _scalar_typehint_info scalar_typehints[] = {
 	{"int", sizeof("int") - 1, IS_LONG},
-	{"integer", sizeof("integer") - 1, IS_LONG},
 	{"float", sizeof("float") - 1, IS_DOUBLE},
 	{"string", sizeof("string") - 1, IS_STRING},
 	{"bool", sizeof("bool") - 1, _IS_BOOL},
-	{"boolean", sizeof("boolean") - 1, _IS_BOOL},
 	{NULL, 0, IS_UNDEF}
 };
 
