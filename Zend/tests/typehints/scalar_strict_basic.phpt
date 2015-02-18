@@ -83,7 +83,7 @@ E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type intege
 
 Testing 'float' typehint:
 *** Trying integer value
-E_RECOVERABLE_ERROR: Argument 1 passed to {closure}() must be of the type float, integer given, called in %s on line 53 and defined on line 19
+float(1)
 *** Trying float value
 float(1)
 *** Trying string value

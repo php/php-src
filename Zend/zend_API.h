@@ -1145,7 +1145,7 @@ static zend_always_inline int zend_parse_arg_double(zval *arg, double *dest, zen
 		*is_null = 0;
 	}
 
-	if (UNEXPECTED(strict && Z_TYPE_P(arg) != IS_DOUBLE && !(check_null && Z_TYPE_P(arg) == IS_NULL))) {
+	if (UNEXPECTED(strict && Z_TYPE_P(arg) != IS_DOUBLE && Z_TYPE_P(arg) != IS_LONG && !(check_null && Z_TYPE_P(arg) == IS_NULL))) {
 		return 0;
 	}
 
