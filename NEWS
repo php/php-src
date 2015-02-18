@@ -45,9 +45,9 @@
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
-- JSON:
-  . Fixed bug #50224 (json_encode() does not always encode a float as a float)
-    by adding JSON_PRESERVE_ZERO_FRACTION. (Juan Basso)
+- Enchant:
+  . Fixed bug #68552 (heap buffer overflow in enchant_broker_request_dict()).
+    (Antony)
 
 - Fileinfo:
   . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
@@ -61,9 +61,19 @@
   . Fixed bug #68571 (core dump when webserver close the socket).
     (redfoxli069 at gmail dot com, Laruence)
 
+- JSON:
+  . Fixed bug #50224 (json_encode() does not always encode a float as a float)
+    by adding JSON_PRESERVE_ZERO_FRACTION. (Juan Basso)
+
 - LIBXML:
   . Fixed bug #64938 (libxml_disable_entity_loader setting is shared
     between threads). (Martin Jansen)
+
+- Mysqli:
+  . Fixed bug #68114 (linker error on some OS X machines with fixed
+    width decimal support) (Keyur Govande)
+  . Fixed bug #68657 (Reading 4 byte floats with Mysqli and libmysqlclient
+    has rounding errors) (Keyur Govande)
 
 - Opcache:
   . Fixed bug with try blocks being removed when extended_info opcode
@@ -93,12 +103,6 @@
     (Daniel Lowrey)
   . Fixed bug #69033 (Request may get env. variables from previous requests
     if PHP works as FastCGI). (Anatol)
-
-- Mysqli:
-  . Fixed bug #68114 (linker error on some OS X machines with fixed
-    width decimal support) (Keyur Govande)
-  . Fixed bug #68657 (Reading 4 byte floats with Mysqli and libmysqlclient
-    has rounding errors) (Keyur Govande)
 
 - Streams:
   . Fixed bug which caused call after final close on streams filter. (Bob)
