@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 5.5.23
 
 - Core:
+  . Fixed bug #65593 (Segfault when calling ob_start from output buffering 
+    callback). (Mike)
   . Fixed bug #69017 (Fail to push to the empty array with the constant value
     defined in class scope). (Laruence)
   . Added NULL byte protection to exec, system and passthru. (Yasuo)
