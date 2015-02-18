@@ -55,7 +55,7 @@ PHP                                                                        NEWS
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
 
 - Enchant: 
-  . Fixed bug #6855 (heap buffer overflow in enchant_broker_request_dict()).
+  . Fixed bug #68552 (heap buffer overflow in enchant_broker_request_dict()).
     (Antony)
 
 - Fileinfo:
