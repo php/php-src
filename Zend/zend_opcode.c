@@ -766,8 +766,10 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_NEW:
-			case ZEND_FE_RESET:
-			case ZEND_FE_FETCH:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_VERIFY_RETURN_TYPE:
@@ -861,6 +863,8 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 			return (binary_op_type) is_smaller_function;
 		case ZEND_IS_SMALLER_OR_EQUAL:
 			return (binary_op_type) is_smaller_or_equal_function;
+		case ZEND_SPACESHIP:
+			return (binary_op_type) compare_function;
 		case ZEND_BW_OR:
 		case ZEND_ASSIGN_BW_OR:
 			return (binary_op_type) bitwise_or_function;

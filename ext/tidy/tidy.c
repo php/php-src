@@ -468,7 +468,7 @@ zend_module_entry tidy_module_entry = {
 
 #ifdef COMPILE_DL_TIDY
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(tidy)
 #endif
@@ -936,7 +936,7 @@ static void *php_tidy_get_opt_val(PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionT
 			break;
 
 		case TidyInteger:
-			return (void *) tidyOptGetInt(ptdoc->doc, tidyOptGetId(opt));
+			return (void *) (uintptr_t) tidyOptGetInt(ptdoc->doc, tidyOptGetId(opt));
 			break;
 
 		case TidyBoolean:
@@ -1058,7 +1058,7 @@ static PHP_MINIT_FUNCTION(tidy)
 static PHP_RINIT_FUNCTION(tidy)
 {
 #if defined(COMPILE_DL_TIDY) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
 	php_tidy_clean_output_start(ZEND_STRL("ob_tidyhandler"));

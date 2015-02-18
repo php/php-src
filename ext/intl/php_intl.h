@@ -58,7 +58,7 @@ ZEND_END_MODULE_GLOBALS(intl)
 #ifdef ZTS
 #define INTL_G(v) ZEND_TSRMG(intl_globals_id, zend_intl_globals *, v)
 #ifdef COMPILE_DL_INTL
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define INTL_G(v) (intl_globals.v)

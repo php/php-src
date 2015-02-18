@@ -75,7 +75,7 @@ ZEND_END_MODULE_GLOBALS(iconv)
 #ifdef ZTS
 # define ICONVG(v) ZEND_TSRMG(iconv_globals_id, zend_iconv_globals *, v)
 # ifdef COMPILE_DL_ICONV
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 # endif
 #else
 # define ICONVG(v) (iconv_globals.v)

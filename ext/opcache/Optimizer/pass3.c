@@ -328,7 +328,8 @@ continue_jmp_ex_optimization:
 							   op->opcode == ZEND_RETURN ||
 							   op->opcode == ZEND_RETURN_BY_REF ||
 							   op->opcode == ZEND_FAST_RET ||
-							   op->opcode == ZEND_FE_FETCH ||
+							   op->opcode == ZEND_FE_FETCH_R ||
+							   op->opcode == ZEND_FE_FETCH_RW ||
 							   op->opcode == ZEND_EXIT) {
 								break;
 							}
@@ -363,7 +364,8 @@ continue_jmp_ex_optimization:
 							   op->opcode == ZEND_RETURN ||
 							   op->opcode == ZEND_RETURN_BY_REF ||
 							   op->opcode == ZEND_FAST_RET ||
-							   op->opcode == ZEND_FE_FETCH ||
+							   op->opcode == ZEND_FE_FETCH_R ||
+							   op->opcode == ZEND_FE_FETCH_RW ||
 							   op->opcode == ZEND_EXIT) {
 								break;
 							}

@@ -212,7 +212,7 @@ static inline void zend_clone_zval(zval *src, int bind)
 			    	if (bind && Z_REFCOUNT_P(src) > 1) {
 						accel_xlat_set(old, Z_ARR_P(src));
 					}
-					zend_hash_clone_zval(Z_ARRVAL_P(src), &old->ht, 0);
+					zend_hash_clone_zval(Z_ARRVAL_P(src), old, 0);
 				}
 			}
 			break;
@@ -378,6 +378,8 @@ static zend_always_inline void zend_prepare_function_for_execution(zend_op_array
 		HashTable *shared_statics = op_array->static_variables;
 
 		ALLOC_HASHTABLE(op_array->static_variables);
+		GC_REFCOUNT(op_array->static_variables) = 1;
+		GC_TYPE(op_array->static_variables) = IS_ARRAY;
 		zend_hash_clone_zval(op_array->static_variables, shared_statics, 0);
 	}
 }

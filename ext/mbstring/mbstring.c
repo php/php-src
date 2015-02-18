@@ -598,7 +598,7 @@ static sapi_post_entry php_post_entries[] = {
 
 #ifdef COMPILE_DL_MBSTRING
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(mbstring)
 #endif
@@ -1495,7 +1495,7 @@ PHP_INI_END()
 static PHP_GINIT_FUNCTION(mbstring)
 {
 #if defined(COMPILE_DL_MBSTRING) && defined(ZTS)
-ZEND_TSRMLS_CACHE_UPDATE;
+ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
 	mbstring_globals->language = mbfl_no_language_uni;

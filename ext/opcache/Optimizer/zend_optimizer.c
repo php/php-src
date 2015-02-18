@@ -310,13 +310,35 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				 * usually terminated by ZEND_FREE that finally kills the value.
 				 */
 				case ZEND_CASE: {
-					zval old_val;
-					ZVAL_COPY_VALUE(&old_val, val);
-					zval_copy_ctor(val);
-					zend_optimizer_update_op1_const(op_array, opline, val);
-					ZVAL_COPY_VALUE(val, &old_val);
-					opline++;
-					continue;
+					zend_op *m, *n;
+					int brk = op_array->last_brk_cont;
+					while (brk--) {
+						if (op_array->brk_cont_array[brk].start <= (opline - op_array->opcodes) &&
+								op_array->brk_cont_array[brk].brk > (opline - op_array->opcodes)) {
+							break;
+						}
+					}
+					m = opline;
+					n = op_array->opcodes + op_array->brk_cont_array[brk].brk + 1;
+					while (m < n) {
+						if (ZEND_OP1_TYPE(m) == type &&
+								ZEND_OP1(m).var == var) {
+							if (m->opcode == ZEND_CASE) {
+								zval old_val;
+								ZVAL_COPY_VALUE(&old_val, val);
+								zval_copy_ctor(val);
+								zend_optimizer_update_op1_const(op_array, m, val);
+								ZVAL_COPY_VALUE(val, &old_val);
+							} else if (m->opcode == ZEND_FREE) {
+								MAKE_NOP(m);
+							} else {
+								ZEND_ASSERT(0);
+							}
+						}
+						m++;
+					}
+					zval_dtor(val);
+					return 1;
 				}
 				case ZEND_FREE:
 					MAKE_NOP(opline);
@@ -450,8 +472,10 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_NEW:
-			case ZEND_FE_RESET:
-			case ZEND_FE_FETCH:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
 				ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
 				break;
 		}
@@ -488,8 +512,10 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_NEW:
-			case ZEND_FE_RESET:
-			case ZEND_FE_FETCH:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
 				break;
 		}

@@ -62,4 +62,5 @@ $TS \
 --with-xpm-dir=/usr \
 --with-kerberos \
 --enable-sysvmsg 
-make --quiet
+make -j2 --quiet
+sudo make install

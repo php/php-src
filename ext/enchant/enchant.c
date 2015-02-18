@@ -552,13 +552,12 @@ PHP_FUNCTION(enchant_broker_request_dict)
 
 	d = enchant_broker_request_dict(pbroker->pbroker, (const char *)tag);
 	if (d) {
+		pos = pbroker->dictcnt++;
 		if (pbroker->dictcnt) {
 			pbroker->dict = (enchant_dict **)erealloc(pbroker->dict, sizeof(enchant_dict *) * pbroker->dictcnt);
-			pos = pbroker->dictcnt++;
 		} else {
 			pbroker->dict = (enchant_dict **)emalloc(sizeof(enchant_dict *));
 			pos = 0;
-			pbroker->dictcnt++;
 		}
 
 		dict = pbroker->dict[pos] = (enchant_dict *)emalloc(sizeof(enchant_dict));
@@ -604,14 +603,14 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 
 	d = enchant_broker_request_pwl_dict(pbroker->pbroker, (const char *)pwl);
 	if (d) {
+		pos = pbroker->dictcnt++;
 		if (pbroker->dictcnt) {
-			pos = pbroker->dictcnt++;
 			pbroker->dict = (enchant_dict **)erealloc(pbroker->dict, sizeof(enchant_dict *) * pbroker->dictcnt);
 		} else {
 			pbroker->dict = (enchant_dict **)emalloc(sizeof(enchant_dict *));
 			pos = 0;
-			pbroker->dictcnt++;
 		}
+
 		dict = pbroker->dict[pos] = (enchant_dict *)emalloc(sizeof(enchant_dict));
 		dict->id = pos;
 		dict->pbroker = pbroker;

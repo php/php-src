@@ -94,6 +94,6 @@ GC [0]
 bool(true)
 Destroy [%s,PHPT-%d]
 
-Warning: unlink(%s/session_test_PHPT-%s): No such file or directory in %s/save_handler.inc on line %d
+Warning: unlink(%ssession_test_PHPT-%s): No such file or directory in %ssave_handler.inc on line %d
 Close [%s,PHPSESSID]
 bool(true)

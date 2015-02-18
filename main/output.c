@@ -81,7 +81,7 @@ static int php_output_handler_devnull_func(void **handler_context, php_output_co
  * Initialize the module globals on MINIT */
 static inline void php_output_init_globals(zend_output_globals *G)
 {
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 	memset(G, 0, sizeof(*G));
 }
 /* }}} */
@@ -179,21 +179,21 @@ PHPAPI void php_output_deactivate(void)
 {
 	php_output_handler **handler = NULL;
 
-	php_output_header();
+	if ((OG(flags) & PHP_OUTPUT_ACTIVATED)) {
 
-	OG(flags) ^= PHP_OUTPUT_ACTIVATED;
-	OG(active) = NULL;
-	OG(running) = NULL;
+		OG(flags) ^= PHP_OUTPUT_ACTIVATED;
+		OG(active) = NULL;
+		OG(running) = NULL;
 
-	/* release all output handlers */
-	if (OG(handlers).elements) {
-		while ((handler = zend_stack_top(&OG(handlers)))) {
-			php_output_handler_free(handler);
-			zend_stack_del_top(&OG(handlers));
+		/* release all output handlers */
+		if (OG(handlers).elements) {
+			while ((handler = zend_stack_top(&OG(handlers)))) {
+				php_output_handler_free(handler);
+				zend_stack_del_top(&OG(handlers));
+			}
 		}
 		zend_stack_destroy(&OG(handlers));
 	}
-
 }
 /* }}} */
 
@@ -545,7 +545,6 @@ PHPAPI void php_output_handler_set_context(php_output_handler *handler, void *op
  * Starts the set up output handler and pushes it on top of the stack. Checks for any conflicts regarding the output handler to start */
 PHPAPI int php_output_handler_start(php_output_handler *handler)
 {
-	HashPosition pos;
 	HashTable *rconflicts;
 	php_output_handler_conflict_check_t conflict;
 
@@ -558,14 +557,11 @@ PHPAPI int php_output_handler_start(php_output_handler *handler)
 		}
 	}
 	if (NULL != (rconflicts = zend_hash_find_ptr(&php_output_handler_reverse_conflicts, handler->name))) {
-		for (zend_hash_internal_pointer_reset_ex(rconflicts, &pos);
-			(conflict = zend_hash_get_current_data_ptr_ex(rconflicts, &pos)) != NULL;
-			zend_hash_move_forward_ex(rconflicts, &pos)
-		) {
+		ZEND_HASH_FOREACH_PTR(rconflicts, conflict) {
 			if (SUCCESS != conflict(handler->name->val, handler->name->len)) {
 				return FAILURE;
 			}
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 	/* zend_stack_push returns stack level */
 	handler->level = zend_stack_push(&OG(handlers), &handler);

@@ -100,6 +100,9 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 		ctxt->sax->warning = NULL;
 		ctxt->sax->error = NULL;
 		/*ctxt->sax->fatalError = NULL;*/
+#if LIBXML_VERSION >= 20703
+		ctxt->options |= XML_PARSE_HUGE;
+#endif
 		old = php_libxml_disable_entity_loader(1);
 		xmlParseDocument(ctxt);
 		php_libxml_disable_entity_loader(old);

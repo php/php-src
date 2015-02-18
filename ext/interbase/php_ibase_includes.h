@@ -101,7 +101,7 @@ typedef struct event {
 	char **events;
 	char *event_buffer, *result_buffer;
 	zval callback;
-	void **thread_ctx;
+	void *thread_ctx;
 	struct event *event_next;
 	enum event_state { NEW, ACTIVE, DEAD } state;
 } ibase_event;
@@ -128,7 +128,14 @@ enum php_interbase_option {
 };
 
 #ifdef ZTS
-#define IBG(v) TSRMG(ibase_globals_id, zend_ibase_globals *, v)
+#else
+#endif
+
+#ifdef ZTS
+# define IBG(v) ZEND_TSRMG(ibase_globals_id, zend_ibase_globals *, v)
+# ifdef COMPILE_DL_INTERBASE
+ZEND_TSRMLS_CACHE_EXTERN();
+# endif
 #else
 #define IBG(v) (ibase_globals.v)
 #endif
@@ -155,9 +162,9 @@ void _php_ibase_module_error(char *, ...)
 
 /* determine if a resource is a link or transaction handle */
 #define PHP_IBASE_LINK_TRANS(zv, lh, th)													\
-	do { if (!zv) {																		\
-			ZEND_FETCH_RESOURCE2(lh, ibase_db_link *, NULL, IBG(default_link),				\
-				"InterBase link", le_link, le_plink) }										\
+	do { if (!zv) {																			\
+			lh = (ibase_db_link *)zend_fetch_resource2(IBG(default_link),				\
+				"InterBase link", le_link, le_plink); }										\
 		else																				\
 			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, zv, &lh, &th);		\
 		if (SUCCESS != _php_ibase_def_trans(lh, &th)) { RETURN_FALSE; }			\
