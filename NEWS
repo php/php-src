@@ -598,7 +598,7 @@
   . Fixed bug #67606 (revised fix 67541, broke mod_fastcgi BC). (David Zuelke)
   . Fixed bug #67530 (error_log=syslog ignored). (Remi)
   . Fixed bug #67635 (php links to systemd libraries without using pkg-config).
-    (pacho@gentoo.org, Remi)
+    (pacho at gentoo dot org, Remi)
   . Fixed bug #67531 (syslog cannot be set in pool configuration). (Remi)
   . Fixed bug #67541 (Fix Apache 2.4.10+ SetHandler proxy:fcgi://
     incompatibilities). (David Zuelke)
