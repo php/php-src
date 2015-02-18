@@ -31,7 +31,7 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #68822 (request time is reset too early). (honghu069 at 163 dot com)
 
-?? ??? 2015, PHP 5.5.22
+19 Feb 2015, PHP 5.5.22
 
 - Core:
   . Removed support for multi-line headers, as the are deprecated by RFC 7230.
@@ -40,14 +40,21 @@ PHP                                                                        NEWS
     not validated in memory.c). (nayana at ddproperty dot com)
   . Fixed bug #67068 (getClosure returns somethings that's not a closure). 
     (Danack at basereality dot com)
+  . Fixed bug #68942 (Use after free vulnerability in unserialize() with
+    DateTimeZone). (CVE-2015-0273) (Stas)
   . Fixed bug #68925 (Mitigation for CVE-2015-0235 – GHOST: glibc gethostbyname
     buffer overflow). (Stas)
+  . Added NULL byte protection to exec, system and passthru. (Yasuo)
 
 - Date:
   . Fixed bug #45081 (strtotime incorrectly interprets SGT time zone). (Derick)
 
 - Dba:
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
+
+- Enchant: 
+  . Fixed bug #6855 (heap buffer overflow in enchant_broker_request_dict()).
+    (Antony)
 
 - Fileinfo:
   . Fixed bug #68827 (Double free with disabled ZMM). (Joshua Rogers)
