@@ -179,21 +179,21 @@ PHPAPI void php_output_deactivate(void)
 {
 	php_output_handler **handler = NULL;
 
-	php_output_header();
+	if ((OG(flags) & PHP_OUTPUT_ACTIVATED)) {
 
-	OG(flags) ^= PHP_OUTPUT_ACTIVATED;
-	OG(active) = NULL;
-	OG(running) = NULL;
+		OG(flags) ^= PHP_OUTPUT_ACTIVATED;
+		OG(active) = NULL;
+		OG(running) = NULL;
 
-	/* release all output handlers */
-	if (OG(handlers).elements) {
-		while ((handler = zend_stack_top(&OG(handlers)))) {
-			php_output_handler_free(handler);
-			zend_stack_del_top(&OG(handlers));
+		/* release all output handlers */
+		if (OG(handlers).elements) {
+			while ((handler = zend_stack_top(&OG(handlers)))) {
+				php_output_handler_free(handler);
+				zend_stack_del_top(&OG(handlers));
+			}
 		}
 		zend_stack_destroy(&OG(handlers));
 	}
-
 }
 /* }}} */
 
