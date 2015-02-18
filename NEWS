@@ -3,6 +3,8 @@
 ?? Feb 2015, PHP 5.6.7
 
 - Core:
+  . Fixed bug #65593 (Segfault when calling ob_start from output buffering 
+    callback). (Mike)
   . Added NULL byte protection to exec, system and passthru. (Yasuo)
 
 - ODBC:
