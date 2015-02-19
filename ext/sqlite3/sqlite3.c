@@ -906,16 +906,21 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	efree(zargs[1]);
 	efree(zargs);
 
-	//retval ought to contain a ZVAL_LONG by now
-	// (the result of a comparison, i.e. most likely -1, 0, or 1)
-	//I suppose we could accept any scalar return type, though.
-	if (Z_TYPE_P(retval) != IS_LONG){
+	if (!retval) {
+		//Exception was thrown by callback, default to 0 for compare
+		ret = 0;
+	} else if (Z_TYPE_P(retval) != IS_LONG) {
+		//retval ought to contain a ZVAL_LONG by now
+    	// (the result of a comparison, i.e. most likely -1, 0, or 1)
+    	//I suppose we could accept any scalar return type, though.
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the compare callback (invalid return type).  Collation behaviour is undefined.");
-	}else{
+	} else {
 		ret = Z_LVAL_P(retval);
 	}
 
-	zval_ptr_dtor(&retval);
+	if (retval) {
+		zval_ptr_dtor(&retval);
+	}
 
 	return ret;
 }
