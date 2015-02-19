@@ -4737,8 +4737,7 @@ PHP_FUNCTION(mb_ord)
 static inline char* php_mb_chr(long cp, const char* enc)
 {
 	enum mbfl_no_encoding no_enc;
-	zend_bool supported = false;
-	zend_string *buf = zend_string_alloc(4, 0);
+	zend_string *buf;
 	char* ret;
 	size_t ret_len;
 
@@ -4750,6 +4749,11 @@ static inline char* php_mb_chr(long cp, const char* enc)
 			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc);
 			return NULL;
 		}
+	}
+
+	if (php_mb_check_forbidden_encoding(no_enc)) {
+		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
+		return NULL;
 	}
 
 	if (no_enc == mbfl_no_encoding_utf8
@@ -4770,19 +4774,6 @@ static inline char* php_mb_chr(long cp, const char* enc)
 		|| no_enc == mbfl_no_encoding_utf16be
 		|| no_enc == mbfl_no_encoding_utf16le
 	) {
-		supported = true;
-	}
-
-	if (!supported || php_mb_check_forbidden_encoding(no_enc)) {
-		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
-		return NULL;
-	}
-
-	if (no_enc == mbfl_no_encoding_utf8
-		|| no_enc == mbfl_no_encoding_utf8_docomo
-		|| no_enc == mbfl_no_encoding_utf8_kddi_a
-		|| no_enc == mbfl_no_encoding_utf8_kddi_b
-	) {
 
     	if (0 > cp || (cp > 0xd7ff && 0xe000 > cp) || 0x10ffff < cp) {
 			if (no_enc == MBSTRG(current_internal_encoding)->no_encoding) {
@@ -4791,18 +4782,56 @@ static inline char* php_mb_chr(long cp, const char* enc)
 				cp = 0x3f;
 			}
 		}
+
+		buf = zend_string_alloc(4, 0);
+		buf->val[0] = (cp >> 24) & 0xff;
+		buf->val[1] = (cp >> 16) & 0xff;
+		buf->val[2] = (cp >>  8) & 0xff;
+		buf->val[3] = cp & 0xff;
+		buf->val[4] = 0;
+
+		ret = php_mb_convert_encoding(buf->val, buf->len, enc, "UCS-4BE", &ret_len);
+		zend_string_release(buf);
+
+		return ret;
 	}
 
-	buf->val[0] = (cp >> 24) & 0xff;
-	buf->val[1] = (cp >> 16) & 0xff;
-	buf->val[2] = (cp >>  8) & 0xff;
-	buf->val[3] = cp & 0xff;
-	buf->val[4] = 0;
+	if (0 > cp || cp > 0x100000000) {
+		if (no_enc == MBSTRG(current_internal_encoding)->no_encoding) {
+			cp = MBSTRG(current_filter_illegal_substchar);
+		} else {
+			cp = 0x3f;
+		}
+	}
 
-	ret = php_mb_convert_encoding(buf->val, buf->len, enc, "UCS-4BE", &ret_len);
+	if (cp < 0x100) {
+		buf = zend_string_alloc(1, 0);
+		buf->val[0] = cp;
+		buf->val[1] = 0;
+	} else if (cp < 0x10000) {
+		buf = zend_string_alloc(2, 0);
+		buf->val[0] = cp >> 8;
+		buf->val[1] = cp & 0xff;
+		buf->val[2] = 0;
+	} else if (cp < 0x1000000) {
+		buf = zend_string_alloc(3, 0);
+		buf->val[0] = cp >> 16;
+		buf->val[1] = (cp >> 8) & 0xff;
+		buf->val[2] = cp & 0xff;
+		buf->val[3] = 0;
+	} else {
+		buf = zend_string_alloc(4, 0);
+		buf->val[0] = cp >> 24;	
+		buf->val[1] = (cp >> 16) & 0xff;
+		buf->val[2] = (cp >> 8) & 0xff;
+		buf->val[3] = cp & 0xff;
+		buf->val[4] = 0;
+	}
+
+	ret = php_mb_convert_encoding(buf->val, buf->len, enc, enc, &ret_len);
 	zend_string_release(buf);
 
-	return ret;
+    return ret;
 } 
 /* {{{ proto bool mb_ord([int cp[, string encoding]]) */
 PHP_FUNCTION(mb_chr)
