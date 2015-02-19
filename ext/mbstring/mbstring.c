@@ -4584,6 +4584,39 @@ PHP_FUNCTION(mb_check_encoding)
 }
 /* }}} */
 
+static inline zend_bool php_mb_check_forbidden_encoding(enum mbfl_no_encoding no_enc)
+{
+	if (no_enc == mbfl_no_encoding_pass
+		|| no_enc == mbfl_no_encoding_auto
+		|| no_enc == mbfl_no_encoding_wchar
+		|| no_enc == mbfl_no_encoding_byte2be
+		|| no_enc == mbfl_no_encoding_byte2le
+		|| no_enc == mbfl_no_encoding_byte4be
+		|| no_enc == mbfl_no_encoding_byte4le
+		|| no_enc == mbfl_no_encoding_base64
+		|| no_enc == mbfl_no_encoding_uuencode
+		|| no_enc == mbfl_no_encoding_html_ent
+		|| no_enc == mbfl_no_encoding_qprint
+		|| no_enc == mbfl_no_encoding_utf7
+		|| no_enc == mbfl_no_encoding_utf7imap
+		|| no_enc == mbfl_no_encoding_2022kr
+		|| no_enc == mbfl_no_encoding_jis
+		|| no_enc == mbfl_no_encoding_2022jp
+		|| no_enc == mbfl_no_encoding_2022jpms
+		|| no_enc == mbfl_no_encoding_jis_ms
+		|| no_enc == mbfl_no_encoding_2022jp_2004
+		|| no_enc == mbfl_no_encoding_2022jp_kddi
+		|| no_enc == mbfl_no_encoding_cp50220
+		|| no_enc == mbfl_no_encoding_cp50220raw
+		|| no_enc == mbfl_no_encoding_cp50221
+		|| no_enc == mbfl_no_encoding_cp50222
+	) {
+		return true;
+	}
+
+	return false;
+}
+
 static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
 {
 	enum mbfl_no_encoding no_enc;
@@ -4634,31 +4667,7 @@ static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
 				(unsigned char) ret[2] <<  8 |
 				(unsigned char) ret[3];
 
-	} else if (no_enc == mbfl_no_encoding_pass
-		|| no_enc == mbfl_no_encoding_auto
-		|| no_enc == mbfl_no_encoding_wchar
-		|| no_enc == mbfl_no_encoding_byte2be
-		|| no_enc == mbfl_no_encoding_byte2le
-		|| no_enc == mbfl_no_encoding_byte4be
-		|| no_enc == mbfl_no_encoding_byte4le
-		|| no_enc == mbfl_no_encoding_base64
-		|| no_enc == mbfl_no_encoding_uuencode
-		|| no_enc == mbfl_no_encoding_html_ent
-		|| no_enc == mbfl_no_encoding_qprint
-		|| no_enc == mbfl_no_encoding_utf7
-		|| no_enc == mbfl_no_encoding_utf7imap
-		|| no_enc == mbfl_no_encoding_2022kr
-		|| no_enc == mbfl_no_encoding_jis
-		|| no_enc == mbfl_no_encoding_2022jp
-		|| no_enc == mbfl_no_encoding_2022jpms
-		|| no_enc == mbfl_no_encoding_jis_ms
-		|| no_enc == mbfl_no_encoding_2022jp_2004
-		|| no_enc == mbfl_no_encoding_2022jp_kddi
-		|| no_enc == mbfl_no_encoding_cp50220
-		|| no_enc == mbfl_no_encoding_cp50220raw
-		|| no_enc == mbfl_no_encoding_cp50221
-		|| no_enc == mbfl_no_encoding_cp50222
-	) {
+	} else if (php_mb_check_forbidden_encoding(no_enc)) {
     	php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
 		return -1;
 	}
