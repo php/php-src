@@ -186,6 +186,7 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 
 	zend_generator_close(generator, 0);
 
+	zval_ptr_dtor(&generator->retval);
 	zend_object_std_dtor(&generator->std);
 
 	if (generator->iterator) {
@@ -203,6 +204,8 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 
 	/* The key will be incremented on first use, so it'll start at 0 */
 	generator->largest_used_integer_key = -1;
+
+	ZVAL_UNDEF(&generator->retval);
 
 	zend_object_std_init(&generator->std, class_type);
 	generator->std.handlers = &zend_generator_handlers;
@@ -537,6 +540,34 @@ ZEND_METHOD(Generator, throw)
 }
 /* }}} */
 
+/* {{{ proto mixed Generator::getReturn()
+ * Retrieves the return value of the generator */
+ZEND_METHOD(Generator, getReturn)
+{
+	zend_generator *generator;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	generator = (zend_generator *) Z_OBJ_P(getThis());
+
+	zend_generator_ensure_initialized(generator);
+	if (EG(exception)) {
+		return;
+	}
+
+	if (Z_ISUNDEF(generator->retval)) {
+		/* Generator hasn't returned yet -> error! */
+		zend_throw_exception(NULL,
+			"Cannot get return value of a generator that hasn't returned", 0);
+		return;
+	}
+
+	ZVAL_COPY(return_value, &generator->retval);
+}
+/* }}} */
+
 /* {{{ proto void Generator::__wakeup()
  * Throws an Exception as generators can't be serialized */
 ZEND_METHOD(Generator, __wakeup)
@@ -670,6 +701,7 @@ static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, next,     arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, send,     arginfo_generator_send, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, throw,    arginfo_generator_throw, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, getReturn,arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, __wakeup, arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
