@@ -4587,9 +4587,11 @@ PHP_FUNCTION(mb_check_encoding)
 static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
 {
 	enum mbfl_no_encoding no_enc;
-	zend_bool supported = false;
 	char* ret;
 	size_t ret_len;
+	const mbfl_encoding *encoding;
+	unsigned char char_len;
+	long cp;
 
 	if (enc == NULL) {
 		no_enc = MBSTRG(current_internal_encoding)->no_encoding;
@@ -4620,7 +4622,18 @@ static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
 		|| no_enc == mbfl_no_encoding_utf16be
 		|| no_enc == mbfl_no_encoding_utf16le
 	) {
-		supported = true;
+
+		ret = php_mb_convert_encoding(str, str_len, "UCS-4BE", enc, &ret_len);
+
+		if (ret == NULL) {
+			return -1;
+		}
+
+		return (unsigned char)  ret[0] << 24 |
+				(unsigned char) ret[1] << 16 |
+				(unsigned char) ret[2] <<  8 |
+				(unsigned char) ret[3];
+
 	} else if (no_enc == mbfl_no_encoding_pass
 		|| no_enc == mbfl_no_encoding_auto
 		|| no_enc == mbfl_no_encoding_wchar
@@ -4646,24 +4659,41 @@ static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
 		|| no_enc == mbfl_no_encoding_cp50221
 		|| no_enc == mbfl_no_encoding_cp50222
 	) {
-		supported = false;
-	}
-
-	if (!supported) {
     	php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
 		return -1;
 	}
 
-	ret = php_mb_convert_encoding(str, str_len, "UCS-4BE", enc, &ret_len);
+	if (!php_mb_check_encoding(str, str_len, enc)) {
 
-	if (ret == NULL) {
-		return -1;
+		if (no_enc == MBSTRG(current_internal_encoding)->no_encoding) {
+			cp = MBSTRG(current_filter_illegal_substchar);
+		} else {
+			cp = 0x3f;
+		}
+
+		return cp;
 	}
 
-	return (unsigned char) ret[0] << 24 |
-			(unsigned char) ret[1] << 16 |
-			(unsigned char) ret[2] <<  8 |
-			(unsigned char) ret[3];
+	encoding = mbfl_no2encoding(no_enc);
+	char_len = php_mb_mbchar_bytes_ex(str, encoding);
+
+	if (char_len == 1) {
+		cp = (unsigned char) str[0];
+	} else if (char_len == 2) {
+		cp = ((unsigned char) str[0] << 8) |
+			 (unsigned char) str[1];
+	} else if (char_len == 3) {
+		cp = ((unsigned char) str[0] << 16) |
+			 ((unsigned char) str[1] <<  8) |
+			  (unsigned char) str[2];
+	} else {
+		cp = ((unsigned char) str[0] << 24) |
+			 ((unsigned char) str[1] << 16) |
+			 ((unsigned char) str[2] <<  8) |
+			  (unsigned char) str[3];
+	}
+
+	return cp;
 }
 
 /* {{{ proto bool mb_ord([string str[, string encoding]]) */
