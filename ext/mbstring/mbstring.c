@@ -4607,6 +4607,12 @@ static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
 		|| no_enc == mbfl_no_encoding_utf8_kddi_a
 		|| no_enc == mbfl_no_encoding_utf8_kddi_b
 		|| no_enc == mbfl_no_encoding_utf8_sb
+		|| no_enc == mbfl_no_encoding_ucs4
+		|| no_enc == mbfl_no_encoding_ucs4be
+		|| no_enc == mbfl_no_encoding_ucs4le
+		|| no_enc == mbfl_no_encoding_utf32
+		|| no_enc == mbfl_no_encoding_utf32be
+		|| no_enc == mbfl_no_encoding_utf32le
 	) {
 		supported = true;
 	}
