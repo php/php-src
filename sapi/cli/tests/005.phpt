@@ -14,7 +14,7 @@ $php = getenv('TEST_PHP_EXECUTABLE');
 
 var_dump(`"$php" -n --rc unknown`);
 var_dump(`"$php" -n --rc stdclass`);
-var_dump(`"$php" -n --rc exception`);
+var_dump(`"$php" -n --rc baseexception`);
 
 echo "Done\n";
 ?>
@@ -40,7 +40,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(1355) "Class [ <internal:Core> class Exception ] {
+string(1368) "Class [ <internal:Core> abstract class BaseException ] {
 
   - Constants [0] {
   }
