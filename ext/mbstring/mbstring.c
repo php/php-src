@@ -4685,7 +4685,7 @@ static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
 		return cp;
 
 	} else if (php_mb_check_forbidden_encoding(no_enc)) {
-    	php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
+		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
 		return -1;
 	}
 
@@ -4759,11 +4759,6 @@ static inline char* php_mb_chr(long cp, const char* enc)
 		}
 	}
 
-	if (php_mb_check_forbidden_encoding(no_enc)) {
-		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
-		return NULL;
-	}
-
 	if (no_enc == mbfl_no_encoding_utf8
 		|| no_enc == mbfl_no_encoding_utf8_docomo
 		|| no_enc == mbfl_no_encoding_utf8_kddi_a
@@ -4802,6 +4797,9 @@ static inline char* php_mb_chr(long cp, const char* enc)
 		zend_string_release(buf);
 
 		return ret;
+	} else if (php_mb_check_forbidden_encoding(no_enc)) {
+		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
+		return NULL;
 	}
 
 	if (0 > cp || cp > 0x100000000) {
@@ -4839,7 +4837,7 @@ static inline char* php_mb_chr(long cp, const char* enc)
 	ret = php_mb_convert_encoding(buf->val, buf->len, enc, enc, &ret_len);
 	zend_string_release(buf);
 
-    return ret;
+	return ret;
 } 
 /* {{{ proto bool mb_ord([int cp[, string encoding]]) */
 PHP_FUNCTION(mb_chr)
