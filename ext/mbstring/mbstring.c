@@ -442,6 +442,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ord, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_chr, 0, 0, 1)
+	ZEND_ARG_INFO(0, cp)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_regex_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
@@ -568,6 +573,7 @@ const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_get_info,				arginfo_mb_get_info)
 	PHP_FE(mb_check_encoding,		arginfo_mb_check_encoding)
 	PHP_FE(mb_ord,		arginfo_mb_ord)
+	PHP_FE(mb_chr,		arginfo_mb_chr)
 #if HAVE_MBREGEX
 	PHP_MBREGEX_FUNCTION_ENTRIES
 #endif
@@ -4732,6 +4738,98 @@ PHP_FUNCTION(mb_ord)
 	}
 
 	RETURN_LONG(cp);
+}
+/* }}} */
+
+static inline char* php_mb_chr(long cp, const char* enc)
+{
+	enum mbfl_no_encoding no_enc;
+	zend_bool supported = false;
+	zend_string *buf = zend_string_alloc(4, 0);
+	char* ret;
+	size_t ret_len;
+
+	if (enc == NULL) {
+		no_enc = MBSTRG(current_internal_encoding)->no_encoding;
+	} else {
+		no_enc = mbfl_name2no_encoding(enc);
+		if (no_enc == mbfl_no_encoding_invalid) {
+			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc);
+			return NULL;
+		}
+	}
+
+	if (no_enc == mbfl_no_encoding_utf8
+		|| no_enc == mbfl_no_encoding_utf8_docomo
+		|| no_enc == mbfl_no_encoding_utf8_kddi_a
+		|| no_enc == mbfl_no_encoding_utf8_kddi_b
+		|| no_enc == mbfl_no_encoding_utf8_sb
+		|| no_enc == mbfl_no_encoding_ucs4
+		|| no_enc == mbfl_no_encoding_ucs4be
+		|| no_enc == mbfl_no_encoding_ucs4le
+		|| no_enc == mbfl_no_encoding_utf32
+		|| no_enc == mbfl_no_encoding_utf32be
+		|| no_enc == mbfl_no_encoding_utf32le
+		|| no_enc == mbfl_no_encoding_ucs2
+		|| no_enc == mbfl_no_encoding_ucs2be
+		|| no_enc == mbfl_no_encoding_ucs2le
+		|| no_enc == mbfl_no_encoding_utf16
+		|| no_enc == mbfl_no_encoding_utf16be
+		|| no_enc == mbfl_no_encoding_utf16le
+	) {
+		supported = true;
+	}
+
+	if (!supported) {
+		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
+		return NULL;
+	}
+
+	if (no_enc == mbfl_no_encoding_utf8
+		|| no_enc == mbfl_no_encoding_utf8_docomo
+		|| no_enc == mbfl_no_encoding_utf8_kddi_a
+		|| no_enc == mbfl_no_encoding_utf8_kddi_b
+	) {
+
+    	if (0 > cp || (cp > 0xd7ff && 0xe000 > cp) || 0x10ffff < cp) {
+			if (no_enc == MBSTRG(current_internal_encoding)->no_encoding) {
+				cp = MBSTRG(current_filter_illegal_substchar);
+			} else {
+				cp = 0x3f;
+			}
+		}
+	}
+
+	buf->val[0] = (cp >> 24) & 0xff;
+	buf->val[1] = (cp >> 16) & 0xff;
+	buf->val[2] = (cp >>  8) & 0xff;
+	buf->val[3] = cp & 0xff;
+	buf->val[4] = 0;
+
+	ret = php_mb_convert_encoding(buf->val, buf->len, enc, "UCS-4BE", &ret_len);
+	zend_string_release(buf);
+
+	return ret;
+} 
+/* {{{ proto bool mb_ord([int cp[, string encoding]]) */
+PHP_FUNCTION(mb_chr)
+{
+	long cp;
+	char* enc = NULL;
+	long enc_len;
+	char* ret;
+ 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|s", &cp, &enc, &enc_len) == FAILURE) {
+ 		return;
+	}
+
+	ret = php_mb_chr(cp, enc);
+
+	if (ret == NULL) {
+		RETURN_FALSE;
+	}
+
+	RETURN_STRING(ret);
 }
 /* }}} */
 
