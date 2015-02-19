@@ -4773,7 +4773,7 @@ static inline char* php_mb_chr(long cp, const char* enc)
 		supported = true;
 	}
 
-	if (!supported) {
+	if (!supported || php_mb_check_forbidden_encoding(no_enc)) {
 		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
 		return NULL;
 	}
