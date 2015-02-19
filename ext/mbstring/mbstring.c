@@ -104,6 +104,7 @@ static void php_mb_gpc_get_detect_order(const zend_encoding ***list, size_t *lis
 
 static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding);
 
+static inline zend_bool php_mb_check_encoding(const char *input, size_t length, const char *enc);
 /* }}} */
 
 /* {{{ php_mb_default_identify_list */
@@ -1981,6 +1982,111 @@ PHP_FUNCTION(mb_detect_order)
 }
 /* }}} */
 
+static inline zend_bool php_mb_check_code_point(long cp)
+{
+	enum mbfl_no_encoding no_enc;
+	const char* enc;
+	char* buf;
+	char buf_len;
+
+	no_enc = MBSTRG(current_internal_encoding)->no_encoding;
+
+	if (no_enc == mbfl_no_encoding_utf8
+		|| no_enc == mbfl_no_encoding_utf8_docomo
+		|| no_enc == mbfl_no_encoding_utf8_kddi_a
+		|| no_enc == mbfl_no_encoding_utf8_kddi_b
+		|| no_enc == mbfl_no_encoding_utf8_sb
+	) {
+		if ((cp > 0 && 0xd800 > cp) || (cp > 0xdfff && 0x110000 > cp)) {
+			return true;
+		}
+
+		return false;
+	} else if (no_enc == mbfl_no_encoding_ucs4
+		|| no_enc == mbfl_no_encoding_ucs4be
+		|| no_enc == mbfl_no_encoding_ucs4le
+		|| no_enc == mbfl_no_encoding_utf32
+		|| no_enc == mbfl_no_encoding_utf32be
+		|| no_enc == mbfl_no_encoding_utf32le
+		|| no_enc == mbfl_no_encoding_ucs2
+		|| no_enc == mbfl_no_encoding_ucs2be
+		|| no_enc == mbfl_no_encoding_ucs2le
+		|| no_enc == mbfl_no_encoding_utf16
+		|| no_enc == mbfl_no_encoding_utf16be
+		|| no_enc == mbfl_no_encoding_utf16le
+	) {
+
+		if (0 > cp || cp > 0x10ffff) {
+			return false;
+		}
+
+		return true;
+
+	} else if (no_enc == mbfl_no_encoding_pass
+		|| no_enc == mbfl_no_encoding_auto
+		|| no_enc == mbfl_no_encoding_wchar
+		|| no_enc == mbfl_no_encoding_byte2be
+		|| no_enc == mbfl_no_encoding_byte2le
+		|| no_enc == mbfl_no_encoding_byte4be
+		|| no_enc == mbfl_no_encoding_byte4le
+		|| no_enc == mbfl_no_encoding_base64
+		|| no_enc == mbfl_no_encoding_uuencode
+		|| no_enc == mbfl_no_encoding_html_ent
+		|| no_enc == mbfl_no_encoding_qprint
+		|| no_enc == mbfl_no_encoding_utf7
+		|| no_enc == mbfl_no_encoding_utf7imap
+		|| no_enc == mbfl_no_encoding_2022kr
+		|| no_enc == mbfl_no_encoding_jis
+		|| no_enc == mbfl_no_encoding_2022jp
+		|| no_enc == mbfl_no_encoding_2022jpms
+		|| no_enc == mbfl_no_encoding_jis_ms
+		|| no_enc == mbfl_no_encoding_2022jp_2004
+		|| no_enc == mbfl_no_encoding_2022jp_kddi
+		|| no_enc == mbfl_no_encoding_cp50220
+		|| no_enc == mbfl_no_encoding_cp50220raw
+		|| no_enc == mbfl_no_encoding_cp50221
+		|| no_enc == mbfl_no_encoding_cp50222
+	) {
+		return cp < 0xffff && cp > 0x0;
+	}
+
+	if (cp < 0x100) {
+		buf_len = 1;
+		buf = emalloc(buf_len);
+		buf[0] = cp;
+		buf[1] = 0;
+	} else if (cp < 0x10000) {
+		buf_len = 2;
+		buf = emalloc(buf_len);
+		buf[0] = cp >> 8;
+		buf[1] = cp & 0xff;
+		buf[2] = 0;
+	} else if (cp < 0x1000000) {
+		buf_len = 3;
+		buf = emalloc(buf_len);
+		buf[0] = cp >> 16;
+		buf[1] = (cp >> 8) & 0xff;
+		buf[2] = cp & 0xff;
+		buf[3] = 0;
+	} else {
+		buf_len = 4;
+		buf = emalloc(buf_len);
+		buf[0] = cp >> 24;	
+		buf[1] = (cp >> 16) & 0xff;
+		buf[2] = (cp >> 8) & 0xff;
+		buf[3] = cp & 0xff;
+		buf[4] = 0;
+	}
+
+	enc = MBSTRG(current_internal_encoding)->name;
+
+	if (php_mb_check_encoding(buf, buf_len, enc)) {
+		return true;
+	}
+
+	return false;
+}
+
 /* {{{ proto mixed mb_substitute_character([mixed substchar])
    Sets the current substitute_character or returns the current substitute_character */
 PHP_FUNCTION(mb_substitute_character)
@@ -2015,7 +2121,7 @@ PHP_FUNCTION(mb_substitute_character)
 				} else {
 					convert_to_long_ex(arg1);
 
-					if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
+					if (php_mb_check_code_point(Z_LVAL_P(arg1))) {
 						MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 						MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
 					} else {
@@ -2026,7 +2132,7 @@ PHP_FUNCTION(mb_substitute_character)
 				break;
 			default:
 				convert_to_long_ex(arg1);
-				if (Z_LVAL_P(arg1) < 0xffff && Z_LVAL_P(arg1) > 0x0) {
+				if (php_mb_check_code_point(Z_LVAL_P(arg1))) {
 					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
 				} else {
