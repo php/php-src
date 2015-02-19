@@ -171,6 +171,7 @@ ZEND_API HashTable *zend_std_get_properties(zval *object);
 ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp);
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type);
 ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, void **cache_slot);
+ZEND_API int zend_std_compare(zval *result, zval *op1, zval *op2);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
 
 ZEND_API int zend_check_private(union _zend_function *fbc, zend_class_entry *ce, zend_string *function_name);

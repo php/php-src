@@ -47,6 +47,7 @@
   . Removed support for hexadecimal numeric strings. (Nikita)
   . Removed obsolete extensions and SAPIs. See the full list in UPGRADING. (Anatol)
   . Added NULL byte protection to exec, system and passthru. (Yasuo)
+  . Implemented the Comparable RFC (https://wiki.php.net/rfc/comparable). (Adam)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)

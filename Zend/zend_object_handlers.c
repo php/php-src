@@ -1593,6 +1593,49 @@ int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **f
 }
 /* }}} */
 
+static inline zend_bool is_comparable_object(const zval *obj) /* {{{ */
+{
+	return (IS_OBJECT == Z_TYPE_P(obj) && instanceof_function(Z_OBJCE_P(obj), zend_ce_comparable));
+}
+/* }}} */
+
+static inline int normalise_comparable_result(zval *result) /* {{{ */
+{
+	/* convert_to_long() will segfault if we give it an IS_UNDEF zval (for
+	 * instance, if the compareTo method threw an exception, so we have to
+	 * check that first. */
+	if (IS_UNDEF == Z_TYPE_P(result)) {
+		return FAILURE;
+	}
+
+	convert_to_long(result);
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_std_compare(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	if (is_comparable_object(op1)) {
+		zend_call_method_with_1_params(op1, NULL, NULL, "compareTo", result, op2);
+		return normalise_comparable_result(result);
+	}
+
+	if (is_comparable_object(op2)) {
+		zend_call_method_with_1_params(op2, NULL, NULL, "compareTo", result, op1);
+
+		if (SUCCESS == normalise_comparable_result(result)) {
+			/* Flip the result, since we called the comparison function on op2. */
+			Z_LVAL_P(result) *= -1;
+			return SUCCESS;
+		}
+
+		return FAILURE;
+	}
+
+	return FAILURE;
+}
+/* }}} */
+
 ZEND_API zend_object_handlers std_object_handlers = {
 	0,										/* offset */
 
@@ -1623,7 +1666,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
 	NULL,									/* do_operation */
-	NULL,									/* compare */
+	zend_std_compare,						/* compare */
 };
 
 /*
