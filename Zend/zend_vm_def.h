@@ -3076,10 +3076,35 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
-ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, ANY, ANY)
+ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, CONST|TMP|VAR|CV, ANY)
 {
+	USE_OPLINE
+	zval *retval;
+	zend_free_op free_op1;
+
 	/* The generator object is stored in EX(return_value) */
 	zend_generator *generator = (zend_generator *) EX(return_value);
+
+	SAVE_OPLINE();
+	retval = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+	/* Copy return value into generator->retval */
+	if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR) {
+		ZVAL_COPY_VALUE(&generator->retval, retval);
+		if (OP1_TYPE == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE(generator->retval))) {
+				zval_copy_ctor_func(&generator->retval);
+			}
+		}
+	} else if ((OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) && Z_ISREF_P(retval)) {
+		ZVAL_COPY(&generator->retval, Z_REFVAL_P(retval));
+		FREE_OP1_IF_VAR();
+	} else {
+		ZVAL_COPY_VALUE(&generator->retval, retval);
+		if (OP1_TYPE == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
+		}
+	}
 
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1);
@@ -6085,7 +6110,10 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[catch_op_num]);
 			ZEND_VM_CONTINUE();
 		} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_GENERATOR_RETURN);
+			/* The generator object is stored in EX(return_value) */
+			zend_generator *generator = (zend_generator *) EX(return_value);
+			zend_generator_close(generator, 1);
+			ZEND_VM_RETURN();
 		} else {
 			ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 		}
@@ -6116,7 +6144,10 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 			ZEND_VM_CONTINUE();
 		case ZEND_USER_OPCODE_RETURN:
 			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-				ZEND_VM_DISPATCH_TO_HANDLER(ZEND_GENERATOR_RETURN);
+				/* The generator object is stored in EX(return_value) */
+				zend_generator *generator = (zend_generator *) EX(return_value);
+				zend_generator_close(generator, 1);
+				ZEND_VM_RETURN();
 			} else {
 				ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 			}
@@ -6400,7 +6431,10 @@ ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, ANY)
 				ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
 				ZEND_VM_CONTINUE();
 			} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-				ZEND_VM_DISPATCH_TO_HANDLER(ZEND_GENERATOR_RETURN);
+				/* The generator object is stored in EX(return_value) */
+				zend_generator *generator = (zend_generator *) EX(return_value);
+				zend_generator_close(generator, 1);
+				ZEND_VM_RETURN();
 			} else {
 				ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 			}

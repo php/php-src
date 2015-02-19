@@ -675,18 +675,6 @@ fcall_end:
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL  ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	/* The generator object is stored in EX(return_value) */
-	zend_generator *generator = (zend_generator *) EX(return_value);
-
-	/* Close the generator to free up resources */
-	zend_generator_close(generator, 1);
-
-	/* Pass execution back to handling code */
-	ZEND_VM_RETURN();
-}
-
 static int ZEND_FASTCALL  ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -1396,7 +1384,10 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 			ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[catch_op_num]);
 			ZEND_VM_CONTINUE();
 		} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-			return ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			/* The generator object is stored in EX(return_value) */
+			zend_generator *generator = (zend_generator *) EX(return_value);
+			zend_generator_close(generator, 1);
+			ZEND_VM_RETURN();
 		} else {
 			return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		}
@@ -1427,7 +1418,10 @@ static int ZEND_FASTCALL  ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			ZEND_VM_CONTINUE();
 		case ZEND_USER_OPCODE_RETURN:
 			if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-				return ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				/* The generator object is stored in EX(return_value) */
+				zend_generator *generator = (zend_generator *) EX(return_value);
+				zend_generator_close(generator, 1);
+				ZEND_VM_RETURN();
 			} else {
 				return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 			}
@@ -1502,7 +1496,10 @@ static int ZEND_FASTCALL  ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				ZEND_VM_SET_OPCODE(&EX(func)->op_array.opcodes[opline->op2.opline_num]);
 				ZEND_VM_CONTINUE();
 			} else if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-				return ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				/* The generator object is stored in EX(return_value) */
+				zend_generator *generator = (zend_generator *) EX(return_value);
+				zend_generator_close(generator, 1);
+				ZEND_VM_RETURN();
 			} else {
 				return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 			}
@@ -2606,6 +2603,43 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 	} while (0);
 
 	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+static int ZEND_FASTCALL  ZEND_GENERATOR_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *retval;
+
+
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
+
+	SAVE_OPLINE();
+	retval = EX_CONSTANT(opline->op1);
+
+	/* Copy return value into generator->retval */
+	if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+		ZVAL_COPY_VALUE(&generator->retval, retval);
+		if (IS_CONST == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE(generator->retval))) {
+				zval_copy_ctor_func(&generator->retval);
+			}
+		}
+	} else if ((IS_CONST == IS_CV || IS_CONST == IS_VAR) && Z_ISREF_P(retval)) {
+		ZVAL_COPY(&generator->retval, Z_REFVAL_P(retval));
+
+	} else {
+		ZVAL_COPY_VALUE(&generator->retval, retval);
+		if (IS_CONST == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
+		}
+	}
+
+	/* Close the generator to free up resources */
+	zend_generator_close(generator, 1);
+
+	/* Pass execution back to handling code */
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_THROW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -8878,6 +8912,43 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int ZEND_FASTCALL  ZEND_GENERATOR_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *retval;
+	zend_free_op free_op1;
+
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
+
+	SAVE_OPLINE();
+	retval = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1);
+
+	/* Copy return value into generator->retval */
+	if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+		ZVAL_COPY_VALUE(&generator->retval, retval);
+		if (IS_TMP_VAR == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE(generator->retval))) {
+				zval_copy_ctor_func(&generator->retval);
+			}
+		}
+	} else if ((IS_TMP_VAR == IS_CV || IS_TMP_VAR == IS_VAR) && Z_ISREF_P(retval)) {
+		ZVAL_COPY(&generator->retval, Z_REFVAL_P(retval));
+
+	} else {
+		ZVAL_COPY_VALUE(&generator->retval, retval);
+		if (IS_TMP_VAR == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
+		}
+	}
+
+	/* Close the generator to free up resources */
+	zend_generator_close(generator, 1);
+
+	/* Pass execution back to handling code */
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL  ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -11553,6 +11624,43 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 
 	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+static int ZEND_FASTCALL  ZEND_GENERATOR_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *retval;
+	zend_free_op free_op1;
+
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
+
+	SAVE_OPLINE();
+	retval = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
+
+	/* Copy return value into generator->retval */
+	if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+		ZVAL_COPY_VALUE(&generator->retval, retval);
+		if (IS_VAR == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE(generator->retval))) {
+				zval_copy_ctor_func(&generator->retval);
+			}
+		}
+	} else if ((IS_VAR == IS_CV || IS_VAR == IS_VAR) && Z_ISREF_P(retval)) {
+		ZVAL_COPY(&generator->retval, Z_REFVAL_P(retval));
+		zval_ptr_dtor_nogc(free_op1);
+	} else {
+		ZVAL_COPY_VALUE(&generator->retval, retval);
+		if (IS_VAR == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
+		}
+	}
+
+	/* Close the generator to free up resources */
+	zend_generator_close(generator, 1);
+
+	/* Pass execution back to handling code */
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -23872,6 +23980,43 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 	} while (0);
 
 	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+static int ZEND_FASTCALL  ZEND_GENERATOR_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *retval;
+
+
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
+
+	SAVE_OPLINE();
+	retval = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
+
+	/* Copy return value into generator->retval */
+	if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+		ZVAL_COPY_VALUE(&generator->retval, retval);
+		if (IS_CV == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE(generator->retval))) {
+				zval_copy_ctor_func(&generator->retval);
+			}
+		}
+	} else if ((IS_CV == IS_CV || IS_CV == IS_VAR) && Z_ISREF_P(retval)) {
+		ZVAL_COPY(&generator->retval, Z_REFVAL_P(retval));
+
+	} else {
+		ZVAL_COPY_VALUE(&generator->retval, retval);
+		if (IS_CV == IS_CV) {
+			if (Z_OPT_REFCOUNTED_P(retval)) Z_ADDREF_P(retval);
+		}
+	}
+
+	/* Close the generator to free up resources */
+	zend_generator_close(generator, 1);
+
+	/* Pass execution back to handling code */
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -40838,31 +40983,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_YIELD_SPEC_CV_VAR_HANDLER,
   	ZEND_YIELD_SPEC_CV_UNUSED_HANDLER,
   	ZEND_YIELD_SPEC_CV_CV_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
-  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_CONST_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_CONST_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_CONST_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_CONST_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_CONST_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_TMP_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_TMP_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_TMP_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_TMP_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_TMP_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_VAR_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_VAR_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_VAR_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_VAR_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_CV_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_CV_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_CV_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_CV_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_CV_HANDLER,
   	ZEND_FAST_CALL_SPEC_HANDLER,
   	ZEND_FAST_CALL_SPEC_HANDLER,
   	ZEND_FAST_CALL_SPEC_HANDLER,
