@@ -4675,45 +4675,46 @@ static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
 			return -1;
 		}
 
-		return (unsigned char)  ret[0] << 24 |
-				(unsigned char) ret[1] << 16 |
-				(unsigned char) ret[2] <<  8 |
-				(unsigned char) ret[3];
+		cp = (unsigned char) ret[0] << 24 | \
+			 (unsigned char) ret[1] << 16 | \
+			 (unsigned char) ret[2] <<  8 | \
+			 (unsigned char) ret[3];
+
+		efree(ret);
+
+		return cp;
 
 	} else if (php_mb_check_forbidden_encoding(no_enc)) {
     	php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
 		return -1;
 	}
 
-	if (!php_mb_check_encoding(str, str_len, enc)) {
+	ret = php_mb_convert_encoding(str, str_len, enc, enc, &ret_len);
 
-		if (no_enc == MBSTRG(current_internal_encoding)->no_encoding) {
-			cp = MBSTRG(current_filter_illegal_substchar);
-		} else {
-			cp = 0x3f;
-		}
-
-		return cp;
+	if (ret == NULL) {
+		return -1;
 	}
 
 	encoding = mbfl_no2encoding(no_enc);
-	char_len = php_mb_mbchar_bytes_ex(str, encoding);
+	char_len = php_mb_mbchar_bytes_ex(ret, encoding);
 
 	if (char_len == 1) {
-		cp = (unsigned char) str[0];
+		cp = (unsigned char) ret[0];
 	} else if (char_len == 2) {
-		cp = ((unsigned char) str[0] << 8) |
-			 (unsigned char) str[1];
+		cp = ((unsigned char) ret[0] << 8) | \
+			 (unsigned char) ret[1];
 	} else if (char_len == 3) {
-		cp = ((unsigned char) str[0] << 16) |
-			 ((unsigned char) str[1] <<  8) |
-			  (unsigned char) str[2];
+		cp = ((unsigned char) ret[0] << 16) | \
+			 ((unsigned char) ret[1] <<  8) | \
+			  (unsigned char) ret[2];
 	} else {
-		cp = ((unsigned char) str[0] << 24) |
-			 ((unsigned char) str[1] << 16) |
-			 ((unsigned char) str[2] <<  8) |
-			  (unsigned char) str[3];
+		cp = ((unsigned char) ret[0] << 24) | \
+			 ((unsigned char) ret[1] << 16) | \
+			 ((unsigned char) ret[2] <<  8) | \
+			  (unsigned char) ret[3];
 	}
+
+	efree(ret);
 
 	return cp;
 }
