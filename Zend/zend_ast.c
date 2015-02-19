@@ -467,7 +467,7 @@ ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
  *  150     left            ^
  *  160     left            &
  *  170     non-associative == != === !==
- *  180     non-associative < <= > >=
+ *  180     non-associative < <= > >= <=>
  *  190     left            << >>
  *  200     left            + - .
  *  210     left            * / %
@@ -1252,6 +1252,7 @@ simple_list:
 				case ZEND_IS_SMALLER_OR_EQUAL: BINARY_OP(" <= ",  180, 181, 181);
 				case ZEND_POW:                 BINARY_OP(" ** ",  250, 251, 250);
 				case ZEND_BOOL_XOR:            BINARY_OP(" xor ",  40,  40,  41);
+				case ZEND_SPACESHIP:           BINARY_OP(" <=> ", 180, 181, 181);
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;
