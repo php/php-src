@@ -4620,6 +4620,12 @@ static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
 		|| no_enc == mbfl_no_encoding_utf32
 		|| no_enc == mbfl_no_encoding_utf32be
 		|| no_enc == mbfl_no_encoding_utf32le
+		|| no_enc == mbfl_no_encoding_ucs2
+		|| no_enc == mbfl_no_encoding_ucs2be
+		|| no_enc == mbfl_no_encoding_ucs2le
+		|| no_enc == mbfl_no_encoding_utf16
+		|| no_enc == mbfl_no_encoding_utf16be
+		|| no_enc == mbfl_no_encoding_utf16le
 	) {
 		supported = true;
 	} else if (no_enc == mbfl_no_encoding_pass
