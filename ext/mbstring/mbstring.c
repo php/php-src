@@ -430,6 +430,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_check_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ord, 0, 0, 1)
+	ZEND_ARG_INFO(0, str)
+	ZEND_ARG_INFO(0, encoding)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_regex_encoding, 0, 0, 0)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
@@ -555,6 +560,7 @@ const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_send_mail,			arginfo_mb_send_mail)
 	PHP_FE(mb_get_info,				arginfo_mb_get_info)
 	PHP_FE(mb_check_encoding,		arginfo_mb_check_encoding)
+	PHP_FE(mb_ord,		arginfo_mb_ord)
 #if HAVE_MBREGEX
 	PHP_MBREGEX_FUNCTION_ENTRIES
 #endif
@@ -4575,6 +4581,73 @@ PHP_FUNCTION(mb_check_encoding)
 	if (php_mb_check_encoding(var, var_len, enc)) {
 		RETVAL_TRUE;
 	}
+}
+/* }}} */
+
+static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
+{
+	enum mbfl_no_encoding no_enc;
+	zend_bool supported = false;
+	char* ret;
+	size_t ret_len;
+
+	if (enc == NULL) {
+		no_enc = MBSTRG(current_internal_encoding)->no_encoding;
+	} else {
+		no_enc = mbfl_name2no_encoding(enc);
+
+		if (no_enc == mbfl_no_encoding_invalid) {
+ 			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc);
+			return -1;
+		}
+	}
+
+	if (no_enc == mbfl_no_encoding_utf8
+		|| no_enc == mbfl_no_encoding_utf8_docomo
+		|| no_enc == mbfl_no_encoding_utf8_kddi_a
+		|| no_enc == mbfl_no_encoding_utf8_kddi_b
+		|| no_enc == mbfl_no_encoding_utf8_sb
+	) {
+		supported = true;
+	}
+
+	if (!supported) {
+    	php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
+		return -1;
+	}
+
+	ret = php_mb_convert_encoding(str, str_len, "UCS-4BE", enc, &ret_len);
+
+	if (ret == NULL) {
+		return -1;
+	}
+
+	return (unsigned char) ret[0] << 24 |
+			(unsigned char) ret[1] << 16 |
+			(unsigned char) ret[2] <<  8 |
+			(unsigned char) ret[3];
+}
+
+/* {{{ proto bool mb_ord([string str[, string encoding]]) */
+PHP_FUNCTION(mb_ord)
+{
+	char* str;
+	size_t str_len;
+	char* enc = NULL;
+	size_t enc_len;
+	long cp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &enc, &enc_len) == FAILURE) {
+		return;
+	}
+
+	cp = php_mb_ord(str, str_len, enc);
+
+	if (0 > cp) {
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(cp);
 }
 /* }}} */
 
