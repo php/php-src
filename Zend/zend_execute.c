@@ -2022,6 +2022,16 @@ static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data
 }
 /* }}} */
 
+static zend_always_inline zend_generator *zend_get_running_generator(zend_execute_data *execute_data) /* {{{ */
+{
+	/* The generator object is stored in EX(return_value) */
+	zend_generator *generator = (zend_generator *) EX(return_value);
+	/* However control may currently be delegated to another generator.
+	 * That's the one we're interested in. */
+	return generator->current_generator;
+}
+/* }}} */
+
 #define ZEND_VM_NEXT_OPCODE() \
 	CHECK_SYMBOL_TABLES() \
 	ZEND_VM_INC_OPCODE(); \

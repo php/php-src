@@ -872,6 +872,7 @@ expr_without_variable:
 	|	T_YIELD { $$ = zend_ast_create(ZEND_AST_YIELD, NULL, NULL); }
 	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); }
 	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); }
+	|	T_YIELD '*' expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $3); }
 	|	function returns_ref '(' parameter_list ')' lexical_vars return_type
 		backup_doc_comment '{' inner_statement_list '}'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2, $1, $8,

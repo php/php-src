@@ -94,6 +94,11 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		ZVAL_UNDEF(&generator->key);
 	}
 
+	if (Z_TYPE(generator->values) != IS_UNDEF) {
+		zval_ptr_dtor(&generator->values);
+		ZVAL_UNDEF(&generator->values);
+	}
+
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
 		zend_op_array *op_array = &execute_data->func->op_array;
@@ -209,6 +214,9 @@ static zend_object *zend_generator_create(zend_class_entry *class_type) /* {{{ *
 	generator->largest_used_integer_key = -1;
 
 	ZVAL_UNDEF(&generator->retval);
+	ZVAL_UNDEF(&generator->values);
+
+	zend_ptr_stack_init(&generator->generator_stack);
 
 	zend_object_std_init(&generator->std, class_type);
 	generator->std.handlers = &zend_generator_handlers;
@@ -283,6 +291,9 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 	EG(vm_stack_end) = current_stack->end;
 	EG(vm_stack) = current_stack;
 
+	/* By default we obviously execute the generator itself. */
+	generator->current_generator = generator;
+
 	/* EX(return_value) keeps pointer to zend_object (not a real zval) */
 	execute_data->return_value = (zval*)generator;
 }
@@ -296,6 +307,82 @@ static zend_function *zend_generator_get_constructor(zend_object *object) /* {{{
 }
 /* }}} */
 
+static int zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
+{
+	zval *value;
+	if (Z_TYPE(generator->values) == IS_ARRAY) {
+		HashTable *ht = Z_ARR(generator->values);
+		HashPosition pos = Z_FE_POS(generator->values);
+
+		Bucket *p;
+		do {
+			if (UNEXPECTED(pos >= ht->nNumUsed)) {
+				/* Reached end of array */
+				goto failure;
+			}
+
+			p = &ht->arData[pos];
+			value = &p->val;
+			if (Z_TYPE_P(value) == IS_INDIRECT) {
+				value = Z_INDIRECT_P(value);
+			}
+			pos++;
+		} while (Z_ISUNDEF_P(value));
+
+		zval_ptr_dtor(&generator->value);
+		ZVAL_COPY(&generator->value, value);
+
+		zval_ptr_dtor(&generator->key);
+		if (p->key) {
+			ZVAL_STR_COPY(&generator->key, p->key);
+		} else {
+			ZVAL_LONG(&generator->key, p->h);
+		}
+
+		Z_FE_POS(generator->values) = pos;
+	} else {
+		zend_object_iterator *iter = (zend_object_iterator *) Z_OBJ(generator->values);
+
+		if (++iter->index > 0) {
+			iter->funcs->move_forward(iter);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				goto failure;
+			}
+		}
+
+		if (iter->funcs->valid(iter) == FAILURE) {
+			/* reached end of iteration */
+			goto failure;
+		}
+
+		value = iter->funcs->get_current_data(iter);
+		if (UNEXPECTED(EG(exception) != NULL || !value)) {
+			goto failure;
+		}
+
+		zval_ptr_dtor(&generator->value);
+		ZVAL_COPY(&generator->value, value);
+
+		zval_ptr_dtor(&generator->key);
+		if (iter->funcs->get_current_key) {
+			iter->funcs->get_current_key(iter, &generator->key);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				ZVAL_UNDEF(&generator->key);
+				goto failure;
+			}
+		} else {
+			ZVAL_LONG(&generator->key, iter->index);
+		}
+	}
+	return SUCCESS;
+
+failure:
+	zval_ptr_dtor(&generator->values);
+	ZVAL_UNDEF(&generator->values);
+	return FAILURE;
+}
+/* }}} */
+
 ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 {
 	/* The generator is already closed, thus can't resume */
@@ -305,6 +392,16 @@ ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 
 	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
 		zend_error(E_ERROR, "Cannot resume an already running generator");
+	}
+
+try_again:
+	if (!Z_ISUNDEF(generator->values)) {
+		if (zend_generator_get_next_delegated_value(generator) == SUCCESS) {
+			return;
+		}
+		/* If there are no more deletegated values, resume the generator
+		 * at the "yield *" expression. */
+		// TODO: Handle exceptions
 	}
 
 	/* Drop the AT_FIRST_YIELD flag */
@@ -352,6 +449,11 @@ ZEND_API void zend_generator_resume(zend_generator *generator) /* {{{ */
 		 * rethrow it in the parent scope. */
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);
+		}
+
+		/* Yield-from was used, try another resume. */
+		if (!Z_ISUNDEF(generator->values)) {
+			goto try_again;
 		}
 	}
 }

@@ -5524,16 +5524,8 @@ void zend_compile_exit(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
+static void zend_mark_function_as_generator() /* {{{ */
 {
-	zend_ast *value_ast = ast->child[0];
-	zend_ast *key_ast = ast->child[1];
-
-	znode value_node, key_node;
-	znode *value_node_ptr = NULL, *key_node_ptr = NULL;
-	zend_op *opline;
-	zend_bool returns_by_ref = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
-
 	if (!CG(active_op_array)->function_name) {
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"The \"yield\" expression can only be used inside a function");
@@ -5555,6 +5547,20 @@ void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
+}
+/* }}} */
+
+void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *value_ast = ast->child[0];
+	zend_ast *key_ast = ast->child[1];
+
+	znode value_node, key_node;
+	znode *value_node_ptr = NULL, *key_node_ptr = NULL;
+	zend_op *opline;
+	zend_bool returns_by_ref = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+
+	zend_mark_function_as_generator();
 
 	if (key_ast) {
 		zend_compile_expr(&key_node, key_ast);
@@ -5575,6 +5581,18 @@ void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 	if (value_ast && returns_by_ref && zend_is_call(value_ast)) {
 		opline->extended_value = ZEND_RETURNS_FUNCTION;
 	}
+}
+/* }}} */
+
+void zend_compile_yield_from(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *expr_ast = ast->child[0];
+	znode expr_node;
+
+	zend_mark_function_as_generator();
+
+	zend_compile_expr(&expr_node, expr_ast);
+	zend_emit_op_tmp(result, ZEND_YIELD_FROM, &expr_node, NULL);
 }
 /* }}} */
 
@@ -6403,6 +6421,9 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_YIELD:
 			zend_compile_yield(result, ast);
+			return;
+		case ZEND_AST_YIELD_FROM:
+			zend_compile_yield_from(result, ast);
 			return;
 		case ZEND_AST_INSTANCEOF:
 			zend_compile_instanceof(result, ast);

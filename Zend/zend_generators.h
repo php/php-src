@@ -42,10 +42,25 @@ typedef struct _zend_generator {
 	zval key;
 	/* Return value */
 	zval retval;
+
 	/* Variable to put sent value into */
 	zval *send_target;
 	/* Largest used integer key for auto-incrementing keys */
 	zend_long largest_used_integer_key;
+
+	/* Values specified by "yield *" to yield from this generator.
+	 * This is only used for arrays or non-generator Traversables.
+	 * This zval also uses the u2 structure in the same way as
+	 * by-value foreach. */
+	zval values;
+
+	/* Generator that is currently yielding values. This will differ
+	 * from the surrounding structure if "yield *" is used on a generator. */
+	struct _zend_generator *current_generator;
+
+	/* Stack of waiting generators when multiple "yield *" expressions
+	 * are nested. */
+	zend_ptr_stack generator_stack;
 
 	/* ZEND_GENERATOR_* flags */
 	zend_uchar flags;
