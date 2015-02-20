@@ -35,26 +35,6 @@ union rand_long_buffer {
 	long number;
 };
 
-/*
-// Copy/pasted from string.c
-static char hexconvtab[] = "0123456789abcdef";
-
-// Copy/pasted from string.c
-static void php_bin_to_hex(zend_string *old, const zend_long old_len, zend_string *hex)
-{
-	zend_long i, j;
-
-	hex = zend_string_alloc(old_len * 2, 0); // @todo is this right?
-
-	for (i = j = 0; i < old_len; i++) {
-		hex->val[j++] = hexconvtab[old->val[i] >> 4];
-		hex->val[j++] = hexconvtab[old->val[i] & 15];
-	}
-
-	hex->val[j] = '\0';
-}
-*/
-
 // Copy/pasted from mcrypt.c
 static int php_random_bytes(char *bytes, zend_long size)
 {
@@ -124,39 +104,6 @@ PHP_FUNCTION(random_bytes)
 	}
 
 	RETURN_STR(bytes);
-}
-/* }}} */
-
-/* {{{ proto string random_hex(int bytes)
-Return an arbitrary length of pseudo-random bytes as hexadecimal string */
-PHP_FUNCTION(random_hex)
-{
-	/*
-	zend_long size;
-	zend_string *bytes;
-	zend_string *hex;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
-		return;
-	}
-
-	if (size <= 0 || size >= INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Cannot genrate a random string with a size of less than 1 or greater than %d", INT_MAX);
-		RETURN_FALSE;
-	}
-
-	if (php_random_bytes(bytes, size) == FAILURE) {
-		return;
-	}
-
-	int hex_size = size * 2;
-
-	php_bin_to_hex(bytes, hex_size, hex);
-
-	zend_string_release(bytes);
-	*/
-
-	RETURN_STR("Foo!");
 }
 /* }}} */
 

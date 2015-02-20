@@ -1902,12 +1902,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_random_bytes, 0, 0, 0)
 	ZEND_ARG_INFO(0, bytes)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_random_hex, 0, 0, 0)
-	ZEND_ARG_INFO(0, bytes)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_random_int, 0, 0, 0)
-	ZEND_ARG_INFO(0, min)
 	ZEND_ARG_INFO(0, max)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -2835,7 +2830,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(mt_getrandmax,													arginfo_mt_getrandmax)
 
 	PHP_FE(random_bytes,													arginfo_random_bytes)
-	PHP_FE(random_hex,													arginfo_random_hex)
 	PHP_FE(random_int,													arginfo_random_int)
 
 #if HAVE_GETSERVBYNAME

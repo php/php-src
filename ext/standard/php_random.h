@@ -22,7 +22,6 @@
 #define PHP_RANDOM_H
 
 PHP_FUNCTION(random_bytes);
-PHP_FUNCTION(random_hex);
 PHP_FUNCTION(random_int);
 #endif
 
