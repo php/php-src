@@ -3804,12 +3804,11 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			ZVAL_COPY_VALUE(&CG(declarables).ticks, &value_zv);
 			zval_dtor(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
+			uint32_t i = 0;
+			zend_bool valid = 0;
 			/* Encoding declaration was already handled during parsing. Here we
 			 * only check that it is the first statement in the file. */
 			zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
-			
-			size_t i = 0;
-			zend_bool valid = 0;
 
 			/* Check to see if this declare is preceeded only by declare statements */
 			while (valid == 0 && i < file_ast->children) {
