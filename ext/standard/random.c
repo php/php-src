@@ -171,7 +171,7 @@ PHP_FUNCTION(random_int)
 		RETURN_FALSE;
 	}
 
-	size = sizeof(number);
+	size = sizeof(max);
 
 	bytes = zend_string_alloc(size, 0);
 
