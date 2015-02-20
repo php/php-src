@@ -1,5 +1,5 @@
 --TEST--
-RFC: DateTime RFC3339 Extended
+Bug #69089 (Add support for RFC3339 extended to DateTime::format)
 --CREDITS--
 Mariano Iglesias <mariano@cricava.com>
 --FILE--
