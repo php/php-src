@@ -2,8 +2,8 @@
 Bug #68557 (SplFileInfo::getPathname() may be broken)
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. Not for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip.. only for Windows');
 }
 ?>
 --FILE--
@@ -36,9 +36,9 @@ unlink(__DIR__ . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'b');
 rmdir(__DIR__ . DIRECTORY_SEPARATOR . 'tmp');
 ?>
 --EXPECTF--
-string(%d) "%s/tmp/b"
-string(%d) "%s/tmp/a"
-string(%d) "%s/tmp/b"
-string(%d) "%s/tmp/a"
-string(%d) "%s/tmp/.."
+string(%d) "%s\tmp\."
+string(%d) "%s\tmp\.."
+string(%d) "%s\tmp\."
+string(%d) "%s\tmp\.."
+string(%d) "%s\tmp\a"
 
