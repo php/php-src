@@ -4578,10 +4578,10 @@ PHP_FUNCTION(mb_check_encoding)
 
 static inline char* php_mb_scrub(const char* str, size_t str_len, const char* enc)
 {
-    char *ret;
-    size_t ret_len;
+	char *ret;
+	size_t ret_len;
 
-    return php_mb_convert_encoding(str, str_len, enc, enc, &ret_len);
+	return php_mb_convert_encoding(str, str_len, enc, enc, &ret_len);
 }
 
 /* {{{ proto bool mb_scrub([string str[, string encoding]]) */
@@ -4594,24 +4594,24 @@ PHP_FUNCTION(mb_scrub)
 
 	char *ret;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &enc, &enc_len) == FAILURE) {
-        return;
-    }
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &enc, &enc_len) == FAILURE) {
+		return;
+	}
 
-    if (enc == NULL) {
-        enc = MBSTRG(current_internal_encoding)->name;
-    } else if (!mbfl_is_support_encoding(enc)) {
-        php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc);
-        RETURN_FALSE; 
-    }
+	if (enc == NULL) {
+		enc = MBSTRG(current_internal_encoding)->name;
+	} else if (!mbfl_is_support_encoding(enc)) {
+		php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc);
+		RETURN_FALSE; 
+	}
 
-    ret = php_mb_scrub(str, str_len, enc);
+	ret = php_mb_scrub(str, str_len, enc);
 
-    if (ret == NULL) {
-        RETURN_FALSE;
-    }
+	if (ret == NULL) {
+		RETURN_FALSE;
+	}
 
-    RETURN_STRING(ret);
+	RETURN_STRING(ret);
 }
 /* }}} */
 
