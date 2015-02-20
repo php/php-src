@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fixed bug #69054 (Null dereference in readline_(read|write)_history() without
     parameters). (Laruence)
 
+- SPL:
+  . Fixed bug #68557 (RecursiveDirectoryIterator::seek(0) broken after 
+    calling getChildren()). (Julien)
+
 - CGI:
   . Fixed bug #69015 (php-cgi's getopt does not see $argv). (Laruence)
 
