@@ -863,7 +863,9 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_op_array *op_array = &function->op_array;
 
-		(*op_array->refcount)++;
+		if (op_array->refcount) {
+			(*op_array->refcount)++;
+		}
 		if (op_array->static_variables) {
 			if (!(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
 				GC_REFCOUNT(op_array->static_variables)++;
@@ -910,7 +912,9 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		}
 		return FAILURE;
 	} else {
-		(*function->op_array.refcount)++;
+		if (function->op_array.refcount) {
+			(*function->op_array.refcount)++;
+		}
 		function->op_array.static_variables = NULL; /* NULL out the unbound function */
 		return SUCCESS;
 	}

@@ -25,10 +25,6 @@
 #include "zend_persist.h"
 #include "zend_shared_alloc.h"
 
-#define ZEND_PROTECTED_REFCOUNT	(1<<30)
-
-static uint32_t zend_accel_refcount = ZEND_PROTECTED_REFCOUNT;
-
 #if SIZEOF_SIZE_T <= SIZEOF_ZEND_LONG
 /* If sizeof(void*) == sizeof(ulong) we can use zend_hash index functions */
 # define accel_xlat_set(old, new)	zend_hash_index_update_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old), (new))
@@ -369,14 +365,6 @@ static void zend_hash_clone_zval(HashTable *ht, HashTable *source, int bind)
 	}
 }
 
-/* protects reference count, creates copy of statics */
-static zend_always_inline void zend_prepare_function_for_execution(zend_op_array *op_array)
-{
-	/* protect reference count */
-	op_array->refcount = &zend_accel_refcount;
-	(*op_array->refcount) = ZEND_PROTECTED_REFCOUNT;
-}
-
 static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class_entry *old_ce, zend_class_entry *ce)
 {
 	uint idx;
@@ -429,9 +417,8 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		/* we use refcount to show that op_array is referenced from several places */
 		if (new_entry->refcount != NULL) {
 			accel_xlat_set(Z_PTR(p->val), new_entry);
+			new_entry->refcount = NULL;
 		}
-
-		zend_prepare_function_for_execution(new_entry);
 
 		if (old_ce == new_entry->scope) {
 			new_entry->scope = ce;
@@ -765,7 +752,6 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 			}
 		}
 		Z_PTR_P(t) = ARENA_REALLOC(Z_PTR(p->val));
-		zend_prepare_function_for_execution((zend_op_array*)Z_PTR_P(t));
 	}
 	target->nInternalPointer = target->nNumOfElements ? 0 : INVALID_IDX;
 	return;
@@ -849,8 +835,6 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		if (zend_hash_num_elements(&persistent_script->function_table) > 0) {
 			zend_accel_function_hash_copy_from_shm(CG(function_table), &persistent_script->function_table);
 		}
-
-		zend_prepare_function_for_execution(op_array);
 
 		/* Register __COMPILER_HALT_OFFSET__ constant */
 		if (persistent_script->compiler_halt_offset != 0 &&
