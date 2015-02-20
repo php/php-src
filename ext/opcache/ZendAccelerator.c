@@ -1973,7 +1973,11 @@ static int accel_clean_non_persistent_function(zval *zv)
 		return ZEND_HASH_APPLY_STOP;
 	} else {
 		if (function->op_array.static_variables) {
-			accel_fast_hash_destroy(function->op_array.static_variables);
+			if (!(GC_FLAGS(function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+				if (--GC_REFCOUNT(function->op_array.static_variables) == 0) {
+					accel_fast_hash_destroy(function->op_array.static_variables);
+				}
+			}
 			function->op_array.static_variables = NULL;
 		}
 		return ZEND_HASH_APPLY_REMOVE;
@@ -2025,7 +2029,11 @@ static void zend_accel_fast_shutdown(void)
 				break;
 			} else {
 				if (func->op_array.static_variables) {
-					accel_fast_hash_destroy(func->op_array.static_variables);
+					if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+						if (--GC_REFCOUNT(func->op_array.static_variables) == 0) {
+							accel_fast_hash_destroy(func->op_array.static_variables);
+						}
+					}
 				}
 				zend_accel_fast_del_bucket(EG(function_table), _idx-1, _p);
 			}
@@ -2043,7 +2051,11 @@ static void zend_accel_fast_shutdown(void)
 					ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
 						if (func->type == ZEND_USER_FUNCTION) {
 							if (func->op_array.static_variables) {
-								accel_fast_hash_destroy(func->op_array.static_variables);
+								if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+									if (--GC_REFCOUNT(func->op_array.static_variables) == 0) {
+										accel_fast_hash_destroy(func->op_array.static_variables);
+									}
+								}
 								func->op_array.static_variables = NULL;
 							}
 						}

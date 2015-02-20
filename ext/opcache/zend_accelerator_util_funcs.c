@@ -55,8 +55,11 @@ static void zend_accel_destroy_zend_function(zval *zv)
 
 	if (function->type == ZEND_USER_FUNCTION) {
 		if (function->op_array.static_variables) {
-
-			FREE_HASHTABLE(function->op_array.static_variables);
+			if (!(GC_FLAGS(function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+				if (--GC_REFCOUNT(function->op_array.static_variables) == 0) {
+					FREE_HASHTABLE(function->op_array.static_variables);
+				}
+			}
 			function->op_array.static_variables = NULL;
 		}
 	}
@@ -372,16 +375,6 @@ static zend_always_inline void zend_prepare_function_for_execution(zend_op_array
 	/* protect reference count */
 	op_array->refcount = &zend_accel_refcount;
 	(*op_array->refcount) = ZEND_PROTECTED_REFCOUNT;
-
-	/* copy statics */
-	if (UNEXPECTED(op_array->static_variables)) {
-		HashTable *shared_statics = op_array->static_variables;
-
-		ALLOC_HASHTABLE(op_array->static_variables);
-		GC_REFCOUNT(op_array->static_variables) = 1;
-		GC_TYPE(op_array->static_variables) = IS_ARRAY;
-		zend_hash_clone_zval(op_array->static_variables, shared_statics, 0);
-	}
 }
 
 static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class_entry *old_ce, zend_class_entry *ce)
