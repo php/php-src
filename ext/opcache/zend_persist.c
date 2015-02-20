@@ -734,6 +734,11 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	*key = zend_accel_memdup(*key, key_length + 1);
 	zend_accel_store_string(script->full_path);
 
+#ifdef __SSE2__
+	/* Align to 64-byte boundary */
+	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
+#endif
+
 	script->arena_mem = ZCG(arena_mem) = ZCG(mem);
 	ZCG(mem) = (void*)((char*)ZCG(mem) + script->arena_size);
 

@@ -771,6 +771,34 @@ failure:
 	zend_error(E_ERROR, "Cannot redeclare class %s", ce1->name->val);
 }
 
+#ifdef __SSE2__
+#include <mmintrin.h>
+#include <emmintrin.h>
+
+static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
+{
+	__m128i *dqdest = (__m128i*)dest;
+	const __m128i *dqsrc  = (const __m128i*)src;
+	const __m128i *end  = (const __m128i*)((const char*)src + size);
+
+	do {
+		_mm_prefetch(dqsrc + 4, _MM_HINT_NTA);
+		_mm_prefetch(dqsrc + 6, _MM_HINT_NTA);
+
+		__m128i xmm0 = _mm_load_si128(dqsrc + 0);
+		__m128i xmm1 = _mm_load_si128(dqsrc + 1);
+		__m128i xmm2 = _mm_load_si128(dqsrc + 2);
+		__m128i xmm3 = _mm_load_si128(dqsrc + 3);
+		dqsrc  += 4;
+		_mm_stream_si128(dqdest + 0, xmm0);
+		_mm_stream_si128(dqdest + 1, xmm1);
+		_mm_stream_si128(dqdest + 2, xmm2);
+		_mm_stream_si128(dqdest	+ 3, xmm3);
+		dqdest += 4;
+	} while (dqsrc != end);
+}
+#endif
+
 zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script, int from_shared_memory)
 {
 	zend_op_array *op_array;
@@ -784,8 +812,15 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		ZCG(current_persistent_script) = persistent_script;
 		ZCG(arena_mem) = NULL;
 		if (EXPECTED(persistent_script->arena_size)) {
+#ifdef __SSE2__
+			/* Target address must be aligned to 64-byte boundary */
+			ZCG(arena_mem) = zend_arena_alloc(&CG(arena), persistent_script->arena_size + 64);
+			ZCG(arena_mem) = (void*)(((zend_uintptr_t)ZCG(arena_mem) + 63L) & ~63L);
+			fast_memcpy(ZCG(arena_mem), persistent_script->arena_mem, persistent_script->arena_size);
+#else
 			ZCG(arena_mem) = zend_arena_alloc(&CG(arena), persistent_script->arena_size);
 			memcpy(ZCG(arena_mem), persistent_script->arena_mem, persistent_script->arena_size);
+#endif
 		}
 
 		/* Copy all the necessary stuff from shared memory to regular memory, and protect the shared script */

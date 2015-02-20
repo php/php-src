@@ -1163,7 +1163,13 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	memory_used = zend_accel_script_persist_calc(new_persistent_script, key, key_length);
 
 	/* Allocate shared memory */
+#ifdef __SSE2__
+	/* Align to 64-byte boundary */
+	ZCG(mem) = zend_shared_alloc(memory_used + 64);
+	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
+#else
 	ZCG(mem) = zend_shared_alloc(memory_used);
+#endif
 	if (!ZCG(mem)) {
 		zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
 		zend_shared_alloc_unlock();
