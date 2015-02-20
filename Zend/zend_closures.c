@@ -499,7 +499,9 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			zend_hash_apply_with_arguments(static_variables, zval_copy_static_var, 1, closure->func.op_array.static_variables);
 		}
 		closure->func.op_array.run_time_cache = NULL;
-		(*closure->func.op_array.refcount)++;
+		if (closure->func.op_array.refcount) {
+			(*closure->func.op_array.refcount)++;
+		}
 	} else {
 		/* verify that we aren't binding internal function to a wrong scope */
 		if(func->common.scope != NULL) {

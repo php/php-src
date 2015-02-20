@@ -927,9 +927,13 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_op_array *op_array = &function->op_array;
 
-		(*op_array->refcount)++;
+		if (op_array->refcount) {
+			(*op_array->refcount)++;
+		}
 		if (op_array->static_variables) {
-			op_array->static_variables = zend_array_dup(op_array->static_variables);
+			if (!(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
+				GC_REFCOUNT(op_array->static_variables)++;
+			}
 		}
 		op_array->run_time_cache = NULL;
 	} else if (function->type == ZEND_INTERNAL_FUNCTION) {
@@ -972,7 +976,9 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		}
 		return FAILURE;
 	} else {
-		(*function->op_array.refcount)++;
+		if (function->op_array.refcount) {
+			(*function->op_array.refcount)++;
+		}
 		function->op_array.static_variables = NULL; /* NULL out the unbound function */
 		return SUCCESS;
 	}
@@ -3160,6 +3166,12 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_
 		zend_hash_init(CG(active_op_array)->static_variables, 8, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
+	if (GC_REFCOUNT(CG(active_op_array)->static_variables) > 1) {
+		if (!(GC_FLAGS(CG(active_op_array)->static_variables) & IS_ARRAY_IMMUTABLE)) {
+			GC_REFCOUNT(CG(active_op_array)->static_variables)--;
+		}
+		CG(active_op_array)->static_variables = zend_array_dup(CG(active_op_array)->static_variables);
+	}
 	zend_hash_update(CG(active_op_array)->static_variables, Z_STR(var_node.u.constant), value);
 
 	opline = zend_emit_op(&result, by_ref ? ZEND_FETCH_W : ZEND_FETCH_R, &var_node, NULL);
@@ -3872,16 +3884,26 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			ZVAL_COPY_VALUE(&CG(declarables).ticks, &value_zv);
 			zval_dtor(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
+			uint32_t i = 0;
+			zend_bool valid = 0;
 			/* Encoding declaration was already handled during parsing. Here we
 			 * only check that it is the first statement in the file. */
-			uint32_t num = CG(active_op_array)->last;
-			while (num > 0 &&
-				   (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
-					CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
-				--num;
-			}
+			zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
 
-			if (num > 0) {
+			/* Check to see if this declare is preceeded only by declare statements */
+			while (valid == 0 && i < file_ast->children) {
+				if (file_ast->child[i] == ast) {
+					valid = 1;
+				} else if (file_ast->child[i] == NULL) {
+					/* Empty statements are not allowed prior to a declare */
+					break;
+				} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
+					/* declares can only be preceeded by other declares */
+					break;
+				}
+				i++;
+			}
+			if (valid != 1) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}

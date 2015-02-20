@@ -595,8 +595,9 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_bool inline_change, zend_clas
 		if (Z_REFCOUNTED_P(p)) Z_SET_REFCOUNT_P(p, refcount);
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
 		zval tmp;
-		SEPARATE_ZVAL_NOREF(p);
-
+		if (inline_change) {
+			SEPARATE_ZVAL_NOREF(p);
+		}
 		zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope);
 		if (inline_change) {
 			zend_ast_destroy_and_free(Z_ASTVAL_P(p));

@@ -180,6 +180,7 @@ PHPAPI void php_output_deactivate(void)
 	php_output_handler **handler = NULL;
 
 	if ((OG(flags) & PHP_OUTPUT_ACTIVATED)) {
+		php_output_header();
 
 		OG(flags) ^= PHP_OUTPUT_ACTIVATED;
 		OG(active) = NULL;
