@@ -313,6 +313,7 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
 	efree(intern->ptr); \
 	intern->ptr = NULL; \
+	ZVAL_NULL(*__id); \
 }
 
 
