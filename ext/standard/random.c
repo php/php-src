@@ -168,11 +168,15 @@ PHP_FUNCTION(random_int)
 	zend_long size;
 	size_t i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &maximum) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &maximum) == FAILURE) {
 		return;
 	}
 
-	if (maximum <= 0 || maximum >= INT_MAX) {
+	if (ZEND_NUM_ARGS() == 0) {
+		maximum = INT_MAX;
+	}
+
+	if (maximum <= 0 || maximum > INT_MAX) {
 		php_error_docref(NULL, E_WARNING, "Cannot use maximum less than 1 or greater than %d", INT_MAX);
 		RETURN_FALSE;
 	}
