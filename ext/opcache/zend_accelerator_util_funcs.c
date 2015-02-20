@@ -413,30 +413,11 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		ZVAL_PTR(&q->val, ARENA_REALLOC(Z_PTR(p->val)));
 		new_entry = (zend_op_array*)Z_PTR(q->val);
 
-		/* Copy constructor */
-		/* we use refcount to show that op_array is referenced from several places */
-		if (new_entry->refcount != NULL) {
-			accel_xlat_set(Z_PTR(p->val), new_entry);
-			new_entry->refcount = NULL;
-		}
-
-		if (old_ce == new_entry->scope) {
-			new_entry->scope = ce;
-		} else {
-			if ((new_ce = accel_xlat_get(new_entry->scope)) != NULL) {
-				new_entry->scope = new_ce;
-			} else {
-				zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s, function %s", ce->name->val, new_entry->function_name->val);
-			}
-		}
+		new_entry->scope = ARENA_REALLOC(new_entry->scope);
 
 		/* update prototype */
 		if (new_entry->prototype) {
-			if ((new_prototype = accel_xlat_get(new_entry->prototype)) != NULL) {
-				new_entry->prototype = new_prototype;
-			} else {
-				zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s, function %s", ce->name->val, new_entry->function_name->val);
-			}
+			new_entry->prototype = ARENA_REALLOC(new_entry->prototype);
 		}
 	}
 }
@@ -497,24 +478,14 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 				prop_info->doc_comment = NULL;
 			}
 		}
-		if (prop_info->ce == old_ce) {
-			prop_info->ce = ce;
-		} else if ((new_ce = accel_xlat_get(prop_info->ce)) != NULL) {
-			prop_info->ce = new_ce;
-		} else {
-			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME" class loading error, class %s, property %s", ce->name->val, prop_info->name->val);
-		}
+		prop_info->ce = ARENA_REALLOC(prop_info->ce);
 	}
 }
 
 #define zend_update_inherited_handler(handler) \
 { \
 	if (ce->handler != NULL) { \
-		if ((new_func = accel_xlat_get(ce->handler)) != NULL) { \
-			ce->handler = new_func; \
-		} else { \
-			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s", ce->name->val); \
-		} \
+		ce->handler = ARENA_REALLOC(ce->handler); \
 	} \
 }
 
@@ -528,11 +499,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 
 	*pce = ce = ARENA_REALLOC(old_ce);
 	ce->refcount = 1;
-
-	if (old_ce->refcount != 1) {
-		/* this class is not used as a parent for any other classes */
-		accel_xlat_set(old_ce, ce);
-	}
 
 	if (old_ce->default_properties_table) {
 		int i;
@@ -583,11 +549,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	}
 
 	if (ce->parent) {
-		if ((new_ce = accel_xlat_get(ce->parent)) != NULL) {
-			ce->parent = new_ce;
-		} else {
-			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME" class loading error, class %s", ce->name->val);
-		}
+		ce->parent = ARENA_REALLOC(ce->parent);
 	}
 
 	zend_update_inherited_handler(constructor);

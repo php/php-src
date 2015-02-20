@@ -508,8 +508,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	if (op_array->scope && op_array->prototype) {
 		if ((persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->prototype))) {
 			op_array->prototype = (union _zend_function*)persist_ptr;
-			/* we use refcount to show that op_array is referenced from several places */
-			op_array->prototype->op_array.refcount++;
 		}
 	} else {
 		op_array->prototype = NULL;
@@ -674,63 +672,47 @@ static int zend_update_parent_ce(zval *zv)
 
 	if (ce->parent) {
 		ce->parent = zend_shared_alloc_get_xlat_entry(ce->parent);
-		/* We use refcount to show if the class is used as a parent */
-		ce->parent->refcount++;
 	}
 
 	/* update methods */
 	if (ce->constructor) {
 		ce->constructor = zend_shared_alloc_get_xlat_entry(ce->constructor);
-		/* we use refcount to show that op_array is referenced from several places */
-		ce->constructor->op_array.refcount++;
 	}
 	if (ce->destructor) {
 		ce->destructor = zend_shared_alloc_get_xlat_entry(ce->destructor);
-		ce->destructor->op_array.refcount++;
 	}
 	if (ce->clone) {
 		ce->clone = zend_shared_alloc_get_xlat_entry(ce->clone);
-		ce->clone->op_array.refcount++;
 	}
 	if (ce->__get) {
 		ce->__get = zend_shared_alloc_get_xlat_entry(ce->__get);
-		ce->__get->op_array.refcount++;
 	}
 	if (ce->__set) {
 		ce->__set = zend_shared_alloc_get_xlat_entry(ce->__set);
-		ce->__set->op_array.refcount++;
 	}
 	if (ce->__call) {
 		ce->__call = zend_shared_alloc_get_xlat_entry(ce->__call);
-		ce->__call->op_array.refcount++;
 	}
 	if (ce->serialize_func) {
 		ce->serialize_func = zend_shared_alloc_get_xlat_entry(ce->serialize_func);
-		ce->serialize_func->op_array.refcount++;
 	}
 	if (ce->unserialize_func) {
 		ce->unserialize_func = zend_shared_alloc_get_xlat_entry(ce->unserialize_func);
-		ce->unserialize_func->op_array.refcount++;
 	}
 	if (ce->__isset) {
 		ce->__isset = zend_shared_alloc_get_xlat_entry(ce->__isset);
-		ce->__isset->op_array.refcount++;
 	}
 	if (ce->__unset) {
 		ce->__unset = zend_shared_alloc_get_xlat_entry(ce->__unset);
-		ce->__unset->op_array.refcount++;
 	}
 	if (ce->__tostring) {
 		ce->__tostring = zend_shared_alloc_get_xlat_entry(ce->__tostring);
-		ce->__tostring->op_array.refcount++;
 	}
 	if (ce->__callstatic) {
 		ce->__callstatic = zend_shared_alloc_get_xlat_entry(ce->__callstatic);
-		ce->__callstatic->op_array.refcount++;
 	}
 	if (ce->__debugInfo) {
 		ce->__debugInfo = zend_shared_alloc_get_xlat_entry(ce->__debugInfo);
-		ce->__debugInfo->op_array.refcount++;
 	}
 	zend_hash_apply(&ce->properties_info, (apply_func_t) zend_update_property_info_ce);
 	return 0;
