@@ -21,12 +21,19 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <math.h>
 
 #include "php.h"
 
 #if PHP_WIN32
 # include "win32/winutil.h"
 #endif
+
+// Big thanks to @ircmaxell for the help on this bit
+union rand_long_buffer {
+	char buffer[8];
+	long number;
+};
 
 /*
 // Copy/pasted from string.c
@@ -62,6 +69,7 @@ static int php_random_bytes(char *bytes, zend_long size)
 	}
 	n = (int)size;
 #else
+	// @todo Need to cache the fd for random_int() call within loop
 	int    fd;
 	size_t read_bytes = 0;
 
@@ -152,56 +160,40 @@ PHP_FUNCTION(random_hex)
 }
 /* }}} */
 
-/* {{{ proto int random_int(int max)
+/* {{{ proto int random_int(int maximum)
 Return an arbitrary pseudo-random integer */
 PHP_FUNCTION(random_int)
 {
-	zend_long max;
+	zend_long maximum;
 	zend_long size;
-	zend_long number = 0;
-	zend_string *bytes;
 	size_t i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &max) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &maximum) == FAILURE) {
 		return;
 	}
 
-	if (max >= INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Cannot use max greater than %d", INT_MAX);
+	if (maximum <= 0 || maximum >= INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Cannot use maximum less than 1 or greater than %d", INT_MAX);
 		RETURN_FALSE;
 	}
 
-	size = sizeof(max);
+	long range = (long) maximum; // @todo Support min?
 
-	bytes = zend_string_alloc(size, 0);
+	// Big thanks to @ircmaxell for the help on this bit
+	union rand_long_buffer value;
+	long result;
+	int bits = (int) (log((double) range) / log(2.0)) + 1;
+	int bytes = MAX(ceil(bits / 8), 1);
+	long mask = (long) pow(2.0, (double) bits) - 1;
 
-	if (php_random_bytes(bytes->val, size) == FAILURE) {
-		zend_string_release(bytes);
-		return;
-	}
-
-	// @todo bin-to-int: I know this is wrong but don't know how to fix
-	for (i = 0; i < size; i++) {
-		unsigned char c = bytes->val[i++];
-		unsigned char d;
-
-		if (c >= '0' && c <= '9') {
-			d = c - '0';
-		} else if (c >= 'a' && c <= 'f') {
-			d = c - 'a' - 10;
-		} else if (c >= 'A' && c <= 'F') {
-			d = c - 'A' - 10;
-		} else {
-			continue;
+	do {
+		if (php_random_bytes(&value.buffer, 8) == FAILURE) {
+			return;
 		}
+		result = value.number & mask;
+	} while (result > maximum);
 
-		// Binary = base-2
-		number = number * 2 + d;
-	}
-
-	zend_string_release(bytes);
-
-	RETURN_LONG(number);
+	RETURN_LONG(result);
 }
 /* }}} */
 
