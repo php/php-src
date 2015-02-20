@@ -3806,14 +3806,24 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
 			/* Encoding declaration was already handled during parsing. Here we
 			 * only check that it is the first statement in the file. */
-			uint32_t num = CG(active_op_array)->last;
-			while (num > 0 &&
-				   (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
-					CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
-				--num;
-			}
+			zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
+			
+			size_t i = 0;
+			signed char valid = 0;
 
-			if (num > 0) {
+			/* Check to see if this declare is preceeded only by declare statements */
+			while (valid == 0 && i < file_ast->children) {
+				if (file_ast->child[i] == ast) {
+					valid = 1;
+				} else if (file_ast->child[i] == NULL) {
+					valid = -1;
+				} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
+					/* declares can only be preceeded by other declares */
+					valid = -1;
+				}
+				i++;
+			}
+			if (valid != 1) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}
