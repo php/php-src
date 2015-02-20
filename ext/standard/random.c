@@ -46,7 +46,7 @@ static void php_bin_to_hex(char *old, const zend_long old_len, char *hex)
 }
 
 // Copy/pasted from mcrypt.c
-static int php_random_bytes(char *bytes, zend_long size)
+static int php_random_bytes(zend_string *bytes, zend_long size)
 {
 	int n = 0;
 
@@ -90,7 +90,7 @@ Return an arbitrary length of pseudo-random bytes as binary string */
 PHP_FUNCTION(random_bytes)
 {
 	zend_long size;
-	char *bytes;
+	zend_string *bytes;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
 		return;
@@ -101,16 +101,16 @@ PHP_FUNCTION(random_bytes)
 		RETURN_FALSE;
 	}
 
-	bytes = ecalloc(size + 1, 1);
+	bytes = zend_string_alloc(size + 1, 0);
 
 	if (php_random_bytes(bytes, size) == FAILURE) {
-		efree(bytes);
+		zend_string_release(bytes);
 		return;
 	}
 
 	RETVAL_STRINGL(bytes, size);
 
-	efree(bytes);
+	zend_string_release(bytes);
 }
 /* }}} */
 
@@ -119,8 +119,8 @@ Return an arbitrary length of pseudo-random bytes as hexadecimal string */
 PHP_FUNCTION(random_hex)
 {
 	zend_long size;
-	char *bytes;
-	char *hex;
+	zend_string *bytes;
+	zend_string *hex;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
 		return;
@@ -132,21 +132,21 @@ PHP_FUNCTION(random_hex)
 	}
 
 	// @todo should we half the size for hex? How for odd num of chars?
-	bytes = ecalloc(size + 1, 1);
+	bytes = zend_string_alloc(size + 1, 0);
 
 	if (php_random_bytes(bytes, size) == FAILURE) {
-		efree(bytes);
+		zend_string_release(bytes);
 		return;
 	}
 
 	int hex_size = size * 2;
-	hex = ecalloc(hex_size + 1, 1);
+	hex = zend_string_alloc(hex_size + 1, 0);
 	php_bin_to_hex(bytes, hex_size, hex);
 
 	RETVAL_STRINGL(hex, hex_size);
 
-	efree(bytes);
-	efree(hex);
+	zend_string_release(bytes);
+	zend_string_release(hex);
 }
 /* }}} */
 
