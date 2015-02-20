@@ -3809,17 +3809,18 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
 			
 			size_t i = 0;
-			signed char valid = 0;
+			zend_bool valid = 0;
 
 			/* Check to see if this declare is preceeded only by declare statements */
 			while (valid == 0 && i < file_ast->children) {
 				if (file_ast->child[i] == ast) {
 					valid = 1;
 				} else if (file_ast->child[i] == NULL) {
-					valid = -1;
+					/* Empty statements are not allowed prior to a declare */
+					break;
 				} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
 					/* declares can only be preceeded by other declares */
-					valid = -1;
+					break;
 				}
 				i++;
 			}
