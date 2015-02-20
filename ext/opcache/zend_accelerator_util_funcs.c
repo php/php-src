@@ -711,21 +711,14 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 	for (idx = 0; idx < source->nNumUsed; idx++) {
 		p = source->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		if (p->key) {
-			t = zend_hash_add(target, p->key, &p->val);
-			if (UNEXPECTED(t == NULL)) {
-				if (p->key->len > 0 && p->key->val[0] == 0) {
-					/* Mangled key */
-					t = zend_hash_update(target, p->key, &p->val);
-				} else {
-					t = zend_hash_find(target, p->key);
-					goto failure;
-				}
-			}
-		} else {
-		    t = zend_hash_index_add(target, p->h, &p->val);
-			if (UNEXPECTED(t == NULL)) {
-				t = zend_hash_index_find(target, p->h);
+		ZEND_ASSERT(p->key);
+		t = zend_hash_add(target, p->key, &p->val);
+		if (UNEXPECTED(t == NULL)) {
+			if (p->key->len > 0 && p->key->val[0] == 0) {
+				/* Mangled key */
+				t = zend_hash_update(target, p->key, &p->val);
+			} else {
+				t = zend_hash_find(target, p->key);
 				goto failure;
 			}
 		}
@@ -760,21 +753,14 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 	for (idx = 0; idx < source->nNumUsed; idx++) {
 		p = source->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		if (p->key) {
-			t = zend_hash_add(target, p->key, &p->val);
-			if (UNEXPECTED(t == NULL)) {
-				if (p->key->len > 0 && p->key->val[0] == 0) {
-					/* Mangled key */
-					t = zend_hash_update(target, p->key, &p->val);
-				} else {
-					t = zend_hash_find(target, p->key);
-					goto failure;
-				}
-			}
-		} else {
-		    t = zend_hash_index_add(target, p->h, &p->val);
-			if (UNEXPECTED(t == NULL)) {
-				t = zend_hash_index_find(target, p->h);
+		ZEND_ASSERT(p->key);
+		t = zend_hash_add(target, p->key, &p->val);
+		if (UNEXPECTED(t == NULL)) {
+			if (p->key->len > 0 && p->key->val[0] == 0) {
+				/* Mangled key */
+				t = zend_hash_update(target, p->key, &p->val);
+			} else {
+				t = zend_hash_find(target, p->key);
 				goto failure;
 			}
 		}
@@ -811,24 +797,15 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 	for (idx = 0; idx < source->nNumUsed; idx++) {
 		p = source->arData + idx;
 		if (Z_TYPE(p->val) == IS_UNDEF) continue;
-		if (p->key) {
-			t = zend_hash_add(target, p->key, &p->val);
-			if (UNEXPECTED(t == NULL)) {
-				if (p->key->len > 0 && p->key->val[0] == 0) {
-					/* Mangled key - ignore and wait for runtime */
-					continue;
-				} else if (!ZCG(accel_directives).ignore_dups) {
-					t = zend_hash_find(target, p->key);
-					goto failure;
-				}
-			}
-		} else {
-			t = zend_hash_index_add(target, p->h, &p->val);
-			if (UNEXPECTED(t == NULL)) {
-				if (!ZCG(accel_directives).ignore_dups) {
-					t = zend_hash_index_find(target,p->h);
-					goto failure;
-				}
+		ZEND_ASSERT(p->key);
+		t = zend_hash_add(target, p->key, &p->val);
+		if (UNEXPECTED(t == NULL)) {
+			if (p->key->len > 0 && p->key->val[0] == 0) {
+				/* Mangled key - ignore and wait for runtime */
+				continue;
+			} else if (!ZCG(accel_directives).ignore_dups) {
+				t = zend_hash_find(target, p->key);
+				goto failure;
 			}
 		}
 		if (pCopyConstructor) {
