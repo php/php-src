@@ -28,32 +28,35 @@
 # include "win32/winutil.h"
 #endif
 
+/*
 // Copy/pasted from string.c
 static char hexconvtab[] = "0123456789abcdef";
 
 // Copy/pasted from string.c
-static void php_bin_to_hex(char *old, const zend_long old_len, char *hex)
+static void php_bin_to_hex(zend_string *old, const zend_long old_len, zend_string *hex)
 {
 	zend_long i, j;
 
-	// @todo I don't think this is doing it right
+	hex = zend_string_alloc(old_len * 2, 0); // @todo is this right?
+
 	for (i = j = 0; i < old_len; i++) {
-		hex[j++] = hexconvtab[old[i] >> 4];
-		hex[j++] = hexconvtab[old[i] & 15];
+		hex->val[j++] = hexconvtab[old->val[i] >> 4];
+		hex->val[j++] = hexconvtab[old->val[i] & 15];
 	}
 
-	hex[j] = '\0';
+	hex->val[j] = '\0';
 }
+*/
 
 // Copy/pasted from mcrypt.c
-static int php_random_bytes(zend_string *bytes, zend_long size)
+static int php_random_bytes(char *bytes, zend_long size)
 {
 	int n = 0;
 
 #if PHP_WIN32
 	/* random/urandom equivalent on Windows */
 	BYTE *win_bytes = (BYTE *) bytes;
-	if (php_win32_get_random_bytes(win_bytes, (size_t) size) == FAILURE){
+	if (php_win32_get_random_bytes(win_bytes, (size_t) size) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 		return FAILURE;
 	}
@@ -75,12 +78,16 @@ static int php_random_bytes(zend_string *bytes, zend_long size)
 		read_bytes += n;
 	}
 	n = read_bytes;
+
 	close(fd);
 	if (n < size) {
 		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 		return FAILURE;
 	}
 #endif
+
+	// @todo - Do we need to do this?
+	bytes[size] = '\0';
 
 	return SUCCESS;
 }
@@ -101,16 +108,14 @@ PHP_FUNCTION(random_bytes)
 		RETURN_FALSE;
 	}
 
-	bytes = zend_string_alloc(size + 1, 0);
+	bytes = zend_string_alloc(size, 0);
 
-	if (php_random_bytes(bytes, size) == FAILURE) {
+	if (php_random_bytes(bytes->val, size) == FAILURE) {
 		zend_string_release(bytes);
 		return;
 	}
 
-	RETVAL_STRINGL(bytes, size);
-
-	zend_string_release(bytes);
+	RETURN_STR(bytes);
 }
 /* }}} */
 
@@ -118,6 +123,7 @@ PHP_FUNCTION(random_bytes)
 Return an arbitrary length of pseudo-random bytes as hexadecimal string */
 PHP_FUNCTION(random_hex)
 {
+	/*
 	zend_long size;
 	zend_string *bytes;
 	zend_string *hex;
@@ -131,49 +137,69 @@ PHP_FUNCTION(random_hex)
 		RETURN_FALSE;
 	}
 
-	// @todo should we half the size for hex? How for odd num of chars?
-	bytes = zend_string_alloc(size + 1, 0);
-
 	if (php_random_bytes(bytes, size) == FAILURE) {
-		zend_string_release(bytes);
 		return;
 	}
 
 	int hex_size = size * 2;
-	hex = zend_string_alloc(hex_size + 1, 0);
+
 	php_bin_to_hex(bytes, hex_size, hex);
 
-	RETVAL_STRINGL(hex, hex_size);
-
 	zend_string_release(bytes);
-	zend_string_release(hex);
+	*/
+
+	RETURN_STR("Foo!");
 }
 /* }}} */
 
-/* {{{ proto int random_int(int min, int max)
+/* {{{ proto int random_int(int max)
 Return an arbitrary pseudo-random integer */
 PHP_FUNCTION(random_int)
 {
-	zend_long min;
 	zend_long max;
-	zend_long number;
+	zend_long size;
+	zend_long number = 0;
+	zend_string *bytes;
+	size_t i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &max) == FAILURE) {
 		return;
 	}
 
-	if (min >= INT_MAX || max >= INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Cannot use range greater than %d", INT_MAX);
+	if (max >= INT_MAX) {
+		php_error_docref(NULL, E_WARNING, "Cannot use max greater than %d", INT_MAX);
 		RETURN_FALSE;
 	}
 
-	if (max < min) {
-		php_error_docref(NULL, E_WARNING, "Max value (%d) is less than min value (%d)", max, min);
-		RETURN_FALSE;
+	size = sizeof(number);
+
+	bytes = zend_string_alloc(size, 0);
+
+	if (php_random_bytes(bytes->val, size) == FAILURE) {
+		zend_string_release(bytes);
+		return;
 	}
 
-	// @todo Insert bin-to-int stuff here
-	number = min + max * 100;
+	// @todo bin-to-int: I know this is wrong but don't know how to fix
+	for (i = 0; i < size; i++) {
+		unsigned char c = bytes->val[i++];
+		unsigned char d;
+
+		if (c >= '0' && c <= '9') {
+			d = c - '0';
+		} else if (c >= 'a' && c <= 'f') {
+			d = c - 'a' - 10;
+		} else if (c >= 'A' && c <= 'F') {
+			d = c - 'A' - 10;
+		} else {
+			continue;
+		}
+
+		// Binary = base-2
+		number = number * 2 + d;
+	}
+
+	zend_string_release(bytes);
 
 	RETURN_LONG(number);
 }
