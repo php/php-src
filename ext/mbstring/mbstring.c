@@ -2996,6 +2996,32 @@ PHP_FUNCTION(mb_strimwidth)
 }
 /* }}} */
 
+static inline zend_bool php_mb_check_unicode_encoding(enum mbfl_no_encoding no_enc)
+{
+	if (no_enc == mbfl_no_encoding_utf8
+		|| no_enc == mbfl_no_encoding_utf8_docomo
+		|| no_enc == mbfl_no_encoding_utf8_kddi_a
+		|| no_enc == mbfl_no_encoding_utf8_kddi_b
+		|| no_enc == mbfl_no_encoding_utf8_sb
+		|| no_enc == mbfl_no_encoding_ucs4
+		|| no_enc == mbfl_no_encoding_ucs4be
+		|| no_enc == mbfl_no_encoding_ucs4le
+		|| no_enc == mbfl_no_encoding_utf32
+		|| no_enc == mbfl_no_encoding_utf32be
+		|| no_enc == mbfl_no_encoding_utf32le
+		|| no_enc == mbfl_no_encoding_ucs2
+		|| no_enc == mbfl_no_encoding_ucs2be
+		|| no_enc == mbfl_no_encoding_ucs2le
+		|| no_enc == mbfl_no_encoding_utf16
+		|| no_enc == mbfl_no_encoding_utf16be
+		|| no_enc == mbfl_no_encoding_utf16le
+	) {
+		return true;
+	}
+
+	return false;
+}
+
 /* {{{ MBSTRING_API char *php_mb_convert_encoding() */
 MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length, const char *_to_encoding, const char *_from_encodings, size_t *output_len)
 {
@@ -3066,7 +3092,32 @@ MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length, co
 		return NULL;
 	}
 	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
-	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
+
+	if (string.no_encoding == MBSTRG(current_internal_encoding)->no_encoding) {
+		mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
+	} else if (php_mb_check_unicode_encoding(string.no_encoding) && php_mb_check_unicode_encoding(MBSTRG(current_internal_encoding)->no_encoding)) {
+
+		if (string.no_encoding == mbfl_no_encoding_utf8_docomo
+			|| string.no_encoding == mbfl_no_encoding_utf8_kddi_a
+			|| string.no_encoding == mbfl_no_encoding_utf8_kddi_b
+			|| string.no_encoding == mbfl_no_encoding_utf8_sb
+		) {
+
+			if (MBSTRG(current_filter_illegal_substchar) > 0xd7ff &&
+				0xe00 > MBSTRG(current_filter_illegal_substchar)
+			) {
+				mbfl_buffer_converter_illegal_substchar(convd, 0x3f);
+			} else {
+				mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
+			}
+
+		} else {
+			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
+		}
+
+	} else {
+		mbfl_buffer_converter_illegal_substchar(convd, 0x3f);
+	}
 
 	/* do it */
 	ret = mbfl_buffer_converter_feed_result(convd, &string, &result);
