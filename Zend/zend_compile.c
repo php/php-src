@@ -3864,6 +3864,28 @@ void zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static int zend_declare_is_first_statement(zend_ast *ast) /* {{{ */
+{
+	uint32_t i = 0;
+	zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
+
+	/* Check to see if this declare is preceeded only by declare statements */
+	while (i < file_ast->children) {
+		if (file_ast->child[i] == ast) {
+			return SUCCESS;
+		} else if (file_ast->child[i] == NULL) {
+			/* Empty statements are not allowed prior to a declare */
+			return FAILURE;
+		} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
+			/* declares can only be preceeded by other declares */
+			return FAILURE;
+		}
+		i++;
+	}
+	return FAILURE;
+}
+/* }}} */
+
 void zend_compile_declare(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *declares = zend_ast_get_list(ast->child[0]);
@@ -3884,46 +3906,25 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			ZVAL_COPY_VALUE(&CG(declarables).ticks, &value_zv);
 			zval_dtor(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
-			uint32_t i = 0;
-			zend_bool valid = 0;
-			/* Encoding declaration was already handled during parsing. Here we
-			 * only check that it is the first statement in the file. */
-			zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
-
-			/* Check to see if this declare is preceeded only by declare statements */
-			while (valid == 0 && i < file_ast->children) {
-				if (file_ast->child[i] == ast) {
-					valid = 1;
-				} else if (file_ast->child[i] == NULL) {
-					/* Empty statements are not allowed prior to a declare */
-					break;
-				} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
-					/* declares can only be preceeded by other declares */
-					break;
-				}
-				i++;
-			}
-			if (valid != 1) {
+			
+			if (FAILURE == zend_declare_is_first_statement(ast)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}
 		} else if (zend_string_equals_literal_ci(name, "strict_types")) {
 			zval value_zv;
 
-            /* Check that it is the node in the AST from the file. */
-            zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
+			if (FAILURE == zend_declare_is_first_statement(ast)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must be "
+					"the very first statement in the script");
+			}
 
-            if (file_ast->child[0] != ast) {
-                zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must be "
-                    "the very first statement in the script");
-            }
+			if (ast->child[1] != NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must not "
+					"use block mode");   
+			}
 
-            if (ast->child[1] != NULL) {
-                zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must not "
-                    "use block mode");   
-            }
-
-            zend_const_expr_to_zval(&value_zv, value_ast);
+			zend_const_expr_to_zval(&value_zv, value_ast);
 
 			if (Z_TYPE(value_zv) != IS_LONG || (Z_LVAL(value_zv) != 0 && Z_LVAL(value_zv) != 1)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must have 0 or 1 as its value");
