@@ -36,28 +36,31 @@ union rand_long_buffer {
 };
 
 // Copy/pasted from mcrypt.c
-static int php_random_bytes(char *bytes, zend_long size)
+static int php_random_bytes(void *bytes, size_t size)
 {
 	int n = 0;
 
 #if PHP_WIN32
-	/* random/urandom equivalent on Windows */
-	BYTE *win_bytes = (BYTE *) bytes;
-	if (php_win32_get_random_bytes(win_bytes, (size_t) size) == FAILURE) {
+	/* Defer to CryptGenRandom on Windows */
+	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 		return FAILURE;
 	}
-	n = (int)size;
 #else
-	// @todo Need to cache the fd for random_int() call within loop
-	int    fd;
+	int    fd = -1;
 	size_t read_bytes = 0;
-
+#if HAVE_DEV_ARANDOM
+	fd = open("/dev/arandom", O_RDONLY);
+#else
+#if HAVE_DEV_URANDOM
 	fd = open("/dev/urandom", O_RDONLY);
+#endif
+#endif
 	if (fd < 0) {
 		php_error_docref(NULL, E_WARNING, "Cannot open source device");
 		return FAILURE;
 	}
+
 	while (read_bytes < size) {
 		n = read(fd, bytes + read_bytes, size - read_bytes);
 		if (n < 0) {
@@ -65,17 +68,13 @@ static int php_random_bytes(char *bytes, zend_long size)
 		}
 		read_bytes += n;
 	}
-	n = read_bytes;
 
 	close(fd);
-	if (n < size) {
+	if (read_bytes < size) {
 		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 		return FAILURE;
 	}
 #endif
-
-	// @todo - Do we need to do this?
-	bytes[size] = '\0';
 
 	return SUCCESS;
 }
@@ -102,6 +101,8 @@ PHP_FUNCTION(random_bytes)
 		zend_string_release(bytes);
 		return;
 	}
+
+	bytes->val[size] = '\0';
 
 	RETURN_STR(bytes);
 }
