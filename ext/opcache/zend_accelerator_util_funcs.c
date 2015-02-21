@@ -370,8 +370,6 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	uint idx;
 	Bucket *p, *q;
 	zend_ulong nIndex;
-	zend_class_entry *new_ce;
-	zend_function *new_prototype;
 	zend_op_array *new_entry;
 
 	ht->nTableSize = source->nTableSize;
@@ -427,7 +425,6 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	uint idx;
 	Bucket *p, *q;
 	zend_ulong nIndex;
-	zend_class_entry *new_ce;
 	zend_property_info *prop_info;
 
 	ht->nTableSize = source->nTableSize;
@@ -494,8 +491,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 {
 	zend_class_entry *ce = *pce;
 	zend_class_entry *old_ce = ce;
-	zend_class_entry *new_ce;
-	zend_function *new_func;
 
 	*pce = ce = ARENA_REALLOC(old_ce);
 	ce->refcount = 1;
