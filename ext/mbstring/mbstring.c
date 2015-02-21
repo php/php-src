@@ -4578,7 +4578,6 @@ PHP_FUNCTION(mb_check_encoding)
 
 static inline char* php_mb_scrub(const char* str, size_t str_len, const char* enc)
 {
-	char *ret;
 	size_t ret_len;
 
 	return php_mb_convert_encoding(str, str_len, enc, enc, &ret_len);
@@ -4611,7 +4610,8 @@ PHP_FUNCTION(mb_scrub)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(ret);
+	RETVAL_STRING(ret);
+	efree(ret);
 }
 /* }}} */
 
