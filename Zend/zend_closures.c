@@ -63,7 +63,9 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	/* destruct the function also, then - we have allocated it in get_method */
 	zend_string_release(func->internal_function.function_name);
 	efree(func);
-	EX(func) = NULL;
+#if ZEND_DEBUG
+	execute_data->func = NULL;
+#endif
 }
 /* }}} */
 
