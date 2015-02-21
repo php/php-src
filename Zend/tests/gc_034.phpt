@@ -1,5 +1,5 @@
 --TEST--
-GC 033: GC in request shutdown and resource list destroy
+GC 034: GC in request shutdown and resource list destroy
 --FILE--
 <?php
 /* run with valgrind */
