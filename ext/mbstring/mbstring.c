@@ -4877,7 +4877,8 @@ PHP_FUNCTION(mb_chr)
 		RETURN_FALSE;
 	}
 
-	RETURN_STRING(ret);
+	RETVAL_STRING(ret);
+	efree(ret);
 }
 /* }}} */
 
