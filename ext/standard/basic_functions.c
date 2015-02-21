@@ -1907,10 +1907,11 @@ ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ random.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_random_bytes, 0, 0, 0)
-	ZEND_ARG_INFO(0, bytes)
+	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_random_int, 0, 0, 0)
+	ZEND_ARG_INFO(0, min)
 	ZEND_ARG_INFO(0, max)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -3670,6 +3671,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 # endif
 #endif
 
+	BASIC_MINIT_SUBMODULE(random)
+
 	return SUCCESS;
 }
 /* }}} */
@@ -3707,6 +3710,8 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 #if HAVE_CRYPT
 	BASIC_MSHUTDOWN_SUBMODULE(crypt)
 #endif
+
+	BASIC_MSHUTDOWN_SUBMODULE(random)
 
 	zend_hash_destroy(&basic_submodules);
 	return SUCCESS;

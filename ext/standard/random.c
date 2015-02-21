@@ -24,63 +24,105 @@
 #include <math.h>
 
 #include "php.h"
+#include "php_random.h"
 
 #if PHP_WIN32
 # include "win32/winutil.h"
 #endif
 
-// Big thanks to @ircmaxell for the help on this bit
-union rand_long_buffer {
-	char buffer[8];
-	long number;
-};
+#ifdef ZTS
+int random_globals_id;
+#else
+php_random_globals random_globals;
+#endif
 
-// Copy/pasted from mcrypt.c
-static int php_random_bytes(char *bytes, zend_long size)
+static void random_globals_ctor(php_random_globals *random_globals_p)
 {
-	int n = 0;
+	random_globals_p->fd = -1;
+}
 
+static void random_globals_dtor(php_random_globals *random_globals_p)
+{
+	if (random_globals_p->fd > 0) {
+		close(random_globals_p->fd);
+		random_globals_p->fd = -1;
+	}
+}
+
+/* {{{ */
+PHP_MINIT_FUNCTION(random)
+{
+#ifdef ZTS
+	ts_allocate_id(&random_globals_id, sizeof(php_random_globals), (ts_allocate_ctor)random_globals_ctor, (ts_allocate_dtor)random_globals_dtor);
+#else
+	random_globals_ctor(&random_globals);
+#endif
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ */
+PHP_MSHUTDOWN_FUNCTION(random)
+{
+#ifndef ZTS
+	random_globals_dtor(&random_globals);
+#endif
+}
+/* }}} */
+
+/* {{{ */
+static int php_random_bytes(void *bytes, size_t size)
+{
 #if PHP_WIN32
-	/* random/urandom equivalent on Windows */
-	BYTE *win_bytes = (BYTE *) bytes;
-	if (php_win32_get_random_bytes(win_bytes, (size_t) size) == FAILURE) {
+	/* Defer to CryptGenRandom on Windows */
+	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 		return FAILURE;
 	}
-	n = (int)size;
 #else
-	// @todo Need to cache the fd for random_int() call within loop
-	int    fd;
+#if HAVE_DECL_ARC4RANDOM_BUF
+	arc4random_buf(bytes, size);
+#else
+	int    fd = RANDOM_G(fd);
 	size_t read_bytes = 0;
 
-	fd = open("/dev/urandom", O_RDONLY);
 	if (fd < 0) {
-		php_error_docref(NULL, E_WARNING, "Cannot open source device");
-		return FAILURE;
+#if HAVE_DEV_ARANDOM
+		fd = open("/dev/arandom", O_RDONLY);
+#else
+#if HAVE_DEV_URANDOM
+		fd = open("/dev/urandom", O_RDONLY);
+#endif // URANDOM
+#endif // ARANDOM
+		if (fd < 0) {
+			php_error_docref(NULL, E_WARNING, "Cannot open source device");
+			return FAILURE;
+		}
+
+		RANDOM_G(fd) = fd;
 	}
+
 	while (read_bytes < size) {
-		n = read(fd, bytes + read_bytes, size - read_bytes);
+		ssize_t n = read(fd, bytes + read_bytes, size - read_bytes);
 		if (n < 0) {
 			break;
 		}
 		read_bytes += n;
 	}
-	n = read_bytes;
 
-	close(fd);
-	if (n < size) {
+	if (read_bytes < size) {
 		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 		return FAILURE;
 	}
-#endif
-
-	// @todo - Do we need to do this?
-	bytes[size] = '\0';
+#endif // !ARC4RANDOM_BUF
+#endif // !WIN32
 
 	return SUCCESS;
 }
+/* }}} */
 
-/* {{{ proto string random_bytes(int bytes)
+/* {{{ proto string random_bytes(int length)
 Return an arbitrary length of pseudo-random bytes as binary string */
 PHP_FUNCTION(random_bytes)
 {
@@ -91,8 +133,8 @@ PHP_FUNCTION(random_bytes)
 		return;
 	}
 
-	if (size <= 0 || size >= INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Cannot genrate a random string with a size of less than 1 or greater than %d", INT_MAX);
+	if (size < 1) {
+		php_error_docref(NULL, E_WARNING, "Length must be greater than 0");
 		RETURN_FALSE;
 	}
 
@@ -100,51 +142,62 @@ PHP_FUNCTION(random_bytes)
 
 	if (php_random_bytes(bytes->val, size) == FAILURE) {
 		zend_string_release(bytes);
-		return;
+		RETURN_FALSE;
 	}
+
+	bytes->val[size] = '\0';
 
 	RETURN_STR(bytes);
 }
 /* }}} */
 
-/* {{{ proto int random_int(int maximum)
+/* {{{ proto int random_int(int min, int max)
 Return an arbitrary pseudo-random integer */
 PHP_FUNCTION(random_int)
 {
-	zend_long maximum;
-	zend_long size;
-	size_t i;
+	zend_long min;
+	zend_long max;
+	zend_ulong limit;
+	zend_ulong umax;
+	zend_ulong result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &maximum) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
-		maximum = INT_MAX;
-	}
-
-	if (maximum <= 0 || maximum > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Cannot use maximum less than 1 or greater than %d", INT_MAX);
+	if (min >= max) {
+		php_error_docref(NULL, E_WARNING, "Minimum value must be less than the maximum value");
 		RETURN_FALSE;
 	}
 
-	long range = (long) maximum; // @todo Support min?
+	umax = max - min;
 
-	// Big thanks to @ircmaxell for the help on this bit
-	union rand_long_buffer value;
-	long result;
-	int bits = (int) (log((double) range) / log(2.0)) + 1;
-	int bytes = MAX(ceil(bits / 8), 1);
-	long mask = (long) pow(2.0, (double) bits) - 1;
+	if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
+		RETURN_FALSE;
+	}
 
-	do {
-		if (php_random_bytes(&value.buffer, 8) == FAILURE) {
-			return;
+	// Special case where no modulus is required
+	if (umax == ZEND_ULONG_MAX) {
+		RETURN_LONG((zend_long)result);
+	}
+
+	// Increment the max so the range is inclusive of max
+	umax++;
+
+	// Powers of two are not biased
+	if ((umax & ~umax) != umax) {
+		// Ceiling under which ZEND_LONG_MAX % max == 0
+		limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
+	
+		// Discard numbers over the limit to avoid modulo bias
+		while (result > limit) {
+			if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
+				return;
+			}
 		}
-		result = value.number & mask;
-	} while (result > maximum);
+	}
 
-	RETURN_LONG(result);
+	RETURN_LONG((zend_long)((result % umax) + min));
 }
 /* }}} */
 

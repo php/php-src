@@ -23,6 +23,22 @@
 
 PHP_FUNCTION(random_bytes);
 PHP_FUNCTION(random_int);
+
+PHP_MINIT_FUNCTION(random);
+PHP_MSHUTDOWN_FUNCTION(random);
+
+typedef struct {
+	int fd;
+} php_random_globals;
+
+#ifdef ZTS
+# define RANDOM_G(v) ZEND_TSRMG(random_globals_id, php_random_globals *, v)
+extern PHPAPI int random_globals_id;
+#else
+# define RANDOM_G(v) random_globals.v
+extern PHPAPI php_random_globals random_globals;
+#endif
+
 #endif
 
 /*
