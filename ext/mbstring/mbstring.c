@@ -4623,6 +4623,32 @@ static inline zend_bool php_mb_check_unsupported_encoding(enum mbfl_no_encoding 
 	return false;
 }
 
+static inline zend_bool php_mb_check_unicode_encoding(enum mbfl_no_encoding no_enc)
+{
+	if (no_enc == mbfl_no_encoding_utf8
+		|| no_enc == mbfl_no_encoding_utf8_docomo
+		|| no_enc == mbfl_no_encoding_utf8_kddi_a
+		|| no_enc == mbfl_no_encoding_utf8_kddi_b
+		|| no_enc == mbfl_no_encoding_utf8_sb
+		|| no_enc == mbfl_no_encoding_ucs4
+		|| no_enc == mbfl_no_encoding_ucs4be
+		|| no_enc == mbfl_no_encoding_ucs4le
+		|| no_enc == mbfl_no_encoding_utf32
+		|| no_enc == mbfl_no_encoding_utf32be
+		|| no_enc == mbfl_no_encoding_utf32le
+		|| no_enc == mbfl_no_encoding_ucs2
+		|| no_enc == mbfl_no_encoding_ucs2be
+		|| no_enc == mbfl_no_encoding_ucs2le
+		|| no_enc == mbfl_no_encoding_utf16
+		|| no_enc == mbfl_no_encoding_utf16be
+		|| no_enc == mbfl_no_encoding_utf16le
+	) {
+		return true;
+	}
+
+	return false;
+}
+
 static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
 {
 	enum mbfl_no_encoding no_enc;
@@ -4643,24 +4669,7 @@ static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
 		}
 	}
 
-	if (no_enc == mbfl_no_encoding_utf8
-		|| no_enc == mbfl_no_encoding_utf8_docomo
-		|| no_enc == mbfl_no_encoding_utf8_kddi_a
-		|| no_enc == mbfl_no_encoding_utf8_kddi_b
-		|| no_enc == mbfl_no_encoding_utf8_sb
-		|| no_enc == mbfl_no_encoding_ucs4
-		|| no_enc == mbfl_no_encoding_ucs4be
-		|| no_enc == mbfl_no_encoding_ucs4le
-		|| no_enc == mbfl_no_encoding_utf32
-		|| no_enc == mbfl_no_encoding_utf32be
-		|| no_enc == mbfl_no_encoding_utf32le
-		|| no_enc == mbfl_no_encoding_ucs2
-		|| no_enc == mbfl_no_encoding_ucs2be
-		|| no_enc == mbfl_no_encoding_ucs2le
-		|| no_enc == mbfl_no_encoding_utf16
-		|| no_enc == mbfl_no_encoding_utf16be
-		|| no_enc == mbfl_no_encoding_utf16le
-	) {
+	if (php_mb_check_unicode_encoding(no_enc)) {
 
 		ret = php_mb_convert_encoding(str, str_len, "UCS-4BE", enc, &ret_len);
 
@@ -4752,30 +4761,39 @@ static inline char* php_mb_chr(long cp, const char* enc)
 		}
 	}
 
-	if (no_enc == mbfl_no_encoding_utf8
+	if (php_mb_check_unicode_encoding(no_enc)) {
+
+		if (0 > cp || 0x10ffff < cp) {
+
+			if (php_mb_check_unicode_encoding(MBSTRG(current_internal_encoding)->no_encoding)) {
+				cp = MBSTRG(current_filter_illegal_substchar);
+			} else {
+				cp = 0x3f;
+			}
+
+		}
+
+		if (no_enc == mbfl_no_encoding_utf8
 		|| no_enc == mbfl_no_encoding_utf8_docomo
 		|| no_enc == mbfl_no_encoding_utf8_kddi_a
 		|| no_enc == mbfl_no_encoding_utf8_kddi_b
 		|| no_enc == mbfl_no_encoding_utf8_sb
-		|| no_enc == mbfl_no_encoding_ucs4
-		|| no_enc == mbfl_no_encoding_ucs4be
-		|| no_enc == mbfl_no_encoding_ucs4le
-		|| no_enc == mbfl_no_encoding_utf32
-		|| no_enc == mbfl_no_encoding_utf32be
-		|| no_enc == mbfl_no_encoding_utf32le
-		|| no_enc == mbfl_no_encoding_ucs2
-		|| no_enc == mbfl_no_encoding_ucs2be
-		|| no_enc == mbfl_no_encoding_ucs2le
-		|| no_enc == mbfl_no_encoding_utf16
-		|| no_enc == mbfl_no_encoding_utf16be
-		|| no_enc == mbfl_no_encoding_utf16le
-	) {
+		) {
+			if (cp > 0xd7ff && 0xe000 > cp) {
 
-    	if (0 > cp || (cp > 0xd7ff && 0xe000 > cp) || 0x10ffff < cp) {
-			if (no_enc == MBSTRG(current_internal_encoding)->no_encoding) {
-				cp = MBSTRG(current_filter_illegal_substchar);
-			} else {
-				cp = 0x3f;
+				if (php_mb_check_unicode_encoding(MBSTRG(current_internal_encoding)->no_encoding)) {
+					if (MBSTRG(current_filter_illegal_substchar) > 0xd7ff &&
+						0xe000 > MBSTRG(current_filter_illegal_substchar)
+					) {
+						cp = 0x3f;
+					} else {
+						cp = MBSTRG(current_filter_illegal_substchar);
+					}
+
+				} else {
+					cp = 0x3f;
+				}
+
 			}
 		}
 
