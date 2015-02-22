@@ -427,25 +427,21 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 		if ((type = is_numeric_string(s, len, &p, &d, 0)) != 0) {
 			if (type == IS_LONG) {
 				smart_str_append_long(buf, p);
-			} else if (type == IS_DOUBLE) {
-				if (!zend_isinf(d) && !zend_isnan(d)) {
-					char num[NUM_BUF_SIZE];
-					int l;
+				return;
+			} else if (type == IS_DOUBLE && !zend_isinf(d) && !zend_isnan(d)) {
+				char num[NUM_BUF_SIZE];
+				int l;
 
-					php_gcvt(d, EG(precision), '.', 'e', (char *)num);
-					l = strlen(num);
-					if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && l < NUM_BUF_SIZE - 2) {
-						num[l++] = '.';
-						num[l++] = '0';
-						num[l] = '\0';
-					}
-					smart_str_appendl(buf, num, l);
-				} else {
-					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
-					smart_str_appendc(buf, '0');
+				php_gcvt(d, EG(precision), '.', 'e', (char *)num);
+				l = strlen(num);
+				if (options & PHP_JSON_PRESERVE_ZERO_FRACTION && strchr(num, '.') == NULL && l < NUM_BUF_SIZE - 2) {
+					num[l++] = '.';
+					num[l++] = '0';
+					num[l] = '\0';
 				}
+				smart_str_appendl(buf, num, l);
+				return;
 			}
-			return;
 		}
 
 	}
