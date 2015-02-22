@@ -19,7 +19,7 @@ require_once('script_extensions-dummy2.inc');
 echo "Done\n";
 ?>
 --EXPECTF--
-X-Powered-By: PHP/%s-%s
+X-Powered-By: PHP/%s
 Content-type: text/html; charset=UTF-8
 
 %sscript_extensions-dummy1.php
