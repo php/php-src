@@ -2996,7 +2996,7 @@ PHP_FUNCTION(mb_strimwidth)
 }
 /* }}} */
 
-static inline zend_bool php_mb_check_unicode_encoding(enum mbfl_no_encoding no_enc)
+static inline int php_mb_check_unicode_encoding(enum mbfl_no_encoding no_enc)
 {
 	if (no_enc == mbfl_no_encoding_utf8
 		|| no_enc == mbfl_no_encoding_utf8_docomo
@@ -3016,12 +3016,25 @@ static inline zend_bool php_mb_check_unicode_encoding(enum mbfl_no_encoding no_e
 		|| no_enc == mbfl_no_encoding_utf16be
 		|| no_enc == mbfl_no_encoding_utf16le
 	) {
-		return true;
+		return 1;
 	}
 
-	return false;
+	return 0;
 }
 
+static inline int php_mb_check_utf8_encoding(enum mbfl_no_encoding no_enc)
+{
+	if (no_enc == mbfl_no_encoding_utf8
+		|| no_enc == mbfl_no_encoding_utf8_docomo
+		|| no_enc == mbfl_no_encoding_utf8_kddi_a
+		|| no_enc == mbfl_no_encoding_utf8_kddi_b
+		|| no_enc == mbfl_no_encoding_utf8_sb
+	) {
+		return 1;
+	}
+
+	return 0;
+}
 /* {{{ MBSTRING_API char *php_mb_convert_encoding() */
 MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length, const char *_to_encoding, const char *_from_encodings, size_t *output_len)
 {
@@ -3097,14 +3110,10 @@ MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length, co
 		mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
 	} else if (php_mb_check_unicode_encoding(string.no_encoding) && php_mb_check_unicode_encoding(MBSTRG(current_internal_encoding)->no_encoding)) {
 
-		if (string.no_encoding == mbfl_no_encoding_utf8_docomo
-			|| string.no_encoding == mbfl_no_encoding_utf8_kddi_a
-			|| string.no_encoding == mbfl_no_encoding_utf8_kddi_b
-			|| string.no_encoding == mbfl_no_encoding_utf8_sb
-		) {
+		if (php_mb_check_utf8_encoding(string.no_encoding)) {
 
 			if (MBSTRG(current_filter_illegal_substchar) > 0xd7ff &&
-				0xe00 > MBSTRG(current_filter_illegal_substchar)
+				0xe000 > MBSTRG(current_filter_illegal_substchar)
 			) {
 				mbfl_buffer_converter_illegal_substchar(convd, 0x3f);
 			} else {
