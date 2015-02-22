@@ -459,7 +459,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	} else {
 		compiler_globals->static_members_table = NULL;
 	}
-	memset(compiler_globals->script_extensions, sizeof(char *), 32);
+	memset(compiler_globals->script_extensions, 0, sizeof(char *) * 32);
 	compiler_globals->script_encoding_list = NULL;
 
 #ifdef ZTS
