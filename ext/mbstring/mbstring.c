@@ -104,7 +104,7 @@ static void php_mb_gpc_get_detect_order(const zend_encoding ***list, size_t *lis
 
 static void php_mb_gpc_set_input_encoding(const zend_encoding *encoding);
 
-static inline zend_bool php_mb_check_encoding(const char *input, size_t length, const char *enc);
+static inline int php_mb_check_encoding(const char *input, size_t length, const char *enc);
 /* }}} */
 
 /* {{{ php_mb_default_identify_list */
@@ -4632,7 +4632,7 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
-static inline zend_bool php_mb_check_encoding(const char *input, size_t length, const char *enc)
+static inline int php_mb_check_encoding(const char *input, size_t length, const char *enc)
 {
 	const mbfl_encoding *encoding = MBSTRG(current_internal_encoding);
 	mbfl_buffer_converter *convd;
@@ -4647,7 +4647,7 @@ static inline zend_bool php_mb_check_encoding(const char *input, size_t length, 
 		encoding = mbfl_name2encoding(enc);
 		if (!encoding || encoding == &mbfl_encoding_pass) {
 			php_error_docref(NULL, E_WARNING, "Invalid encoding \"%s\"", enc);
-			return false;
+			return 0;
 		}
 	}
 
@@ -4655,7 +4655,7 @@ static inline zend_bool php_mb_check_encoding(const char *input, size_t length, 
 
 	if (convd == NULL) {
 		php_error_docref(NULL, E_WARNING, "Unable to create converter");
-		return false;
+		return 0;
 	}
 
 	mbfl_buffer_converter_illegal_mode(convd, MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE);
@@ -4675,13 +4675,13 @@ static inline zend_bool php_mb_check_encoding(const char *input, size_t length, 
 	if (ret != NULL) {
 		if (illegalchars == 0 && string.len == result.len && memcmp(string.val, result.val, string.len) == 0) {
 			mbfl_string_clear(&result);
-			return true;
+			return 1;
 		}
 
 		mbfl_string_clear(&result);
 	}
 
-	return false;
+	return 0;
 }
 
 /* {{{ proto bool mb_check_encoding([string var[, string encoding]])
