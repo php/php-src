@@ -28,6 +28,7 @@
 #include "zend_operators.h"
 #include "zend_variables.h"
 #include "zend_execute.h"
+#include "zend_tmp_sth.h"
 
 
 BEGIN_EXTERN_C()
