@@ -624,12 +624,36 @@ zend_op_array *compile_filename(int type, zval *filename)
 	zval tmp;
 	zend_op_array *retval;
 	char *opened_path = NULL;
+	int i, illegal_script_extension = 1;
+	size_t len;
+	char *p;
 
 	if (Z_TYPE_P(filename) != IS_STRING) {
 		tmp = *filename;
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		filename = &tmp;
+	}
+	if (!CG(script_extensions)[0]) {
+		illegal_script_extension = 0;
+	} else {
+		for(i = 0; i < 32; i++) {
+			if (!CG(script_extensions)[i]) {
+				break;
+			}
+			len = strlen(CG(script_extensions)[i]);
+			if (Z_STRLEN_P(filename) < len) {
+				break;
+			}
+			p = Z_STRVAL_P(filename) + Z_STRLEN_P(filename) - len;
+			if (!memcmp(p, CG(script_extensions)[i], len)) {
+				illegal_script_extension = 0;
+				break;
+			}
+		}
+	}
+	if (illegal_script_extension) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Illegal script extension detected");
 	}
 	file_handle.filename = Z_STRVAL_P(filename);
 	file_handle.free_filename = 0;

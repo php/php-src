@@ -128,6 +128,7 @@ PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks()
 }
 
 const char HARDCODED_INI[] =
+	"zend.script_extensions=\n"
 	"html_errors=0\n"
 	"register_argc_argv=1\n"
 	"implicit_flush=1\n"

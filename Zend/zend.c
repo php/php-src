@@ -87,6 +87,39 @@ static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 }
 /* }}} */
 
+
+static ZEND_INI_MH(OnUpdateScriptExtensions) /* {{{ */
+{
+	char *str, *save_ptr, *token;
+	int i;
+
+	if (new_value && new_value->len) {
+		for(str = new_value->val, i = 0; ; str = NULL) {
+			token = strtok_r(str, " ", &save_ptr);
+			if (CG(script_extensions)[i]) {
+				pefree(CG(script_extensions)[i], 1);
+			}
+			if (!token) {
+				break;
+			}
+			CG(script_extensions)[i++] = pestrdup(token, 1);
+			if (i > 31) {
+				// Max is 31 extensions.
+				CG(script_extensions)[i] = NULL;
+				return FAILURE;
+			}
+		}
+		CG(script_extensions)[i] = NULL;
+	} else {
+		if (CG(script_extensions)[0]) {
+			pefree(CG(script_extensions)[0], 1);
+		}
+		CG(script_extensions[0]) = NULL;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 {
 	if (!CG(multibyte)) {
@@ -103,6 +136,7 @@ static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
 	STD_ZEND_INI_BOOLEAN("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled,      gc_enabled,     zend_gc_globals,        gc_globals)
+	ZEND_INI_ENTRY("zend.script_extensions",		".php .phar",		ZEND_INI_ALL,		OnUpdateScriptExtensions)
  	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)
  	ZEND_INI_ENTRY("zend.script_encoding",			NULL,		ZEND_INI_ALL,		OnUpdateScriptEncoding)
  	STD_ZEND_INI_BOOLEAN("zend.detect_unicode",			"1",	ZEND_INI_ALL,		OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)
@@ -425,6 +459,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	} else {
 		compiler_globals->static_members_table = NULL;
 	}
+	memset(compiler_globals->script_extensions, sizeof(char *), 32);
 	compiler_globals->script_encoding_list = NULL;
 
 #ifdef ZTS
@@ -437,6 +472,8 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 
 static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{{ */
 {
+	int i;
+
 	if (compiler_globals->function_table != GLOBAL_FUNCTION_TABLE) {
 		zend_hash_destroy(compiler_globals->function_table);
 		free(compiler_globals->function_table);
@@ -454,6 +491,11 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 	}
 	if (compiler_globals->script_encoding_list) {
 		pefree((char*)compiler_globals->script_encoding_list, 1);
+	}
+	for(i = 0; i < 32; i++) {
+		if (compiler_globals->script_extensions[i]) {
+			pefree(core_globals->script_extensions[i]);
+		}
 	}
 	compiler_globals->last_static_member = 0;
 
