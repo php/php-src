@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #68986 (pointer returned by php_stream_fopen_temporary_file
     not validated in memory.c). (nayana at ddproperty dot com)
 
+- cURL:
+  . Fixed bug #69088 (PHP_MINIT_FUNCTION does not fully initialize cURL on
+    Win32). (Grant Pannell)
+
 - ODBC:
   . Fixed bug #68964 (Allowed memory size exhausted with odbc_exec). (Anatol)
 
