@@ -639,7 +639,7 @@ zend_op_array *compile_filename(int type, zval *filename)
 	if (!CG(script_extensions)[0]) {
 		illegal_script_extension = 0;
 	} else {
-		for(i = 0; i < 32; i++) {
+		for(i = 0; i < ZEND_MAX_SCRIPT_EXTENSIONS; i++) {
 			if (!CG(script_extensions)[i]) {
 				break;
 			}

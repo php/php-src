@@ -103,9 +103,7 @@ static ZEND_INI_MH(OnUpdateScriptExtensions) /* {{{ */
 				break;
 			}
 			CG(script_extensions)[i++] = pestrdup(token, 1);
-			if (i > 31) {
-				// Max is 31 extensions.
-				CG(script_extensions)[i] = NULL;
+			if (i >= ZEND_MAX_SCRIPT_EXTENSIONS) {
 				return FAILURE;
 			}
 		}
@@ -459,7 +457,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	} else {
 		compiler_globals->static_members_table = NULL;
 	}
-	memset(compiler_globals->script_extensions, 0, sizeof(char *) * 32);
+	memset(compiler_globals->script_extensions, 0, sizeof(char *) * ZEND_MAX_SCRIPT_EXTENSIONS);
 	compiler_globals->script_encoding_list = NULL;
 
 #ifdef ZTS
@@ -492,7 +490,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 	if (compiler_globals->script_encoding_list) {
 		pefree((char*)compiler_globals->script_encoding_list, 1);
 	}
-	for(i = 0; i < 32; i++) {
+	for(i = 0; i < ZEND_MAX_SCRIPT_EXTENSIONS; i++) {
 		if (compiler_globals->script_extensions[i]) {
 			pefree(core_globals->script_extensions[i], 1);
 		}

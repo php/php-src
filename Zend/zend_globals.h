@@ -51,7 +51,7 @@ END_EXTERN_C()
 #endif
 
 #define SYMTABLE_CACHE_SIZE 32
-
+#define ZEND_MAX_SCRIPT_EXTENSIONS 32
 
 #include "zend_compile.h"
 
@@ -130,7 +130,7 @@ struct _zend_compiler_globals {
 
 	HashTable interned_strings;
 
-	char *script_extensions[32];
+	char *script_extensions[ZEND_MAX_SCRIPT_EXTENSIONS];
 
 	const zend_encoding **script_encoding_list;
 	size_t script_encoding_list_size;
