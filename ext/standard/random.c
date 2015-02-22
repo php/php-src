@@ -29,13 +29,6 @@
 # include "win32/winutil.h"
 #endif
 
-// Big thanks to @ircmaxell for the help on this bit
-union rand_long_buffer {
-	char buffer[8];
-	long number;
-};
-
-// Copy/pasted from mcrypt.c
 static int php_random_bytes(void *bytes, size_t size)
 {
 	int n = 0;
@@ -79,7 +72,7 @@ static int php_random_bytes(void *bytes, size_t size)
 	return SUCCESS;
 }
 
-/* {{{ proto string random_bytes(int bytes)
+/* {{{ proto string random_bytes(int length)
 Return an arbitrary length of pseudo-random bytes as binary string */
 PHP_FUNCTION(random_bytes)
 {
@@ -90,8 +83,8 @@ PHP_FUNCTION(random_bytes)
 		return;
 	}
 
-	if (size <= 0 || size >= INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Cannot genrate a random string with a size of less than 1 or greater than %d", INT_MAX);
+	if (size < 1) {
+		php_error_docref(NULL, E_WARNING, "Length must be greater than 0");
 		RETURN_FALSE;
 	}
 
@@ -108,44 +101,46 @@ PHP_FUNCTION(random_bytes)
 }
 /* }}} */
 
-/* {{{ proto int random_int(int maximum)
+/* {{{ proto int random_int(int max)
 Return an arbitrary pseudo-random integer */
 PHP_FUNCTION(random_int)
 {
-	zend_long maximum;
-	zend_long size;
-	size_t i;
+	zend_long max = ZEND_LONG_MAX;
+	zend_long limit;
+	zend_long result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &maximum) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &max) == FAILURE) {
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
-		maximum = INT_MAX;
-	}
-
-	if (maximum <= 0 || maximum > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Cannot use maximum less than 1 or greater than %d", INT_MAX);
+	if (max <= 0 || max > ZEND_LONG_MAX) {
+		php_error_docref(NULL, E_WARNING, "Cannot use maximum less than 1 or greater than %d", ZEND_LONG_MAX);
 		RETURN_FALSE;
 	}
 
-	long range = (long) maximum; // @todo Support min?
-
-	// Big thanks to @ircmaxell for the help on this bit
-	union rand_long_buffer value;
-	long result;
-	int bits = (int) (log((double) range) / log(2.0)) + 1;
-	int bytes = MAX(ceil(bits / 8), 1);
-	long mask = (long) pow(2.0, (double) bits) - 1;
-
-	do {
-		if (php_random_bytes(&value.buffer, 8) == FAILURE) {
+	// Special case so we can return a range inclusive of the upper bound
+	if (max == ZEND_LONG_MAX) {
+		if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
 			return;
 		}
-		result = value.number & mask;
-	} while (result > maximum);
+		RETURN_LONG(result & ZEND_LONG_MAX);
+	}
 
-	RETURN_LONG(result);
+	// Increment the max so the range is inclusive of max
+	max++;
+
+	// Ceiling under which ZEND_LONG_MAX % max == 0
+	limit = ZEND_LONG_MAX - (ZEND_LONG_MAX % max) - 1;
+
+	// Discard numbers over the limit to avoid modulo bias
+	do {
+		if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
+			return;
+		}
+		result &= ZEND_LONG_MAX;
+	} while (result > limit);
+
+	RETURN_LONG(result % max);
 }
 /* }}} */
 
