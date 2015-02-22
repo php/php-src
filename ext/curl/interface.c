@@ -1239,7 +1239,7 @@ PHP_MINIT_FUNCTION(curl)
 	gcry_control(GCRYCTL_SET_THREAD_CBS, &php_curl_gnutls_tsl);
 #endif
 
-	if (curl_global_init(CURL_GLOBAL_SSL) != CURLE_OK) {
+	if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
 		return FAILURE;
 	}
 
