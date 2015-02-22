@@ -3,7 +3,7 @@ Bug #35229 (call_user_func() crashes when argument stack is nearly full)
 --FILE--
 <?php
 class test2 {
-  static function use_stack() {
+  static function use_stack(...$args) {
     echo "OK\n";
   }
 }

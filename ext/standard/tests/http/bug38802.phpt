@@ -39,31 +39,31 @@ function do_test($context_options) {
 
 echo "-- Test: follow all redirections --\n";
 
-do_test(array(), 4);
+do_test(array());
 
 echo "-- Test: fail after 2 redirections --\n";
 
-do_test(array('max_redirects' => 2), 2);
+do_test(array('max_redirects' => 2));
 
 echo "-- Test: fail at first redirection --\n";
 
-do_test(array('max_redirects' => 0), 1);
+do_test(array('max_redirects' => 0));
 
 echo "-- Test: fail at first redirection (2) --\n";
 
-do_test(array('max_redirects' => 1), 1);
+do_test(array('max_redirects' => 1));
 
 echo "-- Test: return at first redirection --\n";
 
-do_test(array('max_redirects' => 0, 'ignore_errors' => 1), 1);
+do_test(array('max_redirects' => 0, 'ignore_errors' => 1));
 
 echo "-- Test: return at first redirection (2) --\n";
 
-do_test(array('max_redirects' => 1, 'ignore_errors' => 1), 1);
+do_test(array('max_redirects' => 1, 'ignore_errors' => 1));
 
 echo "-- Test: return at second redirection --\n";
 
-do_test(array('max_redirects' => 2, 'ignore_errors' => 1), 2);
+do_test(array('max_redirects' => 2, 'ignore_errors' => 1));
 
 ?>
 --EXPECTF--

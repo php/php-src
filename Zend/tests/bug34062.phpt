@@ -3,7 +3,7 @@ Bug #34062 (Crash in catch block when many arguments are used)
 --FILE--
 <?php
 function f1() { throw new Exception; }
-function f2() { echo "here\n"; }
+function f2() { func_get_args(); echo "here\n"; }
 
 try {
       // Currently it's the minimum required number of zeros

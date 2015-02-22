@@ -8,12 +8,12 @@ function gen() {
     yield; // force generator
 }
 
-function function_with_3_args() {
+function function_with_3_args($a, $b, $c) {
     $gen = gen();
     $gen->rewind();
 }
 
-function function_with_4_args() {
+function function_with_4_args($a, $b, $c, $d) {
     function_with_3_args(4, 5, 6);
 }
 

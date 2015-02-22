@@ -9,6 +9,7 @@ function __autoload($class) {
     case "Attachment":
         eval(<<<'PHP'
 class Attachment extends File {
+    public function __construct($arg){}
 }
 PHP
     );

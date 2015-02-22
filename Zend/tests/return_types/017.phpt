@@ -7,7 +7,7 @@ Fully qualified classes in trait return types
 namespace FooSpace;
 
 trait Fooable {
-    function foo(): \Iterator {
+    function foo($arg): \Iterator {
         return new \EmptyIterator();
     }
 }

@@ -3,7 +3,7 @@ func_num_args with variable number of args
 --FILE--
 <?php
 
-function foo($a)
+function foo(...$a)
 {
 	var_dump(func_num_args());	
 }

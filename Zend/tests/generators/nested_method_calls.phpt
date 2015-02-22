@@ -4,13 +4,13 @@ Yield can be used in nested method calls
 <?php
 
 class A {
-    function foo() {
+    function foo($arg) {
         echo "Called A::foo\n";
     }
 }
 
 class B {
-    function foo() {
+    function foo($arg) {
         echo "Called B::foo\n";
     }
 }
