@@ -1074,12 +1074,36 @@ static zend_always_inline int zend_parse_arg_bool(zval *arg, zend_bool *dest, ze
 	if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 		*dest = 1;
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+#if STH_DISABLE_NULL_TO_BOOL
+		if (Z_TYPE_P(arg) == IS_NULL) {
+			if (check_null) {
+				*is_null = (zend_bool)1;
+			} else {
+				return 0;
+			}
+#else
 		if (check_null) {
 			*is_null = (Z_TYPE_P(arg) == IS_NULL);
+#endif
 		}
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
-		*dest = zend_is_true(arg);
+		if (0) {
+#if STH_DISABLE_INT_TO_BOOL	
+		} else if (Z_TYPE_P(arg) == IS_LONG) {
+			return 0;
+#endif
+#if STH_DISABLE_FLOAT_TO_BOOL	
+		} else if (Z_TYPE_P(arg) == IS_DOUBLE) {
+			return 0;
+#endif
+#if STH_DISABLE_STRING_TO_BOOL	
+		} else if (Z_TYPE_P(arg) == IS_DOUBLE) {
+			return 0;
+#endif
+		} else {
+			*dest = zend_is_true(arg);
+		}
 	} else {
 		return 0;
 	}
