@@ -1169,13 +1169,23 @@ static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, ze
 				return 0;
 			}
 		}
-	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
+	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		if (check_null) {
-			*is_null = (Z_TYPE_P(arg) == IS_NULL);
+			*is_null = (zend_bool)1;
+#if STH_DISABLE_NULL_TO_INT
+		} else {
+			return 0;
 		}
-		*dest = 0;
-	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
-		*dest = 1;
+#else
+		}
+	*dest = 0;
+#endif
+	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_TRUE)) {
+#if STH_DISABLE_BOOL_TO_INT
+		return 0;
+#else
+		*dest = ((Z_TYPE_P(arg) == IS_TRUE) ? 1 : 0);
+#endif	
 	} else {
 		return 0;
 	}
