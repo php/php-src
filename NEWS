@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - cURL:
   . Fixed bug #69088 (PHP_MINIT_FUNCTION does not fully initialize cURL on
     Win32). (Grant Pannell)
+  . Add CURLPROXY_SOCKS4A and CURLPROXY_SOCKS5_HOSTNAME constants if supported
+    by libcurl. (Linus Unneback).
 
 - ODBC:
   . Fixed bug #68964 (Allowed memory size exhausted with odbc_exec). (Anatol)
