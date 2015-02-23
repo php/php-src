@@ -96,6 +96,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifstopped, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
 
+#ifdef HAVE_WCONTINUED
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifcontinued, 0, 0, 1)
+	ZEND_ARG_INFO(0, status)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifsignaled, 0, 0, 1)
 	ZEND_ARG_INFO(0, status)
 ZEND_END_ARG_INFO()
@@ -158,7 +164,7 @@ const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_alarm,			arginfo_pcntl_alarm)
 	PHP_FE(pcntl_get_last_error,	arginfo_pcntl_void)
 	PHP_FALIAS(pcntl_errno, pcntl_get_last_error,	NULL)
-	PHP_FE(pcntl_strerror,		arginfo_pcntl_strerror)
+	PHP_FE(pcntl_strerror,		arginfo_pcntl_strerror) 
 #ifdef HAVE_GETPRIORITY
 	PHP_FE(pcntl_getpriority,	arginfo_pcntl_getpriority)
 #endif
@@ -171,6 +177,9 @@ const zend_function_entry pcntl_functions[] = {
 #if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
 	PHP_FE(pcntl_sigwaitinfo,	arginfo_pcntl_sigwaitinfo)
 	PHP_FE(pcntl_sigtimedwait,	arginfo_pcntl_sigtimedwait)
+#endif
+#ifdef HAVE_WCONTINUED
+	PHP_FE(pcntl_wifcontinued,	arginfo_pcntl_wifcontinued)
 #endif
 	PHP_FE_END
 };
@@ -208,6 +217,9 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 #endif
 #ifdef WUNTRACED
 	REGISTER_LONG_CONSTANT("WUNTRACED",  (zend_long) WUNTRACED, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef HAVE_WCONTINUED
+	REGISTER_LONG_CONSTANT("WCONTINUED",  (zend_long) WCONTINUED, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	/* Signal Constants */
@@ -681,6 +693,24 @@ PHP_FUNCTION(pcntl_wifsignaled)
 	RETURN_FALSE;
 }
 /* }}} */
+/* {{{ proto bool pcntl_wifcontinued(int status)
+   Returns true if the child status code represents a process that was resumed due to a SIGCONT signal */
+PHP_FUNCTION(pcntl_wifcontinued)
+{
+#ifdef HAVE_WCONTINUED
+	zend_long status_word;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
+	       return;
+	}
+
+	if (WIFCONTINUED(status_word))
+		RETURN_TRUE;
+#endif
+	RETURN_FALSE;
+}
+/* }}} */
+
 
 /* {{{ proto int pcntl_wexitstatus(int status)
    Returns the status code of a child's exit */
