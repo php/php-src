@@ -90,10 +90,11 @@ static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateScriptExtensions) /* {{{ */
 {
-	char *str, *save_ptr, *token;
+	char *tmp, *str, *save_ptr, *token;
 	int i;
 
 	if (new_value && new_value->len) {
+		tmp = str = estrndup(new_value->val, new_value->len);
 		for(str = new_value->val, i = 0; ; str = NULL) {
 			token = strtok_r(str, " ", &save_ptr);
 			if (CG(script_extensions)[i]) {
@@ -104,9 +105,11 @@ static ZEND_INI_MH(OnUpdateScriptExtensions) /* {{{ */
 			}
 			CG(script_extensions)[i++] = pestrdup(token, 1);
 			if (i >= ZEND_MAX_SCRIPT_EXTENSIONS) {
+				efree(tmp);
 				return FAILURE;
 			}
 		}
+		efree(tmp);
 		CG(script_extensions)[i] = NULL;
 	} else {
 		if (CG(script_extensions)[0]) {
