@@ -692,7 +692,8 @@ END_EXTERN_C()
 	_(Z_EXPECTED_RESOURCE,	"resource") \
 	_(Z_EXPECTED_PATH,		"a valid path") \
 	_(Z_EXPECTED_OBJECT,	"object") \
-	_(Z_EXPECTED_DOUBLE,	"float")
+	_(Z_EXPECTED_DOUBLE,	"float") \
+	_(Z_EXPECTED_NULL,		"null")
 
 #define Z_EXPECTED_TYPE_ENUM(id, str) id,
 #define Z_EXPECTED_TYPE_STR(id, str)  str,
@@ -808,6 +809,17 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error);
 
 #define Z_PARAM_ARRAY_OR_OBJECT(dest, check_null, separate) \
 	Z_PARAM_ARRAY_OR_OBJECT_EX(dest, 0, 0)
+
+#define Z_PARAM_NULL_EX(separate) \
+		Z_PARAM_PROLOGUE(separate); \
+		if (UNEXPECTED(!zend_parse_arg_null(_arg))) { \
+			_expected_type = Z_EXPECTED_NULL; \
+			error_code = ZPP_ERROR_WRONG_ARG; \
+			break; \
+		}
+
+#define Z_PARAM_NULL() \
+	Z_PARAM_NULL_EX(0)
 
 /* old "b" */
 #define Z_PARAM_BOOL_EX(dest, is_null, check_null, separate) \
@@ -1048,6 +1060,11 @@ ZEND_API void zend_wrong_callback_error(int severity, int num, char *error);
 
 ZEND_API int parse_arg_object_to_str(zval *arg, zend_string **str, int type);
 ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null);
+
+static zend_always_inline int zend_parse_arg_null(zval *arg)
+{
+	return (EXPECTED(Z_TYPE_P(arg) == IS_NULL) ? 1 : 0);
+}
 
 static zend_always_inline int zend_parse_arg_bool(zval *arg, zend_bool *dest, zend_bool *is_null, int check_null)
 {
