@@ -492,7 +492,7 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 	}
 	for(i = 0; i < ZEND_MAX_SCRIPT_EXTENSIONS; i++) {
 		if (compiler_globals->script_extensions[i]) {
-			pefree(core_globals->script_extensions[i], 1);
+			pefree(compiler_globals->script_extensions[i], 1);
 		}
 	}
 	compiler_globals->last_static_member = 0;
