@@ -15,7 +15,7 @@ Exception::getMessage();
 --EXPECTF--
 bool(true)
 
-Strict Standards: Non-static method foo::bar() should not be called statically in %sbug47857.php on line %d
+Deprecated: Non-static method foo::bar() should not be called statically in %sbug47857.php on line %d
 ok
 bool(false)
 

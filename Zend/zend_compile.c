@@ -2021,6 +2021,7 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast) /* {{{ */
 
 		if (zend_string_equals_literal(name, "this")) {
 			CG(active_op_array)->this_var = result->u.op.var;
+			CG(active_op_array)->fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
 		return SUCCESS;
 	}
@@ -2169,6 +2170,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 
 	if (is_this_fetch(obj_ast)) {
 		obj_node.op_type = IS_UNUSED;
+		CG(active_op_array)->fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 	} else {
 		zend_delayed_compile_var(&obj_node, obj_ast, type);
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
@@ -2927,6 +2929,7 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 	if (is_this_fetch(obj_ast)) {
 		obj_node.op_type = IS_UNUSED;
+		CG(active_op_array)->fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 	} else {
 		zend_compile_expr(&obj_node, obj_ast);
 	}
