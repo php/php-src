@@ -250,7 +250,7 @@ PHP_FUNCTION(krsort)
 			}
 			return;
 		}
-		zend_error(E_WARNING, "krsort() expects parameter 1 to implement Sortable, object given");
+		zend_error(E_WARNING, "krsort() expects parameter 1 to be array, object given");
 		RETURN_FALSE;
 	}
 #endif
@@ -310,7 +310,7 @@ PHP_FUNCTION(ksort)
 			}
 			return;
 		}
-		zend_error(E_WARNING, "ksort() expects parameter 1 to implement Sortable, object given");
+		zend_error(E_WARNING, "ksort() expects parameter 1 to be array, object given");
 		RETURN_FALSE;
 	}
 #endif
@@ -494,7 +494,7 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 #else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/", &array) == FAILURE) {
 #endif
-		RETURN_FALSE;
+		return;
 	}
 
 #ifdef HAVE_SPL
@@ -516,20 +516,16 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 
 	if (Z_TYPE_P(array) == IS_OBJECT) {
 		zval retval;
+		const char *sort_function = fold_case ? "natcasesort" : "natsort";
 		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
-			if (fold_case) {
-				zend_call_method_with_0_params(array, NULL, NULL, "natcasesort", &retval);
-			}
-			else {
-				zend_call_method_with_0_params(array, NULL, NULL, "natsort", &retval);
-			}
+			zend_call_method_with_0_params(array, NULL, NULL, sort_function, &retval);
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				RETURN_ZVAL(&retval, 1, 0);
 			}
 			return;
 		}
-		zend_error(E_WARNING, "natsort() expects parameter 1 to implement Sortable, object given");
-		RETURN_FALSE;
+		zend_error(E_WARNING, "%s() expects parameter 1 to be array, object given", sort_function);
+		return;
 	}
 #endif
 }
@@ -588,7 +584,7 @@ PHP_FUNCTION(asort)
 			}
 			return;
 		}
-		zend_error(E_WARNING, "asort() expects parameter 1 to implement Sortable, object given");
+		zend_error(E_WARNING, "asort() expects parameter 1 to be array, object given");
 		RETURN_FALSE;
 	}
 #endif
@@ -632,7 +628,7 @@ PHP_FUNCTION(arsort)
 			}
 			return;
 		}
-		zend_error(E_WARNING, "arsort() expects parameter 1 to implement Sortable, object given");
+		zend_error(E_WARNING, "arsort() expects parameter 1 to be array, object given");
 		RETURN_FALSE;
 	}
 #endif
@@ -676,7 +672,7 @@ PHP_FUNCTION(sort)
 			}
 			return;
 		}
-		zend_error(E_WARNING, "sort() expects parameter 1 to implement Sortable, object given");
+		zend_error(E_WARNING, "sort() expects parameter 1 to be array, object given");
 		RETURN_FALSE;
 	}
 #endif
@@ -720,7 +716,7 @@ PHP_FUNCTION(rsort)
 			}
 			return;
 		}
-		zend_error(E_WARNING, "rsort() expects parameter 1 to implement Sortable, object given");
+		zend_error(E_WARNING, "rsort() expects parameter 1 to be array, object given");
 		RETURN_FALSE;
 	}
 #endif
@@ -852,8 +848,8 @@ PHP_FUNCTION(usort)
 			}
 			return;
 		}
-		zend_error(E_WARNING, "usort() expects parameter 1 to implement Sortable, object given");
-		RETURN_FALSE;
+		zend_error(E_WARNING, "usort() expects parameter 1 to be array, object given");
+		return;
 	}
 #endif
 }
@@ -924,8 +920,8 @@ PHP_FUNCTION(uasort)
 			}
 			return;
 		}
-		zend_error(E_WARNING, "uasort() expects parameter 1 to implement Sortable, object given");
-		RETURN_FALSE;
+		zend_error(E_WARNING, "uasort() expects parameter 1 to be array, object given");
+		return;
 	}
 #endif
 }
@@ -1039,8 +1035,8 @@ PHP_FUNCTION(uksort)
 			}
 			return;
 		}
-		zend_error(E_WARNING, "uksort() expects parameter 1 to implement Sortable, object given");
-		RETURN_FALSE;
+		zend_error(E_WARNING, "uksort() expects parameter 1 to be array, object given");
+		return;
 	}
 #endif
 }
