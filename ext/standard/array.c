@@ -220,16 +220,40 @@ PHP_FUNCTION(krsort)
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
 
+#ifdef HAVE_SPL
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/|l", &array, &sort_type) == FAILURE) {
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/|l", &array, &sort_type) == FAILURE) {
+#endif
 		RETURN_FALSE;
 	}
 
-	php_set_compare_func(sort_type);
+#ifdef HAVE_SPL
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+#endif
+		php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_reverse_key_compare, 0) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_reverse_key_compare, 0) == FAILURE) {
+			RETURN_FALSE;
+		}
+		RETURN_TRUE;
+#ifdef HAVE_SPL
+	}
+
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		zval retval, arg;
+		ZVAL_LONG(&arg, sort_type);
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+			zend_call_method_with_1_params(array, NULL, NULL, "krsort", &retval, &arg);
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				RETURN_ZVAL(&retval, 1, 0);
+			}
+			return;
+		}
+		zend_error(E_WARNING, "krsort() expects parameter 1 to implement Sortable, object given");
 		RETURN_FALSE;
 	}
-	RETURN_TRUE;
+#endif
 }
 /* }}} */
 
@@ -241,23 +265,55 @@ PHP_FUNCTION(ksort)
 	zend_long sort_type = PHP_SORT_REGULAR;
 
 #ifndef FAST_ZPP
+# ifdef HAVE_SPL
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/|l", &array, &sort_type) == FAILURE) {
+# else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/|l", &array, &sort_type) == FAILURE) {
+# endif
 		RETURN_FALSE;
 	}
 #else
+# ifdef HAVE_SPL
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_OR_OBJECT_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sort_type)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+# else
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+# endif
 #endif
 
-	php_set_compare_func(sort_type);
+#ifdef HAVE_SPL
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+#endif
+		php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_key_compare, 0) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_key_compare, 0) == FAILURE) {
+			RETURN_FALSE;
+		}
+		RETURN_TRUE;
+#ifdef HAVE_SPL
+	}
+
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		zval retval, arg;
+		ZVAL_LONG(&arg, sort_type);
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+			zend_call_method_with_1_params(array, NULL, NULL, "ksort", &retval, &arg);
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				RETURN_ZVAL(&retval, 1, 0);
+			}
+			return;
+		}
+		zend_error(E_WARNING, "ksort() expects parameter 1 to implement Sortable, object given");
 		RETURN_FALSE;
 	}
-	RETURN_TRUE;
+#endif
 }
 /* }}} */
 
@@ -433,21 +489,49 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 {
 	zval *array;
 
+#ifdef HAVE_SPL
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/", &array) == FAILURE) {
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/", &array) == FAILURE) {
-		return;
+#endif
+		RETURN_FALSE;
 	}
 
-	if (fold_case) {
-		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_case_compare, 0) == FAILURE) {
-			return;
+#ifdef HAVE_SPL
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+#endif
+		if (fold_case) {
+			if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_case_compare, 0) == FAILURE) {
+				return;
+			}
+		} else {
+			if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_compare, 0) == FAILURE) {
+				return;
+			}
 		}
-	} else {
-		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_natural_compare, 0) == FAILURE) {
-			return;
-		}
+
+		RETURN_TRUE;
+#ifdef HAVE_SPL
 	}
 
-	RETURN_TRUE;
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		zval retval;
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+			if (fold_case) {
+				zend_call_method_with_0_params(array, NULL, NULL, "natcasesort", &retval);
+			}
+			else {
+				zend_call_method_with_0_params(array, NULL, NULL, "natsort", &retval);
+			}
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				RETURN_ZVAL(&retval, 1, 0);
+			}
+			return;
+		}
+		zend_error(E_WARNING, "natsort() expects parameter 1 to implement Sortable, object given");
+		RETURN_FALSE;
+	}
+#endif
 }
 /* }}} */
 
@@ -474,16 +558,40 @@ PHP_FUNCTION(asort)
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
 
+#ifdef HAVE_SPL
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/|l", &array, &sort_type) == FAILURE) {
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/|l", &array, &sort_type) == FAILURE) {
+#endif
 		RETURN_FALSE;
 	}
 
-	php_set_compare_func(sort_type);
+#ifdef HAVE_SPL
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+#endif
+		php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_data_compare, 0) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_data_compare, 0) == FAILURE) {
+			RETURN_FALSE;
+		}
+		RETURN_TRUE;
+#ifdef HAVE_SPL
+	}
+
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		zval retval, arg;
+		ZVAL_LONG(&arg, sort_type);
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+			zend_call_method_with_1_params(array, NULL, NULL, "asort", &retval, &arg);
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				RETURN_ZVAL(&retval, 1, 0);
+			}
+			return;
+		}
+		zend_error(E_WARNING, "asort() expects parameter 1 to implement Sortable, object given");
 		RETURN_FALSE;
 	}
-	RETURN_TRUE;
+#endif
 }
 /* }}} */
 
@@ -494,16 +602,40 @@ PHP_FUNCTION(arsort)
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
 
+#ifdef HAVE_SPL
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/|l", &array, &sort_type) == FAILURE) {
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/|l", &array, &sort_type) == FAILURE) {
+#endif
 		RETURN_FALSE;
 	}
 
-	php_set_compare_func(sort_type);
+#ifdef HAVE_SPL
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+#endif
+		php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_reverse_data_compare, 0) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_reverse_data_compare, 0) == FAILURE) {
+			RETURN_FALSE;
+		}
+		RETURN_TRUE;
+#ifdef HAVE_SPL
+	}
+
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		zval retval, arg;
+		ZVAL_LONG(&arg, sort_type);
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+			zend_call_method_with_1_params(array, NULL, NULL, "arsort", &retval, &arg);
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				RETURN_ZVAL(&retval, 1, 0);
+			}
+			return;
+		}
+		zend_error(E_WARNING, "arsort() expects parameter 1 to implement Sortable, object given");
 		RETURN_FALSE;
 	}
-	RETURN_TRUE;
+#endif
 }
 /* }}} */
 
@@ -514,16 +646,40 @@ PHP_FUNCTION(sort)
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
 
+#ifdef HAVE_SPL
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/|l", &array, &sort_type) == FAILURE) {
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/|l", &array, &sort_type) == FAILURE) {
+#endif
 		RETURN_FALSE;
 	}
 
-	php_set_compare_func(sort_type);
+#ifdef HAVE_SPL
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+#endif
+		php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_data_compare, 1) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_data_compare, 1) == FAILURE) {
+			RETURN_FALSE;
+		}
+		RETURN_TRUE;
+#ifdef HAVE_SPL
+	}
+
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		zval retval, arg;
+		ZVAL_LONG(&arg, sort_type);
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+			zend_call_method_with_1_params(array, NULL, NULL, "sort", &retval, &arg);
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				RETURN_ZVAL(&retval, 1, 0);
+			}
+			return;
+		}
+		zend_error(E_WARNING, "sort() expects parameter 1 to implement Sortable, object given");
 		RETURN_FALSE;
 	}
-	RETURN_TRUE;
+#endif
 }
 /* }}} */
 
@@ -534,16 +690,40 @@ PHP_FUNCTION(rsort)
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
 
+#ifdef HAVE_SPL
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/|l", &array, &sort_type) == FAILURE) {
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/|l", &array, &sort_type) == FAILURE) {
+#endif
 		RETURN_FALSE;
 	}
 
-	php_set_compare_func(sort_type);
+#ifdef HAVE_SPL
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+#endif
+		php_set_compare_func(sort_type);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_reverse_data_compare, 1) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_reverse_data_compare, 1) == FAILURE) {
+			RETURN_FALSE;
+		}
+		RETURN_TRUE;
+#ifdef HAVE_SPL
+	}
+
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		zval retval, arg;
+		ZVAL_LONG(&arg, sort_type);
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+			zend_call_method_with_1_params(array, NULL, NULL, "rsort", &retval, &arg);
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				RETURN_ZVAL(&retval, 1, 0);
+			}
+			return;
+		}
+		zend_error(E_WARNING, "rsort() expects parameter 1 to implement Sortable, object given");
 		RETURN_FALSE;
 	}
-	RETURN_TRUE;
+#endif
 }
 /* }}} */
 
@@ -618,37 +798,64 @@ PHP_FUNCTION(usort)
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
 
+#ifdef HAVE_SPL
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/f", &array, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/f", &array, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
+#endif
 		PHP_ARRAY_CMP_FUNC_RESTORE();
 		return;
 	}
 
-	/* Increase reference counter, so the attempts to modify the array in user
-	 * comparison function will create a copy of array and won't affect the
-	 * original array. The fact of modification is detected using refcount
-	 * comparison. The result of sorting in such case is undefined and the
-	 * function returns FALSE.
-	 */
-	Z_ADDREF_P(array);
-	refcount = Z_REFCOUNT_P(array);
-	arr = Z_COUNTED_P(array);
+#ifdef HAVE_SPL
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+#endif
+		/* Increase reference counter, so the attempts to modify the array in user
+		 * comparison function will create a copy of array and won't affect the
+		 * original array. The fact of modification is detected using refcount
+		 * comparison. The result of sorting in such case is undefined and the
+		 * function returns FALSE.
+		 */
+		Z_ADDREF_P(array);
+		refcount = Z_REFCOUNT_P(array);
+		arr = Z_COUNTED_P(array);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 1) == FAILURE) {
-		RETVAL_FALSE;
-	} else {
-		if (refcount > Z_REFCOUNT_P(array)) {
-			php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
-			if (--GC_REFCOUNT(arr) <= 0) {
-				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
-			}
+		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 1) == FAILURE) {
 			RETVAL_FALSE;
 		} else {
-			Z_DELREF_P(array);
-			RETVAL_TRUE;
+			if (refcount > Z_REFCOUNT_P(array)) {
+				php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
+				if (--GC_REFCOUNT(arr) <= 0) {
+					_zval_dtor_func(arr ZEND_FILE_LINE_CC);
+				}
+				RETVAL_FALSE;
+			} else {
+				Z_DELREF_P(array);
+				RETVAL_TRUE;
+			}
 		}
+
+		PHP_ARRAY_CMP_FUNC_RESTORE();
+#ifdef HAVE_SPL
 	}
 
-	PHP_ARRAY_CMP_FUNC_RESTORE();
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		PHP_ARRAY_CMP_FUNC_RESTORE();
+		zval retval;
+		zval *cmp_function;
+
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+			zend_parse_parameters(ZEND_NUM_ARGS(), "A/z", &array, &cmp_function);
+			zend_call_method_with_1_params(array, NULL, NULL, "usort", &retval, cmp_function);
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				RETURN_ZVAL(&retval, 1, 0);
+			}
+			return;
+		}
+		zend_error(E_WARNING, "usort() expects parameter 1 to implement Sortable, object given");
+		RETURN_FALSE;
+	}
+#endif
 }
 /* }}} */
 
@@ -663,37 +870,64 @@ PHP_FUNCTION(uasort)
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
 
+#ifdef HAVE_SPL
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/f", &array, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/f", &array, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
+#endif
 		PHP_ARRAY_CMP_FUNC_RESTORE();
 		return;
 	}
 
-	/* Increase reference counter, so the attempts to modify the array in user
-	 * comparison function will create a copy of array and won't affect the
-	 * original array. The fact of modification is detected using refcount
-	 * comparison. The result of sorting in such case is undefined and the
-	 * function returns FALSE.
-	 */
-	Z_ADDREF_P(array);
-	refcount = Z_REFCOUNT_P(array);
-	arr = Z_COUNTED_P(array);
+#ifdef HAVE_SPL
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+#endif
+		/* Increase reference counter, so the attempts to modify the array in user
+		 * comparison function will create a copy of array and won't affect the
+		 * original array. The fact of modification is detected using refcount
+		 * comparison. The result of sorting in such case is undefined and the
+		 * function returns FALSE.
+		 */
+		Z_ADDREF_P(array);
+		refcount = Z_REFCOUNT_P(array);
+		arr = Z_COUNTED_P(array);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 0) == FAILURE) {
-		RETVAL_FALSE;
-	} else {
-		if (refcount > Z_REFCOUNT_P(array)) {
-			php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
-			if (--GC_REFCOUNT(arr) <= 0) {
-				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
-			}
+		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_compare, 0) == FAILURE) {
 			RETVAL_FALSE;
 		} else {
-			Z_DELREF_P(array);
-			RETVAL_TRUE;
+			if (refcount > Z_REFCOUNT_P(array)) {
+				php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
+				if (--GC_REFCOUNT(arr) <= 0) {
+					_zval_dtor_func(arr ZEND_FILE_LINE_CC);
+				}
+				RETVAL_FALSE;
+			} else {
+				Z_DELREF_P(array);
+				RETVAL_TRUE;
+			}
 		}
+
+		PHP_ARRAY_CMP_FUNC_RESTORE();
+#ifdef HAVE_SPL
 	}
 
-	PHP_ARRAY_CMP_FUNC_RESTORE();
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		PHP_ARRAY_CMP_FUNC_RESTORE();
+		zval retval;
+		zval *cmp_function;
+
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+			zend_parse_parameters(ZEND_NUM_ARGS(), "A/z", &array, &cmp_function);
+			zend_call_method_with_1_params(array, NULL, NULL, "uasort", &retval, cmp_function);
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				RETURN_ZVAL(&retval, 1, 0);
+			}
+			return;
+		}
+		zend_error(E_WARNING, "uasort() expects parameter 1 to implement Sortable, object given");
+		RETURN_FALSE;
+	}
+#endif
 }
 /* }}} */
 
@@ -751,37 +985,64 @@ PHP_FUNCTION(uksort)
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
 
+#ifdef HAVE_SPL
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/f", &array, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/f", &array, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
+#endif
 		PHP_ARRAY_CMP_FUNC_RESTORE();
 		return;
 	}
 
-	/* Increase reference counter, so the attempts to modify the array in user
-	 * comparison function will create a copy of array and won't affect the
-	 * original array. The fact of modification is detected using refcount
-	 * comparison. The result of sorting in such case is undefined and the
-	 * function returns FALSE.
-	 */
-	Z_ADDREF_P(array);
-	refcount = Z_REFCOUNT_P(array);
-	arr = Z_COUNTED_P(array);
+#ifdef HAVE_SPL
+	if (Z_TYPE_P(array) == IS_ARRAY) {
+#endif
+		/* Increase reference counter, so the attempts to modify the array in user
+		 * comparison function will create a copy of array and won't affect the
+		 * original array. The fact of modification is detected using refcount
+		 * comparison. The result of sorting in such case is undefined and the
+		 * function returns FALSE.
+		 */
+		Z_ADDREF_P(array);
+		refcount = Z_REFCOUNT_P(array);
+		arr = Z_COUNTED_P(array);
 
-	if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_key_compare, 0) == FAILURE) {
-		RETVAL_FALSE;
-	} else {
-		if (refcount > Z_REFCOUNT_P(array)) {
-			php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
-			if (--GC_REFCOUNT(arr) <= 0) {
-				_zval_dtor_func(arr ZEND_FILE_LINE_CC);
-			}
+		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_user_key_compare, 0) == FAILURE) {
 			RETVAL_FALSE;
 		} else {
-			Z_DELREF_P(array);
-			RETVAL_TRUE;
+			if (refcount > Z_REFCOUNT_P(array)) {
+				php_error_docref(NULL, E_WARNING, "Array was modified by the user comparison function");
+				if (--GC_REFCOUNT(arr) <= 0) {
+					_zval_dtor_func(arr ZEND_FILE_LINE_CC);
+				}
+				RETVAL_FALSE;
+			} else {
+				Z_DELREF_P(array);
+				RETVAL_TRUE;
+			}
 		}
+
+		PHP_ARRAY_CMP_FUNC_RESTORE();
+#ifdef HAVE_SPL
 	}
 
-	PHP_ARRAY_CMP_FUNC_RESTORE();
+	if (Z_TYPE_P(array) == IS_OBJECT) {
+		PHP_ARRAY_CMP_FUNC_RESTORE();
+		zval retval;
+		zval *cmp_function;
+
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+			zend_parse_parameters(ZEND_NUM_ARGS(), "A/z", &array, &cmp_function);
+			zend_call_method_with_1_params(array, NULL, NULL, "uksort", &retval, cmp_function);
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				RETURN_ZVAL(&retval, 1, 0);
+			}
+			return;
+		}
+		zend_error(E_WARNING, "uksort() expects parameter 1 to implement Sortable, object given");
+		RETURN_FALSE;
+	}
+#endif
 }
 /* }}} */
 
