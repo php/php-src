@@ -5684,7 +5684,7 @@ PHP_FUNCTION(is_uploaded_file)
 /* }}} */
 
 
-static int php_check_filename_extensions(zend_string *filename) { /* {{{  */
+static int php_check_script_extensions(zend_string *filename) { /* {{{  */
 	int i;
 	int valid_extension = FAILURE;
 	char *p;
@@ -5730,7 +5730,7 @@ PHP_FUNCTION(move_uploaded_file)
 		return;
 	}
 
-	if (php_check_filename_extensions(new_path) == SUCCESS) {
+	if (php_check_script_extensions(new_path) == SUCCESS) {
 		php_error_docref(NULL, E_WARNING, "Cannot move PHP script '%s'", new_path->val);
 		RETURN_FALSE;
 	}
