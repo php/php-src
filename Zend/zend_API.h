@@ -1118,7 +1118,14 @@ static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, ze
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		*dest = Z_LVAL_P(arg);
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
-		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
+#if STH_DISABLE_FLOAT_TO_INT
+		return 0;
+#else
+		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg))
+#if STH_RESTRICT_FLOAT_TO_INT
+			|| (!zend_dval_is_integer(Z_DVAL_P(arg)))
+#endif
+			)) {
 			return 0;
 		}
 		if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg)))) {
@@ -1131,13 +1138,21 @@ static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, ze
 		} else {
 			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
 		}
+#endif
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
 		int type;
 
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
 			if (EXPECTED(type != 0)) {
-				if (UNEXPECTED(zend_isnan(d))) {
+#if STH_DISABLE_FLOAT_TO_INT
+				return 0;
+#else
+				if (UNEXPECTED(zend_isnan(d)
+#if STH_RESTRICT_FLOAT_TO_INT
+					|| (!zend_dval_is_integer(Z_DVAL_P(arg)))
+#endif
+				)) {
 					return 0;
 				}
 				if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(d))) {
@@ -1149,6 +1164,7 @@ static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, ze
 				} else {
 					*dest = zend_dval_to_lval(d);
 				}
+#endif
 			} else {
 				return 0;
 			}
