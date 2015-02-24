@@ -66,6 +66,7 @@ void optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				}
 				/* break missing intentionally */
 			case ZEND_NEW:
+			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
 			case ZEND_INIT_FCALL:

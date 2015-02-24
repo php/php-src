@@ -2672,16 +2672,17 @@ void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast) /
 void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array));
-	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-	SET_UNUSED(opline->op1);
 	if (name_node->op_type == IS_CONST && Z_TYPE(name_node->u.constant) == IS_STRING) {
+		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_func_name_literal(CG(active_op_array),
 			Z_STR(name_node->u.constant));
 		zend_alloc_cache_slot(opline->op2.constant);
 	} else {
+		opline->opcode = ZEND_INIT_DYNAMIC_CALL;
 		SET_NODE(opline->op2, name_node);
 	}
+	SET_UNUSED(opline->op1);
 
 	zend_compile_call_common(result, args_ast, NULL);
 }

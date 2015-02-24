@@ -180,6 +180,13 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 				zend_optimizer_add_literal(op_array, val);
 				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
 				break;
+			case ZEND_INIT_DYNAMIC_CALL:
+				opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot++;
+				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
+				zend_optimizer_add_literal(op_array, val);
+				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
+				break;
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
 				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));

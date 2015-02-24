@@ -150,7 +150,7 @@ const char *zend_vm_opcodes_map[171] = {
 	"ZEND_FE_RESET_RW",
 	"ZEND_FE_FETCH_RW",
 	"ZEND_FE_FREE",
-	NULL,
+	"ZEND_INIT_DYNAMIC_CALL",
 	NULL,
 	NULL,
 	NULL,
