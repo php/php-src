@@ -1113,7 +1113,7 @@ ZEND_API void zend_array_destroy(HashTable *ht)
 		/* In some rare cases destructors of regular arrays may be changed */
 		if (UNEXPECTED(ht->pDestructor != ZVAL_PTR_DTOR)) {
 			zend_hash_destroy(ht);
-			return;
+			goto free_ht;
 		}
 
 		p = ht->arData;
@@ -1139,9 +1139,11 @@ ZEND_API void zend_array_destroy(HashTable *ht)
 		zend_hash_iterators_remove(ht);
 		SET_INCONSISTENT(HT_DESTROYED);
 	} else if (EXPECTED(!(ht->u.flags & HASH_FLAG_INITIALIZED))) {
-		return;
+		goto free_ht;
 	}
 	pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
+free_ht:
+	FREE_HASHTABLE(ht);
 }
 
 ZEND_API void zend_hash_clean(HashTable *ht)
