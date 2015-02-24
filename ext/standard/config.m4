@@ -593,6 +593,11 @@ dnl
 AC_CHECK_HEADERS([atomic.h])
 
 dnl
+dnl Check for arc4random on BSD systems
+dnl
+AC_CHECK_DECLS([arc4random_buf])
+
+dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \

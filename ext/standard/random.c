@@ -40,6 +40,9 @@ static int php_random_bytes(void *bytes, size_t size)
 		return FAILURE;
 	}
 #else
+#if HAVE_DECL_ARC4RANDOM_BUF
+	arc4random_buf(bytes, size);
+#else
 	int    fd = -1;
 	size_t read_bytes = 0;
 #if HAVE_DEV_ARANDOM
@@ -47,8 +50,8 @@ static int php_random_bytes(void *bytes, size_t size)
 #else
 #if HAVE_DEV_URANDOM
 	fd = open("/dev/urandom", O_RDONLY);
-#endif
-#endif
+#endif // URANDOM
+#endif // ARANDOM
 	if (fd < 0) {
 		php_error_docref(NULL, E_WARNING, "Cannot open source device");
 		return FAILURE;
@@ -67,7 +70,8 @@ static int php_random_bytes(void *bytes, size_t size)
 		php_error_docref(NULL, E_WARNING, "Could not gather sufficient random data");
 		return FAILURE;
 	}
-#endif
+#endif // !ARC4RANDOM_BUF
+#endif // !WIN32
 
 	return SUCCESS;
 }
