@@ -364,7 +364,7 @@ $op1_free_unfetched = array(
 );
 
 $op2_free_unfetched = array(
-	"ANY"    => "FREE_UNDETCHED_OP(opline->op2_type, opline->op2.var)",
+	"ANY"    => "FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var)",
 	"TMP"    => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
 	"VAR"    => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
 	"CONST"  => "",
