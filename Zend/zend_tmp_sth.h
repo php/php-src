@@ -23,16 +23,16 @@ are not implemented yet :
 
 /* Restrict conversions from IS_NULL */
 
-#define STH_DISABLE_NULL_TO_BOOL	0
-#define STH_DISABLE_NULL_TO_INT		0
-#define STH_DISABLE_NULL_TO_FLOAT	0
-#define STH_DISABLE_NULL_TO_STRING	0
+#define STH_DISABLE_NULL_TO_BOOL	1
+#define STH_DISABLE_NULL_TO_INT		1
+#define STH_DISABLE_NULL_TO_FLOAT	1
+#define STH_DISABLE_NULL_TO_STRING	1
 
 /* Restrict conversions from IS_FALSE/IS_TRUE */
 
-#define STH_DISABLE_BOOL_TO_INT		0
-#define STH_DISABLE_BOOL_TO_FLOAT	0
-#define STH_DISABLE_BOOL_TO_STRING	0
+#define STH_DISABLE_BOOL_TO_INT		1
+#define STH_DISABLE_BOOL_TO_FLOAT	1
+#define STH_DISABLE_BOOL_TO_STRING	1
 
 /* Restrict conversions to bool */
 
@@ -47,7 +47,7 @@ are not implemented yet :
 /* Accepts null fractional part only.
    Ignored when STH_DISABLE_FLOAT_TO_INT is set */
 
-#define STH_RESTRICT_FLOAT_TO_INT	0
+#define STH_RESTRICT_FLOAT_TO_INT	1
 
 /*-------------------------------------------------------------------------*/
 #endif
