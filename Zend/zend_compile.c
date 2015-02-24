@@ -52,15 +52,16 @@
 
 static inline void zend_alloc_cache_slot(uint32_t literal) {
 	zend_op_array *op_array = CG(active_op_array);
-	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->last_cache_slot++;
+	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->cache_size;
+	op_array->cache_size += sizeof(void*);
 }
 
 #define POLYMORPHIC_CACHE_SLOT_SIZE 2
 
 static inline void zend_alloc_polymorphic_cache_slot(uint32_t literal) {
 	zend_op_array *op_array = CG(active_op_array);
-	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->last_cache_slot;
-	op_array->last_cache_slot += POLYMORPHIC_CACHE_SLOT_SIZE;
+	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->cache_size;
+	op_array->cache_size += POLYMORPHIC_CACHE_SLOT_SIZE * sizeof(void*);
 }
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);

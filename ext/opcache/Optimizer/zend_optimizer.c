@@ -129,7 +129,8 @@ void zend_optimizer_update_op1_const(zend_op_array *op_array,
 				case ZEND_NEW:
 					opline->op1.constant = zend_optimizer_add_literal(op_array, val);
 					zend_string_hash_val(Z_STR(ZEND_OP1_LITERAL(opline)));
-					Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->last_cache_slot++;
+					Z_CACHE_SLOT(op_array->literals[opline->op1.constant]) = op_array->cache_size;
+					op_array->cache_size += sizeof(void*);
 					zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 					zend_optimizer_add_literal(op_array, val);
 					zend_string_hash_val(Z_STR(op_array->literals[opline->op1.constant+1]));
@@ -154,7 +155,8 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 		zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 		opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 		zend_string_hash_val(Z_STR(ZEND_OP2_LITERAL(opline)));
-		Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot++;
+		Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
+		op_array->cache_size += sizeof(void*);
 		return;
 	}
 	opline->op2.constant = zend_optimizer_add_literal(op_array, val);
@@ -175,14 +177,16 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 			case ZEND_ADD_INTERFACE:
 			case ZEND_ADD_TRAIT:
 			case ZEND_INSTANCEOF:
-				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot++;
+				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
+				op_array->cache_size += sizeof(void*);
 				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 				zend_optimizer_add_literal(op_array, val);
 				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
 				break;
 			case ZEND_INIT_DYNAMIC_CALL:
 				opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot++;
+				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
+				op_array->cache_size += sizeof(void*);
 				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
 				zend_optimizer_add_literal(op_array, val);
 				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
@@ -207,8 +211,8 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 			case ZEND_POST_INC_OBJ:
 			case ZEND_POST_DEC_OBJ:
 			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
-				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot;
-				op_array->last_cache_slot += 2;
+				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
+				op_array->cache_size += 2 * sizeof(void*);
 				break;
 			case ZEND_ASSIGN_ADD:
 			case ZEND_ASSIGN_SUB:
@@ -222,8 +226,8 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 			case ZEND_ASSIGN_BW_AND:
 			case ZEND_ASSIGN_BW_XOR:
 				if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-					Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot;
-					op_array->last_cache_slot += 2;
+					Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->cache_size;
+					op_array->cache_size += 2 * sizeof(void*);
 				}
 				break;
 			case ZEND_OP_DATA:

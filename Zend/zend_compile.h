@@ -352,7 +352,7 @@ struct _zend_op_array {
 	int last_literal;
 	zval *literals;
 
-	int  last_cache_slot;
+	int  cache_size;
 	void **run_time_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];

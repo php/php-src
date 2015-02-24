@@ -1804,7 +1804,8 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	}
 
 	if (UNEXPECTED(!op_array->run_time_cache)) {
-		op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
+		op_array->run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
+		memset(op_array->run_time_cache, 0, op_array->cache_size);
 	}
 	EX_LOAD_RUN_TIME_CACHE(op_array);
 	EX_LOAD_LITERALS(op_array);
@@ -1829,7 +1830,8 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 	}
 
 	if (!op_array->run_time_cache) {
-		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+		op_array->run_time_cache = emalloc(op_array->cache_size);
+		memset(op_array->run_time_cache, 0, op_array->cache_size);
 	}
 	EX_LOAD_RUN_TIME_CACHE(op_array);
 	EX_LOAD_LITERALS(op_array);
@@ -1906,10 +1908,11 @@ static zend_always_inline void i_init_execute_data(zend_execute_data *execute_da
 
 	if (!op_array->run_time_cache) {
 		if (op_array->function_name) {
-			op_array->run_time_cache = zend_arena_calloc(&CG(arena), op_array->last_cache_slot, sizeof(void*));
+			op_array->run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
 		} else {
-			op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
+			op_array->run_time_cache = emalloc(op_array->cache_size);
 		}
+		memset(op_array->run_time_cache, 0, op_array->cache_size);
 	}
 	EX_LOAD_RUN_TIME_CACHE(op_array);
 	EX_LOAD_LITERALS(op_array);
