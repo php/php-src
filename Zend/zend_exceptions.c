@@ -747,31 +747,6 @@ void zend_register_default_exception(void) /* {{{ */
 	default_exception_ce = zend_register_internal_class_ex(&ce, base_exception_ce);
 	default_exception_ce->create_object = zend_default_exception_new;
 
-	/* A trick, to make visible prvate properties of BaseException */
-	ZEND_HASH_FOREACH_PTR(&default_exception_ce->properties_info, prop) {
-		if (prop->flags & ZEND_ACC_SHADOW) {
-			if (prop->name->len == sizeof("\0BaseException\0string")-1) {
-				prop->flags &= ~ZEND_ACC_SHADOW;
-				prop->flags |= ZEND_ACC_PRIVATE;
-				prop->ce = default_exception_ce;
-				zend_new_interned_string(
-					zend_string_init("\0Exception\0string", sizeof("\0Exception\0string")-1, 1));
-			} else if (prop->name->len == sizeof("\0BaseException\0trace")-1) {
-				prop->flags &= ~ZEND_ACC_SHADOW;
-				prop->flags |= ZEND_ACC_PRIVATE;
-				prop->ce = default_exception_ce;
-				zend_new_interned_string(
-					zend_string_init("\0Exception\0trace", sizeof("\0Exception\0trace")-1, 1));
-			} else if (prop->name->len == sizeof("\0BaseException\0previous")-1) {
-				prop->flags &= ~ZEND_ACC_SHADOW;
-				prop->flags |= ZEND_ACC_PRIVATE;
-				prop->ce = default_exception_ce;
-				zend_new_interned_string(
-					zend_string_init("\0Exception\0previous", sizeof("\0Exception\0previous")-1, 1));
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
-
 	INIT_CLASS_ENTRY(ce, "ErrorException", error_exception_functions);
 	error_exception_ce = zend_register_internal_class_ex(&ce, default_exception_ce);
 	error_exception_ce->create_object = zend_error_exception_new;
