@@ -46,7 +46,6 @@ ZEND_API void _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 				GC_TYPE(arr) = IS_NULL;
 				GC_REMOVE_FROM_BUFFER(arr);
 				zend_array_destroy(arr);
-				efree_size(arr, sizeof(zend_array));
 				break;
 			}
 		case IS_CONSTANT_AST: {
@@ -102,7 +101,6 @@ ZEND_API void _zval_dtor_func_for_ptr(zend_refcounted *p ZEND_FILE_LINE_DC)
 				GC_TYPE(arr) = IS_NULL;
 				GC_REMOVE_FROM_BUFFER(arr);
 				zend_array_destroy(arr);
-				efree_size(arr, sizeof(zend_array));
 				break;
 			}
 		case IS_CONSTANT_AST: {
