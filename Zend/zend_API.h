@@ -1098,7 +1098,7 @@ static zend_always_inline int zend_parse_arg_bool(zval *arg, zend_bool *dest, ze
 			return 0;
 #endif
 #if STH_DISABLE_STRING_TO_BOOL	
-		} else if (Z_TYPE_P(arg) == IS_DOUBLE) {
+		} else if (Z_TYPE_P(arg) == IS_STRING) {
 			return 0;
 #endif
 		} else {
