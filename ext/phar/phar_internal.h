@@ -197,7 +197,7 @@ ZEND_EXTERN_MODULE_GLOBALS(phar)
 #ifdef ZTS
 #	include "TSRM.h"
 #   ifdef COMPILE_DL_PHAR
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #   endif
 #	define PHAR_G(v) ZEND_TSRMG(phar_globals_id, zend_phar_globals *, v)
 #	define PHAR_GLOBALS ((zend_phar_globals *) (*((void ***) ZEND_TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(phar_globals_id)])

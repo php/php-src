@@ -115,7 +115,7 @@ PHP_LIBXML_API void php_libxml_shutdown(void);
 #ifdef ZTS
 #define LIBXML(v) ZEND_TSRMG(libxml_globals_id, zend_libxml_globals *, v)
 #ifdef COMPILE_DL_LIBXML
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define LIBXML(v) (libxml_globals.v)

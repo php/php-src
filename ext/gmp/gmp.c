@@ -215,7 +215,7 @@ zend_module_entry gmp_module_entry = {
 
 #ifdef COMPILE_DL_GMP
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(gmp)
 #endif
@@ -630,7 +630,7 @@ exit:
 static ZEND_GINIT_FUNCTION(gmp)
 {
 #if defined(COMPILE_DL_GMP) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	gmp_globals->rand_initialized = 0;
 }

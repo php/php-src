@@ -33,7 +33,7 @@ ZEND_END_MODULE_GLOBALS(sqlite3)
 #ifdef ZTS
 # define SQLITE3G(v) TSRMG(sqlite3_globals_id, zend_sqlite3_globals *, v)
 # ifdef COMPILE_DL_SQLITE3
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 # endif
 #else
 # define SQLITE3G(v) (sqlite3_globals.v)

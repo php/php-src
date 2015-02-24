@@ -168,9 +168,13 @@ TSRM_API void *tsrm_get_ls_cache(void);
 #define TSRMG(id, type, element)	(((type) (*((void ***) tsrm_get_ls_cache()))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
 
 #define TSRMG_STATIC(id, type, element)	(((type) (*((void ***) TSRMLS_CACHE))[TSRM_UNSHUFFLE_RSRC_ID(id)])->element)
-#define TSRMLS_CACHE_EXTERN extern TSRM_TLS void *TSRMLS_CACHE
-#define TSRMLS_CACHE_DEFINE TSRM_TLS void *TSRMLS_CACHE = NULL
-#define TSRMLS_CACHE_UPDATE if (!TSRMLS_CACHE) TSRMLS_CACHE = tsrm_get_ls_cache()
+#define TSRMLS_CACHE_EXTERN() extern TSRM_TLS void *TSRMLS_CACHE
+#define TSRMLS_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE = NULL
+#if ZEND_DEBUG
+#define TSRMLS_CACHE_UPDATE() TSRMLS_CACHE = tsrm_get_ls_cache()
+#else
+#define TSRMLS_CACHE_UPDATE() if (!TSRMLS_CACHE) TSRMLS_CACHE = tsrm_get_ls_cache()
+#endif
 #define TSRMLS_CACHE _tsrm_ls_cache
 
 /* BC only */
@@ -191,9 +195,9 @@ TSRM_API void *tsrm_get_ls_cache(void);
 #define TSRMLS_SET_CTX(ctx)
 
 #define TSRMG_STATIC(id, type, element)
-#define TSRMLS_CACHE_EXTERN
-#define TSRMLS_CACHE_DEFINE
-#define TSRMLS_CACHE_UPDATE
+#define TSRMLS_CACHE_EXTERN()
+#define TSRMLS_CACHE_DEFINE()
+#define TSRMLS_CACHE_UPDATE()
 #define TSRMLS_CACHE
 
 /* BC only */

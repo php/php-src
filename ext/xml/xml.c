@@ -63,7 +63,7 @@ ZEND_DECLARE_MODULE_GLOBALS(xml)
 /* {{{ dynamically loadable module stuff */
 #ifdef COMPILE_DL_XML
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(xml)
 #endif /* COMPILE_DL_XML */
@@ -294,7 +294,7 @@ static int le_xml_parser;
 static PHP_GINIT_FUNCTION(xml)
 {
 #if defined(COMPILE_DL_XML) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	xml_globals->default_encoding = (XML_Char*)"UTF-8";
 }

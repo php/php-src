@@ -134,7 +134,7 @@ static PHP_MINIT_FUNCTION(json)
 static PHP_GINIT_FUNCTION(json)
 {
 #if defined(COMPILE_DL_JSON) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	json_globals->encoder_depth = 0;
 	json_globals->error_code = 0;
@@ -165,7 +165,7 @@ zend_module_entry json_module_entry = {
 
 #ifdef COMPILE_DL_JSON
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(json)
 #endif

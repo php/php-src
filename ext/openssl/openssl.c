@@ -1351,14 +1351,15 @@ static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_reso
 	if (Z_TYPE_P(val) == IS_RESOURCE) {
 		/* is it an x509 resource ? */
 		void * what;
+		zend_resource *res = Z_RES_P(val);
 
-		what = zend_fetch_resource_ex(val, "OpenSSL X.509", le_x509);
+		what = zend_fetch_resource(res, "OpenSSL X.509", le_x509);
 		if (!what) {
 			return NULL;
 		}
 		/* this is so callers can decide if they should free the X509 */
 		if (resourceval) {
-			*resourceval = Z_RES_P(val);
+			*resourceval = res;
 			Z_ADDREF_P(val);
 		}
 		return (X509*)what;
@@ -1545,7 +1546,7 @@ cleanup:
 		efree(spkstr);
 	}
 
-	if (s->len <= 0) {
+	if (s && s->len <= 0) {
 		RETVAL_FALSE;
 	}
 
@@ -2762,11 +2763,12 @@ static X509_REQ * php_openssl_csr_from_zval(zval * val, int makeresource, zend_r
 	}
 	if (Z_TYPE_P(val) == IS_RESOURCE) {
 		void * what;
+		zend_resource *res = Z_RES_P(val);
 
-		what = zend_fetch_resource_ex(val, "OpenSSL X.509 CSR", le_csr);
+		what = zend_fetch_resource(res, "OpenSSL X.509 CSR", le_csr);
 		if (what) {
 			if (resourceval) {
-				*resourceval = Z_RES_P(val);
+				*resourceval = res;
 				Z_ADDREF_P(val);
 			}
 			return (X509_REQ*)what;
@@ -3219,20 +3221,21 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval * val, int public_key, char * p
 
 	if (Z_TYPE_P(val) == IS_RESOURCE) {
 		void * what;
+		zend_resource * res = Z_RES_P(val);
 
-		what = zend_fetch_resource2_ex(val, "OpenSSL X.509/key", le_x509, le_key);
+		what = zend_fetch_resource2(res, "OpenSSL X.509/key", le_x509, le_key);
 		if (!what) {
 			TMP_CLEAN;
 		}
 		if (resourceval) {
-			*resourceval = Z_RES_P(val);
+			*resourceval = res;
 			Z_ADDREF_P(val);
 		}
-		if (Z_RES_P(val)->type == le_x509) {
+		if (res->type == le_x509) {
 			/* extract key from cert, depending on public_key param */
 			cert = (X509*)what;
 			free_cert = 0;
-		} else if (Z_RES_P(val)->type == le_key) {
+		} else if (res->type == le_key) {
 			int is_priv;
 
 			is_priv = php_openssl_is_private_key((EVP_PKEY*)what);

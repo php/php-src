@@ -895,7 +895,7 @@ zend_module_entry intl_module_entry = {
 
 #ifdef COMPILE_DL_INTL
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE( intl )
 #endif
@@ -904,7 +904,7 @@ ZEND_GET_MODULE( intl )
 static PHP_GINIT_FUNCTION(intl)
 {
 #if defined(COMPILE_DL_INTL) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset( intl_globals, 0, sizeof(zend_intl_globals) );
 }

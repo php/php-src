@@ -180,6 +180,13 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 				zend_optimizer_add_literal(op_array, val);
 				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
 				break;
+			case ZEND_INIT_DYNAMIC_CALL:
+				opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+				Z_CACHE_SLOT(op_array->literals[opline->op2.constant]) = op_array->last_cache_slot++;
+				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
+				zend_optimizer_add_literal(op_array, val);
+				zend_string_hash_val(Z_STR(op_array->literals[opline->op2.constant+1]));
+				break;
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_STATIC_METHOD_CALL:
 				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
@@ -310,13 +317,35 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				 * usually terminated by ZEND_FREE that finally kills the value.
 				 */
 				case ZEND_CASE: {
-					zval old_val;
-					ZVAL_COPY_VALUE(&old_val, val);
-					zval_copy_ctor(val);
-					zend_optimizer_update_op1_const(op_array, opline, val);
-					ZVAL_COPY_VALUE(val, &old_val);
-					opline++;
-					continue;
+					zend_op *m, *n;
+					int brk = op_array->last_brk_cont;
+					while (brk--) {
+						if (op_array->brk_cont_array[brk].start <= (opline - op_array->opcodes) &&
+								op_array->brk_cont_array[brk].brk > (opline - op_array->opcodes)) {
+							break;
+						}
+					}
+					m = opline;
+					n = op_array->opcodes + op_array->brk_cont_array[brk].brk + 1;
+					while (m < n) {
+						if (ZEND_OP1_TYPE(m) == type &&
+								ZEND_OP1(m).var == var) {
+							if (m->opcode == ZEND_CASE) {
+								zval old_val;
+								ZVAL_COPY_VALUE(&old_val, val);
+								zval_copy_ctor(val);
+								zend_optimizer_update_op1_const(op_array, m, val);
+								ZVAL_COPY_VALUE(val, &old_val);
+							} else if (m->opcode == ZEND_FREE) {
+								MAKE_NOP(m);
+							} else {
+								ZEND_ASSERT(0);
+							}
+						}
+						m++;
+					}
+					zval_dtor(val);
+					return 1;
 				}
 				case ZEND_FREE:
 					MAKE_NOP(opline);

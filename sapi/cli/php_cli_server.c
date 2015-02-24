@@ -1302,7 +1302,7 @@ out:
 static int php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 {
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_UPDATE;
+ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	req->protocol_version = 0;
 	req->request_uri = NULL;

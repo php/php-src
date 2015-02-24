@@ -1227,7 +1227,7 @@ ZEND_FUNCTION(get_class_methods)
 			    zend_binary_strcasecmp(key->val, key->len, mptr->common.function_name->val, len) == 0) {
 
 				if (mptr->type == ZEND_USER_FUNCTION &&
-				    *mptr->op_array.refcount > 1 &&
+				    (!mptr->op_array.refcount || *mptr->op_array.refcount > 1) &&
 			    	 !same_name(key, mptr->common.function_name)) {
 					ZVAL_STR_COPY(&method_name, zend_find_alias_name(mptr->common.scope, key));
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
@@ -1936,7 +1936,9 @@ ZEND_FUNCTION(create_function)
 			zend_error(E_ERROR, "Unexpected inconsistency in create_function()");
 			RETURN_FALSE;
 		}
-		(*func->refcount)++;
+		if (func->refcount) {
+			(*func->refcount)++;
+		}
 		static_variables = func->static_variables;
 		func->static_variables = NULL;
 		zend_hash_str_del(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME)-1);

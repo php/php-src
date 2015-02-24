@@ -401,8 +401,8 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           json
-PRIMARY MAINTAINER:  Unknown
-MAINTENANCE:         Odd fixes
+PRIMARY MAINTAINER:  Jakub Zelenka <bukka@php.net>
+MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.2
 -------------------------------------------------------------------------------

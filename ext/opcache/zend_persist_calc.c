@@ -150,8 +150,13 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 	}
 
 	if (op_array->static_variables) {
-		ADD_DUP_SIZE(op_array->static_variables, sizeof(HashTable));
-		zend_hash_persist_calc(op_array->static_variables, zend_persist_zval_calc);
+		if (!zend_shared_alloc_get_xlat_entry(op_array->static_variables)) {
+			HashTable *old = op_array->static_variables;
+
+			ADD_DUP_SIZE(op_array->static_variables, sizeof(HashTable));
+			zend_hash_persist_calc(op_array->static_variables, zend_persist_zval_calc);
+			zend_shared_alloc_register_xlat_entry(old, op_array->static_variables);
+		}
 	}
 
 	if (zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
@@ -356,9 +361,19 @@ uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_scrip
 	ADD_DUP_SIZE(key, key_length + 1);
 	ADD_STRING(new_persistent_script->full_path);
 
+#ifdef __SSE2__
+	/* Align size to 64-byte boundary */
+	new_persistent_script->size = (new_persistent_script->size + 63) & ~63;
+#endif
+
 	zend_accel_persist_class_table_calc(&new_persistent_script->class_table);
 	zend_hash_persist_calc(&new_persistent_script->function_table, zend_persist_op_array_calc);
 	zend_persist_op_array_calc_ex(&new_persistent_script->main_op_array);
+
+#ifdef __SSE2__
+	/* Align size to 64-byte boundary */
+	new_persistent_script->arena_size = (new_persistent_script->arena_size + 63) & ~63;
+#endif
 
 	new_persistent_script->size += new_persistent_script->arena_size;
 
