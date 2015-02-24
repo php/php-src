@@ -754,20 +754,14 @@ void zend_register_default_exception(void) /* {{{ */
 				prop->flags &= ~ZEND_ACC_SHADOW;
 				prop->flags |= ZEND_ACC_PRIVATE;
 				prop->ce = default_exception_ce;
-				zend_new_interned_string(
-					zend_string_init("\0Exception\0string", sizeof("\0Exception\0string")-1, 1));
 			} else if (prop->name->len == sizeof("\0BaseException\0trace")-1) {
 				prop->flags &= ~ZEND_ACC_SHADOW;
 				prop->flags |= ZEND_ACC_PRIVATE;
 				prop->ce = default_exception_ce;
-				zend_new_interned_string(
-					zend_string_init("\0Exception\0trace", sizeof("\0Exception\0trace")-1, 1));
 			} else if (prop->name->len == sizeof("\0BaseException\0previous")-1) {
 				prop->flags &= ~ZEND_ACC_SHADOW;
 				prop->flags |= ZEND_ACC_PRIVATE;
 				prop->ce = default_exception_ce;
-				zend_new_interned_string(
-					zend_string_init("\0Exception\0previous", sizeof("\0Exception\0previous")-1, 1));
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
