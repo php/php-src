@@ -1241,7 +1241,15 @@ static zend_always_inline int zend_parse_arg_str(zval *arg, zend_string **dest, 
 		*dest = Z_STR_P(arg);
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_STRING)) {
 		if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
-			*dest = NULL;
+				*dest = NULL;
+#if STH_DISABLE_NULL_TO_STRING	
+		} else if (Z_TYPE_P(arg) == IS_NULL) {
+				return 0;
+#endif
+#if STH_DISABLE_BOOL_TO_STRING
+		} else if (UNEXPECTED(Z_TYPE_P(arg) <= IS_TRUE)) {
+			return 0;
+#endif
 		} else {
 			if (Z_COPYABLE_P(arg) && Z_REFCOUNT_P(arg) > 1) {
 				Z_DELREF_P(arg);
