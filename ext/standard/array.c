@@ -516,15 +516,19 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 
 	if (Z_TYPE_P(array) == IS_OBJECT) {
 		zval retval;
-		const char *sort_function = fold_case ? "natcasesort" : "natsort";
 		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
-			zend_call_method_with_0_params(array, NULL, NULL, sort_function, &retval);
+			if (fold_case) {
+				zend_call_method_with_0_params(array, NULL, NULL, "natcasesort", &retval);
+			}
+			else {
+				zend_call_method_with_0_params(array, NULL, NULL, "natsort", &retval);
+			}
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				RETURN_ZVAL(&retval, 1, 0);
 			}
 			return;
 		}
-		zend_error(E_WARNING, "%s() expects parameter 1 to be array, object given", sort_function);
+		zend_error(E_WARNING, "%s() expects parameter 1 to be array, object given", fold_case ? "natcasesort" : "natsort");
 		return;
 	}
 #endif
