@@ -1019,6 +1019,7 @@ PHP_FUNCTION(uksort)
 		}
 
 		PHP_ARRAY_CMP_FUNC_RESTORE();
+		return;
 #ifdef HAVE_SPL
 	}
 
@@ -1028,7 +1029,9 @@ PHP_FUNCTION(uksort)
 		zval *cmp_function;
 
 		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
-			zend_parse_parameters(ZEND_NUM_ARGS(), "A/z", &array, &cmp_function);
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/z", &array, &cmp_function) == FAILURE) {
+				return;
+			}
 			zend_call_method_with_1_params(array, NULL, NULL, "uksort", &retval, cmp_function);
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				RETURN_ZVAL(&retval, 1, 0);
