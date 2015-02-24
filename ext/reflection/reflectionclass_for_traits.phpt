@@ -13,7 +13,9 @@ var_dump($r->isCloneable());
 
 ?>
 --EXPECT--
-array(0) {
+array(1) {
+  [0]=>
+  string(6) "public"
 }
 bool(false)
 bool(false)
