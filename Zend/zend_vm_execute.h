@@ -1559,18 +1559,22 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 	zend_function *fbc;
 	zval *function_name, *func;
 
-	if (IS_CONST == IS_CONST && Z_TYPE_P(EX_CONSTANT(opline->op2)) == IS_STRING) {
-		function_name = (zval*)(EX_CONSTANT(opline->op2)+1);
-		if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+	if (IS_CONST == IS_CONST) {
+		if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 			fbc = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
-		} else if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(function_name))) == NULL)) {
-			SAVE_OPLINE();
-			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
 		} else {
-			fbc = Z_FUNC_P(func);
-			CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), fbc);
+			if (UNEXPECTED(Z_TYPE_P(EX_CONSTANT(opline->op2)) != IS_STRING)) {
+				goto init_fcall_complex;
+			}
+			function_name = (zval*)(EX_CONSTANT(opline->op2)+1);
+			if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(function_name))) == NULL)) {
+				SAVE_OPLINE();
+				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+			} else {
+				fbc = Z_FUNC_P(func);
+				CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), fbc);
+			}
 		}
-
 		EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 			fbc, opline->extended_value, NULL, NULL, EX(call));
 
@@ -1582,6 +1586,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 		zend_class_entry *called_scope;
 		zend_object *object;
 
+init_fcall_complex:
 		SAVE_OPLINE();
 		function_name = EX_CONSTANT(opline->op2);
 
@@ -1950,18 +1955,22 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 	zend_function *fbc;
 	zval *function_name, *func;
 
-	if (IS_CV == IS_CONST && Z_TYPE_P(EX_CONSTANT(opline->op2)) == IS_STRING) {
-		function_name = (zval*)(EX_CONSTANT(opline->op2)+1);
-		if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+	if (IS_CV == IS_CONST) {
+		if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 			fbc = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
-		} else if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(function_name))) == NULL)) {
-			SAVE_OPLINE();
-			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
 		} else {
-			fbc = Z_FUNC_P(func);
-			CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), fbc);
+			if (UNEXPECTED(Z_TYPE_P(EX_CONSTANT(opline->op2)) != IS_STRING)) {
+				goto init_fcall_complex;
+			}
+			function_name = (zval*)(EX_CONSTANT(opline->op2)+1);
+			if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(function_name))) == NULL)) {
+				SAVE_OPLINE();
+				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+			} else {
+				fbc = Z_FUNC_P(func);
+				CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), fbc);
+			}
 		}
-
 		EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 			fbc, opline->extended_value, NULL, NULL, EX(call));
 
@@ -1973,6 +1982,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 		zend_class_entry *called_scope;
 		zend_object *object;
 
+init_fcall_complex:
 		SAVE_OPLINE();
 		function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
@@ -2139,18 +2149,22 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMPVAR_HANDLER(ZEND_OPCOD
 	zend_function *fbc;
 	zval *function_name, *func;
 
-	if ((IS_TMP_VAR|IS_VAR) == IS_CONST && Z_TYPE_P(EX_CONSTANT(opline->op2)) == IS_STRING) {
-		function_name = (zval*)(EX_CONSTANT(opline->op2)+1);
-		if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)))) {
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+		if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2))))) {
 			fbc = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)));
-		} else if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(function_name))) == NULL)) {
-			SAVE_OPLINE();
-			zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
 		} else {
-			fbc = Z_FUNC_P(func);
-			CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), fbc);
+			if (UNEXPECTED(Z_TYPE_P(EX_CONSTANT(opline->op2)) != IS_STRING)) {
+				goto init_fcall_complex;
+			}
+			function_name = (zval*)(EX_CONSTANT(opline->op2)+1);
+			if (UNEXPECTED((func = zend_hash_find(EG(function_table), Z_STR_P(function_name))) == NULL)) {
+				SAVE_OPLINE();
+				zend_error_noreturn(E_ERROR, "Call to undefined function %s()", Z_STRVAL_P(EX_CONSTANT(opline->op2)));
+			} else {
+				fbc = Z_FUNC_P(func);
+				CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op2)), fbc);
+			}
 		}
-
 		EX(call) = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 			fbc, opline->extended_value, NULL, NULL, EX(call));
 
@@ -2162,6 +2176,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMPVAR_HANDLER(ZEND_OPCOD
 		zend_class_entry *called_scope;
 		zend_object *object;
 
+init_fcall_complex:
 		SAVE_OPLINE();
 		function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
