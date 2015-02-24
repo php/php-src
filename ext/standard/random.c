@@ -105,7 +105,7 @@ PHP_FUNCTION(random_bytes)
 }
 /* }}} */
 
-/* {{{ proto int random_int(int max)
+/* {{{ proto int random_int(int min, int max)
 Return an arbitrary pseudo-random integer */
 PHP_FUNCTION(random_int)
 {
@@ -115,12 +115,17 @@ PHP_FUNCTION(random_int)
 	zend_ulong umax;
 	zend_ulong result;
 
+	if (ZEND_NUM_ARGS() == 1) {
+		php_error_docref(NULL, E_WARNING, "A minimum and maximum value are expected, only minimum given");
+		RETURN_FALSE;
+	}
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &min, &max) == FAILURE) {
 		return;
 	}
 
 	if (min >= max) {
-		php_error_docref(NULL, E_WARNING, "Minimum value must be greater than the maximum value");
+		php_error_docref(NULL, E_WARNING, "Minimum value must be less than the maximum value");
 		RETURN_FALSE;
 	}
 
