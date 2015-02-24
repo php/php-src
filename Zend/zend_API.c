@@ -3915,7 +3915,7 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 	zend_string *name;
 
 	if (f->common.type != ZEND_USER_FUNCTION ||
-	    *(f->op_array.refcount) < 2 ||
+	    (f->op_array.refcount && *(f->op_array.refcount) < 2) ||
 	    !f->common.scope ||
 	    !f->common.scope->trait_aliases) {
 		return f->common.function_name;

@@ -890,7 +890,6 @@ static void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int ind
 
 static void zend_ast_export_ex(smart_str *str, zend_ast *ast, int priority, int indent)
 {
-	zval *zv;
 	zend_ast_decl *decl;
 	int p, pl, pr;
 	const char *op;

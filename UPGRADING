@@ -398,6 +398,8 @@ Other
   . Added \u{xxxxxx} Unicode Codepoint Escape Syntax for double-quoted strings
     and heredocs.
   . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did.
+  . Added the comparison operator (<=>), aka the spaceship operator.
+    (RFC: https://wiki.php.net/rfc/combined-comparison-operator)
 
 ========================================
 3. Changes in SAPI modules

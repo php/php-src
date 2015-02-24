@@ -236,7 +236,9 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 		zend_op_array *op_array_copy = (zend_op_array*)emalloc(sizeof(zend_op_array));
 		*op_array_copy = *op_array;
 
-		(*op_array->refcount)++;
+		if (op_array->refcount) {
+			(*op_array->refcount)++;
+		}
 		op_array->run_time_cache = NULL;
 		if (op_array->static_variables) {
 			ALLOC_HASHTABLE(op_array_copy->static_variables);

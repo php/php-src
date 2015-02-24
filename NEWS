@@ -34,6 +34,7 @@
   . Implemented FR #55467 (phpinfo: PHP Variables with $ and single quotes). (Kalle)
   . Fixed bug #55415 (php_info produces invalid anchor names). (Kalle, Johannes)
   . Added ?? operator. (Andrea)
+  . Added <=> operator. (Andrea)
   . Added \u{xxxxx} Unicode Codepoint Escape Syntax. (Andrea)
   . Fixed oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
   . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint and conversion error messages. (Andrea)
