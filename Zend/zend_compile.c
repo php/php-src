@@ -2316,6 +2316,50 @@ zend_bool zend_is_assign_to_self(zend_ast *var_ast, zend_ast *expr_ast) /* {{{ *
 }
 /* }}} */
 
+/* Detects if list($a, $b, $c) contains variable with given name */
+zend_bool zend_list_has_assign_to(zend_ast *list_ast, zend_string *name) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(list_ast);
+	uint32_t i;
+	for (i = 0; i < list->children; i++) {
+		zend_ast *var_ast = list->child[i];
+		if (!var_ast) {
+			continue;
+		}
+
+		/* Recursively check nested list()s */
+		if (var_ast->kind == ZEND_AST_LIST && zend_list_has_assign_to(var_ast, name)) {
+			return 1;
+		}
+
+		if (var_ast->kind == ZEND_AST_VAR && var_ast->child[0]->kind == ZEND_AST_ZVAL) {
+			zend_string *var_name = zval_get_string(zend_ast_get_zval(var_ast->child[0]));
+			zend_bool result = zend_string_equals(var_name, name);
+			zend_string_release(var_name);
+			if (result) {
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+/* }}} */
+
+/* Detects patterns like list($a, $b, $c) = $a */
+zend_bool zend_list_has_assign_to_self(zend_ast *list_ast, zend_ast *expr_ast) /* {{{ */
+{
+	/* Only check simple variables on the RHS, as only CVs cause issues with this. */
+	if (expr_ast->kind == ZEND_AST_VAR && expr_ast->child[0]->kind == ZEND_AST_ZVAL) {
+		zend_string *name = zval_get_string(zend_ast_get_zval(expr_ast->child[0]));
+		zend_bool result = zend_list_has_assign_to(list_ast, name);
+		zend_string_release(name);
+		return result;
+	}
+	return 0;
+}
+/* }}} */
+
 void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
@@ -2365,7 +2409,13 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_emit_op_data(&expr_node);
 			return;
 		case ZEND_AST_LIST:
-			zend_compile_expr(&expr_node, expr_ast);
+			if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
+				/* list($a, $b) = $a should evaluate the right $a first */
+				zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
+			} else {
+				zend_compile_expr(&expr_node, expr_ast);
+			}
+
 			zend_compile_list_assign(result, var_ast, &expr_node);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE();
@@ -2622,16 +2672,17 @@ void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast) /
 void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array));
-	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-	SET_UNUSED(opline->op1);
 	if (name_node->op_type == IS_CONST && Z_TYPE(name_node->u.constant) == IS_STRING) {
+		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_func_name_literal(CG(active_op_array),
 			Z_STR(name_node->u.constant));
 		zend_alloc_cache_slot(opline->op2.constant);
 	} else {
+		opline->opcode = ZEND_INIT_DYNAMIC_CALL;
 		SET_NODE(opline->op2, name_node);
 	}
+	SET_UNUSED(opline->op1);
 
 	zend_compile_call_common(result, args_ast, NULL);
 }

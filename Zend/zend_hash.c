@@ -1122,9 +1122,7 @@ ZEND_API void zend_array_destroy(HashTable *ht)
 
 		if (ht->u.flags & HASH_FLAG_PACKED) {
 			do {
-				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
-					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
-				}
+				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
 			} while (++p != end);
 		} else {
 			do {
