@@ -105,42 +105,49 @@ PHP_FUNCTION(random_bytes)
 Return an arbitrary pseudo-random integer */
 PHP_FUNCTION(random_int)
 {
+	zend_long min = ZEND_LONG_MIN;
 	zend_long max = ZEND_LONG_MAX;
-	zend_long limit;
-	zend_long result;
+	zend_ulong limit;
+	zend_ulong umax;
+	zend_ulong result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &max) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &min, &max) == FAILURE) {
 		return;
 	}
 
-	if (max <= 0 || max > ZEND_LONG_MAX) {
-		php_error_docref(NULL, E_WARNING, "Cannot use maximum less than 1 or greater than %d", ZEND_LONG_MAX);
+	if (min >= max) {
+		php_error_docref(NULL, E_WARNING, "Minimum value must be greater than the maximum value");
 		RETURN_FALSE;
 	}
 
-	// Special case so we can return a range inclusive of the upper bound
-	if (max == ZEND_LONG_MAX) {
-		if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
-			return;
-		}
-		RETURN_LONG(result & ZEND_LONG_MAX);
+	umax = max - min;
+
+	if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
+		return;
+	}
+
+	// Special case where no modulus is required
+	if (umax == ZEND_ULONG_MAX) {
+		RETURN_LONG((zend_long)result);
 	}
 
 	// Increment the max so the range is inclusive of max
-	max++;
+	umax++;
 
-	// Ceiling under which ZEND_LONG_MAX % max == 0
-	limit = ZEND_LONG_MAX - (ZEND_LONG_MAX % max) - 1;
-
-	// Discard numbers over the limit to avoid modulo bias
-	do {
-		if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
-			return;
+	// Powers of two are not biased
+	if (umax & ~umax != umax) {
+		// Ceiling under which ZEND_LONG_MAX % max == 0
+		limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
+	
+		// Discard numbers over the limit to avoid modulo bias
+		while (result > limit) {
+			if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
+				return;
+			}
 		}
-		result &= ZEND_LONG_MAX;
-	} while (result > limit);
+	}
 
-	RETURN_LONG(result % max);
+	RETURN_LONG((zend_long)((result % umax) + min));
 }
 /* }}} */
 
