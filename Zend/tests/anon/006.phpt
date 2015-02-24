@@ -1,5 +1,5 @@
 --TEST--
-testing anons inside namespaces
+testing anon classes inside namespaces
 --FILE--
 <?php
 namespace lone {
@@ -9,7 +9,6 @@ namespace lone {
 namespace {
     var_dump ($hello);
 }
-?>
 --EXPECTF--
 object(lone\class@%s)#1 (0) {
 }

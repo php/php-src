@@ -1,7 +1,5 @@
 --TEST--
 ReflectionClass::isAnonymous() method
---CREDITS--
-Phil Sturgeon <philstu@php.net>
 --FILE--
 <?php
 

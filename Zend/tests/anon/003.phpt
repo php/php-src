@@ -4,14 +4,13 @@ reusing anonymous classes
 <?php
 while (@$i++<10) {
     var_dump(new class($i) {
-        
+
         public function __construct($i) {
             $this->i = $i;
         }
     });
 }
-?>
---EXPECTF--	
+--EXPECTF--
 object(class@%s)#1 (1) {
   ["i"]=>
   int(1)
