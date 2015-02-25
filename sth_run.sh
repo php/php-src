@@ -1,11 +1,15 @@
 
 dir=$1
 
-make clean
-
+rsync -av --delete /K/work/Dev/_forked/php-src/ .
 cp $dir/zend_tmp_sth.h Zend
 
-make $MAKEFLAGS
+./buildconf
+../conf --disable-phar
+
+make clean
+make
 
 make test 2>&1 | tee $dir/test.log
+
 
