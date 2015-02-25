@@ -35,6 +35,8 @@
     parameters). (Laruence)
 
 - SPL:
+  . Fixed bug #69108 ("Segmentation fault" when (de)serializing
+    SplObjectStorage). (Laruence)
   . Fixed bug #68557 (RecursiveDirectoryIterator::seek(0) broken after 
     calling getChildren()). (Julien)
 
