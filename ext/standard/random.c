@@ -31,8 +31,6 @@
 
 static int php_random_bytes(void *bytes, size_t size)
 {
-	int n = 0;
-
 #if PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
@@ -57,6 +55,7 @@ static int php_random_bytes(void *bytes, size_t size)
 		return FAILURE;
 	}
 
+	size_t n = 0;
 	while (read_bytes < size) {
 		n = read(fd, bytes + read_bytes, size - read_bytes);
 		if (n < 0) {
@@ -96,7 +95,7 @@ PHP_FUNCTION(random_bytes)
 
 	if (php_random_bytes(bytes->val, size) == FAILURE) {
 		zend_string_release(bytes);
-		return;
+		RETURN_FALSE;
 	}
 
 	bytes->val[size] = '\0';
@@ -132,7 +131,7 @@ PHP_FUNCTION(random_int)
 	umax = max - min;
 
 	if (php_random_bytes(&result, sizeof(result)) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	// Special case where no modulus is required
