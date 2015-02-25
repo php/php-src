@@ -39,7 +39,17 @@ function b($b = "bad") {
 	return $b;
 }
 var_dump(b());
+
+function c() {
+	switch (PHP_OS) {
+		default: return "bad";
+		case PHP_OS: return "okey";
+	}
+}
+
+var_dump(c());
 ?>
 --EXPECT--
+string(4) "okey"
 string(4) "okey"
 string(4) "okey"
