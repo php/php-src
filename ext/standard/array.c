@@ -117,6 +117,7 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 	REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_NATURAL", PHP_SORT_NATURAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_FLAG_CASE", PHP_SORT_FLAG_CASE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SORT_FLAG_REVERSE", PHP_SORT_FLAG_REVERSE, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("CASE_LOWER", CASE_LOWER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CASE_UPPER", CASE_UPPER, CONST_CS | CONST_PERSISTENT);
@@ -143,7 +144,7 @@ PHP_MSHUTDOWN_FUNCTION(array) /* {{{ */
 
 static void php_set_compare_func(zend_long sort_type) /* {{{ */
 {
-	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
+	switch (sort_type & ~PHP_SORT_FLAG_BITS) {
 		case PHP_SORT_NUMERIC:
 			ARRAYG(compare_func) = numeric_compare_function;
 			break;
@@ -235,9 +236,9 @@ PHP_FUNCTION(krsort)
 
 	if (Z_TYPE_P(array) == IS_OBJECT) {
 		zval retval, arg;
-		ZVAL_LONG(&arg, sort_type);
-		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
-			zend_call_method_with_1_params(array, NULL, NULL, "krsort", &retval, &arg);
+		ZVAL_LONG(&arg, sort_type | PHP_SORT_FLAG_REVERSE);
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_SortableKeys)) {
+			zend_call_method_with_1_params(array, NULL, NULL, "ksort", &retval, &arg);
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				RETURN_ZVAL(&retval, 1, 0);
 			}
@@ -268,10 +269,15 @@ PHP_FUNCTION(ksort)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 #endif
 
+	// Safe guard against new reverse flag through bogus input.
+	if (sort_type >= PHP_SORT_FLAG_BITS || sort_type < 0) {
+		sort_type = sort_type & ~PHP_SORT_FLAG_REVERSE;
+	}
+
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		php_set_compare_func(sort_type);
 
-		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_key_compare, 0) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(array), (sort_type & PHP_SORT_FLAG_REVERSE) ? php_array_reverse_key_compare : php_array_key_compare, 0) == FAILURE) {
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
@@ -280,7 +286,7 @@ PHP_FUNCTION(ksort)
 	if (Z_TYPE_P(array) == IS_OBJECT) {
 		zval retval, arg;
 		ZVAL_LONG(&arg, sort_type);
-		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_SortableKeys)) {
 			zend_call_method_with_1_params(array, NULL, NULL, "ksort", &retval, &arg);
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				RETURN_ZVAL(&retval, 1, 0);
@@ -484,14 +490,10 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 	}
 
 	if (Z_TYPE_P(array) == IS_OBJECT) {
-		zval retval;
 		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
-			if (fold_case) {
-				zend_call_method_with_0_params(array, NULL, NULL, "natcasesort", &retval);
-			}
-			else {
-				zend_call_method_with_0_params(array, NULL, NULL, "natsort", &retval);
-			}
+			zval retval, arg;
+			ZVAL_LONG(&arg, PHP_SORT_NATURAL | (fold_case ? PHP_SORT_FLAG_CASE : 0));
+			zend_call_method_with_1_params(array, NULL, NULL, "sort", &retval, &arg);
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				RETURN_ZVAL(&retval, 1, 0);
 			}
@@ -530,10 +532,15 @@ PHP_FUNCTION(asort)
 		RETURN_FALSE;
 	}
 
+	// Safe guard against new reverse flag through bogus input.
+	if (sort_type >= PHP_SORT_FLAG_BITS || sort_type < 0) {
+		sort_type = sort_type & ~PHP_SORT_FLAG_REVERSE;
+	}
+
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		php_set_compare_func(sort_type);
 
-		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_data_compare, 0) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(array), (sort_type & PHP_SORT_FLAG_REVERSE) ? php_array_reverse_data_compare : php_array_data_compare, 0) == FAILURE) {
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
@@ -542,7 +549,7 @@ PHP_FUNCTION(asort)
 	if (Z_TYPE_P(array) == IS_OBJECT) {
 		zval retval, arg;
 		ZVAL_LONG(&arg, sort_type);
-		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_SortableAssoc)) {
 			zend_call_method_with_1_params(array, NULL, NULL, "asort", &retval, &arg);
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				RETURN_ZVAL(&retval, 1, 0);
@@ -577,9 +584,9 @@ PHP_FUNCTION(arsort)
 
 	if (Z_TYPE_P(array) == IS_OBJECT) {
 		zval retval, arg;
-		ZVAL_LONG(&arg, sort_type);
+		ZVAL_LONG(&arg, sort_type | PHP_SORT_FLAG_REVERSE);
 		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
-			zend_call_method_with_1_params(array, NULL, NULL, "arsort", &retval, &arg);
+			zend_call_method_with_1_params(array, NULL, NULL, "asort", &retval, &arg);
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				RETURN_ZVAL(&retval, 1, 0);
 			}
@@ -602,10 +609,15 @@ PHP_FUNCTION(sort)
 		RETURN_FALSE;
 	}
 
+	// Safe guard against new reverse flag through bogus input.
+	if (sort_type >= PHP_SORT_FLAG_BITS || sort_type < 0) {
+		sort_type = sort_type & ~PHP_SORT_FLAG_REVERSE;
+	}
+
 	if (Z_TYPE_P(array) == IS_ARRAY) {
 		php_set_compare_func(sort_type);
 
-		if (zend_hash_sort(Z_ARRVAL_P(array), php_array_data_compare, 1) == FAILURE) {
+		if (zend_hash_sort(Z_ARRVAL_P(array), (sort_type & PHP_SORT_FLAG_REVERSE) ? php_array_reverse_data_compare : php_array_data_compare, 1) == FAILURE) {
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
@@ -649,9 +661,9 @@ PHP_FUNCTION(rsort)
 
 	if (Z_TYPE_P(array) == IS_OBJECT) {
 		zval retval, arg;
-		ZVAL_LONG(&arg, sort_type);
+		ZVAL_LONG(&arg, sort_type | PHP_SORT_FLAG_REVERSE);
 		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
-			zend_call_method_with_1_params(array, NULL, NULL, "rsort", &retval, &arg);
+			zend_call_method_with_1_params(array, NULL, NULL, "sort", &retval, &arg);
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				RETURN_ZVAL(&retval, 1, 0);
 			}
@@ -837,7 +849,7 @@ PHP_FUNCTION(uasort)
 		zval retval;
 		zval *cmp_function;
 
-		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_SortableAssoc)) {
 			zend_parse_parameters(ZEND_NUM_ARGS(), "A/z", &array, &cmp_function);
 			zend_call_method_with_1_params(array, NULL, NULL, "uasort", &retval, cmp_function);
 			if (Z_TYPE(retval) != IS_UNDEF) {
@@ -945,7 +957,7 @@ PHP_FUNCTION(uksort)
 		zval retval;
 		zval *cmp_function;
 
-		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_SortableKeys)) {
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "A/z", &array, &cmp_function) == FAILURE) {
 				return;
 			}
@@ -4598,7 +4610,7 @@ PHP_FUNCTION(array_multisort)
 				parse_state[k] = 1;
 			}
 		} else if (Z_TYPE_P(arg) == IS_LONG) {
-			switch (Z_LVAL_P(arg) & ~PHP_SORT_FLAG_CASE) {
+			switch (Z_LVAL_P(arg) & ~PHP_SORT_FLAG_BITS) {
 				case PHP_SORT_ASC:
 				case PHP_SORT_DESC:
 					/* flag allowed here */

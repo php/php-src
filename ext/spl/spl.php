@@ -578,7 +578,7 @@ interface Countable
 }
 
 /** @ingroup SPL
- * @brief This Interface allows to hook into the global sort() functions.
+ * @brief This Interface allows to hook into the global Xsort() functions.
  * @since PHP 5.6
  */
 interface Sortable
@@ -587,46 +587,40 @@ interface Sortable
 	 */
 	function sort($sort_flags = SORT_REGULAR);
 
-	/** Sort the entries by values in reverse
+	/** Sort the entries by values using user defined function.
 	 */
-	function rsort($sort_flags = SORT_REGULAR);
+	function usort(mixed cmp_function, $sort_flags = SORT_REGULAR);
+}
 
+
+/** @ingroup SPL
+ * @brief This Interface allows to hook into the global XaXsort() functions.
+ * @since PHP 5.6
+ */
+interface SortableAssoc
+{
 	/** Sort the entries by values and maintain indexes.
 	 */
 	function asort($sort_flags = SORT_REGULAR);
 
-	/** Sort the entries by values in reverse and maintain indexes.
+	/** Sort the entries by values using user defined function and maintain index.
 	 */
-	function arsort($sort_flags = SORT_REGULAR);
+	function uasort(mixed cmp_function, $sort_flags = SORT_REGULAR);
+}
 
+/** @ingroup SPL
+ * @brief This Interface allows to hook into the global XkXsort() functions.
+ * @since PHP 5.6
+ */
+interface SortableKeys
+{
 	/** Sort the entries by key.
 	 */
 	function ksort($sort_flags = SORT_REGULAR);
 
-	/** Sort the entries by key in reverse.
-	 */
-	function krsort($sort_flags = SORT_REGULAR);
-
-	/** Sort the entries by values using user defined function.
-	 */
-	function usort(mixed cmp_function);
-
-	/** Sort the entries by values using user defined function and maintain index.
-	 */
-	function uasort(mixed cmp_function);
-
 	/** Sort the entries by key using user defined function.
 	 */
-	function uksort(mixed cmp_function);
-
-	/** Sort the entries by values using "natural order" algorithm.
-	 */
-	function natsort();
-
-	/** Sort the entries by values using case insensitive "natural order" algorithm.
-	 */
-	function natcasesort();
-
+	function uksort(mixed cmp_function, $sort_flags = SORT_REGULAR);
 }
 
 /** @ingroup ZendEngine
@@ -698,33 +692,17 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 
 	/** Sort the entries by values.
 	 */
-	function sort($sort_flags = SORT_REGULAR) {/**/}
-
-	/** Sort the entries by values in reverse
-	 */
-	function rsort($sort_flags = SORT_REGULAR) {/**/}
-
-	/** Sort the entries by values and maintain indexes.
-	 */
 	function asort($sort_flags = SORT_REGULAR) {/**/}
-
-	/** Sort the entries by values in reverse and maintain indexes.
-	 */
-	function arsort($sort_flags = SORT_REGULAR) {/**/}
 
 	/** Sort the entries by key.
 	 */
 	function ksort($sort_flags = SORT_REGULAR) {/**/}
 
-	/** Sort the entries by key in reverse.
-	 */
-	function krsort($sort_flags = SORT_REGULAR) {/**/}
-
 	/** Sort the entries by values using user defined function.
 	 */
 	function usort(mixed cmp_function) {/**/}
 
-	/** Sort the entries by values using user defined function and maintain index.
+	/** Sort the entries by values using user defined function.
 	 */
 	function uasort(mixed cmp_function) {/**/}
 
@@ -844,6 +822,10 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	/** Sort the entries by key.
 	 */
 	function ksort() {/**/}
+
+	/** Sort the entries by values using user defined function.
+	 */
+	function usort(mixed cmp_function) {/**/}
 
 	/** Sort the entries by values using user defined function.
 	 */
