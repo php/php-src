@@ -782,6 +782,7 @@ SPL_METHOD(SplObjectStorage, serialize)
 	INIT_PZVAL(&members);
 	Z_ARRVAL(members) = zend_std_get_properties(getThis() TSRMLS_CC);
 	Z_TYPE(members) = IS_ARRAY;
+	zend_hash_del(Z_ARRVAL(members), "\x00gcdata", sizeof("\x00gcdata"));
 	pmembers = &members;
 	php_var_serialize(&buf, &pmembers, &var_hash TSRMLS_CC); /* finishes the string */
 
