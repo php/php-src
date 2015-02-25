@@ -1742,7 +1742,7 @@ void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
  *                             +----------------------------------------+
  */
 
-static zend_always_inline void i_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value) /* {{{ */
+static zend_always_inline void i_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value, int check_this) /* {{{ */
 {
 	uint32_t first_extra_arg, num_args;
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
@@ -1798,7 +1798,7 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 		} while (var != end);
 	}
 
-	if (op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
+	if (check_this && op_array->this_var != (uint32_t)-1 && EXPECTED(Z_OBJ(EX(This)))) {
 		ZVAL_OBJ(EX_VAR(op_array->this_var), Z_OBJ(EX(This)));
 		GC_REFCOUNT(Z_OBJ(EX(This)))++;
 	}
@@ -1966,7 +1966,7 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 
 	EX(symbol_table) = NULL;
 
-	i_init_func_execute_data(execute_data, op_array, return_value);
+	i_init_func_execute_data(execute_data, op_array, return_value, 1);
 
 	return execute_data;
 }

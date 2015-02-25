@@ -1828,6 +1828,9 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 					case ZEND_ASSIGN:
 					case ZEND_ASSIGN_REF:
 					case ZEND_DO_FCALL:
+					case ZEND_DO_ICALL:
+					case ZEND_DO_UCALL:
+					case ZEND_DO_FCALL_BY_NAME:
 						if (ZEND_RESULT_TYPE(opline) == IS_VAR) {
 							ZEND_RESULT_TYPE(opline) |= EXT_TYPE_UNUSED;
 						}

@@ -153,6 +153,9 @@ END_EXTERN_C()
 #define ZEND_FE_FETCH_RW                     126
 #define ZEND_FE_FREE                         127
 #define ZEND_INIT_DYNAMIC_CALL               128
+#define ZEND_DO_ICALL                        129
+#define ZEND_DO_UCALL                        130
+#define ZEND_DO_FCALL_BY_NAME                131
 #define ZEND_PRE_INC_OBJ                     132
 #define ZEND_PRE_DEC_OBJ                     133
 #define ZEND_POST_INC_OBJ                    134
