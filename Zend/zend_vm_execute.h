@@ -13800,7 +13800,6 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 	zend_free_op free_op1;
 	zval *object_ptr;
 	zend_free_op free_op_data1;
-	zval  rv;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
@@ -13815,12 +13814,20 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 try_assign_dim:
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
-		dim = EX_CONSTANT(opline->op2);
-		zend_fetch_dimension_address_W(&rv, object_ptr, dim, IS_CONST);
+		if (IS_CONST == IS_UNUSED) {
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
+			if (UNEXPECTED(variable_ptr == NULL)) {
+				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				variable_ptr = &EG(error_zval);
+			}
+		} else {
+			dim = EX_CONSTANT(opline->op2);
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(object_ptr), dim, IS_CONST, BP_VAR_W);
 
+		}
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		ZEND_ASSERT(Z_TYPE(rv) == IS_INDIRECT);
-		variable_ptr = Z_INDIRECT(rv);
 		if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -13841,21 +13848,41 @@ try_assign_dim_array:
 
 		zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
 
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
-	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-		zend_long offset;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+			zend_long offset;
 
-		dim = EX_CONSTANT(opline->op2);
-		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+			dim = EX_CONSTANT(opline->op2);
+			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
 
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-		FREE_OP(free_op_data1);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+			FREE_OP(free_op_data1);
+		} else {
+			zval_ptr_dtor_nogc(object_ptr);
+assign_dim_convert_to_array:
+			ZVAL_NEW_ARR(object_ptr);
+			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+			goto try_assign_dim_array;
+		}
 	} else if (EXPECTED(Z_ISREF_P(object_ptr))) {
 		object_ptr = Z_REFVAL_P(object_ptr);
 		goto try_assign_dim;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+		if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			goto assign_dim_clean;
+		}
+		goto assign_dim_convert_to_array;
 	} else {
-		goto try_assign_dim_array;
+		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+assign_dim_clean:
+		dim = EX_CONSTANT(opline->op2);
+
+		value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		FREE_OP(free_op_data1);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
 	}
  	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_dim has two opcodes! */
@@ -15311,7 +15338,6 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 	zend_free_op free_op1;
 	zval *object_ptr;
 	zend_free_op free_op_data1;
-	zval  rv;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
@@ -15326,12 +15352,20 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 try_assign_dim:
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
-		dim = NULL;
-		zend_fetch_dimension_address_W(&rv, object_ptr, dim, IS_UNUSED);
+		if (IS_UNUSED == IS_UNUSED) {
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
+			if (UNEXPECTED(variable_ptr == NULL)) {
+				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				variable_ptr = &EG(error_zval);
+			}
+		} else {
+			dim = NULL;
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(object_ptr), dim, IS_UNUSED, BP_VAR_W);
 
+		}
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		ZEND_ASSERT(Z_TYPE(rv) == IS_INDIRECT);
-		variable_ptr = Z_INDIRECT(rv);
 		if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -15352,21 +15386,41 @@ try_assign_dim_array:
 
 		zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
 
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
-	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-		zend_long offset;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+			zend_long offset;
 
-		dim = NULL;
-		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+			dim = NULL;
+			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
 
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-		FREE_OP(free_op_data1);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+			FREE_OP(free_op_data1);
+		} else {
+			zval_ptr_dtor_nogc(object_ptr);
+assign_dim_convert_to_array:
+			ZVAL_NEW_ARR(object_ptr);
+			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+			goto try_assign_dim_array;
+		}
 	} else if (EXPECTED(Z_ISREF_P(object_ptr))) {
 		object_ptr = Z_REFVAL_P(object_ptr);
 		goto try_assign_dim;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+		if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			goto assign_dim_clean;
+		}
+		goto assign_dim_convert_to_array;
 	} else {
-		goto try_assign_dim_array;
+		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+assign_dim_clean:
+		dim = NULL;
+
+		value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		FREE_OP(free_op_data1);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
 	}
  	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_dim has two opcodes! */
@@ -16684,7 +16738,6 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 	zend_free_op free_op1;
 	zval *object_ptr;
 	zend_free_op free_op_data1;
-	zval  rv;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
@@ -16699,12 +16752,20 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 try_assign_dim:
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
-		dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-		zend_fetch_dimension_address_W(&rv, object_ptr, dim, IS_CV);
+		if (IS_CV == IS_UNUSED) {
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
+			if (UNEXPECTED(variable_ptr == NULL)) {
+				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				variable_ptr = &EG(error_zval);
+			}
+		} else {
+			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(object_ptr), dim, IS_CV, BP_VAR_W);
 
+		}
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		ZEND_ASSERT(Z_TYPE(rv) == IS_INDIRECT);
-		variable_ptr = Z_INDIRECT(rv);
 		if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -16725,21 +16786,41 @@ try_assign_dim_array:
 
 		zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
 
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
-	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-		zend_long offset;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+			zend_long offset;
 
-		dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
 
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-		FREE_OP(free_op_data1);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+			FREE_OP(free_op_data1);
+		} else {
+			zval_ptr_dtor_nogc(object_ptr);
+assign_dim_convert_to_array:
+			ZVAL_NEW_ARR(object_ptr);
+			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+			goto try_assign_dim_array;
+		}
 	} else if (EXPECTED(Z_ISREF_P(object_ptr))) {
 		object_ptr = Z_REFVAL_P(object_ptr);
 		goto try_assign_dim;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+		if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			goto assign_dim_clean;
+		}
+		goto assign_dim_convert_to_array;
 	} else {
-		goto try_assign_dim_array;
+		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+assign_dim_clean:
+		dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+
+		value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		FREE_OP(free_op_data1);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
 	}
  	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_dim has two opcodes! */
@@ -18210,7 +18291,6 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HA
 	zend_free_op free_op1;
 	zval *object_ptr;
 	zend_free_op free_op2, free_op_data1;
-	zval  rv;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
@@ -18225,12 +18305,20 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HA
 try_assign_dim:
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
-		dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-		zend_fetch_dimension_address_W(&rv, object_ptr, dim, (IS_TMP_VAR|IS_VAR));
-		zval_ptr_dtor_nogc(free_op2);
+		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
+			if (UNEXPECTED(variable_ptr == NULL)) {
+				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				variable_ptr = &EG(error_zval);
+			}
+		} else {
+			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(object_ptr), dim, (IS_TMP_VAR|IS_VAR), BP_VAR_W);
+			zval_ptr_dtor_nogc(free_op2);
+		}
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		ZEND_ASSERT(Z_TYPE(rv) == IS_INDIRECT);
-		variable_ptr = Z_INDIRECT(rv);
 		if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -18251,21 +18339,41 @@ try_assign_dim_array:
 
 		zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
 		zval_ptr_dtor_nogc(free_op2);
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
-	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-		zend_long offset;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+			zend_long offset;
 
-		dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
-		zval_ptr_dtor_nogc(free_op2);
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-		FREE_OP(free_op_data1);
+			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+			zval_ptr_dtor_nogc(free_op2);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+			FREE_OP(free_op_data1);
+		} else {
+			zval_ptr_dtor_nogc(object_ptr);
+assign_dim_convert_to_array:
+			ZVAL_NEW_ARR(object_ptr);
+			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+			goto try_assign_dim_array;
+		}
 	} else if (EXPECTED(Z_ISREF_P(object_ptr))) {
 		object_ptr = Z_REFVAL_P(object_ptr);
 		goto try_assign_dim;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+		if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			goto assign_dim_clean;
+		}
+		goto assign_dim_convert_to_array;
 	} else {
-		goto try_assign_dim_array;
+		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+assign_dim_clean:
+		dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+		zval_ptr_dtor_nogc(free_op2);
+		value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		FREE_OP(free_op_data1);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
 	}
  	if (free_op1) {zval_ptr_dtor_nogc(free_op1);};
 	/* assign_dim has two opcodes! */
@@ -26584,7 +26692,6 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 
 	zval *object_ptr;
 	zend_free_op free_op_data1;
-	zval  rv;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
@@ -26599,12 +26706,20 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 try_assign_dim:
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
-		dim = EX_CONSTANT(opline->op2);
-		zend_fetch_dimension_address_W(&rv, object_ptr, dim, IS_CONST);
+		if (IS_CONST == IS_UNUSED) {
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
+			if (UNEXPECTED(variable_ptr == NULL)) {
+				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				variable_ptr = &EG(error_zval);
+			}
+		} else {
+			dim = EX_CONSTANT(opline->op2);
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(object_ptr), dim, IS_CONST, BP_VAR_W);
 
+		}
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		ZEND_ASSERT(Z_TYPE(rv) == IS_INDIRECT);
-		variable_ptr = Z_INDIRECT(rv);
 		if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -26625,21 +26740,41 @@ try_assign_dim_array:
 
 		zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
 
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
-	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-		zend_long offset;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+			zend_long offset;
 
-		dim = EX_CONSTANT(opline->op2);
-		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+			dim = EX_CONSTANT(opline->op2);
+			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
 
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-		FREE_OP(free_op_data1);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+			FREE_OP(free_op_data1);
+		} else {
+			zval_ptr_dtor_nogc(object_ptr);
+assign_dim_convert_to_array:
+			ZVAL_NEW_ARR(object_ptr);
+			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+			goto try_assign_dim_array;
+		}
 	} else if (EXPECTED(Z_ISREF_P(object_ptr))) {
 		object_ptr = Z_REFVAL_P(object_ptr);
 		goto try_assign_dim;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+		if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			goto assign_dim_clean;
+		}
+		goto assign_dim_convert_to_array;
 	} else {
-		goto try_assign_dim_array;
+		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+assign_dim_clean:
+		dim = EX_CONSTANT(opline->op2);
+
+		value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		FREE_OP(free_op_data1);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
 	}
 
 	/* assign_dim has two opcodes! */
@@ -29008,7 +29143,6 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 
 	zval *object_ptr;
 	zend_free_op free_op_data1;
-	zval  rv;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
@@ -29023,12 +29157,20 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 try_assign_dim:
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
-		dim = NULL;
-		zend_fetch_dimension_address_W(&rv, object_ptr, dim, IS_UNUSED);
+		if (IS_UNUSED == IS_UNUSED) {
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
+			if (UNEXPECTED(variable_ptr == NULL)) {
+				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				variable_ptr = &EG(error_zval);
+			}
+		} else {
+			dim = NULL;
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(object_ptr), dim, IS_UNUSED, BP_VAR_W);
 
+		}
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		ZEND_ASSERT(Z_TYPE(rv) == IS_INDIRECT);
-		variable_ptr = Z_INDIRECT(rv);
 		if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -29049,21 +29191,41 @@ try_assign_dim_array:
 
 		zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
 
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
-	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-		zend_long offset;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+			zend_long offset;
 
-		dim = NULL;
-		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+			dim = NULL;
+			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
 
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-		FREE_OP(free_op_data1);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+			FREE_OP(free_op_data1);
+		} else {
+			zval_ptr_dtor_nogc(object_ptr);
+assign_dim_convert_to_array:
+			ZVAL_NEW_ARR(object_ptr);
+			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+			goto try_assign_dim_array;
+		}
 	} else if (EXPECTED(Z_ISREF_P(object_ptr))) {
 		object_ptr = Z_REFVAL_P(object_ptr);
 		goto try_assign_dim;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+		if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			goto assign_dim_clean;
+		}
+		goto assign_dim_convert_to_array;
 	} else {
-		goto try_assign_dim_array;
+		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+assign_dim_clean:
+		dim = NULL;
+
+		value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		FREE_OP(free_op_data1);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
 	}
 
 	/* assign_dim has two opcodes! */
@@ -30766,7 +30928,6 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 
 	zval *object_ptr;
 	zend_free_op free_op_data1;
-	zval  rv;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
@@ -30781,12 +30942,20 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 try_assign_dim:
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
-		dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-		zend_fetch_dimension_address_W(&rv, object_ptr, dim, IS_CV);
+		if (IS_CV == IS_UNUSED) {
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
+			if (UNEXPECTED(variable_ptr == NULL)) {
+				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				variable_ptr = &EG(error_zval);
+			}
+		} else {
+			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(object_ptr), dim, IS_CV, BP_VAR_W);
 
+		}
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		ZEND_ASSERT(Z_TYPE(rv) == IS_INDIRECT);
-		variable_ptr = Z_INDIRECT(rv);
 		if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -30807,21 +30976,41 @@ try_assign_dim_array:
 
 		zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
 
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
-	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-		zend_long offset;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+			zend_long offset;
 
-		dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
-		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+			dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
 
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-		FREE_OP(free_op_data1);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+			FREE_OP(free_op_data1);
+		} else {
+			zval_ptr_dtor_nogc(object_ptr);
+assign_dim_convert_to_array:
+			ZVAL_NEW_ARR(object_ptr);
+			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+			goto try_assign_dim_array;
+		}
 	} else if (EXPECTED(Z_ISREF_P(object_ptr))) {
 		object_ptr = Z_REFVAL_P(object_ptr);
 		goto try_assign_dim;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+		if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			goto assign_dim_clean;
+		}
+		goto assign_dim_convert_to_array;
 	} else {
-		goto try_assign_dim_array;
+		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+assign_dim_clean:
+		dim = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
+
+		value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		FREE_OP(free_op_data1);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
 	}
 
 	/* assign_dim has two opcodes! */
@@ -32827,7 +33016,6 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HAN
 
 	zval *object_ptr;
 	zend_free_op free_op2, free_op_data1;
-	zval  rv;
 	zval *value;
 	zval *variable_ptr;
 	zval *dim;
@@ -32842,12 +33030,20 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_DIM_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HAN
 try_assign_dim:
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_ARRAY)) {
 try_assign_dim_array:
-		dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-		zend_fetch_dimension_address_W(&rv, object_ptr, dim, (IS_TMP_VAR|IS_VAR));
-		zval_ptr_dtor_nogc(free_op2);
+		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
+			if (UNEXPECTED(variable_ptr == NULL)) {
+				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				variable_ptr = &EG(error_zval);
+			}
+		} else {
+			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			SEPARATE_ARRAY(object_ptr);
+			variable_ptr = zend_fetch_dimension_address_inner(Z_ARRVAL_P(object_ptr), dim, (IS_TMP_VAR|IS_VAR), BP_VAR_W);
+			zval_ptr_dtor_nogc(free_op2);
+		}
 		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		ZEND_ASSERT(Z_TYPE(rv) == IS_INDIRECT);
-		variable_ptr = Z_INDIRECT(rv);
 		if (UNEXPECTED(variable_ptr == &EG(error_zval))) {
 			FREE_OP(free_op_data1);
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -32868,21 +33064,41 @@ try_assign_dim_array:
 
 		zend_assign_to_object_dim(UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL, object_ptr, property_name, (opline+1)->op1_type, (opline+1)->op1, execute_data);
 		zval_ptr_dtor_nogc(free_op2);
-	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING) &&
-	    EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
-		zend_long offset;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
+		if (EXPECTED(Z_STRLEN_P(object_ptr) != 0)) {
+			zend_long offset;
 
-		dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
-		offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
-		zval_ptr_dtor_nogc(free_op2);
-		value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
-		zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
-		FREE_OP(free_op_data1);
+			dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+			offset = zend_fetch_string_offset(object_ptr, dim, BP_VAR_W);
+			zval_ptr_dtor_nogc(free_op2);
+			value = get_zval_ptr_deref((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+			zend_assign_to_string_offset(object_ptr, offset, value, (UNEXPECTED(RETURN_VALUE_USED(opline)) ? EX_VAR(opline->result.var) : NULL));
+			FREE_OP(free_op_data1);
+		} else {
+			zval_ptr_dtor_nogc(object_ptr);
+assign_dim_convert_to_array:
+			ZVAL_NEW_ARR(object_ptr);
+			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+			goto try_assign_dim_array;
+		}
 	} else if (EXPECTED(Z_ISREF_P(object_ptr))) {
 		object_ptr = Z_REFVAL_P(object_ptr);
 		goto try_assign_dim;
+	} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
+		if (UNEXPECTED(object_ptr == &EG(error_zval))) {
+			goto assign_dim_clean;
+		}
+		goto assign_dim_convert_to_array;
 	} else {
-		goto try_assign_dim_array;
+		zend_error(E_WARNING, "Cannot use a scalar value as an array");
+assign_dim_clean:
+		dim = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
+		zval_ptr_dtor_nogc(free_op2);
+		value = get_zval_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		FREE_OP(free_op_data1);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
 	}
 
 	/* assign_dim has two opcodes! */
