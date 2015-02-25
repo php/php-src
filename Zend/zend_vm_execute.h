@@ -307,7 +307,6 @@ static zend_uchar zend_user_opcodes[256] = {0,
 };
 
 static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);
-static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS);
 
 
 #undef OPLINE
@@ -324,12 +323,12 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 #undef HANDLE_EXCEPTION
 #undef HANDLE_EXCEPTION_LEAVE
 #define CHECK_EXCEPTION() LOAD_OPLINE()
-#define HANDLE_EXCEPTION() LOAD_OPLINE(); return ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(execute_data)
+#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()
 #define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()
-#define ZEND_VM_CONTINUE()         return  EX(opline)->handler(execute_data)
+#define ZEND_VM_CONTINUE()         return  0
 #define ZEND_VM_RETURN()           return -1
-#define ZEND_VM_ENTER()            return  EG(current_execute_data)->opline->handler(EG(current_execute_data));
-#define ZEND_VM_LEAVE()            return  EG(current_execute_data)->opline->handler(EG(current_execute_data));
+#define ZEND_VM_ENTER()            return  1
+#define ZEND_VM_LEAVE()            return  2
 #define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 
 #define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data
