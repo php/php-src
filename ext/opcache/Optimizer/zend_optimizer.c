@@ -293,16 +293,16 @@ static void replace_tmp_by_const(zend_op_array *op_array,
 			if (opline->opcode == ZEND_CASE || opline->opcode == ZEND_FREE) {
 				zend_op *m, *n;
 				int brk = op_array->last_brk_cont;
-				zend_bool in_case = 0;
+				zend_bool in_switch = 0;
 				while (brk--) {
 					if (op_array->brk_cont_array[brk].start <= (opline - op_array->opcodes) &&
 							op_array->brk_cont_array[brk].brk > (opline - op_array->opcodes)) {
-						in_case = 1;
+						in_switch = 1;
 						break;
 					}
 				}
 
-				if (!in_case) {
+				if (!in_switch) {
 					MAKE_NOP(opline);
 					zval_dtor(val);
 					break;
