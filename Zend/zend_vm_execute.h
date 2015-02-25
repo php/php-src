@@ -2738,15 +2738,21 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* Inspect at runtime for package package private restrictions */
 	if (ce->ce_flags & ZEND_ACC_PRIVATE) {
 		/* Instantiation can only happen under same namespace */
-		if (EG(scope) == NULL) {
+		if (EG(scope) != NULL) {
+			/* In a class scope, class to be instantiated must match namespaces */
+                        if (!zend_is_same_namespace(ce->name->val, EG(scope)->name->val)) {
+                                zend_error_noreturn(E_ERROR, "Class %s cannot instantiate package private class %s", EG(scope)->name->val, ce->name->val);
+                        }
+		} else if (EXPECTED(EX(prev_execute_data))) {
+			zend_execute_data *ptr = EG(current_execute_data);
+
+			if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type) && !zend_is_same_namespace(ce->name->val, ptr->func->common.function_name->val)) {
+				zend_error_noreturn(E_ERROR, "Function %s cannot instantiate package private class %s", ptr->func->common.function_name->val, ce->name->val);
+			}
+		} else {
 			/* In a top-level scope, class cannot be in a namespace */
 			if (strchr(ce->name->val, '\\') != NULL) {
 				zend_error_noreturn(E_ERROR, "Top level scope cannot instantiate package private class %s", ce->name->val);
-			}
-		} else {
-			/* In a class scope, class to be instantiated must match namespaces */
-			if (!zend_is_same_namespace(ce->name->val, EG(scope)->name->val)) {
-				zend_error_noreturn(E_ERROR, "Class %s cannot instantiate package private class %s", EG(scope)->name->val, ce->name->val);
 			}
 		}
 	}
@@ -11886,15 +11892,21 @@ static int ZEND_FASTCALL  ZEND_NEW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	/* Inspect at runtime for package package private restrictions */
 	if (ce->ce_flags & ZEND_ACC_PRIVATE) {
 		/* Instantiation can only happen under same namespace */
-		if (EG(scope) == NULL) {
+		if (EG(scope) != NULL) {
+			/* In a class scope, class to be instantiated must match namespaces */
+                        if (!zend_is_same_namespace(ce->name->val, EG(scope)->name->val)) {
+                                zend_error_noreturn(E_ERROR, "Class %s cannot instantiate package private class %s", EG(scope)->name->val, ce->name->val);
+                        }
+		} else if (EXPECTED(EX(prev_execute_data))) {
+			zend_execute_data *ptr = EG(current_execute_data);
+
+			if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type) && !zend_is_same_namespace(ce->name->val, ptr->func->common.function_name->val)) {
+				zend_error_noreturn(E_ERROR, "Function %s cannot instantiate package private class %s", ptr->func->common.function_name->val, ce->name->val);
+			}
+		} else {
 			/* In a top-level scope, class cannot be in a namespace */
 			if (strchr(ce->name->val, '\\') != NULL) {
 				zend_error_noreturn(E_ERROR, "Top level scope cannot instantiate package private class %s", ce->name->val);
-			}
-		} else {
-			/* In a class scope, class to be instantiated must match namespaces */
-			if (!zend_is_same_namespace(ce->name->val, EG(scope)->name->val)) {
-				zend_error_noreturn(E_ERROR, "Class %s cannot instantiate package private class %s", EG(scope)->name->val, ce->name->val);
 			}
 		}
 	}
