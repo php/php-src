@@ -341,7 +341,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 			break;
 
-		case ZEND_DO_FCALL: {
+		case ZEND_DO_ICALL: {
 			zend_op *send1_opline = opline - 1;
 			zend_op *send2_opline = NULL;
 			zend_op *init_opline = NULL;

@@ -1836,6 +1836,11 @@ static void accel_activate(void)
 		return;
 	}
 
+	if (!ZCG(function_table).nTableSize) {
+		zend_hash_init(&ZCG(function_table), zend_hash_num_elements(CG(function_table)), NULL, ZEND_FUNCTION_DTOR, 1);
+		zend_accel_copy_internal_functions();
+	}
+
 	SHM_UNPROTECT();
 	/* PHP-5.4 and above return "double", but we use 1 sec precision */
 	ZCG(auto_globals_mask) = 0;
@@ -2257,8 +2262,6 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
-	zend_hash_init(&accel_globals->function_table, zend_hash_num_elements(CG(function_table)), NULL, ZEND_FUNCTION_DTOR, 1);
-	zend_accel_copy_internal_functions();
 }
 
 static void accel_globals_internal_func_dtor(zval *zv)
@@ -2268,8 +2271,10 @@ static void accel_globals_internal_func_dtor(zval *zv)
 
 static void accel_globals_dtor(zend_accel_globals *accel_globals)
 {
-	accel_globals->function_table.pDestructor = accel_globals_internal_func_dtor;
-	zend_hash_destroy(&accel_globals->function_table);
+	if (accel_globals->function_table.nTableSize) {
+		accel_globals->function_table.pDestructor = accel_globals_internal_func_dtor;
+		zend_hash_destroy(&accel_globals->function_table);
+	}
 }
 
 static int accel_startup(zend_extension *extension)
@@ -2421,11 +2426,6 @@ static int accel_startup(zend_extension *extension)
 		zend_accel_blacklist_init(&accel_blacklist);
 		zend_accel_blacklist_load(&accel_blacklist, ZCG(accel_directives.user_blacklist_filename));
 	}
-
-#if 0
-	/* FIXME: We probably don't need it here */
-	zend_accel_copy_internal_functions();
-#endif
 
 	return SUCCESS;
 }

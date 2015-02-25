@@ -1454,7 +1454,10 @@ next:
 		PHPDBG_G(last_line) = execute_data->opline->lineno;
 
 		/* stupid hack to make zend_do_fcall_common_helper return ZEND_VM_ENTER() instead of recursively calling zend_execute() and eventually segfaulting */
-		if (execute_data->opline->opcode == ZEND_DO_FCALL && execute_data->func->type == ZEND_USER_FUNCTION) {
+		if ((execute_data->opline->opcode == ZEND_DO_FCALL ||
+		     execute_data->opline->opcode == ZEND_DO_UCALL ||
+		     execute_data->opline->opcode == ZEND_DO_FCALL_BY_NAME) &&
+		    execute_data->func->type == ZEND_USER_FUNCTION) {
 			zend_execute_ex = execute_ex;
 		}
 		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data);

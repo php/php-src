@@ -2617,6 +2617,31 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_uchar zend_get_call_op(zend_uchar init_op, zend_function *fbc) /* {{{ */
+{
+	if (fbc) {
+		if (fbc->type == ZEND_INTERNAL_FUNCTION) {
+			if (!zend_execute_internal &&
+			    !fbc->common.scope &&
+			    !(fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_HAS_TYPE_HINTS))) {
+				return ZEND_DO_ICALL;
+			}
+		} else {
+			if (zend_execute_ex == execute_ex &&
+			    !(fbc->common.fn_flags & ZEND_ACC_GENERATOR)) {
+				return ZEND_DO_UCALL;
+			}
+		}
+	} else if (zend_execute_ex == execute_ex &&
+	           !zend_execute_internal &&
+	           (init_op == ZEND_INIT_FCALL_BY_NAME ||
+	            init_op == ZEND_INIT_NS_FCALL_BY_NAME)) {
+		return ZEND_DO_FCALL_BY_NAME;
+	}
+	return ZEND_DO_FCALL;
+}
+/* }}} */
+
 void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
 {
 	zend_op *opline;
@@ -2636,7 +2661,7 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	}
 
 	call_flags = (opline->opcode == ZEND_NEW ? ZEND_CALL_CTOR : 0);
-	opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
+	opline = zend_emit_op(result, zend_get_call_op(opline->opcode, fbc), NULL, NULL);
 	opline->op1.num = call_flags;
 
 	zend_do_extended_fcall_end();

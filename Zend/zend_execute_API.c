@@ -691,7 +691,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		EG(current_execute_data) = &dummy_execute_data;
 	} else if (EG(current_execute_data)->func &&
 	           ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
-	           EG(current_execute_data)->opline->opcode != ZEND_DO_FCALL) {
+	           EG(current_execute_data)->opline->opcode != ZEND_DO_FCALL &&
+	           EG(current_execute_data)->opline->opcode != ZEND_DO_ICALL &&
+	           EG(current_execute_data)->opline->opcode != ZEND_DO_UCALL &&
+	           EG(current_execute_data)->opline->opcode != ZEND_DO_FCALL_BY_NAME) {
 		/* Insert fake frame in case of include or magic calls */
 		dummy_execute_data = *EG(current_execute_data);
 		dummy_execute_data.prev_execute_data = EG(current_execute_data);
