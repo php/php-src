@@ -14,13 +14,10 @@ namespace B
     {
         $a = new \A();
 
-        echo 'Should work';
+        echo 'Should not work';
     }
-}
 
-namespace 
-{
-    $b = \B\c();
+    c();
 }
 
 ?>

@@ -1,5 +1,5 @@
 --TEST--
-Visibility modifiers: Namespaced private class, same namespace function instantiation
+Visibility modifiers: Namespaced private class, same namespace closure instantiation
 --FILE--
 <?php
 
@@ -7,13 +7,13 @@ namespace A
 {
     private class B {}
 
-    function c() {
+    $c = function () {
         $b = new B();
 
         echo 'Should work';
-    }
+    };
 
-    c();
+    $c();
 }
 
 ?>

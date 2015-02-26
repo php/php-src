@@ -10,7 +10,7 @@ namespace A
 
 namespace
 {
-    $b = new \A\B();
+    $b = new A\B();
 }
 
 ?>
