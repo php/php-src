@@ -81,7 +81,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left '+' '-' '.'
 %left '*' '/' '%'
 %right '!'
-%nonassoc T_INSTANCEOF
+%nonassoc T_INSTANCEOF T_IN
 %right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right T_POW
 %right '['
@@ -134,7 +134,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_SPACESHIP "<=> (T_SPACESHIP)"
 %token T_SL "<< (T_SL)"
 %token T_SR ">> (T_SR)"
-%token T_INSTANCEOF  "instanceof (T_INSTANCEOF)"
+%token T_INSTANCEOF "instanceof (T_INSTANCEOF)"
+%token T_IN "in (T_IN)"
 %token T_INC "++ (T_INC)"
 %token T_DEC "-- (T_DEC)"
 %token T_INT_CAST    "(int) (T_INT_CAST)"
@@ -849,6 +850,8 @@ expr_without_variable:
 			{ $$ = zend_ast_create(ZEND_AST_GREATER_EQUAL, $1, $3); }
 	|	expr T_SPACESHIP expr
 			{ $$ = zend_ast_create_binary_op(ZEND_SPACESHIP, $1, $3); }
+	|	expr T_IN expr
+			{ $$ = zend_ast_create_binary_op(ZEND_IN, $1, $3); }
 	|	expr T_INSTANCEOF class_name_reference
 			{ $$ = zend_ast_create(ZEND_AST_INSTANCEOF, $1, $3); }
 	|	'(' expr ')' { $$ = $2; }

@@ -2067,6 +2067,87 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
 }
 /* }}} */
 
+static zend_always_inline zend_bool in_function_inline(zval *needle, zval *haystack, int *status)
+{
+	zend_string *haystr = Z_STR_P(haystack), *needlestr;
+
+	*status = SUCCESS;
+
+	switch (Z_TYPE_P(haystack)) {
+		zval haycpy, *arrayptr;
+
+		case IS_LONG:
+		case IS_DOUBLE:
+			haycpy = *haystack;
+			convert_to_string(&haycpy);
+			haystr = Z_STR(haycpy);
+		case IS_STRING:
+			needlestr = Z_STR_P(needle);
+
+			switch (Z_TYPE_P(needle)) {
+				zval needlecpy;
+				zend_bool retval;
+					case IS_OBJECT:
+						ZVAL_UNDEF(&needlecpy);
+						convert_object_to_type(needle, &needlecpy, IS_STRING, convert_to_string);
+						if (Z_TYPE(needlecpy) != IS_STRING) {
+							break;
+						}
+				
+				if (0) {
+					case IS_LONG:
+					case IS_DOUBLE:
+						needlecpy = *needle;
+						convert_to_string(&needlecpy);
+				}
+						needlestr = Z_STR(needlecpy);
+					case IS_STRING:
+						retval = zend_memnstr(haystr->val, needlestr->val, needlestr->len, haystr->val + haystr->len) ? 1 : 0;
+						if (Z_TYPE_P(haystack) != IS_STRING) {
+							zend_string_release(haystr);
+						}
+						if (Z_TYPE_P(needle) != IS_STRING) {
+						zend_string_release(needlestr);
+						}
+						return retval;
+			}
+
+			*status = FAILURE;
+			zend_error(E_WARNING, "Invalid needle type %s to haystack type %s for in operator", zend_zval_type_name(needle), zend_zval_type_name(haystack));
+			break;
+
+		case IS_ARRAY:
+			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(haystack), arrayptr) {
+				zval retzv;
+				ZVAL_DEREF(arrayptr);
+				fast_is_identical_function(&retzv, arrayptr, needle);
+				if (Z_TYPE(retzv) == IS_TRUE) {
+					return 1;
+				}
+			} ZEND_HASH_FOREACH_END();
+			break;
+
+		default:
+			*status = FAILURE;
+			zend_error(E_WARNING, "%s is not a valid haystack type for in operator", zend_zval_type_name(haystack));
+	}
+
+	return 0;
+}
+
+ZEND_API zend_bool in_function_ex(zval *needle, zval *haystack)
+{
+	int status;
+	return in_function_inline(needle, haystack, &status);
+}
+
+ZEND_API int in_function(zval *result, zval *needle, zval *haystack)
+{
+	int status;
+	ZVAL_BOOL(result, in_function_inline(needle, haystack, &status));
+	return status;
+}
+
 #define LOWER_CASE 1
 #define UPPER_CASE 2
 #define NUMERIC 3
