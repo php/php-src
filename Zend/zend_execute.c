@@ -752,7 +752,7 @@ static void zend_verify_missing_arg(zend_execute_data *execute_data, uint32_t ar
 static void zend_verify_exceeding_arg(zend_execute_data *execute_data, uint32_t arg_num, uint32_t expect_arg_num)
 {
     // if function is not variadic AND the implementation is not sensible to variable-length argument lists
-	if (EXPECTED(!(EX(func)->common.fn_flags & ZEND_ACC_VARIADIC) && !(EX(func)->common.fn_flags & ZEND_ACC_DYNAMIC_ARGCOUNT))) {
+	if (EXPECTED(!(EX(func)->common.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_VARIADIC|ZEND_ACC_DYNAMIC_ARGCOUNT)))) {
 		const char *parameter_s = expect_arg_num == 1 ? "parameter" : "parameters";
 		const char *expects = expect_arg_num > 0 ? "expects at most " : "expects ";
 		const char *class_name = EX(func)->common.scope ? EX(func)->common.scope->name->val : "";
