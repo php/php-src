@@ -9,7 +9,7 @@ require dirname(__FILE__) . '/config.inc';
 <?php
 require dirname(__FILE__) . '/config.inc';
 
-$stmt = $db->prepare("select ic1.* from information_schema.columns ic1");
+$stmt = $db->prepare("select top 1 ic1.* from information_schema.columns ic1");
 $stmt->execute();
 var_dump($stmt->getColumnMeta(0));
 $stmt = null;
@@ -30,10 +30,10 @@ array(10) {
   int(47)
   ["native_usertype_id"]=>
   int(2)
+  ["pdo_type"]=>
+  int(2)
   ["name"]=>
   string(13) "TABLE_CATALOG"
   ["len"]=>
   int(255)
-  ["pdo_type"]=>
-  int(2)
 }
