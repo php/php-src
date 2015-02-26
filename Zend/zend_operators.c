@@ -30,6 +30,8 @@
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_interfaces.h"
+#include "ext/spl/spl_iterators.h"
 
 #if ZEND_USE_TOLOWER_L
 #include <locale.h>
@@ -2067,6 +2069,22 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
 }
 /* }}} */
 
+static int in_function_interator(zend_object_iterator *iter, zval **needle)
+{
+	zval retzv;
+	zval *val = iter->funcs->get_current_data(iter);
+
+	ZVAL_DEREF(val);
+	fast_is_identical_function(&retzv, val, *needle);
+
+	if (Z_TYPE(retzv) == IS_TRUE) {
+		*needle = NULL;
+		return ZEND_HASH_APPLY_STOP;
+	}
+
+	return ZEND_HASH_APPLY_KEEP;
+}
+
 static zend_always_inline zend_bool in_function_inline(zval *needle, zval *haystack, int *status)
 {
 	zend_string *haystr = Z_STR_P(haystack), *needlestr;
@@ -2078,7 +2096,6 @@ static zend_always_inline zend_bool in_function_inline(zval *needle, zval *hayst
 		zend_bool retval;
 
 		case IS_LONG:
-		case IS_DOUBLE:
 			haycpy = *haystack;
 			convert_to_string(&haycpy);
 			haystr = Z_STR(haycpy);
@@ -2096,7 +2113,6 @@ static zend_always_inline zend_bool in_function_inline(zval *needle, zval *hayst
 				
 				if (0) {
 					case IS_LONG:
-					case IS_DOUBLE:
 						needlecpy = *needle;
 						convert_to_string(&needlecpy);
 				}
@@ -2138,6 +2154,12 @@ static zend_always_inline zend_bool in_function_inline(zval *needle, zval *hayst
 				}
 			} ZEND_HASH_FOREACH_END();
 			break;
+
+		case IS_OBJECT:
+			if (instanceof_function(Z_OBJ_P(haystack)->ce, zend_ce_traversable)) {
+				spl_iterator_apply(haystack, (spl_iterator_apply_func_t) in_function_interator, &needle);
+				return needle == NULL;
+			}
 
 		default:
 			*status = FAILURE;
