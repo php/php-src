@@ -1053,28 +1053,44 @@ ZEND_API void zend_unexpected_null_paramer(int num, zend_expected_type expected_
  * https://wiki.php.net/rfc/coercive_sth
  */
 
-/* Restrict conversions from IS_NULL */
-#define STH_DISABLE_NULL_TO_BOOL	1
-#define STH_DISABLE_NULL_TO_INT		1
-#define STH_DISABLE_NULL_TO_FLOAT	1
-#define STH_DISABLE_NULL_TO_STRING	1
+/* coercion rules for user functions */
+#define STH_DISABLE_USER_NULL_TO_BOOL        1
+#define STH_DISABLE_USER_NULL_TO_INT         1
+#define STH_DISABLE_USER_NULL_TO_FLOAT       1
+#define STH_DISABLE_USER_NULL_TO_STRING      1
+
+/* coercion rules for internal functions */
+#define STH_DISABLE_INTERNAL_NULL_TO_BOOL    0
+#define STH_DISABLE_INTERNAL_NULL_TO_INT     0
+#define STH_DISABLE_INTERNAL_NULL_TO_FLOAT   0
+#define STH_DISABLE_INTERNAL_NULL_TO_STRING  0
+
+/* common coercion rules */
+/* for user functions DISABLED means E_RECOVERABLE */
+/* for internals functions DISABLED means E_DEPRECATED and conversion */
 
 /* Restrict conversions from IS_FALSE/IS_TRUE */
-#define STH_DISABLE_BOOL_TO_INT		1
-#define STH_DISABLE_BOOL_TO_FLOAT	1
-#define STH_DISABLE_BOOL_TO_STRING	1
-/* Restrict conversions to bool */
+#define STH_DISABLE_BOOL_TO_INT              1
+#define STH_DISABLE_BOOL_TO_FLOAT            1
+#define STH_DISABLE_BOOL_TO_STRING           1
 
-#define STH_DISABLE_INT_TO_BOOL		0
-#define STH_DISABLE_FLOAT_TO_BOOL	0
-#define STH_DISABLE_STRING_TO_BOOL	0
+/* Restrict conversions to bool */
+#define STH_DISABLE_INT_TO_BOOL              0
+#define STH_DISABLE_FLOAT_TO_BOOL            1
+#define STH_DISABLE_STRING_TO_BOOL           1
 
 /* Other restrictions */
-#define STH_DISABLE_FLOAT_TO_INT	0
+#define STH_DISABLE_INT_TO_FLOAT             0
+#define STH_DISABLE_FLOAT_TO_INT             0
 
-/* Accepts null fractional part only.
-   Ignored when STH_DISABLE_FLOAT_TO_INT is set */
-#define STH_RESTRICT_FLOAT_TO_INT	1
+/* Accepts null fractional part only */
+#define STH_RESTRICT_FLOAT_TO_INT            1
+
+/* Convert without precision lost */
+#define STH_RESTRICT_INT_TO_FLOAT            1
+
+#define STH_RESTRICT_STRING_TO_INT           1
+#define STH_RESTRICT_STRING_TO_FLOAT         1
 
 ZEND_API int parse_arg_object_to_str(zval *arg, zend_string **str, int type);
 ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null);
@@ -1089,14 +1105,16 @@ static zend_always_inline int zend_parse_arg_bool(int num, zval *arg, zend_bool 
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
 		if (check_null) {
 			*is_null = (Z_TYPE_P(arg) == IS_NULL);
-#if STH_DISABLE_NULL_TO_BOOL
-		}  if (Z_TYPE_P(arg) == IS_NULL) {
+		} else if (Z_TYPE_P(arg) == IS_NULL) {
 			if (is_internal && num >= 0) {
+#if STH_DISABLE_INTERNAL_NULL_TO_BOOL
 				zend_unexpected_null_paramer(num, Z_EXPECTED_BOOL);
-			} else {
-				return 0;
-			}
 #endif
+			} else {
+#if STH_DISABLE_USER_NULL_TO_BOOL
+				return 0;
+#endif
+			}
 		}
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_STRING)) {
@@ -1141,17 +1159,16 @@ static zend_always_inline int zend_parse_arg_long(int num, zval *arg, zend_long 
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		*dest = Z_LVAL_P(arg);
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
+		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
+			return 0;
+		}
 #if STH_DISABLE_FLOAT_TO_INT
 		if (is_internal && num >= 0) {
 			zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
 		} else {
 			return 0;
 		}
-#else
-		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
-			return 0;
-		}
-#if STH_RESTRICT_FLOAT_TO_INT
+#elif STH_RESTRICT_FLOAT_TO_INT
 		if (!zend_dval_is_integer(Z_DVAL_P(arg))) {
 			if (is_internal && num >= 0) {
 				zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
@@ -1170,24 +1187,40 @@ static zend_always_inline int zend_parse_arg_long(int num, zval *arg, zend_long 
 		} else {
 			*dest = zend_dval_to_lval(Z_DVAL_P(arg));
 		}
-#endif
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		double d;
 		int type;
-
+#if STH_RESTRICT_STRING_TO_INT
+		int oflow;
+		const char *s = Z_STRVAL_P(arg);
+		if (*s == '\0' || *s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' || *s == '\v' || *s == '\f') {
+			if (is_internal && num >= 0) {
+				zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+			} else {
+				return 0;
+			}
+		} else if (UNEXPECTED((type = _is_numeric_string_ex(s, Z_STRLEN_P(arg), dest, &d, is_internal ? -1 : 0, &oflow)) != IS_LONG)) {
+			if (oflow != 0) {
+				if (is_internal && num >= 0) {
+					zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+				} else {
+					return 0;
+				}
+			}
+#else
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
+#endif
 			if (EXPECTED(type != 0)) {
+				if (UNEXPECTED(zend_isnan(d))) {
+					return 0;
+				}
 #if STH_DISABLE_FLOAT_TO_INT
 				if (is_internal && num >= 0) {
 					zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
 				} else {
 					return 0;
 				}
-#else
-				if (UNEXPECTED(zend_isnan(d))) {
-					return 0;
-				}
-#if STH_RESTRICT_FLOAT_TO_INT
+#elif STH_RESTRICT_FLOAT_TO_INT
 				if (!zend_dval_is_integer(d)) {
 					if (is_internal && num >= 0) {
 						zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
@@ -1205,7 +1238,6 @@ static zend_always_inline int zend_parse_arg_long(int num, zval *arg, zend_long 
 				} else {
 					*dest = zend_dval_to_lval(d);
 				}
-#endif
 			} else {
 				return 0;
 			}
@@ -1213,14 +1245,16 @@ static zend_always_inline int zend_parse_arg_long(int num, zval *arg, zend_long 
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		if (check_null) {
 			*is_null = (zend_bool)1;
-#if STH_DISABLE_NULL_TO_INT
 		} else {
 			if (is_internal && num >= 0) {
+#if STH_DISABLE_INTERNAL_NULL_TO_INT
 				zend_unexpected_null_paramer(num, Z_EXPECTED_LONG);
-			} else {
-				return 0;
-			}
 #endif
+			} else {
+#if STH_DISABLE_USER_NULL_TO_INT
+				return 0;
+#endif
+			}
 		}
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_TRUE)) {
@@ -1247,13 +1281,61 @@ static zend_always_inline int zend_parse_arg_double(int num, zval *arg, double *
 		*dest = Z_DVAL_P(arg);
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		*dest = (double)Z_LVAL_P(arg);
+#if STH_DISABLE_INT_TO_FLOAT
+		if (is_internal && num >= 0) {
+			zend_deprecated_paramer_type(num, Z_EXPECTED_DOUBLE, arg);
+		} else {
+			return 0;
+		}
+#elif STH_RESTRICT_INT_TO_FLOAT
+		if ((zend_long)*dest != Z_LVAL_P(arg)) {
+			if (is_internal && num >= 0) {
+				zend_deprecated_paramer_type(num, Z_EXPECTED_DOUBLE, arg);
+			} else {
+				return 0;
+			}
+		}
+#endif
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		zend_long l;
 		int type;
-
+#if STH_RESTRICT_STRING_TO_FLOAT
+		int oflow;
+		const char *s = Z_STRVAL_P(arg);
+		if (*s == '\0' || *s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' || *s == '\v' || *s == '\f') {
+			if (is_internal && num >= 0) {
+				zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+			} else {
+				return 0;
+			}
+		} else if (UNEXPECTED((type = _is_numeric_string_ex(s, Z_STRLEN_P(arg),&l,  dest, is_internal ? -1 : 0, &oflow)) != IS_DOUBLE)) {
+			if (oflow != 0) {
+				if (is_internal && num >= 0) {
+					zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+				} else {
+					return 0;
+				}
+			}
+#else
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), &l, dest)) != IS_DOUBLE)) {
+#endif
 			if (EXPECTED(type != 0)) {
 				*dest = (double)(l);
+#if STH_DISABLE_INT_TO_FLOAT
+				if (is_internal && num >= 0) {
+					zend_deprecated_paramer_type(num, Z_EXPECTED_DOUBLE, arg);
+				} else {
+					return 0;
+				}
+#elif STH_RESTRICT_INT_TO_FLOAT
+				if ((zend_long)*dest != l) {
+					if (is_internal && num >= 0) {
+						zend_deprecated_paramer_type(num, Z_EXPECTED_DOUBLE, arg);
+					} else {
+						return 0;
+					}
+				}
+#endif
 			} else {
 				return 0;
 			}
@@ -1261,14 +1343,16 @@ static zend_always_inline int zend_parse_arg_double(int num, zval *arg, double *
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		if (check_null) {
 			*is_null = (zend_bool)1;
-#if STH_DISABLE_NULL_TO_FLOAT
 		} else {
 			if (is_internal && num >= 0) {
+#if STH_DISABLE_INTERNAL_NULL_TO_FLOAT
 				zend_unexpected_null_paramer(num, Z_EXPECTED_DOUBLE);
-			} else {
-				return 0;
-			}
 #endif
+			} else {
+#if STH_DISABLE_USER_NULL_TO_FLOAT
+				return 0;
+#endif
+			}
 		}
 		*dest = 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_TRUE)) {
@@ -1294,15 +1378,16 @@ static zend_always_inline int zend_parse_arg_str(int num, zval *arg, zend_string
 		if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 			*dest = NULL;
 		} else {
-			if (0) {
-#if STH_DISABLE_NULL_TO_STRING
-			} else if (Z_TYPE_P(arg) == IS_NULL) {
+			if (Z_TYPE_P(arg) == IS_NULL) {
 				if (is_internal && num >= 0) {
+#if STH_DISABLE_INTERNAL_NULL_TO_STRING
 					zend_unexpected_null_paramer(num, Z_EXPECTED_STRING);
-				} else {
-					return 0;
-				}
 #endif
+				} else {
+#if STH_DISABLE_USER_NULL_TO_STRING
+					return 0;
+#endif
+				}
 #if STH_DISABLE_BOOL_TO_STRING
 			} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_FALSE) ||
 			           UNEXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
