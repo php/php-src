@@ -164,6 +164,7 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 	switch(type) {
 		case IS_FALSE:
 		case IS_TRUE:
+		case _IS_BOOL:
 			return "boolean";
 		case IS_LONG:
 			return "integer";
