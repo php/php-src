@@ -263,6 +263,20 @@ ZEND_API void zend_wrong_paramer_type_error(int num, zend_expected_type expected
 }
 /* }}} */
 
+ZEND_API void zend_deprecated_paramer_type(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
+{
+	const char *space;
+	const char *class_name = get_active_class_name(&space);
+	static const char * const expected_error[] = {
+		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
+		NULL
+	};
+
+	zend_error(E_DEPRECATED, "%s%s%s() expects parameter %d to be %s, %s given",
+		class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
+}
+/* }}} */
+
 ZEND_API void zend_wrong_paramer_class_error(int num, char *name, zval *arg) /* {{{ */
 {
 	const char *space;
@@ -352,7 +366,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L')) {
+				if (!zend_parse_arg_long(arg_num, arg, p, is_null, check_null, c == 'L')) {
 					return "integer";
 				}
 			}
@@ -367,7 +381,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_double(arg, p, is_null, check_null)) {
+				if (!zend_parse_arg_double(arg_num, arg, p, is_null, check_null)) {
 					return "float";
 				}
 			}
@@ -377,7 +391,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
-				if (!zend_parse_arg_string(arg, p, pl, check_null)) {
+				if (!zend_parse_arg_string(arg_num, arg, p, pl, check_null)) {
 					return "string";
 				}
 			}
@@ -387,7 +401,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
-				if (!zend_parse_arg_path(arg, p, pl, check_null)) {
+				if (!zend_parse_arg_path(arg_num, arg, p, pl, check_null)) {
 					return "a valid path";
 				}
 			}
@@ -396,7 +410,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'P':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				if (!zend_parse_arg_path_str(arg, str, check_null)) {
+				if (!zend_parse_arg_path_str(arg_num, arg, str, check_null)) {
 					return "a valid path";
 				}
 			}
@@ -405,7 +419,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'S':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				if (!zend_parse_arg_str(arg, str, check_null)) {
+				if (!zend_parse_arg_str(arg_num, arg, str, check_null)) {
 					return "string";
 				}
 			}
@@ -420,7 +434,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_bool(arg, p, is_null, check_null)) {
+				if (!zend_parse_arg_bool(arg_num, arg, p, is_null, check_null)) {
 					return "boolean";
 				}
 			}

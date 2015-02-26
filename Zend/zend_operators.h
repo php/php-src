@@ -149,6 +149,14 @@ static zend_always_inline zend_long zend_dval_to_lval(double d)
 #endif
 /* }}} */
 
+static zend_always_inline zend_bool zend_dval_is_integer(double d)
+{
+	double fractpart, intpart;
+
+	fractpart = modf(d, &intpart);
+	return (zend_bool)(fractpart == (double)0.0);
+}
+
 #define ZEND_IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 #define ZEND_IS_XDIGIT(c) (((c) >= 'A' && (c) <= 'F') || ((c) >= 'a' && (c) <= 'f'))
 
