@@ -1,28 +1,28 @@
 --TEST--
-SPL: Test ArrayObject::arsort() function : basic functionality with array based store
+SPL: Test ArrayObject::asort(SORT_FLAG_REVERSE) function : basic functionality with array based store
 --FILE--
 <?php
-/* Prototype  : int ArrayObject::arsort()
- * Description: proto int ArrayIterator::arsort()
+/* Prototype  : int ArrayObject::asort()
+ * Description: proto int ArrayIterator::asort()
  * Sort the entries by values.
  * Source code: ext/spl/spl_array.c
  * Alias to functions:
  */
 
-echo "*** Testing ArrayObject::arsort() : basic functionality ***\n";
+echo "*** Testing ArrayObject::asort(SORT_FLAG_REVERSE) : basic functionality ***\n";
 
 $ao1 = new ArrayObject(array(4,2,3));
 $ao2 = new ArrayObject(array('a'=>4,'b'=>2,'c'=>3));
-var_dump($ao1->arsort());
+var_dump($ao1->asort(SORT_FLAG_REVERSE));
 var_dump($ao1);
-var_dump($ao2->arsort('blah'));
+var_dump($ao2->asort('blah'));
 var_dump($ao2);
-var_dump($ao2->arsort(SORT_NUMERIC));
+var_dump($ao2->asort(SORT_NUMERIC | SORT_FLAG_REVERSE));
 var_dump($ao2);
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing ArrayObject::arsort() : basic functionality ***
+*** Testing ArrayObject::asort(SORT_FLAG_REVERSE) : basic functionality ***
 bool(true)
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
@@ -36,7 +36,7 @@ object(ArrayObject)#%d (1) {
   }
 }
 
-Warning: arsort() expects parameter 2 to be integer, string given in %sarrayObject_arsort_basic1.php on line %d
+Warning: asort() expects parameter 2 to be integer, string given in %sarrayObject_arsort_basic1.php on line %d
 bool(false)
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>

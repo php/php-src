@@ -1,15 +1,15 @@
 --TEST--
-SPL: Test ArrayObject::krsort() function : basic functionality with object base store
+SPL: Test ArrayObject::ksort(SORT_FLAG_REVERSE) function : basic functionality with object base store
 --FILE--
 <?php
-/* Prototype  : int ArrayObject::krsort()
- * Description: proto int ArrayIterator::krsort()
+/* Prototype  : int ArrayObject::ksort()
+ * Description: proto int ArrayIterator::ksort()
  * Sort the entries by key.
  * Source code: ext/spl/spl_array.c
  * Alias to functions:
  */
 
-echo "*** Testing ArrayObject::krsort() : basic functionality ***\n";
+echo "*** Testing ArrayObject::ksort(SORT_FLAG_REVERSE) : basic functionality ***\n";
 Class C {
 	public $x = 'prop1';
 	public $z = 'prop2';
@@ -19,12 +19,12 @@ Class C {
 
 $c = new C;
 $ao1 = new ArrayObject($c);
-var_dump($ao1->krsort());
+var_dump($ao1->ksort(SORT_FLAG_REVERSE));
 var_dump($ao1, $c);
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing ArrayObject::krsort() : basic functionality ***
+*** Testing ArrayObject::ksort(SORT_FLAG_REVERSE) : basic functionality ***
 bool(true)
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>

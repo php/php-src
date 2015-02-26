@@ -1,27 +1,27 @@
 --TEST--
-SPL: Test ArrayObject::krsort() function : basic functionality with array based store
+SPL: Test ArrayObject::ksort(SORT_FLAG_REVERSE) function : basic functionality with array based store
 --FILE--
 <?php
-/* Prototype  : int ArrayObject::krsort()
- * Description: proto int ArrayIterator::krsort()
+/* Prototype  : int ArrayObject::ksort()
+ * Description: proto int ArrayIterator::ksort()
  * Sort the entries by key.
  * Source code: ext/spl/spl_array.c
  * Alias to functions:
  */
 
-echo "*** Testing ArrayObject::krsort() : basic functionality ***\n";
+echo "*** Testing ArrayObject::ksort(SORT_FLAG_REVERSE) : basic functionality ***\n";
 $ao1 = new ArrayObject(array(4,2,3));
 $ao2 = new ArrayObject(array('b'=>4,'a'=>2,'q'=>3, 99=>'x'));
-var_dump($ao1->krsort());
+var_dump($ao1->ksort(SORT_FLAG_REVERSE));
 var_dump($ao1);
-var_dump($ao2->krsort('blah'));
+var_dump($ao2->ksort('blah'));
 var_dump($ao2);
-var_dump($ao2->krsort(SORT_STRING));
+var_dump($ao2->ksort(SORT_STRING | SORT_FLAG_REVERSE));
 var_dump($ao2);
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing ArrayObject::krsort() : basic functionality ***
+*** Testing ArrayObject::ksort(SORT_FLAG_REVERSE) : basic functionality ***
 bool(true)
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
@@ -35,7 +35,7 @@ object(ArrayObject)#%d (1) {
   }
 }
 
-Warning: krsort() expects parameter 2 to be integer, string given in %sarrayObject_krsort_basic1.php on line %d
+Warning: ksort() expects parameter 2 to be integer, string given in %sarrayObject_krsort_basic1.php on line %d
 bool(false)
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>

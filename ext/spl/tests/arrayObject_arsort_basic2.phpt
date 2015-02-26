@@ -1,15 +1,15 @@
 --TEST--
-SPL: Test ArrayObject::arsort() function : basic functionality with object based store
+SPL: Test ArrayObject::asort(SORT_FLAG_REVERSE) function : basic functionality with object based store
 --FILE--
 <?php
-/* Prototype  : int ArrayObject::arsort()
- * Description: proto int ArrayIterator::arsort()
+/* Prototype  : int ArrayObject::asort()
+ * Description: proto int ArrayIterator::asort()
  * Sort the entries by values.
  * Source code: ext/spl/spl_array.c
  * Alias to functions:
  */
 
-echo "*** Testing ArrayObject::arsort() : basic functionality ***\n";
+echo "*** Testing ArrayObject::asort(SORT_FLAG_REVERSE) : basic functionality ***\n";
 Class C {
 	public $prop1 = 'x';
 	public $prop2 = 'z';
@@ -19,12 +19,12 @@ Class C {
 
 $c = new C;
 $ao1 = new ArrayObject($c);
-var_dump($ao1->arsort());
+var_dump($ao1->asort(SORT_FLAG_REVERSE));
 var_dump($ao1, $c);
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing ArrayObject::arsort() : basic functionality ***
+*** Testing ArrayObject::asort(SORT_FLAG_REVERSE) : basic functionality ***
 bool(true)
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>

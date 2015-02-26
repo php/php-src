@@ -1,5 +1,5 @@
 --TEST--
-SPL: Test ArrayObject::arsort() function : basic functionality with array based store
+SPL: Test ArrayObject::asort(SORT_FLAG_REVERSE) function : basic functionality with array based store
 --FILE--
 <?php
 /* Prototype  : int ArrayObject::arsort()
@@ -9,7 +9,7 @@ SPL: Test ArrayObject::arsort() function : basic functionality with array based 
  * Alias to functions:
  */
 
-echo "*** Testing ArrayObject::arsort() : basic functionality ***\n";
+echo "*** Testing ArrayObject::asort(SORT_FLAG_REVERSE) : basic functionality ***\n";
 
 $ao1 = new ArrayObject(array(4,2,3));
 $ao2 = new ArrayObject(array('a'=>4,'b'=>2,'c'=>3));
@@ -22,7 +22,7 @@ var_dump($ao2);
 ?>
 ===DONE===
 --EXPECTF--
-*** Testing ArrayObject::arsort() : basic functionality ***
+*** Testing ArrayObject::asort(SORT_FLAG_REVERSE) : basic functionality ***
 bool(true)
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
