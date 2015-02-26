@@ -2336,12 +2336,19 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMPVAR|UNUSED|CV, CONST|TMPVAR|CV)
 
 	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP2_TYPE != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (OP2_TYPE != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((OP2_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);

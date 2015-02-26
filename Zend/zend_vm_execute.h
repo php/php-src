@@ -19694,12 +19694,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 
 	function_name = EX_CONSTANT(opline->op2);
 
-	if (IS_CONST != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CONST != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_obj_zval_ptr_unused(execute_data);
@@ -21907,12 +21914,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 
 	function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (IS_CV != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CV != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_obj_zval_ptr_unused(execute_data);
@@ -23304,12 +23318,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_
 
 	function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_obj_zval_ptr_unused(execute_data);
@@ -26829,12 +26850,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 
 	function_name = EX_CONSTANT(opline->op2);
 
-	if (IS_CONST != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CONST != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
@@ -31118,12 +31146,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 
 	function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (IS_CV != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CV != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
@@ -33121,12 +33156,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCO
 
 	function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
@@ -34796,12 +34838,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_HANDLER(ZEND_O
 
 	function_name = EX_CONSTANT(opline->op2);
 
-	if (IS_CONST != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CONST != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -36414,12 +36463,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCO
 
 	function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (IS_CV != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CV != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -37077,12 +37133,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_
 
 	function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
