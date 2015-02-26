@@ -511,22 +511,19 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 }
 
 /* this should modify object only if it's empty */
-static inline int make_real_object(zval **object_ptr)
+static inline int make_real_object(zval *object)
 {
-	zval *object = *object_ptr;
-
-	ZVAL_DEREF(object);
 	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)
-			|| (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0)) {
+		if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)) {
+			/* nothing to destroy */
+		} else if (EXPECTED((Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 			zval_ptr_dtor_nogc(object);
-			object_init(object);
-			zend_error(E_WARNING, "Creating default object from empty value");
 		} else {
 			return 0;
 		}
+		object_init(object);
+		zend_error(E_WARNING, "Creating default object from empty value");
 	}
-	*object_ptr = object;
 	return 1;
 }
 
@@ -933,7 +930,7 @@ static zend_always_inline void zend_assign_to_object(zval *retval, zval *object,
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property;
 
-		if (EXPECTED(prop_offset != ZEND_DYNAMIC_PROPERTY_OFFSET)) {
+		if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
 			property = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property) != IS_UNDEF) {
 fast_assign:
@@ -1578,7 +1575,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		zend_object *zobj = Z_OBJ_P(container);
 		zval *retval;
 
-		if (EXPECTED(prop_offset != ZEND_DYNAMIC_PROPERTY_OFFSET)) {
+		if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
 			retval = OBJ_PROP(zobj, prop_offset);
 			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
 				ZVAL_INDIRECT(result, retval);
@@ -2022,7 +2019,7 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 
 static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data **call, uint32_t passed_args, uint32_t additional_args) /* {{{ */
 {
-	if (EXPECTED(EG(vm_stack_end) - EG(vm_stack_top) > additional_args)) {
+	if (EXPECTED((uint32_t)(EG(vm_stack_end) - EG(vm_stack_top)) > additional_args)) {
 		EG(vm_stack_top) += additional_args;
 	} else {
 		*call = zend_vm_stack_copy_call_frame(*call, passed_args, additional_args);
