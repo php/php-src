@@ -2377,7 +2377,7 @@ PHP_FUNCTION(array_unshift)
 	Z_ARRVAL_P(stack)->arData            = new_hash.arData;
 	Z_ARRVAL_P(stack)->arHash            = new_hash.arHash;
 	Z_ARRVAL_P(stack)->pDestructor       = new_hash.pDestructor;
-	
+
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
 
 	/* Clean up and return the number of elements in the stack */
@@ -3650,7 +3650,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		ZVAL_UNDEF(&list->val);
 		if (hash->nNumOfElements > 1) {
 			if (behavior == INTERSECT_NORMAL) {
-				zend_sort((void *) lists[i], hash->nNumOfElements, 
+				zend_sort((void *) lists[i], hash->nNumOfElements,
 						sizeof(Bucket), intersect_data_compare_func, (swap_func_t)zend_hash_bucket_swap);
 			} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
 				zend_sort((void *) lists[i], hash->nNumOfElements,
@@ -4677,14 +4677,14 @@ PHP_FUNCTION(array_product)
 PHP_FUNCTION(array_reduce)
 {
 	zval *input;
-	zval args[2];
-	zval *operand;
+	zval args[3];
 	zval result;
 	zval retval;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
 	zval *initial = NULL;
 	HashTable *htbl;
+	Bucket *operand;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "af|z", &input, &fci, &fci_cache, &initial) == FAILURE) {
 		return;
@@ -4707,20 +4707,28 @@ PHP_FUNCTION(array_reduce)
 	}
 
 	fci.retval = &retval;
-	fci.param_count = 2;
+	fci.param_count = 3;
 	fci.no_separation = 0;
 
-	ZEND_HASH_FOREACH_VAL(htbl, operand) {
+	ZEND_HASH_FOREACH_BUCKET(htbl, operand) {
 		ZVAL_COPY(&args[0], &result);
-		ZVAL_COPY(&args[1], operand);
+		ZVAL_COPY(&args[1], &(operand->val));
+		if (operand->key == NULL) {
+			ZVAL_LONG(&args[2], operand->h);
+		} else {
+			ZVAL_STRINGL(&args[2], operand->key->val, operand->key->len);
+		}
+
 		fci.params = args;
 
 		if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+			zval_ptr_dtor(&args[2]);
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
 			zval_ptr_dtor(&result);
 			ZVAL_COPY_VALUE(&result, &retval);
 		} else {
+			zval_ptr_dtor(&args[2]);
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
 			return;
