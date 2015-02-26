@@ -25,7 +25,6 @@ var_dump("php" in "foobar");
 echo "\n";
 
 var_dump(0 in "0");
-var_dump(0.0 in "0");
 
 ?>
 --EXPECTF--
@@ -49,5 +48,4 @@ bool(true)
 bool(true)
 bool(false)
 
-bool(true)
 bool(true)

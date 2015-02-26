@@ -1,5 +1,5 @@
 --TEST--
-In operator tests for arrays
+In operator tests for arrays and traversables
 --FILE--
 <?php
 
@@ -34,6 +34,11 @@ var_dump([0] in ["foo", 0, [0]]);
 var_dump([0] in [[[0]]]);
 var_dump([[0]] in [[[0]]]);
 
+echo "\n";
+
+var_dump(1 in (function(){ yield 1; print "must already have stopped..."; })());
+var_dump(0 in (function(){ yield 1; yield 2; })());
+
 ?>
 --EXPECT--
 bool(true)
@@ -57,3 +62,6 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+
+bool(true)
+bool(false)
