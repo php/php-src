@@ -706,6 +706,7 @@ ZEND_API void zend_wrong_paramer_type_error(int num, zend_expected_type expected
 ZEND_API void zend_wrong_paramer_class_error(int num, char *name, zval *arg);
 ZEND_API void zend_wrong_callback_error(int severity, int num, char *error);
 ZEND_API void zend_deprecated_paramer_type(int num, zend_expected_type expected_type, zval *arg);
+ZEND_API void zend_unexpected_null_paramer(int num, zend_expected_type expected_type);
 
 #define ZPP_ERROR_OK             0
 #define ZPP_ERROR_FAILURE        1
@@ -812,7 +813,7 @@ ZEND_API void zend_deprecated_paramer_type(int num, zend_expected_type expected_
 /* old "b" */
 #define Z_PARAM_BOOL_EX(dest, is_null, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
-		if (UNEXPECTED(!zend_parse_arg_bool(_i, _arg, &dest, &is_null, check_null))) { \
+		if (UNEXPECTED(!zend_parse_arg_bool(_i, _arg, &dest, &is_null, check_null, 1))) { \
 			_expected_type = Z_EXPECTED_BOOL; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -835,7 +836,7 @@ ZEND_API void zend_deprecated_paramer_type(int num, zend_expected_type expected_
 /* old "d" */
 #define Z_PARAM_DOUBLE_EX(dest, is_null, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
-		if (UNEXPECTED(!zend_parse_arg_double(_i, _arg, &dest, &is_null, check_null))) { \
+		if (UNEXPECTED(!zend_parse_arg_double(_i, _arg, &dest, &is_null, check_null, 1))) { \
 			_expected_type = Z_EXPECTED_DOUBLE; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -890,7 +891,7 @@ ZEND_API void zend_deprecated_paramer_type(int num, zend_expected_type expected_
 /* old "l" */
 #define Z_PARAM_LONG_EX(dest, is_null, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
-		if (UNEXPECTED(!zend_parse_arg_long(_i, _arg, &dest, &is_null, check_null, 0))) { \
+		if (UNEXPECTED(!zend_parse_arg_long(_i, _arg, &dest, &is_null, check_null, 0, 1))) { \
 			_expected_type = Z_EXPECTED_LONG; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -902,7 +903,7 @@ ZEND_API void zend_deprecated_paramer_type(int num, zend_expected_type expected_
 /* old "L" */
 #define Z_PARAM_STRICT_LONG_EX(dest, is_null, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
-		if (UNEXPECTED(!zend_parse_arg_long(_i, _arg, &dest, &is_null, check_null, 1))) { \
+		if (UNEXPECTED(!zend_parse_arg_long(_i, _arg, &dest, &is_null, check_null, 1, 1))) { \
 			_expected_type = Z_EXPECTED_LONG; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -992,7 +993,7 @@ ZEND_API void zend_deprecated_paramer_type(int num, zend_expected_type expected_
 /* old "S" */
 #define Z_PARAM_STR_EX(dest, check_null, separate) \
 		Z_PARAM_PROLOGUE(separate); \
-		if (UNEXPECTED(!zend_parse_arg_str(_i, _arg, &dest, check_null))) { \
+		if (UNEXPECTED(!zend_parse_arg_str(_i, _arg, &dest, check_null, 1))) { \
 			_expected_type = Z_EXPECTED_STRING; \
 			error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
@@ -1081,7 +1082,7 @@ ZEND_API void zend_deprecated_paramer_type(int num, zend_expected_type expected_
 ZEND_API int parse_arg_object_to_str(zval *arg, zend_string **str, int type);
 ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null);
 
-static zend_always_inline int zend_parse_arg_bool(int num, zval *arg, zend_bool *dest, zend_bool *is_null, int check_null)
+static zend_always_inline int zend_parse_arg_bool(int num, zval *arg, zend_bool *dest, zend_bool *is_null, int check_null, int is_internal)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -1093,7 +1094,11 @@ static zend_always_inline int zend_parse_arg_bool(int num, zval *arg, zend_bool 
 			*is_null = (Z_TYPE_P(arg) == IS_NULL);
 #if STH_DISABLE_NULL_TO_BOOL
 		}  if (Z_TYPE_P(arg) == IS_NULL) {
-			zend_deprecated_paramer_type(num, Z_EXPECTED_BOOL, arg);
+			if (is_internal && num >= 0) {
+				zend_unexpected_null_paramer(num, Z_EXPECTED_BOOL);
+			} else {
+				return 0;
+			}
 #endif
 		}
 		*dest = 0;
@@ -1101,15 +1106,27 @@ static zend_always_inline int zend_parse_arg_bool(int num, zval *arg, zend_bool 
 		if (0) {
 #if STH_DISABLE_INT_TO_BOOL
 		} else if (Z_TYPE_P(arg) == IS_LONG) {
-			zend_deprecated_paramer_type(num, Z_EXPECTED_BOOL, arg);
+			if (is_internal && num >= 0) {
+				zend_deprecated_paramer_type(num, Z_EXPECTED_BOOL, arg);
+			} else {
+				return 0;
+			}
 #endif
 #if STH_DISABLE_FLOAT_TO_BOOL
 		} else if (Z_TYPE_P(arg) == IS_DOUBLE) {
-			zend_deprecated_paramer_type(num, Z_EXPECTED_BOOL, arg);
+			if (is_internal && num >= 0) {
+				zend_deprecated_paramer_type(num, Z_EXPECTED_BOOL, arg);
+			} else {
+				return 0;
+			}
 #endif
 #if STH_DISABLE_STRING_TO_BOOL
 		} else if (Z_TYPE_P(arg) == IS_STRING) {
-			zend_deprecated_paramer_type(num, Z_EXPECTED_BOOL, arg);
+			if (is_internal && num >= 0) {
+				zend_deprecated_paramer_type(num, Z_EXPECTED_BOOL, arg);
+			} else {
+				return 0;
+			}
 #endif
 		}
 		*dest = zend_is_true(arg);
@@ -1119,7 +1136,7 @@ static zend_always_inline int zend_parse_arg_bool(int num, zval *arg, zend_bool 
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_long(int num, zval *arg, zend_long *dest, zend_bool *is_null, int check_null, int strict)
+static zend_always_inline int zend_parse_arg_long(int num, zval *arg, zend_long *dest, zend_bool *is_null, int check_null, int strict, int is_internal)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -1128,14 +1145,22 @@ static zend_always_inline int zend_parse_arg_long(int num, zval *arg, zend_long 
 		*dest = Z_LVAL_P(arg);
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
 #if STH_DISABLE_FLOAT_TO_INT
-		zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+		if (is_internal && num >= 0) {
+			zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+		} else {
+			return 0;
+		}
 #else
 		if (UNEXPECTED(zend_isnan(Z_DVAL_P(arg)))) {
 			return 0;
 		}
 #if STH_RESTRICT_FLOAT_TO_INT
 		if (!zend_dval_is_integer(Z_DVAL_P(arg))) {
-			zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+			if (is_internal && num >= 0) {
+				zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+			} else {
+				return 0;
+			}
 		}
 #endif
 		if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(Z_DVAL_P(arg)))) {
@@ -1156,14 +1181,22 @@ static zend_always_inline int zend_parse_arg_long(int num, zval *arg, zend_long 
 		if (UNEXPECTED((type = is_numeric_str_function(Z_STR_P(arg), dest, &d)) != IS_LONG)) {
 			if (EXPECTED(type != 0)) {
 #if STH_DISABLE_FLOAT_TO_INT
-				zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+				if (is_internal && num >= 0) {
+					zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+				} else {
+					return 0;
+				}
 #else
 				if (UNEXPECTED(zend_isnan(d))) {
 					return 0;
 				}
 #if STH_RESTRICT_FLOAT_TO_INT
 				if (!zend_dval_is_integer(d)) {
-					zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+					if (is_internal && num >= 0) {
+						zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+					} else {
+						return 0;
+					}
 				}
 #endif
 				if (UNEXPECTED(!ZEND_DOUBLE_FITS_LONG(d))) {
@@ -1185,13 +1218,21 @@ static zend_always_inline int zend_parse_arg_long(int num, zval *arg, zend_long 
 			*is_null = (zend_bool)1;
 #if STH_DISABLE_NULL_TO_INT
 		} else {
-			zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+			if (is_internal && num >= 0) {
+				zend_unexpected_null_paramer(num, Z_EXPECTED_LONG);
+			} else {
+				return 0;
+			}
 #endif
 		}
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_TRUE)) {
 #if STH_DISABLE_BOOL_TO_INT
-		zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+		if (is_internal && num >= 0) {
+			zend_deprecated_paramer_type(num, Z_EXPECTED_LONG, arg);
+		} else {
+			return 0;
+		}
 #endif
 		*dest = ((Z_TYPE_P(arg) == IS_TRUE) ? 1 : 0);
 	} else {
@@ -1200,7 +1241,7 @@ static zend_always_inline int zend_parse_arg_long(int num, zval *arg, zend_long 
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_double(int num, zval *arg, double *dest, zend_bool *is_null, int check_null)
+static zend_always_inline int zend_parse_arg_double(int num, zval *arg, double *dest, zend_bool *is_null, int check_null, int is_internal)
 {
 	if (check_null) {
 		*is_null = 0;
@@ -1225,13 +1266,21 @@ static zend_always_inline int zend_parse_arg_double(int num, zval *arg, double *
 			*is_null = (zend_bool)1;
 #if STH_DISABLE_NULL_TO_FLOAT
 		} else {
-			zend_deprecated_paramer_type(num, Z_EXPECTED_DOUBLE, arg);
+			if (is_internal && num >= 0) {
+				zend_unexpected_null_paramer(num, Z_EXPECTED_DOUBLE);
+			} else {
+				return 0;
+			}
 #endif
 		}
 		*dest = 0.0;
 	} else if (EXPECTED(Z_TYPE_P(arg) <= IS_TRUE)) {
 #if STH_DISABLE_BOOL_TO_FLOAT
-		zend_deprecated_paramer_type(num, Z_EXPECTED_DOUBLE, arg);
+		if (is_internal && num >= 0) {
+			zend_deprecated_paramer_type(num, Z_EXPECTED_DOUBLE, arg);
+		} else {
+			return 0;
+		}
 #endif
 		*dest = ((Z_TYPE_P(arg) == IS_TRUE) ? 1.0 : 0.0);
 	} else {
@@ -1240,7 +1289,7 @@ static zend_always_inline int zend_parse_arg_double(int num, zval *arg, double *
 	return 1;
 }
 
-static zend_always_inline int zend_parse_arg_str(int num, zval *arg, zend_string **dest, int check_null)
+static zend_always_inline int zend_parse_arg_str(int num, zval *arg, zend_string **dest, int check_null, int is_internal)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		*dest = Z_STR_P(arg);
@@ -1251,11 +1300,19 @@ static zend_always_inline int zend_parse_arg_str(int num, zval *arg, zend_string
 			if (0) {
 #if STH_DISABLE_NULL_TO_STRING
 			} else if (Z_TYPE_P(arg) == IS_NULL) {
-				zend_deprecated_paramer_type(num, Z_EXPECTED_STRING, arg);
+				if (is_internal && num >= 0) {
+					zend_unexpected_null_paramer(num, Z_EXPECTED_STRING);
+				} else {
+					return 0;
+				}
 #endif
 #if STH_DISABLE_BOOL_TO_STRING
 			} else if (UNEXPECTED(Z_TYPE_P(arg) <= IS_TRUE)) {
-				zend_deprecated_paramer_type(num, Z_EXPECTED_STRING, arg);
+				if (is_internal && num >= 0) {
+					zend_deprecated_paramer_type(num, Z_EXPECTED_STRING, arg);
+				} else {
+					return 0;
+				}
 #endif
 			}
 			if (Z_COPYABLE_P(arg) && Z_REFCOUNT_P(arg) > 1) {
@@ -1276,7 +1333,7 @@ static zend_always_inline int zend_parse_arg_string(int num, zval *arg, char **d
 {
 	zend_string *str;
 
-	if (!zend_parse_arg_str(num, arg, &str, check_null)) {
+	if (!zend_parse_arg_str(num, arg, &str, check_null, 1)) {
 		return 0;
 	}
 	if (check_null && UNEXPECTED(!str)) {
@@ -1291,7 +1348,7 @@ static zend_always_inline int zend_parse_arg_string(int num, zval *arg, char **d
 
 static zend_always_inline int zend_parse_arg_path_str(int num, zval *arg, zend_string **dest, int check_null)
 {
-	if (!zend_parse_arg_str(num, arg, dest, check_null) ||
+	if (!zend_parse_arg_str(num, arg, dest, check_null, 1) ||
 	    (*dest && UNEXPECTED(CHECK_NULL_PATH((*dest)->val, (*dest)->len)))) {
 		return 0;
 	}

@@ -273,13 +273,22 @@ ZEND_API void zend_deprecated_paramer_type(int num, zend_expected_type expected_
 		NULL
 	};
 
-	if (num >= 0) {
-		zend_error(E_DEPRECATED, "%s%s%s() expects parameter %d to be %s, %s given",
-			class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
-	} else {
-		zend_error(E_DEPRECATED, "%s%s%s() expects return value to be %s, %s returned",
-			class_name, space, get_active_function_name(), expected_error[expected_type], zend_zval_type_name(arg));
-	}
+	zend_error(E_DEPRECATED, "%s%s%s() expects parameter %d to be %s, %s given",
+		class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
+}
+/* }}} */
+
+ZEND_API void zend_unexpected_null_paramer(int num, zend_expected_type expected_type) /* {{{ */
+{
+	const char *space;
+	const char *class_name = get_active_class_name(&space);
+	static const char * const expected_error[] = {
+		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
+		NULL
+	};
+
+	zend_error(E_STRICT, "%s%s%s() expects parameter %d to be %s, null given",
+		class_name, space, get_active_function_name(), num, expected_error[expected_type]);
 }
 /* }}} */
 
@@ -372,7 +381,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_long(arg_num, arg, p, is_null, check_null, c == 'L')) {
+				if (!zend_parse_arg_long(arg_num, arg, p, is_null, check_null, c == 'L', 1)) {
 					return "integer";
 				}
 			}
@@ -387,7 +396,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_double(arg_num, arg, p, is_null, check_null)) {
+				if (!zend_parse_arg_double(arg_num, arg, p, is_null, check_null, 1)) {
 					return "float";
 				}
 			}
@@ -425,7 +434,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		case 'S':
 			{
 				zend_string **str = va_arg(*va, zend_string **);
-				if (!zend_parse_arg_str(arg_num, arg, str, check_null)) {
+				if (!zend_parse_arg_str(arg_num, arg, str, check_null, 1)) {
 					return "string";
 				}
 			}
@@ -440,7 +449,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 					is_null = va_arg(*va, zend_bool *);
 				}
 
-				if (!zend_parse_arg_bool(arg_num, arg, p, is_null, check_null)) {
+				if (!zend_parse_arg_bool(arg_num, arg, p, is_null, check_null, 1)) {
 					return "boolean";
 				}
 			}

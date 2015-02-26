@@ -536,7 +536,7 @@ static int zend_verify_scalar_type_hint(int arg_num, zend_uchar type_hint, zval 
 			if (Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE) {
 				return 1;
 			}
-			if (!zend_parse_arg_bool(arg_num, arg, &dest, NULL, 0)) {
+			if (!zend_parse_arg_bool(arg_num, arg, &dest, NULL, 0, 0)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -546,7 +546,7 @@ static int zend_verify_scalar_type_hint(int arg_num, zend_uchar type_hint, zval 
 		case IS_LONG: {
 			zend_long dest;
 
-			if (!zend_parse_arg_long(arg_num, arg, &dest, NULL, 0, 0)) {
+			if (!zend_parse_arg_long(arg_num, arg, &dest, NULL, 0, 0, 0)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -556,7 +556,7 @@ static int zend_verify_scalar_type_hint(int arg_num, zend_uchar type_hint, zval 
 		case IS_DOUBLE: {
 			double dest;
 
-			if (!zend_parse_arg_double(arg_num, arg, &dest, NULL, 0)) {
+			if (!zend_parse_arg_double(arg_num, arg, &dest, NULL, 0, 0)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -567,7 +567,7 @@ static int zend_verify_scalar_type_hint(int arg_num, zend_uchar type_hint, zval 
 			zend_string *dest;
 
 			/* on success "arg" is converted to IS_STRING */
-			if (!zend_parse_arg_str(arg_num, arg, &dest, 0)) {
+			if (!zend_parse_arg_str(arg_num, arg, &dest, 0, 0)) {
 				return 0;
 			}
 			return 1;
