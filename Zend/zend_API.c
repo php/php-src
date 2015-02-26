@@ -273,8 +273,13 @@ ZEND_API void zend_deprecated_paramer_type(int num, zend_expected_type expected_
 		NULL
 	};
 
-	zend_error(E_DEPRECATED, "%s%s%s() expects parameter %d to be %s, %s given",
-		class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
+	if (num >= 0) {
+		zend_error(E_DEPRECATED, "%s%s%s() expects parameter %d to be %s, %s given",
+			class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
+	} else {
+		zend_error(E_DEPRECATED, "%s%s%s() expects return value to be %s, %s returned",
+			class_name, space, get_active_function_name(), expected_error[expected_type], zend_zval_type_name(arg));
+	}
 }
 /* }}} */
 

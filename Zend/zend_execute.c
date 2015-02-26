@@ -527,7 +527,7 @@ static inline int make_real_object(zval *object)
 	return 1;
 }
 
-static int zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg)
+static int zend_verify_scalar_type_hint(int arg_num, zend_uchar type_hint, zval *arg)
 {
 	switch (type_hint) {
 		case _IS_BOOL: {
@@ -536,7 +536,7 @@ static int zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg)
 			if (Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE) {
 				return 1;
 			}
-			if (!zend_parse_arg_bool(arg, &dest, NULL, 0)) {
+			if (!zend_parse_arg_bool(arg_num, arg, &dest, NULL, 0)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -546,7 +546,7 @@ static int zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg)
 		case IS_LONG: {
 			zend_long dest;
 
-			if (!zend_parse_arg_long(arg, &dest, NULL, 0, 0)) {
+			if (!zend_parse_arg_long(arg_num, arg, &dest, NULL, 0, 0)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -556,7 +556,7 @@ static int zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg)
 		case IS_DOUBLE: {
 			double dest;
 
-			if (!zend_parse_arg_double(arg, &dest, NULL, 0)) {
+			if (!zend_parse_arg_double(arg_num, arg, &dest, NULL, 0)) {
 				return 0;
 			}
 			zval_ptr_dtor(arg);
@@ -567,7 +567,7 @@ static int zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg)
 			zend_string *dest;
 
 			/* on success "arg" is converted to IS_STRING */
-			if (!zend_parse_arg_str(arg, &dest, 0)) {
+			if (!zend_parse_arg_str(arg_num, arg, &dest, 0)) {
 				return 0;
 			}
 			return 1;
@@ -689,7 +689,7 @@ static void zend_verify_internal_arg_type(zend_function *zf, uint32_t arg_num, z
 				if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL)) {
 					zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
 				}
-			} else if (!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg)) {
+			} else if (!zend_verify_scalar_type_hint(arg_num, cur_arg_info->type_hint, arg)) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "", arg);
 			}
 		}
@@ -727,7 +727,7 @@ static void zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg,
 				if (!zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL)) {
 					zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "", arg);
 				}
-			} else if (!zend_verify_scalar_type_hint(cur_arg_info->type_hint, arg)) {
+			} else if (!zend_verify_scalar_type_hint(arg_num, cur_arg_info->type_hint, arg)) {
 				zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type ", zend_get_type_by_const(cur_arg_info->type_hint), zend_zval_type_name(arg), "", arg);
 			}
 		}
@@ -824,7 +824,7 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 					zend_verify_return_error(E_CORE_ERROR, zf, "be callable", "", zend_zval_type_name(ret), "");
 					return 0;
 				}
-			} else if (!zend_verify_scalar_type_hint(ret_info->type_hint, ret)) {
+			} else if (!zend_verify_scalar_type_hint(-1, ret_info->type_hint, ret)) {
 				zend_verify_return_error(E_CORE_ERROR, zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
 				return 0;
 			}
@@ -856,7 +856,7 @@ static void zend_verify_return_type(zend_function *zf, zval *ret)
 				if (!zend_is_callable(ret, IS_CALLABLE_CHECK_SILENT, NULL)) {
 					zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be callable", "", zend_zval_type_name(ret), "");
 				}
-			} else if (!zend_verify_scalar_type_hint(ret_info->type_hint, ret)) {
+			} else if (!zend_verify_scalar_type_hint(-1, ret_info->type_hint, ret)) {
 				zend_verify_return_error(E_RECOVERABLE_ERROR, zf, "be of the type ", zend_get_type_by_const(ret_info->type_hint), zend_zval_type_name(ret), "");
 			}
 		}
