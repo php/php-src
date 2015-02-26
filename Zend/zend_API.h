@@ -1050,10 +1050,7 @@ ZEND_API void zend_unexpected_null_paramer(int num, zend_expected_type expected_
 /*
  * The flags below allow to modify the behavior of the ZPP layer.
  * Theer settiongs implement the ruleset proposed in
- * https://wiki.php.net/rfc/coercive_sth, except the following points, which
- * are not implemented yet :
- *
- *	- Changes in the way numeric strings are converted to int/float
+ * https://wiki.php.net/rfc/coercive_sth
  */
 
 /* Restrict conversions from IS_NULL */
