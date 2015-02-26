@@ -28,7 +28,6 @@
 #include "zend_operators.h"
 #include "zend_variables.h"
 #include "zend_execute.h"
-#include "zend_tmp_sth.h"
 
 
 BEGIN_EXTERN_C()
@@ -1046,6 +1045,38 @@ ZEND_API void zend_deprecated_paramer_type(int num, zend_expected_type expected_
 /* End of new parameter parsing API */
 
 /* Inlined implementations shared by new and old parameter parsing APIs */
+
+/*
+ * The flags below allow to modify the behavior of the ZPP layer.
+ * Theer settiongs implement the ruleset proposed in
+ * https://wiki.php.net/rfc/coercive_sth, except the following points, which
+ * are not implemented yet :
+ *
+ *	- Changes in the way numeric strings are converted to int/float
+ */
+
+/* Restrict conversions from IS_NULL */
+#define STH_DISABLE_NULL_TO_BOOL	1
+#define STH_DISABLE_NULL_TO_INT		1
+#define STH_DISABLE_NULL_TO_FLOAT	1
+#define STH_DISABLE_NULL_TO_STRING	1
+
+/* Restrict conversions from IS_FALSE/IS_TRUE */
+#define STH_DISABLE_BOOL_TO_INT		1
+#define STH_DISABLE_BOOL_TO_FLOAT	1
+#define STH_DISABLE_BOOL_TO_STRING	1
+/* Restrict conversions to bool */
+
+#define STH_DISABLE_INT_TO_BOOL		0
+#define STH_DISABLE_FLOAT_TO_BOOL	0
+#define STH_DISABLE_STRING_TO_BOOL	0
+
+/* Other restrictions */
+#define STH_DISABLE_FLOAT_TO_INT	0
+
+/* Accepts null fractional part only.
+   Ignored when STH_DISABLE_FLOAT_TO_INT is set */
+#define STH_RESTRICT_FLOAT_TO_INT	1
 
 ZEND_API int parse_arg_object_to_str(zval *arg, zend_string **str, int type);
 ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null);

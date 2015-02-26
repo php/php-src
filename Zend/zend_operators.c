@@ -30,7 +30,6 @@
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
-#include "zend_tmp_sth.h"
 
 #if ZEND_USE_TOLOWER_L
 #include <locale.h>
