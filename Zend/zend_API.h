@@ -1304,7 +1304,8 @@ static zend_always_inline int zend_parse_arg_str(int num, zval *arg, zend_string
 				}
 #endif
 #if STH_DISABLE_BOOL_TO_STRING
-			} else if (UNEXPECTED(Z_TYPE_P(arg) <= IS_TRUE)) {
+			} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_FALSE) ||
+			           UNEXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
 				if (is_internal && num >= 0) {
 					zend_deprecated_paramer_type(num, Z_EXPECTED_STRING, arg);
 				} else {
