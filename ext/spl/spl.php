@@ -589,7 +589,7 @@ interface Sortable
 
 	/** Sort the entries by values using user defined function.
 	 */
-	function usort(mixed cmp_function, $sort_flags = SORT_REGULAR);
+	function usort(mixed cmp_function);
 }
 
 
@@ -605,7 +605,7 @@ interface SortableAssoc
 
 	/** Sort the entries by values using user defined function and maintain index.
 	 */
-	function uasort(mixed cmp_function, $sort_flags = SORT_REGULAR);
+	function uasort(mixed cmp_function);
 }
 
 /** @ingroup SPL
@@ -620,7 +620,7 @@ interface SortableKeys
 
 	/** Sort the entries by key using user defined function.
 	 */
-	function uksort(mixed cmp_function, $sort_flags = SORT_REGULAR);
+	function uksort(mixed cmp_function);
 }
 
 /** @ingroup ZendEngine
