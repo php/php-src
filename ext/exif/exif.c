@@ -158,7 +158,7 @@ ZEND_DECLARE_MODULE_GLOBALS(exif)
 #ifdef ZTS
 #define EXIF_G(v) ZEND_TSRMG(exif_globals_id, zend_exif_globals *, v)
 #ifdef COMPILE_DL_EXIF
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 #else
 #define EXIF_G(v) (exif_globals.v)
@@ -212,7 +212,7 @@ PHP_INI_END()
 static PHP_GINIT_FUNCTION(exif)
 {
 #if defined(COMPILE_DL_EXIF) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	exif_globals->encode_unicode    = NULL;
 	exif_globals->decode_unicode_be = NULL;

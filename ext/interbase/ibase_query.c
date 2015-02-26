@@ -910,8 +910,8 @@ static int _php_ibase_exec(INTERNAL_FUNCTION_PARAMETERS, ibase_result **ib_resul
 			(*l)->trans = trans;
 			(*l)->next = NULL;
 
-			ZEND_REGISTER_RESOURCE(return_value, trans, le_trans);
-			Z_ADDREF_P(return_value);
+			RETVAL_RES(zend_register_resource(trans, le_trans));
+			Z_TRY_ADDREF_P(return_value);
 
 			return SUCCESS;
 
@@ -1080,8 +1080,8 @@ PHP_FUNCTION(ibase_query)
 		    if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 3, "rrs",
 					&zlink, &ztrans, &query, &query_len)) {
 
-				ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link*, zlink, -1, LE_LINK, le_link, le_plink);
-				ZEND_FETCH_RESOURCE(trans, ibase_trans*, ztrans, -1, LE_TRANS,	le_trans);
+				ib_link = (ibase_db_link*)zend_fetch_resource2_ex(zlink, LE_LINK, le_link, le_plink);
+				trans = (ibase_trans*)zend_fetch_resource_ex(ztrans, LE_TRANS,	le_trans);
 
 				trans_res_id = Z_RES_P(ztrans)->handle;
 				bind_i = 3;
@@ -1131,8 +1131,8 @@ PHP_FUNCTION(ibase_query)
 					ib_link->tr_list = NULL;
 					ib_link->event_head = NULL;
 
-					ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
-					Z_ADDREF_P(return_value);
+					RETVAL_RES(zend_register_resource(ib_link, le_link));
+					Z_TRY_ADDREF_P(return_value);
 					IBG(default_link) = Z_RES_P(return_value)->handle;
 					++IBG(num_links);
 				}
@@ -1142,7 +1142,7 @@ PHP_FUNCTION(ibase_query)
 		case 0:
 			if (SUCCESS == zend_parse_parameters(ZEND_NUM_ARGS() ? 1 : 0, "s", &query,
 					&query_len)) {
-				ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK,
+				ib_link = (ibase_db_link *)zend_fetch_resource2_ex(IBG(default_link), LE_LINK,
 			    	le_link, le_plink);
 
 				bind_i = 1;
@@ -1186,8 +1186,8 @@ PHP_FUNCTION(ibase_query)
 			if (ib_query.statement_type != isc_info_sql_stmt_exec_procedure) {
 				ib_query.stmt = NULL; /* keep stmt when free query */
 			}
-			ZEND_REGISTER_RESOURCE(return_value, result, le_result);
-			Z_ADDREF_P(return_value);
+			RETVAL_RES(zend_register_resource(result, le_result));
+			Z_TRY_ADDREF_P(return_value);
 		}
 	} while (0);
 
@@ -1211,7 +1211,7 @@ PHP_FUNCTION(ibase_affected_rows)
 	}
 
 	if (!arg) {
-		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK, le_link, le_plink);
+		ib_link = (ibase_db_link *)zend_fetch_resource2_ex(IBG(default_link), LE_LINK, le_link, le_plink);
 		if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 			RETURN_FALSE;
 		}
@@ -1220,7 +1220,7 @@ PHP_FUNCTION(ibase_affected_rows)
 		/* one id was passed, could be db or trans id */
 		_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, arg, &ib_link, &trans);
 		if (trans == NULL) {
-			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, arg, -1, LE_LINK, le_link, le_plink);
+			ib_link = (ibase_db_link *)zend_fetch_resource2_ex(arg, LE_LINK, le_link, le_plink);
 
 			if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 				RETURN_FALSE;
@@ -1268,7 +1268,7 @@ PHP_FUNCTION(ibase_num_rows)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_result, ibase_result *, &result_arg, -1, LE_RESULT, le_result);
+	ib_result = (ibase_result *)zend_fetch_resource_ex(&result_arg, LE_RESULT, le_result);
 
 	if (isc_dsql_sql_info(IB_STATUS, &ib_result->stmt, sizeof(info_count), info_count, sizeof(result), result)) {
 		_php_ibase_error();
@@ -1335,7 +1335,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 #else
 			if (scale == 0) {
 				l = slprintf(string_data, sizeof(string_data), "%" LL_MASK "d", *(ISC_INT64 *) data);
-				ZVAL_STRINGL(val,string_data,l,1);
+				ZVAL_STRINGL(val,string_data,l);
 			} else {
 				ISC_INT64 n = *(ISC_INT64 *) data, f = scales[-scale];
 
@@ -1346,7 +1346,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 				 } else {
 					l = slprintf(string_data, sizeof(string_data), "-0.%0*" LL_MASK "d", -scale, -n % f);
 				}
-				ZVAL_STRINGL(val,string_data,l,1);
+				ZVAL_STRINGL(val,string_data,l);
 			}
 			break;
 #endif
@@ -1482,7 +1482,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result_arg, -1, LE_RESULT, le_result);
+	ib_result = (ibase_result *)zend_fetch_resource_ex(result_arg, LE_RESULT, le_result);
 
 	if (ib_result->out_sqlda == NULL || !ib_result->has_more_rows) {
 		RETURN_FALSE;
@@ -1698,7 +1698,7 @@ PHP_FUNCTION(ibase_name_result)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result_arg, -1, LE_RESULT, le_result);
+	ib_result = (ibase_result *)zend_fetch_resource_ex(result_arg, LE_RESULT, le_result);
 
 	if (isc_dsql_set_cursor_name(IB_STATUS, &ib_result->stmt, name_arg, 0)) {
 		_php_ibase_error();
@@ -1722,7 +1722,7 @@ PHP_FUNCTION(ibase_free_result)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result_arg, -1, LE_RESULT, le_result);
+	ib_result = (ibase_result *)zend_fetch_resource_ex(result_arg, LE_RESULT, le_result);
 	zend_list_delete(Z_RES_P(result_arg));
 	RETURN_TRUE;
 }
@@ -1745,7 +1745,7 @@ PHP_FUNCTION(ibase_prepare)
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &query, &query_len) == FAILURE) {
 			return;
 		}
-		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK, le_link, le_plink);
+		ib_link = (ibase_db_link *)zend_fetch_resource2_ex(IBG(default_link), LE_LINK, le_link, le_plink);
 	} else if (ZEND_NUM_ARGS() == 2) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &link_arg, &query, &query_len) == FAILURE) {
 			return;
@@ -1759,8 +1759,8 @@ PHP_FUNCTION(ibase_prepare)
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrs", &link_arg, &trans_arg, &query, &query_len) == FAILURE) {
 			return;
 		}
-		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, -1, LE_LINK, le_link, le_plink);
-		ZEND_FETCH_RESOURCE(trans, ibase_trans *, trans_arg, -1, LE_TRANS, le_trans);
+		ib_link = (ibase_db_link *)zend_fetch_resource2_ex(link_arg, LE_LINK, le_link, le_plink);
+		trans = (ibase_trans *)zend_fetch_resource_ex(trans_arg, LE_TRANS, le_trans);
 		trans_res_id = Z_RES_P(trans_arg)->handle;
 	}
 
@@ -1774,8 +1774,8 @@ PHP_FUNCTION(ibase_prepare)
 		efree(ib_query);
 		RETURN_FALSE;
 	}
-	ZEND_REGISTER_RESOURCE(return_value, ib_query, le_query);
-	Z_ADDREF_P(return_value);
+	RETVAL_RES(zend_register_resource(ib_query, le_query));
+	Z_TRY_ADDREF_P(return_value);
 }
 /* }}} */
 
@@ -1796,7 +1796,7 @@ PHP_FUNCTION(ibase_execute)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, query, -1, LE_QUERY, le_query);
+	ib_query = (ibase_query *)zend_fetch_resource_ex(query, LE_QUERY, le_query);
 
 	do {
 		int	expected_n = ib_query->in_sqlda ? ib_query->in_sqlda->sqld : 0;
@@ -1849,8 +1849,8 @@ PHP_FUNCTION(ibase_execute)
 			ret = zend_list_insert(result, le_result);
 			ib_query->result_res_id = Z_RES_HANDLE_P(ret);
 			ZVAL_COPY_VALUE(return_value, ret);
-			Z_ADDREF_P(return_value);
-			Z_ADDREF_P(return_value);
+			Z_TRY_ADDREF_P(return_value);
+			Z_TRY_ADDREF_P(return_value);
 		}
 	} while (0);
 }
@@ -1869,7 +1869,7 @@ PHP_FUNCTION(ibase_free_query)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, query_arg, -1, LE_QUERY, le_query);
+	ib_query = (ibase_query *)zend_fetch_resource_ex(query_arg, LE_QUERY, le_query);
 	zend_list_close(Z_RES_P(query_arg));
 	RETURN_TRUE;
 }
@@ -1894,12 +1894,12 @@ PHP_FUNCTION(ibase_num_fields)
 	if (type == le_query) {
 		ibase_query *ib_query;
 
-		ZEND_FETCH_RESOURCE(ib_query, ibase_query *, result, -1, LE_QUERY, le_query);
+		ib_query = (ibase_query *)zend_fetch_resource_ex(result, LE_QUERY, le_query);
 		sqlda = ib_query->out_sqlda;
 	} else {
 		ibase_result *ib_result;
 
-		ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result, -1, LE_RESULT, le_result);
+		ib_result = (ibase_result *)zend_fetch_resource_ex(result, LE_RESULT, le_result);
 		sqlda = ib_result->out_sqlda;
 	}
 
@@ -2018,12 +2018,12 @@ PHP_FUNCTION(ibase_field_info)
 	if (type == le_query) {
 		ibase_query *ib_query;
 
-		ZEND_FETCH_RESOURCE(ib_query, ibase_query *, result_arg, -1, LE_QUERY, le_query);
+		ib_query= (ibase_query *)zend_fetch_resource_ex(result_arg, LE_QUERY, le_query);
 		sqlda = ib_query->out_sqlda;
 	} else {
 		ibase_result *ib_result;
 
-		ZEND_FETCH_RESOURCE(ib_result, ibase_result *, result_arg, -1, LE_RESULT, le_result);
+		ib_result = (ibase_result *)zend_fetch_resource_ex(result_arg, LE_RESULT, le_result);
 		sqlda = ib_result->out_sqlda;
 	}
 
@@ -2052,7 +2052,7 @@ PHP_FUNCTION(ibase_num_params)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, result, -1, LE_QUERY, le_query);
+	ib_query = (ibase_query *)zend_fetch_resource_ex(result, LE_QUERY, le_query);
 
 	if (ib_query->in_sqlda == NULL) {
 		RETURN_LONG(0);
@@ -2076,7 +2076,7 @@ PHP_FUNCTION(ibase_param_info)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, result_arg, -1, LE_QUERY, le_query);
+	ib_query = (ibase_query *)zend_fetch_resource_ex(result_arg, LE_QUERY, le_query);
 
 	if (ib_query->in_sqlda == NULL) {
 		RETURN_FALSE;

@@ -91,7 +91,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->literals = NULL;
 
 	op_array->run_time_cache = NULL;
-	op_array->last_cache_slot = 0;
+	op_array->cache_size = 0;
 
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
@@ -130,7 +130,8 @@ ZEND_API void zend_function_dtor(zval *zv)
 
 ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
-	if (op_array->static_variables) {
+	if (op_array->static_variables &&
+	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
 		zend_hash_clean(op_array->static_variables);
 	}
 }
@@ -317,16 +318,18 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	zval *end;
 	uint32_t i;
 
-	if (op_array->static_variables) {
-		zend_hash_destroy(op_array->static_variables);
-		FREE_HASHTABLE(op_array->static_variables);
+	if (op_array->static_variables &&
+	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
+	    if (--GC_REFCOUNT(op_array->static_variables) == 0) {
+			zend_array_destroy(op_array->static_variables);
+		}
 	}
 
 	if (op_array->run_time_cache && !op_array->function_name) {
 		efree(op_array->run_time_cache);
 	}
 
-	if (--(*op_array->refcount)>0) {
+	if (!op_array->refcount || --(*op_array->refcount)>0) {
 		return;
 	}
 
@@ -766,8 +769,10 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_NEW:
-			case ZEND_FE_RESET:
-			case ZEND_FE_FETCH:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_VERIFY_RETURN_TYPE:
@@ -861,6 +866,8 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 			return (binary_op_type) is_smaller_function;
 		case ZEND_IS_SMALLER_OR_EQUAL:
 			return (binary_op_type) is_smaller_or_equal_function;
+		case ZEND_SPACESHIP:
+			return (binary_op_type) compare_function;
 		case ZEND_BW_OR:
 		case ZEND_ASSIGN_BW_OR:
 			return (binary_op_type) bitwise_or_function;

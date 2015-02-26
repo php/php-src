@@ -457,7 +457,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	zval_ptr_dtor(&patt);
 
 	ZVAL_STRING(&repl, rep);
-	res = php_pcre_replace_impl(pce, ms->o.buf, strlen(ms->o.buf), &repl, 0, -1, &rep_cnt);
+	res = php_pcre_replace_impl(pce, NULL, ms->o.buf, strlen(ms->o.buf), &repl, 0, -1, &rep_cnt);
 
 	zval_ptr_dtor(&repl);
 	if (NULL == res) {

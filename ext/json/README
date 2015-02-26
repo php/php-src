@@ -1,76 +1,16 @@
-json 1.2.0
+JSON
 ==========
 
+
 This extension implements the JavaScript Object Notation (JSON)
-data-interchange format as specified in [0].
+data-interchange format as specified in RFC 7159
 
-Two functions are implemented: encoding and decoding. The decoding
-is handled by a parser based on JSON_checker[1] by Douglas Crockford.
+The parser is implemented using re2c and Bison. The used versions
+of both tools for generating files in the repository are following:
 
+re2c 0.13.7.5
+Bison 3.0.4
 
-Function overview
------------------
-
-    string json_encode ( mixed value )
-
-json_encode returns a string containing the JSON representation of value.
-value can be any type except a resource.
-
-    mixed json_decode ( string json, [bool assoc] )
-
-json_decode takes a JSON string and converts it into a PHP variable.
-When assoc is given, and evaluates to TRUE, json_decode() will return
-any objects as associative arrays.
-
-
-Example usage
--------------
-
-$arr = array("a"=>1,"b"=>2,"c"=>3,"d"=>4,"e"=>5);
-echo json_encode($arr);
-
----> {"a":1,"b":2,"c":3,"d":4,"e":5}
-
-$json = '{"a":1,"b":2,"c":3,"d":4,"e":5}';
-var_dump(json_decode($json));
-
----> object(stdClass)#1 (5) {
-        ["a"]=>
-        int(1)
-        ["b"]=>
-        int(2)
-        ["c"]=>
-        int(3)
-        ["d"]=>
-        int(4)
-        ["e"]=>
-        int(5)
-     }
-
-$json = '{"a":1,"b":2,"c":3,"d":4,"e":5}';
-var_dump(json_decode($json, true));
-
----> array(5) {
-        ["a"]=>
-        int(1)
-        ["b"]=>
-        int(2)
-        ["c"]=>
-        int(3)
-        ["d"]=>
-        int(4)
-        ["e"]=>
-        int(5)
-     }
-
-
-Authors
--------
-
-Omar Kilani <omar@php.net>
-
-
----
-
-[0] http://www.crockford.com/JSON/draft-jsonorg-json-00.txt
-[1] http://www.crockford.com/JSON/JSON_checker/
+It is recommended to do all contributions to the JSON extension
+through the Github Pull Requests and preferably ping @bukka
+who maintains the extension.

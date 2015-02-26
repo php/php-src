@@ -505,11 +505,11 @@ PHP_FUNCTION(ibase_errcode)
 void _php_ibase_error(void) /* {{{ */
 {
 	char *s = IBG(errmsg);
-	ISC_STATUS *statusp = IB_STATUS;
+	const ISC_STATUS *statusp = IB_STATUS;
 
 	IBG(sql_code) = isc_sqlcode(IB_STATUS);
 
-	while ((s - IBG(errmsg)) < MAX_ERRMSG - (IBASE_MSGSIZE + 2) && isc_interprete(s, &statusp)) {
+	while ((s - IBG(errmsg)) < MAX_ERRMSG - (IBASE_MSGSIZE + 2) && fb_interpret(s, MAX_ERRMSG, &statusp)) {
 		strcat(IBG(errmsg), " ");
 		s = IBG(errmsg) + strlen(IBG(errmsg));
 	}
@@ -553,7 +553,7 @@ void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 		/* Transaction resource: make sure it refers to one link only, then
 		   fetch it; database link is stored in ib_trans->db_link[]. */
 		IBDEBUG("Type is le_trans");
-		ZEND_FETCH_RESOURCE(*trans, ibase_trans *, link_id, -1, LE_TRANS, le_trans);
+		*trans = (ibase_trans *)zend_fetch_resource_ex(link_id, LE_TRANS, le_trans);
 		if ((*trans)->link_cnt > 1) {
 			_php_ibase_module_error("Link id is ambiguous: transaction spans multiple connections."
 				);
@@ -565,7 +565,7 @@ void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 	IBDEBUG("Type is le_[p]link or id not found");
 	/* Database link resource, use default transaction. */
 	*trans = NULL;
-	ZEND_FETCH_RESOURCE2(*ib_link, ibase_db_link *, link_id, -1, LE_LINK, le_link, le_plink);
+	*ib_link = (ibase_db_link *)zend_fetch_resource2_ex(link_id, LE_LINK, le_link, le_plink);
 }
 /* }}} */
 
@@ -941,7 +941,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			xlink->gc.refcount++;
 			xlink->gc.refcount++;
 			IBG(default_link) = xlink->handle;
-			RETURN_RES(xlink);
+			RETVAL_RES(xlink);
 		} else {
 			zend_hash_str_del(&EG(regular_list), hash, sizeof(hash)-1);
 		}
@@ -961,7 +961,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			/* check if connection has timed out */
 			ib_link = (ibase_db_link *) le->ptr;
 			if (!isc_database_info(status, &ib_link->handle, sizeof(info), info, sizeof(result), result)) {
-				ZEND_REGISTER_RESOURCE(return_value, ib_link, le_plink);
+				RETVAL_RES(zend_register_resource(ib_link, le_plink));
 				break;
 			}
 			zend_hash_str_del(&EG(persistent_list), hash, sizeof(hash)-1);
@@ -982,7 +982,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 		/* use non-persistent if allowed number of persistent links is exceeded */
 		if (!persistent || ((l = INI_INT("ibase.max_persistent") != -1) && IBG(num_persistent) >= l)) {
 			ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
-			ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
+			RETVAL_RES(zend_register_resource(ib_link, le_link));
 		} else {
 			zend_resource new_le;
 
@@ -999,7 +999,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 				free(ib_link);
 				RETURN_FALSE;
 			}
-			ZEND_REGISTER_RESOURCE(return_value, ib_link, le_plink);
+			RETVAL_RES(zend_register_resource(ib_link, le_plink));
 			++IBG(num_persistent);
 		}
 		ib_link->handle = db_handle;
@@ -1024,8 +1024,8 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 		}
 	}
 	IBG(default_link) = Z_RES_P(return_value)->handle;
-	Z_ADDREF_P(return_value);
-	Z_ADDREF_P(return_value);
+	Z_TRY_ADDREF_P(return_value);
+	Z_TRY_ADDREF_P(return_value);
 }
 /* }}} */
 
@@ -1067,7 +1067,7 @@ PHP_FUNCTION(ibase_close)
 		link_id = Z_RES_P(link_arg)->handle;
 	}
 
-	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, LE_LINK, le_link, le_plink);
+	ib_link = (ibase_db_link *)zend_fetch_resource2_ex(link_arg, LE_LINK, le_link, le_plink);
 	if (!link_arg) {
 		link_arg = zend_hash_index_find(&EG(regular_list), link_id);
 		zend_list_delete(Z_RES_P(link_arg));
@@ -1105,7 +1105,7 @@ PHP_FUNCTION(ibase_drop_db)
 		link_id = Z_RES_P(link_arg)->handle;
 	}
 
-	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, link_arg, link_id, LE_LINK, le_link, le_plink);
+	ib_link = (ibase_db_link *)zend_fetch_resource2_ex(link_arg, LE_LINK, le_link, le_plink);
 
 	if (isc_drop_database(IB_STATUS, &ib_link->handle)) {
 		_php_ibase_error();
@@ -1168,7 +1168,7 @@ PHP_FUNCTION(ibase_trans)
 
 			if (Z_TYPE(args[i]) == IS_RESOURCE) {
 
-				if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link[link_cnt], ibase_db_link *, &args[i], -1, LE_LINK, le_link, le_plink)) {
+				if ((ib_link[link_cnt] = (ibase_db_link *)zend_fetch_resource2_ex(&args[i], LE_LINK, le_link, le_plink)) == NULL) {
 					efree(teb);
 					efree(tpb);
 					efree(ib_link);
@@ -1236,7 +1236,7 @@ PHP_FUNCTION(ibase_trans)
 
 	if (link_cnt == 0) {
 		link_cnt = 1;
-		if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link[0], ibase_db_link *, NULL, IBG(default_link), LE_LINK, le_link, le_plink)) {
+		if ((ib_link[0] = (ibase_db_link *)zend_fetch_resource2_ex(IBG(default_link), LE_LINK, le_link, le_plink)) == NULL) {
 			efree(ib_link);
 			RETURN_FALSE;
 		}
@@ -1273,8 +1273,8 @@ PHP_FUNCTION(ibase_trans)
 		(*l)->next = NULL;
 	}
 	efree(ib_link);
-	ZEND_REGISTER_RESOURCE(return_value, ib_trans, le_trans);
-	Z_ADDREF_P(return_value);
+	RETVAL_RES(zend_register_resource(ib_trans, le_trans));
+	Z_TRY_ADDREF_P(return_value);
 }
 /* }}} */
 
@@ -1330,7 +1330,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 	}
 
 	if (ZEND_NUM_ARGS() == 0) {
-		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK, le_link, le_plink);
+		ib_link = (ibase_db_link *)zend_fetch_resource2_ex(IBG(default_link), LE_LINK, le_link, le_plink);
 		if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 			/* this link doesn't have a default transaction */
 			_php_ibase_module_error("Default link has no default transaction");
@@ -1340,10 +1340,10 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 	} else {
 		/* one id was passed, could be db or trans id */
 		if (Z_RES_P(arg)->type == le_trans) {
-			ZEND_FETCH_RESOURCE(trans, ibase_trans *, arg, -1, LE_TRANS, le_trans);
+			trans = (ibase_trans *)zend_fetch_resource_ex(arg, LE_TRANS, le_trans);
 			res_id = Z_RES_P(arg)->handle;
 		} else {
-			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, arg, -1, LE_LINK, le_link, le_plink);
+			ib_link = (ibase_db_link *)zend_fetch_resource2_ex(arg, LE_LINK, le_link, le_plink);
 
 			if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 				/* this link doesn't have a default transaction */
@@ -1467,7 +1467,7 @@ PHP_FUNCTION(ibase_gen_id)
 		int l;
 
 		l = spprintf(&res, 0, "%" LL_MASK "d", result);
-		RETURN_STRINGL(res, l, 0);
+		RETURN_STRINGL(res, l);
 	}
 #endif
 	RETURN_LONG((long)result);

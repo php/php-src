@@ -599,7 +599,7 @@ PHPDBG_COMMAND(run) /* {{{ */
 
 		/* clean up from last execution */
 		if (ex && ex->symbol_table) {
-			zend_hash_clean(&ex->symbol_table->ht);
+			zend_hash_clean(ex->symbol_table);
 		} else {
 			zend_rebuild_symbol_table();
 		}
@@ -705,7 +705,7 @@ PHPDBG_COMMAND(ev) /* {{{ */
 
 	if (PHPDBG_G(flags) & PHPDBG_IN_SIGNAL_HANDLER) {
 		phpdbg_try_access {
-			phpdbg_parse_variable(param->str, param->len, &EG(symbol_table).ht, 0, phpdbg_output_ev_variable, 0);
+			phpdbg_parse_variable(param->str, param->len, &EG(symbol_table), 0, phpdbg_output_ev_variable, 0);
 		} phpdbg_catch_access {
 			phpdbg_error("signalsegv", "", "Could not fetch data, invalid data source");
 		} phpdbg_end_try_access();
@@ -1454,7 +1454,10 @@ next:
 		PHPDBG_G(last_line) = execute_data->opline->lineno;
 
 		/* stupid hack to make zend_do_fcall_common_helper return ZEND_VM_ENTER() instead of recursively calling zend_execute() and eventually segfaulting */
-		if (execute_data->opline->opcode == ZEND_DO_FCALL && execute_data->func->type == ZEND_USER_FUNCTION) {
+		if ((execute_data->opline->opcode == ZEND_DO_FCALL ||
+		     execute_data->opline->opcode == ZEND_DO_UCALL ||
+		     execute_data->opline->opcode == ZEND_DO_FCALL_BY_NAME) &&
+		    execute_data->func->type == ZEND_USER_FUNCTION) {
 			zend_execute_ex = execute_ex;
 		}
 		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data);

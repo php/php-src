@@ -60,6 +60,12 @@ static void zend_generator_cleanup_unfinished_execution(zend_generator *generato
 				if (brk_opline->opcode == ZEND_FREE) {
 					zval *var = EX_VAR(brk_opline->op1.var);
 					zval_ptr_dtor_nogc(var);
+				} else if (brk_opline->opcode == ZEND_FE_FREE) {
+					zval *var = EX_VAR(brk_opline->op1.var);
+					if (Z_TYPE_P(var) != IS_ARRAY && Z_FE_ITER_P(var) != (uint32_t)-1) {
+						zend_hash_iterator_del(Z_FE_ITER_P(var));
+					}
+					zval_ptr_dtor_nogc(var);
 				}
 			}
 		}
@@ -230,7 +236,9 @@ ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array 
 		zend_op_array *op_array_copy = (zend_op_array*)emalloc(sizeof(zend_op_array));
 		*op_array_copy = *op_array;
 
-		(*op_array->refcount)++;
+		if (op_array->refcount) {
+			(*op_array->refcount)++;
+		}
 		op_array->run_time_cache = NULL;
 		if (op_array->static_variables) {
 			ALLOC_HASHTABLE(op_array_copy->static_variables);

@@ -2266,7 +2266,7 @@ PHP_MINFO_FUNCTION(sqlite3)
 static PHP_GINIT_FUNCTION(sqlite3)
 {
 #if defined(COMPILE_DL_SQLITE3) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(sqlite3_globals, 0, sizeof(*sqlite3_globals));
 }
@@ -2294,7 +2294,7 @@ zend_module_entry sqlite3_module_entry = {
 
 #ifdef COMPILE_DL_SQLITE3
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(sqlite3)
 #endif

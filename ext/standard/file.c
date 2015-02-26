@@ -156,11 +156,8 @@ static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
 
 static void file_globals_ctor(php_file_globals *file_globals_p)
 {
-	FG(pclose_ret) = 0;
-	FG(pclose_wait) = 0;
-	FG(user_stream_current_filename) = NULL;
-	FG(def_chunk_size) = PHP_SOCK_CHUNK_SIZE;
-	FG(wrapper_errors) = NULL;
+	memset(file_globals_p, 0, sizeof(php_file_globals));
+	file_globals_p->def_chunk_size = PHP_SOCK_CHUNK_SIZE;
 }
 
 static void file_globals_dtor(php_file_globals *file_globals_p)
@@ -362,11 +359,7 @@ PHP_FUNCTION(flock)
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
 	act = flock_values[act - 1] | (operation & PHP_LOCK_NB ? LOCK_NB : 0);
 	if (php_stream_lock(stream, act)) {
-#ifdef PHP_WIN32
-		if (operation && errno == ERROR_INVALID_BLOCK && wouldblock) {
-#else
 		if (operation && errno == EWOULDBLOCK && wouldblock) {
-#endif
 			ZVAL_LONG(wouldblock, 1);
 		}
 		RETURN_FALSE;

@@ -201,7 +201,7 @@ static void user_config_cache_entry_dtor(zval *el)
 static int php_cgi_globals_id;
 #define CGIG(v) ZEND_TSRMG(php_cgi_globals_id, php_cgi_globals_struct *, v)
 #if defined(PHP_WIN32)
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 #else
 static php_cgi_globals_struct php_cgi_globals;
@@ -1440,7 +1440,7 @@ PHP_INI_END()
 static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 {
 #ifdef ZTS
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	php_cgi_globals->rfc2616_headers = 0;
 	php_cgi_globals->nph = 0;
@@ -1668,9 +1668,6 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 		return;
 	}
 
-	if (!&SG(sapi_headers).headers) {
-		RETURN_FALSE;
-	}
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);
 }
@@ -1769,7 +1766,7 @@ int main(int argc, char *argv[])
 #ifdef ZTS
 	tsrm_startup(1, 1, 0, NULL);
 	tsrm_ls = ts_resource(0);
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
 	sapi_startup(&cgi_sapi_module);

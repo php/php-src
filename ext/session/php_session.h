@@ -33,13 +33,13 @@
 #define PS_NUM_APIS      9
 #define PS_OPEN_ARGS     void **mod_data, const char *save_path, const char *session_name
 #define PS_CLOSE_ARGS    void **mod_data
-#define PS_READ_ARGS     void **mod_data, zend_string *key, zend_string **val
-#define PS_WRITE_ARGS    void **mod_data, zend_string *key, zend_string *val
+#define PS_READ_ARGS     void **mod_data, zend_string *key, zend_string **val, int maxlifetime
+#define PS_WRITE_ARGS    void **mod_data, zend_string *key, zend_string *val, int maxlifetime
 #define PS_DESTROY_ARGS  void **mod_data, zend_string *key
 #define PS_GC_ARGS       void **mod_data, int maxlifetime, int *nrdels
 #define PS_CREATE_SID_ARGS void **mod_data
 #define PS_VALIDATE_SID_ARGS void **mod_data, zend_string *key
-#define PS_UPDATE_TIMESTAMP_ARGS void **mod_data, zend_string *key, zend_string *val
+#define PS_UPDATE_TIMESTAMP_ARGS void **mod_data, zend_string *key, zend_string *val, int maxlifetime
 
 typedef struct ps_module_struct {
 	const char *s_name;
@@ -217,7 +217,7 @@ extern zend_module_entry session_module_entry;
 #ifdef ZTS
 #define PS(v) ZEND_TSRMG(ps_globals_id, php_ps_globals *, v)
 #ifdef COMPILE_DL_SESSION
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #endif
 #else
 #define PS(v) (ps_globals.v)

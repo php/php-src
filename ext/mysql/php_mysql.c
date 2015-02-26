@@ -353,7 +353,7 @@ zend_module_entry mysql_module_entry = {
 
 #ifdef COMPILE_DL_MYSQL
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(mysql)
 #endif
@@ -516,7 +516,7 @@ PHP_INI_END()
 static PHP_GINIT_FUNCTION(mysql)
 {
 #if defined(COMPILE_DL_MYSQL) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	mysql_globals->num_persistent = 0;
 	mysql_globals->default_socket = NULL;

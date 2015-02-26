@@ -139,13 +139,6 @@ static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, 
 void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 {
 	php_conf_rec *d = base_conf, *e = new_conf, *n = NULL;
-#if STAS_0
-	php_dir_entry *pe;
-	php_dir_entry *data;
-	char *str;
-	uint str_len;
-	ulong num_index;
-#endif
 
 	n = create_php_config(p, "merge_php_config");
 	/* copy old config */
@@ -155,20 +148,6 @@ void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 	phpapdebug((stderr, "Merge dir (%p)+(%p)=(%p)\n", base_conf, new_conf, n));
 	zend_hash_merge_ex(&n->config, &e->config, NULL, should_overwrite_per_dir_entry, NULL);
 //???	zend_hash_merge_ex(&n->config, &e->config, NULL, sizeof(php_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
-#if STAS_0
-	for (zend_hash_internal_pointer_reset(&d->config);
-			zend_hash_get_current_key(&d->config, &str, &str_len,
-				&num_index) == HASH_KEY_IS_STRING;
-			zend_hash_move_forward(&d->config)) {
-		pe = NULL;
-		zend_hash_get_current_data(&d->config, (void **) &data);
-		if (zend_hash_find(&n->config, str, str_len, (void **) &pe) == SUCCESS) {
-			if (pe->status >= data->status) continue;
-		}
-		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", str, data->status, pe?pe->status:-1));
-		zend_hash_update(&n->config, str, str_len, data, sizeof(*data), NULL);
-	}
-#endif
 	return n;
 }
 

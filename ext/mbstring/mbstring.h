@@ -201,7 +201,7 @@ struct mb_overload_def {
 
 #ifdef ZTS
 #define MBSTRG(v) ZEND_TSRMG(mbstring_globals_id, zend_mbstring_globals *, v)
-ZEND_TSRMLS_CACHE_EXTERN;
+ZEND_TSRMLS_CACHE_EXTERN();
 #else
 #define MBSTRG(v) (mbstring_globals.v)
 #endif

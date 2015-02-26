@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <zend.h>
 
-const char *zend_vm_opcodes_map[170] = {
+const char *zend_vm_opcodes_map[171] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -99,8 +99,8 @@ const char *zend_vm_opcodes_map[170] = {
 	"ZEND_UNSET_VAR",
 	"ZEND_UNSET_DIM",
 	"ZEND_UNSET_OBJ",
-	"ZEND_FE_RESET",
-	"ZEND_FE_FETCH",
+	"ZEND_FE_RESET_R",
+	"ZEND_FE_FETCH_R",
 	"ZEND_EXIT",
 	"ZEND_FETCH_R",
 	"ZEND_FETCH_DIM_R",
@@ -147,13 +147,13 @@ const char *zend_vm_opcodes_map[170] = {
 	"ZEND_DEFINED",
 	"ZEND_TYPE_CHECK",
 	"ZEND_VERIFY_RETURN_TYPE",
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	"ZEND_FE_RESET_RW",
+	"ZEND_FE_FETCH_RW",
+	"ZEND_FE_FREE",
+	"ZEND_INIT_DYNAMIC_CALL",
+	"ZEND_DO_ICALL",
+	"ZEND_DO_UCALL",
+	"ZEND_DO_FCALL_BY_NAME",
 	"ZEND_PRE_INC_OBJ",
 	"ZEND_PRE_DEC_OBJ",
 	"ZEND_POST_INC_OBJ",
@@ -192,6 +192,7 @@ const char *zend_vm_opcodes_map[170] = {
 	"ZEND_ASSIGN_POW",
 	"ZEND_BIND_GLOBAL",
 	"ZEND_COALESCE",
+	"ZEND_SPACESHIP",
 };
 
 ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {

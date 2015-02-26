@@ -964,41 +964,20 @@ retry:
 static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_query, zval *oid, zval *type, zval *value)
 {
 	char *pptr;
-	HashPosition pos_oid, pos_type, pos_value;
+	uint32_t idx_type = 0, idx_value = 0;
 	zval *tmp_oid, *tmp_type, *tmp_value;
 
 	if (Z_TYPE_P(oid) != IS_ARRAY) {
-		/*
-		if (Z_ISREF_PP(oid)) {
-			SEPARATE_ZVAL(oid);
-		}
-		*/
 		convert_to_string_ex(oid);
-	} else if (Z_TYPE_P(oid) == IS_ARRAY) {
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(oid), &pos_oid);
 	}
 
 	if (st & SNMP_CMD_SET) {
 		if (Z_TYPE_P(type) != IS_ARRAY) {
-			/*
-			if (Z_ISREF_PP(type)) {
-				SEPARATE_ZVAL(type);
-			}
-			*/
 			convert_to_string_ex(type);
-		} else if (Z_TYPE_P(type) == IS_ARRAY) {
-			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(type), &pos_type);
 		}
 
 		if (Z_TYPE_P(value) != IS_ARRAY) {
-			/*
-			if (Z_ISREF_PP(value)) {
-				SEPARATE_ZVAL(value);
-			}
-			*/
 			convert_to_string_ex(value);
-		} else if (Z_TYPE_P(value) == IS_ARRAY) {
-			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(value), &pos_value);
 		}
 	}
 
@@ -1041,10 +1020,7 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 			return FALSE;
 		}
 		objid_query->array_output = ( (st & SNMP_CMD_SET) ? FALSE : TRUE );
-		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(oid), &pos_oid);
-			(tmp_oid = zend_hash_get_current_data_ex(Z_ARRVAL_P(oid), &pos_oid)) != NULL;
-			zend_hash_move_forward_ex(Z_ARRVAL_P(oid), &pos_oid) ) {
-
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(oid), tmp_oid) {
 			convert_to_string_ex(tmp_oid);
 			objid_query->vars[objid_query->count].oid = Z_STRVAL_P(tmp_oid);
 			if (st & SNMP_CMD_SET) {
@@ -1052,7 +1028,14 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 					pptr = Z_STRVAL_P(type);
 					objid_query->vars[objid_query->count].type = *pptr;
 				} else if (Z_TYPE_P(type) == IS_ARRAY) {
-					if ((tmp_type = zend_hash_get_current_data_ex(Z_ARRVAL_P(type), &pos_type)) != NULL) {
+					while (idx_type < Z_ARRVAL_P(type)->nNumUsed) {
+						tmp_type = &Z_ARRVAL_P(type)->arData[idx_type].val;
+						if (Z_TYPE_P(tmp_type) != IS_UNDEF) {
+							break;
+						}
+						idx_type++;
+					}
+					if (idx_type < Z_ARRVAL_P(type)->nNumUsed) {
 						convert_to_string_ex(tmp_type);
 						if (Z_STRLEN_P(tmp_type) != 1) {
 							php_error_docref(NULL, E_WARNING, "'%s': bogus type '%s', should be single char, got %u", Z_STRVAL_P(tmp_oid), Z_STRVAL_P(tmp_type), Z_STRLEN_P(tmp_type));
@@ -1061,7 +1044,7 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 						}
 						pptr = Z_STRVAL_P(tmp_type);
 						objid_query->vars[objid_query->count].type = *pptr;
-						zend_hash_move_forward_ex(Z_ARRVAL_P(type), &pos_type);
+						idx_type++;
 					} else {
 						php_error_docref(NULL, E_WARNING, "'%s': no type set", Z_STRVAL_P(tmp_oid));
 						efree(objid_query->vars);
@@ -1072,10 +1055,17 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 				if (Z_TYPE_P(value) == IS_STRING) {
 					objid_query->vars[objid_query->count].value = Z_STRVAL_P(value);
 				} else if (Z_TYPE_P(value) == IS_ARRAY) {
-					if ((tmp_value = zend_hash_get_current_data_ex(Z_ARRVAL_P(value), &pos_value)) != NULL) {
+					while (idx_value < Z_ARRVAL_P(value)->nNumUsed) {
+						tmp_value = &Z_ARRVAL_P(value)->arData[idx_value].val;
+						if (Z_TYPE_P(tmp_value) != IS_UNDEF) {
+							break;
+						}
+						idx_value++;
+					}
+					if (idx_value < Z_ARRVAL_P(value)->nNumUsed) {
 						convert_to_string_ex(tmp_value);
 						objid_query->vars[objid_query->count].value = Z_STRVAL_P(tmp_value);
-						zend_hash_move_forward_ex(Z_ARRVAL_P(value), &pos_value);
+						idx_value++;
 					} else {
 						php_error_docref(NULL, E_WARNING, "'%s': no value set", Z_STRVAL_P(tmp_oid));
 						efree(objid_query->vars);
@@ -1084,7 +1074,7 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 				}
 			}
 			objid_query->count++;
-		}
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	/* now parse all OIDs */

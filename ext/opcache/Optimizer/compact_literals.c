@@ -117,7 +117,7 @@ static void optimizer_literal_class_info(literal_info   *info,
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *opline, *end;
-	int i, j, n, *map, cache_slots;
+	int i, j, n, *map, cache_size;
 	zval zv, *pos;
 	literal_info *info;
 	int l_null = -1;
@@ -139,9 +139,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					LITERAL_INFO(opline->op2.constant, LITERAL_FUNC, 1, 1, 1);
 					break;
 				case ZEND_INIT_FCALL_BY_NAME:
-					if (ZEND_OP2_TYPE(opline) == IS_CONST) {
-						LITERAL_INFO(opline->op2.constant, LITERAL_FUNC, 1, 1, 2);
-					}
+					LITERAL_INFO(opline->op2.constant, LITERAL_FUNC, 1, 1, 2);
 					break;
 				case ZEND_INIT_NS_FCALL_BY_NAME:
 					LITERAL_INFO(opline->op2.constant, LITERAL_FUNC, 1, 1, 3);
@@ -320,7 +318,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 #endif
 
 		/* Merge equal constants */
-		j = 0; cache_slots = 0;
+		j = 0; cache_size = 0;
 		zend_hash_init(&hash, op_array->last_literal, NULL, NULL, 0);
 		map = (int*)zend_arena_alloc(&ctx->arena, op_array->last_literal * sizeof(int));
 		memset(map, 0, op_array->last_literal * sizeof(int));
@@ -441,8 +439,8 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 							info[j] = info[i];
 						}
 						if (LITERAL_NUM_SLOTS(info[i].flags)) {
-							Z_CACHE_SLOT(op_array->literals[j]) = cache_slots;
-							cache_slots += LITERAL_NUM_SLOTS(info[i].flags);
+							Z_CACHE_SLOT(op_array->literals[j]) = cache_size;
+							cache_size += LITERAL_NUM_SLOTS(info[i].flags) * sizeof(void*);
 						}
 						j++;
 						n = LITERAL_NUM_RELATED(info[i].flags);
@@ -467,7 +465,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		}
 		zend_hash_destroy(&hash);
 		op_array->last_literal = j;
-		op_array->last_cache_slot = cache_slots;
+		op_array->cache_size = cache_size;
 
 	    /* Update opcodes to use new literals table */
 		opline = op_array->opcodes;

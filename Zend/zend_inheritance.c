@@ -767,15 +767,27 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 	zend_string *key;
 	zval *zv;
 
-	if ((ce->ce_flags & ZEND_ACC_INTERFACE)
-		&& !(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ce->name->val, parent_ce->name->val);
-	}
-	if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ce->name->val, parent_ce->name->val);
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		/* Interface can only inherit other interfaces */
+		if (!(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ce->name->val, parent_ce->name->val);
+		}
+	} else {
+		/* Class declaration must not extend traits or interfaces */
+		if (parent_ce->ce_flags & ZEND_ACC_INTERFACE) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from interface %s", ce->name->val, parent_ce->name->val);
+		} else if (parent_ce->ce_flags & ZEND_ACC_TRAIT) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from trait %s", ce->name->val, parent_ce->name->val);
+		}
+
+		/* Class must not extend a final class */
+		if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ce->name->val, parent_ce->name->val);
+		}
 	}
 
 	ce->parent = parent_ce;
+
 	/* Copy serialize/unserialize callbacks */
 	if (!ce->serialize) {
 		ce->serialize   = parent_ce->serialize;
@@ -1126,7 +1138,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 					zend_get_function_declaration(existing_fn)->val);
 			}
 			return;
-		} else if ((existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+		} else if (existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT) {
 			/* two traits can't define the same non-abstract method */
 #if 1
 			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",

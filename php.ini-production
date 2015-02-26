@@ -897,7 +897,6 @@ default_socket_timeout = 60
 ;extension=php_soap.dll
 ;extension=php_sockets.dll
 ;extension=php_sqlite3.dll
-;extension=php_sybase_ct.dll
 ;extension=php_tidy.dll
 ;extension=php_xmlrpc.dll
 ;extension=php_xsl.dll
@@ -1323,45 +1322,6 @@ pgsql.ignore_notice = 0
 ; http://php.net/pgsql.log-notice
 pgsql.log_notice = 0
 
-[Sybase-CT]
-; Allow or prevent persistent links.
-; http://php.net/sybct.allow-persistent
-sybct.allow_persistent = On
-
-; Maximum number of persistent links.  -1 means no limit.
-; http://php.net/sybct.max-persistent
-sybct.max_persistent = -1
-
-; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-; http://php.net/sybct.max-links
-sybct.max_links = -1
-
-; Minimum server message severity to display.
-; http://php.net/sybct.min-server-severity
-sybct.min_server_severity = 10
-
-; Minimum client message severity to display.
-; http://php.net/sybct.min-client-severity
-sybct.min_client_severity = 10
-
-; Set per-context timeout
-; http://php.net/sybct.timeout
-;sybct.timeout=
-
-;sybct.packet_size
-
-; The maximum time in seconds to wait for a connection attempt to succeed before returning failure.
-; Default: one minute
-;sybct.login_timeout=
-
-; The name of the host you claim to be connecting from, for display by sp_who.
-; Default: none
-;sybct.hostname=
-
-; Allows you to define how often deadlocks are to be retried. -1 means "forever".
-; Default: 0
-;sybct.deadlock_retry_count=
-
 [bcmath]
 ; Number of decimal digits for all bcmath functions.
 ; http://php.net/bcmath.scale
@@ -1611,58 +1571,6 @@ url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 ; Production Value: 1
 ; http://php.net/session.upload-progress.min-freq
 ;session.upload_progress.min_freq = "1"
-
-[MSSQL]
-; Allow or prevent persistent links.
-mssql.allow_persistent = On
-
-; Maximum number of persistent links.  -1 means no limit.
-mssql.max_persistent = -1
-
-; Maximum number of links (persistent+non persistent).  -1 means no limit.
-mssql.max_links = -1
-
-; Minimum error severity to display.
-mssql.min_error_severity = 10
-
-; Minimum message severity to display.
-mssql.min_message_severity = 10
-
-; Compatibility mode with old versions of PHP 3.0.
-mssql.compatibility_mode = Off
-
-; Connect timeout
-;mssql.connect_timeout = 5
-
-; Query timeout
-;mssql.timeout = 60
-
-; Valid range 0 - 2147483647.  Default = 4096.
-;mssql.textlimit = 4096
-
-; Valid range 0 - 2147483647.  Default = 4096.
-;mssql.textsize = 4096
-
-; Limits the number of records in each batch.  0 = all records in one batch.
-;mssql.batchsize = 0
-
-; Specify how datetime and datetim4 columns are returned
-; On => Returns data converted to SQL server settings
-; Off => Returns values as YYYY-MM-DD hh:mm:ss
-;mssql.datetimeconvert = On
-
-; Use NT authentication when connecting to the server
-mssql.secure_connection = Off
-
-; Specify max number of processes. -1 = library default
-; msdlib defaults to 25
-; FreeTDS defaults to 4096
-;mssql.max_procs = -1
-
-; Specify client character set.
-; If empty or not set the client charset from freetds.conf is used
-; This is only used when compiled with FreeTDS
-;mssql.charset = "ISO-8859-1"
 
 [Assertion]
 ; Assert(expr); active by default.

@@ -773,7 +773,7 @@ zend_module_entry pgsql_module_entry = {
 
 #ifdef COMPILE_DL_PGSQL
 #ifdef ZTS
-ZEND_TSRMLS_CACHE_DEFINE;
+ZEND_TSRMLS_CACHE_DEFINE();
 #endif
 ZEND_GET_MODULE(pgsql)
 #endif
@@ -1093,7 +1093,7 @@ PHP_INI_END()
 static PHP_GINIT_FUNCTION(pgsql)
 {
 #if defined(COMPILE_DL_PGSQL) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE;
+	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(pgsql_globals, 0, sizeof(zend_pgsql_globals));
 	/* Initilize notice message hash at MINIT only */
@@ -5746,9 +5746,6 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 
 	regerr = regexec(&re, str, re.re_nsub+1, subs, 0);
 	if (regerr == REG_NOMATCH) {
-#ifdef PHP_DEBUG
-		php_error_docref(NULL, E_NOTICE, "'%s' does not match with '%s'", str, regex);
-#endif
 		ret = FAILURE;
 	}
 	else if (regerr) {
@@ -5987,7 +5984,12 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 						else {
 							/* better regex? */
 							if (php_pgsql_convert_match(Z_STRVAL_P(val), Z_STRLEN_P(val), "^[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?$", 0) == FAILURE) {
-								err = 1;
+								if (php_pgsql_convert_match(Z_STRVAL_P(val), Z_STRLEN_P(val), "^[+-]{0,1}(inf)(inity){0,1}$", 1) == FAILURE) {
+									err = 1;
+								} else {
+									ZVAL_STRING(&new_val, Z_STRVAL_P(val));
+									php_pgsql_add_quotes(&new_val, 1);
+								}
 							}
 							else {
 								ZVAL_STRING(&new_val, Z_STRVAL_P(val));

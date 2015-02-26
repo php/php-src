@@ -52,15 +52,16 @@
 
 static inline void zend_alloc_cache_slot(uint32_t literal) {
 	zend_op_array *op_array = CG(active_op_array);
-	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->last_cache_slot++;
+	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->cache_size;
+	op_array->cache_size += sizeof(void*);
 }
 
 #define POLYMORPHIC_CACHE_SLOT_SIZE 2
 
 static inline void zend_alloc_polymorphic_cache_slot(uint32_t literal) {
 	zend_op_array *op_array = CG(active_op_array);
-	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->last_cache_slot;
-	op_array->last_cache_slot += POLYMORPHIC_CACHE_SLOT_SIZE;
+	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->cache_size;
+	op_array->cache_size += POLYMORPHIC_CACHE_SLOT_SIZE * sizeof(void*);
 }
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
@@ -829,7 +830,7 @@ static int generate_free_loop_var(znode *var) /* {{{ */
 		{
 			zend_op *opline = get_next_op(CG(active_op_array));
 
-			opline->opcode = ZEND_FREE;
+			opline->opcode = var->flag ? ZEND_FE_FREE : ZEND_FREE;
 			SET_NODE(opline->op1, var);
 			SET_UNUSED(opline->op2);
 		}
@@ -863,12 +864,13 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_op_array *op_array = &function->op_array;
 
-		(*op_array->refcount)++;
+		if (op_array->refcount) {
+			(*op_array->refcount)++;
+		}
 		if (op_array->static_variables) {
-			HashTable *static_variables = op_array->static_variables;
-
-			ALLOC_HASHTABLE(op_array->static_variables);
-			zend_array_dup(op_array->static_variables, static_variables);
+			if (!(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
+				GC_REFCOUNT(op_array->static_variables)++;
+			}
 		}
 		op_array->run_time_cache = NULL;
 	} else if (function->type == ZEND_INTERNAL_FUNCTION) {
@@ -911,7 +913,9 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		}
 		return FAILURE;
 	} else {
-		(*function->op_array.refcount)++;
+		if (function->op_array.refcount) {
+			(*function->op_array.refcount)++;
+		}
 		function->op_array.static_variables = NULL; /* NULL out the unbound function */
 		return SUCCESS;
 	}
@@ -980,12 +984,6 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare class %s", Z_STRVAL_P(op2));
 		}
 		return NULL;
-	}
-
-	if (parent_ce->ce_flags & ZEND_ACC_INTERFACE) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from interface %s", ce->name->val, parent_ce->name->val);
-	} else if ((parent_ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from trait %s", ce->name->val, parent_ce->name->val);
 	}
 
 	zend_do_inheritance(ce, parent_ce);
@@ -1155,13 +1153,6 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 }
 /* }}} */
 
-static inline zend_bool zend_string_equals_str_ci(zend_string *str1, zend_string *str2) /* {{{ */
-{
-	return str1->len == str2->len
-		&& !zend_binary_strcasecmp(str1->val, str1->len, str2->val, str2->len);
-}
-/* }}} */
-
 static zend_constant *zend_lookup_reserved_const(const char *name, size_t len) /* {{{ */
 {
 	zend_constant *c = zend_hash_find_ptr_lc(EG(zend_constants), name, len);
@@ -1179,9 +1170,9 @@ static zend_bool zend_try_ct_eval_const(zval *zv, zend_string *name, zend_bool i
 	/* Substitute case-sensitive (or lowercase) constants */
 	c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c && (
-	      (c->flags & CONST_PERSISTENT)
-	   || (Z_TYPE(c->value) < IS_CONSTANT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)))
-	) {
+	      ((c->flags & CONST_PERSISTENT) && !(CG(compiler_options) & ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION))
+	   || (Z_TYPE(c->value) < IS_OBJECT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION))
+	)) {
 		ZVAL_DUP(zv, &c->value);
 		return 1;
 	}
@@ -1211,10 +1202,10 @@ static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name,
 	uint32_t fetch_type = zend_get_class_fetch_type(class_name);
 	zval *c;
 
-	if (CG(active_class_entry) && (fetch_type == ZEND_FETCH_CLASS_SELF || (fetch_type == ZEND_FETCH_CLASS_DEFAULT && zend_string_equals_str_ci(class_name, CG(active_class_entry)->name)))) {
+	if (CG(active_class_entry) && (fetch_type == ZEND_FETCH_CLASS_SELF || (fetch_type == ZEND_FETCH_CLASS_DEFAULT && zend_string_equals_ci(class_name, CG(active_class_entry)->name)))) {
 		c = zend_hash_find(&CG(active_class_entry)->constants_table, name);
 	} else if (fetch_type == ZEND_FETCH_CLASS_DEFAULT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION)) {
-		zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), class_name);
+		zend_class_entry *ce = zend_hash_find_ptr_lc(CG(class_table), class_name->val, class_name->len);
 		if (ce) {
 			c = zend_hash_find(&ce->constants_table, name);
 		} else {
@@ -1224,14 +1215,19 @@ static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name,
 		return 0;
 	}
 
+	if (CG(compiler_options) & ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION) {
+		return 0;
+	}
+
 	/* Substitute case-sensitive (or lowercase) persistent class constants */
-	if (c && Z_TYPE_P(c) < IS_CONSTANT) {
+	if (c && Z_TYPE_P(c) < IS_OBJECT) {
 		ZVAL_DUP(zv, c);
 		return 1;
 	}
 
 	return 0;
 }
+/* }}} */
 
 void zend_init_list(void *result, void *item) /* {{{ */
 {
@@ -1309,6 +1305,19 @@ void zend_do_extended_fcall_end(void) /* {{{ */
 	opline->opcode = ZEND_EXT_FCALL_END;
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
+}
+/* }}} */
+
+zend_bool zend_is_auto_global_str(char *name, size_t len) /* {{{ */ {
+	zend_auto_global *auto_global;
+
+	if ((auto_global = zend_hash_str_find_ptr(CG(auto_globals), name, len)) != NULL) {
+		if (auto_global->armed) {
+			auto_global->armed = auto_global->auto_global_callback(auto_global->name);
+		}
+		return 1;
+	}
+	return 0;
 }
 /* }}} */
 
@@ -2312,6 +2321,50 @@ zend_bool zend_is_assign_to_self(zend_ast *var_ast, zend_ast *expr_ast) /* {{{ *
 }
 /* }}} */
 
+/* Detects if list($a, $b, $c) contains variable with given name */
+zend_bool zend_list_has_assign_to(zend_ast *list_ast, zend_string *name) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(list_ast);
+	uint32_t i;
+	for (i = 0; i < list->children; i++) {
+		zend_ast *var_ast = list->child[i];
+		if (!var_ast) {
+			continue;
+		}
+
+		/* Recursively check nested list()s */
+		if (var_ast->kind == ZEND_AST_LIST && zend_list_has_assign_to(var_ast, name)) {
+			return 1;
+		}
+
+		if (var_ast->kind == ZEND_AST_VAR && var_ast->child[0]->kind == ZEND_AST_ZVAL) {
+			zend_string *var_name = zval_get_string(zend_ast_get_zval(var_ast->child[0]));
+			zend_bool result = zend_string_equals(var_name, name);
+			zend_string_release(var_name);
+			if (result) {
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+/* }}} */
+
+/* Detects patterns like list($a, $b, $c) = $a */
+zend_bool zend_list_has_assign_to_self(zend_ast *list_ast, zend_ast *expr_ast) /* {{{ */
+{
+	/* Only check simple variables on the RHS, as only CVs cause issues with this. */
+	if (expr_ast->kind == ZEND_AST_VAR && expr_ast->child[0]->kind == ZEND_AST_ZVAL) {
+		zend_string *name = zval_get_string(zend_ast_get_zval(expr_ast->child[0]));
+		zend_bool result = zend_list_has_assign_to(list_ast, name);
+		zend_string_release(name);
+		return result;
+	}
+	return 0;
+}
+/* }}} */
+
 void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
@@ -2361,7 +2414,13 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_emit_op_data(&expr_node);
 			return;
 		case ZEND_AST_LIST:
-			zend_compile_expr(&expr_node, expr_ast);
+			if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
+				/* list($a, $b) = $a should evaluate the right $a first */
+				zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
+			} else {
+				zend_compile_expr(&expr_node, expr_ast);
+			}
+
 			zend_compile_list_assign(result, var_ast, &expr_node);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE();
@@ -2562,6 +2621,31 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_uchar zend_get_call_op(zend_uchar init_op, zend_function *fbc) /* {{{ */
+{
+	if (fbc) {
+		if (fbc->type == ZEND_INTERNAL_FUNCTION) {
+			if (!zend_execute_internal &&
+			    !fbc->common.scope &&
+			    !(fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_HAS_TYPE_HINTS))) {
+				return ZEND_DO_ICALL;
+			}
+		} else {
+			if (zend_execute_ex == execute_ex &&
+			    !(fbc->common.fn_flags & ZEND_ACC_GENERATOR)) {
+				return ZEND_DO_UCALL;
+			}
+		}
+	} else if (zend_execute_ex == execute_ex &&
+	           !zend_execute_internal &&
+	           (init_op == ZEND_INIT_FCALL_BY_NAME ||
+	            init_op == ZEND_INIT_NS_FCALL_BY_NAME)) {
+		return ZEND_DO_FCALL_BY_NAME;
+	}
+	return ZEND_DO_FCALL;
+}
+/* }}} */
+
 void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
 {
 	zend_op *opline;
@@ -2581,7 +2665,7 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	}
 
 	call_flags = (opline->opcode == ZEND_NEW ? ZEND_CALL_CTOR : 0);
-	opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
+	opline = zend_emit_op(result, zend_get_call_op(opline->opcode, fbc), NULL, NULL);
 	opline->op1.num = call_flags;
 
 	zend_do_extended_fcall_end();
@@ -2618,16 +2702,17 @@ void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast) /
 void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array));
-	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-	SET_UNUSED(opline->op1);
 	if (name_node->op_type == IS_CONST && Z_TYPE(name_node->u.constant) == IS_STRING) {
+		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_func_name_literal(CG(active_op_array),
 			Z_STR(name_node->u.constant));
 		zend_alloc_cache_slot(opline->op2.constant);
 	} else {
+		opline->opcode = ZEND_INIT_DYNAMIC_CALL;
 		SET_NODE(opline->op2, name_node);
 	}
+	SET_UNUSED(opline->op1);
 
 	zend_compile_call_common(result, args_ast, NULL);
 }
@@ -3094,6 +3179,12 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_
 		zend_hash_init(CG(active_op_array)->static_variables, 8, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
+	if (GC_REFCOUNT(CG(active_op_array)->static_variables) > 1) {
+		if (!(GC_FLAGS(CG(active_op_array)->static_variables) & IS_ARRAY_IMMUTABLE)) {
+			GC_REFCOUNT(CG(active_op_array)->static_variables)--;
+		}
+		CG(active_op_array)->static_variables = zend_array_dup(CG(active_op_array)->static_variables);
+	}
 	zend_hash_update(CG(active_op_array)->static_variables, Z_STR(var_node.u.constant), value);
 
 	opline = zend_emit_op(&result, by_ref ? ZEND_FETCH_W : ZEND_FETCH_R, &var_node, NULL);
@@ -3442,31 +3533,18 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	}
 
 	opnum_reset = get_next_op_number(CG(active_op_array));
-	opline = zend_emit_op(&reset_node, ZEND_FE_RESET, &expr_node, NULL);
-	if (by_ref && is_variable) {
-		opline->extended_value = ZEND_FE_FETCH_BYREF;
-	}
+	opline = zend_emit_op(&reset_node, by_ref ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
 
+	reset_node.flag = 1; /* generate FE_FREE */
 	zend_stack_push(&CG(loop_var_stack), &reset_node);
 
 	opnum_fetch = get_next_op_number(CG(active_op_array));
-	opline = zend_emit_op(&value_node, ZEND_FE_FETCH, &reset_node, NULL);
-	if (by_ref) {
-		opline->extended_value |= ZEND_FE_FETCH_BYREF;
-	}
+	opline = zend_emit_op(&value_node, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
 	if (key_ast) {
-		opline->extended_value |= ZEND_FE_FETCH_WITH_KEY;
+		opline->extended_value = 1;
 	}
 
 	opline = zend_emit_op(NULL, ZEND_OP_DATA, NULL, NULL);
-
-	/* Allocate enough space to keep HashPointer on VM stack */
-	opline->op1_type = IS_TMP_VAR;
-	opline->op1.var = get_temporary_variable(CG(active_op_array));
-	if (sizeof(HashPointer) > sizeof(zval)) {
-		/* Make sure 1 zval is enough for HashPointer (2 must be enough) */
-		get_temporary_variable(CG(active_op_array));
-	}
 
 	if (key_ast) {
 		zend_make_tmp_result(&key_node, opline);
@@ -3558,6 +3636,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&expr_node, expr_ast);
 
+	expr_node.flag = 0;
 	zend_stack_push(&CG(loop_var_stack), &expr_node);
 
 	zend_begin_loop();
@@ -3803,16 +3882,26 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			ZVAL_COPY_VALUE(&CG(declarables).ticks, &value_zv);
 			zval_dtor(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
+			uint32_t i = 0;
+			zend_bool valid = 0;
 			/* Encoding declaration was already handled during parsing. Here we
 			 * only check that it is the first statement in the file. */
-			uint32_t num = CG(active_op_array)->last;
-			while (num > 0 &&
-				   (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
-					CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
-				--num;
-			}
+			zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
 
-			if (num > 0) {
+			/* Check to see if this declare is preceeded only by declare statements */
+			while (valid == 0 && i < file_ast->children) {
+				if (file_ast->child[i] == ast) {
+					valid = 1;
+				} else if (file_ast->child[i] == NULL) {
+					/* Empty statements are not allowed prior to a declare */
+					break;
+				} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
+					/* declares can only be preceeded by other declares */
+					break;
+				}
+				i++;
+			}
+			if (valid != 1) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}
@@ -3951,9 +4040,13 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 					"Variadic parameter cannot have a default value");
 			}
 		} else if (default_ast) {
+			/* we cannot substitute constants here or it will break ReflectionParameter::getDefaultValueConstantName() and ReflectionParameter::isDefaultValueConstant() */
+			uint32_t cops = CG(compiler_options);
+			CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION | ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION;
 			opcode = ZEND_RECV_INIT;
 			default_node.op_type = IS_CONST;
 			zend_const_expr_to_zval(&default_node.u.constant, default_ast);
+			CG(compiler_options) = cops;
 		} else {
 			opcode = ZEND_RECV;
 			default_node.op_type = IS_UNUSED;
@@ -4064,7 +4157,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 {
 	zend_class_entry *ce = CG(active_class_entry);
 	zend_bool in_interface = (ce->ce_flags & ZEND_ACC_INTERFACE) != 0;
-	zend_bool in_trait = ZEND_CE_IS_TRAIT(ce);
+	zend_bool in_trait = (ce->ce_flags & ZEND_ACC_TRAIT) != 0;
 	zend_bool is_public = (op_array->fn_flags & ZEND_ACC_PUBLIC) != 0;
 	zend_bool is_static = (op_array->fn_flags & ZEND_ACC_STATIC) != 0;
 
@@ -4157,7 +4250,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 			}
 		}
 	} else {
-		if (!in_trait && zend_string_equals_str_ci(lcname, ce->name)) {
+		if (!in_trait && zend_string_equals_ci(lcname, ce->name)) {
 			if (!ce->constructor) {
 				ce->constructor = (zend_function *) op_array;
 			}
@@ -4249,7 +4342,7 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 
 	if (CG(current_import_function)) {
 		zend_string *import_name = zend_hash_find_ptr(CG(current_import_function), lcname);
-		if (import_name && !zend_string_equals_str_ci(lcname, import_name)) {
+		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 			zend_error(E_COMPILE_ERROR, "Cannot declare function %s "
 				"because the name is already in use", name->val);
 		}
@@ -4426,7 +4519,7 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 		zend_string *name = zend_ast_get_str(name_ast);
 		zval value_zv;
 
-		if (ZEND_CE_IS_TRAIT(ce)) {
+		if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
 			return;
 		}
@@ -4643,7 +4736,7 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 		zend_string_addref(name);
 	}
 
-	if (import_name && !zend_string_equals_str_ci(lcname, import_name)) {
+	if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
 			"because the name is already in use", name->val);
 	}
@@ -4821,7 +4914,7 @@ static char *zend_get_use_type_str(uint32_t type) /* {{{ */
 
 static void zend_check_already_in_use(uint32_t type, zend_string *old_name, zend_string *new_name, zend_string *check_name) /* {{{ */
 {
-	if (zend_string_equals_str_ci(old_name, check_name)) {
+	if (zend_string_equals_ci(old_name, check_name)) {
 		return;
 	}
 
@@ -5130,7 +5223,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			break;
 		case T_CLASS_C:
 			if (ce) {
-				if (ZEND_CE_IS_TRAIT(ce)) {
+				if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
 					return 0;
 				} else {
 					ZVAL_STR_COPY(zv, ce->name);
@@ -5140,7 +5233,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			}
 			break;
 		case T_TRAIT_C:
-			if (ce && ZEND_CE_IS_TRAIT(ce)) {
+			if (ce && (ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
 				ZVAL_STR_COPY(zv, ce->name);
 			} else {
 				ZVAL_EMPTY_STRING(zv);
@@ -5872,7 +5965,7 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 	zend_ast *const_ast = ast->child[1];
 
 	znode class_node, const_node;
-	zend_op *opline, *class_op = NULL;
+	zend_op *opline;
 	zend_string *resolved_name;
 
 	zend_eval_const_expr(&class_ast);
@@ -5894,7 +5987,7 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 		if (class_ast->kind == ZEND_AST_ZVAL) {
 			zend_string_release(resolved_name);
 		}
-		class_op = zend_compile_class_ref(&class_node, class_ast);
+		zend_compile_class_ref(&class_node, class_ast);
 	}
 
 	zend_compile_expr(&const_node, const_ast);
@@ -6029,7 +6122,7 @@ void zend_compile_magic_const(znode *result, zend_ast *ast) /* {{{ */
 
 	ZEND_ASSERT(ast->attr == T_CLASS_C &&
 	            CG(active_class_entry) &&
-	            ZEND_CE_IS_TRAIT(CG(active_class_entry)));
+	            (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != 0);
 
 	{
 		zend_ast *const_ast = zend_ast_create(ZEND_AST_CONST,
@@ -6164,7 +6257,7 @@ void zend_compile_const_expr_magic_const(zend_ast **ast_ptr) /* {{{ */
 	/* Other cases already resolved by constant folding */
 	ZEND_ASSERT(ast->attr == T_CLASS_C &&
 	            CG(active_class_entry) &&
-	            ZEND_CE_IS_TRAIT(CG(active_class_entry)));
+	            (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != 0);
 
 	{
 		zval const_zv;

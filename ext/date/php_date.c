@@ -810,6 +810,16 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
 
 /*
+ * RFC3339, Appendix A: http://www.ietf.org/rfc/rfc3339.txt
+ *  ISO 8601 also requires (in section 5.3.1.3) that a decimal fraction
+ *  be proceeded by a "0" if less than unity.  Annex B.2 of ISO 8601
+ *  gives examples where the decimal fractions are not preceded by a "0".
+ *  This grammar assumes section 5.3.1.3 is correct and that Annex B.2 is
+ *  in error.
+ */
+#define DATE_FORMAT_RFC3339_EXTENDED  "Y-m-d\\TH:i:s.vP"
+
+/*
  * This comes from various sources that like to contradict. I'm going with the
  * format here because of:
  * http://msdn.microsoft.com/en-us/library/windows/desktop/aa384321%28v=vs.85%29.aspx
@@ -849,12 +859,15 @@ PHP_MINIT_FUNCTION(date)
  */
 	REGISTER_STRING_CONSTANT("DATE_COOKIE",  DATE_FORMAT_COOKIE,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_ISO8601", DATE_FORMAT_ISO8601, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_STRING_CONSTANT("DATE_RFC822",  DATE_FORMAT_RFC822,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC850",  DATE_FORMAT_RFC850,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC1036", DATE_FORMAT_RFC1036, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC1123", DATE_FORMAT_RFC1123, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("DATE_RFC2822", DATE_FORMAT_RFC2822, CONST_CS | CONST_PERSISTENT);
- 	REGISTER_STRING_CONSTANT("DATE_RFC3339", DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RFC3339", DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_RFC3339_EXTENDED", DATE_FORMAT_RFC3339_EXTENDED, CONST_CS | CONST_PERSISTENT);
+
 /*
  * RSS 2.0 Specification: http://blogs.law.harvard.edu/tech/rss
  *   "All date-times in RSS conform to the Date and Time Specification of RFC 822,
@@ -1145,6 +1158,7 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 			case 'i': length = slprintf(buffer, 32, "%02d", (int) t->i); break;
 			case 's': length = slprintf(buffer, 32, "%02d", (int) t->s); break;
 			case 'u': length = slprintf(buffer, 32, "%06d", (int) floor(t->f * 1000000 + 0.5)); break;
+			case 'v': length = slprintf(buffer, 32, "%03d", (int) floor(t->f * 1000 + 0.5)); break;
 
 			/* timezone */
 			case 'I': length = slprintf(buffer, 32, "%d", localtime ? offset->is_dst : 0); break;
@@ -1981,17 +1995,18 @@ static void date_register_classes(void) /* {{{ */
 #define REGISTER_DATE_CLASS_CONST_STRING(const_name, value) \
 	zend_declare_class_constant_stringl(date_ce_date, const_name, sizeof(const_name)-1, value, sizeof(value)-1);
 
-	REGISTER_DATE_CLASS_CONST_STRING("ATOM",    DATE_FORMAT_RFC3339);
-	REGISTER_DATE_CLASS_CONST_STRING("COOKIE",  DATE_FORMAT_COOKIE);
-	REGISTER_DATE_CLASS_CONST_STRING("ISO8601", DATE_FORMAT_ISO8601);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC822",  DATE_FORMAT_RFC822);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC850",  DATE_FORMAT_RFC850);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC1036", DATE_FORMAT_RFC1036);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC1123", DATE_FORMAT_RFC1123);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC2822", DATE_FORMAT_RFC2822);
-	REGISTER_DATE_CLASS_CONST_STRING("RFC3339", DATE_FORMAT_RFC3339);
-	REGISTER_DATE_CLASS_CONST_STRING("RSS",     DATE_FORMAT_RFC1123);
-	REGISTER_DATE_CLASS_CONST_STRING("W3C",     DATE_FORMAT_RFC3339);
+	REGISTER_DATE_CLASS_CONST_STRING("ATOM",             DATE_FORMAT_RFC3339);
+	REGISTER_DATE_CLASS_CONST_STRING("COOKIE",           DATE_FORMAT_COOKIE);
+	REGISTER_DATE_CLASS_CONST_STRING("ISO8601",          DATE_FORMAT_ISO8601);
+	REGISTER_DATE_CLASS_CONST_STRING("RFC822",           DATE_FORMAT_RFC822);
+	REGISTER_DATE_CLASS_CONST_STRING("RFC850",           DATE_FORMAT_RFC850);
+	REGISTER_DATE_CLASS_CONST_STRING("RFC1036",          DATE_FORMAT_RFC1036);
+	REGISTER_DATE_CLASS_CONST_STRING("RFC1123",          DATE_FORMAT_RFC1123);
+	REGISTER_DATE_CLASS_CONST_STRING("RFC2822",          DATE_FORMAT_RFC2822);
+	REGISTER_DATE_CLASS_CONST_STRING("RFC3339",          DATE_FORMAT_RFC3339);
+	REGISTER_DATE_CLASS_CONST_STRING("RFC3339_EXTENDED", DATE_FORMAT_RFC3339_EXTENDED);
+	REGISTER_DATE_CLASS_CONST_STRING("RSS",              DATE_FORMAT_RFC1123);
+	REGISTER_DATE_CLASS_CONST_STRING("W3C",              DATE_FORMAT_RFC3339);
 
 	INIT_CLASS_ENTRY(ce_immutable, "DateTimeImmutable", date_funcs_immutable);
 	ce_immutable.create_object = date_object_new_date;
@@ -2720,15 +2735,11 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 	php_timezone_obj *tzobj;
 
 	z_date = zend_hash_str_find(myht, "date", sizeof("data")-1);
-	if (z_date) {
-		convert_to_string(z_date);
+	if (z_date && Z_TYPE_P(z_date) == IS_STRING) {
 		z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1);
-		if (z_timezone_type) {
-			convert_to_long(z_timezone_type);
+		if (z_timezone_type && Z_TYPE_P(z_timezone_type) == IS_LONG) {
 			z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1);
-			if (z_timezone) {
-				convert_to_string(z_timezone);
-
+			if (z_timezone && Z_TYPE_P(z_timezone) == IS_STRING) {
 				switch (Z_LVAL_P(z_timezone_type)) {
 					case TIMELIB_ZONETYPE_OFFSET:
 					case TIMELIB_ZONETYPE_ABBR: {
@@ -2742,7 +2753,6 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 
 					case TIMELIB_ZONETYPE_ID: {
 						int ret;
-						convert_to_string(z_timezone);
 
 						tzi = php_date_parse_tzfile(Z_STRVAL_P(z_timezone), DATE_TIMEZONEDB);
 
@@ -3657,7 +3667,9 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 
 	if ((z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1)) != NULL) {
 		if ((z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1)) != NULL) {
-			convert_to_long(z_timezone_type);
+			if(Z_TYPE_P(z_timezone_type) != IS_LONG) {
+				return FAILURE;
+			}
 			if (SUCCESS == timezone_initialize(*tzobj, Z_STRVAL_P(z_timezone))) {
 				return SUCCESS;
 			}
@@ -3682,7 +3694,9 @@ PHP_METHOD(DateTimeZone, __set_state)
 
 	php_date_instantiate(date_ce_timezone, return_value);
 	tzobj = Z_PHPTIMEZONE_P(return_value);
-	php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht);
+	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) != SUCCESS) {
+		php_error_docref(NULL, E_ERROR, "Timezone initialization failed");
+	}
 }
 /* }}} */
 
@@ -3698,7 +3712,9 @@ PHP_METHOD(DateTimeZone, __wakeup)
 
 	myht = Z_OBJPROP_P(object);
 
-	php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht);
+	if(php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht) != SUCCESS) {
+		php_error_docref(NULL, E_ERROR, "Timezone initialization failed");
+	}
 }
 /* }}} */
 

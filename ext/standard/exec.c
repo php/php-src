@@ -189,6 +189,10 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
 		RETURN_FALSE;
 	}
+	if (strlen(cmd) != cmd_len) {
+		php_error_docref(NULL, E_WARNING, "NULL byte detected. Possible attack");
+		RETURN_FALSE;
+	}
 
 	if (!ret_array) {
 		ret = php_exec(mode, cmd, NULL, return_value);

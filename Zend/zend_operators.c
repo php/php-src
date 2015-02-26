@@ -566,8 +566,7 @@ ZEND_API void convert_to_array(zval *op) /* {{{ */
 					HashTable *obj_ht = Z_OBJ_HT_P(op)->get_properties(op);
 					if (obj_ht) {
 						zval arr;
-						ZVAL_NEW_ARR(&arr);
-						zend_array_dup(Z_ARRVAL(arr), obj_ht);
+						ZVAL_ARR(&arr, zend_array_dup(obj_ht));
 						zval_dtor(op);
 						ZVAL_COPY_VALUE(op, &arr);
 						return;
@@ -2870,6 +2869,38 @@ ZEND_API const char* zend_memnrstr_ex(const char *haystack, const char *needle, 
 	return NULL;
 }
 /* }}} */
+
+#if !ZEND_DVAL_TO_LVAL_CAST_OK
+# if SIZEOF_ZEND_LONG == 4
+ZEND_API zend_long zend_dval_to_lval_slow(double d)
+{
+	double	two_pow_32 = pow(2., 32.),
+			dmod;
+
+	dmod = fmod(d, two_pow_32);
+	if (dmod < 0) {
+		/* we're going to make this number positive; call ceil()
+		 * to simulate rounding towards 0 of the negative number */
+		dmod = ceil(dmod);// + two_pow_32;
+	}
+	return (zend_long)(zend_ulong)dmod;
+}
+#else
+ZEND_API zend_long zend_dval_to_lval_slow(double d)
+{
+	double	two_pow_64 = pow(2., 64.),
+			dmod;
+
+	dmod = fmod(d, two_pow_64);
+	if (dmod < 0) {
+		/* no need to call ceil; original double must have had no
+		 * fractional part, hence dmod does not have one either */
+		dmod += two_pow_64;
+	}
+	return (zend_long)(zend_ulong)dmod;
+}
+#endif
+#endif
 
 /*
  * Local variables:

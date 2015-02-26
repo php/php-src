@@ -102,7 +102,7 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ *
 
 	if (ht) {
 		if (zend_hash_num_elements(ht)) {
-			HashPosition pos;
+			int first = 1;
 
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_printf("<tr><td class=\"e\">Registered %s</td><td class=\"v\">", name);
@@ -110,21 +110,20 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht) /* {{{ *
 				php_info_printf("\nRegistered %s => ", name);
 			}
 
-			zend_hash_internal_pointer_reset_ex(ht, &pos);
-			while (zend_hash_get_current_key_ex(ht, &key, NULL, &pos) == HASH_KEY_IS_STRING)
-			{
-				if (!sapi_module.phpinfo_as_text) {
-					php_info_print_html_esc(key->val, key->len);
-				} else {
-					php_info_print(key->val);
+			ZEND_HASH_FOREACH_STR_KEY(ht, key) {
+				if (key) {
+					if (first) {
+						first = 0;
+					} else {
+						php_info_print(", ");
+					}
+					if (!sapi_module.phpinfo_as_text) {
+						php_info_print_html_esc(key->val, key->len);
+					} else {
+						php_info_print(key->val);
+					}
 				}
-				zend_hash_move_forward_ex(ht, &pos);
-				if (zend_hash_get_current_key_ex(ht, &key, NULL, &pos) == HASH_KEY_IS_STRING) {
-					php_info_print(", ");
-				} else {
-					break;
-				}
-			}
+			} ZEND_HASH_FOREACH_END();
 
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("</td></tr>\n");
@@ -205,7 +204,7 @@ static void php_print_gpcse_array(char *name, uint name_length)
 	key = zend_string_init(name, name_length, 0);
 	zend_is_auto_global(key);
 
-	if ((data = zend_hash_find(&EG(symbol_table).ht, key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
+	if ((data = zend_hash_find(&EG(symbol_table), key)) != NULL && (Z_TYPE_P(data) == IS_ARRAY)) {
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_key, string_key, tmp) {
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("<tr>");
@@ -900,16 +899,16 @@ PHPAPI void php_print_info(int flag)
 
 		php_info_print_table_start();
 		php_info_print_table_header(2, "Variable", "Value");
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_SELF", sizeof("PHP_SELF")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_SELF", sizeof("PHP_SELF")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_SELF", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_AUTH_TYPE", sizeof("PHP_AUTH_TYPE")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_TYPE", sizeof("PHP_AUTH_TYPE")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_TYPE", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_AUTH_USER", sizeof("PHP_AUTH_USER")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_USER", sizeof("PHP_AUTH_USER")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_USER", Z_STRVAL_P(data));
 		}
-		if ((data = zend_hash_str_find(&EG(symbol_table).ht, "PHP_AUTH_PW", sizeof("PHP_AUTH_PW")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
+		if ((data = zend_hash_str_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW")-1)) != NULL && Z_TYPE_P(data) == IS_STRING) {
 			php_info_print_table_row(2, "PHP_AUTH_PW", Z_STRVAL_P(data));
 		}
 		php_print_gpcse_array(ZEND_STRL("_REQUEST"));

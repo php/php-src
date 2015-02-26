@@ -150,9 +150,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 	if (Z_TYPE(retval) == IS_ARRAY) {
 		if (Z_IMMUTABLE(retval)) {
 			*is_temp = 1;
-			ALLOC_HASHTABLE(ht);
-			zend_array_dup(ht, Z_ARRVAL(retval));
-			return ht;
+			return zend_array_dup(Z_ARRVAL(retval));
 		} else if (Z_REFCOUNT(retval) <= 1) {
 			*is_temp = 1;
 			ALLOC_HASHTABLE(ht);
@@ -936,6 +934,9 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 
 	/* destruct the function also, then - we have allocated it in get_method */
 	efree_size(func, sizeof(zend_internal_function));
+#if ZEND_DEBUG
+	execute_data->func = NULL;
+#endif
 }
 /* }}} */
 
@@ -1156,6 +1157,9 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 
 	/* destruct the function also, then - we have allocated it in get_method */
 	efree_size(func, sizeof(zend_internal_function));
+#if ZEND_DEBUG
+	execute_data->func = NULL;
+#endif
 }
 /* }}} */
 
