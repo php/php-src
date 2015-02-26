@@ -493,7 +493,7 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
 			zval retval, arg;
 			ZVAL_LONG(&arg, PHP_SORT_NATURAL | (fold_case ? PHP_SORT_FLAG_CASE : 0));
-			zend_call_method_with_1_params(array, NULL, NULL, "sort", &retval, &arg);
+			zend_call_method_with_1_params(array, NULL, NULL, "asort", &retval, &arg);
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				RETURN_ZVAL(&retval, 1, 0);
 			}
