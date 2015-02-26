@@ -2075,6 +2075,7 @@ static zend_always_inline zend_bool in_function_inline(zval *needle, zval *hayst
 
 	switch (Z_TYPE_P(haystack)) {
 		zval haycpy, *arrayptr;
+		zend_bool retval;
 
 		case IS_LONG:
 		case IS_DOUBLE:
@@ -2086,13 +2087,12 @@ static zend_always_inline zend_bool in_function_inline(zval *needle, zval *hayst
 
 			switch (Z_TYPE_P(needle)) {
 				zval needlecpy;
-				zend_bool retval;
 					case IS_OBJECT:
 						ZVAL_UNDEF(&needlecpy);
 						convert_object_to_type(needle, &needlecpy, IS_STRING, convert_to_string);
-						if (Z_TYPE(needlecpy) != IS_STRING) {
-							break;
-						}
+				if (Z_TYPE(needlecpy) != IS_STRING) {
+					zval_dtor(&needlecpy);
+				} else {
 				
 				if (0) {
 					case IS_LONG:
@@ -2102,19 +2102,31 @@ static zend_always_inline zend_bool in_function_inline(zval *needle, zval *hayst
 				}
 						needlestr = Z_STR(needlecpy);
 					case IS_STRING:
-						retval = zend_memnstr(haystr->val, needlestr->val, needlestr->len, haystr->val + haystr->len) ? 1 : 0;
-						if (Z_TYPE_P(haystack) != IS_STRING) {
-							zend_string_release(haystr);
+						if (needlestr->len) {
+							retval = zend_memnstr(haystr->val, needlestr->val, needlestr->len, haystr->val + haystr->len) ? 1 : 0;
+						} else {
+							retval = 0;
+							*status = FAILURE;
+							zend_error(E_WARNING, "Invalid empty string needle to stringish haystack for in operator");
 						}
 						if (Z_TYPE_P(needle) != IS_STRING) {
-						zend_string_release(needlestr);
+							zend_string_release(needlestr);
 						}
-						return retval;
+						break;
+				}
+
+					default:
+						retval = 0;
+						*status = FAILURE;
+						zend_error(E_WARNING, "Invalid needle type %s to haystack type %s for in operator", zend_zval_type_name(needle), zend_zval_type_name(haystack));
+
 			}
 
-			*status = FAILURE;
-			zend_error(E_WARNING, "Invalid needle type %s to haystack type %s for in operator", zend_zval_type_name(needle), zend_zval_type_name(haystack));
-			break;
+			if (Z_TYPE_P(haystack) != IS_STRING && *status == SUCCESS) {
+				zend_string_release(haystr);
+			}
+
+			return retval;
 
 		case IS_ARRAY:
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(haystack), arrayptr) {
