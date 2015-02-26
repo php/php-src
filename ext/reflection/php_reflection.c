@@ -1852,6 +1852,12 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 	/* Return an empty array in case no static variables exist */
 	array_init(return_value);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.static_variables != NULL) {
+		if (GC_REFCOUNT(fptr->op_array.static_variables) > 1) {
+			if (!(GC_FLAGS(fptr->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+				GC_REFCOUNT(fptr->op_array.static_variables)--;
+			}
+			fptr->op_array.static_variables = zend_array_dup(fptr->op_array.static_variables);
+		}
 		zend_hash_apply_with_argument(fptr->op_array.static_variables, (apply_func_arg_t) zval_update_constant_inline_change, fptr->common.scope);
 		zend_hash_copy(Z_ARRVAL_P(return_value), fptr->op_array.static_variables, zval_add_ref);
 	}

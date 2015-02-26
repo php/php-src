@@ -934,7 +934,9 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 
 	/* destruct the function also, then - we have allocated it in get_method */
 	efree_size(func, sizeof(zend_internal_function));
+#if ZEND_DEBUG
 	execute_data->func = NULL;
+#endif
 }
 /* }}} */
 
@@ -1155,7 +1157,9 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 
 	/* destruct the function also, then - we have allocated it in get_method */
 	efree_size(func, sizeof(zend_internal_function));
+#if ZEND_DEBUG
 	execute_data->func = NULL;
+#endif
 }
 /* }}} */
 

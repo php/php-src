@@ -52,15 +52,16 @@
 
 static inline void zend_alloc_cache_slot(uint32_t literal) {
 	zend_op_array *op_array = CG(active_op_array);
-	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->last_cache_slot++;
+	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->cache_size;
+	op_array->cache_size += sizeof(void*);
 }
 
 #define POLYMORPHIC_CACHE_SLOT_SIZE 2
 
 static inline void zend_alloc_polymorphic_cache_slot(uint32_t literal) {
 	zend_op_array *op_array = CG(active_op_array);
-	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->last_cache_slot;
-	op_array->last_cache_slot += POLYMORPHIC_CACHE_SLOT_SIZE;
+	Z_CACHE_SLOT(op_array->literals[literal]) = op_array->cache_size;
+	op_array->cache_size += POLYMORPHIC_CACHE_SLOT_SIZE * sizeof(void*);
 }
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
@@ -863,9 +864,13 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_op_array *op_array = &function->op_array;
 
-		(*op_array->refcount)++;
+		if (op_array->refcount) {
+			(*op_array->refcount)++;
+		}
 		if (op_array->static_variables) {
-			op_array->static_variables = zend_array_dup(op_array->static_variables);
+			if (!(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
+				GC_REFCOUNT(op_array->static_variables)++;
+			}
 		}
 		op_array->run_time_cache = NULL;
 	} else if (function->type == ZEND_INTERNAL_FUNCTION) {
@@ -908,7 +913,9 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		}
 		return FAILURE;
 	} else {
-		(*function->op_array.refcount)++;
+		if (function->op_array.refcount) {
+			(*function->op_array.refcount)++;
+		}
 		function->op_array.static_variables = NULL; /* NULL out the unbound function */
 		return SUCCESS;
 	}
@@ -2310,6 +2317,50 @@ zend_bool zend_is_assign_to_self(zend_ast *var_ast, zend_ast *expr_ast) /* {{{ *
 }
 /* }}} */
 
+/* Detects if list($a, $b, $c) contains variable with given name */
+zend_bool zend_list_has_assign_to(zend_ast *list_ast, zend_string *name) /* {{{ */
+{
+	zend_ast_list *list = zend_ast_get_list(list_ast);
+	uint32_t i;
+	for (i = 0; i < list->children; i++) {
+		zend_ast *var_ast = list->child[i];
+		if (!var_ast) {
+			continue;
+		}
+
+		/* Recursively check nested list()s */
+		if (var_ast->kind == ZEND_AST_LIST && zend_list_has_assign_to(var_ast, name)) {
+			return 1;
+		}
+
+		if (var_ast->kind == ZEND_AST_VAR && var_ast->child[0]->kind == ZEND_AST_ZVAL) {
+			zend_string *var_name = zval_get_string(zend_ast_get_zval(var_ast->child[0]));
+			zend_bool result = zend_string_equals(var_name, name);
+			zend_string_release(var_name);
+			if (result) {
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+/* }}} */
+
+/* Detects patterns like list($a, $b, $c) = $a */
+zend_bool zend_list_has_assign_to_self(zend_ast *list_ast, zend_ast *expr_ast) /* {{{ */
+{
+	/* Only check simple variables on the RHS, as only CVs cause issues with this. */
+	if (expr_ast->kind == ZEND_AST_VAR && expr_ast->child[0]->kind == ZEND_AST_ZVAL) {
+		zend_string *name = zval_get_string(zend_ast_get_zval(expr_ast->child[0]));
+		zend_bool result = zend_list_has_assign_to(list_ast, name);
+		zend_string_release(name);
+		return result;
+	}
+	return 0;
+}
+/* }}} */
+
 void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
@@ -2359,7 +2410,13 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_emit_op_data(&expr_node);
 			return;
 		case ZEND_AST_LIST:
-			zend_compile_expr(&expr_node, expr_ast);
+			if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
+				/* list($a, $b) = $a should evaluate the right $a first */
+				zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
+			} else {
+				zend_compile_expr(&expr_node, expr_ast);
+			}
+
 			zend_compile_list_assign(result, var_ast, &expr_node);
 			return;
 		EMPTY_SWITCH_DEFAULT_CASE();
@@ -2560,6 +2617,31 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_uchar zend_get_call_op(zend_uchar init_op, zend_function *fbc) /* {{{ */
+{
+	if (fbc) {
+		if (fbc->type == ZEND_INTERNAL_FUNCTION) {
+			if (!zend_execute_internal &&
+			    !fbc->common.scope &&
+			    !(fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED|ZEND_ACC_HAS_TYPE_HINTS))) {
+				return ZEND_DO_ICALL;
+			}
+		} else {
+			if (zend_execute_ex == execute_ex &&
+			    !(fbc->common.fn_flags & ZEND_ACC_GENERATOR)) {
+				return ZEND_DO_UCALL;
+			}
+		}
+	} else if (zend_execute_ex == execute_ex &&
+	           !zend_execute_internal &&
+	           (init_op == ZEND_INIT_FCALL_BY_NAME ||
+	            init_op == ZEND_INIT_NS_FCALL_BY_NAME)) {
+		return ZEND_DO_FCALL_BY_NAME;
+	}
+	return ZEND_DO_FCALL;
+}
+/* }}} */
+
 void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *fbc) /* {{{ */
 {
 	zend_op *opline;
@@ -2579,7 +2661,7 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	}
 
 	call_flags = (opline->opcode == ZEND_NEW ? ZEND_CALL_CTOR : 0);
-	opline = zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
+	opline = zend_emit_op(result, zend_get_call_op(opline->opcode, fbc), NULL, NULL);
 	opline->op1.num = call_flags;
 
 	zend_do_extended_fcall_end();
@@ -2616,16 +2698,17 @@ void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast) /
 void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast) /* {{{ */
 {
 	zend_op *opline = get_next_op(CG(active_op_array));
-	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-	SET_UNUSED(opline->op1);
 	if (name_node->op_type == IS_CONST && Z_TYPE(name_node->u.constant) == IS_STRING) {
+		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_func_name_literal(CG(active_op_array),
 			Z_STR(name_node->u.constant));
 		zend_alloc_cache_slot(opline->op2.constant);
 	} else {
+		opline->opcode = ZEND_INIT_DYNAMIC_CALL;
 		SET_NODE(opline->op2, name_node);
 	}
+	SET_UNUSED(opline->op1);
 
 	zend_compile_call_common(result, args_ast, NULL);
 }
@@ -3146,6 +3229,12 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_
 		zend_hash_init(CG(active_op_array)->static_variables, 8, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
+	if (GC_REFCOUNT(CG(active_op_array)->static_variables) > 1) {
+		if (!(GC_FLAGS(CG(active_op_array)->static_variables) & IS_ARRAY_IMMUTABLE)) {
+			GC_REFCOUNT(CG(active_op_array)->static_variables)--;
+		}
+		CG(active_op_array)->static_variables = zend_array_dup(CG(active_op_array)->static_variables);
+	}
 	zend_hash_update(CG(active_op_array)->static_variables, Z_STR(var_node.u.constant), value);
 
 	opline = zend_emit_op(&result, by_ref ? ZEND_FETCH_W : ZEND_FETCH_R, &var_node, NULL);
@@ -3846,16 +3935,26 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			ZVAL_COPY_VALUE(&CG(declarables).ticks, &value_zv);
 			zval_dtor(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
+			uint32_t i = 0;
+			zend_bool valid = 0;
 			/* Encoding declaration was already handled during parsing. Here we
 			 * only check that it is the first statement in the file. */
-			uint32_t num = CG(active_op_array)->last;
-			while (num > 0 &&
-				   (CG(active_op_array)->opcodes[num-1].opcode == ZEND_EXT_STMT ||
-					CG(active_op_array)->opcodes[num-1].opcode == ZEND_TICKS)) {
-				--num;
-			}
+			zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
 
-			if (num > 0) {
+			/* Check to see if this declare is preceeded only by declare statements */
+			while (valid == 0 && i < file_ast->children) {
+				if (file_ast->child[i] == ast) {
+					valid = 1;
+				} else if (file_ast->child[i] == NULL) {
+					/* Empty statements are not allowed prior to a declare */
+					break;
+				} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
+					/* declares can only be preceeded by other declares */
+					break;
+				}
+				i++;
+			}
+			if (valid != 1) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Encoding declaration pragma must be "
 					"the very first statement in the script");
 			}

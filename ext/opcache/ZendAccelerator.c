@@ -1163,7 +1163,13 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	memory_used = zend_accel_script_persist_calc(new_persistent_script, key, key_length);
 
 	/* Allocate shared memory */
+#ifdef __SSE2__
+	/* Align to 64-byte boundary */
+	ZCG(mem) = zend_shared_alloc(memory_used + 64);
+	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
+#else
 	ZCG(mem) = zend_shared_alloc(memory_used);
+#endif
 	if (!ZCG(mem)) {
 		zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
 		zend_shared_alloc_unlock();
@@ -1830,6 +1836,11 @@ static void accel_activate(void)
 		return;
 	}
 
+	if (!ZCG(function_table).nTableSize) {
+		zend_hash_init(&ZCG(function_table), zend_hash_num_elements(CG(function_table)), NULL, ZEND_FUNCTION_DTOR, 1);
+		zend_accel_copy_internal_functions();
+	}
+
 	SHM_UNPROTECT();
 	/* PHP-5.4 and above return "double", but we use 1 sec precision */
 	ZCG(auto_globals_mask) = 0;
@@ -1973,7 +1984,11 @@ static int accel_clean_non_persistent_function(zval *zv)
 		return ZEND_HASH_APPLY_STOP;
 	} else {
 		if (function->op_array.static_variables) {
-			accel_fast_hash_destroy(function->op_array.static_variables);
+			if (!(GC_FLAGS(function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+				if (--GC_REFCOUNT(function->op_array.static_variables) == 0) {
+					accel_fast_hash_destroy(function->op_array.static_variables);
+				}
+			}
 			function->op_array.static_variables = NULL;
 		}
 		return ZEND_HASH_APPLY_REMOVE;
@@ -2025,7 +2040,11 @@ static void zend_accel_fast_shutdown(void)
 				break;
 			} else {
 				if (func->op_array.static_variables) {
-					accel_fast_hash_destroy(func->op_array.static_variables);
+					if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+						if (--GC_REFCOUNT(func->op_array.static_variables) == 0) {
+							accel_fast_hash_destroy(func->op_array.static_variables);
+						}
+					}
 				}
 				zend_accel_fast_del_bucket(EG(function_table), _idx-1, _p);
 			}
@@ -2043,7 +2062,11 @@ static void zend_accel_fast_shutdown(void)
 					ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
 						if (func->type == ZEND_USER_FUNCTION) {
 							if (func->op_array.static_variables) {
-								accel_fast_hash_destroy(func->op_array.static_variables);
+								if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
+									if (--GC_REFCOUNT(func->op_array.static_variables) == 0) {
+										accel_fast_hash_destroy(func->op_array.static_variables);
+									}
+								}
 								func->op_array.static_variables = NULL;
 							}
 						}
@@ -2239,8 +2262,6 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	memset(accel_globals, 0, sizeof(zend_accel_globals));
-	zend_hash_init(&accel_globals->function_table, zend_hash_num_elements(CG(function_table)), NULL, ZEND_FUNCTION_DTOR, 1);
-	zend_accel_copy_internal_functions();
 }
 
 static void accel_globals_internal_func_dtor(zval *zv)
@@ -2250,8 +2271,10 @@ static void accel_globals_internal_func_dtor(zval *zv)
 
 static void accel_globals_dtor(zend_accel_globals *accel_globals)
 {
-	accel_globals->function_table.pDestructor = accel_globals_internal_func_dtor;
-	zend_hash_destroy(&accel_globals->function_table);
+	if (accel_globals->function_table.nTableSize) {
+		accel_globals->function_table.pDestructor = accel_globals_internal_func_dtor;
+		zend_hash_destroy(&accel_globals->function_table);
+	}
 }
 
 static int accel_startup(zend_extension *extension)
@@ -2403,11 +2426,6 @@ static int accel_startup(zend_extension *extension)
 		zend_accel_blacklist_init(&accel_blacklist);
 		zend_accel_blacklist_load(&accel_blacklist, ZCG(accel_directives.user_blacklist_filename));
 	}
-
-#if 0
-	/* FIXME: We probably don't need it here */
-	zend_accel_copy_internal_functions();
-#endif
 
 	return SUCCESS;
 }

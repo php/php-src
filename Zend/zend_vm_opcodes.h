@@ -152,12 +152,16 @@ END_EXTERN_C()
 #define ZEND_FE_RESET_RW                     125
 #define ZEND_FE_FETCH_RW                     126
 #define ZEND_FE_FREE                         127
-#define ZEND_ASSERT_CHECK                    128
+#define ZEND_INIT_DYNAMIC_CALL               128
+#define ZEND_DO_ICALL                        129
+#define ZEND_DO_UCALL                        130
+#define ZEND_DO_FCALL_BY_NAME                131
 #define ZEND_PRE_INC_OBJ                     132
 #define ZEND_PRE_DEC_OBJ                     133
 #define ZEND_POST_INC_OBJ                    134
 #define ZEND_POST_DEC_OBJ                    135
 #define ZEND_ASSIGN_OBJ                      136
+#define ZEND_ASSERT_CHECK                    137
 #define ZEND_INSTANCEOF                      138
 #define ZEND_DECLARE_CLASS                   139
 #define ZEND_DECLARE_INHERITED_CLASS         140
