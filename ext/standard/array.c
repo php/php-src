@@ -490,7 +490,7 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case) /* {{{ */
 	}
 
 	if (Z_TYPE_P(array) == IS_OBJECT) {
-		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_SortableAssoc)) {
 			zval retval, arg;
 			ZVAL_LONG(&arg, PHP_SORT_NATURAL | (fold_case ? PHP_SORT_FLAG_CASE : 0));
 			zend_call_method_with_1_params(array, NULL, NULL, "asort", &retval, &arg);
@@ -585,7 +585,7 @@ PHP_FUNCTION(arsort)
 	if (Z_TYPE_P(array) == IS_OBJECT) {
 		zval retval, arg;
 		ZVAL_LONG(&arg, sort_type | PHP_SORT_FLAG_REVERSE);
-		if (instanceof_function(Z_OBJCE_P(array), spl_ce_Sortable)) {
+		if (instanceof_function(Z_OBJCE_P(array), spl_ce_SortableAssoc)) {
 			zend_call_method_with_1_params(array, NULL, NULL, "asort", &retval, &arg);
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				RETURN_ZVAL(&retval, 1, 0);
