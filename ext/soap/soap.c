@@ -2581,7 +2581,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 	}
 
 	if ((trace = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace")-1)) != NULL &&
-	    Z_LVAL_P(trace) > 0) {
+	    Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) > 0) {
 		add_property_stringl(this_ptr, "__last_request", buf, buf_size);
 	}
 
@@ -2609,7 +2609,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 		}
 		ret = FALSE;
 	} else if ((trace = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace")-1)) != NULL &&
-	    Z_LVAL_P(trace) > 0) {
+	    Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) > 0) {
 		add_property_str(this_ptr, "__last_response", zend_string_copy(Z_STR_P(response)));
 	}
 	zval_ptr_dtor(&func);
@@ -2909,7 +2909,7 @@ PHP_METHOD(SoapClient, __call)
 
 	/* Add default headers */
 	this_ptr = getThis();
-	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers")-1)) != NULL) {
+	if ((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers")-1)) != NULL && Z_TYPE_P(tmp) == IS_ARRAY) {
 		HashTable *default_headers = Z_ARRVAL_P(tmp);
 		if (soap_headers) {
 			if (!free_soap_headers) {
