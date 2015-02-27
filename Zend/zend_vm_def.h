@@ -1659,14 +1659,13 @@ ZEND_VM_HANDLER(98, ZEND_FETCH_LIST, CONST|TMPVAR|CV, CONST)
 
 ZEND_VM_C_LABEL(try_fetch_list):
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-		zend_free_op free_op2;
-		zval *value = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_R);
+		zval *value = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), EX_CONSTANT(opline->op2), OP2_TYPE, BP_VAR_R);
 
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	} else if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT) &&
 	           EXPECTED(Z_OBJ_HT_P(container)->read_dimension)) {
 		zval *result = EX_VAR(opline->result.var);
-		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_R, result);
+		zval *retval = Z_OBJ_HT_P(container)->read_dimension(container, EX_CONSTANT(opline->op2), BP_VAR_R, result);
 
 		if (retval) {
 			if (result != retval) {
@@ -2336,12 +2335,19 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMPVAR|UNUSED|CV, CONST|TMPVAR|CV)
 
 	function_name = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP2_TYPE != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (OP2_TYPE != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((OP2_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = GET_OP1_OBJ_ZVAL_PTR(BP_VAR_R);
@@ -3198,7 +3204,7 @@ ZEND_VM_C_LABEL(fcall_end):
 
 ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 {
-#if OP1_TYPE != IS_UNUSED
+#if !defined(ZEND_VM_SPEC) || (OP1_TYPE != IS_UNUSED)
 	USE_OPLINE
 #endif
 	SAVE_OPLINE();
@@ -4443,7 +4449,7 @@ ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|UNUSED|CV, CONST|TMPVAR|UNUSE
 
 	if (OP1_TYPE == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if !defined(ZEND_VM_SPEC) || OP1_TYPE != IS_UNUSED
+#if !defined(ZEND_VM_SPEC) || (OP1_TYPE != IS_UNUSED)
 	} else {
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ADD_ARRAY_ELEMENT);
 #endif

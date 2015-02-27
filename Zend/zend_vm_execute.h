@@ -4427,7 +4427,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_LIST_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_H
 
 try_fetch_list:
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-
 		zval *value = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), EX_CONSTANT(opline->op2), IS_CONST, BP_VAR_R);
 
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
@@ -4855,7 +4854,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_H
 
 	if (IS_CONST == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_CONST != IS_UNUSED
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -6374,7 +6373,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 
 static int ZEND_FASTCALL  ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-#if IS_CONST != IS_UNUSED
+#if 0 || (IS_CONST != IS_UNUSED)
 	USE_OPLINE
 #endif
 	SAVE_OPLINE();
@@ -6503,7 +6502,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_
 
 	if (IS_CONST == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_CONST != IS_UNUSED
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -7713,7 +7712,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HAND
 
 	if (IS_CONST == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_CONST != IS_UNUSED
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -8818,7 +8817,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_
 
 	if (IS_CONST == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_CONST != IS_UNUSED
+#if 0 || (IS_CONST != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -10002,7 +10001,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HAN
 
 	if (IS_TMP_VAR == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_TMP_VAR != IS_UNUSED
+#if 0 || (IS_TMP_VAR != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -10501,7 +10500,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UNUSED_HANDLER(ZEND_O
 
 static int ZEND_FASTCALL  ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-#if IS_TMP_VAR != IS_UNUSED
+#if 0 || (IS_TMP_VAR != IS_UNUSED)
 	USE_OPLINE
 #endif
 	SAVE_OPLINE();
@@ -10630,7 +10629,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HA
 
 	if (IS_TMP_VAR == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_TMP_VAR != IS_UNUSED
+#if 0 || (IS_TMP_VAR != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -11084,7 +11083,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLE
 
 	if (IS_TMP_VAR == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_TMP_VAR != IS_UNUSED
+#if 0 || (IS_TMP_VAR != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -11509,7 +11508,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_TMPVAR_HANDLER(ZEND_OPCODE_HA
 
 	if (IS_TMP_VAR == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_TMP_VAR != IS_UNUSED
+#if 0 || (IS_TMP_VAR != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -14273,7 +14272,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAN
 
 	if (IS_VAR == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_VAR != IS_UNUSED
+#if 0 || (IS_VAR != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -15571,7 +15570,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 
 static int ZEND_FASTCALL  ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-#if IS_VAR != IS_UNUSED
+#if 0 || (IS_VAR != IS_UNUSED)
 	USE_OPLINE
 #endif
 	SAVE_OPLINE();
@@ -15700,7 +15699,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HA
 
 	if (IS_VAR == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_VAR != IS_UNUSED
+#if 0 || (IS_VAR != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -17167,7 +17166,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLE
 
 	if (IS_VAR == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_VAR != IS_UNUSED
+#if 0 || (IS_VAR != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -18634,7 +18633,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HA
 
 	if (IS_VAR == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_VAR != IS_UNUSED
+#if 0 || (IS_VAR != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -19710,12 +19709,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 
 	function_name = EX_CONSTANT(opline->op2);
 
-	if (IS_CONST != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CONST != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_obj_zval_ptr_unused(execute_data);
@@ -19937,7 +19943,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_
 
 	if (IS_UNUSED == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_UNUSED != IS_UNUSED
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -20901,7 +20907,7 @@ static int ZEND_FASTCALL  ZEND_ASSIGN_BW_XOR_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPC
 
 static int ZEND_FASTCALL  ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-#if IS_UNUSED != IS_UNUSED
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	USE_OPLINE
 #endif
 	SAVE_OPLINE();
@@ -20942,7 +20948,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE
 
 	if (IS_UNUSED == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_UNUSED != IS_UNUSED
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -21923,12 +21929,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 
 	function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (IS_CV != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CV != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_obj_zval_ptr_unused(execute_data);
@@ -22052,7 +22065,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAN
 
 	if (IS_UNUSED == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_UNUSED != IS_UNUSED
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -23320,12 +23333,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_
 
 	function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_obj_zval_ptr_unused(execute_data);
@@ -23450,7 +23470,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE
 
 	if (IS_UNUSED == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_UNUSED != IS_UNUSED
+#if 0 || (IS_UNUSED != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -26653,7 +26673,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_LIST_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 
 try_fetch_list:
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-
 		zval *value = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), EX_CONSTANT(opline->op2), IS_CONST, BP_VAR_R);
 
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
@@ -26845,12 +26864,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 
 	function_name = EX_CONSTANT(opline->op2);
 
-	if (IS_CONST != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CONST != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
@@ -27077,7 +27103,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAND
 
 	if (IS_CV == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_CV != IS_UNUSED
+#if 0 || (IS_CV != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -29252,7 +29278,7 @@ assign_dim_clean:
 
 static int ZEND_FASTCALL  ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-#if IS_CV != IS_UNUSED
+#if 0 || (IS_CV != IS_UNUSED)
 	USE_OPLINE
 #endif
 	SAVE_OPLINE();
@@ -29381,7 +29407,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAN
 
 	if (IS_CV == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_CV != IS_UNUSED
+#if 0 || (IS_CV != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -31134,12 +31160,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 
 	function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (IS_CV != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CV != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
@@ -31366,7 +31399,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER
 
 	if (IS_CV == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_CV != IS_UNUSED
+#if 0 || (IS_CV != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -33137,12 +33170,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCO
 
 	function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var);
@@ -33371,7 +33411,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HAN
 
 	if (IS_CV == IS_UNUSED) {
 		ZEND_VM_NEXT_OPCODE();
-#if 0 || IS_CV != IS_UNUSED
+#if 0 || (IS_CV != IS_UNUSED)
 	} else {
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
@@ -34772,7 +34812,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_LIST_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_
 
 try_fetch_list:
 	if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
-
 		zval *value = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), EX_CONSTANT(opline->op2), IS_CONST, BP_VAR_R);
 
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
@@ -34812,12 +34851,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CONST_HANDLER(ZEND_O
 
 	function_name = EX_CONSTANT(opline->op2);
 
-	if (IS_CONST != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CONST != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -36430,12 +36476,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCO
 
 	function_name = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var);
 
-	if (IS_CV != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if (IS_CV != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);
@@ -37093,12 +37146,19 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_
 
 	function_name = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2);
 
-	if ((IS_TMP_VAR|IS_VAR) != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			HANDLE_EXCEPTION();
-		}
-		zend_error_noreturn(E_ERROR, "Method name must be a string");
+	if ((IS_TMP_VAR|IS_VAR) != IS_CONST && UNEXPECTED(Z_TYPE_P(function_name) != IS_STRING)) {
+		do {
+			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(function_name)) {
+				function_name = Z_REFVAL_P(function_name);
+				if (EXPECTED(Z_TYPE_P(function_name) == IS_STRING)) {
+					break;
+				}
+			}
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
+			zend_error_noreturn(E_ERROR, "Method name must be a string");
+		} while (0);
 	}
 
 	object = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1);

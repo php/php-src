@@ -250,6 +250,7 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 			case ZEND_ADD_ARRAY_ELEMENT:
 			case ZEND_INIT_ARRAY:
+			case ZEND_ASSIGN_DIM:
 			case ZEND_UNSET_DIM:
 			case ZEND_FETCH_DIM_R:
 			case ZEND_FETCH_DIM_W:
