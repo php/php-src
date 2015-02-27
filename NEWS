@@ -3,6 +3,8 @@
 ?? Feb 2015, PHP 5.6.7
 
 - Core:
+  . Fixed bug #69121 (Segfault in get_current_user when script owner is not
+    in passwd with ZTS build). (dan at syneto dot net)
   . Fixed bug #65593 (Segfault when calling ob_start from output buffering 
     callback). (Mike)
   . Fixed bug #68986 (pointer returned by php_stream_fopen_temporary_file
