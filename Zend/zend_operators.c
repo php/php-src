@@ -31,7 +31,6 @@
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 #include "zend_interfaces.h"
-#include "ext/spl/spl_iterators.h"
 
 #if ZEND_USE_TOLOWER_L
 #include <locale.h>
@@ -2069,22 +2068,6 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
 }
 /* }}} */
 
-static int in_function_interator(zend_object_iterator *iter, zval **needle)
-{
-	zval retzv;
-	zval *val = iter->funcs->get_current_data(iter);
-
-	ZVAL_DEREF(val);
-	fast_is_identical_function(&retzv, val, *needle);
-
-	if (Z_TYPE(retzv) == IS_TRUE) {
-		*needle = NULL;
-		return ZEND_HASH_APPLY_STOP;
-	}
-
-	return ZEND_HASH_APPLY_KEEP;
-}
-
 static zend_always_inline zend_bool in_function_inline(zval *needle, zval *haystack, int *status)
 {
 	zend_string *haystr = Z_STR_P(haystack), *needlestr;
@@ -2156,9 +2139,31 @@ static zend_always_inline zend_bool in_function_inline(zval *needle, zval *hayst
 			break;
 
 		case IS_OBJECT:
-			if (instanceof_function(Z_OBJ_P(haystack)->ce, zend_ce_traversable)) {
-				spl_iterator_apply(haystack, (spl_iterator_apply_func_t) in_function_interator, &needle);
-				return needle == NULL;
+			if (instanceof_function(Z_OBJCE_P(haystack), zend_ce_traversable)) {
+				zend_object_iterator *iter = Z_OBJCE_P(haystack)->get_iterator(Z_OBJCE_P(haystack), haystack, 0);
+
+				if (iter->funcs->rewind && !EG(exception)) {
+					iter->funcs->rewind(iter);
+				}
+
+				while (!EG(exception) && iter->funcs->valid(iter) == SUCCESS && !EG(exception)) {
+					zval retzv, *val = iter->funcs->get_current_data(iter);
+
+					ZVAL_DEREF(val);
+					fast_is_identical_function(&retzv, val, needle);
+
+					if (Z_TYPE(retzv) == IS_TRUE) {
+						zend_iterator_dtor(iter);
+						return 1;
+					}
+
+					iter->funcs->move_forward(iter);
+				}
+
+				if (iter) {
+					zend_iterator_dtor(iter);
+				}
+				return 0;
 			}
 
 		default:
