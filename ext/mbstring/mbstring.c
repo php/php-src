@@ -1970,77 +1970,109 @@ PHP_FUNCTION(mb_detect_order)
 }
 /* }}} */
 
-static inline int php_mb_check_unicode_encoding(enum mbfl_no_encoding no_enc)
+static const enum mbfl_no_encoding php_mb_unsupported_no_encoding_list[] = {
+	mbfl_no_encoding_pass,
+	mbfl_no_encoding_auto,
+	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_byte2be,
+	mbfl_no_encoding_byte2le,
+	mbfl_no_encoding_byte4be,
+	mbfl_no_encoding_byte4le,
+	mbfl_no_encoding_base64,
+	mbfl_no_encoding_uuencode,
+	mbfl_no_encoding_html_ent,
+	mbfl_no_encoding_qprint,
+	mbfl_no_encoding_utf7,
+	mbfl_no_encoding_utf7imap,
+	mbfl_no_encoding_2022kr,
+	mbfl_no_encoding_jis,
+	mbfl_no_encoding_2022jp,
+	mbfl_no_encoding_2022jpms,
+	mbfl_no_encoding_jis_ms,
+	mbfl_no_encoding_2022jp_2004,
+	mbfl_no_encoding_2022jp_kddi,
+	mbfl_no_encoding_cp50220,
+	mbfl_no_encoding_cp50220raw,
+	mbfl_no_encoding_cp50221,
+	mbfl_no_encoding_cp50222
+};
+
+static inline int php_mb_is_unsupported_no_encoding(enum mbfl_no_encoding no_enc)
 {
-	if (no_enc == mbfl_no_encoding_utf8
-	|| no_enc == mbfl_no_encoding_utf8_docomo
-	|| no_enc == mbfl_no_encoding_utf8_kddi_a
-	|| no_enc == mbfl_no_encoding_utf8_kddi_b
-	|| no_enc == mbfl_no_encoding_utf8_sb
-	|| no_enc == mbfl_no_encoding_ucs4
-	|| no_enc == mbfl_no_encoding_ucs4be
-	|| no_enc == mbfl_no_encoding_ucs4le
-	|| no_enc == mbfl_no_encoding_utf32
-	|| no_enc == mbfl_no_encoding_utf32be
-	|| no_enc == mbfl_no_encoding_utf32le
-	|| no_enc == mbfl_no_encoding_ucs2
-	|| no_enc == mbfl_no_encoding_ucs2be
-	|| no_enc == mbfl_no_encoding_ucs2le
-	|| no_enc == mbfl_no_encoding_utf16
-	|| no_enc == mbfl_no_encoding_utf16be
-	|| no_enc == mbfl_no_encoding_utf16le
-	) {
-		return 1;
+	int i;
+	int size = sizeof(php_mb_unsupported_no_encoding_list)/sizeof(php_mb_unsupported_no_encoding_list[0]);
+
+	for (i = 0; i < size; i++) {
+
+		if (no_enc == php_mb_unsupported_no_encoding_list[i]) {
+			return 1;
+		}
+
 	}
 
 	return 0;
 }
 
-static inline int php_mb_check_utf8_encoding(enum mbfl_no_encoding no_enc)
+static const enum mbfl_no_encoding php_mb_no_encoding_unicode_list[] = {
+	mbfl_no_encoding_utf8,
+	mbfl_no_encoding_utf8_docomo,
+	mbfl_no_encoding_utf8_kddi_a,
+	mbfl_no_encoding_utf8_kddi_b,
+	mbfl_no_encoding_utf8_sb,
+	mbfl_no_encoding_ucs4,
+	mbfl_no_encoding_ucs4be,
+	mbfl_no_encoding_ucs4le,
+	mbfl_no_encoding_utf32,
+	mbfl_no_encoding_utf32be,
+	mbfl_no_encoding_utf32le,
+	mbfl_no_encoding_ucs2,
+	mbfl_no_encoding_ucs2be,
+	mbfl_no_encoding_ucs2le,
+	mbfl_no_encoding_utf16,
+	mbfl_no_encoding_utf16be,
+	mbfl_no_encoding_utf16le
+};
+
+static inline int php_mb_is_no_encoding_unicode(enum mbfl_no_encoding no_enc)
 {
-	if (no_enc == mbfl_no_encoding_utf8
-	|| no_enc == mbfl_no_encoding_utf8_docomo
-	|| no_enc == mbfl_no_encoding_utf8_kddi_a
-	|| no_enc == mbfl_no_encoding_utf8_kddi_b
-	|| no_enc == mbfl_no_encoding_utf8_sb
-	) {
-		return 1;
+	int i;
+	int size = sizeof(php_mb_no_encoding_unicode_list)/sizeof(php_mb_no_encoding_unicode_list[0]);
+
+	for (i = 0; i < size; i++) {
+
+		if (no_enc == php_mb_no_encoding_unicode_list[i]) {
+			return 1;
+		}
+
 	}
 
 	return 0;
 }
-static inline int php_mb_check_unsupported_encoding(enum mbfl_no_encoding no_enc)
+
+static const enum mbfl_no_encoding php_mb_no_encoding_utf8_list[] = {
+	mbfl_no_encoding_utf8,
+	mbfl_no_encoding_utf8_docomo,
+	mbfl_no_encoding_utf8_kddi_a,
+	mbfl_no_encoding_utf8_kddi_b,
+	mbfl_no_encoding_utf8_sb
+};
+
+static inline int php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc)
 {
-	if (no_enc == mbfl_no_encoding_pass
-	|| no_enc == mbfl_no_encoding_auto
-	|| no_enc == mbfl_no_encoding_wchar
-	|| no_enc == mbfl_no_encoding_byte2be
-	|| no_enc == mbfl_no_encoding_byte2le
-	|| no_enc == mbfl_no_encoding_byte4be
-	|| no_enc == mbfl_no_encoding_byte4le
-	|| no_enc == mbfl_no_encoding_base64
-	|| no_enc == mbfl_no_encoding_uuencode
-	|| no_enc == mbfl_no_encoding_html_ent
-	|| no_enc == mbfl_no_encoding_qprint
-	|| no_enc == mbfl_no_encoding_utf7
-	|| no_enc == mbfl_no_encoding_utf7imap
-	|| no_enc == mbfl_no_encoding_2022kr
-	|| no_enc == mbfl_no_encoding_jis
-	|| no_enc == mbfl_no_encoding_2022jp
-	|| no_enc == mbfl_no_encoding_2022jpms
-	|| no_enc == mbfl_no_encoding_jis_ms
-	|| no_enc == mbfl_no_encoding_2022jp_2004
-	|| no_enc == mbfl_no_encoding_2022jp_kddi
-	|| no_enc == mbfl_no_encoding_cp50220
-	|| no_enc == mbfl_no_encoding_cp50220raw
-	|| no_enc == mbfl_no_encoding_cp50221
-	|| no_enc == mbfl_no_encoding_cp50222
-	) {
-		return 1;
+	int i;
+	int size = sizeof(php_mb_no_encoding_utf8_list)/sizeof(php_mb_no_encoding_utf8_list[0]);
+
+	for (i = 0; i < size; i++) {
+
+		if (no_enc == php_mb_no_encoding_utf8_list[i]) {
+			return 1;
+		}
+
 	}
 
 	return 0;
 }
+
 static inline int php_mb_check_code_point(long cp)
 {
 	enum mbfl_no_encoding no_enc;
@@ -2049,14 +2081,14 @@ static inline int php_mb_check_code_point(long cp)
 
 	no_enc = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (php_mb_check_utf8_encoding(no_enc)) {
+	if (php_mb_is_no_encoding_utf8(no_enc)) {
 
 		if ((cp > 0 && 0xd800 > cp) || (cp > 0xdfff && 0x110000 > cp)) {
 			return 1;
 		}
 
 		return 0;
-	} else if (php_mb_check_unicode_encoding(no_enc)) {
+	} else if (php_mb_is_no_encoding_unicode(no_enc)) {
 
 		if (0 > cp || cp > 0x10ffff) {
 			return 0;
@@ -2065,7 +2097,7 @@ static inline int php_mb_check_code_point(long cp)
 		return 1;
 
 	// backward compatibility
-	} else if (php_mb_check_unsupported_encoding(no_enc)) {
+	} else if (php_mb_is_unsupported_no_encoding(no_enc)) {
 		return cp < 0xffff && cp > 0x0;
 	}
 
