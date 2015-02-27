@@ -440,7 +440,8 @@ Other
 ========================================
 7. New Classes and Interfaces
 ========================================
-
+- SPL:
+  . Added interface Sortable (see https://wiki.php.net/rfc/sortable)
 
 ========================================
 8. Removed Extensions and SAPIs
