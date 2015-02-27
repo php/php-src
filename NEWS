@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug #69054 (Null dereference in readline_(read|write)_history() without
     parameters). (Laruence)
 
+- SOAP:
+  . Fixed bug #69085 (SoapClient's __call() type confusion through
+    unserialize()). (andrea dot palazzo at truel dot it, Laruence)
+
 - SPL:
   . Fixed bug #69108 ("Segmentation fault" when (de)serializing
     SplObjectStorage). (Laruence)
