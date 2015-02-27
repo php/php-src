@@ -56,6 +56,11 @@
   . Fixed day_of_week function as it could sometimes return negative values
     internally. (Derick)
   . Removed $is_dst parameter from mktime() and gmmktime(). (Nikita)
+  . Added "v" DateTime format modifier to get the 3-digit version of fraction
+    of seconds (Mariano Iglesias)
+  . Implemented FR #69089: Added DateTime::RFC3339_EXTENDED to output in 
+    RFC3339 Extended format which includes fraction of seconds (Mariano 
+    Iglesias)
 
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
