@@ -1302,6 +1302,11 @@ PHPAPI char *php_get_current_user(void)
 			return "";
 		}
 		pwd = &_pw;
+
+		if (retpwptr == NULL) {
+			efree(pwbuf);
+			return "";
+		}
 #else
 		if ((pwd=getpwuid(pstat->st_uid))==NULL) {
 			return "";
