@@ -1221,7 +1221,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 				new_len = result_len + subject_len - start_offset;
 				if (new_len > alloc_len) {
 					alloc_len = new_len; /* now we know exactly how long it is */
-					result = zend_string_realloc(result, alloc_len, 0);
+					if (NULL != result) {
+						result = zend_string_realloc(result, alloc_len, 0);
+					} else {
+						result = zend_string_alloc(alloc_len, 0);
+					}
 				}
 				/* stick that last bit of string on our output */
 				memcpy(&result->val[result_len], piece, subject_len - start_offset);
