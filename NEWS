@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug #68986 (pointer returned by php_stream_fopen_temporary_file
     not validated in memory.c). (nayana at ddproperty dot com)
   . Fixed bug #68166 (Exception with invalid character causes segv) (Rasmus)
+  . Fixed bug #69141 (Missing arguments in reflection info for some builtin
+    functions) (kostyantyn dot lysyy at oracle dot com)
 
 - cURL:
   . Fixed bug #69088 (PHP_MINIT_FUNCTION does not fully initialize cURL on
