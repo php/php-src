@@ -32,6 +32,7 @@
 #include "php_openssl.h"
 #include "php_network.h"
 #include <openssl/ssl.h>
+#include <openssl/rsa.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/err.h>
@@ -50,13 +51,30 @@
 #include <sys/select.h>
 #endif
 
+/* OpenSSL 1.0.2 removes SSLv2 support entirely*/
+#if OPENSSL_VERSION_NUMBER < 0x10002000L && !defined(OPENSSL_NO_SSL2)
+#define HAVE_SSL2 1
+#endif
+
+#ifndef OPENSSL_NO_SSL3
+#define HAVE_SSL3 1
+#endif
+
+#if OPENSSL_VERSION_NUMBER >= 0x10001001L
+#define HAVE_TLS11 1
+#define HAVE_TLS12 1
+#endif
+
 #if !defined(OPENSSL_NO_ECDH) && OPENSSL_VERSION_NUMBER >= 0x0090800fL
 #define HAVE_ECDH 1
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x00908070L && !defined(OPENSSL_NO_TLSEXT)
-#define HAVE_SNI 1
+#if !defined(OPENSSL_NO_TLSEXT)
+#if OPENSSL_VERSION_NUMBER >= 0x00908070L
+#define HAVE_TLS_SNI 1
 #endif
+#endif
+
 
 /* Flags for determining allowed stream crypto methods */
 #define STREAM_CRYPTO_IS_CLIENT            (1<<0)
@@ -885,37 +903,37 @@ static int set_local_cert(SSL_CTX *ctx, php_stream *stream) /* {{{ */
 static const SSL_METHOD *php_select_crypto_method(zend_long method_value, int is_client) /* {{{ */
 {
 	if (method_value == STREAM_CRYPTO_METHOD_SSLv2) {
-#ifndef OPENSSL_NO_SSL2
-		return is_client ? SSLv2_client_method() : SSLv2_server_method();
+#ifdef HAVE_SSL2
+		return is_client ? (SSL_METHOD *)SSLv2_client_method() : (SSL_METHOD *)SSLv2_server_method();
 #else
 		php_error_docref(NULL, E_WARNING,
-				"SSLv2 support is not compiled into the OpenSSL library PHP is linked against");
+				"SSLv2 unavailable in the OpenSSL library against which PHP is linked");
 		return NULL;
 #endif
 	} else if (method_value == STREAM_CRYPTO_METHOD_SSLv3) {
-#ifndef OPENSSL_NO_SSL3
+#ifdef HAVE_SSL3
 		return is_client ? SSLv3_client_method() : SSLv3_server_method();
 #else
 		php_error_docref(NULL, E_WARNING,
-				"SSLv3 support is not compiled into the OpenSSL library PHP is linked against");
+				"SSLv3 unavailable in the OpenSSL library against which PHP is linked");
 		return NULL;
 #endif
 	} else if (method_value == STREAM_CRYPTO_METHOD_TLSv1_0) {
 		return is_client ? TLSv1_client_method() : TLSv1_server_method();
 	} else if (method_value == STREAM_CRYPTO_METHOD_TLSv1_1) {
-#if OPENSSL_VERSION_NUMBER >= 0x10001001L
+#ifdef HAVE_TLS11
 		return is_client ? TLSv1_1_client_method() : TLSv1_1_server_method();
 #else
 		php_error_docref(NULL, E_WARNING,
-				"TLSv1.1 support is not compiled into the OpenSSL library PHP is linked against");
+				"TLSv1.1 unavailable in the OpenSSL library against which PHP is linked");
 		return NULL;
 #endif
 	} else if (method_value == STREAM_CRYPTO_METHOD_TLSv1_2) {
-#if OPENSSL_VERSION_NUMBER >= 0x10001001L
+#ifdef HAVE_TLS12
 		return is_client ? TLSv1_2_client_method() : TLSv1_2_server_method();
 #else
 		php_error_docref(NULL, E_WARNING,
-				"TLSv1.2 support is not compiled into the OpenSSL library PHP is linked against");
+				"TLSv1.2 unavailable in the OpenSSL library against which PHP is linked");
 		return NULL;
 #endif
 	} else {
@@ -1086,7 +1104,21 @@ static int set_server_rsa_key(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 		rsa_key_size = 2048;
 	}
 
-	rsa = RSA_generate_key(rsa_key_size, RSA_F4, NULL, NULL);
+#if OPENSSL_VERSION_NUMBER < 0x10002000L
+	/* OpenSSL 1.0.2 deprecates RSA_generate_key */
+	rsa = (RSA*)RSA_generate_key(rsa_key_size, RSA_F4, NULL, NULL);
+#else
+	{
+		BIGNUM *bne = (BIGNUM *)BN_new();
+		if (BN_set_word(bne, RSA_F4) != 1) {
+			BN_free(bne);
+			return FAILURE;
+		}
+		rsa = RSA_new();
+		RSA_generate_key_ex(rsa, rsa_key_size, bne, NULL);
+		BN_free(bne);
+	}
+#endif
 
 	if (!SSL_CTX_set_tmp_rsa(ctx, rsa)) {
 		php_error_docref(NULL, E_WARNING, "Failed setting RSA key");
@@ -1226,7 +1258,7 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 }
 /* }}} */
 
-#ifdef HAVE_SNI
+#ifdef HAVE_TLS_SNI
 static int server_sni_callback(SSL *ssl_handle, int *al, void *arg) /* {{{ */
 {
 	php_stream *stream;
@@ -1466,6 +1498,7 @@ int php_openssl_setup_crypto(php_stream *stream,
 			return FAILURE;
 		}
 	}
+
 	if (FAILURE == set_local_cert(sslsock->ctx, stream)) {
 		return FAILURE;
 	}
@@ -1493,7 +1526,7 @@ int php_openssl_setup_crypto(php_stream *stream,
 		handle_ssl_error(stream, 0, 1);
 	}
 
-#ifdef HAVE_SNI
+#ifdef HAVE_TLS_SNI
 	/* Enable server-side SNI */
 	if (sslsock->is_client == 0 && enable_server_sni(stream, sslsock) == FAILURE) {
 		return FAILURE;
@@ -1534,13 +1567,29 @@ static zend_array *capture_session_meta(SSL *ssl_handle) /* {{{ */
 	const SSL_CIPHER *cipher = SSL_get_current_cipher(ssl_handle);
 
 	switch (proto) {
-#if OPENSSL_VERSION_NUMBER >= 0x10001001L
-		case TLS1_2_VERSION: proto_str = "TLSv1.2"; break;
-		case TLS1_1_VERSION: proto_str = "TLSv1.1"; break;
+#ifdef HAVE_TLS12
+		case TLS1_2_VERSION:
+			proto_str = "TLSv1.2";
+			break;
 #endif
-		case TLS1_VERSION: proto_str = "TLSv1"; break;
-		case SSL3_VERSION: proto_str = "SSLv3"; break;
-		case SSL2_VERSION: proto_str = "SSLv2"; break;
+#ifdef HAVE_TLS11
+		case TLS1_1_VERSION:
+			proto_str = "TLSv1.1";
+			break;
+#endif
+		case TLS1_VERSION:
+			proto_str = "TLSv1";
+			break;
+#ifdef HAVE_SSL3
+		case SSL3_VERSION:
+			proto_str = "SSLv3";
+			break;
+#endif
+#ifdef HAVE_SSL2
+		case SSL2_VERSION:
+			proto_str = "SSLv2";
+			break;
+#endif
 		default: proto_str = "UNKNOWN";
 	}
 
@@ -1615,7 +1664,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 		int				blocked		= sslsock->s.is_blocked,
 						has_timeout = 0;
 
-#ifdef HAVE_SNI
+#ifdef HAVE_TLS_SNI
 		if (sslsock->is_client) {
 			enable_client_sni(stream, sslsock);
 		}
@@ -1699,10 +1748,8 @@ static int php_openssl_enable_crypto(php_stream *stream,
 
 				if (PHP_STREAM_CONTEXT(stream)) {
 					zval *val;
-
 					if (NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
-							"ssl", "capture_session_meta")) &&
-						zend_is_true(val)
+						"ssl", "capture_session_meta")) && zend_is_true(val)
 					) {
 						zval meta_arr;
 						ZVAL_ARR(&meta_arr, capture_session_meta(sslsock->ssl_handle));
@@ -1715,6 +1762,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 			n = 0;
 		} else {
 			n = -1;
+			/* We want to capture the peer cert even if verification fails*/
 			peer_cert = SSL_get_peer_certificate(sslsock->ssl_handle);
 			if (peer_cert && PHP_STREAM_CONTEXT(stream)) {
 				cert_captured = capture_peer_certs(stream, sslsock, peer_cert);
@@ -2344,20 +2392,20 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		sslsock->enable_on_connect = 1;
 		sslsock->method = get_crypto_method(context, STREAM_CRYPTO_METHOD_ANY_CLIENT);
 	} else if (strncmp(proto, "sslv2", protolen) == 0) {
-#ifdef OPENSSL_NO_SSL2
-		php_error_docref(NULL, E_WARNING, "SSLv2 support is not compiled into the OpenSSL library PHP is linked against");
-		return NULL;
-#else
+#ifdef HAVE_SSL2
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_SSLv2_CLIENT;
+#else
+		php_error_docref(NULL, E_WARNING, "SSLv2 support is not compiled into the OpenSSL library against which PHP is linked");
+		return NULL;
 #endif
 	} else if (strncmp(proto, "sslv3", protolen) == 0) {
-#ifdef OPENSSL_NO_SSL3
-		php_error_docref(NULL, E_WARNING, "SSLv3 support is not compiled into the OpenSSL library PHP is linked against");
-		return NULL;
-#else
+#ifdef HAVE_SSL3
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_SSLv3_CLIENT;
+#else
+		php_error_docref(NULL, E_WARNING, "SSLv3 support is not compiled into the OpenSSL library against which PHP is linked");
+		return NULL;
 #endif
 	} else if (strncmp(proto, "tls", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
@@ -2366,19 +2414,19 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT;
 	} else if (strncmp(proto, "tlsv1.1", protolen) == 0) {
-#if OPENSSL_VERSION_NUMBER >= 0x10001001L
+#ifdef HAVE_TLS11
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT;
 #else
-		php_error_docref(NULL, E_WARNING, "TLSv1.1 support is not compiled into the OpenSSL library PHP is linked against");
+		php_error_docref(NULL, E_WARNING, "TLSv1.1 support is not compiled into the OpenSSL library against which PHP is linked");
 		return NULL;
 #endif
 	} else if (strncmp(proto, "tlsv1.2", protolen) == 0) {
-#if OPENSSL_VERSION_NUMBER >= 0x10001001L
+#ifdef HAVE_TLS12
 		sslsock->enable_on_connect = 1;
 		sslsock->method = STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
 #else
-		php_error_docref(NULL, E_WARNING, "TLSv1.2 support is not compiled into the OpenSSL library PHP is linked against");
+		php_error_docref(NULL, E_WARNING, "TLSv1.2 support is not compiled into the OpenSSL library against which PHP is linked");
 		return NULL;
 #endif
 	}
