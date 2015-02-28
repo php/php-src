@@ -7,6 +7,5 @@ $message = "Line 1\r\nLine 2\r\nLine 3";
 mail('caffeinated@not-ever-reached-example.com', 'My Subject', $message, "From: me@me.me");
 ?>
 ===DONE===
---EXPECTF--
-%A
+--EXPECT--
 ===DONE===
