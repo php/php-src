@@ -73,6 +73,9 @@
 #if OPENSSL_VERSION_NUMBER >= 0x00908070L
 #define HAVE_TLS_SNI 1
 #endif
+#if OPENSSL_VERSION_NUMBER >= 0x10002000L
+#define HAVE_TLS_ALPN 1
+#endif
 #endif
 
 
@@ -117,6 +120,14 @@ typedef struct _php_openssl_handshake_bucket_t {
 	unsigned should_close;
 } php_openssl_handshake_bucket_t;
 
+#ifdef HAVE_TLS_ALPN
+/* Holds the available server ALPN protocols for negotiation */
+typedef struct _php_openssl_alpn_ctx_t {
+    unsigned char *data;
+    unsigned short len;
+} php_openssl_alpn_ctx;
+#endif
+
 /* This implementation is very closely tied to the that of the native
  * sockets implemented in the core.
  * Don't try this technique in other extensions!
@@ -133,6 +144,9 @@ typedef struct _php_openssl_netstream_data_t {
 	php_openssl_handshake_bucket_t *reneg;
 	php_openssl_sni_cert_t *sni_certs;
 	unsigned sni_cert_count;
+#ifdef HAVE_TLS_ALPN
+	php_openssl_alpn_ctx *alpn_ctx;
+#endif
 	char *url_name;
 	unsigned state_set:1;
 	unsigned _spare:31;
@@ -1405,6 +1419,67 @@ static void enable_client_sni(php_stream *stream, php_openssl_netstream_data_t *
 /* }}} */
 #endif
 
+
+#ifdef HAVE_TLS_ALPN
+/*-
+ * alpn_protos_parse parses a comma separated list of strings into a string
+ * in a format suitable for passing to SSL_CTX_set_next_protos_advertised.
+ *   outlen: (output) set to the length of the resulting buffer on success.
+ *   err: (maybe NULL) on failure, an error message line is written to this BIO.
+ *   in: a NUL termianted string like "abc,def,ghi"
+ *
+ *   returns: an emalloced buffer or NULL on failure.
+ */
+static unsigned char *alpn_protos_parse(unsigned short *outlen, const char *in)
+{
+	size_t len;
+	unsigned char *out;
+	size_t i, start = 0;
+
+	len = strlen(in);
+	if (len >= 65535) {
+		return NULL;
+	}
+
+	out = emalloc(strlen(in) + 1);
+	if (!out) {
+		return NULL;
+	}
+
+	for (i = 0; i <= len; ++i) {
+		if (i == len || in[i] == ',') {
+			if (i - start > 255) {
+				efree(out);
+				return NULL;
+			}
+			out[start] = i - start;
+			start = i + 1;
+		} else {
+			out[i + 1] = in[i];
+		}
+	}
+
+	*outlen = len + 1;
+
+	return out;
+}
+
+static int server_alpn_callback(SSL *ssl_handle, const unsigned char **out, unsigned char *outlen,
+                   const unsigned char *in, unsigned int inlen, void *arg)
+{
+	php_openssl_netstream_data_t *sslsock = arg;
+
+	if (SSL_select_next_proto
+		((unsigned char **)out, outlen, sslsock->alpn_ctx->data, sslsock->alpn_ctx->len, in,
+			inlen) != OPENSSL_NPN_NEGOTIATED) {
+		return SSL_TLSEXT_ERR_NOACK;
+	}
+
+	return SSL_TLSEXT_ERR_OK;
+}
+
+#endif
+
 int php_openssl_setup_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
 		php_stream_xport_crypto_param *cparam
@@ -1414,6 +1489,7 @@ int php_openssl_setup_crypto(php_stream *stream,
 	int ssl_ctx_options;
 	int method_flags;
 	char *cipherlist = NULL;
+	char *alpn_protocols = NULL;
 	zval *val;
 
 	if (sslsock->ssl_handle) {
@@ -1497,6 +1573,37 @@ int php_openssl_setup_crypto(php_stream *stream,
 		if (SSL_CTX_set_cipher_list(sslsock->ctx, cipherlist) != 1) {
 			return FAILURE;
 		}
+	}
+
+	GET_VER_OPT_STRING("alpn_protocols", alpn_protocols);
+	if (alpn_protocols) {
+#ifdef HAVE_TLS_ALPN
+		{
+			unsigned short alpn_len;
+			unsigned char *alpn = alpn_protos_parse(&alpn_len, alpn_protocols);
+
+			if (alpn == NULL) {
+				php_error_docref(NULL, E_WARNING, "Failed parsing comma-separated TLS ALPN protocol string");
+				SSL_CTX_free(sslsock->ctx);
+				sslsock->ctx = NULL;
+				return FAILURE;
+			}
+
+			if (sslsock->is_client) {
+				SSL_CTX_set_alpn_protos(sslsock->ctx, alpn, alpn_len);
+			} else {
+				sslsock->alpn_ctx = (php_openssl_alpn_ctx *) emalloc(sizeof(php_openssl_alpn_ctx));
+				sslsock->alpn_ctx->data = (unsigned char*)estrndup((const char*)alpn, alpn_len);
+				sslsock->alpn_ctx->len = alpn_len;
+				SSL_CTX_set_alpn_select_cb(sslsock->ctx, server_alpn_callback, sslsock);
+			}
+
+			efree(alpn);
+		}
+#else
+		php_error_docref(NULL, E_WARNING,
+			"alpn_protocols support is not compiled into the OpenSSL library against which PHP is linked");
+#endif
 	}
 
 	if (FAILURE == set_local_cert(sslsock->ctx, stream)) {
@@ -1612,6 +1719,8 @@ static int php_openssl_crypto_info(php_stream *stream,
 	const SSL_CIPHER *cipher;
 	char *cipher_name, *cipher_version, *crypto_protocol;
 	int cipher_bits;
+	const unsigned char *alpn_proto = NULL;
+	unsigned int alpn_proto_len = 0;
 	int needs_array_return;
 
 	if (!sslsock->ssl_active) {
@@ -1621,6 +1730,18 @@ static int php_openssl_crypto_info(php_stream *stream,
 
 	zresult = cparam->inputs.zresult;
 	needs_array_return = (cparam->inputs.infotype == STREAM_CRYPTO_INFO_ALL) ? 1 : 0;
+
+	if (cparam->inputs.infotype & STREAM_CRYPTO_INFO_ALPN_PROTOCOL) {
+#ifdef HAVE_TLS_ALPN
+		SSL_get0_alpn_selected(sslsock->ssl_handle, &alpn_proto, &alpn_proto_len);
+#endif
+		if (!needs_array_return) {
+			if (alpn_proto_len > 0) {
+				ZVAL_STRINGL(zresult, alpn_proto, alpn_proto_len);
+			}
+			return SUCCESS;
+		}
+	}
 
 	if (cparam->inputs.infotype & STREAM_CRYPTO_INFO_CIPHER) {
 		cipher = SSL_get_current_cipher(sslsock->ssl_handle);
@@ -1680,6 +1801,9 @@ static int php_openssl_crypto_info(php_stream *stream,
 	add_assoc_string(zresult, "cipher_name", cipher_name);
 	add_assoc_long(zresult, "cipher_bits", cipher_bits);
 	add_assoc_string(zresult, "cipher_version", cipher_version);
+	if (alpn_proto) {
+		add_assoc_stringl(zresult, "alpn_protocol", (char *) alpn_proto, alpn_proto_len);
+	}
 	Z_ARR_P(zresult);
 
 	return SUCCESS;
