@@ -3380,7 +3380,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 #if !defined(NO_DSA) && defined(HAVE_DSA_DEFAULT_METHOD)
 			case OPENSSL_KEYTYPE_DSA:
 				{
-					DSA* dsaparam;
+					DSA *dsaparam = NULL;
 #if OPENSSL_VERSION_NUMBER < 0x10002000L
 					dsaparam = DSA_generate_parameters(req->priv_key_bits, NULL, 0, NULL, NULL, NULL, NULL);
 #else
@@ -3403,7 +3403,7 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 			case OPENSSL_KEYTYPE_DH:
 				{
 					int codes = 0;
-					DH *dhparam;
+					DH *dhparam = NULL;
 #if OPENSSL_VERSION_NUMBER < 0x10002000L
 					dhparam = DH_generate_parameters(req->priv_key_bits, 2, NULL, NULL);
 #else
