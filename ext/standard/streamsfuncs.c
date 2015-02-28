@@ -1485,6 +1485,45 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 }
 /* }}} */
 
+/* {{{ proto int stream_socket_crypto_info(resource stream  [, int infotype])
+   Retrieve information about the stream's crypto session */
+PHP_FUNCTION(stream_socket_crypto_info)
+{
+	zval *zstream = NULL;
+	php_stream *stream = NULL;
+	zend_long infotype = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &zstream, &infotype) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	php_stream_from_zval(stream, zstream);
+
+	if (infotype == 0) {
+		infotype = STREAM_CRYPTO_INFO_ALL;
+	} else {
+		switch (infotype) {
+			case STREAM_CRYPTO_INFO_CIPHER_NAME:
+			case STREAM_CRYPTO_INFO_CIPHER_BITS:
+			case STREAM_CRYPTO_INFO_CIPHER_VERSION:
+			case STREAM_CRYPTO_INFO_CIPHER:
+			case STREAM_CRYPTO_INFO_PROTOCOL:
+			case STREAM_CRYPTO_INFO_ALL:
+				break;
+			default:
+				php_error_docref(NULL, E_WARNING, "unknown crypto info type");
+				RETURN_FALSE;
+		}
+	}
+
+	if (php_stream_xport_crypto_info(stream, infotype, return_value) != PHP_STREAM_OPTION_RETURN_OK) {
+		RETURN_FALSE;
+	}
+
+	/* return_value populated by php_stream_xport_crypto_info() upon success */
+}
+/* }}} */
+
 /* {{{ proto string stream_resolve_include_path(string filename)
 Determine what file will be opened by calls to fopen() with a relative path */
 PHP_FUNCTION(stream_resolve_include_path)

@@ -1603,6 +1603,89 @@ static zend_array *capture_session_meta(SSL *ssl_handle) /* {{{ */
 }
 /* }}} */
 
+static int php_openssl_crypto_info(php_stream *stream,
+		php_openssl_netstream_data_t *sslsock,
+		php_stream_xport_crypto_param *cparam
+		) /* {{{ */
+{
+	zval *zresult;
+	const SSL_CIPHER *cipher;
+	char *cipher_name, *cipher_version, *crypto_protocol;
+	int cipher_bits;
+	int needs_array_return;
+
+	if (!sslsock->ssl_active) {
+		php_error_docref(NULL, E_WARNING, "SSL/TLS not currently enabled for this stream");
+		return FAILURE;
+	}
+
+	zresult = cparam->inputs.zresult;
+	needs_array_return = (cparam->inputs.infotype == STREAM_CRYPTO_INFO_ALL) ? 1 : 0;
+
+	if (cparam->inputs.infotype & STREAM_CRYPTO_INFO_CIPHER) {
+		cipher = SSL_get_current_cipher(sslsock->ssl_handle);
+
+		if (cparam->inputs.infotype & STREAM_CRYPTO_INFO_CIPHER_NAME) {
+			cipher_name = (char *)SSL_CIPHER_get_name(cipher);
+			if (!needs_array_return) {
+				ZVAL_STRING(zresult, cipher_name);
+				return SUCCESS;
+			}
+		}
+
+		if (cparam->inputs.infotype & STREAM_CRYPTO_INFO_CIPHER_BITS) {
+			cipher_bits = SSL_CIPHER_get_bits(cipher, NULL);
+			if (!needs_array_return) {
+				ZVAL_LONG(zresult, cipher_bits);
+				return SUCCESS;
+			}
+		}
+
+		if (cparam->inputs.infotype & STREAM_CRYPTO_INFO_CIPHER_VERSION) {
+			cipher_version = (char *)SSL_CIPHER_get_version(cipher);
+			if (!needs_array_return) {
+				ZVAL_STRING(zresult, cipher_version);
+				return SUCCESS;
+			}
+		}
+	}
+
+	if (cparam->inputs.infotype & STREAM_CRYPTO_INFO_PROTOCOL) {
+		switch (SSL_version(sslsock->ssl_handle)) {
+#ifdef HAVE_TLS12
+			case TLS1_2_VERSION: crypto_protocol = "TLSv1.2"; break;
+#endif
+#ifdef HAVE_TLS11
+			case TLS1_1_VERSION: crypto_protocol = "TLSv1.1"; break;
+#endif
+			case TLS1_VERSION: crypto_protocol = "TLSv1"; break;
+#ifdef HAVE_SSL3
+			case SSL3_VERSION: crypto_protocol = "SSLv3"; break;
+#endif
+#ifdef HAVE_SSL2
+			case SSL2_VERSION: crypto_protocol = "SSLv2"; break;
+#endif
+			default: crypto_protocol = "UNKNOWN";
+		}
+
+		if (!needs_array_return) {
+			ZVAL_STRING(zresult, crypto_protocol);
+			return SUCCESS;
+		}
+	}
+
+	/* If we're still here we need to return an array with everything */
+	array_init(zresult);
+	add_assoc_string(zresult, "protocol", crypto_protocol);
+	add_assoc_string(zresult, "cipher_name", cipher_name);
+	add_assoc_long(zresult, "cipher_bits", cipher_bits);
+	add_assoc_string(zresult, "cipher_version", cipher_version);
+	Z_ARR_P(zresult);
+
+	return SUCCESS;
+}
+/* }}} */
+
 static int capture_peer_certs(php_stream *stream, php_openssl_netstream_data_t *sslsock, X509 *peer_cert) /* {{{ */
 {
 	zval *val, zcert;
@@ -2206,6 +2289,11 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 				case STREAM_XPORT_CRYPTO_OP_ENABLE:
 					cparam->outputs.returncode = php_openssl_enable_crypto(stream, sslsock, cparam);
 					return PHP_STREAM_OPTION_RETURN_OK;
+					break;
+				case STREAM_XPORT_CRYPTO_OP_INFO:
+					return (php_openssl_crypto_info(stream, sslsock, cparam) == SUCCESS)
+						? PHP_STREAM_OPTION_RETURN_OK
+						: PHP_STREAM_OPTION_RETURN_ERR;
 					break;
 				default:
 					/* fall through */
