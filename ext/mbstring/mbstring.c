@@ -2103,25 +2103,25 @@ static inline int php_mb_check_code_point(long cp)
 
 	if (cp < 0x100) {
 		buf_len = 1;
-		buf = emalloc(buf_len);
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
 		buf[0] = cp;
 		buf[1] = 0;
 	} else if (cp < 0x10000) {
 		buf_len = 2;
-		buf = emalloc(buf_len);
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
 		buf[0] = cp >> 8;
 		buf[1] = cp & 0xff;
 		buf[2] = 0;
 	} else if (cp < 0x1000000) {
 		buf_len = 3;
-		buf = emalloc(buf_len);
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
 		buf[0] = cp >> 16;
 		buf[1] = (cp >> 8) & 0xff;
 		buf[2] = cp & 0xff;
 		buf[3] = 0;
 	} else {
 		buf_len = 4;
-		buf = emalloc(buf_len);
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
 		buf[0] = cp >> 24;	
 		buf[1] = (cp >> 16) & 0xff;
 		buf[2] = (cp >> 8) & 0xff;
