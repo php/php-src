@@ -18,7 +18,7 @@ catch(PDOException $pe) {
         }
 }
 catch(\Exception $e) {
-    echo "Failed to ";
+    echo "Exception throw was not of type PDOException instead was ".get_class($e).PHP_EOL;
 }
 
 ?>
