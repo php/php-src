@@ -4792,7 +4792,8 @@ PHP_FUNCTION(mb_ord)
 static inline char* php_mb_chr(long cp, const char* enc)
 {
 	enum mbfl_no_encoding no_enc;
-	zend_string *buf;
+	char* buf;
+	size_t buf_len;
 	char* ret;
 	size_t ret_len;
 
@@ -4837,15 +4838,16 @@ static inline char* php_mb_chr(long cp, const char* enc)
 
 		}
 
-		buf = zend_string_alloc(4, 0);
-		buf->val[0] = (cp >> 24) & 0xff;
-		buf->val[1] = (cp >> 16) & 0xff;
-		buf->val[2] = (cp >>  8) & 0xff;
-		buf->val[3] = cp & 0xff;
-		buf->val[4] = 0;
+		buf_len = 4;
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
+		buf[0] = (cp >> 24) & 0xff;
+		buf[1] = (cp >> 16) & 0xff;
+		buf[2] = (cp >>  8) & 0xff;
+		buf[3] = cp & 0xff;
+		buf[4] = 0;
 
-		ret = php_mb_convert_encoding(buf->val, buf->len, enc, "UCS-4BE", &ret_len);
-		zend_string_release(buf);
+		ret = php_mb_convert_encoding(buf, buf_len, enc, "UCS-4BE", &ret_len);
+		efree(buf);
 
 		return ret;
 	} else if (php_mb_is_unsupported_no_encoding(no_enc)) {
@@ -4862,31 +4864,35 @@ static inline char* php_mb_chr(long cp, const char* enc)
 	}
 
 	if (cp < 0x100) {
-		buf = zend_string_alloc(1, 0);
-		buf->val[0] = cp;
-		buf->val[1] = 0;
+		buf_len = 1;
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
+		buf[0] = cp;
+		buf[1] = 0;
 	} else if (cp < 0x10000) {
-		buf = zend_string_alloc(2, 0);
-		buf->val[0] = cp >> 8;
-		buf->val[1] = cp & 0xff;
-		buf->val[2] = 0;
+		buf_len = 2;
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
+		buf[0] = cp >> 8;
+		buf[1] = cp & 0xff;
+		buf[2] = 0;
 	} else if (cp < 0x1000000) {
-		buf = zend_string_alloc(3, 0);
-		buf->val[0] = cp >> 16;
-		buf->val[1] = (cp >> 8) & 0xff;
-		buf->val[2] = cp & 0xff;
-		buf->val[3] = 0;
+		buf_len = 3;
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
+		buf[0] = cp >> 16;
+		buf[1] = (cp >> 8) & 0xff;
+		buf[2] = cp & 0xff;
+		buf[3] = 0;
 	} else {
-		buf = zend_string_alloc(4, 0);
-		buf->val[0] = cp >> 24;	
-		buf->val[1] = (cp >> 16) & 0xff;
-		buf->val[2] = (cp >> 8) & 0xff;
-		buf->val[3] = cp & 0xff;
-		buf->val[4] = 0;
+		buf_len = 4;
+		buf = (char *) safe_emalloc(buf_len, 1, 1);
+		buf[0] = cp >> 24;	
+		buf[1] = (cp >> 16) & 0xff;
+		buf[2] = (cp >> 8) & 0xff;
+		buf[3] = cp & 0xff;
+		buf[4] = 0;
 	}
 
-	ret = php_mb_convert_encoding(buf->val, buf->len, enc, enc, &ret_len);
-	zend_string_release(buf);
+	ret = php_mb_convert_encoding(buf, buf_len, enc, enc, &ret_len);
+	efree(buf);
 
 	return ret;
 } 
