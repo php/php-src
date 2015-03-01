@@ -9,15 +9,15 @@
     callback). (Mike)
   . Fixed bug #68986 (pointer returned by php_stream_fopen_temporary_file
     not validated in memory.c). (nayana at ddproperty dot com)
-  . Fixed bug #68166 (Exception with invalid character causes segv) (Rasmus)
+  . Fixed bug #68166 (Exception with invalid character causes segv). (Rasmus)
   . Fixed bug #69141 (Missing arguments in reflection info for some builtin
-    functions) (kostyantyn dot lysyy at oracle dot com)
+    functions). (kostyantyn dot lysyy at oracle dot com)
 
 - cURL:
   . Fixed bug #69088 (PHP_MINIT_FUNCTION does not fully initialize cURL on
     Win32). (Grant Pannell)
   . Add CURLPROXY_SOCKS4A and CURLPROXY_SOCKS5_HOSTNAME constants if supported
-    by libcurl. (Linus Unneback).
+    by libcurl. (Linus Unneback)
 
 - ODBC:
   . Fixed bug #68964 (Allowed memory size exhausted with odbc_exec). (Anatol)
@@ -28,8 +28,8 @@
 
 - OpenSSL:
   . Fixed bug #68912 (Segmentation fault at openssl_spki_new). (Laruence)
-  . Fixed bug #61285, #68329, #68046, #41631: encrypted streams don't observe
-    socket timeouts (Brad Broerman)
+  . Fixed bug #61285, #68329, #68046, #41631 (encrypted streams don't observe
+    socket timeouts). (Brad Broerman)
 
 - pgsql:
   . Fixed bug #68638 (pg_update() fails to store infinite values).
