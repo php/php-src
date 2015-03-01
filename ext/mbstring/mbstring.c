@@ -4817,23 +4817,18 @@ static inline char* php_mb_chr(long cp, const char* enc, size_t *output_len)
 				cp = 0x3f;
 			}
 
-		}
-
-		if (php_mb_is_no_encoding_utf8(no_enc)) {
+		} else if (php_mb_is_no_encoding_utf8(no_enc)) {
 
 			if (cp > 0xd7ff && 0xe000 > cp) {
 				if (php_mb_is_no_encoding_unicode(MBSTRG(current_internal_encoding)->no_encoding)) {
-
-					if (MBSTRG(current_filter_illegal_substchar) > 0xd7ff && 0xe000 > MBSTRG(current_filter_illegal_substchar)) {
-						cp = 0x3f;
-					} else {
+					if (0xd800 > MBSTRG(current_filter_illegal_substchar) || MBSTRG(current_filter_illegal_substchar) > 0xdfff) {
 						cp = MBSTRG(current_filter_illegal_substchar);
+					} else {
+						cp = 0x3f;
 					}
-
 				} else {
 					cp = 0x3f;
 				}
-
 			}
 
 		}
@@ -4854,6 +4849,7 @@ static inline char* php_mb_chr(long cp, const char* enc, size_t *output_len)
 		}
 
 		return ret;
+
 	} else if (php_mb_is_unsupported_no_encoding(no_enc)) {
 		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
 		return NULL;
