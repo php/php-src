@@ -75,7 +75,7 @@
   . New FILTER_VALIDATE_DOMAIN and better RFC conformance for FILTER_VALIDATE_URL. (Kevin Dunglas)
 
 - FPM:
-  . Fixed bug #68945 (Unknown admin values segfault pools) (Laruence)
+  . Fixed bug #68945 (Unknown admin values segfault pools). (Laruence)
   . Fixed bug #65933 (Cannot specify config lines longer than 1024 bytes). (Chris Wright)
   . Implement request #67106 (Split main fpm config). (Elan Ruusamäe, Remi)
 
@@ -98,8 +98,8 @@
     + Opcache). (Laruence)
 
 - OpenSSL:
-  . Fixed bug #61285, #68329, #68046, #41631: encrypted streams don't observe
-    socket timeouts (Brad Broerman)
+  . Fixed bug #61285, #68329, #68046, #41631 (encrypted streams don't observe
+    socket timeouts). (Brad Broerman)
 
 - pcntl:
   . Fixed bug #60509 (pcntl_signal doesn't decrease ref-count of old handler
@@ -121,11 +121,10 @@
 
 - Session:
   . Fixed bug #67694 (Regression in session_regenerate_id()). (Tjerk)
-  . Fixed bug #68941 (mod_files.sh is a bash-script) (bugzilla at ii.nl, Yasuo)
+  . Fixed bug #68941 (mod_files.sh is a bash-script). (bugzilla at ii.nl, Yasuo)
 
 - SOAP:
-  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes).
-    (Laruence)
+  . Fixed bug #68361 (Segmentation fault on SoapClient::__getTypes). (Laruence)
 
 - SPL:
   . Implemented #67886 (SplPriorityQueue/SplHeap doesn't expose extractFlags
