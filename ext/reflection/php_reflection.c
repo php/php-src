@@ -4802,7 +4802,14 @@ ZEND_METHOD(reflection_property, __construct)
 	zend_property_info *property_info = NULL;
 	property_reference *reference;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &classname, &name_str, &name_len) == FAILURE) {
+	int rv;
+	zend_error_handling zeh;
+
+	zend_replace_error_handling(EH_THROW, reflection_exception_ptr, &zeh TSRMLS_CC);
+	rv = zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &classname, &name_str, &name_len);
+	zend_restore_error_handling(&zeh TSRMLS_CC);
+
+	if (rv == FAILURE) {
 		return;
 	}
 
@@ -5197,9 +5204,15 @@ ZEND_METHOD(reflection_extension, __construct)
 	zend_module_entry *module;
 	char *name_str;
 	size_t name_len;
+	int rv;
+	zend_error_handling zeh;
 	ALLOCA_FLAG(use_heap)
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
+	zend_replace_error_handling(EH_THROW, reflection_exception_ptr, &zeh TSRMLS_CC);
+	rv = zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len);
+	zend_restore_error_handling(&zeh TSRMLS_CC);
+
+	if (rv == FAILURE) {
 		return;
 	}
 
@@ -5566,8 +5579,14 @@ ZEND_METHOD(reflection_zend_extension, __construct)
 	zend_extension *extension;
 	char *name_str;
 	size_t name_len;
+	int rv;
+	zend_error_handling zeh;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
+	zend_replace_error_handling(EH_THROW, reflection_exception_ptr, &zeh TSRMLS_CC);
+	rv = zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len);
+	zend_restore_error_handling(&zeh TSRMLS_CC);
+
+	if (rv == FAILURE) {
 		return;
 	}
 
