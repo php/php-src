@@ -4789,7 +4789,7 @@ PHP_FUNCTION(mb_ord)
 }
 /* }}} */
 
-static inline char* php_mb_chr(long cp, const char* enc)
+static inline char* php_mb_chr(long cp, const char* enc, size_t *output_len)
 {
 	enum mbfl_no_encoding no_enc;
 	char* buf;
@@ -4849,6 +4849,10 @@ static inline char* php_mb_chr(long cp, const char* enc)
 		ret = php_mb_convert_encoding(buf, buf_len, enc, "UCS-4BE", &ret_len);
 		efree(buf);
 
+		if (output_len) {
+			*output_len = ret_len;
+		}
+
 		return ret;
 	} else if (php_mb_is_unsupported_no_encoding(no_enc)) {
 		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc);
@@ -4894,6 +4898,10 @@ static inline char* php_mb_chr(long cp, const char* enc)
 	ret = php_mb_convert_encoding(buf, buf_len, enc, enc, &ret_len);
 	efree(buf);
 
+	if (output_len) {
+		*output_len = ret_len;
+	}
+
 	return ret;
 } 
 /* {{{ proto bool mb_ord([int cp[, string encoding]]) */
@@ -4903,12 +4911,13 @@ PHP_FUNCTION(mb_chr)
 	char* enc = NULL;
 	long enc_len;
 	char* ret;
- 
+	size_t ret_len;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|s", &cp, &enc, &enc_len) == FAILURE) {
  		return;
 	}
 
-	ret = php_mb_chr(cp, enc);
+	ret = php_mb_chr(cp, enc, &ret_len);
 
 	if (ret == NULL) {
 		RETURN_FALSE;
