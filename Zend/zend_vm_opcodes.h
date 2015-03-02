@@ -161,7 +161,6 @@ END_EXTERN_C()
 #define ZEND_POST_INC_OBJ                    134
 #define ZEND_POST_DEC_OBJ                    135
 #define ZEND_ASSIGN_OBJ                      136
-#define ZEND_ASSERT_CHECK                    137
 #define ZEND_INSTANCEOF                      138
 #define ZEND_DECLARE_CLASS                   139
 #define ZEND_DECLARE_INHERITED_CLASS         140
@@ -174,6 +173,7 @@ END_EXTERN_C()
 #define ZEND_ISSET_ISEMPTY_PROP_OBJ          148
 #define ZEND_HANDLE_EXCEPTION                149
 #define ZEND_USER_OPCODE                     150
+#define ZEND_ASSERT_CHECK                    151
 #define ZEND_JMP_SET                         152
 #define ZEND_DECLARE_LAMBDA_FUNCTION         153
 #define ZEND_ADD_TRAIT                       154
