@@ -645,9 +645,9 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	zend_hash_get_current_data_ptr_ex(ht, &(ht)->nInternalPointer)
 
 #define ZEND_HASH_FOREACH(_ht, indirect) do { \
-		uint _idx; \
-		for (_idx = 0; _idx < (_ht)->nNumUsed; _idx++) { \
-			Bucket *_p = (_ht)->arData + _idx; \
+		Bucket *_p = (_ht)->arData; \
+		Bucket *_end = _p + (_ht)->nNumUsed; \
+		for (; _p != _end; _p++) { \
 			zval *_z = &_p->val; \
 			if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
 				_z = Z_INDIRECT_P(_z); \
