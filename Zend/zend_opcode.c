@@ -91,7 +91,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->literals = NULL;
 
 	op_array->run_time_cache = NULL;
-	op_array->last_cache_slot = 0;
+	op_array->cache_size = 0;
 
 	memset(op_array->reserved, 0, ZEND_MAX_RESERVED_RESOURCES * sizeof(void*));
 
@@ -773,6 +773,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			case ZEND_FE_RESET_RW:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
+			case ZEND_ASSERT_CHECK:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_VERIFY_RETURN_TYPE:

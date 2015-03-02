@@ -438,16 +438,16 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			"/FREE_OP2_IF_VAR\(\)/",
 			"/FREE_OP1_VAR_PTR\(\)/",
 			"/FREE_OP2_VAR_PTR\(\)/",
-			"/^#ifdef\s+ZEND_VM_SPEC\s*\n/m",
-			"/^#ifndef\s+ZEND_VM_SPEC\s*\n/m",
+			"/^#(\s*)ifdef\s+ZEND_VM_SPEC\s*\n/m",
+			"/^#(\s*)ifndef\s+ZEND_VM_SPEC\s*\n/m",
 			"/\!defined\(ZEND_VM_SPEC\)/m",
 			"/defined\(ZEND_VM_SPEC\)/m",
 			"/ZEND_VM_C_LABEL\(\s*([A-Za-z_]*)\s*\)/m",
 			"/ZEND_VM_C_GOTO\(\s*([A-Za-z_]*)\s*\)/m",
-			"/^#if\s+1\s*\\|\\|.*[^\\\\]$/m",
-			"/^#if\s+0\s*&&.*[^\\\\]$/m",
-			"/^#ifdef\s+ZEND_VM_EXPORT\s*\n/m",
-			"/^#ifndef\s+ZEND_VM_EXPORT\s*\n/m"
+			"/^#(\s*)if\s+1\s*\\|\\|.*[^\\\\]$/m",
+			"/^#(\s*)if\s+0\s*&&.*[^\\\\]$/m",
+			"/^#(\s*)ifdef\s+ZEND_VM_EXPORT\s*\n/m",
+			"/^#(\s*)ifndef\s+ZEND_VM_EXPORT\s*\n/m"
 		),
 		array(
 			$op1_type[$op1],
@@ -476,16 +476,16 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			$op2_free_op_if_var[$op2],
 			$op1_free_op_var_ptr[$op1],
 			$op2_free_op_var_ptr[$op2],
-			($op1!="ANY"||$op2!="ANY")?"#if 1\n":"#if 0\n",
-			($op1!="ANY"||$op2!="ANY")?"#if 0\n":"#if 1\n",
+			($op1!="ANY"||$op2!="ANY")?"#\\1if 1\n":"#\\1if 0\n",
+			($op1!="ANY"||$op2!="ANY")?"#\\1if 0\n":"#\\1if 1\n",
 			($op1!="ANY"||$op2!="ANY")?"0":"1",
 			($op1!="ANY"||$op2!="ANY")?"1":"0",
 			"\\1".(($spec && $kind != ZEND_VM_KIND_CALL)?("_SPEC".$prefix[$op1].$prefix[$op2]):""),
 			"goto \\1".(($spec && $kind != ZEND_VM_KIND_CALL)?("_SPEC".$prefix[$op1].$prefix[$op2]):""),
-			"#if 1",
-			"#if 0",
-			$export?"#if 1\n":"#if 0\n",
-			$export?"#if 0\n":"#if 1\n"
+			"#\\1if 1",
+			"#\\1if 0",
+			$export?"#\\1if 1\n":"#\\1if 0\n",
+			$export?"#\\1if 0\n":"#\\1if 1\n"
 		),
 		$code);
 
@@ -967,7 +967,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#undef LOAD_OPLINE\n");
 							out($f,"#undef SAVE_OPLINE\n");
 							out($f,"#define OPLINE opline\n");
-							out($f,"#define DCL_OPLINE zend_op *opline;\n");
+							out($f,"#define DCL_OPLINE const zend_op *opline;\n");
 							out($f,"#define USE_OPLINE\n");
 							out($f,"#define LOAD_OPLINE() opline = EX(opline)\n");
 							out($f,"#define SAVE_OPLINE() EX(opline) = opline\n");
@@ -993,7 +993,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#undef LOAD_OPLINE\n");
 							out($f,"#undef SAVE_OPLINE\n");
 							out($f,"#define OPLINE opline\n");
-							out($f,"#define DCL_OPLINE zend_op *opline;\n");
+							out($f,"#define DCL_OPLINE const zend_op *opline;\n");
 							out($f,"#define USE_OPLINE\n");
 							out($f,"#define LOAD_OPLINE() opline = EX(opline)\n");
 							out($f,"#define SAVE_OPLINE() EX(opline) = opline\n");
