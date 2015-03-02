@@ -4694,14 +4694,14 @@ static inline int php_mb_is_no_encoding_utf8(enum mbfl_no_encoding no_enc)
 	return 0;
 }
 
-static inline long php_mb_ord(const char* str, size_t str_len, const char* enc)
+static inline zend_long php_mb_ord(const char* str, size_t str_len, const char* enc)
 {
 	enum mbfl_no_encoding no_enc;
 	char* ret;
 	size_t ret_len;
 	const mbfl_encoding *encoding;
 	unsigned char char_len;
-	long cp;
+	zend_long cp;
 
 	if (enc == NULL) {
 		no_enc = MBSTRG(current_internal_encoding)->no_encoding;
@@ -4773,11 +4773,19 @@ PHP_FUNCTION(mb_ord)
 	size_t str_len;
 	char* enc = NULL;
 	size_t enc_len;
-	long cp;
+	zend_long cp;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &enc, &enc_len) == FAILURE) {
 		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(enc, enc_len)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	cp = php_mb_ord(str, str_len, enc);
 
@@ -4789,7 +4797,7 @@ PHP_FUNCTION(mb_ord)
 }
 /* }}} */
 
-static inline char* php_mb_chr(long cp, const char* enc, size_t *output_len)
+static inline char* php_mb_chr(zend_long cp, const char* enc, size_t *output_len)
 {
 	enum mbfl_no_encoding no_enc;
 	char* buf;
@@ -4903,15 +4911,23 @@ static inline char* php_mb_chr(long cp, const char* enc, size_t *output_len)
 /* {{{ proto bool mb_ord([int cp[, string encoding]]) */
 PHP_FUNCTION(mb_chr)
 {
-	long cp;
+	zend_long cp;
 	char* enc = NULL;
-	long enc_len;
+	size_t enc_len;
 	char* ret;
 	size_t ret_len;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|s", &cp, &enc, &enc_len) == FAILURE) {
  		return;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_LONG(cp)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(enc, enc_len)
+	ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	ret = php_mb_chr(cp, enc, &ret_len);
 
