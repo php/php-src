@@ -2884,7 +2884,8 @@ PHP_METHOD(SoapClient, __call)
 	}
 
 	/* Add default headers */
-	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers"), (void **) &tmp)==SUCCESS) {
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers"), (void **) &tmp)==SUCCESS &&
+	    Z_TYPE_PP(tmp) == IS_ARRAY) {
 		HashTable *default_headers = Z_ARRVAL_P(*tmp);
 		if (soap_headers) {
 			if (!free_soap_headers) {
