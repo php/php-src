@@ -99,9 +99,37 @@ static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 }
 /* }}} */
 
+static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
+{
+	zend_long *p, val;
+#ifndef ZTS
+	char *base = (char *) mh_arg2;
+#else
+	char *base;
+
+	base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+
+	p = (zend_long *) (base+(size_t) mh_arg1);
+
+	val = zend_atol(new_value->val, (int)new_value->len);
+
+	if (stage != ZEND_INI_STAGE_STARTUP &&
+	    stage != ZEND_INI_STAGE_SHUTDOWN &&
+	    *p != val &&
+	    (*p < 0 || val < 0)) {
+		zend_error(E_WARNING, "zend.assertions may be completely enabled or disabled only in php.ini");
+		return FAILURE;
+	}
+
+	*p = val;
+	return SUCCESS;
+}
+/* }}} */
 
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
+	STD_ZEND_INI_BOOLEAN("zend.assertions",				"1",    ZEND_INI_ALL,       OnUpdateAssertions,           assertions,   zend_executor_globals,  executor_globals)
 	STD_ZEND_INI_BOOLEAN("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled,      gc_enabled,     zend_gc_globals,        gc_globals)
  	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)
  	ZEND_INI_ENTRY("zend.script_encoding",			NULL,		ZEND_INI_ALL,		OnUpdateScriptEncoding)

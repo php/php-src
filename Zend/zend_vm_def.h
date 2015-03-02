@@ -6839,4 +6839,20 @@ ZEND_VM_HANDLER(122, ZEND_DEFINED, CONST, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(151, ZEND_ASSERT_CHECK, ANY, ANY)
+{
+	USE_OPLINE
+
+	if (EG(assertions) <= 0) {
+		zend_op *target = OP_JMP_ADDR(opline, opline->op2);
+
+		if (RETURN_VALUE_USED(target-1)) {
+			ZVAL_TRUE(EX_VAR((target-1)->result.var));
+		}
+		ZEND_VM_JMP(target);
+	} else {
+		ZEND_VM_NEXT_OPCODE();
+	}
+}
+
 ZEND_VM_EXPORT_HANDLER(zend_do_fcall, ZEND_DO_FCALL)
