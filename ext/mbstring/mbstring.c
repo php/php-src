@@ -4587,18 +4587,26 @@ static inline char* php_mb_scrub(const char* str, size_t str_len, const char* en
 PHP_FUNCTION(mb_scrub)
 {
 	char* str;
-	long str_len;
-	const char *enc = NULL;
-	long enc_len;
+	size_t str_len;
+	char *enc = NULL;
+	size_t enc_len;
 
 	char *ret;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &str, &str_len, &enc, &enc_len) == FAILURE) {
 		return;
 	}
+#else
+ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(enc, enc_len)
+ZEND_PARSE_PARAMETERS_END();
+#endif
 
 	if (enc == NULL) {
-		enc = MBSTRG(current_internal_encoding)->name;
+		enc = (char *) MBSTRG(current_internal_encoding)->name;
 	} else if (!mbfl_is_support_encoding(enc)) {
 		php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", enc);
 		RETURN_FALSE; 
