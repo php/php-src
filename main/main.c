@@ -1301,6 +1301,10 @@ PHPAPI char *php_get_current_user(void)
 			efree(pwbuf);
 			return "";
 		}
+		if (retpwptr == NULL) {
+			efree(pwbuf);
+			return "";
+		}
 		pwd = &_pw;
 #else
 		if ((pwd=getpwuid(pstat->st_uid))==NULL) {

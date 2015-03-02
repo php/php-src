@@ -3665,9 +3665,12 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 	zval            *z_timezone;
 	zval            *z_timezone_type;
 
-	if ((z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1)) != NULL) {
-		if ((z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1)) != NULL) {
-			if(Z_TYPE_P(z_timezone_type) != IS_LONG) {
+	if ((z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type") - 1)) != NULL) {
+		if ((z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone") - 1)) != NULL) {
+			if (Z_TYPE_P(z_timezone_type) != IS_LONG) {
+				return FAILURE;
+			}
+			if (Z_TYPE_P(z_timezone) != IS_STRING) {
 				return FAILURE;
 			}
 			if (SUCCESS == timezone_initialize(*tzobj, Z_STRVAL_P(z_timezone))) {

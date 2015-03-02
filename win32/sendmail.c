@@ -292,7 +292,6 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			efree(headers);
 			efree(headers_lc);
 		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */

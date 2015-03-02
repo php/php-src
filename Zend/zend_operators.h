@@ -90,8 +90,6 @@ ZEND_API zend_uchar _is_numeric_string_ex(const char *str, size_t length, zend_l
 ZEND_API const char* zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end);
 ZEND_API const char* zend_memnrstr_ex(const char *haystack, const char *needle, size_t needle_len, char *end);
 
-END_EXTERN_C()
-
 #if SIZEOF_ZEND_LONG == 4
 #	define ZEND_DOUBLE_FITS_LONG(d) (!((d) > ZEND_LONG_MAX || (d) < ZEND_LONG_MIN))
 #else
@@ -234,7 +232,6 @@ zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, char 
 	}
 }
 
-BEGIN_EXTERN_C()
 ZEND_API int increment_function(zval *op1);
 ZEND_API int decrement_function(zval *op2);
 
