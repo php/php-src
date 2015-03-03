@@ -805,9 +805,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_is_uploaded_file, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_move_uploaded_file, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_move_uploaded_file, 0, 0, 2)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, new_path)
+	ZEND_ARG_INFO(0, allow_script)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_ini_file, 0, 0, 1)
@@ -5690,13 +5691,40 @@ PHP_FUNCTION(is_uploaded_file)
 }
 /* }}} */
 
+
+static int php_check_script_extensions(zend_string *filename) { /* {{{  */
+	int i;
+	int valid_extension = FAILURE;
+	char *p;
+	size_t len;
+
+	if (!CG(script_extensions)[0]) {
+		return SUCCESS;
+	}
+	for(i = 0; i < ZEND_MAX_SCRIPT_EXTENSIONS; i++) {
+		if (!CG(script_extensions)[i]) {
+			break;
+		}
+		len = strlen(CG(script_extensions)[i]);
+		if (filename->len < len + 1) {
+			break;
+		}
+		p = filename->val + filename->len - len;
+		if (!memcmp(CG(script_extensions)[i], p, len)) {
+			valid_extension = SUCCESS;
+			break;
+		}
+	}
+	return valid_extension;
+}
+/* }}} */
+
 /* {{{ proto bool move_uploaded_file(string path, string new_path)
    Move a file if and only if it was created by an upload */
 PHP_FUNCTION(move_uploaded_file)
 {
-	char *path, *new_path;
-	size_t path_len, new_path_len;
-	zend_bool successful = 0;
+	zend_string *path, *new_path;
+	zend_bool successful = 0, allow_script = 0;
 
 #ifndef PHP_WIN32
 	int oldmask; int ret;
@@ -5706,39 +5734,44 @@ PHP_FUNCTION(move_uploaded_file)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &path, &path_len, &new_path, &new_path_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|b", &path, &new_path, &allow_script) == FAILURE) {
 		return;
 	}
 
-	if (!zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
+	if (php_check_script_extensions(new_path) == SUCCESS) {
+		php_error_docref(NULL, E_WARNING, "Cannot move PHP script '%s'", new_path->val);
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(new_path)) {
+	if (!zend_hash_str_exists(SG(rfc1867_uploaded_files), path->val, path->len)) {
 		RETURN_FALSE;
 	}
 
-	if (VCWD_RENAME(path, new_path) == 0) {
+	if (php_check_open_basedir(new_path->val)) {
+		RETURN_FALSE;
+	}
+
+	if (VCWD_RENAME(path->val, new_path->val) == 0) {
 		successful = 1;
 #ifndef PHP_WIN32
 		oldmask = umask(077);
 		umask(oldmask);
 
-		ret = VCWD_CHMOD(new_path, 0666 & ~oldmask);
+		ret = VCWD_CHMOD(new_path->val, 0666 & ~oldmask);
 
 		if (ret == -1) {
 			php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		}
 #endif
-	} else if (php_copy_file_ex(path, new_path, STREAM_DISABLE_OPEN_BASEDIR) == SUCCESS) {
-		VCWD_UNLINK(path);
+	} else if (php_copy_file_ex(path->val, new_path->val, STREAM_DISABLE_OPEN_BASEDIR) == SUCCESS) {
+		VCWD_UNLINK(path->val);
 		successful = 1;
 	}
 
 	if (successful) {
-		zend_hash_str_del(SG(rfc1867_uploaded_files), path, path_len);
+		zend_hash_str_del(SG(rfc1867_uploaded_files), path->val, path->len);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Unable to move '%s' to '%s'", path, new_path);
+		php_error_docref(NULL, E_WARNING, "Unable to move '%s' to '%s'", path->val, new_path->val);
 	}
 
 	RETURN_BOOL(successful);
