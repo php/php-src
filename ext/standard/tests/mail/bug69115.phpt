@@ -6,6 +6,9 @@ if( substr(PHP_OS, 0, 3) != 'WIN' ) {
    die('skip...Windows only test');
 }
 ?>
+--INI--
+SMTP = 
+smtp_port =
 --FILE--
 <?php
 /* Just ensure it doesn't crash when trimming headers */
