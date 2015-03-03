@@ -973,6 +973,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 					opline->opcode == ZEND_MOD ||
 					opline->opcode == ZEND_SL ||
 					opline->opcode == ZEND_SR ||
+					opline->opcode == ZEND_IN ||
 					opline->opcode == ZEND_CONCAT ||
 					opline->opcode == ZEND_IS_EQUAL ||
 					opline->opcode == ZEND_IS_NOT_EQUAL ||
@@ -991,15 +992,15 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			zval result;
 			int er;
 
-            if ((opline->opcode == ZEND_DIV || opline->opcode == ZEND_MOD) &&
-                ((Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG &&
-                  Z_LVAL(ZEND_OP2_LITERAL(opline)) == 0) ||
-                 (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_DOUBLE &&
-                  Z_DVAL(ZEND_OP2_LITERAL(opline)) == 0.0))) {
+			if ((opline->opcode == ZEND_DIV || opline->opcode == ZEND_MOD) &&
+			    ((Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_LONG &&
+			      Z_LVAL(ZEND_OP2_LITERAL(opline)) == 0) ||
+			     (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_DOUBLE &&
+			      Z_DVAL(ZEND_OP2_LITERAL(opline)) == 0.0))) {
 				if (RESULT_USED(opline)) {
 					SET_VAR_SOURCE(opline);
 				}
-                opline++;
+				opline++;
 				continue;
 			}
 			er = EG(error_reporting);

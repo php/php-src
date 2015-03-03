@@ -3954,6 +3954,21 @@ static int ZEND_FASTCALL  ZEND_SPACESHIP_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_IN_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+
+	SAVE_OPLINE();
+	in_function(EX_VAR(opline->result.var),
+		EX_CONSTANT(opline->op1),
+		EX_CONSTANT(opline->op2));
+
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -7068,6 +7083,21 @@ static int ZEND_FASTCALL  ZEND_SPACESHIP_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDL
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_IN_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+
+	SAVE_OPLINE();
+	in_function(EX_VAR(opline->result.var),
+		EX_CONSTANT(opline->op1),
+		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -8212,6 +8242,21 @@ static int ZEND_FASTCALL  ZEND_SPACESHIP_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_H
 
 	SAVE_OPLINE();
 	compare_function(result,
+		EX_CONSTANT(opline->op1),
+		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+
+	zval_ptr_dtor_nogc(free_op2);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_IN_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+
+	SAVE_OPLINE();
+	in_function(EX_VAR(opline->result.var),
 		EX_CONSTANT(opline->op1),
 		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
 
@@ -25496,6 +25541,21 @@ static int ZEND_FASTCALL  ZEND_SPACESHIP_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_IN_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+
+	SAVE_OPLINE();
+	in_function(EX_VAR(opline->result.var),
+		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
+		EX_CONSTANT(opline->op2));
+
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -29948,6 +30008,21 @@ static int ZEND_FASTCALL  ZEND_SPACESHIP_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_IN_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+
+	SAVE_OPLINE();
+	in_function(EX_VAR(opline->result.var),
+		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
+		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -32029,6 +32104,21 @@ static int ZEND_FASTCALL  ZEND_SPACESHIP_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HAND
 
 	SAVE_OPLINE();
 	compare_function(result,
+		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
+		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+
+	zval_ptr_dtor_nogc(free_op2);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_IN_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op2;
+
+	SAVE_OPLINE();
+	in_function(EX_VAR(opline->result.var),
 		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var),
 		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
 
@@ -34471,6 +34561,21 @@ static int ZEND_FASTCALL  ZEND_SPACESHIP_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_H
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_IN_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	in_function(EX_VAR(opline->result.var),
+		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
+		EX_CONSTANT(opline->op2));
+	zval_ptr_dtor_nogc(free_op1);
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -36306,6 +36411,21 @@ static int ZEND_FASTCALL  ZEND_SPACESHIP_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HAND
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_IN_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+
+	SAVE_OPLINE();
+	in_function(EX_VAR(opline->result.var),
+		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
+		_get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var));
+	zval_ptr_dtor_nogc(free_op1);
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_BW_OR_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -36967,6 +37087,21 @@ static int ZEND_FASTCALL  ZEND_SPACESHIP_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_
 
 	SAVE_OPLINE();
 	compare_function(result,
+		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
+		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
+	zval_ptr_dtor_nogc(free_op1);
+	zval_ptr_dtor_nogc(free_op2);
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_IN_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+
+	SAVE_OPLINE();
+	in_function(EX_VAR(opline->result.var),
 		_get_zval_ptr_var(opline->op1.var, execute_data, &free_op1),
 		_get_zval_ptr_var(opline->op2.var, execute_data, &free_op2));
 	zval_ptr_dtor_nogc(free_op1);
@@ -41734,6 +41869,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_SPACESHIP_SPEC_CV_TMPVAR_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_SPACESHIP_SPEC_CV_CV_HANDLER,
+  	ZEND_IN_SPEC_CONST_CONST_HANDLER,
+  	ZEND_IN_SPEC_CONST_TMPVAR_HANDLER,
+  	ZEND_IN_SPEC_CONST_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_IN_SPEC_CONST_CV_HANDLER,
+  	ZEND_IN_SPEC_TMPVAR_CONST_HANDLER,
+  	ZEND_IN_SPEC_TMPVAR_TMPVAR_HANDLER,
+  	ZEND_IN_SPEC_TMPVAR_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_IN_SPEC_TMPVAR_CV_HANDLER,
+  	ZEND_IN_SPEC_TMPVAR_CONST_HANDLER,
+  	ZEND_IN_SPEC_TMPVAR_TMPVAR_HANDLER,
+  	ZEND_IN_SPEC_TMPVAR_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_IN_SPEC_TMPVAR_CV_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_IN_SPEC_CV_CONST_HANDLER,
+  	ZEND_IN_SPEC_CV_TMPVAR_HANDLER,
+  	ZEND_IN_SPEC_CV_TMPVAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_IN_SPEC_CV_CV_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;

@@ -70,6 +70,9 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API zend_bool instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only);
 ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, const zend_class_entry *ce);
 
+ZEND_API zend_bool in_function_ex(zval *needle, zval *haystack);
+ZEND_API int in_function(zval *result, zval *needle, zval *haystack);
+
 /**
  * Checks whether the string "str" with length "length" is numeric. The value
  * of allow_errors determines whether it's required to be entirely numeric, or

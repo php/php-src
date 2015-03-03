@@ -1252,6 +1252,7 @@ simple_list:
 				case ZEND_POW:                 BINARY_OP(" ** ",  250, 251, 250);
 				case ZEND_BOOL_XOR:            BINARY_OP(" xor ",  40,  40,  41);
 				case ZEND_SPACESHIP:           BINARY_OP(" <=> ", 180, 181, 181);
+				case ZEND_IN:                  BINARY_OP(" in ",  235, 235, 236);
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;

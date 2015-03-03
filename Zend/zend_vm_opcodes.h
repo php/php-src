@@ -191,5 +191,6 @@ END_EXTERN_C()
 #define ZEND_BIND_GLOBAL                     168
 #define ZEND_COALESCE                        169
 #define ZEND_SPACESHIP                       170
+#define ZEND_IN                              171
 
 #endif
