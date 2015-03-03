@@ -292,7 +292,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			efree(headers_lc);
+			zend_string_free(headers_lc);
 		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
 		if (NULL == (*error_message = ecalloc(1, HOST_NAME_LEN + 128))) {
@@ -310,7 +310,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			efree(headers_lc);
+			zend_string_free(headers_lc);
 		}
 		if (ret != SUCCESS) {
 			*error = ret;
