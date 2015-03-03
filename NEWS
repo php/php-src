@@ -55,6 +55,9 @@ PHP                                                                        NEWS
 - CGI:
   . Fixed bug #69015 (php-cgi's getopt does not see $argv). (Laruence)
 
+- CLI:
+  . Fixed bug #67741 (auto_prepend_file messes up __LINE__). (Reeze Xia)
+
 - FPM:
   . Fixed bug #68822 (request time is reset too early). (honghu069 at 163 dot com)
 
