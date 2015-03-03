@@ -3017,6 +3017,7 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 		return 0;
 	}
 
+again:
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
 			if (object) {
@@ -3160,7 +3161,6 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 				}
 			}
 			return 0;
-
 		case IS_OBJECT:
 			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(callable, &fcc->calling_scope, &fcc->function_handler, &fcc->object) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
@@ -3174,7 +3174,14 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zend_object *object, uint
 				return 1;
 			}
 			/* break missing intentionally */
-
+			if (callable_name) {
+				*callable_name = zval_get_string(callable);
+			}
+			if (error) zend_spprintf(error, 0, "no array or string given");
+			return 0;
+		case IS_REFERENCE:
+			callable = Z_REFVAL_P(callable);
+			goto again;
 		default:
 			if (callable_name) {
 				*callable_name = zval_get_string(callable);

@@ -2735,6 +2735,10 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV)
 	zend_class_entry *called_scope;
 	zend_object *object;
 
+	if (OP2_TYPE & (IS_VAR|IS_CV)) {
+		ZVAL_DEREF(function_name);
+	}
+
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		if (error) {
 			efree(error);
