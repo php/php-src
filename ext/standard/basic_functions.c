@@ -4704,8 +4704,8 @@ PHP_FUNCTION(error_get_last)
 }
 /* }}} */
 
-/* {{{ proto bool error_clear_last()
-   Clear the last occurred error. Returns false if there hasn't been an error yet. */
+/* {{{ proto void error_clear_last(void)
+   Clear the last occurred error. */
 PHP_FUNCTION(error_clear_last)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -4723,11 +4723,7 @@ PHP_FUNCTION(error_clear_last)
 			free(PG(last_error_file));
 			PG(last_error_file) = NULL;
 		}
-
-		RETURN_TRUE;
 	}
-
-	RETURN_FALSE;
 }
 /* }}} */
 

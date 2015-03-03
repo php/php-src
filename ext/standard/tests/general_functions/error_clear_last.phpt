@@ -4,20 +4,20 @@ error_clear_last() tests
 <?php
 
 var_dump(error_get_last());
-
-var_dump(error_clear_last());
+error_clear_last();
+var_dump(error_get_last());
 
 @$a = $b;
 
 var_dump(error_get_last());
-var_dump(error_clear_last());
+error_clear_last();
 var_dump(error_get_last());
 
 echo "Done\n";
 ?>
 --EXPECTF--	
 NULL
-bool(false)
+NULL
 array(4) {
   ["type"]=>
   int(8)
@@ -28,6 +28,5 @@ array(4) {
   ["line"]=>
   int(%d)
 }
-bool(true)
 NULL
 Done
