@@ -240,20 +240,15 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 	if (headers) {
 		char *pos = NULL;
 		size_t i;
-		zend_string *headers_trim;
 
 		/* Use PCRE to trim the header into the right format */
-		if (NULL == (headers_trim = php_win32_mail_trim_header(headers))) {
+		if (NULL == (headers_lc = php_win32_mail_trim_header(headers))) {
 			*error = W32_SM_PCRE_ERROR;
 			return FAILURE;
 		}
 
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
-		if (NULL == (headers_lc = zend_string_copy(headers_trim))) {
-			*error = OUT_OF_MEMORY;
-			return FAILURE;
-		}
 		for (i = 0; i < headers_lc->len; i++) {
 			headers_lc->val[i] = tolower(headers_lc->val[i]);
 		}
