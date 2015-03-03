@@ -1139,7 +1139,7 @@ ZEND_API void zend_array_destroy(HashTable *ht)
 	} else if (EXPECTED(!(ht->u.flags & HASH_FLAG_INITIALIZED))) {
 		goto free_ht;
 	}
-	pefree(ht->arData, ht->u.flags & HASH_FLAG_PERSISTENT);
+	efree(ht->arData);
 free_ht:
 	FREE_HASHTABLE(ht);
 }
