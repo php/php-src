@@ -3985,7 +3985,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 		}
 
 		if (version == SOAP_1_1) {
-			if ((tmp = zend_hash_str_find(prop, "faultcode", sizeof("faultcode")-1)) != NULL) {
+			if ((tmp = zend_hash_str_find(prop, "faultcode", sizeof("faultcode")-1)) != NULL &&
+			    Z_TYPE_P(tmp) == IS_STRING) {
 				xmlNodePtr node = xmlNewNode(NULL, BAD_CAST("faultcode"));
 				zend_string *str = php_escape_html_entities((unsigned char*)Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), 0, 0, NULL);
 				xmlAddChild(param, node);
@@ -4009,7 +4010,8 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 			}
 			detail_name = "detail";
 		} else {
-		if ((tmp = zend_hash_str_find(prop, "faultcode", sizeof("faultcode")-1)) != NULL) {
+			if ((tmp = zend_hash_str_find(prop, "faultcode", sizeof("faultcode")-1)) != NULL &&
+			    Z_TYPE_P(tmp) == IS_STRING) {
 				xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Code"), NULL);
 				zend_string *str = php_escape_html_entities((unsigned char*)Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), 0, 0, NULL);
 				node = xmlNewChild(node, ns, BAD_CAST("Value"), NULL);

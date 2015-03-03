@@ -388,12 +388,15 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 		encodePtr enc = NULL;
 		HashTable *ht = Z_OBJPROP_P(data);
 
-		if ((ztype = zend_hash_str_find(ht, "enc_type", sizeof("enc_type")-1)) == NULL) {
+		if ((ztype = zend_hash_str_find(ht, "enc_type", sizeof("enc_type")-1)) == NULL ||
+		    Z_TYPE_P(ztype) != IS_LONG) {
 			soap_error0(E_ERROR, "Encoding: SoapVar has no 'enc_type' property");
 		}
 
-		if ((zstype = zend_hash_str_find(ht, "enc_stype", sizeof("enc_stype")-1)) != NULL) {
-			if ((zns = zend_hash_str_find(ht, "enc_ns", sizeof("enc_ns")-1)) != NULL) {
+		if ((zstype = zend_hash_str_find(ht, "enc_stype", sizeof("enc_stype")-1)) != NULL &&
+		    Z_TYPE_P(zstype) == IS_STRING) {
+			if ((zns = zend_hash_str_find(ht, "enc_ns", sizeof("enc_ns")-1)) != NULL &&
+			    Z_TYPE_P(zns) == IS_STRING) {
 				enc = get_encoder(SOAP_GLOBAL(sdl), Z_STRVAL_P(zns), Z_STRVAL_P(zstype));
 			} else {
 				zns = NULL;
@@ -423,8 +426,10 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 		node = master_to_xml(enc, zdata, style, parent);
 
 		if (style == SOAP_ENCODED || (SOAP_GLOBAL(sdl) && encode != enc)) {
-			if ((ztype = zend_hash_str_find(ht, "enc_stype", sizeof("enc_stype")-1)) != NULL) {
-				if ((zns = zend_hash_str_find(ht, "enc_ns", sizeof("enc_ns")-1)) != NULL) {
+			if ((zstype = zend_hash_str_find(ht, "enc_stype", sizeof("enc_stype")-1)) != NULL &&
+			    Z_TYPE_P(zstype) == IS_STRING) {
+				if ((zns = zend_hash_str_find(ht, "enc_ns", sizeof("enc_ns")-1)) != NULL &&
+				    Z_TYPE_P(zns) == IS_STRING) {
 					set_ns_and_type_ex(node, Z_STRVAL_P(zns), Z_STRVAL_P(zstype));
 				} else {
 					set_ns_and_type_ex(node, NULL, Z_STRVAL_P(zstype));
@@ -432,10 +437,12 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			}
 		}
 
-		if ((zname = zend_hash_str_find(ht, "enc_name", sizeof("enc_name")-1)) != NULL) {
+		if ((zname = zend_hash_str_find(ht, "enc_name", sizeof("enc_name")-1)) != NULL &&
+		    Z_TYPE_P(zname) == IS_STRING) {
 			xmlNodeSetName(node, BAD_CAST(Z_STRVAL_P(zname)));
 		}
-		if ((znamens = zend_hash_str_find(ht, "enc_namens", sizeof("enc_namens")-1)) != NULL) {
+		if ((znamens = zend_hash_str_find(ht, "enc_namens", sizeof("enc_namens")-1)) != NULL &&
+		    Z_TYPE_P(znamens) == IS_STRING) {
 			xmlNsPtr nsp = encode_add_ns(node, Z_STRVAL_P(znamens));
 			xmlSetNs(node, nsp);
 		}
