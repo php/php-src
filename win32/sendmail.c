@@ -416,7 +416,11 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	/* in the beginning of the dialog */
 	/* attempt reconnect if the first Post fail */
 	if ((res = Post(Buffer)) != SUCCESS) {
-		MailConnect();
+		int err = MailConnect();
+		if (0 != err) {
+			return (FAILED_TO_SEND);
+		}
+
 		if ((res = Post(Buffer)) != SUCCESS) {
 			return (res);
 		}
@@ -785,12 +789,14 @@ static int MailConnect()
 
 	/* Get our own host name */
 	if (gethostname(LocalHost, HOST_NAME_LEN)) {
+		closesocket(sc);
 		return (FAILED_TO_GET_HOSTNAME);
 	}
 
 	ent = gethostbyname(LocalHost);
 
 	if (!ent) {
+		closesocket(sc);
 		return (FAILED_TO_GET_HOSTNAME);
 	}
 
@@ -803,6 +809,7 @@ static int MailConnect()
 #endif
 	{
 		if (namelen + 2 >= HOST_NAME_LEN) {
+			closesocket(sc);
 			return (FAILED_TO_GET_HOSTNAME);
 		}
 
@@ -811,6 +818,7 @@ static int MailConnect()
 		strcpy(LocalHost + namelen + 1, "]");
 	} else {
 		if (namelen >= HOST_NAME_LEN) {
+			closesocket(sc);
 			return (FAILED_TO_GET_HOSTNAME);
 		}
 
@@ -836,6 +844,7 @@ static int MailConnect()
 	sock_in.sin_addr.S_un.S_addr = GetAddr(MailHost);
 
 	if (connect(sc, (LPSOCKADDR) & sock_in, sizeof(sock_in))) {
+		closesocket(sc);
 		return (FAILED_TO_CONNECT);
 	}
 
