@@ -383,6 +383,7 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 
 static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
+	zend_execute_data *old_execute_data;
 	zend_call_kind call_kind = EX_CALL_KIND();
 
 	if (call_kind == ZEND_CALL_NESTED_FUNCTION) {
@@ -393,14 +394,13 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			zend_clean_and_cache_symbol_table(EX(symbol_table));
 		}
 		zend_vm_stack_free_extra_args(execute_data);
-		EG(current_execute_data) = EX(prev_execute_data);
-		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_CLOSURE) != 0) && EX(func)->op_array.prototype) {
-			OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
+		old_execute_data = execute_data;
+		execute_data = EG(current_execute_data) = EX(prev_execute_data);
+		if (UNEXPECTED((old_execute_data->func->op_array.fn_flags & ZEND_ACC_CLOSURE) != 0) && EX(func)->op_array.prototype) {
+			OBJ_RELEASE((zend_object*)old_execute_data->func->op_array.prototype);
 		}
-		object = Z_OBJ(EX(This));
-		zend_vm_stack_free_call_frame(execute_data);
-
-		execute_data = EG(current_execute_data);
+		object = Z_OBJ(old_execute_data->This);
+		zend_vm_stack_free_call_frame(old_execute_data);
 
 		if (object) {
 			if (UNEXPECTED(EG(exception) != NULL) && (EX(opline)->op1.num & ZEND_CALL_CTOR)) {
@@ -431,10 +431,10 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		zend_detach_symbol_table(execute_data);
 		destroy_op_array(&EX(func)->op_array);
 		efree_size(EX(func), sizeof(zend_op_array));
-		EG(current_execute_data) = EX(prev_execute_data);
-		zend_vm_stack_free_call_frame(execute_data);
+		old_execute_data = execute_data;
+		execute_data = EG(current_execute_data) = EX(prev_execute_data);
+		zend_vm_stack_free_call_frame(old_execute_data);
 
-		execute_data = EG(current_execute_data);
 		zend_attach_symbol_table(execute_data);
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL);
@@ -457,7 +457,6 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			}
 		} else /* if (call_kind == ZEND_CALL_TOP_CODE) */ {
 			zend_array *symbol_table = EX(symbol_table);
-			zend_execute_data *old_execute_data;
 
 			zend_detach_symbol_table(execute_data);
 			old_execute_data = EX(prev_execute_data);
