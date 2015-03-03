@@ -172,7 +172,7 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 /* }}} */
 
 php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
-									 char **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+									 zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
 	int fd = -1;
 	int mode_rw = 0;
@@ -345,6 +345,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			efree(pathdup);
 			return NULL;
 		}
+
 		if (!(stream = php_stream_open_wrapper(p + 10, mode, options, opened_path))) {
 			efree(pathdup);
 			return NULL;

@@ -118,6 +118,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
+		zend_string *entry_str = NULL;
 		int arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 
@@ -148,8 +149,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 				goto skip_phar;
 			}
 			if (use_include_path) {
-				if ((entry = phar_find_in_include_path(entry, entry_len, NULL))) {
-					name = entry;
+				if ((entry_str = phar_find_in_include_path(entry, entry_len, NULL))) {
+					name = entry_str->val;
 					goto phar_it;
 				} else {
 					/* this file is not in the phar, use the original path */
@@ -188,7 +189,11 @@ phar_it:
 				context = php_stream_context_from_zval(zcontext, 0);
 			}
 			stream = php_stream_open_wrapper_ex(name, "rb", 0 | REPORT_ERRORS, NULL, context);
-			efree(name);
+			if (entry_str) {
+				zend_string_release(entry_str);
+			} else {
+				efree(name);
+			}
 
 			if (!stream) {
 				RETURN_FALSE;
@@ -243,6 +248,7 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 	}
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
+		zend_string *entry_str = NULL;
 		int arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 		char *name;
@@ -267,12 +273,12 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 			goto skip_phar;
 		}
 		if (use_include_path) {
-			if (!(entry = phar_find_in_include_path(entry, entry_len, NULL))) {
+			if (!(entry_str = phar_find_in_include_path(entry, entry_len, NULL))) {
 				/* this file is not in the phar, use the original path */
 				efree(arch);
 				goto skip_phar;
 			} else {
-				name = entry;
+				name = entry_str->val;
 			}
 		} else {
 			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
@@ -301,7 +307,11 @@ notfound:
 		efree(arch);
 		context = php_stream_context_from_zval(zcontext, 0);
 		stream = php_stream_open_wrapper_ex(name, "rb", 0 | REPORT_ERRORS, NULL, context);
-		efree(name);
+		if (entry_str) {
+			zend_string_release(entry_str);
+		} else {
+			efree(name);
+		}
 		if (stream == NULL) {
 			RETURN_FALSE;
 		}
@@ -339,6 +349,7 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 	}
 	if (use_include_path || (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://"))) {
 		char *arch, *entry, *fname;
+		zend_string *entry_str = NULL;
 		int arch_len, entry_len, fname_len;
 		php_stream_context *context = NULL;
 		char *name;
@@ -363,12 +374,12 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 			goto skip_phar;
 		}
 		if (use_include_path) {
-			if (!(entry = phar_find_in_include_path(entry, entry_len, NULL))) {
+			if (!(entry_str = phar_find_in_include_path(entry, entry_len, NULL))) {
 				/* this file is not in the phar, use the original path */
 				efree(arch);
 				goto skip_phar;
 			} else {
-				name = entry;
+				name = entry_str->val;
 			}
 		} else {
 			entry = phar_fix_filepath(estrndup(entry, entry_len), &entry_len, 1);
@@ -398,7 +409,11 @@ notfound:
 		efree(arch);
 		context = php_stream_context_from_zval(zcontext, 0);
 		stream = php_stream_open_wrapper_ex(name, mode, 0 | REPORT_ERRORS, NULL, context);
-		efree(name);
+		if (entry_str) {
+			zend_string_release(entry_str);
+		} else {
+			efree(name);
+		}
 		if (stream == NULL) {
 			RETURN_FALSE;
 		}

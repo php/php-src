@@ -250,10 +250,11 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 }
 /* }}} */
 
-char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_data **pphar) /* {{{ */
+zend_string *phar_find_in_include_path(char *filename, int filename_len, phar_archive_data **pphar) /* {{{ */
 {
-	char *path, *fname, *arch, *entry, *ret, *test;
-	int arch_len, entry_len, fname_len, ret_len;
+	zend_string *ret;
+	char *path, *fname, *arch, *entry, *test;
+	int arch_len, entry_len, fname_len;
 	phar_archive_data *phar;
 
 	if (pphar) {
@@ -299,14 +300,14 @@ splitted:
 
 		if (*test == '/') {
 			if (zend_hash_str_exists(&(phar->manifest), test + 1, try_len - 1)) {
-				spprintf(&ret, 0, "phar://%s%s", arch, test);
+				ret = zend_strpprintf(0, "phar://%s%s", arch, test);
 				efree(arch);
 				efree(test);
 				return ret;
 			}
 		} else {
 			if (zend_hash_str_exists(&(phar->manifest), test, try_len)) {
-				spprintf(&ret, 0, "phar://%s/%s", arch, test);
+				ret = zend_strpprintf(0, "phar://%s/%s", arch, test);
 				efree(arch);
 				efree(test);
 				return ret;
@@ -320,11 +321,9 @@ splitted:
 	ret = php_resolve_path(filename, filename_len, path);
 	efree(path);
 
-	if (ret && strlen(ret) > 8 && !strncmp(ret, "phar://", 7)) {
-		ret_len = strlen(ret);
+	if (ret && ret->len > 8 && !strncmp(ret->val, "phar://", 7)) {
 		/* found phar:// */
-
-		if (SUCCESS != phar_split_fname(ret, ret_len, &arch, &arch_len, &entry, &entry_len, 1, 0)) {
+		if (SUCCESS != phar_split_fname(ret->val, ret->len, &arch, &arch_len, &entry, &entry_len, 1, 0)) {
 			return ret;
 		}
 

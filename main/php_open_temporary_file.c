@@ -94,10 +94,10 @@
  * SUCH DAMAGE.
  */
 
-static int php_do_open_temporary_file(const char *path, const char *pfx, char **opened_path_p)
+static int php_do_open_temporary_file(const char *path, const char *pfx, zend_string **opened_path_p)
 {
 	char *trailing_slash;
-	char *opened_path;
+	char opened_path[MAXPATHLEN];
 	char cwd[MAXPATHLEN];
 	cwd_state new_state;
 	int fd = -1;
@@ -138,8 +138,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		trailing_slash = "/";
 	}
 
-	if (spprintf(&opened_path, 0, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, pfx) >= MAXPATHLEN) {
-		efree(opened_path);
+	if (snprintf(opened_path, MAXPATHLEN, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, pfx) >= MAXPATHLEN) {
 		efree(new_state.cwd);
 		return -1;
 	}
@@ -150,7 +149,6 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 		/* Some versions of windows set the temp file to be read-only,
 		 * which means that opening it will fail... */
 		if (VCWD_CHMOD(opened_path, 0600)) {
-			efree(opened_path);
 			efree(new_state.cwd);
 			return -1;
 		}
@@ -165,10 +163,8 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 	}
 #endif
 
-	if (fd == -1 || !opened_path_p) {
-		efree(opened_path);
-	} else {
-		*opened_path_p = opened_path;
+	if (fd != -1 && opened_path_p) {
+		*opened_path_p = zend_string_init(opened_path, strlen(opened_path), 0);
 	}
 	efree(new_state.cwd);
 	return fd;
@@ -264,7 +260,7 @@ PHPAPI const char* php_get_temporary_directory(void)
  * This function should do its best to return a file pointer to a newly created
  * unique file, on every platform.
  */
-PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, char **opened_path_p, zend_bool open_basedir_check)
+PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, zend_string **opened_path_p, zend_bool open_basedir_check)
 {
 	int fd;
 	const char *temp_dir;
@@ -296,12 +292,12 @@ def_tmp:
 	return fd;
 }
 
-PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, char **opened_path_p)
+PHPAPI int php_open_temporary_fd(const char *dir, const char *pfx, zend_string **opened_path_p)
 {
 	return php_open_temporary_fd_ex(dir, pfx, opened_path_p, 0);
 }
 
-PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **opened_path_p)
+PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, zend_string **opened_path_p)
 {
 	FILE *fp;
 	int fd = php_open_temporary_fd(dir, pfx, opened_path_p);

@@ -1350,7 +1350,7 @@ PHP_FUNCTION(set_time_limit)
 
 /* {{{ php_fopen_wrapper_for_zend
  */
-static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path)
+static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **opened_path)
 {
 	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
 }
@@ -1428,7 +1428,7 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 }
 /* }}} */
 
-static char *php_resolve_path_for_zend(const char *filename, int filename_len) /* {{{ */
+static zend_string *php_resolve_path_for_zend(const char *filename, int filename_len) /* {{{ */
 {
 	return php_resolve_path(filename, filename_len, PG(include_path));
 }
@@ -2490,12 +2490,9 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
  			primary_file->opened_path == NULL &&
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
-			int realfile_len;
-
 			if (expand_filepath(primary_file->filename, realfile)) {
-				realfile_len =  (int)strlen(realfile);
-				zend_hash_str_add_empty_element(&EG(included_files), realfile, realfile_len);
-				primary_file->opened_path = estrndup(realfile, realfile_len);
+				primary_file->opened_path = zend_string_init(realfile, strlen(realfile), 0);
+				zend_hash_add_empty_element(&EG(included_files), primary_file->opened_path);
 			}
 		}
 

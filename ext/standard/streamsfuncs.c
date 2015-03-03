@@ -1489,8 +1489,9 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 Determine what file will be opened by calls to fopen() with a relative path */
 PHP_FUNCTION(stream_resolve_include_path)
 {
-	char *filename, *resolved_path;
+	char *filename;
 	size_t filename_len;
+	zend_string *resolved_path;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename, &filename_len) == FAILURE) {
 		return;
@@ -1499,10 +1500,7 @@ PHP_FUNCTION(stream_resolve_include_path)
 	resolved_path = zend_resolve_path(filename, (int)filename_len);
 
 	if (resolved_path) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRING(resolved_path);
-		efree(resolved_path);
-		return;
+		RETURN_STR(resolved_path);
 	}
 	RETURN_FALSE;
 }

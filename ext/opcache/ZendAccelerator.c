@@ -105,7 +105,7 @@ char *zps_api_failure_reason = NULL;
 
 static zend_op_array *(*accelerator_orig_compile_file)(zend_file_handle *file_handle, int type);
 static int (*accelerator_orig_zend_stream_open_function)(const char *filename, zend_file_handle *handle );
-static char *(*accelerator_orig_zend_resolve_path)(const char *filename, int filename_len);
+static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, int filename_len);
 static void (*orig_chdir)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
 
@@ -765,25 +765,23 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 			break;
 		case ZEND_HANDLE_FILENAME:
 		case ZEND_HANDLE_MAPPED:
-			{
-				char *file_path = file_handle->opened_path;
+			if (file_handle->opened_path) {
+				char *file_path = file_handle->opened_path->val;
 
-				if (file_path) {
-					if (is_stream_path(file_path)) {
-						if (zend_get_stream_timestamp(file_path, &statbuf) == SUCCESS) {
-							break;
-						}
-					}
-					if (VCWD_STAT(file_path, &statbuf) != -1) {
+				if (is_stream_path(file_path)) {
+					if (zend_get_stream_timestamp(file_path, &statbuf) == SUCCESS) {
 						break;
 					}
 				}
-
-				if (zend_get_stream_timestamp(file_handle->filename, &statbuf) != SUCCESS) {
-					return 0;
+				if (VCWD_STAT(file_path, &statbuf) != -1) {
+					break;
 				}
-				break;
 			}
+
+			if (zend_get_stream_timestamp(file_handle->filename, &statbuf) != SUCCESS) {
+				return 0;
+			}
+			break;
 		case ZEND_HANDLE_STREAM:
 			{
 				php_stream *stream = (php_stream *)file_handle->handle.stream.handle;
@@ -825,20 +823,25 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 static inline int do_validate_timestamps(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
 {
 	zend_file_handle ps_handle;
-	char *full_path_ptr = NULL;
+	zend_string *full_path_ptr = NULL;
 
 	/** check that the persistent script is indeed the same file we cached
 	 * (if part of the path is a symlink than it possible that the user will change it)
 	 * See bug #15140
 	 */
 	if (file_handle->opened_path) {
-		if (strcmp(persistent_script->full_path->val, file_handle->opened_path) != 0) {
+		if (persistent_script->full_path != file_handle->opened_path &&
+		    (persistent_script->full_path->len != file_handle->opened_path->len ||
+		     memcmp(persistent_script->full_path->val, file_handle->opened_path->val, file_handle->opened_path->len) != 0)) {
 			return FAILURE;
 		}
 	} else {
 		full_path_ptr = accelerator_orig_zend_resolve_path(file_handle->filename, strlen(file_handle->filename));
-		if (full_path_ptr && strcmp(persistent_script->full_path->val, full_path_ptr) != 0) {
-			efree(full_path_ptr);
+		if (full_path_ptr &&
+		    persistent_script->full_path != full_path_ptr &&
+		    (persistent_script->full_path->len != full_path_ptr->len ||
+		     memcmp(persistent_script->full_path->val, full_path_ptr->val, full_path_ptr->len) != 0)) {
+			zend_string_release(full_path_ptr);
 			return FAILURE;
 		}
 		file_handle->opened_path = full_path_ptr;
@@ -846,7 +849,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 
 	if (persistent_script->timestamp == 0) {
 		if (full_path_ptr) {
-			efree(full_path_ptr);
+			zend_string_release(full_path_ptr);
 			file_handle->opened_path = NULL;
 		}
 		return FAILURE;
@@ -854,19 +857,19 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 
 	if (zend_get_file_handle_timestamp(file_handle, NULL) == persistent_script->timestamp) {
 		if (full_path_ptr) {
-			efree(full_path_ptr);
+			zend_string_release(full_path_ptr);
 			file_handle->opened_path = NULL;
 		}
 		return SUCCESS;
 	}
 	if (full_path_ptr) {
-		efree(full_path_ptr);
+		zend_string_release(full_path_ptr);
 		file_handle->opened_path = NULL;
 	}
 
 	ps_handle.type = ZEND_HANDLE_FILENAME;
 	ps_handle.filename = persistent_script->full_path->val;
-	ps_handle.opened_path = persistent_script->full_path->val;
+	ps_handle.opened_path = persistent_script->full_path;
 
 	if (zend_get_file_handle_timestamp(&ps_handle, NULL) == persistent_script->timestamp) {
 		return SUCCESS;
@@ -934,8 +937,8 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
             /* we don't handle this well for now. */
             zend_accel_error(ACCEL_LOG_INFO, "getcwd() failed for '%s' (%d), please try to set opcache.use_cwd to 0 in ini file", file_handle->filename, errno);
             if (file_handle->opened_path) {
-                cwd = file_handle->opened_path;
-		        cwd_len = strlen(cwd);
+                cwd = file_handle->opened_path->val;
+		        cwd_len = file_handle->opened_path->len;
             } else {
 				ZCG(key_len) = 0;
                 return NULL;
@@ -1047,7 +1050,7 @@ static inline char *accel_make_persistent_key(zend_file_handle *file_handle, int
 
 int zend_accel_invalidate(const char *filename, int filename_len, zend_bool force)
 {
-	char *realpath;
+	zend_string *realpath;
 	zend_persistent_script *persistent_script;
 
 	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
@@ -1060,12 +1063,12 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 		return FAILURE;
 	}
 
-	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath, strlen(realpath));
+	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath->val, realpath->len);
 	if (persistent_script && !persistent_script->corrupted) {
 		zend_file_handle file_handle;
 
 		file_handle.type = ZEND_HANDLE_FILENAME;
-		file_handle.filename = realpath;
+		file_handle.filename = realpath->val;
 		file_handle.opened_path = realpath;
 
 		if (force ||
@@ -1317,7 +1320,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
     }
 
 	/* check blacklist right after ensuring that file was opened */
-	if (file_handle->opened_path && zend_accel_blacklist_is_blacklisted(&accel_blacklist, file_handle->opened_path)) {
+	if (file_handle->opened_path && zend_accel_blacklist_is_blacklisted(&accel_blacklist, file_handle->opened_path->val)) {
 		ZCSG(blacklist_misses)++;
 		*op_array_p = accelerator_orig_compile_file(file_handle, type);
 		return NULL;
@@ -1439,7 +1442,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 	}
 
 	if (file_handle->opened_path) {
-		new_persistent_script->full_path = zend_string_init(file_handle->opened_path, strlen(file_handle->opened_path), 0);
+		new_persistent_script->full_path = zend_string_copy(file_handle->opened_path);
 	} else {
 		new_persistent_script->full_path = zend_string_init(file_handle->filename, strlen(file_handle->filename), 0);
 	}
@@ -1521,7 +1524,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		    }
 
 			if (file_handle->opened_path &&
-			    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path, strlen(file_handle->opened_path))) != NULL) {
+			    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path->val, file_handle->opened_path->len)) != NULL) {
 
 				persistent_script = (zend_persistent_script *)bucket->data;
 				if (!ZCG(accel_directives).revalidate_path &&
@@ -1702,7 +1705,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 			    (EG(current_execute_data) &&
 			     (ZCG(cache_opline) == EG(current_execute_data)->opline))) {
 				persistent_script = ZCG(cache_persistent_script);
-				handle->opened_path = estrndup(persistent_script->full_path->val, persistent_script->full_path->len);
+				handle->opened_path = zend_string_copy(persistent_script->full_path);
 				handle->type = ZEND_HANDLE_FILENAME;
 				return SUCCESS;
 #if 0
@@ -1733,7 +1736,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 }
 
 /* zend_resolve_path() replacement for PHP 5.3 and above */
-static char* persistent_zend_resolve_path(const char *filename, int filename_len)
+static zend_string* persistent_zend_resolve_path(const char *filename, int filename_len)
 {
 	if (ZCG(enabled) && accel_startup_ok &&
 	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
@@ -1752,7 +1755,7 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 			zend_file_handle handle;
 			char *key = NULL;
 			int key_length;
-			char *resolved_path;
+			zend_string *resolved_path;
 			zend_accel_hash_entry *bucket;
 			zend_persistent_script *persistent_script;
 
@@ -1766,7 +1769,7 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 					ZCG(key_len) = persistent_script->full_path->len;
 					ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
 					ZCG(cache_persistent_script) = persistent_script;
-					return estrndup(persistent_script->full_path->val, persistent_script->full_path->len);
+					return zend_string_copy(persistent_script->full_path);
 				}
 		    }
 
@@ -1783,7 +1786,7 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 				/* we have persistent script */
 				ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
 				ZCG(cache_persistent_script) = persistent_script;
-				return estrndup(persistent_script->full_path->val, persistent_script->full_path->len);
+				return zend_string_copy(persistent_script->full_path);
 			}
 
 			/* find the full real path */
@@ -1791,7 +1794,7 @@ static char* persistent_zend_resolve_path(const char *filename, int filename_len
 
 		    /* Check if requested file already cached (by real path) */
 			if (resolved_path &&
-			    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), resolved_path, strlen(resolved_path))) != NULL) {
+			    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), resolved_path->val, resolved_path->len)) != NULL) {
 				persistent_script = (zend_persistent_script *)bucket->data;
 
 				if (persistent_script && !persistent_script->corrupted) {

@@ -340,7 +340,7 @@ PHPAPI int php_check_open_basedir_ex(const char *path, int warn)
 
 /* {{{ php_fopen_and_set_opened_path
  */
-static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, char **opened_path)
+static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, zend_string **opened_path)
 {
 	FILE *fp;
 
@@ -349,7 +349,12 @@ static FILE *php_fopen_and_set_opened_path(const char *path, const char *mode, c
 	}
 	fp = VCWD_FOPEN(path, mode);
 	if (fp && opened_path) {
-		*opened_path = expand_filepath_with_mode(path, NULL, NULL, 0, CWD_EXPAND);
+		//TODO :avoid reallocation
+		char *tmp = expand_filepath_with_mode(path, NULL, NULL, 0, CWD_EXPAND);
+		if (tmp) {
+			*opened_path = zend_string_init(tmp, strlen(tmp), 0);
+			efree(tmp);
+		}
 	}
 	return fp;
 }
@@ -361,7 +366,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 {
 	char *path_info;
 	char *filename = NULL;
-	char *resolved_path = NULL;
+	zend_string *resolved_path = NULL;
 	int length;
 	zend_bool orig_display_errors;
 
@@ -448,7 +453,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		}
 		return FAILURE;
 	}
-	efree(resolved_path);
+	zend_string_release(resolved_path);
 
 	orig_display_errors = PG(display_errors);
 	PG(display_errors) = 0;
@@ -481,7 +486,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 /* {{{ php_resolve_path
  * Returns the realpath for given filename according to include path
  */
-PHPAPI char *php_resolve_path(const char *filename, int filename_length, const char *path)
+PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, const char *path)
 {
 	char resolved_path[MAXPATHLEN];
 	char trypath[MAXPATHLEN];
@@ -499,7 +504,7 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 		wrapper = php_stream_locate_url_wrapper(filename, &actual_path, STREAM_OPEN_FOR_INCLUDE);
 		if (wrapper == &php_plain_files_wrapper) {
 			if (tsrm_realpath(actual_path, resolved_path)) {
-				return estrdup(resolved_path);
+				return zend_string_init(resolved_path, strlen(resolved_path), 0);
 			}
 		}
 		return NULL;
@@ -512,7 +517,7 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 	    !path ||
 	    !*path) {
 		if (tsrm_realpath(filename, resolved_path)) {
-			return estrdup(resolved_path);
+			return zend_string_init(resolved_path, strlen(resolved_path), 0);
 		} else {
 			return NULL;
 		}
@@ -562,14 +567,14 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 					php_stream_statbuf ssb;
 
 					if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL)) {
-						return estrdup(trypath);
+						return zend_string_init(trypath, strlen(trypath), 0);
 					}
 				}
 				continue;
 			}
 		}
 		if (tsrm_realpath(actual_path, resolved_path)) {
-			return estrdup(resolved_path);
+			return zend_string_init(resolved_path, strlen(resolved_path), 0);
 		}
 	} /* end provided path */
 
@@ -598,7 +603,7 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 						php_stream_statbuf ssb;
 
 						if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL)) {
-							return estrdup(trypath);
+							return zend_string_init(trypath, strlen(trypath), 0);
 						}
 					}
 					return NULL;
@@ -606,7 +611,7 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
 			}
 
 			if (tsrm_realpath(actual_path, resolved_path)) {
-				return estrdup(resolved_path);
+				return zend_string_init(resolved_path, strlen(resolved_path), 0);
 			}
 		}
 	}
@@ -619,7 +624,7 @@ PHPAPI char *php_resolve_path(const char *filename, int filename_length, const c
  * Tries to open a file with a PATH-style list of directories.
  * If the filename starts with "." or "/", the path is ignored.
  */
-PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const char *path, char **opened_path)
+PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const char *path, zend_string **opened_path)
 {
 	char *pathbuf, *ptr, *end;
 	const char *exec_fname;
