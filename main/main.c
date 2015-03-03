@@ -2507,8 +2507,21 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 #endif
 			zend_set_timeout(INI_INT("max_execution_time"), 0);
 		}
-		retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 
+		{
+			/*
+			   If cli primary file has shabang line and there is a prepend file,
+			   the `start_lineno` will be used by prepend file but not primary file,
+			   save it and restore after prepend file been executed.
+			 */
+			int orig_start_lineno = CG(start_lineno);
+
+			CG(start_lineno) = 0;
+			retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 1, prepend_file_p) == SUCCESS);
+			CG(start_lineno) = orig_start_lineno;
+
+			retval = retval && (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 2, primary_file, append_file_p) == SUCCESS);
+		}
 	} zend_end_try();
 
 #if HAVE_BROKEN_GETCWD
