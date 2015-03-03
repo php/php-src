@@ -310,7 +310,6 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			efree(headers);
 			efree(headers_lc);
 		}
 		if (ret != SUCCESS) {
