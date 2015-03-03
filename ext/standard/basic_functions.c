@@ -4384,6 +4384,10 @@ PHP_FUNCTION(getopt)
    Flush the output buffer */
 PHP_FUNCTION(flush)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	sapi_flush();
 }
 /* }}} */
