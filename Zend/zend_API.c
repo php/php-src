@@ -3173,7 +3173,6 @@ again:
 				}
 				return 1;
 			}
-			/* break missing intentionally */
 			if (callable_name) {
 				*callable_name = zval_get_string(callable);
 			}

@@ -4587,10 +4587,6 @@ static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 	zend_class_entry *called_scope;
 	zend_object *object;
 
-	if (IS_CONST & (IS_VAR|IS_CV)) {
-		ZVAL_DEREF(function_name);
-	}
-
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		if (error) {
 			efree(error);
@@ -7496,10 +7492,6 @@ static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_
 	zend_class_entry *called_scope;
 	zend_object *object;
 
-	if (IS_CV & (IS_VAR|IS_CV)) {
-		ZVAL_DEREF(function_name);
-	}
-
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		if (error) {
 			efree(error);
@@ -8653,10 +8645,6 @@ static int ZEND_FASTCALL  ZEND_INIT_USER_CALL_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPC
 	zend_function *func;
 	zend_class_entry *called_scope;
 	zend_object *object;
-
-	if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) {
-		ZVAL_DEREF(function_name);
-	}
 
 	if (zend_is_callable_ex(function_name, NULL, 0, NULL, &fcc, &error)) {
 		if (error) {
