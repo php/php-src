@@ -36,13 +36,15 @@ int proxy_authentication(zval* this_ptr, smart_str* soap_headers)
 {
 	zval *login, *password;
 
-	if ((login = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_login", sizeof("_proxy_login")-1)) != NULL) {
+	if ((login = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_login", sizeof("_proxy_login")-1)) != NULL &&
+	    Z_TYPE_P(login) == IS_STRING) {
 		zend_string *buf;
 		smart_str auth = {0};
 
 		smart_str_appendl(&auth, Z_STRVAL_P(login), Z_STRLEN_P(login));
 		smart_str_appendc(&auth, ':');
-		if ((password = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_password", sizeof("_proxy_password")-1)) != NULL) {
+		if ((password = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_password", sizeof("_proxy_password")-1)) != NULL &&
+		    Z_TYPE_P(password) == IS_STRING) {
 			smart_str_appendl(&auth, Z_STRVAL_P(password), Z_STRLEN_P(password));
 		}
 		smart_str_0(&auth);
@@ -63,13 +65,15 @@ int basic_authentication(zval* this_ptr, smart_str* soap_headers)
 	zval *login, *password;
 
 	if ((login = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_login", sizeof("_login")-1)) != NULL &&
-			!zend_hash_str_exists(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest")-1)) {
+	    Z_TYPE_P(login) == IS_STRING &&
+	    !zend_hash_str_exists(Z_OBJPROP_P(this_ptr), "_digest", sizeof("_digest")-1)) {
 		zend_string* buf;
 		smart_str auth = {0};
 
 		smart_str_appendl(&auth, Z_STRVAL_P(login), Z_STRLEN_P(login));
 		smart_str_appendc(&auth, ':');
-		if ((password = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password")-1)) != NULL) {
+		if ((password = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_password", sizeof("_password")-1)) != NULL &&
+		    Z_TYPE_P(password) == IS_STRING) {
 			smart_str_appendl(&auth, Z_STRVAL_P(password), Z_STRLEN_P(password));
 		}
 		smart_str_0(&auth);
@@ -565,7 +569,7 @@ try_again:
 		}
 		if (!http_1_1 ||
 			((tmp = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_keep_alive", sizeof("_keep_alive")-1)) != NULL &&
-			 Z_LVAL_P(tmp) == 0)) {
+			 (Z_TYPE_P(tmp) == IS_FALSE || (Z_TYPE_P(tmp) == IS_LONG && Z_LVAL_P(tmp) == 0)))) {
 			smart_str_append_const(&soap_headers, "\r\n"
 				"Connection: close\r\n");
 		} else {
@@ -797,7 +801,8 @@ try_again:
 		}
 
 		/* Send cookies along with request */
-		if ((cookies = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies")-1)) != NULL) {
+		if ((cookies = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies")-1)) != NULL &&
+		    Z_TYPE_P(cookies) == IS_ARRAY) {
 			zval *data;
 			zend_string *key;
 			int i, n;
@@ -840,7 +845,7 @@ try_again:
 		smart_str_append_const(&soap_headers, "\r\n");
 		smart_str_0(&soap_headers);
 		if ((trace = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace")-1)) != NULL &&
-		    Z_LVAL_P(trace) > 0) {
+		    (Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
 			add_property_stringl(this_ptr, "__last_request_headers", soap_headers.s->val, soap_headers.s->len);
 		}
 		smart_str_appendl(&soap_headers, request, request_size);
@@ -885,7 +890,7 @@ try_again:
 		}
 
 		if ((trace = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace")-1)) != NULL &&
-		    Z_LVAL_P(trace) > 0) {
+		    (Z_TYPE_P(trace) == IS_TRUE || (Z_TYPE_P(trace) == IS_LONG && Z_LVAL_P(trace) != 0))) {
 			add_property_str(this_ptr, "__last_response_headers", zend_string_copy(http_headers));
 		}
 
@@ -934,7 +939,8 @@ try_again:
 		char *eqpos, *sempos;
 		zval *cookies;
 
-		if ((cookies = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies")-1)) == NULL) {
+		if ((cookies = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies")-1)) == NULL ||
+		    Z_TYPE_P(cookies) != IS_ARRAY) {
 			zval tmp_cookies;
 			array_init(&tmp_cookies);
 			cookies = zend_hash_str_update(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies")-1, &tmp_cookies);
