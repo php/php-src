@@ -685,6 +685,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_error_get_last, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_error_clear_last, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func, 0, 0, 1)
 	ZEND_ARG_INFO(0, function_name)
 	ZEND_ARG_VARIADIC_INFO(0, parameters)
@@ -2942,6 +2945,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(error_log,														arginfo_error_log)
 	PHP_FE(error_get_last,													arginfo_error_get_last)
+	PHP_FE(error_clear_last,													arginfo_error_clear_last)
 	PHP_FE(call_user_func,													arginfo_call_user_func)
 	PHP_FE(call_user_func_array,											arginfo_call_user_func_array)
 	PHP_FE(forward_static_call,											arginfo_forward_static_call)
@@ -4697,6 +4701,33 @@ PHP_FUNCTION(error_get_last)
 		add_assoc_string_ex(return_value, "file", sizeof("file")-1, PG(last_error_file)?PG(last_error_file):"-");
 		add_assoc_long_ex(return_value, "line", sizeof("line")-1, PG(last_error_lineno));
 	}
+}
+/* }}} */
+
+/* {{{ proto bool error_clear_last()
+   Clear the last occurred error. Returns false if there hasn't been an error yet. */
+PHP_FUNCTION(error_clear_last)
+{
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE) {
+		return;
+	}
+
+	if (PG(last_error_message)) {
+		PG(last_error_type) = 0;
+		PG(last_error_lineno) = 0;
+
+		free(PG(last_error_message));
+		PG(last_error_message) = NULL;
+
+		if (PG(last_error_file)) {
+			free(PG(last_error_file));
+			PG(last_error_file) = NULL;
+		}
+
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
