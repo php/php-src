@@ -270,7 +270,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	}
 
 #ifdef VIRTUAL_DIR
-		efree(path_copy);
+	efree(path_copy);
 #endif
 
 	if (bz_file == NULL) {
