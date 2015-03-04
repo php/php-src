@@ -249,6 +249,7 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 
 	if (ce->trait_precedences) {
 		size_t i = 0;
+		zend_bool free_class_name = !(ce->ce_flags & ZEND_ACC_TRAITS_BOUND);
 		
 		while (ce->trait_precedences[i]) {
 			efree((char*)ce->trait_precedences[i]->trait_method->method_name);
@@ -256,6 +257,15 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 			efree(ce->trait_precedences[i]->trait_method);
 
 			if (ce->trait_precedences[i]->exclude_from_classes) {
+				if (free_class_name) {
+					int j = 0;
+					zend_trait_precedence *cur_precedence = ce->trait_precedences[j];
+					while (cur_precedence->exclude_from_classes[j]) {
+						efree(cur_precedence->exclude_from_classes[j]);
+						++j;
+					}
+				}
+
 				efree(ce->trait_precedences[i]->exclude_from_classes);
 			}
 

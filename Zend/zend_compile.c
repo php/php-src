@@ -4421,6 +4421,8 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 	if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		ce->ce_flags -= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 	}
+
+	ce->ce_flags |=  ZEND_ACC_TRAITS_BOUND;
 }
 /* }}} */
 
