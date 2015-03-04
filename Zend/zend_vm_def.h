@@ -1907,7 +1907,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		zend_vm_stack_free_extra_args(execute_data);
 		old_execute_data = execute_data;
 		execute_data = EG(current_execute_data) = EX(prev_execute_data);
-		if (UNEXPECTED((old_execute_data->func->op_array.fn_flags & ZEND_ACC_CLOSURE) != 0) && EX(func)->op_array.prototype) {
+		if (UNEXPECTED((old_execute_data->func->op_array.fn_flags & ZEND_ACC_CLOSURE) != 0) && old_execute_data->func->op_array.prototype) {
 			OBJ_RELEASE((zend_object*)old_execute_data->func->op_array.prototype);
 		}
 		object = Z_OBJ(old_execute_data->This);
