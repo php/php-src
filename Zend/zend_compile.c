@@ -4524,17 +4524,17 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i;
 
+	if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
+		return;
+	}
+
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast *value_ast = const_ast->child[1];
 		zend_string *name = zend_ast_get_str(name_ast);
 		zval value_zv;
-
-		if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
-			return;
-		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast);
 
