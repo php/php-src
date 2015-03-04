@@ -183,15 +183,28 @@ typedef enum {
 	STREAM_CRYPTO_METHOD_ANY_SERVER = ((1 << 1) | (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5))
 } php_stream_xport_crypt_method_t;
 
+typedef enum {
+	STREAM_CRYPTO_INFO_CIPHER_NAME = 1,
+	STREAM_CRYPTO_INFO_CIPHER_BITS = 2,
+	STREAM_CRYPTO_INFO_CIPHER_VERSION = 4,
+	STREAM_CRYPTO_INFO_CIPHER = 5,
+	STREAM_CRYPTO_INFO_PROTOCOL = 8,
+	STREAM_CRYPTO_INFO_ALPN_PROTOCOL = 16,
+	STREAM_CRYPTO_INFO_ALL = 63
+} php_stream_xport_crypt_info_t;
+
 /* These functions provide crypto support on the underlying transport */
 
 BEGIN_EXTERN_C()
 PHPAPI int php_stream_xport_crypto_setup(php_stream *stream, php_stream_xport_crypt_method_t crypto_method, php_stream *session_stream);
 PHPAPI int php_stream_xport_crypto_enable(php_stream *stream, int activate);
+PHPAPI int php_stream_xport_crypto_info(php_stream *stream, zend_long infotype, zval *zresult);
 END_EXTERN_C()
 
 typedef struct _php_stream_xport_crypto_param {
 	struct {
+		zval *zresult;
+		int infotype;
 		php_stream *session;
 		int activate;
 		php_stream_xport_crypt_method_t method;
@@ -201,7 +214,8 @@ typedef struct _php_stream_xport_crypto_param {
 	} outputs;
 	enum {
 		STREAM_XPORT_CRYPTO_OP_SETUP,
-		STREAM_XPORT_CRYPTO_OP_ENABLE
+		STREAM_XPORT_CRYPTO_OP_ENABLE,
+		STREAM_XPORT_CRYPTO_OP_INFO
 	} op;
 } php_stream_xport_crypto_param;
 

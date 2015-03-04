@@ -40,6 +40,11 @@
     socket timeouts). (Brad Broerman)
   . Fixed bug #68920 (use strict peer_fingerprint input checks)
     (Daniel Lowrey)
+  . Added "alpn_protocols" SSL context option allowing encrypted client/server
+    streams to negotiate alternative protocols using the ALPN TLS extension when
+    built against OpenSSL 1.0.2 or newer. Negotiated protocol information is
+    accessible by passing streams to the new stream_socket_crypto_info().
+    (Daniel Lowrey)
 
 - pgsql:
   . Fixed bug #68638 (pg_update() fails to store infinite values).
@@ -58,6 +63,9 @@
     SplObjectStorage). (Laruence)
   . Fixed bug #68557 (RecursiveDirectoryIterator::seek(0) broken after 
     calling getChildren()). (Julien)
+
+- Stream:
+  . Added stream_socket_crypto_info() allowing inspection of negotiated TLS values
 
 - CGI:
   . Fixed bug #69015 (php-cgi's getopt does not see $argv). (Laruence)
