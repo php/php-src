@@ -719,6 +719,8 @@ ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(zend_uchar init_op, zend_function *fbc);
+uint32_t zend_check_reserved_method_name(zend_string *name);
+uint32_t zend_check_reserved_class_const_name(zend_string *name);
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
@@ -757,6 +759,16 @@ int zend_add_literal(zend_op_array *op_array, zval *zv);
 #define ZEND_FETCH_CLASS_MASK        0x0f
 #define ZEND_FETCH_CLASS_NO_AUTOLOAD 0x80
 #define ZEND_FETCH_CLASS_SILENT      0x0100
+
+/* reserved names */
+#define ZEND_NOT_RESERVED			0
+#define ZEND_RESERVED_STATIC		1
+#define ZEND_RESERVED_ABSTRACT		2
+#define ZEND_RESERVED_FINAL			3
+#define ZEND_RESERVED_PRIVATE		4
+#define ZEND_RESERVED_PROTECTED		5
+#define ZEND_RESERVED_PUBLIC		6
+#define ZEND_RESERVED_CLASS			7
 
 /* variable parsing type (compile-time) */
 #define ZEND_PARSED_MEMBER				(1<<0)
