@@ -249,7 +249,7 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 
 	if (ce->trait_precedences) {
 		size_t i = 0;
-		zend_bool free_class_name = !(ce->ce_flags & ZEND_ACC_TRAITS_BINDED);
+		zend_bool free_class_name = !(ce->ce_flags & ZEND_ACC_TRAITS_BOUND);
 		
 		while (ce->trait_precedences[i]) {
 			efree((char*)ce->trait_precedences[i]->trait_method->method_name);
