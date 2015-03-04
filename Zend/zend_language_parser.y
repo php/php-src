@@ -571,6 +571,7 @@ parameter:
 optional_type:
 		/* empty */	{ $$ = NULL; }
 	|	type		{ $$ = $1; }
+	|	'?' type	{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
 ;
 
 type:
@@ -580,8 +581,9 @@ type:
 ;
 
 return_type:
-		/* empty */	{ $$ = NULL; }
-	|	':' type	{ $$ = $2; }
+		/* empty */		{ $$ = NULL; }
+	|	':' type		{ $$ = $2; }
+	|	':' '?' type	{ $$ = $3; $$->attr |= ZEND_TYPE_NULLABLE; }
 ;
 
 argument_list:

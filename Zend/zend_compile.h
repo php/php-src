@@ -771,9 +771,12 @@ int zend_add_literal(zend_op_array *op_array, zval *zv);
 #define ZEND_PARAM_REF      (1<<0)
 #define ZEND_PARAM_VARIADIC (1<<1)
 
-#define ZEND_NAME_FQ       0
-#define ZEND_NAME_NOT_FQ   1
-#define ZEND_NAME_RELATIVE 2
+#define ZEND_NAME_FQ        (1<<0)
+#define ZEND_NAME_NOT_FQ    (1<<1)
+#define ZEND_NAME_RELATIVE  (1<<2)
+
+#define ZEND_TYPE_MASK      0xff
+#define ZEND_TYPE_NULLABLE  (1<<8)
 
 /* unset types */
 #define ZEND_UNSET_REG 0

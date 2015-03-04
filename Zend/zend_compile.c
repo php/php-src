@@ -611,12 +611,12 @@ zend_string *zend_resolve_non_class_name(
 		return zend_string_init(name->val + 1, name->len - 1, 0);
 	}
 
-	if (type == ZEND_NAME_FQ) {
+	if (type & ZEND_NAME_FQ) {
 		*is_fully_qualified = 1;
 		return zend_string_copy(name);
 	}
 
-	if (type == ZEND_NAME_RELATIVE) {
+	if (type & ZEND_NAME_RELATIVE) {
 		*is_fully_qualified = 1;
 		return zend_prefix_with_ns(name);
 	}
@@ -673,11 +673,11 @@ zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
 {
 	char *compound;
 
-	if (type == ZEND_NAME_RELATIVE) {
+	if (type & ZEND_NAME_RELATIVE) {
 		return zend_prefix_with_ns(name);
 	}
 
-	if (type == ZEND_NAME_FQ || name->val[0] == '\\') {
+	if ((type & ZEND_NAME_FQ) || name->val[0] == '\\') {
 		/* Remove \ prefix (only relevant if this is a string rather than a label) */
 		if (name->val[0] == '\\') {
 			name = zend_string_init(name->val + 1, name->len - 1, 0);
@@ -1928,7 +1928,7 @@ static inline zend_bool zend_is_const_default_class_ref(zend_ast *name_ast) /* {
 	}
 
 	/* Fully qualified names are always default refs */
-	if (!name_ast->attr) {
+	if (name_ast->attr & (ZEND_NAME_FQ | ZEND_NAME_RELATIVE)) {
 		return 1;
 	}
 
@@ -3984,11 +3984,11 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 		arg_infos->pass_by_reference = (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 		arg_infos->is_variadic = 0;
 		arg_infos->type_hint = 0;
-		arg_infos->allow_null = 0;
+		arg_infos->allow_null = (return_type_ast->attr & ZEND_TYPE_NULLABLE) != 0;
 		arg_infos->class_name = NULL;
 
 		if (return_type_ast->kind == ZEND_AST_TYPE) {
-			arg_infos->type_hint = return_type_ast->attr;
+			arg_infos->type_hint = return_type_ast->attr & ZEND_TYPE_MASK;
 		} else {
 			zend_string *class_name = zend_ast_get_str(return_type_ast);
 
@@ -4093,10 +4093,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, zend_bool is_
 						&& strcasecmp(Z_STRVAL(default_node.u.constant), "NULL") == 0));
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
-			arg_info->allow_null = has_null_default;
+			arg_info->allow_null = (type_ast->attr & ZEND_TYPE_NULLABLE) || has_null_default;
 
 			if (type_ast->kind == ZEND_AST_TYPE) {
-				arg_info->type_hint = type_ast->attr;
+				arg_info->type_hint = type_ast->attr & ZEND_TYPE_MASK;
 				if (arg_info->type_hint == IS_ARRAY) {
 					if (default_ast && !has_null_default
 						&& Z_TYPE(default_node.u.constant) != IS_ARRAY
