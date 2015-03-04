@@ -197,7 +197,6 @@ typedef struct _zend_try_catch_element {
 /* user class has methods with static variables */
 #define ZEND_HAS_STATIC_IN_METHODS    0x800000
 
-
 #define ZEND_ACC_CLOSURE              0x100000
 #define ZEND_ACC_GENERATOR            0x800000
 
@@ -213,7 +212,7 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
-/* class traits binded */
+/* class traits bound */
 #define ZEND_ACC_TRAITS_BOUND		    0x10000000
 
 char *zend_visibility_string(zend_uint fn_flags);
