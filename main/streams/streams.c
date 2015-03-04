@@ -1829,7 +1829,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 				if (localhost == 1) {
 					(*path_for_open) += 11;
 				}
-				while (*(++*path_for_open)=='/');
+				while (*(++*path_for_open)=='/') {
+					/* intentionally empty */
+				}
 #ifdef PHP_WIN32
 				if (*(*path_for_open + 1) != ':')
 #endif
