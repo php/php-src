@@ -2007,8 +2007,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			if (info->type_hint) {
 				if (info->class_name) {
 					ZEND_ASSERT(info->type_hint == IS_OBJECT);
-					if (!strcasecmp(info->class_name, "self") && !scope) {
-						zend_error(E_CORE_ERROR, "Cannot declare a return type of self outside of a class scope");
+					if (!scope && (!strcasecmp(info->class_name, "self") || !strcasecmp(info->class_name, "parent"))) {
+						zend_error(E_CORE_ERROR, "Cannot declare a return type of %s outside of a class scope", info->class_name);
 					}
 				}
 
