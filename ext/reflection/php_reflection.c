@@ -387,6 +387,9 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 	if (ce->get_iterator != NULL) {
 		string_printf(str, "<iterateable> ");
 	}
+	if (ce->ce_flags & ZEND_ACC_PRIVATE) {
+		string_printf(str, "private ");
+	}
 	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 		string_printf(str, "interface ");
 	} else if (ce->ce_flags & ZEND_ACC_TRAIT) {
@@ -1166,6 +1169,7 @@ PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object)
 	intern->ptr = ce;
 	intern->ref_type = REF_TYPE_OTHER;
 	intern->ce = ce;
+	intern->ignore_visibility = 0;
 	reflection_update_property(object, "name", &name);
 }
 /* }}} */
@@ -1267,6 +1271,7 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 	intern->ptr = method;
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = ce;
+	intern->ignore_visibility = 0;
 	if (closure_object) {
 		Z_ADDREF_P(closure_object);
 		ZVAL_COPY_VALUE(&intern->obj, closure_object);
@@ -4161,6 +4166,22 @@ ZEND_METHOD(reflection_class, isFinal)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionClass::isPublic()
+   Returns whether this class is public */
+ZEND_METHOD(reflection_class, isPublic)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PUBLIC);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionClass::isPrivate()
+   Returns whether this class is private */
+ZEND_METHOD(reflection_class, isPrivate)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PRIVATE);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionClass::isAbstract()
    Returns whether this class is abstract */
 ZEND_METHOD(reflection_class, isAbstract)
@@ -4202,6 +4223,27 @@ ZEND_METHOD(reflection_class, isInstance)
 }
 /* }}} */
 
+/* {{{ proto public void ReflectionClass::setAccessible(bool visible)
+   Sets whether non-public classes can be invoked */
+ZEND_METHOD(reflection_class, setAccessible)
+{
+	reflection_object *intern;
+	zend_bool visible;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &visible) == FAILURE) {
+		return;
+	}
+
+	intern = Z_REFLECTION_P(getThis());
+
+	if (intern == NULL) {
+		return;
+	}
+
+	intern->ignore_visibility = visible;
+}
+/* }}} */
+
 /* {{{ proto public stdclass ReflectionClass::newInstance(mixed* args, ...)
    Returns an instance of this class */
 ZEND_METHOD(reflection_class, newInstance)
@@ -4213,6 +4255,12 @@ ZEND_METHOD(reflection_class, newInstance)
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
+
+	if ((ce->ce_flags & ZEND_ACC_PRIVATE) != 0 && intern->ignore_visibility == 0) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			"Unable to create private class %s through reflection", ce->name->val);
+		return;
+	}
 
 	object_init_ex(return_value, ce);
 
@@ -4285,6 +4333,12 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
+	if ((ce->ce_flags & ZEND_ACC_PRIVATE) != 0 && intern->ignore_visibility == 0) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			"Unable to create private class %s through reflection", ce->name->val);
+		return;
+	}
+
 	if (ce->create_object != NULL && ce->ce_flags & ZEND_ACC_FINAL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s is an internal class marked as final that cannot be instantiated without invoking its constructor", ce->name->val);
 	}
@@ -4314,6 +4368,12 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 
 	if (ZEND_NUM_ARGS() > 0) {
 		argc = args->nNumOfElements;
+	}
+
+	if ((ce->ce_flags & ZEND_ACC_PRIVATE) != 0 && intern->ignore_visibility == 0) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			"Unable to create private class %s through reflection", ce->name->val);
+		return;
 	}
 
 	object_init_ex(return_value, ce);
@@ -5881,6 +5941,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_isInstance, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_setAccessible, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_newInstance, 0)
 	ZEND_ARG_INFO(0, args)
 ZEND_END_ARG_INFO()
@@ -5931,6 +5995,8 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getTraitNames, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getTraitAliases, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isTrait, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, isPublic, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, isPrivate, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isAbstract, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isFinal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getModifiers, arginfo_reflection__void, 0)
@@ -5951,6 +6017,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, inNamespace, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getNamespaceName, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getShortName, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, setAccessible, arginfo_reflection_class_setAccessible, 0)
 	PHP_FE_END
 };
 
@@ -6180,6 +6247,8 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_PUBLIC", ZEND_ACC_PUBLIC);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_PRIVATE", ZEND_ACC_PRIVATE);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_FINAL", ZEND_ACC_FINAL);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionObject", reflection_object_functions);

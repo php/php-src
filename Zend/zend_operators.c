@@ -2408,6 +2408,17 @@ ZEND_API zend_string *zend_string_tolower(zend_string *str) /* {{{ */
 }
 /* }}} */
 
+ZEND_API int zend_is_same_namespace(const char *fc, const char *sc) /* {{{ */
+{
+	const char *fc_pos = strrchr(fc, '\\'), *sc_pos = strrchr(sc, '\\');
+
+	return (
+		(fc_pos == NULL && sc_pos == NULL) ||
+		(fc_pos != NULL && sc_pos != NULL && zend_binary_strcasecmp(fc, fc_pos - fc + 1, sc, sc_pos - sc + 1) == 0)
+	);
+}
+/* }}} */
+
 ZEND_API int zend_binary_strcmp(const char *s1, size_t len1, const char *s2, size_t len2) /* {{{ */
 {
 	int retval;

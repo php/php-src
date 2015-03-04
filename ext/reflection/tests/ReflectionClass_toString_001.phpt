@@ -11,9 +11,11 @@ echo $rc;
 --EXPECTF--
 Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
-  - Constants [3] {
+  - Constants [5] {
     Constant [ integer IS_IMPLICIT_ABSTRACT ] { 16 }
     Constant [ integer IS_EXPLICIT_ABSTRACT ] { 32 }
+    Constant [ integer IS_PUBLIC ] { 256 }
+    Constant [ integer IS_PRIVATE ] { 1024 }
     Constant [ integer IS_FINAL ] { 4 }
   }
 
@@ -34,7 +36,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Property [ <default> public $name ]
   }
 
-  - Methods [49] {
+  - Methods [52] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -218,6 +220,18 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       }
     }
 
+    Method [ <internal:Reflection> public method isPublic ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method isPrivate ] {
+
+      - Parameters [0] {
+      }
+    }
+
     Method [ <internal:Reflection> public method isAbstract ] {
 
       - Parameters [0] {
@@ -344,6 +358,13 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Method [ <internal:Reflection> public method getShortName ] {
 
       - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method setAccessible ] {
+
+      - Parameters [1] {
+        Parameter #0 [ <required> $value ]
       }
     }
   }
