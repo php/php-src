@@ -619,17 +619,16 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, zend_string *key, zend_class_entry *child_ce) /* {{{ */
 {
-	uint32_t parent_flags = parent->common.fn_flags;
-	zend_function *child;
+	zval *child = zend_hash_find(child_function_table, key);
 
-	if ((child = zend_hash_find_ptr(child_function_table, key)) == NULL) {
-		if (parent_flags & (ZEND_ACC_ABSTRACT)) {
+	if (child == NULL) {
+		if (parent->common.fn_flags & (ZEND_ACC_ABSTRACT)) {
 			child_ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
 		return 1; /* method doesn't exist in child, copy from parent */
 	}
 
-	do_inheritance_check_on_method(child, parent);
+	do_inheritance_check_on_method((zend_function*)Z_PTR_P(child), parent);
 
 	return 0;
 }
@@ -637,16 +636,17 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 
 static void do_inherit_property(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
 {
-	zend_property_info *child_info = zend_hash_find_ptr(&ce->properties_info, key);
-	zend_class_entry *parent_ce = ce->parent;
+	zval *child = zend_hash_find(&ce->properties_info, key);
+	zend_property_info *child_info;
 
-	if (UNEXPECTED(child_info)) {
+	if (UNEXPECTED(child)) {
+		child_info = Z_PTR_P(child);
 		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW)) {
 			child_info->flags |= ZEND_ACC_CHANGED;
 		} else {
 			if ((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s%s::$%s as %s%s::$%s",
-					(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", parent_ce->name->val, key->val,
+					(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ce->parent->name->val, key->val,
 					(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ce->name->val, key->val);
 			}
 
@@ -655,7 +655,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 
 			if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name->val, key->val, zend_visibility_string(parent_info->flags), parent_ce->name->val, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name->val, key->val, zend_visibility_string(parent_info->flags), ce->parent->name->val, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 			} else if ((child_info->flags & ZEND_ACC_STATIC) == 0) {
 				int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
 				int child_num = OBJ_PROP_TO_NUM(child_info->offset);
@@ -736,28 +736,22 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_
 }
 /* }}} */
 
-#ifdef ZTS
-# define zval_property_ctor(parent_ce, ce) \
-	(((parent_ce)->type != (ce)->type) ? ZVAL_COPY_CTOR : zval_add_ref)
-#else
-# define zval_property_ctor(parent_ce, ce) \
-	zval_add_ref
-#endif
-
 static void do_inherit_class_constant(zend_string *name, zval *zv, zend_class_entry *ce, zend_class_entry *parent_ce) /* {{{ */
 {
-	if (!Z_ISREF_P(zv)) {
-		if (parent_ce->type == ZEND_INTERNAL_CLASS) {
-			ZVAL_NEW_PERSISTENT_REF(zv, zv);
-		} else {
-			ZVAL_NEW_REF(zv, zv);
+	if (!zend_hash_exists(&ce->constants_table, name)) {
+		if (!Z_ISREF_P(zv)) {
+			if (parent_ce->type == ZEND_INTERNAL_CLASS) {
+				ZVAL_NEW_PERSISTENT_REF(zv, zv);
+			} else {
+				ZVAL_NEW_REF(zv, zv);
+			}
 		}
-	}
-	if (Z_CONSTANT_P(Z_REFVAL_P(zv))) {
-		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-	}
-	if (zend_hash_add(&ce->constants_table, name, zv)) {
+		if (Z_CONSTANT_P(Z_REFVAL_P(zv))) {
+			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+		}
 		Z_ADDREF_P(zv);
+		zend_string_addref(name);
+		_zend_hash_append(&ce->constants_table, name, zv);
 	}
 }
 /* }}} */
@@ -774,7 +768,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		if (!(parent_ce->ce_flags & ZEND_ACC_INTERFACE)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ce->name->val, parent_ce->name->val);
 		}
-	} else {
+	} else if (UNEXPECTED(parent_ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_FINAL))) {
 		/* Class declaration must not extend traits or interfaces */
 		if (parent_ce->ce_flags & ZEND_ACC_INTERFACE) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from interface %s", ce->name->val, parent_ce->name->val);
@@ -888,24 +882,39 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	zend_hash_extend(&ce->properties_info,
-		zend_hash_num_elements(&ce->properties_info) +
-		zend_hash_num_elements(&parent_ce->properties_info), 0);
+	if (zend_hash_num_elements(&parent_ce->properties_info)) {
+		zend_hash_extend(&ce->properties_info,
+			zend_hash_num_elements(&ce->properties_info) +
+			zend_hash_num_elements(&parent_ce->properties_info), 0);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->properties_info, key, property_info) {
-		do_inherit_property(property_info, key, ce);
-	} ZEND_HASH_FOREACH_END();
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->properties_info, key, property_info) {
+			do_inherit_property(property_info, key, ce);
+		} ZEND_HASH_FOREACH_END();
+	}
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(&parent_ce->constants_table, key, zv) {
-		do_inherit_class_constant(key, zv, ce, parent_ce);
-	} ZEND_HASH_FOREACH_END();
+	if (zend_hash_num_elements(&parent_ce->constants_table)) {
+		zend_hash_extend(&ce->constants_table,
+			zend_hash_num_elements(&ce->constants_table) +
+			zend_hash_num_elements(&parent_ce->constants_table), 0);
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
-		if (do_inherit_method_check(&ce->function_table, func, key, ce)) {
-			zend_function *new_func = do_inherit_method(func, ce);
-			zend_hash_add_new_ptr(&ce->function_table, key, new_func);
-		}
-	} ZEND_HASH_FOREACH_END();
+		ZEND_HASH_FOREACH_STR_KEY_VAL(&parent_ce->constants_table, key, zv) {
+			do_inherit_class_constant(key, zv, ce, parent_ce);
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	if (zend_hash_num_elements(&parent_ce->function_table)) {
+		zend_hash_extend(&ce->function_table,
+			zend_hash_num_elements(&ce->function_table) +
+			zend_hash_num_elements(&parent_ce->function_table), 0);
+
+		ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
+			if (do_inherit_method_check(&ce->function_table, func, key, ce)) {
+				zend_function *new_func = do_inherit_method(func, ce);
+				zend_string_addref(key);
+				_zend_hash_append_ptr(&ce->function_table, key, new_func);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	do_inherit_parent_constructor(ce);
 

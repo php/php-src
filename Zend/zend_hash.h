@@ -800,6 +800,22 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		__fill_ht->nInternalPointer = 0; \
 	} while (0)
 
+static zend_always_inline void _zend_hash_append(HashTable *ht, zend_string *key, zval *zv)
+{
+	uint32_t idx = ht->nNumUsed++;
+	uint32_t nIndex;
+	Bucket *p = ht->arData + idx;
+
+	ZVAL_COPY_VALUE(&p->val, zv);
+	p->key = key;
+	p->h = key->h;
+	nIndex = p->h & ht->nTableMask;
+	Z_NEXT(p->val) = ht->arHash[nIndex];
+	ht->arHash[nIndex] = idx;
+	ht->nNumUsed = idx + 1;
+	ht->nNumOfElements++;
+}
+
 static zend_always_inline void _zend_hash_append_ptr(HashTable *ht, zend_string *key, void *ptr)
 {
 	uint32_t idx = ht->nNumUsed++;
