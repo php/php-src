@@ -45,7 +45,7 @@ CODE;
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
-Warning: stream_socket_client(): Peer fingerprint doesn't match in %s on line %d
+Warning: stream_socket_client(): peer_fingerprint match failure in %s on line %d
 
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 

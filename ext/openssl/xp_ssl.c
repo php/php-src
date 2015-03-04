@@ -298,6 +298,7 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
 		}
 
 		return method && php_x509_fingerprint_cmp(peer, method, Z_STRVAL_P(val) TSRMLS_CC) == 0;
+
 	} else if (Z_TYPE_P(val) == IS_ARRAY) {
 		HashPosition pos;
 		zval **current;
@@ -305,21 +306,33 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
 		uint key_len;
 		ulong key_index;
 
+		if (!zend_hash_num_elements(Z_ARRVAL_P(val))) {
+			php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
+			return 0;
+		}
+
 		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(val), &pos);
 			zend_hash_get_current_data_ex(Z_ARRVAL_P(val), (void **)&current, &pos) == SUCCESS;
 			zend_hash_move_forward_ex(Z_ARRVAL_P(val), &pos)
 		) {
 			int key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(val), &key, &key_len, &key_index, 0, &pos);
 
-			if (key_type == HASH_KEY_IS_STRING 
-				&& Z_TYPE_PP(current) == IS_STRING
-				&& php_x509_fingerprint_cmp(peer, key, Z_STRVAL_PP(current) TSRMLS_CC) != 0
-			) {
+			if (!(key_type == HASH_KEY_IS_STRING && Z_TYPE_PP(current) == IS_STRING)) {
+				php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
+				return 0;
+			}
+			if (php_x509_fingerprint_cmp(peer, key, Z_STRVAL_PP(current) TSRMLS_CC) != 0) {
 				return 0;
 			}
 		}
+
 		return 1;
+
+	} else {
+		php_error_docref(NULL, E_WARNING,
+			"Invalid peer_fingerprint value; fingerprint string or array of the form [algo => fingerprint] required");
 	}
+
 	return 0;
 }
 
@@ -439,7 +452,7 @@ static int apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 		? zend_is_true(*val)
 		: sslsock->is_client;
 
-	must_verify_fingerprint = (GET_VER_OPT("peer_fingerprint") && zend_is_true(*val));
+	must_verify_fingerprint = GET_VER_OPT("peer_fingerprint");
 
 	if ((must_verify_peer || must_verify_peer_name || must_verify_fingerprint) && peer == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not get peer certificate");
@@ -474,7 +487,7 @@ static int apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 		if (Z_TYPE_PP(val) == IS_STRING || Z_TYPE_PP(val) == IS_ARRAY) {
 			if (!php_x509_fingerprint_match(peer, *val TSRMLS_CC)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,
-					"Peer fingerprint doesn't match"
+					"peer_fingerprint match failure"
 				);
 				return FAILURE;
 			}
@@ -482,6 +495,7 @@ static int apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				"Expected peer fingerprint must be a string or an array"
 			);
+			return FAILURE;
 		}
 	}
 
@@ -1894,7 +1908,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				break;
 
 				/* Otherwise, we need to wait again (up to time_left or we get an error) */
-				if (blocked)
+				if (blocked) {
 					if (read) {
 						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
 							(POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
@@ -1902,6 +1916,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
 							(POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);
 					}
+				}
 			}
 		/* Finally, we keep going until we got data, and an SSL_ERROR_NONE, unless we had an error. */
 		} while (retry);
