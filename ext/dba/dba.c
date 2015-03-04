@@ -868,7 +868,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					info->path = pestrndup(opened_path->val, opened_path->len, persistent);
 				}
 				/* now store the name of the lock */
-				info->lock.name = pestrdup(opened_path->val, opened_path->len, persistent);
+				info->lock.name = pestrndup(opened_path->val, opened_path->len, persistent);
 				zend_string_release(opened_path);
 			}
 		}
