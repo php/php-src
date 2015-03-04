@@ -635,53 +635,55 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 }
 /* }}} */
 
-static zend_bool do_inherit_property_access_check(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
+static void do_inherit_property(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
 {
-	zend_property_info *child_info;
+	zend_property_info *child_info = zend_hash_find_ptr(&ce->properties_info, key);
 	zend_class_entry *parent_ce = ce->parent;
 
-	if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW)) {
-		if ((child_info = zend_hash_find_ptr(&ce->properties_info, key)) != NULL) {
+	if (UNEXPECTED(child_info)) {
+		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW)) {
 			child_info->flags |= ZEND_ACC_CHANGED;
 		} else {
+			if ((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s%s::$%s as %s%s::$%s",
+					(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", parent_ce->name->val, key->val,
+					(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ce->name->val, key->val);
+			}
+
+			if (parent_info->flags & ZEND_ACC_CHANGED) {
+				child_info->flags |= ZEND_ACC_CHANGED;
+			}
+
+			if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name->val, key->val, zend_visibility_string(parent_info->flags), parent_ce->name->val, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+			} else if ((child_info->flags & ZEND_ACC_STATIC) == 0) {
+				int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
+				int child_num = OBJ_PROP_TO_NUM(child_info->offset);
+
+				zval_ptr_dtor(&(ce->default_properties_table[parent_num]));
+				ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
+				ZVAL_UNDEF(&ce->default_properties_table[child_num]);
+				child_info->offset = parent_info->offset;
+			}
+		}
+	} else {
+		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW)) {
 			if(ce->type & ZEND_INTERNAL_CLASS) {
 				child_info = zend_duplicate_property_info_internal(parent_info);
 			} else {
 				child_info = zend_duplicate_property_info(parent_info);
 			}
-			zend_hash_update_ptr(&ce->properties_info, key, child_info);
 			child_info->flags &= ~ZEND_ACC_PRIVATE; /* it's not private anymore */
 			child_info->flags |= ZEND_ACC_SHADOW; /* but it's a shadow of private */
+		} else {
+			if (ce->type & ZEND_INTERNAL_CLASS) {
+				child_info = zend_duplicate_property_info_internal(parent_info);
+			} else {
+				child_info = parent_info;
+			}
 		}
-		return 0; /* don't copy access information to child */
-	}
-
-	if ((child_info = zend_hash_find_ptr(&ce->properties_info, key)) != NULL) {
-		if ((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s%s::$%s as %s%s::$%s",
-				(parent_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", parent_ce->name->val, key->val,
-				(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ce->name->val, key->val);
-
-		}
-
-		if(parent_info->flags & ZEND_ACC_CHANGED) {
-			child_info->flags |= ZEND_ACC_CHANGED;
-		}
-
-		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name->val, key->val, zend_visibility_string(parent_info->flags), parent_ce->name->val, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
-		} else if ((child_info->flags & ZEND_ACC_STATIC) == 0) {
-			int parent_num = OBJ_PROP_TO_NUM(parent_info->offset);
-			int child_num = OBJ_PROP_TO_NUM(child_info->offset);
-
-			zval_ptr_dtor(&(ce->default_properties_table[parent_num]));
-			ce->default_properties_table[parent_num] = ce->default_properties_table[child_num];
-			ZVAL_UNDEF(&ce->default_properties_table[child_num]);
-			child_info->offset = parent_info->offset;
-		}
-		return 0;	/* Don't copy from parent */
-	} else {
-		return 1;	/* Copy from parent */
+		zend_string_addref(key);
+		_zend_hash_append_ptr(&ce->properties_info, key, child_info);
 	}
 }
 /* }}} */
@@ -886,15 +888,12 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 	} ZEND_HASH_FOREACH_END();
 
+	zend_hash_extend(&ce->properties_info,
+		zend_hash_num_elements(&ce->properties_info) +
+		zend_hash_num_elements(&parent_ce->properties_info), 0);
+
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&parent_ce->properties_info, key, property_info) {
-		if (do_inherit_property_access_check(property_info, key, ce)) {
-			if (ce->type & ZEND_INTERNAL_CLASS) {
-				property_info = zend_duplicate_property_info_internal(property_info);
-			} else {
-				property_info = zend_duplicate_property_info(property_info);
-			}
-			zend_hash_add_new_ptr(&ce->properties_info, key, property_info);
-		}
+		do_inherit_property(property_info, key, ce);
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(&parent_ce->constants_table, key, zv) {
@@ -1485,6 +1484,10 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 			/* next: check for conflicts with current class */
 			if ((coliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {
 				if (coliding_prop->flags & ZEND_ACC_SHADOW) {
+					zend_string_release(coliding_prop->name);
+					if (coliding_prop->doc_comment) {
+						zend_string_release(coliding_prop->doc_comment);
+                    }
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
 				} else {

@@ -158,16 +158,6 @@ void zend_accel_copy_internal_functions(void)
 	ZCG(internal_functions_count) = zend_hash_num_elements(&ZCG(function_table));
 }
 
-static void zend_destroy_property_info(zval *zv)
-{
-	zend_property_info *property_info = Z_PTR_P(zv);
-
-	zend_string_release(property_info->name);
-	if (property_info->doc_comment) {
-		zend_string_release(property_info->doc_comment);
-	}
-}
-
 static zend_always_inline zend_string *zend_clone_str(zend_string *str)
 {
 	zend_string *ret;
@@ -420,7 +410,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	}
 }
 
-static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_class_entry *old_ce, zend_class_entry *ce)
+static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_class_entry *old_ce)
 {
 	uint idx;
 	Bucket *p, *q;
@@ -432,7 +422,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
-	ht->pDestructor = zend_destroy_property_info;
+	ht->pDestructor = NULL;
 	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
 	ht->nInternalPointer = source->nNumOfElements ? 0 : INVALID_IDX;
 
@@ -463,19 +453,24 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		q->key = zend_clone_str(p->key);
 
 		/* Copy data */
-		ZVAL_PTR(&q->val, ARENA_REALLOC(Z_PTR(p->val)));
-		prop_info = Z_PTR(q->val);
+		prop_info = ARENA_REALLOC(Z_PTR(p->val));
+		ZVAL_PTR(&q->val, prop_info);
 
-		/* Copy constructor */
-		prop_info->name = zend_clone_str(prop_info->name);
-		if (prop_info->doc_comment) {
-			if (ZCG(accel_directives).load_comments) {
-				prop_info->doc_comment = zend_string_dup(prop_info->doc_comment, 0);
-			} else {
-				prop_info->doc_comment = NULL;
+		if (prop_info->ce == old_ce || (prop_info->flags & ZEND_ACC_SHADOW)) {
+			/* Copy constructor */
+			prop_info->name = zend_clone_str(prop_info->name);
+			if (prop_info->doc_comment) {
+				if (ZCG(accel_directives).load_comments) {
+					prop_info->doc_comment = zend_string_dup(prop_info->doc_comment, 0);
+				} else {
+					prop_info->doc_comment = NULL;
+				}
 			}
+			prop_info->ce = ARENA_REALLOC(prop_info->ce);
+		} else if ((void*)prop_info->ce >= ZCG(current_persistent_script)->arena_mem &&
+		           (void*)prop_info->ce < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
+			prop_info->ce = ARENA_REALLOC(prop_info->ce);
 		}
-		prop_info->ce = ARENA_REALLOC(prop_info->ce);
 	}
 }
 
@@ -520,7 +515,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	ce->static_members_table = ce->default_static_members_table;
 
 	/* properties_info */
-	zend_hash_clone_prop_info(&ce->properties_info, &old_ce->properties_info, old_ce, ce);
+	zend_hash_clone_prop_info(&ce->properties_info, &old_ce->properties_info, old_ce);
 
 	/* constants table */
 	zend_hash_clone_zval(&ce->constants_table, &old_ce->constants_table, 1);
