@@ -38,6 +38,8 @@
   . Fixed bug #68912 (Segmentation fault at openssl_spki_new). (Laruence)
   . Fixed bug #61285, #68329, #68046, #41631 (encrypted streams don't observe
     socket timeouts). (Brad Broerman)
+  . Fixed bug #68920 (use strict peer_fingerprint input checks)
+    (Daniel Lowrey)
 
 - pgsql:
   . Fixed bug #68638 (pg_update() fails to store infinite values).

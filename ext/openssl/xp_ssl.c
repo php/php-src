@@ -299,15 +299,26 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val)
 		zval *current;
 		zend_string *key;
 
+		if (!zend_hash_num_elements(Z_ARRVAL_P(val))) {
+			php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
+			return 0;
+		}
+
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), key, current) {
-			if (key && Z_TYPE_P(current) == IS_STRING
-				&& php_x509_fingerprint_cmp(peer, key->val, Z_STRVAL_P(current)) != 0
-			) {
+			if (key == NULL || Z_TYPE_P(current) != IS_STRING) {
+				php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
+				return 0;
+			}
+			if (php_x509_fingerprint_cmp(peer, key->val, Z_STRVAL_P(current)) != 0) {
 				return 0;
 			}
 		} ZEND_HASH_FOREACH_END();
+
 		return 1;
+	} else {
+		php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint value; fingerprint string or array of the form [algo => fingerprint] required");
 	}
+
 	return 0;
 }
 
@@ -428,7 +439,7 @@ static int apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 		? zend_is_true(val)
 		: sslsock->is_client;
 
-	must_verify_fingerprint = (GET_VER_OPT("peer_fingerprint") && zend_is_true(val));
+	must_verify_fingerprint = GET_VER_OPT("peer_fingerprint");
 
 	if ((must_verify_peer || must_verify_peer_name || must_verify_fingerprint) && peer == NULL) {
 		php_error_docref(NULL, E_WARNING, "Could not get peer certificate");
@@ -463,7 +474,7 @@ static int apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 		if (Z_TYPE_P(val) == IS_STRING || Z_TYPE_P(val) == IS_ARRAY) {
 			if (!php_x509_fingerprint_match(peer, val)) {
 				php_error_docref(NULL, E_WARNING,
-					"Peer fingerprint doesn't match"
+					"peer_fingerprint match failure"
 				);
 				return FAILURE;
 			}
@@ -471,6 +482,7 @@ static int apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 			php_error_docref(NULL, E_WARNING,
 				"Expected peer fingerprint must be a string or an array"
 			);
+			return FAILURE;
 		}
 	}
 
