@@ -25,6 +25,8 @@
   . Fixed bug #68964 (Allowed memory size exhausted with odbc_exec). (Anatol)
 
 - Opcache:
+  . Fixed bug #69159 (Opcache causes problem when passing a variable variable 
+    to a function). (Dmitry, Laruence)
   . Fixed bug #69125 (Array numeric string as key). (Laruence)
   . Fixed bug #69038 (switch(SOMECONSTANT) misbehaves). (Laruence)
 
