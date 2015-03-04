@@ -269,6 +269,10 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 		*opened_path = zend_string_init(path_copy, strlen(path_copy), 0);
 	}
 
+#ifdef VIRTUAL_DIR
+		efree(path_copy);
+#endif
+
 	if (bz_file == NULL) {
 		/* that didn't work, so try and get something from the network/wrapper */
 		stream = php_stream_open_wrapper(path, mode, options | STREAM_WILL_CAST, opened_path);
