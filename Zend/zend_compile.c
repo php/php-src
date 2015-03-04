@@ -3003,7 +3003,7 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 		zend_bool runtime_resolution = zend_compile_function_name(&name_node, name_ast);
 		if (runtime_resolution) {
 			if (zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "assert")) {
-				zend_compile_assert(result, args_ast, Z_STR(name_node.u.constant), NULL);
+				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL);
 			} else {
 				zend_compile_ns_call(result, &name_node, args_ast);
 			}
