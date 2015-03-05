@@ -4211,6 +4211,7 @@ static void zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *trait
 static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	size_t i, j = 0;
+	zend_trait_precedence **precedences;
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
 	char *lcname;
@@ -4219,7 +4220,9 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 	/* resolve class references */
 	if (ce->trait_precedences) {
 		i = 0;
-		while ((cur_precedence = ce->trait_precedences[i])) {
+		precedences = ce->trait_precedences;
+		ce->trait_precedences = NULL;
+		while ((cur_precedence = precedences[i])) {
 			/** Resolve classes for all precedence operations. */
 			if (cur_precedence->exclude_from_classes) {
 				cur_method_ref = cur_precedence->trait_method;
@@ -4276,6 +4279,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 			}
 			i++;
 		}
+		ce->trait_precedences = precedences;
 	}
 
 	if (ce->trait_aliases) {
