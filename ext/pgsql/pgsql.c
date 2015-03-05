@@ -5745,9 +5745,6 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 	pcre_free(re);
 
 	if (res == PCRE_ERROR_NOMATCH) {
-#ifdef PHP_DEBUG
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "'%s' does not match with '%s'", str, regex);
-#endif
 		return FAILURE;
 	} else if (res) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot exec regex");
