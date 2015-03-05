@@ -629,7 +629,7 @@ mprint(struct magic_set *ms, struct magic *m)
 		char *cp;
 		int rval;
 
-		cp = zend_strndup((const char *)ms->search.s, ms->search.rm_len);
+		cp = estrndup((const char *)ms->search.s, ms->search.rm_len);
 		if (cp == NULL) {
 			file_oomem(ms, ms->search.rm_len);
 			return -1;
@@ -1642,7 +1642,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 		break;
 
 	case FILE_REGEX:
-		if (nbytes < offset)
+		if (OFFSET_OOB(nbytes, offset, 0))
 			return 0;
 		break;
 
@@ -1651,8 +1651,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 			offset += CAST(uint32_t, o);
 		if (offset == 0)
 			return 0;
-
-		if (nbytes < offset)
+		if (OFFSET_OOB(nbytes, offset, 0))
 			return 0;
 
 		if ((pb = file_push_buffer(ms)) == NULL)
@@ -1683,7 +1682,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 		return rv;
 
 	case FILE_USE:
-		if (nbytes < offset)
+		if (OFFSET_OOB(nbytes, offset, 0))
 			return 0;
 		rbuf = m->value.s;
 		if (*rbuf == '^') {
@@ -1907,6 +1906,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			break;
 
 		default:
+			matched = 0;
 			file_magerror(ms, "cannot happen with float: invalid relation `%c'",
 			    m->reln);
 			return -1;
@@ -1940,6 +1940,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			break;
 
 		default:
+			matched = 0;
 			file_magerror(ms, "cannot happen with double: invalid relation `%c'", m->reln);
 			return -1;
 		}
@@ -2188,6 +2189,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		break;
 
 	default:
+		matched = 0;
 		file_magerror(ms, "cannot happen: invalid relation `%c'",
 		    m->reln);
 		return -1;
