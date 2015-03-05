@@ -300,14 +300,14 @@ splitted:
 
 		if (*test == '/') {
 			if (zend_hash_str_exists(&(phar->manifest), test + 1, try_len - 1)) {
-				ret = zend_strpprintf(0, "phar://%s%s", arch, test);
+				ret = strpprintf(0, "phar://%s%s", arch, test);
 				efree(arch);
 				efree(test);
 				return ret;
 			}
 		} else {
 			if (zend_hash_str_exists(&(phar->manifest), test, try_len)) {
-				ret = zend_strpprintf(0, "phar://%s/%s", arch, test);
+				ret = strpprintf(0, "phar://%s/%s", arch, test);
 				efree(arch);
 				efree(test);
 				return ret;

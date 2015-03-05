@@ -231,7 +231,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			}
 		}
 		if (opened_path) {
-			*opened_path = zend_strpprintf(MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
+			*opened_path = strpprintf(MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
 		}
 		return fpf;
 	} else {
@@ -249,7 +249,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				}
 				efree(internal_file);
 				if (opened_path) {
-					*opened_path = zend_strpprintf(MAXPATHLEN, "%s", phar->fname);
+					*opened_path = strpprintf(MAXPATHLEN, "%s", phar->fname);
 				}
 				php_url_free(resource);
 				goto phar_stub;
@@ -275,7 +275,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				++(entry->fp_refcount);
 				php_url_free(resource);
 				if (opened_path) {
-					*opened_path = zend_strpprintf(MAXPATHLEN, "%s", phar->fname);
+					*opened_path = strpprintf(MAXPATHLEN, "%s", phar->fname);
 				}
 				efree(internal_file);
 				goto phar_stub;
@@ -332,7 +332,7 @@ idata_error:
 		}
 	}
 	if (opened_path) {
-		*opened_path = zend_strpprintf(MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
+		*opened_path = strpprintf(MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
 	}
 	efree(internal_file);
 phar_stub:
