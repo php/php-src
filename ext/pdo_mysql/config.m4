@@ -13,6 +13,18 @@ if test -z "$PHP_ZLIB_DIR"; then
 fi
 
 if test "$PHP_PDO_MYSQL" != "no"; then
+  dnl This depends on ext/mysqli/config.m4 providing the
+  dnl PHP_MYSQL_SOCKET_SEARCH macro and --with-mysql-sock configure option.
+  AC_MSG_CHECKING([for MySQL UNIX socket location])
+  if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
+    MYSQL_SOCK=$PHP_MYSQL_SOCK
+    AC_DEFINE_UNQUOTED(PHP_MYSQL_UNIX_SOCK_ADDR, "$MYSQL_SOCK", [ ])
+    AC_MSG_RESULT([$MYSQL_SOCK])
+  elif test "$PHP_MYSQL_SOCK" = "yes"; then
+    PHP_MYSQL_SOCKET_SEARCH
+  else
+    AC_MSG_RESULT([no])
+  fi
 
   if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
