@@ -307,7 +307,7 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
 		ulong key_index;
 
 		if (!zend_hash_num_elements(Z_ARRVAL_P(val))) {
-			php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
+			php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required" TSRMLS_CC);
 			return 0;
 		}
 
@@ -318,7 +318,7 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
 			int key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(val), &key, &key_len, &key_index, 0, &pos);
 
 			if (!(key_type == HASH_KEY_IS_STRING && Z_TYPE_PP(current) == IS_STRING)) {
-				php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required");
+				php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint array; [algo => fingerprint] form required" TSRMLS_CC);
 				return 0;
 			}
 			if (php_x509_fingerprint_cmp(peer, key, Z_STRVAL_PP(current) TSRMLS_CC) != 0) {
@@ -330,7 +330,7 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
 
 	} else {
 		php_error_docref(NULL, E_WARNING,
-			"Invalid peer_fingerprint value; fingerprint string or array of the form [algo => fingerprint] required");
+			"Invalid peer_fingerprint value; fingerprint string or array of the form [algo => fingerprint] required" TSRMLS_CC);
 	}
 
 	return 0;
