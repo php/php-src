@@ -446,6 +446,10 @@ Other
 8. Removed Extensions and SAPIs
 ========================================
 
+- ext/ereg
+- ext/mysql
+For more details see https://wiki.php.net/rfc/remove_deprecated_functionality_in_php7
+
 - sapi/aolserver
 - sapi/apache
 - sapi/apache_hooks
@@ -461,7 +465,6 @@ Other
 - sapi/tux
 - sapi/webjames
 - ext/mssql
-- ext/mysql
 - ext/sybase_ct
 For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 
@@ -469,6 +472,14 @@ For more details see https://wiki.php.net/rfc/removal_of_dead_sapis_and_exts
 9. Other Changes to Extensions
 ========================================
 
+- mbstring
+  . Removed constant 'MB_OVERLOAD_REGEX'
+
+- opcache
+  . Now uses PCRE for blacklist filtering
+
+- pgsql
+  . Now uses PCRE for column type detection
 
 ========================================
 10. New Global Constants
