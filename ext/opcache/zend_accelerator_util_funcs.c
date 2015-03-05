@@ -401,11 +401,15 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		ZVAL_PTR(&q->val, ARENA_REALLOC(Z_PTR(p->val)));
 		new_entry = (zend_op_array*)Z_PTR(q->val);
 
-		new_entry->scope = ARENA_REALLOC(new_entry->scope);
+		if ((void*)new_entry->scope >= ZCG(current_persistent_script)->arena_mem &&
+		    (void*)new_entry->scope < (void*)((char*)ZCG(current_persistent_script)->arena_mem + ZCG(current_persistent_script)->arena_size)) {
 
-		/* update prototype */
-		if (new_entry->prototype) {
-			new_entry->prototype = ARENA_REALLOC(new_entry->prototype);
+			new_entry->scope = ARENA_REALLOC(new_entry->scope);
+
+			/* update prototype */
+			if (new_entry->prototype) {
+				new_entry->prototype = ARENA_REALLOC(new_entry->prototype);
+			}
 		}
 	}
 }

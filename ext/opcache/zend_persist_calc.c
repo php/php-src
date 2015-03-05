@@ -247,8 +247,22 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 
 static void zend_persist_op_array_calc(zval *zv)
 {
-	ADD_ARENA_SIZE(sizeof(zend_op_array));
-	zend_persist_op_array_calc_ex(Z_PTR_P(zv));
+	zend_op_array *op_array = Z_PTR_P(zv);
+
+	if (op_array->type == ZEND_USER_FUNCTION/* &&
+	    (!op_array->refcount || *(op_array->refcount) > 1)*/) {
+		zend_op_array *old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
+		if (old_op_array) {
+			Z_PTR_P(zv) = old_op_array;
+		} else {
+			ADD_ARENA_SIZE(sizeof(zend_op_array));
+			zend_persist_op_array_calc_ex(Z_PTR_P(zv));
+			zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
+		}
+	} else {
+		ADD_ARENA_SIZE(sizeof(zend_op_array));
+		zend_persist_op_array_calc_ex(Z_PTR_P(zv));
+	}
 }
 
 static void zend_persist_property_info_calc(zval *zv)
