@@ -36,6 +36,8 @@
     socket timeouts). (Brad Broerman)
   . Fixed bug #68920 (use strict peer_fingerprint input checks)
     (Daniel Lowrey)
+  . Fixed bug #68879 (IP Address fields in subjectAltNames not used)
+    (Daniel Lowrey)
 
 - pgsql:
   . Fixed bug #68638 (pg_update() fails to store infinite values).

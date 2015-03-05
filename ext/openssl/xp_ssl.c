@@ -370,40 +370,51 @@ static zend_bool matches_wildcard_name(const char *subjectname, const char *cert
 }
 /* }}} */
 
-static zend_bool matches_san_list(X509 *peer, const char *subject_name TSRMLS_DC) /* {{{ */
+static zend_bool matches_san_list(X509 *peer, const char *subject_name) /* {{{ */
 {
-	int i, san_name_len;
-	zend_bool is_match = 0;
+	int i;
 	unsigned char *cert_name = NULL;
+	char ipbuffer[64];
 
 	GENERAL_NAMES *alt_names = X509_get_ext_d2i(peer, NID_subject_alt_name, 0, 0);
 	int alt_name_count = sk_GENERAL_NAME_num(alt_names);
 
 	for (i = 0; i < alt_name_count; i++) {
 		GENERAL_NAME *san = sk_GENERAL_NAME_value(alt_names, i);
-		if (san->type != GEN_DNS) {
-			/* we only care about DNS names */
-			continue;
-		}
 
-		san_name_len = ASN1_STRING_length(san->d.dNSName);
-		ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
+		if (san->type == GEN_DNS) {
+			ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
+			if (ASN1_STRING_length(san->d.dNSName) != strlen((const char*)cert_name)) {
+				OPENSSL_free(cert_name);
+				/* prevent null-byte poisoning*/
+				continue;
+			}
 
-		/* prevent null byte poisoning */
-		if (san_name_len != strlen((const char*)cert_name)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer SAN entry is malformed");
-		} else {
-			is_match = matches_wildcard_name(subject_name, (const char *)cert_name);
-		}
-
-		OPENSSL_free(cert_name);
-
-		if (is_match) {
-			break;
+			if (matches_wildcard_name(subject_name, (const char *)cert_name)) {
+				OPENSSL_free(cert_name);
+				return 1;
+			}
+			OPENSSL_free(cert_name);
+		} else if (san->type == GEN_IPADD) {
+			if (san->d.iPAddress->length == 4) {
+				sprintf(ipbuffer, "%d.%d.%d.%d",
+					san->d.iPAddress->data[0],
+					san->d.iPAddress->data[1],
+					san->d.iPAddress->data[2],
+					san->d.iPAddress->data[3]
+				);
+				if (strcasecmp(subject_name, (const char*)ipbuffer) == 0) {
+					return 1;
+				}
+			}
+			/* No, we aren't bothering to check IPv6 addresses. Why?
+			 * Because IP SAN names are officially deprecated and are
+			 * not allowed by CAs starting in 2015. Deal with it.
+			 */
 		}
 	}
 
-	return is_match;
+	return 0;
 }
 /* }}} */
 
@@ -515,7 +526,7 @@ static int apply_peer_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 		}
 
 		if (peer_name) {
-			if (matches_san_list(peer, peer_name TSRMLS_CC)) {
+			if (matches_san_list(peer, peer_name)) {
 				return SUCCESS;
 			} else if (matches_common_name(peer, peer_name TSRMLS_CC)) {
 				return SUCCESS;
