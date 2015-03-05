@@ -19,7 +19,7 @@ object(DateTime)#%d (3) {
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>
-  string(13) "America/New_York"
+  string(16) "America/New_York"
 }
 
 Warning: DateTime::createFromImmutable() expects parameter 1 to be DateTimeImmutable, object given in %stests%eDateTime_createFromImmutable.php on line %d
