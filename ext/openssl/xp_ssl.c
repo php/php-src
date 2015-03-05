@@ -372,7 +372,7 @@ static zend_bool matches_wildcard_name(const char *subjectname, const char *cert
 
 static zend_bool matches_san_list(X509 *peer, const char *subject_name) /* {{{ */
 {
-	int i;
+	int i, len;
 	unsigned char *cert_name = NULL;
 	char ipbuffer[64];
 
@@ -388,6 +388,12 @@ static zend_bool matches_san_list(X509 *peer, const char *subject_name) /* {{{ *
 				OPENSSL_free(cert_name);
 				/* prevent null-byte poisoning*/
 				continue;
+			}
+
+			/* accommodate valid FQDN entries ending in "." */
+			len = strlen((const char*)cert_name);
+			if (len && strcmp((const char *)&cert_name[len-1], ".") == 0) {
+				cert_name[len-1] = '\0';
 			}
 
 			if (matches_wildcard_name(subject_name, (const char *)cert_name)) {
