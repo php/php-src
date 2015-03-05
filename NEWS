@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 - Curl:
   . Implemented FR#69278 (HTTP2 support). (Masaki Kagaya)
 
+- Date:
+  . Added DateTime::createFromImmutable(). (Trevor Suarez)
+
 - Enchant:
   . Fixed bug #65406 (Enchant broker plugins are in the wrong place in windows
     builds). (Anatol)
