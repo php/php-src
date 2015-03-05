@@ -174,7 +174,6 @@ static zend_always_inline void zend_hash_realloc(HashTable *ht, size_t new_size)
 
 static void zend_hash_packed_grow(HashTable *ht)
 {
-	size_t new_size;
 	HT_ASSERT(GC_REFCOUNT(ht) == 1);
 	if (ht->nTableSize >= HT_MAX_SIZE) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", ht->nTableSize * 2, sizeof(Bucket), sizeof(Bucket));
