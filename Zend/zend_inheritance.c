@@ -89,8 +89,6 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 
 static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 {
-	zend_function *function, *new_function;
-
 	ZEND_ASSERT(ce->parent != NULL);
 
 	/* You cannot change create_object */
