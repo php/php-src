@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2015, PHP 5.5.23
 
 - Core:
+  . Fixed bug #69174 (leaks when unused inner class use traits precedence).
+    (Laruence)
   . Fixed bug #69139 (Crash in gc_zval_possible_root on unserialize).
     (Laruence)
   . Fixed bug #69121 (Segfault in get_current_user when script owner is not

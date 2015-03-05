@@ -4204,22 +4204,37 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	for (i = 0; i < ce->num_traits; i++) {
 		if (ce->trait_precedences) {
 			HashTable exclude_table;
+			zend_trait_precedence **precedences;
 
 			/* TODO: revisit this start size, may be its not optimal */
 			zend_hash_init_ex(&exclude_table, 2, NULL, NULL, 0, 0);
 
-			zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
+			precedences = ce->trait_precedences;
+			ce->trait_precedences = NULL;
+			zend_traits_compile_exclude_table(&exclude_table, precedences, ce->traits[i]);
 
 			/* copies functions, applies defined aliasing, and excludes unused trait methods */
 			zend_hash_apply_with_arguments(&ce->traits[i]->function_table TSRMLS_CC, (apply_func_args_t)zend_traits_copy_functions, 3, ce, &overriden, &exclude_table);
 
 			zend_hash_destroy(&exclude_table);
+			ce->trait_precedences = precedences;
 		} else {
 			zend_hash_apply_with_arguments(&ce->traits[i]->function_table TSRMLS_CC, (apply_func_args_t)zend_traits_copy_functions, 3, ce, &overriden, NULL);
 		}
 	}
 
     zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t)zend_fixup_trait_method, ce TSRMLS_CC);
+
+	if (ce->trait_precedences) {
+		i = 0;
+		while (ce->trait_precedences[i]) {
+			if (ce->trait_precedences[i]->exclude_from_classes) {
+				efree(ce->trait_precedences[i]->exclude_from_classes);
+				ce->trait_precedences[i]->exclude_from_classes = NULL;
+			}
+			i++;
+		}
+	}
 
 	if (overriden) {
 		zend_hash_destroy(overriden);
