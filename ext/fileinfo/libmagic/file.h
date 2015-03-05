@@ -430,6 +430,7 @@ protected int file_buffer(struct magic_set *, php_stream *, const char *, const 
     size_t);
 protected int file_fsmagic(struct magic_set *, const char *, zend_stat_t *, php_stream *);
 protected int file_pipe2file(struct magic_set *, int, const void *, size_t);
+protected size_t file_printedlen(const struct magic_set *);
 protected int file_replace(struct magic_set *, const char *, const char *);
 protected int file_printf(struct magic_set *, const char *, ...);
 protected int file_reset(struct magic_set *);
