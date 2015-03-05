@@ -42,7 +42,7 @@ Warning: assert_options() expects at most 2 parameters, 3 given in %s on line %d
 
 Warning: assert_options() expects parameter 1 to be integer, %unicode_string_optional% given in %s on line %d
 
-Warning: assert(): Assertion failed in %s on line %d
+Warning: assert(): assert(0) failed in %s on line %d
 
-Warning: assert(): Assertion failed in %s on line %d
+Warning: assert(): assert(0) failed in %s on line %d
 

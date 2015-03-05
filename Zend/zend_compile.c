@@ -72,17 +72,6 @@ ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
-static void zend_destroy_property_info(zval *zv) /* {{{ */
-{
-	zend_property_info *property_info = Z_PTR_P(zv);
-
-	zend_string_release(property_info->name);
-	if (property_info->doc_comment) {
-		zend_string_release(property_info->doc_comment);
-	}
-}
-/* }}} */
-
 static void zend_destroy_property_info_internal(zval *zv) /* {{{ */
 {
 	zend_property_info *property_info = Z_PTR_P(zv);
@@ -1415,7 +1404,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;
-	zend_hash_init_ex(&ce->properties_info, 8, NULL, (persistent_hashes ? zend_destroy_property_info_internal : zend_destroy_property_info), persistent_hashes, 0);
+	zend_hash_init_ex(&ce->properties_info, 8, NULL, (persistent_hashes ? zend_destroy_property_info_internal : NULL), persistent_hashes, 0);
 	zend_hash_init_ex(&ce->constants_table, 8, NULL, zval_ptr_dtor_func, persistent_hashes, 0);
 	zend_hash_init_ex(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 
@@ -2898,7 +2887,55 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 }
 /* }}} */
 
-int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args) /* {{{ */
+
+
+static int zend_compile_assert(znode *result, zend_ast_list *args, zend_string *name, zend_function *fbc) /* {{{ */
+{
+	if (EG(assertions) >= 0) {
+		znode name_node;
+		zend_op *opline;
+		uint32_t check_op_number = get_next_op_number(CG(active_op_array));
+
+		zend_emit_op(NULL, ZEND_ASSERT_CHECK, NULL, NULL);
+
+		if (fbc) {
+			name_node.op_type = IS_CONST;
+			ZVAL_STR_COPY(&name_node.u.constant, name);
+
+			opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
+		} else {
+			opline = zend_emit_op(NULL, ZEND_INIT_NS_FCALL_BY_NAME, NULL, NULL);
+			opline->op2_type = IS_CONST;
+			opline->op2.constant = zend_add_ns_func_name_literal(
+				CG(active_op_array), name);
+		}
+		zend_alloc_cache_slot(opline->op2.constant);
+
+		if (args->children == 1 &&
+		    (args->child[0]->kind != ZEND_AST_ZVAL ||
+		     Z_TYPE_P(zend_ast_get_zval(args->child[0])) != IS_STRING)) {
+			/* add "assert(condition) as assertion message */
+			zend_ast_list_add((zend_ast*)args,
+				zend_ast_create_zval_from_str(
+					zend_ast_export("assert(", args->child[0], ")")));
+		}
+
+		zend_compile_call_common(result, (zend_ast*)args, fbc);
+
+		CG(active_op_array)->opcodes[check_op_number].op2.opline_num = get_next_op_number(CG(active_op_array));
+	} else {
+		if (!fbc) {
+			zend_string_release(name);
+		}
+		result->op_type = IS_CONST;
+		ZVAL_TRUE(&result->u.constant);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc) /* {{{ */
 {
 	if (zend_string_equals_literal(lcname, "strlen")) {
 		return zend_compile_func_strlen(result, args);
@@ -2930,6 +2967,8 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_cufa(result, args, lcname);
 	} else if (zend_string_equals_literal(lcname, "call_user_func")) {
 		return zend_compile_func_cuf(result, args, lcname);
+	} else if (zend_string_equals_literal(lcname, "assert")) {
+		return zend_compile_assert(result, args, lcname, fbc);
 	} else {
 		return FAILURE;
 	}
@@ -2952,7 +2991,11 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 	{
 		zend_bool runtime_resolution = zend_compile_function_name(&name_node, name_ast);
 		if (runtime_resolution) {
-			zend_compile_ns_call(result, &name_node, args_ast);
+			if (zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "assert")) {
+				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL);
+			} else {
+				zend_compile_ns_call(result, &name_node, args_ast);
+			}
 			return;
 		}
 	}
@@ -2975,7 +3018,7 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 		}
 
 		if (zend_try_compile_special_func(result, lcname,
-				zend_ast_get_list(args_ast)) == SUCCESS
+				zend_ast_get_list(args_ast), fbc) == SUCCESS
 		) {
 			zend_string_release(lcname);
 			zval_ptr_dtor(&name_node.u.constant);
@@ -4481,17 +4524,17 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i;
 
+	if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
+		return;
+	}
+
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast *value_ast = const_ast->child[1];
 		zend_string *name = zend_ast_get_str(name_ast);
 		zval value_zv;
-
-		if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
-			return;
-		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast);
 

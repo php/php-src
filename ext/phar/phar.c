@@ -27,7 +27,7 @@
 static void destroy_phar_data(zval *zv);
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
-char *(*phar_save_resolve_path)(const char *filename, int filename_len);
+zend_string *(*phar_save_resolve_path)(const char *filename, int filename_len);
 
 /**
  * set's phar->is_writeable based on the current INI value
@@ -1322,7 +1322,8 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 {
 	phar_archive_data *mydata;
 	php_stream *fp;
-	char *actual = NULL, *p;
+	zend_string *actual = NULL;
+	char *p;
 
 	if (!pphar) {
 		pphar = &mydata;
@@ -1340,8 +1341,8 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	fp = php_stream_open_wrapper(fname, "rb", IGNORE_URL|STREAM_MUST_SEEK|0, &actual);
 
 	if (actual) {
-		fname = actual;
-		fname_len = strlen(actual);
+		fname = actual->val;
+		fname_len = actual->len;
 	}
 
 	if (fp) {
@@ -1350,20 +1351,20 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 				(*pphar)->is_writeable = 1;
 			}
 			if (actual) {
-				efree(actual);
+				zend_string_release(actual);
 			}
 			return SUCCESS;
 		} else {
 			/* file exists, but is either corrupt or not a phar archive */
 			if (actual) {
-				efree(actual);
+				zend_string_release(actual);
 			}
 			return FAILURE;
 		}
 	}
 
 	if (actual) {
-		efree(actual);
+		zend_string_release(actual);
 	}
 
 	if (PHAR_G(readonly) && !is_data) {
@@ -1475,7 +1476,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	php_stream *fp;
-	char *actual;
+	zend_string *actual;
 	int ret, is_data = 0;
 
 	if (error) {
@@ -1509,20 +1510,20 @@ int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_l
 			}
 		}
 		if (actual) {
-			efree(actual);
+			zend_string_release(actual);
 		}
 		return FAILURE;
 	}
 
 	if (actual) {
-		fname = actual;
-		fname_len = strlen(actual);
+		fname = actual->val;
+		fname_len = actual->len;
 	}
 
 	ret =  phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, is_data, error);
 
 	if (actual) {
-		efree(actual);
+		zend_string_release(actual);
 	}
 
 	return ret;
@@ -2252,7 +2253,7 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error) /* {{{
 	char *fname;
 	php_stream *fp;
 	int fname_len;
-	char *actual = NULL;
+	zend_string *actual = NULL;
 	int ret;
 
 	if (error) {
@@ -2298,20 +2299,20 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error) /* {{{
 			spprintf(error, 0, "unable to open phar for reading \"%s\"", fname);
 		}
 		if (actual) {
-			efree(actual);
+			zend_string_release(actual);
 		}
 		return FAILURE;
 	}
 
 	if (actual) {
-		fname = actual;
-		fname_len = strlen(actual);
+		fname = actual->val;
+		fname_len = actual->len;
 	}
 
 	ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, 0, error);
 
 	if (actual) {
-		efree(actual);
+		zend_string_release(actual);
 	}
 
 	return ret;
@@ -3254,7 +3255,7 @@ static size_t phar_zend_stream_fsizer(void *handle) /* {{{ */
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type);
 #define phar_orig_zend_open zend_stream_open_function
 
-static char *phar_resolve_path(const char *filename, int filename_len)
+static zend_string *phar_resolve_path(const char *filename, int filename_len)
 {
 	return phar_find_in_include_path((char *) filename, filename_len, NULL);
 }

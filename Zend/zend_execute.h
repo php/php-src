@@ -221,6 +221,7 @@ static zend_always_inline void zend_vm_stack_free_call_frame(zend_execute_data *
 ZEND_API const char *get_active_class_name(const char **space);
 ZEND_API const char *get_active_function_name(void);
 ZEND_API const char *zend_get_executed_filename(void);
+ZEND_API zend_string *zend_get_executed_filename_ex(void);
 ZEND_API uint zend_get_executed_lineno(void);
 ZEND_API zend_bool zend_is_executing(void);
 

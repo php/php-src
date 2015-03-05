@@ -627,7 +627,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *file_mode;
 	char mode[4], *pmode, *lock_file_mode = NULL;
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
-	char *opened_path = NULL;
+	zend_string *opened_path = NULL;
 	char *lock_name;
 
 	if (ac < 2) {
@@ -853,13 +853,9 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				/* when not in read mode or failed to open .lck file read only. now try again in create(write) mode and log errors */
 				lock_file_mode = "a+b";
 			} else {
-				if (!persistent) {
-					info->lock.name = opened_path;
-				} else {
-					if (opened_path) {
-						info->lock.name = pestrdup(opened_path, persistent);
-						efree(opened_path);
-					}
+				if (opened_path) {
+					info->lock.name = pestrndup(opened_path->val, opened_path->len, persistent);
+					zend_string_release(opened_path);
 				}
 			}
 		}
@@ -869,15 +865,11 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				if (lock_dbf) {
 					/* replace the path info with the real path of the opened file */
 					pefree(info->path, persistent);
-					info->path = pestrdup(opened_path, persistent);
+					info->path = pestrndup(opened_path->val, opened_path->len, persistent);
 				}
 				/* now store the name of the lock */
-				if (!persistent) {
-					info->lock.name = opened_path;
-				} else {
-					info->lock.name = pestrdup(opened_path, persistent);
-					efree(opened_path);
-				}
+				info->lock.name = pestrndup(opened_path->val, opened_path->len, persistent);
+				zend_string_release(opened_path);
 			}
 		}
 		if (!lock_dbf) {

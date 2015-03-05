@@ -193,7 +193,7 @@ typedef struct _zend_utility_functions {
 	void (*error_function)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
 	size_t (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 	size_t (*write_function)(const char *str, size_t str_length);
-	FILE *(*fopen_function)(const char *filename, char **opened_path);
+	FILE *(*fopen_function)(const char *filename, zend_string **opened_path);
 	void (*message_handler)(zend_long message, const void *data);
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
@@ -204,7 +204,7 @@ typedef struct _zend_utility_functions {
 	size_t (*vspprintf_function)(char **pbuf, size_t max_len, const char *format, va_list ap);
 	zend_string *(*vstrpprintf_function)(size_t max_len, const char *format, va_list ap);
 	char *(*getenv_function)(char *name, size_t name_len);
-	char *(*resolve_path_function)(const char *filename, int filename_len);
+	zend_string *(*resolve_path_function)(const char *filename, int filename_len);
 } zend_utility_functions;
 
 typedef struct _zend_utility_values {
@@ -272,7 +272,7 @@ END_EXTERN_C()
 BEGIN_EXTERN_C()
 extern ZEND_API size_t (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 extern ZEND_API zend_write_func_t zend_write;
-extern ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
+extern ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_path);
 extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
@@ -282,7 +282,7 @@ extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file
 extern size_t (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 extern zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
-extern ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len);
+extern ZEND_API zend_string *(*zend_resolve_path)(const char *filename, int filename_len);
 
 ZEND_API void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 

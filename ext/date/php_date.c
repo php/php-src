@@ -827,13 +827,6 @@ PHP_RSHUTDOWN_FUNCTION(date)
  */
 #define DATE_FORMAT_COOKIE   "l, d-M-Y H:i:s T"
 
-#define DATE_TZ_ERRMSG \
-	"It is not safe to rely on the system's timezone settings. You are " \
-	"*required* to use the date.timezone setting or the " \
-	"date_default_timezone_set() function. In case you used any of those " \
-	"methods and you are still getting this warning, you most likely " \
-	"misspelled the timezone identifier. "
-
 #define SUNFUNCS_RET_TIMESTAMP 0
 #define SUNFUNCS_RET_STRING    1
 #define SUNFUNCS_RET_DOUBLE    2
@@ -954,7 +947,9 @@ static PHP_INI_MH(OnUpdate_date_timezone)
 	DATEG(timezone_valid) = 0;
 	if (stage == PHP_INI_STAGE_RUNTIME) {
 		if (!timelib_timezone_id_is_valid(DATEG(default_timezone), DATE_TIMEZONEDB)) {
-			php_error_docref(NULL, E_WARNING, DATE_TZ_ERRMSG);
+			if (DATEG(default_timezone) && *DATEG(default_timezone)) {
+				php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s', we selected the timezone 'UTC' for now.", DATEG(default_timezone));
+			}
 		} else {
 			DATEG(timezone_valid) = 1;
 		}
@@ -994,7 +989,6 @@ static char* guess_timezone(const timelib_tzdb *tzdb)
 		return DATEG(default_timezone);
 	}
 	/* Fallback to UTC */
-	php_error_docref(NULL, E_WARNING, DATE_TZ_ERRMSG "We selected the timezone 'UTC' for now, but please set date.timezone to select your timezone.");
 	return "UTC";
 }
 

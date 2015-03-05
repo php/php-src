@@ -171,6 +171,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 			case ZEND_NEW:
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
+			case ZEND_ASSERT_CHECK:
 				START_BLOCK_OP(ZEND_OP2(opline).opline_num);
 				START_BLOCK_OP(opno + 1);
 				break;
@@ -306,6 +307,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg, zend_optimiz
 				case ZEND_COALESCE:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
+				case ZEND_ASSERT_CHECK:
 					cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
 					/* break missing intentionally */
 				default:

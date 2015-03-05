@@ -1419,6 +1419,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_setcookie, 0, 0, 1)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, domain)
 	ZEND_ARG_INFO(0, secure)
+	ZEND_ARG_INFO(0, httponly)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_setrawcookie, 0, 0, 1)
@@ -1428,6 +1429,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_setrawcookie, 0, 0, 1)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, domain)
 	ZEND_ARG_INFO(0, secure)
+	ZEND_ARG_INFO(0, httponly)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_headers_sent, 0, 0, 0)
@@ -1533,12 +1535,14 @@ ZEND_BEGIN_ARG_INFO(arginfo_iptcparse, 0)
 	ZEND_ARG_INFO(0, iptcdata)
 ZEND_END_ARG_INFO()
 /* }}} */
+
 /* {{{ lcg.c */
 ZEND_BEGIN_ARG_INFO(arginfo_lcg_value, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
+
 /* {{{ levenshtein.c */
-ZEND_BEGIN_ARG_INFO(arginfo_levenshtein, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_levenshtein, 0, 0, 2)
 	ZEND_ARG_INFO(0, str1)
 	ZEND_ARG_INFO(0, str2)
 	ZEND_ARG_INFO(0, cost_ins)
@@ -2097,6 +2101,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_enable_crypto, 0, 0, 2)
 	ZEND_ARG_INFO(0, enable)
 	ZEND_ARG_INFO(0, cryptokind)
 	ZEND_ARG_INFO(0, sessionstream)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_stream_socket_crypto_info, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_INFO(0, infotype)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_SHUTDOWN
@@ -3082,6 +3091,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_socket_recvfrom,											arginfo_stream_socket_recvfrom)
 	PHP_FE(stream_socket_sendto,											arginfo_stream_socket_sendto)
 	PHP_FE(stream_socket_enable_crypto,										arginfo_stream_socket_enable_crypto)
+	PHP_FE(stream_socket_crypto_info,										arginfo_stream_socket_crypto_info)
 #ifdef HAVE_SHUTDOWN
 	PHP_FE(stream_socket_shutdown,											arginfo_stream_socket_shutdown)
 #endif
@@ -4380,6 +4390,10 @@ PHP_FUNCTION(getopt)
    Flush the output buffer */
 PHP_FUNCTION(flush)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	sapi_flush();
 }
 /* }}} */
