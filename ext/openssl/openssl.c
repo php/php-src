@@ -1552,7 +1552,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	sig_nid = OBJ_obj2nid((cert)->sig_alg->algorithm);
 	add_assoc_string(return_value, "signatureTypeSN", (char*)OBJ_nid2sn(sig_nid), 1);
 	add_assoc_string(return_value, "signatureTypeLN", (char*)OBJ_nid2ln(sig_nid), 1);
-	add_assoc_long(return_value, "signatureTypeNID", sig_nid TSRMLS_CC);
+	add_assoc_long(return_value, "signatureTypeNID", sig_nid);
 
 	MAKE_STD_ZVAL(subitem);
 	array_init(subitem);
