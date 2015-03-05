@@ -275,7 +275,7 @@ static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *
 	int result = -1;
 
 	if (php_openssl_x509_fingerprint(peer, method, 0, &fingerprint, &fingerprint_len TSRMLS_CC) == SUCCESS) {
-		result = strcmp(expected, fingerprint);
+		result = strcasecmp(expected, fingerprint);
 		efree(fingerprint);
 	}
 
