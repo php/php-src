@@ -357,7 +357,8 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val)
 
 		return 1;
 	} else {
-		php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint value; fingerprint string or array of the form [algo => fingerprint] required");
+		php_error_docref(NULL, E_WARNING,
+			"Invalid peer_fingerprint value; fingerprint string or array of the form [algo => fingerprint] required");
 	}
 
 	return 0;
