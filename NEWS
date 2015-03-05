@@ -41,6 +41,7 @@
   . Fixed bug #68879 (IP Address fields in subjectAltNames not used)
     (Daniel Lowrey)
   . Fixed bug #68265 (SAN match fails with trailing DNS dot) (Daniel Lowrey)
+  . Fixed bug #67403 (Add signatureType to openssl_x509_parse) (Daniel Lowrey)
 
 - pgsql:
   . Fixed bug #68638 (pg_update() fails to store infinite values).
