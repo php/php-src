@@ -629,7 +629,7 @@ mprint(struct magic_set *ms, struct magic *m)
 		char *cp;
 		int rval;
 
-		cp = strndup((const char *)ms->search.s, ms->search.rm_len);
+		cp = zend_strndup((const char *)ms->search.s, ms->search.rm_len);
 		if (cp == NULL) {
 			file_oomem(ms, ms->search.rm_len);
 			return -1;
