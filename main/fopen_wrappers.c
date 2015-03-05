@@ -493,6 +493,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 	const char *ptr, *end, *p;
 	const char *actual_path;
 	php_stream_wrapper *wrapper;
+	zend_string *exec_filename;
 
 	if (!filename || CHECK_NULL_PATH(filename, filename_length)) {
 		return NULL;
@@ -580,13 +581,13 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 
 	/* check in calling scripts' current working directory as a fall back case
 	 */
-	if (zend_is_executing()) {
-		const char *exec_fname = zend_get_executed_filename();
-		int exec_fname_length = (int)strlen(exec_fname);
+	if (zend_is_executing() &&
+	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
+		const char *exec_fname = exec_filename->val;
+		size_t exec_fname_length = exec_filename->len;
 
 		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
-		if (exec_fname && exec_fname[0] != '[' &&
-		    exec_fname_length > 0 &&
+		if (exec_fname_length > 0 &&
 		    exec_fname_length + 1 + filename_length + 1 < MAXPATHLEN) {
 			memcpy(trypath, exec_fname, exec_fname_length + 1);
 			memcpy(trypath+exec_fname_length + 1, filename, filename_length+1);
@@ -627,12 +628,10 @@ PHPAPI zend_string *php_resolve_path(const char *filename, int filename_length, 
 PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const char *path, zend_string **opened_path)
 {
 	char *pathbuf, *ptr, *end;
-	const char *exec_fname;
 	char trypath[MAXPATHLEN];
 	FILE *fp;
-	int path_length;
 	int filename_length;
-	int exec_fname_length;
+	zend_string *exec_filename;
 
 	if (opened_path) {
 		*opened_path = NULL;
@@ -660,16 +659,18 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 	/* append the calling scripts' current working directory
 	 * as a fall back case
 	 */
-	if (zend_is_executing()) {
-		exec_fname = zend_get_executed_filename();
-		exec_fname_length = (int)strlen(exec_fname);
-		path_length = (int)strlen(path);
+	if (zend_is_executing() &&
+	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
+		const char *exec_fname = exec_filename->val;
+		size_t exec_fname_length = exec_filename->len;
 
 		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
 		if ((exec_fname && exec_fname[0] == '[') || exec_fname_length <= 0) {
 			/* [no active file] or no path */
 			pathbuf = estrdup(path);
 		} else {
+			size_t path_length = strlen(path);
+
 			pathbuf = (char *) emalloc(exec_fname_length + path_length + 1 + 1);
 			memcpy(pathbuf, path, path_length);
 			pathbuf[path_length] = DEFAULT_DIR_SEPARATOR;

@@ -927,8 +927,8 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
         !is_stream_path(file_handle->filename)) {
         char *include_path = NULL;
         int include_path_len = 0;
-        const char *parent_script = NULL;
-        int parent_script_len = 0;
+        zend_string *parent_script = NULL;
+        size_t parent_script_len = 0;
         int cur_len = 0;
         int cwd_len;
         char *cwd;
@@ -990,11 +990,10 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
            in include path too.
         */
         if (EG(current_execute_data) &&
-            (parent_script = zend_get_executed_filename()) != NULL &&
-	        parent_script[0] != '[') {
+            (parent_script = zend_get_executed_filename_ex()) != NULL) {
 
-            parent_script_len = strlen(parent_script);
-            while ((--parent_script_len > 0) && !IS_SLASH(parent_script[parent_script_len]));
+            parent_script_len = parent_script->len;
+            while ((--parent_script_len > 0) && !IS_SLASH(parent_script->val[parent_script_len]));
         }
 
         /* Calculate key length */
@@ -1022,7 +1021,7 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
         cur_len = cwd_len + 1 + path_length + 1;
 
         if (parent_script_len) {
-			memcpy(ZCG(key) + cur_len, parent_script, parent_script_len);
+			memcpy(ZCG(key) + cur_len, parent_script->val, parent_script_len);
             cur_len += parent_script_len;
 			ZCG(key)[cur_len] = ':';
             cur_len++;

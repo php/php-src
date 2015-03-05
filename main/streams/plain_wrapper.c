@@ -1390,12 +1390,10 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 	/* code ripped off from fopen_wrappers.c */
 	char *pathbuf, *end;
 	const char *ptr;
-	const char *exec_fname;
 	char trypath[MAXPATHLEN];
 	php_stream *stream;
-	int path_length;
 	int filename_length;
-	int exec_fname_length;
+	zend_string *exec_filename;
 
 	if (opened_path) {
 		*opened_path = NULL;
@@ -1471,17 +1469,18 @@ not_relative_path:
 	/* append the calling scripts' current working directory
 	 * as a fall back case
 	 */
-	if (zend_is_executing()) {
-		exec_fname = zend_get_executed_filename();
-		exec_fname_length = (int)strlen(exec_fname);
-		path_length = (int)strlen(path);
+	if (zend_is_executing() &&
+	    (exec_filename = zend_get_executed_filename_ex()) != NULL) {
+		const char *exec_fname = exec_filename->val;
+		size_t exec_fname_length = exec_filename->len;
 
 		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
-		if ((exec_fname && exec_fname[0] == '[')
-				|| exec_fname_length<=0) {
-			/* [no active file] or no path */
+		if (exec_fname_length<=0) {
+			/* no path */
 			pathbuf = estrdup(path);
 		} else {
+			size_t path_length = strlen(path);
+
 			pathbuf = (char *) emalloc(exec_fname_length + path_length +1 +1);
 			memcpy(pathbuf, path, path_length);
 			pathbuf[path_length] = DEFAULT_DIR_SEPARATOR;
