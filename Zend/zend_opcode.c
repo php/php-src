@@ -256,9 +256,14 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 			efree(ce->trait_precedences[i]->trait_method);
 
 			if (ce->trait_precedences[i]->exclude_from_classes) {
+				zend_uint j = 0;
+				zend_trait_precedence *cur_precedence = ce->trait_precedences[i];
+				while (cur_precedence->exclude_from_classes[j]) {
+					efree(cur_precedence->exclude_from_classes[j]);
+					j++;
+				}
 				efree(ce->trait_precedences[i]->exclude_from_classes);
 			}
-
 			efree(ce->trait_precedences[i]);
 			i++;
 		}
