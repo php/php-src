@@ -2,10 +2,10 @@
 non-existent imported constants should not be looked up in the global table
 --FILE--
 <?php
+use const foo\bar\baz;
 
 require 'includes/global_baz.php';
 
-use const foo\bar\baz;
 var_dump(baz);
 
 ?>

@@ -4,9 +4,9 @@ using const with same name as defined should fail
 <?php
 
 namespace {
+    use const foo\bar;
     const bar = 42;
 
-    use const foo\bar;
 }
 
 namespace {
@@ -15,4 +15,4 @@ namespace {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use const foo\bar as bar because the name is already in use in %s on line %d
+Fatal error: Cannot declare const bar because the name is already in use in %s on line %d

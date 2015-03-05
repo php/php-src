@@ -3,9 +3,9 @@ shadowing a global core function with a local version
 --FILE--
 <?php
 
-require 'includes/foo_strlen.php';
-
 use function foo\strlen;
+
+require 'includes/foo_strlen.php';
 
 var_dump(strlen('foo bar baz'));
 echo "Done\n";
