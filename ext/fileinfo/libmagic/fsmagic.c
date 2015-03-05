@@ -107,6 +107,16 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 	}
 
 #define COMMA	(did++ ? ", " : "")
+	/*
+	 * Fstat is cheaper but fails for files you don't have read perms on.
+	 * On 4.2BSD and similar systems, use lstat() to identify symlinks.
+	 */
+#ifdef	S_IFLNK
+	if ((ms->flags & MAGIC_SYMLINK) == 0)
+		ret = lstat(fn, sb);
+	else
+#endif
+	ret = stat(fn, sb);	/* don't merge into if; see "ret =" above */
 
 	if (stream) {
 		php_stream_statbuf ssb;
