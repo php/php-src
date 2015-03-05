@@ -1,6 +1,8 @@
 ﻿PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Feb 2015, PHP 5.6.7
+?? Apr 2015, PHP 5.6.8
+
+19 Mar 2015, PHP 5.6.7
 
 - Core:
   . Fixed bug #69174 (leaks when unused inner class use traits precedence).
