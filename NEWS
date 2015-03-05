@@ -19,11 +19,20 @@
   . Fixed bug #69141 (Missing arguments in reflection info for some builtin
     functions). (kostyantyn dot lysyy at oracle dot com)
 
+- CGI:
+  . Fixed bug #69015 (php-cgi's getopt does not see $argv). (Laruence)
+
+- CLI:
+  . Fixed bug #67741 (auto_prepend_file messes up __LINE__). (Reeze Xia)
+
 - cURL:
   . Fixed bug #69088 (PHP_MINIT_FUNCTION does not fully initialize cURL on
     Win32). (Grant Pannell)
   . Add CURLPROXY_SOCKS4A and CURLPROXY_SOCKS5_HOSTNAME constants if supported
     by libcurl. (Linus Unneback)
+
+- FPM:
+  . Fixed bug #68822 (request time is reset too early). (honghu069 at 163 dot com)
 
 - ODBC:
   . Fixed bug #68964 (Allowed memory size exhausted with odbc_exec). (Anatol)
@@ -62,15 +71,6 @@
     SplObjectStorage). (Laruence)
   . Fixed bug #68557 (RecursiveDirectoryIterator::seek(0) broken after 
     calling getChildren()). (Julien)
-
-- CGI:
-  . Fixed bug #69015 (php-cgi's getopt does not see $argv). (Laruence)
-
-- CLI:
-  . Fixed bug #67741 (auto_prepend_file messes up __LINE__). (Reeze Xia)
-
-- FPM:
-  . Fixed bug #68822 (request time is reset too early). (honghu069 at 163 dot com)
 
 19 Feb 2015, PHP 5.6.6
 
