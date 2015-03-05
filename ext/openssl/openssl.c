@@ -1501,7 +1501,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	zval ** zcert;
 	X509 * cert = NULL;
 	long certresource = -1;
-	int i;
+	int i, sig_nid;
 	zend_bool useshortnames = 1;
 	char * tmpstr;
 	zval * subitem;
@@ -1548,11 +1548,12 @@ PHP_FUNCTION(openssl_x509_parse)
 	if (tmpstr) {
 		add_assoc_string(return_value, "alias", tmpstr, 1);
 	}
-/*
-	add_assoc_long(return_value, "signaturetypeLONG", X509_get_signature_type(cert));
-	add_assoc_string(return_value, "signaturetype", OBJ_nid2sn(X509_get_signature_type(cert)), 1);
-	add_assoc_string(return_value, "signaturetypeLN", OBJ_nid2ln(X509_get_signature_type(cert)), 1);
-*/
+
+	sig_nid = OBJ_obj2nid((cert)->sig_alg->algorithm);
+	add_assoc_string(return_value, "signatureTypeSN", (char*)OBJ_nid2sn(sig_nid), 1);
+	add_assoc_string(return_value, "signatureTypeLN", (char*)OBJ_nid2ln(sig_nid), 1);
+	add_assoc_long(return_value, "signatureTypeNID", sig_nid TSRMLS_CC);
+
 	MAKE_STD_ZVAL(subitem);
 	array_init(subitem);
 

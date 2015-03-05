@@ -38,6 +38,7 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bugs #61285, #68329, #68046, #41631 (encrypted streams don't observe
     socket timeouts). (Brad Broerman)
+  . Fix bug #67403 (Add signatureType to openssl_x509_parse)
 
 - pgsql:
   . Fixed bug #68638 (pg_update() fails to store infinite values).
