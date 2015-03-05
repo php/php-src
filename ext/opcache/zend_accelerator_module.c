@@ -282,24 +282,18 @@ static int filename_is_in_cache(zend_string *filename)
 {
 	char *key;
 	int key_length;
-	zend_file_handle handle = {{0}, NULL, NULL, 0, 0};
-	zend_persistent_script *persistent_script;
 
-	handle.filename = filename->val;
-	handle.type = ZEND_HANDLE_FILENAME;
+	key = accel_make_persistent_key(filename->val, filename->len, &key_length);
+	if (key != NULL) {
+		zend_persistent_script *persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length);
+		if (persistent_script && !persistent_script->corrupted) {
+			zend_file_handle handle = {{0}, NULL, NULL, 0, 0};
 
-	if (IS_ABSOLUTE_PATH(filename->val, filename->len)) {
-		persistent_script = zend_accel_hash_find(&ZCSG(hash), filename->val, filename->len);
-		if (persistent_script) {
-			return !persistent_script->corrupted &&
-				validate_timestamp_and_record(persistent_script, &handle) == SUCCESS;
+			handle.filename = filename->val;
+			handle.type = ZEND_HANDLE_FILENAME;
+
+			return validate_timestamp_and_record(persistent_script, &handle) == SUCCESS;
 		}
-	}
-
-	if ((key = accel_make_persistent_key_ex(&handle, filename->len, &key_length)) != NULL) {
-		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length);
-		return persistent_script && !persistent_script->corrupted &&
-			validate_timestamp_and_record(persistent_script, &handle) == SUCCESS;
 	}
 
 	return 0;

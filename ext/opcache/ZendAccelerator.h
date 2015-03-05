@@ -306,7 +306,7 @@ int  zend_accel_script_optimize(zend_persistent_script *persistent_script);
 int  accelerator_shm_read_lock(void);
 void accelerator_shm_read_unlock(void);
 
-char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_length, int *key_len);
+char *accel_make_persistent_key(const char *path, int path_length, int *key_len);
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 
 #if !defined(ZEND_DECLARE_INHERITED_CLASS_DELAYED)
