@@ -473,7 +473,7 @@ file_push_buffer(struct magic_set *ms)
 	if (ms->event_flags & EVENT_HAD_ERR)
 		return NULL;
 
-	if ((pb = (CAST(file_pushbuf_t *, malloc(sizeof(*pb))))) == NULL)
+	if ((pb = (CAST(file_pushbuf_t *, emalloc(sizeof(*pb))))) == NULL)
 		return NULL;
 
 	pb->buf = ms->o.buf;
@@ -491,8 +491,8 @@ file_pop_buffer(struct magic_set *ms, file_pushbuf_t *pb)
 	char *rbuf;
 
 	if (ms->event_flags & EVENT_HAD_ERR) {
-		free(pb->buf);
-		free(pb);
+		efree(pb->buf);
+		efree(pb);
 		return NULL;
 	}
 
@@ -501,7 +501,7 @@ file_pop_buffer(struct magic_set *ms, file_pushbuf_t *pb)
 	ms->o.buf = pb->buf;
 	ms->offset = pb->offset;
 
-	free(pb);
+	efree(pb);
 	return rbuf;
 }
 
