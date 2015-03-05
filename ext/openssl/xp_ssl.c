@@ -313,7 +313,7 @@ static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *
 
 	fingerprint = php_openssl_x509_fingerprint(peer, method, 0);
 	if (fingerprint) {
-		result = strcmp(expected, fingerprint->val);
+		result = strcasecmp(expected, fingerprint->val);
 		zend_string_release(fingerprint);
 	}
 
