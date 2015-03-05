@@ -1268,15 +1268,16 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 				j = 0;
 				while (cur_precedence->exclude_from_classes[j].class_name) {
 					zend_string* class_name = cur_precedence->exclude_from_classes[j].class_name;
+					zend_class_entry *trait;
 
-					if (!(cur_precedence->exclude_from_classes[j].ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_TRAIT |ZEND_FETCH_CLASS_NO_AUTOLOAD))) {
+					if (!(trait = zend_fetch_class(class_name, ZEND_FETCH_CLASS_TRAIT |ZEND_FETCH_CLASS_NO_AUTOLOAD))) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", class_name->val);
 					}
-					zend_check_trait_usage(ce, cur_precedence->exclude_from_classes[j].ce);
+					zend_check_trait_usage(ce, trait);
 
 					/* make sure that the trait method is not from a class mentioned in
 					 exclude_from_classes, for consistency */
-					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[j].ce) {
+					if (cur_precedence->trait_method->ce == trait) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 								   "Inconsistent insteadof definition. "
 								   "The method %s is to be used from %s, but %s is also on the exclude list",
@@ -1285,6 +1286,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 								   cur_precedence->trait_method->ce->name->val);
 					}
 
+					cur_precedence->exclude_from_classes[j].ce = trait;
 					zend_string_release(class_name);
 					j++;
 				}
@@ -1358,11 +1360,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce) /* {{{ */
 	for (i = 0; i < ce->num_traits; i++) {
 		if (ce->trait_precedences) {
 			HashTable exclude_table;
+			zend_trait_precedence **precedences;
 
 			/* TODO: revisit this start size, may be its not optimal */
 			zend_hash_init_ex(&exclude_table, 8, NULL, NULL, 0, 0);
 
-			zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
+			precedences = ce->trait_precedences;
+			ce->trait_precedences = NULL;
+			zend_traits_compile_exclude_table(&exclude_table, precedences, ce->traits[i]);
 
 			/* copies functions, applies defined aliasing, and excludes unused trait methods */
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->traits[i]->function_table, key, fn) {
@@ -1370,6 +1375,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce) /* {{{ */
 			} ZEND_HASH_FOREACH_END();
 
 			zend_hash_destroy(&exclude_table);
+			ce->trait_precedences = precedences;
 		} else {
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->traits[i]->function_table, key, fn) {
 				zend_traits_copy_functions(key, fn, ce, &overriden, NULL);
@@ -1380,6 +1386,17 @@ static void zend_do_traits_method_binding(zend_class_entry *ce) /* {{{ */
 	ZEND_HASH_FOREACH_PTR(&ce->function_table, fn) {
 		zend_fixup_trait_method(fn, ce);
 	} ZEND_HASH_FOREACH_END();
+
+	if (ce->trait_precedences) {
+		i = 0;
+		while (ce->trait_precedences[i]) {
+			if (ce->trait_precedences[i]->exclude_from_classes) {
+				efree(ce->trait_precedences[i]->exclude_from_classes);
+				ce->trait_precedences[i]->exclude_from_classes = NULL;
+			}
+			i++;
+		}
+	}
 
 	if (overriden) {
 		zend_hash_destroy(overriden);
