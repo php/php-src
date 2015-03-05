@@ -1227,6 +1227,7 @@ static void zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *trait
 static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 {
 	size_t i, j = 0;
+	zend_trait_precedence **precedences;
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
 	zend_string *lcname;
@@ -1235,7 +1236,9 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 	/* resolve class references */
 	if (ce->trait_precedences) {
 		i = 0;
-		while ((cur_precedence = ce->trait_precedences[i])) {
+		precedences = ce->trait_precedences;
+		ce->trait_precedences = NULL;
+		while ((cur_precedence = precedences[i])) {
 			/** Resolve classes for all precedence operations. */
 			if (cur_precedence->exclude_from_classes) {
 				cur_method_ref = cur_precedence->trait_method;
@@ -1266,16 +1269,15 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 				j = 0;
 				while (cur_precedence->exclude_from_classes[j].class_name) {
 					zend_string* class_name = cur_precedence->exclude_from_classes[j].class_name;
-					zend_class_entry *trait;
 
-					if (!(trait = zend_fetch_class(class_name, ZEND_FETCH_CLASS_TRAIT |ZEND_FETCH_CLASS_NO_AUTOLOAD))) {
+					if (!(cur_precedence->exclude_from_classes[j].ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_TRAIT |ZEND_FETCH_CLASS_NO_AUTOLOAD))) {
 						zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", class_name->val);
 					}
-					zend_check_trait_usage(ce, trait);
+					zend_check_trait_usage(ce, cur_precedence->exclude_from_classes[j].ce);
 
 					/* make sure that the trait method is not from a class mentioned in
 					 exclude_from_classes, for consistency */
-					if (cur_precedence->trait_method->ce == trait) {
+					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[j].ce) {
 						zend_error_noreturn(E_COMPILE_ERROR,
 								   "Inconsistent insteadof definition. "
 								   "The method %s is to be used from %s, but %s is also on the exclude list",
@@ -1284,13 +1286,13 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 								   cur_precedence->trait_method->ce->name->val);
 					}
 
-					cur_precedence->exclude_from_classes[j].ce = trait;
 					zend_string_release(class_name);
 					j++;
 				}
 			}
 			i++;
 		}
+		ce->trait_precedences = precedences;
 	}
 
 	if (ce->trait_aliases) {
