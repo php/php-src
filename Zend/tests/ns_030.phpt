@@ -9,4 +9,4 @@ use A\B as Foo;
 
 new Foo();
 --EXPECTF--
-Fatal error: Cannot use A\B as Foo because the name is already in use in %sns_030.php on line 5
+Fatal error: Class 'A\B' not found in %s on line %d
