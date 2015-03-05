@@ -131,7 +131,7 @@ static int php_stream_ftp_stream_close(php_stream_wrapper *wrapper, php_stream *
 /* {{{ php_ftp_fopen_connect
  */
 static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
-										 char **opened_path, php_stream_context *context, php_stream **preuseid,
+										 zend_string **opened_path, php_stream_context *context, php_stream **preuseid,
 										 php_url **presource, int *puse_ssl, int *puse_ssl_on_data)
 {
 	php_stream *stream = NULL, *reuseid = NULL;
@@ -412,7 +412,7 @@ static unsigned short php_fopen_do_pasv(php_stream *stream, char *ip, size_t ip_
 /* {{{ php_fopen_url_wrap_ftp
  */
 php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *path, const char *mode,
-									 int options, char **opened_path, php_stream_context *context STREAMS_DC)
+									 int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	php_stream *stream = NULL, *datastream = NULL;
 	php_url *resource = NULL;
@@ -684,7 +684,7 @@ static php_stream_ops php_ftp_dirstream_ops = {
 /* {{{ php_stream_ftp_opendir
  */
 php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
-									char **opened_path, php_stream_context *context STREAMS_DC)
+									zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	php_stream *stream, *reuseid, *datastream = NULL;
 	php_ftp_dirstream_data *dirsdata;

@@ -255,10 +255,13 @@ static void zend_persist_property_info_calc(zval *zv)
 {
 	zend_property_info *prop = Z_PTR_P(zv);
 
-	ADD_ARENA_SIZE(sizeof(zend_property_info));
-	ADD_INTERNED_STRING(prop->name, 0);
-	if (ZCG(accel_directives).save_comments && prop->doc_comment) {
-		ADD_STRING(prop->doc_comment);
+	if (!zend_shared_alloc_get_xlat_entry(prop)) {
+		zend_shared_alloc_register_xlat_entry(prop, prop);
+		ADD_ARENA_SIZE(sizeof(zend_property_info));
+		ADD_INTERNED_STRING(prop->name, 0);
+		if (ZCG(accel_directives).save_comments && prop->doc_comment) {
+			ADD_STRING(prop->doc_comment);
+		}
 	}
 }
 

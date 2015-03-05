@@ -495,7 +495,7 @@ union _phar_entry_object {
 #endif
 
 #ifndef PHAR_MAIN
-extern char *(*phar_save_resolve_path)(const char *filename, int filename_len);
+extern zend_string *(*phar_save_resolve_path)(const char *filename, int filename_len);
 #endif
 
 BEGIN_EXTERN_C()
@@ -562,7 +562,7 @@ char *phar_compress_filter(phar_entry_info * entry, int return_unknown);
 void phar_remove_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len);
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len);
 int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len);
-char *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar);
+zend_string *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar);
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
 int phar_parse_metadata(char **buffer, zval *metadata, int zip_metadata_len);

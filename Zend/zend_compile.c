@@ -72,17 +72,6 @@ ZEND_API zend_compiler_globals compiler_globals;
 ZEND_API zend_executor_globals executor_globals;
 #endif
 
-static void zend_destroy_property_info(zval *zv) /* {{{ */
-{
-	zend_property_info *property_info = Z_PTR_P(zv);
-
-	zend_string_release(property_info->name);
-	if (property_info->doc_comment) {
-		zend_string_release(property_info->doc_comment);
-	}
-}
-/* }}} */
-
 static void zend_destroy_property_info_internal(zval *zv) /* {{{ */
 {
 	zend_property_info *property_info = Z_PTR_P(zv);
@@ -1415,7 +1404,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;
-	zend_hash_init_ex(&ce->properties_info, 8, NULL, (persistent_hashes ? zend_destroy_property_info_internal : zend_destroy_property_info), persistent_hashes, 0);
+	zend_hash_init_ex(&ce->properties_info, 8, NULL, (persistent_hashes ? zend_destroy_property_info_internal : NULL), persistent_hashes, 0);
 	zend_hash_init_ex(&ce->constants_table, 8, NULL, zval_ptr_dtor_func, persistent_hashes, 0);
 	zend_hash_init_ex(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 
@@ -3003,7 +2992,7 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 		zend_bool runtime_resolution = zend_compile_function_name(&name_node, name_ast);
 		if (runtime_resolution) {
 			if (zend_string_equals_literal_ci(zend_ast_get_str(name_ast), "assert")) {
-				zend_compile_assert(result, args_ast, Z_STR(name_node.u.constant), NULL);
+				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL);
 			} else {
 				zend_compile_ns_call(result, &name_node, args_ast);
 			}
@@ -4535,17 +4524,17 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i;
 
+	if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
+		return;
+	}
+
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *const_ast = list->child[i];
 		zend_ast *name_ast = const_ast->child[0];
 		zend_ast *value_ast = const_ast->child[1];
 		zend_string *name = zend_ast_get_str(name_ast);
 		zval value_zv;
-
-		if ((ce->ce_flags & ZEND_ACC_TRAIT) != 0) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Traits cannot have constants");
-			return;
-		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast);
 

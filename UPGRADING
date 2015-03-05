@@ -369,6 +369,10 @@ Other
   . session.lazy_write(default=On) INI setting enables only write session data when
     session data is updated.
 
+- OpenSSL:
+  . Removed the "rsa_key_size" SSL context option in favor of automatically
+    setting the appropriate size given the negotiated crypto algorithm.
+
 - PCRE:
   . Removed support for /e (PREG_REPLACE_EVAL) modifier. Use
     preg_reaplace_callback() instead.
@@ -400,6 +404,12 @@ Other
   . define() now supports arrays as constant values, fixing an oversight where define() did not support arrays yet const syntax did.
   . Added the comparison operator (<=>), aka the spaceship operator.
     (RFC: https://wiki.php.net/rfc/combined-comparison-operator)
+
+- OpenSSL
+  . Added "alpn_protocols" SSL context option allowing encrypted client/server
+    streams to negotiate alternative protocols using the ALPN TLS extension when
+    built against OpenSSL 1.0.2 or newer. Negotiated protocol information is
+    accessible by passing streams to the new stream_socket_crypto_info().
 
 ========================================
 3. Changes in SAPI modules
@@ -436,6 +446,10 @@ Other
 
 - Standard
   . Added intdiv() function for integer division.
+
+- Stream:
+  . Added stream_socket_crypto_info() allowing inspection of negotiated TLS
+    connection properties
 
 ========================================
 7. New Classes and Interfaces

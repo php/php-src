@@ -13,4 +13,6 @@ var_dump(flush($extra_arg));
 ?>
 --EXPECTF--
 Too many arguments
+
+Warning: flush() expects exactly 0 parameters, 1 given in %s on line %d
 NULL

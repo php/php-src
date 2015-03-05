@@ -134,7 +134,7 @@ typedef struct _php_stream_ops  {
 typedef struct _php_stream_wrapper_ops {
 	/* open/create a wrapped stream */
 	php_stream *(*stream_opener)(php_stream_wrapper *wrapper, const char *filename, const char *mode,
-			int options, char **opened_path, php_stream_context *context STREAMS_DC);
+			int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 	/* close/destroy a wrapped stream */
 	int (*stream_closer)(php_stream_wrapper *wrapper, php_stream *stream);
 	/* stat a wrapped stream */
@@ -143,7 +143,7 @@ typedef struct _php_stream_wrapper_ops {
 	int (*url_stat)(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context);
 	/* open a "directory" stream */
 	php_stream *(*dir_opener)(php_stream_wrapper *wrapper, const char *filename, const char *mode,
-			int options, char **opened_path, php_stream_context *context STREAMS_DC);
+			int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 
 	const char *label;
 
@@ -554,7 +554,7 @@ PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrap
 PHPAPI int php_unregister_url_stream_wrapper(const char *protocol);
 PHPAPI int php_register_url_stream_wrapper_volatile(const char *protocol, php_stream_wrapper *wrapper);
 PHPAPI int php_unregister_url_stream_wrapper_volatile(const char *protocol);
-PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC);
+PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const char **path_for_open, int options);
 PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 

@@ -225,29 +225,19 @@ ZEND_API void zval_add_ref_unref(zval *p)
 
 ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	switch (Z_TYPE_P(zvalue)) {
-		case IS_CONSTANT:
-		case IS_STRING:
-			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
-			Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
-			break;
-		case IS_ARRAY:
-			ZVAL_ARR(zvalue, zend_array_dup(Z_ARRVAL_P(zvalue)));
-			break;
-		case IS_CONSTANT_AST: {
-				zend_ast_ref *ast = emalloc(sizeof(zend_ast_ref));
+	if (EXPECTED(Z_TYPE_P(zvalue) == IS_ARRAY)) {
+		ZVAL_ARR(zvalue, zend_array_dup(Z_ARRVAL_P(zvalue)));
+	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_STRING) ||
+	           EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT)) {
+		CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
+		Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
+	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT_AST)) {
+		zend_ast_ref *ast = emalloc(sizeof(zend_ast_ref));
 
-				GC_REFCOUNT(ast) = 1;
-				GC_TYPE_INFO(ast) = IS_CONSTANT_AST;
-				ast->ast = zend_ast_copy(Z_ASTVAL_P(zvalue));
-				Z_AST_P(zvalue) = ast;
-			}
-			break;
-		case IS_OBJECT:
-		case IS_RESOURCE:
-		case IS_REFERENCE:
-			Z_ADDREF_P(zvalue);
-			break;
+		GC_REFCOUNT(ast) = 1;
+		GC_TYPE_INFO(ast) = IS_CONSTANT_AST;
+		ast->ast = zend_ast_copy(Z_ASTVAL_P(zvalue));
+		Z_AST_P(zvalue) = ast;
 	}
 }
 

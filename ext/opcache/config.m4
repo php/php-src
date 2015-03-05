@@ -388,4 +388,5 @@ fi
 	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
+  PHP_ADD_EXTENSION_DEP(opcache, pcre)
 fi

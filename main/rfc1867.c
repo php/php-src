@@ -191,16 +191,16 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
 
 static int unlink_filename(zval *el) /* {{{ */
 {
-	char *filename = (char*)Z_PTR_P(el);
-	VCWD_UNLINK(filename);
+	zend_string *filename = Z_STR_P(el);
+	VCWD_UNLINK(filename->val);
 	return 0;
 }
 /* }}} */
 
 
 static void free_filename(zval *el) {
-	char *filename = (char*)Z_PTR_P(el);
-	efree(filename);
+	zend_string *filename = Z_STR_P(el);
+	zend_string_release(filename);
 }
 
 void destroy_uploaded_files_hash(void) /* {{{ */
@@ -685,7 +685,8 @@ static char *multipart_buffer_read_body(multipart_buffer *self, size_t *len)
 SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 {
 	char *boundary, *s = NULL, *boundary_end = NULL, *start_arr = NULL, *array_index = NULL;
-	char *temp_filename = NULL, *lbuf = NULL, *abuf = NULL;
+	char *lbuf = NULL, *abuf = NULL;
+	zend_string *temp_filename = NULL;
 	int boundary_len = 0, cancel_upload = 0, is_arr_upload = 0, array_len = 0;
 	int64_t total_bytes = 0, max_file_size = 0;
 	int skip_upload = 0, anonindex = 0, is_anonymous;
@@ -980,7 +981,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				event_file_start.name = param;
 				event_file_start.filename = &filename;
 				if (php_rfc1867_callback(MULTIPART_EVENT_FILE_START, &event_file_start, &event_extra_data) == FAILURE) {
-					temp_filename = "";
+					temp_filename = NULL;
 					efree(param);
 					efree(filename);
 					continue;
@@ -1095,7 +1096,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				multipart_event_file_end event_file_end;
 
 				event_file_end.post_bytes_processed = SG(read_post_bytes);
-				event_file_end.temp_filename = temp_filename;
+				event_file_end.temp_filename = temp_filename->val;
 				event_file_end.cancel_upload = cancel_upload;
 				if (php_rfc1867_callback(MULTIPART_EVENT_FILE_END, &event_file_end, &event_extra_data) == FAILURE) {
 					cancel_upload = UPLOAD_ERROR_X;
@@ -1105,13 +1106,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			if (cancel_upload) {
 				if (temp_filename) {
 					if (cancel_upload != UPLOAD_ERROR_E) { /* file creation failed */
-						unlink(temp_filename);
+						unlink(temp_filename->val);
 					}
-					efree(temp_filename);
+					zend_string_release(temp_filename);
 				}
-				temp_filename = "";
+				temp_filename = NULL;
 			} else {
-				zend_hash_str_add_ptr(SG(rfc1867_uploaded_files), temp_filename, strlen(temp_filename), temp_filename);
+				zend_hash_add_ptr(SG(rfc1867_uploaded_files), temp_filename, temp_filename);
 			}
 
 			/* is_arr_upload is true when name of file upload field
@@ -1211,7 +1212,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 				/* if param is of form xxx[.*] this will cut it to xxx */
 				if (!is_anonymous) {
-					ZVAL_STRING(&zfilename, temp_filename);
+					if (temp_filename) {
+						ZVAL_STR_COPY(&zfilename, temp_filename);
+					} else {
+						ZVAL_EMPTY_STRING(&zfilename);
+					}
 					safe_php_register_variable_ex(param, &zfilename, NULL, 1);
 				}
 
@@ -1222,7 +1227,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					snprintf(lbuf, llen, "%s[tmp_name]", param);
 				}
 				add_protected_variable(lbuf);
-				ZVAL_STRING(&zfilename, temp_filename);
+				if (temp_filename) {
+					ZVAL_STR_COPY(&zfilename, temp_filename);
+				} else {
+					ZVAL_EMPTY_STRING(&zfilename);
+				}
 				register_http_post_files_variable_ex(lbuf, &zfilename, &PG(http_globals)[TRACK_VARS_FILES], 1);
 			}
 

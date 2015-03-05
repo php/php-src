@@ -482,7 +482,6 @@ ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding)
 
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 {
-	const char *file_path = NULL;
 	char *buf;
 	size_t size, offset = 0;
 	zend_string *compiled_filename;
@@ -536,12 +535,11 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	BEGIN(INITIAL);
 
 	if (file_handle->opened_path) {
-		file_path = file_handle->opened_path;
+		compiled_filename = zend_string_copy(file_handle->opened_path);
 	} else {
-		file_path = file_handle->filename;
+		compiled_filename = zend_string_init(file_handle->filename, strlen(file_handle->filename), 0);
 	}
 
-	compiled_filename = zend_string_init(file_path, strlen(file_path), 0);
 	zend_set_compiled_filename(compiled_filename);
 	zend_string_release(compiled_filename);
 
@@ -623,7 +621,7 @@ zend_op_array *compile_filename(int type, zval *filename)
 	zend_file_handle file_handle;
 	zval tmp;
 	zend_op_array *retval;
-	char *opened_path = NULL;
+	zend_string *opened_path = NULL;
 
 	if (Z_TYPE_P(filename) != IS_STRING) {
 		tmp = *filename;
@@ -640,13 +638,13 @@ zend_op_array *compile_filename(int type, zval *filename)
 	retval = zend_compile_file(&file_handle, type);
 	if (retval && file_handle.handle.stream.handle) {
 		if (!file_handle.opened_path) {
-			file_handle.opened_path = opened_path = estrndup(Z_STRVAL_P(filename), Z_STRLEN_P(filename));
+			file_handle.opened_path = opened_path = zend_string_copy(Z_STR_P(filename));
 		}
 
-		zend_hash_str_add_empty_element(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path));
+		zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path);
 
 		if (opened_path) {
-			efree(opened_path);
+			zend_string_release(opened_path);
 		}
 	}
 	zend_destroy_file_handle(&file_handle);

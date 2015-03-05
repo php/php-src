@@ -37,8 +37,6 @@ int
 zip_file_get_external_attributes(struct zip *za, zip_uint64_t idx, zip_flags_t flags, zip_uint8_t *opsys, zip_uint32_t *attributes)
 {
     struct zip_dirent *de;
-    zip_uint32_t len;
-    const zip_uint8_t *str;
 
     if ((de=_zip_get_dirent(za, idx, flags, NULL)) == NULL)
 	return -1;

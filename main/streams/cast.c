@@ -342,7 +342,7 @@ exit_success:
 /* }}} */
 
 /* {{{ php_stream_open_wrapper_as_file */
-PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int options, char **opened_path STREAMS_DC)
+PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int options, zend_string **opened_path STREAMS_DC)
 {
 	FILE *fp = NULL;
 	php_stream *stream = NULL;
@@ -356,7 +356,7 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO|PHP_STREAM_CAST_TRY_HARD|PHP_STREAM_CAST_RELEASE, (void**)&fp, REPORT_ERRORS) == FAILURE) {
 		php_stream_close(stream);
 		if (opened_path && *opened_path) {
-			efree(*opened_path);
+			zend_string_release(*opened_path);
 		}
 		return NULL;
 	}

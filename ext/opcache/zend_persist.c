@@ -581,12 +581,17 @@ static void zend_persist_op_array(zval *zv)
 
 static void zend_persist_property_info(zval *zv)
 {
-	zend_property_info *prop;
+	zend_property_info *prop = zend_shared_alloc_get_xlat_entry(Z_PTR_P(zv));
 
+	if (prop) {
+		Z_PTR_P(zv) = prop;
+		return;
+	}
 	memcpy(ZCG(arena_mem), Z_PTR_P(zv), sizeof(zend_property_info));
 	zend_shared_alloc_register_xlat_entry(Z_PTR_P(zv), ZCG(arena_mem));
 	prop = Z_PTR_P(zv) = ZCG(arena_mem);
 	ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_property_info)));
+	prop->ce = zend_shared_alloc_get_xlat_entry(prop->ce);
 	zend_accel_store_interned_string(prop->name);
 	if (prop->doc_comment) {
 		if (ZCG(accel_directives).save_comments) {
@@ -714,13 +719,13 @@ static void zend_persist_class_entry(zval *zv)
 	}
 }
 
-static int zend_update_property_info_ce(zval *zv)
-{
-	zend_property_info *prop = Z_PTR_P(zv);
-
-	prop->ce = zend_shared_alloc_get_xlat_entry(prop->ce);
-	return 0;
-}
+//static int zend_update_property_info_ce(zval *zv)
+//{
+//	zend_property_info *prop = Z_PTR_P(zv);
+//
+//	prop->ce = zend_shared_alloc_get_xlat_entry(prop->ce);
+//	return 0;
+//}
 
 static int zend_update_parent_ce(zval *zv)
 {
@@ -770,7 +775,7 @@ static int zend_update_parent_ce(zval *zv)
 	if (ce->__debugInfo) {
 		ce->__debugInfo = zend_shared_alloc_get_xlat_entry(ce->__debugInfo);
 	}
-	zend_hash_apply(&ce->properties_info, (apply_func_t) zend_update_property_info_ce);
+//	zend_hash_apply(&ce->properties_info, (apply_func_t) zend_update_property_info_ce);
 	return 0;
 }
 

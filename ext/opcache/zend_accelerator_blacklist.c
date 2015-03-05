@@ -23,7 +23,6 @@
 #include "main/fopen_wrappers.h"
 #include "ZendAccelerator.h"
 #include "zend_accelerator_blacklist.h"
-#include "ext/ereg/php_regex.h"
 
 #ifdef ZEND_WIN32
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB|REG_ICASE)
@@ -39,10 +38,12 @@
 #endif
 #endif
 
+#include "ext/pcre/php_pcre.h"
+
 #define ZEND_BLACKLIST_BLOCK_SIZE	32
 
 struct _zend_regexp_list {
-	regex_t           comp_regex;
+	pcre             *re;
 	zend_regexp_list *next;
 };
 
@@ -65,23 +66,15 @@ void zend_accel_blacklist_init(zend_blacklist *blacklist)
 	blacklist->regexp_list = NULL;
 }
 
-static void blacklist_report_regexp_error(regex_t *comp_regex, int reg_err)
+static void blacklist_report_regexp_error(const char *pcre_error, int pcre_error_offset)
 {
-	char *errbuf;
-	int errsize = regerror(reg_err, comp_regex, NULL, 0);
-	errbuf = malloc(errsize);
-	if (!errbuf) {
-		zend_accel_error(ACCEL_LOG_ERROR, "Blacklist compilation: no memory\n");
-		return;
-	}
-	regerror(reg_err, comp_regex, errbuf, errsize);
-	zend_accel_error(ACCEL_LOG_ERROR, "Blacklist compilation: %s\n", errbuf);
-	free(errbuf);
+	zend_accel_error(ACCEL_LOG_ERROR, "Blacklist compilation failed (offset: %d), %s\n", pcre_error_offset, pcre_error);
 }
 
 static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 {
-	int i, reg_err;
+	const char *pcre_error;
+	int i, pcre_error_offset;
 	zend_regexp_list **regexp_list_it, *it;
 	char regexp[12*1024], *p, *end, *c, *backtrack = NULL;
 
@@ -184,8 +177,8 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			}
 			it->next = NULL;
 
-			if ((reg_err = regcomp(&it->comp_regex, regexp, REGEX_MODE)) != 0) {
-				blacklist_report_regexp_error(&it->comp_regex, reg_err);
+			if ((it->re = pcre_compile(regexp, PCRE_NO_AUTO_CAPTURE, &pcre_error, &pcre_error_offset, 0)) == NULL) {
+				blacklist_report_regexp_error(pcre_error, pcre_error_offset);
 			}
 			/* prepare for the next iteration */
 			p = regexp + 2;
@@ -212,7 +205,7 @@ void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 	if (blacklist->regexp_list) {
 		zend_regexp_list *temp, *it = blacklist->regexp_list;
 		while (it) {
-			regfree(&it->comp_regex);
+			pcre_free(it->re);
 			temp = it;
 			it = it->next;
 			free(temp);
@@ -348,7 +341,7 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 		return 0;
 	}
 	while (regexp_list_it != NULL) {
-		if (regexec(&(regexp_list_it->comp_regex), verify_path, 0, NULL, 0) == 0) {
+		if (pcre_exec(regexp_list_it->re, NULL, verify_path, strlen(verify_path), 0, 0, NULL, 0) >= 0) {
 			ret = 1;
 			break;
 		}

@@ -619,7 +619,7 @@ PHPAPI php_stream_ops php_stream_rfc2397_ops = {
 };
 
 static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, const char *path,
-												const char *mode, int options, char **opened_path,
+												const char *mode, int options, zend_string **opened_path,
 												php_stream_context *context STREAMS_DC) /* {{{ */
 {
 	php_stream *stream;

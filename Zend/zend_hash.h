@@ -63,6 +63,7 @@ ZEND_API void zend_hash_clean(HashTable *ht);
 ZEND_API void zend_hash_real_init(HashTable *ht, zend_bool packed);
 ZEND_API void zend_hash_packed_to_hash(HashTable *ht);
 ZEND_API void zend_hash_to_packed(HashTable *ht);
+ZEND_API void zend_hash_extend(HashTable *ht, uint32_t nSize, zend_bool packed);
 
 /* additions/updates/changes */
 ZEND_API zval *_zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *pData, uint32_t flag ZEND_FILE_LINE_DC);
@@ -483,6 +484,15 @@ static zend_always_inline void *zend_hash_str_add_ptr(HashTable *ht, const char 
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
+static zend_always_inline void *zend_hash_str_add_new_ptr(HashTable *ht, const char *str, size_t len, void *pData)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, pData);
+	zv = zend_hash_str_add_new(ht, str, len, &tmp);
+	return zv ? Z_PTR_P(zv) : NULL;
+}
+
 static zend_always_inline void *zend_hash_update_ptr(HashTable *ht, zend_string *key, void *pData)
 {
 	zval tmp, *zv;
@@ -795,9 +805,41 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_FILL_END() \
 		__fill_ht->nNumUsed = __fill_idx; \
 		__fill_ht->nNumOfElements = __fill_idx; \
-		__fill_ht->nNextFreeElement = __fill_idx + 1; \
+		__fill_ht->nNextFreeElement = __fill_idx; \
 		__fill_ht->nInternalPointer = 0; \
 	} while (0)
+
+static zend_always_inline void _zend_hash_append(HashTable *ht, zend_string *key, zval *zv)
+{
+	uint32_t idx = ht->nNumUsed++;
+	uint32_t nIndex;
+	Bucket *p = ht->arData + idx;
+
+	ZVAL_COPY_VALUE(&p->val, zv);
+	p->key = key;
+	p->h = key->h;
+	nIndex = p->h & ht->nTableMask;
+	Z_NEXT(p->val) = ht->arHash[nIndex];
+	ht->arHash[nIndex] = idx;
+	ht->nNumUsed = idx + 1;
+	ht->nNumOfElements++;
+}
+
+static zend_always_inline void _zend_hash_append_ptr(HashTable *ht, zend_string *key, void *ptr)
+{
+	uint32_t idx = ht->nNumUsed++;
+	uint32_t nIndex;
+	Bucket *p = ht->arData + idx;
+
+	ZVAL_PTR(&p->val, ptr);
+	p->key = key;
+	p->h = key->h;
+	nIndex = p->h & ht->nTableMask;
+	Z_NEXT(p->val) = ht->arHash[nIndex];
+	ht->arHash[nIndex] = idx;
+	ht->nNumUsed = idx + 1;
+	ht->nNumOfElements++;
+}
 
 #endif							/* ZEND_HASH_H */
 

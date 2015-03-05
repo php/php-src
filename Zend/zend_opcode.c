@@ -233,6 +233,7 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 
 ZEND_API void destroy_zend_class(zval *zv)
 {
+	zend_property_info *prop_info;
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (--ce->refcount > 0) {
@@ -260,6 +261,14 @@ ZEND_API void destroy_zend_class(zval *zv)
 				}
 				efree(ce->default_static_members_table);
 			}
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+				if (prop_info->ce == ce || (prop_info->flags & ZEND_ACC_SHADOW)) {
+					zend_string_release(prop_info->name);
+					if (prop_info->doc_comment) {
+						zend_string_release(prop_info->doc_comment);
+					}
+				}
+			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
 			zend_hash_destroy(&ce->function_table);

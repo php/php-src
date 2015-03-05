@@ -48,7 +48,7 @@
 ZEND_API zend_class_entry *zend_standard_class_def = NULL;
 ZEND_API size_t (*zend_printf)(const char *format, ...);
 ZEND_API zend_write_func_t zend_write;
-ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
+ZEND_API FILE *(*zend_fopen)(const char *filename, zend_string **opened_path);
 ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle);
 ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
@@ -57,7 +57,7 @@ ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint 
 size_t (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 zend_string *(*zend_vstrpprintf)(size_t max_len, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
-ZEND_API char *(*zend_resolve_path)(const char *filename, int filename_len);
+ZEND_API zend_string *(*zend_resolve_path)(const char *filename, int filename_len);
 
 void (*zend_on_timeout)(int seconds);
 
@@ -374,10 +374,10 @@ ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int
 }
 /* }}} */
 
-static FILE *zend_fopen_wrapper(const char *filename, char **opened_path) /* {{{ */
+static FILE *zend_fopen_wrapper(const char *filename, zend_string **opened_path) /* {{{ */
 {
 	if (opened_path) {
-		*opened_path = estrdup(filename);
+		*opened_path = zend_string_init(filename, strlen(filename), 0);
 	}
 	return fopen(filename, "rb");
 }
@@ -1303,7 +1303,7 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 
 		op_array = zend_compile_file(file_handle, type);
 		if (file_handle->opened_path) {
-			zend_hash_str_add_empty_element(&EG(included_files), file_handle->opened_path, strlen(file_handle->opened_path));
+			zend_hash_add_empty_element(&EG(included_files), file_handle->opened_path);
 		}
 		zend_destroy_file_handle(file_handle);
 		if (op_array) {
