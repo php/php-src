@@ -58,9 +58,6 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.230 2015/01/02 21:29:39 christos Exp $")
 #else
 #include <unistd.h>
 #endif
-#ifdef HAVE_STDDEF_H
-#include <stddef.h>
-#endif
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
@@ -441,7 +438,8 @@ apprentice_1(struct magic_set *ms, const char *fn, int action)
 	for (i = 0; i < MAGIC_SETS; i++) {
 		if (add_mlist(ms->mlist[i], map, i) == -1) {
 			file_oomem(ms, sizeof(*ml));
-			goto fail;
+			apprentice_unmap(map);
+			return -1;
 		}
 	}
 
@@ -455,12 +453,6 @@ apprentice_1(struct magic_set *ms, const char *fn, int action)
 		}
 	}
 	return 0;
-fail:
-	for (i = 0; i < MAGIC_SETS; i++) {
-		mlist_free(ms->mlist[i]);
-		ms->mlist[i] = NULL;
-	}
-	return -1;
 }
 
 protected void
@@ -569,55 +561,6 @@ mlist_free(struct mlist *mlist)
 			break;
 	}
 }
-
-#ifndef COMPILE_ONLY
-/* void **bufs: an array of compiled magic files */
-protected int
-buffer_apprentice(struct magic_set *ms, struct magic **bufs,
-    size_t *sizes, size_t nbufs)
-{
-	size_t i, j;
-	struct mlist *ml;
-	struct magic_map *map;
-
-	if (nbufs == 0)
-		return -1;
-
-	if (ms->mlist[0] != NULL)
-		file_reset(ms);
-
-	init_file_tables();
-
-	for (i = 0; i < MAGIC_SETS; i++) {
-		mlist_free(ms->mlist[i]);
-		if ((ms->mlist[i] = mlist_alloc()) == NULL) {
-			file_oomem(ms, sizeof(*ms->mlist[i]));
-			goto fail;
-		}
-	}
-
-	for (i = 0; i < nbufs; i++) {
-		map = apprentice_buf(ms, bufs[i], sizes[i]);
-		if (map == NULL)
-			goto fail;
-
-		for (j = 0; j < MAGIC_SETS; j++) {
-			if (add_mlist(ms->mlist[j], map, j) == -1) {
-				file_oomem(ms, sizeof(*ml));
-				goto fail;
-			}
-		}
-	}
-
-	return 0;
-fail:
-	for (i = 0; i < MAGIC_SETS; i++) {
-		mlist_free(ms->mlist[i]);
-		ms->mlist[i] = NULL;
-	}
-	return -1;
-}
-#endif
 
 /* const char *fn: list of magic files and directories */
 protected int
@@ -1161,6 +1104,7 @@ load_1(struct magic_set *ms, int action, const char *fn, int *errs,
 	}
 	if (me.mp)
 		(void)addentry(ms, &me, mset);
+    efree(line);
 	php_stream_close(stream);
 }
 
@@ -2517,16 +2461,20 @@ getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
 				    m->value.s);
 			return -1;
 		}
-		/*if (m->type == FILE_REGEX) {
-			file_regex_t rx;
-			int rc = file_regcomp(&rx, m->value.s, REG_EXTENDED);
-			if (rc) {
-				if (ms->flags & MAGIC_CHECK)
-					file_regerror(&rx, rc, ms);
+		if (m->type == FILE_REGEX) {
+			/*  XXX do we need this? */
+			/*zval pattern;
+			int options = 0;
+			pcre_cache_entry *pce;
+
+			convert_libmagic_pattern(&pattern, m->value.s, strlen(m->value.s), options);
+
+			if ((pce = pcre_get_compiled_regex_cache(Z_STR(pattern))) == NULL) {
+				return -1;	
 			}
-			file_regfree(&rx);
-			return rc ? -1 : 0;
-		}*/
+
+			return 0;*/
+		}
 		return 0;
 	case FILE_FLOAT:
 	case FILE_BEFLOAT:
