@@ -57,8 +57,8 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 {
 	zend_function *new_function;
 
-	if (func->type == ZEND_INTERNAL_FUNCTION) {
-		if (ce->type & ZEND_INTERNAL_CLASS) {
+	if (UNEXPECTED(func->type == ZEND_INTERNAL_FUNCTION)) {
+		if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
 			new_function = pemalloc(sizeof(zend_internal_function), 1);
 			memcpy(new_function, func, sizeof(zend_internal_function));
 		} else {
@@ -66,7 +66,7 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 			memcpy(new_function, func, sizeof(zend_internal_function));
 			new_function->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
 		}
-		if (new_function->common.function_name) {
+		if (EXPECTED(new_function->common.function_name)) {
 			zend_string_addref(new_function->common.function_name);
 		}
 	} else {
@@ -595,7 +595,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 	if (UNEXPECTED(child)) {
 		child_info = Z_PTR_P(child);
-		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW)) {
+		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
 			child_info->flags |= ZEND_ACC_CHANGED;
 		} else {
 			if (UNEXPECTED((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC))) {
@@ -621,8 +621,8 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
-		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW)) {
-			if(ce->type & ZEND_INTERNAL_CLASS) {
+		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
+			if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
 				child_info = zend_duplicate_property_info_internal(parent_info);
 			} else {
 				child_info = zend_duplicate_property_info(parent_info);
@@ -630,7 +630,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			child_info->flags &= ~ZEND_ACC_PRIVATE; /* it's not private anymore */
 			child_info->flags |= ZEND_ACC_SHADOW; /* but it's a shadow of private */
 		} else {
-			if (ce->type & ZEND_INTERNAL_CLASS) {
+			if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
 				child_info = zend_duplicate_property_info_internal(parent_info);
 			} else {
 				child_info = parent_info;
