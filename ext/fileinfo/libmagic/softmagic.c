@@ -636,7 +636,7 @@ mprint(struct magic_set *ms, struct magic *m)
 		}
 		rval = file_printf(ms, F(ms, m, "%s"),
 		    file_printable(sbuf, sizeof(sbuf), cp));
-		free(cp);
+		efree(cp);
 
 		if (rval == -1)
 			return -1;
@@ -1089,13 +1089,8 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 				return 0;
 			}
 
-			if (m->str_flags & REGEX_LINE_COUNT) {
-				linecnt = m->str_range;
-				bytecnt = linecnt * 80;
-			} else {
-				linecnt = 0;
-				bytecnt = m->str_range;
-			}
+			linecnt = m->str_range;
+			bytecnt = linecnt * 80;
 
 			if (bytecnt == 0 || bytecnt > nbytes - offset)
 				bytecnt = nbytes - offset;
@@ -1667,11 +1662,11 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 				return -1;
 			}
 			if (file_printf(ms, "%s", rbuf) == -1) {
-				if (rbuf) free(rbuf);
+				if (rbuf) efree(rbuf);
 				return -1;
 			}
 		}
-		if (rbuf) free(rbuf);
+		if (rbuf) efree(rbuf);
 		return rv;
 
 	case FILE_USE:

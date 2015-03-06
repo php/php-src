@@ -107,7 +107,7 @@ static const struct cv {
 	},
 	{	{ 0,			 0			},
 		NULL,
-	}
+	},
 };
 
 private const char *

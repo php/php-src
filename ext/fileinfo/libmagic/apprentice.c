@@ -447,7 +447,8 @@ apprentice_1(struct magic_set *ms, const char *fn, int action)
 
 	if (action == FILE_LIST) {
 		for (i = 0; i < MAGIC_SETS; i++) {
-			printf("Set " SIZE_T_FORMAT ":\nBinary patterns:\n",i);
+			printf("Set %" SIZE_T_FORMAT "u:\nBinary patterns:\n",
+			    i);
 			apprentice_list(ms->mlist[i], BINTEST);
 			printf("Text patterns:\n");
 			apprentice_list(ms->mlist[i], TEXTTEST);
