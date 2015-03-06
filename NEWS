@@ -6,6 +6,10 @@
   . Fixed bugs #68853, #65137 (Buffered crypto stream data breaks IO polling
     in stream_select() contexts) (Chris Wright)
 
+- Core:
+  . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
+
+
 19 Mar 2015, PHP 5.6.7
 
 - Core:
