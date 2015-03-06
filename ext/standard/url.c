@@ -192,6 +192,9 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 			port = ZEND_STRTOL(port_buf, NULL, 10);
 			if (port > 0 && port <= 65535) {
 				ret->port = (unsigned short) port;
+				if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
+				    s += 2;
+				}
 			} else {
 				if (ret->scheme) efree(ret->scheme);
 				efree(ret);
@@ -201,12 +204,12 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 			if (ret->scheme) efree(ret->scheme);
 			efree(ret);
 			return NULL;
-		} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+		} else if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 			s += 2;
 		} else {
 			goto just_path;
 		}
-	} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+	} else if (*s == '/' && *(s + 1) == '/') { /* relative-scheme URL */
 		s += 2;
 	} else {
 		just_path:
