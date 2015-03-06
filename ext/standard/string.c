@@ -2207,8 +2207,9 @@ PHP_FUNCTION(strrchr)
 	zend_string *haystack;
 	const char *found = NULL;
 	zend_long found_offset;
+	zend_bool part = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz", &haystack, &needle) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|b", &haystack, &needle, &part) == FAILURE) {
 		return;
 	}
 
@@ -2225,7 +2226,11 @@ PHP_FUNCTION(strrchr)
 
 	if (found) {
 		found_offset = found - haystack->val;
-		RETURN_STRINGL(found, haystack->len - found_offset);
+		if(part) {
+			RETURN_STRINGL(haystack->val, found_offset);
+		} else {
+			RETURN_STRINGL(found, haystack->len - found_offset);
+		}
 	} else {
 		RETURN_FALSE;
 	}
