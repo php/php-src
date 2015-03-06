@@ -1089,8 +1089,13 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 				return 0;
 			}
 
-			linecnt = m->str_range;
-			bytecnt = linecnt * 80;
+			if (m->str_flags & REGEX_LINE_COUNT) {
+				linecnt = m->str_range;
+				bytecnt = linecnt * 80;
+			} else {
+				linecnt = 0;
+				bytecnt = m->str_range;
+			}
 
 			/* XXX bytecnt_max is to be kept for PHP, see cve-2014-3538.
 				PCRE might stuck if the input buffer is too big. To ensure
@@ -1901,7 +1906,6 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			break;
 
 		default:
-			matched = 0;
 			file_magerror(ms, "cannot happen with float: invalid relation `%c'",
 			    m->reln);
 			return -1;
@@ -1935,7 +1939,6 @@ magiccheck(struct magic_set *ms, struct magic *m)
 			break;
 
 		default:
-			matched = 0;
 			file_magerror(ms, "cannot happen with double: invalid relation `%c'", m->reln);
 			return -1;
 		}
@@ -2184,7 +2187,6 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		break;
 
 	default:
-		matched = 0;
 		file_magerror(ms, "cannot happen: invalid relation `%c'",
 		    m->reln);
 		return -1;

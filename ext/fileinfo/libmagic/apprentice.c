@@ -58,9 +58,6 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.230 2015/01/02 21:29:39 christos Exp $")
 #else
 #include <unistd.h>
 #endif
-#ifdef HAVE_STDDEF_H
-#include <stddef.h>
-#endif
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
@@ -441,7 +438,8 @@ apprentice_1(struct magic_set *ms, const char *fn, int action)
 	for (i = 0; i < MAGIC_SETS; i++) {
 		if (add_mlist(ms->mlist[i], map, i) == -1) {
 			file_oomem(ms, sizeof(*ml));
-			goto fail;
+			apprentice_unmap(map);
+			return -1;
 		}
 	}
 
@@ -455,12 +453,6 @@ apprentice_1(struct magic_set *ms, const char *fn, int action)
 		}
 	}
 	return 0;
-fail:
-	for (i = 0; i < MAGIC_SETS; i++) {
-		mlist_free(ms->mlist[i]);
-		ms->mlist[i] = NULL;
-	}
-	return -1;
 }
 
 protected void
