@@ -1459,16 +1459,23 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache)) {
 		/*printf("Cache hit!  Reusing %x\n", symtable_cache[symtable_cache_ptr]);*/
 		symbol_table = ex->symbol_table = *(EG(symtable_cache_ptr)--);
+		if (!ex->func->op_array.last_var) {
+			return symbol_table;
+		}
+		zend_hash_extend(symbol_table, ex->func->op_array.last_var, 0);
 	} else {
 		symbol_table = ex->symbol_table = emalloc(sizeof(zend_array));
 		zend_hash_init(symbol_table, ex->func->op_array.last_var, NULL, ZVAL_PTR_DTOR, 0);
+		if (!ex->func->op_array.last_var) {
+			return symbol_table;
+		}
+		zend_hash_real_init(symbol_table, 0);
 		/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 	}
 	for (i = 0; i < ex->func->op_array.last_var; i++) {
-		zval zv;
-
-		ZVAL_INDIRECT(&zv, ZEND_CALL_VAR_NUM(ex, i));
-		zend_hash_add_new(symbol_table, ex->func->op_array.vars[i], &zv);
+		zend_string_addref(ex->func->op_array.vars[i]);
+		_zend_hash_append_ind(symbol_table, ex->func->op_array.vars[i],
+			ZEND_CALL_VAR_NUM(ex, i));
 	}
 	return symbol_table;
 }
