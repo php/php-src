@@ -5,6 +5,13 @@
 # to the maintainers, at file@mx.gw.com
 
 #------------------------------------------------------------------------------
+# Localstuff:  file(1) magic for locally observed files
+#
+# $File: Localstuff,v 1.4 2003/03/23 04:17:27 christos Exp $
+# Add any locally observed files here.  Remember:
+# text if readable, executable if runnable binary, data if unreadable.
+
+#------------------------------------------------------------------------------
 # $File$
 # acorn:  file(1) magic for files found on Acorn systems
 #
@@ -6527,7 +6534,7 @@
 0       string          FCS3.0          Flow Cytometry Standard (FCS) data, version 3.0
 
 #------------------------------------------------------------------------------
-# $File: filesystems,v 1.107 2014/12/03 18:02:52 christos Exp $
+# $File: filesystems,v 1.108 2015/01/01 17:43:47 christos Exp $
 # filesystems:  file(1) magic for different filesystems
 #
 0	name	partid  
@@ -8456,6 +8463,7 @@
 >>38917	string    3         (version 2.0)
 >>38917	byte     >0x33      (unknown version, ID 0x%X)
 >>38917	byte     <0x31      (unknown version, ID 0x%X)
+>0x1FE	leshort  0xAA55     (DOS/MBR boot sector)
 # "application id" which appears to be used as a volume label
 >32808	string/T  >\0       '%s'
 >34816	string    \000CD001\001EL\ TORITO\ SPECIFICATION    (bootable)
@@ -10930,7 +10938,7 @@
 >8	string          IFZS		\b, Z-machine or Glulx saved game file (Quetzal)
 
 #------------------------------------------------------------------------------
-# $File: images,v 1.104 2015/01/24 22:45:46 christos Exp $
+# $File: images,v 1.105 2015/02/14 17:30:03 christos Exp $
 # images:  file(1) magic for image formats (see also "iff", and "c-lang" for
 # XPM bitmaps)
 #
@@ -11616,7 +11624,26 @@
 >25	string	>\0	dated %.14s
 
 # GEM Image: Version 1, Headerlen 8 (Wolfram Kleff)
-0	belong		0x00010008	GEM Image data
+# Format variations from: Bernd Nuernberger <bernd.nuernberger@web.de>
+# See http://fileformats.archiveteam.org/wiki/GEM_Raster
+# For variations, also see:
+#    http://www.seasip.info/Gem/ff_img.html (Ventura) 
+#    http://www.atari-wiki.com/?title=IMG_file (XIMG, STTT)
+#    http://www.fileformat.info/format/gemraster/spec/index.htm (XIMG, STTT)
+#    http://sylvana.net/1stguide/1STGUIDE.ENG (TIMG)
+0       beshort     0x0001
+>2      beshort     0x0008      GEM Image data
+>>0     use gem_info
+>2      beshort     0x0009      GEM Image data (Ventura)
+>>0     use gem_info
+16      string      XIMG\0      GEM XIMG Image data
+>0      use gem_info
+16      string      STTT\0\x10  GEM STTT Image data 
+>0      use gem_info
+16      string      TIMG\0      GEM TIMG Image data
+>0      use gem_info
+
+0   name        gem_info
 >12	beshort		x		%d x
 >14	beshort		x		%d,
 >4	beshort		x		%d planes,
