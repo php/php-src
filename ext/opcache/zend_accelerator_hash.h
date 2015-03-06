@@ -73,10 +73,18 @@ zend_accel_hash_entry* zend_accel_hash_update(
 
 void* zend_accel_hash_find(
 		zend_accel_hash        *accel_hash,
+		zend_string            *key);
+
+zend_accel_hash_entry* zend_accel_hash_find_entry(
+		zend_accel_hash        *accel_hash,
+		zend_string            *key);
+
+void* zend_accel_hash_str_find(
+		zend_accel_hash        *accel_hash,
 		char                   *key,
 		uint32_t               key_length);
 
-zend_accel_hash_entry* zend_accel_hash_find_entry(
+zend_accel_hash_entry* zend_accel_hash_str_find_entry(
 		zend_accel_hash        *accel_hash,
 		char                   *key,
 		uint32_t               key_length);

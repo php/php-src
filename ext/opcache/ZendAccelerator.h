@@ -227,12 +227,14 @@ typedef struct _zend_accel_globals {
 	zend_bool               locked;    /* thread obtained exclusive lock */
 	HashTable               bind_hash; /* prototype and zval lookup table */
 	zend_accel_directives   accel_directives;
-	char                   *cwd;              /* current working directory or NULL */
-	int                     cwd_len;          /* "cwd" string length */
-	char                   *include_path_key; /* one letter key of current "include_path" */
-	char                   *include_path;     /* current section of "include_path" directive */
-	int                     include_path_len; /* "include_path" string length */
+	zend_string            *cwd;                  /* current working directory or NULL */
+	zend_string            *include_path;         /* current value of "include_path" directive */
+	char                    include_path_key[32]; /* key of current "include_path" */
+	char                    cwd_key[32];          /* key of current working directory */
+	int                     include_path_key_len;
 	int                     include_path_check;
+	int                     cwd_key_len;
+	int                     cwd_check;
 	int                     auto_globals_mask;
 	time_t                  request_time;
 	/* preallocated shared-memory block to save current script */
@@ -256,7 +258,6 @@ typedef struct _zend_accel_shared_globals {
 	zend_ulong   hash_restarts;    /* number of restarts because of hash overflow */
 	zend_ulong   manual_restarts;  /* number of restarts scheduled by opcache_reset() */
 	zend_accel_hash hash;             /* hash table for cached scripts */
-	zend_accel_hash include_paths;    /* used "include_path" values    */
 
 	/* Directives & Maintenance */
 	time_t          start_time;

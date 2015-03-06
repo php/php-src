@@ -285,7 +285,7 @@ static int filename_is_in_cache(zend_string *filename)
 
 	key = accel_make_persistent_key(filename->val, filename->len, &key_length);
 	if (key != NULL) {
-		zend_persistent_script *persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length);
+		zend_persistent_script *persistent_script = zend_accel_hash_str_find(&ZCSG(hash), key, key_length);
 		if (persistent_script && !persistent_script->corrupted) {
 			zend_file_handle handle = {{0}, NULL, NULL, 0, 0};
 

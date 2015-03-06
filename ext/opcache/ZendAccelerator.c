@@ -157,22 +157,22 @@ static ZEND_FUNCTION(accel_chdir)
 	orig_chdir(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
 		if (ZCG(cwd)) {
-			efree(ZCG(cwd));
+			zend_string_release(ZCG(cwd));
 		}
-		ZCG(cwd_len) = strlen(cwd);
-		ZCG(cwd) = estrndup(cwd, ZCG(cwd_len));
+		ZCG(cwd) = zend_string_init(cwd, strlen(cwd), 0);
 	} else {
 		if (ZCG(cwd)) {
-			efree(ZCG(cwd));
+			zend_string_release(ZCG(cwd));
 			ZCG(cwd) = NULL;
 		}
 	}
+	ZCG(cwd_key_len) = 0;
+	ZCG(cwd_check) = 1;
 }
 
-static inline char* accel_getcwd(int *cwd_len)
+static inline zend_string* accel_getcwd(void)
 {
 	if (ZCG(cwd)) {
-		*cwd_len = ZCG(cwd_len);
 		return ZCG(cwd);
 	} else {
 		char cwd[MAXPATHLEN + 1];
@@ -180,8 +180,9 @@ static inline char* accel_getcwd(int *cwd_len)
 		if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
 			return NULL;
 		}
-		*cwd_len = ZCG(cwd_len) = strlen(cwd);
-		ZCG(cwd) = estrndup(cwd, ZCG(cwd_len));
+		ZCG(cwd) = zend_string_init(cwd, strlen(cwd), 0);
+		ZCG(cwd_key_len) = 0;
+		ZCG(cwd_check) = 1;
 		return ZCG(cwd);
 	}
 }
@@ -202,47 +203,10 @@ static ZEND_INI_MH(accel_include_path_on_modify)
 {
 	int ret = orig_include_path_on_modify(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 
-	ZCG(include_path_key) = NULL;
 	if (ret == SUCCESS) {
-		ZCG(include_path) = new_value->val;
-		if (ZCG(include_path) && *ZCG(include_path)) {
-			ZCG(include_path_len) = new_value->len;
-
-			if (ZCG(enabled) && accel_startup_ok &&
-			    (ZCG(counted) || ZCSG(accelerator_enabled))) {
-
-				ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len));
-			    if (!ZCG(include_path_key) &&
-			        !zend_accel_hash_is_full(&ZCSG(include_paths))) {
-					SHM_UNPROTECT();
-					zend_shared_alloc_lock();
-
-					ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len));
-				    if (!ZCG(include_path_key) &&
-					    !zend_accel_hash_is_full(&ZCSG(include_paths))) {
-						char *key;
-
-						key = zend_shared_alloc(ZCG(include_path_len) + 2);
-						if (key) {
-							memcpy(key, ZCG(include_path), ZCG(include_path_len) + 1);
-							key[ZCG(include_path_len) + 1] = 'A' + ZCSG(include_paths).num_entries;
-							ZCG(include_path_key) = key + ZCG(include_path_len) + 1;
-							zend_accel_hash_update(&ZCSG(include_paths), key, ZCG(include_path_len), 0, ZCG(include_path_key));
-						} else {
-							zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
-						}
-					}
-
-					zend_shared_alloc_unlock();
-					SHM_PROTECT();
-				}
-			} else {
-				ZCG(include_path_check) = 1;
-			}
-		} else {
-			ZCG(include_path) = "";
-			ZCG(include_path_len) = 0;
-		}
+		ZCG(include_path) = new_value;
+		ZCG(include_path_key_len) = 0;
+		ZCG(include_path_check) = 1;
 	}
 	return ret;
 }
@@ -302,6 +266,39 @@ static void accel_interned_strings_save_state(void)
 	ZCSG(interned_strings_saved_top) = ZCSG(interned_strings_top);
 }
 #endif
+
+static zend_string *accel_find_interned_string(zend_string *str)
+{
+/* for now interned strings are supported only for non-ZTS build */
+#ifndef ZTS
+	zend_ulong h;
+	uint nIndex;
+	uint idx;
+	Bucket *p;
+
+	if (IS_ACCEL_INTERNED(str)) {
+		/* this is already an interned string */
+		return str;
+	}
+
+	h = zend_string_hash_val(str);
+	nIndex = h & ZCSG(interned_strings).nTableMask;
+
+	/* check for existing interned string */
+	idx = ZCSG(interned_strings).arHash[nIndex];
+	while (idx != INVALID_IDX) {
+		p = ZCSG(interned_strings).arData + idx;
+		if ((p->h == h) && (p->key->len == str->len)) {
+			if (!memcmp(p->key->val, str->val, str->len)) {
+				return p->key;
+			}
+		}
+		idx = Z_NEXT(p->val);
+	}
+#endif
+
+	return NULL;
+}
 
 zend_string *accel_new_interned_string(zend_string *str)
 {
@@ -937,56 +934,90 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
     } else if (UNEXPECTED(!ZCG(accel_directives).use_cwd)) {
 		/* pass */
     } else {
-		char *include_path = NULL;
-		int include_path_len = 0;
+		const char *include_path = NULL, *cwd = NULL;
+		int include_path_len = 0, cwd_len = 0;
 		zend_string *parent_script = NULL;
 		size_t parent_script_len = 0;
-		int cwd_len;
-		char *cwd;
 
-		if (UNEXPECTED((cwd = accel_getcwd(&cwd_len)) == NULL)) {
-			/* we don't handle this well for now. */
-			zend_accel_error(ACCEL_LOG_INFO, "getcwd() failed for '%s' (%d), please try to set opcache.use_cwd to 0 in ini file", path, errno);
-			return NULL;
-		}
-
-		if (EXPECTED(ZCG(include_path_key))) {
-			include_path = ZCG(include_path_key);
-			include_path_len = 1;
+		if (EXPECTED(ZCG(cwd_key_len))) {
+			cwd = ZCG(cwd_key);
+			cwd_len = ZCG(cwd_key_len);
 		} else {
-			include_path = ZCG(include_path);
-			include_path_len = ZCG(include_path_len);
-			if (ZCG(include_path_check) &&
-			    ZCG(enabled) && accel_startup_ok &&
-			    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
-			    !zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len)) &&
-			    !zend_accel_hash_is_full(&ZCSG(include_paths))) {
+			zend_string *cwd_str = accel_getcwd();
 
-				SHM_UNPROTECT();
-				zend_shared_alloc_lock();
+			if (UNEXPECTED(!cwd_str)) {
+				/* we don't handle this well for now. */
+				zend_accel_error(ACCEL_LOG_INFO, "getcwd() failed for '%s' (%d), please try to set opcache.use_cwd to 0 in ini file", path, errno);
+				return NULL;
+			}
+			cwd = cwd_str->val;
+			cwd_len = cwd_str->len;
+#ifndef ZTS
+			if (ZCG(cwd_check)) {
+				ZCG(cwd_check) = 0;
+				if ((ZCG(counted) || ZCSG(accelerator_enabled))) {
 
-				ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len));
-				if (UNEXPECTED(ZCG(include_path_key))) {
-					include_path = ZCG(include_path_key);
-					include_path_len = 1;
-				} else if (!zend_accel_hash_is_full(&ZCSG(include_paths))) {
-					char *key = zend_shared_alloc(ZCG(include_path_len) + 2);
+					zend_string *str = accel_find_interned_string(cwd_str);
+					if (!str) {
+						SHM_UNPROTECT();
+						zend_shared_alloc_lock();
+						str = accel_new_interned_string(zend_string_copy(cwd_str));
+						if (str == cwd_str) {
+							str = NULL;
+						}
+						zend_shared_alloc_unlock();
+						SHM_PROTECT();
+					}
+					if (str) {
+						char buf[32];
+						char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, str->val - ZCSG(interned_strings_start));
 
-					if (key) {
-						memcpy(key, ZCG(include_path), ZCG(include_path_len) + 1);
-						key[ZCG(include_path_len) + 1] = 'A' + ZCSG(include_paths).num_entries;
-						ZCG(include_path_key) = key + ZCG(include_path_len) + 1;
-						zend_accel_hash_update(&ZCSG(include_paths), key, ZCG(include_path_len), 0, ZCG(include_path_key));
-						include_path = ZCG(include_path_key);
-						include_path_len = 1;
-					} else {
-						zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
+						cwd_len = ZCG(cwd_key_len) = buf + sizeof(buf) - 1 - res;
+						cwd = ZCG(cwd_key);
+						memcpy(ZCG(cwd_key), res, cwd_len + 1);
 					}
 				}
-
-				zend_shared_alloc_unlock();
-				SHM_PROTECT();
 			}
+#endif
+		}
+
+		if (EXPECTED(ZCG(include_path_key_len))) {
+			include_path = ZCG(include_path_key);
+			include_path_len = ZCG(include_path_key_len);
+		} else if (!ZCG(include_path) || ZCG(include_path)->len == 0) {
+			include_path = "";
+			include_path_len = 0;
+		} else {
+			include_path = ZCG(include_path)->val;
+			include_path_len = ZCG(include_path)->len;
+
+#ifndef ZTS
+			if (ZCG(include_path_check)) {
+				ZCG(include_path_check) = 0;
+				if ((ZCG(counted) || ZCSG(accelerator_enabled))) {
+
+					zend_string *str = accel_find_interned_string(ZCG(include_path));
+					if (!str) {
+						SHM_UNPROTECT();
+						zend_shared_alloc_lock();
+						str = accel_new_interned_string(zend_string_copy(ZCG(include_path)));
+						if (str == ZCG(include_path)) {
+							str = NULL;
+						}
+						zend_shared_alloc_unlock();
+						SHM_PROTECT();
+					}
+					if (str) {
+						char buf[32];
+						char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, str->val - ZCSG(interned_strings_start));
+
+						include_path_len = ZCG(include_path_key_len) = buf + sizeof(buf) - 1 - res;
+						include_path = ZCG(include_path_key);
+						memcpy(ZCG(include_path_key), res, include_path_len + 1);
+					}
+				}
+			}
+#endif
 		}
 
 		/* Calculate key length */
@@ -1004,12 +1035,10 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 		key_length = path_length + 1;
 		memcpy(ZCG(key) + key_length, cwd, cwd_len);
 		key_length += cwd_len;
-		ZCG(key)[key_length] = ':';
-		key_length += 1;
-		if (EXPECTED(include_path_len == 1)) {
-			ZCG(key)[key_length] = include_path[0];
+
+		if (include_path_len) {
+			ZCG(key)[key_length] = ':';
 			key_length += 1;
-		} else {
 			memcpy(ZCG(key) + key_length, include_path, include_path_len);
 			key_length += include_path_len;
 		}
@@ -1038,14 +1067,8 @@ char *accel_make_persistent_key(const char *path, int path_length, int *key_len)
 	}
 
 	/* not use_cwd */
-//	if (UNEXPECTED((size_t)path_length >= sizeof(ZCG(key)))) {
-//		return NULL;
-//	}
 	*key_len = path_length;
 	return (char*)path;
-//	memcpy(ZCG(key), path, path_length + 1);
-//	*key_len = ZCG(key_len) = path_length;
-//	return ZCG(key);
 }
 
 int zend_accel_invalidate(const char *filename, int filename_len, zend_bool force)
@@ -1063,7 +1086,7 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 		return FAILURE;
 	}
 
-	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath->val, realpath->len);
+	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath);
 	if (persistent_script && !persistent_script->corrupted) {
 		zend_file_handle file_handle;
 
@@ -1100,7 +1123,7 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 /* Adds another key for existing cached script */
 static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_hash_entry *bucket)
 {
-	if (!zend_accel_hash_find(&ZCSG(hash), key, key_length)) {
+	if (!zend_accel_hash_str_find(&ZCSG(hash), key, key_length)) {
 		if (zend_accel_hash_is_full(&ZCSG(hash))) {
 			zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
 			ZSMMG(memory_exhausted) = 1;
@@ -1147,7 +1170,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	/* Check if we still need to put the file into the cache (may be it was
 	 * already stored by another process. This final check is done under
 	 * exclusive lock) */
-	bucket = zend_accel_hash_find_entry(&ZCSG(hash), new_persistent_script->full_path->val, new_persistent_script->full_path->len);
+	bucket = zend_accel_hash_find_entry(&ZCSG(hash), new_persistent_script->full_path);
 	if (bucket) {
 		zend_persistent_script *existing_persistent_script = (zend_persistent_script *)bucket->data;
 
@@ -1492,7 +1515,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 			if (!key) {
 				return accelerator_orig_compile_file(file_handle, type);
 			}
-			persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length);
+			persistent_script = zend_accel_hash_str_find(&ZCSG(hash), key, key_length);
 		}
 		if (!persistent_script) {
 			/* try to find cached script by full real path */
@@ -1511,7 +1534,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		    }
 
 			if (file_handle->opened_path) {
-				bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path->val, file_handle->opened_path->len);
+				bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path);
 
 				if (bucket) {
 					persistent_script = (zend_persistent_script *)bucket->data;
@@ -1726,7 +1749,7 @@ static zend_string* persistent_zend_resolve_path(const char *filename, int filen
 				/* lookup by "not-real" path */
 				key = accel_make_persistent_key(filename, filename_len, &key_length);
 				if (key) {
-					zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), key, key_length);
+					zend_accel_hash_entry *bucket = zend_accel_hash_str_find_entry(&ZCSG(hash), key, key_length);
 					if (bucket != NULL) {
 						zend_persistent_script *persistent_script = (zend_persistent_script *)bucket->data;
 						if (!persistent_script->corrupted) {
@@ -1747,7 +1770,7 @@ static zend_string* persistent_zend_resolve_path(const char *filename, int filen
 
 			if (resolved_path) {
 				/* lookup by real path */
-				zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), resolved_path->val, resolved_path->len);
+				zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), resolved_path);
 				if (bucket) {
 					zend_persistent_script *persistent_script = (zend_persistent_script *)bucket->data;
 					if (!persistent_script->corrupted) {
@@ -1807,7 +1830,8 @@ static void accel_activate(void)
 	ZCG(request_time) = (time_t)sapi_get_request_time();
 	ZCG(cache_opline) = NULL;
 	ZCG(cache_persistent_script) = NULL;
-	ZCG(include_path_check) = !ZCG(include_path_key);
+	ZCG(include_path_key_len) = 0;
+	ZCG(include_path_check) = 1;
 
 	if (ZCG(counted)) {
 #ifdef ZTS
@@ -1841,14 +1865,6 @@ static void accel_activate(void)
 				zend_reset_cache_vars();
 				zend_accel_hash_clean(&ZCSG(hash));
 
-				/* include_paths keeps only the first path */
-				if (ZCSG(include_paths).num_entries > 1) {
-					ZCSG(include_paths).num_entries = 1;
-					ZCSG(include_paths).num_direct_entries = 1;
-					memset(ZCSG(include_paths).hash_table, 0, sizeof(zend_accel_hash_entry*) * ZCSG(include_paths).max_num_entries);
-					ZCSG(include_paths).hash_table[zend_inline_hash_func(ZCSG(include_paths).hash_entries[0].key, ZCSG(include_paths).hash_entries[0].key_length) % ZCSG(include_paths).max_num_entries] = &ZCSG(include_paths).hash_entries[0];
-				}
-
 #if !defined(ZTS)
 				if (ZCG(accel_directives).interned_strings_buffer) {
 					accel_interned_strings_restore_state();
@@ -1870,6 +1886,8 @@ static void accel_activate(void)
 	}
 
 	ZCG(cwd) = NULL;
+	ZCG(cwd_key_len) = 0;
+	ZCG(cwd_check) = 1;
 
 	SHM_PROTECT();
 }
@@ -2062,7 +2080,7 @@ static void accel_deactivate(void)
 #endif
 
 	if (ZCG(cwd)) {
-		efree(ZCG(cwd));
+		zend_string_release(ZCG(cwd));
 		ZCG(cwd) = NULL;
 	}
 
@@ -2142,7 +2160,6 @@ static int zend_accel_init_shm(void)
 	ZSMMG(app_shared_globals) = accel_shared_globals;
 
 	zend_accel_hash_init(&ZCSG(hash), ZCG(accel_directives).max_accelerated_files);
-	zend_accel_hash_init(&ZCSG(include_paths), 32);
 
 	ZCSG(interned_strings_start) = ZCSG(interned_strings_end) = NULL;
 # ifndef ZTS
@@ -2316,34 +2333,11 @@ static int accel_startup(zend_extension *extension)
 		func->internal_function.handler = ZEND_FN(accel_chdir);
 	}
 	ZCG(cwd) = NULL;
+	ZCG(include_path) = NULL;
 
 	/* Override "include_path" modifier callback */
 	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", sizeof("include_path")-1)) != NULL) {
-		ZCG(include_path) = INI_STR("include_path");
-		ZCG(include_path_key) = NULL;
-		if (ZCG(include_path) && *ZCG(include_path)) {
-			ZCG(include_path_len) = strlen(ZCG(include_path));
-			ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len));
-			if (!ZCG(include_path_key) &&
-			    !zend_accel_hash_is_full(&ZCSG(include_paths))) {
-				char *key;
-
-				zend_shared_alloc_lock();
-				key = zend_shared_alloc(ZCG(include_path_len) + 2);
-				if (key) {
-					memcpy(key, ZCG(include_path), ZCG(include_path_len) + 1);
-					key[ZCG(include_path_len) + 1] = 'A' + ZCSG(include_paths).num_entries;
-					ZCG(include_path_key) = key + ZCG(include_path_len) + 1;
-					zend_accel_hash_update(&ZCSG(include_paths), key, ZCG(include_path_len), 0, ZCG(include_path_key));
-				} else {
-					zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
-				}
-				zend_shared_alloc_unlock();
-			}
-		} else {
-			ZCG(include_path) = "";
-			ZCG(include_path_len) = 0;
-		}
+		ZCG(include_path) = ini_entry->value;
 		orig_include_path_on_modify = ini_entry->on_modify;
 		ini_entry->on_modify = accel_include_path_on_modify;
 	}
