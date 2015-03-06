@@ -27,7 +27,6 @@ foreach($streams as $stream)
 	var_dump(feof($fp));
 	echo "===GETC===\n";
 	var_dump(fgetc($fp));
-	var_dump(fgetc($fp));
 	var_dump(ftell($fp));
 	var_dump(feof($fp));
 	echo "===REWIND===\n";
@@ -95,7 +94,6 @@ int(5)
 bool(false)
 ===GETC===
 string(1) "5"
-bool(false)
 int(6)
 bool(true)
 ===REWIND===
