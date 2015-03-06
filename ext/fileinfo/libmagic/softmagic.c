@@ -1089,13 +1089,8 @@ mcopy(struct magic_set *ms, union VALUETYPE *p, int type, int indir,
 				return 0;
 			}
 
-			if (m->str_flags & REGEX_LINE_COUNT) {
-				linecnt = m->str_range;
-				bytecnt = linecnt * 80;
-			} else {
-				linecnt = 0;
-				bytecnt = m->str_range;
-			}
+			linecnt = m->str_range;
+			bytecnt = linecnt * 80;
 
 			/* XXX bytecnt_max is to be kept for PHP, see cve-2014-3538.
 				PCRE might stuck if the input buffer is too big. To ensure
