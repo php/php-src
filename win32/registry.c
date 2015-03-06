@@ -240,7 +240,7 @@ void UpdateIniFromRegistry(char *path)
 	}
 	zend_str_tolower(path, path_len);
 
-	while (path_len >= 0) {
+	while (path_len > 0) {
 		HashTable *ht = (HashTable *)zend_hash_str_find_ptr(PW32G(registry_directories), path, path_len);
 
 		if (ht != NULL) {
@@ -252,11 +252,9 @@ void UpdateIniFromRegistry(char *path)
 			} ZEND_HASH_FOREACH_END();
 		}
 
-		if (--path_len > 0) {
-			while (path_len > 0 && path[path_len] != '/') {
-				path_len--;
-			}
-		}
+		do {
+			path_len--;
+		} while (path_len > 0 && path[path_len] != '/');
 		path[path_len] = 0;
 	}
 
