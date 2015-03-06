@@ -19,7 +19,7 @@ echo "\n-- Testing strrchr() function with less than expected no. of arguments -
 var_dump( strrchr($haystack) );
 
 echo "\n-- Testing strrchr() function with more than expected no. of arguments --";
-var_dump( strrchr($haystack, $needle, $extra_arg) );
+var_dump( strrchr($haystack, $needle, true, $extra_arg) );
 
 echo "*** Done ***";
 ?>
@@ -35,6 +35,6 @@ Warning: strrchr() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
 -- Testing strrchr() function with more than expected no. of arguments --
-Warning: strrchr() expects exactly 2 parameters, 3 given in %s on line %d
+Warning: strrchr() expects exactly 3 parameters, 4 given in %s on line %d
 NULL
 *** Done ***

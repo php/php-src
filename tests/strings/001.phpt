@@ -40,12 +40,14 @@ echo "Testing strrchr: ";
 $test = "fola fola blakken";
 $found1 = strrchr($test, "b");
 $found2 = strrchr($test, 102);
+$found3 = strrchr($test, "o", true);
 if ($found1 != "blakken") {
 	echo("failed 1\n");
 } elseif ($found2 != "fola blakken") {
 	echo("failed 2\n");
-}
-else {
+} elseif ($found3 != "fola f") {
+	echo("failed 3\n");
+} else {
 	echo("passed\n");
 }
 
