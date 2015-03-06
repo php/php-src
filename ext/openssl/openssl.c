@@ -4281,7 +4281,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	char * extracertsfilename = NULL;
 	size_t extracertsfilename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ppzza!|lp",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ppzza!|lp!",
 				&infilename, &infilename_len, &outfilename, &outfilename_len,
 				&zcert, &zprivkey, &zheaders, &flags, &extracertsfilename,
 				&extracertsfilename_len) == FAILURE) {
