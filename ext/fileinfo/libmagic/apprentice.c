@@ -2944,10 +2944,6 @@ error:
 	return NULL;
 }
 
-private const uint32_t ar[] = {
-    MAGICNO, VERSIONNO
-};
-
 private int
 check_buffer(struct magic_set *ms, struct magic_map *map, const char *dbname)
 {
@@ -3017,6 +3013,10 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 	char *dbname;
 	int rv = -1;
 	uint32_t i;
+	union {
+		struct magic m;
+		uint32_t h[2 + MAGIC_SETS];
+	} hdr;
 	php_stream *stream;
 
 
@@ -3032,21 +3032,13 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 		file_error(ms, errno, "cannot open `%s'", dbname);
 		goto out;
 	}
+	memset(&hdr, 0, sizeof(hdr));
+	hdr.h[0] = MAGICNO;
+	hdr.h[1] = VERSIONNO;
+	memcpy(hdr.h + 2, map->nmagic, nm);
 
-	if (write(fd, ar, sizeof(ar)) != (ssize_t)sizeof(ar)) {
+	if (php_stream_write(stream,(const char *)&hdr, sizeof(hdr)) != (ssize_t)sizeof(hdr)) {
 		file_error(ms, errno, "error writing `%s'", dbname);
-		goto out;
-	}
-
-	if (php_stream_write(stream, (const char *)map->nmagic, nm) != (ssize_t)nm) {
-		file_error(ms, errno, "error writing `%s'", dbname);
-		goto out;
-	}
-
-	assert(nm + sizeof(ar) < m);
-
-	if (php_stream_seek(stream,(zend_off_t)sizeof(struct magic), SEEK_SET) != sizeof(struct magic)) {
-		file_error(ms, errno, "error seeking `%s'", dbname);
 		goto out;
 	}
 
@@ -3061,7 +3053,6 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 	if (stream) {
 		php_stream_close(stream);
 	}
-
 	rv = 0;
 out:
 	efree(dbname);
