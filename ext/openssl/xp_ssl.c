@@ -2511,7 +2511,7 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)
 					}
 				}
 
-				*(int *)ret = sslsock->s.socket;
+				*(php_socket_t *)ret = sslsock->s.socket;
 			}
 			return SUCCESS;
 
