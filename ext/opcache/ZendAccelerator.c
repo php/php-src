@@ -1470,10 +1470,10 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	/* In case this callback is called from include_once, require_once or it's
 	 * a main FastCGI request, the key must be already calculated, and cached
 	 * persistent script already found */
-	if ((ZCG(cache_persistent_script) && ZCG(key_len) &&
+	if (ZCG(cache_persistent_script) && ZCG(key_len) &&
 	    (!EG(current_execute_data) &&
 	     file_handle->filename == SG(request_info).path_translated &&
-	     ZCG(cache_opline) == NULL)) ||
+	     ZCG(cache_opline) == NULL) ||
 	    (EG(current_execute_data) &&
 	     EG(current_execute_data)->func &&
 	     ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
@@ -1702,9 +1702,9 @@ static zend_string* persistent_zend_resolve_path(const char *filename, int filen
 	    !ZCSG(restart_in_progress)) {
 
 		/* check if callback is called from include_once or it's a main request */
-		if ((!ZCG(accel_directives).revalidate_path &&
+		if (!ZCG(accel_directives).revalidate_path &&
 		    (!EG(current_execute_data) &&
-		     filename == SG(request_info).path_translated)) ||
+		     filename == SG(request_info).path_translated) ||
 		    (EG(current_execute_data) &&
 		     EG(current_execute_data)->func &&
 		     ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
