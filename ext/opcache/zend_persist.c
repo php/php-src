@@ -801,7 +801,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	zend_shared_alloc_clear_xlat_table();
 
 	zend_accel_store(script, sizeof(zend_persistent_script));
-	*key = zend_accel_memdup(*key, key_length + 1);
+	if (*key) {
+		*key = zend_accel_memdup(*key, key_length + 1);
+	}
 	zend_accel_store_string(script->full_path);
 
 #ifdef __SSE2__

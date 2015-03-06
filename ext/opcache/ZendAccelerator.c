@@ -1152,7 +1152,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		zend_persistent_script *existing_persistent_script = (zend_persistent_script *)bucket->data;
 
 		if (!existing_persistent_script->corrupted) {
-			if (!ZCG(accel_directives).revalidate_path &&
+			if (key &&
 			    (!ZCG(accel_directives).validate_timestamps ||
 			     (new_persistent_script->timestamp == existing_persistent_script->timestamp))) {
 				zend_accel_add_key(key, key_length, bucket);
@@ -1204,7 +1204,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->full_path->val, new_persistent_script->full_path->len, 0, new_persistent_script);
 	if (bucket) {
 		zend_accel_error(ACCEL_LOG_INFO, "Cached script '%s'", new_persistent_script->full_path);
-		if (!ZCG(accel_directives).revalidate_path &&
+		if (key &&
 		    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
 		    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
 		    (new_persistent_script->full_path->len != key_length ||
@@ -1470,26 +1470,30 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	/* In case this callback is called from include_once, require_once or it's
 	 * a main FastCGI request, the key must be already calculated, and cached
 	 * persistent script already found */
-	if (ZCG(cache_persistent_script) && ZCG(key_len) &&
-	    (!EG(current_execute_data) &&
-	     file_handle->filename == SG(request_info).path_translated &&
-	     ZCG(cache_opline) == NULL) ||
-	    (EG(current_execute_data) &&
-	     EG(current_execute_data)->func &&
-	     ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
-	     ZCG(cache_opline) == EG(current_execute_data)->opline)) {
+	if (ZCG(cache_persistent_script) &&
+	    ((!EG(current_execute_data) &&
+	      file_handle->filename == SG(request_info).path_translated &&
+	      ZCG(cache_opline) == NULL) ||
+	     (EG(current_execute_data) &&
+	      EG(current_execute_data)->func &&
+	      ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
+	      ZCG(cache_opline) == EG(current_execute_data)->opline))) {
 
 		persistent_script = ZCG(cache_persistent_script);
-		key = ZCG(key);
-		key_length = ZCG(key_len);
+		if (ZCG(key_len)) {
+			key = ZCG(key);
+			key_length = ZCG(key_len);
+		}
 
 	} else {
-		/* try to find cached script by key */
-		key = accel_make_persistent_key(file_handle->filename, strlen(file_handle->filename), &key_length);
-		if (!key) {
-			return accelerator_orig_compile_file(file_handle, type);
+		if (!ZCG(accel_directives).revalidate_path) {
+			/* try to find cached script by key */
+			key = accel_make_persistent_key(file_handle->filename, strlen(file_handle->filename), &key_length);
+			if (!key) {
+				return accelerator_orig_compile_file(file_handle, type);
+			}
+			persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length);
 		}
-		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length);
 		if (!persistent_script) {
 			/* try to find cached script by full real path */
 			zend_accel_hash_entry *bucket;
@@ -1506,17 +1510,19 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				return NULL;
 		    }
 
-			if (file_handle->opened_path &&
-			    (bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path->val, file_handle->opened_path->len)) != NULL) {
+			if (file_handle->opened_path) {
+				bucket = zend_accel_hash_find_entry(&ZCSG(hash), file_handle->opened_path->val, file_handle->opened_path->len);
 
-				persistent_script = (zend_persistent_script *)bucket->data;
-				if (!ZCG(accel_directives).revalidate_path &&
-				    !persistent_script->corrupted) {
-			    	SHM_UNPROTECT();
-					zend_shared_alloc_lock();
-					zend_accel_add_key(key, key_length, bucket);
-					zend_shared_alloc_unlock();
-			    	SHM_PROTECT();
+				if (bucket) {
+					persistent_script = (zend_persistent_script *)bucket->data;
+
+					if (key && !persistent_script->corrupted) {
+						SHM_UNPROTECT();
+						zend_shared_alloc_lock();
+						zend_accel_add_key(key, key_length, bucket);
+						zend_shared_alloc_unlock();
+						SHM_PROTECT();
+					}
 				}
 			}
 		}
@@ -1702,8 +1708,7 @@ static zend_string* persistent_zend_resolve_path(const char *filename, int filen
 	    !ZCSG(restart_in_progress)) {
 
 		/* check if callback is called from include_once or it's a main request */
-		if (!ZCG(accel_directives).revalidate_path &&
-		    (!EG(current_execute_data) &&
+		if ((!EG(current_execute_data) &&
 		     filename == SG(request_info).path_translated) ||
 		    (EG(current_execute_data) &&
 		     EG(current_execute_data)->func &&
@@ -1715,17 +1720,25 @@ static zend_string* persistent_zend_resolve_path(const char *filename, int filen
 			/* we are in include_once or FastCGI request */
 			zend_string *resolved_path;
 			int key_length;
-			char *key = accel_make_persistent_key(filename, filename_len, &key_length);
-
-			if (key) {
-				zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), key, key_length);
-				if (bucket != NULL) {
-					zend_persistent_script *persistent_script = (zend_persistent_script *)bucket->data;
-					if (persistent_script && !persistent_script->corrupted) {
-						ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
-						ZCG(cache_persistent_script) = persistent_script;
-						return zend_string_copy(persistent_script->full_path);
+			char *key = NULL;
+			
+			if (!ZCG(accel_directives).revalidate_path) {
+				/* lookup by "not-real" path */
+				key = accel_make_persistent_key(filename, filename_len, &key_length);
+				if (key) {
+					zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), key, key_length);
+					if (bucket != NULL) {
+						zend_persistent_script *persistent_script = (zend_persistent_script *)bucket->data;
+						if (!persistent_script->corrupted) {
+							ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
+							ZCG(cache_persistent_script) = persistent_script;
+							return zend_string_copy(persistent_script->full_path);
+						}
 					}
+				} else {
+					ZCG(cache_opline) = NULL;
+					ZCG(cache_persistent_script) = NULL;
+					return accelerator_orig_zend_resolve_path(filename, filename_len);
 				}
 			}
 
@@ -1733,10 +1746,11 @@ static zend_string* persistent_zend_resolve_path(const char *filename, int filen
 			resolved_path = accelerator_orig_zend_resolve_path(filename, filename_len);
 
 			if (resolved_path) {
+				/* lookup by real path */
 				zend_accel_hash_entry *bucket = zend_accel_hash_find_entry(&ZCSG(hash), resolved_path->val, resolved_path->len);
 				if (bucket) {
 					zend_persistent_script *persistent_script = (zend_persistent_script *)bucket->data;
-					if (persistent_script && !persistent_script->corrupted) {
+					if (!persistent_script->corrupted) {
 						if (key) {
 							/* add another "key" for the same bucket */
 							SHM_UNPROTECT();
@@ -1744,9 +1758,11 @@ static zend_string* persistent_zend_resolve_path(const char *filename, int filen
 							zend_accel_add_key(key, key_length, bucket);
 							zend_shared_alloc_unlock();
 							SHM_PROTECT();
+						} else {
+							ZCG(key_len) = 0;
 						}
-						ZCG(cache_opline) = (EG(current_execute_data) && key) ? EG(current_execute_data)->opline : NULL;
-						ZCG(cache_persistent_script) = key ? persistent_script : NULL;
+						ZCG(cache_opline) = EG(current_execute_data) ? EG(current_execute_data)->opline : NULL;
+						ZCG(cache_persistent_script) = persistent_script;
 						return resolved_path;
 					}
 				}
@@ -1917,25 +1933,6 @@ static void accel_fast_zval_dtor(zval *zvalue)
 				return;
 				break;
 		}
-	}
-}
-
-static int accel_clean_non_persistent_function(zval *zv)
-{
-	zend_function *function = Z_PTR_P(zv);
-
-	if (function->type == ZEND_INTERNAL_FUNCTION) {
-		return ZEND_HASH_APPLY_STOP;
-	} else {
-		if (function->op_array.static_variables) {
-			if (!(GC_FLAGS(function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				if (--GC_REFCOUNT(function->op_array.static_variables) == 0) {
-					accel_fast_hash_destroy(function->op_array.static_variables);
-				}
-			}
-			function->op_array.static_variables = NULL;
-		}
-		return ZEND_HASH_APPLY_REMOVE;
 	}
 }
 

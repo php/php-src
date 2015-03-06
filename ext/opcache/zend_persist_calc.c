@@ -375,7 +375,9 @@ uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_scrip
 	ZCG(current_persistent_script) = new_persistent_script;
 
 	ADD_DUP_SIZE(new_persistent_script, sizeof(zend_persistent_script));
-	ADD_DUP_SIZE(key, key_length + 1);
+	if (key) {
+		ADD_DUP_SIZE(key, key_length + 1);
+	}
 	ADD_STRING(new_persistent_script->full_path);
 
 #ifdef __SSE2__
