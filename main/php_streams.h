@@ -307,6 +307,9 @@ PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t coun
 #define php_stream_write_string(stream, str)	_php_stream_write(stream, str, strlen(str))
 #define php_stream_write(stream, buf, count)	_php_stream_write(stream, (buf), (count))
 
+PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size);
+#define php_stream_fill_read_buffer(stream, size)	_php_stream_fill_read_buffer((stream), (size))
+
 #ifdef ZTS
 PHPAPI size_t _php_stream_printf(php_stream *stream, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 #else
