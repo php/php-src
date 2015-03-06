@@ -5,6 +5,8 @@
 - OpenSSL
   . Fixed bugs #68853, #65137 (Buffered crypto stream data breaks IO polling
     in stream_select() contexts) (Chris Wright)
+  . Fixed bug #69197 (openssl_pkcs7_sign handles default value incorrectly)
+    (Daniel Lowrey)
 
 - Core:
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
