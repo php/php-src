@@ -13,6 +13,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Nikita Popov <nikic@php.net>                                |
+   |          Bob Weinand <bobwei9@hotmail.com>                           |
    +----------------------------------------------------------------------+
 */
 
@@ -24,8 +25,28 @@
 BEGIN_EXTERN_C()
 
 extern ZEND_API zend_class_entry *zend_ce_generator;
+extern ZEND_API zend_class_entry *zend_ce_ClosedGeneratorException;
 
-typedef struct _zend_generator {
+typedef struct _zend_generator_node zend_generator_node;
+typedef struct _zend_generator zend_generator;
+
+struct _zend_generator_node {
+	zend_generator *parent; /* NULL for root */
+	uint32_t children;
+	union {
+		HashTable ht; /* if > 4 children */
+		struct {
+			zend_generator *leaf;
+			zend_generator *child;
+		} array[4]; /* if <= 4 children */
+	} child;
+	union {
+		zend_generator *leaf; /* if > 0 children */
+		zend_generator *root; /* if 0 children */
+	} ptr;
+};
+
+struct _zend_generator {
 	zend_object std;
 
 	zend_object_iterator *iterator;
@@ -48,32 +69,36 @@ typedef struct _zend_generator {
 	/* Largest used integer key for auto-incrementing keys */
 	zend_long largest_used_integer_key;
 
-	/* Values specified by "yield *" to yield from this generator.
+	/* Values specified by "yield from" to yield from this generator.
 	 * This is only used for arrays or non-generator Traversables.
 	 * This zval also uses the u2 structure in the same way as
 	 * by-value foreach. */
 	zval values;
 
-	/* Generator that is currently yielding values. This will differ
-	 * from the surrounding structure if "yield *" is used on a generator. */
-	struct _zend_generator *current_generator;
-
-	/* Stack of waiting generators when multiple "yield *" expressions
+	/* Node of waiting generators when multiple "yield *" expressions
 	 * are nested. */
-	zend_ptr_stack generator_stack;
+	zend_generator_node node;
+
+	/* Fake execute_data for stacktraces */
+	zend_execute_data execute_fake;
 
 	/* ZEND_GENERATOR_* flags */
 	zend_uchar flags;
-} zend_generator;
+};
 
 static const zend_uchar ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;
 static const zend_uchar ZEND_GENERATOR_FORCED_CLOSE      = 0x2;
 static const zend_uchar ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
+static const zend_uchar ZEND_GENERATOR_DO_INIT           = 0x8;
 
 void zend_register_generator_ce(void);
 ZEND_API void zend_generator_create_zval(zend_execute_data *call, zend_op_array *op_array, zval *return_value);
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution);
 ZEND_API void zend_generator_resume(zend_generator *generator);
+
+void zend_generator_yield_from(zend_generator *this, zend_generator *from);
+ZEND_API zend_generator *zend_generator_get_current(zend_generator *generator);
+ZEND_API zend_execute_data *zend_generator_check_placeholder_frame(zend_execute_data *ptr);
 
 END_EXTERN_C()
 

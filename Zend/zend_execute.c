@@ -2028,7 +2028,7 @@ static zend_always_inline zend_generator *zend_get_running_generator(zend_execut
 	zend_generator *generator = (zend_generator *) EX(return_value);
 	/* However control may currently be delegated to another generator.
 	 * That's the one we're interested in. */
-	return generator->current_generator;
+	return generator;
 }
 /* }}} */
 

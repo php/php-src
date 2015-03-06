@@ -1119,6 +1119,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_RETURN;
 }
 
+<ST_IN_SCRIPTING>"yield"{WHITESPACE}"from" {
+	return T_YIELD_FROM;
+}
+
 <ST_IN_SCRIPTING>"yield" {
 	return T_YIELD;
 }

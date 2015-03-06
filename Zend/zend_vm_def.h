@@ -6392,13 +6392,27 @@ ZEND_VM_HANDLER(170, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 		if (ce == zend_ce_generator) {
 			zend_generator *new_gen = (zend_generator *) Z_OBJ_P(val);
 
-			zend_ptr_stack_push(&generator->generator_stack, generator->current_generator);
-			generator->current_generator = new_gen;
-
 			if (OP1_TYPE != IS_TMP_VAR) {
 				Z_ADDREF_P(val);
 			}
 			FREE_OP1_IF_VAR();
+
+			if (Z_ISUNDEF(new_gen->retval)) {
+				zend_generator_yield_from(generator, new_gen);
+			} else if (new_gen->execute_data == NULL) {
+				// TODO: Should be an engine exception
+				zend_error(E_RECOVERABLE_ERROR, "Generator passed to yield from was aborted without proper return and is unable to continue");
+
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+				if (RETURN_VALUE_USED(opline)) {
+					ZVAL_COPY(EX_VAR(opline->result.var), &new_gen->retval);
+				}
+
+				CHECK_EXCEPTION();
+				ZEND_VM_NEXT_OPCODE();
+			}
 		} else {
 			zend_object_iterator *iter = ce->get_iterator(ce, val, 0);
 			FREE_OP1();
@@ -6425,12 +6439,13 @@ ZEND_VM_HANDLER(170, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 		}
 	} else {
 		// TODO: Should be an engine exception
-		zend_throw_exception(NULL, "Can use \"yield *\" only with arrays and Traversables", 0);
+		zend_throw_exception(NULL, "Can use \"yield from\" only with arrays and Traversables", 0);
 		HANDLE_EXCEPTION();
 	}
 
+	/* This is the default return value
+	 * when the expression is a Generator, it will be overwritten in zend_generator_resume() */
 	if (RETURN_VALUE_USED(opline)) {
-		// TODO
 		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 
