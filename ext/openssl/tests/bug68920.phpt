@@ -1,29 +1,53 @@
 --TEST--
 Bug #68920: peer_fingerprint input checks should be strict
 --SKIPIF--
-<?php
+<?php 
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
+if (!function_exists("proc_open")) die("skip no proc_open");
 --FILE--
 <?php
-error_reporting(E_ALL);
+$serverCode = <<<'CODE'
+    $serverUri = "ssl://127.0.0.1:64321";
+    $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
+    $serverCtx = stream_context_create(['ssl' => [
+        'local_cert' => __DIR__ . '/san-cert.pem',
+    ]]);
 
-$ctx = stream_context_create(['ssl' => ['verify_peer'=> false, 'peer_fingerprint' => true]]);
-$sock = stream_socket_client("ssl://php.net:443", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $ctx);
-var_dump($sock);
+    $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
+    phpt_notify();
 
-$ctx = stream_context_create(['ssl' => ['verify_peer'=> false, 'peer_fingerprint' => null]]);
-$sock = stream_socket_client("ssl://php.net:443", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $ctx);
-var_dump($sock);
+    stream_socket_accept($server, 30);
+    stream_socket_accept($server, 30);
+    stream_socket_accept($server, 30);
+    stream_socket_accept($server, 30);
+CODE;
 
-$ctx = stream_context_create(['ssl' => ['verify_peer'=> false, 'peer_fingerprint' => []]]);
-$sock = stream_socket_client("ssl://php.net:443", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $ctx);
-var_dump($sock);
+$clientCode = <<<'CODE'
+    $serverUri = "ssl://127.0.0.1:64321";
+    $clientFlags = STREAM_CLIENT_CONNECT;
 
-$ctx = stream_context_create(['ssl' => ['verify_peer'=> false, 'peer_fingerprint' => ['foo']]]);
-$sock = stream_socket_client("ssl://php.net:443", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $ctx);
-var_dump($sock);
+    phpt_wait();
+
+    $ctx = stream_context_create(['ssl' => ['verify_peer'=> false, 'peer_fingerprint' => true]]);
+    $sock = stream_socket_client($serverUri, $errno, $errstr, 30, $clientFlags, $ctx);
+    var_dump($sock);
+
+    $ctx = stream_context_create(['ssl' => ['verify_peer'=> false, 'peer_fingerprint' => null]]);
+    $sock = stream_socket_client($serverUri, $errno, $errstr, 30, $clientFlags, $ctx);
+    var_dump($sock);
+
+    $ctx = stream_context_create(['ssl' => ['verify_peer'=> false, 'peer_fingerprint' => []]]);
+    $sock = stream_socket_client($serverUri, $errno, $errstr, 30, $clientFlags, $ctx);
+    var_dump($sock);
+
+    $ctx = stream_context_create(['ssl' => ['verify_peer'=> false, 'peer_fingerprint' => ['foo']]]);
+    $sock = stream_socket_client($serverUri, $errno, $errstr, 30, $clientFlags, $ctx);
+    var_dump($sock);
+CODE;
+
+include 'ServerClientTestCase.inc';
+ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
-
 Warning: stream_socket_client(): Expected peer fingerprint must be a string or an array in %s on line %d
 
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
