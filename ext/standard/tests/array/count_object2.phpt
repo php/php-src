@@ -6,7 +6,6 @@ Test count() function : object functionality - objects without Countable interfa
  * Description: Counts an elements in an array. If Standard PHP library is installed,
  * it will return the properties of an object.
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
  */
 
 echo "*** Testing count() : object functionality ***\n";

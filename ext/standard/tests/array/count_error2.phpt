@@ -6,7 +6,6 @@ Test count() function : error conditions
  * Description: Counts an elements in an array. If Standard PHP Library is installed, 
  * it will return the properties of an object.
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
  */
 
 // Calling count() with zero and more than expected arguments .

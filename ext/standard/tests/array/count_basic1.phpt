@@ -6,7 +6,6 @@ Test count() function : basic functionality - for scalar types
  * Description: Counts an elements in an array. If Standard PHP library is 
  *              installed, it will return the properties of an object.
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
  */
 
 /* Testing the count() for some of the scalar types(integer, float) values 
