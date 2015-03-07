@@ -357,7 +357,8 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val)
 
 		return 1;
 	} else {
-		php_error_docref(NULL, E_WARNING, "Invalid peer_fingerprint value; fingerprint string or array of the form [algo => fingerprint] required");
+		php_error_docref(NULL, E_WARNING,
+			"Invalid peer_fingerprint value; fingerprint string or array of the form [algo => fingerprint] required");
 	}
 
 	return 0;
@@ -400,7 +401,7 @@ static zend_bool matches_wildcard_name(const char *subjectname, const char *cert
 
 static zend_bool matches_san_list(X509 *peer, const char *subject_name) /* {{{ */
 {
-	int i;
+	int i, len;
 	unsigned char *cert_name = NULL;
 	char ipbuffer[64];
 
@@ -416,6 +417,12 @@ static zend_bool matches_san_list(X509 *peer, const char *subject_name) /* {{{ *
 				OPENSSL_free(cert_name);
 				/* prevent null-byte poisoning*/
 				continue;
+			}
+
+			/* accommodate valid FQDN entries ending in "." */
+			len = strlen((const char*)cert_name);
+			if (len && strcmp((const char *)&cert_name[len-1], ".") == 0) {
+				cert_name[len-1] = '\0';
 			}
 
 			if (matches_wildcard_name(subject_name, (const char *)cert_name)) {
@@ -2491,6 +2498,19 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)
 
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 			if (ret) {
+				if (sslsock->ssl_active) {
+					/* OpenSSL has an internal buffer which select() cannot see. If we don't
+					   fetch it into the stream's buffer, no activity will be reported on the
+					   stream even though there is data waiting to be read - but we only fetch
+					   the number of bytes OpenSSL has ready to give us since we weren't asked
+					   for any data at this stage. This is only likely to cause issues with
+					   non-blocking streams, but it's harmless to always do it. */
+					int bytes;
+					while ((bytes = SSL_pending(sslsock->ssl_handle)) > 0) {
+						php_stream_fill_read_buffer(stream, (size_t)bytes);
+					}
+				}
+
 				*(php_socket_t *)ret = sslsock->s.socket;
 			}
 			return SUCCESS;

@@ -715,6 +715,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
 #endif
 
+#ifdef ZEND_SIGNALS
+	zend_signal_startup();
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -769,9 +773,6 @@ void zend_post_startup(void) /* {{{ */
 
 void zend_shutdown(void) /* {{{ */
 {
-#ifdef ZEND_SIGNALS
-	zend_signal_shutdown();
-#endif
 	zend_destroy_rsrc_list(&EG(persistent_list));
 	if (EG(active))
 	{

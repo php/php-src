@@ -20,6 +20,7 @@
   . Fixed bug #68166 (Exception with invalid character causes segv). (Rasmus)
   . Fixed bug #69141 (Missing arguments in reflection info for some builtin
     functions). (kostyantyn dot lysyy at oracle dot com)
+  . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
 
 - cURL:
   . Fixed bug #69088 (PHP_MINIT_FUNCTION does not fully initialize cURL on

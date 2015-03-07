@@ -841,6 +841,22 @@ static zend_always_inline void _zend_hash_append_ptr(HashTable *ht, zend_string 
 	ht->nNumOfElements++;
 }
 
+static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string *key, zval *ptr)
+{
+	uint32_t idx = ht->nNumUsed++;
+	uint32_t nIndex;
+	Bucket *p = ht->arData + idx;
+
+	ZVAL_INDIRECT(&p->val, ptr);
+	p->key = key;
+	p->h = key->h;
+	nIndex = p->h & ht->nTableMask;
+	Z_NEXT(p->val) = ht->arHash[nIndex];
+	ht->arHash[nIndex] = idx;
+	ht->nNumUsed = idx + 1;
+	ht->nNumOfElements++;
+}
+
 #endif							/* ZEND_HASH_H */
 
 /*

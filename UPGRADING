@@ -385,7 +385,8 @@ Other
 - JSON:
   . Rejected RFC 7159 incompatible number formats in json_decode string -
         top level (07, 0xff, .1, -.1) and all levels ([1.], [1.e1])
-  . Empty PHP string passed to json_encode emits a JSON syntax error.
+  . Calling json_decode with 1st argument equal to empty PHP string or value that 
+    after casting to string is empty string (NULL, FALSE) results in JSON syntax error.
 
 - Stream:
   . Removed set_socket_blocking() in favor of its alias stream_set_blocking().

@@ -331,7 +331,7 @@ finish:
 
 		/* enable SSL transport layer */
 		if (stream) {
-			if (php_stream_xport_crypto_setup(stream, STREAM_CRYPTO_METHOD_ANY_CLIENT, NULL) < 0 ||
+			if (php_stream_xport_crypto_setup(stream, STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL) < 0 ||
 			    php_stream_xport_crypto_enable(stream, 1) < 0) {
 				php_stream_wrapper_log_error(wrapper, options, "Cannot connect to HTTPS server through proxy");
 				php_stream_close(stream);

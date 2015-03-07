@@ -77,14 +77,16 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 		ALLOC_HASHTABLE(zobj->properties);
 		zend_hash_init(zobj->properties, ce->default_properties_count, NULL, ZVAL_PTR_DTOR, 0);
 		if (ce->default_properties_count) {
+			zend_hash_real_init(zobj->properties, 0);
+			zobj->properties->nInternalPointer = 0;
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (/*prop_info->ce == ce &&*/
 				    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
 				    Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) != IS_UNDEF) {
-					zval zv;
 
-					ZVAL_INDIRECT(&zv, OBJ_PROP(zobj, prop_info->offset));
-					zend_hash_add_new(zobj->properties, prop_info->name, &zv);
+					zend_string_addref(prop_info->name);
+					_zend_hash_append_ind(zobj->properties, prop_info->name, 
+						OBJ_PROP(zobj, prop_info->offset));
 				}
 			} ZEND_HASH_FOREACH_END();
 			while (ce->parent && ce->parent->default_properties_count) {

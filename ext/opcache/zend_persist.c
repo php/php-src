@@ -572,6 +572,15 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 static void zend_persist_op_array(zval *zv)
 {
+	zend_op_array *op_array = Z_PTR_P(zv);
+	zend_op_array *old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
+	if (old_op_array) {
+		Z_PTR_P(zv) = old_op_array;
+		if (op_array->refcount && --(*op_array->refcount) == 0) {
+			efree(op_array->refcount);
+		}
+		return;
+	}
 	memcpy(ZCG(arena_mem), Z_PTR_P(zv), sizeof(zend_op_array));
 	zend_shared_alloc_register_xlat_entry(Z_PTR_P(zv), ZCG(arena_mem));
 	Z_PTR_P(zv) = ZCG(arena_mem);
@@ -792,7 +801,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	zend_shared_alloc_clear_xlat_table();
 
 	zend_accel_store(script, sizeof(zend_persistent_script));
-	*key = zend_accel_memdup(*key, key_length + 1);
+	if (*key) {
+		*key = zend_accel_memdup(*key, key_length + 1);
+	}
 	zend_accel_store_string(script->full_path);
 
 #ifdef __SSE2__

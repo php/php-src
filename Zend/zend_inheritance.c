@@ -57,8 +57,8 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 {
 	zend_function *new_function;
 
-	if (func->type == ZEND_INTERNAL_FUNCTION) {
-		if (ce->type & ZEND_INTERNAL_CLASS) {
+	if (UNEXPECTED(func->type == ZEND_INTERNAL_FUNCTION)) {
+		if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
 			new_function = pemalloc(sizeof(zend_internal_function), 1);
 			memcpy(new_function, func, sizeof(zend_internal_function));
 		} else {
@@ -66,7 +66,7 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 			memcpy(new_function, func, sizeof(zend_internal_function));
 			new_function->common.fn_flags |= ZEND_ACC_ARENA_ALLOCATED;
 		}
-		if (new_function->common.function_name) {
+		if (EXPECTED(new_function->common.function_name)) {
 			zend_string_addref(new_function->common.function_name);
 		}
 	} else {
@@ -89,8 +89,6 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 
 static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 {
-	zend_function *function, *new_function;
-
 	ZEND_ASSERT(ce->parent != NULL);
 
 	/* You cannot change create_object */
@@ -597,7 +595,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 	if (UNEXPECTED(child)) {
 		child_info = Z_PTR_P(child);
-		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW)) {
+		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
 			child_info->flags |= ZEND_ACC_CHANGED;
 		} else {
 			if (UNEXPECTED((parent_info->flags & ZEND_ACC_STATIC) != (child_info->flags & ZEND_ACC_STATIC))) {
@@ -623,8 +621,8 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
-		if (parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW)) {
-			if(ce->type & ZEND_INTERNAL_CLASS) {
+		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
+			if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
 				child_info = zend_duplicate_property_info_internal(parent_info);
 			} else {
 				child_info = zend_duplicate_property_info(parent_info);
@@ -632,7 +630,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			child_info->flags &= ~ZEND_ACC_PRIVATE; /* it's not private anymore */
 			child_info->flags |= ZEND_ACC_SHADOW; /* but it's a shadow of private */
 		} else {
-			if (ce->type & ZEND_INTERNAL_CLASS) {
+			if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
 				child_info = zend_duplicate_property_info_internal(parent_info);
 			} else {
 				child_info = parent_info;
@@ -1229,6 +1227,7 @@ static void zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *trait
 static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 {
 	size_t i, j = 0;
+	zend_trait_precedence **precedences;
 	zend_trait_precedence *cur_precedence;
 	zend_trait_method_reference *cur_method_ref;
 	zend_string *lcname;
@@ -1237,7 +1236,9 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 	/* resolve class references */
 	if (ce->trait_precedences) {
 		i = 0;
-		while ((cur_precedence = ce->trait_precedences[i])) {
+		precedences = ce->trait_precedences;
+		ce->trait_precedences = NULL;
+		while ((cur_precedence = precedences[i])) {
 			/** Resolve classes for all precedence operations. */
 			if (cur_precedence->exclude_from_classes) {
 				cur_method_ref = cur_precedence->trait_method;
@@ -1291,6 +1292,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 			}
 			i++;
 		}
+		ce->trait_precedences = precedences;
 	}
 
 	if (ce->trait_aliases) {
@@ -1358,11 +1360,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce) /* {{{ */
 	for (i = 0; i < ce->num_traits; i++) {
 		if (ce->trait_precedences) {
 			HashTable exclude_table;
+			zend_trait_precedence **precedences;
 
 			/* TODO: revisit this start size, may be its not optimal */
 			zend_hash_init_ex(&exclude_table, 8, NULL, NULL, 0, 0);
 
-			zend_traits_compile_exclude_table(&exclude_table, ce->trait_precedences, ce->traits[i]);
+			precedences = ce->trait_precedences;
+			ce->trait_precedences = NULL;
+			zend_traits_compile_exclude_table(&exclude_table, precedences, ce->traits[i]);
 
 			/* copies functions, applies defined aliasing, and excludes unused trait methods */
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->traits[i]->function_table, key, fn) {
@@ -1370,6 +1375,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce) /* {{{ */
 			} ZEND_HASH_FOREACH_END();
 
 			zend_hash_destroy(&exclude_table);
+			ce->trait_precedences = precedences;
 		} else {
 			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->traits[i]->function_table, key, fn) {
 				zend_traits_copy_functions(key, fn, ce, &overriden, NULL);
@@ -1380,6 +1386,17 @@ static void zend_do_traits_method_binding(zend_class_entry *ce) /* {{{ */
 	ZEND_HASH_FOREACH_PTR(&ce->function_table, fn) {
 		zend_fixup_trait_method(fn, ce);
 	} ZEND_HASH_FOREACH_END();
+
+	if (ce->trait_precedences) {
+		i = 0;
+		while (ce->trait_precedences[i]) {
+			if (ce->trait_precedences[i]->exclude_from_classes) {
+				efree(ce->trait_precedences[i]->exclude_from_classes);
+				ce->trait_precedences[i]->exclude_from_classes = NULL;
+			}
+			i++;
+		}
+	}
 
 	if (overriden) {
 		zend_hash_destroy(overriden);
