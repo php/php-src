@@ -1,20 +1,19 @@
 --TEST--
-Test sizeof() function : usage variations - different array values for 'var' argument
+Test count() function : usage variations - different array values for 'var' argument
 --FILE--
 <?php
-/* Prototype  : int sizeof($mixed var[, int $mode])
+/* Prototype  : int count($mixed var[, int $mode])
  * Description: Counts an elements in an array. If Standard PHP library is installed, 
  * it will return the properties of an object.
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
  */
 
-echo "*** Testing sizeof() : usage variations ***\n";
+echo "*** Testing count() : usage variations ***\n";
 
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-echo "--- Testing sizeof() with different array values for 'var' argument ---\n";
+echo "--- Testing count() with different array values for 'var' argument ---\n";
 
 // array containing different types of array values for 'var' argument 
 $values = array (
@@ -35,7 +34,7 @@ $values = array (
 );   
 
 // loop through each element of the values array for 'var' argument 
-// check the working of sizeof()
+// check the working of count()
 $counter = 1;
 for($i = 0; $i < count($values); $i++)
 {
@@ -43,15 +42,15 @@ for($i = 0; $i < count($values); $i++)
   $var = $values[$i];
 
   echo "Default Mode: "; 
-  var_dump( sizeof($var) );
+  var_dump( count($var) );
   echo "\n";
   
   echo "COUNT_NORMAL Mode: ";
-  var_dump( sizeof($var, COUNT_NORMAL) );
+  var_dump( count($var, COUNT_NORMAL) );
   echo "\n";
 
   echo "COUNT_RECURSIVE Mode: ";
-  var_dump( sizeof($var, COUNT_RECURSIVE) );
+  var_dump( count($var, COUNT_RECURSIVE) );
   echo "\n";
 
   $counter++;
@@ -60,8 +59,8 @@ for($i = 0; $i < count($values); $i++)
 echo "Done";
 ?>
 --EXPECTF--
-*** Testing sizeof() : usage variations ***
---- Testing sizeof() with different array values for 'var' argument ---
+*** Testing count() : usage variations ***
+--- Testing count() with different array values for 'var' argument ---
 -- Iteration 1 --
 Default Mode: int(2)
 

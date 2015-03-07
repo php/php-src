@@ -4,7 +4,7 @@ array_chunk() - variation 25
 <?php
 $array = array ("p" => "A", "q" => "B", "r" => "C", "s" => "D", "u" => "E", "v" => "F");
 var_dump ($array);
-for ($i = 0; $i < (sizeof($array) + 1); $i++) {
+for ($i = 0; $i < (count($array) + 1); $i++) {
 	echo "[$i]\n";
 	var_dump (@array_chunk ($array, $i));
 	var_dump (@array_chunk ($array, $i, TRUE));

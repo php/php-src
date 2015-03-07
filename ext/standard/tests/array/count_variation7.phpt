@@ -1,17 +1,16 @@
 --TEST--
-Test sizeof() function : usage variations - all kinds of unset variables for 'var' argument 
+Test count() function : usage variations - all kinds of unset variables for 'var' argument 
 --FILE--
 <?php
-/* Prototype  : int sizeof($mixed var[, int $mode])
+/* Prototype  : int count($mixed var[, int $mode])
  * Description: Counts an elements in an array. If Standard PHP library is installed,
  * it will return the properties of an object.
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
  */
 
-echo "*** Testing sizeof() : usage variations ***\n";
+echo "*** Testing count() : usage variations ***\n";
 
-echo "--- Testing sizeof() for all kinds of unset variables in default, Normal and Recursive Modes ---\n";
+echo "--- Testing count() for all kinds of unset variables in default, Normal and Recursive Modes ---\n";
 
 // class declaration
 class test
@@ -55,7 +54,7 @@ $values = array (
 );
 
 // loop through the each element of the $values array for 'var' argument 
-// and check the functionality of sizeof()
+// and check the functionality of count()
 $counter = 1;
 foreach($values as $value)
 {
@@ -66,15 +65,15 @@ foreach($values as $value)
 
   // now check the size of unset variable when different modes are given
   echo "Default Mode: ";
-  var_dump( sizeof($value) );
+  var_dump( count($value) );
   echo "\n";
  
   echo "COUNT_NORMAL Mode: ";
-  var_dump( sizeof($value, COUNT_NORMAL) );
+  var_dump( count($value, COUNT_NORMAL) );
   echo "\n";
 
   echo "COUNT_RECURSIVE Mode: ";
-  var_dump( sizeof($value, COUNT_RECURSIVE) );
+  var_dump( count($value, COUNT_RECURSIVE) );
   echo "\n";
 
   $counter++;
@@ -85,8 +84,8 @@ fclose($fp);
 echo "Done";
 ?>
 --EXPECTF--
-*** Testing sizeof() : usage variations ***
---- Testing sizeof() for all kinds of unset variables in default, Normal and Recursive Modes ---
+*** Testing count() : usage variations ***
+--- Testing count() for all kinds of unset variables in default, Normal and Recursive Modes ---
 -- Iteration 1 --
 Default Mode: 
 Notice: Undefined variable: value in %s on line %d

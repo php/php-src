@@ -1,17 +1,16 @@
 --TEST--
-Test sizeof() function : usage variations - for all scalar types and resource variable
+Test count() function : usage variations - for all scalar types and resource variable
 --FILE--
 <?php
-/* Prototype  : int sizeof($mixed var[, int $mode])
+/* Prototype  : int count($mixed var[, int $mode])
  * Description: Counts an elements in an array. If Standard PHP library is installed,
  * it will return the properties of an object.
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: count()
  */
 
-echo "*** Testing sizeof() : usage variations ***\n";
+echo "*** Testing count() : usage variations ***\n";
 
-echo "--- Testing sizeof() for all scalar types in default,COUNT_NORMAL and COUNT_RECURSIVE mode ---\n";
+echo "--- Testing count() for all scalar types in default,COUNT_NORMAL and COUNT_RECURSIVE mode ---\n";
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
@@ -51,7 +50,7 @@ $values = array (
   /* 19 */  $fp
 );
 
-// loop through the each value of the array for 'var' argument and check the behaviour of sizeof()
+// loop through the each value of the array for 'var' argument and check the behaviour of count()
 $counter = 1;
 for($i = 0; $i < count($values); $i++)
 {
@@ -60,15 +59,15 @@ for($i = 0; $i < count($values); $i++)
   $var = $values[$i]; 
 
   echo "Default Mode: ";
-  var_dump( sizeof($var) );
+  var_dump( count($var) );
   echo "\n";
 
   echo "COUNT_NORMAL Mode: ";
-  var_dump( sizeof($var, COUNT_NORMAL) );
+  var_dump( count($var, COUNT_NORMAL) );
   echo "\n";
      
   echo "COUNT_RECURSIVE Mode: ";
-  var_dump( sizeof($var, COUNT_RECURSIVE) );
+  var_dump( count($var, COUNT_RECURSIVE) );
   echo "\n";
   
   $counter++;
@@ -77,8 +76,8 @@ for($i = 0; $i < count($values); $i++)
 echo "Done";
 ?>
 --EXPECTF--
-*** Testing sizeof() : usage variations ***
---- Testing sizeof() for all scalar types in default,COUNT_NORMAL and COUNT_RECURSIVE mode ---
+*** Testing count() : usage variations ***
+--- Testing count() for all scalar types in default,COUNT_NORMAL and COUNT_RECURSIVE mode ---
 -- Iteration 1 --
 Default Mode: int(1)
 
