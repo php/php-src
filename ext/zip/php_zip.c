@@ -1399,6 +1399,7 @@ static ZIPARCHIVE_METHOD(open)
 	zend_string *filename;
 	zval *self = getThis();
 	ze_zip_object *ze_obj = NULL;
+	char *php_spn = "php://";
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|l", &filename, &flags) == FAILURE) {
 		return;
@@ -1418,9 +1419,13 @@ static ZIPARCHIVE_METHOD(open)
 		RETURN_FALSE;
 	}
 
-	if (!(resolved_path = expand_filepath(filename->val, NULL))) {
-		RETURN_FALSE;
-	}
+    if (!strspn(filename->val,php_spn)) {
+    	if (!(resolved_path = expand_filepath(filename->val, NULL))) {
+    		RETURN_FALSE;
+    	}
+    } else {
+        resolved_path = filename->val;
+    }
 
 	if (ze_obj->za) {
 		/* we already have an opened zip, free it */
