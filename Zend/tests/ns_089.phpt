@@ -1,5 +1,5 @@
 --TEST--
-Batch use statements
+Group use statements
 --FILE--
 <?php
 namespace Foo\Bar\Baz {

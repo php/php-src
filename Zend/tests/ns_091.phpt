@@ -1,5 +1,5 @@
 --TEST--
-Batch use statements with compound namespaces
+Group use statements with compound namespaces
 --FILE--
 <?php
 namespace Foo\Bar {

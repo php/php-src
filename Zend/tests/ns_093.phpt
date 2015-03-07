@@ -1,5 +1,5 @@
 --TEST--
-Batch use declarations and whitespace nuances
+Group use declarations and whitespace nuances
 --FILE--
 <?php
 

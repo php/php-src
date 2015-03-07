@@ -1,5 +1,5 @@
 --TEST--
-Nested batch use statements syntax error
+Nested group use statements syntax error
 --FILE--
 <?php
 namespace Fiz\Biz\Buz {
