@@ -1528,6 +1528,7 @@ static ZIPARCHIVE_METHOD(open)
 
 	zval *this = getThis();
 	ze_zip_object *ze_obj = NULL;
+	char *php_spn = "php://";
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, ARG_PATH "|l", &filename, &filename_len, &flags) == FAILURE) {
 		return;
@@ -1547,8 +1548,12 @@ static ZIPARCHIVE_METHOD(open)
 		RETURN_FALSE;
 	}
 
-	if (!(resolved_path = expand_filepath(filename, NULL TSRMLS_CC))) {
-		RETURN_FALSE;
+	if (!strspn(filename,php_spn)) {
+		if (!(resolved_path = expand_filepath(filename, NULL TSRMLS_CC))) {
+			RETURN_FALSE;
+		}
+	} else {
+		resolved_path = filename;
 	}
 
 	if (ze_obj->za) {
