@@ -84,7 +84,6 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 				    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
 				    Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) != IS_UNDEF) {
 
-					zend_string_addref(prop_info->name);
 					_zend_hash_append_ind(zobj->properties, prop_info->name, 
 						OBJ_PROP(zobj, prop_info->offset));
 				}

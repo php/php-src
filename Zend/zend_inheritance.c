@@ -636,7 +636,6 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				child_info = parent_info;
 			}
 		}
-		zend_string_addref(key);
 		_zend_hash_append_ptr(&ce->properties_info, key, child_info);
 	}
 }
@@ -704,7 +703,6 @@ static void do_inherit_class_constant(zend_string *name, zval *zv, zend_class_en
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
 		Z_ADDREF_P(zv);
-		zend_string_addref(name);
 		_zend_hash_append(&ce->constants_table, name, zv);
 	}
 }
@@ -857,7 +855,6 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			zend_function *new_func = do_inherit_method(key, func, ce);
 
 			if (new_func) {
-				zend_string_addref(key);
 				_zend_hash_append_ptr(&ce->function_table, key, new_func);
 			}
 		} ZEND_HASH_FOREACH_END();

@@ -1473,7 +1473,6 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 		/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 	}
 	for (i = 0; i < ex->func->op_array.last_var; i++) {
-		zend_string_addref(ex->func->op_array.vars[i]);
 		_zend_hash_append_ind(symbol_table, ex->func->op_array.vars[i],
 			ZEND_CALL_VAR_NUM(ex, i));
 	}
