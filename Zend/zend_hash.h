@@ -279,7 +279,8 @@ static zend_always_inline zval *zend_hash_find_ind(const HashTable *ht, zend_str
 	zval *zv;
 
 	zv = zend_hash_find(ht, key);
-	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? Z_INDIRECT_P(zv) : zv;
+	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? 
+		((Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF) ? Z_INDIRECT_P(zv) : NULL) : zv;
 }
 
 
@@ -298,7 +299,8 @@ static zend_always_inline zval *zend_hash_str_find_ind(const HashTable *ht, cons
 	zval *zv;
 
 	zv = zend_hash_str_find(ht, str, len);
-	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? Z_INDIRECT_P(zv) : zv;
+	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? 
+		((Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF) ? Z_INDIRECT_P(zv) : NULL) : zv;
 }
 
 
