@@ -117,7 +117,7 @@ file_fmtcheck(struct magic_set *ms, const struct magic *m, const char *def,
 #elif defined(HAVE_FMTCHECK)
 #define F(a, b, c) fmtcheck((b)->desc, (c))
 #else
-#define F(a, b, c) (c)
+#define F(a, b, c) ((b)->desc)
 #endif
 
 /*
