@@ -27,4 +27,4 @@ Warning: intlgregcal_get_gregorian_change() expects exactly 1 parameter, 2 given
 Warning: intlgregcal_get_gregorian_change(): intlgregcal_get_gregorian_change: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlgregcal_get_gregorian_change() must be an instance of IntlGregorianCalendar, integer given in %s on line %d
+Catchable fatal error: Argument 1 passed to intlgregcal_get_gregorian_change() must be an instance of the class IntlGregorianCalendar, integer given in %s on line %d

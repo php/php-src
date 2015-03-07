@@ -555,7 +555,7 @@ ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, ch
 	if (*pce && (*pce)->ce_flags & ZEND_ACC_INTERFACE) {
 		return "implement interface ";
 	} else {
-		return "be an instance of ";
+		return "be an instance of the class ";
 	}
 }
 

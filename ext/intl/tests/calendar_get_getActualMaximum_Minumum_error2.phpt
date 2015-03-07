@@ -57,15 +57,15 @@ bool(false)
 error: 2, intlcal_get_actual_minimum() expects parameter 2 to be integer, string given
 error: 2, intlcal_get_actual_minimum(): intlcal_get_actual_minimum: bad arguments
 bool(false)
-error: 4096, Argument 1 passed to intlcal_get() must be an instance of IntlCalendar, integer given
+error: 4096, Argument 1 passed to intlcal_get() must be an instance of the class IntlCalendar, integer given
 error: 2, intlcal_get() expects exactly 2 parameters, 1 given
 error: 2, intlcal_get(): intlcal_get: bad arguments
 bool(false)
-error: 4096, Argument 1 passed to intlcal_get_actual_maximum() must be an instance of IntlCalendar, integer given
+error: 4096, Argument 1 passed to intlcal_get_actual_maximum() must be an instance of the class IntlCalendar, integer given
 error: 2, intlcal_get_actual_maximum() expects exactly 2 parameters, 1 given
 error: 2, intlcal_get_actual_maximum(): intlcal_get_actual_maximum: bad arguments
 bool(false)
-error: 4096, Argument 1 passed to intlcal_get_actual_minimum() must be an instance of IntlCalendar, integer given
+error: 4096, Argument 1 passed to intlcal_get_actual_minimum() must be an instance of the class IntlCalendar, integer given
 error: 2, intlcal_get_actual_minimum() expects exactly 2 parameters, 1 given
 error: 2, intlcal_get_actual_minimum(): intlcal_get_actual_minimum: bad arguments
 bool(false)
