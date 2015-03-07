@@ -123,15 +123,18 @@ static const zend_internal_function zend_pass_function = {
 #define DECODE_CTOR(ce) \
 	((zend_class_entry*)(((zend_uintptr_t)(ce)) & ~(CTOR_CALL_BIT|CTOR_USED_BIT)))
 
-#define ZEND_VM_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
+#define ZEND_VM_MAIN_STACK_PAGE_SLOTS (16 * 1024) /* should be a power of 2 */
+#define ZEND_VM_GENERATOR_STACK_PAGE_SLOTS (256)
 
-#define ZEND_VM_STACK_PAGE_SIZE  (ZEND_VM_STACK_PAGE_SLOTS * sizeof(zval))
+#define ZEND_VM_STACK_PAGE_SLOTS(gen) ((gen) ? ZEND_VM_GENERATOR_STACK_PAGE_SLOTS : ZEND_VM_MAIN_STACK_PAGE_SLOTS)
 
-#define ZEND_VM_STACK_FREE_PAGE_SIZE \
-	((ZEND_VM_STACK_PAGE_SLOTS - ZEND_VM_STACK_HEADER_SLOTS) * sizeof(zval))
+#define ZEND_VM_STACK_PAGE_SIZE(gen)  (ZEND_VM_STACK_PAGE_SLOTS(gen) * sizeof(zval))
 
-#define ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size) \
-	(((size) + (ZEND_VM_STACK_FREE_PAGE_SIZE - 1)) & ~ZEND_VM_STACK_PAGE_SIZE)
+#define ZEND_VM_STACK_FREE_PAGE_SIZE(gen) \
+	((ZEND_VM_STACK_PAGE_SLOTS(gen) - ZEND_VM_STACK_HEADER_SLOTS) * sizeof(zval))
+
+#define ZEND_VM_STACK_PAGE_ALIGNED_SIZE(gen, size) \
+	(((size) + (ZEND_VM_STACK_FREE_PAGE_SIZE(gen) - 1)) & ~ZEND_VM_STACK_PAGE_SIZE(gen))
 
 static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend_vm_stack prev) {
 	zend_vm_stack page = (zend_vm_stack)emalloc(size);
@@ -144,7 +147,7 @@ static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend
 
 ZEND_API void zend_vm_stack_init(void)
 {
-	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE, NULL);
+	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE(0 /* main stack */), NULL);
 	EG(vm_stack)->top++;
 	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
@@ -163,14 +166,14 @@ ZEND_API void zend_vm_stack_destroy(void)
 
 ZEND_API void* zend_vm_stack_extend(size_t size)
 {
-    zend_vm_stack stack;
-    void *ptr;
+	zend_vm_stack stack;
+	void *ptr;
 
-    stack = EG(vm_stack);
-    stack->top = EG(vm_stack_top);
+	stack = EG(vm_stack);
+	stack->top = EG(vm_stack_top);
 	EG(vm_stack) = stack = zend_vm_stack_new_page(
-		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE) ?
-			ZEND_VM_STACK_PAGE_SIZE : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size),
+		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE(0)) ?
+			ZEND_VM_STACK_PAGE_SIZE(0) : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(0, size),
 		stack);
 	ptr = stack->top;
 	EG(vm_stack_top) = (void*)(((char*)ptr) + size);
@@ -1934,9 +1937,9 @@ ZEND_API zend_execute_data *zend_create_generator_execute_data(zend_execute_data
 	size_t stack_size = (ZEND_CALL_FRAME_SLOT + MAX(op_array->last_var + op_array->T, num_args)) * sizeof(zval);
 
 	EG(vm_stack) = zend_vm_stack_new_page(
-		EXPECTED(stack_size < ZEND_VM_STACK_FREE_PAGE_SIZE) ?
-			ZEND_VM_STACK_PAGE_SIZE :
-			ZEND_VM_STACK_PAGE_ALIGNED_SIZE(stack_size),
+		EXPECTED(stack_size < ZEND_VM_STACK_FREE_PAGE_SIZE(1)) ?
+			ZEND_VM_STACK_PAGE_SIZE(1) :
+			ZEND_VM_STACK_PAGE_ALIGNED_SIZE(1, stack_size),
 		NULL);
 	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
