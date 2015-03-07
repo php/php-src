@@ -1772,10 +1772,22 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
+				if (Z_OBJ_HANDLER_P(op1, compare)) {
+					if (SUCCESS == Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2)) {
+						return SUCCESS;
+					}
+				}
+
 				ZVAL_LONG(result, 1);
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_NULL, IS_OBJECT):
+				if (Z_OBJ_HANDLER_P(op2, compare)) {
+					if (SUCCESS == Z_OBJ_HANDLER_P(op2, compare)(result, op1, op2)) {
+						return SUCCESS;
+					}
+				}
+
 				ZVAL_LONG(result, -1);
 				return SUCCESS;
 
@@ -1789,9 +1801,15 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 				}
 
 				if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, compare)) {
-					return Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2);
+					/* If compare fails, we want to fall through to give the
+					 * other comparison functions a chance to run. */
+					if (SUCCESS == Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2)) {
+						return SUCCESS;
+					}
 				} else if (Z_TYPE_P(op2) == IS_OBJECT && Z_OBJ_HANDLER_P(op2, compare)) {
-					return Z_OBJ_HANDLER_P(op2, compare)(result, op1, op2);
+					if (SUCCESS == Z_OBJ_HANDLER_P(op2, compare)(result, op1, op2)) {
+						return SUCCESS;
+					}
 				}
 
 				if (Z_TYPE_P(op1) == IS_OBJECT && Z_TYPE_P(op2) == IS_OBJECT) {
