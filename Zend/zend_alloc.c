@@ -1950,9 +1950,6 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 
 #if ZEND_MM_CUSTOM
 	if (heap->use_custom_heap) {
-		if (full) {
-			heap->_free(heap);
-		}
 		return;
 	}
 #endif
