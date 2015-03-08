@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: funcs.c,v 1.68 2014/02/18 11:09:31 kim Exp $")
+FILE_RCSID("@(#)$File: funcs.c,v 1.79 2014/12/16 20:52:49 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -46,7 +46,7 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.68 2014/02/18 11:09:31 kim Exp $")
 #endif
 
 #ifndef SIZE_MAX
-# define SIZE_MAX ((size_t) -1)
+#define SIZE_MAX	((size_t)~0)
 #endif
 
 #include "php.h"
@@ -61,6 +61,7 @@ extern public void convert_libmagic_pattern(zval *pattern, char *val, int len, i
 protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {
+	int rv;
 	va_list ap;
 	int len;
 	char *buf = NULL, *newstr;
@@ -232,7 +233,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 
 	/* try soft magic tests */
 	if ((ms->flags & MAGIC_NO_CHECK_SOFT) == 0)
-		if ((m = file_softmagic(ms, ubuf, nb, 0, BINTEST,
+		if ((m = file_softmagic(ms, ubuf, nb, 0, NULL, BINTEST,
 		    looks_text)) != 0) {
 			if ((ms->flags & MAGIC_DEBUG) != 0)
 				(void)fprintf(stderr, "softmagic %d\n", m);
@@ -264,19 +265,6 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 			if ((ms->flags & MAGIC_DEBUG) != 0)
 				(void)fprintf(stderr, "ascmagic %d\n", m);
 			goto done;
-		}
-
-		/* try to discover text encoding */
-		if ((ms->flags & MAGIC_NO_CHECK_ENCODING) == 0) {
-			if (looks_text == 0)
-				if ((m = file_ascmagic_with_encoding( ms, ubuf,
-				    nb, u8buf, ulen, code, ftype, looks_text))
-				    != 0) {
-					if ((ms->flags & MAGIC_DEBUG) != 0)
-						(void)fprintf(stderr,
-						    "ascmagic/enc %d\n", m);
-					goto done;
-				}
 		}
 	}
 
@@ -349,6 +337,7 @@ file_getbuffer(struct magic_set *ms)
 	/* * 4 is for octal representation, + 1 is for NUL */
 	len = strlen(ms->o.buf);
 	if (len > (SIZE_MAX - 1) / 4) {
+		file_oomem(ms, len);
 		return NULL;
 	}
 	psize = len * 4 + 1;
@@ -436,6 +425,7 @@ file_printedlen(const struct magic_set *ms)
 	return ms->o.buf == NULL ? 0 : strlen(ms->o.buf);
 }
 
+protected int
 file_replace(struct magic_set *ms, const char *pat, const char *rep)
 {
 	zval patt;
@@ -474,3 +464,69 @@ out:
 	(void)setlocale(LC_CTYPE, "");
 	return rep_cnt;
 }
+
+protected file_pushbuf_t *
+file_push_buffer(struct magic_set *ms)
+{
+	file_pushbuf_t *pb;
+
+	if (ms->event_flags & EVENT_HAD_ERR)
+		return NULL;
+
+	if ((pb = (CAST(file_pushbuf_t *, emalloc(sizeof(*pb))))) == NULL)
+		return NULL;
+
+	pb->buf = ms->o.buf;
+	pb->offset = ms->offset;
+
+	ms->o.buf = NULL;
+	ms->offset = 0;
+
+	return pb;
+}
+
+protected char *
+file_pop_buffer(struct magic_set *ms, file_pushbuf_t *pb)
+{
+	char *rbuf;
+
+	if (ms->event_flags & EVENT_HAD_ERR) {
+		efree(pb->buf);
+		efree(pb);
+		return NULL;
+	}
+
+	rbuf = ms->o.buf;
+
+	ms->o.buf = pb->buf;
+	ms->offset = pb->offset;
+
+	efree(pb);
+	return rbuf;
+}
+
+/*
+ * convert string to ascii printable format.
+ */
+protected char *
+file_printable(char *buf, size_t bufsiz, const char *str)
+{
+	char *ptr, *eptr;
+	const unsigned char *s = (const unsigned char *)str;
+
+	for (ptr = buf, eptr = ptr + bufsiz - 1; ptr < eptr && *s; s++) {
+		if (isprint(*s)) {
+			*ptr++ = *s;
+			continue;
+		}
+		if (ptr >= eptr - 3)
+			break;
+		*ptr++ = '\\';
+		*ptr++ = ((*s >> 6) & 7) + '0';
+		*ptr++ = ((*s >> 3) & 7) + '0';
+		*ptr++ = ((*s >> 0) & 7) + '0';
+	}
+	*ptr = '\0';
+	return buf;
+}
+
