@@ -5046,18 +5046,18 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 
 void zend_compile_group_use(zend_ast *ast) /* {{{ */
 {
+	uint32_t i;
 	zend_string *ns = zend_ast_get_str(ast->child[0]);
 	zend_ast_list *list = zend_ast_get_list(ast->child[1]);
-	uint32_t i;
 
 	for (i = 0; i < list->children; i++) {
-		zend_ast *use = list->child[i];
+		zend_ast *inline_use, *use = list->child[i];
 		zval *name_zval = zend_ast_get_zval(use->child[0]);
 		zend_string *name = Z_STR_P(name_zval);
 		zend_string *compound_ns = zend_concat_names(ns->val, ns->len, name->val, name->len);
 		zend_string_release(name);
 		ZVAL_STR(name_zval, compound_ns);
-		zend_ast *inline_use = zend_ast_create_list(1, ZEND_AST_USE, use);
+		inline_use = zend_ast_create_list(1, ZEND_AST_USE, use);
 		inline_use->attr = ast->attr ? ast->attr : use->attr;
 		zend_compile_use(inline_use);
 	}
