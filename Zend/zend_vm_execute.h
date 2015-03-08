@@ -12999,6 +12999,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
+				zptr = z;
 				ZVAL_DEREF(z);
 				SEPARATE_ZVAL_NOREF(z);
 				binary_op(z, z, value);
@@ -13006,7 +13007,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
-				zval_ptr_dtor(z);
+				zval_ptr_dtor(zptr);
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -15937,6 +15938,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
+				zptr = z;
 				ZVAL_DEREF(z);
 				SEPARATE_ZVAL_NOREF(z);
 				binary_op(z, z, value);
@@ -15944,7 +15946,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
-				zval_ptr_dtor(z);
+				zval_ptr_dtor(zptr);
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -17485,6 +17487,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMPVAR(int (*
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
+				zptr = z;
 				ZVAL_DEREF(z);
 				SEPARATE_ZVAL_NOREF(z);
 				binary_op(z, z, value);
@@ -17492,7 +17495,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMPVAR(int (*
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
-				zval_ptr_dtor(z);
+				zval_ptr_dtor(zptr);
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -18918,6 +18921,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
+				zptr = z;
 				ZVAL_DEREF(z);
 				SEPARATE_ZVAL_NOREF(z);
 				binary_op(z, z, value);
@@ -18925,7 +18929,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
-				zval_ptr_dtor(z);
+				zval_ptr_dtor(zptr);
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -21136,6 +21140,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
+				zptr = z;
 				ZVAL_DEREF(z);
 				SEPARATE_ZVAL_NOREF(z);
 				binary_op(z, z, value);
@@ -21143,7 +21148,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
-				zval_ptr_dtor(z);
+				zval_ptr_dtor(zptr);
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -22534,6 +22539,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(int
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
+				zptr = z;
 				ZVAL_DEREF(z);
 				SEPARATE_ZVAL_NOREF(z);
 				binary_op(z, z, value);
@@ -22541,7 +22547,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMPVAR(int
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
-				zval_ptr_dtor(z);
+				zval_ptr_dtor(zptr);
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -25605,6 +25611,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
+				zptr = z;
 				ZVAL_DEREF(z);
 				SEPARATE_ZVAL_NOREF(z);
 				binary_op(z, z, value);
@@ -25612,7 +25619,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
-				zval_ptr_dtor(z);
+				zval_ptr_dtor(zptr);
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -30057,6 +30064,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
+				zptr = z;
 				ZVAL_DEREF(z);
 				SEPARATE_ZVAL_NOREF(z);
 				binary_op(z, z, value);
@@ -30064,7 +30072,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
-				zval_ptr_dtor(z);
+				zval_ptr_dtor(zptr);
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -32146,6 +32154,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMPVAR(int (*b
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
+				zptr = z;
 				ZVAL_DEREF(z);
 				SEPARATE_ZVAL_NOREF(z);
 				binary_op(z, z, value);
@@ -32153,7 +32162,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMPVAR(int (*b
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
-				zval_ptr_dtor(z);
+				zval_ptr_dtor(zptr);
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {

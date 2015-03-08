@@ -402,6 +402,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 					}
 					ZVAL_COPY_VALUE(z, value);
 				}
+				zptr = z;
 				ZVAL_DEREF(z);
 				SEPARATE_ZVAL_NOREF(z);
 				binary_op(z, z, value);
@@ -409,7 +410,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_COPY(EX_VAR(opline->result.var), z);
 				}
-				zval_ptr_dtor(z);
+				zval_ptr_dtor(zptr);
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property of non-object");
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
