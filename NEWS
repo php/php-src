@@ -24,7 +24,8 @@
     non-object"`. (Timm)
   . Added options parameter for unserialize allowing to specify acceptable
     classes (https://wiki.php.net/rfc/secure_unserialize). (Stas)
-  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly triggered). (Julien)
+  . Fixed bug #68185 ("Inconsistent insteadof definition."- incorrectly
+    triggered). (Julien)
   . Fixed bug #65419 (Inside trait, self::class != __CLASS__). (Julien)
   . Fixed bug #65576 (Constructor from trait conflicts with inherited
     constructor). (dunglas at gmail dot com)
@@ -36,14 +37,18 @@
   . Added ?? operator. (Andrea)
   . Added <=> operator. (Andrea)
   . Added \u{xxxxx} Unicode Codepoint Escape Syntax. (Andrea)
-  . Fixed oversight where define() did not support arrays yet const syntax did. (Andrea, Dmitry)
-  . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint and conversion error messages. (Andrea)
-  . Implemented FR #55428 (E_RECOVERABLE_ERROR when output buffering in output buffering handler). (Kalle)
+  . Fixed oversight where define() did not support arrays yet const syntax did.
+    (Andrea, Dmitry)
+  . Use "integer" and "float" instead of "long" and "double" in ZPP, type hint
+    and conversion error messages. (Andrea)
+  . Implemented FR #55428 (E_RECOVERABLE_ERROR when output buffering in output
+    buffering handler). (Kalle)
   . Removed scoped calls of non-static methods from an incompatible $this
     context. (Nikita)
   . Removed support for #-style comments in ini files. (Nikita)
   . Removed support for assigning the result of new by reference. (Nikita)
-  . Invalid octal literals in source code now produce compile errors, fixes PHPSadness #31. (Andrea)
+  . Invalid octal literals in source code now produce compile errors, fixes
+    PHPSadness #31. (Andrea)
   . Removed dl() function on fpm-fcgi. (Nikita)
   . Removed support for hexadecimal numeric strings. (Nikita)
   . Removed obsolete extensions and SAPIs. See the full list in UPGRADING. (Anatol)
@@ -56,8 +61,14 @@
   . Fixed day_of_week function as it could sometimes return negative values
     internally. (Derick)
   . Removed $is_dst parameter from mktime() and gmmktime(). (Nikita)
-  . Removed date.timezone warning (https://wiki.php.net/rfc/date.timezone_warning_removal). (Bob)
-
+  . Removed date.timezone warning
+    (https://wiki.php.net/rfc/date.timezone_warning_removal). (Bob)
+  . Added "v" DateTime format modifier to get the 3-digit version of fraction 
+    of seconds. (Mariano Iglesias)
+  . Implemented FR #69089: Added DateTime::RFC3339_EXTENDED to output in 
+    RFC3339 Extended format which includes fraction of seconds (Mariano 
+    Iglesias)
+	
 - DBA:
   . Fixed bug #62490 (dba_delete returns true on missing item (inifile)). (Mike)
   . Fixed bug #68711 (useless comparisons). (bugreports at internot dot info)
