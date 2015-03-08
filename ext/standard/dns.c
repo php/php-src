@@ -247,7 +247,7 @@ PHP_FUNCTION(gethostbynamel)
 
 	if(hostname_len > MAXFQDNLEN) {
 		/* name too long, protect from CVE-2015-0235 */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Host name is too long, the limit is %d characters", MAXFQDNLEN);
+		php_error_docref(NULL, E_WARNING, "Host name is too long, the limit is %d characters", MAXFQDNLEN);
 		RETURN_FALSE;
 	}
 

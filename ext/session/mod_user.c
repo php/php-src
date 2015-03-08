@@ -222,7 +222,7 @@ PS_VALIDATE_SID_FUNC(user)
 	}
 
 	/* dummy function defined by PS_MOD */
-	return php_session_validate_sid(mod_data, key TSRMLS_CC);
+	return php_session_validate_sid(mod_data, key);
 }
 
 PS_UPDATE_TIMESTAMP_FUNC(user)

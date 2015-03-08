@@ -1055,7 +1055,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	extra->match_limit_recursion = (unsigned long)PCRE_G(recursion_limit);
 
 	if (pce->preg_options & PREG_REPLACE_EVAL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
+		php_error_docref(NULL, E_WARNING, "The /e modifier is no longer supported, use preg_replace_callback instead");
 		return NULL;
 	}
 	if (!is_callable_replace) {

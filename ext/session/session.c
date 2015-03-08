@@ -2202,7 +2202,7 @@ static PHP_FUNCTION(session_start)
 	}
 
 	if (PS(id) && !(PS(id)->len)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot start session with empty session ID");
+		php_error_docref(NULL, E_WARNING, "Cannot start session with empty session ID");
 		RETURN_FALSE;
 	}
 
@@ -2632,7 +2632,7 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	php_session_id_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
 
 	INIT_CLASS_ENTRY(ce, PS_UPDATE_TIMESTAMP_IFACE_NAME, php_session_update_timestamp_iface_functions);
-	php_session_update_timestamp_iface_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_session_update_timestamp_iface_entry = zend_register_internal_class(&ce);
 	php_session_update_timestamp_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
 
 	/* Register base class */

@@ -5737,7 +5737,7 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 	}
 
 	if ((re = pcre_compile(regex, options, &err_msg, &err_offset, NULL)) == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot compile regex");
+		php_error_docref(NULL, E_WARNING, "Cannot compile regex");
 		return FAILURE;
 	}
 
@@ -5747,7 +5747,7 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 	if (res == PCRE_ERROR_NOMATCH) {
 		return FAILURE;
 	} else if (res) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot exec regex");
+		php_error_docref(NULL, E_WARNING, "Cannot exec regex");
 		return FAILURE;
 	}
 	return SUCCESS;
