@@ -298,6 +298,10 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 					efree(name);
 				} zend_end_try();
 
+				if (EG(exception)) {
+					zend_exception_error(EG(exception), E_ERROR);
+				}
+
 				zend_bailout();
 			}
 
