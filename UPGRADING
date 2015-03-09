@@ -323,6 +323,25 @@ Relevant RFCs:
 Other language changes
 ----------------------
 
+* The yield language construct no longer requires parentheses when used in an
+  expression context. It is now a right-associative operator with precedence
+  between the "print" and "=>" operators. This can result in different behavior
+  in some cases, for example:
+
+      echo yield -1;
+      // Was previously interpreted as
+      echo (yield) - 1;
+      // And is now interpreted as
+      echo yield (-1);
+
+      yield $foo or die;
+      // Was previously interpreted as
+      yield ($foo or die);
+      // And is now interpreted as
+      (yield $foo) or die;
+
+  Such cases can always be resolved by adding additional parentheses.
+
   . Removed ASP (<%) and script (<script language=php>) tags.
     (RFC: https://wiki.php.net/rfc/remove_alternative_php_tags)
   . Removed support for assigning the result of new by reference.
