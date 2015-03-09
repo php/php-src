@@ -345,6 +345,10 @@ Standard library changes
 Other
 =====
 
+- Curl:
+  . Removed support for disabling the CURLOPT_SAFE_UPLOAD option. All curl file
+    uploads must use the curl_file / CURLFile APIs.
+
 - Date:
   . Removed $is_dst parameter from mktime() and gmmktime().
 

@@ -57,6 +57,7 @@
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
+  . Removed support for unsafe file uploads. (Nikita)
 
 - Date:
   . Fixed day_of_week function as it could sometimes return negative values
