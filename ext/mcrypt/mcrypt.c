@@ -258,7 +258,6 @@ const zend_function_entry mcrypt_functions[] = { /* {{{ */
 	PHP_FE(mcrypt_generic_init, 	arginfo_mcrypt_generic_init)
 	PHP_FE(mcrypt_generic, 			arginfo_mcrypt_generic)
 	PHP_FE(mdecrypt_generic, 		arginfo_mdecrypt_generic)
-	PHP_DEP_FALIAS(mcrypt_generic_end, mcrypt_generic_deinit, arginfo_mcrypt_generic_deinit)
 	PHP_FE(mcrypt_generic_deinit, 	arginfo_mcrypt_generic_deinit)
 
 	PHP_FE(mcrypt_enc_self_test, 	arginfo_mcrypt_enc_self_test)

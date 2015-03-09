@@ -361,6 +361,10 @@ Other
   . gmp_setbit() and gmp_clrbit() now return FALSE for negative indices, making
     them consistent with other GMP functions.
 
+- Mcrypt
+  . Removed deprecate mcrypt_generic_end() alias in favor of
+    mcrypt_generic_deinit().
+
 - Session
   . session_start() accepts all INI settings as array. e.g. ['cache_limiter'=>'private']
     sets session.cache_limiter=private. It also supports 'read_and_close' which closes

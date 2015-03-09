@@ -103,6 +103,7 @@
 
 - Mcrypt:
   . Fixed possible read after end of buffer and use after free. (Dmitry)
+  . Removed mcrypt_generic_end() alias. (Nikita)
 
 - Opcache:
   . Fixed bug with try blocks being removed when extended_info opcode
