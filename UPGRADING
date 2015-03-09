@@ -447,6 +447,7 @@ Other
 
 - Standard
   . Added intdiv() function for integer division.
+  . Added error_clear_last() function to reset error state.
 
 - Stream:
   . Added stream_socket_crypto_info() allowing inspection of negotiated TLS

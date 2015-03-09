@@ -53,6 +53,7 @@
   . Removed support for hexadecimal numeric strings. (Nikita)
   . Removed obsolete extensions and SAPIs. See the full list in UPGRADING. (Anatol)
   . Added NULL byte protection to exec, system and passthru. (Yasuo)
+  . Added error_clear_last() function. (Reeze Xia)
 
 - Curl:
   . Fixed bug #68937 (Segfault in curl_multi_exec). (Laruence)
