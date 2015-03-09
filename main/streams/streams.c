@@ -583,7 +583,7 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
-		while ((!stream->eof || !flushed_eof) && !err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
+		while ((!stream->eof || flushed_eof == 1) && !err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
 			size_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
@@ -599,6 +599,10 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 				php_stream_bucket_append(brig_inp, bucket);
 
 				flags = PSFS_FLAG_NORMAL;
+
+				if (!flushed_eof) {
+					flushed_eof = 1;
+				}
 			} else if (!stream->eof) {
 				flags = PSFS_FLAG_FLUSH_INC;
 			} else {
@@ -608,7 +612,7 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 				 * check to ensure that, even if EOF has been reached, we have
 				 * called the filter method with the flushed flag at least
 				 * once. */
-				flushed_eof = 1;
+				flushed_eof = 2;
 			}
 
 			/* wind the handle... */
