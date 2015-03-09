@@ -47,7 +47,7 @@ $str_array = array(
   //using special chars in sentence
   "t@@#$% %test ^test &test *test +test -test",
   "!test ~test `test` =test= @test@test.com",
-  "/test/r\test\ucwords\t\y\y\u\3 \yy\ /uu/",
+  "/test/r\test\\ucwords\t\y\y\\u\3 \yy\ /uu/",
   
   //only special chars
   "!@#$%^&*()_+=-`~"

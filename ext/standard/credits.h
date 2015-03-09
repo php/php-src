@@ -1,6 +1,6 @@
-/* 
+/*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -37,6 +37,6 @@
 
 #endif /* HAVE_CREDITS_DEFS */
 
-PHPAPI void php_print_credits(int flag TSRMLS_DC);
+PHPAPI void php_print_credits(int flag);
 
 #endif

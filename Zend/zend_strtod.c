@@ -139,7 +139,7 @@ typedef unsigned long int uint32_t;
 #if (defined(__APPLE__) || defined(__APPLE_CC__)) && (defined(__BIG_ENDIAN__) || defined(__LITTLE_ENDIAN__))
 # if defined(__LITTLE_ENDIAN__)
 #  undef WORDS_BIGENDIAN
-# else 
+# else
 #  if defined(__BIG_ENDIAN__)
 #   define WORDS_BIGENDIAN
 #  endif
@@ -432,12 +432,12 @@ static void destroy_freelist(void);
 #ifdef ZTS
 
 static MUTEX_T dtoa_mutex;
-static MUTEX_T pow5mult_mutex; 
+static MUTEX_T pow5mult_mutex;
 
 #define _THREAD_PRIVATE_MUTEX_LOCK(x) tsrm_mutex_lock(x);
 #define _THREAD_PRIVATE_MUTEX_UNLOCK(x) tsrm_mutex_unlock(x);
 
-#else 
+#else
 
 #define _THREAD_PRIVATE_MUTEX_LOCK(x)
 #define _THREAD_PRIVATE_MUTEX_UNLOCK(x)
@@ -1394,7 +1394,7 @@ static void destroy_freelist(void)
 		freelist[i] = NULL;
 	}
 	_THREAD_PRIVATE_MUTEX_UNLOCK(dtoa_mutex);
-	
+
 }
 
 
@@ -2639,7 +2639,7 @@ ZEND_API double zend_oct_strtod(const char *str, const char **endptr)
 	while ((c = *s++)) {
 		if (c < '0' || c > '7') {
 			/* break and return the current value if the number is not well-formed
-			 * that's what Linux strtol() does 
+			 * that's what Linux strtol() does
 			 */
 			break;
 		}

@@ -21,11 +21,11 @@ function open($save_path, $session_name) {
     throw new Exception("Stop...!");
 }
 
-function close() { }
-function read($id) { }
-function write($id, $session_data) { }
-function destroy($id) { }
-function gc($maxlifetime) { }
+function close() { return true; }
+function read($id) { return ''; }
+function write($id, $session_data) { return true; }
+function destroy($id) { return true; }
+function gc($maxlifetime) { return true; }
 
 var_dump(session_module_name("files"));
 session_set_save_handler("open", "close", "read", "write", "destroy", "gc");
@@ -41,9 +41,11 @@ ob_end_flush();
 string(%d) "%s"
 string(4) "user"
 
-Fatal error: Uncaught exception 'Exception' with message 'Stop...!' in %s:%d
+Warning: Uncaught exception 'Exception' with message 'Stop...!' in %s:%d
 Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')
 #1 %s(%d): session_start()
 #2 {main}
   thrown in %s on line %d
+
+Fatal error: session_start(): Failed to initialize storage module: %s in %s%esession_module_name_variation3.php on line %d

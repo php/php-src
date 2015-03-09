@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -44,7 +44,7 @@ struct php_process_handle {
 	HANDLE childHandle;
 #endif
 	int npipes;
-	long pipes[PHP_PROC_OPEN_MAX_DESCRIPTORS];
+	zend_resource *pipes[PHP_PROC_OPEN_MAX_DESCRIPTORS];
 	char *command;
 	int is_persistent;
 	php_process_env_t env;

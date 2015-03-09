@@ -22,6 +22,7 @@
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 #include "phpdbg_prompt.h"
+#include "phpdbg_eol.h"
 #include "zend.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
@@ -40,11 +41,11 @@ const phpdbg_command_t phpdbg_help_commands[] = {
 };  /* }}} */
 
 /* {{{ pretty_print.  Formatting escapes and wrapping text in a string before printing it. */
-void pretty_print(char *text TSRMLS_DC)
+void pretty_print(char *text)
 {
 	char *new, *p, *q;
 
-	const char  *prompt_escape = phpdbg_get_prompt(TSRMLS_C);
+	const char  *prompt_escape = phpdbg_get_prompt();
 	unsigned int prompt_escape_len = strlen(prompt_escape);
 	unsigned int prompt_len = strlen(PHPDBG_G(prompt)[0]);
 
@@ -52,7 +53,7 @@ void pretty_print(char *text TSRMLS_DC)
 	const char  *bold_off_escape = PHPDBG_G(flags) & PHPDBG_IS_COLOURED ? "\033[0m" : "";
 	unsigned int bold_escape_len = strlen(bold_on_escape);
 
-	unsigned int term_width = phpdbg_get_terminal_width(TSRMLS_C);
+	unsigned int term_width = phpdbg_get_terminal_width();
 	unsigned int size = 0;
 
 	int in_bold = 0;
@@ -60,6 +61,11 @@ void pretty_print(char *text TSRMLS_DC)
 	char *last_new_blank = NULL;          /* position in new buffer of last blank char */
 	unsigned int last_blank_count = 0;    /* printable char offset of last blank char */
 	unsigned int line_count = 0;          /* number printable chars on current line */
+
+	if (PHPDBG_G(flags) & PHPDBG_WRITE_XML) {
+		phpdbg_xml("<help %r msg=\"%s\" />", text);
+		return;
+	}
 
 	/* First pass calculates a safe size for the pretty print version */
 	for (p = text; *p; p++) {
@@ -128,24 +134,24 @@ void pretty_print(char *text TSRMLS_DC)
 	*q++ = '\0';
 
 	if ((q-new)>size) {
-		phpdbg_error("Output overrun of %lu bytes", ((q-new) - size));
+		phpdbg_error("help", "overrun=\"%lu\"", "Output overrun of %lu bytes", ((q - new) - size));
 	}
 
-	phpdbg_write("%s\n", new);
+	phpdbg_out("%s\n", new);
 	efree(new);
 }  /* }}} */
 
 /* {{{ summary_print.  Print a summary line giving, the command, its alias and tip */
-void summary_print(phpdbg_command_t const * const cmd TSRMLS_DC)
+void summary_print(phpdbg_command_t const * const cmd)
 {
 	char *summary;
 	spprintf(&summary, 0, "Command: **%s**  Alias: **%c**  **%s**\n", cmd->name, cmd->alias, cmd->tip);
-	pretty_print(summary TSRMLS_CC);
+	pretty_print(summary);
 	efree(summary);
 }
 
 /* {{{ get_help. Retries and formats text from the phpdbg help text table */
-static char *get_help(const char * const key TSRMLS_DC)
+static char *get_help(const char * const key)
 {
 	phpdbg_help_text_t *p;
 
@@ -174,7 +180,7 @@ static int get_command(
 	const char *key, size_t len,      /* pointer and length of key */
 	phpdbg_command_t const **command, /* address of first matching command  */
 	phpdbg_command_t const * commands /* command table to be scanned */
-	TSRMLS_DC)
+	)
 {
 	const phpdbg_command_t *c;
 	unsigned int num_matches = 0;
@@ -201,7 +207,7 @@ static int get_command(
 
 	return num_matches;
 
-} /* }}} */	
+} /* }}} */
 
 PHPDBG_COMMAND(help) /* {{{ */
 {
@@ -209,40 +215,40 @@ PHPDBG_COMMAND(help) /* {{{ */
 	int n;
 
 	if (!param || param->type == EMPTY_PARAM) {
-		pretty_print(get_help("overview!" TSRMLS_CC) TSRMLS_CC);
+		pretty_print(get_help("overview!"));
 		return SUCCESS;
 	}
 
 	if (param && param->type == STR_PARAM) {
-	    n = get_command(param->str, param->len, &cmd, phpdbg_prompt_commands TSRMLS_CC);
+	    n = get_command(param->str, param->len, &cmd, phpdbg_prompt_commands);
 
 		if (n==1) {
-			summary_print(cmd TSRMLS_CC);
-			pretty_print(get_help(cmd->name TSRMLS_CC) TSRMLS_CC);
+			summary_print(cmd);
+			pretty_print(get_help(cmd->name));
 			return SUCCESS;
 
 		} else if (n>1) {
 			if (param->len > 1) {
 				for (cmd=phpdbg_prompt_commands; cmd->name; cmd++) {
 					if (!strncmp(cmd->name, param->str, param->len)) {
-						summary_print(cmd TSRMLS_CC);
+						summary_print(cmd);
 					}
 				}
-				pretty_print(get_help("duplicate!" TSRMLS_CC) TSRMLS_CC);
+				pretty_print(get_help("duplicate!"));
 				return SUCCESS;
 			} else {
-				phpdbg_error("Internal help error, non-unique alias \"%c\"", param->str[0]);
+				phpdbg_error("help", "type=\"ambiguousalias\" alias=\"%s\"", "Internal help error, non-unique alias \"%c\"", param->str[0]);
 				return FAILURE;
 			}
 
 		} else { /* no prompt command found so try help topic */
-		    n = get_command( param->str, param->len, &cmd, phpdbg_help_commands TSRMLS_CC);
+		    n = get_command( param->str, param->len, &cmd, phpdbg_help_commands);
 
 			if (n>0) {
-				if (cmd->alias == 'a') {   /* help aliases executes a canned routine */ 
-					return cmd->handler(param TSRMLS_CC);
+				if (cmd->alias == 'a') {   /* help aliases executes a canned routine */
+					return cmd->handler(param);
 				} else {
-					pretty_print(get_help(cmd->name TSRMLS_CC) TSRMLS_CC);
+					pretty_print(get_help(cmd->name));
 					return SUCCESS;
 				}
 			}
@@ -259,35 +265,42 @@ PHPDBG_HELP(aliases) /* {{{ */
 	int len;
 
 	/* Print out aliases for all commands except help as this one comes last */
-	phpdbg_writeln("Below are the aliased, short versions of all supported commands");
+	phpdbg_writeln("help", "", "Below are the aliased, short versions of all supported commands");
+	phpdbg_xml("<helpcommands %r>");
 	for(c = phpdbg_prompt_commands; c->name; c++) {
 		if (c->alias && c->alias != 'h') {
-			phpdbg_writeln(" %c     %-20s  %s", c->alias, c->name, c->tip);
+			phpdbg_writeln("command", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s", c->alias, c->name, c->tip);
 			if (c->subs) {
 				len = 20 - 1 - c->name_len;
 				for(c_sub = c->subs; c_sub->alias; c_sub++) {
 					if (c_sub->alias) {
-						phpdbg_writeln(" %c %c   %s %-*s  %s",
-							c->alias, c_sub->alias, (char *)c->name, len, c_sub->name, c_sub->tip);
+						phpdbg_writeln("subcommand", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
+							c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 					}
 				}
 			}
 		}
 	}
 
+	phpdbg_xml("</helpcommands>");
+
 	/* Print out aliases for help as this one comes last, with the added text on how aliases are used */
-	get_command("h", 1, &c, phpdbg_prompt_commands TSRMLS_CC);
-	phpdbg_writeln(" %c     %-20s  %s\n", c->alias, c->name, c->tip);
+	get_command("h", 1, &c, phpdbg_prompt_commands);
+	phpdbg_writeln("aliasinfo", "alias=\"%c\" name=\"%s\" tip=\"%s\"", " %c     %-20s  %s\n", c->alias, c->name, c->tip);
+
+	phpdbg_xml("<helpaliases>");
 
 	len = 20 - 1 - c->name_len;
 	for(c_sub = c->subs; c_sub->alias; c_sub++) {
 		if (c_sub->alias) {
-			phpdbg_writeln(" %c %c   %s %-*s  %s",
+			phpdbg_writeln("alias", "parent_alias=\"%c\" alias=\"%c\" parent=\"%s\" name=\"%-*s\" tip=\"%s\"", " %c %c   %s %-*s  %s",
 				c->alias, c_sub->alias, c->name, len, c_sub->name, c_sub->tip);
 		}
 	}
 
-	pretty_print(get_help("aliases!" TSRMLS_CC) TSRMLS_CC);
+	phpdbg_xml("</helpaliases>");
+
+	pretty_print(get_help("aliases!"));
 	return SUCCESS;
 } /* }}} */
 
@@ -319,7 +332,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **list**     list PHP source" CR
 "  **info**     displays information on the debug session" CR
 "  **print**    show opcodes" CR
-"  **frame**    select a stack frame and print a stack frame summary" CR 
+"  **frame**    select a stack frame and print a stack frame summary" CR
 "  **back**     shows the current backtrace" CR
 "  **help**     provide help on a topic" CR CR
 
@@ -362,7 +375,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-c**      **-c**/my/php.ini       Set php.ini file to load" CR
 "  **-d**      **-d**memory_limit=4G   Set a php.ini directive" CR
 "  **-n**                          Disable default php.ini" CR
-"  **-q**                          Supress welcome banner" CR
+"  **-q**                          Suppress welcome banner" CR
 "  **-v**                          Enable oplog output" CR
 "  **-s**                          Enable stepping" CR
 "  **-b**                          Disable colour" CR
@@ -375,6 +388,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "  **-S**      **-S**cli               Override SAPI name, careful!" CR
 "  **-l**      **-l**4000              Setup remote console ports" CR
 "  **-a**      **-a**192.168.0.3       Setup remote console bind address" CR
+"  **-x**                          Enable xml output (instead of normal text output)" CR
 "  **-V**                          Print version number" CR
 "  **--**      **--** arg1 arg2        Use to delimit phpdbg arguments and php $argv; append any $argv "
 "argument after it" CR CR
@@ -386,9 +400,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "bind address using the **-a** option. If **-a** is specied without an argument, then phpdbg "
 "will bind to all available interfaces.  You should be aware of the security implications of "
 "doing this, so measures should be taken to secure this service if bound to a publicly accessible "
-"interface/port." CR CR
-
-"Specify both stdin and stdout with -lstdin/stdout; by default stdout is stdin * 2."
+"interface/port."
 },
 
 {"phpdbginit", CR
@@ -400,10 +412,10 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Debugger scripts can also be executed using the **source** command." CR CR
 
 "A script file can contain a sequence of valid debugger commands, comments and embedded PHP "
-"code. " CR CR 
+"code. " CR CR
 
 "Comment lines are prefixed by the **#** character.  Note that comments are only allowed in script "
-"files and not in interactive sessions." CR CR 
+"files and not in interactive sessions." CR CR
 
 "PHP code is delimited by the start and end escape tags **<:** and **:>**. PHP code can be used "
 "to define application context for a debugging session and also to extend the debugger by defining "
@@ -545,7 +557,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 
 "    $P break ZEND_ADD" CR
 "    $P b ZEND_ADD" CR
-"    Break on any occurence of the opcode ZEND_ADD" CR CR
+"    Break on any occurrence of the opcode ZEND_ADD" CR CR
 
 "    $P break del 2" CR
 "    $P b ~ 2" CR
@@ -596,7 +608,7 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 },
 
 {"exec",
-"The **exec** command sets the execution context, that is the script to be executed.  The " 
+"The **exec** command sets the execution context, that is the script to be executed.  The "
 "execution context must be defined either by executing the **exec** command or by using the "
 "**-e** command line option." CR CR
 
@@ -642,14 +654,16 @@ phpdbg_help_text_t phpdbg_help_text[] = {
 "Specific info commands are show below:" CR CR
 
 "  **Target**   **Alias**  **Purpose**" CR
-"  **break**    **b**      show current breakpoints" CR
-"  **files**    **F**      show included files" CR
-"  **classes**  **c**      show loaded classes" CR
-"  **funcs**    **f**      show loaded classes" CR
-"  **error**    **e**      show last error" CR
-"  **vars**     **v**      show active variables" CR
-"  **literal**  **l**      show active literal constants" CR
-"  **memory**   **m**      show memory manager stats"
+"  **break**      **b**      show current breakpoints" CR
+"  **files**      **F**      show included files" CR
+"  **classes**    **c**      show loaded classes" CR
+"  **funcs**      **f**      show loaded functions" CR
+"  **error**      **e**      show last error" CR
+"  **constants**  **d**      show user-defined constants" CR
+"  **vars**       **v**      show active variables" CR
+"  **globals**    **g**      show superglobal variables" CR
+"  **literal**    **l**      show active literal constants" CR
+"  **memory**     **m**      show memory manager stats"
 },
 
 // ******** same issue about breakpoints in called frames

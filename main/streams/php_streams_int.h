@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -49,7 +49,7 @@
 #define CHUNK_SIZE	8192
 
 #ifdef PHP_WIN32
-# ifdef EWOULDBLOCK 
+# ifdef EWOULDBLOCK
 #  undef EWOULDBLOCK
 # endif
 # define EWOULDBLOCK WSAEWOULDBLOCK
@@ -66,6 +66,6 @@
  * ones. result should be a char[5]. */
 void php_stream_mode_sanitize_fdopen_fopencookie(php_stream *stream, char *result);
 
-void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper TSRMLS_DC);
-void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption TSRMLS_DC);
+void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper);
+void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption);
 

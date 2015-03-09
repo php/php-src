@@ -16,5 +16,5 @@ var_dump(gc_collect_cycles());
 echo "ok\n";
 ?>
 --EXPECT--
-int(10002)
+int(2)
 ok

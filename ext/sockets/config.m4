@@ -56,6 +56,6 @@ if test "$PHP_SOCKETS" != "no"; then
     AC_DEFINE(HAVE_AI_V4MAPPED,1,[Whether you have AI_V4MAPPED])
   fi
 
-  PHP_NEW_EXTENSION([sockets], [sockets.c multicast.c conversions.c sockaddr_conv.c sendrecvmsg.c], [$ext_shared])
+  PHP_NEW_EXTENSION([sockets], [sockets.c multicast.c conversions.c sockaddr_conv.c sendrecvmsg.c], [$ext_shared],, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_INSTALL_HEADERS([ext/sockets/], [php_sockets.h])
 fi

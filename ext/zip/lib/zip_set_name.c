@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,14 +31,14 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include <stdlib.h>
 #include <string.h>
 
 #include "zipint.h"
 
-
+
 
 int
 _zip_set_name(struct zip *za, zip_uint64_t idx, const char *name, zip_flags_t flags)
@@ -58,7 +58,7 @@ _zip_set_name(struct zip *za, zip_uint64_t idx, const char *name, zip_flags_t fl
 	return -1;
     }
 
-    if (name && strlen(name) > 0) {
+    if (name && name[0] != '\0') {
         /* TODO: check for string too long */
 	if ((str=_zip_string_new((const zip_uint8_t *)name, (zip_uint16_t)strlen(name), flags, &za->error)) == NULL)
 	    return -1;
@@ -93,7 +93,7 @@ _zip_set_name(struct zip *za, zip_uint64_t idx, const char *name, zip_flags_t fl
 	changed = !_zip_string_equal(e->orig->filename, str);
     else
 	changed = 1;
-	
+
     if (changed) {
         if (e->changes == NULL) {
             if ((e->changes=_zip_dirent_clone(e->orig)) == NULL) {

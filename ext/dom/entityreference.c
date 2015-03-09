@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -34,10 +34,10 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class DOMEntityReference extends DOMNode 
+* class DOMEntityReference extends DOMNode
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-11C98490
-* Since: 
+* Since:
 */
 
 const zend_function_entry php_dom_entityreference_class_functions[] = {
@@ -53,37 +53,37 @@ PHP_METHOD(domentityreference, __construct)
 	xmlNodePtr oldnode = NULL;
 	dom_object *intern;
 	char *name;
-	int name_len, name_valid;
+	size_t name_len, name_valid;
 	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling TSRMLS_CC);
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &id, dom_entityreference_class_entry, &name, &name_len) == FAILURE) {
-		zend_restore_error_handling(&error_handling TSRMLS_CC);
+	zend_replace_error_handling(EH_THROW, dom_domexception_class_entry, &error_handling);
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &id, dom_entityreference_class_entry, &name, &name_len) == FAILURE) {
+		zend_restore_error_handling(&error_handling);
 		return;
 	}
 
-	zend_restore_error_handling(&error_handling TSRMLS_CC);
+	zend_restore_error_handling(&error_handling);
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
-		php_dom_throw_error(INVALID_CHARACTER_ERR, 1 TSRMLS_CC);
+		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
 		RETURN_FALSE;
 	}
 
-	node = xmlNewReference(NULL, name);
+	node = xmlNewReference(NULL, (xmlChar *) name);
 
 	if (!node) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1 TSRMLS_CC);
+		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		RETURN_FALSE;
 	}
 
-	intern = (dom_object *)zend_object_store_get_object(id TSRMLS_CC);
+	intern = Z_DOMOBJ_P(id);
 	if (intern != NULL) {
 		oldnode = dom_object_get_node(intern);
 		if (oldnode != NULL) {
-			php_libxml_node_free_resource(oldnode  TSRMLS_CC);
+			php_libxml_node_free_resource(oldnode );
 		}
-		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, node, (void *)intern TSRMLS_CC);
+		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, node, (void *)intern);
 	}
 }
 /* }}} end DOMEntityReference::__construct */

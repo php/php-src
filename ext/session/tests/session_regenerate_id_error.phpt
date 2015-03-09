@@ -96,63 +96,103 @@ ob_end_flush();
 *** Testing session_regenerate_id() : error functionality ***
 
 -- Iteration 1 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 2 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 3 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 4 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 5 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 6 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 7 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 8 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 9 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 10 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 11 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 12 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 13 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 14 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 15 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 16 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 17 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 18 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 19 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 20 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 21 --
@@ -161,9 +201,13 @@ Warning: session_regenerate_id() expects parameter 1 to be boolean, object given
 NULL
 
 -- Iteration 22 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 23 --
+
+Warning: session_regenerate_id(): Cannot regenerate session id - session is not active in %s on line %d
 bool(false)
 
 -- Iteration 24 --

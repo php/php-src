@@ -28,7 +28,7 @@ struct itimerval {
 	struct timeval it_value;	/* current value */
 };
 
-#ifndef timespec
+#if !defined(timespec) && _MSC_VER < 1900
 struct timespec
 {
 	time_t   tv_sec;   /* seconds */

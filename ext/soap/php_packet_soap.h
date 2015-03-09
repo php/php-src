@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -22,6 +22,6 @@
 #ifndef PHP_PACKET_SOAP_H
 #define PHP_PACKET_SOAP_H
 
-int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctionPtr fn, char *fn_name, zval *return_value, zval *soap_headers TSRMLS_DC);
+int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctionPtr fn, char *fn_name, zval *return_value, zval *soap_headers);
 
 #endif

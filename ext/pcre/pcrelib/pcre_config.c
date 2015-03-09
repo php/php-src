@@ -41,9 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 /* This module contains the external function pcre_config(). */
 
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 /* Keep the original link size. */
 static int real_link_size = LINK_SIZE;

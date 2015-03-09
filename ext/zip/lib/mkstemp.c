@@ -48,7 +48,7 @@
 #define O_BINARY 0
 #endif
 
-
+
 
 int
 _zip_mkstemp(char *path)
@@ -62,7 +62,7 @@ _zip_mkstemp(char *path)
 		return ret;
 	}
 #else
-	int fd;   
+	int fd;
 	char *start, *trv;
 	struct stat sbuf;
 	pid_t pid;
@@ -80,7 +80,7 @@ _zip_mkstemp(char *path)
 		if (*trv == 'X')
 			xcnt++;
 		else
-			xcnt = 0;	
+			xcnt = 0;
 
 	/* Use at least one from xtra.  Use 2 if more than 6 X's. */
 	if (*(trv - 1) == 'X')

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,9 +35,9 @@ void transliterator_register_constants( INIT_FUNC_ARGS )
 		return;
 	}
 
-	#define TRANSLITERATOR_EXPOSE_CONST( x ) REGISTER_LONG_CONSTANT( #x, x, CONST_CS )
-	#define TRANSLITERATOR_EXPOSE_CLASS_CONST( x ) zend_declare_class_constant_long( Transliterator_ce_ptr, ZEND_STRS( #x ) - 1, TRANSLITERATOR_##x TSRMLS_CC );
-	#define TRANSLITERATOR_EXPOSE_CUSTOM_CLASS_CONST( name, value ) zend_declare_class_constant_long( Transliterator_ce_ptr, ZEND_STRS( name ) - 1, value TSRMLS_CC );*/
+	#define TRANSLITERATOR_EXPOSE_CONST( x ) REGISTER_LONG_CONSTANT( #x, x, CONST_PERSISTENT | CONST_CS )
+	#define TRANSLITERATOR_EXPOSE_CLASS_CONST( x ) zend_declare_class_constant_long( Transliterator_ce_ptr, ZEND_STRS( #x ) - 1, TRANSLITERATOR_##x );
+	#define TRANSLITERATOR_EXPOSE_CUSTOM_CLASS_CONST( name, value ) zend_declare_class_constant_long( Transliterator_ce_ptr, ZEND_STRS( name ) - 1, value );*/
 
 	/* Normalization form constants */
 	TRANSLITERATOR_EXPOSE_CLASS_CONST( FORWARD );

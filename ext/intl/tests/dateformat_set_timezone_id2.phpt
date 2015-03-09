@@ -5,7 +5,7 @@ date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
 

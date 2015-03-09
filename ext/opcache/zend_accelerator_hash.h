@@ -47,7 +47,7 @@ typedef struct _zend_accel_hash_entry zend_accel_hash_entry;
 struct _zend_accel_hash_entry {
 	zend_ulong             hash_value;
 	char                  *key;
-	zend_uint              key_length;
+	uint32_t              key_length;
 	zend_accel_hash_entry *next;
 	void                  *data;
 	zend_bool              indirect;
@@ -56,35 +56,35 @@ struct _zend_accel_hash_entry {
 typedef struct _zend_accel_hash {
 	zend_accel_hash_entry **hash_table;
 	zend_accel_hash_entry  *hash_entries;
-	zend_uint               num_entries;
-	zend_uint               max_num_entries;
-	zend_uint               num_direct_entries;
+	uint32_t               num_entries;
+	uint32_t               max_num_entries;
+	uint32_t               num_direct_entries;
 } zend_accel_hash;
 
-void zend_accel_hash_init(zend_accel_hash *accel_hash, zend_uint hash_size);
+void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size);
 void zend_accel_hash_clean(zend_accel_hash *accel_hash);
 
 zend_accel_hash_entry* zend_accel_hash_update(
 		zend_accel_hash        *accel_hash,
 		char                   *key,
-		zend_uint               key_length,
+		uint32_t               key_length,
 		zend_bool               indirect,
 		void                   *data);
 
 void* zend_accel_hash_find(
 		zend_accel_hash        *accel_hash,
 		char                   *key,
-		zend_uint               key_length);
+		uint32_t               key_length);
 
 zend_accel_hash_entry* zend_accel_hash_find_entry(
 		zend_accel_hash        *accel_hash,
 		char                   *key,
-		zend_uint               key_length);
+		uint32_t               key_length);
 
 int zend_accel_hash_unlink(
 		zend_accel_hash        *accel_hash,
 		char                   *key,
-		zend_uint               key_length);
+		uint32_t               key_length);
 
 static inline zend_bool zend_accel_hash_is_full(zend_accel_hash *accel_hash)
 {

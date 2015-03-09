@@ -1,0 +1,29 @@
+send_user "IMAP test start..."
+spawn telnet 127.0.0.1 143
+
+expect "Dovecot ready" {
+                send_user "OK: $expect_out(0,string)\n"
+} "refused" {
+                send_user "connect to POP refused\n"
+                exit 1
+} timeout {
+                send_user "connect to POP timeout\n"
+                exit 1
+}
+
+send "a1 LOGIN webmaster@something.com p4ssw0rd\n"
+
+expect "a1 OK" {
+                send_user "OK, imap works\n"
+} "a1 NO*" {
+                send_user "auth failed: $expect_out(buffer)\n"
+                exit 1
+} "error*" {
+		send_user "ERROR: $expect_out(buffer)\n"
+} timeout {
+                send_user "connect to POP timeout\n"
+                exit 1
+}
+
+exit 0
+

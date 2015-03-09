@@ -1,6 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 5                                                        |
+  | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
   | Copyright (c) 1997-2015 The PHP Group                                |
   +----------------------------------------------------------------------+
@@ -38,10 +38,10 @@ struct pdo_sqlite_fci {
 struct pdo_sqlite_func {
 	struct pdo_sqlite_func *next;
 
-	zval *func, *step, *fini;
+	zval func, step, fini;
 	int argc;
 	const char *funcname;
-	
+
 	/* accelerated callback references */
 	struct pdo_sqlite_fci afunc, astep, afini;
 };
@@ -50,7 +50,7 @@ struct pdo_sqlite_collation {
 	struct pdo_sqlite_collation *next;
 
 	const char *name;
-	zval *callback;
+	zval callback;
 	struct pdo_sqlite_fci fc;
 };
 
@@ -70,9 +70,9 @@ typedef struct {
 
 extern pdo_driver_t pdo_sqlite_driver;
 
-extern int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line TSRMLS_DC);
-#define pdo_sqlite_error(s) _pdo_sqlite_error(s, NULL, __FILE__, __LINE__ TSRMLS_CC)
-#define pdo_sqlite_error_stmt(s) _pdo_sqlite_error(stmt->dbh, stmt, __FILE__, __LINE__ TSRMLS_CC)
+extern int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
+#define pdo_sqlite_error(s) _pdo_sqlite_error(s, NULL, __FILE__, __LINE__)
+#define pdo_sqlite_error_stmt(s) _pdo_sqlite_error(stmt->dbh, stmt, __FILE__, __LINE__)
 
 extern struct pdo_stmt_methods sqlite_stmt_methods;
 #endif

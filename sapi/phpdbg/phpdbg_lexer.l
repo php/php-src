@@ -21,12 +21,13 @@
 #define YYFILL(n)
 
 #define NORMAL 0
-#define RAW 1
-#define INITIAL 2
+#define PRE_RAW 1
+#define RAW 2
+#define INITIAL 3
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-void phpdbg_init_lexer (phpdbg_param_t *stack, char *input TSRMLS_DC) {
+void phpdbg_init_lexer (phpdbg_param_t *stack, char *input) {
 	PHPDBG_G(parser_stack) = stack;
 
 	YYSETCONDITION(INITIAL);
@@ -36,7 +37,6 @@ void phpdbg_init_lexer (phpdbg_param_t *stack, char *input TSRMLS_DC) {
 }
 
 int phpdbg_lex (phpdbg_param_t* yylval) {
-	TSRMLS_FETCH(); /* Slow, but this is not a major problem here. TODO: Use TSRMLS_DC */
 
 restart:
 	LEX(text) = YYCURSOR;
@@ -65,8 +65,15 @@ INPUT       [^\n\000]+
 
 <!*> := yyleng = (size_t) YYCURSOR - (size_t) yytext;
 
-<*>[\n\000] {
+<*>{WS}?[\n\000] {
 	return 0;
+}
+
+<PRE_RAW, NORMAL>[-][r]{WS}?{DIGITS} {
+	char *text = yytext + 2;
+	while (*++text < '0');
+	yylval->num = atoi(text);
+	return T_REQ_ID;
 }
 
 <NORMAL>{T_IF}{WS} {
@@ -93,7 +100,7 @@ INPUT       [^\n\000]+
 
 <NORMAL>({T_YES}|{T_ON}|{T_ENABLED}|{T_TRUE}){WS} {
 	phpdbg_init_param(yylval, NUMERIC_PARAM);
-	yylval->num = 1;		
+	yylval->num = 1;
 	return T_TRUTHY;
 }
 
@@ -126,7 +133,7 @@ INPUT       [^\n\000]+
 	phpdbg_init_param(yylval, STR_PARAM);
 	yylval->str = zend_strndup(yytext, yyleng);
 	yylval->len = yyleng;
-	return T_ID; 
+	return T_ID;
 }
 
 <RAW>{INPUT} {
@@ -143,19 +150,26 @@ INPUT       [^\n\000]+
 }
 
 <INITIAL>{T_EVAL}{WS} {
-	YYSETCONDITION(RAW);
+	YYSETCONDITION(PRE_RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_EVAL;
 }
 <INITIAL>{T_SHELL}{WS} {
-	YYSETCONDITION(RAW);
+	YYSETCONDITION(PRE_RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_SHELL;
 }
 <INITIAL>({T_RUN}|{T_RUN_SHORT}){WS} {
-	YYSETCONDITION(RAW);
+	YYSETCONDITION(PRE_RAW);
 	phpdbg_init_param(yylval, EMPTY_PARAM);
 	return T_RUN;
+}
+
+<PRE_RAW>. {
+	YYSETCONDITION(RAW);
+
+	YYCURSOR = LEX(text);
+	goto restart;
 }
 
 <INITIAL>. {

@@ -38,11 +38,12 @@ class MySession2 extends SessionHandler {
 	}
 
 	public function write($id, $data) {
-		return file_put_contents($this->path . $id, $data);
+		return (bool)file_put_contents($this->path . $id, $data);
 	}
 
 	public function destroy($id) {
 		@unlink($this->path . $id);
+		return true;
 	}
 
 	public function gc($maxlifetime) {

@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2012 University of Cambridge
+           Copyright (c) 1997-2014 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,7 @@ a local function is used.
 Also, when compiling for Virtual Pascal, things are done differently, and
 global variables are not used. */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 #include "pcre_internal.h"
 
@@ -72,6 +70,7 @@ PCRE_EXP_DATA_DEFN void  (*PUBL(free))(void *) = LocalPcreFree;
 PCRE_EXP_DATA_DEFN void *(*PUBL(stack_malloc))(size_t) = LocalPcreMalloc;
 PCRE_EXP_DATA_DEFN void  (*PUBL(stack_free))(void *) = LocalPcreFree;
 PCRE_EXP_DATA_DEFN int   (*PUBL(callout))(PUBL(callout_block) *) = NULL;
+PCRE_EXP_DATA_DEFN int   (*PUBL(stack_guard))(void) = NULL;
 
 #elif !defined VPCOMPAT
 PCRE_EXP_DATA_DEFN void *(*PUBL(malloc))(size_t) = malloc;
@@ -79,6 +78,7 @@ PCRE_EXP_DATA_DEFN void  (*PUBL(free))(void *) = free;
 PCRE_EXP_DATA_DEFN void *(*PUBL(stack_malloc))(size_t) = malloc;
 PCRE_EXP_DATA_DEFN void  (*PUBL(stack_free))(void *) = free;
 PCRE_EXP_DATA_DEFN int   (*PUBL(callout))(PUBL(callout_block) *) = NULL;
+PCRE_EXP_DATA_DEFN int   (*PUBL(stack_guard))(void) = NULL;
 #endif
 
 /* End of pcre_globals.c */

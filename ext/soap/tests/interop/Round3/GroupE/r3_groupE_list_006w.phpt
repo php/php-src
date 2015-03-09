@@ -33,7 +33,7 @@ object(stdClass)#%d (3) {
   ["varString"]=>
   string(4) "arg1"
   ["child"]=>
-  &object(stdClass)#%d (3) {
+  object(stdClass)#%d (3) {
     ["varInt"]=>
     int(2)
     ["varString"]=>

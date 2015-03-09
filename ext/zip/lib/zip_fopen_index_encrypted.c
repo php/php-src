@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,7 +31,7 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include <errno.h>
 #include <stdio.h>
@@ -41,7 +41,7 @@
 
 static struct zip_file *_zip_file_new(struct zip *za);
 
-
+
 
 ZIP_EXTERN struct zip_file *
 zip_fopen_index_encrypted(struct zip *za, zip_uint64_t index, zip_flags_t flags,
@@ -69,7 +69,7 @@ zip_fopen_index_encrypted(struct zip *za, zip_uint64_t index, zip_flags_t flags,
     return zf;
 }
 
-
+
 
 static struct zip_file *
 _zip_file_new(struct zip *za)
@@ -80,7 +80,7 @@ _zip_file_new(struct zip *za)
 	_zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
 	return NULL;
     }
-    
+
     if (za->nfile+1 >= za->nfile_alloc) {
 	unsigned int n;
 	n = za->nfile_alloc + 10;

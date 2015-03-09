@@ -1,23 +1,13 @@
 {%DEFINES%}
 
-ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data TSRMLS_DC)
+ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data)
 {
 	DCL_OPLINE
-	zend_bool original_in_execution;
 
 	{%HELPER_VARS%}
 
 	{%INTERNAL_LABELS%}
 
-	original_in_execution = EG(in_execution);
-	EG(in_execution) = 1;
-
-	if (0) {
-zend_vm_enter:
-		execute_data = i_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);
-	}
-
-	LOAD_REGS();
 	LOAD_OPLINE();
 
 	while (1) {
@@ -36,12 +26,24 @@ zend_vm_enter:
 	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
 }
 
-ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
+ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array, zval *return_value)
 {
-	if (EG(exception)) {
+	zend_execute_data *execute_data;
+
+	if (EG(exception) != NULL) {
 		return;
-	} 
-	zend_{%EXECUTOR_NAME%}_ex(i_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC) TSRMLS_CC);
+	}
+
+	execute_data = zend_vm_stack_push_call_frame(ZEND_CALL_TOP_CODE,
+		(zend_function*)op_array, 0, EG(current_execute_data) ? EG(current_execute_data)->called_scope : NULL, EG(current_execute_data) ? Z_OBJ(EG(current_execute_data)->This) : NULL, NULL);
+	if (EG(current_execute_data)) {
+		execute_data->symbol_table = zend_rebuild_symbol_table();
+	} else {
+		execute_data->symbol_table = &EG(symbol_table);
+	}
+	EX(prev_execute_data) = EG(current_execute_data);
+	i_init_execute_data(execute_data, op_array, return_value);
+	zend_{%EXECUTOR_NAME%}_ex(execute_data);
 }
 
 {%EXTERNAL_EXECUTOR%}

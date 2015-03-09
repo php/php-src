@@ -41,15 +41,15 @@ array(11) {
   NULL
   [1]=>
   NULL
+  [5]=>
+  string(1) ""
   [6]=>
   string(1) "
 "
-  [10]=>
-  string(1) ""
   [7]=>
   string(1) "	"
-  [5]=>
-  string(1) ""
+  [10]=>
+  string(1) ""
   [4]=>
   string(1) ""
   [2]=>
@@ -65,16 +65,16 @@ bool(true)
 array(12) {
   [3]=>
   string(5) "apple"
-  [11]=>
-  string(6) "BANANA"
   [2]=>
   string(6) "banana"
+  [11]=>
+  string(6) "BANANA"
   [0]=>
   string(5) "lemoN"
-  [10]=>
-  string(6) "oraNGe"
   [1]=>
   string(6) "Orange"
+  [10]=>
+  string(6) "oraNGe"
   [4]=>
   string(4) "Test"
   [6]=>

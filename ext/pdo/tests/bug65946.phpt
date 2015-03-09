@@ -16,7 +16,12 @@ $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->exec('CREATE TABLE test(id int)');
 $db->exec('INSERT INTO test VALUES(1)');
-$stmt = $db->prepare('SELECT * FROM test LIMIT :limit');
+if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'firebird') {
+	$sql = 'SELECT FIRST :limit * FROM test';
+} else {
+	$sql = 'SELECT * FROM test LIMIT :limit';
+}
+$stmt = $db->prepare($sql);
 $stmt->bindValue('limit', 1, PDO::PARAM_INT);
 if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());
 if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());

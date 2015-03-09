@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -21,6 +21,6 @@
 #ifndef CSS_H
 #define CSS_H
 
-PHPAPI void php_info_print_css(TSRMLS_D);
+PHPAPI void php_info_print_css(void);
 
 #endif

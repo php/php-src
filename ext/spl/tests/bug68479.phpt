@@ -12,22 +12,22 @@ var_dump($params);
 --EXPECTF--
 array(4) {
   [0]=>
-  &object(ReflectionParameter)#2 (1) {
+  object(ReflectionParameter)#2 (1) {
     ["name"]=>
     string(6) "fields"
   }
   [1]=>
-  &object(ReflectionParameter)#3 (1) {
+  object(ReflectionParameter)#3 (1) {
     ["name"]=>
     string(9) "delimiter"
   }
   [2]=>
-  &object(ReflectionParameter)#4 (1) {
+  object(ReflectionParameter)#4 (1) {
     ["name"]=>
     string(9) "enclosure"
   }
   [3]=>
-  &object(ReflectionParameter)#5 (1) {
+  object(ReflectionParameter)#5 (1) {
     ["name"]=>
     string(6) "escape"
   }

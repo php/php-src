@@ -1,7 +1,7 @@
 The interactive PHP debugger
 ============================
 
-Implemented as a SAPI module, phpdbg can excert complete control over the environment without impacting the functionality or performance of your code.
+Implemented as a SAPI module, phpdbg can exert complete control over the environment without impacting the functionality or performance of your code.
 
 phpdbg aims to be a lightweight, powerful, easy to use debugging platform for PHP 5.4+
 

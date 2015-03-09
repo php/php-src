@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -188,9 +188,9 @@ static void timelib_eat_until_separator(char **ptr)
 	}
 }
 
-static long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb)
+static timelib_long timelib_get_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb)
 {
-	long retval = 0;
+	timelib_long retval = 0;
 
 	*tz_not_found = 0;
 
@@ -242,7 +242,7 @@ static int scan(Scanner *s)
 {
 	uchar *cursor = s->cur;
 	char *str, *ptr = NULL;
-		
+
 std:
 	s->tok = cursor;
 	s->len = 0;
@@ -336,11 +336,11 @@ isoweek          = year4 "-"? "W" weekofyear;
 				case 'D': s->period->d = nr; break;
 				case 'H': s->period->h = nr; break;
 				case 'S': s->period->s = nr; break;
-				case 'M': 
+				case 'M':
 					if (in_time) {
 						s->period->i = nr;
 					} else {
-						s->period->m = nr; 
+						s->period->m = nr;
 					}
 					break;
 				default:
@@ -398,9 +398,9 @@ isoweek          = year4 "-"? "W" weekofyear;
 
 /*!max:re2c */
 
-void timelib_strtointerval(char *s, int len, 
-                           timelib_time **begin, timelib_time **end, 
-						   timelib_rel_time **period, int *recurrences, 
+void timelib_strtointerval(char *s, size_t len,
+                           timelib_time **begin, timelib_time **end,
+						   timelib_rel_time **period, int *recurrences,
 						   struct timelib_error_container **errors)
 {
 	Scanner in;

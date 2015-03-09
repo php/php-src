@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -27,7 +27,7 @@
 #  define PHP_ICONV_API __declspec(dllexport)
 # else
 #  define PHP_ICONV_API __declspec(dllimport)
-# endif 
+# endif
 #elif defined(__GNUC__) && __GNUC__ >= 4
 # define PHP_ICONV_API __attribute__ ((visibility("default")))
 #else
@@ -73,7 +73,10 @@ ZEND_BEGIN_MODULE_GLOBALS(iconv)
 ZEND_END_MODULE_GLOBALS(iconv)
 
 #ifdef ZTS
-# define ICONVG(v) TSRMG(iconv_globals_id, zend_iconv_globals *, v)
+# define ICONVG(v) ZEND_TSRMG(iconv_globals_id, zend_iconv_globals *, v)
+# ifdef COMPILE_DL_ICONV
+ZEND_TSRMLS_CACHE_EXTERN();
+# endif
 #else
 # define ICONVG(v) (iconv_globals.v)
 #endif
@@ -104,7 +107,7 @@ typedef enum _php_iconv_err_t {
 } php_iconv_err_t;
 /* }}} */
 
-PHP_ICONV_API php_iconv_err_t php_iconv_string(const char * in_p, size_t in_len, char **out, size_t *out_len, const char *out_charset, const char *in_charset);
+PHP_ICONV_API php_iconv_err_t php_iconv_string(const char * in_p, size_t in_len, zend_string **out, const char *out_charset, const char *in_charset);
 
 #else
 

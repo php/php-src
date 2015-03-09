@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,7 +19,7 @@
 
 int32_t umsg_format_arg_count(UMessageFormat *fmt);
 void umsg_format_helper(MessageFormatter_object *mfo, HashTable *args,
-						UChar **formatted, int *formatted_len TSRMLS_DC);
-void umsg_parse_helper(UMessageFormat *fmt, int *count, zval ***args,
+						UChar **formatted, int *formatted_len);
+void umsg_parse_helper(UMessageFormat *fmt, int *count, zval **args,
 					   UChar *source, int source_len, UErrorCode *status);
 #endif // MSG_FORMAT_HELPERS_H

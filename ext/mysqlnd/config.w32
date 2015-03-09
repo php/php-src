@@ -10,7 +10,6 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_alloc.c " +
 			"mysqlnd_auth.c " +
 			"mysqlnd_block_alloc.c " +
-			"mysqlnd_bt.c " +
 			"mysqlnd_charset.c " +
 			"mysqlnd_debug.c " +
 			"mysqlnd_driver.c " +
@@ -26,9 +25,12 @@ if (PHP_MYSQLND != "no") {
 			"mysqlnd_statistics.c " +
 			"mysqlnd_wireprotocol.c " +
 			"php_mysqlnd.c ";
-		EXTENSION("mysqlnd", mysqlnd_source, false);
-		if (((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "mysqlnd", PHP_MYSQLND))) || 
-			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "mysqlnd", PHP_MYSQLND)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
+		EXTENSION("mysqlnd", mysqlnd_source, false, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+		if ((((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "mysqlnd", PHP_MYSQLND))) ||
+			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "mysqlnd", PHP_MYSQLND)) ||
+			(PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED))) &&
+			CHECK_HEADER_ADD_INCLUDE("zlib.h", "CFLAGS", "..\\zlib;" + php_usual_include_suspects)
+			)
 		{
 			AC_DEFINE("MYSQLND_COMPRESSION_ENABLED", 1, "Compression support");
 			AC_DEFINE("MYSQLND_SSL_SUPPORTED", 1, "SSL support");

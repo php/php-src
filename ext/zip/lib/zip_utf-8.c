@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,13 +31,13 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include "zipint.h"
 
 #include <stdlib.h>
 
-
+
 
 static const zip_uint16_t _cp437_to_unicode[256] = {
     /* 0x00 - 0x0F */
@@ -114,7 +114,7 @@ static const zip_uint16_t _cp437_to_unicode[256] = {
 #define UTF_8_CONTINUE_MASK  0xc0
 #define UTF_8_CONTINUE_MATCH 0x80
 
-
+
 
 enum zip_encoding_type
 _zip_guess_encoding(struct zip_string *str, enum zip_encoding_type expected_encoding)
@@ -173,11 +173,11 @@ done:
 	if (expected_encoding != enc && enc != ZIP_ENCODING_ASCII)
 	    return ZIP_ENCODING_ERROR;
     }
-    
+
     return enc;
 }
 
-
+
 
 static zip_uint32_t
 _zip_unicode_to_utf8_len(zip_uint32_t codepoint)
@@ -191,7 +191,7 @@ _zip_unicode_to_utf8_len(zip_uint32_t codepoint)
     return 4;
 }
 
-
+
 
 static zip_uint32_t
 _zip_unicode_to_utf8(zip_uint32_t codepoint, zip_uint8_t *buf)
@@ -218,7 +218,7 @@ _zip_unicode_to_utf8(zip_uint32_t codepoint, zip_uint8_t *buf)
     return 4;
 }
 
-
+
 
 zip_uint8_t *
 _zip_cp437_to_utf8(const zip_uint8_t * const _cp437buf, zip_uint32_t len,

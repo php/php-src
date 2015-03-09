@@ -3,8 +3,8 @@
  *
  * This file is a portion of "streamable kanji code filter and converter"
  * library, which is distributed under GNU Lesser General Public License
- * version 2.1.  
- * 
+ * version 2.1.
+ *
  * The source code included in this files was separated from mbfilter.c
  * by Moriyoshi Koizumi <moriyoshi@php.net> on 4 Dec 2002.
  *

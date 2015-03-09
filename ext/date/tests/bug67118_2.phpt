@@ -1,5 +1,5 @@
 --TEST--
-Regression introduce in fix for Bug #67118
+Regression introduce in fix for Bug #67118 - Invalid code
 --INI--
 date.timezone=Europe/Paris
 --FILE--
@@ -26,7 +26,7 @@ First try
 Second try
 object(Foo)#1 (3) {
   ["date"]=>
-  string(%d) "2007-09-12 15:49:%s"
+  string(26) "2007-09-12 15:49:12.000000"
   ["timezone_type"]=>
   int(3)
   ["timezone"]=>

@@ -1,9 +1,9 @@
 --TEST--
-IntlTimeZone::getDisplayName(): type parameter (ICU >= 49 && ICU < 51.2)
+IntlTimeZone::getDisplayName(): type parameter (ICU >= 49 && ICU < 50.1.2)
 --SKIPIF--
 <?php if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '49') < 0) die('skip for ICU 49+'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);

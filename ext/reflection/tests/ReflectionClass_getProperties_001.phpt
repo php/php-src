@@ -39,14 +39,14 @@ foreach($classes as $class) {
 Reflecting on class pubf: 
 array(2) {
   [0]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     [%u|b%"name"]=>
     %unicode|string%(1) "a"
     [%u|b%"class"]=>
     %unicode|string%(4) "pubf"
   }
   [1]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     [%u|b%"name"]=>
     %unicode|string%(1) "s"
     [%u|b%"class"]=>
@@ -56,14 +56,14 @@ array(2) {
 Reflecting on class subpubf: 
 array(2) {
   [0]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     [%u|b%"name"]=>
     %unicode|string%(1) "a"
     [%u|b%"class"]=>
     %unicode|string%(4) "pubf"
   }
   [1]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     [%u|b%"name"]=>
     %unicode|string%(1) "s"
     [%u|b%"class"]=>
@@ -73,14 +73,14 @@ array(2) {
 Reflecting on class protf: 
 array(2) {
   [0]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     [%u|b%"name"]=>
     %unicode|string%(1) "a"
     [%u|b%"class"]=>
     %unicode|string%(5) "protf"
   }
   [1]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     [%u|b%"name"]=>
     %unicode|string%(1) "s"
     [%u|b%"class"]=>
@@ -90,14 +90,14 @@ array(2) {
 Reflecting on class subprotf: 
 array(2) {
   [0]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     [%u|b%"name"]=>
     %unicode|string%(1) "a"
     [%u|b%"class"]=>
     %unicode|string%(5) "protf"
   }
   [1]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     [%u|b%"name"]=>
     %unicode|string%(1) "s"
     [%u|b%"class"]=>
@@ -107,14 +107,14 @@ array(2) {
 Reflecting on class privf: 
 array(2) {
   [0]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     [%u|b%"name"]=>
     %unicode|string%(1) "a"
     [%u|b%"class"]=>
     %unicode|string%(5) "privf"
   }
   [1]=>
-  &object(ReflectionProperty)#%d (2) {
+  object(ReflectionProperty)#%d (2) {
     [%u|b%"name"]=>
     %unicode|string%(1) "s"
     [%u|b%"class"]=>

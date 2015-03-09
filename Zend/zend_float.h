@@ -26,9 +26,9 @@ BEGIN_EXTERN_C()
 /*
   Define functions for FP initialization and de-initialization.
 */
-extern ZEND_API void zend_init_fpu(TSRMLS_D);
-extern ZEND_API void zend_shutdown_fpu(TSRMLS_D);
-extern ZEND_API void zend_ensure_fpu_mode(TSRMLS_D);
+extern ZEND_API void zend_init_fpu(void);
+extern ZEND_API void zend_shutdown_fpu(void);
+extern ZEND_API void zend_ensure_fpu_mode(void);
 
 END_EXTERN_C()
 
@@ -57,7 +57,7 @@ END_EXTERN_C()
  Implementation notes:
 
  x86_64:
-  - Since all x86_64 compilers use SSE by default, it is probably unecessary
+  - Since all x86_64 compilers use SSE by default, it is probably unnecessary
     to use these macros there. We define them anyway since we are too lazy
     to differentiate the architecture. Also, the compiler option -mfpmath=i387
     justifies this decision.

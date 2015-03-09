@@ -125,11 +125,13 @@ static size_t ps_buffer_cur_len; /* actual string length in ps_buffer */
 static int save_argc;
 static char** save_argv;
 
-/* 
+/*
  * This holds the 'locally' allocated environ from the save_ps_args method.
  * This is subsequently free'd at exit.
  */
+#if defined(PS_USE_CLOBBER_ARGV)
 static char** frozen_environ, **new_environ;
+#endif
 
 /*
  * Call this method early, before any code has used the original argv passed in
@@ -311,7 +313,7 @@ const char* ps_title_errno(int rc)
 
 #ifdef PS_USE_WIN32
     case PS_TITLE_WINDOWS_ERROR:
-        sprintf(windows_error_details, "Windows error code: %d", GetLastError());
+        sprintf(windows_error_details, "Windows error code: %lu", GetLastError());
         return windows_error_details;
 #endif
     }
@@ -386,7 +388,7 @@ int get_ps_title(int *displen, const char** string)
         return rc;
 
 #ifdef PS_USE_WIN32
-    if (!(ps_buffer_cur_len = GetConsoleTitle(ps_buffer, ps_buffer_size)))
+    if (!(ps_buffer_cur_len = GetConsoleTitle(ps_buffer, (DWORD)ps_buffer_size)))
         return PS_TITLE_WINDOWS_ERROR;
 #endif
     *displen = (int)ps_buffer_cur_len;

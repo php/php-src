@@ -118,7 +118,7 @@ $inputs = array(
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
       $res = mb_strstr($haystack, $needle, $value, $encoding);
-      if ($res === false) {
+      if ($res === NULL) {
          var_dump($res);
       }
       else {
@@ -162,19 +162,19 @@ string(12) "737472696e67"
 
 --empty array--
 Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
-bool(false)
+NULL
 
 --int indexed array--
 Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
-bool(false)
+NULL
 
 --associative array--
 Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
-bool(false)
+NULL
 
 --nested arrays--
 Error: 2 - mb_strstr() expects parameter 3 to be boolean, array given, %s(%d)
-bool(false)
+NULL
 
 --uppercase NULL--
 string(8) "5f76616c"
@@ -214,11 +214,11 @@ string(12) "737472696e67"
 
 --instance of classWithToString--
 Error: 2 - mb_strstr() expects parameter 3 to be boolean, object given, %s(%d)
-bool(false)
+NULL
 
 --instance of classWithoutToString--
 Error: 2 - mb_strstr() expects parameter 3 to be boolean, object given, %s(%d)
-bool(false)
+NULL
 
 --undefined var--
 string(8) "5f76616c"
@@ -228,5 +228,5 @@ string(8) "5f76616c"
 
 --resource--
 Error: 2 - mb_strstr() expects parameter 3 to be boolean, resource given, %s(%d)
-bool(false)
+NULL
 ===DONE===

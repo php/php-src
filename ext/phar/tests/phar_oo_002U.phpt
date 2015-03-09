@@ -3,7 +3,7 @@ Phar object: iterator & entries
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", "<")) die("skip requires Unicode support");
+if (version_compare(PHP_VERSION, "6.0", "!=")) die("skip requires Unicode support");
 if (!extension_loaded("spl")) die("skip SPL not available");
 ?>
 --INI--

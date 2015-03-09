@@ -52,4 +52,6 @@ array(0) {
 
 Warning: SessionHandler::write(): Parent session handler is not open in %ssession_set_save_handler_class_005.php on line %d
 
+Warning: session_write_close(): Failed to write session data %s in %ssession_set_save_handler_class_005.php on line %d
+
 Warning: SessionHandler::close(): Parent session handler is not open in %ssession_set_save_handler_class_005.php on line %d

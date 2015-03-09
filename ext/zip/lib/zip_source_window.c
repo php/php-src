@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,7 +31,7 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
 
 #include <stdlib.h>
 #include <string.h>
@@ -48,7 +48,7 @@ struct window {
 static zip_int64_t window_read(struct zip_source *, void *, void *,
 			       zip_uint64_t, enum zip_source_cmd);
 
-
+
 
 struct zip_source *
 zip_source_window(struct zip *za, struct zip_source *src, zip_uint64_t start, zip_uint64_t len)
@@ -72,7 +72,7 @@ zip_source_window(struct zip *za, struct zip_source *src, zip_uint64_t start, zi
     return zip_source_layered(za, src, window_read, ctx);
 }
 
-
+
 
 static zip_int64_t
 window_read(struct zip_source *src, void *_ctx, void *data,
@@ -102,7 +102,7 @@ window_read(struct zip_source *src, void *_ctx, void *data,
     case ZIP_SOURCE_READ:
 	if (len > ctx->left)
 	    len = ctx->left;
-	
+
 	if (len == 0)
 	    return 0;
 
@@ -134,7 +134,7 @@ window_read(struct zip_source *src, void *_ctx, void *data,
 	    st->valid &= ~(ZIP_STAT_CRC|ZIP_STAT_COMP_SIZE);
 	}
 	return 0;
-	
+
     case ZIP_SOURCE_ERROR:
 	memcpy(data, ctx->e, sizeof(ctx->e));
 	return 0;
@@ -146,5 +146,5 @@ window_read(struct zip_source *src, void *_ctx, void *data,
     default:
 	return -1;
     }
-    
+
 }

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -28,13 +28,15 @@ PHPAPI int php_win32_core_globals_id;
 php_win32_core_globals the_php_win32_core_globals;
 #endif
 
-void php_win32_core_globals_ctor(void *vg TSRMLS_DC)
+void php_win32_core_globals_ctor(void *vg)
 {
 	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
 	memset(wg, 0, sizeof(*wg));
+
+	wg->mail_socket = INVALID_SOCKET;
 }
 
-void php_win32_core_globals_dtor(void *vg TSRMLS_DC)
+void php_win32_core_globals_dtor(void *vg)
 {
 	php_win32_core_globals *wg = (php_win32_core_globals*)vg;
 
@@ -50,6 +52,10 @@ void php_win32_core_globals_dtor(void *vg TSRMLS_DC)
 		zend_hash_destroy(wg->registry_directories);
 		free(wg->registry_directories);
 		wg->registry_directories = NULL;
+	}
+
+	if (INVALID_SOCKET != wg->mail_socket) {
+		closesocket(wg->mail_socket);
 	}
 }
 

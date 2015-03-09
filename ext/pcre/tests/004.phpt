@@ -12,8 +12,6 @@ var_dump($m);
 var_dump(preg_match_all('/zend_parse_parameters(?:_ex\s*\([^,]+,[^,]+|\s*\([^,]+),\s*"([^"]*)"\s*,\s*([^{;]*)/S', 'zend_parse_parameters( 0, "addd|s/", a, b, &c);', $m, PREG_SET_ORDER | PREG_OFFSET_CAPTURE));
 var_dump($m);
 
-var_dump(preg_replace(array('@//.*@S', '@/\*.*\*/@SsUe'), array('', 'preg_replace("/[^\r\n]+/S", "", \'$0\')'), "hello\n//x \n/*\ns\n*/"));
-
 var_dump(preg_split('/PHP_(?:NAMED_)?(?:FUNCTION|METHOD)\s*\((\w+(?:,\s*\w+)?)\)/S', "PHP_FUNCTION(s, preg_match)\n{\nlalala", -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE));
 ?>
 --EXPECTF--
@@ -117,13 +115,6 @@ array(1) {
     }
   }
 }
-
-Deprecated: preg_replace(): The /e modifier is deprecated, use preg_replace_callback instead in %s on line %d
-string(9) "hello
-
-
-
-"
 array(3) {
   [0]=>
   array(2) {

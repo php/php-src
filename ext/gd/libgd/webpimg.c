@@ -547,7 +547,7 @@ void gd_RGBAToYUV420(gdImagePtr im2,
 
   if (!im2->trueColor) {
   	/* Todo: Replace the color/YUV functions with our own and simplify
-  	   that should boost the conversion a bit as well, not only for 
+  	   that should boost the conversion a bit as well, not only for
   	   palette image. */
   	im = gdImageCreateTrueColor(im2->sx, im2->sy);
   	if (!im) {

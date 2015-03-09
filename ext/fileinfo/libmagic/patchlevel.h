@@ -353,14 +353,14 @@
  * Numerous changes from Guy Harris too numerous to mention but including
  * byte-order independence, fixing "old-style masking", etc. etc. A bugfix
  * for broken symlinks from martin@@d255s004.zfe.siemens.de.
- * 
+ *
  * Revision 1.7  93/01/05  14:57:27  ian
  * Couple of nits picked by Christos (again, thanks).
- * 
+ *
  * Revision 1.6  93/01/05  13:51:09  ian
  * Lotsa work on the Magic directory.
- * 
+ *
  * Revision 1.5  92/09/14  14:54:51  ian
  * Fix a tiny null-pointer bug in previous fix for tar archive + uncompress.
- * 
+ *
  */

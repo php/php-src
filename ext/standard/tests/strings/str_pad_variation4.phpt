@@ -1,5 +1,7 @@
 --TEST--
 Test str_pad() function : usage variations - unexpected inputs for '$pad_type' argument
+--SKIPIF--
+<?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
 --FILE--
 <?php
 /* Prototype  : string str_pad  ( string $input  , int $pad_length  [, string $pad_string  [, int $pad_type  ]] )
@@ -121,29 +123,31 @@ Warning: str_pad(): Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_P
 NULL
 -- Iteration 10 --
 
-Warning: str_pad() expects parameter 4 to be long, string given in %s on line %d
+Warning: str_pad() expects parameter 4 to be integer, string given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: str_pad() expects parameter 4 to be long, string given in %s on line %d
+Warning: str_pad() expects parameter 4 to be integer, string given in %s on line %d
 NULL
 -- Iteration 12 --
 string(20) "****Test string*****"
 -- Iteration 13 --
-string(20) "****Test string*****"
+
+Notice: A non well formed numeric value encountered in %s on line %d
+string(20) "*********Test string"
 -- Iteration 14 --
 string(20) "****Test string*****"
 -- Iteration 15 --
 
-Warning: str_pad() expects parameter 4 to be long, array given in %s on line %d
+Warning: str_pad() expects parameter 4 to be integer, array given in %s on line %d
 NULL
 -- Iteration 16 --
 
-Warning: str_pad() expects parameter 4 to be long, array given in %s on line %d
+Warning: str_pad() expects parameter 4 to be integer, array given in %s on line %d
 NULL
 -- Iteration 17 --
 
-Warning: str_pad() expects parameter 4 to be long, array given in %s on line %d
+Warning: str_pad() expects parameter 4 to be integer, array given in %s on line %d
 NULL
 -- Iteration 18 --
 string(20) "Test string*********"
@@ -159,7 +163,7 @@ string(20) "*********Test string"
 string(20) "*********Test string"
 -- Iteration 24 --
 
-Warning: str_pad() expects parameter 4 to be long, object given in %s on line %d
+Warning: str_pad() expects parameter 4 to be integer, object given in %s on line %d
 NULL
 -- Iteration 25 --
 string(20) "*********Test string"

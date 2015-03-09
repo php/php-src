@@ -2,7 +2,7 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -114,7 +114,6 @@ if (ob_get_level()) echo "Not all buffers were deleted.\n";
 
 error_reporting(E_ALL);
 if (PHP_MAJOR_VERSION < 6) {
-	ini_set('magic_quotes_runtime',0); // this would break tests by modifying EXPECT sections
 	if (ini_get('safe_mode')) {
 		echo <<< SAFE_MODE_WARNING
 
@@ -236,7 +235,6 @@ $ini_overwrites = array(
 		'error_append_string=',
 		'auto_prepend_file=',
 		'auto_append_file=',
-		'magic_quotes_runtime=0',
 		'ignore_repeated_errors=0',
 		'precision=14',
 		'memory_limit=128M',
@@ -343,7 +341,7 @@ function save_or_mail_results()
 		if ($just_save_results || TRAVIS_CI || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
 			/*
 			 * Collect information about the host system for our report
-			 * Fetch phpinfo() output so that we can see the PHP enviroment
+			 * Fetch phpinfo() output so that we can see the PHP environment
 			 * Make an archive of all the failed tests
 			 * Send an email
 			 */
@@ -594,6 +592,9 @@ if (isset($argc) && $argc > 1) {
 						$pass_options .= ' -n';
 					}
 					$pass_option_n = true;
+					break;
+				case 'e':
+					$pass_options .= ' -e';
 					break;
 				case '--no-clean':
 					$no_clean = true;
@@ -1124,7 +1125,10 @@ function system_with_timeout($commandline, $env = null, $stdin = null)
 	$stat = proc_get_status($proc);
 
 	if ($stat['signaled']) {
-		$data .= "\nTermsig=" . $stat['stopsig'];
+		$data .= "\nTermsig=" . $stat['stopsig'] . "\n";
+	}
+	if ($stat["exitcode"] > 128 && $stat["exitcode"] < 160) {
+		$data .= "\nTermsig=" . ($stat["exitcode"] - 128) . "\n";
 	}
 
 	$code = proc_close($proc);
@@ -1190,6 +1194,7 @@ function run_test($php, $file, $env)
 	global $no_clean;
 	global $valgrind_version;
 	global $JUNIT;
+	global $SHOW_ONLY_GROUPS;
 	$temp_filenames = null;
 	$org_file = $file;
 
@@ -1364,7 +1369,9 @@ TEST $file
 		}
 	}
 
-	show_test($test_idx, $shortname);
+	if (!$SHOW_ONLY_GROUPS) {
+		show_test($test_idx, $shortname);
+	}
 
 	if (is_array($IN_REDIRECT)) {
 		$temp_dir = $test_dir = $IN_REDIRECT['dir'];
@@ -2570,7 +2577,7 @@ function show_result($result, $tested, $tested_file, $extra = '', $temp_filename
 
 	if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
 		echo "$result $tested [$tested_file] $extra\n";
-	} else {
+	} else if (!$SHOW_ONLY_GROUPS) {
 		// Write over the last line to avoid random trailing chars on next echo
 		echo str_repeat(" ", $line_length), "\r";
 	}

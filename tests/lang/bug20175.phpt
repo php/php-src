@@ -1,9 +1,7 @@
 --TEST--
 Bug #20175 (Static vars can't store ref to new instance)
---SKIPIF--
-<?php if (version_compare(zend_version(),'2.0.0-dev','<')) die('skip ZE1 does not have static class members'); ?>
 --INI--
-error_reporting=E_ALL | E_STRICT | E_DEPRECATED
+error_reporting=E_ALL
 --FILE--
 <?php
 print zend_version()."\n";
@@ -35,7 +33,7 @@ function foo_static() {
 /* Part 2:
  * Storing a reference to the result of a function in a static variable.
  * Same as Part 1 but:
- * The return statment transports a copy of the value to return. In other 
+ * The return statement transports a copy of the value to return. In other 
  * words the return value of bar_global() is a temporary variable only valid
  * after the function call bar_global() is done in current local scope.
  */
@@ -114,7 +112,7 @@ class oop_test {
 	function oop_static() {
 		echo "oop_static()\n";
 		if (!isset(self::$oop_value)) {
-			self::$oop_value = & new oop_class;
+			self::$oop_value = new oop_class;
 		}
 		echo self::$oop_value->oop_name;
 	}
@@ -139,7 +137,6 @@ $oop_tester = new oop_test; // repeated.
 print $oop_tester->oop_static()."\n";
 ?>
 --EXPECTF--
-Deprecated: Assigning the return value of new by reference is deprecated in %s.php on line %d
 %s
 foo_static()
 foo_global()

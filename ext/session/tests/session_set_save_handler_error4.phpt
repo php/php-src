@@ -15,7 +15,7 @@ ob_start();
 
 echo "*** Testing session_set_save_handler() : error functionality ***\n";
 
-function callback() { }
+function callback() { return true; }
 
 session_set_save_handler("callback", "callback", "callback", "callback", "callback", "callback");
 session_set_save_handler("callback", "echo", "callback", "callback", "callback", "callback");

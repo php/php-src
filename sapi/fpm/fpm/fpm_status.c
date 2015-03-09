@@ -46,7 +46,7 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-int fpm_status_handle_request(TSRMLS_D) /* {{{ */
+int fpm_status_handle_request(void) /* {{{ */
 {
 	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
 	struct fpm_scoreboard_proc_s proc;
@@ -55,6 +55,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 	int full, encode;
 	char *short_syntax, *short_post;
 	char *full_pre, *full_syntax, *full_post, *full_separator;
+	zend_string *_GET_str;
 
 	if (!SG(request_info).request_uri) {
 		return 0;
@@ -63,9 +64,9 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 	/* PING */
 	if (fpm_status_ping_uri && fpm_status_ping_response && !strcmp(fpm_status_ping_uri, SG(request_info).request_uri)) {
 		fpm_request_executing();
-		sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
-		sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
-		sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
+		sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
+		sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
+		sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 		SG(sapi_headers).http_response_code = 200;
 
 		/* handle HEAD */
@@ -85,9 +86,9 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		if (!scoreboard_p) {
 			zlog(ZLOG_ERROR, "status: unable to find or access status shared memory");
 			SG(sapi_headers).http_response_code = 500;
-			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
-			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
-			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
+			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
+			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 			PUTS("Internal error. Please review log file for errors.");
 			return 1;
 		}
@@ -95,9 +96,9 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		if (!fpm_spinlock(&scoreboard_p->lock, 1)) {
 			zlog(ZLOG_NOTICE, "[pool %s] status: scoreboard already in used.", scoreboard_p->pool);
 			SG(sapi_headers).http_response_code = 503;
-			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
-			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
-			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
+			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
+			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 			PUTS("Server busy. Please try again later.");
 			return 1;
 		}
@@ -108,16 +109,16 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		if (scoreboard.idle < 0 || scoreboard.active < 0) {
 			zlog(ZLOG_ERROR, "[pool %s] invalid status values", scoreboard.pool);
 			SG(sapi_headers).http_response_code = 500;
-			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
-			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
-			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
+			sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
+			sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 			PUTS("Internal error. Please review log file for errors.");
 			return 1;
 		}
 
 		/* send common headers */
-		sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1 TSRMLS_CC);
-		sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1 TSRMLS_CC);
+		sapi_add_header_ex(ZEND_STRL("Expires: Thu, 01 Jan 1970 00:00:00 GMT"), 1, 1);
+		sapi_add_header_ex(ZEND_STRL("Cache-Control: no-cache, no-store, must-revalidate, max-age=0"), 1, 1);
 		SG(sapi_headers).http_response_code = 200;
 
 		/* handle HEAD */
@@ -126,14 +127,15 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		}
 
 		/* full status ? */
-		full = (fpm_php_get_string_from_table("_GET", "full" TSRMLS_CC) != NULL);
+		_GET_str = zend_string_init("_GET", sizeof("_GET")-1, 0);
+		full = (fpm_php_get_string_from_table(_GET_str, "full") != NULL);
 		short_syntax = short_post = NULL;
 		full_separator = full_pre = full_syntax = full_post = NULL;
 		encode = 0;
 
 		/* HTML */
-		if (fpm_php_get_string_from_table("_GET", "html" TSRMLS_CC)) {
-			sapi_add_header_ex(ZEND_STRL("Content-Type: text/html"), 1, 1 TSRMLS_CC);
+		if (fpm_php_get_string_from_table(_GET_str, "html")) {
+			sapi_add_header_ex(ZEND_STRL("Content-Type: text/html"), 1, 1);
 			time_format = "%d/%b/%Y:%H:%M:%S %z";
 			encode = 1;
 
@@ -207,8 +209,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 			}
 
 		/* XML */
-		} else if (fpm_php_get_string_from_table("_GET", "xml" TSRMLS_CC)) {
-			sapi_add_header_ex(ZEND_STRL("Content-Type: text/xml"), 1, 1 TSRMLS_CC);
+		} else if (fpm_php_get_string_from_table(_GET_str, "xml")) {
+			sapi_add_header_ex(ZEND_STRL("Content-Type: text/xml"), 1, 1);
 			time_format = "%s";
 			encode = 1;
 
@@ -236,7 +238,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 					short_post = "</status>";
 				} else {
 					full_pre = "<processes>\n";
-					full_syntax = 
+					full_syntax =
 						"<process>"
 							"<pid>%d</pid>"
 							"<state>%s</state>"
@@ -259,8 +261,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				}
 
 			/* JSON */
-		} else if (fpm_php_get_string_from_table("_GET", "json" TSRMLS_CC)) {
-			sapi_add_header_ex(ZEND_STRL("Content-Type: application/json"), 1, 1 TSRMLS_CC);
+		} else if (fpm_php_get_string_from_table(_GET_str, "json")) {
+			sapi_add_header_ex(ZEND_STRL("Content-Type: application/json"), 1, 1);
 			time_format = "%s";
 
 			short_syntax =
@@ -311,7 +313,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 
 		/* TEXT */
 		} else {
-			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1 TSRMLS_CC);
+			sapi_add_header_ex(ZEND_STRL("Content-Type: text/plain"), 1, 1);
 			time_format = "%d/%b/%Y:%H:%M:%S %z";
 
 			short_syntax =
@@ -376,6 +378,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 
 		PUTS(buffer);
 		efree(buffer);
+		zend_string_release(_GET_str);
 
 		if (short_post) {
 			PUTS(short_post);
@@ -384,7 +387,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		/* no need to test the var 'full' */
 		if (full_syntax) {
 			int i, first;
-			size_t len;
+			zend_string *tmp_query_string;
 			char *query_string;
 			struct timeval duration, now;
 #ifdef HAVE_FPM_LQ
@@ -413,12 +416,13 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				}
 
 				query_string = NULL;
-				len = 0;
+				tmp_query_string = NULL;
 				if (proc.query_string[0] != '\0') {
 					if (!encode) {
 						query_string = proc.query_string;
 					} else {
-						query_string = php_escape_html_entities_ex((unsigned char *)proc.query_string, strlen(proc.query_string), &len, 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, 1 TSRMLS_CC);
+						tmp_query_string = php_escape_html_entities_ex((unsigned char *)proc.query_string, strlen(proc.query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, 1);
+						query_string = tmp_query_string->val;
 					}
 				}
 
@@ -458,8 +462,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				PUTS(buffer);
 				efree(buffer);
 
-				if (len > 0 && query_string) {
-					efree(query_string);
+				if (tmp_query_string) {
+					zend_string_free(tmp_query_string);
 				}
 			}
 

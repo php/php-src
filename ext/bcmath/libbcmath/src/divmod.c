@@ -26,7 +26,7 @@
                 Computer Science Department, 9062
                 Western Washington University
                 Bellingham, WA 98226-9062
-       
+
 *************************************************************************/
 
 #include <config.h>
@@ -45,24 +45,24 @@
  */
 
 int
-bc_divmod (bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, int scale TSRMLS_DC)
+bc_divmod (bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, int scale)
 {
   bc_num quotient = NULL;
   bc_num temp;
   int rscale;
 
   /* Check for correct numbers. */
-  if (bc_is_zero (num2 TSRMLS_CC)) return -1;
+  if (bc_is_zero (num2)) return -1;
 
   /* Calculate final scale. */
   rscale = MAX (num1->n_scale, num2->n_scale+scale);
-  bc_init_num(&temp TSRMLS_CC);
+  bc_init_num(&temp);
 
   /* Calculate it. */
-  bc_divide (num1, num2, &temp, scale TSRMLS_CC);
+  bc_divide (num1, num2, &temp, scale);
   if (quot)
     quotient = bc_copy_num (temp);
-  bc_multiply (temp, num2, &temp, rscale TSRMLS_CC);
+  bc_multiply (temp, num2, &temp, rscale);
   bc_sub (num1, temp, rem, rscale);
   bc_free_num (&temp);
 
@@ -80,8 +80,8 @@ bc_divmod (bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, int scale TSRMLS
    result in RESULT.   */
 
 int
-bc_modulo (bc_num num1, bc_num num2, bc_num *result, int scale TSRMLS_DC)
+bc_modulo (bc_num num1, bc_num num2, bc_num *result, int scale)
 {
-  return bc_divmod (num1, num2, NULL, result, scale TSRMLS_CC);
+  return bc_divmod (num1, num2, NULL, result, scale);
 }
 

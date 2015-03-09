@@ -1,0 +1,17 @@
+#################################################
+# name: compile
+# purpose: test compiling error code
+# expect: TEST::FORMAT
+# options: -rr
+#################################################
+#[PHP Parse error:  syntax error, unexpected 'echo' (T_ECHO) in %s on line %s]
+#[Could not find information about included file...]
+#################################################
+<:
+define('OUT', 
+	tempnam(null, "phpdbg"));
+file_put_contents(OUT, "<?error echo \"Hello World\"; ?>");
+phpdbg_exec(OUT);
+:>
+run
+quit

@@ -83,6 +83,9 @@ if (PHP_GD != "no") {
 /D USE_GD_IOCTX \
 /D MSWIN32 \
 		");
+		if (ICC_TOOLSET) {
+			ADD_FLAG("LDFLAGS_GD", "/nodefaultlib:libcmt");
+		}
 		
 		PHP_INSTALL_HEADERS("", "ext/gd ext/gd/libgd" );
 	} else {

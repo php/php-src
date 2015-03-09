@@ -42,7 +42,6 @@ $page["name"] = A::A_ftk();
 Non-static method A::A_ftk() should not be called statically
 1 %sbug38047.php:13 get_error_context()
 2 %sbug38047.php:36 kalus_error_handler()
-3 %sbug38047.php:36 A_ftk()
 
 Missing argument 1 for A::A_ftk(), called in %sbug38047.php on line 36 and defined
 1 %sbug38047.php:13 get_error_context()

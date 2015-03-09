@@ -70,14 +70,16 @@ var_dump($db->pgsqlGetNotify());
 // Test second parameter, should wait 2 seconds because no notify is queued
 $t = microtime(1);
 $notify = $db->pgsqlGetNotify(PDO::FETCH_ASSOC, 1000);
-var_dump((microtime(1) - $t) >= 1);
+$diff = microtime(1) - $t;
+var_dump($diff >= 1 || 1 - abs($diff) < .01);
 var_dump($notify);
 
 // Test second parameter, should return immediately because a notify is queued
 $db->exec("NOTIFY notifies_phpt");
 $t = microtime(1);
 $notify = $db->pgsqlGetNotify(PDO::FETCH_ASSOC, 5000);
-var_dump((microtime(1) - $t) < 1);
+$diff = microtime(1) - $t;
+var_dump($diff < 1 || abs(1 - abs($diff)) < .01);
 var_dump(count($notify));
 
 ?>

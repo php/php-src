@@ -23,4 +23,4 @@ imagefilltoborder( $image, 50, 50, 'wrong param', imagecolorallocate( $image, 25
 
 ?> 
 --EXPECTF--
-Warning: imagefilltoborder() expects parameter 4 to be long, %s given in %s on line %d
+Warning: imagefilltoborder() expects parameter 4 to be integer, %s given in %s on line %d

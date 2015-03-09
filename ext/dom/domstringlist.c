@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -34,7 +34,7 @@ ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
-* class domstringlist 
+* class domstringlist
 *
 * URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMStringList
 * Since: DOM Level 3
@@ -47,15 +47,14 @@ const zend_function_entry php_dom_domstringlist_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-/* {{{ length	unsigned long	
-readonly=yes 
+/* {{{ length	unsigned long
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMStringList-length
-Since: 
+Since:
 */
-int dom_domstringlist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
+int dom_domstringlist_length_read(dom_object *obj, zval *retval)
 {
-	ALLOC_ZVAL(*retval);
-	ZVAL_STRING(*retval, "TEST", 1);
+	ZVAL_STRING(retval, "TEST");
 	return SUCCESS;
 }
 
@@ -63,7 +62,7 @@ int dom_domstringlist_length_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 /* {{{ proto domstring dom_domstringlist_item(int index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMStringList-item
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_domstringlist_item)
 {

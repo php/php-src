@@ -12,4 +12,4 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 imagefontheight('string');
 ?>
 --EXPECTF--
-Warning: imagefontheight() expects parameter 1 to be long, %s given in %s on line %d
+Warning: imagefontheight() expects parameter 1 to be integer, %s given in %s on line %d

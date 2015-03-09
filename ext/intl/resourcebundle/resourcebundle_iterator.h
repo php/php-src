@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,12 +25,12 @@ typedef struct {
 	zend_object_iterator  intern;
 	ResourceBundle_object *subject;
 	zend_bool             is_table;
-	long                  length;
-	zval                  *current;
+	zend_long             length;
+	zval                  current;
 	char                  *currentkey;
-	long                  i;
+	zend_long             i;
 } ResourceBundle_iterator;
 
-zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *object, int byref TSRMLS_DC );
+zend_object_iterator *resourcebundle_get_iterator( zend_class_entry *ce, zval *object, int byref );
 
 #endif // #ifndef RESOURCEBUNDLE_ITERATOR_H

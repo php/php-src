@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(opcache, whether to enable Zend OPcache support,
-[  --enable-opcache        Enable Zend OPcache support], yes)
+[  --disable-opcache       Disable Zend OPcache support], yes)
 
 if test "$PHP_OPCACHE" != "no"; then
 
@@ -376,8 +376,17 @@ fi
 	shared_alloc_shm.c \
 	shared_alloc_mmap.c \
 	shared_alloc_posix.c \
-	Optimizer/zend_optimizer.c,
-	shared,,,,yes)
+	Optimizer/zend_optimizer.c \
+	Optimizer/pass1_5.c \
+	Optimizer/pass2.c \
+	Optimizer/pass3.c \
+	Optimizer/optimize_func_calls.c \
+	Optimizer/block_pass.c \
+	Optimizer/optimize_temp_vars_5.c \
+	Optimizer/nop_removal.c \
+	Optimizer/compact_literals.c,
+	shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,,yes)
 
   PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
+  PHP_ADD_EXTENSION_DEP(opcache, pcre)
 fi

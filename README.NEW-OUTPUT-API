@@ -34,7 +34,7 @@ API adjustment to the old output control code:
 		php_output_handler_started(handler_name, handler_name_len TSRMLS_CC);
 
 	Flushing one output buffer:
-		// php_ob_end_buffer(1, 1 TSRMLS_CC);
+		// php_end_ob_buffer(1, 1 TSRMLS_CC);
 		php_output_flush(TSRMLS_C);
 
 	Flushing all output buffers:

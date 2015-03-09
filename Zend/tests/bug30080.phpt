@@ -10,9 +10,9 @@ class foo {
 
 new foo(array(new stdClass)); 
 ?>
---EXPECT--
+--EXPECTF--
 array(1) {
   [0]=>
-  object(stdClass)#2 (0) {
+  object(stdClass)#%d (0) {
   }
 }

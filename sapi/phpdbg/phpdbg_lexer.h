@@ -34,7 +34,7 @@ typedef struct {
 #define yyparse phpdbg_parse
 #define yylex phpdbg_lex
 
-void phpdbg_init_lexer (phpdbg_param_t *stack, char *input TSRMLS_DC);
+void phpdbg_init_lexer (phpdbg_param_t *stack, char *input);
 
 int phpdbg_lex (phpdbg_param_t* yylval);
 

@@ -10,5 +10,4 @@ var_dump(baz);
 
 ?>
 --EXPECTF--
-Notice: Use of undefined constant baz - assumed 'baz' in %s on line %d
-string(3) "baz"
+Fatal error: Undefined constant 'foo\bar\baz' in %s on line %d

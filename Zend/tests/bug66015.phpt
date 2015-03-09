@@ -11,7 +11,8 @@ class Test
    protected static $array = [
        self::FIRST => 'first',
        'second',
-       'third'
+       'third',
+       4,
    ];
 
    public function __construct()
@@ -22,9 +23,13 @@ class Test
 
 $test = new Test();
 ?>
+
+===DONE===
 --EXPECTF--
 array (
   1 => 'first',
   2 => 'second',
   3 => 'third',
+  4 => 4,
 )
+===DONE===

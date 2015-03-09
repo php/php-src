@@ -1,6 +1,6 @@
-/* 
+/*
 	+----------------------------------------------------------------------+
-	| PHP Version 5                                                        |
+	| PHP Version 7                                                        |
 	+----------------------------------------------------------------------+
 	| Copyright (c) 1997-2015 The PHP Group                                |
 	+----------------------------------------------------------------------+
@@ -28,10 +28,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
-
-#ifndef ZEND_ENGINE_2
-#error HEAD does not work with ZendEngine1 anymore
-#endif
 
 #include "ext/standard/dl.h"
 #include "ext/standard/file.h"
@@ -192,10 +188,10 @@ static zend_module_entry *php_builtin_extensions[] = {
 /* }}} */
 
 #define EXTCOUNT (sizeof(php_builtin_extensions)/sizeof(zend_module_entry *))
-	
-PHPAPI int php_register_internal_extensions(TSRMLS_D)
+
+PHPAPI int php_register_internal_extensions(void)
 {
-	return php_register_extensions(php_builtin_extensions, EXTCOUNT TSRMLS_CC);
+	return php_register_extensions(php_builtin_extensions, EXTCOUNT);
 }
 
 /*

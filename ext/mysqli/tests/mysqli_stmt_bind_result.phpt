@@ -10,7 +10,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$hint_str_or_unicode = (version_compare(PHP_VERSION, '5.9.9', '>') == 1) ? "unicode":"string";
+	$hint_str_or_unicode = (version_compare(PHP_VERSION, '6.0', '==') == 1) ? "unicode":"string";
 
 	$tmp    = NULL;
 	$link   = NULL;

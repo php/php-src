@@ -421,8 +421,8 @@
 /^[\p{Arabic}]/8
     \x{06e9}
     \x{060b}
-    \x{061c}
     ** Failers
+    \x{061c}
     X\x{06e9}   
 
 /^[\P{Yi}]/8
@@ -1483,5 +1483,17 @@
     !\"#%&'()*,-./:;?@[\\]_{}
     \x{a1}\x{a7}  
     \x{37e} 
+
+/[RST]+/8iW
+    Ss\x{17f}
+    
+/[R-T]+/8iW 
+    Ss\x{17f}
+
+/[q-u]+/8iW 
+    Ss\x{17f}
+
+/^s?c/mi8
+    scat
 
 /-- End of testinput6 --/

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,10 +36,10 @@ PHP_FUNCTION( msgfmt_get_pattern )
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &object, MessageFormatter_ce_ptr ) == FAILURE )
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
-			"msgfmt_get_pattern: unable to parse input params", 0 TSRMLS_CC );
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"msgfmt_get_pattern: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
@@ -47,7 +47,7 @@ PHP_FUNCTION( msgfmt_get_pattern )
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	if(mfo->mf_data.orig_format) {
-		RETURN_STRINGL(mfo->mf_data.orig_format, mfo->mf_data.orig_format_len, 1);
+		RETURN_STRINGL(mfo->mf_data.orig_format, mfo->mf_data.orig_format_len);
 	}
 
 	RETURN_FALSE;
@@ -62,17 +62,17 @@ PHP_FUNCTION( msgfmt_get_pattern )
 PHP_FUNCTION( msgfmt_set_pattern )
 {
 	char*       value = NULL;
-	int         value_len = 0;
-	int         spattern_len = 0;
+	size_t      value_len = 0;
+	int32_t     spattern_len = 0;
 	UChar*	    spattern  = NULL;
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, MessageFormatter_ce_ptr, &value, &value_len ) == FAILURE )
 	{
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
-			"msgfmt_set_pattern: unable to parse input params", 0 TSRMLS_CC);
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"msgfmt_set_pattern: unable to parse input params", 0);
 		RETURN_FALSE;
 	}
 
@@ -85,7 +85,7 @@ PHP_FUNCTION( msgfmt_set_pattern )
 #ifdef MSG_FORMAT_QUOTE_APOS
 	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
 		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
-			"msgfmt_set_pattern: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
+			"msgfmt_set_pattern: error converting pattern to quote-friendly format", 0 );
 		RETURN_FALSE;
 	}
 #endif
@@ -124,11 +124,11 @@ PHP_FUNCTION( msgfmt_get_locale )
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_get_locale: unable to parse input params", 0 TSRMLS_CC );
+			"msgfmt_get_locale: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
@@ -137,7 +137,7 @@ PHP_FUNCTION( msgfmt_get_locale )
 	MSG_FORMAT_METHOD_FETCH_OBJECT;
 
 	loc = (char *)umsg_getLocale(MSG_FORMAT_OBJECT(mfo));
-	RETURN_STRING(loc, 1);
+	RETURN_STRING(loc);
 }
 /* }}} */
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -564,11 +564,11 @@ static timelib_sll timelib_get_relative_text(char **ptr, int *behavior)
 	return timelib_lookup_relative_text(ptr, behavior);
 }
 
-static long timelib_lookup_month(char **ptr)
+static timelib_long timelib_lookup_month(char **ptr)
 {
 	char *word;
 	char *begin = *ptr, *end;
-	long  value = 0;
+	timelib_long  value = 0;
 	const timelib_lookup_table *tp;
 
 	while ((**ptr >= 'A' && **ptr <= 'Z') || (**ptr >= 'a' && **ptr <= 'z')) {
@@ -588,7 +588,7 @@ static long timelib_lookup_month(char **ptr)
 	return value;
 }
 
-static long timelib_get_month(char **ptr)
+static timelib_long timelib_get_month(char **ptr)
 {
 	while (**ptr == ' ' || **ptr == '\t' || **ptr == '-' || **ptr == '.' || **ptr == '/') {
 		++*ptr;
@@ -668,7 +668,7 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, int behavior, S
 	}
 }
 
-const static timelib_tz_lookup_table* abbr_search(const char *word, long gmtoffset, int isdst)
+const static timelib_tz_lookup_table* abbr_search(const char *word, timelib_long gmtoffset, int isdst)
 {
 	int first_found = 0;
 	const timelib_tz_lookup_table  *tp, *first_found_elem = NULL;
@@ -677,7 +677,7 @@ const static timelib_tz_lookup_table* abbr_search(const char *word, long gmtoffs
 	if (strcasecmp("utc", word) == 0 || strcasecmp("gmt", word) == 0) {
 		return timelib_timezone_utc;
 	}
-	
+
 	for (tp = timelib_timezone_lookup; tp->name; tp++) {
 		if (strcasecmp(word, tp->name) == 0) {
 			if (!first_found) {
@@ -706,11 +706,11 @@ const static timelib_tz_lookup_table* abbr_search(const char *word, long gmtoffs
 	return NULL;
 }
 
-static long timelib_lookup_abbr(char **ptr, int *dst, char **tz_abbr, int *found)
+static timelib_long timelib_lookup_abbr(char **ptr, int *dst, char **tz_abbr, int *found)
 {
 	char *word;
 	char *begin = *ptr, *end;
-	long  value = 0;
+	timelib_long  value = 0;
 	const timelib_tz_lookup_table *tp;
 
 	while (**ptr != '\0' && **ptr != ')' && **ptr != ' ') {
@@ -733,10 +733,10 @@ static long timelib_lookup_abbr(char **ptr, int *dst, char **tz_abbr, int *found
 	return value;
 }
 
-long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper)
+timelib_long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_wrapper)
 {
 	timelib_tzinfo *res;
-	long            retval = 0;
+	timelib_long            retval = 0;
 
 	*tz_not_found = 0;
 
@@ -764,7 +764,7 @@ long timelib_parse_zone(char **ptr, int *dst, timelib_time *t, int *tz_not_found
 		retval = timelib_parse_tz_cor(ptr);
 	} else {
 		int found = 0;
-		long offset = 0;
+		timelib_long offset = 0;
 		char *tz_abbr;
 
 		t->is_localtime = 1;
@@ -808,7 +808,7 @@ static int scan(Scanner *s, timelib_tz_get_wrapper tz_get_wrapper)
 {
 	uchar *cursor = s->cur;
 	char *str, *ptr = NULL;
-		
+
 std:
 	s->tok = cursor;
 	s->len = 0;
@@ -871,7 +871,7 @@ iso8601normtz =  't'? hour24 [:.] minute [:.] secondlz space? (tzcorrection | tz
 
 gnunocolon       = 't'? hour24lz minutelz;
 /* gnunocolontz     = hour24lz minutelz space? (tzcorrection | tz); */
-iso8601nocolon   = 't'? hour24lz minutelz secondlz; 
+iso8601nocolon   = 't'? hour24lz minutelz secondlz;
 /* iso8601nocolontz = hour24lz minutelz secondlz space? (tzcorrection | tz); */
 
 /* Date formats */
@@ -1437,7 +1437,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		TIMELIB_HAVE_RELATIVE();
-		
+
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		w = timelib_get_nr((char **) &ptr, 2);
 		d = timelib_get_nr((char **) &ptr, 1);
@@ -1456,7 +1456,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		TIMELIB_INIT;
 		TIMELIB_HAVE_DATE();
 		TIMELIB_HAVE_RELATIVE();
-		
+
 		s->time->y = timelib_get_nr((char **) &ptr, 4);
 		w = timelib_get_nr((char **) &ptr, 2);
 		d = 1;
@@ -1560,7 +1560,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		if (s->time->relative.weekday_behavior != 2) {
 			s->time->relative.weekday_behavior = 1;
 		}
-		
+
 		TIMELIB_DEINIT;
 		return TIMELIB_WEEKDAY;
 	}
@@ -1721,7 +1721,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 
 /*!max:re2c */
 
-timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
+timelib_time* timelib_strtotime(char *s, size_t len, struct timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
 {
 	Scanner in;
 	int t;
@@ -1832,7 +1832,7 @@ static void timelib_time_reset_unset_fields(timelib_time *time)
 	if (time->f == TIMELIB_UNSET ) time->f = 0.0;
 }
 
-timelib_time *timelib_parse_from_format(char *format, char *string, int len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
+timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, timelib_error_container **errors, const timelib_tzdb *tzdb, timelib_tz_get_wrapper tz_get_wrapper)
 {
 	char       *fptr = format;
 	char       *ptr = string;
@@ -1877,7 +1877,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 						add_pbf_error(s, "A textual day could not be found", string, begin);
 						break;
 					} else {
-						in.time->have_relative = 1; 
+						in.time->have_relative = 1;
 						in.time->relative.have_weekday_relative = 1;
 						in.time->relative.weekday = tmprel->multiplier;
 						in.time->relative.weekday_behavior = 1;
@@ -2148,13 +2148,13 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 
 	/* do funky checking whether the parsed time was valid time */
 	if (s->time->h != TIMELIB_UNSET && s->time->i != TIMELIB_UNSET &&
-		s->time->s != TIMELIB_UNSET && 
+		s->time->s != TIMELIB_UNSET &&
 		!timelib_valid_time( s->time->h, s->time->i, s->time->s)) {
 		add_pbf_warning(s, "The parsed time was invalid", string, ptr);
 	}
 	/* do funky checking whether the parsed date was valid date */
 	if (s->time->y != TIMELIB_UNSET && s->time->m != TIMELIB_UNSET &&
-		s->time->d != TIMELIB_UNSET && 
+		s->time->d != TIMELIB_UNSET &&
 		!timelib_valid_date( s->time->y, s->time->m, s->time->d)) {
 		add_pbf_warning(s, "The parsed date was invalid", string, ptr);
 	}
@@ -2202,7 +2202,7 @@ void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options)
 */
 }
 
-char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst)
+char *timelib_timezone_id_from_abbr(const char *abbr, timelib_long gmtoffset, int isdst)
 {
 	const timelib_tz_lookup_table *tp;
 
@@ -2227,7 +2227,7 @@ int main(void)
 	printf ("%04d-%02d-%02d %02d:%02d:%02d.%-5d %+04d %1d",
 		time.y, time.m, time.d, time.h, time.i, time.s, time.f, time.z, time.dst);
 	if (time.have_relative) {
-		printf ("%3dY %3dM %3dD / %3dH %3dM %3dS", 
+		printf ("%3dY %3dM %3dD / %3dH %3dM %3dS",
 			time.relative.y, time.relative.m, time.relative.d, time.relative.h, time.relative.i, time.relative.s);
 	}
 	if (time.have_weekday_relative) {
@@ -2236,7 +2236,7 @@ int main(void)
 	if (time.have_weeknr_day) {
 		printf(" / %dW%d", time.relative.weeknr_day.weeknr, time.relative.weeknr_day.dayofweek);
 	}
-	return 0;				
+	return 0;
 }
 #endif
 

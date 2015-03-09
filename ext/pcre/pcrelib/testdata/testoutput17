@@ -228,7 +228,7 @@ Options: extended
 No first char
 No need char
 Subject length lower bound = 3
-Starting byte set: \x09 \x20 ! " # $ % & ' ( * + - / 0 1 2 3 4 5 6 7 8 
+Starting chars: \x09 \x20 ! " # $ % & ' ( * + - / 0 1 2 3 4 5 6 7 8 
   9 = ? A B C D E F G H I J K L M N O P Q R S T U V W X Y Z ^ _ ` a b c d e 
   f g h i j k l m n o p q r s t u v w x y z { | } ~ \x7f \xff 
 
@@ -274,7 +274,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: \x09 \x20 \xa0 \xff 
+Starting chars: \x09 \x20 \xa0 \xff 
     \x{1681}\x{200b}\x{1680}\x{2000}\x{202f}\x{3000}
  0: \x{1680}\x{2000}\x{202f}\x{3000}
     \x{3001}\x{2fff}\x{200a}\xa0\x{2000}
@@ -292,7 +292,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+Starting chars: \x09 \x20 \xa0 \xff 
     \x{1681}\x{200b}\x{1680}\x{2000}\x{202f}\x{3000}
  0: \x{1680}\x{2000}\x{202f}\x{3000}
     \x{3001}\x{2fff}\x{200a}\xa0\x{2000}
@@ -304,7 +304,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
     \x{1680}\x{180e}\x{167f}\x{1681}\x{180d}\x{180f}
  0: \x{167f}\x{1681}\x{180d}\x{180f}
     \x{2000}\x{200a}\x{1fff}\x{200b}
@@ -330,7 +330,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: \x0a \x0b \x0c \x0d \x85 \xff 
+Starting chars: \x0a \x0b \x0c \x0d \x85 \xff 
     \x{2027}\x{2030}\x{2028}\x{2029}
  0: \x{2028}\x{2029}
     \x09\x0e\x84\x86\x85\x0a\x0b\x0c\x0d
@@ -348,7 +348,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+Starting chars: \x0a \x0b \x0c \x0d \x85 \xff 
     \x{2027}\x{2030}\x{2028}\x{2029}
  0: \x{2028}\x{2029}
     \x09\x0e\x84\x86\x85\x0a\x0b\x0c\x0d
@@ -360,7 +360,7 @@ No options
 No first char
 No need char
 Subject length lower bound = 1
-No set of starting bytes
+No starting char list
     \x{2028}\x{2029}\x{2027}\x{2030}
  0: \x{2027}\x{2030}
     \x85\x0a\x0b\x0c\x0d\x09\x0e\x84\x86
@@ -378,7 +378,7 @@ Options: bsr_unicode
 No first char
 No need char
 Subject length lower bound = 1
-Starting byte set: \x0a \x0b \x0c \x0d \x85 \xff 
+Starting chars: \x0a \x0b \x0c \x0d \x85 \xff 
     \x{2027}\x{2030}\x{2028}\x{2029}
  0: \x{2028}\x{2029}
     \x09\x0e\x84\x86\x85\x0a\x0b\x0c\x0d
@@ -534,18 +534,18 @@ MK: 0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789AB
 ------------------------------------------------------------------
         Bra
         a*
-        [b-\x{200}]?+
+        [b-\xff\x{100}-\x{200}]?+
         a#
         a*+
-        [b-\x{200}]?
+        [b-\xff\x{100}-\x{200}]?
         b#
-        [a-f]*
-        [g-\x{200}]*+
+        [a-f]*+
+        [g-\xff\x{100}-\x{200}]*+
         #
-        [g-\x{200}]*
+        [g-\xff\x{100}-\x{200}]*+
         [a-c]*+
         #
-        [g-\x{200}]*
+        [g-\xff\x{100}-\x{200}]*
         [a-h]*+
         Ket
         End

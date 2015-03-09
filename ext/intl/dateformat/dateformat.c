@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,11 +34,11 @@ void dateformat_register_constants( INIT_FUNC_ARGS )
 		return;
 	}
 
-	#define DATEFORMATTER_EXPOSE_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_CS)
-	#define DATEFORMATTER_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_long( IntlDateFormatter_ce_ptr, ZEND_STRS( #x ) - 1, UDAT_##x TSRMLS_CC );
-	#define DATEFORMATTER_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_long( IntlDateFormatter_ce_ptr, ZEND_STRS( name ) - 1, value TSRMLS_CC );
+	#define DATEFORMATTER_EXPOSE_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_PERSISTENT | CONST_CS)
+	#define DATEFORMATTER_EXPOSE_CLASS_CONST(x) zend_declare_class_constant_long( IntlDateFormatter_ce_ptr, ZEND_STRS( #x ) - 1, UDAT_##x );
+	#define DATEFORMATTER_EXPOSE_CUSTOM_CLASS_CONST(name, value) zend_declare_class_constant_long( IntlDateFormatter_ce_ptr, ZEND_STRS( name ) - 1, value );
 
-	#define DATEFORMATTER_EXPOSE_UCAL_CLASS_CONST(x) zend_declare_class_constant_long( IntlDateFormatter_ce_ptr, ZEND_STRS( #x ) - 1, UCAL_##x TSRMLS_CC );
+	#define DATEFORMATTER_EXPOSE_UCAL_CLASS_CONST(x) zend_declare_class_constant_long( IntlDateFormatter_ce_ptr, ZEND_STRS( #x ) - 1, UCAL_##x );
 
 	/* UDateFormatStyle constants */
 	DATEFORMATTER_EXPOSE_CLASS_CONST( FULL );
@@ -74,15 +74,15 @@ PHP_FUNCTION( datefmt_get_error_code )
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_get_error_code: unable to parse input params", 0 TSRMLS_CC );
+			"datefmt_get_error_code: unable to parse input params", 0 );
 		RETURN_FALSE;
 	}
 
-	dfo = (IntlDateFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
+	dfo = Z_INTL_DATEFORMATTER_P( object );
 
 	/* Return formatter's last error code. */
 	RETURN_LONG( INTL_DATA_ERROR_CODE(dfo) );
@@ -96,23 +96,23 @@ PHP_FUNCTION( datefmt_get_error_code )
  */
 PHP_FUNCTION( datefmt_get_error_message )
 {
-	char*                    message = NULL;
+	zend_string *message = NULL;
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"datefmt_get_error_message: unable to parse input params", 0 TSRMLS_CC );
+			"datefmt_get_error_message: unable to parse input params", 0 );
 
 		RETURN_FALSE;
 	}
 
-	dfo = (IntlDateFormatter_object *) zend_object_store_get_object( object TSRMLS_CC );
+	dfo = Z_INTL_DATEFORMATTER_P( object );
 
 	/* Return last error message. */
-	message = intl_error_get_message( INTL_DATA_ERROR_P(dfo) TSRMLS_CC );
-	RETURN_STRING( message, 0);
+	message = intl_error_get_message( INTL_DATA_ERROR_P(dfo) );
+	RETURN_STR( message);
 }
 /* }}} */

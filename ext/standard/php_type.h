@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -30,7 +30,7 @@ PHP_FUNCTION(settype);
 PHP_FUNCTION(is_null);
 PHP_FUNCTION(is_resource);
 PHP_FUNCTION(is_bool);
-PHP_FUNCTION(is_long);
+PHP_FUNCTION(is_int);
 PHP_FUNCTION(is_float);
 PHP_FUNCTION(is_numeric);
 PHP_FUNCTION(is_string);

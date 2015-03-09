@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,13 +30,13 @@ PHP_METHOD(Spoofchecker, __construct)
 {
 	int checks;
 	SPOOFCHECKER_METHOD_INIT_VARS;
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	
+
 	SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK;
-	
+
 	co->uspoof = uspoof_open(SPOOFCHECKER_ERROR_CODE_P(co));
 	INTL_CTOR_CHECK_STATUS(co, "spoofchecker: unable to open ICU Spoof Checker");
 

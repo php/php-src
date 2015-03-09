@@ -3,7 +3,7 @@ Phar: gzipped phar
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of PHP required");
+if (version_compare(PHP_VERSION, "6.0", "==")) die("skip pre-unicode version of PHP required");
 if (!extension_loaded("spl")) die("skip SPL not available");
 if (!extension_loaded("zlib")) die("skip zlib not available");
 if (version_compare(phpversion(), '5.2.6', '<')) die("skip zlib is buggy in PHP < 5.2.6");

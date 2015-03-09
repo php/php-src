@@ -62,4 +62,9 @@ int phpdbg_btree_insert_or_update(phpdbg_btree *tree, zend_ulong idx, void *ptr,
 #define phpdbg_btree_update(tree, idx, ptr) phpdbg_btree_insert_or_update(tree, idx, ptr, PHPDBG_BTREE_UPDATE)
 #define phpdbg_btree_overwrite(tree, idx, ptr) phpdbg_btree_insert_or_update(tree, idx, ptr, PHPDBG_BTREE_OWERWRITE)
 
+
+/* debugging functions */
+void phpdbg_btree_branch_dump(phpdbg_btree_branch *branch, zend_ulong depth);
+void phpdbg_btree_dump(phpdbg_btree *tree);
+
 #endif

@@ -84,8 +84,9 @@ if test "$PHP_INTL" != "no"; then
     breakiterator/rulebasedbreakiterator_methods.cpp \
     breakiterator/codepointiterator_internal.cpp \
     breakiterator/codepointiterator_methods.cpp \
+    uchar/uchar.c \
     idn/idn.c \
-    $icu_spoof_src, $ext_shared,,$ICU_INCS -Wno-write-strings)
+    $icu_spoof_src, $ext_shared,,$ICU_INCS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_ADD_BUILD_DIR($ext_builddir/collator)
   PHP_ADD_BUILD_DIR($ext_builddir/converter)
   PHP_ADD_BUILD_DIR($ext_builddir/common)
@@ -102,4 +103,5 @@ if test "$PHP_INTL" != "no"; then
   PHP_ADD_BUILD_DIR($ext_builddir/idn)
   PHP_ADD_BUILD_DIR($ext_builddir/spoofchecker)
   PHP_ADD_BUILD_DIR($ext_builddir/breakiterator)
+  PHP_ADD_BUILD_DIR($ext_builddir/uchar)
 fi

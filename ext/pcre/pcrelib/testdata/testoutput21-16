@@ -50,7 +50,7 @@ Options: anchored extended
 No first char
 No need char
 Subject length lower bound = 6
-No set of starting bytes
+No starting char list
 
 <!testsaved16BE-1
 Compiled pattern loaded from testsaved16BE-1
@@ -83,7 +83,7 @@ Options: anchored extended
 No first char
 No need char
 Subject length lower bound = 6
-No set of starting bytes
+No starting char list
 
 <!testsaved32LE-1
 Compiled pattern loaded from testsaved32LE-1

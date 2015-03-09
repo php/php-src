@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2015 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -22,7 +22,7 @@
 #define PHP_HASH_SNEFRU_H
 
 /* SNEFRU-2.5a with 8 passes and 256 bit hash output
- * AKA "Xerox Secure Hash Function" 
+ * AKA "Xerox Secure Hash Function"
  */
 
 #include "ext/standard/basic_functions.h"

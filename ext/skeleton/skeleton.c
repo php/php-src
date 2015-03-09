@@ -36,20 +36,22 @@ PHP_INI_END()
 PHP_FUNCTION(confirm_extname_compiled)
 {
 	char *arg = NULL;
-	int arg_len, len;
+	size_t arg_len, len;
 	char *strg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
 	len = spprintf(&strg, 0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "extname", arg);
-	RETURN_STRINGL(strg, len, 0);
+
+	RETVAL_STRINGL(strg, len);
+	efree(strg);
 }
 /* }}} */
-/* The previous line is meant for vim and emacs, so it can correctly fold and 
-   unfold functions in source code. See the corresponding marks just before 
-   function definition, where the functions purpose is also documented. Please 
+/* The previous line is meant for vim and emacs, so it can correctly fold and
+   unfold functions in source code. See the corresponding marks just before
+   function definition, where the functions purpose is also documented. Please
    follow this convention for the convenience of others editing your code.
 */
 
@@ -70,7 +72,7 @@ static void php_extname_init_globals(zend_extname_globals *extname_globals)
  */
 PHP_MINIT_FUNCTION(extname)
 {
-	/* If you have INI entries, uncomment these lines 
+	/* If you have INI entries, uncomment these lines
 	REGISTER_INI_ENTRIES();
 	*/
 	return SUCCESS;
@@ -93,6 +95,9 @@ PHP_MSHUTDOWN_FUNCTION(extname)
  */
 PHP_RINIT_FUNCTION(extname)
 {
+#if defined(COMPILE_DL_EXTNAME) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	return SUCCESS;
 }
 /* }}} */
@@ -148,6 +153,9 @@ zend_module_entry extname_module_entry = {
 /* }}} */
 
 #ifdef COMPILE_DL_EXTNAME
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE();
+#endif
 ZEND_GET_MODULE(extname)
 #endif
 

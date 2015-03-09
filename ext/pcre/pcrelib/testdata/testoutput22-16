@@ -37,7 +37,7 @@ Options: extended utf
 No first char
 No need char
 Subject length lower bound = 2
-No set of starting bytes
+No starting char list
 
 <!testsaved16BE-2
 Compiled pattern loaded from testsaved16BE-2
@@ -64,7 +64,7 @@ Options: extended utf
 No first char
 No need char
 Subject length lower bound = 2
-No set of starting bytes
+No starting char list
 
 <!testsaved32LE-2
 Compiled pattern loaded from testsaved32LE-2

@@ -14,14 +14,14 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
   - Constants [3] {
     Constant [ integer IS_IMPLICIT_ABSTRACT ] { 16 }
     Constant [ integer IS_EXPLICIT_ABSTRACT ] { 32 }
-    Constant [ integer IS_FINAL ] { 64 }
+    Constant [ integer IS_FINAL ] { 4 }
   }
 
   - Static properties [0] {
   }
 
   - Static methods [1] {
-    Method [ <internal:Reflection> static public method export ] {
+    Method [ <internal:Reflection, prototype Reflector> static public method export ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $argument ]
@@ -48,7 +48,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       }
     }
 
-    Method [ <internal:Reflection> public method __toString ] {
+    Method [ <internal:Reflection, prototype Reflector> public method __toString ] {
 
       - Parameters [0] {
       }

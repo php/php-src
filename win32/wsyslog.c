@@ -61,13 +61,12 @@
 
 void closelog(void)
 {
-	TSRMLS_FETCH();
 	if (PW32G(log_source)) {
 		DeregisterEventSource(PW32G(log_source));
 		PW32G(log_source) = NULL;
 	}
 	if (PW32G(log_header)) {
-		STR_FREE(PW32G(log_header));
+		efree(PW32G(log_header));
 		PW32G(log_header) = NULL;
 	}
 }
@@ -85,7 +84,6 @@ void syslog(int priority, const char *message, ...)
 	unsigned short etype;
 	char *tmp = NULL;
 	DWORD evid;
-	TSRMLS_FETCH();
 
 	/* default event source */
 	if (!PW32G(log_source))
@@ -123,13 +121,12 @@ void syslog(int priority, const char *message, ...)
 
 void openlog(const char *ident, int logopt, int facility)
 {
-	TSRMLS_FETCH();
 
 	if (PW32G(log_source)) {
 		closelog();
 	}
 
-	STR_FREE(PW32G(log_header));
+	efree(PW32G(log_header));
 
 	PW32G(log_source) = RegisterEventSource(NULL, "PHP-" PHP_VERSION);
 	spprintf(&PW32G(log_header), 0, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());

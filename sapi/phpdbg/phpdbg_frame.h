@@ -23,8 +23,8 @@
 
 #include "TSRM.h"
 
-void phpdbg_restore_frame(TSRMLS_D);
-void phpdbg_switch_frame(int TSRMLS_DC);
-void phpdbg_dump_backtrace(size_t TSRMLS_DC);
+void phpdbg_restore_frame(void);
+void phpdbg_switch_frame(int);
+void phpdbg_dump_backtrace(size_t);
 
 #endif /* PHPDBG_FRAME_H */

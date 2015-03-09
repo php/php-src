@@ -20,14 +20,14 @@ $b->b();
 --EXPECTF--
 array(2) {
   [0]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(1) "B"
     ["class"]=>
     string(1) "A"
   }
   [1]=>
-  &object(ReflectionMethod)#%d (2) {
+  object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(1) "A"
     ["class"]=>

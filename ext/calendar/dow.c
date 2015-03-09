@@ -32,7 +32,7 @@
 #include "sdncal.h"
 
 int DayOfWeek(
-				 long int sdn)
+				 zend_long sdn)
 {
 	int dow;
 

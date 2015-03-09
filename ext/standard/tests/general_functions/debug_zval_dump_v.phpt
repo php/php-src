@@ -124,81 +124,81 @@ echo "Done\n";
 --- Variation 1: global variable inside a function ---
 
 -- Value of global variable, before calling dump_globalvar() --
-long(10) refcount(2)
+long(10)
 
 -- Value of local variable inside dump_globalvar() --
-long(10) refcount(1)
+long(10)
 
 -- Value of global variable inside dump_globalvar() --
-long(10) refcount(1)
+long(10)
 
 -- Value of global variable, after exiting dump_globalvar() --
-long(10) refcount(2)
+long(10)
 
 --- Variation 2: one variable references another ---
 
 -- Value of $first_var: --
-long(10) refcount(2)
+long(10)
 
 -- Value of $ref_first_var --
-NULL refcount(1)
+NULL
 
 -- Value of $first_var --
-long(10) refcount(2)
+long(10)
 
 -- Value of $ref_first_var --
 
 Notice: Undefined variable: ref_first_var in %s on line %d
-NULL refcount(1)
+NULL
 
 -- Value of $first_var --
-long(10) refcount(2)
+long(10)
 
 --- Variation 3: multiple references of variables ---
 
 -- Value of $var_1: (before referencing) --
-long(10) refcount(1)
+long(10)
 
 -- Value of $var_2: (referencing var_1) --
-long(10) refcount(1)
+long(10)
 
 -- Value of $var_3: (referencing var_2) --
-long(10) refcount(1)
+long(10)
 
 -- Value of $var_3: (after unsetting var_3) --
 
 Notice: Undefined variable: var_3 in %s on line %d
-NULL refcount(1)
+NULL
 
 -- Value of $var_2: --
-long(10) refcount(1)
+long(10)
 
 -- Value of $var_3: --
-long(10) refcount(1)
+long(10)
 
 -- Value of $var_1: (after unsetting variable_1) --
 
 Notice: Undefined variable: var_1 in %s on line %d
-NULL refcount(1)
+NULL
 
 -- Value of $var_2: --
-long(10) refcount(2)
+long(10)
 
 *** Testing debug_zval_dump() on miscelleneous input arguments ***
 -- Iteration 1 --
-NULL refcount(3)
+NULL
 -- Iteration 2 --
-NULL refcount(3)
+NULL
 -- Iteration 3 --
-NULL refcount(1)
+NULL
 -- Iteration 4 --
-NULL refcount(1)
+NULL
 -- Iteration 5 --
-string(7) "TRUE123" refcount(3)
+string(7) "TRUE123" refcount(%d)
 -- Iteration 6 --
-string(9) "123string" refcount(3)
+string(9) "123string" refcount(%d)
 -- Iteration 7 --
-string(9) "string123" refcount(3)
+string(9) "string123" refcount(%d)
 -- Iteration 8 --
-string(10) "NULLstring" refcount(3)
+string(10) "NULLstring" refcount(%d)
 Done

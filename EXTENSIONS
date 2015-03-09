@@ -136,7 +136,7 @@ STATUS:              Working
 COMMENT:             DBM abstraction for db2, db3, db4, dbm, ndbm, gdbm, ini
 -------------------------------------------------------------------------------
 EXTENSION:           interbase
-PRIMARY MAINTAINER:  Ard Biesheuvel <ard@ard.nu>, Jouni Ahto <jouni.ahto@exdec.fi>
+PRIMARY MAINTAINER:  Ard Biesheuvel <ard@ard.nu>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -227,13 +227,6 @@ PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Yasuo Ohgaki <yohgaki@php.n
 MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             Use PostgreSQL 7.0.x or later. PostgreSQL 6.5.3 or less have fatal bug.
--------------------------------------------------------------------------------
-EXTENSION:           sqlite
-PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Wez Furlong <wez@php.net>, Ilia Alshanetsky <iliaa@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Working
-SINCE:               5.0 (Since 4.3.2 in PECL)
-COMMENT:             Integrates SQLite 2 embeddable SQL database engine.
 -------------------------------------------------------------------------------
 EXTENSION:           sqlite3
 PRIMARY MAINTAINER:  Scott MacVicar <scottmac@php.net>
@@ -408,8 +401,8 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           json
-PRIMARY MAINTAINER:  Unknown
-MAINTENANCE:         Odd fixes
+PRIMARY MAINTAINER:  Jakub Zelenka <bukka@php.net>
+MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.2
 -------------------------------------------------------------------------------
@@ -427,22 +420,6 @@ EXTENSION:           mcrypt
 PRIMARY MAINTAINER:  Derick Rethans <derick@derickrethans.nl>
 MAINTENANCE:         Maintained
 STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           mhash
-PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>, Scott MacVicar <scottmac@php.net>
-MAINTENANCE:         Unknown
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           mime_magic
-PRIMARY MAINTAINER:  Unknown
-MAINTENANCE:         Deprecated
-STATUS:              Experimental
-COMMENT:             Use the fileinfo extension instead
--------------------------------------------------------------------------------
-EXTENSION:           ming
-PRIMARY MAINTAINER:  Frank M. Kromann
-MAINTENANCE:         Unknown
-STATUS:              Experimental
 -------------------------------------------------------------------------------
 EXTENSION:           opcache
 PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@zend.com>, Xinchen Hui <laruence@php.net>
