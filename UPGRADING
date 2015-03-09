@@ -362,8 +362,11 @@ Other
     them consistent with other GMP functions.
 
 - Mcrypt
-  . Removed deprecate mcrypt_generic_end() alias in favor of
+  . Removed deprecated mcrypt_generic_end() alias in favor of
     mcrypt_generic_deinit().
+  . Removed deprecated mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb()
+    functions in favor of mcrypt_encrypt() and mcrypt_decrypt() with an
+    MCRYPT_MODE_* flag.
 
 - Session
   . session_start() accepts all INI settings as array. e.g. ['cache_limiter'=>'private']

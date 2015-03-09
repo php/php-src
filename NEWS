@@ -104,6 +104,7 @@
 - Mcrypt:
   . Fixed possible read after end of buffer and use after free. (Dmitry)
   . Removed mcrypt_generic_end() alias. (Nikita)
+  . Removed mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb(), mcrypt_ofb(). (Nikita)
 
 - Opcache:
   . Fixed bug with try blocks being removed when extended_info opcode
