@@ -655,7 +655,7 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count)
 			1, args,
 			0, NULL);
 
-	zval_ptr_dtor(&args[0);
+	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor(&func_name);
 
 	if (EG(exception)) {
