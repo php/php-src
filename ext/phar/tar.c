@@ -615,7 +615,7 @@ bail:
 
 	phar_request_initialize();
 
-	if (NULL == (actual = zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len, myphar))) {
+	if (NULL == (actual = zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), myphar->fname, fname_len, myphar))) {
 		if (error) {
 			spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\" to phar registry", fname);
 		}
@@ -631,31 +631,31 @@ bail:
 
 		myphar->is_temporary_alias = 0;
 
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len))) {
+		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len))) {
 			if (SUCCESS != phar_free_alias(fd_ptr, actual_alias, myphar->alias_len)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 				}
-				zend_hash_str_del(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len);
+				zend_hash_str_del(&(PHAR_G(phar_fname_map)), myphar->fname, fname_len);
 				return FAILURE;
 			}
 		}
 
-		zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_alias_map), actual_alias, myphar->alias_len, myphar);
+		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, myphar->alias_len, myphar);
 	} else {
 		phar_archive_data *fd_ptr;
 
 		if (alias_len) {
-			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len))) {
+			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
 				if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: Unable to add tar-based phar \"%s\", alias is already in use", fname);
 					}
-					zend_hash_str_del(&(PHAR_GLOBALS->phar_fname_map), myphar->fname, fname_len);
+					zend_hash_str_del(&(PHAR_G(phar_fname_map)), myphar->fname, fname_len);
 					return FAILURE;
 				}
 			}
-			zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, myphar);
+			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, myphar);
 			myphar->alias = pestrndup(alias, alias_len, myphar->is_persistent);
 			myphar->alias_len = alias_len;
 		} else {
