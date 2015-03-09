@@ -34,7 +34,7 @@ $test->bar();
 object(Exception)#%d (7) {
   ["message":protected]=>
   string(3) "foo"
-  ["string":"Exception":private]=>
+  ["string":"BaseException":private]=>
   string(0) ""
   ["code":protected]=>
   int(0)
@@ -42,7 +42,7 @@ object(Exception)#%d (7) {
   string(%d) "%s030.php"
   ["line":protected]=>
   int(%d)
-  ["trace":"Exception":private]=>
+  ["trace":"BaseException":private]=>
   array(1) {
     [0]=>
     array(6) {
@@ -61,7 +61,7 @@ object(Exception)#%d (7) {
       }
     }
   }
-  ["previous":"Exception":private]=>
+  ["previous":"BaseException":private]=>
   NULL
 }
 'test' => '0'

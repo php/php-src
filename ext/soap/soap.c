@@ -1482,6 +1482,26 @@ PHP_METHOD(SoapServer, addFunction)
 }
 /* }}} */
 
+static void _soap_server_exception(soapServicePtr service, sdlFunctionPtr function, zval *this_ptr) /* {{{ */
+{
+	zval exception_object;
+
+	ZVAL_OBJ(&exception_object, EG(exception));
+	if (instanceof_function(Z_OBJCE(exception_object), soap_fault_class_entry)) {
+		soap_server_fault_ex(function, &exception_object, NULL);
+	} else if (instanceof_function(Z_OBJCE(exception_object), zend_get_engine_exception())) {
+		if (service->send_errors) {
+			zval rv;
+			zend_string *msg = zval_get_string(zend_read_property(zend_exception_get_base(), &exception_object, "message", sizeof("message")-1, 0, &rv));
+			add_soap_fault_ex(&exception_object, this_ptr, "Server", msg->val, NULL, NULL);
+			zend_string_release(msg);
+		} else {
+			add_soap_fault_ex(&exception_object, this_ptr, "Server", "Internal Error", NULL, NULL);
+		}
+		soap_server_fault_ex(function, &exception_object, NULL);
+	} 
+}
+/* }}} */
 
 /* {{{ proto void SoapServer::handle ( [string soap_request])
    Handles a SOAP request */
@@ -1646,13 +1666,8 @@ PHP_METHOD(SoapServer, handle)
 	xmlFreeDoc(doc_request);
 
 	if (EG(exception)) {
-		zval exception_object;
-
-		ZVAL_OBJ(&exception_object, EG(exception));
 		php_output_discard();
-		if (instanceof_function(Z_OBJCE(exception_object), soap_fault_class_entry)) {
-			soap_server_fault_ex(function, &exception_object, NULL);
-		}
+		_soap_server_exception(service, function, getThis());
 		goto fail;
 	}
 
@@ -1700,13 +1715,8 @@ PHP_METHOD(SoapServer, handle)
 					php_error_docref(NULL, E_ERROR, "Error calling constructor");
 				}
 				if (EG(exception)) {
-					zval exception_object;
-
-					ZVAL_OBJ(&exception_object, EG(exception));
 					php_output_discard();
-					if (instanceof_function(Z_OBJCE(exception_object), soap_fault_class_entry)) {
-						soap_server_fault_ex(function, &exception_object, NULL);
-					}
+					_soap_server_exception(service, function, getThis());
 					zval_dtor(&constructor);
 					zval_dtor(&c_ret);
 					zval_ptr_dtor(&tmp_soap);
@@ -1728,13 +1738,8 @@ PHP_METHOD(SoapServer, handle)
 					}
 
 					if (EG(exception)) {
-						zval exception_object;
-
-						ZVAL_OBJ(&exception_object, EG(exception));
 						php_output_discard();
-						if (instanceof_function(Z_OBJCE(exception_object), soap_fault_class_entry)) {
-							soap_server_fault_ex(function, &exception_object, NULL);
-						}
+						_soap_server_exception(service, function, getThis());
 						zval_dtor(&constructor);
 						zval_dtor(&c_ret);
 						efree(class_name);
@@ -1823,20 +1828,8 @@ PHP_METHOD(SoapServer, handle)
 					if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(soap_obj);}
 					goto fail;
 				} else if (EG(exception)) {
-					zval exception_object;
-
-					ZVAL_OBJ(&exception_object, EG(exception));
 					php_output_discard();
-					if (instanceof_function(Z_OBJCE(exception_object), soap_fault_class_entry)) {
-//???						zval *headerfault = NULL;
-						zval *tmp;
-
-						if ((tmp = zend_hash_str_find(Z_OBJPROP(exception_object), "headerfault", sizeof("headerfault")-1)) != NULL &&
-						    Z_TYPE_P(tmp) != IS_NULL) {
-//???							headerfault = tmp;
-						}
-						soap_server_fault_ex(function, &exception_object, h);
-					}
+					_soap_server_exception(service, function, getThis());
 					efree(fn_name);
 					if (service->type == SOAP_CLASS && soap_obj) {zval_ptr_dtor(soap_obj);}
 					goto fail;
@@ -1874,13 +1867,8 @@ PHP_METHOD(SoapServer, handle)
 	efree(fn_name);
 
 	if (EG(exception)) {
-		zval exception_object;
-
-		ZVAL_OBJ(&exception_object, EG(exception));
 		php_output_discard();
-		if (instanceof_function(Z_OBJCE(exception_object), soap_fault_class_entry)) {
-			soap_server_fault_ex(function, &exception_object, NULL);
-		}
+		_soap_server_exception(service, function, getThis());
 		if (service->type == SOAP_CLASS) {
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 			if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
@@ -1918,13 +1906,8 @@ PHP_METHOD(SoapServer, handle)
 	}
 
 	if (EG(exception)) {
-		zval exception_object;
-
-		ZVAL_OBJ(&exception_object, EG(exception));
 		php_output_discard();
-		if (instanceof_function(Z_OBJCE(exception_object), soap_fault_class_entry)) {
-			soap_server_fault_ex(function, &exception_object, NULL);
-		}
+		_soap_server_exception(service, function, getThis());
 		if (service->type == SOAP_CLASS) {
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 			if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
@@ -2143,7 +2126,7 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 	_old_http_response_code = SG(sapi_headers).http_response_code;
 	_old_http_status_line = SG(sapi_headers).http_status_line;
 
-	if (!SOAP_GLOBAL(use_soap_error_handler) || !EG(objects_store).object_buckets) {
+	if (!SOAP_GLOBAL(use_soap_error_handler) || !EG(objects_store).object_buckets || (error_num & E_EXCEPTION)) {
 		call_old_error_handler(error_num, error_filename, error_lineno, format, args);
 		return;
 	}

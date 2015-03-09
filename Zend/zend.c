@@ -842,7 +842,7 @@ void zend_set_utility_values(zend_utility_values *utility_values) /* {{{ */
 /* this should be compatible with the standard zenderror */
 void zenderror(const char *error) /* {{{ */
 {
-	zend_error(E_PARSE, "%s", error);
+	zend_throw_exception(zend_get_parse_exception(), error, E_PARSE);
 }
 /* }}} */
 
@@ -1015,6 +1015,21 @@ static void zend_error_va_list(int type, const char *format, va_list args)
 	zend_stack delayed_oplines_stack;
 	zend_stack context_stack;
 	zend_array *symbol_table;
+
+	if (type & E_EXCEPTION) {
+		char *message = NULL;
+
+#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
+		va_start(args, format);
+#endif
+		zend_vspprintf(&message, 0, format, args);
+		zend_throw_exception(zend_get_engine_exception(), message, type & ~E_EXCEPTION);
+		efree(message);
+#if !defined(HAVE_NORETURN) || defined(HAVE_NORETURN_ALIAS)
+		va_end(args);
+#endif
+		return;
+	}
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {

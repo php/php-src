@@ -2540,6 +2540,10 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 		}
 	} zend_end_try();
 
+	if (EG(exception)) {
+		zend_exception_error(EG(exception), E_ERROR);
+	}
+
 #if HAVE_BROKEN_GETCWD
 	if (old_cwd_fd != -1) {
 		fchdir(old_cwd_fd);
@@ -2665,6 +2669,9 @@ PHPAPI int php_lint_script(zend_file_handle *file)
 			retval = SUCCESS;
 		}
 	} zend_end_try();
+	if (EG(exception)) {
+		zend_exception_error(EG(exception), E_ERROR);
+	}
 
 	return retval;
 }
