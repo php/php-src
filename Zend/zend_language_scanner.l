@@ -1271,7 +1271,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_OBJECT_OPERATOR;
 }
 
-<ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY,ST_LOOKING_FOR_SEMI_RESERVED_NAME>{WHITESPACE}+ {
 	HANDLE_NEWLINES(yytext, yyleng);
 	return T_WHITESPACE;
 }
@@ -1875,7 +1875,7 @@ inline_char_handler:
 }
 
 
-<ST_IN_SCRIPTING>"#"|"//" {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_SEMI_RESERVED_NAME>"#"|"//" {
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR++) {
 			case '\r':
@@ -1904,7 +1904,7 @@ inline_char_handler:
 	return T_COMMENT;
 }
 
-<ST_IN_SCRIPTING>"/*"|"/**"{WHITESPACE} {
+<ST_IN_SCRIPTING,ST_LOOKING_FOR_SEMI_RESERVED_NAME>"/*"|"/**"{WHITESPACE} {
 	int doc_com;
 
 	if (yyleng > 2) {
@@ -1935,6 +1935,18 @@ inline_char_handler:
 	}
 
 	return T_COMMENT;
+}
+
+<ST_LOOKING_FOR_SEMI_RESERVED_NAME>{LABEL} {
+    zend_copy_value(zendlval, yytext, yyleng);
+    yy_pop_state();
+    return T_STRING;
+}
+
+<ST_LOOKING_FOR_SEMI_RESERVED_NAME>{ANY_CHAR} {
+    yyless(0);
+    yy_pop_state();
+    goto restart;
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
