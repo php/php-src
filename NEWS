@@ -7,6 +7,10 @@ PHP                                                                        NEWS
    (Julian)
   . Fixed bug #68917 (parse_url fails on some partial urls). (Wei Dai)
 
+- Filter:
+  . Fixed bug #69202: (FILTER_FLAG_STRIP_BACKTICK ignored unless other
+    flags are used). (Jeff Welch)
+
 - Mbstring:
    . Fixed bug #68846 (False detection of CJK Unified Ideographs Extension E).
     (Masaki Kagaya)
