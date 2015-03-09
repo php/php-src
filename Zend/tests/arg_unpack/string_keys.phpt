@@ -7,14 +7,18 @@ set_error_handler(function($errno, $errstr) {
     var_dump($errstr);
 });
 
-var_dump(...[1, 2, "foo" => 3, 4]);
-var_dump(...new ArrayIterator([1, 2, "foo" => 3, 4]));
+try {
+	var_dump(...[1, 2, "foo" => 3, 4]);
+} catch (EngineException $ex) {
+	var_dump($ex->getMessage());
+}
+try {
+	var_dump(...new ArrayIterator([1, 2, "foo" => 3, 4]));
+} catch (EngineException $ex) {
+	var_dump($ex->getMessage());
+}
 
 ?>
 --EXPECTF--
 string(36) "Cannot unpack array with string keys"
-int(1)
-int(2)
 string(42) "Cannot unpack Traversable with string keys"
-int(1)
-int(2)

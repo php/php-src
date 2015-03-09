@@ -46,4 +46,3 @@ echo "um, hi\n";
 write: goodbye cruel world
 
 Fatal error: Call to undefined function undefined_function() in %s on line %d
-close: goodbye cruel world

@@ -9,7 +9,12 @@ set_error_handler(function($code, $message) {
 $comparator= null;
 $list= [1, 4, 2, 3, -1];
 usort($list, function($a, $b) use ($comparator) {
-  return $comparator->compare($a, $b);
+  try {
+	  return $comparator->compare($a, $b);
+  } catch (EngineException $e) {
+	  var_dump($e->getCode(), $e->getMessage());
+	  return 0;
+  }
 });
 var_dump($list);
 echo "Alive\n";
