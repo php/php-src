@@ -4655,7 +4655,8 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 		zend_const_expr_to_zval(&value_zv, value_ast);
 
 		name = zend_new_interned_string_safe(name);
-		if (zend_hash_add(&ce->constants_table, name, &value_zv) == NULL) {
+
+		if (zend_string_equals_literal_ci(name, "class") || zend_hash_add(&ce->constants_table, name, &value_zv) == NULL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s",
 				ce->name->val, name->val);
 		}
