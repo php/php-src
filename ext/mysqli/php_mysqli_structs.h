@@ -314,7 +314,7 @@ extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 	mysqli_object *intern = Z_MYSQLI_P(__id); \
 	efree(intern->ptr); \
 	intern->ptr = NULL; \
-	ZVAL_NULL(*__id); \
+	ZVAL_NULL(__id); \
 }
 
 
