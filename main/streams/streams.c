@@ -575,6 +575,7 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_
 	if (stream->readfilters.head) {
 		char *chunk_buf;
 		int err_flag = 0;
+		unsigned int flushed_eof = 0;
 		php_stream_bucket_brigade brig_in = { NULL, NULL }, brig_out = { NULL, NULL };
 		php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out, *brig_swap;
 
@@ -585,7 +586,7 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_
 		/* allocate a buffer for reading chunks */
 		chunk_buf = emalloc(stream->chunk_size);
 
-		while (!stream->eof && !err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
+		while ((!stream->eof || !flushed_eof) && !err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
 			size_t justread = 0;
 			int flags;
 			php_stream_bucket *bucket;
@@ -601,8 +602,16 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_
 				php_stream_bucket_append(brig_inp, bucket TSRMLS_CC);
 
 				flags = PSFS_FLAG_NORMAL;
+			} else if (!stream->eof) {
+				flags = PSFS_FLAG_FLUSH_INC;
 			} else {
-				flags = stream->eof ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC;
+				flags = PSFS_FLAG_FLUSH_CLOSE;
+				/* Bug #68948: It is possible for a stream to have bucket data
+				 * AND have have reached EOF. Thus, we need a separate flushed
+				 * check to ensure that, even if EOF has been reached, we have
+				 * called the filter method with the flushed flag at least
+				 * once. */
+				flushed_eof = 1;
 			}
 
 			/* wind the handle... */
