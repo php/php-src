@@ -220,9 +220,17 @@ PHP_FUNCTION(krsort)
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
 
+#ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/|l", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
+#else
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_EX(array, 0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(sort_type)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+#endif
 
 	php_set_compare_func(sort_type);
 
