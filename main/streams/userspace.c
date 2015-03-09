@@ -701,7 +701,7 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 	zval_ptr_dtor(&zcount);
 
 	if (EG(exception)) {
-		return -1;
+		return 0;
 	}
 
 	if (call_result == SUCCESS && retval != NULL) {
