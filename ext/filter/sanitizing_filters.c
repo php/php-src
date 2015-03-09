@@ -115,7 +115,7 @@ static void php_filter_strip(zval *value, zend_long flags)
 	zend_string *buf;
 
 	/* Optimization for if no strip flags are set */
-	if (! ((flags & FILTER_FLAG_STRIP_LOW) || (flags & FILTER_FLAG_STRIP_HIGH)) ) {
+	if (!(flags & (FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK))) {
 		return;
 	}
 
