@@ -2106,11 +2106,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_enable_crypto, 0, 0, 2)
 	ZEND_ARG_INFO(0, sessionstream)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_stream_socket_crypto_info, 0)
-	ZEND_ARG_INFO(0, stream)
-	ZEND_ARG_INFO(0, infotype)
-ZEND_END_ARG_INFO()
-
 #ifdef HAVE_SHUTDOWN
 ZEND_BEGIN_ARG_INFO(arginfo_stream_socket_shutdown, 0)
 	ZEND_ARG_INFO(0, stream)
@@ -3095,7 +3090,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_socket_recvfrom,											arginfo_stream_socket_recvfrom)
 	PHP_FE(stream_socket_sendto,											arginfo_stream_socket_sendto)
 	PHP_FE(stream_socket_enable_crypto,										arginfo_stream_socket_enable_crypto)
-	PHP_FE(stream_socket_crypto_info,										arginfo_stream_socket_crypto_info)
 #ifdef HAVE_SHUTDOWN
 	PHP_FE(stream_socket_shutdown,											arginfo_stream_socket_shutdown)
 #endif
