@@ -14577,7 +14577,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -14590,6 +14589,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CONST(int (*b
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {
@@ -17088,7 +17088,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -17101,6 +17100,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_TMP(int (*bin
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (1) {
@@ -19186,7 +19186,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -19199,6 +19198,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_VAR(int (*bin
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {
@@ -21389,7 +21389,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -21402,6 +21401,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {
@@ -22819,7 +22819,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -22832,6 +22831,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_CV(int (*bina
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {
@@ -24778,7 +24778,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -24791,6 +24790,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int 
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {
@@ -26191,7 +26191,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -26204,6 +26203,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (1) {
@@ -27513,7 +27513,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -27526,6 +27525,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {
@@ -28836,7 +28836,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -28849,6 +28848,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {
@@ -29267,7 +29267,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -29280,6 +29279,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*b
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {
@@ -32102,7 +32102,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -32115,6 +32114,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CONST(int (*bi
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {
@@ -34382,7 +34382,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -34395,6 +34394,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_TMP(int (*bina
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (1) {
@@ -36341,7 +36341,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -36354,6 +36353,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_VAR(int (*bina
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {
@@ -38404,7 +38404,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -38417,6 +38416,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*b
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {
@@ -39685,7 +39685,6 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -39698,6 +39697,7 @@ static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_CV(int (*binar
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (0) {

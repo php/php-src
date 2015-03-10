@@ -407,7 +407,6 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
-				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -420,6 +419,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 					EX_T(opline->result.var).var.ptr = &EG(uninitialized_zval);
 				}
 			}
+			zval_ptr_dtor(&object);
 		}
 
 		if (IS_OP2_TMP_FREE()) {
