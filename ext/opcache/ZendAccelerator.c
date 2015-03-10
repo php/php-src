@@ -1323,23 +1323,6 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		return NULL;
 	}
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-	if (file_handle->type == ZEND_HANDLE_STREAM &&
-	    (!strstr(file_handle->filename, ".phar") ||
-	     strstr(file_handle->filename, "://"))) {
-		char *buf;
-		size_t size;
-
-		/* Stream callbacks needs to be called in context of original
-		 * function and class tables (see: https://bugs.php.net/bug.php?id=64353)
-		 */
-		if (zend_stream_fixup(file_handle, &buf, &size TSRMLS_CC) == FAILURE) {
-			*op_array_p = NULL;
-			return NULL;
-		}
-	}
-#endif
-
 	if (ZCG(accel_directives).validate_timestamps ||
 	    ZCG(accel_directives).file_update_protection ||
 	    ZCG(accel_directives).max_file_size > 0) {
