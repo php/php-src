@@ -1078,7 +1078,7 @@ ZEND_API void zend_unexpected_null_paramer(int num, zend_expected_type expected_
 /* Restrict conversions to bool */
 #define STH_DISABLE_INT_TO_BOOL              0
 #define STH_DISABLE_FLOAT_TO_BOOL            1
-#define STH_DISABLE_STRING_TO_BOOL           1
+#define STH_DISABLE_STRING_TO_BOOL           0
 
 /* Other restrictions */
 #define STH_DISABLE_INT_TO_FLOAT             0
@@ -1090,8 +1090,8 @@ ZEND_API void zend_unexpected_null_paramer(int num, zend_expected_type expected_
 /* Convert without precision lost */
 #define STH_RESTRICT_INT_TO_FLOAT            1
 
-#define STH_RESTRICT_STRING_TO_INT           1
-#define STH_RESTRICT_STRING_TO_FLOAT         1
+#define STH_RESTRICT_STRING_TO_INT           0
+#define STH_RESTRICT_STRING_TO_FLOAT         0
 
 ZEND_API int parse_arg_object_to_str(zval *arg, zend_string **str, int type);
 ZEND_API int zend_parse_arg_class(zval *arg, zend_class_entry **pce, int num, int check_null);

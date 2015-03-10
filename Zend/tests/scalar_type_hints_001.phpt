@@ -2,9 +2,10 @@
 Scalar type hints 001
 --FILE--
 <?php
-set_error_handler(function ($code, $msg) {
+function error($code, $msg) {
 	$GLOBALS["error"] = "($code): $msg";
-});
+}
+set_error_handler('error');
 function bool_func(bool $x) {
 	if (isset($GLOBALS["error"])) {
 		echo $GLOBALS["error"] . "\n";
@@ -15,7 +16,15 @@ function bool_func(bool $x) {
 }
 function check_bool($x) {
 	var_dump($x);
-	bool_func($x);
+	try {
+		bool_func($x);
+	} catch (EngineException $e) {
+		error($e->getCode(), $e->getMessage());
+		if (isset($GLOBALS["error"])) {
+			echo $GLOBALS["error"] . "\n";
+			unset($GLOBALS["error"]);
+		}
+	}
 	echo "----\n";
 }
 function int_func(int $x) {
@@ -28,7 +37,15 @@ function int_func(int $x) {
 }
 function check_int($x) {
 	var_dump($x);
-	int_func($x);
+	try {
+		int_func($x);
+	} catch (EngineException $e) {
+		error($e->getCode(), $e->getMessage());
+		if (isset($GLOBALS["error"])) {
+			echo $GLOBALS["error"] . "\n";
+			unset($GLOBALS["error"]);
+		}
+	}
 	echo "----\n";
 }
 function float_func(float $x) {
@@ -41,7 +58,15 @@ function float_func(float $x) {
 }
 function check_float($x) {
 	var_dump($x);
-	float_func($x);
+	try {
+		float_func($x);
+	} catch (EngineException $e) {
+		error($e->getCode(), $e->getMessage());
+		if (isset($GLOBALS["error"])) {
+			echo $GLOBALS["error"] . "\n";
+			unset($GLOBALS["error"]);
+		}
+	}
 	echo "----\n";
 }
 function string_func(string $x) {
@@ -54,7 +79,15 @@ function string_func(string $x) {
 }
 function check_string($x) {
 	var_dump($x);
-	string_func($x);
+	try {
+		string_func($x);
+	} catch (EngineException $e) {
+		error($e->getCode(), $e->getMessage());
+		if (isset($GLOBALS["error"])) {
+			echo $GLOBALS["error"] . "\n";
+			unset($GLOBALS["error"]);
+		}
+	}
 	echo "----\n";
 }
 
@@ -120,7 +153,7 @@ check_string(1.1);
 --EXPECTF--
 == bool ==
 NULL
-(4096): Argument 1 passed to bool_func() must be of the type boolean, null given, called in %s on line 15 and defined
+(1): Argument 1 passed to bool_func() must be of the type boolean, null given, called in %s on line %d and defined
 ----
 bool(false)
 bool(false)
@@ -138,32 +171,32 @@ int(2)
 bool(true)
 ----
 float(0)
-(4096): Argument 1 passed to bool_func() must be of the type boolean, float given, called in %s on line 15 and defined
+(1): Argument 1 passed to bool_func() must be of the type boolean, float given, called in %s on line %d and defined
 ----
 float(1)
-(4096): Argument 1 passed to bool_func() must be of the type boolean, float given, called in %s on line 15 and defined
+(1): Argument 1 passed to bool_func() must be of the type boolean, float given, called in %s on line %d and defined
 ----
 float(0.2)
-(4096): Argument 1 passed to bool_func() must be of the type boolean, float given, called in %s on line 15 and defined
+(1): Argument 1 passed to bool_func() must be of the type boolean, float given, called in %s on line %d and defined
 ----
 string(0) ""
-(4096): Argument 1 passed to bool_func() must be of the type boolean, string given, called in %s on line 15 and defined
+bool(false)
 ----
 string(1) "0"
-(4096): Argument 1 passed to bool_func() must be of the type boolean, string given, called in %s on line 15 and defined
+bool(false)
 ----
 string(1) "1"
-(4096): Argument 1 passed to bool_func() must be of the type boolean, string given, called in %s on line 15 and defined
+bool(true)
 ----
 == int ==
 NULL
-(4096): Argument 1 passed to int_func() must be of the type integer, null given, called in %s on line 28 and defined
+(1): Argument 1 passed to int_func() must be of the type integer, null given, called in %s on line %d and defined
 ----
 bool(false)
-(4096): Argument 1 passed to int_func() must be of the type integer, boolean given, called in %s on line 28 and defined
+(1): Argument 1 passed to int_func() must be of the type integer, boolean given, called in %s on line %d and defined
 ----
 bool(true)
-(4096): Argument 1 passed to int_func() must be of the type integer, boolean given, called in %s on line 28 and defined
+(1): Argument 1 passed to int_func() must be of the type integer, boolean given, called in %s on line %d and defined
 ----
 int(0)
 int(0)
@@ -178,10 +211,10 @@ float(1)
 int(1)
 ----
 float(0.2)
-(4096): Argument 1 passed to int_func() must be of the type integer, float given, called in %s on line 28 and defined
+(1): Argument 1 passed to int_func() must be of the type integer, float given, called in %s on line %d and defined
 ----
 string(0) ""
-(4096): Argument 1 passed to int_func() must be of the type integer, string given, called in %s on line 28 and defined
+(1): Argument 1 passed to int_func() must be of the type integer, string given, called in %s on line %d and defined
 ----
 string(1) "0"
 int(0)
@@ -190,29 +223,29 @@ string(1) "1"
 int(1)
 ----
 string(2) " 1"
-(4096): Argument 1 passed to int_func() must be of the type integer, string given, called in %s on line 28 and defined
+int(1)
 ----
 string(2) "1 "
-(4096): Argument 1 passed to int_func() must be of the type integer, string given, called in %s on line 28 and defined
+(8): A non well formed numeric value encountered
 ----
 string(37) "1111111111111111111111111111111111111"
-(4096): Argument 1 passed to int_func() must be of the type integer, string given, called in %s on line 28 and defined
+(1): Argument 1 passed to int_func() must be of the type integer, string given, called in %s on line %d and defined
 ----
 string(3) "1.0"
 int(1)
 ----
 string(3) "1.1"
-(4096): Argument 1 passed to int_func() must be of the type integer, string given, called in %s on line 28 and defined
+(1): Argument 1 passed to int_func() must be of the type integer, string given, called in %s on line %d and defined
 ----
 == float ==
 NULL
-(4096): Argument 1 passed to float_func() must be of the type float, null given, called in %s on line 41 and defined
+(1): Argument 1 passed to float_func() must be of the type float, null given, called in %s on line %d and defined
 ----
 bool(false)
-(4096): Argument 1 passed to float_func() must be of the type float, boolean given, called in %s on line 41 and defined
+(1): Argument 1 passed to float_func() must be of the type float, boolean given, called in %s on line %d and defined
 ----
 bool(true)
-(4096): Argument 1 passed to float_func() must be of the type float, boolean given, called in %s on line 41 and defined
+(1): Argument 1 passed to float_func() must be of the type float, boolean given, called in %s on line %d and defined
 ----
 int(0)
 float(0)
@@ -227,7 +260,7 @@ float(1.1)
 float(1.1)
 ----
 string(0) ""
-(4096): Argument 1 passed to float_func() must be of the type float, string given, called in %s on line 41 and defined
+(1): Argument 1 passed to float_func() must be of the type float, string given, called in %s on line %d and defined
 ----
 string(1) "0"
 float(0)
@@ -236,10 +269,10 @@ string(1) "1"
 float(1)
 ----
 string(2) " 1"
-(4096): Argument 1 passed to float_func() must be of the type float, string given, called in %s on line 41 and defined
+float(1)
 ----
 string(2) "1 "
-(4096): Argument 1 passed to float_func() must be of the type float, string given, called in %s on line 41 and defined
+(8): A non well formed numeric value encountered
 ----
 string(37) "1111111111111111111111111111111111111"
 float(1.1111111111111E+36)
@@ -252,13 +285,13 @@ float(1.1)
 ----
 == string ==
 NULL
-(4096): Argument 1 passed to string_func() must be of the type string, null given, called in %s on line 54 and defined
+(1): Argument 1 passed to string_func() must be of the type string, null given, called in %s on line %d and defined
 ----
 bool(false)
-(4096): Argument 1 passed to string_func() must be of the type string, boolean given, called in %s on line 54 and defined
+(1): Argument 1 passed to string_func() must be of the type string, boolean given, called in %s on line %d and defined
 ----
 bool(true)
-(4096): Argument 1 passed to string_func() must be of the type string, boolean given, called in %s on line 54 and defined
+(1): Argument 1 passed to string_func() must be of the type string, boolean given, called in %s on line %d and defined
 ----
 int(0)
 string(1) "0"
