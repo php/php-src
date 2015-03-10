@@ -378,6 +378,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 		if (!have_get_ptr) {
 			zval *z = NULL;
 
+			Z_ADDREF_P(object);
 			if (opline->extended_value == ZEND_ASSIGN_OBJ) {
 				if (Z_OBJ_HT_P(object)->read_property) {
 					z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
@@ -406,6 +407,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 				} else /* if (opline->extended_value == ZEND_ASSIGN_DIM) */ {
 					Z_OBJ_HT_P(object)->write_dimension(object, property, z TSRMLS_CC);
 				}
+				zval_ptr_dtor(&object);
 				if (RETURN_VALUE_USED(opline)) {
 					PZVAL_LOCK(z);
 					EX_T(opline->result.var).var.ptr = z;
@@ -636,7 +638,10 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			zval *z;
+			
+			Z_ADDREF_P(object);
+			z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
@@ -653,6 +658,7 @@ ZEND_VM_HELPER_EX(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR|
 			incdec_op(z);
 			*retval = z;
 			Z_OBJ_HT_P(object)->write_property(object, property, z, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			zval_ptr_dtor(&object);
 			SELECTIVE_PZVAL_LOCK(*retval, opline);
 			zval_ptr_dtor(&z);
 		} else {
@@ -737,9 +743,10 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 
 	if (!have_get_ptr) {
 		if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-			zval *z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
-			zval *z_copy;
+			zval *z, *z_copy;
 
+			Z_ADDREF_P(object);
+			z = Z_OBJ_HT_P(object)->read_property(object, property, BP_VAR_R, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			if (UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) && Z_OBJ_HT_P(z)->get) {
 				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
 
@@ -758,6 +765,7 @@ ZEND_VM_HELPER_EX(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 			incdec_op(z_copy);
 			Z_ADDREF_P(z);
 			Z_OBJ_HT_P(object)->write_property(object, property, z_copy, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			zval_ptr_dtor(&object);
 			zval_ptr_dtor(&z_copy);
 			zval_ptr_dtor(&z);
 		} else {
