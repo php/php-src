@@ -1,0 +1,19 @@
+--TEST--
+Test exception doesn't cause RSHUTDOWN bypass, variation 1
+--INI--
+assert.bail=1
+assert.exception=1
+--FILE--
+<?php 
+
+$func = create_function('', 'define("Mommy", 1); assert(false);');
+$func();
+
+?>
+--EXPECTF--
+Fatal error: Uncaught exception 'AssertionException' with message 'assert(false)' in %sexception_012.php(%d) : runtime-created function:%d
+Stack trace:
+#0 %sexception_012.php(%d) : runtime-created function(%d): assert(false, 'assert(false)')
+#1 %sexception_012.php(%d): __lambda_func()
+#2 {main}
+  thrown in %sexception_012.php(%d) : runtime-created function on line %d
