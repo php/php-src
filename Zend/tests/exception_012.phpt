@@ -10,6 +10,8 @@ $func = create_function('', 'define("Mommy", 1); assert(false);');
 $func();
 
 ?>
+--EXPECTHEADERS--
+Content-type: text/html; charset=UTF-8
 --EXPECTF--
 Fatal error: Uncaught exception 'AssertionException' with message 'assert(false)' in %sexception_012.php(%d) : runtime-created function:%d
 Stack trace:
