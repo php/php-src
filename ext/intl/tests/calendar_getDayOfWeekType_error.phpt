@@ -41,4 +41,4 @@ Warning: intlcal_get_day_of_week_type() expects parameter 2 to be integer, strin
 Warning: intlcal_get_day_of_week_type(): intlcal_get_day_of_week_type: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_get_day_of_week_type() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_get_day_of_week_type() must be an instance of IntlCalendar, integer given in %s on line %d

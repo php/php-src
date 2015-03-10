@@ -49,10 +49,10 @@ try {
 error: 2, IntlCalendar::equals() expects exactly 1 parameter, 0 given
 error: 2, IntlCalendar::equals(): intlcal_equals: bad arguments
 bool(false)
-error: 4096, Argument 1 passed to IntlCalendar::equals() must be an instance of IntlCalendar, instance of stdClass given
+error: 1, Argument 1 passed to IntlCalendar::equals() must be an instance of IntlCalendar, instance of stdClass given
 
-error: 4096, Argument 1 passed to IntlCalendar::equals() must be an instance of IntlCalendar, integer given
+error: 1, Argument 1 passed to IntlCalendar::equals() must be an instance of IntlCalendar, integer given
 
-error: 4096, Argument 2 passed to intlcal_equals() must be an instance of IntlCalendar, array given
+error: 1, Argument 2 passed to intlcal_equals() must be an instance of IntlCalendar, array given
 
-error: 4096, Argument 1 passed to intlcal_equals() must be an instance of IntlCalendar, integer given
+error: 1, Argument 1 passed to intlcal_equals() must be an instance of IntlCalendar, integer given

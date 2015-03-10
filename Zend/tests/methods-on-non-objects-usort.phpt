@@ -20,13 +20,13 @@ var_dump($list);
 echo "Alive\n";
 ?>
 --EXPECTF--
-int(4096)
+int(1)
 string(43) "Call to a member function compare() on null"
-int(4096)
+int(1)
 string(43) "Call to a member function compare() on null"
-int(4096)
+int(1)
 string(43) "Call to a member function compare() on null"
-int(4096)
+int(1)
 string(43) "Call to a member function compare() on null"
 array(5) {
   [0]=>

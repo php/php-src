@@ -12,4 +12,4 @@ foo(123);
 --EXPECTF--
 3
 
-Catchable fatal error: Argument 1 passed to foo() must be of the type array, integer given, called in %sarray_type_hint_001.php on line 7 and defined in %sarray_type_hint_001.php on line 2
+Fatal error: Argument 1 passed to foo() must be of the type array, integer given, called in %sarray_type_hint_001.php on line 7 and defined in %sarray_type_hint_001.php on line 2

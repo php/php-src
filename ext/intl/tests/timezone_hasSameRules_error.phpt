@@ -31,9 +31,9 @@ try {
 }
 
 --EXPECT--
-int(4096)
+int(1)
 string(99) "Argument 1 passed to IntlTimeZone::hasSameRules() must be an instance of IntlTimeZone, string given"
 
-int(4096)
+int(1)
 string(92) "Argument 1 passed to intltz_has_same_rules() must be an instance of IntlTimeZone, null given"
 

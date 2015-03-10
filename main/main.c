@@ -2522,7 +2522,9 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 	} zend_end_try();
 
 	if (EG(exception)) {
-		zend_exception_error(EG(exception), E_ERROR);
+		zend_try {
+			zend_exception_error(EG(exception), E_ERROR);
+		} zend_end_try();
 	}
 
 #if HAVE_BROKEN_GETCWD

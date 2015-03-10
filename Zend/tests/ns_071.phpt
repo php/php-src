@@ -18,4 +18,4 @@ new bar(new \stdclass);
 --EXPECTF--
 NULL
 
-Catchable fatal error: Argument 1 passed to foo\bar::__construct() must be of the type array, object given, called in %s on line %d and defined in %s on line %d
+Fatal error: Argument 1 passed to foo\bar::__construct() must be of the type array, object given, called in %s on line %d and defined in %s on line %d

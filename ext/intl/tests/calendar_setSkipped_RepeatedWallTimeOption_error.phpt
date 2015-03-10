@@ -79,4 +79,4 @@ Warning: intlcal_set_repeated_wall_time_option() expects exactly 2 parameters, 1
 Warning: intlcal_set_repeated_wall_time_option(): intlcal_set_repeated_wall_time_option: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_set_repeated_wall_time_option() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_set_repeated_wall_time_option() must be an instance of IntlCalendar, integer given in %s on line %d

@@ -76,4 +76,4 @@ NULL
 
 Notice: Undefined offset: 3 in %s on line %d
 
-Catchable fatal error: Call to a member function bar() on null in %s on line %d
+Fatal error: Call to a member function bar() on null in %s on line %d

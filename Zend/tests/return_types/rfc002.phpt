@@ -10,4 +10,4 @@ function answer(): int {
 answer();
 
 --EXPECTF--
-Catchable fatal error: Return value of answer() must be an instance of int, integer returned in %s on line %d
+Fatal error: Return value of answer() must be an instance of int, integer returned in %s on line %d
