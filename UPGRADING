@@ -446,7 +446,7 @@ Other
   . Added "alpn_protocols" SSL context option allowing encrypted client/server
     streams to negotiate alternative protocols using the ALPN TLS extension when
     built against OpenSSL 1.0.2 or newer. Negotiated protocol information is
-    accessible by passing streams to the new stream_socket_crypto_info().
+    accessible through stream_get_meta_data() output.
 
 ========================================
 3. Changes in SAPI modules
@@ -460,6 +460,10 @@ Other
 4. Deprecated Functionality
 ========================================
 
+- OpenSSL
+  . The "capture_session_meta" SSL context option is now deprecated. Meta
+    data concerning active crypto on a stream resource is now accessible
+    through the return result from stream_get_meta_data().
 
 ========================================
 5. Changed Functions
@@ -485,9 +489,6 @@ Other
   . Added intdiv() function for integer division.
   . Added error_clear_last() function to reset error state.
 
-- Stream:
-  . Added stream_socket_crypto_info() allowing inspection of negotiated TLS
-    connection properties
 
 ========================================
 7. New Classes and Interfaces
