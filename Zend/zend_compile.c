@@ -975,6 +975,10 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		return NULL;
 	}
 
+	if (zend_hash_exists(class_table, Z_STR_P(op2))) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare class %s", ce->name->val);
+	}
+
 	zend_do_inheritance(ce, parent_ce);
 
 	ce->refcount++;
