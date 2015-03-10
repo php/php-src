@@ -2438,7 +2438,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMPVAR|UNUSED|CV, CONST|TMPVAR|CV)
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
-			zend_error(E_EXCEPTION | E_RECOVERABLE_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+			zend_error(E_EXCEPTION | E_ERROR, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
 			FREE_OP2();
 			FREE_OP1();
 			HANDLE_EXCEPTION();
@@ -3685,7 +3685,7 @@ ZEND_VM_C_LABEL(send_again):
 
 			ZEND_HASH_FOREACH_STR_KEY_VAL(ht, name, arg) {
 				if (name) {
-					zend_error(E_EXCEPTION | E_RECOVERABLE_ERROR, "Cannot unpack array with string keys");
+					zend_error(E_EXCEPTION | E_ERROR, "Cannot unpack array with string keys");
 					FREE_OP1();
 					HANDLE_EXCEPTION();
 				}
@@ -3758,7 +3758,7 @@ ZEND_VM_C_LABEL(send_again):
 					}
 
 					if (Z_TYPE(key) == IS_STRING) {
-						zend_error(E_EXCEPTION | E_RECOVERABLE_ERROR,
+						zend_error(E_EXCEPTION | E_ERROR,
 							"Cannot unpack Traversable with string keys");
 						zend_string_release(Z_STR(key));
 						ZEND_VM_C_GOTO(unpack_iter_dtor);

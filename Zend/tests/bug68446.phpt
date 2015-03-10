@@ -32,5 +32,5 @@ array(1) {
   int(1)
 }
 
-Catchable fatal error: Argument 1 passed to a() must be of the type array, null given, called in %s on line %d and defined in %s on line %d
+Fatal error: Argument 1 passed to a() must be of the type array, null given, called in %s on line %d and defined in %s on line %d
 

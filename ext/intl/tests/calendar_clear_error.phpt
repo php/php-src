@@ -28,4 +28,4 @@ bool(false)
 Warning: intlcal_clear(): intlcal_clear: invalid field in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_clear() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_clear() must be an instance of IntlCalendar, integer given in %s on line %d
