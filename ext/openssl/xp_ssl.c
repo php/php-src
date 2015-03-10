@@ -1869,8 +1869,14 @@ static int php_openssl_enable_crypto(php_stream *stream,
 				if (PHP_STREAM_CONTEXT(stream)) {
 					zval *val;
 					if (NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
-						"ssl", "capture_session_meta")) && zend_is_true(val)
+						"ssl", "capture_session_meta"))
 					) {
+						 php_error(E_DEPRECATED,
+                            "capture_session_meta is deprecated; its information is now available via stream_get_meta_data()"
+                        );
+					}
+
+					if (val && zend_is_true(val)) {
 						zval meta_arr;
 						ZVAL_ARR(&meta_arr, capture_session_meta(sslsock->ssl_handle));
 						php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "session_meta", &meta_arr);
