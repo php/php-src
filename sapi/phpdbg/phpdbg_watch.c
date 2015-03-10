@@ -332,7 +332,7 @@ static void phpdbg_delete_ht_watchpoints_recursive(phpdbg_watchpoint_t *watch) {
 		if (strkey) {
 			str_len = asprintf(&str, "%.*s%s%s%s", (int) watch->str_len, watch->str, (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", phpdbg_get_property_key(strkey->val), (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
 		} else {
-			str_len = asprintf(&str, "%.*s%s%lli%s", (int) watch->str_len, watch->str, (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", numkey, (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
+			str_len = asprintf(&str, "%.*s%s" ZEND_LONG_FMT "%s", (int) watch->str_len, watch->str, (watch->flags & PHPDBG_WATCH_ARRAY) ? "[" : "->", numkey, (watch->flags & PHPDBG_WATCH_ARRAY) ? "]" : "");
 		}
 
 		if ((watchpoint = zend_hash_str_find_ptr(&PHPDBG_G(watchpoints), str, str_len))) {
