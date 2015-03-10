@@ -6377,6 +6377,11 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 				}
 				OBJ_RELEASE(Z_OBJ(call->This));
 			}
+			if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
+				zend_string_release(call->func->common.function_name);
+				efree(call->func);
+			}
+
 			EX(call) = call->prev_execute_data;
 			zend_vm_stack_free_call_frame(call);
 			call = EX(call);
