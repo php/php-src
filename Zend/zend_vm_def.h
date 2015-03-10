@@ -5042,6 +5042,10 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 				}
 				zval_ptr_dtor(&call->object);
 			}
+			if (call->fbc->common.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) {
+				efree((char *) call->fbc->common.function_name);
+				efree(call->fbc);
+			}
 			call--;
 		} while (call >= EX(call_slots));
 		EX(call) = NULL;
