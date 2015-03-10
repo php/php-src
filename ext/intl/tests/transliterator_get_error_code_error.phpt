@@ -21,4 +21,4 @@ Warning: Transliterator::getErrorCode() expects exactly 0 parameters, 1 given in
 Warning: Transliterator::getErrorCode(): transliterator_get_error_code: unable to parse input params in %s on line %d
 
 
-Catchable fatal error: Argument 1 passed to transliterator_get_error_code() must be an instance of Transliterator, array given in %s on line %d
+Fatal error: Argument 1 passed to transliterator_get_error_code() must be an instance of Transliterator, array given in %s on line %d

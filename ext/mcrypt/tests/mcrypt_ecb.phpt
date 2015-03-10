@@ -9,19 +9,13 @@ $secret   = "PHP Testfest 2008";
 $cipher   = MCRYPT_RIJNDAEL_128;
 
 $iv       = mcrypt_create_iv(mcrypt_get_iv_size($cipher, MCRYPT_MODE_ECB), MCRYPT_RAND);
-$enc_data = mcrypt_ecb($cipher, $key, $secret, MCRYPT_ENCRYPT, $iv);
+$enc_data = mcrypt_encrypt($cipher, $key, $secret, MCRYPT_MODE_ECB, $iv);
 
 // we have to trim as AES rounds the blocks and decrypt doesnt detect that
-echo trim(mcrypt_ecb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv)) . "\n";
+echo trim(mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_ECB, $iv)) . "\n";
 
 // a warning must be issued if we don't use a IV on a AES cipher, that usually requires an IV
-mcrypt_ecb($cipher, $key, $enc_data, MCRYPT_DECRYPT);
+mcrypt_decrypt($cipher, $key, $enc_data, MCRYPT_MODE_ECB);
 
 --EXPECTF--
-
-Deprecated: Function mcrypt_ecb() is deprecated in %s on line %d
-
-Deprecated: Function mcrypt_ecb() is deprecated in %s on line %d
 PHP Testfest 2008
-
-Deprecated: Function mcrypt_ecb() is deprecated in %s on line %d

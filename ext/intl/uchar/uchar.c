@@ -1,6 +1,6 @@
 #include "uchar.h"
-#include "ext/intl/intl_data.h"
-#include "ext/intl/intl_convert.h"
+#include "intl_data.h"
+#include "intl_convert.h"
 
 #include <unicode/uchar.h>
 

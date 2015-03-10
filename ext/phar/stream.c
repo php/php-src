@@ -103,7 +103,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 		phar_archive_data *pphar = NULL, *phar;
 
-		if (PHAR_GLOBALS->request_init && PHAR_GLOBALS->phar_fname_map.u.flags && NULL == (pphar = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len))) {
+		if (PHAR_G(request_init) && PHAR_G(phar_fname_map.u.flags) && NULL == (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), arch, arch_len))) {
 			pphar = NULL;
 		}
 		if (PHAR_G(readonly) && (!pphar || !pphar->is_data)) {
@@ -155,7 +155,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 /**
  * used for fopen('phar://...') and company
  */
-static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
+static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_data *idata;
@@ -231,7 +231,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 			}
 		}
 		if (opened_path) {
-			spprintf(opened_path, MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
+			*opened_path = strpprintf(MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
 		}
 		return fpf;
 	} else {
@@ -249,7 +249,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				}
 				efree(internal_file);
 				if (opened_path) {
-					spprintf(opened_path, MAXPATHLEN, "%s", phar->fname);
+					*opened_path = strpprintf(MAXPATHLEN, "%s", phar->fname);
 				}
 				php_url_free(resource);
 				goto phar_stub;
@@ -275,7 +275,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				++(entry->fp_refcount);
 				php_url_free(resource);
 				if (opened_path) {
-					spprintf(opened_path, MAXPATHLEN, "%s", phar->fname);
+					*opened_path = strpprintf(MAXPATHLEN, "%s", phar->fname);
 				}
 				efree(internal_file);
 				goto phar_stub;
@@ -332,7 +332,7 @@ idata_error:
 		}
 	}
 	if (opened_path) {
-		spprintf(opened_path, MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
+		*opened_path = strpprintf(MAXPATHLEN, "phar://%s/%s", idata->phar->fname, idata->internal_file->filename);
 	}
 	efree(internal_file);
 phar_stub:
@@ -701,7 +701,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	host_len = strlen(resource->host);
 	phar_request_initialize();
 
-	pphar = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_fname_map), resource->host, host_len);
+	pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), resource->host, host_len);
 	if (PHAR_G(readonly) && (!pphar || !pphar->is_data)) {
 		php_url_free(resource);
 		php_stream_wrapper_log_error(wrapper, options, "phar error: write operations disabled by the php.ini setting phar.readonly");

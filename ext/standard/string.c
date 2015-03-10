@@ -3140,7 +3140,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 			pos++;
 		}
 	}
-	if (result.s && result.s->len) {
+	if (result.s) {
 		smart_str_appendl(&result, str + old_pos, slen - old_pos);
 		smart_str_0(&result);
 		RETVAL_STR(result.s);

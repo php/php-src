@@ -162,8 +162,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, char operation) /* {{{
 				user_flags[i], (char)args_len[i], (char)(args_len[i] >> 8), args[i]);
 
 			if ((spb_len + chunk) > sizeof(buf) || chunk <= 0) {
-				_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%d)"
-					TSRMLS_CC, spb_len);
+				_php_ibase_module_error("Internal error: insufficient buffer space for SPB (%d)", spb_len);
 				RETURN_FALSE;
 			}
 			spb_len += chunk;

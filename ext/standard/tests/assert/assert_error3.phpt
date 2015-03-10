@@ -10,12 +10,11 @@ error_reporting = -1
 display_errors = 1
 --FILE--
 <?php
-$sa = "0 $ 0";
-var_dump($r2 = assert($sa));
+var_dump($r2 = assert("0 $ 0"));
 --EXPECTF--
 
-Parse error: syntax error, %s in %s(3) : assert code on line 1
+Parse error: syntax error, unexpected '$', expecting ';' in %s(2) : assert code on line 1
 
 Catchable fatal error: assert(): Failure evaluating code: 
-0 $ 0 in %s on line 3
+0 $ 0 in %s on line 2
 

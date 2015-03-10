@@ -63,6 +63,7 @@ ZEND_API void zend_hash_clean(HashTable *ht);
 ZEND_API void zend_hash_real_init(HashTable *ht, zend_bool packed);
 ZEND_API void zend_hash_packed_to_hash(HashTable *ht);
 ZEND_API void zend_hash_to_packed(HashTable *ht);
+ZEND_API void zend_hash_extend(HashTable *ht, uint32_t nSize, zend_bool packed);
 
 /* additions/updates/changes */
 ZEND_API zval *_zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *pData, uint32_t flag ZEND_FILE_LINE_DC);
@@ -278,7 +279,8 @@ static zend_always_inline zval *zend_hash_find_ind(const HashTable *ht, zend_str
 	zval *zv;
 
 	zv = zend_hash_find(ht, key);
-	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? Z_INDIRECT_P(zv) : zv;
+	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? 
+		((Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF) ? Z_INDIRECT_P(zv) : NULL) : zv;
 }
 
 
@@ -297,7 +299,8 @@ static zend_always_inline zval *zend_hash_str_find_ind(const HashTable *ht, cons
 	zval *zv;
 
 	zv = zend_hash_str_find(ht, str, len);
-	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? Z_INDIRECT_P(zv) : zv;
+	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? 
+		((Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF) ? Z_INDIRECT_P(zv) : NULL) : zv;
 }
 
 
@@ -483,6 +486,15 @@ static zend_always_inline void *zend_hash_str_add_ptr(HashTable *ht, const char 
 	return zv ? Z_PTR_P(zv) : NULL;
 }
 
+static zend_always_inline void *zend_hash_str_add_new_ptr(HashTable *ht, const char *str, size_t len, void *pData)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, pData);
+	zv = zend_hash_str_add_new(ht, str, len, &tmp);
+	return zv ? Z_PTR_P(zv) : NULL;
+}
+
 static zend_always_inline void *zend_hash_update_ptr(HashTable *ht, zend_string *key, void *pData)
 {
 	zval tmp, *zv;
@@ -645,9 +657,9 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	zend_hash_get_current_data_ptr_ex(ht, &(ht)->nInternalPointer)
 
 #define ZEND_HASH_FOREACH(_ht, indirect) do { \
-		uint _idx; \
-		for (_idx = 0; _idx < (_ht)->nNumUsed; _idx++) { \
-			Bucket *_p = (_ht)->arData + _idx; \
+		Bucket *_p = (_ht)->arData; \
+		Bucket *_end = _p + (_ht)->nNumUsed; \
+		for (; _p != _end; _p++) { \
 			zval *_z = &_p->val; \
 			if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
 				_z = Z_INDIRECT_P(_z); \
@@ -795,9 +807,57 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 #define ZEND_HASH_FILL_END() \
 		__fill_ht->nNumUsed = __fill_idx; \
 		__fill_ht->nNumOfElements = __fill_idx; \
-		__fill_ht->nNextFreeElement = __fill_idx + 1; \
+		__fill_ht->nNextFreeElement = __fill_idx; \
 		__fill_ht->nInternalPointer = 0; \
 	} while (0)
+
+static zend_always_inline void _zend_hash_append(HashTable *ht, zend_string *key, zval *zv)
+{
+	uint32_t idx = ht->nNumUsed++;
+	uint32_t nIndex;
+	Bucket *p = ht->arData + idx;
+
+	ZVAL_COPY_VALUE(&p->val, zv);
+	p->key = zend_string_copy(key);
+	p->h = zend_string_hash_val(key);
+	nIndex = p->h & ht->nTableMask;
+	Z_NEXT(p->val) = ht->arHash[nIndex];
+	ht->arHash[nIndex] = idx;
+	ht->nNumUsed = idx + 1;
+	ht->nNumOfElements++;
+}
+
+static zend_always_inline void _zend_hash_append_ptr(HashTable *ht, zend_string *key, void *ptr)
+{
+	uint32_t idx = ht->nNumUsed++;
+	uint32_t nIndex;
+	Bucket *p = ht->arData + idx;
+
+	ZVAL_PTR(&p->val, ptr);
+	p->key = zend_string_copy(key);
+	p->h = zend_string_hash_val(key);
+	nIndex = p->h & ht->nTableMask;
+	Z_NEXT(p->val) = ht->arHash[nIndex];
+	ht->arHash[nIndex] = idx;
+	ht->nNumUsed = idx + 1;
+	ht->nNumOfElements++;
+}
+
+static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string *key, zval *ptr)
+{
+	uint32_t idx = ht->nNumUsed++;
+	uint32_t nIndex;
+	Bucket *p = ht->arData + idx;
+
+	ZVAL_INDIRECT(&p->val, ptr);
+	p->key = zend_string_copy(key);
+	p->h = zend_string_hash_val(key);
+	nIndex = p->h & ht->nTableMask;
+	Z_NEXT(p->val) = ht->arHash[nIndex];
+	ht->arHash[nIndex] = idx;
+	ht->nNumUsed = idx + 1;
+	ht->nNumOfElements++;
+}
 
 #endif							/* ZEND_HASH_H */
 

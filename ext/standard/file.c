@@ -802,7 +802,7 @@ PHP_FUNCTION(tempnam)
 {
 	char *dir, *prefix;
 	size_t dir_len, prefix_len;
-	char *opened_path;
+	zend_string *opened_path;
 	int fd;
 	zend_string *p;
 
@@ -823,9 +823,7 @@ PHP_FUNCTION(tempnam)
 
 	if ((fd = php_open_temporary_fd_ex(dir, p->val, &opened_path, 1)) >= 0) {
 		close(fd);
-		// TODO: avoid reallocation ???
-		RETVAL_STRING(opened_path);
-		efree(opened_path);
+		RETVAL_STR(opened_path);
 	}
 	zend_string_release(p);
 }

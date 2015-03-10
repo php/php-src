@@ -262,7 +262,7 @@ void * _mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D)
 	/* -1 is also "true" */
 	if (*threshold) {
 #endif
-		ret = _erealloc(REAL_PTR(ptr), REAL_SIZE(new_size), 0 ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+		ret = _erealloc(REAL_PTR(ptr), REAL_SIZE(new_size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 #if PHP_DEBUG
 		--*threshold;
 	} else if (*threshold == 0) {

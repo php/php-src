@@ -1186,29 +1186,11 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		case E_PARSE:
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
-		{ /* new block to allow variable definition */
-			/* eval() errors do not affect exit_status or response code */
-			zend_bool during_eval = 0;
-
-			if (type == E_PARSE) {
-				zend_execute_data *execute_data = EG(current_execute_data);
-
-				while (execute_data && (!execute_data->func || !ZEND_USER_CODE(execute_data->func->common.type))) {
-					execute_data = execute_data->prev_execute_data;
-				}
-
-				during_eval = (execute_data &&
-					execute_data->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
-					execute_data->opline->extended_value == ZEND_EVAL);
-			}
-			if (!during_eval) {
-				EG(exit_status) = 255;
-			}
+			EG(exit_status) = 255;
 			if (module_initialized) {
 				if (!PG(display_errors) &&
 				    !SG(headers_sent) &&
-					SG(sapi_headers).http_response_code == 200 &&
-				    !during_eval
+					SG(sapi_headers).http_response_code == 200
 				) {
 					sapi_header_line ctr = {0};
 
@@ -1229,7 +1211,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				}
 			}
 			break;
-		}
 	}
 
 	/* Log if necessary */
@@ -1301,6 +1282,10 @@ PHPAPI char *php_get_current_user(void)
 			efree(pwbuf);
 			return "";
 		}
+		if (retpwptr == NULL) {
+			efree(pwbuf);
+			return "";
+		}
 		pwd = &_pw;
 #else
 		if ((pwd=getpwuid(pstat->st_uid))==NULL) {
@@ -1346,7 +1331,7 @@ PHP_FUNCTION(set_time_limit)
 
 /* {{{ php_fopen_wrapper_for_zend
  */
-static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path)
+static FILE *php_fopen_wrapper_for_zend(const char *filename, zend_string **opened_path)
 {
 	return php_stream_open_wrapper_as_file((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS|STREAM_OPEN_FOR_INCLUDE, opened_path);
 }
@@ -1424,7 +1409,7 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 }
 /* }}} */
 
-static char *php_resolve_path_for_zend(const char *filename, int filename_len) /* {{{ */
+static zend_string *php_resolve_path_for_zend(const char *filename, int filename_len) /* {{{ */
 {
 	return php_resolve_path(filename, filename_len, PG(include_path));
 }
@@ -2486,12 +2471,9 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
  			primary_file->opened_path == NULL &&
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
-			int realfile_len;
-
 			if (expand_filepath(primary_file->filename, realfile)) {
-				realfile_len =  (int)strlen(realfile);
-				zend_hash_str_add_empty_element(&EG(included_files), realfile, realfile_len);
-				primary_file->opened_path = estrndup(realfile, realfile_len);
+				primary_file->opened_path = zend_string_init(realfile, strlen(realfile), 0);
+				zend_hash_add_empty_element(&EG(included_files), primary_file->opened_path);
 			}
 		}
 
@@ -2520,9 +2502,30 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file)
 #endif
 			zend_set_timeout(INI_INT("max_execution_time"), 0);
 		}
-		retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 
+		/*
+		   If cli primary file has shabang line and there is a prepend file,
+		   the `start_lineno` will be used by prepend file but not primary file,
+		   save it and restore after prepend file been executed.
+		 */
+		if (CG(start_lineno) && prepend_file_p) {
+			int orig_start_lineno = CG(start_lineno);
+
+			CG(start_lineno) = 0;
+			if (zend_execute_scripts(ZEND_REQUIRE, NULL, 1, prepend_file_p) == SUCCESS) {
+				CG(start_lineno) = orig_start_lineno;
+				retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 2, primary_file, append_file_p) == SUCCESS);
+			}
+		} else {
+			retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
+		}
 	} zend_end_try();
+
+	if (EG(exception)) {
+		zend_try {
+			zend_exception_error(EG(exception), E_ERROR);
+		} zend_end_try();
+	}
 
 #if HAVE_BROKEN_GETCWD
 	if (old_cwd_fd != -1) {
@@ -2649,6 +2652,9 @@ PHPAPI int php_lint_script(zend_file_handle *file)
 			retval = SUCCESS;
 		}
 	} zend_end_try();
+	if (EG(exception)) {
+		zend_exception_error(EG(exception), E_ERROR);
+	}
 
 	return retval;
 }

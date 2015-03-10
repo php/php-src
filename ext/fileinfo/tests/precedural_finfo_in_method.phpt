@@ -15,4 +15,4 @@ $test->method();
 
 ?>
 --EXPECT--
-string(28) "text/plain; charset=us-ascii"
+string(28) "text/x-php; charset=us-ascii"

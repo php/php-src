@@ -250,6 +250,7 @@ void zend_optimizer_update_op2_const(zend_op_array *op_array,
 			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 			case ZEND_ADD_ARRAY_ELEMENT:
 			case ZEND_INIT_ARRAY:
+			case ZEND_ASSIGN_DIM:
 			case ZEND_UNSET_DIM:
 			case ZEND_FETCH_DIM_R:
 			case ZEND_FETCH_DIM_W:
@@ -494,6 +495,7 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_FE_RESET_RW:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
+			case ZEND_ASSERT_CHECK:
 				ZEND_PASS_TWO_UNDO_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
 				break;
 		}
@@ -534,6 +536,7 @@ static void zend_accel_optimize(zend_op_array      *op_array,
 			case ZEND_FE_RESET_RW:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
+			case ZEND_ASSERT_CHECK:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, ZEND_OP2(opline));
 				break;
 		}

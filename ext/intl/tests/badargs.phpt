@@ -16,7 +16,11 @@ foreach($funcs as $func) {
 		
 		try {
 			$res = $func($arg);
-		} catch (Exception $e) { continue; }
+		} catch (Exception $e) {
+			continue;
+		} catch (EngineException $e) {
+			continue;
+		}
         if($res != false) {
                 echo "$func: ";
                 var_dump($res);

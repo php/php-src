@@ -40,6 +40,8 @@
 #include "php_ini.h"
 #include "inet.h"
 
+#include "php_win32_globals.h"
+
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
 #endif
@@ -69,22 +71,6 @@
 #define SMTP_SKIP_SPACE(str)	{ while (isspace(*str)) { str++; } }
 
 
-#ifndef THREAD_SAFE
-char Buffer[MAIL_BUFFER_SIZE];
-
-/* socket related data */
-SOCKET sc;
-#ifndef NETWARE
-WSADATA Data;
-struct hostent *adr;
-int WinsockStarted;
-/* values set by the constructor */
-char *AppName;
-#endif	/* NETWARE */
-SOCKADDR_IN sock_in;
-char MailHost[HOST_NAME_LEN];
-char LocalHost[HOST_NAME_LEN];
-#endif
 char seps[] = " ,\t\n";
 #ifndef NETWARE
 char *php_mailer = "PHP 7 WIN32";
@@ -223,10 +209,6 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 	zend_string *headers_lc = NULL; /* headers_lc is only created if we've a header at all */
 	char *pos1 = NULL, *pos2 = NULL;
 
-#ifndef NETWARE
-	WinsockStarted = FALSE;
-#endif
-
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
 		return FAILURE;
@@ -234,26 +216,21 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		*error = BAD_MAIL_HOST;
 		return FAILURE;
 	} else {
-		strcpy(MailHost, host);
+		strcpy(PW32G(mail_host), host);
 	}
 
 	if (headers) {
 		char *pos = NULL;
 		size_t i;
-		zend_string *headers_trim;
 
 		/* Use PCRE to trim the header into the right format */
-		if (NULL == (headers_trim = php_win32_mail_trim_header(headers))) {
+		if (NULL == (headers_lc = php_win32_mail_trim_header(headers))) {
 			*error = W32_SM_PCRE_ERROR;
 			return FAILURE;
 		}
 
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
-		if (NULL == (headers_lc = zend_string_copy(headers_trim))) {
-			*error = OUT_OF_MEMORY;
-			return FAILURE;
-		}
 		for (i = 0; i < headers_lc->len; i++) {
 			headers_lc->val[i] = tolower(headers_lc->val[i]);
 		}
@@ -292,8 +269,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			efree(headers);
-			efree(headers_lc);
+			zend_string_free(headers_lc);
 		}
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
 		if (NULL == (*error_message = ecalloc(1, HOST_NAME_LEN + 128))) {
@@ -302,7 +278,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		snprintf(*error_message, HOST_NAME_LEN + 128,
 			"Failed to connect to mailserver at \"%s\" port %d, verify your \"SMTP\" "
 			"and \"smtp_port\" setting in php.ini or use ini_set()",
-			MailHost, !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
+			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
 		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc->val, error_message);
@@ -311,8 +287,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			efree(RPath);
 		}
 		if (headers) {
-			efree(headers);
-			efree(headers_lc);
+			zend_string_free(headers_lc);
 		}
 		if (ret != SUCCESS) {
 			*error = ret;
@@ -339,8 +314,8 @@ PHPAPI void TSMClose()
 	   elesewhere
 	*/
 
-	shutdown(sc, 0);
-	closesocket(sc);
+	shutdown(PW32G(mail_socket), 0);
+	closesocket(PW32G(mail_socket));
 }
 
 
@@ -412,13 +387,17 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		return (BAD_MSG_DESTINATION);
 	*/
 
-	snprintf(Buffer, sizeof(Buffer), "HELO %s\r\n", LocalHost);
+	snprintf(PW32G(mail_buffer), sizeof(PW32G(mail_buffer)), "HELO %s\r\n", PW32G(mail_local_host));
 
 	/* in the beginning of the dialog */
 	/* attempt reconnect if the first Post fail */
-	if ((res = Post(Buffer)) != SUCCESS) {
-		MailConnect();
-		if ((res = Post(Buffer)) != SUCCESS) {
+	if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
+		int err = MailConnect();
+		if (0 != err) {
+			return (FAILED_TO_SEND);
+		}
+
+		if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
 			return (res);
 		}
 	}
@@ -428,8 +407,8 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	}
 
 	SMTP_SKIP_SPACE(RPath);
-	FormatEmailAddress(Buffer, RPath, "MAIL FROM:<%s>\r\n");
-	if ((res = Post(Buffer)) != SUCCESS) {
+	FormatEmailAddress(PW32G(mail_buffer), RPath, "MAIL FROM:<%s>\r\n");
+	if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
 		return (res);
 	}
 	if ((res = Ack(&server_response)) != SUCCESS) {
@@ -443,8 +422,8 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	while (token != NULL)
 	{
 		SMTP_SKIP_SPACE(token);
-		FormatEmailAddress(Buffer, token, "RCPT TO:<%s>\r\n");
-		if ((res = Post(Buffer)) != SUCCESS) {
+		FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
+		if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
 			efree(tempMailTo);
 			return (res);
 		}
@@ -464,8 +443,8 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		while (token != NULL)
 		{
 			SMTP_SKIP_SPACE(token);
-			FormatEmailAddress(Buffer, token, "RCPT TO:<%s>\r\n");
-			if ((res = Post(Buffer)) != SUCCESS) {
+			FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
+			if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
 				efree(tempMailTo);
 				return (res);
 			}
@@ -494,8 +473,8 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		while (token != NULL)
 		{
 			SMTP_SKIP_SPACE(token);
-			FormatEmailAddress(Buffer, token, "RCPT TO:<%s>\r\n");
-			if ((res = Post(Buffer)) != SUCCESS) {
+			FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
+			if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
 				efree(tempMailTo);
 				return (res);
 			}
@@ -519,8 +498,8 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 		while (token != NULL)
 		{
 			SMTP_SKIP_SPACE(token);
-			FormatEmailAddress(Buffer, token, "RCPT TO:<%s>\r\n");
-			if ((res = Post(Buffer)) != SUCCESS) {
+			FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
+			if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
 				efree(tempMailTo);
 				return (res);
 			}
@@ -552,8 +531,8 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 			while (token != NULL)
 			{
 				SMTP_SKIP_SPACE(token);
-				FormatEmailAddress(Buffer, token, "RCPT TO:<%s>\r\n");
-				if ((res = Post(Buffer)) != SUCCESS) {
+				FormatEmailAddress(PW32G(mail_buffer), token, "RCPT TO:<%s>\r\n");
+				if ((res = Post(PW32G(mail_buffer))) != SUCCESS) {
 					efree(tempMailTo);
 					return (res);
 				}
@@ -778,20 +757,23 @@ static int MailConnect()
 #ifdef HAVE_IPV6
 	IN6_ADDR addr6;
 #endif
+	SOCKADDR_IN sock_in;
 
 	/* Create Socket */
-	if ((sc = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
+	if ((PW32G(mail_socket) = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
 		return (FAILED_TO_OBTAIN_SOCKET_HANDLE);
 	}
 
 	/* Get our own host name */
-	if (gethostname(LocalHost, HOST_NAME_LEN)) {
+	if (gethostname(PW32G(mail_local_host), HOST_NAME_LEN)) {
+		closesocket(PW32G(mail_socket));
 		return (FAILED_TO_GET_HOSTNAME);
 	}
 
-	ent = gethostbyname(LocalHost);
+	ent = gethostbyname(PW32G(mail_local_host));
 
 	if (!ent) {
+		closesocket(PW32G(mail_socket));
 		return (FAILED_TO_GET_HOSTNAME);
 	}
 
@@ -804,23 +786,25 @@ static int MailConnect()
 #endif
 	{
 		if (namelen + 2 >= HOST_NAME_LEN) {
+			closesocket(PW32G(mail_socket));
 			return (FAILED_TO_GET_HOSTNAME);
 		}
 
-		strcpy(LocalHost, "[");
-		strcpy(LocalHost + 1, ent->h_name);
-		strcpy(LocalHost + namelen + 1, "]");
+		strcpy(PW32G(mail_local_host), "[");
+		strcpy(PW32G(mail_local_host) + 1, ent->h_name);
+		strcpy(PW32G(mail_local_host) + namelen + 1, "]");
 	} else {
 		if (namelen >= HOST_NAME_LEN) {
+			closesocket(PW32G(mail_socket));
 			return (FAILED_TO_GET_HOSTNAME);
 		}
 
-		strcpy(LocalHost, ent->h_name);
+		strcpy(PW32G(mail_local_host), ent->h_name);
 	}
 
 	/* Resolve the servers IP */
 	/*
-	if (!isdigit(MailHost[0])||!gethostbyname(MailHost))
+	if (!isdigit(PW32G(mail_host)[0])||!gethostbyname(PW32G(mail_host)))
 	{
 		return (FAILED_TO_RESOLVE_HOST);
 	}
@@ -834,9 +818,10 @@ static int MailConnect()
 	/* Connect to server */
 	sock_in.sin_family = AF_INET;
 	sock_in.sin_port = htons(portnum);
-	sock_in.sin_addr.S_un.S_addr = GetAddr(MailHost);
+	sock_in.sin_addr.S_un.S_addr = GetAddr(PW32G(mail_host));
 
-	if (connect(sc, (LPSOCKADDR) & sock_in, sizeof(sock_in))) {
+	if (connect(PW32G(mail_socket), (LPSOCKADDR) & sock_in, sizeof(sock_in))) {
+		closesocket(PW32G(mail_socket));
 		return (FAILED_TO_CONNECT);
 	}
 
@@ -861,7 +846,7 @@ static int Post(LPCSTR msg)
 	int index = 0;
 
 	while (len > 0) {
-		if ((slen = send(sc, msg + index, len, 0)) < 1)
+		if ((slen = send(PW32G(mail_socket), msg + index, len, 0)) < 1)
 			return (FAILED_TO_SEND);
 		len -= slen;
 		index += slen;
@@ -890,7 +875,7 @@ static int Ack(char **server_response)
 
 again:
 
-	if ((rlen = recv(sc, buf + Index, ((MAIL_BUFFER_SIZE) - 1) - Received, 0)) < 1) {
+	if ((rlen = recv(PW32G(mail_socket), buf + Index, ((MAIL_BUFFER_SIZE) - 1) - Received, 0)) < 1) {
 		return (FAILED_TO_RECEIVE);
 	}
 	Received += rlen;

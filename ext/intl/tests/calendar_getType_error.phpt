@@ -29,4 +29,4 @@ Warning: intlcal_get_type() expects exactly 1 parameter, 2 given in %s on line %
 Warning: intlcal_get_type(): intlcal_get_type: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_get_type() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_get_type() must be an instance of IntlCalendar, integer given in %s on line %d

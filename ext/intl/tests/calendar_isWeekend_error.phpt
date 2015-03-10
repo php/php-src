@@ -35,4 +35,4 @@ Warning: intlcal_is_weekend() expects parameter 2 to be float, string given in %
 Warning: intlcal_is_weekend(): intlcal_is_weekend: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_is_weekend() must be an instance of IntlCalendar, integer given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_is_weekend() must be an instance of IntlCalendar, integer given in %s on line %d

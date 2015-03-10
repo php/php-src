@@ -565,7 +565,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 /* {{{ generic stream operations */
 
-static void php_stream_fill_read_buffer(php_stream *stream, size_t size)
+PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 {
 	/* allocate/fill the buffer */
 
@@ -1829,7 +1829,9 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 				if (localhost == 1) {
 					(*path_for_open) += 11;
 				}
-				while (*(++*path_for_open)=='/');
+				while (*(++*path_for_open)=='/') {
+					/* intentionally empty */
+				}
 #ifdef PHP_WIN32
 				if (*(*path_for_open + 1) != ':')
 #endif
@@ -2015,13 +2017,13 @@ PHPAPI php_stream_dirent *_php_stream_readdir(php_stream *dirstream, php_stream_
 
 /* {{{ php_stream_open_wrapper_ex */
 PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mode, int options,
-		char **opened_path, php_stream_context *context STREAMS_DC)
+		zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	php_stream *stream = NULL;
 	php_stream_wrapper *wrapper = NULL;
 	const char *path_to_open;
 	int persistent = options & STREAM_OPEN_PERSISTENT;
-	char *resolved_path = NULL;
+	zend_string *resolved_path = NULL;
 	char *copy_of_path = NULL;
 
 	if (opened_path) {
@@ -2036,7 +2038,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	if (options & USE_PATH) {
 		resolved_path = zend_resolve_path(path, (int)strlen(path));
 		if (resolved_path) {
-			path = resolved_path;
+			path = resolved_path->val;
 			/* we've found this file, don't re-check include_path or run realpath */
 			options |= STREAM_ASSUME_REALPATH;
 			options &= ~USE_PATH;
@@ -2049,7 +2051,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	if (options & STREAM_USE_URL && (!wrapper || !wrapper->is_url)) {
 		php_error_docref(NULL, E_WARNING, "This function may only be used against URLs");
 		if (resolved_path) {
-			efree(resolved_path);
+			zend_string_release(resolved_path);
 		}
 		return NULL;
 	}
@@ -2102,7 +2104,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 						? PHP_STREAM_PREFER_STDIO : PHP_STREAM_NO_PREFERENCE)) {
 			case PHP_STREAM_UNCHANGED:
 				if (resolved_path) {
-					efree(resolved_path);
+					zend_string_release(resolved_path);
 				}
 				return stream;
 			case PHP_STREAM_RELEASED:
@@ -2111,7 +2113,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 				}
 				newstream->orig_path = pestrdup(path, persistent);
 				if (resolved_path) {
-					efree(resolved_path);
+					zend_string_release(resolved_path);
 				}
 				return newstream;
 			default:
@@ -2141,7 +2143,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	if (stream == NULL && (options & REPORT_ERRORS)) {
 		php_stream_display_wrapper_errors(wrapper, path, "failed to open stream");
 		if (opened_path && *opened_path) {
-			efree(*opened_path);
+			zend_string_release(*opened_path);
 			*opened_path = NULL;
 		}
 	}
@@ -2152,7 +2154,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 #endif
 	if (resolved_path) {
-		efree(resolved_path);
+		zend_string_release(resolved_path);
 	}
 	return stream;
 }

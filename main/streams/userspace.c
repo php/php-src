@@ -45,7 +45,7 @@ struct php_user_stream_wrapper {
 	php_stream_wrapper wrapper;
 };
 
-static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC);
+static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context);
 static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context);
@@ -53,7 +53,7 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, int option, void *value, php_stream_context *context);
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
-		int options, char **opened_path, php_stream_context *context STREAMS_DC);
+		int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 
 static php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_opener,
@@ -325,7 +325,7 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 }
 
 static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode,
-									   int options, char **opened_path, php_stream_context *context STREAMS_DC)
+									   int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	php_userstream_data_t *us;
@@ -385,7 +385,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 		/* if the opened path is set, copy it out */
 		if (Z_ISREF(args[3]) && Z_TYPE_P(Z_REFVAL(args[3])) == IS_STRING && opened_path) {
-			*opened_path = estrndup(Z_STRVAL_P(Z_REFVAL(args[3])), Z_STRLEN_P(Z_REFVAL(args[3])));
+			*opened_path = zend_string_copy(Z_STR_P(Z_REFVAL(args[3])));
 		}
 
 		/* set wrapper data to be a reference to our object */
@@ -415,7 +415,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 }
 
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
-		int options, char **opened_path, php_stream_context *context STREAMS_DC)
+		int options, zend_string **opened_path, php_stream_context *context STREAMS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	php_userstream_data_t *us;
@@ -607,6 +607,11 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 	zval_ptr_dtor(&func_name);
 
 	didwrite = 0;
+
+	if (EG(exception)) {
+		return 0;
+	}
+
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		convert_to_long(&retval);
 		didwrite = Z_LVAL(retval);
@@ -650,6 +655,13 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count)
 			1, args,
 			0, NULL);
 
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&func_name);
+
+	if (EG(exception)) {
+		return -1;
+	}
+
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 		convert_to_string(&retval);
 		didread = Z_STRLEN(retval);
@@ -664,11 +676,9 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count)
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_READ " is not implemented!",
 				us->wrapper->classname);
 	}
-	zval_ptr_dtor(&args[0]);
 
 	zval_ptr_dtor(&retval);
 	ZVAL_UNDEF(&retval);
-	zval_ptr_dtor(&func_name);
 
 	/* since the user stream has no way of setting the eof flag directly, we need to ask it if we hit eof */
 

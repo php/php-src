@@ -42,7 +42,11 @@ $it = new RecursiveIteratorIterator($it);
 var_dump(iterator_apply($it, 'test'));
 
 echo "===ERRORS===\n";
-var_dump(iterator_apply($it, 'test', 1));
+try {
+	var_dump(iterator_apply($it, 'test', 1));
+} catch (EngineException $e) {
+	my_error_handler($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+}
 var_dump(iterator_apply($it, 'non_existing_function'));
 var_dump(iterator_apply($it, 'non_existing_function', NULL, 2));
 
@@ -75,8 +79,6 @@ int(6)
 int(4)
 ===ERRORS===
 Error: Argument 3 passed to iterator_apply() must be of the type array, integer given
-Error: iterator_apply() expects parameter 3 to be array, integer given
-NULL
 Error: iterator_apply() expects parameter 2 to be a valid callback, function 'non_existing_function' not found or invalid function name
 NULL
 Error: iterator_apply() expects at most 3 parameters, 4 given

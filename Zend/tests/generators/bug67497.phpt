@@ -8,7 +8,10 @@ function gen() {
     yield $a;
 }
 
-@eval('abc');
+try {
+	eval('abc');
+} catch (ParseException $ex) {
+}
 
 $values = gen();
 $values->next();

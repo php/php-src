@@ -23,4 +23,4 @@ Warning: IntlCalendar::getErrorMessage() expects exactly 0 parameters, 1 given i
 Warning: IntlCalendar::getErrorMessage(): intlcal_get_error_message: bad arguments in %s on line %d
 bool(false)
 
-Catchable fatal error: Argument 1 passed to intlcal_get_error_message() must be an instance of IntlCalendar, null given in %s on line %d
+Fatal error: Argument 1 passed to intlcal_get_error_message() must be an instance of IntlCalendar, null given in %s on line %d

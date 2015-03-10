@@ -669,7 +669,7 @@ foundit:
 		mydata->is_data = 1;
 	}
 
-	zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len, mydata);
+	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
 
 	if (actual_alias) {
 		phar_archive_data *fd_ptr;
@@ -679,19 +679,19 @@ foundit:
 				spprintf(error, 4096, "phar error: invalid alias \"%s\" in zip-based phar \"%s\"", actual_alias, fname);
 			}
 			efree(actual_alias);
-			zend_hash_str_del(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len);
+			zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
 			return FAILURE;
 		}
 
 		mydata->is_temporary_alias = 0;
 
-		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_alias_map), actual_alias, mydata->alias_len))) {
+		if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), actual_alias, mydata->alias_len))) {
 			if (SUCCESS != phar_free_alias(fd_ptr, actual_alias, mydata->alias_len)) {
 				if (error) {
 					spprintf(error, 4096, "phar error: Unable to add zip-based phar \"%s\" with implicit alias, alias is already in use", fname);
 				}
 				efree(actual_alias);
-				zend_hash_str_del(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len);
+				zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
 				return FAILURE;
 			}
 		}
@@ -702,22 +702,22 @@ foundit:
 			efree(actual_alias);
 		}
 
-		zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_alias_map), actual_alias, mydata->alias_len, mydata);
+		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, mydata->alias_len, mydata);
 	} else {
 		phar_archive_data *fd_ptr;
 
 		if (alias_len) {
-			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len))) {
+			if (NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
 				if (SUCCESS != phar_free_alias(fd_ptr, alias, alias_len)) {
 					if (error) {
 						spprintf(error, 4096, "phar error: Unable to add zip-based phar \"%s\" with explicit alias, alias is already in use", fname);
 					}
-					zend_hash_str_del(&(PHAR_GLOBALS->phar_fname_map), mydata->fname, fname_len);
+					zend_hash_str_del(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len);
 					return FAILURE;
 				}
 			}
 
-			zend_hash_str_add_ptr(&(PHAR_GLOBALS->phar_alias_map), actual_alias, mydata->alias_len, mydata);
+			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, mydata->alias_len, mydata);
 			mydata->alias = pestrndup(alias, alias_len, mydata->is_persistent);
 			mydata->alias_len = alias_len;
 		} else {

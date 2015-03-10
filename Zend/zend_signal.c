@@ -75,12 +75,12 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 	int errno_save = errno;
 	zend_signal_queue_t *queue, *qtmp;
 
-	if (SIGG(active)) {
-		if (SIGG(depth) == 0) { /* try to handle signal */
-			if (SIGG(blocked) != -1) { /* inverse */
-				SIGG(blocked) = -1; /* signal is not blocked */
+	if (EXPECTED(SIGG(active))) {
+		if (UNEXPECTED(SIGG(depth) == 0)) { /* try to handle signal */
+			if (UNEXPECTED(SIGG(blocked))) {
+				SIGG(blocked) = 0;
 			}
-			if (SIGG(running) == 0) {
+			if (EXPECTED(SIGG(running) == 0)) {
 				SIGG(running) = 1;
 				zend_signal_handler(signo, siginfo, context);
 
@@ -98,7 +98,7 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 				SIGG(running) = 0;
 			}
 		} else { /* delay signal handling */
-			SIGG(blocked) = 0; /* signal is blocked */
+			SIGG(blocked) = 1; /* signal is blocked */
 
 			if ((queue = SIGG(pavail))) { /* if none available it's simply forgotton */
 				SIGG(pavail) = queue->next;
@@ -135,7 +135,7 @@ ZEND_API void zend_signal_handler_unblock(void)
 	zend_signal_queue_t *queue;
 	zend_signal_t zend_signal;
 
-	if (SIGG(active)) {
+	if (EXPECTED(SIGG(active))) {
 		SIGNAL_BEGIN_CRITICAL(); /* procmask to protect handler_defer as if it were called by the kernel */
 		queue = SIGG(phead);
 		SIGG(phead) = queue->next;
@@ -282,7 +282,7 @@ void zend_signal_activate(void)
 
 	memcpy(&SIGG(handlers), &global_orig_handlers, sizeof(global_orig_handlers));
 
-	for (x=0; x < sizeof(zend_sigs) / sizeof(*zend_sigs); x++) {
+	for (x = 0; x < sizeof(zend_sigs) / sizeof(*zend_sigs); x++) {
 		zend_signal_register(zend_sigs[x], zend_signal_handler_defer);
 	}
 
@@ -294,15 +294,15 @@ void zend_signal_activate(void)
  * */
 void zend_signal_deactivate(void)
 {
-	int x;
-	struct sigaction sa = {{0}};
 
 	if (SIGG(check)) {
+		int x;
+		struct sigaction sa = {{0}};
 		if (SIGG(depth) != 0) {
 			zend_error(E_CORE_WARNING, "zend_signal: shutdown with non-zero blocking depth (%d)", SIGG(depth));
 		}
 		/* did anyone steal our installed handler */
-		for (x=0; x < sizeof(zend_sigs) / sizeof(*zend_sigs); x++) {
+		for (x = 0; x < sizeof(zend_sigs) / sizeof(*zend_sigs); x++) {
 			sigaction(zend_sigs[x], NULL, &sa);
 			if (sa.sa_sigaction != zend_signal_handler_defer) {
 				zend_error(E_CORE_WARNING, "zend_signal: handler was replaced for signal (%d) after startup", zend_sigs[x]);
@@ -313,18 +313,17 @@ void zend_signal_deactivate(void)
 	SIGNAL_BEGIN_CRITICAL();
 	SIGG(active) = 0;
 	SIGG(running) = 0;
-	SIGG(blocked) = -1;
+	SIGG(blocked) = 0;
 	SIGG(depth) = 0;
 	SIGNAL_END_CRITICAL();
 }
 /* }}} */
 
-static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals)
+static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals) /* {{{ */
 {
 	size_t x;
 
 	memset(zend_signal_globals, 0, sizeof(*zend_signal_globals));
-	zend_signal_globals->blocked = -1;
 
 	for (x = 0; x < sizeof(zend_signal_globals->pstorage) / sizeof(*zend_signal_globals->pstorage); ++x) {
 		zend_signal_queue_t *queue = &zend_signal_globals->pstorage[x];
@@ -333,21 +332,35 @@ static void zend_signal_globals_ctor(zend_signal_globals_t *zend_signal_globals)
 		zend_signal_globals->pavail = queue;
 	}
 }
+/* }}} */
 
-static void zend_signal_globals_dtor(zend_signal_globals_t *zend_signal_globals)
+void zend_signal_init() /* {{{ */
 {
-	zend_signal_globals->blocked = -1;
+	int signo;
+	struct sigaction sa = {{0}};
+
+	/* Save previously registered signal handlers into orig_handlers */
+	memset(&global_orig_handlers, 0, sizeof(global_orig_handlers));
+	for (signo = 1; signo < NSIG; ++signo) {
+		if (sigaction(signo, NULL, &sa) == 0) {
+			global_orig_handlers[signo-1].flags = sa.sa_flags;
+			if (sa.sa_flags & SA_SIGINFO) {
+				global_orig_handlers[signo-1].handler = (void *) sa.sa_sigaction;
+			} else {
+				global_orig_handlers[signo-1].handler = (void *) sa.sa_handler;
+			}
+		}
+	}
 }
+/* }}} */
 
 /* {{{ zend_signal_startup
  * alloc zend signal globals */
 void zend_signal_startup()
 {
-	int signo;
-	struct sigaction sa = {{0}};
 
 #ifdef ZTS
-	ts_allocate_id(&zend_signal_globals_id, sizeof(zend_signal_globals_t), (ts_allocate_ctor) zend_signal_globals_ctor, (ts_allocate_dtor) zend_signal_globals_dtor);
+	ts_allocate_id(&zend_signal_globals_id, sizeof(zend_signal_globals_t), (ts_allocate_ctor) zend_signal_globals_ctor, NULL);
 #else
 	zend_signal_globals_ctor(&zend_signal_globals);
 #endif
@@ -374,28 +387,7 @@ void zend_signal_startup()
 	sigdelset(&global_sigmask, SIGTRAP);
 #endif
 
-	/* Save previously registered signal handlers into orig_handlers */
-	memset(&global_orig_handlers, 0, sizeof(global_orig_handlers));
-	for (signo = 1; signo < NSIG; ++signo) {
-		if (sigaction(signo, NULL, &sa) == 0) {
-			global_orig_handlers[signo-1].flags = sa.sa_flags;
-			if (sa.sa_flags & SA_SIGINFO) {
-				global_orig_handlers[signo-1].handler = (void *) sa.sa_sigaction;
-			} else {
-				global_orig_handlers[signo-1].handler = (void *) sa.sa_handler;
-			}
-		}
-	}
-}
-/* }}} */
-
-/* {{{ zend_signal_shutdown
- * called by zend_shutdown */
-void zend_signal_shutdown(void)
-{
-#ifndef ZTS
-	zend_signal_globals_dtor(&zend_signal_globals);
-#endif
+	zend_signal_init();
 }
 /* }}} */
 

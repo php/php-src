@@ -353,6 +353,26 @@ $op2_free_op_var_ptr = array(
 	"TMPVAR" => "???",
 );
 
+$op1_free_unfetched = array(
+	"ANY"    => "FREE_UNFETCHED_OP(opline->op1_type, opline->op1.var)",
+	"TMP"    => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
+	"VAR"    => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
+	"CONST"  => "",
+	"UNUSED" => "",
+	"CV"     => "",
+	"TMPVAR" => "zval_ptr_dtor_nogc(EX_VAR(opline->op1.var))",
+);
+
+$op2_free_unfetched = array(
+	"ANY"    => "FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var)",
+	"TMP"    => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
+	"VAR"    => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
+	"CONST"  => "",
+	"UNUSED" => "",
+	"CV"     => "",
+	"TMPVAR" => "zval_ptr_dtor_nogc(EX_VAR(opline->op2.var))",
+);
+
 $list    = array(); // list of opcode handlers and helpers in original order
 $opcodes = array(); // opcode handlers by code
 $helpers = array(); // opcode helpers by name
@@ -405,7 +425,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 		$op1_get_obj_zval_ptr_deref, $op2_get_obj_zval_ptr_deref,
 		$op1_get_obj_zval_ptr_ptr, $op2_get_obj_zval_ptr_ptr,
 		$op1_get_obj_zval_ptr_ptr_undef, $op2_get_obj_zval_ptr_ptr_undef,
-		$op1_free, $op2_free,
+		$op1_free, $op2_free, $op1_free_unfetched, $op2_free_unfetched,
 		$op1_free_op, $op2_free_op, $op1_free_op_if_var, $op2_free_op_if_var,
 		$op1_free_op_var_ptr, $op2_free_op_var_ptr, $prefix;
 
@@ -438,16 +458,18 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			"/FREE_OP2_IF_VAR\(\)/",
 			"/FREE_OP1_VAR_PTR\(\)/",
 			"/FREE_OP2_VAR_PTR\(\)/",
-			"/^#ifdef\s+ZEND_VM_SPEC\s*\n/m",
-			"/^#ifndef\s+ZEND_VM_SPEC\s*\n/m",
+			"/FREE_UNFETCHED_OP1\(\)/",
+			"/FREE_UNFETCHED_OP2\(\)/",
+			"/^#(\s*)ifdef\s+ZEND_VM_SPEC\s*\n/m",
+			"/^#(\s*)ifndef\s+ZEND_VM_SPEC\s*\n/m",
 			"/\!defined\(ZEND_VM_SPEC\)/m",
 			"/defined\(ZEND_VM_SPEC\)/m",
 			"/ZEND_VM_C_LABEL\(\s*([A-Za-z_]*)\s*\)/m",
 			"/ZEND_VM_C_GOTO\(\s*([A-Za-z_]*)\s*\)/m",
-			"/^#if\s+1\s*\\|\\|.*[^\\\\]$/m",
-			"/^#if\s+0\s*&&.*[^\\\\]$/m",
-			"/^#ifdef\s+ZEND_VM_EXPORT\s*\n/m",
-			"/^#ifndef\s+ZEND_VM_EXPORT\s*\n/m"
+			"/^#(\s*)if\s+1\s*\\|\\|.*[^\\\\]$/m",
+			"/^#(\s*)if\s+0\s*&&.*[^\\\\]$/m",
+			"/^#(\s*)ifdef\s+ZEND_VM_EXPORT\s*\n/m",
+			"/^#(\s*)ifndef\s+ZEND_VM_EXPORT\s*\n/m"
 		),
 		array(
 			$op1_type[$op1],
@@ -476,16 +498,18 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 			$op2_free_op_if_var[$op2],
 			$op1_free_op_var_ptr[$op1],
 			$op2_free_op_var_ptr[$op2],
-			($op1!="ANY"||$op2!="ANY")?"#if 1\n":"#if 0\n",
-			($op1!="ANY"||$op2!="ANY")?"#if 0\n":"#if 1\n",
+			$op1_free_unfetched[$op1],
+			$op2_free_unfetched[$op2],
+			($op1!="ANY"||$op2!="ANY")?"#\\1if 1\n":"#\\1if 0\n",
+			($op1!="ANY"||$op2!="ANY")?"#\\1if 0\n":"#\\1if 1\n",
 			($op1!="ANY"||$op2!="ANY")?"0":"1",
 			($op1!="ANY"||$op2!="ANY")?"1":"0",
 			"\\1".(($spec && $kind != ZEND_VM_KIND_CALL)?("_SPEC".$prefix[$op1].$prefix[$op2]):""),
 			"goto \\1".(($spec && $kind != ZEND_VM_KIND_CALL)?("_SPEC".$prefix[$op1].$prefix[$op2]):""),
-			"#if 1",
-			"#if 0",
-			$export?"#if 1\n":"#if 0\n",
-			$export?"#if 0\n":"#if 1\n"
+			"#\\1if 1",
+			"#\\1if 0",
+			$export?"#\\1if 1\n":"#\\1if 0\n",
+			$export?"#\\1if 0\n":"#\\1if 1\n"
 		),
 		$code);
 
